@@ -8,6 +8,11 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // yeral.app is a zone in the same Cloudflare account; www redirects to the apex (next.config.ts)
+  "routes": [
+    { "pattern": "yeral.app", "custom_domain": true },
+    { "pattern": "www.yeral.app", "custom_domain": true }
+  ],
   "services": [
     { "binding": "WORKER_SELF_REFERENCE", "service": "yeral-web" }
   ]
