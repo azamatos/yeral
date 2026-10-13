@@ -5,16 +5,17 @@ description: Choose and write the right test in Yeral — Vitest unit tests for 
 
 # Testing
 
-Strategy: ADR 0013. Before M0 the Next app has no test setup; tests start with the monorepo packages.
+Strategy: ADR 0013. Today: Vitest unit tests for the booking rules in `apps/legacy/src/domain/*.test.ts` (they move to
+`@yeral/domain` in M2); Storybook, API and Playwright tests arrive with M1–M3.
 
 ## Which test
 
 | You changed… | Write | Where | Run |
 |---|---|---|---|
 | a rule in `@yeral/domain` (slots, statuses, deadlines) | Vitest unit test, table of cases | `packages/domain/src/<file>.test.ts` | `pnpm test --filter=@yeral/domain` |
-| a helper in `lib`, `sdk`, `i18n` | Vitest unit test | next to the file | `pnpm test --filter=<pkg>` |
+| a helper in `lib`, `sdk`, `i18n` | Vitest unit test | next to the file | `pnpm test --filter=@yeral/<pkg>` |
 | a component in `@yeral/ui` or an entity/feature UI | stories with `play` functions (they run as tests) | `<name>.stories.tsx` | `pnpm test:stories` |
-| an endpoint | API test with `app.request()` on the test database | `apps/api/src/modules/<area>/*.test.ts` | `pnpm test --filter=api` |
+| an endpoint | API test with `app.request()` on the test database | `apps/api/src/modules/<area>/*.test.ts` | `pnpm test --filter=@yeral/api` |
 | a user flow across screens or apps | Playwright spec | `apps/<app>/e2e/*.spec.ts`, cross-app in `e2e/` at the root | `pnpm e2e` |
 | a bug | the smallest test above that fails without the fix | — | — |
 

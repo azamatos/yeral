@@ -1,50 +1,48 @@
-# Yeral — web (yeral.app)
+# Yeral
 
-Web version of Yeral: booking at beauty & wellness salons in Ashgabat.
-Phase 1 = the client marketplace, running on mock data. Backend contract: [docs/API.md](docs/API.md).
+Online booking for beauty and wellness salons in Turkmenistan: a client marketplace, a business workspace for salons,
+an internal CMS and the API behind them, in one monorepo.
 
-**Moving to a monorepo** (landing, client, business, cms, api): architecture, roadmap and decisions are in the
-[memory bank](docs/memory-bank/README.md) and [ADRs](docs/decisions/README.md). Agent instructions: [CLAUDE.md](CLAUDE.md).
+**Status:** monorepo foundation done (M0). The live site https://yeral.app is the first Next.js version in `apps/legacy`;
+the new apps replace it milestone by milestone ([roadmap](docs/memory-bank/progress.md)).
 
-Next.js 16 (App Router) · React 19 · Tailwind 4 · TanStack Query · next-intl · MapLibre + OpenFreeMap · Cloudflare Workers via OpenNext.
-
-## Run
-
-```bash
-pnpm install        # also copies the MapLibre worker into public/vendor
-pnpm dev            # http://localhost:3000
-```
-
-Demo login: any `+993` number, code **1234**. `+993 65 12 34 56` is the demo client with booking history.
-«Ножницы» (`/nozhnitsy`) waits for the salon's answer — answer it from the demo panel on the booking page.
-Other salons answer by themselves in a few seconds (or confirm instantly).
-
-## Where things are
+## Start here
 
 | | |
 |---|---|
-| `src/domain` | types, Ashgabat time, booking rules (slots, buffer, lead time, window, statuses) — ported from `../app` |
-| `src/api/contract.ts` | the API the UI depends on |
-| `src/api/mock` | in-browser backend: seed (24 salons), localStorage DB, synthetic occupancy, salon «answers» |
-| `src/api/hooks.ts` | TanStack Query hooks used by pages |
-| `src/app/(site)` | marketplace pages: home, search, salon, account, login, for-business |
-| `src/app/(focus)/[slug]/book` | full-page booking wizard |
-| `src/components` | `ui/` kit, `site/` header/footer/cards/map/search, `salon/`, `booking/`, `account/` |
-| `messages/ru.json` | all UI strings (Turkmen comes as `tk.json`) |
-| `public/photos` | stock photos (Unsplash/Pexels licence, see `manifest.json`) |
+| [AGENTS.md](AGENTS.md) | rules and commands for people and coding agents |
+| [docs/memory-bank](docs/memory-bank/README.md) | project memory: brief, product rules, architecture, tech, operations, current focus |
+| [docs/decisions](docs/decisions/README.md) | why things are the way they are (ADRs) |
+| [docs/design](docs/design) | the Claude Design export (Design System v2, Client App, Business App, decks) |
 
-Data lives in the browser (`localStorage`, key `yeral-web-v1`). Profile → «Сбросить демо-данные» restores the seed.
+## Run
 
-## Deploy to Cloudflare
+Node 22.12+ (CI uses 24, see `.node-version`) and pnpm 12 (pinned in `package.json`; `npm i -g pnpm@12` if your pnpm can't switch).
 
 ```bash
-npx wrangler login            # once, opens the browser
-pnpm run deploy               # opennextjs-cloudflare build + deploy → yeral-web.<account>.workers.dev
-pnpm run preview              # the same Worker locally (http://localhost:8787)
+pnpm install     # also installs git hooks (format on commit, commit message check)
+pnpm dev         # apps/legacy on http://localhost:3000 (PORT_BASE moves it)
+pnpm check       # lint, types, tests, format — the same checks as CI
 ```
 
-Custom domain: Cloudflare dashboard → Workers & Pages → `yeral-web` → Settings → Domains & Routes → add `yeral.app`
-(the domain has to be a zone in the same Cloudflare account).
+Demo login: any `+993` number, code **1234**. `+993 65 12 34 56` is the demo client with booking history.
 
-`next` is pinned to **16.3.8**: 16.4.0 builds but fails at runtime on Workers with the current OpenNext adapter
-(`Unexpected loadManifest(preview-props.json)`). Re-check when `@opennextjs/cloudflare` updates.
+## Layout
+
+```
+apps/legacy        the Next.js marketplace live on yeral.app (frozen; deleted at M4)
+packages/config    shared tsconfig, ESLint, Prettier and Vitest presets
+turbo/generators   `pnpm gen <generator>` templates
+scripts/           version stamp and post-deploy smoke checks
+docs/              memory bank, decisions, design export, API notes
+.github/           CI, release and deploy workflows, Renovate, issue and PR templates
+```
+
+Planned: `apps/{landing,client,business,cms,api,storybook}`, `packages/{domain,contract,sdk,i18n,ui,lib}` — see
+[systemPatterns](docs/memory-bank/systemPatterns.md).
+
+## Release
+
+Changes land through pull requests with green CI. User-visible changes carry a changeset (`pnpm changeset`); the
+release workflow turns them into a «chore: version packages» PR, and merging it tags the versions and deploys the
+changed apps. Details: [operations](docs/memory-bank/operations.md).

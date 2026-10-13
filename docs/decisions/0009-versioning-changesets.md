@@ -13,7 +13,7 @@ in production, have readable changelogs, and keep a stable API for clients that 
 - **Trunk-based**: `main` always deployable; short branches → PR → squash merge.
 - **Conventional Commits** for PR titles and commits (`feat(client): …`), checked by commitlint in a git hook and CI.
 - **Changesets**: user-visible changes add a changeset; the «Version packages» PR bumps versions and writes a
-  `CHANGELOG.md` per app and package; merging it tags `<app>@x.y.z` and releases those apps to production.
+  `CHANGELOG.md` per app and package; merging it tags `@yeral/<app>@x.y.z` and releases those apps to production.
 - **SemVer**: apps on `0.x` until the public launch (`1.0.0`); packages private, `workspace:*`.
 - **API**: `/v1` path; additive changes only; breaking changes go to `/v2` side by side; OpenAPI diff in CI.
 - **Database**: forward-only SQL migrations, expand → migrate → contract.

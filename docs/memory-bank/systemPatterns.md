@@ -28,7 +28,8 @@ yeral/                           github.com/azamatos/yeral
 │  ├─ business/    Vite SPA + TanStack Router, installable (PWA)
 │  ├─ cms/         Vite SPA + TanStack Router
 │  ├─ api/         Hono + zod-openapi + Drizzle; entry/worker.ts (Cloudflare) and entry/node.ts (Docker)
-│  └─ storybook/   Storybook 10: stories from packages/* and app slices
+│  ├─ storybook/   Storybook 10: stories from packages/* and app slices
+│  └─ legacy/      the first Next.js marketplace (frozen, live on yeral.app until M4)
 ├─ packages/
 │  ├─ domain/      @yeral/domain    types, Ashgabat time, booking rules, phone, ids. Pure TS, zero deps, DOM-free
 │  ├─ contract/    @yeral/contract  zod schemas of everything on the wire: DTOs, inputs, enums, error codes
@@ -42,7 +43,8 @@ yeral/                           github.com/azamatos/yeral
 ├─ infra/
 │  ├─ docker/      Dockerfiles per deployable, compose.yml (production-like), compose.dev.yml (Postgres for local work)
 │  └─ nginx/       nginx.conf + one server block per host, TLS, caching, security headers
-├─ turbo/generators/  `pnpm gen` templates: ui-component, slice, endpoint, app
+├─ turbo/generators/  `pnpm gen` templates: package (M0); ui-component, slice, endpoint, app (later)
+├─ scripts/        version-stamp.mjs (/version.json), smoke.sh (post-deploy checks)
 ├─ docs/           memory-bank/ (+ log/), decisions/, design/ (Claude Design export, read-only), API.md
 ├─ .claude/        skills/, agents/, settings.json
 ├─ .github/        workflows/, renovate.json, ISSUE_TEMPLATE/

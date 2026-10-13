@@ -4,9 +4,9 @@ _Last updated: 2026-10-13_
 
 ## Current focus
 
-Architecture is final after two review rounds with the owner (ADRs 0001–0014). **Next: M0, the monorepo foundation**,
-then M1 (design system + Storybook) and M2 (platform: packages, api on Postgres, Docker). Infrastructure before features.
-The live site is still the Next.js marketplace at https://yeral.app.
+**M0 (monorepo foundation) is done** on branch `chore/m0-monorepo` (see `progress.md`). **Next: M1, design system +
+Storybook**, then M2 (platform: packages, api on Postgres, Docker). Infrastructure before features. The live site is still
+the Next.js marketplace (`apps/legacy`) at https://yeral.app; from now on it deploys through the release workflow.
 
 ## Owner's direction (2026-10-13)
 
@@ -45,7 +45,8 @@ The live site is still the Next.js marketplace at https://yeral.app.
 | 2 | Which locale owns URLs without a prefix: `ru` or `tk`? | owner | M7 |
 | 3 | Final name and domain (`yeral.app`, `yeral.com`, other)? | owner | public launch |
 | 4 | Rename the Cloudflare workers.dev subdomain so PR preview URLs can be turned on | owner, dashboard | previews (optional) |
-| 5 | Cloudflare API token for CI, stored as a GitHub secret | owner | M0 deploy step |
+| 5 | Cloudflare API token for CI (template «Edit Cloudflare Workers», account + zone `yeral.app`), saved with `gh secret set CLOUDFLARE_API_TOKEN` | owner | deploys from CI |
+| 5a | Repo settings: allow GitHub Actions to create PRs (Changesets version PR); branch protection on `main`; install the Renovate app | owner's OK, then Claude or owner | release flow, dependency PRs |
 | 6 | Neon account (free) for the api database | owner | M2 |
 | 7 | Subscription and commission prices in manats; when online payment becomes possible | owner | M4 pricing copy |
 | 8 | Real salon photos and texts to replace the stock seed | owner | public launch |
@@ -53,7 +54,6 @@ The live site is still the Next.js marketplace at https://yeral.app.
 
 ## Next steps
 
-1. M0: move the Next app to `apps/legacy`; workspace + catalog; turbo + generators; `@yeral/config`; lefthook, commitlint,
-   Changesets; CI/release/deploy workflows; Renovate; issue templates; branch protection (with the owner's OK).
-2. M1: `@yeral/ui` + `apps/storybook` + component tests.
-3. M2: packages, api on Postgres, Docker + nginx.
+1. Merge the M0 PR once CI is green; the owner's repo-settings and token steps (#5, #5a) unlock the version PR and deploys.
+2. M1: `@yeral/ui` + `apps/storybook` + component tests (`pnpm gen ui-component`), Storybook on `storybook.yeral.app`.
+3. M2: packages (`domain` with the existing tests, `contract`, `i18n`, `lib`, `sdk`), api on Postgres, Docker + nginx.

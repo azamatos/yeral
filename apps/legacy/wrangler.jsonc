@@ -2,6 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
   "name": "yeral-web",
+  // not a secret; lets CI deploy with only an API token
+  "account_id": "90af7d87d8b4cc5e517a859f6413f96e",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {

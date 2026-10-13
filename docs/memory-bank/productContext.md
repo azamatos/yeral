@@ -73,7 +73,7 @@ Every salon action reaches the client, every client action reaches the salon (in
 
 ## Demo behaviour (outside production)
 
-The seed and these behaviours run in local and staging environments (in the Next app: the in-browser mock).
+The seed and these behaviours run in local and staging environments (in `apps/legacy`: the in-browser mock).
 
 - «Ножницы» (`/nozhnitsy`) confirms manually: answer from the business app (or the demo panel on the booking page).
 - Other salons answer by themselves in a few seconds, or confirm instantly.

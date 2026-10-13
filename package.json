@@ -1,41 +1,38 @@
 {
-  "name": "yeral-web",
-  "version": "0.1.0",
+  "name": "yeral",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "postinstall": "mkdir -p public/vendor/maplibre && cp node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs public/vendor/maplibre/"
+  "description": "Yeral monorepo: landing, client, business, cms, api and the design system",
+  "type": "module",
+  "packageManager": "pnpm@12.11.2",
+  "engines": {
+    "node": ">=22.12"
   },
-  "dependencies": {
-    "@tanstack/react-query": "^5.104.2",
-    "clsx": "^2.1.1",
-    "lucide-react": "^1.56.0",
-    "maplibre-gl": "^6.14.0",
-    "next": "16.3.8",
-    "next-intl": "^4.14.9",
-    "radix-ui": "^1.8.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "tailwind-merge": "^3.7.0"
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "lint:fsd": "turbo run lint:fsd",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "check": "turbo run lint lint:fsd typecheck test && prettier --check .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "gen": "turbo gen",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "tag-release": "changeset tag",
+    "prepare": "lefthook install"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1.20.11",
-    "@tailwindcss/turbopack": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.8",
-    "tailwindcss": "^4",
-    "typescript": "^5",
-    "wrangler": "^4.150.0"
-  },
-  "packageManager": "pnpm@10.30.1"
+    "@changesets/changelog-github": "catalog:",
+    "@changesets/cli": "catalog:",
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:",
+    "@turbo/gen": "catalog:",
+    "@yeral/config": "workspace:*",
+    "lefthook": "catalog:",
+    "prettier": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:"
+  }
 }

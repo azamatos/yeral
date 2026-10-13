@@ -13,7 +13,7 @@ Watch the console (`read_console_messages` with a pattern) for errors on every p
 - Login: any `+993` number, code `1234`. `+993 65 12 34 56` = demo client with history.
 - «Ножницы» (`/nozhnitsy`) waits for the salon's answer; other salons answer by themselves or confirm instantly.
 - Reset: profile → «Сбросить демо-данные».
-- Local: Next app `http://localhost:3000` today; after the migration landing :3000, client :3001, business :3002, cms :3003,
+- Local: `apps/legacy` on `http://localhost:3000` today (`pnpm dev`); after the migration landing :3000, client :3001, business :3002, cms :3003,
   api :3004, Storybook :3005 (plus `PORT_BASE` offset in other worktrees). Staging: `*-stage.yeral.app`.
 
 ## Flows (expected result in brackets)

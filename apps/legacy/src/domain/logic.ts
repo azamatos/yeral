@@ -30,7 +30,10 @@ export const isActive = (b: Pick<Booking, 'status'>) => b.status === 'pending' |
 function inException(e: DateException, date: string): boolean {
   if (!e.yearly) return date >= e.from && date <= e.to
   const md = date.slice(5)
-  return md >= e.from.slice(5) && md <= e.to.slice(5)
+  const from = e.from.slice(5)
+  const to = e.to.slice(5)
+  // a yearly range can wrap around New Year (31 Dec – 2 Jan)
+  return from <= to ? md >= from && md <= to : md >= from || md <= to
 }
 
 export function salonHours(sal: Pick<Salon, 'hours' | 'exceptions'>, date: string): DayHours {

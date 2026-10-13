@@ -1,7 +1,8 @@
 # Operations: environments, hosting, Docker, CI/CD, versioning, parallel work
 
-Status 2026-10-13: production = the Next.js marketplace on Cloudflare, deployed by hand (`pnpm run deploy`).
-Everything else here is *planned* and lands with milestones M0–M2 (see `progress.md`).
+Status 2026-10-13 (M0): production = `apps/legacy` (Next.js) on Cloudflare. `ci.yml`, `release.yml`, `deploy.yml` exist;
+legacy deploys to production from a release once the `CLOUDFLARE_API_TOKEN` secret is set (until then the deploy job
+skips with a warning). Staging, Neon, Docker and the new apps are *planned* (M1–M2).
 
 ## Environments
 
@@ -60,7 +61,7 @@ switch DNS records → switch CI's deploy step. The Docker setup exists and is b
 | Workflow | Trigger | Does |
 |---|---|---|
 | `ci.yml` | pull request, push to `main` | pnpm install (cached) → `turbo run lint lint:fsd typecheck test build --affected` → Storybook tests in Vitest browser mode → API tests with a Postgres service → Playwright on affected apps → Docker image builds for affected deployables. Required to merge |
-| `release.yml` | push to `main` | Changesets: opens or updates «Version packages»; when merged, tags `<app>@x.y.z`, creates GitHub Releases, deploys those apps to production |
+| `release.yml` | push to `main` | Changesets: opens or updates «Version packages»; when merged, tags `@yeral/<app>@x.y.z`, creates GitHub Releases, deploys those apps to production |
 | `deploy.yml` | called by the two above | build → database migrations (api) → `wrangler deploy` (now) / image push + `docker compose up -d` over SSH (later) → smoke check: `/version.json` shows the commit, key pages answer 200 |
 | Renovate | weekly | grouped dependency PRs; dev-dependency patches merge themselves when CI is green |
 
@@ -99,6 +100,26 @@ switch DNS records → switch CI's deploy step. The Docker setup exists and is b
 - One worktree + branch per task; `PORT_BASE` per worktree; database `yeral_<branch>` in the shared local Postgres.
 - Hot spots (contract, ui tokens, catalog, turbo/root config, migrations) in small PRs that merge first.
 - Memory notes go to `docs/memory-bank/log/YYYY-MM-DD-<topic>.md` during parallel work; the lead folds them in.
+
+## How the release flow behaves (as built in M0)
+
+- Every workspace package is versioned (`privatePackages.version/tag: true`); tags look like `@yeral/legacy@0.1.1`.
+- With pending changesets, a push to `main` opens or updates «chore: version packages». With none, the workflow runs
+  `changeset tag`; any package version without a tag gets one, a GitHub Release, and — for apps with a deploy job in
+  `release.yml` — a production deploy.
+- The version PR is pushed with the workflow's `GITHUB_TOKEN`, which by GitHub's design triggers no other workflows, so
+  CI doesn't run on it. It only touches versions and changelogs; the owner (admin) merges it.
+- Needs the repo setting *Actions → General → Allow GitHub Actions to create and approve pull requests*.
+- `apps/legacy` deploys to production only (no staging); smoke checks live in `scripts/smoke.sh`.
+- Labels for tasks: `lane:*`, `status:*`, `type:*`; agents add `agent:<name>` when claiming (create it if missing).
+
+## Local setup notes
+
+- pnpm switches itself to the pinned 12.x. If an older global pnpm fails to switch (`ENOEXEC`, pnpm 10 can't run pnpm 12's
+  native binary), run `npm i -g pnpm@12` once, or `node ~/Library/pnpm/.tools/pnpm/<version>/node_modules/pnpm/install.js`.
+- pnpm 11+ blocks dependency install scripts unless listed in `allowBuilds` (`pnpm-workspace.yaml`); it also skips package
+  versions younger than one day and records exceptions in `minimumReleaseAgeExclude`.
+- `apps/legacy` and `docs/design` are excluded from Prettier; Markdown is never auto-formatted.
 
 ## Rollback
 

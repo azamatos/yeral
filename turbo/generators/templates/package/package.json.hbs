@@ -1,0 +1,21 @@
+{
+  "name": "@yeral/{{ dashCase name }}",
+  "version": "0.0.0",
+  "private": true,
+  "description": "{{ description }}",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@yeral/config": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
