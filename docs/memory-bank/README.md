@@ -12,14 +12,16 @@ Read `activeContext.md` first, then whatever the task touches.
 | [operations.md](operations.md) | environments, domains, CI/CD, versioning and releases, hosting, secrets | when infra changes |
 | [activeContext.md](activeContext.md) | current focus, recent decisions, open questions, next steps | every work session |
 | [progress.md](progress.md) | roadmap with status and done-criteria | when a milestone moves |
+| [log/](log) | append-only notes, one file per task or session (`YYYY-MM-DD-<topic>.md`) | during parallel work; folded into the files above by the lead |
 
 Decisions with a "why" live in [`../decisions`](../decisions) (ADRs). The memory bank states the current truth;
 ADRs keep the history of how we got there.
 
 ## Rules
 
-- Update `activeContext.md` and `progress.md` at the end of every work session (`/memory-bank` skill).
+- Update `activeContext.md` and `progress.md` at the end of every work session (skill `memory-bank`). When several agents
+  work in parallel, each writes a `log/` note instead and the lead folds them in (ADR 0014).
 - A decision that changes architecture, a library or a process gets an ADR, and the affected memory-bank file is updated in the same commit.
 - Write facts, not plans dressed as facts: mark anything not built yet as *planned*.
 - Dates are absolute (`2026-10-13`), never "yesterday".
-- This repository is public while the visibility question is open: no prices under negotiation, no competitor numbers, no secrets.
+- The repository is public (owner's choice until launch): never commit secrets or personal data.

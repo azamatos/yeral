@@ -1,69 +1,73 @@
 # System patterns (architecture)
 
 Status 2026-10-13: **target architecture, agreed; migration not started.** The live code is still the Next.js app in
-`src/` (see `progress.md`). Everything below marked *planned* does not exist yet.
+`src/` (see `progress.md`). Everything below is *planned* until its milestone lands.
 
 ## System map
 
 ```
-   yeral.app ──────────┐ short links /{slug} → 301 client.yeral.app/{slug}
-   (landing, static)   │ search box → client.yeral.app/search?q=
-                       ▼
-   client.yeral.app  (TanStack Start, SSR)  ──┐
-   business.yeral.app (SPA, PWA)            ──┼──►  api.yeral.app/v1  (Hono)
-   cms.yeral.app     (SPA, access-gated)    ──┘        │
-                                                       ├─ modules (catalog, availability, bookings, biz/*, admin/* …)
-                                                       ├─ @yeral/domain rules
-                                                       └─ Store port ─► memory store (demo)  |  Postgres via Drizzle (planned)
+   yeral.app ─────────── landing (static) ── short links /{slug} → 301 client.yeral.app/{slug}
+   client.yeral.app ──── client (TanStack Start, SSR) ──┐
+   business.yeral.app ── business (SPA)              ───┼──► api.yeral.app/v1 (Hono) ──► Postgres
+   cms.yeral.app ─────── cms (SPA, access-gated)     ───┘          │                     (Neon now, Docker later)
+   storybook.yeral.app ─ design system (static)                    ├─ @yeral/domain rules
+                                                                    ├─ jobs: runDueJobs() every minute
+                                                                    └─ files: S3 API (R2 now, MinIO/disk later)
 ```
 
-One session cookie on `.yeral.app` serves client and business; the CMS has its own accounts and cookie.
+Now every box runs on Cloudflare Workers; later on one server in Docker behind nginx (ADR 0007). One session cookie
+on the parent domain serves client and business; the CMS has its own accounts and cookie.
 
 ## Monorepo layout
 
 ```
-yeral/                         github.com/azamatos/yeral
+yeral/                           github.com/azamatos/yeral
 ├─ apps/
-│  ├─ landing/    yeral.app           TanStack Start, prerendered to static HTML
-│  ├─ client/     client.yeral.app    TanStack Start, SSR for public pages, client-only for account/booking
-│  ├─ business/   business.yeral.app  Vite SPA + TanStack Router, installable (PWA)
-│  ├─ cms/        cms.yeral.app       Vite SPA + TanStack Router
-│  └─ api/        api.yeral.app       Hono + zod-openapi; Node entry, Cloudflare entry for the demo
+│  ├─ landing/     TanStack Start, prerendered
+│  ├─ client/      TanStack Start, SSR for public pages, client-only for account/booking
+│  ├─ business/    Vite SPA + TanStack Router, installable (PWA)
+│  ├─ cms/         Vite SPA + TanStack Router
+│  ├─ api/         Hono + zod-openapi + Drizzle; entry/worker.ts (Cloudflare) and entry/node.ts (Docker)
+│  └─ storybook/   Storybook 10: stories from packages/* and app slices
 ├─ packages/
-│  ├─ domain/     @yeral/domain    types, Ashgabat time, booking rules, phone, money. Pure TS, zero deps, DOM-free
-│  ├─ contract/   @yeral/contract  zod schemas of everything on the wire: DTOs, inputs, enums, error codes
-│  ├─ sdk/        @yeral/sdk       typed API client (Hono RPC), ApiError, query keys, queryOptions and mutations, SSE → invalidation
-│  ├─ i18n/       @yeral/i18n      use-intl setup, shared messages (ru, tk), formatters (money, dates, plurals)
-│  ├─ ui/         @yeral/ui        design tokens (Tailwind @theme), primitives on Radix, DS components, cn(). No domain
-│  ├─ entities/   @yeral/entities  cross-app entity UI (status badge, staff avatar, price, rating…)   — created when a 2nd app needs it
-│  ├─ features/   @yeral/features  cross-app user actions (phone auth, …)                            — created when a 2nd app needs it
-│  ├─ lib/        @yeral/lib       framework-free helpers: .ics, maps/tel links, safe storage, env parsing
-│  └─ config/     @yeral/config    tsconfig bases, ESLint, Prettier, Steiger configs
-├─ docs/          memory-bank/, decisions/, API.md
-├─ .claude/       skills/, settings.json
-├─ .github/       workflows/, renovate.json
+│  ├─ domain/      @yeral/domain    types, Ashgabat time, booking rules, phone, ids. Pure TS, zero deps, DOM-free
+│  ├─ contract/    @yeral/contract  zod schemas of everything on the wire: DTOs, inputs, enums, error codes
+│  ├─ sdk/         @yeral/sdk       typed API client (Hono RPC), ApiError, query keys, queryOptions, mutations, events poller
+│  ├─ i18n/        @yeral/i18n      use-intl setup, shared messages (ru, tk), formatters
+│  ├─ ui/          @yeral/ui        design system: tokens, base styles, components (Radix + cva), cn(). No domain, no text
+│  ├─ entities/    @yeral/entities  cross-app entity UI (status badge, staff avatar, price…) — when a 2nd app needs it
+│  ├─ features/    @yeral/features  cross-app user actions (phone login…)                   — when a 2nd app needs it
+│  ├─ lib/         @yeral/lib       framework-free helpers: .ics, maps/tel links, safe storage, env parsing, site config
+│  └─ config/      @yeral/config    tsconfig bases, ESLint, Prettier, Steiger, Vitest presets
+├─ infra/
+│  ├─ docker/      Dockerfiles per deployable, compose.yml (production-like), compose.dev.yml (Postgres for local work)
+│  └─ nginx/       nginx.conf + one server block per host, TLS, caching, security headers
+├─ turbo/generators/  `pnpm gen` templates: ui-component, slice, endpoint, app
+├─ docs/           memory-bank/ (+ log/), decisions/, API.md
+├─ .claude/        skills/, agents/, settings.json
+├─ .github/        workflows/, renovate.json, ISSUE_TEMPLATE/
 ├─ .changeset/
-└─ turbo.json · pnpm-workspace.yaml (with the dependency catalog) · package.json · lefthook.yml · CLAUDE.md
+└─ AGENTS.md · CLAUDE.md · turbo.json · pnpm-workspace.yaml (catalog) · package.json · lefthook.yml · .node-version
 ```
 
 ### Package dependency rules
 
 ```
 config      ← everything (dev only)
-domain      ← contract, i18n, entities, features, apps/*
-contract    ← sdk, entities, features, api
-sdk         ← entities, features, client, business, cms, landing      (type-only import of AppType from api)
-i18n        ← entities, features, apps/*                         (ui stays text-free: labels come in as props)
-ui          ← entities, features, apps/*                               (ui imports nothing internal except config)
-entities    ← features, apps/*
-features    ← apps/*
-lib         ← anything (imports nothing internal)
+lib         ← anything                                   (imports nothing internal)
+domain      ← contract, i18n, entities, features, api, apps
+contract    ← sdk, entities, features, api, apps
+sdk         ← entities, features, landing, client, business, cms   (type-only import of AppType from api)
+i18n        ← entities, features, apps                   (ui stays text-free: labels come in as props)
+ui          ← entities, features, apps, storybook
+entities    ← features, apps
+features    ← apps
 ```
 
 - A package never imports an app. The single exception is `import type { AppType } from '@yeral/api'` inside `@yeral/sdk`.
 - A package lists every internal package it imports in its `package.json` (`workspace:*`); pnpm's strict
-  node_modules makes undeclared imports fail.
-- Packages are consumed as TypeScript source (`exports` → `./src/*.ts`); no build step for internal packages.
+  `node_modules` makes undeclared imports fail.
+- Internal packages are consumed as TypeScript source (`exports` → `./src/*.ts(x)`); no build step.
 
 ## Feature-Sliced Design inside each app
 
@@ -80,87 +84,86 @@ Layers, top to bottom; a layer imports only from layers below it:
 
 Below `shared/` sit the packages: they are the cross-app part of the lower layers.
 
-- **Slices** (`pages/salon`, `features/cancel-booking`) don't import each other on the same layer. Entities that must
-  reference each other use FSD's `@x` cross-import (`entities/booking/@x/salon.ts`); rare and explicit.
+- **Slices** don't import each other on the same layer. Entities that must reference each other use FSD's `@x`
+  cross-import (`entities/booking/@x/salon.ts`); rare and explicit.
 - **Segments** inside a slice: `ui/`, `model/` (hooks, stores, zod schemas, search-param schemas), `api/`
-  (slice-specific queryOptions), `lib/`, `config/`. Use only the ones you need.
-- **Public API**: every slice has `index.ts`; import a slice only through it. Shared and packages export by subpath
+  (slice-specific query wrappers), `lib/`, `config/`. Use only the ones you need.
+- **Public API**: every slice has `index.ts`; import a slice only through it. Packages export by subpath
   (`@yeral/ui/button`), not one giant barrel.
 - **Pages first** (FSD 2.1): write code in the page slice; move it down a layer when a second consumer appears; promote it
   to `packages/` when a second *app* needs it.
 - **Routes stay thin**: `createFileRoute(...)({ validateSearch, loader, head, component })`, with the search schema and
   the component imported from the page slice. The route tree lives in `src/app/routes` (`routesDirectory` config).
-- Enforced by **Steiger** (`pnpm lint:fsd`) per app and by ESLint import rules.
+- Enforced by **Steiger** (`pnpm lint:fsd`) per app and by ESLint import rules. Details: skill `fsd`, ADR 0004.
 
 ## Data flow
 
 ```
-component ─► useQuery(sdk.salon.detail(slug)) ─► hc client ─► GET api.yeral.app/v1/salons/:slug
+component ─► useQuery(sdk.salons.detail(slug)) ─► hc client ─► GET api.yeral.app/v1/salons/:slug
                                                                  │ zod validates input
                                                                  ▼
-                                             module route → service (uses @yeral/domain rules) → Store port
+                                   module route → service (@yeral/domain rules) → Drizzle repository → Postgres
 ```
 
-- Components never call `fetch` or the client directly: they use `queryOptions` / mutations from `@yeral/sdk`
+- Components never call `fetch` or the client directly: they use `queryOptions` / mutation options from `@yeral/sdk`
   (or a slice's `api/` segment that wraps them).
-- Mutations invalidate by query keys defined in `@yeral/sdk`; optimistic updates only where the UI needs instant
-  feedback (favourite toggle).
-- **Live updates** (*planned*): `GET /v1/events` (Server-Sent Events) streams `{ type, ids }`; `@yeral/sdk` turns events into
-  query invalidations. A booking confirmed in the business app updates the client's screen without polling.
+- Mutations invalidate by query keys defined in `@yeral/sdk`; optimistic updates only where instant feedback matters.
+- **Live updates**: the api writes an event per change (`booking.confirmed`, `booking.created` …) to an `events` table.
+  While a screen is open the sdk polls `GET /v1/events?after=<cursor>` (≈10 s, on window focus, and after the user's own
+  mutations) and invalidates the matching queries. A push channel can replace polling on the own server; screens don't change.
 
-## State: where each kind lives
+## State
 
-| Kind | Tool | Example |
-|---|---|---|
-| server data | TanStack Query via `@yeral/sdk` | salons, availability, bookings |
-| URL state | TanStack Router search params validated by zod | search filters, wizard step and picks, calendar date/view |
-| form state | React Hook Form + zod schemas from `@yeral/contract` | profile, service editor, booking rules |
-| local UI state | `useState` / `useReducer` | an open popover |
-| cross-component UI state | Zustand store in the slice's `model/` (rare) | calendar zoom, drawer stack in business |
-
-No global client store. If something feels like it needs one, it's usually server state or URL state.
+One owner per kind of state (ADR 0011): server data → TanStack Query; anything a link should restore → router search
+params (zod); unsaved form input → TanStack Form; one subtree → `useState`; client-only state shared by distant components
+→ a Zustand store in the owning slice's `model/`; changes made elsewhere → events → query invalidation. No global store.
 
 ## Rendering
 
 | App | Mode | Notes |
 |---|---|---|
-| landing | prerendered at build (static files) | any unknown single-segment path → `301 client.yeral.app/{slug}`; salon slugs can't use reserved landing paths |
+| landing | prerendered at build (static files) | unknown single-segment path → `301 client.<domain>/{slug}`; salon slugs can't use reserved landing paths |
 | client | SSR for home, search, salon, category/district pages; `ssr: false` for account, booking, login | loaders `ensureQueryData` → dehydrated into the page; `head()` gives title, description, canonical, hreflang, OG, JSON-LD |
-| business, cms | SPA, `index.html` fallback | no SEO; `noindex` |
+| business, cms, storybook | static SPA, `index.html` fallback | `noindex` |
 
 ## Backend (`apps/api`)
 
 ```
 apps/api/src/
-  app.ts            OpenAPIHono, middleware (request id, logging, CORS for *.yeral.app, session, error mapper), /v1 router
-  modules/<name>/   routes.ts (createRoute + handler) · service.ts (use cases; calls @yeral/domain) · store.ts (the port it needs)
+  app.ts            OpenAPIHono, middleware (request id, logging, CORS for configured sites, auth session, error mapper), /v1
+  modules/<name>/   routes.ts (createRoute + handler) · service.ts (use cases) · repo.ts (Drizzle queries)
                     auth · catalog · availability · bookings · reviews · favorites · notifications · events
                     biz/{calendar, requests, clients, services, team, rules, hours, reviews, analytics, settings} · admin/*
-  store/            memory/ (demo: seed + mutations) · pg/ (planned: Drizzle on Postgres)
-  demo/             seed (24 salons), synthetic occupancy, salons that answer by themselves, demo worlds
-  jobs/             (planned) reminders, expiring requests, notifications — pg-boss
-  entry/node.ts · entry/worker.ts
+  db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (24 demo salons, synthetic occupancy overlay)
+  jobs/             runDueJobs(): reminders, expiring requests, notifications
+  ports/            sms (dev: code 1234 logged), files (S3 API), clock
+  config.ts         one place that reads env on Workers (c.env) and Node (process.env)
+  entry/worker.ts · entry/node.ts
 ```
 
-- Services hold the rules; routes only validate, call a service and map the result. The same service code runs on the demo store and on Postgres.
-- OpenAPI 3.1 is generated from the routes and served at `api.yeral.app/docs` (Scalar). It's the contract for anyone
-  outside the monorepo (a future mobile app, partners).
-- **Demo worlds** (*planned*, M2): a `yeral_demo` cookie on `.yeral.app` picks the visitor's world (seed + their changes),
-  so the client and business tabs share it. Worlds expire when idle; «Сбросить демо-данные» resets one.
-- **Double booking** (*planned*, real backend): Postgres exclusion constraint on staff × time range for active bookings,
-  plus the domain check; the API answers `409 slot_taken` with alternatives.
+- Services hold the rules; routes only validate, authorise, call a service and map the result to contract DTOs.
+- OpenAPI 3.1 is generated from the routes and served at `/docs` (Scalar).
+- Double booking: Postgres exclusion constraint on staff × time range for active bookings + the domain check → `409 slot_taken`.
+- Demo behaviour (code `1234`, salons that answer by themselves, synthetic occupancy) is on outside production only.
 
 ## Auth
 
-- Client and business: phone + SMS code → session cookie `yeral_session` (httpOnly, Secure, SameSite=Lax,
-  Domain=`.yeral.app`). One person can be a client and a salon member at once; business access = membership in a salon
-  with a role (owner, admin, master, reception).
-- CMS: separate staff accounts and cookie, two-factor, plus a gate in front of the host (access policy / IP allow-list).
-- Mutations check `Origin` against `*.yeral.app`. Mobile apps (later) use bearer tokens.
+- Client and business: phone + one-time code (Better Auth phone plugin) → httpOnly session cookie on the parent
+  domain (`SameSite=Lax`, `Secure`). One person can be a client and a salon member at once; business access = membership
+  in a salon (Better Auth organization) with a role: owner, admin, master, reception.
+- CMS: separate staff accounts and cookie, two-factor, plus Cloudflare Access in front of `cms.` now (IP allow-list or VPN on the own server).
+- Mutations check `Origin` against the configured sites. Mobile apps (later) use bearer tokens.
+
+## Configuration, domains and brand
+
+- `@yeral/lib/site` reads one config per environment: site URLs (landing, client, business, cms, api, storybook),
+  cookie domain, brand name key. Apps and api never hard-code `yeral.app`.
+- The brand name is an i18n message (`common.brand`); logos live in `@yeral/ui/brand`. A rename = env + messages + logo files.
+- Every app serves `/version.json` (`{ app, version, commit, builtAt }`).
 
 ## i18n
 
-- `use-intl` (the framework-free core of next-intl, so today's `useTranslations` calls and ICU messages carry over).
+- `use-intl` (the framework-free core of next-intl): today's `useTranslations` calls and ICU messages carry over.
 - Locales: `ru` now, `tk` next. Shared namespaces (`common`, `categories`, `status`, `errors`, units) in `@yeral/i18n`;
   app namespaces in `apps/<app>/messages/{ru,tk}.json`. Keys are typed per app.
 - Landing and client put the locale in the URL for SEO (`/tk/...`); business and cms take it from the user's settings.
@@ -174,5 +177,4 @@ apps/api/src/
 - API errors: `{ error: { code, message?, details? } }` with the right HTTP status; codes are an enum in `@yeral/contract`;
   the UI shows `errors.<code>` from i18n. `@yeral/sdk` throws `ApiError`.
 - Each route has `errorComponent` and `notFoundComponent`; failed mutations show a toast; form errors sit next to fields.
-- **No third-party hosts at runtime**: fonts are system or self-hosted, map tiles self-hosted (*planned*: PMTiles
-  extract of Turkmenistan), error reports go through our own endpoint. Strict CSP (`self` + our hosts).
+- Portable code only (ADR 0007): web-standard APIs, no Cloudflare-only storage for product data.

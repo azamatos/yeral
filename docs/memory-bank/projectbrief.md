@@ -1,6 +1,7 @@
 # Project brief
 
 **Yeral** is online booking for beauty and wellness services in Turkmenistan, Ashgabat first.
+The name and domain are working titles: the owner may move to `yeral.com` or rebrand, so both are configuration.
 
 ## Products and sites
 
@@ -10,7 +11,8 @@
 | `client.yeral.app` | `apps/client` | clients | marketplace: search, salon pages, booking wizard, my visits, reviews, favourites, notifications |
 | `business.yeral.app` | `apps/business` | salons and masters | workspace: calendar, requests, manual booking, clients, services, team and schedules, booking rules, hours, analytics, reviews, settings |
 | `cms.yeral.app` | `apps/cms` | the Yeral team | admin + content: salon onboarding and moderation, users, complaints and no-shows, reference data (categories, districts), landing texts, banners, SEO texts |
-| `api.yeral.app` | `apps/api` | all of the above | REST API `/v1`; today the demo backend, later the real one |
+| `api.yeral.app` | `apps/api` | all of the above | REST API `/v1` on Postgres |
+| `storybook.yeral.app` | `apps/storybook` | the team and agents | the design system: every component, its variants and docs |
 
 **Core principle** (from the Project Brief): every salon action has a mirror screen for the client, booking statuses are
 the same in both apps, and the salon confirms requests manually unless it turned on instant confirmation.
@@ -29,22 +31,24 @@ Bookings through the salon's own link (`yeral.app/{slug}`, QR code) are free for
 
 - People: Ashgabat; Russian and Turkmen speakers; phones `+993`; money in manats (TMT, whole numbers);
   time zone `Asia/Ashgabat` (UTC+5, no daylight saving).
-- **Internet in Turkmenistan is heavily filtered.** Cloudflare and most foreign CDNs are reported blocked
-  (Tor forum, Jan 2026), as are Telegram, Instagram and YouTube. Production must work from inside the country
-  without a VPN. The production host is not chosen yet; until then the architecture stays portable and
-  nothing at runtime depends on third-party hosts. See [ADR 0007](../decisions/0007-portable-hosting.md).
+- **Hosting:** Cloudflare now. Later an own server (likely in Turkmenistan, where Cloudflare is reported filtered) running
+  everything in Docker behind nginx, with Cloudflare kept for DNS. Not a focus until that server is bought; the code
+  stays portable so the move is a deploy ([ADR 0007](../decisions/0007-hosting-cloudflare-now-docker-later.md)).
 - UX reference: Fresha. Visual source: the Claude Design export (Design System v2, Client App, Business App,
-  Business Clients and Analytics, Product Deck, Business Deck) kept next to the repository in `../design`.
+  Business Clients and Analytics, Product Deck, Business Deck) at `/Users/azamatos/www/yeral/design` on the owner's machine.
 - The first prototype (mobile PWA): github.com/azamatos/yeral_proto. Its `src/data/actions.ts` is the reference for
   every business action not yet built here.
+- The repository is public by the owner's choice until the product is ready; it will go private then. Never commit secrets.
 
 ## Goals
 
-- **Now:** a full demo on a mock backend: book as a client, answer as the salon, and see both sides update live.
-- **Next:** business workspace, landing, CMS; Turkmen language; SEO.
-- **Then:** the real backend in this monorepo (TypeScript), SMS codes, push notifications, production hosting reachable in Turkmenistan.
+- **Now:** infrastructure first — monorepo, tooling, design system with Storybook, tests, CI/CD, Docker — then a working
+  product on a real API and database.
+- **Next:** rebuild and polish the client app (the owner isn't satisfied with the first version), landing, business workspace, CMS; Turkmen; SEO.
+- **Then:** production SMS codes, push notifications, the own server.
 
 ## Non-goals for now
 
 - Native mobile apps. Packages that hold logic (`domain`, `contract`, `sdk`, `i18n`) stay DOM-free so an Expo app can reuse them later.
 - Online payments.
+- Optimising for network filtering in Turkmenistan before the own server exists.

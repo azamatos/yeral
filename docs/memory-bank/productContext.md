@@ -71,9 +71,11 @@ Every salon action reaches the client, every client action reaches the salon (in
 - Notification settings describe *when* a message arrives, not toggles per event × role.
 - Help is its own section. Analytics MVP answers three questions: about staff, services, clients.
 
-## Demo behaviour (until the real backend)
+## Demo behaviour (outside production)
+
+The seed and these behaviours run in local and staging environments (in the Next app: the in-browser mock).
 
 - «Ножницы» (`/nozhnitsy`) confirms manually: answer from the business app (or the demo panel on the booking page).
 - Other salons answer by themselves in a few seconds, or confirm instantly.
 - Demo login: any `+993` number, code `1234`; `+993 65 12 34 56` is the demo client with history.
-- Busy slots are synthetic but deterministic per master and day; real bookings always win.
+- Demo salons get synthetic but deterministic busy slots per master and day; real bookings always win.

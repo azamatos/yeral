@@ -1,82 +1,84 @@
 # Tech context
 
 Versions checked on npm on 2026-10-13. Every dependency is pinned once in `pnpm-workspace.yaml` (`catalog:`) and
-referenced as `"catalog:"` from packages, so all apps run the same versions. Status: *planned* until the migration
-milestones in `progress.md` land; the live Next.js app uses a subset.
+referenced as `"catalog:"` from packages, so all apps run the same versions. Status: *planned* until the milestones in
+`progress.md` land; the live Next.js app uses a subset. The "why" for the big choices is in `docs/decisions`.
 
 ## Foundation
 
 | Tool | Version | Why | Instead of |
 |---|---|---|---|
-| Node.js | 24 LTS | tooling, SSR, API; pinned in `.node-version` | 26 once it becomes LTS |
-| pnpm | 12 | workspaces, strict `node_modules` (undeclared imports fail), catalogs | npm, yarn |
-| Turborepo | 2.11 | task graph (packages before apps), local and CI cache, `--affected` runs only what changed | Nx: more power than we need, heavier config |
+| Node.js | 24 LTS | tooling, SSR and api in Docker; pinned in `.node-version` | 26 once it becomes LTS |
+| pnpm | 12 | workspaces; strict `node_modules` (an undeclared import fails); catalogs pin one version per dependency | npm, yarn (no strictness), Bun (edge cases in tooling) |
+| Turborepo + @turbo/gen | 2.11 | task graph (packages before apps), local and CI cache, `--affected`; generators for consistent scaffolding | Nx: more than we need, heavier config |
 | TypeScript | 6.0 | strict; typescript-eslint supports `< 6.1` today | 7.0 (native, much faster) once typescript-eslint supports it |
-| Vite | 8 | dev server and builds for all frontends | Next.js / webpack |
-| React | 19.3 + React Compiler 1.0 | compiler (via `@rolldown/plugin-babel`) removes most manual `useMemo`/`useCallback` | |
+| Vite | 8 | dev server and build for every frontend; Storybook, Vitest and TanStack Start all run on it, so one config world | webpack / Rspack |
+| React | 19.3 + React Compiler 1.0 | compiler (via `@rolldown/plugin-babel`) memoises for us; rules-of-React lint | — |
 
-## Routing, data, API
+## Frontend
 
-| Library | Version | Used in | Why |
+| Library | Version | Why | Instead of |
 |---|---|---|---|
-| TanStack Start | 1.169 | landing (prerender), client (SSR) | Vite plugin, explicit loaders and `head()`, SSR per route on/off, Node or Cloudflare target, no Server Components |
-| TanStack Router | 1.170 | all frontends | typed routes, typed zod-validated search params (wizard and filters live in the URL) |
-| TanStack Query | 5.104 | all frontends | server state, cache, SSR dehydration through the router integration |
-| Hono | 4.13 | api | small, runs on Node and Workers, typed RPC client (`hc`) |
-| @hono/zod-openapi + @scalar/hono-api-reference | 1.6 / 0.12 | api | routes declared with zod → validation + OpenAPI 3.1 + docs page |
-| zod | 4.6 | everywhere | one schema language: API input/output, forms, search params, env |
+| TanStack Start | 1.169 | SSR for landing (prerender) and client: explicit loaders and `head()`, SSR on/off per route, builds for Cloudflare or Node | Next.js (ADR 0002), React Router 7, Astro |
+| TanStack Router | 1.170 | typed routes and zod-validated search params: filters, wizard and calendar live in the URL | React Router (weaker search-param typing) |
+| TanStack Query + router SSR integration | 5.104 / 1.167 | server state: cache, de-dupe, refresh, invalidation, optimistic updates, SSR hydration | SWR (fewer features), RTK Query (needs Redux) |
+| TanStack Form | 1.33 | typed forms with zod validators; compiler-friendly; `createFormHook` binds our field components | React Hook Form (ADR 0011) |
+| Zustand | 5 | small client-only stores in a slice's `model/` (calendar, selection) | Redux, Jotai, MobX (ADR 0011) |
+| zod | 4.6 | one schema language: API input/output, forms, search params, env | valibot, arktype (smaller ecosystem around forms/OpenAPI) |
+| use-intl | 4.14 | ICU messages and typed keys; same API as today's next-intl code | Paraglide, i18next, Lingui (ADR 0008) |
+| Tailwind CSS | 4.3 | tokens as CSS variables in one `@theme`; no runtime CSS-in-JS; consistent scale | CSS Modules, vanilla-extract, Panda |
+| class-variance-authority + tailwind-merge + clsx | 0.7 / 3.7 / 2.1 | component variants; `cn()` merges classes so a passed `className` wins | tailwind-variants (fine too; cva matches shadcn output) |
+| Radix UI (`radix-ui`) | 1.8 | accessible primitives: dialog, popover, menu, select, tabs, tooltip | Base UI (newer), React Aria (heavier API) |
+| shadcn CLI | 4 | scaffolds Radix components into `@yeral/ui`; we own and restyle the code | ready-made kits (MUI, Mantine) that fight DS v2 |
+| lucide-react | 1.56 | icons, stroke 1.75 (design system) | — |
+| sonner | 2 | toasts | our hand-rolled toast |
+| TanStack Table / Virtual | 9 / 3 | data tables and long lists in business and cms | AG Grid (heavy) |
+| react-day-picker | 10 | date pickers in business and cms | — |
+| dnd-kit (`@dnd-kit/core`) | 6.3 | calendar drag and drop; re-check `@dnd-kit/react` (0.x) at the business milestone | pragmatic-drag-and-drop |
+| Recharts | 3 | analytics charts | visx (lower level), ECharts (heavy) |
+| MapLibre GL | 6 | maps; OpenFreeMap tiles now, self-hosted tiles on the own server | Google/Mapbox (keys, cost) |
 
-## UI
+## Backend
 
-| Library | Version | Why |
-|---|---|---|
-| Tailwind CSS | 4.3 | design tokens as `@theme` in `@yeral/ui`; apps `@import` them and `@source` the packages |
-| tailwind-merge + clsx → `cn()` | 3.7 / 2.1 | conflict-free class composition |
-| class-variance-authority | 0.7 | component variants (`variant`, `size`) |
-| Radix UI (`radix-ui`) | 1.8 | accessible primitives: dialog, popover, menu, select, tabs, tooltip |
-| shadcn CLI | 4 | scaffolds Radix-based components into `@yeral/ui`; we own and restyle the code to DS v2 |
-| lucide-react | 1.56 | icons, stroke 1.75 (design system) |
-| sonner | 2 | toasts (replaces the hand-rolled one) |
-| React Hook Form + @hookform/resolvers | 7.90 / 5.9 | forms; zod schemas from `@yeral/contract` (TanStack Form is the alternative; RHF has the bigger ecosystem) |
-| TanStack Table | 9 | data tables in business and cms |
-| TanStack Virtual | 3 | long lists |
-| react-day-picker | 10 | date pickers in business and cms |
-| dnd-kit (`@dnd-kit/core`) | 6.3 | calendar drag and drop; re-check `@dnd-kit/react` (0.x today) at M5 |
-| Recharts | 3 | analytics charts |
-| MapLibre GL | 6 | maps; tiles from OpenFreeMap today, self-hosted PMTiles of Turkmenistan before launch |
-| Zustand | 5 | rare cross-component UI state |
-| use-intl | 4.14 | i18n, ICU messages, same API as today's next-intl code |
+| Tool | Version | Why | Instead of |
+|---|---|---|---|
+| Hono + @hono/node-server | 4.13 / 2.1 | one `fetch` handler that runs on Workers now and Node in Docker later; typed RPC client | Fastify/Express (Node only), NestJS (heavy) |
+| @hono/zod-openapi + @scalar/hono-api-reference | 1.6 / 0.12 | routes declared with zod → validation + OpenAPI 3.1 + docs page | hand-written OpenAPI |
+| PostgreSQL | 18 | relational data, exclusion constraints against double booking, full-text search | D1/SQLite (ADR 0005) |
+| Neon | — | managed Postgres while on Cloudflare: free tier, a branch per environment, reached through Hyperdrive | Supabase (extras we don't need) |
+| Drizzle ORM / drizzle-kit | 0.45 / 0.31 | TypeScript schema, SQL-like queries, SQL migrations in git, runs on Workers and Node | Prisma 7, Kysely |
+| postgres (postgres.js) | 3.4 | driver for Drizzle on both runtimes | Neon-specific driver |
+| Better Auth | 1.7 | phone + one-time code, sessions in Postgres, organizations = salons with roles and invitations | hand-rolled sessions |
+| jobs table + `runDueJobs()` | — | reminders and expiry without a queue service; Cron Trigger now, a container loop later | pg-boss (needs a long-running process) |
+| pino | 10 | structured logs on Node | — |
 
-## Backend (*planned*, real backend milestone)
-
-| Tool | Version | Why |
-|---|---|---|
-| PostgreSQL | 18 | main database; exclusion constraint makes double booking impossible |
-| Drizzle ORM / drizzle-kit | 0.45 / 0.31 | typed SQL, migrations as SQL files in git |
-| Better Auth | 1.7 | phone OTP, sessions, organizations = salons with member roles. To be confirmed against hand-rolled sessions at that milestone |
-| pg-boss | 12 | background jobs on Postgres (reminders, expiring requests, notifications); no Redis |
-| pino | 10 | structured logs |
-| SMS gateway | local, TBD | behind a `Sms` port; the demo prints the code |
-| Web Push (VAPID) | | notifications for the business PWA and the client |
-
-## Quality and workflow
+## Quality and tests
 
 | Tool | Version | Role |
 |---|---|---|
 | ESLint | 10 | flat config in `@yeral/config`: typescript-eslint 8 (type-aware), react-hooks 7 (incl. compiler rules), TanStack Query/Router plugins |
 | Steiger + @feature-sliced/steiger-plugin | 0.7 / 0.8 | FSD rules per app (`pnpm lint:fsd`) |
-| Prettier + prettier-plugin-tailwindcss | 3.9 / 0.8 | formatting and class order. Biome is faster but would cost us the react-hooks/compiler lint rules |
-| Vitest + Testing Library + happy-dom | 5 / 16 / 21 | unit and component tests |
-| Playwright | 1.64 | end-to-end flows, including client ↔ business |
-| Storybook | 10 | living docs of `@yeral/ui` (from the business milestone) |
+| Prettier + prettier-plugin-tailwindcss | 3.9 / 0.8 | formatting and class order (Biome is faster but lacks the compiler/TanStack lint rules) |
+| Vitest | 5 | unit tests; browser mode (`@vitest/browser-playwright`) for component tests and screenshots |
+| Storybook + addon-vitest, addon-a11y | 10.6 | design-system docs; stories run as tests (interactions, a11y, screenshots) |
+| MSW + msw-storybook-addon | 3.0 | contract-shaped API mocks in stories and component tests |
+| Playwright | 1.64 | end-to-end flows across apps (several origins in one test) |
 | lefthook | 2 | git hooks: format + lint staged files, commit message check |
 | commitlint | 21 | Conventional Commits |
 | Changesets + @changesets/changelog-github | 3 / 1 | versions and changelogs per app and package |
 | Renovate | — | grouped dependency PRs |
 
-**Observability** (*planned*): errors through the Sentry SDK with a `tunnel` to our own endpoint (or self-hosted
-GlitchTip, decided with the host); product analytics with self-hosted Umami. No Google Analytics or Tag Manager:
-unreliable in Turkmenistan and a third-party runtime host.
+## Infrastructure
+
+| Tool | Why |
+|---|---|
+| Cloudflare Workers + wrangler 4 | hosting now: static assets, SSR, api; custom domains created on deploy |
+| Hyperdrive, R2, Cron Triggers, Access | Postgres connection pooling, photo storage (S3 API), the jobs tick, gate in front of the CMS |
+| Docker + Compose | the production-like stack and the future server: one image per deployable (`turbo prune --docker`, multi-stage) |
+| nginx (official image) | the future server's front door: TLS (Let's Encrypt), reverse proxy to Node services, static apps, caching, headers |
+| GitHub Actions + GHCR | CI/CD; container registry for the server phase |
+| Sentry (free tier, `@sentry/react`, `@sentry/cloudflare`) | error tracking now; self-host or tunnel later if needed |
+| Cloudflare Web Analytics | privacy-friendly page analytics now; Umami on the own server later |
 
 ## Where shared things live
 
@@ -88,11 +90,13 @@ unreliable in Turkmenistan and a third-party runtime host.
 | `+993` phones | `normPhone() fmtPhone()` | `@yeral/domain/phone` |
 | ids | `uid()` | `@yeral/domain/id` |
 | money, dates, durations, relative days on screen | `useFmt()` (`money price dur dayMonth when whenInline relDay …`) | `@yeral/i18n` |
+| site URLs, cookie domain, brand | `site` | `@yeral/lib/site` |
 | add to calendar | `buildIcs() downloadIcs()` | `@yeral/lib/ics` |
 | directions, call | `directionsUrl() telHref()` | `@yeral/lib/links` |
 | local/session storage that never throws | `safeStorage` | `@yeral/lib/storage` |
 | env vars | `parseEnv(schema)` → `shared/config/env.ts` per app | `@yeral/lib/env` |
-| API data | `sdk.<resource>.<query>()` queryOptions, `sdk.<resource>.<action>` mutations | `@yeral/sdk` |
+| API data | `sdk.<resource>.<query>()` queryOptions, `sdk.<resource>.<action>()` mutation options | `@yeral/sdk` |
+| forms | `useAppForm()` with `TextField`, `PhoneField`, `SelectField` … | `@yeral/ui/form` |
 
 Before writing a helper, look here and in the package; add new shared helpers to the right package and to this table.
 
@@ -106,24 +110,28 @@ Before writing a helper, look here and in the package; add new shared helpers to
 - No user-visible string in code, `aria-label` included: everything through i18n.
 - Mobile first: works at 360 px wide, touch targets ≥ 40 px, keyboard and screen reader friendly.
 - Imports: packages by name and subpath (`@yeral/ui/button`); inside an app via `@/` = `src/`.
-- Tests sit next to the code (`rules.test.ts`). `@yeral/domain` rules are covered by unit tests.
+- Tests sit next to the code (`rules.test.ts`, `button.stories.tsx`).
 
 ## Local development (*planned* monorepo)
 
 ```bash
 pnpm install
-pnpm dev                       # api + all apps through turbo
-pnpm dev --filter=client...    # one app and what it depends on
+pnpm db:up && pnpm db:setup     # Postgres in Docker, database for this worktree, migrations + seed
+pnpm dev                        # api + all apps + Storybook through turbo
+pnpm dev --filter=client...     # one app and what it depends on
+pnpm gen ui-component <name>    # scaffold a design-system component (also: slice, endpoint)
 pnpm lint && pnpm lint:fsd && pnpm typecheck && pnpm test
-pnpm e2e                       # Playwright against the local stack
-pnpm changeset                 # describe a user-visible change
+pnpm e2e                        # Playwright against the local stack
+pnpm docker:up                  # production-like stack (nginx + images) on *.yeral.localhost
+pnpm changeset                  # describe a user-visible change
 ```
 
-| landing | client | business | cms | api |
-|---|---|---|---|---|
-| :3000 | :3001 | :3002 | :3003 | :8787 (`/docs`) |
+| landing | client | business | cms | api | storybook |
+|---|---|---|---|---|---|
+| :3000 | :3001 | :3002 | :3003 | :3004 (`/docs`) | :3005 |
 
-Cookies on `localhost` are shared across ports, so one demo login works in every app locally.
+Ports are `PORT_BASE` + offset (`PORT_BASE=3100` in a second worktree). Cookies on `localhost` are shared across ports,
+so one login works in every app locally.
 
 **Today (before the migration)**: `pnpm dev` runs the Next.js marketplace; `pnpm run deploy` builds with OpenNext and
 publishes to Cloudflare (`yeral.app`).

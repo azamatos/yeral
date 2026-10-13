@@ -1,75 +1,104 @@
-# Operations: environments, CI/CD, versioning, hosting
+# Operations: environments, hosting, Docker, CI/CD, versioning, parallel work
 
 Status 2026-10-13: production = the Next.js marketplace on Cloudflare, deployed by hand (`pnpm run deploy`).
-Everything else here is *planned* and lands with milestone M0–M2 (see `progress.md`).
+Everything else here is *planned* and lands with milestones M0–M2 (see `progress.md`).
 
 ## Environments
 
-| Env | Hosts | Data | Deployed |
+| Env | Hosts | Database | Deployed |
 |---|---|---|---|
-| local | `localhost:3000–3003`, api `:8787` | demo memory store | `pnpm dev` |
-| preview (optional) | Cloudflare preview URL per PR | demo | on every PR, once the workers.dev subdomain is renamed (today it contains part of the account e-mail, so preview URLs are off) |
-| staging | `stage.yeral.app`, `client-stage.yeral.app`, `business-stage.yeral.app`, `cms-stage.yeral.app`, `api-stage.yeral.app` | demo | every push to `main` after CI passes |
-| production | `yeral.app`, `client.yeral.app`, `business.yeral.app`, `cms.yeral.app`, `api.yeral.app` | demo now, Postgres later | when a release is cut (Changesets) |
+| local | `localhost:3000–3005` (`PORT_BASE` + offset) | Postgres in Docker, one database per worktree | `pnpm dev` |
+| local, production-like | `*.yeral.localhost` through nginx | Postgres container | `pnpm docker:up` |
+| preview (optional) | Cloudflare preview URL per PR | Neon branch per PR | once the workers.dev subdomain is renamed (it contains part of the account e-mail today, so previews are off) |
+| staging | `stage.yeral.app`, `client-stage.`, `business-stage.`, `cms-stage.`, `api-stage.`, `storybook.` | Neon branch `stage` (demo seed) | every green push to `main` |
+| production | `yeral.app`, `client.`, `business.`, `cms.`, `api.` | Neon `main` | when a release is cut (Changesets) |
 
 Staging hosts are one level deep (`client-stage`, not `client.stage`) so the `*.yeral.app` certificate covers them.
-Staging uses its own cookie names (`yeral_session_stage`) so it never overwrites a production session on `.yeral.app`.
+Staging uses its own cookie names so it never overwrites a production session on the shared parent domain.
+All hosts come from config (`@yeral/lib/site`), so a new domain is a config change.
 
-## Hosting
+## Hosting now: Cloudflare
 
-- **Demo period:** Cloudflare (account of the owner, zone `yeral.app`). Workers with static assets for each app;
-  the api's demo worlds in a Durable Object. Only the api's demo store adapter and the `entry/worker.ts` files are Cloudflare-specific.
-- **Production:** *not decided.* It must be reachable from inside Turkmenistan without a VPN, and Cloudflare is
-  reported blocked there ([ADR 0007](../decisions/0007-portable-hosting.md)). Candidates: a server in a Turkmen data
-  centre, or a foreign VPS whose IP range works from Turkmenistan. Delivery is the same either way:
-  Docker images (api on Node; landing and client as Node SSR servers; business and cms as static files behind Caddy)
-  + Postgres, deployed from GitHub Actions over SSH with Docker Compose (or Kamal).
-- **Reachability test** (do before choosing): from Ashgabat, on Turkmentelecom home internet and on TMCELL mobile,
-  without VPN: open `https://yeral.app`, open a test page on each candidate server, load the map. Write the result into `activeContext.md`.
+Each deployable is a Worker whose wrangler config declares its host as a custom domain; `wrangler deploy` creates
+the DNS record and the certificate. No dashboard work per subdomain.
+
+| Host | Worker | Bindings |
+|---|---|---|
+| `yeral.app`, `www.yeral.app` | `yeral-landing` | static assets |
+| `client.yeral.app` | `yeral-client` | static assets + SSR |
+| `business.yeral.app` | `yeral-business` | static assets, SPA fallback |
+| `cms.yeral.app` | `yeral-cms` | static assets; Cloudflare Access policy (owner sets it up once in Zero Trust, free up to 50 users) |
+| `api.yeral.app` | `yeral-api` | Hyperdrive → Neon, R2 bucket `yeral-media`, Cron Trigger `* * * * *` → `runDueJobs()` |
+| `storybook.yeral.app` | `yeral-storybook` | static assets |
+
+**Cost now:** Workers Free (100k requests/day, 10 ms CPU per request) until SSR and the api need more, then Workers Paid
+$5/month; Neon, R2 (10 GB), Sentry and Cloudflare Web Analytics on free tiers. **No VPS needed** until the move.
+
+**Owner's one-time steps** (when the milestone needs them): Neon account (M2), Cloudflare API token for CI (M0),
+Workers Paid when limits are hit, Access policy for `cms.` (M6).
+
+## Hosting later: own server with Docker + nginx
+
+One VPS to start (≈4 vCPU, 8 GB RAM, 100 GB SSD), everything in Docker Compose (`infra/docker/compose.yml`):
+
+| Service | Image | Role |
+|---|---|---|
+| `nginx` | official nginx | TLS (Let's Encrypt via certbot), one server block per host, serves landing/business/cms/storybook static files, proxies `client` and `api`, gzip/brotli, cache and security headers |
+| `client` | `yeral-client` (Node) | TanStack Start SSR |
+| `api` | `yeral-api` (Node) | Hono on `@hono/node-server`, migrations on start |
+| `jobs` | `yeral-api` (same image, `jobs` command) | calls `runDueJobs()` every minute |
+| `postgres` | postgres:18 | data in a volume; nightly `pg_dump` to off-site storage |
+| `minio` (optional) | minio | photos via S3 API (or local disk behind nginx) |
+
+Static apps are built into the nginx image (or a volume). Cloudflare stays as DNS only (grey cloud), since proxied
+Cloudflare IPs may be blocked in Turkmenistan. **Move checklist:** buy server → test from Ashgabat that its IP and
+Cloudflare's nameservers work without VPN → `docker compose up` → restore `pg_dump` from Neon → copy photos from R2 →
+switch DNS records → switch CI's deploy step. The Docker setup exists and is built in CI from M2, so this is a deploy.
 
 ## CI/CD (GitHub Actions)
 
 | Workflow | Trigger | Does |
 |---|---|---|
-| `ci.yml` | pull request, push to `main` | pnpm install (cached) → `turbo run lint lint:fsd typecheck test build --affected` → Playwright on affected apps against the local stack → reports as artifacts. Required to merge |
-| `release.yml` | push to `main` | `changesets/action`: opens or updates the «Version packages» PR; when that PR is merged, tags `<app>@x.y.z`, creates GitHub Releases, starts production deploy of the apps whose version changed |
-| `deploy.yml` | called by the two above | builds with turbo and deploys the given apps to the given environment (wrangler today, Docker later), then smoke-checks: `/version.json` shows the new commit and key pages return 200 |
-| Renovate | weekly | grouped dependency PRs (TanStack, Radix, ESLint, …); dev-dependency patches merge themselves when CI is green |
-
-Staging deploys every green push to `main`. Production deploys only from a release; the `production` GitHub
-Environment can require a manual approval.
+| `ci.yml` | pull request, push to `main` | pnpm install (cached) → `turbo run lint lint:fsd typecheck test build --affected` → Storybook tests in Vitest browser mode → API tests with a Postgres service → Playwright on affected apps → Docker image builds for affected deployables. Required to merge |
+| `release.yml` | push to `main` | Changesets: opens or updates «Version packages»; when merged, tags `<app>@x.y.z`, creates GitHub Releases, deploys those apps to production |
+| `deploy.yml` | called by the two above | build → database migrations (api) → `wrangler deploy` (now) / image push + `docker compose up -d` over SSH (later) → smoke check: `/version.json` shows the commit, key pages answer 200 |
+| Renovate | weekly | grouped dependency PRs; dev-dependency patches merge themselves when CI is green |
 
 ## Versioning and releases
 
 - **Trunk-based.** `main` is always deployable. Short branches `feat/…`, `fix/…`, `chore/…` → pull request → squash merge.
   PR titles follow Conventional Commits with the app or package as scope: `feat(client): show free slots on cards`.
 - **Changesets.** A PR that changes something a user or an API consumer can notice adds `.changeset/*.md`
-  (`pnpm changeset`: which apps/packages, patch/minor/major, one sentence in user terms). The Version PR bumps
-  `package.json` versions and writes `CHANGELOG.md` for each app and package.
-- **SemVer for apps:** patch = fix, minor = feature, major = a big release that changes URLs or flows. Apps stay on `0.x`
-  until the public launch, which is `1.0.0`. Packages are private (never published) and versioned for their changelogs;
-  apps depend on them through `workspace:*`.
-- **API versions:** path prefix `/v1`. Inside v1 only additive changes. A breaking change ships as `/v2` next to `/v1`
-  until old clients are gone. CI compares the OpenAPI document with `main` and fails on breaking changes (*planned*: oasdiff).
-- **Database:** drizzle-kit SQL migrations in git, forward only, expand → migrate data → contract, so the previous app
-  version keeps working during a deploy. Deploy applies migrations before starting the new api.
-- **Build stamp:** each app serves `/version.json` `{ app, version, commit, builtAt }`; the api adds `X-Yeral-Version`.
-  Business and CMS show the version in settings, which helps with support.
-- **Demo seed:** `SEED_VERSION` in the api; bump it when the seed's shape changes so demo worlds reset cleanly.
+  (`pnpm changeset`). The Version PR bumps versions and writes `CHANGELOG.md` for each app and package.
+- **SemVer for apps:** patch = fix, minor = feature, major = a release that changes URLs or flows. Apps stay on `0.x`
+  until the public launch (`1.0.0`). Packages are private and versioned for their changelogs; apps use `workspace:*`.
+- **API versions:** path prefix `/v1`; only additive changes inside it; breaking changes ship as `/v2` side by side.
+  CI compares the OpenAPI document with `main` and fails on breaking changes (oasdiff).
+- **Database:** drizzle-kit SQL migrations in git, forward only, expand → migrate data → contract.
+- **Build stamp:** `/version.json` `{ app, version, commit, builtAt }` in every app; `X-Yeral-Version` from the api.
 
 ## Secrets
 
-- Stored as GitHub Environment secrets (`staging`, `production`), never in the repo or in chat:
-  `CLOUDFLARE_API_TOKEN` (Workers Scripts edit, Workers Routes edit, Zone read on `yeral.app`), `CLOUDFLARE_ACCOUNT_ID`;
-  later `DATABASE_URL`, `SMS_*`, `VAPID_*`, error-tracking DSN, SSH deploy key.
-- The owner creates tokens in the provider's dashboard and stores them with `gh secret set NAME --env staging`
+- GitHub Environment secrets (`staging`, `production`), never in the repo or in chat: `CLOUDFLARE_API_TOKEN` (Workers
+  Scripts edit, Workers Routes edit, Zone read, Hyperdrive edit, R2 edit), `CLOUDFLARE_ACCOUNT_ID`, `DATABASE_URL` per
+  environment, `BETTER_AUTH_SECRET`, `SENTRY_DSN`; later the SSH deploy key and SMS gateway keys.
+- The owner creates tokens in the providers' dashboards and stores them with `gh secret set NAME --env staging`
   (the value is typed into the prompt).
 - Local: `.env.local` per app (gitignored); `.env.example` committed and documents every variable.
 
-## Repository settings (owner's approval needed before changing)
+## Repository
 
-- Visibility: the repo is **public** today. Recommended private once backend code and infra land.
-- Branch protection on `main`: required CI check, linear history, no force pushes.
+- Public by the owner's choice until the product is ready, then private. Never commit secrets.
+- Branch protection on `main` (required CI, up to date before merge, linear history): set up in M0 with the owner's OK.
+- Issues and a GitHub Project board hold the tasks (ADR 0014).
+
+## Parallel agents (ADR 0014, skill `parallel-work`)
+
+- Instructions for any agent tool: `AGENTS.md`; Claude Code adds `CLAUDE.md` and `.claude/skills`.
+- Task = GitHub issue with scope + acceptance criteria; claim with label `agent:<name>`.
+- One worktree + branch per task; `PORT_BASE` per worktree; database `yeral_<branch>` in the shared local Postgres.
+- Hot spots (contract, ui tokens, catalog, turbo/root config, migrations) in small PRs that merge first.
+- Memory notes go to `docs/memory-bank/log/YYYY-MM-DD-<topic>.md` during parallel work; the lead folds them in.
 
 ## Rollback
 

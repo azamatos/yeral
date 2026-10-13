@@ -1,6 +1,6 @@
 ---
 name: api-endpoint
-description: Add or change a Yeral API endpoint end to end — zod contract, api route + service + store, mirror notification/event, sdk query or mutation, tests, changeset. Use whenever a screen needs data or an action the API doesn't offer yet, or an existing request/response shape changes.
+description: Add or change a Yeral API endpoint end to end — zod contract, api route + service + Drizzle repository (+ migration), mirror notification/event, sdk query or mutation, tests, changeset. Use whenever a screen needs data or an action the API doesn't offer yet, or an existing request/response shape changes.
 ---
 
 # API endpoint, end to end
@@ -17,13 +17,15 @@ there, change `contract.ts`, `mock/index.ts` and `hooks.ts` the same way.
 2. **Rules**: a business rule (availability, statuses, deadlines, limits) goes into `@yeral/domain` as a pure function with a unit test.
 3. **Route** (`apps/api/src/modules/<area>/routes.ts`): `createRoute({ method, path, request, responses })` + handler.
    The handler validates (automatic), checks auth and role, calls the service and maps the result. No rules in handlers.
-4. **Service** (`service.ts`): the use case. Reads and writes through the module's store port (`store.ts`), implemented
-   in `apps/api/src/store/memory` (and `store/pg` once it exists).
-5. **Mirror**: a salon action notifies the client and a client action notifies the salon (`productContext.md`). Emit the
-   notification and an SSE event (`{ type, ids }`) so open screens refresh.
-6. **SDK** (`packages/sdk/src/<area>.ts`): query key, `queryOptions` or mutation with the invalidations it causes
-   (and the SSE event → invalidation mapping). Apps use only this.
-7. **Tests**: `app.request()` tests for success, validation error, auth, and conflicts (`409`); domain tests for the rule.
+4. **Service + data** (`service.ts`, `repo.ts`): the use case in the service; Drizzle queries in the module's repository.
+   A schema change = `apps/api/src/db/schema/*` + `pnpm db:generate` (a new SQL migration; never edit a merged one;
+   migrations are a hot spot, skill `parallel-work`). Extend the seed if demo data needs it.
+5. **Mirror**: a salon action notifies the client and a client action notifies the salon (`productContext.md`). Write the
+   notification and an `events` row (`booking.confirmed`, ids) in the same transaction, so open screens refresh.
+6. **SDK** (`packages/sdk/src/<area>.ts`): query key, `queryOptions` or mutation options with the invalidations it causes,
+   and the event type → invalidation mapping. Apps use only this. Add MSW handlers/fixtures for stories (skill `testing`).
+7. **Tests**: `app.request()` tests on the test database for success, validation error, auth, and conflicts (`409`);
+   domain tests for the rule (skill `testing`).
 8. **Ship**: OpenAPI regenerates by itself; update `docs/API.md` only if the guide changes; `pnpm changeset` for `api`
    (and the apps whose behaviour changes).
 

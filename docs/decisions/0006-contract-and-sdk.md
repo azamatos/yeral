@@ -13,12 +13,13 @@ outside the monorepo (a future mobile app, partners).
 
 - `@yeral/contract`: zod 4 schemas for everything on the wire (DTOs, inputs, enums, error codes). Used by the api for
   validation, by forms for client-side validation, and as inferred TypeScript types everywhere.
-- `apps/api` declares routes with `createRoute` from these schemas; OpenAPI 3.1 is generated and served at `/docs`.
+- `apps/api` declares routes with `createRoute` from these schemas; OpenAPI 3.1 is generated and served at `/docs` (Scalar).
 - `@yeral/sdk`: the typed client is Hono's `hc<AppType>` (type-only import from the api; no runtime coupling), wrapped with
-  credentials, `ApiError` mapping and the event stream. It exports query keys, `queryOptions` and mutation helpers per
-  resource. Apps use only the sdk.
+  credentials, base URL from config, `ApiError` mapping and the events poller. It exports query keys, `queryOptions` and
+  mutation options per resource. Apps use only the sdk.
 - Errors: `{ error: { code, message?, details? } }` + HTTP status; codes enumerated in the contract.
 - API path versioning `/v1` (ADR 0009).
+- Storybook and component tests mock the API with MSW handlers that return contract-shaped data (ADR 0013).
 
 ## Consequences
 
@@ -30,4 +31,4 @@ outside the monorepo (a future mobile app, partners).
 
 - **OpenAPI-first + codegen** (openapi-typescript, hey-api, Orval): good across languages; unnecessary while both sides are TypeScript in one repo. The generated spec keeps this door open.
 - **tRPC / oRPC**: great types, but not plain REST; mobile apps and partners would need a separate API.
-- **Keep the TypeScript `Api` interface + mock**: no network boundary, can't be shared across subdomains.
+- **Keep the TypeScript `Api` interface + in-browser mock**: no network boundary, can't be shared across subdomains.

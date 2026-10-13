@@ -6,25 +6,28 @@
   with JSON-LD, full-page booking wizard, phone login, my bookings and booking detail (cancel, move, proposal,
   review, «это не я»), favourites, profile, notifications, demo panel playing the salon. Live at https://yeral.app
   (Cloudflare Worker `yeral-web`, www → apex). Commits `3906655`, `f536f22`.
-- **2026-10-13 · Architecture agreed:** monorepo, four sites, TanStack, FSD, TypeScript backend, portable hosting.
-  This memory bank and ADRs 0001–0010.
+- **2026-10-13 · Architecture agreed** in two rounds with the owner: monorepo, four sites + api + Storybook, TanStack,
+  FSD, state ownership, TypeScript backend on Postgres from the start, design system in Storybook, testing strategy,
+  Cloudflare now / Docker + nginx later, Changesets, GitHub Actions, parallel agents. ADRs 0001–0014, this memory bank,
+  `AGENTS.md`, project skills.
 
-Not click-tested yet in the Next app (re-test after the port): cancel dialog, move flow, posting and editing a review,
-favourites and profile pages, notification click-through, booking confirmation on a phone.
+**The owner is not satisfied with the first client app.** It gets rebuilt and polished in M3 on the new foundation.
+Before that, collect the owner's specific complaints and review it against DS v2 and Fresha.
+Not click-tested in the Next app: cancel dialog, move flow, review post/edit, favourites and profile pages,
+notification click-through, booking confirmation on a phone.
 
 ## Roadmap
 
-Each milestone ends deployed to staging, with the memory bank updated. Order can change; M8's host decision can happen at any time.
+Infrastructure first (owner, 2026-10-13). Each milestone ends merged, deployed to staging, memory bank updated.
 
 | # | Milestone | Scope | Done when |
 |---|---|---|---|
-| M0 | **Monorepo skeleton** | pnpm 12 workspace + catalog, Turborepo, `@yeral/config` (tsconfig, ESLint, Prettier, Steiger), lefthook + commitlint, Changesets, `ci.yml`, Renovate. The current Next app moves to `apps/legacy` unchanged and keeps serving `yeral.app` | `pnpm i && pnpm build` green locally and in CI; legacy deploys from the monorepo |
-| M1 | **Shared packages** | `@yeral/domain` (port + unit tests for the rules), `@yeral/contract` (zod from today's `contract.ts`), `@yeral/i18n` (use-intl, messages split into shared and per-app), `@yeral/ui` (tokens, cva variants, Radix/shadcn primitives in DS v2), `@yeral/lib` | packages typecheck, rules covered by tests |
-| M2 | **API (demo)** | `apps/api`: Hono modules for every endpoint in `docs/API.md`, demo store ported from the mock (seed, synthetic occupancy, auto-answering salons), demo worlds, SSE events, OpenAPI at `/docs`; `@yeral/sdk` with queryOptions; deployed to `api-stage` | each endpoint answers per the contract; API tests pass |
-| M3 | **Client app** | marketplace ported to TanStack Start + FSD on `@yeral/sdk`; SSR public pages with `head()`; full QA of the untested flows; `client.yeral.app` | Playwright booking suite green; salon link shows a preview card in messengers; parity with the live site |
+| M0 | **Monorepo foundation** | pnpm 12 workspace + catalog; Turborepo + generators; `@yeral/config` (tsconfig, ESLint, Prettier, Steiger, Vitest presets); lefthook + commitlint; Changesets; `ci.yml`, `release.yml`, `deploy.yml`; Renovate; issue templates + Project board; `PORT_BASE`; `AGENTS.md`; the Next app moved to `apps/legacy`, still serving `yeral.app` | `pnpm i && pnpm build && pnpm lint` green locally and in CI; legacy deploys from CI |
+| M1 | **Design system** | `@yeral/ui`: DS v2 tokens, base styles, components rebuilt on Radix/shadcn + cva (button, icon button, input, phone input, select, checkbox, switch, chip, tag, badge/status, avatar, rating, skeleton, empty state, dialog/sheet, popover, menu, tabs, tooltip, toast, form fields with `useAppForm`, date rail, time chips); `apps/storybook` deployed to `storybook.yeral.app`; Vitest browser tests: interactions, a11y, screenshots | every component has stories for all variants; CI runs them; Storybook live |
+| M2 | **Platform** | `@yeral/domain` (+ unit tests), `@yeral/contract`, `@yeral/i18n`, `@yeral/lib` (site config), `@yeral/sdk`; `apps/api`: Drizzle schema + migrations + seed, Better Auth (phone, dev code), catalog, availability, bookings, reviews, favorites, notifications, events, jobs; OpenAPI docs; Dockerfiles + Compose + nginx; api on Cloudflare with Neon | every endpoint in `docs/API.md` works on Postgres with tests; `pnpm docker:up` serves the stack locally |
+| M3 | **Client app** | rebuilt with TanStack Start + FSD on `@yeral/sdk` and `@yeral/ui`; polished with the owner's feedback; SSR public pages with `head()`; Playwright suite; `client.yeral.app` | the owner signs it off; booking flows green in Playwright; link previews work |
 | M4 | **Landing** | `yeral.app`: «Я клиент» / «Я бизнес», search box, for-business pricing and sign-up entry, short-link redirects; apex moves from legacy to landing; `apps/legacy` deleted | `yeral.app/nozhnitsy` → client app; legacy gone |
-| M5 | **Business app** | phone login + salon switcher; calendar (staff columns, day / 3 days / week load, drag and drop: proposal for app clients, move for phone clients, side drawer); requests; manual booking; clients; services; team and schedules; booking rules; hours and exceptions; reviews and answers; analytics MVP; settings; notifications; PWA | e2e: client books → business confirms → client sees it without reloading |
-| M6 | **CMS** | staff accounts, salon onboarding and moderation, users, complaints and no-shows, categories and districts, content (landing texts, banners, SEO texts), demo world reset | the team can onboard a salon end to end |
+| M5 | **Business app** | phone login + salon switcher; calendar (staff columns, day / 3 days / week load, drag and drop: proposal for app clients, move for phone clients, side drawer); requests; manual booking; clients; services; team and schedules; booking rules; hours and exceptions; reviews and answers; analytics MVP; settings; notifications; PWA | e2e: client books → business confirms → client sees it |
+| M6 | **CMS** | staff accounts, salon onboarding and moderation, users, complaints and no-shows, categories and districts, content (landing texts, banners, SEO texts), Cloudflare Access | the team can onboard a salon end to end |
 | M7 | **Turkmen + SEO** | `tk` messages, locale in URLs, hreflang, city × category pages, sitemap, OG images, client PWA | both languages complete; sitemap valid |
-| M8 | **Production hosting** | host chosen after the Turkmenistan test; Docker images; self-hosted map tiles; error tracking; analytics; uptime checks | the sites open in Ashgabat without a VPN |
-| M9 | **Real backend** | Postgres + Drizzle store, SMS codes, sessions and roles, jobs (reminders, expiring requests), web push, migrations, backups; production api leaves demo mode (demo stays on staging) | a real salon takes real bookings |
+| M8 | **Own server** | when the owner buys it: reachability test from Ashgabat, Compose stack live, data moved from Neon/R2, DNS switched, CI deploys over SSH; production SMS gateway and push | the sites open in Ashgabat without a VPN |
