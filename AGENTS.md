@@ -3,8 +3,8 @@
 Online booking for beauty and wellness salons in Turkmenistan. One monorepo for the landing, client, business and cms
 sites, the api and the design system (Storybook). Applies to every agent tool; Claude Code also reads `CLAUDE.md`.
 
-**Migration in progress:** the architecture is agreed (`docs/decisions`), but the live code is still the Next.js
-marketplace in `src/`, deployed to yeral.app. Status and milestones: `docs/memory-bank/progress.md`.
+**Migration in progress:** the monorepo foundation is in place (M0); the live marketplace is still the frozen Next.js app
+in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-bank/progress.md`.
 
 ## Read first
 
@@ -55,17 +55,15 @@ marketplace in `src/`, deployed to yeral.app. Status and milestones: `docs/memor
 
 ## Commands
 
-Today (Next app at the repo root): `pnpm dev` · `pnpm lint` · `pnpm typecheck` · `pnpm run deploy`
+Every task runs through Turborepo from the root; `--filter=@yeral/<name>...` narrows it to one package and its dependencies.
 
-After M0: `pnpm dev` · `pnpm dev --filter=client...` · `pnpm gen <generator>` · `pnpm lint` · `pnpm lint:fsd` ·
-`pnpm typecheck` · `pnpm test` · `pnpm e2e` · `pnpm db:up` · `pnpm db:setup` · `pnpm docker:up` · `pnpm changeset`
+| Command | Does |
+|---|---|
+| `pnpm dev` | all dev servers (`PORT_BASE` + offset, legacy on +0) |
+| `pnpm check` | lint, FSD lint, types, tests, format check — run before every PR |
+| `pnpm build` · `pnpm lint` · `pnpm typecheck` · `pnpm test` | one task across the workspace |
+| `pnpm format` | Prettier on everything except `apps/legacy`, `docs/design` and Markdown |
+| `pnpm gen package` | scaffold an internal package (more generators arrive with M1–M3) |
+| `pnpm changeset` | describe a user-visible change for the next release |
 
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+Planned with later milestones: `pnpm e2e`, `pnpm db:up`, `pnpm db:setup`, `pnpm docker:up`, `pnpm gen ui-component|slice|endpoint`.

@@ -6,7 +6,7 @@ description: Decide where code goes in the Yeral monorepo (Feature-Sliced Design
 # Where code goes
 
 Architecture reference: `docs/memory-bank/systemPatterns.md`, ADR 0004.
-Until milestone M3 the live marketplace is the Next app in `src/` (folders by kind). Don't restructure it piecemeal;
+Until milestone M3 the live marketplace is the frozen Next app in `apps/legacy` (folders by kind). Don't restructure it piecemeal;
 FSD code goes into `apps/*` and `packages/*` of the monorepo.
 
 ## 1. Look for what exists

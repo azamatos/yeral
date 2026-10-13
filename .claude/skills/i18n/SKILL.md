@@ -5,13 +5,13 @@ description: Add or change user-visible text, numbers, prices, dates, durations 
 
 # Strings and formats
 
-Reference: ADR 0008; `systemPatterns.md` (i18n). Library: `use-intl` (today `next-intl` in the Next app — same API).
+Reference: ADR 0008; `systemPatterns.md` (i18n). Library: `use-intl` (today `next-intl` in `apps/legacy` — same API).
 
 ## Where strings go
 
 - Shared namespaces (`common`, `categories`, `amenities`, `status`, `errors`, units) → `packages/i18n/messages/<locale>/`.
 - Everything else → `apps/<app>/messages/<locale>.json`, one namespace per screen or slice (`salon`, `booking`, `calendar`).
-- Today: `messages/ru.json` at the repo root.
+- Today: `apps/legacy/messages/ru.json`.
 - Keys camelCase, grouped by where they appear; reuse `common.*` before adding a duplicate.
 
 ## Rules
@@ -28,7 +28,7 @@ Reference: ADR 0008; `systemPatterns.md` (i18n). Library: `use-intl` (today `nex
 
 ## Numbers, money, dates
 
-Use `useFmt()` (`@yeral/i18n`; today `src/lib/format.ts`). Never `toLocaleString` or `Intl` in components.
+Use `useFmt()` (`@yeral/i18n`; today `apps/legacy/src/lib/format.ts`). Never `toLocaleString` or `Intl` in components.
 
 | Need | Call |
 |---|---|

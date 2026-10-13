@@ -1,3 +1,93 @@
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+packages:
+  - apps/*
+  - packages/*
+
+# One version of each shared dependency for the whole monorepo: packages reference them as "catalog:".
+# apps/legacy (the frozen Next.js app) keeps its own pinned versions.
+catalog:
+  '@changesets/changelog-github': ^1.0.1
+  '@changesets/cli': ^3.0.3
+  '@commitlint/cli': ^21.2.3
+  '@commitlint/config-conventional': ^21.2.3
+  '@eslint/js': ^10.0.1
+  '@turbo/gen': ^2.11.8
+  '@types/node': ^24.0.0
+  eslint: ^10.12.0
+  eslint-plugin-react-hooks: ^7.1.1
+  globals: ^17.13.0
+  lefthook: ^2.2.2
+  prettier: ^3.9.10
+  prettier-plugin-tailwindcss: ^0.8.1
+  turbo: ^2.11.8
+  typescript: ~6.0.3
+  typescript-eslint: ^8.71.2
+  vitest: ^5.0.4
+
+# Install scripts (pnpm 11+): nothing runs unless listed as true. These ship prebuilt binaries through
+# optional dependencies, so their scripts aren't needed; listing them as false keeps installs quiet.
+allowBuilds:
+  '@parcel/watcher': false
+  '@swc/core': false
+  esbuild: false
+  lefthook: false
+  sharp: false
+  unrs-resolver: false
+  workerd: false
+
+# Versions younger than pnpm's 1-day minimum release age that the lockfile already uses (written by pnpm).
+minimumReleaseAgeExclude:
+  - '@opennextjs/aws@4.1.10'
+  - '@opennextjs/cloudflare@1.20.11'
+  - '@radix-ui/react-accordion@1.3.1'
+  - '@radix-ui/react-alert-dialog@1.2.1'
+  - '@radix-ui/react-avatar@1.3.1'
+  - '@radix-ui/react-checkbox@1.4.1'
+  - '@radix-ui/react-collapsible@1.2.1'
+  - '@radix-ui/react-context-menu@2.4.1'
+  - '@radix-ui/react-dialog@1.3.1'
+  - '@radix-ui/react-dismissable-layer@1.2.1'
+  - '@radix-ui/react-dropdown-menu@2.2.1'
+  - '@radix-ui/react-focus-scope@1.3.1'
+  - '@radix-ui/react-hover-card@1.2.1'
+  - '@radix-ui/react-menu@2.2.1'
+  - '@radix-ui/react-menubar@1.2.1'
+  - '@radix-ui/react-navigation-menu@1.4.1'
+  - '@radix-ui/react-one-time-password-field@0.2.1'
+  - '@radix-ui/react-password-toggle-field@0.2.1'
+  - '@radix-ui/react-popover@1.3.1'
+  - '@radix-ui/react-progress@1.2.1'
+  - '@radix-ui/react-radio-group@1.5.1'
+  - '@radix-ui/react-roving-focus@1.2.1'
+  - '@radix-ui/react-select@2.4.1'
+  - '@radix-ui/react-slider@1.6.1'
+  - '@radix-ui/react-switch@1.4.1'
+  - '@radix-ui/react-tabs@1.2.1'
+  - '@radix-ui/react-toast@1.3.1'
+  - '@radix-ui/react-toggle-group@1.2.1'
+  - '@radix-ui/react-toggle@1.2.1'
+  - '@radix-ui/react-toolbar@1.2.1'
+  - '@radix-ui/react-tooltip@1.4.1'
+  - '@turbo/darwin-64@2.11.8'
+  - '@turbo/darwin-arm64@2.11.8'
+  - '@turbo/gen@2.11.8'
+  - '@turbo/linux-64@2.11.8'
+  - '@turbo/linux-arm64@2.11.8'
+  - '@turbo/windows-64@2.11.8'
+  - '@turbo/windows-arm64@2.11.8'
+  - lefthook-android-arm64@2.2.2
+  - lefthook-darwin-arm64@2.2.2
+  - lefthook-darwin-x64@2.2.2
+  - lefthook-freebsd-arm64@2.2.2
+  - lefthook-freebsd-x64@2.2.2
+  - lefthook-linux-arm64@2.2.2
+  - lefthook-linux-x64@2.2.2
+  - lefthook-openbsd-arm64@2.2.2
+  - lefthook-openbsd-x64@2.2.2
+  - lefthook-windows-arm64@2.2.2
+  - lefthook-windows-x64@2.2.2
+  - lefthook@2.2.2
+  - lucide-react@1.56.0
+  - miniflare@5.20261006.2-beta
+  - radix-ui@1.8.1
+  - turbo@2.11.8
+  - wrangler@4.150.0

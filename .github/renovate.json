@@ -1,0 +1,37 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommitTypeAll(chore)", "group:monorepos", "group:recommended"],
+  "timezone": "Asia/Ashgabat",
+  "schedule": ["before 9am on monday"],
+  "labels": ["type:deps"],
+  "rangeStrategy": "bump",
+  "minimumReleaseAge": "3 days",
+  "lockFileMaintenance": { "enabled": true, "schedule": ["before 9am on monday"] },
+  "ignorePaths": ["apps/legacy/**"],
+  "packageRules": [
+    { "groupName": "TanStack", "matchPackageNames": ["@tanstack/**"] },
+    { "groupName": "Radix UI", "matchPackageNames": ["radix-ui", "@radix-ui/**"] },
+    { "groupName": "Storybook", "matchPackageNames": ["storybook", "@storybook/**"] },
+    {
+      "groupName": "lint and format",
+      "matchPackageNames": [
+        "eslint",
+        "@eslint/**",
+        "typescript-eslint",
+        "eslint-plugin-**",
+        "prettier",
+        "prettier-plugin-**",
+        "steiger",
+        "@feature-sliced/**"
+      ]
+    },
+    { "groupName": "test tools", "matchPackageNames": ["vitest", "@vitest/**", "@playwright/test", "msw", "@testing-library/**"] },
+    { "groupName": "GitHub Actions", "matchManagers": ["github-actions"] },
+    {
+      "description": "Dev-tool patches merge themselves when CI is green",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    }
+  ]
+}

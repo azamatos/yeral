@@ -112,17 +112,17 @@ Before writing a helper, look here and in the package; add new shared helpers to
 - Imports: packages by name and subpath (`@yeral/ui/button`); inside an app via `@/` = `src/`.
 - Tests sit next to the code (`rules.test.ts`, `button.stories.tsx`).
 
-## Local development (*planned* monorepo)
+## Local development
 
 ```bash
 pnpm install
-pnpm db:up && pnpm db:setup     # Postgres in Docker, database for this worktree, migrations + seed
+pnpm db:up && pnpm db:setup     # (M2) Postgres in Docker, database for this worktree, migrations + seed
 pnpm dev                        # api + all apps + Storybook through turbo
-pnpm dev --filter=client...     # one app and what it depends on
-pnpm gen ui-component <name>    # scaffold a design-system component (also: slice, endpoint)
-pnpm lint && pnpm lint:fsd && pnpm typecheck && pnpm test
-pnpm e2e                        # Playwright against the local stack
-pnpm docker:up                  # production-like stack (nginx + images) on *.yeral.localhost
+pnpm dev --filter=@yeral/client...  # one app and what it depends on
+pnpm gen package                # scaffold an internal package; ui-component (M1), slice (M3), endpoint (M2) follow
+pnpm check                      # lint, FSD lint, types, tests, format — same as CI
+pnpm e2e                        # (M3) Playwright against the local stack
+pnpm docker:up                  # (M2) production-like stack (nginx + images) on *.yeral.localhost
 pnpm changeset                  # describe a user-visible change
 ```
 
@@ -133,5 +133,5 @@ pnpm changeset                  # describe a user-visible change
 Ports are `PORT_BASE` + offset (`PORT_BASE=3100` in a second worktree). Cookies on `localhost` are shared across ports,
 so one login works in every app locally.
 
-**Today (before the migration)**: `pnpm dev` runs the Next.js marketplace; `pnpm run deploy` builds with OpenNext and
-publishes to Cloudflare (`yeral.app`).
+**Today**: `pnpm dev` runs `apps/legacy` on :3000 (the landing takes :3000 when legacy is deleted at M4).
+`pnpm --filter @yeral/legacy run deploy` builds with OpenNext and publishes to Cloudflare by hand (fallback to the release flow).

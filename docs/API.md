@@ -4,12 +4,11 @@
 > ([ADR 0005](decisions/0005-typescript-backend-in-monorepo.md), [ADR 0006](decisions/0006-contract-and-sdk.md)).
 > Paths gain the `/v1` prefix. Until then this file describes the endpoints the mock implements.
 
-The web app talks to the backend only through the `Api` interface in `src/api/contract.ts`.
-Today it's served by the in-browser mock (`src/api/mock`). When the backend is ready, `src/api/http`
-implements the same interface with `fetch`, and `src/api/index.ts` switches to it. No UI changes.
+The web app talks to the backend only through the `Api` interface in `apps/legacy/src/api/contract.ts`.
+Today it's served by the in-browser mock (`apps/legacy/src/api/mock`). In the new apps it's replaced by `apps/api` and `@yeral/sdk` (ADR 0005/0006).
 
 This file maps every method to a REST endpoint. JSON field names are exactly the TypeScript types in
-`src/api/contract.ts` and `src/domain/types.ts`. Dates are salon-local `YYYY-MM-DD`; times are minutes
+`apps/legacy/src/api/contract.ts` and `apps/legacy/src/domain/types.ts`. Dates are salon-local `YYYY-MM-DD`; times are minutes
 from midnight (`870` = 14:30); all salon logic runs in `Asia/Ashgabat` (UTC+5). Money is in manats (TMT), integers.
 
 ## Auth
@@ -76,7 +75,7 @@ active bookings and slots held by reschedule proposals.
 ## Notifications the backend sends (mirror screens)
 
 Every salon action has a client-side screen; every client action reaches the salon. The mock's
-`notify(...)` calls in `src/api/mock/index.ts` list them; in production they go out as push + SMS:
+`notify(...)` calls in `apps/legacy/src/api/mock/index.ts` list them; in production they go out as push + SMS:
 
 - salon confirms / declines (with reason) / proposes another time / cancels / books by phone / marks a no-show → **client**
 - client sends a request / cancels (late or not) / accepts or declines a proposal / says «это не я» / confirms the visit / leaves a review → **salon**
