@@ -11,14 +11,15 @@
   Cloudflare now / Docker + nginx later, Changesets, GitHub Actions, parallel agents. ADRs 0001–0014, this memory bank,
   `AGENTS.md`, project skills.
 
-- **2026-10-13 · M0 monorepo foundation** (branch `chore/m0-monorepo`): pnpm 12 workspace with a dependency catalog and
+- **2026-10-13 · M0 monorepo foundation** (PR #1, `76a218b`): pnpm 12 workspace with a dependency catalog and
   `allowBuilds`; Turborepo tasks (`build lint lint:fsd typecheck test dev deploy`); `@yeral/config` (tsconfig bases,
   ESLint 10 flat preset, Prettier with Tailwind class sorting, Vitest preset, with type declarations); `pnpm gen package`;
   lefthook (format staged files, commitlint); Changesets (private packages versioned and tagged); GitHub Actions `ci.yml`,
   `release.yml`, `deploy.yml` + `scripts/smoke.sh`; `/version.json` stamp; Renovate config; issue and PR templates;
   `PORT_BASE`; `AGENTS.md` for every agent tool. The Next app moved to `apps/legacy` (`@yeral/legacy`) and builds, previews
   and deploys from the monorepo. First tests: 45 Vitest cases for the booking rules, which found and fixed a bug (yearly
-  closures across New Year were ignored).
+  closures across New Year were ignored). CI green on the first run; release workflow opened version PR #2. Repo
+  settings: labels (`lane:*`, `status:*`, `type:*`), Actions may open PRs, `main` protected.
 
 **The owner is not satisfied with the first client app.** It gets rebuilt and polished in M3 on the new foundation.
 Before that, collect the owner's specific complaints and review it against DS v2 and Fresha.

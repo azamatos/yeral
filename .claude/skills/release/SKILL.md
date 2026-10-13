@@ -20,8 +20,9 @@ References: `docs/memory-bank/operations.md`, ADR 0009, 0010. Workflows: `.githu
 6. **Production**: the release workflow keeps a «chore: version packages» PR open with the pending changesets. Merging it
    tags `@yeral/<app>@x.y.z`, creates GitHub Releases and runs `deploy.yml` for those apps; the smoke check verifies
    `/version.json` and key pages. Watch it: `gh run list --workflow=release.yml`, `gh run watch`.
-   The version PR is created by GitHub Actions, so CI doesn't run on it (GitHub doesn't trigger workflows from its own
-   token); it only changes versions and changelogs, so merge it as admin.
+   The version PR is opened by GitHub Actions, so its CI waits for approval: find the run
+   (`gh run list --branch changeset-release/main`), approve it (`gh api -X POST repos/azamatos/yeral/actions/runs/<id>/approve`),
+   wait for green, then `gh pr merge <n> --squash`.
 7. **Manual deploy** (fallback): `gh workflow run deploy.yml -f app=legacy -f environment=production`, or locally
    `pnpm --filter @yeral/legacy run deploy` (needs `wrangler login`).
 

@@ -90,7 +90,9 @@ switch DNS records → switch CI's deploy step. The Docker setup exists and is b
 ## Repository
 
 - Public by the owner's choice until the product is ready, then private. Never commit secrets.
-- Branch protection on `main` (required CI, up to date before merge, linear history): set up in M0 with the owner's OK.
+- Branch protection on `main` (since 2026-10-13): required checks «Format, lint, types, tests, build» and «PR title is a
+  Conventional Commit», branch up to date before merge, linear history, no force pushes. Admins may override; nobody
+  pushes to `main` directly any more.
 - Issues and a GitHub Project board hold the tasks (ADR 0014).
 
 ## Parallel agents (ADR 0014, skill `parallel-work`)
@@ -107,9 +109,9 @@ switch DNS records → switch CI's deploy step. The Docker setup exists and is b
 - With pending changesets, a push to `main` opens or updates «chore: version packages». With none, the workflow runs
   `changeset tag`; any package version without a tag gets one, a GitHub Release, and — for apps with a deploy job in
   `release.yml` — a production deploy.
-- The version PR is pushed with the workflow's `GITHUB_TOKEN`, which by GitHub's design triggers no other workflows, so
-  CI doesn't run on it. It only touches versions and changelogs; the owner (admin) merges it.
-- Needs the repo setting *Actions → General → Allow GitHub Actions to create and approve pull requests*.
+- The version PR is opened by GitHub Actions, so its CI run waits for approval: *Approve and run* on the PR, or
+  `gh api -X POST repos/azamatos/yeral/actions/runs/<run-id>/approve`. Then it merges like any PR.
+- Repo setting *Allow GitHub Actions to create and approve pull requests* is on (2026-10-13).
 - `apps/legacy` deploys to production only (no staging); smoke checks live in `scripts/smoke.sh`.
 - Labels for tasks: `lane:*`, `status:*`, `type:*`; agents add `agent:<name>` when claiming (create it if missing).
 
