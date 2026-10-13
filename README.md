@@ -1,7 +1,10 @@
 # Yeral — web (yeral.app)
 
 Web version of Yeral: booking at beauty & wellness salons in Ashgabat.
-Phase 1 = the client marketplace, running on mock data. Plan: [docs/PLAN.md](docs/PLAN.md) · backend contract: [docs/API.md](docs/API.md).
+Phase 1 = the client marketplace, running on mock data. Backend contract: [docs/API.md](docs/API.md).
+
+**Moving to a monorepo** (landing, client, business, cms, api): architecture, roadmap and decisions are in the
+[memory bank](docs/memory-bank/README.md) and [ADRs](docs/decisions/README.md). Agent instructions: [CLAUDE.md](CLAUDE.md).
 
 Next.js 16 (App Router) · React 19 · Tailwind 4 · TanStack Query · next-intl · MapLibre + OpenFreeMap · Cloudflare Workers via OpenNext.
 

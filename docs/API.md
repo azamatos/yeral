@@ -1,5 +1,9 @@
 # Yeral API — contract for the backend
 
+> Planned: this moves to `apps/api` (Hono) with zod schemas in `@yeral/contract` and a generated OpenAPI document
+> ([ADR 0005](decisions/0005-typescript-backend-in-monorepo.md), [ADR 0006](decisions/0006-contract-and-sdk.md)).
+> Paths gain the `/v1` prefix. Until then this file describes the endpoints the mock implements.
+
 The web app talks to the backend only through the `Api` interface in `src/api/contract.ts`.
 Today it's served by the in-browser mock (`src/api/mock`). When the backend is ready, `src/api/http`
 implements the same interface with `fetch`, and `src/api/index.ts` switches to it. No UI changes.
