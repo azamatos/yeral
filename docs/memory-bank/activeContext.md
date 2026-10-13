@@ -16,6 +16,7 @@ The live site is still the Next.js marketplace at https://yeral.app.
 - The repo stays public until the product is ready.
 - Design system with components, Storybook and tests from the start.
 - Not satisfied with the first client app: rebuild and polish it (M3) after the foundation.
+- Design export added to the repo as `docs/design/` (owner's request).
 - Wants to understand every choice (the "why" is in `docs/decisions` and `techContext.md`) and to run 2–3 agents in parallel later.
 
 ## Decisions (2026-10-13)
@@ -39,16 +40,15 @@ The live site is still the Next.js marketplace at https://yeral.app.
 
 | # | Question | Who | Blocks |
 |---|---|---|---|
-| 1 | Add the design export (`/Users/azamatos/www/yeral/design`, 4.2 MB) to the repo as `docs/design`, so worktrees and other agents can read it? | owner | M1 |
-| 2 | What exactly is wrong with the first client app (list of complaints)? | owner | M3 |
-| 3 | Which locale owns URLs without a prefix: `ru` or `tk`? | owner | M7 |
-| 4 | Final name and domain (`yeral.app`, `yeral.com`, other)? | owner | public launch |
-| 5 | Rename the Cloudflare workers.dev subdomain so PR preview URLs can be turned on | owner, dashboard | previews (optional) |
-| 6 | Cloudflare API token for CI, stored as a GitHub secret | owner | M0 deploy step |
-| 7 | Neon account (free) for the api database | owner | M2 |
-| 8 | Subscription and commission prices in manats; when online payment becomes possible | owner | M4 pricing copy |
-| 9 | Real salon photos and texts to replace the stock seed | owner | public launch |
-| 10 | SMS gateway and push provider for production | owner + research | M8 |
+| 1 | What exactly is wrong with the first client app (list of complaints)? | owner | M3 |
+| 2 | Which locale owns URLs without a prefix: `ru` or `tk`? | owner | M7 |
+| 3 | Final name and domain (`yeral.app`, `yeral.com`, other)? | owner | public launch |
+| 4 | Rename the Cloudflare workers.dev subdomain so PR preview URLs can be turned on | owner, dashboard | previews (optional) |
+| 5 | Cloudflare API token for CI, stored as a GitHub secret | owner | M0 deploy step |
+| 6 | Neon account (free) for the api database | owner | M2 |
+| 7 | Subscription and commission prices in manats; when online payment becomes possible | owner | M4 pricing copy |
+| 8 | Real salon photos and texts to replace the stock seed | owner | public launch |
+| 9 | SMS gateway and push provider for production | owner + research | M8 |
 
 ## Next steps
 

@@ -7,7 +7,7 @@ description: Work on Yeral's design system — DS v2 tokens, @yeral/ui component
 
 Decision: ADR 0012. Package: `packages/ui` (tokens `src/styles/tokens.css`, components `src/components/<name>/`).
 Docs and tests: `apps/storybook` → `storybook.yeral.app`. Visual source: `Yeral Design System v2.dc.html` (+ Client App,
-Business App) in the design export (`/Users/azamatos/www/yeral/design`). Before M1 the tokens are in `src/app/globals.css`
+Business App) in `docs/design/`. Before M1 the tokens are in `src/app/globals.css`
 of the Next app.
 
 ## DS v2 in one screen

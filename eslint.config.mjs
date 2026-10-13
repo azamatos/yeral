@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "public/vendor/**",
     ".open-next/**",
+    // the Claude Design export (read-only reference)
+    "docs/design/**",
   ]),
   {
     rules: {

@@ -12,8 +12,8 @@ marketplace in `src/`, deployed to yeral.app. Status and milestones: `docs/memor
 2. `docs/memory-bank/systemPatterns.md` before writing code: monorepo map, FSD, data flow, state, rendering, auth, i18n.
 3. As the task needs: `productContext.md` (product rules, glossary), `techContext.md` (libraries, why, where shared
    helpers live), `operations.md` (environments, Docker, CI/CD, versioning, parallel work), `docs/decisions/` (ADRs).
-4. Design source: the Claude Design export (Design System v2, Client App, Business App, decks) at
-   `/Users/azamatos/www/yeral/design` on the owner's machine, not in the repo yet.
+4. Design source: `docs/design/` — the Claude Design export (Design System v2, Client App, Business App, Business
+   Clients and Analytics, Product and Business decks, Project Brief). Open the `.dc.html` files in a browser.
 
 ## Rules
 
@@ -38,6 +38,7 @@ marketplace in `src/`, deployed to yeral.app. Status and milestones: `docs/memor
   Until M0 there's no staging: `pnpm run deploy` publishes straight to yeral.app, so say so when doing it.
 - Ask first before: repository settings, DNS changes, deleting anything in the Cloudflare or GitHub account, paid services,
   adding files from outside the repo.
+- `docs/design/` is the owner's export: read it, don't edit it (a new export replaces the folder).
 - Never ask for tokens or passwords in chat. The owner signs in with `gh auth login` / `npx wrangler login`, or stores
   secrets with `gh secret set NAME`.
 

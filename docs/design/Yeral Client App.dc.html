@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#ececed;color:#101014;font-family:-apple-system,"SF Pro Text",system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#5a3ff0}a:hover{color:#4429d6}
+@keyframes ySkel{0%,100%{opacity:1}50%{opacity:.5}}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;gap:54px;padding:44px 44px 90px">
+
+  <header style="display:flex;flex-direction:column;gap:14px;max-width:900px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:32px;height:32px;border-radius:10px;background:#101014;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;letter-spacing:-.03em">y</div>
+      <span style="font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6e6e78">yeral · заход 4 · приложение клиента · итерация 2.1</span>
+    </div>
+    <h1 style="font-size:42px;font-weight:700;letter-spacing:-.035em;line-height:1.05;margin:0">Раскадровка клиентского приложения</h1>
+    <p style="margin:0;max-width:74ch;font-size:15.5px;line-height:1.6;color:#4a4a55">Все экраны раздела 4 брифа на системе v0.2. Клиент уже вошёл. Два пути бронирования живут на одном экране: после услуг сразу показываем мастеров, а под списком — «сначала время». Кому важен мастер, выбирает его; кому важнее время — уходит к окнам салона и выбирает мастера уже из свободных. Автоназначения нет ни в одном пути. Итерация 2.1 подтягивает решения бизнес-приложения: статусы и цвета общие на обе стороны, у каждого экрана есть обоснование, а в конце — секция «зеркало»: что клиент видит, когда салон подтверждает, отклоняет, переносит или записывает его вручную.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:2px">
+      <span style="display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:8px;background:#efecfe;border:1px solid #d5cbfb;color:#4429d6;font-size:12px;font-weight:600">Статусы общие с бизнес-приложением</span>
+      <span style="display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:8px;background:#fff;border:1px solid #e6e6ea;color:#4a4a55;font-size:12px;font-weight:600">390 × 844 · iOS</span>
+      <span style="display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:8px;background:#fff;border:1px solid #e6e6ea;color:#4a4a55;font-size:12px;font-weight:600">Буфер 15 мин скрыт от клиента</span>
+    </div>
+  </header>
+
+  <!-- ═══════ ПУТЬ 1 ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">ПУТЬ 1</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Клиент знает, к кому идёт</h2>
+      <span style="font-size:13px;color:#5a5a64">каталог → бизнес → услуги → мастер → время → подтверждение</span>
+    </div>
+
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <!-- B1 каталог -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">B1</span><span style="font-size:12.5px;color:#4a4a55">Каталог и поиск</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;display:flex;align-items:center;gap:6px;padding:6px 16px 10px">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="2.6"></circle></svg>
+            <span style="font-size:16px;font-weight:700;letter-spacing:-.02em">Алматы</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+            <span style="flex:1"></span>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9zM10.2 21a2.2 2.2 0 0 0 3.6 0"></path></svg>
+          </div>
+          <div style="flex:none;padding:0 16px 12px">
+            <div style="display:flex;align-items:center;gap:9px;height:46px;padding:0 14px;border-radius:12px;background:#f4f4f6">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.9-3.9"></path></svg>
+              <span style="font-size:15px;color:#6e6e78">Услуга, салон или мастер</span>
+            </div>
+          </div>
+          <div style="flex:none;display:flex;gap:8px;padding:0 16px 14px;overflow:hidden">
+            <sc-for list="{{ cats }}" as="c" hint-placeholder-count="4">
+              <div style="{{ c.style }}"><span style="font-size:20px">{{ c.glyph }}</span><span style="font-size:11.5px;font-weight:600;text-align:center;line-height:1.2">{{ c.name }}</span></div>
+            </sc-for>
+          </div>
+          <div style="flex:none;display:flex;align-items:center;gap:8px;padding:0 16px 12px">
+            <span style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 12px;border-radius:999px;background:#101014;color:#fff;font-size:12.5px;font-weight:600">По рейтингу<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></span>
+            <span style="display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:999px;border:1px solid #e6e6ea;font-size:12.5px;font-weight:600;color:#4a4a55">Свободно сегодня</span>
+            <span style="display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:999px;border:1px solid #e6e6ea;font-size:12.5px;font-weight:600;color:#4a4a55">Цена</span>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:18px">
+            <sc-for list="{{ catalog }}" as="b" hint-placeholder-count="2">
+              <div>
+                <div style="height:158px;border-radius:14px;background:repeating-linear-gradient(135deg,#eeeef1 0 10px,#f6f6f8 10px 20px);display:flex;align-items:center;justify-content:center;position:relative">
+                  <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#6e6e78">{{ b.photo }}</span>
+                  <span style="position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.4 5.6a5 5 0 0 0-7.1 0L12 6.9l-1.3-1.3a5 5 0 1 0-7.1 7.1L12 21l8.4-8.3a5 5 0 0 0 0-7.1z"></path></svg></span>
+                </div>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:10px">
+                  <span style="font-size:17px;font-weight:700;letter-spacing:-.015em">{{ b.name }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:600"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg>{{ b.rating }} <span style="color:#6e6e78;font-weight:400">{{ b.reviews }}</span></span>
+                </div>
+                <div style="font-size:13.5px;color:#5a5a64;margin-top:2px">{{ b.meta }}</div>
+                <div style="display:flex;gap:6px;margin-top:9px">
+                  <span style="{{ b.freeStyle }}">{{ b.free }}</span>
+                  <span style="display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:8px;background:#f4f4f6;font-size:12px;font-weight:600;color:#4a4a55">{{ b.price }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:auto;flex:none;border-top:1px solid #e6e6ea;display:flex;padding:7px 6px 0;background:#fff"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding-bottom:6px;color:#5a3ff0"><svg width="23" height="23" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.6" fill="currentColor"></circle><circle cx="11" cy="11" r="3.6" fill="#fff"></circle><path d="M20 20l-3.4-3.4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"></path></svg><span style="font-size:10.5px;font-weight:600">Поиск</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding-bottom:6px;color:#6e6e78"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"></rect><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"></path></svg><span style="font-size:10.5px;font-weight:600">Записи</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding-bottom:6px;color:#6e6e78"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg><span style="font-size:10.5px;font-weight:600">Профиль</span></div></div>
+          <div style="height:22px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Каталог — витрина, а не фильтры: сначала салон, рейтинг и ближайшее окно. Из фильтров реально нажимают «свободно сегодня» — он отвечает на главный вопрос «когда», поэтому стоит первым после сортировки.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- B2 страница бизнеса -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">B2</span><span style="font-size:12.5px;color:#4a4a55">Страница бизнеса · вход по прямой ссылке</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:262px;flex:none;background:repeating-linear-gradient(135deg,#eeeef1 0 10px,#f6f6f8 10px 20px);position:relative;display:flex;align-items:center;justify-content:center">
+            <span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#6e6e78">фото салона · 1 / 6</span>
+            <div style="position:absolute;top:52px;left:16px;right:16px;display:flex;justify-content:space-between">
+              <span style="width:36px;height:36px;border-radius:999px;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+              <span style="display:flex;gap:8px">
+                <span style="width:36px;height:36px;border-radius:999px;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 8l4-4 4 4M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15"></path></svg></span>
+                <span style="width:36px;height:36px;border-radius:999px;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.4 5.6a5 5 0 0 0-7.1 0L12 6.9l-1.3-1.3a5 5 0 1 0-7.1 7.1L12 21l8.4-8.3a5 5 0 0 0 0-7.1z"></path></svg></span>
+              </span>
+            </div>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:16px 16px 0">
+            <div style="font-size:26px;font-weight:700;letter-spacing:-.03em">Ножницы</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:14px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="#101014"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg>
+              <span style="font-weight:600">4,9</span><span style="color:#6e6e78">(212 отзыва)</span>
+            </div>
+            <div style="font-size:14px;color:#5a5a64;margin-top:6px">Барбершоп · Абая 52, Алмалинский</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:14px;color:#066a41;font-weight:600">Открыто до 21:00</div>
+            <div style="display:flex;gap:14px;margin:16px 0 4px;border-bottom:1px solid #e6e6ea">
+              <span style="padding-bottom:9px;border-bottom:2px solid #101014;font-size:14.5px;font-weight:600">Услуги</span>
+              <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">Мастера</span>
+              <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">Отзывы</span>
+              <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">О салоне</span>
+            </div>
+            <sc-for list="{{ svcPreview }}" as="s" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #eeeef1">
+                <div style="flex:1">
+                  <div style="font-size:15px;font-weight:600">{{ s.name }}</div>
+                  <div style="font-size:13px;color:#5a5a64;margin-top:2px">{{ s.dur }}</div>
+                  <div style="font-size:14px;font-weight:600;margin-top:4px">{{ s.price }}</div>
+                </div>
+                <span style="display:inline-flex;align-items:center;height:34px;padding:0 16px;border-radius:999px;border:1px solid #d8d8de;font-size:13.5px;font-weight:600">Выбрать</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex:none;border-top:1px solid #e6e6ea;padding:12px 16px 0;background:#fff">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="flex:1"><div style="font-size:14px;font-weight:600">39 услуг</div><div style="font-size:12.5px;color:#5a5a64">ближайшее время сегодня 14:30</div></div>
+              <span style="{{ cta }}">Записаться</span>
+            </div>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Тот же экран открывается по прямой ссылке из инстаграма — вход без каталога. Кнопка записи закреплена внизу и не уезжает при скролле, как нижняя панель в бизнес-приложении.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- B3 выбор услуг -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">B3</span><span style="font-size:12.5px;color:#4a4a55">Выбор услуг · можно несколько</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+            <span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+            <span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg></span>
+          </div>
+          <div style="flex:none;padding:0 16px 12px"><div style="font-size:28px;font-weight:700;letter-spacing:-.03em">Выберите услуги</div></div>
+          <div style="flex:none;display:flex;gap:8px;padding:0 16px 6px;overflow:hidden">
+            <span style="display:inline-flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;background:#101014;color:#fff;font-size:13px;font-weight:600;white-space:nowrap">Популярное</span>
+            <span style="display:inline-flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:#4a4a55;white-space:nowrap">Стрижки</span>
+            <span style="display:inline-flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:#4a4a55;white-space:nowrap">Борода</span>
+            <span style="display:inline-flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:#4a4a55;white-space:nowrap">Уход</span>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:0 16px">
+            <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78;padding:12px 0 2px">Популярное</div>
+            <sc-for list="{{ svcRows }}" as="s" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #eeeef1">
+                <div style="flex:1">
+                  <div style="font-size:15px;font-weight:600">{{ s.name }}</div>
+                  <div style="font-size:13px;color:#5a5a64;margin-top:2px">{{ s.dur }}</div>
+                  <div style="font-size:14px;font-weight:600;margin-top:4px">{{ s.price }}</div>
+                </div>
+                <span style="{{ s.boxStyle }}">
+                  <sc-if value="{{ s.on }}" hint-placeholder-val="{{ false }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7L9.5 17.5 4 12"></path></svg></sc-if>
+                  <sc-if value="{{ s.off }}" hint-placeholder-val="{{ true }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></sc-if>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex:none;border-top:1px solid #e6e6ea;padding:12px 16px 0;background:#fff">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="flex:1"><div style="font-size:15px;font-weight:700">9 000 ₸</div><div style="font-size:12.5px;color:#5a5a64">2 услуги · 1 ч 5 мин</div></div>
+              <span style="{{ cta }}">Далее</span>
+            </div>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Несколько услуг в одной заявке: сумма и длительность считаются сразу и приезжают в календарь салона одним блоком. Буфер 15 минут добавляется скрыто — клиенту его не показываем.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- B5 выбор мастера -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">B4</span><span style="font-size:12.5px;color:#4a4a55">Выбор мастера · или «сначала время»</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+            <span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+            <span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg></span>
+          </div>
+          <div style="flex:none;padding:0 16px 4px"><div style="font-size:28px;font-weight:700;letter-spacing:-.03em">Выберите мастера</div><div style="font-size:13.5px;color:#5a5a64;margin-top:6px">Показаны те, кто делает обе выбранные услуги</div></div>
+          <div style="flex:1;overflow:hidden;padding:14px 16px 0">
+            <sc-for list="{{ masters }}" as="m" hint-placeholder-count="3">
+              <div style="{{ m.row }}">
+                <span style="{{ m.av }}">{{ m.initial }}</span>
+                <div style="flex:1">
+                  <div style="font-size:15.5px;font-weight:600">{{ m.name }}</div>
+                  <div style="font-size:13px;color:#5a5a64;margin-top:2px">{{ m.role }}</div>
+                  <div style="display:flex;align-items:center;gap:5px;margin-top:5px;font-size:12.5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="#101014"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg><span style="font-weight:600">{{ m.rating }}</span><span style="color:#6e6e78">· {{ m.jobs }}</span></div>
+                </div>
+                <span style="{{ m.radio }}"><sc-if value="{{ m.on }}" hint-placeholder-val="{{ false }}"><span style="width:10px;height:10px;border-radius:999px;background:#fff"></span></sc-if></span>
+              </div>
+            </sc-for>
+            <div style="margin-top:4px;border:1px solid #e6e6ea;border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px">
+              <span style="width:44px;height:44px;border-radius:999px;background:#f4f4f6;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#4a4a55" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg></span>
+              <div style="flex:1"><div style="font-size:15.5px;font-weight:600">Мне не важно кто — сначала время</div><div style="font-size:13px;color:#5a5a64;margin-top:2px;line-height:1.4">Покажем все окна салона, а потом тех, кто свободен</div></div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.9" stroke-linecap="round" style="flex:none"><path d="M9 5l7 7-7 7"></path></svg>
+            </div>
+          </div>
+          <div style="flex:none;border-top:1px solid #e6e6ea;padding:12px 16px 0;background:#fff">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="flex:1"><div style="font-size:15px;font-weight:700">9 000 ₸</div><div style="font-size:12.5px;color:#5a5a64">Марат · 1 ч 5 мин</div></div>
+              <span style="{{ cta }}">Далее</span>
+            </div>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Автоназначения нет ни в одном пути: либо клиент выбирает мастера, либо явно уходит в «сначала время». Показываем только тех, кто делает обе услуги, иначе заявка развалится на стороне салона.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- B6 выбор времени -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">B5</span><span style="font-size:12.5px;color:#4a4a55">Выбор времени · окна Марата</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+            <span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+            <span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg></span>
+          </div>
+          <div style="flex:none;padding:0 16px 12px"><div style="font-size:28px;font-weight:700;letter-spacing:-.03em">Выберите время</div></div>
+          <div style="flex:none;padding:0 16px 12px"><span style="{{ masterChip }}"><span style="width:24px;height:24px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">М</span>Марат<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></span></div>
+          <div style="flex:none;padding:0 16px 6px;font-size:14px;font-weight:600;color:#5a5a64">Сентябрь 2026</div>
+          <div style="flex:none;display:flex;gap:6px;padding:0 16px 16px;overflow:hidden">
+            <sc-for list="{{ days }}" as="d" hint-placeholder-count="6">
+              <div style="{{ d.wrap }}"><span style="{{ d.circle }}">{{ d.num }}</span><span style="{{ d.dowStyle }}">{{ d.dow }}</span></div>
+            </sc-for>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ slotRows }}" as="t" hint-placeholder-count="6">
+              <div style="{{ t.style }}">{{ t.label }}</div>
+            </sc-for>
+          </div>
+          <div style="flex:none;border-top:1px solid #e6e6ea;padding:12px 16px 0;background:#fff">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="flex:1"><div style="font-size:15px;font-weight:700">9 000 ₸</div><div style="font-size:12.5px;color:#5a5a64">3 сентября, 14:30 · Марат</div></div>
+              <span style="{{ cta }}">Далее</span>
+            </div>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Окна уже учитывают буфер и график смен из бизнес-приложения — клиент видит только то, что салон реально может принять. День выбирается лентой, месяц-календарь оставляем на потом.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- B7 подтверждение -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">B6</span><span style="font-size:12.5px;color:#4a4a55">Подтверждение</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 12px">
+            <span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+            <span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg></span>
+          </div>
+          <div style="flex:none;padding:0 16px 14px"><div style="font-size:28px;font-weight:700;letter-spacing:-.03em">Проверьте заявку</div></div>
+          <div style="flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid #eeeef1">
+              <div style="width:52px;height:52px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px)"></div>
+              <div style="flex:1"><div style="font-size:16px;font-weight:700;letter-spacing:-.015em">Ножницы</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">Абая 52, Алмалинский</div></div>
+            </div>
+            <div style="border:1px solid #e6e6ea;border-radius:14px;padding:14px">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"></rect><path d="M8 2v4M16 2v4M3 10h18"></path></svg>
+                <span style="font-size:15px;font-weight:600">Среда, 3 сентября · 14:30</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="{{ avSm }}">М</span>
+                <span style="font-size:15px">Марат · барбер</span>
+              </div>
+            </div>
+            <div style="border:1px solid #e6e6ea;border-radius:14px;padding:14px">
+              <div style="display:flex;justify-content:space-between;font-size:14.5px;margin-bottom:8px"><span>Мужская стрижка<span style="color:#5a5a64;font-size:13px"> · 45 мин</span></span><span style="font-weight:600">6 000 ₸</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14.5px"><span>Стрижка бороды<span style="color:#5a5a64;font-size:13px"> · 20 мин</span></span><span style="font-weight:600">3 000 ₸</span></div>
+              <div style="height:1px;background:#eeeef1;margin:12px 0"></div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13.5px;color:#5a5a64">Итого · 1 ч 5 мин</span><span style="font-size:19px;font-weight:700">9 000 ₸</span></div>
+            </div>
+            <div>
+              <div style="font-size:12.5px;font-weight:600;color:#5a5a64;margin-bottom:6px">Комментарий мастеру</div>
+              <div style="border:1px solid #e6e6ea;border-radius:12px;padding:12px 13px;font-size:14px;color:#6e6e78;min-height:66px">Подстричь короче по бокам, сверху оставить</div>
+            </div>
+            <div style="display:flex;gap:9px;align-items:flex-start;background:#fef6e7;border:1px solid #f2ddb0;border-radius:12px;padding:11px 12px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5M12 8h.01"></path></svg>
+              <div style="font-size:12.5px;line-height:1.45;color:#93500a">Это заявка: салон подтвердит её в течение часа. Место держим до ответа.</div>
+            </div>
+          </div>
+          <div style="flex:none;border-top:1px solid #e6e6ea;padding:12px 16px 0;background:#fff">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="flex:1"><div style="font-size:15px;font-weight:700">9 000 ₸</div><div style="font-size:12.5px;color:#5a5a64">оплата в салоне</div></div>
+              <span style="{{ cta }}">Отправить заявку</span>
+            </div>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Экран называется «Проверьте заявку», а не «Оплата»: денег в MVP нет, салон подтверждает вручную. Обещание ответа в течение часа стоит здесь, до отправки, а не после.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- B8 отправлено -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#dc8b0b;color:#fff;padding:3px 7px;border-radius:5px">B7</span><span style="font-size:12.5px;color:#4a4a55">Заявка отправлена</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 28px;text-align:center">
+            <span style="{{ bigCheck }}"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7L9.5 17.5 4 12"></path></svg></span>
+            <div style="font-size:28px;font-weight:700;letter-spacing:-.03em;margin-top:24px">Заявка отправлена</div>
+            <div style="font-size:15px;line-height:1.5;color:#5a5a64;margin-top:10px;max-width:30ch">Марат подтвердит её в течение часа — пришлём уведомление.</div>
+            <span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12.5px;font-weight:600;margin-top:18px"><span style="width:7px;height:7px;border-radius:999px;background:#dc8b0b"></span>Ждёт подтверждения</span>
+            <div style="border:1px solid #e6e6ea;border-radius:14px;padding:14px;margin-top:24px;width:100%;text-align:left">
+              <div style="font-size:15px;font-weight:600">Среда, 3 сентября · 14:30</div>
+              <div style="font-size:13.5px;color:#5a5a64;margin-top:4px">Ножницы · Марат · стрижка + борода</div>
+              <div style="font-size:15px;font-weight:700;margin-top:8px">9 000 ₸</div>
+            </div>
+          </div>
+          <div style="flex:none;padding:0 16px 8px;display:flex;flex-direction:column;gap:9px">
+            <span style="{{ ctaBlock }}">Мои записи</span>
+            <span style="height:48px;border:1px solid #d8d8de;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Добавить в календарь</span>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">«Ждёт подтверждения» — тот же янтарь, что и «Заявка · подтвердить» в календаре салона: один статус, один цвет на обеих сторонах продукта.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ ПУТЬ 2 ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">ПУТЬ 2</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Клиенту важнее время</h2>
+      <span style="font-size:13px;color:#5a5a64">из экрана мастеров нажали «сначала время» → окна всего салона → кто свободен → подтверждение (тот же B6)</span>
+    </div>
+
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <!-- C2 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#0e7c66;color:#fff;padding:3px 7px;border-radius:5px">C1</span><span style="font-size:12.5px;color:#4a4a55">Время по всему салону</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;height:50px;display:flex;align-items:center;padding:0 12px"><span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span></div>
+          <div style="flex:none;padding:0 16px 10px"><div style="font-size:28px;font-weight:700;letter-spacing:-.03em">Выберите время</div><div style="font-size:13.5px;color:#5a5a64;margin-top:6px">Все свободные окна салона на этот день</div></div>
+          <div style="flex:none;padding:0 16px 6px;font-size:14px;font-weight:600;color:#5a5a64">Сентябрь 2026</div>
+          <div style="flex:none;display:flex;gap:6px;padding:0 16px 16px;overflow:hidden">
+            <sc-for list="{{ days }}" as="d" hint-placeholder-count="6">
+              <div style="{{ d.wrap }}"><span style="{{ d.circle }}">{{ d.num }}</span><span style="{{ d.dowStyle }}">{{ d.dow }}</span></div>
+            </sc-for>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ slotAll }}" as="t" hint-placeholder-count="6">
+              <div style="{{ t.style }}"><span style="{{ t.tStyle }}">{{ t.t }}</span><span style="{{ t.nStyle }}">{{ t.n }}</span></div>
+            </sc-for>
+          </div>
+          <div style="flex:none;border-top:1px solid #e6e6ea;padding:12px 16px 0;background:#fff">
+            <div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><div style="font-size:15px;font-weight:700">9 000 ₸</div><div style="font-size:12.5px;color:#5a5a64">3 сентября, 14:30</div></div><span style="{{ cta }}">Далее</span></div>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Те же 12 окон, но с числом свободных мастеров. Тап по времени ведёт к выбору мастера, а не к подтверждению — автоназначения нет и здесь.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- C3 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#0e7c66;color:#fff;padding:3px 7px;border-radius:5px">C2</span><span style="font-size:12.5px;color:#4a4a55">Кто свободен в 14:30</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;height:50px;display:flex;align-items:center;padding:0 12px"><span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span></div>
+          <div style="flex:none;padding:0 16px 4px"><div style="font-size:28px;font-weight:700;letter-spacing:-.03em">Кто вас примет</div><div style="font-size:13.5px;color:#5a5a64;margin-top:6px">Свободны в среду, 3 сентября в 14:30</div></div>
+          <div style="flex:1;overflow:hidden;padding:14px 16px 0">
+            <sc-for list="{{ freeAt }}" as="m" hint-placeholder-count="2">
+              <div style="{{ m.row }}">
+                <span style="{{ m.av }}">{{ m.initial }}</span>
+                <div style="flex:1">
+                  <div style="font-size:15.5px;font-weight:600">{{ m.name }}</div>
+                  <div style="font-size:13px;color:#5a5a64;margin-top:2px">{{ m.role }}</div>
+                  <div style="display:flex;align-items:center;gap:5px;margin-top:5px;font-size:12.5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="#101014"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg><span style="font-weight:600">{{ m.rating }}</span></div>
+                </div>
+                <span style="{{ m.radio }}"><sc-if value="{{ m.on }}" hint-placeholder-val="{{ false }}"><span style="width:10px;height:10px;border-radius:999px;background:#fff"></span></sc-if></span>
+              </div>
+            </sc-for>
+            <div style="display:flex;gap:9px;align-items:flex-start;background:#f4f4f6;border-radius:12px;padding:12px 13px;margin-top:6px">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.9" stroke-linecap="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5M12 8h.01"></path></svg>
+              <div style="font-size:12.5px;line-height:1.5;color:#4a4a55">Санжар в это время занят — его в списке нет. Выберите другое время, если нужен именно он.</div>
+            </div>
+          </div>
+          <div style="flex:none;border-top:1px solid #e6e6ea;padding:12px 16px 0;background:#fff">
+            <div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><div style="font-size:15px;font-weight:700">9 000 ₸</div><div style="font-size:12.5px;color:#5a5a64">3 сентября, 14:30 · Марат</div></div><span style="{{ cta }}">Далее</span></div>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Занятых мастеров не показываем вовсе: серая карточка провоцирует тап. Вместо этого текстом объясняем, кого не хватает и что сделать, чтобы попасть именно к нему.</div>
+      </div>
+
+      <div style="align-self:center;flex:none;display:flex;flex-direction:column;align-items:center;gap:8px;width:150px">
+        <div style="color:#b0b0b8;font-size:22px">→</div>
+        <div style="font-size:12.5px;color:#5a5a64;text-align:center;line-height:1.5">Дальше — тот же экран подтверждения <strong style="color:#101014">B6</strong> и «Заявка отправлена» <strong style="color:#101014">B7</strong></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ ЖИЗНЬ ЗАПИСИ ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">ПОСЛЕ ЗАЯВКИ</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Мои записи, отзыв, профиль</h2>
+      <span style="font-size:13px;color:#5a5a64">напоминание → визит → отзыв → повторная запись в один тап</span>
+    </div>
+
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <!-- D1 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">D1</span><span style="font-size:12.5px;color:#4a4a55">Мои записи</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;padding:12px 16px 12px"><div style="font-size:28px;font-weight:700;letter-spacing:-.03em">Мои записи</div></div>
+          <div style="flex:none;display:flex;gap:4px;padding:0 16px 14px"><div style="display:flex;gap:4px;padding:3px;background:#f4f4f6;border-radius:10px;width:100%"><span style="flex:1;height:34px;border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(16,16,20,.1);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600">Предстоящие</span><span style="flex:1;height:34px;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600;color:#5a5a64">Прошлые</span></div></div>
+          <div style="flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ upcoming }}" as="b" hint-placeholder-count="2">
+              <div style="border:1px solid #e6e6ea;border-radius:16px;padding:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+                  <span style="font-size:15.5px;font-weight:700">{{ b.when }}</span>
+                  <span style="{{ b.badge }}"><span style="{{ b.dotStyle }}"></span>{{ b.label }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:11px">
+                  <div style="width:44px;height:44px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+                  <div style="flex:1"><div style="font-size:14.5px;font-weight:600">{{ b.biz }}</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">{{ b.svc }}</div></div>
+                  <span style="font-size:14.5px;font-weight:700">{{ b.sum }}</span>
+                </div>
+              </div>
+            </sc-for>
+            <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78;padding:8px 0 0">Прошлые</div>
+            <sc-for list="{{ past }}" as="b" hint-placeholder-count="2">
+              <div style="border:1px solid #e6e6ea;border-radius:16px;padding:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+                  <span style="font-size:15.5px;font-weight:700">{{ b.when }}</span>
+                  <span style="{{ b.badge }}"><span style="{{ b.dotStyle }}"></span>{{ b.label }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:11px">
+                  <div style="width:44px;height:44px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+                  <div style="flex:1"><div style="font-size:14.5px;font-weight:600">{{ b.biz }}</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">{{ b.svc }}</div></div>
+                </div>
+                <sc-if value="{{ b.review }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:8px;margin-top:12px">
+                    <span style="flex:1;height:42px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600">Записаться снова</span>
+                    <span style="flex:1;height:42px;border-radius:10px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600">Оставить отзыв</span>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:auto;flex:none;border-top:1px solid #e6e6ea;display:flex;padding:7px 6px 0;background:#fff"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding-bottom:6px;color:#6e6e78"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.9-3.9"></path></svg><span style="font-size:10.5px;font-weight:600">Поиск</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding-bottom:6px;color:#5a3ff0"><svg width="23" height="23" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3.5" fill="currentColor"></rect><path d="M8 2.5v3M16 2.5v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"></path><path d="M9 14l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg><span style="font-size:10.5px;font-weight:600">Записи</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding-bottom:6px;color:#6e6e78"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"></path></svg><span style="font-size:10.5px;font-weight:600">Профиль</span></div></div>
+          <div style="height:22px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Записи — отдельный таб, а не вложенность в профиль. У прошлого визита сразу две кнопки: «записаться снова» подставляет мастера и услуги, отзыв просим один раз и не напоминаем повторно.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- D2 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#dc8b0b;color:#fff;padding:3px 7px;border-radius:5px">D2</span><span style="font-size:12.5px;color:#4a4a55">Детали · ждёт подтверждения</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;height:50px;display:flex;align-items:center;gap:2px;padding:0 12px"><span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span><span style="font-size:17px;font-weight:600;letter-spacing:-.01em">Запись</span></div>
+          <div style="flex:1;overflow:hidden;padding:0 16px">
+            <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:8px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12.5px;font-weight:600"><span style="width:7px;height:7px;border-radius:999px;background:#dc8b0b"></span>Ждёт подтверждения</span>
+            <div style="font-size:28px;font-weight:700;letter-spacing:-.03em;margin-top:12px">Среда, 3 сентября<br>14:30</div>
+            <div style="font-size:14px;color:#5a5a64;margin-top:8px">Салон ответит в течение часа</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:16px 0;margin-top:8px;border-top:1px solid #eeeef1;border-bottom:1px solid #eeeef1">
+              <div style="width:52px;height:52px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+              <div style="flex:1"><div style="font-size:16px;font-weight:700;letter-spacing:-.015em">Ножницы</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">Абая 52 · 1,2 км</div></div>
+              <span style="width:40px;height:40px;border-radius:999px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:11px;padding:16px 0;border-bottom:1px solid #eeeef1">
+              <span style="{{ avSm }}">М</span><span style="font-size:15px">Марат · барбер</span>
+            </div>
+            <div style="padding:16px 0;border-bottom:1px solid #eeeef1">
+              <div style="display:flex;justify-content:space-between;font-size:14.5px;margin-bottom:8px"><span>Мужская стрижка<span style="color:#5a5a64;font-size:13px"> · 45 мин</span></span><span style="font-weight:600">6 000 ₸</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14.5px"><span>Стрижка бороды<span style="color:#5a5a64;font-size:13px"> · 20 мин</span></span><span style="font-weight:600">3 000 ₸</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:12px"><span style="font-size:13.5px;color:#5a5a64">Итого · 1 ч 5 мин</span><span style="font-size:19px;font-weight:700">9 000 ₸</span></div>
+            </div>
+            <div style="font-size:12.5px;color:#5a5a64;padding-top:14px;line-height:1.5">Бесплатная отмена — до 15:30 вторника. Правило задаёт салон.</div>
+          </div>
+          <div style="flex:none;padding:0 16px 8px;display:flex;flex-direction:column;gap:9px">
+            <span style="height:48px;border:1px solid #d8d8de;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Перенести</span>
+            <span style="height:48px;border-radius:12px;background:#fee4e2;color:#b42318;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Отменить запись</span>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Пока заявка не подтверждена, главные действия — перенести и отменить. Правило бесплатной отмены задаёт салон, и оно написано прямо на экране, а не в справке.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- D3 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#0e7c66;color:#fff;padding:3px 7px;border-radius:5px">D3</span><span style="font-size:12.5px;color:#4a4a55">Детали · визит состоялся</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;height:50px;display:flex;align-items:center;gap:2px;padding:0 12px"><span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span><span style="font-size:17px;font-weight:600;letter-spacing:-.01em">Запись</span></div>
+          <div style="flex:1;overflow:hidden;padding:0 16px">
+            <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:8px;background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41;font-size:12.5px;font-weight:600"><span style="width:7px;height:7px;border-radius:999px;background:#12a366"></span>Состоялось</span>
+            <div style="font-size:28px;font-weight:700;letter-spacing:-.03em;margin-top:12px">8 августа<br>15:00</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:16px 0;margin-top:8px;border-top:1px solid #eeeef1;border-bottom:1px solid #eeeef1">
+              <div style="width:52px;height:52px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+              <div style="flex:1"><div style="font-size:16px;font-weight:700;letter-spacing:-.015em">Ножницы</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">Марат · стрижка + борода</div></div>
+              <span style="font-size:15px;font-weight:700">9 000 ₸</span>
+            </div>
+            <div style="border:1px solid #e6e6ea;border-radius:16px;padding:16px;margin-top:18px;text-align:center">
+              <div style="font-size:16px;font-weight:700">Как всё прошло?</div>
+              <div style="font-size:13.5px;color:#5a5a64;margin-top:5px;line-height:1.45">Отзыв виден другим клиентам и помогает мастеру</div>
+              <div style="display:flex;justify-content:center;gap:2px;margin-top:12px">
+                <sc-for list="{{ stars }}" as="st" hint-placeholder-count="5">
+                  <span style="{{ st.style }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg></span>
+                </sc-for>
+              </div>
+            </div>
+            <span style="{{ ctaBlock }}">Записаться снова</span>
+            <div style="font-size:12.5px;color:#5a5a64;text-align:center;margin-top:10px;line-height:1.5">Подставим Марата и те же услуги — останется выбрать время</div>
+          </div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Визит считается состоявшимся по умолчанию — то же правило, что и в бизнес-приложении: отмечать «пришёл» не нужно ни одной из сторон.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- D4 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">D4</span><span style="font-size:12.5px;color:#4a4a55">Отзыв</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:none;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 12px"><span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg></span></div>
+          <div style="flex:1;overflow:hidden;padding:0 16px">
+            <div style="font-size:28px;font-weight:700;letter-spacing:-.03em">Оцените визит</div>
+            <div style="display:flex;align-items:center;gap:11px;margin-top:16px;padding-bottom:16px;border-bottom:1px solid #eeeef1">
+              <span style="{{ avSm }}">М</span>
+              <div style="flex:1"><div style="font-size:15px;font-weight:600">Марат · Ножницы</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">8 августа · стрижка + борода</div></div>
+            </div>
+            <div style="display:flex;justify-content:center;gap:4px;margin:22px 0 6px">
+              <sc-for list="{{ stars }}" as="st" hint-placeholder-count="5">
+                <span style="{{ st.style }}"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg></span>
+              </sc-for>
+            </div>
+            <div style="text-align:center;font-size:15px;font-weight:600">Отлично</div>
+            <div style="font-size:12.5px;font-weight:600;color:#5a5a64;margin:22px 0 6px">Что понравилось?</div>
+            <div style="border:1px solid #e6e6ea;border-radius:12px;padding:13px;font-size:14.5px;line-height:1.5;min-height:120px">Марат сделал ровно как я просил, без лишних разговоров. Приду ещё.</div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+              <span style="display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:999px;border:1px solid #e6e6ea;font-size:12.5px;font-weight:600;color:#4a4a55">Пунктуальность</span>
+              <span style="display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:999px;border:1px solid #e6e6ea;font-size:12.5px;font-weight:600;color:#4a4a55">Чистота</span>
+              <span style="display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:999px;border:1px solid #e6e6ea;font-size:12.5px;font-weight:600;color:#4a4a55">Результат</span>
+            </div>
+          </div>
+          <div style="flex:none;padding:0 16px 8px"><span style="{{ ctaBlock }}">Отправить отзыв</span></div>
+          <div style="height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Звёзды и один вопрос, теги необязательны. Отзыв уходит во вкладку «Отзывы» салона и в карточку мастера — там же, где бизнес отвечает на него.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <!-- D5 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">D5</span><span style="font-size:12.5px;color:#4a4a55">Профиль</span></div>
+        <div style="width:390px;height:844px;background:#fff;border:1px solid #dededf;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(16,16,20,.05),0 10px 30px rgba(16,16,20,.07)">
+          <div style="height:44px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;font-size:14px;font-weight:600"><span>9:41</span><span style="width:22px;height:11px;border:1.4px solid #101014;border-radius:3px"></span></div>
+          <div style="flex:1;overflow:hidden;padding:12px 16px 0">
+            <div style="font-size:28px;font-weight:700;letter-spacing:-.03em">Профиль</div>
+            <div style="display:flex;align-items:center;gap:14px;margin:20px 0 22px">
+              <span style="{{ avBig }}">Т</span>
+              <div style="flex:1"><div style="font-size:19px;font-weight:700;letter-spacing:-.02em">Тимур Абдрахманов</div><div style="font-size:14px;color:#5a5a64;margin-top:3px">+7 707 123 45 67</div></div>
+              <span style="width:40px;height:40px;border-radius:999px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16z"></path></svg></span>
+            </div>
+            <sc-for list="{{ profileRows }}" as="p" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid #eeeef1">
+                <span style="font-size:15px;flex:1">{{ p.name }}</span>
+                <sc-if value="{{ p.hasCount }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:#5a5a64">{{ p.count }}</span></sc-if>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.9" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+              </div>
+            </sc-for>
+            <div style="padding:18px 0;font-size:15px;font-weight:600;color:#b42318">Выйти</div>
+          </div>
+          <div style="margin-top:auto;flex:none;border-top:1px solid #e6e6ea;display:flex;padding:7px 6px 0;background:#fff"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding-bottom:6px;color:#6e6e78"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.9-3.9"></path></svg><span style="font-size:10.5px;font-weight:600">Поиск</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding-bottom:6px;color:#6e6e78"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"></rect><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"></path></svg><span style="font-size:10.5px;font-weight:600">Записи</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding-bottom:6px;color:#5a3ff0"><svg width="23" height="23" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4.2" fill="currentColor"></circle><path d="M4 21v-.6C4 16.9 7.1 14 11 14h2c3.9 0 7 2.9 7 6.4v.6z" fill="currentColor"></path></svg><span style="font-size:10.5px;font-weight:600">Профиль</span></div></div>
+          <div style="height:22px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff"><span style="width:134px;height:5px;border-radius:999px;background:#101014"></span></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Профиль — только про самого клиента: телефон, избранное, уведомления, выход. Ничего про салон здесь нет, чтобы таб не превращался в свалку настроек.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ ЗЕРКАЛО ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">ЗЕРКАЛО</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Что клиент видит, когда действует салон</h2>
+      <span style="font-size:13px;color:#5a5a64">каждое решение из бизнес-приложения имеет ответный экран здесь</span>
+    </div>
+    <p style="margin:0;max-width:84ch;font-size:13.5px;line-height:1.6;color:#4a4a55">Салон подтверждает и отклоняет заявки, двигает блоки в календаре, записывает телефонных клиентов вручную и жалуется на неявки. Ни одно из этих действий не должно случаться для клиента молча: на каждое — уведомление и экран с понятным следующим шагом.</p>
+
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+
+      <!-- M1 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#0e7c66;color:#fff;padding:3px 7px;border-radius:5px">M1</span><span style="font-size:12.5px;color:#4a4a55">Салон подтвердил · пуш и статус</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+          <div style="flex:none;height:84px"></div>
+          <div style="flex:none;height:50px;display:flex;align-items:center;gap:2px;padding:0 12px"><span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span><span style="font-size:17px;font-weight:600;letter-spacing:-.01em">Запись</span></div>
+          <div style="flex:1;overflow:hidden;padding:0 16px">
+            <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:8px;background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41;font-size:12.5px;font-weight:600"><span style="width:7px;height:7px;border-radius:999px;background:#12a366"></span>Подтверждено</span>
+            <div style="font-size:28px;font-weight:700;letter-spacing:-.03em;margin-top:12px">Среда, 3 сентября<br>14:30</div>
+            <div style="font-size:14px;color:#5a5a64;margin-top:8px">Марат подтвердил в 9:52 — место за вами</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:16px 0;margin-top:8px;border-top:1px solid #eeeef1;border-bottom:1px solid #eeeef1">
+              <div style="width:52px;height:52px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+              <div style="flex:1"><div style="font-size:16px;font-weight:700;letter-spacing:-.015em">Ножницы</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">Марат · стрижка + борода · 9 000 ₸</div></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:16px">
+              <span style="flex:1;height:46px;border:1px solid #d8d8de;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14.5px;font-weight:600"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"></rect><path d="M8 2v4M16 2v4M3 10h18"></path></svg>В календарь</span>
+              <span style="flex:1;height:46px;border:1px solid #d8d8de;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14.5px;font-weight:600"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="2.6"></circle></svg>Как добраться</span>
+            </div>
+            <div style="font-size:12.5px;color:#5a5a64;margin-top:14px;line-height:1.5">Напомним за день и за два часа до визита.</div>
+          </div>
+          <div style="position:absolute;left:12px;right:12px;top:12px;background:rgba(255,255,255,.98);border:1px solid #e6e6ea;border-radius:18px;padding:12px 13px;display:flex;gap:11px;box-shadow:0 8px 24px rgba(16,16,20,.14)">
+            <div style="width:34px;height:34px;border-radius:9px;background:#101014;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;letter-spacing:-.03em;flex:none">y</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:13.5px;font-weight:700;flex:1">Ножницы</span><span style="font-size:11.5px;color:#6e6e78">сейчас</span></div>
+              <div style="font-size:13px;line-height:1.4;color:#101014;margin-top:2px">Заявка подтверждена: среда, 3 сентября, 14:30</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Подтверждение в календаре салона — один тап, у клиента это пуш и смена янтарного статуса на зелёный. Тот же зелёный, что и «состоялось»: подтверждённая запись и есть нормальное состояние.</div>
+      </div>
+
+      <!-- M2 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#b42318;color:#fff;padding:3px 7px;border-radius:5px">M2</span><span style="font-size:12.5px;color:#4a4a55">Салон отклонил · с причиной</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;height:50px;display:flex;align-items:center;gap:2px;padding:0 12px"><span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span><span style="font-size:17px;font-weight:600;letter-spacing:-.01em">Запись</span></div>
+          <div style="flex:1;overflow:hidden;padding:0 16px">
+            <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:8px;background:#fee4e2;border:1px solid #f6c7c2;color:#b42318;font-size:12.5px;font-weight:600"><span style="width:7px;height:7px;border-radius:999px;background:#d92d20"></span>Салон не смог принять</span>
+            <div style="font-size:26px;font-weight:700;letter-spacing:-.03em;margin-top:12px;text-decoration:line-through;text-decoration-color:#c8c8d0">Среда, 3 сентября · 14:30</div>
+            <div style="background:#f4f4f6;border-radius:14px;padding:13px 14px;margin-top:14px">
+              <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px"><span style="width:26px;height:26px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#5a5a64">М</span><span style="font-size:12.5px;font-weight:600;color:#5a5a64">Марат · причина отказа</span></div>
+              <div style="font-size:14px;line-height:1.5;color:#101014">«Заболел, в среду меня не будет. В четверг то же время свободно»</div>
+            </div>
+            <div style="font-size:13px;line-height:1.5;color:#5a5a64;margin-top:14px">Деньги не списывались: в Yeral заявка ничего не резервирует, кроме времени.</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">
+              <span style="height:48px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Выбрать другое время</span>
+              <span style="height:48px;border:1px solid #d8d8de;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Другой мастер в салоне</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">В бизнес-приложении отклонение обязательно просит причину — вот ради чего. Без причины экран превращается в тупик, с ней — в предложение соседнего слота, который мастер уже назвал сам.</div>
+      </div>
+
+      <!-- M3 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#dc8b0b;color:#fff;padding:3px 7px;border-radius:5px">M3</span><span style="font-size:12.5px;color:#4a4a55">Салон перенёс · клиент подтверждает</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+          <div style="flex:1;padding:20px 16px 0;opacity:.35">
+            <div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Мои записи</div>
+            <div style="height:96px;border-radius:16px;border:1px solid #e6e6ea;margin-top:16px"></div>
+            <div style="height:96px;border-radius:16px;border:1px solid #e6e6ea;margin-top:10px"></div>
+          </div>
+          <div style="position:absolute;inset:0;background:rgba(16,16,20,.4)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:10px 16px 24px;box-shadow:0 -8px 24px rgba(16,16,20,.16)">
+            <div style="width:36px;height:4px;border-radius:999px;background:#e0e0e5;margin:0 auto 14px"></div>
+            <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:8px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12.5px;font-weight:600"><span style="width:7px;height:7px;border-radius:999px;background:#dc8b0b"></span>Салон предлагает перенос</span>
+            <div style="font-size:20px;font-weight:700;letter-spacing:-.025em;margin-top:12px">Марат просит сдвинуть на 45 минут</div>
+            <div style="display:flex;align-items:center;gap:12px;border:1px solid #e6e6ea;border-radius:14px;padding:14px;margin-top:14px">
+              <div style="flex:1"><div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78">Было</div><div style="font-size:15.5px;font-weight:600;margin-top:4px;color:#6e6e78;text-decoration:line-through">3 сен, 14:30</div></div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="M9 5l7 7-7 7"></path></svg>
+              <div style="flex:1"><div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78">Станет</div><div style="font-size:15.5px;font-weight:700;margin-top:4px">3 сен, 15:15</div></div>
+            </div>
+            <div style="font-size:13px;line-height:1.5;color:#5a5a64;margin-top:12px">Мастер, услуги и цена не меняются. Пока вы не ответили, старое время держится за вами.</div>
+            <div style="display:flex;gap:8px;margin-top:16px">
+              <span style="flex:1;height:52px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:600">Подходит</span>
+              <span style="height:52px;padding:0 18px;border-radius:12px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#4a4a55;flex:none">Другое время</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Перетаскивание блока в календаре салона — это не свершившийся факт, а предложение. Внутри дня и без смены мастера — один экран согласия; если мастер меняется, клиент возвращается к выбору.</div>
+      </div>
+
+      <!-- M4 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">M4</span><span style="font-size:12.5px;color:#4a4a55">Записал салон по телефону</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;padding:20px 16px 12px"><div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Мои записи</div></div>
+          <div style="flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:10px">
+            <div style="border:1px solid #e6e6ea;border-radius:16px;padding:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+                <span style="font-size:15.5px;font-weight:700">Пятница, 5 сентября · 11:00</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:8px;background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41;font-size:12px;font-weight:600"><span style="width:6px;height:6px;border-radius:999px;background:#12a366"></span>Подтверждено</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px">
+                <div style="width:44px;height:44px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+                <div style="flex:1"><div style="font-size:14.5px;font-weight:600">Ножницы</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">Марат · мужская стрижка</div></div>
+                <span style="font-size:14.5px;font-weight:700">6 000 ₸</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;margin-top:11px;padding-top:11px;border-top:1px solid #eeeef1;font-size:12.5px;color:#5a5a64">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="2" stroke-linecap="round" style="flex:none"><rect x="7" y="2.5" width="10" height="19" rx="2.5"></rect><path d="M11 18h2"></path></svg>
+                <span style="flex:1">Записал салон по телефону · 2 сентября</span>
+                <span style="font-weight:600;color:#b42318">Это не я</span>
+              </div>
+            </div>
+            <div style="border:1px solid #e6e6ea;border-radius:16px;padding:14px;opacity:.55">
+              <div style="font-size:15.5px;font-weight:700;margin-bottom:10px">Среда, 3 сентября · 14:30</div>
+              <div style="font-size:13px;color:#5a5a64">Ножницы · Марат · стрижка + борода</div>
+            </div>
+            <div style="display:flex;gap:9px;align-items:flex-start;background:#f4f4f6;border-radius:12px;padding:12px 13px;margin-top:2px">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.9" stroke-linecap="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5M12 8h.01"></path></svg>
+              <div style="font-size:12.5px;line-height:1.5;color:#4a4a55">Запись появилась, потому что номер совпал с вашим. Визиты из салона и из приложения копятся в одной истории.</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Ручная запись из календаря салона доезжает до клиента — иначе телефонные визиты живут отдельной жизнью и напоминания до них не доходят. «Это не я» — страховка от опечатки в номере.</div>
+      </div>
+
+      <!-- M5 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#b42318;color:#fff;padding:3px 7px;border-radius:5px">M5</span><span style="font-size:12.5px;color:#4a4a55">Отмена · причина нужна обеим сторонам</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+          <div style="flex:1;padding:20px 16px 0;opacity:.35">
+            <div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Запись</div>
+            <div style="height:80px;border-radius:14px;border:1px solid #e6e6ea;margin-top:16px"></div>
+          </div>
+          <div style="position:absolute;inset:0;background:rgba(16,16,20,.4)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:10px 16px 24px;box-shadow:0 -8px 24px rgba(16,16,20,.16)">
+            <div style="width:36px;height:4px;border-radius:999px;background:#e0e0e5;margin:0 auto 14px"></div>
+            <div style="font-size:20px;font-weight:700;letter-spacing:-.025em">Почему отменяете?</div>
+            <div style="font-size:13px;line-height:1.5;color:#5a5a64;margin-top:5px">Причину увидит только салон. Она помогает мастеру понять, стоит ли предложить другое время.</div>
+            <div style="margin-top:14px;border:1px solid #e6e6ea;border-radius:14px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:11px;padding:12px 13px"><span style="width:22px;height:22px;border-radius:999px;background:#101014;display:flex;align-items:center;justify-content:center;flex:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 7L9.5 17.5 4 12"></path></svg></span><span style="font-size:14.5px;font-weight:600">Планы изменились</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:12px 13px;border-top:1px solid #eeeef1"><span style="width:22px;height:22px;border-radius:999px;border:1.5px solid #d8d8de;flex:none"></span><span style="font-size:14.5px">Не успеваю ко времени</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:12px 13px;border-top:1px solid #eeeef1"><span style="width:22px;height:22px;border-radius:999px;border:1.5px solid #d8d8de;flex:none"></span><span style="font-size:14.5px">Заболел</span></div>
+              <div style="display:flex;align-items:center;gap:11px;padding:12px 13px;border-top:1px solid #eeeef1"><span style="width:22px;height:22px;border-radius:999px;border:1.5px solid #d8d8de;flex:none"></span><span style="font-size:14.5px">Записался в другое место</span></div>
+            </div>
+            <div style="display:flex;gap:9px;align-items:flex-start;background:#fef6e7;border:1px solid #f2ddb0;border-radius:12px;padding:11px 12px;margin-top:12px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5M12 8h.01"></path></svg>
+              <div style="font-size:12.5px;line-height:1.45;color:#93500a">До визита меньше суток — салон отметит отмену как позднюю.</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <span style="height:52px;padding:0 20px;border-radius:12px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#4a4a55;flex:none">Оставить</span>
+              <span style="flex:1;height:52px;border-radius:12px;background:#b42318;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:600">Отменить запись</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Тот же лист, что и жалоба на клиента в бизнес-приложении: список причин, комментарий по желанию, деструктивная кнопка справа. Симметрия намеренная — обе стороны отчитываются одинаково.</div>
+      </div>
+
+      <!-- M6 -->
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#dc8b0b;color:#fff;padding:3px 7px;border-radius:5px">M6</span><span style="font-size:12.5px;color:#4a4a55">Подтверждение за день · после двух неявок</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;height:50px;display:flex;align-items:center;gap:2px;padding:0 12px"><span style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span><span style="font-size:17px;font-weight:600;letter-spacing:-.01em">Запись</span></div>
+          <div style="flex:1;overflow:hidden;padding:0 16px;position:relative">
+            <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:8px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12.5px;font-weight:600"><span style="width:7px;height:7px;border-radius:999px;background:#dc8b0b"></span>Нужно подтвердить до 20:00</span>
+            <div style="font-size:26px;font-weight:700;letter-spacing:-.03em;margin-top:12px">Завтра, 4 сентября · 11:00</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:16px 0;margin-top:8px;border-top:1px solid #eeeef1;border-bottom:1px solid #eeeef1">
+              <div style="width:48px;height:48px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+              <div style="flex:1"><div style="font-size:15.5px;font-weight:700">Ножницы</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">Марат · мужская стрижка · 6 000 ₸</div></div>
+            </div>
+            <div style="font-size:13px;line-height:1.55;color:#4a4a55;margin-top:14px">После двух неявок подряд «Ножницы» просят подтверждать визит за день — правило салона, не всего Yeral. Без ответа до 20:00 слот освободится.</div>
+            <div style="display:flex;gap:8px;margin-top:18px">
+              <span style="flex:1;height:48px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Буду</span>
+              <span style="height:48px;padding:0 18px;border-radius:12px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#4a4a55;flex:none">Отменить</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Правило из кейса <strong style="color:#101014">K2</strong>: после двух неявок салон не закрывает клиенту онлайн-запись, а просит подтверждение за сутки. Мягче блокировки и полезнее для салона — освободившийся слот успевают продать.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ СОСТОЯНИЯ ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">СОСТОЯНИЯ</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Не только счастливый путь</h2>
+      <span style="font-size:13px;color:#5a5a64">срезы экранов, 390 × 600</span>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#6e6e78;color:#fff;padding:3px 7px;border-radius:5px">E1</span><span style="font-size:12.5px;color:#4a4a55">Поиск в фокусе, ещё ничего не введено</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;padding:20px 16px 12px;display:flex;align-items:center;gap:10px">
+            <div style="flex:1;display:flex;align-items:center;gap:9px;height:46px;padding:0 14px;border-radius:12px;background:#fff;border:1.5px solid #5a3ff0">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.9-3.9"></path></svg>
+              <span style="font-size:15px;color:#6e6e78">Услуга, салон или мастер</span>
+            </div>
+            <span style="font-size:15px;font-weight:600;color:#5a5a64">Отмена</span>
+          </div>
+          <div style="flex:1;padding:6px 16px">
+            <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78;padding:10px 0 4px">Недавние</div>
+            <sc-for list="{{ recent }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #eeeef1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>
+                <span style="flex:1;font-size:15px">{{ r }}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.9" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+              </div>
+            </sc-for>
+            <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78;padding:18px 0 4px">Избранное</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #eeeef1">
+              <div style="width:40px;height:40px;border-radius:10px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px)"></div>
+              <div style="flex:1"><div style="font-size:15px;font-weight:600">Ножницы</div><div style="font-size:13px;color:#5a5a64">Свободно сегодня 14:30</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#6e6e78;color:#fff;padding:3px 7px;border-radius:5px">E2</span><span style="font-size:12.5px;color:#4a4a55">Ничего не найдено</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;padding:20px 16px 12px">
+            <div style="display:flex;align-items:center;gap:9px;height:46px;padding:0 14px;border-radius:12px;background:#f4f4f6">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.9-3.9"></path></svg>
+              <span style="font-size:15px">лазерная эпиляция</span>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 32px">
+            <div style="width:56px;height:56px;border-radius:999px;background:#f4f4f6;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.9-3.9"></path></svg></div>
+            <div style="font-size:17px;font-weight:700;letter-spacing:-.015em">Ничего не нашли</div>
+            <div style="font-size:13.5px;line-height:1.5;color:#5a5a64;margin-top:6px;max-width:32ch">В Алматы пока нет салонов с такой услугой. Попробуйте другой запрос или посмотрите похожее.</div>
+            <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center">
+              <span style="display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:999px;border:1px solid #e6e6ea;font-size:13px;font-weight:600">Косметология</span>
+              <span style="display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:999px;border:1px solid #e6e6ea;font-size:13px;font-weight:600">Уход за кожей</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#6e6e78;color:#fff;padding:3px 7px;border-radius:5px">E3</span><span style="font-size:12.5px;color:#4a4a55">Нет свободных окон в этот день</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;padding:20px 16px 10px"><div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Выберите время</div></div>
+          <div style="flex:none;display:flex;gap:6px;padding:0 16px 16px">
+            <sc-for list="{{ days }}" as="d" hint-placeholder-count="6">
+              <div style="{{ d.wrap }}"><span style="{{ d.circle }}">{{ d.num }}</span><span style="{{ d.dowStyle }}">{{ d.dow }}</span></div>
+            </sc-for>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 28px">
+            <div style="width:56px;height:56px;border-radius:999px;background:#f4f4f6;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg></div>
+            <div style="font-size:17px;font-weight:700;letter-spacing:-.015em">В среду всё занято</div>
+            <div style="font-size:13.5px;line-height:1.5;color:#5a5a64;margin-top:6px;max-width:32ch">У Марата на 3 сентября свободных окон нет. Ближайшее — в четверг утром.</div>
+            <span style="height:46px;padding:0 20px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:inline-flex;align-items:center;font-size:14.5px;font-weight:600;margin-top:16px">Показать 4 сентября, 10:00</span>
+            <span style="font-size:13.5px;font-weight:600;color:#5a3ff0;margin-top:14px">Выбрать другого мастера</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#6e6e78;color:#fff;padding:3px 7px;border-radius:5px">E4</span><span style="font-size:12.5px;color:#4a4a55">Выходной мастера</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;padding:20px 16px 10px"><div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Выберите время</div></div>
+          <div style="flex:none;display:flex;gap:6px;padding:0 16px 16px">
+            <sc-for list="{{ daysOff }}" as="d" hint-placeholder-count="6">
+              <div style="{{ d.wrap }}"><span style="{{ d.circle }}">{{ d.num }}</span><span style="{{ d.dowStyle }}">{{ d.dow }}</span></div>
+            </sc-for>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 28px">
+            <div style="width:56px;height:56px;border-radius:999px;background:#f4f4f6;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"></rect><path d="M8 2v4M16 2v4M3 10h18M9 15l6 0"></path></svg></div>
+            <div style="font-size:17px;font-weight:700;letter-spacing:-.015em">У Марата выходной</div>
+            <div style="font-size:13.5px;line-height:1.5;color:#5a5a64;margin-top:6px;max-width:32ch">В воскресенье он не работает. Соседние дни открыты.</div>
+            <span style="height:46px;padding:0 20px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:inline-flex;align-items:center;font-size:14.5px;font-weight:600;margin-top:16px">Ближайшее: понедельник, 10:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#6e6e78;color:#fff;padding:3px 7px;border-radius:5px">E5</span><span style="font-size:12.5px;color:#4a4a55">Записей ещё не было</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;padding:20px 16px 12px"><div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Мои записи</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 30px">
+            <div style="width:56px;height:56px;border-radius:999px;background:#f4f4f6;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"></rect><path d="M8 2v4M16 2v4M3 10h18"></path></svg></div>
+            <div style="font-size:17px;font-weight:700;letter-spacing:-.015em">Записей пока нет</div>
+            <div style="font-size:13.5px;line-height:1.5;color:#5a5a64;margin-top:6px;max-width:30ch">Найдите салон рядом и запишитесь — записи появятся здесь.</div>
+            <span style="height:46px;padding:0 20px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:inline-flex;align-items:center;font-size:14.5px;font-weight:600;margin-top:16px">Найти салон</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ ВАРИАНТЫ ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">ВАРИАНТЫ</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Выбор времени</h2>
+      <span style="font-size:13px;color:#5a5a64">одни и те же 12 окон в трёх подачах</span>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#5a3ff0;color:#fff;padding:3px 7px;border-radius:5px">V1-a</span><span style="font-size:12.5px;color:#4a4a55">Список строк · как в B5</span></div>
+        <div style="width:390px;height:520px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="font-size:14px;font-weight:600;color:#5a5a64;margin-bottom:10px">Среда, 3 сентября</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ slotRows }}" as="t" hint-placeholder-count="6">
+              <div style="{{ t.style }}">{{ t.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Крупная цель, легко попасть, видно немного окон сразу. Хорош, когда слотов мало.</div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#5a3ff0;color:#fff;padding:3px 7px;border-radius:5px">V1-b</span><span style="font-size:12.5px;color:#4a4a55">Сетка чипов</span></div>
+        <div style="width:390px;height:520px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="font-size:14px;font-weight:600;color:#5a5a64;margin-bottom:10px">Среда, 3 сентября</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <sc-for list="{{ chipsGrid }}" as="t" hint-placeholder-count="12">
+              <div style="{{ t.style }}">{{ t.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Весь день на одном экране, ничего не листать. Цель мельче, но 44px соблюдены.</div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#5a3ff0;color:#fff;padding:3px 7px;border-radius:5px">V1-c</span><span style="font-size:12.5px;color:#4a4a55">Группы «Утро / День / Вечер»</span></div>
+        <div style="width:390px;height:520px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="font-size:14px;font-weight:600;color:#5a5a64;margin-bottom:10px">Среда, 3 сентября</div>
+          <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+            <div style="margin-bottom:16px">
+              <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">
+                <span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">{{ g.name }}</span>
+                <span style="font-size:12px;color:#6e6e78">{{ g.meta }}</span>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="3">
+                  <div style="{{ c.style }}">{{ c.label }}</div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Клиент обычно думает «после работы», а не «в 17:15». Группы отвечают на этот вопрос быстрее всех.</div>
+      </div>
+
+    </div>
+
+    <div style="display:flex;align-items:baseline;gap:10px;margin-top:14px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">ВАРИАНТЫ</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Выбор мастера и каталог</h2>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#5a3ff0;color:#fff;padding:3px 7px;border-radius:5px">V2-a</span><span style="font-size:12.5px;color:#4a4a55">Мастера списком · как в B4</span></div>
+        <div style="width:390px;height:340px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;padding:18px 16px 0">
+          <sc-for list="{{ masters }}" as="m" hint-placeholder-count="3">
+            <div style="{{ m.row }}">
+              <span style="{{ m.av }}">{{ m.initial }}</span>
+              <div style="flex:1"><div style="font-size:15.5px;font-weight:600">{{ m.name }}</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">{{ m.role }}</div></div>
+              <span style="{{ m.radio }}"><sc-if value="{{ m.on }}" hint-placeholder-val="{{ false }}"><span style="width:10px;height:10px;border-radius:999px;background:#fff"></span></sc-if></span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Помещается специализация и рейтинг. Лучше для салона с 5+ мастерами.</div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#5a3ff0;color:#fff;padding:3px 7px;border-radius:5px">V2-b</span><span style="font-size:12.5px;color:#4a4a55">Мастера плитками</span></div>
+        <div style="width:390px;height:340px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;padding:18px 16px 0">
+          <div style="display:flex;gap:10px">
+            <sc-for list="{{ tiles }}" as="m" hint-placeholder-count="3">
+              <div style="{{ m.card }}">
+                <span style="{{ m.av }}">{{ m.initial }}</span>
+                <span style="font-size:14.5px;font-weight:600">{{ m.name }}</span>
+                <span style="font-size:12px;color:#5a5a64">{{ m.role }}</span>
+                <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600"><svg width="12" height="12" viewBox="0 0 24 24" fill="#101014"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg>{{ m.rating }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Лица крупнее, выбор ощущается как «кто именно». Работает до 4 мастеров, дальше начинается горизонтальный скролл.</div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#5a3ff0;color:#fff;padding:3px 7px;border-radius:5px">V3-b</span><span style="font-size:12.5px;color:#4a4a55">Каталог плотным списком · сравнить с B1</span></div>
+        <div style="width:390px;height:340px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;padding:12px 16px 0">
+          <sc-for list="{{ dense }}" as="d" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #eeeef1">
+              <div style="width:56px;height:56px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:15px;font-weight:600">{{ d.name }}</span><span style="display:inline-flex;align-items:center;gap:3px;font-size:12.5px;font-weight:600"><svg width="12" height="12" viewBox="0 0 24 24" fill="#101014"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg>{{ d.rating }}</span></div>
+                <div style="font-size:12.5px;color:#5a5a64;margin-top:2px">{{ d.meta }}</div>
+                <div style="display:flex;gap:6px;margin-top:6px"><span style="{{ d.freeStyle }}">{{ d.free }}</span><span style="font-size:11.5px;color:#5a5a64;align-self:center">{{ d.price }}</span></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Четыре салона вместо полутора. Быстрее сравнивать, но витрина теряет вау-эффект и фото почти не работают.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ ВХОДЫ ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">ВХОДЫ</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Четыре дороги на страницу бизнеса</h2>
+    </div>
+    <div style="display:flex;gap:16px;align-items:stretch;flex-wrap:wrap;max-width:1180px">
+      <sc-for list="{{ entries }}" as="e" hint-placeholder-count="4">
+        <div style="flex:1 1 240px;background:#fff;border:1px solid #e6e6ea;border-radius:16px;padding:16px">
+          <div style="width:26px;height:26px;border-radius:999px;background:#101014;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">{{ e.n }}</div>
+          <div style="font-size:15px;font-weight:700;margin-top:10px">{{ e.name }}</div>
+          <div style="font-size:13px;line-height:1.5;color:#5a5a64;margin-top:5px">{{ e.desc }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="font-size:13.5px;line-height:1.6;color:#4a4a55;max-width:78ch">Дороги 1–3 приводят на страницу бизнеса <strong>B2</strong>, дальше общий флоу. Дорога 4 — короткая: бизнес, мастер и услуги уже известны, клиент попадает сразу на выбор времени <strong>B5</strong>. Прямая ссылка из соцсетей открывает ту же <strong>B2</strong>, поэтому она самодостаточна: там есть всё для решения — фото, услуги, мастера, отзывы, адрес.</div>
+  </section>
+
+  <!-- ═══════ ПОИСК ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">ВХОД 2 И 4</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Поиск по услуге и дню · повтор визита</h2>
+      <span style="font-size:13px;color:#5a5a64">выбираем услугу и день — показываем только тех, у кого есть окна</span>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">F1</span><span style="font-size:12.5px;color:#4a4a55">Услуга + день</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Что и когда</div>
+          <div style="display:flex;align-items:center;gap:9px;height:46px;padding:0 14px;border-radius:12px;background:#fff;border:1.5px solid #5a3ff0;margin-top:14px">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.9-3.9"></path></svg>
+            <span style="font-size:15px;flex:1">Мужская стрижка</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.9" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+          </div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78;margin:20px 0 8px">Когда</div>
+          <div style="display:flex;gap:8px;overflow:hidden">
+            <sc-for list="{{ searchDays }}" as="d" hint-placeholder-count="4">
+              <div style="{{ d.style }}">{{ d.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:9px;align-items:flex-start;background:#f4f4f6;border-radius:12px;padding:12px 13px;margin-top:20px">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.9" stroke-linecap="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5M12 8h.01"></path></svg>
+            <div style="font-size:12.5px;line-height:1.5;color:#4a4a55">Только день, без часов: точное время клиент выбирает уже внутри салона. Так список не схлопывается до двух карточек.</div>
+          </div>
+          <div style="margin-top:auto;border-top:1px solid #e6e6ea;padding:12px 0 14px"><div style="height:50px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600">Показать салоны</div></div>
+        </div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">F2</span><span style="font-size:12.5px;color:#4a4a55">Кто свободен сегодня</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;padding:20px 16px 12px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+              <div style="flex:1"><div style="font-size:16px;font-weight:700;letter-spacing:-.02em">Мужская стрижка</div><div style="font-size:12.5px;color:#5a5a64">Сегодня · Алматы · 7 салонов</div></div>
+              <span style="height:34px;padding:0 12px;border-radius:999px;border:1px solid #e6e6ea;display:inline-flex;align-items:center;font-size:12.5px;font-weight:600">Фильтры</span>
+            </div>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:0 16px">
+            <sc-for list="{{ results }}" as="r" hint-placeholder-count="3">
+              <div style="padding:13px 0;border-bottom:1px solid #eeeef1">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:52px;height:52px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:15.5px;font-weight:600">{{ r.name }}</span><span style="display:inline-flex;align-items:center;gap:3px;font-size:12.5px;font-weight:600"><svg width="12" height="12" viewBox="0 0 24 24" fill="#101014"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg>{{ r.rating }}</span></div>
+                    <div style="font-size:12.5px;color:#5a5a64;margin-top:2px">{{ r.meta }}</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:10px;overflow:hidden">
+                  <sc-for list="{{ r.chips }}" as="c" hint-placeholder-count="3">
+                    <div style="{{ c.style }}">{{ c.label }}</div>
+                  </sc-for>
+                  <div style="height:38px;padding:0 12px;border-radius:10px;border:1px solid #e6e6ea;display:inline-flex;align-items:center;font-size:13.5px;color:#5a5a64;flex:none">ещё</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Тап по времени ведёт сразу к подтверждению: услуга, день и слот уже выбраны, остаётся мастер, если их несколько.</div>
+      </div>
+
+      <div style="align-self:center;color:#b0b0b8;font-size:22px;flex:none">→</div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">F3</span><span style="font-size:12.5px;color:#4a4a55">Повтор из истории · вход 4</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+          <div style="flex:1;padding:20px 16px 0;opacity:.45">
+            <div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Мои записи</div>
+            <div style="border:1px solid #e6e6ea;border-radius:16px;padding:14px;margin-top:16px">
+              <div style="font-size:15.5px;font-weight:700">8 августа, 15:00</div>
+              <div style="font-size:13px;color:#5a5a64;margin-top:4px">Ножницы · Марат · стрижка + борода</div>
+            </div>
+          </div>
+          <div style="position:absolute;inset:0;background:rgba(16,16,20,.4)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:10px 16px 20px;box-shadow:0 -8px 24px rgba(16,16,20,.16)">
+            <div style="width:36px;height:4px;border-radius:999px;background:#e0e0e5;margin:0 auto 14px"></div>
+            <div style="font-size:19px;font-weight:700;letter-spacing:-.02em">Записаться снова</div>
+            <div style="font-size:13.5px;color:#5a5a64;margin-top:5px">Всё как в прошлый раз — проверьте и выберите время</div>
+            <div style="border:1px solid #e6e6ea;border-radius:14px;padding:13px;margin-top:14px">
+              <div style="display:flex;align-items:center;gap:11px;padding-bottom:11px;border-bottom:1px solid #eeeef1">
+                <div style="width:40px;height:40px;border-radius:10px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+                <div style="flex:1"><div style="font-size:15px;font-weight:600">Ножницы</div><div style="font-size:12.5px;color:#5a5a64">Марат · барбер</div></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:11px"><span>Мужская стрижка · Стрижка бороды</span><span style="font-weight:600">9 000 ₸</span></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <span style="flex:1;height:48px;border-radius:12px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Изменить</span>
+              <span style="flex:1.4;height:48px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Выбрать время</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ ВКЛАДКИ БИЗНЕСА ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">СТРАНИЦА БИЗНЕСА</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Мастера, отзывы, о салоне</h2>
+      <span style="font-size:13px;color:#5a5a64">те же вкладки B2, шапка и липкая кнопка не меняются</span>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">G1</span><span style="font-size:12.5px;color:#4a4a55">Вкладка «Мастера»</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;display:flex;gap:14px;padding:18px 16px 0;border-bottom:1px solid #e6e6ea">
+            <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">Услуги</span>
+            <span style="padding-bottom:9px;border-bottom:2px solid #101014;font-size:14.5px;font-weight:600">Мастера</span>
+            <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">Отзывы</span>
+            <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">О салоне</span>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:4px 16px 0">
+            <sc-for list="{{ staff }}" as="m" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #eeeef1">
+                <span style="width:52px;height:52px;border-radius:999px;background:#f0f0f3;color:#5a5a64;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;flex:none">{{ m.initial }}</span>
+                <div style="flex:1">
+                  <div style="font-size:15.5px;font-weight:600">{{ m.name }}</div>
+                  <div style="font-size:13px;color:#5a5a64;margin-top:2px">{{ m.role }}</div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:5px;font-size:12.5px">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#101014"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg>
+                    <span style="font-weight:600">{{ m.rating }}</span><span style="color:#6e6e78">· {{ m.meta }}</span>
+                  </div>
+                </div>
+                <span style="height:34px;padding:0 14px;border-radius:999px;border:1px solid #d8d8de;display:inline-flex;align-items:center;font-size:13px;font-weight:600;flex:none">К нему</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex:none;border-top:1px solid #e6e6ea;padding:12px 16px 14px;display:flex;align-items:center;gap:12px">
+            <div style="flex:1"><div style="font-size:14px;font-weight:600">3 мастера</div><div style="font-size:12.5px;color:#5a5a64">ближайшее время 14:30</div></div>
+            <span style="{{ cta }}">Записаться</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">G2</span><span style="font-size:12.5px;color:#4a4a55">Вкладка «Отзывы»</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;display:flex;gap:14px;padding:18px 16px 0;border-bottom:1px solid #e6e6ea">
+            <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">Услуги</span>
+            <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">Мастера</span>
+            <span style="padding-bottom:9px;border-bottom:2px solid #101014;font-size:14.5px;font-weight:600">Отзывы</span>
+            <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">О салоне</span>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:14px 16px 0">
+            <div style="display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1px solid #eeeef1">
+              <div style="font-size:38px;font-weight:700;letter-spacing:-.03em">4,9</div>
+              <div style="flex:1">
+                <div style="display:flex;gap:2px">
+                  <sc-for list="{{ stars }}" as="st" hint-placeholder-count="5">
+                    <span style="{{ st.style }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg></span>
+                  </sc-for>
+                </div>
+                <div style="font-size:13px;color:#5a5a64;margin-top:4px">212 отзыва · только от состоявшихся визитов</div>
+              </div>
+            </div>
+            <sc-for list="{{ reviews }}" as="r" hint-placeholder-count="3">
+              <div style="padding:14px 0;border-bottom:1px solid #eeeef1">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="width:36px;height:36px;border-radius:999px;background:#f0f0f3;color:#5a5a64;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex:none">{{ r.initial }}</span>
+                  <div style="flex:1"><div style="font-size:14.5px;font-weight:600">{{ r.who }}</div><div style="font-size:12.5px;color:#5a5a64">{{ r.when }} · {{ r.master }}</div></div>
+                  <span style="display:inline-flex;gap:1px">
+                    <sc-for list="{{ r.starList }}" as="st" hint-placeholder-count="5">
+                      <span style="{{ st.style }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg></span>
+                    </sc-for>
+                  </span>
+                </div>
+                <div style="font-size:14px;line-height:1.5;color:#101014;margin-top:9px">{{ r.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">G3</span><span style="font-size:12.5px;color:#4a4a55">Вкладка «О салоне»</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;display:flex;gap:14px;padding:18px 16px 0;border-bottom:1px solid #e6e6ea">
+            <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">Услуги</span>
+            <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">Мастера</span>
+            <span style="padding-bottom:9px;font-size:14.5px;color:#5a5a64">Отзывы</span>
+            <span style="padding-bottom:9px;border-bottom:2px solid #101014;font-size:14.5px;font-weight:600">О салоне</span>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:14px 16px 0">
+            <div style="height:120px;border-radius:14px;background:repeating-linear-gradient(135deg,#eeeef1 0 10px,#f6f6f8 10px 20px);display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#6e6e78">карта · Абая 52</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #eeeef1">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="2.6"></circle></svg>
+              <div style="flex:1"><div style="font-size:14.5px">Абая 52, Алматы</div><div style="font-size:12.5px;color:#5a5a64">Алмалинский район · 1,2 км</div></div>
+              <span style="font-size:13px;font-weight:600;color:#5a3ff0">Маршрут</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid #eeeef1">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>
+              <div style="flex:1">
+                <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px"><span>Пн — Пт</span><span style="font-weight:600">10:00 — 21:00</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px"><span>Суббота</span><span style="font-weight:600">11:00 — 20:00</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:14px;color:#5a5a64"><span>Воскресенье</span><span>Выходной</span></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #eeeef1">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.75" stroke-linecap="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"></rect><path d="M11 18h2"></path></svg>
+              <span style="flex:1;font-size:14.5px">+7 727 350 40 40</span>
+              <span style="font-size:13px;font-weight:600;color:#5a3ff0">Позвонить</span>
+            </div>
+            <div style="font-size:14px;line-height:1.55;color:#101014;padding:14px 0">Барбершоп на четыре кресла. Работаем с 2019 года, стрижём мужчин и детей, кофе за счёт заведения.</div>
+            <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;border-top:1px solid #eeeef1;padding-top:12px">Отмена — бесплатно до 23:00 предыдущего дня. Дальше место остаётся за вами, но салон отметит неявку, если не придёте.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ ПРОФИЛЬ ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">ПРОФИЛЬ</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Сохранённое, отзывы, уведомления, помощь</h2>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">H1</span><span style="font-size:12.5px;color:#4a4a55">Сохранённое · салоны и мастера</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="display:flex;align-items:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg><span style="font-size:17px;font-weight:600">Сохранённое</span></div>
+          <div style="display:flex;gap:4px;padding:3px;background:#f4f4f6;border-radius:10px;margin-top:16px">
+            <span style="flex:1;height:34px;border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(16,16,20,.1);display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600">Салоны · 2</span>
+            <span style="flex:1;height:34px;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600;color:#5a5a64">Мастера · 3</span>
+          </div>
+          <div style="margin-top:6px">
+            <sc-for list="{{ savedSalons }}" as="s" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #eeeef1">
+                <div style="width:52px;height:52px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+                <div style="flex:1">
+                  <div style="font-size:15px;font-weight:600">{{ s.name }}</div>
+                  <div style="font-size:12.5px;color:#5a5a64;margin-top:2px">{{ s.meta }}</div>
+                  <div style="margin-top:6px"><span style="{{ s.freeStyle }}">{{ s.free }}</span></div>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#101014" stroke="none" style="flex:none"><path d="M20.4 5.6a5 5 0 0 0-7.1 0L12 6.9l-1.3-1.3a5 5 0 1 0-7.1 7.1L12 21l8.4-8.3a5 5 0 0 0 0-7.1z"></path></svg>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;margin-top:14px">Мастер сохраняется отдельно от салона: если он перейдёт в другое место, вкладка «Мастера» приведёт туда, где он работает сейчас.</div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">H2</span><span style="font-size:12.5px;color:#4a4a55">Мои отзывы</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="display:flex;align-items:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg><span style="font-size:17px;font-weight:600">Мои отзывы</span></div>
+          <sc-for list="{{ myReviews }}" as="r" hint-placeholder-count="2">
+            <div style="border:1px solid #e6e6ea;border-radius:16px;padding:14px;margin-top:14px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="display:inline-flex;gap:1px">
+                  <sc-for list="{{ r.starList }}" as="st" hint-placeholder-count="5">
+                    <span style="{{ st.style }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.6l2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8z"></path></svg></span>
+                  </sc-for>
+                </span>
+                <span style="flex:1"></span>
+                <span style="font-size:12.5px;color:#5a5a64">{{ r.when }}</span>
+              </div>
+              <div style="font-size:14.5px;font-weight:600;margin-top:9px">{{ r.biz }} · {{ r.master }}</div>
+              <div style="font-size:14px;line-height:1.5;color:#101014;margin-top:5px">{{ r.text }}</div>
+              <div style="display:flex;gap:16px;margin-top:12px;padding-top:11px;border-top:1px solid #eeeef1">
+                <span style="font-size:13.5px;font-weight:600;color:#5a3ff0">Изменить</span>
+                <span style="font-size:13.5px;font-weight:600;color:#b42318">Удалить</span>
+              </div>
+            </div>
+          </sc-for>
+          <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;margin-top:14px">Отзыв можно изменить или удалить в течение 24 часов после публикации — дальше он остаётся у салона.</div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">H3</span><span style="font-size:12.5px;color:#4a4a55">Уведомления · push и SMS</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="display:flex;align-items:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg><span style="font-size:17px;font-weight:600">Уведомления</span></div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78;margin:18px 0 2px">Push</div>
+          <sc-for list="{{ notifPush }}" as="n" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #eeeef1">
+              <div style="flex:1"><div style="font-size:14.5px;font-weight:600">{{ n.name }}</div><div style="font-size:12.5px;color:#5a5a64;margin-top:2px">{{ n.desc }}</div></div>
+              <span style="{{ n.track }}"><span style="width:27px;height:27px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(16,16,20,.3)"></span></span>
+            </div>
+          </sc-for>
+          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78;margin:20px 0 2px">SMS</div>
+          <sc-for list="{{ notifSms }}" as="n" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #eeeef1">
+              <div style="flex:1;font-size:14.5px">{{ n.name }}</div>
+              <span style="{{ n.track }}"><span style="width:27px;height:27px;border-radius:999px;background:#fff;box-shadow:0 1px 3px rgba(16,16,20,.3)"></span></span>
+            </div>
+          </sc-for>
+          <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;margin-top:14px">Подтверждение, отказ и перенос отключить нельзя: без них клиент не узнает, состоится ли визит. Гасить можно только напоминание.</div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">H4</span><span style="font-size:12.5px;color:#4a4a55">Редактирование профиля</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="display:flex;align-items:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg><span style="font-size:17px;font-weight:600;flex:1">Профиль</span><span style="font-size:15px;font-weight:600;color:#5a3ff0">Готово</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin:18px 0 4px">
+            <span style="{{ avBig }}">Т</span>
+            <span style="font-size:13.5px;font-weight:600;color:#5a3ff0">Изменить фото</span>
+          </div>
+          <sc-for list="{{ editFields }}" as="p" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #eeeef1">
+              <span style="font-size:14.5px;color:#5a5a64;width:132px;flex:none">{{ p.name }}</span>
+              <span style="flex:1;font-size:15px;text-align:right">{{ p.val }}</span>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.9" stroke-linecap="round" style="flex:none"><path d="M9 5l7 7-7 7"></path></svg>
+            </div>
+          </sc-for>
+          <div style="font-size:12.5px;color:#5a5a64;margin-top:12px;line-height:1.5">Смена телефона подтверждается кодом из SMS — по нему салон вас узнаёт.</div>
+          <div style="margin-top:auto;padding:14px 0;font-size:15px;font-weight:600;color:#b42318">Удалить аккаунт</div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#101014;color:#fff;padding:3px 7px;border-radius:5px">H5</span><span style="font-size:12.5px;color:#4a4a55">Помощь</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="display:flex;align-items:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg><span style="font-size:17px;font-weight:600">Помощь</span></div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78;margin:18px 0 2px">Частые вопросы</div>
+          <sc-for list="{{ faq }}" as="f" hint-placeholder-count="4">
+            <div style="padding:13px 0;border-bottom:1px solid #eeeef1">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="flex:1;font-size:14.5px;font-weight:600">{{ f.q }}</span>
+                <span style="{{ f.caret }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.9" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg></span>
+              </div>
+              <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:13.5px;line-height:1.55;color:#4a4a55;margin-top:8px">{{ f.aText }}</div>
+              </sc-if>
+            </div>
+          </sc-for>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #eeeef1;margin-top:6px">
+            <span style="flex:1;font-size:14.5px;font-weight:600">Правила отмены и неявки</span>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.9" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg>
+          </div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78;margin:16px 0 8px">Связаться</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span style="height:40px;padding:0 14px;border-radius:999px;border:1px solid #e6e6ea;display:inline-flex;align-items:center;font-size:13.5px;font-weight:600">WhatsApp</span>
+            <span style="height:40px;padding:0 14px;border-radius:999px;border:1px solid #e6e6ea;display:inline-flex;align-items:center;font-size:13.5px;font-weight:600">Telegram</span>
+            <span style="height:40px;padding:0 14px;border-radius:999px;border:1px solid #e6e6ea;display:inline-flex;align-items:center;font-size:13.5px;font-weight:600">help@yeral.kz</span>
+            <span style="height:40px;padding:0 14px;border-radius:999px;border:1px solid #e6e6ea;display:inline-flex;align-items:center;font-size:13.5px;font-weight:600">+7 727 000 00 00</span>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:auto;padding:14px 0;font-size:13px;color:#5a5a64"><span>Соглашение</span><span>Приватность</span></div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#5a3ff0;color:#fff;padding:3px 7px;border-radius:5px">H6</span><span style="font-size:12.5px;color:#4a4a55">Модалка подтверждения</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+          <div style="flex:1;padding:20px 16px 0;opacity:.4">
+            <div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Профиль</div>
+            <div style="display:flex;align-items:center;gap:14px;margin:18px 0">
+              <span style="width:56px;height:56px;border-radius:999px;background:#f0f0f3"></span>
+              <div><div style="font-size:17px;font-weight:700">Тимур Абдрахманов</div><div style="font-size:13.5px;color:#5a5a64">+7 707 123 45 67</div></div>
+            </div>
+            <div style="height:1px;background:#eeeef1;margin:12px 0"></div>
+            <div style="font-size:15px;padding:12px 0">Сохранённое</div>
+            <div style="font-size:15px;padding:12px 0">Мои отзывы</div>
+          </div>
+          <div style="position:absolute;inset:0;background:rgba(16,16,20,.4)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:10px 16px 22px;box-shadow:0 -8px 24px rgba(16,16,20,.16)">
+            <div style="width:36px;height:4px;border-radius:999px;background:#e0e0e5;margin:0 auto 16px"></div>
+            <div style="font-size:19px;font-weight:700;letter-spacing:-.02em">Выйти из аккаунта?</div>
+            <div style="font-size:14px;line-height:1.5;color:#5a5a64;margin-top:6px">Записи и отзывы останутся — вы увидите их, когда войдёте снова по номеру.</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">
+              <span style="height:50px;border-radius:12px;background:#fee4e2;color:#b42318;display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:600">Выйти</span>
+              <span style="height:50px;border-radius:12px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:600">Остаться</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Один шаблон на все необратимые действия: выход, удаление аккаунта, удаление отзыва, отмена записи. Деструктивная кнопка сверху, «остаться» — под пальцем.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════ ПОЛНЫЕ КЕЙСЫ ═══════ -->
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#5a3ff0">КЕЙСЫ</span>
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0">Когда что-то пошло не так</h2>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#b42318;color:#fff;padding:3px 7px;border-radius:5px">K1</span><span style="font-size:12.5px;color:#4a4a55">Слот заняли, пока оформлял</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;position:relative">
+          <div style="flex:1;padding:20px 16px 0;opacity:.4">
+            <div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Проверьте заявку</div>
+            <div style="border:1px solid #e6e6ea;border-radius:14px;padding:14px;margin-top:16px;font-size:15px;font-weight:600">Среда, 3 сентября · 14:30</div>
+          </div>
+          <div style="position:absolute;inset:0;background:rgba(16,16,20,.4)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:10px 16px 22px;box-shadow:0 -8px 24px rgba(16,16,20,.16)">
+            <div style="width:36px;height:4px;border-radius:999px;background:#e0e0e5;margin:0 auto 16px"></div>
+            <div style="font-size:19px;font-weight:700;letter-spacing:-.02em">14:30 только что заняли</div>
+            <div style="font-size:14px;line-height:1.5;color:#5a5a64;margin-top:6px">Кто-то успел раньше. У Марата в тот же день свободно другое время.</div>
+            <div style="display:flex;gap:8px;margin-top:16px">
+              <span style="flex:1;height:50px;border-radius:12px;background:#efecfe;border:1.5px solid #5a3ff0;color:#101014;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">15:15</span>
+              <span style="flex:1;height:50px;border-radius:12px;border:1px solid #e6e6ea;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500">16:00</span>
+              <span style="flex:1;height:50px;border-radius:12px;border:1px solid #e6e6ea;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500">17:15</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+              <span style="height:50px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:600">Записаться на 15:15</span>
+              <span style="height:50px;border-radius:12px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:600">Выбрать другое время</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#b42318;color:#fff;padding:3px 7px;border-radius:5px">K2</span><span style="font-size:12.5px;color:#4a4a55">Неявка и последствия</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="display:flex;align-items:center;gap:2px;margin-bottom:14px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg><span style="font-size:17px;font-weight:600;margin-left:6px">Запись</span></div>
+          <span style="display:inline-flex;align-self:flex-start;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:8px;background:#fee4e2;border:1px solid #f6c7c2;color:#a3251b;font-size:12.5px;font-weight:600"><span style="width:7px;height:7px;border-radius:999px;background:#d9412f"></span>Неявка</span>
+          <div style="font-size:26px;font-weight:700;letter-spacing:-.03em;margin-top:12px">21 августа<br>16:00</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:16px 0;margin-top:8px;border-top:1px solid #eeeef1;border-bottom:1px solid #eeeef1">
+            <div style="width:48px;height:48px;border-radius:12px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+            <div style="flex:1"><div style="font-size:15.5px;font-weight:700">Ножницы</div><div style="font-size:13px;color:#5a5a64;margin-top:2px">Марат · мужская стрижка</div></div>
+          </div>
+          <div style="background:#fee4e2;border:1px solid #f6c7c2;border-radius:14px;padding:13px;margin-top:16px">
+            <div style="font-size:14px;font-weight:700;color:#a3251b">Салон отметил, что вы не пришли</div>
+            <div style="font-size:13px;line-height:1.5;color:#a3251b;margin-top:6px">Это видно только этому салону. Записываться можно как раньше, но после двух неявок подряд «Ножницы» могут просить подтверждать визит за день.</div>
+          </div>
+          <div style="font-size:13px;line-height:1.55;color:#4a4a55;margin-top:14px">Считаете, что это ошибка? Напишите салону — отметку снимут вручную.</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:auto;padding-bottom:16px">
+            <span style="height:48px;border-radius:12px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Написать салону</span>
+            <span style="height:48px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Записаться снова</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#b42318;color:#fff;padding:3px 7px;border-radius:5px">K3</span><span style="font-size:12.5px;color:#4a4a55">Салон не принимает онлайн-записи</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="height:170px;flex:none;background:repeating-linear-gradient(135deg,#eeeef1 0 10px,#f6f6f8 10px 20px);display:flex;align-items:center;justify-content:center;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#6e6e78">фото салона</div>
+          <div style="flex:1;padding:14px 16px 0">
+            <div style="font-size:22px;font-weight:700;letter-spacing:-.03em">Chop Almaty</div>
+            <div style="font-size:13.5px;color:#5a5a64;margin-top:5px">Барбершоп · Медеуский · 4,1 км</div>
+            <div style="background:#eef1f6;border:1px solid #d3dbe6;border-radius:14px;padding:13px;margin-top:14px">
+              <div style="font-size:14px;font-weight:700;color:#41505f">Сейчас без онлайн-записи</div>
+              <div style="font-size:13px;line-height:1.5;color:#41505f;margin-top:5px">Салон временно принимает только по телефону. Услуги и цены актуальны.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+              <span style="height:48px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"></rect><path d="M11 18h2"></path></svg>Позвонить в салон</span>
+              <span style="height:48px;border-radius:12px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Сообщить, когда откроют запись</span>
+            </div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6e6e78;margin:18px 0 2px">Похожие рядом</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #eeeef1">
+              <div style="width:44px;height:44px;border-radius:10px;background:repeating-linear-gradient(135deg,#eeeef1 0 6px,#f6f6f8 6px 12px);flex:none"></div>
+              <div style="flex:1"><div style="font-size:14.5px;font-weight:600">Ножницы</div><div style="font-size:12.5px;color:#5a5a64">Свободно сегодня 14:30</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#b42318;color:#fff;padding:3px 7px;border-radius:5px">K4</span><span style="font-size:12.5px;color:#4a4a55">Нет сети · заявка не ушла</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="font-size:24px;font-weight:700;letter-spacing:-.03em">Проверьте заявку</div>
+          <div style="display:flex;align-items:flex-start;gap:10px;background:#fee4e2;border:1px solid #f6c7c2;border-radius:14px;padding:13px;margin-top:14px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a3251b" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5M12 16h.01"></path></svg>
+            <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#a3251b">Не удалось отправить</div><div style="font-size:13px;line-height:1.5;color:#a3251b;margin-top:4px">Похоже, пропала связь. Черновик сохранён — отправим, как только сеть вернётся.</div></div>
+          </div>
+          <div style="border:1px solid #e6e6ea;border-radius:14px;padding:14px;margin-top:14px;opacity:.6">
+            <div style="font-size:15px;font-weight:600">Среда, 3 сентября · 14:30</div>
+            <div style="font-size:13.5px;color:#5a5a64;margin-top:4px">Ножницы · Марат · стрижка + борода</div>
+            <div style="font-size:15px;font-weight:700;margin-top:8px">9 000 ₸</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;color:#5a5a64"><span style="width:7px;height:7px;border-radius:999px;background:#dc8b0b"></span>Время держим 10 минут, пока вы офлайн</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:auto;padding-bottom:16px">
+            <span style="height:50px;border-radius:999px;background:linear-gradient(135deg,#7a5cff,#5a3ff0);color:#fff;box-shadow:0 8px 22px rgba(90,63,240,.32);display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:600">Повторить отправку</span>
+            <span style="height:50px;border-radius:12px;border:1px solid #d8d8de;display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:600">Сохранить и выйти</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:390px;flex:none;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;background:#6e6e78;color:#fff;padding:3px 7px;border-radius:5px">K5</span><span style="font-size:12.5px;color:#4a4a55">Загрузка · скелетоны</span></div>
+        <div style="width:390px;height:600px;background:#fff;border:1px solid #dededf;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;padding:20px 16px 0">
+          <div style="height:22px;width:120px;border-radius:8px;background:#f0f0f3;animation:ySkel 1.4s infinite"></div>
+          <div style="height:46px;border-radius:12px;background:#f0f0f3;margin-top:14px;animation:ySkel 1.4s infinite"></div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <div style="flex:1;height:78px;border-radius:14px;background:#f0f0f3;animation:ySkel 1.4s infinite"></div>
+            <div style="flex:1;height:78px;border-radius:14px;background:#f0f0f3;animation:ySkel 1.4s infinite"></div>
+            <div style="flex:1;height:78px;border-radius:14px;background:#f0f0f3;animation:ySkel 1.4s infinite"></div>
+            <div style="flex:1;height:78px;border-radius:14px;background:#f0f0f3;animation:ySkel 1.4s infinite"></div>
+          </div>
+          <div style="height:158px;border-radius:14px;background:#f0f0f3;margin-top:18px;animation:ySkel 1.4s infinite"></div>
+          <div style="height:18px;width:60%;border-radius:7px;background:#f0f0f3;margin-top:12px;animation:ySkel 1.4s infinite"></div>
+          <div style="height:14px;width:40%;border-radius:7px;background:#f0f0f3;margin-top:8px;animation:ySkel 1.4s infinite"></div>
+          <div style="height:158px;border-radius:14px;background:#f0f0f3;margin-top:20px;animation:ySkel 1.4s infinite"></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.5;color:#5a5a64;padding:0 2px">Скелетон повторяет будущую раскладку, а не крутит спиннер: экран не прыгает, когда данные пришли.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:4px 2px">
+    <div style="font-size:13.5px;line-height:1.6;color:#4a4a55;max-width:78ch"><strong style="color:#101014">Дальше:</strong> выберите подачу времени (<strong>V1-a / V1-b / V1-c</strong>), мастера (<strong>V2-a / V2-b</strong>) и каталога (<strong>B1 / V3-b</strong>) — зафиксирую в системе и соберу приложение бизнеса: календарь дня, карточка записи, ручная запись. Открытые вопросы: нужен ли экран «Категория на главной» отдельно от каталога и как ведёт себя «Сообщить, когда откроют запись» (<strong>K3</strong>).</div>
+    <div style="font-size:12px;font-family:ui-monospace,Menlo,monospace;color:#6e6e78">yeral · клиент · v0.2</div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#5a3ff0&quot;,&quot;options&quot;:[&quot;#5a3ff0&quot;,&quot;#0f62fe&quot;,&quot;#0e7c66&quot;,&quot;#c2410c&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Тема&quot;}}">
+const ACC = { base: "#5a3ff0", tint: "#efecfe", line: "#d5cbfb", ink: "#4429d6" };
+
+class Component extends DCLogic {
+  a() { const b = this.props.accent || ACC.base; return b === ACC.base ? ACC : { base: b, tint: "#f2f2ff", line: "#d8d8ea", ink: b }; }
+
+  renderVals() {
+    const a = this.a();
+    const black = { height: 48, padding: "0 24px", borderRadius: 999, background: "linear-gradient(135deg,#7a5cff,#5a3ff0)", color: "#fff", boxShadow: "0 8px 22px rgba(90,63,240,.32)", fontSize: 15, fontWeight: 600, display: "inline-flex", alignItems: "center", justifyContent: "center", flex: "none" };
+
+    return {
+      cta: black,
+      ctaGhost: { height: 48, padding: "0 22px", borderRadius: 12, border: "1px solid #d8d8de", background: "#fff", color: "#101014", fontSize: 15, fontWeight: 600, display: "inline-flex", alignItems: "center", justifyContent: "center", flex: "none" },
+      pickCardOff: { border: "1px solid #e6e6ea", borderRadius: 16, padding: 16 },
+
+      slotAll: [
+        { t: "10:00", n: "2 мастера свободны" },
+        { t: "11:15", n: "1 мастер" },
+        { t: "13:30", n: "3 мастера свободны" },
+        { t: "14:30", n: "2 мастера свободны" },
+        { t: "16:00", n: "1 мастер" },
+        { t: "17:15", n: "3 мастера свободны" }
+      ].map(x => ({
+        t: x.t, n: x.n,
+        style: {
+          display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px",
+          height: 54, borderRadius: 12, flex: "none",
+          background: x.t === "14:30" ? a.tint : "#fff",
+          border: x.t === "14:30" ? `1.5px solid ${a.base}` : "1px solid #e6e6ea"
+        },
+        tStyle: { fontSize: 15, fontWeight: x.t === "14:30" ? 600 : 500 },
+        nStyle: { fontSize: 12.5, color: x.t === "14:30" ? a.ink : "#5a5a64" }
+      })),
+
+      freeAt: [
+        { name: "Марат", role: "Барбер · владелец", rating: "4,9", initial: "М", on: true },
+        { name: "Ержан", role: "Барбер", rating: "4,8", initial: "Е", on: false }
+      ].map(m => Object.assign({}, m, {
+        row: { display: "flex", alignItems: "center", gap: 12, padding: 12, marginBottom: 10, borderRadius: 16, background: m.on ? a.tint : "#fff", border: m.on ? `1.5px solid ${a.base}` : "1px solid #e6e6ea" },
+        av: { width: 48, height: 48, borderRadius: 999, background: m.on ? "#fff" : "#f0f0f3", color: m.on ? a.ink : "#5a5a64", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 600, flex: "none" },
+        radio: { width: 22, height: 22, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: m.on ? a.base : "transparent", border: m.on ? "none" : "1.5px solid #d8d8de" }
+      })),
+
+      upcoming: [
+        { when: "Сегодня, 14:30", biz: "Ножницы · Марат", svc: "Стрижка + борода", sum: "9 000 ₸", label: "Ждёт подтверждения", bg: "#fef6e7", line: "#f2ddb0", ink: "#93500a", dot: "#dc8b0b" },
+        { when: "12 сентября, 18:00", biz: "Barber Loft · Айдос", svc: "Мужская стрижка", sum: "5 500 ₸", label: "Подтверждено", bg: a.tint, line: a.line, ink: a.ink, dot: a.base }
+      ].map(b => Object.assign({}, b, {
+        badge: { display: "inline-flex", alignItems: "center", gap: 6, height: 26, padding: "0 10px", borderRadius: 8, background: b.bg, border: `1px solid ${b.line}`, color: b.ink, fontSize: 12, fontWeight: 600 },
+        dotStyle: { width: 7, height: 7, borderRadius: 999, background: b.dot }
+      })),
+
+      past: [
+        { when: "8 августа, 15:00", biz: "Ножницы · Марат", svc: "Стрижка + борода", sum: "9 000 ₸", label: "Состоялось", bg: "#e7f8ee", line: "#bfe6d1", ink: "#066a41", dot: "#12a366", review: true },
+        { when: "17 июля, 12:30", biz: "Ножницы · Ержан", svc: "Мужская стрижка", sum: "6 000 ₸", label: "Отменено", bg: "#eef1f6", line: "#d3dbe6", ink: "#41505f", dot: "#7b8ea3", review: false }
+      ].map(b => Object.assign({}, b, {
+        badge: { display: "inline-flex", alignItems: "center", gap: 6, height: 26, padding: "0 10px", borderRadius: 8, background: b.bg, border: `1px solid ${b.line}`, color: b.ink, fontSize: 12, fontWeight: 600 },
+        dotStyle: { width: 7, height: 7, borderRadius: 999, background: b.dot }
+      })),
+
+      chipsGrid: ["10:00", "10:30", "11:15", "12:00", "13:30", "14:00", "14:30", "15:15", "16:00", "16:30", "17:15", "18:00"].map(t => ({
+        label: t,
+        style: {
+          height: 44, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 14.5, fontWeight: t === "14:30" ? 600 : 500,
+          background: t === "14:30" ? a.tint : "#fff", color: "#101014",
+          border: t === "14:30" ? `1.5px solid ${a.base}` : "1px solid #e6e6ea"
+        }
+      })),
+      groups: [
+        { name: "Утро", meta: "3 окна", times: ["10:00", "10:30", "11:15"] },
+        { name: "День", meta: "4 окна", times: ["13:30", "14:00", "14:30", "15:15"] },
+        { name: "Вечер", meta: "2 окна", times: ["17:15", "18:00"] }
+      ].map(g => Object.assign({}, g, {
+        chips: g.times.map(t => ({
+          label: t,
+          style: {
+            height: 42, padding: "0 16px", borderRadius: 999, display: "inline-flex", alignItems: "center",
+            fontSize: 14.5, fontWeight: t === "14:30" ? 600 : 500,
+            background: t === "14:30" ? a.base : "#fff", color: t === "14:30" ? "#fff" : "#101014",
+            border: t === "14:30" ? "none" : "1px solid #e6e6ea"
+          }
+        }))
+      })),
+      tiles: [
+        { name: "Марат", role: "Владелец", rating: "4,9", initial: "М", on: true },
+        { name: "Ержан", role: "Барбер", rating: "4,8", initial: "Е", on: false },
+        { name: "Санжар", role: "Барбер", rating: "4,7", initial: "С", on: false }
+      ].map(m => Object.assign({}, m, {
+        card: { flex: "1 1 100px", borderRadius: 16, padding: "16px 10px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: m.on ? a.tint : "#fff", border: m.on ? `1.5px solid ${a.base}` : "1px solid #e6e6ea" },
+        av: { width: 56, height: 56, borderRadius: 999, background: m.on ? "#fff" : "#f0f0f3", color: m.on ? a.ink : "#5a5a64", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 600 }
+      })),
+      dense: [
+        { name: "Ножницы", meta: "Барбершоп · 1,2 км", rating: "4,9", free: "14:30", price: "от 4 000 ₸" },
+        { name: "Barber Loft", meta: "Барбершоп · 3,4 км", rating: "4,7", free: "завтра 11:00", price: "от 5 500 ₸" },
+        { name: "Chop-Chop Almaty", meta: "Барбершоп · 4,1 км", rating: "4,6", free: "18:00", price: "от 4 500 ₸" },
+        { name: "Studio 7", meta: "Салон красоты · 2,0 км", rating: "4,8", free: "15:45", price: "от 7 000 ₸" }
+      ].map(d => Object.assign({}, d, {
+        freeStyle: { display: "inline-flex", alignItems: "center", height: 24, padding: "0 9px", borderRadius: 7, background: a.tint, border: `1px solid ${a.line}`, color: a.ink, fontSize: 11.5, fontWeight: 600 }
+      })),
+      recent: ["Мужская стрижка", "Барбершоп рядом", "Ножницы"],
+
+      searchDays: ["Сегодня", "Завтра", "3 сен, ср", "4 сен, чт", "5 сен, пт"].map((d, i) => ({
+        label: d,
+        style: {
+          height: 40, padding: "0 16px", borderRadius: 999, display: "inline-flex", alignItems: "center", flex: "none",
+          fontSize: 14, fontWeight: i === 0 ? 600 : 500,
+          background: i === 0 ? "#101014" : "#fff", color: i === 0 ? "#fff" : "#101014",
+          border: i === 0 ? "none" : "1px solid #e6e6ea"
+        }
+      })),
+      results: [
+        { name: "Ножницы", meta: "Барбершоп · Алмалинский · 1,2 км", rating: "4,9", times: ["14:30", "16:00", "17:15"] },
+        { name: "Barber Loft", meta: "Барбершоп · Бостандыкский · 3,4 км", rating: "4,7", times: ["11:00", "13:45"] },
+        { name: "Chop Almaty", meta: "Барбершоп · Медеуский · 4,1 км", rating: "4,6", times: ["18:00"] }
+      ].map(r => Object.assign({}, r, {
+        chips: r.times.map((t, i) => ({
+          label: t,
+          style: {
+            height: 38, padding: "0 14px", borderRadius: 10, display: "inline-flex", alignItems: "center",
+            fontSize: 14, fontWeight: 600, flex: "none",
+            background: i === 0 ? a.tint : "#fff", color: i === 0 ? a.ink : "#101014",
+            border: i === 0 ? `1px solid ${a.line}` : "1px solid #e6e6ea"
+          }
+        }))
+      })),
+      staff: [
+        { name: "Марат", role: "Владелец · барбер", rating: "4,9", meta: "12 услуг · 320 визитов", initial: "М" },
+        { name: "Ержан", role: "Барбер", rating: "4,8", meta: "9 услуг · 210 визитов", initial: "Е" },
+        { name: "Санжар", role: "Барбер", rating: "4,7", meta: "7 услуг · 180 визитов", initial: "С" }
+      ],
+      reviews: [
+        { who: "Тимур А.", when: "8 августа", master: "Марат", text: "Сделал ровно как просил, без лишних разговоров. Приду ещё.", initial: "Т", n: 5 },
+        { who: "Данияр К.", when: "2 августа", master: "Ержан", text: "Опоздал на 10 минут — приняли без вопросов. Борода как надо.", initial: "Д", n: 5 },
+        { who: "Асхат М.", when: "28 июля", master: "Марат", text: "Хорошее место, но по субботам шумно.", initial: "А", n: 4 }
+      ].map(r => Object.assign({}, r, {
+        starList: [1, 2, 3, 4, 5].map(i => ({ style: { color: i <= r.n ? a.base : "#d8d8de", display: "inline-flex" } }))
+      })),
+      myReviews: [
+        { biz: "Ножницы", master: "Марат", when: "8 августа", text: "Сделал ровно как просил, без лишних разговоров.", n: 5 },
+        { biz: "Barber Loft", master: "Айдос", when: "14 июня", text: "Стрижка нормальная, но ждал 15 минут.", n: 4 }
+      ].map(r => Object.assign({}, r, {
+        starList: [1, 2, 3, 4, 5].map(i => ({ style: { color: i <= r.n ? a.base : "#d8d8de", display: "inline-flex" } }))
+      })),
+      notifPush: [
+        { name: "Заявка подтверждена или отклонена", desc: "Главное событие — приходит всегда", on: true, locked: true },
+        { name: "Напоминание за 2 часа", desc: "Чтобы не забыть и не получить неявку", on: true, locked: false },
+        { name: "Мастер перенёс или отменил", desc: "Изменения со стороны салона", on: true, locked: true }
+      ].map(n => Object.assign({}, n, {
+        track: { width: 51, height: 31, borderRadius: 999, padding: 2, display: "flex", justifyContent: n.on ? "flex-end" : "flex-start", background: n.on ? "#12a366" : "#d8d8de", opacity: n.locked ? .5 : 1, flex: "none" }
+      })),
+      notifSms: [
+        { name: "Заявка подтверждена или отклонена", desc: "", on: true, locked: false },
+        { name: "Напоминание за 2 часа", desc: "", on: false, locked: false },
+        { name: "Мастер перенёс или отменил", desc: "", on: true, locked: false }
+      ].map(n => Object.assign({}, n, {
+        track: { width: 51, height: 31, borderRadius: 999, padding: 2, display: "flex", justifyContent: n.on ? "flex-end" : "flex-start", background: n.on ? "#12a366" : "#d8d8de", flex: "none" }
+      })),
+      editFields: [
+        { name: "Имя и фамилия", val: "Тимур Абдрахманов" },
+        { name: "Телефон", val: "+7 707 123 45 67" },
+        { name: "Дата рождения", val: "14 марта 1994" },
+        { name: "Пол", val: "Мужской" },
+        { name: "Город", val: "Алматы" },
+        { name: "Язык интерфейса", val: "Русский" }
+      ],
+      faq: [
+        { q: "Чем заявка отличается от записи?", open: true, aText: "Заявка — это запрос салону. Пока мастер её не подтвердил, время держится за вами, но визит не гарантирован. После подтверждения статус меняется на «Подтверждено»." },
+        { q: "Как отменить или перенести визит?", open: false, aText: "" },
+        { q: "Что будет, если я не приду?", open: false, aText: "" },
+        { q: "Можно записаться без аккаунта?", open: false, aText: "" }
+      ].map(x => Object.assign({}, x, {
+        caret: { display: "inline-flex", flex: "none", transform: x.open ? "rotate(180deg)" : "none" }
+      })),
+      savedSalons: [
+        { name: "Ножницы", meta: "Барбершоп · 1,2 км", free: "Сегодня 14:30" },
+        { name: "Studio 7", meta: "Салон красоты · 2,0 км", free: "Сегодня 15:45" }
+      ].map(s => Object.assign({}, s, {
+        freeStyle: { display: "inline-flex", alignItems: "center", height: 24, padding: "0 9px", borderRadius: 7, background: a.tint, border: `1px solid ${a.line}`, color: a.ink, fontSize: 11.5, fontWeight: 600 }
+      })),
+      entries: [
+        { n: "1", name: "Каталог и витрина", desc: "Смотрю, что есть рядом. Вход в бизнес — по карточке." },
+        { n: "2", name: "Поиск по услуге и дню", desc: "Знаю, что и когда нужно. Вижу только тех, у кого есть окна." },
+        { n: "3", name: "Категория на главной", desc: "«Стрижка» плиткой — тот же список, предзаполненный фильтр." },
+        { n: "4", name: "Повтор из истории", desc: "Записаться снова: бизнес, мастер и услуги уже выбраны." }
+      ],
+      avBig: { width: 62, height: 62, borderRadius: 999, background: a.tint, color: a.ink, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 600, flex: "none" },
+      profileRows: [
+        { name: "Избранные салоны", count: "4", hasCount: true },
+        { name: "Мои отзывы", count: "7", hasCount: true },
+        { name: "Уведомления", count: "", hasCount: false },
+        { name: "Город", count: "Алматы", hasCount: true },
+        { name: "Помощь", count: "", hasCount: false }
+      ],
+      stars: [1, 2, 3, 4, 5].map(i => ({ on: i <= 5, style: { width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", color: i <= 5 ? a.base : "#d8d8de" } })),
+      ctaBlock: Object.assign({}, black, { width: "100%", height: 52, fontSize: 16 }),
+      avSm: { width: 34, height: 34, borderRadius: 999, background: a.tint, color: a.ink, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 600, flex: "none" },
+      bigCheck: { width: 88, height: 88, borderRadius: 999, background: a.base, display: "flex", alignItems: "center", justifyContent: "center" },
+      masterChip: { display: "inline-flex", alignItems: "center", gap: 7, height: 36, padding: "0 12px 0 5px", borderRadius: 999, background: a.tint, border: `1px solid ${a.line}`, color: a.ink, fontSize: 14, fontWeight: 600 },
+      pickCardOn: { border: `1.5px solid ${a.base}`, background: a.tint, borderRadius: 16, padding: 16 },
+      pickIconOn: { width: 40, height: 40, borderRadius: 12, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", color: a.ink, flex: "none" },
+      radioOn: { width: 22, height: 22, borderRadius: 999, background: a.base, display: "flex", alignItems: "center", justifyContent: "center", flex: "none" },
+
+      cats: [["Стрижка", "✂"], ["Борода", "🪒"], ["Ногти", "💅"], ["Массаж", "💆"]].map(([name, glyph]) => ({
+        name, glyph,
+        style: { flex: 1, height: 78, borderRadius: 14, background: "#f4f4f6", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 }
+      })),
+
+      catalog: [
+        { name: "Ножницы", rating: "4,9", reviews: "(212)", meta: "Барбершоп · Алмалинский · 1,2 км", free: "Свободно сегодня 14:30", price: "от 4 000 ₸", photo: "фото салона 16:9" },
+        { name: "Barber Loft", rating: "4,7", reviews: "(88)", meta: "Барбершоп · Бостандыкский · 3,4 км", free: "Свободно завтра 11:00", price: "от 5 500 ₸", photo: "фото салона 16:9" }
+      ].map(b => Object.assign({}, b, {
+        freeStyle: { display: "inline-flex", alignItems: "center", height: 26, padding: "0 10px", borderRadius: 8, background: a.tint, border: `1px solid ${a.line}`, color: a.ink, fontSize: 12, fontWeight: 600 }
+      })),
+
+      svcPreview: [
+        { name: "Мужская стрижка", dur: "45 мин", price: "6 000 ₸" },
+        { name: "Стрижка бороды", dur: "20 мин", price: "3 000 ₸" },
+        { name: "Бритьё опасной бритвой", dur: "30 мин", price: "5 000 ₸" },
+        { name: "Детская стрижка", dur: "30 мин", price: "4 000 ₸" }
+      ],
+
+      svcRows: [
+        { name: "Мужская стрижка", dur: "45 мин", price: "6 000 ₸", on: true },
+        { name: "Стрижка бороды", dur: "20 мин", price: "3 000 ₸", on: true },
+        { name: "Бритьё опасной бритвой", dur: "30 мин", price: "5 000 ₸", on: false },
+        { name: "Детская стрижка", dur: "30 мин", price: "4 000 ₸", on: false }
+      ].map(s => Object.assign({}, s, {
+        off: !s.on,
+        boxStyle: { width: 28, height: 28, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: s.on ? a.base : "#fff", border: s.on ? "none" : "1px solid #d8d8de" }
+      })),
+
+      masters: [
+        { name: "Марат", role: "Барбер · владелец", rating: "4,9", jobs: "320 визитов", initial: "М", on: true },
+        { name: "Ержан", role: "Барбер", rating: "4,8", jobs: "210 визитов", initial: "Е", on: false },
+        { name: "Санжар", role: "Барбер", rating: "4,7", jobs: "180 визитов", initial: "С", on: false }
+      ].map(m => Object.assign({}, m, {
+        row: { display: "flex", alignItems: "center", gap: 12, padding: 12, marginBottom: 10, borderRadius: 16, background: m.on ? a.tint : "#fff", border: m.on ? `1.5px solid ${a.base}` : "1px solid #e6e6ea" },
+        av: { width: 48, height: 48, borderRadius: 999, background: m.on ? "#fff" : "#f0f0f3", color: m.on ? a.ink : "#5a5a64", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 600, flex: "none" },
+        radio: { width: 22, height: 22, borderRadius: 999, flex: "none", display: "flex", alignItems: "center", justifyContent: "center", background: m.on ? a.base : "transparent", border: m.on ? "none" : "1.5px solid #d8d8de" }
+      })),
+
+      days: [["пн", "1"], ["вт", "2"], ["ср", "3"], ["чт", "4"], ["пт", "5"], ["сб", "6"]].map(([dow, num], i) => ({
+        dow, num,
+        wrap: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 },
+        circle: { width: 44, height: 44, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 600, background: i === 2 ? a.base : "transparent", color: i === 2 ? "#fff" : "#101014" },
+        dowStyle: { fontSize: 11.5, fontWeight: 500, color: i === 2 ? a.ink : "#6e6e78" }
+      })),
+
+      daysOff: [["пт", "5"], ["сб", "6"], ["вс", "7"], ["пн", "8"], ["вт", "9"], ["ср", "10"]].map(([dow, num], i) => ({
+        dow, num,
+        wrap: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 },
+        circle: { width: 44, height: 44, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 600, background: i === 2 ? "#101014" : "transparent", color: i === 2 ? "#fff" : "#101014" },
+        dowStyle: { fontSize: 11.5, fontWeight: 500, color: "#6e6e78" }
+      })),
+
+      slotRows: ["10:00", "11:15", "13:30", "14:30", "16:00", "17:15"].map(t => ({
+        label: t,
+        style: {
+          height: 50, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 15, fontWeight: t === "14:30" ? 600 : 500, flex: "none",
+          background: t === "14:30" ? a.tint : "#fff",
+          border: t === "14:30" ? `1.5px solid ${a.base}` : "1px solid #e6e6ea"
+        }
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

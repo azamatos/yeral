@@ -43,7 +43,7 @@ yeral/                           github.com/azamatos/yeral
 │  ├─ docker/      Dockerfiles per deployable, compose.yml (production-like), compose.dev.yml (Postgres for local work)
 │  └─ nginx/       nginx.conf + one server block per host, TLS, caching, security headers
 ├─ turbo/generators/  `pnpm gen` templates: ui-component, slice, endpoint, app
-├─ docs/           memory-bank/ (+ log/), decisions/, API.md
+├─ docs/           memory-bank/ (+ log/), decisions/, design/ (Claude Design export, read-only), API.md
 ├─ .claude/        skills/, agents/, settings.json
 ├─ .github/        workflows/, renovate.json, ISSUE_TEMPLATE/
 ├─ .changeset/
