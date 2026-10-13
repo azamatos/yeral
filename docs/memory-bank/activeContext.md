@@ -41,6 +41,7 @@ The live site is still the Next.js marketplace at https://yeral.app.
 | # | Question | Who | Blocks |
 |---|---|---|---|
 | 1 | What exactly is wrong with the first client app (list of complaints)? | owner | M3 |
+| 1a | **Desktop/web extension of DS v2** (in progress by the owner in Claude Design): web foundations (breakpoints, grid, states, density), web components (header, sidebar, table, menus, date picker…), desktop screens — business first (all-staff calendar, requests, clients, settings), then client and landing. The export replaces `docs/design/` | owner | M3, M5 (not M0/M1 primitives) |
 | 2 | Which locale owns URLs without a prefix: `ru` or `tk`? | owner | M7 |
 | 3 | Final name and domain (`yeral.app`, `yeral.com`, other)? | owner | public launch |
 | 4 | Rename the Cloudflare workers.dev subdomain so PR preview URLs can be turned on | owner, dashboard | previews (optional) |

@@ -35,7 +35,8 @@ Bookings through the salon's own link (`yeral.app/{slug}`, QR code) are free for
   everything in Docker behind nginx, with Cloudflare kept for DNS. Not a focus until that server is bought; the code
   stays portable so the move is a deploy ([ADR 0007](../decisions/0007-hosting-cloudflare-now-docker-later.md)).
 - UX reference: Fresha. Visual source: the Claude Design export (Design System v2, Client App, Business App,
-  Business Clients and Analytics, Product Deck, Business Deck, Project Brief) in `docs/design/`.
+  Business Clients and Analytics, Product Deck, Business Deck, Project Brief) in `docs/design/`. **All of it is mobile-only**
+  (the all-staff calendar was explicitly left for tablet); a desktop/web extension is being designed.
 - The first prototype (mobile PWA): github.com/azamatos/yeral_proto. Its `src/data/actions.ts` is the reference for
   every business action not yet built here.
 - The repository is public by the owner's choice until the product is ready; it will go private then. Never commit secrets.
