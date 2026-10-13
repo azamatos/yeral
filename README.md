@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Yeral — web (yeral.app)
 
-## Getting Started
+Web version of Yeral: booking at beauty & wellness salons in Ashgabat.
+Phase 1 = the client marketplace, running on mock data. Plan: [docs/PLAN.md](docs/PLAN.md) · backend contract: [docs/API.md](docs/API.md).
 
-First, run the development server:
+Next.js 16 (App Router) · React 19 · Tailwind 4 · TanStack Query · next-intl · MapLibre + OpenFreeMap · Cloudflare Workers via OpenNext.
+
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install        # also copies the MapLibre worker into public/vendor
+pnpm dev            # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Demo login: any `+993` number, code **1234**. `+993 65 12 34 56` is the demo client with booking history.
+«Ножницы» (`/nozhnitsy`) waits for the salon's answer — answer it from the demo panel on the booking page.
+Other salons answer by themselves in a few seconds (or confirm instantly).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Where things are
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| | |
+|---|---|
+| `src/domain` | types, Ashgabat time, booking rules (slots, buffer, lead time, window, statuses) — ported from `../app` |
+| `src/api/contract.ts` | the API the UI depends on |
+| `src/api/mock` | in-browser backend: seed (24 salons), localStorage DB, synthetic occupancy, salon «answers» |
+| `src/api/hooks.ts` | TanStack Query hooks used by pages |
+| `src/app/(site)` | marketplace pages: home, search, salon, account, login, for-business |
+| `src/app/(focus)/[slug]/book` | full-page booking wizard |
+| `src/components` | `ui/` kit, `site/` header/footer/cards/map/search, `salon/`, `booking/`, `account/` |
+| `messages/ru.json` | all UI strings (Turkmen comes as `tk.json`) |
+| `public/photos` | stock photos (Unsplash/Pexels licence, see `manifest.json`) |
 
-## Learn More
+Data lives in the browser (`localStorage`, key `yeral-web-v1`). Profile → «Сбросить демо-данные» restores the seed.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy to Cloudflare
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npx wrangler login            # once, opens the browser
+pnpm run deploy               # opennextjs-cloudflare build + deploy → yeral-web.<account>.workers.dev
+pnpm run preview              # the same Worker locally (http://localhost:8787)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Custom domain: Cloudflare dashboard → Workers & Pages → `yeral-web` → Settings → Domains & Routes → add `yeral.app`
+(the domain has to be a zone in the same Cloudflare account).
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`next` is pinned to **16.3.8**: 16.4.0 builds but fails at runtime on Workers with the current OpenNext adapter
+(`Unexpected loadManifest(preview-props.json)`). Re-check when `@opennextjs/cloudflare` updates.

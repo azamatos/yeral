@@ -1,26 +1,178 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Yeral Design System v2 (design/Yeral Design System v2.dc.html) as Tailwind tokens.
+ * White base, 1px dividers instead of shadows, one violet accent, graphite text.
+ */
+@theme {
+  --color-ink: #101014;
+  --color-ink-hover: #2a2a31;
+  --color-ink-2: #5a5a64;
+  --color-ink-3: #6e6e78;
+  --color-ink-4: #b0b0b8;
+  --color-line: #e6e6ea;
+  --color-line-2: #d8d8de;
+  --color-row: #eeeef1;
+  --color-group: #f4f4f6;
+  --color-group-2: #f6f6f8;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-acc: #5a3ff0;
+  --color-acc-hover: #4a30d8;
+  --color-acc-ink: #4429d6;
+  --color-acc-tint: #efecfe;
+  --color-acc-line: #d5cbfb;
+  --color-acc-200: #c3b6fb;
+  --color-acc-300: #9d88f7;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-amber: #dc8b0b;
+  --color-amber-tint: #fef6e7;
+  --color-amber-line: #f2ddb0;
+  --color-amber-ink: #93500a;
+  --color-green: #12a366;
+  --color-green-tint: #e7f8ee;
+  --color-green-line: #bfe6d1;
+  --color-green-ink: #066a41;
+  --color-red: #d9412f;
+  --color-red-tint: #fdeceb;
+  --color-red-line: #f6c9c4;
+  --color-red-ink: #a8281c;
+  --color-slate-tint: #eef1f6;
+  --color-slate-line: #d3dbe6;
+  --color-slate-ink: #41505f;
+  --color-slate-dot: #7b8ea3;
+
+  --radius-input: 12px;
+  --radius-btn: 12px;
+  --radius-card: 16px;
+  --radius-sheet: 22px;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+
+  --shadow-pop: 0 12px 40px rgb(16 16 20 / 0.14), 0 0 0 1px rgb(16 16 20 / 0.04);
+  --shadow-sheet: 0 -8px 24px rgb(0 0 0 / 0.16);
+  --shadow-btn: inset 0 1px 0 rgb(255 255 255 / 0.22), 0 1px 2px rgb(68 41 214 / 0.28);
+
+  --animate-fade-in: fade-in 0.2s ease;
+  --animate-pop-in: pop-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-sheet-in: sheet-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-skel: skel 1.4s ease infinite;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+  }
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  }
+  @keyframes sheet-in {
+    from { transform: translateY(100%); }
+  }
+  @keyframes skel {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  :root {
+    color-scheme: light;
+    --grad: linear-gradient(180deg, #8265ff, #5a3ff0);
+    --grad-hover: linear-gradient(180deg, #7458fb, #4a30d8);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: #fff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-acc);
+    outline-offset: 2px;
+  }
+  svg {
+    flex: none;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility hatch {
+  background: repeating-linear-gradient(135deg, #f4f4f6 0 6px, #fff 6px 12px);
+}
+
+/* map markers & popups (MapLibre, plain DOM) */
+.yeral-pin {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+.yeral-pin span {
+  display: inline-flex;
+  height: 28px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #101014;
+  color: #fff;
+  font: 600 13px/1 var(--font-sans);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.22);
+  white-space: nowrap;
+  transition: transform 0.12s, background 0.12s;
+}
+.yeral-pin.on span,
+.yeral-pin:hover span {
+  background: #5a3ff0;
+  transform: scale(1.12);
+}
+.yeral-pin.on {
+  z-index: 2;
+}
+.maplibregl-popup-content {
+  padding: 0 !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-pop) !important;
+}
+.yeral-pop {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: #101014;
+  text-decoration: none;
+  font: 14px/1.35 var(--font-sans);
+  padding-bottom: 10px;
+}
+.yeral-pop img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  margin-bottom: 6px;
+}
+.yeral-pop b,
+.yeral-pop span {
+  padding: 0 12px;
+}
+.yeral-pop span {
+  color: #5a5a64;
+  font-size: 13px;
 }

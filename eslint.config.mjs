@@ -12,7 +12,15 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "public/vendor/**",
+    ".open-next/**",
   ]),
+  {
+    rules: {
+      // images are served as-is in the mock phase (no optimizer on Workers yet)
+      "@next/next/no-img-element": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
