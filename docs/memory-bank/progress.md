@@ -22,7 +22,9 @@
   Releases `@yeral/legacy@0.1.1`, `@yeral/config@0.0.1` → CI deployed yeral.app → smoke check green. Repo
   settings: labels (`lane:*`, `status:*`, `type:*`), Actions may open PRs, `main` protected.
 
-- **2026-10-14 · M1 design system** (branch `feat/m1-design-system`): `@yeral/ui` from web DS v0.3.1 — theme
+- **2026-10-14 · Neon** linked and verified: project Yeral in Frankfurt, Postgres 18, `neon.ts` in the repo, local env
+  via `neon env pull`; driver decision updated to node-postgres via Hyperdrive (ADR 0005 revision).
+- **2026-10-14 · M1 design system** (PR #6, released `@yeral/ui@0.1.0`, live at storybook.yeral.app): `@yeral/ui` from web DS v0.3.1 — theme
   (`styles/theme.css`, every `docs/design/tokens.css` value under a Tailwind name, default palette switched off, a
   96-case sync test), self-hosted Onest, `cn()`, brand assets + `Logo`, `UIProvider` (Lucide stroke 1.75), and
   components: Button (7 variants × 3 sizes, icon-only, loading), Field, Input, Textarea, PhoneInput (+993), Select,

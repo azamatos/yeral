@@ -36,3 +36,4 @@ apps/legacy/public/vendor/
 *.pem
 *.log
 .vercel
+.neon

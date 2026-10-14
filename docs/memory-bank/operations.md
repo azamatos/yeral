@@ -37,6 +37,18 @@ $5/month; Neon, R2 (10 GB), Sentry and Cloudflare Web Analytics on free tiers. *
 **Owner's one-time steps** (when the milestone needs them): Neon account (M2), Cloudflare API token for CI (M0),
 Workers Paid when limits are hit, Access policy for `cms.` (M6).
 
+## Database: Neon (while on Cloudflare)
+
+- Project **Yeral** (`summer-mountain-55668852`), region `aws-eu-central-1` (Frankfurt), Postgres 18, org
+  `org-solitary-credit-03680071`; linked to this repo by `.neon` (gitignored) and described by `neon.ts` (committed).
+- Branch `production` today; `stage` and per-PR branches come with M2 (`neon checkout <name> --create` applies `neon.ts`).
+- Local env: `npx neon@latest env pull` (or `neon deploy`) writes `.env.local` (gitignored): `DATABASE_URL` (pooled,
+  `-pooler` host — app traffic), `DATABASE_URL_UNPOOLED` (direct — migrations, `pg_dump`, `LISTEN/NOTIFY`), `NEON_BRANCH`.
+- Sign-in: the owner's `npx neon@latest login` on this machine (OAuth); agents use that session, never a pasted key.
+- Verified 2026-10-14: SSL connection over both URLs, write/read round trip with node-postgres, extensions `btree_gist`,
+  `pg_trgm`, `cube`, `earthdistance` available.
+- `neon init` also installed Neon plugins/skills/MCP settings into the owner's AI tools (user scope).
+
 ## Hosting later: own server with Docker + nginx
 
 One VPS to start (≈4 vCPU, 8 GB RAM, 100 GB SSD), everything in Docker Compose (`infra/docker/compose.yml`):

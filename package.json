@@ -29,6 +29,8 @@
     "@changesets/cli": "catalog:",
     "@commitlint/cli": "catalog:",
     "@commitlint/config-conventional": "catalog:",
+    "@neon/config": "catalog:",
+    "@neon/env": "catalog:",
     "@turbo/gen": "catalog:",
     "@yeral/config": "workspace:*",
     "lefthook": "catalog:",
