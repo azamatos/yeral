@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Biznes · app shell</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f4f6}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.dev{font-size:13px;line-height:18px;color:#5a5a64;max-width:560px}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6}
+.b-ico{width:40px;height:40px;padding:0;min-width:0}
+.b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.shell{display:flex;background:#ffffff;border:1px solid #d8d8de;border-radius:16px;overflow:hidden;color:#101014}
+.side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
+.swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
+.swb:hover{background:#f4f4f6}
+.sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014}
+.sn:hover{background:#f4f4f6;color:#101014}
+.sn.on{background:#efecfe;color:#4429d6;font-weight:600}
+.sn.off{color:#6e6e78;cursor:default}
+.sn.off:hover{background:transparent;color:#6e6e78}
+.cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
+.gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
+.kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
+.pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
+.mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
+.mi:hover{background:#f4f4f6;color:#101014}
+.av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+</style>
+</helmet>
+<div style="width: 1600px; min-height: 2140px; padding: 64px 80px; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; color: #101014; display: flex; flex-direction: column; gap: 40px">
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span class="lbl">business.yeral.app · app shell</span>
+<h1 style="margin: 0; font-size: 44px; line-height: 48px; font-weight: 700; letter-spacing: -0.03em">Ýeral Biznes — workspace shell</h1>
+<p class="dev" style="max-width: 900px; font-size: 15px; line-height: 22px">Every business screen sits in this shell: sidebar 248 (business switcher, 5 sections, help, user), top bar 64 (title, global search ⌘K, one primary action), content padded 32. Copy this markup for every business artboard. Desktop-first ≥1024; tablet 768–1023 → 72 px icon rail; under 768 → one-staff calendar + app banner.</p>
+</div>
+
+<div class="shell" style="height: 860px">
+<aside class="side" aria-label="Esasy menýu">
+<button class="swb" aria-label="Biznesi çalyş"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bitarap Türkmenistan şaýoly</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
+<span class="sn off" aria-disabled="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar<span class="soon">ýakynda</span></span>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<div style="flex: 1"></div>
+<a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<button class="swb" aria-label="Hasabym"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+</aside>
+<div class="main">
+<div class="top">
+<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Senenama</h1>
+<div style="flex: 1"></div>
+<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
+<a class="b b-pri b-sm" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täze ýazylyş</a>
+</div>
+<div style="flex: 1; padding: 32px; display: flex">
+<div style="flex: 1; border: 1.5px dashed #d8d8de; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px"><span style="font-size: 15px; font-weight: 600; color: #5a5a64">Page content</span><span class="cap">padding 32 · tables and calendar use full width · forms max 720</span></div>
+</div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: 300px 300px 1fr; gap: 40px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="lbl">Business switcher · popover</span>
+<div class="pop" style="width: 300px" role="menu">
+<div style="padding: 8px 10px 6px" class="lbl">Biznesleriňiz</div>
+<a class="mi" href="#" role="menuitemradio" aria-checked="true" style="background: #efecfe"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 28px; height: 28px; border-radius: 8px"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-weight: 600">Glow Studio</span><span class="cap" style="font-size: 12px">Bitarap Türkmenistan şaýoly</span></span><span class="cnt">5</span></a>
+<a class="mi" href="#" role="menuitemradio" aria-checked="false"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 28px; height: 28px; border-radius: 8px"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-weight: 600">Glow Studio · Parahat</span><span class="cap" style="font-size: 12px">Parahat 7</span></span><span class="cnt">2</span></a>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
+<a class="mi" href="B-Onboarding.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Şahamça goş</a>
+</div>
+<span class="cap">Switching changes the whole workspace. Badges = unanswered requests in that branch.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="lbl">User menu · popover</span>
+<div class="pop" style="width: 300px" role="menu">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">M</span><span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">+993 65 10 20 30 · Eýesi</span></span></div>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
+<a class="mi" href="#">Profilim</a>
+<a class="mi" href="#">Dil: Türkmençe</a>
+<a class="mi" href="#">Müşderi hökmünde aç · yeral.app</a>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
+<a class="mi" href="#">Çykmak</a>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="lbl">Tablet 768–1023 · icon rail 72</span>
+<div class="shell" style="height: 300px; width: 560px">
+<div style="width: 72px; flex: none; border-right: 1px solid #e6e6ea; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 0">
+<img src="../../assets/brand/yeral-icon.png" alt="Glow Studio" style="width: 36px; height: 36px; border-radius: 10px; margin-bottom: 8px">
+<a class="sn on" href="#" aria-label="Senenama" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></a>
+<a class="sn" href="#" aria-label="Ýazylyşlar, 5 haýyş" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #dc8b0b"></span></a>
+<a class="sn" href="#" aria-label="Müşderiler" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></a>
+<a class="sn" href="#" aria-label="Sazlamalar" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></a>
+</div>
+<div style="flex: 1; display: flex; flex-direction: column"><div style="height: 56px; border-bottom: 1px solid #e6e6ea; display: flex; align-items: center; padding: 0 20px; gap: 12px"><span style="font-size: 19px; font-weight: 700">Senenama</span><div style="flex: 1"></div><a class="b b-pri b-sm b-ico" href="#" aria-label="Täze ýazylyş" style="width: 36px; height: 36px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></a></div><div style="flex: 1; margin: 20px; border: 1.5px dashed #d8d8de; border-radius: 12px"></div></div>
+</div>
+<span class="cap">Rail tooltips on hover; switcher and user menu open from the logo and an avatar at the rail bottom. Under 768 px: one-staff day calendar + banner “Telefonda Ýeral Biznes programmasy has amatly” with App Store / Google Play.</span>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px; background: #ffffff; border-radius: 16px; border: 1px solid #e6e6ea"><span class="lbl">Request toast · new booking arrives</span>
+<div role="status" style="display: flex; align-items: center; gap: 12px; padding: 12px 8px 12px 16px; border-radius: 12px; background: #101014; color: #ffffff; box-shadow: 0 8px 24px rgba(16,16,20,.16); font-size: 14px"><span style="width: 8px; height: 8px; border-radius: 999px; background: #dc8b0b; flex: none"></span><span style="flex: 1">Täze haýyş: Ejegyz T. · Aýna · şu gün 15:30</span><a class="b b-sm" href="#" style="background: transparent; color: #c3b6fb; min-width: 0">Aç</a></div>
+<span class="cap">Bottom-left, 6 s, soft sound. Browser notification when the tab is in the background (ask permission once, from Settings).</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px; background: #ffffff; border-radius: 16px; border: 1px solid #e6e6ea"><span class="lbl">Verification banner · new business</span>
+<div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: #fef6e7; border: 1px solid #f2ddb0; color: #93500a; font-size: 14px; line-height: 20px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span><b>Profilyňyz barlagda.</b> Ýeral topary 24 sagadyň içinde barlar — şondan soň gözlegde görünersiňiz. Senenamany häzirden ulanyp bilersiňiz.</span></div>
+<span class="cap">Sits above page content until verified (CMS moderation). Dismiss not allowed.</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px; background: #ffffff; border-radius: 16px; border: 1px solid #e6e6ea"><span class="lbl">Permissions in the shell</span>
+<span class="cap">Hidden, not disabled, when a role lacks access: revenue figures, Sazlamalar sections the role can't edit, other staff details (shown as “Bes”). “Hasabatlar” shows “ýakynda” for everyone this round.</span></div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":2140}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

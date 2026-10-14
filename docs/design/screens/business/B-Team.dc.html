@@ -1,0 +1,1322 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Biznes · Topar we roller</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6}
+.b-ico{width:40px;height:40px;padding:0;min-width:0}
+.b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
+.swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
+.swb:hover{background:#f4f4f6}
+.sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014}
+.sn:hover{background:#f4f4f6;color:#101014}
+.sn.on{background:#efecfe;color:#4429d6;font-weight:600}
+.sn.off{color:#6e6e78;cursor:default}
+.sn.off:hover{background:transparent;color:#6e6e78}
+.cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
+.gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
+.kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
+.pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
+.mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
+.mi:hover{background:#f4f4f6;color:#101014}
+.av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.app>.side{position:sticky;top:0;height:100vh;overflow-y:auto;z-index:20}
+.b-red{background:#b42318;color:#ffffff}
+.b-red:hover{background:#912018;color:#ffffff}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed}
+button.sn{border:0;background:transparent;font-family:inherit;width:100%;cursor:pointer;text-align:left}
+button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:pointer;text-align:left}
+.mi.dan{color:#a3251b}
+.mi.dan:hover{background:#fee4e2;color:#a3251b}
+.mi:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #7a5ff4}
+.sbody{flex:1;display:flex;gap:40px;align-items:flex-start;padding:32px 32px 64px}
+.snav{width:240px;flex:none;position:sticky;top:24px;display:flex;flex-direction:column;gap:2px}
+.snav .sn{white-space:nowrap}
+.sdv{height:1px;background:#e6e6ea;margin:8px 4px}
+.pane{flex:1;min-width:0;display:flex;flex-direction:column;gap:24px}
+.phd{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.pt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.pha{display:flex;gap:8px;flex-wrap:wrap}
+.tin{min-width:820px}
+.trow{position:relative;display:grid;grid-template-columns:28px minmax(200px,1.4fr) 128px 96px minmax(140px,1fr) 128px 40px;align-items:center;column-gap:12px;min-height:64px;padding:8px;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.trow:hover{background:#f6f6f8}
+.trow.sel{background:#efecfe}
+.trow.dim{color:#6e6e78}
+.trow.dim .av{background:#f0f0f3;color:#6e6e78}
+.trow.th{min-height:40px;padding-top:0;padding-bottom:0;border-top:1px solid #e6e6ea}
+.trow.th:hover{background:transparent}
+.tsec{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:20px 8px 8px;border-bottom:1px solid #e6e6ea}
+.tsec .lbl{color:#101014}
+.hdl{position:relative;z-index:1;width:28px;height:36px;padding:0;border:0;border-radius:8px;background:transparent;color:#6e6e78;cursor:grab;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.hdl:hover{background:#f0f0f3;color:#101014}
+.hdl:focus-visible,.rm:focus-visible,.sw:focus-visible,.lnk:focus-visible,.lnkd:focus-visible,.tab:focus-visible,.opt:focus-visible,.rr:focus-visible,.cka:focus-visible,.sumr:focus-visible,.stp:focus-visible,.rli-b:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.pcell{display:flex;align-items:center;gap:12px;min-width:0}
+.pnm{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rbtn{align-self:flex-start;padding:0;border:0;background:none;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;color:inherit;cursor:pointer;text-align:left}
+.rbtn::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0}
+.rbtn:focus-visible{outline:none}
+.rbtn:focus-visible::after{box-shadow:inset 0 0 0 2px #7a5ff4}
+.cell{display:flex;flex-direction:column;min-width:0}
+.rpill{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:#f4f4f6;border:1px solid #e6e6ea;font-size:13px;font-weight:600;color:#101014;white-space:nowrap;justify-self:start}
+.stt{display:inline-flex;align-items:center;gap:8px;font-size:14px;line-height:20px;font-weight:600;white-space:nowrap}
+.st-on{color:#066a41}
+.st-inv{color:#93500a}
+.st-neu{color:#41505f}
+.dot{width:8px;height:8px;border-radius:999px;flex:none}
+.d-d{background:#12a366}.d-p{background:#dc8b0b}.d-x{background:#7b8ea3}
+.rmw{position:relative;display:flex;justify-content:flex-end}
+.rm{position:relative;z-index:1;width:36px;height:36px;border-radius:10px}
+.pm-pop{position:absolute;right:0;top:40px;width:240px;z-index:31;display:flex;flex-direction:column}
+.catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
+.lnk{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0;border:0;background:transparent;font-family:inherit;font-size:14px;font-weight:600;color:#4429d6;cursor:pointer;white-space:nowrap;border-radius:4px}
+.lnk:hover{color:#3520a6;text-decoration:underline}
+.lnkd{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 6px;margin-left:-6px;border:0;border-radius:10px;background:transparent;font-family:inherit;font-size:14px;font-weight:600;color:#a3251b;cursor:pointer;white-space:nowrap}
+.lnkd:hover{background:#fee4e2}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.opn{font-weight:400;color:#5a5a64}
+.inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp::placeholder{color:#6e6e78}
+.inp:hover{border-color:#b0b0b8}
+.inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.inp:disabled{background:#f6f6f8;border-color:#e6e6ea;color:#6e6e78}
+.inp.ro{background:#f6f6f8;border-color:#e6e6ea}
+.selw{position:relative;min-width:0}
+.sel{appearance:none;-webkit-appearance:none;padding-right:40px;cursor:pointer}
+.selw svg{position:absolute;right:14px;top:14px;pointer-events:none;color:#5a5a64}
+.inp.sm{height:40px;font-size:14px;padding:0 30px 0 12px;font-variant-numeric:tabular-nums}
+.selw.sm svg{top:10px;right:8px}
+.pfx{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;flex:none}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.h3s{margin:0;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.ntl{font-size:15px;line-height:22px;font-weight:600}
+.ckt{display:flex;flex-direction:column;min-width:0;flex:1}
+.ckn{font-size:14px;line-height:20px;font-weight:600;color:#101014}
+.ckr{display:flex;align-items:center;gap:12px;min-height:48px;padding:6px 8px;margin:0 -8px;border-radius:10px;cursor:pointer}
+.ckr:hover{background:#f6f6f8}
+.ckr input{width:18px;height:18px;accent-color:#5a3ff0;margin:0;flex:none;cursor:pointer}
+.sgrp{display:flex;flex-direction:column;padding-bottom:8px;border-bottom:1px solid #e6e6ea}
+.sgh{display:flex;align-items:center;gap:8px;min-height:48px}
+.sgn{font-size:14px;line-height:20px;font-weight:700}
+.cka{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 10px;margin-right:-10px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:#101014;cursor:pointer}
+.cka:hover{background:#f4f4f6}
+.ckb{width:18px;height:18px;border-radius:4px;border:1.5px solid #6e6e78;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;color:#ffffff;flex:none}
+.ckb.on,.ckb.mix{background:#5a3ff0;border-color:#5a3ff0}
+.opt{display:flex;align-items:flex-start;gap:12px;width:100%;padding:14px 16px;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff;font-family:inherit;color:#101014;text-align:left;cursor:pointer}
+.opt:hover{background:#f6f6f8}
+.opt.on,.opt.on:hover{background:#efecfe;border-color:#d5cbfb}
+.opt:disabled{cursor:not-allowed}
+.opt:disabled:not(.on),.opt:disabled:not(.on):hover{background:#f6f6f8;color:#6e6e78}
+.rad{width:20px;height:20px;border-radius:999px;border:1.5px solid #6e6e78;background:#ffffff;flex:none;margin-top:1px}
+.opt.on .rad,.rr.on .rad{border:6px solid #5a3ff0}
+.opt:disabled:not(.on) .rad{border-color:#d8d8de;background:#f6f6f8}
+.optl{display:flex;flex-direction:column;gap:8px}
+.rr{display:flex;align-items:flex-start;gap:12px;width:100%;min-height:44px;padding:10px 8px;border:0;border-radius:10px;background:transparent;font-family:inherit;font-size:14px;line-height:20px;color:#101014;text-align:left;cursor:pointer}
+.rr:hover{background:#fdf0d5}
+.cbox{display:flex;flex-direction:column;gap:6px;padding:14px 14px 10px 16px;border-radius:12px;background:#fef6e7;border:1px solid #f2ddb0}
+.cft{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:20px;font-weight:600;color:#93500a}
+.cft svg{flex:none;margin-top:1px}
+.dayr{display:grid;grid-template-columns:52px 92px minmax(0,1fr);align-items:center;gap:8px;min-height:52px;border-bottom:1px solid #e6e6ea}
+.dnm{font-size:14px;line-height:20px;font-weight:600}
+.dtm{display:grid;grid-template-columns:minmax(0,1fr) 12px minmax(0,1fr);align-items:center;gap:6px}
+.dro{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px;font-variant-numeric:tabular-nums}
+.dro span:first-child{font-weight:600}
+.exr{display:flex;align-items:center;gap:12px;min-height:60px;padding:6px 0;border-bottom:1px solid #e6e6ea}
+.exi{width:36px;height:36px;border-radius:10px;background:#f4f4f6;color:#5a5a64;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.pbox{display:flex;flex-direction:column;gap:14px;padding:16px;border:1px solid #e6e6ea;border-radius:12px}
+.pact{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.dbox{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;background:#f4f4f6;font-size:14px;line-height:20px;color:#101014}
+.rdesc{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:#f4f4f6;font-size:13px;line-height:18px;color:#5a5a64}
+.rdesc svg{flex:none;margin-top:1px}
+.sw{width:52px;height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;flex:none;position:relative;z-index:1}
+.sw:disabled{cursor:not-allowed}
+.sw:disabled .trk{opacity:.45}
+.trk{position:relative;width:40px;height:24px;border-radius:999px;background:#e6e6ea;box-shadow:inset 0 0 0 1.5px #6e6e78;transition:background .15s}
+.sw.on .trk{background:#5a3ff0;box-shadow:none}
+.knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:999px;background:#ffffff;box-shadow:0 1px 2px rgba(16,16,20,.2);transition:left .15s}
+.sw.on .knob{left:18px}
+.dsep{height:1px;background:#e6e6ea;flex:none}
+.scrim{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:40}
+.drw{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:100%;display:flex;flex-direction:column;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);z-index:41}
+.grab{display:none;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:8px auto 0;flex:none}
+.drw-h{display:flex;align-items:center;gap:14px;padding:18px 20px 16px 24px;flex:none}
+.av48{width:48px;height:48px;font-size:19px}
+.dt{margin:0;font-size:19px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.dtabs{display:flex;gap:24px;padding:0 24px;border-bottom:1px solid #e6e6ea;flex:none;overflow-x:auto}
+.tab{display:inline-flex;align-items:center;height:44px;padding:0 2px;border:0;border-bottom:2px solid transparent;background:none;font-family:inherit;font-size:15px;font-weight:500;color:#5a5a64;cursor:pointer;white-space:nowrap;margin-bottom:-1px}
+.tab:hover{color:#101014}
+.tab.on{color:#101014;font-weight:600;border-bottom-color:#5a3ff0}
+.drw-b{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:24px}
+.drw-f{flex:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 24px;border-top:1px solid #e6e6ea;background:#ffffff}
+.mwrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
+.mwrap .scrim{position:absolute;z-index:0}
+.mdl{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;max-width:100%;max-height:100%;overflow-y:auto;padding:24px;border-radius:16px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.mdl-s{width:480px}
+.mdl-m{width:560px}
+.mhd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.mt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.mp{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
+.mact{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.stps{display:flex;align-items:center;gap:10px;flex-wrap:wrap;list-style:none;margin:0;padding:0 0 16px;border-bottom:1px solid #e6e6ea}
+.stps li{display:flex;align-items:center;gap:10px}
+.stsep{width:20px;height:1px;background:#d8d8de;flex:none}
+.stp{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 6px 0 2px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:14px;line-height:18px;font-weight:500;color:#6e6e78;white-space:nowrap;cursor:default}
+.stp.done{color:#101014;cursor:pointer}
+.stp.done:hover .stl{text-decoration:underline}
+.stp.cur{color:#101014;font-weight:600}
+.stp:disabled:not(.cur){color:#6e6e78}
+.stn{width:24px;height:24px;border-radius:999px;border:1px solid #d8d8de;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#6e6e78;flex:none}
+.stp.cur .stn{background:#101014;border-color:#101014;color:#ffffff}
+.stp.done .stn{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.sumr{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:12px;align-items:start;width:100%;padding:12px 8px;border:0;border-bottom:1px solid #e6e6ea;border-radius:0;background:transparent;font-family:inherit;font-size:14px;line-height:20px;color:#101014;text-align:left;cursor:pointer}
+.sumr:hover{background:#f6f6f8}
+.sk{color:#5a5a64}
+.sv{font-weight:600;min-width:0}
+.se{font-size:13px;font-weight:600;color:#4429d6}
+.rgrid{display:grid;grid-template-columns:280px minmax(0,1fr);gap:32px;align-items:start}
+.rlist{display:flex;flex-direction:column;gap:8px}
+.rli-b{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff;font-family:inherit;color:#101014;text-align:left;cursor:pointer}
+.rli-b:hover{background:#f6f6f8}
+.rli-b.on,.rli-b.on:hover{background:#efecfe;border-color:#d5cbfb}
+.rln{display:inline-flex;align-items:center;gap:6px;font-size:15px;line-height:20px;font-weight:600}
+.rlc{margin-left:auto;font-size:13px;line-height:18px;font-weight:600;color:#5a5a64;white-space:nowrap;align-self:flex-start;padding-top:1px}
+.redit{display:flex;flex-direction:column;gap:24px;min-width:0}
+.prw{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:6px 0;border-bottom:1px solid #e6e6ea}
+.lockb{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:#f4f4f6;font-size:14px;line-height:20px;color:#101014}
+.lockb svg{flex:none;margin-top:1px}
+.avs{display:flex;flex:none}
+.avs .av{box-shadow:0 0 0 2px #ffffff}
+.avs .av+.av{margin-left:-8px}
+.toast{position:fixed;left:272px;bottom:24px;z-index:80;display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 16px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:15px;line-height:20px;max-width:calc(100% - 296px)}
+@media (min-width:1280px){.dsc{display:none}}
+@media (min-width:1024px){.tbx{overflow:visible}}
+@media (max-width:1023px){
+.app>.side{width:72px;padding:12px 14px;align-items:center}
+.side .swb{width:44px;justify-content:center;padding:4px}
+.side .swb>span:not(.av),.side .swb>svg{display:none}
+.side>div{align-self:stretch}
+.side .sn{position:relative;width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0}
+.side .sn .cnt{position:absolute;top:6px;right:6px;min-width:0;width:8px;height:8px;padding:0;border:0;background:#dc8b0b;font-size:0}
+.side .soon{display:none}
+.top{padding:0 24px}
+.gs{width:300px}
+.sbody{flex-direction:column;align-items:stretch;gap:20px;padding:24px 24px 48px}
+.snav{position:static;width:auto;flex-direction:row;gap:8px;overflow-x:auto;margin:0 -24px;padding:0 24px 4px}
+.snav .sn{flex:none;width:auto;height:44px;padding:0 16px;gap:8px;border:1px solid #d8d8de;border-radius:999px}
+.snav .sn.on{border-color:#d5cbfb}
+.snav .sn.off,.snav .sdv{display:none}
+.tbx{overflow-x:auto;margin:0 -24px;padding:0 24px}
+.rgrid{grid-template-columns:minmax(0,1fr);gap:24px}
+.toast{left:96px;max-width:calc(100% - 120px)}
+}
+@media (max-width:767px){
+.app{flex-direction:column}
+.app>.side{position:sticky;top:0;z-index:20;width:100%;height:auto;flex-direction:row;align-items:center;gap:4px;padding:6px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow-x:auto}
+.side>div,.side a[href="#"]{display:none}
+.side .swb,.side .sn{flex:none}
+.top{height:56px;padding:0 16px}
+.gs{display:none}
+.sbody{padding:16px 16px 40px}
+.snav{margin:0 -16px;padding:0 16px 4px}
+.tbx{margin:0 -16px;padding:0 16px}
+.b-sm{height:44px;border-radius:12px}
+.pha{width:100%}
+.pha .b{flex:1 1 auto}
+.g2{grid-template-columns:minmax(0,1fr)}
+.drw{top:auto;left:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}
+.grab{display:block}
+.drw-h{padding:12px 16px 12px}
+.dtabs{padding:0 16px;gap:20px}
+.drw-b{padding:20px 16px}
+.drw-f{padding:12px 16px 16px}
+.drw-f .b{flex:1 1 auto}
+.mwrap{align-items:flex-end;padding:0}
+.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}
+.mdl .grab{display:block;margin:0 auto}
+.mact .b{flex:1 1 auto}
+.stl{display:none}
+.stp.cur .stl{display:inline}
+.toast{left:16px;right:16px;bottom:16px;max-width:none}
+}
+</style>
+</helmet>
+<div class="app" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<aside class="side" aria-label="Esasy menýu">
+<button class="swb" aria-label="Biznesi çalyş"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bitarap Türkmenistan şaýoly</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<a class="sn" href="B-Calendar.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
+<span class="sn off" aria-disabled="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar<span class="soon">ýakynda</span></span>
+<a class="sn on" href="B-Settings.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<div style="flex: 1"></div>
+<a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<button class="swb" aria-label="Hasabym"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+</aside>
+
+<div class="main">
+<div class="top">
+<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Sazlamalar</h1>
+<div style="flex: 1"></div>
+<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
+</div>
+
+<div class="sbody">
+<nav class="snav" aria-label="Sazlamalar bölümleri">
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"></path><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"></path><path d="M2 7h20"></path><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"></path></svg>Biznes profili</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg>Ýazylyş düzgünleri</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Iş wagty</a>
+<a class="sn" href="B-Services.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path><path d="M7 7h.01"></path></svg>Hyzmatlar</a>
+<button class="{{navTeamCls}}" aria-current="{{navTeamCur}}" onClick="{{toTeam}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>Topar</button>
+<button class="{{navRolesCls}}" aria-current="{{navRolesCur}}" onClick="{{toRoles}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Roller</button>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"></rect><rect width="5" height="5" x="16" y="3" rx="1"></rect><rect width="5" height="5" x="3" y="16" rx="1"></rect><path d="M21 16h-3a2 2 0 0 0-2 2v3"></path><path d="M21 21v.01"></path><path d="M12 7v3a2 2 0 0 1-2 2H7"></path><path d="M3 12h.01"></path><path d="M12 3h.01"></path><path d="M12 16v.01"></path><path d="M16 12h1"></path><path d="M21 12v.01"></path><path d="M12 21v-1"></path></svg>Salgy we QR</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg>Şahamçalar</a>
+<div class="sdv"></div>
+<span class="sn off" aria-disabled="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>Habarnamalar<span class="soon">ýakynda</span></span>
+<span class="sn off" aria-disabled="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"></rect><path d="M2 10h20"></path></svg>Töleg we tarif<span class="soon">ýakynda</span></span>
+<span class="sn off" aria-disabled="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek<span class="soon">ýakynda</span></span>
+</nav>
+
+<section class="pane" aria-labelledby="pane-t">
+
+<sc-if value="{{isTeam}}" hint-placeholder-val="{{true}}">
+<div class="phd">
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<h2 id="pane-t" class="pt">Topar</h2>
+<p class="cap" style="margin: 0">Müşderiler hünärmenleri şu tertipde görýär</p>
+</div>
+<div class="pha">
+<button class="b b-pri b-sm" aria-haspopup="dialog" onClick="{{openInvite}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Işgär çagyr</button>
+</div>
+</div>
+
+<div class="tbx">
+<div class="tin">
+<div class="trow th" aria-hidden="true"><span></span><span class="lbl">Işgär</span><span class="lbl">Rol</span><span class="lbl">Hyzmatlar</span><span class="lbl">Iş wagty</span><span class="lbl">Ýagdaý</span><span></span></div>
+<sc-for list="{{sections}}" as="sec" hint-placeholder-count="2">
+<div role="group" aria-label="{{sec.title}}">
+<div class="tsec"><span class="lbl">{{sec.title}}</span><span class="cap">{{sec.sub}}</span></div>
+<sc-for list="{{sec.rows}}" as="m" hint-placeholder-count="4">
+<div class="{{m.cls}}">
+<sc-if value="{{m.drag}}" hint-placeholder-val="{{true}}"><button class="hdl" aria-label="{{m.dragLabel}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button></sc-if>
+<sc-if value="{{m.noDrag}}" hint-placeholder-val="{{false}}"><span></span></sc-if>
+<div class="pcell"><span class="av" aria-hidden="true">{{m.ini}}</span><span class="pnm"><button class="rbtn" aria-haspopup="dialog" onClick="{{m.open}}">{{m.full}}</button><span class="cap">{{m.sub}}</span></span></div>
+<div><span class="rpill">{{m.roleName}}</span></div>
+<div class="cell"><span>{{m.svcText}}</span></div>
+<div class="cell"><span>{{m.schedMain}}</span><sc-if value="{{m.hasSchedSub}}" hint-placeholder-val="{{false}}"><span class="cap" style="font-variant-numeric: tabular-nums">{{m.schedSub}}</span></sc-if></div>
+<div class="cell"><span class="{{m.stCls}}"><span class="{{m.dotCls}}" aria-hidden="true"></span>{{m.stText}}</span><sc-if value="{{m.hasStSub}}" hint-placeholder-val="{{false}}"><span class="cap" style="padding-left: 16px">{{m.stSub}}</span></sc-if></div>
+<div class="rmw">
+<button class="b b-gho b-ico rm" aria-label="{{m.menuLabel}}" aria-haspopup="menu" aria-expanded="{{m.menuOpen}}" onClick="{{m.toggleMenu}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></button>
+<sc-if value="{{m.menuOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop pm-pop" role="menu" aria-label="{{m.menuLabel}}">
+<sc-for list="{{m.menu}}" as="it" hint-placeholder-count="3">
+<sc-if value="{{it.sep}}" hint-placeholder-val="{{false}}"><div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div></sc-if>
+<sc-if value="{{it.btn}}" hint-placeholder-val="{{true}}"><button class="{{it.cls}}" role="menuitem" onClick="{{it.act}}">{{it.t}}</button></sc-if>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+<p class="cap" style="margin: 0">Hünärmenleriň tertibini üýtgetmek üçin setiri çep tarapdaky belgiden tutup süýräň. Dolandyryş işgärleri müşderilere görünmeýär.</p>
+</sc-if>
+
+<sc-if value="{{isRoles}}" hint-placeholder-val="{{false}}">
+<div class="phd">
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<h2 id="pane-t" class="pt">Roller</h2>
+<p class="cap" style="margin: 0">Rol işgäriň näme görýändigini we näme edip bilýändigini kesgitleýär. Her işgäriň bir roly bar.</p>
+</div>
+</div>
+
+<div class="rgrid">
+<div class="rlist">
+<div class="rlist" role="tablist" aria-orientation="vertical" aria-label="Roller">
+<sc-for list="{{roleItems}}" as="r" hint-placeholder-count="4">
+<button class="{{r.cls}}" role="tab" aria-selected="{{r.on}}" onClick="{{r.pick}}">
+<span class="ckt"><span class="rln">{{r.name}}<sc-if value="{{r.lock}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="ulgam roly, üýtgedilmeýär"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></sc-if></span><span class="cap">{{r.cap}}</span></span>
+<span class="rlc">{{r.count}}</span>
+</button>
+</sc-for>
+</div>
+<button class="b b-gho b-sm" style="justify-content: flex-start; align-self: flex-start; padding: 0 12px" onClick="{{newRole}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Rol döret</button>
+</div>
+
+<div class="redit" role="tabpanel" aria-labelledby="re-t">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap"><h3 id="re-t" class="h3s">{{re.title}}</h3><span class="cap">{{re.countText}}</span></div>
+
+<sc-if value="{{re.locked}}" hint-placeholder-val="{{false}}"><div class="lockb"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>Eýesi hemme zady görýär we edýär. Bu rol üýtgedilmeýär — bir biznesde bir eýe bolýar.</span></div></sc-if>
+
+<div class="fld"><label class="flab" for="re-n">Ady</label>
+<input id="re-n" class="inp" style="max-width: 420px" value="{{re.name}}" onInput="{{onReName}}" disabled="{{re.locked}}" placeholder="mysal üçin: Kassir">
+<span class="cap">Bu ady diňe toparyňyz görýär; müşderä at we hünär görkezilýär.</span>
+</div>
+
+<sc-if value="{{re.isNoLogin}}" hint-placeholder-val="{{false}}"><div class="lockb"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Programmasyz işgär Ýeral Biznese girmeýär, şonuň üçin bu roluň hukugy ýok. Müşderiler oňa onlaýn ýazylyp bilýär; haýyşlaryny we ýazylyşlaryny eýesi we administrator alyp barýar.</span></div></sc-if>
+
+<sc-if value="{{re.canLogin}}" hint-placeholder-val="{{true}}">
+<div class="fld" style="gap: 10px">
+<span class="flab" id="re-v">Näme görýär</span>
+<div class="g2" role="radiogroup" aria-labelledby="re-v">
+<sc-for list="{{visOpts}}" as="o" hint-placeholder-count="2"><button class="{{o.cls}}" role="radio" aria-checked="{{o.on}}" disabled="{{o.dis}}" onClick="{{o.pick}}"><span class="rad" aria-hidden="true"></span><span class="ckt"><span class="ckn">{{o.t}}</span><span class="cap">{{o.c}}</span></span></button></sc-for>
+</div>
+</div>
+
+<div class="fld" style="gap: 2px">
+<span class="flab" id="re-p">Näme edip bilýär</span>
+<div role="group" aria-labelledby="re-p">
+<sc-for list="{{perms}}" as="p" hint-placeholder-count="8"><div class="prw"><span class="ckt"><span id="{{p.lid}}" class="ckn">{{p.t}}</span><span class="cap">{{p.c}}</span></span><button class="{{p.cls}}" role="switch" aria-checked="{{p.on}}" aria-labelledby="{{p.lid}}" disabled="{{p.dis}}" onClick="{{p.flip}}"><span class="trk"><span class="knob"></span></span></button></div></sc-for>
+</div>
+<span class="cap" style="padding-top: 10px">Roluň hukuklary — iň ýokary çäk: işgäriň habarnamalary we ekranlary şundan çykmaýar.</span>
+</div>
+</sc-if>
+
+<div class="dsep"></div>
+
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+<sc-if value="{{re.hasMembers}}" hint-placeholder-val="{{true}}"><span class="avs" aria-hidden="true"><sc-for list="{{re.avatars}}" as="a" hint-placeholder-count="3"><span class="av">{{a}}</span></sc-for></span></sc-if>
+<span style="font-size: 14px; line-height: 20px; flex: 1 1 240px">{{re.membersText}}</span>
+<button class="lnk" onClick="{{toTeam}}">Topara geç</button>
+</div>
+
+<sc-if value="{{re.editable}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; align-items: center; justify-content: flex-end; gap: 16px; flex-wrap: wrap">
+<sc-if value="{{re.dirty}}" hint-placeholder-val="{{false}}"><span class="cap">Ýatda saklanmadyk üýtgeşmeler bar</span></sc-if>
+<button class="b b-pri" disabled="{{re.cantSave}}" onClick="{{saveRole}}">Roly ýatda sakla</button>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+</section>
+</div>
+</div>
+
+<sc-if value="{{anyMenu}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeMenu}}"></div></sc-if>
+
+<sc-if value="{{drawerOpen}}" hint-placeholder-val="{{false}}">
+<div class="scrim dsc" onClick="{{closeDrawer}}"></div>
+<aside class="drw" role="dialog" aria-labelledby="sd-t" onKeyDown="{{drawerKey}}">
+<span class="grab"></span>
+<div class="drw-h">
+<span class="av av48" aria-hidden="true">{{sd.ini}}</span>
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1">
+<h2 id="sd-t" class="dt">{{sd.full}}</h2>
+<span class="cap">{{sd.sub}}</span>
+</div>
+<button class="b b-gho b-ico" aria-label="Ýap" onClick="{{closeDrawer}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div class="dtabs" role="tablist" aria-label="Işgär">
+<sc-for list="{{stabs}}" as="t" hint-placeholder-count="4"><button class="{{t.cls}}" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}">{{t.t}}</button></sc-for>
+</div>
+
+<div class="drw-b" role="tabpanel" aria-label="{{stabLabel}}">
+
+<sc-if value="{{tabInfo}}" hint-placeholder-val="{{false}}">
+<div class="fld"><label class="flab" for="sd-name">Müşderilere görkezilýän ady</label>
+<input id="sd-name" class="inp" value="{{sd.name}}" onInput="{{onSdName}}" placeholder="mysal üçin: Gülnar">
+<sc-if value="{{sd.isPro}}" hint-placeholder-val="{{true}}"><span class="cap">Müşderi görýär: <b style="color: #101014">{{sd.clientLine}}</b></span></sc-if>
+</div>
+<div class="fld"><label class="flab" for="sd-full">Doly ady <span class="opn">(hökman däl)</span></label>
+<input id="sd-full" class="inp" value="{{sd.fullVal}}" onInput="{{onSdFull}}" placeholder="Ady we familiýasy">
+<span class="cap">Diňe toparyňyz görýär.</span>
+</div>
+<div class="fld"><label class="flab" for="sd-spec">Hünäri <span class="opn">(hökman däl)</span></label>
+<input id="sd-spec" class="inp" value="{{sd.spec}}" onInput="{{onSdSpec}}" placeholder="mysal üçin: stilist, reňk ussasy">
+</div>
+<div class="fld"><label class="flab" for="sd-phone">Telefon</label>
+<input id="sd-phone" class="inp ro" value="{{sd.phone}}" readonly="">
+<span class="cap">{{sd.phoneHint}}</span>
+</div>
+<div class="dbox"><span class="lbl">Ýeral Biznes</span><span>{{sd.appLine}}</span></div>
+</sc-if>
+
+<sc-if value="{{tabSvc}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="ntl">{{sd.svcQ}}</span><span class="cap">{{sd.svcHint}}</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{sdGroups}}" as="g" hint-placeholder-count="4">
+<div class="sgrp" role="group" aria-labelledby="{{g.hid}}">
+<div class="sgh"><span id="{{g.hid}}" class="sgn">{{g.name}}</span><span class="cap">{{g.countText}}</span><span style="flex: 1"></span><button class="cka" role="checkbox" aria-checked="{{g.aria}}" aria-label="{{g.allLabel}}" onClick="{{g.toggleAll}}"><span class="{{g.boxCls}}" aria-hidden="true"><sc-if value="{{g.isAll}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{g.isMixed}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"></path></svg></sc-if></span>Ählisi</button></div>
+<sc-for list="{{g.items}}" as="it" hint-placeholder-count="3"><label class="ckr"><input type="checkbox" checked="{{it.on}}" onChange="{{it.flip}}"><span class="ckt"><span class="ckn">{{it.name}}</span><span class="cap">{{it.meta}}</span></span></label></sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{tabHours}}" hint-placeholder-val="{{true}}">
+<div class="fld" style="gap: 10px">
+<span class="flab" id="sh-l">Iş wagty</span>
+<div class="g2" role="radiogroup" aria-labelledby="sh-l">
+<sc-for list="{{schedOpts}}" as="o" hint-placeholder-count="2"><button class="{{o.cls}}" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}"><span class="rad" aria-hidden="true"></span><span class="ckt"><span class="ckn">{{o.t}}</span><span class="cap">{{o.c}}</span></span></button></sc-for>
+</div>
+</div>
+
+<sc-if value="{{sdOwn}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; border-top: 1px solid #e6e6ea">
+<sc-for list="{{dayRows}}" as="dy" hint-placeholder-count="7">
+<div class="dayr">
+<button class="{{dy.swCls}}" role="switch" aria-checked="{{dy.on}}" aria-label="{{dy.swLabel}}" onClick="{{dy.flip}}" style="margin-left: -6px"><span class="trk"><span class="knob"></span></span></button>
+<span class="dnm">{{dy.name}}</span>
+<sc-if value="{{dy.on}}" hint-placeholder-val="{{true}}">
+<div class="dtm">
+<div class="selw sm"><select class="inp sel sm" aria-label="{{dy.fromLabel}}" value="{{dy.from}}" onChange="{{dy.onFrom}}"><sc-for list="{{dy.fromOpts}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div>
+<span aria-hidden="true" style="text-align: center; color: #5a5a64">–</span>
+<div class="selw sm"><select class="inp sel sm" aria-label="{{dy.toLabel}}" value="{{dy.to}}" onChange="{{dy.onTo}}"><sc-for list="{{dy.toOpts}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div>
+</div>
+</sc-if>
+<sc-if value="{{dy.off}}" hint-placeholder-val="{{false}}"><span style="font-size: 14px; color: #5a5a64">Dynç güni</span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{sdInherit}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; border-top: 1px solid #e6e6ea">
+<sc-for list="{{bizRows}}" as="br" hint-placeholder-count="7"><div class="dro"><span>{{br.name}}</span><span>{{br.hours}}</span></div></sc-for>
+</div>
+</sc-if>
+
+<p class="cap" style="margin: -12px 0 0">Biznesiň iş wagty esasy: biznes ýapyk bolsa, şahsy smena ýazylyş açmaýar.</p>
+
+<div class="dsep"></div>
+
+<div class="fld" style="gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span class="ntl">Şahsy aýratyn günler</span><span class="cap">Rugsat, doglan gün we ş.m. Diňe biznesiň içinde görünýär.</span></div>
+<div style="display: flex; flex-direction: column">
+<sc-for list="{{excs}}" as="x" hint-placeholder-count="1">
+<div class="exr">
+<span class="exi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m14 14-4 4"></path><path d="m10 14 4 4"></path></svg></span>
+<span class="ckt"><span class="ckn" style="font-variant-numeric: tabular-nums">{{x.text}}</span><span class="cap">{{x.sub}}</span></span>
+<button class="b b-gho b-ico rm" aria-label="{{x.delLabel}}" onClick="{{x.del}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+</div>
+<sc-if value="{{x.hasConflict}}" hint-placeholder-val="{{true}}">
+<div class="cbox" role="group" aria-labelledby="{{x.cid}}" style="margin-top: 12px">
+<div class="cft"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span id="{{x.cid}}">{{x.conflictTitle}}</span></div>
+<div role="radiogroup" aria-labelledby="{{x.cid}}" style="display: flex; flex-direction: column; margin: 0 -6px">
+<sc-for list="{{x.opts}}" as="o" hint-placeholder-count="2"><button class="{{o.cls}}" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}"><span class="rad" aria-hidden="true"></span><span class="ckt"><span style="font-weight: 600">{{o.t}}</span><span class="cap">{{o.c}}</span></span></button></sc-for>
+</div>
+<a class="lnk" href="B-Bookings.dc.html" style="align-self: flex-start">Ýazylyşlary görkez<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+</div>
+</sc-if>
+</sc-for>
+<sc-if value="{{noExcs}}" hint-placeholder-val="{{false}}"><span class="cap" style="padding: 8px 0">Şahsy aýratyn gün ýok.</span></sc-if>
+</div>
+
+<sc-if value="{{excFormOpen}}" hint-placeholder-val="{{false}}">
+<div class="pbox" role="group" aria-label="Aýratyn gün goş">
+<div class="fld"><label class="flab" for="ex-n">Ady</label><input id="ex-n" class="inp" value="{{exName}}" onInput="{{onExName}}" placeholder="mysal üçin: Rugsat, Doglan güni"></div>
+<div class="g2">
+<div class="fld"><label class="flab" for="ex-f">Başlaýar</label><input id="ex-f" type="date" class="inp" min="2026-10-14" value="{{exFrom}}" onInput="{{onExFrom}}"></div>
+<div class="fld"><label class="flab" for="ex-t">Gutarýar <span class="opn">(hökman däl)</span></label><input id="ex-t" type="date" class="inp" min="2026-10-14" value="{{exTo}}" onInput="{{onExTo}}"></div>
+</div>
+<label class="ckr" style="min-height: 44px"><input type="checkbox" checked="{{exYearly}}" onChange="{{onExYearly}}"><span class="ckn" style="font-weight: 500">Her ýyl gaýtalanýar</span></label>
+<sc-if value="{{exBadRange}}" hint-placeholder-val="{{false}}"><span class="cap" style="color: #a3251b">Gutarýan senesi başlaýan senesinden öň bolup bilmez.</span></sc-if>
+<div class="pact"><button class="b b-gho b-sm" onClick="{{exCancel}}">Ýatyr</button><button class="b b-sec b-sm" disabled="{{exCant}}" onClick="{{exAdd}}">Goş</button></div>
+</div>
+</sc-if>
+<sc-if value="{{excAddBtn}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm" style="align-self: flex-start" onClick="{{openExc}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Aýratyn gün goş</button></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{tabRole}}" hint-placeholder-val="{{false}}">
+<div class="fld" style="gap: 10px">
+<span class="flab" id="sr-l">Rol</span>
+<div class="optl" role="radiogroup" aria-labelledby="sr-l">
+<sc-for list="{{sdRoles}}" as="r" hint-placeholder-count="4"><button class="{{r.cls}}" role="radio" aria-checked="{{r.on}}" disabled="{{r.dis}}" onClick="{{r.pick}}"><span class="rad" aria-hidden="true"></span><span class="ckt"><span class="ckn">{{r.name}}</span><span class="cap">{{r.cap}}</span></span></button></sc-for>
+</div>
+<div class="rdesc"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>{{sd.roleSummary}}</span></div>
+<span class="cap">{{sd.roleNote}} <button class="lnk" style="min-height: 0; font-size: 13px" onClick="{{goRoles}}">Rollary sazla</button></span>
+</div>
+</sc-if>
+</div>
+
+<div class="drw-f">
+<sc-if value="{{sd.canDisable}}" hint-placeholder-val="{{true}}"><button class="lnkd" onClick="{{openDisable}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>Işgäri öçür</button></sc-if>
+<sc-if value="{{sd.isOwner}}" hint-placeholder-val="{{false}}"><span class="cap">Eýesini öçürip bolmaýar</span></sc-if>
+<sc-if value="{{sd.isDisabled}}" hint-placeholder-val="{{false}}"><button class="b b-sec" onClick="{{reactivate}}">Gaýtadan işjeňleşdir</button></sc-if>
+<span style="flex: 1"></span>
+<button class="b b-pri" disabled="{{sdCantSave}}" onClick="{{saveStaff}}">Ýatda sakla</button>
+</div>
+</aside>
+</sc-if>
+
+<sc-if value="{{invOpen}}" hint-placeholder-val="{{false}}">
+<div class="mwrap" onKeyDown="{{invKey}}">
+<div class="scrim" onClick="{{closeInvite}}"></div>
+<div class="mdl mdl-m" role="dialog" aria-modal="true" aria-labelledby="inv-t">
+<span class="grab"></span>
+<div class="mhd"><h2 id="inv-t" class="mt">Işgär çagyr</h2><button class="b b-gho b-ico" style="width: 36px; height: 36px" aria-label="Ýap" onClick="{{closeInvite}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<ol class="stps" aria-label="Ädimler">
+<sc-for list="{{invSteps}}" as="st" hint-placeholder-count="3">
+<li><sc-if value="{{st.sep}}" hint-placeholder-val="{{true}}"><span class="stsep" aria-hidden="true"></span></sc-if><button class="{{st.cls}}" disabled="{{st.dis}}" onClick="{{st.go}}" aria-current="{{st.cur}}"><span class="stn"><sc-if value="{{st.done}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{st.notDone}}" hint-placeholder-val="{{true}}">{{st.n}}</sc-if></span><span class="stl">{{st.t}}</span></button></li>
+</sc-for>
+</ol>
+
+<sc-if value="{{inv1}}" hint-placeholder-val="{{true}}">
+<div class="fld"><label class="flab" for="iv-ph">Telefon</label>
+<div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="iv-ph" class="inp" inputmode="tel" value="{{invPhoneFmt}}" onInput="{{onInvPhone}}" placeholder="6X XX XX XX"></div>
+<span class="cap">{{invPhoneHint}}</span>
+</div>
+<div class="fld"><label class="flab" for="iv-nm">Ady</label>
+<input id="iv-nm" class="inp" value="{{invName}}" onInput="{{onInvName}}" placeholder="mysal üçin: Gülnar">
+<span class="cap">Müşderilere görkezilýän at.</span>
+</div>
+<div class="fld"><label class="flab" for="iv-sp">Hünäri <span class="opn">(hökman däl)</span></label>
+<input id="iv-sp" class="inp" value="{{invSpec}}" onInput="{{onInvSpec}}" placeholder="mysal üçin: stilist, reňk ussasy">
+</div>
+<div class="fld"><label class="flab" for="iv-rl">Rol</label>
+<div class="selw"><select id="iv-rl" class="inp sel" value="{{invRole}}" onChange="{{onInvRole}}"><sc-for list="{{invRoleOpts}}" as="o" hint-placeholder-count="3"><option value="{{o.v}}">{{o.t}}</option></sc-for></select><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div>
+<div class="rdesc"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg><span>{{invRoleDesc}}</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{inv2}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 4px"><h3 class="h3s">{{invQ}}</h3><span class="cap">{{invSvcHint}}</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{invGroups}}" as="g" hint-placeholder-count="4">
+<div class="sgrp" role="group" aria-labelledby="{{g.hid}}">
+<div class="sgh"><span id="{{g.hid}}" class="sgn">{{g.name}}</span><span class="cap">{{g.countText}}</span><span style="flex: 1"></span><button class="cka" role="checkbox" aria-checked="{{g.aria}}" aria-label="{{g.allLabel}}" onClick="{{g.toggleAll}}"><span class="{{g.boxCls}}" aria-hidden="true"><sc-if value="{{g.isAll}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{g.isMixed}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"></path></svg></sc-if></span>Ählisi</button></div>
+<sc-for list="{{g.items}}" as="it" hint-placeholder-count="3"><label class="ckr"><input type="checkbox" checked="{{it.on}}" onChange="{{it.flip}}"><span class="ckt"><span class="ckn">{{it.name}}</span><span class="cap">{{it.meta}}</span></span></label></sc-for>
+</div>
+</sc-for>
+</div>
+<span class="cap" style="font-weight: 600; color: #101014">{{invSvcCount}}</span>
+</sc-if>
+
+<sc-if value="{{inv3}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; border-top: 1px solid #e6e6ea">
+<sc-for list="{{sumRows}}" as="r" hint-placeholder-count="5"><button class="sumr" onClick="{{r.go}}" aria-label="{{r.label}}"><span class="sk">{{r.k}}</span><span class="sv">{{r.v}}</span><span class="se">Üýtget</span></button></sc-for>
+</div>
+<div class="dbox"><span>{{invNote}}</span></div>
+</sc-if>
+
+<div class="mact">
+<sc-if value="{{inv1}}" hint-placeholder-val="{{true}}"><button class="b b-gho" onClick="{{closeInvite}}">Ýatyr</button></sc-if>
+<sc-if value="{{invHasBack}}" hint-placeholder-val="{{false}}"><button class="b b-sec" onClick="{{invBack}}">Yza</button></sc-if>
+<sc-if value="{{invNotLast}}" hint-placeholder-val="{{true}}"><button class="b b-pri" disabled="{{invCantNext}}" onClick="{{invNext}}">Dowam et</button></sc-if>
+<sc-if value="{{inv3}}" hint-placeholder-val="{{false}}"><button class="b b-pri" onClick="{{sendInvite}}">{{invSendText}}</button></sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{disOpen}}" hint-placeholder-val="{{false}}">
+<div class="mwrap" onKeyDown="{{disKey}}">
+<div class="scrim" onClick="{{closeDisable}}"></div>
+<div class="mdl mdl-s" role="dialog" aria-modal="true" aria-labelledby="ds-t">
+<span class="grab"></span>
+<div class="mhd"><h2 id="ds-t" class="mt">{{dis.title}}</h2><button class="b b-gho b-ico" style="width: 36px; height: 36px" aria-label="Ýap" onClick="{{closeDisable}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<p class="mp">{{dis.text}}</p>
+<sc-if value="{{dis.hasUpcoming}}" hint-placeholder-val="{{true}}">
+<div class="fld" style="gap: 10px">
+<span class="ntl" id="ds-q">{{dis.countText}}</span>
+<div class="optl" role="radiogroup" aria-labelledby="ds-q">
+<button class="{{dis.moveCls}}" role="radio" aria-checked="{{dis.isMove}}" onClick="{{dis.pickMove}}"><span class="rad" aria-hidden="true"></span><span class="ckt"><span class="ckn">Başga hünärmene geçir</span><span class="cap">Müşderä SMS bilen habar bereris</span></span></button>
+<sc-if value="{{dis.isMove}}" hint-placeholder-val="{{true}}">
+<div class="fld" style="padding: 4px 0 8px 48px"><label class="flab" for="ds-to">Kime</label>
+<div class="selw"><select id="ds-to" class="inp sel" value="{{dis.to}}" onChange="{{dis.onTo}}"><sc-for list="{{dis.toOpts}}" as="o" hint-placeholder-count="4"><option value="{{o.v}}">{{o.t}}</option></sc-for></select><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div>
+<span class="cap">Şol wagt we hyzmat saklanar</span>
+</div>
+</sc-if>
+<button class="{{dis.keepCls}}" role="radio" aria-checked="{{dis.isKeep}}" onClick="{{dis.pickKeep}}"><span class="rad" aria-hidden="true"></span><span class="ckt"><span class="ckn">Bolşy ýaly galdyr — täze ýazylyş kabul edilmez</span><span class="cap">{{dis.keepCap}}</span></span></button>
+<button class="{{dis.cancelCls}}" role="radio" aria-checked="{{dis.isCancel}}" onClick="{{dis.pickCancel}}"><span class="rad" aria-hidden="true"></span><span class="ckt"><span class="ckn">Ýatyr we müşderilere 3 başga wagt hödürle</span><span class="cap">Müşderi täze wagty bir basyşda kabul edip biler</span></span></button>
+</div>
+</div>
+</sc-if>
+<div class="mact"><button class="b b-sec" onClick="{{closeDisable}}">Yza</button><button class="b b-red" onClick="{{confirmDisable}}">Öçür</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div class="toast" role="status">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+<span>{{toastText}}</span>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["team","roles"],"default":"team","section":"State"},"panel":{"editor":"enum","options":["none","staff","invite","disable"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1360}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const team = this.seedTeam();
+    const roles = this.seedRoles();
+    this.state = Object.assign({ team: team, roles: roles, toast: null, seq: 1 }, this.fromProps(props || {}, team, roles));
+  }
+  fromProps(p, team, roles) {
+    const tab = p.tab === 'roles' ? 'roles' : 'team';
+    const panel = p.panel ?? 'none';
+    const jeren = team.find((m) => m.id === 'jeren');
+    const spec = roles.find((r) => r.id === 'specialist') || roles[0];
+    const o = { tab: tab, staffId: null, sd: null, stab: 'hours', conflict: 'move', exc: null, inv: null, dis: null, menu: null, roleSel: spec.id, rd: this.copyRole(spec) };
+    if ((panel === 'staff' || panel === 'disable') && jeren) { o.staffId = 'jeren'; o.sd = this.copyMember(jeren); }
+    if (panel === 'disable' && jeren) o.dis = { id: 'jeren', choice: 'move', to: 'any' };
+    if (panel === 'invite') o.inv = { step: 1, phone: '64215590', name: 'Gülnar', spec: 'Stilist', role: 'specialist', services: ['s1', 's2', 's4'] };
+    return o;
+  }
+  componentDidUpdate(pp) {
+    const p = this.props;
+    if (pp.tab !== p.tab || pp.panel !== p.panel) this.setState(this.fromProps(p, this.state.team, this.state.roles));
+  }
+  componentWillUnmount() { clearTimeout(this.tt); }
+  flash(patch, text) {
+    clearTimeout(this.tt);
+    this.setState(Object.assign({}, patch, { toast: text }));
+    this.tt = setTimeout(() => this.setState({ toast: null }), 6000);
+  }
+  DAYN() { return ['Duşenbe', 'Sişenbe', 'Çarşenbe', 'Penşenbe', 'Anna', 'Şenbe', 'Ýekşenbe']; }
+  BIZ() { return [['09:00', '20:00'], ['09:00', '20:00'], ['09:00', '20:00'], ['09:00', '20:00'], ['09:00', '20:00'], ['09:00', '20:00'], ['10:00', '18:00']]; }
+  PERMS() {
+    return [['confirm', 'Ýazylyşlary tassyklamak'], ['move', 'Geçirmek we ýatyrmak'], ['noshow', 'Gelmedi bellemek'], ['clients', 'Müşderileri görmek we üýtgetmek'], ['services', 'Hyzmatlary we bahalary üýtgetmek'], ['invite', 'Işgär çagyrmak'], ['revenue', 'Girdejini görmek'], ['settings', 'Sazlamalary üýtgetmek']];
+  }
+  bizDays() { return this.BIZ().map((b) => ({ on: true, from: b[0], to: b[1] })); }
+  ownDays(from, to) { return this.BIZ().map((b, i) => (i < 6 ? { on: true, from: from, to: to } : { on: false, from: b[0], to: b[1] })); }
+  seedRoles() {
+    return [
+      { id: 'owner', name: 'Eýesi', system: true, vis: 'all', perms: ['confirm', 'move', 'noshow', 'clients', 'services', 'invite', 'revenue', 'settings'] },
+      { id: 'admin', name: 'Administrator', vis: 'all', perms: ['confirm', 'move', 'noshow', 'clients', 'invite'] },
+      { id: 'specialist', name: 'Hünärmen', vis: 'own', perms: ['confirm', 'move', 'noshow'] },
+      { id: 'noapp', name: 'Programmasyz', vis: 'none', noLogin: true, perms: [] }
+    ];
+  }
+  seedTeam() {
+    return [
+      { id: 'ayna', name: 'Aýna', full: 'Aýna Myradowa', spec: 'Stilist', role: 'specialist', phone: '+993 65 31 22 10', kind: 'pro', services: ['s1', 's2', 's3', 's4'], sched: 'business', days: this.bizDays(), excs: [{ id: 'x2', name: 'Doglan güni', when: '3 maý', n: 1, yearly: true, conflict: null }], status: 'active', hasApp: true, upcoming: 5 },
+      { id: 'maral', name: 'Maral', full: 'Maral Sapargeldiýewa', spec: 'Dyrnak ussasy', role: 'specialist', phone: '+993 61 44 08 19', kind: 'pro', services: ['s5', 's6', 's7'], sched: 'business', days: this.bizDays(), excs: [], status: 'active', hasApp: true, upcoming: 4 },
+      { id: 'jeren', name: 'Jeren', full: 'Jeren Ataýewa', spec: 'Kosmetolog', role: 'specialist', phone: '+993 62 70 15 33', kind: 'pro', services: ['s8', 's9'], sched: 'own', days: this.ownDays('10:00', '19:00'), excs: [{ id: 'x1', name: 'Rugsat', when: '2–9 noýabr 2026', n: 8, yearly: false, conflict: { count: 3, sum: '350 TMT', range: '2–9 noýabr' } }], status: 'active', hasApp: true, upcoming: 7 },
+      { id: 'leyli', name: 'Leýli', full: 'Leýli Garaýewa', spec: 'Massažist', role: 'noapp', phone: '+993 63 12 90 47', kind: 'pro', services: ['s10', 's11'], sched: 'own', days: this.ownDays('12:00', '20:00'), excs: [], status: 'active', hasApp: false, upcoming: 3 },
+      { id: 'gulnar', name: 'Gülnar', full: '', spec: 'Stilist', role: 'specialist', phone: '+993 64 21 55 90', kind: 'pro', services: ['s1', 's2', 's4'], sched: 'business', days: this.bizDays(), excs: [], status: 'invited', hasApp: false, upcoming: 0 },
+      { id: 'mays', name: 'Maýsa', full: 'Maýsa Annaýewa', spec: '', role: 'owner', phone: '+993 65 10 20 30', kind: 'mgmt', services: [], sched: 'business', days: this.bizDays(), excs: [], status: 'active', hasApp: true, upcoming: 0, me: true },
+      { id: 'selbi', name: 'Selbi', full: 'Selbi Hojaýewa', spec: '', role: 'admin', phone: '+993 65 88 41 02', kind: 'mgmt', services: [], sched: 'business', days: this.bizDays(), excs: [], status: 'active', hasApp: true, upcoming: 0 }
+    ];
+  }
+  catalog() {
+    return [
+      { name: 'Saç', items: [['s1', 'Aýal saç kesimi', '60 min · 80 TMT'], ['s2', 'Saç düzmek', '45 min · 60 TMT'], ['s3', 'Saç reňklemek', '2 sag · 250 TMT-den'], ['s4', 'Çaga saç kesimi', '30 min · 40 TMT']] },
+      { name: 'Dyrnak', items: [['s5', 'Manikýur', '60 min · 70 TMT'], ['s6', 'Gel-lak bilen manikýur', '1 sag 30 min · 110 TMT'], ['s7', 'Pedikýur', '1 sag 15 min · 90 TMT']] },
+      { name: 'Ýüz ideg', items: [['s8', 'Ýüz arassalamak', '60 min · 150 TMT'], ['s9', 'Gaş we kirpik', '30 min · 50 TMT']] },
+      { name: 'Massaž', items: [['s10', 'Arka massažy', '30 min · 90 TMT'], ['s11', 'Doly beden massažy', '60 min · 160 TMT']] }
+    ];
+  }
+  copyMember(m) {
+    return Object.assign({}, m, {
+      services: m.services.slice(),
+      days: m.days.map((d) => Object.assign({}, d)),
+      excs: m.excs.map((x) => Object.assign({}, x))
+    });
+  }
+  copyRole(r) { return Object.assign({}, r, { perms: r.perms.slice() }); }
+  suf(name) {
+    const w = String(name || '').trim();
+    const back = 'aouy';
+    const vowels = 'aouyeäiöü';
+    const last = w.slice(-1).toLowerCase();
+    let lastV = '';
+    for (let i = w.length - 1; i >= 0; i--) { const ch = w.charAt(i).toLowerCase(); if (vowels.indexOf(ch) >= 0) { lastV = ch; break; } }
+    const isBack = back.indexOf(lastV) >= 0;
+    if (vowels.indexOf(last) >= 0) return { acc: w + (isBack ? '-ny' : '-ni'), gen: w + (isBack ? '-nyň' : '-niň') };
+    return { acc: w + (isBack ? '-y' : '-i'), gen: w + (isBack ? '-yň' : '-iň') };
+  }
+  toMin(t) { const a = String(t).split(':'); return parseInt(a[0], 10) * 60 + parseInt(a[1], 10); }
+  fromMin(m) { const h = Math.floor(m / 60); const r = m % 60; return (h < 10 ? '0' : '') + h + ':' + (r < 10 ? '0' : '') + r; }
+  times(a, b) { const out = []; for (let m = this.toMin(a); m <= this.toMin(b); m += 30) out.push(this.fromMin(m)); return out; }
+  fmtPhone(dg) { return String(dg).replace(/(\d{2})(?=\d)/g, '$1 '); }
+  fmtDates(a, b, yearly) {
+    const MON = ['ýanwar', 'fewral', 'mart', 'aprel', 'maý', 'iýun', 'iýul', 'awgust', 'sentýabr', 'oktýabr', 'noýabr', 'dekabr'];
+    const pa = a.split('-').map((x) => parseInt(x, 10));
+    if (!b || b === a) return pa[2] + ' ' + MON[pa[1] - 1] + (yearly ? '' : ' ' + pa[0]);
+    const pb = b.split('-').map((x) => parseInt(x, 10));
+    const y = yearly ? '' : ' ' + pb[0];
+    if (pa[0] === pb[0] && pa[1] === pb[1]) return pa[2] + '–' + pb[2] + ' ' + MON[pa[1] - 1] + y;
+    return pa[2] + ' ' + MON[pa[1] - 1] + ' – ' + pb[2] + ' ' + MON[pb[1] - 1] + y;
+  }
+  dayCount(a, b) {
+    if (!b) return 1;
+    const pa = a.split('-').map((x) => parseInt(x, 10));
+    const pb = b.split('-').map((x) => parseInt(x, 10));
+    return Math.round((Date.UTC(pb[0], pb[1] - 1, pb[2]) - Date.UTC(pa[0], pa[1] - 1, pa[2])) / 86400000) + 1;
+  }
+  roleCap(r) {
+    if (!r) return '';
+    if (r.system) return 'Doly elýeterlilik';
+    if (r.noLogin) return 'Girmeýär';
+    if (r.vis === 'own') return 'Diňe öz ýazylyşlary';
+    return r.perms.indexOf('revenue') >= 0 ? 'Ähli senenama we girdeji' : 'Ähli senenama, girdejisiz';
+  }
+  roleSummary(r) {
+    if (!r) return '';
+    if (r.system) return 'Hemme zady görýär we edýär: girdeji, sazlamalar, roller.';
+    if (r.noLogin) return 'Programma girmeýär. Müşderiler oňa onlaýn ýazylyp bilýär; ýazylyşlaryny eýesi we administrator alyp barýar.';
+    const V = { confirm: 'haýyşlary tassyklaýar', move: 'geçirýär we ýatyrýar', noshow: 'gelmedi belleýär', clients: 'müşderileri görýär', services: 'hyzmatlary üýtgedýär', invite: 'işgär çagyrýar', revenue: 'girdejini görýär', settings: 'sazlamalary üýtgedýär' };
+    const parts = this.PERMS().filter((p) => r.perms.indexOf(p[0]) >= 0).map((p) => V[p[0]]);
+    const head = r.vis === 'all' ? 'Ähli senenamany görýär' : 'Diňe öz ýazylyşlaryny görýär, beýlekileriň wagty «Bes»';
+    let t = head + (parts.length ? '; ' + parts.join(', ') : '; hiç zady üýtgedip bilmeýär') + '.';
+    if (r.perms.indexOf('revenue') < 0) t += ' Girdejini görmeýär.';
+    return t;
+  }
+  ownSummary(days) {
+    const on = days.filter((d) => d.on).map((d) => d.from + '–' + d.to);
+    if (!on.length) return 'iş güni ýok';
+    const uniq = on.filter((v, i) => on.indexOf(v) === i);
+    return uniq.length === 1 ? uniq[0] : 'günlere görä dürli';
+  }
+  groupsFor(sel, apply, prefix) {
+    return this.catalog().map((g, gi) => {
+      const ids = g.items.map((it) => it[0]);
+      const n = ids.filter((id) => sel.indexOf(id) >= 0).length;
+      const all = n === ids.length;
+      const mixed = n > 0 && !all;
+      return {
+        name: g.name,
+        hid: prefix + '-g' + gi,
+        countText: n + ' / ' + ids.length,
+        aria: all ? 'true' : (mixed ? 'mixed' : 'false'),
+        boxCls: all ? 'ckb on' : (mixed ? 'ckb mix' : 'ckb'),
+        isAll: all,
+        isMixed: mixed,
+        allLabel: g.name + ': ählisi',
+        toggleAll: () => apply(all ? sel.filter((id) => ids.indexOf(id) < 0) : sel.concat(ids.filter((id) => sel.indexOf(id) < 0))),
+        items: g.items.map((it) => ({
+          name: it[1], meta: it[2], on: sel.indexOf(it[0]) >= 0,
+          flip: () => apply(sel.indexOf(it[0]) >= 0 ? sel.filter((x) => x !== it[0]) : sel.concat([it[0]]))
+        }))
+      };
+    });
+  }
+  openStaff(id, tab) {
+    const m = this.state.team.find((x) => x.id === id);
+    if (!m) return;
+    this.setState({ staffId: id, sd: this.copyMember(m), stab: tab || 'info', exc: null, menu: null, conflict: 'move' });
+  }
+  closeStaff() { this.setState({ staffId: null, sd: null, exc: null }); }
+  setSd(patch) { if (this.state.sd) this.setState({ sd: Object.assign({}, this.state.sd, patch) }); }
+  setDay(i, patch) {
+    const sd = this.state.sd;
+    if (!sd) return;
+    const days = sd.days.map((d, j) => (j === i ? Object.assign({}, d, patch) : d));
+    this.setState({ sd: Object.assign({}, sd, { days: days }) });
+  }
+  saveStaff() {
+    const s = this.state;
+    const d = s.sd;
+    if (!d || !d.name.trim()) return;
+    const kind = d.services.length > 0 || d.role === 'specialist' || d.role === 'noapp' ? 'pro' : 'mgmt';
+    const m = Object.assign(this.copyMember(d), { name: d.name.trim(), full: d.full.trim(), spec: d.spec.trim(), kind: kind, hasApp: d.role === 'noapp' ? false : d.hasApp });
+    this.flash({ team: s.team.map((x) => (x.id === d.id ? m : x)), staffId: null, sd: null, exc: null }, m.name + ': üýtgeşmeler ýatda saklandy');
+  }
+  setStatus(id, status, text) {
+    const s = this.state;
+    const sd = s.sd && s.sd.id === id ? Object.assign({}, s.sd, { status: status }) : s.sd;
+    this.flash({ team: s.team.map((x) => (x.id === id ? Object.assign({}, x, { status: status }) : x)), menu: null, sd: sd }, text);
+  }
+  confirmDisable() {
+    const s = this.state;
+    const dis = s.dis;
+    if (!dis) return;
+    const m = s.team.find((x) => x.id === dis.id);
+    if (!m) return;
+    const n = m.upcoming;
+    const who = dis.to === 'any' ? 'boş hünärmenlere' : (s.team.find((x) => x.id === dis.to) || { name: '' }).name + ' atly hünärmene';
+    const msgs = { move: n + ' ýazylyş ' + who + ' geçirildi', keep: n + ' ýazylyş galdy, täze ýazylyş kabul edilmeýär', cancel: n + ' ýazylyş ýatyryldy, müşderilere başga wagt hödürlendi' };
+    const text = m.name + ' öçürildi' + (n ? ' · ' + msgs[dis.choice] : '');
+    this.flash({ team: s.team.map((x) => (x.id === m.id ? Object.assign({}, x, { status: 'disabled', upcoming: dis.choice === 'keep' ? n : 0 }) : x)), dis: null, staffId: null, sd: null, menu: null }, text);
+  }
+  cancelInvite(id) {
+    const s = this.state;
+    const m = s.team.find((x) => x.id === id);
+    if (!m) return;
+    this.flash({ team: s.team.filter((x) => x.id !== id), menu: null, staffId: s.staffId === id ? null : s.staffId, sd: s.staffId === id ? null : s.sd }, this.suf(m.name).gen + ' çakylygy ýatyryldy');
+  }
+  setInv(patch) { if (this.state.inv) this.setState({ inv: Object.assign({}, this.state.inv, patch) }); }
+  sendInvite() {
+    const s = this.state;
+    const v = s.inv;
+    if (!v) return;
+    const role = s.roles.find((r) => r.id === v.role);
+    const noLogin = !!(role && role.noLogin);
+    const phone = '+993 ' + this.fmtPhone(v.phone);
+    const name = v.name.trim();
+    const kind = v.services.length > 0 || v.role === 'specialist' || v.role === 'noapp' ? 'pro' : 'mgmt';
+    const base = { name: name, spec: v.spec.trim(), role: v.role, phone: phone, kind: kind, services: v.services.slice(), status: noLogin ? 'active' : 'invited', hasApp: false };
+    const existing = s.team.find((x) => x.phone === phone);
+    let team;
+    if (existing) team = s.team.map((x) => (x.id === existing.id ? Object.assign({}, x, base) : x));
+    else team = s.team.concat([Object.assign({ id: 'n' + s.seq, full: '', sched: 'business', days: this.bizDays(), excs: [], upcoming: 0 }, base)]);
+    this.flash({ team: team, inv: null, seq: s.seq + 1 }, noLogin ? name + ' topara goşuldy' : 'Çakylyk iberildi: ' + name + ' · ' + phone);
+  }
+  pickRole(id) {
+    const r = this.state.roles.find((x) => x.id === id);
+    if (!r) return;
+    this.setState({ roleSel: id, rd: this.copyRole(r) });
+  }
+  saveRole() {
+    const s = this.state;
+    const rd = s.rd;
+    if (!rd || rd.system || !String(rd.name).trim()) return;
+    const clean = Object.assign(this.copyRole(rd), { name: String(rd.name).trim() });
+    if (s.roleSel === 'new') {
+      clean.id = 'r' + s.seq;
+      this.flash({ roles: s.roles.concat([clean]), roleSel: clean.id, rd: this.copyRole(clean), seq: s.seq + 1 }, '«' + clean.name + '» roly döredildi');
+      return;
+    }
+    const n = s.team.filter((m) => m.role === clean.id && m.status === 'active').length;
+    this.flash({ roles: s.roles.map((r) => (r.id === clean.id ? clean : r)), rd: this.copyRole(clean) }, '«' + clean.name + '» roly ýatda saklandy' + (n ? ' · ' + n + ' işgär' : ''));
+  }
+  renderVals() {
+    const f = this.props.font ?? 'Onest';
+    const s = this.state;
+    const roleById = {};
+    s.roles.forEach((r) => { roleById[r.id] = r; });
+    const isTeam = s.tab !== 'roles';
+    return Object.assign({
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      isTeam: isTeam,
+      isRoles: !isTeam,
+      navTeamCls: isTeam ? 'sn on' : 'sn',
+      navTeamCur: isTeam ? 'page' : 'false',
+      navRolesCls: isTeam ? 'sn' : 'sn on',
+      navRolesCur: isTeam ? 'false' : 'page',
+      toTeam: () => this.setState({ tab: 'team', menu: null }),
+      toRoles: () => this.setState({ tab: 'roles', menu: null }),
+      anyMenu: !!s.menu,
+      closeMenu: () => this.setState({ menu: null }),
+      hasToast: !!s.toast,
+      toastText: s.toast || ''
+    }, this.teamVals(s, roleById), this.drawerVals(s, roleById), this.inviteVals(s, roleById), this.disableVals(s), this.rolesVals(s));
+  }
+  teamVals(s, roleById) {
+    const row = (m) => {
+      const r = roleById[m.role];
+      const noapp = !!(r && r.noLogin);
+      let stText = 'Işjeň';
+      let stCls = 'stt st-on';
+      let dotCls = 'dot d-d';
+      let stSub = '';
+      if (m.status === 'disabled') { stText = 'Öçürilen'; stCls = 'stt st-neu'; dotCls = 'dot d-x'; }
+      else if (m.status === 'invited') { stText = 'Çagyryldy'; stCls = 'stt st-inv'; dotCls = 'dot d-p'; stSub = 'SMS iberildi'; }
+      else if (noapp) { stText = 'Programmasyz'; stCls = 'stt st-neu'; dotCls = 'dot d-x'; stSub = 'Girmeýär'; }
+      const svcN = m.services.length;
+      let schedMain = '—';
+      let schedSub = '';
+      if (svcN || m.kind === 'pro') {
+        if (m.sched === 'own') { schedMain = 'Öz smenasy'; schedSub = this.ownSummary(m.days); }
+        else schedMain = 'Biznes wagty bilen';
+      }
+      const menu = [];
+      const noop = () => {};
+      const add = (t, act, dan) => menu.push({ t: t, act: act, cls: dan ? 'mi dan' : 'mi', btn: true, sep: false });
+      const sep = () => menu.push({ t: '', act: noop, cls: 'mi', btn: false, sep: true });
+      if (m.status === 'disabled') add('Gaýtadan işjeňleşdir', () => this.setStatus(m.id, 'active', m.name + ' gaýtadan işjeň'));
+      else if (m.role === 'owner') add('Üýtget', () => this.openStaff(m.id, 'info'));
+      else if (m.status === 'invited') {
+        add('Üýtget', () => this.openStaff(m.id, 'info'));
+        add('Çakylygy täzeden iber', () => this.flash({ menu: null }, 'Çakylyk täzeden iberildi: ' + m.phone));
+        sep();
+        add('Çakylygy ýatyr', () => this.cancelInvite(m.id), true);
+      } else {
+        add('Üýtget', () => this.openStaff(m.id, 'info'));
+        add('Iş wagtyny üýtget', () => this.openStaff(m.id, 'hours'));
+        sep();
+        add('Işgäri öçür', () => this.setState({ menu: null, dis: { id: m.id, choice: 'move', to: 'any' } }), true);
+      }
+      const dragable = m.kind === 'pro';
+      let cls = 'trow';
+      if (s.staffId === m.id) cls += ' sel';
+      if (m.status === 'disabled') cls += ' dim';
+      return {
+        cls: cls,
+        drag: dragable,
+        noDrag: !dragable,
+        dragLabel: 'Süýräp tertibini üýtget: ' + m.name,
+        ini: m.name.charAt(0),
+        full: m.full || m.name,
+        sub: m.me ? 'Siz' : (m.spec || m.phone),
+        open: () => this.openStaff(m.id, 'info'),
+        roleName: r ? (r.name || 'Atsyz rol') : '—',
+        svcText: svcN ? svcN + ' hyzmat' : '—',
+        schedMain: schedMain,
+        schedSub: schedSub,
+        hasSchedSub: !!schedSub,
+        stText: stText,
+        stCls: stCls,
+        dotCls: dotCls,
+        stSub: stSub,
+        hasStSub: !!stSub,
+        menuLabel: m.name + ': hereketler',
+        menuOpen: s.menu === m.id,
+        toggleMenu: () => this.setState({ menu: this.state.menu === m.id ? null : m.id }),
+        menu: menu
+      };
+    };
+    const pro = s.team.filter((m) => m.kind === 'pro');
+    const mgmt = s.team.filter((m) => m.kind !== 'pro');
+    const sections = [];
+    if (pro.length) sections.push({ title: 'Hünärmenler', sub: 'Müşderiler görýär we saýlaýar', rows: pro.map(row) });
+    if (mgmt.length) sections.push({ title: 'Dolandyryş', sub: 'Ýazylyş kabul etmeýärler — müşderilere görünmeýär', rows: mgmt.map(row) });
+    return {
+      sections: sections,
+      openInvite: () => this.setState({ inv: { step: 1, phone: '', name: '', spec: '', role: 'specialist', services: [] }, menu: null })
+    };
+  }
+  drawerVals(s, roleById) {
+    const d = s.sd || this.copyMember(s.team[0] || this.seedTeam()[0]);
+    const r = roleById[d.role];
+    const isOwner = d.role === 'owner';
+    const noapp = !!(r && r.noLogin);
+    const DAYN = this.DAYN();
+    const BIZ = this.BIZ();
+    const nm = d.name.trim() || 'Işgär';
+    const tabsDef = [['info', 'Maglumat'], ['svc', 'Hyzmatlar'], ['hours', 'Iş wagty'], ['role', 'Rol']];
+    const curTab = tabsDef.find((t) => t[0] === s.stab) || tabsDef[2];
+    let phoneHint = 'Bu belgi — onuň girişi. Belgini işgäriň özi SMS kody bilen üýtgedýär.';
+    let appLine = 'Programma girýär.';
+    if (noapp) { phoneHint = 'Programmasyz işgär girmeýär. Belgi diňe size we administratora görünýär.'; appLine = 'Programmasyz — girmeýär. Ýazylyşlaryny eýesi we administrator alyp barýar.'; }
+    else if (d.status === 'invited') { phoneHint = 'Çakylyk SMS-i şu belgä iberildi. Ol şu belgi bilen girer.'; appLine = 'Çakylyk iberildi, entek girmedi.'; }
+    else if (!d.hasApp) appLine = 'Entek girmedi.';
+    const excs = d.excs.map((x) => {
+      const c = x.conflict;
+      const cid = 'cf-' + x.id;
+      return {
+        text: x.name + ' · ' + x.when + (x.n > 1 ? ' · ' + x.n + ' gün' : ''),
+        sub: x.yearly ? 'Her ýyl gaýtalanýar' : 'Bu günler ' + nm + ' bilen ýazylyş açylmaýar',
+        delLabel: 'Poz: ' + x.name + ', ' + x.when,
+        del: () => { const cur = this.state.sd; if (cur) this.setState({ sd: Object.assign({}, cur, { excs: cur.excs.filter((y) => y.id !== x.id) }) }); },
+        hasConflict: !!c,
+        cid: cid,
+        conflictTitle: c ? c.range + ': ' + c.count + ' ýazylyş bar — jemi ' + c.sum : '',
+        opts: [
+          ['move', 'Başga hünärmene geçir (boş bolsa)', 'Boş hünärmen tapylmasa, müşderä 3 başga wagt hödürläris.'],
+          ['keep', 'Ýazylyşlary galdyr — ' + nm + ' diňe şolara gelýär', 'Täze ýazylyş kabul edilmez.']
+        ].map((o) => ({ t: o[1], c: o[2], on: s.conflict === o[0], cls: s.conflict === o[0] ? 'rr on' : 'rr', pick: () => this.setState({ conflict: o[0] }) }))
+      };
+    });
+    const ex = s.exc;
+    const exBad = !!(ex && ex.from && ex.to && ex.to < ex.from);
+    const dayRows = d.days.map((x, i) => {
+      const open = BIZ[i][0];
+      const close = BIZ[i][1];
+      const fromOpts = this.times(open, this.fromMin(this.toMin(close) - 30));
+      const toOpts = this.times(this.fromMin(Math.min(this.toMin(x.from) + 30, this.toMin(close))), close);
+      return {
+        name: DAYN[i],
+        on: !!x.on,
+        off: !x.on,
+        swCls: x.on ? 'sw on' : 'sw',
+        swLabel: DAYN[i] + ': işleýär',
+        flip: () => this.setDay(i, { on: !x.on }),
+        from: x.from,
+        to: x.to,
+        fromOpts: fromOpts,
+        toOpts: toOpts,
+        fromLabel: DAYN[i] + ': başlaýar',
+        toLabel: DAYN[i] + ': gutarýar',
+        onFrom: (e) => {
+          const v = e.target.value;
+          const cur = this.state.sd ? this.state.sd.days[i] : x;
+          const patch = { from: v };
+          if (this.toMin(cur.to) <= this.toMin(v)) patch.to = this.fromMin(Math.min(this.toMin(v) + 30, this.toMin(close)));
+          this.setDay(i, patch);
+        },
+        onTo: (e) => this.setDay(i, { to: e.target.value })
+      };
+    });
+    return {
+      drawerOpen: !!s.sd,
+      closeDrawer: () => this.closeStaff(),
+      drawerKey: (e) => { if (e && e.key === 'Escape' && !this.state.dis) this.closeStaff(); },
+      sd: {
+        ini: nm.charAt(0),
+        full: d.full || d.name || 'Işgär',
+        sub: [d.spec, r ? r.name : ''].filter((v) => !!v).join(' · '),
+        name: d.name,
+        fullVal: d.full,
+        spec: d.spec,
+        phone: d.phone,
+        phoneHint: phoneHint,
+        appLine: appLine,
+        isPro: d.kind === 'pro' || d.services.length > 0,
+        clientLine: nm + (d.spec.trim() ? ' · ' + d.spec.trim() : ''),
+        svcQ: nm + ' näme edýär?',
+        svcHint: d.kind === 'pro' || d.services.length ? 'Müşderi ony diňe şu hyzmatlarda görer.' : nm + ' häzir ýazylyş kabul etmeýär. Hyzmat saýlasaňyz, müşderiler ony hem saýlap biler.',
+        roleSummary: this.roleSummary(r),
+        roleNote: isOwner ? 'Eýesiniň roly üýtgedilmeýär — bir biznesde bir eýe bolýar.' : 'Rol näme görýändigini we edip bilýändigini kesgitleýär.',
+        canDisable: !isOwner && d.status !== 'disabled',
+        isOwner: isOwner,
+        isDisabled: d.status === 'disabled'
+      },
+      sdCantSave: !d.name.trim(),
+      stabs: tabsDef.map((t) => ({ t: t[1], on: s.stab === t[0], cls: s.stab === t[0] ? 'tab on' : 'tab', pick: () => this.setState({ stab: t[0], exc: null }) })),
+      stabLabel: curTab[1],
+      tabInfo: s.stab === 'info',
+      tabSvc: s.stab === 'svc',
+      tabHours: s.stab === 'hours',
+      tabRole: s.stab === 'role',
+      onSdName: (e) => this.setSd({ name: e.target.value.slice(0, 30) }),
+      onSdFull: (e) => this.setSd({ full: e.target.value.slice(0, 60) }),
+      onSdSpec: (e) => this.setSd({ spec: e.target.value.slice(0, 40) }),
+      sdGroups: this.groupsFor(d.services, (next) => this.setSd({ services: next }), 'sd'),
+      schedOpts: [['business', 'Biznes wagty bilen', 'Biznes açyk wagty işleýär'], ['own', 'Öz smenasy', 'Her gün üçin öz wagty']].map((o) => ({
+        t: o[1], c: o[2], on: d.sched === o[0], cls: d.sched === o[0] ? 'opt on' : 'opt',
+        pick: () => {
+          const cur = this.state.sd;
+          if (!cur) return;
+          const patch = { sched: o[0] };
+          if (o[0] === 'business') patch.days = this.bizDays();
+          this.setState({ sd: Object.assign({}, cur, patch) });
+        }
+      })),
+      sdOwn: d.sched === 'own',
+      sdInherit: d.sched !== 'own',
+      dayRows: dayRows,
+      bizRows: DAYN.map((n, i) => ({ name: n, hours: BIZ[i][0] + '–' + BIZ[i][1] })),
+      excs: excs,
+      noExcs: excs.length === 0 && !ex,
+      excFormOpen: !!ex,
+      excAddBtn: !ex,
+      openExc: () => this.setState({ exc: { name: '', from: '', to: '', yearly: false } }),
+      exName: ex ? ex.name : '',
+      exFrom: ex ? ex.from : '',
+      exTo: ex ? ex.to : '',
+      exYearly: !!(ex && ex.yearly),
+      exBadRange: exBad,
+      onExName: (e) => this.setState({ exc: Object.assign({}, this.state.exc, { name: e.target.value.slice(0, 40) }) }),
+      onExFrom: (e) => this.setState({ exc: Object.assign({}, this.state.exc, { from: e.target.value }) }),
+      onExTo: (e) => this.setState({ exc: Object.assign({}, this.state.exc, { to: e.target.value }) }),
+      onExYearly: () => this.setState({ exc: Object.assign({}, this.state.exc, { yearly: !(this.state.exc && this.state.exc.yearly) }) }),
+      exCant: !(ex && ex.name.trim() && ex.from) || exBad,
+      exCancel: () => this.setState({ exc: null }),
+      exAdd: () => {
+        const st = this.state;
+        const e2 = st.exc;
+        if (!st.sd || !e2 || !e2.name.trim() || !e2.from || (e2.to && e2.to < e2.from)) return;
+        const item = { id: 'x' + (st.seq + 10), name: e2.name.trim(), when: this.fmtDates(e2.from, e2.to, e2.yearly), n: this.dayCount(e2.from, e2.to), yearly: !!e2.yearly, conflict: null };
+        this.setState({ sd: Object.assign({}, st.sd, { excs: st.sd.excs.concat([item]) }), exc: null, seq: st.seq + 1 });
+      },
+      sdRoles: s.roles.map((ro) => ({
+        name: ro.name || 'Atsyz rol',
+        cap: this.roleCap(ro),
+        on: d.role === ro.id,
+        cls: d.role === ro.id ? 'opt on' : 'opt',
+        dis: ro.id === 'owner' || isOwner,
+        pick: () => { if (ro.id !== 'owner' && !isOwner) this.setSd({ role: ro.id }); }
+      })),
+      goRoles: () => this.setState({ tab: 'roles', staffId: null, sd: null, exc: null, roleSel: d.role, rd: this.copyRole(roleById[d.role] || s.roles[0]) }),
+      openDisable: () => { if (this.state.sd) this.setState({ dis: { id: this.state.sd.id, choice: 'move', to: 'any' } }); },
+      reactivate: () => { if (this.state.sd) this.setStatus(this.state.sd.id, 'active', this.state.sd.name + ' gaýtadan işjeň'); },
+      saveStaff: () => this.saveStaff()
+    };
+  }
+  inviteVals(s, roleById) {
+    const v = s.inv || { step: 1, phone: '', name: '', spec: '', role: 'specialist', services: [] };
+    const role = roleById[v.role] || roleById.specialist || s.roles[0];
+    const noLogin = !!role.noLogin;
+    const optional = !!(role.id === 'admin');
+    const ok1 = v.phone.length === 8 && v.name.trim().length > 0;
+    const ok2 = optional || v.services.length > 0;
+    const nm = v.name.trim() || 'Işgär';
+    const go = (n) => () => { const cur = this.state.inv; if (cur && n < cur.step) this.setInv({ step: n }); };
+    const steps = [[1, 'Kim'], [2, 'Hyzmatlar'], [3, 'Barla']].map((x) => ({
+      n: x[0], t: x[1], sep: x[0] > 1,
+      cls: v.step === x[0] ? 'stp cur' : (v.step > x[0] ? 'stp done' : 'stp'),
+      done: v.step > x[0], notDone: v.step <= x[0],
+      dis: x[0] > v.step,
+      cur: v.step === x[0] ? 'step' : 'false',
+      go: go(x[0])
+    }));
+    const names = [];
+    this.catalog().forEach((g) => g.items.forEach((it) => { if (v.services.indexOf(it[0]) >= 0) names.push(it[1]); }));
+    const sum = [
+      ['Telefon', '+993 ' + this.fmtPhone(v.phone), 1],
+      ['Ady', v.name.trim(), 1],
+      ['Hünäri', v.spec.trim() || '—', 1],
+      ['Rol', (role.name || 'Atsyz rol') + ' — ' + this.roleCap(role).toLowerCase(), 1],
+      ['Hyzmatlar', names.length ? names.length + ': ' + names.join(', ') : 'Saýlanmady', 2]
+    ].map((x) => ({ k: x[0], v: x[1], label: x[0] + ': ' + x[1] + '. Üýtget', go: () => this.setInv({ step: x[2] }) }));
+    return {
+      invOpen: !!s.inv,
+      closeInvite: () => this.setState({ inv: null }),
+      invKey: (e) => { if (e && e.key === 'Escape') this.setState({ inv: null }); },
+      invSteps: steps,
+      inv1: v.step === 1,
+      inv2: v.step === 2,
+      inv3: v.step === 3,
+      invHasBack: v.step > 1,
+      invNotLast: v.step < 3,
+      invCantNext: v.step === 1 ? !ok1 : !ok2,
+      invBack: () => { const cur = this.state.inv; if (cur && cur.step > 1) this.setInv({ step: cur.step - 1 }); },
+      invNext: () => {
+        const cur = this.state.inv;
+        if (!cur) return;
+        if (cur.step === 1 && ok1) this.setInv({ step: 2 });
+        else if (cur.step === 2 && ok2) this.setInv({ step: 3 });
+      },
+      invPhoneFmt: this.fmtPhone(v.phone),
+      onInvPhone: (e) => this.setInv({ phone: e.target.value.replace(/\D/g, '').slice(0, 8) }),
+      invPhoneHint: noLogin ? 'Programmasyz işgär girmeýär — SMS iberilmeýär. Belgi diňe size we administratora görünýär.' : 'Telefon belgisi — onuň girişi. Çakylyk SMS bilen geler.',
+      invName: v.name,
+      onInvName: (e) => this.setInv({ name: e.target.value.slice(0, 30) }),
+      invSpec: v.spec,
+      onInvSpec: (e) => this.setInv({ spec: e.target.value.slice(0, 40) }),
+      invRole: v.role,
+      onInvRole: (e) => this.setInv({ role: e.target.value }),
+      invRoleOpts: s.roles.filter((r) => r.id !== 'owner').map((r) => ({ v: r.id, t: r.name || 'Atsyz rol' })),
+      invRoleDesc: this.roleSummary(role),
+      invQ: nm + ' näme edýär?',
+      invSvcHint: optional ? 'Administrator üçin hökman däl — saýlasaňyz, müşderiler ony hem saýlap biler.' : 'Müşderi ony diňe şu hyzmatlarda görer.',
+      invGroups: this.groupsFor(v.services, (next) => this.setInv({ services: next }), 'iv'),
+      invSvcCount: v.services.length ? v.services.length + ' hyzmat saýlandy' : 'Entek hyzmat saýlanmady',
+      sumRows: sum,
+      invNote: noLogin ? nm + ' programma girmeýär, SMS iberilmeýär. Müşderiler oňa derrew onlaýn ýazylyp biler.' : nm + ' SMS bilen çakylyk alar we şu belgi bilen girer. Girýänçä ýagdaýy «Çagyryldy» bolar.',
+      invSendText: noLogin ? 'Işgäri goş' : 'Çakylyk iber',
+      sendInvite: () => this.sendInvite()
+    };
+  }
+  disableVals(s) {
+    const dv = s.dis || { id: '', choice: 'move', to: 'any' };
+    const m = s.team.find((x) => x.id === dv.id) || s.team[0];
+    const sf = this.suf(m.name);
+    const n = m.upcoming || 0;
+    const setDis = (patch) => { if (this.state.dis) this.setState({ dis: Object.assign({}, this.state.dis, patch) }); };
+    const toOpts = [{ v: 'any', t: 'Islendik boş hünärmen' }].concat(s.team.filter((x) => x.id !== m.id && x.kind === 'pro' && x.status === 'active').map((x) => ({ v: x.id, t: x.name })));
+    const mr = s.roles.find((r) => r.id === m.role);
+    const canLogin = !(mr && mr.noLogin);
+    const bookable = m.kind === 'pro';
+    let lose = '';
+    if (canLogin && bookable) lose = ' ' + m.name + ' programma girip bilmez, müşderiler oňa ýazylyp bilmez.';
+    else if (canLogin) lose = ' ' + m.name + ' programma girip bilmez.';
+    else if (bookable) lose = ' Müşderiler oňa ýazylyp bilmez.';
+    return {
+      disOpen: !!s.dis,
+      closeDisable: () => this.setState({ dis: null }),
+      disKey: (e) => { if (e && e.key === 'Escape') this.setState({ dis: null }); },
+      confirmDisable: () => this.confirmDisable(),
+      dis: {
+        title: sf.acc + ' öçürmekmi?',
+        text: 'Taryh we hasabatlar saklanar.' + lose + (n ? '' : ' Gelýän ýazylyşy ýok.'),
+        hasUpcoming: n > 0,
+        countText: sf.gen + ' ' + n + ' gelýän ýazylyşy bar',
+        isMove: dv.choice === 'move',
+        isKeep: dv.choice === 'keep',
+        isCancel: dv.choice === 'cancel',
+        moveCls: dv.choice === 'move' ? 'opt on' : 'opt',
+        keepCls: dv.choice === 'keep' ? 'opt on' : 'opt',
+        cancelCls: dv.choice === 'cancel' ? 'opt on' : 'opt',
+        pickMove: () => setDis({ choice: 'move' }),
+        pickKeep: () => setDis({ choice: 'keep' }),
+        pickCancel: () => setDis({ choice: 'cancel' }),
+        keepCap: m.name + ' şol ýazylyşlara gelýär, soň senenamadan aýrylýar',
+        to: dv.to,
+        toOpts: toOpts,
+        onTo: (e) => setDis({ to: e.target.value })
+      }
+    };
+  }
+  rolesVals(s) {
+    const isNew = s.roleSel === 'new';
+    const rd = s.rd || this.copyRole(s.roles[0]);
+    const saved = s.roles.find((r) => r.id === s.roleSel);
+    const locked = !!rd.system;
+    const noLogin = !!rd.noLogin;
+    const count = (id) => s.team.filter((m) => m.role === id && m.status === 'active').length;
+    const items = s.roles.map((r) => ({
+      name: r.name || 'Atsyz rol',
+      cap: this.roleCap(r),
+      count: count(r.id) + ' işgär',
+      lock: !!r.system,
+      on: s.roleSel === r.id,
+      cls: s.roleSel === r.id ? 'rli-b on' : 'rli-b',
+      pick: () => this.pickRole(r.id)
+    }));
+    if (isNew) items.push({ name: String(rd.name).trim() || 'Täze rol', cap: this.roleCap(rd), count: '0 işgär', lock: false, on: true, cls: 'rli-b on', pick: () => {} });
+    const members = isNew ? [] : s.team.filter((m) => m.role === rd.id && m.status === 'active');
+    const invited = isNew ? [] : s.team.filter((m) => m.role === rd.id && m.status === 'invited');
+    let membersText = 'Bu rolda entek işgär ýok. Işgäriň roluny Topar bölüminde üýtgedip bilersiňiz.';
+    if (members.length) membersText = 'Bu roldaky işgärler: ' + members.map((m) => m.name).join(', ') + (invited.length ? ' · çagyrylan: ' + invited.map((m) => m.name).join(', ') : '');
+    else if (invited.length) membersText = 'Bu rolda çagyrylan: ' + invited.map((m) => m.name).join(', ');
+    const sortJ = (a) => a.slice().sort().join(',');
+    const dirty = isNew || !!(saved && (String(saved.name) !== String(rd.name) || saved.vis !== rd.vis || sortJ(saved.perms) !== sortJ(rd.perms)));
+    const setRd = (patch) => { if (this.state.rd) this.setState({ rd: Object.assign({}, this.state.rd, patch) }); };
+    const PC = {
+      confirm: rd.vis === 'all' ? 'Ähli täze haýyşlara jogap berýär: tassyklaýar ýa-da ret edýär' : 'Diňe öz haýyşlaryna jogap berýär: tassyklaýar ýa-da ret edýär',
+      move: 'Ýazylyşy başga wagta geçirýär ýa-da ýatyrýar — müşderä SMS gidýär',
+      noshow: '«Arz et»: gelmedi, gijä galdy, gödek gylyk',
+      clients: 'Müşderi kartlary, telefon belgileri we bellikler',
+      services: 'Hyzmatlar sahypasy: atlar, dowamlylyk, bahalar',
+      invite: 'Topara täze işgär çagyrýar',
+      revenue: 'Bahalaryň jemi, müşderiniň jemi tölegi, hasabatlar',
+      settings: 'Biznes profili, iş wagty, ýazylyş düzgünleri'
+    };
+    return {
+      roleItems: items,
+      newRole: () => this.setState({ roleSel: 'new', rd: { id: null, name: '', vis: 'own', perms: [] } }),
+      re: {
+        title: String(rd.name).trim() || 'Täze rol',
+        countText: isNew ? 'Täze rol' : members.length + ' işgär',
+        name: rd.name,
+        locked: locked,
+        isNoLogin: noLogin,
+        canLogin: !noLogin,
+        hasMembers: members.length > 0,
+        avatars: members.slice(0, 5).map((m) => m.name.charAt(0)),
+        membersText: membersText,
+        editable: !locked,
+        dirty: dirty && !locked,
+        cantSave: locked || !String(rd.name).trim()
+      },
+      onReName: (e) => setRd({ name: e.target.value.slice(0, 30) }),
+      visOpts: [['own', 'Diňe öz ýazylyşlary', 'Beýlekileriň wagty «Bes» görüner'], ['all', 'Ähli senenama', 'Ähli hünärmenleriň ýazylyşlary we müşderileri']].map((o) => ({
+        t: o[1], c: o[2], on: rd.vis === o[0], cls: rd.vis === o[0] ? 'opt on' : 'opt', dis: locked,
+        pick: () => { if (!locked) setRd({ vis: o[0] }); }
+      })),
+      perms: this.PERMS().map((p) => {
+        const on = locked || rd.perms.indexOf(p[0]) >= 0;
+        return {
+          t: p[1], c: PC[p[0]], lid: 'pm-' + p[0], on: on, cls: on ? 'sw on' : 'sw', dis: locked,
+          flip: () => {
+            const cur = this.state.rd;
+            if (!cur || cur.system) return;
+            const has = cur.perms.indexOf(p[0]) >= 0;
+            setRd({ perms: has ? cur.perms.filter((x) => x !== p[0]) : cur.perms.concat([p[0]]) });
+          }
+        };
+      }),
+      saveRole: () => this.saveRole()
+    };
+  }
+}
+</script>
+</body>
+</html>

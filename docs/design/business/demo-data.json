@@ -1,0 +1,936 @@
+{
+  "_about": "Demo dataset for the business workspace (business.yeral.app) of Glow Studio. Same business, services (ids s1–s11) and specialists as demo-data.json. Demo clock = Wednesday 14 Oct 2026, 11:20. Signed-in user = owner Maýsa.",
+  "now": "2026-10-14T11:20:00+05:00",
+  "nowLabelTk": "Çarşenbe, 14 oktýabr · 11:20",
+  "business": {
+    "slug": "glow-studio",
+    "name": "Glow Studio",
+    "categoryTk": "Gözellik salony",
+    "address": "Bitarap Türkmenistan şaýoly 247, 2-nji gat",
+    "entranceNote": "Söwda merkeziniň gapdalyndaky gapydan, lift bilen 2-nji gat",
+    "phone": "+993 12 45 67 89",
+    "link": "yeral.app/tk/b/glow-studio",
+    "logoBlob": "ca78c9263808b968b674fc1863df8a5c",
+    "verification": "verified",
+    "branches": [
+      {
+        "name": "Glow Studio",
+        "sub": "Bitarap Türkmenistan şaýoly",
+        "pending": 5,
+        "current": true
+      },
+      {
+        "name": "Glow Studio · Parahat",
+        "sub": "Parahat 7",
+        "pending": 2
+      }
+    ]
+  },
+  "me": {
+    "name": "Maýsa Annaýewa",
+    "role": "Eýesi",
+    "phone": "+993 65 10 20 30",
+    "initial": "M"
+  },
+  "roles": [
+    {
+      "id": "owner",
+      "name": "Eýesi",
+      "system": true,
+      "visibility": "all",
+      "permissions": "all"
+    },
+    {
+      "id": "admin",
+      "name": "Administrator",
+      "visibility": "all",
+      "permissions": [
+        "confirm",
+        "move",
+        "noshow",
+        "clients",
+        "invite"
+      ]
+    },
+    {
+      "id": "specialist",
+      "name": "Hünärmen",
+      "visibility": "own",
+      "permissions": [
+        "confirm",
+        "move",
+        "noshow"
+      ]
+    },
+    {
+      "id": "noapp",
+      "name": "Programmasyz",
+      "visibility": "none",
+      "permissions": [],
+      "note": "Girmeýär; ýazylyşlaryny eýesi we administrator alyp barýar"
+    }
+  ],
+  "permissionLabels": {
+    "all": "Ähli senenamany görmek",
+    "confirm": "Ýazylyşlary tassyklamak",
+    "move": "Geçirmek we ýatyrmak",
+    "noshow": "Gelmedi bellemek",
+    "clients": "Müşderileri görmek we üýtgetmek",
+    "services": "Hyzmatlary we bahalary üýtgetmek",
+    "invite": "Işgär çagyrmak",
+    "revenue": "Girdejini görmek",
+    "settings": "Sazlamalary üýtgetmek"
+  },
+  "team": [
+    {
+      "id": "mays",
+      "name": "Maýsa Annaýewa",
+      "role": "Eýesi",
+      "bookable": false,
+      "phone": "+993 65 10 20 30",
+      "status": "Işjeň"
+    },
+    {
+      "id": "selbi",
+      "name": "Selbi Hojaýewa",
+      "role": "Administrator",
+      "bookable": false,
+      "phone": "+993 65 88 41 02",
+      "status": "Işjeň"
+    },
+    {
+      "id": "ayna",
+      "name": "Aýna",
+      "fullName": "Aýna Myradowa",
+      "role": "Hünärmen",
+      "specialization": "Stilist",
+      "bookable": true,
+      "hasApp": true,
+      "phone": "+993 65 31 22 10",
+      "services": [
+        "s1",
+        "s2",
+        "s3",
+        "s4"
+      ],
+      "schedule": "Biznes wagty bilen",
+      "hours": "09:00–20:00",
+      "break": "14:00–14:40",
+      "status": "Işjeň",
+      "exceptions": [
+        {
+          "name": "Doglan güni",
+          "dates": "3 maý",
+          "yearly": true
+        }
+      ],
+      "breakNote": "Daily break 14:00–14:40 on Wednesdays; Thursday 13:30–14:10 (so b18 at 14:30 fits)"
+    },
+    {
+      "id": "maral",
+      "name": "Maral",
+      "fullName": "Maral Sapargeldiýewa",
+      "role": "Hünärmen",
+      "specialization": "Dyrnak ussasy",
+      "bookable": true,
+      "hasApp": true,
+      "phone": "+993 61 44 08 19",
+      "services": [
+        "s5",
+        "s6",
+        "s7"
+      ],
+      "schedule": "Biznes wagty bilen",
+      "hours": "09:00–20:00",
+      "status": "Işjeň"
+    },
+    {
+      "id": "jeren",
+      "name": "Jeren",
+      "fullName": "Jeren Ataýewa",
+      "role": "Hünärmen",
+      "specialization": "Kosmetolog",
+      "bookable": true,
+      "hasApp": true,
+      "phone": "+993 62 70 15 33",
+      "services": [
+        "s8",
+        "s9"
+      ],
+      "schedule": "Öz smenasy",
+      "hours": "10:00–19:00",
+      "status": "Işjeň",
+      "exceptions": [
+        {
+          "name": "Rugsat",
+          "dates": "2–9 noýabr 2026",
+          "yearly": false
+        }
+      ]
+    },
+    {
+      "id": "leyli",
+      "name": "Leýli",
+      "fullName": "Leýli Garaýewa",
+      "role": "Programmasyz",
+      "specialization": "Massažist",
+      "bookable": true,
+      "hasApp": false,
+      "phone": "+993 63 12 90 47",
+      "services": [
+        "s10",
+        "s11"
+      ],
+      "schedule": "Öz smenasy",
+      "hours": "12:00–20:00",
+      "status": "Işjeň"
+    },
+    {
+      "id": "gulnar",
+      "name": "Gülnar",
+      "role": "Hünärmen",
+      "specialization": "Stilist",
+      "bookable": false,
+      "phone": "+993 64 21 55 90",
+      "status": "Çagyryldy",
+      "note": "SMS çakylyk iberildi, entek girmedi"
+    }
+  ],
+  "rules": {
+    "online": true,
+    "confirmMode": "manual",
+    "hold": "30 min",
+    "lead": "1 sagat",
+    "window": "30 gün",
+    "buffer": "10 min",
+    "step": "15 min",
+    "cancelWindow": "2 sagat",
+    "askReason": true,
+    "blockAfterNoShows": 2
+  },
+  "hours": [
+    [
+      "Duşenbe",
+      "09:00–20:00"
+    ],
+    [
+      "Sişenbe",
+      "09:00–20:00"
+    ],
+    [
+      "Çarşenbe",
+      "09:00–20:00"
+    ],
+    [
+      "Penşenbe",
+      "09:00–20:00"
+    ],
+    [
+      "Anna",
+      "09:00–20:00"
+    ],
+    [
+      "Şenbe",
+      "09:00–20:00"
+    ],
+    [
+      "Ýekşenbe",
+      "10:00–18:00"
+    ]
+  ],
+  "exceptions": [
+    {
+      "name": "Täze ýyl",
+      "dates": "1 ýanwar",
+      "yearly": true,
+      "closed": true
+    },
+    {
+      "name": "Nowruz",
+      "dates": "21–22 mart",
+      "yearly": true,
+      "closed": true
+    },
+    {
+      "name": "Garaşsyzlyk güni",
+      "dates": "27 sentýabr",
+      "yearly": true,
+      "closed": true
+    },
+    {
+      "name": "Inwentarizasiýa",
+      "dates": "2 noýabr 2026",
+      "yearly": false,
+      "closed": true
+    }
+  ],
+  "serviceBuffers": {
+    "s3": "15 min"
+  },
+  "calendarDay": {
+    "dateTk": "Çarşenbe, 14 oktýabr",
+    "summaryTk": "16 ýazylyş · 3 haýyş",
+    "visibleFrom": "08:00",
+    "visibleTo": "21:00",
+    "columns": [
+      {
+        "staff": "ayna",
+        "hours": "09:00–20:00",
+        "breaks": [
+          [
+            "14:00",
+            "14:40",
+            "Arakesme"
+          ]
+        ],
+        "bookings": [
+          {
+            "id": "b01",
+            "from": "09:00",
+            "to": "10:00",
+            "client": "Ogulşat M.",
+            "service": "Aýal saç kesimi",
+            "status": "completed",
+            "source": "online"
+          },
+          {
+            "id": "b02",
+            "from": "10:15",
+            "to": "11:00",
+            "client": "Merjen K.",
+            "service": "Saç düzmek",
+            "status": "completed",
+            "source": "phone"
+          },
+          {
+            "id": "b03",
+            "from": "11:30",
+            "to": "13:30",
+            "client": "Gülälek N.",
+            "service": "Saç reňklemek",
+            "status": "confirmed",
+            "source": "online",
+            "alert": "Ammiaksyz reňk — allergiýa",
+            "price": "250 TMT"
+          },
+          {
+            "id": "b04",
+            "from": "15:30",
+            "to": "16:30",
+            "client": "Ejegyz T.",
+            "service": "Aýal saç kesimi",
+            "status": "pending",
+            "source": "online",
+            "hold": "18 min",
+            "price": "80 TMT",
+            "clientNote": "Saçym uzyn, ujuny diňe 5 sm kesmeli"
+          },
+          {
+            "id": "b05",
+            "from": "17:00",
+            "to": "17:30",
+            "client": "Döwlet B.",
+            "service": "Çaga saç kesimi",
+            "status": "confirmed",
+            "source": "phone"
+          },
+          {
+            "id": "b06",
+            "from": "18:00",
+            "to": "18:45",
+            "client": "Aýsoltan R.",
+            "service": "Saç düzmek",
+            "status": "confirmed",
+            "source": "online"
+          }
+        ]
+      },
+      {
+        "staff": "maral",
+        "hours": "09:00–20:00",
+        "breaks": [],
+        "bookings": [
+          {
+            "id": "b07",
+            "from": "09:30",
+            "to": "10:30",
+            "client": "Aýgül R.",
+            "service": "Manikýur",
+            "status": "completed",
+            "source": "online"
+          },
+          {
+            "id": "b08",
+            "from": "11:00",
+            "to": "12:30",
+            "client": "Bahar A.",
+            "service": "Gel-lak bilen manikýur",
+            "status": "confirmed",
+            "source": "online"
+          },
+          {
+            "id": "b09",
+            "from": "13:00",
+            "to": "14:15",
+            "client": "Jemal S.",
+            "service": "Pedikýur",
+            "status": "confirmed",
+            "source": "online"
+          },
+          {
+            "id": "b17",
+            "from": "15:00",
+            "to": "16:00",
+            "client": "Jahan M.",
+            "service": "Manikýur",
+            "status": "cancelled",
+            "cancelledBy": "client",
+            "source": "online"
+          },
+          {
+            "id": "b10",
+            "from": "16:00",
+            "to": "17:00",
+            "client": "Mähri G.",
+            "service": "Manikýur",
+            "status": "pending",
+            "source": "online",
+            "hold": "24 min",
+            "price": "70 TMT"
+          },
+          {
+            "id": "b11",
+            "from": "18:00",
+            "to": "19:30",
+            "client": "Läle O.",
+            "service": "Gel-lak bilen manikýur",
+            "status": "confirmed",
+            "source": "phone"
+          }
+        ]
+      },
+      {
+        "staff": "jeren",
+        "hours": "10:00–19:00",
+        "breaks": [],
+        "bookings": [
+          {
+            "id": "b12",
+            "from": "10:00",
+            "to": "11:00",
+            "client": "Ogulnabat Ç.",
+            "service": "Ýüz arassalamak",
+            "status": "noshow",
+            "source": "online"
+          },
+          {
+            "id": "b13",
+            "from": "15:00",
+            "to": "15:30",
+            "client": "Sona P.",
+            "service": "Gaş we kirpik",
+            "status": "confirmed",
+            "source": "online"
+          }
+        ]
+      },
+      {
+        "staff": "leyli",
+        "hours": "12:00–20:00",
+        "noApp": true,
+        "breaks": [],
+        "bookings": [
+          {
+            "id": "b14",
+            "from": "12:00",
+            "to": "13:00",
+            "client": "Nurjahan A.",
+            "service": "Doly beden massažy",
+            "status": "confirmed",
+            "source": "phone"
+          },
+          {
+            "id": "b15",
+            "from": "16:30",
+            "to": "17:00",
+            "client": "Gözel A.",
+            "service": "Arka massažy",
+            "status": "pending",
+            "source": "online",
+            "hold": "21 min",
+            "price": "90 TMT"
+          },
+          {
+            "id": "b16",
+            "from": "18:00",
+            "to": "18:30",
+            "client": "Merdan K.",
+            "service": "Arka massažy",
+            "status": "confirmed",
+            "source": "online"
+          }
+        ]
+      }
+    ],
+    "_counting": "Count = all non-cancelled bookings of the day incl. requests and no-shows. Planned revenue = confirmed + pending + completed prices; excludes cancelled and no-show."
+  },
+  "otherRequests": [
+    {
+      "id": "b18",
+      "client": "Aýjemal Gurbanowa",
+      "phone": "+993 65 90 11 22",
+      "service": "Aýal saç kesimi",
+      "staff": "Aýna",
+      "whenTk": "Ertir · Penşenbe, 15 oktýabr · 14:30–15:30",
+      "hold": "28 min",
+      "price": "80 TMT",
+      "visits": "3-nji gelşi",
+      "note": "Saçym uzyn, reňk saýlamakda kömek gerek"
+    },
+    {
+      "id": "b19",
+      "client": "Arzygül H.",
+      "phone": "+993 64 72 03 18",
+      "service": "Ýüz arassalamak",
+      "staff": "Jeren",
+      "whenTk": "Anna, 16 oktýabr · 10:00–11:00",
+      "hold": "12 min",
+      "price": "150 TMT",
+      "visits": "Täze müşderi"
+    }
+  ],
+  "weekLoad": {
+    "_about": "booked share of working time, Mon 12 – Sun 18 Oct; [percent, bookings, requests]. Illustrative only — the build computes load from bookings.",
+    "ayna": [
+      [
+        72,
+        6,
+        0
+      ],
+      [
+        80,
+        7,
+        0
+      ],
+      [
+        86,
+        6,
+        1
+      ],
+      [
+        64,
+        5,
+        1
+      ],
+      [
+        90,
+        7,
+        0
+      ],
+      [
+        100,
+        8,
+        0
+      ],
+      [
+        40,
+        2,
+        0
+      ]
+    ],
+    "maral": [
+      [
+        60,
+        5,
+        0
+      ],
+      [
+        75,
+        6,
+        0
+      ],
+      [
+        78,
+        5,
+        1
+      ],
+      [
+        55,
+        4,
+        0
+      ],
+      [
+        70,
+        5,
+        0
+      ],
+      [
+        95,
+        7,
+        0
+      ],
+      [
+        30,
+        2,
+        0
+      ]
+    ],
+    "jeren": [
+      [
+        30,
+        2,
+        0
+      ],
+      [
+        45,
+        3,
+        0
+      ],
+      [
+        17,
+        2,
+        0
+      ],
+      [
+        50,
+        3,
+        0
+      ],
+      [
+        35,
+        2,
+        1
+      ],
+      [
+        70,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "leyli": [
+      [
+        50,
+        3,
+        0
+      ],
+      [
+        38,
+        2,
+        0
+      ],
+      [
+        38,
+        3,
+        1
+      ],
+      [
+        62,
+        4,
+        0
+      ],
+      [
+        50,
+        3,
+        0
+      ],
+      [
+        88,
+        5,
+        0
+      ],
+      [
+        25,
+        1,
+        0
+      ]
+    ]
+  },
+  "clientsSummaryTk": "148 müşderi · şu aý 9 täze",
+  "clients": [
+    {
+      "id": "c1",
+      "name": "Gülälek N.",
+      "fullName": "Gülälek Nurmuhammedowa",
+      "phone": "+993 65 44 70 19",
+      "visits": 12,
+      "last": "28 sentýabr",
+      "next": "Şu gün 11:30",
+      "avg": "145 TMT",
+      "total": "1 740 TMT",
+      "since": "mart 2024",
+      "tags": [
+        "Yzygiderli",
+        "VIP"
+      ],
+      "source": "Instagram",
+      "noShows": 1,
+      "notes": [
+        {
+          "text": "Ammiaksyz reňk ulanmaly — allergiýa.",
+          "alert": true,
+          "by": "Aýna",
+          "at": "12 awgust"
+        },
+        {
+          "text": "Diňe irden gelip bilýär, günortandan soň ýazmaň.",
+          "alert": false,
+          "by": "Selbi",
+          "at": "3 iýul"
+        }
+      ],
+      "history": [
+        [
+          "28 sentýabr",
+          "Saç reňklemek · Aýna",
+          "250 TMT",
+          "completed"
+        ],
+        [
+          "7 sentýabr",
+          "Aýal saç kesimi · Aýna",
+          "80 TMT",
+          "completed"
+        ],
+        [
+          "19 awgust",
+          "Saç düzmek · Aýna",
+          "60 TMT",
+          "noshow"
+        ],
+        [
+          "2 awgust",
+          "Gel-lak bilen manikýur · Maral",
+          "110 TMT",
+          "completed"
+        ]
+      ]
+    },
+    {
+      "id": "c2",
+      "name": "Ogulşat M.",
+      "phone": "+993 65 21 77 03",
+      "visits": 7,
+      "last": "Şu gün",
+      "avg": "82 TMT",
+      "tags": [
+        "Yzygiderli"
+      ],
+      "source": "Ýeral"
+    },
+    {
+      "id": "c3",
+      "name": "Aýjemal Gurbanowa",
+      "phone": "+993 65 90 11 22",
+      "visits": 3,
+      "last": "18 sentýabr",
+      "next": "Ertir 14:30 · haýyş",
+      "avg": "85 TMT",
+      "tags": [],
+      "source": "Ýeral"
+    },
+    {
+      "id": "c4",
+      "name": "Sona P.",
+      "phone": "+993 62 33 81 07",
+      "visits": 14,
+      "last": "1 oktýabr",
+      "next": "Şu gün 15:00",
+      "avg": "64 TMT",
+      "tags": [
+        "VIP",
+        "Yzygiderli"
+      ],
+      "source": "Tanyş maslahat berdi"
+    },
+    {
+      "id": "c5",
+      "name": "Bahar A.",
+      "phone": "+993 65 70 33 18",
+      "visits": 9,
+      "last": "Şu gün",
+      "avg": "98 TMT",
+      "tags": [
+        "Yzygiderli"
+      ],
+      "source": "Instagram"
+    },
+    {
+      "id": "c6",
+      "name": "Mähri G.",
+      "phone": "+993 61 30 44 92",
+      "visits": 4,
+      "last": "2 oktýabr",
+      "next": "Şu gün 16:00 · haýyş",
+      "avg": "70 TMT",
+      "tags": [],
+      "source": "Ýeral"
+    },
+    {
+      "id": "c7",
+      "name": "Ogulnabat Ç.",
+      "phone": "+993 62 18 60 05",
+      "visits": 3,
+      "last": "Şu gün · gelmedi",
+      "avg": "150 TMT",
+      "tags": [
+        "Arz edilen"
+      ],
+      "noShows": 2,
+      "onlineBlocked": true,
+      "notes": [
+        {
+          "text": "2 gezek gelmedi — diňe jaň arkaly ýazyň.",
+          "alert": true,
+          "by": "Selbi",
+          "at": "Şu gün"
+        }
+      ]
+    },
+    {
+      "id": "c8",
+      "name": "Merjen K.",
+      "phone": "+993 65 02 91 66",
+      "visits": 5,
+      "last": "Şu gün",
+      "avg": "60 TMT",
+      "tags": [],
+      "source": "Köçeden"
+    },
+    {
+      "id": "c9",
+      "name": "Läle O.",
+      "phone": "+993 63 47 25 51",
+      "visits": 2,
+      "last": "20 sentýabr",
+      "next": "Şu gün 18:00",
+      "avg": "110 TMT",
+      "tags": [
+        "Täze"
+      ],
+      "source": "Instagram"
+    },
+    {
+      "id": "c10",
+      "name": "Döwlet B.",
+      "phone": "+993 65 66 10 22",
+      "visits": 6,
+      "last": "16 sentýabr",
+      "next": "Şu gün 17:00",
+      "avg": "40 TMT",
+      "tags": [
+        "Çaga"
+      ],
+      "source": "Tanyş maslahat berdi",
+      "notes": [
+        {
+          "text": "Ejesi Jahan getirýär, telefon ejesiniňki.",
+          "alert": false,
+          "by": "Aýna",
+          "at": "16 sentýabr"
+        }
+      ]
+    },
+    {
+      "id": "c11",
+      "name": "Mahym D.",
+      "phone": "+993 65 37 48 20",
+      "visits": 4,
+      "last": "3 iýul",
+      "avg": "75 TMT",
+      "tags": [],
+      "source": "Ýeral"
+    },
+    {
+      "id": "c12",
+      "name": "Ejegyz T.",
+      "phone": "+993 64 55 12 80",
+      "visits": 0,
+      "last": "—",
+      "next": "Şu gün 15:30 · haýyş",
+      "avg": "—",
+      "tags": [
+        "Täze"
+      ],
+      "source": "Ýeral"
+    }
+  ],
+  "declineReasons": [
+    "Bu wagt boş däl",
+    "Hünärmen ýok",
+    "Bu hyzmaty edip bilmeýäris",
+    "Başga sebäp"
+  ],
+  "complaintReasons": [
+    "Gelmedi",
+    "Gijä galdy",
+    "Gödek gylyk",
+    "Başga"
+  ],
+  "categoriesForSignup": [
+    {
+      "group": "Gözellik",
+      "items": [
+        "Gözellik salony",
+        "Dellekhana",
+        "Dyrnak studiýasy",
+        "Gaş we kirpik",
+        "Spa we massaž"
+      ]
+    },
+    {
+      "group": "Saglyk",
+      "items": [
+        "Diş lukmany",
+        "Lukmançylyk merkezi",
+        "Fizioterapiýa",
+        "Psiholog"
+      ]
+    },
+    {
+      "group": "Sport",
+      "items": [
+        "Fitnes studiýasy",
+        "Ýoga we stretçing",
+        "Şahsy tälimçi"
+      ],
+      "note": "Topar sapaklary ýakynda — häzir wagt bellemek görnüşinde"
+    },
+    {
+      "group": "Okuw",
+      "items": [
+        "Repetitor",
+        "Dil kursy",
+        "Saz sapaklary"
+      ]
+    },
+    {
+      "group": "Awtoulag",
+      "items": [
+        "Awtoýuwalga",
+        "Tigir hyzmaty",
+        "Awtoservis"
+      ]
+    },
+    {
+      "group": "Iýmit",
+      "items": [
+        "Restoran",
+        "Kafe we çaýhana"
+      ],
+      "note": "Stol dolandyryşy ýakynda"
+    },
+    {
+      "group": "Başga",
+      "items": [
+        "Öý haýwanlary",
+        "Öý hyzmatlary",
+        "Başga — hyzmatlary özüm ýazaryn"
+      ]
+    }
+  ]
+}

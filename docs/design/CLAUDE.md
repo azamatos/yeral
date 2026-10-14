@@ -11,7 +11,7 @@ This folder (`docs/design/`) is the complete design hand-off for **yeral.app**, 
 
 ## Non-negotiable product rules
 - **Ýeral = "ýer al" (take a place).** Bookings for any business that sells time — not only beauty. Four booking types: appointment, table, class, resource (later). The category decides the type.
-- **The business confirms every booking by hand.** The client's first state is always *Garaşylýar* (Pending) and copy says the request was *sent* ("Ýazylyş ugradyldy"), never "booked".
+- **The business confirms bookings by hand by default.** The client's first state is *Garaşylýar* (Pending) and copy says the request was *sent* ("Ýazylyş ugradyldy"), never "booked". Businesses may switch on instant confirmation (then: *Tassyklandy* at once). Unanswered requests expire after the business's hold time (default 30 min).
 - **Five statuses with one meaning everywhere:** Garaşylýar / Tassyklandy / Tamamlandy / Ýatyryldy / Gelmedi, with the exact badge colours in `tokens.css`. A visit becomes Completed by default after it ends. Phone bookings are Confirmed + phone icon. Cancelled-by-client vs by-business = same colour, different icon + label.
 - **No city in UI copy.** Location = the user's position ("Ýakynymda", "golaýyňyzda"). An IP city may appear only inside the "Nirede?" field when geolocation is denied.
 - **Turkmen is the default language** (`/tk/…`), then RU, EN. Copy in the screens is final TK draft — copy it verbatim into the TK message catalogue (it still needs a native review). RU strings run ~30% longer: never fixed-width buttons.
@@ -64,3 +64,12 @@ Manat prices for business plans/commission · real average bills · official sto
 ## Assets
 - `assets/photos/` — Unsplash photos (free licence, credits in `CREDITS.md`). Fine for demo seeds and marketing placeholders; real businesses upload their own photos.
 - `assets/brand/` — Ýeral icon, mark and lockups (ink/white). The `salon-*.jpg` files there are leftovers from the mobile prototype with unclear origin (one came from a Fresha listing) — do not ship them.
+
+## Business workspace (business.yeral.app)
+- Spec: `business/README.md` (roles & permissions, request handling, calendar rules, CRM, setup wizard, settings, data model, decisions log). Demo data: `business/demo-data.json` (Glow Studio's workspace, same services/staff as the client demo).
+- Screens: `screens/business/` — start with `B-Shell.dc.html` (sidebar + top bar every page shares), then `B-Calendar` (the core screen), `B-Bookings`, `B-Clients`, `B-Client`, `B-Onboarding`, `B-Settings`, `B-Services`, `B-Team`.
+- Same design system and tokens as the client site, denser: 14/20 in tables and panels, rows 52–56, S buttons in toolbars.
+- Desktop-first (≥1024), icon rail at 768–1023, under 768 a one-staff calendar + "use the app" banner.
+- Permissions hide (not disable) what a role can't see: revenue, other staff's booking details ("Bes"), settings sections.
+- Build order: shell → calendar (day all staff → panels → week) → bookings list → clients → setup wizard → settings → services → team & roles.
+- Not in scope yet: analytics, reviews, notification settings, help, billing, B2B landing, table/class management, checkout (revenue = prices of completed visits).

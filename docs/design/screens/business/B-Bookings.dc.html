@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Biznes — ýazylyşlar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6;color:#101014}
+.b-tin{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.b-tin:hover{background:#ded7fd;color:#4429d6}
+.b-dan{background:#ffffff;border-color:#f6c7c2;color:#a3251b}
+.b-dan:hover{background:#fee4e2;color:#a3251b}
+.b-red{background:#b42318;color:#ffffff}
+.b-red:hover{background:#912018;color:#ffffff}
+.b-ico{width:40px;height:40px;padding:0;min-width:0;flex:none}
+.b-sm.b-ico{width:36px;height:36px}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed}
+.b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
+.swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
+.swb:hover{background:#f4f4f6}
+.sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014}
+.sn:hover{background:#f4f4f6;color:#101014}
+.sn.on{background:#efecfe;color:#4429d6;font-weight:600}
+.sn.off{color:#6e6e78;cursor:default}
+.sn.off:hover{background:transparent;color:#6e6e78}
+.cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
+.gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
+.kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
+.pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
+.mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
+.mi:hover{background:#f4f4f6;color:#101014}
+.av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.cnt.hid,.tn.hid{display:none}
+.popa{position:absolute;z-index:31;display:flex;flex-direction:column}
+button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:pointer;text-align:left}
+.mi:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #7a5ff4}
+.mi-d,.mi-d:hover{color:#a3251b}
+.catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
+.zup{z-index:35 !important}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.tab{display:inline-flex;align-items:center;height:44px;padding:0 2px;border:0;border-bottom:2px solid transparent;background:none;font-family:inherit;font-size:15px;font-weight:500;color:#5a5a64;cursor:pointer;margin-bottom:-1px;white-space:nowrap;flex:none}
+.tab:hover{color:#101014}
+.tab.on{color:#101014;font-weight:600;border-bottom-color:#5a3ff0}
+.tab:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4;border-radius:6px}
+.tn{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 6px;margin-left:8px;border-radius:999px;background:#f0f0f3;color:#5a5a64;font-size:12px;font-weight:600}
+.tab.on .tn{background:#efecfe;color:#4429d6}
+.tn.tp,.tab.on .tn.tp{background:#fef6e7;color:#93500a}
+.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px 0 14px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;white-space:nowrap;flex:none}
+.chip:hover{background:#f6f6f8}
+.chip.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.chip.on:hover{background:#ded7fd}
+.chip:focus-visible,.slot:focus-visible,.cb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.slot{height:40px;min-width:72px;padding:0 12px;border-radius:10px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:600;color:#101014;cursor:pointer;font-variant-numeric:tabular-nums}
+.slot:hover{border-color:#5a3ff0;color:#4429d6}
+.slot.on{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
+.tsr{display:flex;align-items:center;gap:8px;height:36px;width:300px;max-width:100%;padding:0 4px 0 12px;border:1px solid #d8d8de;border-radius:10px;background:#ffffff;color:#5a5a64}
+.tsr:hover{border-color:#b0b0b8}
+.tsr:focus-within{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.tsr input{border:0;outline:none;font-family:inherit;font-size:14px;color:#101014;background:transparent;flex:1;min-width:0;height:100%;padding:0}
+.tsr input::placeholder{color:#6e6e78}
+.tsx{width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:#5a5a64;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;padding:0}
+.tsx:hover{background:#f4f4f6;color:#101014}
+.tsx:focus-visible{outline:none;box-shadow:0 0 0 2px #7a5ff4}
+.tcard{border:1px solid #e6e6ea;border-radius:16px;background:#ffffff}
+.tbl{min-width:1044px}
+.tr{position:relative;display:grid;column-gap:12px;align-items:center;min-height:56px;padding:6px 8px;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px;color:#101014}
+.tr:hover{background:#f6f6f8}
+.tr.sel,.tr.on,.tr.sel:hover,.tr.on:hover{background:#efecfe}
+.th,.th:hover{min-height:40px;padding-top:0;padding-bottom:0;background:transparent;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78;border-radius:16px 16px 0 0}
+.c-std{grid-template-columns:36px minmax(150px,1.5fr) minmax(150px,1.5fr) minmax(72px,.7fr) minmax(104px,1fr) minmax(88px,.8fr) 176px 40px}
+.c-req{grid-template-columns:36px minmax(150px,1.4fr) minmax(150px,1.4fr) minmax(72px,.7fr) minmax(104px,1fr) minmax(88px,.8fr) 124px 168px 40px}
+.c-std>.jg{display:none}
+.cell{display:flex;flex-direction:column;min-width:0}
+.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.z1{position:relative;z-index:1}
+.cb{width:18px;height:18px;accent-color:#5a3ff0;margin:0;cursor:pointer;border-radius:4px}
+.ropen{padding:0;border:0;background:none;font-family:inherit;font-size:14px;line-height:20px;font-weight:600;color:#101014;cursor:pointer;text-align:left;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ropen::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0}
+.ropen:focus-visible{outline:none}
+.ropen:focus-visible::after{box-shadow:inset 0 0 0 2px #7a5ff4}
+.tg{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:999px;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
+.tg-new{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
+.src{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#101014;white-space:nowrap}
+.src svg{color:#5a5a64;flex:none}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:999px;flex:none}
+.st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
+.st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
+.st-d{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
+.st-x{background:#eef1f6;border:1px solid #d3dbe6;color:#41505f}
+.st-n{background:#fee4e2;border:1px solid #f6c7c2;color:#a3251b}
+.d-p{background:#dc8b0b}.d-c{background:#5a3ff0}.d-d{background:#12a366}.d-x{background:#7b8ea3}.d-n{background:#d9412f}
+.by{display:inline-flex;align-items:center;gap:5px;font-size:12px;line-height:16px;color:#41505f;white-space:nowrap}
+.tmr{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tmr.hot{color:#a3251b}
+.tfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:0 16px}
+.bulk{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 12px 12px 20px;background:#101014;color:#ffffff;border-radius:0 0 15px 15px}
+.bk-w{background:#ffffff;color:#101014}
+.bk-w:hover{background:#f0f0f3;color:#101014}
+.bk-o{background:transparent;color:#ffffff;border-color:#5a5a64}
+.bk-o:hover{background:#2a2a32;color:#ffffff}
+.bk-x{background:transparent;color:#ffffff}
+.bk-x:hover{background:#2a2a32;color:#ffffff}
+.bulk .b:disabled{background:transparent;border-color:#3a3a42;color:#8a8a94}
+.empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:48px 32px;border:1px dashed #d8d8de;border-radius:16px;text-align:center}
+.eic{width:56px;height:56px;border-radius:999px;background:#efecfe;color:#5a3ff0;display:flex;align-items:center;justify-content:center}
+.scrim{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:40}
+.drw{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:100%;display:flex;flex-direction:column;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);z-index:41}
+.grab{display:none;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:8px auto 0;flex:none}
+.drw-h{display:flex;align-items:center;gap:8px;height:64px;padding:0 14px 0 24px;border-bottom:1px solid #e6e6ea;flex:none}
+.dtt{margin:0;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.drw-b{flex:1;overflow-y:auto;padding:20px 24px 24px;display:flex;flex-direction:column;gap:20px}
+.drw-f{flex:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 24px;border-top:1px solid #e6e6ea;background:#ffffff}
+.drow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dsrc{display:inline-flex;align-items:center;gap:6px;font-size:13px;line-height:18px;font-weight:500;color:#5a5a64}
+.dl{margin:0;display:flex;flex-direction:column}
+.dr{display:grid;grid-template-columns:140px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.dr.last{border-bottom:0}
+.dr dt{color:#5a5a64}
+.dr dd{margin:0;font-weight:500;color:#101014}
+.dsec{display:flex;flex-direction:column;gap:8px}
+.wbox{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:14px;line-height:20px}
+.wbox svg{flex:none;margin-top:1px}
+.wbt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.qbox{display:flex;flex-direction:column;gap:6px;margin:0;padding:12px 14px;border-radius:12px;background:#f6f6f8}
+.qtxt{margin:0;font-size:14px;line-height:20px;color:#101014}
+.cli{display:flex;align-items:flex-start;gap:12px}
+.clim{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.cn{font-size:16px;line-height:22px;font-weight:600}
+.tgs{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-top:4px}
+.tg-a{background:#efecfe;color:#4429d6}
+.tg-n{background:#fee4e2;color:#a3251b}
+.tg-p{background:#fef6e7;color:#93500a}
+.cact{display:flex;gap:8px;flex-wrap:wrap;padding-top:10px}
+.lnk{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:14px;line-height:20px;font-weight:600}
+.hst{display:inline-flex;align-items:center;gap:6px;font-size:13px;line-height:18px;color:#5a5a64;white-space:nowrap}
+.b-dtx{background:transparent;color:#a3251b}
+.b-dtx:hover{background:#fee4e2;color:#a3251b}
+.av40{width:40px;height:40px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.hrow{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.hrow.last{border-bottom:0}
+.inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp::placeholder{color:#6e6e78}
+.inp:hover{border-color:#b0b0b8}
+.inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.ta{height:88px;padding:10px 14px;resize:none;line-height:20px;font-size:14px}
+.fld{display:flex;flex-direction:column;gap:8px;min-width:0}
+.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.sw{width:52px;height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;flex:none}
+.sw:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.trk{position:relative;width:40px;height:24px;border-radius:999px;background:#e6e6ea;box-shadow:inset 0 0 0 1.5px #6e6e78;transition:background .15s}
+.sw.on .trk{background:#5a3ff0;box-shadow:none}
+.knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:999px;background:#ffffff;box-shadow:0 1px 2px rgba(16,16,20,.2);transition:left .15s}
+.sw.on .knob{left:18px}
+.mwrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
+.mwrap .scrim{position:absolute;z-index:0}
+.mdl{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;max-width:100%;max-height:100%;overflow-y:auto;padding:24px;border-radius:16px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.mdl-s{width:480px}
+.dsc-n{color:#a3251b;font-weight:600}
+.mt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.mp{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
+.mact{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.toast{position:fixed;left:272px;bottom:24px;z-index:80;display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 8px 0 16px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:15px;line-height:20px;max-width:calc(100% - 296px)}
+.toast .tb{background:transparent;color:#c3b6fb;padding:0 10px}
+.toast .tb:hover{background:#2a2a32;color:#c3b6fb}
+.tsp{width:8px;flex:none}
+@media (min-width:1280px){.dscrim{display:none}}
+@media (max-width:1359px){.tbx{overflow-x:auto}}
+@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side .swb{width:44px;padding:4px;justify-content:center}.side .swb>span:not(.av),.side .swb>svg{display:none}.sn{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0;position:relative}.sn .cnt{position:absolute;top:6px;right:6px;min-width:0;width:8px;height:8px;padding:0;border:0;background:#dc8b0b;font-size:0}.sn .soon{display:none}.sdv{width:44px;margin:8px 0 !important}.top{padding:0 24px}.gs{width:auto;flex:0 1 320px}.pad{padding:24px !important}.toast{left:96px;max-width:calc(100% - 120px)}}
+@media (max-width:767px){.app{flex-direction:column}.side{position:relative !important;top:auto !important;height:auto !important;width:100%;flex-direction:row;align-items:center;gap:4px;padding:8px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow-x:auto}.sdv,.sfill,.sx{display:none}.side .swb:last-of-type{margin-left:auto}.top{height:56px;padding:0 16px;gap:12px}.top h1{font-size:19px !important;line-height:24px !important}.gs{display:none}.pad{padding:16px !important}.tsr{width:100%;height:44px}.chip{height:44px}.b-sm{height:44px;border-radius:12px}.b-sm.b-ico{width:44px;height:44px}.drw{top:auto;left:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.grab{display:block}.drw-h{height:56px;padding:0 8px 0 16px}.drw-b{padding:16px}.drw-f{padding:12px 16px 16px}.drw-f .b{flex:1 1 auto}.dr{grid-template-columns:120px minmax(0,1fr)}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:16px;max-width:none}}
+</style>
+</helmet>
+<div class="app" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<aside class="side" aria-label="Esasy menýu" style="position: sticky; top: 0; height: 100vh; z-index: 20">
+<button class="swb" aria-label="Biznesi çalyş" aria-haspopup="menu" aria-expanded="{{bizOpen}}" onClick="{{toggleBiz}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bitarap Türkmenistan şaýoly</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<a class="sn" href="B-Calendar.dc.html" aria-label="Senenama"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
+<a class="sn on" href="B-Bookings.dc.html" aria-current="page" aria-label="{{navReqLabel}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="{{cntCls}}">{{pendingN}}</span></a>
+<a class="sn" href="B-Clients.dc.html" aria-label="Müşderiler"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
+<span class="sn off" aria-disabled="true" aria-label="Hasabatlar, ýakynda"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar<span class="soon">ýakynda</span></span>
+<a class="sn" href="B-Settings.dc.html" aria-label="Sazlamalar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<div class="sfill" style="flex: 1"></div>
+<a class="sn sx" href="#" aria-label="Ýeral sahypaňyz"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn sx" href="#" aria-label="Kömek"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<button class="swb" aria-label="Hasabym" aria-haspopup="menu" aria-expanded="{{userOpen}}" onClick="{{toggleUser}}"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<sc-if value="{{sideOpen}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeSide}}"></div></sc-if>
+<sc-if value="{{bizOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa" role="menu" aria-label="Biznesleriňiz" style="top: 60px; left: 12px; width: 300px">
+<div style="padding: 8px 10px 6px" class="lbl">Biznesleriňiz</div>
+<a class="mi" href="#" role="menuitemradio" aria-checked="true" style="background: #efecfe"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 28px; height: 28px; border-radius: 8px"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-weight: 600">Glow Studio</span><span class="cap" style="font-size: 12px">Bitarap Türkmenistan şaýoly</span></span><span class="{{cntCls}}">{{pendingN}}</span></a>
+<a class="mi" href="#" role="menuitemradio" aria-checked="false"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 28px; height: 28px; border-radius: 8px"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-weight: 600">Glow Studio · Parahat</span><span class="cap" style="font-size: 12px">Parahat 7</span></span><span class="cnt">2</span></a>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
+<a class="mi" href="B-Onboarding.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Şahamça goş</a>
+</div>
+</sc-if>
+<sc-if value="{{userOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa" role="menu" aria-label="Hasabym" style="bottom: 64px; left: 12px; width: 300px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">M</span><span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">+993 65 10 20 30 · Eýesi</span></span></div>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
+<a class="mi" href="#">Profilim</a>
+<a class="mi" href="#">Dil: Türkmençe</a>
+<a class="mi" href="Home.dc.html">Müşderi hökmünde aç · yeral.app</a>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
+<a class="mi" href="#">Çykmak</a>
+</div>
+</sc-if>
+</aside>
+
+<div class="main">
+<div class="top">
+<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Ýazylyşlar</h1>
+<div style="flex: 1"></div>
+<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
+<a class="b b-pri b-sm" href="B-Calendar.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täze ýazylyş</a>
+</div>
+
+<div class="pad" style="flex: 1; padding: 24px 32px 32px; display: flex; flex-direction: column; gap: 16px; min-width: 0">
+
+<div role="tablist" aria-label="Ýazylyşlar" style="display: flex; gap: 28px; border-bottom: 1px solid #e6e6ea; overflow-x: auto">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5"><button class="{{t.cls}}" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}">{{t.t}}<span class="{{t.nCls}}">{{t.n}}</span></button></sc-for>
+</div>
+
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<label class="tsr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Ýazylyşlary gözle" placeholder="Müşderi, telefon ýa-da belgi" value="{{q}}" onInput="{{onQ}}"><sc-if value="{{hasQ}}" hint-placeholder-val="{{false}}"><button class="tsx" aria-label="Gözlegi arassala" onClick="{{clearQ}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></sc-if></label>
+<div class="{{staffWrap}}" style="position: relative">
+<button class="{{staffChipCls}}" aria-haspopup="menu" aria-expanded="{{staffOpen}}" onClick="{{toggleStaff}}">{{staffChip}}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+<sc-if value="{{staffOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa" role="menu" aria-label="Hünärmen" style="top: 42px; left: 0; width: 240px">
+<sc-for list="{{staffOpts}}" as="o" hint-placeholder-count="5"><button class="mi" role="menuitemradio" aria-checked="{{o.on}}" onClick="{{o.pick}}"><span style="flex: 1">{{o.t}}</span><span class="cap">{{o.sub}}</span><sc-if value="{{o.on}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></button></sc-for>
+</div>
+</sc-if>
+</div>
+<div class="{{svcWrap}}" style="position: relative">
+<button class="{{svcChipCls}}" aria-haspopup="menu" aria-expanded="{{svcOpen}}" onClick="{{toggleSvc}}">{{svcChip}}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+<sc-if value="{{svcOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa" role="menu" aria-label="Hyzmat" style="top: 42px; left: 0; width: 280px; max-height: 420px; overflow-y: auto">
+<button class="mi" role="menuitemradio" aria-checked="{{svcAllOn}}" onClick="{{svcAll}}"><span style="flex: 1">Ähli hyzmatlar</span><sc-if value="{{svcAllOn}}" hint-placeholder-val="{{true}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></button>
+<sc-for list="{{svcGroups}}" as="g" hint-placeholder-count="4">
+<div class="lbl" style="padding: 10px 10px 4px">{{g.t}}</div>
+<sc-for list="{{g.items}}" as="o" hint-placeholder-count="3"><button class="mi" role="menuitemradio" aria-checked="{{o.on}}" onClick="{{o.pick}}"><span style="flex: 1">{{o.t}}</span><span class="cap">{{o.sub}}</span><sc-if value="{{o.on}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></button></sc-for>
+</sc-for>
+</div>
+</sc-if>
+</div>
+<div class="{{dateWrap}}" style="position: relative">
+<button class="{{dateChipCls}}" aria-haspopup="menu" aria-expanded="{{dateOpen}}" onClick="{{toggleDate}}">{{dateChip}}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+<sc-if value="{{dateOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa" role="menu" aria-label="Sene" style="top: 42px; left: 0; width: 260px">
+<sc-for list="{{dateOpts}}" as="o" hint-placeholder-count="3"><button class="mi" role="menuitemradio" aria-checked="{{o.on}}" onClick="{{o.pick}}"><span style="flex: 1">{{o.t}}</span><span class="cap">{{o.sub}}</span><sc-if value="{{o.on}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></button></sc-for>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{hasFilters}}" hint-placeholder-val="{{false}}"><button class="b b-gho b-sm" onClick="{{clearFilters}}">Arassala</button></sc-if>
+<div style="flex: 1"></div>
+<button class="b b-sec b-sm" onClick="{{doExport}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Eksport</button>
+</div>
+
+<sc-if value="{{showReqEmpty}}" hint-placeholder-val="{{false}}">
+<div class="empty">
+<div class="eic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></div>
+<div style="font-size: 19px; line-height: 24px; font-weight: 600">Täze haýyş ýok</div>
+<div style="font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 360px">Hemme haýyşlara jogap berildi. Täze haýyş gelende size habar bereris.</div>
+<a class="b b-sec b-sm" href="B-Calendar.dc.html" style="margin-top: 4px">Senenamany aç</a>
+</div>
+</sc-if>
+
+<sc-if value="{{showTable}}" hint-placeholder-val="{{true}}">
+<div class="tcard">
+<div class="tbx">
+<div class="tbl" role="table" aria-label="{{tableLabel}}">
+<div class="{{headCls}}" role="row">
+<span role="columnheader" style="display: flex; justify-content: center"><input type="checkbox" class="cb" aria-label="Ählisini saýla" checked="{{allSel}}" onChange="{{toggleAll}}"></span>
+<span role="columnheader">Müşderi</span>
+<span role="columnheader">Hyzmat</span>
+<span role="columnheader">Hünärmen</span>
+<span role="columnheader" style="display: inline-flex; align-items: center; gap: 4px; color: #101014">Wagt<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{sortIcon}}"></path></svg></span>
+<span role="columnheader">Çeşme</span>
+<span role="columnheader">Ýagdaý</span>
+<span class="jg" role="columnheader" style="display: inline-flex; align-items: center; gap: 4px; color: #101014">Jogap<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"></path></svg></span>
+<span role="columnheader"><span class="sr">Hereketler</span></span>
+</div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+<div class="{{r.cls}}" role="row">
+<span role="cell" class="z1" style="display: flex; justify-content: center"><input type="checkbox" class="cb" aria-label="{{r.selLabel}}" checked="{{r.sel}}" onChange="{{r.toggle}}"></span>
+<span role="cell" class="cell"><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><button class="ropen" aria-label="{{r.openLabel}}" onClick="{{r.open}}">{{r.client}}</button><sc-if value="{{r.isNew}}" hint-placeholder-val="{{false}}"><span class="tg tg-new">Täze</span></sc-if></span><span class="cap ell" style="font-variant-numeric: tabular-nums">{{r.phone}}</span></span>
+<span role="cell" class="cell"><span class="ell">{{r.svcName}}</span><span class="cap ell">{{r.svcMeta}}</span></span>
+<span role="cell" class="ell">{{r.staff}}</span>
+<span role="cell" class="cell"><span style="font-weight: 500; font-variant-numeric: tabular-nums">{{r.time}}</span><span class="cap ell">{{r.day}}</span></span>
+<span role="cell" class="src"><sc-if value="{{r.isOnline}}" hint-placeholder-val="{{true}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg></sc-if><sc-if value="{{r.isPhone}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></sc-if><sc-if value="{{r.isWalk}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if>{{r.src}}</span>
+<span role="cell" class="cell" style="gap: 4px; align-items: flex-start"><span class="{{r.badgeCls}}"><span class="{{r.dotCls}}"></span>{{r.statusLabel}}</span><sc-if value="{{r.hasBy}}" hint-placeholder-val="{{false}}"><span class="by"><sc-if value="{{r.byClient}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if><sc-if value="{{r.byBiz}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg></sc-if><sc-if value="{{r.bySys}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if>{{r.byText}}</span></sc-if></span>
+<span role="cell" class="jg z1" style="display: flex; align-items: center; gap: 6px"><span class="{{r.timerCls}}" title="{{r.timerLabel}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{r.holdText}}</span><button class="b b-tin b-sm b-ico" aria-label="Tassykla" title="Tassykla" onClick="{{r.confirm}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></button><button class="b b-sec b-sm b-ico" aria-label="Ret et" title="Ret et" onClick="{{r.decline}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></span>
+<span role="cell" class="{{r.menuCell}}" style="display: flex; justify-content: center">
+<button class="b b-gho b-sm b-ico" aria-label="{{r.menuLabel}}" aria-haspopup="menu" aria-expanded="{{r.menuOpen}}" onClick="{{r.toggleMenu}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></button>
+<sc-if value="{{r.menuOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa" role="menu" aria-label="{{r.menuLabel}}" style="{{r.menuPos}}">
+<sc-for list="{{r.menu}}" as="m" hint-placeholder-count="3"><sc-if value="{{m.isLink}}" hint-placeholder-val="{{false}}"><a class="mi" role="menuitem" href="{{m.href}}">{{m.t}}</a></sc-if><sc-if value="{{m.isBtn}}" hint-placeholder-val="{{true}}"><button class="{{m.cls}}" role="menuitem" onClick="{{m.act}}">{{m.t}}</button></sc-if></sc-for>
+</div>
+</sc-if>
+</span>
+</div>
+</sc-for>
+<sc-if value="{{showNoMatch}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 24px; text-align: center; border-bottom: 1px solid #e6e6ea">
+<span style="font-size: 17px; line-height: 24px; font-weight: 600">Hiç zat tapylmady</span>
+<span class="cap">Gözlegi ýa-da süzgüçleri üýtgedip görüň.</span>
+<button class="b b-sec b-sm" style="margin-top: 4px" onClick="{{clearFilters}}">Süzgüçleri arassala</button>
+</div>
+</sc-if>
+</div>
+</div>
+<div class="tfoot"><span class="cap">{{footText}}</span></div>
+<sc-if value="{{hasSel}}" hint-placeholder-val="{{false}}">
+<div class="bulk" role="region" aria-label="Saýlanan ýazylyşlar">
+<span style="font-size: 14px; line-height: 20px; font-weight: 600">{{selText}}</span>
+<div style="flex: 1"></div>
+<button class="b b-sm bk-w" disabled="{{bulkOff}}" onClick="{{bulkConfirm}}">Tassykla</button>
+<button class="b b-sm bk-o" disabled="{{bulkOff}}" onClick="{{bulkDecline}}">Ret et</button>
+<a class="b b-sm bk-o" href="B-Calendar.dc.html">Başga wagta geçir</a>
+<button class="b b-sm b-ico bk-x" aria-label="Saýlawy aýyr" onClick="{{clearSel}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+</div>
+</div>
+
+<sc-if value="{{anyPop}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closePops}}"></div></sc-if>
+
+<sc-if value="{{showDrawer}}" hint-placeholder-val="{{false}}">
+<div class="scrim dscrim" onClick="{{closeDrawer}}"></div>
+<aside class="drw" role="dialog" aria-labelledby="drw-t" onKeyDown="{{drawerKey}}">
+<span class="grab"></span>
+<div class="drw-h">
+<h2 id="drw-t" class="dtt">{{d.title}}</h2>
+<div style="flex: 1"></div>
+<button class="b b-gho b-sm b-ico" aria-label="Ýap" onClick="{{closeDrawer}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div class="drw-b">
+<div class="drow">
+<span class="{{d.badgeCls}}"><span class="{{d.dotCls}}"></span>{{d.statusLabel}}</span>
+<span class="dsrc"><sc-if value="{{d.isOnline}}" hint-placeholder-val="{{true}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg></sc-if><sc-if value="{{d.isPhone}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></sc-if><sc-if value="{{d.isWalk}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if>{{d.srcLabel}}</span>
+<sc-if value="{{d.hasBy}}" hint-placeholder-val="{{false}}"><span class="dsrc">{{d.byText}}</span></sc-if>
+</div>
+
+<sc-if value="{{d.isPending}}" hint-placeholder-val="{{true}}">
+<div class="wbox" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="wbt"><span style="font-weight: 600; color: {{d.timerColor}}">{{d.timerText}}</span><span>Jogap berilmese, haýyş awtomatik ýatyrylar we müşderä 3 başga wagt teklip ediler.</span></span></div>
+</sc-if>
+
+<div class="dsec">
+<div class="cli">
+<span class="av40" aria-hidden="true">{{d.initial}}</span>
+<span class="clim"><span class="cn">{{d.client}}</span><span class="cap" style="font-variant-numeric: tabular-nums">{{d.phone}}</span><span class="tgs"><sc-if value="{{d.isNewCl}}" hint-placeholder-val="{{false}}"><span class="tg tg-a">Täze müşderi</span></sc-if><sc-if value="{{d.hasVisits}}" hint-placeholder-val="{{true}}"><span class="cap">{{d.visits}}</span></sc-if><sc-if value="{{d.hasNs}}" hint-placeholder-val="{{false}}"><span class="tg tg-n">{{d.nsText}}</span></sc-if><sc-if value="{{d.blocked}}" hint-placeholder-val="{{false}}"><span class="tg tg-p">Diňe jaň arkaly</span></sc-if></span>
+<sc-if value="{{d.isBooking}}" hint-placeholder-val="{{false}}"><span class="cact"><button class="b b-sec b-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Jaň et</button><a class="b b-gho b-sm" href="B-Calendar.dc.html">Gaýtadan ýaz</a></span></sc-if></span>
+</div>
+<a class="lnk" href="B-Client.dc.html">Müşderiniň kartyna geç<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+</div>
+
+<sc-if value="{{d.hasAlert}}" hint-placeholder-val="{{false}}"><div class="wbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span class="wbt"><span class="lbl" style="color: #93500a">Bellik · ähli topar görýär</span><span>{{d.alert}}</span></span></div></sc-if>
+
+<dl class="dl"><sc-for list="{{d.details}}" as="row" hint-placeholder-count="7"><div class="{{row.cls}}"><dt>{{row.k}}</dt><dd>{{row.v}}</dd></div></sc-for></dl>
+
+<sc-if value="{{d.hasNote}}" hint-placeholder-val="{{false}}"><figure class="qbox"><figcaption class="lbl">Müşderiniň belligi</figcaption><blockquote class="qtxt">“{{d.note}}”</blockquote></figure></sc-if>
+
+<sc-if value="{{d.isBooking}}" hint-placeholder-val="{{false}}">
+<div class="fld"><label class="flab" for="drw-note">Içerki bellik</label><textarea id="drw-note" class="inp ta" value="{{d.inote}}" onInput="{{onNote}}" placeholder="Meselem: reňk belgisi ýa-da ýörite isleg" aria-describedby="drw-note-c"></textarea><span id="drw-note-c" class="cap">{{d.noteCap}}</span></div>
+</sc-if>
+
+<sc-if value="{{d.hasHist}}" hint-placeholder-val="{{false}}">
+<div class="dsec">
+<span class="lbl">Soňky gelşleri</span>
+<div><sc-for list="{{d.hist}}" as="h" hint-placeholder-count="3"><div class="{{h.cls}}"><span class="cap" style="font-variant-numeric: tabular-nums">{{h.date}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span class="ell">{{h.what}}</span><span class="hst"><span class="{{h.dotCls}}"></span>{{h.label}}</span></span><span style="font-weight: 600; font-variant-numeric: tabular-nums">{{h.price}}</span></div></sc-for></div>
+</div>
+</sc-if>
+</div>
+
+<sc-if value="{{d.hasFoot}}" hint-placeholder-val="{{true}}">
+<div class="drw-f">
+<sc-if value="{{d.actPending}}" hint-placeholder-val="{{true}}">
+<button class="b b-sec" style="flex: 1 1 0" onClick="{{drwDecline}}">Ret et</button>
+<button class="b b-pri" style="flex: 1 1 0" onClick="{{drwConfirm}}">Tassykla</button>
+</sc-if>
+<sc-if value="{{d.actConfirmed}}" hint-placeholder-val="{{false}}">
+<a class="b b-sec" href="B-Calendar.dc.html">Başga wagta geçir</a>
+<button class="b b-gho" onClick="{{drwComplaint}}">Arz et</button>
+<div style="flex: 1"></div>
+<button class="b b-dtx" onClick="{{drwCancel}}">Ýatyr</button>
+</sc-if>
+<sc-if value="{{d.actDone}}" hint-placeholder-val="{{false}}">
+<button class="b b-gho" onClick="{{drwComplaint}}">Arz et</button>
+</sc-if>
+<sc-if value="{{d.actRebook}}" hint-placeholder-val="{{false}}">
+<a class="b b-sec" href="B-Calendar.dc.html">Gaýtadan ýaz</a>
+</sc-if>
+</div>
+</sc-if>
+</aside>
+</sc-if>
+
+<sc-if value="{{showModal}}" hint-placeholder-val="{{false}}">
+<div class="mwrap" onKeyDown="{{modalKey}}">
+<div class="scrim" onClick="{{closeModal}}"></div>
+<div class="mdl mdl-s" role="dialog" aria-modal="true" aria-labelledby="md-t">
+<span class="grab"></span>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h2 id="md-t" class="mt">{{m.title}}</h2><button class="b b-gho b-sm b-ico" aria-label="Ýap" onClick="{{closeModal}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><p class="mp">{{m.lead}}</p><span class="cap">{{m.ctx}}</span></div>
+<div class="fld">
+<span class="flab" id="md-r">{{m.reasonLabel}}</span>
+<div role="radiogroup" aria-labelledby="md-r" style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{m.chips}}" as="c" hint-placeholder-count="4"><button class="{{c.cls}}" role="radio" aria-checked="{{c.on}}" onClick="{{c.pick}}">{{c.t}}</button></sc-for></div>
+<sc-if value="{{m.hasDesc}}" hint-placeholder-val="{{false}}"><span class="{{m.descCls}}">{{m.desc}}</span></sc-if>
+</div>
+<sc-if value="{{m.showText}}" hint-placeholder-val="{{true}}">
+<div class="fld">
+<label class="flab" for="md-x">{{m.textLabel}}</label>
+<textarea id="md-x" class="inp ta" value="{{rtext}}" onInput="{{onRtext}}" placeholder="{{m.textPh}}"></textarea>
+</div>
+</sc-if>
+<sc-if value="{{m.showAlt}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 12px; padding-top: 16px; border-top: 1px solid #e6e6ea">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 16px"><div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span id="md-alt" style="font-size: 14px; line-height: 20px; font-weight: 500">Başga wagt teklip et</span><span class="cap">Müşderi teklip edilen wagty bir basyşda kabul edip biler</span></div><button class="{{altCls}}" role="switch" aria-checked="{{altOn}}" aria-labelledby="md-alt" onClick="{{flipAlt}}"><span class="trk"><span class="knob"></span></span></button></div>
+<sc-if value="{{altOn}}" hint-placeholder-val="{{true}}"><div style="display: flex; flex-direction: column; gap: 8px"><div role="group" aria-label="Teklip edilýän wagtlar" style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{m.alts}}" as="a" hint-placeholder-count="3"><button class="{{a.cls}}" aria-pressed="{{a.on}}" onClick="{{a.pick}}">{{a.t}}</button></sc-for></div><span class="cap">{{m.altCount}}</span></div></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{m.hasNote}}" hint-placeholder-val="{{false}}"><p class="cap" style="margin: 0">Müşderiniň kartyna ýazylar we diňe topar görer. 2 gezek gelmedik müşderi diňe jaň arkaly ýazylyp biler.</p></sc-if>
+<div class="mact"><button class="b b-sec" onClick="{{closeModal}}">Yza</button><button class="{{m.okCls}}" disabled="{{m.okOff}}" onClick="{{doModal}}">{{m.okLabel}}</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div class="toast" role="status">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+<span>{{toastText}}</span>
+<sc-if value="{{toastUndo}}" hint-placeholder-val="{{false}}"><button class="b b-sm tb" onClick="{{undo}}">Yzyna al</button></sc-if>
+<sc-if value="{{toastPlain}}" hint-placeholder-val="{{true}}"><span class="tsp"></span></sc-if>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["requests","today","upcoming","past","cancelled"],"default":"requests","section":"State"},"panel":{"editor":"enum","options":["none","request","booking","decline"],"default":"none","section":"State"},"selected":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1320}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = Object.assign({ over: {}, notes: {}, toast: null, q: '', fStaff: '', fSvc: '', fDate: 'week', pop: null, side: null }, this.fromProps(props || {}));
+  }
+  fromProps(p) {
+    const tab = p.tab ?? 'requests';
+    const panel = p.panel ?? 'none';
+    const st = { tab: tab, openId: null, modal: null, mIds: [], reason: null, rtext: '', altOn: false, alts: {}, sel: {}, menuId: null, pop: null };
+    if (panel === 'request' || panel === 'decline') st.openId = 'b04';
+    if (panel === 'booking') st.openId = 'b03';
+    if (panel === 'decline') { st.modal = 'decline'; st.mIds = ['b04']; st.reason = 'Bu wagt boş däl'; st.altOn = true; st.alts = { 0: true }; }
+    if (p.selected) {
+      const L = this.listFor(tab, {});
+      const pend = L.filter((r) => r.status === 'pending');
+      (pend.length >= 2 ? pend : L).slice(0, 2).forEach((r) => { st.sel[r.id] = true; });
+    }
+    return st;
+  }
+  componentDidUpdate(pp) {
+    const p = this.props;
+    if (pp.tab !== p.tab || pp.panel !== p.panel || pp.selected !== p.selected) this.setState(this.fromProps(p));
+  }
+  componentWillUnmount() { clearTimeout(this.tt); }
+  flash(patch, text, undo) {
+    clearTimeout(this.tt);
+    this.setState(Object.assign({}, patch, { toast: { text: text, undo: undo || null } }));
+    this.tt = setTimeout(() => this.setState({ toast: null }), 6000);
+  }
+  data() {
+    if (this._d) return this._d;
+    const SV = {
+      s1: ['Aýal saç kesimi', '60 min', '80 TMT'], s2: ['Saç düzmek', '45 min', '60 TMT'], s3: ['Saç reňklemek', '2 sag', '250 TMT-den'], s4: ['Çaga saç kesimi', '30 min', '40 TMT'],
+      s5: ['Manikýur', '60 min', '70 TMT'], s6: ['Gel-lak bilen manikýur', '1 sag 30 min', '110 TMT'], s7: ['Pedikýur', '1 sag 15 min', '90 TMT'],
+      s8: ['Ýüz arassalamak', '60 min', '150 TMT'], s9: ['Gaş we kirpik', '30 min', '50 TMT'],
+      s10: ['Arka massažy', '30 min', '90 TMT'], s11: ['Doly beden massažy', '60 min', '160 TMT']
+    };
+    const CL = {
+      'Ogulşat M.': ['+993 65 21 77 03', 7, 0, '', '82 TMT'], 'Aýgül R.': ['+993 65 18 42 07', 5],
+      'Ogulnabat Ç.': ['+993 62 18 60 05', 3, 2, '2 gezek gelmedi — diňe jaň arkaly ýazyň.', '150 TMT', [], true],
+      'Merjen K.': ['+993 65 02 91 66', 5, 0, '', '60 TMT'], 'Bahar A.': ['+993 65 70 33 18', 9, 0, '', '98 TMT'],
+      'Gülälek N.': ['+993 65 44 70 19', 12, 1, 'Ammiaksyz reňk ulanmaly — allergiýa.', '145 TMT', [['28 sent.', 'Saç reňklemek · Aýna', 'completed', '250 TMT'], ['7 sent.', 'Aýal saç kesimi · Aýna', 'completed', '80 TMT'], ['19 awg.', 'Saç düzmek · Aýna', 'noshow', '60 TMT']]],
+      'Nurjahan A.': ['+993 63 51 08 77', 6], 'Jemal S.': ['+993 61 27 90 34', 8], 'Jahan M.': ['+993 61 84 52 19', 2],
+      'Sona P.': ['+993 62 33 81 07', 14, 0, '', '64 TMT'], 'Ejegyz T.': ['+993 64 55 12 80', 0], 'Mähri G.': ['+993 61 30 44 92', 4, 0, '', '70 TMT'],
+      'Gözel A.': ['+993 65 73 26 41', 1], 'Döwlet B.': ['+993 65 66 10 22', 6, 0, '', '40 TMT'], 'Aýsoltan R.': ['+993 64 30 15 62', 2],
+      'Läle O.': ['+993 63 47 25 51', 2, 0, '', '110 TMT'], 'Merdan K.': ['+993 62 21 08 40', 3], 'Aýjemal Gurbanowa': ['+993 65 90 11 22', 3, 0, '', '85 TMT'],
+      'Arzygül H.': ['+993 64 72 03 18', 0], 'Mahym D.': ['+993 65 37 48 20', 4, 0, '', '75 TMT']
+    };
+    const R = [
+      ['b01', 'YR-48101', 'Ogulşat M.', 's1', 'Aýna', 0, '09:00', '10:00', 'online', 'completed'],
+      ['b07', 'YR-48107', 'Aýgül R.', 's5', 'Maral', 0, '09:30', '10:30', 'online', 'completed'],
+      ['b12', 'YR-48112', 'Ogulnabat Ç.', 's8', 'Jeren', 0, '10:00', '11:00', 'online', 'noshow'],
+      ['b02', 'YR-48102', 'Merjen K.', 's2', 'Aýna', 0, '10:15', '11:00', 'phone', 'completed'],
+      ['b08', 'YR-48108', 'Bahar A.', 's6', 'Maral', 0, '11:00', '12:30', 'online', 'confirmed'],
+      ['b03', 'YR-48103', 'Gülälek N.', 's3', 'Aýna', 0, '11:30', '13:30', 'online', 'confirmed', { price: '250 TMT' }],
+      ['b14', 'YR-48114', 'Nurjahan A.', 's11', 'Leýli', 0, '12:00', '13:00', 'phone', 'confirmed'],
+      ['b09', 'YR-48109', 'Jemal S.', 's7', 'Maral', 0, '13:00', '14:15', 'online', 'confirmed'],
+      ['b17', 'YR-48117', 'Jahan M.', 's5', 'Maral', 0, '15:00', '16:00', 'online', 'cancelled', { by: 'client' }],
+      ['b13', 'YR-48113', 'Sona P.', 's9', 'Jeren', 0, '15:00', '15:30', 'online', 'confirmed'],
+      ['b04', 'YR-48104', 'Ejegyz T.', 's1', 'Aýna', 0, '15:30', '16:30', 'online', 'pending', { hold: 18, note: 'Saçym uzyn, ujuny diňe 5 sm kesmeli' }],
+      ['b10', 'YR-48110', 'Mähri G.', 's5', 'Maral', 0, '16:00', '17:00', 'online', 'pending', { hold: 24 }],
+      ['b15', 'YR-48115', 'Gözel A.', 's10', 'Leýli', 0, '16:30', '17:00', 'online', 'pending', { hold: 21 }],
+      ['b05', 'YR-48105', 'Döwlet B.', 's4', 'Aýna', 0, '17:00', '17:30', 'phone', 'confirmed'],
+      ['b06', 'YR-48106', 'Aýsoltan R.', 's2', 'Aýna', 0, '18:00', '18:45', 'online', 'confirmed'],
+      ['b11', 'YR-48111', 'Läle O.', 's6', 'Maral', 0, '18:00', '19:30', 'phone', 'confirmed'],
+      ['b16', 'YR-48116', 'Merdan K.', 's10', 'Leýli', 0, '18:00', '18:30', 'online', 'confirmed'],
+      ['b18', 'YR-48213', 'Aýjemal Gurbanowa', 's1', 'Aýna', 1, '14:30', '15:30', 'online', 'pending', { hold: 28, note: 'Saçym uzyn, reňk saýlamakda kömek gerek' }],
+      ['b19', 'YR-48220', 'Arzygül H.', 's8', 'Jeren', 2, '10:00', '11:00', 'online', 'pending', { hold: 12 }],
+      ['u1', 'YR-48121', 'Aýgül R.', 's6', 'Maral', 1, '10:00', '11:30', 'online', 'confirmed'],
+      ['u2', 'YR-48124', 'Nurjahan A.', 's8', 'Jeren', 1, '16:00', '17:00', 'online', 'confirmed'],
+      ['u3', 'YR-48126', 'Sona P.', 's9', 'Jeren', 2, '12:00', '12:30', 'phone', 'confirmed'],
+      ['u4', 'YR-48130', 'Aýsoltan R.', 's3', 'Aýna', 3, '10:00', '12:00', 'online', 'confirmed', { price: '250 TMT' }],
+      ['u5', 'YR-48133', 'Jahan M.', 's5', 'Maral', 3, '15:00', '16:00', 'online', 'confirmed'],
+      ['p1', 'YR-48092', 'Gözel A.', 's10', 'Leýli', -1, '17:00', '17:30', 'walkin', 'completed'],
+      ['p2', 'YR-48071', 'Jemal S.', 's5', 'Maral', -2, '12:00', '13:00', 'phone', 'completed'],
+      ['x1', 'YR-48095', 'Mahym D.', 's1', 'Aýna', -1, '16:00', '17:00', 'online', 'cancelled', { by: 'system' }],
+      ['x2', 'YR-48069', 'Merdan K.', 's11', 'Leýli', -2, '18:00', '19:00', 'phone', 'cancelled', { by: 'business', why: 'Hünärmen ýok' }]
+    ];
+    const rows = R.map((a) => {
+      const sv = SV[a[3]];
+      const cl = CL[a[2]] || ['', 0];
+      const x = a[10] || {};
+      return {
+        id: a[0], ref: a[1], client: a[2], svc: a[3], svcName: sv[0], dur: sv[1], price: x.price || sv[2], staff: a[4], day: a[5], from: a[6], to: a[7], src: a[8], status: a[9],
+        hold: x.hold || 0, by: x.by || '', why: x.why || '', note: x.note || '',
+        phone: cl[0], visits: cl[1], ns: cl[2] || 0, alert: cl[3] || '', avg: cl[4] || '', hist: cl[5] || [], blocked: !!cl[6]
+      };
+    });
+    const ALT = {
+      b04: ['Ertir 10:00', 'Ertir 16:00', 'Anna 12:00'], b10: ['Ertir 12:00', 'Ertir 17:00', 'Anna 11:00'], b15: ['Şu gün 19:00', 'Ertir 13:00', 'Ertir 17:30'],
+      b18: ['Ertir 16:00', 'Anna 10:00', 'Anna 14:30'], b19: ['Anna 14:00', 'Şenbe 10:00', 'Şenbe 13:00']
+    };
+    const GROUPS = [['Saç', ['s1', 's2', 's3', 's4']], ['Dyrnak', ['s5', 's6', 's7']], ['Ýüz ideg', ['s8', 's9']], ['Massaž', ['s10', 's11']]];
+    this._d = { rows: rows, SV: SV, ALT: ALT, GROUPS: GROUPS };
+    return this._d;
+  }
+  cur(r, over) {
+    const o = over[r.id];
+    return o ? Object.assign({}, r, o) : r;
+  }
+  inTab(r, t) {
+    if (t === 'requests') return r.status === 'pending';
+    if (t === 'today') return r.day === 0 && r.status !== 'cancelled';
+    if (t === 'upcoming') return r.day > 0 && r.status === 'confirmed';
+    if (t === 'past') return r.status === 'completed' || r.status === 'noshow';
+    return r.status === 'cancelled';
+  }
+  listFor(t, over) {
+    const toMin = (h) => parseInt(h.slice(0, 2), 10) * 60 + parseInt(h.slice(3, 5), 10);
+    const k = (r) => r.day * 1440 + toMin(r.from);
+    const L = this.data().rows.map((r) => this.cur(r, over)).filter((r) => this.inTab(r, t));
+    if (t === 'requests') L.sort((a, b) => a.hold - b.hold);
+    else if (t === 'past' || t === 'cancelled') L.sort((a, b) => k(b) - k(a));
+    else L.sort((a, b) => k(a) - k(b));
+    return L;
+  }
+  byId(id) {
+    const r = this.data().rows.find((x) => x.id === id);
+    return r ? this.cur(r, this.state.over) : null;
+  }
+  doConfirm(ids) {
+    const s = this.state;
+    const over = Object.assign({}, s.over);
+    let n = 0;
+    ids.forEach((id) => {
+      const r = this.byId(id);
+      if (r && r.status === 'pending') { over[id] = { status: 'confirmed' }; n += 1; }
+    });
+    if (!n) return;
+    const close = ids.indexOf(s.openId) >= 0;
+    this.flash({ over: over, sel: {}, menuId: null, openId: close ? null : s.openId }, n > 1 ? n + ' ýazylyş tassyklandy · müşderilere SMS iberildi' : 'Ýazylyş tassyklandy · müşderä SMS iberildi', { over: s.over });
+  }
+  openModal(kind, ids) {
+    this.setState({ modal: kind, mIds: ids, reason: null, rtext: '', altOn: false, alts: {}, menuId: null });
+  }
+  doModal() {
+    const s = this.state;
+    if (!s.reason || !s.mIds.length) return;
+    const over = Object.assign({}, s.over);
+    let text = '';
+    if (s.modal === 'decline') {
+      s.mIds.forEach((id) => { over[id] = { status: 'cancelled', by: 'business', why: s.reason }; });
+      const altN = Object.keys(s.alts).filter((k) => s.alts[k]).length;
+      if (s.mIds.length > 1) text = s.mIds.length + ' haýyş ret edildi · müşderilere SMS iberildi';
+      else if (s.altOn && altN) text = 'Haýyş ret edildi · müşderä ' + altN + ' başga wagt teklip edildi';
+      else text = 'Haýyş ret edildi · müşderä SMS iberildi';
+    } else if (s.modal === 'cancel') {
+      const byClient = s.reason === 'Müşderi jaň edip ýatyrdy';
+      s.mIds.forEach((id) => { over[id] = { status: 'cancelled', by: byClient ? 'client' : 'business', why: byClient ? '' : s.reason }; });
+      text = 'Ýazylyş ýatyryldy · müşderä SMS iberildi';
+    } else {
+      if (s.reason === 'Gelmedi') s.mIds.forEach((id) => { over[id] = { status: 'noshow' }; });
+      text = s.reason === 'Gelmedi' ? 'Arz ýatda saklandy · ýagdaýy «Gelmedi»' : 'Arz ýatda saklandy · müşderiniň kartyna goşuldy';
+    }
+    const close = s.mIds.indexOf(s.openId) >= 0;
+    this.flash({ over: over, modal: null, mIds: [], reason: null, rtext: '', sel: {}, openId: close ? null : s.openId }, text, { over: s.over });
+  }
+  renderVals() {
+    const f = this.props.font ?? 'Onest';
+    const s = this.state;
+    const D = this.data();
+    const all = D.rows.map((r) => this.cur(r, s.over));
+    const byId = {};
+    all.forEach((r) => { byId[r.id] = r; });
+    const pendingN = all.filter((r) => r.status === 'pending').length;
+    const todayN = all.filter((r) => r.day === 0 && r.status !== 'cancelled').length;
+    const BADGE = { pending: ['st-p', 'd-p', 'Garaşylýar'], confirmed: ['st-c', 'd-c', 'Tassyklandy'], completed: ['st-d', 'd-d', 'Tamamlandy'], cancelled: ['st-x', 'd-x', 'Ýatyryldy'], noshow: ['st-n', 'd-n', 'Gelmedi'] };
+    const SRC = { online: 'Onlaýn', phone: 'Telefon', walkin: 'Gelip' };
+    const SRCL = { online: 'Onlaýn', phone: 'Telefon arkaly', walkin: 'Gelip ýazyldy' };
+    const DAYS = { '-2': 'Duşenbe, 12 okt.', '-1': 'Sişenbe, 13 okt.', '0': 'Şu gün', '1': 'Ertir, 15 okt.', '2': 'Anna, 16 okt.', '3': 'Şenbe, 17 okt.' };
+    const DAYL = { '-2': 'Duşenbe, 12 oktýabr', '-1': 'Sişenbe, 13 oktýabr', '0': 'Şu gün, 14 oktýabr', '1': 'Ertir, 15 oktýabr', '2': 'Anna, 16 oktýabr', '3': 'Şenbe, 17 oktýabr' };
+    const SHORT = { '-2': 'Duşenbe', '-1': 'Sişenbe', '0': 'Şu gün', '1': 'Ertir', '2': 'Anna', '3': 'Şenbe' };
+    const SPEC = { 'Aýna': 'Stilist', 'Maral': 'Dyrnak ussasy', 'Jeren': 'Kosmetolog', 'Leýli': 'Massažist · programmasyz' };
+    const BY = { client: 'Müşderi ýatyrdy', business: 'Biznes ýatyrdy', system: 'Wagt geçdi (jogapsyz)' };
+    const isReq = s.tab === 'requests';
+
+    const qd = s.q.trim().toLowerCase();
+    const qDig = qd.replace(/\D/g, '');
+    const match = (r) => {
+      if (s.fStaff && r.staff !== s.fStaff) return false;
+      if (s.fSvc && r.svc !== s.fSvc) return false;
+      if (s.fDate === 'today' && r.day !== 0) return false;
+      if (!qd) return true;
+      if (r.client.toLowerCase().indexOf(qd) >= 0) return true;
+      if (r.ref.toLowerCase().indexOf(qd) >= 0) return true;
+      if (qDig.length >= 2 && r.phone.replace(/\D/g, '').indexOf(qDig) >= 0) return true;
+      return false;
+    };
+    const tabList = this.listFor(s.tab, s.over);
+    const list = tabList.filter(match);
+
+    const rows = list.map((r, idx) => {
+      const bd = BADGE[r.status];
+      const sel = !!s.sel[r.id];
+      const mOpen = s.menuId === r.id;
+      const openIt = () => this.setState({ openId: r.id, menuId: null });
+      const mb = (t, act, danger) => ({ t: t, isBtn: true, isLink: false, href: '#', cls: danger ? 'mi mi-d' : 'mi', act: act });
+      const ml = (t, href) => ({ t: t, isBtn: false, isLink: true, href: href, cls: 'mi', act: null });
+      const menu = [];
+      if (r.status === 'pending') {
+        menu.push(mb('Tassykla', () => this.doConfirm([r.id])));
+        menu.push(mb('Ret et', () => this.openModal('decline', [r.id])));
+        menu.push(mb('Haýyşy aç', openIt));
+      } else {
+        menu.push(mb('Ýazylyşy aç', openIt));
+        if (r.status === 'confirmed') {
+          menu.push(ml('Başga wagta geçir', 'B-Calendar.dc.html'));
+          menu.push(mb('Arz et', () => this.openModal('complaint', [r.id])));
+          menu.push(mb('Ýatyr', () => this.openModal('cancel', [r.id]), true));
+        }
+        if (r.status === 'completed') menu.push(mb('Arz et', () => this.openModal('complaint', [r.id])));
+        if (r.status === 'cancelled' || r.status === 'noshow') menu.push(ml('Gaýtadan ýaz', 'B-Calendar.dc.html'));
+      }
+      menu.push(ml('Müşderiniň kartyna geç', 'B-Client.dc.html'));
+      return {
+        cls: 'tr ' + (isReq ? 'c-req' : 'c-std') + (sel ? ' sel' : (s.openId === r.id ? ' on' : '')),
+        client: r.client, phone: r.phone, isNew: r.visits === 0,
+        svcName: r.svcName, svcMeta: r.dur + ' · ' + r.price, staff: r.staff,
+        time: r.from + '–' + r.to, day: DAYS[r.day],
+        src: SRC[r.src], isOnline: r.src === 'online', isPhone: r.src === 'phone', isWalk: r.src === 'walkin',
+        badgeCls: 'badge ' + bd[0], dotCls: 'dot ' + bd[1], statusLabel: bd[2],
+        hasBy: r.status === 'cancelled', byText: BY[r.by] || '', byClient: r.by === 'client', byBiz: r.by === 'business', bySys: r.by === 'system',
+        holdText: r.hold + ' min', timerCls: r.hold <= 15 ? 'tmr hot' : 'tmr', timerLabel: 'Jogap bermäge ' + r.hold + ' min galdy',
+        sel: sel, selLabel: 'Saýla: ' + r.client,
+        toggle: () => {
+          const n = Object.assign({}, this.state.sel);
+          if (n[r.id]) delete n[r.id]; else n[r.id] = true;
+          this.setState({ sel: n });
+        },
+        open: openIt,
+        openLabel: r.client + ', ' + DAYS[r.day] + ' ' + r.from + ' — ' + (r.status === 'pending' ? 'haýyşy aç' : 'ýazylyşy aç'),
+        confirm: () => this.doConfirm([r.id]),
+        decline: () => this.openModal('decline', [r.id]),
+        menuOpen: mOpen, menuCell: mOpen ? 'z1 zup' : 'z1', menuLabel: 'Hereketler: ' + r.client,
+        menuPos: (idx >= 3 && idx >= list.length - 3 ? 'bottom: 40px' : 'top: 40px') + '; right: 0; width: 240px',
+        toggleMenu: () => this.setState({ menuId: mOpen ? null : r.id, pop: null }),
+        menu: menu
+      };
+    });
+
+    const TD = [['requests', 'Haýyşlar', pendingN, true], ['today', 'Şu gün', todayN, false], ['upcoming', 'Gelýän', 0, false], ['past', 'Geçen', 0, false], ['cancelled', 'Ýatyrylan', 0, false]];
+    const tabs = TD.map(([id, t, n, warn]) => ({
+      t: t, n: String(n), nCls: n > 0 ? (warn ? 'tn tp' : 'tn') : 'tn hid', on: s.tab === id, cls: s.tab === id ? 'tab on' : 'tab',
+      pick: () => this.setState({ tab: id, sel: {}, menuId: null, pop: null })
+    }));
+
+    const STAFF = [['', 'Ähli hünärmenler', ''], ['Aýna', 'Aýna', 'Stilist'], ['Maral', 'Maral', 'Dyrnak ussasy'], ['Jeren', 'Jeren', 'Kosmetolog'], ['Leýli', 'Leýli', 'Massažist']];
+    const staffOpts = STAFF.map(([v, t, sub]) => ({ t: t, sub: sub, on: s.fStaff === v, pick: () => this.setState({ fStaff: v, pop: null, sel: {} }) }));
+    const svcGroups = D.GROUPS.map(([g, ids]) => ({ t: g, items: ids.map((id) => ({ t: D.SV[id][0], sub: D.SV[id][1], on: s.fSvc === id, pick: () => this.setState({ fSvc: id, pop: null, sel: {} }) })) }));
+    const DATE = [['today', 'Şu gün', '14 oktýabr'], ['week', 'Şu hepde', '12–18 oktýabr'], ['all', 'Ähli wagt', '']];
+    const dateOpts = DATE.map(([v, t, sub]) => ({ t: t, sub: sub, on: s.fDate === v, pick: () => this.setState({ fDate: v, pop: null, sel: {} }) }));
+    const dateName = (DATE.find((x) => x[0] === s.fDate) || DATE[1])[1];
+    const pop = s.pop;
+    const togglePop = (k) => () => this.setState({ pop: pop === k ? null : k, menuId: null });
+    const hasFilters = !!(s.q || s.fStaff || s.fSvc || s.fDate !== 'week');
+
+    const visibleIds = list.map((r) => r.id);
+    const allSel = visibleIds.length > 0 && visibleIds.every((id) => s.sel[id]);
+    const selIds = Object.keys(s.sel).filter((id) => s.sel[id] && byId[id]);
+    const selPending = selIds.filter((id) => byId[id].status === 'pending');
+
+    const ob = s.openId ? byId[s.openId] : null;
+    let d = { title: '', ref: '', badgeCls: 'badge', dotCls: 'dot', statusLabel: '', details: [], hist: [] };
+    if (ob) {
+      const bd = BADGE[ob.status];
+      const pend = ob.status === 'pending';
+      const det = [['Hyzmat', ob.svcName], ['Hünärmen', ob.staff + ' · ' + SPEC[ob.staff]], ['Sene we wagt', DAYL[ob.day] + ' · ' + ob.from + '–' + ob.to], ['Dowamlylygy', ob.dur], ['Bahasy', ob.price], ['Çeşme', SRCL[ob.src]], ['Belgi', ob.ref]];
+      const inote = s.notes[ob.id];
+      d = {
+        title: pend ? 'Haýyş' : 'Ýazylyş', ref: ob.ref,
+        badgeCls: 'badge ' + bd[0], dotCls: 'dot ' + bd[1], statusLabel: bd[2],
+        srcLabel: SRCL[ob.src], isOnline: ob.src === 'online', isPhone: ob.src === 'phone', isWalk: ob.src === 'walkin',
+        hasBy: ob.status === 'cancelled', byText: (BY[ob.by] || '') + (ob.why ? ' · ' + ob.why : ''),
+        isPending: pend, isBooking: !pend && ob.status !== 'cancelled',
+        timerText: 'Jogap bermäge ' + ob.hold + ' min galdy', timerColor: ob.hold <= 15 ? '#a3251b' : '#93500a',
+        initial: ob.client.charAt(0), client: ob.client, phone: ob.phone,
+        isNewCl: !ob.visits, hasVisits: !!ob.visits, visits: ob.visits + ' gelşi' + (ob.avg ? ' · ortaça ' + ob.avg : ''),
+        hasNs: ob.ns > 0, nsText: ob.ns + ' gezek gelmedi', blocked: ob.blocked,
+        hasAlert: !!ob.alert, alert: ob.alert,
+        details: det.map(([k, v], i) => ({ k: k, v: v, cls: i === det.length - 1 ? 'dr last' : 'dr' })),
+        hasNote: !!ob.note, note: ob.note,
+        inote: inote || '', noteCap: inote ? 'Diňe toparyňyz görýär · ýatda saklandy' : 'Diňe toparyňyz görýär · awtomatik ýatda saklanýar',
+        hasHist: !pend && ob.hist.length > 0,
+        hist: ob.hist.map((h, i) => {
+          const hb = BADGE[h[2]];
+          return { date: h[0], what: h[1], price: h[3], dotCls: 'dot ' + hb[1], label: hb[2], cls: i === ob.hist.length - 1 ? 'hrow last' : 'hrow' };
+        }),
+        actPending: pend, actConfirmed: ob.status === 'confirmed', actDone: ob.status === 'completed', actRebook: ob.status === 'cancelled', hasFoot: ob.status !== 'noshow'
+      };
+    }
+
+    const mRows = s.mIds.map((id) => byId[id]).filter(Boolean);
+    const m0 = mRows[0];
+    const showModal = !!s.modal && mRows.length > 0;
+    let m = { title: '', lead: '', ctx: '', reasonLabel: 'Sebäbi', textLabel: '', textPh: '', showText: false, showAlt: false, hasDesc: false, desc: '', descCls: 'cap', hasNote: false, okLabel: '', okCls: 'b b-red', okOff: true, chips: [], alts: [], altCount: '' };
+    if (showModal) {
+      const one = mRows.length === 1;
+      const ctx = one ? m0.client + ' · ' + m0.svcName + ' · ' + SHORT[m0.day] + ' ' + m0.from + '–' + m0.to : mRows.map((r) => r.client).join(', ');
+      let reasons = [];
+      let descs = {};
+      if (s.modal === 'decline') {
+        reasons = ['Bu wagt boş däl', 'Hünärmen ýok', 'Bu hyzmaty edip bilmeýäris', 'Başga sebäp'];
+        m = Object.assign(m, { title: one ? 'Haýyşy ret etmek' : mRows.length + ' haýyşy ret etmek', lead: 'Müşderi sebäbi görer.', ctx: ctx, showText: true, textLabel: 'Müşderä düşündiriş (hökman däl)', textPh: 'Meselem: Aýna şu gün irräk gutarýar', showAlt: one, okLabel: 'Ret et', okCls: 'b b-red' });
+      } else if (s.modal === 'cancel') {
+        reasons = ['Müşderi jaň edip ýatyrdy', 'Hünärmen işe çykyp bilmeýär', 'Başga sebäp'];
+        m = Object.assign(m, { title: 'Ýazylyşy ýatyrmak', lead: 'Müşderä SMS bilen habar bereris we sebäbini görkezeris.', ctx: ctx, okLabel: 'Ýatyr', okCls: 'b b-red' });
+      } else {
+        reasons = ['Gelmedi', 'Gijä galdy', 'Gödek gylyk', 'Başga'];
+        descs = { 'Gelmedi': 'Ýazylyş «Gelmedi» bolar', 'Gijä galdy': 'Ýazylyş üýtgemeýär', 'Gödek gylyk': 'Ýazylyş üýtgemeýär', 'Başga': 'Gysgaça ýazyň' };
+        m = Object.assign(m, { title: 'Näme boldy?', lead: 'Arz diňe topara görünýär.', ctx: ctx, reasonLabel: 'Sebäbi', showText: s.reason === 'Başga', textLabel: 'Näme boldy — gysgaça', textPh: 'Gysgaça ýazyň', hasNote: true, okLabel: 'Ýatda sakla', okCls: 'b b-pri' });
+        m.hasDesc = !!s.reason;
+        m.desc = descs[s.reason] || '';
+        m.descCls = s.reason === 'Gelmedi' ? 'cap dsc-n' : 'cap';
+      }
+      m.okOff = !s.reason;
+      m.chips = reasons.map((t) => ({ t: t, on: s.reason === t, cls: s.reason === t ? 'chip on' : 'chip', pick: () => this.setState({ reason: t }) }));
+      const altN = Object.keys(s.alts).filter((k) => s.alts[k]).length;
+      m.altCount = altN ? altN + ' / 3 wagt saýlandy' : 'Iň köp 3 wagt saýlap bilersiňiz';
+      m.alts = (D.ALT[m0.id] || []).map((t, i) => ({
+        t: t, on: !!s.alts[i], cls: s.alts[i] ? 'slot on' : 'slot',
+        pick: () => this.setState({ alts: Object.assign({}, this.state.alts, { [i]: !this.state.alts[i] }) })
+      }));
+    }
+
+    let footText = '';
+    if (isReq) footText = list.length + ' haýyş · jogap möhleti az galanlar ýokarda';
+    else if (s.tab === 'today') footText = list.length + ' ýazylyş · wagt boýunça';
+    else if (s.tab === 'upcoming') footText = list.length + ' ýazylyş · ýakynlary ýokarda';
+    else footText = list.length + ' ýazylyş · täzeleri ýokarda';
+    const tabName = (TD.find((x) => x[0] === s.tab) || TD[0])[1];
+    const closeAllPops = () => this.setState({ pop: null, menuId: null });
+
+    return {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      pendingN: String(pendingN),
+      cntCls: pendingN > 0 ? 'cnt' : 'cnt hid',
+      navReqLabel: pendingN > 0 ? 'Ýazylyşlar, ' + pendingN + ' haýyş' : 'Ýazylyşlar',
+      bizOpen: s.side === 'biz',
+      userOpen: s.side === 'user',
+      sideOpen: !!s.side,
+      toggleBiz: () => this.setState({ side: s.side === 'biz' ? null : 'biz' }),
+      toggleUser: () => this.setState({ side: s.side === 'user' ? null : 'user' }),
+      closeSide: () => this.setState({ side: null }),
+      tabs: tabs,
+      q: s.q,
+      hasQ: !!s.q,
+      onQ: (e) => this.setState({ q: e.target.value.slice(0, 60) }),
+      clearQ: () => this.setState({ q: '' }),
+      staffOpen: pop === 'staff',
+      staffWrap: pop === 'staff' ? 'zup' : '',
+      staffChip: s.fStaff ? 'Hünärmen: ' + s.fStaff : 'Hünärmen',
+      staffChipCls: s.fStaff ? 'chip on' : 'chip',
+      toggleStaff: togglePop('staff'),
+      staffOpts: staffOpts,
+      svcOpen: pop === 'svc',
+      svcWrap: pop === 'svc' ? 'zup' : '',
+      svcChip: s.fSvc ? 'Hyzmat: ' + D.SV[s.fSvc][0] : 'Hyzmat',
+      svcChipCls: s.fSvc ? 'chip on' : 'chip',
+      toggleSvc: togglePop('svc'),
+      svcAllOn: !s.fSvc,
+      svcAll: () => this.setState({ fSvc: '', pop: null }),
+      svcGroups: svcGroups,
+      dateOpen: pop === 'date',
+      dateWrap: pop === 'date' ? 'zup' : '',
+      dateChip: 'Sene: ' + dateName,
+      dateChipCls: s.fDate !== 'week' ? 'chip on' : 'chip',
+      toggleDate: togglePop('date'),
+      dateOpts: dateOpts,
+      hasFilters: hasFilters,
+      clearFilters: () => this.setState({ q: '', fStaff: '', fSvc: '', fDate: 'week', pop: null }),
+      doExport: () => this.flash({ pop: null }, 'CSV faýl taýýarlandy · ' + list.length + ' setir'),
+      anyPop: !!(pop || s.menuId),
+      closePops: closeAllPops,
+      showReqEmpty: isReq && tabList.length === 0,
+      showTable: !(isReq && tabList.length === 0),
+      showNoMatch: tabList.length > 0 && list.length === 0,
+      tableLabel: tabName,
+      headCls: 'tr th ' + (isReq ? 'c-req' : 'c-std'),
+      sortIcon: (s.tab === 'past' || s.tab === 'cancelled') ? 'm6 9 6 6 6-6' : 'm18 15-6-6-6 6',
+      allSel: allSel,
+      toggleAll: () => {
+        const n = Object.assign({}, this.state.sel);
+        if (allSel) visibleIds.forEach((id) => { delete n[id]; });
+        else visibleIds.forEach((id) => { n[id] = true; });
+        this.setState({ sel: n });
+      },
+      rows: rows,
+      footText: footText,
+      hasSel: selIds.length > 0,
+      selText: selIds.length + ' saýlandy',
+      bulkOff: selPending.length === 0,
+      bulkConfirm: () => this.doConfirm(selPending),
+      bulkDecline: () => { if (selPending.length) this.openModal('decline', selPending); },
+      clearSel: () => this.setState({ sel: {} }),
+      showDrawer: !!ob,
+      d: d,
+      closeDrawer: () => this.setState({ openId: null }),
+      drawerKey: (e) => { if (e && e.key === 'Escape' && !this.state.modal) this.setState({ openId: null }); },
+      onNote: (e) => this.setState({ notes: Object.assign({}, this.state.notes, { [this.state.openId]: e.target.value.slice(0, 500) }) }),
+      drwConfirm: () => { if (ob) this.doConfirm([ob.id]); },
+      drwDecline: () => { if (ob) this.openModal('decline', [ob.id]); },
+      drwCancel: () => { if (ob) this.openModal('cancel', [ob.id]); },
+      drwComplaint: () => { if (ob) this.openModal('complaint', [ob.id]); },
+      showModal: showModal,
+      m: m,
+      rtext: s.rtext,
+      onRtext: (e) => this.setState({ rtext: e.target.value.slice(0, 300) }),
+      altOn: !!s.altOn,
+      altCls: s.altOn ? 'sw on' : 'sw',
+      flipAlt: () => this.setState({ altOn: !this.state.altOn }),
+      closeModal: () => this.setState({ modal: null, mIds: [] }),
+      modalKey: (e) => { if (e && e.key === 'Escape') this.setState({ modal: null, mIds: [] }); },
+      doModal: () => this.doModal(),
+      hasToast: !!s.toast,
+      toastText: s.toast ? s.toast.text : '',
+      toastUndo: !!(s.toast && s.toast.undo),
+      toastPlain: !(s.toast && s.toast.undo),
+      undo: () => {
+        const u = this.state.toast && this.state.toast.undo;
+        clearTimeout(this.tt);
+        this.setState({ over: u ? u.over : this.state.over, toast: null });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
