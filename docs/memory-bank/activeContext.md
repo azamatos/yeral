@@ -4,8 +4,8 @@ _Last updated: 2026-10-14_
 
 ## Current focus
 
-**M1 (design system + Storybook) is built** on `feat/m1-design-system` (see `progress.md`); Neon is linked on
-`chore/neon`, waiting for the owner's `neon login`. **M0 is merged and the release path is proven** (version PR #2 → tags → CI deploy of yeral.app → smoke check green,
+**M1 (design system + Storybook) is built** on `feat/m1-design-system` (see `progress.md`); Neon is set up and verified
+(project Yeral, Frankfurt, Postgres 18; see `operations.md`). **M0 is merged and the release path is proven** (version PR #2 → tags → CI deploy of yeral.app → smoke check green,
 `/version.json` = `d718e35`). **The web design v0.3 arrived** (`docs/design/`, 14.10.2026): the client site is fully
 designed, and the product is now a booking marketplace for any business that sells time. **Next: M2** (platform with the
 multi-category model, api on Postgres via Neon, Docker), then M3 (the client site on yeral.app, exactly as designed). Business workspace and CMS wait for their design rounds.
@@ -49,13 +49,11 @@ multi-category model, api on Postgres via Neon, Docker), then M3 (the client sit
 | 5 | Native Turkmen review of all copy; RU/EN drafts written by Claude need a check too | owner | public launch |
 | 6 | SMS provider and sender name | owner + research | production SMS (M8) |
 | 7 | Final name and domain (`yeral.app`, `yeral.com`, other)? | owner | public launch |
-| 8 | Neon account (free) for the api database | owner | M2 |
 | 9 | Rename the Cloudflare workers.dev subdomain so PR preview URLs can be turned on | owner, dashboard | previews (optional) |
 | 10 | Real business photos and texts to replace the demo seed | owner | public launch |
 
 ## Next steps
 
 1. Merge M1; check storybook.yeral.app after the first deploy.
-2. Neon: owner runs `npx neon@latest login`; then `neon deploy`, verify the connection, merge `chore/neon`.
-3. M2: multi-category `@yeral/domain` + contract, i18n (tk/ru/en), sdk; api on Postgres with the demo seed; Docker + nginx.
-4. M3: the client site, screen by screen in the design's order.
+2. M2: multi-category `@yeral/domain` + contract, i18n (tk/ru/en), sdk; api on Postgres with the demo seed; Docker + nginx.
+3. M3: the client site, screen by screen in the design's order.

@@ -31,6 +31,13 @@ not a longer-lived mock. A demo memory store would be thrown away when the real 
 - Double booking: Postgres exclusion constraint (`btree_gist`) on staff × time range for active bookings + the domain check;
   the API answers `409 slot_taken` with alternatives.
 
+## Revision 2026-10-14
+
+Driver: **node-postgres (`pg`)** with Drizzle (`drizzle-orm/node-postgres`), through Cloudflare Hyperdrive on Workers
+and directly on Node — the combination both Neon's and Cloudflare's guidance recommend (it replaces postgres.js here).
+The app uses the pooled `DATABASE_URL`; migrations, dumps and anything session-level use `DATABASE_URL_UNPOOLED`.
+Connection strings use `sslmode=verify-full`.
+
 ## Consequences
 
 - No throwaway mock layer: what we build in M2 is the backend.

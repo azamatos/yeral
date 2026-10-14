@@ -48,7 +48,8 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | PostgreSQL | 18 | relational data, exclusion constraints against double booking, full-text search | D1/SQLite (ADR 0005) |
 | Neon | — | managed Postgres while on Cloudflare: free tier, a branch per environment, reached through Hyperdrive | Supabase (extras we don't need) |
 | Drizzle ORM / drizzle-kit | 0.45 / 0.31 | TypeScript schema, SQL-like queries, SQL migrations in git, runs on Workers and Node | Prisma 7, Kysely |
-| postgres (postgres.js) | 3.4 | driver for Drizzle on both runtimes | Neon-specific driver |
+| node-postgres (`pg`) | 8 | driver for Drizzle on both runtimes (Hyperdrive on Workers); Neon's and Cloudflare's recommended pairing | postgres.js, Neon serverless driver |
+| `@neon/config` + `@neon/env` + `neon` CLI | 1.9 / 1.6 | `neon.ts` = the Neon project as code; `neon env pull` writes `DATABASE_URL`(`_UNPOOLED`) to `.env.local` | dashboard clicks |
 | Better Auth | 1.7 | phone + one-time code, sessions in Postgres, organizations = salons with roles and invitations | hand-rolled sessions |
 | jobs table + `runDueJobs()` | — | reminders and expiry without a queue service; Cron Trigger now, a container loop later | pg-boss (needs a long-running process) |
 | pino | 10 | structured logs on Node | — |
