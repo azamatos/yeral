@@ -2,7 +2,7 @@ import type { PlopTypes } from '@turbo/gen'
 
 /**
  * `pnpm gen <generator>` scaffolds code in the shape every agent is expected to produce.
- * Planned: `ui-component` (M1, design system), `slice` (M3, FSD slice), `endpoint` (M2, api module).
+ * Planned: `slice` (M3, FSD slice), `endpoint` (M2, api module).
  */
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
   plop.setGenerator('package', {
@@ -38,6 +38,33 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         templateFile: 'templates/package/index.ts.hbs',
       },
       () => 'Next: pnpm install, then add the package to "Where shared things live" in docs/memory-bank/techContext.md',
+    ],
+  })
+
+  plop.setGenerator('ui-component', {
+    description: 'Design-system component in packages/ui (component, stories that are tests, export)',
+    prompts: [
+      { type: 'input', name: 'name', message: 'Component name (kebab-case, e.g. "rating-bar"):' },
+      { type: 'input', name: 'board', message: 'Where it is drawn (e.g. "DS-Components → Selection" or "Venue → reviews")' },
+    ],
+    actions: [
+      {
+        type: 'add',
+        path: '{{ turbo.paths.root }}/packages/ui/src/components/{{ dashCase name }}/{{ dashCase name }}.tsx',
+        templateFile: 'templates/ui-component/component.tsx.hbs',
+      },
+      {
+        type: 'add',
+        path: '{{ turbo.paths.root }}/packages/ui/src/components/{{ dashCase name }}/{{ dashCase name }}.stories.tsx',
+        templateFile: 'templates/ui-component/component.stories.tsx.hbs',
+      },
+      {
+        type: 'add',
+        path: '{{ turbo.paths.root }}/packages/ui/src/components/{{ dashCase name }}/index.ts',
+        templateFile: 'templates/ui-component/index.ts.hbs',
+      },
+      () =>
+        'Import it as @yeral/ui/{{ dashCase name }}. Next: port the design, cover every state in stories, run pnpm --filter @yeral/storybook test',
     ],
   })
 }

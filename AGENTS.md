@@ -72,7 +72,8 @@ Every task runs through Turborepo from the root; `--filter=@yeral/<name>...` nar
 | `pnpm check` | lint, FSD lint, types, tests, format check — run before every PR |
 | `pnpm build` · `pnpm lint` · `pnpm typecheck` · `pnpm test` | one task across the workspace |
 | `pnpm format` | Prettier on everything except `apps/legacy`, `docs/design` and Markdown |
-| `pnpm gen package` | scaffold an internal package (more generators arrive with M1–M3) |
+| `pnpm test:stories` | every Storybook story as a Chromium test (render, interactions, axe) |
+| `pnpm gen package` · `pnpm gen ui-component` | scaffold an internal package / a design-system component with stories |
 | `pnpm changeset` | describe a user-visible change for the next release |
 
 Planned with later milestones: `pnpm e2e`, `pnpm db:up`, `pnpm db:setup`, `pnpm docker:up`, `pnpm gen ui-component|slice|endpoint`.

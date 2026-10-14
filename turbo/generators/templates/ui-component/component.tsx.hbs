@@ -1,0 +1,7 @@
+import type { ComponentProps } from 'react'
+import { cn } from '../../lib/cn'
+
+/** {{ pascalCase name }} — {{ board }}. TODO: describe what it is for and when not to use it. */
+export function {{ pascalCase name }}({ className, ...props }: ComponentProps<'div'>) {
+  return <div {...props} className={cn('', className)} />
+}

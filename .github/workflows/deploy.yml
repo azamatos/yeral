@@ -19,7 +19,7 @@ on:
       app:
         description: App to deploy
         type: choice
-        options: [legacy]
+        options: [legacy, storybook]
       environment:
         description: Environment
         type: choice

@@ -1,0 +1,8 @@
+/*
+ * The design system's CSS. Apps import it after Tailwind:
+ *   @import 'tailwindcss';
+ *   @import '@yeral/ui/styles.css';
+ *   @source '<path to>/packages/ui/src';
+ */
+@import './theme.css';
+@import './base.css';

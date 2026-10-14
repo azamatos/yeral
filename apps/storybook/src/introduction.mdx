@@ -1,0 +1,49 @@
+import { Meta } from '@storybook/addon-docs/blocks'
+
+<Meta title="Introduction" />
+
+# Ýeral design system
+
+Web DS **v0.3.1** — the components of yeral.app, business.yeral.app and cms.yeral.app. Source of truth:
+`docs/design/` in the repository (tokens, the Foundations / Components / Booking types sheets and every screen).
+Code: `packages/ui` (`@yeral/ui`). Every story here is also a test: it must render, its interactions must pass and
+axe must find no accessibility violations.
+
+## Rules that never bend
+
+- White base; 1px `n-200` hairlines instead of boxed cards; ink `n-900` text.
+- **One violet accent** (`a-500`) for selection, status and the single primary action — nothing else.
+- **One gradient primary button per view.** The header search button and store buttons are ink.
+- Flat until raised: shadows only on popovers, drawers, modals and toasts.
+- Modal 400 / 480 / 560 / 640, right drawer 480, popover 280–360 — all become bottom sheets under 768.
+- Focus is always visible (`2px white + 2px a-400`); touch targets ≥ 44px; text contrast ≥ 4.5:1.
+- Five booking statuses with one colour and one shape everywhere.
+- Lucide icons, stroke 1.75, sizes 16/20/24. No emoji, no gradient backgrounds, no new colours.
+- Copy is Turkmen first; Russian runs ~30% longer, so nothing has a fixed width.
+
+## Using it in an app
+
+```css
+/* app.css */
+@import 'tailwindcss';
+@import '@yeral/ui/styles.css';
+@source '<path to>/packages/ui/src/**/*.{ts,tsx}';
+```
+
+```tsx
+import { UIProvider } from '@yeral/ui/provider'
+import { Button } from '@yeral/ui/button'
+
+;<UIProvider>
+  <Button variant="primary">Ýazylmak</Button>
+</UIProvider>
+```
+
+Classes read like the spec: `text-n-600`, `bg-a-50`, `border-n-200`, `rounded-m`, `text-h2`, `shadow-raised`.
+Breakpoints are the design's: `sm` 768, `md` 1024, `lg` 1280, `xl` 1440 (mobile first; no prefix = phone).
+
+## Adding a component
+
+`pnpm gen ui-component <name>` creates `packages/ui/src/components/<name>/` with the component, its stories and the
+export. Build it from `DS-Components.dc.html`, cover every state in stories, run `pnpm --filter @yeral/storybook test`.
+Full checklist: the `design-system` skill (`.claude/skills/design-system/SKILL.md`).

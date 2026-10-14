@@ -11,6 +11,7 @@ concurrency:
 
 permissions:
   contents: read
+  deployments: write
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
@@ -36,11 +37,30 @@ jobs:
           path: .turbo/cache
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: turbo-${{ runner.os }}-
+      - name: Chromium for story tests
+        # cached by Playwright version; system libraries come from --with-deps
+        id: pw
+        run: echo "version=$(pnpm --filter @yeral/storybook exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - run: pnpm --filter @yeral/storybook exec playwright install --with-deps chromium
       - name: Format
         run: pnpm format:check
       - name: Lint, FSD, types, tests, build
         # pull requests check only what they affect; main checks everything
         run: pnpm turbo run lint lint:fsd typecheck test build ${{ github.event_name == 'pull_request' && '--affected' || '' }}
+
+  deploy-storybook:
+    name: Deploy Storybook
+    needs: checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      app: storybook
+      environment: production
+    secrets: inherit
 
   pr-title:
     name: PR title is a Conventional Commit

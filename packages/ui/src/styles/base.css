@@ -1,0 +1,82 @@
+/* Base styles of the design system: font, page defaults, focus, phone type scale, helpers. */
+@import '@fontsource-variable/onest';
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-n-0);
+    color: var(--color-n-900);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Keyboard focus is always visible (design: 2px white gap + 2px a-400). Components may refine it. */
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+  ::selection {
+    background: var(--color-a-100);
+  }
+  button {
+    font-family: inherit;
+  }
+
+  /* Phone type scale (docs/design/tokens.css, max-width 767px) */
+  @media (max-width: 767px) {
+    :root {
+      --text-display: 40px;
+      --text-display--line-height: 44px;
+      --text-h1: 32px;
+      --text-h1--line-height: 36px;
+      --text-h2: 26px;
+      --text-h2--line-height: 30px;
+      --text-h3: 19px;
+      --text-h3--line-height: 24px;
+      --text-body-l: 16px;
+      --text-body-l--line-height: 24px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Grows a 36–40px control to a 44px touch area without changing its look (Mobile board `.hit`). */
+@utility hit {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Primary gradient button surface */
+@utility bg-primary {
+  background: var(--primary-bg);
+}
+@utility bg-primary-hover {
+  background: var(--primary-bg-hover);
+}
+@utility bg-primary-active {
+  background: var(--primary-bg-active);
+}
+@utility bg-scrim {
+  background: var(--scrim);
+}

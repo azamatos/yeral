@@ -1,0 +1,3 @@
+/* Tailwind + the design system in one file: lets tools (Prettier's class sorting) know the theme. */
+@import 'tailwindcss';
+@import './index.css';

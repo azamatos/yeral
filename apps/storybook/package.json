@@ -1,0 +1,40 @@
+{
+  "name": "@yeral/storybook",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Ýeral design system docs and component tests (storybook.yeral.app)",
+  "type": "module",
+  "scripts": {
+    "dev": "storybook dev --no-open -p $(( ${PORT_BASE:-3000} + 5 ))",
+    "build": "storybook build --quiet -o storybook-static",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "deploy:production": "storybook build --quiet -o storybook-static && node ../../scripts/version-stamp.mjs storybook storybook-static && wrangler deploy"
+  },
+  "dependencies": {
+    "@yeral/ui": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "catalog:",
+    "@storybook/addon-docs": "catalog:",
+    "@storybook/addon-vitest": "catalog:",
+    "@storybook/react-vite": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "@yeral/config": "workspace:*",
+    "eslint": "catalog:",
+    "playwright": "catalog:",
+    "storybook": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "wrangler": "catalog:"
+  }
+}
