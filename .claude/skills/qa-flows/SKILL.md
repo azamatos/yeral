@@ -18,6 +18,11 @@ Watch the console (`read_console_messages` with a pattern) for errors on every p
 
 ## Flows (expected result in brackets)
 
+The flows below test `apps/legacy`. From M3 the client site follows `docs/design/screens/README.md`: rewrite this list
+from it (Home → Search → Business page → appointment / table / class booking → login → my bookings → profile, plus every
+state on the States board, at 1440 and 390, in TK, RU and EN).
+
+
 1. **Discover**: home → category tile → search (list + map pins, day rail changes the free times) → salon card → salon page
    (photos, services, team, reviews, hours, map) [no empty sections, times in the future only].
 2. **Book, any master**: salon → «Записаться» → service → «Любой мастер» → time (shows who is free) → confirm →

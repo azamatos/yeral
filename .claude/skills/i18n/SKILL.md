@@ -1,42 +1,47 @@
 ---
 name: i18n
-description: Add or change user-visible text, numbers, prices, dates, durations or plurals in Yeral apps (Russian now, Turkmen next). Use for every new string or aria-label, for Russian plural forms, for formatting money and dates, and when adding Turkmen translations.
+description: Add or change user-visible text, numbers, prices, dates, durations, distances or plurals in Ýeral apps — Turkmen (default, verbatim from the design), Russian and English. Use for every new string or aria-label, for plural forms, for formatting money, dates and distances, and when translating.
 ---
 
 # Strings and formats
 
-Reference: ADR 0008; `systemPatterns.md` (i18n). Library: `use-intl` (today `next-intl` in `apps/legacy` — same API).
+References: ADR 0008 (use-intl), ADR 0016 (tk/ru/en, prefixed URLs), `docs/design/README.md` §8 (formats) and §9
+(Turkmen glossary). Library: `use-intl` (today `next-intl` in `apps/legacy`, Russian only — not a reference for new copy).
 
 ## Where strings go
 
-- Shared namespaces (`common`, `categories`, `amenities`, `status`, `errors`, units) → `packages/i18n/messages/<locale>/`.
-- Everything else → `apps/<app>/messages/<locale>.json`, one namespace per screen or slice (`salon`, `booking`, `calendar`).
-- Today: `apps/legacy/messages/ru.json`.
-- Keys camelCase, grouped by where they appear; reuse `common.*` before adding a duplicate.
+- Shared namespaces (`common`, `categories`, `status`, `errors`, units) → `packages/i18n/messages/{tk,ru,en}/`.
+- Everything else → `apps/<app>/messages/{tk,ru,en}.json`, one namespace per screen or slice (`home`, `search`,
+  `business`, `booking`, `account`).
+- Keys camelCase, grouped by where they appear; reuse `common.*` before adding a duplicate. Every key exists in all three
+  locales in the same change (CI checks).
 
 ## Rules
 
+- **Turkmen is the default and comes verbatim from the design screens** (`docs/design/screens/**/*.dc.html`). Don't
+  reword it; use the glossary (Ýazylmak, Ýazylyş, Hünärmen, Boş wagt, Garaşylýar…). It still needs a native review — don't "fix" it silently.
+- Russian and English: write them for every key, natural and short; Russian runs ~30% longer, so never rely on fixed widths.
+- No city names anywhere in copy ("Ýakynymda", "golaýyňyzda" instead).
 - No literal user-visible text in TSX, `aria-label`, `title`, `alt` and toasts included: `t('key')`.
 - Call `useTranslations` at the top of the component, never after an early return or inside a condition.
-- Russian plurals need all four forms:
-  `"{count, plural, one {# мастер} few {# мастера} many {# мастеров} other {# мастера}}"`.
-- Turkmen (CLDR `one`/`other`): nouns after a numeral stay singular («3 ussa»), so most plurals are just `{count} …`.
-- Variables, not concatenation: `"{name} подтвердил запись"`, never `name + ' подтвердил'`.
-- Copy: friendly and short, «вы» in lowercase, no exclamation marks in errors, the same word for the same thing
-  (glossary in `productContext.md`: запись, заявка, мастер, окно…).
-- When `tk` exists, every key added to `ru` is added to `tk` in the same change (CI will check for missing keys).
+- Plurals: Russian needs one/few/many/other — `"{count, plural, one {# место} few {# места} many {# мест} other {# места}}"`.
+  Turkmen (`one`/`other`): nouns after a numeral stay singular («3 ýer galdy»). English: one/other.
+- Variables, not concatenation: `"{business} ýazylyşyňyzy tassyklady"`.
+- Requests are *sent*, never *booked*, until the business confirms ("Ýazylyş ugradyldy").
 
-## Numbers, money, dates
+## Numbers, money, dates, distances
 
-Use `useFmt()` (`@yeral/i18n`; today `apps/legacy/src/lib/format.ts`). Never `toLocaleString` or `Intl` in components.
+Use `useFmt()` (`@yeral/i18n`). Never `toLocaleString` or raw `Intl` in components.
 
-| Need | Call |
+| Need | TK example |
 |---|---|
-| price | `fmt.money(120)` → «120 м» (manats); `fmt.price(service)` handles «от» |
-| duration | `fmt.dur(90)` → «1 ч 30 мин» |
-| date | `fmt.dayMonth(d)`, `fmt.weekdayShort(d)`, `fmt.longDay(d)`; `fmt.relDay(d)` → «Сегодня» / «Завтра» / null |
-| date + time in a sentence | `fmt.whenInline(d, min)` (lowercase «завтра») vs `fmt.when(d, min)` at the start |
-| time of day | `fmt.hm(870)` → «14:30» |
+| price | `40 TMT`, from `250 TMT-den`, free `Mugt`, average bill `≈ 150 TMT` |
+| rating | `4,9` (decimal comma) |
+| distance | `1,2 km`, under 1 km `850 m` |
+| duration | `60 min`, `1 sag 30 min` |
+| date | `Penşenbe, 15 oktýabr` (weekday capitalised, month lower-case), short `15 okt.`; relative `Şu gün`, `Ertir` |
+| weekdays short | Du Si Ça Pe An Şe Ýe (Monday first) |
+| time | 24-hour `14:30` |
+| phone | `+993 65 12 34 56` |
 
-Dates are salon-local strings and are formatted in UTC on purpose (no day shift). Plain counts use the plural messages
-in `common` (`reviews`, `masters`, `windows`…).
+Dates are business-local `YYYY-MM-DD` strings formatted in UTC on purpose (no day shift).

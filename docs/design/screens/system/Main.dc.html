@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Web DS · Foundations</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6;text-decoration:underline}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:16px;color:#5a5a64}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+</style>
+</helmet>
+<div style="width: 1440px; min-height: 3260px; padding: 72px 120px 96px; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column">
+
+<header style="display: flex; flex-direction: column; gap: 40px; padding-bottom: 64px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 36px; width: auto">
+<div style="display: flex; gap: 24px; align-items: center">
+<span class="mono">Web DS v0.3 · 13.10.2026</span>
+<span class="mono">Source: mobile DS v0.2</span>
+<span style="display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: #efecfe; border: 1px solid #d5cbfb; color: #4429d6; font-size: 13px; font-weight: 600">yeral.app · business · cms</span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px; max-width: 880px">
+<h1 style="margin: 0; font-size: 64px; line-height: 68px; font-weight: 700; letter-spacing: -0.035em">Foundations</h1>
+<p style="margin: 0; font-size: 19px; line-height: 28px; color: #5a5a64; text-wrap: pretty">The mobile system, carried to desktop, tablet and the mobile web. One set of tokens for the client marketplace, the business workspace and the CMS — for any business that takes bookings, not only salons.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #e6e6ea">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px 24px 0 0">
+<span class="lbl">01</span>
+<div style="font-size: 17px; line-height: 24px; font-weight: 600">White base, 1px dividers</div>
+<div class="cap">Lists and sections separated by hairlines, not boxed into cards.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px 24px 0; border-left: 1px solid #e6e6ea">
+<span class="lbl">02</span>
+<div style="font-size: 17px; line-height: 24px; font-weight: 600">One violet accent</div>
+<div class="cap">Violet means selection, status or the single primary action. Nothing else.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px 24px 0; border-left: 1px solid #e6e6ea">
+<span class="lbl">03</span>
+<div style="font-size: 17px; line-height: 24px; font-weight: 600">Dense lists, big titles</div>
+<div class="cap">Large page titles; compact rows underneath. Tables go denser on desktop.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px 0 0 24px; border-left: 1px solid #e6e6ea">
+<span class="lbl">04</span>
+<div style="font-size: 17px; line-height: 24px; font-weight: 600">Flat until raised</div>
+<div class="cap">No shadows in normal flow. Only popovers, drawers, modals and toasts lift.</div>
+</div>
+</div>
+</header>
+
+<section style="display: flex; flex-direction: column; gap: 40px; padding: 64px 0; border-top: 1px solid #e6e6ea">
+<div style="display: flex; align-items: baseline; gap: 16px"><span class="lbl">Color</span><h2 style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.025em">Neutrals carry the page, violet marks the choice</h2></div>
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="font-size: 15px; font-weight: 600">Neutral ramp</div>
+<div style="display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #ffffff; border: 1px solid #e6e6ea"></div><div style="font-size: 13px; font-weight: 600">n-0</div><div class="mono">#ffffff</div><div class="cap">Surface</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #f6f6f8"></div><div style="font-size: 13px; font-weight: 600">n-50</div><div class="mono">#f6f6f8</div><div class="cap">Row hover</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #f0f0f3"></div><div style="font-size: 13px; font-weight: 600">n-100</div><div class="mono">#f0f0f3</div><div class="cap">Track, disabled fill</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #e6e6ea"></div><div style="font-size: 13px; font-weight: 600">n-200</div><div class="mono">#e6e6ea</div><div class="cap">Divider</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #d8d8de"></div><div style="font-size: 13px; font-weight: 600">n-300</div><div class="mono">#d8d8de</div><div class="cap">Input &amp; button border</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #b0b0b8"></div><div style="font-size: 13px; font-weight: 600">n-400</div><div class="mono">#b0b0b8</div><div class="cap">Disabled controls only</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #6e6e78"></div><div style="font-size: 13px; font-weight: 600">n-500</div><div class="mono">#6e6e78</div><div class="cap">Tertiary text 5.1:1</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #5a5a64"></div><div style="font-size: 13px; font-weight: 600">n-600</div><div class="mono">#5a5a64</div><div class="cap">Secondary text 6.8:1</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #101014"></div><div style="font-size: 13px; font-weight: 600">n-900</div><div class="mono">#101014</div><div class="cap">Ink 18.9:1</div></div>
+</div>
+<div class="cap">Group background stays <span class="mono">#f4f4f6</span> (settings groups, app canvas behind tables). Page background is always white.</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="font-size: 15px; font-weight: 600">Accent ramp</div>
+<div style="display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #efecfe"></div><div style="font-size: 13px; font-weight: 600">a-50</div><div class="mono">#efecfe</div><div class="cap">Tint · selected bg</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #ded7fd"></div><div style="font-size: 13px; font-weight: 600">a-100</div><div class="mono">#ded7fd</div><div class="cap">Selected hover</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #c3b6fb"></div><div style="font-size: 13px; font-weight: 600">a-200</div><div class="mono">#c3b6fb</div><div class="cap">Calendar load</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #9d88f7"></div><div style="font-size: 13px; font-weight: 600">a-300</div><div class="mono">#9d88f7</div><div class="cap">Charts</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #7a5ff4"></div><div style="font-size: 13px; font-weight: 600">a-400</div><div class="mono">#7a5ff4</div><div class="cap">Focus ring</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #5a3ff0; box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #5a3ff0"></div><div style="font-size: 13px; font-weight: 600">a-500 · base</div><div class="mono">#5a3ff0</div><div class="cap">Accent, dots, slots</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #4429d6"></div><div style="font-size: 13px; font-weight: 600">a-600 · ink</div><div class="mono">#4429d6</div><div class="cap">Links, tinted text 8.3:1</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #3520a6"></div><div style="font-size: 13px; font-weight: 600">a-700</div><div class="mono">#3520a6</div><div class="cap">Link hover</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 88px; border-radius: 12px; background: #241573"></div><div style="font-size: 13px; font-weight: 600">a-800</div><div class="mono">#241573</div><div class="cap">Dark bands</div></div>
+</div>
+<div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px">
+<div style="display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid #e6e6ea; border-radius: 16px">
+<div style="width: 120px; height: 48px; border-radius: 12px; background: linear-gradient(180deg, #8265ff 0%, #5a3ff0 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 2px 6px rgba(68,41,214,.3)"></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><div style="font-size: 13px; font-weight: 600">Primary gradient — chosen for web</div><div class="mono">#8265ff → #5a3ff0 · inset 0 1px 0 rgba(255,255,255,.22) · 0 2px 6px rgba(68,41,214,.3)</div></div>
+</div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #e6e6ea; border-radius: 16px"><div style="width: 48px; height: 48px; border-radius: 12px; background: #4a30d8"></div><div style="display: flex; flex-direction: column; gap: 4px"><div style="font-size: 13px; font-weight: 600">Hover</div><div class="mono">#4a30d8</div></div></div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #e6e6ea; border-radius: 16px"><div style="width: 48px; height: 48px; border-radius: 12px; background: #efecfe; border: 1px solid #d5cbfb"></div><div style="display: flex; flex-direction: column; gap: 4px"><div style="font-size: 13px; font-weight: 600">Line</div><div class="mono">#d5cbfb</div></div></div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 48px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="font-size: 15px; font-weight: 600">Text roles</div>
+<div style="display: flex; flex-direction: column; border-top: 1px solid #e6e6ea">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #e6e6ea"><span style="font-size: 15px; color: #101014">Primary — Ýazylyş tassyklandy</span><span class="mono">#101014 · 18.9</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #e6e6ea"><span style="font-size: 15px; color: #5a5a64">Secondary — Magtymguly şaýoly 12 · 1,2 km</span><span class="mono">#5a5a64 · 6.8</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #e6e6ea"><span style="font-size: 15px; color: #6e6e78">Tertiary — 3 sagat öň</span><span class="mono">#6e6e78 · 5.1</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #e6e6ea"><span style="font-size: 15px; color: #4429d6; font-weight: 500">Link — Ählisini gör</span><span class="mono">#4429d6 · 8.3</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #e6e6ea"><span style="font-size: 15px; color: #101014; display: inline-flex; align-items: center; gap: 8px"><span style="width: 32px; height: 18px; border-radius: 999px; background: #f0f0f3; border: 1px solid #b0b0b8"></span>Disabled control</span><span class="mono">#b0b0b8 · never text</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="font-size: 15px; font-weight: 600">Booking statuses — one meaning in every app and every business type</div>
+<div style="display: flex; flex-direction: column; border-top: 1px solid #e6e6ea">
+<div style="display: grid; grid-template-columns: 150px 1fr 1fr 1fr; gap: 16px; padding: 10px 0; border-bottom: 1px solid #e6e6ea"><span class="lbl">Badge · TK</span><span class="lbl">bg / line / ink / dot</span><span class="lbl">RU · EN</span><span class="lbl">Meaning</span></div>
+<div style="display: grid; grid-template-columns: 150px 1fr 1fr 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; align-items: center">
+<span style="justify-self: start; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: #fef6e7; border: 1px solid #f2ddb0; color: #93500a; font-size: 13px; font-weight: 600"><span style="width: 6px; height: 6px; border-radius: 999px; background: #dc8b0b"></span>Garaşylýar</span>
+<span class="mono">#fef6e7 #f2ddb0 #93500a #dc8b0b</span><span class="cap">Ожидает · Pending</span><span class="cap">Needs attention — business must confirm</span></div>
+<div style="display: grid; grid-template-columns: 150px 1fr 1fr 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; align-items: center">
+<span style="justify-self: start; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: #efecfe; border: 1px solid #d5cbfb; color: #4429d6; font-size: 13px; font-weight: 600"><span style="width: 6px; height: 6px; border-radius: 999px; background: #5a3ff0"></span>Tassyklandy</span>
+<span class="mono">#efecfe #d5cbfb #4429d6 #5a3ff0</span><span class="cap">Подтверждена · Confirmed</span><span class="cap">Phone booking = this + phone icon</span></div>
+<div style="display: grid; grid-template-columns: 150px 1fr 1fr 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; align-items: center">
+<span style="justify-self: start; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: #e7f8ee; border: 1px solid #bfe6d1; color: #066a41; font-size: 13px; font-weight: 600"><span style="width: 6px; height: 6px; border-radius: 999px; background: #12a366"></span>Tamamlandy</span>
+<span class="mono">#e7f8ee #bfe6d1 #066a41 #12a366</span><span class="cap">Завершена · Completed</span><span class="cap">Default after the slot ends</span></div>
+<div style="display: grid; grid-template-columns: 150px 1fr 1fr 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; align-items: center">
+<span style="justify-self: start; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: #eef1f6; border: 1px solid #d3dbe6; color: #41505f; font-size: 13px; font-weight: 600"><span style="width: 6px; height: 6px; border-radius: 999px; background: #7b8ea3"></span>Ýatyryldy</span>
+<span class="mono">#eef1f6 #d3dbe6 #41505f #7b8ea3</span><span class="cap">Отменена · Cancelled</span><span class="cap">By client or business — icon tells which</span></div>
+<div style="display: grid; grid-template-columns: 150px 1fr 1fr 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; align-items: center">
+<span style="justify-self: start; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: #fee4e2; border: 1px solid #f6c7c2; color: #a3251b; font-size: 13px; font-weight: 600"><span style="width: 6px; height: 6px; border-radius: 999px; background: #d9412f"></span>Gelmedi</span>
+<span class="mono">#fee4e2 #f6c7c2 #a3251b #d9412f</span><span class="cap">Неявка · No-show</span><span class="cap">The only red status</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 40px; padding: 64px 0; border-top: 1px solid #e6e6ea">
+<div style="display: flex; align-items: baseline; gap: 16px"><span class="lbl">Type</span><h2 style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.025em">Onest — Turkmen Latin and Cyrillic in one family</h2></div>
+<div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: flex-end; gap: 32px">
+<div style="font-size: 168px; line-height: 150px; font-weight: 700; letter-spacing: -0.05em">Ýý</div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px">
+<div style="font-size: 34px; line-height: 40px; font-weight: 600; letter-spacing: -0.01em">Ää Çç Žž Ňň</div>
+<div style="font-size: 34px; line-height: 40px; font-weight: 600; letter-spacing: -0.01em">Öö Şş Üü Ýý</div>
+<div style="font-size: 34px; line-height: 40px; font-weight: 600; letter-spacing: -0.01em; color: #5a5a64">Жж Щщ Ыы Ёё</div>
+</div>
+</div>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 560px; text-wrap: pretty">Covers every Turkmen letter (ä ç ž ň ö ş ü ý) and full Cyrillic. A neutral grotesque close to SF Pro and Roboto, so web screens sit next to the mobile apps without a style jump. Free on Google Fonts, variable 400–800. Fallback: system stack. Switch the family in Tweaks to compare.</p>
+<div style="display: flex; flex-direction: column; border-top: 1px solid #e6e6ea">
+<div style="display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; align-items: baseline"><span class="lbl">TK</span><span style="font-size: 17px; line-height: 24px">Dellekhanadan diş lukmanyna çenli — islendik hyzmata onlaýn ýazylyň.</span></div>
+<div style="display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; align-items: baseline"><span class="lbl">RU</span><span style="font-size: 17px; line-height: 24px">От барбершопа до стоматолога — записывайтесь онлайн куда угодно.</span></div>
+<div style="display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; align-items: baseline"><span class="lbl">EN</span><span style="font-size: 17px; line-height: 24px">From a barber to a dentist — book anything online.</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="font-size: 15px; font-weight: 600">Same line in the two runners-up</div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 20px; border: 1px solid #e6e6ea; border-radius: 16px">
+<div style="display: flex; justify-content: space-between"><span style="font-size: 13px; font-weight: 600">Golos Text</span><span class="cap">Cyrillic-first, slightly narrower, friendlier</span></div>
+<div style="font-family: 'Golos Text', sans-serif; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em">Şu gün boş wagtlar — golaýyňyzda</div>
+<div style="font-family: 'Golos Text', sans-serif; font-size: 15px; line-height: 22px; color: #5a5a64">Ää Çç Žž Ňň Öö Şş Üü Ýý · Ýazylyş tassyklandy</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 20px; border: 1px solid #e6e6ea; border-radius: 16px">
+<div style="display: flex; justify-content: space-between"><span style="font-size: 13px; font-weight: 600">Manrope</span><span class="cap">Wider, geometric, more “tech”</span></div>
+<div style="font-family: 'Manrope', sans-serif; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em">Şu gün boş wagtlar — golaýyňyzda</div>
+<div style="font-family: 'Manrope', sans-serif; font-size: 15px; line-height: 22px; color: #5a5a64">Ää Çç Žž Ňň Öö Şş Üü Ýý · Ýazylyş tassyklandy</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 20px; border: 1px solid #d5cbfb; background: #efecfe; border-radius: 16px">
+<div style="display: flex; justify-content: space-between"><span style="font-size: 13px; font-weight: 600; color: #4429d6">Onest — chosen</span><span class="cap" style="color: #4429d6">Even color in TK, RU and EN</span></div>
+<div style="font-family: 'Onest', sans-serif; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em">Şu gün boş wagtlar — golaýyňyzda</div>
+<div style="font-family: 'Onest', sans-serif; font-size: 15px; line-height: 22px; color: #5a5a64">Ää Çç Žž Ňň Öö Şş Üü Ýý · Ýazylyş tassyklandy</div>
+</div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; border-top: 1px solid #101014">
+<div style="display: grid; grid-template-columns: 120px 1fr 260px 170px; gap: 24px; padding: 12px 0; border-bottom: 1px solid #e6e6ea"><span class="lbl">Token</span><span class="lbl">Sample (TK)</span><span class="lbl">Desktop ≥1024</span><span class="lbl">Mobile web ≤767</span></div>
+<div style="display: grid; grid-template-columns: 120px 1fr 260px 170px; gap: 24px; padding: 20px 0; border-bottom: 1px solid #e6e6ea; align-items: center"><span class="mono">display</span><span style="font-size: 64px; line-height: 68px; font-weight: 700; letter-spacing: -0.035em">Ýeriňi al</span><span class="mono">700 64/68 −0.035em · hero only</span><span class="mono">40/44</span></div>
+<div style="display: grid; grid-template-columns: 120px 1fr 260px 170px; gap: 24px; padding: 18px 0; border-bottom: 1px solid #e6e6ea; align-items: center"><span class="mono">h1</span><span style="font-size: 44px; line-height: 48px; font-weight: 700; letter-spacing: -0.03em">Golaýyňyzdaky ýerler</span><span class="mono">700 44/48 −0.03em · page title</span><span class="mono">32/36</span></div>
+<div style="display: grid; grid-template-columns: 120px 1fr 260px 170px; gap: 24px; padding: 16px 0; border-bottom: 1px solid #e6e6ea; align-items: center"><span class="mono">h2</span><span style="font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.025em">Meşhur ýerler</span><span class="mono">700 32/38 −0.025em · section</span><span class="mono">26/30</span></div>
+<div style="display: grid; grid-template-columns: 120px 1fr 260px 170px; gap: 24px; padding: 16px 0; border-bottom: 1px solid #e6e6ea; align-items: center"><span class="mono">h3</span><span style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Barber Loft · Köpetdag</span><span class="mono">600 22/28 −0.015em · card, panel</span><span class="mono">19/24</span></div>
+<div style="display: grid; grid-template-columns: 120px 1fr 260px 170px; gap: 24px; padding: 16px 0; border-bottom: 1px solid #e6e6ea; align-items: center"><span class="mono">body-l</span><span style="font-size: 17px; line-height: 26px">Boş wagtlary görüň we bir minutda ýazylyň.</span><span class="mono">400 17/26 · marketing copy</span><span class="mono">16/24</span></div>
+<div style="display: grid; grid-template-columns: 120px 1fr 260px 170px; gap: 24px; padding: 16px 0; border-bottom: 1px solid #e6e6ea; align-items: center"><span class="mono">body</span><span style="font-size: 15px; line-height: 22px">Biznes tassyklandan soň size SMS geler.</span><span class="mono">400 15/22 · UI default</span><span class="mono">15/22</span></div>
+<div style="display: grid; grid-template-columns: 120px 1fr 260px 170px; gap: 24px; padding: 16px 0; border-bottom: 1px solid #e6e6ea; align-items: center"><span class="mono">dense</span><span style="font-size: 13px; line-height: 18px">14:30 · Erkek saç kesimi · Myrat · 60 min · 40 TMT</span><span class="mono">400/500 13/18 · tables, meta</span><span class="mono">13/18</span></div>
+<div style="display: grid; grid-template-columns: 120px 1fr 260px 170px; gap: 24px; padding: 16px 0; border-bottom: 1px solid #e6e6ea; align-items: center"><span class="mono">button</span><span style="font-size: 15px; line-height: 20px; font-weight: 600">Ýazylmak</span><span class="mono">600 15/20 · S: 14/18</span><span class="mono">15/20</span></div>
+<div style="display: grid; grid-template-columns: 120px 1fr 260px 170px; gap: 24px; padding: 16px 0; border-bottom: 1px solid #e6e6ea; align-items: center"><span class="mono">label</span><span class="lbl">Şu gün boş</span><span class="mono">600 11/14 +0.07em caps</span><span class="mono">11/14</span></div>
+</div>
+<div class="cap">Plan for ~30% longer strings: “Ýazylmak” (TK) · “Записаться” (RU) · “Book” (EN). Buttons hug content, never fixed width; labels wrap to two lines before they truncate.</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 40px; padding: 64px 0; border-top: 1px solid #e6e6ea">
+<div style="display: flex; align-items: baseline; gap: 16px"><span class="lbl">Layout</span><h2 style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.025em">Five breakpoints, three grids, two shells</h2></div>
+<div style="display: flex; align-items: flex-end; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="width: 288px; height: 150px; border: 1px solid #d8d8de; border-radius: 10px; padding: 12px 24px; display: flex; gap: 4px"><sc-for list="{{cols12}}" as="c" hint-placeholder-count="12"><div style="flex: 1; background: #efecfe; border-radius: 2px"></div></sc-for></div><span style="font-size: 13px; font-weight: 600">xl · 1440</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="width: 256px; height: 150px; border: 1px solid #d8d8de; border-radius: 10px; padding: 12px 10px; display: flex; gap: 4px"><sc-for list="{{cols12}}" as="c" hint-placeholder-count="12"><div style="flex: 1; background: #efecfe; border-radius: 2px"></div></sc-for></div><span style="font-size: 13px; font-weight: 600">lg · 1280</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="width: 205px; height: 150px; border: 1px solid #d8d8de; border-radius: 10px; padding: 12px 8px; display: flex; gap: 4px"><sc-for list="{{cols8}}" as="c" hint-placeholder-count="8"><div style="flex: 1; background: #efecfe; border-radius: 2px"></div></sc-for></div><span style="font-size: 13px; font-weight: 600">md · 1024</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="width: 154px; height: 150px; border: 1px solid #d8d8de; border-radius: 10px; padding: 12px 6px; display: flex; gap: 3px"><sc-for list="{{cols8}}" as="c" hint-placeholder-count="8"><div style="flex: 1; background: #efecfe; border-radius: 2px"></div></sc-for></div><span style="font-size: 13px; font-weight: 600">sm · 768</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="width: 78px; height: 150px; border: 1px solid #d8d8de; border-radius: 10px; padding: 12px 4px; display: flex; gap: 3px"><sc-for list="{{cols4}}" as="c" hint-placeholder-count="4"><div style="flex: 1; background: #efecfe; border-radius: 2px"></div></sc-for></div><span style="font-size: 13px; font-weight: 600">xs · 390</span></div>
+</div>
+<div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: start">
+<div style="display: flex; flex-direction: column; border-top: 1px solid #101014">
+<div style="display: grid; grid-template-columns: 90px 110px 80px 80px 1fr; gap: 16px; padding: 10px 0; border-bottom: 1px solid #e6e6ea"><span class="lbl">Name</span><span class="lbl">Viewport</span><span class="lbl">Columns</span><span class="lbl">Gutter</span><span class="lbl">Side margin / container</span></div>
+<div style="display: grid; grid-template-columns: 90px 110px 80px 80px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; font-size: 14px"><span style="font-weight: 600">xl</span><span>≥1440</span><span>12</span><span>24</span><span>container 1200, centered</span></div>
+<div style="display: grid; grid-template-columns: 90px 110px 80px 80px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; font-size: 14px"><span style="font-weight: 600">lg</span><span>1280–1439</span><span>12</span><span>24</span><span>40 → container 1200</span></div>
+<div style="display: grid; grid-template-columns: 90px 110px 80px 80px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; font-size: 14px"><span style="font-weight: 600">md</span><span>1024–1279</span><span>8</span><span>20</span><span>32, fluid</span></div>
+<div style="display: grid; grid-template-columns: 90px 110px 80px 80px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; font-size: 14px"><span style="font-weight: 600">sm</span><span>768–1023</span><span>8</span><span>16</span><span>24, fluid</span></div>
+<div style="display: grid; grid-template-columns: 90px 110px 80px 80px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid #e6e6ea; font-size: 14px"><span style="font-weight: 600">xs</span><span>≤767 (390)</span><span>4</span><span>12</span><span>16, fluid</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; gap: 16px; align-items: flex-start">
+<div style="width: 120px; height: 76px; border: 1px solid #d8d8de; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; flex: none"><div style="height: 12px; border-bottom: 1px solid #e6e6ea"></div><div style="flex: 1; margin: 6px 20px; background: #efecfe; border-radius: 2px"></div></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><div style="font-size: 15px; font-weight: 600">Marketplace shell · yeral.app</div><div class="cap">Top nav 72 px, content max 1200 centered. Search, catalog, business page, booking, account.</div></div>
+</div>
+<div style="display: flex; gap: 16px; align-items: flex-start">
+<div style="width: 120px; height: 76px; border: 1px solid #d8d8de; border-radius: 8px; display: flex; overflow: hidden; flex: none"><div style="width: 24px; border-right: 1px solid #e6e6ea; background: #f6f6f8"></div><div style="flex: 1; display: flex; flex-direction: column"><div style="height: 12px; border-bottom: 1px solid #e6e6ea"></div><div style="flex: 1; margin: 6px; background: #efecfe; border-radius: 2px"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><div style="font-size: 15px; font-weight: 600">App shell · business &amp; cms</div><div class="cap">Full width. Sidebar 248 → 72 icon rail at md → top bar with drawer at sm/xs. Content padding 32 / 24 / 16.</div></div>
+</div>
+</div>
+</div>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; padding: 64px 0 0; border-top: 1px solid #e6e6ea">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="lbl">Spacing</span><div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Base 4</div></div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 12px"><span class="mono" style="width: 28px">4</span><div style="width: 4px; height: 12px; background: #5a3ff0; border-radius: 2px"></div></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="mono" style="width: 28px">8</span><div style="width: 8px; height: 12px; background: #5a3ff0; border-radius: 2px"></div></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="mono" style="width: 28px">12</span><div style="width: 12px; height: 12px; background: #5a3ff0; border-radius: 2px"></div></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="mono" style="width: 28px">16</span><div style="width: 16px; height: 12px; background: #5a3ff0; border-radius: 2px"></div></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="mono" style="width: 28px">24</span><div style="width: 24px; height: 12px; background: #5a3ff0; border-radius: 2px"></div></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="mono" style="width: 28px">32</span><div style="width: 32px; height: 12px; background: #5a3ff0; border-radius: 2px"></div></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="mono" style="width: 28px">48</span><div style="width: 48px; height: 12px; background: #9d88f7; border-radius: 2px"></div><span class="cap">web</span></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="mono" style="width: 28px">64</span><div style="width: 64px; height: 12px; background: #9d88f7; border-radius: 2px"></div><span class="cap">web</span></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="mono" style="width: 28px">96</span><div style="width: 96px; height: 12px; background: #9d88f7; border-radius: 2px"></div><span class="cap">section rhythm</span></div>
+</div>
+<div class="cap">List rows 56–64; table rows 48 (dense 40).</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="lbl">Radii</span><div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Soft, not round</div></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; border: 1.5px solid #101014; border-radius: 8px"></div><span class="mono">8 · input</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; border: 1.5px solid #101014; border-radius: 10px"></div><span class="mono">10 · button S, slot</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; border: 1.5px solid #101014; border-radius: 12px"></div><span class="mono">12 · button M</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; border: 1.5px solid #101014; border-radius: 14px"></div><span class="mono">14 · button L</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; border: 1.5px solid #101014; border-radius: 16px"></div><span class="mono">16 · card, modal</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 56px; border: 1.5px solid #101014; border-radius: 999px"></div><span class="mono">999 · chip, avatar</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="lbl">Elevation &amp; icons</span><div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Flat by default</div></div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 64px; height: 40px; border: 1px solid #e6e6ea; border-radius: 10px; flex: none"></div><span class="cap"><b style="color: #101014">Flow</b> — 1px #e6e6ea, no shadow</span></div>
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 64px; height: 40px; border-top: 1px solid #e6e6ea; flex: none; background: #ffffff"></div><span class="cap"><b style="color: #101014">Sticky</b> — full-width border, no shadow</span></div>
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 64px; height: 40px; border-radius: 10px; background: #ffffff; box-shadow: 0 8px 24px rgba(16,16,20,.16); border: 1px solid #e6e6ea; flex: none"></div><span class="cap"><b style="color: #101014">Raised</b> — 0 8px 24px rgba(16,16,20,.16)</span></div>
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 64px; height: 40px; border-radius: 10px; background: rgba(16,16,20,.4); flex: none"></div><span class="cap"><b style="color: #101014">Scrim</b> — rgba(16,16,20,.40) behind modal</span></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 14px; color: #101014; padding-top: 4px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"></circle><path d="M8.12 8.12 12 12"></path><path d="M20 4 8.12 15.88"></path><circle cx="6" cy="18" r="3"></circle><path d="M14.8 14.8 20 20"></path></svg>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"></circle><circle cx="18" cy="8" r="2"></circle><circle cx="20" cy="16" r="2"></circle><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"></path></svg>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+</div>
+<div class="cap">Lucide, stroke 1.75 · 16 dense, 20 UI, 24 nav and feature.</div>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":3260}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const f = this.props.font ?? 'Onest';
+    const n = (k) => Array.from({ length: k }, (_, i) => ({ i }));
+    return {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      cols12: n(12),
+      cols8: n(8),
+      cols4: n(4)
+    };
+  }
+}
+</script>
+</body>
+</html>

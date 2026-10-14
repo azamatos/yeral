@@ -1,7 +1,8 @@
 # Yeral — instructions for coding agents
 
-Online booking for beauty and wellness salons in Turkmenistan. One monorepo for the landing, client, business and cms
-sites, the api and the design system (Storybook). Applies to every agent tool; Claude Code also reads `CLAUDE.md`.
+Ýeral ("ýer al", take a place): booking for any business that sells its time — salons, dentists, restaurants, gyms,
+tutors, mechanics and more — launching in Turkmenistan. One monorepo for the client marketplace (yeral.app), the
+business workspace, the CMS, the api and the design system (Storybook). Applies to every agent tool; Claude Code also reads `CLAUDE.md`.
 
 **Migration in progress:** the monorepo foundation is in place (M0); the live marketplace is still the frozen Next.js app
 in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-bank/progress.md`.
@@ -12,8 +13,11 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 2. `docs/memory-bank/systemPatterns.md` before writing code: monorepo map, FSD, data flow, state, rendering, auth, i18n.
 3. As the task needs: `productContext.md` (product rules, glossary), `techContext.md` (libraries, why, where shared
    helpers live), `operations.md` (environments, Docker, CI/CD, versioning, parallel work), `docs/decisions/` (ADRs).
-4. Design source: `docs/design/` — the Claude Design export (Design System v2, Client App, Business App, Business
-   Clients and Analytics, Product and Business decks, Project Brief). Open the `.dc.html` files in a browser.
+4. **Design source: `docs/design/`** — web design v0.3 (14.10.2026): `README.md` (product spec), `CLAUDE.md` (design
+   rules, how to read `.dc.html`), `tokens.css`, `screens/` (hi-fi screens + index), `demo-data.json`. The screen wins on
+   visuals, the design README on behaviour. Where `docs/design/CLAUDE.md` suggests a stack (Next.js, CSS Modules,
+   next-intl), this repo's ADRs win: TanStack, Tailwind mapped from `tokens.css`, use-intl. Business and CMS screens
+   aren't designed yet.
 
 ## Rules
 
@@ -21,8 +25,12 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 2. State has one owner: server data → TanStack Query via `@yeral/sdk`; shareable → URL search params; form input →
    TanStack Form; local → `useState`; shared client-only → a Zustand store in the owning slice (ADR 0011).
 3. UI talks to the API only through `@yeral/sdk`. No `fetch` in components.
-4. No user-visible string in code, `aria-label` included: i18n with Russian plural forms.
-5. Salon dates/times through `@yeral/domain/time` (`Asia/Ashgabat`, `YYYY-MM-DD`, minutes). Money = whole manats.
+4. No user-visible string in code, `aria-label` included: i18n in `tk` (default, verbatim from the screens), `ru`, `en`.
+   No city names in copy.
+5. Business dates/times through `@yeral/domain/time` (business-local, `Asia/Ashgabat` today; `YYYY-MM-DD`, minutes).
+   Money = whole manats, shown `40 TMT`.
+5a. UI follows `docs/design`: exact values from the screens, nothing invented; anything undrawn follows the nearest
+   drawn pattern (design `CLAUDE.md` → "When something isn't drawn"); ask about the design's open questions.
 6. Domains, cookie domain and brand name come from config (`@yeral/lib/site`); never hard-code `yeral.app`.
 7. Portable code only: web-standard APIs; no Cloudflare-only storage for product data; every deployable has a Dockerfile (ADR 0007).
 8. UI components live in `@yeral/ui` with Storybook stories for every variant; scaffold with `pnpm gen ui-component` (ADR 0012).
@@ -38,7 +46,8 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
   Until M0 there's no staging: `pnpm run deploy` publishes straight to yeral.app, so say so when doing it.
 - Ask first before: repository settings, DNS changes, deleting anything in the Cloudflare or GitHub account, paid services,
   adding files from outside the repo.
-- `docs/design/` is the owner's export: read it, don't edit it (a new export replaces the folder).
+- `docs/design/` is the owner's export: read it, don't edit it (a new export replaces the folder). The old mobile designs
+  were removed on purpose (2026-10-14); don't restore them.
 - Never ask for tokens or passwords in chat. The owner signs in with `gh auth login` / `npx wrangler login`, or stores
   secrets with `gh secret set NAME`.
 

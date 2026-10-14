@@ -1,0 +1,64 @@
+# Screens index
+
+Hi-fi screens exported from the "Ýeral Web" canvas (14.10.2026). Each `.dc.html` = one artboard. See `../CLAUDE.md` → "How to read a .dc.html screen".
+Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to 360); boards are fixed sheets.
+
+## client/ — yeral.app
+
+| File | Route | Kind · frame | States / tweaks |
+|---|---|---|---|
+| `Home.dc.html` | `/tk` | page · 1440×3180 | Static sections; links to Search |
+| `Search.dc.html` | `/tk/search` | page · 1440×2780 | Category chips filter, day toggle, row↔pin hover; Glow Studio row → Venue |
+| `Venue.dc.html` | `/tk/b/{slug}` | page · 1440×5160 | Service select/deselect, group chip filter, favourite toggle, summary card; tweak `preselect` |
+| `Booking.dc.html` | `/tk/b/{slug}/book` | page · 1440×1600 | Tweaks `step` (services · staff · time · confirm · sent), `loggedIn`, `slotTaken`; code `0000` = wrong; phone 65 90 11 22 = existing user |
+| `Booking-Table.dc.html` | `/tk/b/{slug}/book` (table) | page · 1440×1900 | Party 1–8/9+, date, time, area, requests, login; tweaks `sent`, `loggedIn` |
+| `Booking-Class.dc.html` | `/tk/b/{slug}/book` (class) | page · 1440×1460 | Day tabs, sessions (seats left / Doly), seats stepper; tweaks `sent`, `loggedIn` |
+| `Auth.dc.html` | `/tk/login` (modal) | board · 1800×1480 | Phone → code → new user → wrong code / 60 s lock; logged-in avatar menu |
+| `Account-Bookings.dc.html` | `/tk/account/bookings[/{id}[/review]]` | page · 1440×1400 | Tabs Gelýän/Geçen, detail drawer by status, cancel modal + undo toast, review modal; tweaks `view` (list · drawer · cancel · review), `empty`, `late` (cancel window passed) |
+| `Account-Profile.dc.html` | `/tk/account/profile`, `/favorites` | page · 1440×1600 | Profile form + dirty save bar, phone change via SMS, language, SMS switches, delete-account modal; favourites grid with remove + undo; tweak `pane` |
+| `Mobile.dc.html` | — | board · 1442×2280 | Phone frames 390×844: Home, Search list, Map, Business page, Booking time step, My bookings sheet |
+| `States.dc.html` | — | board · 1440×3760 | No results · location ask · location denied · slot taken · not bookable online · closed today · network error · loading skeleton · 404 · login required for favourite |
+| `Client-Map.dc.html` | — | board · 1440×2860 | Site map, flow, inventory, decisions log |
+
+## system/ — design system
+`Main.dc.html` (Foundations: colour, type, layout, spacing), `DS-Components.dc.html` (all components with hover/focus/pressed/disabled), `DS-Booking.dc.html` (categories × booking types).
+
+## explorations/
+`Home-A/B/C.dc.html` — round-1 homepage options. **Not to build.** Final Home = B's hero + A's body.
+
+## Developer notes collected while drawing
+
+**Global**
+- "Jaň et" = `tel:` link; "Ýol görkez" = maps deep link; both are `#` in the screens.
+- Header "Giriş" opens the login modal (`/tk/login` as fallback route).
+- Lists use skeletons while loading; buttons show an inline spinner and keep their width.
+- `.hit` (Mobile board): pseudo-element that grows 36–40 px chips/slots to a 44 px touch area without changing their look — use it on touch layouts.
+
+**Search**
+- Sort nearest first; hide slots earlier than now + lead time.
+- When geolocation is denied: hide distances, sort by rating × review count.
+
+**Business page (Venue)**
+- Specialist "Ýazylmak" → `/book?staff={id}`; "Dowam et" from the summary → `/book?services=…&step=staff`.
+- Service chips filter (not scroll). Aside is sticky; ≤1023 it becomes a bottom bar.
+- Logged-out heart → login modal first, then save (States tile 10).
+- Main column `flex-basis` 540 so the aside doesn't wrap between 1024–1108 px.
+
+**Appointment booking**
+- Keep `step, services, staff, date, time` in the URL; scroll to top on step change.
+- Availability: a slot is free only if the whole duration (all chosen services, back-to-back) fits the specialist's schedule. "Islendik hünärmen" = earliest time any qualified specialist (or combination per service) is free.
+- Date strip: days of the hidden week are not focusable; arrows page by week; on phones it scrolls natively.
+- SMS code: `inputmode="numeric"`, `autocomplete="one-time-code"`, paste fills all boxes, auto-submit on the 4th digit, "Tassykla" fallback, resend timer 0:59 and 60 s lock after 3 wrong tries are live timers.
+- "Senenama goş" downloads an `.ics` file.
+- `slotTaken`: show the banner for the chosen time; picking an alternative clears it; the taken slot shows as disabled in the time grid.
+
+**Table / class booking**
+- Close (×) returns to the business page `/b/{slug}`.
+- Table: VIP area requires party ≥ 6; changing day clears an unavailable time; table is held 15 min after the time.
+- Class: seats stepper max = min(2, seats left); full sessions disabled with "Sanawa ýazylmak — ýakynda" (waitlist later). Same-day sessions after the free-cancel window show "Mugt ýatyrmak wagty geçdi…".
+
+**Account**
+- Cancel window = each booking's start − the business's `cancelWindowMin` (default 120). Past it: only "Jaň et".
+- A booking cancelled from Gelýän stays there greyed until reload.
+- Review: 1 per completed booking, editable 7 days, shown as "Aýjemal G." (first name + surname initial).
+- Favourites route opens the favourites pane directly.

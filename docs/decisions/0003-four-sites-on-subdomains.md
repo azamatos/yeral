@@ -1,6 +1,6 @@
 # 0003. Four sites on subdomains, short links on the apex
 
-- Status: Accepted 2026-10-13
+- Status: Superseded by [0015](0015-marketplace-on-the-apex.md) on 2026-10-14 (accepted 2026-10-13)
 - Decided by: owner (site map) + Claude (short links, shared session)
 
 ## Context

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral — giriş</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f4f6}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.cap a{text-decoration:underline}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-lg{height:52px;padding:0 24px;border-radius:14px;font-size:16px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6;color:#101014}
+.b:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b-ico{width:44px;padding:0}
+.nl{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:500;color:#101014;border:0;background:transparent;font-family:inherit;cursor:pointer}
+.nl:hover{background:#f4f4f6;color:#101014}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld label{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp::placeholder{color:#6e6e78}
+.inp:hover{border-color:#b0b0b8}
+.inp:focus,.inp.is-f{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.pfx{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;flex:none}
+.lnk{display:inline-flex;align-items:center;min-height:32px;border:0;background:transparent;padding:0;font-family:inherit;font-size:14px;font-weight:600;color:#4429d6;cursor:pointer;white-space:nowrap}
+.lnk:hover{color:#3520a6;text-decoration:underline}
+.lnk:disabled{color:#6e6e78;text-decoration:none;cursor:default}
+.otp{display:inline-flex;gap:12px;align-self:flex-start}
+.ob{width:56px;height:56px;border:1px solid #d8d8de;border-radius:8px;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#101014;font-variant-numeric:tabular-nums}
+.ob.f{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.ob.e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
+.ob.d{background:#f6f6f8;border-color:#e6e6ea;color:#6e6e78}
+.caret{width:2px;height:26px;border-radius:1px;background:#101014}
+.mdl{display:flex;flex-direction:column;gap:20px;width:400px;padding:28px;background:#ffffff;border-radius:16px;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.mtop{display:flex;align-items:flex-start;justify-content:space-between}
+.mlogo{width:40px;height:40px;border-radius:10px;display:block}
+.mx{width:36px;height:36px;border-radius:10px;margin:-4px -8px 0 0}
+.mt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.ms{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
+.mcol{display:flex;flex-direction:column;gap:16px;width:400px;flex:none}
+.mcap{display:flex;flex-direction:column;gap:4px;padding:0 4px}
+.mn{font-size:14px;line-height:20px;font-weight:600;color:#101014}
+.ava{width:40px;height:40px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.avb{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 10px 0 5px;border:1px solid #d8d8de;border-radius:999px;background:#f6f6f8;font-family:inherit;color:#101014;cursor:pointer}
+.pop{display:flex;flex-direction:column;padding:6px;background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.mi{display:flex;align-items:center;gap:12px;height:40px;padding:0 10px;border-radius:8px;font-size:15px;line-height:20px;color:#101014}
+.mi:hover{background:#f4f4f6;color:#101014}
+.mi svg{flex:none;color:#5a5a64}
+.mdv{height:1px;background:#e6e6ea;margin:6px 0}
+</style>
+</helmet>
+<div style="width: 1800px; min-height: 1480px; padding: 64px; background: #f4f4f6; color: #101014; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; gap: 40px">
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em">Giriş · telefon arkaly</h1>
+<p class="cap" style="margin: 0; font-size: 15px; line-height: 22px">Opens as a modal from the header «Giriş» (and inline inside booking). Phone only — no passwords.</p>
+</div>
+
+<div style="display: flex; gap: 24px; align-items: flex-start">
+
+<div class="mcol">
+<div class="mdl" role="dialog" aria-modal="true" aria-labelledby="m1-t">
+<div class="mtop">
+<img class="mlogo" src="../../assets/brand/yeral-icon.png" alt="Ýeral">
+<button class="b b-gho b-ico mx" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h2 id="m1-t" class="mt">Ýeral-a giriň</h2>
+<p class="ms">Ýazylyşlaryňyzy dolandyrmak üçin telefon belgiňizi ýazyň.</p>
+</div>
+<div class="fld">
+<label for="m1-phone">Telefon belgiňiz</label>
+<div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="m1-phone" class="inp is-f" type="tel" inputmode="numeric" autocomplete="tel-national" value="65 90 11 22" style="font-variant-numeric: tabular-nums"></div>
+</div>
+<button class="b b-pri b-lg" style="width: 100%">Kod iber</button>
+<p class="cap" style="margin: 0">Dowam etmek bilen <a href="#">Ulanyş şertleri</a> we <a href="#">Gizlinlik syýasaty</a> bilen ylalaşýarsyňyz.</p>
+<div style="display: flex; justify-content: center; padding-top: 12px; margin-top: -4px; border-top: 1px solid #e6e6ea">
+<button class="nl" style="font-size: 14px" aria-haspopup="listbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Dil: Türkmençe<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+</div>
+</div>
+<div class="mcap">
+<span class="mn">1 · Telefon</span>
+<span class="cap">Modal 400, focus on the phone field. Fixed +993 prefix, 8 digits; short number → field error «Belgi doly däl: 8 san bolmaly.» Under 768 px it opens as a bottom sheet.</span>
+</div>
+</div>
+
+<div class="mcol">
+<div class="mdl" role="dialog" aria-modal="true" aria-labelledby="m2-t">
+<div class="mtop">
+<img class="mlogo" src="../../assets/brand/yeral-icon.png" alt="Ýeral">
+<button class="b b-gho b-ico mx" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 4px; margin-left: -10px">
+<button class="b b-gho b-ico" style="width: 36px; height: 36px; border-radius: 10px" aria-label="Yza"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+<h2 id="m2-t" class="mt">SMS kody ýazyň</h2>
+</div>
+<p class="ms">Kod <span style="white-space: nowrap; font-variant-numeric: tabular-nums">+993 65 90 11 22</span> belgä iberildi.</p>
+</div>
+<div class="otp" role="group" aria-label="SMS kod">
+<span class="ob">4</span>
+<span class="ob">7</span>
+<span class="ob f"><span class="caret"></span></span>
+<span class="ob"></span>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: -6px">
+<button class="lnk" disabled="{{true}}">Täzeden iber (0:42)</button>
+<button class="lnk">Belgini üýtget</button>
+</div>
+</div>
+<div class="mcap">
+<span class="mn">2 · SMS kod</span>
+<span class="cap">One input (inputmode numeric, autocomplete one-time-code) drawn as 4 boxes; the box to type into gets the focus halo. Verifies by itself on the 4th digit (no button in the modal). Resend unlocks after 0:59.</span>
+</div>
+</div>
+
+<div class="mcol">
+<div class="mdl" role="dialog" aria-modal="true" aria-labelledby="m3-t">
+<div class="mtop">
+<img class="mlogo" src="../../assets/brand/yeral-icon.png" alt="Ýeral">
+<button class="b b-gho b-ico mx" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h2 id="m3-t" class="mt">Hoş geldiňiz!</h2>
+<p class="ms">Biz size nähili ýüzlenmeli?</p>
+</div>
+<span style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; line-height: 20px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg><span style="font-variant-numeric: tabular-nums">+993 65 90 11 22</span><span class="cap">· tassyklandy</span></span>
+<div class="fld"><label for="m3-fn">Adyňyz</label><input id="m3-fn" class="inp is-f" autocomplete="given-name" value="Aýjemal"></div>
+<div class="fld"><label for="m3-ln">Familiýaňyz (hökman däl)</label><input id="m3-ln" class="inp" autocomplete="family-name"></div>
+<button class="b b-pri b-lg" style="width: 100%">Dowam et</button>
+</div>
+<div class="mcap">
+<span class="mn">3 · Täze ulanyjy</span>
+<span class="cap">Only when the phone has no account yet. Name required, surname optional. «Dowam et» closes the modal and the page carries on (booking keeps its selection).</span>
+</div>
+</div>
+
+<div class="mcol">
+<div class="mdl" role="dialog" aria-modal="true" aria-labelledby="m4-t">
+<div class="mtop">
+<img class="mlogo" src="../../assets/brand/yeral-icon.png" alt="Ýeral">
+<button class="b b-gho b-ico mx" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 4px; margin-left: -10px">
+<button class="b b-gho b-ico" style="width: 36px; height: 36px; border-radius: 10px" aria-label="Yza"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+<h2 id="m4-t" class="mt">SMS kody ýazyň</h2>
+</div>
+<p class="ms">Kod <span style="white-space: nowrap; font-variant-numeric: tabular-nums">+993 65 90 11 22</span> belgä iberildi.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div class="otp" role="group" aria-label="SMS kod" aria-invalid="true">
+<span class="ob e">4</span>
+<span class="ob e">7</span>
+<span class="ob e">1</span>
+<span class="ob e">9</span>
+</div>
+<span role="alert" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; color: #a3251b"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Kod nädogry. Ýene 2 synanyşyk galdy.</span>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: -6px">
+<button class="lnk" disabled="{{true}}">Täzeden iber (0:42)</button>
+<button class="lnk">Belgini üýtget</button>
+</div>
+</div>
+<div class="mcap">
+<span class="mn">4 · Ýalňyş kod</span>
+<span class="cap">Boxes #d9412f border + #fee4e2 halo, message counts the tries left. Typing a new digit clears the error. After the 3rd wrong code the input locks for 60 s:</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 20px; background: #ffffff; border: 1px dashed #d8d8de; border-radius: 16px">
+<span class="lbl">Variant · 60 s lock</span>
+<div class="otp" aria-hidden="true">
+<span class="ob d"></span>
+<span class="ob d"></span>
+<span class="ob d"></span>
+<span class="ob d"></span>
+</div>
+<span style="font-size: 13px; line-height: 18px; color: #6e6e78">Köp synanyşyk. 60 sekuntdan soň gaýtadan synanyşyň.</span>
+</div>
+</div>
+
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 16px; padding-top: 32px; border-top: 1px solid #e6e6ea">
+<div style="display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap">
+<h2 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Logged-in header</h2>
+<span class="cap">«Giriş» becomes the avatar button. Menu = popover 260, anchored right under the avatar; Esc or an outside click closes it; bottom sheet under 768 px.</span>
+</div>
+<div style="position: relative; width: 1200px; height: 420px; background: #ffffff; border: 1px solid #e6e6ea; border-radius: 16px; overflow: hidden">
+<header style="display: flex; align-items: center; gap: 16px; height: 72px; padding: 0 24px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<a href="Home.dc.html" aria-label="Ýeral baş sahypa" style="display: flex"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 30px; width: auto"></a>
+<div style="flex: 1"></div>
+<nav style="display: flex; align-items: center; gap: 4px">
+<a class="nl" href="#">Biznes üçin</a>
+<button class="nl" aria-label="Dil: Türkmençe"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>TK</button>
+<button class="avb" aria-haspopup="menu" aria-expanded="true" aria-controls="acct-menu" aria-label="Hasap menýusy: Aýjemal Gurbanowa" style="margin-left: 8px"><span class="ava" style="width: 32px; height: 32px; font-size: 14px">A</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"></path></svg></button>
+</nav>
+</header>
+<div id="acct-menu" class="pop" role="menu" aria-label="Hasap" style="position: absolute; top: 80px; right: 24px; width: 260px">
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 10px 8px">
+<span class="ava" aria-hidden="true">A</span>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Aýjemal Gurbanowa</span><span class="cap" style="font-variant-numeric: tabular-nums">+993 65 90 11 22</span></span>
+</div>
+<div class="mdv"></div>
+<a class="mi" role="menuitem" href="Account-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlarym</a>
+<a class="mi" role="menuitem" href="Account-Profile.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>Halanlarym</a>
+<a class="mi" role="menuitem" href="Account-Profile.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profil</a>
+<div class="mdv"></div>
+<a class="mi" role="menuitem" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Dil: Türkmençe<span class="cap" style="margin-left: auto">TK</span></a>
+<a class="mi" role="menuitem" href="Home.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Çykmak</a>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1800,"height":1480}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

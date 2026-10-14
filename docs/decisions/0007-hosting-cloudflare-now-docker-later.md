@@ -17,8 +17,7 @@
 
 | Host | Worker | What runs |
 |---|---|---|
-| `yeral.app`, `www` | `yeral-landing` | static assets (prerendered) |
-| `client.yeral.app` | `yeral-client` | TanStack Start SSR |
+| `yeral.app`, `www` | `yeral-client` | TanStack Start SSR (site map: ADR 0015) |
 | `business.yeral.app` | `yeral-business` | static assets, SPA fallback |
 | `cms.yeral.app` | `yeral-cms` | static assets, behind Cloudflare Access |
 | `api.yeral.app` | `yeral-api` | Hono; Postgres (Neon) through Hyperdrive; R2 for photos; Cron Trigger for jobs |
@@ -28,7 +27,7 @@ Each Worker declares its host in its wrangler config (`custom_domain: true`), so
 certificate by itself. Staging uses `<name>-stage` Workers on `*-stage.yeral.app` and a Neon `stage` branch.
 
 **Later: one own server** (VPS, e.g. in Turkmenistan) with Docker Compose: nginx (TLS via Let's Encrypt, reverse proxy,
-serves the static apps), `client` and `landing` Node servers, `api`, `jobs`, `postgres`, optional `minio` for photos.
+serves the static apps), the `client` Node server, `api`, `jobs`, `postgres`, optional `minio` for photos.
 Cloudflare becomes DNS only (grey cloud). Moving = DNS switch + `pg_dump`/restore + copy photos from R2.
 
 **Ready from day one**, so the move is a deploy and not a project: every deployable has a Dockerfile, `infra/docker`

@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral — profil we sazlamalar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 40px}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-ink{background:#101014;color:#ffffff}
+.b-ink:hover{background:#2a2a32;color:#ffffff}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6;color:#101014}
+.b-dan{background:#ffffff;border-color:#f6c7c2;color:#a3251b}
+.b-dan:hover{background:#fee4e2;color:#a3251b}
+.b-red{background:#b42318;color:#ffffff}
+.b-red:hover{background:#912018;color:#ffffff}
+.b-red:hover{background:#c0331f;color:#ffffff}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed}
+.b-ico{width:40px;height:40px;padding:0;border-radius:10px;flex:none}
+.b:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.nl{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:500;color:#101014;border:0;background:transparent;font-family:inherit;cursor:pointer}
+.nl:hover{background:#f4f4f6;color:#101014}
+.qs{display:flex;align-items:center;height:56px;border:1px solid #d8d8de;border-radius:999px;padding:0 6px 0 4px;flex:0 1 640px;min-width:0;background:#ffffff}
+.qf{display:flex;align-items:center;gap:10px;padding:0 18px;height:44px;border-radius:999px;min-width:0;flex:1;cursor:pointer}
+.qf:hover{background:#f4f4f6}
+.qv{font-size:14px;line-height:18px;font-weight:600;color:#101014;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qd{width:1px;height:28px;background:#e6e6ea;flex:none}
+.qgo{width:44px;height:44px;border-radius:999px;border:0;display:inline-flex;align-items:center;justify-content:center;flex:none;cursor:pointer}
+.slot{display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 10px;border-radius:8px;border:1px solid #d8d8de;font-size:13px;font-weight:600;color:#101014;background:#ffffff}
+.slot:hover{border-color:#5a3ff0;color:#4429d6}
+.vc{display:flex;flex-direction:column;gap:12px;color:#101014}
+.vc:hover{color:#101014}
+.vc:hover .vn{text-decoration:underline}
+.vc img{transition:filter .15s}
+.vc:hover img{filter:brightness(.94)}
+.vc:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4;border-radius:12px}
+.sep{height:1px;background:#e6e6ea}
+.gfoot{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:32px}
+.fl{font-size:14px;line-height:20px;color:#5a5a64}
+.fl:hover{color:#101014}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp::placeholder{color:#6e6e78}
+.inp:hover{border-color:#b0b0b8}
+.inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.inp.is-e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
+.inp.ro{flex:1;background:#f6f6f8;border-color:#e6e6ea}
+.pre{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;font-size:15px;font-weight:500;flex:none}
+.avb{display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 10px 0 5px;border:1px solid #d8d8de;border-radius:999px;background:#ffffff;color:#101014;font-family:inherit;cursor:pointer;margin-left:4px}
+.avb:hover{background:#f6f6f8}
+.avb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.pop{position:absolute;top:54px;right:0;width:280px;padding:6px;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);z-index:31;display:flex;flex-direction:column}
+.catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
+.mi{display:flex;align-items:center;gap:12px;width:100%;height:40px;padding:0 12px;border-radius:8px;border:0;background:transparent;font-family:inherit;font-size:15px;color:#101014;cursor:pointer;text-align:left}
+.mi:hover{background:#f4f4f6;color:#101014}
+.acc{display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;padding:40px 0 96px}
+.aside{flex:1 1 240px;max-width:260px;display:flex;flex-direction:column;gap:20px;min-width:0}
+.amain{flex:999 1 640px;min-width:0;display:flex;flex-direction:column}
+.aprof{display:flex;align-items:center;gap:14px;padding:0 12px}
+.av56{width:56px;height:56px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:22px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.anav{display:flex;flex-direction:column;gap:2px}
+.sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014;white-space:nowrap}
+button.sn{border:0;background:transparent;font-family:inherit;width:100%;cursor:pointer;text-align:left}
+.sn:hover{background:#f4f4f6;color:#101014}
+.sn.on{background:#efecfe;color:#4429d6;font-weight:600}
+.sn:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.adiv{height:1px;background:#e6e6ea;margin:8px 0}
+.h1a{margin:0;font-size:32px;line-height:38px;font-weight:700;letter-spacing:-0.025em}
+.prow{display:grid;grid-template-columns:240px minmax(0,1fr);gap:32px;padding:32px 0;border-top:1px solid #e6e6ea}
+.pl{display:flex;flex-direction:column;gap:4px}
+.ph{margin:0;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.pc{display:flex;flex-direction:column;gap:20px;min-width:0}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.pbox{display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid #e6e6ea;border-radius:12px}
+.pact{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.rg{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:12px}
+.rc{display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;border:1px solid #d8d8de;border-radius:12px;background:#ffffff;font-family:inherit;font-size:15px;font-weight:600;color:#101014;cursor:pointer;text-align:left}
+.rc:hover{background:#f6f6f8}
+.rc.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.rc:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.lcode{width:32px;height:24px;border-radius:6px;background:#f0f0f3;color:#5a5a64;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.rc.on .lcode{background:#ffffff;color:#4429d6}
+.nrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #e6e6ea}
+.nrow.first{padding-top:0}
+.nrow.last{border-bottom:0;padding-bottom:0}
+.sw{width:52px;height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;flex:none}
+.sw:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.trk{position:relative;width:40px;height:24px;border-radius:999px;background:#e6e6ea;box-shadow:inset 0 0 0 1.5px #6e6e78;transition:background .15s}
+.sw.on .trk{background:#5a3ff0;box-shadow:none}
+.knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:999px;background:#ffffff;box-shadow:0 1px 2px rgba(16,16,20,.2);transition:left .15s}
+.sw.on .knob{left:18px}
+.sbar{position:sticky;bottom:16px;z-index:10;margin-top:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:12px 12px 12px 20px;background:#ffffff;border:1px solid #e6e6ea;border-radius:16px;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.gfav{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:32px 24px;margin-top:24px}
+.fav{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:999px;border:0;background:#ffffff;color:#4429d6;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(16,16,20,.12)}
+.fav:hover{background:#f6f6f8}
+.fav:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.tagq{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600}
+.empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 32px;border:1px dashed #d8d8de;border-radius:16px;text-align:center;margin-top:24px}
+.eic{width:56px;height:56px;border-radius:999px;background:#efecfe;color:#5a3ff0;display:flex;align-items:center;justify-content:center}
+.scrim{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:40}
+.grab{display:none;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:0 auto;flex:none}
+.mwrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
+.mwrap .scrim{position:absolute;z-index:0}
+.mdl{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;max-width:100%;max-height:100%;overflow-y:auto;padding:24px;border-radius:16px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.mdl-s{width:480px}
+.mt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.mp{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
+.mact{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.toast{position:fixed;left:24px;bottom:24px;z-index:80;display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 8px 0 16px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:15px;line-height:20px;max-width:calc(100% - 48px)}
+.toast .tb{background:transparent;color:#c3b6fb;padding:0 10px}
+.toast .tb:hover{background:#2a2a32;color:#c3b6fb}
+.tsp{width:8px;flex:none}
+@media (max-width:1023px){.wrap{padding:0 24px}.hide-md{display:none !important}.acc{gap:24px;padding-top:24px}.aside{flex-basis:100%;max-width:none}.aprof,.adiv,.sn-out{display:none !important}.anav{flex-direction:row;gap:8px;overflow-x:auto;margin:0 -24px;padding:0 24px 4px}.anav .sn{flex:none;width:auto;height:44px;padding:0 16px;gap:8px;border:1px solid #d8d8de;border-radius:999px}.anav .sn.on{border-color:#d5cbfb}}
+@media (max-width:767px){.wrap{padding:0 16px}.hide-xs{display:none !important}.qs{height:48px}.qf{padding:0 12px}.anav{margin:0 -16px;padding:0 16px 4px}.b-sm{height:44px;border-radius:12px}.prow{grid-template-columns:minmax(0,1fr);gap:16px;padding:24px 0}.g2{grid-template-columns:minmax(0,1fr)}.sbar{bottom:12px;padding:12px}.sbar .b{flex:1 1 auto}.fav{width:44px;height:44px}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:16px;max-width:none}}
+</style>
+</helmet>
+<div style="min-height: 100%; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column">
+
+<header style="border-bottom: 1px solid #e6e6ea; background: #ffffff; position: relative; z-index: 20">
+<div style="display: flex; align-items: center; gap: 24px; height: 80px; padding: 0 24px">
+<a href="Home.dc.html" aria-label="Ýeral baş sahypa" style="display: flex; flex: none"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 28px; width: auto"></a>
+<div class="qs" role="search">
+<a class="qf" href="Search.dc.html"><span style="display: flex; flex-direction: column; min-width: 0"><span class="lbl" style="color: #101014">Näme?</span><span class="qv">Ähli hyzmatlar</span></span></a>
+<span class="qd"></span>
+<a class="qf" href="Search.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><line x1="2" x2="5" y1="12" y2="12"></line><line x1="19" x2="22" y1="12" y2="12"></line><line x1="12" x2="12" y1="2" y2="5"></line><line x1="12" x2="12" y1="19" y2="22"></line><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="3"></circle></svg><span style="display: flex; flex-direction: column; min-width: 0"><span class="lbl" style="color: #101014">Nirede?</span><span class="qv">Ýakynymda</span></span></a>
+<span class="qd hide-xs"></span>
+<a class="qf hide-xs" href="Search.dc.html"><span style="display: flex; flex-direction: column; min-width: 0"><span class="lbl" style="color: #101014">Haçan?</span><span class="qv">Islendik wagt</span></span></a>
+<a class="qgo b-ink" href="Search.dc.html" aria-label="Gözle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></a>
+</div>
+<div style="flex: 1"></div>
+<nav style="display: flex; align-items: center; gap: 4px; flex: none; position: relative">
+<a class="nl hide-md" href="#">Biznes üçin</a>
+<button class="nl hide-xs" aria-label="Dil: Türkmençe"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>TK</button>
+<button class="avb" aria-label="Hasabym" aria-haspopup="menu" aria-expanded="{{menuOpen}}" onClick="{{toggleMenu}}"><span class="av">A</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeMenu}}"></div>
+<div class="pop" role="menu" aria-label="Hasabym">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 10px 12px 12px; margin-bottom: 6px; border-bottom: 1px solid #e6e6ea"><span style="font-size: 15px; line-height: 20px; font-weight: 600; color: #101014">{{fullName}}</span><span class="cap">{{phone}}</span></div>
+<a class="mi" role="menuitem" href="Account-Bookings.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Ýazylyşlarym</a>
+<button class="mi" role="menuitem" onClick="{{menuFav}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>Halanlarym</button>
+<button class="mi" role="menuitem" onClick="{{menuProfile}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>Profil</button>
+<button class="mi" role="menuitem" onClick="{{menuProfile}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Dil<span class="cap" style="margin-left: auto">{{langName}}</span></button>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 0"></div>
+<a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>Çykmak</a>
+</div>
+</sc-if>
+</nav>
+</div>
+</header>
+
+<div class="wrap" style="flex: 1">
+<div class="acc">
+
+<aside class="aside" aria-label="Hasabym">
+<div class="aprof">
+<span class="av56" aria-hidden="true">{{initial}}</span>
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 16px; line-height: 22px; font-weight: 600">{{fullName}}</span><span class="cap">{{phone}}</span></div>
+</div>
+<nav class="anav" aria-label="Hasap bölümleri">
+<a class="sn" href="Account-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Ýazylyşlarym</a>
+<button class="{{navFav.cls}}" aria-current="{{navFav.cur}}" onClick="{{toFav}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>Halanlarym</button>
+<button class="{{navProf.cls}}" aria-current="{{navProf.cur}}" onClick="{{toProfile}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>Profil we sazlamalar</button>
+<span class="adiv"></span>
+<a class="sn sn-out" href="Home.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>Çykmak</a>
+</nav>
+</aside>
+
+<main class="amain">
+
+<sc-if value="{{isProfile}}" hint-placeholder-val="{{true}}">
+<h1 class="h1a" style="margin-bottom: 24px">Profil we sazlamalar</h1>
+
+<section class="prow" aria-labelledby="pr-1">
+<div class="pl"><h2 id="pr-1" class="ph">Şahsy maglumatlar</h2><span class="cap">Ýazylyşlaryňyzda bizneslere şu at görünýär.</span></div>
+<div class="pc">
+<div class="g2">
+<div class="fld"><label class="flab" for="pf-first">Adyňyz</label><input id="pf-first" class="{{firstCls}}" value="{{first}}" onInput="{{onFirst}}"><sc-if value="{{firstErr}}" hint-placeholder-val="{{false}}"><span class="cap" style="color: #a3251b">Adyňyzy ýazyň.</span></sc-if></div>
+<div class="fld"><label class="flab" for="pf-last">Familiýaňyz</label><input id="pf-last" class="inp" value="{{last}}" onInput="{{onLast}}"></div>
+</div>
+<div class="fld">
+<label class="flab" for="pf-phone">Telefon</label>
+<div style="display: flex; gap: 8px; align-items: center">
+<input id="pf-phone" class="inp ro" value="{{phone}}" readonly="">
+<sc-if value="{{phoneIdle}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm" onClick="{{startPhone}}">Üýtget</button></sc-if>
+</div>
+<span class="cap">Täze belgä SMS kod ibereris.</span>
+</div>
+<sc-if value="{{phoneStep1}}" hint-placeholder-val="{{false}}">
+<div class="pbox">
+<div class="fld"><label class="flab" for="pf-new">Täze telefon belgisi</label>
+<div style="display: flex; gap: 8px"><span class="pre">+993</span><input id="pf-new" class="inp" value="{{newPhoneFmt}}" onInput="{{onNewPhone}}" placeholder="6X XX XX XX"></div>
+<span class="cap">8 san. SMS kod şu belgä geler.</span></div>
+<div class="pact"><button class="b b-gho b-sm" onClick="{{cancelPhone}}">Ýatyr</button><button class="b b-sec b-sm" disabled="{{noNewPhone}}" onClick="{{sendCode}}">Kod iber</button></div>
+</div>
+</sc-if>
+<sc-if value="{{phoneStep2}}" hint-placeholder-val="{{false}}">
+<div class="pbox">
+<div class="fld"><label class="flab" for="pf-code">SMS kod</label>
+<input id="pf-code" class="inp" value="{{code}}" onInput="{{onCode}}" placeholder="4 san" style="max-width: 160px; letter-spacing: .3em; font-weight: 600">
+<span class="cap">Kody +993 {{newPhoneFmt}} belgä iberdik. Täzeden iber: 0:59</span></div>
+<div class="pact"><button class="b b-gho b-sm" onClick="{{cancelPhone}}">Ýatyr</button><button class="b b-sec b-sm" disabled="{{noCode}}" onClick="{{confirmCode}}">Tassykla</button></div>
+</div>
+</sc-if>
+</div>
+</section>
+
+<section class="prow" aria-labelledby="pr-2">
+<div class="pl"><h2 id="pr-2" class="ph">Dil</h2><span class="cap">Saýt we SMS habarnamalar şu dilde bolar.</span></div>
+<div class="pc">
+<div class="rg" role="radiogroup" aria-labelledby="pr-2"><sc-for list="{{langs}}" as="l" hint-placeholder-count="3"><button class="{{l.cls}}" role="radio" aria-checked="{{l.on}}" onClick="{{l.pick}}"><span class="lcode">{{l.code}}</span><span lang="{{l.id}}">{{l.t}}</span><sc-if value="{{l.on}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left: auto; flex: none"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></button></sc-for></div>
+</div>
+</section>
+
+<section class="prow" aria-labelledby="pr-3">
+<div class="pl"><h2 id="pr-3" class="ph">Habarnamalar</h2><span class="cap">SMS {{phone}} belgä gelýär.</span></div>
+<div class="pc" style="gap: 0">
+<sc-for list="{{notifs}}" as="n" hint-placeholder-count="4">
+<div class="{{n.rowCls}}"><div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span id="{{n.lid}}" style="font-size: 15px; line-height: 22px; font-weight: 500">{{n.t}}</span><span class="cap">{{n.c}}</span></div><button class="{{n.cls}}" role="switch" aria-checked="{{n.on}}" aria-labelledby="{{n.lid}}" onClick="{{n.flip}}"><span class="trk"><span class="knob"></span></span></button></div>
+</sc-for>
+</div>
+</section>
+
+<section class="prow" aria-labelledby="pr-4">
+<div class="pl"><h2 id="pr-4" class="ph">Hasap</h2><span class="cap">Bu enjamdan çykyň ýa-da hasabyňyzy doly öçüriň.</span></div>
+<div class="pc">
+<div><a class="b b-sec" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>Çykmak</a></div>
+<div class="sep"></div>
+<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px"><button class="b b-dan b-sm" onClick="{{openDel}}">Hasaby öçür</button><span class="cap">Ähli ýazylyşlaryňyz we teswirleriňiz pozular. Bu yzyna gaýtarylmaýar.</span></div>
+</div>
+</section>
+
+<sc-if value="{{dirty}}" hint-placeholder-val="{{false}}">
+<div class="sbar" role="region" aria-label="Ýatda saklanmadyk üýtgeşmeler">
+<span style="font-size: 15px; line-height: 22px; font-weight: 600">Üýtgeşmeleri ýatda saklaň?</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b b-gho" onClick="{{revert}}">Ýatyr</button><button class="b b-pri" disabled="{{cantSave}}" onClick="{{save}}">Ýatda sakla</button></div>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{isFav}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap"><h1 class="h1a">Halanlarym</h1><span style="font-size: 15px; line-height: 22px; color: #5a5a64">{{favCount}}</span></div>
+<sc-if value="{{hasFavs}}" hint-placeholder-val="{{true}}">
+<div class="gfav">
+<sc-for list="{{favs}}" as="v" hint-placeholder-count="4">
+<div style="position: relative; min-width: 0">
+<a class="vc" href="Venue.dc.html">
+<img src="{{v.img}}" alt="{{v.alt}}" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; display: block">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="vn" style="font-size: 17px; line-height: 22px; font-weight: 600">{{v.name}}</span><span class="cap">{{v.meta}}</span></div>
+<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600; flex: none"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>{{v.rating}}<span class="cap">{{v.count}}</span></span>
+</div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center"><sc-for list="{{v.slots}}" as="t" hint-placeholder-count="3"><span class="slot">{{t}}</span></sc-for><sc-if value="{{v.hasTag}}" hint-placeholder-val="{{false}}"><span class="tagq">{{v.tag}}</span></sc-if><span class="cap" style="margin-left: 4px">{{v.note}}</span></div>
+</a>
+<button class="fav" aria-label="{{v.removeLabel}}" onClick="{{v.remove}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noFavs}}" hint-placeholder-val="{{false}}">
+<div class="empty">
+<div class="eic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></div>
+<div style="font-size: 19px; line-height: 24px; font-weight: 600">Halanlaryňyz ýok</div>
+<div style="font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 340px">Ýürek belgisine basyp, ýerleri ýatda saklaň.</div>
+<a class="b b-pri" href="Search.dc.html" style="margin-top: 4px">Gözlege geç</a>
+</div>
+</sc-if>
+</sc-if>
+
+</main>
+
+</div>
+</div>
+
+<footer style="border-top: 1px solid #e6e6ea; padding: 56px 0 40px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 40px">
+<div class="gfoot">
+<div style="display: flex; flex-direction: column; gap: 16px"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 26px; width: auto; align-self: flex-start"><span class="cap" style="max-width: 220px">Islendik hyzmata onlaýn ýazylyş.</span></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Müşderiler üçin</span><a class="fl" href="Search.dc.html">Gözleg</a><a class="fl" href="#">Kategoriýalar</a><a class="fl" href="Account-Bookings.dc.html">Ýazylyşlarym</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Biznes üçin</span><a class="fl" href="#">Ýeral Biznes</a><a class="fl" href="#">Bahalar</a><a class="fl" href="#">Biznes girişi</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Ýeral</span><a class="fl" href="#">Biz barada</a><a class="fl" href="#">Kömek merkezi</a><a class="fl" href="#">Habarlaşmak</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Dil</span><a class="fl" href="#" style="color: #101014; font-weight: 600">Türkmençe</a><a class="fl" href="#">Русский</a><a class="fl" href="#">English</a></div>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e6e6ea"><span class="cap">© 2026 Ýeral</span><div style="display: flex; gap: 20px"><a class="fl" href="#" style="font-size: 13px">Gizlinlik syýasaty</a><a class="fl" href="#" style="font-size: 13px">Ulanyş şertleri</a></div></div>
+</div>
+</footer>
+
+<sc-if value="{{delOpen}}" hint-placeholder-val="{{false}}">
+<div class="mwrap" onKeyDown="{{modalKey}}">
+<div class="scrim" onClick="{{closeDel}}"></div>
+<div class="mdl mdl-s" role="dialog" aria-modal="true" aria-labelledby="del-t">
+<span class="grab"></span>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h2 id="del-t" class="mt">Hasaby öçürmelimi?</h2><button class="b b-gho b-ico" style="width: 36px; height: 36px" aria-label="Ýap" onClick="{{closeDel}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<p class="mp">Gelýän 3 ýazylyşyňyz ýatyrylar we bizneslere habar bereris. Ähli ýazylyşlaryňyz, teswirleriňiz we halanlaryňyz pozular. Bu yzyna gaýtarylmaýar.</p>
+<div class="mact"><button class="b b-sec" onClick="{{closeDel}}">Yza</button><a class="b b-red" href="Home.dc.html">Hawa, öçür</a></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div class="toast" role="status">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+<span>{{toastText}}</span>
+<sc-if value="{{toastUndo}}" hint-placeholder-val="{{false}}"><button class="b b-sm tb" onClick="{{undo}}">Yzyna al</button></sc-if>
+<sc-if value="{{toastPlain}}" hint-placeholder-val="{{true}}"><span class="tsp"></span></sc-if>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"pane":{"editor":"enum","options":["profile","favorites"],"default":"profile","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1600}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const p = props || {};
+    const base = { first: 'Aýjemal', last: 'Gurbanowa', lang: 'tk', n: { conf: true, d1: true, h2: true, rv: false } };
+    this.state = Object.assign({}, base, {
+      pane: p.pane ?? 'profile', saved: base, phone: '+993 65 90 11 22', phoneStep: 0, newPhone: '', code: '',
+      removed: [], toast: null, menuOpen: false, delOpen: false
+    });
+  }
+  componentDidUpdate(pp) {
+    if (pp.pane !== this.props.pane) this.setState({ pane: this.props.pane ?? 'profile' });
+  }
+  componentWillUnmount() { clearTimeout(this.tt); }
+  flash(patch, text, undoId) {
+    clearTimeout(this.tt);
+    this.setState(Object.assign({}, patch, { toast: { text: text, undo: undoId || null } }));
+    this.tt = setTimeout(() => this.setState({ toast: null }), 6000);
+  }
+  renderVals() {
+    const f = this.props.font ?? 'Onest';
+    const s = this.state;
+    
+    const fmt = (dg) => dg.replace(/(\d{2})(?=\d)/g, '$1 ');
+    const isProfile = s.pane !== 'favorites';
+    const nKeys = ['conf', 'd1', 'h2', 'rv'];
+    const dirty = s.first !== s.saved.first || s.last !== s.saved.last || s.lang !== s.saved.lang || nKeys.some((k) => s.n[k] !== s.saved.n[k]);
+    const firstErr = s.first.trim() === '';
+    const LANGS = [['tk', 'TK', 'Türkmençe'], ['ru', 'RU', 'Русский'], ['en', 'EN', 'English']];
+    const langs = LANGS.map(([id, code, t]) => ({ id, code, t, on: s.lang === id, cls: s.lang === id ? 'rc on' : 'rc', pick: () => this.setState({ lang: id }) }));
+    const ND = [
+      ['conf', 'Tassyklama we üýtgeşmeler (SMS)', 'Biznes ýazylyşyňyzy tassyklanda, wagtyny üýtgedende ýa-da ýatyranda habar bereris.'],
+      ['d1', 'Ýatlatma: 1 gün öň', 'Ýazylyşyňyzdan bir gün öň SMS ibereris.'],
+      ['h2', 'Ýatlatma: 2 sagat öň', 'Ýazylyşyňyzdan 2 sagat öň SMS ibereris.'],
+      ['rv', 'Teswir haýyşy', 'Ýazylyşyňyz tamamlanandan 2 sagat soň baha bermegi haýyş ederis.']
+    ];
+    const notifs = ND.map(([id, t, c], i) => ({
+      t, c, lid: 'nt-' + id, on: !!s.n[id], cls: s.n[id] ? 'sw on' : 'sw',
+      rowCls: i === 0 ? 'nrow first' : (i === ND.length - 1 ? 'nrow last' : 'nrow'),
+      flip: () => this.setState({ n: Object.assign({}, s.n, { [id]: !s.n[id] }) })
+    }));
+    const FAV = [
+      { id: 'glow-studio', name: 'Glow Studio', alt: 'Glow Studio salonynda saç ussasy', img: '../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg', meta: 'Gözellik salony · 3,0 km', rating: '4,9', count: '(96)', slots: ['15:30', '16:00', '18:00'], note: '40 TMT-den', tag: '' },
+      { id: 'bag-kafe', name: 'Bag kafe', alt: 'Bag kafesiniň terrasy', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', meta: 'Kafe · 0,9 km', rating: '4,8', count: '(119)', slots: ['13:00', '13:30', '18:00'], note: '2 adam', tag: '' },
+      { id: 'aydyn-yoga', name: 'Aýdyň ýoga', alt: 'Aýdyň ýoga studiýasynda sapak', img: '../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg', meta: 'Ýoga studiýa · 2,6 km', rating: '4,8', count: '(54)', slots: ['18:30'], note: 'Hatha ýoga', tag: '3 ýer galdy' },
+      { id: 'ak-dis', name: 'Ak Diş', alt: 'Ak Diş stomatologiýasy', img: '../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', meta: 'Diş lukmany · 2,1 km', rating: '4,8', count: '(131)', slots: ['16:00', '17:30', '18:00'], note: '50 TMT-den', tag: '' }
+    ];
+    const favs = FAV.filter((v) => s.removed.indexOf(v.id) < 0).map((v) => Object.assign({}, v, {
+      hasTag: !!v.tag,
+      removeLabel: 'Halanlardan aýyr: ' + v.name,
+      remove: () => this.flash({ removed: s.removed.concat([v.id]) }, v.name + ' halanlardan aýryldy', v.id)
+    }));
+    const nav = (on) => ({ cls: on ? 'sn on' : 'sn', cur: on ? 'page' : 'false' });
+    const langName = (LANGS.find(([id]) => id === s.saved.lang) || LANGS[0])[2];
+    return {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      menuOpen: !!s.menuOpen,
+      toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
+      closeMenu: () => this.setState({ menuOpen: false }),
+      menuFav: () => this.setState({ menuOpen: false, pane: 'favorites' }),
+      menuProfile: () => this.setState({ menuOpen: false, pane: 'profile' }),
+      langName,
+      fullName: (s.saved.first + ' ' + s.saved.last).trim(),
+      initial: (s.saved.first || 'A').charAt(0).toUpperCase(),
+      phone: s.phone,
+      navFav: nav(!isProfile),
+      navProf: nav(isProfile),
+      toFav: () => this.setState({ pane: 'favorites' }),
+      toProfile: () => this.setState({ pane: 'profile' }),
+      isProfile,
+      isFav: !isProfile,
+      first: s.first,
+      last: s.last,
+      firstErr,
+      firstCls: firstErr ? 'inp is-e' : 'inp',
+      onFirst: (e) => this.setState({ first: e.target.value.slice(0, 40) }),
+      onLast: (e) => this.setState({ last: e.target.value.slice(0, 40) }),
+      phoneIdle: s.phoneStep === 0,
+      phoneStep1: s.phoneStep === 1,
+      phoneStep2: s.phoneStep === 2,
+      startPhone: () => this.setState({ phoneStep: 1, newPhone: '', code: '' }),
+      cancelPhone: () => this.setState({ phoneStep: 0, newPhone: '', code: '' }),
+      newPhoneFmt: fmt(s.newPhone),
+      onNewPhone: (e) => this.setState({ newPhone: e.target.value.replace(/\D/g, '').slice(0, 8) }),
+      noNewPhone: s.newPhone.length !== 8,
+      sendCode: () => { if (s.newPhone.length === 8) this.setState({ phoneStep: 2, code: '' }); },
+      code: s.code,
+      onCode: (e) => this.setState({ code: e.target.value.replace(/\D/g, '').slice(0, 4) }),
+      noCode: s.code.length !== 4,
+      confirmCode: () => { if (s.code.length === 4) this.flash({ phone: '+993 ' + fmt(s.newPhone), phoneStep: 0, newPhone: '', code: '' }, 'Telefon belgiňiz üýtgedildi'); },
+      langs,
+      notifs,
+      dirty,
+      cantSave: firstErr,
+      revert: () => this.setState({ first: s.saved.first, last: s.saved.last, lang: s.saved.lang, n: Object.assign({}, s.saved.n) }),
+      save: () => {
+        if (firstErr) return;
+        const next = { first: s.first.trim(), last: s.last.trim(), lang: s.lang, n: Object.assign({}, s.n) };
+        this.flash(Object.assign({}, next, { saved: next }), 'Üýtgeşmeler ýatda saklandy');
+      },
+      openDel: () => this.setState({ delOpen: true }),
+      closeDel: () => this.setState({ delOpen: false }),
+      delOpen: !!s.delOpen,
+      modalKey: (e) => { if (e && e.key === 'Escape') this.setState({ delOpen: false }); },
+      favs,
+      favCount: favs.length + ' ýer',
+      hasFavs: favs.length > 0,
+      noFavs: favs.length === 0,
+      hasToast: !!s.toast,
+      toastText: s.toast ? s.toast.text : '',
+      toastUndo: !!(s.toast && s.toast.undo),
+      toastPlain: !(s.toast && s.toast.undo),
+      undo: () => {
+        const id = s.toast && s.toast.undo;
+        clearTimeout(this.tt);
+        this.setState({ removed: s.removed.filter((x) => x !== id), toast: null });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

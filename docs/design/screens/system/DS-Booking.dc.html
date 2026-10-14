@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Web DS · Categories and booking types</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.step{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;border:1px solid #e6e6ea;border-radius:10px;font-size:14px;font-weight:500}
+.num{width:20px;height:20px;border-radius:999px;background:#101014;color:#ffffff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.slot{display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 10px;border-radius:8px;border:1px solid #d8d8de;font-size:13px;font-weight:600;background:#ffffff;color:#101014}
+.crow{display:grid;grid-template-columns:52px 1.1fr 1fr 1fr 190px 1.6fr;gap:16px;align-items:center;min-height:52px;border-bottom:1px solid #e6e6ea;font-size:14px}
+.ic{width:36px;height:36px;border-radius:10px;background:#f4f4f6;display:flex;align-items:center;justify-content:center;color:#101014}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;background:#efecfe;color:#4429d6;border:1px solid #d5cbfb;white-space:nowrap}
+.tag-n{background:#f4f4f6;color:#41505f;border-color:#e6e6ea}
+</style>
+</helmet>
+<div style="width: 1440px; min-height: 2500px; padding: 72px 120px 96px; background: #ffffff; color: #101014; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column">
+
+<header style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 64px; align-items: end; padding-bottom: 56px">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<span class="lbl">Ýeral Web DS v0.3 · beyond beauty</span>
+<h1 style="margin: 0; font-size: 64px; line-height: 68px; font-weight: 700; letter-spacing: -0.035em">Every booking is a place</h1>
+<p style="margin: 0; font-size: 19px; line-height: 28px; color: #5a5a64; text-wrap: pretty">Ýeral — “ýer al”, take a place — works for anyone who sells their time: a barber’s chair, a dentist working from home, a restaurant table, a mat in a yoga class. One booking engine, four booking types. The category a business picks decides its type, the search filters clients see and the services suggested at sign-up.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<img src="../../assets/photos/allef-vinicius-IvQeAVeJULw-unsplash.jpg" alt="Barber chair" style="width: 100%; height: 132px; object-fit: cover; border-radius: 12px">
+<img src="../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg" alt="Dental office" style="width: 100%; height: 132px; object-fit: cover; border-radius: 12px">
+<img src="../../assets/photos/mustafa-fatemi-ZEfHrVDF3NM-unsplash.jpg" alt="Restaurant hall" style="width: 100%; height: 132px; object-fit: cover; border-radius: 12px">
+<img src="../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg" alt="Yoga class" style="width: 100%; height: 132px; object-fit: cover; border-radius: 12px">
+</div>
+</header>
+
+<section style="display: flex; flex-direction: column; gap: 32px; padding: 56px 0; border-top: 1px solid #e6e6ea">
+<div style="display: flex; align-items: baseline; gap: 16px"><span class="lbl">Booking types</span><h2 style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.025em">Four flows, one engine</h2></div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #101014">
+<div style="display: flex; flex-direction: column; gap: 16px; padding: 24px 24px 0 0">
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="lbl">01 · Appointment</span><div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Wagt bellemek</div><div class="cap">A specialist’s time for a service.</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div class="step"><span class="num">1</span>Hyzmat</div><div class="step"><span class="num">2</span>Hünärmen <span class="cap">ýa-da islendik</span></div><div class="step"><span class="num">3</span>Sene we wagt</div><div class="step"><span class="num">4</span>Tassyklama</div>
+</div>
+<div class="cap"><b style="color: #101014">Used by</b> barbers, salons, dentists, physio, tutors, mechanics, groomers.</div>
+<div class="cap"><b style="color: #101014">Card shows</b> the next free slots today.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px; padding: 24px 24px 0; border-left: 1px solid #e6e6ea">
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="lbl">02 · Table</span><div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Stol bronlamak</div><div class="cap">A table for a party, for a time.</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div class="step"><span class="num">1</span>Adam sany</div><div class="step"><span class="num">2</span>Sene we wagt</div><div class="step"><span class="num">3</span>Ýer <span class="cap">zal, terrasa</span></div><div class="step"><span class="num">4</span>Tassyklama</div>
+</div>
+<div class="cap"><b style="color: #101014">Used by</b> restaurants, cafés, tea houses, banquet halls.</div>
+<div class="cap"><b style="color: #101014">Card shows</b> times for the chosen party size and the average bill.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px; padding: 24px 24px 0; border-left: 1px solid #e6e6ea">
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="lbl">03 · Class</span><div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Topar sapagy</div><div class="cap">A seat in a scheduled session.</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div class="step"><span class="num">1</span>Sapak</div><div class="step"><span class="num">2</span>Sene</div><div class="step"><span class="num">3</span>Ýer sany</div><div class="step"><span class="num">4</span>Tassyklama</div>
+</div>
+<div class="cap"><b style="color: #101014">Used by</b> yoga, group fitness, language courses, workshops.</div>
+<div class="cap"><b style="color: #101014">Card shows</b> the next session and seats left.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px; padding: 24px 0 0 24px; border-left: 1px solid #e6e6ea">
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="lbl" style="display: flex; gap: 8px; align-items: center">04 · Resource <span class="tag tag-n">Later</span></span><div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em; color: #5a5a64">Ýer kärendesi</div><div class="cap">A room, court or pitch by the hour.</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px; color: #5a5a64">
+<div class="step" style="border-style: dashed"><span class="num" style="background: #6e6e78">1</span>Obýekt</div><div class="step" style="border-style: dashed"><span class="num" style="background: #6e6e78">2</span>Wagt aralygy</div><div class="step" style="border-style: dashed"><span class="num" style="background: #6e6e78">3</span>Tassyklama</div>
+</div>
+<div class="cap"><b style="color: #101014">Used by</b> football pitches, saunas, photo studios, meeting rooms.</div>
+<div class="cap"><b style="color: #101014">Card shows</b> free hours as a strip.</div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; padding-top: 24px">
+<article style="display: flex; flex-direction: column; gap: 12px">
+<img src="../../assets/photos/nathon-oski-EW_rqoSdDes-unsplash.jpg" alt="Barber Loft içi" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px"><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 17px; line-height: 22px; font-weight: 600">Barber Loft</span><span class="cap">Dellekhana · 1,2 km</span></div><span style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>4,9 <span class="cap">(212)</span></span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="lbl">Şu gün boş</span><div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="slot">14:30</span><span class="slot">15:00</span><span class="slot">16:15</span><span class="slot">+5</span></div></div>
+<div style="display: flex; justify-content: space-between; border-top: 1px solid #e6e6ea; padding-top: 10px"><span class="cap">Erkek saç kesimi</span><span style="font-size: 14px; font-weight: 600">40 TMT-den</span></div>
+<span class="tag" style="align-self: flex-start">Appointment card</span>
+</article>
+<article style="display: flex; flex-direction: column; gap: 12px">
+<img src="../../assets/photos/mustafa-fatemi-ZEfHrVDF3NM-unsplash.jpg" alt="Ojak restoranynyň zaly" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px"><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 17px; line-height: 22px; font-weight: 600">Ojak</span><span class="cap">Restoran · 2,8 km</span></div><span style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>4,7 <span class="cap">(88)</span></span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="lbl" style="display: flex; align-items: center; gap: 6px">Bu agşam · <span style="display: inline-flex; align-items: center; gap: 4px; color: #101014"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>2 adam</span></span><div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="slot">19:00</span><span class="slot">19:30</span><span class="slot">20:45</span></div></div>
+<div style="display: flex; justify-content: space-between; border-top: 1px solid #e6e6ea; padding-top: 10px"><span class="cap">Ortaça hasap</span><span style="font-size: 14px; font-weight: 600">≈ [AVG BILL] TMT</span></div>
+<span class="tag" style="align-self: flex-start">Table card</span>
+</article>
+<article style="display: flex; flex-direction: column; gap: 12px">
+<img src="../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg" alt="Ýoga sapagy" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px"><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 17px; line-height: 22px; font-weight: 600">Aýdyň ýoga</span><span class="cap">Ýoga studiýa · 3,4 km</span></div><span style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>4,8 <span class="cap">(54)</span></span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="lbl">Indiki sapak</span><div style="display: flex; align-items: center; justify-content: space-between; height: 32px"><span style="font-size: 14px; font-weight: 600">Hatha ýoga · Ertir 08:00 · 60 min</span><span class="tag" style="background: #fef6e7; border-color: #f2ddb0; color: #93500a">3 ýer galdy</span></div></div>
+<div style="display: flex; justify-content: space-between; border-top: 1px solid #e6e6ea; padding-top: 10px"><span class="cap">Bir sapak</span><span style="font-size: 14px; font-weight: 600">50 TMT</span></div>
+<span class="tag" style="align-self: flex-start">Class card</span>
+</article>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 24px; padding: 56px 0; border-top: 1px solid #e6e6ea">
+<div style="display: flex; align-items: baseline; gap: 16px"><span class="lbl">Categories</span><h2 style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.025em">Launch set, in three languages</h2></div>
+<div style="display: flex; flex-direction: column; border-top: 1px solid #101014">
+<div class="crow" style="min-height: 40px"><span></span><span class="lbl">TK</span><span class="lbl">RU</span><span class="lbl">EN</span><span class="lbl">Booking type</span><span class="lbl">Suggested services (TK)</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"></path></svg></span><span style="font-weight: 600">Gözellik</span><span>Красота</span><span>Beauty</span><span class="tag">Appointment</span><span class="cap">Saç kesimi, reňklemek, kosmetolog</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"></circle><path d="M8.12 8.12 12 12"></path><path d="M20 4 8.12 15.88"></path><circle cx="6" cy="18" r="3"></circle><path d="M14.8 14.8 20 20"></path></svg></span><span style="font-weight: 600">Dellekhana</span><span>Барбершоп</span><span>Barbershop</span><span class="tag">Appointment</span><span class="cap">Erkek saç kesimi, sakgal düzediş</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"></path><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg></span><span style="font-weight: 600">Dyrnak</span><span>Ногти</span><span>Nails</span><span class="tag">Appointment</span><span class="cap">Manikýur, pedikýur, gel-lak</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg></span><span style="font-weight: 600">Spa we massaž</span><span>Спа и массаж</span><span>Spa &amp; massage</span><span class="tag">Appointment</span><span class="cap">Massaž, ýüz ideg, hammam</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3C5 3 3.5 5 3.5 7.5c0 2 .9 3.4 1.6 5 .6 1.5.8 3.3 1.1 5 .3 1.9.9 3.5 2 3.5 1.3 0 1.6-1.9 1.9-3.5.3-1.6.8-3 1.9-3s1.6 1.4 1.9 3c.3 1.6.6 3.5 1.9 3.5 1.1 0 1.7-1.6 2-3.5.3-1.7.5-3.5 1.1-5 .7-1.6 1.6-3 1.6-5C20.5 5 19 3 16.5 3c-1.7 0-2.9 1-4.5 1S9.2 3 7.5 3z"></path></svg></span><span style="font-weight: 600">Diş lukmany</span><span>Стоматология</span><span>Dentist</span><span class="tag">Appointment</span><span class="cap">Barlag, arassalamak, plomba</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2v2"></path><path d="M5 2v2"></path><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"></path><path d="M8 15a6 6 0 0 0 12 0v-3"></path><circle cx="20" cy="10" r="2"></circle></svg></span><span style="font-weight: 600">Saglyk</span><span>Здоровье</span><span>Health</span><span class="tag">Appointment</span><span class="cap">Fizioterapiýa, psiholog, dietolog</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg></span><span style="font-weight: 600">Restoran</span><span>Ресторан</span><span>Restaurant</span><span class="tag">Table</span><span class="cap">Stol, banket, doglan gün</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg></span><span style="font-weight: 600">Kafe we çaýhana</span><span>Кафе и чайхана</span><span>Café &amp; tea house</span><span class="tag">Table</span><span class="cap">Stol, terrasa</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.4 14.4 9.6 9.6"></path><path d="M18.66 21.49a2 2 0 1 1-2.83-2.83l-1.77 1.77a2 2 0 1 1-2.83-2.83l6.36-6.36a2 2 0 1 1 2.83 2.83l-1.77 1.77a2 2 0 1 1 2.83 2.83z"></path><path d="m21.5 21.5-1.4-1.4"></path><path d="M3.9 3.9 2.5 2.5"></path><path d="M6.4 12.77a2 2 0 1 1-2.83-2.83l1.77-1.77a2 2 0 1 1-2.83-2.83l2.83-2.83a2 2 0 1 1 2.83 2.83l1.77-1.77a2 2 0 1 1 2.83 2.83z"></path></svg></span><span style="font-weight: 600">Sport</span><span>Спорт</span><span>Fitness</span><span style="display: flex; gap: 4px"><span class="tag">Class</span><span class="tag">Appt.</span></span><span class="cap">Topar türgenleşigi, şahsy tälimçi</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.42 10.92a1 1 0 0 0-.02-1.84L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0z"></path><path d="M22 10v6"></path><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path></svg></span><span style="font-weight: 600">Okuw</span><span>Обучение</span><span>Lessons</span><span style="display: flex; gap: 4px"><span class="tag">Appt.</span><span class="tag">Class</span></span><span class="cap">Repetitor, dil kursy, saz sapagy</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg></span><span style="font-weight: 600">Awtoulag</span><span>Авто</span><span>Auto</span><span class="tag">Appointment</span><span class="cap">Ýuwmak, tigir çalyşmak, diagnostika</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"></circle><circle cx="18" cy="8" r="2"></circle><circle cx="20" cy="16" r="2"></circle><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.05Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"></path></svg></span><span style="font-weight: 600">Öý haýwanlary</span><span>Питомцы</span><span>Pets</span><span class="tag">Appointment</span><span class="cap">Groming, weterinar</span></div>
+<div class="crow"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .71-1.53l7-6a2 2 0 0 1 2.58 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></span><span style="font-weight: 600">Öý hyzmatlary</span><span>Услуги на дому</span><span>Home services</span><span class="tag">Appointment</span><span class="cap">Arassaçylyk, santehnik — at the client’s address</span></div>
+</div>
+<div class="cap">The list lives in the CMS (catalog structure module), so new categories ship without a release. Each category stores its icon, three names, booking types and a starter service list.</div>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; padding: 56px 0 0; border-top: 1px solid #e6e6ea">
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="lbl">Where</span><div style="font-size: 17px; line-height: 24px; font-weight: 600">At the business, at the client’s, or online</div><div class="cap">A dentist or tutor working from home can hide the exact address until the booking is confirmed — the map shows the district only.</div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="lbl">Who</span><div style="font-size: 17px; line-height: 24px; font-weight: 600">“Hünärmen” by default, renamed per category</div><div class="cap">Lukman for doctors, mugallym for tutors, tälimçi for trainers, ussa for mechanics. A solo business skips the step.</div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="lbl">Same everywhere</span><div style="font-size: 17px; line-height: 24px; font-weight: 600">Statuses, confirmation, reminders</div><div class="cap">Every type uses the five statuses and manual confirmation. A gym can mix types: classes plus personal training.</div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="lbl">Money</span><div style="font-size: 17px; line-height: 24px; font-weight: 600">Pay at the place, for now</div><div class="cap">Prices are fixed, “from” or none (restaurants show the average bill). The booking summary keeps a row for card deposits once online payment arrives.</div></div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

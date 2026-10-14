@@ -19,24 +19,25 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 
 | Library | Version | Why | Instead of |
 |---|---|---|---|
-| TanStack Start | 1.169 | SSR for landing (prerender) and client: explicit loaders and `head()`, SSR on/off per route, builds for Cloudflare or Node | Next.js (ADR 0002), React Router 7, Astro |
+| TanStack Start | 1.169 | SSR for the client site: explicit loaders and `head()`, SSR on/off per route, builds for Cloudflare or Node | Next.js (ADR 0002), React Router 7, Astro |
 | TanStack Router | 1.170 | typed routes and zod-validated search params: filters, wizard and calendar live in the URL | React Router (weaker search-param typing) |
 | TanStack Query + router SSR integration | 5.104 / 1.167 | server state: cache, de-dupe, refresh, invalidation, optimistic updates, SSR hydration | SWR (fewer features), RTK Query (needs Redux) |
 | TanStack Form | 1.33 | typed forms with zod validators; compiler-friendly; `createFormHook` binds our field components | React Hook Form (ADR 0011) |
 | Zustand | 5 | small client-only stores in a slice's `model/` (calendar, selection) | Redux, Jotai, MobX (ADR 0011) |
 | zod | 4.6 | one schema language: API input/output, forms, search params, env | valibot, arktype (smaller ecosystem around forms/OpenAPI) |
-| use-intl | 4.14 | ICU messages and typed keys; same API as today's next-intl code | Paraglide, i18next, Lingui (ADR 0008) |
-| Tailwind CSS | 4.3 | tokens as CSS variables in one `@theme`; no runtime CSS-in-JS; consistent scale | CSS Modules, vanilla-extract, Panda |
+| use-intl | 4.14 | ICU messages and typed keys for `tk`, `ru`, `en` (ADR 0016) | Paraglide, i18next, Lingui (ADR 0008) |
+| Tailwind CSS | 4.3 | `docs/design/tokens.css` mapped one to one into `@theme` (same names); exact design values; no runtime CSS-in-JS | CSS Modules (the design's suggestion), vanilla-extract, Panda |
+| Onest (`@fontsource-variable/onest`) | 5 | the design's font, self-hosted (latin, latin-ext, cyrillic, cyrillic-ext): Turkmen letters + Cyrillic, no Google Fonts request | Google Fonts link |
 | class-variance-authority + tailwind-merge + clsx | 0.7 / 3.7 / 2.1 | component variants; `cn()` merges classes so a passed `className` wins | tailwind-variants (fine too; cva matches shadcn output) |
 | Radix UI (`radix-ui`) | 1.8 | accessible primitives: dialog, popover, menu, select, tabs, tooltip | Base UI (newer), React Aria (heavier API) |
-| shadcn CLI | 4 | scaffolds Radix components into `@yeral/ui`; we own and restyle the code | ready-made kits (MUI, Mantine) that fight DS v2 |
+| shadcn CLI | 4 | scaffolds Radix components into `@yeral/ui`; we own and restyle the code | ready-made kits (MUI, Mantine) that fight the design |
 | lucide-react | 1.56 | icons, stroke 1.75 (design system) | — |
 | sonner | 2 | toasts | our hand-rolled toast |
 | TanStack Table / Virtual | 9 / 3 | data tables and long lists in business and cms | AG Grid (heavy) |
 | react-day-picker | 10 | date pickers in business and cms | — |
 | dnd-kit (`@dnd-kit/core`) | 6.3 | calendar drag and drop; re-check `@dnd-kit/react` (0.x) at the business milestone | pragmatic-drag-and-drop |
 | Recharts | 3 | analytics charts | visx (lower level), ECharts (heavy) |
-| MapLibre GL | 6 | maps; OpenFreeMap tiles now, self-hosted tiles on the own server | Google/Mapbox (keys, cost) |
+| MapLibre GL | 6 | maps, restyled to the design; OpenFreeMap tiles now (owner's decision 2026-10-14), self-hosted tiles on the own server | Google, Yandex (keys, billing, third-party scripts) |
 
 ## Backend
 
@@ -85,7 +86,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | Need | Use | From |
 |---|---|---|
 | class names | `cn()` | `@yeral/ui/cn` |
-| salon today / now, date maths | `today() nowMin() addDays() diffDays() dow() parseYmd() hm()` | `@yeral/domain/time` |
+| business today / now, date maths | `today() nowMin() addDays() diffDays() dow() parseYmd() hm()` | `@yeral/domain/time` |
 | availability and statuses | `freeSlots() salonSlots() nextFree() openState() viewStatus() cancelDeadline()` | `@yeral/domain/rules` |
 | `+993` phones | `normPhone() fmtPhone()` | `@yeral/domain/phone` |
 | ids | `uid()` | `@yeral/domain/id` |
@@ -106,7 +107,7 @@ Before writing a helper, look here and in the package; add new shared helpers to
 - Files kebab-case (`booking-card.tsx`); components PascalCase; hooks `useX`; zod schemas `xSchema` with `type X = z.infer<…>`.
 - Named exports only (route files export `Route`, as TanStack expects).
 - Prettier: no semicolons, single quotes, `printWidth` 140, trailing commas.
-- Comments explain a non-obvious *why*; product rules name their source (deck, brief, prototype).
+- Comments explain a non-obvious *why*; product rules name their source (design spec section, ADR).
 - No user-visible string in code, `aria-label` included: everything through i18n.
 - Mobile first: works at 360 px wide, touch targets ≥ 40 px, keyboard and screen reader friendly.
 - Imports: packages by name and subpath (`@yeral/ui/button`); inside an app via `@/` = `src/`.
@@ -126,12 +127,13 @@ pnpm docker:up                  # (M2) production-like stack (nginx + images) on
 pnpm changeset                  # describe a user-visible change
 ```
 
-| landing | client | business | cms | api | storybook |
+| client | business | cms | api | storybook | — |
 |---|---|---|---|---|---|
-| :3000 | :3001 | :3002 | :3003 | :3004 (`/docs`) | :3005 |
+| :3000 (:3001 while legacy lives) | :3002 | :3003 | :3004 (`/docs`) | :3005 | |
 
 Ports are `PORT_BASE` + offset (`PORT_BASE=3100` in a second worktree). Cookies on `localhost` are shared across ports,
 so one login works in every app locally.
 
-**Today**: `pnpm dev` runs `apps/legacy` on :3000 (the landing takes :3000 when legacy is deleted at M4).
+**Today**: `pnpm dev` runs `apps/legacy` on :3000. `apps/client` takes :3000 when it replaces legacy (end of M3); until
+then it runs on :3001 next to legacy.
 `pnpm --filter @yeral/legacy run deploy` builds with OpenNext and publishes to Cloudflare by hand (fallback to the release flow).
