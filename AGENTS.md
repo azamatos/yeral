@@ -75,5 +75,7 @@ Every task runs through Turborepo from the root; `--filter=@yeral/<name>...` nar
 | `pnpm test:stories` | every Storybook story as a Chromium test (render, interactions, axe) |
 | `pnpm gen package` · `pnpm gen ui-component` | scaffold an internal package / a design-system component with stories |
 | `pnpm changeset` | describe a user-visible change for the next release |
+| `pnpm db:up` · `pnpm db:setup` | Postgres 18 in Docker; create, migrate and seed the database in `apps/api/.env.local` (API tests need it too) |
+| `pnpm db:generate` | a new SQL migration from the Drizzle schema (`apps/api/src/db/schema`) |
 
-Planned with later milestones: `pnpm e2e`, `pnpm db:up`, `pnpm db:setup`, `pnpm docker:up`, `pnpm gen ui-component|slice|endpoint`.
+Planned with later milestones: `pnpm e2e`, `pnpm docker:up`, `pnpm gen slice|endpoint`.

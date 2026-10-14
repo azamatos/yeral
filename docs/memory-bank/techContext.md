@@ -50,7 +50,8 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | Drizzle ORM / drizzle-kit | 0.45 / 0.31 | TypeScript schema, SQL-like queries, SQL migrations in git, runs on Workers and Node | Prisma 7, Kysely |
 | node-postgres (`pg`) | 8 | driver for Drizzle on both runtimes (Hyperdrive on Workers); Neon's and Cloudflare's recommended pairing | postgres.js, Neon serverless driver |
 | `@neon/config` + `@neon/env` + `neon` CLI | 1.9 / 1.6 | `neon.ts` = the Neon project as code; `neon env pull` writes `DATABASE_URL`(`_UNPOOLED`) to `.env.local` | dashboard clicks |
-| Better Auth | 1.7 | phone + one-time code and sessions in Postgres; teams, roles and invitations are our own tables (ADR 0018) | hand-rolled sessions; its organization plugin (phone-only staff, SMS invites) |
+| Own phone login + sessions | — | 4-digit SMS code with the design's attempts/lock/resend rules, hashed session tokens in Postgres, cookie on the parent domain; teams, roles and invitations are our own tables too (ADR 0018, 0019) | Better Auth (phone plugin rules and e-mail-based users don't fit; its organization plugin: phone-only staff, SMS invites) |
+| tsx / esbuild | 4.23 / 0.28 | run the api and its scripts from TypeScript in dev; bundle the Node entry into one file for Docker | ts-node; tsup (one more layer over esbuild) |
 | jobs table + `runDueJobs()` | — | reminders and expiry without a queue service; Cron Trigger now, a container loop later | pg-boss (needs a long-running process) |
 | pino | 10 | structured logs on Node | — |
 
@@ -131,7 +132,7 @@ Before writing a helper, look here and in the package; add new shared helpers to
 
 ```bash
 pnpm install
-pnpm db:up && pnpm db:setup     # (M2) Postgres in Docker, database for this worktree, migrations + seed
+pnpm db:up && pnpm db:setup     # Postgres 18 in Docker; creates the database from apps/api/.env.local, migrates, seeds the demo
 pnpm dev                        # api + all apps + Storybook through turbo
 pnpm dev --filter=@yeral/client...  # one app and what it depends on
 pnpm gen package                # scaffold an internal package

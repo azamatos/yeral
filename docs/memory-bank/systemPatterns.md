@@ -147,8 +147,8 @@ apps/api/src/
 
 ## Auth
 
-- Client and business: phone + one-time code (Better Auth phone-number plugin) → httpOnly session cookie on the parent
-  domain (`SameSite=Lax`, `Secure`). Better Auth owns identity and sessions only (ADR 0018).
+- Client and business: phone + 4-digit code → httpOnly session cookie on the parent domain (`SameSite=Lax`, `Secure`);
+  our own `modules/auth` with `users`, `login_codes`, `sessions`, `rate_limits` tables (ADR 0019).
 - Business access = a row in our `memberships` table (user ↔ business, role, staff row). Roles are per-business
   (Eýesi locked, Administrator, Hünärmen editable): visibility `own | all` + permission switches. The api checks them with
   `@yeral/domain/permissions` and redacts: other staff's bookings become "Bes" (busy, no details) for `own` visibility,
