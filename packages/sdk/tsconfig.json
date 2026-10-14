@@ -1,0 +1,4 @@
+{
+  "extends": "@yeral/config/tsconfig/react.json",
+  "include": ["src", "vitest.config.ts"]
+}

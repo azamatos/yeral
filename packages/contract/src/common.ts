@@ -16,6 +16,7 @@ export const epochSchema = z.number().int().meta({ description: 'Epoch milliseco
 export const manatSchema = z.number().int().min(0)
 export const priceSchema = z.object({ type: z.enum(PRICE_TYPES), amount: manatSchema }).meta({ id: 'Price' })
 export const localeSchema = z.enum(LOCALES)
+export type Locale = z.infer<typeof localeSchema>
 export const bookingTypeSchema = z.enum(BOOKING_TYPES)
 export const idSchema = z.uuid()
 export const slugSchema = z

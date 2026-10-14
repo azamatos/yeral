@@ -112,7 +112,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | env vars | `parseEnv(schema, source)` (names bad variables, never values) → `shared/config/env.ts` per app, `config.ts` in the api | `@yeral/lib/env` |
 | api: rate limits, the caller's IP (only from `TRUSTED_IP_HEADER`), hashes and random digits | `hit() clientIp()`, `sha256Hex() randomDigits()` | `apps/api/src/lib/{rate-limit,crypto}.ts` |
 | request/response schemas, error codes and their HTTP status | `createBookingSchema`, `businessDetailSchema`, `ERROR_STATUS` … | `@yeral/contract/{common,errors,catalog,availability,bookings,account,events}` |
-| API data | `sdk.<resource>.<query>()` queryOptions, `sdk.<resource>.<action>()` mutation options | `@yeral/sdk` |
+| API data | `createSdk(createClient({ baseUrl: site.urls.api }), queryClient)` once per app; then `useQuery(sdk.catalog.business(slug, lang))`, `useMutation(sdk.bookings.cancel(lang))`; `startEvents(client, queryClient)` for live updates; errors are `ApiError` (`isApiError(e, 'slot_taken')`) | `@yeral/sdk` |
 | forms | `useAppForm()` with `TextField`, `PhoneField`, `SelectField` … | `@yeral/ui/form` |
 
 Before writing a helper, look here and in the package; add new shared helpers to the right package and to this table.

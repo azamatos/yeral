@@ -1,0 +1,32 @@
+{
+  "name": "@yeral/sdk",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The only way apps talk to the api: typed Hono RPC client, ApiError, TanStack Query keys, query and mutation options, events poller (ADR 0006)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@yeral/contract": "workspace:*",
+    "hono": "catalog:"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.104.0"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "catalog:",
+    "@types/react": "catalog:",
+    "@yeral/api": "workspace:*",
+    "@yeral/config": "workspace:*",
+    "eslint": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
