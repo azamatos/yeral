@@ -19,8 +19,8 @@ not a longer-lived mock. A demo memory store would be thrown away when the real 
   in CI and on the future server.
 - **Seed** (`pnpm db:seed`): the 24 salons, staff, services, reviews from today's mock; demo salons keep synthetic
   occupancy as an availability overlay (flag on the salon), so search looks alive.
-- **Auth: Better Auth** — phone number + one-time code, sessions in Postgres, cookie on the configured domain,
-  organization plugin = salon with member roles and invitations. SMS goes through an `Sms` port: the dev/staging adapter
+- **Auth: Better Auth** — phone number + one-time code, sessions in Postgres, cookie on the configured domain.
+  Teams, roles and invitations are our own tables, not the organization plugin ([ADR 0018](0018-business-workspace-model.md)). SMS goes through an `Sms` port: the dev/staging adapter
   accepts code `1234` and logs it; the production gateway comes later.
 - **Jobs** (reminders, expiring requests, notifications): a Postgres `jobs` table + `runDueJobs()`; Cloudflare Cron
   Trigger calls it every minute now, a `jobs` container loop later. No queue service.

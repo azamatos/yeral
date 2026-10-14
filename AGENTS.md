@@ -16,8 +16,8 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 4. **Design source: `docs/design/`** — web design v0.3 (14.10.2026): `README.md` (product spec), `CLAUDE.md` (design
    rules, how to read `.dc.html`), `tokens.css`, `screens/` (hi-fi screens + index), `demo-data.json`. The screen wins on
    visuals, the design README on behaviour. Where `docs/design/CLAUDE.md` suggests a stack (Next.js, CSS Modules,
-   next-intl), this repo's ADRs win: TanStack, Tailwind mapped from `tokens.css`, use-intl. Business and CMS screens
-   aren't designed yet.
+   next-intl), this repo's ADRs win: TanStack, Tailwind mapped from `tokens.css`, use-intl. Business workspace (round 4,
+   appointment type): `docs/design/business/README.md` + `screens/business/`. The CMS isn't designed yet.
 
 ## Rules
 

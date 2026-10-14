@@ -30,16 +30,24 @@ the `.dc.html` screens win on visuals. Rules are implemented in `@yeral/domain` 
 | Pending | Garaşylýar | sent, waiting for the business | cancel (no fee), edit note |
 | Confirmed | Tassyklandy | business accepted (phone bookings: + phone icon) | reschedule or cancel until the cancellation window (default 120 min before start); after it only "Jaň et" |
 | Completed | Tamamlandy | default after the slot ends | review (if none), book again |
-| Cancelled | Ýatyryldy | `cancelledBy`: client · business (with reason) · system (pending request expired at start time) | book again |
-| No-show | Gelmedi | marked by the business; the only red status | book again, see the business note |
+| Cancelled | Ýatyryldy | `cancelledBy`: client · business (decline or cancel, with reason) · system (request not answered within the hold time) | book again; after a decline, accept one of the business's alternative times |
+| No-show | Gelmedi | set by the business through "Arz et" (complaint); the only red status | book again, see the business note |
 
-- **The business confirms every booking by hand** (owner decision 2026-10-14; no instant confirmation).
+- **Confirmation** (business spec §2, ADR 0017): manual by default — online bookings arrive as requests (*Garaşylýar*);
+  a business may switch on instant confirmation (then *Tassyklandy* at once, "Ýazylyş tassyklandy"). Staff-made bookings
+  (phone, walk-in) are always confirmed.
+- **Hold time** (manual mode): a request holds its slot 15 min – 24 h (default 30 min), never past the start; unanswered →
+  cancelled by the system + SMS with 3 alternative times.
+- **Decline**: reason chips (+ text for "Başga sebäp") that the client sees, plus up to 3 alternative times the client
+  accepts in one tap (accepted = confirmed at once).
+- **Complaint** ("Arz et"): Gelmedi (→ no-show) · Gijä galdy · Gödek gylyk · Başga; goes to the client card (team only).
+  After N no-shows at a business (default 2) the client can book there only by phone.
 - Reschedule = a new request for the new time; the old time stays held until the business answers; if declined, the original stays Confirmed.
 - Reviews: only after a Completed booking, one per booking, editable for 7 days, shown as "Aýjemal G.".
 - A booking cancelled from the Upcoming tab stays there greyed (toast with "Yzyna al") until the next page load.
 - Booking codes are human-readable: `YR-48213`.
-- SMS (TK, or the user's language): confirmed, declined, reminders 1 day and 2 h before, review ask 2 h after the end.
-  No SMS when a request is sent (on-screen only). Templates: design spec §6.
+- SMS (TK, or the user's language): confirmed, declined (with reason), expired (with 3 times), reminders 1 day and 2 h
+  before, review ask 2 h after the end. No SMS when a request is sent (on-screen only). Templates: design spec §6.
 
 ## Search and location
 
@@ -53,13 +61,32 @@ the `.dc.html` screens win on visuals. Rules are implemented in `@yeral/domain` 
 - Phone-only login: +993 phone → 4-digit SMS code (auto-submit, 3 tries then 60 s lock, resend after 0:59) → name for new users.
 - Language TK/RU/EN saved per user; favourites; notification settings (SMS confirmation, reminders, review asks); delete account.
 
+## Business workspace (business.yeral.app)
+
+Spec: `docs/design/business/README.md` (round 4: daily work + setup; appointment type only). Model: ADR 0018.
+
+| Role | Sees | Can (default switches) |
+|---|---|---|
+| Eýesi (owner, one per business, locked) | everything | everything, incl. revenue, roles, settings |
+| Administrator | whole calendar, all clients | confirm/decline, move/cancel, no-show, clients, invite; no revenue, roles or settings |
+| Hünärmen (specialist) | own bookings; others' time as "Bes" | confirm own requests, move own bookings, no-show |
+| Programmasyz (phone-only) | — (never logs in) | — ; bookable online, owner/admin answer for them |
+
+- Permission switches: whole calendar · confirm · move/cancel · no-show · clients · services & prices · invite · revenue · settings. Enforced by the api, hidden in the UI.
+- One Ýeral account can be a client and a member of several businesses; a branch is its own business (switcher in the sidebar).
+- New businesses are "Barlagda" (in review) until the Ýeral team verifies them (≤ 24 h); they use the workspace at once but aren't public.
+- Day summary: count = all non-cancelled bookings incl. requests and no-shows; planned revenue = confirmed + pending + completed prices (revenue permission only).
+- Client segments: Yzygiderli (≥ 3 visits in 6 months) · Täze (first visit ≤ 30 days) · Köpden bäri gelmedik (60+ days) · Arz edilen (has complaints).
+
 ## Glossary (code ↔ Turkmen UI)
 
 | Code | EN | TK |
 |---|---|---|
 | `Business` | business, place | biznes, ýer |
 | `Category` | category | kategoriýa (Gözellik, Dellekhana, Dyrnak, Spa we massaž, Diş lukmany, Saglyk, Restoran, Kafe we çaýhana, Sport, Okuw, Awtoulag, Öý haýwanlary, Öý hyzmatlary) |
-| `Specialist` | specialist / any specialist | hünärmen / islendik hünärmen |
+| `Staff` (bookable = specialist) | specialist / any specialist / team | hünärmen / islendik hünärmen / topar |
+| `Client` | a business's client | müşderi |
+| `Membership`, `Role` | team access, role | rol (Eýesi, Administrator, Hünärmen) |
 | `Service`, `ServiceGroup` | service | hyzmat |
 | `Session` | class session | sapak |
 | `TableArea` | seating area | ýer (Zal, Terrasa, VIP otag) |
@@ -71,7 +98,8 @@ Full UI glossary: design spec §9. All Turkmen copy needs a native review before
 
 ## Demo data
 
-`docs/design/demo-data.json` is the seed for every screen: demo clock `2026-10-14T11:20+05:00`, user Aýjemal
+`docs/design/demo-data.json` (client) and `docs/design/business/demo-data.json` (Glow Studio's workspace: team, roles,
+rules, hours, calendar day, clients) are the seed for every screen: demo clock `2026-10-14T11:20+05:00`, user Aýjemal
 (`+993 65 90 11 22`), businesses (Glow Studio, Barber Loft, Ak Diş, Ojak, Aýdyň ýoga …), bookings. In the designs, SMS
 code `0000` is wrong and any other works; the real demo environment accepts `1234`.
 

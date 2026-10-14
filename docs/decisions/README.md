@@ -22,7 +22,8 @@ before any code used them were edited in place (marked "revised").
 | [0014](0014-parallel-agents.md) | Working with several agents in parallel | Accepted 2026-10-13 |
 | [0015](0015-marketplace-on-the-apex.md) | The marketplace lives on yeral.app; no separate landing | Accepted 2026-10-14 |
 | [0016](0016-languages-tk-ru-en.md) | Turkmen first, then Russian and English; every client URL carries its language | Accepted 2026-10-14 |
-| [0017](0017-booking-model.md) | One booking engine for any business that sells time | Accepted 2026-10-14 |
+| [0017](0017-booking-model.md) | One booking engine for any business that sells time | Accepted 2026-10-14 (revised) |
+| [0018](0018-business-workspace-model.md) | Business workspace model: own teams, roles and client records; Better Auth for identity only | Accepted 2026-10-14 |
 
 New record: copy [`_template.md`](_template.md), take the next number, add a row here, update the affected
 memory-bank file in the same commit.

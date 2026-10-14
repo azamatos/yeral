@@ -6,8 +6,9 @@ groomers, home services. Every booking is a place: a chair, a table, a mat, a co
 Ashgabat first. The name and domain are working titles (a move to `yeral.com` or a rebrand is possible), so both are
 configuration.
 
-Design and product spec: [`docs/design/`](../design) (client site fully designed 14.10.2026; business workspace and
-CMS come in the designer's next rounds). Logic reference: Fresha — copy its flows, never its visuals.
+Design and product spec: [`docs/design/`](../design) (client site fully designed 14.10.2026; business workspace round 4
+— daily work and setup, appointment type — designed 14.10.2026 in `docs/design/business/`; analytics, reviews, billing,
+the B2B page, table/class management and the CMS come in the designer's next rounds). Logic reference: Fresha — copy its flows, never its visuals.
 
 ## Sites
 
@@ -21,8 +22,9 @@ CMS come in the designer's next rounds). Logic reference: Fresha — copy its fl
 
 ## Product rules that never break (from the design spec)
 
-1. The business confirms every booking by hand. A client never sees "booked" until then: the first state is always
-   *Garaşylýar* (Pending) and the copy says the request was *sent*.
+1. By default the business confirms every booking by hand: a client never sees "booked" until then, the first state is
+   *Garaşylýar* (Pending) and the copy says the request was *sent*. A business may switch on instant confirmation;
+   unanswered requests expire after the business's hold time.
 2. Five statuses with one meaning everywhere (web, apps, business, CMS): Pending · Confirmed · Completed · Cancelled · No-show.
 3. A visit is Completed by default after it ends unless the business marks No-show.
 4. A phone booking (entered by the business) is Confirmed + a phone icon, not a separate status.
@@ -36,7 +38,7 @@ CMS come in the designer's next rounds). Logic reference: Fresha — copy its fl
 
 Free for a solo specialist → subscription per business (not per seat) → commission only for a new client from the
 catalogue → payments and deposits later. Bookings through the business's own link are free. Every booking records its
-source (`web` | `app` | `phone` | `ai`). Manat prices for plans and commission are open.
+source (`web` | `app` | `phone` | `walkin` | `ai`). Manat prices for plans and commission are open.
 
 ## Market and constraints
 
