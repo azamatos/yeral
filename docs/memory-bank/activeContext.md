@@ -7,9 +7,11 @@ _Last updated: 2026-10-14_
 **M0 and M1 are merged and released** (`@yeral/ui@0.1.0`, storybook.yeral.app); Neon is set up and verified (project
 Yeral, Frankfurt, Postgres 18; see `operations.md`). The client site is fully designed (web design v0.3) and **the
 business workspace design arrived** (round 4, `docs/design/business/`, reviewed 2026-10-14: ADR 0017 revised, ADR 0018).
-**Now: M2** (platform: domain, contract, i18n, lib, sdk, api on Postgres, Docker), in the slices listed under Next steps;
-the schema covers the business side too, so M5 doesn't migrate bookings twice. Then M3 (client site), then M5 (business
-workspace, unblocked for its round-4 scope).
+**M2 is built** as a stack of PRs waiting to merge in order: #13 domain → #14 lib + i18n → #15 contract → #16 api
+foundation → #17 api endpoints → #18 sdk → #19 Docker + Workers (each one's details in `progress.md`). The api serves every
+client screen on Postgres (30 paths, 51 API tests); the schema covers the business side too, so M5 doesn't migrate
+bookings twice. Not deployed yet: staging needs the owner's OK (open question 13). Then M3 (client site), then M5
+(business workspace, unblocked for its round-4 scope).
 
 ## Owner's direction
 
@@ -44,7 +46,9 @@ workspace, unblocked for its round-4 scope).
 [0017](../decisions/0017-booking-model.md) revised by the business design: confirm modes, hold time, booking rules,
 decline with alternatives, complaints, source `web|app|phone|walkin|ai` ·
 [0018](../decisions/0018-business-workspace-model.md) business model: our own staff, memberships, per-business roles and
-client records; Better Auth for identity only; a branch is its own business; only verified businesses are public.
+client records; a branch is its own business; only verified businesses are public ·
+[0019](../decisions/0019-own-phone-login-and-sessions.md) (in PR #16) own phone-code login and database sessions
+instead of Better Auth (the design's attempts/lock/resend rules, no placeholder e-mails, endpoints in the contract).
 
 ## Open questions
 
@@ -52,6 +56,8 @@ client records; Better Auth for identity only; a branch is its own business; onl
 |---|---|---|---|
 | 1 | Business workspace round 5: analytics, reviews and replies, notification settings, help, billing, B2B landing + pricing, table/class management, checkout (round 4 covers daily work + setup) | owner (Claude Design) | parts of M5 |
 | 11 | Client side of the business rules, not drawn yet: decline reason + 3 alternative times to accept in one tap (booking drawer and the SMS link), the expired-request alternatives, a client blocked from online booking. Plan until drawn: show them in the booking detail drawer with time chips; a blocked client gets the "not bookable online" state with "Jaň et" | owner (design) | M3 polish |
+| 13 | **Go-ahead for api staging on Cloudflare**: create the Neon branch `stage`, a Hyperdrive config on it, and the Worker `yeral-api-stage` on `api-stage.yeral.app` (a new DNS record); then CI deploys it on every green push to `main` | owner | api staging |
+| 14 | Merging the M2 stack: the auto-mode permission classifier blocks `gh pr merge` for the agent, so the owner merges #12–#19 in order (squash), or allows merges for the agent | owner | M2 done |
 | 12 | A new business is "Barlagda" until verified: its link and QR are given at setup step 8. Plan: the public page answers 404 until verified; members see it with a banner | owner | M3/M5 |
 | 2 | CMS design (six modules) | owner (Claude Design round 3) | M6 |
 | 3 | Manat prices for business plans and commission | owner | B2B pricing page |
@@ -64,19 +70,10 @@ client records; Better Auth for identity only; a branch is its own business; onl
 
 ## Next steps
 
-M2 in slices, each one PR merged in order:
-
-1. **M2a `@yeral/domain`**: time, phone, ids and booking codes, enums, lifecycle (confirm modes, holdUntil, transitions,
-   client actions, cancel window), hours/exceptions/shifts/breaks, availability (appointment chains + any specialist,
-   buffers, step, lead, window, holds; table; class), permissions, geo; legacy rule tests carried over.
-2. **M2b `@yeral/lib` + `@yeral/i18n`**: site config, env, ics, links, storage; tk/ru/en shared namespaces, `useFmt()`.
-3. **M2c `@yeral/contract`**: zod DTOs, inputs, error codes for every client screen.
-4. **M2d `apps/api` foundation**: Hono app, config, Drizzle schema (ADR 0017 + 0018), migrations, local Postgres
-   (`pnpm db:up`, `db:setup`), seed from both demo-data files + 13 categories, test harness.
-5. **M2e api endpoints**: auth (Better Auth phone, dev code 1234, SMS port), catalog/search/business page/availability,
-   bookings, me, reviews, favourites, events, jobs, OpenAPI `/docs`.
-6. **M2f `@yeral/sdk`**.
-7. **M2g Docker + nginx; api on Cloudflare staging** (Hyperdrive → Neon `stage` branch, `api-stage.yeral.app`): needs the
-   owner's OK for the new Cloudflare resources and DNS record.
+1. Merge #12 (this review), then the M2 stack #13 → #19 in order; after each squash merge the next PR is rebased on
+   `main` (a docs conflict in `progress.md` / `systemPatterns.md` / `techContext.md` is expected and trivial).
+2. With the owner's OK: api staging on Cloudflare (open question 13; steps in `operations.md`).
+3. M3: the client site (`apps/client`, TanStack Start + FSD) on the sdk, screen by screen in the design's order; MSW
+   handlers for stories with the first screens; the client serves the demo photos (`/media/demo`).
 
 Then M3: the client site, screen by screen in the design's order.
