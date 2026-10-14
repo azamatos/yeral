@@ -1,11 +1,12 @@
 # Active context
 
-_Last updated: 2026-10-13_
+_Last updated: 2026-10-14_
 
 ## Current focus
 
-**M0 (monorepo foundation) is merged** (PR #1, `76a218b`; see `progress.md`). Version PR #2 (`@yeral/legacy` 0.1.1)
-waits for the Cloudflare token so its merge can prove the whole release → deploy → smoke-check path. **Next: M1, design system +
+**M0 (monorepo foundation) is merged** (PR #1, `76a218b`; see `progress.md`). The release path is proven end to end
+(2026-10-14): version PR #2 merged → tags `@yeral/legacy@0.1.1`, `@yeral/config@0.0.1` + GitHub Releases → CI deployed
+yeral.app → smoke check green (`/version.json` = `d718e35`). **Next: M1, design system +
 Storybook**, then M2 (platform: packages, api on Postgres, Docker). Infrastructure before features. The live site is still
 the Next.js marketplace (`apps/legacy`) at https://yeral.app; from now on it deploys through the release workflow.
 
@@ -46,7 +47,6 @@ the Next.js marketplace (`apps/legacy`) at https://yeral.app; from now on it dep
 | 2 | Which locale owns URLs without a prefix: `ru` or `tk`? | owner | M7 |
 | 3 | Final name and domain (`yeral.app`, `yeral.com`, other)? | owner | public launch |
 | 4 | Rename the Cloudflare workers.dev subdomain so PR preview URLs can be turned on | owner, dashboard | previews (optional) |
-| 5 | Cloudflare API token for CI (template «Edit Cloudflare Workers» + Zone · DNS · Edit, account + zone `yeral.app`), saved with `gh secret set CLOUDFLARE_API_TOKEN` | owner | deploys from CI, merging version PR #2 |
 | 5a | Install the Renovate GitHub App for this repo (github.com/apps/renovate) | owner | dependency PRs |
 | 6 | Neon account (free) for the api database | owner | M2 |
 | 7 | Subscription and commission prices in manats; when online payment becomes possible | owner | M4 pricing copy |
@@ -55,6 +55,5 @@ the Next.js marketplace (`apps/legacy`) at https://yeral.app; from now on it dep
 
 ## Next steps
 
-1. When the token exists: approve CI on version PR #2, merge it, watch release → deploy → smoke check on yeral.app.
-2. M1: `@yeral/ui` + `apps/storybook` + component tests (`pnpm gen ui-component`), Storybook on `storybook.yeral.app`.
-3. M2: packages (`domain` with the existing tests, `contract`, `i18n`, `lib`, `sdk`), api on Postgres, Docker + nginx.
+1. M1: `@yeral/ui` + `apps/storybook` + component tests (`pnpm gen ui-component`), Storybook on `storybook.yeral.app`.
+2. M2: packages (`domain` with the existing tests, `contract`, `i18n`, `lib`, `sdk`), api on Postgres, Docker + nginx.

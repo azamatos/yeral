@@ -1,8 +1,8 @@
 # Operations: environments, hosting, Docker, CI/CD, versioning, parallel work
 
 Status 2026-10-13 (M0): production = `apps/legacy` (Next.js) on Cloudflare. `ci.yml`, `release.yml`, `deploy.yml` exist;
-legacy deploys to production from a release once the `CLOUDFLARE_API_TOKEN` secret is set (until then the deploy job
-skips with a warning). Staging, Neon, Docker and the new apps are *planned* (M1–M2).
+legacy deploys to production from a release (first CI deploy: `@yeral/legacy@0.1.1`, 2026-10-14). The
+`CLOUDFLARE_API_TOKEN` repository secret is set; without it the deploy job skips with a warning. Staging, Neon, Docker and the new apps are *planned* (M1–M2).
 
 ## Environments
 
