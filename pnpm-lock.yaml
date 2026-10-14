@@ -382,6 +382,9 @@ importers:
       '@yeral/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@yeral/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@yeral/lib':
         specifier: workspace:*
         version: link:../../packages/lib

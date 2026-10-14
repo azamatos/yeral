@@ -6,7 +6,8 @@ import { localeSchema, phoneInputSchema, phoneSchema } from './common'
 
 // ── Login ──
 
-export const sendCodeSchema = z.object({ phone: phoneInputSchema }).meta({ id: 'SendCode' })
+/** `lang`: the site's language, for the SMS text and a new account's language. */
+export const sendCodeSchema = z.object({ phone: phoneInputSchema, lang: localeSchema.optional() }).meta({ id: 'SendCode' })
 export const sendCodeResponseSchema = z.object({
   /** The resend timer ("0:59"). */
   resendAfterSec: z.number().int(),
@@ -17,6 +18,7 @@ export const verifyCodeSchema = z
   .object({
     phone: phoneInputSchema,
     code: z.string().regex(/^\d{4}$/),
+    lang: localeSchema.optional(),
   })
   .meta({ id: 'VerifyCode' })
 

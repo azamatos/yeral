@@ -6,7 +6,7 @@
 import type { Price } from '@yeral/domain/model'
 import { formatPhone } from '@yeral/domain/phone'
 import { dow, hm, parseYmd } from '@yeral/domain/time'
-import { createTranslator } from 'use-intl'
+import { createTranslator } from 'use-intl/core'
 import { messages, type Locale } from './messages'
 
 const NBSP = ' '
@@ -95,3 +95,8 @@ export function createFmt(locale: Locale) {
 }
 
 export type Fmt = ReturnType<typeof createFmt>
+
+/** A translator over the shared messages, outside React (the api's SMS texts, decline reasons). */
+export function createT(locale: Locale) {
+  return createTranslator({ locale, messages: messages[locale] })
+}

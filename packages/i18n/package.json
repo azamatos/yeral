@@ -2,10 +2,12 @@
   "name": "@yeral/i18n",
   "version": "0.0.0",
   "private": true,
-  "description": "Ýeral languages (tk default, ru, en): shared messages and formatters for money, prices, durations, dates and distances",
+  "description": "\u00dderal languages (tk default, ru, en): shared messages and formatters for money, prices, durations, dates and distances",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./fmt": "./src/fmt.ts",
+    "./messages": "./src/messages.ts",
     "./messages/*.json": "./src/messages/*.json"
   },
   "scripts": {

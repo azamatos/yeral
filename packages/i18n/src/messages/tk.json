@@ -39,6 +39,22 @@
     "internal": "Näsazlyk ýüze çykdy. Gaýtadan synanyşyň.",
     "network": "Baglanyşyk ýok. Gaýtadan synanyşyň."
   },
+  "declineReasons": {
+    "slot_busy": "Bu wagt boş däl",
+    "no_staff": "Hünärmen ýok",
+    "cannot_do": "Bu hyzmaty edip bilmeýäris",
+    "other": "Başga sebäp"
+  },
+  "sms": {
+    "code": "Ýeral kody: {code}",
+    "confirmed": "Ýeral: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: {link}",
+    "declined": "Ýeral: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}",
+    "expired": "Ýeral: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {times} — {link}",
+    "cancelled": "Ýeral: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}",
+    "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",
+    "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}.",
+    "reviewAsk": "{business}-da bolşuňyz nähili boldy? Baha beriň: {link}"
+  },
   "fmt": {
     "money": "{amount} TMT",
     "priceFrom": "{amount} TMT-den",

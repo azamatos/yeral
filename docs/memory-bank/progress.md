@@ -75,6 +75,22 @@
   moved to today; Glow Studio's client list reproduces the design's visits and no-shows. `pnpm db:up/db:setup/db:generate`,
   API tests on per-file Postgres copies, Postgres service in CI. ADR 0019: own phone login and sessions instead of Better Auth.
 
+- **2026-10-14 · M2e api endpoints for every client screen** (30 paths in the OpenAPI document): phone login
+  (`/v1/auth/code|verify|logout`: 4 digits, 5 min, resend 59 s, attempts left, 3 tries → 60 s lock, rate limits per
+  phone and IP, demo code 1234; a login links invitations, client rows and phone bookings with that number), sessions
+  (hashed token cookie, 60 days sliding, bearer for apps), `/v1/me` (profile, language, SMS switches, phone change,
+  deletion), favourites, categories, search (radius or map area, category/type/rating/price/open-now/women-only, "has free
+  time" on the day or week, nearest first or rating × reviews, cursor paging), suggestions, places, business page,
+  reviews, free times (appointment with the 14-day strip and next free day, per-specialist next free, tables, class
+  sessions), bookings (send all three types with domain checks + exclusion constraints → `409 slot_taken` with 3 nearest
+  times; list upcoming/past; detail with timeline, hold, cancel deadline, decline/expiry alternatives, pending move,
+  actions; cancel + "Yzyna al" for 5 min; note; move = new request (instant businesses move at once); take an offered
+  time; reviews with the business rating kept up to date), events polling, and `runDueJobs()` (expire requests at their
+  hold time with 3 alternatives + SMS, complete finished visits, SMS queue with reminders and review asks honouring the
+  person's switches, demo businesses without a team answer by themselves). SMS texts and decline reasons live in
+  `@yeral/i18n` (`sms`, `declineReasons`); SMS links are `yeral.app/b/{code}` (ADR 0015: the client site sends booking
+  codes to the booking detail). 51 API tests on Postgres.
+
 ## Roadmap
 
 Infrastructure first (owner, 2026-10-13). Each milestone ends merged, deployed to staging, memory bank updated.

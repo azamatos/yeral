@@ -2,7 +2,7 @@
   "name": "@yeral/api",
   "version": "0.0.0",
   "private": true,
-  "description": "Ýeral REST api (/v1): Hono + zod OpenAPI on Postgres through Drizzle; runs on Cloudflare Workers now and Node in Docker later",
+  "description": "\u00dderal REST api (/v1): Hono + zod OpenAPI on Postgres through Drizzle; runs on Cloudflare Workers now and Node in Docker later",
   "type": "module",
   "exports": {
     ".": "./src/app.ts"
@@ -25,6 +25,7 @@
     "@scalar/hono-api-reference": "catalog:",
     "@yeral/contract": "workspace:*",
     "@yeral/domain": "workspace:*",
+    "@yeral/i18n": "workspace:*",
     "@yeral/lib": "workspace:*",
     "drizzle-orm": "catalog:",
     "hono": "catalog:",

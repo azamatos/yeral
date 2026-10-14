@@ -9,7 +9,14 @@ import { cors } from 'hono/cors'
 import { requestId } from 'hono/request-id'
 import { ApiError, errorBody, errorResponse, validationDetails } from './http/errors'
 import type { AppEnv } from './http/env'
+import { authRoutes } from './modules/auth/routes'
+import { sessionMiddleware } from './modules/auth/session'
+import { availabilityRoutes } from './modules/availability/routes'
+import { bookingRoutes } from './modules/bookings/routes'
+import { catalogRoutes } from './modules/catalog/routes'
+import { eventRoutes } from './modules/events/routes'
 import { healthRoutes } from './modules/health/routes'
+import { meRoutes } from './modules/me/routes'
 import { build } from './version'
 
 export type { AppEnv } from './http/env'
@@ -46,6 +53,8 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     await next()
   })
 
+  app.use('/v1/*', sessionMiddleware)
+
   app.onError((err, c) => {
     if (err instanceof ApiError) return errorResponse(c, err)
     c.var.deps.log.error('unhandled', {
@@ -56,7 +65,14 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
   })
   app.notFound((c) => c.json(errorBody('not_found'), 404))
 
-  const routes = app.route('/v1', healthRoutes)
+  const routes = app
+    .route('/v1', healthRoutes)
+    .route('/v1', authRoutes)
+    .route('/v1', meRoutes)
+    .route('/v1', catalogRoutes)
+    .route('/v1', availabilityRoutes)
+    .route('/v1', bookingRoutes)
+    .route('/v1', eventRoutes)
 
   app.get('/version.json', (c) => c.json({ app: 'api', ...build }))
   app.doc31('/openapi.json', {

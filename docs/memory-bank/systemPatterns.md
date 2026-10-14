@@ -131,8 +131,10 @@ params (zod); unsaved form input → TanStack Form; one subtree → `useState`; 
 apps/api/src/
   app.ts            OpenAPIHono, middleware (request id, logging, CORS for configured sites, auth session, error mapper), /v1
   modules/<name>/   routes.ts (createRoute + handler) · service.ts (use cases) · repo.ts (Drizzle queries)
-                    auth · catalog · availability · bookings · reviews · favorites · notifications · events
-                    biz/{calendar, requests, bookings, clients, services, team, roles, rules, hours, profile, branches} · admin/*
+                    health · auth (codes, sessions) · me (profile, favourites) · catalog (search, cards, pages, reviews)
+                    availability · bookings (send, actions, reviews, confirm) · events · jobs (runDueJobs)
+                    later: biz/{calendar, requests, bookings, clients, services, team, roles, rules, hours, reviews,
+                    analytics, profile, branches, settings} · admin/*
   db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (docs/design demo data + 13 categories)
   jobs/             runDueJobs(): expire requests at holdUntil, complete visits, reminders, review asks, SMS
   ports/            sms (dev: code 1234 logged), files (S3 API), clock
