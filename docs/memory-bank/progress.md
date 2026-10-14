@@ -98,6 +98,14 @@
   stale keys). The api's booking action routes keep literal paths so each action is its own RPC route. MSW handlers for
   stories come with the first screens that need them (M3).
 
+- **2026-10-14 · M2g Docker + Workers**: `infra/docker/api.Dockerfile` (pruned install, one bundled file, no
+  node_modules at runtime), `infra/docker/compose.yml` (Postgres 18, migrate+seed, api, nginx) with `pnpm docker:up`,
+  `infra/nginx` (JSON access logs, gzip, security headers, `api.yeral.localhost`), CI job «Docker stack» (health through
+  nginx). The api's Workers entry (Hyperdrive client per request, cron → jobs) and `wrangler.jsonc` (staging env),
+  verified in local workerd against Postgres. `db:setup` now seeds only an empty database (`db:seed` starts over).
+  **Not deployed**: staging needs the owner's OK for the Neon `stage` branch, a Hyperdrive config and the
+  `api-stage.yeral.app` record (operations.md).
+
 ## Roadmap
 
 Infrastructure first (owner, 2026-10-13). Each milestone ends merged, deployed to staging, memory bank updated.

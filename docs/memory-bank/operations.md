@@ -65,6 +65,25 @@ Workers Paid when limits are hit, Access policy for `cms.` (M6).
 - Migrations: `pnpm db:generate` (drizzle-kit, `apps/api/src/db/migrations`); hand-written SQL (extensions, exclusion
   constraints) goes into a `--custom` migration. Never edit a merged migration.
 
+## The api on Cloudflare (prepared in M2g, not deployed yet)
+
+- `apps/api/src/entry/worker.ts` is the Worker: a node-postgres client per request through Hyperdrive, the Cron Trigger
+  (`* * * * *`) runs `runDueJobs()`. `apps/api/wrangler.jsonc` has the `staging` environment (`yeral-api-stage` on
+  `api-stage.yeral.app`); `pnpm --filter @yeral/api run build:worker` is a dry-run bundle (≈ 300 KiB gzip).
+- Locally in workerd: `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://user:pass@localhost:5432/yeral pnpm --filter @yeral/api exec wrangler dev --env staging --local`.
+- **Waiting for the owner's go-ahead** (Cloudflare account resources + a DNS record): create the Neon branch `stage`,
+  a Hyperdrive config `yeral-stage` on its direct connection string (Hyperdrive pools by itself), put its id into
+  `wrangler.jsonc`, migrate + seed the branch (`db:setup --allow-remote` from CI), `pnpm --filter @yeral/api run deploy:staging`
+  (creates `api-stage.yeral.app`), then a CI job deploys it on every green push to `main` with a smoke check.
+- Photos on staging: `MEDIA_BASE_URL=https://stage.yeral.app/media` — the client site serves the demo photos from M3.
+
+## The production-like stack (since M2g)
+
+`pnpm docker:up` builds `infra/docker/api.Dockerfile` (turbo prune → pnpm install → esbuild bundle → `node:24-alpine`
+with only `dist/`), starts Postgres 18, runs `migrate` (`node dist/cli.js setup`: migrations, demo seed while empty), the
+api (jobs tick inside) and nginx (`infra/nginx`, one server block per host): http://api.yeral.localhost/docs. CI's
+«Docker stack» job does the same and asks for health through nginx. `pnpm docker:down` stops it (`-v` drops the data).
+
 ## Hosting later: own server with Docker + nginx
 
 One VPS to start (≈4 vCPU, 8 GB RAM, 100 GB SSD), everything in Docker Compose (`infra/docker/compose.yml`):

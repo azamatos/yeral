@@ -1,0 +1,60 @@
+# Production-like stack on this machine: `pnpm docker:up` → http://api.yeral.localhost/docs (operations.md).
+# The same images and nginx config go to the own server later, with TLS and real hosts.
+name: yeral
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: yeral
+      POSTGRES_PASSWORD: yeral
+      POSTGRES_DB: yeral
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U yeral']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # creates the schema and the demo data once, then exits
+  migrate:
+    image: yeral-api:local
+    build:
+      context: ../..
+      dockerfile: infra/docker/api.Dockerfile
+      args:
+        GITHUB_SHA: ${GITHUB_SHA:-local}
+    command: ['node', 'dist/cli.js', 'setup']
+    environment: &api-env
+      DATABASE_URL: postgres://yeral:yeral@postgres:5432/yeral
+      YERAL_ENV: docker
+      YERAL_DOMAIN: yeral.app
+      PORT: '3004'
+      DEMO_MEDIA_DIR: /app/media-demo
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    image: yeral-api:local
+    environment: *api-env
+    volumes:
+      # the design's demo photos (free Unsplash licence, docs/design/assets/photos/CREDITS.md)
+      - ../../docs/design/assets/photos:/app/media-demo:ro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  nginx:
+    image: nginx:1.29-alpine
+    ports:
+      - '80:80'
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:

@@ -16,3 +16,4 @@ pnpm-lock.yaml
 # generator templates are Handlebars
 turbo/generators/templates/
 apps/api/src/db/migrations
+**/dist-worker/

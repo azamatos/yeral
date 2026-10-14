@@ -65,6 +65,28 @@ jobs:
         # pull requests check only what they affect; main checks everything
         run: pnpm turbo run lint lint:fsd typecheck test build ${{ github.event_name == 'pull_request' && '--affected' || '' }}
 
+  docker:
+    name: Docker stack
+    # the own server's stack (ADR 0007): build the api image, start Postgres + api + nginx, ask for health through nginx
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build and start
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: docker compose -f infra/docker/compose.yml up -d --build --wait
+      - name: Health through nginx
+        run: |
+          curl -fsS -H 'Host: api.yeral.localhost' http://localhost/v1/health
+          curl -fsS -H 'Host: api.yeral.localhost' 'http://localhost/v1/search?lat=37.95&lng=58.383&limit=1' > /dev/null
+      - name: Logs
+        if: failure()
+        run: docker compose -f infra/docker/compose.yml logs --no-color
+      - name: Stop
+        if: always()
+        run: docker compose -f infra/docker/compose.yml down -v
+
   deploy-storybook:
     name: Deploy Storybook
     needs: checks
