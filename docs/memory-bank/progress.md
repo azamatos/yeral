@@ -55,6 +55,12 @@
   (smallest free table, VIP minimum), classes (seats, max 2), permissions with "Bes" visibility, client stats and
   segments, no-show block. 112 Vitest cases, the legacy rule cases carried over.
 
+- **2026-10-14 · M2b `@yeral/lib` + `@yeral/i18n`**: `lib/site` (hosts per environment from `YERAL_ENV`,
+  `YERAL_DOMAIN`, `PORT_BASE`; cookie domain and prefix; origins; demo flag) and `lib/env` (`parseEnv`); `@yeral/i18n` with
+  shared `common`/`status`/`fmt` messages in tk/ru/en (key parity tested) and hand-written formatters (`createFmt`,
+  `useFmt`) that print the design's formats on server and browser alike (`1 410 TMT`, `250 TMT-den`, `1 sag 30 min`,
+  `1,2 km`, `Penşenbe, 15 oktýabr`, `14 okt.`). `zod` and `use-intl` added to the catalog.
+
 ## Roadmap
 
 Infrastructure first (owner, 2026-10-13). Each milestone ends merged, deployed to staging, memory bank updated.

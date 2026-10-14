@@ -1,0 +1,121 @@
+/**
+ * Hosts, cookie domain and environment for every app and the api (AGENTS.md rule 6, operations.md "Environments").
+ * The name and domain are working titles, so nothing outside this file knows `yeral.app`: a new domain is a config change.
+ */
+import { z } from 'zod'
+
+export const SITE_ENVS = ['local', 'docker', 'staging', 'production'] as const
+export type SiteEnv = (typeof SITE_ENVS)[number]
+
+export const SITE_APPS = ['client', 'business', 'cms', 'api', 'storybook'] as const
+export type SiteApp = (typeof SITE_APPS)[number]
+
+export interface SiteConfig {
+  env: SiteEnv
+  /** Origin of each site, no trailing slash. */
+  urls: Record<SiteApp, string>
+  /** `Domain` of the shared session cookie (client + business); undefined = host-only (localhost). */
+  cookieDomain: string | undefined
+  /** Cookie name prefix, so a staging session never overwrites a production one on the shared parent domain. */
+  cookiePrefix: string
+  /** Web origins allowed to call the api with credentials. */
+  origins: string[]
+  /** Demo behaviour (SMS code 1234, demo businesses that answer by themselves) is on everywhere but production. */
+  demo: boolean
+}
+
+/** Local dev ports are PORT_BASE + offset (techContext "Local development"). */
+export const PORT_OFFSETS: Record<SiteApp, number> = {
+  // the client site takes +0 when it replaces apps/legacy (end of M3); until then legacy has +0
+  client: 1,
+  business: 2,
+  cms: 3,
+  api: 4,
+  storybook: 5,
+}
+
+export interface SiteOptions {
+  env: SiteEnv
+  /** Registered domain: `yeral.app` today. */
+  domain?: string
+  /** First local port: 3000, or 3100, 3200… in a parallel worktree. */
+  portBase?: number
+}
+
+export function siteConfig({ env, domain = 'yeral.app', portBase = 3000 }: SiteOptions): SiteConfig {
+  let urls: Record<SiteApp, string>
+  let cookieDomain: string | undefined = domain
+  let cookiePrefix = 'yeral'
+  switch (env) {
+    case 'production':
+      urls = {
+        client: `https://${domain}`,
+        business: `https://business.${domain}`,
+        cms: `https://cms.${domain}`,
+        api: `https://api.${domain}`,
+        storybook: `https://storybook.${domain}`,
+      }
+      break
+    case 'staging':
+      // one level deep (business-stage, not business.stage) so the *.domain certificate covers them
+      urls = {
+        client: `https://stage.${domain}`,
+        business: `https://business-stage.${domain}`,
+        cms: `https://cms-stage.${domain}`,
+        api: `https://api-stage.${domain}`,
+        storybook: `https://storybook.${domain}`,
+      }
+      cookiePrefix = 'yeral-stage'
+      break
+    case 'docker': {
+      // the production-like stack behind nginx: *.localhost resolves to this machine without /etc/hosts
+      const base = domain.replace(/\.[a-z]+$/, '.localhost')
+      urls = {
+        client: `http://${base}`,
+        business: `http://business.${base}`,
+        cms: `http://cms.${base}`,
+        api: `http://api.${base}`,
+        storybook: `http://storybook.${base}`,
+      }
+      cookieDomain = base
+      cookiePrefix = 'yeral-docker'
+      break
+    }
+    case 'local':
+      urls = Object.fromEntries(SITE_APPS.map((app) => [app, `http://localhost:${portBase + PORT_OFFSETS[app]}`])) as Record<
+        SiteApp,
+        string
+      >
+      // localhost cookies are shared across ports, so one login works in every app
+      cookieDomain = undefined
+      cookiePrefix = 'yeral-local'
+      break
+  }
+  return {
+    env,
+    urls,
+    cookieDomain,
+    cookiePrefix,
+    origins: [urls.client, urls.business, urls.cms],
+    demo: env !== 'production',
+  }
+}
+
+const siteEnvSchema = z.object({
+  YERAL_ENV: z.enum(SITE_ENVS).default('local'),
+  YERAL_DOMAIN: z
+    .string()
+    .regex(/^[a-z0-9-]+(\.[a-z0-9-]+)+$/)
+    .default('yeral.app'),
+  PORT_BASE: z.coerce.number().int().min(1024).max(65000).default(3000),
+})
+
+/**
+ * Site config from environment variables: `YERAL_ENV`, `YERAL_DOMAIN`, `PORT_BASE`. Vite apps pass `import.meta.env`
+ * with prefix `VITE_` (`VITE_YERAL_ENV` …); the api passes `process.env` or the Worker's env.
+ */
+export function siteFromEnv(source: Record<string, unknown>, prefix = ''): SiteConfig {
+  const pick = (name: string) => source[prefix + name] ?? (name === 'PORT_BASE' ? source.PORT_BASE : undefined)
+  const env = siteEnvSchema.parse({ YERAL_ENV: pick('YERAL_ENV'), YERAL_DOMAIN: pick('YERAL_DOMAIN'), PORT_BASE: pick('PORT_BASE') })
+  return siteConfig({ env: env.YERAL_ENV, domain: env.YERAL_DOMAIN, portBase: env.PORT_BASE })
+}

@@ -102,12 +102,13 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | distances, radius box | `distanceM() boundingBox() popularity()` | `@yeral/domain/geo` |
 | `+993` phones | `isPhone() isMobile() toE164() formatPhone()` | `@yeral/domain/phone` |
 | ids, booking codes | `newId() bookingCode()` | `@yeral/domain/id` |
-| money, dates, durations, relative days on screen | `useFmt()` (`money price dur dayMonth when whenInline relDay …`) | `@yeral/i18n` |
-| site URLs, cookie domain, brand | `site` | `@yeral/lib/site` |
-| add to calendar | `buildIcs() downloadIcs()` | `@yeral/lib/ics` |
-| directions, call | `directionsUrl() telHref()` | `@yeral/lib/links` |
-| local/session storage that never throws | `safeStorage` | `@yeral/lib/storage` |
-| env vars | `parseEnv(schema)` → `shared/config/env.ts` per app | `@yeral/lib/env` |
+| money, prices, durations, distances, dates on screen | `useFmt()` in components, `createFmt(locale)` elsewhere (`money price rating duration distance time timeRange dayMonth shortDate weekdayDate monthYear relativeDay phone`) | `@yeral/i18n` |
+| locales, shared messages (`common`, `status`, `fmt`) | `LOCALES DEFAULT_LOCALE isLocale() messages` | `@yeral/i18n` |
+| site URLs, cookie domain and prefix, allowed origins, demo flag | `siteConfig({ env, domain, portBase })`, `siteFromEnv(env, 'VITE_')` | `@yeral/lib/site` |
+| add to calendar *(M3)* | `buildIcs() downloadIcs()` | `@yeral/lib/ics` |
+| directions, call *(M3)* | `directionsUrl() telHref()` | `@yeral/lib/links` |
+| local/session storage that never throws *(M3)* | `safeStorage` | `@yeral/lib/storage` |
+| env vars | `parseEnv(schema, source)` (names bad variables, never values) → `shared/config/env.ts` per app, `config.ts` in the api | `@yeral/lib/env` |
 | API data | `sdk.<resource>.<query>()` queryOptions, `sdk.<resource>.<action>()` mutation options | `@yeral/sdk` |
 | forms | `useAppForm()` with `TextField`, `PhoneField`, `SelectField` … | `@yeral/ui/form` |
 
