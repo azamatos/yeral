@@ -1,6 +1,6 @@
 {
   "name": "@yeral/ui",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Ýeral design system: tokens, base styles, brand and components (web DS v0.3.1)",
   "type": "module",
