@@ -5,7 +5,7 @@
   "account_id": "90af7d87d8b4cc5e517a859f6413f96e",
   "compatibility_date": "2026-10-01",
   // static site: the built Storybook, no Worker code
-  // serve files exactly as built: Storybook loads iframe.html by name, so no .html → clean-URL redirects
-  "assets": { "directory": "./storybook-static", "html_handling": "none", "not_found_handling": "404-page" },
+  // default html handling: "/" serves index.html; "/iframe.html?…" redirects to "/iframe?…" (query kept), which Storybook follows
+  "assets": { "directory": "./storybook-static", "not_found_handling": "404-page" },
   "routes": [{ "pattern": "storybook.yeral.app", "custom_domain": true }],
 }

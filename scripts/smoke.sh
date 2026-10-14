@@ -35,7 +35,7 @@ fi
 echo "version.json: $served"
 
 for p in "${paths[@]}"; do
-  code=$(curl -s -o /dev/null -w '%{http_code}' "$base$p")
+  code=$(curl -sL -o /dev/null -w '%{http_code}' "$base$p") # final status after redirects
   echo "$code $base$p"
   [ "$code" = 200 ] || { echo "::error::$base$p answered $code"; exit 1; }
 done
