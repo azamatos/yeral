@@ -18,7 +18,8 @@
   `release.yml`, `deploy.yml` + `scripts/smoke.sh`; `/version.json` stamp; Renovate config; issue and PR templates;
   `PORT_BASE`; `AGENTS.md` for every agent tool. The Next app moved to `apps/legacy` (`@yeral/legacy`) and builds, previews
   and deploys from the monorepo. First tests: 45 Vitest cases for the booking rules, which found and fixed a bug (yearly
-  closures across New Year were ignored). CI green on the first run; release workflow opened version PR #2. Repo
+  closures across New Year were ignored). CI green on the first run. 2026-10-14: `CLOUDFLARE_API_TOKEN` secret set; version PR #2 merged → tags and GitHub
+  Releases `@yeral/legacy@0.1.1`, `@yeral/config@0.0.1` → CI deployed yeral.app → smoke check green. Repo
   settings: labels (`lane:*`, `status:*`, `type:*`), Actions may open PRs, `main` protected.
 
 **The owner is not satisfied with the first client app.** It gets rebuilt and polished in M3 on the new foundation.
