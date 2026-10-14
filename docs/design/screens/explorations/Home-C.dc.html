@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral — baş sahypa C</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 40px}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-lg{height:52px;padding:0 24px;border-radius:14px;font-size:16px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-ink{background:#101014;color:#ffffff}
+.b-ink:hover{background:#2a2a32;color:#ffffff}
+.b:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.nl{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:500;color:#101014;border:0;background:transparent;font-family:inherit;cursor:pointer}
+.nl:hover{background:#f4f4f6;color:#101014}
+.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;white-space:nowrap}
+.chip:hover{background:#f6f6f8}
+.chip.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.seg{display:inline-flex;padding:3px;background:#f0f0f3;border-radius:10px;gap:2px}
+.sgb{height:30px;padding:0 12px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:#5a5a64;cursor:pointer}
+.sgb.on{background:#ffffff;color:#101014;font-weight:600;box-shadow:0 0 0 1px #e6e6ea}
+.slot{display:inline-flex;align-items:center;justify-content:center;height:36px;min-width:64px;padding:0 10px;border-radius:10px;border:1px solid #d8d8de;font-size:14px;font-weight:600;color:#101014;background:#ffffff}
+.slot:hover{border-color:#5a3ff0;color:#4429d6}
+.hs{display:flex;align-items:center;height:44px;flex:0 1 560px;border:1px solid #d8d8de;border-radius:12px;padding:0 4px 0 14px;gap:10px}
+.hs input{border:0;outline:none;font-family:inherit;font-size:14px;color:#101014;background:transparent;min-width:0;flex:1}
+.hs input::placeholder{color:#6e6e78}
+.main{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start}
+.list{flex:999 1 600px;min-width:0;display:flex;flex-direction:column}
+.aside{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:24px}
+.row{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid #e6e6ea}
+.row:hover{background:#f6f6f8;margin:0 -12px;padding:14px 12px;border-radius:0}
+.row img{width:72px;height:72px;object-fit:cover;border-radius:10px;display:block}
+.slots{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.ci{display:flex;align-items:center;gap:12px;height:44px;padding:0 8px;border-radius:10px;color:#101014;font-size:15px;font-weight:500}
+.ci:hover{background:#f4f4f6;color:#101014}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:32px}
+.gfoot{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:32px}
+.fl{font-size:14px;line-height:20px;color:#5a5a64}
+.fl:hover{color:#101014}
+@media (max-width:1023px){.wrap{padding:0 24px}.hide-md{display:none !important}}
+@media (max-width:767px){.wrap{padding:0 16px}.hide-xs{display:none !important}.row{grid-template-columns:56px minmax(0,1fr)}.row img{width:56px;height:56px}.slots{grid-column:1 / -1;justify-content:flex-start}.h1c{font-size:30px !important;line-height:34px !important}}
+</style>
+</helmet>
+<div style="min-height: 100%; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<header style="border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<div class="wrap" style="display: flex; align-items: center; gap: 24px; height: 72px">
+<a href="#" aria-label="Ýeral baş sahypa" style="display: flex; flex: none"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 28px; width: auto"></a>
+<form class="hs hide-xs" role="search">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+<input aria-label="Näme gözleýärsiňiz" placeholder="Hyzmat, ýer ýa-da hünärmen">
+<span style="width: 1px; height: 24px; background: #e6e6ea"></span>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #101014; padding: 0 8px; white-space: nowrap">Ähli etraplar<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+<button class="b b-pri b-sm" type="submit" style="height: 34px">Gözle</button>
+</form>
+<div style="flex: 1"></div>
+<nav style="display: flex; align-items: center; gap: 4px">
+<a class="nl hide-md" href="#">Biznes üçin</a>
+<button class="nl hide-xs" aria-label="Dil: Türkmençe"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>TK</button>
+<a class="b b-sec b-sm" href="#">Giriş</a>
+</nav>
+</div>
+</header>
+
+<section style="padding: 40px 0 24px">
+<div class="wrap" style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 class="h1c" style="margin: 0; font-size: 44px; line-height: 48px; font-weight: 700; letter-spacing: -0.03em">Aşgabatda onlaýn ýazylyş</h1>
+<p style="margin: 0; font-size: 17px; line-height: 26px; color: #5a5a64">Boş wagty saýlaň — dellekden diş lukmanyna, restorandan sport zalyna çenli.</p>
+</div>
+<div class="seg" role="group" aria-label="Gün"><sc-for list="{{days}}" as="d" hint-placeholder-count="3"><button class="{{d.cls}}" onClick="{{d.pick}}">{{d.t}}</button></sc-for></div>
+</div>
+</section>
+
+<section style="padding: 0 0 72px">
+<div class="wrap main">
+<div class="list">
+<div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 16px; border-bottom: 1px solid #e6e6ea">
+<sc-for list="{{cats}}" as="c" hint-placeholder-count="7"><button class="{{c.cls}}" onClick="{{c.pick}}" aria-pressed="{{c.on}}">{{c.t}}</button></sc-for>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 0 4px"><span class="lbl">{{listTitle}}</span><span class="cap">Ýakynlygy boýunça</span></div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+<a class="row" href="#" style="color: #101014">
+<img src="{{r.img}}" alt="">
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap"><span style="font-size: 16px; line-height: 20px; font-weight: 600">{{r.name}}</span><span style="display: inline-flex; align-items: center; gap: 3px; font-size: 13px; font-weight: 600"><svg width="12" height="12" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>{{r.rating}}</span><span class="cap">{{r.count}}</span></div>
+<span class="cap">{{r.meta}}</span>
+<span class="cap" style="color: #101014">{{r.price}}</span>
+</div>
+<div class="slots"><sc-for list="{{r.slots}}" as="s" hint-placeholder-count="3"><span class="slot">{{s}}</span></sc-for></div>
+</a>
+</sc-for>
+<sc-if value="{{empty}}" hint-placeholder-val="{{false}}"><div style="padding: 40px 0; text-align: center; color: #5a5a64; font-size: 15px">Bu kategoriýada şu gün boş wagt ýok — ertir üçin serediň.</div></sc-if>
+<a class="b b-sec" href="#" style="align-self: center; margin-top: 24px">Ýene görkez</a>
+</div>
+
+<aside class="aside">
+<div style="position: relative; border: 1px solid #e6e6ea; border-radius: 16px; overflow: hidden">
+<svg viewBox="0 0 360 280" width="100%" style="display: block; background: #f0f0f3" role="img" aria-label="Aşgabadyň kartasy, şekil">
+<path d="M0 210 C 60 190, 120 220, 180 196 S 300 170, 360 186" stroke="#d8d8de" stroke-width="18" fill="none"></path>
+<path d="M-10 70 L 370 120" stroke="#ffffff" stroke-width="10"></path>
+<path d="M40 -10 L 120 290" stroke="#ffffff" stroke-width="8"></path>
+<path d="M230 -10 L 210 290" stroke="#ffffff" stroke-width="10"></path>
+<path d="M-10 150 L 370 150" stroke="#ffffff" stroke-width="6"></path>
+<path d="M300 -10 L 330 290" stroke="#ffffff" stroke-width="5"></path>
+<text x="22" y="40" font-size="11" font-weight="600" fill="#6e6e78" letter-spacing=".06em">KÖPETDAG</text>
+<text x="246" y="40" font-size="11" font-weight="600" fill="#6e6e78" letter-spacing=".06em">BERKARARLYK</text>
+<text x="20" y="250" font-size="11" font-weight="600" fill="#6e6e78" letter-spacing=".06em">BAGTYÝARLYK</text>
+<text x="250" y="262" font-size="11" font-weight="600" fill="#6e6e78" letter-spacing=".06em">BÜZMEÝIN</text>
+<circle cx="96" cy="96" r="7" fill="#5a3ff0" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="182" cy="128" r="7" fill="#5a3ff0" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="262" cy="92" r="7" fill="#5a3ff0" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="140" cy="178" r="7" fill="#5a3ff0" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="292" cy="214" r="7" fill="#5a3ff0" stroke="#ffffff" stroke-width="3"></circle>
+<circle cx="64" cy="200" r="7" fill="#5a3ff0" stroke="#ffffff" stroke-width="3"></circle>
+<rect x="104" y="58" width="132" height="28" rx="8" fill="#101014"></rect>
+<text x="116" y="76" font-size="12" font-weight="600" fill="#ffffff">Barber Loft · 14:30</text>
+</svg>
+<a class="b b-sec b-sm" href="#" style="position: absolute; right: 12px; bottom: 12px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15"></path><path d="M9 3.236v15"></path></svg>Kartada aç</a>
+</div>
+<div style="display: flex; flex-direction: column">
+<span class="lbl" style="padding: 0 8px 8px">Kategoriýalar</span>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"></path></svg><span style="flex: 1">Gözellik we dyrnak</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"></circle><path d="M8.12 8.12 12 12"></path><path d="M20 4 8.12 15.88"></path><circle cx="6" cy="18" r="3"></circle><path d="M14.8 14.8 20 20"></path></svg><span style="flex: 1">Dellekhana</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3C5 3 3.5 5 3.5 7.5c0 2 .9 3.4 1.6 5 .6 1.5.8 3.3 1.1 5 .3 1.9.9 3.5 2 3.5 1.3 0 1.6-1.9 1.9-3.5.3-1.6.8-3 1.9-3s1.6 1.4 1.9 3c.3 1.6.6 3.5 1.9 3.5 1.1 0 1.7-1.6 2-3.5.3-1.7.5-3.5 1.1-5 .7-1.6 1.6-3 1.6-5C20.5 5 19 3 16.5 3c-1.7 0-2.9 1-4.5 1S9.2 3 7.5 3z"></path></svg><span style="flex: 1">Diş lukmany</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2v2"></path><path d="M5 2v2"></path><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"></path><path d="M8 15a6 6 0 0 0 12 0v-3"></path><circle cx="20" cy="10" r="2"></circle></svg><span style="flex: 1">Saglyk</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg><span style="flex: 1">Restoran we kafe</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.4 14.4 9.6 9.6"></path><path d="M18.66 21.49a2 2 0 1 1-2.83-2.83l-1.77 1.77a2 2 0 1 1-2.83-2.83l6.36-6.36a2 2 0 1 1 2.83 2.83l-1.77 1.77a2 2 0 1 1 2.83 2.83z"></path><path d="m21.5 21.5-1.4-1.4"></path><path d="M3.9 3.9 2.5 2.5"></path><path d="M6.4 12.77a2 2 0 1 1-2.83-2.83l1.77-1.77a2 2 0 1 1-2.83-2.83l2.83-2.83a2 2 0 1 1 2.83 2.83l1.77-1.77a2 2 0 1 1 2.83 2.83z"></path></svg><span style="flex: 1">Sport we ýoga</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg><span style="flex: 1">Spa we massaž</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.42 10.92a1 1 0 0 0-.02-1.84L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0z"></path><path d="M22 10v6"></path><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path></svg><span style="flex: 1">Okuw</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg><span style="flex: 1">Awtoulag</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"></circle><circle cx="18" cy="8" r="2"></circle><circle cx="20" cy="16" r="2"></circle><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.05Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"></path></svg><span style="flex: 1">Öý haýwanlary</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+<a class="ci" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .71-1.53l7-6a2 2 0 0 1 2.58 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg><span style="flex: 1">Öý hyzmatlary</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+</div>
+</aside>
+</div>
+</section>
+
+<section style="border-top: 1px solid #e6e6ea; padding: 56px 0">
+<div class="wrap g3">
+<div style="display: flex; gap: 16px"><span style="font-size: 32px; line-height: 32px; font-weight: 700; color: #5a3ff0; letter-spacing: -0.03em">1</span><div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 17px; font-weight: 600">Gözläň</span><span style="font-size: 15px; line-height: 22px; color: #5a5a64">Hyzmat, etrap we gün — boş wagtly ýerler derrew görünýär.</span></div></div>
+<div style="display: flex; gap: 16px"><span style="font-size: 32px; line-height: 32px; font-weight: 700; color: #5a3ff0; letter-spacing: -0.03em">2</span><div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 17px; font-weight: 600">Wagt saýlaň</span><span style="font-size: 15px; line-height: 22px; color: #5a5a64">Hünärmen, stol ýa-da sapak — size amatly wagty belläň.</span></div></div>
+<div style="display: flex; gap: 16px"><span style="font-size: 32px; line-height: 32px; font-weight: 700; color: #5a3ff0; letter-spacing: -0.03em">3</span><div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 17px; font-weight: 600">Tassyklama alyň</span><span style="font-size: 15px; line-height: 22px; color: #5a5a64">Biznes tassyklandan soň SMS geler.</span></div></div>
+</div>
+</section>
+
+<section style="background: #101014; color: #ffffff; padding: 64px 0">
+<div class="wrap" style="display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 10px; max-width: 640px">
+<span class="lbl" style="color: #b0b0b8">Ýeral Biznes</span>
+<h2 style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.025em">Wagtyňyzy satýarsyňyzmy? Ýazylyşlary Ýeralda kabul ediň.</h2>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #d8d8de">Senenama, müşderiler, ýatlatmalar we hasabatlar. Ýeke işleýän hünärmenler üçin mugt.</p>
+</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap"><a class="b b-pri b-lg" href="#">Biznesiňizi goşuň</a><a class="b b-lg" href="#" style="color: #ffffff; border-color: #5a5a64">Bahalar</a></div>
+</div>
+</section>
+
+<footer style="padding: 56px 0 40px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 40px">
+<div class="gfoot">
+<div style="display: flex; flex-direction: column; gap: 16px"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 26px; width: auto; align-self: flex-start"><div style="display: flex; flex-direction: column; gap: 8px"><a class="b b-ink b-sm" href="#" style="align-self: flex-start">App Store</a><a class="b b-ink b-sm" href="#" style="align-self: flex-start">Google Play</a></div></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Müşderiler üçin</span><a class="fl" href="#">Gözleg</a><a class="fl" href="#">Kategoriýalar</a><a class="fl" href="#">Ýazylyşlarym</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Biznes üçin</span><a class="fl" href="#">Ýeral Biznes</a><a class="fl" href="#">Bahalar</a><a class="fl" href="#">Biznes girişi</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Ýeral</span><a class="fl" href="#">Biz barada</a><a class="fl" href="#">Kömek merkezi</a><a class="fl" href="#">Habarlaşmak</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Dil</span><a class="fl" href="#" style="color: #101014; font-weight: 600">Türkmençe</a><a class="fl" href="#">Русский</a><a class="fl" href="#">English</a></div>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e6e6ea"><span class="cap">© 2026 Ýeral · Aşgabat</span><div style="display: flex; gap: 20px"><a class="fl" href="#" style="font-size: 13px">Gizlinlik syýasaty</a><a class="fl" href="#" style="font-size: 13px">Ulanyş şertleri</a></div></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":2240}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { cat: 'all', day: 'today' };
+  }
+  renderVals() {
+    const f = this.props.font ?? 'Onest';
+    const s = this.state;
+    
+    const all = [
+      { cat: 'beauty', name: 'Barber Loft', img: '../../assets/photos/nathon-oski-EW_rqoSdDes-unsplash.jpg', rating: '4,9', count: '(212)', meta: 'Dellekhana · Köpetdag · Magtymguly şaýoly 12 · 1,2 km', price: 'Erkek saç kesimi · 40 TMT-den', slots: ['14:30', '15:00', '16:15', '17:00'] },
+      { cat: 'health', name: 'Ak Diş', img: '../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', rating: '4,8', count: '(131)', meta: 'Diş lukmany · Berkararlyk · Görogly köçesi 52 · 2,1 km', price: 'Barlag · 50 TMT', slots: ['16:00', '17:30', '18:00'] },
+      { cat: 'beauty', name: 'Glow Studio', img: '../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg', rating: '4,9', count: '(96)', meta: 'Gözellik · Bagtyýarlyk · Bitarap Türkmenistan şaýoly 247', price: 'Saç düzmek · 60 TMT-den', slots: ['13:00', '15:45', '17:00', '18:15'] },
+      { cat: 'food', name: 'Ojak', img: '../../assets/photos/nick-hillier-xBXF9pr6LQo-unsplash.jpg', rating: '4,7', count: '(88)', meta: 'Restoran · Berkararlyk · Oguzhan köçesi · 2,8 km', price: 'Stol, 2 adam', slots: ['19:00', '19:30', '20:45'] },
+      { cat: 'sport', name: 'Güýç Fitness', img: '../../assets/photos/sergio-kian-G6svDyPVRrc-unsplash.jpg', rating: '4,8', count: '(64)', meta: 'Sport · Büzmeýin · 4,2 km', price: 'Şahsy tälimçi · 90 TMT', slots: ['18:00', '19:00', '20:00'] },
+      { cat: 'beauty', name: 'Nail Bar Aýna', img: '../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg', rating: '4,9', count: '(73)', meta: 'Dyrnak · Köpetdag · Andalyp köçesi · 1,6 km', price: 'Manikýur · 70 TMT-den', slots: ['12:00', '14:30', '16:00'] },
+      { cat: 'edu', name: 'Açar okuw merkezi', img: '../../assets/photos/ronald-felton-6c86TCPmNRQ-unsplash.jpg', rating: '4,7', count: '(41)', meta: 'Okuw · Berkararlyk · 2,4 km', price: 'Iňlis dili · 1 sapak 60 TMT', slots: ['15:00', '16:30'] },
+      { cat: 'food', name: 'Bag kafe', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', rating: '4,8', count: '(119)', meta: 'Kafe · Köpetdag · 0,9 km', price: 'Stol, terrasa', slots: ['13:00', '13:30', '18:00'] },
+      { cat: 'auto', name: 'Awto Ussa', img: '../../assets/photos/christian-buehner-Fd6osyVbtG4-unsplash.jpg', rating: '4,6', count: '(58)', meta: 'Awtoulag · Büzmeýin · 5,1 km', price: 'Diagnostika · 100 TMT', slots: ['10:30', '12:00', '14:00'] }
+    ];
+    const catDefs = [['all', 'Ählisi'], ['beauty', 'Gözellik'], ['health', 'Saglyk'], ['food', 'Restoran we kafe'], ['sport', 'Sport'], ['edu', 'Okuw'], ['auto', 'Awtoulag']];
+    const cats = catDefs.map(([id, t]) => ({ t, on: s.cat === id, cls: s.cat === id ? 'chip on' : 'chip', pick: () => this.setState({ cat: id }) }));
+    const days = [['today', 'Şu gün'], ['tomorrow', 'Ertir'], ['week', 'Şu hepde']].map(([id, t]) => ({ t, cls: s.day === id ? 'sgb on' : 'sgb', pick: () => this.setState({ day: id }) }));
+    const rows = s.cat === 'all' ? all : all.filter((r) => r.cat === s.cat);
+    const titles = { today: 'Şu gün boş wagtlar', tomorrow: 'Ertir boş wagtlar', week: 'Şu hepde boş wagtlar' };
+    return {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      cats, days, rows, empty: rows.length === 0, listTitle: titles[s.day]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -11,8 +11,8 @@ legacy deploys to production from a release (first CI deploy: `@yeral/legacy@0.1
 | local | `localhost:3000–3005` (`PORT_BASE` + offset) | Postgres in Docker, one database per worktree | `pnpm dev` |
 | local, production-like | `*.yeral.localhost` through nginx | Postgres container | `pnpm docker:up` |
 | preview (optional) | Cloudflare preview URL per PR | Neon branch per PR | once the workers.dev subdomain is renamed (it contains part of the account e-mail today, so previews are off) |
-| staging | `stage.yeral.app`, `client-stage.`, `business-stage.`, `cms-stage.`, `api-stage.`, `storybook.` | Neon branch `stage` (demo seed) | every green push to `main` |
-| production | `yeral.app`, `client.`, `business.`, `cms.`, `api.` | Neon `main` | when a release is cut (Changesets) |
+| staging | `stage.yeral.app` (client), `business-stage.`, `cms-stage.`, `api-stage.`, `storybook.` | Neon branch `stage` (demo seed) | every green push to `main` |
+| production | `yeral.app` (client), `business.`, `cms.`, `api.` | Neon `main` | when a release is cut (Changesets) |
 
 Staging hosts are one level deep (`client-stage`, not `client.stage`) so the `*.yeral.app` certificate covers them.
 Staging uses its own cookie names so it never overwrites a production session on the shared parent domain.
@@ -25,8 +25,7 @@ the DNS record and the certificate. No dashboard work per subdomain.
 
 | Host | Worker | Bindings |
 |---|---|---|
-| `yeral.app`, `www.yeral.app` | `yeral-landing` | static assets |
-| `client.yeral.app` | `yeral-client` | static assets + SSR |
+| `yeral.app`, `www.yeral.app` | `yeral-client` (`yeral-web` = legacy until M3) | static assets + SSR |
 | `business.yeral.app` | `yeral-business` | static assets, SPA fallback |
 | `cms.yeral.app` | `yeral-cms` | static assets; Cloudflare Access policy (owner sets it up once in Zero Trust, free up to 50 users) |
 | `api.yeral.app` | `yeral-api` | Hyperdrive → Neon, R2 bucket `yeral-media`, Cron Trigger `* * * * *` → `runDueJobs()` |
@@ -44,7 +43,7 @@ One VPS to start (≈4 vCPU, 8 GB RAM, 100 GB SSD), everything in Docker Compose
 
 | Service | Image | Role |
 |---|---|---|
-| `nginx` | official nginx | TLS (Let's Encrypt via certbot), one server block per host, serves landing/business/cms/storybook static files, proxies `client` and `api`, gzip/brotli, cache and security headers |
+| `nginx` | official nginx | TLS (Let's Encrypt via certbot), one server block per host, serves business/cms/storybook static files, proxies `client` and `api`, gzip/brotli, cache and security headers |
 | `client` | `yeral-client` (Node) | TanStack Start SSR |
 | `api` | `yeral-api` (Node) | Hono on `@hono/node-server`, migrations on start |
 | `jobs` | `yeral-api` (same image, `jobs` command) | calls `runDueJobs()` every minute |

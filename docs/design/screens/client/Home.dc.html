@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral — baş sahypa</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 40px}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-lg{height:52px;padding:0 24px;border-radius:14px;font-size:16px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-ink{background:#101014;color:#ffffff}
+.b-ink:hover{background:#2a2a32;color:#ffffff}
+.b:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.nl{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:500;color:#101014;border:0;background:transparent;font-family:inherit;cursor:pointer}
+.nl:hover{background:#f4f4f6;color:#101014}
+.slot{display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 10px;border-radius:8px;border:1px solid #d8d8de;font-size:13px;font-weight:600;color:#101014;background:#ffffff}
+.slot:hover{border-color:#5a3ff0;color:#4429d6}
+.vc{display:flex;flex-direction:column;gap:12px;color:#101014}
+.vc:hover{color:#101014}
+.vc:hover .vn{text-decoration:underline}
+.vc img{transition:filter .15s}
+.vc:hover img{filter:brightness(.94)}
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(460px,100%),1fr));gap:56px;align-items:center}
+.sf{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #e6e6ea}
+.sf input{border:0;outline:none;font-family:inherit;font-size:16px;padding:0;color:#101014;background:transparent;width:100%}
+.sf input::placeholder{color:#6e6e78}
+.mosaic{display:grid;grid-template-columns:1.15fr 1fr;grid-template-rows:200px 200px 180px;gap:12px}
+.mosaic figure{margin:0;position:relative;border-radius:16px;overflow:hidden}
+.mosaic img{width:100%;height:100%;object-fit:cover;display:block}
+.tagp{position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;background:#ffffff;color:#101014;font-size:13px;font-weight:600}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:32px 24px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:32px}
+.gcat{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(176px,100%),1fr));gap:12px}
+.cat{display:flex;flex-direction:column;gap:20px;padding:16px;border:1px solid #e6e6ea;border-radius:16px;color:#101014;font-size:15px;font-weight:600;min-height:120px}
+.cat:hover{background:#f6f6f8;color:#101014}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:48px;align-items:center}
+.gfoot{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:32px}
+.fl{font-size:14px;line-height:20px;color:#5a5a64}
+.fl:hover{color:#101014}
+.disp{margin:0;font-size:80px;line-height:80px;font-weight:700;letter-spacing:-0.045em}
+.h2p{margin:0;font-size:32px;line-height:38px;font-weight:700;letter-spacing:-0.025em}
+.sec{padding:80px 0}
+@media (max-width:1023px){.wrap{padding:0 24px}.hide-md{display:none !important}}
+@media (max-width:767px){.wrap{padding:0 16px}.hide-xs{display:none !important}.disp{font-size:48px;line-height:50px}.h2p{font-size:26px;line-height:30px}.sec{padding:56px 0}.mosaic{grid-template-rows:140px 140px 120px}}
+</style>
+</helmet>
+<div style="min-height: 100%; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<header style="border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<div class="wrap" style="display: flex; align-items: center; gap: 16px; height: 72px">
+<a href="Home.dc.html" aria-label="Ýeral baş sahypa" style="display: flex"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 30px; width: auto"></a>
+<div style="flex: 1"></div>
+<nav style="display: flex; align-items: center; gap: 4px">
+<a class="nl hide-xs" href="#">Biznes üçin</a>
+<button class="nl hide-xs" aria-label="Dil: Türkmençe"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>TK</button>
+<a class="b b-sec b-sm" href="#">Giriş</a>
+</nav>
+</div>
+</header>
+
+<section style="padding: 56px 0 88px">
+<div class="wrap hero">
+<div style="display: flex; flex-direction: column; gap: 24px">
+<span style="align-self: flex-start; display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 999px; background: #efecfe; border: 1px solid #d5cbfb; color: #4429d6; font-size: 13px; font-weight: 600">Islendik hyzmata onlaýn ýazylyş</span>
+<h1 class="disp">Ýeriňi al.</h1>
+<p style="margin: 0; font-size: 19px; line-height: 28px; color: #5a5a64; max-width: 500px; text-wrap: pretty">Dellegiň kreslosy, restoranyň stoly ýa-da ýoga sapagyndaky ýer — boş wagty görüň we bir minutda ýazylyň.</p>
+<form role="search" style="display: flex; flex-direction: column; border: 1px solid #d8d8de; border-radius: 16px; background: #ffffff; max-width: 520px; overflow: hidden">
+<label class="sf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><span style="display: flex; flex-direction: column; gap: 2px; flex: 1"><span class="lbl" style="color: #101014">Näme?</span><input placeholder="Hyzmat, ýer ýa-da hünärmen"></span></label>
+<div style="display: grid; grid-template-columns: 1fr 1fr">
+<label class="sf" style="border-right: 1px solid #e6e6ea"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="2" x2="5" y1="12" y2="12"></line><line x1="19" x2="22" y1="12" y2="12"></line><line x1="12" x2="12" y1="2" y2="5"></line><line x1="12" x2="12" y1="19" y2="22"></line><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="3"></circle></svg><span style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0"><span class="lbl" style="color: #101014">Nirede?</span><input value="Ýakynymda" aria-label="Nirede"></span></label>
+<label class="sf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0"><span class="lbl" style="color: #101014">Haçan?</span><input placeholder="Islendik wagt"></span></label>
+</div>
+<div style="padding: 8px"><a class="b b-pri b-lg" href="Search.dc.html" style="width: 100%">Boş wagtlary görkez</a></div>
+</form>
+</div>
+<div class="mosaic" aria-label="Ýeraldaky ýerler">
+<figure style="grid-row: span 2"><img src="../../assets/photos/nathon-oski-EW_rqoSdDes-unsplash.jpg" alt="Dellekhananyň içi"><span class="tagp">Dellekhana</span></figure>
+<figure><img src="../../assets/photos/harold-hisona-Bg81yWKZlMg-unsplash.jpg" alt="Diş lukmany näsag bilen gürleşýär"><span class="tagp">Diş lukmany</span></figure>
+<figure><img src="../../assets/photos/sergio-kian-G6svDyPVRrc-unsplash.jpg" alt="Sport zalynda tälimçi"><span class="tagp">Sport</span></figure>
+<figure><img src="../../assets/photos/nick-hillier-xBXF9pr6LQo-unsplash.jpg" alt="Restoranda adamlar"><span class="tagp">Restoran</span></figure>
+<figure><img src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Saç ussasy"><span class="tagp">Gözellik</span></figure>
+</div>
+</div>
+</section>
+
+<section style="padding: 0 0 80px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 6px"><h2 class="h2p">Golaýyňyzda şu gün boş</h2><span style="font-size: 15px; color: #5a5a64; display: inline-flex; align-items: center; gap: 6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>Ýerleşişiňiz boýunça · <a href="#" style="font-weight: 600">üýtget</a></span></div>
+<a href="Search.dc.html" style="display: inline-flex; align-items: center; gap: 4px; font-size: 15px; font-weight: 600">Ählisini gör<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+</div>
+<div class="g4">
+<sc-for list="{{venues}}" as="v" hint-placeholder-count="4">
+<a class="vc" href="Search.dc.html">
+<img src="{{v.img}}" alt="{{v.alt}}" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; display: block">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="vn" style="font-size: 17px; line-height: 22px; font-weight: 600">{{v.name}}</span><span class="cap">{{v.meta}}</span></div>
+<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600; flex: none"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>{{v.rating}}<span class="cap">{{v.count}}</span></span>
+</div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center"><sc-for list="{{v.slots}}" as="s" hint-placeholder-count="3"><span class="slot">{{s}}</span></sc-for><span class="cap" style="margin-left: 4px">{{v.note}}</span></div>
+</a>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section style="padding: 0 0 80px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 6px"><h2 class="h2p">Diňe gözellik däl</h2><span style="font-size: 15px; color: #5a5a64">Wagtyny satýan islendik hünärmen we ýer — bir programmada.</span></div>
+<div class="gcat">
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"></path></svg><span style="display: flex; flex-direction: column; gap: 2px">Gözellik<span class="cap" style="font-weight: 400">Saç, kosmetolog</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"></circle><path d="M8.12 8.12 12 12"></path><path d="M20 4 8.12 15.88"></path><circle cx="6" cy="18" r="3"></circle><path d="M14.8 14.8 20 20"></path></svg><span style="display: flex; flex-direction: column; gap: 2px">Dellekhana<span class="cap" style="font-weight: 400">Saç, sakgal</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3C5 3 3.5 5 3.5 7.5c0 2 .9 3.4 1.6 5 .6 1.5.8 3.3 1.1 5 .3 1.9.9 3.5 2 3.5 1.3 0 1.6-1.9 1.9-3.5.3-1.6.8-3 1.9-3s1.6 1.4 1.9 3c.3 1.6.6 3.5 1.9 3.5 1.1 0 1.7-1.6 2-3.5.3-1.7.5-3.5 1.1-5 .7-1.6 1.6-3 1.6-5C20.5 5 19 3 16.5 3c-1.7 0-2.9 1-4.5 1S9.2 3 7.5 3z"></path></svg><span style="display: flex; flex-direction: column; gap: 2px">Diş lukmany<span class="cap" style="font-weight: 400">Barlag, arassalamak</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2v2"></path><path d="M5 2v2"></path><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"></path><path d="M8 15a6 6 0 0 0 12 0v-3"></path><circle cx="20" cy="10" r="2"></circle></svg><span style="display: flex; flex-direction: column; gap: 2px">Saglyk<span class="cap" style="font-weight: 400">Fizioterapiýa, psiholog</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg><span style="display: flex; flex-direction: column; gap: 2px">Restoran<span class="cap" style="font-weight: 400">Stol, banket</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg><span style="display: flex; flex-direction: column; gap: 2px">Kafe we çaýhana<span class="cap" style="font-weight: 400">Stol, terrasa</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.4 14.4 9.6 9.6"></path><path d="M18.66 21.49a2 2 0 1 1-2.83-2.83l-1.77 1.77a2 2 0 1 1-2.83-2.83l6.36-6.36a2 2 0 1 1 2.83 2.83l-1.77 1.77a2 2 0 1 1 2.83 2.83z"></path><path d="m21.5 21.5-1.4-1.4"></path><path d="M3.9 3.9 2.5 2.5"></path><path d="M6.4 12.77a2 2 0 1 1-2.83-2.83l1.77-1.77a2 2 0 1 1-2.83-2.83l2.83-2.83a2 2 0 1 1 2.83 2.83l1.77-1.77a2 2 0 1 1 2.83 2.83z"></path></svg><span style="display: flex; flex-direction: column; gap: 2px">Sport we ýoga<span class="cap" style="font-weight: 400">Topar, tälimçi</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg><span style="display: flex; flex-direction: column; gap: 2px">Spa we massaž<span class="cap" style="font-weight: 400">Massaž, ýüz ideg</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.42 10.92a1 1 0 0 0-.02-1.84L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0z"></path><path d="M22 10v6"></path><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path></svg><span style="display: flex; flex-direction: column; gap: 2px">Okuw<span class="cap" style="font-weight: 400">Repetitor, dil, saz</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg><span style="display: flex; flex-direction: column; gap: 2px">Awtoulag<span class="cap" style="font-weight: 400">Ýuwmak, abatlamak</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"></circle><circle cx="18" cy="8" r="2"></circle><circle cx="20" cy="16" r="2"></circle><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.05Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"></path></svg><span style="display: flex; flex-direction: column; gap: 2px">Öý haýwanlary<span class="cap" style="font-weight: 400">Groming, weterinar</span></span></a>
+<a class="cat" href="Search.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .71-1.53l7-6a2 2 0 0 1 2.58 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg><span style="display: flex; flex-direction: column; gap: 2px">Öý hyzmatlary<span class="cap" style="font-weight: 400">Arassaçylyk, ussa</span></span></a>
+</div>
+</div>
+</section>
+
+<section class="sec" style="border-top: 1px solid #e6e6ea">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 40px">
+<h2 class="h2p">Nähili işleýär?</h2>
+<div class="g3">
+<div style="display: flex; flex-direction: column; gap: 12px"><span style="width: 36px; height: 36px; border-radius: 999px; background: #efecfe; color: #4429d6; display: inline-flex; align-items: center; justify-content: center; font-weight: 700">1</span><div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Gözläň</div><div style="font-size: 15px; line-height: 22px; color: #5a5a64">Hyzmaty ýa-da ýeri ýazyň, güni saýlaň — ýakynyňyzdaky boş wagtly ýerleri görersiňiz.</div></div>
+<div style="display: flex; flex-direction: column; gap: 12px"><span style="width: 36px; height: 36px; border-radius: 999px; background: #efecfe; color: #4429d6; display: inline-flex; align-items: center; justify-content: center; font-weight: 700">2</span><div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Wagt saýlaň</div><div style="font-size: 15px; line-height: 22px; color: #5a5a64">Hünärmeni, stoly ýa-da sapagy saýlap, özüňize amatly wagty belläň.</div></div>
+<div style="display: flex; flex-direction: column; gap: 12px"><span style="width: 36px; height: 36px; border-radius: 999px; background: #efecfe; color: #4429d6; display: inline-flex; align-items: center; justify-content: center; font-weight: 700">3</span><div style="font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Tassyklama alyň</div><div style="font-size: 15px; line-height: 22px; color: #5a5a64">Biznes ýazylyşyňyzy tassyklandan soň SMS geler. Üýtgetmek ýa-da ýatyrmak — iki basyşda.</div></div>
+</div>
+</div>
+</section>
+
+<section style="background: #f4f4f6">
+<div class="wrap sec split">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<span class="lbl">Ýeral Biznes</span>
+<h2 class="h2p" style="font-size: 40px; line-height: 44px; letter-spacing: -0.03em">Wagtyňyzy satýarsyňyzmy? Müşderiler sizi şu ýerde tapar.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 26px; color: #5a5a64; max-width: 520px">Salon, öýde işleýän diş lukmany, mugallym ýa-da restoran — ýazylyşlar, senenama, müşderiler we hasabatlar bir ýerde. Ýeke işleýän hünärmenler üçin mugt.</p>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; padding-top: 4px"><a class="b b-pri b-lg" href="#">Biznesiňizi goşuň</a><a class="b b-sec b-lg" href="#">Bahalar</a></div>
+</div>
+<div style="display: flex; flex-direction: column; background: #ffffff; border: 1px solid #e6e6ea; border-radius: 16px">
+<div style="display: flex; gap: 16px; padding: 20px 24px; border-bottom: 1px solid #e6e6ea"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">Onlaýn ýazylyş gije-gündiz</span><span class="cap">Müşderiler boş wagty özleri saýlaýar, siz diňe tassyklaýarsyňyz.</span></div></div>
+<div style="display: flex; gap: 16px; padding: 20px 24px; border-bottom: 1px solid #e6e6ea"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">SMS ýatlatmalar</span><span class="cap">Müşderi gelmezden öň ýatlatma alýar — boş galan wagt azalýar.</span></div></div>
+<div style="display: flex; gap: 16px; padding: 20px 24px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">Toparyň senenamasy</span><span class="cap">Ähli işgärler bir ekranda; kompýuterde we telefonda.</span></div></div>
+</div>
+</div>
+</section>
+
+<section class="sec">
+<div class="wrap split">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<h2 class="h2p">Ýeral telefonyňyzda</h2>
+<p style="margin: 0; font-size: 17px; line-height: 26px; color: #5a5a64; max-width: 480px">Ýazylyşlar, ýatlatmalar we halanlaryňyz hemişe ýanyňyzda.</p>
+</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end">
+<a class="b b-ink b-lg" href="#" style="height: 56px; gap: 12px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg><span style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1"><span style="font-size: 11px; font-weight: 500; opacity: .8">Ýükläň</span><span>App Store</span></span></a>
+<a class="b b-ink b-lg" href="#" style="height: 56px; gap: 12px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg><span style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1"><span style="font-size: 11px; font-weight: 500; opacity: .8">Ýükläň</span><span>Google Play</span></span></a>
+</div>
+</div>
+</section>
+
+<footer style="border-top: 1px solid #e6e6ea; padding: 56px 0 40px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 40px">
+<div class="gfoot">
+<div style="display: flex; flex-direction: column; gap: 16px"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 26px; width: auto; align-self: flex-start"><span class="cap" style="max-width: 220px">Islendik hyzmata onlaýn ýazylyş.</span></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Müşderiler üçin</span><a class="fl" href="Search.dc.html">Gözleg</a><a class="fl" href="#">Kategoriýalar</a><a class="fl" href="#">Ýazylyşlarym</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Biznes üçin</span><a class="fl" href="#">Ýeral Biznes</a><a class="fl" href="#">Bahalar</a><a class="fl" href="#">Biznes girişi</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Ýeral</span><a class="fl" href="#">Biz barada</a><a class="fl" href="#">Kömek merkezi</a><a class="fl" href="#">Habarlaşmak</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Dil</span><a class="fl" href="#" style="color: #101014; font-weight: 600">Türkmençe</a><a class="fl" href="#">Русский</a><a class="fl" href="#">English</a></div>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e6e6ea"><span class="cap">© 2026 Ýeral</span><div style="display: flex; gap: 20px"><a class="fl" href="#" style="font-size: 13px">Gizlinlik syýasaty</a><a class="fl" href="#" style="font-size: 13px">Ulanyş şertleri</a></div></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":3180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const f = this.props.font ?? 'Onest';
+    return {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      venues: [
+        { name: 'Bag kafe', alt: 'Bag kafesiniň terrasy', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', meta: 'Kafe · 0,9 km', rating: '4,8', count: '(119)', slots: ['13:00', '13:30', '18:00'], note: '2 adam' },
+        { name: 'Barber Loft', alt: 'Barber Loft dellekhanasy', img: '../../assets/photos/allef-vinicius-IvQeAVeJULw-unsplash.jpg', meta: 'Dellekhana · 1,2 km', rating: '4,9', count: '(212)', slots: ['14:30', '15:00', '16:15'], note: '40 TMT-den' },
+        { name: 'Rahat Spa', alt: 'Rahat Spa massaž otagy', img: '../../assets/photos/engin-akyurt-ZbzYDboN7fg-unsplash.jpg', meta: 'Spa we massaž · 1,9 km', rating: '4,9', count: '(140)', slots: ['12:30', '16:00', '18:30'], note: '150 TMT-den' },
+        { name: 'Ak Diş', alt: 'Ak Diş stomatologiýasy', img: '../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', meta: 'Diş lukmany · 2,1 km', rating: '4,8', count: '(131)', slots: ['16:00', '17:30', '18:00'], note: '50 TMT-den' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

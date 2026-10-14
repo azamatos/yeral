@@ -6,25 +6,23 @@ Status 2026-10-13: **target architecture, agreed; migration not started.** The l
 ## System map
 
 ```
-   yeral.app ─────────── landing (static) ── short links /{slug} → 301 client.yeral.app/{slug}
-   client.yeral.app ──── client (TanStack Start, SSR) ──┐
-   business.yeral.app ── business (SPA)              ───┼──► api.yeral.app/v1 (Hono) ──► Postgres
-   cms.yeral.app ─────── cms (SPA, access-gated)     ───┘          │                     (Neon now, Docker later)
-   storybook.yeral.app ─ design system (static)                    ├─ @yeral/domain rules
-                                                                    ├─ jobs: runDueJobs() every minute
-                                                                    └─ files: S3 API (R2 now, MinIO/disk later)
+   yeral.app/{tk,ru,en} ── client marketplace (TanStack Start, SSR) ──┐
+   business.yeral.app ──── business workspace (SPA, PWA)           ───┼──► api.yeral.app/v1 (Hono) ──► Postgres
+   cms.yeral.app ───────── cms (SPA, access-gated)                 ───┘          │                (Neon now, Docker later)
+   storybook.yeral.app ─── design system (static)                                ├─ @yeral/domain rules (4 booking types)
+                                                                                  ├─ jobs: runDueJobs() every minute
+                                                                                  └─ files: S3 API (R2 now, MinIO/disk later)
 ```
 
-Now every box runs on Cloudflare Workers; later on one server in Docker behind nginx (ADR 0007). One session cookie
-on the parent domain serves client and business; the CMS has its own accounts and cookie.
+Now every box runs on Cloudflare Workers; later on one server in Docker behind nginx (ADR 0007). Site map: ADR 0015.
+One session cookie on the parent domain serves the client site and the business workspace; the CMS has its own accounts and cookie.
 
 ## Monorepo layout
 
 ```
 yeral/                           github.com/azamatos/yeral
 ├─ apps/
-│  ├─ landing/     TanStack Start, prerendered
-│  ├─ client/      TanStack Start, SSR for public pages, client-only for account/booking
+│  ├─ client/      yeral.app — TanStack Start, SSR for public pages, client-only for account/booking; /tk /ru /en
 │  ├─ business/    Vite SPA + TanStack Router, installable (PWA)
 │  ├─ cms/         Vite SPA + TanStack Router
 │  ├─ api/         Hono + zod-openapi + Drizzle; entry/worker.ts (Cloudflare) and entry/node.ts (Docker)
@@ -59,7 +57,7 @@ config      ← everything (dev only)
 lib         ← anything                                   (imports nothing internal)
 domain      ← contract, i18n, entities, features, api, apps
 contract    ← sdk, entities, features, api, apps
-sdk         ← entities, features, landing, client, business, cms   (type-only import of AppType from api)
+sdk         ← entities, features, client, business, cms   (type-only import of AppType from api)
 i18n        ← entities, features, apps                   (ui stays text-free: labels come in as props)
 ui          ← entities, features, apps, storybook
 entities    ← features, apps
@@ -77,11 +75,11 @@ Layers, top to bottom; a layer imports only from layers below it:
 
 | Layer | Holds | Example (client) |
 |---|---|---|
-| `app/` | entry, providers, router, `routes/` (file-based, thin), global styles | `routes/$slug.tsx` → loader + head + `SalonPage` |
-| `pages/` | one slice per screen; composes everything below | `pages/salon`, `pages/booking`, `pages/account-bookings` |
-| `widgets/` | large blocks used by 2+ pages | `widgets/header`, `widgets/salon-map` |
+| `app/` | entry, providers, router, `routes/` (file-based, thin), global styles | `routes/$lang/b/$slug.tsx` → loader + head + `BusinessPage` |
+| `pages/` | one slice per screen; composes everything below | `pages/business`, `pages/booking-appointment`, `pages/account-bookings` |
+| `widgets/` | large blocks used by 2+ pages | `widgets/search-header`, `widgets/results-map` |
 | `features/` | one user action with business value | `features/toggle-favorite`, `features/cancel-booking`, `features/pick-slot` |
-| `entities/` | app-specific views of a business object | `entities/salon` (`SalonCard`), `entities/booking` (`BookingRow`) |
+| `entities/` | app-specific views of a business object | `entities/business` (`BusinessCard`), `entities/booking` (`BookingRow`) |
 | `shared/` | app-only config, sdk instance, helpers, small ui wrappers | `shared/config/env.ts`, `shared/api/sdk.ts` |
 
 Below `shared/` sit the packages: they are the cross-app part of the lower layers.
@@ -101,7 +99,7 @@ Below `shared/` sit the packages: they are the cross-app part of the lower layer
 ## Data flow
 
 ```
-component ─► useQuery(sdk.salons.detail(slug)) ─► hc client ─► GET api.yeral.app/v1/salons/:slug
+component ─► useQuery(sdk.businesses.detail(slug)) ─► hc client ─► GET api.yeral.app/v1/businesses/:slug
                                                                  │ zod validates input
                                                                  ▼
                                    module route → service (@yeral/domain rules) → Drizzle repository → Postgres
@@ -124,8 +122,7 @@ params (zod); unsaved form input → TanStack Form; one subtree → `useState`; 
 
 | App | Mode | Notes |
 |---|---|---|
-| landing | prerendered at build (static files) | unknown single-segment path → `301 client.<domain>/{slug}`; salon slugs can't use reserved landing paths |
-| client | SSR for home, search, salon, category/district pages; `ssr: false` for account, booking, login | loaders `ensureQueryData` → dehydrated into the page; `head()` gives title, description, canonical, hreflang, OG, JSON-LD |
+| client | SSR for home, search, category and business pages; `ssr: false` for account, booking, login | `/` → saved language or `/tk`; `/b/{slug}` → `/{lang}/b/{slug}`; loaders `ensureQueryData` → dehydrated into the page; `head()` gives title, description, canonical, hreflang, OG, JSON-LD |
 | business, cms, storybook | static SPA, `index.html` fallback | `noindex` |
 
 ## Backend (`apps/api`)
@@ -158,7 +155,7 @@ apps/api/src/
 
 ## Configuration, domains and brand
 
-- `@yeral/lib/site` reads one config per environment: site URLs (landing, client, business, cms, api, storybook),
+- `@yeral/lib/site` reads one config per environment: site URLs (client, business, cms, api, storybook),
   cookie domain, brand name key. Apps and api never hard-code `yeral.app`.
 - The brand name is an i18n message (`common.brand`); logos live in `@yeral/ui/brand`. A rename = env + messages + logo files.
 - Every app serves `/version.json` (`{ app, version, commit, builtAt }`).
@@ -166,15 +163,16 @@ apps/api/src/
 ## i18n
 
 - `use-intl` (the framework-free core of next-intl): today's `useTranslations` calls and ICU messages carry over.
-- Locales: `ru` now, `tk` next. Shared namespaces (`common`, `categories`, `status`, `errors`, units) in `@yeral/i18n`;
-  app namespaces in `apps/<app>/messages/{ru,tk}.json`. Keys are typed per app.
-- Landing and client put the locale in the URL for SEO (`/tk/...`); business and cms take it from the user's settings.
-- Numbers, money, dates and plurals only through `useFmt()` / ICU, always in `Asia/Ashgabat`.
+- Locales: `tk` (default), `ru`, `en` (ADR 0016). Shared namespaces (`common`, `categories`, `status`, `errors`, units) in
+  `@yeral/i18n`; app namespaces in `apps/<app>/messages/{tk,ru,en}.json`. Keys are typed per app; CI checks all three exist.
+- The client site puts the locale first in every URL (`/tk/b/{slug}`); business and cms take it from the user's settings.
+- Turkmen copy comes verbatim from the design screens; no city names in copy.
+- Numbers, money, dates, distances and plurals only through `useFmt()` / ICU, in the business's time zone (`Asia/Ashgabat` today).
 
 ## Conventions the whole system relies on
 
-- Salon dates are `YYYY-MM-DD` strings in Ashgabat time; times of day are minutes from midnight (`870` = 14:30);
-  instants are epoch milliseconds. Use `@yeral/domain/time`; never derive a salon date from `new Date()` directly.
+- Business dates are `YYYY-MM-DD` strings in the business's local time (Ashgabat today); times of day are minutes from midnight (`870` = 14:30);
+  instants are epoch milliseconds. Use `@yeral/domain/time`; never derive a business date from `new Date()` directly.
 - Money: whole manats (integers).
 - API errors: `{ error: { code, message?, details? } }` with the right HTTP status; codes are an enum in `@yeral/contract`;
   the UI shows `errors.<code>` from i18n. `@yeral/sdk` throws `ApiError`.

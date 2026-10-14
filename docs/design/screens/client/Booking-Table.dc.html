@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral — stol bronlamak</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 40px}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.cap a{text-decoration:underline}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;min-width:88px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .12s,box-shadow .12s,transform .06s;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px;line-height:18px;min-width:72px}
+.b-lg{height:52px;padding:0 24px;border-radius:14px;font-size:16px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-pri:active{background:linear-gradient(180deg,#5a3ff0 0%,#4429d6 100%);box-shadow:inset 0 1px 2px rgba(16,16,20,.28);transform:translateY(1px)}
+.b-pri:focus-visible{outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-sec:active{background:#f0f0f3;transform:translateY(1px)}
+.b-sec:focus-visible,.b-gho:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6;color:#101014}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed;transform:none}
+.b-ico{min-width:0;width:44px;padding:0}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld label,.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp::placeholder{color:#6e6e78}
+.inp:hover{border-color:#b0b0b8}
+.inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.inp.is-e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
+.hint{font-size:13px;line-height:18px;color:#5a5a64}
+.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;white-space:nowrap;flex:none}
+.chip:hover{background:#f6f6f8}
+.chip.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.chip.on:hover{background:#ded7fd}
+.slot{height:40px;min-width:72px;padding:0 12px;border-radius:10px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:600;color:#101014;cursor:pointer;font-variant-numeric:tabular-nums}
+.slot:hover{border-color:#5a3ff0;color:#4429d6}
+.slot.on{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
+.slot:disabled{background:#f6f6f8;border-color:#f0f0f3;color:#6e6e78;text-decoration:line-through;cursor:not-allowed}
+.pg{width:36px;height:36px;border-radius:10px;border:1px solid transparent;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.pg:hover{background:#f4f4f6}
+.pg:disabled{color:#b0b0b8;background:transparent;cursor:default}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:999px}
+.st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.tag-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
+.sep{height:1px;background:#e6e6ea}
+.hidden{display:none !important}
+.chip:focus-visible,.slot:focus-visible,.pg:focus-visible,.dy:focus-visible,.opt:focus-visible,.pc:focus-visible,.lnk:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.fh{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;height:72px;padding:0 24px;background:#ffffff;border-bottom:1px solid #e6e6ea}
+.yza{min-width:0;padding:0 16px 0 10px;margin-left:-10px}
+.fht{font-size:17px;line-height:22px;font-weight:600;letter-spacing:-0.01em;text-align:center;white-space:nowrap}
+.bbody{display:flex;flex-wrap:wrap;align-items:flex-start;gap:48px;padding:40px 0 96px}
+.bmain{flex:999 1 560px;min-width:0}
+.bcol{max-width:720px;display:flex;flex-direction:column}
+.bside{flex:1 1 340px;min-width:0;position:sticky;top:24px}
+.card{display:flex;flex-direction:column;gap:20px;padding:24px;border:1px solid #e6e6ea;border-radius:16px;background:#ffffff}
+.show-md{display:none}
+.h1{margin:0;font-size:28px;line-height:34px;font-weight:700;letter-spacing:-0.025em}
+.sub{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
+.h17{margin:0;font-size:17px;line-height:22px;font-weight:600;letter-spacing:-0.01em}
+.csec{display:flex;flex-direction:column;gap:16px;padding:28px 0;border-top:1px solid #e6e6ea}
+.csh{display:flex;align-items:center;justify-content:space-between;gap:4px 12px;flex-wrap:wrap;min-height:22px}
+.lead{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
+.note{margin:0;padding:12px 14px;border-radius:12px;background:#f4f4f6;font-size:14px;line-height:20px;color:#5a5a64}
+.bstrip{display:flex;align-items:center;gap:16px;padding-bottom:28px}
+.bstrip img{width:96px;height:96px;border-radius:12px;object-fit:cover;display:block;flex:none}
+.bname{margin:0;font-size:22px;line-height:28px;font-weight:700;letter-spacing:-0.02em}
+.pc{display:inline-flex;align-items:center;justify-content:center;min-width:48px;height:48px;padding:0 14px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:15px;font-weight:600;color:#101014;cursor:pointer;font-variant-numeric:tabular-nums;flex:none}
+.pc:hover{border-color:#5a3ff0;color:#4429d6}
+.pc.on{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
+.strip{overflow:hidden;margin:0 -4px;padding:4px}
+.strip-in{display:flex;gap:8px;transition:transform .25s ease}
+.strip-in.p1{transform:translateX(calc(-100% - 8px))}
+.dy{flex:0 0 calc((100% - 48px) / 7);min-width:64px;height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff;font-family:inherit;color:#101014;cursor:pointer}
+.dy:hover{border-color:#5a3ff0}
+.ddw{font-size:12px;line-height:16px;font-weight:500;color:#5a5a64;white-space:nowrap}
+.ddn{font-size:20px;line-height:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.dy.on{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
+.dy.on .ddw{color:#ffffff}
+.opt{display:flex;align-items:center;gap:16px;width:100%;padding:16px;border:1px solid #e6e6ea;border-radius:16px;background:#ffffff;font-family:inherit;color:#101014;text-align:left;cursor:pointer}
+.opt:not(:disabled):hover{background:#f6f6f8}
+.opt.on,.opt.on:hover{background:#efecfe;border-color:#d5cbfb}
+.opt:disabled{cursor:not-allowed;color:#6e6e78}
+.opt:disabled .cap{color:#6e6e78}
+.av{width:48px;height:48px;border-radius:999px;background:#f0f0f3;color:#101014;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex:none}
+.opt.on .av{background:#ffffff;color:#4429d6}
+.opt:disabled .av{background:#f6f6f8;color:#6e6e78}
+.on .on-ink{color:#4429d6}
+.rad{width:20px;height:20px;border-radius:999px;border:1.5px solid #b0b0b8;background:#ffffff;flex:none}
+.opt.on .rad{border:6px solid #5a3ff0}
+.opt:disabled .rad{border-color:#e6e6ea;background:#f6f6f8}
+.pfx{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;flex:none}
+.err{display:inline-flex;align-items:center;gap:6px;color:#a3251b}
+.lnk{display:inline-flex;align-items:center;min-height:32px;border:0;background:transparent;padding:0;font-family:inherit;font-size:14px;font-weight:600;color:#4429d6;cursor:pointer;white-space:nowrap}
+.lnk:hover{color:#3520a6;text-decoration:underline}
+.avs{width:44px;height:44px;border-radius:999px;background:#efecfe;color:#4429d6;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;flex:none}
+.otp{position:relative;display:inline-flex;gap:12px;align-self:flex-start}
+.ob{width:56px;height:56px;border:1px solid #d8d8de;border-radius:8px;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:#101014;font-variant-numeric:tabular-nums}
+.ob.f{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.ob.e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
+.otpin{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;font-size:16px;cursor:text}
+.ta{display:block;height:96px;padding:12px 14px;line-height:22px;resize:vertical}
+.cons{margin:0;padding-top:28px;border-top:1px solid #e6e6ea}
+.sline{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:20px;color:#101014}
+.sline svg{flex:none;margin-top:1px;color:#5a5a64}
+.sline.mute{color:#6e6e78}
+.mbar{display:none}
+.sentcol{width:100%;max-width:640px;margin:0 auto;padding:56px 24px 96px;display:flex;flex-direction:column;gap:40px}
+.okc{width:64px;height:64px;border-radius:999px;background:#efecfe;color:#5a3ff0;display:flex;align-items:center;justify-content:center}
+.kv{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px 16px;margin:0;padding:20px 24px}
+.kv dt{font-size:14px;line-height:22px;color:#5a5a64}
+.kv dd{margin:0;font-size:15px;line-height:22px;font-weight:500;color:#101014}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tli{position:relative;display:flex;gap:14px;padding-bottom:22px}
+.tli:last-child{padding-bottom:0}
+.tli:not(:last-child)::after{content:"";position:absolute;left:13px;top:32px;bottom:4px;width:2px;border-radius:2px;background:#e6e6ea}
+.tli.done:not(:last-child)::after{background:#d5cbfb}
+.tlm{width:28px;height:28px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;color:#5a5a64;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}
+.tli.done .tlm{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.tlb{display:flex;flex-direction:column;gap:2px;padding-top:3px;min-width:0}
+.tlt{font-size:15px;line-height:22px;font-weight:600}
+@media (max-width:1023px){.wrap{padding:0 24px}.hide-md{display:none !important}.show-md{display:flex}.bbody{padding-bottom:40px}.mbar{display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;bottom:0;z-index:5;padding:12px 24px;background:#ffffff;border-top:1px solid #e6e6ea}}
+@media (max-width:767px){.wrap{padding:0 16px}.hide-xs{display:none !important}.fh{padding:0 16px}.fht{font-size:16px}.bbody{padding-top:24px}.bstrip img{width:72px;height:72px}.bname{font-size:20px;line-height:26px}.csec{padding:24px 0}.chip{height:44px}.slot{height:44px}.strip{overflow-x:auto;scrollbar-width:none}.strip-in,.strip-in.p1{transform:none}.dy{flex:0 0 64px}.mbar{padding:12px 16px}.mbar .b-lg{padding:0 18px}.sentcol{padding:40px 16px 64px}.kv{grid-template-columns:96px minmax(0,1fr);padding:16px 20px}.lnk{min-height:44px}}
+</style>
+</helmet>
+<div style="min-height: 100%; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column">
+
+<header class="fh">
+<div style="display: flex; align-items: center; min-width: 0">
+<sc-if value="{{notSent}}" hint-placeholder-val="{{true}}"><a class="b b-gho yza" href="Search.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>Yza</a></sc-if>
+<sc-if value="{{sent}}" hint-placeholder-val="{{false}}"><a href="Home.dc.html" aria-label="Ýeral baş sahypa" style="display: flex"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 28px; width: auto"></a></sc-if>
+</div>
+<div class="fht">Stol bronlamak</div>
+<div style="display: flex; justify-content: flex-end; min-width: 0">
+<a class="b b-gho b-ico" href="Search.dc.html" aria-label="Ýap"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></a>
+</div>
+</header>
+
+<sc-if value="{{notSent}}" hint-placeholder-val="{{true}}">
+<div class="wrap">
+<div class="bbody">
+<main class="bmain">
+<div class="bcol">
+
+<div class="bstrip">
+<img src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="Bag kafesiniň bagdaky oturylyşyk ýeri">
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<h1 class="bname">Bag kafe</h1>
+<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px; line-height: 20px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>4,8<span class="cap">(119)</span></span>
+<span class="cap">Kafe · 0,9 km · Andalyp köçesi 8</span>
+<span class="cap" style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Her gün 09:00–23:00</span>
+</div>
+</div>
+
+<section class="csec" aria-labelledby="h-party">
+<div class="csh"><h2 id="h-party" class="h17">Adam sany</h2></div>
+<div role="group" aria-labelledby="h-party" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{parties}}" as="p" hint-placeholder-count="9"><button class="{{p.cls}}" onClick="{{p.pick}}" aria-pressed="{{p.on}}" aria-label="{{p.aria}}">{{p.t}}</button></sc-for>
+</div>
+<sc-if value="{{big}}" hint-placeholder-val="{{false}}">
+<div class="note" role="status" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+<span style="display: flex; flex-direction: column; flex: 1; min-width: 180px"><span style="font-size: 15px; line-height: 22px; font-weight: 600; color: #101014">9 we ondan köp adam bolsa, jaň ediň</span><span style="font-variant-numeric: tabular-nums">Bag kafe · +993 12 22 33 44</span></span>
+<a class="b b-sec b-sm" href="#">Jaň et</a>
+</div>
+</sc-if>
+</section>
+
+<section class="csec" aria-labelledby="h-date">
+<div class="csh">
+<h2 id="h-date" class="h17">Sene</h2>
+<div style="display: flex; align-items: center; gap: 12px">
+<span class="cap">Oktýabr 2026</span>
+<div class="hide-xs" style="display: flex; gap: 4px">
+<button class="pg" aria-label="Öňki hepde" disabled="{{wkPrevDis}}" onClick="{{wkPrev}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+<button class="pg" aria-label="Indiki hepde" disabled="{{wkNextDis}}" onClick="{{wkNext}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+</div>
+</div>
+</div>
+<div class="strip" role="group" aria-labelledby="h-date">
+<div class="{{stripCls}}">
+<sc-for list="{{days}}" as="d" hint-placeholder-count="14"><button class="{{d.cls}}" onClick="{{d.pick}}" aria-pressed="{{d.on}}" aria-label="{{d.aria}}"><span class="ddw">{{d.wd}}</span><span class="ddn">{{d.n}}</span></button></sc-for>
+</div>
+</div>
+</section>
+
+<section class="csec" aria-labelledby="h-time">
+<div class="csh"><h2 id="h-time" class="h17">Wagt</h2><span class="cap">{{timeCap}}</span></div>
+<div style="display: flex; flex-direction: column; gap: 24px">
+<sc-for list="{{slotGroups}}" as="g" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span class="lbl">{{g.t}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{g.slots}}" as="sl" hint-placeholder-count="8"><button class="{{sl.cls}}" disabled="{{sl.dis}}" onClick="{{sl.pick}}" aria-pressed="{{sl.on}}" aria-label="{{sl.aria}}">{{sl.t}}</button></sc-for></div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section class="csec" aria-labelledby="h-area">
+<div class="csh"><h2 id="h-area" class="h17">Nirede oturmak isleýärsiňiz?</h2></div>
+<div role="radiogroup" aria-labelledby="h-area" style="display: flex; flex-direction: column; gap: 12px">
+<button class="{{aHall.cls}}" role="radio" aria-checked="{{aHall.on}}" onClick="{{aHall.pick}}">
+<span class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg></span>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span class="on-ink" style="font-size: 16px; line-height: 22px; font-weight: 600">Zal</span><span class="cap">Kondisionerli · boş</span></span>
+<span class="rad" aria-hidden="true"></span>
+</button>
+<button class="{{aTer.cls}}" role="radio" aria-checked="{{aTer.on}}" onClick="{{aTer.pick}}">
+<span class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg></span>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span class="on-ink" style="font-size: 16px; line-height: 22px; font-weight: 600">Terrasa</span><span class="cap">Açyk howada</span></span>
+<span class="tag tag-p">Az galdy</span>
+<span class="rad" aria-hidden="true"></span>
+</button>
+<button class="{{aVip.cls}}" role="radio" aria-checked="{{aVip.on}}" disabled="{{aVip.dis}}" onClick="{{aVip.pick}}">
+<span class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"></path><path d="M5 21h14"></path></svg></span>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span class="on-ink" style="font-size: 16px; line-height: 22px; font-weight: 600">VIP otag</span><span class="cap">6–10 adam</span><sc-if value="{{aVip.dis}}" hint-placeholder-val="{{false}}"><span class="cap">Diňe 6 we has köp adam üçin</span></sc-if></span>
+<span class="rad" aria-hidden="true"></span>
+</button>
+</div>
+</section>
+
+<section class="csec" aria-labelledby="h-req">
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 id="h-req" class="h17">Goşmaça islegler</h2><span class="cap">Kafe mümkin boldugyça göz öňünde tutar.</span></div>
+<div role="group" aria-labelledby="h-req" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{reqs}}" as="r" hint-placeholder-count="4"><button class="{{r.cls}}" onClick="{{r.pick}}" aria-pressed="{{r.on}}"><sc-if value="{{r.on}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>{{r.t}}</button></sc-for>
+</div>
+<div class="fld"><label for="tb-note">Bellik (hökman däl)</label><textarea id="tb-note" class="inp ta" placeholder="Kafe üçin goşmaça maglumat" value="{{note}}" onChange="{{onNote}}"></textarea></div>
+</section>
+
+<div class="card show-md" style="gap: 10px; padding: 16px 20px; margin-bottom: 28px">
+<span class="sline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Stol 15 minut saklanýar</span>
+<span class="sline" style="color: #5a5a64"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="12" x="2" y="6" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>Ortaça hasap ≈ [AVG BILL] TMT · Töleg ýerinde</span>
+</div>
+
+<section class="csec" aria-labelledby="h-you">
+<h2 id="h-you" class="h17">Siziň maglumatlaryňyz</h2>
+<sc-if value="{{authPhone}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<p class="lead">Bronlamagy ugratmak üçin telefon belgiňizi tassyklaň. Parol gerek däl.</p>
+<div class="fld" style="max-width: 400px">
+<label for="tb-phone">Telefon belgiňiz</label>
+<div style="display: flex; gap: 8px">
+<span class="pfx">+993</span>
+<input id="tb-phone" class="{{phoneCls}}" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="65 12 34 56" value="{{phone}}" onChange="{{onPhone}}" style="font-variant-numeric: tabular-nums">
+</div>
+<sc-if value="{{phoneErr}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Belgi doly däl: 8 san bolmaly.</span></sc-if>
+</div>
+<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<button class="b b-sec" onClick="{{sendCode}}">Kod iber</button>
+<span class="cap">Size 4 sanly SMS kod ibereris</span>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{authCode}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0 12px">
+<p class="lead">Kod <span style="font-variant-numeric: tabular-nums">+993 {{phoneFmt}}</span> belgä iberildi</p>
+<button class="lnk" onClick="{{editPhone}}">Belgini üýtget</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="flab" id="tb-code-l">SMS kod</span>
+<div class="otp">
+<sc-for list="{{codeBoxes}}" as="c" hint-placeholder-count="4"><span class="{{c.cls}}" aria-hidden="true">{{c.ch}}</span></sc-for>
+<input class="otpin" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="4" aria-labelledby="tb-code-l" value="{{code}}" onChange="{{onCode}}" onFocus="{{codeOn}}" onBlur="{{codeOff}}">
+</div>
+<sc-if value="{{codeErr}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Kod nädogry. Ýene 2 synanyşyk galdy.</span></sc-if>
+</div>
+<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<button class="b b-sec" disabled="{{verifyDis}}" onClick="{{verify}}">Tassykla</button>
+<span class="cap" style="color: #6e6e78">Täzeden iber (0:59)</span>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{authName}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<p class="lead">Belgiňiz tassyklandy. Ilkinji gezek bronlaýarsyňyz — adyňyzy ýazyň.</p>
+<div class="fld" style="max-width: 400px">
+<label for="tb-name">Adyňyz</label>
+<input id="tb-name" class="inp" autocomplete="given-name" placeholder="Mysal üçin: Aýjemal" value="{{name}}" onChange="{{onName}}">
+<span class="hint">Kafe sizi şu at bilen görer.</span>
+</div>
+<div><button class="b b-sec" disabled="{{nameDis}}" onClick="{{saveName}}">Dowam et</button></div>
+</div>
+</sc-if>
+<sc-if value="{{authDone}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; align-items: center; gap: 14px">
+<span class="avs" aria-hidden="true">{{userInitial}}</span>
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1">
+<span style="font-size: 15px; line-height: 22px; font-weight: 600">{{userName}}</span>
+<span class="cap" style="display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums">{{userPhone}}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Belgi tassyklandy"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></span>
+</div>
+<button class="lnk" onClick="{{editPhone}}">Üýtget</button>
+</div>
+</sc-if>
+</section>
+
+<p class="cap cons">«Stoly bronla» düwmesine basyp, <a href="#">Ulanyş şertleri</a> we <a href="#">Gizlinlik syýasaty</a> bilen ylalaşýarsyňyz.</p>
+
+</div>
+</main>
+
+<aside class="bside hide-md" aria-label="Bronlamagyňyz">
+<div class="card">
+<div style="display: flex; align-items: center; gap: 14px">
+<img src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="" style="width: 56px; height: 56px; border-radius: 10px; object-fit: cover; display: block; flex: none">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 16px; line-height: 22px; font-weight: 600">Bag kafe</span>
+<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 13px; line-height: 18px; font-weight: 600"><svg width="13" height="13" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>4,8<span class="cap">(119)</span></span>
+<span class="cap" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Andalyp köçesi 8</span>
+</div>
+</div>
+<div class="sep"></div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div class="sline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>{{sumParty}}</div>
+<div class="sline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>{{sumDate}}</div>
+<div class="{{timeLineCls}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font-variant-numeric: tabular-nums">{{sumTime}}</span></div>
+<div class="{{areaLineCls}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"></path><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"></path><path d="M5 18v2"></path><path d="M19 18v2"></path></svg>{{sumArea}}</div>
+<sc-if value="{{hasReqs}}" hint-placeholder-val="{{false}}"><div class="sline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>{{reqText}}</div></sc-if>
+</div>
+<div class="sep"></div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; font-size: 15px; line-height: 22px; color: #5a5a64"><span>Ortaça hasap</span><span style="font-weight: 600; white-space: nowrap">≈ [AVG BILL] TMT</span></div>
+<span class="cap" style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Stol 15 minut saklanýar</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<button class="b b-pri b-lg" style="width: 100%" disabled="{{cantSend}}" onClick="{{send}}">Stoly bronla</button>
+<sc-if value="{{hasMissing}}" hint-placeholder-val="{{false}}"><span class="cap" style="text-align: center; color: #101014">{{missing}}</span></sc-if>
+<span class="cap" style="text-align: center">Töleg ýerinde · tassyklanandan soň SMS</span>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{sent}}" hint-placeholder-val="{{false}}">
+<main class="sentcol">
+<div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px">
+<span class="okc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></span>
+<h1 class="h1" style="font-size: 32px; line-height: 38px; text-wrap: balance">Stol bronlamak haýyşy ugradyldy</h1>
+<span class="badge st-p"><span class="dot" style="background: #dc8b0b"></span>Garaşylýar</span>
+<p class="sub" style="max-width: 460px">Bag kafe haýyşyňyzy tassyklanda <span style="white-space: nowrap; font-variant-numeric: tabular-nums">{{userPhone}}</span> belgä SMS ibereris.</p>
+</div>
+<div class="card" style="padding: 0; gap: 0; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 14px; padding: 20px 24px; border-bottom: 1px solid #e6e6ea">
+<img src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="" style="width: 48px; height: 48px; border-radius: 10px; object-fit: cover; display: block; flex: none">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span style="font-size: 16px; line-height: 22px; font-weight: 600">Bag kafe</span><span class="cap">Kafe · 0,9 km</span></div>
+<a href="#" style="font-size: 14px; line-height: 20px; font-weight: 600; flex: none">Ýol görkez</a>
+</div>
+<dl class="kv">
+<dt>Adam sany</dt>
+<dd>{{sumParty}}</dd>
+<dt>Wagt</dt>
+<dd>{{sumDate}} · {{sumTime}}</dd>
+<dt>Ýer</dt>
+<dd>{{sumArea}}</dd>
+<dt>Islegler</dt>
+<dd>{{wishText}}</dd>
+<dt>Salgy</dt>
+<dd>Andalyp köçesi 8</dd>
+</dl>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 24px; border-top: 1px solid #e6e6ea">
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; line-height: 22px; font-weight: 600">Ortaça hasap</span><span class="cap">Töleg ýerinde</span></span>
+<span style="font-size: 19px; line-height: 24px; font-weight: 700; color: #5a5a64; white-space: nowrap">≈ [AVG BILL] TMT</span>
+</div>
+<div class="cap" style="padding: 14px 24px; border-top: 1px solid #e6e6ea; background: #f6f6f8">Ýazylyş belgisi: <span style="color: #101014; font-weight: 600">YR-47990</span></div>
+</div>
+<section style="display: flex; flex-direction: column; gap: 20px">
+<h2 class="h17" style="font-size: 20px; line-height: 26px">Indi näme bolar?</h2>
+<ol class="tl">
+<li class="tli done"><span class="tlm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><span class="tlb"><span class="tlt">Ugradyldy</span><span class="cap">Şu gün, 11:20</span></span></li>
+<li class="tli"><span class="tlm">2</span><span class="tlb"><span class="tlt">Kafe tassyklar</span><span class="cap">Tassyklanda size SMS geler.</span></span></li>
+<li class="tli"><span class="tlm">3</span><span class="tlb"><span class="tlt">Ýatlatma: 2 sagat öň</span><span class="cap">{{remindCap}}</span></span></li>
+<li class="tli"><span class="tlm">4</span><span class="tlb"><span class="tlt">Stol 15 minut saklanýar</span><span class="cap">{{holdCap}}</span></span></li>
+</ol>
+</section>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px">
+<a class="b b-pri b-lg" href="Account-Bookings.dc.html">Ýazylyşlaryma geç</a>
+<button class="b b-sec b-lg" onClick="{{addIcs}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M10 16h4"></path><path d="M12 14v4"></path></svg>Senenama goş</button>
+<a class="b b-gho b-lg" href="Home.dc.html">Baş sahypa</a>
+</div>
+<sc-if value="{{icsDone}}" hint-placeholder-val="{{false}}"><span class="cap" role="status">Senenama faýly (.ics) ýüklendi.</span></sc-if>
+<span class="cap" style="text-align: center">Tassyklanýança haýyşy mugt ýatyryp bilersiňiz.</span>
+</div>
+</main>
+</sc-if>
+
+<div class="{{mbarCls}}">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums">{{barText}}</span>
+<span class="cap" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{barSub}}</span>
+</div>
+<button class="b b-pri b-lg" disabled="{{cantSend}}" onClick="{{send}}">Stoly bronla</button>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"sent":{"editor":"boolean","default":false,"section":"Flow"},"loggedIn":{"editor":"boolean","default":true,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { party: 4, day: 3, wk: 0, time: '19:00', area: 'terrace', reqs: {}, note: '', sent: false, ics: false, switched: false, auth: 'phone', phone: '', phoneErr: false, code: '', codeFocus: false, codeErr: false, name: '' };
+  }
+  renderVals() {
+    const f = this.props.font ?? 'Onest';
+    const s = this.state;
+    const loggedIn = this.props.loggedIn ?? true;
+    const sent = !!((this.props.sent ?? false) || s.sent);
+    const WD = ['Duşenbe', 'Sişenbe', 'Çarşenbe', 'Penşenbe', 'Anna', 'Şenbe', 'Ýekşenbe'];
+    const WS = ['Du', 'Si', 'Ça', 'Pe', 'An', 'Şe', 'Ýe'];
+    // day index 0 = Çarşenbe, 14 oktýabr (demo "now"); 14 days, Bag kafe is open every day
+    const info = (i) => { const w = (2 + i) % 7; return { w, n: 14 + i, full: WD[w] + ', ' + (14 + i) + ' oktýabr', short: WS[w] + ', ' + (14 + i) + ' okt.' }; };
+    // taken times: weekends are busier
+    const offFor = (i) => { const w = (2 + i) % 7; if (w >= 5) return ['13:00', '13:30', '20:00', '20:30', '21:00']; if (w === 4) return ['20:00', '20:30']; return ['12:30', '19:30']; };
+    const off = offFor(s.day);
+    const val = (e) => (e && e.target ? e.target.value : '');
+    const toMin = (t) => parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(3), 10);
+    const fmt = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+
+    const big = s.party === '9+';
+    const vipOk = big || s.party >= 6;
+    const parties = [1, 2, 3, 4, 5, 6, 7, 8, '9+'].map((p) => ({
+      t: String(p),
+      on: s.party === p,
+      cls: s.party === p ? 'pc on' : 'pc',
+      aria: p === '9+' ? '9 we ondan köp adam' : p + ' adam',
+      pick: () => { const patch = { party: p }; if (s.area === 'vip' && p !== '9+' && p < 6) patch.area = null; this.setState(patch); }
+    }));
+
+    const days = [];
+    for (let i = 0; i < 14; i++) {
+      const d = info(i);
+      days.push({
+        wd: i === 0 ? 'Şu gün' : WS[d.w],
+        n: String(d.n),
+        on: s.day === i,
+        cls: s.day === i ? 'dy on' : 'dy',
+        aria: d.full,
+        pick: () => { const patch = { day: i }; if (s.time && offFor(i).includes(s.time)) patch.time = null; this.setState(patch); }
+      });
+    }
+
+    const mk = (list) => list.map((t) => { const dis = off.includes(t); const on = !dis && s.time === t; return { t, dis, on, cls: on ? 'slot on' : 'slot', aria: dis ? t + ', boş däl' : t, pick: () => this.setState({ time: t }) }; });
+    const slotGroups = [
+      { t: 'Günortan', slots: mk(['12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30']) },
+      { t: 'Agşam', slots: mk(['18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00']) }
+    ];
+
+    const AREA = { hall: 'Zal', terrace: 'Terrasa', vip: 'VIP otag' };
+    const mkArea = (id) => { const dis = id === 'vip' && !vipOk; const on = !dis && s.area === id; return { on, dis, cls: on ? 'opt on' : 'opt', pick: () => this.setState({ area: id }) }; };
+
+    const reqDefs = ['Doglan gün', 'Çaga oturgyjy', 'Penjiräniň ýanynda', 'Sessiz ýer'];
+    const reqs = reqDefs.map((t) => ({ t, on: !!s.reqs[t], cls: s.reqs[t] ? 'chip on' : 'chip', pick: () => this.setState({ reqs: { ...s.reqs, [t]: !s.reqs[t] } }) }));
+    const reqOn = reqDefs.filter((t) => s.reqs[t]);
+    const noteTxt = s.note.trim();
+
+    // inline login: loggedIn tweak = verified row; otherwise phone → code → name → verified row
+    const authed = loggedIn && !s.switched;
+    const step = authed ? 'done' : s.auth;
+    const digits = String(s.phone || '').replace(/\D/g, '').slice(0, 8);
+    const phoneFmt = digits.length === 8 ? digits.replace(/(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4') : '65 90 11 22';
+    const userName = authed ? 'Aýjemal Gurbanowa' : (s.name.trim() || 'Aýjemal Gurbanowa');
+    const userPhone = authed ? '+993 65 90 11 22' : '+993 ' + phoneFmt;
+    const focusAt = Math.min(s.code.length, 3);
+    const codeBoxes = [0, 1, 2, 3].map((i) => ({ ch: s.code.charAt(i), cls: s.codeErr ? 'ob e' : (s.codeFocus && i === focusAt ? 'ob f' : 'ob') }));
+
+    const timeOk = !!s.time && !off.includes(s.time);
+    const areaOk = !!s.area && !(s.area === 'vip' && !vipOk);
+    let missing = '';
+    if (big) missing = '9 we ondan köp adam bolsa, jaň ediň';
+    else if (!timeOk) missing = 'Wagt saýlaň';
+    else if (!areaOk) missing = 'Oturmak üçin ýer saýlaň';
+    else if (step !== 'done') missing = step === 'name' ? 'Adyňyzy ýazyň' : 'Telefon belgiňizi tassyklaň';
+
+    const di = info(s.day);
+    const rel = s.day === 0 ? 'Şu gün · ' : (s.day === 1 ? 'Ertir · ' : '');
+    const dayWord = s.day === 0 ? 'Şu gün' : (s.day === 1 ? 'Ertir' : WD[di.w]);
+    const sumParty = big ? '9+ adam' : s.party + ' adam';
+    const areaName = areaOk ? AREA[s.area] : '';
+    let remindCap = '';
+    if (timeOk) remindCap = (s.day === 0 && toMin(s.time) - 120 <= 680) ? 'Wagt ýakyn — ýatlatma iberilmeýär.' : dayWord + ', ' + fmt(toMin(s.time) - 120) + ' · SMS bilen';
+    const wish = reqOn.slice();
+    if (noteTxt) wish.push('«' + noteTxt + '»');
+
+    return {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      sent,
+      notSent: !sent,
+      mbarCls: sent ? 'mbar hidden' : 'mbar',
+      parties,
+      big,
+      days,
+      stripCls: s.wk ? 'strip-in p1' : 'strip-in',
+      wkPrevDis: !s.wk,
+      wkNextDis: !!s.wk,
+      wkPrev: () => this.setState({ wk: 0 }),
+      wkNext: () => this.setState({ wk: 1 }),
+      timeCap: big ? '' : sumParty + ' üçin boş wagtlar',
+      slotGroups,
+      aHall: mkArea('hall'),
+      aTer: mkArea('terrace'),
+      aVip: mkArea('vip'),
+      reqs,
+      note: s.note,
+      onNote: (e) => this.setState({ note: val(e) }),
+      authPhone: step === 'phone',
+      authCode: step === 'code',
+      authName: step === 'name',
+      authDone: step === 'done',
+      phone: s.phone,
+      phoneFmt,
+      phoneCls: s.phoneErr ? 'inp is-e' : 'inp',
+      phoneErr: s.phoneErr,
+      onPhone: (e) => this.setState({ phone: val(e), phoneErr: false }),
+      sendCode: () => { if (digits.length === 8) this.setState({ auth: 'code', code: '', codeErr: false }); else this.setState({ phoneErr: true }); },
+      editPhone: () => this.setState({ switched: true, auth: 'phone', code: '', codeErr: false, phoneErr: false }),
+      code: s.code,
+      codeBoxes,
+      codeErr: s.codeErr,
+      onCode: (e) => this.setState({ code: val(e).replace(/\D/g, '').slice(0, 4), codeErr: false }),
+      codeOn: () => this.setState({ codeFocus: true }),
+      codeOff: () => this.setState({ codeFocus: false }),
+      verifyDis: s.code.length < 4,
+      verify: () => { if (s.code.length < 4) return; if (s.code === '0000') this.setState({ codeErr: true }); else this.setState({ auth: 'name', codeErr: false }); },
+      name: s.name,
+      onName: (e) => this.setState({ name: val(e) }),
+      nameDis: !s.name.trim(),
+      saveName: () => { if (s.name.trim()) this.setState({ auth: 'done' }); },
+      userName,
+      userInitial: userName.charAt(0),
+      userPhone,
+      sumParty,
+      sumDate: rel + di.full,
+      sumTime: timeOk ? s.time : 'Wagt saýlanmady',
+      timeLineCls: timeOk ? 'sline' : 'sline mute',
+      sumArea: areaOk ? areaName : 'Ýer saýlanmady',
+      areaLineCls: areaOk ? 'sline' : 'sline mute',
+      hasReqs: reqOn.length > 0,
+      reqText: reqOn.join(' · '),
+      wishText: wish.length ? wish.join(' · ') : 'Ýok',
+      missing,
+      hasMissing: !!missing,
+      cantSend: !!missing,
+      send: () => { if (!missing) this.setState({ sent: true }); },
+      barText: di.short + ' · ' + (timeOk ? s.time : 'wagt saýlaň'),
+      barSub: big ? '9+ adam · jaň ediň' : sumParty + ' · ' + (areaOk ? areaName : 'ýer saýlaň'),
+      remindCap,
+      holdCap: timeOk ? fmt(toMin(s.time) + 15) + '-e çenli gelmeseňiz, stol boşadylyp bilner.' : '',
+      addIcs: () => this.setState({ ics: true }),
+      icsDone: s.ics
+    };
+  }
+}
+</script>
+</body>
+</html>

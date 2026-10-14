@@ -1,55 +1,60 @@
 # Project brief
 
-**Yeral** is online booking for beauty and wellness services in Turkmenistan, Ashgabat first.
-The name and domain are working titles: the owner may move to `yeral.com` or rebrand, so both are configuration.
+**Ýeral** — "ýer al", Turkmen for *take a place* — is a booking marketplace for anyone who sells their time: barbers
+and beauty salons, dentists (home practices too), physio, restaurants and cafés, gyms and yoga studios, tutors, mechanics,
+groomers, home services. Every booking is a place: a chair, a table, a mat, a court. Launch market: Turkmenistan,
+Ashgabat first. The name and domain are working titles (a move to `yeral.com` or a rebrand is possible), so both are
+configuration.
 
-## Products and sites
+Design and product spec: [`docs/design/`](../design) (client site fully designed 14.10.2026; business workspace and
+CMS come in the designer's next rounds). Logic reference: Fresha — copy its flows, never its visuals.
+
+## Sites
 
 | Site | App | For whom | What it does |
 |---|---|---|---|
-| `yeral.app` | `apps/landing` | everyone | entry point: «Я клиент» / «Я бизнес», search box straight into the marketplace, for-business pricing and sign-up, short salon links `yeral.app/{slug}` → client app |
-| `client.yeral.app` | `apps/client` | clients | marketplace: search, salon pages, booking wizard, my visits, reviews, favourites, notifications |
-| `business.yeral.app` | `apps/business` | salons and masters | workspace: calendar, requests, manual booking, clients, services, team and schedules, booking rules, hours, analytics, reviews, settings |
-| `cms.yeral.app` | `apps/cms` | the Yeral team | admin + content: salon onboarding and moderation, users, complaints and no-shows, reference data (categories, districts), landing texts, banners, SEO texts |
+| `yeral.app` | `apps/client` | clients | the marketplace: home, search with map, category pages, business pages, booking (appointment, table, class), account; `/tk` `/ru` `/en` |
+| `business.yeral.app` | `apps/business` | businesses and their staff | workspace: multi-staff calendar, bookings, clients, services, team, analytics, settings; the B2B pricing page |
+| `cms.yeral.app` | `apps/cms` | the Ýeral team | admin + content: businesses, users, complaints, category catalogue (icons, TK/RU/EN names, booking types, starter services), content |
 | `api.yeral.app` | `apps/api` | all of the above | REST API `/v1` on Postgres |
-| `storybook.yeral.app` | `apps/storybook` | the team and agents | the design system: every component, its variants and docs |
+| `storybook.yeral.app` | `apps/storybook` | the team and agents | the design system |
 
-**Core principle** (from the Project Brief): every salon action has a mirror screen for the client, booking statuses are
-the same in both apps, and the salon confirms requests manually unless it turned on instant confirmation.
+## Product rules that never break (from the design spec)
+
+1. The business confirms every booking by hand. A client never sees "booked" until then: the first state is always
+   *Garaşylýar* (Pending) and the copy says the request was *sent*.
+2. Five statuses with one meaning everywhere (web, apps, business, CMS): Pending · Confirmed · Completed · Cancelled · No-show.
+3. A visit is Completed by default after it ends unless the business marks No-show.
+4. A phone booking (entered by the business) is Confirmed + a phone icon, not a separate status.
+5. Cancelled by the client or by the business: same colour, an icon and label tell them apart.
+6. The category decides how a business is found and booked: booking type, search filters, suggested services.
+7. One gradient primary button per view.
+8. No city name in UI copy; everything is relative to the user's location ("Ýakynymda", "golaýyňyzda").
+9. No online payment yet: "Töleg ýerinde" (pay at the place); a hidden deposit row is reserved in summaries.
 
 ## Business model (as shown on the public for-business page)
 
-1. Free for a solo master.
-2. Subscription for a team: priced per business, not per seat.
-3. Commission only for a *new* client who came from the catalogue.
-4. Online payments and deposits later, when local online payment matures.
-
-Bookings through the salon's own link (`yeral.app/{slug}`, QR code) are free forever. Every booking records its channel:
-`marketplace` | `direct` | `phone`.
+Free for a solo specialist → subscription per business (not per seat) → commission only for a new client from the
+catalogue → payments and deposits later. Bookings through the business's own link are free. Every booking records its
+source (`web` | `app` | `phone` | `ai`). Manat prices for plans and commission are open.
 
 ## Market and constraints
 
-- People: Ashgabat; Russian and Turkmen speakers; phones `+993`; money in manats (TMT, whole numbers);
-  time zone `Asia/Ashgabat` (UTC+5, no daylight saving).
-- **Hosting:** Cloudflare now. Later an own server (likely in Turkmenistan, where Cloudflare is reported filtered) running
-  everything in Docker behind nginx, with Cloudflare kept for DNS. Not a focus until that server is bought; the code
-  stays portable so the move is a deploy ([ADR 0007](../decisions/0007-hosting-cloudflare-now-docker-later.md)).
-- UX reference: Fresha. Visual source: the Claude Design export (Design System v2, Client App, Business App,
-  Business Clients and Analytics, Product Deck, Business Deck, Project Brief) in `docs/design/`. **All of it is mobile-only**
-  (the all-staff calendar was explicitly left for tablet); a desktop/web extension is being designed.
-- The first prototype (mobile PWA): github.com/azamatos/yeral_proto. Its `src/data/actions.ts` is the reference for
-  every business action not yet built here.
+- Turkmen (default), Russian, English. Money in manats, shown as `40 TMT`; decimal comma (`4,9`, `1,2 km`); phones `+993`.
+- Business-local time: `Asia/Ashgabat` (UTC+5, no daylight saving) for every business today.
+- **Hosting:** Cloudflare now; later an own server (likely in Turkmenistan, where Cloudflare is reported filtered) running
+  everything in Docker behind nginx, with Cloudflare kept for DNS
+  ([ADR 0007](../decisions/0007-hosting-cloudflare-now-docker-later.md)).
 - The repository is public by the owner's choice until the product is ready; it will go private then. Never commit secrets.
 
 ## Goals
 
-- **Now:** infrastructure first — monorepo, tooling, design system with Storybook, tests, CI/CD, Docker — then a working
-  product on a real API and database.
-- **Next:** rebuild and polish the client app (the owner isn't satisfied with the first version), landing, business workspace, CMS; Turkmen; SEO.
-- **Then:** production SMS codes, push notifications, the own server.
+- **Now:** infrastructure first — design system with Storybook (M1), platform with the multi-category model on Postgres
+  (M2) — then the client site exactly as designed (M3), replacing the first Next.js version on yeral.app.
+- **Next:** business workspace and CMS once their designs exist; SEO and growth.
+- **Then:** production SMS, push notifications, the own server.
 
 ## Non-goals for now
 
-- Native mobile apps. Packages that hold logic (`domain`, `contract`, `sdk`, `i18n`) stay DOM-free so an Expo app can reuse them later.
-- Online payments.
-- Optimising for network filtering in Turkmenistan before the own server exists.
+- Native mobile apps (designed separately). Logic packages (`domain`, `contract`, `sdk`, `i18n`) stay DOM-free so they can be reused.
+- Online payment and deposits, the resource booking type, waitlists, gift cards, loyalty, in-app chat, AI bookings, paid promotion.

@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ýeral — phone layouts</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f4f6}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-lg{height:52px;padding:0 24px;border-radius:14px;font-size:16px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6;color:#101014}
+.b-tin{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.b-tin:hover{background:#ded7fd;color:#4429d6}
+.b-dtx{background:transparent;color:#a3251b}
+.b-dtx:hover{background:#fee4e2;color:#a3251b}
+.b-ink{background:#101014;color:#ffffff}
+.b-ink:hover{background:#2a2a32;color:#ffffff}
+.b:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b-ico{width:44px;padding:0;flex:none}
+.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;white-space:nowrap;flex:none}
+.chip:hover{background:#f6f6f8}
+.chip.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.tab{flex:none;height:44px;padding:0 2px;border:0;border-bottom:2px solid transparent;background:none;font-family:inherit;font-size:15px;font-weight:500;color:#5a5a64;cursor:pointer;white-space:nowrap}
+.tab:hover{color:#101014}
+.tab.on{color:#101014;font-weight:600;border-bottom-color:#5a3ff0}
+.slot{display:inline-flex;align-items:center;justify-content:center;height:40px;min-width:64px;padding:0 10px;border-radius:10px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:600;color:#101014;cursor:pointer;flex:none}
+.slot:hover{border-color:#5a3ff0;color:#4429d6}
+.slot.on{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
+.slot:disabled{background:#f6f6f8;border-color:#f0f0f3;color:#6e6e78;text-decoration:line-through;cursor:not-allowed}
+.slot-s{height:36px;min-width:52px;padding:0 8px;font-size:13px}
+.slot-g{width:100%;min-width:0;height:44px}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;align-self:flex-start}
+.dot{width:6px;height:6px;border-radius:999px;flex:none}
+.st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
+.st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
+.st-d{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
+.st-x{background:#eef1f6;border:1px solid #d3dbe6;color:#41505f}
+.st-n{background:#fee4e2;border:1px solid #f6c7c2;color:#a3251b}
+.pin{position:absolute;transform:translate(-50%,-100%);display:inline-flex;align-items:center;height:30px;padding:0 10px;border-radius:999px;background:#ffffff;border:1px solid #d8d8de;font-size:13px;font-weight:700;color:#101014;white-space:nowrap;box-shadow:0 2px 6px rgba(16,16,20,.12)}
+.pin.hot{background:#101014;border-color:#101014;color:#ffffff;z-index:2;box-shadow:0 8px 24px rgba(16,16,20,.24)}
+.hit{position:relative}
+.hit::after{content:"";position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
+.hs{display:flex;overflow-x:auto;scrollbar-width:none}
+.hs::-webkit-scrollbar{display:none}
+.fig{margin:0;display:flex;flex-direction:column;gap:16px}
+.ph{position:relative;width:390px;height:844px;flex:none;background:#ffffff;border:1px solid #d8d8de;border-radius:28px;overflow:hidden;display:flex;flex-direction:column;color:#101014}
+.fcap{display:flex;flex-direction:column;gap:4px;width:390px;min-height:94px}
+.ft{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.ib{width:44px;height:44px;flex:none;border-radius:999px;border:0;background:#ffffff;color:#101014;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.ib:hover{background:#f6f6f8;color:#101014}
+.ib:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.qp{display:flex;align-items:center;gap:10px;height:48px;flex:1;min-width:0;padding:0 16px;border:1px solid #d8d8de;border-radius:999px;background:#ffffff;font-family:inherit;text-align:left;color:#101014;cursor:pointer}
+.qp:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.qp1{font-size:14px;line-height:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qp2{font-size:12px;line-height:16px;color:#5a5a64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tagp{position:absolute;left:8px;bottom:8px;display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:#ffffff;color:#101014;font-size:12px;font-weight:600}
+.mos{margin:0;position:relative;border-radius:14px;overflow:hidden}
+.mos img{width:100%;height:100%;object-fit:cover;display:block}
+.vc{display:flex;flex-direction:column;gap:10px;width:260px;flex:none;color:#101014}
+.vc:hover{color:#101014}
+.rt{display:inline-flex;align-items:center;gap:4px;font-size:13px;line-height:22px;font-weight:600;color:#101014;flex:none}
+.mr{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:1px solid #e6e6ea;color:#101014}
+.mr:hover{color:#101014}
+.mcard{display:grid;grid-template-columns:80px minmax(0,1fr);gap:12px;width:300px;flex:none;padding:12px;border-radius:16px;background:#ffffff;color:#101014;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.mcard:hover{color:#101014}
+.mcard.on{box-shadow:0 0 0 2px #101014,0 8px 24px rgba(16,16,20,.16)}
+.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.dcell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:56px;height:72px;flex:none;padding:0;border-radius:12px;border:1px solid #e6e6ea;background:#ffffff;font-family:inherit;color:#101014;cursor:pointer}
+.dcell:hover{border-color:#b0b0b8}
+.dw{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.dn{font-size:17px;line-height:22px;font-weight:600}
+.dm{font-size:11px;line-height:14px;color:#6e6e78}
+.dcell.today{border-color:#101014}
+.dcell.on{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
+.dcell.on .dw,.dcell.on .dm{color:#ffffff}
+.svc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid #e6e6ea}
+.tgl{min-width:116px}
+.brow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:14px 0;border-bottom:1px solid #e6e6ea;color:#101014}
+.brow:hover{color:#101014}
+.srow{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:12px;align-items:center;min-height:48px;border-bottom:1px solid #e6e6ea;font-size:15px;line-height:20px;color:#101014}
+.bar{flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid #e6e6ea;background:#ffffff}
+</style>
+</helmet>
+<div style="width: 1442px; min-height: 2280px; padding: 64px; background: #f4f4f6; color: #101014; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; gap: 48px">
+
+<header style="display: flex; flex-direction: column; gap: 8px">
+<span class="lbl">Mobile web · 390</span>
+<h2 style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.025em">Phone layouts of the client site</h2>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #5a5a64">Designed at 390; must work 360–767. No fake status bar — the browser draws its own.</p>
+</header>
+
+<div style="display: grid; grid-template-columns: repeat(3, 390px); column-gap: 72px; row-gap: 72px; align-items: start">
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<header style="display: flex; align-items: center; justify-content: space-between; height: 56px; flex: none; padding: 0 4px 0 16px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<a href="Home.dc.html" aria-label="Ýeral baş sahypa" style="display: flex"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 24px; width: auto"></a>
+<div style="display: flex">
+<button class="b b-gho b-ico" aria-label="Gözle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></button>
+<button class="b b-gho b-ico" aria-label="Menýu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg></button>
+</div>
+</header>
+<div style="flex: 1; min-height: 0; overflow: hidden">
+<section style="display: flex; flex-direction: column; align-items: flex-start; padding: 16px 16px 0">
+<span style="display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: #efecfe; border: 1px solid #d5cbfb; color: #4429d6; font-size: 13px; font-weight: 600">Islendik hyzmata onlaýn ýazylyş</span>
+<h1 style="margin: 12px 0 0; font-size: 48px; line-height: 50px; font-weight: 700; letter-spacing: -0.045em">Ýeriňi al.</h1>
+<p style="margin: 8px 0 0; font-size: 15px; line-height: 22px; color: #5a5a64">Dellegiň kreslosy, restoranyň stoly ýa-da ýoga sapagyndaky ýer — boş wagty görüň we bir minutda ýazylyň.</p>
+<button type="button" style="margin-top: 16px; display: flex; align-items: center; gap: 12px; width: 100%; height: 52px; padding: 0 16px; border: 1px solid #d8d8de; border-radius: 14px; background: #ffffff; font-family: inherit; font-size: 16px; line-height: 20px; color: #6e6e78; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>Hyzmat, ýer ýa-da hünärmen</button>
+<div style="display: flex; gap: 8px; margin-top: 10px">
+<button class="chip hit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="2" x2="5" y1="12" y2="12"></line><line x1="19" x2="22" y1="12" y2="12"></line><line x1="12" x2="12" y1="2" y2="5"></line><line x1="12" x2="12" y1="19" y2="22"></line><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="3"></circle></svg>Ýakynymda</button>
+<button class="chip hit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Islendik wagt</button>
+</div>
+</section>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 64px 64px; gap: 8px; padding: 0 16px; margin-top: 20px" aria-label="Ýeraldaky ýerler">
+<figure class="mos"><img src="../../assets/photos/nathon-oski-EW_rqoSdDes-unsplash.jpg" alt="Dellekhananyň içi"><span class="tagp">Dellekhana</span></figure>
+<figure class="mos"><img src="../../assets/photos/harold-hisona-Bg81yWKZlMg-unsplash.jpg" alt="Diş lukmany näsag bilen gürleşýär"><span class="tagp">Diş lukmany</span></figure>
+<figure class="mos"><img src="../../assets/photos/sergio-kian-G6svDyPVRrc-unsplash.jpg" alt="Sport zalynda tälimçi"><span class="tagp">Sport</span></figure>
+<figure class="mos"><img src="../../assets/photos/nick-hillier-xBXF9pr6LQo-unsplash.jpg" alt="Restoranda adamlar"><span class="tagp">Restoran</span></figure>
+</div>
+<section style="display: flex; flex-direction: column; gap: 14px; margin-top: 28px">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 0 16px">
+<h2 style="margin: 0; font-size: 26px; line-height: 30px; font-weight: 700; letter-spacing: -0.025em">Golaýyňyzda şu gün boş</h2>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<span class="cap" style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>Ýerleşişiňiz boýunça · <a href="#" style="font-weight: 600">üýtget</a></span>
+<a class="hit" href="Search.dc.html" style="font-size: 14px; line-height: 18px; font-weight: 600">Ählisini gör</a>
+</div>
+</div>
+<div class="hs" style="gap: 12px; padding: 0 16px">
+<sc-for list="{{homeCards}}" as="v" hint-placeholder-count="4">
+<a class="vc" href="Venue.dc.html">
+<img src="{{v.img}}" alt="{{v.alt}}" style="width: 260px; height: 195px; object-fit: cover; border-radius: 12px; display: block">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 16px; line-height: 22px; font-weight: 600">{{v.name}}</span><span class="cap">{{v.meta}}</span></div>
+<span class="rt"><svg width="13" height="13" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>{{v.rating}}<span class="cap">{{v.count}}</span></span>
+</div>
+<div style="display: flex; gap: 6px"><sc-for list="{{v.slots}}" as="s" hint-placeholder-count="3"><span class="slot hit">{{s}}</span></sc-for></div>
+</a>
+</sc-for>
+</div>
+</section>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">1 · Home · /tk</span><span class="cap">The search field opens a full-screen search sheet (what → where → when); each chip opens it at its step. Cards: 260 wide, snap-scroll, nearest first.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<header style="flex: none; display: flex; flex-direction: column; gap: 8px; padding: 8px 0 12px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<div style="display: flex; align-items: center; gap: 4px; padding: 0 12px 0 4px">
+<a class="b b-gho b-ico" href="Home.dc.html" aria-label="Yza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<button class="qp" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><span style="display: flex; flex-direction: column; min-width: 0"><span class="qp1">Ähli hyzmatlar</span><span class="qp2">Ýakynymda · 5 km · Şu gün</span></span></button>
+<button class="b b-sec b-ico" aria-label="Süzgüçler" style="margin-left: 4px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4h-7"></path><path d="M10 4H3"></path><path d="M21 12h-9"></path><path d="M8 12H3"></path><path d="M21 20h-5"></path><path d="M12 20H3"></path><path d="M14 2v4"></path><path d="M8 10v4"></path><path d="M16 18v4"></path></svg></button>
+</div>
+<div class="hs" style="gap: 8px; padding: 0 16px"><sc-for list="{{searchChips}}" as="c" hint-placeholder-count="6"><button class="{{c.cls}}" aria-pressed="{{c.on}}">{{c.t}}</button></sc-for></div>
+</header>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 16px 16px 0">
+<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.02em">Golaýyňyzdaky ýerler</h1>
+<p class="cap" style="margin: 2px 0 4px">12 ýer · şu gün boş wagty bar</p>
+<sc-for list="{{searchRows}}" as="r" hint-placeholder-count="5">
+<a class="mr" href="Venue.dc.html">
+<img src="{{r.img}}" alt="{{r.alt}}" style="width: 96px; height: 96px; object-fit: cover; border-radius: 12px; display: block">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px"><span class="ell" style="font-size: 16px; line-height: 22px; font-weight: 600">{{r.name}}</span><span class="rt"><svg width="13" height="13" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>{{r.rating}}<span class="cap">{{r.count}}</span></span></div>
+<span class="cap ell">{{r.meta}}</span>
+<span class="ell" style="font-size: 14px; line-height: 20px">{{r.line}}</span>
+<div style="display: flex; align-items: center; gap: 6px; padding-top: 8px"><sc-for list="{{r.slots}}" as="s" hint-placeholder-count="3"><span class="slot hit">{{s}}</span></sc-for><span style="font-size: 13px; font-weight: 600; color: #4429d6; margin-left: 2px">{{r.more}}</span></div>
+</div>
+</a>
+</sc-for>
+</main>
+<a class="b b-ink" href="#" style="position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); height: 48px; padding: 0 20px; border-radius: 999px; box-shadow: 0 8px 24px rgba(16,16,20,.16)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15"></path><path d="M9 3.236v15"></path></svg>Karta</a>
+</div>
+<figcaption class="fcap"><span class="ft">2 · Search list · /tk/search</span><span class="cap">Top bar sticks. The pill reopens the search sheet; the filter button opens Süzgüçler (with sort) as a sheet. Rows drop the street. “Karta” floats 24 above the bottom.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style="position: absolute; inset: 0; display: block" aria-hidden="true">
+<rect width="390" height="844" fill="#eceef2"></rect>
+<rect x="24" y="150" width="120" height="92" rx="16" fill="#e1eadf"></rect>
+<rect x="252" y="470" width="124" height="108" rx="18" fill="#e1eadf"></rect>
+<rect x="36" y="640" width="100" height="84" rx="14" fill="#e1eadf"></rect>
+<path d="M-20 384 C 80 352, 160 414, 240 388 S 340 342, 410 362" stroke="#d6e0ec" stroke-width="28" fill="none"></path>
+<path d="M-20 272 L 410 312" stroke="#ffffff" stroke-width="14"></path>
+<path d="M-20 560 L 410 528" stroke="#ffffff" stroke-width="14"></path>
+<path d="M172 -20 L 142 864" stroke="#ffffff" stroke-width="14"></path>
+<path d="M312 -20 L 332 864" stroke="#ffffff" stroke-width="10"></path>
+<path d="M-20 128 L 410 160" stroke="#ffffff" stroke-width="6"></path>
+<path d="M-20 452 L 410 452" stroke="#ffffff" stroke-width="6"></path>
+<path d="M-20 700 L 410 668" stroke="#ffffff" stroke-width="6"></path>
+<path d="M-20 792 L 410 780" stroke="#ffffff" stroke-width="6"></path>
+<path d="M70 -20 L 40 864" stroke="#ffffff" stroke-width="6"></path>
+<path d="M242 -20 L 234 864" stroke="#ffffff" stroke-width="6"></path>
+<circle cx="196" cy="420" r="40" fill="#5a3ff0" fill-opacity=".12"></circle>
+<circle cx="196" cy="420" r="8" fill="#5a3ff0" stroke="#ffffff" stroke-width="4"></circle>
+</svg>
+<sc-for list="{{pins}}" as="p" hint-placeholder-count="9"><span class="{{p.cls}}" style="left: {{p.x}}px; top: {{p.y}}px">{{p.t}}</span></sc-for>
+<div style="position: absolute; top: 12px; left: 12px; right: 12px; display: flex; align-items: center; gap: 8px; z-index: 3">
+<a class="ib" href="#" aria-label="Yza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<button class="qp" type="button" style="border-color: #ffffff; box-shadow: 0 8px 24px rgba(16,16,20,.16)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><span style="display: flex; flex-direction: column; min-width: 0"><span class="qp1">Ähli hyzmatlar</span><span class="qp2">Ýakynymda · 5 km · Şu gün</span></span></button>
+<button class="ib" aria-label="Süzgüçler"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4h-7"></path><path d="M10 4H3"></path><path d="M21 12h-9"></path><path d="M8 12H3"></path><path d="M21 20h-5"></path><path d="M12 20H3"></path><path d="M14 2v4"></path><path d="M8 10v4"></path><path d="M16 18v4"></path></svg></button>
+</div>
+<button class="b b-sec b-sm" style="position: absolute; top: 72px; left: 50%; transform: translateX(-50%); z-index: 3; box-shadow: 0 8px 24px rgba(16,16,20,.16)">Bu ýerde gözle</button>
+<a class="b b-ink" href="#" style="position: absolute; left: 50%; bottom: 144px; transform: translateX(-50%); z-index: 3; height: 44px; padding: 0 18px; border-radius: 999px; box-shadow: 0 8px 24px rgba(16,16,20,.16)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Sanaw</a>
+<button class="ib" aria-label="Meniň ýerim" style="position: absolute; right: 16px; bottom: 144px; z-index: 3; border-radius: 12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg></button>
+<div class="hs" style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; gap: 12px; padding: 16px 16px 20px">
+<sc-for list="{{mapCards}}" as="m" hint-placeholder-count="3">
+<a class="{{m.cls}}" href="Venue.dc.html">
+<img src="{{m.img}}" alt="{{m.alt}}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px; display: block">
+<div style="display: flex; flex-direction: column; min-width: 0">
+<span class="ell" style="font-size: 15px; line-height: 20px; font-weight: 600">{{m.name}}</span>
+<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 13px; line-height: 18px; font-weight: 600"><svg width="12" height="12" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>{{m.rating}}<span class="cap" style="font-weight: 400">{{m.count}} · {{m.dist}}</span></span>
+<div style="display: flex; gap: 6px; padding-top: 8px"><sc-for list="{{m.slots}}" as="s" hint-placeholder-count="3"><span class="slot slot-s hit">{{s}}</span></sc-for></div>
+</div>
+</a>
+</sc-for>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">3 · Map · “Karta” on /tk/search</span><span class="cap">Snapped card ↔ ink pin; tapping a pin snaps its card. “Bu ýerde gözle” shows only after a pan. “Sanaw” returns to the list at the same scroll.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column">
+<div style="position: relative; height: 280px; flex: none">
+<img src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio: stilist müşderiniň saçyny kesýär" style="width: 100%; height: 100%; object-fit: cover; display: block">
+<div style="position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between">
+<a class="ib" href="Search.dc.html" aria-label="Yza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<div style="display: flex; gap: 8px">
+<button class="ib" aria-label="Halanlara goş"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></button>
+<button class="ib" aria-label="Paýlaş"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.59 13.51 6.83 3.98"></path><path d="m15.41 6.51-6.82 3.98"></path></svg></button>
+</div>
+</div>
+<span style="position: absolute; right: 12px; bottom: 12px; display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(16,16,20,.64); color: #ffffff; font-size: 13px; font-weight: 600" aria-label="Surat 1, jemi 5">1 / 5</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 16px 16px 14px">
+<h1 style="margin: 0 0 2px; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.015em">Glow Studio</h1>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span style="font-weight: 600">4,9</span><span style="color: #5a5a64">·</span><a href="#teswirler" style="color: #101014; text-decoration: underline">96 teswir</a></span>
+<span style="font-size: 14px; line-height: 20px; color: #5a5a64">Gözellik salony · 3,0 km</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px"><span class="dot" style="background: #12a366"></span><span style="color: #066a41; font-weight: 600">Häzir açyk</span><span style="color: #5a5a64">· 20:00-a çenli</span></span>
+</div>
+<nav class="hs" role="tablist" aria-label="Bölümler" style="flex: none; gap: 20px; padding: 0 16px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<button class="tab on" role="tab" aria-selected="true">Hyzmatlar</button>
+<button class="tab" role="tab" aria-selected="false">Hünärmenler</button>
+<button class="tab" role="tab" aria-selected="false">Teswirler</button>
+<button class="tab" role="tab" aria-selected="false">Barada</button>
+</nav>
+<div class="hs" style="flex: none; gap: 8px; padding: 12px 16px">
+<button class="chip hit on" aria-pressed="true">Saç</button>
+<button class="chip hit" aria-pressed="false">Dyrnak</button>
+<button class="chip hit" aria-pressed="false">Ýüz ideg</button>
+<button class="chip hit" aria-pressed="false">Massaž</button>
+</div>
+<div style="padding: 0 16px">
+<h2 style="margin: 4px 0 0; font-size: 17px; line-height: 22px; font-weight: 600">Saç</h2>
+<sc-for list="{{services}}" as="sv" hint-placeholder-count="4">
+<div class="svc">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 15px; line-height: 20px; font-weight: 600">{{sv.name}}</span>
+<span class="cap">{{sv.meta}}</span>
+<span style="font-size: 15px; line-height: 20px; font-weight: 600; margin-top: 4px">{{sv.price}}</span>
+</div>
+<sc-if value="{{sv.on}}" hint-placeholder-val="{{false}}"><button class="b b-tin b-sm hit tgl" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Saýlandy</button></sc-if>
+<sc-if value="{{sv.off}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm hit tgl" aria-pressed="false">Saýla</button></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+<div class="bar">
+<div style="display: flex; flex-direction: column; flex: 1; min-width: 0"><span class="cap">2 hyzmat · 1 sag 45 min</span><span style="font-size: 17px; line-height: 22px; font-weight: 700">140 TMT</span></div>
+<a class="b b-pri b-lg" href="Booking.dc.html">Dowam et</a>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">4 · Business page · /tk/b/glow-studio</span><span class="cap">Carousel swipes; tabs stick once scrolled; chips jump to a group. Bar = “Şu gün 15:30-dan boş” + “Ýazylmak” until a service is picked, then selection + “Dowam et”.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<header style="position: relative; flex: none; display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 4px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<a class="b b-gho b-ico" href="#" aria-label="Yza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<span style="font-size: 15px; line-height: 20px; font-weight: 600">3 / 4 · Wagt</span>
+<a class="b b-gho b-ico" href="Venue.dc.html" aria-label="Ýap"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></a>
+<span style="position: absolute; left: 0; bottom: -1px; width: 75%; height: 2px; background: #5a3ff0" aria-hidden="true"></span>
+</header>
+<main style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: 20px 16px 0">
+<h1 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.015em">Wagty saýlaň</h1>
+<span class="cap" style="margin-top: 4px">Glow Studio · Aýna, stilist</span>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 18px"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Oktýabr 2026</span><button class="b b-gho b-ico" aria-label="Senenamany aç" style="margin-right: -12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></button></div>
+<div class="hs" role="group" aria-label="Sene" style="gap: 8px; margin: 6px -16px 0; padding: 0 16px">
+<sc-for list="{{days}}" as="d" hint-placeholder-count="7"><button class="{{d.cls}}" aria-pressed="{{d.on}}" aria-label="{{d.aria}}"><span class="dw">{{d.w}}</span><span class="dn">{{d.n}}</span><span class="dm">okt.</span></button></sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 18px; margin-top: 22px">
+<sc-for list="{{slotGroups}}" as="g" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="lbl">{{g.t}}</span>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px"><sc-for list="{{g.slots}}" as="s" hint-placeholder-count="4"><button class="{{s.cls}}" disabled="{{s.dis}}" aria-pressed="{{s.on}}">{{s.t}}</button></sc-for></div>
+</div>
+</sc-for>
+</div>
+</main>
+<div class="bar">
+<button type="button" aria-haspopup="dialog" style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; height: 52px; padding: 0; border: 0; background: transparent; font-family: inherit; text-align: left; color: #101014; cursor: pointer">
+<span style="display: flex; flex-direction: column; min-width: 0"><span class="ell" style="font-size: 15px; line-height: 20px; font-weight: 600">Aýal saç kesimi</span><span class="cap ell">Pe 15, 14:30 · 80 TMT</span></span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="m18 15-6-6-6 6"></path></svg>
+</button>
+<a class="b b-pri b-lg" href="#">Dowam et</a>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">5 · Booking · step 3 of 4 · /tk/b/glow-studio/book</span><span class="cap">Focused flow, no site header or footer. The desktop summary card becomes this bar; tap it for the full summary as a sheet. Taken slots stay visible, struck through.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<header style="flex: none; display: flex; align-items: center; gap: 4px; height: 56px; padding: 0 16px 0 4px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<a class="b b-gho b-ico" href="Home.dc.html" aria-label="Yza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<h1 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">Ýazylyşlarym</h1>
+</header>
+<nav role="tablist" aria-label="Ýazylyşlar" style="flex: none; display: flex; gap: 24px; padding: 0 16px; border-bottom: 1px solid #e6e6ea">
+<button class="tab on" role="tab" aria-selected="true">Gelýän (3)</button>
+<button class="tab" role="tab" aria-selected="false">Geçen (5)</button>
+</nav>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 0 16px">
+<sc-for list="{{bookings}}" as="k" hint-placeholder-count="3">
+<a class="brow" href="#">
+<img src="{{k.img}}" alt="{{k.alt}}" style="width: 64px; height: 64px; object-fit: cover; border-radius: 12px; display: block">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 15px; line-height: 20px; font-weight: 600">{{k.business}}</span>
+<span class="cap ell">{{k.what}}</span>
+<span class="ell" style="font-size: 13px; line-height: 18px; font-weight: 500">{{k.when}}</span>
+<span class="{{k.badgeCls}}" style="margin-top: 6px"><span class="dot" style="background: {{k.dotColor}}"></span>{{k.status}}</span>
+</div>
+</a>
+</sc-for>
+</main>
+<div style="position: absolute; inset: 0; background: rgba(16,16,20,.4); z-index: 4" aria-hidden="true"></div>
+<div role="dialog" aria-modal="true" aria-labelledby="bs-title" style="position: absolute; left: 0; right: 0; bottom: 0; height: 512px; z-index: 5; display: flex; flex-direction: column; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -8px 24px rgba(16,16,20,.16)">
+<div style="display: flex; justify-content: center; padding-top: 8px"><span style="width: 32px; height: 4px; border-radius: 999px; background: #d8d8de"></span></div>
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 4px 0 16px">
+<span class="badge st-c"><span class="dot" style="background: #5a3ff0"></span>Tassyklandy</span>
+<button class="b b-gho b-ico" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 2px 16px 0">
+<h2 id="bs-title" style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Bag kafe</h2>
+<span class="cap">Tassyklandy · Şenbe, 19:00</span>
+</div>
+<div style="display: flex; flex-direction: column; margin: 12px 16px 0; border-top: 1px solid #e6e6ea">
+<div class="srow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Şenbe, 17 oktýabr · 19:00</span><span></span></div>
+<div class="srow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Stol · 4 adam · Terrasa</span><span></span></div>
+<div class="srow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span class="ell">Andalyp köçesi 8 · 0,9 km</span><a class="hit" href="#" style="font-size: 14px; font-weight: 600">Ýol görkez</a></div>
+<div class="srow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span>+993 12 22 33 44</span><a class="hit" href="#" style="font-size: 14px; font-weight: 600">Jaň et</a></div>
+</div>
+<p class="cap" style="margin: 12px 16px 0">Şenbe, 17:00-a çenli mugt üýtgedip ýa-da ýatyryp bilersiňiz. Töleg ýerinde.</p>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 16px 16px 0">
+<a class="b b-sec" href="Booking-Table.dc.html" style="width: 100%">Başga wagta geçir</a>
+<button class="b b-dtx" style="width: 100%">Ýazylyşy ýatyr</button>
+</div>
+<span class="cap" style="margin: 10px 16px 0; text-align: center; color: #6e6e78">Ýazylyş belgisi: YR-47990</span>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">6 · Booking detail · /tk/account/bookings/{id}</span><span class="cap">Desktop drawer → bottom sheet over a 40% scrim; drag down, tap the scrim or × to close. Actions follow status; “Ýazylyşy ýatyr” opens a confirm sheet.</span></figcaption>
+</figure>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1442,"height":2280}}'>
+class Component extends DCLogic {
+  renderVals() {
+    
+    const homeCards = [
+      { name: 'Bag kafe', alt: 'Bag kafesiniň terrasy', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', meta: 'Kafe · 0,9 km', rating: '4,8', count: '(119)', slots: ['13:00', '13:30', '18:00'] },
+      { name: 'Barber Loft', alt: 'Barber Loft dellekhanasy', img: '../../assets/photos/allef-vinicius-IvQeAVeJULw-unsplash.jpg', meta: 'Dellekhana · 1,2 km', rating: '4,9', count: '(212)', slots: ['14:30', '15:00', '16:15'] },
+      { name: 'Rahat Spa', alt: 'Rahat Spa massaž otagy', img: '../../assets/photos/engin-akyurt-ZbzYDboN7fg-unsplash.jpg', meta: 'Spa we massaž · 1,9 km', rating: '4,9', count: '(140)', slots: ['12:30', '16:00', '18:30'] },
+      { name: 'Ak Diş', alt: 'Ak Diş stomatologiýasy', img: '../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', meta: 'Diş lukmany · 2,1 km', rating: '4,8', count: '(131)', slots: ['16:00', '17:30', '18:00'] }
+    ];
+    const chipDefs = ['Ählisi', 'Gözellik', 'Saglyk', 'Restoran we kafe', 'Sport', 'Okuw', 'Awtoulag', 'Öý haýwanlary'];
+    const searchChips = chipDefs.map((t, i) => ({ t, on: i === 0, cls: i === 0 ? 'chip hit on' : 'chip hit' }));
+    const searchRows = [
+      { name: 'Bag kafe', alt: 'Bag kafe', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', rating: '4,8', count: '(119)', meta: 'Kafe · 0,9 km', line: 'Stol · 2 adam · terrasa bar', slots: ['13:00', '13:30', '18:00'], more: '+3' },
+      { name: 'Barber Loft', alt: 'Barber Loft', img: '../../assets/photos/allef-vinicius-IvQeAVeJULw-unsplash.jpg', rating: '4,9', count: '(212)', meta: 'Dellekhana · 1,2 km', line: 'Erkek saç kesimi · 40 TMT-den', slots: ['14:30', '15:00', '16:15'], more: '+5' },
+      { name: 'Nail Bar Aýna', alt: 'Nail Bar Aýna', img: '../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg', rating: '4,9', count: '(73)', meta: 'Dyrnak · 1,6 km', line: 'Manikýur · 70 TMT-den', slots: ['12:00', '14:30', '16:00'], more: '+2' },
+      { name: 'Rahat Spa', alt: 'Rahat Spa', img: '../../assets/photos/engin-akyurt-ZbzYDboN7fg-unsplash.jpg', rating: '4,9', count: '(140)', meta: 'Spa we massaž · 1,9 km', line: 'Massaž 60 min · 150 TMT', slots: ['12:30', '16:00', '18:30'], more: '+1' },
+      { name: 'Ak Diş', alt: 'Ak Diş', img: '../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', rating: '4,8', count: '(131)', meta: 'Diş lukmany · 2,1 km', line: 'Barlag · 50 TMT', slots: ['16:00', '17:30', '18:00'], more: '' }
+    ];
+    const pins = [
+      { t: '12:30', x: 88, y: 252 },
+      { t: '15:00', x: 204, y: 206 },
+      { t: '16:00', x: 296, y: 240 },
+      { t: '18:00', x: 344, y: 160 },
+      { t: '14:30', x: 150, y: 334 },
+      { t: '12:00', x: 104, y: 474 },
+      { t: '18:30', x: 322, y: 452 },
+      { t: '19:00', x: 262, y: 562 },
+      { t: '13:00', x: 230, y: 396, hot: true }
+    ].map((p) => ({ ...p, cls: p.hot ? 'pin hot' : 'pin' }));
+    const mapCards = [
+      { name: 'Bag kafe', alt: 'Bag kafe', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', rating: '4,8', count: '(119)', dist: '0,9 km', slots: ['13:00', '13:30', '18:00'], cls: 'mcard on' },
+      { name: 'Barber Loft', alt: 'Barber Loft', img: '../../assets/photos/allef-vinicius-IvQeAVeJULw-unsplash.jpg', rating: '4,9', count: '(212)', dist: '1,2 km', slots: ['14:30', '15:00', '16:15'], cls: 'mcard' },
+      { name: 'Nail Bar Aýna', alt: 'Nail Bar Aýna', img: '../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg', rating: '4,9', count: '(73)', dist: '1,6 km', slots: ['12:00', '14:30', '16:00'], cls: 'mcard' }
+    ];
+    const services = [
+      { name: 'Aýal saç kesimi', meta: '60 min · Ýuwmak, kesmek we düzmek', price: '80 TMT', on: true },
+      { name: 'Saç düzmek', meta: '45 min', price: '60 TMT', on: true },
+      { name: 'Saç reňklemek', meta: '2 sag · Bahasy saçyň uzynlygyna bagly', price: '250 TMT-den', on: false },
+      { name: 'Çaga saç kesimi', meta: '30 min', price: '40 TMT', on: false }
+    ].map((s) => ({ ...s, off: !s.on }));
+    const dayDefs = [
+      ['Ça', '14', 'Çarşenbe, 14 oktýabr, şu gün'],
+      ['Pe', '15', 'Penşenbe, 15 oktýabr'],
+      ['An', '16', 'Anna, 16 oktýabr'],
+      ['Şe', '17', 'Şenbe, 17 oktýabr'],
+      ['Ýe', '18', 'Ýekşenbe, 18 oktýabr'],
+      ['Du', '19', 'Duşenbe, 19 oktýabr'],
+      ['Si', '20', 'Sişenbe, 20 oktýabr']
+    ];
+    const days = dayDefs.map(([w, n, aria]) => ({ w, n, aria, on: n === '15', cls: 'dcell' + (n === '14' ? ' today' : '') + (n === '15' ? ' on' : '') }));
+    const groups = [
+      ['Irden', ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30'], ['10:00', '10:30']],
+      ['Günortan', ['12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'], ['13:00', '14:00', '15:00', '16:30']],
+      ['Agşam', ['17:00', '17:30', '18:00', '18:30', '19:00'], ['17:00', '18:30']]
+    ];
+    const slotGroups = groups.map(([t, list, off]) => ({
+      t,
+      slots: list.map((x) => ({ t: x, dis: off.includes(x), on: x === '14:30', cls: x === '14:30' ? 'slot slot-g on' : 'slot slot-g' }))
+    }));
+    const badge = {
+      pending: { badgeCls: 'badge st-p', dotColor: '#dc8b0b', status: 'Garaşylýar' },
+      confirmed: { badgeCls: 'badge st-c', dotColor: '#5a3ff0', status: 'Tassyklandy' }
+    };
+    const bookings = [
+      { business: 'Glow Studio', img: '../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg', alt: 'Glow Studio', what: 'Aýal saç kesimi · Aýna', when: 'Ertir · Penşenbe, 15 oktýabr · 14:30', st: 'pending' },
+      { business: 'Bag kafe', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', alt: 'Bag kafe', what: 'Stol · 4 adam · Terrasa', when: 'Şenbe, 17 oktýabr · 19:00', st: 'confirmed' },
+      { business: 'Aýdyň ýoga', img: '../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg', alt: 'Aýdyň ýoga', what: 'Irden akym · 1 ýer · Aýgözel', when: 'Duşenbe, 19 oktýabr · 08:00', st: 'confirmed' }
+    ].map((k) => ({ ...k, ...badge[k.st] }));
+    return { homeCards, searchChips, searchRows, pins, mapCards, services, days, slotGroups, bookings };
+  }
+}
+</script>
+</body>
+</html>

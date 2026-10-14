@@ -1,81 +1,81 @@
 # Product context
 
-Rules here are product truth. Code implements them in `@yeral/domain` (rules) and `apps/api` (actions); the UI only
-displays them. Source: the prototype, the design export and decisions taken while building the web marketplace.
+Product truth for code. The full spec, with every screen's behaviour, is [`docs/design/README.md`](../design/README.md);
+this file is the condensed version agents need while coding. Where they differ, the design spec wins on behaviour and
+the `.dc.html` screens win on visuals. Rules are implemented in `@yeral/domain` and `apps/api`; the UI only displays them.
 
-## Glossary
+## Booking types: one engine, four types
 
-| Русский | English (UI copy, docs) | Code |
+| Type | TK | Client steps | Card shows | Used by |
+|---|---|---|---|---|
+| Appointment | Wagt bellemek | service(s) → specialist or «Islendik hünärmen» → date & time → details → send | next free slots | barbers, salons, dentists, physio, tutors, mechanics, groomers, home services |
+| Table | Stol bronlamak | party size → date & time → seating area → details → send | times for the party size (default 2), average bill | restaurants, cafés, tea houses |
+| Class | Topar sapagy | session from the schedule → seats → details → send | next session + seats left | yoga, group fitness, courses |
+| Resource *(later)* | Ýer kärendesi | resource → time range → details → send | free hours strip | pitches, saunas, studios |
+
+- A business has one or more types; its category sets the default (a gym = classes + personal training).
+- Where: at the business (default), at the client's address, or online. Home-based businesses can hide the exact address
+  until confirmed (the map shows an approximate circle).
+- Specialist word: *hünärmen*; categories rename it (*lukman*, *mugallym*, *tälimçi*, *ussa*, beauty roles). A solo business skips the step.
+- Several services in one appointment run back to back, with one specialist if possible; «Islendik hünärmen» lets the
+  system pick per service. A slot is free only if the whole chain fits.
+- Prices: fixed (`80 TMT`), from (`250 TMT-den`), free (`Mugt`), hidden (restaurants show `≈ 150 TMT` average bill). Durations on every service.
+- Table: party chips 1–8, "9+" means call; VIP areas need ≥ 6; a table is held 15 minutes after the time.
+- Class: seats stepper up to min(2, seats left); full sessions disabled (waitlist later).
+
+## Statuses and lifecycle
+
+| Status | TK | Meaning | Client can |
+|---|---|---|---|
+| Pending | Garaşylýar | sent, waiting for the business | cancel (no fee), edit note |
+| Confirmed | Tassyklandy | business accepted (phone bookings: + phone icon) | reschedule or cancel until the cancellation window (default 120 min before start); after it only "Jaň et" |
+| Completed | Tamamlandy | default after the slot ends | review (if none), book again |
+| Cancelled | Ýatyryldy | `cancelledBy`: client · business (with reason) · system (pending request expired at start time) | book again |
+| No-show | Gelmedi | marked by the business; the only red status | book again, see the business note |
+
+- **The business confirms every booking by hand** (owner decision 2026-10-14; no instant confirmation).
+- Reschedule = a new request for the new time; the old time stays held until the business answers; if declined, the original stays Confirmed.
+- Reviews: only after a Completed booking, one per booking, editable for 7 days, shown as "Aýjemal G.".
+- A booking cancelled from the Upcoming tab stays there greyed (toast with "Yzyna al") until the next page load.
+- Booking codes are human-readable: `YR-48213`.
+- SMS (TK, or the user's language): confirmed, declined, reminders 1 day and 2 h before, review ask 2 h after the end.
+  No SMS when a request is sent (on-screen only). Templates: design spec §6.
+
+## Search and location
+
+- Default location = browser geolocation ("Ýakynymda"), radius 5 km (1/3/5/10/25). Sort nearest first; never show a slot
+  earlier than now + the business's lead time.
+- Geolocation denied → IP city shown only inside the "Nirede?" field; distances hidden; sort by rating × review count.
+- No city name anywhere else in UI copy. Distances `1,2 km`, under 1 km `850 m`. Cards: `category · distance`.
+
+## Accounts
+
+- Phone-only login: +993 phone → 4-digit SMS code (auto-submit, 3 tries then 60 s lock, resend after 0:59) → name for new users.
+- Language TK/RU/EN saved per user; favourites; notification settings (SMS confirmation, reminders, review asks); delete account.
+
+## Glossary (code ↔ Turkmen UI)
+
+| Code | EN | TK |
 |---|---|---|
-| салон, заведение | salon, venue | `Salon` |
-| мастер, сотрудник | master, team member | `Staff` |
-| услуга | service | `Service` |
-| запись | booking, visit | `Booking` |
-| заявка | request (a booking waiting for the salon) | `Booking` with `status: 'pending'` |
-| перенос, «предложить другое время» | proposal, reschedule | `Booking.proposal`, `rescheduled` |
-| неявка | no-show | `status: 'noshow'` |
-| клиент салона | salon client (the salon's card, may have no account) | `SalonClient` |
-| пользователь | user (has a Yeral account) | `User` |
-| окно | free slot | `Slot` |
-| правила записи | booking rules | `Rules` |
+| `Business` | business, place | biznes, ýer |
+| `Category` | category | kategoriýa (Gözellik, Dellekhana, Dyrnak, Spa we massaž, Diş lukmany, Saglyk, Restoran, Kafe we çaýhana, Sport, Okuw, Awtoulag, Öý haýwanlary, Öý hyzmatlary) |
+| `Specialist` | specialist / any specialist | hünärmen / islendik hünärmen |
+| `Service`, `ServiceGroup` | service | hyzmat |
+| `Session` | class session | sapak |
+| `TableArea` | seating area | ýer (Zal, Terrasa, VIP otag) |
+| `Booking` | booking / send booking | ýazylyş / ýazylyşy ugrat |
+| `Slot` | free time | boş wagt |
+| `Review` | review | teswir |
 
-## Booking statuses
+Full UI glossary: design spec §9. All Turkmen copy needs a native review before launch.
 
-Stored: `pending` → `confirmed` | `declined`; `confirmed` → `cancelled` | `noshow`; `pending` → `cancelled`.
-Shown (`viewStatus`): a confirmed booking whose end has passed is **done** by default (one button marks a no-show,
-there is no "came / didn't come" pair); a pending request whose start has passed is **expired**.
-One colour semantics and one badge shape in every app; orange means "needs attention".
+## Demo data
 
-## Booking rules (per salon)
+`docs/design/demo-data.json` is the seed for every screen: demo clock `2026-10-14T11:20+05:00`, user Aýjemal
+(`+993 65 90 11 22`), businesses (Glow Studio, Barber Loft, Ak Diş, Ojak, Aýdyň ýoga …), bookings. In the designs, SMS
+code `0000` is wrong and any other works; the real demo environment accepts `1234`.
 
-`online` (online booking on/off) · `manual` (requests wait for the salon; off = instant confirmation) ·
-`minLead` (minimum minutes before a visit) · `windowDays` (how far ahead) · `buffer` (minutes after each visit, applied
-silently) · `cancelHours` (free cancellation until N hours before; later = `late`) · `askReason` · `blockAfter2`
-(after two no-shows the client must confirm the day before).
+## The first web version (`apps/legacy`)
 
-Availability = salon hours and exceptions ∩ staff schedule and exceptions − active bookings (+ buffer) − slots held by
-pending proposals, starting at `now + minLead`, within `windowDays`. Candidate starts every 30 minutes plus right
-after each busy block (rounded to 15).
-
-## Client flows
-
-- **Booking wizard**: services → master → time → confirm. «Любой мастер» is the time-first path: the time step shows
-  every window and who is free at it. State lives in the URL (shareable, back button works).
-- **Login**: phone + SMS code at the moment it's needed (inside the wizard, not before).
-- **After booking**: request screen that follows the salon's answer; confirmed / declined (with reason) / proposal
-  (accept or decline) / cancelled by salon.
-- **My visits**: cancel (free or late), move (a new request; the old slot is kept until the salon answers),
-  «это не я» for a phone booking made with a wrong number, confirm attendance when the salon requires it, review after a done visit
-  (one per booking, editable), add to calendar (.ics), directions, call.
-- **Favourites, notifications, profile** (name, birthday, gender, notification toggles).
-
-## Mirror screens
-
-Every salon action reaches the client, every client action reaches the salon (in production: push + SMS).
-
-- Salon → client: confirms · declines (reason) · proposes another time · cancels · books by phone · marks a no-show.
-- Client → salon: sends a request · cancels (late or not) · accepts / declines a proposal · «это не я» · confirms the visit · leaves a review.
-
-## Business workspace decisions (from the Project Brief)
-
-- The calendar shows one team member per wide column; week view is load only (blocks without text, tap opens the day).
-- One button instead of "came / didn't come": a visit counts as done by default.
-- Dragging a booking: a proposal for app clients, a direct move for phone clients.
-- Settings tab, slider icon. Profile opens as a finished page, not a form.
-- The business category drives how clients find the salon and which services are suggested.
-- Address and phone are a separate screen with a map. Booking rules are their own section.
-- Hours: one screen without tabs, about the salon only; exceptions start with a name.
-- Team: invite block above the list, two-step invite. No stats on a staff card (they live in analytics).
-- Disabling a team member moves their bookings to another master by default. Staff schedule and exceptions share one screen.
-- Services catalogue lists services only (no staff).
-- Notification settings describe *when* a message arrives, not toggles per event × role.
-- Help is its own section. Analytics MVP answers three questions: about staff, services, clients.
-
-## Demo behaviour (outside production)
-
-The seed and these behaviours run in local and staging environments (in `apps/legacy`: the in-browser mock).
-
-- «Ножницы» (`/nozhnitsy`) confirms manually: answer from the business app (or the demo panel on the booking page).
-- Other salons answer by themselves in a few seconds, or confirm instantly.
-- Demo login: any `+993` number, code `1234`; `+993 65 12 34 56` is the demo client with history.
-- Demo salons get synthetic but deterministic busy slots per master and day; real bookings always win.
+Beauty-only, Russian, salon-centric model with instant-confirmation and "declined/expired" statuses. It stays live until
+the client site replaces it (M3) and is not a reference for new behaviour.

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral — baş sahypa B</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 40px}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-lg{height:52px;padding:0 24px;border-radius:14px;font-size:16px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-ink{background:#101014;color:#ffffff}
+.b-ink:hover{background:#2a2a32;color:#ffffff}
+.b-wht{background:#ffffff;color:#101014}
+.b-wht:hover{background:#f0f0f3;color:#101014}
+.b:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.nl{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:500;color:#101014;border:0;background:transparent;font-family:inherit;cursor:pointer}
+.nl:hover{background:#f4f4f6;color:#101014}
+.slot{display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 10px;border-radius:8px;border:1px solid #d8d8de;font-size:13px;font-weight:600;color:#101014;background:#ffffff}
+.slot:hover{border-color:#5a3ff0;color:#4429d6}
+.vc{display:flex;flex-direction:column;gap:12px;color:#101014}
+.vc:hover{color:#101014}
+.vc:hover .vn{text-decoration:underline}
+.vc:hover img{filter:brightness(.94)}
+.sf{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #e6e6ea}
+.sf input{border:0;outline:none;font-family:inherit;font-size:16px;padding:0;color:#101014;background:transparent;width:100%}
+.sf input::placeholder{color:#6e6e78}
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(460px,100%),1fr));gap:56px;align-items:center}
+.mosaic{display:grid;grid-template-columns:1.15fr 1fr;grid-template-rows:200px 200px 180px;gap:12px}
+.mosaic figure{margin:0;position:relative;border-radius:16px;overflow:hidden}
+.mosaic img{width:100%;height:100%;object-fit:cover;display:block}
+.tagp{position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;background:#ffffff;color:#101014;font-size:13px;font-weight:600}
+.gph{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:24px 16px}
+.ph{display:flex;flex-direction:column;gap:10px;color:#101014;font-size:15px;font-weight:600}
+.ph:hover{color:#101014}
+.ph img{width:100%;aspect-ratio:1 / 1;object-fit:cover;border-radius:12px;display:block;transition:filter .15s}
+.ph:hover img{filter:brightness(.92)}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:32px 24px}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));gap:56px;align-items:center}
+.gfoot{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:32px}
+.fl{font-size:14px;line-height:20px;color:#5a5a64}
+.fl:hover{color:#101014}
+.disp{margin:0;font-size:80px;line-height:80px;font-weight:700;letter-spacing:-0.045em}
+.h2p{margin:0;font-size:32px;line-height:38px;font-weight:700;letter-spacing:-0.025em}
+.sec{padding:88px 0}
+.trow{display:grid;grid-template-columns:88px 1fr;gap:20px;align-items:center;padding:18px 0;border-bottom:1px solid #e6e6ea}
+.trow img{width:88px;height:88px;object-fit:cover;border-radius:12px;display:block}
+@media (max-width:1023px){.wrap{padding:0 24px}.hide-md{display:none !important}}
+@media (max-width:767px){.wrap{padding:0 16px}.hide-xs{display:none !important}.disp{font-size:48px;line-height:50px}.h2p{font-size:26px;line-height:30px}.sec{padding:56px 0}.mosaic{grid-template-rows:140px 140px 120px}.gph{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</helmet>
+<div style="min-height: 100%; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<header style="border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<div class="wrap" style="display: flex; align-items: center; gap: 16px; height: 72px">
+<a href="#" aria-label="Ýeral baş sahypa" style="display: flex"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 30px; width: auto"></a>
+<div style="flex: 1"></div>
+<nav style="display: flex; align-items: center; gap: 4px">
+<a class="nl hide-xs" href="#">Biznes üçin</a>
+<button class="nl hide-xs" aria-label="Dil: Türkmençe"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>TK</button>
+<a class="b b-sec b-sm" href="#">Giriş</a>
+</nav>
+</div>
+</header>
+
+<section style="padding: 56px 0 88px">
+<div class="wrap hero">
+<div style="display: flex; flex-direction: column; gap: 24px">
+<span class="lbl" style="display: inline-flex; align-items: center; gap: 8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>Aşgabat</span>
+<h1 class="disp">Ýeriňi al.</h1>
+<p style="margin: 0; font-size: 19px; line-height: 28px; color: #5a5a64; max-width: 480px; text-wrap: pretty">Dellege, diş lukmanyna, restorana ýa-da ýoga sapagyna — islendik ýere onlaýn ýazylyň.</p>
+<form role="search" style="display: flex; flex-direction: column; border: 1px solid #d8d8de; border-radius: 16px; background: #ffffff; max-width: 520px; overflow: hidden">
+<label class="sf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><span style="display: flex; flex-direction: column; gap: 2px; flex: 1"><span class="lbl" style="color: #101014">Näme?</span><input placeholder="Hyzmat, ýer ýa-da hünärmen"></span></label>
+<div style="display: grid; grid-template-columns: 1fr 1fr">
+<label class="sf" style="border-right: 1px solid #e6e6ea"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0"><span class="lbl" style="color: #101014">Nirede?</span><input placeholder="Ähli etraplar"></span></label>
+<label class="sf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0"><span class="lbl" style="color: #101014">Haçan?</span><input placeholder="Islendik wagt"></span></label>
+</div>
+<div style="padding: 8px"><button class="b b-pri b-lg" type="submit" style="width: 100%">Boş wagtlary görkez</button></div>
+</form>
+</div>
+<div class="mosaic" aria-label="Ýeraldaky ýerler">
+<figure style="grid-row: span 2"><img src="../../assets/photos/nathon-oski-EW_rqoSdDes-unsplash.jpg" alt="Dellekhananyň içi"><span class="tagp">Dellekhana</span></figure>
+<figure><img src="../../assets/photos/harold-hisona-Bg81yWKZlMg-unsplash.jpg" alt="Diş lukmany näsag bilen gürleşýär"><span class="tagp">Diş lukmany</span></figure>
+<figure><img src="../../assets/photos/sergio-kian-G6svDyPVRrc-unsplash.jpg" alt="Sport zalynda tälimçi"><span class="tagp">Sport</span></figure>
+<figure><img src="../../assets/photos/nick-hillier-xBXF9pr6LQo-unsplash.jpg" alt="Restoranda adamlar"><span class="tagp">Restoran</span></figure>
+<figure><img src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Saç ussasy"><span class="tagp">Gözellik</span></figure>
+</div>
+</div>
+</section>
+
+<section style="padding: 0 0 88px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap"><h2 class="h2p">Näme gözleýärsiňiz?</h2><a href="#" style="font-size: 15px; font-weight: 600">Ähli kategoriýalar</a></div>
+<div class="gph">
+<a class="ph" href="#"><img src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="">Gözellik</a>
+<a class="ph" href="#"><img src="../../assets/photos/allef-vinicius-IvQeAVeJULw-unsplash.jpg" alt="">Dellekhana</a>
+<a class="ph" href="#"><img src="../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg" alt="">Dyrnak</a>
+<a class="ph" href="#"><img src="../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg" alt="">Diş lukmany</a>
+<a class="ph" href="#"><img src="../../assets/photos/yury-kirillov-pbUWW-CBoqY-unsplash.jpg" alt="">Saglyk</a>
+<a class="ph" href="#"><img src="../../assets/photos/engin-akyurt-ZbzYDboN7fg-unsplash.jpg" alt="">Spa we massaž</a>
+<a class="ph" href="#"><img src="../../assets/photos/mustafa-fatemi-ZEfHrVDF3NM-unsplash.jpg" alt="">Restoran</a>
+<a class="ph" href="#"><img src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="">Kafe we çaýhana</a>
+<a class="ph" href="#"><img src="../../assets/photos/sergio-kian-G6svDyPVRrc-unsplash.jpg" alt="">Sport we ýoga</a>
+<a class="ph" href="#"><img src="../../assets/photos/ronald-felton-6c86TCPmNRQ-unsplash.jpg" alt="">Okuw</a>
+<a class="ph" href="#"><img src="../../assets/photos/christian-buehner-Fd6osyVbtG4-unsplash.jpg" alt="">Awtoulag</a>
+<a class="ph" href="#"><img src="../../assets/photos/buddy-an-LpK2xddrElI-unsplash.jpg" alt="">Öý haýwanlary</a>
+</div>
+</div>
+</section>
+
+<section style="padding: 0 0 88px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 6px"><h2 class="h2p">Şu gün boş</h2><span style="font-size: 15px; color: #5a5a64">Häzir ýazylyp boljak ýerler</span></div>
+<a href="#" style="display: inline-flex; align-items: center; gap: 4px; font-size: 15px; font-weight: 600">Ählisini gör<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+</div>
+<div class="g4">
+<sc-for list="{{venues}}" as="v" hint-placeholder-count="4">
+<a class="vc" href="#">
+<img src="{{v.img}}" alt="{{v.alt}}" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; display: block; transition: filter .15s">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="vn" style="font-size: 17px; line-height: 22px; font-weight: 600">{{v.name}}</span><span class="cap">{{v.meta}}</span></div>
+<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600; flex: none"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>{{v.rating}}<span class="cap">{{v.count}}</span></span>
+</div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center"><sc-for list="{{v.slots}}" as="s" hint-placeholder-count="3"><span class="slot">{{s}}</span></sc-for><span class="cap" style="margin-left: 4px">{{v.note}}</span></div>
+</a>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section class="sec" style="border-top: 1px solid #e6e6ea">
+<div class="wrap split">
+<img src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="Ösümlikli kafe" style="width: 100%; aspect-ratio: 5 / 4; object-fit: cover; border-radius: 16px; display: block">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="lbl">Bir programma</span>
+<h2 class="h2p" style="font-size: 40px; line-height: 44px; letter-spacing: -0.03em; margin-bottom: 16px">Wagt, stol ýa-da ýer — hemmesi bir ýazylyşda</h2>
+<div class="trow" style="border-top: 1px solid #e6e6ea"><img src="../../assets/photos/harold-hisona-Bg81yWKZlMg-unsplash.jpg" alt=""><div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 19px; line-height: 24px; font-weight: 600">Hünärmende wagt</span><span style="font-size: 15px; line-height: 22px; color: #5a5a64">Hyzmaty, hünärmeni we wagty saýlaň: dellek, lukman, mugallym, ussa.</span></div></div>
+<div class="trow"><img src="../../assets/photos/mustafa-fatemi-ZEfHrVDF3NM-unsplash.jpg" alt=""><div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 19px; line-height: 24px; font-weight: 600">Restoranda stol</span><span style="font-size: 15px; line-height: 22px; color: #5a5a64">Adam sanyny we wagty görkeziň — stol size garaşar.</span></div></div>
+<div class="trow"><img src="../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg" alt=""><div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 19px; line-height: 24px; font-weight: 600">Sapakda ýer</span><span style="font-size: 15px; line-height: 22px; color: #5a5a64">Ýoga, sport topary ýa-da kurs: näçe ýer galanyny derrew görersiňiz.</span></div></div>
+</div>
+</div>
+</section>
+
+<section style="background: #101014; color: #ffffff">
+<div class="wrap sec split">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<span class="lbl" style="color: #b0b0b8">Ýeral Biznes</span>
+<h2 class="h2p" style="font-size: 44px; line-height: 48px; letter-spacing: -0.03em; color: #ffffff">Wagtyňyzy satýarsyňyzmy? Müşderiler sizi şu ýerde tapar.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 26px; color: #d8d8de; max-width: 520px">Ýazylyşlar, senenama, müşderiler we hasabatlar bir ýerde — salon üçin hem, öýde işleýän diş lukmany üçin hem. Ýeke işleýän hünärmenler üçin mugt.</p>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; padding-top: 4px"><a class="b b-pri b-lg" href="#">Biznesiňizi goşuň</a><a class="b b-lg" href="#" style="color: #ffffff; border-color: #5a5a64">Bahalar</a></div>
+</div>
+<img src="../../assets/photos/benyamin-bohlouli-LGXN4OSQSa4-unsplash.jpg" alt="Gözellik salonynyň içi" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 16px; display: block">
+</div>
+</section>
+
+<section class="sec">
+<div class="wrap split">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<h2 class="h2p">Ýeral telefonyňyzda</h2>
+<p style="margin: 0; font-size: 17px; line-height: 26px; color: #5a5a64; max-width: 480px">Ýazylyşlar, ýatlatmalar we halanlaryňyz hemişe ýanyňyzda.</p>
+</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end">
+<a class="b b-ink b-lg" href="#" style="height: 56px; gap: 12px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg><span style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1"><span style="font-size: 11px; font-weight: 500; opacity: .8">Ýükläň</span><span>App Store</span></span></a>
+<a class="b b-ink b-lg" href="#" style="height: 56px; gap: 12px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg><span style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1"><span style="font-size: 11px; font-weight: 500; opacity: .8">Ýükläň</span><span>Google Play</span></span></a>
+</div>
+</div>
+</section>
+
+<footer style="border-top: 1px solid #e6e6ea; padding: 56px 0 40px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 40px">
+<div class="gfoot">
+<div style="display: flex; flex-direction: column; gap: 16px"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 26px; width: auto; align-self: flex-start"><span class="cap" style="max-width: 220px">Aşgabatda onlaýn ýazylyş — islendik hyzmata.</span></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Müşderiler üçin</span><a class="fl" href="#">Gözleg</a><a class="fl" href="#">Kategoriýalar</a><a class="fl" href="#">Ýazylyşlarym</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Biznes üçin</span><a class="fl" href="#">Ýeral Biznes</a><a class="fl" href="#">Bahalar</a><a class="fl" href="#">Biznes girişi</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Ýeral</span><a class="fl" href="#">Biz barada</a><a class="fl" href="#">Kömek merkezi</a><a class="fl" href="#">Habarlaşmak</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Dil</span><a class="fl" href="#" style="color: #101014; font-weight: 600">Türkmençe</a><a class="fl" href="#">Русский</a><a class="fl" href="#">English</a></div>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e6e6ea"><span class="cap">© 2026 Ýeral · Aşgabat · Suratlar: Unsplash</span><div style="display: flex; gap: 20px"><a class="fl" href="#" style="font-size: 13px">Gizlinlik syýasaty</a><a class="fl" href="#" style="font-size: 13px">Ulanyş şertleri</a></div></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":3760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const f = this.props.font ?? 'Onest';
+    return {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      venues: [
+        { name: 'Güýç Fitness', alt: 'Güýç Fitness zaly', img: '../../assets/photos/sergio-kian-G6svDyPVRrc-unsplash.jpg', meta: 'Sport · Büzmeýin · 4,2 km', rating: '4,8', count: '(64)', slots: ['18:00', '19:00', '20:00'], note: 'Tälimçi bilen' },
+        { name: 'Rahat Spa', alt: 'Rahat Spa massaž otagy', img: '../../assets/photos/engin-akyurt-ZbzYDboN7fg-unsplash.jpg', meta: 'Spa we massaž · Köpetdag · 1,9 km', rating: '4,9', count: '(140)', slots: ['12:30', '16:00', '18:30'], note: '150 TMT-den' },
+        { name: 'Pamyk', alt: 'Pamyk groming salony', img: '../../assets/photos/buddy-an-LpK2xddrElI-unsplash.jpg', meta: 'Öý haýwanlary · Berkararlyk · 2,5 km', rating: '5,0', count: '(37)', slots: ['11:00', '14:00', '15:30'], note: '80 TMT-den' },
+        { name: 'Hereket Fizio', alt: 'Fizioterapiýa otagy', img: '../../assets/photos/yury-kirillov-pbUWW-CBoqY-unsplash.jpg', meta: 'Saglyk · Bagtyýarlyk · 3,6 km', rating: '4,8', count: '(52)', slots: ['10:00', '13:30', '17:00'], note: '120 TMT-den' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

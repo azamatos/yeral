@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ýeral client site map</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6;text-decoration:underline}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:16px;color:#5a5a64}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.h2{margin:0;font-size:32px;line-height:38px;font-weight:700;letter-spacing:-0.025em}
+.sec{display:flex;flex-direction:column;gap:28px;padding:56px 0;border-top:1px solid #e6e6ea}
+.step{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border:1px solid #e6e6ea;border-radius:12px;min-width:0;flex:1}
+.arr{flex:none;color:#6e6e78;font-size:18px;align-self:center}
+.card{display:flex;flex-direction:column;gap:10px;padding:20px;border:1px solid #e6e6ea;border-radius:16px}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.t-d{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
+.t-p{background:#f4f4f6;border:1px solid #e6e6ea;color:#41505f}
+.li{font-size:13px;line-height:18px;color:#101014;display:flex;gap:8px}
+.li::before{content:"";width:4px;height:4px;border-radius:999px;background:#6e6e78;margin-top:7px;flex:none}
+.dec{display:grid;grid-template-columns:240px 1fr;gap:24px;padding:14px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+</style>
+</helmet>
+<div style="width: 1440px; min-height: 2860px; padding: 72px 120px 96px; background: #ffffff; color: #101014; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column">
+
+<header style="display: flex; align-items: flex-end; justify-content: space-between; gap: 48px; padding-bottom: 48px">
+<div style="display: flex; flex-direction: column; gap: 14px; max-width: 860px">
+<span class="lbl">yeral.app · client site v1 · 14.10.2026</span>
+<h1 style="margin: 0; font-size: 56px; line-height: 60px; font-weight: 700; letter-spacing: -0.035em">Client site map</h1>
+<p style="margin: 0; font-size: 17px; line-height: 26px; color: #5a5a64; text-wrap: pretty">Every page of yeral.app: its route, its artboard and the states it covers. “Designed” pages are drawn hi-fi on this canvas; “Pattern” pages are not drawn — build them from the named screen. Behaviour lives in <span class="mono">docs/design/README.md</span>; when a screen and the spec disagree, the screen wins on looks, the spec on behaviour.</p>
+</div>
+<img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 36px; width: auto">
+</header>
+
+<section class="sec">
+<div style="display: flex; align-items: baseline; gap: 16px"><span class="lbl">Main flow</span><h2 class="h2">Find → choose → send → manage</h2></div>
+<div style="display: flex; gap: 10px; align-items: stretch">
+<a class="step" href="Home.dc.html" style="color: #101014"><span class="lbl">1</span><span style="font-size: 15px; font-weight: 600">Home</span><span class="mono">/tk</span></a>
+<span class="arr">→</span>
+<a class="step" href="Search.dc.html" style="color: #101014"><span class="lbl">2</span><span style="font-size: 15px; font-weight: 600">Search</span><span class="mono">/tk/search</span></a>
+<span class="arr">→</span>
+<a class="step" href="Venue.dc.html" style="color: #101014"><span class="lbl">3</span><span style="font-size: 15px; font-weight: 600">Business page</span><span class="mono">/tk/b/{slug}</span></a>
+<span class="arr">→</span>
+<a class="step" href="Booking.dc.html" style="color: #101014; background: #efecfe; border-color: #d5cbfb"><span class="lbl" style="color: #4429d6">4 · booking</span><span style="font-size: 15px; font-weight: 600">Services → Specialist → Time → Confirm</span><span class="mono">/tk/b/{slug}/book</span></a>
+<span class="arr">→</span>
+<a class="step" href="Booking.dc.html" style="color: #101014"><span class="lbl">5</span><span style="font-size: 15px; font-weight: 600">Sent · Garaşylýar</span><span class="mono">step=sent</span></a>
+<span class="arr">→</span>
+<a class="step" href="Account-Bookings.dc.html" style="color: #101014"><span class="lbl">6</span><span style="font-size: 15px; font-weight: 600">My bookings</span><span class="mono">/tk/account/bookings</span></a>
+</div>
+<div class="cap">Table and class businesses swap step 4 for <a href="Booking-Table.dc.html">Booking-Table</a> or <a href="Booking-Class.dc.html">Booking-Class</a>. Login (<a href="Auth.dc.html">Auth</a>) appears inline at the confirm step or as a modal from the header. After the visit: SMS review request → review modal in My bookings.</div>
+</section>
+
+<section class="sec">
+<div style="display: flex; align-items: baseline; gap: 16px"><span class="lbl">Pages</span><h2 class="h2">Inventory</h2></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Home</span><span class="tag t-d">Designed</span></div><span class="mono">/tk · Home.dc.html</span>
+<span class="li">Hero explains “Ýeriňi al.” + search card + category mosaic</span><span class="li">Free today near you (nearest first) · categories · how it works · business · apps</span><span class="li">No location → “Meşhur ýerler” + location banner (States)</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Search results</span><span class="tag t-d">Designed</span></div><span class="mono">/tk/search?what&amp;cat&amp;near&amp;r&amp;date&amp;sort · Search.dc.html</span>
+<span class="li">List + map, rows by booking type, pins ↔ rows hover</span><span class="li">Chips filter · day toggle · Süzgüçler drawer · sort</span><span class="li">Phone: list + “Karta” full-screen map (Mobile 2–3)</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Category landing</span><span class="tag t-p">Pattern</span></div><span class="mono">/tk/c/{category} → Search</span>
+<span class="li">Search pre-filtered by one category</span><span class="li">H1 = category name + “golaýyňyzda”, short SEO intro under it</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Business page</span><span class="tag t-d">Designed</span></div><span class="mono">/tk/b/{slug} · Venue.dc.html</span>
+<span class="li">Gallery · tabs Hyzmatlar / Hünärmenler / Teswirler / Barada</span><span class="li">Sticky card: next free time → selection summary</span><span class="li">Tweak preselect = summary state · Phone: Mobile 4</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Photo gallery</span><span class="tag t-p">Pattern</span></div><span class="mono">/tk/b/{slug}/photos</span>
+<span class="li">Full-screen viewer over the business page: ink background, image centred, arrows, counter “2 / 5”, close ×</span><span class="li">Phone: swipe</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Booking · appointment</span><span class="tag t-d">Designed</span></div><span class="mono">/tk/b/{slug}/book?step= · Booking.dc.html</span>
+<span class="li">Tweak step: services · staff · time · confirm · sent</span><span class="li">Tweaks loggedIn, slotTaken · code “0000” = wrong</span><span class="li">Phone: Mobile 5 (summary → bottom bar)</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Booking · table</span><span class="tag t-d">Designed</span></div><span class="mono">Booking-Table.dc.html</span>
+<span class="li">Party 1–8 / 9+ (call) · date · time · area · requests</span><span class="li">Tweaks sent, loggedIn</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Booking · class</span><span class="tag t-d">Designed</span></div><span class="mono">Booking-Class.dc.html</span>
+<span class="li">Day tabs · sessions with seats left / Doly · seats stepper</span><span class="li">Tweaks sent, loggedIn</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Login</span><span class="tag t-d">Designed</span></div><span class="mono">/tk/login (modal) · Auth.dc.html</span>
+<span class="li">Phone → SMS code → name · wrong code · 60 s lock</span><span class="li">Logged-in avatar menu</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">My bookings</span><span class="tag t-d">Designed</span></div><span class="mono">/tk/account/bookings[/{id}[/review]] · Account-Bookings.dc.html</span>
+<span class="li">Tabs Gelýän / Geçen · detail drawer · cancel modal · review modal</span><span class="li">Tweaks view, empty, late (cancel window passed)</span><span class="li">Phone: Mobile 6 (drawer → sheet)</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Profile &amp; favourites</span><span class="tag t-d">Designed</span></div><span class="mono">/tk/account/profile · /favorites · Account-Profile.dc.html</span>
+<span class="li">Name, phone change by SMS, language, SMS switches, log out, delete</span><span class="li">Favourites grid · tweak pane</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Static pages</span><span class="tag t-p">Pattern</span></div><span class="mono">/tk/about · /help · /privacy · /terms</span>
+<span class="li">Marketing header + footer from Home</span><span class="li">One text column max 720: h1 44/48, body-l 17/26, h2 22/28 sections</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">States</span><span class="tag t-d">Designed</span></div><span class="mono">States.dc.html</span>
+<span class="li">No results · location ask / denied · slot taken · not bookable online · closed today · network · loading · 404 · login-required</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">Phone layouts</span><span class="tag t-d">Designed</span></div><span class="mono">Mobile.dc.html</span>
+<span class="li">390 × 844: Home · Search · Map · Business · Booking time · My bookings sheet</span><span class="li">Every page must work 360–767</span></div>
+
+<div class="card"><div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 17px; font-weight: 600">For business</span><span class="tag t-p">Other site</span></div><span class="mono">→ business.yeral.app</span>
+<span class="li">Header link “Biznes üçin” and the home business block leave yeral.app</span></div>
+</div>
+</section>
+
+<section class="sec">
+<div style="display: flex; align-items: baseline; gap: 16px"><span class="lbl">Decisions</span><h2 class="h2">Settled while drawing round 3</h2></div>
+<div style="display: flex; flex-direction: column; border-top: 1px solid #101014">
+<div class="dec"><span style="font-weight: 600">Header search button</span><span>The compact query bar’s round search button is <b>ink</b> (#101014) on every page. Gradient stays for the page’s one primary action.</span></div>
+<div class="dec"><span style="font-weight: 600">Service group chips</span><span>Filter the list (not jump-scroll), on the business page and booking step 1.</span></div>
+<div class="dec"><span style="font-weight: 600">Slot conflict copy</span><span>“Bu wagt ýaňy alyndy. Golaý boş wagtlar:” + 3 nearest slots.</span></div>
+<div class="dec"><span style="font-weight: 600">Table party size</span><span>Chips 1–8 and 9+. 9+ disables sending and shows “9 we ondan köp adam bolsa, jaň ediň” + call link.</span></div>
+<div class="dec"><span style="font-weight: 600">SMS code entry</span><span>4 boxes, auto-submit on the 4th digit; “Tassykla” button stays as the visible fallback. <span class="mono">autocomplete="one-time-code"</span>. 3 wrong tries → 60 s lock.</span></div>
+<div class="dec"><span style="font-weight: 600">Login modal width</span><span>400 px (not 480).</span></div>
+<div class="dec"><span style="font-weight: 600">Closing a booking flow</span><span>× and “Yza” on step 1 return to that business’s page <span class="mono">/b/{slug}</span>.</span></div>
+<div class="dec"><span style="font-weight: 600">Booking detail on phones</span><span>Bottom sheet over the list (deep link opens the sheet). Desktop: right drawer 480.</span></div>
+<div class="dec"><span style="font-weight: 600">Location</span><span>No location → banner “Ýakynyňyzdaky ýerleri görkezeliň” above popular places. Denied → IP city only inside Nirede?, distances hidden, sort by rating × reviews.</span></div>
+<div class="dec"><span style="font-weight: 600">Danger colour</span><span>Solid danger buttons use <span class="mono">#b42318</span> (hover #912018) — white text 6.6:1. #d9412f stays for dots, borders and the No-show badge.</span></div>
+<div class="dec"><span style="font-weight: 600">Cancelled upcoming booking</span><span>Stays in Gelýän (greyed, Ýatyryldy badge) until the next page load, then moves to Geçen.</span></div>
+<div class="dec"><span style="font-weight: 600">Search ordering</span><span>Nearest first by default; never show a slot earlier than now + business lead time.</span></div>
+<div class="dec" style="border-bottom: 0"><span style="font-weight: 600">Cover photo</span><span>A business’s first photo is its card and row image everywhere (Barber Loft = barber chair).</span></div>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2860}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

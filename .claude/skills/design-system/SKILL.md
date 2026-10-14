@@ -1,51 +1,64 @@
 ---
 name: design-system
-description: Work on Yeral's design system — DS v2 tokens, @yeral/ui components (Radix + cva), Storybook stories and their tests, and checking screens against the Claude Design export. Use when adding or changing a component, a token or a style, writing stories, or when something looks off against the design.
+description: Work on Ýeral's design system — web DS v0.3.1 tokens, @yeral/ui components (Radix + cva on Tailwind), Storybook stories and their tests, and matching the hi-fi screens in docs/design. Use when adding or changing a component, a token or a style, writing stories, building any screen, or when something looks off against the design.
 ---
 
 # Design system
 
-Decision: ADR 0012. Package: `packages/ui` (tokens `src/styles/tokens.css`, components `src/components/<name>/`).
-Docs and tests: `apps/storybook` → `storybook.yeral.app`. Visual source: `Yeral Design System v2.dc.html` (+ Client App,
-Business App) in `docs/design/`. Before M1 the tokens are in
-`apps/legacy/src/app/globals.css`.
+Decisions: ADR 0012 (+ revision 2026-10-14). Source of truth: `docs/design/` — read `docs/design/CLAUDE.md` first
+(visual rules, how to read a `.dc.html`), then `tokens.css`, `screens/system/Main.dc.html` (foundations),
+`screens/system/DS-Components.dc.html` (every component and state), `screens/README.md` (screens, states, dev notes).
+Package: `packages/ui` (tokens `src/styles/tokens.css`, components `src/components/<name>/`). Docs and tests:
+`apps/storybook` → `storybook.yeral.app`.
 
-## DS v2 in one screen
+## The rules in one screen (web DS v0.3.1)
 
-- White working surface; grey (`group`, `group-2`) only behind grouped rows; neutral dividers (`line`) instead of cards.
-- One violet accent: `acc` #5a3ff0, text on tint `acc-ink` #4429d6, tint `acc-tint` #efecfe. Graphite `ink` #101014, greys `ink-2..4`.
-- Status colours: green = confirmed/done, amber = needs attention (pending, proposal), red = declined/cancelled/no-show,
-  slate = neutral/past. One badge shape for every status, in every app.
-- Primary button: vertical gradient (`--grad`) + inner highlight + 1 px shadow (`--shadow-btn`). Radii by size: xs/sm 9–10,
-  md 12, lg 14 px. Dark (`ink`) is secondary emphasis, not the main CTA.
-- Radii: inputs 12, cards 16, sheets 22. Shadows only on floating layers (`--shadow-pop`, `--shadow-sheet`).
-- System fonts (SF Pro / Roboto / Segoe). Icons: lucide-react, `strokeWidth={1.75}`, 18–20 px in rows, 16 in chips.
-- Changing numbers (times, prices) use `tabular-nums`.
+- White base; 1px `n-200` dividers instead of boxed cards; ink `n-900` text; secondary `n-600`, tertiary `n-500`;
+  `n-400` is for disabled controls only, never text. Page background always white; `bg-group` only behind settings groups.
+- One violet accent `a-500` for selection, status and the single primary action. Links / tinted text `a-600`.
+- **One gradient primary button per view** (`--primary-bg`, inset highlight, `--primary-shadow`). Secondary = white +
+  1px `n-300`. Ghost, Tint, Danger outline (`--danger-ink` / `--danger-line`); solid danger `--danger-solid` only for the
+  final destructive confirm. The round search button in the header query bar is ink (`--ink-btn`).
+- Sizes: buttons S 36 / r10 · M 44 / r12 · L 52 / r14; inputs 48 high, radius 8; cards radius 16; pills 999.
+- Selection: tint (`a-50` bg, `a-line` border, `a-600` text) for chips, rows, tabs, cards; solid `a-500` for the chosen
+  date and time slot. Hover rows `n-50`; pressed moves 1px down; disabled `n-100` fill + `n-500` text.
+- Focus: `--focus-ring` on `:focus-visible` everywhere; inputs focus = border `a-500` + `--input-focus` halo; error = `#d9412f` + `--input-error`.
+- Flat: shadows only on raised layers (`--shadow-raised`: popover, drawer, modal, toast; `--shadow-sheet` on phones).
+- Overlays: modal 400 (login) / 480 / 640 · right drawer 480 · popover 280–360 · all become bottom sheets under 768.
+  Toast: ink, bottom-left (bottom-centre on phones), 4–6 s, one at a time, one optional action ("Yzyna al" for undo).
+- Statuses: `st-pending|confirmed|completed|cancelled|noshow` with `-bg/-line/-ink/-dot`; one badge shape everywhere;
+  phone booking = confirmed + phone icon; cancelled-by-client vs by-business = same colour, icon + label.
+- Type: Onest (self-hosted variable 400–800). Desktop scale display 64/68 · h1 44/48 · h2 32/38 · h3 22/28 · body-l 17/26 ·
+  body 15/22 · dense 13/18 · button 15/20 · label 11/14 caps +0.07em; phones scale down below 768 (see `tokens.css`).
+- Layout: breakpoints xl ≥1440 · lg 1280 · md 1024 · sm 768 · xs ≤767 (design at 390); grid 12/8/4; side margin 40/32/24/16;
+  marketplace container 1200; app shell sidebar 248 → rail 72 → drawer.
+- Icons: Lucide, stroke 1.75, sizes 16/20/24. No emoji, no gradient backgrounds, no left-border accent cards, no new colours.
+- Touch targets ≥ 44 px (the `.hit` pseudo-element trick grows 36–40 px chips); text contrast ≥ 4.5:1.
+- Copy exact numbers from the screens (padding, gaps, radii, font sizes, line heights). Don't round to a framework scale.
+
+## Tokens in code
+
+`packages/ui/src/styles/tokens.css` keeps the design's CSS variables with the same names and maps them into Tailwind
+`@theme` (`--color-n-200`, `--color-a-500`, `--radius-btn-m`, `--text-h2`…), so classes read like the spec:
+`border-n-200 text-n-600 bg-a-50 rounded-btn-m`. A value missing from the tokens is a question for the owner, not a new token.
 
 ## Adding a component
 
-1. **Is it domain-free?** Yes → `@yeral/ui`. It mentions salons, bookings or masters → an entity's `ui/` (skill `fsd`).
-2. **Scaffold**: `pnpm gen ui-component <name>` → `src/components/<name>/{<name>.tsx, <name>.stories.tsx, <name>.test.tsx, index.ts}`
-   and the `exports` entry. Interactive primitives (dialog, popover, menu, select, tabs, tooltip) start from Radix:
-   `pnpm dlx shadcn@latest add <name>` inside `packages/ui`, then restyle to the tokens. We own the code.
-3. **API**: variants with `cva` (`variant`, `size`, booleans like `block`); `cn()` so a passed `className` wins; `ref` is a
-   normal prop (React 19); spread rest props on the root; no text inside (labels, `aria-label`s, empty-state copy come as props).
-4. **Responsive**: design at 360–390 px first. Dialog = bottom sheet on phones, centred dialog from `sm`.
-5. **States**: default, hover, focus-visible, active (`scale-[0.98]`), disabled, loading (`Skeleton` for content), empty, error, long text.
-6. **A11y**: real `<button>`/`<a>`; visible focus ring; Radix `aria-*`; touch targets ≥ 40 px; contrast on tints.
-7. **Stories** (`<name>.stories.tsx`, CSF3): one story per variant and state, a `Playground` with controls, a phone-width
-   story. Interactions as `play` functions (keyboard, open/close). Stories are the component's tests (skill `testing`).
-8. **Docs**: a short description at the top of the story file (what it's for, when not to use it) + the design screen it comes from.
-9. **Forms**: field components (`TextField`, `PhoneField`, `SelectField`, `Checkbox`, `Switch`) are bound into
-   `useAppForm` (`@yeral/ui/form`, TanStack Form `createFormHook`), so app forms stay short.
-
-## Changing tokens
-
-Tokens are a hot spot (ADR 0014): a separate small PR, announced. Update `tokens.css`, the "Tokens" docs page in
-Storybook, and check screenshots of affected stories.
+1. **Find it in `DS-Components.dc.html`** (and where screens use it). Port the helmet CSS classes (`.b .b-pri .chip
+   .slot .tab .badge .st-*` …) into cva variants using the tokens; inline `style` values are exact.
+2. **Domain-free?** → `@yeral/ui`. Mentions businesses, bookings, specialists → an entity's `ui/` (skill `fsd`).
+3. **Scaffold**: `pnpm gen ui-component <name>` → `src/components/<name>/{<name>.tsx, <name>.stories.tsx, <name>.test.tsx, index.ts}`.
+   Interactive primitives (dialog, popover, menu, select, tabs, tooltip) start from Radix (shadcn CLI scaffold), restyled to the tokens.
+4. **API**: `cva` variants (`variant`, `size`, booleans); `cn()` so a passed `className` wins; `ref` as a normal prop;
+   rest props on the root; no text inside (labels, `aria-label`s, empty-state copy come as props).
+5. **States** from the sheet: default, hover, focus-visible, pressed, selected, disabled, loading (keeps width), error, empty, long text, RU (+30% length).
+6. **Responsive**: check 1440, 1024, 768 and 390; overlays switch to bottom sheets under 768.
+7. **A11y**: real `<button>`/`<a>`/`<input>` + `<label>`; Esc closes overlays and focus returns to the trigger; Radix `aria-*`.
+8. **Stories** (CSF3): one per variant and state, a `Playground`, a phone-width story; `play` for keyboard and pointer.
+   Stories are the component's tests (skill `testing`). The story file starts with what it's for and which design board it comes from.
 
 ## Checking against the design
 
-Open the matching screen in the `.dc.html` export and the story side by side at 390 and 1280 px: spacing, radius,
-colour token, icon size and stroke, copy. Use Claude in Chrome for screenshots (skill `qa-flows`). The owner may run
-`/design-sync` to sync this library with a Claude Design design-system project; don't start it yourself.
+Open the `.dc.html` (in a browser through the canvas, or read its markup) next to the story at the same width and
+compare spacing, radius, colour token, type size, icon size and copy. Use Claude in Chrome for side-by-side screenshots
+(skill `qa-flows`). The owner may run `/design-sync`; don't start it yourself.

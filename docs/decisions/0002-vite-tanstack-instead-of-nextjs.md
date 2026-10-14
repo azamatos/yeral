@@ -17,7 +17,7 @@ commission-free channel, so its preview card matters.
 ## Decision
 
 - **Vite 8 + React 19 everywhere.**
-- **TanStack Start** (SSR) for `apps/client` and `apps/landing` (landing prerendered to static files). SSR is on for
+- **TanStack Start** (SSR) for `apps/client` (the landing app was dropped by ADR 0015). SSR is on for
   public pages and off (`ssr: false`) for account, booking and login.
 - **TanStack Router** (SPA) for `apps/business` and `apps/cms`.
 - One router, one data layer (TanStack Query), one set of patterns across all four apps.

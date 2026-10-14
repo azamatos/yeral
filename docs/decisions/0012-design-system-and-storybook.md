@@ -29,6 +29,13 @@ one documented component library they'll each invent buttons and spacing.
 - Tokens stay in CSS (single source). If a native app arrives, they move to DTCG JSON with generated CSS/TS.
 - The skill `design-system` is the working guide.
 
+## Revision 2026-10-14
+
+The source is now the web design system v0.3.1 in `docs/design/` (`tokens.css`, `screens/system/*.dc.html`), not the
+mobile DS v2. Tokens are mapped one to one into Tailwind `@theme` (same names: `n-*`, `a-*`, `st-*`, radii, sizes, type
+scale); exact values from the screens, no rounding to a framework scale. Font: Onest, self-hosted
+(`@fontsource-variable/onest`, latin, latin-ext, cyrillic, cyrillic-ext) rather than loaded from Google Fonts.
+
 ## Consequences
 
 - New UI starts in Storybook, then goes into screens.

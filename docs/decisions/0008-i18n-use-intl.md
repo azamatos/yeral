@@ -1,6 +1,6 @@
 # 0008. i18n with use-intl
 
-- Status: Accepted 2026-10-13
+- Status: Accepted 2026-10-13 — locales and URL strategy amended by [0016](0016-languages-tk-ru-en.md)
 - Decided by: owner (Russian now, Turkmen later) + Claude (library)
 
 ## Context

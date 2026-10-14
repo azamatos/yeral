@@ -1,0 +1,138 @@
+{
+  "_about": "Demo dataset used by every screen on the Ýeral Web canvas. Use it for fixtures/seeds. 'now' is the demo clock. Photos: 'asset' = file in docs/design/assets/photos (canvas uses blob ids). Prices in TMT.",
+  "now": "2026-10-14T11:20:00+05:00",
+  "nowLabelTk": "Çarşenbe, 14 oktýabr, 11:20",
+  "user": { "id": "u1", "name": "Aýjemal Gurbanowa", "firstName": "Aýjemal", "phone": "+993 65 90 11 22", "lang": "tk", "favorites": ["glow-studio", "bag-kafe", "aydyn-yoga", "ak-dis"] },
+  "photos": {
+    "hair-stylist": { "blob": "8ab7a7623289aee7737b7084124e15a2", "asset": "adam-winger-FkAZqQJTbXM-unsplash.jpg" },
+    "salon-interior": { "blob": "22efd1e4f481d471bea475cca50be6bd", "asset": "benyamin-bohlouli-LGXN4OSQSa4-unsplash.jpg" },
+    "nails": { "blob": "7faf8165f652f4f0205a7b050b095ba1", "asset": "giorgio-trovato-gb6gtiTZKB8-unsplash.jpg" },
+    "facial": { "blob": "734b8cbe86338b51b277523b74bffa6f", "asset": "rosa-rafael-Pe9IXUuC6QU-unsplash.jpg" },
+    "spa-stones": { "blob": "26ef6b727386418884911b42f580f68f", "asset": "engin-akyurt-ZbzYDboN7fg-unsplash.jpg" },
+    "barbershop": { "blob": "342ed153fb4ae0af491da88c91c32fc3", "asset": "nathon-oski-EW_rqoSdDes-unsplash.jpg" },
+    "barber-client": { "blob": "480230868072606f2617f85c397b419d", "asset": "allef-vinicius-IvQeAVeJULw-unsplash.jpg" },
+    "dental-office": { "blob": "87dcc885277b61dd3c37345664033480", "asset": "benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg" },
+    "dentist-patient": { "blob": "c9e3579f97a275cc31c671ab369df5d7", "asset": "harold-hisona-Bg81yWKZlMg-unsplash.jpg" },
+    "physio": { "blob": "fc2adfb07c4b83041890a551c0b9358e", "asset": "yury-kirillov-pbUWW-CBoqY-unsplash.jpg" },
+    "restaurant-hall": { "blob": "f712cab869a5f4571ed366f2b9562d71", "asset": "mustafa-fatemi-ZEfHrVDF3NM-unsplash.jpg" },
+    "restaurant-people": { "blob": "20f981ae27b3e6687a8abca5e5c5e585", "asset": "nick-hillier-xBXF9pr6LQo-unsplash.jpg" },
+    "cafe-garden": { "blob": "407435cd6d9e2b64b40d4254b17562a6", "asset": "ruben-ramirez-xhKG01FN2uk-unsplash.jpg" },
+    "gym-trainer": { "blob": "96cb009a12b7e5aae301b026d0bae9d1", "asset": "sergio-kian-G6svDyPVRrc-unsplash.jpg" },
+    "yoga-class": { "blob": "b58182745b105687b564183919ddc3f4", "asset": "christian-harb-qY468agdO7g-unsplash.jpg" },
+    "tutor": { "blob": "a0640c978164a490d59cc9dc829d425d", "asset": "ronald-felton-6c86TCPmNRQ-unsplash.jpg" },
+    "auto-service": { "blob": "40a1a0038f249c31e3017935b8bf12a6", "asset": "christian-buehner-Fd6osyVbtG4-unsplash.jpg" },
+    "pet-grooming": { "blob": "64eca3fa7b65f1bb27ba311834c6acea", "asset": "buddy-an-LpK2xddrElI-unsplash.jpg" }
+  },
+  "brand": {
+    "lockup-ink": { "blob": "e98b793ed0552834343b3585c3049e3c", "asset": "../brand/yeral-lockup-ink.png" },
+    "lockup-white": { "blob": "a1bf2a3635052806b69be5ee7249ae5d", "asset": "../brand/yeral-lockup-white.png" },
+    "mark": { "blob": "4ca5f90fe9d7d650c98c5b4c43a05a55", "asset": "../brand/yeral-mark.png" },
+    "icon": { "blob": "ca78c9263808b968b674fc1863df8a5c", "asset": "../brand/yeral-icon.png" }
+  },
+  "businesses": [
+    {
+      "slug": "glow-studio", "name": "Glow Studio", "category": "beauty", "categoryTk": "Gözellik salony", "type": "appointment",
+      "rating": "4,9", "reviewsCount": 96, "distance": "3,0 km", "address": "Bitarap Türkmenistan şaýoly 247, 2-nji gat", "phone": "+993 12 45 67 89",
+      "photos": ["hair-stylist", "salon-interior", "nails", "facial", "spa-stones"],
+      "hours": [["Duşenbe", "09:00–20:00"], ["Sişenbe", "09:00–20:00"], ["Çarşenbe", "09:00–20:00"], ["Penşenbe", "09:00–20:00"], ["Anna", "09:00–20:00"], ["Şenbe", "09:00–20:00"], ["Ýekşenbe", "10:00–18:00"]],
+      "openNowTk": "Häzir açyk · 20:00-a çenli",
+      "about": "Saç, dyrnak we ýüz ideg — bir ýerde. Diňe barlanan serişdeler bilen işleýäris; her müşderä wagtynda garaşýarys.",
+      "amenities": ["Wi-Fi", "Kondisioner", "Awtoulag duralgasy", "Kart bilen töleg ýerinde"],
+      "rules": ["Ýazylyşy 2 sagat öňünden mugt ýatyryp ýa-da üýtgedip bilersiňiz.", "15 minutdan köp gijä galsaňyz, ýazylyş ýatyrylyp bilner.", "Töleg ýerinde: nagt ýa-da kart."],
+      "typicalConfirmTk": "Adatça 15 minudyň dowamynda tassyklaýar",
+      "nextFreeTk": "Şu gün 15:30",
+      "serviceGroups": [
+        { "name": "Saç", "services": [
+          { "id": "s1", "name": "Aýal saç kesimi", "duration": "60 min", "price": "80 TMT", "desc": "Ýuwmak, kesmek we düzmek", "staff": ["ayna"] },
+          { "id": "s2", "name": "Saç düzmek", "duration": "45 min", "price": "60 TMT", "staff": ["ayna"] },
+          { "id": "s3", "name": "Saç reňklemek", "duration": "2 sag", "price": "250 TMT-den", "desc": "Bahasy saçyň uzynlygyna bagly", "staff": ["ayna"] },
+          { "id": "s4", "name": "Çaga saç kesimi", "duration": "30 min", "price": "40 TMT", "staff": ["ayna"] }
+        ]},
+        { "name": "Dyrnak", "services": [
+          { "id": "s5", "name": "Manikýur", "duration": "60 min", "price": "70 TMT", "staff": ["maral"] },
+          { "id": "s6", "name": "Gel-lak bilen manikýur", "duration": "1 sag 30 min", "price": "110 TMT", "staff": ["maral"] },
+          { "id": "s7", "name": "Pedikýur", "duration": "1 sag 15 min", "price": "90 TMT", "staff": ["maral"] }
+        ]},
+        { "name": "Ýüz ideg", "services": [
+          { "id": "s8", "name": "Ýüz arassalamak", "duration": "60 min", "price": "150 TMT", "staff": ["jeren"] },
+          { "id": "s9", "name": "Gaş we kirpik", "duration": "30 min", "price": "50 TMT", "staff": ["jeren"] }
+        ]},
+        { "name": "Massaž", "services": [
+          { "id": "s10", "name": "Arka massažy", "duration": "30 min", "price": "90 TMT", "staff": ["leyli"] },
+          { "id": "s11", "name": "Doly beden massažy", "duration": "60 min", "price": "160 TMT", "staff": ["leyli"] }
+        ]}
+      ],
+      "specialists": [
+        { "id": "ayna", "name": "Aýna", "role": "Stilist", "rating": "4,9", "nextFree": "Şu gün 15:30" },
+        { "id": "maral", "name": "Maral", "role": "Dyrnak ussasy", "rating": "5,0", "nextFree": "Şu gün 16:00" },
+        { "id": "jeren", "name": "Jeren", "role": "Kosmetolog", "rating": "4,8", "nextFree": "Ertir 10:00" },
+        { "id": "leyli", "name": "Leýli", "role": "Massažist", "rating": "4,9", "nextFree": "Şu gün 18:00" }
+      ],
+      "ratingBreakdown": { "5": 84, "4": 9, "3": 2, "2": 1, "1": 0 },
+      "reviews": [
+        { "name": "Gülälek N.", "rating": 5, "when": "2 gün öň", "service": "Aýal saç kesimi · Aýna", "text": "Aýna saçymy edil isleýşim ýaly kesdi. Wagtynda kabul etdiler, salon arassa we rahat.", "reply": "Sag boluň, Gülälek! Ýene garaşýarys." },
+        { "name": "Ogulşat M.", "rating": 5, "when": "1 hepde öň", "service": "Gel-lak bilen manikýur · Maral", "text": "Maral örän üns berip işleýär. Gel-lak üç hepde saklandy." },
+        { "name": "Bahar A.", "rating": 4, "when": "3 hepde öň", "service": "Ýüz arassalamak · Jeren", "text": "Hyzmat gowy, ýöne başlamazdan öň biraz garaşmaly boldum." }
+      ],
+      "similar": ["nail-bar-ayna", "rahat-spa", "barber-loft", "hereket-fizio"]
+    },
+    {
+      "slug": "bag-kafe", "name": "Bag kafe", "category": "cafe", "categoryTk": "Kafe", "type": "table",
+      "rating": "4,8", "reviewsCount": 119, "distance": "0,9 km", "address": "Andalyp köçesi 8", "phone": "+993 12 22 33 44",
+      "photos": ["cafe-garden", "restaurant-hall", "restaurant-people"],
+      "hours": "Her gün 09:00–23:00", "avgBill": "≈ [AVG BILL] TMT",
+      "areas": [ { "id": "hall", "name": "Zal", "note": "Kondisionerli" }, { "id": "terrace", "name": "Terrasa", "note": "Açyk howada" }, { "id": "vip", "name": "VIP otag", "note": "6–10 adam" } ],
+      "partySizes": [1, 2, 3, 4, 5, 6, 7, 8, "9+"],
+      "requests": ["Doglan gün", "Çaga oturgyjy", "Penjiräniň ýanynda", "Sessiz ýer"],
+      "rules": ["Stol 15 minut saklanýar.", "9 we ondan köp adam bolsa, jaň ediň."],
+      "demoBooking": { "partySize": 4, "area": "Terrasa", "dateTk": "Şenbe, 17 oktýabr", "time": "19:00" }
+    },
+    {
+      "slug": "aydyn-yoga", "name": "Aýdyň ýoga", "category": "sport", "categoryTk": "Ýoga studiýa", "type": "class",
+      "rating": "4,8", "reviewsCount": 54, "distance": "2,6 km", "address": "Atatürk köçesi 40", "phone": "+993 12 77 88 99",
+      "photos": ["yoga-class"],
+      "trainers": [ { "id": "aygozel", "name": "Aýgözel", "role": "Tälimçi" }, { "id": "kakajan", "name": "Kakajan", "role": "Tälimçi" } ],
+      "schedule": {
+        "Çarşenbe, 14 oktýabr": [
+          { "time": "18:30", "name": "Hatha ýoga", "trainer": "Aýgözel", "level": "Başlangyç", "duration": "60 min", "price": "50 TMT", "capacity": 14, "left": 3 },
+          { "time": "20:00", "name": "Ýin ýoga", "trainer": "Kakajan", "level": "Ähli derejeler", "duration": "75 min", "price": "60 TMT", "capacity": 12, "left": 0 }
+        ],
+        "Penşenbe, 15 oktýabr": [
+          { "time": "08:00", "name": "Irden akym", "trainer": "Aýgözel", "level": "Orta", "duration": "45 min", "price": "45 TMT", "capacity": 12, "left": 7 },
+          { "time": "19:00", "name": "Hatha ýoga", "trainer": "Aýgözel", "level": "Başlangyç", "duration": "60 min", "price": "50 TMT", "capacity": 14, "left": 9 }
+        ]
+      },
+      "rules": ["Sapakdan 12 sagat öň mugt ýatyryp bilersiňiz.", "Düşegiňizi alyp geliň ýa-da ýerinde 10 TMT-e alyň."]
+    }
+  ],
+  "otherBusinesses": [
+    { "slug": "barber-loft", "name": "Barber Loft", "categoryTk": "Dellekhana", "rating": "4,9", "count": 212, "distance": "1,2 km", "address": "Magtymguly şaýoly 12", "photo": "barber-client" },
+    { "slug": "ak-dis", "name": "Ak Diş", "categoryTk": "Diş lukmany", "rating": "4,8", "count": 131, "distance": "2,1 km", "address": "Görogly köçesi 52", "photo": "dental-office" },
+    { "slug": "nail-bar-ayna", "name": "Nail Bar Aýna", "categoryTk": "Dyrnak", "rating": "4,9", "count": 73, "distance": "1,6 km", "address": "Oguzhan köçesi 21", "photo": "nails" },
+    { "slug": "rahat-spa", "name": "Rahat Spa", "categoryTk": "Spa we massaž", "rating": "4,9", "count": 140, "distance": "1,9 km", "address": "Bitarap Türkmenistan şaýoly 247", "photo": "spa-stones" },
+    { "slug": "ojak", "name": "Ojak", "categoryTk": "Restoran", "rating": "4,7", "count": 88, "distance": "2,8 km", "address": "Garaşsyzlyk şaýoly 15", "photo": "restaurant-people" },
+    { "slug": "guyc-fitness", "name": "Güýç Fitness", "categoryTk": "Sport zaly", "rating": "4,8", "count": 64, "distance": "4,2 km", "address": "Arçabil şaýoly 3", "photo": "gym-trainer" },
+    { "slug": "hereket-fizio", "name": "Hereket Fizio", "categoryTk": "Fizioterapiýa", "rating": "4,8", "count": 52, "distance": "3,6 km", "address": "Çandybil şaýoly 9", "photo": "physio" },
+    { "slug": "acar-okuw", "name": "Açar okuw merkezi", "categoryTk": "Okuw", "rating": "4,7", "count": 41, "distance": "2,4 km", "address": "Magtymguly şaýoly 88", "photo": "tutor" },
+    { "slug": "awto-ussa", "name": "Awto Ussa", "categoryTk": "Awtoulag", "rating": "4,6", "count": 58, "distance": "5,1 km", "address": "Gurtly ýoly 2", "photo": "auto-service" },
+    { "slug": "pamyk", "name": "Pamyk", "categoryTk": "Öý haýwanlary", "rating": "5,0", "count": 37, "distance": "3,1 km", "address": "Parahat 4", "photo": "pet-grooming" }
+  ],
+  "demoAppointment": {
+    "business": "glow-studio", "services": ["s1"], "specialist": "ayna",
+    "dateTk": "Penşenbe, 15 oktýabr", "time": "14:30–15:30", "total": "80 TMT", "status": "pending", "id": "YR-48213"
+  },
+  "myBookings": {
+    "upcoming": [
+      { "id": "YR-48213", "business": "Glow Studio", "photo": "hair-stylist", "what": "Aýal saç kesimi · Aýna", "when": "Ertir · Penşenbe, 15 oktýabr · 14:30", "status": "pending", "price": "80 TMT" },
+      { "id": "YR-47990", "business": "Bag kafe", "photo": "cafe-garden", "what": "Stol · 4 adam · Terrasa", "when": "Şenbe, 17 oktýabr · 19:00", "status": "confirmed", "price": "" },
+      { "id": "YR-47702", "business": "Aýdyň ýoga", "photo": "yoga-class", "what": "Irden akym · 1 ýer · Aýgözel", "when": "Duşenbe, 19 oktýabr · 08:00", "status": "confirmed", "price": "45 TMT" }
+    ],
+    "past": [
+      { "id": "YR-46511", "business": "Ak Diş", "photo": "dental-office", "what": "Barlag · Lukman Döwlet", "when": "Anna, 2 oktýabr · 10:00", "status": "completed", "review": null, "price": "50 TMT" },
+      { "id": "YR-45320", "business": "Nail Bar Aýna", "photo": "nails", "what": "Manikýur · Maral", "when": "Ýekşenbe, 20 sentýabr · 12:00", "status": "completed", "review": 5, "price": "70 TMT" },
+      { "id": "YR-44987", "business": "Rahat Spa", "photo": "spa-stones", "what": "Arka massažy · Leýli", "when": "Şenbe, 12 sentýabr · 16:00", "status": "cancelled", "cancelledBy": "client", "price": "90 TMT" },
+      { "id": "YR-44650", "business": "Ojak", "photo": "restaurant-people", "what": "Stol · 2 adam · Zal", "when": "Şenbe, 5 sentýabr · 19:30", "status": "cancelled", "cancelledBy": "business", "reason": "Şol gün ýapyk", "price": "" },
+      { "id": "YR-43108", "business": "Pamyk", "photo": "pet-grooming", "what": "Groming", "when": "Anna, 28 awgust · 11:00", "status": "noshow", "price": "80 TMT" }
+    ]
+  }
+}
