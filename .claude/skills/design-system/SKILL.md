@@ -8,8 +8,10 @@ description: Work on Ýeral's design system — web DS v0.3.1 tokens, @yeral/ui 
 Decisions: ADR 0012 (+ revision 2026-10-14). Source of truth: `docs/design/` — read `docs/design/CLAUDE.md` first
 (visual rules, how to read a `.dc.html`), then `tokens.css`, `screens/system/Main.dc.html` (foundations),
 `screens/system/DS-Components.dc.html` (every component and state), `screens/README.md` (screens, states, dev notes).
-Package: `packages/ui` (tokens `src/styles/tokens.css`, components `src/components/<name>/`). Docs and tests:
-`apps/storybook` → `storybook.yeral.app`.
+Package: `packages/ui` (theme `src/styles/theme.css` — every design token under a Tailwind name, checked against
+`docs/design/tokens.css` by `tokens.test.ts`; components `src/components/<name>/`). Docs and tests: `apps/storybook`
+→ `storybook.yeral.app`. Look at the existing components first: they are the reference for patterns (cva variants,
+`asChild`, field context, mobile sheets).
 
 ## The rules in one screen (web DS v0.3.1)
 
@@ -24,7 +26,7 @@ Package: `packages/ui` (tokens `src/styles/tokens.css`, components `src/componen
   date and time slot. Hover rows `n-50`; pressed moves 1px down; disabled `n-100` fill + `n-500` text.
 - Focus: `--focus-ring` on `:focus-visible` everywhere; inputs focus = border `a-500` + `--input-focus` halo; error = `#d9412f` + `--input-error`.
 - Flat: shadows only on raised layers (`--shadow-raised`: popover, drawer, modal, toast; `--shadow-sheet` on phones).
-- Overlays: modal 400 (login) / 480 / 640 · right drawer 480 · popover 280–360 · all become bottom sheets under 768.
+- Overlays: modal 400 (login) / 480 / 560 (review) / 640 · right drawer 480 · popover 280–360 · all become bottom sheets under 768.
   Toast: ink, bottom-left (bottom-centre on phones), 4–6 s, one at a time, one optional action ("Yzyna al" for undo).
 - Statuses: `st-pending|confirmed|completed|cancelled|noshow` with `-bg/-line/-ink/-dot`; one badge shape everywhere;
   phone booking = confirmed + phone icon; cancelled-by-client vs by-business = same colour, icon + label.
@@ -38,9 +40,11 @@ Package: `packages/ui` (tokens `src/styles/tokens.css`, components `src/componen
 
 ## Tokens in code
 
-`packages/ui/src/styles/tokens.css` keeps the design's CSS variables with the same names and maps them into Tailwind
-`@theme` (`--color-n-200`, `--color-a-500`, `--radius-btn-m`, `--text-h2`…), so classes read like the spec:
-`border-n-200 text-n-600 bg-a-50 rounded-btn-m`. A value missing from the tokens is a question for the owner, not a new token.
+`packages/ui/src/styles/theme.css` carries the design's values under Tailwind names (`--color-n-200`, `--color-a-500`,
+`--radius-m`, `--text-h2`…), so classes read like the spec: `border-n-200 text-n-600 bg-a-50 rounded-m text-h2`.
+Radii: `rounded-input` 8, `rounded-s` 10, `rounded-m` 12, `rounded-l` 14, `rounded-card` 16, `rounded-pill`. Default
+Tailwind colours are off. A value missing from the tokens is a question for the owner, not a new token. When the
+designer exports new tokens, `pnpm --filter @yeral/ui test` shows exactly what changed.
 
 ## Adding a component
 
@@ -48,7 +52,7 @@ Package: `packages/ui` (tokens `src/styles/tokens.css`, components `src/componen
    .slot .tab .badge .st-*` …) into cva variants using the tokens; inline `style` values are exact.
 2. **Domain-free?** → `@yeral/ui`. Mentions businesses, bookings, specialists → an entity's `ui/` (skill `fsd`).
 3. **Scaffold**: `pnpm gen ui-component <name>` → `src/components/<name>/{<name>.tsx, <name>.stories.tsx, <name>.test.tsx, index.ts}`.
-   Interactive primitives (dialog, popover, menu, select, tabs, tooltip) start from Radix (shadcn CLI scaffold), restyled to the tokens.
+   Interactive primitives (dialog, popover, menu, select, tabs, tooltip, switch, radio group) are built on Radix (`radix-ui`).
 4. **API**: `cva` variants (`variant`, `size`, booleans); `cn()` so a passed `className` wins; `ref` as a normal prop;
    rest props on the root; no text inside (labels, `aria-label`s, empty-state copy come as props).
 5. **States** from the sheet: default, hover, focus-visible, pressed, selected, disabled, loading (keeps width), error, empty, long text, RU (+30% length).

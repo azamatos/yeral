@@ -1,0 +1,191 @@
+/*
+ * Ýeral web design system v0.3.1 as a Tailwind theme.
+ * Source of truth: docs/design/tokens.css. Every value here is that file's value under a Tailwind name
+ * (src/styles/tokens.test.ts fails when they drift). Default Tailwind colours, radii, shadows, type sizes and
+ * breakpoints are switched off so only design values exist ("no new colours").
+ */
+@theme static {
+  /* Colours ------------------------------------------------------------------------------------------- */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-n-0: #ffffff;
+  --color-n-50: #f6f6f8;
+  --color-n-100: #f0f0f3;
+  --color-n-200: #e6e6ea;
+  --color-n-300: #d8d8de;
+  --color-n-400: #b0b0b8;
+  --color-n-500: #6e6e78;
+  --color-n-600: #5a5a64;
+  --color-n-900: #101014;
+  --color-group: #f4f4f6;
+
+  --color-a-50: #efecfe;
+  --color-a-100: #ded7fd;
+  --color-a-200: #c3b6fb;
+  --color-a-300: #9d88f7;
+  --color-a-400: #7a5ff4;
+  --color-a-500: #5a3ff0;
+  --color-a-600: #4429d6;
+  --color-a-700: #3520a6;
+  --color-a-800: #241573;
+  --color-a-hover: #4a30d8;
+  --color-a-line: #d5cbfb;
+
+  --color-danger-ink: #a3251b;
+  --color-danger-line: #f6c7c2;
+  --color-danger-solid: #b42318;
+  --color-danger-solid-hover: #912018;
+  --color-ink-btn: #101014;
+  --color-ink-btn-hover: #2a2a32;
+  --color-switch-on: #5a3ff0;
+  --color-switch-off: #e6e6ea;
+  /* input error border and halo (components sheet) = the no-show dot and background */
+  --color-error: #d9412f;
+  --color-error-tint: #fee4e2;
+
+  --color-st-pending-bg: #fef6e7;
+  --color-st-pending-line: #f2ddb0;
+  --color-st-pending-ink: #93500a;
+  --color-st-pending-dot: #dc8b0b;
+  --color-st-confirmed-bg: #efecfe;
+  --color-st-confirmed-line: #d5cbfb;
+  --color-st-confirmed-ink: #4429d6;
+  --color-st-confirmed-dot: #5a3ff0;
+  --color-st-completed-bg: #e7f8ee;
+  --color-st-completed-line: #bfe6d1;
+  --color-st-completed-ink: #066a41;
+  --color-st-completed-dot: #12a366;
+  --color-st-cancelled-bg: #eef1f6;
+  --color-st-cancelled-line: #d3dbe6;
+  --color-st-cancelled-ink: #41505f;
+  --color-st-cancelled-dot: #7b8ea3;
+  --color-st-noshow-bg: #fee4e2;
+  --color-st-noshow-line: #f6c7c2;
+  --color-st-noshow-ink: #a3251b;
+  --color-st-noshow-dot: #d9412f;
+
+  /* Type ---------------------------------------------------------------------------------------------- */
+  --font-*: initial;
+  /* the design's Onest, self-hosted by @fontsource-variable/onest under this family name */
+  --font-sans: 'Onest Variable', ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --text-*: initial;
+  --text-display: 64px;
+  --text-display--line-height: 68px;
+  --text-display--letter-spacing: -0.035em;
+  --text-display--font-weight: 700;
+  --text-h1: 44px;
+  --text-h1--line-height: 48px;
+  --text-h1--letter-spacing: -0.03em;
+  --text-h1--font-weight: 700;
+  --text-h2: 32px;
+  --text-h2--line-height: 38px;
+  --text-h2--letter-spacing: -0.025em;
+  --text-h2--font-weight: 700;
+  --text-h3: 22px;
+  --text-h3--line-height: 28px;
+  --text-h3--letter-spacing: -0.015em;
+  --text-h3--font-weight: 600;
+  --text-body-l: 17px;
+  --text-body-l--line-height: 26px;
+  --text-body: 15px;
+  --text-body--line-height: 22px;
+  --text-dense: 13px;
+  --text-dense--line-height: 18px;
+  --text-button: 15px;
+  --text-button--line-height: 20px;
+  --text-label: 11px;
+  --text-label--line-height: 14px;
+  --text-label--letter-spacing: 0.07em;
+  --text-label--font-weight: 600;
+  /* sizes the components sheet uses without a token: S buttons, chips, slots, nav (14/18); L button (16/20); counts (12/16) */
+  --text-small: 14px;
+  --text-small--line-height: 18px;
+  --text-button-l: 16px;
+  --text-button-l--line-height: 20px;
+  --text-micro: 12px;
+  --text-micro--line-height: 16px;
+
+  /* Layout -------------------------------------------------------------------------------------------- */
+  --spacing: 4px;
+
+  --breakpoint-*: initial;
+  --breakpoint-sm: 768px;
+  --breakpoint-md: 1024px;
+  --breakpoint-lg: 1280px;
+  --breakpoint-xl: 1440px;
+
+  --container-*: initial;
+  --container-marketplace: 1200px;
+  --container-booking: 1280px;
+  --container-text: 720px;
+  --container-modal-s: 400px;
+  --container-modal-m: 480px;
+  --container-modal-l: 640px;
+  --container-drawer: 480px;
+  --container-popover: 280px;
+  --container-popover-l: 360px;
+
+  --radius-*: initial;
+  --radius-input: 8px;
+  --radius-s: 10px;
+  --radius-m: 12px;
+  --radius-l: 14px;
+  --radius-card: 16px;
+  --radius-pill: 999px;
+
+  /* Elevation ----------------------------------------------------------------------------------------- */
+  --shadow-*: initial;
+  --shadow-raised: 0 8px 24px rgba(16, 16, 20, 0.16);
+  --shadow-sheet: 0 -8px 24px rgba(16, 16, 20, 0.16);
+  --shadow-primary: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 6px rgba(68, 41, 214, 0.3);
+  --shadow-primary-active: inset 0 1px 2px rgba(16, 16, 20, 0.28);
+  --shadow-focus: 0 0 0 2px #ffffff, 0 0 0 4px #7a5ff4;
+  --shadow-primary-focus: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 0 2px #ffffff, 0 0 0 4px #7a5ff4;
+  --shadow-input-focus: 0 0 0 3px #efecfe;
+  --shadow-input-error: 0 0 0 3px #fee4e2;
+  --shadow-knob: 0 1px 2px rgba(16, 16, 20, 0.2);
+  --shadow-segment: 0 0 0 1px #e6e6ea;
+  --shadow-switch-off: inset 0 0 0 1.5px #6e6e78;
+
+  /* Not Tailwind namespaces; used through var() in arbitrary values */
+  --primary-bg: linear-gradient(180deg, #8265ff 0%, #5a3ff0 100%);
+  --primary-bg-hover: linear-gradient(180deg, #7459fb 0%, #4a30d8 100%);
+  --primary-bg-active: linear-gradient(180deg, #5a3ff0 0%, #4429d6 100%);
+  --scrim: rgba(16, 16, 20, 0.4);
+
+  /* Motion -------------------------------------------------------------------------------------------- */
+  --animate-fade-in: fade-in 0.16s ease-out;
+  --animate-fade-out: fade-out 0.12s ease-in;
+  --animate-pop-in: pop-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-drawer-in: drawer-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-sheet-in: sheet-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+    }
+  }
+  @keyframes drawer-in {
+    from {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes sheet-in {
+    from {
+      transform: translateY(100%);
+    }
+  }
+}

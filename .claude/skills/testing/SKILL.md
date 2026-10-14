@@ -14,7 +14,7 @@ Strategy: ADR 0013. Today: Vitest unit tests for the booking rules in `apps/lega
 |---|---|---|---|
 | a rule in `@yeral/domain` (slots, statuses, deadlines) | Vitest unit test, table of cases | `packages/domain/src/<file>.test.ts` | `pnpm test --filter=@yeral/domain` |
 | a helper in `lib`, `sdk`, `i18n` | Vitest unit test | next to the file | `pnpm test --filter=@yeral/<pkg>` |
-| a component in `@yeral/ui` or an entity/feature UI | stories with `play` functions (they run as tests) | `<name>.stories.tsx` | `pnpm test:stories` |
+| a component in `@yeral/ui` or an entity/feature UI | stories with `play` functions (they run as tests) | `<name>.stories.tsx` | `pnpm test:stories` (Chromium; first time: `pnpm --filter @yeral/storybook exec playwright install chromium`) |
 | an endpoint | API test with `app.request()` on the test database | `apps/api/src/modules/<area>/*.test.ts` | `pnpm test --filter=@yeral/api` |
 | a user flow across screens or apps | Playwright spec | `apps/<app>/e2e/*.spec.ts`, cross-app in `e2e/` at the root | `pnpm e2e` |
 | a bug | the smallest test above that fails without the fix | — | — |

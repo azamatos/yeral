@@ -30,7 +30,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | Onest (`@fontsource-variable/onest`) | 5 | the design's font, self-hosted (latin, latin-ext, cyrillic, cyrillic-ext): Turkmen letters + Cyrillic, no Google Fonts request | Google Fonts link |
 | class-variance-authority + tailwind-merge + clsx | 0.7 / 3.7 / 2.1 | component variants; `cn()` merges classes so a passed `className` wins | tailwind-variants (fine too; cva matches shadcn output) |
 | Radix UI (`radix-ui`) | 1.8 | accessible primitives: dialog, popover, menu, select, tabs, tooltip | Base UI (newer), React Aria (heavier API) |
-| shadcn CLI | 4 | scaffolds Radix components into `@yeral/ui`; we own and restyle the code | ready-made kits (MUI, Mantine) that fight the design |
+| (shadcn CLI) | — | not used in M1: components are written directly on Radix from DS-Components; the CLI stays an option for complex primitives | ready-made kits (MUI, Mantine) that fight the design |
 | lucide-react | 1.56 | icons, stroke 1.75 (design system) | — |
 | sonner | 2 | toasts | our hand-rolled toast |
 | TanStack Table / Virtual | 9 / 3 | data tables and long lists in business and cms | AG Grid (heavy) |
@@ -85,7 +85,10 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 
 | Need | Use | From |
 |---|---|---|
-| class names | `cn()` | `@yeral/ui/cn` |
+| class names | `cn()` (tailwind-merge that knows the design's scales) | `@yeral/ui/cn` |
+| design-system components | `import { Button } from '@yeral/ui/button'` (subpath per component folder) | `@yeral/ui/*` |
+| logo, brand images | `Logo`, `brand` | `@yeral/ui/brand` |
+| app-wide providers | `UIProvider` (Lucide stroke 1.75, tooltip delay), `Toaster` | `@yeral/ui/provider`, `@yeral/ui/toast` |
 | business today / now, date maths | `today() nowMin() addDays() diffDays() dow() parseYmd() hm()` | `@yeral/domain/time` |
 | availability and statuses | `freeSlots() salonSlots() nextFree() openState() viewStatus() cancelDeadline()` | `@yeral/domain/rules` |
 | `+993` phones | `normPhone() fmtPhone()` | `@yeral/domain/phone` |
@@ -120,8 +123,11 @@ pnpm install
 pnpm db:up && pnpm db:setup     # (M2) Postgres in Docker, database for this worktree, migrations + seed
 pnpm dev                        # api + all apps + Storybook through turbo
 pnpm dev --filter=@yeral/client...  # one app and what it depends on
-pnpm gen package                # scaffold an internal package; ui-component (M1), slice (M3), endpoint (M2) follow
+pnpm gen package                # scaffold an internal package
+pnpm gen ui-component           # scaffold a design-system component + stories; slice (M3), endpoint (M2) follow
 pnpm check                      # lint, FSD lint, types, tests, format — same as CI
+pnpm test:stories               # every Storybook story as a Chromium test (render, play, axe)
+pnpm dev --filter=@yeral/storybook   # Storybook on :3005 (PORT_BASE + 5)
 pnpm e2e                        # (M3) Playwright against the local stack
 pnpm docker:up                  # (M2) production-like stack (nginx + images) on *.yeral.localhost
 pnpm changeset                  # describe a user-visible change
@@ -130,6 +136,10 @@ pnpm changeset                  # describe a user-visible change
 | client | business | cms | api | storybook | — |
 |---|---|---|---|---|---|
 | :3000 (:3001 while legacy lives) | :3002 | :3003 | :3004 (`/docs`) | :3005 | |
+
+Storybook dev generates Tailwind classes as stories load; if a new component looks unstyled, reload. If the port is
+busy, an old server is still running: `pkill -f "storybook/dist/bin/dispatcher"`. The static build (`pnpm build`) is
+what CI tests and deploys.
 
 Ports are `PORT_BASE` + offset (`PORT_BASE=3100` in a second worktree). Cookies on `localhost` are shared across ports,
 so one login works in every app locally.

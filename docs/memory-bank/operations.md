@@ -62,6 +62,7 @@ switch DNS records → switch CI's deploy step. The Docker setup exists and is b
 | `ci.yml` | pull request, push to `main` | pnpm install (cached) → `turbo run lint lint:fsd typecheck test build --affected` → Storybook tests in Vitest browser mode → API tests with a Postgres service → Playwright on affected apps → Docker image builds for affected deployables. Required to merge |
 | `release.yml` | push to `main` | Changesets: opens or updates «Version packages»; when merged, tags `@yeral/<app>@x.y.z`, creates GitHub Releases, deploys those apps to production |
 | `deploy.yml` | called by the two above | build → database migrations (api) → `wrangler deploy` (now) / image push + `docker compose up -d` over SSH (later) → smoke check: `/version.json` shows the commit, key pages answer 200 |
+| `ci.yml` → `deploy-storybook` | push to `main` after checks | builds Storybook and deploys it to storybook.yeral.app (no release needed: internal docs) |
 | Renovate | weekly | grouped dependency PRs; dev-dependency patches merge themselves when CI is green |
 
 ## Versioning and releases

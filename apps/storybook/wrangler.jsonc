@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "yeral-storybook",
+  // not a secret; lets CI deploy with only an API token
+  "account_id": "90af7d87d8b4cc5e517a859f6413f96e",
+  "compatibility_date": "2026-10-01",
+  // static site: the built Storybook, no Worker code
+  "assets": { "directory": "./storybook-static", "not_found_handling": "404-page" },
+  "routes": [{ "pattern": "storybook.yeral.app", "custom_domain": true }],
+}

@@ -12,6 +12,10 @@ case "$app:$env" in
     base=https://yeral.app
     paths=(/ /search /nozhnitsy /for-business)
     ;;
+  storybook:production)
+    base=https://storybook.yeral.app
+    paths=(/ /iframe.html /index.json)
+    ;;
   *)
     echo "No smoke checks defined for $app:$env"
     exit 0

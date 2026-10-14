@@ -4,11 +4,11 @@ _Last updated: 2026-10-14_
 
 ## Current focus
 
-**M0 is merged and the release path is proven** (version PR #2 → tags → CI deploy of yeral.app → smoke check green,
+**M1 (design system + Storybook) is built** on `feat/m1-design-system` (see `progress.md`); Neon is linked on
+`chore/neon`, waiting for the owner's `neon login`. **M0 is merged and the release path is proven** (version PR #2 → tags → CI deploy of yeral.app → smoke check green,
 `/version.json` = `d718e35`). **The web design v0.3 arrived** (`docs/design/`, 14.10.2026): the client site is fully
-designed, and the product is now a booking marketplace for any business that sells time. **Next: M1, the design system
-from tokens v0.3.1 + Storybook**, then M2 (platform with the multi-category model, api on Postgres, Docker), then M3
-(the client site on yeral.app, exactly as designed). Business workspace and CMS wait for their design rounds.
+designed, and the product is now a booking marketplace for any business that sells time. **Next: M2** (platform with the
+multi-category model, api on Postgres via Neon, Docker), then M3 (the client site on yeral.app, exactly as designed). Business workspace and CMS wait for their design rounds.
 
 ## Owner's direction
 
@@ -55,7 +55,7 @@ from tokens v0.3.1 + Storybook**, then M2 (platform with the multi-category mode
 
 ## Next steps
 
-1. M1: `@yeral/ui` from `docs/design/tokens.css` + `screens/system/DS-Components.dc.html`, `apps/storybook` on
-   `storybook.yeral.app`, `pnpm gen ui-component`, story tests (interactions, a11y, screenshots).
-2. M2: multi-category `@yeral/domain` + contract, i18n (tk/ru/en), sdk; api on Postgres with the demo seed; Docker + nginx.
-3. M3: the client site, screen by screen in the design's order.
+1. Merge M1; check storybook.yeral.app after the first deploy.
+2. Neon: owner runs `npx neon@latest login`; then `neon deploy`, verify the connection, merge `chore/neon`.
+3. M2: multi-category `@yeral/domain` + contract, i18n (tk/ru/en), sdk; api on Postgres with the demo seed; Docker + nginx.
+4. M3: the client site, screen by screen in the design's order.
