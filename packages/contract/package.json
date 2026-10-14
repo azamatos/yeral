@@ -1,0 +1,26 @@
+{
+  "name": "@yeral/contract",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Everything on the wire between the api and the apps: zod schemas of DTOs, inputs, enums and error codes (ADR 0006)",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@yeral/domain": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@yeral/config": "workspace:*",
+    "@yeral/i18n": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

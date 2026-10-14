@@ -1,88 +1,49 @@
-# Yeral API — contract for the backend
+# Ýeral API — guide
 
-> Planned: this moves to `apps/api` (Hono) with zod schemas in `@yeral/contract` and a generated OpenAPI document
-> ([ADR 0005](decisions/0005-typescript-backend-in-monorepo.md), [ADR 0006](decisions/0006-contract-and-sdk.md)).
-> Paths gain the `/v1` prefix. Until then this file describes the endpoints the mock implements.
+The api is `apps/api` (Hono, M2). Request and response shapes are the zod schemas in `@yeral/contract`
+(`packages/contract/src/<area>.ts`); the OpenAPI 3.1 document generated from the routes is the reference, served at
+`/docs` ([ADR 0005](decisions/0005-typescript-backend-in-monorepo.md), [ADR 0006](decisions/0006-contract-and-sdk.md)).
+Apps call it only through `@yeral/sdk`. The frozen `apps/legacy` keeps its own in-browser mock.
 
-The web app talks to the backend only through the `Api` interface in `apps/legacy/src/api/contract.ts`.
-Today it's served by the in-browser mock (`apps/legacy/src/api/mock`). In the new apps it's replaced by `apps/api` and `@yeral/sdk` (ADR 0005/0006).
+## Conventions
 
-This file maps every method to a REST endpoint. JSON field names are exactly the TypeScript types in
-`apps/legacy/src/api/contract.ts` and `apps/legacy/src/domain/types.ts`. Dates are salon-local `YYYY-MM-DD`; times are minutes
-from midnight (`870` = 14:30); all salon logic runs in `Asia/Ashgabat` (UTC+5). Money is in manats (TMT), integers.
+- Paths start with `/v1`; inside it changes are additive only (breaking changes ship as `/v2`).
+- Business-local dates `YYYY-MM-DD`, times of day in minutes from midnight (`870` = 14:30), instants in epoch ms,
+  money in whole manats. Every business is in `Asia/Ashgabat` today.
+- Text endpoints take `?lang=tk|ru|en` (default `tk`) and return resolved strings.
+- Lists: `{ items, total?, cursor? }`; pass `cursor` back for the next page (`null` = last page).
+- Errors: `{ error: { code, message?, details? } }` with the HTTP status from `ERROR_STATUS` (`@yeral/contract/errors`);
+  apps show `errors.<code>` from `@yeral/i18n`. `409 slot_taken` carries `details.alternatives` (3 nearest times),
+  `400 code_invalid` carries `details.attemptsLeft`, `429` codes carry `details.retryAfterSec`.
+- Session: an httpOnly cookie on the parent domain (`@yeral/lib/site` names and scopes it); mutations check `Origin`.
 
-## Auth
+## Client endpoints (M2)
 
-Phone + SMS code (OTP). The session is an HTTP-only cookie (or a bearer token for the mobile apps).
-
-| Method | Endpoint | Notes |
+| Area | Endpoint | Schemas (`@yeral/contract/…`) |
 |---|---|---|
-| `auth.requestCode(phone)` | `POST /auth/code` `{ phone }` → `{ sent: true }` | rate-limit per phone & IP; code valid 5 min |
-| `auth.verify(phone, code)` | `POST /auth/verify` `{ phone, code }` → `{ session: { user }, isNew }` | 400 `{ error: 'code' }` on a wrong code |
-| `auth.session()` | `GET /me` → `{ user } \| 401` | |
-| `auth.updateMe(patch)` | `PATCH /me` | name, birthday, gender, notif toggles |
-| `auth.logout()` | `POST /auth/logout` | |
+| Login | `POST /v1/auth/code` · `POST /v1/auth/verify` · `POST /v1/auth/logout` | `account`: `sendCode`, `verifyCode` → `verifyCodeResponse` |
+| Me | `GET /v1/me` · `PATCH /v1/me` · `DELETE /v1/me` · `POST /v1/me/phone/code` · `POST /v1/me/phone/verify` | `account`: `me`, `updateMe`, `changePhone` |
+| Favourites | `GET /v1/me/favorites` · `PUT /v1/me/favorites/:slug` · `DELETE /v1/me/favorites/:slug` | `catalog`: `businessCard` |
+| Categories | `GET /v1/categories` | `catalog`: `categoryList` |
+| Search | `GET /v1/search` (Home "Golaýyňyzda şu gün boş" too) · `GET /v1/search/suggest` | `catalog`: `searchQuery` → `searchResponse`, `suggest*` |
+| Places | `GET /v1/places/suggest` · `GET /v1/places/ip` | `catalog`: `placeList`, `ipPlace` |
+| Business page | `GET /v1/businesses/:slug` · `GET /v1/businesses/:slug/reviews` | `catalog`: `businessDetail`, `reviewList` |
+| Free times | `GET /v1/businesses/:slug/availability` (appointment) · `GET /v1/businesses/:slug/specialists/availability` · `GET /v1/businesses/:slug/tables` · `GET /v1/businesses/:slug/sessions` | `availability` |
+| Bookings | `POST /v1/bookings` · `GET /v1/me/bookings?tab=upcoming\|past` · `GET /v1/me/bookings/:code` | `bookings`: `createBooking`, `bookingList`, `bookingDetail` |
+| Booking actions | `POST /v1/me/bookings/:code/cancel` · `…/restore` · `PATCH …/note` · `POST …/reschedule` · `POST …/accept-alternative` · `POST …/review` · `PATCH …/review` | `bookings` |
+| Live updates | `GET /v1/events?after=` | `events` |
 
-## Catalogue (public, cacheable)
+Who may call: catalogue, search, places and free times are public (cacheable except free times); everything under
+`/v1/me` and `POST /v1/bookings` needs a session. Login code requests are rate-limited per phone and IP.
 
-| Method | Endpoint | Notes |
-|---|---|---|
-| `catalog.districts()` | `GET /districts` | reference data |
-| `catalog.search(p)` | `GET /salons?q=&category=&district=&date=&openNow=&instant=&sort=&bounds=n,s,e,w` → `{ items: SalonCard[], total }` | `date` keeps only salons with free windows that day; `services` on each card = the 3 most booked, or the ones matching `q`/`category` |
-| `catalog.salon(slug)` | `GET /salons/:slug` → `SalonDetail` | 404 when unknown; old slugs answer `301` to the new one (slug can change once in 30 days, per the business deck) |
-| `catalog.slugs()` | `GET /salons/slugs` | sitemap |
-| `catalog.reviews(id)` | `GET /salons/:id/reviews` | only from finished visits; newest first |
-| `catalog.similar(id)` | `GET /salons/:id/similar` | same categories, nearest first |
-| `catalog.suggest(q)` | `GET /suggest?q=` → `{ services: {name, salons}[], salons: SalonCard[] }` | search-as-you-type |
+## Business and CMS endpoints
 
-## Availability (public, not cached)
+Business workspace (`/v1/biz/...`, M5): calendar, requests, bookings, clients, services, team, roles, rules, hours,
+profile, branches — permissions and redaction per ADR 0018. CMS (`/v1/admin/...`, M6). Their schemas join the contract
+with their milestones.
 
-Computed by the backend with the same rules as `src/domain/logic.ts`: opening hours and exceptions,
-staff schedule and exceptions, **buffer** after each visit, **minimum lead time**, **booking window**,
-active bookings and slots held by reschedule proposals.
+## Notifications the api sends
 
-| Method | Endpoint | Notes |
-|---|---|---|
-| `availability.day(q)` | `GET /salons/:id/availability?services=a,b&staff=&date=&exclude=` → `{ date, closed, slots: { start, staff[] }[] }` | `staff` omitted = any master; `exclude` = booking being moved |
-| `availability.days(q)` | `GET /salons/:id/availability/days?services=&staff=&from=&days=` → `{ date, count, closed }[]` | calendar dots |
-| `availability.nextFree(id, staff?)` | `GET /salons/:id/next-free?staff=` → `{ date, start, staffId } \| null` | |
-| `availability.nextFreeMany(ids, date?)` | `GET /availability/next?salons=a,b,c&date=` → `{ [salonId]: number[] }` | search cards |
-
-## Bookings (client)
-
-| Method | Endpoint | Notes |
-|---|---|---|
-| `bookings.mine()` | `GET /me/bookings` → `BookingView[]` | matched by the user's phone across salons (a salon may have booked them by phone) |
-| `bookings.get(id)` | `GET /me/bookings/:id` | |
-| `bookings.create(inp)` | `POST /me/bookings` `{ salonId, staffId, serviceIds, date, start, comment?, channel, replaceId? }` → `{ id, status }` | **409** `{ reason: 'taken', alternatives: number[] }` when the slot went meanwhile; `status` is `confirmed` when the salon has instant confirmation, else `pending`; `channel` = `marketplace` \| `direct` (salon's own link — no commission) |
-| `bookings.cancel(id, reason)` | `POST /me/bookings/:id/cancel` `{ reason }` | server sets `late` when inside the salon's free-cancellation window |
-| `bookings.acceptProposal(id)` | `POST /me/bookings/:id/proposal/accept` | |
-| `bookings.declineProposal(id)` | `POST /me/bookings/:id/proposal/decline` | |
-| `bookings.confirmAttendance(id)` | `POST /me/bookings/:id/attend` | the «confirm the day before» rule after two no-shows |
-| `bookings.notMe(id)` | `POST /me/bookings/:id/not-me` | phone booking made by the salon with a wrong number |
-
-## Reviews, favourites, notifications
-
-| Method | Endpoint |
-|---|---|
-| `reviews.mine()` | `GET /me/reviews` |
-| `reviews.create(bookingId, …)` | `POST /me/bookings/:id/review` `{ rating, text, tags }` (only for `done` visits, one per booking) |
-| `reviews.update(id, …)` | `PATCH /me/reviews/:id` |
-| `reviews.remove(id)` | `DELETE /me/reviews/:id` |
-| `favorites.list()` / `toggle(id)` | `GET /me/favorites`, `PUT/DELETE /me/favorites/:salonId` |
-| `notifications.list()` / `markRead(id?)` | `GET /me/notifications`, `POST /me/notifications/read` `{ id? }` |
-
-## Notifications the backend sends (mirror screens)
-
-Every salon action has a client-side screen; every client action reaches the salon. The mock's
-`notify(...)` calls in `apps/legacy/src/api/mock/index.ts` list them; in production they go out as push + SMS:
-
-- salon confirms / declines (with reason) / proposes another time / cancels / books by phone / marks a no-show → **client**
-- client sends a request / cancels (late or not) / accepts or declines a proposal / says «это не я» / confirms the visit / leaves a review → **salon**
-
-## Not yet in the contract (phase 2, business workspace)
-
-Salon-side endpoints: calendar (`GET /biz/calendar?staff=&from=&to=`), requests, manual booking,
-drag-to-move (proposal for app clients, direct move for phone clients), complaints / no-show, clients & notes,
-services, team & roles & schedules with conflict resolution, booking rules, hours & exceptions, reviews & answers,
-analytics. The prototype's `app/src/data/actions.ts` is the reference for each of them.
+Every business action reaches the client and every client action reaches the business, as an `events` row (open screens
+refresh) and, for clients, an SMS from the design's templates (client spec §6): confirmed, declined with reason, expired
+with 3 times, reminders 1 day and 2 h before, review ask 2 h after the end. No SMS when a request is sent.

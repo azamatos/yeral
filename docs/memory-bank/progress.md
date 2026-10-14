@@ -61,6 +61,11 @@
   `useFmt`) that print the design's formats on server and browser alike (`1 410 TMT`, `250 TMT-den`, `1 sag 30 min`,
   `1,2 km`, `Penşenbe, 15 oktýabr`, `14 okt.`). `zod` and `use-intl` added to the catalog.
 
+- **2026-10-14 · M2c `@yeral/contract`**: zod 4 schemas for every client screen (`common`, `errors`, `catalog`,
+  `availability`, `bookings`, `account`, `events`), named for OpenAPI with `.meta({ id })`; error codes with their HTTP
+  status and messages in tk/ru/en (`@yeral/i18n` `errors` namespace; a test fails when a code has no message);
+  `docs/API.md` rewritten as the endpoint map.
+
 ## Roadmap
 
 Infrastructure first (owner, 2026-10-13). Each milestone ends merged, deployed to staging, memory bank updated.
