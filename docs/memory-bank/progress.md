@@ -47,6 +47,14 @@
   with field-level redaction, a CRM per business, branches and verification. Recorded in ADR 0017 (revised) and ADR 0018;
   client-side gaps logged as open questions 11–12. Its data matches the client demo (Glow Studio, services s1–s11, staff).
 
+- **2026-10-14 · M2a `@yeral/domain`**: the booking engine as pure TypeScript with subpath exports (`time`, `model`,
+  `rules`, `hours`, `availability`, `lifecycle`, `permissions`, `clients`, `pricing`, `geo`, `phone`, `id`), following
+  ADR 0017/0018 and the business design: confirm modes and hold time, booking rules with their option lists, special days
+  with special hours, staff shifts and per-day breaks, service chains with «Islendik hünärmen» split, buffers (per-service
+  override) that must fit hours, slot step, staff bookings without lead/window, plan checks for drag-to-move, tables
+  (smallest free table, VIP minimum), classes (seats, max 2), permissions with "Bes" visibility, client stats and
+  segments, no-show block. 112 Vitest cases, the legacy rule cases carried over.
+
 ## Roadmap
 
 Infrastructure first (owner, 2026-10-13). Each milestone ends merged, deployed to staging, memory bank updated.

@@ -90,10 +90,18 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | design-system components | `import { Button } from '@yeral/ui/button'` (subpath per component folder) | `@yeral/ui/*` |
 | logo, brand images | `Logo`, `brand` | `@yeral/ui/brand` |
 | app-wide providers | `UIProvider` (Lucide stroke 1.75, tooltip delay), `Toaster` | `@yeral/ui/provider`, `@yeral/ui/toast` |
-| business today / now, date maths | `today() nowMin() addDays() diffDays() dow() parseYmd() hm()` | `@yeral/domain/time` |
-| availability and statuses | `freeSlots() salonSlots() nextFree() openState() viewStatus() cancelDeadline()` | `@yeral/domain/rules` |
-| `+993` phones | `normPhone() fmtPhone()` | `@yeral/domain/phone` |
-| ids | `uid()` | `@yeral/domain/id` |
+| business today / now, date maths | `today() nowMin() localOf() epochOf() addDays() diffDays() dow() parseYmd() hm() parseHm()` (pass `now` for a fixed clock) | `@yeral/domain/time` |
+| enums shared with the contract and the database, `Localized` text | `BOOKING_STATUSES BOOKING_SOURCES CONFIRM_MODES …`, `localized()` | `@yeral/domain/model` |
+| booking rules: defaults, option lists, validation | `DEFAULT_RULES RULE_OPTIONS rulesErrors()` | `@yeral/domain/rules` |
+| opening hours, special days, staff shifts and breaks | `businessDay() staffDay() workingIntervals() staffOffReason() openState()` | `@yeral/domain/hours` |
+| free times: appointment, table, class | `appointmentSlots() findAppointmentSlot() nearestSlots() nextFreeSlot() checkPlan() busyOf() tableSlots() assignTable() maxSeats()` | `@yeral/domain/availability` |
+| statuses, hold time, who may do what with a booking | `initialStatus() holdUntil() effectiveStatus() dueTransition() cancelDeadline() clientActions() canAnswerRequest() canComplain() …` | `@yeral/domain/lifecycle` |
+| workspace roles and permissions | `ROLE_TEMPLATES can() canActOn() seesBooking()` | `@yeral/domain/permissions` |
+| client stats, segments, online block | `clientStats() clientSegments() isOnlineBlocked()` | `@yeral/domain/clients` |
+| price totals, calendar day summary | `priceTotal() daySummary()` | `@yeral/domain/pricing` |
+| distances, radius box | `distanceM() boundingBox() popularity()` | `@yeral/domain/geo` |
+| `+993` phones | `isPhone() isMobile() toE164() formatPhone()` | `@yeral/domain/phone` |
+| ids, booking codes | `newId() bookingCode()` | `@yeral/domain/id` |
 | money, dates, durations, relative days on screen | `useFmt()` (`money price dur dayMonth when whenInline relDay …`) | `@yeral/i18n` |
 | site URLs, cookie domain, brand | `site` | `@yeral/lib/site` |
 | add to calendar | `buildIcs() downloadIcs()` | `@yeral/lib/ics` |
