@@ -20,6 +20,20 @@ Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to
 | `States.dc.html` | — | board · 1440×3760 | No results · location ask · location denied · slot taken · not bookable online · closed today · network error · loading skeleton · 404 · login required for favourite |
 | `Client-Map.dc.html` | — | board · 1440×2860 | Site map, flow, inventory, decisions log |
 
+## business/ — business.yeral.app (spec: `../business/README.md`)
+
+| File | Route | Kind · frame | States / tweaks |
+|---|---|---|---|
+| `B-Shell.dc.html` | — | board · 1600×2140 | Sidebar, top bar, business switcher, user menu, tablet rail, request toast, verification banner |
+| `B-Calendar.dc.html` | `/tk/calendar` | page · 1440×1420 | Tweaks `view` (dayAll · dayOne · weekAll · weekOne), `panel` (none · request · booking · new · decline · complaint · move); Play: click slots/blocks, confirm/decline, drag move, create booking |
+| `B-Bookings.dc.html` | `/tk/bookings` | page · 1440×1320 | Tabs Haýyşlar/Şu gün/Gelýän/Geçen/Ýatyrylan, filters, bulk bar, drawers, decline modal; tweaks `tab`, `panel`, `selected` |
+| `B-Clients.dc.html` | `/tk/clients` | page · 1440×1120 | Filter chips, search, bulk bar, new-client modal (phone only required); tweaks `filter`, `modal` |
+| `B-Client.dc.html` | `/tk/clients/{id}` | page · 1440×1680 | Stats, notes (alert notes), upcoming, history, complaints, settings; tweaks `edit`, `composer` |
+| `B-Onboarding.dc.html` | `/tk/signup` → `/tk/setup/{step}` | page · 1440×1024 | 8 steps; tweaks `step`, `homeBased` |
+| `B-Settings.dc.html` | `/tk/settings/{profile,rules,hours,link,branches}` | page · 1440×1540 | Tweaks `pane`, `dirty`, `exceptionModal`; client-view preview of rules |
+| `B-Services.dc.html` | `/tk/settings/services` | page · 1440×1440 | Catalog + service drawer; tweak `drawer` |
+| `B-Team.dc.html` | `/tk/settings/team`, `/roles` | page · 1440×1360 | Team table, staff drawer, invite (3 steps), disable modal, role editor; tweaks `tab`, `panel` |
+
 ## system/ — design system
 `Main.dc.html` (Foundations: colour, type, layout, spacing), `DS-Components.dc.html` (all components with hover/focus/pressed/disabled), `DS-Booking.dc.html` (categories × booking types).
 

@@ -6,7 +6,7 @@ const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../../../packages/ui/src/**/*.stories.@(ts|tsx)'],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y', '@storybook/addon-vitest'],
   core: { disableTelemetry: true },
-  staticDirs: [{ from: '../../../docs/design/assets/photos', to: '/photos' }],
+  staticDirs: ['../public', { from: '../../../docs/design/assets/photos', to: '/photos' }],
   viteFinal: (vite) => ({ ...vite, plugins: [...(vite.plugins ?? []), tailwindcss()] }),
 }
 

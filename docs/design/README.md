@@ -30,7 +30,7 @@ Native mobile apps (client + business) already exist as designs; the web follows
 **Money:** manat, shown as `40 TMT`. No online payment yet: clients pay at the place. Card deposits will come later — keep a reserved row in booking summaries (hidden for now).
 
 ### Product rules that must never break
-1. **The business confirms every booking by hand.** A client never sees "booked" until the business confirms. First state is always *Garaşylýar* (Pending). Copy says "sent", not "booked".
+1. **By default the business confirms every booking by hand.** A client never sees "booked" until the business confirms: first state *Garaşylýar* (Pending), copy says "sent", not "booked". A business may switch on **instant confirmation**; then the booking is *Tassyklandy* at once and the sent screen says "Ýazylyş tassyklandy". Unanswered requests expire after the business's hold time (15 min–24 h, default 30 min, never past the start) and the client gets 3 alternative times.
 2. **Five statuses, one meaning everywhere** (client web, apps, business, CMS): Pending · Confirmed · Completed · Cancelled · No-show. See §6.
 3. A visit counts as **Completed by default** after its end time unless the business marks No-show.
 4. A phone booking (entered by the business) is *Confirmed* + a phone icon — not a separate status.
@@ -126,7 +126,7 @@ Focused layout: main column (max 720) + sticky summary card (360). Steps:
 2. **Hünärmen** — "Islendik hünärmen" (first, default: earliest availability) + specialists who do all selected services; each shows rating and "Indiki boş wagt: ertir 10:00".
 3. **Wagt** — horizontal date strip (14 days, today first, closed days disabled), slots grouped Irden (morning) / Günortan (afternoon) / Agşam (evening); empty day → "Bu gün boş wagt ýok" + "Indiki boş gün: Anna, 16 oktýabr" button. Slot step = service duration, start every 15 or 30 min (business setting).
 4. **Tassyklama** — if logged out: phone (+993 prefix, 8 digits) → "Kod iber" → 4-digit SMS code (auto-advance, resend timer 0:59) → name (first time only). Then: optional note to the business, booking rules (cancellation window), payment at the place, consent line. Primary: **"Ýazylyşy ugrat"** (Send booking).
-5. **Ugradyldy** (sent) — success state: status badge Garaşylýar, "Biznes tassyklanda SMS bilen habar bereris", summary, "Senenama goş" (add to calendar .ics), "Ýazylyşlaryma geç", "Baş sahypa".
+5. **Ugradyldy** (sent) — success state: status badge Garaşylýar, "Biznes tassyklanda SMS bilen habar bereris", summary, "Senenama goş" (add to calendar .ics), "Ýazylyşlaryma geç", "Baş sahypa". For instant-confirm businesses the same screen shows title "Ýazylyş tassyklandy", badge Tassyklandy and no "waiting" timeline step. When the business has a hold time, the pending explanation adds "Jogap bermese, {N} minutdan soň size başga wagtlary hödürläris."
 
 Errors: slot taken meanwhile → inline banner on step 4 "Bu wagt ýaňy alyndy. Golaý boş wagtlar:" + 3 nearest slots, and "Ýazylyşy ugrat" stays disabled until a new time is picked; SMS code wrong → "Kod nädogry. Ýene N synanyşyk galdy." (3 tries then 60 s lock); network → toast with retry.
 
@@ -179,8 +179,8 @@ A booking cancelled from Gelýän stays in that tab (greyed, Ýatyryldy badge, t
             client sends
                 │
                 ▼
-        ┌── Garaşylýar (Pending) ──┐
-  business confirms        business declines / client cancels / expires at start time
+        ┌── Garaşylýar (Pending) ──┐          (skipped when the business uses instant confirmation)
+  business confirms        business declines (reason shown to client) / client cancels / hold time expires
         │                          │
         ▼                          ▼
   Tassyklandy (Confirmed)      Ýatyryldy (Cancelled)  ← cancelledBy: client | business | system
@@ -195,7 +195,8 @@ A booking cancelled from Gelýän stays in that tab (greyed, Ýatyryldy badge, t
 SMS (TK templates; RU/EN by user language):
 - Sent: — (no SMS; on-screen only)
 - Confirmed: "Ýeral: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: yeral.app/b/{id}"
-- Declined: "Ýeral: {business} {date} {time} ýazylyşyny kabul edip bilmedi. Başga wagt saýlaň: {link}"
+- Declined: "Ýeral: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}"
+- Expired (no answer within hold time): "Ýeral: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {t1}, {t2}, {t3} — {link}"
 - Reminder −1 day / −2 h: "Ýatlatma: ertir {time} {business}, {address}."
 - Review ask (2 h after end): "{business}-da bolşuňyz nähili boldy? Baha beriň: {link}"
 
@@ -208,7 +209,7 @@ Category    id, icon, name{tk,ru,en}, bookingTypes[], specialistWord{tk,ru,en}
 Business    id, slug, name, categoryIds[], bookingTypes[], photos[], rating, reviewsCount,
             address, geo{lat,lng}, hideExactAddress, phone, hours[{day,open,close}], exceptions[],
             about{tk,ru,en}, amenities[], rules{cancelWindowMin, lateToleranceMin, note},
-            typicalConfirmMin, priceLevel, avgBill?, onlineBookingPaused (bool),
+            typicalConfirmMin, priceLevel, avgBill?, onlineBookingPaused (bool), confirmMode: manual|instant, holdMinutes,
             exceptions[{date, label, closed: bool, hours?}]   // e.g. {label: 'Baýramçylyk', closed: true}
 ServiceGroup id, businessId, name, order
 Service     id, groupId, name, description?, durationMin, price{type: fixed|from|free|hidden, amount}, specialistIds[]
