@@ -33,7 +33,7 @@ code login and sessions. Everything about businesses is ours, in Drizzle tables 
 | `booking_rules` | one row per business (spec §8 "Ýazylyş düzgünleri") | see ADR 0017 revision for the fields |
 | `clients` | the business's client list: unique `(businessId, phone)`, name, birthday, source, tags, `noRemindersSms`, `onlineBlocked`, `userId` when the phone belongs to a Ýeral user | an online booking finds or creates the client row by the user's verified phone. Visits, average bill, last visit and no-shows are computed from bookings, not stored |
 | `client_notes` | text, `alert` ("Ýazylanda görkez": shown on booking blocks and drawers), author, time | team-only |
-| `business_verification` | `pending · verified · rejected`, reason | only verified businesses are public: search, category pages, sitemap, business page. Members see their own page with a "Barlagda" banner. The workspace works from the first minute |
+| `businesses.verification` (+ `verification_history`) | `pending · verified · rejected`, reason | only verified businesses are public: search, category pages, sitemap, business page. Members see their own page with a "Barlagda" banner. The workspace works from the first minute |
 
 **Permissions** are the nine keys of spec §1, in code: visibility `own | all` plus `confirm`, `move`, `noshow`, `clients`,
 `services`, `invite`, `revenue`, `settings`. The owner role has all of them and can't be edited or removed. A person's
