@@ -18,7 +18,7 @@
     "online_disabled": "Bu ýer häzir onlaýn ýazylyşy kabul etmeýär",
     "online_blocked": "Bu ýere diňe jaň edip ýazylyp bilersiňiz.",
     "not_bookable": "Bu wagta ýazylyp bolmaýar.",
-    "party_too_large": "9 we ondan köp adam bolsa, jaň ediň.",
+    "party_too_large": "{callFrom} we ondan köp adam bolsa, jaň ediň.",
     "session_full": "Sapak doly.",
     "invalid_status": "Bu ýazylyş eýýäm üýtgedi.",
     "request_expired": "Haýyşyň wagty geçdi.",
