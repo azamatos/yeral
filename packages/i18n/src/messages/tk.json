@@ -1,0 +1,88 @@
+{
+  "common": {
+    "brand": "Ýeral"
+  },
+  "status": {
+    "pending": "Garaşylýar",
+    "confirmed": "Tassyklandy",
+    "completed": "Tamamlandy",
+    "cancelled": "Ýatyryldy",
+    "noshow": "Gelmedi"
+  },
+  "fmt": {
+    "money": "{amount} TMT",
+    "priceFrom": "{amount} TMT-den",
+    "priceFree": "Mugt",
+    "priceApprox": "≈ {amount} TMT",
+    "minutes": "{m} min",
+    "hours": "{h} sag",
+    "hoursMinutes": "{h} sag {m} min",
+    "km": "{n} km",
+    "m": "{n} m",
+    "today": "Şu gün",
+    "tomorrow": "Ertir",
+    "weekdayDate": "{weekday}, {date}",
+    "dayMonth": "{day} {month}",
+    "monthYear": "{month} {year}",
+    "months": {
+      "1": "ýanwar",
+      "2": "fewral",
+      "3": "mart",
+      "4": "aprel",
+      "5": "maý",
+      "6": "iýun",
+      "7": "iýul",
+      "8": "awgust",
+      "9": "sentýabr",
+      "10": "oktýabr",
+      "11": "noýabr",
+      "12": "dekabr"
+    },
+    "monthsStandalone": {
+      "1": "Ýanwar",
+      "2": "Fewral",
+      "3": "Mart",
+      "4": "Aprel",
+      "5": "Maý",
+      "6": "Iýun",
+      "7": "Iýul",
+      "8": "Awgust",
+      "9": "Sentýabr",
+      "10": "Oktýabr",
+      "11": "Noýabr",
+      "12": "Dekabr"
+    },
+    "monthsShort": {
+      "1": "ýan.",
+      "2": "few.",
+      "3": "mar.",
+      "4": "apr.",
+      "5": "maý",
+      "6": "iýun",
+      "7": "iýul",
+      "8": "awg.",
+      "9": "sen.",
+      "10": "okt.",
+      "11": "noý.",
+      "12": "dek."
+    },
+    "weekdays": {
+      "0": "Duşenbe",
+      "1": "Sişenbe",
+      "2": "Çarşenbe",
+      "3": "Penşenbe",
+      "4": "Anna",
+      "5": "Şenbe",
+      "6": "Ýekşenbe"
+    },
+    "weekdaysShort": {
+      "0": "Du",
+      "1": "Si",
+      "2": "Ça",
+      "3": "Pe",
+      "4": "An",
+      "5": "Şe",
+      "6": "Ýe"
+    }
+  }
+}

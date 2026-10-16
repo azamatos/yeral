@@ -1,0 +1,105 @@
+import { describe, expect, it } from 'vitest'
+import { createFmt, formatNumber } from './fmt'
+import { LOCALES, messages } from './messages'
+
+const tk = createFmt('tk')
+const ru = createFmt('ru')
+const en = createFmt('en')
+
+describe('numbers and money', () => {
+  it('groups thousands with a no-break space in tk and ru, a comma in en; decimal comma in tk and ru', () => {
+    expect(formatNumber('tk', 1410)).toBe('1\u00a0410')
+    expect(formatNumber('tk', 980)).toBe('980')
+    expect(formatNumber('tk', 14100)).toBe('14 100')
+    expect(formatNumber('en', 14100)).toBe('14,100')
+    expect(tk.rating(4.9)).toBe('4,9')
+    expect(en.rating(4.9)).toBe('4.9')
+  })
+
+  it('prints prices the way the design does', () => {
+    expect(tk.money(40)).toBe('40 TMT')
+    expect(tk.price({ type: 'fixed', amount: 80 })).toBe('80 TMT')
+    expect(tk.price({ type: 'from', amount: 250 })).toBe('250 TMT-den')
+    expect(ru.price({ type: 'from', amount: 250 })).toBe('от 250 TMT')
+    expect(tk.price({ type: 'free', amount: 0 })).toBe('Mugt')
+    expect(tk.price({ type: 'hidden', amount: 0 }, 150)).toBe('≈ 150 TMT')
+    expect(tk.price({ type: 'hidden', amount: 0 })).toBe('')
+  })
+})
+
+describe('durations and distances', () => {
+  it.each([
+    [30, '30 min'],
+    [60, '60 min'],
+    [75, '1 sag 15 min'],
+    [90, '1 sag 30 min'],
+    [120, '2 sag'],
+  ])('tk duration %i = %s', (min, text) => {
+    expect(tk.duration(min)).toBe(text)
+  })
+
+  it('ru and en durations', () => {
+    expect(ru.duration(90)).toBe('1 ч 30 мин')
+    expect(en.duration(120)).toBe('2 h')
+  })
+
+  it.each([
+    [850, '850 m'],
+    [1200, '1,2 km'],
+    [3000, '3 km'],
+    [12_400, '12 km'],
+    [4, '10 m'],
+  ])('tk distance %i m = %s', (metres, text) => {
+    expect(tk.distance(metres)).toBe(text)
+  })
+
+  it('en uses a decimal point', () => {
+    expect(en.distance(1200)).toBe('1.2 km')
+  })
+})
+
+describe('dates and times', () => {
+  it('weekday capitalised, month lower-case', () => {
+    expect(tk.weekdayDate('2026-10-15')).toBe('Penşenbe, 15 oktýabr')
+    expect(ru.weekdayDate('2026-10-15')).toBe('Четверг, 15 октября')
+    expect(en.weekdayDate('2026-10-15')).toBe('Thursday, 15 October')
+  })
+
+  it('short dates and the month picker header', () => {
+    expect(tk.shortDate('2026-10-14')).toBe('14 okt.')
+    expect(tk.monthYear('2026-10-14')).toBe('Oktýabr 2026')
+    expect(ru.monthYear('2026-10-14')).toBe('Октябрь 2026')
+  })
+
+  it('relative days', () => {
+    expect(tk.relativeDay('2026-10-14', '2026-10-14')).toBe('Şu gün')
+    expect(tk.relativeDay('2026-10-15', '2026-10-14')).toBe('Ertir')
+    expect(tk.relativeDay('2026-10-17', '2026-10-14')).toBe('Şenbe')
+    expect(tk.weekdayShort('2026-10-12')).toBe('Du')
+  })
+
+  it('24-hour times and phones', () => {
+    expect(tk.time(870)).toBe('14:30')
+    expect(tk.timeRange(870, 930)).toBe('14:30–15:30')
+    expect(tk.phone('99365901122')).toBe('+993 65 90 11 22')
+  })
+})
+
+describe('message catalogues', () => {
+  const keys = (o: object, prefix = ''): string[] =>
+    Object.entries(o).flatMap(([k, v]) => (typeof v === 'object' && v !== null ? keys(v as object, `${prefix}${k}.`) : [`${prefix}${k}`]))
+
+  it('every key exists in tk, ru and en', () => {
+    const tkKeys = keys(messages.tk).sort()
+    for (const locale of LOCALES) expect(keys(messages[locale]).sort()).toEqual(tkKeys)
+  })
+
+  it('no empty messages', () => {
+    for (const locale of LOCALES) {
+      const empty = keys(messages[locale]).filter(
+        (k) => !k.split('.').reduce<unknown>((o, part) => (o as Record<string, unknown>)[part], messages[locale]),
+      )
+      expect(empty).toEqual([])
+    }
+  })
+})

@@ -10,7 +10,8 @@ References: ADR 0008 (use-intl), ADR 0016 (tk/ru/en, prefixed URLs), `docs/desig
 
 ## Where strings go
 
-- Shared namespaces (`common`, `categories`, `status`, `errors`, units) → `packages/i18n/messages/{tk,ru,en}/`.
+- Shared namespaces (`common`, `status`, `errors`, `fmt` = units, months, weekdays) → `packages/i18n/src/messages/{tk,ru,en}.json`.
+  Category names are not messages: they live in the CMS catalogue (`name{tk,ru,en}` in the database).
 - Everything else → `apps/<app>/messages/{tk,ru,en}.json`, one namespace per screen or slice (`home`, `search`,
   `business`, `booking`, `account`).
 - Keys camelCase, grouped by where they appear; reuse `common.*` before adding a duplicate. Every key exists in all three

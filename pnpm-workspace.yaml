@@ -36,6 +36,7 @@ catalog:
   tailwindcss: ^4.3.3
   '@tailwindcss/vite': ^4.3.3
   turbo: ^2.11.8
+  use-intl: ^4.14.9
   '@turbo/gen': ^2.11.8
   '@types/node': ^24.0.0
   '@types/react': ^19.3.0
@@ -46,6 +47,7 @@ catalog:
   vitest: ^5.0.4
   '@vitest/browser-playwright': ^5.0.4
   wrangler: ^4.150.0
+  zod: ^4.6.7
 
 # Install scripts (pnpm 11+): nothing runs unless listed as true. These ship prebuilt binaries through
 # optional dependencies, so their scripts aren't needed; listing them as false keeps installs quiet.
