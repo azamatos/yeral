@@ -8,8 +8,11 @@ _Last updated: 2026-10-16_
 #13–#16 in #21 (each fix with a test that failed first; details in `progress.md`). The api serves every client screen on
 Postgres; not deployed (staging: owner said "not yet", open question 13). **Design export v0.4 arrived**: the business
 workspace is fully designed (rounds 4–5), design system v0.4 with two new boards and `docs/design/COMPONENTS.md` (the
-component map), tokens v0.4 mapped into `@yeral/ui`. **Next**: grow `@yeral/ui` from `COMPONENTS.md` in its order
-(extend the existing components, then the new primitives), then M3 (client site) screen by screen; M5 after.
+component map), tokens v0.4 mapped into `@yeral/ui`. **Released 2026-10-16** (#20): `@yeral/ui@0.2.0`, api, domain,
+contract, sdk, lib, i18n `0.1.0`, Storybook `0.1.1` — tags and GitHub Releases only; yeral.app still serves
+`apps/legacy` until M3 replaces it. **Design round 6 requested** (`docs/design-requests/2026-10-16-round-6.md`, 18 logic
+gaps for export v0.5). **Next**: grow `@yeral/ui` from `COMPONENTS.md` in its order (extend the existing components,
+then the new primitives), then M3 (client site) screen by screen; M5 after.
 
 ## Owner's direction
 
@@ -54,12 +57,12 @@ instead of Better Auth (the design's attempts/lock/resend rules, no placeholder 
 | # | Question | Who | Blocks |
 |---|---|---|---|
 | 1 | Business workspace: checkout / POS and a table/class setup wizard aren't designed (round 5 covered the rest) | owner (Claude Design) | parts of M5 |
-| 11 | Client side of the business rules, not drawn yet: decline reason + 3 alternative times to accept in one tap (booking drawer and the SMS link), the expired-request alternatives, a client blocked from online booking. Plan until drawn: show them in the booking detail drawer with time chips; a blocked client gets the "not bookable online" state with "Jaň et" | owner (design) | M3 polish |
 | 13 | **Go-ahead for api staging on Cloudflare** (2026-10-16: "not yet"): the Neon branch `stage`, a Hyperdrive config (`--caching-disabled`), the Worker `yeral-api-stage` on `api-stage.yeral.app` (a new DNS record); then CI deploys it on every green push to `main` | owner | api staging |
 | 15 | Staging and production share session cookies (`Domain=yeral.app`): a separate staging domain (recommended, with question 7), or api-host-only `__Host-` cookies everywhere (revises ADR 0019) | owner | api staging |
-| 16 | Moving table and class bookings: "Başga wagta geçir" is drawn on every confirmed booking, but their rule texts only mention cancelling; the api answers `not_bookable` | owner (design) | M3 booking detail |
+| 16 | Moving table and class bookings: "Başga wagta geçir" is drawn on every confirmed booking, but their rule texts only mention cancelling; the api answers `not_bookable` (design round 6, A4) | owner (design) | M3 booking detail |
 | 17 | Design v0.4 open items (`docs/design/CHANGELOG.md` §6, business README §24): Topar trial behind "Synap gör", Ýeral's bank and company details, support phone, Telegram link, font sizes 28 / 24 / 80 (mapped to h2 / h3 / display for now), businesses open past midnight | owner | B2B pricing, billing |
-| 12 | A new business is "Barlagda" until verified: its link and QR are given at setup step 8. Plan: the public page answers 404 until verified; members see it with a banner | owner | M3/M5 |
+| 18 | Design round 6 (`docs/design-requests/2026-10-16-round-6.md`; replaces the old questions 11 and 12): client side of declines, expiries, waiting moves, undo failures, phone-only clients, hidden prices, mobile-only login, party limit as a setting, midnight, overlapping special days, unverified businesses, reviews under moderation | owner (Claude Design → export v0.5) | M3 states, M5 |
+| 19 | What counts as "found through Ýeral search" for the commission (search, home cards, category pages, map, favourites?) and for how long | owner | M5 billing; bookings must record the entry point |
 | 2 | CMS design (six modules) | owner (Claude Design round 3) | M6 |
 | 3 | Manat prices: Topar `[PRICE]` TMT a month and the commission `[X]%` (two plans + a commission layer, productContext) | owner | B2B pricing page, billing |
 | 4 | Real average bills for restaurant cards; official App Store / Google Play badges | owner | M3 polish |
