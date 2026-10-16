@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@yeral/contract": "workspace:*",
-    "hono": "catalog:"
+    "hono": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.104.0"

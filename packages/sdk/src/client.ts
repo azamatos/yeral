@@ -63,5 +63,11 @@ export async function call<T extends ClientResponse<unknown>>(request: T | Promi
     }
     throw new ApiError(res.status, body?.error?.code ?? 'internal', body?.error?.details ?? {})
   }
-  return parseResponse(res)
+  // a success that isn't the api's JSON (a proxy's HTML page, a cut-off body) is a failure too
+  if (res.status !== 204 && !/json/i.test(res.headers.get('content-type') ?? '')) throw new ApiError(res.status, 'internal')
+  try {
+    return await parseResponse(res)
+  } catch {
+    throw new ApiError(res.status, 'internal')
+  }
 }
