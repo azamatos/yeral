@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Biznes — habarnamalar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6}
+.b-ico{width:40px;height:40px;padding:0;min-width:0}
+.b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
+.swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
+.swb:hover{background:#f4f4f6}
+.sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014}
+.sn:hover{background:#f4f4f6;color:#101014}
+.sn.on{background:#efecfe;color:#4429d6;font-weight:600}
+.sn.off{color:#6e6e78;cursor:default}
+.sn.off:hover{background:transparent;color:#6e6e78}
+.cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}
+.soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
+.gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
+.kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
+.pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
+.mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
+.mi:hover{background:#f4f4f6;color:#101014}
+.av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.app .side{position:sticky;top:0;height:100vh;overflow-y:auto;z-index:20}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;opacity:0}
+.cont{flex:1;padding:32px 32px 64px}
+.setl{display:flex;gap:40px;align-items:flex-start}
+.snav{width:240px;flex:none;position:sticky;top:24px;display:flex;flex-direction:column;gap:2px}
+.sdv{height:1px;background:#e6e6ea;margin:8px 4px}
+.pwrap{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
+.pane{flex:999 1 520px;max-width:720px;min-width:0;display:flex;flex-direction:column}
+.phd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;padding-bottom:24px}
+.phdl{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 320px}
+.pt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.plead{font-size:14px;line-height:20px;color:#5a5a64}
+.ps{display:flex;flex-direction:column;gap:20px;padding:24px 0;border-top:1px solid #e6e6ea}
+.pst{margin:0;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.sr{display:flex;align-items:center;justify-content:space-between;gap:12px 24px;flex-wrap:wrap}
+.sl{display:flex;flex-direction:column;gap:2px;flex:1 1 280px;min-width:0}
+.sll{font-size:15px;line-height:22px;font-weight:500;color:#101014}
+.inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp:hover{border-color:#b0b0b8}
+.inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.inp:disabled{background:#f6f6f8;border-color:#e6e6ea;color:#6e6e78;cursor:not-allowed}
+.selw{position:relative;display:inline-flex;flex:none;color:#101014}
+.selw svg{position:absolute;right:12px;top:50%;margin-top:-10px;pointer-events:none}
+.tsel{height:40px;width:104px;min-width:0;padding:0 28px 0 12px;font-size:14px;font-variant-numeric:tabular-nums;appearance:none;-webkit-appearance:none;cursor:pointer}
+.selw.t svg{right:8px;margin-top:-8px}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.sw{width:52px;height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;flex:none}
+.sw:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.sw:disabled{cursor:not-allowed;opacity:.45}
+.trk{position:relative;width:40px;height:24px;border-radius:999px;background:#e6e6ea;box-shadow:inset 0 0 0 1.5px #6e6e78;transition:background .15s}
+.sw.on .trk{background:#5a3ff0;box-shadow:none}
+.knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:999px;background:#ffffff;box-shadow:0 1px 2px rgba(16,16,20,.2);transition:left .15s}
+.sw.on .knob{left:18px}
+.dot{width:6px;height:6px;border-radius:999px;flex:none}
+.pbn{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 12px 12px 16px;border-radius:12px;background:#efecfe;border:1px solid #d5cbfb;font-size:14px;line-height:20px;color:#101014}
+.pok{display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px}
+.lgd{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(196px,100%),1fr));gap:12px 24px;margin:0;padding:0;list-style:none}
+.lgi{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.lgic{width:32px;height:32px;border-radius:8px;background:#f4f4f6;color:#101014;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.lgt{display:flex;flex-direction:column;min-width:0}
+.lgn{font-size:14px;line-height:20px;font-weight:600;color:#101014}
+.evls{display:flex;flex-direction:column;border-top:1px solid #e6e6ea}
+.ev{display:flex;align-items:flex-start;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;padding:16px 0;border-bottom:1px solid #e6e6ea}
+.evl{display:flex;flex-direction:column;gap:2px;flex:1 1 260px;min-width:0}
+.evn{font-size:15px;line-height:22px;font-weight:600;color:#101014}
+.evw{font-size:14px;line-height:20px;color:#101014}
+.evoff{display:inline-flex;align-items:center;gap:6px;padding-top:4px;font-size:13px;line-height:18px;font-weight:500;color:#6e6e78}
+.evnote{font-size:13px;line-height:18px;color:#4429d6;padding-top:4px}
+.evr{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:0 0 auto}
+.chs{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tch{position:relative;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px 0 10px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:13px;line-height:16px;font-weight:500;color:#5a5a64;cursor:pointer;white-space:nowrap;flex:none}
+.tch:hover{background:#f6f6f8;color:#101014}
+.tch.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6;font-weight:600}
+.tch.on:hover{background:#ded7fd;color:#4429d6}
+.tch.na,.tch.na:hover{background:#f6f6f8;border-color:#e6e6ea;border-style:dashed;color:#6e6e78;cursor:not-allowed}
+.tch:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.tip{display:none;position:absolute;right:0;bottom:calc(100% + 8px);z-index:6;width:236px;padding:8px 10px;border-radius:8px;background:#101014;color:#ffffff;font-size:12px;line-height:16px;font-weight:500;white-space:normal;text-align:left;box-shadow:0 8px 24px rgba(16,16,20,.16);pointer-events:none}
+.tch.na:hover .tip,.tch.na:focus-visible .tip{display:block}
+.snd{display:flex;align-items:center;gap:6px;font-size:13px;line-height:18px;font-weight:500;color:#5a5a64;margin-right:-8px}
+.qrow{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.qdash{height:40px;display:inline-flex;align-items:center;color:#5a5a64}
+.wcap{font-size:13px;line-height:18px;font-weight:600;color:#93500a;padding-top:2px}
+.sbar{position:sticky;bottom:16px;z-index:10;flex:1 1 100%;max-width:720px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:12px 12px 12px 20px;background:#ffffff;border:1px solid #e6e6ea;border-radius:16px;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.toast{position:fixed;left:272px;bottom:24px;z-index:80;display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 8px 0 16px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:15px;line-height:20px;max-width:calc(100% - 296px)}
+.tsp{width:8px;flex:none}
+@media (max-width:1023px){.side{width:72px;padding:12px 0;align-items:center}.side > div{align-self:stretch}.side .swb{width:44px;height:44px;padding:4px;justify-content:center}.side .swb > span:not(.av),.side .swb > svg{display:none}.side .sn{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0;position:relative}.side .cnt{position:absolute;top:6px;right:6px;min-width:0;width:8px;height:8px;padding:0;border:0;background:#dc8b0b;font-size:0}.side .cnt.cnt-n{background:#7b8ea3}.side .soon{display:none}.top{padding:0 24px}.gs{width:auto;flex:0 1 320px}.cont{padding:24px 24px 48px}.setl{flex-direction:column;gap:20px}.snav{position:static;width:auto;align-self:stretch;flex-direction:row;overflow-x:auto;gap:8px;margin:0 -24px;padding:0 24px 4px}.snav .sn{flex:none;width:auto;height:44px;padding:0 16px;gap:8px;border:1px solid #d8d8de;border-radius:999px;white-space:nowrap}.snav .sn.on{border-color:#d5cbfb}.snav .sdv,.snav .sn.off{display:none}.pwrap{width:100%;flex:none}.toast{left:96px;max-width:calc(100% - 120px)}}
+@media (max-width:767px){.app{flex-direction:column}.app .side{position:sticky;top:0;height:auto;width:100%;flex-direction:row;align-items:center;gap:4px;padding:6px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow-x:auto;overflow-y:hidden}.side > div{display:none}.side .swb,.side .sn{flex:none}.top{height:56px;padding:0 16px}.gs{display:none}.cont{padding:16px 16px 40px}.snav{margin:0 -16px;padding:0 16px 4px}.pbn .b{flex:1 1 auto;height:44px;border-radius:12px}.evr{flex-basis:100%;align-items:flex-start}.chs{justify-content:flex-start}.tch{height:44px;padding:0 14px 0 12px;font-size:14px}.tip{right:auto;left:0}.snd{margin-right:0;margin-left:-4px}.sbar{bottom:12px;padding:12px}.sbar .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:16px;max-width:none}}
+@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}</style>
+</helmet>
+<div class="app" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<aside class="side" aria-label="Esasy menýu">
+<button class="swb" aria-label="Biznesi çalyş"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bitarap Türkmenistan şaýoly</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<a class="sn" href="B-Calendar.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
+<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
+<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<a class="sn on" href="B-Settings.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<div style="flex: 1"></div>
+<a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<button class="swb" aria-label="Hasabym"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+</aside>
+
+<div class="main">
+<div class="top">
+<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Sazlamalar</h1>
+<div style="flex: 1"></div>
+<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
+</div>
+
+<div class="cont">
+<div class="setl">
+
+<nav class="snav" aria-label="Sazlamalar bölümleri">
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"></path><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"></path><path d="M2 7h20"></path><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"></path></svg>Biznes profili</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg>Ýazylyş düzgünleri</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Iş wagty</a>
+<a class="sn" href="B-Services.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path><path d="M7 7h.01"></path></svg>Hyzmatlar</a>
+<a class="sn" href="B-Team.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>Topar</a>
+<a class="sn" href="B-Team.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Roller</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"></rect><rect width="5" height="5" x="16" y="3" rx="1"></rect><rect width="5" height="5" x="3" y="16" rx="1"></rect><path d="M21 16h-3a2 2 0 0 0-2 2v3"></path><path d="M21 21v.01"></path><path d="M12 7v3a2 2 0 0 1-2 2H7"></path><path d="M3 12h.01"></path><path d="M12 3h.01"></path><path d="M12 16v.01"></path><path d="M16 12h1"></path><path d="M21 12v.01"></path><path d="M12 21v-1"></path></svg>Salgy we QR</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg>Şahamçalar</a>
+<div class="sdv"></div>
+<a class="sn on" href="B-Notifications.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>Habarnamalar</a>
+<a class="sn" href="B-Billing.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"></rect><path d="M2 10h20"></path></svg>Töleg we tarif</a>
+</nav>
+
+<div class="pwrap">
+<div class="pane">
+<div class="phd">
+<div class="phdl"><h2 class="pt">Habarnamalar</h2><span class="plead">Haýsy habaryň haçan we nirä geljegini saýlaň. Bu sazlamalar diňe size degişli.</span></div>
+</div>
+
+<div style="padding-bottom: 24px">
+<sc-if value="{{noPerm}}" hint-placeholder-val="{{true}}">
+<div class="pbn" role="region" aria-label="Brauzer rugsady">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+<span style="flex: 1 1 280px; min-width: 0">Brauzer habarnamalary ýapyk — täze haýyşlary sekuntda görmek üçin açyň.</span>
+<button class="b b-sec b-sm" onClick="{{grant}}">Rugsat ber</button>
+</div>
+</sc-if>
+<sc-if value="{{perm}}" hint-placeholder-val="{{false}}">
+<div class="pok" role="status"><span class="dot" style="background: #12a366; width: 8px; height: 8px"></span><span><span style="color: #066a41; font-weight: 600">Brauzer habarnamalary açyk</span><span style="color: #5a5a64"> · şu brauzerde</span></span></div>
+</sc-if>
+</div>
+
+<section class="ps" aria-labelledby="n-ev">
+<div class="sl" style="flex: none"><h3 class="pst" id="n-ev">Haýsy habar haçan gelýär</h3><span class="cap">Her habar üçin nirä geljegini saýlaň. Kim alýandygy rollara görä bellenýär.</span></div>
+<ul class="lgd" aria-label="Habarlar nirä gelýär">
+<li class="lgi"><span class="lgic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg></span><span class="lgt"><span class="lgn">Brauzerde</span><span class="cap">Ýeral Biznes açyk bolanda</span></span></li>
+<li class="lgi"><span class="lgic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg></span><span class="lgt"><span class="lgn">Programmada</span><span class="cap">Telefonyňyzdaky programma</span></span></li>
+<li class="lgi"><span class="lgic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span><span class="lgt"><span class="lgn">SMS</span><span class="cap">Diňe möhüm habarlar, gije däl</span></span></li>
+</ul>
+<div class="evls">
+<sc-for list="{{evs}}" as="e" hint-placeholder-count="10">
+<div class="ev">
+<div class="evl">
+<span class="evn" id="{{e.hid}}">{{e.n}}</span>
+<span class="evw">{{e.when}}</span>
+<span class="cap">{{e.who}}</span>
+<sc-if value="{{e.smsNote}}" hint-placeholder-val="{{false}}"><span class="evnote">SMS diňe programma habary ýetirip bilmese gelýär — gije däl.</span></sc-if>
+<sc-if value="{{e.off}}" hint-placeholder-val="{{false}}"><span class="evoff"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5"></path><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path><path d="m2 2 20 20"></path></svg>Häzir size gelmeýär</span></sc-if>
+</div>
+<div class="evr">
+<div class="chs" role="group" aria-labelledby="{{e.hid}}">
+<button class="{{e.br.cls}}" aria-pressed="{{e.br.on}}" aria-label="{{e.br.aria}}" onClick="{{e.br.flip}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>Brauzerde</button>
+<button class="{{e.ap.cls}}" aria-pressed="{{e.ap.on}}" aria-label="{{e.ap.aria}}" onClick="{{e.ap.flip}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg>Programmada</button>
+<sc-if value="{{e.smsOk}}" hint-placeholder-val="{{false}}"><button class="{{e.sm.cls}}" aria-pressed="{{e.sm.on}}" aria-label="{{e.sm.aria}}" onClick="{{e.sm.flip}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>SMS</button></sc-if>
+<sc-if value="{{e.smsNa}}" hint-placeholder-val="{{true}}"><button class="tch na" aria-disabled="true" aria-describedby="{{e.tipId}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>SMS<span class="tip" role="tooltip" id="{{e.tipId}}">Bu habar SMS bilen iberilmeýär. SMS diňe möhüm habarlar üçin: täze haýyş we Ýeral.</span></button></sc-if>
+</div>
+<sc-if value="{{e.hasSnd}}" hint-placeholder-val="{{false}}"><div class="snd"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"></path><path d="M16 9a5 5 0 0 1 0 6"></path><path d="M19.364 18.364a9 9 0 0 0 0-12.728"></path></svg><span aria-hidden="true">Ses bilen</span><button class="{{e.sndCls}}" role="switch" aria-checked="{{e.sndOn}}" aria-label="{{e.sndAria}}" disabled="{{e.sndDis}}" onClick="{{e.flipSnd}}"><span class="trk"><span class="knob"></span></span></button></div></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section class="ps" aria-labelledby="n-q">
+<div class="sr">
+<div class="sl"><h3 class="pst" id="n-q">Gijeki dymyşlyk</h3></div>
+<button class="{{quietCls}}" role="switch" aria-checked="{{f.quiet}}" aria-labelledby="n-q" onClick="{{flipQuiet}}"><span class="trk"><span class="knob"></span></span></button>
+</div>
+<div class="qrow">
+<div class="fld"><label class="flab" for="n-qf">Başlanýar</label><span class="selw t"><select id="n-qf" class="inp tsel" value="{{f.qFrom}}" disabled="{{quietOff}}" onChange="{{onQFrom}}"><option>19:00</option><option>19:30</option><option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option><option>22:30</option><option>23:00</option><option>23:30</option><option>00:00</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></div>
+<span class="qdash" aria-hidden="true">–</span>
+<div class="fld"><label class="flab" for="n-qt">Gutarýar</label><span class="selw t"><select id="n-qt" class="inp tsel" value="{{f.qTo}}" disabled="{{quietOff}}" onChange="{{onQTo}}"><option>05:00</option><option>05:30</option><option>06:00</option><option>06:30</option><option>07:00</option><option>07:30</option><option>08:00</option><option>08:30</option><option>09:00</option><option>09:30</option><option>10:00</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></div>
+</div>
+<span class="cap">{{quietCap}}</span>
+</section>
+
+<section class="ps" aria-labelledby="n-j">
+<div class="sl" style="flex: none"><h3 class="pst" id="n-j">Jemlemeler</h3><span class="cap">Bir habarda gysga syn. Nirä geljegini ýokardaky sanawda saýlaň.</span></div>
+<div class="sr">
+<div class="sl"><label class="sll" for="n-eve">Ertirki jemleme</label><span class="cap">Ertir kim gelýär — her agşam bir habarda.</span><sc-if value="{{eveWarn}}" hint-placeholder-val="{{false}}"><span class="wcap">Bu wagt gijeki dymyşlyga düşýär — ses we push bolmaz.</span></sc-if></div>
+<span class="selw t"><select id="n-eve" class="inp tsel" value="{{f.eve}}" onChange="{{onEve}}"><option>17:00</option><option>17:30</option><option>18:00</option><option>18:30</option><option>19:00</option><option>19:30</option><option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option><option>22:30</option><option>23:00</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+</div>
+<div class="sr">
+<div class="sl"><label class="sll" for="n-morn">Gündelik jemleme</label><span class="cap">Şu günüň ýazylyşlary we haýyşlary — her irden bir habarda.</span><sc-if value="{{mornWarn}}" hint-placeholder-val="{{false}}"><span class="wcap">Bu wagt gijeki dymyşlyga düşýär — ses we push bolmaz.</span></sc-if></div>
+<span class="selw t"><select id="n-morn" class="inp tsel" value="{{f.morn}}" onChange="{{onMorn}}"><option>05:00</option><option>05:30</option><option>06:00</option><option>06:30</option><option>07:00</option><option>07:30</option><option>08:00</option><option>08:30</option><option>09:00</option><option>09:30</option><option>10:00</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+</div>
+</section>
+</div>
+
+<sc-if value="{{showBar}}" hint-placeholder-val="{{false}}">
+<div class="sbar" role="region" aria-label="Ýatda saklanmadyk üýtgeşmeler">
+<span style="font-size: 15px; line-height: 22px; font-weight: 600">Üýtgeşmeleri ýatda saklaňmy?</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b b-gho" onClick="{{revert}}">Ýatyr</button><button class="b b-pri" onClick="{{save}}">Ýatda sakla</button></div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</div>
+</div>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div class="toast" role="status">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+<span>{{toastText}}</span>
+<span class="tsp"></span>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"permission":{"editor":"boolean","default":false,"section":"State"},"dirty":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":2060}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const p = props || {};
+    const base = this.base();
+    this.state = { f: base, saved: base, forceDirty: !!p.dirty, perm: !!p.permission, toast: null };
+  }
+  componentDidUpdate(pp) {
+    const p = this.props;
+    if (pp.dirty !== p.dirty) this.setState({ forceDirty: !!p.dirty });
+    if (pp.permission !== p.permission) this.setState({ perm: !!p.permission });
+  }
+  componentWillUnmount() { clearTimeout(this.tt); }
+  base() {
+    // business-demo.json → notifications (channels per event); b = Brauzerde, a = Programmada, s = SMS, snd = Ses bilen
+    return {
+      ev: [
+        { b: true, a: true, s: false, snd: true },
+        { b: true, a: true, s: false, snd: true },
+        { b: false, a: true, s: false },
+        { b: true, a: true, s: false },
+        { b: false, a: false, s: false },
+        { b: false, a: true, s: false },
+        { b: false, a: true, s: false },
+        { b: true, a: false, s: false },
+        { b: false, a: true, s: false },
+        { b: true, a: false, s: true }
+      ],
+      quiet: true, qFrom: '22:00', qTo: '08:00', eve: '20:00', morn: '08:00'
+    };
+  }
+  flash(patch, text) {
+    clearTimeout(this.tt);
+    this.setState(Object.assign({}, patch, { toast: { text: text } }));
+    this.tt = setTimeout(() => this.setState({ toast: null }), 6000);
+  }
+  renderVals() {
+    const fnt = this.props.font ?? 'Onest';
+    const s = this.state;
+    const f = s.f;
+    const upd = (patch) => this.setState({ f: Object.assign({}, this.state.f, patch) });
+    const updEv = (i, patch) => upd({ ev: this.state.f.ev.map((x, k) => (k === i ? Object.assign({}, x, patch) : x)) });
+
+    const EV = [
+      { n: 'Täze haýyş', w: 'täze haýyş gelende derrew', k: 'siz, administrator we haýyşyň hünärmeni', sms: true, snd: true },
+      { n: 'Haýyşyň wagty gutarýar', w: 'jogap bermäge 5 minut galanda', k: 'siz we administrator', snd: true },
+      { n: 'Müşderi ýatyrdy', w: 'müşderi ýazylyşy ýatyranda', k: 'siz we şol hünärmen' },
+      { n: 'Müşderi wagtyny üýtgetdi', w: 'täze wagt haýyşy gelende', k: 'siz, administrator we hünärmen' },
+      { n: 'Kärdeşiňiz ýazylyş goşdy', w: 'telefon ýa-da gelip ýazylyş goşulanda', k: 'siz' },
+      { n: 'Täze teswir', w: 'müşderi teswir ýazanda', k: 'siz' },
+      { n: 'Ertirki ýazylyşlar', w: 'her agşam ' + f.eve + '-da jemleme', k: 'her hünärmen öz ýazylyşlaryny' },
+      { n: 'Gündelik jemleme', w: 'her gün ' + f.morn + '-da', k: 'siz' },
+      { n: 'Topar', w: 'işgär çakylygy kabul edende', k: 'siz' },
+      { n: 'Ýeral', w: 'töleg, barlag we täzelikler barada', k: 'diňe eýesi', sms: true }
+    ];
+    const evs = EV.map((e, i) => {
+      const v = f.ev[i];
+      const chip = (key, label) => ({
+        cls: v[key] ? 'tch on' : 'tch', on: !!v[key], aria: e.n + ': ' + label,
+        flip: () => updEv(i, { [key]: !this.state.f.ev[i][key] })
+      });
+      const audible = v.b || v.a;
+      return {
+        n: e.n, hid: 'ev-' + i, tipId: 'ev-tip-' + i,
+        when: 'Haçan: ' + e.w, who: 'Kim alýar: ' + e.k,
+        off: !v.b && !v.a && !v.s,
+        smsNote: !!e.sms && i === 0 && !!v.s,
+        br: chip('b', 'brauzerde'), ap: chip('a', 'programmada'), sm: chip('s', 'SMS'),
+        smsOk: !!e.sms, smsNa: !e.sms,
+        hasSnd: !!e.snd,
+        sndOn: !!v.snd && audible,
+        sndCls: v.snd && audible ? 'sw on' : 'sw',
+        sndDis: !audible,
+        sndAria: e.n + ': ses bilen',
+        flipSnd: () => updEv(i, { snd: !this.state.f.ev[i].snd })
+      };
+    });
+
+    const mins = (t) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+    const inQuiet = (t) => {
+      if (!f.quiet) return false;
+      const a = mins(f.qFrom);
+      const b = mins(f.qTo);
+      const x = mins(t);
+      return a > b ? (x >= a || x < b) : (x >= a && x < b);
+    };
+
+    const dirtyReal = JSON.stringify(f) !== JSON.stringify(s.saved);
+
+    return {
+      fontStack: "'" + fnt + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      f: f,
+      noPerm: !s.perm,
+      perm: !!s.perm,
+      grant: () => this.flash({ perm: true }, 'Brauzer habarnamalary açyldy'),
+      evs: evs,
+      quietCls: f.quiet ? 'sw on' : 'sw',
+      quietOff: !f.quiet,
+      flipQuiet: () => upd({ quiet: !this.state.f.quiet }),
+      onQFrom: (e) => upd({ qFrom: e.target.value }),
+      onQTo: (e) => upd({ qTo: e.target.value }),
+      quietCap: f.quiet ? 'Bu wagtda ses we push ýok; SMS gije hiç haçan iberilmeýär.' : 'Dymyşlyk öçük: ses we push islendik wagt gelýär. SMS gije hiç haçan iberilmeýär.',
+      onEve: (e) => upd({ eve: e.target.value }),
+      onMorn: (e) => upd({ morn: e.target.value }),
+      eveWarn: inQuiet(f.eve),
+      mornWarn: inQuiet(f.morn),
+      showBar: dirtyReal || !!s.forceDirty,
+      revert: () => this.setState({ f: this.state.saved, forceDirty: false }),
+      save: () => this.flash({ saved: this.state.f, forceDirty: false }, 'Ýatda saklandy'),
+      hasToast: !!s.toast,
+      toastText: s.toast ? s.toast.text : ''
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Biznes — töleg we tarif</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6}
+.b-ico{width:40px;height:40px;padding:0;min-width:0}
+.b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
+.swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
+.swb:hover{background:#f4f4f6}
+.sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014}
+.sn:hover{background:#f4f4f6;color:#101014}
+.sn.on{background:#efecfe;color:#4429d6;font-weight:600}
+.sn.off{color:#6e6e78;cursor:default}
+.sn.off:hover{background:transparent;color:#6e6e78}
+.cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}
+.soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
+.gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
+.kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
+.pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
+.mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
+.mi:hover{background:#f4f4f6;color:#101014}
+.av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.app .side{position:sticky;top:0;height:100vh;overflow-y:auto;z-index:20}
+.mi:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed}
+label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;opacity:0}
+.cont{flex:1;padding:32px 32px 64px}
+.setl{display:flex;gap:40px;align-items:flex-start}
+.snav{width:240px;flex:none;position:sticky;top:24px;display:flex;flex-direction:column;gap:2px}
+.sdv{height:1px;background:#e6e6ea;margin:8px 4px}
+.pwrap{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
+.pane{flex:999 1 520px;max-width:720px;min-width:0;display:flex;flex-direction:column}
+.phd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;padding-bottom:24px}
+.phdl{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 320px}
+.pt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.plead{font-size:14px;line-height:20px;color:#5a5a64}
+.ps{display:flex;flex-direction:column;gap:20px;padding:24px 0;border-top:1px solid #e6e6ea}
+.pst{margin:0;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.sr{display:flex;align-items:center;justify-content:space-between;gap:12px 24px;flex-wrap:wrap}
+.sl{display:flex;flex-direction:column;gap:2px;flex:1 1 280px;min-width:0}
+.sll{font-size:15px;line-height:22px;font-weight:500;color:#101014}
+.scw{flex:0 1 320px;min-width:0;display:flex;flex-direction:column;gap:6px}
+.inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp::placeholder{color:#6e6e78}
+.inp:hover{border-color:#b0b0b8}
+.inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.inp.is-e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
+.i44{height:44px}
+.err{font-size:13px;line-height:18px;color:#a3251b}
+.warn{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:12px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:14px;line-height:20px}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:999px;flex:none}
+.st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
+.st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
+.st-d{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
+.st-n{background:#fee4e2;border:1px solid #f6c7c2;color:#a3251b}
+.d-p{background:#dc8b0b}.d-d{background:#12a366}.d-n{background:#d9412f}
+.xic{width:40px;height:40px;border-radius:10px;background:#f4f4f6;color:#5a5a64;display:flex;align-items:center;justify-content:center;flex:none}
+.xm{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.xn{font-size:15px;line-height:22px;font-weight:600}
+.tg{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;background:#f4f4f6;color:#5a5a64;white-space:nowrap;border:1px solid #e6e6ea}
+.tg-c{background:#efecfe;color:#4429d6;border-color:#d5cbfb}
+.lrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lnkb{padding:0;border:0;background:none;font-family:inherit;font-size:14px;line-height:20px;font-weight:600;color:#4429d6;cursor:pointer}
+.lnkb:hover{color:#3520a6;text-decoration:underline}
+.lnkb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4;border-radius:4px}
+.plan{display:flex;flex-direction:column;gap:12px;padding:24px;border:1px solid #e6e6ea;border-radius:16px;background:#ffffff;margin-bottom:32px}
+.plt{display:flex;align-items:flex-start;justify-content:space-between;gap:12px 16px;flex-wrap:wrap}
+.pltl{display:flex;flex-direction:column;gap:6px;min-width:0}
+.pln{margin:0;font-size:22px;line-height:28px;font-weight:700;letter-spacing:-0.015em}
+.plp{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.plpv{font-size:28px;line-height:34px;font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+.plps{font-size:15px;line-height:22px;color:#5a5a64}
+.plm{display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;color:#101014}
+.plm svg{color:#5a5a64;flex:none}
+.plf{display:flex;flex-wrap:wrap;gap:6px 18px;padding-top:12px;border-top:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.plfi{display:inline-flex;align-items:center;gap:6px}
+.plfi svg{color:#5a3ff0;flex:none}
+.plk{font-size:14px;line-height:20px;color:#5a5a64}
+.tbx{overflow-x:auto}
+.tbl{min-width:700px}
+.tr{display:grid;column-gap:12px;align-items:center;min-height:52px;padding:6px 8px;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px;color:#101014}
+.th{min-height:36px;padding-top:0;padding-bottom:0;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.c-cm{grid-template-columns:minmax(140px,1.3fr) 116px minmax(130px,1.2fr) 112px 112px}
+.c-iv{grid-template-columns:minmax(120px,1fr) minmax(104px,1fr) minmax(104px,1fr) 156px 160px}
+.iva{display:inline-flex;align-items:center;gap:8px}
+.r{text-align:right;justify-self:end}
+.num{font-variant-numeric:tabular-nums}
+.tcell{display:flex;flex-direction:column;min-width:0}
+.stc{padding-left:16px}
+.tft{border-bottom:0;font-weight:600;min-height:48px}
+.pmr{display:flex;align-items:center;gap:14px}
+.bank{display:flex;flex-direction:column;padding:8px 16px 4px;border-radius:12px;background:#f6f6f8}
+.bkh{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:40px}
+.bkdl{margin:0;display:flex;flex-direction:column}
+.bkr{display:grid;grid-template-columns:160px minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.bkr dt{color:#5a5a64}
+.bkr dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.hintr{display:flex;align-items:flex-start;gap:8px}
+.hintr svg{flex:none;color:#5a5a64;margin-top:1px}
+.chipf{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:#f4f4f6;border:1px solid #e6e6ea;color:#5a5a64;font-size:13px;font-weight:600;white-space:nowrap}
+.scrim{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:40}
+.grab{display:none;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:0 auto;flex:none}
+.mwrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
+.mwrap .scrim{position:absolute;z-index:0}
+.mdl{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;max-width:100%;max-height:100%;overflow-y:auto;padding:24px;border-radius:16px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.mdl-s{width:480px}
+.mdl-l{width:640px}
+.mt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.mp{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
+.mact{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:12px}
+.pkom{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:#f6f6f8;font-size:14px;line-height:20px;color:#101014}
+.pkom svg{flex:none;color:#5a3ff0;margin-top:1px}
+.pkt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pcol{display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff}
+.pcol.rec{border-color:#d5cbfb;box-shadow:inset 0 0 0 1px #d5cbfb}
+.pch{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:24px}
+.pcn{font-size:17px;line-height:24px;font-weight:600}
+.pcp{display:flex;flex-direction:column}
+.pcpv{font-size:22px;line-height:28px;font-weight:700;letter-spacing:-0.015em;font-variant-numeric:tabular-nums}
+.pcps{min-height:18px}
+.pcf{display:flex;flex-direction:column;gap:6px;flex:1;padding:12px 0 4px;border-top:1px solid #e6e6ea}
+.pcfi{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:18px}
+.pcfi svg{color:#5a3ff0;flex:none;margin-top:1px}
+.pcol .b{width:100%}
+.dl{margin:0;display:flex;flex-direction:column}
+.dr{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.dr.last{border-bottom:0}
+.dr dt{color:#5a5a64}
+.dr dd{margin:0;font-weight:500;color:#101014}
+.sbar{position:sticky;bottom:16px;z-index:10;flex:1 1 100%;max-width:720px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:12px 12px 12px 20px;background:#ffffff;border:1px solid #e6e6ea;border-radius:16px;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.toast{position:fixed;left:272px;bottom:24px;z-index:80;display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 16px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:15px;line-height:20px;max-width:calc(100% - 296px)}
+@media (max-width:1023px){.side{width:72px;padding:12px 0;align-items:center}.side > div{align-self:stretch}.side .swb{width:44px;height:44px;padding:4px;justify-content:center}.side .swb > span:not(.av),.side .swb > svg{display:none}.side .sn{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0;position:relative}.side .cnt{position:absolute;top:6px;right:6px;min-width:0;width:8px;height:8px;padding:0;border:0;background:#dc8b0b;font-size:0}.side .cnt-n{background:#7b8ea3}.side .soon{display:none}.top{padding:0 24px}.gs{width:auto;flex:0 1 320px}.cont{padding:24px 24px 48px}.setl{flex-direction:column;gap:20px}.snav{position:static;width:auto;align-self:stretch;flex-direction:row;overflow-x:auto;gap:8px;margin:0 -24px;padding:0 24px 4px}.snav .sn{flex:none;width:auto;height:44px;padding:0 16px;gap:8px;border:1px solid #d8d8de;border-radius:999px;white-space:nowrap}.snav .sn.on{border-color:#d5cbfb}.snav .sdv,.snav .sn.off{display:none}.pwrap{width:100%;flex:none}.toast{left:96px;max-width:calc(100% - 120px)}}
+@media (max-width:767px){.app{flex-direction:column}.app .side{position:sticky;top:0;height:auto;width:100%;flex-direction:row;align-items:center;gap:4px;padding:6px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow-x:auto;overflow-y:hidden}.side > div{display:none}.side .swb,.side .sn{flex:none}.top{height:56px;padding:0 16px}.gs{display:none}.cont{padding:16px 16px 40px}.snav{margin:0 -16px;padding:0 16px 4px}.scw{flex-basis:100%}.plan{padding:16px}.plpv{font-size:24px;line-height:30px}.bkr{grid-template-columns:minmax(0,1fr)}.pmr{align-items:flex-start}.sbar{bottom:12px;padding:12px}.sbar .b{flex:1 1 auto}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:16px;max-width:none}}
+@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}</style>
+</helmet>
+<div class="app" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<aside class="side" aria-label="Esasy menýu">
+<button class="swb" aria-label="Biznesi çalyş"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bitarap Türkmenistan şaýoly</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<a class="sn" href="B-Calendar.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
+<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
+<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<a class="sn on" href="B-Settings.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<div style="flex: 1"></div>
+<a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<button class="swb" aria-label="Hasabym"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+</aside>
+
+<div class="main">
+<div class="top">
+<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Sazlamalar</h1>
+<div style="flex: 1"></div>
+<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
+</div>
+
+<div class="cont">
+<div class="setl">
+
+<nav class="snav" aria-label="Sazlamalar bölümleri">
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"></path><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"></path><path d="M2 7h20"></path><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"></path></svg>Biznes profili</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg>Ýazylyş düzgünleri</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Iş wagty</a>
+<a class="sn" href="B-Services.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path><path d="M7 7h.01"></path></svg>Hyzmatlar</a>
+<a class="sn" href="B-Team.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>Topar</a>
+<a class="sn" href="B-Team.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Roller</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"></rect><rect width="5" height="5" x="16" y="3" rx="1"></rect><rect width="5" height="5" x="3" y="16" rx="1"></rect><path d="M21 16h-3a2 2 0 0 0-2 2v3"></path><path d="M21 21v.01"></path><path d="M12 7v3a2 2 0 0 1-2 2H7"></path><path d="M3 12h.01"></path><path d="M12 3h.01"></path><path d="M12 16v.01"></path><path d="M16 12h1"></path><path d="M21 12v.01"></path><path d="M12 21v-1"></path></svg>Salgy we QR</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg>Şahamçalar</a>
+<div class="sdv"></div>
+<a class="sn" href="B-Notifications.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>Habarnamalar</a>
+<a class="sn on" href="B-Billing.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"></rect><path d="M2 10h20"></path></svg>Töleg we tarif</a>
+</nav>
+
+<div class="pwrap">
+<div class="pane">
+<div class="phd">
+<div class="phdl"><h2 class="pt">Töleg we tarif</h2><span class="cap" style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Diňe eýesi görýär</span></div>
+</div>
+
+<section class="plan" aria-labelledby="bl-plan">
+<div class="plt">
+<div class="pltl">
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><h3 id="bl-plan" class="pln">Topar</h3><span class="tg tg-c">Häzirki</span></div>
+<div class="plp"><span class="plpv">[PRICE] TMT</span><span class="plps">/ aý</span></div>
+<span class="plk">+ komissiýa: täze müşderilerden [X]% (<a href="#bl-cm">aşakda</a>)</span>
+</div>
+<button class="b b-sec b-sm" aria-haspopup="dialog" onClick="{{openModal}}">Tarifi üýtget</button>
+</div>
+<div class="plm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Indiki hasap-faktura: <span style="font-weight: 600">1 noýabr 2026</span></span></div>
+<div class="plf" role="list" aria-label="Topar tarifine girýänler">
+<span class="plfi" role="listitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Çäksiz işgär we roller</span>
+<span class="plfi" role="listitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Hasabatlar</span>
+<span class="plfi" role="listitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Şahamçalar</span>
+<span class="plfi" role="listitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Goldaw çaty</span>
+</div>
+<span class="cap">Baha işgär sanyna bagly däl. Her şahamça aýratyn tölenýär.</span>
+</section>
+
+<section class="ps" aria-labelledby="bl-cm">
+<div class="sr" style="align-items: flex-start">
+<div class="sl"><h3 class="pst" id="bl-cm">Komissiýa · oktýabr</h3><span class="plead">Diňe Ýeral gözleginden gelen täze müşderileriň ilkinji gelşinden [X]%. Öz salgyňyzdan, QR-dan we telefon arkaly gelenler — mugt.</span></div>
+<span class="cap" style="flex: none; padding-top: 3px">14 oktýabr ýagdaýyna</span>
+</div>
+<div class="tbx">
+<div class="tbl" role="table" aria-labelledby="bl-cm">
+<div class="tr th c-cm" role="row"><span role="columnheader">Müşderi</span><span role="columnheader">Ilkinji gelşi</span><span role="columnheader">Hyzmat</span><span role="columnheader" class="r">Gelşiň bahasy</span><span role="columnheader" class="r">Komissiýa</span></div>
+<sc-for list="{{cmRows}}" as="r" hint-placeholder-count="3">
+<div class="tr c-cm" role="row"><span role="cell" style="font-weight: 600">{{r.client}}</span><span role="cell" class="tcell"><span class="num">{{r.date}}</span><sc-if value="{{r.planned}}" hint-placeholder-val="{{false}}"><span class="cap">meýilleşdirilen</span></sc-if></span><span role="cell">{{r.svc}}</span><span role="cell" class="r num">{{r.price}}</span><span role="cell" class="r num">[X]%</span></div>
+</sc-for>
+<div class="tr tft" role="row"><span role="cell" class="r num" style="grid-column: 1 / -1">Jemi: [AMOUNT] TMT</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="cap">Müşderi gelmese ýa-da ýazylyş ýatyrylsa, komissiýa alynmaýar.</span>
+<a href="B-Help.dc.html" style="font-size: 14px; line-height: 20px; font-weight: 600; align-self: flex-start">Komissiýa nähili hasaplanýar?</a>
+</div>
+</section>
+
+<section class="ps" aria-labelledby="bl-iv">
+<h3 class="pst" id="bl-iv">Hasap-fakturalar</h3>
+<div class="tbx">
+<div class="tbl" role="table" aria-labelledby="bl-iv">
+<div class="tr th c-iv" role="row"><span role="columnheader">Belgi</span><span role="columnheader">Döwür</span><span role="columnheader" class="r">Möçber</span><span role="columnheader" class="stc">Ýagdaý</span><span role="columnheader" class="r"><span class="vh">Hereketler</span></span></div>
+<sc-for list="{{invoices}}" as="iv" hint-placeholder-count="4">
+<div class="tr c-iv" role="row"><span role="cell" class="num" style="font-weight: 600">{{iv.no}}</span><span role="cell">{{iv.period}}</span><span role="cell" class="r num">{{iv.amount}}</span><span role="cell" class="stc"><span class="{{iv.badgeCls}}"><span class="{{iv.dotCls}}"></span>{{iv.st}}</span></span><span role="cell" class="r iva"><sc-if value="{{iv.overdue}}" hint-placeholder-val="{{false}}"><button class="b b-sec b-sm" aria-label="{{iv.payLabel}}" onClick="{{iv.pay}}">Töle</button></sc-if><button class="b b-gho b-sm" aria-label="{{iv.pdfLabel}}" onClick="{{iv.dl}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>PDF</button></span></div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section class="ps" aria-labelledby="bl-pm">
+<h3 class="pst" id="bl-pm">Töleg usuly</h3>
+<div class="pmr">
+<span class="xic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" x2="21" y1="22" y2="22"></line><line x1="6" x2="6" y1="18" y2="11"></line><line x1="10" x2="10" y1="18" y2="11"></line><line x1="14" x2="14" y1="18" y2="11"></line><line x1="18" x2="18" y1="18" y2="11"></line><polygon points="12 2 20 7 4 7"></polygon></svg></span>
+<div class="xm"><span class="xn">Bank geçirimi · hasap-faktura boýunça</span><span class="cap">Hasap-fakturany ýükläň we bank arkaly töläň.</span></div>
+</div>
+<div class="bank" role="group" aria-labelledby="bl-bk">
+<div class="bkh"><span id="bl-bk" class="lbl">Ýeral bank rekwizitleri</span><button class="b b-gho b-sm" onClick="{{copyBank}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>Göçür</button></div>
+<dl class="bkdl">
+<div class="bkr"><dt>Bank</dt><dd>[BANK]</dd></div>
+<div class="bkr"><dt>Hasap belgisi</dt><dd>[ACCOUNT]</dd></div>
+</dl>
+</div>
+<span class="cap hintr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Tölegde hasap-faktura belgisini görkeziň · mysal üçin, YB-2026-0010</span></span>
+<div class="lrow">
+<button class="b b-sec b-sm" aria-label="Garaşylýan hasap-fakturany ýükle: YB-2026-0010" onClick="{{dlInvoice}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Hasap-faktura ýükle</button>
+<span class="chipf"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"></rect><path d="M2 10h20"></path></svg>Kart bilen töleg — ýakynda</span>
+</div>
+</section>
+
+<section class="ps" aria-labelledby="bl-co">
+<div class="sl" style="flex: none"><h3 class="pst" id="bl-co">Kärhananyň maglumatlary</h3><span class="cap">Hasap-fakturalarda şu maglumatlar ýazylýar.</span></div>
+<div class="sr">
+<div class="sl"><label class="sll" for="co-name">Kärhananyň ady</label><span class="cap">Resmi resminamalardaky ýaly ýazyň</span></div>
+<div class="scw"><input id="co-name" class="{{nameCls}}" value="{{f.name}}" onInput="{{onName}}"><sc-if value="{{nameErr}}" hint-placeholder-val="{{false}}"><span class="err">Kärhananyň adyny ýazyň.</span></sc-if></div>
+</div>
+<div class="sr">
+<div class="sl"><label class="sll" for="co-tax">Salgyt belgisi</label><span class="cap">Salgyt edarasynyň beren belgisi</span></div>
+<div class="scw"><input id="co-tax" class="inp i44" value="{{f.taxId}}" onInput="{{onTax}}"></div>
+</div>
+<div class="sr">
+<div class="sl"><label class="sll" for="co-bank">Bank</label><span class="cap">Kärhanaňyzyň hasaby açylan bank</span></div>
+<div class="scw"><input id="co-bank" class="inp i44" value="{{f.bank}}" onInput="{{onBank}}"></div>
+</div>
+<div class="sr">
+<div class="sl"><label class="sll" for="co-acc">Hasap belgisi</label><span class="cap">Kärhanaňyzyň bank hasaby</span></div>
+<div class="scw"><input id="co-acc" class="inp i44" inputmode="numeric" value="{{f.account}}" onInput="{{onAcc}}"></div>
+</div>
+</section>
+</div>
+
+<sc-if value="{{showBar}}" hint-placeholder-val="{{false}}">
+<div class="sbar" role="region" aria-label="Ýatda saklanmadyk üýtgeşmeler">
+<span style="font-size: 15px; line-height: 22px; font-weight: 600">Üýtgeşmeleri ýatda saklaňmy?</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b b-gho" onClick="{{revert}}">Ýatyr</button><button class="b b-pri" disabled="{{cantSave}}" onClick="{{save}}">Ýatda sakla</button></div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</div>
+</div>
+
+<sc-if value="{{modalOpen}}" hint-placeholder-val="{{false}}">
+<div class="mwrap" onKeyDown="{{modalKey}}">
+<div class="scrim" onClick="{{closeModal}}"></div>
+<div class="{{mdlCls}}" role="dialog" aria-modal="true" aria-labelledby="bl-mt">
+<span class="grab"></span>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h2 id="bl-mt" class="mt">{{mTitle}}</h2><button class="b b-gho b-sm b-ico" aria-label="Ýap" onClick="{{closeModal}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+
+<sc-if value="{{mCompare}}" hint-placeholder-val="{{true}}">
+<div class="pgrid">
+<sc-for list="{{plans}}" as="p" hint-placeholder-count="2">
+<div class="{{p.cls}}">
+<div class="pch"><span class="pcn">{{p.name}}</span><sc-if value="{{p.rec}}" hint-placeholder-val="{{false}}"><span class="tg tg-c">Toparlar üçin</span></sc-if></div>
+<div class="pcp"><span class="pcpv">{{p.main}}</span><span class="cap pcps">{{p.suf}}</span></div>
+<span class="cap">{{p.who}}</span>
+<div class="pcf" role="list" aria-label="{{p.featLabel}}">
+<sc-for list="{{p.features}}" as="ft" hint-placeholder-count="4"><span class="pcfi" role="listitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>{{ft.t}}</span></sc-for>
+</div>
+<sc-if value="{{p.cur}}" hint-placeholder-val="{{false}}"><button class="b b-sec b-sm" disabled="">Häzirki tarif</button></sc-if>
+<sc-if value="{{p.canGo}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm" aria-label="{{p.goLabel}}" onClick="{{p.go}}">Geç</button></sc-if>
+</div>
+</sc-for>
+</div>
+<div class="pkom" role="note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" x2="5" y1="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg><span class="pkt"><span><span style="font-weight: 600">Komissiýa — ähli tariflerde:</span> Ýeral gözleginden gelen täze müşderiniň ilkinji gelşinden [X]%</span><span class="cap">Öz salgyňyzdan, QR-dan we telefon arkaly gelenler, gaýdyp gelýänler — mugt.</span></span></div>
+<p class="cap" style="margin: 0">Täze tarif indiki hasap-faktura döwründen güýje girýär. Tor (zynjyr) üçin: <a href="B-Help.dc.html" style="font-weight: 600">habarlaşyň</a></p>
+</sc-if>
+
+<sc-if value="{{mYeke}}" hint-placeholder-val="{{false}}">
+<p class="mp">Ýeke tarifi bir hünärmen üçin. Toparyňyzda häzir 4 hünärmen bar: Aýna, Maral, Jeren we Leýli.</p>
+<div class="warn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>Geçmek üçin ilki 3 hünärmeni öçürmeli bolarsyňyz. Olaryň geljekki ýazylyşlaryny başga hünärmene geçirmeli ýa-da ýatyrmaly bolarsyňyz.</span></div>
+<div class="mact"><button class="b b-sec" onClick="{{backCompare}}">Yza</button><a class="b b-sec" href="B-Team.dc.html">Topary aç</a></div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div class="toast" role="status">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+<span>{{toastText}}</span>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"modal":{"editor":"boolean","default":false,"section":"State"},"dirty":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":2120}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const p = props || {};
+    const base = this.base();
+    this.state = { f: base, saved: base, forceDirty: !!p.dirty, modal: !!p.modal, pick: null, toast: null };
+  }
+  componentDidUpdate(pp) {
+    const p = this.props;
+    if (pp.modal !== p.modal) this.setState({ modal: !!p.modal, pick: null });
+    if (pp.dirty !== p.dirty) this.setState({ forceDirty: !!p.dirty });
+  }
+  componentWillUnmount() { clearTimeout(this.tt); }
+  base() {
+    return { name: '«Glow Studio» HK', taxId: '[TAX ID]', bank: '[BANK]', account: '[ACCOUNT]' };
+  }
+  flash(patch, text) {
+    clearTimeout(this.tt);
+    this.setState(Object.assign({}, patch, { toast: text }));
+    this.tt = setTimeout(() => this.setState({ toast: null }), 5000);
+  }
+  renderVals() {
+    const fnt = this.props.font ?? 'Onest';
+    const s = this.state;
+    const f = s.f;
+    const upd = (patch) => this.setState({ f: Object.assign({}, this.state.f, patch) });
+
+    // commission statement: first visits in October only (billing.commissionRows minus the September row), oldest first;
+    // visits after the demo clock (14 oktýabr, 11:20) are planned — Ejegyz T. comes today at 15:30
+    const CM = [
+      ['Gözel A.', 13, 'Arka massažy', '90 TMT'],
+      ['Ejegyz T.', 14, 'Aýal saç kesimi', '80 TMT'],
+      ['Arzygül H.', 16, 'Ýüz arassalamak', '150 TMT']
+    ];
+    const cmRows = CM.map((r) => ({ client: r[0], date: r[1] + ' oktýabr', svc: r[2], price: r[3], planned: r[1] >= 14 }));
+
+    // invoices (billing.invoices)
+    const ST = {
+      'Garaşylýar': ['badge st-p', 'dot d-p'],
+      'Tölendi': ['badge st-d', 'dot d-d'],
+      'Möhleti geçdi': ['badge st-n', 'dot d-n']
+    };
+    const IV = [
+      ['YB-2026-0010', 'Oktýabr 2026', '[AMOUNT] TMT', 'Garaşylýar'],
+      ['YB-2026-0009', 'Sentýabr 2026', '[AMOUNT] TMT', 'Tölendi'],
+      ['YB-2026-0008', 'Awgust 2026', '[AMOUNT] TMT', 'Tölendi'],
+      ['YB-2026-0007', 'Iýul 2026', '[AMOUNT] TMT', 'Möhleti geçdi']
+    ];
+    const invoices = IV.map((r) => ({
+      no: r[0], period: r[1], amount: r[2], st: r[3],
+      badgeCls: (ST[r[3]] || ST['Garaşylýar'])[0],
+      dotCls: (ST[r[3]] || ST['Garaşylýar'])[1],
+      pdfLabel: r[0] + ' hasap-fakturasyny PDF görnüşinde ýükle',
+      overdue: r[3] === 'Möhleti geçdi',
+      payLabel: r[0] + ' hasap-fakturasyny töle',
+      pay: () => this.flash({}, 'Ýeral rekwizitleri: [BANK] · hasap [ACCOUNT]. Tölegde ' + r[0] + ' belgisini görkeziň.'),
+      dl: () => this.flash({}, r[0] + '.pdf ýüklendi')
+    }));
+
+    // plans (data.plans)
+    const PL = [
+      { key: 'yeke', name: 'Ýeke', main: 'Mugt', suf: '', who: 'Ýeke işleýän hünärmen', features: ['Onlaýn ýazylyş', 'Senenama we müşderiler', 'SMS ýatlatmalar', 'Salgy we QR'] },
+      { key: 'topar', name: 'Topar', main: '[PRICE] TMT', suf: '/ aý', who: 'Topary bolan biznes', features: ['Çäksiz işgär we roller', 'Hasabatlar', 'Şahamçalar', 'Goldaw çaty'], rec: true }
+    ];
+    const current = 'topar';
+    const plans = PL.map((p) => ({
+      name: p.name, main: p.main, suf: p.suf, who: p.who, rec: !!p.rec,
+      cls: p.rec ? 'pcol rec' : 'pcol',
+      features: p.features.map((t) => ({ t: t })),
+      featLabel: p.name + ' tarifine girýänler',
+      cur: p.key === current,
+      canGo: p.key !== current,
+      goLabel: p.name + ' tarifine geç',
+      go: () => this.setState({ pick: p.key })
+    }));
+    const closeModal = () => this.setState({ modal: false, pick: null });
+    const pick = s.pick;
+    const mTitle = pick === 'yeke' ? 'Ýeke tarifine geçmelimi?' : 'Tarifi saýlaň';
+
+    const nameErr = !f.name.trim();
+    const dirtyReal = JSON.stringify(f) !== JSON.stringify(s.saved);
+
+    return {
+      fontStack: "'" + fnt + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      f: f,
+
+      openModal: () => this.setState({ modal: true, pick: null }),
+
+      cmRows: cmRows,
+      invoices: invoices,
+      copyBank: () => this.flash({}, 'Rekwizitler göçürildi'),
+      dlInvoice: () => this.flash({}, 'YB-2026-0010.pdf ýüklendi'),
+
+      nameErr: nameErr,
+      nameCls: nameErr ? 'inp i44 is-e' : 'inp i44',
+      onName: (e) => upd({ name: e.target.value.slice(0, 120) }),
+      onTax: (e) => upd({ taxId: e.target.value.slice(0, 40) }),
+      onBank: (e) => upd({ bank: e.target.value.slice(0, 120) }),
+      onAcc: (e) => upd({ account: e.target.value.slice(0, 40) }),
+      showBar: dirtyReal || !!s.forceDirty,
+      cantSave: nameErr,
+      revert: () => this.setState({ f: this.state.saved, forceDirty: false }),
+      save: () => { if (!nameErr) this.flash({ saved: this.state.f, forceDirty: false }, 'Ýatda saklandy'); },
+
+      modalOpen: !!s.modal,
+      mdlCls: pick ? 'mdl mdl-s' : 'mdl mdl-l',
+      mTitle: mTitle,
+      mCompare: !pick,
+      mYeke: pick === 'yeke',
+      plans: plans,
+      closeModal: closeModal,
+      modalKey: (e) => { if (e && e.key === 'Escape') closeModal(); },
+      backCompare: () => this.setState({ pick: null }),
+
+      hasToast: !!s.toast,
+      toastText: s.toast || ''
+    };
+  }
+}
+</script>
+</body>
+</html>

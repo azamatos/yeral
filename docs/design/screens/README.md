@@ -1,6 +1,6 @@
 # Screens index
 
-Hi-fi screens exported from the "Ýeral Web" canvas (14.10.2026). Each `.dc.html` = one artboard. See `../CLAUDE.md` → "How to read a .dc.html screen".
+Hi-fi screens exported from the "Ýeral Web" canvas (14.10.2026, export v0.4 — see `../CHANGELOG.md`). Each `.dc.html` = one artboard. See `../CLAUDE.md` → "How to read a .dc.html screen".
 Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to 360); boards are fixed sheets.
 
 ## client/ — yeral.app
@@ -33,9 +33,25 @@ Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to
 | `B-Settings.dc.html` | `/tk/settings/{profile,rules,hours,link,branches}` | page · 1440×1540 | Tweaks `pane`, `dirty`, `exceptionModal`; client-view preview of rules |
 | `B-Services.dc.html` | `/tk/settings/services` | page · 1440×1440 | Catalog + service drawer; tweak `drawer` |
 | `B-Team.dc.html` | `/tk/settings/team`, `/roles` | page · 1440×1360 | Team table, staff drawer, invite (3 steps), disable modal, role editor; tweaks `tab`, `panel` |
+| `B-Analytics.dc.html` | `/tk/analytics[/staff[/{id}]\|/services\|/clients]` | page · 1440×1160 | Overview (tiles, revenue chart with hover tooltip, section rows), staff table + one staff, services (sortable), clients (weekly stacked bars, sources), first-weeks state; tweaks `view` (overview · staff · staffOne · services · clients · firstWeeks), `role` (owner · specialist — no money) |
+| `B-Reviews.dc.html` | `/tk/reviews` | page · 1440×1980 | Summary + distribution, filters (Jogapsyz, stars, Hünärmen popover), sort, reply composer, edit/delete reply + undo, report modal → "Barlanýar"; tweaks `filter`, `composer`, `report` |
+| `B-Notifications.dc.html` | `/tk/settings/notifications` | page · 1440×2060 | Browser-permission banner, 10 event rows (Haçan / Kim alýar + channel chips Brauzerde · Programmada · SMS), sound switches, quiet hours, summary times, save bar; tweaks `permission`, `dirty` |
+| `B-Help.dc.html` | `/tk/help[/{article}]` | page · 1440×1260 | Search with live filter + no results, category tiles, popular articles, article view (steps with mini UI drawings, "Peýdaly boldumy?"), contact band, support-chat drawer; tweaks `view` (home · article), `chat` |
+| `B-Billing.dc.html` | `/tk/settings/billing` (owner only) | page · 1440×2120 | Plan card (+ commission line), commission statement, invoices (Möhleti geçdi + "Töle"), bank transfer, company details form + save bar, compare modal (2 plans + commission row), Ýeke downgrade warning; tweaks `modal`, `dirty` |
+| `B-Tables.dc.html` | `/tk/tables`, `/tk/settings/tables` | page · 1440×1240 | Bag kafe: timeline (areas, bars, requests, hold tails, now line, free-now side panel), floor plan, 2-person filter, reservation/request/walk-in drawers, table settings; tweaks `view` (timeline · floor · settings), `panel` (none · reservation · request · walkin) |
+| `B-Classes.dc.html` | `/tk/classes`, `/tk/settings/classes` | page · 1440×1290 | Aýdyň ýoga: week grid (lanes, capacity bars, Doly, past, cancelled), session drawer (attendees, inline confirm/decline, add client), move modal, cancel-session modal with alternatives, add-class modal (recurring), class catalog; tweaks `view` (week · catalog), `panel` (session · cancel · add · none) |
+| `B-Landing.dc.html` | `business.yeral.app` (logged out) | page · 1440×4680 | Header + phone menu, hero with drawn calendar mock, Kimler üçin (10 categories), features, 3 steps, pricing (2 plans + commission box), FAQ accordion, CTA band, footer |
 
-## system/ — design system
-`Main.dc.html` (Foundations: colour, type, layout, spacing), `DS-Components.dc.html` (all components with hover/focus/pressed/disabled), `DS-Booking.dc.html` (categories × booking types).
+## system/ — design system (v0.4)
+| File | Kind · frame | What |
+|---|---|---|
+| `Main.dc.html` | board · 1440×3260 | Foundations: colour, type, layout, spacing (v0.3.1; v0.4 token additions are listed in `../COMPONENTS.md` Part 3) |
+| `DS-Components.dc.html` | board · 1440×3900 | v0.3 components with hover/focus/pressed/disabled — the base of today's `@yeral/ui` + Storybook |
+| `DS-Booking.dc.html` | board · 1440×2500 | Categories × booking types |
+| `DS-Patterns.dc.html` | board · 1440×25400 | **v0.4 · Product components** — new domain-free components and new variants of existing ones (→ `@yeral/ui`). 8 sections: status & labels, feedback, data display, charts, inputs, navigation & layout, overlays, new variants |
+| `DS-Business.dc.html` | board · 1440×40600 | **v0.4 · Business patterns** — domain components (→ FSD entities / features / widgets). 13 sections: calendar, requests & bookings, clients, team & services, settings & onboarding, reviews, notifications, analytics, billing, landing, tables, classes, client site |
+
+Every drawing has a caption `Name · package · Storybook: … · from: …`; the full map is `../COMPONENTS.md`. Board heights are estimates (drawn without rendering) — some white space at the bottom is expected.
 
 ## explorations/
 `Home-A/B/C.dc.html` — round-1 homepage options. **Not to build.** Final Home = B's hero + A's body.
@@ -76,3 +92,13 @@ Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to
 - A booking cancelled from Gelýän stays there greyed until reload.
 - Review: 1 per completed booking, editable 7 days, shown as "Aýjemal G." (first name + surname initial).
 - Favourites route opens the favourites pane directly.
+
+**Business workspace (round 5)**
+- Sidebar everywhere: Senenama (Stollar / Sapaklar by booking type) · Ýazylyşlar (amber count) · Müşderiler · Teswirler (grey count) · Hasabatlar · Sazlamalar · Ýeral sahypaňyz · Kömek. Settings nav: … · Şahamçalar · Habarnamalar · Töleg we tarif.
+- Analytics: money only with `Girdejini görmek`; every chart has a hidden table / aria summary; period switch is label-only in the demo.
+- Reviews: moderation reviews are visible but not counted (business README §15).
+- Billing: commission is a layer on every plan, not a plan; "Töle" on an overdue invoice shows bank details + invoice number.
+- Tables: confirmed booking past its start = seated; online bookings auto-assigned the smallest fitting table; time suffixes follow vowel harmony.
+- Classes: "Gelmedi belle" only after the session starts; waitlist later.
+- Help: articles come from the CMS; the article title is the page h1 (top bar title not h1 on that view).
+- Landing: one gradient primary per view (header "Mugt başla"); FAQ = real buttons with `aria-expanded`.

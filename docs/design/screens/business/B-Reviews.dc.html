@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Biznes — teswirler</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6}
+.b-ico{width:40px;height:40px;padding:0;min-width:0}
+.b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
+.swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
+.swb:hover{background:#f4f4f6}
+.sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014}
+.sn:hover{background:#f4f4f6;color:#101014}
+.sn.on{background:#efecfe;color:#4429d6;font-weight:600}
+.sn.off{color:#6e6e78;cursor:default}
+.sn.off:hover{background:transparent;color:#6e6e78}
+.cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}
+.soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
+.gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
+.kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
+.pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
+.mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
+.mi:hover{background:#f4f4f6;color:#101014}
+.av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.app .side{position:sticky;top:0;height:100vh;overflow-y:auto;z-index:20}
+button.mi{border:0;background:transparent;font-family:inherit;width:100%;cursor:pointer;text-align:left}
+.mi:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+label.mi:has(input:focus-visible){box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.mi.dis,.mi.dis:hover{color:#6e6e78;background:transparent;cursor:default}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.cont{flex:1;padding:32px 32px 64px}
+.rwrap{max-width:920px;display:flex;flex-direction:column;gap:20px}
+.sum{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;padding-bottom:24px;border-bottom:1px solid #e6e6ea}
+.sumc{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;padding:4px 32px;border-left:1px solid #e6e6ea}
+.sumc.s1{padding-left:0;border-left:0}
+.sumc.s2{align-items:stretch}
+.big{font-size:48px;line-height:48px;font-weight:700;letter-spacing:-0.035em}
+.stars{display:inline-flex;gap:2px;flex:none}
+.bars{display:flex;flex-direction:column;gap:8px;max-width:360px;width:100%}
+.bar{display:grid;grid-template-columns:12px minmax(0,1fr) 28px;align-items:center;gap:12px;font-size:13px;line-height:18px}
+.bt{display:block;height:6px;border-radius:999px;background:#f0f0f3;overflow:hidden}
+.bf{display:block;height:100%;border-radius:999px;background:#5a3ff0}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:999px;flex:none}
+.st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
+.st-d{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
+button.badge{font-family:inherit;cursor:pointer}
+button.badge.st-p:hover{background:#fcecc9}
+button.badge:focus-visible,.lb:focus-visible,.chip:focus-visible,.xl:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.xl{display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:20px;font-weight:600;border-radius:6px}
+.frow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.chg{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px 0 14px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;white-space:nowrap;flex:none}
+.chip:hover{background:#f6f6f8}
+.chip.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.chip.on:hover{background:#ded7fd}
+.popa{position:absolute;z-index:31;display:flex;flex-direction:column}
+.catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
+label.mi{cursor:pointer}
+.cb{width:18px;height:18px;accent-color:#5a3ff0;margin:0;cursor:pointer;flex:none}
+.inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp::placeholder{color:#6e6e78}
+.inp:hover{border-color:#b0b0b8}
+.inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.selw{position:relative;display:inline-flex;flex:none;color:#101014}
+.selw svg{position:absolute;right:12px;top:50%;margin-top:-9px;pointer-events:none}
+.isel{appearance:none;-webkit-appearance:none;padding-right:40px;cursor:pointer;min-width:184px}
+.i36{height:36px;border-radius:10px;font-size:14px;padding-left:12px}
+.ta{height:112px;padding:10px 14px;resize:vertical;line-height:20px;font-size:14px}
+.fld{display:flex;flex-direction:column;gap:8px;min-width:0}
+.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.rvl{display:flex;flex-direction:column;border-top:1px solid #e6e6ea}
+.rv{display:flex;gap:14px;padding:20px 0;border-bottom:1px solid #e6e6ea}
+.rav{width:40px;height:40px;border-radius:999px;background:#f0f0f3;color:#101014;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.rvb{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.rvh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rvm{display:flex;flex-direction:column;gap:4px;min-width:0}
+.rvn{font-size:15px;line-height:20px;font-weight:600;color:#101014}
+.rvw{font-size:13px;line-height:18px;font-weight:400;color:#5a5a64}
+.rvs{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rvt{margin:0;font-size:15px;line-height:22px;color:#101014;max-width:680px;text-wrap:pretty}
+.mod{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rep{display:flex;flex-direction:column;gap:4px;max-width:680px;padding:10px 12px 12px 16px;border-radius:12px;background:#f6f6f8}
+.reph{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.repa{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.rept{margin:0;font-size:14px;line-height:20px;color:#101014}
+.lb{display:inline-flex;align-items:center;height:32px;padding:0 8px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:#4429d6;cursor:pointer}
+.lb:hover{background:#ececf0;color:#3520a6}
+.lb-d{color:#a3251b}
+.lb-d:hover{color:#a3251b}
+.cmp{display:flex;flex-direction:column;gap:8px;max-width:680px}
+.cmpf{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.cmpa{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.empty{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:20px;padding:48px 32px;border:1px dashed #d8d8de;border-radius:16px;text-align:center}
+.eic{width:56px;height:56px;border-radius:999px;background:#efecfe;color:#5a3ff0;display:flex;align-items:center;justify-content:center}
+.foot{display:flex;gap:8px;align-items:flex-start;color:#5a5a64}
+.scrim{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:40}
+.grab{display:none;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:0 auto;flex:none}
+.mwrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
+.mwrap .scrim{position:absolute;z-index:0}
+.mdl{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;max-width:100%;max-height:100%;overflow-y:auto;padding:24px;border-radius:16px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.mdl-s{width:480px}
+.mt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.mact{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.qbox{display:flex;flex-direction:column;gap:6px;margin:0;padding:12px 14px;border-radius:12px;background:#f6f6f8}
+.qtxt{margin:0;font-size:14px;line-height:20px;color:#101014}
+.rgl{display:flex;flex-direction:column}
+.rl{display:flex;align-items:center;gap:10px;min-height:44px;font-size:15px;line-height:20px;color:#101014;cursor:pointer}
+.rl input{width:18px;height:18px;accent-color:#5a3ff0;margin:0;flex:none;cursor:pointer}
+.toast{position:fixed;left:272px;bottom:24px;z-index:80;display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 8px 0 16px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:15px;line-height:20px;max-width:calc(100% - 296px)}
+.toast .tb{background:transparent;color:#c3b6fb;padding:0 10px}
+.toast .tb:hover{background:#2a2a32;color:#c3b6fb}
+.tsp{width:8px;flex:none}
+@media (max-width:1023px){.side{width:72px;padding:12px 0;align-items:center}.side > div{align-self:stretch}.side .swb{width:44px;height:44px;padding:4px;justify-content:center}.side .swb > span:not(.av),.side .swb > svg{display:none}.side .sn{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0;position:relative}.side .cnt{position:absolute;top:6px;right:6px;min-width:0;width:8px;height:8px;padding:0;border:0;background:#dc8b0b;font-size:0}.side .cnt.cnt-n{background:#7b8ea3}.side .soon{display:none}.top{padding:0 24px}.gs{width:auto;flex:0 1 320px}.cont{padding:24px 24px 48px}.sum{grid-template-columns:auto minmax(0,1fr)}.sumc.s3{grid-column:1 / -1;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:20px;padding:20px 0 0;border-left:0;border-top:1px solid #e6e6ea}.toast{left:96px;max-width:calc(100% - 120px)}}
+@media (max-width:767px){.app{flex-direction:column}.app .side{position:sticky;top:0;height:auto;width:100%;flex-direction:row;align-items:center;gap:4px;padding:6px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow-x:auto;overflow-y:hidden}.side > div{display:none}.side .swb,.side .sn{flex:none}.top{height:56px;padding:0 16px}.gs{display:none}.cont{padding:16px 16px 40px}.sum{grid-template-columns:minmax(0,1fr)}.sumc{padding:16px 0 0;border-left:0}.sumc.s1{padding-top:0}.sumc.s2{margin-top:16px;border-top:1px solid #e6e6ea}.sumc.s3{margin-top:16px;padding-top:16px}.chip{height:44px}.b-sm{height:44px;border-radius:12px}.lb{height:44px}.mi{min-height:44px}.frow > .selw,.frow .isel{width:100%}.rv{gap:12px}.rav{width:36px;height:36px;font-size:14px}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:16px;max-width:none}}
+@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}</style>
+</helmet>
+<div class="app" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<aside class="side" aria-label="Esasy menýu">
+<button class="swb" aria-label="Biznesi çalyş"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bitarap Türkmenistan şaýoly</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<a class="sn" href="B-Calendar.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
+<a class="sn on" href="B-Reviews.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<sc-if value="{{hasNavCnt}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-label="{{navCntLabel}}">{{unansweredN}}</span></sc-if></a>
+<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<div style="flex: 1"></div>
+<a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<button class="swb" aria-label="Hasabym"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+</aside>
+
+<div class="main">
+<div class="top">
+<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Teswirler</h1>
+<div style="flex: 1"></div>
+<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
+</div>
+
+<div class="cont">
+<div class="rwrap">
+
+<section class="sum" aria-label="Teswirleriň jemi">
+<div class="sumc s1">
+<div style="display: flex; align-items: flex-end; gap: 14px">
+<span class="big">4,9</span>
+<div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 2px">
+<span class="stars" role="img" aria-label="Ortaça baha: 5-den 4,9"><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>
+<span class="cap">96 teswir</span>
+</div>
+</div>
+</div>
+<div class="sumc s2">
+<div class="bars">
+<sc-for list="{{bars}}" as="b" hint-placeholder-count="5">
+<div class="bar" role="img" aria-label="{{b.aria}}"><span style="font-weight: 600">{{b.n}}</span><span class="bt"><span class="bf" style="width: {{b.pct}}%"></span></span><span class="cap" style="text-align: right; font-variant-numeric: tabular-nums">{{b.c}}</span></div>
+</sc-for>
+</div>
+</div>
+<div class="sumc s3">
+<sc-if value="{{hasUnanswered}}" hint-placeholder-val="{{true}}"><button class="badge st-p" onClick="{{showUnanswered}}"><span class="dot" style="background: #dc8b0b"></span>Jogapsyz · {{unansweredN}}</button></sc-if>
+<sc-if value="{{allAnswered}}" hint-placeholder-val="{{false}}"><span class="badge st-d"><span class="dot" style="background: #12a366"></span>Ähli teswirlere jogap berildi</span></sc-if>
+<span class="cap">Ortaça jogap wagty: 6 sagat</span>
+<a class="xl" href="Venue.dc.html">Sahypaňyzda görüň<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+</div>
+</section>
+
+<div class="frow">
+<div class="chg" role="group" aria-label="Teswirleri süz">
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="7"><button class="{{c.cls}}" aria-pressed="{{c.on}}" aria-label="{{c.aria}}" onClick="{{c.pick}}">{{c.t}}<sc-if value="{{c.star}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></sc-if></button></sc-for>
+<div style="position: relative; flex: none">
+<button class="{{staffChipCls}}" aria-haspopup="true" aria-expanded="{{staffOpen}}" onClick="{{toggleStaff}}">{{staffChip}}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+<sc-if value="{{staffOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closePops}}"></div>
+<div class="pop popa" role="group" aria-label="Hünärmen boýunça süz" style="top: 42px; left: 0; width: 260px">
+<div class="lbl" style="padding: 8px 10px 4px">Hünärmenler</div>
+<sc-for list="{{staffOpts}}" as="o" hint-placeholder-count="4"><label class="mi"><input type="checkbox" class="cb" checked="{{o.on}}" onChange="{{o.flip}}"><span style="flex: 1">{{o.t}}</span><span class="cap">{{o.sub}}</span></label></sc-for>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 2px 2px"><button class="b b-gho b-sm" disabled="{{noStaff}}" onClick="{{clearStaff}}">Arassala</button><button class="b b-sec b-sm" onClick="{{closePops}}">Taýýar</button></div>
+</div>
+</sc-if>
+</div>
+</div>
+<span class="selw"><select class="inp i36 isel" aria-label="Tertip" value="{{sort}}" onChange="{{onSort}}"><option value="new">Iň täzeler</option><option value="old">Iň köneler</option><option value="low">Iň pes bahalar</option><option value="high">Iň ýokary bahalar</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+</div>
+
+<section class="rvl" aria-label="Teswirleriň sanawy">
+<sc-for list="{{reviews}}" as="r" hint-placeholder-count="5">
+<article class="rv" aria-labelledby="{{r.hid}}">
+<sc-if value="{{r.named}}" hint-placeholder-val="{{true}}"><span class="rav" aria-hidden="true">{{r.ini}}</span></sc-if>
+<sc-if value="{{r.anon}}" hint-placeholder-val="{{false}}"><span class="rav" aria-hidden="true" style="color: #5a5a64"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span></sc-if>
+<div class="rvb">
+<div class="rvh">
+<div class="rvm">
+<span class="rvn" id="{{r.hid}}">{{r.name}}<span class="rvw"> · {{r.when}}</span></span>
+<span class="rvs"><span class="stars" role="img" aria-label="{{r.starsAria}}"><sc-for list="{{r.stars}}" as="st" hint-placeholder-count="5"><svg width="14" height="14" viewBox="0 0 24 24" fill="{{st}}" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></sc-for></span><sc-if value="{{r.hasSvc}}" hint-placeholder-val="{{true}}"><span class="cap">{{r.svc}}</span></sc-if></span>
+</div>
+<div style="position: relative; flex: none">
+<button class="b b-gho b-ico" style="width: 36px; height: 36px" aria-label="{{r.menuLabel}}" aria-haspopup="menu" aria-expanded="{{r.menuOpen}}" onClick="{{r.toggleMenu}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></button>
+<sc-if value="{{r.menuOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closePops}}"></div>
+<div class="pop popa" role="menu" aria-label="{{r.menuLabel}}" style="top: 40px; right: 0; width: 260px">
+<sc-if value="{{r.canReport}}" hint-placeholder-val="{{true}}"><button class="mi" role="menuitem" onClick="{{r.report}}" style="align-items: flex-start"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 500">Arz et</span><span class="cap" style="font-size: 12px; line-height: 16px">Ýalan, kemsidiji ýa-da mahabat bolsa</span></span></button></sc-if>
+<sc-if value="{{r.reported}}" hint-placeholder-val="{{false}}"><span class="mi dis" role="menuitem" aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg>Arz edildi · barlanýar</span></sc-if>
+</div>
+</sc-if>
+</div>
+</div>
+<p class="rvt">{{r.text}}</p>
+<sc-if value="{{r.reported}}" hint-placeholder-val="{{false}}"><div class="mod"><span class="badge st-p"><span class="dot" style="background: #dc8b0b"></span>Barlanýar · Ýeral moderasiýasy</span><span class="cap">{{r.repCap}}</span></div></sc-if>
+<sc-if value="{{r.showReply}}" hint-placeholder-val="{{false}}">
+<div class="rep">
+<div class="reph"><span class="repa">Glow Studio · Maýsa</span><span class="cap">{{r.replyWhen}}</span><span style="flex: 1"></span><button class="lb" aria-label="{{r.editLabel}}" onClick="{{r.edit}}">Üýtget</button><button class="lb lb-d" aria-label="{{r.delLabel}}" onClick="{{r.del}}">Poz</button></div>
+<p class="rept">{{r.replyText}}</p>
+</div>
+</sc-if>
+<sc-if value="{{r.showAnswer}}" hint-placeholder-val="{{true}}"><div><button class="b b-sec b-sm" aria-label="{{r.answerLabel}}" onClick="{{r.answer}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>Jogap ber</button></div></sc-if>
+<sc-if value="{{r.showCmp}}" hint-placeholder-val="{{false}}">
+<div class="cmp">
+<label class="flab" for="{{r.cmpId}}">Glow Studio adyndan jogabyňyz</label>
+<textarea id="{{r.cmpId}}" class="inp ta" placeholder="{{r.ph}}" aria-describedby="{{r.cmpCapId}}" value="{{draft}}" onInput="{{onDraft}}"></textarea>
+<div class="cmpf"><span class="cap" id="{{r.cmpCapId}}">Jogabyňyz hemmä görüner. Gysga we hormatly ýazyň.</span><span class="cap" style="font-variant-numeric: tabular-nums; color: {{draftCntColor}}">{{draftCount}} / 500</span></div>
+<div class="cmpa"><button class="b b-gho b-sm" onClick="{{cancelCmp}}">Ýatyr</button><button class="b b-pri b-sm" disabled="{{cantPublish}}" onClick="{{publish}}">{{publishLabel}}</button></div>
+</div>
+</sc-if>
+</div>
+</article>
+</sc-for>
+<sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+<div class="empty">
+<div class="eic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
+<div style="font-size: 19px; line-height: 24px; font-weight: 600">{{emptyTitle}}</div>
+<div style="font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 360px">{{emptyText}}</div>
+<button class="b b-sec b-sm" style="margin-top: 4px" onClick="{{resetFilters}}">{{emptyAction}}</button>
+</div>
+</sc-if>
+</section>
+
+<div class="foot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span class="cap">Teswirleri pozup bolmaýar — diňe ýalan ýa-da kemsidiji bolsa arz ediň.</span></div>
+
+</div>
+</div>
+</div>
+
+<sc-if value="{{repOpen}}" hint-placeholder-val="{{false}}">
+<div class="mwrap" onKeyDown="{{repKey}}">
+<div class="scrim" onClick="{{closeRep}}"></div>
+<div class="mdl mdl-s" role="dialog" aria-modal="true" aria-labelledby="rp-t" aria-describedby="rp-d">
+<span class="grab"></span>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h2 id="rp-t" class="mt">Teswiri arz etmek</h2><button class="b b-gho b-ico" style="width: 36px; height: 36px" aria-label="Ýap" onClick="{{closeRep}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<figure class="qbox">
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap"><span style="font-size: 13px; line-height: 18px; font-weight: 600">{{repName}}</span><span class="stars" role="img" aria-label="{{repStarsAria}}"><sc-for list="{{repStars}}" as="st" hint-placeholder-count="5"><svg width="12" height="12" viewBox="0 0 24 24" fill="{{st}}" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></sc-for></span><span class="cap">{{repWhen}}</span></div>
+<blockquote class="qtxt">{{repQuote}}</blockquote>
+</figure>
+<div class="fld" style="gap: 2px">
+<span class="flab" id="rp-r">Näme üçin arz edýärsiňiz?</span>
+<div class="rgl" role="radiogroup" aria-labelledby="rp-r">
+<sc-for list="{{repReasons}}" as="o" hint-placeholder-count="5"><label class="rl"><input type="radio" name="rp-reason" checked="{{o.on}}" onChange="{{o.pick}}">{{o.t}}</label></sc-for>
+</div>
+</div>
+<div class="fld"><label class="flab" for="rp-x">{{repTextLabel}}</label><textarea id="rp-x" class="inp ta" style="height: 88px" placeholder="Meselem: bu adam bize hiç haçan ýazylmandy" value="{{repText}}" onInput="{{onRepText}}"></textarea></div>
+<span class="cap" id="rp-d">Ýeral topary 48 sagadyň içinde barlar. Teswir şu wagta çenli görünýär.</span>
+<div class="mact"><button class="b b-sec" onClick="{{closeRep}}">Yza</button><button class="b b-pri" disabled="{{repInvalid}}" onClick="{{submitRep}}">Arz et</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div class="toast" role="status">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+<span>{{toastText}}</span>
+<sc-if value="{{toastUndo}}" hint-placeholder-val="{{false}}"><button class="b b-sm tb" onClick="{{undo}}">Yzyna al</button></sc-if>
+<sc-if value="{{toastPlain}}" hint-placeholder-val="{{true}}"><span class="tsp"></span></sc-if>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"filter":{"editor":"enum","options":["all","unanswered"],"default":"all","section":"State"},"composer":{"editor":"boolean","default":true,"section":"State"},"report":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1980}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const p = props || {};
+    const rep = !!p.report;
+    this.state = Object.assign({
+      items: this.seed(rep),
+      filter: p.filter === 'unanswered' ? 'unanswered' : 'all',
+      staff: [], sort: 'new', staffOpen: false, menuFor: null, keep: [],
+      toast: null, lastDel: null
+    }, this.cmpState(p.composer ?? true), this.repState(rep));
+  }
+  componentDidUpdate(pp) {
+    const p = this.props;
+    if (pp.filter !== p.filter) this.setState({ filter: p.filter === 'unanswered' ? 'unanswered' : 'all', keep: [], staffOpen: false, menuFor: null });
+    if (pp.composer !== p.composer) {
+      const on = p.composer ?? true;
+      const d = this.state.items.filter((x) => x.id === 'dowran')[0];
+      this.setState(on && d && d.reply ? { cmpFor: 'dowran', cmpMode: 'edit', draft: d.reply.text } : this.cmpState(on));
+    }
+    if (pp.report !== p.report) {
+      const on = !!p.report;
+      const items = this.state.items.map((x) => (x.id === 'anon' ? Object.assign({}, x, { report: on ? null : { reason: 'Başga biznes barada' } }) : x));
+      this.setState(Object.assign({ items: items, menuFor: null }, this.repState(on)));
+    }
+  }
+  componentWillUnmount() { clearTimeout(this.tt); }
+  cmpState(on) { return { cmpFor: on ? 'dowran' : null, cmpMode: 'new', draft: '' }; }
+  repState(on) { return { repFor: on ? 'anon' : null, repReason: on ? 'Başga biznes barada' : null, repText: '' }; }
+  seed(reportOpen) {
+    return [
+      { id: 'dowran', name: 'Döwran S.', rating: 2, when: 'Şu gün', age: 0, svc: 'Saç düzmek', staff: 'Aýna', text: 'Ýarym sagat garaşdym, hiç kim düşündirmedi. Netije gowy, ýöne wagtymy ýitirdim.', reply: null, report: null },
+      { id: 'mahri', name: 'Mähri G.', rating: 5, when: 'Düýn', age: 1, svc: 'Manikýur', staff: 'Maral', text: 'Elmydama wagtynda, arassa we mähirli.', reply: null, report: null },
+      { id: 'anon', name: 'Anonim', anon: true, rating: 1, when: 'Düýn', age: 1.5, svc: '', staff: '', text: 'Iň erbet salon, «Altyn Gül»-e gidiň!', reply: null, report: reportOpen ? null : { reason: 'Başga biznes barada' } },
+      { id: 'gulalek', name: 'Gülälek N.', rating: 5, when: '2 gün öň', age: 2, svc: 'Aýal saç kesimi', staff: 'Aýna', text: 'Aýna saçymy edil isleýşim ýaly kesdi. Wagtynda kabul etdiler, salon arassa we rahat.', reply: { text: 'Sag boluň, Gülälek! Ýene garaşýarys.', when: '2 gün öň' }, report: null },
+      { id: 'sona', name: 'Sona P.', rating: 5, when: '4 gün öň', age: 4, svc: 'Gaş we kirpik', staff: 'Jeren', text: 'Iň gowy kirpik ussasy!', reply: null, report: null },
+      { id: 'ogulsat', name: 'Ogulşat M.', rating: 5, when: '1 hepde öň', age: 7, svc: 'Gel-lak bilen manikýur', staff: 'Maral', text: 'Maral örän üns berip işleýär. Gel-lak üç hepde saklandy.', reply: { text: 'Sag boluň, Ogulşat! Sözleriňizi Marala ýetireris.', when: '6 gün öň' }, report: null },
+      { id: 'bahar', name: 'Bahar A.', rating: 4, when: '3 hepde öň', age: 21, svc: 'Ýüz arassalamak', staff: 'Jeren', text: 'Hyzmat gowy, ýöne başlamazdan öň biraz garaşmaly boldum.', reply: { text: 'Bahar, garaşdyranymyz üçin bagyşlaň. Indi ýazylyşlaryň arasynda goşmaça wagt goýýarys.', when: '3 hepde öň' }, report: null }
+    ];
+  }
+  flash(patch, text, undo) {
+    clearTimeout(this.tt);
+    this.setState(Object.assign({}, patch, { toast: { text: text, undo: !!undo } }));
+    this.tt = setTimeout(() => this.setState({ toast: null }), 6000);
+  }
+  renderVals() {
+    const fnt = this.props.font ?? 'Onest';
+    const s = this.state;
+    const items = s.items;
+    const STAR = (n) => [1, 2, 3, 4, 5].map((i) => (i <= n ? '#101014' : '#d8d8de'));
+    const isStar = (f) => /^[1-5]$/.test(f);
+    const setItem = (id, patch) => this.state.items.map((x) => (x.id === id ? Object.assign({}, x, patch) : x));
+    const unanswered = items.filter((x) => !x.reply).length;
+
+    // summary (business-demo.json → reviews)
+    const BRK = { 5: 88, 4: 6, 3: 1, 2: 1, 1: 0 };
+    const TOTAL = 96;
+    const bars = [5, 4, 3, 2, 1].map((n) => ({ n: String(n), c: String(BRK[n]), pct: Math.round((BRK[n] / TOTAL) * 1000) / 10, aria: n + ' ýyldyz: ' + BRK[n] + ' teswir' }));
+
+    // filters
+    const F = [['all', 'Ählisi'], ['unanswered', 'Jogapsyz (' + unanswered + ')'], ['5', '5'], ['4', '4'], ['3', '3'], ['2', '2'], ['1', '1']];
+    const chips = F.map((c) => ({
+      t: c[1], star: isStar(c[0]), aria: isStar(c[0]) ? c[0] + ' ýyldyz' : c[1],
+      on: s.filter === c[0], cls: s.filter === c[0] ? 'chip on' : 'chip',
+      pick: () => this.setState({ filter: c[0], keep: [], menuFor: null, staffOpen: false })
+    }));
+    const ST = [['Aýna', 'Stilist'], ['Maral', 'Dyrnak ussasy'], ['Jeren', 'Kosmetolog'], ['Leýli', 'Massažist']];
+    const staffOpts = ST.map((o) => ({
+      t: o[0], sub: o[1], on: s.staff.indexOf(o[0]) >= 0,
+      flip: () => {
+        const cur = this.state.staff;
+        this.setState({ staff: cur.indexOf(o[0]) >= 0 ? cur.filter((x) => x !== o[0]) : cur.concat([o[0]]) });
+      }
+    }));
+    const nSt = s.staff.length;
+
+    // list
+    const visible = items.filter((x) => {
+      if (s.filter === 'unanswered' && x.reply && s.keep.indexOf(x.id) < 0) return false;
+      if (isStar(s.filter) && x.rating !== Number(s.filter)) return false;
+      if (nSt && s.staff.indexOf(x.staff) < 0) return false;
+      return true;
+    });
+    const SORT = {
+      new: (a, b) => a.age - b.age,
+      old: (a, b) => b.age - a.age,
+      low: (a, b) => a.rating - b.rating || a.age - b.age,
+      high: (a, b) => b.rating - a.rating || a.age - b.age
+    };
+    const list = visible.slice().sort(SORT[s.sort] || SORT.new);
+    const reviews = list.map((r) => {
+      const first = r.name.split(' ')[0];
+      const open = s.cmpFor === r.id;
+      const ph = r.anon
+        ? 'Meselem: Bu ýagdaýa düşünmek isleýäris — bize jaň ediň: +993 12 45 67 89'
+        : (r.rating >= 4 ? 'Meselem: Sag boluň, ' + first + '! Ýene garaşýarys.' : 'Meselem: ' + first + ', ýazanyňyz üçin sag boluň. Bu ýagdaýy düzetmek isleýäris…');
+      return {
+        hid: 'rv-' + r.id, cmpId: 'cmp-' + r.id, cmpCapId: 'cmpc-' + r.id,
+        name: r.name, when: r.when, anon: !!r.anon, named: !r.anon, ini: r.name.charAt(0),
+        stars: STAR(r.rating), starsAria: 'Baha: 5-den ' + r.rating,
+        hasSvc: !!r.svc, svc: r.svc + ' · ' + r.staff,
+        text: r.text,
+        reported: !!r.report, canReport: !r.report,
+        repCap: r.report ? 'Sebäp: ' + r.report.reason : '',
+        showReply: !!r.reply && !(open && s.cmpMode === 'edit'),
+        replyText: r.reply ? r.reply.text : '', replyWhen: r.reply ? r.reply.when : '',
+        showAnswer: !r.reply && !open,
+        showCmp: open,
+        ph: ph,
+        answerLabel: r.name + ' teswirine jogap ber',
+        editLabel: r.name + ' teswirine jogaby üýtget',
+        delLabel: r.name + ' teswirine jogaby poz',
+        menuOpen: s.menuFor === r.id, menuLabel: r.name + ' teswiri: hereketler',
+        answer: () => this.setState({ cmpFor: r.id, cmpMode: 'new', draft: '', menuFor: null, staffOpen: false }),
+        edit: () => {
+          const cur = this.state.items.filter((x) => x.id === r.id)[0];
+          this.setState({ cmpFor: r.id, cmpMode: 'edit', draft: cur && cur.reply ? cur.reply.text : '', menuFor: null, staffOpen: false });
+        },
+        del: () => {
+          const cur = this.state.items.filter((x) => x.id === r.id)[0];
+          if (!cur || !cur.reply) return;
+          this.flash({ items: setItem(r.id, { reply: null }), lastDel: { id: r.id, reply: cur.reply }, cmpFor: this.state.cmpFor === r.id ? null : this.state.cmpFor }, 'Jogap pozuldy', true);
+        },
+        toggleMenu: () => this.setState({ menuFor: this.state.menuFor === r.id ? null : r.id, staffOpen: false }),
+        report: () => this.setState({ menuFor: null, repFor: r.id, repReason: null, repText: '' })
+      };
+    });
+    const isEmpty = reviews.length === 0;
+    const allDone = s.filter === 'unanswered' && unanswered === 0 && nSt === 0;
+
+    // composer
+    const dl = s.draft.length;
+
+    // report modal
+    const REASONS = ['Ýalan — bu müşderi gelmedi', 'Kemsidiji sözler', 'Başga biznes barada', 'Mahabat ýa-da spam', 'Başga sebäp'];
+    const rep = s.repFor ? items.filter((x) => x.id === s.repFor)[0] : null;
+    const repOther = s.repReason === 'Başga sebäp';
+    const repInvalid = !s.repReason || (repOther && !s.repText.trim());
+    const closeRep = () => this.setState({ repFor: null, repReason: null, repText: '' });
+
+    return {
+      fontStack: "'" + fnt + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+
+      unansweredN: String(unanswered),
+      hasNavCnt: unanswered > 0,
+      navCntLabel: unanswered + ' jogapsyz teswir',
+      hasUnanswered: unanswered > 0,
+      allAnswered: unanswered === 0,
+      showUnanswered: () => this.setState({ filter: 'unanswered', keep: [], staffOpen: false, menuFor: null }),
+      bars: bars,
+
+      chips: chips,
+      staffOpts: staffOpts,
+      staffOpen: !!s.staffOpen,
+      staffChip: nSt === 0 ? 'Hünärmen' : (nSt === 1 ? s.staff[0] : 'Hünärmen · ' + nSt),
+      staffChipCls: nSt ? 'chip on' : 'chip',
+      noStaff: nSt === 0,
+      toggleStaff: () => this.setState({ staffOpen: !this.state.staffOpen, menuFor: null }),
+      clearStaff: () => this.setState({ staff: [] }),
+      closePops: () => this.setState({ staffOpen: false, menuFor: null }),
+      sort: s.sort,
+      onSort: (e) => this.setState({ sort: e.target.value }),
+
+      reviews: reviews,
+      isEmpty: isEmpty,
+      emptyTitle: allDone ? 'Ähli teswirlere jogap berdiňiz' : 'Bu süzgüç boýunça teswir ýok',
+      emptyText: allDone ? 'Täze teswir gelende size habar bereris.' : 'Başga baha ýa-da hünärmen saýlap görüň.',
+      emptyAction: allDone ? 'Ähli teswirleri görkez' : 'Süzgüçleri arassala',
+      resetFilters: () => this.setState({ filter: 'all', staff: [], keep: [], staffOpen: false, menuFor: null }),
+
+      draft: s.draft,
+      draftCount: String(dl),
+      draftCntColor: dl >= 500 ? '#a3251b' : (dl >= 450 ? '#93500a' : '#5a5a64'),
+      onDraft: (e) => this.setState({ draft: e.target.value.slice(0, 500) }),
+      cantPublish: !s.draft.trim(),
+      publishLabel: s.cmpMode === 'edit' ? 'Ýatda sakla' : 'Jogaby çap et',
+      cancelCmp: () => this.setState({ cmpFor: null, cmpMode: 'new', draft: '' }),
+      publish: () => {
+        const st = this.state;
+        const txt = st.draft.trim();
+        if (!txt || !st.cmpFor) return;
+        const id = st.cmpFor;
+        const edit = st.cmpMode === 'edit';
+        const next = st.items.map((x) => (x.id === id ? Object.assign({}, x, { reply: { text: txt, when: edit && x.reply ? x.reply.when : 'Şu wagt' } }) : x));
+        const keep = st.filter === 'unanswered' && st.keep.indexOf(id) < 0 ? st.keep.concat([id]) : st.keep;
+        this.flash({ items: next, keep: keep, cmpFor: null, cmpMode: 'new', draft: '' }, edit ? 'Jogap üýtgedildi' : 'Jogap çap edildi');
+      },
+
+      repOpen: !!rep,
+      repName: rep ? rep.name : '',
+      repWhen: rep ? rep.when : '',
+      repQuote: rep ? '«' + rep.text + '»' : '',
+      repStars: STAR(rep ? rep.rating : 0),
+      repStarsAria: 'Baha: 5-den ' + (rep ? rep.rating : 0),
+      repReasons: REASONS.map((t) => ({ t: t, on: s.repReason === t, pick: () => this.setState({ repReason: t }) })),
+      repTextLabel: repOther ? 'Düşündiriş' : 'Düşündiriş (hökman däl)',
+      repText: s.repText,
+      onRepText: (e) => this.setState({ repText: e.target.value.slice(0, 500) }),
+      repInvalid: repInvalid,
+      closeRep: closeRep,
+      repKey: (e) => { if (e && e.key === 'Escape') closeRep(); },
+      submitRep: () => {
+        const st = this.state;
+        if (!st.repFor || !st.repReason || (st.repReason === 'Başga sebäp' && !st.repText.trim())) return;
+        const next = st.items.map((x) => (x.id === st.repFor ? Object.assign({}, x, { report: { reason: st.repReason, text: st.repText.trim() } }) : x));
+        this.flash({ items: next, repFor: null, repReason: null, repText: '' }, 'Arz ugradyldy · Ýeral topary 48 sagadyň içinde barlar');
+      },
+
+      hasToast: !!s.toast,
+      toastText: s.toast ? s.toast.text : '',
+      toastUndo: !!(s.toast && s.toast.undo),
+      toastPlain: !(s.toast && s.toast.undo),
+      undo: () => {
+        const ld = this.state.lastDel;
+        clearTimeout(this.tt);
+        if (!ld) { this.setState({ toast: null }); return; }
+        this.setState({ items: this.state.items.map((x) => (x.id === ld.id ? Object.assign({}, x, { reply: ld.reply }) : x)), lastDel: null, toast: null });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

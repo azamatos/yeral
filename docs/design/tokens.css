@@ -1,5 +1,6 @@
-/* Ýeral Web — design tokens v0.3.1 (14.10.2026)
-   Source of truth: canvas "Ýeral Web" → DS · Foundations / Components.
+/* Ýeral Web — design tokens v0.4 (14.10.2026)
+   Source of truth: canvas "Ýeral Web" → DS · Foundations / Components / Product components / Business patterns.
+   v0.4 = v0.3.1 + aliases for values the client and business screens already use (no new colours) — see COMPONENTS.md Part 3.
    Extends mobile DS v0.2. Font: Onest (Google Fonts) — covers Turkmen Latin + Cyrillic. */
 
 :root {
@@ -14,6 +15,8 @@
   --fs-dense: 13px;    --lh-dense: 18px;                             /* 400/500, tables */
   --fs-button: 15px;   --lh-button: 20px;                            /* 600 */
   --fs-label: 11px;    --lh-label: 14px;    --ls-label: 0.07em;      /* 600, uppercase */
+  --fs-small: 14px;    --lh-small: 20px;                             /* v0.4 · business body, S buttons, menus, table cells */
+  --fs-micro: 12px;    --lh-micro: 16px;                             /* v0.4 · counts, kbd, tooltips, chart axes */
 
   /* Neutrals */
   --n-0: #ffffff;   /* surface */
@@ -53,6 +56,9 @@
   --ink-btn-hover: #2a2a32;
   --switch-on: #5a3ff0;
   --switch-off: #e6e6ea;               /* + inset 1.5px #6e6e78 border */
+  --switch-off-ring: inset 0 0 0 1.5px #6e6e78;   /* v0.4 */
+  --focus-ring-inset: inset 0 0 0 2px #7a5ff4;    /* v0.4 · focus inside clipped containers (table rows, grid cells) */
+  --input-warning: 0 0 0 3px #fef6e7;             /* v0.4 · + border #dc8b0b */
 
   /* Booking statuses: bg / line / ink / dot */
   --st-pending-bg: #fef6e7;   --st-pending-line: #f2ddb0;   --st-pending-ink: #93500a;   --st-pending-dot: #dc8b0b;
@@ -66,18 +72,24 @@
 
   /* Radii */
   --r-input: 8px; --r-btn-s: 10px; --r-btn-m: 12px; --r-btn-l: 14px; --r-card: 16px; --r-pill: 999px;
+  --r-xs: 4px; --r-sm: 6px;   /* v0.4 · checkbox, bar ends, swatches / kbd, skeleton, small tiles */
 
   /* Sizes */
   --btn-s: 36px; --btn-m: 44px; --btn-l: 52px; --input-h: 48px;
   --row-list: 56px; --row-table: 56px; --row-table-dense: 40px;
   --nav-h: 72px; --nav-h-search: 80px; --sidebar-w: 248px; --sidebar-rail: 72px;
-  --modal-s: 400px; --modal-m: 480px; --modal-l: 640px; --drawer-w: 480px;
+  --modal-s: 400px; --modal-m: 480px; --modal-ml: 560px; --modal-l: 640px; --drawer-w: 480px;   /* modal-ml v0.4: review, new client, invite, special day, add class */
   --container: 1200px;
 
   /* Elevation */
   --shadow-raised: 0 8px 24px rgba(16,16,20,.16);   /* popover, drawer, modal, toast */
   --shadow-sheet: 0 -8px 24px rgba(16,16,20,.16);   /* xs bottom sheet */
   --scrim: rgba(16,16,20,.40);
+  --shadow-control: 0 1px 2px rgba(16,16,20,.2);   /* v0.4 · switch knob, photo controls */
+
+  /* Charts (v0.4 aliases — categories use the accent ramp, never status colours) */
+  --chart-1: #5a3ff0; --chart-2: #c3b6fb; --chart-3: #4429d6; --chart-4: #9d88f7;
+  --chart-area: #efecfe; --chart-compare: #b0b0b8; --chart-grid: #f0f0f3; --chart-axis: #6e6e78;
 }
 
 /* Breakpoints: xl ≥1440 · lg 1280–1439 · md 1024–1279 · sm 768–1023 · xs ≤767

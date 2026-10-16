@@ -61,7 +61,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
 .dot{width:6px;height:6px;border-radius:999px;flex:none}
 .st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
-.soon{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;background:#f0f0f3;color:#5a5a64;font-size:11px;line-height:14px;font-weight:600;white-space:nowrap;flex:none}
+.btag,.soon{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;background:#f0f0f3;color:#5a5a64;font-size:11px;line-height:14px;font-weight:600;white-space:nowrap;flex:none}
 .tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;background:#ffffff;border:1px solid #d5cbfb;color:#4429d6;font-size:12px;font-weight:600;white-space:nowrap}
 .av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
 /* layout */
@@ -326,7 +326,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <sc-for list="{{catGroups}}" as="g" hint-placeholder-count="3">
 <div role="group" aria-label="{{g.name}}" style="display: flex; flex-direction: column">
 <span class="lbl cg">{{g.name}}</span>
-<sc-for list="{{g.items}}" as="c" hint-placeholder-count="4"><button class="{{c.cls}}" role="radio" aria-checked="{{c.on}}" onClick="{{c.pick}}"><span class="rad" aria-hidden="true"></span><span style="flex: 1; min-width: 0">{{c.t}}</span><sc-if value="{{c.soon}}" hint-placeholder-val="{{false}}"><span class="soon">Stol dolandyryşy ýakynda</span></sc-if></button></sc-for>
+<sc-for list="{{g.items}}" as="c" hint-placeholder-count="4"><button class="{{c.cls}}" role="radio" aria-checked="{{c.on}}" onClick="{{c.pick}}"><span class="rad" aria-hidden="true"></span><span style="flex: 1; min-width: 0">{{c.t}}</span><sc-if value="{{c.typeTag}}" hint-placeholder-val="{{false}}"><span class="btag">{{c.typeTag}}</span></sc-if></button></sc-for>
 </div>
 </sc-for>
 <sc-if value="{{catEmpty}}" hint-placeholder-val="{{false}}">
@@ -338,7 +338,10 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </sc-if>
 </div>
 <sc-if value="{{catIsFood}}" hint-placeholder-val="{{false}}">
-<div class="info" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Stol dolandyryşy ýakynda goşular. Häzirlikçe wagt bellemek görnüşinde başlap bilersiňiz — müşderiler boş wagt saýlap ýazylar. Stol bronlamak açylanda size habar bereris.</span></div>
+<div class="info" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Restoran we kafeler stol bronlamak bilen işleýär: müşderi adam sanyny we wagty saýlaýar. Zallaryňyzy we stollaryňyzy gurnamagy ahyrynda «Stollar» bölüminde edersiňiz.</span></div>
+</sc-if>
+<sc-if value="{{catIsClass}}" hint-placeholder-val="{{false}}">
+<div class="info" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Topar sapaklary: müşderi tertipnamadan sapak we ýer saýlaýar. Sapaklaryňyzy we tälimçileriňizi ahyrynda «Sapaklar» bölüminde goşarsyňyz.</span></div>
 </sc-if>
 </div>
 </section>
@@ -821,21 +824,22 @@ class Component extends DCLogic {
     const CATS = [
       { group: 'Gözellik', items: ['Gözellik salony', 'Dellekhana', 'Dyrnak studiýasy', 'Gaş we kirpik', 'Spa we massaž'] },
       { group: 'Saglyk', items: ['Diş lukmany', 'Lukmançylyk merkezi', 'Fizioterapiýa', 'Psiholog'] },
-      { group: 'Sport', items: ['Fitnes studiýasy', 'Ýoga we stretçing', 'Şahsy tälimçi'] },
+      { group: 'Sport', items: ['Fitnes studiýasy', 'Ýoga we stretçing', 'Şahsy tälimçi'], classItems: ['Fitnes studiýasy', 'Ýoga we stretçing'] },
       { group: 'Okuw', items: ['Repetitor', 'Dil kursy', 'Saz sapaklary'] },
       { group: 'Awtoulag', items: ['Awtoýuwalga', 'Tigir hyzmaty', 'Awtoservis'] },
-      { group: 'Iýmit', items: ['Restoran', 'Kafe we çaýhana'], soon: true },
+      { group: 'Iýmit', items: ['Restoran', 'Kafe we çaýhana'], tables: true },
       { group: 'Başga', items: ['Öý haýwanlary', 'Öý hyzmatlary', 'Başga — hyzmatlary özüm ýazaryn'] }
     ];
     const q = s.catQ.trim().toLowerCase();
     const catGroups = CATS.map((g) => {
       const groupHit = !q || g.group.toLowerCase().indexOf(q) >= 0;
       const items = g.items.filter((t) => groupHit || t.toLowerCase().indexOf(q) >= 0).map((t) => ({
-        t, on: s.cat === t, cls: s.cat === t ? 'ci on' : 'ci', soon: !!g.soon, pick: () => set({ cat: t })
+        t, on: s.cat === t, cls: s.cat === t ? 'ci on' : 'ci', typeTag: g.tables ? 'Stol bronlamak' : ((g.classItems || []).indexOf(t) >= 0 ? 'Topar sapaklary' : ''), pick: () => set({ cat: t })
       }));
       return { name: g.group, items };
     }).filter((g) => g.items.length > 0);
-    const catIsFood = CATS.some((g) => g.soon && g.items.indexOf(s.cat) >= 0);
+    const catIsFood = CATS.some((g) => g.tables && g.items.indexOf(s.cat) >= 0);
+    const catIsClass = CATS.some((g) => (g.classItems || []).indexOf(s.cat) >= 0);
     const v1 = s.biz.trim().length > 0 && !!s.cat;
     const h1 = !s.biz.trim() ? 'Biznesiň adyny ýazyň.' : 'Kategoriýa saýlaň.';
 
@@ -1088,6 +1092,7 @@ class Component extends DCLogic {
       catEmpty: catGroups.length === 0,
       pickOther: () => set({ cat: 'Başga — hyzmatlary özüm ýazaryn', catQ: '' }),
       catIsFood,
+      catIsClass,
       // 3 · address
       addrQ: s.addrQ,
       onAddr: (e) => set({ addrQ: val(e).slice(0, 80), addr: -1 }),

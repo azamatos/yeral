@@ -68,7 +68,7 @@
         { "id": "jeren", "name": "Jeren", "role": "Kosmetolog", "rating": "4,8", "nextFree": "Ertir 10:00" },
         { "id": "leyli", "name": "Leýli", "role": "Massažist", "rating": "4,9", "nextFree": "Şu gün 18:00" }
       ],
-      "ratingBreakdown": { "5": 84, "4": 9, "3": 2, "2": 1, "1": 0 },
+      "ratingBreakdown": { "5": 88, "4": 6, "3": 1, "2": 1, "1": 0 },
       "reviews": [
         { "name": "Gülälek N.", "rating": 5, "when": "2 gün öň", "service": "Aýal saç kesimi · Aýna", "text": "Aýna saçymy edil isleýşim ýaly kesdi. Wagtynda kabul etdiler, salon arassa we rahat.", "reply": "Sag boluň, Gülälek! Ýene garaşýarys." },
         { "name": "Ogulşat M.", "rating": 5, "when": "1 hepde öň", "service": "Gel-lak bilen manikýur · Maral", "text": "Maral örän üns berip işleýär. Gel-lak üç hepde saklandy." },
