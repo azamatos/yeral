@@ -56,6 +56,35 @@ describe('phone login (ADR 0019)', () => {
     expect((await b.req('/v1/auth/verify', { body: { phone, code: '1234' } })).status).toBe(200)
   })
 
+  it('guesses sent at once share the same three tries', async () => {
+    const b = browser(t.app)
+    const phone = '+99365000009'
+    await b.req('/v1/auth/code', { body: { phone } })
+    const tries = await Promise.all(Array.from({ length: 10 }, () => b.req('/v1/auth/verify', { body: { phone, code: '0000' } })))
+    expect(tries.filter((r) => r.json.error.code === 'code_invalid')).toHaveLength(2)
+    expect(tries.filter((r) => r.json.error.code === 'too_many_attempts')).toHaveLength(8)
+    expect((await b.req('/v1/auth/verify', { body: { phone, code: '1234' } })).json.error.code).toBe('too_many_attempts')
+  })
+
+  it('a right code signs in once, however many requests carry it', async () => {
+    const b = browser(t.app)
+    const phone = '+99365000010'
+    await b.req('/v1/auth/code', { body: { phone } })
+    const tries = await Promise.all(Array.from({ length: 5 }, () => b.req('/v1/auth/verify', { body: { phone, code: '1234' } })))
+    expect(tries.filter((r) => r.status === 200)).toHaveLength(1)
+  })
+
+  it('the per-IP limit keys on the address our proxy saw, not on headers the caller sends', async () => {
+    const proxied = browser(testApp(db, { trustedIpHeader: 'x-forwarded-for' }).app)
+    const send = (i: number) =>
+      proxied.req('/v1/auth/code', {
+        body: { phone: `+993657${String(i).padStart(5, '0')}` },
+        headers: { 'cf-connecting-ip': `10.0.0.${i}`, 'x-forwarded-for': `10.9.9.${i}, 192.0.2.7` },
+      })
+    for (let i = 0; i < 20; i++) expect((await send(i)).status).toBe(200)
+    expect((await send(20)).json.error.code).toBe('rate_limited')
+  })
+
   it('a code expires after 5 minutes', async () => {
     const b = browser(t.app)
     await b.req('/v1/auth/code', { body: { phone: '+99365000003' } })

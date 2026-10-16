@@ -6,13 +6,14 @@ type App = ReturnType<typeof createApp>
 /** A browser-like client: keeps the session cookie, sends our Origin and JSON. */
 export function browser(app: App) {
   let cookie = ''
-  const req = async (path: string, init: { method?: string; body?: unknown } = {}) => {
+  const req = async (path: string, init: { method?: string; body?: unknown; headers?: Record<string, string> } = {}) => {
     const res = await app.request(path, {
       method: init.method ?? (init.body === undefined ? 'GET' : 'POST'),
       headers: {
         Origin: ORIGIN,
         ...(cookie ? { Cookie: cookie } : {}),
         ...(init.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+        ...init.headers,
       },
       ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
     })

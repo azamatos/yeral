@@ -44,7 +44,7 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
   let nextFree: BusinessDetail['nextFree'] = null
   const first = online[0]
   if (type === 'appointment' && first && lb.rules.onlineEnabled) {
-    const busy = await loadBusy(db, [b.id], day, addDays(day, lb.rules.windowDays), now)
+    const busy = await loadBusy(db, [b.id], day, addDays(day, lb.rules.windowDays))
     const found = nextFreeSlot(
       appointmentContext(lb, busy, now),
       { serviceIds: [first.id], staffId: null, by: 'client' },

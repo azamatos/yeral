@@ -5,10 +5,12 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, businesses, classSessions, jobs, rateLimits, services, staff } from '../../db/schema'
+import { bookingRules, bookings, businesses, classSessions, jobs, rateLimits, services, staff, users } from '../../db/schema'
 import { seed } from '../../db/seed'
+import { emit } from '../../notify'
 import { runDueJobs } from '../jobs/run'
 import { confirmBooking } from './confirm'
+import { setStatus, StaleBooking } from './repo'
 
 const MIN = 60_000
 const THU = '2026-10-15'
@@ -203,6 +205,8 @@ describe('client bookings', () => {
     expect((await b.req(`/v1/me/bookings/${json.code}/review`, { body: { rating: 5 } })).json.error.code).toBe('review_exists')
     const reviews = await b.req('/v1/businesses/barber-loft/reviews')
     expect(reviews.json.items[0]).toMatchObject({ author: 'Sona P.', rating: 4, what: 'Sakgal düzediş · Merdan' })
+    const inRussian = await b.req('/v1/businesses/barber-loft/reviews?lang=ru')
+    expect(inRussian.json.items[0]).toMatchObject({ what: 'Оформление бороды · Merdan' })
     t.clock.now += 8 * 86_400_000
     expect((await b.req(`/v1/me/bookings/${json.code}/review`, { method: 'PATCH', body: { rating: 5 } })).json.error.code).toBe(
       'review_locked',
@@ -288,5 +292,144 @@ describe('client bookings', () => {
     t.clock.now += 30_000
     await runDueJobs(t.deps)
     expect((await b.req(`/v1/me/bookings/${json.code}`)).json.status).toBe('confirmed')
+  })
+
+  const freeStarts = async (b: ReturnType<typeof browser>, date: string, staffId: string) =>
+    (
+      await b.req(`/v1/businesses/glow-studio/availability?services=${svc['Aýal saç kesimi']}&staff=${staffId}&date=${date}`)
+    ).json.slots.map((x: { start: number }) => x.start) as number[]
+
+  it('an offered time makes one booking, and only when the business still takes online requests', async () => {
+    const b = browser(t.app)
+    await b.login('+99365111013', 'Gözel')
+    const { json } = await b.req('/v1/bookings', { body: glow(1110) })
+    t.clock.now += 31 * MIN
+    await runDueJobs(t.deps)
+    const [glowRow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    await db.update(bookingRules).set({ onlineEnabled: false }).where(eq(bookingRules.businessId, glowRow!.id))
+    const off = await b.req(`/v1/me/bookings/${json.code}/accept-alternative`, { body: { source: 'expired', index: 0 } })
+    await db.update(bookingRules).set({ onlineEnabled: true }).where(eq(bookingRules.businessId, glowRow!.id))
+    expect(off.json.error?.code).toBe('online_disabled')
+    const tries = await Promise.all(
+      [0, 1].map((index) => b.req(`/v1/me/bookings/${json.code}/accept-alternative`, { body: { source: 'expired', index } })),
+    )
+    expect(tries.filter((r) => r.status < 300)).toHaveLength(1)
+    const again = await b.req(`/v1/me/bookings/${json.code}/accept-alternative`, { body: { source: 'expired', index: 2 } })
+    expect(again.json.error?.code).toBe('invalid_status')
+  })
+
+  it('a request whose hold just ran out keeps its time until the jobs expire it', async () => {
+    const b = browser(t.app)
+    await b.login('+99365111014', 'Maral')
+    const ayna = who['Aýna']!
+    const start = (await freeStarts(b, THU, ayna)).at(-1)!
+    expect((await b.req('/v1/bookings', { body: glow(start, { staffId: ayna }) })).status).toBe(201)
+    t.clock.now += 31 * MIN
+    expect(await freeStarts(b, THU, ayna)).not.toContain(start)
+    const other = browser(t.app)
+    await other.login('+99365111015', 'Ogulşat')
+    const taken = await other.req('/v1/bookings', { body: glow(start, { staffId: ayna }) })
+    expect(taken.json.error?.code).toBe('slot_taken')
+    expect(taken.json.error.details.alternatives.map((x: { start: number }) => x.start)).not.toContain(start)
+    await runDueJobs(t.deps)
+    expect(await freeStarts(b, THU, ayna)).toContain(start)
+  })
+
+  it('a moved booking’s old reminders stay quiet', async () => {
+    const b = browser(t.app)
+    const phone = '+99365111016'
+    await b.login(phone, 'Kerim')
+    const barber = { type: 'appointment', business: 'barber-loft', serviceIds: [svc['barber:Erkek saç kesimi']], staffId: null }
+    const { json } = await b.req('/v1/bookings', { body: { ...barber, date: THU, start: 720 } })
+    expect(json.status).toBe('confirmed')
+    const moved = await b.req(`/v1/me/bookings/${json.code}/reschedule`, { body: { date: '2026-10-16', start: 720 } })
+    expect(moved.json).toMatchObject({ status: 'confirmed', date: '2026-10-16', start: 720 })
+    await runDueJobs(t.deps) // the two "confirmed" SMS
+    const sent = t.sms.sent.filter((x) => x.to === phone).length
+    // Thursday 10:01: the old 2-hour and day-before reminders are due, the new ones aren't
+    t.clock.now = epochOf(THU, 601)
+    await runDueJobs(t.deps)
+    expect(t.sms.sent.filter((x) => x.to === phone)).toHaveLength(sent)
+  })
+
+  it('a failed move keeps the earlier move request', async () => {
+    const b = browser(t.app)
+    await b.login('+99365111017', 'Aksoltan')
+    const ayna = who['Aýna']!
+    const FRI = '2026-10-16'
+    const starts = await freeStarts(b, FRI, ayna)
+    const first = starts[0]!
+    const x = starts.find((m) => m >= first + 120)!
+    const y = starts.find((m) => m >= x + 120)!
+    const { json } = await b.req('/v1/bookings', { body: glow(first, { staffId: ayna, date: FRI }) })
+    const [row] = await db.select().from(bookings).where(eq(bookings.code, json.code))
+    await db.transaction((tx) => confirmBooking(tx, t.deps, row!))
+    expect((await b.req(`/v1/me/bookings/${json.code}/reschedule`, { body: { date: FRI, start: x, staffId: ayna } })).status).toBe(200)
+    const other = browser(t.app)
+    await other.login('+99365111018', 'Bägül')
+    expect((await other.req('/v1/bookings', { body: glow(y, { staffId: ayna, date: FRI }) })).status).toBe(201)
+    const refused = await b.req(`/v1/me/bookings/${json.code}/reschedule`, { body: { date: FRI, start: y, staffId: ayna } })
+    expect(refused.json.error?.code).toBe('slot_taken')
+    expect((await b.req(`/v1/me/bookings/${json.code}`)).json.reschedule).toMatchObject({ date: FRI, start: x })
+  })
+
+  it('"Yzyna al" for a class counts the seats again', async () => {
+    const b = browser(t.app)
+    await b.login('+99365111019', 'Leýli')
+    const [yoga] = await db.select().from(businesses).where(eq(businesses.slug, 'aydyn-yoga'))
+    const sessions = await db.select().from(classSessions).where(eq(classSessions.businessId, yoga!.id))
+    const session = sessions.find((x) => x.date === '2026-10-16')!
+    const { json } = await b.req('/v1/bookings', { body: { type: 'class', business: 'aydyn-yoga', sessionId: session.id, seats: 1 } })
+    await b.req(`/v1/me/bookings/${json.code}/cancel`, { body: {} })
+    // the seat went to someone else meanwhile: the session is full without it
+    const others = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.sessionId, session.id), eq(bookings.active, true)))
+    await db
+      .update(classSessions)
+      .set({ capacity: others.reduce((n, x) => n + (x.seats ?? 0), 0) })
+      .where(eq(classSessions.id, session.id))
+    const restored = await b.req(`/v1/me/bookings/${json.code}/restore`, { method: 'POST' })
+    await db.update(classSessions).set({ capacity: session.capacity }).where(eq(classSessions.id, session.id))
+    expect(restored.json.error?.code).toBe('session_full')
+  })
+
+  it('a status change from a stale read is refused', async () => {
+    const b = browser(t.app)
+    await b.login('+99365111020', 'Myrat')
+    const start = (await freeStarts(b, '2026-10-16', who['Aýna']!)).at(-1)!
+    const { json } = await b.req('/v1/bookings', { body: glow(start, { staffId: who['Aýna'], date: '2026-10-16' }) })
+    const [stale] = await db.select().from(bookings).where(eq(bookings.code, json.code))
+    await db.transaction((tx) => confirmBooking(tx, t.deps, stale!))
+    await expect(setStatus(db, stale!, { status: 'cancelled', cancelledBy: 'system', at: new Date(t.clock.now) })).rejects.toBeInstanceOf(
+      StaleBooking,
+    )
+    expect((await b.req(`/v1/me/bookings/${json.code}`)).json.status).toBe('confirmed')
+  })
+
+  it('events: a cursor never passes an event that commits late', async () => {
+    const b = browser(t.app)
+    const phone = '+99365111021'
+    await b.login(phone, 'Batyr')
+    const [user] = await db.select().from(users).where(eq(users.phone, phone))
+    const mine = { type: 'booking.updated' as const, businessId: null, userId: user!.id }
+    const { cursor } = (await b.req('/v1/events')).json
+    let release!: () => void
+    let written!: () => void
+    const inserted = new Promise<void>((r) => (written = r))
+    const slow = db.transaction(async (tx) => {
+      await emit(tx, { ...mine, bookingCode: 'YR-SLOW' })
+      written()
+      await new Promise<void>((r) => (release = r))
+    })
+    await inserted
+    await emit(db, { ...mine, bookingCode: 'YR-FAST' })
+    expect((await b.req(`/v1/events?after=${cursor}`)).json.items).toEqual([])
+    release()
+    await slow
+    const res = await b.req(`/v1/events?after=${cursor}`)
+    expect(res.json.items.map((e: { bookingCode: string }) => e.bookingCode)).toEqual(['YR-SLOW', 'YR-FAST'])
+    expect((await b.req(`/v1/events?after=${res.json.cursor}`)).json.items).toEqual([])
   })
 })

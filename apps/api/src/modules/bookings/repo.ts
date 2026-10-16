@@ -55,7 +55,17 @@ export interface StatusChange {
   at: Date
 }
 
-/** Change a booking's status; items follow (`active` = pending or confirmed). */
+/** The booking changed since it was read (another request or the jobs got there first). */
+export class StaleBooking extends ApiError {
+  constructor() {
+    super('invalid_status')
+  }
+}
+
+/**
+ * Change a booking's status; items follow (`active` = pending or confirmed). Only from the status `b` was read with:
+ * a change made in between wins, and this one throws `StaleBooking`.
+ */
 export async function setStatus(db: Queryable, b: BookingRow, change: StatusChange): Promise<BookingRow> {
   const active = isActiveStatus(change.status)
   const [row] = await db
@@ -72,10 +82,10 @@ export async function setStatus(db: Queryable, b: BookingRow, change: StatusChan
       holdUntil: change.status === 'confirmed' || change.status === 'completed' ? null : b.holdUntil,
       updatedAt: change.at,
     })
-    .where(eq(bookings.id, b.id))
+    .where(and(eq(bookings.id, b.id), eq(bookings.status, b.status)))
     .returning()
+  if (!row) throw new StaleBooking()
   await db.update(bookingItems).set({ active }).where(eq(bookingItems.bookingId, b.id))
-  if (!row) throw new ApiError('not_found')
   return row
 }
 

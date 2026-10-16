@@ -2,6 +2,7 @@
 import { parseEnv } from '@yeral/lib/env'
 import { siteFromEnv, type SiteConfig } from '@yeral/lib/site'
 import { z } from 'zod'
+import type { TrustedIpHeader } from './lib/rate-limit'
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
@@ -10,6 +11,8 @@ const envSchema = z.object({
   /** Where photos are served from; defaults to `<api>/media`. */
   MEDIA_BASE_URL: z.url().optional(),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  /** The header our edge sets with the caller's IP: `cf-connecting-ip` (Workers), `x-forwarded-for` (behind nginx). */
+  TRUSTED_IP_HEADER: z.enum(['cf-connecting-ip', 'x-forwarded-for']).optional(),
 })
 
 export interface Config {
@@ -18,6 +21,7 @@ export interface Config {
   site: SiteConfig
   mediaBaseUrl: string
   logLevel: 'debug' | 'info' | 'warn' | 'error'
+  trustedIpHeader?: TrustedIpHeader
 }
 
 export function loadConfig(source: Record<string, unknown>): Config {
@@ -29,5 +33,6 @@ export function loadConfig(source: Record<string, unknown>): Config {
     site,
     mediaBaseUrl: (env.MEDIA_BASE_URL ?? `${site.urls.api}/media`).replace(/\/$/, ''),
     logLevel: env.LOG_LEVEL,
+    trustedIpHeader: env.TRUSTED_IP_HEADER,
   }
 }

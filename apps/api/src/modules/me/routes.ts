@@ -130,7 +130,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
       await sendCode(c.var.deps, {
         phone,
         purpose: 'change_phone',
-        ip: clientIp((n) => c.req.header(n)),
+        ip: clientIp((n) => c.req.header(n), c.var.deps.trustedIpHeader),
         lang: user.lang,
         userId: user.id,
       }),

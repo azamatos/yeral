@@ -20,6 +20,7 @@ const deps: Deps = {
   sms: logSms(log),
   media: (key) => `${config.mediaBaseUrl}/${key}`,
   log,
+  trustedIpHeader: config.trustedIpHeader,
 }
 
 const app = createApp(async (c, next) => {

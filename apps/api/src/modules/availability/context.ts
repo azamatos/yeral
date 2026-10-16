@@ -1,10 +1,12 @@
 /**
  * Loads what `@yeral/domain/availability` needs from the database: the business calendar, rules, team, services and
- * the busy time of active bookings (pending requests count until they expire).
+ * the busy time of active bookings. A pending request counts until the jobs expire it, even when its hold time has
+ * just run out: the database's no-overlap constraints still hold its slot until then, so offering it would only end in
+ * 409 slot_taken.
  */
 import type { AppointmentContext, BusyInterval, TableContext } from '@yeral/domain/availability'
 import type { BookingRules } from '@yeral/domain/rules'
-import { and, eq, gt, gte, inArray, lte, or } from 'drizzle-orm'
+import { and, eq, gte, inArray, lte } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, businesses, diningTables, services, staff, staffServices, tableAreas } from '../../db/schema'
 
@@ -74,7 +76,7 @@ export async function loadBusinesses(db: Queryable, ids: string[]): Promise<Map<
 }
 
 /** Busy time per specialist, buffers included, for active bookings between two dates. */
-export async function loadBusy(db: Queryable, businessIds: string[], from: string, to: string, now: number): Promise<BusyInterval[]> {
+export async function loadBusy(db: Queryable, businessIds: string[], from: string, to: string): Promise<BusyInterval[]> {
   if (!businessIds.length) return []
   const rows = await db
     .select({
@@ -93,7 +95,6 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
         eq(bookingItems.active, true),
         gte(bookingItems.date, from),
         lte(bookingItems.date, to),
-        or(eq(bookings.status, 'confirmed'), and(eq(bookings.status, 'pending'), gt(bookings.holdUntil, new Date(now)))),
       ),
     )
   return rows.flatMap((r) =>
@@ -120,44 +121,67 @@ export function appointmentContext(lb: LoadedBusiness, busy: BusyInterval[], now
   }
 }
 
+export type LoadedTableContext = TableContext & { areaRows: (typeof tableAreas.$inferSelect)[] }
+
 export async function loadTableContext(
   db: Queryable,
   lb: LoadedBusiness,
   from: string,
   to: string,
   now: number,
-): Promise<TableContext & { areaRows: (typeof tableAreas.$inferSelect)[] }> {
-  const areaRows = await db.select().from(tableAreas).where(eq(tableAreas.businessId, lb.business.id)).orderBy(tableAreas.sort)
-  const tables = areaRows.length
-    ? await db
-        .select()
-        .from(diningTables)
-        .where(
-          inArray(
-            diningTables.areaId,
-            areaRows.map((a) => a.id),
-          ),
-        )
-    : []
-  const busy = await db
-    .select({ tableId: bookings.tableId, date: bookings.date, start: bookings.start, end: bookings.end, bookingId: bookings.id })
-    .from(bookings)
-    .where(
-      and(
-        eq(bookings.businessId, lb.business.id),
-        eq(bookings.active, true),
-        gte(bookings.date, from),
-        lte(bookings.date, to),
-        or(eq(bookings.status, 'confirmed'), and(eq(bookings.status, 'pending'), gt(bookings.holdUntil, new Date(now)))),
-      ),
-    )
-  return {
-    business: { hours: lb.business.hours, exceptions: lb.business.exceptions },
-    rules: lb.rules,
-    areas: areaRows.map((a) => ({ id: a.id, minParty: a.minParty, maxParty: a.maxParty, tables: tables.filter((t) => t.areaId === a.id) })),
-    sittingMinutes: lb.business.tableSittingMinutes,
-    busy: busy.flatMap((b) => (b.tableId ? [{ ...b, tableId: b.tableId }] : [])),
-    now,
-    areaRows,
+): Promise<LoadedTableContext> {
+  const ctx = (await loadTableContexts(db, [lb], from, to, now)).get(lb.business.id)
+  if (!ctx) throw new Error('table context missing')
+  return ctx
+}
+
+/** Areas, tables and busy tables of several restaurants in three queries (search cards). */
+export async function loadTableContexts(
+  db: Queryable,
+  lbs: LoadedBusiness[],
+  from: string,
+  to: string,
+  now: number,
+): Promise<Map<string, LoadedTableContext>> {
+  const out = new Map<string, LoadedTableContext>()
+  if (!lbs.length) return out
+  const ids = lbs.map((lb) => lb.business.id)
+  const areaRows = await db.select().from(tableAreas).where(inArray(tableAreas.businessId, ids)).orderBy(tableAreas.sort)
+  const [tables, busy] = await Promise.all([
+    areaRows.length
+      ? db
+          .select()
+          .from(diningTables)
+          .where(
+            inArray(
+              diningTables.areaId,
+              areaRows.map((a) => a.id),
+            ),
+          )
+      : [],
+    db
+      .select({
+        businessId: bookings.businessId,
+        tableId: bookings.tableId,
+        date: bookings.date,
+        start: bookings.start,
+        end: bookings.end,
+        bookingId: bookings.id,
+      })
+      .from(bookings)
+      .where(and(inArray(bookings.businessId, ids), eq(bookings.active, true), gte(bookings.date, from), lte(bookings.date, to))),
+  ])
+  for (const lb of lbs) {
+    const areas = areaRows.filter((a) => a.businessId === lb.business.id)
+    out.set(lb.business.id, {
+      business: { hours: lb.business.hours, exceptions: lb.business.exceptions },
+      rules: lb.rules,
+      areas: areas.map((a) => ({ id: a.id, minParty: a.minParty, maxParty: a.maxParty, tables: tables.filter((t) => t.areaId === a.id) })),
+      sittingMinutes: lb.business.tableSittingMinutes,
+      busy: busy.flatMap(({ businessId, ...b }) => (b.tableId && businessId === lb.business.id ? [{ ...b, tableId: b.tableId }] : [])),
+      now,
+      areaRows: areas,
+    })
   }
+  return out
 }

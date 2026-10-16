@@ -13,7 +13,7 @@ import {
   appointmentContext,
   loadBusinesses,
   loadBusy,
-  loadTableContext,
+  loadTableContexts,
   type LoadedBusiness,
   type ServiceRow,
 } from '../availability/context'
@@ -55,7 +55,14 @@ export async function buildCards(deps: Deps, ids: string[], opts: CardOptions): 
   const now = deps.now()
   const loaded = await loadBusinesses(db, ids)
   const last = addDays(opts.date, opts.days - 1)
-  const busy = await loadBusy(db, ids, opts.date, last, now)
+  const busy = await loadBusy(db, ids, opts.date, last)
+  const tableContexts = await loadTableContexts(
+    db,
+    [...loaded.values()].filter((l) => l.business.bookingTypes[0] === 'table'),
+    opts.date,
+    last,
+    now,
+  )
   const classIds = [...loaded.values()].filter((l) => l.business.bookingTypes[0] === 'class').map((l) => l.business.id)
   const sessions = await loadSessions(db, classIds, opts.date, addDays(opts.date, Math.max(opts.days, 14) - 1))
   const categories = await db.select().from(categoriesTable)
@@ -87,10 +94,10 @@ export async function buildCards(deps: Deps, ids: string[], opts: CardOptions): 
         more: Math.max(0, starts.length - SHOWN),
       }
     } else if (type === 'table') {
-      const ctx = await loadTableContext(db, lb, opts.date, last, now)
+      const ctx = tableContexts.get(id)
       let date = opts.date
       let starts: number[] = []
-      for (let i = 0; i < opts.days && lb.rules.onlineEnabled; i++) {
+      for (let i = 0; ctx && i < opts.days && lb.rules.onlineEnabled; i++) {
         date = addDays(opts.date, i)
         starts = tableSlots(ctx, { date, partySize: opts.partySize }).map((s) => s.start)
         if (starts.length) break

@@ -4,7 +4,7 @@
  */
 import type { Locale } from '@yeral/domain/model'
 import { isMobile } from '@yeral/domain/phone'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, gt, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import { loginCodes } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
@@ -66,30 +66,52 @@ export async function sendCode(
   return { resendAfterSec: RESEND_SEC, expiresInSec: CODE_TTL_SEC }
 }
 
-/** Checks and spends a code; returns who asked for it (phone change). */
+/**
+ * Checks and spends a code; returns who asked for it (phone change). Every try takes one of the three attempts in a
+ * single update before the code is compared, so guesses sent at once can't share a read of the counter.
+ */
 export async function checkCode(deps: Deps, req: { phone: string; purpose: Purpose; code: string }): Promise<{ userId: string | null }> {
   const { db } = deps
   const now = deps.now()
   const where = and(eq(loginCodes.phone, req.phone), eq(loginCodes.purpose, req.purpose))
-  const [row] = await db.select().from(loginCodes).where(where)
-  if (!row) throw new ApiError('code_expired')
-  if (row.lockedUntil && row.lockedUntil.getTime() > now)
-    throw new ApiError('too_many_attempts', { retryAfterSec: secondsLeft(row.lockedUntil, now) })
-  if (row.expiresAt.getTime() <= now) throw new ApiError('code_expired')
+  const [row] = await db
+    .update(loginCodes)
+    .set({ attempts: sql`${loginCodes.attempts} + 1` })
+    .where(
+      and(
+        where,
+        lt(loginCodes.attempts, MAX_ATTEMPTS),
+        gt(loginCodes.expiresAt, new Date(now)),
+        or(isNull(loginCodes.lockedUntil), lte(loginCodes.lockedUntil, new Date(now))),
+      ),
+    )
+    .returning()
+  if (!row) {
+    const [spent] = await db.select().from(loginCodes).where(where)
+    if (spent?.lockedUntil && spent.lockedUntil.getTime() > now)
+      throw new ApiError('too_many_attempts', { retryAfterSec: secondsLeft(spent.lockedUntil, now) })
+    if (spent && spent.attempts >= MAX_ATTEMPTS && spent.expiresAt.getTime() > now)
+      throw new ApiError('too_many_attempts', { retryAfterSec: LOCK_SEC })
+    throw new ApiError('code_expired')
+  }
 
-  if ((await hashOf(req.purpose, req.phone, req.code)) !== row.codeHash) {
-    const attempts = row.attempts + 1
-    if (attempts >= MAX_ATTEMPTS) {
+  const codeHash = await hashOf(req.purpose, req.phone, req.code)
+  if (codeHash !== row.codeHash) {
+    if (row.attempts >= MAX_ATTEMPTS) {
       // locked for a minute; the code is spent, so a new one is needed afterwards
       await db
         .update(loginCodes)
-        .set({ attempts, lockedUntil: new Date(now + LOCK_SEC * 1000), expiresAt: new Date(now) })
+        .set({ lockedUntil: new Date(now + LOCK_SEC * 1000), expiresAt: new Date(now) })
         .where(where)
       throw new ApiError('too_many_attempts', { retryAfterSec: LOCK_SEC })
     }
-    await db.update(loginCodes).set({ attempts }).where(where)
-    throw new ApiError('code_invalid', { attemptsLeft: MAX_ATTEMPTS - attempts })
+    throw new ApiError('code_invalid', { attemptsLeft: MAX_ATTEMPTS - row.attempts })
   }
-  await db.delete(loginCodes).where(where)
-  return { userId: row.userId }
+  // only one request can delete the row, so a right code signs in once
+  const [used] = await db
+    .delete(loginCodes)
+    .where(and(where, eq(loginCodes.codeHash, codeHash)))
+    .returning({ userId: loginCodes.userId })
+  if (!used) throw new ApiError('code_expired')
+  return { userId: used.userId }
 }

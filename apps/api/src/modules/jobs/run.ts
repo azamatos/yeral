@@ -13,7 +13,7 @@ import type { Deps } from '../../deps'
 import { bookingSmsText, emit, expiredSmsText, queueSms, type BookingSmsKind } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
-import { setStatus, type BookingRow } from '../bookings/repo'
+import { setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100
 const MAX_ATTEMPTS = 5
@@ -28,7 +28,7 @@ async function alternativesFor(deps: Deps, b: BookingRow): Promise<{ date: strin
   if (!serviceIds.length) return []
   const now = deps.now()
   const from = localOf(now).date
-  const ctx = appointmentContext(lb, await loadBusy(deps.db, [b.businessId], from, addDays(from, lb.rules.windowDays), now), now)
+  const ctx = appointmentContext(lb, await loadBusy(deps.db, [b.businessId], from, addDays(from, lb.rules.windowDays)), now)
   const q = { serviceIds, staffId: null, by: 'client' as const }
   const out = nearestSlots(ctx, { ...q, date: b.date }, b.start, MAX_ALTERNATIVES).map((s) => ({
     date: b.date,
@@ -54,26 +54,43 @@ async function expireRequests(deps: Deps): Promise<number> {
   for (const b of due) {
     // a move request that wasn't answered just lapses: the booking it would move stays as it was
     const alternatives = b.rescheduleOf ? [] : await alternativesFor(deps, b)
-    await deps.db.transaction(async (tx) => {
-      const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'system', at: now })
-      await tx.update(bookings).set({ expiredAlternatives: alternatives }).where(eq(bookings.id, row.id))
-      await emit(tx, { type: 'booking.expired', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
-      if (!b.rescheduleOf && row.clientPhone) {
-        const [biz] = await tx.select().from(businesses).where(eq(businesses.id, row.businessId))
-        const [user] = row.userId ? await tx.select().from(users).where(eq(users.id, row.userId)) : []
-        if (biz) {
-          const text = expiredSmsText(
-            deps.site,
-            user?.lang ?? 'tk',
-            { code: row.code, date: row.date, start: row.start, businessName: biz.name, address: biz.address },
-            alternatives,
-          )
-          await queueSms(tx, { to: row.clientPhone, text, runAt: now, dedupeKey: `expired:${row.id}` })
+    // answered meanwhile: setStatus refuses, nothing is sent
+    await skipStale(
+      deps.db.transaction(async (tx) => {
+        const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'system', at: now })
+        await tx.update(bookings).set({ expiredAlternatives: alternatives }).where(eq(bookings.id, row.id))
+        await emit(tx, {
+          type: 'booking.expired',
+          businessId: row.businessId,
+          bookingId: row.id,
+          bookingCode: row.code,
+          userId: row.userId,
+        })
+        if (!b.rescheduleOf && row.clientPhone) {
+          const [biz] = await tx.select().from(businesses).where(eq(businesses.id, row.businessId))
+          const [user] = row.userId ? await tx.select().from(users).where(eq(users.id, row.userId)) : []
+          if (biz) {
+            const text = expiredSmsText(
+              deps.site,
+              user?.lang ?? 'tk',
+              { code: row.code, date: row.date, start: row.start, businessName: biz.name, address: biz.address },
+              alternatives,
+            )
+            await queueSms(tx, { to: row.clientPhone, text, runAt: now, dedupeKey: `expired:${row.id}` })
+          }
         }
-      }
-    })
+      }),
+    )
   }
   return due.length
+}
+
+async function skipStale(work: Promise<unknown>): Promise<void> {
+  try {
+    await work
+  } catch (e) {
+    if (!(e instanceof StaleBooking)) throw e
+  }
 }
 
 async function completeVisits(deps: Deps): Promise<number> {
@@ -84,24 +101,30 @@ async function completeVisits(deps: Deps): Promise<number> {
     .where(and(eq(bookings.status, 'confirmed'), or(lt(bookings.date, date), and(eq(bookings.date, date), lte(bookings.end, min)))))
     .limit(BATCH)
   for (const b of due) {
-    await deps.db.transaction(async (tx) => {
-      const row = await setStatus(tx, b, { status: 'completed', at: new Date(deps.now()) })
-      await emit(tx, {
-        type: 'booking.completed',
-        businessId: row.businessId,
-        bookingId: row.id,
-        bookingCode: row.code,
-        userId: row.userId,
-      })
-    })
+    await skipStale(
+      deps.db.transaction(async (tx) => {
+        const row = await setStatus(tx, b, { status: 'completed', at: new Date(deps.now()) })
+        await emit(tx, {
+          type: 'booking.completed',
+          businessId: row.businessId,
+          bookingId: row.id,
+          bookingCode: row.code,
+          userId: row.userId,
+        })
+      }),
+    )
   }
   return due.length
 }
 
-/** A booking SMS, if the booking is still in the right state and the client wants it. */
-async function sendBookingSms(deps: Deps, bookingId: string, kind: BookingSmsKind): Promise<void> {
+/**
+ * A booking SMS, if the booking is still in the right state, still at the time the SMS was planned for (`at`; older
+ * jobs have none), and the client wants it.
+ */
+async function sendBookingSms(deps: Deps, bookingId: string, kind: BookingSmsKind, at: { date?: unknown; start?: unknown }): Promise<void> {
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
   if (!b?.clientPhone) return
+  if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   const wanted = kind === 'reviewAsk' ? b.status === 'completed' || b.status === 'confirmed' : b.status === 'confirmed'
   if (!wanted) return
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
@@ -150,14 +173,14 @@ async function runQueue(deps: Deps): Promise<number> {
     try {
       const p = job.payload
       if (job.kind === 'sms') await deps.sms.send({ to: String(p.to), text: String(p.text) })
-      else if (job.kind === 'booking.sms') await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind)
+      else if (job.kind === 'booking.sms') await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind, p)
       else if (job.kind === 'demo.answer') {
         const [b] = await deps.db
           .select()
           .from(bookings)
           .where(eq(bookings.id, String(p.bookingId)))
         if (b?.status === 'pending' && (b.holdUntil?.getTime() ?? 0) > deps.now())
-          await deps.db.transaction((tx) => confirmBooking(tx, deps, b))
+          await skipStale(deps.db.transaction((tx) => confirmBooking(tx, deps, b)))
       }
       await deps.db
         .update(jobs)

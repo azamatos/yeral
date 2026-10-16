@@ -12,10 +12,18 @@ export const site = siteConfig({ env: 'local', portBase: 3000 })
 export const ORIGIN = site.urls.client
 
 /** The app as the entries build it, with a settable clock and captured SMS. */
-export function testApp(db: Db, opts: { now?: number } = {}) {
+export function testApp(db: Db, opts: { now?: number; trustedIpHeader?: Deps['trustedIpHeader'] } = {}) {
   const clock = { now: opts.now ?? DEMO_NOW }
   const sms = logSms(nullLogger)
-  const deps: Deps = { db, site, now: () => clock.now, sms, media: (key) => `http://media.test/${key}`, log: nullLogger }
+  const deps: Deps = {
+    db,
+    site,
+    now: () => clock.now,
+    sms,
+    media: (key) => `http://media.test/${key}`,
+    log: nullLogger,
+    trustedIpHeader: opts.trustedIpHeader,
+  }
   const app = createApp(async (c, next) => {
     c.set('deps', deps)
     await next()

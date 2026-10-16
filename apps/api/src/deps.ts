@@ -1,6 +1,7 @@
 /** What every request handler gets: database, site config, clock, SMS, media URLs, logger. */
 import type { SiteConfig } from '@yeral/lib/site'
 import type { Db } from './db/client'
+import type { TrustedIpHeader } from './lib/rate-limit'
 import type { Logger } from './ports/log'
 import type { SmsPort } from './ports/sms'
 
@@ -13,4 +14,6 @@ export interface Deps {
   /** Media key → public URL. */
   media: (key: string) => string
   log: Logger
+  /** Where the caller's IP comes from (`TRUSTED_IP_HEADER`); unset = no header is trusted. */
+  trustedIpHeader?: TrustedIpHeader
 }

@@ -81,6 +81,7 @@ interface Insert {
   status: 'pending' | 'confirmed'
   note?: string
   rescheduleOf?: string
+  alternativeOf?: string
 }
 
 async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<BookingRow> {
@@ -107,7 +108,8 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       date: x.date,
       start: x.start,
       end,
-      status: x.status,
+      // instant bookings are confirmed right below, so the confirmation runs like any other
+      status: 'pending',
       active: true,
       source: 'web',
       clientNote: x.note ?? null,
@@ -115,6 +117,7 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       priceAmount: price?.amount ?? null,
       holdUntil: x.status === 'pending' ? new Date(holdUntilOf(now, { date: x.date, start: x.start }, x.lb.rules.holdMinutes)) : null,
       rescheduleOf: x.rescheduleOf ?? null,
+      alternativeOf: x.alternativeOf ?? null,
       partySize: x.placement.table?.partySize ?? null,
       areaId: x.placement.table?.areaId ?? null,
       tableId: x.placement.table?.tableId ?? null,
@@ -150,7 +153,7 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
     )
   }
   await emit(db, { type: 'booking.created', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
-  if (row.status === 'confirmed') return confirmBooking(db, deps, { ...row, status: 'pending' })
+  if (x.status === 'confirmed') return confirmBooking(db, deps, row)
   if (deps.site.demo && x.lb.business.demo && !(await hasActiveTeam(db, row.businessId))) {
     await db.insert(jobs).values({ kind: 'demo.answer', runAt: new Date(now + DEMO_ANSWER_MS), payload: { bookingId: row.id } })
   }
@@ -164,9 +167,10 @@ async function placeAppointment(
   q: AppointmentQuery,
   start: number,
   by: 'client' | 'staff' = 'client',
+  db: Queryable = deps.db,
 ): Promise<AppointmentSlot> {
   const now = deps.now()
-  const ctx = appointmentContext(lb, await loadBusy(deps.db, [lb.business.id], q.date, q.date, now), now)
+  const ctx = appointmentContext(lb, await loadBusy(db, [lb.business.id], q.date, q.date), now)
   const query = { ...q, by }
   const slot = findAppointmentSlot(ctx, query, start)
   if (!slot)
@@ -176,14 +180,30 @@ async function placeAppointment(
   return slot
 }
 
-/** Run the insert; a race lost to another booking becomes 409 slot_taken. */
-async function inTransaction<T>(deps: Deps, fn: (tx: Queryable) => Promise<T>, alternatives: () => Promise<unknown[]>): Promise<T> {
+/** Run the insert; a race lost to another booking becomes 409 slot_taken. Inside a transaction: a savepoint. */
+async function inTransaction<T>(
+  deps: Deps,
+  fn: (tx: Queryable) => Promise<T>,
+  alternatives: () => Promise<unknown[]>,
+  db: Queryable = deps.db,
+): Promise<T> {
   try {
-    return await deps.db.transaction(fn)
+    return await db.transaction(fn)
   } catch (e) {
     if (isSlotConflict(e)) throw new ApiError('slot_taken', { alternatives: await alternatives() })
     throw e
   }
+}
+
+/** A request the client sends online: the business takes them, and this client isn't limited to phone bookings. */
+export async function assertOnlineBooking(db: Queryable, lb: LoadedBusiness, user: User): Promise<void> {
+  if (!lb.rules.onlineEnabled) throw new ApiError('online_disabled')
+  const [known] = await db
+    .select()
+    .from(clients)
+    .where(and(eq(clients.businessId, lb.business.id), eq(clients.phone, user.phone)))
+  if (known && isOnlineBlocked({ onlineBlocked: known.onlineBlocked, noShows: await noShowsOf(db, known.id) }, lb.rules))
+    throw new ApiError('online_blocked')
 }
 
 export async function createBooking(deps: Deps, user: User, input: CreateBooking): Promise<BookingRow> {
@@ -192,14 +212,8 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
   const b = await publicBusiness(deps, input.business)
   const lb = (await loadBusinesses(db, [b.id])).get(b.id)
   if (!lb) throw new ApiError('not_found')
-  if (!lb.rules.onlineEnabled) throw new ApiError('online_disabled')
+  await assertOnlineBooking(db, lb, user)
   if (!b.bookingTypes.includes(input.type)) throw new ApiError('not_bookable')
-  const [known] = await db
-    .select()
-    .from(clients)
-    .where(and(eq(clients.businessId, b.id), eq(clients.phone, user.phone)))
-  if (known && isOnlineBlocked({ onlineBlocked: known.onlineBlocked, noShows: await noShowsOf(db, known.id) }, lb.rules))
-    throw new ApiError('online_blocked')
   const status = initialStatus('web', lb.rules.confirmMode)
 
   if (input.type === 'appointment') {
@@ -219,7 +233,7 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
           note: input.note,
         }),
       async () => {
-        const ctx = appointmentContext(lb, await loadBusy(db, [b.id], input.date, input.date, deps.now()), deps.now())
+        const ctx = appointmentContext(lb, await loadBusy(db, [b.id], input.date, input.date), deps.now())
         return nearestSlots(ctx, q, input.start).map((s) => ({ date: input.date, start: s.start, end: s.end }))
       },
     )
@@ -288,15 +302,18 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
   })
 }
 
-/** A new appointment like `from` at another time: a client's move request, or an offered alternative. */
+/**
+ * A new appointment like `from` at another time: a client's move request, or an offered alternative. `opts.db` runs it
+ * inside the caller's transaction.
+ */
 export async function rebook(
   deps: Deps,
   user: User,
   from: BookingRow,
   to: { date: string; start: number; staffId?: string | null },
-  opts: { status: 'pending' | 'confirmed'; rescheduleOf?: string },
+  opts: { status: 'pending' | 'confirmed'; rescheduleOf?: string; alternativeOf?: string; db?: Queryable },
 ): Promise<BookingRow> {
-  const { db } = deps
+  const db = opts.db ?? deps.db
   const lb = (await loadBusinesses(db, [from.businessId])).get(from.businessId)
   if (!lb) throw new ApiError('not_found')
   if (from.type !== 'appointment') throw new ApiError('not_bookable')
@@ -307,11 +324,11 @@ export async function rebook(
   const q = { date: to.date, serviceIds, staffId, by: 'client' as const }
   let slot: AppointmentSlot
   try {
-    slot = await placeAppointment(deps, lb, q, to.start)
+    slot = await placeAppointment(deps, lb, q, to.start, 'client', db)
   } catch (e) {
     // the same specialist may be busy now: any free specialist will do
     if (staffId === null || to.staffId !== undefined) throw e
-    slot = await placeAppointment(deps, lb, { ...q, staffId: null }, to.start)
+    slot = await placeAppointment(deps, lb, { ...q, staffId: null }, to.start, 'client', db)
   }
   return inTransaction(
     deps,
@@ -326,7 +343,9 @@ export async function rebook(
         status: opts.status,
         note: from.clientNote ?? undefined,
         rescheduleOf: opts.rescheduleOf,
+        alternativeOf: opts.alternativeOf,
       }),
     () => Promise.resolve([]),
+    db,
   )
 }

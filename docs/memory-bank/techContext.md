@@ -110,6 +110,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | directions, call *(M3)* | `directionsUrl() telHref()` | `@yeral/lib/links` |
 | local/session storage that never throws *(M3)* | `safeStorage` | `@yeral/lib/storage` |
 | env vars | `parseEnv(schema, source)` (names bad variables, never values) → `shared/config/env.ts` per app, `config.ts` in the api | `@yeral/lib/env` |
+| api: rate limits, the caller's IP (only from `TRUSTED_IP_HEADER`), hashes and random digits | `hit() clientIp()`, `sha256Hex() randomDigits()` | `apps/api/src/lib/{rate-limit,crypto}.ts` |
 | request/response schemas, error codes and their HTTP status | `createBookingSchema`, `businessDetailSchema`, `ERROR_STATUS` … | `@yeral/contract/{common,errors,catalog,availability,bookings,account,events}` |
 | API data | `sdk.<resource>.<query>()` queryOptions, `sdk.<resource>.<action>()` mutation options | `@yeral/sdk` |
 | forms | `useAppForm()` with `TextField`, `PhoneField`, `SelectField` … | `@yeral/ui/form` |

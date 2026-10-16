@@ -23,7 +23,15 @@ export async function hit(
   return { ok: row.count <= limit, retryAfterSec: Math.max(1, Math.ceil((started + windowSec * 1000 - now) / 1000)) }
 }
 
-/** The caller's IP: Cloudflare's header on Workers, nginx's X-Forwarded-For on the own server. */
-export function clientIp(header: (name: string) => string | undefined): string {
-  return header('cf-connecting-ip') ?? header('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+/** The header our edge writes with the caller's address (`TRUSTED_IP_HEADER`); callers can send any header themselves. */
+export type TrustedIpHeader = 'cf-connecting-ip' | 'x-forwarded-for'
+
+/**
+ * The caller's IP for rate limits, read only from the header our edge sets: Cloudflare's `CF-Connecting-IP` on Workers;
+ * on the own server the last `X-Forwarded-For` entry, the one nginx appended. Nothing trusted → one shared bucket.
+ */
+export function clientIp(header: (name: string) => string | undefined, trusted?: TrustedIpHeader): string {
+  if (trusted === 'cf-connecting-ip') return header('cf-connecting-ip')?.trim() || 'unknown'
+  if (trusted === 'x-forwarded-for') return header('x-forwarded-for')?.split(',').at(-1)?.trim() || 'unknown'
+  return 'unknown'
 }

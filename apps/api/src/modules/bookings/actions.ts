@@ -8,22 +8,36 @@ import {
   REVIEW_EDIT_DAYS,
 } from '@yeral/domain/lifecycle'
 import { epochOf } from '@yeral/domain/time'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, businesses, reviews } from '../../db/schema'
+import { bookingItems, bookings, businesses, classSessions, reviews } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
-import { loadBusinesses } from '../availability/context'
-import { rebook } from './create'
+import { loadBusinesses, type LoadedBusiness } from '../availability/context'
+import { visitWhat } from '../catalog/map'
+import { assertOnlineBooking, rebook } from './create'
 import { isSlotConflict, setStatus, stateOf, type BookingRow } from './repo'
 import { RESTORE_MINUTES } from './view'
 
-async function rulesOf(deps: Deps, b: BookingRow) {
+async function businessOf(deps: Deps, b: BookingRow): Promise<LoadedBusiness> {
   const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
   if (!lb) throw new ApiError('not_found')
-  return lb.rules
+  return lb
+}
+
+const rulesOf = async (deps: Deps, b: BookingRow) => (await businessOf(deps, b)).rules
+
+/** Seats still free in a class session, counted under a lock on the session row. */
+async function seatsLeft(tx: Queryable, sessionId: string): Promise<number> {
+  const [session] = await tx.select().from(classSessions).where(eq(classSessions.id, sessionId)).for('update')
+  if (!session) return 0
+  const [taken] = await tx
+    .select({ seats: sql<number>`coalesce(sum(${bookings.seats}), 0)::int` })
+    .from(bookings)
+    .where(and(eq(bookings.sessionId, sessionId), eq(bookings.active, true)))
+  return session.capacity - (taken?.seats ?? 0)
 }
 
 const guard = (problem: ReturnType<typeof canClientCancel>) => {
@@ -59,6 +73,8 @@ export async function restoreBooking(deps: Deps, b: BookingRow): Promise<Booking
   const status = b.confirmedAt ? 'confirmed' : 'pending'
   try {
     return await deps.db.transaction(async (tx) => {
+      // the seats may have gone meanwhile; tables and specialists are guarded by the database
+      if (b.type === 'class' && b.sessionId && (await seatsLeft(tx, b.sessionId)) < (b.seats ?? 1)) throw new ApiError('session_full')
       const row = await setStatus(
         tx,
         { ...b, holdUntil: b.holdUntil && b.holdUntil.getTime() > now ? b.holdUntil : null },
@@ -89,7 +105,8 @@ export async function editNote(deps: Deps, b: BookingRow, note: string): Promise
 
 /**
  * Move to another time: a new request; the original stays confirmed until the business answers (instant businesses move
- * at once). The new time can't overlap the old one with the same specialist while both are held.
+ * at once). The new time can't overlap the old one with the same specialist while both are held. An earlier pending move
+ * is withdrawn in the same transaction, so it stays if the new time can't be had.
  */
 export async function rescheduleBooking(
   deps: Deps,
@@ -97,19 +114,22 @@ export async function rescheduleBooking(
   b: BookingRow,
   to: { date: string; start: number; staffId?: string | null },
 ): Promise<BookingRow> {
-  const rules = await rulesOf(deps, b)
-  guard(canClientReschedule(stateOf(b), rules, deps.now()))
+  const lb = await businessOf(deps, b)
+  guard(canClientReschedule(stateOf(b), lb.rules, deps.now()))
   if (b.type !== 'appointment') throw new ApiError('not_bookable')
-  await dropPendingMove(deps.db, b, new Date(deps.now()))
-  await rebook(deps, user, b, to, { status: initialStatus('web', rules.confirmMode), rescheduleOf: b.id })
-  const [fresh] = await deps.db.select().from(bookings).where(eq(bookings.id, b.id))
-  if (!fresh) throw new ApiError('not_found')
-  return fresh
+  await assertOnlineBooking(deps.db, lb, user)
+  return deps.db.transaction(async (tx) => {
+    await dropPendingMove(tx, b, new Date(deps.now()))
+    await rebook(deps, user, b, to, { status: initialStatus('web', lb.rules.confirmMode), rescheduleOf: b.id, db: tx })
+    const [fresh] = await tx.select().from(bookings).where(eq(bookings.id, b.id))
+    if (!fresh) throw new ApiError('not_found')
+    return fresh
+  })
 }
 
 /**
  * Pick one of the offered times: after a decline the business already agreed (confirmed at once); after an expired
- * request it's a new request like any other.
+ * request it's a new request like any other. Each offer makes one booking (`alternativeOf` is unique).
  */
 export async function acceptAlternative(
   deps: Deps,
@@ -123,14 +143,24 @@ export async function acceptAlternative(
   const wanted = source === 'decline' ? cancelledBy === 'business' : cancelledBy === 'system'
   const slot = list[index]
   if (status !== 'cancelled' || !wanted || !slot) throw new ApiError('invalid_status')
-  const rules = await rulesOf(deps, b)
-  return rebook(
-    deps,
-    user,
-    b,
-    { date: slot.date, start: slot.start },
-    { status: source === 'decline' ? 'confirmed' : initialStatus('web', rules.confirmMode) },
-  )
+  const [taken] = await deps.db.select({ id: bookings.id }).from(bookings).where(eq(bookings.alternativeOf, b.id))
+  if (taken) throw new ApiError('invalid_status')
+  const lb = await businessOf(deps, b)
+  if (source === 'expired') await assertOnlineBooking(deps.db, lb, user)
+  try {
+    return await rebook(
+      deps,
+      user,
+      b,
+      { date: slot.date, start: slot.start },
+      { status: source === 'decline' ? 'confirmed' : initialStatus('web', lb.rules.confirmMode), alternativeOf: b.id },
+    )
+  } catch (e) {
+    // another request took an offered time from this booking first
+    if ((e as { cause?: { code?: string } }).cause?.code === '23505' || (e as { code?: string }).code === '23505')
+      throw new ApiError('invalid_status')
+    throw e
+  }
 }
 
 /** "Aýjemal G.": first name and the initial of the last. */
@@ -164,9 +194,8 @@ export async function writeReview(deps: Deps, user: User, b: BookingRow, input: 
   const [existing] = await deps.db.select().from(reviews).where(eq(reviews.bookingId, b.id))
   if (existing) throw new ApiError('review_exists')
   const items = await deps.db.select().from(bookingItems).where(eq(bookingItems.bookingId, b.id)).orderBy(bookingItems.sort)
-  const what = items.length
-    ? `${items.map((i) => i.serviceName.tk).join(' + ')}${items[0]?.staffName ? ` · ${items[0].staffName}` : ''}`
-    : ''
+  // stored in Turkmen for reviews without items; readers get it in their language (catalog reviews)
+  const what = visitWhat(items, 'tk')
   await deps.db.transaction(async (tx) => {
     await tx.insert(reviews).values({
       bookingId: b.id,

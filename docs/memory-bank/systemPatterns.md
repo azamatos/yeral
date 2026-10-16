@@ -110,7 +110,8 @@ component ─► useQuery(sdk.businesses.detail(slug)) ─► hc client ─► G
 - Mutations invalidate by query keys defined in `@yeral/sdk`; optimistic updates only where instant feedback matters.
 - **Live updates**: the api writes an event per change (`booking.confirmed`, `booking.created` …) to an `events` table.
   While a screen is open the sdk polls `GET /v1/events?after=<cursor>` (≈10 s, on window focus, and after the user's own
-  mutations) and invalidates the matching queries. A push channel can replace polling on the own server; screens don't change.
+  mutations) and invalidates the matching queries. The cursor is `<txid>.<id>`: events are read in the order of the
+  transaction that wrote them, only once every older transaction has finished, so one that commits late is never skipped. A push channel can replace polling on the own server; screens don't change.
 
 ## State
 

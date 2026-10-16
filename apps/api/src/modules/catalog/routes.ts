@@ -15,12 +15,12 @@ import {
   suggestResponseSchema,
 } from '@yeral/contract/catalog'
 import { langQuerySchema, slugSchema } from '@yeral/contract/common'
-import { and, asc, desc, eq, or, sql, type AnyColumn, type SQL } from 'drizzle-orm'
-import { businesses, categories, places, reviews, services } from '../../db/schema'
+import { and, asc, desc, eq, inArray, or, sql, type AnyColumn, type SQL } from 'drizzle-orm'
+import { bookingItems, businesses, categories, places, reviews, services } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
 import { businessDetail, publicBusiness } from './detail'
-import { text } from './map'
+import { text, visitWhat } from './map'
 import { search, wordStartLikes } from './search'
 
 const slugParam = z.object({ slug: slugSchema })
@@ -170,7 +170,7 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(reviewsRoute, async (c) => {
     const { slug } = c.req.valid('param')
-    const { cursor, limit } = c.req.valid('query')
+    const { cursor, limit, lang } = c.req.valid('query')
     const b = await publicBusiness(c.var.deps, slug)
     const offset = Number(cursor ?? 0) || 0
     const rows = await c.var.deps.db
@@ -180,14 +180,23 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
       .orderBy(desc(reviews.createdAt))
       .limit(limit + 1)
       .offset(offset)
-    const items = rows.slice(0, limit).map((r) => ({
+    const page = rows.slice(0, limit)
+    const ids = page.flatMap((r) => (r.bookingId ? [r.bookingId] : []))
+    const visitItems = ids.length
+      ? await c.var.deps.db.select().from(bookingItems).where(inArray(bookingItems.bookingId, ids)).orderBy(asc(bookingItems.sort))
+      : []
+    const items = page.map((r) => ({
       id: r.id,
       author: r.authorName,
       rating: r.rating,
       tags: r.tags,
       text: r.text,
       createdAt: r.createdAt.getTime(),
-      what: r.what,
+      what:
+        visitWhat(
+          visitItems.filter((i) => i.bookingId === r.bookingId),
+          lang,
+        ) || r.what,
       reply: r.replyText && r.replyAt ? { text: r.replyText, createdAt: r.replyAt.getTime() } : null,
     }))
     return c.json({ items, cursor: rows.length > limit ? String(offset + limit) : null }, 200)

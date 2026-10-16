@@ -37,7 +37,7 @@ export const authRoutes = new OpenAPIHono<AppEnv>()
     const res = await sendCode(c.var.deps, {
       phone,
       purpose: 'login',
-      ip: clientIp((n) => c.req.header(n)),
+      ip: clientIp((n) => c.req.header(n), c.var.deps.trustedIpHeader),
       lang: known?.lang ?? lang ?? 'tk',
     })
     return c.json(res, 200)

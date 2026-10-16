@@ -84,7 +84,7 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const first = today(now)
     const date = q.date ?? first
     const last = addDays(first, Math.max(q.days, lb.rules.windowDays + 1))
-    const ctx = appointmentContext(lb, await loadBusy(deps.db, [lb.business.id], first, last, now), now)
+    const ctx = appointmentContext(lb, await loadBusy(deps.db, [lb.business.id], first, last), now)
     const staffId = q.staff === 'any' ? null : q.staff
     checkQuery(ctx, q.services, staffId)
     const query = { serviceIds: q.services, staffId, by: 'client' as const }
@@ -106,7 +106,7 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const { services } = c.req.valid('query')
     const lb = await loaded(deps, c.req.valid('param').slug)
     const first = today(now)
-    const ctx = appointmentContext(lb, await loadBusy(deps.db, [lb.business.id], first, addDays(first, lb.rules.windowDays), now), now)
+    const ctx = appointmentContext(lb, await loadBusy(deps.db, [lb.business.id], first, addDays(first, lb.rules.windowDays)), now)
     checkQuery(ctx, services, null)
     const next = (staffId: string | null) => {
       const found = lb.rules.onlineEnabled ? nextFreeSlot(ctx, { serviceIds: services, staffId, by: 'client' }, first) : null

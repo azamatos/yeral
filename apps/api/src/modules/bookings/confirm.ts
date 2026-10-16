@@ -32,7 +32,8 @@ export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, 
       due.map((p) => ({
         kind: 'booking.sms',
         runAt: new Date(Math.max(p.runAt, now)),
-        payload: { bookingId: b.id, kind: p.kind },
+        // the time it was planned for: after a move the old reminders find another time and stay quiet
+        payload: { bookingId: b.id, kind: p.kind, date: b.date, start: b.start },
         // a moved booking gets new reminders: the key carries the time
         dedupeKey: `${p.kind}:${b.id}:${b.date}:${b.start}`,
       })),

@@ -7,6 +7,13 @@ import type { BusinessRow, ServiceRow } from '../availability/context'
 
 export const text = (l: Localized | null | undefined, lang: Locale): string => (l ? localized(l, lang) : '')
 
+/** "Aýal saç kesimi + Gel-lak · Aýna": what a review was for, from the visit's services in the reader's language. */
+export function visitWhat(items: { serviceName: Localized; staffName: string | null }[], lang: Locale): string {
+  if (!items.length) return ''
+  const staffName = items[0]?.staffName
+  return `${items.map((i) => text(i.serviceName, lang)).join(' + ')}${staffName ? ` · ${staffName}` : ''}`
+}
+
 export const photoOf = (deps: Deps, p: StoredPhoto, lang: Locale) => ({ url: deps.media(p.key), alt: text(p.alt, lang) })
 
 /** Home-based businesses show an approximate point (≈ 1 km) until the booking is confirmed. */
