@@ -114,7 +114,7 @@ List + map (Fresha pattern). Category chips, day toggle (Şu gün / Ertir / Şu 
 Gallery (1 large + 4 small, "Ähli suratlar"), name, rating, category, address + distance, open-now state, favourite (heart) and share. Sticky right card: next free time, "Ýazylmak" primary, hours today, address, phone; it becomes the **selection summary** once services are chosen. Tabs (sticky under header): Hyzmatlar · Hünärmenler · Teswirler · Barada.
 - **Services:** grouped by service category with a chip row that **filters** the list (Ählisi = all); each row = name, duration, price, optional description, a select toggle (Saýla / Saýlandy ✓). Selecting adds to the summary card; "Dowam et" → booking flow at the specialist step. "Ýazylmak" with nothing selected → booking flow at the services step.
 - **Specialists:** avatar, name, role, rating; click → booking flow with that specialist preselected.
-- **Reviews:** average, count, 5→1 distribution bars, list (name, stars, date, service · specialist, text, business reply). "Ähli teswirler" opens more. Only clients with a Completed booking can review.
+- **Reviews:** average, count, 5→1 distribution bars, list (name, stars, date, service · specialist, text, business reply). "Ähli teswirler" opens more. Only clients with a Completed booking can review. Reviews reported by the business and under Ýeral moderation stay visible but are not counted in the average, count or bars until cleared (business spec §15).
 - **About:** description, hours table (today highlighted), map + address + "Ýol görkez" (directions), amenities, booking rules (cancellation window, lateness), payment at the place, "Adatça 15 minudyň dowamynda tassyklaýar" (typical confirmation time, computed).
 - **Golaýdaky ýerler:** 4 similar businesses.
 - Phone: gallery becomes a swipeable full-width carousel; sticky bottom bar with price summary + "Ýazylmak".
@@ -220,7 +220,7 @@ Slot        start, end, specialistId?|areaId?|sessionId?, available
 Booking     id, businessId, type, items[{serviceId, specialistId, start, end}] | partySize+areaId | sessionId+seats,
             start, end, status, cancelledBy?, cancelReason?, clientNote?, source: web|app|phone|ai,
             price{total, currency:'TMT'}, createdAt, confirmedAt?
-Review      id, bookingId, businessId, rating 1–5, tags[], text?, createdAt, reply?{text, createdAt}
+Review      id, bookingId, businessId, rating 1–5, tags[], text?, createdAt, reply?{text, createdAt}, moderation?{status: pending|cleared|removed, reason}
 User        id, phone, name, lang, favorites[businessId], notificationPrefs
 ```
 
@@ -304,4 +304,4 @@ All Turkmen copy needs a native review before launch.
 Online payment and deposits · Resource booking type · Waitlist for full classes · Gift cards · Loyalty · Business replies in-app chat · AI-assistant bookings · Paid promotion in search.
 
 ## 13. Open questions
-Manat pricing for business plans and commission · Real average bills · Official store badges · Map provider (screens use a drawn placeholder) · Native Turkmen copy review · SMS provider and sender name.
+Manat pricing for the Topar plan and the commission % (model decided: business spec §18) · Real average bills · Official store badges · Map provider (screens use a drawn placeholder) · Native Turkmen copy review · SMS provider and sender name.

@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Biznes — hasabatlar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6;color:#101014}
+.b-ico{width:40px;height:40px;padding:0;min-width:0;flex:none}
+.b-i36{width:36px;height:36px;padding:0;min-width:0;border-radius:10px;flex:none}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed}
+.b-gho:disabled{background:transparent;border-color:transparent;color:#b0b0b8}
+.b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
+.swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
+.swb:hover{background:#f4f4f6}
+.sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014}
+.sn:hover{background:#f4f4f6;color:#101014}
+.sn.on{background:#efecfe;color:#4429d6;font-weight:600}
+.sn.off{color:#6e6e78;cursor:default}
+.sn.off:hover{background:transparent;color:#6e6e78}
+.cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}
+.soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
+.gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
+.kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
+.pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
+.mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
+.mi:hover{background:#f4f4f6;color:#101014}
+.av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.av48{width:48px;height:48px;font-size:19px}
+.popa{position:absolute;z-index:31;display:flex;flex-direction:column}
+.catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.pad{flex:1;padding:24px 32px 48px;display:flex;flex-direction:column;min-width:0}
+.vh{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding-bottom:16px}
+.back{display:inline-flex;align-items:center;gap:2px;height:32px;padding:0 10px 0 4px;margin-left:-4px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:14px;line-height:18px;font-weight:600;color:#4429d6;cursor:pointer}
+.back:hover{background:#efecfe;color:#3520a6}
+.back:focus-visible,.sgb:focus-visible,.srow:focus-visible,.trb:focus-visible,.thb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.vhr{display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:100%}
+.vt{margin:0;font-size:22px;line-height:28px;font-weight:700;letter-spacing:-0.015em}
+.cell{display:flex;flex-direction:column;min-width:0}
+.lnk{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-size:14px;line-height:20px;font-weight:600;padding:8px 10px;border-radius:10px}
+.lnk:hover{background:#efecfe}
+.lnk:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.tbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding-bottom:20px}
+.seg{display:inline-flex;padding:3px;background:#f0f0f3;border-radius:10px;gap:2px;flex:none}
+.sgb{height:30px;padding:0 12px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:#5a5a64;cursor:pointer;white-space:nowrap}
+.sgb:hover{color:#101014}
+.sgb.on{background:#ffffff;color:#101014;font-weight:600;box-shadow:0 0 0 1px #e6e6ea}
+.navg{display:flex;align-items:center;gap:2px;flex:none}
+.plbl{min-width:132px;padding:0 4px;text-align:center;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em;white-space:nowrap}
+.tsp{flex:1}
+.lock{display:inline-flex;align-items:center;gap:6px;font-size:13px;line-height:18px;color:#5a5a64}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:4px 0 28px}
+.stats.s3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat{display:flex;flex-direction:column;gap:6px;padding:0 24px;border-left:1px solid #e6e6ea;min-width:0}
+.stat.first{padding-left:0;border-left:0}
+.tv{font-size:32px;line-height:38px;font-weight:700;letter-spacing:-0.02em;white-space:nowrap}
+.tdr{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px}
+.dp{display:inline-flex;align-items:center;gap:3px;height:24px;padding:0 8px 0 6px;border-radius:999px;font-size:13px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
+.dp-up{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
+.dp-dn{background:#fee4e2;border:1px solid #f6c7c2;color:#a3251b}
+.sec{display:flex;flex-direction:column;gap:16px;padding:28px 0;border-top:1px solid #e6e6ea;min-width:0}
+.sh{margin:0;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.shrow{display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
+.lg{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;font-size:13px;line-height:18px;color:#5a5a64}
+.lgi{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.lgn{color:#101014;font-weight:600}
+.lk{display:inline-block;width:16px;height:0;border-top:2px solid #5a3ff0;flex:none}
+.lk-d{border-top:2px dashed #b0b0b8}
+.sw10{display:inline-block;width:10px;height:10px;border-radius:3px;flex:none}
+.chx{overflow-x:auto;padding-top:8px}
+.chin{min-width:0}
+.pgrid{display:grid;grid-template-columns:84px minmax(0,1fr)}
+.yax{position:relative;height:240px}
+.ylab{position:absolute;right:12px;transform:translateY(-50%);font-size:12px;line-height:16px;color:#6e6e78;white-space:nowrap;font-variant-numeric:tabular-nums}
+.plot{position:relative;height:240px}
+.gl{position:absolute;left:0;right:0;height:1px;background:#f0f0f3}
+.gl0{background:#e6e6ea}
+.psvg{position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible}
+.hz{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;z-index:2}
+.hc{flex:1 1 0;min-width:0}
+.xh{position:absolute;top:0;bottom:0;width:1px;margin-left:-0.5px;background:#d8d8de;pointer-events:none}
+.hdot{position:absolute;width:10px;height:10px;border-radius:999px;transform:translate(-50%,-50%);box-shadow:0 0 0 2px #ffffff;pointer-events:none}
+.tip{position:absolute;z-index:4;display:flex;flex-direction:column;gap:4px;padding:10px 12px;background:#ffffff;border:1px solid #e6e6ea;border-radius:10px;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:13px;line-height:18px;color:#5a5a64;white-space:nowrap;pointer-events:none}
+.tip-c{top:4px}
+.tipv{display:flex;align-items:center;gap:8px;color:#101014;font-size:15px;line-height:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.tipp{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.xax{position:relative;height:30px}
+.xlab{position:absolute;top:8px;transform:translateX(-50%);font-size:12px;line-height:16px;color:#6e6e78;white-space:nowrap}
+.srows{display:flex;flex-direction:column;padding:12px 0;border-top:1px solid #e6e6ea}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) 24px;gap:16px;align-items:center;width:100%;padding:18px 12px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;color:#101014;cursor:pointer}
+.srow:hover{background:#f6f6f8}
+.srow svg{color:#6e6e78}
+.srb{display:flex;flex-direction:column;gap:2px;min-width:0}
+.srt{font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.srk{font-size:15px;line-height:22px;font-weight:500;color:#101014}
+.srm{color:#6e6e78;font-weight:400}
+.sri{font-size:14px;line-height:20px;color:#5a5a64;padding-top:2px}
+.sdiv{height:1px;background:#e6e6ea;margin:0 12px}
+.facts{display:flex;align-items:center;flex-wrap:wrap;gap:8px 20px;padding:16px 12px 0;border-top:1px solid #e6e6ea;font-size:14px;line-height:20px;color:#5a5a64}
+.fct{display:inline-flex;align-items:center;gap:8px}
+.fct b{color:#101014;font-weight:600}
+.dot{width:6px;height:6px;border-radius:999px;flex:none}
+.ibox{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;margin-bottom:24px;border-radius:12px;background:#efecfe;border:1px solid #d5cbfb;font-size:15px;line-height:22px;color:#101014}
+.ibox svg{flex:none;color:#4429d6;margin-top:1px}
+.share{display:flex;gap:2px;height:20px}
+.shs{height:100%;min-width:2px}
+.tcard{border:1px solid #e6e6ea;border-radius:16px;background:#ffffff;overflow:hidden}
+.tbx{overflow-x:auto}
+.tr{display:grid;column-gap:16px;align-items:center;min-height:56px;padding:6px 20px;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px;color:#101014}
+.tr.last{border-bottom:0}
+.th{min-height:40px;padding-top:0;padding-bottom:0;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.trb{width:100%;border:0;border-bottom:1px solid #e6e6ea;background:#ffffff;font-family:inherit;text-align:left;cursor:pointer}
+.trb:hover{background:#f6f6f8}
+.trb.last{border-bottom:0}
+.trb svg{color:#6e6e78}
+.c-st{grid-template-columns:minmax(200px,1.7fr) repeat(6,minmax(84px,1fr)) 20px;min-width:900px}
+.c-sv{grid-template-columns:minmax(200px,1.7fr) repeat(3,minmax(96px,1fr)) minmax(200px,1.5fr);min-width:820px}
+.num{text-align:right;justify-self:end;font-variant-numeric:tabular-nums;white-space:nowrap}
+.nm{display:flex;align-items:center;gap:12px;min-width:0}
+.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thb{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 6px;margin:0 -6px;border:0;border-radius:6px;background:transparent;font-family:inherit;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78;cursor:pointer;white-space:nowrap}
+.thb:hover{background:#f4f4f6;color:#101014}
+.thb.on{color:#101014}
+.pc{display:flex;align-items:center;gap:12px;min-width:0}
+.btrk{flex:1 1 auto;height:8px;border-radius:4px;background:#efecfe;min-width:40px}
+.bfil{height:100%;border-radius:0 4px 4px 0;background:#5a3ff0;min-width:2px}
+.pv{width:40px;text-align:right;font-variant-numeric:tabular-nums;flex:none}
+.trm{color:#5a5a64}
+.tfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:48px;padding:12px 20px;border-top:1px solid #e6e6ea;font-size:14px;line-height:20px;color:#5a5a64}
+.slist{display:flex;flex-direction:column}
+.svr{display:grid;grid-template-columns:minmax(140px,220px) minmax(0,1fr) 112px;gap:16px;align-items:center;min-height:52px;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.svr.last{border-bottom:0}
+.sbtrk{display:block;min-width:0}
+.sbar{height:10px;border-radius:0 4px 4px 0;background:#5a3ff0;min-width:2px}
+.svv{display:flex;flex-direction:column;align-items:flex-end;font-variant-numeric:tabular-nums;white-space:nowrap}
+.g2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px 48px}
+.cbox{display:flex;flex-direction:column;gap:16px;min-width:0}
+.wks{display:flex;flex-direction:column;gap:14px;padding-top:4px}
+.wk{display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;align-items:center}
+.wkl{font-size:13px;line-height:18px;color:#5a5a64;white-space:nowrap}
+.wkb{display:flex;align-items:center;gap:8px;min-width:0}
+.wkf{display:flex;gap:2px;height:20px;flex:none}
+.wsg{position:relative;height:100%;min-width:2px;cursor:default}
+.wsg.on{box-shadow:0 0 0 2px #ffffff,0 0 0 3px #101014}
+.tip-s{bottom:calc(100% + 10px);left:50%;transform:translateX(-50%)}
+.wkt{font-size:13px;line-height:18px;font-weight:600;color:#101014;font-variant-numeric:tabular-nums;white-space:nowrap}
+.srcr{display:grid;grid-template-columns:minmax(110px,170px) minmax(0,1fr) 116px;gap:12px;align-items:center;min-height:40px;font-size:14px;line-height:20px}
+.lap{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;padding:16px 20px;border:1px solid #e6e6ea;border-radius:16px}
+.lapi{width:40px;height:40px;border-radius:999px;background:#f4f4f6;color:#5a5a64;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.fw{display:flex;flex-direction:column;gap:20px;padding:28px;border:1px solid #e6e6ea;border-radius:16px;max-width:760px}
+.fwi{width:56px;height:56px;border-radius:999px;background:#efecfe;color:#5a3ff0;display:flex;align-items:center;justify-content:center;flex:none}
+.prg{height:8px;border-radius:999px;background:#efecfe;overflow:hidden}
+.prgf{height:100%;border-radius:999px;background:#5a3ff0}
+.ulr{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #e6e6ea;font-size:15px;line-height:22px}
+.uli{width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.uli-d{background:#e7f8ee;color:#066a41}
+.uli-l{background:#f4f4f6;color:#6e6e78}
+.ulw{margin-left:auto;font-size:14px;line-height:20px;white-space:nowrap}
+.ulw-d{color:#066a41;font-weight:600}
+.ulw-l{color:#5a5a64}
+.toast{position:fixed;left:272px;bottom:24px;z-index:80;display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 20px 0 16px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:15px;line-height:20px;max-width:calc(100% - 296px)}
+@media (max-width:1180px){.g2{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side .swb{width:44px;padding:4px;justify-content:center}.side .swb>span:not(.av),.side .swb>svg{display:none}.sn{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0;position:relative}.sn .cnt{position:absolute;top:6px;right:6px;min-width:0;width:8px;height:8px;padding:0;border:0;background:#dc8b0b;font-size:0}.sn .cnt.cnt-n{background:#6e6e78}.sn .soon{display:none}.sdv{width:44px;margin:8px 0 !important}.top{padding:0 24px}.gs{width:auto;flex:0 1 320px}.pad{padding:24px 24px 40px !important}.toast{left:96px;max-width:calc(100% - 120px)}}
+@media (max-width:767px){.app{flex-direction:column}.side{position:relative !important;top:auto !important;height:auto !important;width:100%;flex-direction:row;align-items:center;gap:4px;padding:8px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow-x:auto}.sdv,.sfill,.sx{display:none}.side .swb:last-of-type{margin-left:auto}.top{height:56px;padding:0 16px;gap:12px}.top h1{font-size:19px !important;line-height:24px !important}.gs{display:none}.pad{padding:16px 16px 40px !important}.b-sm{height:44px;border-radius:12px}.b-i36{width:44px;height:44px}.sgb{height:38px;padding:0 14px}.plbl{min-width:0;font-size:16px}.stats,.stats.s3{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:20px}.stat{padding:0 0 0 16px}.stat:nth-child(odd){padding-left:0;border-left:0}.tv{font-size:24px;line-height:30px}.chin{min-width:640px}.srow{padding:16px 8px}.sdiv{margin:0 8px}.facts{padding-left:8px;padding-right:8px}.tr{padding-left:16px;padding-right:16px}.svr{grid-template-columns:minmax(0,1fr) 104px;row-gap:6px;padding:10px 0}.svr .sbtrk{grid-column:1 / -1;grid-row:2}.srcr{grid-template-columns:minmax(0,1fr) 108px;row-gap:4px;padding:6px 0}.srcr .sbtrk{grid-column:1 / -1;grid-row:2}.lnk{margin-left:0}.fw{padding:20px}.ulr{flex-wrap:wrap}.ulw{margin-left:40px;white-space:normal}.toast{left:16px;right:16px;bottom:16px;max-width:none}}
+</style>
+</helmet>
+<div class="app" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<aside class="side" aria-label="Esasy menýu" style="position: sticky; top: 0; height: 100vh; z-index: 20">
+<button class="swb" aria-label="Biznesi çalyş" aria-haspopup="menu" aria-expanded="{{bizOpen}}" onClick="{{toggleBiz}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bitarap Türkmenistan şaýoly</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<a class="sn" href="B-Calendar.dc.html" aria-label="Senenama"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
+<a class="sn" href="B-Bookings.dc.html" aria-label="{{navReqLabel}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt">{{pendN}}</span></a>
+<a class="sn" href="B-Clients.dc.html" aria-label="Müşderiler"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
+<a class="sn" href="B-Reviews.dc.html" aria-label="Teswirler, 4 jogapsyz teswir"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n">4</span></a>
+<a class="sn on" href="B-Analytics.dc.html" aria-current="page" aria-label="Hasabatlar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<a class="sn" href="B-Settings.dc.html" aria-label="Sazlamalar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<div class="sfill" style="flex: 1"></div>
+<a class="sn sx" href="#" aria-label="Ýeral sahypaňyz"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn sx" href="B-Help.dc.html" aria-label="Kömek"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<button class="swb" aria-label="Hasabym" aria-haspopup="menu" aria-expanded="{{userOpen}}" onClick="{{toggleUser}}"><span class="av">{{meIni}}</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">{{meName}}</span><span class="cap" style="font-size: 12px">{{meRole}}</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<sc-if value="{{sideOpen}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeSide}}"></div></sc-if>
+<sc-if value="{{bizOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa" role="menu" aria-label="Biznesleriňiz" style="top: 60px; left: 12px; width: 300px">
+<div style="padding: 8px 10px 6px" class="lbl">Biznesleriňiz</div>
+<a class="mi" href="#" role="menuitemradio" aria-checked="true" style="background: #efecfe"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 28px; height: 28px; border-radius: 8px"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-weight: 600">Glow Studio</span><span class="cap" style="font-size: 12px">Bitarap Türkmenistan şaýoly</span></span><span class="cnt">{{pendN}}</span></a>
+<a class="mi" href="#" role="menuitemradio" aria-checked="false"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 28px; height: 28px; border-radius: 8px"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-weight: 600">Glow Studio · Parahat</span><span class="cap" style="font-size: 12px">Parahat 7</span></span><span class="cnt">2</span></a>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
+<a class="mi" href="B-Onboarding.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Şahamça goş</a>
+</div>
+</sc-if>
+<sc-if value="{{userOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa" role="menu" aria-label="Hasabym" style="bottom: 64px; left: 12px; width: 300px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">{{meIni}}</span><span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">{{meName}}</span><span class="cap" style="font-size: 12px">{{mePhoneRole}}</span></span></div>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
+<a class="mi" href="#">Profilim</a>
+<a class="mi" href="#">Dil: Türkmençe</a>
+<a class="mi" href="Home.dc.html">Müşderi hökmünde aç · yeral.app</a>
+<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
+<a class="mi" href="#">Çykmak</a>
+</div>
+</sc-if>
+</aside>
+
+<div class="main">
+<div class="top">
+<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Hasabatlar</h1>
+<div style="flex: 1"></div>
+<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
+</div>
+
+<div class="pad">
+
+<sc-if value="{{isDrill}}" hint-placeholder-val="{{false}}">
+<div class="vh">
+<button class="back" onClick="{{goBack}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>{{backLabel}}</button>
+<div class="vhr">
+<sc-if value="{{showAv}}" hint-placeholder-val="{{false}}"><span class="av av48" aria-hidden="true">{{oneIni}}</span></sc-if>
+<div class="cell"><h2 class="vt">{{viewTitle}}</h2><sc-if value="{{hasViewSub}}" hint-placeholder-val="{{false}}"><span class="cap" style="font-size: 14px; line-height: 20px">{{viewSub}}</span></sc-if></div>
+<sc-if value="{{showCalLink}}" hint-placeholder-val="{{false}}"><a class="lnk" href="B-Calendar.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>{{calLinkText}}</a></sc-if>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{isOverview}}" hint-placeholder-val="{{true}}"><h2 class="sr">Umumy syn</h2></sc-if>
+
+<div class="tbar">
+<div class="seg" role="group" aria-label="Döwür"><sc-for list="{{periods}}" as="p" hint-placeholder-count="3"><button class="{{p.cls}}" aria-pressed="{{p.on}}" onClick="{{p.pick}}">{{p.t}}</button></sc-for></div>
+<div class="navg">
+<button class="b b-gho b-i36" aria-label="Öňki döwür" disabled="{{prevDis}}" onClick="{{prevP}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+<span class="plbl" aria-live="polite">{{periodLabel}}</span>
+<button class="b b-gho b-i36" aria-label="Indiki döwür" disabled="{{nextDis}}" onClick="{{nextP}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+</div>
+<span class="cap">{{compareCap}}</span>
+<span class="tsp"></span>
+<sc-if value="{{isOwner}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm" onClick="{{doExport}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Eksport (CSV)</button></sc-if>
+<sc-if value="{{isSpec}}" hint-placeholder-val="{{false}}"><span class="lock"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Girdeji diňe eýesine görünýär</span></sc-if>
+</div>
+
+<sc-if value="{{hasInsight}}" hint-placeholder-val="{{false}}">
+<div class="ibox"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg><span>{{insight}}</span></div>
+</sc-if>
+
+<sc-if value="{{hasTiles}}" hint-placeholder-val="{{true}}">
+<div class="{{statsCls}}" role="list" aria-label="Esasy görkezijiler">
+<sc-for list="{{tiles}}" as="t" hint-placeholder-count="4">
+<div class="{{t.cls}}" role="listitem">
+<span class="lbl">{{t.lbl}}</span>
+<span class="tv">{{t.val}}</span>
+<span class="tdr">
+<sc-if value="{{t.hasD}}" hint-placeholder-val="{{true}}"><span class="{{t.dCls}}"><sc-if value="{{t.up}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if><sc-if value="{{t.down}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>{{t.d}}<span class="sr">{{t.dSr}}</span></span></sc-if>
+<span class="cap">{{t.cap}}</span>
+</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isOverview}}" hint-placeholder-val="{{true}}">
+<section class="sec" aria-labelledby="chT">
+<div class="shrow"><h3 class="sh" id="chT">{{chartTitle}}</h3>
+<div class="lg" aria-hidden="true"><span class="lgi"><span class="lk"></span>Sentýabr</span><span class="lgi"><span class="lk lk-d"></span>Awgust</span></div></div>
+<div class="chx">
+<div class="chin">
+<div class="pgrid">
+<div class="yax" aria-hidden="true"><sc-for list="{{ticks}}" as="k" hint-placeholder-count="3"><span class="ylab" style="top: {{k.top}}px">{{k.t}}</span></sc-for></div>
+<div class="plot" aria-hidden="true" onMouseLeave="{{unhover}}">
+<sc-for list="{{ticks}}" as="k" hint-placeholder-count="3"><div class="gl" style="top: {{k.top}}px"></div></sc-for>
+<div class="gl gl0" style="bottom: 0"></div>
+<svg class="psvg" viewBox="0 0 1000 240" preserveAspectRatio="none" aria-hidden="true"><path d="{{areaD}}" fill="#efecfe" stroke="none"></path><path d="{{prevD}}" fill="none" stroke="#b0b0b8" stroke-width="1.5" stroke-dasharray="4 4" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path><path d="{{curD}}" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg>
+<sc-if value="{{hasHov}}" hint-placeholder-val="{{false}}">
+<div class="xh" style="left: {{hv.left}}%"></div>
+<span class="hdot" style="left: {{hv.left}}%; top: {{hv.py}}px; background: #b0b0b8"></span>
+<span class="hdot" style="left: {{hv.left}}%; top: {{hv.cy}}px; background: #5a3ff0"></span>
+<div class="tip tip-c" style="left: {{hv.left}}%; transform: translateX({{hv.shift}})"><span>{{hv.date}}</span><span class="tipv"><span class="lk"></span>{{hv.cur}}</span><span class="tipp"><span class="lk lk-d"></span>{{hv.prev}}</span></div>
+</sc-if>
+<div class="hz"><sc-for list="{{days}}" as="d" hint-placeholder-count="30"><div class="hc" onMouseEnter="{{d.hover}}"></div></sc-for></div>
+</div>
+</div>
+<div class="pgrid"><span></span><div class="xax" aria-hidden="true"><sc-for list="{{xlabs}}" as="x" hint-placeholder-count="7"><span class="xlab" style="left: {{x.left}}%">{{x.t}}</span></sc-for></div></div>
+</div>
+</div>
+<div class="sr" role="table" aria-label="{{tblLabel}}">
+<div role="rowgroup"><div role="row"><span role="columnheader">Sene</span><span role="columnheader">Sentýabr</span><span role="columnheader">Awgust</span></div></div>
+<div role="rowgroup"><sc-for list="{{tblRows}}" as="r" hint-placeholder-count="30"><div role="row"><span role="rowheader">{{r.d}}</span><span role="cell">{{r.c}}</span><span role="cell">{{r.p}}</span></div></sc-for></div>
+</div>
+</section>
+
+<nav class="srows" aria-label="Hasabat bölümleri">
+<sc-for list="{{sections}}" as="s" hint-placeholder-count="3">
+<sc-if value="{{s.div}}" hint-placeholder-val="{{false}}"><div class="sdiv"></div></sc-if>
+<button class="srow" onClick="{{s.go}}">
+<span class="srb">
+<span class="srt">{{s.t}}</span>
+<span class="srk">{{s.k}}<span class="srm">{{s.m}}</span></span>
+<span class="sri">{{s.i}}</span>
+</span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+</button>
+</sc-for>
+</nav>
+<div class="facts">
+<span class="fct"><span class="dot" style="background: #d9412f"></span>Gelmedik: <b>{{noShowLine}}</b></span>
+<span class="fct">Köpden bäri gelmedik: <b>{{lapsedLine}}</b></span>
+</div>
+</sc-if>
+
+<sc-if value="{{isStaff}}" hint-placeholder-val="{{false}}">
+<section class="sec" aria-labelledby="shT">
+<div class="shrow"><h3 class="sh" id="shT">Girdejiniň paýy</h3><span class="cap">Jemi 46 200 TMT · sentýabr</span></div>
+<div class="share" role="img" aria-label="{{shareAria}}"><sc-for list="{{shareSegs}}" as="g" hint-placeholder-count="4"><span class="shs" style="flex: {{g.share}} 1 0%; background: {{g.color}}; border-radius: {{g.rad}}"></span></sc-for></div>
+<div class="lg" aria-hidden="true"><sc-for list="{{shareSegs}}" as="g" hint-placeholder-count="4"><span class="lgi"><span class="sw10" style="background: {{g.color}}"></span><span class="lgn">{{g.name}}</span>{{g.pct}} · {{g.rev}}</span></sc-for></div>
+</section>
+<div class="tcard">
+<div class="tbx">
+<div class="tr th c-st" aria-hidden="true"><span>Hünärmen</span><span class="num">Girdeji</span><span class="num">Paý</span><span class="num">Ýazylyş</span><span class="num">Ortaça çek</span><span class="num">Gaýdyp gelýän</span><span class="num">Gelmedik</span><span></span></div>
+<sc-for list="{{staffRows}}" as="r" hint-placeholder-count="4">
+<button class="{{r.cls}}" aria-label="{{r.aria}}" onClick="{{r.go}}">
+<span class="nm"><span class="av" aria-hidden="true">{{r.ini}}</span><span class="cell"><span class="ell" style="font-weight: 600">{{r.name}}</span><span class="cap ell">{{r.spec}}</span></span></span>
+<span class="num" style="font-weight: 600">{{r.rev}}</span>
+<span class="num">{{r.share}}</span>
+<span class="num">{{r.bk}}</span>
+<span class="num">{{r.avg}}</span>
+<span class="num">{{r.ret}}</span>
+<span class="num">{{r.ns}}</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+</button>
+</sc-for>
+</div>
+<div class="tfoot"><span>Jemi: 46 200 TMT · 412 ýazylyş · 9 gelmedik</span><span>Hünärmeni saýlaň — hyzmatlary we görkezijileri açylar</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{isStaffOne}}" hint-placeholder-val="{{false}}">
+<section class="sec" aria-labelledby="soT">
+<div class="shrow"><h3 class="sh" id="soT">{{oneListTitle}}</h3><span class="cap">{{oneListCap}}</span></div>
+<div class="slist" role="list">
+<sc-for list="{{oneRows}}" as="r" hint-placeholder-count="4">
+<div class="{{r.cls}}" role="listitem">
+<span style="font-weight: 600">{{r.name}}</span>
+<span class="sbtrk"><span class="sbar" style="display: block; width: {{r.w}}%"></span></span>
+<span class="svv"><span style="font-weight: 600; color: #101014">{{r.val}}</span><span class="cap">{{r.sub}}</span></span>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{isServices}}" hint-placeholder-val="{{false}}">
+<div class="tcard">
+<div class="tbx">
+<div role="table" aria-label="Hyzmatlar boýunça girdeji">
+<div role="rowgroup"><div class="tr th c-sv" role="row"><sc-for list="{{svcCols}}" as="c" hint-placeholder-count="5"><span class="{{c.cls}}" role="columnheader" aria-sort="{{c.sort}}"><button class="{{c.bcls}}" onClick="{{c.pick}}">{{c.t}}<sc-if value="{{c.none}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></sc-if><sc-if value="{{c.up}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"></path></svg></sc-if><sc-if value="{{c.down}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></sc-if></button></span></sc-for></div></div>
+<div role="rowgroup">
+<sc-for list="{{svcRows}}" as="r" hint-placeholder-count="6">
+<div class="tr c-sv" role="row">
+<span class="ell" role="rowheader" style="font-weight: 600">{{r.name}}</span>
+<span class="num" role="cell" style="font-weight: 600">{{r.rev}}</span>
+<span class="num" role="cell">{{r.cnt}}</span>
+<span class="num" role="cell">{{r.ph}}</span>
+<span class="pc" role="cell"><span class="btrk"><span class="bfil" style="display: block; width: {{r.w}}%"></span></span><span class="pv">{{r.share}}</span></span>
+</div>
+</sc-for>
+<div class="tr c-sv last trm" role="row">
+<span role="rowheader">Beýleki 5 hyzmat</span>
+<span class="num" role="cell">4 500 TMT</span>
+<span class="num" role="cell"></span>
+<span class="num" role="cell"></span>
+<span class="pc" role="cell"><span class="btrk"><span class="bfil" style="display: block; width: 37%; background: #c3b6fb"></span></span><span class="pv">10%</span></span>
+</div>
+</div>
+</div>
+</div>
+<div class="tfoot"><span>Jemi: 46 200 TMT · 11 hyzmat</span><span>Sagadyna — hyzmata sarp edilen her sagadyň girdejisi</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{isClients}}" hint-placeholder-val="{{false}}">
+<div class="sec g2">
+<section class="cbox" aria-labelledby="wkT">
+<h3 class="sh" id="wkT">Hepdeler boýunça müşderiler</h3>
+<div class="lg" aria-hidden="true"><sc-for list="{{cTypes}}" as="c" hint-placeholder-count="3"><span class="lgi"><span class="sw10" style="background: {{c.color}}"></span><span class="lgn">{{c.t}}</span>{{c.n}}</span></sc-for></div>
+<div class="wks" role="img" aria-label="{{wkAria}}">
+<sc-for list="{{weeks}}" as="w" hint-placeholder-count="4">
+<div class="wk"><span class="wkl">{{w.t}}</span>
+<div class="wkb"><div class="wkf" style="width: {{w.pct}}%"><sc-for list="{{w.segs}}" as="g" hint-placeholder-count="3"><span class="{{g.cls}}" style="flex: {{g.v}} 1 0%; background: {{g.color}}; border-radius: {{g.rad}}" onMouseEnter="{{g.hover}}" onMouseLeave="{{g.leave}}"><sc-if value="{{g.on}}" hint-placeholder-val="{{false}}"><span class="tip tip-s"><span>{{w.t}}</span><span class="tipv"><span class="sw10" style="background: {{g.color}}"></span>{{g.tip}}</span></span></sc-if></span></sc-for></div><span class="wkt">{{w.tot}}</span></div>
+</div>
+</sc-for>
+</div>
+<span class="cap">Her müşderi aýda bir gezek — ilkinji gelen hepdesinde sanalýar.</span>
+</section>
+<section class="cbox" aria-labelledby="srT">
+<h3 class="sh" id="srT">{{srcTitle}}</h3>
+<div role="list">
+<sc-for list="{{sources}}" as="r" hint-placeholder-count="4">
+<div class="srcr" role="listitem"><span>{{r.t}}</span><span class="sbtrk"><span class="sbar" style="display: block; width: {{r.w}}%"></span></span><span class="num"><b style="color: #101014; font-weight: 600">{{r.n}}</b> · {{r.p}}</span></div>
+</sc-for>
+</div>
+<span class="cap">{{srcCap}}</span>
+</section>
+</div>
+<div class="lap">
+<span class="lapi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></span>
+<span class="cell" style="flex: 1 1 260px"><span style="font-size: 15px; line-height: 22px; font-weight: 600">{{lapsedTitle}}</span><span class="cap">{{lapsedCap}}</span></span>
+<sc-if value="{{isOwner}}" hint-placeholder-val="{{true}}"><a class="b b-gho b-sm" href="B-Clients.dc.html">Sanawy aç</a><button class="b b-sec b-sm" disabled="">Ýatlatma iber · ýakynda</button></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{isFirst}}" hint-placeholder-val="{{false}}">
+<section class="fw" aria-labelledby="fwT">
+<div style="display: flex; align-items: flex-start; gap: 16px">
+<span class="fwi"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg></span>
+<div class="cell" style="gap: 4px"><h3 id="fwT" style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Hasabatlar taýýarlanýar</h3><span style="font-size: 15px; line-height: 22px; color: #5a5a64">Doly hasabatlar üçin azyndan 30 ýazylyş gerek. Häzirlikçe ilkinji sanlary görkezýäris.</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><span style="font-size: 15px; font-weight: 600">12 / 30 ýazylyş</span><span class="cap">ýene 18 ýazylyş</span></div>
+<div class="prg" role="progressbar" aria-label="Hasabatlar üçin ýazylyşlar" aria-valuemin="0" aria-valuemax="30" aria-valuenow="12" aria-valuetext="30 ýazylyşdan 12"><div class="prgf" style="width: 40%"></div></div>
+</div>
+<div role="list">
+<sc-for list="{{unlocks}}" as="u" hint-placeholder-count="4">
+<div class="ulr" role="listitem">
+<sc-if value="{{u.done}}" hint-placeholder-val="{{false}}"><span class="uli uli-d"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span></sc-if>
+<sc-if value="{{u.locked}}" hint-placeholder-val="{{true}}"><span class="uli uli-l"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span></sc-if>
+<span style="font-weight: 500">{{u.t}}</span>
+<span class="{{u.wCls}}">{{u.w}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+
+</div>
+</div>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div class="toast" role="status">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+<span>{{toastText}}</span>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["overview","staff","staffOne","services","clients","firstWeeks"],"default":"overview","section":"State"},"role":{"editor":"enum","options":["owner","specialist"],"default":"owner","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1160}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = Object.assign({ period: 'month', pOff: 0, sortKey: 'rev', sortDir: 'desc', side: null, toast: null }, this.fromProps(props || {}));
+  }
+  fromProps(p) {
+    return { view: p.view ?? 'overview', staffId: 'ayna', hov: null, segHov: null };
+  }
+  componentDidUpdate(pp) {
+    const p = this.props;
+    if (pp.view !== p.view || pp.role !== p.role) this.setState(this.fromProps(p));
+  }
+  componentWillUnmount() { clearTimeout(this.tt); }
+  flash(text) {
+    clearTimeout(this.tt);
+    this.setState({ toast: text });
+    this.tt = setTimeout(() => this.setState({ toast: null }), 5000);
+  }
+  go(view, staffId) {
+    this.setState({ view: view, staffId: staffId || this.state.staffId, hov: null, segHov: null, side: null });
+  }
+  renderVals() {
+    const s = this.state;
+    const f = this.props.font ?? 'Onest';
+    const isSpec = (this.props.role ?? 'owner') === 'specialist';
+    const isOwner = !isSpec;
+    const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const tmt = (n) => fmt(n) + ' TMT';
+    const MON = ['Ýanwar', 'Fewral', 'Mart', 'Aprel', 'Maý', 'Iýun', 'Iýul', 'Awgust', 'Sentýabr', 'Oktýabr', 'Noýabr', 'Dekabr'];
+    const mon = MON.map((m) => m.toLowerCase());
+    const WD = ['Duşenbe', 'Sişenbe', 'Çarşenbe', 'Penşenbe', 'Anna', 'Şenbe', 'Ýekşenbe'];
+
+    // ---- data (business-demo.json → analytics; staff splits derived) ----
+    const REV = [1220, 1440, 1570, 950, 1670, 2250, 1340, 1160, 1480, 1590, 1020, 1760, 2350, 1270, 1230, 1420, 1550, 1090, 1840, 2490, 1360, 1290, 1460, 1650, 1050, 1900, 2530, 1410, 1320, 1540];
+    const PREV = [1050, 1290, 1430, 860, 1530, 2050, 1140, 1000, 1340, 1430, 930, 1620, 2100, 1140, 1100, 1240, 1380, 950, 1670, 2190, 1190, 1140, 1320, 1480, 910, 1720, 2300, 1240, 1190, 1320];
+    const AY = [4, 5, 5, 3, 5, 7, 4, 4, 5, 5, 3, 6, 8, 4, 4, 5, 5, 3, 6, 8, 4, 4, 5, 5, 3, 6, 8, 5, 4, 5];
+    const AYP = [4, 4, 5, 3, 5, 7, 4, 3, 5, 5, 3, 6, 7, 4, 4, 4, 5, 3, 6, 7, 4, 4, 4, 5, 3, 6, 8, 4, 4, 4];
+    const STAFF = [
+      { id: 'ayna', name: 'Aýna', full: 'Aýna Myradowa', spec: 'Stilist', ini: 'A', color: '#5a3ff0', rev: 19800, share: 43, bk: 148, avg: '134 TMT', ret: 68, ns: 3, nsPct: '2,0%', d: '+8%', up: true, prevRev: '18 330 TMT',
+        svc: [['Saç reňklemek', 12500, 50], ['Aýal saç kesimi', 6720, 84], ['Saç düzmek', 420, 7], ['Çaga saç kesimi', 160, 4]],
+        ins: 'Aýna-nyň müşderileriniň 68%-i gaýdyp gelýär — biznes boýunça ortaçadan (61%) 7 bal ýokary.' },
+      { id: 'maral', name: 'Maral', full: 'Maral Sapargeldiýewa', spec: 'Dyrnak ussasy', ini: 'M', color: '#c3b6fb', rev: 13900, share: 30, bk: 152, avg: '91 TMT', ret: 64, ns: 2, nsPct: '1,3%', d: '+22%', up: true, prevRev: '11 390 TMT',
+        svc: [['Gel-lak bilen manikýur', 8250, 75], ['Manikýur', 3850, 55], ['Pedikýur', 1800, 20]],
+        ins: 'Maral-yň ýazylyşy iň köp — 152, ýöne ortaça çegi iň pes: 91 TMT.' },
+      { id: 'jeren', name: 'Jeren', full: 'Jeren Ataýewa', spec: 'Kosmetolog', ini: 'J', color: '#4429d6', rev: 6300, share: 14, bk: 58, avg: '109 TMT', ret: 41, ns: 3, nsPct: '5,2%', d: '−4%', up: false, prevRev: '6 560 TMT',
+        svc: [['Ýüz arassalamak', 5250, 35], ['Gaş we kirpik', 1050, 21]],
+        ins: 'Jeren-iň müşderileriniň 41%-i gaýdyp gelýär — topar boýunça iň pes görkeziji.' },
+      { id: 'leyli', name: 'Leýli', full: 'Leýli Garaýewa', spec: 'Massažist · programmasyz', ini: 'L', color: '#9d88f7', rev: 6200, share: 13, bk: 54, avg: '115 TMT', ret: 72, ns: 1, nsPct: '1,9%', d: '+25%', up: true, prevRev: '4 970 TMT',
+        svc: [['Doly beden massažy', 3680, 23], ['Arka massažy', 2520, 28]],
+        ins: 'Leýli-niň müşderileriniň 72%-i gaýdyp gelýär — iň ýokary görkeziji.' }
+    ];
+    const SVC = [['Saç reňklemek', 12500, 50, 125, 27], ['Gel-lak bilen manikýur', 9900, 90, 73, 21], ['Aýal saç kesimi', 7200, 90, 80, 16], ['Doly beden massažy', 4800, 30, 160, 10], ['Ýüz arassalamak', 4500, 30, 150, 10], ['Manikýur', 2800, 40, 70, 6]];
+    const INS = {
+      staff: 'Leýli-niň müşderileriniň 72%-i gaýdyp gelýär — iň ýokary görkeziji. Jeren-de bu 41%: deň ýazylyş sanynda iň uly tapawut.',
+      services: 'Saç reňklemek girdejiniň 27%-ini berýär; sagadyna iň köp Doly beden massažy gazandyrýar — 160 TMT.',
+      clients: 'Täze müşderileriň 59%-i Ýeral gözleginden geldi.'
+    };
+    const CL = isSpec
+      ? { came: 87, nw: 22, rg: 58, rt: 7, ret: '68%', lapsed: 9, weeks: [[5, 17, 2], [6, 15, 1], [5, 14, 2], [6, 12, 2]], src: [['Ýeral', 13, '59%'], ['Instagram', 5, '23%'], ['Tanyş maslahat berdi', 3, '14%'], ['Köçeden', 1, '4%']], ins: 'Täze müşderileriňiziň 59%-i Ýeral gözleginden geldi.' }
+      : { came: 238, nw: 64, rg: 151, rt: 23, ret: '61%', lapsed: 27, weeks: [[14, 42, 5], [15, 38, 6], [16, 37, 5], [19, 34, 7]], src: [['Ýeral', 38, '59%'], ['Instagram', 14, '22%'], ['Tanyş maslahat berdi', 8, '13%'], ['Köçeden', 4, '6%']], ins: INS.clients };
+
+    // ---- view routing ----
+    let v = s.view || 'overview';
+    if (isSpec && (v === 'staff' || v === 'services')) v = 'staffOne';
+    const sid = isSpec ? 'ayna' : (s.staffId || 'ayna');
+    const one = STAFF.find((x) => x.id === sid) || STAFF[0];
+    const isFirst = v === 'firstWeeks';
+    const isDrill = v === 'staff' || v === 'staffOne' || v === 'services' || v === 'clients';
+
+    // ---- period header ----
+    const per = s.period;
+    const off = s.pOff;
+    let pLabel = '';
+    let pCmp = '';
+    let canPrev = true;
+    let canNext = true;
+    if (per === 'week') {
+      const st = new Date(2026, 8, 7 + off * 7);
+      const en = new Date(2026, 8, 13 + off * 7);
+      pLabel = st.getMonth() === en.getMonth()
+        ? st.getDate() + '–' + en.getDate() + ' ' + mon[st.getMonth()] + ' ' + en.getFullYear()
+        : st.getDate() + ' ' + mon[st.getMonth()] + ' – ' + en.getDate() + ' ' + mon[en.getMonth()] + ' ' + en.getFullYear();
+      pCmp = 'öňki hepde bilen deňeşdirilende';
+      canPrev = off > -30;
+      canNext = off < 5;
+    } else if (per === 'year') {
+      pLabel = String(2026 + off);
+      pCmp = (2025 + off) + ' ýyl bilen deňeşdirilende';
+      canPrev = off > -1;
+      canNext = off < 0;
+    } else {
+      const m = 8 + off;
+      const mi = ((m % 12) + 12) % 12;
+      const yy = 2026 + Math.floor(m / 12);
+      pLabel = MON[mi] + ' ' + yy;
+      pCmp = mon[(mi + 11) % 12] + ' bilen deňeşdirilende';
+      canPrev = off > -8;
+      canNext = off < 1;
+    }
+    if (isFirst) {
+      pLabel = 'Oktýabr 2026';
+      pCmp = 'deňeşdirmek üçin entek öňki aý ýok';
+      canPrev = false;
+      canNext = false;
+    }
+    const periods = [['week', 'Hepde'], ['month', 'Aý'], ['year', 'Ýyl']].map(([id, t]) => ({
+      t: t, on: per === id, cls: per === id ? 'sgb on' : 'sgb',
+      pick: () => this.setState({ period: id, pOff: 0, hov: null })
+    }));
+
+    // ---- tiles ----
+    const T = (lbl, val, cap, d, up) => ({ lbl: lbl, val: val, cap: cap, d: d || '', up: !!d && !!up, down: !!d && !up });
+    let tiles = [];
+    if (isFirst) {
+      tiles = isSpec
+        ? [T('Ýazylyşlarym', '5', '1–14 oktýabr'), T('Gelmedik', '0', 'häzirlikçe ýok')]
+        : [T('Girdeji', '1 450 TMT', '1–14 oktýabr'), T('Ýazylyşlar', '12', '1–14 oktýabr'), T('Ortaça çek', '121 TMT', '12 ýazylyşdan')];
+    } else if (v === 'overview') {
+      tiles = isSpec
+        ? [T('Ýazylyşlarym', '148', 'awgustda 140 ýazylyş', '+6%', true), T('Gaýdyp gelýänler', '68%', 'biznes boýunça 61%'), T('Gelmedik', '3', 'ýazylyşlaryňyzyň 2,0%-i')]
+        : [T('Girdeji', '46 200 TMT', 'awgustda 41 250 TMT', '+12%', true), T('Ýazylyşlar', '412', 'awgustda 381 ýazylyş', '+8%', true), T('Ortaça çek', '112 TMT', 'awgustda 108 TMT', '+4%', true), T('Gaýdyp gelýänler', '61%', 'awgustda 56%', '+5 bal', true)];
+    } else if (v === 'staff') {
+      tiles = [T('Hünärmenleriň girdejisi', '46 200 TMT', 'awgustda 41 250 TMT', '+12%', true), T('Ýazylyşlar', '412', '4 hünärmen · ortaça çek 112 TMT'), T('Ortaça gaýdyp gelýän', '61%', 'iň ýokary: Leýli, 72%', '+5 bal', true), T('Gelmedik', '9', 'ýazylyşlaryň 2,2%-i')];
+    } else if (v === 'staffOne') {
+      tiles = isSpec
+        ? [T('Ýazylyşlarym', '148', 'awgustda 140 ýazylyş', '+6%', true), T('Gaýdyp gelýänler', '68%', 'biznes boýunça 61%'), T('Gelmedik', '3', 'ýazylyşlaryňyzyň 2,0%-i')]
+        : [T('Girdeji', tmt(one.rev), one.share + '% paý · awgustda ' + one.prevRev, one.d, one.up), T('Ýazylyşlar', String(one.bk), 'ortaça çek ' + one.avg), T('Gaýdyp gelýänler', one.ret + '%', 'biznes boýunça 61%'), T('Gelmedik', String(one.ns), 'ýazylyşlaryň ' + one.nsPct + '-i')];
+    } else if (v === 'clients') {
+      tiles = [
+        T(isSpec ? 'Müşderilerim' : 'Gelen müşderiler', String(CL.came), 'täze ' + CL.nw + ' · yzygiderli ' + CL.rg + ' · arakesmeden soň ' + CL.rt),
+        isSpec ? T('Gaýdyp gelýänler', CL.ret, 'biznes boýunça 61%') : T('Gaýdyp gelýänler', CL.ret, 'awgustda 56%', '+5 bal', true),
+        T('Gelşi / müşderi', '1,7', 'bir müşderi ortaça 1,7 gezek geldi')
+      ];
+    }
+    tiles = tiles.map((t, i) => Object.assign(t, {
+      cls: i === 0 ? 'stat first' : 'stat',
+      hasD: !!t.d,
+      dCls: t.up ? 'dp dp-up' : 'dp dp-dn',
+      dSr: t.up ? ' — ýokarlandy' : ' — peseldi'
+    }));
+    const statsCls = tiles.length === 3 ? 'stats s3' : 'stats';
+
+    // ---- overview chart ----
+    const cur = isSpec ? AY : REV;
+    const prv = isSpec ? AYP : PREV;
+    const max = isSpec ? 9 : 3000;
+    const unit = isSpec ? ((n) => n + ' ýazylyş') : tmt;
+    const tickVals = isSpec ? [3, 6, 9] : [1000, 2000, 3000];
+    const H = 240;
+    const n = cur.length;
+    const xp = (i) => (i + 0.5) * 1000 / n;
+    const yp = (val) => H - val / max * H;
+    const line = (arr) => arr.map((val, i) => (i ? 'L' : 'M') + xp(i).toFixed(1) + ' ' + yp(val).toFixed(1)).join(' ');
+    const curD = line(cur);
+    const prevD = line(prv);
+    const areaD = curD + ' L' + xp(n - 1).toFixed(1) + ' ' + H + ' L' + xp(0).toFixed(1) + ' ' + H + ' Z';
+    const ticks = tickVals.map((tv) => ({ top: yp(tv).toFixed(0), t: unit(tv) }));
+    const xlabs = [1, 5, 10, 15, 20, 25, 30].map((d) => ({ left: ((d - 0.5) / n * 100).toFixed(2), t: d + ' sent.' }));
+    const days = cur.map((val, i) => ({ hover: () => { if (this.state.hov !== i) this.setState({ hov: i }); } }));
+    const dayName = (i) => WD[(1 + i) % 7] + ', ' + (i + 1) + ' sentýabr';
+    const hi = s.hov;
+    const hasHov = v === 'overview' && hi !== null && hi !== undefined && hi >= 0 && hi < n;
+    const hv = hasHov
+      ? { left: ((hi + 0.5) / n * 100).toFixed(2), cy: yp(cur[hi]).toFixed(1), py: yp(prv[hi]).toFixed(1), shift: hi < n / 2 ? '14px' : 'calc(-100% - 14px)', date: dayName(hi), cur: unit(cur[hi]), prev: 'awgust: ' + unit(prv[hi]) }
+      : { left: '0', cy: '0', py: '0', shift: '0px', date: '', cur: '', prev: '' };
+    const tblRows = cur.map((val, i) => ({ d: dayName(i), c: unit(val), p: unit(prv[i]) }));
+
+    // ---- overview sections ----
+    const goTo = (view, id) => () => this.go(view, id);
+    let sections = isSpec
+      ? [
+        { t: 'Meniň hyzmatlarym', k: 'Aýal saç kesimi: 84 gezek', m: ' · Saç reňklemek 50 · Saç düzmek 7 · Çaga saç kesimi 4', i: 'Hyzmatlaryňyzyň 58%-i — Aýal saç kesimi.', go: goTo('staffOne', 'ayna') },
+        { t: 'Meniň müşderilerim', k: '87 müşderi, 68% gaýdyp geldi', m: ' · täze 22 · yzygiderli 58 · arakesmeden soň 7', i: CL.ins, go: goTo('clients') }
+      ]
+      : [
+        { t: 'Hünärmenler', k: 'Aýna iň köp gazandyrýar (43%)', m: ' · Maral 30% · Jeren 14% · Leýli 13%', i: INS.staff, go: goTo('staff') },
+        { t: 'Hyzmatlar', k: 'Saç reňklemek: 12 500 TMT', m: ' · Gel-lak bilen manikýur 9 900 TMT · Aýal saç kesimi 7 200 TMT', i: INS.services, go: goTo('services') },
+        { t: 'Müşderiler', k: '238 müşderi, 61% gaýdyp geldi', m: ' · täze 64 · yzygiderli 151 · arakesmeden soň 23', i: INS.clients, go: goTo('clients') }
+      ];
+    sections = sections.map((x, i) => Object.assign(x, { div: i > 0 }));
+
+    // ---- staff view ----
+    const shareSegs = STAFF.map((x, i) => ({ name: x.name, share: x.share, pct: x.share + '%', rev: tmt(x.rev), color: x.color, rad: i === STAFF.length - 1 ? '0 4px 4px 0' : '0' }));
+    const shareAria = 'Girdejiniň paýy: ' + STAFF.map((x) => x.name + ' ' + x.share + '%').join(', ');
+    const staffRows = STAFF.map((x, i) => ({
+      name: x.name, spec: x.spec, ini: x.ini, rev: tmt(x.rev), share: x.share + '%', bk: String(x.bk), avg: x.avg, ret: x.ret + '%', ns: String(x.ns),
+      cls: i === STAFF.length - 1 ? 'tr trb c-st last' : 'tr trb c-st',
+      aria: x.name + ': girdeji ' + tmt(x.rev) + ', paýy ' + x.share + '%, ' + x.bk + ' ýazylyş, gaýdyp gelýän ' + x.ret + '%. Jikme-jik gör',
+      go: goTo('staffOne', x.id)
+    }));
+
+    // ---- one staff ----
+    const svcList = one.svc.slice().sort((a, b) => (isSpec ? b[2] - a[2] : b[1] - a[1]));
+    const maxV = isSpec ? Math.max.apply(null, svcList.map((r) => r[2])) : Math.max.apply(null, svcList.map((r) => r[1]));
+    const oneRows = svcList.map((r, i) => ({
+      name: r[0],
+      val: isSpec ? r[2] + ' gezek' : tmt(r[1]),
+      sub: isSpec ? '' : r[2] + ' gezek',
+      w: ((isSpec ? r[2] : r[1]) / maxV * 100).toFixed(1),
+      cls: i === svcList.length - 1 ? 'svr last' : 'svr'
+    }));
+    const svcCount = one.svc.reduce((a, r) => a + r[2], 0);
+
+    // ---- services ----
+    const SK = { name: 0, rev: 1, cnt: 2, ph: 3, share: 4 };
+    const sk = s.sortKey;
+    const sdir = s.sortDir;
+    const sorted = SVC.slice().sort((a, b) => {
+      const ix = SK[sk];
+      const r = ix === 0 ? String(a[0]).localeCompare(String(b[0]), 'tk') : a[ix] - b[ix];
+      return sdir === 'asc' ? r : -r;
+    });
+    const svcRows = sorted.map((r) => ({ name: r[0], rev: tmt(r[1]), cnt: String(r[2]), ph: tmt(r[3]), share: r[4] + '%', w: (r[4] / 27 * 100).toFixed(1) }));
+    const svcCols = [['name', 'Hyzmat', false], ['rev', 'Girdeji', true], ['cnt', 'Sany', true], ['ph', 'Sagadyna', true], ['share', 'Paý', false]].map(([key, t, numc]) => {
+      const on = sk === key;
+      return {
+        t: t, cls: numc ? 'num' : '', bcls: on ? 'thb on' : 'thb',
+        sort: on ? (sdir === 'asc' ? 'ascending' : 'descending') : 'none',
+        up: on && sdir === 'asc', down: on && sdir === 'desc', none: !on,
+        pick: () => {
+          if (this.state.sortKey === key) this.setState({ sortDir: this.state.sortDir === 'asc' ? 'desc' : 'asc' });
+          else this.setState({ sortKey: key, sortDir: key === 'name' ? 'asc' : 'desc' });
+        }
+      };
+    });
+
+    // ---- clients ----
+    const CT = [['Täze', '#9d88f7', CL.nw], ['Yzygiderli', '#5a3ff0', CL.rg], ['Arakesmeden soň', '#c3b6fb', CL.rt]];
+    const cTypes = CT.map((c) => ({ t: c[0], color: c[1], n: String(c[2]) }));
+    const WKL = ['1–7 sent.', '8–14 sent.', '15–21 sent.', '22–30 sent.'];
+    const tots = CL.weeks.map((w) => w[0] + w[1] + w[2]);
+    const scale = Math.max.apply(null, tots) * 1.15;
+    const weeks = CL.weeks.map((w, wi) => ({
+      t: WKL[wi], tot: String(tots[wi]), pct: (tots[wi] / scale * 100).toFixed(1),
+      segs: w.map((val, k) => {
+        const key = wi + '-' + k;
+        const on = s.segHov === key;
+        return {
+          v: val, color: CT[k][1], rad: k === 2 ? '0 4px 4px 0' : '0', on: on, cls: on ? 'wsg on' : 'wsg',
+          tip: CT[k][0] + ': ' + val + ' müşderi',
+          hover: () => { if (this.state.segHov !== key) this.setState({ segHov: key }); },
+          leave: () => this.setState({ segHov: null })
+        };
+      })
+    }));
+    const wkAria = 'Hepdeler boýunça müşderiler: ' + CL.weeks.map((w, wi) => WKL[wi] + ' — täze ' + w[0] + ', yzygiderli ' + w[1] + ', arakesmeden soň ' + w[2]).join('; ');
+    const srcMax = CL.src[0][1];
+    const sources = CL.src.map((r) => ({ t: r[0], n: r[1] + ' müşderi', p: r[2], w: (r[1] / srcMax * 100).toFixed(1) }));
+
+    // ---- first weeks ----
+    const U = (t, w, done) => ({ t: t, w: w, done: !!done, locked: !done, wCls: done ? 'ulw ulw-d' : 'ulw ulw-l' });
+    const unlocks = [
+      U(isSpec ? 'Ýazylyşlar we gelmedikler' : 'Girdeji, ýazylyşlar, ortaça çek', 'eýýäm hasaplanýar', true),
+      U(isSpec ? 'Meniň hyzmatlarym' : 'Hünärmenler we hyzmatlar', '30 ýazylyşdan soň'),
+      U('Gaýdyp gelýän müşderiler', 'doly bir aýdan soň'),
+      U('Öňki aý bilen deňeşdirme', 'indiki aý')
+    ];
+
+    // ---- drill header ----
+    let backLabel = 'Hasabatlar';
+    let backTo = 'overview';
+    let viewTitle = '';
+    let viewSub = '';
+    if (v === 'staff') viewTitle = 'Hünärmenler';
+    if (v === 'services') viewTitle = 'Hyzmatlar';
+    if (v === 'clients') viewTitle = isSpec ? 'Meniň müşderilerim' : 'Müşderiler';
+    if (v === 'staffOne') {
+      if (isSpec) { viewTitle = 'Meniň hyzmatlarym'; viewSub = 'Aýna · Stilist'; }
+      else { viewTitle = one.name; viewSub = one.spec + ' · ' + one.full; backLabel = 'Hünärmenler'; backTo = 'staff'; }
+    }
+    let insight = '';
+    if (v === 'staff') insight = INS.staff;
+    if (v === 'services') insight = INS.services;
+    if (v === 'clients') insight = CL.ins;
+    if (v === 'staffOne') insight = isSpec ? 'Hyzmatlaryňyzyň 58%-i — Aýal saç kesimi: 84 gezek.' : one.ins;
+
+    const sideOpen = !!s.side;
+    return {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      // shell
+      pendN: isSpec ? '2' : '5',
+      navReqLabel: isSpec ? 'Ýazylyşlar, 2 haýyş' : 'Ýazylyşlar, 5 haýyş',
+      meIni: isSpec ? 'A' : 'M',
+      meName: isSpec ? 'Aýna Myradowa' : 'Maýsa Annaýewa',
+      meRole: isSpec ? 'Hünärmen' : 'Eýesi',
+      mePhoneRole: isSpec ? '+993 65 31 22 10 · Hünärmen' : '+993 65 10 20 30 · Eýesi',
+      bizOpen: s.side === 'biz',
+      userOpen: s.side === 'user',
+      sideOpen: sideOpen,
+      toggleBiz: () => this.setState({ side: this.state.side === 'biz' ? null : 'biz' }),
+      toggleUser: () => this.setState({ side: this.state.side === 'user' ? null : 'user' }),
+      closeSide: () => this.setState({ side: null }),
+      // role + view flags
+      isOwner: isOwner,
+      isSpec: isSpec,
+      isOverview: v === 'overview',
+      isStaff: v === 'staff',
+      isStaffOne: v === 'staffOne',
+      isServices: v === 'services',
+      isClients: v === 'clients',
+      isFirst: isFirst,
+      isDrill: isDrill,
+      // drill header
+      backLabel: backLabel,
+      goBack: goTo(backTo),
+      viewTitle: viewTitle,
+      viewSub: viewSub,
+      hasViewSub: !!viewSub,
+      showAv: v === 'staffOne' && isOwner,
+      oneIni: one.ini,
+      showCalLink: v === 'staffOne',
+      calLinkText: isSpec ? 'Senenamamy aç' : 'Senenamasyny aç',
+      // period bar
+      periods: periods,
+      periodLabel: pLabel,
+      compareCap: pCmp,
+      prevDis: !canPrev,
+      nextDis: !canNext,
+      prevP: () => { if (canPrev) this.setState({ pOff: this.state.pOff - 1, hov: null }); },
+      nextP: () => { if (canNext) this.setState({ pOff: this.state.pOff + 1, hov: null }); },
+      doExport: () => this.flash('CSV faýl taýýarlandy · Hasabatlar, ' + pLabel),
+      // insight + tiles
+      hasInsight: !!insight,
+      insight: insight,
+      hasTiles: tiles.length > 0,
+      tiles: tiles,
+      statsCls: statsCls,
+      // chart
+      chartTitle: isSpec ? 'Ýazylyşlarym günler boýunça' : 'Girdeji günler boýunça',
+      ticks: ticks,
+      xlabs: xlabs,
+      areaD: areaD,
+      curD: curD,
+      prevD: prevD,
+      days: days,
+      unhover: () => { if (this.state.hov !== null) this.setState({ hov: null }); },
+      hasHov: hasHov,
+      hv: hv,
+      tblLabel: isSpec ? 'Günler boýunça ýazylyşlarym: sentýabr we awgust' : 'Günler boýunça girdeji: sentýabr we awgust',
+      tblRows: tblRows,
+      sections: sections,
+      noShowLine: isSpec ? '3 ýazylyş · 2,0%' : '9 ýazylyş · 2,2%',
+      lapsedLine: isSpec ? '9 müşderi' : '27 müşderi',
+      // staff
+      shareSegs: shareSegs,
+      shareAria: shareAria,
+      staffRows: staffRows,
+      // one staff
+      oneListTitle: isSpec ? 'Hyzmatlar boýunça ýazylyşlar' : 'Hyzmatlar boýunça girdeji',
+      oneListCap: isSpec ? svcCount + ' hyzmat · sentýabr' : 'Jemi ' + tmt(one.rev) + ' · ' + svcCount + ' hyzmat',
+      oneRows: oneRows,
+      // services
+      svcCols: svcCols,
+      svcRows: svcRows,
+      // clients
+      cTypes: cTypes,
+      weeks: weeks,
+      wkAria: wkAria,
+      srcTitle: isSpec ? 'Täze müşderilerim nireden geldi' : 'Täze müşderiler nireden geldi',
+      srcCap: 'Jemi ' + CL.nw + ' täze müşderi · çeşmäni müşderi kartyndaky “Nireden geldi” görkezýär',
+      sources: sources,
+      lapsedTitle: 'Köpden bäri gelmedik · ' + CL.lapsed + ' müşderi',
+      lapsedCap: isSpec ? 'Soňky 60 günde gelmedik müşderileriňiz · sanawy eýesi we administrator görýär' : 'Soňky 60 günde gelmedik müşderiler',
+      // first weeks
+      unlocks: unlocks,
+      // toast
+      hasToast: !!s.toast,
+      toastText: s.toast || ''
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # 0012. Design system in `@yeral/ui`, documented and tested in Storybook
 
-- Status: Accepted 2026-10-13
+- Status: Accepted 2026-10-13; revised 2026-10-14 (web DS v0.3.1) and 2026-10-16 (DS v0.4 + component map)
 - Decided by: owner (design system with components, Storybook) + Claude
 
 ## Context
@@ -35,6 +35,14 @@ The source is now the web design system v0.3.1 in `docs/design/` (`tokens.css`, 
 mobile DS v2. Tokens are mapped one to one into Tailwind `@theme` (same names: `n-*`, `a-*`, `st-*`, radii, sizes, type
 scale); exact values from the screens, no rounding to a framework scale. Font: Onest, self-hosted
 (`@fontsource-variable/onest`, latin, latin-ext, cyrillic, cyrillic-ext) rather than loaded from Google Fonts.
+
+## Revision 2026-10-16
+
+Design export v0.4 adds tokens v0.4 (aliases for values the screens already used, no new colours), two boards
+(`DS-Patterns`: domain-free product components; `DS-Business`: domain components) and `docs/design/COMPONENTS.md`, the map
+from every drawn component to its package or FSD slice, Storybook title and states. Rule: before a screen is built, each
+piece of it is looked up there; missing components and variants are built first, with stories for every state on the
+board, and the board wins where screens drifted. Domain components keep their stories in their FSD slice.
 
 ## Consequences
 

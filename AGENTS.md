@@ -13,11 +13,13 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 2. `docs/memory-bank/systemPatterns.md` before writing code: monorepo map, FSD, data flow, state, rendering, auth, i18n.
 3. As the task needs: `productContext.md` (product rules, glossary), `techContext.md` (libraries, why, where shared
    helpers live), `operations.md` (environments, Docker, CI/CD, versioning, parallel work), `docs/decisions/` (ADRs).
-4. **Design source: `docs/design/`** — web design v0.3 (14.10.2026): `README.md` (product spec), `CLAUDE.md` (design
-   rules, how to read `.dc.html`), `tokens.css`, `screens/` (hi-fi screens + index), `demo-data.json`. The screen wins on
-   visuals, the design README on behaviour. Where `docs/design/CLAUDE.md` suggests a stack (Next.js, CSS Modules,
-   next-intl), this repo's ADRs win: TanStack, Tailwind mapped from `tokens.css`, use-intl. Business workspace (round 4,
-   appointment type): `docs/design/business/README.md` + `screens/business/`. The CMS isn't designed yet.
+4. **Design source: `docs/design/`** — design export v0.4 (14.10.2026; `CHANGELOG.md` says what each export changed):
+   `README.md` (client spec), `business/README.md` (business workspace spec, rounds 4–5), `CLAUDE.md` (design rules, how
+   to read `.dc.html`), `tokens.css`, `screens/` (client, business and design-system boards + index), `COMPONENTS.md`
+   (every component → package or FSD slice, Storybook title; look a screen's pieces up here before building it),
+   `demo-data.json`. The screen wins on visuals, the design README on behaviour, the DS boards where screens drifted.
+   Where `docs/design/CLAUDE.md` suggests a stack (Next.js, CSS Modules, next-intl), this repo's ADRs win: TanStack,
+   Tailwind mapped from `tokens.css`, use-intl. The client site and the business workspace are designed; the CMS isn't.
 
 ## Rules
 

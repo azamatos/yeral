@@ -17,7 +17,7 @@ export function Switch({ className, ...props }: ComponentProps<typeof SwitchPrim
       )}
     >
       <span className="relative h-6 w-10 rounded-pill bg-switch-off shadow-switch-off transition-colors group-data-[state=checked]:bg-switch-on group-data-[state=checked]:shadow-none">
-        <SwitchPrimitive.Thumb className="absolute top-0.5 left-0.5 size-5 rounded-pill bg-n-0 shadow-knob transition-[left] duration-150 data-[state=checked]:left-4.5" />
+        <SwitchPrimitive.Thumb className="absolute top-0.5 left-0.5 size-5 rounded-pill bg-n-0 shadow-control transition-[left] duration-150 data-[state=checked]:left-4.5" />
       </span>
     </SwitchPrimitive.Root>
   )

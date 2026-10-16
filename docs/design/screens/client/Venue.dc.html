@@ -435,7 +435,7 @@ class Component extends DCLogic {
   renderVals() {
     const f = this.props.font ?? 'Onest';
     const s = this.state;
-    
+    const B = '';
     const G = [
       { id: 'sac', name: 'Saç', items: [
         { id: 's1', name: 'Aýal saç kesimi', duration: '60 min', price: '80 TMT', desc: 'Ýuwmak, kesmek we düzmek' },
@@ -501,7 +501,7 @@ class Component extends DCLogic {
       { name: 'Leýli', role: 'Massažist', rating: '4,9', next: 'Şu gün 18:00' }
     ].map((p) => ({ ...p, ini: p.name.charAt(0), aria: 'Ýazylmak: ' + p.name }));
 
-    const rb = { 5: 84, 4: 9, 3: 2, 2: 1, 1: 0 };
+    const rb = { 5: 88, 4: 6, 3: 1, 2: 1, 1: 0 };
     const rTotal = 96;
     const bars = [5, 4, 3, 2, 1].map((n) => ({ n: String(n), c: String(rb[n]), pct: Math.round((rb[n] / rTotal) * 1000) / 10, aria: n + ' ýyldyz: ' + rb[n] + ' teswir' }));
 

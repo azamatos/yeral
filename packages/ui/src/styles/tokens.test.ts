@@ -53,6 +53,10 @@ const MAP: Record<string, string | null> = {
   '--lh-dense': '--text-dense--line-height',
   '--fs-button': '--text-button',
   '--lh-button': '--text-button--line-height',
+  '--fs-small': '--text-small',
+  '--lh-small': '--text-small--line-height',
+  '--fs-micro': '--text-micro',
+  '--lh-micro': '--text-micro--line-height',
   '--fs-label': '--text-label',
   '--lh-label': '--text-label--line-height',
   '--ls-label': '--text-label--letter-spacing',
@@ -65,15 +69,22 @@ const MAP: Record<string, string | null> = {
   '--focus-ring': '--shadow-focus',
   '--input-focus': '--shadow-input-focus',
   '--input-error': '--shadow-input-error',
+  '--input-warning': '--shadow-input-warning',
+  '--focus-ring-inset': '--shadow-focus-inset',
+  '--switch-off-ring': '--shadow-switch-off',
+  '--shadow-control': '--shadow-control',
   '--r-input': '--radius-input',
   '--r-btn-s': '--radius-s',
   '--r-btn-m': '--radius-m',
   '--r-btn-l': '--radius-l',
   '--r-card': '--radius-card',
   '--r-pill': '--radius-pill',
+  '--r-xs': '--radius-xs',
+  '--r-sm': '--radius-sm',
   '--container': '--container-marketplace',
   '--modal-s': '--container-modal-s',
   '--modal-m': '--container-modal-m',
+  '--modal-ml': '--container-modal-ml',
   '--modal-l': '--container-modal-l',
   '--drawer-w': '--container-drawer',
   '--shadow-raised': '--shadow-raised',
@@ -84,7 +95,7 @@ const MAP: Record<string, string | null> = {
 const SIZE_VARS = /^--(s-\d+|btn-[sml]|input-h|row-[\w-]+|nav-h[\w-]*|sidebar-[\w]+)$/
 const target = (name: string) =>
   MAP[name] ??
-  (/^--(n|a|st|danger|ink-btn|switch)(-|$)/.test(name) || name === '--a-hover' || name === '--a-line'
+  (/^--(n|a|st|danger|ink-btn|switch|chart)(-|$)/.test(name) || name === '--a-hover' || name === '--a-line'
     ? `--color-${name.slice(2)}`
     : undefined)
 

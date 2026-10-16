@@ -37,7 +37,7 @@ export function Stepper({
                   onClick={() => onStepClick?.(i)}
                   className={cn(
                     'group inline-flex items-center gap-2 border-0 border-b-2 border-transparent bg-transparent px-0.5 text-small font-medium whitespace-nowrap text-n-500',
-                    'focus-visible:rounded-input focus-visible:shadow-[inset_0_0_0_2px_var(--color-a-400)] focus-visible:outline-none disabled:cursor-default',
+                    'focus-visible:rounded-input focus-visible:shadow-focus-inset focus-visible:outline-none disabled:cursor-default',
                     done && 'cursor-pointer text-n-900',
                     cur && 'border-a-500 font-semibold text-n-900',
                   )}

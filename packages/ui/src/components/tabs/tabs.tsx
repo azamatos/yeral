@@ -5,7 +5,7 @@ import { cn } from '../../lib/cn'
 /** Underline tab look (DS `.tab`); also for link tabs (business page section nav). */
 export const tabClass = cn(
   'relative -mb-px inline-flex h-11 cursor-pointer items-center border-0 border-b-2 border-transparent bg-transparent px-0.5 text-body font-medium whitespace-nowrap text-n-600 no-underline',
-  'hover:text-n-900 focus-visible:rounded-[6px] focus-visible:shadow-focus focus-visible:outline-none',
+  'hover:text-n-900 focus-visible:rounded-sm focus-visible:shadow-focus focus-visible:outline-none',
   'data-[state=active]:border-a-500 data-[state=active]:font-semibold data-[state=active]:text-n-900',
   'aria-[current=page]:border-a-500 aria-[current=page]:font-semibold aria-[current=page]:text-n-900',
   'group',

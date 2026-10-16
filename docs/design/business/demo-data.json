@@ -880,7 +880,8 @@
         "Dyrnak studiýasy",
         "Gaş we kirpik",
         "Spa we massaž"
-      ]
+      ],
+      "bookingType": "appointment"
     },
     {
       "group": "Saglyk",
@@ -889,7 +890,8 @@
         "Lukmançylyk merkezi",
         "Fizioterapiýa",
         "Psiholog"
-      ]
+      ],
+      "bookingType": "appointment"
     },
     {
       "group": "Sport",
@@ -898,7 +900,11 @@
         "Ýoga we stretçing",
         "Şahsy tälimçi"
       ],
-      "note": "Topar sapaklary ýakynda — häzir wagt bellemek görnüşinde"
+      "bookingTypeByItem": {
+        "Fitnes studiýasy": "class",
+        "Ýoga we stretçing": "class",
+        "Şahsy tälimçi": "appointment"
+      }
     },
     {
       "group": "Okuw",
@@ -906,7 +912,8 @@
         "Repetitor",
         "Dil kursy",
         "Saz sapaklary"
-      ]
+      ],
+      "bookingType": "appointment"
     },
     {
       "group": "Awtoulag",
@@ -914,7 +921,8 @@
         "Awtoýuwalga",
         "Tigir hyzmaty",
         "Awtoservis"
-      ]
+      ],
+      "bookingType": "appointment"
     },
     {
       "group": "Iýmit",
@@ -922,7 +930,7 @@
         "Restoran",
         "Kafe we çaýhana"
       ],
-      "note": "Stol dolandyryşy ýakynda"
+      "bookingType": "table"
     },
     {
       "group": "Başga",
@@ -930,7 +938,908 @@
         "Öý haýwanlary",
         "Öý hyzmatlary",
         "Başga — hyzmatlary özüm ýazaryn"
-      ]
+      ],
+      "bookingType": "appointment"
     }
-  ]
+  ],
+  "analytics": {
+    "period": "Sentýabr 2026",
+    "compareTo": "awgust",
+    "tiles": [
+      [
+        "Girdeji",
+        "46 200 TMT",
+        "+12%",
+        "41 250 TMT"
+      ],
+      [
+        "Ýazylyşlar",
+        "412",
+        "+8%",
+        "381"
+      ],
+      [
+        "Ortaça çek",
+        "112 TMT",
+        "+4%",
+        "108 TMT"
+      ],
+      [
+        "Gaýdyp gelýänler",
+        "61%",
+        "+5 bal",
+        "56%"
+      ]
+    ],
+    "noShows": "9 · 2,2%",
+    "revenueByDay": [
+      1220,
+      1440,
+      1570,
+      950,
+      1670,
+      2250,
+      1340,
+      1160,
+      1480,
+      1590,
+      1020,
+      1760,
+      2350,
+      1270,
+      1230,
+      1420,
+      1550,
+      1090,
+      1840,
+      2490,
+      1360,
+      1290,
+      1460,
+      1650,
+      1050,
+      1900,
+      2530,
+      1410,
+      1320,
+      1540
+    ],
+    "revenueByDayPrev": [
+      1050,
+      1290,
+      1430,
+      860,
+      1530,
+      2050,
+      1140,
+      1000,
+      1340,
+      1430,
+      930,
+      1620,
+      2100,
+      1140,
+      1100,
+      1240,
+      1380,
+      950,
+      1670,
+      2190,
+      1190,
+      1140,
+      1320,
+      1480,
+      910,
+      1720,
+      2300,
+      1240,
+      1190,
+      1320
+    ],
+    "staff": [
+      {
+        "name": "Aýna",
+        "revenue": "19 800 TMT",
+        "share": 43,
+        "bookings": 148,
+        "avg": "134 TMT",
+        "return": "68%",
+        "noShows": 3
+      },
+      {
+        "name": "Maral",
+        "revenue": "13 900 TMT",
+        "share": 30,
+        "bookings": 152,
+        "avg": "91 TMT",
+        "return": "64%",
+        "noShows": 2
+      },
+      {
+        "name": "Jeren",
+        "revenue": "6 300 TMT",
+        "share": 14,
+        "bookings": 58,
+        "avg": "109 TMT",
+        "return": "41%",
+        "noShows": 3
+      },
+      {
+        "name": "Leýli",
+        "revenue": "6 200 TMT",
+        "share": 13,
+        "bookings": 54,
+        "avg": "115 TMT",
+        "return": "72%",
+        "noShows": 1
+      }
+    ],
+    "services": [
+      {
+        "name": "Saç reňklemek",
+        "revenue": "12 500 TMT",
+        "count": 50,
+        "perHour": "125 TMT",
+        "share": 27
+      },
+      {
+        "name": "Gel-lak bilen manikýur",
+        "revenue": "9 900 TMT",
+        "count": 90,
+        "perHour": "73 TMT",
+        "share": 21
+      },
+      {
+        "name": "Aýal saç kesimi",
+        "revenue": "7 200 TMT",
+        "count": 90,
+        "perHour": "80 TMT",
+        "share": 16
+      },
+      {
+        "name": "Doly beden massažy",
+        "revenue": "4 800 TMT",
+        "count": 30,
+        "perHour": "160 TMT",
+        "share": 10
+      },
+      {
+        "name": "Ýüz arassalamak",
+        "revenue": "4 500 TMT",
+        "count": 30,
+        "perHour": "150 TMT",
+        "share": 10
+      },
+      {
+        "name": "Manikýur",
+        "revenue": "2 800 TMT",
+        "count": 40,
+        "perHour": "70 TMT",
+        "share": 6
+      }
+    ],
+    "clients": {
+      "came": 238,
+      "new": 64,
+      "regular": 151,
+      "returning": 23,
+      "retention": "61%",
+      "visitsPerClient": "1,7",
+      "lapsed": 27,
+      "sources": [
+        [
+          "Ýeral",
+          38
+        ],
+        [
+          "Instagram",
+          14
+        ],
+        [
+          "Tanyş maslahat berdi",
+          8
+        ],
+        [
+          "Köçeden",
+          4
+        ]
+      ]
+    },
+    "insights": {
+      "staff": "Leýli-niň müşderileriniň 72%-i gaýdyp gelýär — iň ýokary görkeziji. Jeren-de bu 41%: deň ýazylyş sanynda iň uly tapawut.",
+      "services": "Saç reňklemek girdejiniň 27%-ini berýär we sagadyna iň köp gazandyrýar: 125 TMT.",
+      "clients": "Täze müşderileriň 59%-i Ýeral gözleginden geldi."
+    }
+  },
+  "reviews": {
+    "avg": "4,9",
+    "count": 96,
+    "unanswered": 4,
+    "breakdown": {
+      "5": 88,
+      "4": 6,
+      "3": 1,
+      "2": 1,
+      "1": 0
+    },
+    "items": [
+      {
+        "name": "Gülälek N.",
+        "rating": 5,
+        "when": "2 gün öň",
+        "service": "Aýal saç kesimi · Aýna",
+        "text": "Aýna saçymy edil isleýşim ýaly kesdi. Wagtynda kabul etdiler, salon arassa we rahat.",
+        "reply": "Sag boluň, Gülälek! Ýene garaşýarys."
+      },
+      {
+        "name": "Ogulşat M.",
+        "rating": 5,
+        "when": "1 hepde öň",
+        "service": "Gel-lak bilen manikýur · Maral",
+        "text": "Maral örän üns berip işleýär. Gel-lak üç hepde saklandy."
+      },
+      {
+        "name": "Bahar A.",
+        "rating": 4,
+        "when": "3 hepde öň",
+        "service": "Ýüz arassalamak · Jeren",
+        "text": "Hyzmat gowy, ýöne başlamazdan öň biraz garaşmaly boldum."
+      },
+      {
+        "name": "Mähri G.",
+        "rating": 5,
+        "when": "Düýn",
+        "service": "Manikýur · Maral",
+        "text": "Elmydama wagtynda, arassa we mähirli."
+      },
+      {
+        "name": "Döwran S.",
+        "rating": 2,
+        "when": "Şu gün",
+        "service": "Saç düzmek · Aýna",
+        "text": "Ýarym sagat garaşdym, hiç kim düşündirmedi. Netije gowy, ýöne wagtymy ýitirdim."
+      },
+      {
+        "name": "Sona P.",
+        "rating": 5,
+        "when": "4 gün öň",
+        "service": "Gaş we kirpik · Jeren",
+        "text": "Iň gowy kirpik ussasy!"
+      },
+      {
+        "name": "Anonim",
+        "rating": 1,
+        "when": "Düýn",
+        "service": "—",
+        "text": "Iň erbet salon, «Altyn Gül»-e gidiň!",
+        "reportCandidate": "Başga biznes barada / Mahabat",
+        "status": "Barlanýar"
+      }
+    ],
+    "reportReasons": [
+      "Ýalan — bu müşderi gelmedi",
+      "Kemsidiji sözler",
+      "Başga biznes barada",
+      "Mahabat ýa-da spam",
+      "Başga sebäp"
+    ],
+    "countingRule": "Reviews under moderation ('Barlanýar') stay visible but are not counted in avg/count/breakdown until Ýeral clears them; the Anonim 1★ review is under moderation."
+  },
+  "notifications": [
+    [
+      "Täze haýyş",
+      "Täze haýyş gelende derrew",
+      [
+        "browser",
+        "app"
+      ],
+      "Siz, administrator we haýyşyň hünärmeni"
+    ],
+    [
+      "Haýyşyň wagty gutarýar",
+      "Jogap bermäge 5 minut galanda",
+      [
+        "browser",
+        "app"
+      ],
+      "Siz we administrator"
+    ],
+    [
+      "Müşderi ýatyrdy",
+      "Müşderi ýazylyşy ýatyranda",
+      [
+        "app"
+      ],
+      "Siz we şol hünärmen"
+    ],
+    [
+      "Müşderi wagtyny üýtgetdi",
+      "Täze wagt haýyşy gelende",
+      [
+        "browser",
+        "app"
+      ],
+      "Siz, administrator we hünärmen"
+    ],
+    [
+      "Kärdeşiňiz ýazylyş goşdy",
+      "Telefon ýa-da gelip ýazylyş goşulanda",
+      [],
+      "Siz"
+    ],
+    [
+      "Täze teswir",
+      "Müşderi teswir ýazanda",
+      [
+        "app"
+      ],
+      "Siz"
+    ],
+    [
+      "Ertirki ýazylyşlar",
+      "Her agşam 20:00-da jemleme",
+      [
+        "app"
+      ],
+      "Her hünärmen öz ýazylyşlaryny"
+    ],
+    [
+      "Gündelik jemleme",
+      "Her gün 08:00-da",
+      [
+        "browser"
+      ],
+      "Siz"
+    ],
+    [
+      "Topar",
+      "Işgär çakylygy kabul edende",
+      [
+        "app"
+      ],
+      "Siz"
+    ],
+    [
+      "Ýeral",
+      "Töleg, barlag we täzelikler",
+      [
+        "browser",
+        "sms"
+      ],
+      "Diňe eýesi"
+    ]
+  ],
+  "help": {
+    "categories": [
+      "Başlamak",
+      "Senenama we ýazylyşlar",
+      "Müşderiler",
+      "Topar we roller",
+      "Sazlamalar",
+      "Töleg we tarif"
+    ],
+    "popular": [
+      "Dynç gününi ýa-da rugsady nädip bellemeli",
+      "Haýyşy nädip tassyklamaly ýa-da ret etmeli",
+      "Işgäri nädip çagyrmaly",
+      "Onlaýn ýazylyşy wagtlaýyn nädip ýapmaly",
+      "QR kody nädip ýüklemeli",
+      "Müşderi gelmedi: näme etmeli"
+    ],
+    "article": {
+      "title": "Dynç gününi ýa-da rugsady nädip bellemeli",
+      "updated": "12 oktýabr 2026",
+      "steps": [
+        "Sazlamalar → Iş wagty bölümine geçiň.",
+        "«Aýratyn gün goş» düwmesine basyň.",
+        "Adyny ýazyň — ýazylyş ýatyrylsa, müşderi şu ady görer.",
+        "Senäni ýa-da aralygy saýlaň; baýramçylyk bolsa «Her ýyl gaýtala» belläň.",
+        "Şol günlere ýazylyş bar bolsa, olary galdyrmagy ýa-da müşderilere başga wagt hödürlemegi saýlaň."
+      ],
+      "tip": "Diňe bir hünärmen rugsada çyksa, Topar → işgär → Iş wagty bölüminde onuň şahsy aýratyn gününi goşuň."
+    },
+    "support": {
+      "chat": "Goldaw çaty · adatça 10 minutda jogap",
+      "hours": "Duşenbe–Şenbe 09:00–21:00",
+      "phone": "[SUPPORT PHONE]",
+      "telegram": "@yeral_biznes [PLACEHOLDER]"
+    }
+  },
+  "billing": {
+    "plan": "Topar",
+    "price": "[PRICE] TMT / aý",
+    "nextInvoice": "1 noýabr 2026",
+    "commissionRate": "[X]%",
+    "commissionRows": [
+      [
+        "Gözel A.",
+        "13 oktýabr",
+        "Arka massažy",
+        "90 TMT"
+      ],
+      [
+        "Ejegyz T.",
+        "14 oktýabr",
+        "Aýal saç kesimi",
+        "80 TMT"
+      ],
+      [
+        "Arzygül H.",
+        "16 oktýabr",
+        "Ýüz arassalamak",
+        "150 TMT"
+      ]
+    ],
+    "invoices": [
+      [
+        "YB-2026-0010",
+        "Oktýabr 2026",
+        "[AMOUNT] TMT",
+        "Garaşylýar"
+      ],
+      [
+        "YB-2026-0009",
+        "Sentýabr 2026",
+        "[AMOUNT] TMT",
+        "Tölendi"
+      ],
+      [
+        "YB-2026-0008",
+        "Awgust 2026",
+        "[AMOUNT] TMT",
+        "Tölendi"
+      ],
+      [
+        "YB-2026-0007",
+        "Iýul 2026",
+        "[AMOUNT] TMT",
+        "Möhleti geçdi"
+      ]
+    ],
+    "company": {
+      "name": "«Glow Studio» HK",
+      "taxId": "[TAX ID]",
+      "bank": "[BANK]",
+      "account": "[ACCOUNT]"
+    },
+    "commissionRowsNote": "Rows dated after the demo clock (14 okt 11:20) are shown as 'meýilleşdirilen' (planned) until the visit is completed."
+  },
+  "tablesWorkspace": {
+    "business": "Bag kafe",
+    "owner": "Myrat Çaryýew",
+    "ownerInitial": "M",
+    "date": "Şenbe, 17 oktýabr",
+    "now": "18:40",
+    "areas": [
+      {
+        "name": "Zal",
+        "tables": [
+          [
+            "1",
+            2
+          ],
+          [
+            "2",
+            2
+          ],
+          [
+            "3",
+            4
+          ],
+          [
+            "4",
+            4
+          ],
+          [
+            "5",
+            4
+          ],
+          [
+            "6",
+            6
+          ],
+          [
+            "7",
+            2
+          ],
+          [
+            "8",
+            8
+          ]
+        ]
+      },
+      {
+        "name": "Terrasa",
+        "tables": [
+          [
+            "T1",
+            2
+          ],
+          [
+            "T2",
+            2
+          ],
+          [
+            "T3",
+            4
+          ],
+          [
+            "T4",
+            4
+          ],
+          [
+            "T5",
+            6
+          ],
+          [
+            "T6",
+            4
+          ]
+        ]
+      },
+      {
+        "name": "VIP otag",
+        "tables": [
+          [
+            "V1",
+            10
+          ]
+        ]
+      }
+    ],
+    "reservations": [
+      [
+        "T4",
+        "19:00",
+        "21:00",
+        4,
+        "Aýjemal Gurbanowa",
+        "confirmed",
+        "online",
+        "Doglan gün"
+      ],
+      [
+        "T1",
+        "18:00",
+        "19:30",
+        2,
+        "Döwran A.",
+        "confirmed",
+        "online",
+        ""
+      ],
+      [
+        "3",
+        "18:30",
+        "20:30",
+        4,
+        "Gelip oturdy",
+        "confirmed",
+        "walkin",
+        ""
+      ],
+      [
+        "T3",
+        "19:30",
+        "21:30",
+        3,
+        "Läle O.",
+        "pending",
+        "online",
+        ""
+      ],
+      [
+        "V1",
+        "20:00",
+        "22:30",
+        9,
+        "Myrat B. · banket",
+        "confirmed",
+        "phone",
+        "Torta getirerler"
+      ],
+      [
+        "6",
+        "19:00",
+        "21:00",
+        5,
+        "Serdar K.",
+        "confirmed",
+        "online",
+        "Çaga oturgyjy"
+      ],
+      [
+        "2",
+        "17:30",
+        "19:00",
+        2,
+        "Ogulgerek",
+        "completed",
+        "online",
+        ""
+      ],
+      [
+        "8",
+        "20:30",
+        "22:30",
+        7,
+        "Kakajan T.",
+        "pending",
+        "online",
+        ""
+      ],
+      [
+        "T5",
+        "21:00",
+        "23:00",
+        6,
+        "Batyr H.",
+        "confirmed",
+        "phone",
+        ""
+      ]
+    ],
+    "turnTimes": [
+      [
+        "1–2 adam",
+        "1 sag 30 min"
+      ],
+      [
+        "3–4 adam",
+        "2 sag"
+      ],
+      [
+        "5+ adam",
+        "2 sag 30 min"
+      ]
+    ]
+  },
+  "classesWorkspace": {
+    "business": "Aýdyň ýoga",
+    "owner": "Aýgözel Hojamuradowa",
+    "ownerInitial": "A",
+    "week": "12–18 oktýabr",
+    "trainers": [
+      "Aýgözel",
+      "Kakajan"
+    ],
+    "rooms": [
+      "Uly zal",
+      "Kiçi zal"
+    ],
+    "classes": [
+      [
+        "Hatha ýoga",
+        "60 min",
+        14,
+        "50 TMT",
+        "Başlangyç"
+      ],
+      [
+        "Ýin ýoga",
+        "75 min",
+        12,
+        "60 TMT",
+        "Ähli derejeler"
+      ],
+      [
+        "Irden akym",
+        "45 min",
+        12,
+        "45 TMT",
+        "Orta"
+      ]
+    ],
+    "sessions": [
+      [
+        "Du 12",
+        "08:00",
+        "Irden akym",
+        "Aýgözel",
+        9,
+        12
+      ],
+      [
+        "Du 12",
+        "18:30",
+        "Hatha ýoga",
+        "Aýgözel",
+        12,
+        14
+      ],
+      [
+        "Si 13",
+        "18:30",
+        "Ýin ýoga",
+        "Kakajan",
+        8,
+        12
+      ],
+      [
+        "Ça 14",
+        "18:30",
+        "Hatha ýoga",
+        "Aýgözel",
+        11,
+        14
+      ],
+      [
+        "Ça 14",
+        "20:00",
+        "Ýin ýoga",
+        "Kakajan",
+        12,
+        12
+      ],
+      [
+        "Pe 15",
+        "08:00",
+        "Irden akym",
+        "Aýgözel",
+        5,
+        12
+      ],
+      [
+        "Pe 15",
+        "19:00",
+        "Hatha ýoga",
+        "Aýgözel",
+        5,
+        14
+      ],
+      [
+        "An 16",
+        "08:00",
+        "Irden akym",
+        "Aýgözel",
+        7,
+        12
+      ],
+      [
+        "An 16",
+        "18:30",
+        "Ýin ýoga",
+        "Kakajan",
+        10,
+        12
+      ],
+      [
+        "Şe 17",
+        "10:00",
+        "Hatha ýoga",
+        "Aýgözel",
+        14,
+        14
+      ],
+      [
+        "Şe 17",
+        "12:00",
+        "Ýin ýoga",
+        "Kakajan",
+        6,
+        12
+      ],
+      [
+        "Ýe 18",
+        "10:00",
+        "Ýin ýoga",
+        "Kakajan",
+        8,
+        12
+      ],
+      [
+        "Ýe 18",
+        "17:00",
+        "Hatha ýoga",
+        "Aýgözel",
+        3,
+        14
+      ]
+    ],
+    "attendees": [
+      [
+        "Aýjemal Gurbanowa",
+        1,
+        "confirmed",
+        "online"
+      ],
+      [
+        "Bahar A.",
+        1,
+        "confirmed",
+        "online"
+      ],
+      [
+        "Mähri G.",
+        2,
+        "confirmed",
+        "online"
+      ],
+      [
+        "Selbi H.",
+        1,
+        "pending",
+        "online"
+      ],
+      [
+        "Jeren A.",
+        1,
+        "confirmed",
+        "phone"
+      ],
+      [
+        "Gülälek N.",
+        1,
+        "confirmed",
+        "online"
+      ],
+      [
+        "Ogulşat M.",
+        1,
+        "confirmed",
+        "online"
+      ],
+      [
+        "Nurjahan A.",
+        1,
+        "confirmed",
+        "online"
+      ],
+      [
+        "Merjen K.",
+        1,
+        "cancelled",
+        "online"
+      ],
+      [
+        "Sona P.",
+        1,
+        "confirmed",
+        "walkin"
+      ]
+    ],
+    "recurring": "Her hepde Duşenbe, Çarşenbe · 18:30 · Aýgözel · Uly zal"
+  },
+  "plans": [
+    {
+      "name": "Ýeke",
+      "price": "Mugt",
+      "for": "1 hünärmen",
+      "features": [
+        "Onlaýn ýazylyş",
+        "Senenama we müşderiler",
+        "SMS ýatlatmalar",
+        "Salgy we QR"
+      ],
+      "cta": "Mugt başla"
+    },
+    {
+      "name": "Topar",
+      "price": "[PRICE] TMT / aý",
+      "for": "Bir biznes üçin · çäksiz işgär",
+      "features": [
+        "Çäksiz işgär we roller",
+        "Hasabatlar",
+        "Şahamçalar (her şahamça aýratyn)",
+        "Goldaw çaty"
+      ],
+      "tag": "Toparlar üçin",
+      "cta": "Synap gör",
+      "trial": "[TRIAL] — not defined yet"
+    }
+  ],
+  "commission": {
+    "_about": "Not a plan: a layer on every plan (Ýeke and Topar).",
+    "rate": "[X]%",
+    "title": "Komissiýa — diňe Ýeral-dan gelen täze müşderiden",
+    "appliesTo": "first completed visit of a client who found the business through Ýeral search",
+    "free": [
+      "Öz salgyňyzdan ýa-da QR-dan gelenler",
+      "Telefon arkaly ýazylyşlar",
+      "Gaýdyp gelýän müşderiler"
+    ],
+    "never": [
+      "Gelmedik ýa-da ýatyrylan ýazylyşlar"
+    ]
+  }
 }

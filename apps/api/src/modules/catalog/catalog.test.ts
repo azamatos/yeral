@@ -80,7 +80,7 @@ describe('catalogue', () => {
       confirmMode: 'manual',
       holdMinutes: 30,
     })
-    expect(d.ratingBreakdown).toEqual({ 1: 0, 2: 1, 3: 2, 4: 9, 5: 84 })
+    expect(d.ratingBreakdown).toEqual({ 1: 0, 2: 1, 3: 1, 4: 6, 5: 88 })
     expect(d.serviceGroups.map((g: { name: string }) => g.name)).toEqual(['Saç', 'Dyrnak', 'Ýüz ideg', 'Massaž'])
     expect(d.serviceGroups[0].services[2]).toMatchObject({ name: 'Saç reňklemek', durationMin: 120, price: { type: 'from', amount: 250 } })
     expect(d.specialists.map((s: { name: string }) => s.name)).toEqual(['Aýna', 'Maral', 'Jeren', 'Leýli'])

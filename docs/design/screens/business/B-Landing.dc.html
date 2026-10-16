@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Biznes — mümkinçilikler we bahalar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 40px}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
+.b-lg{height:52px;padding:0 24px;border-radius:14px;font-size:16px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-ink{background:#101014;color:#ffffff}
+.b-ink:hover{background:#2a2a32;color:#ffffff}
+.b:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.nl{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:500;color:#101014;border:0;background:transparent;font-family:inherit;cursor:pointer}
+.nl:hover{background:#f4f4f6;color:#101014}
+.slot{display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 10px;border-radius:8px;border:1px solid #d8d8de;font-size:13px;font-weight:600;color:#101014;background:#ffffff}
+.slot:hover{border-color:#5a3ff0;color:#4429d6}
+.vc{display:flex;flex-direction:column;gap:12px;color:#101014}
+.vc:hover{color:#101014}
+.vc:hover .vn{text-decoration:underline}
+.vc img{transition:filter .15s}
+.vc:hover img{filter:brightness(.94)}
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(460px,100%),1fr));gap:56px;align-items:center}
+.sf{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid #e6e6ea}
+.sf input{border:0;outline:none;font-family:inherit;font-size:16px;padding:0;color:#101014;background:transparent;width:100%}
+.sf input::placeholder{color:#6e6e78}
+.mosaic{display:grid;grid-template-columns:1.15fr 1fr;grid-template-rows:200px 200px 180px;gap:12px}
+.mosaic figure{margin:0;position:relative;border-radius:16px;overflow:hidden}
+.mosaic img{width:100%;height:100%;object-fit:cover;display:block}
+.tagp{position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;background:#ffffff;color:#101014;font-size:13px;font-weight:600}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:32px 24px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:32px}
+.gcat{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(176px,100%),1fr));gap:12px}
+.cat{display:flex;flex-direction:column;gap:20px;padding:16px;border:1px solid #e6e6ea;border-radius:16px;color:#101014;font-size:15px;font-weight:600;min-height:120px}
+.cat:hover{background:#f6f6f8;color:#101014}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:48px;align-items:center}
+.gfoot{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:32px}
+.fl{font-size:14px;line-height:20px;color:#5a5a64}
+.fl:hover{color:#101014}
+.disp{margin:0;font-size:80px;line-height:80px;font-weight:700;letter-spacing:-0.045em}
+.h2p{margin:0;font-size:32px;line-height:38px;font-weight:700;letter-spacing:-0.025em}
+.sec{padding:80px 0}
+@media (max-width:1023px){.wrap{padding:0 24px}.hide-md{display:none !important}}
+@media (max-width:767px){.wrap{padding:0 16px}.hide-xs{display:none !important}.disp{font-size:48px;line-height:50px}.h2p{font-size:26px;line-height:30px}.sec{padding:56px 0}.mosaic{grid-template-rows:140px 140px 120px}}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6;color:#101014}
+.b-ico{width:44px;padding:0}
+.mbtn{display:none}
+.lgo{height:30px;width:auto;display:block}
+.hnav{display:flex;align-items:center;gap:4px;margin-left:16px;flex:none}
+.bz{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;background:#efecfe;border:1px solid #d5cbfb;color:#4429d6;font-size:12px;line-height:16px;font-weight:600}
+.nl:focus-visible,.mni:focus-visible,.fq:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.fl:focus-visible,.lk:focus-visible,.hl0:focus-visible{outline:none;border-radius:4px;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.mnav{display:none}
+.mni{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:0 4px;border:0;border-bottom:1px solid #e6e6ea;background:transparent;font-family:inherit;font-size:16px;line-height:22px;font-weight:500;color:#101014;text-align:left;cursor:pointer}
+.mni:hover{color:#4429d6}
+.eyb{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;background:#efecfe;border:1px solid #d5cbfb;color:#4429d6;font-size:13px;font-weight:600}
+.d56{margin:0;font-size:56px;line-height:60px;font-weight:700;letter-spacing:-0.035em;text-wrap:balance}
+.lead{margin:0;font-size:19px;line-height:28px;color:#5a5a64;max-width:520px;text-wrap:pretty}
+.sub{margin:0;font-size:17px;line-height:26px;color:#5a5a64;max-width:640px;text-wrap:pretty}
+.shd{display:flex;flex-direction:column;gap:8px}
+.gct{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0;padding:0;list-style:none}
+.ct{display:flex;flex-direction:column;justify-content:space-between;gap:20px;min-height:120px;padding:16px;border:1px solid #e6e6ea;border-radius:16px;font-size:15px;line-height:20px;font-weight:600;color:#101014}
+.cth{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.gft{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:40px 32px;margin:0;padding:0;list-style:none}
+.ft{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.fic{width:44px;height:44px;border-radius:999px;background:#efecfe;color:#4429d6;display:inline-flex;align-items:center;justify-content:center;flex:none;margin-bottom:8px}
+.fh{margin:0;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.fp{margin:0;font-size:15px;line-height:22px;color:#5a5a64;max-width:360px}
+.gst{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:32px;margin:0;padding:0;list-style:none}
+.stp{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.stn{width:36px;height:36px;border-radius:999px;background:#ffffff;border:1px solid #d5cbfb;color:#4429d6;display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.sth{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.stx{margin:0;font-size:15px;line-height:22px;color:#5a5a64;max-width:380px}
+.chp{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;background:#ffffff;border:1px solid #e6e6ea;font-size:13px;line-height:18px;font-weight:600;color:#101014;white-space:nowrap}
+.gp{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:24px}
+.pc{display:flex;flex-direction:column;gap:20px;padding:28px;border:1px solid #e6e6ea;border-radius:16px;background:#ffffff}
+.kom{display:flex;flex-wrap:wrap;align-items:flex-start;gap:24px 48px;padding:28px;border-radius:16px;background:#efecfe}
+.kr{flex:1 1 420px;min-width:0;display:flex;flex-direction:column;margin:0;padding:0;list-style:none}
+.kr li{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #d5cbfb;font-size:15px;line-height:22px;color:#101014}
+.kr li:first-child{padding-top:0}
+.kr li:last-child{border-bottom:0;padding-bottom:0}
+.krl{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.krl svg{flex:none;margin-top:2px}
+.krv{font-weight:600;color:#4429d6;white-space:nowrap;flex:none}
+.pn{margin:0;font-size:22px;line-height:28px;font-weight:700;letter-spacing:-0.015em}
+.ptg{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:#efecfe;border:1px solid #d5cbfb;color:#4429d6;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
+.pr{font-size:36px;line-height:40px;font-weight:700;letter-spacing:-0.03em}
+.pu{font-size:15px;line-height:22px;font-weight:500;color:#5a5a64}
+.pf{display:flex;flex-direction:column;gap:12px;margin:0;padding:20px 0 0;list-style:none;border-top:1px solid #e6e6ea}
+.pf li{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:22px}
+.pf svg{flex:none;margin-top:2px}
+.pb{width:100%;margin-top:auto}
+.fi{border-bottom:1px solid #e6e6ea}
+.fq{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:64px;margin:0;padding:16px 0;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:17px;line-height:24px;font-weight:600;color:#101014;text-align:left;cursor:pointer}
+.fq:hover{color:#4429d6}
+.chev{flex:none;transition:transform .15s}
+.fq.on .chev{transform:rotate(180deg)}
+.fa{margin:0;padding:0 48px 22px 0;font-size:15px;line-height:22px;color:#5a5a64;max-width:760px}
+.mkw{position:relative;width:100%;max-width:620px;justify-self:center}
+.mk{position:relative;border-radius:24px;background:#f4f4f6;padding:72px 88px 80px 28px}
+.mk-cal{position:relative;background:#ffffff;border:1px solid #e6e6ea;border-radius:16px;overflow:hidden}
+.mk-hd{display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-bottom:1px solid #e6e6ea;font-size:13px;line-height:18px;font-weight:600;white-space:nowrap}
+.mk-rq{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;font-weight:600}
+.mk-dot{display:inline-block;width:6px;height:6px;border-radius:999px;background:#dc8b0b;flex:none}
+.mk-row{display:grid;grid-template-columns:44px repeat(3,minmax(0,1fr))}
+.mk-st{border-bottom:1px solid #e6e6ea}
+.mk-sh{display:flex;align-items:center;gap:7px;height:44px;padding:0 8px;border-left:1px solid #e6e6ea;min-width:0}
+.mk-av{width:24px;height:24px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.mk-nm{display:flex;flex-direction:column;min-width:0;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
+.mk-sp{font-size:10px;line-height:14px;font-weight:500;color:#5a5a64;overflow:hidden;text-overflow:ellipsis}
+.mk-gr{position:relative;height:320px}
+.mk-tm{position:relative}
+.mk-hl{position:absolute;right:6px;font-size:10px;line-height:12px;color:#6e6e78;font-variant-numeric:tabular-nums}
+.mk-col{position:relative;border-left:1px solid #e6e6ea;background-image:linear-gradient(to bottom,#f0f0f3 0,#f0f0f3 1px,transparent 1px);background-size:100% 40px}
+.mk-off{position:absolute;left:0;right:0;display:block;background:#f6f6f8}
+.mk-buf{position:absolute;left:3px;right:3px;display:block;border-radius:0 0 5px 5px;background:repeating-linear-gradient(135deg,#f0f0f3 0 4px,#ffffff 4px 8px)}
+.mk-brk{position:absolute;left:3px;right:3px;display:block;border-radius:6px;background:#f0f0f3;padding:2px 6px;font-size:10px;line-height:14px;font-weight:600;color:#5a5a64;overflow:hidden;white-space:nowrap}
+.mk-bk{position:absolute;left:3px;right:3px;z-index:2;display:flex;flex-direction:column;padding:3px 6px;border-radius:6px;border:1px solid transparent;overflow:hidden;color:#101014}
+.mk-l1{display:flex;align-items:baseline;gap:4px;min-width:0;white-space:nowrap;overflow:hidden;font-size:11px;line-height:15px;font-weight:600}
+.mk-t{font-variant-numeric:tabular-nums;flex:none}
+.mk-n{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.mk-s{display:block;font-size:11px;line-height:15px;color:#5a5a64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk-s2{display:flex;align-items:center;gap:4px;min-width:0;font-size:11px;line-height:15px;color:#5a5a64;white-space:nowrap;overflow:hidden}
+.k-c{background:#efecfe;border-color:#d5cbfb}
+.k-d{background:#e7f8ee;border-color:#bfe6d1}
+.k-n{background:#fee4e2;border-color:#f6c7c2}
+.k-p{background:transparent;border-color:transparent}
+.k-p::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;z-index:-1;border-radius:5px;background:#fef6e7;border:1px dashed #dc8b0b;opacity:.7}
+.mk-pill{display:inline-flex;align-items:center;gap:3px;height:16px;padding:0 5px;border-radius:999px;background:#ffffff;border:1px solid #f2ddb0;color:#93500a;font-size:10px;line-height:14px;font-weight:600;flex:none;font-variant-numeric:tabular-nums}
+.mk-now{position:absolute;left:44px;right:0;z-index:3;display:block;height:2px;background:#5a3ff0}
+.mk-now::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:999px;background:#5a3ff0}
+.mk-nowt{position:absolute;left:4px;z-index:3;height:16px;padding:0 4px;border-radius:999px;background:#5a3ff0;color:#ffffff;font-size:9px;line-height:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.mk-toast{position:absolute;top:24px;right:24px;z-index:4;width:284px;display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;background:#ffffff;border:1px solid #e6e6ea;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.mk-ti{width:32px;height:32px;border-radius:999px;background:#fef6e7;color:#93500a;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.mk-tb{display:inline-flex;align-items:center;height:30px;padding:0 10px;border-radius:8px;background:#101014;color:#ffffff;font-size:12px;font-weight:600;flex:none}
+.mk-ph{position:absolute;right:24px;bottom:24px;z-index:4;width:184px;display:flex;flex-direction:column;gap:10px;padding:10px 12px 14px;border:6px solid #101014;border-radius:30px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.mk-notch{display:block;width:44px;height:5px;border-radius:999px;background:#e6e6ea;margin:0 auto 4px}
+.mk-ok{width:36px;height:36px;border-radius:999px;background:#efecfe;color:#4429d6;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.mk-bdg{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 8px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;font-weight:600}
+.mk-sum{display:flex;flex-direction:column;gap:1px;padding:8px 10px;border-radius:10px;background:#f6f6f8;font-size:11px;line-height:15px}
+.mk-pb{display:flex;align-items:center;justify-content:center;height:30px;border-radius:8px;border:1px solid #d8d8de;font-size:11px;font-weight:600;color:#101014}
+@media (max-width:1023px){.gct{grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr))}.hnav{margin-left:0;gap:0}.hnav .nl{padding:0 8px}}
+@media (max-width:767px){.mbtn{display:inline-flex}.hb{height:44px}.lgo{height:26px}.mnav{display:flex;flex-direction:column;padding:4px 16px 16px;border-bottom:1px solid #e6e6ea;background:#ffffff}.d56{font-size:40px;line-height:44px}.lead{font-size:17px;line-height:26px}.gct{grid-template-columns:repeat(2,minmax(0,1fr))}.ct{min-height:104px;gap:14px}.pc{padding:24px}.kom{padding:20px}.fa{padding-right:0}.fq{font-size:16px;line-height:22px}.mk{padding:96px 12px 12px}.mk-toast{left:12px;right:12px;top:12px;width:auto}.mk-ph{display:none}.ctab{font-size:30px !important;line-height:34px !important}}
+</style>
+</helmet>
+<div style="min-height: 100%; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<header style="border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<div class="wrap" style="display: flex; align-items: center; gap: 16px; height: 72px">
+<a class="hl0" href="B-Landing.dc.html" aria-label="Ýeral Biznes baş sahypa" style="display: flex; align-items: center; gap: 10px; flex: none"><img class="lgo" src="../../assets/brand/yeral-lockup-ink.png" alt=""><span class="bz">Biznes</span></a>
+<nav class="hnav hide-xs" aria-label="Esasy">
+<a class="nl" href="#mumkincilikler">Mümkinçilikler</a>
+<a class="nl" href="#bahalar">Bahalar</a>
+<a class="nl" href="#komek">Kömek</a>
+</nav>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 8px; flex: none">
+<button class="nl hide-md" aria-label="Dil: Türkmençe"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>TK</button>
+<a class="b b-sec b-sm hide-xs" href="B-Calendar.dc.html">Giriş</a>
+<a class="b b-pri b-sm hb" href="B-Onboarding.dc.html">Mugt başla</a>
+<button class="b b-gho b-ico mbtn" aria-label="Menýu" aria-expanded="{{menuOpen}}" aria-controls="mnav" onClick="{{toggleMenu}}"><sc-if value="{{menuClosed}}" hint-placeholder-val="{{true}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg></sc-if><sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if></button>
+</div>
+</div>
+</header>
+
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+<nav id="mnav" class="mnav" aria-label="Menýu">
+<a class="mni" href="#mumkincilikler" onClick="{{closeMenu}}">Mümkinçilikler</a>
+<a class="mni" href="#bahalar" onClick="{{closeMenu}}">Bahalar</a>
+<a class="mni" href="#komek" onClick="{{closeMenu}}">Kömek</a>
+<button class="mni" aria-label="Dil: Türkmençe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Türkmençe</button>
+<a class="b b-sec" href="B-Calendar.dc.html" style="margin-top: 16px; width: 100%">Giriş</a>
+</nav>
+</sc-if>
+
+<main>
+
+<section style="padding: 56px 0 88px">
+<div class="wrap hero">
+<div style="display: flex; flex-direction: column; gap: 24px">
+<span class="eyb">Wagtyny satýanlar üçin</span>
+<h1 class="d56">Müşderileriňiz onlaýn ýazylsyn</h1>
+<p class="lead">Senenama, haýyşlar, müşderi bazasy we SMS ýatlatmalar — bir ýerde. Salon, diş lukmany, mugallym ýa-da ussa: 5 minutda başlaň.</p>
+<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 16px">
+<div style="display: flex; gap: 12px; flex-wrap: wrap">
+<a class="b b-pri b-lg" href="B-Onboarding.dc.html">Mugt başla</a>
+<a class="b b-sec b-lg" href="#nahili">Nähili işleýär</a>
+</div>
+<span class="cap">Ýeke hünärmen üçin mugt · Kart gerek däl</span>
+</div>
+</div>
+
+<div class="mkw">
+<p class="sr">Ýeral Biznes senenamasynyň mysaly: üç hünärmeniň iş güni, tassyklanmaga garaşýan täze haýyş we müşderiniň telefonynda «Ýazylyş ugradyldy» ekrany.</p>
+<div class="mk" aria-hidden="true">
+<div class="mk-cal">
+<div class="mk-hd"><span>Çarşenbe, 14 oktýabr</span><span class="mk-rq"><span class="mk-dot"></span>1 haýyş</span></div>
+<div class="mk-row mk-st">
+<span></span>
+<div class="mk-sh"><span class="mk-av">A</span><span class="mk-nm">Aýna<span class="mk-sp">Stilist</span></span></div>
+<div class="mk-sh"><span class="mk-av">M</span><span class="mk-nm">Maral<span class="mk-sp">Dyrnak ussasy</span></span></div>
+<div class="mk-sh"><span class="mk-av">J</span><span class="mk-nm">Jeren<span class="mk-sp">Kosmetolog</span></span></div>
+</div>
+<div class="mk-row mk-gr">
+<div class="mk-tm">
+<span class="mk-hl" style="top: 34px">10:00</span>
+<span class="mk-hl" style="top: 74px">11:00</span>
+<span class="mk-hl" style="top: 114px">12:00</span>
+<span class="mk-hl" style="top: 154px">13:00</span>
+<span class="mk-hl" style="top: 194px">14:00</span>
+<span class="mk-hl" style="top: 234px">15:00</span>
+<span class="mk-hl" style="top: 274px">16:00</span>
+<span class="mk-nowt" style="top: 86px">11:20</span>
+</div>
+<div class="mk-col">
+<div class="mk-bk k-d" style="top: 1px; height: 38px"><span class="mk-l1"><span class="mk-t">09:00</span><span class="mk-n">Ogulşat M.</span></span><span class="mk-s">Aýal saç kesimi</span></div>
+<span class="mk-buf" style="top: 40px; height: 7px"></span>
+<div class="mk-bk k-d" style="top: 51px; height: 28px"><span class="mk-l1"><span class="mk-t">10:15</span><span class="mk-n">Merjen K.</span></span></div>
+<span class="mk-buf" style="top: 80px; height: 7px"></span>
+<div class="mk-bk k-c" style="top: 101px; height: 78px"><span class="mk-l1"><span class="mk-t">11:30</span><span class="mk-n">Gülälek N.</span></span><span class="mk-s">Saç reňklemek</span></div>
+<span class="mk-buf" style="top: 180px; height: 10px"></span>
+<span class="mk-brk" style="top: 200px; height: 27px">Arakesme</span>
+<div class="mk-bk k-p" style="top: 261px; height: 38px"><span class="mk-l1"><span class="mk-t">15:30</span><span class="mk-n">Ejegyz T.</span></span><span class="mk-s2"><span class="mk-pill"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>18 min</span><span class="mk-n">Aýal saç kesimi</span></span></div>
+<span class="mk-buf" style="top: 300px; height: 7px"></span>
+</div>
+<div class="mk-col">
+<div class="mk-bk k-d" style="top: 21px; height: 38px"><span class="mk-l1"><span class="mk-t">09:30</span><span class="mk-n">Aýgül R.</span></span><span class="mk-s">Manikýur</span></div>
+<span class="mk-buf" style="top: 60px; height: 7px"></span>
+<div class="mk-bk k-c" style="top: 81px; height: 58px"><span class="mk-l1"><span class="mk-t">11:00</span><span class="mk-n">Bahar A.</span></span><span class="mk-s">Gel-lak bilen manikýur</span></div>
+<span class="mk-buf" style="top: 140px; height: 7px"></span>
+<div class="mk-bk k-c" style="top: 161px; height: 48px"><span class="mk-l1"><span class="mk-t">13:00</span><span class="mk-n">Jemal S.</span></span><span class="mk-s">Pedikýur</span></div>
+<span class="mk-buf" style="top: 210px; height: 7px"></span>
+</div>
+<div class="mk-col">
+<span class="mk-off" style="top: 0px; height: 40px"></span>
+<div class="mk-bk k-n" style="top: 41px; height: 38px"><span class="mk-l1"><span class="mk-t">10:00</span><span class="mk-n">Ogulnabat Ç.</span></span><span class="mk-s">Ýüz arassalamak</span></div>
+<span class="mk-buf" style="top: 80px; height: 7px"></span>
+<div class="mk-bk k-c" style="top: 241px; height: 18px; padding-top: 1px; padding-bottom: 1px"><span class="mk-l1"><span class="mk-t">15:00</span><span class="mk-n">Sona P.</span></span></div>
+<span class="mk-buf" style="top: 260px; height: 7px"></span>
+</div>
+<span class="mk-now" style="top: 93px"></span>
+</div>
+</div>
+
+<div class="mk-toast">
+<span class="mk-ti"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg></span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1">
+<span style="font-size: 11px; line-height: 15px; font-weight: 600; color: #93500a">Täze haýyş</span>
+<span style="font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap">Ejegyz T. · 15:30</span>
+<span style="font-size: 11px; line-height: 15px; color: #5a5a64; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Aýal saç kesimi · Aýna</span>
+</span>
+<span class="mk-tb">Tassykla</span>
+</div>
+
+<div class="mk-ph">
+<span class="mk-notch"></span>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center">
+<span class="mk-ok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></span>
+<span style="font-size: 13px; line-height: 17px; font-weight: 700; letter-spacing: -0.01em">Ýazylyş ugradyldy</span>
+<span class="mk-bdg"><span class="mk-dot"></span>Garaşylýar</span>
+<span style="font-size: 11px; line-height: 15px; color: #5a5a64">Glow Studio tassyklanda SMS ibereris.</span>
+</div>
+<div class="mk-sum"><span style="font-weight: 600">Aýal saç kesimi</span><span style="color: #5a5a64">Aýna · Şu gün, 15:30</span></div>
+<span class="mk-pb">Ýazylyşlaryma geç</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section style="padding: 0 0 80px" aria-labelledby="kim-h">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 28px">
+<div class="shd"><h2 id="kim-h" class="h2p">Kimler üçin</h2><p class="sub">Wagtyny satýan islendik biznes üçin — ýeke ussadan uly topara çenli. Stol bronlamak we topar sapaklary hem bar.</p></div>
+<ul class="gct" role="list">
+<li class="ct"><div class="cth"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"></path></svg></div><span style="display: flex; flex-direction: column; gap: 2px">Gözellik salony<span class="cap" style="font-weight: 400">Saç, ýüz ideg, massaž</span></span></li>
+<li class="ct"><div class="cth"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"></circle><path d="M8.12 8.12 12 12"></path><path d="M20 4 8.12 15.88"></path><circle cx="6" cy="18" r="3"></circle><path d="M14.8 14.8 20 20"></path></svg></div><span style="display: flex; flex-direction: column; gap: 2px">Dellekhana<span class="cap" style="font-weight: 400">Saç, sakgal</span></span></li>
+<li class="ct"><div class="cth"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"></path><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg></div><span style="display: flex; flex-direction: column; gap: 2px">Dyrnak<span class="cap" style="font-weight: 400">Manikýur, pedikýur</span></span></li>
+<li class="ct"><div class="cth"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 3C5 3 3.5 5 3.5 7.5c0 2 .9 3.4 1.6 5 .6 1.5.8 3.3 1.1 5 .3 1.9.9 3.5 2 3.5 1.3 0 1.6-1.9 1.9-3.5.3-1.6.8-3 1.9-3s1.6 1.4 1.9 3c.3 1.6.6 3.5 1.9 3.5 1.1 0 1.7-1.6 2-3.5.3-1.7.5-3.5 1.1-5 .7-1.6 1.6-3 1.6-5C20.5 5 19 3 16.5 3c-1.7 0-2.9 1-4.5 1S9.2 3 7.5 3z"></path></svg></div><span style="display: flex; flex-direction: column; gap: 2px">Diş lukmany<span class="cap" style="font-weight: 400">Barlag, arassalamak</span></span></li>
+<li class="ct"><div class="cth"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2v2"></path><path d="M5 2v2"></path><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"></path><path d="M8 15a6 6 0 0 0 12 0v-3"></path><circle cx="20" cy="10" r="2"></circle></svg></div><span style="display: flex; flex-direction: column; gap: 2px">Fizioterapiýa<span class="cap" style="font-weight: 400">Bejeriş, massaž</span></span></li>
+<li class="ct"><div class="cth"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.42 10.92a1 1 0 0 0-.02-1.84L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0z"></path><path d="M22 10v6"></path><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path></svg></div><span style="display: flex; flex-direction: column; gap: 2px">Repetitor<span class="cap" style="font-weight: 400">Dil, saz, mekdep dersleri</span></span></li>
+<li class="ct"><div class="cth"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg></div><span style="display: flex; flex-direction: column; gap: 2px">Awtoservis<span class="cap" style="font-weight: 400">Abatlamak, ýuwmak</span></span></li>
+<li class="ct"><div class="cth"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"></circle><circle cx="18" cy="8" r="2"></circle><circle cx="20" cy="16" r="2"></circle><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.05Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"></path></svg></div><span style="display: flex; flex-direction: column; gap: 2px">Öý haýwanlary<span class="cap" style="font-weight: 400">Groming, weterinar</span></span></li>
+<li class="ct"><div class="cth"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg></div><span style="display: flex; flex-direction: column; gap: 2px">Restoran<span class="cap" style="font-weight: 400">Stol bronlamak</span></span></li>
+<li class="ct"><div class="cth"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="1"></circle><path d="m9 20 3-6 3 6"></path><path d="m6 8 6 2 6-2"></path><path d="M12 10v4"></path></svg></div><span style="display: flex; flex-direction: column; gap: 2px">Ýoga<span class="cap" style="font-weight: 400">Topar sapaklary</span></span></li>
+</ul>
+</div>
+</section>
+
+<section id="mumkincilikler" class="sec" style="border-top: 1px solid #e6e6ea" aria-labelledby="mum-h">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 40px">
+<div class="shd"><h2 id="mum-h" class="h2p">Mümkinçilikler</h2><p class="sub">Ýazylyşdan hasabata çenli — ähli iş bir ýerde, kompýuterde we telefonda.</p></div>
+<ul class="gft" role="list">
+<li class="ft"><span class="fic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></span><h3 class="fh">Onlaýn ýazylyş 24/7</h3><p class="fp">Müşderiler boş wagty özleri saýlap ýazylýar — gije-de, dynç günleri-de, jaň etmezden.</p></li>
+<li class="ft"><span class="fic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></span><h3 class="fh">Haýyşlar we tassyklama</h3><p class="fp">Her ýazylyşy özüňiz tassyklaýarsyňyz ýa-da derrew tassyklamany açýarsyňyz.</p></li>
+<li class="ft"><span class="fic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></span><h3 class="fh">Senenama we topar</h3><p class="fp">Ähli hünärmenleriň güni bir ekranda. Ýazylyşy süýräp başga wagta geçiriň.</p></li>
+<li class="ft"><span class="fic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><h3 class="fh">Müşderi bazasy</h3><p class="fp">Her müşderiniň telefony, gelşleri we bellikleri bir kartda.</p></li>
+<li class="ft"><span class="fic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span><h3 class="fh">SMS ýatlatmalar</h3><p class="fp">Müşderä gelmezden öň ýatlatma gidýär — gelmezlik azalýar.</p></li>
+<li class="ft"><span class="fic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg></span><h3 class="fh">Hasabatlar</h3><p class="fp">Hünärmenler, hyzmatlar we müşderiler boýunça girdeji we ýazylyşlar.</p></li>
+</ul>
+</div>
+</section>
+
+<section id="nahili" class="sec" style="background: #f4f4f6" aria-labelledby="nah-h">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 40px">
+<div style="display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap"><h2 id="nah-h" class="h2p">Nähili başlamaly</h2><span class="eyb" style="align-self: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>5 minutda</span></div>
+<ol class="gst" role="list">
+<li class="stp"><span class="stn" aria-hidden="true">1</span><h3 class="sth">Hasaba duruň</h3><p class="stx">Telefon belgiňizi ýazyň we SMS kody giriziň. Parol gerek däl.</p></li>
+<li class="stp"><span class="stn" aria-hidden="true">2</span><h3 class="sth">Hyzmatlary we iş wagtyny goşuň</h3><p class="stx">Kategoriýaňyz boýunça taýýar hyzmat sanawy bar: diňe bahasyny we wagtyny düzediň.</p></li>
+<li class="stp"><span class="stn" aria-hidden="true">3</span><h3 class="sth">Salgyňyzy paýlaşyň</h3><p class="stx">Sahypaňyzyň salgysyny Instagram-a goýuň, QR-y girelgä asyň — müşderiler şol ýerden ýazylýar.</p>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px">
+<span class="chp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>yeral.app/tk/b/glow-studio</span>
+<span class="chp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"></rect><rect width="5" height="5" x="16" y="3" rx="1"></rect><rect width="5" height="5" x="3" y="16" rx="1"></rect><path d="M21 16h-3a2 2 0 0 0-2 2v3"></path><path d="M21 21v.01"></path><path d="M12 7v3a2 2 0 0 1-2 2H7"></path><path d="M3 12h.01"></path><path d="M12 3h.01"></path><path d="M12 16v.01"></path><path d="M16 12h1"></path><path d="M21 12v.01"></path><path d="M12 21v-1"></path></svg>QR</span>
+</div>
+</li>
+</ol>
+<p class="cap" style="margin: 0; font-size: 14px; line-height: 20px; max-width: 760px">Täze biznesleri Ýeral topary 24 sagadyň içinde barlaýar. Senenamany şol bada ulanyp bilersiňiz, sahypaňyz bolsa barlagdan soň gözlegde görünýär.</p>
+</div>
+</section>
+
+<section id="bahalar" class="sec" aria-labelledby="bah-h">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 40px">
+<div class="shd"><h2 id="bah-h" class="h2p">Bahalar</h2><p class="sub">Başlamak mugt. Toparyňyz ösende tarifi islendik wagt üýtgedip bilersiňiz.</p></div>
+<div style="display: flex; flex-direction: column; gap: 24px">
+<div class="gp">
+<sc-for list="{{plans}}" as="p" hint-placeholder-count="2">
+<div class="pc">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; min-height: 28px"><h3 class="pn">{{p.name}}</h3><sc-if value="{{p.hasTag}}" hint-placeholder-val="{{false}}"><span class="ptg">{{p.tag}}</span></sc-if></div>
+<span style="font-size: 14px; line-height: 20px; color: #5a5a64">{{p.who}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap"><span class="pr">{{p.price}}</span><sc-if value="{{p.hasUnit}}" hint-placeholder-val="{{true}}"><span class="pu">{{p.unit}}</span></sc-if></div>
+<sc-if value="{{p.hasNote}}" hint-placeholder-val="{{false}}"><span class="cap">{{p.note}}</span></sc-if>
+</div>
+<ul class="pf" role="list">
+<sc-for list="{{p.features}}" as="ft" hint-placeholder-count="4"><li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span>{{ft}}</span></li></sc-for>
+</ul>
+<a class="b b-sec pb" href="{{p.href}}">{{p.btn}}</a>
+</div>
+</sc-for>
+</div>
+<div id="komissiya" class="kom">
+<div style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+<h3 class="pn" style="font-size: 19px; line-height: 26px; letter-spacing: -0.01em">Komissiýa — diňe Ýeral-dan gelen täze müşderiden</h3>
+<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap"><span class="pr">[X]%</span><span class="pu" style="color: #101014">ilkinji gelşinden · ähli tariflerde</span></div>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 460px">Ýeral gözleginde sizi tapan täze müşderi ilkinji gezek gelende alynýar. Ol müşderiniň indiki gelşleri — mugt.</p>
+</div>
+<ul class="kr" role="list">
+<li><span class="krl"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Öz salgyňyzdan ýa-da QR-dan gelenler</span><span class="krv">Elmydama mugt</span></li>
+<li><span class="krl"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Telefon arkaly ýazylyşlar</span><span class="krv">Elmydama mugt</span></li>
+<li><span class="krl"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Gaýdyp gelýän müşderiler</span><span class="krv">Elmydama mugt</span></li>
+<li><span class="krl"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Gelmedik ýa-da ýatyrylan ýazylyşlar</span><span class="krv">Komissiýa ýok</span></li>
+</ul>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #101014">Zynjyr ýa-da birnäçe şahamça? <a class="lk" href="#komek" style="font-weight: 600">Habarlaşyň.</a></p>
+<span class="cap">Töleg hasap-faktura boýunça bank geçirimi bilen. Bahalar manatda.</span>
+</div>
+</div>
+</div>
+</section>
+
+<section id="komek" class="sec" style="border-top: 1px solid #e6e6ea" aria-labelledby="kom-h">
+<div class="wrap" style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 32px 64px">
+<div style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="kom-h" class="h2p">Ýygy soraglar</h2>
+<p class="sub">Jogap tapmadyňyzmy? Bize jaň ediň ýa-da ýazyň — kömek ederis.</p>
+<span style="font-size: 15px; line-height: 22px; color: #5a5a64">Jaň: <span style="color: #101014; font-weight: 600; white-space: nowrap">+993 12 00 00 00</span></span>
+</div>
+<div style="flex: 999 1 560px; min-width: 0; border-top: 1px solid #e6e6ea">
+
+<div class="fi">
+<h3 style="margin: 0"><button class="{{c0}}" id="fq0" aria-expanded="{{o0}}" aria-controls="fa0" onClick="{{t0}}"><span>Haýsy bizneslere laýyk?</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></h3>
+<div id="fa0" class="fa" role="region" aria-labelledby="fq0" hidden="{{h0}}">Wagt bellenip berilýän islendik hyzmata: gözellik salony, dellekhana, dyrnak ussasy, diş lukmany, fizioterapiýa, repetitor, awtoservis, öý haýwanlary. Ýeke işleýän hünärmen hem, birnäçe şahamçasy bolan biznes hem ulanyp biler. Restoranlar üçin stol bronlamak we ýoga studiýalary üçin topar sapaklary hem bar.</div>
+</div>
+
+<div class="fi">
+<h3 style="margin: 0"><button class="{{c1}}" id="fq1" aria-expanded="{{o1}}" aria-controls="fa1" onClick="{{t1}}"><span>Müşderi nädip ýazylýar?</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></h3>
+<div id="fa1" class="fa" role="region" aria-labelledby="fq1" hidden="{{h1}}">Müşderi sizi Ýeral gözleginde tapýar ýa-da öz salgyňyzdan, QR-dan sahypaňyzy açýar. Hyzmaty, hünärmeni we boş wagty saýlap, telefon belgisi bilen ýazylyşy ugradýar. Programma ýüklemek hökman däl.</div>
+</div>
+
+<div class="fi">
+<h3 style="margin: 0"><button class="{{c2}}" id="fq2" aria-expanded="{{o2}}" aria-controls="fa2" onClick="{{t2}}"><span>Ýazylyşy nädip tassyklamaly?</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></h3>
+<div id="fa2" class="fa" role="region" aria-labelledby="fq2" hidden="{{h2}}">Täze haýyş senenamada we ýazylyşlar sanawynda görünýär, size bildiriş gelýär. «Tassykla» ýa-da «Ret et» basyň: ret etseňiz, sebäbini ýazyp, başga wagt teklip edip bilersiňiz. Jogapsyz galan haýyş siz saýlan wagtdan (15 minutdan 24 sagada çenli) soň ýatyrylýar. Isleseňiz, derrew tassyklamany açyň.</div>
+</div>
+
+<div class="fi">
+<h3 style="margin: 0"><button class="{{c3}}" id="fq3" aria-expanded="{{o3}}" aria-controls="fa3" onClick="{{t3}}"><span>SMS ýatlatmalar mugtmy?</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></h3>
+<div id="fa3" class="fa" role="region" aria-labelledby="fq3" hidden="{{h3}}">Müşderä ýatlatma SMS-leri ähli tariflerde bar.</div>
+</div>
+
+<div class="fi">
+<h3 style="margin: 0"><button class="{{c4}}" id="fq4" aria-expanded="{{o4}}" aria-controls="fa4" onClick="{{t4}}"><span>Onlaýn töleg barmy?</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></h3>
+<div id="fa4" class="fa" role="region" aria-labelledby="fq4" hidden="{{h4}}">Häzir töleg ýerinde; kart bilen töleg we öňünden töleg ýakynda.</div>
+</div>
+
+<div class="fi">
+<h3 style="margin: 0"><button class="{{c5}}" id="fq5" aria-expanded="{{o5}}" aria-controls="fa5" onClick="{{t5}}"><span>Maglumatlarym howpsuzmy?</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></h3>
+<div id="fa5" class="fa" role="region" aria-labelledby="fq5" hidden="{{h5}}">Müşderi bazaňyzy diňe siz we toparyňyz görýär. Her işgäre rol berýärsiňiz: hünärmen diňe öz ýazylyşlaryny görýär, girdejini diňe rugsat berlenler görýär. Giriş telefon belgisi we SMS kody bilen; maglumatlaryňyzy islendik wagt eksport edip bilersiňiz.</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<section class="sec" style="background: #101014; color: #ffffff" aria-labelledby="cta-h">
+<div class="wrap" style="display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap">
+<div style="flex: 1 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<img src="../../assets/brand/yeral-lockup-white.png" alt="Ýeral" style="height: 28px; width: auto; align-self: flex-start; display: block">
+<h2 id="cta-h" class="h2p ctab" style="color: #ffffff; font-size: 40px; line-height: 44px; letter-spacing: -0.03em">Ilkinji müşderiňizi şu gün kabul ediň</h2>
+<p style="margin: 0; font-size: 17px; line-height: 26px; color: #d8d8de; max-width: 560px">Hasaba durmak 5 minut alýar. Senenamany şol bada ulanyp bilersiňiz.</p>
+</div>
+<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 12px; flex: none">
+<a class="b b-pri b-lg" href="B-Onboarding.dc.html">Mugt başla</a>
+<span class="cap" style="color: #d8d8de">Ýeke hünärmen üçin mugt · Kart gerek däl</span>
+</div>
+</div>
+</section>
+
+</main>
+
+<footer style="padding: 56px 0 40px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 40px">
+<div class="gfoot">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 26px; width: auto; display: block"><span class="bz">Biznes</span></div>
+<span class="cap" style="max-width: 240px">Wagtyny satýanlar üçin onlaýn ýazylyş, senenama we müşderi bazasy.</span>
+<span class="cap">Müşderi hökmünde: <a class="lk" href="Home.dc.html" style="font-weight: 600">yeral.app</a></span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Önüm</span><a class="fl" href="#mumkincilikler">Mümkinçilikler</a><a class="fl" href="#bahalar">Bahalar</a><a class="fl" href="#nahili">Nähili başlamaly</a><a class="fl" href="B-Calendar.dc.html">Giriş</a></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Kömek</span><a class="fl" href="#komek">Ýygy soraglar</a><a class="fl" href="#">Kömek merkezi</a><a class="fl" href="#">Habarlaşmak</a><span class="fl">+993 12 00 00 00</span></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><span class="lbl">Dil</span><a class="fl" href="#" style="color: #101014; font-weight: 600">Türkmençe</a><a class="fl" href="#">Русский</a><a class="fl" href="#">English</a></div>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid #e6e6ea"><span class="cap">© 2026 Ýeral</span><div style="display: flex; gap: 20px"><a class="fl" href="#" style="font-size: 13px">Gizlinlik syýasaty</a><a class="fl" href="#" style="font-size: 13px">Ulanyş şertleri</a></div></div>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":4680}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { open: [true, false, false, false, false, false], menu: false };
+  }
+  renderVals() {
+    const f = this.props.font ?? 'Onest';
+    const s = this.state;
+    const vals = {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      menuOpen: s.menu,
+      menuClosed: !s.menu,
+      toggleMenu: () => this.setState({ menu: !this.state.menu }),
+      closeMenu: () => this.setState({ menu: false })
+    };
+    s.open.forEach((on, i) => {
+      vals['o' + i] = on;
+      vals['h' + i] = !on;
+      vals['c' + i] = on ? 'fq on' : 'fq';
+      vals['t' + i] = () => {
+        const next = this.state.open.slice();
+        next[i] = !next[i];
+        this.setState({ open: next });
+      };
+    });
+    const plans = [
+      { name: 'Ýeke', price: 'Mugt', unit: '', note: '1 hünärmen', who: 'Ýeke işleýän hünärmen', features: ['Onlaýn ýazylyş', 'Senenama we müşderiler', 'SMS ýatlatmalar', 'Salgy we QR'], tag: '', btn: 'Mugt başla', href: 'B-Onboarding.dc.html' },
+      { name: 'Topar', price: '[PRICE] TMT', unit: '/ aý', note: 'Bir biznes üçin · çäksiz işgär', who: 'Topary bolan biznes', features: ['Çäksiz işgär we roller', 'Hasabatlar', 'Şahamçalar', 'Goldaw çaty'], tag: 'Toparlar üçin', btn: 'Synap gör', href: 'B-Onboarding.dc.html' }
+    ];
+    vals.plans = plans.map((p) => ({
+      ...p,
+      hasTag: !!p.tag,
+      hasUnit: !!p.unit,
+      hasNote: !!p.note
+    }));
+    return vals;
+  }
+}
+</script>
+</body>
+</html>
