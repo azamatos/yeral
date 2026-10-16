@@ -63,7 +63,8 @@ the `.dc.html` screens win on visuals. Rules are implemented in `@yeral/domain` 
 
 ## Business workspace (business.yeral.app)
 
-Spec: `docs/design/business/README.md` (round 4: daily work + setup; appointment type only). Model: ADR 0018.
+Spec: `docs/design/business/README.md` (round 4: daily work + setup; round 5, design v0.4: analytics, reviews,
+notifications, help, billing, B2B landing, tables, classes; decisions in §22, open questions in §24). Model: ADR 0018.
 
 | Role | Sees | Can (default switches) |
 |---|---|---|
@@ -77,6 +78,29 @@ Spec: `docs/design/business/README.md` (round 4: daily work + setup; appointment
 - New businesses are "Barlagda" (in review) until the Ýeral team verifies them (≤ 24 h); they use the workspace at once but aren't public.
 - Day summary: count = all non-cancelled bookings incl. requests and no-shows; planned revenue = confirmed + pending + completed prices (revenue permission only).
 - Client segments: Yzygiderli (≥ 3 visits in 6 months) · Täze (first visit ≤ 30 days) · Köpden bäri gelmedik (60+ days) · Arz edilen (has complaints).
+- Reviews (§15): only after a Completed booking, one per booking; the business can't delete them, can reply (and edit or
+  delete its reply), and can report one ("Arz et": false / didn't come · insulting · about another business · spam ·
+  other) to Ýeral moderation. **A reported review stays visible on both sides but isn't counted** in the average, the
+  count or the star bars until Ýeral clears it; removed → gone. Teswirler badge = unanswered count, neutral grey.
+- Analytics (§14): money only with the revenue permission ("Girdejini görmek"); others see counts, no export or client lists.
+- Notifications (§16): one sentence per event + channels (browser · app · SMS); SMS to staff only for critical events
+  (a new request when the person has no app), never at night; quiet hours and summaries.
+- Tables (§20): online bookings get the smallest fitting table automatically (staff can change it); a confirmed booking
+  past its start counts as seated; walk-ins = confirmed + person icon.
+- Classes (§21): "Gelmedi belle" only after the session starts; a manual add = 1 seat, source phone, confirmed; clashes =
+  same trainer or room; waitlist later.
+
+### Plans and commission (§18, decided 14.10.2026; prices open)
+
+- **Ýeke**: free, one specialist (online booking, calendar, clients, SMS reminders, link and QR). **Topar**: `[PRICE]` TMT
+  a month per business (not per staff), unlimited staff, roles, analytics, support chat; each branch billed on its own;
+  "Synap gör" trial terms open.
+- **Commission is a layer on every plan, not a plan**: `[X]%` of the **first completed visit of a new client who found
+  the business through Ýeral search**. Always free: the business's own link or QR, phone bookings, returning clients;
+  never charged: no-shows and cancellations. So bookings must remember where the client came from (search vs own
+  link/QR) — needed by M5 billing.
+- SMS reminders to clients are included on every plan (Ýeral pays). Payment = invoice + bank transfer; plan changes take
+  effect at the next invoice; Topar → Ýeke is blocked while more than one specialist is active.
 
 ## Glossary (code ↔ Turkmen UI)
 

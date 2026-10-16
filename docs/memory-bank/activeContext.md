@@ -1,17 +1,15 @@
 # Active context
 
-_Last updated: 2026-10-14_
+_Last updated: 2026-10-16_
 
 ## Current focus
 
-**M0 and M1 are merged and released** (`@yeral/ui@0.1.0`, storybook.yeral.app); Neon is set up and verified (project
-Yeral, Frankfurt, Postgres 18; see `operations.md`). The client site is fully designed (web design v0.3) and **the
-business workspace design arrived** (round 4, `docs/design/business/`, reviewed 2026-10-14: ADR 0017 revised, ADR 0018).
-**M2 is built** as a stack of PRs waiting to merge in order: #13 domain → #14 lib + i18n → #15 contract → #16 api
-foundation → #17 api endpoints → #18 sdk → #19 Docker + Workers (each one's details in `progress.md`). The api serves every
-client screen on Postgres (30 paths, 51 API tests); the schema covers the business side too, so M5 doesn't migrate
-bookings twice. Not deployed yet: staging needs the owner's OK (open question 13). Then M3 (client site), then M5
-(business workspace, unblocked for its round-4 scope).
+**M2 is merged** (#12–#19, 2026-10-16) after a code review of every PR: #17–#19 were fixed before merging, the merged
+#13–#16 in #21 (each fix with a test that failed first; details in `progress.md`). The api serves every client screen on
+Postgres; not deployed (staging: owner said "not yet", open question 13). **Design export v0.4 arrived**: the business
+workspace is fully designed (rounds 4–5), design system v0.4 with two new boards and `docs/design/COMPONENTS.md` (the
+component map), tokens v0.4 mapped into `@yeral/ui`. **Next**: grow `@yeral/ui` from `COMPONENTS.md` in its order
+(extend the existing components, then the new primitives), then M3 (client site) screen by screen; M5 after.
 
 ## Owner's direction
 
@@ -22,6 +20,7 @@ bookings twice. Not deployed yet: staging needs the owner's OK (open question 13
 - 2026-10-14 (business design round 4, "decided 14.10.2026"): manual confirmation is the default, a business may switch on
   instant confirmation; requests expire after the business's hold time (default 30 min) with 3 alternative times. This
   replaces the morning's "every booking by hand, no instant setting".
+- 2026-10-16: review every PR before merging (the agent merges after review and green CI); api staging not yet.
 
 ## Decisions
 
@@ -54,13 +53,15 @@ instead of Better Auth (the design's attempts/lock/resend rules, no placeholder 
 
 | # | Question | Who | Blocks |
 |---|---|---|---|
-| 1 | Business workspace round 5: analytics, reviews and replies, notification settings, help, billing, B2B landing + pricing, table/class management, checkout (round 4 covers daily work + setup) | owner (Claude Design) | parts of M5 |
+| 1 | Business workspace: checkout / POS and a table/class setup wizard aren't designed (round 5 covered the rest) | owner (Claude Design) | parts of M5 |
 | 11 | Client side of the business rules, not drawn yet: decline reason + 3 alternative times to accept in one tap (booking drawer and the SMS link), the expired-request alternatives, a client blocked from online booking. Plan until drawn: show them in the booking detail drawer with time chips; a blocked client gets the "not bookable online" state with "Jaň et" | owner (design) | M3 polish |
-| 13 | **Go-ahead for api staging on Cloudflare**: create the Neon branch `stage`, a Hyperdrive config on it, and the Worker `yeral-api-stage` on `api-stage.yeral.app` (a new DNS record); then CI deploys it on every green push to `main` | owner | api staging |
-| 14 | Merging the M2 stack: the auto-mode permission classifier blocks `gh pr merge` for the agent, so the owner merges #12–#19 in order (squash), or allows merges for the agent | owner | M2 done |
+| 13 | **Go-ahead for api staging on Cloudflare** (2026-10-16: "not yet"): the Neon branch `stage`, a Hyperdrive config (`--caching-disabled`), the Worker `yeral-api-stage` on `api-stage.yeral.app` (a new DNS record); then CI deploys it on every green push to `main` | owner | api staging |
+| 15 | Staging and production share session cookies (`Domain=yeral.app`): a separate staging domain (recommended, with question 7), or api-host-only `__Host-` cookies everywhere (revises ADR 0019) | owner | api staging |
+| 16 | Moving table and class bookings: "Başga wagta geçir" is drawn on every confirmed booking, but their rule texts only mention cancelling; the api answers `not_bookable` | owner (design) | M3 booking detail |
+| 17 | Design v0.4 open items (`docs/design/CHANGELOG.md` §6, business README §24): Topar trial behind "Synap gör", Ýeral's bank and company details, support phone, Telegram link, font sizes 28 / 24 / 80 (mapped to h2 / h3 / display for now), businesses open past midnight | owner | B2B pricing, billing |
 | 12 | A new business is "Barlagda" until verified: its link and QR are given at setup step 8. Plan: the public page answers 404 until verified; members see it with a banner | owner | M3/M5 |
 | 2 | CMS design (six modules) | owner (Claude Design round 3) | M6 |
-| 3 | Manat prices for business plans and commission | owner | B2B pricing page |
+| 3 | Manat prices: Topar `[PRICE]` TMT a month and the commission `[X]%` (two plans + a commission layer, productContext) | owner | B2B pricing page, billing |
 | 4 | Real average bills for restaurant cards; official App Store / Google Play badges | owner | M3 polish |
 | 5 | Native Turkmen review of all copy; RU/EN drafts written by Claude need a check too | owner | public launch |
 | 6 | SMS provider and sender name | owner + research | production SMS (M8) |
@@ -70,10 +71,9 @@ instead of Better Auth (the design's attempts/lock/resend rules, no placeholder 
 
 ## Next steps
 
-1. Merge #12 (this review), then the M2 stack #13 → #19 in order; after each squash merge the next PR is rebased on
-   `main` (a docs conflict in `progress.md` / `systemPatterns.md` / `techContext.md` is expected and trivial).
-2. With the owner's OK: api staging on Cloudflare (open question 13; steps in `operations.md`).
-3. M3: the client site (`apps/client`, TanStack Start + FSD) on the sdk, screen by screen in the design's order; MSW
-   handlers for stories with the first screens; the client serves the demo photos (`/media/demo`).
-
-Then M3: the client site, screen by screen in the design's order.
+1. `@yeral/ui` from `docs/design/COMPONENTS.md` in its suggested order: extend the existing components (SideNav, Button,
+   Input/Field, Chip, Table, Drawer/Modal, StatusBadge, Toast), then the new primitives, each with stories for every
+   state on its board.
+2. M3: the client site (`apps/client`, TanStack Start + FSD) on the sdk, screen by screen in the design's order, built
+   only from components that have stories; MSW handlers for stories with the first screens.
+3. With the owner's OK: api staging (open questions 13 and 15; steps in `operations.md`).
