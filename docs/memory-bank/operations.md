@@ -56,14 +56,19 @@ Workers Paid when limits are hit, Access policy for `cms.` (M6).
   (a second worktree uses `…/yeral_<branch>`). `pnpm db:setup` creates it if missing, applies the migrations and seeds the
   demo while the database has no businesses; it never touches a database that has them. `pnpm db:seed` starts the demo over.
   The root `.env.local` holds the **Neon production** URL for the neon tooling: the api never reads it.
-- Seeding wipes the database, so `db:seed` refuses any host but localhost/`postgres`/`db` unless `--allow-remote` is passed
-  (staging from CI); with `YERAL_ENV=production` it writes only the category catalogue.
+- Seeding wipes the database, so `db:seed` and `db:setup` refuse any host but localhost/`postgres`/`db` unless
+  `--allow-remote` is passed (staging from CI), and refuse without an explicit `YERAL_ENV` (`.env.example` sets `local`):
+  `local`, `docker`, `staging` seed the demo, `production` writes only the category catalogue. The seed is one
+  transaction: if it fails, the database stays as it was.
 - Demo dates move with today, once: the design's demo day (2026-10-14) becomes the day you seed, and stays that date.
   A database seeded on an earlier day shows that day's demo (requests expired, "today" in the past): `pnpm db:seed` (wipes
-  the database) brings it to today. Photos are served by the Node entry from `docs/design/assets/photos` at
-  `/media/demo/*` outside production.
+  the database) brings it to today. Weekly data turns with the dates (opening hours, shifts, breaks, the yoga week), so the
+  demo day always has the design's Wednesday, whatever weekday it is. Photos are served by the Node entry (dev and
+  `start`) from `docs/design/assets/photos` at `/media/demo/*` outside production; Docker mounts them at `DEMO_MEDIA_DIR`.
 - API tests: `TEST_DATABASE_URL` (default `postgres://yeral:yeral@localhost:5432/postgres`, an admin connection). A global
-  setup migrates `yeral_test_template`; each test file gets its own copy (`create database … template …`) and drops it.
+  setup migrates a template of the run's own (`yeral_test_<run>_template`); each test file gets a copy
+  (`create database … template …`); at the end the run drops every `yeral_test_<run>_…` database, so parallel runs from
+  several worktrees share one server.
   CI runs a `postgres:18` service container for this (`ci.yml`, job «Format, lint, types, tests, build»).
 - Migrations: `pnpm db:generate` (drizzle-kit, `apps/api/src/db/migrations`); hand-written SQL (extensions, exclusion
   constraints) goes into a `--custom` migration. Never edit a merged migration.

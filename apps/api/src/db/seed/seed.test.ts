@@ -1,13 +1,60 @@
 import { appointmentSlots } from '@yeral/domain/availability'
 import { clientStats } from '@yeral/domain/clients'
-import { and, eq } from 'drizzle-orm'
+import { staffDay, workingIntervals } from '@yeral/domain/hours'
+import { addDays, diffDays, dow, today } from '@yeral/domain/time'
+import { and, eq, gte, sql } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { DEMO_NOW } from '../../../test/app'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../client'
 import * as t from '../schema'
-import { seed } from './index'
-import { GLOW_CLIENTS } from './demo-data'
+import { seed, TABLES } from './index'
+import { AYJEMAL_BOOKINGS, DEMO_DAY, GLOW_BOOKINGS, GLOW_CLIENTS, m, YOGA_TAKEN } from './demo-data'
+
+const DAY = 86_400_000
+
+/**
+ * What must hold whatever weekday the demo lands on: Glow Studio's bookings from the demo day on fit their specialist's
+ * working time, and the yoga seats taken (the design's "3 ýer galdy", "Doly" …) and Aýjemal's class are there.
+ */
+async function expectDemoWeek(db: Db, now: number) {
+  const day = (date: string) => addDays(date, diffDays(today(now), DEMO_DAY))
+  const [glow] = await db.select().from(t.businesses).where(eq(t.businesses.slug, 'glow-studio'))
+  const team = await db.select().from(t.staff).where(eq(t.staff.businessId, glow!.id))
+  const items = await db
+    .select({ item: t.bookingItems })
+    .from(t.bookingItems)
+    .innerJoin(t.bookings, eq(t.bookings.id, t.bookingItems.bookingId))
+    .where(and(eq(t.bookings.businessId, glow!.id), gte(t.bookings.date, today(now))))
+  expect(items).toHaveLength(GLOW_BOOKINGS.length)
+  for (const { item } of items) {
+    const who = team.find((s) => s.id === item.staffId)!
+    const work = staffDay(glow!, who, item.date)
+    const at = `${who.name} ${item.date} ${item.start}–${item.end}`
+    expect(work, at).not.toBeNull()
+    expect(
+      workingIntervals(work!).some((i) => i.start <= item.start && item.end <= i.end),
+      at,
+    ).toBe(true)
+  }
+
+  const [yoga] = await db.select().from(t.businesses).where(eq(t.businesses.slug, 'aydyn-yoga'))
+  for (const [key, taken] of Object.entries(YOGA_TAKEN)) {
+    const [date = '', time = ''] = key.split(' ')
+    const rows = await db
+      .select()
+      .from(t.bookings)
+      .where(and(eq(t.bookings.businessId, yoga!.id), eq(t.bookings.date, day(date)), eq(t.bookings.start, m(time))))
+    expect(
+      rows.reduce((n, r) => n + (r.seats ?? 0), 0),
+      key,
+    ).toBe(taken)
+  }
+  const mine = AYJEMAL_BOOKINGS.find((a) => a.type === 'class')!
+  const [b] = await db.select().from(t.bookings).where(eq(t.bookings.code, mine.code))
+  expect(b).toMatchObject({ date: day(mine.date), start: m(mine.from), status: 'confirmed' })
+  expect(b!.sessionId).toBeTruthy()
+}
 
 describe('demo seed', () => {
   let db: Db
@@ -82,5 +129,55 @@ describe('demo seed', () => {
     expect(slots).not.toContain(855)
     expect(slots).not.toContain(870)
     expect(slots).toContain(945)
+  })
+
+  it('Glow Studio’s demo week and the yoga seats are as designed', () => expectDemoWeek(db, DEMO_NOW))
+
+  it('only requests hold a slot or wait for confirmation; table bookings sit for the business’s sitting time', async () => {
+    const rows = await db
+      .select({ b: t.bookings, sitting: t.businesses.tableSittingMinutes })
+      .from(t.bookings)
+      .innerJoin(t.businesses, eq(t.businesses.id, t.bookings.businessId))
+    for (const { b } of rows) {
+      expect(b.holdUntil !== null, b.code).toBe(b.status === 'pending')
+      expect(b.confirmedAt === null, b.code).toBe(b.status === 'pending')
+    }
+    const tables = rows.filter((r) => r.b.type === 'table')
+    expect(tables.length).toBeGreaterThan(0)
+    for (const { b, sitting } of tables) expect(b.end, b.code).toBe(Math.min(1440, b.start + sitting))
+  })
+
+  it('wipe() covers every table in the database', async () => {
+    const { rows } = await db.execute<{ tablename: string }>(sql`select tablename from pg_tables where schemaname = 'public'`)
+    expect([...TABLES].sort()).toEqual(rows.map((r) => r.tablename).sort())
+  })
+})
+
+describe('demo seed on other weekdays', () => {
+  let db: Db
+  beforeAll(async () => {
+    ;({ db } = await testDatabase())
+  })
+
+  it.each([1, 2, 3, 4, 5, 6])('the demo day %i day(s) after the design’s Wednesday keeps the design’s week', async (shift) => {
+    const now = DEMO_NOW + shift * DAY
+    expect(dow(today(now))).not.toBe(dow(DEMO_DAY))
+    await seed(db, { demo: true, now })
+    await expectDemoWeek(db, now)
+  })
+
+  it('a seed that fails halfway leaves the database as it was', async () => {
+    await seed(db, { demo: true, now: DEMO_NOW })
+    await db.execute(sql`create function fail_insert() returns trigger language plpgsql as $$ begin raise exception 'seed broke'; end $$`)
+    await db.execute(sql`create trigger fail_reviews before insert on reviews for each row execute function fail_insert()`)
+    try {
+      await expect(seed(db, { demo: true, now: DEMO_NOW + DAY })).rejects.toThrow()
+    } finally {
+      await db.execute(sql`drop trigger fail_reviews on reviews`)
+      await db.execute(sql`drop function fail_insert()`)
+    }
+    expect(await db.select().from(t.businesses)).toHaveLength(14)
+    const [request] = await db.select().from(t.bookings).where(eq(t.bookings.code, 'YR-48213'))
+    expect(request?.date).toBe('2026-10-15')
   })
 })
