@@ -24,6 +24,8 @@
     "db:down": "docker compose -f infra/docker/compose.dev.yml down",
     "db:setup": "pnpm --filter @yeral/api db:setup",
     "db:generate": "pnpm --filter @yeral/api db:generate",
+    "docker:up": "docker compose -f infra/docker/compose.yml up -d --build --wait",
+    "docker:down": "docker compose -f infra/docker/compose.yml down",
     "version-packages": "changeset version",
     "tag-release": "changeset tag",
     "prepare": "lefthook install"

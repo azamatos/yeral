@@ -53,17 +53,51 @@ Workers Paid when limits are hit, Access policy for `cms.` (M6).
 
 - `pnpm db:up` starts Postgres 18 from `infra/docker/compose.dev.yml` (user/password `yeral`, port 5432, a named volume).
 - `apps/api/.env.local` (copy `.env.example`) names this worktree's database: `DATABASE_URL=postgres://yeral:yeral@localhost:5432/yeral`
-  (a second worktree uses `…/yeral_<branch>`). `pnpm db:setup` creates it if missing, applies the migrations and seeds the demo.
+  (a second worktree uses `…/yeral_<branch>`). `pnpm db:setup` creates it if missing, applies the migrations and seeds the
+  demo while the database has no businesses; it never touches a database that has them. `pnpm db:seed` starts the demo over.
   The root `.env.local` holds the **Neon production** URL for the neon tooling: the api never reads it.
 - Seeding wipes the database, so `db:seed` refuses any host but localhost/`postgres`/`db` unless `--allow-remote` is passed
   (staging from CI); with `YERAL_ENV=production` it writes only the category catalogue.
-- Demo dates move with today: the design's demo day (2026-10-14) becomes the day you seed. Photos are served by the Node
-  entry from `docs/design/assets/photos` at `/media/demo/*` outside production.
+- Demo dates move with today, once: the design's demo day (2026-10-14) becomes the day you seed, and stays that date.
+  A database seeded on an earlier day shows that day's demo (requests expired, "today" in the past): `pnpm db:seed` (wipes
+  the database) brings it to today. Photos are served by the Node entry from `docs/design/assets/photos` at
+  `/media/demo/*` outside production.
 - API tests: `TEST_DATABASE_URL` (default `postgres://yeral:yeral@localhost:5432/postgres`, an admin connection). A global
   setup migrates `yeral_test_template`; each test file gets its own copy (`create database … template …`) and drops it.
   CI runs a `postgres:18` service container for this (`ci.yml`, job «Format, lint, types, tests, build»).
 - Migrations: `pnpm db:generate` (drizzle-kit, `apps/api/src/db/migrations`); hand-written SQL (extensions, exclusion
   constraints) goes into a `--custom` migration. Never edit a merged migration.
+
+## The api on Cloudflare (prepared in M2g, not deployed yet)
+
+- `apps/api/src/entry/worker.ts` is the Worker: a node-postgres client per request through Hyperdrive, opened on the
+  request's first query (preflights, `/version.json`, `/docs` never connect); the Cron Trigger (`* * * * *`) runs the jobs
+  tick on a pool of 3. Both entries run `jobsTick()` (`modules/jobs/tick.ts`): a transaction-level advisory lock keeps
+  runs from overlapping (Node processes, Cron invocations), failures are logged. `apps/api/wrangler.jsonc` has the
+  `staging` environment (`yeral-api-stage` on `api-stage.yeral.app`); its top level has no database binding and no URL,
+  so a deploy without `--env` fails loudly. `pnpm --filter @yeral/api run build:worker` is a dry-run bundle (≈ 300 KiB gzip).
+- Client IPs for rate limits: `TRUSTED_IP_HEADER` names the one header the api trusts — `cf-connecting-ip` on Workers
+  (wrangler vars), `x-forwarded-for` behind our nginx (compose), which sets it and drops a client-sent `CF-Connecting-IP`.
+- Locally in workerd: `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://user:pass@localhost:5432/yeral pnpm --filter @yeral/api exec wrangler dev --env staging --local`.
+- **Waiting for the owner's go-ahead** (Cloudflare account resources + a DNS record): create the Neon branch `stage`,
+  a Hyperdrive config `yeral-stage` on its direct connection string (Hyperdrive pools by itself) with query caching off —
+  the api needs fresh reads (sessions, events, free times):
+  `pnpm --filter @yeral/api exec wrangler hyperdrive create yeral-stage --connection-string="$DATABASE_URL_UNPOOLED" --caching-disabled`
+  — put its id into `wrangler.jsonc`, migrate + seed the branch (`db:setup --allow-remote` from CI),
+  `pnpm --filter @yeral/api run deploy:staging` (creates `api-stage.yeral.app`), then a CI job deploys it on every green
+  push to `main` with a smoke check.
+- Staging's demo goes stale like any seeded database: planned with that CI job, a nightly scheduled run of
+  `db:seed --allow-remote` (YERAL_ENV=staging) starts it over on the new day; deploys only migrate.
+- Photos on staging: `MEDIA_BASE_URL=https://stage.yeral.app/media` — the client site serves the demo photos from M3.
+
+## The production-like stack (since M2g)
+
+`pnpm docker:up` builds `infra/docker/api.Dockerfile` (turbo prune with the lockfile's turbo → pnpm install → esbuild
+bundle → `node:24-alpine` with only `dist/`), starts Postgres 18, runs `migrate` (`node dist/cli.js setup`: migrations,
+demo seed while empty), the api (jobs tick inside) and nginx (`infra/nginx`, one server block per host):
+http://api.yeral.localhost/docs. CI's «Docker stack» job does the same and asks for health through nginx.
+`pnpm docker:down` stops it (`-v` drops the data). The demo keeps the day of the first `docker:up`; start it over with
+`docker compose -f infra/docker/compose.yml run --rm migrate node dist/cli.js seed`.
 
 ## Hosting later: own server with Docker + nginx
 

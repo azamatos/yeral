@@ -37,3 +37,6 @@ apps/legacy/public/vendor/
 *.log
 .vercel
 .neon
+
+# wrangler dry-run output
+dist-worker/

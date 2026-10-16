@@ -5,23 +5,13 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import { createApp } from '../app'
 import { loadConfig } from '../config'
 import { createDb, createPool } from '../db/client'
-import type { Deps } from '../deps'
-import { runDueJobs } from '../modules/jobs/run'
-import { createLogger } from '../ports/log'
-import { logSms } from '../ports/sms'
+import { createDeps } from '../deps'
+import { jobsTick } from '../modules/jobs/tick'
 
 const config = loadConfig(process.env)
-const log = createLogger(config.logLevel, { app: 'api' })
 const pool = createPool(config.databaseUrl)
-const deps: Deps = {
-  db: createDb(pool),
-  site: config.site,
-  now: Date.now,
-  sms: logSms(log),
-  media: (key) => `${config.mediaBaseUrl}/${key}`,
-  log,
-  trustedIpHeader: config.trustedIpHeader,
-}
+const deps = createDeps(config, createDb(pool))
+const { log } = deps
 
 const app = createApp(async (c, next) => {
   c.set('deps', deps)
@@ -36,15 +26,13 @@ if (config.site.demo) {
 
 const server = serve({ fetch: app.fetch, port: config.port }, (info) => log.info('listening', { port: info.port, env: config.site.env }))
 
-// the jobs tick (ADR 0005): expiries, completions, SMS, reminders; one run at a time
+// the jobs tick (ADR 0005): expiries, completions, SMS, reminders; one run at a time in this process, and across
+// processes through the tick's database lock
 let running = false
 const tick = () => {
   if (running) return
   running = true
-  runDueJobs(deps)
-    .then((r) => (r.expired || r.completed || r.jobs ? log.info('jobs', r) : undefined))
-    .catch((e: unknown) => log.error('jobs failed', { error: String(e) }))
-    .finally(() => (running = false))
+  void jobsTick(deps).finally(() => (running = false))
 }
 const timer = setInterval(tick, 60_000)
 tick()

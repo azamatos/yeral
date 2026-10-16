@@ -7,6 +7,7 @@ import { Scalar } from '@scalar/hono-api-reference'
 import type { Context, MiddlewareHandler } from 'hono'
 import { cors } from 'hono/cors'
 import { requestId } from 'hono/request-id'
+import type { Deps } from './deps'
 import { ApiError, errorBody, errorResponse, validationDetails } from './http/errors'
 import type { AppEnv } from './http/env'
 import { authRoutes } from './modules/auth/routes'
@@ -17,11 +18,13 @@ import { catalogRoutes } from './modules/catalog/routes'
 import { eventRoutes } from './modules/events/routes'
 import { healthRoutes } from './modules/health/routes'
 import { meRoutes } from './modules/me/routes'
+import { createLogger } from './ports/log'
 import { build } from './version'
 
 export type { AppEnv } from './http/env'
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
+const fallbackLog = createLogger('info', { app: 'api' })
 
 export function createApp(provide: MiddlewareHandler<AppEnv>) {
   const app = new OpenAPIHono<AppEnv>({
@@ -57,7 +60,9 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
 
   app.onError((err, c) => {
     if (err instanceof ApiError) return errorResponse(c, err)
-    c.var.deps.log.error('unhandled', {
+    // the entry may have failed before providing deps (bad config, no database binding)
+    const log = (c.var.deps as Deps | undefined)?.log ?? fallbackLog
+    log.error('unhandled', {
       requestId: c.var.requestId,
       error: err instanceof Error ? (err.stack ?? err.message) : String(err),
     })

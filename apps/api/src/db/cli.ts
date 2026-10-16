@@ -1,7 +1,10 @@
 /**
  * `pnpm db:migrate | db:seed | db:setup` (root: `pnpm db:setup`). Seeding writes demo data, so it runs only against a
  * local database unless `--allow-remote` is passed (staging from CI); production gets the category catalogue only.
+ * `setup` = create the database if missing, migrate, and seed it while it has no businesses. The demo's dates are fixed
+ * at seed time (the demo day becomes that day), so a long-lived database goes stale: `seed` starts it over on today.
  */
+import { sql } from 'drizzle-orm'
 import pg from 'pg'
 import { loadConfig } from '../config'
 import { createDb } from './client'
@@ -41,8 +44,14 @@ async function main() {
       if (!isLocal && !flags.includes('--allow-remote'))
         throw new Error(`Refusing to seed ${url.hostname}: pass --allow-remote for a remote database`)
       const demo = config.site.env !== 'production'
-      const counts = await seed(db, { demo, now: Date.now() })
-      console.warn(`seeded ${demo ? 'demo data' : 'the category catalogue'}: ${JSON.stringify(counts)}`)
+      // `setup` seeds an empty database only; `seed` starts the demo over
+      const [{ n } = { n: 0 }] = (await db.execute<{ n: number }>(sql`select count(*)::int as n from businesses`)).rows
+      if (command === 'setup' && demo && n > 0) {
+        console.warn(`the database already has ${n} businesses: kept (db:seed starts the demo over on today's date)`)
+      } else {
+        const counts = await seed(db, { demo, now: Date.now() })
+        console.warn(`seeded ${demo ? 'demo data' : 'the category catalogue'}: ${JSON.stringify(counts)}`)
+      }
     }
   } finally {
     await pool.end()

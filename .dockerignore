@@ -1,0 +1,16 @@
+**/node_modules
+**/.turbo
+**/dist
+**/.next
+**/.open-next
+**/.wrangler
+**/storybook-static
+**/coverage
+.git
+**/.env
+**/.env.*
+**/.dev.vars
+**/.dev.vars.*
+docs/design/assets
+apps/legacy/.next
+apps/legacy/.open-next

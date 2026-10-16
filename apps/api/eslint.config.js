@@ -1,6 +1,8 @@
 import { config } from '@yeral/config/eslint'
 
 export default [
+  // wrangler's dry-run bundle
+  { ignores: ['dist-worker/**'] },
   ...config({ tsconfigRootDir: import.meta.dirname }),
   {
     // API tests read response JSON loosely; the contract schemas type the real clients

@@ -133,7 +133,8 @@ Before writing a helper, look here and in the package; add new shared helpers to
 
 ```bash
 pnpm install
-pnpm db:up && pnpm db:setup     # Postgres 18 in Docker; creates the database from apps/api/.env.local, migrates, seeds the demo
+pnpm db:up && pnpm db:setup     # Postgres 18 in Docker; creates the database from apps/api/.env.local, migrates, seeds the demo if empty
+pnpm db:seed                    # starts the demo over on today's date (wipes the database; operations.md)
 pnpm dev                        # api + all apps + Storybook through turbo
 pnpm dev --filter=@yeral/client...  # one app and what it depends on
 pnpm gen package                # scaffold an internal package
