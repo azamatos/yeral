@@ -1,19 +1,28 @@
 ---
 name: design-system
-description: Work on Ýeral's design system — web DS v0.3.1 tokens, @yeral/ui components (Radix + cva on Tailwind), Storybook stories and their tests, and matching the hi-fi screens in docs/design. Use when adding or changing a component, a token or a style, writing stories, building any screen, or when something looks off against the design.
+description: Work on Ýeral's design system — web DS v0.4 tokens, @yeral/ui components (Radix + cva on Tailwind), Storybook stories and their tests, and matching the hi-fi screens in docs/design. Use when adding or changing a component, a token or a style, writing stories, building any screen, or when something looks off against the design.
 ---
 
 # Design system
 
 Decisions: ADR 0012 (+ revision 2026-10-14). Source of truth: `docs/design/` — read `docs/design/CLAUDE.md` first
-(visual rules, how to read a `.dc.html`), then `tokens.css`, `screens/system/Main.dc.html` (foundations),
-`screens/system/DS-Components.dc.html` (every component and state), `screens/README.md` (screens, states, dev notes).
+(visual rules, how to read a `.dc.html`), then `tokens.css` (+ `token-audit.md`: which stray screen value maps to which
+token), `screens/system/Main.dc.html` (foundations), `screens/system/DS-Components.dc.html` (every component and state),
+`screens/system/DS-Patterns.dc.html` (v0.4 product components: new primitives and new variants of existing ones),
+`screens/system/DS-Business.dc.html` (v0.4 domain components), `COMPONENTS.md` (every component → package or FSD place,
+Storybook title, status exists / extend / new, states, drift winners), `screens/README.md` (screens, states, dev notes).
+`CHANGELOG.md` says what each export changed.
+
+**Before building a screen, look up every piece of it in `COMPONENTS.md`.** `exists` → use it; `extend` → add the
+variant and its stories first; `new` → build it first (domain-free → `@yeral/ui`, domain → the FSD slice in the row) with
+stories for every state on its board. Where screens drew the same thing differently, the board wins. No screen ships a
+component without stories.
 Package: `packages/ui` (theme `src/styles/theme.css` — every design token under a Tailwind name, checked against
 `docs/design/tokens.css` by `tokens.test.ts`; components `src/components/<name>/`). Docs and tests: `apps/storybook`
 → `storybook.yeral.app`. Look at the existing components first: they are the reference for patterns (cva variants,
 `asChild`, field context, mobile sheets).
 
-## The rules in one screen (web DS v0.3.1)
+## The rules in one screen (web DS v0.4)
 
 - White base; 1px `n-200` dividers instead of boxed cards; ink `n-900` text; secondary `n-600`, tertiary `n-500`;
   `n-400` is for disabled controls only, never text. Page background always white; `bg-group` only behind settings groups.
@@ -42,7 +51,10 @@ Package: `packages/ui` (theme `src/styles/theme.css` — every design token unde
 
 `packages/ui/src/styles/theme.css` carries the design's values under Tailwind names (`--color-n-200`, `--color-a-500`,
 `--radius-m`, `--text-h2`…), so classes read like the spec: `border-n-200 text-n-600 bg-a-50 rounded-m text-h2`.
-Radii: `rounded-input` 8, `rounded-s` 10, `rounded-m` 12, `rounded-l` 14, `rounded-card` 16, `rounded-pill`. Default
+Radii: `rounded-xs` 4, `rounded-sm` 6, `rounded-input` 8, `rounded-s` 10 (S button — not `sm`), `rounded-m` 12, `rounded-l` 14,
+`rounded-card` 16, `rounded-pill`. Type adds `text-small` 14/20 (business body, menus, table cells) and `text-micro` 12/16;
+shadows `shadow-control` (knobs, photo controls, pins), `shadow-focus-inset` (focus inside clipped rows and cells),
+`shadow-input-warning`; charts `chart-1…4` (accent ramp) + `chart-area|compare|grid|axis`. Default
 Tailwind colours are off. A value missing from the tokens is a question for the owner, not a new token. When the
 designer exports new tokens, `pnpm --filter @yeral/ui test` shows exactly what changed.
 
