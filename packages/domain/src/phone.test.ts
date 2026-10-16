@@ -13,6 +13,24 @@ describe('Turkmen phones', () => {
     expect(formatPhone('')).toBe('+993')
   })
 
+  it('drops the country code or the trunk 8 while typing, not only on a full number', () => {
+    expect(nationalDigits('+993 65 12')).toBe('6512')
+    expect(formatPhone('+993 65 12')).toBe('+993 65 12')
+    expect(formatPhone('+99')).toBe('+993')
+    expect(formatPhone('8 65 1')).toBe('+993 65 1')
+    expect(nationalDigits('8 65 12 34 56')).toBe('65123456')
+    expect(isPhone('8 65 12 34 56')).toBe(true)
+    expect(toE164('8 (65) 12-34-56')).toBe('+99365123456')
+    expect(isMobile('8 65 12 34 56')).toBe(true)
+  })
+
+  it('drops a trunk 8 typed after the fixed +993 too', () => {
+    expect(formatPhone('+993 8')).toBe('+993')
+    expect(formatPhone('+993 8 65 1')).toBe('+993 65 1')
+    expect(toE164('+993 8 65 12 34 56')).toBe('+99365123456')
+    expect(isMobile('99386512345 6')).toBe(true)
+  })
+
   it('needs exactly 8 national digits', () => {
     expect(isPhone('6512345')).toBe(false)
     expect(isPhone('+993 65 12 34 56')).toBe(true)

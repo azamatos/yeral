@@ -37,3 +37,6 @@ export function openOf(b: BusinessRow, now: number) {
 }
 
 export const servicePrice = (s: ServiceRow): Price => ({ type: s.priceType, amount: s.priceAmount })
+
+/** What clients see: a hidden price never leaves the api with its amount. */
+export const publicPrice = (s: ServiceRow): Price => (s.priceType === 'hidden' ? { type: 'hidden', amount: 0 } : servicePrice(s))

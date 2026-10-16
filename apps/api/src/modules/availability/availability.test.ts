@@ -65,7 +65,10 @@ describe('free times', () => {
     expect(four.json.slots[0].areaIds).toHaveLength(2)
     const six = await b.req('/v1/businesses/bag-kafe/tables?party=6')
     expect(six.json.slots[0].areaIds).toHaveLength(3)
-    expect((await b.req('/v1/businesses/bag-kafe/tables?party=9')).status).toBe(400)
+    const nine = await b.req('/v1/businesses/bag-kafe/tables?party=9')
+    expect(nine.status).toBe(400)
+    expect(nine.json.error).toEqual({ code: 'party_too_large', details: { callFrom: 9 } })
+    expect((await b.req('/v1/businesses/no-such-place/tables?party=12')).status).toBe(404)
   })
 
   it('classes: seats left as the design shows them', async () => {

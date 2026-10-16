@@ -1,6 +1,8 @@
 /**
  * `seed(db, { demo, now })`: the category catalogue always; with `demo`, the whole design demo (wipes the database
- * first — the CLI allows that only on local and staging databases). Demo dates move with "today".
+ * first — the CLI allows that only on local and staging databases). One transaction: a seed that fails leaves the
+ * database as it was. Demo dates move with "today"; weekly data (opening hours, shifts, breaks, the yoga week) turns with
+ * them, so the demo day keeps the design's Wednesday whatever weekday it lands on.
  */
 import { bookingCode } from '@yeral/domain/id'
 import { holdUntil as holdUntilOf } from '@yeral/domain/lifecycle'
@@ -8,8 +10,9 @@ import type { BookingStatus } from '@yeral/domain/model'
 import { ROLE_TEMPLATES, type RoleTemplate } from '@yeral/domain/permissions'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
 import { addDays, diffDays, dow, epochOf, today } from '@yeral/domain/time'
-import { sql } from 'drizzle-orm'
-import type { Db } from '../client'
+import { getTableName, is, sql } from 'drizzle-orm'
+import { PgTable } from 'drizzle-orm/pg-core'
+import type { Db, Queryable } from '../client'
 import * as t from '../schema'
 import { CATEGORIES } from './categories'
 import {
@@ -40,40 +43,14 @@ export function offset(from: { lat: number; lng: number }, km: number, bearing: 
   return { lat: Number((from.lat + dLat).toFixed(6)), lng: Number((from.lng + dLng).toFixed(6)) }
 }
 
-const ALL_TABLES = [
-  'events',
-  'jobs',
-  'reviews',
-  'booking_items',
-  'bookings',
-  'client_notes',
-  'clients',
-  'favorites',
-  'memberships',
-  'roles',
-  'staff_services',
-  'services',
-  'service_groups',
-  'staff',
-  'dining_tables',
-  'table_areas',
-  'class_sessions',
-  'booking_rules',
-  'verification_history',
-  'businesses',
-  'categories',
-  'places',
-  'sessions',
-  'login_codes',
-  'rate_limits',
-  'users',
-]
+/** Every table of the schema, so a new one can't be missed by `wipe()`. */
+export const TABLES: readonly string[] = Object.values(t).flatMap((x) => (is(x, PgTable) ? [getTableName(x)] : []))
 
-export async function wipe(db: Db): Promise<void> {
-  await db.execute(sql.raw(`truncate table ${ALL_TABLES.map((x) => `"${x}"`).join(', ')} restart identity cascade`))
+export async function wipe(db: Queryable): Promise<void> {
+  await db.execute(sql.raw(`truncate table ${TABLES.map((x) => `"${x}"`).join(', ')} restart identity cascade`))
 }
 
-export async function seedCategories(db: Db): Promise<number> {
+export async function seedCategories(db: Queryable): Promise<number> {
   for (const [i, c] of CATEGORIES.entries()) {
     const row = { ...c, intro: { tk: '', ru: '', en: '' }, sort: i }
     await db.insert(t.categories).values(row).onConflictDoUpdate({ target: t.categories.id, set: row })
@@ -82,10 +59,12 @@ export async function seedCategories(db: Db): Promise<number> {
 }
 
 interface Ctx {
-  db: Db
+  db: Queryable
   now: number
   /** Demo day → today. */
   day: (date: string) => string
+  /** A design week (0 = Monday) turned with the dates, so a demo date's weekday data lands on the date it moves to. */
+  week: <T>(days: readonly T[]) => T[]
   usedCodes: Set<string>
   users: Map<string, string>
   clients: Map<string, string>
@@ -115,6 +94,7 @@ interface SeededBusiness {
   areas: Map<string, { id: string; tables: { id: string; seats: number }[] }>
   buffer: number
   holdMinutes: number
+  sittingMinutes: number
 }
 
 async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness> {
@@ -144,7 +124,7 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
         }
       }),
       amenities: def.amenities,
-      hours: def.hours,
+      hours: ctx.week(def.hours),
       exceptions: (def.exceptions ?? []).map((e) => (e.yearly ? e : { ...e, from: ctx.day(e.from), to: ctx.day(e.to) })),
       avgBill: def.avgBill ?? null,
       rating: def.rating,
@@ -161,29 +141,30 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       tableRequests: def.tableRequests ?? [],
       demo: true,
     })
-    .returning({ id: t.businesses.id })
+    .returning({ id: t.businesses.id, sittingMinutes: t.businesses.tableSittingMinutes })
   if (!biz) throw new Error('business insert failed')
 
   const { note, ...ruleOverrides } = def.rules ?? {}
   const rules = { ...DEFAULT_RULES, ...ruleOverrides }
   await db.insert(t.bookingRules).values({ businessId: biz.id, ...rules, note: note ?? null })
 
-  const roleIds = new Map<RoleTemplate, string>()
-  for (const template of ['owner', 'admin', 'specialist'] as const) {
-    const grant = ROLE_TEMPLATES[template]
-    const [role] = await db
-      .insert(t.roles)
-      .values({
-        businessId: biz.id,
-        name: ROLE_NAMES[template],
-        template,
-        system: grant.system,
-        visibility: grant.visibility,
-        permissions: [...grant.permissions],
-      })
-      .returning({ id: t.roles.id })
-    if (role) roleIds.set(template, role.id)
-  }
+  const roles = await db
+    .insert(t.roles)
+    .values(
+      (['owner', 'admin', 'specialist'] as const).map((template) => {
+        const grant = ROLE_TEMPLATES[template]
+        return {
+          businessId: biz.id,
+          name: ROLE_NAMES[template],
+          template,
+          system: grant.system,
+          visibility: grant.visibility,
+          permissions: [...grant.permissions],
+        }
+      }),
+    )
+    .returning({ id: t.roles.id, template: t.roles.template })
+  const roleIds = new Map(roles.map((r) => [r.template, r.id]))
 
   const staffIds = new Map<string, { id: string; name: string }>()
   for (const [i, s] of (def.staff ?? []).entries()) {
@@ -200,8 +181,8 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
         hasApp: s.hasApp ?? true,
         status: s.status ?? 'active',
         sort: i,
-        shift: s.shift ?? null,
-        breaks: s.breaks ?? [null, null, null, null, null, null, null],
+        shift: s.shift ? ctx.week(s.shift) : null,
+        breaks: ctx.week(s.breaks ?? [null, null, null, null, null, null, null]),
         daysOff: (s.daysOff ?? []).map((e) => (e.yearly ? e : { ...e, from: ctx.day(e.from), to: ctx.day(e.to) })),
         rating: s.rating ?? null,
       })
@@ -264,7 +245,39 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
     areas.set(a.key, { id: area.id, tables })
   }
 
-  return { id: biz.id, def, services: serviceIds, staff: staffIds, areas, buffer: rules.bufferMinutes, holdMinutes: rules.holdMinutes }
+  return {
+    id: biz.id,
+    def,
+    services: serviceIds,
+    staff: staffIds,
+    areas,
+    buffer: rules.bufferMinutes,
+    holdMinutes: rules.holdMinutes,
+    sittingMinutes: biz.sittingMinutes,
+  }
+}
+
+/**
+ * A seeded booking's lifecycle fields, as the api would have left them: a request holds its slot (`hold` minutes still
+ * to go) and isn't confirmed; everything else was confirmed ten minutes after it was made.
+ */
+function lifecycle(
+  ctx: Ctx,
+  biz: SeededBusiness,
+  b: { date: string; start: number; end: number; status: BookingStatus; hold?: number },
+): Pick<typeof t.bookings.$inferInsert, 'holdUntil' | 'createdAt' | 'confirmedAt' | 'cancelledAt' | 'completedAt'> {
+  const startEpoch = epochOf(b.date, b.start)
+  const createdAt =
+    b.status === 'pending'
+      ? ctx.now - (biz.holdMinutes - (b.hold ?? biz.holdMinutes)) * 60_000
+      : Math.min(ctx.now, startEpoch) - 3 * 86_400_000
+  return {
+    holdUntil: b.status === 'pending' ? new Date(holdUntilOf(createdAt, { date: b.date, start: b.start }, biz.holdMinutes)) : null,
+    createdAt: new Date(createdAt),
+    confirmedAt: b.status === 'pending' ? null : new Date(createdAt + 10 * 60_000),
+    cancelledAt: b.status === 'cancelled' ? new Date(Math.min(ctx.now, startEpoch) - 86_400_000) : null,
+    completedAt: b.status === 'completed' || b.status === 'noshow' ? new Date(epochOf(b.date, b.end)) : null,
+  }
 }
 
 interface AppointmentSeed {
@@ -292,12 +305,7 @@ async function seedAppointment(ctx: Ctx, a: AppointmentSeed): Promise<string> {
   const who = a.biz.staff.get(a.staffKey)
   if (!svc || !who) throw new Error(`unknown service ${a.serviceKey} or staff ${a.staffKey} in ${a.biz.def.slug}`)
   const end = a.start + svc.def.durationMin
-  const active = a.status === 'pending' || a.status === 'confirmed'
-  const startEpoch = epochOf(a.date, a.start)
-  const createdAt =
-    a.status === 'pending'
-      ? ctx.now - (a.biz.holdMinutes - (a.hold ?? a.biz.holdMinutes)) * 60_000
-      : Math.min(ctx.now, startEpoch) - 3 * 86_400_000
+  const times = lifecycle(ctx, a.biz, { date: a.date, start: a.start, end, status: a.status, hold: a.hold })
   const [row] = await ctx.db
     .insert(t.bookings)
     .values({
@@ -312,18 +320,13 @@ async function seedAppointment(ctx: Ctx, a: AppointmentSeed): Promise<string> {
       start: a.start,
       end,
       status: a.status,
-      active,
       cancelledBy: a.cancelledBy ?? null,
       cancelReason: a.cancelReason ?? null,
       source: a.source,
       clientNote: a.clientNote ?? null,
       priceType: svc.def.price[0],
       priceAmount: svc.def.price[1],
-      holdUntil: a.status === 'pending' ? new Date(holdUntilOf(createdAt, { date: a.date, start: a.start }, a.biz.holdMinutes)) : null,
-      createdAt: new Date(createdAt),
-      confirmedAt: a.status === 'pending' ? null : new Date(createdAt + 10 * 60_000),
-      cancelledAt: a.status === 'cancelled' ? new Date(Math.min(ctx.now, startEpoch) - 86_400_000) : null,
-      completedAt: a.status === 'completed' || a.status === 'noshow' ? new Date(epochOf(a.date, end)) : null,
+      ...times,
     })
     .returning({ id: t.bookings.id })
   if (!row) throw new Error('booking insert failed')
@@ -339,7 +342,6 @@ async function seedAppointment(ctx: Ctx, a: AppointmentSeed): Promise<string> {
     bufferAfter: svc.def.bufferMin ?? a.biz.buffer,
     priceType: svc.def.price[0],
     priceAmount: svc.def.price[1],
-    active,
   })
   return row.id
 }
@@ -363,12 +365,23 @@ async function seedClient(
 }
 
 export async function seed(db: Db, opts: { demo: boolean; now: number }): Promise<Record<string, number>> {
-  if (!opts.demo) return { categories: await seedCategories(db) }
+  return db.transaction(async (tx) => (opts.demo ? seedDemo(tx, opts) : { categories: await seedCategories(tx) }))
+}
 
+async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<string, number>> {
   await wipe(db)
   const counts: Record<string, number> = { categories: await seedCategories(db) }
   const shift = diffDays(today(opts.now), DEMO_DAY)
-  const ctx: Ctx = { db, now: opts.now, day: (d) => addDays(d, shift), usedCodes: new Set(), users: new Map(), clients: new Map() }
+  const turn = ((shift % 7) + 7) % 7
+  const ctx: Ctx = {
+    db,
+    now: opts.now,
+    day: (d) => addDays(d, shift),
+    week: <T>(days: readonly T[]): T[] => days.map((_, i) => days[(i - turn + 7) % 7] as T),
+    usedCodes: new Set(),
+    users: new Map(),
+    clients: new Map(),
+  }
 
   await db.insert(t.places).values(PLACES.map((p) => ({ label: p.label, ...offset(DEMO_CENTER, p.distanceKm, p.bearing) })))
 
@@ -532,6 +545,7 @@ export async function seed(db: Db, opts: { demo: boolean; now: number }): Promis
       const area = b.areas.get(a.area)
       const table = area?.tables.filter((x) => x.seats >= (a.partySize ?? 2)).sort((x, y) => x.seats - y.seats)[0]
       const start = m(a.from)
+      const end = Math.min(1440, start + b.sittingMinutes)
       await db.insert(t.bookings).values({
         code: code(ctx, a.code),
         businessId: b.id,
@@ -542,105 +556,104 @@ export async function seed(db: Db, opts: { demo: boolean; now: number }): Promis
         clientPhone: DEMO_USER.phone,
         date,
         start,
-        end: Math.min(1440, start + 120),
+        end,
         status: a.status,
-        active: a.status === 'pending' || a.status === 'confirmed',
         cancelledBy: a.cancelledBy ?? null,
         cancelReason: a.reason ?? null,
         source: 'web',
         partySize: a.partySize,
         areaId: area?.id ?? null,
         tableId: table?.id ?? null,
-        createdAt: new Date(Math.min(opts.now, epochOf(date, start)) - 3 * 86_400_000),
-        confirmedAt: new Date(Math.min(opts.now, epochOf(date, start)) - 3 * 86_400_000 + 600_000),
-        cancelledAt: a.status === 'cancelled' ? new Date(epochOf(date, start) - 86_400_000) : null,
+        ...lifecycle(ctx, b, { date, start, end, status: a.status }),
       })
     }
   }
 
   // Aýdyň ýoga: sessions from a week ago to two weeks ahead; the demo day's seats as in the design
   const yoga = biz('aydyn-yoga')
-  const sessionIds = new Map<string, string>()
-  for (let i = -7; i <= 14; i++) {
-    const date = addDays(today(opts.now), i)
-    for (const s of YOGA_WEEK.filter((x) => x.dow === dow(date))) {
-      const [row] = await db
-        .insert(t.classSessions)
-        .values({
-          businessId: yoga.id,
-          name: s.name,
-          trainerId: yoga.staff.get(s.trainer)?.id ?? null,
-          level: s.level,
-          date,
-          start: m(s.start),
-          durationMin: s.durationMin,
-          capacity: s.capacity,
-          price: s.price,
-        })
-        .returning({ id: t.classSessions.id })
-      if (row) sessionIds.set(`${date} ${s.start}`, row.id)
-    }
-  }
+  // the design's weekday of each date: YOGA_WEEK and the seats taken are written for the design's dates
+  const sessionRows = Array.from({ length: 22 }, (_, i) => addDays(today(opts.now), i - 7)).flatMap((date) =>
+    YOGA_WEEK.filter((x) => x.dow === dow(addDays(date, -shift))).map((s) => ({
+      businessId: yoga.id,
+      name: s.name,
+      trainerId: yoga.staff.get(s.trainer)?.id ?? null,
+      level: s.level,
+      date,
+      start: m(s.start),
+      durationMin: s.durationMin,
+      capacity: s.capacity,
+      price: s.price,
+    })),
+  )
+  const sessions = await db
+    .insert(t.classSessions)
+    .values(sessionRows)
+    .returning({ id: t.classSessions.id, date: t.classSessions.date, start: t.classSessions.start })
+  const sessionIds = new Map(sessions.map((x) => [`${x.date} ${x.start}`, x.id]))
   let anonymous = 0
   for (const [key, taken] of Object.entries(YOGA_TAKEN)) {
     const [date = DEMO_DAY, time = '00:00'] = key.split(' ')
-    const sessionId = sessionIds.get(`${ctx.day(date)} ${time}`)
-    const s = YOGA_WEEK.find((x) => x.dow === dow(ctx.day(date)) && x.start === time)
-    if (!sessionId || !s) continue
-    for (let i = 0; i < taken; i++) {
+    const sessionId = sessionIds.get(`${ctx.day(date)} ${m(time)}`)
+    const s = YOGA_WEEK.find((x) => x.dow === dow(date) && x.start === time)
+    if (!sessionId || !s) throw new Error(`no yoga session for ${key}`)
+    const people = Array.from({ length: taken }, () => {
       anonymous++
-      const phone = `+99365${String(900000 + anonymous).slice(-6)}`
-      const clientId = await seedClient(ctx, yoga.id, { phone, name: `Müşderi ${anonymous}`, source: 'walkby' })
-      await db.insert(t.bookings).values({
+      return { phone: `+99365${String(900000 + anonymous).slice(-6)}`, name: `Müşderi ${anonymous}` }
+    })
+    const clients = await db
+      .insert(t.clients)
+      .values(people.map((p) => ({ ...p, businessId: yoga.id, source: 'walkby' as const })))
+      .returning({ id: t.clients.id, phone: t.clients.phone, name: t.clients.name })
+    // the same cache seedClient() fills, so a later demo row for one of these numbers finds its client
+    for (const c of clients) ctx.clients.set(`${yoga.id} ${c.phone}`, c.id)
+    await db.insert(t.bookings).values(
+      clients.map((c) => ({
         code: code(ctx),
         businessId: yoga.id,
-        type: 'class',
-        clientId,
-        clientName: `Müşderi ${anonymous}`,
-        clientPhone: phone,
+        type: 'class' as const,
+        clientId: c.id,
+        clientName: c.name,
+        clientPhone: c.phone,
         date: ctx.day(date),
         start: m(time),
         end: m(time) + s.durationMin,
-        status: 'confirmed',
-        active: true,
-        source: 'phone',
+        status: 'confirmed' as const,
+        source: 'phone' as const,
         sessionId,
         seats: 1,
-        priceType: 'fixed',
+        priceType: 'fixed' as const,
         priceAmount: s.price,
         confirmedAt: new Date(opts.now - 86_400_000),
-      })
-    }
+      })),
+    )
   }
   const yogaBooking = AYJEMAL_BOOKINGS.find((a) => a.type === 'class')
   if (yogaBooking?.session) {
     const date = ctx.day(yogaBooking.date)
-    const sessionId = sessionIds.get(`${date} ${yogaBooking.session.start}`)
-    const s = YOGA_WEEK.find((x) => x.dow === dow(date) && x.start === yogaBooking.session?.start)
-    if (sessionId && s) {
-      const clientId = await seedClient(ctx, yoga.id, { phone: DEMO_USER.phone, name: DEMO_USER.name, userId: ayjemal, source: 'yeral' })
-      await db.insert(t.bookings).values({
-        code: code(ctx, yogaBooking.code),
-        businessId: yoga.id,
-        type: 'class',
-        clientId,
-        userId: ayjemal,
-        clientName: DEMO_USER.name,
-        clientPhone: DEMO_USER.phone,
-        date,
-        start: m(s.start),
-        end: m(s.start) + s.durationMin,
-        status: 'confirmed',
-        active: true,
-        source: 'web',
-        sessionId,
-        seats: yogaBooking.seats ?? 1,
-        priceType: 'fixed',
-        priceAmount: s.price,
-        createdAt: new Date(opts.now - 2 * 86_400_000),
-        confirmedAt: new Date(opts.now - 2 * 86_400_000),
-      })
-    }
+    const sessionId = sessionIds.get(`${date} ${m(yogaBooking.session.start)}`)
+    const s = YOGA_WEEK.find((x) => x.dow === dow(yogaBooking.date) && x.start === yogaBooking.session?.start)
+    if (!sessionId || !s) throw new Error(`no yoga session for ${yogaBooking.code}`)
+    const clientId = await seedClient(ctx, yoga.id, { phone: DEMO_USER.phone, name: DEMO_USER.name, userId: ayjemal, source: 'yeral' })
+    await db.insert(t.bookings).values({
+      code: code(ctx, yogaBooking.code),
+      businessId: yoga.id,
+      type: 'class',
+      clientId,
+      userId: ayjemal,
+      clientName: DEMO_USER.name,
+      clientPhone: DEMO_USER.phone,
+      date,
+      start: m(s.start),
+      end: m(s.start) + s.durationMin,
+      status: 'confirmed',
+      source: 'web',
+      sessionId,
+      seats: yogaBooking.seats ?? 1,
+      priceType: 'fixed',
+      priceAmount: s.price,
+      createdAt: new Date(opts.now - 2 * 86_400_000),
+      confirmedAt: new Date(opts.now - 2 * 86_400_000),
+    })
   }
 
   // Glow Studio · Parahat: the branch switcher shows two waiting requests

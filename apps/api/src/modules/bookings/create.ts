@@ -4,10 +4,12 @@
  * free times). Online bookings wait for the business unless it confirms instantly.
  */
 import type { CreateBooking } from '@yeral/contract/bookings'
+import type { PartyTooLargeDetails } from '@yeral/contract/errors'
 import {
   assignTable,
   canBookSession,
   findAppointmentSlot,
+  MAX_ONLINE_PARTY,
   maxSeats,
   nearestSlots,
   tableSlots,
@@ -15,7 +17,7 @@ import {
   type AppointmentSlot,
 } from '@yeral/domain/availability'
 import { isOnlineBlocked } from '@yeral/domain/clients'
-import { holdUntil as holdUntilOf, initialStatus } from '@yeral/domain/lifecycle'
+import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { priceTotal } from '@yeral/domain/pricing'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -110,7 +112,6 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       end,
       // instant bookings are confirmed right below, so the confirmation runs like any other
       status: 'pending',
-      active: true,
       source: 'web',
       clientNote: x.note ?? null,
       priceType: price?.type ?? null,
@@ -146,7 +147,6 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
           bufferAfter: it.bufferAfter,
           priceType: svc?.priceType ?? 'fixed',
           priceAmount: svc?.priceAmount ?? 0,
-          active: true,
           sort: i,
         }
       }),
@@ -240,13 +240,16 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
   }
 
   if (input.type === 'table') {
+    // "9 we ondan köp adam bolsa, jaň ediň" (client spec §4.5)
+    if (input.partySize > MAX_ONLINE_PARTY)
+      throw new ApiError('party_too_large', { callFrom: MAX_ONLINE_PARTY + 1 } satisfies PartyTooLargeDetails)
     const ctx = await loadTableContext(db, lb, input.date, input.date, now)
     const tableId = assignTable(ctx, { date: input.date, start: input.start, partySize: input.partySize, areaId: input.areaId })
     const nearest = () =>
       tableSlots(ctx, { date: input.date, partySize: input.partySize })
         .filter((s) => s.areaIds.includes(input.areaId) && s.start !== input.start)
         .sort((x, y) => Math.abs(x.start - input.start) - Math.abs(y.start - input.start))
-        .slice(0, 3)
+        .slice(0, MAX_ALTERNATIVES)
         .sort((x, y) => x.start - y.start)
         .map((s) => ({ date: input.date, start: s.start, end: Math.min(1440, s.start + ctx.sittingMinutes) }))
     if (!tableId) throw new ApiError('slot_taken', { alternatives: nearest() })

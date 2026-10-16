@@ -3,6 +3,7 @@
  * The name and domain are working titles, so nothing outside this file knows `yeral.app`: a new domain is a config change.
  */
 import { z } from 'zod'
+import { EnvError, parseEnv } from './env'
 
 export const SITE_ENVS = ['local', 'docker', 'staging', 'production'] as const
 export type SiteEnv = (typeof SITE_ENVS)[number]
@@ -69,7 +70,7 @@ export function siteConfig({ env, domain = 'yeral.app', portBase = 3000 }: SiteO
       break
     case 'docker': {
       // the production-like stack behind nginx: *.localhost resolves to this machine without /etc/hosts
-      const base = domain.replace(/\.[a-z]+$/, '.localhost')
+      const base = domain.replace(/\.[^.]+$/, '.localhost')
       urls = {
         client: `http://${base}`,
         business: `http://business.${base}`,
@@ -115,7 +116,18 @@ const siteEnvSchema = z.object({
  * with prefix `VITE_` (`VITE_YERAL_ENV` …); the api passes `process.env` or the Worker's env.
  */
 export function siteFromEnv(source: Record<string, unknown>, prefix = ''): SiteConfig {
-  const pick = (name: string) => source[prefix + name] ?? (name === 'PORT_BASE' ? source.PORT_BASE : undefined)
-  const env = siteEnvSchema.parse({ YERAL_ENV: pick('YERAL_ENV'), YERAL_DOMAIN: pick('YERAL_DOMAIN'), PORT_BASE: pick('PORT_BASE') })
+  // an empty variable (`VITE_YERAL_DOMAIN=`) counts as unset, so the default applies
+  const value = (name: string) => (source[name] === '' ? undefined : source[name])
+  // the variable each setting is read from: PORT_BASE is shared by every app, a prefixed one wins when it's set
+  const nameOf = (key: string) => (key === 'PORT_BASE' && value(prefix + key) === undefined ? key : prefix + key)
+  const keys = Object.keys(siteEnvSchema.shape)
+  let env: z.output<typeof siteEnvSchema>
+  try {
+    env = parseEnv(siteEnvSchema, Object.fromEntries(keys.map((key) => [key, value(nameOf(key))])))
+  } catch (e) {
+    // name the variables as they're spelled in the environment (`VITE_YERAL_ENV`), like every other env error
+    if (e instanceof EnvError) throw new EnvError(e.variables.map(nameOf))
+    throw e
+  }
   return siteConfig({ env: env.YERAL_ENV, domain: env.YERAL_DOMAIN, portBase: env.PORT_BASE })
 }

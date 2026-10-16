@@ -43,6 +43,11 @@ describe('siteConfig', () => {
     expect(site.urls.api).toBe('http://api.yeral.localhost')
     expect(site.cookieDomain).toBe('yeral.localhost')
   })
+
+  it('docker: replaces the last label whatever it is', () => {
+    expect(siteConfig({ env: 'docker', domain: 'yeral.xn--p1ai' }).urls.client).toBe('http://yeral.localhost')
+    expect(siteConfig({ env: 'docker', domain: 'yeral.app2' }).urls.api).toBe('http://api.yeral.localhost')
+  })
 })
 
 describe('siteFromEnv', () => {
@@ -55,6 +60,22 @@ describe('siteFromEnv', () => {
 
   it('rejects an unknown environment', () => {
     expect(() => siteFromEnv({ YERAL_ENV: 'prod' })).toThrow()
+  })
+
+  it('treats an empty variable as unset', () => {
+    expect(siteFromEnv({ VITE_YERAL_ENV: '', VITE_YERAL_DOMAIN: '', VITE_PORT_BASE: '' }, 'VITE_').urls.api).toBe('http://localhost:3004')
+    expect(siteFromEnv({ PORT_BASE: '', YERAL_DOMAIN: '' }).urls.api).toBe('http://localhost:3004')
+    expect(siteFromEnv({ VITE_PORT_BASE: '', PORT_BASE: '3200' }, 'VITE_').urls.api).toBe('http://localhost:3204')
+  })
+
+  it('names the bad variables as they are spelled in the environment', () => {
+    try {
+      siteFromEnv({ VITE_YERAL_ENV: 'prod', VITE_YERAL_DOMAIN: 'not a domain', PORT_BASE: '80' }, 'VITE_')
+      expect.unreachable()
+    } catch (e) {
+      expect(e).toBeInstanceOf(EnvError)
+      expect((e as EnvError).variables).toEqual(['VITE_YERAL_ENV', 'VITE_YERAL_DOMAIN', 'PORT_BASE'])
+    }
   })
 })
 

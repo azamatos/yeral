@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { daySummary, priceTotal } from './pricing'
+import { businessTotal, daySummary, priceTotal } from './pricing'
 import { DEFAULT_RULES, rulesErrors } from './rules'
 
 describe('priceTotal', () => {
@@ -30,6 +30,35 @@ describe('priceTotal', () => {
     ).toEqual({ type: 'fixed', amount: 50 })
     expect(priceTotal([{ type: 'free', amount: 0 }])).toEqual({ type: 'free', amount: 0 })
     expect(priceTotal([{ type: 'hidden', amount: 0 }])).toEqual({ type: 'hidden', amount: 0 })
+  })
+
+  it('never adds a hidden price into a shown total: the rest becomes a "from" total, or the total stays hidden', () => {
+    expect(
+      priceTotal([
+        { type: 'fixed', amount: 40 },
+        { type: 'hidden', amount: 100 },
+      ]),
+    ).toEqual({ type: 'from', amount: 40 })
+    expect(
+      priceTotal([
+        { type: 'free', amount: 0 },
+        { type: 'hidden', amount: 0 },
+      ]),
+    ).toEqual({ type: 'hidden', amount: 0 })
+    expect(priceTotal([{ type: 'hidden', amount: 120 }])).toEqual({ type: 'hidden', amount: 0 })
+  })
+})
+
+describe('businessTotal', () => {
+  it('the business counts every amount it set, hidden ones too', () => {
+    const prices = [
+      { type: 'fixed', amount: 40 },
+      { type: 'hidden', amount: 100 },
+      { type: 'from', amount: 25 },
+      { type: 'free', amount: 0 },
+    ] as const
+    expect(businessTotal(prices)).toBe(165)
+    expect(priceTotal(prices)).toEqual({ type: 'from', amount: 65 })
   })
 })
 

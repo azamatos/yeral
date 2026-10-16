@@ -16,14 +16,26 @@ export function newId(): string {
 
 export const BOOKING_CODE_PREFIX = 'YR-'
 
+/** The largest multiple of 10 a Uint32 reaches; draws above it are redrawn so every digit is equally likely. */
+const DIGIT_LIMIT = 2 ** 32 - (2 ** 32 % 10)
+
+function randomDigit(from: number): number {
+  const draw = new Uint32Array(1)
+  for (;;) {
+    const [n = 0] = webCrypto.getRandomValues(draw)
+    if (n < DIGIT_LIMIT && n % 10 >= from) return n % 10
+  }
+}
+
 /**
  * `YR-` + `digits` random digits, never starting with 0. Codes are unique in the database; on a collision the api
- * retries, and grows to more digits after a few tries, so codes never run out.
+ * retries, and grows to more digits after a few tries, so codes never run out. One draw per digit, so any length
+ * gets the whole range without bias.
  */
 export function bookingCode(digits = 5): string {
-  const [n = 0] = webCrypto.getRandomValues(new Uint32Array(1))
-  const min = 10 ** (digits - 1)
-  return `${BOOKING_CODE_PREFIX}${min + (n % (9 * min))}`
+  let code = String(randomDigit(1))
+  for (let i = 1; i < digits; i++) code += String(randomDigit(0))
+  return `${BOOKING_CODE_PREFIX}${code}`
 }
 
 export function isBookingCode(s: string): boolean {

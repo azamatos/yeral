@@ -22,6 +22,13 @@
       "when": 1792153710734,
       "tag": "0002_offers_and_event_cursor",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792155511861,
+      "tag": "0003_active_from_status",
+      "breakpoints": true
     }
   ]
 }

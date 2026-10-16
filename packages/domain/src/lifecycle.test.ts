@@ -74,6 +74,20 @@ describe('effectiveStatus and jobs', () => {
     expect(effectiveStatus(booking({ status: 'noshow' }), NOW).status).toBe('noshow')
   })
 
+  it('a job does exactly what effectiveStatus already shows', () => {
+    const statuses = ['pending', 'confirmed', 'completed', 'cancelled', 'noshow'] as const
+    const holds = [null, NOW + 30 * MIN]
+    const times = [NOW, NOW + 30 * MIN, epochOf(THU, 870), epochOf(THU, 930), epochOf(THU, 931)]
+    for (const status of statuses)
+      for (const hold of holds)
+        for (const now of times) {
+          const b = booking({ status, holdUntil: hold })
+          const shown = effectiveStatus(b, now).status
+          const expected = shown === b.status ? null : shown === 'cancelled' ? 'expire' : 'complete'
+          expect(dueTransition(b, now), `${status} ${hold} ${now}`).toBe(expected)
+        }
+  })
+
   it('pending and confirmed bookings take their slot', () => {
     expect(occupiesSlot(pending, NOW)).toBe(true)
     expect(occupiesSlot(pending, NOW + 31 * MIN)).toBe(false)

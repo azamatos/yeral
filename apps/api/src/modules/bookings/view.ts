@@ -61,7 +61,6 @@ export async function summaries(deps: Deps, rows: BookingRow[], lang: Locale): P
     }
     return {
       code: r.code,
-      type: r.type,
       business: {
         slug: b?.slug ?? '',
         name: b?.name ?? '',

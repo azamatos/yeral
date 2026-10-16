@@ -13,4 +13,11 @@ describe('ids', () => {
     expect(isBookingCode('YR-04821')).toBe(false)
     expect(isBookingCode('48213')).toBe(false)
   })
+
+  it('long codes use the whole range, beyond what one 32-bit draw covers', () => {
+    const codes = Array.from({ length: 200 }, () => bookingCode(12))
+    for (const c of codes) expect(c).toMatch(/^YR-[1-9]\d{11}$/)
+    // one Uint32 reaches only 100 000 000 000 + 4 294 967 295: every code would start with "10"
+    expect(new Set(codes.map((c) => c.slice(3, 4))).size).toBeGreaterThan(1)
+  })
 })

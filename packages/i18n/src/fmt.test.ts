@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createFmt, formatNumber } from './fmt'
+import { createFmt, createT, formatNumber } from './fmt'
 import { LOCALES, messages } from './messages'
 
 const tk = createFmt('tk')
@@ -49,6 +49,8 @@ describe('durations and distances', () => {
     [3000, '3 km'],
     [12_400, '12 km'],
     [4, '10 m'],
+    [994, '990 m'],
+    [996, '1 km'],
   ])('tk distance %i m = %s', (metres, text) => {
     expect(tk.distance(metres)).toBe(text)
   })
@@ -75,12 +77,23 @@ describe('dates and times', () => {
     expect(tk.relativeDay('2026-10-14', '2026-10-14')).toBe('Şu gün')
     expect(tk.relativeDay('2026-10-15', '2026-10-14')).toBe('Ertir')
     expect(tk.relativeDay('2026-10-17', '2026-10-14')).toBe('Şenbe')
+    expect(tk.relativeDay('2026-10-20', '2026-10-14')).toBe('Sişenbe')
     expect(tk.weekdayShort('2026-10-12')).toBe('Du')
+  })
+
+  it('a weekday only within the coming week, otherwise the date', () => {
+    expect(tk.relativeDay('2026-10-13', '2026-10-14')).toBe('13 oktýabr')
+    expect(tk.relativeDay('2026-10-21', '2026-10-14')).toBe('21 oktýabr')
+    expect(tk.relativeDay('2026-10-24', '2026-10-14')).toBe('24 oktýabr')
   })
 
   it('24-hour times and phones', () => {
     expect(tk.time(870)).toBe('14:30')
     expect(tk.timeRange(870, 930)).toBe('14:30–15:30')
+    // a day may end at midnight (the hours pickers draw 24:00); later times run into the next day
+    expect(tk.timeRange(1380, 1440)).toBe('23:00–24:00')
+    expect(tk.time(1500)).toBe('01:00')
+    expect(tk.timeRange(1380, 1500)).toBe('23:00–01:00')
     expect(tk.phone('99365901122')).toBe('+993 65 90 11 22')
   })
 })
@@ -92,6 +105,13 @@ describe('message catalogues', () => {
   it('every key exists in tk, ru and en', () => {
     const tkKeys = keys(messages.tk).sort()
     for (const locale of LOCALES) expect(keys(messages[locale]).sort()).toEqual(tkKeys)
+  })
+
+  it('the party limit comes in as an argument', () => {
+    expect(createT('tk')('errors.party_too_large', { callFrom: 9 })).toBe('9 we ondan köp adam bolsa, jaň ediň.')
+    expect(createT('ru')('errors.party_too_large', { callFrom: 9 })).toBe('Если вас 9 и больше, позвоните.')
+    expect(createT('en')('errors.party_too_large', { callFrom: 9 })).toBe('For 9 or more people, please call.')
+    expect(createT('tk')('errors.party_too_large', { callFrom: 13 })).toBe('13 we ondan köp adam bolsa, jaň ediň.')
   })
 
   it('no empty messages', () => {

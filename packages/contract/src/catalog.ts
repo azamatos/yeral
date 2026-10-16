@@ -2,6 +2,7 @@
  * Public catalogue: categories, search, business cards and pages, reviews, places (client spec §4.1–4.3, §5).
  * Text comes resolved for `?lang=`; distances only when the request carries a position.
  */
+import { MAX_ONLINE_PARTY } from '@yeral/domain/availability'
 import { DEFAULT_RADIUS_KM, RADIUS_OPTIONS_KM } from '@yeral/domain/geo'
 import { CONFIRM_MODES } from '@yeral/domain/model'
 import { z } from 'zod'
@@ -9,16 +10,18 @@ import {
   bookingTypeSchema,
   cursorQuerySchema,
   epochSchema,
+  geoSchema,
   idSchema,
   langQuerySchema,
-  latLngSchema,
   listOf,
   manatSchema,
   minuteSchema,
+  nextFreeSchema,
   phoneSchema,
   photoSchema,
   priceSchema,
   slugSchema,
+  startMinuteSchema,
   ymdSchema,
 } from './common'
 
@@ -46,7 +49,7 @@ export const categoryListSchema = listOf(categorySchema)
 export const openStateSchema = z
   .discriminatedUnion('open', [
     z.object({ open: z.literal(true), until: minuteSchema }),
-    z.object({ open: z.literal(false), inDays: z.number().int().min(0).nullable(), at: minuteSchema.nullable() }),
+    z.object({ open: z.literal(false), inDays: z.number().int().min(0).nullable(), at: startMinuteSchema.nullable() }),
   ])
   .meta({ id: 'OpenState' })
 
@@ -54,18 +57,18 @@ export const openStateSchema = z
 
 /** What a card shows for the chosen day, per booking type (client spec §4.2 "Row content per type"). */
 export const cardAvailabilitySchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('appointment'), date: ymdSchema, starts: z.array(minuteSchema).max(4), more: z.number().int().min(0) }),
+  z.object({ type: z.literal('appointment'), date: ymdSchema, starts: z.array(startMinuteSchema).max(4), more: z.number().int().min(0) }),
   z.object({
     type: z.literal('table'),
     date: ymdSchema,
     partySize: z.number().int(),
-    starts: z.array(minuteSchema).max(4),
+    starts: z.array(startMinuteSchema).max(4),
     more: z.number().int().min(0),
   }),
   z.object({
     type: z.literal('class'),
     session: z
-      .object({ id: idSchema, date: ymdSchema, start: minuteSchema, name: z.string(), seatsLeft: z.number().int().min(0) })
+      .object({ id: idSchema, date: ymdSchema, start: startMinuteSchema, name: z.string(), seatsLeft: z.number().int().min(0) })
       .nullable(),
   }),
 ])
@@ -80,7 +83,7 @@ export const businessCardSchema = z
     reviewsCount: z.number().int().min(0),
     /** Street line for rows: "Bitarap Türkmenistan şaýoly 247". */
     street: z.string(),
-    geo: latLngSchema.extend({ approximate: z.boolean() }),
+    geo: geoSchema,
     /** Null when the request has no position (location denied). */
     distanceM: z.number().int().min(0).nullable(),
     bookingType: bookingTypeSchema,
@@ -100,12 +103,21 @@ export const SEARCH_SORTS = ['distance', 'rating', 'price'] as const
 
 const boolQuery = z.enum(['1', '0', 'true', 'false']).transform((v) => v === '1' || v === 'true')
 
-export const searchQuerySchema = langQuerySchema.extend(cursorQuerySchema.shape).extend({
+/** A position is both coordinates or neither: one alone would silently search without a position. */
+function latWithLng(v: { lat?: number; lng?: number }, ctx: z.RefinementCtx) {
+  if ((v.lat === undefined) !== (v.lng === undefined))
+    ctx.addIssue({ code: 'custom', path: [v.lat === undefined ? 'lat' : 'lng'], message: 'lat and lng come together' })
+}
+
+const latQuery = z.coerce.number().min(-90).max(90)
+const lngQuery = z.coerce.number().min(-180).max(180)
+
+const searchFields = langQuerySchema.extend(cursorQuerySchema.shape).extend({
   /** "Näme?": a service, a business name or a category word. */
   q: z.string().trim().max(80).optional(),
   cat: slugSchema.optional(),
-  lat: z.coerce.number().min(-90).max(90).optional(),
-  lng: z.coerce.number().min(-180).max(180).optional(),
+  lat: latQuery.optional(),
+  lng: lngQuery.optional(),
   r: z.coerce
     .number()
     .refine((n) => (RADIUS_OPTIONS_KM as readonly number[]).includes(n))
@@ -123,11 +135,17 @@ export const searchQuerySchema = langQuerySchema.extend(cursorQuerySchema.shape)
   bbox: z
     .string()
     .transform((s) => s.split(',').map(Number))
-    .pipe(z.tuple([z.number(), z.number(), z.number(), z.number()]))
+    .pipe(
+      z
+        .tuple([z.number().min(-90).max(90), z.number().min(-180).max(180), z.number().min(-90).max(90), z.number().min(-180).max(180)])
+        .refine(([minLat, minLng, maxLat, maxLng]) => minLat <= maxLat && minLng <= maxLng, 'Expected min ≤ max'),
+    )
     .optional(),
-  /** Table cards: times for this party size (default 2). */
-  party: z.coerce.number().int().min(1).max(8).default(2),
+  /** Table cards: times for this party size (default 2); larger parties book by phone. */
+  party: z.coerce.number().int().min(1).max(MAX_ONLINE_PARTY).default(2),
 })
+
+export const searchQuerySchema = searchFields.superRefine(latWithLng)
 export type SearchQuery = z.infer<typeof searchQuerySchema>
 
 export const searchResponseSchema = listOf(businessCardSchema)
@@ -223,7 +241,7 @@ export const businessDetailSchema = z
     entranceNote: z.string().nullable(),
     /** Home-based: the exact address shows only on a confirmed booking; `geo` is then approximate. */
     hideExactAddress: z.boolean(),
-    geo: latLngSchema.extend({ approximate: z.boolean() }),
+    geo: geoSchema,
     distanceM: z.number().int().min(0).nullable(),
     phone: phoneSchema,
     photos: z.array(photoSchema),
@@ -250,7 +268,7 @@ export const businessDetailSchema = z
     priceFrom: priceSchema.nullable(),
     avgBill: manatSchema.nullable(),
     /** Next free time for the sticky card (appointment), null when nothing is free in the window. */
-    nextFree: z.object({ date: ymdSchema, start: minuteSchema }).nullable(),
+    nextFree: nextFreeSchema,
     serviceGroups: z.array(serviceGroupSchema),
     specialists: z.array(specialistSchema),
     tables: z.object({ areas: z.array(tableAreaSchema), maxParty: z.number().int(), requests: z.array(z.string()) }).nullable(),
@@ -259,10 +277,12 @@ export const businessDetailSchema = z
   .meta({ id: 'BusinessDetail' })
 export type BusinessDetail = z.infer<typeof businessDetailSchema>
 
-export const businessQuerySchema = langQuerySchema.extend({
-  lat: z.coerce.number().min(-90).max(90).optional(),
-  lng: z.coerce.number().min(-180).max(180).optional(),
-})
+export const businessQuerySchema = langQuerySchema
+  .extend({
+    lat: latQuery.optional(),
+    lng: lngQuery.optional(),
+  })
+  .superRefine(latWithLng)
 
 // ── Reviews ──
 

@@ -3,7 +3,7 @@
  * A business day ends by midnight: hours past midnight are not designed yet (business spec §11).
  */
 import type { Interval } from './model'
-import { addDays, dow, localOf } from './time'
+import { addDays, diffDays, dow, localOf } from './time'
 
 /** One weekday's hours, minutes from midnight; one optional break ("Arakesme"). */
 export interface DayHours {
@@ -60,8 +60,31 @@ export function inException(e: Pick<DateException, 'from' | 'to' | 'yearly'>, da
   return from <= to ? md >= from && md <= to : md >= from || md <= to
 }
 
-export function findException<E extends Pick<DateException, 'from' | 'to' | 'yearly'>>(list: readonly E[], date: string): E | undefined {
-  return list.find((e) => inException(e, date))
+/** Days a special day covers (a yearly one in any one year, wrapping New Year). */
+function spanDays(e: Pick<DateException, 'from' | 'to' | 'yearly'>): number {
+  if (!e.yearly) return diffDays(e.to, e.from)
+  const days = diffDays(`2001-${e.to.slice(5)}`, `2001-${e.from.slice(5)}`)
+  return days < 0 ? days + 365 : days
+}
+
+/**
+ * The special day that applies on a date. When several overlap, the most specific wins: a dated one beats a yearly
+ * one (the business changed this year's holiday), then the narrower range (short hours on one day inside a longer
+ * closure), then closed beats special hours; list order decides only between equals.
+ */
+export function findException<E extends Pick<DateException, 'from' | 'to' | 'yearly'> & { hours?: DateException['hours'] }>(
+  list: readonly E[],
+  date: string,
+): E | undefined {
+  const rank = (e: E) => [e.yearly ? 1 : 0, spanDays(e), e.hours ? 1 : 0]
+  const before = (a: E, b: E) => {
+    const [x, y] = [rank(a), rank(b)]
+    for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i]! < y[i]!
+    return false
+  }
+  let best: E | undefined
+  for (const e of list) if (inException(e, date) && (!best || before(e, best))) best = e
+  return best
 }
 
 function clipBreak(b: Interval | null | undefined, open: number, close: number): Interval[] {
@@ -132,12 +155,19 @@ export function workingIntervals(day: WorkDay): Interval[] {
 
 export type OpenState = { open: true; until: number } | { open: false; inDays: number; at: number } | { open: false; inDays: null }
 
-/** Is the business open right now ("Häzir açyk · 20:00-a çenli"); if not, when it opens next (within a week). */
+/**
+ * Is the business open right now ("Häzir açyk · 20:00-a çenli"); if not, when it opens next (within a week). The break
+ * ("Arakesme") counts as closed: open until it starts, reopening when it ends.
+ */
 export function openState(b: BusinessHours, now = Date.now()): OpenState {
   const { date, min } = localOf(now)
   const day = businessDay(b, date)
-  if (day && min >= day.open && min < day.close) return { open: true, until: day.close }
-  for (let i = day && min < day.open ? 0 : 1; i < 8; i++) {
+  const stretches = day ? workingIntervals(day) : []
+  const current = stretches.find((w) => min >= w.start && min < w.end)
+  if (current) return { open: true, until: current.end }
+  const later = stretches.find((w) => w.start > min)
+  if (later) return { open: false, inDays: 0, at: later.start }
+  for (let i = 1; i < 8; i++) {
     const next = businessDay(b, addDays(date, i))
     if (next) return { open: false, inDays: i, at: next.open }
   }

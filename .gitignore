@@ -40,3 +40,6 @@ apps/legacy/public/vendor/
 
 # wrangler dry-run output
 dist-worker/
+
+# git worktrees of Claude Code agents (isolation: worktree)
+.claude/worktrees/

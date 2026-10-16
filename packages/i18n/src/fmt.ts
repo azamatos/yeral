@@ -5,11 +5,15 @@
  */
 import type { Price } from '@yeral/domain/model'
 import { formatPhone } from '@yeral/domain/phone'
-import { dow, hm, parseYmd } from '@yeral/domain/time'
+import { diffDays, dow, hm, parseYmd } from '@yeral/domain/time'
 import { createTranslator } from 'use-intl/core'
 import { messages, type Locale } from './messages'
 
 const NBSP = ' '
+const DAY_MIN = 1440
+
+/** A day may end at midnight (`24:00`, as the hours pickers draw it); anything later is the next day's clock time. */
+const clock = (min: number) => hm(min > DAY_MIN ? min % DAY_MIN : min)
 
 /** Grouping and decimal marks: Turkmen and Russian `1 410` and `4,9` (the calendar header groups 4 digits too); English `1,410` and `4.9`. */
 const MARKS: Record<Locale, { group: string; decimal: string }> = {
@@ -60,14 +64,15 @@ export function createFmt(locale: Locale) {
     },
     /** `850 m`, `1,2 km`, `12 km` */
     distance: (metres: number) => {
-      if (metres < 1000) return t('m', { n: num(Math.max(10, Math.round(metres / 10) * 10)) })
+      const rounded = Math.max(10, Math.round(metres / 10) * 10)
+      if (rounded < 1000) return t('m', { n: num(rounded) })
       const km = metres / 1000
       return t('km', { n: km < 10 ? num(Math.round(km * 10) / 10, 1).replace(/[,.]0$/, '') : num(Math.round(km)) })
     },
     /** `14:30` (24-hour, minutes from midnight) */
-    time: (min: number) => hm(min),
+    time: (min: number) => clock(min),
     /** `14:30–15:30` */
-    timeRange: (start: number, end: number) => `${hm(start)}–${hm(end)}`,
+    timeRange: (start: number, end: number) => `${clock(start)}–${clock(end)}`,
     /** `15 oktýabr` */
     dayMonth: (date: string) => t('dayMonth', { day: parseYmd(date).getUTCDate(), month: t(`months.${monthOf(date)}`) }),
     /** `15 okt.` */
@@ -81,12 +86,12 @@ export function createFmt(locale: Locale) {
     /** `Oktýabr 2026` (month picker header) */
     monthYear: (date: string) =>
       t('monthYear', { month: t(`monthsStandalone.${monthOf(date)}`), year: String(parseYmd(date).getUTCFullYear()) }),
-    /** `Şu gün`, `Ertir`, otherwise the weekday. */
+    /** `Şu gün`, `Ertir`, the weekday within the coming week (`Şenbe`), otherwise the date (`21 oktýabr`). */
     relativeDay: (date: string, today: string) => {
-      const d = Math.round((parseYmd(date).getTime() - parseYmd(today).getTime()) / 86_400_000)
+      const d = diffDays(date, today)
       if (d === 0) return t('today')
       if (d === 1) return t('tomorrow')
-      return fmt.weekday(date)
+      return d > 1 && d < 7 ? fmt.weekday(date) : fmt.dayMonth(date)
     },
     /** `+993 65 12 34 56` */
     phone: (raw: string) => formatPhone(raw),

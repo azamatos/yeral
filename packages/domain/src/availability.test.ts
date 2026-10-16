@@ -7,6 +7,7 @@ import {
   canBookSession,
   checkPlan,
   findAppointmentSlot,
+  hasAppointmentSlot,
   maxSeats,
   nearestSlots,
   nextFreeSlot,
@@ -163,6 +164,13 @@ describe('appointment slots for one specialist', () => {
   it('a specialist who doesn’t do every service gets nothing', () => {
     expect(starts(ctx(), q({ serviceIds: ['cut', 'color'] }))).toEqual([])
   })
+
+  it('"has a free time" agrees with the full list, day by day', () => {
+    const shift = [null, null, h(600, 1200), h(720, 960), null, null, null]
+    const c = ctx({ staff: [person('a', ['cut'], { shift, daysOff: [{ name: 'Rugsat', from: FRI, to: FRI, yearly: false }] })] })
+    for (const query of [q(), q({ date: FRI }), q({ date: '2026-10-13' }), q({ serviceIds: ['cut', 'color'] })])
+      expect(hasAppointmentSlot(c, query)).toBe(appointmentSlots(c, query).length > 0)
+  })
 })
 
 describe('chains and «Islendik hünärmen»', () => {
@@ -217,6 +225,14 @@ describe('bookings made by staff', () => {
   it('ignore the booking window', () => {
     expect(starts(ctx(), q({ date: addDays(TODAY, 45), by: 'staff' })).length).toBeGreaterThan(0)
   })
+
+  it('never offer past times: they would be confirmed at once and turn into completed visits', () => {
+    // 11:20 on Wednesday: a walk-in can still start in the current 30-minute step
+    const c = ctx({ now: Date.parse('2026-10-14T06:20:00Z') })
+    expect(starts(c, q({ date: TODAY, by: 'staff' }))[0]).toBe(660)
+    expect(starts(c, q({ date: '2026-10-13', by: 'staff' }))).toEqual([])
+    expect(findAppointmentSlot(c, q({ date: TODAY, by: 'staff' }), 630)).toBeNull()
+  })
 })
 
 describe('next and nearest free times', () => {
@@ -234,6 +250,18 @@ describe('next and nearest free times', () => {
     const next = nextFreeSlot(c, { serviceIds: ['cut'], staffId: null, by: 'client' })
     expect(next?.date).toBe(FRI)
     expect(next?.slot.start).toBe(600)
+  })
+
+  it('one start and the next free time agree with the full list of the day', () => {
+    const team3 = [person('a', ['cut']), person('b', ['color']), person('c', ['cut', 'color'])]
+    const c = ctx({ staff: team3, busy: [busy('c', THU, 540, 900), busy('a', THU, 720, 780), busy('b', THU, 840, 960)] })
+    const query = q({ serviceIds: ['cut', 'color'], staffId: null })
+    const all = appointmentSlots(c, query)
+    for (let start = 540; start <= 1200; start += 15) {
+      expect(findAppointmentSlot(c, query, start)).toEqual(all.find((s) => s.start === start) ?? null)
+    }
+    const next = nextFreeSlot(c, { serviceIds: ['cut', 'color'], staffId: null, by: 'client' }, THU)
+    expect(next).toEqual({ date: THU, slot: all[0] })
   })
 
   it('offers the three nearest starts when one is taken', () => {
@@ -311,6 +339,16 @@ describe('tables', () => {
     expect(assignTable(t, { date: THU, start: 1080, partySize: 3, areaId: 'hall' })).toBe('t6')
     expect(assignTable(t, { date: THU, start: 600, partySize: 3, areaId: 'hall' })).toBe('t4')
     expect(assignTable(t, { date: THU, start: 600, partySize: 3, areaId: 'vip' })).toBeNull()
+  })
+
+  it('a moved booking doesn’t collide with its own old table', () => {
+    const tables = [{ id: 't4', seats: 4 }]
+    const t = table({
+      areas: [{ id: 'hall', minParty: 1, maxParty: 4, tables }],
+      busy: [{ tableId: 't4', date: THU, start: 1140, end: 1260, bookingId: 'mine' }],
+    })
+    expect(assignTable(t, { date: THU, start: 1080, partySize: 3, areaId: 'hall' })).toBeNull()
+    expect(assignTable(t, { date: THU, start: 1080, partySize: 3, areaId: 'hall', excludeBookingId: 'mine' })).toBe('t4')
   })
 })
 

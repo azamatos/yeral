@@ -2,6 +2,7 @@
  * API errors: `{ error: { code, message?, details? } }` with the HTTP status below (ADR 0006). The UI shows
  * `errors.<code>` from i18n, so every code needs a message in tk, ru and en.
  */
+import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { z } from 'zod'
 import { timeSlotSchema } from './common'
 
@@ -53,7 +54,11 @@ export const errorSchema = z
 export type ApiErrorBody = z.infer<typeof errorSchema>
 
 /** `slot_taken`: the nearest free times of the same day ("Bu wagt ýaňy alyndy. Golaý boş wagtlar"). */
-export const slotTakenDetailsSchema = z.object({ alternatives: z.array(timeSlotSchema).max(3) })
+export const slotTakenDetailsSchema = z.object({ alternatives: z.array(timeSlotSchema).max(MAX_ALTERNATIVES) })
+
+/** `party_too_large`: "{callFrom} we ondan köp adam bolsa, jaň ediň" — parties from this size book by phone. */
+export const partyTooLargeDetailsSchema = z.object({ callFrom: z.number().int().min(2) })
+export type PartyTooLargeDetails = z.infer<typeof partyTooLargeDetailsSchema>
 
 /** `code_invalid`: "Kod nädogry. Ýene N synanyşyk galdy." */
 export const codeInvalidDetailsSchema = z.object({ attemptsLeft: z.number().int().min(0) })

@@ -1,6 +1,7 @@
 /**
  * `pnpm db:migrate | db:seed | db:setup` (root: `pnpm db:setup`). Seeding writes demo data, so it runs only against a
- * local database unless `--allow-remote` is passed (staging from CI); production gets the category catalogue only.
+ * local database unless `--allow-remote` is passed (staging from CI), and only with YERAL_ENV set (`seedMode()`):
+ * production gets the category catalogue only.
  * `setup` = create the database if missing, migrate, and seed it while it has no businesses. The demo's dates are fixed
  * at seed time (the demo day becomes that day), so a long-lived database goes stale: `seed` starts it over on today.
  */
@@ -10,6 +11,7 @@ import { loadConfig } from '../config'
 import { createDb } from './client'
 import { runMigrations } from './migrate'
 import { seed } from './seed'
+import { seedMode } from './seed/mode'
 
 const [command = 'setup', ...flags] = process.argv.slice(2)
 const config = loadConfig(process.env)
@@ -32,6 +34,11 @@ async function ensureDatabase() {
 }
 
 async function main() {
+  const seeds = command === 'seed' || command === 'setup'
+  // checked before anything runs: a misconfigured server gets an error, not a half-done setup
+  const demo = seeds && seedMode(process.env.YERAL_ENV) === 'demo'
+  if (seeds && !isLocal && !flags.includes('--allow-remote'))
+    throw new Error(`Refusing to seed ${url.hostname}: pass --allow-remote for a remote database`)
   if (command === 'setup') await ensureDatabase()
   const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 2 })
   const db = createDb(pool)
@@ -40,10 +47,7 @@ async function main() {
       await runMigrations(db)
       console.warn('migrations applied')
     }
-    if (command === 'seed' || command === 'setup') {
-      if (!isLocal && !flags.includes('--allow-remote'))
-        throw new Error(`Refusing to seed ${url.hostname}: pass --allow-remote for a remote database`)
-      const demo = config.site.env !== 'production'
+    if (seeds) {
       // `setup` seeds an empty database only; `seed` starts the demo over
       const [{ n } = { n: 0 }] = (await db.execute<{ n: number }>(sql`select count(*)::int as n from businesses`)).rows
       if (command === 'setup' && demo && n > 0) {

@@ -49,7 +49,7 @@ export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow): 
     if (original) {
       // the original takes the new time and items; the request row goes away
       await db.delete(bookingItems).where(eq(bookingItems.bookingId, original.id))
-      await db.update(bookingItems).set({ bookingId: original.id, active: true }).where(eq(bookingItems.bookingId, b.id))
+      await db.update(bookingItems).set({ bookingId: original.id }).where(eq(bookingItems.bookingId, b.id))
       const [moved] = await db
         .update(bookings)
         .set({ date: b.date, start: b.start, end: b.end, priceType: b.priceType, priceAmount: b.priceAmount, updatedAt: at })
