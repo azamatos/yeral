@@ -17,7 +17,7 @@ import {
   type AppointmentSlot,
 } from '@yeral/domain/availability'
 import { isOnlineBlocked } from '@yeral/domain/clients'
-import { holdUntil as holdUntilOf, initialStatus } from '@yeral/domain/lifecycle'
+import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { priceTotal } from '@yeral/domain/pricing'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -249,7 +249,7 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
       tableSlots(ctx, { date: input.date, partySize: input.partySize })
         .filter((s) => s.areaIds.includes(input.areaId) && s.start !== input.start)
         .sort((x, y) => Math.abs(x.start - input.start) - Math.abs(y.start - input.start))
-        .slice(0, 3)
+        .slice(0, MAX_ALTERNATIVES)
         .sort((x, y) => x.start - y.start)
         .map((s) => ({ date: input.date, start: s.start, end: Math.min(1440, s.start + ctx.sittingMinutes) }))
     if (!tableId) throw new ApiError('slot_taken', { alternatives: nearest() })

@@ -18,6 +18,8 @@ const PAGE = 100
 
 const settled = sql`${events.txid} < pg_snapshot_xmin(pg_current_snapshot())`
 const cursorOf = (e: { txid: string; id: number }) => `${e.txid}.${e.id}`
+const MAX_XID8 = 2n ** 64n - 1n
+const MAX_ID = 2n ** 63n - 1n
 
 const eventsRoute = createRoute({
   method: 'get',
@@ -42,8 +44,8 @@ export const eventRoutes = new OpenAPIHono<AppEnv>().openapi(eventsRoute, async 
     return row ? cursorOf(row) : '0.0'
   }
   const [, txid, id] = /^(\d{1,20})\.(\d{1,19})$/.exec(after ?? '') ?? []
-  // no cursor yet, or one from before this format: start from now
-  if (!txid || !id) return c.json({ items: [], cursor: await latest() }, 200)
+  // no cursor yet, one from before this format, or out of range: start from now
+  if (!txid || !id || BigInt(txid) > MAX_XID8 || BigInt(id) > MAX_ID) return c.json({ items: [], cursor: await latest() }, 200)
   const teams = await db
     .select({ businessId: memberships.businessId })
     .from(memberships)
@@ -61,7 +63,7 @@ export const eventRoutes = new OpenAPIHono<AppEnv>().openapi(eventsRoute, async 
     .select({ e: events, slug: businesses.slug })
     .from(events)
     .leftJoin(businesses, eq(businesses.id, events.businessId))
-    .where(and(sql`(${events.txid}, ${events.id}) > (${txid}::xid8, ${Number(id)})`, mine, settled))
+    .where(and(sql`(${events.txid}, ${events.id}) > (${txid}::xid8, ${id}::bigint)`, mine, settled))
     .orderBy(asc(events.txid), asc(events.id))
     .limit(PAGE)
   const items = rows.map(({ e, slug }) => ({

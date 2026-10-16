@@ -9,13 +9,13 @@ const COUNTRY = '993'
 /**
  * The digits after the country code (993) or the trunk prefix (8), as typed. National numbers start with 1–7, never
  * with 8 or 9, so a leading 993 or 8 is always a prefix, even in partial input; a '+' followed by part of 993 is too.
+ * The 8 can also follow the 993: a field that shows "+993" gets the local form "8 65 …" typed after it.
  */
 function afterPrefix(raw: string): string {
   const digits = raw.replace(/\D/g, '')
-  if (digits.startsWith(COUNTRY)) return digits.slice(COUNTRY.length)
   if (raw.trim().startsWith('+') && COUNTRY.startsWith(digits)) return ''
-  if (digits.startsWith('8')) return digits.slice(1)
-  return digits
+  const rest = digits.startsWith(COUNTRY) ? digits.slice(COUNTRY.length) : digits
+  return rest.startsWith('8') ? rest.slice(1) : rest
 }
 
 /** The 8 national digits from any input ('+993 65 12-34-56', '99365123456', '8 65 123456'); may be shorter while typing. */

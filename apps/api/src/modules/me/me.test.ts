@@ -87,6 +87,10 @@ describe('account', () => {
     )
     expect((await b.req(`/v1/events?after=${res.json.cursor}`)).json.items).toEqual([])
     expect((await browser(t.app).req('/v1/events')).status).toBe(401)
+    // a cursor past what Postgres can hold starts over instead of failing
+    const far = await b.req('/v1/events?after=99999999999999999999.1')
+    expect(far.status).toBe(200)
+    expect(far.json.items).toEqual([])
   })
 
   it('the OpenAPI document lists every client endpoint', async () => {

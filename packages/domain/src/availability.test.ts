@@ -7,6 +7,7 @@ import {
   canBookSession,
   checkPlan,
   findAppointmentSlot,
+  hasAppointmentSlot,
   maxSeats,
   nearestSlots,
   nextFreeSlot,
@@ -162,6 +163,13 @@ describe('appointment slots for one specialist', () => {
 
   it('a specialist who doesn’t do every service gets nothing', () => {
     expect(starts(ctx(), q({ serviceIds: ['cut', 'color'] }))).toEqual([])
+  })
+
+  it('"has a free time" agrees with the full list, day by day', () => {
+    const shift = [null, null, h(600, 1200), h(720, 960), null, null, null]
+    const c = ctx({ staff: [person('a', ['cut'], { shift, daysOff: [{ name: 'Rugsat', from: FRI, to: FRI, yearly: false }] })] })
+    for (const query of [q(), q({ date: FRI }), q({ date: '2026-10-13' }), q({ serviceIds: ['cut', 'color'] })])
+      expect(hasAppointmentSlot(c, query)).toBe(appointmentSlots(c, query).length > 0)
   })
 })
 

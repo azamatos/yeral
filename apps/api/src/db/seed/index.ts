@@ -604,6 +604,8 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
       .insert(t.clients)
       .values(people.map((p) => ({ ...p, businessId: yoga.id, source: 'walkby' as const })))
       .returning({ id: t.clients.id, phone: t.clients.phone, name: t.clients.name })
+    // the same cache seedClient() fills, so a later demo row for one of these numbers finds its client
+    for (const c of clients) ctx.clients.set(`${yoga.id} ${c.phone}`, c.id)
     await db.insert(t.bookings).values(
       clients.map((c) => ({
         code: code(ctx),

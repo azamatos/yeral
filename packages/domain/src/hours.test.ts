@@ -52,6 +52,13 @@ describe('business days', () => {
     expect(findException([yearlyClosed, openThisYear], THU)?.name).toBe('Gysga gün')
   })
 
+  it('the narrower special day wins: short hours on one day inside a month-long closure', () => {
+    const repairs = ex({ name: 'Remont', from: '2026-10-01', to: '2026-10-31' })
+    const shortDay = ex({ name: 'Gysga gün', hours: h(600, 840) })
+    expect(businessDay(biz({ exceptions: [repairs, shortDay] }), THU)).toEqual({ open: 600, close: 840, breaks: [] })
+    expect(businessDay(biz({ exceptions: [repairs, shortDay] }), '2026-10-16')).toBeNull()
+  })
+
   it('a special day can have special hours instead of closing', () => {
     expect(businessDay(biz({ exceptions: [ex({ hours: h(600, 900) })] }), THU)).toEqual({ open: 600, close: 900, breaks: [] })
     expect(businessClosedReason(biz({ exceptions: [ex({ hours: h(600, 900) })] }), THU)).toBeNull()

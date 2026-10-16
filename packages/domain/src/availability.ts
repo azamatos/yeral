@@ -12,6 +12,7 @@
  * - pending requests block their slot until they expire, like confirmed bookings (the api passes both as busy).
  */
 import { businessDay, staffDay, workingIntervals, type BusinessHours, type StaffSchedule } from './hours'
+import { MAX_ALTERNATIVES } from './lifecycle'
 import { contains, overlaps, type Interval } from './model'
 import type { BookingRules } from './rules'
 import { addDays, diffDays, epochOf, localOf, today } from './time'
@@ -275,6 +276,11 @@ function* freeSlots(ctx: AppointmentContext, q: AppointmentQuery, only?: number)
 }
 
 /** Every free start on a date for the chosen services and specialist, with the plan behind each. */
+/** Whether a day has any free start: stops at the first one (the 14-day strip, "has free time" filters). */
+export function hasAppointmentSlot(ctx: AppointmentContext, q: AppointmentQuery): boolean {
+  return !freeSlots(ctx, q).next().done
+}
+
 export function appointmentSlots(ctx: AppointmentContext, q: AppointmentQuery): AppointmentSlot[] {
   return [...freeSlots(ctx, q)]
 }
@@ -285,7 +291,7 @@ export function findAppointmentSlot(ctx: AppointmentContext, q: AppointmentQuery
 }
 
 /** Up to `count` free starts nearest to `start` on the same date ("Bu wagt ýaňy alyndy. Golaý boş wagtlar"). */
-export function nearestSlots(ctx: AppointmentContext, q: AppointmentQuery, start: number, count = 3): AppointmentSlot[] {
+export function nearestSlots(ctx: AppointmentContext, q: AppointmentQuery, start: number, count = MAX_ALTERNATIVES): AppointmentSlot[] {
   return appointmentSlots(ctx, q)
     .filter((s) => s.start !== start)
     .sort((a, b) => Math.abs(a.start - start) - Math.abs(b.start - start) || a.start - b.start)

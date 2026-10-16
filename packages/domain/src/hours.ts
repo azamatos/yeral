@@ -3,7 +3,7 @@
  * A business day ends by midnight: hours past midnight are not designed yet (business spec §11).
  */
 import type { Interval } from './model'
-import { addDays, dow, localOf } from './time'
+import { addDays, diffDays, dow, localOf } from './time'
 
 /** One weekday's hours, minutes from midnight; one optional break ("Arakesme"). */
 export interface DayHours {
@@ -60,17 +60,30 @@ export function inException(e: Pick<DateException, 'from' | 'to' | 'yearly'>, da
   return from <= to ? md >= from && md <= to : md >= from || md <= to
 }
 
+/** Days a special day covers (a yearly one in any one year, wrapping New Year). */
+function spanDays(e: Pick<DateException, 'from' | 'to' | 'yearly'>): number {
+  if (!e.yearly) return diffDays(e.to, e.from)
+  const days = diffDays(`2001-${e.to.slice(5)}`, `2001-${e.from.slice(5)}`)
+  return days < 0 ? days + 365 : days
+}
+
 /**
- * The special day that applies on a date. When several overlap, a dated one beats a yearly one (the business changed
- * this year's holiday), then closed beats special hours; list order decides only between equals.
+ * The special day that applies on a date. When several overlap, the most specific wins: a dated one beats a yearly
+ * one (the business changed this year's holiday), then the narrower range (short hours on one day inside a longer
+ * closure), then closed beats special hours; list order decides only between equals.
  */
 export function findException<E extends Pick<DateException, 'from' | 'to' | 'yearly'> & { hours?: DateException['hours'] }>(
   list: readonly E[],
   date: string,
 ): E | undefined {
-  const rank = (e: E) => (e.yearly ? 2 : 0) + (e.hours ? 1 : 0)
+  const rank = (e: E) => [e.yearly ? 1 : 0, spanDays(e), e.hours ? 1 : 0]
+  const before = (a: E, b: E) => {
+    const [x, y] = [rank(a), rank(b)]
+    for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i]! < y[i]!
+    return false
+  }
   let best: E | undefined
-  for (const e of list) if (inException(e, date) && (!best || rank(e) < rank(best))) best = e
+  for (const e of list) if (inException(e, date) && (!best || before(e, best))) best = e
   return best
 }
 

@@ -13,13 +13,14 @@ import {
 import { slugSchema } from '@yeral/contract/common'
 import type { PartyTooLargeDetails } from '@yeral/contract/errors'
 import {
+  type AppointmentContext,
   appointmentSlots,
+  hasAppointmentSlot,
   MAX_ONLINE_PARTY,
   maxSeats,
   nextFreeSlot,
   staffDoingAll,
   tableSlots,
-  type AppointmentContext,
 } from '@yeral/domain/availability'
 import { businessClosedReason } from '@yeral/domain/hours'
 import { cancelDeadline } from '@yeral/domain/lifecycle'
@@ -103,7 +104,8 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
       const d = addDays(first, i)
       const closed = businessClosedReason(ctx.business, d)
       if (closed) return { date: d, state: 'closed' as const, closedReason: closed.kind === 'exception' ? closed.name : null }
-      return { date: d, state: slotsOn(d).length ? ('open' as const) : ('full' as const), closedReason: null }
+      const free = online && hasAppointmentSlot(ctx, { ...query, date: d })
+      return { date: d, state: free ? ('open' as const) : ('full' as const), closedReason: null }
     })
     const slots = slotsOn(date).map((s) => ({ start: s.start, end: s.end }))
     const next = !slots.length && online ? nextFreeSlot(ctx, query, addDays(date, 1), lb.rules.windowDays) : null
@@ -127,9 +129,9 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const now = deps.now()
     const q = c.req.valid('query')
+    const lb = await loaded(deps, c.req.valid('param').slug)
     // "9 we ondan köp adam bolsa, jaň ediň" (client spec §4.5)
     if (q.party > MAX_ONLINE_PARTY) throw new ApiError('party_too_large', { callFrom: MAX_ONLINE_PARTY + 1 } satisfies PartyTooLargeDetails)
-    const lb = await loaded(deps, c.req.valid('param').slug)
     const first = today(now)
     const date = q.date ?? first
     const ctx = await loadTableContext(deps.db, lb, first, addDays(first, Math.max(q.days, lb.rules.windowDays + 1)), now)

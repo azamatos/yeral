@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { daySummary, priceTotal } from './pricing'
+import { businessTotal, daySummary, priceTotal } from './pricing'
 import { DEFAULT_RULES, rulesErrors } from './rules'
 
 describe('priceTotal', () => {
@@ -46,6 +46,19 @@ describe('priceTotal', () => {
       ]),
     ).toEqual({ type: 'hidden', amount: 0 })
     expect(priceTotal([{ type: 'hidden', amount: 120 }])).toEqual({ type: 'hidden', amount: 0 })
+  })
+})
+
+describe('businessTotal', () => {
+  it('the business counts every amount it set, hidden ones too', () => {
+    const prices = [
+      { type: 'fixed', amount: 40 },
+      { type: 'hidden', amount: 100 },
+      { type: 'from', amount: 25 },
+      { type: 'free', amount: 0 },
+    ] as const
+    expect(businessTotal(prices)).toBe(165)
+    expect(priceTotal(prices)).toEqual({ type: 'from', amount: 65 })
   })
 })
 

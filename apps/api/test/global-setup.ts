@@ -19,12 +19,7 @@ export default async function setup(project: TestProject) {
   await admin.connect()
   await admin.query(`create database "${template}"`)
   await admin.end()
-  const pool = new pg.Pool({ connectionString: urlFor(template), max: 1 })
-  await runMigrations(createDb(pool))
-  await pool.end()
-  project.provide('testRun', run)
-
-  return async () => {
+  const teardown = async () => {
     const cleanup = new pg.Client({ connectionString: ADMIN_URL })
     await cleanup.connect()
     const { rows } = await cleanup.query<{ datname: string }>('select datname from pg_database where starts_with(datname, $1)', [
@@ -33,4 +28,16 @@ export default async function setup(project: TestProject) {
     for (const { datname } of rows) await cleanup.query(`drop database if exists "${datname}" with (force)`)
     await cleanup.end()
   }
+  const pool = new pg.Pool({ connectionString: urlFor(template), max: 1 })
+  try {
+    await runMigrations(createDb(pool))
+  } catch (e) {
+    // a broken migration leaves no template behind either
+    await pool.end()
+    await teardown()
+    throw e
+  }
+  await pool.end()
+  project.provide('testRun', run)
+  return teardown
 }

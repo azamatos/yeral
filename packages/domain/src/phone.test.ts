@@ -24,6 +24,13 @@ describe('Turkmen phones', () => {
     expect(isMobile('8 65 12 34 56')).toBe(true)
   })
 
+  it('drops a trunk 8 typed after the fixed +993 too', () => {
+    expect(formatPhone('+993 8')).toBe('+993')
+    expect(formatPhone('+993 8 65 1')).toBe('+993 65 1')
+    expect(toE164('+993 8 65 12 34 56')).toBe('+99365123456')
+    expect(isMobile('99386512345 6')).toBe(true)
+  })
+
   it('needs exactly 8 national digits', () => {
     expect(isPhone('6512345')).toBe(false)
     expect(isPhone('+993 65 12 34 56')).toBe(true)

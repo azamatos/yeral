@@ -15,12 +15,20 @@ export function priceTotal(prices: readonly Price[]): Price {
   return { type: hidden || prices.some((p) => p.type === 'from') ? 'from' : 'fixed', amount }
 }
 
+/**
+ * What the business earns from these services: every amount it set, hidden ones included (the client never sees this
+ * figure; bookings keep `priceTotal` for the client and each item's own price for this).
+ */
+export function businessTotal(prices: readonly Price[]): number {
+  return prices.reduce((sum, p) => sum + (p.type === 'free' ? 0 : p.amount), 0)
+}
+
 /** A day in the calendar header: "16 ýazylyş · 3 haýyş · Girdeji (meýilleşdirilen): 1 410 TMT" (business spec §4). */
 export interface DaySummary {
   /** Every booking except cancelled ones: requests and no-shows count. */
   count: number
   requests: number
-  /** Confirmed + pending + completed prices; shown only with the revenue permission. */
+  /** Confirmed + pending + completed prices (`businessTotal` of each booking's items); only with the revenue permission. */
   plannedRevenue: number
 }
 
