@@ -7,13 +7,14 @@
  * - a buffer follows each specialist's part of the chain: the last service's override, else the business buffer;
  * - visit + buffer must fit inside working hours, outside breaks and other bookings (their buffers included);
  * - starts are multiples of the business's slot step; clients also get the lead time and the booking window,
- *   staff booking by phone don't (they choose a specialist who does every service themselves);
+ *   staff booking by phone don't (they choose a specialist who does every service themselves), but they get no time
+ *   before the current step either: staff bookings are confirmed at once and would complete as visits that never were;
  * - pending requests block their slot until they expire, like confirmed bookings (the api passes both as busy).
  */
 import { businessDay, staffDay, workingIntervals, type BusinessHours, type StaffSchedule } from './hours'
 import { contains, overlaps, type Interval } from './model'
 import type { BookingRules } from './rules'
-import { addDays, diffDays, epochOf, today } from './time'
+import { addDays, diffDays, epochOf, localOf, today } from './time'
 
 export interface StaffForBooking extends StaffSchedule {
   id: string
@@ -56,7 +57,10 @@ export interface AppointmentQuery {
   serviceIds: readonly string[]
   /** null = «Islendik hünärmen». */
   staffId: string | null
-  /** 'staff' = a booking made in the workspace: no lead time, window or online switch, no per-service split. */
+  /**
+   * 'staff' = a booking made in the workspace: no lead time, window or online switch, no per-service split; the current
+   * step is the earliest start (a walk-in at 11:20 can start at 11:15 with a 15-minute step).
+   */
   by: 'client' | 'staff'
   /** The booking being moved: its own time doesn't count as busy. */
   excludeBookingId?: string
@@ -186,10 +190,15 @@ function splitPlan(
     const prev = chosen[i - 1]
     const candidates = order.filter((id) => views.get(id)?.staff.serviceIds.includes(svc.id))
     const ordered = prev && candidates.includes(prev) ? [prev, ...candidates.filter((id) => id !== prev)] : candidates
+    // prune early: when the specialist changes, the runs finished so far (buffers included) must already fit; that
+    // depends only on the choices before i, so it's checked once per level, not per candidate
+    let prefixFits: boolean | undefined
     for (const id of ordered) {
       chosen[i] = id
-      // prune early: when the specialist changes, the runs finished so far (buffers included) must already fit
-      if (i > 0 && id !== prev && !planFits(views, layOut(ctx, services.slice(0, i), chosen.slice(0, i), start))) continue
+      if (i > 0 && id !== prev) {
+        prefixFits ??= planFits(views, layOut(ctx, services.slice(0, i), chosen.slice(0, i), start))
+        if (!prefixFits) continue
+      }
       const found = search(i + 1)
       if (found) return found
     }
@@ -235,30 +244,44 @@ function planAt(
   return null
 }
 
-/** Every free start on a date for the chosen services and specialist, with the plan behind each. */
-export function appointmentSlots(ctx: AppointmentContext, q: AppointmentQuery): AppointmentSlot[] {
-  if (q.by === 'client' && !inBookingWindow(ctx.rules, q.date, ctx.now)) return []
+/** The earliest instant a start may have: now + lead time for clients, the current step for staff. */
+function earliestStart(ctx: AppointmentContext, q: AppointmentQuery): number {
+  if (q.by === 'client') return ctx.now + ctx.rules.leadMinutes * 60_000
+  const { date, min } = localOf(ctx.now)
+  return epochOf(date, Math.floor(min / ctx.rules.slotStep) * ctx.rules.slotStep)
+}
+
+/** Free starts on a date, earliest first; `only` checks that one start. Lazy, so callers can stop at the first. */
+function* freeSlots(ctx: AppointmentContext, q: AppointmentQuery, only?: number): Generator<AppointmentSlot, undefined> {
+  if (q.by === 'client' && !inBookingWindow(ctx.rules, q.date, ctx.now)) return
   const services = resolveServices(ctx, q)
-  if (!services) return []
+  if (!services) return
   const day = businessDay(ctx.business, q.date)
-  if (!day) return []
+  if (!day) return
   const views = dayViews(ctx, q.date, q.excludeBookingId)
-  if (views.size === 0) return []
-  const earliest = q.by === 'client' ? ctx.now + ctx.rules.leadMinutes * 60_000 : -Infinity
+  if (views.size === 0) return
+  const earliest = earliestStart(ctx, q)
   const step = ctx.rules.slotStep
   const total = services.reduce((sum, s) => sum + s.durationMin, 0)
-  const slots: AppointmentSlot[] = []
-  for (let start = Math.ceil(day.open / step) * step; start + total <= day.close; start += step) {
-    if (epochOf(q.date, start) < earliest) continue
-    const items = planAt(ctx, q, views, services, start)
-    if (items) slots.push({ start, end: start + total, items })
+  const first = Math.ceil(day.open / step) * step
+  if (only !== undefined && (only < first || (only - first) % step !== 0)) return
+  for (let start = only ?? first; start + total <= day.close; start += step) {
+    if (epochOf(q.date, start) >= earliest) {
+      const items = planAt(ctx, q, views, services, start)
+      if (items) yield { start, end: start + total, items }
+    }
+    if (only !== undefined) return
   }
-  return slots
+}
+
+/** Every free start on a date for the chosen services and specialist, with the plan behind each. */
+export function appointmentSlots(ctx: AppointmentContext, q: AppointmentQuery): AppointmentSlot[] {
+  return [...freeSlots(ctx, q)]
 }
 
 /** The plan for one exact start, or null when it's taken (the api answers 409 slot_taken). */
 export function findAppointmentSlot(ctx: AppointmentContext, q: AppointmentQuery, start: number): AppointmentSlot | null {
-  return appointmentSlots(ctx, q).find((s) => s.start === start) ?? null
+  return freeSlots(ctx, q, start).next().value ?? null
 }
 
 /** Up to `count` free starts nearest to `start` on the same date ("Bu wagt ýaňy alyndy. Golaý boş wagtlar"). */
@@ -279,7 +302,7 @@ export function nextFreeSlot(
 ): { date: string; slot: AppointmentSlot } | null {
   for (let i = 0; i <= days; i++) {
     const date = addDays(from, i)
-    const [slot] = appointmentSlots(ctx, { ...q, date })
+    const slot = freeSlots(ctx, { ...q, date }).next().value
     if (slot) return { date, slot }
   }
   return null
@@ -378,12 +401,15 @@ export function tableSlots(ctx: TableContext, q: { date: string; partySize: numb
   return out
 }
 
-/** The table a booking gets: the smallest free one that seats the party. */
-export function assignTable(ctx: TableContext, q: { date: string; start: number; partySize: number; areaId: string }): string | null {
+/** The table a booking gets: the smallest free one that seats the party. `excludeBookingId`: the booking being moved. */
+export function assignTable(
+  ctx: TableContext,
+  q: { date: string; start: number; partySize: number; areaId: string; excludeBookingId?: string },
+): string | null {
   const area = ctx.areas.find((a) => a.id === q.areaId)
   if (!area || q.partySize < area.minParty || q.partySize > area.maxParty) return null
   if (!tableSlots(ctx, q).some((s) => s.start === q.start && s.areaIds.includes(q.areaId))) return null
-  return freeTable(ctx, area, q.date, { start: q.start, end: q.start + ctx.sittingMinutes }, q.partySize)?.id ?? null
+  return freeTable(ctx, area, q.date, { start: q.start, end: q.start + ctx.sittingMinutes }, q.partySize, q.excludeBookingId)?.id ?? null
 }
 
 // ── Classes ───────────────────────────────────────────────────────────────────────────────────────────────────────

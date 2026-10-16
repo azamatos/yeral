@@ -60,11 +60,14 @@ export function occupiesSlot(b: BookingState, now = Date.now()): boolean {
   return s === 'pending' || s === 'confirmed'
 }
 
-/** What a job must do with a booking now: expire an unanswered request or complete a finished visit. */
+/**
+ * What a job must do with a booking now: expire an unanswered request or complete a finished visit. Derived from
+ * `effectiveStatus`, so the jobs store exactly what screens already show.
+ */
 export function dueTransition(b: BookingState, now = Date.now()): 'expire' | 'complete' | null {
-  if (b.status === 'pending' && now >= (b.holdUntil ?? startOf(b))) return 'expire'
-  if (b.status === 'confirmed' && now >= endOf(b)) return 'complete'
-  return null
+  const { status } = effectiveStatus(b, now)
+  if (status === b.status) return null
+  return status === 'cancelled' ? 'expire' : 'complete'
 }
 
 /** Until when the client may cancel or move a confirmed booking (epoch ms); null window = until the start. */

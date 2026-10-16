@@ -4,18 +4,28 @@
  */
 
 const NATIONAL_DIGITS = 8
+const COUNTRY = '993'
 
-/** The 8 national digits from any input ('+993 65 12-34-56', '99365123456', '65 123456'); may be shorter while typing. */
-export function nationalDigits(raw: string): string {
+/**
+ * The digits after the country code (993) or the trunk prefix (8), as typed. National numbers start with 1–7, never
+ * with 8 or 9, so a leading 993 or 8 is always a prefix, even in partial input; a '+' followed by part of 993 is too.
+ */
+function afterPrefix(raw: string): string {
   const digits = raw.replace(/\D/g, '')
-  const national = digits.length > NATIONAL_DIGITS && digits.startsWith('993') ? digits.slice(3) : digits
-  return national.slice(0, NATIONAL_DIGITS)
+  if (digits.startsWith(COUNTRY)) return digits.slice(COUNTRY.length)
+  if (raw.trim().startsWith('+') && COUNTRY.startsWith(digits)) return ''
+  if (digits.startsWith('8')) return digits.slice(1)
+  return digits
+}
+
+/** The 8 national digits from any input ('+993 65 12-34-56', '99365123456', '8 65 123456'); may be shorter while typing. */
+export function nationalDigits(raw: string): string {
+  return afterPrefix(raw).slice(0, NATIONAL_DIGITS)
 }
 
 /** A complete Turkmen number. */
 export function isPhone(raw: string): boolean {
-  const digits = raw.replace(/\D/g, '')
-  return digits.length === NATIONAL_DIGITS || (digits.length === NATIONAL_DIGITS + 3 && digits.startsWith('993'))
+  return /^[1-7]\d{7}$/.test(afterPrefix(raw))
 }
 
 /** Mobile numbers start with 6 or 7 (61–65, 71 today); only they can receive the login code. */

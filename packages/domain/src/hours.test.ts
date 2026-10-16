@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   businessClosedReason,
   businessDay,
+  findException,
   inException,
   openState,
   staffDay,
@@ -38,6 +39,17 @@ describe('business days', () => {
     expect(inException(newYear, '2027-01-01')).toBe(true)
     expect(inException(newYear, '2027-12-31')).toBe(true)
     expect(businessDay(biz({ exceptions: [newYear] }), '2027-01-04')).toEqual({ open: 600, close: 1200, breaks: [] })
+  })
+
+  it('when special days overlap, a dated one beats a yearly one, and closed beats special hours', () => {
+    const shortDay = ex({ name: 'Gysga gün', from: '2026-10-01', to: '2026-10-31', hours: h(600, 900) })
+    const closed = ex({ name: 'Inwentarizasiýa' })
+    expect(businessDay(biz({ exceptions: [shortDay, closed] }), THU)).toBeNull()
+    expect(businessClosedReason(biz({ exceptions: [shortDay, closed] }), THU)).toEqual({ kind: 'exception', name: 'Inwentarizasiýa' })
+    const yearlyClosed = ex({ name: 'Baýramçylyk', from: '2025-10-15', to: '2025-10-15', yearly: true })
+    const openThisYear = ex({ name: 'Gysga gün', hours: h(600, 900) })
+    expect(businessDay(biz({ exceptions: [yearlyClosed, openThisYear] }), THU)).toEqual({ open: 600, close: 900, breaks: [] })
+    expect(findException([yearlyClosed, openThisYear], THU)?.name).toBe('Gysga gün')
   })
 
   it('a special day can have special hours instead of closing', () => {
@@ -98,6 +110,16 @@ describe('openState', () => {
   it('opens on the next working day after closing', () => {
     // Saturday 21:00, Sunday off
     expect(openState(biz(), at('2026-10-17T16:00:00Z'))).toEqual({ open: false, inDays: 2, at: 600 })
+  })
+
+  it('is closed during the break and says when it reopens', () => {
+    const week = WEEK.map((d) => (d ? { ...d, break: { start: 780, end: 840 } } : null))
+    // Wednesday 13:30, break 13:00–14:00
+    expect(openState(biz({ hours: week }), at('2026-10-14T08:30:00Z'))).toEqual({ open: false, inDays: 0, at: 840 })
+    // 11:00: open until the break
+    expect(openState(biz({ hours: week }), at('2026-10-14T06:00:00Z'))).toEqual({ open: true, until: 780 })
+    // 15:00: open until closing
+    expect(openState(biz({ hours: week }), at('2026-10-14T10:00:00Z'))).toEqual({ open: true, until: 1200 })
   })
 
   it('has no opening when every day is off', () => {

@@ -31,6 +31,22 @@ describe('priceTotal', () => {
     expect(priceTotal([{ type: 'free', amount: 0 }])).toEqual({ type: 'free', amount: 0 })
     expect(priceTotal([{ type: 'hidden', amount: 0 }])).toEqual({ type: 'hidden', amount: 0 })
   })
+
+  it('never adds a hidden price into a shown total: the rest becomes a "from" total, or the total stays hidden', () => {
+    expect(
+      priceTotal([
+        { type: 'fixed', amount: 40 },
+        { type: 'hidden', amount: 100 },
+      ]),
+    ).toEqual({ type: 'from', amount: 40 })
+    expect(
+      priceTotal([
+        { type: 'free', amount: 0 },
+        { type: 'hidden', amount: 0 },
+      ]),
+    ).toEqual({ type: 'hidden', amount: 0 })
+    expect(priceTotal([{ type: 'hidden', amount: 120 }])).toEqual({ type: 'hidden', amount: 0 })
+  })
 })
 
 describe('daySummary (calendar header)', () => {

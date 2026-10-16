@@ -60,8 +60,18 @@ export function inException(e: Pick<DateException, 'from' | 'to' | 'yearly'>, da
   return from <= to ? md >= from && md <= to : md >= from || md <= to
 }
 
-export function findException<E extends Pick<DateException, 'from' | 'to' | 'yearly'>>(list: readonly E[], date: string): E | undefined {
-  return list.find((e) => inException(e, date))
+/**
+ * The special day that applies on a date. When several overlap, a dated one beats a yearly one (the business changed
+ * this year's holiday), then closed beats special hours; list order decides only between equals.
+ */
+export function findException<E extends Pick<DateException, 'from' | 'to' | 'yearly'> & { hours?: DateException['hours'] }>(
+  list: readonly E[],
+  date: string,
+): E | undefined {
+  const rank = (e: E) => (e.yearly ? 2 : 0) + (e.hours ? 1 : 0)
+  let best: E | undefined
+  for (const e of list) if (inException(e, date) && (!best || rank(e) < rank(best))) best = e
+  return best
 }
 
 function clipBreak(b: Interval | null | undefined, open: number, close: number): Interval[] {
@@ -132,12 +142,19 @@ export function workingIntervals(day: WorkDay): Interval[] {
 
 export type OpenState = { open: true; until: number } | { open: false; inDays: number; at: number } | { open: false; inDays: null }
 
-/** Is the business open right now ("Häzir açyk · 20:00-a çenli"); if not, when it opens next (within a week). */
+/**
+ * Is the business open right now ("Häzir açyk · 20:00-a çenli"); if not, when it opens next (within a week). The break
+ * ("Arakesme") counts as closed: open until it starts, reopening when it ends.
+ */
 export function openState(b: BusinessHours, now = Date.now()): OpenState {
   const { date, min } = localOf(now)
   const day = businessDay(b, date)
-  if (day && min >= day.open && min < day.close) return { open: true, until: day.close }
-  for (let i = day && min < day.open ? 0 : 1; i < 8; i++) {
+  const stretches = day ? workingIntervals(day) : []
+  const current = stretches.find((w) => min >= w.start && min < w.end)
+  if (current) return { open: true, until: current.end }
+  const later = stretches.find((w) => w.start > min)
+  if (later) return { open: false, inDays: 0, at: later.start }
+  for (let i = 1; i < 8; i++) {
     const next = businessDay(b, addDays(date, i))
     if (next) return { open: false, inDays: i, at: next.open }
   }
