@@ -111,6 +111,7 @@ export function siteFromEnv(source: Record<string, unknown>, prefix = ''): SiteC
   // the variable each setting is read from: PORT_BASE is shared by every app, a prefixed one wins when it's set
   const nameOf = (key: string) => (key === 'PORT_BASE' && value(prefix + key) === undefined ? key : prefix + key)
   const keys = Object.keys(siteEnvSchema.shape)
+  if (value(nameOf('YERAL_ENV')) === 'staging') throw new EnvError([nameOf('YERAL_ENV')], 'there is no staging any more, ADR 0020')
   let env: z.output<typeof siteEnvSchema>
   try {
     env = parseEnv(siteEnvSchema, Object.fromEntries(keys.map((key) => [key, value(nameOf(key))])))

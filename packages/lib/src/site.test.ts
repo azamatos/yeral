@@ -53,7 +53,7 @@ describe('siteFromEnv', () => {
   it('rejects an unknown environment', () => {
     expect(() => siteFromEnv({ YERAL_ENV: 'prod' })).toThrow()
     // there is no staging (ADR 0020)
-    expect(() => siteFromEnv({ YERAL_ENV: 'staging' })).toThrow()
+    expect(() => siteFromEnv({ YERAL_ENV: 'staging' })).toThrow(/no staging any more/)
   })
 
   it('treats an empty variable as unset', () => {

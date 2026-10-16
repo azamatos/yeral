@@ -5,8 +5,11 @@
 import type { z } from 'zod'
 
 export class EnvError extends Error {
-  constructor(readonly variables: string[]) {
-    super(`Invalid or missing environment variables: ${variables.join(', ')}`)
+  constructor(
+    readonly variables: string[],
+    hint?: string,
+  ) {
+    super(`Invalid or missing environment variables: ${variables.join(', ')}${hint ? ` (${hint})` : ''}`)
     this.name = 'EnvError'
   }
 }

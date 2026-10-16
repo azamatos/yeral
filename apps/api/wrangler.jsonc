@@ -3,9 +3,9 @@
   // the api on Cloudflare Workers (ADR 0007); production only, no staging (ADR 0020). Deployed with
   // `pnpm run deploy:production` once the owner has created the Neon production branch, the Hyperdrive config and the
   // api.yeral.app record (operations.md) — not before the new client site (M3).
-  // The top level is not an environment: it has no database binding (every request fails with a clear log line) and
-  // no URL (no route, no workers.dev), so always pass --env.
-  "name": "yeral-api",
+  // The top level is not an environment: its own Worker name (a bare `wrangler deploy` can't replace production), no
+  // database binding (every request fails with a clear log line) and no URL (no route, no workers.dev): always pass --env.
+  "name": "yeral-api-no-env",
   "workers_dev": false,
   "account_id": "90af7d87d8b4cc5e517a859f6413f96e",
   "main": "src/entry/worker.ts",
@@ -20,7 +20,7 @@
       "vars": {
         "YERAL_ENV": "production",
         "YERAL_DOMAIN": "yeral.app",
-        "MEDIA_BASE_URL": "https://yeral.app/media",
+        // MEDIA_BASE_URL: where photos live in production is decided with M3 (the client site or R2)
         // client IPs for rate limits: Cloudflare's header
         "TRUSTED_IP_HEADER": "cf-connecting-ip",
       },

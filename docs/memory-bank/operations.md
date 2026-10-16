@@ -79,17 +79,19 @@ Workers Paid when limits are hit, Access policy for `cms.` (M6).
   request's first query (preflights, `/version.json`, `/docs` never connect); the Cron Trigger (`* * * * *`) runs the jobs
   tick on a pool of 3. Both entries run `jobsTick()` (`modules/jobs/tick.ts`): a transaction-level advisory lock keeps
   runs from overlapping (Node processes, Cron invocations), failures are logged. `apps/api/wrangler.jsonc` has one
-  environment, `production` (`yeral-api` on `api.yeral.app`); its top level has no database binding and no URL, so a
-  deploy without `--env` fails loudly. `pnpm --filter @yeral/api run build:worker` is a dry-run bundle (≈ 300 KiB gzip).
+  environment, `production` (`yeral-api` on `api.yeral.app`); its top level is a different Worker name with no database
+  binding and no URL, so a deploy without `--env` can't replace production and fails loudly. `pnpm --filter @yeral/api run build:worker` is a dry-run bundle (≈ 300 KiB gzip).
 - Client IPs for rate limits: `TRUSTED_IP_HEADER` names the one header the api trusts — `cf-connecting-ip` on Workers
   (wrangler vars), `x-forwarded-for` behind our nginx (compose), which sets it and drops a client-sent `CF-Connecting-IP`.
-- Locally in workerd: `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://user:pass@localhost:5432/yeral pnpm --filter @yeral/api exec wrangler dev --env production --local`.
+- Locally in workerd: `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://user:pass@localhost:5432/yeral pnpm --filter @yeral/api exec wrangler dev --env production --local --var YERAL_ENV:local` (local site config: localhost cookies and origins, demo on).
 - **First deploy, when the new client site (M3) ships and with the owner's go-ahead** (Cloudflare resources + the
   `api.yeral.app` record): a Hyperdrive config `yeral-production` on the Neon production branch's direct connection string
   (Hyperdrive pools by itself) with query caching off — the api needs fresh reads (sessions, events, free times):
   `pnpm --filter @yeral/api exec wrangler hyperdrive create yeral-production --connection-string="$DATABASE_URL_UNPOOLED" --caching-disabled`
   — put its id into `wrangler.jsonc`, migrate and write the catalogue (`YERAL_ENV=production pnpm db:setup --allow-remote`),
-  then `pnpm --filter @yeral/api run deploy:production` and a deploy job in `release.yml` with a smoke check.
+  then `pnpm --filter @yeral/api run deploy:production` (it refuses while the Hyperdrive id is the placeholder) and a
+  deploy job in `release.yml` with a smoke check. Decide before that deploy: the jobs cron cadence (every minute keeps
+  the Neon compute from suspending, which costs compute hours on a free product) and where production photos live.
 - Photos: `MEDIA_BASE_URL=https://yeral.app/media` — the client site serves them from M3.
 
 ## The production-like stack (since M2g)

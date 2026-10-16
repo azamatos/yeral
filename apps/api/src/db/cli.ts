@@ -11,7 +11,7 @@ import { loadConfig } from '../config'
 import { createDb } from './client'
 import { runMigrations } from './migrate'
 import { seed } from './seed'
-import { seedMode } from './seed/mode'
+import { assertSeedTarget, seedMode } from './seed/mode'
 
 const [command = 'setup', ...flags] = process.argv.slice(2)
 const config = loadConfig(process.env)
@@ -37,8 +37,7 @@ async function main() {
   const seeds = command === 'seed' || command === 'setup'
   // checked before anything runs: a misconfigured server gets an error, not a half-done setup
   const demo = seeds && seedMode(process.env.YERAL_ENV) === 'demo'
-  if (seeds && !isLocal && !flags.includes('--allow-remote'))
-    throw new Error(`Refusing to seed ${url.hostname}: pass --allow-remote for a remote database`)
+  if (seeds) assertSeedTarget({ demo, local: isLocal, allowRemote: flags.includes('--allow-remote'), host: url.hostname })
   if (command === 'setup') await ensureDatabase()
   const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 2 })
   const db = createDb(pool)
