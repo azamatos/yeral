@@ -4,7 +4,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses } from '../../db/schema'
+import { businesses, services } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { DEMO_CENTER } from '../../db/seed/demo-data'
 
@@ -89,6 +89,18 @@ describe('catalogue', () => {
     expect(d.photos[0].url).toBe('http://media.test/demo/adam-winger-FkAZqQJTbXM-unsplash.jpg')
     expect(d.distanceM).toBeGreaterThan(2900)
     expect(d.nextFree).not.toBeNull()
+  })
+
+  it('a hidden price stays hidden on the public page', async () => {
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const [svc] = await db.select().from(services).where(eq(services.businessId, glow!.id)).limit(1)
+    await db.update(services).set({ priceType: 'hidden', priceAmount: 120 }).where(eq(services.id, svc!.id))
+    const res = await b.req('/v1/businesses/glow-studio')
+    await db.update(services).set({ priceType: svc!.priceType, priceAmount: svc!.priceAmount }).where(eq(services.id, svc!.id))
+    const shown = res.json.serviceGroups
+      .flatMap((g: { services: { id: string }[] }) => g.services)
+      .find((s: { id: string }) => s.id === svc!.id)
+    expect(shown.price).toEqual({ type: 'hidden', amount: 0 })
   })
 
   it('reviews, newest first, with the business reply', async () => {

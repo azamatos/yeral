@@ -11,7 +11,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { buildCards } from './cards'
-import { geoOf, openOf, photoOf, priceFromOf, servicePrice, text } from './map'
+import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
 
 const SPECIAL_DAYS_AHEAD = 14
 
@@ -123,7 +123,7 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
             name: text(s.name, lang),
             description: s.description ? text(s.description, lang) : null,
             durationMin: s.durationMin,
-            price: servicePrice(s),
+            price: publicPrice(s),
             staffIds: specialists.filter((p) => p.serviceIds.includes(s.id)).map((p) => p.id),
           })),
       }))
