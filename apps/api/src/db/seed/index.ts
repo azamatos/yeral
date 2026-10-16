@@ -1,6 +1,6 @@
 /**
  * `seed(db, { demo, now })`: the category catalogue always; with `demo`, the whole design demo (wipes the database
- * first — the CLI allows that only on local and staging databases). One transaction: a seed that fails leaves the
+ * first — the CLI allows that only on local and docker databases). One transaction: a seed that fails leaves the
  * database as it was. Demo dates move with "today"; weekly data (opening hours, shifts, breaks, the yoga week) turns with
  * them, so the demo day keeps the design's Wednesday whatever weekday it lands on.
  */

@@ -90,7 +90,11 @@ notifications, help, billing, B2B landing, tables, classes; decisions in §22, o
 - Classes (§21): "Gelmedi belle" only after the session starts; a manual add = 1 seat, source phone, confirmed; clashes =
   same trainer or room; waitlist later.
 
-### Plans and commission (§18, decided 14.10.2026; prices open)
+### Plans and commission (§18) — later: **Ýeral is free for now** (owner, 2026-10-16)
+
+Every business gets everything at no cost: no plans, no commission, no invoices, no limit on specialists. The model below
+is the design's plan for later (round 5, decided 14.10.2026, prices never set); nothing of it is built until the owner
+turns it on.
 
 - **Ýeke**: free, one specialist (online booking, calendar, clients, SMS reminders, link and QR). **Topar**: `[PRICE]` TMT
   a month per business (not per staff), unlimited staff, roles, analytics, support chat; each branch billed on its own;

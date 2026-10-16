@@ -9,6 +9,6 @@ export function seedMode(yeralEnv: string | undefined): 'demo' | 'catalogue' {
   if (yeralEnv === 'production') return 'catalogue'
   if ((SITE_ENVS as readonly string[]).includes(yeralEnv ?? '')) return 'demo'
   throw new Error(
-    'Refusing to seed without YERAL_ENV: local, docker or staging seed the demo (wipes the database), production the category catalogue',
+    'Refusing to seed without YERAL_ENV: local or docker seed the demo (wipes the database), production the category catalogue',
   )
 }

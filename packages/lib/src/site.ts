@@ -5,7 +5,8 @@
 import { z } from 'zod'
 import { EnvError, parseEnv } from './env'
 
-export const SITE_ENVS = ['local', 'docker', 'staging', 'production'] as const
+/** Local work and production only (ADR 0020): no staging. */
+export const SITE_ENVS = ['local', 'docker', 'production'] as const
 export type SiteEnv = (typeof SITE_ENVS)[number]
 
 export const SITE_APPS = ['client', 'business', 'cms', 'api', 'storybook'] as const
@@ -17,7 +18,7 @@ export interface SiteConfig {
   urls: Record<SiteApp, string>
   /** `Domain` of the shared session cookie (client + business); undefined = host-only (localhost). */
   cookieDomain: string | undefined
-  /** Cookie name prefix, so a staging session never overwrites a production one on the shared parent domain. */
+  /** Cookie name prefix per environment, so sessions from different environments never mix. */
   cookiePrefix: string
   /** Web origins allowed to call the api with credentials. */
   origins: string[]
@@ -56,17 +57,6 @@ export function siteConfig({ env, domain = 'yeral.app', portBase = 3000 }: SiteO
         api: `https://api.${domain}`,
         storybook: `https://storybook.${domain}`,
       }
-      break
-    case 'staging':
-      // one level deep (business-stage, not business.stage) so the *.domain certificate covers them
-      urls = {
-        client: `https://stage.${domain}`,
-        business: `https://business-stage.${domain}`,
-        cms: `https://cms-stage.${domain}`,
-        api: `https://api-stage.${domain}`,
-        storybook: `https://storybook.${domain}`,
-      }
-      cookiePrefix = 'yeral-stage'
       break
     case 'docker': {
       // the production-like stack behind nginx: *.localhost resolves to this machine without /etc/hosts

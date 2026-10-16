@@ -1,10 +1,10 @@
-// Deploys the api Worker with the build stamp: node scripts/deploy.mjs <staging|production>
+// Deploys the api Worker with the build stamp: node scripts/deploy.mjs production (no staging, ADR 0020)
 import { execFileSync, execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 
 const env = process.argv[2]
-if (!['staging', 'production'].includes(env ?? '')) {
-  console.error('usage: deploy.mjs <staging|production>')
+if (env !== 'production') {
+  console.error('usage: deploy.mjs production')
   process.exit(1)
 }
 const { version } = JSON.parse(readFileSync('package.json', 'utf8'))

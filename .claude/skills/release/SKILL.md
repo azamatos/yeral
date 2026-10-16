@@ -14,10 +14,11 @@ References: `docs/memory-bank/operations.md`, ADR 0009, 0010. Workflows: `.githu
    Skip only for changes nobody can notice (refactors, docs, CI).
 3. **Branch + PR**: `git switch -c <type>/<topic>`, commit (`feat(client): …`), `git push -u origin HEAD`,
    `gh pr create --fill` (title = Conventional Commit; CI checks it). Wait for CI: `gh pr checks --watch`.
-4. **Merge**: `gh pr merge --squash --delete-branch` once CI is green.
-5. **Staging** (from the first new app on): merging deploys affected apps to `*-stage.yeral.app`. Check `/version.json`
-   shows the merge commit, then run the relevant flows from skill `qa-flows`. `apps/legacy` has no staging.
-6. **Production**: the release workflow keeps a «chore: version packages» PR open with the pending changesets. Merging it
+4. **Review, then merge**: run skill `code-review` on the PR (`high` for code, `medium` for docs), fix what it finds,
+   then `gh pr merge --squash --delete-branch` once CI is green.
+5. **No staging** (ADR 0020): prove the change locally before merging — `pnpm check`, the Docker stack
+   (`pnpm docker:up`) for api or infra changes, the flows from skill `qa-flows` against local dev servers.
+6. **Production** (the owner decides when): the release workflow keeps a «chore: version packages» PR open with the pending changesets. Merging it
    tags `@yeral/<app>@x.y.z`, creates GitHub Releases and runs `deploy.yml` for those apps; the smoke check verifies
    `/version.json` and key pages. Watch it: `gh run list --workflow=release.yml`, `gh run watch`.
    The version PR is opened by GitHub Actions, so its CI waits for approval: find the run

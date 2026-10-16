@@ -1,7 +1,7 @@
 /**
  * `pnpm db:migrate | db:seed | db:setup` (root: `pnpm db:setup`). Seeding writes demo data, so it runs only against a
- * local database unless `--allow-remote` is passed (staging from CI), and only with YERAL_ENV set (`seedMode()`):
- * production gets the category catalogue only.
+ * local database unless `--allow-remote` is passed (production, by hand), and only with YERAL_ENV set (`seedMode()`):
+ * production gets the category catalogue only. There is no staging (ADR 0020).
  * `setup` = create the database if missing, migrate, and seed it while it has no businesses. The demo's dates are fixed
  * at seed time (the demo day becomes that day), so a long-lived database goes stale: `seed` starts it over on today.
  */

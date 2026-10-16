@@ -1,6 +1,6 @@
 name: Deploy
 
-# Reusable: called by release.yml (production) and later by ci.yml (staging); can also be run by hand.
+# Reusable: called by release.yml (production; there is no staging, ADR 0020); can also be run by hand.
 # Each app has a `deploy:<environment>` script. Cloudflare today; Docker over SSH on the own server later.
 
 on:
@@ -11,7 +11,7 @@ on:
         type: string
         required: true
       environment:
-        description: staging or production
+        description: production (the only deployed environment)
         type: string
         required: true
   workflow_dispatch:
