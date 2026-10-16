@@ -39,6 +39,22 @@
     "internal": "Something went wrong. Please try again.",
     "network": "No connection. Please try again."
   },
+  "declineReasons": {
+    "slot_busy": "This time isn't free",
+    "no_staff": "No specialist available",
+    "cannot_do": "We don't offer this service",
+    "other": "Other reason"
+  },
+  "sms": {
+    "code": "Ýeral code: {code}",
+    "confirmed": "Ýeral: {business} confirmed your booking. {weekday}, {date}, {time}. Change: {link}",
+    "declined": "Ýeral: {business} can't take your booking on {date} {time}: {reason}. Pick another time: {link}",
+    "expired": "Ýeral: {business} didn't answer in time. Free times: {times} — {link}",
+    "cancelled": "Ýeral: {business} cancelled your booking on {date} {time}: {reason}. {link}",
+    "reminderDay": "Reminder: tomorrow at {time}, {business}, {address}.",
+    "reminder2h": "Reminder: today at {time}, {business}, {address}.",
+    "reviewAsk": "How was your visit to {business}? Rate it: {link}"
+  },
   "fmt": {
     "money": "{amount} TMT",
     "priceFrom": "from {amount} TMT",

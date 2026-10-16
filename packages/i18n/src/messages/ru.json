@@ -39,6 +39,22 @@
     "internal": "Что-то пошло не так. Попробуйте ещё раз.",
     "network": "Нет соединения. Попробуйте ещё раз."
   },
+  "declineReasons": {
+    "slot_busy": "Это время занято",
+    "no_staff": "Нет специалиста",
+    "cannot_do": "Мы не оказываем эту услугу",
+    "other": "Другая причина"
+  },
+  "sms": {
+    "code": "Код Ýeral: {code}",
+    "confirmed": "Ýeral: {business} подтвердил вашу запись. {weekday}, {date}, {time}. Изменить: {link}",
+    "declined": "Ýeral: {business} не может принять запись на {date} {time}: {reason}. Выберите другое время: {link}",
+    "expired": "Ýeral: {business} не ответил вовремя. Есть свободное время: {times} — {link}",
+    "cancelled": "Ýeral: {business} отменил вашу запись на {date} {time}: {reason}. {link}",
+    "reminderDay": "Напоминание: завтра в {time} {business}, {address}.",
+    "reminder2h": "Напоминание: сегодня в {time} {business}, {address}.",
+    "reviewAsk": "Как прошёл визит в {business}? Оцените: {link}"
+  },
   "fmt": {
     "money": "{amount} TMT",
     "priceFrom": "от {amount} TMT",

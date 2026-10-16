@@ -6,6 +6,7 @@ import { createApp } from '../app'
 import { loadConfig } from '../config'
 import { createDb, createPool } from '../db/client'
 import type { Deps } from '../deps'
+import { runDueJobs } from '../modules/jobs/run'
 import { createLogger } from '../ports/log'
 import { logSms } from '../ports/sms'
 
@@ -19,6 +20,7 @@ const deps: Deps = {
   sms: logSms(log),
   media: (key) => `${config.mediaBaseUrl}/${key}`,
   log,
+  trustedIpHeader: config.trustedIpHeader,
 }
 
 const app = createApp(async (c, next) => {
@@ -34,8 +36,22 @@ if (config.site.demo) {
 
 const server = serve({ fetch: app.fetch, port: config.port }, (info) => log.info('listening', { port: info.port, env: config.site.env }))
 
+// the jobs tick (ADR 0005): expiries, completions, SMS, reminders; one run at a time
+let running = false
+const tick = () => {
+  if (running) return
+  running = true
+  runDueJobs(deps)
+    .then((r) => (r.expired || r.completed || r.jobs ? log.info('jobs', r) : undefined))
+    .catch((e: unknown) => log.error('jobs failed', { error: String(e) }))
+    .finally(() => (running = false))
+}
+const timer = setInterval(tick, 60_000)
+tick()
+
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
+    clearInterval(timer)
     server.close()
     void pool.end().then(() => process.exit(0))
   })

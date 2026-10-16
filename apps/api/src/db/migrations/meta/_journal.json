@@ -15,6 +15,13 @@
       "when": 1791979118185,
       "tag": "0001_no_double_booking",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792153710734,
+      "tag": "0002_offers_and_event_cursor",
+      "breakpoints": true
     }
   ]
 }

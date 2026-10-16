@@ -11,7 +11,7 @@ import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uuid, t
 import { users } from './auth'
 import { businesses, classSessions, clients, diningTables, services, staff, tableAreas } from './business'
 import { bookingSource, bookingStatus, bookingType, cancelledBy, complaintType, declineReason, priceType } from './enums'
-import { createdAt, int4range, ts } from './types'
+import { createdAt, int4range, ts, xid8 } from './types'
 
 /** A time offered to the client (decline or expiry alternatives). */
 export interface TimeSlot {
@@ -61,6 +61,10 @@ export const bookings = pgTable(
     holdUntil: ts(),
     /** A client's move request points at the booking it would replace. */
     rescheduleOf: uuid().references((): AnyPgColumn => bookings.id, { onDelete: 'cascade' }),
+    /** Made from a time offered after a decline or an expiry: one booking per offer (unique). */
+    alternativeOf: uuid()
+      .unique()
+      .references((): AnyPgColumn => bookings.id, { onDelete: 'set null' }),
     /** Tell the client by SMS about changes made in the workspace (manual bookings). */
     notifyClient: boolean().notNull().default(true),
     // table
@@ -151,6 +155,10 @@ export const events = pgTable(
     bookingCode: text(),
     /** The client the event concerns. */
     userId: uuid().references(() => users.id, { onDelete: 'cascade' }),
+    /** The writing transaction: pollers only read events older than every transaction still running. */
+    txid: xid8()
+      .notNull()
+      .default(sql`pg_current_xact_id()`),
   },
   (t) => [index('events_business_idx').on(t.businessId, t.id), index('events_user_idx').on(t.userId, t.id)],
 )

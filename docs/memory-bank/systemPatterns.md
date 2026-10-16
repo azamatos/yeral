@@ -110,7 +110,8 @@ component ─► useQuery(sdk.businesses.detail(slug)) ─► hc client ─► G
 - Mutations invalidate by query keys defined in `@yeral/sdk`; optimistic updates only where instant feedback matters.
 - **Live updates**: the api writes an event per change (`booking.confirmed`, `booking.created` …) to an `events` table.
   While a screen is open the sdk polls `GET /v1/events?after=<cursor>` (≈10 s, on window focus, and after the user's own
-  mutations) and invalidates the matching queries. A push channel can replace polling on the own server; screens don't change.
+  mutations) and invalidates the matching queries. The cursor is `<txid>.<id>`: events are read in the order of the
+  transaction that wrote them, only once every older transaction has finished, so one that commits late is never skipped. A push channel can replace polling on the own server; screens don't change.
 
 ## State
 
@@ -131,8 +132,10 @@ params (zod); unsaved form input → TanStack Form; one subtree → `useState`; 
 apps/api/src/
   app.ts            OpenAPIHono, middleware (request id, logging, CORS for configured sites, auth session, error mapper), /v1
   modules/<name>/   routes.ts (createRoute + handler) · service.ts (use cases) · repo.ts (Drizzle queries)
-                    auth · catalog · availability · bookings · reviews · favorites · notifications · events
-                    biz/{calendar, requests, bookings, clients, services, team, roles, rules, hours, profile, branches} · admin/*
+                    health · auth (codes, sessions) · me (profile, favourites) · catalog (search, cards, pages, reviews)
+                    availability · bookings (send, actions, reviews, confirm) · events · jobs (runDueJobs)
+                    later: biz/{calendar, requests, bookings, clients, services, team, roles, rules, hours, reviews,
+                    analytics, profile, branches, settings} · admin/*
   db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (docs/design demo data + 13 categories)
   jobs/             runDueJobs(): expire requests at holdUntil, complete visits, reminders, review asks, SMS
   ports/            sms (dev: code 1234 logged), files (S3 API), clock
