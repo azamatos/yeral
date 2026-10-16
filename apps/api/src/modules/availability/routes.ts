@@ -11,7 +11,16 @@ import {
   tableAvailabilitySchema,
 } from '@yeral/contract/availability'
 import { slugSchema } from '@yeral/contract/common'
-import { appointmentSlots, maxSeats, nextFreeSlot, staffDoingAll, tableSlots, type AppointmentContext } from '@yeral/domain/availability'
+import type { PartyTooLargeDetails } from '@yeral/contract/errors'
+import {
+  appointmentSlots,
+  MAX_ONLINE_PARTY,
+  maxSeats,
+  nextFreeSlot,
+  staffDoingAll,
+  tableSlots,
+  type AppointmentContext,
+} from '@yeral/domain/availability'
 import { businessClosedReason } from '@yeral/domain/hours'
 import { cancelDeadline } from '@yeral/domain/lifecycle'
 import { addDays, epochOf, today } from '@yeral/domain/time'
@@ -63,7 +72,7 @@ const tablesRoute = createRoute({
   tags: ['availability'],
   summary: 'Times with a free table for the party size, per area',
   request: { params: slugParam, query: tableAvailabilityQuerySchema },
-  responses: { 200: json(tableAvailabilitySchema), 404: errors[404] },
+  responses: { 200: json(tableAvailabilitySchema), 400: errors[400], 404: errors[404] },
 })
 
 const sessionsRoute = createRoute({
@@ -118,6 +127,8 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const now = deps.now()
     const q = c.req.valid('query')
+    // "9 we ondan köp adam bolsa, jaň ediň" (client spec §4.5)
+    if (q.party > MAX_ONLINE_PARTY) throw new ApiError('party_too_large', { callFrom: MAX_ONLINE_PARTY + 1 } satisfies PartyTooLargeDetails)
     const lb = await loaded(deps, c.req.valid('param').slug)
     const first = today(now)
     const date = q.date ?? first

@@ -91,7 +91,6 @@ describe('client bookings', () => {
     expect(res.status).toBe(201)
     expect(res.json).toMatchObject({
       status: 'pending',
-      type: 'appointment',
       business: { slug: 'glow-studio', name: 'Glow Studio', category: 'Gözellik salony' },
       what: { type: 'appointment', items: [{ service: 'Aýal saç kesimi', staff: 'Aýna', start: 600, end: 660 }] },
       price: { type: 'fixed', amount: 80 },
@@ -100,6 +99,8 @@ describe('client bookings', () => {
       timeline: [{ event: 'sent', at: DEMO_NOW }],
       actions: { cancel: true, reschedule: false, editNote: true },
     })
+    // the type is `what.type` only
+    expect(res.json).not.toHaveProperty('type')
     expect(res.json.code).toMatch(/^YR-\d{5}$/)
     const list = await b.req('/v1/me/bookings?tab=upcoming')
     expect(list.json.items.map((x: { code: string }) => x.code)).toEqual([res.json.code])
@@ -229,6 +230,18 @@ describe('client bookings', () => {
     })
     const [row] = await db.select().from(bookings).where(eq(bookings.code, res.json.code))
     expect(row!.tableId).not.toBeNull()
+  })
+
+  it('a table for 9 or more: book by phone (party_too_large)', async () => {
+    const b = browser(t.app)
+    await b.login('+99365111019', 'Aýna')
+    const detail = await b.req('/v1/businesses/bag-kafe')
+    const hall = detail.json.tables.areas[0]
+    const res = await b.req('/v1/bookings', {
+      body: { type: 'table', business: 'bag-kafe', partySize: 9, areaId: hall.id, date: THU, start: 1140 },
+    })
+    expect(res.status).toBe(400)
+    expect(res.json.error).toEqual({ code: 'party_too_large', details: { callFrom: 9 } })
   })
 
   it('a client with repeated no-shows can book only by phone', async () => {

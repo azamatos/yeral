@@ -4,10 +4,12 @@
  * free times). Online bookings wait for the business unless it confirms instantly.
  */
 import type { CreateBooking } from '@yeral/contract/bookings'
+import type { PartyTooLargeDetails } from '@yeral/contract/errors'
 import {
   assignTable,
   canBookSession,
   findAppointmentSlot,
+  MAX_ONLINE_PARTY,
   maxSeats,
   nearestSlots,
   tableSlots,
@@ -240,6 +242,9 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
   }
 
   if (input.type === 'table') {
+    // "9 we ondan köp adam bolsa, jaň ediň" (client spec §4.5)
+    if (input.partySize > MAX_ONLINE_PARTY)
+      throw new ApiError('party_too_large', { callFrom: MAX_ONLINE_PARTY + 1 } satisfies PartyTooLargeDetails)
     const ctx = await loadTableContext(db, lb, input.date, input.date, now)
     const tableId = assignTable(ctx, { date: input.date, start: input.start, partySize: input.partySize, areaId: input.areaId })
     const nearest = () =>
