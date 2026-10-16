@@ -36,7 +36,7 @@ export function Crumb({ asChild, current, className, ...props }: ComponentProps<
     <Comp
       {...props}
       className={cn(
-        'text-n-600 no-underline hover:text-n-900 hover:underline focus-visible:rounded-[4px] focus-visible:shadow-focus focus-visible:outline-none',
+        'text-n-600 no-underline hover:text-n-900 hover:underline focus-visible:rounded-xs focus-visible:shadow-focus focus-visible:outline-none',
         className,
       )}
     />

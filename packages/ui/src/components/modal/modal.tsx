@@ -13,7 +13,7 @@ export const Modal = Dialog.Root
 export const ModalTrigger = Dialog.Trigger
 export const ModalClose = Dialog.Close
 
-const widths = { 400: 'sm:w-100 sm:p-7', 480: 'sm:w-120', 560: 'sm:w-140', 640: 'sm:w-160' } as const
+const widths = { 400: 'sm:w-modal-s sm:p-7', 480: 'sm:w-modal-m', 560: 'sm:w-modal-ml', 640: 'sm:w-modal-l' } as const
 
 export function ModalContent({
   size = 480,

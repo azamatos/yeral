@@ -4,6 +4,8 @@ import { extendTailwindMerge } from 'tailwind-merge'
 // tailwind-merge needs to know the design's custom scales, or it would treat `text-small` (size) and `text-n-600` (colour) as the same group.
 const twMerge = extendTailwindMerge({
   extend: {
+    // the radius scale covers every side and corner (`rounded-t-card`, `rounded-bl-xs`)
+    theme: { radius: ['xs', 'sm', 'input', 's', 'm', 'l', 'card', 'pill'] },
     classGroups: {
       'font-size': [{ text: ['display', 'h1', 'h2', 'h3', 'body-l', 'body', 'dense', 'button', 'button-l', 'label', 'small', 'micro'] }],
       shadow: [
@@ -25,7 +27,6 @@ const twMerge = extendTailwindMerge({
           ],
         },
       ],
-      rounded: [{ rounded: ['xs', 'sm', 'input', 's', 'm', 'l', 'card', 'pill'] }],
     },
   },
 })
