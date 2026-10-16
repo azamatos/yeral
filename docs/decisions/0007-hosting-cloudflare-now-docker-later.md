@@ -1,6 +1,6 @@
 # 0007. Hosting: Cloudflare now, own server with Docker + nginx later
 
-- Status: Accepted 2026-10-13 (revised the same day after the owner's review)
+- Status: Accepted 2026-10-13 (revised the same day after the owner's review); staging dropped by [0020](0020-local-and-production-only.md)
 - Decided by: owner (Cloudflare now, own server later, Docker + nginx, Cloudflare for the domain) + Claude (topology)
 
 ## Context

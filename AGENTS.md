@@ -44,8 +44,9 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 ## Working with the owner
 
 - The owner writes in English; the product UI is Russian (Turkmen next).
-- Finished work: commit, push and deploy to staging without asking. Production comes from releases.
-  Until M0 there's no staging: `pnpm run deploy` publishes straight to yeral.app, so say so when doing it.
+- Finished work: review it (skill `code-review`, fix what it finds), then commit, push and merge on green CI without
+  asking. There is no staging (ADR 0020): prove changes locally. Production changes only from a release (the version PR),
+  and the owner decides when one ships.
 - Ask first before: repository settings, DNS changes, deleting anything in the Cloudflare or GitHub account, paid services,
   adding files from outside the repo.
 - `docs/design/` is the owner's export: read it, don't edit it (a new export replaces the folder). The old mobile designs

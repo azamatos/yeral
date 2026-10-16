@@ -2,7 +2,8 @@
 
 Status 2026-10-13 (M0): production = `apps/legacy` (Next.js) on Cloudflare. `ci.yml`, `release.yml`, `deploy.yml` exist;
 legacy deploys to production from a release (first CI deploy: `@yeral/legacy@0.1.1`, 2026-10-14). The
-`CLOUDFLARE_API_TOKEN` repository secret is set; without it the deploy job skips with a warning. Staging, Neon, Docker and the new apps are *planned* (M1–M2).
+`CLOUDFLARE_API_TOKEN` repository secret is set; without it the deploy job skips with a warning. Since 2026-10-16 there
+are two kinds of environment only, local and production (ADR 0020): no staging.
 
 ## Environments
 
@@ -10,13 +11,11 @@ legacy deploys to production from a release (first CI deploy: `@yeral/legacy@0.1
 |---|---|---|---|
 | local | `localhost:3000–3005` (`PORT_BASE` + offset) | Postgres in Docker, one database per worktree | `pnpm dev` |
 | local, production-like | `*.yeral.localhost` through nginx | Postgres container | `pnpm docker:up` |
-| preview (optional) | Cloudflare preview URL per PR | Neon branch per PR | once the workers.dev subdomain is renamed (it contains part of the account e-mail today, so previews are off) |
-| staging | `stage.yeral.app` (client), `business-stage.`, `cms-stage.`, `api-stage.`, `storybook.` | Neon branch `stage` (demo seed) | every green push to `main` |
-| production | `yeral.app` (client), `business.`, `cms.`, `api.` | Neon `main` | when a release is cut (Changesets) |
+| production | `yeral.app` (client), `business.`, `cms.`, `api.`, `storybook.` | Neon branch `production` (categories, no demo) | when a release is cut (Changesets); Storybook on every push to `main` |
 
-Staging hosts are one level deep (`client-stage`, not `client.stage`) so the `*.yeral.app` certificate covers them.
-Staging uses its own cookie names so it never overwrites a production session on the shared parent domain.
-All hosts come from config (`@yeral/lib/site`), so a new domain is a config change.
+No staging and no PR previews (ADR 0020): a change is proven locally (tests, the Docker stack), reviewed, and merged on
+green CI; production changes only from a release. A risky migration can be rehearsed on a throwaway Neon branch of
+production. All hosts come from config (`@yeral/lib/site`), so a new domain is a config change.
 
 ## Hosting now: Cloudflare
 
@@ -41,7 +40,8 @@ Workers Paid when limits are hit, Access policy for `cms.` (M6).
 
 - Project **Yeral** (`summer-mountain-55668852`), region `aws-eu-central-1` (Frankfurt), Postgres 18, org
   `org-solitary-credit-03680071`; linked to this repo by `.neon` (gitignored) and described by `neon.ts` (committed).
-- Branch `production` today; `stage` and per-PR branches come with M2 (`neon checkout <name> --create` applies `neon.ts`).
+- Branch `production`; a throwaway branch may rehearse a risky migration (`neon checkout <name> --create` applies
+  `neon.ts`), deleted afterwards. No staging branch (ADR 0020).
 - Local env: `npx neon@latest env pull` (or `neon deploy`) writes `.env.local` (gitignored): `DATABASE_URL` (pooled,
   `-pooler` host — app traffic), `DATABASE_URL_UNPOOLED` (direct — migrations, `pg_dump`, `LISTEN/NOTIFY`), `NEON_BRANCH`.
 - Sign-in: the owner's `npx neon@latest login` on this machine (OAuth); agents use that session, never a pasted key.
@@ -57,8 +57,8 @@ Workers Paid when limits are hit, Access policy for `cms.` (M6).
   demo while the database has no businesses; it never touches a database that has them. `pnpm db:seed` starts the demo over.
   The root `.env.local` holds the **Neon production** URL for the neon tooling: the api never reads it.
 - Seeding wipes the database, so `db:seed` and `db:setup` refuse any host but localhost/`postgres`/`db` unless
-  `--allow-remote` is passed (staging from CI), and refuse without an explicit `YERAL_ENV` (`.env.example` sets `local`):
-  `local`, `docker`, `staging` seed the demo, `production` writes only the category catalogue. The seed is one
+  `--allow-remote` is passed (production, by hand), and refuse without an explicit `YERAL_ENV` (`.env.example` sets
+  `local`): `local` and `docker` seed the demo, `production` writes only the category catalogue. The seed is one
   transaction: if it fails, the database stays as it was.
 - Demo dates move with today, once: the design's demo day (2026-10-14) becomes the day you seed, and stays that date.
   A database seeded on an earlier day shows that day's demo (requests expired, "today" in the past): `pnpm db:seed` (wipes
@@ -73,27 +73,26 @@ Workers Paid when limits are hit, Access policy for `cms.` (M6).
 - Migrations: `pnpm db:generate` (drizzle-kit, `apps/api/src/db/migrations`); hand-written SQL (extensions, exclusion
   constraints) goes into a `--custom` migration. Never edit a merged migration.
 
-## The api on Cloudflare (prepared in M2g, not deployed yet)
+## The api on Cloudflare (prepared in M2g, not deployed yet; production only)
 
 - `apps/api/src/entry/worker.ts` is the Worker: a node-postgres client per request through Hyperdrive, opened on the
   request's first query (preflights, `/version.json`, `/docs` never connect); the Cron Trigger (`* * * * *`) runs the jobs
   tick on a pool of 3. Both entries run `jobsTick()` (`modules/jobs/tick.ts`): a transaction-level advisory lock keeps
-  runs from overlapping (Node processes, Cron invocations), failures are logged. `apps/api/wrangler.jsonc` has the
-  `staging` environment (`yeral-api-stage` on `api-stage.yeral.app`); its top level has no database binding and no URL,
-  so a deploy without `--env` fails loudly. `pnpm --filter @yeral/api run build:worker` is a dry-run bundle (≈ 300 KiB gzip).
+  runs from overlapping (Node processes, Cron invocations), failures are logged. `apps/api/wrangler.jsonc` has one
+  environment, `production` (`yeral-api` on `api.yeral.app`); its top level is a different Worker name with no database
+  binding and no URL, so a deploy without `--env` can't replace production and fails loudly. `pnpm --filter @yeral/api run build:worker` is a dry-run bundle (≈ 300 KiB gzip).
 - Client IPs for rate limits: `TRUSTED_IP_HEADER` names the one header the api trusts — `cf-connecting-ip` on Workers
   (wrangler vars), `x-forwarded-for` behind our nginx (compose), which sets it and drops a client-sent `CF-Connecting-IP`.
-- Locally in workerd: `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://user:pass@localhost:5432/yeral pnpm --filter @yeral/api exec wrangler dev --env staging --local`.
-- **Waiting for the owner's go-ahead** (Cloudflare account resources + a DNS record): create the Neon branch `stage`,
-  a Hyperdrive config `yeral-stage` on its direct connection string (Hyperdrive pools by itself) with query caching off —
-  the api needs fresh reads (sessions, events, free times):
-  `pnpm --filter @yeral/api exec wrangler hyperdrive create yeral-stage --connection-string="$DATABASE_URL_UNPOOLED" --caching-disabled`
-  — put its id into `wrangler.jsonc`, migrate + seed the branch (`db:setup --allow-remote` from CI),
-  `pnpm --filter @yeral/api run deploy:staging` (creates `api-stage.yeral.app`), then a CI job deploys it on every green
-  push to `main` with a smoke check.
-- Staging's demo goes stale like any seeded database: planned with that CI job, a nightly scheduled run of
-  `db:seed --allow-remote` (YERAL_ENV=staging) starts it over on the new day; deploys only migrate.
-- Photos on staging: `MEDIA_BASE_URL=https://stage.yeral.app/media` — the client site serves the demo photos from M3.
+- Locally in workerd: `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://user:pass@localhost:5432/yeral pnpm --filter @yeral/api exec wrangler dev --env production --local --var YERAL_ENV:local` (local site config: localhost cookies and origins, demo on).
+- **First deploy, when the new client site (M3) ships and with the owner's go-ahead** (Cloudflare resources + the
+  `api.yeral.app` record): a Hyperdrive config `yeral-production` on the Neon production branch's direct connection string
+  (Hyperdrive pools by itself) with query caching off — the api needs fresh reads (sessions, events, free times):
+  `pnpm --filter @yeral/api exec wrangler hyperdrive create yeral-production --connection-string="$DATABASE_URL_UNPOOLED" --caching-disabled`
+  — put its id into `wrangler.jsonc`, migrate and write the catalogue (`YERAL_ENV=production pnpm db:setup --allow-remote`),
+  then `pnpm --filter @yeral/api run deploy:production` (it refuses while the Hyperdrive id is the placeholder) and a
+  deploy job in `release.yml` with a smoke check. Decide before that deploy: the jobs cron cadence (every minute keeps
+  the Neon compute from suspending, which costs compute hours on a free product) and where production photos live.
+- Photos: `MEDIA_BASE_URL=https://yeral.app/media` — the client site serves them from M3.
 
 ## The production-like stack (since M2g)
 
@@ -147,10 +146,10 @@ switch DNS records → switch CI's deploy step. The Docker setup exists and is b
 
 ## Secrets
 
-- GitHub Environment secrets (`staging`, `production`), never in the repo or in chat: `CLOUDFLARE_API_TOKEN` (Workers
+- GitHub Environment secrets (`production`), never in the repo or in chat: `CLOUDFLARE_API_TOKEN` (Workers
   Scripts edit, Workers Routes edit, Zone read, Hyperdrive edit, R2 edit), `CLOUDFLARE_ACCOUNT_ID`, `DATABASE_URL` per
   environment, `BETTER_AUTH_SECRET`, `SENTRY_DSN`; later the SSH deploy key and SMS gateway keys.
-- The owner creates tokens in the providers' dashboards and stores them with `gh secret set NAME --env staging`
+- The owner creates tokens in the providers' dashboards and stores them with `gh secret set NAME --env production`
   (the value is typed into the prompt).
 - Local: `.env.local` per app (gitignored); `.env.example` committed and documents every variable.
 
@@ -179,7 +178,7 @@ switch DNS records → switch CI's deploy step. The Docker setup exists and is b
 - The version PR is opened by GitHub Actions, so its CI run waits for approval: *Approve and run* on the PR, or
   `gh api -X POST repos/azamatos/yeral/actions/runs/<run-id>/approve`. Then it merges like any PR.
 - Repo setting *Allow GitHub Actions to create and approve pull requests* is on (2026-10-13).
-- `apps/legacy` deploys to production only (no staging); smoke checks live in `scripts/smoke.sh`.
+- Apps deploy to production only (no staging, ADR 0020); smoke checks live in `scripts/smoke.sh`.
 - Labels for tasks: `lane:*`, `status:*`, `type:*`; agents add `agent:<name>` when claiming (create it if missing).
 
 ## Local setup notes

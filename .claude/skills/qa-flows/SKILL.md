@@ -14,7 +14,7 @@ Watch the console (`read_console_messages` with a pattern) for errors on every p
 - «Ножницы» (`/nozhnitsy`) waits for the salon's answer; other salons answer by themselves or confirm instantly.
 - Reset: profile → «Сбросить демо-данные».
 - Local: `apps/legacy` on `http://localhost:3000` today (`pnpm dev`); after the migration landing :3000, client :3001, business :3002, cms :3003,
-  api :3004, Storybook :3005 (plus `PORT_BASE` offset in other worktrees). Staging: `*-stage.yeral.app`.
+  api :3004, Storybook :3005 (plus `PORT_BASE` offset in other worktrees). No staging (ADR 0020): test locally or `pnpm docker:up`.
 
 ## Flows (expected result in brackets)
 

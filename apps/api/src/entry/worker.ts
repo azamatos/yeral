@@ -20,7 +20,7 @@ interface ExecutionContext {
   waitUntil(promise: Promise<unknown>): void
 }
 
-/** The binding exists only in the wrangler environments (`--env staging`); the top level is not deployable. */
+/** The binding exists only in the wrangler environment (`--env production`); the top level is not deployable. */
 function databaseUrl(env: Env): string {
   const url = env.HYPERDRIVE?.connectionString
   if (!url) throw new Error('The HYPERDRIVE binding is missing: deploy and run with --env (apps/api/wrangler.jsonc)')

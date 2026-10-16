@@ -25,6 +25,7 @@ before any code used them were edited in place (marked "revised").
 | [0017](0017-booking-model.md) | One booking engine for any business that sells time | Accepted 2026-10-14 (revised) |
 | [0018](0018-business-workspace-model.md) | Business workspace model: own teams, roles and client records; Better Auth for identity only | Accepted 2026-10-14 (identity revised by 0019) |
 | [0019](0019-own-phone-login-and-sessions.md) | Our own phone-code login and database sessions instead of Better Auth | Accepted 2026-10-14 |
+| [0020](0020-local-and-production-only.md) | Local and production only: no staging | Accepted 2026-10-16 |
 
 New record: copy [`_template.md`](_template.md), take the next number, add a row here, update the affected
 memory-bank file in the same commit.

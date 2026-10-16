@@ -1,6 +1,6 @@
 # 0010. CI/CD on GitHub Actions
 
-- Status: Accepted 2026-10-13
+- Status: Accepted 2026-10-13; staging dropped by [0020](0020-local-and-production-only.md)
 - Decided by: Claude
 
 ## Context

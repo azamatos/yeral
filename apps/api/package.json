@@ -18,8 +18,8 @@
     "db:migrate": "tsx --env-file-if-exists=.env.local src/db/cli.ts migrate",
     "db:seed": "tsx --env-file-if-exists=.env.local src/db/cli.ts seed",
     "db:setup": "tsx --env-file-if-exists=.env.local src/db/cli.ts setup",
-    "build:worker": "wrangler deploy --dry-run --env staging --outdir dist-worker",
-    "deploy:staging": "node scripts/deploy.mjs staging"
+    "build:worker": "wrangler deploy --dry-run --env production --outdir dist-worker",
+    "deploy:production": "node scripts/deploy.mjs production"
   },
   "dependencies": {
     "@hono/node-server": "catalog:",

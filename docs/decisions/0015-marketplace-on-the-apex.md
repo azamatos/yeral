@@ -1,6 +1,6 @@
 # 0015. The marketplace lives on yeral.app; no separate landing
 
-- Status: Accepted 2026-10-14 — supersedes [0003](0003-four-sites-on-subdomains.md)
+- Status: Accepted 2026-10-14 — supersedes [0003](0003-four-sites-on-subdomains.md); its staging host dropped by [0020](0020-local-and-production-only.md)
 - Decided by: owner (follow the design) + Claude
 
 ## Context

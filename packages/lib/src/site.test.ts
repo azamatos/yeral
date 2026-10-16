@@ -17,14 +17,6 @@ describe('siteConfig', () => {
     expect(site.demo).toBe(false)
   })
 
-  it('staging: hosts one level deep, its own cookie names, demo on', () => {
-    const site = siteConfig({ env: 'staging' })
-    expect(site.urls.client).toBe('https://stage.yeral.app')
-    expect(site.urls.api).toBe('https://api-stage.yeral.app')
-    expect(site.cookiePrefix).toBe('yeral-stage')
-    expect(site.demo).toBe(true)
-  })
-
   it('a new domain is a config change', () => {
     expect(siteConfig({ env: 'production', domain: 'yeral.com' }).urls.business).toBe('https://business.yeral.com')
   })
@@ -53,13 +45,15 @@ describe('siteConfig', () => {
 describe('siteFromEnv', () => {
   it('reads plain and VITE_-prefixed variables, with defaults', () => {
     expect(siteFromEnv({}).env).toBe('local')
-    expect(siteFromEnv({ YERAL_ENV: 'staging' }).urls.client).toBe('https://stage.yeral.app')
+    expect(siteFromEnv({ YERAL_ENV: 'production' }).urls.client).toBe('https://yeral.app')
     expect(siteFromEnv({ VITE_YERAL_ENV: 'production', VITE_YERAL_DOMAIN: 'yeral.com' }, 'VITE_').urls.client).toBe('https://yeral.com')
     expect(siteFromEnv({ PORT_BASE: '3200' }).urls.api).toBe('http://localhost:3204')
   })
 
   it('rejects an unknown environment', () => {
     expect(() => siteFromEnv({ YERAL_ENV: 'prod' })).toThrow()
+    // there is no staging (ADR 0020)
+    expect(() => siteFromEnv({ YERAL_ENV: 'staging' })).toThrow(/no staging any more/)
   })
 
   it('treats an empty variable as unset', () => {

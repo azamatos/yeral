@@ -1,7 +1,7 @@
 /**
  * `pnpm db:migrate | db:seed | db:setup` (root: `pnpm db:setup`). Seeding writes demo data, so it runs only against a
- * local database unless `--allow-remote` is passed (staging from CI), and only with YERAL_ENV set (`seedMode()`):
- * production gets the category catalogue only.
+ * local database unless `--allow-remote` is passed (production, by hand), and only with YERAL_ENV set (`seedMode()`):
+ * production gets the category catalogue only. There is no staging (ADR 0020).
  * `setup` = create the database if missing, migrate, and seed it while it has no businesses. The demo's dates are fixed
  * at seed time (the demo day becomes that day), so a long-lived database goes stale: `seed` starts it over on today.
  */
@@ -11,7 +11,7 @@ import { loadConfig } from '../config'
 import { createDb } from './client'
 import { runMigrations } from './migrate'
 import { seed } from './seed'
-import { seedMode } from './seed/mode'
+import { assertSeedTarget, seedMode } from './seed/mode'
 
 const [command = 'setup', ...flags] = process.argv.slice(2)
 const config = loadConfig(process.env)
@@ -37,8 +37,7 @@ async function main() {
   const seeds = command === 'seed' || command === 'setup'
   // checked before anything runs: a misconfigured server gets an error, not a half-done setup
   const demo = seeds && seedMode(process.env.YERAL_ENV) === 'demo'
-  if (seeds && !isLocal && !flags.includes('--allow-remote'))
-    throw new Error(`Refusing to seed ${url.hostname}: pass --allow-remote for a remote database`)
+  if (seeds) assertSeedTarget({ demo, local: isLocal, allowRemote: flags.includes('--allow-remote'), host: url.hostname })
   if (command === 'setup') await ensureDatabase()
   const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 2 })
   const db = createDb(pool)
