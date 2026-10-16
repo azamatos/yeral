@@ -2,7 +2,7 @@ import { epochOf } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
-import { browser } from '../../../test/client'
+import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
 import { bookingRules, bookings, businesses, classSessions, jobs, rateLimits, services, staff, users } from '../../db/schema'
@@ -10,7 +10,7 @@ import { seed } from '../../db/seed'
 import { emit } from '../../notify'
 import { runDueJobs } from '../jobs/run'
 import { confirmBooking } from './confirm'
-import { setStatus, StaleBooking } from './repo'
+import { isSlotConflict, setStatus, StaleBooking } from './repo'
 
 const MIN = 60_000
 const THU = '2026-10-15'
@@ -421,6 +421,29 @@ describe('client bookings', () => {
     expect((await b.req(`/v1/me/bookings/${json.code}`)).json.status).toBe('confirmed')
   })
 
+  it('a status changed anywhere frees or takes its time: the database keeps `active`', async () => {
+    const b = browser(t.app)
+    await b.login('+99365111022', 'Gülşat')
+    const ayna = who['Aýna']!
+    const SAT = '2026-10-17'
+    const start = (await freeStarts(b, SAT, ayna))[0]!
+    const { json } = await b.req('/v1/bookings', { body: glow(start, { staffId: ayna, date: SAT }) })
+    await db.update(bookings).set({ status: 'cancelled' }).where(eq(bookings.code, json.code))
+    const other = browser(t.app)
+    await other.login('+99365111023', 'Jemile')
+    expect((await other.req('/v1/bookings', { body: glow(start, { staffId: ayna, date: SAT }) })).status).toBe(201)
+    // back to a request: the specialist would be booked twice, which Postgres refuses
+    const twice = await db
+      .update(bookings)
+      .set({ status: 'pending' })
+      .where(eq(bookings.code, json.code))
+      .then(
+        () => null,
+        (e: unknown) => e,
+      )
+    expect(isSlotConflict(twice)).toBe(true)
+  })
+
   it('events: a cursor never passes an event that commits late', async () => {
     const b = browser(t.app)
     const phone = '+99365111021'
@@ -441,7 +464,7 @@ describe('client bookings', () => {
     expect((await b.req(`/v1/events?after=${cursor}`)).json.items).toEqual([])
     release()
     await slow
-    const res = await b.req(`/v1/events?after=${cursor}`)
+    const res = await eventsAfter(b, cursor)
     expect(res.json.items.map((e: { bookingCode: string }) => e.bookingCode)).toEqual(['YR-SLOW', 'YR-FAST'])
     expect((await b.req(`/v1/events?after=${res.json.cursor}`)).json.items).toEqual([])
   })

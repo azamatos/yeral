@@ -265,14 +265,13 @@ function lifecycle(
   ctx: Ctx,
   biz: SeededBusiness,
   b: { date: string; start: number; end: number; status: BookingStatus; hold?: number },
-): Pick<typeof t.bookings.$inferInsert, 'active' | 'holdUntil' | 'createdAt' | 'confirmedAt' | 'cancelledAt' | 'completedAt'> {
+): Pick<typeof t.bookings.$inferInsert, 'holdUntil' | 'createdAt' | 'confirmedAt' | 'cancelledAt' | 'completedAt'> {
   const startEpoch = epochOf(b.date, b.start)
   const createdAt =
     b.status === 'pending'
       ? ctx.now - (biz.holdMinutes - (b.hold ?? biz.holdMinutes)) * 60_000
       : Math.min(ctx.now, startEpoch) - 3 * 86_400_000
   return {
-    active: b.status === 'pending' || b.status === 'confirmed',
     holdUntil: b.status === 'pending' ? new Date(holdUntilOf(createdAt, { date: b.date, start: b.start }, biz.holdMinutes)) : null,
     createdAt: new Date(createdAt),
     confirmedAt: b.status === 'pending' ? null : new Date(createdAt + 10 * 60_000),
@@ -343,7 +342,6 @@ async function seedAppointment(ctx: Ctx, a: AppointmentSeed): Promise<string> {
     bufferAfter: svc.def.bufferMin ?? a.biz.buffer,
     priceType: svc.def.price[0],
     priceAmount: svc.def.price[1],
-    active: times.active,
   })
   return row.id
 }
@@ -618,7 +616,6 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
         start: m(time),
         end: m(time) + s.durationMin,
         status: 'confirmed' as const,
-        active: true,
         source: 'phone' as const,
         sessionId,
         seats: 1,
@@ -647,7 +644,6 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
       start: m(s.start),
       end: m(s.start) + s.durationMin,
       status: 'confirmed',
-      active: true,
       source: 'web',
       sessionId,
       seats: yogaBooking.seats ?? 1,

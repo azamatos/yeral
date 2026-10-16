@@ -112,7 +112,6 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       end,
       // instant bookings are confirmed right below, so the confirmation runs like any other
       status: 'pending',
-      active: true,
       source: 'web',
       clientNote: x.note ?? null,
       priceType: price?.type ?? null,
@@ -148,7 +147,6 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
           bufferAfter: it.bufferAfter,
           priceType: svc?.priceType ?? 'fixed',
           priceAmount: svc?.priceAmount ?? 0,
-          active: true,
           sort: i,
         }
       }),

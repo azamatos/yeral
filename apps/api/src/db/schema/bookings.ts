@@ -40,8 +40,10 @@ export const bookings = pgTable(
     start: integer().notNull(),
     end: integer().notNull(),
     status: bookingStatus().notNull(),
-    /** pending or confirmed: takes its slot. Kept in step with `status` by the repository. */
-    active: boolean().notNull(),
+    /** pending or confirmed: takes its slot. Computed by Postgres from `status`, so the no-overlap constraints can't drift. */
+    active: boolean()
+      .notNull()
+      .generatedAlwaysAs(sql`"status" in ('pending', 'confirmed')`),
     cancelledBy: cancelledBy(),
     cancelReason: text(),
     declineReason: declineReason(),
@@ -109,7 +111,8 @@ export const bookingItems = pgTable(
     bufferAfter: integer().notNull().default(0),
     priceType: priceType().notNull(),
     priceAmount: integer().notNull(),
-    active: boolean().notNull(),
+    /** Its booking's `active`, copied by a trigger (migration 0003) whenever either row changes. */
+    active: boolean().notNull().default(false),
     span: int4range().generatedAlwaysAs(sql`int4range("start", "end" + "buffer_after")`),
     sort: integer().notNull().default(0),
   },

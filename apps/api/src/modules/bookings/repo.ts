@@ -1,4 +1,4 @@
-/** Booking rows: lookups, the lifecycle view, status changes that keep `active` in step, codes. */
+/** Booking rows: lookups, the lifecycle view, status changes, codes. */
 import { bookingCode } from '@yeral/domain/id'
 import type { BookingState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, CancelledBy } from '@yeral/domain/model'
@@ -9,8 +9,6 @@ import { ApiError } from '../../http/errors'
 
 export type BookingRow = typeof bookings.$inferSelect
 export type ItemRow = typeof bookingItems.$inferSelect
-
-export const isActiveStatus = (s: BookingStatus) => s === 'pending' || s === 'confirmed'
 
 export function stateOf(b: BookingRow): BookingState {
   return {
@@ -63,16 +61,15 @@ export class StaleBooking extends ApiError {
 }
 
 /**
- * Change a booking's status; items follow (`active` = pending or confirmed). Only from the status `b` was read with:
+ * Change a booking's status; Postgres keeps `active` (pending or confirmed) and its items' copy in step. Only from the
+ * status `b` was read with:
  * a change made in between wins, and this one throws `StaleBooking`.
  */
 export async function setStatus(db: Queryable, b: BookingRow, change: StatusChange): Promise<BookingRow> {
-  const active = isActiveStatus(change.status)
   const [row] = await db
     .update(bookings)
     .set({
       status: change.status,
-      active,
       cancelledBy: change.status === 'cancelled' ? (change.cancelledBy ?? null) : null,
       cancelReason: change.status === 'cancelled' ? (change.cancelReason ?? null) : b.cancelReason,
       cancelledAt: change.status === 'cancelled' ? change.at : null,
@@ -85,7 +82,6 @@ export async function setStatus(db: Queryable, b: BookingRow, change: StatusChan
     .where(and(eq(bookings.id, b.id), eq(bookings.status, b.status)))
     .returning()
   if (!row) throw new StaleBooking()
-  await db.update(bookingItems).set({ active }).where(eq(bookingItems.bookingId, b.id))
   return row
 }
 

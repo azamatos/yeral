@@ -40,3 +40,15 @@ export function browser(app: App) {
     },
   }
 }
+
+/**
+ * `GET /v1/events?after=` until something arrives (≤ 5 s): events show once every older transaction on the server has
+ * finished, and other test files seed in parallel.
+ */
+export async function eventsAfter(b: ReturnType<typeof browser>, cursor: string) {
+  for (let i = 0; ; i++) {
+    const res = await b.req(`/v1/events?after=${cursor}`)
+    if (res.json.items?.length || i >= 50) return res
+    await new Promise((r) => setTimeout(r, 100))
+  }
+}

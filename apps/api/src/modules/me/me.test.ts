@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
-import { browser } from '../../../test/client'
+import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
 import { rateLimits } from '../../db/schema'
@@ -78,7 +78,7 @@ describe('account', () => {
     const { json } = await b.req('/v1/bookings', {
       body: { type: 'appointment', business: 'barber-loft', serviceIds: [svc], staffId: null, date: '2026-10-16', start: 900 },
     })
-    const res = await b.req(`/v1/events?after=${cursor}`)
+    const res = await eventsAfter(b, cursor)
     expect(res.json.items.map((e: { type: string; bookingCode: string; business: string }) => [e.type, e.bookingCode, e.business])).toEqual(
       [
         ['booking.created', json.code, 'barber-loft'],
