@@ -7,10 +7,11 @@ ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH TURBO_TELEMETRY_DISABLED=1 LEFTHOOK=0
 RUN corepack enable
 WORKDIR /repo
 
-# 1. only what @yeral/api needs from the monorepo
+# 1. only what @yeral/api needs from the monorepo; turbo at the version the lockfile pins for the catalog
 FROM base AS pruned
 COPY . .
-RUN pnpm dlx turbo@2.11.8 prune @yeral/api --docker
+RUN TURBO=$(node -e "const m = /^catalogs:[\s\S]*?^ {4}turbo:\n {6}specifier: .*\n {6}version: (\S+)/m.exec(require('fs').readFileSync('pnpm-lock.yaml', 'utf8')); if (!m) throw new Error('turbo is missing from the lockfile catalog'); console.log(m[1])") \
+  && pnpm dlx "turbo@$TURBO" prune @yeral/api --docker
 
 # 2. install from the pruned lockfile (cached until a dependency changes), then build
 FROM base AS build

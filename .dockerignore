@@ -7,9 +7,10 @@
 **/storybook-static
 **/coverage
 .git
-.env
-.env.*
-**/.env.local
+**/.env
+**/.env.*
+**/.dev.vars
+**/.dev.vars.*
 docs/design/assets
 apps/legacy/.next
 apps/legacy/.open-next

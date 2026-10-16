@@ -31,6 +31,8 @@ services:
       YERAL_DOMAIN: yeral.app
       PORT: '3004'
       DEMO_MEDIA_DIR: /app/media-demo
+      # client IPs for rate limits come from nginx (infra/nginx/conf.d/api.conf)
+      TRUSTED_IP_HEADER: x-forwarded-for
     depends_on:
       postgres:
         condition: service_healthy
