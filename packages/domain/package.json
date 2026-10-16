@@ -1,0 +1,21 @@
+{
+  "name": "@yeral/domain",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Ýeral business rules: business-local time, phones, ids, booking lifecycle, hours, availability, permissions, clients, geo. Pure TypeScript, no dependencies",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@yeral/config": "workspace:*",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

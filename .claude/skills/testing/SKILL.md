@@ -5,8 +5,8 @@ description: Choose and write the right test in Yeral — Vitest unit tests for 
 
 # Testing
 
-Strategy: ADR 0013. Today: Vitest unit tests for the booking rules in `apps/legacy/src/domain/*.test.ts` (they move to
-`@yeral/domain` in M2); Storybook, API and Playwright tests arrive with M1–M3.
+Strategy: ADR 0013. Today: Vitest unit tests for the booking rules in `packages/domain/src/*.test.ts` (the legacy
+app keeps its own copy until it's deleted), Storybook story tests in `apps/storybook`; API and Playwright tests arrive with M2–M3.
 
 ## Which test
 

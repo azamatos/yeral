@@ -1,0 +1,409 @@
+/**
+ * Free times (ADR 0017 "Availability"). Pure: the api loads the business, its rules, team, services and the busy
+ * intervals for the dates in question, and asks these functions; the client site shows what the api returns.
+ *
+ * Appointment rules (client spec §2, §4.4; business spec §4, §11):
+ * - several services run back to back; one specialist if possible, otherwise «Islendik hünärmen» picks per service;
+ * - a buffer follows each specialist's part of the chain: the last service's override, else the business buffer;
+ * - visit + buffer must fit inside working hours, outside breaks and other bookings (their buffers included);
+ * - starts are multiples of the business's slot step; clients also get the lead time and the booking window,
+ *   staff booking by phone don't (they choose a specialist who does every service themselves);
+ * - pending requests block their slot until they expire, like confirmed bookings (the api passes both as busy).
+ */
+import { businessDay, staffDay, workingIntervals, type BusinessHours, type StaffSchedule } from './hours'
+import { contains, overlaps, type Interval } from './model'
+import type { BookingRules } from './rules'
+import { addDays, diffDays, epochOf, today } from './time'
+
+export interface StaffForBooking extends StaffSchedule {
+  id: string
+  serviceIds: readonly string[]
+  /** Shown to clients and takes bookings (owner and admin usually don't). */
+  bookable: boolean
+  /** false once disabled ("Öçürilen"). */
+  active: boolean
+}
+
+export interface ServiceForBooking {
+  id: string
+  durationMin: number
+  /** null = the business buffer. */
+  bufferMin: number | null
+  /** "Onlaýn ýazylmak bolýar"; staff can still book it by phone. */
+  online: boolean
+}
+
+/** Time a team member is taken on a date, buffer included. */
+export interface BusyInterval extends Interval {
+  staffId: string
+  date: string
+  bookingId: string
+}
+
+export interface AppointmentContext {
+  business: BusinessHours
+  rules: Pick<BookingRules, 'leadMinutes' | 'windowDays' | 'bufferMinutes' | 'slotStep'>
+  /** In the business's display order: «Islendik hünärmen» tries them in this order. */
+  staff: readonly StaffForBooking[]
+  services: readonly ServiceForBooking[]
+  busy: readonly BusyInterval[]
+  now: number
+}
+
+export interface AppointmentQuery {
+  date: string
+  /** In the order the client picked them; they run in this order. */
+  serviceIds: readonly string[]
+  /** null = «Islendik hünärmen». */
+  staffId: string | null
+  /** 'staff' = a booking made in the workspace: no lead time, window or online switch, no per-service split. */
+  by: 'client' | 'staff'
+  /** The booking being moved: its own time doesn't count as busy. */
+  excludeBookingId?: string
+}
+
+export interface PlannedItem extends Interval {
+  serviceId: string
+  staffId: string
+  /** Buffer after this item: set on the last item of each specialist's part of the chain, else 0. */
+  bufferAfter: number
+}
+
+export interface AppointmentSlot extends Interval {
+  items: PlannedItem[]
+}
+
+/** Specialists a client can book. */
+export function bookableStaff(ctx: Pick<AppointmentContext, 'staff'>): StaffForBooking[] {
+  return ctx.staff.filter((s) => s.active && s.bookable && s.serviceIds.length > 0)
+}
+
+/** Specialists who do every one of the services. */
+export function staffDoingAll(ctx: Pick<AppointmentContext, 'staff'>, serviceIds: readonly string[]): StaffForBooking[] {
+  return bookableStaff(ctx).filter((s) => serviceIds.every((id) => s.serviceIds.includes(id)))
+}
+
+/** The date is inside what the client may book: not in the past, not beyond the window. */
+export function inBookingWindow(rules: Pick<BookingRules, 'windowDays'>, date: string, now = Date.now()): boolean {
+  const d = diffDays(date, today(now))
+  return d >= 0 && d <= rules.windowDays
+}
+
+/** One staff member's free-time picture for a date. */
+interface StaffDayView {
+  staff: StaffForBooking
+  working: Interval[]
+  busy: Interval[]
+}
+
+function dayViews(ctx: AppointmentContext, date: string, excludeBookingId?: string): Map<string, StaffDayView> {
+  const views = new Map<string, StaffDayView>()
+  for (const s of bookableStaff(ctx)) {
+    const day = staffDay(ctx.business, s, date)
+    if (!day) continue
+    const busy = ctx.busy.filter((b) => b.staffId === s.id && b.date === date && b.bookingId !== excludeBookingId)
+    views.set(s.id, { staff: s, working: workingIntervals(day), busy })
+  }
+  return views
+}
+
+function isFree(view: StaffDayView, span: Interval, extra: readonly Interval[] = []): boolean {
+  return view.working.some((w) => contains(w, span)) && !view.busy.some((b) => overlaps(b, span)) && !extra.some((b) => overlaps(b, span))
+}
+
+function bufferOf(ctx: AppointmentContext, svc: ServiceForBooking): number {
+  return svc.bufferMin ?? ctx.rules.bufferMinutes
+}
+
+/** Lay the services out back to back from `start`, one specialist per service. */
+function layOut(
+  ctx: AppointmentContext,
+  services: readonly ServiceForBooking[],
+  staffIds: readonly string[],
+  start: number,
+): PlannedItem[] {
+  const items: PlannedItem[] = []
+  let t = start
+  services.forEach((svc, i) => {
+    const staffId = staffIds[i] ?? ''
+    items.push({ serviceId: svc.id, staffId, start: t, end: t + svc.durationMin, bufferAfter: 0 })
+    t += svc.durationMin
+  })
+  // the buffer follows the last item of each specialist's run
+  items.forEach((it, i) => {
+    const next = items[i + 1]
+    if (!next || next.staffId !== it.staffId) {
+      const svc = services[i]
+      if (svc) it.bufferAfter = bufferOf(ctx, svc)
+    }
+  })
+  return items
+}
+
+/** The spans a plan occupies per specialist: each run of items plus its buffer. */
+function occupied(items: readonly PlannedItem[]): { staffId: string; span: Interval }[] {
+  const out: { staffId: string; span: Interval }[] = []
+  let runStart: number | null = null
+  items.forEach((it, i) => {
+    runStart ??= it.start
+    const next = items[i + 1]
+    if (!next || next.staffId !== it.staffId) {
+      out.push({ staffId: it.staffId, span: { start: runStart, end: it.end + it.bufferAfter } })
+      runStart = null
+    }
+  })
+  return out
+}
+
+function planFits(views: Map<string, StaffDayView>, items: readonly PlannedItem[]): boolean {
+  const taken: { staffId: string; span: Interval }[] = []
+  for (const o of occupied(items)) {
+    const view = views.get(o.staffId)
+    if (!view) return false
+    const mine = taken.filter((x) => x.staffId === o.staffId).map((x) => x.span)
+    if (!isFree(view, o.span, mine)) return false
+    taken.push(o)
+  }
+  return true
+}
+
+/** «Islendik hünärmen» with no single specialist free: assign per service, preferring to stay with the same person. */
+function splitPlan(
+  ctx: AppointmentContext,
+  views: Map<string, StaffDayView>,
+  services: readonly ServiceForBooking[],
+  start: number,
+): PlannedItem[] | null {
+  const order = bookableStaff(ctx).map((s) => s.id)
+  const chosen: string[] = []
+  const search = (i: number): PlannedItem[] | null => {
+    if (i === services.length) {
+      const items = layOut(ctx, services, chosen, start)
+      return planFits(views, items) ? items : null
+    }
+    const svc = services[i]
+    if (!svc) return null
+    const prev = chosen[i - 1]
+    const candidates = order.filter((id) => views.get(id)?.staff.serviceIds.includes(svc.id))
+    const ordered = prev && candidates.includes(prev) ? [prev, ...candidates.filter((id) => id !== prev)] : candidates
+    for (const id of ordered) {
+      chosen[i] = id
+      // prune early: when the specialist changes, the runs finished so far (buffers included) must already fit
+      if (i > 0 && id !== prev && !planFits(views, layOut(ctx, services.slice(0, i), chosen.slice(0, i), start))) continue
+      const found = search(i + 1)
+      if (found) return found
+    }
+    chosen.length = i
+    return null
+  }
+  return search(0)
+}
+
+function resolveServices(ctx: AppointmentContext, q: AppointmentQuery): ServiceForBooking[] | null {
+  if (q.serviceIds.length === 0) return null
+  const out: ServiceForBooking[] = []
+  for (const id of q.serviceIds) {
+    const svc = ctx.services.find((s) => s.id === id)
+    if (!svc || (q.by === 'client' && !svc.online)) return null
+    out.push(svc)
+  }
+  return out
+}
+
+/** The plan for one start time, or null when it isn't free. */
+function planAt(
+  ctx: AppointmentContext,
+  q: AppointmentQuery,
+  views: Map<string, StaffDayView>,
+  services: ServiceForBooking[],
+  start: number,
+) {
+  const ids = q.serviceIds
+  const singles = q.staffId ? [q.staffId] : staffDoingAll(ctx, ids).map((s) => s.id)
+  for (const staffId of singles) {
+    const view = views.get(staffId)
+    if (!view || !ids.every((id) => view.staff.serviceIds.includes(id))) continue
+    const items = layOut(
+      ctx,
+      services,
+      services.map(() => staffId),
+      start,
+    )
+    if (planFits(views, items)) return items
+  }
+  if (!q.staffId && q.by === 'client' && services.length > 1) return splitPlan(ctx, views, services, start)
+  return null
+}
+
+/** Every free start on a date for the chosen services and specialist, with the plan behind each. */
+export function appointmentSlots(ctx: AppointmentContext, q: AppointmentQuery): AppointmentSlot[] {
+  if (q.by === 'client' && !inBookingWindow(ctx.rules, q.date, ctx.now)) return []
+  const services = resolveServices(ctx, q)
+  if (!services) return []
+  const day = businessDay(ctx.business, q.date)
+  if (!day) return []
+  const views = dayViews(ctx, q.date, q.excludeBookingId)
+  if (views.size === 0) return []
+  const earliest = q.by === 'client' ? ctx.now + ctx.rules.leadMinutes * 60_000 : -Infinity
+  const step = ctx.rules.slotStep
+  const total = services.reduce((sum, s) => sum + s.durationMin, 0)
+  const slots: AppointmentSlot[] = []
+  for (let start = Math.ceil(day.open / step) * step; start + total <= day.close; start += step) {
+    if (epochOf(q.date, start) < earliest) continue
+    const items = planAt(ctx, q, views, services, start)
+    if (items) slots.push({ start, end: start + total, items })
+  }
+  return slots
+}
+
+/** The plan for one exact start, or null when it's taken (the api answers 409 slot_taken). */
+export function findAppointmentSlot(ctx: AppointmentContext, q: AppointmentQuery, start: number): AppointmentSlot | null {
+  return appointmentSlots(ctx, q).find((s) => s.start === start) ?? null
+}
+
+/** Up to `count` free starts nearest to `start` on the same date ("Bu wagt ýaňy alyndy. Golaý boş wagtlar"). */
+export function nearestSlots(ctx: AppointmentContext, q: AppointmentQuery, start: number, count = 3): AppointmentSlot[] {
+  return appointmentSlots(ctx, q)
+    .filter((s) => s.start !== start)
+    .sort((a, b) => Math.abs(a.start - start) - Math.abs(b.start - start) || a.start - b.start)
+    .slice(0, count)
+    .sort((a, b) => a.start - b.start)
+}
+
+/** The first free start from `from` on, at most `days` days ahead ("Indiki boş wagt", "Indiki boş gün"). */
+export function nextFreeSlot(
+  ctx: AppointmentContext,
+  q: Omit<AppointmentQuery, 'date'>,
+  from = today(ctx.now),
+  days = ctx.rules.windowDays,
+): { date: string; slot: AppointmentSlot } | null {
+  for (let i = 0; i <= days; i++) {
+    const date = addDays(from, i)
+    const [slot] = appointmentSlots(ctx, { ...q, date })
+    if (slot) return { date, slot }
+  }
+  return null
+}
+
+export type PlanProblem = 'staff_cannot_do' | 'staff_off' | 'outside_hours' | 'overlap'
+
+/**
+ * Check a plan the workspace wants to save (drag to move, "Başga wagta geçir"): why it can't be done, or null.
+ * Order matches what the toast should say first.
+ */
+export function checkPlan(
+  ctx: AppointmentContext,
+  date: string,
+  items: readonly PlannedItem[],
+  excludeBookingId?: string,
+): PlanProblem | null {
+  const views = dayViews(ctx, date, excludeBookingId)
+  for (const it of items) {
+    const s = ctx.staff.find((x) => x.id === it.staffId)
+    if (!s?.serviceIds.includes(it.serviceId)) return 'staff_cannot_do'
+    if (!views.has(it.staffId)) return 'staff_off'
+  }
+  for (const o of occupied(items)) {
+    const view = views.get(o.staffId)
+    if (!view?.working.some((w) => contains(w, o.span))) return 'outside_hours'
+  }
+  return planFits(views, items) ? null : 'overlap'
+}
+
+/** Move a plan to a new start (and optionally to one specialist), keeping durations and buffers. */
+export function shiftPlan(items: readonly PlannedItem[], start: number, staffId?: string): PlannedItem[] {
+  const first = items[0]
+  if (!first) return []
+  const delta = start - first.start
+  return items.map((it) => ({ ...it, start: it.start + delta, end: it.end + delta, staffId: staffId ?? it.staffId }))
+}
+
+/** Busy intervals a saved booking contributes (what the api loads into `AppointmentContext.busy`). */
+export function busyOf(bookingId: string, date: string, items: readonly PlannedItem[]): BusyInterval[] {
+  return occupied(items).map((o) => ({ bookingId, date, staffId: o.staffId, ...o.span }))
+}
+
+// ── Tables ────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+/** Parties above this book by phone ("9 we ondan köp adam bolsa, jaň ediň"). */
+export const MAX_ONLINE_PARTY = 8
+
+export interface TableArea {
+  id: string
+  /** VIP rooms need at least 6 people. */
+  minParty: number
+  maxParty: number
+  tables: readonly { id: string; seats: number }[]
+}
+
+export interface TableContext {
+  business: BusinessHours
+  rules: Pick<BookingRules, 'leadMinutes' | 'windowDays' | 'slotStep'>
+  areas: readonly TableArea[]
+  /** How long a party keeps a table. */
+  sittingMinutes: number
+  busy: readonly { tableId: string; date: string; start: number; end: number; bookingId: string }[]
+  now: number
+}
+
+export interface TableSlot {
+  start: number
+  /** Areas with a free table for the party at this time. */
+  areaIds: string[]
+}
+
+function freeTable(ctx: TableContext, area: TableArea, date: string, span: Interval, partySize: number, excludeBookingId?: string) {
+  return [...area.tables]
+    .filter((t) => t.seats >= partySize)
+    .sort((a, b) => a.seats - b.seats)
+    .find((t) => !ctx.busy.some((b) => b.tableId === t.id && b.date === date && b.bookingId !== excludeBookingId && overlaps(b, span)))
+}
+
+export function tableSlots(ctx: TableContext, q: { date: string; partySize: number; excludeBookingId?: string }): TableSlot[] {
+  if (q.partySize < 1 || q.partySize > MAX_ONLINE_PARTY) return []
+  if (!inBookingWindow(ctx.rules, q.date, ctx.now)) return []
+  const day = businessDay(ctx.business, q.date)
+  if (!day) return []
+  const working = workingIntervals(day)
+  const earliest = ctx.now + ctx.rules.leadMinutes * 60_000
+  const areas = ctx.areas.filter((a) => q.partySize >= a.minParty && q.partySize <= a.maxParty)
+  const out: TableSlot[] = []
+  const step = ctx.rules.slotStep
+  for (let start = Math.ceil(day.open / step) * step; start + ctx.sittingMinutes <= day.close; start += step) {
+    const span = { start, end: start + ctx.sittingMinutes }
+    if (epochOf(q.date, start) < earliest || !working.some((w) => contains(w, span))) continue
+    const areaIds = areas.filter((a) => freeTable(ctx, a, q.date, span, q.partySize, q.excludeBookingId)).map((a) => a.id)
+    if (areaIds.length) out.push({ start, areaIds })
+  }
+  return out
+}
+
+/** The table a booking gets: the smallest free one that seats the party. */
+export function assignTable(ctx: TableContext, q: { date: string; start: number; partySize: number; areaId: string }): string | null {
+  const area = ctx.areas.find((a) => a.id === q.areaId)
+  if (!area || q.partySize < area.minParty || q.partySize > area.maxParty) return null
+  if (!tableSlots(ctx, q).some((s) => s.start === q.start && s.areaIds.includes(q.areaId))) return null
+  return freeTable(ctx, area, q.date, { start: q.start, end: q.start + ctx.sittingMinutes }, q.partySize)?.id ?? null
+}
+
+// ── Classes ───────────────────────────────────────────────────────────────────────────────────────────────────────
+
+/** A client takes at most this many seats in one booking (client spec §4.6). */
+export const MAX_SEATS_PER_BOOKING = 2
+
+export interface ClassSession {
+  date: string
+  start: number
+  capacity: number
+  /** Seats taken by pending and confirmed bookings. */
+  booked: number
+}
+
+export const seatsLeft = (s: Pick<ClassSession, 'capacity' | 'booked'>) => Math.max(0, s.capacity - s.booked)
+
+/** How many seats the stepper allows; 0 = full ("Doly"). */
+export const maxSeats = (s: Pick<ClassSession, 'capacity' | 'booked'>) => Math.min(MAX_SEATS_PER_BOOKING, seatsLeft(s))
+
+export function canBookSession(s: ClassSession, seats: number, rules: Pick<BookingRules, 'leadMinutes'>, now = Date.now()): boolean {
+  return Number.isInteger(seats) && seats >= 1 && seats <= maxSeats(s) && epochOf(s.date, s.start) >= now + rules.leadMinutes * 60_000
+}
