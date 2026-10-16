@@ -2,7 +2,7 @@ import type { ComponentProps, CSSProperties, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 /**
- * Data table look (DS-Components → Data, `.tr`): rows of a CSS grid, 56 high, 14/18 type; hover n-50; selected a-50.
+ * Data table look (DS-Components → Data, `.tr`): rows of a CSS grid, 56 high, 14/20 type; hover n-50; selected a-50.
  * Pass `columns` (a grid-template-columns value) once on the table. Behaviour (sorting, selection, paging) comes from
  * TanStack Table in the apps; these are the visual primitives with table roles.
  * Wide tables scroll inside their box below 1024; on phones apps render rows as stacked list items.

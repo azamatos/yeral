@@ -1,5 +1,5 @@
 /*
- * Ýeral web design system v0.3.1 as a Tailwind theme.
+ * Ýeral web design system v0.4 as a Tailwind theme.
  * Source of truth: docs/design/tokens.css. Every value here is that file's value under a Tailwind name
  * (src/styles/tokens.test.ts fails when they drift). Default Tailwind colours, radii, shadows, type sizes and
  * breakpoints are switched off so only design values exist ("no new colours").
@@ -39,6 +39,15 @@
   --color-ink-btn-hover: #2a2a32;
   --color-switch-on: #5a3ff0;
   --color-switch-off: #e6e6ea;
+  /* charts: categories from the accent ramp, never status colours */
+  --color-chart-1: #5a3ff0;
+  --color-chart-2: #c3b6fb;
+  --color-chart-3: #4429d6;
+  --color-chart-4: #9d88f7;
+  --color-chart-area: #efecfe;
+  --color-chart-compare: #b0b0b8;
+  --color-chart-grid: #f0f0f3;
+  --color-chart-axis: #6e6e78;
   /* input error border and halo (components sheet) = the no-show dot and background */
   --color-error: #d9412f;
   --color-error-tint: #fee4e2;
@@ -99,13 +108,13 @@
   --text-label--line-height: 14px;
   --text-label--letter-spacing: 0.07em;
   --text-label--font-weight: 600;
-  /* sizes the components sheet uses without a token: S buttons, chips, slots, nav (14/18); L button (16/20); counts (12/16) */
   --text-small: 14px;
-  --text-small--line-height: 18px;
-  --text-button-l: 16px;
-  --text-button-l--line-height: 20px;
+  --text-small--line-height: 20px;
   --text-micro: 12px;
   --text-micro--line-height: 16px;
+  /* L button (16/20): drawn on the components sheet without a token */
+  --text-button-l: 16px;
+  --text-button-l--line-height: 20px;
 
   /* Layout -------------------------------------------------------------------------------------------- */
   --spacing: 4px;
@@ -122,12 +131,15 @@
   --container-text: 720px;
   --container-modal-s: 400px;
   --container-modal-m: 480px;
+  --container-modal-ml: 560px;
   --container-modal-l: 640px;
   --container-drawer: 480px;
   --container-popover: 280px;
   --container-popover-l: 360px;
 
   --radius-*: initial;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
   --radius-input: 8px;
   --radius-s: 10px;
   --radius-m: 12px;
@@ -145,7 +157,11 @@
   --shadow-primary-focus: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 0 2px #ffffff, 0 0 0 4px #7a5ff4;
   --shadow-input-focus: 0 0 0 3px #efecfe;
   --shadow-input-error: 0 0 0 3px #fee4e2;
-  --shadow-knob: 0 1px 2px rgba(16, 16, 20, 0.2);
+  --shadow-input-warning: 0 0 0 3px #fef6e7;
+  /* focus inside clipped containers: table rows, grid cells, menu items */
+  --shadow-focus-inset: inset 0 0 0 2px #7a5ff4;
+  /* switch knob, photo controls, map pins */
+  --shadow-control: 0 1px 2px rgba(16, 16, 20, 0.2);
   --shadow-segment: 0 0 0 1px #e6e6ea;
   --shadow-switch-off: inset 0 0 0 1.5px #6e6e78;
 

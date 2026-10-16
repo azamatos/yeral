@@ -81,34 +81,54 @@ a test fails if they drift).
     subtitle="outline text · outline border · solid (final confirm) · solid hover"
     colors={{ ink: '#a3251b', line: '#f6c7c2', solid: '#b42318', 'solid-hover': '#912018' }}
   />
+  <ColorItem
+    title="Charts"
+    subtitle="categories from the accent ramp, never status colours · area · compare · grid · axis"
+    colors={{
+      '1': '#5a3ff0',
+      '2': '#c3b6fb',
+      '3': '#4429d6',
+      '4': '#9d88f7',
+      area: '#efecfe',
+      compare: '#b0b0b8',
+      grid: '#f0f0f3',
+      axis: '#6e6e78',
+    }}
+  />
 </ColorPalette>
 
 ## Type — Onest
 
 <Typeset
   fontFamily="'Onest Variable', sans-serif"
-  fontSizes={[64, 44, 32, 22, 17, 15, 13, 11]}
+  fontSizes={[64, 44, 32, 22, 17, 15, 14, 13, 12, 11]}
   fontWeight={600}
   sampleText="Ýeriňi al. Ää Çç Žž Ňň Öö Şş Üü Ýý — Жж Щщ"
 />
 
-| Token          | Size / line          | Weight  | Use                          |
-| -------------- | -------------------- | ------- | ---------------------------- |
-| `text-display` | 64/68, −0.035em      | 700     | hero only (40/44 on phones)  |
-| `text-h1`      | 44/48, −0.03em       | 700     | page titles (32/36)          |
-| `text-h2`      | 32/38, −0.025em      | 700     | sections (26/30)             |
-| `text-h3`      | 22/28, −0.015em      | 600     | modal titles, cards (19/24)  |
-| `text-body-l`  | 17/26                | 400     | marketing (16/24)            |
-| `text-body`    | 15/22                | 400     | UI default                   |
-| `text-dense`   | 13/18                | 400/500 | tables, captions             |
-| `text-button`  | 15/20                | 600     | buttons M                    |
-| `text-small`   | 14/18                | 500/600 | S buttons, chips, slots, nav |
-| `text-label`   | 11/14, +0.07em, caps | 600     | eyebrows, table headers      |
+| Token          | Size / line          | Weight  | Use                                                 |
+| -------------- | -------------------- | ------- | --------------------------------------------------- |
+| `text-display` | 64/68, −0.035em      | 700     | hero only (40/44 on phones)                         |
+| `text-h1`      | 44/48, −0.03em       | 700     | page titles (32/36)                                 |
+| `text-h2`      | 32/38, −0.025em      | 700     | sections (26/30)                                    |
+| `text-h3`      | 22/28, −0.015em      | 600     | modal titles, cards (19/24)                         |
+| `text-body-l`  | 17/26                | 400     | marketing (16/24)                                   |
+| `text-body`    | 15/22                | 400     | UI default                                          |
+| `text-small`   | 14/20                | 400–600 | business body, S buttons, chips, menus, table cells |
+| `text-dense`   | 13/18                | 400/500 | tables, captions                                    |
+| `text-micro`   | 12/16                | 500/600 | counts, kbd, tooltips, chart axes                   |
+| `text-button`  | 15/20                | 600     | buttons M                                           |
+| `text-label`   | 11/14, +0.07em, caps | 600     | eyebrows, table headers                             |
 
 ## Spacing, radii, elevation
 
 - Spacing unit 4px: `p-4` = 16, `gap-6` = 24; section rhythm 48 / 64 / 96. Exact values from the screens, e.g. `px-4.5` = 18.
-- Radii: `rounded-input` 8 · `rounded-s` 10 · `rounded-m` 12 · `rounded-l` 14 · `rounded-card` 16 · `rounded-pill`.
+- Radii: `rounded-xs` 4 (checkbox, bar ends, swatches) · `rounded-sm` 6 (kbd, skeleton, small tiles) · `rounded-input` 8 ·
+  `rounded-s` 10 (S button; not `sm`) · `rounded-m` 12 · `rounded-l` 14 · `rounded-card` 16 · `rounded-pill`.
 - Sizes: buttons 36 / 44 / 52, inputs 48, list and table rows 56 (dense 40), nav 72 (search header 80), sidebar 248 → rail 72.
 - Layout: breakpoints ≥1440 · 1280 · 1024 · 768 · ≤767; grid 12 / 8 / 4; side margin 40 / 32 / 24 / 16; marketplace container 1200.
-- Elevation: `shadow-raised` (popover, drawer, modal, toast) and `shadow-sheet` (phone sheets); nothing else casts a shadow.
+- Overlays: `ModalContent size` 400 (login) · 480 · 560 (review, new client, invite, special day, add class) · 640; drawer 480.
+- Elevation: `shadow-raised` (popover, drawer, modal, toast) and `shadow-sheet` (phone sheets); `shadow-control` only for small
+  controls (switch knob, photo controls, map pins); nothing else casts a shadow.
+- Focus: `shadow-focus` (2 white + 2 a-400) outside; `shadow-focus-inset` inside clipped containers (table rows, grid cells).
+  Inputs: `shadow-input-focus` · `shadow-input-error` · `shadow-input-warning` (border `st-pending-dot`).
