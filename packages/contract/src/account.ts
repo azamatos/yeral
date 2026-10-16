@@ -2,12 +2,12 @@
  * Login by phone code, the signed-in person, profile and favourites (client spec §4.7–4.8).
  */
 import { z } from 'zod'
-import { localeSchema, phoneInputSchema, phoneSchema } from './common'
+import { localeSchema, mobileInputSchema, phoneInputSchema, phoneSchema } from './common'
 
 // ── Login ──
 
-/** `lang`: the site's language, for the SMS text and a new account's language. */
-export const sendCodeSchema = z.object({ phone: phoneInputSchema, lang: localeSchema.optional() }).meta({ id: 'SendCode' })
+/** `lang`: the site's language, for the SMS text and a new account's language. Codes go to mobile numbers only. */
+export const sendCodeSchema = z.object({ phone: mobileInputSchema, lang: localeSchema.optional() }).meta({ id: 'SendCode' })
 export const sendCodeResponseSchema = z.object({
   /** The resend timer ("0:59"). */
   resendAfterSec: z.number().int(),

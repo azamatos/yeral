@@ -4,19 +4,21 @@
  */
 import { isBookingCode } from '@yeral/domain/id'
 import { BOOKING_TYPES, LOCALES, PRICE_TYPES } from '@yeral/domain/model'
-import { isPhone, toE164 } from '@yeral/domain/phone'
+import { isMobile, isPhone, toE164 } from '@yeral/domain/phone'
 import { isYmd } from '@yeral/domain/time'
 import { z } from 'zod'
 
 export const ymdSchema = z.string().refine(isYmd, 'Expected a date YYYY-MM-DD').meta({ example: '2026-10-15' })
-/** Minutes from midnight, business-local (870 = 14:30). */
+/** Minutes from midnight, business-local (870 = 14:30); 1440 = midnight at the end of the day (a closing time, an end). */
 export const minuteSchema = z.number().int().min(0).max(1440).meta({ example: 870 })
+/** A start: a time of day, so 23:59 at the latest (a business day ends by midnight, ADR 0017). */
+export const startMinuteSchema = z.number().int().min(0).max(1439).meta({ example: 870 })
 export const epochSchema = z.number().int().meta({ description: 'Epoch milliseconds' })
 /** Whole manats. */
 export const manatSchema = z.number().int().min(0)
 export const priceSchema = z.object({ type: z.enum(PRICE_TYPES), amount: manatSchema }).meta({ id: 'Price' })
 export const localeSchema = z.enum(LOCALES)
-export type Locale = z.infer<typeof localeSchema>
+export type { Locale } from '@yeral/domain/model'
 export const bookingTypeSchema = z.enum(BOOKING_TYPES)
 export const idSchema = z.uuid()
 export const slugSchema = z
@@ -27,21 +29,33 @@ export const slugSchema = z
 export const bookingCodeSchema = z.string().refine(isBookingCode, 'Expected a booking code YR-12345').meta({ example: 'YR-48213' })
 /** Any way people type a Turkmen number in; E.164 out (`+99365123456`). */
 export const phoneInputSchema = z.string().max(32).refine(isPhone, 'Expected a Turkmen phone number').transform(toE164)
+/** A number that can receive an SMS (login codes): mobile only (61–65, 71). */
+export const mobileInputSchema = z
+  .string()
+  .max(32)
+  .refine(isPhone, 'Expected a Turkmen phone number')
+  .refine(isMobile, 'Expected a Turkmen mobile number')
+  .transform(toE164)
 export const phoneSchema = z
   .string()
   .regex(/^\+993\d{8}$/)
   .meta({ example: '+99365901122' })
 export const latLngSchema = z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) })
+/** A place on the map; `approximate` for home-based businesses until the booking is confirmed (≈ 1 km circle). */
+export const geoSchema = latLngSchema.extend({ approximate: z.boolean() })
 export const photoSchema = z.object({ url: z.string(), alt: z.string() }).meta({ id: 'Photo' })
 
 /** `?lang=` on every endpoint that returns text; Turkmen by default. */
 export const langQuerySchema = z.object({ lang: localeSchema.default('tk') })
 
-/** Comma-separated ids in a query string: `services=a,b`. */
+/** Comma-separated ids in a query string: `services=a,b`; an id listed twice counts once. */
 export const idListQuery = z
   .string()
-  .transform((s) => s.split(',').filter(Boolean))
+  .transform((s) => [...new Set(s.split(',').filter(Boolean))])
   .pipe(z.array(idSchema).min(1).max(10))
+
+/** Ids in a request body, each at most once (a service is booked once per booking). */
+export const uniqueIdsSchema = z.array(idSchema).refine((ids) => new Set(ids).size === ids.length, 'Each id at most once')
 
 /** `{ items, total?, cursor? }` — `cursor` is null on the last page. */
 export function listOf<T extends z.ZodType>(item: T) {
@@ -54,4 +68,7 @@ export const cursorQuerySchema = z.object({
 })
 
 /** A free time someone can pick: the slot taken banner, decline and expiry alternatives. */
-export const timeSlotSchema = z.object({ date: ymdSchema, start: minuteSchema, end: minuteSchema }).meta({ id: 'TimeSlot' })
+export const timeSlotSchema = z.object({ date: ymdSchema, start: startMinuteSchema, end: minuteSchema }).meta({ id: 'TimeSlot' })
+
+/** "Indiki boş wagt: ertir 10:00" (appointments); null when nothing is free in the booking window. */
+export const nextFreeSchema = z.object({ date: ymdSchema, start: startMinuteSchema }).nullable()

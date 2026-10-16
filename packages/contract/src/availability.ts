@@ -1,9 +1,18 @@
 /**
  * Free times for the booking flows (client spec §4.4–4.6). The api computes them with `@yeral/domain/availability`.
  */
-import { MAX_ONLINE_PARTY } from '@yeral/domain/availability'
 import { z } from 'zod'
-import { epochSchema, idListQuery, idSchema, langQuerySchema, manatSchema, minuteSchema, ymdSchema } from './common'
+import {
+  epochSchema,
+  idListQuery,
+  idSchema,
+  langQuerySchema,
+  manatSchema,
+  minuteSchema,
+  nextFreeSchema,
+  startMinuteSchema,
+  ymdSchema,
+} from './common'
 
 /** The date strip: 14 days, today first; closed days disabled, full days still selectable ("Bu gün boş wagt ýok"). */
 export const dayStateSchema = z
@@ -14,8 +23,6 @@ export const dayStateSchema = z
     closedReason: z.string().nullable(),
   })
   .meta({ id: 'DayState' })
-
-const nextFreeSchema = z.object({ date: ymdSchema, start: minuteSchema }).nullable()
 
 // ── Appointment ──
 
@@ -30,7 +37,7 @@ export const appointmentAvailabilityQuerySchema = langQuerySchema.extend({
 export const appointmentAvailabilitySchema = z
   .object({
     date: ymdSchema,
-    slots: z.array(z.object({ start: minuteSchema, end: minuteSchema })),
+    slots: z.array(z.object({ start: startMinuteSchema, end: minuteSchema })),
     days: z.array(dayStateSchema),
     /** "Indiki boş gün: Anna, 16 oktýabr" when the chosen day is full or closed. */
     nextFree: nextFreeSchema,
@@ -49,7 +56,8 @@ export const specialistsAvailabilitySchema = z
 // ── Table ──
 
 export const tableAvailabilityQuerySchema = langQuerySchema.extend({
-  party: z.coerce.number().int().min(1).max(MAX_ONLINE_PARTY),
+  /** Above MAX_ONLINE_PARTY the api answers `party_too_large` ("9+": book by phone). */
+  party: z.coerce.number().int().min(1),
   date: ymdSchema.optional(),
   days: z.coerce.number().int().min(1).max(31).default(14),
 })
@@ -57,7 +65,7 @@ export const tableAvailabilityQuerySchema = langQuerySchema.extend({
 export const tableAvailabilitySchema = z
   .object({
     date: ymdSchema,
-    slots: z.array(z.object({ start: minuteSchema, areaIds: z.array(idSchema).min(1) })),
+    slots: z.array(z.object({ start: startMinuteSchema, areaIds: z.array(idSchema).min(1) })),
     days: z.array(dayStateSchema),
     nextFree: nextFreeSchema,
   })
@@ -69,7 +77,7 @@ export const classSessionSchema = z
   .object({
     id: idSchema,
     date: ymdSchema,
-    start: minuteSchema,
+    start: startMinuteSchema,
     durationMin: z.number().int(),
     name: z.string(),
     trainer: z.object({ id: idSchema, name: z.string() }).nullable(),

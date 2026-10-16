@@ -29,9 +29,21 @@ export const eventSchema = z
   })
   .meta({ id: 'Event' })
 
-export const eventsQuerySchema = z.object({ after: z.string().max(40).optional() })
+/** Where a poll left off: `<txid>.<id>` (`7421.318`), the order events commit in. Opaque to the apps. */
+export const eventCursorSchema = z
+  .string()
+  .regex(/^\d{1,20}\.\d{1,19}$/)
+  .meta({ example: '7421.318' })
+
+/** `after` also takes the old numeric cursor (`318`) until every open page has polled once with the new one. */
+export const eventsQuerySchema = z.object({
+  after: z
+    .string()
+    .regex(/^\d{1,20}(\.\d{1,19})?$/)
+    .optional(),
+})
 export const eventListSchema = z.object({
   items: z.array(eventSchema),
   /** Pass as `after` next time. */
-  cursor: z.string(),
+  cursor: eventCursorSchema,
 })

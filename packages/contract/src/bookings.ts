@@ -2,25 +2,26 @@
  * Bookings from the client side: send, list, detail, cancel, move, note, alternatives, review
  * (client spec §4.4–4.8, §6; ADR 0017).
  */
-import { MAX_ONLINE_PARTY, MAX_SEATS_PER_BOOKING } from '@yeral/domain/availability'
+import { MAX_SEATS_PER_BOOKING } from '@yeral/domain/availability'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { BOOKING_SOURCES, BOOKING_STATUSES, CANCELLED_BY, DECLINE_REASONS } from '@yeral/domain/model'
 import { z } from 'zod'
 import {
   bookingCodeSchema,
-  bookingTypeSchema,
   cursorQuerySchema,
   epochSchema,
+  geoSchema,
   idSchema,
   langQuerySchema,
-  latLngSchema,
   listOf,
   minuteSchema,
   phoneSchema,
   photoSchema,
   priceSchema,
   slugSchema,
+  startMinuteSchema,
   timeSlotSchema,
+  uniqueIdsSchema,
   ymdSchema,
 } from './common'
 
@@ -33,20 +34,22 @@ export const createBookingSchema = z
     z.object({
       type: z.literal('appointment'),
       business: slugSchema,
-      serviceIds: z.array(idSchema).min(1).max(10),
+      /** In the order they run; each service once. */
+      serviceIds: uniqueIdsSchema.min(1).max(10),
       /** null = «Islendik hünärmen». */
       staffId: idSchema.nullable(),
       date: ymdSchema,
-      start: minuteSchema,
+      start: startMinuteSchema,
       note: noteSchema.optional(),
     }),
     z.object({
       type: z.literal('table'),
       business: slugSchema,
-      partySize: z.number().int().min(1).max(MAX_ONLINE_PARTY),
+      /** Above MAX_ONLINE_PARTY the api answers `party_too_large` ("9 we ondan köp adam bolsa, jaň ediň"). */
+      partySize: z.number().int().min(1),
       areaId: idSchema,
       date: ymdSchema,
-      start: minuteSchema,
+      start: startMinuteSchema,
       /** Special request chips: "Doglan gün", "Çaga oturgyjy" … */
       requests: z.array(z.string().max(40)).max(5).default([]),
       note: noteSchema.optional(),
@@ -79,11 +82,11 @@ export const bookingWhatSchema = z.discriminatedUnion('type', [
 export const bookingSummarySchema = z
   .object({
     code: bookingCodeSchema,
-    type: bookingTypeSchema,
     business: z.object({ slug: slugSchema, name: z.string(), category: z.string(), photo: photoSchema.nullable(), phone: phoneSchema }),
+    /** What was booked; `what.type` is the booking type. */
     what: bookingWhatSchema,
     date: ymdSchema,
-    start: minuteSchema,
+    start: startMinuteSchema,
     end: minuteSchema,
     /** The status people see now (expired requests and finished visits already settled). */
     status: bookingStatusSchema,
@@ -114,7 +117,7 @@ export const bookingDetailSchema = bookingSummarySchema
     /** The exact address, unless the business hides it until confirmation. */
     address: z.string(),
     entranceNote: z.string().nullable(),
-    geo: latLngSchema.extend({ approximate: z.boolean() }),
+    geo: geoSchema,
     clientNote: z.string().nullable(),
     /** When an unanswered request expires; pending only. */
     holdUntil: epochSchema.nullable(),
@@ -132,7 +135,7 @@ export const bookingDetailSchema = bookingSummarySchema
     /** Times offered by the system after an expired request (a new request when picked). */
     expiredAlternatives: z.array(timeSlotSchema).max(MAX_ALTERNATIVES),
     /** A pending move of this booking: the original stays confirmed until the business answers. */
-    reschedule: z.object({ date: ymdSchema, start: minuteSchema, end: minuteSchema, holdUntil: epochSchema.nullable() }).nullable(),
+    reschedule: z.object({ date: ymdSchema, start: startMinuteSchema, end: minuteSchema, holdUntil: epochSchema.nullable() }).nullable(),
     actions: z.object({
       cancel: z.boolean(),
       reschedule: z.boolean(),
@@ -159,7 +162,19 @@ export const bookingCodeParamSchema = z.object({ code: bookingCodeSchema })
 
 export const cancelBookingSchema = z.object({ reason: z.string().trim().max(300).optional() })
 export const editNoteSchema = z.object({ note: noteSchema })
-export const rescheduleSchema = z.object({ date: ymdSchema, start: minuteSchema, staffId: idSchema.nullable().optional() })
+/**
+ * A client's move request (a new request for the new time; the original stays confirmed until the business answers).
+ * Appointments only for now: the api answers `not_bookable` for tables and classes.
+ */
+export const rescheduleSchema = z.object({
+  date: ymdSchema,
+  start: startMinuteSchema,
+  /**
+   * Omitted = the same specialist as now (any free one if the whole booking had more than one, or if they're busy at the
+   * new time); null = «Islendik hünärmen»; an id = that specialist only.
+   */
+  staffId: idSchema.nullable().optional(),
+})
 export const acceptAlternativeSchema = z.object({
   index: z
     .number()
