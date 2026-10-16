@@ -132,9 +132,9 @@ apps/api/src/
   app.ts            OpenAPIHono, middleware (request id, logging, CORS for configured sites, auth session, error mapper), /v1
   modules/<name>/   routes.ts (createRoute + handler) · service.ts (use cases) · repo.ts (Drizzle queries)
                     auth · catalog · availability · bookings · reviews · favorites · notifications · events
-                    biz/{calendar, requests, clients, services, team, rules, hours, reviews, analytics, settings} · admin/*
-  db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (24 demo salons, synthetic occupancy overlay)
-  jobs/             runDueJobs(): reminders, expiring requests, notifications
+                    biz/{calendar, requests, bookings, clients, services, team, roles, rules, hours, profile, branches} · admin/*
+  db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (docs/design demo data + 13 categories)
+  jobs/             runDueJobs(): expire requests at holdUntil, complete visits, reminders, review asks, SMS
   ports/            sms (dev: code 1234 logged), files (S3 API), clock
   config.ts         one place that reads env on Workers (c.env) and Node (process.env)
   entry/worker.ts · entry/node.ts
@@ -143,13 +143,16 @@ apps/api/src/
 - Services hold the rules; routes only validate, authorise, call a service and map the result to contract DTOs.
 - OpenAPI 3.1 is generated from the routes and served at `/docs` (Scalar).
 - Double booking: Postgres exclusion constraint on staff × time range for active bookings + the domain check → `409 slot_taken`.
-- Demo behaviour (code `1234`, salons that answer by themselves, synthetic occupancy) is on outside production only.
+- Demo behaviour (code `1234`, demo businesses that answer by themselves) is on outside production only.
 
 ## Auth
 
-- Client and business: phone + one-time code (Better Auth phone plugin) → httpOnly session cookie on the parent
-  domain (`SameSite=Lax`, `Secure`). One person can be a client and a salon member at once; business access = membership
-  in a salon (Better Auth organization) with a role: owner, admin, master, reception.
+- Client and business: phone + one-time code (Better Auth phone-number plugin) → httpOnly session cookie on the parent
+  domain (`SameSite=Lax`, `Secure`). Better Auth owns identity and sessions only (ADR 0018).
+- Business access = a row in our `memberships` table (user ↔ business, role, staff row). Roles are per-business
+  (Eýesi locked, Administrator, Hünärmen editable): visibility `own | all` + permission switches. The api checks them with
+  `@yeral/domain/permissions` and redacts: other staff's bookings become "Bes" (busy, no details) for `own` visibility,
+  money totals disappear without `revenue`. One person can be a client and a member of several businesses (branches) at once.
 - CMS: separate staff accounts and cookie, two-factor, plus Cloudflare Access in front of `cms.` now (IP allow-list or VPN on the own server).
 - Mutations check `Origin` against the configured sites. Mobile apps (later) use bearer tokens.
 

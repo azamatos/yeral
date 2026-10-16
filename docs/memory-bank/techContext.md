@@ -50,7 +50,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | Drizzle ORM / drizzle-kit | 0.45 / 0.31 | TypeScript schema, SQL-like queries, SQL migrations in git, runs on Workers and Node | Prisma 7, Kysely |
 | node-postgres (`pg`) | 8 | driver for Drizzle on both runtimes (Hyperdrive on Workers); Neon's and Cloudflare's recommended pairing | postgres.js, Neon serverless driver |
 | `@neon/config` + `@neon/env` + `neon` CLI | 1.9 / 1.6 | `neon.ts` = the Neon project as code; `neon env pull` writes `DATABASE_URL`(`_UNPOOLED`) to `.env.local` | dashboard clicks |
-| Better Auth | 1.7 | phone + one-time code, sessions in Postgres, organizations = salons with roles and invitations | hand-rolled sessions |
+| Better Auth | 1.7 | phone + one-time code and sessions in Postgres; teams, roles and invitations are our own tables (ADR 0018) | hand-rolled sessions; its organization plugin (phone-only staff, SMS invites) |
 | jobs table + `runDueJobs()` | — | reminders and expiry without a queue service; Cron Trigger now, a container loop later | pg-boss (needs a long-running process) |
 | pino | 10 | structured logs on Node | — |
 
