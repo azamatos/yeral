@@ -158,7 +158,7 @@ export const BUSINESSES: DemoBusiness[] = [
     ],
     rating: 4.9,
     reviewsCount: 96,
-    ratingBreakdown: { 5: 84, 4: 9, 3: 2, 2: 1, 1: 0 },
+    ratingBreakdown: { 5: 88, 4: 6, 3: 1, 2: 1, 1: 0 },
     about: L(
       'Saç, dyrnak we ýüz ideg — bir ýerde. Diňe barlanan serişdeler bilen işleýäris; her müşderä wagtynda garaşýarys.',
       'Волосы, ногти и уход за лицом — в одном месте. Работаем только с проверенными средствами и принимаем вовремя.',
