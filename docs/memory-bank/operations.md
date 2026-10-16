@@ -49,6 +49,22 @@ Workers Paid when limits are hit, Access policy for `cms.` (M6).
   `pg_trgm`, `cube`, `earthdistance` available.
 - `neon init` also installed Neon plugins/skills/MCP settings into the owner's AI tools (user scope).
 
+## Local database and API tests (since M2d)
+
+- `pnpm db:up` starts Postgres 18 from `infra/docker/compose.dev.yml` (user/password `yeral`, port 5432, a named volume).
+- `apps/api/.env.local` (copy `.env.example`) names this worktree's database: `DATABASE_URL=postgres://yeral:yeral@localhost:5432/yeral`
+  (a second worktree uses `…/yeral_<branch>`). `pnpm db:setup` creates it if missing, applies the migrations and seeds the demo.
+  The root `.env.local` holds the **Neon production** URL for the neon tooling: the api never reads it.
+- Seeding wipes the database, so `db:seed` refuses any host but localhost/`postgres`/`db` unless `--allow-remote` is passed
+  (staging from CI); with `YERAL_ENV=production` it writes only the category catalogue.
+- Demo dates move with today: the design's demo day (2026-10-14) becomes the day you seed. Photos are served by the Node
+  entry from `docs/design/assets/photos` at `/media/demo/*` outside production.
+- API tests: `TEST_DATABASE_URL` (default `postgres://yeral:yeral@localhost:5432/postgres`, an admin connection). A global
+  setup migrates `yeral_test_template`; each test file gets its own copy (`create database … template …`) and drops it.
+  CI runs a `postgres:18` service container for this (`ci.yml`, job «Format, lint, types, tests, build»).
+- Migrations: `pnpm db:generate` (drizzle-kit, `apps/api/src/db/migrations`); hand-written SQL (extensions, exclusion
+  constraints) goes into a `--custom` migration. Never edit a merged migration.
+
 ## Hosting later: own server with Docker + nginx
 
 One VPS to start (≈4 vCPU, 8 GB RAM, 100 GB SSD), everything in Docker Compose (`infra/docker/compose.yml`):

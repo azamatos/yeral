@@ -1,7 +1,7 @@
 {
   "name": "yeral",
   "private": true,
-  "description": "Yeral monorepo: landing, client, business, cms, api and the design system",
+  "description": "\u00dderal monorepo: client marketplace, business workspace, cms, api and the design system",
   "type": "module",
   "packageManager": "pnpm@12.11.2",
   "engines": {
@@ -20,6 +20,10 @@
     "format:check": "prettier --check .",
     "gen": "turbo gen",
     "changeset": "changeset",
+    "db:up": "docker compose -f infra/docker/compose.dev.yml up -d --wait",
+    "db:down": "docker compose -f infra/docker/compose.dev.yml down",
+    "db:setup": "pnpm --filter @yeral/api db:setup",
+    "db:generate": "pnpm --filter @yeral/api db:generate",
     "version-packages": "changeset version",
     "tag-release": "changeset tag",
     "prepare": "lefthook install"

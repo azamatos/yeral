@@ -1,0 +1,21 @@
+# Postgres for local work and API tests: `pnpm db:up`, then `pnpm db:setup` (operations.md).
+# Each git worktree uses its own database name in apps/api/.env.local; the server is shared.
+name: yeral-dev
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: yeral
+      POSTGRES_PASSWORD: yeral
+      POSTGRES_DB: yeral
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U yeral']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  pgdata:

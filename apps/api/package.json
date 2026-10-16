@@ -1,0 +1,45 @@
+{
+  "name": "@yeral/api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Ýeral REST api (/v1): Hono + zod OpenAPI on Postgres through Drizzle; runs on Cloudflare Workers now and Node in Docker later",
+  "type": "module",
+  "exports": {
+    ".": "./src/app.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env.local src/entry/node.ts",
+    "build": "node scripts/build.mjs",
+    "start": "node dist/node.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx --env-file-if-exists=.env.local src/db/cli.ts migrate",
+    "db:seed": "tsx --env-file-if-exists=.env.local src/db/cli.ts seed",
+    "db:setup": "tsx --env-file-if-exists=.env.local src/db/cli.ts setup"
+  },
+  "dependencies": {
+    "@hono/node-server": "catalog:",
+    "@hono/zod-openapi": "catalog:",
+    "@scalar/hono-api-reference": "catalog:",
+    "@yeral/contract": "workspace:*",
+    "@yeral/domain": "workspace:*",
+    "@yeral/lib": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "hono": "catalog:",
+    "pg": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "@yeral/config": "workspace:*",
+    "drizzle-kit": "catalog:",
+    "esbuild": "catalog:",
+    "eslint": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

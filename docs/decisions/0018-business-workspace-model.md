@@ -1,6 +1,6 @@
 # 0018. Business workspace model: our own teams, roles and client records; Better Auth for identity only
 
-- Status: Accepted 2026-10-14
+- Status: Accepted 2026-10-14; identity (Better Auth) revised by [0019](0019-own-phone-login-and-sessions.md) (own phone login and sessions)
 - Decided by: the business design spec (`docs/design/business/README.md`, round 4, 14.10.2026) + Claude (model, auth split)
 
 ## Context
