@@ -91,6 +91,13 @@
   `@yeral/i18n` (`sms`, `declineReasons`); SMS links are `yeral.app/b/{code}` (ADR 0015: the client site sends booking
   codes to the booking detail). 51 API tests on Postgres.
 
+- **2026-10-14 · M2f `@yeral/sdk`**: `createClient` (Hono RPC over `AppType`, cookies included, every failure an
+  `ApiError` with the contract code, `network` when there's no answer), `keys`, `createSdk(client, queryClient)` with query
+  and mutation options for auth, me, favourites, catalogue, free times and bookings (mutations cache the returned booking
+  and invalidate lists and that business's free times), `startEvents` (poll every 10 s, on focus and on demand; event →
+  stale keys). The api's booking action routes keep literal paths so each action is its own RPC route. MSW handlers for
+  stories come with the first screens that need them (M3).
+
 ## Roadmap
 
 Infrastructure first (owner, 2026-10-13). Each milestone ends merged, deployed to staging, memory bank updated.

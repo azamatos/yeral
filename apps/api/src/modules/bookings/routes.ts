@@ -62,17 +62,15 @@ const detailRoute = createRoute({
   responses: detail,
 })
 
-const action = <B extends z.ZodType>(path: string, summary: string, body: B) =>
-  createRoute({
-    method: 'post',
-    path: `/me/bookings/{code}/${path}`,
-    tags,
-    summary,
-    request: { ...codeAndLang, ...jsonBody(body) },
-    responses: detail,
-  })
+/** `path` stays a literal type, so the RPC client sees each action as its own route. */
+const action = <P extends string, B extends z.ZodType>(path: P, summary: string, body: B) =>
+  createRoute({ method: 'post', path, tags, summary, request: { ...codeAndLang, ...jsonBody(body) }, responses: detail })
 
-const cancelRoute = action('cancel', 'Cancel (requests any time; confirmed bookings until the cancellation window)', cancelBookingSchema)
+const cancelRoute = action(
+  '/me/bookings/{code}/cancel',
+  'Cancel (requests any time; confirmed bookings until the cancellation window)',
+  cancelBookingSchema,
+)
 const restoreRoute = createRoute({
   method: 'post',
   path: '/me/bookings/{code}/restore',
@@ -81,9 +79,9 @@ const restoreRoute = createRoute({
   request: codeAndLang,
   responses: detail,
 })
-const rescheduleRoute = action('reschedule', 'Ask to move to another time', rescheduleSchema)
-const alternativeRoute = action('accept-alternative', 'Take one of the offered times', acceptAlternativeSchema)
-const reviewRoute = action('review', 'Review a completed visit', reviewInputSchema)
+const rescheduleRoute = action('/me/bookings/{code}/reschedule', 'Ask to move to another time', rescheduleSchema)
+const alternativeRoute = action('/me/bookings/{code}/accept-alternative', 'Take one of the offered times', acceptAlternativeSchema)
+const reviewRoute = action('/me/bookings/{code}/review', 'Review a completed visit', reviewInputSchema)
 const noteRoute = createRoute({
   method: 'patch',
   path: '/me/bookings/{code}/note',
