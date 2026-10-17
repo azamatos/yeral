@@ -33,6 +33,11 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0
 .inp::placeholder{color:#6e6e78}
 .inp:hover{border-color:#b0b0b8}
 .inp:focus,.inp.is-f{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.inp.is-e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
+.fer{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:18px;color:#a3251b}
+.fer svg{flex:none;margin-top:2px}
+.vbox{display:flex;flex-direction:column;gap:20px;padding:20px;background:#ffffff;border:1px dashed #d8d8de;border-radius:16px}
+.vsep{height:1px;background:#e6e6ea}
 .pfx{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;flex:none}
 .lnk{display:inline-flex;align-items:center;min-height:32px;border:0;background:transparent;padding:0;font-family:inherit;font-size:14px;font-weight:600;color:#4429d6;cursor:pointer;white-space:nowrap}
 .lnk:hover{color:#3520a6;text-decoration:underline}
@@ -61,7 +66,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0
 .mdv{height:1px;background:#e6e6ea;margin:6px 0}
 </style>
 </helmet>
-<div style="width: 1800px; min-height: 1480px; padding: 64px; background: #f4f4f6; color: #101014; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; gap: 40px">
+<div style="width: 1800px; min-height: 1800px; padding: 64px; background: #f4f4f6; color: #101014; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; gap: 40px">
 
 <div style="display: flex; flex-direction: column; gap: 8px">
 <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em">Giriş · telefon arkaly</h1>
@@ -92,7 +97,22 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0
 </div>
 <div class="mcap">
 <span class="mn">1 · Telefon</span>
-<span class="cap">Modal 400, focus on the phone field. Fixed +993 prefix, 8 digits; short number → field error «Belgi doly däl: 8 san bolmaly.» Under 768 px it opens as a bottom sheet.</span>
+<span class="cap">Modal 400, focus on the phone field. Fixed +993 prefix, 8 digits, checked on «Kod iber»: short → «Belgi doly däl…»; not a mobile number (+993 6x / 7x, e.g. a landline 12 …) → the mobile-only error (round 6 C1; same in every inline login and B-Login). Typing clears the error. Under 768 px: bottom sheet.</span>
+</div>
+<div class="vbox">
+<div class="fld">
+<span class="lbl">Variant · short number</span>
+<label for="m1b-phone">Telefon belgiňiz</label>
+<div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="m1b-phone" class="inp is-e" type="tel" inputmode="numeric" autocomplete="tel-national" value="65 90 11" aria-invalid="true" aria-describedby="m1b-err" style="font-variant-numeric: tabular-nums"></div>
+<span id="m1b-err" class="fer" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>Belgi doly däl: 8 san bolmaly.</span>
+</div>
+<div class="vsep"></div>
+<div class="fld">
+<span class="lbl">Variant · landline · mobile only (C1)</span>
+<label for="m1c-phone">Telefon belgiňiz</label>
+<div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="m1c-phone" class="inp is-e" type="tel" inputmode="numeric" autocomplete="tel-national" value="12 45 67 89" aria-invalid="true" aria-describedby="m1c-err" style="font-variant-numeric: tabular-nums"></div>
+<span id="m1c-err" class="fer" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>Kod diňe mobil belgä iberilýär. +993 6… ýa-da 7… bilen başlaýan belgi ýazyň.</span>
+</div>
 </div>
 </div>
 
@@ -225,7 +245,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1800,"height":1480}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1800,"height":1800}}'>
 class Component extends DCLogic {
   renderVals() {
     return {};

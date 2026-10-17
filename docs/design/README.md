@@ -78,6 +78,8 @@ All routes carry a language prefix: `/tk/…` (default), `/ru/…`, `/en/…`. `
 | `/tk/account/bookings` | My bookings, tabs Upcoming / Past (`Account-Bookings.dc.html`) | designed |
 | `/tk/account/bookings/{id}` | Booking detail (right drawer on desktop, bottom sheet on phone; the deep link opens it over the list) | designed (in Account-Bookings) |
 | `/tk/account/bookings/{id}/review` | Leave a review (modal) | designed (in Account-Bookings) |
+| `/b/{code}` | SMS link page for one booking (`Booking-Link.dc.html`): summary, status, offered times, inline login with the booking's phone (round 6) | designed |
+| `/tk/b/{slug}/book?move={id}` | Move mode of the appointment booking flow (`Booking.dc.html`, tweak `mode=move`; round 6) | designed |
 | `/tk/account/favorites` | Favourites (grid of business cards) | designed (in Account-Profile) |
 | `/tk/account/profile` | Profile + settings (language, notifications), log out, delete account | designed (`Account-Profile.dc.html`) |
 | `/tk/about`, `/tk/help`, `/tk/privacy`, `/tk/terms` | Static pages: header + narrow text column (max 720) + footer | pattern |
@@ -172,6 +174,8 @@ A booking cancelled from Gelýän stays in that tab (greyed, Ýatyryldy badge, t
 - Cards show `category · distance`; rows on Search show `category · street · distance`; full address on the business page.
 
 ---
+
+**Status icons (round 6, 16.10.2026):** every status badge is icon + label (the dot is retired): Garaşylýar clock · Tassyklandy check · Tamamlandy check-check · Ýatyryldy x · Gelmedi user-x — same on the client site and in the business app. Cancelled-by-client / by-business keep their extra icon + label.
 
 ## 6. Booking lifecycle
 
@@ -304,4 +308,22 @@ All Turkmen copy needs a native review before launch.
 Online payment and deposits · Resource booking type · Waitlist for full classes · Gift cards · Loyalty · Business replies in-app chat · AI-assistant bookings · Paid promotion in search.
 
 ## 13. Open questions
-Manat pricing for the Topar plan and the commission % (model decided: business spec §18) · Real average bills · Official store badges · Map provider (screens use a drawn placeholder) · Native Turkmen copy review · SMS provider and sender name.
+Real average bills · Official store badges · SMS provider and sender name · font sizes 28 / 24 / 80 (code maps them to h2 / h3 / display — keep) · open past midnight. **Closed:** maps = MapLibre + OpenFreeMap tiles (owner, 14.10.2026); Turkmen copy is checked by the owner during coding; RU/EN are added in code from the TK strings.
+
+
+## 14. Decisions log (round 6 · client logic gaps, 17.10.2026)
+Answers to `docs/design-requests/2026-10-16-round-6.md`; the item-by-item table with screens, tweaks and repo to-dos is `../ROUND6-ANSWERS.md` (next to this file). Copy is Turkmen only (RU/EN come from code).
+- **A1 Declined request:** the client sees "Biznes ret etdi", the reason (+ the business's note) and up to 3 offered times as chips ("Bir basyşda ýazylyň — biznes bu wagtlary özi teklip etdi."). Tapping one asks once ("… — şu wagta ýazylmalymy?" Ýazyl / Yza) and creates a **confirmed** booking at once; the other chips go; the declined row moves to Geçen ("Teklip edilen wagt kabul edildi → YR-…"). A chip taken meanwhile: "Eýýäm eýelendi". All offered times past: "Teklip edilen wagtlaryň möhleti geçdi" + "Başga wagt saýla". One booking per declined request.
+- **SMS link page `/b/{code}`:** works signed out; shows the booking card and, for a declined/expired request, the chips. Taking a time logs in inline with the **booking's own phone, masked and not editable** ("Kod diňe ýazylyşdaky belgä iberilýär."). Other states: confirmed / pending (read-only + Ýol görkez / Jaň et), offers expired, "Bu salgy işlemeýär".
+- **A2 Unanswered request:** three canceller labels everywhere — "Siz ýatyrdyňyz" (user icon), "Biznes ýatyrdy" / "Biznes ret etdi" (building; "ret etdi" when it was never confirmed), "Wagtynda jogap gelmedi" (hourglass). The expired request offers 3 free times; tapping one sends a **new request** (pending, or confirmed at an instant business). The sent screen of a manual business adds: "Biznes adatça {N1} içinde jogap berýär. Jogap bermese, {N2} minutdan soň size başga wagtlary hödürläris." (N2 = the business's hold time).
+- **A3 Waiting move:** the booking stays Tassyklandy with "Täze wagt soraldy: … · jogap garaşylýar"; the drawer shows old → new and "Haýyşy yzyna al". Declined or unanswered → "Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar."; a second move replaces the first; cancelling the booking also withdraws its waiting move; an instant business moves it at once ("Wagt üýtgedildi").
+- **A4:** only appointments can be moved. Table and class bookings offer "Ýazylyşy ýatyr" + "Gaýtadan ýazyl".
+- **A5 Move mode** (`/tk/b/{slug}/book?move={id}`): "Wagty üýtget", steps Hünärmen · Wagt · Tassykla, services locked, current specialist preselected + "Islendik hünärmen", "Öňki wagt → Täze wagt", manual → "Täze wagty sora", instant → "Wagty üýtget"; same free-change window as cancelling. **Rule change:** the time grid follows the chosen specialist — no silent swap to another specialist.
+- **A6 Undo:** 5 minutes. Failure: "Yzyna alyp bolmady — {sebäbi}." + "Başga wagt saýla" (time taken · no seats left · visit started · request's answer time ran out).
+- **A7 Phone-only client:** calm card "Bu biznese telefon arkaly ýazylyp bilersiňiz" / "Biznes siziň bilen ýazylyşlary jaň arkaly ylalaşmagy haýyş etdi." + "Jaň et"; no blame; offered times after a decline can still be taken online.
+- **B1 Hidden price:** "Baha ýerinde aýdylýar" in rows, flow, summary and detail; mixed total "{sum} TMT-den"; hidden-only total without an amount.
+- **C1:** codes only to mobile numbers: "Kod diňe mobil belgä iberilýär. +993 6… ýa-da 7… bilen başlaýan belgi ýazyň."
+- **D1:** the party chips follow the business's online limit (1…max + "{max+1}+" → call note). **D2:** search gets "Adam sany: 2 ▾" for restaurants (1–7 + 8+).
+- **E1:** hours may end at 24:00 ("09:00–24:00", "Häzir açyk · 24:00-a çenli").
+- **F1:** an unverified business's link shows "Bu sahypa entek açylmady" (States tile 11) to visitors; the owner sees a preview banner. **F2:** reviews under moderation are listed with "Ýeral barlaýar · ortaça baha hasaplanmaýar" and not counted.
+- **Status badges** are icon + label (round 6 part A) on every client screen.

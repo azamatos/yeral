@@ -187,6 +187,19 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .tb:hover{background:#2a2a32;color:#c3b6fb}
 @media (max-width:1023px){.lp{display:none}.mb{display:block}.cnt{padding:40px 32px 48px}.fin{padding:14px 32px}.toast{left:16px;bottom:96px}}
 @media (max-width:767px){.cnt{padding:28px 16px 40px}.stepc{gap:28px}.fin{padding:12px 16px}.fin .b-pri{flex:1 1 auto}.hide-xs{display:none !important}.h1{font-size:26px;line-height:32px}.mbi{padding:0 16px;gap:12px}.g2,.gfl{grid-template-columns:minmax(0,1fr)}.srow{grid-template-columns:minmax(0,1fr);gap:12px}.hhd{display:none}.hrow{grid-template-columns:minmax(0,1fr) 52px}.htm,.hbrk{grid-column:1 / -1}.svh{display:none}.svr{grid-template-columns:24px minmax(0,1fr) minmax(0,1fr)}.svr .nmc{grid-column:2 / -1}.svr .dur{grid-column:2}.svr .prw{grid-column:3}.thd{display:none}.tmr{grid-template-columns:minmax(0,1fr) 44px}.tmr .tnm{grid-column:1;grid-row:1}.tmr .tx{grid-column:2;grid-row:1}.tmr .tph{grid-column:1 / -1;grid-row:2}.tmr .trl{grid-column:1 / -1;grid-row:3}.rl{grid-template-columns:minmax(0,1fr);gap:2px}.rl dd{margin-bottom:8px}.cbx{width:52px;height:52px}.toast{left:16px;right:16px;max-width:none}}
+.rro{display:flex;align-items:flex-start;gap:12px;width:100%;padding:14px 16px;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff;font-family:inherit;color:#101014;text-align:left;cursor:pointer}
+.rro:hover{background:#f6f6f8}
+.rro.on,.rro.on:hover{background:#efecfe;border-color:#d5cbfb}
+.rro.on .rad{border:6px solid #5a3ff0}
+.rro .rad{margin-top:1px}
+.rro:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.rro.on .rrt{color:#4429d6}
+.rrt{font-size:15px;line-height:20px;font-weight:600}
+.av64{width:64px;height:64px;font-size:24px}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;opacity:0}
+label.b{position:relative}
+label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.opn{font-weight:400;color:#5a5a64}
 </style>
 </helmet>
 <div class="ob" style="min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
@@ -197,8 +210,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span class="bz">Biznes</span>
 </div>
 <div style="display: flex; flex-direction: column; gap: 4px; padding: 0 12px">
-<span style="font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em">Biznesiňizi açyň</span>
-<span class="cap">8 ädim · takmynan 5 minut</span>
+<span style="font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em">{{lpTitle}}</span>
+<span class="cap">{{lpCap}}</span>
 </div>
 <nav aria-label="Ädimler">
 <ol class="sl">
@@ -233,7 +246,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <header class="shd">
 <span class="lbl">1 / 8</span>
 <h1 class="h1">Ýeral Biznes-e hoş geldiňiz</h1>
-<p class="sub">Telefon belgiňizi tassyklaň — ol hasabyňyza giriş bolar. Parol gerek däl.</p>
+<p class="sub">Telefon belgiňizi ýazyň — size 4 sanly SMS kod ibereris. Parol gerek däl.</p>
 </header>
 
 <sc-if value="{{authPhone}}" hint-placeholder-val="{{true}}">
@@ -248,7 +261,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span class="hint">Ýeral-y müşderi hökmünde ulanýan bolsaňyz, şol belgini ýazyň — bir hasap ikisi üçin hem ýeterlik.</span>
 </div>
 <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
-<button class="b b-sec" onClick="{{sendCode}}">Kod iber</button>
+<button class="b b-sec" onClick="{{sendCode}}">Kod al</button>
 <span class="cap">Size 4 sanly SMS kod ibereris</span>
 </div>
 </div>
@@ -283,18 +296,31 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span style="flex: 1"></span>
 <button class="lnk" onClick="{{editPhone}}">Belgini üýtget</button>
 </div>
-<div class="fld" style="max-width: 400px">
-<label for="ob-owner">Adyňyz we familiýaňyz</label>
-<input id="ob-owner" class="inp" placeholder="Mysal üçin: Maýsa Annaýewa" value="{{owner}}" onChange="{{onOwner}}">
-<span class="hint">Işgärleriňiz sizi şu at bilen görer. Siz biznesiň eýesi bolarsyňyz.</span>
+<div style="display: flex; align-items: center; gap: 16px">
+<span class="av av64" aria-hidden="true"><sc-if value="{{hasOwner}}" hint-placeholder-val="{{false}}">{{ownerInitial}}</sc-if><sc-if value="{{noOwner}}" hint-placeholder-val="{{true}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if></span>
+<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px">
+<label class="b b-sec b-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Surat goş<input class="vh" type="file" accept="image/png,image/jpeg"></label>
+<span class="cap">Hökman däl · JPG ýa-da PNG</span>
 </div>
+</div>
+<div class="g2" style="max-width: 560px">
+<div class="fld">
+<label for="ob-owner">Adyňyz</label>
+<input id="ob-owner" class="inp" autocomplete="given-name" placeholder="Mysal üçin: Maýsa" value="{{owner}}" onChange="{{onOwner}}">
+</div>
+<div class="fld">
+<label for="ob-owner-l">Familiýaňyz <span class="opn">(hökman däl)</span></label>
+<input id="ob-owner-l" class="inp" autocomplete="family-name" value="{{ownerLast}}" onChange="{{onOwnerLast}}">
+</div>
+</div>
+<span class="hint" style="margin-top: -12px">Ýeral hasabyňyz üçin — toparyňyz sizi şu at bilen görer. Siz biznesiň eýesi bolarsyňyz.</span>
 </div>
 </sc-if>
 
 <div class="sep"></div>
 <div style="display: flex; flex-direction: column; gap: 12px">
-<p class="cap" style="margin: 0">«Kod iber» düwmesine basyp, <a href="#">Ulanyş şertleri</a> we <a href="#">Gizlinlik syýasaty</a> bilen ylalaşýarsyňyz.</p>
-<p style="margin: 0; font-size: 15px; line-height: 22px; color: #5a5a64">Eýýäm hasabyňyz barmy? <a href="B-Calendar.dc.html" style="font-weight: 600">Giriş</a></p>
+<p class="cap" style="margin: 0">«Kod al» düwmesine basyp, <a href="#">Ulanyş şertleri</a> we <a href="#">Gizlinlik syýasaty</a> bilen ylalaşýarsyňyz.</p>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #5a5a64">Eýýäm hasabyňyz barmy? <a href="B-Login.dc.html" style="font-weight: 600">Giriş</a></p>
 </div>
 </section>
 </sc-if>
@@ -303,9 +329,20 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <section class="stepc">
 <header class="shd">
 <span class="lbl">2 / 8</span>
-<h1 class="h1">Biznesiňiz barada</h1>
-<p class="sub">Müşderiler sizi şu at we kategoriýa boýunça tapar. Kategoriýa başlangyç hyzmatlary hem teklip eder.</p>
+<sc-if value="{{notFs}}" hint-placeholder-val="{{true}}"><h1 class="h1">Biznesiňiz barada</h1>
+<p class="sub">Müşderiler sizi şu at we kategoriýa boýunça tapar. Kategoriýa başlangyç hyzmatlary hem teklip eder.</p></sc-if>
+<sc-if value="{{fs}}" hint-placeholder-val="{{false}}"><h1 class="h1">Täze biznes döret</h1>
+<p class="sub">Her iş ýeri — bir biznes we bir salgy: öz senenamasy, topary, müşderileri we sazlamalary bolar. Hasabyňyz şol bir galýar, siz täze biznesiň eýesi bolarsyňyz.</p></sc-if>
 </header>
+
+<sc-if value="{{fs}}" hint-placeholder-val="{{false}}">
+<div class="okl">
+<span class="av" aria-hidden="true">{{ownerInitial}}</span>
+<span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600">{{ownerName}}</span><span class="cap" style="font-variant-numeric: tabular-nums">+993 {{phoneShown}}</span></span>
+<span style="flex: 1"></span>
+<span class="cap">Ýeral hasabyňyz</span>
+</div>
+</sc-if>
 
 <div class="fld">
 <label for="ob-biz">Biznesiň ady</label>
@@ -526,7 +563,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <sc-if value="{{teamOn}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 16px">
 <div style="display: flex; flex-direction: column">
-<div class="thd" aria-hidden="true"><span class="lbl">Ady</span><span class="lbl">Telefon</span><span class="lbl">Rol</span><span></span></div>
+<div class="thd" aria-hidden="true"><span class="lbl">Ady</span><span class="lbl">Telefon</span><span class="lbl">Dereje</span><span></span></div>
 <div class="tmr own">
 <span class="tnm" style="display: flex; align-items: center; gap: 10px; min-width: 0"><span class="av" aria-hidden="true">{{ownerInitial}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ownerName}}</span><span class="cap">Siz</span></span></span>
 <span class="tph cap" style="font-size: 14px; align-items: center; font-variant-numeric: tabular-nums">+993 {{phoneShown}}</span>
@@ -543,12 +580,13 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </sc-for>
 </div>
 <button class="addrow" onClick="{{addStaff}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Işgär goş</button>
-<p class="cap" style="margin: 0">Her işgäre SMS çakylyk ibereris. Telefon belgisi — onuň girişi.</p>
+<p class="cap" style="margin: 0">Her işgäre SMS bilen çakylyk salgysyny ibereris — 7 gün güýjünde. Ol öz telefon belgisi bilen Ýeral-a girip, çakylygy kabul eder. Programmasyz işgärlere SMS iberilmeýär.</p>
 <dl class="rl">
-<dt>Hünärmen</dt><dd>Öz ýazylyşlaryny görýär we tassyklaýar.</dd>
+<dt>Hünärmen</dt><dd>Öz senenamasyny, ýazylyşlaryny we müşderilerini görýär; öz haýyşlaryna jogap berýär.</dd>
 <dt>Administrator</dt><dd>Ähli senenamany we müşderileri dolandyrýar; girdejini görmeýär.</dd>
-<dt>Programmasyz</dt><dd>Programma girmeýär. Müşderiler oňa onlaýn ýazylyp biler, haýyşlaryny siz ýa-da administrator kabul edýär.</dd>
+<dt>Programmasyz</dt><dd>Programma girmeýär. Müşderiler oňa onlaýn ýazylyp biler; haýyşlaryna siz ýa-da administrator jogap berýär.</dd>
 </dl>
+<p class="cap" style="margin: 0">Her derejäniň rugsatlaryny soňra Sazlamalar → Rugsatlar bölüminde üýtgedip bilersiňiz.</p>
 </div>
 </sc-if>
 <sc-if value="{{soloOn}}" hint-placeholder-val="{{false}}">
@@ -585,6 +623,16 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span class="selw"><select id="ob-hold" class="inp sel" style="width: 100%" value="{{hold}}" onChange="{{setHold}}"><option value="15">15 min</option><option value="30">30 min</option><option value="60">1 sagat</option><option value="120">2 sagat</option><option value="360">6 sagat</option><option value="1440">24 sagat</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
 </div>
 </sc-if>
+<sc-if value="{{showWho}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 20px 0; border-top: 1px solid #e6e6ea">
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><span class="swt" id="ob-who">Haýyşlara kim jogap berýär?</span><span class="cap">Toparyňyz bar — onlaýn haýyşy kim tassyklap ýa-da ret edip biler. Siz hemişe jogap berip bilýärsiňiz.</span></div>
+<div role="radiogroup" aria-labelledby="ob-who" style="display: flex; flex-direction: column; gap: 8px">
+<button class="{{whoDesk.cls}}" role="radio" aria-checked="{{whoDesk.on}}" onClick="{{whoDesk.pick}}"><span class="rad" aria-hidden="true"></span><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="rrt">Administrator we eýesi</span><span class="cap">Hünärmenler öz haýyşlaryny görýär, ýöne jogap bermeýär</span></span></button>
+<button class="{{whoEach.cls}}" role="radio" aria-checked="{{whoEach.on}}" onClick="{{whoEach.pick}}"><span class="rad" aria-hidden="true"></span><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="rrt">Her hünärmen özi</span><span class="cap">Hünärmen öz haýyşlaryna özi jogap berýär; administrator diňe görýär</span></span></button>
+<button class="{{whoBoth.cls}}" role="radio" aria-checked="{{whoBoth.on}}" onClick="{{whoBoth.pick}}"><span class="rad" aria-hidden="true"></span><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="rrt">Ikisi hem</span><span class="cap">Kim ilki jogap berse — şol</span></span></button>
+</div>
+</div>
+</sc-if>
 <sc-if value="{{instOn}}" hint-placeholder-val="{{false}}">
 <div class="info" style="margin: 4px 0 20px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Müşderi derrew «Ýazylyş tassyklandy» görer. Boş däl wagtlaryňyzy senenamada ýapyp goýuň.</span></div>
 </sc-if>
@@ -606,17 +654,18 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <header class="shd">
 <span class="lbl">8 / 8</span>
 <h1 class="h1">{{doneTitle}}</h1>
-<p class="sub">Senenamany häzirden ulanyp bilersiňiz: ýazylyş goşuň, haýyşlary kabul ediň.</p>
+<p class="sub">Senenamany häzirden ulanyp bilersiňiz: jaň edip ýa-da gelip ýazylanlary goşuň. Onlaýn ýazylyş barlagdan soň açylar.</p>
 </header>
 
 <div class="warn" role="status">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
-<span><b>Profilyňyz barlagda</b> — Ýeral topary 24 sagadyň içinde barlar. Şondan soň müşderiler sizi gözlegde tapar.</span>
+<span><b>Sahypaňyz barlagda</b> — häzir ony diňe siz we toparyňyz görýärsiňiz. Barlagdan soň gözlegde we salgyňyzda hemmä açylar. Adatça 24 sagat çekýär.</span>
 </div>
+<sc-if value="{{fs}}" hint-placeholder-val="{{false}}"><p class="cap" style="margin: -16px 0 0">Täze iş ýeri çep menýunyň ýokarsyndaky iş ýeri çalyşyjysynda peýda bolar — Glow Studio-a şol ýerden gaýdyp bilersiňiz.</p></sc-if>
 
 <div class="dgrid">
 <div style="display: flex; flex-direction: column; gap: 12px; min-width: 0">
-<span class="lbl">Müşderiler sizi şeýle görer</span>
+<span class="lbl">Barlagdan soň müşderiler sizi şeýle görer</span>
 <div style="display: flex; flex-direction: column; gap: 12px">
 <img src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="{{doneName}}" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; display: block">
 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
@@ -627,6 +676,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 <div style="display: flex; flex-direction: column; gap: 12px; min-width: 0">
 <span class="lbl">Sahypaňyzyň salgysy</span>
+<span style="font-size: 15px; line-height: 22px; font-weight: 600">Salgyňyz we QR kodyňyz taýýar — barlagdan soň müşderiler üçin açylar.</span>
 <div class="linkf">
 <span class="mono" style="flex: 1; min-width: 0; font-size: 14px; line-height: 20px; color: #101014; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{slugUrl}}</span>
 <button class="b b-sec b-sm" onClick="{{copy}}"><sc-if value="{{copied}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Göçürildi</sc-if><sc-if value="{{notCopied}}" hint-placeholder-val="{{true}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>Göçür</sc-if></button>
@@ -634,7 +684,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; padding-top: 4px">
 <div class="qrt"><svg width="160" height="160" viewBox="0 0 25 25" role="img" aria-label="QR kod" shape-rendering="crispEdges" style="display: block"><path d="{{qrPath}}" fill="#101014"></path></svg></div>
 </div>
-<span class="cap">Kassanyň ýanynda goýuň: müşderiler telefon bilen skanirläp, göni ýazylar.</span>
+<span class="cap">Çap edip, kassanyň ýanynda goýuň: barlagdan soň müşderiler telefon bilen skanirläp, göni ýazylar.</span>
 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
 <button class="b b-sec b-sm" onClick="{{dlQr}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>QR-y ýükle</button>
 <sc-if value="{{qrDone}}" hint-placeholder-val="{{false}}"><span class="cap" role="status">QR kod ýüklendi (PNG)</span></sc-if>
@@ -670,6 +720,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 <div class="foot">
 <div class="fin">
+<sc-if value="{{showCancel}}" hint-placeholder-val="{{false}}"><a class="b b-gho b-lg" href="B-Calendar.dc.html">Ýatyr</a></sc-if>
 <sc-if value="{{showBack}}" hint-placeholder-val="{{true}}"><button class="b b-gho b-lg yza" onClick="{{back}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>Yza</button></sc-if>
 <div style="flex: 1"></div>
 <sc-if value="{{hasHint}}" hint-placeholder-val="{{false}}"><span class="fh hide-xs">{{hint}}</span></sc-if>
@@ -693,7 +744,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["phone","business","address","hours","services","team","rules","done"],"default":"business","section":"Flow"},"homeBased":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1024}}'>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["phone","business","address","hours","services","team","rules","done"],"default":"business","section":"Flow"},"homeBased":{"editor":"boolean","default":false,"section":"Flow"},"fromSwitcher":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1100}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -710,8 +761,9 @@ class Component extends DCLogic {
   }
 
   // Seed data for a fresh flow. p0 = index of the step tweak; steps before it are treated as already filled in.
-  defaults(p0, home) {
-    const verified = p0 > 0;
+  defaults(p0, home, fs) {
+    const verified = p0 > 0 || fs;
+    const fresh = fs && p0 <= 1;
     const picked = p0 > 2 || home;
     const day = (n, from, to) => ({ n, open: true, from, to, brk: null });
     const sv = (id, g, name, min, price, from) => ({ id, g, name, min, price, from: !!from, on: true });
@@ -720,9 +772,9 @@ class Component extends DCLogic {
       reached: p0,
       // 1 · phone (owner = Maýsa, business-demo.json → me)
       auth: verified ? 'ok' : 'phone', phone: verified ? '65102030' : '', phoneErr: false,
-      code: ['', '', '', ''], codeErr: false, wrong: 0, owner: verified ? 'Maýsa Annaýewa' : '',
+      code: ['', '', '', ''], codeErr: false, wrong: 0, owner: verified ? 'Maýsa' : '', ownerLast: verified ? 'Annaýewa' : '',
       // 2 · business
-      biz: 'Glow Studio', cat: 'Gözellik salony', catQ: '',
+      biz: fresh ? '' : 'Glow Studio', cat: fresh ? '' : 'Gözellik salony', catQ: '',
       // 3 · address
       addrQ: picked ? 'Bitarap Türkmenistan şaýoly 247' : 'Bitarap Türkmenistan 247', addr: picked ? 0 : -1,
       pin: { x: 47, y: 52 }, drag: false, off: { dx: 0, dy: 0 }, home: !!home, floor: '2-nji gat',
@@ -748,7 +800,7 @@ class Component extends DCLogic {
       ],
       nextStaff: 5,
       // 7 · rules (BUSINESS-SPEC §2, §8)
-      mode: 'manual', hold: '30', cancel: '120', buffer: '10',
+      mode: 'manual', hold: '30', cancel: '120', buffer: '10', who: 'both',
       // 8 · done
       copied: false, qr: false, invited: false,
       toast: null
@@ -759,13 +811,15 @@ class Component extends DCLogic {
     const P = this.props;
     const f = P.font ?? 'Onest';
     const ORDER = ['phone', 'business', 'address', 'hours', 'services', 'team', 'rules', 'done'];
-    const NAMES = ['Telefon', 'Biznes', 'Salgy', 'Iş wagty', 'Hyzmatlar', 'Topar', 'Ýazylyş düzgünleri', 'Taýýar'];
+    const fs = !!(P.fromSwitcher ?? false);
+    // fromSwitcher: a signed-in person creates another workspace → the wizard starts at step 2 with the existing account
+    const NAMES = [fs ? 'Hasap' : 'Telefon', 'Biznes', 'Salgy', 'Iş wagty', 'Hyzmatlar', 'Topar', 'Ýazylyş düzgünleri', 'Taýýar'];
     const pi = ORDER.indexOf(P.step);
-    const p0 = pi >= 0 ? pi : 1;
+    const p0 = Math.max(pi >= 0 ? pi : 1, fs ? 1 : 0);
     const homeTweak = !!(P.homeBased ?? false);
-    const tk = ORDER[p0] + '|' + (homeTweak ? 1 : 0);
+    const tk = ORDER[p0] + '|' + (homeTweak ? 1 : 0) + '|' + (fs ? 1 : 0);
     const fresh = this.state.tk !== tk;
-    const DEF = fresh ? this.defaults(p0, homeTweak) : null;
+    const DEF = fresh ? this.defaults(p0, homeTweak, fs) : null;
     const s = fresh ? DEF : this.state;
     const set = (patch) => this.setState(Object.assign({}, fresh ? DEF : {}, patch, { tk }));
 
@@ -814,6 +868,7 @@ class Component extends DCLogic {
       }
     }));
     const v0 = s.auth === 'ok' && s.owner.trim().length > 0;
+    const ownerFull = (s.owner.trim() + ' ' + s.ownerLast.trim()).trim();
     const h0 = s.auth === 'phone' ? 'Belgiňizi ýazyp, SMS kod alyň.' : (s.auth === 'code' ? 'SMS kody ýazyň.' : 'Adyňyzy ýazyň.');
 
     // ---------- 2 · business name + category ----------
@@ -978,7 +1033,7 @@ class Component extends DCLogic {
         phoneFmt: fmtPhone(m.phone), phoneAria: nm + ': telefon belgisi',
         phonePh: m.role === 'noapp' ? 'Hökman däl' : '65 12 34 56',
         setPhone: (e) => updStaff(m.id, { phone: val(e).replace(/\D/g, '').slice(0, 8) }),
-        role: m.role, roleAria: nm + ': roly',
+        role: m.role, roleAria: nm + ': derejesi',
         setRole: (e) => updStaff(m.id, { role: val(e) || 'specialist' }),
         rmAria: 'Aýyr: ' + nm,
         remove: () => set({ staff: s.staff.filter((x) => x.id !== m.id) })
@@ -1023,7 +1078,7 @@ class Component extends DCLogic {
     const hints = [h0, h1, h2, h3, h4, h5, '', ''];
     const goTo = (i) => set({ step: i, reached: Math.max(reached, i), toast: null, drag: false });
     const sums = [
-      '+993 ' + fmtPhone(s.phone),
+      fs ? ownerFull + ' · +993 ' + fmtPhone(s.phone) : '+993 ' + fmtPhone(s.phone),
       bizName + ' · ' + s.cat,
       (s.home ? 'Öýde · ' : '') + addrShort,
       hoursSum,
@@ -1036,7 +1091,7 @@ class Component extends DCLogic {
       const isCur = i === cur;
       const done = i < reached && !isCur;
       const vis = i === reached && !isCur;
-      const canGo = !isCur && i <= reached && (i < cur || valids[cur]);
+      const canGo = !isCur && i <= reached && (i < cur || valids[cur]) && !(fs && i === 0);
       return {
         n: String(i + 1), t: NAMES[i],
         done, notDone: !done,
@@ -1052,6 +1107,9 @@ class Component extends DCLogic {
       fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
       // left panel + mobile progress
       steps,
+      fs, notFs: !fs,
+      lpTitle: fs ? 'Täze biznes döret' : 'Biznesiňizi açyň',
+      lpCap: fs ? '7 ädim · takmynan 5 minut · mugt' : '8 ädim · takmynan 5 minut · mugt',
       canSave: s.auth === 'ok' && cur < 7,
       saveExit: () => set({ toast: 'Ýatda saklandy. Şu belgi bilen girip, galan ýerinden dowam edersiňiz.' }),
       stepNum: (cur + 1) + ' / 8',
@@ -1079,7 +1137,11 @@ class Component extends DCLogic {
       verify: () => { if (codeFull && !locked) checkCode(s.code.slice()); },
       verifyDis: !codeFull || locked,
       owner: s.owner,
-      onOwner: (e) => set({ owner: val(e).slice(0, 60) }),
+      onOwner: (e) => set({ owner: val(e).slice(0, 40) }),
+      ownerLast: s.ownerLast,
+      hasOwner: s.owner.trim().length > 0,
+      noOwner: s.owner.trim().length === 0,
+      onOwnerLast: (e) => set({ ownerLast: val(e).slice(0, 40) }),
       // 2 · business
       biz: s.biz,
       onBiz: (e) => set({ biz: val(e).slice(0, 60) }),
@@ -1132,7 +1194,7 @@ class Component extends DCLogic {
       teamCls: solo ? 'rcard' : 'rcard on',
       pickSolo: () => set({ team: 'solo' }),
       pickTeam: () => set({ team: 'team' }),
-      ownerName: s.owner.trim() || 'Siz',
+      ownerName: ownerFull || 'Siz',
       ownerInitial: (s.owner.trim() || 'S').charAt(0).toUpperCase(),
       staff,
       addStaff,
@@ -1145,6 +1207,10 @@ class Component extends DCLogic {
       hold: s.hold, setHold: (e) => set({ hold: val(e) || '30' }),
       cancel: s.cancel, setCancel: (e) => set({ cancel: val(e) || '120' }),
       buffer: s.buffer, setBuffer: (e) => set({ buffer: val(e) || '10' }),
+      showWho: manual && !solo,
+      whoDesk: { on: s.who === 'desk', cls: s.who === 'desk' ? 'rro on' : 'rro', pick: () => set({ who: 'desk' }) },
+      whoEach: { on: s.who === 'each', cls: s.who === 'each' ? 'rro on' : 'rro', pick: () => set({ who: 'each' }) },
+      whoBoth: { on: s.who === 'both', cls: s.who === 'both' ? 'rro on' : 'rro', pick: () => set({ who: 'both' }) },
       // 8 · done
       doneTitle: bizName + ' taýýar!',
       doneName: bizName,
@@ -1156,10 +1222,11 @@ class Component extends DCLogic {
       dlQr: () => set({ qr: true }),
       canInvite: invitable > 0,
       invited: !!s.invited, notInvited: !s.invited,
-      invite: () => { if (!s.invited) set({ invited: true, toast: invitable + ' işgäre SMS çakylyk iberildi.' }); },
+      invite: () => { if (!s.invited) set({ invited: true, toast: invitable + ' işgäre SMS çakylyk iberildi · 7 gün güýjünde.' }); },
       // footer
-      showBack: cur > 0 && cur < 7,
-      back: () => { if (cur > 0) set({ step: cur - 1, reached, toast: null, drag: false }); },
+      showBack: cur > (fs ? 1 : 0) && cur < 7,
+      showCancel: fs && cur === 1,
+      back: () => { if (cur > (fs ? 1 : 0)) set({ step: cur - 1, reached, toast: null, drag: false }); },
       hasHint: cur < 7 && !valids[cur],
       hint: hints[cur],
       ctaDis: !valids[cur],

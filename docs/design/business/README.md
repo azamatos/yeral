@@ -1,30 +1,35 @@
 # Ýeral Biznes — business web workspace spec (business.yeral.app)
 
-Version: business-web v2 (rounds 4 + 5) · 14.10.2026 · canvas "Ýeral Web", page *Business workspace*
+Version: business-web v3 (rounds 4–6) · 16.10.2026 · canvas "Ýeral Web", page *Business workspace*
+**Round 6 is the current truth where sections disagree:** everything is free on MVP (no billing), one Ýeral login with several workspaces, three fixed access levels, a setting for who answers requests, status icons + legend + internal statuses, full phone web. Summary and decisions: §25.
 Components: every reusable piece of these screens is catalogued in `../COMPONENTS.md` and drawn on `../screens/system/DS-Patterns.dc.html` (domain-free → `@yeral/ui`) and `../screens/system/DS-Business.dc.html` (domain → FSD entities/features/widgets). Build screens from those, and extend Storybook with them.
 Read with: `../README.md` (client spec — product rules, statuses, booking types, glossary), `../CLAUDE.md`, `../tokens.css`.
-Source logic: the native Ýeral Business mobile app (12 flows). The web keeps its rules and adds desktop power: multi-staff calendar, tables, bulk actions.
+Reference product: Fresha (workspaces, access levels, invites, system + custom statuses). The web app ships first and must work on phones; native business and client apps come later.
 
-Scope: round 4 (§1–13) = **daily work** (calendar, requests, bookings, clients) and **setup & settings** (sign-up + setup wizard, profile, booking rules, hours, services, team & roles, link/QR), appointment type. Round 5 (§14–23) = analytics, reviews, notification settings, help, billing, B2B landing + pricing, tables, classes. Only checkout/POS is still out of scope (revenue = prices of completed visits). Build order stays: appointment workspace first, then tables and classes.
-
----
-
-## 1. Who uses it
-| Role (TK) | EN | Sees | Can |
-|---|---|---|---|
-| **Eýesi** | Owner (system role, one per business, can't be removed) | everything, all branches | everything incl. revenue, billing, roles |
-| **Administrator** | Admin / reception | whole calendar, all clients | confirm/decline, create/move/cancel bookings, mark no-show, edit clients; no revenue, no roles/billing |
-| **Hünärmen** | Specialist | own bookings only; others' slots show as "Bes" (busy) without details | depends on role switches (default: confirm own requests, move own bookings, mark no-show) |
-| **Programmasyz hünärmen** | Phone-only specialist (no login) | — | nothing; clients can book them online; owner/admin handle their requests |
-
-Roles are editable templates (except Eýesi). Permission switches (role = ceiling; a person can't exceed it):
-`Ähli senenamany görmek` (whole calendar) · `Ýazylyşlary tassyklamak` (confirm/decline) · `Geçirmek we ýatyrmak` (move/cancel) · `Gelmedi bellemek` (mark no-show/complaint) · `Müşderileri görmek we üýtgetmek` · `Hyzmatlary we bahalary üýtgetmek` · `Işgär çagyrmak` · `Girdejini görmek` (revenue) · `Sazlamalary üýtgetmek`.
-
-Login = phone + SMS code (same as clients; one Ýeral account can be a client and a business member). One person can belong to several businesses/branches → business switcher at the top of the sidebar.
-
-Devices: desktop-first (≥1024), works on tablets (768–1023: sidebar → 72 px icon rail, calendar shows up to 3 staff columns with horizontal scroll). Under 768: calendar one-staff day view + banner "Telefonda Ýeral Biznes programmasy has amatly" with store links.
+Scope: round 4 (§1–13) = **daily work** (calendar, requests, bookings, clients) and **setup & settings** (sign-up + setup wizard, profile, booking rules, hours, services, team & roles, link/QR), appointment type. Round 5 (§14–23) = analytics, reviews, notification settings, help, B2B landing, tables, classes (billing was designed, then removed from the MVP in round 6). Round 6 (§25) = login & workspaces, access levels, request handling, statuses, phones, free MVP. Only checkout/POS is still out of scope (revenue = prices of completed visits). Build order stays: appointment workspace first, then tables and classes.
 
 ---
+
+## 1. Who uses it — accounts, workspaces, access levels (round 6)
+- **One Ýeral account** = phone + SMS code, the same account people use to book on yeral.app. Login page `business.yeral.app/tk/giris` (`B-Login.dc.html`): phone → 4-digit code → (new person) name + optional photo → routing:
+  - a pending **invite** → invite screen first (Kabul et / Ret et). Invites are SMS links valid **7 days**; expired → "Çakylygyň möhleti geçdi".
+  - **no workspace** → "Entek iş ýeriňiz ýok": "Biznesimi döret" (setup wizard from step 2) + how to ask an owner for an invite.
+  - otherwise → the **last used workspace** opens.
+- **Workspace** = one business at one address (own calendar, team, clients, settings). **No branches** — a second address is another workspace. One person can belong to several workspaces with a **different access level in each** (demo: Aýna is Hünärmen in Glow Studio and Eýesi of "Aýnanyň saç studiýasy").
+- **The only switch is the workspace switcher** at the top of the sidebar (list of your workspaces with your level and their unanswered requests, "+ Täze biznes döret"). The block at the bottom is the person (avatar, name, phone, "…" menu: Profilim · Dil · Müşderi hökmünde aç · Çykmak) — not a switcher.
+- **Access levels** (fixed, no custom roles):
+
+| Level | Sees / can (defaults) |
+|---|---|
+| **Eýesi** (one per workspace; transfer via Topar → "Eýeçiligi geçir") | everything, incl. revenue, team and permissions |
+| **Administrator** | all calendars, bookings, clients, reviews (reply), analytics without money, settings; Topar view-only |
+| **Hünärmen** | own column, own bookings and requests, own clients (with phone), reviews about them (read), own analytics with own earnings; no Sazlamalar |
+| **Programmasyz hünärmen** | no login; bookable; owner/admin handle their bookings and requests |
+
+  The owner can change what Administrator and Hünärmen may do in **Sazlamalar → Rugsatlar** (matrix; "own" = only their own). Anything a level can't access is **hidden, not disabled** (opening it by URL → Senenama + toast). Matrix data: `business-demo.json → accessLevels`.
+- **Profilim** (from the user menu): name, photo, phone change via SMS, specialization per workspace (read-only, set by the owner), switch "Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez" (default on), "Bu biznesden çyk" (not for the owner).
+- **Busy elsewhere:** a person in 2+ workspaces — each calendar shows her bookings from the other workspace as a **"Başga ýerde"** block without details; online booking and staff can't book her then.
+- **Devices:** the web app is fully usable on phones (no "download the app" banner): under 768 a bottom tab bar (Senenama · Ýazylyşlar · Müşderiler · Köp), one-staff day calendar with staff chips, drawers as bottom sheets (`B-Mobile.dc.html`). Tablets 768–1023: 72 px icon rail.
 
 ## 2. Requests and confirmation (decided 14.10.2026)
 - **Manual confirmation is the default.** Each new online booking arrives as a request (*Garaşylýar*).
@@ -33,6 +38,8 @@ Devices: desktop-first (≥1024), works on tablets (768–1023: sidebar → 72 p
 - Declining asks for a reason (chips + optional text); **the client sees the reason**. Decline can attach up to 3 alternative times the client can accept in one tap.
 - Requests are visible everywhere they matter: sidebar badge on Ýazylyşlar, "N haýyş" chip in the calendar header, dashed blocks in the grid, top-bar toast + sound on arrival (browser notification if allowed).
 - Who can answer: Eýesi, Administrator, and the specialist themself if their role allows; requests for phone-only specialists go to owner/admin.
+- **Who answers requests** (round 6, Sazlamalar → Ýazylyş düzgünleri → "Haýyşlara kim jogap berýär?", only in manual mode): **Administrator we eýesi** (specialists see their requests, can't answer) · **Her hünärmen özi** (each specialist answers their own; admin only sees) · **Ikisi hem** (default — whoever answers first). Hidden for a one-person business (the owner answers). Per-person override in the staff drawer ("Öz haýyşlaryna jogap berip biler"). Requests for Programmasyz staff always go to owner/admin. Someone who can't answer sees a read-only footer ("… siz diňe görýärsiňiz") instead of Tassykla / Ret et.
+
 
 ## 3. Booking statuses from the business side
 Same five statuses and colours as the client site.
@@ -42,6 +49,9 @@ Same five statuses and colours as the client site.
 - **Gelmedi** — set through **"Arz et"** (complaint): one button instead of came/didn't-come. Reasons: Gelmedi (no-show → status Gelmedi), Gijä galdy (late), Gödek gylyk (rude), Başga. The reason goes to the client card (team-only). Booking rule: after N no-shows (default 2) a client can book only by phone.
 - **Ýatyryldy** — by client / by business / by system (expired request). Hidden in the calendar by default (toggle "Ýatyrylanlary görkez").
 - **Manual bookings** (made by staff for phone or walk-in clients) are created *Tassyklandy* immediately with a phone icon (source: phone) or person icon (source: walk-in "Gelip ýazyldy").
+- **Icons (round 6):** every status has one icon used everywhere — Garaşylýar clock · Tassyklandy check · Tamamlandy check-check · Ýatyryldy x · Gelmedi user-x. StatusBadge = icon + label (the dot is retired, client site too). Calendar blocks start with the icon; cancelled blocks are outline-only with the name struck; requests are dashed without transparency; selection is an ink ring (never violet). A **"Reňkler we nyşanlar"** legend (circle-help button in the calendar/list/timeline toolbars) explains statuses, sources and calendar layers; it opens by itself on the first visit.
+- **Internal statuses** (like Fresha's custom statuses): the owner can add up to 5 team-only markers (presets **Geldi**, **Başlandy**; name + icon + colour) in Ýazylyş düzgünleri → "Ýazylyş ýagdaýlary". Set from the booking drawer ("Içerki ýagdaý"), shown as a small chip on the block; clients never see them and they never change the system status. Off by default.
+
 
 ## 4. Calendar (`/tk/calendar`)
 Header: date navigation (Şu gün · ‹ › · date picker popover), view segmented **Gün / Hepde**, staff segmented **Ähli işgärler / Bir işgär** (+ staff picker when "Bir işgär"), chip "N haýyş" (opens requests panel), toggle "Ýatyrylanlary görkez", primary **"Täze ýazylyş"**.
@@ -55,7 +65,9 @@ Day summary line: "16 ýazylyş · 3 haýyş · Girdeji (meýilleşdirilen): 1 4
 - **Outside working hours** = `#f6f6f8` shading; staff day off = whole column shaded + "Dynç güni".
 - **Now line** = 2 px `#5a3ff0` with a dot and time label in the gutter.
 - Click empty slot → New booking drawer prefilled (staff + time). Click block → Booking drawer (or Request drawer). Drag a block → move: drop shows a ghost; on release a confirm popover "14:30 → 16:00, Aýna · Müşderä SMS iberilsin" (checkbox on) + Tassykla / Yza. Conflicts (overlap, outside hours, staff doesn't do the service) → drop refused with a toast reason.
-**Day · one staff**: same grid, one wide column, room for notes and client info in blocks.
+**Day · one staff**: same grid, one wide column, room for notes and client info in blocks. A Hünärmen always gets this view of her own column (round 6); her summary shows her own planned earnings, not the business revenue. Administrator's summary has no revenue unless "Girdejini görmek" is granted.
+**Layers (round 6):** outside hours flat `#f6f6f8` · break `#f0f0f3` + coffee icon "Arakesme" · blocked/closed `#f0f0f3` + lock + reason · buffer hatching · **"Başga ýerde"** dashed `#b0b0b8` + briefcase (not clickable, slots under it refuse with a toast).
+**New booking is phone-first** (most clients call): phone number field first → known client fills in (visits, alert note) → services → staff → "Iň ýakyn boş wagtlar" chips → "Ýazyp goý" (SMS switch on); name search is secondary.
 **Week · all staff**: matrix rows = staff, columns = 7 days; each cell = load bar (booked / working minutes) + "5 ýazylyş · 1 haýyş"; click → that day. (Mobile rule: week shows load, not details.)
 **Week · one staff**: 7 day columns time grid with **textless** blocks (status colour only); click → that day.
 
@@ -75,31 +87,35 @@ Client card (page): header (name, phone, tags, since), stats (gelşi, ortaça ç
 1 Telefon + SMS · 2 Biznes: name, category (searchable grouped list; category sets booking type — `business-demo.json → categoriesForSignup.bookingType`; table categories (Restoran, Kafe we çaýhana) carry a neutral tag "Stol bronlamak", class categories (Fitnes studiýasy, Ýoga we stretçing) "Topar sapaklary"; choosing one shows an info line that tables / classes are set up after the wizard in Sazlamalar → Stollar / Sapaklar. The appointment-only steps 4–5 stay as they are for MVP; a table/class-specific wizard is not designed) · 3 Salgy: address search + **map pin** + "Girelge nirede?" note + switch "Öýde işleýärin — takyk salgyny diňe tassyklanandan soň görkez" · 4 Iş wagty (weekly; "Iş günleri birmeňzeş" shortcut) · 5 Hyzmatlar: starter list from the category (checkbox, editable name/duration/price) + "Hyzmat goş" · 6 Topar: "Ýeke işleýärin" / "Toparym bar" (add name + phone + role; invites by SMS) · 7 Ýazylyş düzgünleri: manual vs instant, hold time, cancellation window · 8 Taýýar: business page preview card, link `yeral.app/tk/b/{slug}` + QR, status **"Barlagda"** — the Ýeral team verifies new businesses within 24 h (CMS moderation) before they appear in search; checklist (logo, 3+ photos, description) to raise quality. Progress: left step list + "Soňra dowam et" (save and exit). Business can use the calendar immediately; it's just not public until verified.
 
 ## 8. Settings (`/tk/settings/{section}`)
-Left settings nav (inside the content area, 240 px): **Biznes profili · Ýazylyş düzgünleri · Iş wagty · Hyzmatlar · Topar · Roller · Salgy we QR · Şahamçalar** (branches) · divider · **Habarnamalar** (§16) · **Töleg we tarif** (§18, owner only). Table businesses get **Stollar** (§20) and class businesses **Sapaklar** (§21) in place of / next to Hyzmatlar. Kömek is not a settings item — it lives in the sidebar (§17).
-- **Biznes profili**: logo, name, category, description per language (TK/RU/EN tabs), photos (grid, drag to reorder, first = cover, 3+ recommended), contact phone, amenities (checkbox list), address block with map preview → "Salgyny üýtget" opens the map modal; "Sahypany gör" opens the public page.
-- **Ýazylyş düzgünleri**: Onlaýn ýazylyş (switch) · Tassyklama: manual / instant (radio cards) · Haýyş saklanýar: 15 min…24 h · Iň az öňünden: 0/30 min/1/2/4/24 h · Näçe gün öňünden açyk: 7/14/30/60/90 · Hyzmatdan soňky arakesme (buffer): 0/5/10/15/20/30/custom · Wagt ädimi: 15/30 min · Müşderi ýatyryp biler: … sagat öň · Ýatyrylanda sebäp sora (switch) · N gelmedikden soň onlaýn ýazylyşy ýap (0=off, 1–5).
-- **Iş wagty**: weekly table (day, open switch, from–to with 30-min time pickers, + break "Arakesme" optional); **Aýratyn günler** (exceptions): list with name, dates, "Her ýyl" repeat; "Aýratyn gün goş" modal (name shown to clients when a booking must be cancelled; single date or range; yearly repeat; closed or special hours). Conflicts: if an exception overlaps bookings → warning with the count and options (keep / cancel and notify with alternatives).
-- **Hyzmatlar**: catalog grouped by service category (reorder by drag), rows: name, duration, price (fixed/from/free/hidden), buffer override, who performs (avatars), onlaýn (switch); "Hyzmat goş" + "Topar goş"; service drawer: name per language, description, category, duration (5-min steps), buffer override, price type + amount, specialists (checkboxes), "Onlaýn ýazylmak bolýar" switch, delete.
-- **Topar**: list (avatar, name, role, services count, schedule summary "Biznes wagty bilen" / "Öz smenasy", status Işjeň / Çagyryldy / Öçürilen); order shown to clients (drag). **Invite (3 steps modal)**: 1 Kim: phone (= login), name as shown to clients, specialization (optional), role · 2 Hyzmatlar: what this person does (group checkboxes) · 3 Barla we tassykla. **Staff drawer**: profile, services, schedule (as business / own shift per day within business hours), personal exceptions (vacation, birthday — "Diňe biznesiň içinde görünýär"), conflicts with bookings, role, "Işgäri öçür" → modal with N future bookings: **Başga hünärmene geçir** (default; pick who) / Bolşy ýaly galdyr (no new bookings) / Ýatyr we müşderilere habar ber (3 alternatives).
-- **Roller**: roles list + role editor: name, visibility (own / whole calendar), permission switches (§1). Eýesi is locked.
-- **Salgy we QR**: public link `yeral.app/tk/b/glow-studio` (copy, share), QR (download PNG/SVG for the front desk), "Ýazylyş düwmesi" (button code for Instagram/website — later).
-- **Şahamçalar**: list of the owner's businesses/branches with pending-request badges; "Şahamça goş" → wizard.
+Left settings nav (240 px; chips row on phones): **Biznes profili · Ýazylyş düzgünleri · Iş wagty · Hyzmatlar** (or **Stollar** / **Sapaklar** for table / class workspaces) **· Topar · Rugsatlar · Salgy we QR** · divider · **Habarnamalar** (§16). No branches, no billing (round 6). Kömek lives in the sidebar (§17). Hidden entirely for Hünärmen.
+- **Biznes profili**: logo, name, category, description per language (TK/RU/EN tabs), photos (grid, drag to reorder, first = cover, 3+ recommended), contact phone, amenities, address block with map preview → "Salgyny üýtget" opens the map modal ("Her iş ýeri — bir salgy": a new address = "Täze biznes döret"); "Sahypany gör" opens the public page.
+- **Ýazylyş düzgünleri**: Onlaýn ýazylyş (switch) · Tassyklama: manual / instant (radio cards) · **Haýyşlara kim jogap berýär?** (§2, manual mode only) · Haýyş saklanýar: 15 min…24 h · Iň az öňünden · Näçe gün öňünden açyk · buffer · Wagt ädimi · Müşderi ýatyryp biler · Ýatyrylanda sebäp sora · N gelmedikden soň onlaýn ýazylyşy ýap · **Ýazylyş ýagdaýlary** (5 system statuses locked with icon + meaning; internal statuses list + "Ýagdaý goş" modal: name ≤ 20, 8 icons, 6 token colours, preview, max 5).
+- **Iş wagty**: weekly table (day, open switch, from–to, optional break); **Aýratyn günler** (exceptions) with conflict handling.
+- **Hyzmatlar**: catalog grouped by category, rows (name, duration, price type, buffer override, who performs, online switch), service drawer.
+- **Topar**: list with **Dereje** (Eýesi / Administrator / Hünärmen / Programmasyz), services count, schedule summary, status (Işjeň / Çagyryldy · "19 oktýabra çenli" with Täzeden iber / Çakylygy ýatyr / expired / Öçürilen). **Invite (3 steps)**: phone (= their Ýeral login), name, specialization, **access level** → services → check & send (SMS link, 7 days). **Staff drawer**: profile, services, schedule, exceptions, access level + "Öz haýyşlaryna jogap berip biler", "Işgäri öçür" (reassign future bookings); for the owner: **"Eýeçiligi geçir"** (pick an active member who logs in → they become Eýesi, you become Administrator).
+- **Rugsatlar**: permission matrix (rows × Administrator / Hünärmen; Eýesi locked); cells are switches or Ýok / Diňe özüniňki / Hemmesi (Topar: Ýok / Diňe görmek / Dolandyrmak); "Haýyşlara jogap bermek" is read-only here and links to Ýazylyş düzgünleri; sticky save bar.
+- **Salgy we QR**: public link, QR (PNG/SVG), "Ýazylyş düwmesi" (later).
 
-## 9. App shell
-- **Sidebar 248** (white, right 1px divider): business switcher (logo, name, branch, chevron → popover with other branches + request badges + "Şahamça goş"), nav: Senenama (or Stollar / Sapaklar for table / class businesses) · Ýazylyşlar (badge = pending count, pending colours) · Müşderiler · Teswirler (neutral grey badge = unanswered reviews) · Hasabatlar · Sazlamalar; bottom: Ýeral sahypaňyz (public page), Kömek (→ `/tk/help`), user (avatar, name, role) with menu (Profil, Dil, Müşderi hökmünde aç → yeral.app, Çykmak).
-- **Top bar 64** (inside content, bottom divider): page title, global search (clients, phone, booking ID; ⌘K), "Täze ýazylyş" primary (only on pages without their own primary), notifications bell (later), help.
-- Content padding 32 (24 tablet). Tables and calendar fill the width; forms max 720.
-- Toasts bottom-left (ink). Drawers right 480 with scrim only on <1280 (on wide screens the drawer pushes nothing and has no scrim for the calendar so staff can keep context).
+## 9. App shell (round 6)
+- **Sidebar 248**: **workspace switcher** (logo, name, your level; chevrons → popover "Iş ýerleriňiz": your workspaces with level · address and unanswered-request counts, current one checked, "+ Täze biznes döret") · nav: Senenama (or Stollar / Sapaklar) · Ýazylyşlar (amber count) · Müşderiler · Teswirler (grey count; no count for Hünärmen) · Hasabatlar · Sazlamalar (hidden for Hünärmen) · bottom: Ýeral sahypaňyz · Kömek · **user block** (avatar, name, phone, "…" → Profilim · Dil · Müşderi hökmünde aç · Çykmak → login).
+- **Top bar 64**: page title, global search (clients, phone, booking ID; ⌘K), one primary action, legend button on calendar-like pages.
+- **Tablet 768–1023**: 72 px icon rail (logo opens the switcher, avatar opens the user menu).
+- **Phone < 768**: sidebar hidden; top strip with the switcher; bottom tab bar Senenama · Ýazylyşlar · Müşderiler · Köp; "Köp" sheet holds the rest of the nav + the user menu; toasts and save bars sit above the tab bar; drawers become bottom sheets (`B-Mobile.dc.html`).
+- Content padding 32 (24 tablet, 16 phone). Toasts bottom-left (ink). Drawers right 480 with scrim only below 1280.
 
 ## 10. Data model additions
 ```
-Membership  userId, businessId, roleId, staffId?, status: active|invited|disabled
-Role        id, businessId, name, system: bool, visibility: own|all, permissions[]
+User        id, phone, name, photo?, busyElsewhereVisible: bool            (one Ýeral account, client + business)
+Workspace   = Business (one address); no branches
+Membership  userId, businessId, level: owner|admin|specialist, staffId?, status: active|invited|disabled, answersOwnRequests?: bool
+Invite      businessId, phone, level, invitedBy, sentAt, expiresAt (7 days), status: pending|accepted|declined|expired
+LevelPermissions businessId, level: admin|specialist, permissions{key: none|own|all|view}   (owner = all, locked)
+InternalStatus id, businessId, name, icon, color, order, enabled            (team-only, max 5)
 Staff       id, businessId, name, specialization?, phone, avatar?, hasApp: bool, bookable: bool, order, serviceIds[],
             schedule: inherit | {day: [{from,to}]}, breaks[], exceptions[{name, from, to, yearly}]
-BookingRules businessId, onlineEnabled, confirmMode: manual|instant, holdMinutes, leadMinutes,
+BookingRules businessId, onlineEnabled, confirmMode: manual|instant, requestHandling: desk|each|both, holdMinutes, leadMinutes,
             windowDays, bufferMinutes, slotStep, cancelWindowMinutes, askCancelReason, blockAfterNoShows
-Booking     + source: online|phone|walkin|ai, internalNote, decline{reason, alternatives[]}, complaint{type, text}, holdUntil
+Booking     + source: online|phone|walkin|ai, internalNote, internalStatusId?, decline{reason, alternatives[]}, complaint{type, text}, holdUntil
 Client      id, businessId, phone, name?, birthday?, source?, tags[], notes[{text, alert, authorId, at}],
             noRemindersSms, onlineBlocked, stats{visits, avgCheck, lastVisit, noShows}
 BusinessVerification businessId, status: pending|verified|rejected, reason?
@@ -122,10 +138,10 @@ BusinessVerification businessId, status: pending|verified|rejected, reason?
 - Not designed yet: businesses open past midnight, role deletion, multi-booking move, real QR generation, photo upload preview.
 
 ## 12. Business glossary (TK)
-Senenama (calendar) · Ýazylyşlar · Haýyş (request) · Tassykla / Ret et · Täze ýazylyş · Ýazyp goý (save booking) · Başga wagta geçir · Arz et (complaint) · Näme boldy? · Müşderi / Müşderiler · Bellik (note) · Bellikler · Yzygiderli (regular) · Köpden bäri gelmedik · Gelşi (visit) · Ortaça çek · Hünärmen · Topar (team) · Rol / Roller · Eýesi · Administrator · Programmasyz · Çagyr (invite) · Öçür (disable) · Iş wagty · Arakesme (break) · Aýratyn günler (exceptions) · Dynç güni (day off) · Hyzmatdan soňky arakesme (buffer) · Ýazylyş düzgünleri · Onlaýn ýazylyş · Derrew tassyklama (instant) · Sazlamalar · Şahamça (branch) · Barlagda (in review) · Çeşme (source): Onlaýn / Telefon / Gelip ýazyldy · Ýatda saklandy (saved) · Eksport.
+Senenama (calendar) · Ýazylyşlar · Haýyş (request) · Tassykla / Ret et · Täze ýazylyş · Ýazyp goý (save booking) · Başga wagta geçir · Arz et (complaint) · Näme boldy? · Müşderi / Müşderiler · Bellik (note) · Bellikler · Yzygiderli (regular) · Köpden bäri gelmedik · Gelşi (visit) · Ortaça çek · Hünärmen · Topar (team) · Dereje (access level) · Rugsatlar (permissions) · Eýesi · Administrator · Hünärmen · Programmasyz · Iş ýeri (workspace) · Iş ýerleriňiz · Täze biznes döret · Çakylyk (invite) · Eýeçiligi geçir · Başga ýerde (busy elsewhere) · Içerki ýagdaý (internal status) · Reňkler we nyşanlar (legend) · Çagyr (invite) · Öçür (disable) · Iş wagty · Arakesme (break) · Aýratyn günler (exceptions) · Dynç güni (day off) · Hyzmatdan soňky arakesme (buffer) · Ýazylyş düzgünleri · Onlaýn ýazylyş · Derrew tassyklama (instant) · Sazlamalar · Barlagda (in review) · Çeşme (source): Onlaýn / Telefon / Gelip ýazyldy · Ýatda saklandy (saved) · Eksport.
 
 ## 13. Open for later rounds (now covered in round 5 below, except checkout/POS)
-Analytics (staff / services / clients) · Reviews & replies · Notification settings (event × role) · Help & support chat · Billing (plans in manat, commission) · B2B landing + pricing · Table timeline & floor plan · Class schedule & attendance · Checkout/POS (MVP: revenue = prices of completed visits).
+Analytics (staff / services / clients) · Reviews & replies · Notification settings (event × role) · Help & support chat · Billing (designed in round 5, removed from the MVP in round 6) · B2B landing + pricing · Table timeline & floor plan · Class schedule & attendance · Checkout/POS (MVP: revenue = prices of completed visits).
 
 
 ---
@@ -153,26 +169,19 @@ Mobile rule kept: analytics answers three questions — **staff, services, clien
 
 ## 16. Habarnamalar — notification settings (`/tk/settings/notifications`)
 Mobile rule kept: **each line says when a message arrives and where**, not a matrix of switches. Per person (the signed-in user), with role defaults.
-- Events: Täze haýyş · Haýyşyň wagty gutarýar (5 min galanda) · Müşderi ýatyrdy · Müşderi wagtyny üýtgetdi · Telefon/gelip ýazylyş goşuldy (by colleague) · Täze teswir · Ertirki ýazylyşlar (evening summary 20:00) · Gündelik jemleme (08:00) · Topar: çakylyk kabul edildi · Ýeral: tölegler, barlag, täzelikler.
-- Each row: event name, one sentence "Haçan: täze haýyş gelende derrew", channel toggles **Brauzerde · Programmada · SMS** (SMS only for critical events: new request when no app; costs are Ýeral's), and "Kim alýar" caption derived from roles ("Siz, administrator we haýyşyň hünärmeni").
+- Events: Täze haýyş · Haýyşyň wagty gutarýar (5 min galanda) · Müşderi ýatyrdy · Müşderi wagtyny üýtgetdi · Telefon/gelip ýazylyş goşuldy (by colleague) · Täze teswir · Ertirki ýazylyşlar (evening summary 20:00) · Gündelik jemleme (08:00) · Topar: çakylyk kabul edildi · Ýeral: barlag we täzelikler.
+- Each row: event name, one sentence "Haçan: täze haýyş gelende derrew", channel toggles **Brauzerde · Programmada · SMS** (round 6: "Programmada" appears only once the native business app ships — on MVP: Brauzerde + SMS) (SMS only for critical events: new request when no app; costs are Ýeral's), and "Kim alýar" caption derived from roles ("Siz, administrator we haýyşyň hünärmeni").
 - Quiet hours: "Gijeki dymyşlyk 22:00–08:00" (no sound/push, SMS never at night).
 - Browser permission banner if not granted: "Brauzer habarnamalaryny açyň" + button.
 
 ## 17. Kömek — help (`/tk/help`)
-- Search "Sorag ýazyň…", category tiles (Başlamak · Senenama we ýazylyşlar · Müşderiler · Topar we roller · Sazlamalar · Töleg we tarif), popular articles list, article page (title, updated date, steps with numbered list and small inline UI illustrations — drawn as simplified boxes, "Peýdaly boldumy? Hawa / Ýok"), contact block: **Goldaw çaty** (opens a right drawer chat with Ýeral support, typical reply "adatça 10 minutda", working hours), phone, Telegram link. Context help: "?" buttons in settings open the matching article in a drawer.
+- Search "Sorag ýazyň…", category tiles (Başlamak · Senenama we ýazylyşlar · Müşderiler · Topar we rugsatlar · Sazlamalar · Profil we iş ýerleri), popular articles list, article page (title, updated date, steps with numbered list and small inline UI illustrations — drawn as simplified boxes, "Peýdaly boldumy? Hawa / Ýok"), contact block: **Goldaw çaty** (opens a right drawer chat with Ýeral support, typical reply "adatça 10 minutda", working hours), phone, Telegram link. Context help: "?" buttons in settings open the matching article in a drawer.
 
-## 18. Töleg we tarif — billing (`/tk/settings/billing`) — owner only
-**Two plans + one commission layer** (decided 14.10.2026; prices are open questions → placeholders `[PRICE]`, `[X]%`):
-1. **Ýeke** — mugt; one specialist; online booking, calendar, clients, SMS reminders, link & QR.
-2. **Topar** — `[PRICE] TMT / aý` per business (not per staff; "Bir biznes üçin · çäksiz işgär"); unlimited staff, roles, analytics, support chat; each branch is billed separately. Tag **"Toparlar üçin"** (neutral, not a popularity claim). CTA "Synap gör" = a trial whose length and terms are **not defined yet** (open question).
-- **Komissiýa is not a plan.** It applies on **every plan**, only to the **first completed visit of a new client who found the business through Ýeral search**: `[X]%` of that visit (below the market's 20–30 %). Always free: clients from the business's own link or QR, phone bookings, returning clients. Never charged: no-shows and cancelled bookings.
-- SMS reminders to clients are included on every plan (Ýeral pays the SMS).
-- Plan changes take effect at the next invoice; switching a multi-specialist business to Ýeke is blocked until only one specialist is active.
-- Later: card payments and deposits; paid promotion in search; "Tor" for chains (contact us).
-Billing page: current plan card (name, price, next invoice date, line "+ komissiýa: täze müşderilerden [X]% (aşakda)", "Tarifi üýtget" → compare modal with two plan columns and a full-width commission row), this month's commission statement (table: client, first visit date, service, visit price, commission; total; caption "Diňe Ýeral gözleginden gelen täze müşderiler"), invoices list (number, period, amount, status Tölendi / Garaşylýar / Möhleti geçdi in no-show colours with a "Töle" button that shows Ýeral's bank details and the invoice number to quote, "PDF"), payment method: **bank transfer by invoice** (bank details block, "Hasap-faktura ýükle"), company details (Kärhananyň ady, Salgyt belgisi/STIR? → "Salgyt belgisi", Bank, Hasap) editable. Change plan modal compares plans.
+## 18. Töleg we tarif — NOT in the MVP (round 6)
+Everything is free on MVP: no plans, prices for Ýeral, commission, invoices or payment settings anywhere. The round-5 billing design (`B-Billing.dc.html`) is kept only on the canvas page "Later · not MVP" and is not part of this export. Business revenue from visits (Girdeji) is the business's own money and stays in analytics/calendar. Clients still pay at the place (Töleg ýerinde).
 
-## 19. B2B landing + pricing (`business.yeral.app`, logged out)
-Marketing header (Ýeral Biznes lockup, Mümkinçilikler · Bahalar · Kömek · Giriş, primary "Mugt başla" → setup wizard). Sections: hero ("Müşderileriňiz onlaýn ýazylsyn" + sub + CTA + product visual = a simplified drawn calendar mock, not a screenshot), who it's for (10 category tiles incl. restaurant/café and yoga — no "ýakynda"; subtitle mentions table booking and group classes), features (6: Onlaýn ýazylyş 24/7 · Senenama we topar · Haýyşlar we tassyklama · Müşderi bazasy · SMS ýatlatmalar · Hasabatlar), how it starts (3 steps, "5 minutda"), pricing (**2 plan cards** Ýeke / Topar + a full-width commission box "Komissiýa — diňe Ýeral-dan gelen täze müşderiden" with `[X]%` and the 4 free/never rules + "Tor" contact line + invoice caption), FAQ (6 questions, accordion), final CTA band, footer (TK/RU/EN). One gradient primary per view (header CTA counts; repeat CTAs below are the same action). No city names; "Türkmenistanda" may appear in legal/footer only? → No: keep "Ýeral" generic.
+## 19. B2B landing (`business.yeral.app`, logged out)
+Marketing header (Ýeral Biznes lockup, Mümkinçilikler · Nähili başlamaly · Kömek, Giriş → `/tk/giris`, primary "Mugt başla" → setup wizard). Sections: hero (drawn calendar mock with round-6 status icons), Kimler üçin (10 categories incl. restaurant/café and yoga), features (6), how it starts (3 steps), **"Mugt" band** ("Ýeral Biznes mugt" · ähli mümkinçilikler · çäksiz işgär · SMS ýatlatmalar hem mugt · kart gerek däl — no "for now", no future pricing), FAQ (6, first: "Ýeral Biznes mugtmy?" → yes), final CTA band, footer. One gradient primary per view.
 
 ## 20. Stol dolandyryşy — tables (`/tk/tables`) — Bag kafe workspace
 - Business type table: sidebar shows **Stollar** instead of Senenama (or both for mixed businesses).
@@ -193,7 +202,7 @@ Marketing header (Ýeral Biznes lockup, Mümkinçilikler · Bahalar · Kömek ·
 - Charts use the accent ramp for categories; status colours only for statuses.
 - Notification settings: one sentence per event + channel toggles, no event × role matrix (mobile decision).
 - SMS to business staff only for critical events (new request when the person has no app); never at night.
-- Billing: invoice + bank transfer; commission only on the first visit of clients from Ýeral search — a layer on every plan, not a plan (§18).
+- ~~Billing: invoice + bank transfer; commission layer~~ — removed in round 6: everything is free on MVP (§18).
 - Tables and classes live in the same shell; a business with several booking types sees each section in the sidebar.
 - Reviews under moderation are visible but not counted (§15). Teswirler badge = unanswered count in the neutral grey count tone (not the pending amber — reviews aren't urgent).
 - Analytics: Hepde/Ýyl and ‹ › change only labels in the demo (data is September only); daily revenue in the data now adds up to the tiles (46 200 / 41 250). Service shares that don't reach 100 % get a derived "Beýleki N hyzmat" row. Chart category order: `#5a3ff0`, `#c3b6fb`, `#4429d6`, `#9d88f7` (adjacent segments stay distinguishable); every chart has a legend + text alternative. A specialist sees counts only ("Girdeji diňe eýesine görünýär"); Eksport and client lists are hidden for that role. One-service drill-down page is not drawn (rows not clickable yet).
@@ -203,13 +212,35 @@ Marketing header (Ýeral Biznes lockup, Mümkinçilikler · Bahalar · Kömek ·
 - Classes: no hold timer on class requests (they use the business hold time like appointments when built); "Gelmedi belle" is enabled only after the session starts; waitlist later ("garaşýanlar sanawy ýakynda"); manual add = 1 seat, source phone, confirmed; clash checks = trainer or room overlap.
 - Restaurant and yoga are no longer "ýakynda" anywhere (onboarding, settings, landing).
 
-## 23. Design system v0.4 and Storybook (14.10.2026)
-- The repo already has `@yeral/ui` (38 components) + Storybook 10 built from DS v0.3.1. Round 4–5 screens introduced many new components and variants. They are now unified and catalogued:
-  - `screens/system/DS-Patterns.dc.html` — domain-free primitives (pills/tags, timer & delta pills, callouts, save bar, progress/meter, checklist, timeline, stat tiles, charts, inputs with addons, copy field, number stepper, time range, combobox, tag input, photo manager, settings layout/rows, app top bar, side-nav rail & switcher, accordion, map frame, QR block, overlay sizes) + the new variants of existing components.
-  - `screens/system/DS-Business.dc.html` — domain components (calendar grid & booking blocks, request/booking drawers, client header & tags, staff/role rows, service rows, rules & hours editors, review item, notification rows, KPI rows, plan card, commission & invoice rows, floor plan & table timeline, class session & roster, client-site cards).
-  - `COMPONENTS.md` — one row per component: package / FSD place, Storybook status (exists / extend / new + title), variants & states, screens, code notes.
-- Where screens drew the same thing differently, the DS boards hold the canonical version (drift list in `COMPONENTS.md`). Build from the boards, not from the older drift.
-- Every new component gets stories for all its states before the screens use it (repo skill `design-system`).
+## 23. Design system v0.5 and Storybook (16.10.2026)
+- The repo already has `@yeral/ui` (38 components) + Storybook 10 built from DS v0.3.1. Rounds 4–6 added many components and variants; they are catalogued and unified on:
+  - `screens/system/DS-Patterns.dc.html` (**v0.5**) — domain-free primitives: StatusBadge with icons, StatusLegend, WorkspaceSwitcher, AccountMenu, BottomTabBar + MoreSheet, AuthCard, pills, callouts, save bar, stat tiles, charts, inputs, settings layout, overlays…
+  - `screens/system/DS-Business.dc.html` (**v0.5**) — domain components: calendar (BookingBlock with icons, ScheduleLayers incl. Başga ýerde, InternalStatusChip, legend, role variants), phone-first NewBookingDrawer + QuickBookingSheet, Access & accounts (LoginFlow, InviteCard, PermissionMatrix, AccessLevelField, InviteRow, TransferOwnershipModal, ProfileDrawer), RequestHandlingSetting, StatusSettings, tables, classes, client-site cards, phone section. Billing components are retired.
+  - `COMPONENTS.md` — one row per component: package / FSD place, Storybook status, states, screens, code notes; "Round 6 changes" and "Retired" lists.
+- Where screens drew the same thing differently, the boards hold the canonical version. Every new component gets stories for all its states before the screens use it.
 
 ## 24. Open questions (owner)
-`[PRICE]` for Topar · commission `[X]%` · the Topar trial behind "Synap gör" (length, card needed?) · `[AMOUNT]`, `[BANK]`, `[ACCOUNT]`, `[TAX ID]`, `[SUPPORT PHONE]`, Telegram link · SMS provider · map provider · native Turkmen review of all new copy (incl. `-da/-de` after times) · whether modal width 560 becomes a token (`--modal-ml`) or those forms move to 640 · new type tokens 14/12 and radii 4/6 proposed by the DS audit (`COMPONENTS.md` → Tokens) · table/class-specific setup wizard · businesses open past midnight.
+`[SUPPORT PHONE]` and Telegram link for help · SMS provider and sender name · map provider · Turkmen copy check (owner does it during coding) · table/class-specific setup wizard · businesses open past midnight · admin panel (cms.yeral.app) for business verification, review reports, help articles and support.
+
+## 25. Round 6 (16.10.2026) — decisions
+Reference: Fresha. Screens: new `B-Login`, `B-Mobile`; reworked `B-Shell`; updated every business screen.
+1. **Free MVP.** No billing anywhere (plans, commission, invoices, "Töleg we tarif", prices for Ýeral). Landing pricing → "Mugt" band; help billing category → "Profil we iş ýerleri"; Ýeral notification = "barlag we täzelikler". `B-Billing` moved to the canvas page "Later · not MVP" (not exported). Demo data keeps it under `laterNotMvp` only.
+2. **Login & workspaces** (§1): one Ýeral account; login → invite / empty / last used workspace; invites by SMS link valid 7 days; workspace = one address, no branches; the workspace switcher is the only switch; the bottom block is the person's menu (not a switcher); Profilim; "Başga ýerde" across workspaces.
+3. **Access levels** (§1, §8): Eýesi / Administrator / Hünärmen + Programmasyz; no custom roles; Rugsatlar matrix; hidden-not-disabled; ownership transfer.
+4. **Who answers requests** (§2): Administrator we eýesi · Her hünärmen özi · Ikisi hem (default); per-person override; read-only footer for those who can't answer.
+5. **Statuses** (§3): one icon per status everywhere (badge dot retired), cancelled outline-only, requests dashed without transparency, ink selection ring, "Reňkler we nyşanlar" legend, optional internal statuses (Geldi, Başlandy, custom).
+6. **Phones** (§1, §9): full phone web, bottom tab bar, "Köp" sheet, phone-first quick booking (clients mostly call), no app banner. Native apps come later ("Programmada" notification channel appears then).
+7. **Role views drawn:** B-Calendar / B-Bookings tweak `role` (owner · admin · specialist) and `answers` (both · each · desk); B-Analytics `role` (owner · specialist; specialist sees own earnings); B-Team `tab=permissions`, `panel=transfer`; B-Settings `statusModal`; B-Onboarding `fromSwitcher`; B-Login `step`; B-Calendar `legend`, `internal`; B-Tables/B-Classes `legend`.
+8. **Demo data** (`business-demo.json`): `accounts` (Maýsa, Aýna, Gülnar, new user), `accessLevels`, `statusesV2`; Aýna busy elsewhere today 19:00–20:00; Jeren blocked 16:30–17:30 "Ýapyk · Okuw".
+9. Known drift left to the boards: B-Reviews still shows dot pills for review states ("Jogapsyz", "Barlanýar") → build them as Pill with icon (DS-Patterns); tab bar class names differ between screens → use the BottomTabBar on DS-Patterns.
+
+## 26. Round 6 · part B (17.10.2026) — business side of the client logic gaps
+Answers to `docs/design-requests/2026-10-16-round-6.md`; full table `../ROUND6-ANSWERS.md`.
+- **A3 Move requests:** a client's move at a manual business arrives as a request of type **"Wagt üýtgetmek"** — row in Haýyşlar ("Anna 16 · 10:00 → Şenbe 17 · 11:30", Tassyklandy badge + tag, timer, ✓/✕), drawer "Wagt üýtgetmek haýyşy" (old → new with "Görkez", fit line, "Täze wagty tassykla" / "Ret et" without offered times), calendar: the original block stays (timer, "→ Şenbe 17 · 11:30?", not draggable while open) + a dashed ghost block "Täze wagt?" holding the asked slot, linked (hover/selection ring both). Same "Haýyşlara kim jogap berýär?" rule; unanswered in the hold time → dropped, booking stays. B-Calendar / B-Bookings tweak `panel=move-request`.
+- **E3 Current slot, no back-dating:** staff may start a booking at the slot containing now (11:20 → 11:15; tables 18:40 → 18:30), never earlier. New-booking drawer: switch **"Telefon jaňy / Gelip ýazyldy"**; walk-in = today, current slot, SMS off ("Müşderi ýanyňyzda — ýazylyş häzirki wagtdan (11:15) başlap biler, öňe süýşürip bolmaýar."), walk-in icon.
+- **D3 Combine tables while creating:** when no free single table fits the party, the new reservation / walk-in suggests combinable pairs ("Stol 3+4 birleşdir · 8 ýer"); both tables get one linked bar ("20:30–23:00 · 3+4"). B-Tables tweak `panel=new8`.
+- **E1 Midnight:** end pickers include 24:00 (days, breaks, special days); starts stay 06:00–23:30.
+- **E2 Overlapping special days:** warning in "Aýratyn gün goş" ("Bu seneler «{name}» bilen gabat gelýär. Şol günler üçin «{winner}» ulanylar." + the rule); warning only; full tie → the existing day. B-Settings tweak `exceptionOverlap`.
+- **F1 Verification:** banner "Sahypaňyz barlagda — häzir ony diňe siz we toparyňyz görýärsiňiz. Barlagdan soň gözlegde we salgyňyzda hemmä açylar."; setup step 8 "Salgyňyz we QR kodyňyz taýýar — barlagdan soň müşderiler üçin açylar."; visitors see "Bu sahypa entek açylmady".
+- **C1:** B-Login refuses landlines with the mobile-only message (`step=phoneLandline`).
+- Demo drift (design only): B-Calendar / B-Bookings count 6 requests (incl. the move request), other screens 5.

@@ -16,6 +16,9 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
 .cap{font-size:13px;line-height:18px;color:#5a5a64}
 .dev{font-size:13px;line-height:18px;color:#5a5a64;max-width:560px}
+.dev b{color:#101014;font-weight:600}
+.h2{margin:0;font-size:28px;line-height:34px;font-weight:700;letter-spacing:-0.02em}
+.shd{display:flex;flex-direction:column;gap:8px}
 .b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
 .b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px}
 .b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
@@ -25,7 +28,9 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .b-gho{background:transparent;color:#101014}
 .b-gho:hover{background:#f4f4f6}
 .b-ico{width:40px;height:40px;padding:0;min-width:0}
-.b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b-ic{width:36px;height:36px;min-width:0;padding:0;border-radius:10px;justify-content:center;flex:none;color:#101014}
+.b-ic:hover{background:#f6f6f8;color:#101014}
+.b:focus-visible,.sn:focus-visible,.swb:focus-visible,.mi:focus-visible,.lnk:focus-visible,.lnkd:focus-visible,.sw:focus-visible,.tbi:focus-visible,.rlb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .shell{display:flex;background:#ffffff;border:1px solid #d8d8de;border-radius:16px;overflow:hidden;color:#101014}
 .side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
 .swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
@@ -35,31 +40,110 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .sn.on{background:#efecfe;color:#4429d6;font-weight:600}
 .sn.off{color:#6e6e78;cursor:default}
 .sn.off:hover{background:transparent;color:#6e6e78}
-.cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.sdv{height:1px;background:#e6e6ea;margin:8px 4px;flex:none}
+.cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}
 .soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
+.me{min-width:0}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
 .gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
 .kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
 .pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
+.pdv{height:1px;background:#e6e6ea;margin:6px 4px}
 .mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
 .mi:hover{background:#f4f4f6;color:#101014}
+.mi svg{flex:none;color:#5a5a64}
+.mi-dan,.mi-dan:hover{color:#a3251b}
+.mi-dan:hover{background:#fee4e2}
+.mi-dan svg{color:#a3251b}
+.wsi{min-height:52px}
+.wsi.on,.wsi.on:hover{background:#efecfe}
+.wsi.on svg{color:#4429d6}
+.wst{display:flex;flex-direction:column;min-width:0;flex:1}
+.wsn{font-size:14px;line-height:20px;font-weight:600;color:#101014;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wsc{font-size:12px;line-height:16px;color:#5a5a64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wpl{width:32px;height:32px;border-radius:8px;border:1px dashed #b0b0b8;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.av64{width:64px;height:64px;font-size:24px}
+.tile{display:flex;flex-direction:column;gap:10px;padding:20px;background:#ffffff;border-radius:16px;border:1px solid #e6e6ea}
+.strip{padding:12px;background:#ffffff;border:1px solid #e6e6ea;border-radius:16px}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.rlb{width:44px;height:44px;border:0;padding:0;border-radius:12px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.rlb:hover{background:#f4f4f6}
+.tbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid #e6e6ea;background:#ffffff}
+.tbi{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;padding:6px 0;border:0;background:transparent;font-family:inherit;font-size:11px;line-height:14px;font-weight:600;color:#5a5a64;cursor:pointer}
+.tbi:hover{color:#101014}
+.tbi.on{color:#4429d6}
+.tbd{position:absolute;top:4px;left:calc(50% + 4px);min-width:18px;height:16px;padding:0 5px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.hid{margin:0;padding:0 0 0 16px;font-size:13px;line-height:18px;color:#5a5a64}
+.hid li{margin:0 0 4px}
+.hid b{color:#101014;font-weight:600}
+.tcard{border:1px solid #e6e6ea;border-radius:16px;background:#ffffff;overflow:hidden}
+.mx-r{display:grid;grid-template-columns:minmax(0,1fr) 140px 160px 160px;align-items:center;column-gap:12px;min-height:56px;padding:8px 20px;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px;color:#101014}
+.mx-r:last-child{border-bottom:0}
+.mx-h{min-height:44px;padding-top:0;padding-bottom:0;background:#f6f6f8}
+.mx-n{display:flex;flex-direction:column;gap:2px;min-width:0;font-weight:500}
+.mx-c{display:flex;align-items:center;justify-content:center;min-height:24px}
+.mx-hc{display:flex;align-items:center;justify-content:center;gap:6px}
+.pl{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:#f4f4f6;border:1px solid #e6e6ea;color:#41505f;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
+.mx-no{color:#6e6e78;font-size:16px;line-height:20px}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.pdr{width:480px;display:flex;flex-direction:column;background:#ffffff;border-radius:16px;box-shadow:0 8px 24px rgba(16,16,20,.16);overflow:hidden;color:#101014}
+.pdr-h{display:flex;align-items:flex-start;gap:12px;padding:20px 20px 16px 24px;border-bottom:1px solid #e6e6ea}
+.dt{margin:0;font-size:19px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.pdr-b{display:flex;flex-direction:column;gap:24px;padding:24px}
+.pdr-f{display:flex;align-items:center;gap:12px;padding:16px 24px;border-top:1px solid #e6e6ea}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld label,.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.inp{height:44px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.ro{display:flex;align-items:center;gap:8px;height:44px;padding:0 8px 0 14px;border:1px solid #e6e6ea;border-radius:8px;background:#f6f6f8;font-size:15px;color:#101014}
+.pfx{display:inline-flex;align-items:center;height:44px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;flex:none}
+.hint{font-size:13px;line-height:18px;color:#5a5a64}
+.lnk{display:inline-flex;align-items:center;gap:6px;min-height:32px;border:0;background:transparent;padding:0 6px;border-radius:6px;font-family:inherit;font-size:14px;font-weight:600;color:#4429d6;cursor:pointer;white-space:nowrap}
+.lnk:hover{color:#3520a6;text-decoration:underline}
+.lnk:disabled{color:#6e6e78;text-decoration:none;cursor:default;font-variant-numeric:tabular-nums}
+.lnkd{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 6px;margin-left:-6px;border:0;border-radius:10px;background:transparent;font-family:inherit;font-size:14px;font-weight:600;color:#a3251b;cursor:pointer;white-space:nowrap}
+.lnkd:hover{background:#fee4e2}
+.dsep{height:1px;background:#e6e6ea}
+.ntl{font-size:15px;line-height:20px;font-weight:600;color:#101014}
+.wrow{display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 0;border-bottom:1px solid #e6e6ea}
+.wrow:first-child{border-top:1px solid #e6e6ea}
+.spv{display:flex;flex-direction:column;align-items:flex-end;text-align:right;flex:none}
+.swr{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.swt{font-size:15px;line-height:22px;font-weight:600}
+.sw{width:52px;height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;flex:none;margin:-10px -6px 0 0}
+.trk{position:relative;width:40px;height:24px;border-radius:999px;background:#e6e6ea;box-shadow:inset 0 0 0 1.5px #6e6e78}
+.sw.on .trk{background:#5a3ff0;box-shadow:none}
+.knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:999px;background:#ffffff;box-shadow:0 1px 2px rgba(16,16,20,.2)}
+.sw.on .knob{left:18px}
+.obox{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:#f6f6f8;border:1px solid #e6e6ea;font-size:14px;line-height:20px;color:#101014}
+.obox svg{flex:none;margin-top:1px}
+.pbox{display:flex;flex-direction:column;gap:14px;padding:16px;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff}
+.otp{display:flex;gap:10px}
+.ob{width:48px;height:48px;border:1px solid #d8d8de;border-radius:8px;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:#101014;font-variant-numeric:tabular-nums}
+.ob.f{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.caret{width:2px;height:24px;border-radius:1px;background:#101014}
+.stl{font-size:14px;line-height:20px;font-weight:600;color:#101014}
 </style>
 </helmet>
-<div style="width: 1600px; min-height: 2140px; padding: 64px 80px; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; color: #101014; display: flex; flex-direction: column; gap: 40px">
+<div style="width: 1600px; min-height: 6000px; padding: 64px 80px; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; color: #101014; display: flex; flex-direction: column; gap: 56px">
 
 <div style="display: flex; flex-direction: column; gap: 10px">
-<span class="lbl">business.yeral.app · app shell</span>
+<span class="lbl">business.yeral.app · app shell · round 6</span>
 <h1 style="margin: 0; font-size: 44px; line-height: 48px; font-weight: 700; letter-spacing: -0.03em">Ýeral Biznes — workspace shell</h1>
-<p class="dev" style="max-width: 900px; font-size: 15px; line-height: 22px">Every business screen sits in this shell: sidebar 248 (business switcher, 5 sections, help, user), top bar 64 (title, global search ⌘K, one primary action), content padded 32. Copy this markup for every business artboard. Desktop-first ≥1024; tablet 768–1023 → 72 px icon rail; under 768 → one-staff calendar + app banner.</p>
+<p class="dev" style="max-width: 980px; font-size: 15px; line-height: 22px">Every business screen sits in this shell: sidebar 248 (workspace switcher, sections for the person's access level, Ýeral sahypaňyz, Kömek, user block), top bar 64 (title, global search ⌘K, one primary action), content padded 32. Copy this markup for every business artboard. One Ýeral account (phone + SMS, same as yeral.app) can belong to several workspaces with a different role in each; a workspace = one business at one address; a second location is simply another workspace. Desktop-first ≥1024; tablet 768–1023 → 72 px icon rail; under 768 → bottom tab bar (see B-Mobile). Login: B-Login (/tk/giris).</p>
 </div>
 
 <div class="shell" style="height: 860px">
 <aside class="side" aria-label="Esasy menýu">
-<button class="swb" aria-label="Biznesi çalyş"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bitarap Türkmenistan şaýoly</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
-<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak">
+<img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+</button>
+<div class="sdv"></div>
 <a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
 <a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
 <a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
@@ -67,17 +151,21 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
 <a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
 <div style="flex: 1"></div>
-<a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
 <a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
-<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
-<button class="swb" aria-label="Hasabym"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div class="sdv"></div>
+<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<span class="av">M</span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 10 20 30</span></span>
+<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+</div>
 </aside>
 <div class="main">
 <div class="top">
 <h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Senenama</h1>
 <div style="flex: 1"></div>
 <label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
-<a class="b b-pri b-sm" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täze ýazylyş</a>
+<a class="b b-pri b-sm" href="B-Calendar.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täze ýazylyş</a>
 </div>
 <div style="flex: 1; padding: 32px; display: flex">
 <div style="flex: 1; border: 1.5px dashed #d8d8de; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px"><span style="font-size: 15px; font-weight: 600; color: #5a5a64">Page content</span><span class="cap">padding 32 · tables and calendar use full width · forms max 720</span></div>
@@ -85,65 +173,380 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 300px 300px 1fr; gap: 40px; align-items: start">
-<div style="display: flex; flex-direction: column; gap: 12px">
-<span class="lbl">Business switcher · popover</span>
-<div class="pop" style="width: 300px" role="menu">
-<div style="padding: 8px 10px 6px" class="lbl">Biznesleriňiz</div>
-<a class="mi" href="#" role="menuitemradio" aria-checked="true" style="background: #efecfe"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 28px; height: 28px; border-radius: 8px"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-weight: 600">Glow Studio</span><span class="cap" style="font-size: 12px">Bitarap Türkmenistan şaýoly</span></span><span class="cnt">5</span></a>
-<a class="mi" href="#" role="menuitemradio" aria-checked="false"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 28px; height: 28px; border-radius: 8px"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-weight: 600">Glow Studio · Parahat</span><span class="cap" style="font-size: 12px">Parahat 7</span></span><span class="cnt">2</span></a>
-<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
-<a class="mi" href="B-Onboarding.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Şahamça goş</a>
+<div style="display: grid; grid-template-columns: 300px 300px minmax(0, 1fr); gap: 40px; align-items: start">
+<div class="col">
+<span class="lbl">Workspace switcher · closed → open</span>
+<div class="strip" style="width: 272px">
+<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak">
+<img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+</button>
 </div>
-<span class="cap">Switching changes the whole workspace. Badges = unanswered requests in that branch.</span>
+<div class="pop" role="menu" aria-label="Iş ýerleriňiz" style="width: 300px">
+<div class="lbl" style="padding: 8px 10px 6px">Iş ýerleriňiz</div>
+<a class="mi wsi on" role="menuitemradio" aria-checked="true" href="B-Calendar.dc.html"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Eýesi · Bitarap Türkmenistan şaýoly</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></a>
+<a class="mi wsi" role="menuitemradio" aria-checked="false" href="B-Calendar.dc.html"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio · Parahat</span><span class="wsc">Eýesi · Parahat 7</span></span><span class="cnt" aria-label="2 haýyş">2</span></a>
+<div class="pdv" role="separator"></div>
+<a class="mi" role="menuitem" href="B-Onboarding.dc.html"><span class="wpl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Täze biznes döret</a>
 </div>
-<div style="display: flex; flex-direction: column; gap: 12px">
-<span class="lbl">User menu · popover</span>
-<div class="pop" style="width: 300px" role="menu">
-<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">M</span><span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">+993 65 10 20 30 · Eýesi</span></span></div>
-<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
-<a class="mi" href="#">Profilim</a>
-<a class="mi" href="#">Dil: Türkmençe</a>
-<a class="mi" href="#">Müşderi hökmünde aç · yeral.app</a>
-<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
-<a class="mi" href="#">Çykmak</a>
+<span class="cap">The ONLY switch. Popover 300 · raised · r12 · padding 6. Row: logo 32 r8 · name 14/600 · “role · address” 12 · right: amber count of unanswered requests, or tint + check for the current one. Picking a row switches the whole workspace and opens its Senenama. «Täze biznes döret» → setup wizard from step 2, already signed in.</span>
+</div>
+<div class="col">
+<span class="lbl">User block · menu</span>
+<div class="pop" role="menu" aria-label="Hasap" style="width: 300px">
+<a class="mi" role="menuitem" href="#profilim"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profilim</a>
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Dil: Türkmençe<span class="cap" style="margin-left: auto">TK</span></a>
+<a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Müşderi hökmünde aç<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<div class="pdv" role="separator"></div>
+<a class="mi mi-dan" role="menuitem" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Çykmak</a>
+</div>
+<div class="strip" style="width: 272px">
+<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<span class="av">M</span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 10 20 30</span></span>
+<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
 </div>
 </div>
-<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="cap">Not a switcher: no box, no chevron. Only the dots button (ghost 36) opens the menu, above the block. Profilim → right drawer 480 (below). Müşderi hökmünde aç → yeral.app, same account. Çykmak → /tk/giris (B-Login).</span>
+</div>
+<div class="col">
 <span class="lbl">Tablet 768–1023 · icon rail 72</span>
-<div class="shell" style="height: 300px; width: 560px">
+<div class="shell" style="height: 540px; width: 560px">
 <div style="width: 72px; flex: none; border-right: 1px solid #e6e6ea; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 0">
-<img src="../../assets/brand/yeral-icon.png" alt="Glow Studio" style="width: 36px; height: 36px; border-radius: 10px; margin-bottom: 8px">
-<a class="sn on" href="#" aria-label="Senenama" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></a>
-<a class="sn" href="#" aria-label="Ýazylyşlar, 5 haýyş" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #dc8b0b"></span></a>
-<a class="sn" href="#" aria-label="Müşderiler" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></a>
-<a class="sn" href="#" aria-label="Teswirler, 4 jogapsyz" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #6e6e78"></span></a>
-<a class="sn" href="#" aria-label="Hasabatlar" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg></a>
-<a class="sn" href="#" aria-label="Sazlamalar" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></a>
+<button class="rlb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak" style="margin-bottom: 8px"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"></button>
+<a class="sn on" href="B-Calendar.dc.html" aria-label="Senenama" aria-current="page" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></a>
+<a class="sn" href="B-Bookings.dc.html" aria-label="Ýazylyşlar, 5 haýyş" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #dc8b0b"></span></a>
+<a class="sn" href="B-Clients.dc.html" aria-label="Müşderiler" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></a>
+<a class="sn" href="B-Reviews.dc.html" aria-label="Teswirler, 4 jogapsyz" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #6e6e78"></span></a>
+<a class="sn" href="B-Analytics.dc.html" aria-label="Hasabatlar" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg></a>
+<a class="sn" href="B-Settings.dc.html" aria-label="Sazlamalar" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></a>
+<div style="flex: 1"></div>
+<a class="sn" href="Venue.dc.html" aria-label="Ýeral sahypaňyz" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+<a class="sn" href="B-Help.dc.html" aria-label="Kömek" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></a>
+<button class="rlb" aria-haspopup="menu" aria-label="Hasap menýusy: Maýsa Annaýewa"><span class="av">M</span></button>
 </div>
-<div style="flex: 1; display: flex; flex-direction: column"><div style="height: 56px; border-bottom: 1px solid #e6e6ea; display: flex; align-items: center; padding: 0 20px; gap: 12px"><span style="font-size: 19px; font-weight: 700">Senenama</span><div style="flex: 1"></div><a class="b b-pri b-sm b-ico" href="#" aria-label="Täze ýazylyş" style="width: 36px; height: 36px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></a></div><div style="flex: 1; margin: 20px; border: 1.5px dashed #d8d8de; border-radius: 12px"></div></div>
+<div style="flex: 1; display: flex; flex-direction: column"><div style="height: 56px; border-bottom: 1px solid #e6e6ea; display: flex; align-items: center; padding: 0 20px; gap: 12px"><span style="font-size: 19px; font-weight: 700">Senenama</span><div style="flex: 1"></div><a class="b b-pri b-sm b-ico" href="B-Calendar.dc.html" aria-label="Täze ýazylyş" style="width: 36px; height: 36px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></a></div><div style="flex: 1; margin: 20px; border: 1.5px dashed #d8d8de; border-radius: 12px"></div></div>
 </div>
-<span class="cap">Rail tooltips on hover; switcher and user menu open from the logo and an avatar at the rail bottom. Under 768 px: one-staff day calendar + banner “Telefonda Ýeral Biznes programmasy has amatly” with App Store / Google Play.</span>
+<span class="cap" style="max-width: 560px">Rail tooltips on hover. The workspace switcher opens from the logo at the top, the user menu from the avatar at the bottom (same popovers as on desktop). Ýeral sahypaňyz and Kömek stay as the last two icons above the avatar.</span>
 </div>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
-<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px; background: #ffffff; border-radius: 16px; border: 1px solid #e6e6ea"><span class="lbl">Request toast · new booking arrives</span>
-<div role="status" style="display: flex; align-items: center; gap: 12px; padding: 12px 8px 12px 16px; border-radius: 12px; background: #101014; color: #ffffff; box-shadow: 0 8px 24px rgba(16,16,20,.16); font-size: 14px"><span style="width: 8px; height: 8px; border-radius: 999px; background: #dc8b0b; flex: none"></span><span style="flex: 1">Täze haýyş: Ejegyz T. · Aýna · şu gün 15:30</span><a class="b b-sm" href="#" style="background: transparent; color: #c3b6fb; min-width: 0">Aç</a></div>
-<span class="cap">Bottom-left, 6 s, soft sound. Browser notification when the tab is in the background (ask permission once, from Settings).</span></div>
-<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px; background: #ffffff; border-radius: 16px; border: 1px solid #e6e6ea"><span class="lbl">Verification banner · new business</span>
-<div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: #fef6e7; border: 1px solid #f2ddb0; color: #93500a; font-size: 14px; line-height: 20px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span><b>Profilyňyz barlagda.</b> Ýeral topary 24 sagadyň içinde barlar — şondan soň gözlegde görünersiňiz. Senenamany häzirden ulanyp bilersiňiz.</span></div>
-<span class="cap">Sits above page content until verified (CMS moderation). Dismiss not allowed.</span></div>
-<div style="display: flex; flex-direction: column; gap: 8px; padding: 20px; background: #ffffff; border-radius: 16px; border: 1px solid #e6e6ea"><span class="lbl">Permissions in the shell</span>
-<span class="cap">Hidden, not disabled, when a role lacks access: revenue figures, Sazlamalar sections the role can't edit, other staff details (shown as “Bes”). Workspaces with tables or classes show “Stollar” / “Sapaklar” in place of (or next to) “Senenama”.</span></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start">
+<div class="tile"><span class="lbl">Request toast · new booking arrives</span>
+<div role="status" style="display: flex; align-items: center; gap: 12px; padding: 12px 8px 12px 16px; border-radius: 12px; background: #101014; color: #ffffff; box-shadow: 0 8px 24px rgba(16,16,20,.16); font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f2ddb0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span style="flex: 1">Täze haýyş: Ejegyz T. · Aýna · şu gün 15:30</span><a class="b b-sm" href="B-Bookings.dc.html" style="background: transparent; color: #c3b6fb; min-width: 0">Aç</a></div>
+<span class="cap">Bottom-left (left 272, clear of the sidebar), 6 s, soft sound. Browser notification when the tab is in the background. Only for requests this person can see in the current workspace; requests in other workspaces only raise the count in the switcher.</span></div>
+<div class="tile"><span class="lbl">Verification banner · new business</span>
+<div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: #fef6e7; border: 1px solid #f2ddb0; color: #93500a; font-size: 14px; line-height: 20px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span><b>Sahypaňyz barlagda</b> — häzir ony diňe siz we toparyňyz görýärsiňiz. Barlagdan soň gözlegde we salgyňyzda hemmä açylar. Senenamany häzirden ulanyp bilersiňiz.</span></div>
+<span class="cap">Sits above page content until verified (CMS moderation, usually within 24 h). Dismiss not allowed. Until then, visitors at the public link see the «Bu sahypa entek açylmady» page (States) — no business details; owner and team see their own page.</span></div>
+<div class="tile"><span class="lbl">Phone · under 768</span>
+<div style="width: 100%; max-width: 360px; border: 1px solid #d8d8de; border-radius: 16px; overflow: hidden; background: #ffffff">
+<div style="height: 40px; background: #f6f6f8"></div>
+<nav class="tbar" aria-label="Esasy menýu">
+<a class="tbi on" href="B-Calendar.dc.html" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Senenama</span></a>
+<a class="tbi" href="B-Bookings.dc.html" aria-label="Ýazylyşlar, 5 haýyş"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span aria-hidden="true">Ýazylyşlar</span><span class="tbd" aria-hidden="true">5</span></a>
+<a class="tbi" href="B-Clients.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Müşderiler</span></a>
+<button class="tbi" aria-haspopup="menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg><span>Köp</span></button>
+</nav>
 </div>
+<span class="cap">The web app is fully usable on phones — no app banner, no store links. Bottom tab bar Senenama · Ýazylyşlar · Müşderiler · Köp; Köp opens a sheet with the rest of the sidebar (Teswirler, Hasabatlar, Sazlamalar, Ýeral sahypaňyz, Kömek), the workspace switcher and the user menu. Drawers become bottom sheets. See B-Mobile.</span></div>
+</div>
+
+<section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-ws">
+<div class="shd"><span class="lbl">Workspaces · Aýna Myradowa</span><h2 id="s-ws" class="h2">Bir adam — birnäçe iş ýeri</h2></div>
+<div style="display: grid; grid-template-columns: 300px 300px minmax(0, 1fr); gap: 40px; align-items: start">
+<div class="col">
+<span class="lbl">In Glow Studio · open</span>
+<div class="strip" style="width: 272px">
+<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Hünärmen. Çalyşmak">
+<img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Hünärmen</span></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+</button>
+</div>
+<div class="pop" role="menu" aria-label="Iş ýerleriňiz" style="width: 300px">
+<div class="lbl" style="padding: 8px 10px 6px">Iş ýerleriňiz</div>
+<a class="mi wsi on" role="menuitemradio" aria-checked="true" href="B-Calendar.dc.html"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Hünärmen · Bitarap Türkmenistan şaýoly</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></a>
+<a class="mi wsi" role="menuitemradio" aria-checked="false" href="B-Calendar.dc.html"><span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 8px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: #f0f0f3; color: #41505f; font-size: 14px; font-weight: 700">A</span><span class="wst"><span class="wsn">Aýnanyň saç studiýasy</span><span class="wsc">Eýesi · Öýde kabul edýär · Parahat 2</span></span><span class="cnt" aria-label="1 haýyş">1</span></a>
+<div class="pdv" role="separator"></div>
+<a class="mi" role="menuitem" href="B-Onboarding.dc.html"><span class="wpl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Täze biznes döret</a>
+</div>
+</div>
+<div class="col">
+<span class="lbl">After picking her own studio</span>
+<div class="strip" style="width: 272px">
+<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Aýnanyň saç studiýasy, Eýesi. Çalyşmak">
+<span aria-hidden="true" style="width: 36px; height: 36px; border-radius: 10px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: #f0f0f3; color: #41505f; font-size: 15px; font-weight: 700">A</span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Aýnanyň saç studiýasy</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+</button>
+</div>
+<span class="cap">Solo workspace: she is Eýesi there, so her sidebar shows everything incl. Sazlamalar; «Haýyşlara kim jogap berýär?» is hidden (one-person business).</span>
+</div>
+<div class="col" style="max-width: 620px">
+<p class="dev" style="margin: 0; max-width: none; font-size: 15px; line-height: 22px; color: #101014">Switching changes the whole workspace — calendar, team, clients, settings, numbers — and the role with it: Aýna is Hünärmen in Glow Studio (own column, no Sazlamalar) and Eýesi in “Aýnanyň saç studiýasy”.</p>
+<ul class="hid">
+<li>After login the <b>last used</b> workspace opens (accounts.*.lastUsed) — no picker each time.</li>
+<li>Counts in the popover = unanswered requests this person can answer in that workspace.</li>
+<li>Her bookings in one workspace show in the other as a <b>«Başga ýerde»</b> block without details (today 18:30–19:30 in Glow Studio), and online booking doesn't offer those times. She can turn this off in Profilim.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-lv">
+<div class="shd"><span class="lbl">Access levels · sidebar</span><h2 id="s-lv" class="h2">Eýesi · Administrator · Hünärmen</h2><p class="dev" style="max-width: 980px">Three fixed access levels, no custom roles. What a level can't use is <b>hidden, not disabled</b> — menu items, money, buttons. Same shell markup; only the items, counts and the role under the workspace name change.</p></div>
+<div style="display: grid; grid-template-columns: 250px 250px 250px minmax(0, 1fr); gap: 40px; align-items: start">
+<div class="col">
+<span class="lbl">Eýesi · Maýsa Annaýewa</span>
+<div class="shell" style="height: 600px">
+<aside class="side" aria-label="Esasy menýu" style="border-right: 0">
+<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak">
+<img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+</button>
+<div class="sdv"></div>
+<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
+<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
+<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<div style="flex: 1"></div>
+<a class="sn" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div class="sdv"></div>
+<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<span class="av">M</span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 10 20 30</span></span>
+<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+</div>
+</aside>
+</div>
+<ul class="hid">
+<li>Nothing hidden: money everywhere, Sazlamalar incl. Topar and Rugsatlar.</li>
+<li>One Eýesi per workspace; can't leave until «Eýeçiligi geçir» (Topar).</li>
+</ul>
+</div>
+<div class="col">
+<span class="lbl">Administrator · Selbi Hojaýewa</span>
+<div class="shell" style="height: 600px">
+<aside class="side" aria-label="Esasy menýu" style="border-right: 0">
+<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Administrator. Çalyşmak">
+<img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Administrator</span></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+</button>
+<div class="sdv"></div>
+<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
+<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
+<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<div style="flex: 1"></div>
+<a class="sn" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div class="sdv"></div>
+<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<span class="av">S</span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Selbi Hojaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 88 41 02</span></span>
+<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+</div>
+</aside>
+</div>
+<ul class="hid">
+<li>Hidden: <b>money</b> — Girdeji in Hasabatlar and the calendar summary, client «jemi» — unless the owner gives «Girdejini görmek».</li>
+<li><b>Topar</b> and Rugsatlar are view-only (no invite / edit / remove buttons).</li>
+<li>Answers requests (count 5) and reviews (count 4).</li>
+</ul>
+</div>
+<div class="col">
+<span class="lbl">Hünärmen · Aýna Myradowa</span>
+<div class="shell" style="height: 600px">
+<aside class="side" aria-label="Esasy menýu" style="border-right: 0">
+<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Hünärmen. Çalyşmak">
+<img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Hünärmen</span></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+</button>
+<div class="sdv"></div>
+<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="2 haýyş">2</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
+<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler</a>
+<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<div style="flex: 1"></div>
+<a class="sn" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div class="sdv"></div>
+<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<span class="av">A</span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Aýna Myradowa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 31 22 10</span></span>
+<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+</div>
+</aside>
+</div>
+<ul class="hid">
+<li>Hidden: <b>Sazlamalar</b> (own profile via the user menu → Profilim).</li>
+<li>Senenama: own column; others' time shows as «Bes». Ýazylyşlar / Müşderiler: own only (count 2 = her requests).</li>
+<li>Teswirler: about her, read-only (no count, no reply). Hasabatlar: own numbers and own earnings.</li>
+</ul>
+</div>
+<div class="col">
+<span class="lbl">Rules</span>
+<ul class="hid">
+<li>Programmasyz hünärmen has no login; owner / admin handle their bookings and requests.</li>
+<li>Who answers requests is set in Sazlamalar → Ýazylyş düzgünleri → «Haýyşlara kim jogap berýär?» (default «Ikisi hem») with a per-person override in the staff drawer. The Ýazylyşlar count = requests this person may answer; when specialists only see theirs («Administrator we eýesi»), a Hünärmen gets no count.</li>
+<li>Workspaces with tables or classes show «Stollar» / «Sapaklar» in place of (or next to) «Senenama».</li>
+<li>Direct URL to a hidden page → redirect to Senenama with a toast «Bu bölüm siziň üçin ýapyk».</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-mx">
+<div class="shd"><span class="lbl">Default access · business-demo.json → accessLevels.permissions</span><h2 id="s-mx" class="h2">Rugsatlar</h2></div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 40px; align-items: start">
+<div class="tcard" role="table" aria-label="Deslapky rugsatlar">
+<div class="mx-r mx-h" role="row"><span class="lbl" role="columnheader">Rugsat</span><span class="mx-hc lbl" role="columnheader"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Eýesi<span class="sr">, üýtgedip bolmaýar</span></span><span class="mx-hc lbl" role="columnheader">Administrator</span><span class="mx-hc lbl" role="columnheader">Hünärmen</span></div>
+<sc-for list="{{matrix}}" as="r" hint-placeholder-count="11">
+<div class="mx-r" role="row">
+<span class="mx-n" role="rowheader"><span>{{r.t}}</span><sc-if value="{{r.hasSub}}" hint-placeholder-val="{{false}}"><span class="cap" style="font-weight: 400">{{r.sub}}</span></sc-if></span>
+<sc-for list="{{r.cells}}" as="c" hint-placeholder-count="3">
+<span class="mx-c" role="cell">
+<sc-if value="{{c.yes}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span class="sr">Hawa</span></sc-if>
+<sc-if value="{{c.no}}" hint-placeholder-val="{{false}}"><span class="mx-no" aria-hidden="true">—</span><span class="sr">Ýok</span></sc-if>
+<sc-if value="{{c.own}}" hint-placeholder-val="{{false}}"><span class="pl">Diňe özüniňki</span></sc-if>
+<sc-if value="{{c.view}}" hint-placeholder-val="{{false}}"><span class="pl">Diňe görmek</span></sc-if>
+</span>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<div class="col">
+<ul class="hid">
+<li>Drawn in Sazlamalar → <b>Rugsatlar</b> as this matrix: permission rows × Administrator / Hünärmen columns. The owner toggles cells; the <b>Eýesi</b> column is locked all-on.</li>
+<li><b>«Diňe özüniňki»</b> (“own”) = only their own bookings, clients or numbers. Cells that can be “own” toggle Ýok / Diňe özüniňki / Hawa; others are on/off.</li>
+<li>«Haýyşlara jogap bermek» for Hünärmen follows «Haýyşlara kim jogap berýär?» (Ýazylyş düzgünleri).</li>
+<li>A Hünärmen always reads reviews about themself; replying is the owner's / admin's.</li>
+<li>Programmasyz hünärmen: no login, not in the matrix.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section id="profilim" style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-pf">
+<div class="shd"><span class="lbl">User menu → Profilim · right drawer 480 (bottom sheet under 768)</span><h2 id="s-pf" class="h2">Profilim</h2><p class="dev" style="max-width: 980px">The <b>person</b>, not the business: name, photo, phone (= login, change via SMS), specialization per workspace (read-only, set by each owner in Topar), the «Başga ýerde» switch, and leaving a workspace. Same drawer in every workspace and for every access level; only the bottom differs for the owner.</p></div>
+<div style="display: grid; grid-template-columns: 480px 480px minmax(0, 1fr); gap: 40px; align-items: start">
+<div class="col">
+<span class="lbl">Maýsa · Eýesi in Glow Studio</span>
+<aside class="pdr" role="dialog" aria-labelledby="pf1-t">
+<div class="pdr-h">
+<div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0"><h3 id="pf1-t" class="dt">Profilim</h3><span class="cap">Ýeral hasabyňyz — ähli iş ýerleriňizde birmeňzeş</span></div>
+<button class="b b-gho b-ic" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div class="pdr-b">
+<div style="display: flex; align-items: center; gap: 16px"><span class="av av64" aria-hidden="true">M</span><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px"><button class="b b-sec b-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Surat goş</button><span class="cap">Hökman däl · JPG ýa-da PNG</span></div></div>
+<div class="fld"><label for="pf1-n">Adyňyz we familiýaňyz</label><input id="pf1-n" class="inp" value="Maýsa Annaýewa"><span class="hint">Toparlaryňyz sizi şu at bilen görýär.</span></div>
+<div class="fld"><span class="flab" id="pf1-pl">Telefon belgisi</span><div class="ro" role="group" aria-labelledby="pf1-pl"><span style="font-variant-numeric: tabular-nums; font-weight: 500">+993 65 10 20 30</span><span style="flex: 1"></span><button class="lnk">Belgini üýtget</button></div><span class="hint">Şu belgi bilen Ýeral Biznes-e we yeral.app-a girýärsiňiz. Täze belgä SMS kod ibereris.</span></div>
+<div class="dsep"></div>
+<div class="fld" style="gap: 10px"><span class="ntl">Iş ýerlerim</span>
+<div style="display: flex; flex-direction: column">
+<div class="wrow"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Eýesi</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Hünäri</span><span style="font-size: 14px; line-height: 20px; color: #6e6e78">Bellenmedi</span></span></div>
+<div class="wrow"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio · Parahat</span><span class="wsc">Eýesi</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Hünäri</span><span style="font-size: 14px; line-height: 20px; color: #6e6e78">Bellenmedi</span></span></div>
+</div>
+<span class="cap">Hünäriňizi her iş ýeriniň eýesi Topar bölüminde belleýär.</span>
+</div>
+<div class="dsep"></div>
+<div class="swr"><span style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><span id="pf1-sw" class="swt">Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez</span><span class="cap">Beýleki iş ýeriňizdäki ýazylyşlar her senenamada jikme-jiksiz «Başga ýerde» bolup görünýär we ol wagtlar onlaýn ýazylyşda hödürlenmeýär.</span></span><button class="sw on" role="switch" aria-checked="true" aria-labelledby="pf1-sw"><span class="trk"><span class="knob"></span></span></button></div>
+<div class="obox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Siz Glow Studio-nyň eýesi. Biznesden çykmak üçin ilki eýeçiligi başga adama geçiriň: Topar → «Eýeçiligi geçir». <a href="B-Team.dc.html" style="font-weight: 600">Topara geç</a></span></div>
+</div>
+<div class="pdr-f">
+<span style="flex: 1"></span><button class="b b-pri">Ýatda sakla</button>
+</div>
+</aside>
+<span class="cap">Owner: no «Bu biznesden çyk». The box points to Topar → «Eýeçiligi geçir» (B-Team).</span>
+</div>
+<div class="col">
+<span class="lbl">Aýna · Hünärmen in Glow Studio</span>
+<aside class="pdr" role="dialog" aria-labelledby="pf2-t">
+<div class="pdr-h">
+<div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0"><h3 id="pf2-t" class="dt">Profilim</h3><span class="cap">Ýeral hasabyňyz — ähli iş ýerleriňizde birmeňzeş</span></div>
+<button class="b b-gho b-ic" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div class="pdr-b">
+<div style="display: flex; align-items: center; gap: 16px"><span class="av av64" aria-hidden="true">A</span><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px"><button class="b b-sec b-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Surat goş</button><span class="cap">Hökman däl · JPG ýa-da PNG</span></div></div>
+<div class="fld"><label for="pf2-n">Adyňyz we familiýaňyz</label><input id="pf2-n" class="inp" value="Aýna Myradowa"><span class="hint">Toparlaryňyz sizi şu at bilen görýär.</span></div>
+<div class="fld"><span class="flab" id="pf2-pl">Telefon belgisi</span><div class="ro" role="group" aria-labelledby="pf2-pl"><span style="font-variant-numeric: tabular-nums; font-weight: 500">+993 65 31 22 10</span><span style="flex: 1"></span><button class="lnk">Belgini üýtget</button></div><span class="hint">Şu belgi bilen Ýeral Biznes-e we yeral.app-a girýärsiňiz. Täze belgä SMS kod ibereris.</span></div>
+<div class="dsep"></div>
+<div class="fld" style="gap: 10px"><span class="ntl">Iş ýerlerim</span>
+<div style="display: flex; flex-direction: column">
+<div class="wrow"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Hünärmen</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Hünäri</span><span style="font-size: 14px; line-height: 20px; font-weight: 500">Stilist</span></span></div>
+<div class="wrow"><span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 8px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: #f0f0f3; color: #41505f; font-size: 14px; font-weight: 700">A</span><span class="wst"><span class="wsn">Aýnanyň saç studiýasy</span><span class="wsc">Eýesi</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Hünäri</span><span style="font-size: 14px; line-height: 20px; font-weight: 500">Stilist</span></span></div>
+</div>
+<span class="cap">Hünäriňizi her iş ýeriniň eýesi Topar bölüminde belleýär.</span>
+</div>
+<div class="dsep"></div>
+<div class="swr"><span style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><span id="pf2-sw" class="swt">Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez</span><span class="cap">Beýleki iş ýeriňizdäki ýazylyşlar her senenamada jikme-jiksiz «Başga ýerde» bolup görünýär we ol wagtlar onlaýn ýazylyşda hödürlenmeýär.</span></span><button class="sw on" role="switch" aria-checked="true" aria-labelledby="pf2-sw"><span class="trk"><span class="knob"></span></span></button></div>
+</div>
+<div class="pdr-f">
+<button class="lnkd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Bu biznesden çyk</button>
+<span style="flex: 1"></span><button class="b b-pri">Ýatda sakla</button>
+</div>
+</aside>
+<span class="cap">«Bu biznesden çyk» (current workspace only) → confirm modal «Glow Studio-dan çykýarsyňyzmy?» · «Hawa, çyk» / «Yza». Her future bookings stay; the owner reassigns them (same flow as «Işgäri öçür»). Account and other workspaces stay.</span>
+</div>
+<div class="col">
+<span class="lbl">Belgini üýtget · expands in place</span>
+<div class="tile" style="gap: 16px">
+<span class="stl">1 · Täze belgi</span>
+<div class="pbox">
+<div class="fld"><label for="pc-ph">Täze telefon belgisi</label><div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="pc-ph" class="inp" type="tel" inputmode="numeric" value="61 05 77 32" style="font-variant-numeric: tabular-nums"></div></div>
+<div style="display: flex; justify-content: flex-end; gap: 8px"><button class="b b-gho b-sm">Ýatyr</button><button class="b b-sec b-sm">Kod iber</button></div>
+</div>
+<span class="stl">2 · SMS kod</span>
+<div class="pbox">
+<p class="hint" style="margin: 0">Kod <span style="white-space: nowrap; color: #101014; font-weight: 600">+993 61 05 77 32</span> belgä iberildi.</p>
+<div class="otp" role="group" aria-label="SMS kod"><span class="ob">3</span><span class="ob">8</span><span class="ob f"><span class="caret"></span></span><span class="ob"></span></div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><button class="lnk" disabled="{{true}}">Täzeden iber (0:42)</button><button class="b b-gho b-sm">Ýatyr</button></div>
+<span class="hint">Täze belgi tassyklanýança köne belgi bilen girip bilersiňiz.</span>
+</div>
+</div>
+<ul class="hid">
+<li>Code goes to the <b>new</b> number; verifies on the 4th digit (code 0000 = wrong, as in B-Login), then the row collapses and a toast says «Telefon belgisi üýtgedildi».</li>
+<li>The login phone changes for every workspace and for yeral.app; teams see the new number.</li>
+<li>Number already on another Ýeral account → field error «Bu belgi başga hasapda ulanylýar».</li>
+<li>Name / photo save with «Ýatda sakla»; the «Başga ýerde» switch saves at once (default on).</li>
+</ul>
+</div>
+</div>
+</section>
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":2140}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":6000}}'>
 class Component extends DCLogic {
   renderVals() {
-    return {};
+    // business-demo.json → accessLevels.permissions (Eýesi column is locked all-on)
+    const PERMS = [
+      ['Ähli işgärleriň senenamasyny görmek', '', true, true, false],
+      ['Haýyşlara jogap bermek', '«Haýyşlara kim jogap berýär?» sazlamasyna bagly', true, true, 'own'],
+      ['Ýazylyş goşmak, geçirmek, ýatyrmak', '', true, true, 'own'],
+      ['Gelmedi bellemek we arz etmek', '', true, true, 'own'],
+      ['Müşderileri görmek (telefon bilen)', '', true, true, 'own'],
+      ['Teswirlere jogap bermek', 'Hünärmen özi baradaky teswirleri okaýar', true, true, false],
+      ['Girdejini görmek', '', true, false, 'own'],
+      ['Hasabatlar', '', true, true, 'own'],
+      ['Hyzmatlary we bahalary üýtgetmek', '', true, true, false],
+      ['Biznes sazlamalaryny üýtgetmek', '', true, true, false],
+      ['Topary we rugsatlary dolandyrmak', '', true, 'view', false]
+    ];
+    const cell = (v) => ({ yes: v === true, no: v === false, own: v === 'own', view: v === 'view' });
+    return {
+      matrix: PERMS.map((p) => ({ t: p[0], sub: p[1], hasSub: !!p[1], cells: [cell(p[2]), cell(p[3]), cell(p[4])] }))
+    };
   }
 }
 </script>

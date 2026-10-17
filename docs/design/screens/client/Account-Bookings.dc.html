@@ -58,14 +58,13 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .tab:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4;border-radius:6px}
 .tn{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 6px;margin-left:8px;border-radius:999px;background:#f0f0f3;color:#5a5a64;font-size:12px;font-weight:600}
 .tab.on .tn{background:#efecfe;color:#4429d6}
-.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
-.dot{width:6px;height:6px;border-radius:999px;flex:none}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.badge svg{flex:none}
 .st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
 .st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
 .st-d{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
 .st-x{background:#eef1f6;border:1px solid #d3dbe6;color:#41505f}
 .st-n{background:#fee4e2;border:1px solid #f6c7c2;color:#a3251b}
-.d-p{background:#dc8b0b}.d-c{background:#5a3ff0}.d-d{background:#12a366}.d-x{background:#7b8ea3}.d-n{background:#d9412f}
 .fld{display:flex;flex-direction:column;gap:6px;min-width:0}
 .flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
 .inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
@@ -171,8 +170,42 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .toast .tb{background:transparent;color:#c3b6fb;padding:0 10px}
 .toast .tb:hover{background:#2a2a32;color:#c3b6fb}
 .tsp{width:8px;flex:none}
+.toast>span{padding-top:8px;padding-bottom:8px}
+.bwhen.gone{color:#6e6e78;text-decoration:line-through}
+.bwhen.gone svg{stroke:#6e6e78}
+.brow.dim .bimg{opacity:.5}
+.brow.dim .bopen,.brow.dim .bwhen{color:#5a5a64}
+.bln{display:flex;align-items:center;flex-wrap:wrap;gap:2px 10px}
+.blnk{position:relative;z-index:1;display:inline-flex;align-items:center;align-self:flex-start;min-height:24px;padding:0;border:0;background:none;font-family:inherit;font-size:13px;line-height:18px;font-weight:600;color:#4429d6;cursor:pointer;text-align:left}
+.blnk:hover{color:#3520a6;text-decoration:underline}
+.blnk:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4;border-radius:4px}
+.uerr{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:18px;color:#a3251b}
+.uerr svg{flex:none;margin-top:1px}
+.uerr .blnk{display:inline;min-height:0;margin-left:4px}
+.bx{grid-column:2 / -1;display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0}
+.bx.off{display:none}
+.ofl{font-size:14px;line-height:20px;color:#101014}
+.offg{position:relative;z-index:1;max-width:100%}
+.offg.on{z-index:35}
+.offs{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px}
+.ofw{display:inline-flex;flex-direction:column;align-items:flex-start;gap:4px}
+.slot{height:40px;min-width:72px;padding:0 14px;border-radius:10px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:600;color:#101014;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums}
+.slot:hover{border-color:#5a3ff0;color:#4429d6}
+.slot.on,.slot.on:hover{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
+.slot:disabled{background:#f6f6f8;border-color:#f0f0f3;color:#6e6e78;text-decoration:line-through;cursor:not-allowed}
+.slot:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.oft{font-size:12px;line-height:16px;color:#6e6e78;padding-left:2px}
+.cpop{position:absolute;left:0;top:calc(100% + 8px);z-index:31;width:360px;display:flex;flex-direction:column;gap:16px;padding:16px;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.cpop .grab{display:none}
+.cpt{margin:0;font-size:15px;line-height:22px;font-weight:600;color:#101014}
+.b-dgh{background:transparent;color:#a3251b}
+.b-dgh:hover{background:#fee4e2;color:#a3251b}
+.mvbox{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px 16px;border-radius:12px;background:#fef6e7;border:1px solid #f2ddb0}
+.mvh{display:flex;align-items:center;gap:8px;font-size:15px;line-height:20px;font-weight:600;color:#101014}
+.mvt{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;font-size:15px;line-height:22px;color:#101014;font-variant-numeric:tabular-nums}
+.mvbox .b-dgh{margin:4px 0 0 -10px;padding:0 10px}
 @media (max-width:1023px){.wrap{padding:0 24px}.hide-md{display:none !important}.acc{gap:24px;padding-top:24px}.aside{flex-basis:100%;max-width:none}.aprof,.adiv,.sn-out{display:none !important}.anav{flex-direction:row;gap:8px;overflow-x:auto;margin:0 -24px;padding:0 24px 4px}.sn{flex:none;height:44px;padding:0 16px;gap:8px;border:1px solid #d8d8de;border-radius:999px}.sn.on{border-color:#d5cbfb}}
-@media (max-width:767px){.wrap{padding:0 16px}.hide-xs{display:none !important}.qs{height:48px}.qf{padding:0 12px}.anav{margin:0 -16px;padding:0 16px 4px}.b-sm{height:44px;border-radius:12px}.brow{grid-template-columns:72px minmax(0,1fr);gap:14px;padding:16px 12px;margin:0 -12px}.bimg{width:72px;height:72px}.bside{grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap}.drw{top:auto;left:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.grab{display:block}.drw-h{padding:12px 16px 16px 16px}.drw-b{padding:20px 16px}.drw-f{padding:12px 16px 16px}.dr{grid-template-columns:120px minmax(0,1fr)}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:16px;max-width:none}.star{width:44px;height:44px}}
+@media (max-width:767px){.wrap{padding:0 16px}.hide-xs{display:none !important}.qs{height:48px}.qf{padding:0 12px}.anav{margin:0 -16px;padding:0 16px 4px}.b-sm{height:44px;border-radius:12px}.brow{grid-template-columns:72px minmax(0,1fr);gap:14px;padding:16px 12px;margin:0 -12px}.bimg{width:72px;height:72px}.bside{grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap}.drw{top:auto;left:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.grab{display:block}.drw-h{padding:12px 16px 16px 16px}.drw-b{padding:20px 16px}.drw-f{padding:12px 16px 16px}.dr{grid-template-columns:120px minmax(0,1fr)}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:16px;max-width:none}.star{width:44px;height:44px}.bx{grid-column:1 / -1}.bside{order:2}.slot{height:44px}.cpop{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.cpop .grab{display:block;margin:0 auto}.catcher.ask{background:rgba(16,16,20,.4)}}
 </style>
 </helmet>
 <div style="min-height: 100%; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column">
@@ -249,13 +282,20 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="bmid">
 <button class="bopen" onClick="{{r.open}}" aria-label="{{r.openLabel}}">{{r.business}}</button>
 <span class="bwhat">{{r.what}}</span>
-<span class="bwhen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>{{r.when}}</span>
+<span class="{{r.whenCls}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>{{r.when}}</span>
 <div class="bst">
-<span class="{{r.badgeCls}}"><span class="{{r.dotCls}}"></span>{{r.statusLabel}}</span>
+<span class="{{r.badgeCls}}"><sc-if value="{{r.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{r.icC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{r.icD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{r.icX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{r.icN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{r.statusLabel}}</span>
 <sc-if value="{{r.hasNote}}" hint-placeholder-val="{{false}}"><span class="cap">{{r.note}}</span></sc-if>
-<sc-if value="{{r.byClient}}" hint-placeholder-val="{{false}}"><span class="cap bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Siz ýatyrdyňyz</span></sc-if>
-<sc-if value="{{r.byBiz}}" hint-placeholder-val="{{false}}"><span class="cap bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>{{r.bizText}}</span></sc-if>
+<sc-if value="{{r.byUser}}" hint-placeholder-val="{{false}}"><span class="cap bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Siz ýatyrdyňyz</span></sc-if>
+<sc-if value="{{r.byBiz}}" hint-placeholder-val="{{false}}"><span class="cap bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>{{r.byText}}</span></sc-if>
+<sc-if value="{{r.bySys}}" hint-placeholder-val="{{false}}"><span class="cap bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Wagtynda jogap gelmedi</span></sc-if>
+<sc-if value="{{r.hasMove}}" hint-placeholder-val="{{false}}"><span class="cap bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{r.moveText}}</span></sc-if>
 </div>
+<sc-if value="{{r.hasReason}}" hint-placeholder-val="{{false}}"><span class="cap">{{r.reasonText}}</span></sc-if>
+<sc-if value="{{r.hasMsg}}" hint-placeholder-val="{{false}}"><span class="cap">«{{r.msg}}»</span></sc-if>
+<sc-if value="{{r.hasTook}}" hint-placeholder-val="{{false}}"><button class="blnk" onClick="{{r.openNew}}">{{r.tookText}}</button></sc-if>
+<sc-if value="{{r.hasPastOffers}}" hint-placeholder-val="{{false}}"><span class="bln"><span class="cap bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m14 14-4 4"></path><path d="m10 14 4 4"></path></svg>Teklip edilen wagtlaryň möhleti geçdi</span><a class="blnk" href="Venue.dc.html">Başga wagt saýla</a></span></sc-if>
+<sc-if value="{{r.hasUndoErr}}" hint-placeholder-val="{{false}}"><span class="uerr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>{{r.undoErrText}}<a class="blnk" href="{{r.flow}}">Başga wagt saýla</a></span></span></sc-if>
 </div>
 <div class="bside">
 <span class="{{r.priceCls}}">{{r.price}}</span>
@@ -263,8 +303,27 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <sc-if value="{{r.isUpcoming}}" hint-placeholder-val="{{true}}"><button class="b b-gho b-sm" aria-label="{{r.dirLabel}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>Ýol görkez</button><button class="b b-gho b-sm" aria-label="{{r.callLabel}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Jaň et</button></sc-if>
 <sc-if value="{{r.canReview}}" hint-placeholder-val="{{false}}"><button class="b b-sec b-sm" onClick="{{r.review}}">Teswir ýaz</button></sc-if>
 <sc-if value="{{r.reviewed}}" hint-placeholder-val="{{false}}"><span class="rated"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>{{r.reviewN}} · Baha berdiňiz</span></sc-if>
+<sc-if value="{{r.canUndo}}" hint-placeholder-val="{{false}}"><button class="b b-gho b-sm" onClick="{{r.undo}}" aria-label="{{r.undoLabel}}">Yzyna al</button></sc-if>
 <sc-if value="{{r.rebook}}" hint-placeholder-val="{{false}}"><a class="b b-sec b-sm" href="Venue.dc.html">Gaýtadan ýazyl</a></sc-if>
 </div>
+</div>
+<div class="{{r.bxCls}}">
+<sc-if value="{{r.isDecl}}" hint-placeholder-val="{{true}}"><span class="lbl">Teklip edilen wagtlar</span></sc-if>
+<sc-if value="{{r.isExp}}" hint-placeholder-val="{{false}}"><span class="ofl">{{r.expLead}}</span></sc-if>
+<div class="{{r.offgCls}}">
+<div class="offs" role="group" aria-label="{{r.offAria}}">
+<sc-for list="{{r.offers}}" as="o" hint-placeholder-count="3"><span class="ofw"><button class="{{o.cls}}" disabled="{{o.taken}}" aria-label="{{o.aria}}" aria-haspopup="dialog" aria-expanded="{{o.open}}" onClick="{{o.ask}}">{{o.t}}</button><sc-if value="{{o.taken}}" hint-placeholder-val="{{false}}"><span class="oft">Eýýäm eýelendi</span></sc-if></span></sc-for>
+</div>
+<sc-if value="{{r.asking}}" hint-placeholder-val="{{false}}">
+<div class="catcher ask" onClick="{{closeAsk}}"></div>
+<div class="cpop" role="dialog" aria-labelledby="ask-t" onKeyDown="{{askKey}}">
+<span class="grab"></span>
+<p id="ask-t" class="cpt">{{r.askText}}</p>
+<div class="mact"><button class="b b-sec b-sm" onClick="{{closeAsk}}">Yza</button><button class="b b-pri b-sm" onClick="{{r.take}}">Ýazyl</button></div>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{r.isDecl}}" hint-placeholder-val="{{true}}"><span class="cap">Bir basyşda ýazylyň — biznes bu wagtlary özi teklip etdi.</span></sc-if>
 </div>
 </div>
 <div class="sep"></div>
@@ -304,13 +363,52 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 <div class="drw-b">
 <div style="display: flex; flex-direction: column; gap: 8px">
-<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><span class="{{d.badgeCls}}"><span class="{{d.dotCls}}"></span>{{d.statusLabel}}</span></div>
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><span class="{{d.badgeCls}}"><sc-if value="{{d.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{d.icC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{d.icD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{d.icX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{d.icN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{d.statusLabel}}</span></div>
 <sc-if value="{{d.hasLine}}" hint-placeholder-val="{{true}}"><div class="dline">{{d.line}}</div></sc-if>
 <sc-if value="{{d.lineUser}}" hint-placeholder-val="{{false}}"><div class="dline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#41505f" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Siz ýatyrdyňyz</div></sc-if>
-<sc-if value="{{d.lineBiz}}" hint-placeholder-val="{{false}}"><div class="dline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#41505f" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>{{d.bizText}}</div></sc-if>
+<sc-if value="{{d.lineBiz}}" hint-placeholder-val="{{false}}"><div class="dline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#41505f" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>{{d.byText}}</div></sc-if>
+<sc-if value="{{d.lineSys}}" hint-placeholder-val="{{false}}"><div class="dline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#41505f" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Wagtynda jogap gelmedi</div></sc-if>
 <sc-if value="{{d.rated}}" hint-placeholder-val="{{false}}"><div class="rated" style="font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>{{d.ratedText}}</div></sc-if>
 <sc-if value="{{d.hasSub}}" hint-placeholder-val="{{true}}"><div class="cap">{{d.sub}}</div></sc-if>
+<sc-if value="{{d.hasTook}}" hint-placeholder-val="{{false}}"><button class="blnk" onClick="{{d.openNew}}">{{d.tookText}}</button></sc-if>
+<sc-if value="{{d.hasPastOffers}}" hint-placeholder-val="{{false}}"><div class="cap bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m14 14-4 4"></path><path d="m10 14 4 4"></path></svg>Teklip edilen wagtlaryň möhleti geçdi</div></sc-if>
 </div>
+
+<sc-if value="{{d.hasTopNote}}" hint-placeholder-val="{{false}}"><div class="dbox"><span class="lbl">Biznesiň belligi</span><span>{{d.topNote}}</span></div></sc-if>
+
+<sc-if value="{{d.hasOffers}}" hint-placeholder-val="{{false}}">
+<div class="dsec" style="gap: 10px">
+<sc-if value="{{d.isDecl}}" hint-placeholder-val="{{true}}"><span class="lbl">Teklip edilen wagtlar</span></sc-if>
+<sc-if value="{{d.isExp}}" hint-placeholder-val="{{false}}"><span class="ofl">{{d.expLead}}</span></sc-if>
+<div class="{{d.offgCls}}">
+<div class="offs" role="group" aria-label="{{d.offAria}}">
+<sc-for list="{{d.offers}}" as="o" hint-placeholder-count="3"><span class="ofw"><button class="{{o.cls}}" disabled="{{o.taken}}" aria-label="{{o.aria}}" aria-haspopup="dialog" aria-expanded="{{o.open}}" onClick="{{o.ask}}">{{o.t}}</button><sc-if value="{{o.taken}}" hint-placeholder-val="{{false}}"><span class="oft">Eýýäm eýelendi</span></sc-if></span></sc-for>
+</div>
+<sc-if value="{{d.asking}}" hint-placeholder-val="{{false}}">
+<div class="catcher ask" onClick="{{closeAsk}}"></div>
+<div class="cpop" role="dialog" aria-labelledby="ask-dt" onKeyDown="{{askKey}}">
+<span class="grab"></span>
+<p id="ask-dt" class="cpt">{{d.askText}}</p>
+<div class="mact"><button class="b b-sec b-sm" onClick="{{closeAsk}}">Yza</button><button class="b b-pri b-sm" onClick="{{d.take}}">Ýazyl</button></div>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{d.isDecl}}" hint-placeholder-val="{{true}}"><span class="cap">Bir basyşda ýazylyň — biznes bu wagtlary özi teklip etdi.</span></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{d.hasMove}}" hint-placeholder-val="{{false}}">
+<section class="mvbox" aria-labelledby="mv-h">
+<div class="mvh"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span id="mv-h">Wagt üýtgetmek haýyşy</span></div>
+<div class="mvt"><span>{{d.mvFrom}}</span><span aria-hidden="true" style="color: #5a5a64">→</span><span style="font-weight: 600">{{d.mvTo}}</span></div>
+<span class="cap">Biznes tassyklaýança öňki wagtyňyz saklanýar.</span>
+<button class="b b-dgh b-sm" onClick="{{withdrawMove}}">Haýyşy yzyna al</button>
+</section>
+</sc-if>
+
+<sc-if value="{{d.moveNo}}" hint-placeholder-val="{{false}}">
+<div class="dnote" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span style="display: flex; flex-direction: column; gap: 2px"><span>Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar.</span><sc-if value="{{d.moveNoHasReason}}" hint-placeholder-val="{{true}}"><span class="cap">{{d.moveNoReason}}</span></sc-if></span></div>
+</sc-if>
 
 <ol class="tl" aria-label="Ýazylyşyň ýagdaýy">
 <sc-for list="{{d.steps}}" as="it" hint-placeholder-count="3">
@@ -374,7 +472,18 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </sc-if>
 <sc-if value="{{d.actConfirmed}}" hint-placeholder-val="{{false}}">
 <button class="b b-dan" onClick="{{openCancel}}">Ýazylyşy ýatyr</button>
-<a class="b b-pri" href="{{d.flow}}">Başga wagta geçir</a>
+<sc-if value="{{d.moveFree}}" hint-placeholder-val="{{true}}"><a class="b b-pri" href="{{d.flow}}">Başga wagta geçir</a></sc-if>
+<sc-if value="{{d.moveBusy}}" hint-placeholder-val="{{false}}"><button class="b b-pri" onClick="{{openMoveAgain}}">Başga wagta geçir</button></sc-if>
+</sc-if>
+<sc-if value="{{d.actFixed}}" hint-placeholder-val="{{false}}">
+<button class="b b-dan" onClick="{{openCancel}}">Ýazylyşy ýatyr</button>
+<a class="b b-sec" href="{{d.flow}}">Gaýtadan ýazyl</a>
+</sc-if>
+<sc-if value="{{d.actOffers}}" hint-placeholder-val="{{false}}">
+<a class="b b-sec" href="Venue.dc.html">Başga wagt saýla</a>
+</sc-if>
+<sc-if value="{{d.actPastOffers}}" hint-placeholder-val="{{false}}">
+<a class="b b-pri" href="Venue.dc.html">Başga wagt saýla</a>
 </sc-if>
 <sc-if value="{{d.actLate}}" hint-placeholder-val="{{false}}">
 <div class="dnote"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Ýatyrmak üçin wagt geçdi — biznese jaň ediň.</span></div>
@@ -398,12 +507,25 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span class="grab"></span>
 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h2 id="cx-t" class="mt">Ýazylyşy ýatyrmalymy?</h2><button class="b b-gho b-ico" style="width: 36px; height: 36px" aria-label="Ýap" onClick="{{closeModal}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
 <p class="mp">{{cx.text}}</p>
+<sc-if value="{{cx.moveLine}}" hint-placeholder-val="{{false}}"><div class="dnote"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span>Wagt üýtgetmek haýyşy hem yzyna alnar.</span></div></sc-if>
 <div style="display: flex; flex-direction: column; gap: 10px">
 <span class="flab" id="cx-r">Sebäbi (hökman däl)</span>
 <div role="group" aria-labelledby="cx-r" style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{reasons}}" as="c" hint-placeholder-count="4"><button class="{{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.t}}</button></sc-for></div>
 <sc-if value="{{cx.showHint}}" hint-placeholder-val="{{false}}"><div class="cap">Wagty üýtgetmek isleseňiz, ýatyrmagyň deregine <a href="{{cx.flow}}" style="font-weight: 600">başga wagta geçiriň</a>.</div></sc-if>
 </div>
 <div class="mact"><button class="b b-sec" onClick="{{closeModal}}">Yza</button><button class="b b-red" onClick="{{confirmCancel}}">Hawa, ýatyr</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showMove}}" hint-placeholder-val="{{false}}">
+<div class="mwrap" onKeyDown="{{modalKey}}">
+<div class="scrim" onClick="{{closeModal}}"></div>
+<div class="mdl mdl-s" role="dialog" aria-modal="true" aria-labelledby="mv-t">
+<span class="grab"></span>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h2 id="mv-t" class="mt">Başga wagta geçir</h2><button class="b b-gho b-ico" style="width: 36px; height: 36px" aria-label="Ýap" onClick="{{closeModal}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<p class="mp">{{mvAgainText}}</p>
+<div class="mact"><button class="b b-sec" onClick="{{closeModal}}">Yza</button><a class="b b-pri" href="{{mvFlow}}">Dowam et</a></div>
 </div>
 </div>
 </sc-if>
@@ -440,38 +562,66 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </sc-if>
 
 <sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
-<div class="toast" role="status">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+<div class="toast" role="{{toastRole}}">
+<sc-if value="{{toastOk}}" hint-placeholder-val="{{true}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></sc-if>
+<sc-if value="{{toastErr}}" hint-placeholder-val="{{false}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f6c7c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg></sc-if>
 <span>{{toastText}}</span>
 <sc-if value="{{toastUndo}}" hint-placeholder-val="{{false}}"><button class="b b-sm tb" onClick="{{undo}}">Yzyna al</button></sc-if>
+<sc-if value="{{toastLink}}" hint-placeholder-val="{{false}}"><a class="b b-sm tb" href="{{toastHref}}">Başga wagt saýla</a></sc-if>
 <sc-if value="{{toastPlain}}" hint-placeholder-val="{{true}}"><span class="tsp"></span></sc-if>
 </div>
 </sc-if>
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["list","drawer","cancel","review"],"default":"drawer","section":"State"},"empty":{"editor":"boolean","default":false,"section":"State"},"late":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1400}}'>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["list","drawer","cancel","review","declined","declinedConfirm","declinedTaken","offersExpired","expired","expiredTaken","moveWaiting","moveDeclined","moveUnanswered","moveAccepted","undoFailed"],"default":"drawer","section":"State"},"undo":{"editor":"enum","options":["works","taken","full","started","expired"],"default":"works","section":"State"},"empty":{"editor":"boolean","default":false,"section":"State"},"late":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1880}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = Object.assign({ over: {}, reviews: {}, notes: {}, toast: null, menuOpen: false }, this.fromView(props || {}));
+    this.state = Object.assign({ reviews: {}, notes: {}, menuOpen: false }, this.fromView(props || {}));
   }
+  undoText(k) {
+    const T = { taken: 'bu wagt eýýäm başga müşderä berildi', full: 'sapakda boş ýer galmady', started: 'ýazylyş wagty başlandy', expired: 'haýyşyň jogap wagty gutardy' };
+    return T[k] || T.taken;
+  }
+  // every canvas state starts from here; Play clicks then change the state
   fromView(p) {
     const v = p.view ?? 'drawer';
-    const base = { tab: 'up', openId: null, modal: null, cancelId: null, reviewId: null, reason: null, stars: 0, hoverStar: 0, tags: {}, text: '', noteEdit: false, noteDraft: '' };
+    const u = p.undo && p.undo !== 'works' ? p.undo : 'taken';
+    const base = { tab: 'up', openId: null, modal: null, cancelId: null, reviewId: null, reason: null, stars: 0, hoverStar: 0, tags: {}, text: '', noteEdit: false, noteDraft: '', over: {}, took: {}, ask: null, move: 'waiting', offersPast: false, toast: null };
+    const pin = (kind, text, href) => ({ kind: kind, text: text, undo: null, href: href || '', sticky: true });
     if (v === 'drawer') return Object.assign(base, { openId: p.late ? 'YR-47990' : 'YR-48213' });
     if (v === 'cancel') return Object.assign(base, { openId: 'YR-48213', modal: 'cancel', cancelId: 'YR-48213' });
     if (v === 'review') return Object.assign(base, { tab: 'past', modal: 'review', reviewId: 'YR-46511' });
+    if (v === 'declined') return Object.assign(base, { openId: 'YR-48230' });
+    if (v === 'declinedConfirm') return Object.assign(base, { ask: { id: 'YR-48230', i: 0, at: 'row' } });
+    if (v === 'declinedTaken') return Object.assign(base, { took: { 'YR-48230': 0 }, toast: pin('ok', 'Ýazyldyňyz: Penşenbe, 15 okt · 18:00') });
+    if (v === 'offersExpired') return Object.assign(base, { tab: 'past', offersPast: true });
+    if (v === 'expired') return Object.assign(base, { openId: 'YR-48241' });
+    if (v === 'expiredTaken') return Object.assign(base, { took: { 'YR-48241': 0 }, toast: pin('ok', 'Täze haýyş ugradyldy') });
+    if (v === 'moveWaiting') return Object.assign(base, { openId: 'YR-48190' });
+    if (v === 'moveDeclined') return Object.assign(base, { openId: 'YR-48190', move: 'declined' });
+    if (v === 'moveUnanswered') return Object.assign(base, { openId: 'YR-48190', move: 'unanswered' });
+    if (v === 'moveAccepted') return Object.assign(base, { move: 'accepted', toast: pin('ok', 'Täze wagt tassyklandy: Şenbe, 17 okt · 11:30') });
+    if (v === 'undoFailed') {
+      const id = u === 'full' ? 'YR-47702' : 'YR-48213';
+      const over = {};
+      over[id] = { status: 'cancelled', by: 'client', at: '14 okt., 11:22', undoErr: u };
+      return Object.assign(base, { over: over, toast: pin('err', 'Yzyna alyp bolmady — ' + this.undoText(u) + '.', u === 'full' ? 'Booking-Class.dc.html' : 'Booking.dc.html') });
+    }
     return base;
   }
   componentDidUpdate(pp) {
     const p = this.props;
-    if (pp.view !== p.view || pp.late !== p.late || pp.empty !== p.empty) this.setState(this.fromView(p));
+    if (pp.view !== p.view || pp.late !== p.late || pp.empty !== p.empty || pp.undo !== p.undo) {
+      clearTimeout(this.tt);
+      this.setState(this.fromView(p));
+    }
   }
   componentWillUnmount() { clearTimeout(this.tt); }
-  flash(patch, text, undoId) {
+  flash(patch, toast) {
     clearTimeout(this.tt);
-    this.setState(Object.assign({}, patch, { toast: { text: text, undo: undoId || null } }));
+    this.setState(Object.assign({}, patch, { toast: toast }));
     this.tt = setTimeout(() => this.setState({ toast: null }), 6000);
   }
   renderVals() {
@@ -479,106 +629,227 @@ class Component extends DCLogic {
     const s = this.state;
     const empty = !!this.props.empty;
     const late = !!this.props.late;
-    
+    const undoMode = this.props.undo ?? 'works';
+    const B = '';
     const NOW = Date.parse('2026-10-14T11:20:00+05:00');
+    const OF = (t, iso, day, time, end, v, taken) => ({ t: t, iso: iso, day: day, time: time, end: end, v: v, taken: !!taken });
+    const ok = (text, undoId) => ({ kind: 'ok', text: text, undo: undoId || null, href: '' });
     const ALL = [
-      { id: 'YR-48213', tab: 'up', business: 'Glow Studio', cat: 'Gözellik salony', dist: '3,0 km', img: '../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg', alt: 'Glow Studio salonynda saç ussasy', what: 'Aýal saç kesimi · Aýna', when: 'Ertir · Penşenbe, 15 oktýabr · 14:30', start: '2026-10-15T14:30:00+05:00', status: 'pending', price: '80 TMT', service: 'Aýal saç kesimi', day: 'Penşenbe, 15 oktýabr', dateLong: 'Penşenbe, 15 oktýabr, 14:30', confLine: 'Tassyklandy · ertir 14:30', typical: 'Adatça 15 minudyň dowamynda tassyklaýar', sent: '14 okt., 11:20', confAt: '', visit: '15 okt., 14:30', windowMin: 120, flow: 'Booking.dc.html', address: 'Bitarap Türkmenistan şaýoly 247, 2-nji gat', phone: '+993 12 45 67 89', rule: 'Ýazylyşy 2 sagat öňünden mugt ýatyryp ýa-da üýtgedip bilersiňiz. 15 minutdan köp gijä galsaňyz, ýazylyş ýatyrylyp bilner.',
+      { id: 'YR-48230', tab: 'up', kind: 'appt', business: 'Glow Studio', cat: 'Gözellik salony', dist: '3,0 km', img: '../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg', alt: 'Glow Studio salonynda saç ussasy', what: 'Saç düzmek · Aýna', when: 'Penşenbe, 15 oktýabr · 17:00', start: '2026-10-15T17:00:00+05:00', status: 'cancelled', by: 'business', reason: 'Bu wagt boş däl', msg: 'Aýna 17:00-da başga müşderide bolar — şu wagtlaryň birini saýlaň.', price: '60 TMT', service: 'Saç düzmek', staff: 'Aýna', day: 'Penşenbe, 15 oktýabr', dateLong: 'Penşenbe, 15 oktýabr, 17:00', sent: '14 okt., 10:31', confAt: '', cancelAt: '14 okt., 10:48', flow: 'Booking.dc.html', address: 'Bitarap Türkmenistan şaýoly 247, 2-nji gat', phone: '+993 12 45 67 89', rule: '',
+        offerType: 'declined', newId: 'YR-48231', newStatus: 'confirmed', ruleNew: 'Ýazylyşy 2 sagat öňünden mugt ýatyryp ýa-da üýtgedip bilersiňiz. 15 minutdan köp gijä galsaňyz, ýazylyş ýatyrylyp bilner.',
+        offers: [OF('Penşenbe, 15 okt · 18:00', '2026-10-15T18:00:00+05:00', 'Penşenbe, 15 oktýabr', '18:00', '18:45', '15 okt., 18:00'), OF('Anna, 16 okt · 11:00', '2026-10-16T11:00:00+05:00', 'Anna, 16 oktýabr', '11:00', '11:45', '16 okt., 11:00', true), OF('Anna, 16 okt · 15:30', '2026-10-16T15:30:00+05:00', 'Anna, 16 oktýabr', '15:30', '16:15', '16 okt., 15:30')],
+        details: [['Hyzmat', 'Saç düzmek'], ['Hünärmen', 'Aýna · Stilist'], ['Sene we wagt', 'Penşenbe, 15 oktýabr · 17:00–17:45'], ['Dowamlylygy', '45 min'], ['Bahasy', '60 TMT'], ['Töleg', 'Ýerinde — nagt ýa-da kart']] },
+      { id: 'YR-48241', tab: 'up', kind: 'appt', business: 'Nail Bar Aýna', cat: 'Dyrnak', dist: '1,6 km', img: '../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg', alt: 'Nail Bar Aýna dyrnak salony', what: 'Manikýur · Maral', when: 'Penşenbe, 15 oktýabr · 10:00', start: '2026-10-15T10:00:00+05:00', status: 'cancelled', by: 'system', reason: '', price: '70 TMT', service: 'Manikýur', staff: 'Maral', day: 'Penşenbe, 15 oktýabr', dateLong: 'Penşenbe, 15 oktýabr, 10:00', sent: '14 okt., 10:42', confAt: '', cancelAt: '14 okt., 11:12', flow: 'Booking.dc.html', address: 'Oguzhan köçesi 21', phone: '+993 12 48 20 15', rule: '',
+        offerType: 'expired', holdMin: 30, newId: 'YR-48242', newStatus: 'pending', ruleNew: 'Ýazylyşy 2 sagat öňünden mugt ýatyryp ýa-da üýtgedip bilersiňiz.',
+        offers: [OF('Penşenbe, 15 okt · 12:00', '2026-10-15T12:00:00+05:00', 'Penşenbe, 15 oktýabr', '12:00', '13:00', '15 okt., 12:00'), OF('Penşenbe, 15 okt · 16:30', '2026-10-15T16:30:00+05:00', 'Penşenbe, 15 oktýabr', '16:30', '17:30', '15 okt., 16:30'), OF('Anna, 16 okt · 10:00', '2026-10-16T10:00:00+05:00', 'Anna, 16 oktýabr', '10:00', '11:00', '16 okt., 10:00')],
+        details: [['Hyzmat', 'Manikýur'], ['Hünärmen', 'Maral · Dyrnak ussasy'], ['Sene we wagt', 'Penşenbe, 15 oktýabr · 10:00–11:00'], ['Dowamlylygy', '60 min'], ['Bahasy', '70 TMT'], ['Töleg', 'Ýerinde']] },
+      { id: 'YR-48213', tab: 'up', kind: 'appt', business: 'Glow Studio', cat: 'Gözellik salony', dist: '3,0 km', img: '../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg', alt: 'Glow Studio salonynda saç ussasy', what: 'Aýal saç kesimi · Aýna', when: 'Ertir · Penşenbe, 15 oktýabr · 14:30', start: '2026-10-15T14:30:00+05:00', status: 'pending', price: '80 TMT', service: 'Aýal saç kesimi', staff: 'Aýna', day: 'Penşenbe, 15 oktýabr', dateLong: 'Penşenbe, 15 oktýabr, 14:30', confLine: 'Tassyklandy · ertir 14:30', typical: 'Adatça 15 minudyň dowamynda tassyklaýar', sent: '14 okt., 11:20', confAt: '', visit: '15 okt., 14:30', windowMin: 120, flow: 'Booking.dc.html', address: 'Bitarap Türkmenistan şaýoly 247, 2-nji gat', phone: '+993 12 45 67 89', rule: 'Ýazylyşy 2 sagat öňünden mugt ýatyryp ýa-da üýtgedip bilersiňiz. 15 minutdan köp gijä galsaňyz, ýazylyş ýatyrylyp bilner.',
         details: [['Hyzmat', 'Aýal saç kesimi'], ['Hünärmen', 'Aýna · Stilist'], ['Sene we wagt', 'Penşenbe, 15 oktýabr · 14:30–15:30'], ['Dowamlylygy', '60 min'], ['Bahasy', '80 TMT'], ['Töleg', 'Ýerinde — nagt ýa-da kart']] },
-      { id: 'YR-47990', tab: 'up', business: 'Bag kafe', cat: 'Kafe', dist: '0,9 km', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', alt: 'Bag kafesiniň terrasy', what: 'Stol · 4 adam · Terrasa', when: 'Şenbe, 17 oktýabr · 19:00', start: '2026-10-17T19:00:00+05:00', status: 'confirmed', price: '', service: 'Stol · 4 adam', day: 'Şenbe, 17 oktýabr', dateLong: 'Şenbe, 17 oktýabr, 19:00', confLine: 'Tassyklandy · Şenbe, 17 oktýabr, 19:00', typical: '', sent: '12 okt., 20:14', confAt: '12 okt., 20:31', visit: '17 okt., 19:00', windowMin: 120, flow: 'Booking-Table.dc.html', address: 'Andalyp köçesi 8', phone: '+993 12 22 33 44', rule: 'Ýazylyşy 2 sagat öňünden mugt ýatyryp bilersiňiz. Stol 15 minut saklanýar.',
+      { id: 'YR-48190', tab: 'up', kind: 'appt', business: 'Ak Diş', cat: 'Diş lukmany', dist: '2,1 km', img: '../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', alt: 'Ak Diş stomatologiýasynyň otagy', what: 'Barlag · Lukman Döwlet', when: 'Anna, 16 oktýabr · 10:00', start: '2026-10-16T10:00:00+05:00', status: 'confirmed', price: '50 TMT', service: 'Barlag', staff: 'Lukman Döwlet', day: 'Anna, 16 oktýabr', dateLong: 'Anna, 16 oktýabr, 10:00', confLine: 'Tassyklandy · Anna, 16 oktýabr, 10:00', typical: '', sent: '12 okt., 15:05', confAt: '12 okt., 15:40', visit: '16 okt., 10:00', windowMin: 120, flow: 'Booking.dc.html', address: 'Görogly köçesi 52', phone: '+993 12 34 56 70', rule: 'Ýazylyşy 2 sagat öňünden mugt ýatyryp ýa-da üýtgedip bilersiňiz.',
+        move: { from: 'Anna, 16 okt · 10:00', to: 'Şenbe, 17 okt · 11:30', short: 'Şenbe, 11:30', asked: '14 okt., 10:40', answered: '14 okt., 11:05', reason: 'Bu wagt boş däl', when: 'Şenbe, 17 oktýabr · 11:30', start: '2026-10-17T11:30:00+05:00', day: 'Şenbe, 17 oktýabr', dateLong: 'Şenbe, 17 oktýabr, 11:30', visit: '17 okt., 11:30', range: 'Şenbe, 17 oktýabr · 11:30–12:00' },
+        details: [['Hyzmat', 'Barlag'], ['Lukman', 'Döwlet'], ['Sene we wagt', 'Anna, 16 oktýabr · 10:00–10:30'], ['Dowamlylygy', '30 min'], ['Bahasy', '50 TMT'], ['Töleg', 'Ýerinde']] },
+      { id: 'YR-47990', tab: 'up', kind: 'table', business: 'Bag kafe', cat: 'Kafe', dist: '0,9 km', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', alt: 'Bag kafesiniň terrasy', what: 'Stol · 4 adam · Terrasa', when: 'Şenbe, 17 oktýabr · 19:00', start: '2026-10-17T19:00:00+05:00', status: 'confirmed', price: '', service: 'Stol · 4 adam', staff: '', day: 'Şenbe, 17 oktýabr', dateLong: 'Şenbe, 17 oktýabr, 19:00', confLine: 'Tassyklandy · Şenbe, 17 oktýabr, 19:00', typical: '', sent: '12 okt., 20:14', confAt: '12 okt., 20:31', visit: '17 okt., 19:00', windowMin: 120, flow: 'Booking-Table.dc.html', address: 'Andalyp köçesi 8', phone: '+993 12 22 33 44', rule: 'Ýazylyşy 2 sagat öňünden mugt ýatyryp bilersiňiz. Stol 15 minut saklanýar.',
         details: [['Bronlama', 'Stol'], ['Adam sany', '4 adam'], ['Ýer', 'Terrasa'], ['Sene we wagt', 'Şenbe, 17 oktýabr · 19:00'], ['Bahasy', 'Ortaça hasap ≈ [AVG BILL] TMT'], ['Töleg', 'Ýerinde']] },
-      { id: 'YR-47702', tab: 'up', business: 'Aýdyň ýoga', cat: 'Ýoga studiýa', dist: '2,6 km', img: '../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg', alt: 'Aýdyň ýoga studiýasynda sapak', what: 'Irden akym · 1 ýer · Aýgözel', when: 'Duşenbe, 19 oktýabr · 08:00', start: '2026-10-19T08:00:00+05:00', status: 'confirmed', price: '45 TMT', service: 'Irden akym', day: 'Duşenbe, 19 oktýabr', dateLong: 'Duşenbe, 19 oktýabr, 08:00', confLine: 'Tassyklandy · Duşenbe, 19 oktýabr, 08:00', typical: '', sent: '13 okt., 09:02', confAt: '13 okt., 09:40', visit: '19 okt., 08:00', windowMin: 720, flow: 'Booking-Class.dc.html', address: 'Atatürk köçesi 40', phone: '+993 12 77 88 99', rule: 'Sapakdan 12 sagat öň mugt ýatyryp bilersiňiz. Düşegiňizi alyp geliň ýa-da ýerinde 10 TMT-e alyň.',
+      { id: 'YR-47702', tab: 'up', kind: 'class', business: 'Aýdyň ýoga', cat: 'Ýoga studiýa', dist: '2,6 km', img: '../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg', alt: 'Aýdyň ýoga studiýasynda sapak', what: 'Irden akym · 1 ýer · Aýgözel', when: 'Duşenbe, 19 oktýabr · 08:00', start: '2026-10-19T08:00:00+05:00', status: 'confirmed', price: '45 TMT', service: 'Irden akym', staff: 'Aýgözel', day: 'Duşenbe, 19 oktýabr', dateLong: 'Duşenbe, 19 oktýabr, 08:00', confLine: 'Tassyklandy · Duşenbe, 19 oktýabr, 08:00', typical: '', sent: '13 okt., 09:02', confAt: '13 okt., 09:40', visit: '19 okt., 08:00', windowMin: 720, flow: 'Booking-Class.dc.html', address: 'Atatürk köçesi 40', phone: '+993 12 77 88 99', rule: 'Sapakdan 12 sagat öň mugt ýatyryp bilersiňiz. Düşegiňizi alyp geliň ýa-da ýerinde 10 TMT-e alyň.',
         details: [['Sapak', 'Irden akym · Orta'], ['Tälimçi', 'Aýgözel'], ['Sene we wagt', 'Duşenbe, 19 oktýabr · 08:00–08:45'], ['Dowamlylygy', '45 min'], ['Ýer sany', '1'], ['Bahasy', '45 TMT'], ['Töleg', 'Ýerinde']] },
-      { id: 'YR-46511', tab: 'past', business: 'Ak Diş', cat: 'Diş lukmany', dist: '2,1 km', img: '../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', alt: 'Ak Diş stomatologiýasynyň otagy', what: 'Barlag · Lukman Döwlet', when: 'Anna, 2 oktýabr · 10:00', status: 'completed', review: 0, price: '50 TMT', service: 'Barlag', day: 'Anna, 2 oktýabr', dateLong: 'Anna, 2 oktýabr, 10:00', sent: '29 sent., 16:45', confAt: '29 sent., 17:10', doneAt: '2 okt., 10:30', flow: 'Booking.dc.html', address: 'Görogly köçesi 52', phone: '+993 12 34 56 70', rule: '',
+      { id: 'YR-46511', tab: 'past', kind: 'appt', business: 'Ak Diş', cat: 'Diş lukmany', dist: '2,1 km', img: '../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', alt: 'Ak Diş stomatologiýasynyň otagy', what: 'Barlag · Lukman Döwlet', when: 'Anna, 2 oktýabr · 10:00', start: '2026-10-02T10:00:00+05:00', status: 'completed', review: 0, price: '50 TMT', service: 'Barlag', day: 'Anna, 2 oktýabr', dateLong: 'Anna, 2 oktýabr, 10:00', sent: '29 sent., 16:45', confAt: '29 sent., 17:10', doneAt: '2 okt., 10:30', flow: 'Booking.dc.html', address: 'Görogly köçesi 52', phone: '+993 12 34 56 70', rule: '',
         details: [['Hyzmat', 'Barlag'], ['Lukman', 'Döwlet'], ['Sene we wagt', 'Anna, 2 oktýabr · 10:00–10:30'], ['Dowamlylygy', '30 min'], ['Bahasy', '50 TMT'], ['Töleg', 'Ýerinde']] },
-      { id: 'YR-45320', tab: 'past', business: 'Nail Bar Aýna', cat: 'Dyrnak', dist: '1,6 km', img: '../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg', alt: 'Nail Bar Aýna dyrnak salony', what: 'Manikýur · Maral', when: 'Ýekşenbe, 20 sentýabr · 12:00', status: 'completed', review: 5, price: '70 TMT', service: 'Manikýur', day: 'Ýekşenbe, 20 sentýabr', dateLong: 'Ýekşenbe, 20 sentýabr, 12:00', sent: '18 sent., 19:20', confAt: '18 sent., 19:32', doneAt: '20 sent., 13:00', flow: 'Booking.dc.html', address: 'Oguzhan köçesi 21', phone: '+993 12 48 20 15', rule: '',
+      { id: 'YR-45320', tab: 'past', kind: 'appt', business: 'Nail Bar Aýna', cat: 'Dyrnak', dist: '1,6 km', img: '../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg', alt: 'Nail Bar Aýna dyrnak salony', what: 'Manikýur · Maral', when: 'Ýekşenbe, 20 sentýabr · 12:00', start: '2026-09-20T12:00:00+05:00', status: 'completed', review: 5, price: '70 TMT', service: 'Manikýur', day: 'Ýekşenbe, 20 sentýabr', dateLong: 'Ýekşenbe, 20 sentýabr, 12:00', sent: '18 sent., 19:20', confAt: '18 sent., 19:32', doneAt: '20 sent., 13:00', flow: 'Booking.dc.html', address: 'Oguzhan köçesi 21', phone: '+993 12 48 20 15', rule: '',
         details: [['Hyzmat', 'Manikýur'], ['Hünärmen', 'Maral · Dyrnak ussasy'], ['Sene we wagt', 'Ýekşenbe, 20 sentýabr · 12:00–13:00'], ['Dowamlylygy', '60 min'], ['Bahasy', '70 TMT'], ['Töleg', 'Ýerinde']] },
-      { id: 'YR-44987', tab: 'past', business: 'Rahat Spa', cat: 'Spa we massaž', dist: '1,9 km', img: '../../assets/photos/engin-akyurt-ZbzYDboN7fg-unsplash.jpg', alt: 'Rahat Spa massaž otagy', what: 'Arka massažy · Leýli', when: 'Şenbe, 12 sentýabr · 16:00', status: 'cancelled', by: 'client', reason: '', price: '90 TMT', service: 'Arka massažy', day: 'Şenbe, 12 sentýabr', dateLong: 'Şenbe, 12 sentýabr, 16:00', sent: '9 sent., 12:10', confAt: '9 sent., 12:25', cancelAt: '11 sent., 21:05', flow: 'Booking.dc.html', address: 'Bitarap Türkmenistan şaýoly 247', phone: '+993 12 45 90 31', rule: '',
+      { id: 'YR-44987', tab: 'past', kind: 'appt', business: 'Rahat Spa', cat: 'Spa we massaž', dist: '1,9 km', img: '../../assets/photos/engin-akyurt-ZbzYDboN7fg-unsplash.jpg', alt: 'Rahat Spa massaž otagy', what: 'Arka massažy · Leýli', when: 'Şenbe, 12 sentýabr · 16:00', start: '2026-09-12T16:00:00+05:00', status: 'cancelled', by: 'client', reason: '', price: '90 TMT', service: 'Arka massažy', day: 'Şenbe, 12 sentýabr', dateLong: 'Şenbe, 12 sentýabr, 16:00', sent: '9 sent., 12:10', confAt: '9 sent., 12:25', cancelAt: '11 sent., 21:05', flow: 'Booking.dc.html', address: 'Bitarap Türkmenistan şaýoly 247', phone: '+993 12 45 90 31', rule: '',
         details: [['Hyzmat', 'Arka massažy'], ['Hünärmen', 'Leýli · Massažist'], ['Sene we wagt', 'Şenbe, 12 sentýabr · 16:00–16:30'], ['Dowamlylygy', '30 min'], ['Bahasy', '90 TMT'], ['Töleg', 'Ýerinde']] },
-      { id: 'YR-44650', tab: 'past', business: 'Ojak', cat: 'Restoran', dist: '2,8 km', img: '../../assets/photos/nick-hillier-xBXF9pr6LQo-unsplash.jpg', alt: 'Ojak restoranynda adamlar', what: 'Stol · 2 adam · Zal', when: 'Şenbe, 5 sentýabr · 19:30', status: 'cancelled', by: 'business', reason: 'Şol gün ýapyk', price: '', service: 'Stol · 2 adam', day: 'Şenbe, 5 sentýabr', dateLong: 'Şenbe, 5 sentýabr, 19:30', sent: '3 sent., 15:00', confAt: '', cancelAt: '4 sent., 10:12', flow: 'Booking-Table.dc.html', address: 'Garaşsyzlyk şaýoly 15', phone: '+993 12 39 07 52', rule: '',
+      { id: 'YR-44650', tab: 'past', kind: 'table', business: 'Ojak', cat: 'Restoran', dist: '2,8 km', img: '../../assets/photos/nick-hillier-xBXF9pr6LQo-unsplash.jpg', alt: 'Ojak restoranynda adamlar', what: 'Stol · 2 adam · Zal', when: 'Şenbe, 5 sentýabr · 19:30', start: '2026-09-05T19:30:00+05:00', status: 'cancelled', by: 'business', reason: 'Şol gün ýapyk', price: '', service: 'Stol · 2 adam', day: 'Şenbe, 5 sentýabr', dateLong: 'Şenbe, 5 sentýabr, 19:30', sent: '3 sent., 15:00', confAt: '', cancelAt: '4 sent., 10:12', flow: 'Booking-Table.dc.html', address: 'Garaşsyzlyk şaýoly 15', phone: '+993 12 39 07 52', rule: '',
         details: [['Bronlama', 'Stol'], ['Adam sany', '2 adam'], ['Ýer', 'Zal'], ['Sene we wagt', 'Şenbe, 5 sentýabr · 19:30'], ['Bahasy', 'Ortaça hasap ≈ [AVG BILL] TMT'], ['Töleg', 'Ýerinde']] },
-      { id: 'YR-43108', tab: 'past', business: 'Pamyk', cat: 'Öý haýwanlary', dist: '3,1 km', img: '../../assets/photos/buddy-an-LpK2xddrElI-unsplash.jpg', alt: 'Pamyk groming salonynda it', what: 'Groming', when: 'Anna, 28 awgust · 11:00', status: 'noshow', price: '80 TMT', service: 'Groming', day: 'Anna, 28 awgust', dateLong: 'Anna, 28 awgust, 11:00', sent: '25 awg., 18:30', confAt: '25 awg., 18:52', noshowAt: '28 awg., 11:40', bizNote: 'Size 11:15-de jaň etdik, jogap bolmady. Täze wagta ýazylyp bilersiňiz.', flow: 'Booking.dc.html', address: 'Parahat 4', phone: '+993 12 27 64 18', rule: '',
+      { id: 'YR-43108', tab: 'past', kind: 'appt', business: 'Pamyk', cat: 'Öý haýwanlary', dist: '3,1 km', img: '../../assets/photos/buddy-an-LpK2xddrElI-unsplash.jpg', alt: 'Pamyk groming salonynda it', what: 'Groming', when: 'Anna, 28 awgust · 11:00', start: '2026-08-28T11:00:00+05:00', status: 'noshow', price: '80 TMT', service: 'Groming', day: 'Anna, 28 awgust', dateLong: 'Anna, 28 awgust, 11:00', sent: '25 awg., 18:30', confAt: '25 awg., 18:52', noshowAt: '28 awg., 11:40', bizNote: 'Size 11:15-de jaň etdik, jogap bolmady. Täze wagta ýazylyp bilersiňiz.', flow: 'Booking.dc.html', address: 'Parahat 4', phone: '+993 12 34 56 78', rule: '',
         details: [['Hyzmat', 'Groming'], ['Sene we wagt', 'Anna, 28 awgust · 11:00–12:30'], ['Dowamlylygy', '1 sag 30 min'], ['Bahasy', '80 TMT'], ['Töleg', 'Ýerinde']] }
     ];
     const BADGE = { pending: ['st-p', 'd-p', 'Garaşylýar'], confirmed: ['st-c', 'd-c', 'Tassyklandy'], completed: ['st-d', 'd-d', 'Tamamlandy'], cancelled: ['st-x', 'd-x', 'Ýatyryldy'], noshow: ['st-n', 'd-n', 'Gelmedi'] };
-    const get = (id) => ALL.find((b) => b.id === id) || null;
-    const cur = (b) => {
+
+    // offers of a declined / expired request: live (Gelýän, chips) · took (one was taken → Geçen) · past (all offered times passed → Geçen)
+    const offerState = (b) => (!b.offers ? null : (s.took[b.id] != null ? 'took' : (s.offersPast ? 'past' : 'live')));
+    const cur = (b0) => {
+      let b = b0;
+      if (b.move && s.move === 'accepted') {
+        const m = b.move;
+        b = Object.assign({}, b, { when: m.when, start: m.start, day: m.day, dateLong: m.dateLong, confLine: 'Tassyklandy · ' + m.dateLong, visit: m.visit, details: b.details.map((x) => [x[0], x[0] === 'Sene we wagt' ? m.range : x[1]]) });
+      }
       const o = s.over[b.id];
-      return o ? Object.assign({}, b, { status: o.status, by: o.by, cancelAt: o.at, reason: '' }) : b;
+      if (o) b = Object.assign({}, b, { status: o.status, by: o.by, cancelAt: o.at, reason: '', undoErr: o.undoErr || null, greyed: true });
+      const os = offerState(b);
+      if (os) b = Object.assign({}, b, { os: os, tab: os === 'live' ? 'up' : 'past' });
+      return b;
     };
-    const ratingOf = (b) => s.reviews[b.id] || b.review || 0;
-    const isLate = (b) => b.status === 'confirmed' && (late || Date.parse(b.start) - NOW < b.windowMin * 60000);
-    const up = empty ? [] : ALL.filter((b) => b.tab === 'up');
-    const past = ALL.filter((b) => b.tab === 'past');
+    // the booking created by taking an offered time: YR-48231 (confirmed at once) or YR-48242 (new request, pending)
+    const mkNew = (src, i) => {
+      const o = src.offers[i];
+      const conf = src.newStatus === 'confirmed';
+      const tmr = o.iso.indexOf('2026-10-15') === 0;
+      return {
+        id: src.newId, tab: 'up', kind: src.kind, business: src.business, cat: src.cat, dist: src.dist, img: src.img, alt: src.alt,
+        what: src.what, when: (tmr ? 'Ertir · ' : '') + o.day + ' · ' + o.time, start: o.iso, status: src.newStatus, price: src.price,
+        service: src.service, staff: src.staff, day: o.day, dateLong: o.day + ', ' + o.time,
+        confLine: 'Tassyklandy · ' + (tmr ? 'ertir ' + o.time : o.day + ', ' + o.time), typical: '',
+        sent: '14 okt., 11:20', confAt: conf ? '14 okt., 11:20' : '', visit: o.v, windowMin: 120,
+        flow: src.flow, address: src.address, phone: src.phone, rule: src.ruleNew,
+        details: src.details.map((x) => [x[0], x[0] === 'Sene we wagt' ? o.day + ' · ' + o.time + '–' + o.end : x[1]])
+      };
+    };
+    const items = ALL.map(cur);
+    ALL.forEach((b) => { if (b.offers && s.took[b.id] != null) items.push(cur(mkNew(b, s.took[b.id]))); });
+    const byStart = (a, b) => Date.parse(a.start) - Date.parse(b.start);
+    const upAll = items.filter((b) => b.tab === 'up');
+    // requests with live offers sit on top of Gelýän; the rest soonest first
+    const up = empty ? [] : upAll.filter((b) => b.os === 'live').concat(upAll.filter((b) => b.os !== 'live').sort(byStart));
+    const past = items.filter((b) => b.tab === 'past').sort((a, b) => byStart(b, a));
     const list = s.tab === 'up' ? up : past;
+    const get = (id) => items.find((b) => b.id === id) || null;
     const openB = s.openId ? get(s.openId) : null;
     const showDrawer = !!openB && !(empty && openB.tab === 'up');
 
-    const tabs = [['up', 'Gelýän', up.length], ['past', 'Geçen', past.length]].map(([id, t, n]) => ({ t, n: String(n), on: s.tab === id, cls: s.tab === id ? 'tab on' : 'tab', pick: () => this.setState({ tab: id }) }));
+    const ratingOf = (b) => s.reviews[b.id] || b.review || 0;
+    const isLate = (b) => b.status === 'confirmed' && (late || Date.parse(b.start) - NOW < b.windowMin * 60000);
+    // canceller: client (user icon) · business (building: "ret etdi" for a request it never confirmed, "ýatyrdy" after confirming) · system (hourglass)
+    const byKind = (b) => (b.status !== 'cancelled' ? '' : b.by === 'client' ? 'user' : b.by === 'system' ? 'sys' : 'biz');
+    const bizWord = (b) => (b.confAt ? 'Biznes ýatyrdy' : 'Biznes ret etdi');
+    const byLabel = (b) => { const k = byKind(b); return k === 'user' ? 'Siz ýatyrdyňyz' : k === 'sys' ? 'Wagtynda jogap gelmedi' : bizWord(b); };
+    // "slot taken" reads "no seats left" for a class
+    const reasonKey = (b) => ((b.undoErr === 'taken' || b.undoErr === 'full') ? (b.kind === 'class' ? 'full' : 'taken') : b.undoErr);
 
-    const rows = list.map((b0) => {
-      const b = cur(b0);
+    const tabs = [['up', 'Gelýän', up.length], ['past', 'Geçen', past.length]].map(([id, t, n]) => ({ t: t, n: String(n), on: s.tab === id, cls: s.tab === id ? 'tab on' : 'tab', pick: () => this.setState({ tab: id, ask: null }) }));
+
+    const undoFor = (id) => {
+      const o = Object.assign({}, s.over);
+      if (!o[id]) return;
+      clearTimeout(this.tt);
+      if (undoMode === 'works') { delete o[id]; this.setState({ over: o, toast: null }); return; }
+      const b = get(id);
+      const k = reasonKey({ kind: b ? b.kind : 'appt', undoErr: undoMode });
+      o[id] = Object.assign({}, o[id], { undoErr: undoMode });
+      this.flash({ over: o }, { kind: 'err', text: 'Yzyna alyp bolmady — ' + this.undoText(k) + '.', undo: null, href: b ? b.flow : 'Venue.dc.html' });
+    };
+
+    const chips = (b, at) => (b.offers || []).map((o, i) => {
+      const open = !!(s.ask && s.ask.id === b.id && s.ask.at === at && s.ask.i === i);
+      return {
+        t: o.t, taken: o.taken, open: open, cls: open ? 'slot on' : 'slot',
+        aria: o.taken ? o.t + ' — eýýäm eýelendi' : o.t + ' — şu wagta ýazyl',
+        ask: () => { if (!o.taken) this.setState({ ask: open ? null : { id: b.id, i: i, at: at } }); }
+      };
+    });
+    const take = (b) => () => {
+      if (!s.ask || s.ask.id !== b.id) return;
+      const o = b.offers[s.ask.i];
+      const patch = { took: Object.assign({}, s.took, { [b.id]: s.ask.i }), ask: null };
+      if (s.openId === b.id) patch.openId = b.newId;
+      this.flash(patch, ok(b.offerType === 'declined' ? 'Ýazyldyňyz: ' + o.t : 'Täze haýyş ugradyldy'));
+    };
+    const offerBits = (b, at) => {
+      const live = b.os === 'live';
+      const a = live && s.ask && s.ask.id === b.id && s.ask.at === at ? b.offers[s.ask.i] : null;
+      return {
+        hasOffers: live,
+        bxCls: live ? 'bx' : 'bx off',
+        isDecl: b.offerType === 'declined',
+        isExp: b.offerType === 'expired',
+        expLead: b.offerType === 'expired' ? b.business + ' ' + b.holdMin + ' minudyň içinde jogap bermedi. Şu boş wagtlaryň birini saýlaň:' : '',
+        offAria: b.offerType === 'declined' ? 'Teklip edilen wagtlar' : 'Boş wagtlar',
+        offers: live ? chips(b, at) : [],
+        asking: !!a,
+        offgCls: a ? 'offg on' : 'offg',
+        askText: a ? a.t + ' · ' + b.service + ' · ' + b.staff + ' — şu wagta ýazylmalymy?' : '',
+        take: take(b),
+        hasTook: b.os === 'took',
+        tookText: b.os === 'took' ? (b.offerType === 'declined' ? 'Teklip edilen wagt kabul edildi → ' : 'Täze haýyş ugradyldy → ') + b.newId : '',
+        openNew: () => this.setState({ tab: 'up', openId: b.newId, ask: null }),
+        hasPastOffers: b.os === 'past'
+      };
+    };
+
+    const rows = list.map((b) => {
       const st = b.status;
       const rv = ratingOf(b);
       const bd = BADGE[st];
       const off = st === 'cancelled' || st === 'noshow';
-      return {
-        business: b.business, img: b.img, alt: b.alt, what: b.what, when: b.when, price: b.price,
-        cls: showDrawer && s.openId === b.id ? 'brow on' : 'brow',
+      const bk = byKind(b);
+      const mv = !!(b.move && s.move === 'waiting' && st === 'confirmed');
+      const greyed = !!b.greyed && b.tab === 'up';
+      return Object.assign({
+        business: b.business, img: b.img, alt: b.alt, what: b.what, when: b.when, price: b.price, flow: b.flow,
+        cls: 'brow' + (showDrawer && s.openId === b.id ? ' on' : '') + (greyed ? ' dim' : ''),
+        whenCls: b.os === 'live' ? 'bwhen gone' : 'bwhen',
         priceCls: off ? 'bprice mute' : 'bprice',
-        badgeCls: 'badge ' + bd[0], dotCls: 'dot ' + bd[1], statusLabel: bd[2],
+        badgeCls: 'badge ' + bd[0], icP: bd[1] === 'd-p', icC: bd[1] === 'd-c', icD: bd[1] === 'd-d', icX: bd[1] === 'd-x', icN: bd[1] === 'd-n', statusLabel: bd[2],
         hasNote: st === 'pending' || st === 'noshow',
         note: st === 'pending' ? 'Biznesiň tassyklamagyna garaşylýar' : 'Gelmediňiz diýlip bellendi',
-        byClient: st === 'cancelled' && b.by === 'client',
-        byBiz: st === 'cancelled' && b.by === 'business',
-        bizText: 'Biznes ýatyrdy' + (b.reason ? ': ' + b.reason : ''),
+        byUser: bk === 'user', byBiz: bk === 'biz', bySys: bk === 'sys', byText: bizWord(b),
+        hasMove: mv, moveText: mv ? 'Täze wagt soraldy: ' + b.move.to + ' · jogap garaşylýar' : '',
+        hasReason: st === 'cancelled' && !!b.reason, reasonText: b.reason ? 'Sebäbi: ' + b.reason : '',
+        hasMsg: b.os === 'live' && !!b.msg, msg: b.msg || '',
+        hasUndoErr: greyed && !!b.undoErr,
+        undoErrText: b.undoErr ? 'Yzyna alyp bolmady — ' + this.undoText(reasonKey(b)) + '.' : '',
+        canUndo: greyed && !b.undoErr,
+        undoLabel: 'Yzyna al: ' + b.business + ', ' + b.when,
+        undo: () => undoFor(b.id),
         isUpcoming: st === 'pending' || st === 'confirmed',
         canReview: st === 'completed' && !rv,
         reviewed: st === 'completed' && !!rv,
         reviewN: String(rv || ''),
-        rebook: off,
+        rebook: off && !b.os && !(greyed && b.undoErr),
         openLabel: b.business + ', ' + b.when + ' — ýazylyşy aç',
         dirLabel: 'Ýol görkez: ' + b.business,
         callLabel: 'Jaň et: ' + b.business,
-        open: () => this.setState({ openId: b.id, noteEdit: false }),
+        open: () => this.setState({ openId: b.id, noteEdit: false, ask: null }),
         review: () => this.setState({ modal: 'review', reviewId: b.id, stars: 0, hoverStar: 0, tags: {}, text: '' })
-      };
+      }, offerBits(b, 'row'));
     });
 
-    let d = { steps: [], details: [], badgeCls: 'badge', dotCls: 'dot' };
+    let d = { steps: [], details: [], offers: [], badgeCls: 'badge', icP: false, icC: false, icD: false, icX: false, icN: false };
     if (openB) {
-      const b = cur(openB);
+      const b = openB;
       const st = b.status;
       const rv = ratingOf(b);
       const lt = isLate(b);
       const bd = BADGE[st];
+      const bk = byKind(b);
+      const mvWait = !!(b.move && s.move === 'waiting' && st === 'confirmed');
+      const mvNo = !!(b.move && (s.move === 'declined' || s.move === 'unanswered') && st === 'confirmed');
+      const mvOk = !!(b.move && s.move === 'accepted' && st === 'confirmed');
       let line = '';
       let sub = '';
-      if (st === 'pending') { line = 'Biznesiň tassyklamagyna garaşylýar'; sub = b.typical + '. Ýatyrmak mugt.'; }
+      if (st === 'pending') { line = 'Biznesiň tassyklamagyna garaşylýar'; sub = (b.typical ? b.typical + '. ' : '') + 'Ýatyrmak mugt.'; }
       if (st === 'confirmed') { line = b.confLine; sub = lt ? 'Ýatyrmak möhleti geçdi. Üýtgeşme gerek bolsa, biznese jaň ediň.' : 'Ýatlatmany 1 gün we 2 sagat öň SMS bilen ibereris.'; }
       if (st === 'noshow') { line = 'Gelmediňiz diýlip bellendi'; }
-      const steps = [{ t: 'Ugradyldy', s: b.sent, k: 'done' }];
+      if (st === 'cancelled' && b.reason) { sub = 'Sebäbi: ' + b.reason; }
+      const steps = [{ t: b.offerType ? 'Haýyş ugradyldy' : 'Ugradyldy', s: b.sent, k: 'done' }];
       if (st === 'pending') { steps.push({ t: 'Tassyklama garaşylýar', s: 'Tassyklananda SMS bilen habar bereris', k: 'now' }); steps.push({ t: 'Bellenen wagt', s: b.visit, k: 'next' }); }
-      if (st === 'confirmed') { steps.push({ t: 'Tassyklandy', s: b.confAt, k: 'done' }); steps.push({ t: 'Bellenen wagt', s: b.visit, k: 'next' }); }
+      if (st === 'confirmed') {
+        steps.push({ t: 'Tassyklandy', s: b.confAt, k: 'done' });
+        if (mvWait) steps.push({ t: 'Täze wagt soraldy', s: b.move.asked + ' · ' + b.move.to, k: 'now' });
+        if (mvOk) steps.push({ t: 'Täze wagt tassyklandy', s: b.move.answered + ' · ' + b.move.to, k: 'done' });
+        steps.push({ t: 'Bellenen wagt', s: b.visit, k: 'next' });
+      }
       if (st === 'completed') { steps.push({ t: 'Tassyklandy', s: b.confAt, k: 'done' }); steps.push({ t: 'Tamamlandy', s: b.doneAt, k: 'ok' }); }
       if (st === 'cancelled') {
         if (b.confAt) steps.push({ t: 'Tassyklandy', s: b.confAt, k: 'done' });
-        steps.push({ t: b.by === 'client' ? 'Siz ýatyrdyňyz' : 'Biznes ýatyrdy', s: b.cancelAt + (b.reason ? ' · ' + b.reason : ''), k: 'x' });
+        steps.push({ t: byLabel(b), s: b.cancelAt + (b.reason ? ' · ' + b.reason : ''), k: 'x' });
+        if (b.os === 'took') steps.push({ t: b.offerType === 'declined' ? 'Teklip edilen wagt kabul edildi' : 'Täze haýyş ugradyldy', s: b.newId + ' · ' + b.offers[s.took[b.id]].t, k: 'done' });
       }
       if (st === 'noshow') { steps.push({ t: 'Tassyklandy', s: b.confAt, k: 'done' }); steps.push({ t: 'Gelmedi', s: b.noshowAt, k: 'nx' }); }
       const det = b.details.concat([['Ýazylyş belgisi', b.id]]);
       const note = s.notes[b.id] || '';
-      d = {
+      d = Object.assign({
         business: b.business, cat: b.cat, dist: b.dist, img: b.img, alt: b.alt, address: b.address, phone: b.phone, flow: b.flow, rule: b.rule, bizNote: b.bizNote || '',
-        badgeCls: 'badge ' + bd[0], dotCls: 'dot ' + bd[1], statusLabel: bd[2],
-        hasLine: !!line, line,
-        lineUser: st === 'cancelled' && b.by === 'client',
-        lineBiz: st === 'cancelled' && b.by === 'business',
-        bizText: 'Biznes ýatyrdy' + (b.reason ? ': ' + b.reason : ''),
+        badgeCls: 'badge ' + bd[0], icP: bd[1] === 'd-p', icC: bd[1] === 'd-c', icD: bd[1] === 'd-d', icX: bd[1] === 'd-x', icN: bd[1] === 'd-n', statusLabel: bd[2],
+        hasLine: !!line, line: line,
+        lineUser: bk === 'user', lineBiz: bk === 'biz', lineSys: bk === 'sys', byText: bizWord(b),
         rated: st === 'completed' && !!rv,
         ratedText: rv + ' · Baha berdiňiz',
-        hasSub: !!sub, sub,
+        hasSub: !!sub, sub: sub,
+        hasTopNote: b.os === 'live' && !!b.msg, topNote: b.msg || '',
+        hasMove: mvWait, mvFrom: b.move ? b.move.from : '', mvTo: b.move ? b.move.to : '',
+        moveNo: mvNo, moveNoHasReason: !!(b.move && b.move.reason) && s.move === 'declined', moveNoReason: b.move ? 'Sebäbi: ' + b.move.reason : '',
         steps: steps.map((x, i) => ({ t: x.t, s: x.s, cls: i === steps.length - 1 ? 'tli last' : 'tli', mcls: 'tm tm-' + x.k, check: x.k === 'done' || x.k === 'ok', cross: x.k === 'x' || x.k === 'nx' })),
-        details: det.map(([k, v], i) => ({ k, v, cls: i === det.length - 1 ? 'dr last' : 'dr' })),
+        details: det.map(([k, v], i) => ({ k: k, v: v, cls: i === det.length - 1 ? 'dr last' : 'dr' })),
         showNote: st === 'pending' || !!note,
         noteView: !(s.noteEdit && st === 'pending'),
         noteEditing: s.noteEdit && st === 'pending',
@@ -588,21 +859,30 @@ class Component extends DCLogic {
         hasRule: (st === 'pending' || st === 'confirmed') && !!b.rule,
         actPending: st === 'pending',
         showNoteBtn: st === 'pending' && !s.noteEdit,
-        actConfirmed: st === 'confirmed' && !lt,
+        // only appointments can be moved; tables and classes: cancel + book again (A4)
+        actConfirmed: st === 'confirmed' && !lt && b.kind === 'appt',
+        moveFree: !mvWait,
+        moveBusy: mvWait,
+        actFixed: st === 'confirmed' && !lt && b.kind !== 'appt',
         actLate: st === 'confirmed' && lt,
         actReview: st === 'completed' && !rv,
-        actRebook: (st === 'completed' && !!rv) || st === 'cancelled' || st === 'noshow'
-      };
+        actOffers: b.os === 'live',
+        actPastOffers: b.os === 'past',
+        actRebook: ((st === 'completed' && !!rv) || st === 'cancelled' || st === 'noshow') && b.os !== 'live' && b.os !== 'past'
+      }, offerBits(b, 'drw'));
     }
 
     const cxB = s.cancelId ? get(s.cancelId) : null;
     const showCancel = s.modal === 'cancel' && !!cxB && !(empty && cxB.tab === 'up');
     const cx = cxB ? {
       text: cxB.business + ' · ' + cxB.service + ' · ' + cxB.dateLong + '. Ýatyrmak mugt, biznese derrew habar bereris.',
-      showHint: s.reason === 'time' && cur(cxB).status === 'confirmed' && !isLate(cur(cxB)),
-      flow: cxB.flow
-    } : { text: '', showHint: false, flow: '#' };
-    const reasons = [['plan', 'Meýilnamam üýtgedi'], ['time', 'Başga wagt gerek'], ['place', 'Başga ýer tapdym'], ['other', 'Başga sebäp']].map(([id, t]) => ({ t, on: s.reason === id, cls: s.reason === id ? 'chip on' : 'chip', pick: () => this.setState({ reason: s.reason === id ? null : id }) }));
+      showHint: s.reason === 'time' && cxB.status === 'confirmed' && cxB.kind === 'appt' && !isLate(cxB),
+      flow: cxB.flow,
+      moveLine: !!(cxB.move && s.move === 'waiting' && cxB.status === 'confirmed')
+    } : { text: '', showHint: false, flow: '#', moveLine: false };
+    const reasons = [['plan', 'Meýilnamam üýtgedi'], ['time', 'Başga wagt gerek'], ['place', 'Başga ýer tapdym'], ['other', 'Başga sebäp']].map(([id, t]) => ({ t: t, on: s.reason === id, cls: s.reason === id ? 'chip on' : 'chip', pick: () => this.setState({ reason: s.reason === id ? null : id }) }));
+
+    const mvB = openB && openB.move ? openB : null;
 
     const rvB = s.reviewId ? get(s.reviewId) : null;
     const showReview = s.modal === 'review' && !!rvB;
@@ -610,67 +890,81 @@ class Component extends DCLogic {
     const shown = s.hoverStar || s.stars;
     const stars = [1, 2, 3, 4, 5].map((n) => ({ label: n + ' ýyldyz', checked: s.stars === n, cls: n <= shown ? 'star on' : 'star', pick: () => this.setState({ stars: n }), enter: () => this.setState({ hoverStar: n }) }));
     const words = ['Ýyldyz saýlaň', 'Erbet', 'Gowy däl', 'Orta', 'Gowy', 'Ajaýyp'];
-    const tags = ['Wagtynda kabul etdiler', 'Arassa', 'Ussat hünärmen', 'Mähirli', 'Bahasyna laýyk'].map((t) => ({ t, on: !!s.tags[t], cls: s.tags[t] ? 'chip on' : 'chip', pick: () => this.setState({ tags: Object.assign({}, s.tags, { [t]: !s.tags[t] }) }) }));
+    const tags = ['Wagtynda kabul etdiler', 'Arassa', 'Ussat hünärmen', 'Mähirli', 'Bahasyna laýyk'].map((t) => ({ t: t, on: !!s.tags[t], cls: s.tags[t] ? 'chip on' : 'chip', pick: () => this.setState({ tags: Object.assign({}, s.tags, { [t]: !s.tags[t] }) }) }));
 
     const closeAll = (e) => { if (e && e.key === 'Escape') this.setState({ modal: null }); };
+    const tst = s.toast;
 
     return {
       fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
       menuOpen: !!s.menuOpen,
       toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
       closeMenu: () => this.setState({ menuOpen: false }),
-      tabs,
-      rows,
+      tabs: tabs,
+      rows: rows,
       panelLabel: s.tab === 'up' ? 'Gelýän ýazylyşlar' : 'Geçen ýazylyşlar',
       showEmpty: s.tab === 'up' && up.length === 0,
       showList: !(s.tab === 'up' && up.length === 0),
-      showDrawer,
+      showDrawer: showDrawer,
       dScrimCls: s.modal ? 'scrim clear' : 'scrim',
-      d,
-      closeDrawer: () => this.setState({ openId: null, noteEdit: false }),
-      drawerKey: (e) => { if (e && e.key === 'Escape' && !s.modal) this.setState({ openId: null, noteEdit: false }); },
+      d: d,
+      closeDrawer: () => this.setState({ openId: null, noteEdit: false, ask: null }),
+      drawerKey: (e) => {
+        if (!e || e.key !== 'Escape' || s.modal) return;
+        if (s.ask) this.setState({ ask: null });
+        else this.setState({ openId: null, noteEdit: false });
+      },
+      closeAsk: () => this.setState({ ask: null }),
+      askKey: (e) => { if (e && e.key === 'Escape') { if (e.stopPropagation) e.stopPropagation(); this.setState({ ask: null }); } },
       editNote: () => this.setState({ noteEdit: true, noteDraft: s.notes[s.openId] || '' }),
       cancelNote: () => this.setState({ noteEdit: false }),
       onNote: (e) => this.setState({ noteDraft: e.target.value.slice(0, 300) }),
       noteDraft: s.noteDraft,
       noteCount: String(s.noteDraft.length),
-      saveNote: () => this.flash({ noteEdit: false, notes: Object.assign({}, s.notes, { [s.openId]: s.noteDraft.trim() }) }, 'Bellik ýatda saklandy'),
+      saveNote: () => this.flash({ noteEdit: false, notes: Object.assign({}, s.notes, { [s.openId]: s.noteDraft.trim() }) }, ok('Bellik ýatda saklandy')),
+      withdrawMove: () => this.flash({ move: 'withdrawn' }, ok('Wagt üýtgetmek haýyşy yzyna alyndy')),
+      openMoveAgain: () => this.setState({ modal: 'move' }),
+      showMove: s.modal === 'move' && !!mvB,
+      mvAgainText: mvB ? 'Öňki haýyşyňyz (' + mvB.move.short + ') täzesi bilen çalşylar.' : '',
+      mvFlow: mvB ? mvB.flow : 'Booking.dc.html',
       openCancel: () => this.setState({ modal: 'cancel', cancelId: s.openId, reason: null }),
       openReviewD: () => this.setState({ modal: 'review', reviewId: s.openId, stars: 0, hoverStar: 0, tags: {}, text: '' }),
       closeModal: () => this.setState({ modal: null }),
       modalKey: closeAll,
-      showCancel,
-      cx,
-      reasons,
+      showCancel: showCancel,
+      cx: cx,
+      reasons: reasons,
       confirmCancel: () => {
         const id = s.cancelId;
-        this.flash({ over: Object.assign({}, s.over, { [id]: { status: 'cancelled', by: 'client', at: '14 okt., 11:22' } }), modal: null, openId: null, reason: null, noteEdit: false }, 'Ýazylyş ýatyryldy', id);
+        const b = get(id);
+        const patch = { over: Object.assign({}, s.over, { [id]: { status: 'cancelled', by: 'client', at: '14 okt., 11:22' } }), modal: null, openId: null, reason: null, noteEdit: false };
+        if (b && b.move && s.move === 'waiting') patch.move = 'withdrawn';
+        this.flash(patch, ok('Ýazylyş ýatyryldy', id));
       },
-      showReview,
-      rv,
-      stars,
+      showReview: showReview,
+      rv: rv,
+      stars: stars,
       starWord: words[shown],
       starLeave: () => this.setState({ hoverStar: 0 }),
-      tags,
+      tags: tags,
       reviewText: s.text,
       textCount: String(s.text.length),
       onText: (e) => this.setState({ text: e.target.value.slice(0, 500) }),
       noStars: !s.stars,
       submitReview: () => {
         if (!s.stars) return;
-        this.flash({ reviews: Object.assign({}, s.reviews, { [s.reviewId]: s.stars }), modal: null }, 'Sag boluň! Teswiriňiz çap edildi.');
+        this.flash({ reviews: Object.assign({}, s.reviews, { [s.reviewId]: s.stars }), modal: null }, ok('Sag boluň! Teswiriňiz çap edildi.'));
       },
-      hasToast: !!s.toast,
-      toastText: s.toast ? s.toast.text : '',
-      toastUndo: !!(s.toast && s.toast.undo),
-      toastPlain: !(s.toast && s.toast.undo),
-      undo: () => {
-        const id = s.toast && s.toast.undo;
-        const o = Object.assign({}, s.over);
-        if (id) delete o[id];
-        clearTimeout(this.tt);
-        this.setState({ over: o, toast: null });
-      }
+      hasToast: !!tst,
+      toastRole: tst && tst.kind === 'err' ? 'alert' : 'status',
+      toastOk: !!tst && tst.kind !== 'err',
+      toastErr: !!tst && tst.kind === 'err',
+      toastText: tst ? tst.text : '',
+      toastUndo: !!(tst && tst.undo),
+      toastLink: !!(tst && tst.href),
+      toastHref: tst && tst.href ? tst.href : '#',
+      toastPlain: !(tst && (tst.undo || tst.href)),
+      undo: () => { if (s.toast && s.toast.undo) undoFor(s.toast.undo); }
     };
   }
 }

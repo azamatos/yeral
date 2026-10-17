@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral Biznes — giriş</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.cap a{text-decoration:underline}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;min-width:88px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .12s,box-shadow .12s,transform .06s;text-decoration:none}
+.b-sm{height:36px;padding:0 14px;border-radius:10px;font-size:14px;line-height:18px;min-width:72px}
+.b-lg{height:52px;padding:0 24px;border-radius:14px;font-size:16px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-pri:active{background:linear-gradient(180deg,#5a3ff0 0%,#4429d6 100%);box-shadow:inset 0 1px 2px rgba(16,16,20,.28);transform:translateY(1px)}
+.b-pri:focus-visible{outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-sec:active{background:#f0f0f3;transform:translateY(1px)}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6;color:#101014}
+.b-dan{background:#ffffff;border-color:#f6c7c2;color:#a3251b}
+.b-dan:hover{background:#fee4e2;color:#a3251b}
+.b-sec:focus-visible,.b-gho:focus-visible,.b-dan:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed;transform:none}
+.nl{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:500;color:#101014;border:0;background:transparent;font-family:inherit;cursor:pointer}
+.nl:hover{background:#f4f4f6;color:#101014}
+.nl:focus-visible,.hl0:focus-visible,.flk:focus-visible{outline:none;border-radius:10px;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.bz{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;background:#efecfe;border:1px solid #d5cbfb;color:#4429d6;font-size:12px;line-height:16px;font-weight:600}
+.lgo{height:30px;width:auto;display:block}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld label,.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.opn{font-weight:400;color:#5a5a64}
+.inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp::placeholder{color:#6e6e78}
+.inp:hover{border-color:#b0b0b8}
+.inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.inp.is-e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
+.inp:disabled{background:#f6f6f8;border-color:#e6e6ea;color:#6e6e78}
+.pfx{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;flex:none}
+.cbx{width:56px;height:56px;padding:0;text-align:center;font-size:24px;font-weight:600;flex:none;font-variant-numeric:tabular-nums}
+.hint{font-size:13px;line-height:18px;color:#5a5a64}
+.err{display:inline-flex;align-items:center;gap:6px;color:#a3251b}
+.err svg{flex:none}
+.lnk{display:inline-flex;align-items:center;gap:6px;min-height:32px;border:0;background:transparent;padding:0;font-family:inherit;font-size:14px;font-weight:600;color:#4429d6;cursor:pointer;white-space:nowrap;text-decoration:none}
+.lnk:hover{color:#3520a6;text-decoration:underline}
+.lnk:disabled{color:#6e6e78;text-decoration:none;cursor:default;font-variant-numeric:tabular-nums}
+.lnk:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4;border-radius:4px}
+.sep{height:1px;background:#e6e6ea}
+.av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.av64{width:64px;height:64px;font-size:24px}
+.info{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:#f6f6f8;border:1px solid #e6e6ea;font-size:14px;line-height:20px;color:#101014}
+.info svg{flex:none;margin-top:1px;color:#5a5a64}
+.okl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-radius:12px;background:#f6f6f8;border:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.okl svg{flex:none}
+/* login page */
+.lh{border-bottom:1px solid #e6e6ea;background:#ffffff}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding:0 40px}
+.lmain{flex:1;display:flex;justify-content:center;align-items:flex-start;padding:64px 16px 56px}
+.col{width:100%;max-width:440px}
+.card{display:flex;flex-direction:column;padding:32px;border:1px solid #e6e6ea;border-radius:16px;background:#ffffff}
+.stp{display:flex;flex-direction:column;gap:24px;margin:0}
+.shd{display:flex;flex-direction:column;gap:8px}
+.h1{margin:0;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-0.02em;text-wrap:balance}
+.h1:focus{outline:none}
+.sub{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
+.otp{display:flex;gap:12px}
+.nw{white-space:nowrap;font-variant-numeric:tabular-nums}
+.upl{position:relative}
+.upl:focus-within{box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.wsr{display:flex;align-items:center;gap:14px;min-width:0}
+.lg56{width:56px;height:56px;border-radius:14px;object-fit:cover;flex:none;border:1px solid #e6e6ea;display:block}
+.lg64{width:64px;height:64px;border-radius:16px;object-fit:cover;flex:none;border:1px solid #e6e6ea;display:block}
+.inv{display:flex;align-items:center;gap:10px;margin:0;font-size:15px;line-height:22px;color:#101014}
+.can{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.can li{display:flex;align-items:center;gap:12px;font-size:15px;line-height:22px;color:#101014}
+.ci{width:36px;height:36px;border-radius:999px;background:#f4f4f6;color:#101014;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.vld{display:flex;align-items:center;gap:8px;margin:0;font-size:14px;line-height:20px;font-weight:500;color:#101014}
+.vld svg{flex:none;color:#5a5a64}
+.ib{width:48px;height:48px;border-radius:999px;background:#f4f4f6;color:#101014;display:flex;align-items:center;justify-content:center;flex:none}
+.acts{display:flex;flex-direction:column;gap:12px}
+.cfm{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:12px;border:1px solid #e6e6ea;background:#f6f6f8}
+.cfm-t{margin:0;font-size:15px;line-height:22px;font-weight:600;color:#101014}
+.cfm-t:focus{outline:none}
+.cfa{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.acc{display:flex;align-items:center;justify-content:space-between;gap:4px 12px;flex-wrap:wrap;padding-top:16px;border-top:1px solid #e6e6ea}
+.bar{position:relative;width:100%;max-width:240px;height:4px;border-radius:999px;background:#f0f0f3;overflow:hidden}
+.bar span{position:absolute;top:0;bottom:0;left:-40%;width:40%;border-radius:999px;background:#5a3ff0;animation:lgbar 1.2s ease-in-out infinite}
+@keyframes lgbar{0%{left:-40%}100%{left:100%}}
+@media (prefers-reduced-motion:reduce){.bar span{animation:none;left:0;width:60%}}
+.lf{display:flex;justify-content:center;padding:24px 16px 40px}
+.flk{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;min-height:32px;padding:0 6px;font-size:14px;line-height:20px;color:#5a5a64}
+.flk:hover{color:#101014}
+.flk b{color:#4429d6;font-weight:600}
+@media (max-width:767px){.wrap{padding:0 16px}.lgo{height:26px}.lmain{padding:24px 16px 40px}.card{padding:0;border:0;border-radius:0}.h1{font-size:24px;line-height:30px}.otp{gap:10px}.cbx{width:52px;height:52px}.lf{padding:24px 16px 32px}}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-direction: column; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
+
+<header class="lh">
+<div class="wrap" style="display: flex; align-items: center; gap: 16px; height: 72px">
+<a class="hl0" href="B-Landing.dc.html" aria-label="Ýeral Biznes baş sahypa" style="display: flex; align-items: center; gap: 10px; flex: none"><img class="lgo" src="../../assets/brand/yeral-lockup-ink.png" alt=""><span class="bz">Biznes</span></a>
+<div style="flex: 1"></div>
+<button class="nl" type="button" aria-label="Dil: Türkmençe"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>TK</button>
+</div>
+</header>
+
+<main class="lmain">
+<div class="col">
+<div class="card">
+
+<sc-if value="{{isPhone}}" hint-placeholder-val="{{true}}">
+<form class="stp" aria-labelledby="lg-t1" onSubmit="{{sendCode}}">
+<div class="shd">
+<h1 id="lg-t1" class="h1">Ýeral Biznes-e giriň</h1>
+<p class="sub">Telefon belgiňizi ýazyň — size 4 sanly SMS kod ibereris. Parol gerek däl.</p>
+</div>
+<div class="fld">
+<label for="lg-phone">Telefon belgiňiz</label>
+<div style="display: flex; gap: 8px">
+<span class="pfx">+993</span>
+<input id="lg-phone" class="{{phoneCls}}" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="65 12 34 56" value="{{phoneFmt}}" aria-invalid="{{phoneErr}}" aria-describedby="lg-phone-h" onChange="{{onPhone}}" ref="{{setPhoneRef}}" style="font-variant-numeric: tabular-nums">
+</div>
+<sc-if value="{{phoneErr}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>{{phoneErrText}}</span></sc-if>
+<span id="lg-phone-h" class="hint">Ýeral-y müşderi hökmünde ulanýan bolsaňyz, şol belgini ýazyň — bir hasap ikisi üçin hem ýeterlik.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<button class="b b-pri b-lg" type="submit" style="width: 100%">Kod al</button>
+<p class="cap" style="margin: 0">«Kod al» düwmesine basyp, <a href="#">Ulanyş şertleri</a> we <a href="#">Gizlinlik syýasaty</a> bilen ylalaşýarsyňyz.</p>
+</div>
+<div class="sep"></div>
+<p class="sub">Biznesiňiz entek ýokmy? <a href="B-Onboarding.dc.html" style="font-weight: 600">Mugt başlaň</a></p>
+</form>
+</sc-if>
+
+<sc-if value="{{isCode}}" hint-placeholder-val="{{false}}">
+<div class="stp">
+<div class="shd">
+<h1 id="lg-t2" class="h1">SMS kody ýazyň</h1>
+<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0 12px">
+<p class="sub">Kod <span class="nw">+993 {{phoneFmt}}</span> belgä iberildi.</p>
+<button class="lnk" type="button" onClick="{{editPhone}}">Belgini üýtget</button>
+</div>
+</div>
+<div class="fld" style="gap: 8px">
+<span class="flab" id="lg-code-l">SMS kod</span>
+<div class="otp" role="group" aria-labelledby="lg-code-l">
+<sc-for list="{{codeBoxes}}" as="c" hint-placeholder-count="4"><input class="{{c.cls}}" type="text" inputmode="numeric" autocomplete="{{c.ac}}" aria-label="{{c.aria}}" aria-invalid="{{c.inv}}" value="{{c.v}}" disabled="{{c.dis}}" onChange="{{c.change}}" onKeyDown="{{c.key}}" ref="{{c.setRef}}"></sc-for>
+</div>
+<sc-if value="{{hasCodeErr}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>{{codeErrText}}</span></sc-if>
+<sc-if value="{{showResent}}" hint-placeholder-val="{{false}}"><span class="hint" role="status">Täze kod iberildi.</span></sc-if>
+<span class="hint">Dördünji sany ýazanyňyzda kod özi barlanýar.</span>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap">
+<button class="lnk" type="button" disabled="{{resendDis}}" onClick="{{resend}}">{{resendText}}</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isName}}" hint-placeholder-val="{{false}}">
+<form class="stp" aria-labelledby="lg-t3" onSubmit="{{submitName}}">
+<div class="shd">
+<h1 id="lg-t3" class="h1">Adyňyz näme?</h1>
+<p class="sub">Belgiňiz tassyklandy. Ýeral hasabyňyz üçin adyňyzy ýazyň — toparyňyz sizi şu at bilen görer.</p>
+</div>
+<div class="okl">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+<span class="nw" style="font-weight: 600">+993 {{phoneFmt}}</span>
+<span class="cap">Belgi tassyklandy</span>
+</div>
+<div style="display: flex; align-items: center; gap: 16px">
+<span class="av av64" aria-hidden="true"><sc-if value="{{hasInitial}}" hint-placeholder-val="{{false}}">{{initial}}</sc-if><sc-if value="{{noInitial}}" hint-placeholder-val="{{true}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if></span>
+<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px">
+<label class="b b-sec b-sm upl"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Surat goş<input class="sr" type="file" accept="image/*"></label>
+<span class="cap">Hökman däl · JPG ýa-da PNG</span>
+</div>
+</div>
+<div class="fld">
+<label for="lg-first">Adyňyz</label>
+<input id="lg-first" class="{{firstCls}}" autocomplete="given-name" placeholder="Mysal üçin: Gülälek" value="{{first}}" aria-invalid="{{nameErr}}" onChange="{{onFirst}}" ref="{{setFirstRef}}">
+<sc-if value="{{nameErr}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Adyňyzy ýazyň.</span></sc-if>
+</div>
+<div class="fld">
+<label for="lg-last">Familiýaňyz <span class="opn">(hökman däl)</span></label>
+<input id="lg-last" class="inp" autocomplete="family-name" value="{{last}}" onChange="{{onLast}}">
+</div>
+<button class="b b-pri b-lg" type="submit" style="width: 100%">Dowam et</button>
+</form>
+</sc-if>
+
+<sc-if value="{{isInvite}}" hint-placeholder-val="{{false}}">
+<div class="stp">
+<div class="wsr">
+<img class="lg56" src="../../assets/brand/yeral-icon.png" alt="Glow Studio logotipi">
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 17px; line-height: 24px; font-weight: 600">Glow Studio</span><span class="cap">Gözellik salony · Bitarap Türkmenistan şaýoly</span></span>
+</div>
+<div class="shd">
+<span class="lbl">Çakylyk</span>
+<h1 class="h1" tabindex="-1" ref="{{setHeadRef}}">Glow Studio sizi topara çagyrýar</h1>
+<p class="inv"><span class="av" aria-hidden="true">M</span><span>Maýsa Annaýewa sizi <b>Hünärmen</b> hökmünde goşdy</span></p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="lbl" id="lg-can">Hünärmen hökmünde</span>
+<ul class="can" aria-labelledby="lg-can">
+<li><span class="ci"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></span><span>Öz senenamaňyzy we ýazylyşlaryňyzy görersiňiz</span></li>
+<li><span class="ci"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg></span><span>Öz haýyşlaryňyza jogap berip bilersiňiz</span></li>
+<li><span class="ci"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span><span>Öz müşderileriňizi we girdejiňizi görersiňiz</span></li>
+</ul>
+<span class="cap">Rugsatlary biznesiň eýesi sazlaýar.</span>
+</div>
+<p class="vld"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Çakylyk 19 oktýabra çenli işleýär</p>
+<sc-if value="{{showInviteActs}}" hint-placeholder-val="{{true}}">
+<div class="acts">
+<a class="b b-pri b-lg" href="B-Calendar.dc.html" style="width: 100%">Kabul et</a>
+<button class="b b-sec b-lg" type="button" onClick="{{askDecline}}" style="width: 100%">Ret et</button>
+</div>
+</sc-if>
+<sc-if value="{{declineAsk}}" hint-placeholder-val="{{false}}">
+<div class="cfm" role="group" aria-labelledby="lg-cfm-t">
+<p id="lg-cfm-t" class="cfm-t" tabindex="-1" ref="{{setConfirmRef}}">Çakylygy ret edýärsiňizmi?</p>
+<p class="cap" style="margin: 0">Maýsa Annaýewa habar alar. Soňra goşulmak isleseňiz, täze çakylyk gerek bolar.</p>
+<div class="cfa">
+<button class="b b-gho" type="button" onClick="{{cancelDecline}}">Yza</button>
+<button class="b b-dan" type="button" onClick="{{doDecline}}">Hawa, ret et</button>
+</div>
+</div>
+</sc-if>
+<div class="acc">
+<span class="cap">Siz: <span class="nw" style="color: #101014; font-weight: 600">{{whoLine}}</span></span>
+<button class="lnk" type="button" onClick="{{otherPhone}}">Başga belgi bilen gir</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isExpired}}" hint-placeholder-val="{{false}}">
+<div class="stp">
+<span class="ib"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m14 14-4 4"></path><path d="m10 14 4 4"></path></svg></span>
+<div class="shd">
+<h1 class="h1" tabindex="-1" ref="{{setHeadRef}}">Çakylygyň möhleti geçdi</h1>
+<p class="sub">Her çakylyk 7 gün işleýär. Glow Studio-nyň 12 oktýabrda iberen çakylygy 19 oktýabrda gutardy.</p>
+</div>
+<div class="info"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Eýesinden täzeden ibermegini haýyş ediň — täze çakylyk şu ýerde peýda bolar.</span></div>
+<div class="acc">
+<span class="cap">Siz: <span class="nw" style="color: #101014; font-weight: 600">{{whoLine}}</span></span>
+<button class="b b-gho" type="button" onClick="{{otherPhone}}" style="margin-right: -12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>Başga belgi bilen gir</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+<div class="stp">
+<sc-if value="{{declined}}" hint-placeholder-val="{{false}}"><div class="okl" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span>Glow Studio-nyň çakylygyny ret etdiňiz.</span></div></sc-if>
+<span class="ib"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"></path><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"></path><path d="M2 7h20"></path><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"></path></svg></span>
+<div class="shd">
+<h1 class="h1" tabindex="-1" ref="{{setHeadRef}}">Entek iş ýeriňiz ýok</h1>
+<p class="sub">Biznesiňizi açyň: senenama, onlaýn ýazylyş we müşderi bazasy — mugt.</p>
+</div>
+<a class="b b-pri b-lg" href="B-Onboarding.dc.html" style="width: 100%">Biznesimi döret</a>
+<div class="info"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Bir biznesde işleýärsiňizmi? Eýesinden telefon belgiňize çakylyk ibermegini haýyş ediň — çakylyk şu ýerde peýda bolar.</span></div>
+<div class="acc">
+<span class="cap">Siz: <span class="nw" style="color: #101014; font-weight: 600">{{whoLine}}</span></span>
+<button class="lnk" type="button" onClick="{{otherPhone}}">Başga belgi bilen gir</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isRouting}}" hint-placeholder-val="{{false}}">
+<div class="stp" style="align-items: center; text-align: center; padding: 16px 0 8px">
+<img class="lg64" src="../../assets/brand/yeral-icon.png" alt="">
+<div class="shd" style="align-items: center">
+<h1 class="h1" tabindex="-1" ref="{{setHeadRef}}">{{rtTitle}}</h1>
+<p class="sub">{{rtSub}}</p>
+</div>
+<div class="bar" role="progressbar" aria-label="{{rtTitle}}"><span></span></div>
+<p class="cap" style="margin: 0; max-width: 340px">{{rtNote}}</p>
+<a class="lnk" href="B-Calendar.dc.html">Garaşman, senenamany aç<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+</div>
+</sc-if>
+
+</div>
+</div>
+</main>
+
+<footer class="lf">
+<a class="flk" href="Home.dc.html">Ýeral-da müşderi hökmünde ýazylmak<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><b>yeral.app</b></a>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["phone","phoneLandline","code","name","invite","inviteExpired","empty","routing"],"default":"phone","section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1160}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = this.init(props && props.step);
+    this.codeEls = [];
+    this.iv = null;
+    this.quiet = false;
+  }
+
+  // Seed for each value of the step tweak (business-demo.json → accounts)
+  init(step) {
+    const STEPS = ['phone', 'phoneLandline', 'code', 'name', 'invite', 'inviteExpired', 'empty', 'routing'];
+    const tw = STEPS.indexOf(step) >= 0 ? step : 'phone';
+    // phoneLandline = phone step after «Kod al» with a landline number (ROUND6-CLIENT C1)
+    const st = tw === 'phoneLandline' ? 'phone' : tw;
+    const PH = { phone: '', phoneLandline: '12345678', code: '65102030', name: '63774512', invite: '64215590', inviteExpired: '64215590', empty: '63774512', routing: '65102030' };
+    return {
+      step: st, phone: PH[tw], phoneErr: tw === 'phoneLandline' ? 'land' : false,
+      code: ['', '', '', ''], codeErr: false, wrong: 0, left: st === 'code' ? 42 : 0, resent: false,
+      first: '', last: '', nameErr: false,
+      declineAsk: false, declined: false
+    };
+  }
+
+  componentDidMount() { this.syncTimer(); }
+
+  componentDidUpdate(pp, ps) {
+    if ((pp && pp.step) !== this.props.step) {
+      this.quiet = true;
+      this.setState(this.init(this.props.step));
+      return;
+    }
+    this.syncTimer();
+    const quiet = this.quiet;
+    this.quiet = false;
+    if (quiet || !ps) return;
+    if (ps.step !== this.state.step) this.focusStep();
+    else if (!ps.declineAsk && this.state.declineAsk) this.focusEl(this.confirmEl);
+    else if (ps.declineAsk && !this.state.declineAsk && this.state.step === 'invite') this.focusEl(this.headEl);
+  }
+
+  componentWillUnmount() {
+    if (this.iv) { clearInterval(this.iv); this.iv = null; }
+  }
+
+  // resend countdown runs only while the code step is visible
+  syncTimer() {
+    const need = this.state.step === 'code' && this.state.left > 0;
+    if (need && !this.iv) {
+      this.iv = setInterval(() => {
+        this.setState((s) => ({ left: Math.max(0, (s.left || 0) - 1) }));
+      }, 1000);
+    }
+    if (!need && this.iv) { clearInterval(this.iv); this.iv = null; }
+  }
+
+  focusEl(el) {
+    if (el && typeof el.focus === 'function') {
+      try {
+        el.focus();
+        if (el.tagName === 'INPUT' && typeof el.select === 'function') el.select();
+      } catch (e) { /* focus is a nicety only */ }
+    }
+  }
+
+  focusStep() {
+    const st = this.state.step;
+    if (st === 'phone') this.focusEl(this.phoneEl);
+    else if (st === 'code') this.focusEl(this.codeEls[0]);
+    else if (st === 'name') this.focusEl(this.firstEl);
+    else this.focusEl(this.headEl);
+  }
+
+  renderVals() {
+    const P = this.props;
+    const f = P.font ?? 'Onest';
+    const s = this.state;
+    const set = (patch) => this.setState(patch);
+    const val = (e) => String((e && e.target && e.target.value) || '');
+    const fmtPhone = (d) => [d.slice(0, 2), d.slice(2, 4), d.slice(4, 6), d.slice(6, 8)].filter(Boolean).join(' ');
+
+    // Who is behind each phone (business-demo.json → accounts, team). Others = new person.
+    const ACC = {
+      '65102030': { name: 'Maýsa Annaýewa', role: 'Eýesi', count: 2 },
+      '65312210': { name: 'Aýna Myradowa', role: 'Hünärmen', count: 2 },
+      '65884102': { name: 'Selbi Hojaýewa', role: 'Administrator', count: 1 },
+      '61440819': { name: 'Maral Sapargeldiýewa', role: 'Hünärmen', count: 1 },
+      '62701533': { name: 'Jeren Ataýewa', role: 'Hünärmen', count: 1 },
+      '64215590': { name: 'Gülnar Öwezowa', invite: true }
+    };
+    const acc = ACC[s.phone] || null;
+
+    // ---------- phone ----------
+    const sendCode = (e) => {
+      if (e && e.preventDefault) e.preventDefault();
+      // short number first, then mobile-only (+993 6x / 7x): SMS codes can't go to landlines
+      if (s.phone.length !== 8) { set({ phoneErr: 'short' }); this.focusEl(this.phoneEl); return; }
+      if (!/^[67]/.test(s.phone)) { set({ phoneErr: 'land' }); this.focusEl(this.phoneEl); return; }
+      set({ step: 'code', phoneErr: false, code: ['', '', '', ''], codeErr: false, wrong: 0, left: 59, resent: false });
+    };
+
+    // ---------- code ----------
+    const locked = s.wrong >= 3;
+    const route = () => {
+      const base = { code: ['', '', '', ''], codeErr: false, wrong: 0, left: 0, resent: false };
+      if (acc && acc.invite) set(Object.assign(base, { step: 'invite', declineAsk: false }));
+      else if (acc) set(Object.assign(base, { step: 'routing' }));
+      else set(Object.assign(base, { step: 'name', first: '', last: '', nameErr: false }));
+    };
+    const checkCode = (code) => {
+      if (code.join('') === '0000') {
+        const w = s.wrong + 1;
+        set({ code: ['', '', '', ''], codeErr: true, wrong: w, resent: false, left: w >= 3 ? 60 : s.left });
+        if (w < 3) this.focusCode(0);
+        return;
+      }
+      route();
+    };
+    const codeBoxes = [0, 1, 2, 3].map((i) => ({
+      v: s.code[i] || '',
+      aria: 'SMS kod, ' + (i + 1) + '-nji san',
+      ac: i === 0 ? 'one-time-code' : 'off',
+      dis: locked,
+      inv: !!s.codeErr,
+      cls: 'inp cbx' + (s.codeErr ? ' is-e' : ''),
+      setRef: (el) => { this.codeEls[i] = el; },
+      change: (e) => {
+        if (locked) return;
+        const dg = val(e).replace(/\D/g, '');
+        const code = s.code.slice();
+        if (dg.length >= 4) {
+          for (let k = 0; k < 4; k++) code[k] = dg.charAt(k);
+          checkCode(code);
+          return;
+        }
+        code[i] = dg.slice(-1);
+        if (code.join('').length === 4) { checkCode(code); return; }
+        set({ code, codeErr: false, resent: false });
+        if (code[i] && i < 3) this.focusCode(i + 1);
+      },
+      key: (e) => {
+        if (e && e.key === 'Backspace' && !s.code[i] && i > 0) {
+          const code = s.code.slice();
+          code[i - 1] = '';
+          set({ code, codeErr: false });
+          this.focusCode(i - 1);
+        }
+      }
+    }));
+    const mm = Math.floor(s.left / 60);
+    const ss = s.left % 60;
+    const resendText = s.left > 0 ? 'Täzeden iber (' + mm + ':' + (ss < 10 ? '0' : '') + ss + ')' : 'Täzeden iber';
+    const left3 = 3 - s.wrong;
+    const codeErrText = locked ? 'Synanyşyklar gutardy. Täze kod alyň.' : 'Kod nädogry. Ýene ' + left3 + ' synanyşyk galdy.';
+
+    // ---------- name ----------
+    const firstT = s.first.trim();
+    const submitName = (e) => {
+      if (e && e.preventDefault) e.preventDefault();
+      if (!firstT) { set({ nameErr: true }); this.focusEl(this.firstEl); return; }
+      set({ step: 'empty', nameErr: false, declined: false });
+    };
+
+    // ---------- signed-in line (invite / expired / empty) ----------
+    const fullName = acc ? acc.name : (firstT ? (firstT + (s.last.trim() ? ' ' + s.last.trim() : '')) : '');
+    const phoneLine = '+993 ' + fmtPhone(s.phone);
+    const whoLine = fullName ? fullName + ' · ' + phoneLine : phoneLine;
+
+    // ---------- routing: open the last used workspace ----------
+    const rAcc = acc && !acc.invite ? acc : ACC['65102030'];
+    const rtSub = rAcc.role + ' · Bitarap Türkmenistan şaýoly';
+    const rtNote = rAcc.count > 1
+      ? 'Siziň ' + rAcc.count + ' iş ýeriňiz bar. Soňky işlän ýeriňizi açýarys; beýlekisini çep menýunyň ýokarsyndan saýlap bilersiňiz.'
+      : 'Soňky işlän ýeriňizi açýarys.';
+
+    const otherPhone = () => set(this.init('phone'));
+
+    return {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      isPhone: s.step === 'phone',
+      isCode: s.step === 'code',
+      isName: s.step === 'name',
+      isInvite: s.step === 'invite',
+      isExpired: s.step === 'inviteExpired',
+      isEmpty: s.step === 'empty',
+      isRouting: s.step === 'routing',
+      // phone
+      phoneFmt: fmtPhone(s.phone),
+      phoneCls: s.phoneErr ? 'inp is-e' : 'inp',
+      phoneErr: !!s.phoneErr,
+      phoneErrText: s.phoneErr === 'land' ? 'Kod diňe mobil belgä iberilýär. +993 6… ýa-da 7… bilen başlaýan belgi ýazyň.' : 'Belgi doly däl: 8 san bolmaly.',
+      onPhone: (e) => set({ phone: val(e).replace(/\D/g, '').replace(/^993/, '').slice(0, 8), phoneErr: false }),
+      setPhoneRef: (el) => { this.phoneEl = el; },
+      sendCode: sendCode,
+      // code
+      editPhone: () => set({ step: 'phone', code: ['', '', '', ''], codeErr: false, wrong: 0, left: 0, resent: false }),
+      codeBoxes: codeBoxes,
+      hasCodeErr: !!s.codeErr || locked,
+      codeErrText: codeErrText,
+      showResent: !!s.resent && !s.codeErr,
+      resendDis: s.left > 0,
+      resendText: resendText,
+      resend: () => {
+        if (s.left > 0) return;
+        set({ code: ['', '', '', ''], codeErr: false, wrong: 0, left: 59, resent: true });
+        this.focusCode(0);
+      },
+      // name
+      first: s.first,
+      last: s.last,
+      firstCls: s.nameErr ? 'inp is-e' : 'inp',
+      nameErr: !!s.nameErr,
+      hasInitial: firstT.length > 0,
+      noInitial: firstT.length === 0,
+      initial: firstT ? firstT.charAt(0).toUpperCase() : '',
+      onFirst: (e) => set({ first: val(e).slice(0, 40), nameErr: false }),
+      onLast: (e) => set({ last: val(e).slice(0, 40) }),
+      setFirstRef: (el) => { this.firstEl = el; },
+      submitName: submitName,
+      // invite
+      showInviteActs: !s.declineAsk,
+      declineAsk: !!s.declineAsk,
+      askDecline: () => set({ declineAsk: true }),
+      cancelDecline: () => set({ declineAsk: false }),
+      doDecline: () => set({ step: 'empty', declineAsk: false, declined: true }),
+      setConfirmRef: (el) => { this.confirmEl = el; },
+      setHeadRef: (el) => { this.headEl = el; },
+      // empty / expired
+      declined: !!s.declined,
+      whoLine: whoLine,
+      otherPhone: otherPhone,
+      // routing
+      rtTitle: 'Glow Studio açylýar…',
+      rtSub: rtSub,
+      rtNote: rtNote
+    };
+  }
+
+  focusCode(i) {
+    this.focusEl(this.codeEls[i]);
+  }
+}
+</script>
+</body>
+</html>

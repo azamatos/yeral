@@ -70,14 +70,13 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 .slot{height:36px;min-width:64px;padding:0 12px;border-radius:10px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:600;color:#101014;cursor:pointer;font-variant-numeric:tabular-nums}
 .slot:hover{border-color:#5a3ff0;color:#4429d6}
 .slot.on{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
-.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;flex:none}
-.dot{width:6px;height:6px;border-radius:999px;flex:none;display:inline-block}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;flex:none}
+.badge svg{flex:none}
 .st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
 .st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
 .st-d{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
 .st-x{background:#eef1f6;border:1px solid #d3dbe6;color:#41505f}
 .st-n{background:#fee4e2;border:1px solid #f6c7c2;color:#a3251b}
-.d-p{background:#dc8b0b}.d-c{background:#5a3ff0}.d-d{background:#12a366}.d-x{background:#7b8ea3}.d-n{background:#d9412f}
 .fld{display:flex;flex-direction:column;gap:6px;min-width:0}
 .flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
 .inp{height:44px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:14px;color:#101014;background:#ffffff;outline:none}
@@ -107,8 +106,6 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 .lnkb:hover{color:#3520a6;text-decoration:underline}
 .catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
 .chip:focus-visible,.slot:focus-visible,.dy:focus-visible,.sw:focus-visible,.lnkb:focus-visible,.ss:focus-visible,.agr:focus-visible,.rr:focus-visible,.stb:focus-visible,.rqc:focus-visible,.tab:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
-.appb{display:none;align-items:flex-start;gap:12px;margin:12px 16px 0;padding:12px 8px 12px 14px;border-radius:12px;background:#f6f6f8}
-.appi{width:36px;height:36px;border-radius:10px;background:#efecfe;color:#4429d6;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .calh{display:flex;flex-direction:column;gap:10px;padding:16px 32px;border-bottom:1px solid #e6e6ea}
 .calbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .navg{display:flex;align-items:center;gap:2px;flex:none}
@@ -140,11 +137,15 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 .qs:not(:disabled):hover::after{content:"+ " attr(data-t)}
 .ss{position:absolute;z-index:4;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:2px;margin:0;padding:4px 7px;border-radius:8px;border:1px solid transparent;font-family:inherit;text-align:left;color:#101014;cursor:pointer;overflow:hidden;min-width:0}
 .ss:hover{filter:brightness(.97)}
-.ss.sel{box-shadow:0 0 0 2px #5a3ff0;z-index:5}
-.ss.hi{box-shadow:0 0 0 2px #5a3ff0,0 8px 24px rgba(16,16,20,.16);z-index:5}
-.k-c{background:#efecfe;border-color:#d5cbfb}
-.k-past{background:#f6f6f8;border-color:#e6e6ea;color:#5a5a64}
-.k-x{background:#eef1f6;border-color:#d3dbe6;color:#41505f}
+.ss.sel{box-shadow:0 0 0 2px #ffffff,0 0 0 4px #101014;z-index:5}
+.ss.hi{box-shadow:0 0 0 2px #ffffff,0 0 0 4px #101014,0 8px 24px rgba(16,16,20,.16);z-index:5}
+.k-c{background:#efecfe;border:1px solid #d5cbfb}
+.k-d{background:#e7f8ee;border:1px solid #bfe6d1}
+.k-n{background:#fee4e2;border:1px solid #f6c7c2}
+.k-p{background:#fef6e7;border:1.5px dashed #dc8b0b}
+.k-x{background:#ffffff;border:1px dashed #7b8ea3;color:#41505f}
+.si{display:inline-flex;flex:none}
+.si-p{color:#93500a}.si-c{color:#4429d6}.si-d{color:#066a41}.si-x{color:#41505f}.si-n{color:#a3251b}
 .sl{display:flex;align-items:center;gap:6px;min-width:0;white-space:nowrap}
 .sn1{font-size:13px;line-height:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .strike{text-decoration:line-through}
@@ -153,17 +154,14 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 .sst{font-size:12px;line-height:16px;font-weight:600;font-variant-numeric:tabular-nums;flex:none}
 .mbar{display:block;flex:1 1 16px;min-width:12px;height:4px;border-radius:999px;background:#ffffff;overflow:hidden}
 .mfill{display:block;height:100%;border-radius:999px;background:#5a3ff0}
-.k-past .mbar{background:#e6e6ea}
-.k-past .mfill{background:#6e6e78}
+.k-d .mfill{background:#12a366}
+.k-x .sn1{color:#41505f}
 .lvt{display:inline-block;height:16px;padding:0 6px;border-radius:999px;background:#ffffff;color:#5a5a64;font-size:11px;line-height:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
-.ppl{display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 6px;border-radius:999px;background:#ffffff;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
+.ppl{display:inline-flex;align-items:center;gap:3px;height:18px;padding:0 6px 0 4px;border-radius:999px;background:#ffffff;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
 .dly{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:999px;background:#ffffff;border:1px solid #d8d8de;color:#101014;font-size:11px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
 .nowl{position:absolute;left:0;right:0;height:2px;background:#5a3ff0;z-index:7;pointer-events:none}
 .nowl::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:999px;background:#5a3ff0}
 .nowt{position:absolute;left:6px;z-index:7;height:20px;padding:0 6px;border-radius:999px;background:#5a3ff0;color:#ffffff;font-size:11px;line-height:20px;font-weight:700;font-variant-numeric:tabular-nums}
-.legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:16px 32px 20px}
-.lg{display:inline-flex;align-items:center;gap:6px;font-size:12px;line-height:16px;color:#5a5a64;white-space:nowrap}
-.lsw{width:14px;height:14px;border-radius:4px;border:1px solid transparent;flex:none;display:inline-block}
 .agenda{display:none;flex-direction:column;padding:0 16px 24px}
 .agd{display:flex;flex-direction:column;padding-top:16px}
 .agh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:8px;border-bottom:1px solid #e6e6ea}
@@ -173,7 +171,7 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 .agr.sel{background:#efecfe}
 .agr .mbar{background:#f0f0f3;max-width:120px}
 .a-past .agn,.a-x .agn{color:#5a5a64}
-.a-past .mfill{background:#6e6e78}
+.a-past .mfill{background:#12a366}
 .agt{display:flex;flex-direction:column;width:52px;flex:none}
 .agtt{font-size:15px;line-height:20px;font-weight:600;font-variant-numeric:tabular-nums}
 .agm{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
@@ -301,26 +299,89 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 .tbx{width:36px;padding:0;color:#ffffff}
 .tbx:hover{color:#ffffff}
 @media (max-width:1279px){.dscrim{display:block}.gwrap{overflow-x:auto}.ggut{position:sticky;left:0;z-index:8}}
-@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side > div{align-self:stretch}.side .swb{justify-content:center;width:44px;padding:4px}.side .swb > span:not(.av),.side .swb > svg{display:none}.side .sn{font-size:0;gap:0;width:44px;height:44px;padding:0;justify-content:center;position:relative}.side .cnt{position:absolute;top:6px;right:6px;width:8px;height:8px;min-width:0;padding:0;border:0;background:#dc8b0b;font-size:0}.side .cnt-n,.side .soon{display:none}.top{padding:0 24px}.gs{width:auto;flex:0 1 300px}.kbd{display:none}.calh{padding:14px 24px}.legend{padding:14px 24px 18px}.toast{left:96px;max-width:calc(100% - 120px)}.sbody{flex-direction:column;align-items:stretch;gap:20px;padding:24px 24px 48px}.snav{position:static;width:auto;flex-direction:row;gap:8px;overflow-x:auto;margin:0 -24px;padding:0 24px 4px}.snav .sn{flex:none;height:44px;padding:0 16px;gap:8px;border:1px solid #d8d8de;border-radius:999px}.snav .sn.on{border-color:#d5cbfb}.snav .sn.off,.snav .sdv{display:none}.tbx{margin:0 -24px;padding:0 24px}}
-@media (max-width:767px){.root{flex-direction:column}.side{position:sticky !important;top:0;z-index:20;height:auto !important;width:100%;flex-direction:row;align-items:center;gap:4px;padding:6px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow-x:auto !important;overflow-y:hidden !important}.side > div,.side > a[href="#"],.side > a[href="B-Help.dc.html"]{display:none}.side .swb,.side .sn{flex:none}.top{height:56px;padding:0 16px;gap:12px}.top h1{font-size:19px !important;line-height:24px !important}.gs{display:none}.appb{display:flex}.calh{padding:12px 16px}.calbar .b-sm,.calbar .b-i36,.calbar .chip,.rqc{height:44px}.calbar .b-i36{width:44px}.vsep{display:none}.gwrap,.legend{display:none}.agenda{display:flex}.drw{top:auto;left:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.grab{display:block}.drw-h{height:56px;padding:0 8px 0 16px}.drw-b{padding:16px}.drw-f{padding:12px 16px 16px}.drw-f .b{flex:1 1 auto}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.b-i36{width:44px;height:44px}.g2{grid-template-columns:minmax(0,1fr)}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.slot{height:44px}.toast{left:16px;right:16px;bottom:16px;max-width:none}.sbody{padding:16px 16px 40px}.snav{margin:0 -16px;padding:0 16px 4px}.tbx{margin:0 -16px;padding:0 16px}.pha{width:100%}.pha .b{flex:1 1 auto}.xr{flex-wrap:wrap}.xnx{order:3;width:100%;padding-left:54px}}
-@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}</style>
+@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side > div{align-self:stretch}.side .swb{justify-content:center;width:44px;padding:4px}.side .swb > span:not(.av),.side .swb > svg{display:none !important}.side .sn{font-size:0;gap:0;width:44px;height:44px;padding:0;justify-content:center;position:relative}.side .cnt{position:absolute;top:6px;right:6px;width:8px;height:8px;min-width:0;padding:0;border:0;background:#dc8b0b;font-size:0}.side .cnt-n,.side .soon{display:none}.top{padding:0 24px}.gs{width:auto;flex:0 1 300px}.kbd{display:none}.calh{padding:14px 24px}.toast{left:96px;max-width:calc(100% - 120px)}.sbody{flex-direction:column;align-items:stretch;gap:20px;padding:24px 24px 48px}.snav{position:static;width:auto;flex-direction:row;gap:8px;overflow-x:auto;margin:0 -24px;padding:0 24px 4px}.snav .sn{flex:none;height:44px;padding:0 16px;gap:8px;border:1px solid #d8d8de;border-radius:999px}.snav .sn.on{border-color:#d5cbfb}.snav .sn.off,.snav .sdv{display:none}.tbx{margin:0 -24px;padding:0 24px}}
+@media (max-width:767px){.root{flex-direction:column}.side{position:sticky !important;top:0 !important;z-index:20;height:auto !important;width:100%;flex-direction:row;align-items:center;gap:4px;padding:6px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow:visible !important}.top{height:56px;padding:0 16px;gap:12px}.top h1{font-size:19px !important;line-height:24px !important}.gs{display:none}.calh{padding:12px 16px}.calbar .b-sm,.calbar .b-i36,.calbar .chip,.rqc{height:44px}.calbar .b-i36{width:44px}.vsep{display:none}.gwrap{display:none}.agenda{display:flex}.drw{top:auto;left:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.grab{display:block}.drw-h{height:56px;padding:0 8px 0 16px}.drw-b{padding:16px}.drw-f{padding:12px 16px 16px}.drw-f .b{flex:1 1 auto}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.b-i36{width:44px;height:44px}.g2{grid-template-columns:minmax(0,1fr)}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.slot{height:44px}.toast{left:16px;right:16px;bottom:80px;max-width:none}.sbody{padding:16px 16px 40px}.snav{margin:0 -16px;padding:0 16px 4px}.tbx{margin:0 -16px;padding:0 16px}.pha{width:100%}.pha .b{flex:1 1 auto}.xr{flex-wrap:wrap}.xnx{order:3;width:100%;padding-left:54px}}
+@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}
+.me{position:relative}
+.b-ic{width:36px;height:36px;padding:0;border-radius:10px;justify-content:center;flex:none}
+.me .b-ic:hover{background:#f6f6f8}
+.me .b-ic:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.popa{position:absolute;z-index:31;display:flex;flex-direction:column}
+.wsp{top:60px;left:12px;width:300px}
+.ump{bottom:60px;left:12px;width:264px}
+.wsr{min-height:52px}
+.mi svg{flex:none}
+.mi.dan{color:#a3251b}
+.mi.dan:hover{background:#fee4e2;color:#a3251b}
+.pdv{height:1px;background:#e6e6ea;margin:6px 4px;flex:none}
+.tabb{display:none;position:fixed;left:0;right:0;bottom:0;z-index:35;height:64px;padding:0 4px;background:#ffffff;border-top:1px solid #e6e6ea;grid-template-columns:repeat(4,minmax(0,1fr))}
+.tbi{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;height:63px;margin:0;padding:0;border:0;border-radius:12px;background:transparent;font-family:inherit;font-size:11px;line-height:14px;font-weight:600;color:#5a5a64;cursor:pointer;text-decoration:none}
+.tbi:hover{color:#101014}
+.tbi.on,.tbi.on:hover{color:#4429d6}
+.tbi:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #7a5ff4}
+.tbc{position:absolute;top:5px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:16px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.kscrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:36;background:rgba(16,16,20,.4)}
+.ksh{position:fixed;left:0;right:0;bottom:64px;z-index:37;max-height:calc(100% - 96px);overflow-y:auto;display:flex;flex-direction:column;padding:4px 8px 12px;background:#ffffff;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}
+.ksh .mi{min-height:48px;font-size:15px}
+.kgrab{display:block;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:4px auto 6px;flex:none}
+@media (min-width:768px){.kscrim,.ksh{display:none}}
+@media (max-width:1023px){.me{flex-direction:column;gap:6px;padding:4px 0 !important}.me > span:not(.av){display:none !important}.ump{bottom:92px}}
+@media (max-width:767px){.side .sn,.side .sdv,.side .sfill,.side .me,.ump{display:none !important}.side .swb{width:auto;max-width:100%;padding:6px 8px}.side .swb > span:not(.av),.side .swb > svg{display:flex !important}.side .swb > svg{display:block !important}.tabb{display:grid}.main{padding-bottom:64px}.wsp{width:min(300px,calc(100vw - 24px))}}
+.lgw{position:relative;flex:none}
+.lgp{position:absolute;top:44px;right:0;z-index:45;width:320px;max-width:calc(100vw - 32px);max-height:calc(100vh - 150px);overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:14px 16px 16px;text-align:left}
+.lgt{margin:0;font-size:15px;line-height:20px;font-weight:600;color:#101014}
+.lgs{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 12px;align-items:center}
+.lgs .badge{justify-self:start}
+.lgm{font-size:12px;line-height:16px;color:#5a5a64}
+.lgr{display:flex;flex-wrap:wrap;gap:6px 16px}
+.lgi{display:inline-flex;align-items:center;gap:8px;min-width:0;font-size:12px;line-height:16px;color:#101014}
+.lgi > svg{flex:none;color:#5a5a64}
+.lgg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+.lgsep{height:1px;background:#e6e6ea;flex:none}
+.lgb{display:inline-flex;align-items:center;justify-content:center;width:30px;height:20px;border-radius:6px;flex:none}
+.lgc{width:16px;height:16px;border-radius:999px;border:1.5px solid #d8d8de;background:#ffffff;flex:none;display:inline-block}
+.lgq{width:24px;height:16px;border-radius:4px;flex:none;display:inline-block}
+@media (max-width:767px){.lgp{position:fixed;top:auto;left:0;right:0;bottom:0;width:auto;max-width:none;max-height:85%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:16px 16px 20px}.lgp .b-sm{height:44px}.lgw .catcher{z-index:61;background:rgba(16,16,20,.4)}.lgp{z-index:62}}
+@media (max-width:767px){.side .swb > span:not(.av){display:flex !important}.side .swb > svg{display:block !important}}</style>
 </helmet>
 <div class="root" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
 
-<aside class="side" aria-label="Esasy menýu" style="position: sticky; top: 0; height: 100vh; overflow-y: auto">
-<button class="swb" aria-label="Biznesi çalyş"><img src="../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Aýdyň ýoga</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Atatürk köçesi 40</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
-<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<aside class="side" aria-label="Esasy menýu" style="position: sticky; top: 0; height: 100vh; z-index: 20">
+<button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="Iş ýeri: Aýdyň ýoga, Eýesi. Çalyşmak" onClick="{{toggleWs}}"><img src="../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Aýdyň ýoga</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div class="sdv"></div>
 <a class="{{navCls.cls}}" href="B-Classes.dc.html" aria-current="{{navCls.cur}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>Sapaklar</a>
 <a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><span class="cnt" aria-label="{{pendAria}}">{{pendCount}}</span></sc-if></a>
 <a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
 <a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
 <a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
 <a class="{{navSet.cls}}" href="B-Settings.dc.html" aria-current="{{navSet.cur}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
-<div style="flex: 1"></div>
+<div class="sfill" style="flex: 1"></div>
 <a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
 <a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
-<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
-<button class="swb" aria-label="Hasabym"><span class="av">A</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">Aýgözel Hojamuradowa</span><span class="cap" style="font-size: 12px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div class="sdv"></div>
+<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<span class="av">A</span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Aýgözel Hojamuradowa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 64 72 30 15</span></span>
+<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" aria-expanded="{{umOpen}}" onClick="{{toggleUm}}" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+</div>
+<sc-if value="{{shellPop}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeShell}}"></div></sc-if>
+<sc-if value="{{wsOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa wsp" role="menu" aria-label="Iş ýerleriňiz">
+<div class="lbl" style="padding: 8px 10px 6px">IŞ ÝERLERIŇIZ</div>
+<a class="mi wsr" href="B-Classes.dc.html" role="menuitemradio" aria-checked="true"><img src="../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Aýdyň ýoga</span><span class="cap" style="font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Eýesi · Atatürk köçesi 40</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></a>
+<div class="pdv" role="separator"></div>
+<a class="mi" role="menuitem" href="B-Onboarding.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täze biznes döret</a>
+</div>
+</sc-if>
+<sc-if value="{{umOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa ump" role="menu" aria-label="Hasap menýusy">
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profilim</a>
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg>Dil: Türkmençe</a>
+<a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Müşderi hökmünde aç<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<div class="pdv" role="separator"></div>
+<a class="mi dan" role="menuitem" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Çykmak</a>
+</div>
+</sc-if>
 </aside>
 
 <div class="main">
@@ -333,14 +394,6 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 </div>
 
 <sc-if value="{{isWeek}}" hint-placeholder-val="{{true}}">
-<sc-if value="{{banner}}" hint-placeholder-val="{{true}}">
-<div class="appb" role="region" aria-label="Ýeral Biznes programmasy">
-<span class="appi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg></span>
-<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600">Telefonda Ýeral Biznes programmasy has amatly</span><span class="cap">Gatnaşyjylary sapakda telefonyňyzdan belläň — haýyşlar derrew geler.</span><div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 8px"><a class="b b-sec b-sm" href="#">App Store</a><a class="b b-sec b-sm" href="#">Google Play</a></div></div>
-<button class="b b-gho b-i36" aria-label="Ýap" onClick="{{hideBanner}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
-</div>
-</sc-if>
-
 <div class="calh">
 <div class="calbar">
 <button class="b b-sec b-sm" onClick="{{goThis}}">Şu hepde</button>
@@ -354,7 +407,26 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 <span class="vsep" aria-hidden="true"></span>
 <div class="fgrp" role="group" aria-label="Zal"><sc-for list="{{roomChips}}" as="rc" hint-placeholder-count="2"><button class="{{rc.cls}}" aria-pressed="{{rc.on}}" onClick="{{rc.pick}}">{{rc.t}}</button></sc-for></div>
 <div style="flex: 1"></div>
-<sc-if value="{{hasWkPend}}" hint-placeholder-val="{{true}}"><button class="rqc" aria-label="{{wkPendAria}}" onClick="{{openPend}}"><span class="dot d-p"></span>{{wkPendChip}}</button></sc-if>
+<sc-if value="{{hasWkPend}}" hint-placeholder-val="{{true}}"><button class="rqc" aria-label="{{wkPendAria}}" onClick="{{openPend}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{wkPendChip}}</button></sc-if>
+<div class="lgw">
+<button class="b b-gho b-i36" aria-label="Reňkler we nyşanlar" title="Reňkler we nyşanlar" aria-haspopup="dialog" aria-expanded="{{lgOpen}}" onClick="{{toggleLg}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></button>
+<sc-if value="{{lgOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeLg}}"></div>
+<div class="pop lgp" role="dialog" aria-labelledby="lg-t" onKeyDown="{{lgKey}}">
+<h2 id="lg-t" class="lgt">Reňkler we nyşanlar</h2>
+<span class="lbl">Ýagdaýlar</span>
+<div class="lgs"><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span><span class="lgm">Täze haýyş — jogap garaşýar</span><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span><span class="lgm">Wagt bellenildi, müşderä habar berildi</span><span class="badge st-d"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg>Tamamlandy</span><span class="lgm">Gelşi geçdi (wagty gutarandan soň özi)</span><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span><span class="lgm">Müşderi, biznes ýa-da ulgam ýatyrdy</span><span class="badge st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>Gelmedi</span><span class="lgm">Müşderi gelmedi — «Arz et» arkaly bellenýär</span></div>
+<div class="lgsep"></div>
+<span class="lbl">Çeşme</span>
+<div class="lgr"><span class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Onlaýn</span><span class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Telefon</span><span class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Gelip ýazyldy</span></div>
+<div class="lgsep"></div>
+<span class="lbl">Sapaklar</span>
+<div class="lgg"><span class="lgi"><span class="lgb k-c"><span class="si si-c"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span></span>Meýilleşdirilen</span><span class="lgi"><span class="lgb k-d"><span class="si si-d"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></span></span>Geçen sapak</span><span class="lgi"><span class="lgb k-x"><span class="si si-x"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></span></span>Ýatyrylan sapak</span><span class="lgi"><span class="dly">Doly</span>Ähli ýer ýazyldy</span><span class="lgi"><span class="ppl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>1 haýyş</span>Jogap garaşýar</span><span class="lgi"><span class="mbar" style="width: 28px; flex: none; background: #efecfe"><span class="mfill" style="width: 70%"></span></span>Dolulygy</span></div>
+<span class="cap" style="font-size: 12px; line-height: 16px">Sapaga basyň — gatnaşyjylar we hereketler. Boş öýjüge basyň — täze sapak.</span>
+<button class="b b-sec b-sm" style="align-self: stretch" onClick="{{closeLg}}">Düşnükli</button>
+</div>
+</sc-if>
+</div>
 </div>
 <div class="calsum">
 <sc-if value="{{hasSum}}" hint-placeholder-val="{{true}}"><span><b>{{sumN}}</b> sapak</span><span class="sdot">·</span><span><b>{{sumSeats}}</b> ýer</span><span class="sdot">·</span><span><b>{{sumPct}}</b> doly</span></sc-if>
@@ -381,13 +453,13 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 <div class="slots"><sc-for list="{{c.slots}}" as="q" hint-placeholder-count="29"><button class="qs" tabindex="-1" data-t="{{q.t}}" disabled="{{q.dis}}" aria-label="{{q.aria}}" onClick="{{q.pick}}"></button></sc-for></div>
 <sc-for list="{{c.blocks}}" as="k" hint-placeholder-count="2">
 <button class="{{k.cls}}" style="top: {{k.top}}px; height: {{k.h}}px; left: calc({{k.l}}% + 4px); width: calc({{k.w}}% - 8px)" aria-label="{{k.aria}}" title="{{k.aria}}" onClick="{{k.open}}">
-<span class="sl"><span class="{{k.nameCls}}">{{k.name}}</span></span>
+<span class="sl"><span class="{{k.siCls}}"><sc-if value="{{k.icP}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{k.icC}}" hint-placeholder-val="{{true}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{k.icD}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{k.icX}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{k.icN}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if></span><span class="{{k.nameCls}}">{{k.name}}</span></span>
 <sc-if value="{{k.c3}}" hint-placeholder-val="{{true}}"><span class="st2">{{k.line2}}</span></sc-if>
 <span class="sl">
 <sc-if value="{{k.cmp}}" hint-placeholder-val="{{false}}"><span class="st2" style="flex: none">{{k.start}}</span></sc-if>
 <sc-if value="{{k.isX}}" hint-placeholder-val="{{false}}"><span class="st2">Ýatyryldy</span></sc-if>
 <sc-if value="{{k.live}}" hint-placeholder-val="{{true}}"><span class="sst">{{k.seats}}</span><sc-if value="{{k.bar}}" hint-placeholder-val="{{true}}"><span class="mbar" aria-hidden="true"><span class="mfill" style="width: {{k.pct}}%"></span></span></sc-if></sc-if>
-<sc-if value="{{k.pend}}" hint-placeholder-val="{{false}}"><span class="ppl"><span class="dot d-p"></span>{{k.pendL}}</span></sc-if>
+<sc-if value="{{k.pend}}" hint-placeholder-val="{{false}}"><span class="ppl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{k.pendL}}</span></sc-if>
 <sc-if value="{{k.full}}" hint-placeholder-val="{{false}}"><span class="dly">Doly</span></sc-if>
 <sc-if value="{{k.lvlIn}}" hint-placeholder-val="{{true}}"><span class="lvt">{{k.level}}</span></sc-if>
 </span>
@@ -408,11 +480,11 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 <sc-for list="{{ag.items}}" as="k" hint-placeholder-count="2">
 <button class="{{k.acls}}" aria-label="{{k.aria}}" onClick="{{k.open}}">
 <span class="agt"><span class="agtt">{{k.start}}</span><span class="cap">{{k.durL}}</span></span>
-<span class="agm"><span class="{{k.anCls}}">{{k.name}}</span><span class="cap">{{k.meta}}</span>
+<span class="agm"><span class="sl"><span class="{{k.siCls}}"><sc-if value="{{k.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{k.icC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{k.icD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{k.icX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{k.icN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if></span><span class="{{k.anCls}}">{{k.name}}</span></span><span class="cap">{{k.meta}}</span>
 <span class="sl">
 <sc-if value="{{k.isX}}" hint-placeholder-val="{{false}}"><span class="st2">Ýatyryldy</span></sc-if>
 <sc-if value="{{k.live}}" hint-placeholder-val="{{true}}"><span class="sst">{{k.seats}}</span><span class="mbar" aria-hidden="true"><span class="mfill" style="width: {{k.pct}}%"></span></span></sc-if>
-<sc-if value="{{k.pend}}" hint-placeholder-val="{{false}}"><span class="ppl"><span class="dot d-p"></span>{{k.pendL}}</span></sc-if>
+<sc-if value="{{k.pend}}" hint-placeholder-val="{{false}}"><span class="ppl"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{k.pendL}}</span></sc-if>
 <sc-if value="{{k.full}}" hint-placeholder-val="{{false}}"><span class="dly">Doly</span></sc-if>
 </span>
 </span>
@@ -423,14 +495,6 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 </sc-for>
 </div>
 
-<div class="legend" aria-label="Belgiler">
-<span class="lg"><span class="lsw k-c"></span>Boş ýer bar</span>
-<span class="lg"><span class="dly">Doly</span>Ähli ýer ýazyldy</span>
-<span class="lg"><span class="ppl"><span class="dot d-p"></span>1 haýyş</span>Jogap garaşýan haýyş</span>
-<span class="lg"><span class="mbar" style="width: 28px; flex: none; background: #efecfe"><span class="mfill" style="width: 70%"></span></span>Dolulygy</span>
-<span class="lg"><span class="lsw k-past"></span>Geçen sapak</span>
-<span class="lg"><span class="lsw k-x"></span>Ýatyrylan sapak</span>
-</div>
 </sc-if>
 
 <sc-if value="{{isCat}}" hint-placeholder-val="{{false}}">
@@ -441,12 +505,10 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 <a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Iş wagty</a>
 <a class="sn on" href="B-Classes.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>Sapaklar</a>
 <a class="sn" href="B-Team.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>Topar</a>
-<a class="sn" href="B-Team.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Roller</a>
+<a class="sn" href="B-Team.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Rugsatlar</a>
 <a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"></rect><rect width="5" height="5" x="16" y="3" rx="1"></rect><rect width="5" height="5" x="3" y="16" rx="1"></rect><path d="M21 16h-3a2 2 0 0 0-2 2v3"></path><path d="M21 21v.01"></path><path d="M12 7v3a2 2 0 0 1-2 2H7"></path><path d="M3 12h.01"></path><path d="M12 3h.01"></path><path d="M12 16v.01"></path><path d="M16 12h1"></path><path d="M21 12v.01"></path><path d="M12 21v-1"></path></svg>Salgy we QR</a>
-<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg>Şahamçalar</a>
 <div class="sdv"></div>
 <a class="sn" href="B-Notifications.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>Habarnamalar</a>
-<a class="sn" href="B-Billing.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"></rect><path d="M2 10h20"></path></svg>Töleg we tarif</a>
 </nav>
 
 <section class="pane" aria-labelledby="pane-t">
@@ -562,8 +624,8 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 <div class="{{a.cls}}">
 <div class="ar">
 <span class="av">{{a.ini}}</span>
-<span class="arm"><span class="arn"><span>{{a.name}}</span><span class="sic" role="img" aria-label="{{a.srcL}}" title="{{a.srcL}}"><sc-if value="{{a.srcOn}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg></sc-if><sc-if value="{{a.srcPh}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></sc-if><sc-if value="{{a.srcWk}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if></span></span><span class="cap">{{a.sub}}</span></span>
-<span class="{{a.badgeCls}}"><span class="{{a.dotCls}}"></span>{{a.stL}}</span>
+<span class="arm"><span class="arn"><span>{{a.name}}</span><span class="sic" role="img" aria-label="{{a.srcL}}" title="{{a.srcL}}"><sc-if value="{{a.srcOn}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg></sc-if><sc-if value="{{a.srcPh}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></sc-if><sc-if value="{{a.srcWk}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if></span></span><span class="cap">{{a.sub}}</span></span>
+<span class="{{a.badgeCls}}"><sc-if value="{{a.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{a.icC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{a.icD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{a.icX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{a.icN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{a.stL}}</span>
 <sc-if value="{{a.isPend}}" hint-placeholder-val="{{false}}"><span class="aok"><button class="b b-tin b-i36" aria-label="{{a.okAria}}" title="Tassykla" onClick="{{a.ok}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></button><button class="b b-sec b-i36" aria-label="{{a.noAria}}" title="Ret et" onClick="{{a.no}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></span></sc-if>
 <sc-if value="{{a.hasMenu}}" hint-placeholder-val="{{true}}">
 <div class="rmw">
@@ -597,7 +659,7 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 <span class="lbl" style="padding-top: 8px">{{sv.xLabel}}</span>
 <div class="alist">
 <sc-for list="{{sv.xrows}}" as="a" hint-placeholder-count="1">
-<div class="{{a.cls}}"><div class="ar"><span class="av" style="background: #f0f0f3; color: #5a5a64">{{a.ini}}</span><span class="arm"><span class="arn"><span>{{a.name}}</span></span><span class="cap">{{a.sub}}</span></span><span class="{{a.badgeCls}}"><span class="{{a.dotCls}}"></span>{{a.stL}}</span></div></div>
+<div class="{{a.cls}}"><div class="ar"><span class="av" style="background: #f0f0f3; color: #5a5a64">{{a.ini}}</span><span class="arm"><span class="arn"><span>{{a.name}}</span></span><span class="cap">{{a.sub}}</span></span><span class="{{a.badgeCls}}"><sc-if value="{{a.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{a.icC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{a.icD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{a.icX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{a.icN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{a.stL}}</span></div></div>
 </sc-for>
 </div>
 </sc-if>
@@ -716,9 +778,36 @@ button.mi{border:0;background:transparent;width:100%;font-family:inherit;cursor:
 </div>
 </sc-if>
 
+
+<nav class="tabb" aria-label="Bölümler">
+<a class="{{tabMainCls}}" href="B-Classes.dc.html" aria-current="{{tabMainCur}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg><span>Sapaklar</span></a>
+<a class="tbi" href="B-Bookings.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span>Ýazylyşlar</span><sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><span class="tbc" aria-label="{{pendAria}}">{{pendCount}}</span></sc-if></a>
+<a class="tbi" href="B-Clients.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Müşderiler</span></a>
+<button class="{{tabKopCls}}" aria-haspopup="dialog" aria-expanded="{{kopOpen}}" onClick="{{toggleKop}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg><span>Köp</span></button>
+</nav>
+<sc-if value="{{kopOpen}}" hint-placeholder-val="{{false}}">
+<div class="kscrim" onClick="{{closeShell}}"></div>
+<div class="ksh" role="dialog" aria-modal="true" aria-label="Köp">
+<span class="kgrab"></span>
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px 10px"><span class="av">A</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Aýgözel Hojamuradowa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 64 72 30 15</span></span></div>
+<div class="pdv" role="separator"></div>
+<a class="mi" href="B-Reviews.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
+<a class="mi" href="B-Analytics.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<a class="mi" href="B-Settings.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<a class="mi" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="mi" href="B-Help.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div class="pdv" role="separator"></div>
+<a class="mi" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profilim</a>
+<a class="mi" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg>Dil: Türkmençe</a>
+<a class="mi" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Müşderi hökmünde aç<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<div class="pdv"></div>
+<a class="mi dan" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Çykmak</a>
+</div>
+</sc-if>
+
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["week","catalog"],"default":"week","section":"State"},"panel":{"editor":"enum","options":["none","session","add","cancel"],"default":"session","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1290}}'>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["week","catalog"],"default":"week","section":"State"},"panel":{"editor":"enum","options":["none","session","add","cancel"],"default":"session","section":"State"},"legend":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1240}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -726,12 +815,12 @@ class Component extends DCLogic {
   }
   fresh() {
     const D = this.D();
-    return { wk: 0, trainer: 'all', rooms: [], ov: {}, att: {}, added: [], types: D.TYPES.map((t) => Object.assign({}, t, { trainers: t.trainers.slice(), desc: Object.assign({}, t.desc) })), ruleEd: {}, seq: 1, banner: true };
+    return { wk: 0, trainer: 'all', rooms: [], ov: {}, att: {}, added: [], types: D.TYPES.map((t) => Object.assign({}, t, { trainers: t.trainers.slice(), desc: Object.assign({}, t.desc) })), ruleEd: {}, seq: 1, shell: null };
   }
   fromTweaks(p) {
     const v = (p.view ?? 'week') === 'catalog' ? 'catalog' : 'week';
     const pn = p.panel ?? 'session';
-    const st = { view: v, sel: null, modal: null, menu: null, axp: null, adding: false, aq: '', creating: false, nPhone: '', nName: '', am: null, cm: this.blankCancel(), mv: null, tm: null, toast: null, hiId: null };
+    const st = { view: v, sel: null, modal: null, menu: null, axp: null, adding: false, aq: '', creating: false, nPhone: '', nName: '', am: null, cm: this.blankCancel(), mv: null, tm: null, toast: null, hiId: null, lg: !!p.legend };
     if (v === 'week' && (pn === 'session' || pn === 'cancel')) st.sel = 'r0_3';
     if (v === 'week' && pn === 'cancel') { st.modal = 'cancel'; st.cm = this.blankCancel({ reason: 'Tälimçi syrkawlady' }); }
     if (pn === 'add') { st.modal = 'add'; st.am = this.blankAdd({ type: 'hatha', trainer: 'Kakajan', room: 'Kiçi zal', abs: 7, from: 1110, rep: true, days: [0, 2], endAbs: 48 }); }
@@ -739,7 +828,7 @@ class Component extends DCLogic {
   }
   componentDidUpdate(pp) {
     const p = this.props;
-    if (pp.view !== p.view || pp.panel !== p.panel) this.setState(Object.assign(this.fresh(), this.fromTweaks(p)));
+    if (pp.view !== p.view || pp.panel !== p.panel || pp.legend !== p.legend) this.setState(Object.assign(this.fresh(), this.fromTweaks(p)));
   }
   up(patch) {
     this.setState(Object.assign({ toast: null, hiId: null }, patch));
@@ -984,7 +1073,8 @@ class Component extends DCLogic {
     const fullP = full && !past;
     const time = this.hm(x.from) + '–' + this.hm(x.from + dur);
     const sel = s.sel === x.id;
-    let cls = 'ss ' + (isX ? 'k-x' : (past ? 'k-past' : 'k-c'));
+    const sk = isX ? 'x' : (past ? 'd' : 'c');
+    let cls = 'ss k-' + sk;
     if (sel) cls += ' sel';
     if (s.hiId === x.id) cls += ' hi';
     const acls = 'agr' + (isX ? ' a-x' : (past ? ' a-past' : '')) + (sel ? ' sel' : '');
@@ -994,6 +1084,7 @@ class Component extends DCLogic {
       top: Math.round((x.from - 420) * 64 / 60 * 100) / 100 + 1, h: h,
       l: Math.round(lane * 10000 / n) / 100, w: Math.round(10000 / n) / 100,
       name: ty.name, nameCls: isX ? 'sn1 strike' : 'sn1', anCls: isX ? 'agn strike' : 'agn',
+      siCls: 'si si-' + sk, icP: false, icC: sk === 'c', icD: sk === 'd', icX: sk === 'x', icN: false,
       c3: !cmp, c4: tall && !isX, cmp: cmp,
       line2: this.hm(x.from) + ' · ' + x.trainer,
       start: this.hm(x.from), durL: dur + ' min',
@@ -1081,8 +1172,23 @@ class Component extends DCLogic {
     });
     const hasPend = pendCount > 0;
     const pendAria = pendCount + ' jogapsyz haýyş';
-    const banner = !!s.banner;
-    const hideBanner = () => this.up({ banner: false });
+    // D2 shell (workspace switcher, user menu) + D5 phone tab bar
+    const wsOpen = s.shell === 'ws';
+    const umOpen = s.shell === 'um';
+    const kopOpen = s.shell === 'kop';
+    const shellPop = wsOpen || umOpen;
+    const toggleWs = () => this.setState({ shell: wsOpen ? null : 'ws' });
+    const toggleUm = () => this.setState({ shell: umOpen ? null : 'um' });
+    const toggleKop = () => this.setState({ shell: kopOpen ? null : 'kop' });
+    const closeShell = () => this.setState({ shell: null });
+    const tabMainCls = isWeek && !kopOpen ? 'tbi on' : 'tbi';
+    const tabMainCur = isWeek ? 'page' : 'false';
+    const tabKopCls = isCat || kopOpen ? 'tbi on' : 'tbi';
+    // D4 legend «Reňkler we nyşanlar» (opens by itself on the first visit; tweak "legend")
+    const lgOpen = isWeek && !!s.lg;
+    const toggleLg = () => this.setState({ lg: !s.lg });
+    const closeLg = () => this.setState({ lg: false });
+    const lgKey = (e) => { if (e && e.key === 'Escape') this.setState({ lg: false }); };
     const openAddTop = () => { const abs = s.wk > 0 ? s.wk * 7 : D.TODAY + 1; this.openAdd({ abs: abs, from: this.freeStart(abs, 'hatha') }); };
 
     // ---------- week grid
@@ -1235,7 +1341,7 @@ class Component extends DCLogic {
           ini: a.name.charAt(0), name: a.name,
           srcOn: a.src === 'online', srcPh: a.src === 'phone', srcWk: a.src === 'walkin', srcL: srcL[a.src] || 'Onlaýn',
           sub: a.seats + ' ýer' + (isPend ? ' · onlaýn haýyş' : '') + (a.reason ? ' · ' + a.reason : ''),
-          badgeCls: 'badge ' + B[0], dotCls: 'dot ' + B[1], stL: stLabel(a),
+          badgeCls: 'badge ' + B[0], icP: B[1] === 'd-p', icC: B[1] === 'd-c', icD: B[1] === 'd-d', icX: B[1] === 'd-x', icN: B[1] === 'd-n', stL: stLabel(a),
           isPend: isPend, okAria: a.name + ' — haýyşy tassykla', noAria: a.name + ' — haýyşy ret et',
           ok: () => this.setAtt(sx.id, a.id, { st: 'confirmed' }, a.name + ' tassyklandy · SMS iberildi'),
           no: () => this.up({ menu: null, axp: { sid: sx.id, aid: a.id, mode: 'decline', reason: null, text: '' } }),
@@ -1578,7 +1684,8 @@ class Component extends DCLogic {
     const closeToast = () => this.setState({ toast: null });
 
     return {
-      fontStack, isWeek, isCat, navCls, navSet, goCat, goWeek, hasPend, pendCount, pendAria, banner, hideBanner, openAddTop,
+      fontStack, isWeek, isCat, navCls, navSet, goCat, goWeek, hasPend, pendCount, pendAria, openAddTop,
+      wsOpen, umOpen, kopOpen, shellPop, toggleWs, toggleUm, toggleKop, closeShell, tabMainCls, tabMainCur, tabKopCls, lgOpen, toggleLg, closeLg, lgKey,
       weekLabel, goThis, goPrev, goNext, trChips, roomChips, hasSum, noSum, sumN, sumSeats, sumPct, hasWkPend, wkPendChip, wkPendAria, openPend,
       cols, agDays, hourLabels, showNow, nowTop, nowPillTop, nowLabel,
       drawerOpen, closePanel, drawerKey, closeMenu, drwMenu, catMenu, adding, toggleAdd, sv, xp, ac, openMove, openCancel,

@@ -11,65 +11,56 @@
     "phone": "+993 12 45 67 89",
     "link": "yeral.app/tk/b/glow-studio",
     "logoBlob": "ca78c9263808b968b674fc1863df8a5c",
-    "verification": "verified",
-    "branches": [
-      {
-        "name": "Glow Studio",
-        "sub": "Bitarap Türkmenistan şaýoly",
-        "pending": 5,
-        "current": true
-      },
-      {
-        "name": "Glow Studio · Parahat",
-        "sub": "Parahat 7",
-        "pending": 2
-      }
-    ]
+    "verification": "verified"
   },
   "me": {
     "name": "Maýsa Annaýewa",
     "role": "Eýesi",
     "phone": "+993 65 10 20 30",
-    "initial": "M"
+    "initial": "M",
+    "note": "Default signed-in user on most screens. Her role comes from the workspace; the switcher lists only workspaces she belongs to."
   },
-  "roles": [
-    {
-      "id": "owner",
-      "name": "Eýesi",
-      "system": true,
-      "visibility": "all",
-      "permissions": "all"
-    },
-    {
-      "id": "admin",
-      "name": "Administrator",
-      "visibility": "all",
-      "permissions": [
-        "confirm",
-        "move",
-        "noshow",
-        "clients",
-        "invite"
-      ]
-    },
-    {
-      "id": "specialist",
-      "name": "Hünärmen",
-      "visibility": "own",
-      "permissions": [
-        "confirm",
-        "move",
-        "noshow"
-      ]
-    },
-    {
-      "id": "noapp",
-      "name": "Programmasyz",
-      "visibility": "none",
-      "permissions": [],
-      "note": "Girmeýär; ýazylyşlaryny eýesi we administrator alyp barýar"
-    }
-  ],
+  "roles": {
+    "_superseded": "Round 6: custom roles removed — see accessLevels (Eýesi / Administrator / Hünärmen + Programmasyz).",
+    "round5": [
+      {
+        "id": "owner",
+        "name": "Eýesi",
+        "system": true,
+        "visibility": "all",
+        "permissions": "all"
+      },
+      {
+        "id": "admin",
+        "name": "Administrator",
+        "visibility": "all",
+        "permissions": [
+          "confirm",
+          "move",
+          "noshow",
+          "clients",
+          "invite"
+        ]
+      },
+      {
+        "id": "specialist",
+        "name": "Hünärmen",
+        "visibility": "own",
+        "permissions": [
+          "confirm",
+          "move",
+          "noshow"
+        ]
+      },
+      {
+        "id": "noapp",
+        "name": "Programmasyz",
+        "visibility": "none",
+        "permissions": [],
+        "note": "Girmeýär; ýazylyşlaryny eýesi we administrator alyp barýar"
+      }
+    ]
+  },
   "permissionLabels": {
     "all": "Ähli senenamany görmek",
     "confirm": "Ýazylyşlary tassyklamak",
@@ -193,7 +184,7 @@
       "bookable": false,
       "phone": "+993 64 21 55 90",
       "status": "Çagyryldy",
-      "note": "SMS çakylyk iberildi, entek girmedi"
+      "note": "SMS çakylyk 12 oktýabrda iberildi · 19 oktýabra çenli işleýär"
     }
   ],
   "rules": {
@@ -1301,7 +1292,7 @@
     ],
     [
       "Ýeral",
-      "Töleg, barlag we täzelikler",
+      "Barlag we täzelikler",
       [
         "browser",
         "sms"
@@ -1314,9 +1305,9 @@
       "Başlamak",
       "Senenama we ýazylyşlar",
       "Müşderiler",
-      "Topar we roller",
+      "Topar we rugsatlar",
       "Sazlamalar",
-      "Töleg we tarif"
+      "Profil we iş ýerleri"
     ],
     "popular": [
       "Dynç gününi ýa-da rugsady nädip bellemeli",
@@ -1344,65 +1335,6 @@
       "phone": "[SUPPORT PHONE]",
       "telegram": "@yeral_biznes [PLACEHOLDER]"
     }
-  },
-  "billing": {
-    "plan": "Topar",
-    "price": "[PRICE] TMT / aý",
-    "nextInvoice": "1 noýabr 2026",
-    "commissionRate": "[X]%",
-    "commissionRows": [
-      [
-        "Gözel A.",
-        "13 oktýabr",
-        "Arka massažy",
-        "90 TMT"
-      ],
-      [
-        "Ejegyz T.",
-        "14 oktýabr",
-        "Aýal saç kesimi",
-        "80 TMT"
-      ],
-      [
-        "Arzygül H.",
-        "16 oktýabr",
-        "Ýüz arassalamak",
-        "150 TMT"
-      ]
-    ],
-    "invoices": [
-      [
-        "YB-2026-0010",
-        "Oktýabr 2026",
-        "[AMOUNT] TMT",
-        "Garaşylýar"
-      ],
-      [
-        "YB-2026-0009",
-        "Sentýabr 2026",
-        "[AMOUNT] TMT",
-        "Tölendi"
-      ],
-      [
-        "YB-2026-0008",
-        "Awgust 2026",
-        "[AMOUNT] TMT",
-        "Tölendi"
-      ],
-      [
-        "YB-2026-0007",
-        "Iýul 2026",
-        "[AMOUNT] TMT",
-        "Möhleti geçdi"
-      ]
-    ],
-    "company": {
-      "name": "«Glow Studio» HK",
-      "taxId": "[TAX ID]",
-      "bank": "[BANK]",
-      "account": "[ACCOUNT]"
-    },
-    "commissionRowsNote": "Rows dated after the demo clock (14 okt 11:20) are shown as 'meýilleşdirilen' (planned) until the visit is completed."
   },
   "tablesWorkspace": {
     "business": "Bag kafe",
@@ -1800,46 +1732,389 @@
     ],
     "recurring": "Her hepde Duşenbe, Çarşenbe · 18:30 · Aýgözel · Uly zal"
   },
-  "plans": [
-    {
-      "name": "Ýeke",
-      "price": "Mugt",
-      "for": "1 hünärmen",
-      "features": [
-        "Onlaýn ýazylyş",
-        "Senenama we müşderiler",
-        "SMS ýatlatmalar",
-        "Salgy we QR"
-      ],
-      "cta": "Mugt başla"
+  "accounts": {
+    "_about": "Round 6: one Ýeral account (phone + SMS) for clients and business. A person can belong to several businesses (workspaces) with a different role in each. Switching workspace changes everything. No branches: each location is its own workspace.",
+    "maysa": {
+      "name": "Maýsa Annaýewa",
+      "phone": "+993 65 10 20 30",
+      "initial": "M",
+      "lastUsed": "glow-studio",
+      "workspaces": [
+        {
+          "slug": "glow-studio",
+          "name": "Glow Studio",
+          "sub": "Bitarap Türkmenistan şaýoly",
+          "role": "Eýesi",
+          "pending": 5,
+          "current": true,
+          "logoBlob": "ca78c9263808b968b674fc1863df8a5c"
+        },
+        {
+          "slug": "glow-studio-parahat",
+          "name": "Glow Studio · Parahat",
+          "sub": "Parahat 7",
+          "role": "Eýesi",
+          "pending": 2,
+          "logoBlob": "ca78c9263808b968b674fc1863df8a5c"
+        }
+      ]
     },
-    {
-      "name": "Topar",
-      "price": "[PRICE] TMT / aý",
-      "for": "Bir biznes üçin · çäksiz işgär",
-      "features": [
-        "Çäksiz işgär we roller",
-        "Hasabatlar",
-        "Şahamçalar (her şahamça aýratyn)",
-        "Goldaw çaty"
+    "ayna": {
+      "name": "Aýna Myradowa",
+      "phone": "+993 65 31 22 10",
+      "initial": "A",
+      "lastUsed": "glow-studio",
+      "workspaces": [
+        {
+          "slug": "glow-studio",
+          "name": "Glow Studio",
+          "sub": "Bitarap Türkmenistan şaýoly",
+          "role": "Hünärmen",
+          "pending": 2,
+          "current": true
+        },
+        {
+          "slug": "ayna-sac-studiyasy",
+          "name": "Aýnanyň saç studiýasy",
+          "sub": "Öýde kabul edýär · Parahat 2",
+          "role": "Eýesi",
+          "pending": 1,
+          "solo": true
+        }
       ],
-      "tag": "Toparlar üçin",
-      "cta": "Synap gör",
-      "trial": "[TRIAL] — not defined yet"
+      "busyElsewhere": [
+        {
+          "date": "2026-10-14",
+          "from": "19:00",
+          "to": "20:00",
+          "label": "Başga ýerde",
+          "detailHiddenFrom": "glow-studio"
+        },
+        {
+          "date": "2026-10-15",
+          "from": "09:00",
+          "to": "10:00",
+          "label": "Başga ýerde",
+          "detailHiddenFrom": "glow-studio"
+        }
+      ],
+      "ownStudioToday": [
+        {
+          "time": "08:00–08:45",
+          "client": "Bahar A.",
+          "service": "Saç düzmek",
+          "status": "confirmed"
+        },
+        {
+          "time": "19:00–20:00",
+          "client": "Mähri G.",
+          "service": "Aýal saç kesimi",
+          "status": "confirmed"
+        },
+        {
+          "time": "20:15–21:00",
+          "client": "Täze haýyş · Nurana B.",
+          "service": "Saç düzmek",
+          "status": "pending"
+        }
+      ]
+    },
+    "gulnar": {
+      "name": "Gülnar Öwezowa",
+      "phone": "+993 64 21 55 90",
+      "initial": "G",
+      "workspaces": [],
+      "invites": [
+        {
+          "business": "Glow Studio",
+          "sub": "Bitarap Türkmenistan şaýoly",
+          "role": "Hünärmen",
+          "invitedBy": "Maýsa Annaýewa",
+          "sentAt": "12 oktýabr",
+          "expiresAt": "19 oktýabr",
+          "validDays": 7
+        }
+      ]
+    },
+    "newUser": {
+      "phone": "+993 63 77 45 12",
+      "workspaces": [],
+      "invites": []
     }
-  ],
-  "commission": {
-    "_about": "Not a plan: a layer on every plan (Ýeke and Topar).",
-    "rate": "[X]%",
-    "title": "Komissiýa — diňe Ýeral-dan gelen täze müşderiden",
-    "appliesTo": "first completed visit of a client who found the business through Ýeral search",
-    "free": [
-      "Öz salgyňyzdan ýa-da QR-dan gelenler",
-      "Telefon arkaly ýazylyşlar",
-      "Gaýdyp gelýän müşderiler"
+  },
+  "accessLevels": {
+    "_about": "Round 6: three fixed access levels (like Fresha's access levels) + phone-only staff. No custom roles. The owner toggles permissions per level (Topar → Rugsatlar); Eýesi column is locked. Hidden, not disabled.",
+    "levels": [
+      "Eýesi",
+      "Administrator",
+      "Hünärmen"
     ],
-    "never": [
-      "Gelmedik ýa-da ýatyrylan ýazylyşlar"
-    ]
-  }
+    "phoneOnly": "Programmasyz hünärmen — no login; owner/admin manage their bookings",
+    "permissions": [
+      {
+        "key": "calendarAll",
+        "tk": "Ähli işgärleriň senenamasyny görmek",
+        "Eýesi": true,
+        "Administrator": true,
+        "Hünärmen": false
+      },
+      {
+        "key": "answerRequests",
+        "tk": "Haýyşlara jogap bermek",
+        "Eýesi": true,
+        "Administrator": true,
+        "Hünärmen": "own",
+        "note": "set by Ýazylyş düzgünleri → Haýyşlara kim jogap berýär?"
+      },
+      {
+        "key": "createMove",
+        "tk": "Ýazylyş goşmak, geçirmek, ýatyrmak",
+        "Eýesi": true,
+        "Administrator": true,
+        "Hünärmen": "own"
+      },
+      {
+        "key": "noshow",
+        "tk": "Gelmedi bellemek we arz etmek",
+        "Eýesi": true,
+        "Administrator": true,
+        "Hünärmen": "own"
+      },
+      {
+        "key": "clients",
+        "tk": "Müşderileri görmek (telefon bilen)",
+        "Eýesi": true,
+        "Administrator": true,
+        "Hünärmen": "own"
+      },
+      {
+        "key": "reviewsReply",
+        "tk": "Teswirlere jogap bermek",
+        "Eýesi": true,
+        "Administrator": true,
+        "Hünärmen": false,
+        "note": "Hünärmen reads reviews about them"
+      },
+      {
+        "key": "revenue",
+        "tk": "Girdejini görmek",
+        "Eýesi": true,
+        "Administrator": false,
+        "Hünärmen": "own"
+      },
+      {
+        "key": "analytics",
+        "tk": "Hasabatlar",
+        "Eýesi": true,
+        "Administrator": true,
+        "Hünärmen": "own"
+      },
+      {
+        "key": "servicesEdit",
+        "tk": "Hyzmatlary we bahalary üýtgetmek",
+        "Eýesi": true,
+        "Administrator": true,
+        "Hünärmen": false
+      },
+      {
+        "key": "settingsEdit",
+        "tk": "Biznes sazlamalaryny üýtgetmek",
+        "Eýesi": true,
+        "Administrator": true,
+        "Hünärmen": false
+      },
+      {
+        "key": "team",
+        "tk": "Topary we rugsatlary dolandyrmak",
+        "Eýesi": true,
+        "Administrator": "view",
+        "Hünärmen": false
+      }
+    ],
+    "requestHandling": {
+      "tk": "Haýyşlara kim jogap berýär?",
+      "options": [
+        {
+          "id": "desk",
+          "tk": "Administrator we eýesi",
+          "sub": "Hünärmenler öz haýyşlaryny görýär, ýöne jogap bermeýär"
+        },
+        {
+          "id": "each",
+          "tk": "Her hünärmen özi",
+          "sub": "Hünärmen öz haýyşlaryna özi jogap berýär; administrator diňe görýär"
+        },
+        {
+          "id": "both",
+          "tk": "Ikisi hem",
+          "sub": "Kim ilki jogap berse — şol"
+        }
+      ],
+      "default": "both",
+      "solo": "Hidden for a one-person business — the owner answers everything",
+      "perPersonOverride": true
+    }
+  },
+  "statusesV2": {
+    "_about": "Round 6: 5 system statuses (fixed, clients see them) each with its own icon everywhere + optional internal statuses only the team sees (like Fresha custom statuses).",
+    "system": [
+      {
+        "id": "pending",
+        "tk": "Garaşylýar",
+        "icon": "clock",
+        "meaning": "Täze haýyş — jogap garaşýar"
+      },
+      {
+        "id": "confirmed",
+        "tk": "Tassyklandy",
+        "icon": "check",
+        "meaning": "Wagt bellenildi, müşderä habar berildi"
+      },
+      {
+        "id": "completed",
+        "tk": "Tamamlandy",
+        "icon": "check-check",
+        "meaning": "Gelşi geçdi (wagty gutarandan soň özi)"
+      },
+      {
+        "id": "cancelled",
+        "tk": "Ýatyryldy",
+        "icon": "x",
+        "meaning": "Müşderi, biznes ýa-da ulgam ýatyrdy"
+      },
+      {
+        "id": "noshow",
+        "tk": "Gelmedi",
+        "icon": "user-x",
+        "meaning": "Müşderi gelmedi — «Arz et» arkaly bellenýär"
+      }
+    ],
+    "internal": {
+      "enabledByDefault": false,
+      "presets": [
+        {
+          "tk": "Geldi",
+          "icon": "user-check"
+        },
+        {
+          "tk": "Başlandy",
+          "icon": "play"
+        }
+      ],
+      "max": 5,
+      "colors": [
+        "#4429d6",
+        "#066a41",
+        "#93500a",
+        "#a3251b",
+        "#41505f",
+        "#101014"
+      ]
+    }
+  },
+  "laterNotMvp": {
+    "_about": "NOT MVP — everything is free on MVP (round 6). Kept only as a record for a future paid version; no MVP screen uses it.",
+    "plans": [
+      {
+        "name": "Ýeke",
+        "price": "Mugt",
+        "for": "1 hünärmen",
+        "features": [
+          "Onlaýn ýazylyş",
+          "Senenama we müşderiler",
+          "SMS ýatlatmalar",
+          "Salgy we QR"
+        ],
+        "cta": "Mugt başla"
+      },
+      {
+        "name": "Topar",
+        "price": "[PRICE] TMT / aý",
+        "for": "Bir biznes üçin · çäksiz işgär",
+        "features": [
+          "Çäksiz işgär we roller",
+          "Hasabatlar",
+          "Şahamçalar (her şahamça aýratyn)",
+          "Goldaw çaty"
+        ],
+        "tag": "Toparlar üçin",
+        "cta": "Synap gör",
+        "trial": "[TRIAL] — not defined yet"
+      }
+    ],
+    "commission": {
+      "_about": "Not a plan: a layer on every plan (Ýeke and Topar).",
+      "rate": "[X]%",
+      "title": "Komissiýa — diňe Ýeral-dan gelen täze müşderiden",
+      "appliesTo": "first completed visit of a client who found the business through Ýeral search",
+      "free": [
+        "Öz salgyňyzdan ýa-da QR-dan gelenler",
+        "Telefon arkaly ýazylyşlar",
+        "Gaýdyp gelýän müşderiler"
+      ],
+      "never": [
+        "Gelmedik ýa-da ýatyrylan ýazylyşlar"
+      ]
+    },
+    "billing": {
+      "plan": "Topar",
+      "price": "[PRICE] TMT / aý",
+      "nextInvoice": "1 noýabr 2026",
+      "commissionRate": "[X]%",
+      "commissionRows": [
+        [
+          "Gözel A.",
+          "13 oktýabr",
+          "Arka massažy",
+          "90 TMT"
+        ],
+        [
+          "Ejegyz T.",
+          "14 oktýabr",
+          "Aýal saç kesimi",
+          "80 TMT"
+        ],
+        [
+          "Arzygül H.",
+          "16 oktýabr",
+          "Ýüz arassalamak",
+          "150 TMT"
+        ]
+      ],
+      "invoices": [
+        [
+          "YB-2026-0010",
+          "Oktýabr 2026",
+          "[AMOUNT] TMT",
+          "Garaşylýar"
+        ],
+        [
+          "YB-2026-0009",
+          "Sentýabr 2026",
+          "[AMOUNT] TMT",
+          "Tölendi"
+        ],
+        [
+          "YB-2026-0008",
+          "Awgust 2026",
+          "[AMOUNT] TMT",
+          "Tölendi"
+        ],
+        [
+          "YB-2026-0007",
+          "Iýul 2026",
+          "[AMOUNT] TMT",
+          "Möhleti geçdi"
+        ]
+      ],
+      "company": {
+        "name": "«Glow Studio» HK",
+        "taxId": "[TAX ID]",
+        "bank": "[BANK]",
+        "account": "[ACCOUNT]"
+      },
+      "commissionRowsNote": "Rows dated after the demo clock (14 okt 11:20) are shown as 'meýilleşdirilen' (planned) until the visit is completed."
+    }
+  },
+  "notificationsNote": "Round 6: 'app' (Programmada) channel becomes available when the native business app ships; on MVP the channels are Brauzerde and SMS."
 }

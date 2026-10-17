@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<title>Ýeral — ýazylyş salgysy</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#ffffff}
+*{box-sizing:border-box}
+a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
+a:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4;border-radius:4px}
+.lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.cap{font-size:13px;line-height:18px;color:#5a5a64}
+.cap a{text-decoration:underline}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;min-width:88px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .12s,box-shadow .12s,transform .06s;text-decoration:none}
+.b-lg{height:52px;padding:0 24px;border-radius:14px;font-size:16px}
+.b-pri{background:linear-gradient(180deg,#8265ff 0%,#5a3ff0 100%);color:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 6px rgba(68,41,214,.3)}
+.b-pri:hover{background:linear-gradient(180deg,#7459fb 0%,#4a30d8 100%);color:#ffffff}
+.b-pri:active{background:linear-gradient(180deg,#5a3ff0 0%,#4429d6 100%);box-shadow:inset 0 1px 2px rgba(16,16,20,.28);transform:translateY(1px)}
+.b-pri:focus-visible{outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
+.b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
+.b-sec:focus-visible,.b-gho:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b-gho{background:transparent;color:#101014}
+.b-gho:hover{background:#f4f4f6;color:#101014}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed;transform:none}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.badge svg{flex:none}
+.st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
+.st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
+.st-x{background:#eef1f6;border:1px solid #d3dbe6;color:#41505f}
+.bby{display:inline-flex;align-items:center;gap:6px}
+.bby svg{flex:none}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.inp{height:48px;width:100%;min-width:0;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
+.inp::placeholder{color:#6e6e78}
+.inp:hover{border-color:#b0b0b8}
+.inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.inp.is-e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
+.inp:disabled{background:#f6f6f8;border-color:#e6e6ea;color:#6e6e78}
+.pfx{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;flex:none}
+.ro{display:flex;align-items:center;gap:8px;height:48px;flex:1;min-width:0;padding:0 14px;border:1px solid #e6e6ea;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.ro svg{flex:none;color:#6e6e78}
+.cbx{width:56px;height:56px;padding:0;text-align:center;font-size:24px;font-weight:600;flex:none;font-variant-numeric:tabular-nums}
+.hint{font-size:13px;line-height:18px;color:#5a5a64}
+.err{display:inline-flex;align-items:flex-start;gap:6px;color:#a3251b}
+.err svg{flex:none;margin-top:2px}
+.lnk{display:inline-flex;align-items:center;min-height:32px;border:0;background:transparent;padding:0;font-family:inherit;font-size:14px;font-weight:600;color:#4429d6;cursor:pointer;white-space:nowrap}
+.lnk:hover{color:#3520a6;text-decoration:underline}
+.lnk:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4;border-radius:4px}
+.sep{height:1px;background:#e6e6ea}
+.slot{height:40px;min-width:72px;padding:0 14px;border-radius:10px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:600;color:#101014;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums}
+.slot:hover{border-color:#5a3ff0;color:#4429d6}
+.slot.on,.slot.on:hover{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
+.slot:disabled{background:#f6f6f8;border-color:#f0f0f3;color:#6e6e78;text-decoration:line-through;cursor:not-allowed}
+.slot:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.offs{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px}
+.ofw{display:inline-flex;flex-direction:column;align-items:flex-start;gap:4px}
+.oft{font-size:12px;line-height:16px;color:#6e6e78;padding-left:2px}
+.ofl{font-size:14px;line-height:20px;color:#101014}
+.lh{display:flex;align-items:center;height:72px;padding:0 24px;border-bottom:1px solid #e6e6ea;background:#ffffff}
+.lmain{flex:1;display:flex;flex-direction:column;align-items:center;gap:20px;padding:48px 24px 80px}
+.lcard{width:100%;max-width:480px;display:flex;flex-direction:column;border:1px solid #e6e6ea;border-radius:16px;background:#ffffff;overflow:hidden}
+.lban{display:block;width:100%;height:168px;object-fit:cover}
+.lbody{display:flex;flex-direction:column;gap:20px;padding:24px}
+.lname{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.lsvc{font-size:15px;line-height:22px;font-weight:600}
+.lwhen{display:inline-flex;align-items:center;gap:8px;font-size:15px;line-height:22px;color:#101014;font-variant-numeric:tabular-nums}
+.lwhen svg{flex:none;color:#5a5a64}
+.lwhen.gone{color:#6e6e78;text-decoration:line-through}
+.lwhen.gone svg{color:#6e6e78}
+.dbox{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:12px;background:#f4f4f6;font-size:14px;line-height:20px;color:#101014}
+.dnote{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:#f4f4f6;font-size:14px;line-height:20px;color:#101014}
+.dnote svg{flex:none;margin-top:1px}
+.mvl{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:18px;color:#5a5a64}
+.mvl svg{flex:none;margin-top:2px}
+.lgn{display:flex;flex-direction:column;gap:16px;padding-top:20px;border-top:1px solid #e6e6ea}
+.cpt{margin:0;font-size:15px;line-height:22px;font-weight:600;color:#101014}
+.lead{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
+.row2{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.row2 .b-pri{flex:1 1 auto}
+.okc{width:64px;height:64px;border-radius:999px;background:#efecfe;color:#5a3ff0;display:flex;align-items:center;justify-content:center;flex:none}
+.okc.mute{background:#f0f0f3;color:#5a5a64}
+.kv{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px 16px;margin:0}
+.kv dt{font-size:14px;line-height:22px;color:#5a5a64}
+.kv dd{margin:0;font-size:15px;line-height:22px;font-weight:500;color:#101014}
+.acts{display:flex;gap:12px;flex-wrap:wrap}
+.acts .b{flex:1 1 auto}
+.lfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 24px;border-top:1px solid #e6e6ea;background:#f6f6f8}
+.legal{margin:0;text-align:center}
+@media (max-width:767px){.lh{height:64px;padding:0 16px}.lmain{padding:16px 16px 48px;gap:16px}.lban{height:140px}.lbody{padding:20px 16px}.lfoot{padding:14px 16px}.lname{font-size:20px;line-height:26px}.slot{height:44px}.kv{grid-template-columns:88px minmax(0,1fr)}.lnk{min-height:44px}.cbx{width:56px}}
+</style>
+</helmet>
+<div style="min-height: 100%; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column">
+
+<header class="lh">
+<a href="Home.dc.html" aria-label="Ýeral baş sahypa" style="display: flex"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 28px; width: auto"></a>
+</header>
+
+<main class="lmain">
+
+<sc-if value="{{isNotFound}}" hint-placeholder-val="{{false}}">
+<div class="lcard">
+<div class="lbody" style="align-items: center; text-align: center; gap: 16px; padding: 48px 32px 40px">
+<span class="okc mute"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7"></path><path d="M15 7h2a5 5 0 0 1 4 8"></path><line x1="8" x2="12" y1="12" y2="12"></line><line x1="2" x2="22" y1="2" y2="22"></line></svg></span>
+<h1 class="lname" style="font-size: 24px; line-height: 30px">Bu salgy işlemeýär</h1>
+<p class="lead" style="max-width: 340px">Baglanyşyk nädogry ýa-da köne bolup biler. Ýazylyşlaryňyzy hasabyňyzda görüp bilersiňiz.</p>
+<div class="acts" style="width: 100%; justify-content: center; margin-top: 8px"><a class="b b-pri b-lg" href="Account-Bookings.dc.html">Ýazylyşlaryma geç</a><a class="b b-gho b-lg" href="Home.dc.html">Baş sahypa</a></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showCard}}" hint-placeholder-val="{{true}}">
+<article class="lcard" aria-labelledby="lk-t">
+<img class="lban" src="{{bk.img}}" alt="{{bk.alt}}">
+
+<sc-if value="{{showDone}}" hint-placeholder-val="{{false}}">
+<div class="lbody" style="gap: 24px">
+<div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px">
+<span class="okc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>
+<h1 id="lk-t" class="lname" style="font-size: 24px; line-height: 30px">{{done.title}}</h1>
+<span class="{{done.badgeCls}}"><sc-if value="{{done.icC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{done.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if>{{done.badge}}</span>
+<p class="lead" style="max-width: 360px">{{done.sub}}</p>
+</div>
+<dl class="kv">
+<dt>Hyzmat</dt><dd>{{bk.service}}</dd>
+<dt>Hünärmen</dt><dd>{{bk.staffRole}}</dd>
+<dt>Wagt</dt><dd>{{done.when}}</dd>
+<dt>Salgy</dt><dd>{{bk.business}}, {{bk.address}}</dd>
+<dt>Bahasy</dt><dd>{{bk.price}} · Töleg ýerinde</dd>
+</dl>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<a class="b b-pri b-lg" href="Account-Bookings.dc.html" style="width: 100%">Ýazylyşlaryma geç</a>
+<button class="b b-sec b-lg" style="width: 100%" onClick="{{addIcs}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M10 16h4"></path><path d="M12 14v4"></path></svg>Senenama goş</button>
+<sc-if value="{{icsDone}}" hint-placeholder-val="{{false}}"><span class="cap" role="status" style="text-align: center">Senenama faýly (.ics) ýüklendi.</span></sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showMain}}" hint-placeholder-val="{{true}}">
+<div class="lbody">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 id="lk-t" class="lname">{{bk.business}}</h1>
+<span class="cap">{{bk.cat}} · {{bk.address}}</span>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="lsvc">{{bk.what}}</span>
+<span class="{{whenCls}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>{{bk.when}}</span></span>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+<span class="{{st.badgeCls}}"><sc-if value="{{st.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{st.icC}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{st.icX}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if>{{st.label}}</span>
+<sc-if value="{{st.byBiz}}" hint-placeholder-val="{{true}}"><span class="cap bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>Biznes ret etdi</span></sc-if>
+<sc-if value="{{st.bySys}}" hint-placeholder-val="{{false}}"><span class="cap bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Wagtynda jogap gelmedi</span></sc-if>
+<sc-if value="{{st.isPending}}" hint-placeholder-val="{{false}}"><span class="cap">Biznesiň tassyklamagyna garaşylýar</span></sc-if>
+</div>
+<sc-if value="{{st.hasReason}}" hint-placeholder-val="{{true}}"><span class="cap">{{st.reasonText}}</span></sc-if>
+<sc-if value="{{st.hasTypical}}" hint-placeholder-val="{{false}}"><span class="cap">{{bk.typical}}</span></sc-if>
+<sc-if value="{{st.hasMove}}" hint-placeholder-val="{{false}}"><span class="mvl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{bk.move}}</span></sc-if>
+</div>
+
+<sc-if value="{{hasMsg}}" hint-placeholder-val="{{true}}"><div class="dbox"><span class="lbl">Biznesiň belligi</span><span>{{bk.msg}}</span></div></sc-if>
+
+<sc-if value="{{showOffers}}" hint-placeholder-val="{{true}}">
+<div class="sep"></div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{isDecl}}" hint-placeholder-val="{{true}}"><span class="lbl" id="lk-off">Teklip edilen wagtlar</span></sc-if>
+<sc-if value="{{isExp}}" hint-placeholder-val="{{false}}"><span class="ofl" id="lk-off">{{expLead}}</span></sc-if>
+<div class="offs" role="group" aria-labelledby="lk-off">
+<sc-for list="{{offers}}" as="o" hint-placeholder-count="3"><span class="ofw"><button class="{{o.cls}}" disabled="{{o.taken}}" aria-pressed="{{o.on}}" aria-label="{{o.aria}}" onClick="{{o.pick}}">{{o.t}}</button><sc-if value="{{o.taken}}" hint-placeholder-val="{{false}}"><span class="oft">Eýýäm eýelendi</span></sc-if></span></sc-for>
+</div>
+<sc-if value="{{showOfferCap}}" hint-placeholder-val="{{true}}"><span class="cap">Bir basyşda ýazylyň — biznes bu wagtlary özi teklip etdi.</span></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{showPhone}}" hint-placeholder-val="{{false}}">
+<section class="lgn" aria-labelledby="lk-q">
+<p id="lk-q" class="cpt">{{askText}}</p>
+<div class="fld">
+<span class="flab" id="lk-ph">Telefon belgiňiz</span>
+<div style="display: flex; gap: 8px">
+<span class="pfx">+993</span>
+<span class="ro" role="textbox" aria-readonly="true" aria-labelledby="lk-ph"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>65 •• •• 22</span>
+</div>
+<span class="hint">Kod diňe ýazylyşdaky belgä iberilýär.</span>
+</div>
+<div class="row2"><button class="b b-pri" onClick="{{sendCode}}">Kod al</button><button class="b b-gho" onClick="{{backToChips}}">Yza</button></div>
+</section>
+</sc-if>
+
+<sc-if value="{{showCode}}" hint-placeholder-val="{{false}}">
+<section class="lgn" aria-labelledby="lk-q2">
+<p id="lk-q2" class="cpt">{{askText}}</p>
+<p class="lead">Kod <span style="white-space: nowrap; font-variant-numeric: tabular-nums; color: #101014">+993 65 •• •• 22</span> belgä iberildi</p>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="flab" id="lk-code">SMS kod</span>
+<div role="group" aria-labelledby="lk-code" style="display: flex; gap: 12px">
+<sc-for list="{{codeBoxes}}" as="c" hint-placeholder-count="4"><input class="{{c.cls}}" inputmode="numeric" autocomplete="{{c.ac}}" aria-label="{{c.aria}}" aria-invalid="{{c.bad}}" value="{{c.v}}" disabled="{{c.dis}}" onChange="{{c.change}}" onKeyDown="{{c.key}}" ref="{{c.setRef}}"></sc-for>
+</div>
+<sc-if value="{{hasCodeErr}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>{{codeErrText}}</span></sc-if>
+</div>
+<div class="row2"><button class="b b-pri" disabled="{{verifyDis}}" onClick="{{verify}}">Tassykla</button><span class="cap" style="color: #6e6e78">Täzeden iber (0:59)</span></div>
+</section>
+</sc-if>
+
+<sc-if value="{{showOffersGone}}" hint-placeholder-val="{{false}}">
+<div class="sep"></div>
+<div class="dnote"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m14 14-4 4"></path><path d="m10 14 4 4"></path></svg><span>Teklip edilen wagtlaryň möhleti geçdi</span></div>
+<a class="b b-pri b-lg" href="Venue.dc.html" style="width: 100%">Başga wagt saýla</a>
+</sc-if>
+
+<sc-if value="{{showReadOnly}}" hint-placeholder-val="{{false}}">
+<div class="sep"></div>
+<dl class="kv">
+<dt>Salgy</dt><dd>{{bk.address}}</dd>
+<dt>Telefon</dt><dd style="font-variant-numeric: tabular-nums">{{bk.phone}}</dd>
+<dt>Bahasy</dt><dd>{{bk.price}} · Töleg ýerinde</dd>
+</dl>
+<div class="acts">
+<button class="b b-sec" aria-label="{{dirLabel}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>Ýol görkez</button>
+<button class="b b-sec" aria-label="{{callLabel}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Jaň et</button>
+</div>
+<p class="cap" style="margin: 0">Ýatyrmak ýa-da üýtgetmek üçin <a href="Account-Bookings.dc.html">Ýazylyşlarym</a> bölümine giriň.</p>
+</sc-if>
+</div>
+</sc-if>
+
+<div class="lfoot"><span class="cap">Ýazylyş belgisi</span><span style="font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums">{{codeShown}}</span></div>
+</article>
+</sc-if>
+
+<p class="cap legal">© 2026 Ýeral · <a href="#">Gizlinlik syýasaty</a> · <a href="#">Ulanyş şertleri</a></p>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["declined","expired","confirmed","pending","offersExpired","notFound","loginCode","success"],"default":"declined","section":"State"},"loginStep":{"editor":"enum","options":["phone","code","wrongCode"],"default":"phone","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1320}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = this.fromProps(props || {});
+    this.codeEls = [];
+  }
+  // tweak → starting state of the card; Play clicks move on from here
+  fromProps(p) {
+    const st = p.state ?? 'declined';
+    const ls = p.loginStep ?? 'phone';
+    const base = { stage: 'view', pick: null, code: ['', '', '', ''], codeErr: false, wrong: 0, ics: false };
+    if (st === 'loginCode') {
+      if (ls === 'code') return Object.assign(base, { stage: 'code', pick: 0 });
+      if (ls === 'wrongCode') return Object.assign(base, { stage: 'code', pick: 0, code: ['0', '0', '0', '0'], codeErr: true, wrong: 1 });
+      return Object.assign(base, { stage: 'phone', pick: 0 });
+    }
+    if (st === 'success') return Object.assign(base, { stage: 'done', pick: 0 });
+    return base;
+  }
+  componentDidUpdate(pp) {
+    const p = this.props;
+    if (pp.state !== p.state || pp.loginStep !== p.loginStep) this.setState(this.fromProps(p));
+  }
+  focusCode(i) {
+    const el = this.codeEls[i];
+    if (el && typeof el.focus === 'function') {
+      try { el.focus(); if (typeof el.select === 'function') el.select(); } catch (e) { /* focus is a nicety only */ }
+    }
+  }
+  renderVals() {
+    const P = this.props;
+    const f = P.font ?? 'Onest';
+    const s = this.state;
+    const B = '';
+    const OF = (t, range, taken) => ({ t: t, range: range, taken: !!taken });
+    const BK = {
+      'YR-48230': { id: 'YR-48230', business: 'Glow Studio', cat: 'Gözellik salony', address: 'Bitarap Türkmenistan şaýoly 247, 2-nji gat', phone: '+993 12 45 67 89', img: '../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg', alt: 'Glow Studio salonynda saç ussasy', what: 'Saç düzmek · Aýna', service: 'Saç düzmek', staff: 'Aýna', staffRole: 'Aýna · Stilist', when: 'Penşenbe, 15 oktýabr · 17:00', status: 'cancelled', by: 'business', reason: 'Bu wagt boş däl', msg: 'Aýna 17:00-da başga müşderide bolar — şu wagtlaryň birini saýlaň.', type: 'declined', newId: 'YR-48231', price: '60 TMT', typical: '', move: '',
+        offers: [OF('Penşenbe, 15 okt · 18:00', 'Penşenbe, 15 oktýabr · 18:00–18:45'), OF('Anna, 16 okt · 11:00', 'Anna, 16 oktýabr · 11:00–11:45', true), OF('Anna, 16 okt · 15:30', 'Anna, 16 oktýabr · 15:30–16:15')] },
+      'YR-48241': { id: 'YR-48241', business: 'Nail Bar Aýna', cat: 'Dyrnak', address: 'Oguzhan köçesi 21', phone: '+993 12 48 20 15', img: '../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg', alt: 'Nail Bar Aýna dyrnak salony', what: 'Manikýur · Maral', service: 'Manikýur', staff: 'Maral', staffRole: 'Maral · Dyrnak ussasy', when: 'Penşenbe, 15 oktýabr · 10:00', status: 'cancelled', by: 'system', reason: '', msg: '', type: 'expired', holdMin: 30, newId: 'YR-48242', price: '70 TMT', typical: '', move: '',
+        offers: [OF('Penşenbe, 15 okt · 12:00', 'Penşenbe, 15 oktýabr · 12:00–13:00'), OF('Penşenbe, 15 okt · 16:30', 'Penşenbe, 15 oktýabr · 16:30–17:30'), OF('Anna, 16 okt · 10:00', 'Anna, 16 oktýabr · 10:00–11:00')] },
+      'YR-48190': { id: 'YR-48190', business: 'Ak Diş', cat: 'Diş lukmany', address: 'Görogly köçesi 52', phone: '+993 12 34 56 70', img: '../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', alt: 'Ak Diş stomatologiýasynyň otagy', what: 'Barlag · Lukman Döwlet', service: 'Barlag', staff: 'Lukman Döwlet', staffRole: 'Lukman Döwlet', when: 'Anna, 16 oktýabr · 10:00', status: 'confirmed', reason: '', msg: '', type: '', price: '50 TMT', typical: '', move: 'Täze wagt soraldy: Şenbe, 17 okt · 11:30 · jogap garaşylýar', offers: null },
+      'YR-48213': { id: 'YR-48213', business: 'Glow Studio', cat: 'Gözellik salony', address: 'Bitarap Türkmenistan şaýoly 247, 2-nji gat', phone: '+993 12 45 67 89', img: '../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg', alt: 'Glow Studio salonynda saç ussasy', what: 'Aýal saç kesimi · Aýna', service: 'Aýal saç kesimi', staff: 'Aýna', staffRole: 'Aýna · Stilist', when: 'Penşenbe, 15 oktýabr · 14:30', status: 'pending', reason: '', msg: '', type: '', price: '80 TMT', typical: 'Adatça 15 minudyň dowamynda tassyklaýar.', move: '', offers: null }
+    };
+    const st = P.state ?? 'declined';
+    const WHICH = { declined: 'YR-48230', loginCode: 'YR-48230', success: 'YR-48230', offersExpired: 'YR-48230', expired: 'YR-48241', confirmed: 'YR-48190', pending: 'YR-48213' };
+    const isNotFound = st === 'notFound';
+    const bk = BK[WHICH[st] || 'YR-48230'];
+    const offerable = !!bk.offers && st !== 'offersExpired';
+    const stage = offerable ? s.stage : 'view';
+    const pick = offerable && s.pick != null ? bk.offers[s.pick] : null;
+    const decl = bk.type === 'declined';
+    const set = (patch) => this.setState(patch);
+
+    // ---- status block ----
+    const stv = {
+      badgeCls: 'badge ' + (bk.status === 'pending' ? 'st-p' : bk.status === 'confirmed' ? 'st-c' : 'st-x'),
+      icP: bk.status === 'pending', icC: bk.status === 'confirmed', icX: bk.status === 'cancelled',
+      label: bk.status === 'pending' ? 'Garaşylýar' : bk.status === 'confirmed' ? 'Tassyklandy' : 'Ýatyryldy',
+      byBiz: bk.status === 'cancelled' && bk.by === 'business',
+      bySys: bk.status === 'cancelled' && bk.by === 'system',
+      isPending: bk.status === 'pending',
+      hasReason: !!bk.reason, reasonText: bk.reason ? 'Sebäbi: ' + bk.reason : '',
+      hasTypical: !!bk.typical,
+      hasMove: !!bk.move
+    };
+
+    // ---- offered times ----
+    const offers = (bk.offers || []).map((o, i) => {
+      const on = stage !== 'view' && s.pick === i;
+      return {
+        t: o.t, taken: o.taken, on: on, cls: on ? 'slot on' : 'slot',
+        aria: o.taken ? o.t + ' — eýýäm eýelendi' : o.t + ' — şu wagta ýazyl',
+        pick: () => { if (!o.taken) set({ stage: s.stage === 'view' || s.stage === 'done' ? 'phone' : s.stage, pick: i }); }
+      };
+    });
+
+    // ---- inline login: masked phone → code → done ----
+    const locked = s.wrong >= 3;
+    const tryCode = (code) => {
+      if (code.join('').length < 4 || locked) { set({ code: code, codeErr: false }); return; }
+      if (code.join('') === '0000') { set({ code: code, codeErr: true, wrong: s.wrong + 1 }); return; }
+      set({ code: code, codeErr: false, stage: 'done' });
+    };
+    const codeBoxes = [0, 1, 2, 3].map((i) => ({
+      v: s.code[i] || '',
+      aria: (i + 1) + '-nji san',
+      ac: i === 0 ? 'one-time-code' : 'off',
+      bad: !!s.codeErr,
+      dis: locked,
+      cls: 'inp cbx' + (s.codeErr ? ' is-e' : ''),
+      setRef: (el) => { this.codeEls[i] = el; },
+      change: (e) => {
+        const dg = String((e && e.target && e.target.value) || '').replace(/\D/g, '');
+        const code = s.code.slice();
+        if (i === 0 && dg.length >= 4) {
+          for (let k = 0; k < 4; k++) code[k] = dg.charAt(k);
+          this.focusCode(3);
+          tryCode(code);
+          return;
+        }
+        code[i] = dg.slice(-1);
+        if (code[i] && i < 3) this.focusCode(i + 1);
+        tryCode(code);
+      },
+      key: (e) => {
+        if (e && e.key === 'Backspace' && !s.code[i] && i > 0) {
+          const code = s.code.slice();
+          code[i - 1] = '';
+          set({ code: code, codeErr: false });
+          this.focusCode(i - 1);
+        }
+      }
+    }));
+    const codeFull = s.code.join('').length === 4;
+
+    const doneConf = decl;
+    const done = {
+      title: doneConf ? 'Ýazylyş tassyklandy' : 'Täze haýyş ugradyldy',
+      badgeCls: 'badge ' + (doneConf ? 'st-c' : 'st-p'),
+      icC: doneConf, icP: !doneConf,
+      badge: doneConf ? 'Tassyklandy' : 'Garaşylýar',
+      sub: doneConf ? 'Ýatlatmany 1 gün we 2 sagat öň SMS bilen ibereris.' : 'Biznes tassyklanda SMS bilen habar bereris.',
+      when: pick ? pick.range : ''
+    };
+
+    return {
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      isNotFound: isNotFound,
+      showCard: !isNotFound,
+      bk: bk,
+      st: stv,
+      whenCls: bk.status === 'cancelled' ? 'lwhen gone' : 'lwhen',
+      hasMsg: !!bk.msg && st !== 'offersExpired',
+      showDone: offerable && stage === 'done',
+      showMain: !(offerable && stage === 'done'),
+      done: done,
+      icsDone: !!s.ics,
+      addIcs: () => set({ ics: true }),
+      showOffers: offerable,
+      isDecl: decl,
+      isExp: bk.type === 'expired',
+      expLead: bk.type === 'expired' ? bk.business + ' ' + bk.holdMin + ' minudyň içinde jogap bermedi. Şu boş wagtlaryň birini saýlaň:' : '',
+      offers: offers,
+      showOfferCap: decl && stage === 'view',
+      askText: pick ? pick.t + ' · ' + bk.service + ' · ' + bk.staff + ' — şu wagta ýazylmalymy?' : '',
+      showPhone: offerable && stage === 'phone',
+      showCode: offerable && stage === 'code',
+      backToChips: () => set({ stage: 'view', pick: null }),
+      // the code goes only to the phone on the booking (shown masked); the number can't be changed here
+      sendCode: () => { set({ stage: 'code', code: ['', '', '', ''], codeErr: false, wrong: 0 }); this.focusCode(0); },
+      codeBoxes: codeBoxes,
+      hasCodeErr: !!s.codeErr || locked,
+      codeErrText: locked ? 'Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň.' : 'Kod nädogry. Ýene ' + (3 - s.wrong) + ' synanyşyk galdy.',
+      verifyDis: !codeFull || locked,
+      verify: () => tryCode(s.code),
+      showOffersGone: st === 'offersExpired',
+      showReadOnly: st === 'confirmed' || st === 'pending',
+      dirLabel: 'Ýol görkez: ' + bk.business,
+      callLabel: 'Jaň et: ' + bk.business + ', ' + bk.phone,
+      codeShown: offerable && stage === 'done' ? bk.newId : bk.id
+    };
+  }
+}
+</script>
+</body>
+</html>

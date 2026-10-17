@@ -24,6 +24,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .b-gho{background:transparent;color:#101014}
 .b-gho:hover{background:#f4f4f6}
 .b-ico{width:40px;height:40px;padding:0;min-width:0}
+.b-ic{width:36px;height:36px;padding:0;min-width:0;border-radius:10px;flex:none}
+.me .b-gho:hover{background:#f6f6f8}
 .b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
 .swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
@@ -68,14 +70,16 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .day.inwk{background:#efecfe;color:#4429d6}
 .day.on{background:#5a3ff0;color:#ffffff;box-shadow:none}
 .day.blank{visibility:hidden}
-.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
-.dot{width:6px;height:6px;border-radius:999px;flex:none;display:inline-block}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.badge svg{flex:none}
+.badge.sm{height:24px}
 .st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
 .st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
 .st-d{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
 .st-x{background:#eef1f6;border:1px solid #d3dbe6;color:#41505f}
 .st-n{background:#fee4e2;border:1px solid #f6c7c2;color:#a3251b}
-.d-p{background:#dc8b0b}.d-c{background:#5a3ff0}.d-d{background:#12a366}.d-x{background:#7b8ea3}.d-n{background:#d9412f}
+.i-p{color:#93500a}.i-c{color:#4429d6}.i-d{color:#066a41}.i-x{color:#41505f}.i-n{color:#a3251b}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .fld{display:flex;flex-direction:column;gap:6px;min-width:0}
 .flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
 .inp{height:44px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:14px;color:#101014;background:#ffffff;outline:none}
@@ -91,11 +95,30 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:999px;background:#ffffff;box-shadow:0 1px 2px rgba(16,16,20,.2);transition:left .15s}
 .sw.on .knob{left:18px}
 .catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
-.chip:focus-visible,.slot:focus-visible,.day:focus-visible,.dy:focus-visible,.sgb:focus-visible,.dbtn:focus-visible,.rqc:focus-visible,.gh:focus-visible,.wkc:focus-visible,.woh:focus-visible,.rr:focus-visible,.selc:focus-visible,.sw:focus-visible,.lnkb:focus-visible,.bk:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
-.appb{display:none;align-items:flex-start;gap:12px;margin:12px 16px 0;padding:12px 8px 12px 14px;border-radius:12px;background:#f6f6f8}
-.appi{width:36px;height:36px;border-radius:10px;background:#efecfe;color:#4429d6;display:inline-flex;align-items:center;justify-content:center;flex:none}
+button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:pointer;text-align:left}
+.mi-d,.mi-d:hover{color:#a3251b}
+.mdv{height:1px;background:#e6e6ea;margin:6px 4px}
+.wsp{position:fixed;top:68px;left:12px;z-index:31;width:300px;display:flex;flex-direction:column}
+.ump{position:fixed;bottom:68px;left:12px;z-index:31;width:260px;display:flex;flex-direction:column}
+.wsr{gap:12px}
+.wsi{width:32px;height:32px;border-radius:8px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.wsn{display:flex;flex-direction:column;min-width:0;flex:1}
+.wst{font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wsc{font-size:12px;line-height:16px;color:#5a5a64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mws{display:none;align-items:center;gap:4px;height:44px;margin-left:-6px;padding:0 6px;border:0;border-radius:12px;background:transparent;color:#5a5a64;cursor:pointer;flex:none}
+.mws:hover{background:#f4f4f6}
+.tabbar{display:none}
+.tbi{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:60px;padding:6px 4px;border:0;background:transparent;font-family:inherit;font-size:11px;line-height:14px;font-weight:600;color:#5a5a64;cursor:pointer}
+.tbi:hover{color:#101014}
+.tbi.on{color:#4429d6}
+.tbc{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:16px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.mscrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:44;background:rgba(16,16,20,.4)}
+.more{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;flex-direction:column;max-height:85%;overflow-y:auto;padding:8px 8px 16px;background:#ffffff;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}
+.more .mi{min-height:48px;gap:12px}
+.more .grab{display:block;margin:0 auto 8px}
+.mi:focus-visible,.tbi:focus-visible,.mws:focus-visible,.chip:focus-visible,.slot:focus-visible,.day:focus-visible,.dy:focus-visible,.sgb:focus-visible,.dbtn:focus-visible,.rqc:focus-visible,.gh:focus-visible,.wkc:focus-visible,.woh:focus-visible,.rr:focus-visible,.selc:focus-visible,.sw:focus-visible,.lnkb:focus-visible,.bk:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .calh{display:flex;flex-direction:column;gap:10px;padding:16px 32px;border-bottom:1px solid #e6e6ea}
-.calbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.calbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .navg{display:flex;align-items:center;gap:2px;flex:none}
 .dbtn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:0;border-radius:10px;background:transparent;font-family:inherit;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em;color:#101014;cursor:pointer;white-space:nowrap}
 .dbtn:hover{background:#f4f4f6}
@@ -106,8 +129,24 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .selw{position:relative;display:inline-flex;flex:none}
 .selw svg{position:absolute;right:12px;top:10px;pointer-events:none;color:#4429d6}
 .selc{appearance:none;-webkit-appearance:none;height:36px;padding:0 34px 0 14px;border-radius:999px;border:1px solid #d5cbfb;background:#efecfe;color:#4429d6;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
-.xso{display:none}
-.rqc{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;border:1px solid #f2ddb0;background:#fef6e7;color:#93500a;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none}
+.xso,.xsp{display:none}
+.stchips{display:none;gap:8px;overflow-x:auto;margin:0 -16px;padding:2px 16px}
+.lgw{position:relative;flex:none}
+.lgp{position:absolute;top:44px;right:0;z-index:31;width:320px;max-height:calc(100vh - 200px);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+.lgh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-6px -6px -6px 0}
+.lgt{margin:0;font-size:15px;line-height:20px;font-weight:600}
+.lgs{display:flex;flex-direction:column;gap:8px}
+.lgr{display:grid;grid-template-columns:126px minmax(0,1fr);gap:10px;align-items:center;font-size:12px;line-height:16px;color:#5a5a64}
+.lgr .badge{justify-self:start}
+.lgi{display:flex;align-items:center;gap:10px;font-size:13px;line-height:18px;color:#101014}
+.lgi > svg{flex:none;color:#5a5a64}
+.lsq{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;flex:none;color:#5a5a64}
+.lsq-b{background:#f0f0f3}
+.lsq-h{background:repeating-linear-gradient(135deg,#f0f0f3 0 3px,#ffffff 3px 6px);box-shadow:inset 0 0 0 1px #e6e6ea}
+.lsq-o{background:#f6f6f8;box-shadow:inset 0 0 0 1px #e6e6ea}
+.lsq-e{background:#f6f6f8;border:1px dashed #b0b0b8}
+.lgf{display:flex;justify-content:flex-end;padding-top:12px;border-top:1px solid #e6e6ea}
+.rqc{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1px solid #f2ddb0;background:#fef6e7;color:#93500a;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none}
 .rqc:hover{border-color:#dc8b0b}
 .rq0{background:#f6f6f8;border-color:#e6e6ea;color:#5a5a64;cursor:default}
 .rq0:hover{border-color:#e6e6ea}
@@ -138,7 +177,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .hl{position:absolute;right:10px;font-size:12px;line-height:18px;color:#6e6e78;font-variant-numeric:tabular-nums}
 .gcol{position:relative;flex:1 1 0;min-width:200px;height:1041px;border-left:1px solid #e6e6ea;border-bottom:1px solid #e6e6ea}
 .shd{position:absolute;left:0;right:0;display:block;background:#f6f6f8;z-index:0}
-.shl{display:block;padding:16px 12px;font-size:13px;line-height:18px;font-weight:600;color:#5a5a64;text-align:center}
+.shx{background:#f0f0f3}
+.shl{display:flex;align-items:center;justify-content:center;gap:6px;padding:16px 12px;font-size:13px;line-height:18px;font-weight:600;color:#5a5a64;text-align:center}
 .slots{position:absolute;top:0;left:0;right:0;z-index:1;display:flex;flex-direction:column}
 .qs{display:block;width:100%;height:20px;flex:none;margin:0;padding:0 8px;border:0;border-top:1px solid #f0f0f3;border-radius:0;background:transparent;font-family:inherit;font-size:12px;line-height:18px;font-weight:600;color:#4429d6;text-align:left;cursor:pointer;font-variant-numeric:tabular-nums}
 .qs:nth-child(4n+1){border-top-color:#e6e6ea}
@@ -146,21 +186,32 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .qs:not(:disabled):hover{background:#efecfe}
 .qs:not(:disabled):hover::after{content:"+ " attr(data-t)}
 .mv .qs:not(:disabled):hover::after{content:"→ " attr(data-t)}
-.brk{position:absolute;left:4px;right:4px;z-index:3;border-radius:6px;background:#f0f0f3;padding:4px 8px;font-size:12px;line-height:16px;font-weight:600;color:#5a5a64;overflow:hidden}
+.qs.be{cursor:not-allowed}
+.gcol .qs.be:hover{background:transparent}
+.gcol .qs.be:hover::after,.mv .qs.be:hover::after{content:none}
+.brk{position:absolute;left:4px;right:4px;z-index:3;display:flex;align-items:flex-start;gap:6px;border-radius:6px;background:#f0f0f3;padding:4px 8px;font-size:12px;line-height:16px;font-weight:600;color:#5a5a64;overflow:hidden;white-space:nowrap}
+.brk svg,.bel svg{flex:none;margin-top:1px}
+.bel{position:absolute;left:4px;right:4px;z-index:4;display:flex;align-items:flex-start;gap:6px;padding:5px 8px;border-radius:8px;background:#f6f6f8;border:1px dashed #b0b0b8;font-size:12px;line-height:16px;font-weight:500;color:#5a5a64;pointer-events:none;overflow:hidden;white-space:nowrap}
+.bel.half{left:calc(50% + 2px)}
 .buf{position:absolute;left:4px;right:4px;z-index:3;border-radius:0 0 6px 6px;background:repeating-linear-gradient(135deg,#f0f0f3 0 4px,#ffffff 4px 8px)}
 .bk{position:absolute;left:4px;right:4px;z-index:4;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:1px;margin:0;padding:4px 8px;border-radius:8px;border:1px solid transparent;font-family:inherit;text-align:left;color:#101014;cursor:pointer;overflow:hidden}
 .bk:hover{filter:brightness(.97)}
-.bk.sel{box-shadow:0 0 0 2px #5a3ff0;z-index:5}
-.bk.hi{box-shadow:0 0 0 2px #5a3ff0,0 8px 24px rgba(16,16,20,.16);z-index:5}
+.bk.sel{box-shadow:0 0 0 2px #ffffff,0 0 0 4px #101014;z-index:5}
+.bk.hi{box-shadow:0 0 0 2px #ffffff,0 0 0 4px #101014,0 8px 24px rgba(16,16,20,.16);z-index:5}
 .bk.half{left:52%}
+.bk.lhalf{right:calc(50% + 2px)}
 .bk.src{opacity:.4;pointer-events:none}
-.k-c{background:#efecfe;border-color:#d5cbfb}
-.k-d{background:#e7f8ee;border-color:#bfe6d1}
-.k-n{background:#fee4e2;border-color:#f6c7c2}
-.k-x{background:#eef1f6;border-color:#d3dbe6}
-.k-p{background:transparent;border-color:transparent}
-.k-p::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;z-index:-1;border-radius:7px;background:#fef6e7;border:1px dashed #dc8b0b;opacity:.7}
+.k-c{background:#efecfe;border:1px solid #d5cbfb}
+.k-d{background:#e7f8ee;border:1px solid #bfe6d1}
+.k-n{background:#fee4e2;border:1px solid #f6c7c2}
+.k-p{background:#fef6e7;border:1.5px dashed #dc8b0b}
+.k-x{background:#ffffff;border:1px dashed #7b8ea3;color:#41505f}
+.sti{flex:none}
+.k-p .sti{color:#93500a}.k-c .sti{color:#4429d6}.k-d .sti{color:#066a41}.k-x .sti{color:#41505f}.k-n .sti{color:#a3251b}
 .bl{display:flex;align-items:baseline;gap:6px;min-width:0;white-space:nowrap;overflow:hidden}
+.bl.l1{align-items:center;gap:5px}
+.ich{display:inline-flex;align-items:center;justify-content:center;gap:3px;height:18px;min-width:18px;padding:0 3px;border-radius:999px;background:#ffffff;box-shadow:0 0 0 1px rgba(16,16,20,.1);font-size:11px;line-height:16px;font-weight:600;white-space:nowrap}
+.ich.lb{padding:0 6px 0 4px}
 .bl .bs{min-width:0}
 .bt{font-size:12px;line-height:16px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
 .bn{font-size:14px;line-height:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -205,14 +256,21 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .wocol:hover{background:#f6f6f8}
 .wol{position:absolute;top:0;left:0;right:0;bottom:0;z-index:1;pointer-events:none;background-image:linear-gradient(to bottom,#e6e6ea 0,#e6e6ea 1px,transparent 1px);background-size:100% 48px}
 .wb{position:absolute;left:4px;right:4px;z-index:2;display:block;border-radius:4px;border:1px solid transparent}
-.wb.k-p::before{border-radius:3px}
 .wbr{background:#f0f0f3;border-color:#f0f0f3}
+.wbe{background:#f6f6f8;border:1px dashed #b0b0b8}
+.wb.wsel{box-shadow:0 0 0 2px #ffffff,0 0 0 3px #101014;z-index:3}
+.bk.lk{box-shadow:0 0 0 2px #ffffff,0 0 0 4px #6e6e78;z-index:5}
+.lsq-p{background:#fef6e7;border:1.5px dashed #dc8b0b;color:#93500a}
+.okc{color:#066a41;font-weight:500}
+.mvtag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px 0 7px;border-radius:999px;background:#ffffff;border:1px dashed #dc8b0b;color:#93500a;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
+.mvtag svg{flex:none}
+.mvc{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;background:#f6f6f8}
+.mvr{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:10px;align-items:baseline;font-size:14px;line-height:20px}
+.mvo{color:#5a5a64}
+.mvn{font-weight:600;color:#101014}
+.mvl{display:inline-flex;align-items:flex-start;gap:5px;font-size:12px;line-height:16px;font-weight:600;color:#93500a}
+.mvl svg{flex:none;margin-top:1px}
 .wnow{position:absolute;left:0;right:0;z-index:3;height:2px;background:#5a3ff0;display:block}
-.legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:16px 32px 20px}
-.lg{display:inline-flex;align-items:center;gap:6px;font-size:12px;line-height:16px;color:#5a5a64;white-space:nowrap}
-.lsw{width:14px;height:14px;border-radius:4px;border:1px solid transparent;flex:none;display:inline-block}
-.lsw-p{background:#fef6e7;border:1px dashed #dc8b0b}
-.lsw-h{background:repeating-linear-gradient(135deg,#f0f0f3 0 3px,#ffffff 3px 6px);border-color:#e6e6ea}
 .dscrim{display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:40}
 .drw{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:100%;display:flex;flex-direction:column;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);z-index:41}
 .grab{display:none;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:8px auto 0;flex:none}
@@ -265,6 +323,11 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .rr0{padding:12px;border-top:1px solid #e6e6ea}
 .resh + .rr{border-top:0}
 .selcl{display:flex;align-items:center;gap:12px;padding:10px 8px 10px 12px;border:1px solid #d5cbfb;border-radius:12px;background:#efecfe}
+.res > .rr:first-child{border-top:0}
+.stfx{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #e6e6ea;border-radius:12px}
+.nx{display:inline-flex;align-items:center;gap:6px;height:40px}
+.nxd{font-weight:500;color:#5a5a64}
+.nx.on .nxd{color:#ffffff}
 .g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .sgp{display:flex;flex-direction:column}
 .svr{display:flex;align-items:center;gap:12px;min-height:44px;padding:6px 12px;border-radius:10px;cursor:pointer}
@@ -302,43 +365,40 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .tbx{width:36px;padding:0;color:#ffffff}
 .tbx:hover{color:#ffffff}
 @media (max-width:1279px){.dscrim{display:block}}
-@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side > div{align-self:stretch}.swb{justify-content:center;width:44px;padding:4px}.swb > span:not(.av),.swb > svg{display:none}.sn{font-size:0;gap:0;width:44px;height:44px;padding:0;justify-content:center;position:relative}.cnt{position:absolute;top:6px;right:6px;width:8px;height:8px;min-width:0;padding:0;border:0;background:#dc8b0b;font-size:0}.soon{display:none}.top{padding:0 24px}.gs{width:auto;flex:0 1 300px}.kbd{display:none}.calh{padding:14px 24px}.mvbar{margin:12px 24px 0}.gwrap{overflow-x:auto}.ggut{position:sticky;left:0;z-index:8}.legend{padding:14px 24px 18px}.wkh0,.wks{padding-left:24px}.wknote{padding:14px 24px 24px}.toast{left:96px;max-width:calc(100% - 120px)}}
-@media (max-width:767px){.root{flex-direction:column}.side{position:static !important;height:auto !important;width:100%;flex-direction:row;align-items:center;gap:4px;padding:8px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow:visible !important}.side > :nth-child(2),.side > :nth-child(6),.side > :nth-child(9),.side > :nth-child(10),.side > :nth-child(11){display:none}.side > div{align-self:center}.top{height:56px;padding:0 16px;gap:12px}.top h1{font-size:19px !important;line-height:24px !important}.gs{display:none}.appb{display:flex}.calh{padding:12px 16px}.calbar .b-sm,.calbar .b-i36,.dbtn,.selc,.rqc,.ckl{height:44px;min-height:44px}.calbar .b-i36{width:44px}.sgb{height:38px}.selw svg{top:14px}.stseg{display:none}.selw.xso{display:inline-flex}.mvbar{margin:12px 16px 0}.gx{display:none}.gh,.gcol{min-width:0}.ghx{display:none}.legend{padding:12px 16px 16px}.wkh0,.wks{padding-left:16px}.wkg{grid-template-columns:150px repeat(7,minmax(104px,1fr));min-width:880px}.wknote{padding:12px 16px 20px}.woh{padding:8px 4px}.woh .wkd{font-size:12px;padding:0 4px;margin-left:-4px}.woh .ghm{display:none}.mvpop{left:8px !important;right:8px !important;width:auto}.drw{top:auto;left:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.grab{display:block}.drw-h{height:56px;padding:0 8px 0 16px}.drw-b{padding:16px}.drw-f{padding:12px 16px 16px}.drw-f .b{flex:1 1 auto}.dr{grid-template-columns:110px minmax(0,1fr)}.g2{grid-template-columns:minmax(0,1fr)}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:16px;max-width:none}.slot{height:44px}.dpop{position:fixed;top:auto;left:0;right:0;bottom:0;width:auto;border-radius:16px 16px 0 0}.dpg{grid-template-columns:repeat(7,44px)}.day{width:44px;height:44px}}
+@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side > div{align-self:stretch}.swb{justify-content:center;width:44px;padding:4px}.swb > span,.swb > svg{display:none !important}.sn{font-size:0;gap:0;width:44px;height:44px;padding:0;justify-content:center;position:relative}.sn .cnt{position:absolute;top:6px;right:6px;width:8px;height:8px;min-width:0;padding:0;border:0;background:#dc8b0b;font-size:0}.soon{display:none}.me{flex-direction:column;gap:4px !important;padding:4px 0 !important}.mex{display:none !important}.ump{bottom:96px;left:8px}.top{padding:0 24px}.gs{width:auto;flex:0 1 300px}.kbd{display:none}.calh{padding:14px 24px}.mvbar{margin:12px 24px 0}.gwrap{overflow-x:auto}.ggut{position:sticky;left:0;z-index:8}.wkh0,.wks{padding-left:24px}.wknote{padding:14px 24px 24px}.toast{left:96px;max-width:calc(100% - 120px)}}
+@media (max-width:767px){.root{flex-direction:column}.side{display:none !important}.mws{display:inline-flex}.main{padding-bottom:72px}.tabbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:35;padding:0 4px;background:#ffffff;border-top:1px solid #e6e6ea}.top{height:56px;padding:0 16px;gap:10px}.top h1{font-size:19px !important;line-height:24px !important}.gs{display:none}.calh{padding:12px 16px}.calbar .b-sm,.calbar .b-i36,.dbtn,.rqc,.ckl{height:44px;min-height:44px}.calbar .b-i36{width:44px}.sgb{height:38px}.stseg,.selw{display:none !important}.stchips{display:flex}.stchips .chip{height:44px}.mvbar{margin:12px 16px 0}.gx{display:none}.gh,.gcol{min-width:0}.ghx{display:none}.wkh0,.wks{padding-left:16px}.wkg{grid-template-columns:150px repeat(7,minmax(104px,1fr));min-width:880px}.wknote{padding:12px 16px 20px}.woh{padding:8px 4px}.woh .wkd{font-size:12px;padding:0 4px;margin-left:-4px}.woh .ghm{display:none}.mvpop{left:8px !important;right:8px !important;width:auto}.drw{top:auto;left:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.grab{display:block}.drw-h{height:56px;padding:0 8px 0 16px}.drw-b{padding:16px}.drw-f{padding:12px 16px 16px}.drw-f .b{flex:1 1 auto}.dr{grid-template-columns:110px minmax(0,1fr)}.g2{grid-template-columns:minmax(0,1fr)}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:80px;max-width:none}.slot{height:44px}.dpop{position:fixed;top:auto;left:0;right:0;bottom:0;width:auto;border-radius:16px 16px 0 0}.dpg{grid-template-columns:repeat(7,44px)}.day{width:44px;height:44px}.lgp{position:fixed;top:auto;left:0;right:0;bottom:0;width:auto;max-height:85%;border-radius:16px 16px 0 0;z-index:45}.wsp{top:60px;left:8px;right:8px;width:auto}}
 .cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}</style>
 </helmet>
 <div class="root" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
 
 <aside class="side" aria-label="Esasy menýu" style="position: sticky; top: 0; height: 100vh; overflow-y: auto">
-<button class="swb" aria-label="Biznesi çalyş"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bitarap Türkmenistan şaýoly</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
-<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">{{me.role}}</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
 <a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
 <a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><span class="cnt" aria-label="{{pendAria}}">{{pendCount}}</span></sc-if></a>
 <a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
-<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
+<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<sc-if value="{{showRevBadge}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></sc-if></a>
 <a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
-<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
-<div style="flex: 1"></div>
+<sc-if value="{{showSettings}}" hint-placeholder-val="{{true}}"><a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a></sc-if>
+<div class="sfill" style="flex: 1"></div>
 <a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
 <a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
-<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
-<button class="swb" aria-label="Hasabym"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<span class="av">{{me.ini}}</span>
+<span class="mex" style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums">{{me.phone}}</span></span>
+<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" aria-expanded="{{userOpen}}" onClick="{{toggleUser}}" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+</div>
 </aside>
 
 <div class="main">
 <div class="top">
+<button class="mws" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
 <h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Senenama</h1>
 <div style="flex: 1"></div>
 <label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
 <button class="b b-pri b-sm" onClick="{{openNewBlank}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täze ýazylyş</button>
 </div>
-
-<sc-if value="{{banner}}" hint-placeholder-val="{{true}}">
-<div class="appb" role="region" aria-label="Ýeral Biznes programmasy">
-<span class="appi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg></span>
-<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600">Telefonda Ýeral Biznes programmasy has amatly</span><span class="cap">Haýyşlara derrew jogap beriň — bildirişler telefonyňyza geler.</span><div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 8px"><a class="b b-sec b-sm" href="#">App Store</a><a class="b b-sec b-sm" href="#">Google Play</a></div></div>
-<button class="b b-gho b-i36" aria-label="Ýap" onClick="{{hideBanner}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
-</div>
-</sc-if>
 
 <div class="calh">
 <div class="calbar">
@@ -363,20 +423,60 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="seg" role="group" aria-label="Döwür">
 <sc-for list="{{rangeSegs}}" as="rg" hint-placeholder-count="2"><button class="{{rg.cls}}" aria-pressed="{{rg.on}}" onClick="{{rg.pick}}">{{rg.t}}</button></sc-for>
 </div>
-<div class="seg stseg" role="group" aria-label="Işgärler">
+<sc-if value="{{showStaffSeg}}" hint-placeholder-val="{{true}}"><div class="seg stseg" role="group" aria-label="Işgärler">
 <sc-for list="{{modeSegs}}" as="md" hint-placeholder-count="2"><button class="{{md.cls}}" aria-pressed="{{md.on}}" onClick="{{md.pick}}">{{md.t}}</button></sc-for>
-</div>
+</div></sc-if>
 <div class="{{selCls}}">
 <select class="selc" aria-label="Işgär" value="{{staffId}}" onChange="{{pickStaff}}"><option value="ayna">Aýna</option><option value="maral">Maral</option><option value="jeren">Jeren</option><option value="leyli">Leýli</option></select>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
 </div>
 <div style="flex: 1"></div>
-<sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><button class="rqc" aria-label="{{pendChipAria}}" onClick="{{openQueue}}"><span class="dot d-p"></span>{{pendChip}}</button></sc-if>
+<sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><button class="rqc" aria-label="{{pendChipAria}}" onClick="{{openQueue}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{pendChip}}</button></sc-if>
 <sc-if value="{{noPend}}" hint-placeholder-val="{{false}}"><span class="rqc rq0">Täze haýyş ýok</span></sc-if>
 <label class="ckl"><input type="checkbox" checked="{{showX}}" onChange="{{toggleX}}">Ýatyrylanlary görkez</label>
+<div class="lgw">
+<button class="b b-gho b-i36" aria-label="Reňkler we nyşanlar" title="Reňkler we nyşanlar" aria-haspopup="dialog" aria-expanded="{{legendOpen}}" onClick="{{toggleLegend}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></button>
+<sc-if value="{{legendOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeMenus}}"></div>
+<div class="pop lgp" role="dialog" aria-labelledby="lg-t" onKeyDown="{{menuKey}}">
+<div class="lgh"><h2 id="lg-t" class="lgt">Reňkler we nyşanlar</h2><button class="b b-gho b-i36" aria-label="Ýap" onClick="{{closeMenus}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<div class="lgs"><span class="lbl">Ýagdaýlar</span>
+<div class="lgr"><span class="badge sm st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span><span>Täze haýyş — jogap garaşýar</span></div>
+<div class="lgr"><span class="badge sm st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span><span>Wagt bellenildi, müşderä habar berildi</span></div>
+<div class="lgr"><span class="badge sm st-d"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg>Tamamlandy</span><span>Gelşi geçdi (wagty gutarandan soň özi)</span></div>
+<div class="lgr"><span class="badge sm st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span><span>Müşderi, biznes ýa-da ulgam ýatyrdy</span></div>
+<div class="lgr"><span class="badge sm st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>Gelmedi</span><span>Müşderi gelmedi — «Arz et» arkaly bellenýär</span></div>
 </div>
+<div class="lgs"><span class="lbl">Çeşme</span>
+<div class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>Onlaýn — müşderi Ýeral arkaly ýazyldy</span></div>
+<div class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span>Telefon — jaň boýunça ýazyldy</span></div>
+<div class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Gelip ýazyldy</span></div>
+</div>
+<div class="lgs"><span class="lbl">Senenamada</span>
+<div class="lgi"><span class="lsq lsq-b"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg></span><span>Arakesme</span></div>
+<div class="lgi"><span class="lsq lsq-b"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span><span>Ýapyk wagt — sebäbi bilen</span></div>
+<div class="lgi"><span class="lsq lsq-h"></span><span>Hyzmatdan soňky arakesme</span></div>
+<div class="lgi"><span class="lsq lsq-o"></span><span>Iş wagtyndan daşary</span></div>
+<div class="lgi"><span class="lsq lsq-p"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></span><span>Täze wagt? — müşderi wagty üýtgetmegi haýyş etdi; öňki ýazylyş öz ýerinde galýar</span></div>
+<div class="lgi"><span class="lsq lsq-e"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path><rect width="20" height="14" x="2" y="6" rx="2"></rect></svg></span><span>Başga ýerde — hünärmen beýleki iş ýerinde, jikme-jiklik görkezilmeýär</span></div>
+<div class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>Müşderi barada möhüm bellik</span></div>
+<div class="lgi"><span class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>18 min</span><span>Haýyşa jogap bermäge galan wagt</span></div>
+</div>
+<sc-if value="{{internalOn}}" hint-placeholder-val="{{false}}">
+<div class="lgs"><span class="lbl">Içerki ýagdaýlar</span>
+<div class="lgi"><span class="ich" style="color: #066a41"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m16 11 2 2 4-4"></path></svg></span><span>Geldi</span></div>
+<div class="lgi"><span class="ich" style="color: #4429d6"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></span><span>Başlandy</span></div>
+<span class="cap">Diňe topar görýär. Ýazylyşyň ýagdaýyny üýtgetmeýär.</span>
+</div>
+</sc-if>
+<div class="lgf"><button class="b b-sec b-sm" onClick="{{closeMenus}}">Düşnükli</button></div>
+</div>
+</sc-if>
+</div>
+</div>
+<sc-if value="{{showStChips}}" hint-placeholder-val="{{false}}"><div class="stchips" role="group" aria-label="Işgär"><sc-for list="{{stChips}}" as="sp" hint-placeholder-count="4"><button class="{{sp.cls}}" aria-pressed="{{sp.on}}" onClick="{{sp.pick}}"><span class="av av24">{{sp.ini}}</span>{{sp.name}}</button></sc-for></div></sc-if>
 <div class="calsum">
-<sc-if value="{{isDay}}" hint-placeholder-val="{{true}}"><span><b>{{sumBk}}</b> ýazylyş</span><span class="sdot">·</span><span><b>{{sumReq}}</b> haýyş</span><span class="sdot">·</span><span>{{revLabel}}: <b>{{revText}}</b></span></sc-if>
+<sc-if value="{{isDay}}" hint-placeholder-val="{{true}}"><span><b>{{sumBk}}</b> ýazylyş</span><span class="sdot">·</span><span><b>{{sumReq}}</b> haýyş</span><sc-if value="{{showRev}}" hint-placeholder-val="{{true}}"><span class="sdot">·</span><span>{{revLabel}}: <b>{{revText}}</b></span></sc-if></sc-if>
 <sc-if value="{{isWeek}}" hint-placeholder-val="{{false}}"><span>{{wkWho}}: <b>{{wkBk}}</b> ýazylyş</span><span class="sdot">·</span><span><b>{{wkReq}}</b> haýyş</span></sc-if>
 </div>
 </div>
@@ -405,26 +505,28 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 <sc-for list="{{cols}}" as="c" hint-placeholder-count="4">
 <div class="{{c.colCls}}">
-<sc-for list="{{c.shades}}" as="z" hint-placeholder-count="2"><div class="shd" style="top: {{z.top}}px; height: {{z.h}}px"><sc-if value="{{z.hasLabel}}" hint-placeholder-val="{{false}}"><span class="shl">{{z.label}}</span></sc-if></div></sc-for>
+<sc-for list="{{c.shades}}" as="z" hint-placeholder-count="2"><div class="{{z.cls}}" style="top: {{z.top}}px; height: {{z.h}}px"><sc-if value="{{z.hasLabel}}" hint-placeholder-val="{{false}}"><span class="shl"><sc-if value="{{z.lock}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></sc-if>{{z.label}}</span></sc-if></div></sc-for>
 <div class="slots">
-<sc-for list="{{c.slots}}" as="q" hint-placeholder-count="52"><button class="qs" tabindex="-1" data-t="{{q.t}}" disabled="{{q.dis}}" aria-label="{{q.aria}}" onClick="{{q.pick}}" onDragOver="{{q.over}}" onDrop="{{q.drop}}"></button></sc-for>
+<sc-for list="{{c.slots}}" as="q" hint-placeholder-count="52"><button class="{{q.cls}}" tabindex="-1" data-t="{{q.t}}" disabled="{{q.dis}}" aria-label="{{q.aria}}" onClick="{{q.pick}}" onDragOver="{{q.over}}" onDrop="{{q.drop}}"></button></sc-for>
 </div>
-<sc-for list="{{c.breaks}}" as="br" hint-placeholder-count="1"><div class="brk" style="top: {{br.top}}px; height: {{br.h}}px">{{br.label}}</div></sc-for>
+<sc-for list="{{c.breaks}}" as="br" hint-placeholder-count="1"><div class="brk" style="top: {{br.top}}px; height: {{br.h}}px"><sc-if value="{{br.coffee}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"></path><path d="M6 2v2"></path></svg></sc-if><sc-if value="{{br.lock}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></sc-if><span>{{br.label}}</span></div></sc-for>
 <sc-for list="{{c.bufs}}" as="u" hint-placeholder-count="4"><div class="buf" style="top: {{u.top}}px; height: {{u.h}}px" title="{{u.title}}"></div></sc-for>
 <sc-for list="{{c.blocks}}" as="k" hint-placeholder-count="5">
-<button class="{{k.cls}}" style="top: {{k.top}}px; height: {{k.h}}px; padding-right: {{k.pr}}px" aria-label="{{k.aria}}" onClick="{{k.open}}" draggable="{{k.drag}}" onDragStart="{{k.dragStart}}">
-<sc-if value="{{k.nc}}" hint-placeholder-val="{{false}}"><span class="bl"><span class="bt">{{k.start}}</span><span class="{{k.nameCls}}">{{k.client}}</span></span></sc-if>
-<sc-if value="{{k.nt}}" hint-placeholder-val="{{true}}"><span class="bt">{{k.time}}</span><span class="{{k.nameCls}}">{{k.client}}</span><sc-if value="{{k.showSvc}}" hint-placeholder-val="{{true}}"><span class="bs">{{k.svc}}</span></sc-if></sc-if>
-<sc-if value="{{k.wc}}" hint-placeholder-val="{{false}}"><span class="bl"><span class="bt">{{k.time}}</span><span class="{{k.nameCls}}">{{k.client}}</span><span class="bm">{{k.phoneNo}}</span><span class="bs">· {{k.svc}} · {{k.priceL}}</span></span></sc-if>
-<sc-if value="{{k.wt}}" hint-placeholder-val="{{false}}"><span class="bl"><span class="bt">{{k.time}}</span><span class="bs">{{k.svc}} · {{k.durL}} · {{k.priceL}}</span></span><span class="bl"><span class="{{k.nameCls}}">{{k.client}}</span><span class="bm">{{k.phoneNo}}</span></span><sc-if value="{{k.showNote}}" hint-placeholder-val="{{false}}"><span class="{{k.noteCls}}"><sc-if value="{{k.nAlert}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></sc-if><sc-if value="{{k.nOther}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></sc-if>{{k.note}}</span></sc-if></sc-if>
+<button class="{{k.cls}}" style="top: {{k.top}}px; height: {{k.h}}px; padding-right: {{k.pr}}px" aria-label="{{k.aria}}" onClick="{{k.open}}" onMouseEnter="{{k.hov}}" onMouseLeave="{{k.unhov}}" draggable="{{k.drag}}" onDragStart="{{k.dragStart}}">
+<span class="bl l1"><sc-if value="{{k.iP}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{k.iC}}" hint-placeholder-val="{{true}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{k.iD}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{k.iX}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{k.iN}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if><span class="bt">{{k.t1}}</span><span class="{{k.nameCls}}">{{k.client}}</span><sc-if value="{{k.wide}}" hint-placeholder-val="{{false}}"><span class="bm">{{k.phoneNo}}</span></sc-if><sc-if value="{{k.wc}}" hint-placeholder-val="{{false}}"><span class="bs">· {{k.svc}} · {{k.priceL}}</span></sc-if></span>
+<sc-if value="{{k.l2}}" hint-placeholder-val="{{true}}"><span class="bs">{{k.line2}}</span></sc-if>
+<sc-if value="{{k.l3}}" hint-placeholder-val="{{false}}"><span class="bm">{{k.line3}}</span></sc-if>
+<sc-if value="{{k.showNote}}" hint-placeholder-val="{{false}}"><span class="{{k.noteCls}}"><sc-if value="{{k.nAlert}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></sc-if><sc-if value="{{k.nOther}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></sc-if>{{k.note}}</span></sc-if>
 <span class="bic">
+<sc-if value="{{k.hasIst}}" hint-placeholder-val="{{false}}"><span class="{{k.istCls}}" style="color: {{k.istColor}}"><sc-if value="{{k.istArr}}" hint-placeholder-val="{{true}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m16 11 2 2 4-4"></path></svg></sc-if><sc-if value="{{k.istRun}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></sc-if><sc-if value="{{k.istLabel}}" hint-placeholder-val="{{false}}"><span>{{k.istText}}</span></sc-if></span></sc-if>
 <sc-if value="{{k.phone}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></sc-if>
+<sc-if value="{{k.walk}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if>
 <sc-if value="{{k.alert}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></sc-if>
-<sc-if value="{{k.done}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#066a41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></sc-if>
 <sc-if value="{{k.pend}}" hint-placeholder-val="{{false}}"><span class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{k.hold}}</span></sc-if>
 </span>
 </button>
 </sc-for>
+<sc-for list="{{c.els}}" as="e" hint-placeholder-count="1"><div class="{{e.cls}}" style="top: {{e.top}}px; height: {{e.h}}px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path><rect width="20" height="14" x="2" y="6" rx="2"></rect></svg><span>{{e.label}}</span><span class="sr">{{e.sr}}</span></div></sc-for>
 <sc-if value="{{c.hasGhost}}" hint-placeholder-val="{{false}}">
 <div class="ghost" style="top: {{c.gh.top}}px; height: {{c.gh.h}}px" aria-hidden="true"><span class="bt">{{c.gh.time}}</span><span class="bn">{{c.gh.client}}</span></div>
 <div class="pop mvpop" role="dialog" aria-labelledby="mv-t" style="top: {{c.gh.popTop}}px; left: {{c.gh.left}}; right: {{c.gh.right}}">
@@ -451,7 +553,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="wks"><span class="av">{{wr.ini}}</span><span class="ghn"><span class="ghname">{{wr.name}}<sc-if value="{{wr.noApp}}" hint-placeholder-val="{{false}}"><span class="tagna">programmasyz</span></sc-if></span><span class="ghm">{{wr.spec}}</span></span></div>
 <sc-for list="{{wr.cells}}" as="x" hint-placeholder-count="7">
 <button class="{{x.cls}}" aria-label="{{x.aria}}" onClick="{{x.pick}}">
-<sc-if value="{{x.work}}" hint-placeholder-val="{{true}}"><span class="lbar"><span class="lfill" style="width: {{x.pct}}%"></span></span><span class="wkn"><span>{{x.cnt}}</span><span class="wkp">{{x.pctLabel}}</span></span><sc-if value="{{x.hasReq}}" hint-placeholder-val="{{false}}"><span class="wkr"><span class="dot d-p"></span>{{x.req}}</span></sc-if></sc-if>
+<sc-if value="{{x.work}}" hint-placeholder-val="{{true}}"><span class="lbar"><span class="lfill" style="width: {{x.pct}}%"></span></span><span class="wkn"><span>{{x.cnt}}</span><span class="wkp">{{x.pctLabel}}</span></span><sc-if value="{{x.hasReq}}" hint-placeholder-val="{{false}}"><span class="wkr"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{x.req}}</span></sc-if></sc-if>
 <sc-if value="{{x.off}}" hint-placeholder-val="{{false}}"><span class="wko">{{x.offLabel}}</span></sc-if>
 </button>
 </sc-for>
@@ -472,7 +574,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="ggut gtimes wot" aria-hidden="true"><sc-for list="{{woHours}}" as="wh" hint-placeholder-count="14"><span class="hl" style="top: {{wh.top}}px">{{wh.t}}</span></sc-for></div>
 <sc-for list="{{woDays}}" as="wo" hint-placeholder-count="7">
 <button class="wocol" tabindex="-1" aria-label="{{wo.aria}}" onClick="{{wo.open}}">
-<sc-for list="{{wo.shades}}" as="z" hint-placeholder-count="2"><span class="shd" style="top: {{z.top}}px; height: {{z.h}}px"><sc-if value="{{z.hasLabel}}" hint-placeholder-val="{{false}}"><span class="shl">{{z.label}}</span></sc-if></span></sc-for>
+<sc-for list="{{wo.shades}}" as="z" hint-placeholder-count="2"><span class="{{z.cls}}" style="top: {{z.top}}px; height: {{z.h}}px"><sc-if value="{{z.hasLabel}}" hint-placeholder-val="{{false}}"><span class="shl">{{z.label}}</span></sc-if></span></sc-for>
 <span class="wol"></span>
 <sc-for list="{{wo.blocks}}" as="wb" hint-placeholder-count="4"><span class="{{wb.cls}}" style="top: {{wb.top}}px; height: {{wb.h}}px"></span></sc-for>
 <sc-if value="{{wo.now}}" hint-placeholder-val="{{false}}"><span class="wnow" style="top: {{woNowTop}}px"></span></sc-if>
@@ -483,20 +585,6 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 </sc-if>
 
-<sc-if value="{{showLegend}}" hint-placeholder-val="{{true}}">
-<div class="legend" aria-label="Belgiler">
-<span class="lg"><span class="lsw lsw-p"></span>Garaşylýar (haýyş)</span>
-<span class="lg"><span class="lsw k-c"></span>Tassyklandy</span>
-<span class="lg"><span class="lsw k-d"></span>Tamamlandy</span>
-<span class="lg"><span class="lsw k-n"></span>Gelmedi</span>
-<span class="lg"><span class="lsw k-x"></span>Ýatyryldy</span>
-<span class="lg"><span class="lsw" style="background: #f0f0f3; border-color: #f0f0f3"></span>Arakesme</span>
-<span class="lg"><span class="lsw lsw-h"></span>Hyzmatdan soňky arakesme</span>
-<span class="lg"><span class="lsw" style="background: #f6f6f8; border-color: #e6e6ea"></span>Iş wagtyndan daşary</span>
-<span class="lg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Telefon arkaly</span>
-<span class="lg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>Bellik bar</span>
-</div>
-</sc-if>
 </div>
 
 <sc-if value="{{drawerOpen}}" hint-placeholder-val="{{false}}">
@@ -514,8 +602,15 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 <sc-if value="{{isReq}}" hint-placeholder-val="{{false}}">
 <div class="drw-b">
-<div class="drow"><span class="badge st-p"><span class="dot d-p"></span>Garaşylýar</span><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Onlaýn haýyş</span></div>
+<div class="drow"><sc-if value="{{rv.isPlain}}" hint-placeholder-val="{{true}}"><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span></sc-if><sc-if value="{{rv.isMove}}" hint-placeholder-val="{{false}}"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span><span class="mvtag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg>Wagt üýtgetmek</span></sc-if><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Onlaýn haýyş</span></div>
 <div class="wbox" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="wbt"><span style="font-weight: 600">Jogap bermäge {{rv.hold}} galdy</span><span>{{rv.expire}}</span></span></div>
+<sc-if value="{{rv.isMove}}" hint-placeholder-val="{{false}}">
+<div class="mvc"><span class="lbl">Wagt üýtgetmek haýyşy</span>
+<div class="mvr"><span class="cap">Öňki wagt</span><span class="mvo">{{rv.mvFrom}}</span><button class="lnkb" onClick="{{rv.showFrom}}">Görkez</button></div>
+<div class="mvr"><span class="cap">Täze wagt</span><span class="mvn">{{rv.mvTo}}</span><button class="lnkb" onClick="{{rv.showTo}}">Görkez</button></div>
+<span class="{{rv.fitCls}}">{{rv.fitText}}</span>
+<span class="cap">Tassyklasaňyz, ýazylyş täze wagta geçer we müşderä SMS gider. Ret etseňiz, öňki wagtynda galar.</span></div>
+</sc-if>
 <div class="dsec">
 <div class="cli">
 <span class="av40">{{rv.ini}}</span>
@@ -527,16 +622,18 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <dl class="dl"><sc-for list="{{rv.details}}" as="dr" hint-placeholder-count="6"><div class="{{dr.cls}}"><dt>{{dr.k}}</dt><dd>{{dr.v}}</dd></div></sc-for></dl>
 <sc-if value="{{rv.hasNote}}" hint-placeholder-val="{{true}}"><figure class="qbox"><figcaption class="lbl">Müşderiniň belligi</figcaption><blockquote class="qtxt">“{{rv.note}}”</blockquote></figure></sc-if>
 </div>
-<div class="drw-f"><button class="b b-sec" style="flex: 1 1 0" onClick="{{openDecline}}">Ret et</button><button class="b b-pri" style="flex: 1 1 0" onClick="{{confirmReq}}">Tassykla</button></div>
+<sc-if value="{{rv.canAnswer}}" hint-placeholder-val="{{true}}"><div class="drw-f"><button class="b b-sec" style="flex: 1 1 0" onClick="{{openDecline}}">Ret et</button><button class="b b-pri" style="flex: 1 1 0" disabled="{{rv.okDis}}" onClick="{{confirmReq}}">{{rv.okLabel}}</button></div></sc-if>
+<sc-if value="{{rv.noAnswer}}" hint-placeholder-val="{{false}}"><div class="drw-f"><span class="cap" style="flex: 1 1 auto; min-width: 0">{{rv.whoAnswers}}</span></div></sc-if>
 </sc-if>
 
 <sc-if value="{{isBook}}" hint-placeholder-val="{{false}}">
 <div class="drw-b">
-<div class="drow"><span class="{{bv.badgeCls}}"><span class="{{bv.dotCls}}"></span>{{bv.status}}</span>
+<div class="drow"><span class="{{bv.badgeCls}}"><sc-if value="{{bv.iP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{bv.iC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{bv.iD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{bv.iX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{bv.iN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{bv.status}}</span>
 <sc-if value="{{bv.srcOnline}}" hint-placeholder-val="{{true}}"><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Onlaýn</span></sc-if>
 <sc-if value="{{bv.srcPhone}}" hint-placeholder-val="{{false}}"><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Telefon arkaly</span></sc-if>
 <sc-if value="{{bv.isX}}" hint-placeholder-val="{{false}}"><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>{{bv.xLine}}</span></sc-if>
 </div>
+<sc-if value="{{bv.showIst}}" hint-placeholder-val="{{false}}"><div class="fld"><label class="flab" for="bv-ist">Içerki ýagdaý</label><select id="bv-ist" class="inp" style="max-width: 240px" value="{{bv.istVal}}" onChange="{{onIst}}" aria-describedby="bv-ist-c"><option value="">Ýok</option><option value="arrived">Geldi</option><option value="started">Başlandy</option></select><span id="bv-ist-c" class="cap">Diňe topar görýär · ýazylyşyň ýagdaýy üýtgemeýär</span></div></sc-if>
 <sc-if value="{{bv.hasAlert}}" hint-placeholder-val="{{true}}"><div class="wbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span class="wbt"><span class="lbl" style="color: #93500a">Bellik · ähli topar görýär</span><span>{{bv.alert}}</span></span></div></sc-if>
 <div class="dsec">
 <div class="cli">
@@ -551,7 +648,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="fld"><label class="flab" for="bv-note">Içerki bellik</label><textarea id="bv-note" class="inp ta" value="{{bv.note}}" onInput="{{onNote}}" placeholder="Meselem: reňk belgisi ýa-da ýörite isleg" aria-describedby="bv-note-c"></textarea><span id="bv-note-c" class="cap">{{bv.noteCap}}</span></div>
 <div class="dsec">
 <span class="lbl">Soňky gelşleri</span>
-<sc-if value="{{bv.hasHist}}" hint-placeholder-val="{{true}}"><div><sc-for list="{{bv.hist}}" as="hi" hint-placeholder-count="3"><div class="{{hi.cls}}"><span class="cap" style="font-variant-numeric: tabular-nums">{{hi.date}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{hi.what}}</span><span class="hst"><span class="{{hi.dotCls}}"></span>{{hi.st}}</span></span><span style="font-weight: 600; font-variant-numeric: tabular-nums">{{hi.price}}</span></div></sc-for></div></sc-if>
+<sc-if value="{{bv.hasHist}}" hint-placeholder-val="{{true}}"><div><sc-for list="{{bv.hist}}" as="hi" hint-placeholder-count="3"><div class="{{hi.cls}}"><span class="cap" style="font-variant-numeric: tabular-nums">{{hi.date}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{hi.what}}</span><span class="hst"><span class="{{hi.ink}}" style="display: inline-flex"><sc-if value="{{hi.iP}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{hi.iC}}" hint-placeholder-val="{{true}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{hi.iD}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{hi.iX}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{hi.iN}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if></span>{{hi.st}}</span></span><span style="font-weight: 600; font-variant-numeric: tabular-nums">{{hi.price}}</span></div></sc-for></div></sc-if>
 <sc-if value="{{bv.noHist}}" hint-placeholder-val="{{false}}"><span class="cap">{{bv.lastLine}}</span></sc-if>
 </div>
 </div>
@@ -567,27 +664,26 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 <sc-if value="{{isNew}}" hint-placeholder-val="{{false}}">
 <div class="drw-b">
+<div style="display: flex; flex-direction: column; gap: 6px"><div class="seg" role="group" aria-label="Çeşme" style="align-self: flex-start"><sc-for list="{{nv.srcSegs}}" as="ss" hint-placeholder-count="2"><button class="{{ss.cls}}" aria-pressed="{{ss.on}}" onClick="{{ss.pick}}">{{ss.t}}</button></sc-for></div><sc-if value="{{nv.isWalk}}" hint-placeholder-val="{{false}}"><span class="cap">{{nv.walkCap}}</span></sc-if></div>
 <section class="nsec" aria-labelledby="nv-cl">
-<span id="nv-cl" class="flab">Müşderi</span>
+<div class="nsh"><span id="nv-cl" class="flab">Müşderi</span><sc-if value="{{nv.canSwitch}}" hint-placeholder-val="{{true}}"><button class="lnkb" onClick="{{nv.toggleMode}}">{{nv.switchLabel}}</button></sc-if></div>
 <sc-if value="{{nv.hasClient}}" hint-placeholder-val="{{false}}">
-<div class="selcl"><span class="av40" style="background: #ffffff">{{nv.cl.ini}}</span><span class="clim"><span style="font-size: 15px; line-height: 20px; font-weight: 600">{{nv.cl.name}}</span><span class="cap" style="font-variant-numeric: tabular-nums">{{nv.cl.phone}} · {{nv.cl.meta}}</span></span><button class="b b-gho b-sm" onClick="{{nv.clear}}">Üýtget</button></div>
+<div class="selcl"><span class="av40" style="background: #ffffff">{{nv.cl.ini}}</span><span class="clim"><span style="font-size: 15px; line-height: 20px; font-weight: 600">{{nv.cl.name}}</span><span class="cap" style="font-variant-numeric: tabular-nums">{{nv.cl.phone}} · {{nv.cl.meta}}</span><sc-if value="{{nv.cl.hasTags}}" hint-placeholder-val="{{false}}"><span class="tgs"><sc-if value="{{nv.cl.hasNs}}" hint-placeholder-val="{{false}}"><span class="tg tg-n">{{nv.cl.nsLabel}}</span></sc-if><sc-if value="{{nv.cl.blocked}}" hint-placeholder-val="{{false}}"><span class="tg tg-p">Diňe jaň arkaly</span></sc-if></span></sc-if></span><button class="b b-gho b-sm" onClick="{{nv.clear}}">Üýtget</button></div>
 <sc-if value="{{nv.cl.hasAlert}}" hint-placeholder-val="{{false}}"><div class="wbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span class="wbt"><span class="lbl" style="color: #93500a">Bellik · ähli topar görýär</span><span>{{nv.cl.alert}}</span></span></div></sc-if>
 </sc-if>
-<sc-if value="{{nv.searching}}" hint-placeholder-val="{{true}}">
-<div class="srch"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input id="nv-q" class="inp" value="{{nv.q}}" onInput="{{nv.onQ}}" placeholder="Ady ýa-da telefon belgisi" aria-labelledby="nv-cl" autocomplete="off"></div>
+<sc-if value="{{nv.phoneMode}}" hint-placeholder-val="{{true}}">
+<div class="fld"><label class="flab" for="nv-ph" style="font-weight: 500">Telefon belgisi</label><div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="nv-ph" class="{{nv.phoneCls}}" type="tel" inputmode="numeric" autocomplete="off" value="{{nv.phoneFmt}}" onInput="{{nv.onPhone}}" onBlur="{{nv.phoneBlur}}" placeholder="65 12 34 56" aria-describedby="nv-phh"></div><span id="nv-phh" class="{{nv.phoneHintCls}}">{{nv.phoneHint}}</span></div>
+<sc-if value="{{nv.hasMatches}}" hint-placeholder-val="{{false}}"><div class="res" role="group" aria-label="Gabat gelýän müşderiler"><sc-for list="{{nv.matches}}" as="mc" hint-placeholder-count="2"><button class="rr" onClick="{{mc.pick}}"><span class="av">{{mc.ini}}</span><span class="clim"><span style="font-size: 14px; line-height: 20px; font-weight: 600">{{mc.name}}</span><span class="cap" style="font-variant-numeric: tabular-nums">{{mc.phone}}</span></span><sc-if value="{{mc.hasFlag}}" hint-placeholder-val="{{false}}"><span class="tg tg-p">Diňe jaň arkaly</span></sc-if><span class="cap" style="white-space: nowrap">{{mc.meta}}</span></button></sc-for></div></sc-if>
+<sc-if value="{{nv.isNewCl}}" hint-placeholder-val="{{false}}"><div class="fld"><label class="flab" for="nv-nm" style="font-weight: 500">Ady <span class="cap">· hökman däl</span></label><input id="nv-nm" class="inp" value="{{nv.name}}" onInput="{{nv.onName}}" placeholder="Meselem: Aýgözel" autocomplete="off"></div></sc-if>
+</sc-if>
+<sc-if value="{{nv.byName}}" hint-placeholder-val="{{false}}">
+<div class="srch"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input id="nv-q" class="inp" value="{{nv.q}}" onInput="{{nv.onQ}}" placeholder="Ady ýa-da telefon belgisi" aria-label="Müşderiniň ady ýa-da telefony" autocomplete="off"></div>
 <div class="res">
 <sc-if value="{{nv.resHead}}" hint-placeholder-val="{{true}}"><div class="resh lbl">Köp gelýän müşderiler</div></sc-if>
 <sc-for list="{{nv.results}}" as="cr" hint-placeholder-count="4"><button class="rr" onClick="{{cr.pick}}"><span class="av">{{cr.ini}}</span><span class="clim"><span style="font-size: 14px; line-height: 20px; font-weight: 600">{{cr.name}}</span><span class="cap" style="font-variant-numeric: tabular-nums">{{cr.phone}}</span></span><sc-if value="{{cr.hasFlag}}" hint-placeholder-val="{{false}}"><span class="tg tg-p">Diňe jaň arkaly</span></sc-if><span class="cap" style="white-space: nowrap">{{cr.meta}}</span></button></sc-for>
 <sc-if value="{{nv.noRes}}" hint-placeholder-val="{{false}}"><div class="rr0 cap">{{nv.noResText}}</div></sc-if>
 <button class="rr nw" onClick="{{nv.startNew}}"><span class="av" style="background: #ffffff; box-shadow: inset 0 0 0 1px #d5cbfb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>{{nv.newLabel}}</button>
 </div>
-</sc-if>
-<sc-if value="{{nv.creating}}" hint-placeholder-val="{{false}}">
-<div class="g2">
-<div class="fld"><label class="flab" for="nv-ph">Telefon</label><div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="nv-ph" class="{{nv.phoneCls}}" inputmode="numeric" value="{{nv.phoneFmt}}" onInput="{{nv.onPhone}}" onBlur="{{nv.phoneBlur}}" placeholder="65 12 34 56" aria-describedby="nv-phh"></div><span id="nv-phh" class="{{nv.phoneHintCls}}">{{nv.phoneHint}}</span></div>
-<div class="fld"><label class="flab" for="nv-nm">Ady</label><input id="nv-nm" class="inp" value="{{nv.name}}" onInput="{{nv.onName}}" placeholder="Hökman däl"></div>
-</div>
-<button class="lnkb" onClick="{{nv.backSearch}}">Gözlege gaýt</button>
 </sc-if>
 </section>
 
@@ -603,12 +699,19 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 <section class="nsec" aria-labelledby="nv-st">
 <span id="nv-st" class="flab">Hünärmen</span>
-<div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{nv.staff}}" as="sc" hint-placeholder-count="4"><button class="{{sc.cls}}" disabled="{{sc.dis}}" aria-pressed="{{sc.on}}" onClick="{{sc.pick}}"><span class="av av24">{{sc.ini}}</span>{{sc.name}}</button></sc-for></div>
+<sc-if value="{{nv.staffFixed}}" hint-placeholder-val="{{false}}"><div class="stfx"><span class="av">{{me.ini}}</span><span class="clim"><span style="font-size: 14px; line-height: 20px; font-weight: 600">{{me.name}}</span><span class="cap">Stilist · ýazylyş size goşular</span></span></div></sc-if>
+<sc-if value="{{nv.staffPick}}" hint-placeholder-val="{{true}}"><div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{nv.staff}}" as="sc" hint-placeholder-count="4"><button class="{{sc.cls}}" disabled="{{sc.dis}}" aria-pressed="{{sc.on}}" onClick="{{sc.pick}}"><span class="av av24">{{sc.ini}}</span>{{sc.name}}</button></sc-for></div></sc-if>
 <sc-if value="{{nv.noStaff}}" hint-placeholder-val="{{false}}"><div class="wbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Saýlanan hyzmatlary bir hünärmen etmeýär — olar üçin aýry ýazylyş dörediň.</span></div></sc-if>
 </section>
 
+<section class="nsec" aria-labelledby="nv-nx">
+<span id="nv-nx" class="flab">Iň ýakyn boş wagtlar</span>
+<sc-if value="{{nv.hasNear}}" hint-placeholder-val="{{true}}"><div role="group" aria-labelledby="nv-nx" style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{nv.near}}" as="nx" hint-placeholder-count="4"><button class="{{nx.cls}}" aria-pressed="{{nx.on}}" aria-label="{{nx.aria}}" onClick="{{nx.pick}}"><span class="nxd">{{nx.day}}</span>{{nx.t}}<sc-if value="{{nx.hasSt}}" hint-placeholder-val="{{false}}"><span class="nxd">· {{nx.st}}</span></sc-if></button></sc-for></div></sc-if>
+<sc-if value="{{nv.noNear}}" hint-placeholder-val="{{false}}"><span class="cap">{{nv.nearMsg}}</span></sc-if>
+</section>
+
 <section class="nsec" aria-labelledby="nv-dt">
-<span id="nv-dt" class="flab">Sene we wagt</span>
+<span id="nv-dt" class="flab">Başga sene we wagt</span>
 <div class="dys"><sc-for list="{{nv.days}}" as="dd" hint-placeholder-count="7"><button class="{{dd.cls}}" aria-pressed="{{dd.on}}" aria-label="{{dd.aria}}" onClick="{{dd.pick}}"><span class="ddw">{{dd.top}}</span><span class="ddn">{{dd.num}}</span></button></sc-for></div>
 <sc-if value="{{nv.hasMsg}}" hint-placeholder-val="{{false}}"><span class="{{nv.msgCls}}">{{nv.msg}}</span></sc-if>
 <sc-for list="{{nv.times}}" as="tg" hint-placeholder-count="2"><div style="display: flex; flex-direction: column; gap: 6px"><span class="lbl">{{tg.t}}</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{tg.slots}}" as="ts" hint-placeholder-count="4"><button class="{{ts.cls}}" aria-pressed="{{ts.on}}" onClick="{{ts.pick}}">{{ts.t}}</button></sc-for></div></div></sc-for>
@@ -627,13 +730,15 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="scrim" onClick="{{closeModal}}"></div>
 <div class="mdl mdl-s" role="dialog" aria-modal="true" aria-labelledby="dc-t">
 <span class="grab"></span>
-<div class="mhd"><h2 id="dc-t" class="mt">Haýyşy ret etmek</h2><button class="b b-gho b-i36" aria-label="Ýap" onClick="{{closeModal}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
-<div style="display: flex; flex-direction: column; gap: 4px"><p class="mp">Müşderi sebäbi görer.</p><span class="cap">{{dv.ctx}}</span></div>
+<div class="mhd"><h2 id="dc-t" class="mt">{{dv.title}}</h2><button class="b b-gho b-i36" aria-label="Ýap" onClick="{{closeModal}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><p class="mp">{{dv.lead}}</p><span class="cap">{{dv.ctx}}</span></div>
 <div class="nsec"><span class="flab" id="dc-r">Sebäbi</span><div role="radiogroup" aria-labelledby="dc-r" style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{dv.reasons}}" as="dz" hint-placeholder-count="4"><button class="{{dz.cls}}" role="radio" aria-checked="{{dz.on}}" onClick="{{dz.pick}}">{{dz.t}}</button></sc-for></div>
 <sc-if value="{{dv.other}}" hint-placeholder-val="{{false}}"><textarea class="inp ta" aria-label="Başga sebäp" value="{{dv.text}}" onInput="{{dv.onText}}" placeholder="Sebäbini gysgaça ýazyň — müşderi görer"></textarea></sc-if>
 </div>
+<sc-if value="{{dv.canAlt}}" hint-placeholder-val="{{true}}">
 <div class="nrow"><span style="display: flex; flex-direction: column; gap: 2px"><span id="dc-alt" style="font-size: 14px; line-height: 20px; font-weight: 500">Başga wagt teklip et</span><span class="cap">Müşderi teklip edilen wagty bir basyşda kabul edip biler</span></span><button class="{{dv.altCls}}" role="switch" aria-checked="{{dv.alt}}" aria-labelledby="dc-alt" onClick="{{dv.toggleAlt}}"><span class="trk"><span class="knob"></span></span></button></div>
 <sc-if value="{{dv.alt}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column; gap: 8px"><div role="group" aria-label="Teklip edilýän wagtlar" style="display: flex; gap: 8px; flex-wrap: wrap"><sc-for list="{{dv.slots}}" as="ds" hint-placeholder-count="3"><button class="{{ds.cls}}" aria-pressed="{{ds.on}}" onClick="{{ds.pick}}">{{ds.t}}</button></sc-for></div><span class="cap">{{dv.altCount}}</span></div></sc-if>
+</sc-if>
 <div class="mact"><button class="b b-sec" onClick="{{closeModal}}">Yza</button><button class="b b-red" disabled="{{dv.dis}}" onClick="{{dv.go}}">Ret et</button></div>
 </div>
 </div>
@@ -667,6 +772,54 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 </sc-if>
 
+<sc-if value="{{wsOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeMenus}}"></div>
+<div class="pop wsp" role="menu" aria-label="Iş ýerleriňiz" onKeyDown="{{menuKey}}">
+<div class="lbl" style="padding: 8px 10px 6px">Iş ýerleriňiz</div>
+<sc-for list="{{wsList}}" as="w" hint-placeholder-count="2">
+<sc-if value="{{w.cur}}" hint-placeholder-val="{{true}}"><button class="mi wsr" role="menuitemradio" aria-checked="true" aria-label="{{w.aria}}" onClick="{{closeMenus}}"><sc-if value="{{w.logo}}" hint-placeholder-val="{{true}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"></sc-if><sc-if value="{{w.noLogo}}" hint-placeholder-val="{{false}}"><span class="wsi">{{w.ini}}</span></sc-if><span class="wsn"><span class="wst">{{w.name}}</span><span class="wsc">{{w.cap}}</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M20 6 9 17l-5-5"></path></svg></button></sc-if>
+<sc-if value="{{w.other}}" hint-placeholder-val="{{false}}"><a class="mi wsr" role="menuitemradio" aria-checked="false" aria-label="{{w.aria}}" href="B-Calendar.dc.html"><sc-if value="{{w.logo}}" hint-placeholder-val="{{true}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"></sc-if><sc-if value="{{w.noLogo}}" hint-placeholder-val="{{false}}"><span class="wsi">{{w.ini}}</span></sc-if><span class="wsn"><span class="wst">{{w.name}}</span><span class="wsc">{{w.cap}}</span></span><sc-if value="{{w.hasPend}}" hint-placeholder-val="{{true}}"><span class="cnt" aria-hidden="true">{{w.pend}}</span></sc-if></a></sc-if>
+</sc-for>
+<div class="mdv"></div>
+<a class="mi wsr" role="menuitem" href="B-Onboarding.dc.html"><span class="wsi" style="background: #ffffff; box-shadow: inset 0 0 0 1px #d8d8de; color: #101014"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Täze biznes döret</a>
+</div>
+</sc-if>
+
+<sc-if value="{{userOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeMenus}}"></div>
+<div class="pop ump" role="menu" aria-label="Hasap menýusy" onKeyDown="{{menuKey}}">
+<a class="mi" role="menuitem" href="#">Profilim</a>
+<a class="mi" role="menuitem" href="#">Dil: Türkmençe</a>
+<a class="mi" role="menuitem" href="Home.dc.html">Müşderi hökmünde aç (yeral.app)</a>
+<div class="mdv"></div>
+<a class="mi mi-d" role="menuitem" href="B-Login.dc.html">Çykmak</a>
+</div>
+</sc-if>
+
+<nav class="tabbar" aria-label="Esasy bölümler">
+<a class="tbi on" href="B-Calendar.dc.html" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Senenama</span></a>
+<a class="tbi" href="B-Bookings.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span>Ýazylyşlar</span><sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><span class="tbc" aria-label="{{pendAria}}">{{pendCount}}</span></sc-if></a>
+<a class="tbi" href="B-Clients.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Müşderiler</span></a>
+<button class="tbi" aria-haspopup="dialog" aria-expanded="{{moreOpen}}" onClick="{{toggleMore}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path></svg><span>Köp</span></button>
+</nav>
+<sc-if value="{{moreOpen}}" hint-placeholder-val="{{false}}">
+<div class="mscrim" onClick="{{closeMenus}}"></div>
+<div class="more" role="dialog" aria-label="Köp" onKeyDown="{{menuKey}}">
+<span class="grab"></span>
+<a class="mi" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<sc-if value="{{showRevBadge}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></sc-if></a>
+<a class="mi" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<sc-if value="{{showSettings}}" hint-placeholder-val="{{true}}"><a class="mi" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a></sc-if>
+<a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="mi" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div class="mdv"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">{{me.ini}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 14px; line-height: 20px; font-weight: 600">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px">{{me.phone}} · {{me.role}}</span></span></div>
+<a class="mi" href="#">Profilim</a>
+<a class="mi" href="#">Dil: Türkmençe</a>
+<a class="mi" href="Home.dc.html">Müşderi hökmünde aç (yeral.app)</a>
+<a class="mi mi-d" href="B-Login.dc.html">Çykmak</a>
+</div>
+</sc-if>
+
 <sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
 <div class="toast" role="status">
 <sc-if value="{{toastOk}}" hint-placeholder-val="{{true}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></sc-if>
@@ -679,40 +832,42 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["dayAll","dayOne","weekAll","weekOne"],"default":"dayAll","section":"State"},"panel":{"editor":"enum","options":["none","request","booking","new","decline","complaint","move"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1420}}'>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["dayAll","dayOne","weekAll","weekOne"],"default":"dayAll","section":"State"},"panel":{"editor":"enum","options":["none","request","move-request","booking","new","decline","complaint","move"],"default":"none","section":"State"},"legend":{"editor":"boolean","default":false,"section":"State"},"internal":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"answers":{"editor":"enum","options":["both","each","desk"],"default":"both","section":"Access"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1360}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.state = Object.assign(this.fresh(), this.fromTweaks(props || {}));
   }
   fresh() {
-    return { ov: {}, added: [], newClients: [], notes: {}, showX: false, banner: true, seq: 1 };
+    return { ov: {}, added: [], newClients: [], notes: {}, showX: false, seq: 1 };
   }
   blankNew(o) {
-    return Object.assign({ q: '', cid: null, creating: false, phone: '', name: '', svcs: [], staff: null, allSvc: false, off: 0, time: null, note: '', sms: true, tried: false }, o || {});
+    return Object.assign({ src: 'phone', q: '', cid: null, byName: false, phone: '', name: '', svcs: [], staff: null, allSvc: false, off: 0, time: null, note: '', sms: true, tried: false }, o || {});
   }
   fromTweaks(p) {
     const pn = p.panel ?? 'none';
     let v = p.view ?? 'dayAll';
     if (['dayAll', 'dayOne', 'weekAll', 'weekOne'].indexOf(v) < 0) v = 'dayAll';
-    const st = { view: v, staffId: 'ayna', dayOff: 0, panel: 'none', target: null, modal: null, moveId: null, moveTo: null, moveSms: true, dReason: null, dText: '', dAlt: false, dSlots: [], cReason: null, cText: '', xReason: null, nw: this.blankNew(), datePop: false, toast: null, hiId: null };
+    const st = { view: v, staffId: 'ayna', dayOff: 0, panel: 'none', target: null, modal: null, moveId: null, moveTo: null, moveSms: true, dReason: null, dText: '', dAlt: false, dSlots: [], cReason: null, cText: '', xReason: null, nw: this.blankNew(), datePop: false, toast: null, hiId: null, menu: p.legend ? 'legend' : null, istat: p.internal ? { b08: 'arrived' } : {} };
     if (pn === 'request' || pn === 'decline') { st.panel = 'request'; st.target = 'b04'; }
+    if (pn === 'move-request' && p.role !== 'specialist') { st.panel = 'request'; st.target = 'b20'; st.dayOff = 3; st.staffId = 'maral'; }
     if (pn === 'decline') st.modal = 'decline';
     if (pn === 'booking' || pn === 'complaint') { st.panel = 'booking'; st.target = 'b03'; }
     if (pn === 'complaint') st.modal = 'complaint';
     if (pn === 'new') { st.panel = 'new'; st.nw = this.blankNew({ staff: 'ayna', time: 885 }); }
-    if (pn === 'move') { st.moveId = 'b06'; st.moveTo = { staff: 'ayna', off: 0, from: 1140 }; if (v.indexOf('week') === 0) st.view = 'dayAll'; }
+    if (pn === 'move') { st.moveId = 'b05'; st.moveTo = { staff: 'ayna', off: 0, from: 885 }; if (v.indexOf('week') === 0) st.view = 'dayAll'; }
+    if (p.role === 'specialist') { st.staffId = 'ayna'; st.view = st.view.replace('All', 'One'); }
     return st;
   }
   componentDidUpdate(pp) {
     const p = this.props;
-    if (pp.view !== p.view || pp.panel !== p.panel) this.setState(Object.assign(this.fresh(), this.fromTweaks(p)));
+    if (pp.view !== p.view || pp.panel !== p.panel || pp.role !== p.role || pp.answers !== p.answers || pp.internal !== p.internal || pp.legend !== p.legend) this.setState(Object.assign(this.fresh(), this.fromTweaks(p)));
   }
   up(patch) {
-    this.setState(Object.assign({ toast: null, hiId: null }, patch));
+    this.setState(Object.assign({ toast: null, hiId: null, menu: null }, patch));
   }
   say(patch, text, kind, act) {
-    this.setState(Object.assign({ hiId: null }, patch, { toast: { text: text, kind: kind || 'ok', act: act || null } }));
+    this.setState(Object.assign({ hiId: null, menu: null }, patch, { toast: { text: text, kind: kind || 'ok', act: act || null } }));
   }
   D() {
     if (this._d) return this._d;
@@ -777,12 +932,19 @@ class Component extends DCLogic {
       ['b15', 'leyli', 990, 1020, 'x6', 's10', 'pending', 'online', { hold: 21 }],
       ['b16', 'leyli', 1080, 1110, 'x7', 's10', 'confirmed', 'online'],
       ['b18', 'ayna', 870, 930, 'c3', 's1', 'pending', 'online', { off: 1, hold: 28, note: 'Saçym uzyn, reňk saýlamakda kömek gerek' }],
-      ['b19', 'jeren', 600, 660, 'x8', 's8', 'pending', 'online', { off: 2, hold: 12 }]
+      ['b19', 'jeren', 600, 660, 'x8', 's8', 'pending', 'online', { off: 2, hold: 12 }],
+      ['b20', 'maral', 600, 660, 'c11', 's5', 'confirmed', 'online', { off: 2, mv: { off: 3, from: 690, to: 750, hold: 26 } }]
     ];
     const BASE = raw.map((r) => Object.assign({ id: r[0], staff: r[1], from: r[2], to: r[3], cid: r[4], svcs: [r[5]], status: r[6], source: r[7], off: 0 }, r[8] || {}));
     const BADGE = { pending: ['st-p', 'd-p', 'Garaşylýar', 'k-p'], confirmed: ['st-c', 'd-c', 'Tassyklandy', 'k-c'], completed: ['st-d', 'd-d', 'Tamamlandy', 'k-d'], cancelled: ['st-x', 'd-x', 'Ýatyryldy', 'k-x'], noshow: ['st-n', 'd-n', 'Gelmedi', 'k-n'] };
     const ROT = ['c2', 'c8', 'c1', 'c10', 'x1', 'x2', 'c5', 'x3', 'c6', 'c9', 'c4', 'x5', 'x7', 'c11', 'c3', 'x4'];
-    this._d = { SVC: SVC, GROUPS: GROUPS, STAFF: STAFF, CL: CL, BASE: BASE, BADGE: BADGE, ROT: ROT, BREAKS: { ayna: [[840, 880, 'Arakesme']] }, NOW: 680 };
+    const PEOPLE = {
+      owner: { name: 'Maýsa Annaýewa', ini: 'M', phone: '+993 65 10 20 30', role: 'Eýesi', ws: [['Glow Studio', 'Eýesi · Bitarap Türkmenistan şaýoly', true, 6, true], ['Glow Studio · Parahat', 'Eýesi · Parahat 7', true, 2, false]] },
+      admin: { name: 'Selbi Hojaýewa', ini: 'S', phone: '+993 65 88 41 02', role: 'Administrator', ws: [['Glow Studio', 'Administrator · Bitarap Türkmenistan şaýoly', true, 6, true]] },
+      specialist: { name: 'Aýna Myradowa', ini: 'A', phone: '+993 65 31 22 10', role: 'Hünärmen', ws: [['Glow Studio', 'Hünärmen · Bitarap Türkmenistan şaýoly', true, 2, true], ['Aýnanyň saç studiýasy', 'Eýesi · Öýde kabul edýär · Parahat 2', false, 1, false]] }
+    };
+    const IST = { arrived: { t: 'Geldi', color: '#066a41' }, started: { t: 'Başlandy', color: '#4429d6' } };
+    this._d = { SVC: SVC, GROUPS: GROUPS, STAFF: STAFF, CL: CL, BASE: BASE, BADGE: BADGE, ROT: ROT, BREAKS: { ayna: [[840, 880, 'Arakesme']] }, BLOCKS: { jeren: [[990, 1050, 'Ýapyk · Okuw']] }, ELSE: { ayna: [[0, 1140, 1200], [1, 540, 600]] }, PEOPLE: PEOPLE, IST: IST, NOW: 680 };
     return this._d;
   }
   hm(m) {
@@ -836,11 +998,56 @@ class Component extends DCLogic {
   staff(id) {
     return this.D().STAFF.find((x) => x.id === id) || this.D().STAFF[0];
   }
+  role() {
+    const r = this.props.role;
+    return r === 'admin' || r === 'specialist' ? r : 'owner';
+  }
+  answers() {
+    const a = this.props.answers;
+    return a === 'each' || a === 'desk' ? a : 'both';
+  }
+  mine(b) {
+    return this.role() !== 'specialist' || b.staff === 'ayna';
+  }
+  canAnswer(b) {
+    const r = this.role();
+    if (r === 'owner') return true;
+    if (r === 'admin') return this.answers() !== 'each' || this.staff(b.staff).noApp;
+    return b.staff === 'ayna' && this.answers() !== 'desk';
+  }
+  slotNow() {
+    return Math.floor(this.D().NOW / 15) * 15;
+  }
+  isMv(b) {
+    return !!(b && b.mv && b.status === 'confirmed');
+  }
+  holdOf(b) {
+    return this.isMv(b) ? b.mv.hold : (b.hold || 0);
+  }
+  ghosts(off) {
+    return this.real().map((b) => this.ap(b)).filter((b) => this.isMv(b) && b.mv.off === off);
+  }
+  dShort(off) {
+    const x = this.dt(off);
+    return x.wd + ' ' + x.d;
+  }
+  sti(st) {
+    return { iP: st === 'pending', iC: st === 'confirmed', iD: st === 'completed', iX: st === 'cancelled', iN: st === 'noshow' };
+  }
+  elseAt(stId, off, t) {
+    return (this.D().ELSE[stId] || []).find((r) => r[0] === off && t >= r[1] && t < r[2]) || null;
+  }
+  elseMsg(stId, r, moving) {
+    const when = this.hm(r[1]) + '–' + this.hm(r[2]);
+    const what = moving ? 'ýazylyşy bu wagta geçirip bolmaýar' : 'bu wagta ýazylyş goşup bolmaýar';
+    if (this.role() === 'specialist' && stId === 'ayna') return 'Siz ' + when + ' aralygynda başga ýerde işleýärsiňiz — ' + what;
+    return this.staff(stId).name + ' ' + when + ' aralygynda başga ýerde işleýär — ' + what;
+  }
   hrs(st, off) {
     const c = this.closed(off);
-    if (c) return { off: c };
+    if (c) return { off: c, lock: true };
     const x = this.dt(off);
-    if (st.id === 'jeren' && x.y === 2026 && x.m === 10 && x.d >= 2 && x.d <= 9) return { off: 'Rugsat' };
+    if (st.id === 'jeren' && x.y === 2026 && x.m === 10 && x.d >= 2 && x.d <= 9) return { off: 'Rugsat', lock: true };
     if (st.wl[x.dow][0] === 0) return { off: 'Dynç güni' };
     const b = x.dow === 6 ? [600, 1080] : [540, 1200];
     return { from: Math.max(b[0], st.from), to: Math.min(b[1], st.to) };
@@ -867,7 +1074,7 @@ class Component extends DCLogic {
     if (off === 0) return [];
     const D = this.D();
     const base = D.BASE.filter((b) => b.off === 0 && b.status !== 'cancelled');
-    const realDay = D.BASE.filter((b) => b.off === off);
+    const realDay = D.BASE.filter((b) => b.off === off).concat(D.BASE.filter((b) => b.mv && b.mv.off === off).map((b) => ({ staff: b.mv.staff || b.staff, from: b.mv.from, to: b.mv.to })));
     const out = [];
     const L = D.ROT.length;
     base.forEach((b, i) => {
@@ -911,8 +1118,10 @@ class Component extends DCLogic {
     this.day(off).forEach((b) => {
       if (b.staff === stId && b.status !== 'cancelled' && b.id !== except) out.push([b.from, b.to + this.bufOf(b)]);
     });
-    const br = this.D().BREAKS[stId];
-    if (off === 0 && br) br.forEach((r) => out.push([r[0], r[1]]));
+    const D = this.D();
+    if (off === 0) (D.BREAKS[stId] || []).concat(D.BLOCKS[stId] || []).forEach((r) => out.push([r[0], r[1]]));
+    (D.ELSE[stId] || []).forEach((r) => { if (r[0] === off) out.push([r[1], r[2]]); });
+    this.ghosts(off).forEach((b) => { if ((b.mv.staff || b.staff) === stId && b.id !== except) out.push([b.mv.from, b.mv.to + this.bufOf(b)]); });
     return out;
   }
   fits(stId, off, t, dur, buf, except, bz) {
@@ -920,7 +1129,7 @@ class Component extends DCLogic {
     const h = this.hrs(this.staff(stId), off);
     if (h.off) return false;
     if (t < h.from || t + dur > h.to) return false;
-    if (off === 0 && t < this.D().NOW) return false;
+    if (off === 0 && t < this.slotNow()) return false;
     const list = bz || this.busy(stId, off, except);
     return !list.some((r) => t < r[1] && r[0] < t + dur + buf);
   }
@@ -931,19 +1140,24 @@ class Component extends DCLogic {
     return out;
   }
   queue() {
-    return this.real().map((b) => this.ap(b)).filter((b) => b.status === 'pending').sort((a, b) => a.hold - b.hold);
+    return this.real().map((b) => this.ap(b)).filter((b) => (b.status === 'pending' || this.isMv(b)) && this.mine(b)).sort((a, b) => this.holdOf(a) - this.holdOf(b));
   }
-  openBk(id) {
+  openBk(id, at) {
     const b = this.find(id);
     if (!b) return;
     const s = this.state;
-    const patch = { panel: b.status === 'pending' ? 'request' : 'booking', target: id, modal: null, moveId: null, moveTo: null, datePop: false, dReason: null, dText: '', dAlt: false, dSlots: [], cReason: null, cText: '', xReason: null };
-    if ((s.view === 'dayAll' || s.view === 'dayOne') && b.off !== s.dayOff) patch.dayOff = b.off;
+    const mvq = this.isMv(b);
+    const patch = { panel: b.status === 'pending' || mvq ? 'request' : 'booking', target: id, modal: null, moveId: null, moveTo: null, datePop: false, dReason: null, dText: '', dAlt: false, dSlots: [], cReason: null, cText: '', xReason: null };
+    const day = mvq && at !== 'orig' ? b.mv.off : b.off;
+    if ((s.view === 'dayAll' || s.view === 'dayOne') && day !== s.dayOff) patch.dayOff = day;
     if (s.view === 'dayOne' || s.view === 'weekOne') patch.staffId = b.staff;
     this.up(patch);
   }
   slotPick(stId, off, t) {
     const s = this.state;
+    if (off < 0 || (off === 0 && t < this.slotNow())) return;
+    const be = this.elseAt(stId, off, t);
+    if (be) { this.say({}, this.elseMsg(stId, be, !!s.moveId), 'err'); return; }
     if (s.moveId) {
       const mv = this.find(s.moveId);
       if (!mv) return;
@@ -967,15 +1181,25 @@ class Component extends DCLogic {
     const h = this.hrs(st, off);
     const mine = items.filter((b) => b.staff === st.id);
     const live = mine.filter((b) => b.status !== 'cancelled');
-    const nReq = live.filter((b) => b.status === 'pending').length;
+    const ghs = this.ghosts(off).filter((b) => (b.mv.staff || b.staff) === st.id);
+    const nReq = live.filter((b) => b.status === 'pending').length + ghs.length;
+    const internalOn = !!this.props.internal;
     const shades = [];
-    if (h.off) shades.push({ top: 0, h: 1040, hasLabel: true, label: h.off });
+    if (h.off) shades.push({ cls: h.lock ? 'shd shx' : 'shd', top: 0, h: 1040, hasLabel: true, label: h.off, lock: !!h.lock });
     else {
-      if (h.from > 480) shades.push({ top: 0, h: ph(h.from - 480), hasLabel: false, label: '' });
-      if (h.to < 1260) shades.push({ top: px(h.to), h: ph(1260 - h.to), hasLabel: false, label: '' });
+      if (h.from > 480) shades.push({ cls: 'shd', top: 0, h: ph(h.from - 480), hasLabel: false, label: '', lock: false });
+      if (h.to < 1260) shades.push({ cls: 'shd', top: px(h.to), h: ph(1260 - h.to), hasLabel: false, label: '', lock: false });
     }
     const brs = off === 0 && D.BREAKS[st.id] ? D.BREAKS[st.id] : [];
-    const breaks = brs.map((r) => ({ top: px(r[0]) + 1, h: ph(r[1] - r[0]) - 2, label: r[2] }));
+    const blk = off === 0 && D.BLOCKS[st.id] ? D.BLOCKS[st.id] : [];
+    const layer = (r, coffee) => ({ top: px(r[0]) + 1, h: ph(r[1] - r[0]) - 2, label: wide ? r[2] + ' · ' + this.hm(r[0]) + '–' + this.hm(r[1]) : r[2], coffee: coffee, lock: !coffee });
+    const breaks = brs.map((r) => layer(r, true)).concat(blk.map((r) => layer(r, false)));
+    const elsR = (D.ELSE[st.id] || []).filter((r) => r[0] === off);
+    const els = elsR.map((r) => {
+      const ov = live.some((b) => b.from < r[2] && r[1] < b.to);
+      const when = this.hm(r[1]) + '–' + this.hm(r[2]);
+      return { cls: 'bel' + (ov ? ' half' : ''), top: px(r[1]) + 1, h: ph(r[2] - r[1]) - 2, label: wide ? 'Başga ýerde · ' + when : 'Başga ýerde', sr: wide ? '' : ', ' + when };
+    });
     const bufs = [];
     live.forEach((b) => {
       const nb = this.bufOf(b);
@@ -988,11 +1212,12 @@ class Component extends DCLogic {
     const slots = [];
     for (let i = 0; i < 52; i++) {
       const t = 480 + i * 15;
-      const free = this.fits(st.id, off, t, 15, 0, null, bz);
+      const be = elsR.some((r) => t >= r[1] && t < r[2]);
+      const free = !be && this.fits(st.id, off, t, 15, 0, null, bz);
       const tl = this.hm(t);
       slots.push({
-        t: tl, dis: !free,
-        aria: st.name + ', ' + tl + (moving ? ' — şu wagta geçir' : ' — täze ýazylyş'),
+        t: tl, dis: !free && !be, cls: be ? 'qs be' : 'qs',
+        aria: st.name + ', ' + tl + (be ? ' — başga ýerde' : (moving ? ' — şu wagta geçir' : ' — täze ýazylyş')),
         pick: () => this.slotPick(st.id, off, t),
         over: (e) => { if (e && e.preventDefault) e.preventDefault(); },
         drop: (e) => { if (e && e.preventDefault) e.preventDefault(); this.slotPick(st.id, off, t); }
@@ -1007,37 +1232,79 @@ class Component extends DCLogic {
       const bd = D.BADGE[b.status];
       const pend = b.status === 'pending';
       const half = b.status === 'cancelled' && live.some((o) => o.from < b.to && b.from < o.to);
+      const lhalf = b.status !== 'cancelled' && elsR.some((r) => b.from < r[2] && r[1] < b.to);
       const svc = b.svcs.map((x) => D.SVC[x].n).join(' + ');
       const price = b.svcs.reduce((p, x) => p + D.SVC[x].p, 0);
       const alertTxt = b.alert || cl.alert || '';
       const inote = s.notes[b.id] || '';
-      const note = alertTxt || (b.note ? '“' + b.note + '”' : inote);
-      const icons = (b.source === 'phone' ? 1 : 0) + (alertTxt ? 1 : 0) + (b.status === 'completed' ? 1 : 0);
+      const mvq = this.isMv(b);
+      const mvTo = mvq ? this.dShort(b.mv.off) + ' · ' + this.hm(b.mv.from) : '';
+      const note = alertTxt || (mvq ? 'Täze wagt soraldy: ' + mvTo : (b.note ? '“' + b.note + '”' : inote));
+      const walk = b.source === 'walkin';
+      const ist = internalOn && b.status === 'confirmed' ? (s.istat[b.id] || '') : '';
+      const istD = ist ? D.IST[ist] : null;
+      const istLabel = wide && !!istD;
+      const icons = (b.source === 'phone' || walk ? 1 : 0) + (alertTxt ? 1 : 0);
       const compact = hgt < 44;
       const time = this.hm(b.from) + '–' + this.hm(b.to);
-      const canDrag = b.status === 'confirmed' && (b.off > 0 || (b.off === 0 && b.from >= D.NOW));
+      const canDrag = b.status === 'confirmed' && !mvq && this.mine(b) && (b.off > 0 || (b.off === 0 && b.from >= D.NOW));
       let cls = 'bk ' + bd[3];
       if (half) cls += ' half';
+      if (lhalf) cls += ' lhalf';
       if ((s.panel === 'request' || s.panel === 'booking') && s.target === b.id) cls += ' sel';
       if (s.hiId === b.id) cls += ' hi';
       if (s.moveId === b.id) cls += ' src';
-      blocks.push({
-        cls: cls, top: px(b.from) + 1, h: hgt, pr: 8 + icons * 18 + (pend ? 60 : 0),
-        time: time, start: this.hm(b.from), client: cl.name, svc: svc, phoneNo: cl.phone, priceL: this.money(price), durL: this.durL(dur),
+      if (mvq && s.lk === b.id) cls += ' lk';
+      blocks.push(Object.assign({
+        cls: cls, top: px(b.from) + 1, h: hgt, pr: 8 + icons * 18 + (pend || mvq ? 60 : 0) + (istD ? (istLabel ? 30 + istD.t.length * 7 : 22) : 0),
+        t1: wide ? time : this.hm(b.from), client: cl.name, phoneNo: cl.phone, wide: wide, wc: wide && compact,
+        svc: svc, priceL: this.money(price),
+        l2: !compact, line2: wide ? svc + ' · ' + this.durL(dur) + ' · ' + this.money(price) : svc,
+        l3: !wide && hgt >= 62, line3: mvq ? '→ ' + mvTo + '?' : time + ' · ' + this.durL(dur),
         nameCls: b.status === 'cancelled' ? 'bn strike' : 'bn',
-        nc: !wide && compact, nt: !wide && !compact, showSvc: hgt >= 62,
-        wc: wide && compact, wt: wide && !compact, showNote: wide && !compact && hgt >= 62 && !!note,
-        note: note, noteCls: alertTxt ? 'bnt al' : 'bnt', nAlert: !!alertTxt, nOther: !alertTxt && !!note,
-        phone: b.source === 'phone', alert: !!alertTxt, done: b.status === 'completed', pend: pend, hold: (b.hold || 0) + ' min',
-        aria: time + ', ' + cl.name + ', ' + svc + ', ' + bd[2] + (b.source === 'phone' ? ', telefon arkaly' : '') + (alertTxt ? ', bellik: ' + alertTxt : '') + (pend ? ', jogap bermäge ' + b.hold + ' min galdy' : ''),
+        showNote: wide && !compact && hgt >= 62 && !!note,
+        note: note, noteCls: alertTxt || mvq ? 'bnt al' : 'bnt', nAlert: !!alertTxt, nOther: !alertTxt && !mvq && !!note,
+        phone: b.source === 'phone', walk: walk, alert: !!alertTxt, pend: pend || mvq, hold: this.holdOf(b) + ' min',
+        hasIst: !!istD, istCls: istLabel ? 'ich lb' : 'ich', istColor: istD ? istD.color : '', istArr: ist === 'arrived', istRun: ist === 'started', istLabel: istLabel, istText: istD ? istD.t : '',
+        aria: time + ', ' + cl.name + ', ' + svc + ', ' + bd[2] + (b.source === 'phone' ? ', telefon arkaly' : '') + (walk ? ', gelip ýazyldy' : '') + (istD ? ', içerki ýagdaý: ' + istD.t : '') + (alertTxt ? ', bellik: ' + alertTxt : '') + (pend ? ', jogap bermäge ' + b.hold + ' min galdy' : '') + (mvq ? ', wagt üýtgetmek haýyşy: ' + mvTo + ', jogap bermäge ' + b.mv.hold + ' min galdy' : ''),
         drag: canDrag,
         dragStart: (e) => {
           if (!canDrag) return;
           try { if (e && e.dataTransfer) { e.dataTransfer.setData('text/plain', b.id); e.dataTransfer.effectAllowed = 'move'; } } catch (err) { }
           this.up({ moveId: b.id, moveTo: null, panel: 'none', target: null, modal: null });
         },
-        open: () => this.openBk(b.id)
-      });
+        open: () => this.openBk(b.id, 'orig'),
+        hov: mvq ? () => this.setState({ lk: b.id }) : () => {},
+        unhov: mvq ? () => this.setState({ lk: null }) : () => {}
+      }, this.sti(b.status)));
+    });
+    ghs.forEach((b) => {
+      const cl = this.client(b.cid);
+      const mv = b.mv;
+      const dur = mv.to - mv.from;
+      const hgt = ph(dur) - 2;
+      const compact = hgt < 44;
+      const svc = b.svcs.map((x) => D.SVC[x].n).join(' + ');
+      const price = b.svcs.reduce((p, x) => p + D.SVC[x].p, 0);
+      const was = this.dShort(b.off) + ' · ' + this.hm(b.from);
+      let cls = 'bk k-p mvg';
+      if ((s.panel === 'request' || s.panel === 'booking') && s.target === b.id) cls += ' sel';
+      if (s.lk === b.id) cls += ' lk';
+      blocks.push(Object.assign({
+        cls: cls, top: px(mv.from) + 1, h: hgt, pr: 68,
+        t1: wide ? this.hm(mv.from) + '–' + this.hm(mv.to) : this.hm(mv.from), client: 'Täze wagt?', phoneNo: cl.name, wide: wide, wc: wide && compact,
+        svc: svc, priceL: this.money(price),
+        l2: !compact, line2: wide ? svc + ' · ' + this.durL(dur) + ' · ' + this.money(price) : cl.name,
+        l3: !wide && hgt >= 62, line3: was + '-dan',
+        nameCls: 'bn', showNote: wide && !compact && hgt >= 62, note: 'Öňki wagty: ' + was, noteCls: 'bnt', nAlert: false, nOther: false,
+        phone: false, walk: false, alert: false, pend: true, hold: mv.hold + ' min',
+        hasIst: false, istCls: 'ich', istColor: '', istArr: false, istRun: false, istLabel: false, istText: '',
+        aria: 'Täze wagt soralýar: ' + this.hm(mv.from) + '–' + this.hm(mv.to) + ', ' + cl.name + ', ' + svc + ', öňki wagty ' + was + ', jogap bermäge ' + mv.hold + ' min galdy — haýyşy aç',
+        drag: false, dragStart: () => {},
+        open: () => this.openBk(b.id, 'ghost'),
+        hov: () => this.setState({ lk: b.id }),
+        unhov: () => this.setState({ lk: null })
+      }, this.sti('pending')));
     });
     let hasGhost = false;
     let gh = { top: 0, h: 0, time: '', client: '', from: '', to: '', staff: '', what: '', popTop: 0, left: 'auto', right: 'auto' };
@@ -1069,7 +1336,7 @@ class Component extends DCLogic {
       headAria: st.name + ', ' + st.spec + ' — diňe şu işgäriň gününi görkez',
       focus: () => this.up({ view: 'dayOne', staffId: st.id }),
       hoursLabel: h.off ? h.off : 'Iş wagty ' + this.hm(h.from) + '–' + this.hm(h.to) + brLabel,
-      shades: shades, slots: slots, breaks: breaks, bufs: bufs, blocks: blocks, hasGhost: hasGhost, gh: gh
+      shades: shades, slots: slots, breaks: breaks, bufs: bufs, blocks: blocks, els: els, hasGhost: hasGhost, gh: gh
     };
   }
   renderVals() {
@@ -1077,7 +1344,12 @@ class Component extends DCLogic {
     const D = this.D();
     const f = this.props.font ?? 'Onest';
     const fontStack = "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif";
-    const view = s.view;
+    const role = this.role();
+    const spec = role === 'specialist';
+    const admin = role === 'admin';
+    const internalOn = !!this.props.internal;
+    const view = spec ? s.view.replace('All', 'One') : s.view;
+    const sid = spec ? 'ayna' : s.staffId;
     const isDay = view === 'dayAll' || view === 'dayOne';
     const isWeek = !isDay;
     const isWeekAll = view === 'weekAll';
@@ -1094,6 +1366,28 @@ class Component extends DCLogic {
     const pendAria = pendCount + ' jogapsyz haýyş';
     const pendChip = pendCount + ' haýyş';
     const pendChipAria = pendCount + ' jogapsyz haýyş — iň gyssagly haýyşy aç';
+
+    const P = D.PEOPLE[role];
+    const me = { name: P.name, ini: P.ini, phone: P.phone, role: P.role };
+    const wsAria = 'Iş ýeri: Glow Studio, ' + P.role + '. Çalyşmak';
+    const wsList = P.ws.map((w) => ({
+      name: w[0], cap: w[1], logo: w[2], noLogo: !w[2], ini: w[0].charAt(0), cur: w[4], other: !w[4], hasPend: w[3] > 0, pend: String(w[3]),
+      aria: w[0] + ', ' + w[1] + (w[4] ? ', häzirki iş ýeri' : (w[3] ? ', ' + w[3] + ' jogapsyz haýyş' : ''))
+    }));
+    const menu = s.menu;
+    const wsOpen = menu === 'ws';
+    const userOpen = menu === 'user';
+    const moreOpen = menu === 'more';
+    const legendOpen = menu === 'legend';
+    const toggleWs = () => this.up({ menu: wsOpen ? null : 'ws', datePop: false });
+    const toggleUser = () => this.up({ menu: userOpen ? null : 'user', datePop: false });
+    const toggleMore = () => this.up({ menu: moreOpen ? null : 'more', datePop: false });
+    const toggleLegend = () => this.up({ menu: legendOpen ? null : 'legend', datePop: false });
+    const closeMenus = () => this.setState({ menu: null });
+    const menuKey = (e) => { if (e && e.key === 'Escape') this.setState({ menu: null }); };
+    const showSettings = !spec;
+    const showRevBadge = !spec;
+    const showStaffSeg = !spec;
 
     let dateLabel = this.dLong(off);
     if (isWeek) {
@@ -1131,27 +1425,31 @@ class Component extends DCLogic {
       const on = (r[0] === 'one') === one;
       return { t: r[1], on: on, cls: on ? 'sgb on' : 'sgb', pick: () => this.up({ view: range + (r[0] === 'one' ? 'One' : 'All'), datePop: false }) };
     });
-    const selCls = 'selw' + (one ? '' : ' xso');
-    const staffId = s.staffId;
+    const selCls = 'selw' + (spec ? ' xsp' : (one ? '' : ' xso'));
+    const staffId = sid;
+    const showStChips = !spec && view !== 'weekAll';
+    const stChips = D.STAFF.map((st) => {
+      const on = (one ? sid : D.STAFF[0].id) === st.id;
+      return { ini: st.name.charAt(0), name: st.name, on: on, cls: on ? 'chip on' : 'chip', pick: () => this.up({ view: range + 'One', staffId: st.id }) };
+    });
     const pickStaff = (e) => this.up({ staffId: e.target.value, view: range + 'One' });
     const openQueue = () => { const q = this.queue(); if (q.length) this.openBk(q[0].id); };
     const showX = !!s.showX;
     const toggleX = () => this.up({ showX: !s.showX });
-    const banner = !!s.banner;
-    const hideBanner = () => this.up({ banner: false });
-    const openNewBlank = () => this.up({ panel: 'new', target: null, modal: null, moveId: null, moveTo: null, datePop: false, nw: this.blankNew({ staff: one ? s.staffId : null, off: Math.max(off, 0) }) });
+    const openNewBlank = () => this.up({ panel: 'new', target: null, modal: null, moveId: null, moveTo: null, datePop: false, nw: this.blankNew({ staff: one ? sid : null, off: Math.max(off, 0) }) });
 
     const items = this.day(off);
-    const liveDay = items.filter((b) => b.status !== 'cancelled');
+    const liveDay = items.filter((b) => b.status !== 'cancelled' && this.mine(b));
     const sumBk = String(liveDay.length);
-    const sumReq = String(liveDay.filter((b) => b.status === 'pending').length);
+    const sumReq = String(liveDay.filter((b) => b.status === 'pending').length + this.ghosts(off).filter((b) => this.mine(b)).length);
     const rev = liveDay.filter((b) => b.status !== 'noshow').reduce((a, b) => a + b.svcs.reduce((p, x) => p + D.SVC[x].p, 0), 0);
-    const revLabel = off < 0 ? 'Girdeji' : 'Girdeji (meýilleşdirilen)';
+    const showRev = !admin;
+    const revLabel = spec ? (off < 0 ? 'Girdejiňiz' : 'Girdejiňiz (meýilleşdirilen)') : (off < 0 ? 'Girdeji' : 'Girdeji (meýilleşdirilen)');
     const revText = this.money(rev);
 
     let cols = [];
     if (isDay) {
-      const list = one ? D.STAFF.filter((x) => x.id === s.staffId) : D.STAFF;
+      const list = one ? D.STAFF.filter((x) => x.id === sid) : D.STAFF;
       cols = list.map((st, ci) => this.col(st, ci, list.length, off, items, one));
     }
     const gridCls = 'gin' + (s.moveId ? ' mv' : '');
@@ -1201,12 +1499,12 @@ class Component extends DCLogic {
           if (o === 0) {
             const L = this.day(0).filter((b) => b.staff === st.id && b.status !== 'cancelled');
             bk = L.length;
-            rq = L.filter((b) => b.status === 'pending').length;
+            rq = L.filter((b) => b.status === 'pending').length + this.ghosts(0).filter((b) => b.staff === st.id).length;
           } else {
             const orig = D.BASE.filter((b) => b.off === o && b.staff === st.id);
             const liv = this.real().map((b) => this.ap(b)).filter((b) => b.off === o && b.staff === st.id);
             bk = w[1] + liv.filter((b) => b.status !== 'cancelled').length - orig.filter((b) => b.status !== 'cancelled').length;
-            rq = w[2] + liv.filter((b) => b.status === 'pending').length - orig.filter((b) => b.status === 'pending').length;
+            rq = w[2] + liv.filter((b) => b.status === 'pending').length - orig.filter((b) => b.status === 'pending').length + this.ghosts(o).filter((b) => b.staff === st.id).length;
           }
           totals[i] += bk;
           wkBkN += bk;
@@ -1227,7 +1525,7 @@ class Component extends DCLogic {
     for (let i = 0; i <= 13; i++) woHours.push({ t: this.hm(480 + i * 60), top: i === 0 ? 2 : (i === 13 ? 624 - 20 : i * 48 - 9) });
     const woNowTop = Math.round((D.NOW - 480) * 0.8 * 100) / 100 - 1;
     if (isWeekOne) {
-      const st = this.staff(s.staffId);
+      const st = this.staff(sid);
       const pxw = (m) => Math.round((m - 480) * 0.8 * 100) / 100;
       const phw = (m) => Math.round(m * 0.8 * 100) / 100;
       woDays = [0, 1, 2, 3, 4, 5, 6].map((i) => {
@@ -1236,32 +1534,37 @@ class Component extends DCLogic {
         const h = this.hrs(st, o);
         const L = this.day(o).filter((b) => b.staff === st.id);
         const live = L.filter((b) => b.status !== 'cancelled');
-        const rq = live.filter((b) => b.status === 'pending').length;
+        const gw = this.ghosts(o).filter((b) => b.staff === st.id);
+        const rq = live.filter((b) => b.status === 'pending').length + gw.length;
         wkBkN += live.length;
         wkReqN += rq;
         const shades = [];
-        if (h.off) shades.push({ top: 0, h: 624, hasLabel: true, label: h.off.indexOf('Ýapyk') === 0 ? 'Ýapyk' : h.off });
+        if (h.off) shades.push({ cls: h.lock ? 'shd shx' : 'shd', top: 0, h: 624, hasLabel: true, label: h.off.indexOf('Ýapyk') === 0 ? 'Ýapyk' : h.off });
         else {
-          if (h.from > 480) shades.push({ top: 0, h: phw(h.from - 480), hasLabel: false, label: '' });
-          if (h.to < 1260) shades.push({ top: pxw(h.to), h: phw(1260 - h.to), hasLabel: false, label: '' });
+          if (h.from > 480) shades.push({ cls: 'shd', top: 0, h: phw(h.from - 480), hasLabel: false, label: '' });
+          if (h.to < 1260) shades.push({ cls: 'shd', top: pxw(h.to), h: phw(1260 - h.to), hasLabel: false, label: '' });
         }
-        const blocks = L.filter((b) => b.status !== 'cancelled' || s.showX).map((b) => ({ cls: 'wb ' + D.BADGE[b.status][3], top: pxw(b.from) + 1, h: Math.max(phw(b.to - b.from) - 2, 6) }));
-        if (o === 0 && D.BREAKS[st.id]) D.BREAKS[st.id].forEach((r) => blocks.push({ cls: 'wb wbr', top: pxw(r[0]) + 1, h: phw(r[1] - r[0]) - 2 }));
+        const wsel = (b) => ((s.panel === 'request' || s.panel === 'booking') && s.target === b.id ? ' wsel' : '');
+        const blocks = L.filter((b) => b.status !== 'cancelled' || s.showX).map((b) => ({ cls: 'wb ' + D.BADGE[b.status][3] + wsel(b), top: pxw(b.from) + 1, h: Math.max(phw(b.to - b.from) - 2, 6) }));
+        gw.forEach((b) => blocks.push({ cls: 'wb k-p' + wsel(b), top: pxw(b.mv.from) + 1, h: Math.max(phw(b.mv.to - b.mv.from) - 2, 6) }));
+        if (o === 0) (D.BREAKS[st.id] || []).concat(D.BLOCKS[st.id] || []).forEach((r) => blocks.push({ cls: 'wb wbr', top: pxw(r[0]) + 1, h: phw(r[1] - r[0]) - 2 }));
+        (D.ELSE[st.id] || []).filter((r) => r[0] === o).forEach((r) => blocks.push({ cls: 'wb wbe', top: pxw(r[1]) + 1, h: phw(r[2] - r[1]) - 2 }));
         const cnt = h.off ? (h.off.indexOf('Ýapyk') === 0 ? 'Ýapyk' : h.off) : live.length + ' ýazylyş' + (rq ? ' · ' + rq + ' haýyş' : '');
         return { label: x.ws + ' ' + x.d, cnt: cnt, hcls: 'woh' + (o === 0 ? ' tdy' : ''), aria: this.dLong(o) + ', ' + st.name + ': ' + cnt + ' — güni aç', open: () => this.up({ view: 'dayOne', dayOff: o }), shades: shades, blocks: blocks, now: o === 0 };
       });
     }
     const wkBk = String(wkBkN);
     const wkReq = String(wkReqN);
-    const wkWho = isWeekOne ? this.staff(s.staffId).name + ' · hepde' : 'Hepde';
-    const showLegend = !isWeekAll;
+    const wkWho = isWeekOne ? this.staff(sid).name + ' · hepde' : 'Hepde';
 
-    const tb = (s.panel === 'request' || s.panel === 'booking') ? this.find(s.target) : null;
-    const isReq = !!tb && tb.status === 'pending';
-    const isBook = !!tb && tb.status !== 'pending';
+    const tb0 = (s.panel === 'request' || s.panel === 'booking') ? this.find(s.target) : null;
+    const tb = tb0 && this.mine(tb0) ? tb0 : null;
+    const isMove = this.isMv(tb);
+    const isReq = !!tb && (tb.status === 'pending' || isMove);
+    const isBook = !!tb && !isReq;
     const isNew = s.panel === 'new';
     const drawerOpen = isReq || isBook || isNew;
-    const drawerTitle = isReq ? 'Haýyş' : (isBook ? 'Ýazylyş' : 'Täze ýazylyş');
+    const drawerTitle = isMove ? 'Wagt üýtgetmek haýyşy' : (isReq ? 'Haýyş' : (isBook ? 'Ýazylyş' : 'Täze ýazylyş'));
     const closePanel = () => this.up({ panel: 'none', target: null, modal: null });
     const drawerKey = (e) => { if (e && e.key === 'Escape' && !s.modal) this.up({ panel: 'none', target: null }); };
     const qi = isReq ? queue.findIndex((b) => b.id === tb.id) : -1;
@@ -1276,34 +1579,58 @@ class Component extends DCLogic {
     const svcOf = (b) => b.svcs.map((x) => D.SVC[x].n).join(' + ');
     const priceOf = (b) => b.svcs.reduce((p, x) => p + D.SVC[x].p, 0);
 
-    let rv = { hold: '', expire: '', ini: '', client: '', phone: '', isNewCl: false, hasVisits: false, visits: '', hasNoShow: false, noShowLabel: '', hasAlert: false, alert: '', details: [], hasNote: false, note: '' };
+    let rv = { isMove: false, isPlain: true, mvFrom: '', mvTo: '', fitCls: 'cap', fitText: '', showFrom: () => {}, showTo: () => {}, okDis: false, okLabel: 'Tassykla', hold: '', expire: '', ini: '', client: '', phone: '', isNewCl: false, hasVisits: false, visits: '', hasNoShow: false, noShowLabel: '', hasAlert: false, alert: '', details: [], hasNote: false, note: '', canAnswer: true, noAnswer: false, whoAnswers: '' };
     if (isReq) {
       const b = tb;
       const cl = this.client(b.cid);
       const st = this.staff(b.staff);
-      const det = [['Hyzmat', svcOf(b)], ['Hünärmen', st.name + ' · ' + st.spec + (st.noApp ? ' · programmasyz' : '')], ['Sene we wagt', whenOf(b)], ['Dowamlylygy', this.durL(b.to - b.from)], ['Bahasy', this.money(priceOf(b))], ['Çeşme', 'Onlaýn']];
+      const det = isMove
+        ? [['Hyzmat', svcOf(b)], ['Hünärmen', st.name + ' · ' + st.spec + (st.noApp ? ' · programmasyz' : '')], ['Dowamlylygy', this.durL(b.to - b.from)], ['Bahasy', this.money(priceOf(b))], ['Ýazylyş', 'Tassyklandy · öňki wagty haýyş jogaplanýança saklanýar'], ['Çeşme', 'Onlaýn']]
+        : [['Hyzmat', svcOf(b)], ['Hünärmen', st.name + ' · ' + st.spec + (st.noApp ? ' · programmasyz' : '')], ['Sene we wagt', whenOf(b)], ['Dowamlylygy', this.durL(b.to - b.from)], ['Bahasy', this.money(priceOf(b))], ['Çeşme', 'Onlaýn']];
+      const hold = this.holdOf(b);
+      const ms = isMove ? this.staff(b.mv.staff || b.staff) : st;
+      const fitsTo = !isMove || this.fits(ms.id, b.mv.off, b.mv.from, b.mv.to - b.mv.from, this.bufOf(b), b.id);
+      const goDay = (o) => () => this.up({ dayOff: o, view: isDay ? view : (one ? 'dayOne' : 'dayAll') });
       rv = {
-        hold: b.hold + ' min',
-        expire: 'Jogap berilmese, haýyş ' + this.loc(this.hm(D.NOW + b.hold)) + ' awtomatik ýatyrylar we müşderä 3 başga wagt teklip ediler.',
+        isMove: isMove, isPlain: !isMove,
+        mvFrom: isMove ? whenOf(b) : '', mvTo: isMove ? this.dLong(b.mv.off) + ' · ' + this.hm(b.mv.from) + '–' + this.hm(b.mv.to) : '',
+        fitCls: fitsTo ? 'cap okc' : 'cap warn', fitText: fitsTo ? ms.name + ' täze wagtda boş — tassyklap bolýar.' : ms.name + ' täze wagtda boş däl — tassyklap bolmaýar.',
+        showFrom: goDay(b.off), showTo: goDay(isMove ? b.mv.off : b.off),
+        okDis: !fitsTo, okLabel: isMove ? 'Täze wagty tassykla' : 'Tassykla',
+        hold: hold + ' min',
+        expire: isMove
+          ? 'Jogap berilmese, haýyş ' + this.loc(this.hm(D.NOW + hold)) + ' awtomatik ýatyrylar — ýazylyş öňki wagtynda galar.'
+          : 'Jogap berilmese, haýyş ' + this.loc(this.hm(D.NOW + b.hold)) + ' awtomatik ýatyrylar we müşderä 3 başga wagt teklip ediler.',
         ini: cl.name.charAt(0), client: cl.name, phone: cl.phone,
         isNewCl: !cl.visits, hasVisits: !!cl.visits, visits: cl.visits + ' gelşi · ortaça ' + cl.avg,
         hasNoShow: !!cl.noShows, noShowLabel: (cl.noShows || 0) + ' gezek gelmedi',
         hasAlert: !!(b.alert || cl.alert), alert: b.alert || cl.alert || '',
         details: det.map((r, i) => ({ k: r[0], v: r[1], cls: i === det.length - 1 ? 'dr last' : 'dr' })),
-        hasNote: !!b.note, note: b.note || ''
+        hasNote: !!b.note, note: b.note || '',
+        canAnswer: this.canAnswer(b), noAnswer: !this.canAnswer(b),
+        whoAnswers: spec ? 'Haýyşlara administrator we eýesi jogap berýär — siz diňe görýärsiňiz.' : st.name + ' öz haýyşlaryna özi jogap berýär — siz diňe görýärsiňiz.'
       };
     }
     const openDecline = () => this.up({ modal: 'decline', dReason: null, dText: '', dAlt: false, dSlots: [] });
     const confirmReq = () => {
-      if (!tb) return;
+      if (!tb || !this.canAnswer(tb)) return;
       const id = tb.id;
       const rest = queue.filter((b) => b.id !== id);
       const ov = Object.assign({}, s.ov);
+      if (isMove) {
+        const mv = tb.mv;
+        if (!this.fits(mv.staff || tb.staff, mv.off, mv.from, mv.to - mv.from, this.bufOf(tb), id)) return;
+        ov[id] = Object.assign({}, s.ov[id] || {}, { off: mv.off, from: mv.from, to: mv.to, staff: mv.staff || tb.staff, mv: null });
+        const patch = { ov: ov, panel: 'none', target: null, modal: null, hiId: id };
+        if (isDay) patch.dayOff = mv.off;
+        this.say(patch, 'Täze wagt tassyklandy: ' + this.dLong(mv.off) + ' · ' + this.hm(mv.from) + ' · müşderä SMS iberildi', 'ok', rest.length ? 'next' : null);
+        return;
+      }
       ov[id] = Object.assign({}, s.ov[id] || {}, { status: 'confirmed' });
       this.say({ ov: ov, panel: 'none', target: null, modal: null, hiId: id }, 'Ýazylyş tassyklandy · müşderä SMS iberildi', 'ok', rest.length ? 'next' : null);
     };
 
-    let bv = { badgeCls: 'badge', dotCls: 'dot', status: '', srcOnline: false, srcPhone: false, isX: false, xLine: '', hasAlert: false, alert: '', ini: '', client: '', phone: '', callAria: '', stats: '', hasNoShow: false, noShowLabel: '', blocked: false, details: [], hasCNote: false, cnote: '', note: '', noteCap: '', hasHist: false, noHist: true, hist: [], lastLine: '', canMove: false, canComplain: false, canCancel: false, hasFoot: false };
+    let bv = { badgeCls: 'badge', iP: false, iC: false, iD: false, iX: false, iN: false, showIst: false, istVal: '', status: '', srcOnline: false, srcPhone: false, isX: false, xLine: '', hasAlert: false, alert: '', ini: '', client: '', phone: '', callAria: '', stats: '', hasNoShow: false, noShowLabel: '', blocked: false, details: [], hasCNote: false, cnote: '', note: '', noteCap: '', hasHist: false, noHist: true, hist: [], lastLine: '', canMove: false, canComplain: false, canCancel: false, hasFoot: false };
     if (isBook) {
       const b = tb;
       const cl = this.client(b.cid);
@@ -1316,8 +1643,9 @@ class Component extends DCLogic {
       const hist = (cl.hist || []).slice(0, 3);
       const canMove = b.status === 'confirmed' && future;
       const canComplain = b.status === 'confirmed' || b.status === 'completed';
-      bv = {
-        badgeCls: 'badge ' + bd[0], dotCls: 'dot ' + bd[1], status: bd[2],
+      bv = Object.assign({
+        badgeCls: 'badge ' + bd[0], status: bd[2],
+        showIst: internalOn && b.status === 'confirmed', istVal: s.istat[b.id] || '',
         srcOnline: b.source === 'online' && b.status !== 'cancelled', srcPhone: b.source === 'phone' && b.status !== 'cancelled',
         isX: b.status === 'cancelled', xLine: b.by === 'client' ? 'Müşderi ýatyrdy' + (b.reason ? ' · ' + b.reason : '') : 'Biznes ýatyrdy' + (b.reason ? ' · ' + b.reason : ''),
         hasAlert: !!(b.alert || cl.alert), alert: b.alert || cl.alert || '',
@@ -1328,13 +1656,19 @@ class Component extends DCLogic {
         hasCNote: !!b.note, cnote: b.note || '',
         note: note, noteCap: note ? 'Diňe toparyňyz görýär · ýatda saklandy' : 'Diňe toparyňyz görýär · awtomatik ýatda saklanýar',
         hasHist: hist.length > 0, noHist: hist.length === 0,
-        hist: hist.map((r, i) => ({ date: r[0], what: r[1], price: r[2], st: D.BADGE[r[3]][2], dotCls: 'dot ' + D.BADGE[r[3]][1], cls: i === hist.length - 1 ? 'hrow last' : 'hrow' })),
+        hist: hist.map((r, i) => Object.assign({ date: r[0], what: r[1], price: r[2], st: D.BADGE[r[3]][2], ink: 'i-' + D.BADGE[r[3]][0].slice(3), cls: i === hist.length - 1 ? 'hrow last' : 'hrow' }, this.sti(r[3]))),
         lastLine: cl.last && cl.last !== '—' ? 'Soňky gelşi: ' + cl.last + ' · doly taryh müşderiniň kartynda' : 'Öňki gelşi ýok',
         canMove: canMove, canComplain: canComplain, canCancel: canMove, hasFoot: canMove || canComplain
-      };
+      }, this.sti(b.status));
     }
+    const onIst = (e) => {
+      const m = Object.assign({}, s.istat);
+      const v = e && e.target ? e.target.value : '';
+      if (v) m[s.target] = v; else delete m[s.target];
+      this.setState({ istat: m });
+    };
     const onNote = (e) => { const n = Object.assign({}, s.notes); n[s.target] = e.target.value.slice(0, 300); this.setState({ notes: n }); };
-    const startMove = () => { if (!tb) return; this.up({ moveId: tb.id, moveTo: null, panel: 'none', target: null, modal: null, view: isDay ? view : 'dayAll', dayOff: tb.off }); };
+    const startMove = () => { if (!tb) return; this.up({ moveId: tb.id, moveTo: null, panel: 'none', target: null, modal: null, view: isDay ? view : (one ? 'dayOne' : 'dayAll'), dayOff: tb.off }); };
     const openComplaint = () => this.up({ modal: 'complaint', cReason: null, cText: '' });
     const openCancel = () => this.up({ modal: 'cancel', xReason: null });
     const rebook = () => { if (!tb) return; this.up({ panel: 'new', target: null, modal: null, nw: this.blankNew({ cid: tb.cid, staff: tb.staff, svcs: tb.svcs.slice(), off: Math.max(off, 0) }) }); };
@@ -1343,33 +1677,57 @@ class Component extends DCLogic {
     let nv = {};
     {
       const allCl = D.CL.concat(s.newClients);
+      const dig8 = (p) => p.replace(/\D/g, '').slice(-8);
       const cl = nw.cid ? this.client(nw.cid) : null;
+      const ph = nw.phone;
       const q = nw.q.trim().toLowerCase();
       const qd = nw.q.replace(/\D/g, '');
       let res = [];
       if (!q) res = allCl.filter((c) => c.visits > 0).sort((a, b) => b.visits - a.visits).slice(0, 4);
       else res = allCl.filter((c) => c.name.toLowerCase().indexOf(q) >= 0 || (qd.length >= 2 && c.phone.replace(/\D/g, '').indexOf(qd) >= 0)).slice(0, 6);
-      const results = res.map((c) => ({ ini: c.name.charAt(0), name: c.name, phone: c.phone, meta: c.visits ? c.visits + ' gelşi' : 'Täze', hasFlag: !!c.blocked, pick: () => this.setNw({ cid: c.id, creating: false }) }));
+      const pickCl = (c) => this.setNw({ cid: c.id, phone: dig8(c.phone), byName: false, q: '', tried: false });
+      const rowOf = (c) => ({ ini: c.name.charAt(0), name: c.name, phone: c.phone, meta: c.visits ? c.visits + ' gelşi' : 'Täze', hasFlag: !!c.blocked, pick: () => pickCl(c) });
+      const results = res.map(rowOf);
       const digitsOnly = /^[\d\s+]+$/.test(nw.q.trim());
       let qPhone = qd;
       if (qPhone.length > 8 && qPhone.indexOf('993') === 0) qPhone = qPhone.slice(3);
       qPhone = qPhone.slice(0, 8);
-      const startNew = () => this.setNw(digitsOnly && qd.length ? { creating: true, phone: qPhone, name: '' } : { creating: true, phone: '', name: nw.q.trim() });
-      const phoneOk = nw.phone.length === 8;
-      const phoneErr = nw.tried && !phoneOk;
+      const startNew = () => {
+        if (digitsOnly && qd.length) {
+          const hit = qPhone.length === 8 ? allCl.find((c) => dig8(c.phone) === qPhone) : null;
+          this.setNw({ byName: false, cid: hit ? hit.id : null, phone: qPhone, name: '', q: '' });
+        } else this.setNw({ byName: false, cid: null, phone: '', name: nw.q.trim(), q: '' });
+      };
+      const matches = !cl && ph.length >= 3 && ph.length < 8 ? allCl.filter((c) => dig8(c.phone).indexOf(ph) === 0).slice(0, 3) : [];
+      const isNewCl = !cl && ph.length === 8;
+      const phoneErr = nw.tried && ph.length > 0 && ph.length < 8;
+      let phoneHint = 'Belgini ýazyň — müşderi bazada bar bolsa, ady we bellikleri özi doldurylar.';
+      let phoneHintCls = 'cap';
+      if (phoneErr) { phoneHint = 'Belgi doly däl: 8 san bolmaly.'; phoneHintCls = 'cap warn'; }
+      else if (isNewCl) phoneHint = 'Bu belgi bazada ýok — täze müşderi hökmünde goşular. Müşderä SMS şu belgä gider.';
+      else if (matches.length) phoneHint = 'Gabat gelýän müşderini saýlaň ýa-da belgini doly ýazyň.';
+      else if (ph.length) phoneHint = 'Belgini doly ýazyň: 8 san.';
+      const onPhone = (e) => {
+        let d = e.target.value.replace(/\D/g, '');
+        if (d.length > 8 && d.indexOf('993') === 0) d = d.slice(3);
+        d = d.slice(0, 8);
+        const hit = d.length === 8 ? allCl.find((c) => dig8(c.phone) === d) : null;
+        this.setNw({ phone: d, cid: hit ? hit.id : null, tried: false });
+      };
       const svcs = nw.svcs;
       const totDur = svcs.reduce((a, x) => a + D.SVC[x].d, 0);
       const totP = svcs.reduce((a, x) => a + D.SVC[x].p, 0);
       const anyFrom = svcs.some((x) => D.SVC[x].from);
       const maxBuf = svcs.reduce((m, x) => Math.max(m, D.SVC[x].buf || 10), 0);
-      const elig = D.STAFF.filter((st) => svcs.every((x) => st.svcs.indexOf(x) >= 0));
+      const elig = D.STAFF.filter((st) => (!spec || st.id === 'ayna') && svcs.every((x) => st.svcs.indexOf(x) >= 0));
       const eligIds = elig.map((st) => st.id);
       let eff = null;
-      if (!svcs.length) eff = nw.staff;
+      if (spec) eff = 'ayna';
+      else if (!svcs.length) eff = nw.staff;
       else if (nw.staff && eligIds.indexOf(nw.staff) >= 0) eff = nw.staff;
       else if (elig.length === 1) eff = elig[0].id;
-      const pre = nw.staff ? this.staff(nw.staff) : null;
-      const filtered = !!pre && !nw.allSvc;
+      const pre = spec ? this.staff('ayna') : (nw.staff ? this.staff(nw.staff) : null);
+      const filtered = !!pre && (spec || !nw.allSvc);
       const groups = D.GROUPS.map((g) => ({ name: g[0], ids: g[1].filter((id) => !filtered || pre.svcs.indexOf(id) >= 0) })).filter((g) => g.ids.length).map((g) => ({
         name: g.name,
         items: g.ids.map((id) => {
@@ -1395,8 +1753,45 @@ class Component extends DCLogic {
       });
       const dur = svcs.length ? totDur : 15;
       const buf = svcs.length ? maxBuf : 0;
+      const near = [];
+      if (svcs.length && elig.length) {
+        const ids = eff ? [eff] : eligIds;
+        for (let o = 0; o <= 13 && near.length < 4; o++) {
+          const dayList = [];
+          ids.forEach((id) => {
+            const fr = this.freeTimes(id, o, dur, buf, null);
+            fr.forEach((t, k) => { if (k === 0 || fr[k - 1] !== t - 15) dayList.push({ o: o, t: t, st: id }); });
+          });
+          dayList.sort((a, b) => a.t - b.t).forEach((x) => { if (near.length < 4) near.push(x); });
+        }
+      }
+      const nearL = near.map((x) => {
+        const on = nw.off === x.o && nw.time === x.t && eff === x.st;
+        const multi = !eff;
+        const stn = this.staff(x.st).name;
+        return {
+          day: x.o === 0 ? 'Şu gün' : (x.o === 1 ? 'Ertir' : this.dt(x.o).wd), t: this.hm(x.t), hasSt: multi, st: stn, on: on, cls: on ? 'slot nx on' : 'slot nx',
+          aria: this.dLong(x.o) + ', ' + this.hm(x.t) + (multi ? ', ' + stn : ''), pick: () => this.setNw({ off: x.o, time: x.t, staff: x.st })
+        };
+      });
+      let nearMsg = '';
+      if (!svcs.length) nearMsg = 'Hyzmat saýlanyňyzdan soň iň ýakyn boş wagtlar şu ýerde görüner.';
+      else if (!elig.length) nearMsg = 'Saýlanan hyzmatlary bir hünärmen etmeýär.';
+      else if (!nearL.length) nearMsg = 'Ýakyn iki hepdede boş wagt ýok.';
       const free = eff ? this.freeTimes(eff, nw.off, dur, buf, null) : [];
       const timeOk = nw.time !== null && free.indexOf(nw.time) >= 0;
+      const isWalk = nw.src === 'walkin';
+      const srcSegs = [['phone', 'Telefon jaňy'], ['walkin', 'Gelip ýazyldy']].map((r) => {
+        const on = nw.src === r[0];
+        return {
+          t: r[1], on: on, cls: on ? 'sgb on' : 'sgb',
+          pick: () => {
+            if (r[0] === 'phone') { this.setNw({ src: 'phone', sms: true }); return; }
+            const today = eff ? this.freeTimes(eff, 0, dur, buf, null) : [];
+            this.setNw({ src: 'walkin', off: 0, time: today.length ? today[0] : null, sms: false });
+          }
+        };
+      });
       const times = [['Irden', 0, 720], ['Günortan', 720, 1020], ['Agşam', 1020, 2000]].map((g) => ({
         t: g[0],
         slots: free.filter((m) => m >= g[1] && m < g[2]).map((m) => ({ t: this.hm(m), on: nw.time === m, cls: nw.time === m ? 'slot on' : 'slot', pick: () => this.setNw({ time: m }) }))
@@ -1409,10 +1804,10 @@ class Component extends DCLogic {
       else if (!free.length) { msg = 'Bu gün boş wagt ýok — başga gün saýlaň.'; msgCls = 'cap warn'; }
       else if (nw.time !== null && !timeOk) { msg = (svcs.length ? this.loc(this.hm(nw.time)) + ' saýlanan hyzmatlara wagt ýetmeýär' : this.hm(nw.time) + ' boş däl') + ' — başga wagt saýlaň.'; msgCls = 'cap warn'; }
       else if (!svcs.length) msg = 'Hyzmat saýlanyňyzdan soň wagtlar dowamlylygyna görä süzüler.';
-      const hasCl = !!cl || (nw.creating && phoneOk);
+      const hasCl = !!cl || isNewCl;
       const canSubmit = hasCl && svcs.length > 0 && !!eff && timeOk;
       const missing = [];
-      if (!hasCl) missing.push('müşderi');
+      if (!hasCl) missing.push('müşderiniň telefony');
       if (!svcs.length) missing.push('hyzmat');
       if (!eff && svcs.length) missing.push('hünärmen');
       if (!timeOk) missing.push('wagt');
@@ -1424,11 +1819,11 @@ class Component extends DCLogic {
         const patch = {};
         if (!cid) {
           cid = 'n' + seq;
-          const ph = '+993 ' + this.fmtP(nw.phone);
-          patch.newClients = s.newClients.concat([{ id: cid, name: nw.name.trim() || ph, phone: ph, visits: 0, avg: '—', last: '—' }]);
+          const phF = '+993 ' + this.fmtP(nw.phone);
+          patch.newClients = s.newClients.concat([{ id: cid, name: nw.name.trim() || phF, phone: phF, visits: 0, avg: '—', last: '—' }]);
         }
         const id = 'a' + seq;
-        const bk = { id: id, off: nw.off, staff: eff, from: nw.time, to: nw.time + totDur, cid: cid, svcs: svcs.slice(), status: 'confirmed', source: 'phone' };
+        const bk = { id: id, off: nw.off, staff: eff, from: nw.time, to: nw.time + totDur, cid: cid, svcs: svcs.slice(), status: 'confirmed', source: isWalk ? 'walkin' : 'phone' };
         const notes = Object.assign({}, s.notes);
         if (nw.note.trim()) notes[id] = nw.note.trim();
         patch.added = s.added.concat([bk]);
@@ -1438,26 +1833,32 @@ class Component extends DCLogic {
         patch.nw = this.blankNew();
         patch.hiId = id;
         if (isDay) patch.dayOff = nw.off;
-        this.say(patch, 'Ýazylyş goşuldy' + (nw.sms ? ' · müşderä SMS iberildi' : ''));
+        this.say(patch, 'Ýazylyş goşuldy' + (isWalk ? ' · gelip ýazyldy' : '') + (nw.sms ? ' · müşderä SMS iberildi' : ''));
       };
+      const clv = cl ? {
+        ini: cl.name.charAt(0), name: cl.name, phone: cl.phone, meta: cl.visits ? cl.visits + ' gelşi · ortaça ' + cl.avg : 'Täze müşderi',
+        hasAlert: !!cl.alert, alert: cl.alert || '', blocked: !!cl.blocked, hasNs: !!cl.noShows, nsLabel: (cl.noShows || 0) + ' gezek gelmedi', hasTags: !!cl.blocked || !!cl.noShows
+      } : { ini: '', name: '', phone: '', meta: '', hasAlert: false, alert: '', blocked: false, hasNs: false, nsLabel: '', hasTags: false };
       nv = {
-        hasClient: !!cl, searching: !cl && !nw.creating, creating: !cl && nw.creating,
-        cl: cl ? { ini: cl.name.charAt(0), name: cl.name, phone: cl.phone, meta: cl.visits ? cl.visits + ' gelşi · ortaça ' + cl.avg : 'Täze müşderi', hasAlert: !!cl.alert, alert: cl.alert || '' } : { ini: '', name: '', phone: '', meta: '', hasAlert: false, alert: '' },
-        clear: () => this.setNw({ cid: null, q: '', creating: false }),
+        srcSegs: srcSegs, isWalk: isWalk, walkCap: 'Müşderi ýanyňyzda — ýazylyş häzirki wagtdan (' + this.hm(this.slotNow()) + ') başlap biler, öňe süýşürip bolmaýar.',
+        hasClient: !!cl, phoneMode: !cl && !nw.byName, byName: !cl && nw.byName,
+        canSwitch: !cl, switchLabel: nw.byName ? 'Telefon belgisi boýunça' : 'Ady boýunça gözle', toggleMode: () => this.setNw({ byName: !nw.byName, q: '' }),
+        cl: clv,
+        clear: () => this.setNw({ cid: null, phone: '', q: '', name: '', tried: false, byName: false }),
+        phoneFmt: this.fmtP(ph), phoneCls: phoneErr ? 'inp is-e' : 'inp', onPhone: onPhone,
+        phoneBlur: () => { if (ph.length && ph.length < 8) this.setNw({ tried: true }); },
+        phoneHint: phoneHint, phoneHintCls: phoneHintCls,
+        hasMatches: matches.length > 0, matches: matches.map(rowOf),
+        isNewCl: isNewCl, name: nw.name, onName: (e) => this.setNw({ name: e.target.value.slice(0, 60) }),
         q: nw.q, onQ: (e) => this.setNw({ q: e.target.value }),
         resHead: !q, results: results, noRes: !!q && results.length === 0, noResText: '«' + nw.q.trim() + '» boýunça müşderi tapylmady',
         newLabel: digitsOnly && qd.length >= 2 ? 'Täze müşderi döret · +993 ' + this.fmtP(qPhone) : (q && !digitsOnly ? 'Täze müşderi döret · ' + nw.q.trim() : 'Täze müşderi döret'),
         startNew: startNew,
-        phoneFmt: this.fmtP(nw.phone), phoneCls: phoneErr ? 'inp is-e' : 'inp',
-        onPhone: (e) => this.setNw({ phone: e.target.value.replace(/\D/g, '').slice(0, 8) }),
-        phoneBlur: () => { if (nw.phone.length) this.setNw({ tried: true }); },
-        phoneHint: phoneErr ? 'Belgi doly däl: 8 san bolmaly.' : 'Hökman — müşderä SMS şu belgä gider.', phoneHintCls: phoneErr ? 'cap warn' : 'cap',
-        name: nw.name, onName: (e) => this.setNw({ name: e.target.value.slice(0, 60) }),
-        backSearch: () => this.setNw({ creating: false }),
-        canFilter: !!pre, filterLabel: filtered ? 'Ähli hyzmatlary görkez' : 'Diňe ' + (pre ? pre.gen : '') + ' hyzmatlary',
+        canFilter: !!pre && !spec, filterLabel: filtered ? 'Ähli hyzmatlary görkez' : 'Diňe ' + (pre ? pre.gen : '') + ' hyzmatlary',
         toggleAll: () => this.setNw({ allSvc: !nw.allSvc }),
         groups: groups, hasSvc: svcs.length > 0, totLabel: this.durL(totDur) + ' · ' + this.money(totP) + (anyFrom ? '-den' : ''),
-        staff: staffChips, noStaff: svcs.length > 0 && elig.length === 0,
+        staffFixed: spec, staffPick: !spec, staff: staffChips, noStaff: svcs.length > 0 && elig.length === 0,
+        hasNear: nearL.length > 0, near: nearL, noNear: nearL.length === 0, nearMsg: nearMsg,
         days: days, times: times, hasMsg: !!msg, msg: msg, msgCls: msgCls,
         note: nw.note, onNote: (e) => this.setNw({ note: e.target.value.slice(0, 300) }),
         sms: nw.sms, smsCls: nw.sms ? 'sw on' : 'sw', toggleSms: () => this.setNw({ sms: !nw.sms }),
@@ -1472,13 +1873,16 @@ class Component extends DCLogic {
     const modalKey = (e) => { if (e && e.key === 'Escape') this.up({ modal: null }); };
     const ctxOf = (b) => this.client(b.cid).name + ' · ' + svcOf(b) + ' · ' + whenOf(b);
 
-    const DR = ['Bu wagt boş däl', 'Hünärmen ýok', 'Bu hyzmaty edip bilmeýäris', 'Başga sebäp'];
+    const DR = isMove ? ['Bu wagt boş däl', 'Hünärmen ýok', 'Başga sebäp'] : ['Bu wagt boş däl', 'Hünärmen ýok', 'Bu hyzmaty edip bilmeýäris', 'Başga sebäp'];
     const dOther = s.dReason === 'Başga sebäp';
     const dv = {
-      ctx: tb ? ctxOf(tb) : '',
+      title: isMove ? 'Täze wagty ret etmek' : 'Haýyşy ret etmek',
+      lead: isMove ? 'Müşderi sebäbi görer. Ýazylyş öňki wagtynda galýar.' : 'Müşderi sebäbi görer.',
+      canAlt: !isMove,
+      ctx: tb ? (isMove ? this.client(tb.cid).name + ' · ' + svcOf(tb) + ' · ' + this.dShort(tb.off) + ' · ' + this.hm(tb.from) + ' → ' + this.dShort(tb.mv.off) + ' · ' + this.hm(tb.mv.from) : ctxOf(tb)) : '',
       reasons: DR.map((t) => ({ t: t, on: s.dReason === t, cls: s.dReason === t ? 'chip on' : 'chip', pick: () => this.up({ dReason: t }) })),
       other: dOther, text: s.dText, onText: (e) => this.setState({ dText: e.target.value.slice(0, 200) }),
-      alt: !!s.dAlt, altCls: s.dAlt ? 'sw on' : 'sw', toggleAlt: () => this.up({ dAlt: !s.dAlt }),
+      alt: !isMove && !!s.dAlt, altCls: s.dAlt ? 'sw on' : 'sw', toggleAlt: () => this.up({ dAlt: !s.dAlt }),
       slots: ['16:30', '17:00', '17:30'].map((t) => {
         const on = s.dSlots.indexOf(t) >= 0;
         return { t: t, on: on, cls: on ? 'slot on' : 'slot', pick: () => this.up({ dSlots: on ? s.dSlots.filter((x) => x !== t) : (s.dSlots.length < 3 ? s.dSlots.concat([t]) : s.dSlots) }) };
@@ -1489,8 +1893,13 @@ class Component extends DCLogic {
         if (!tb || !s.dReason || (dOther && !s.dText.trim())) return;
         const alts = s.dAlt ? s.dSlots : [];
         const ov = Object.assign({}, s.ov);
-        ov[tb.id] = Object.assign({}, s.ov[tb.id] || {}, { status: 'cancelled', by: 'business', reason: dOther ? s.dText.trim() : s.dReason });
         const rest = queue.filter((b) => b.id !== tb.id);
+        if (isMove) {
+          ov[tb.id] = Object.assign({}, s.ov[tb.id] || {}, { mv: null, mvNo: dOther ? s.dText.trim() : s.dReason });
+          this.say({ ov: ov, modal: null, panel: 'none', target: null }, 'Täze wagt ret edildi · ýazylyş öňki wagtynda galýar · müşderä sebäbi iberildi', 'ok', rest.length ? 'next' : null);
+          return;
+        }
+        ov[tb.id] = Object.assign({}, s.ov[tb.id] || {}, { status: 'cancelled', by: 'business', reason: dOther ? s.dText.trim() : s.dReason });
         this.say({ ov: ov, modal: null, panel: 'none', target: null }, 'Haýyş ret edildi · müşderä sebäbi' + (alts.length ? ' we ' + alts.length + ' başga wagt' : '') + ' iberildi', 'ok', rest.length ? 'next' : null);
       }
     };
@@ -1534,14 +1943,16 @@ class Component extends DCLogic {
     const closeToast = () => this.setState({ toast: null });
 
     return {
-      fontStack, hasPend, noPend, pendCount, pendAria, pendChip, pendChipAria, openNewBlank, banner, hideBanner,
+      fontStack, hasPend, noPend, pendCount, pendAria, pendChip, pendChipAria, openNewBlank,
+      me, wsAria, wsList, wsOpen, userOpen, moreOpen, legendOpen, toggleWs, toggleUser, toggleMore, toggleLegend, closeMenus, menuKey,
+      showSettings, showRevBadge, showStaffSeg, showStChips, stChips, internalOn,
       goToday, goPrev, goNext, prevLabel, nextLabel, datePop, toggleDate, closeDate, dateKey, goTodayClose, dateLabel, monthLabel, calDays,
       rangeSegs, modeSegs, selCls, staffId, pickStaff, openQueue, showX, toggleX,
-      isDay, isWeek, isWeekAll, isWeekOne, sumBk, sumReq, revLabel, revText, wkBk, wkReq, wkWho,
+      isDay, isWeek, isWeekAll, isWeekOne, sumBk, sumReq, showRev, revLabel, revText, wkBk, wkReq, wkWho,
       moveBar, mvClient, mvSvc, cancelMove, moveSms, toggleMoveSms, confirmMove, gridCls, cols, hourLabels, showNow, nowTop, nowPillTop, nowLabel,
-      wkDays, wkRows, woDays, woHours, woNowTop, showLegend,
+      wkDays, wkRows, woDays, woHours, woNowTop,
       drawerOpen, drawerTitle, closePanel, drawerKey, showPager, pgLabel, pgPrevDis, pgNextDis, pgPrev, pgNext,
-      isReq, rv, openDecline, confirmReq, isBook, bv, onNote, startMove, openComplaint, openCancel, rebook, isNew, nv,
+      isReq, rv, openDecline, confirmReq, isBook, bv, onNote, onIst, startMove, openComplaint, openCancel, rebook, isNew, nv,
       showDecline, showComplaint, showCancelM, closeModal, modalKey, dv, cv, xv,
       hasToast, toastOk, toastErr, toastText, toastAct, toastNext, closeToast
     };

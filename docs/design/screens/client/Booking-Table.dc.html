@@ -51,8 +51,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .pg{width:36px;height:36px;border-radius:10px;border:1px solid transparent;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .pg:hover{background:#f4f4f6}
 .pg:disabled{color:#b0b0b8;background:transparent;cursor:default}
-.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
-.dot{width:6px;height:6px;border-radius:999px}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.badge svg{flex:none}
 .st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
 .tag{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
 .tag-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
@@ -103,7 +103,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .opt.on .rad{border:6px solid #5a3ff0}
 .opt:disabled .rad{border-color:#e6e6ea;background:#f6f6f8}
 .pfx{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;flex:none}
-.err{display:inline-flex;align-items:center;gap:6px;color:#a3251b}
+.err{display:inline-flex;align-items:flex-start;gap:6px;color:#a3251b}
+.err svg{flex:none;margin-top:2px}
 .lnk{display:inline-flex;align-items:center;min-height:32px;border:0;background:transparent;padding:0;font-family:inherit;font-size:14px;font-weight:600;color:#4429d6;cursor:pointer;white-space:nowrap}
 .lnk:hover{color:#3520a6;text-decoration:underline}
 .avs{width:44px;height:44px;border-radius:999px;background:#efecfe;color:#4429d6;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;flex:none}
@@ -162,6 +163,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px; line-height: 20px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>4,8<span class="cap">(119)</span></span>
 <span class="cap">Kafe · 0,9 km · Andalyp köçesi 8</span>
 <span class="cap" style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Her gün 09:00–23:00</span>
+<span class="cap" style="display: inline-flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>{{ruleText}}</span>
 </div>
 </div>
 
@@ -173,7 +175,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <sc-if value="{{big}}" hint-placeholder-val="{{false}}">
 <div class="note" role="status" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-<span style="display: flex; flex-direction: column; flex: 1; min-width: 180px"><span style="font-size: 15px; line-height: 22px; font-weight: 600; color: #101014">9 we ondan köp adam bolsa, jaň ediň</span><span style="font-variant-numeric: tabular-nums">Bag kafe · +993 12 22 33 44</span></span>
+<span style="display: flex; flex-direction: column; flex: 1; min-width: 180px"><span style="font-size: 15px; line-height: 22px; font-weight: 600; color: #101014">{{callText}}</span><span style="font-variant-numeric: tabular-nums">Bag kafe · +993 12 22 33 44</span></span>
 <a class="b b-sec b-sm" href="#">Jaň et</a>
 </div>
 </sc-if>
@@ -253,9 +255,10 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <label for="tb-phone">Telefon belgiňiz</label>
 <div style="display: flex; gap: 8px">
 <span class="pfx">+993</span>
-<input id="tb-phone" class="{{phoneCls}}" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="65 12 34 56" value="{{phone}}" onChange="{{onPhone}}" style="font-variant-numeric: tabular-nums">
+<input id="tb-phone" class="{{phoneCls}}" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="65 12 34 56" value="{{phone}}" aria-invalid="{{phoneInvalid}}" onChange="{{onPhone}}" style="font-variant-numeric: tabular-nums">
 </div>
-<sc-if value="{{phoneErr}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Belgi doly däl: 8 san bolmaly.</span></sc-if>
+<sc-if value="{{phoneShort}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Belgi doly däl: 8 san bolmaly.</span></sc-if>
+<sc-if value="{{phoneLand}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Kod diňe mobil belgä iberilýär. +993 6… ýa-da 7… bilen başlaýan belgi ýazyň.</span></sc-if>
 </div>
 <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
 <button class="b b-sec" onClick="{{sendCode}}">Kod iber</button>
@@ -350,7 +353,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px">
 <span class="okc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></span>
 <h1 class="h1" style="font-size: 32px; line-height: 38px; text-wrap: balance">Stol bronlamak haýyşy ugradyldy</h1>
-<span class="badge st-p"><span class="dot" style="background: #dc8b0b"></span>Garaşylýar</span>
+<span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span>
 <p class="sub" style="max-width: 460px">Bag kafe haýyşyňyzy tassyklanda <span style="white-space: nowrap; font-variant-numeric: tabular-nums">{{userPhone}}</span> belgä SMS ibereris.</p>
 </div>
 <div class="card" style="padding: 0; gap: 0; overflow: hidden">
@@ -408,11 +411,11 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"sent":{"editor":"boolean","default":false,"section":"Flow"},"loggedIn":{"editor":"boolean","default":true,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1900}}'>
+<script type="text/x-dc" data-dc-script data-props='{"sent":{"editor":"boolean","default":false,"section":"Flow"},"loggedIn":{"editor":"boolean","default":true,"section":"Flow"},"maxParty":{"editor":"enum","options":["8","6"],"default":"8","section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1900}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { party: 4, day: 3, wk: 0, time: '19:00', area: 'terrace', reqs: {}, note: '', sent: false, ics: false, switched: false, auth: 'phone', phone: '', phoneErr: false, code: '', codeFocus: false, codeErr: false, name: '' };
+    this.state = { party: 4, day: 3, wk: 0, time: '19:00', area: 'terrace', reqs: {}, note: '', sent: false, ics: false, switched: false, auth: 'phone', phone: '', phoneErr: '', code: '', codeFocus: false, codeErr: false, name: '' };
   }
   renderVals() {
     const f = this.props.font ?? 'Onest';
@@ -430,15 +433,25 @@ class Component extends DCLogic {
     const toMin = (t) => parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(3), 10);
     const fmt = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
 
-    const big = s.party === '9+';
+    // D1 · party limit follows the business setting "Onlaýn bronda iň köp adam" (Bag kafe 8; tweak 6): chips 1…max + "{max+1}+"
+    const max = String(this.props.maxParty ?? '8') === '6' ? 6 : 8;
+    const bigLbl = (max + 1) + '+';
+    const callText = (max + 1) + ' we ondan köp adam bolsa, jaň ediň';
+    const big = s.party === 'big' || (typeof s.party === 'number' && s.party > max);
     const vipOk = big || s.party >= 6;
-    const parties = [1, 2, 3, 4, 5, 6, 7, 8, '9+'].map((p) => ({
-      t: String(p),
-      on: s.party === p,
-      cls: s.party === p ? 'pc on' : 'pc',
-      aria: p === '9+' ? '9 we ondan köp adam' : p + ' adam',
-      pick: () => { const patch = { party: p }; if (s.area === 'vip' && p !== '9+' && p < 6) patch.area = null; this.setState(patch); }
-    }));
+    const partyList = [];
+    for (let i = 1; i <= max; i++) partyList.push(i);
+    partyList.push('big');
+    const parties = partyList.map((p) => {
+      const on = p === 'big' ? big : s.party === p;
+      return {
+        t: p === 'big' ? bigLbl : String(p),
+        on,
+        cls: on ? 'pc on' : 'pc',
+        aria: p === 'big' ? (max + 1) + ' we ondan köp adam' : p + ' adam',
+        pick: () => { const patch = { party: p }; if (s.area === 'vip' && p !== 'big' && p < 6) patch.area = null; this.setState(patch); }
+      };
+    });
 
     const days = [];
     for (let i = 0; i < 14; i++) {
@@ -480,7 +493,7 @@ class Component extends DCLogic {
     const timeOk = !!s.time && !off.includes(s.time);
     const areaOk = !!s.area && !(s.area === 'vip' && !vipOk);
     let missing = '';
-    if (big) missing = '9 we ondan köp adam bolsa, jaň ediň';
+    if (big) missing = callText;
     else if (!timeOk) missing = 'Wagt saýlaň';
     else if (!areaOk) missing = 'Oturmak üçin ýer saýlaň';
     else if (step !== 'done') missing = step === 'name' ? 'Adyňyzy ýazyň' : 'Telefon belgiňizi tassyklaň';
@@ -488,7 +501,7 @@ class Component extends DCLogic {
     const di = info(s.day);
     const rel = s.day === 0 ? 'Şu gün · ' : (s.day === 1 ? 'Ertir · ' : '');
     const dayWord = s.day === 0 ? 'Şu gün' : (s.day === 1 ? 'Ertir' : WD[di.w]);
-    const sumParty = big ? '9+ adam' : s.party + ' adam';
+    const sumParty = big ? bigLbl + ' adam' : s.party + ' adam';
     const areaName = areaOk ? AREA[s.area] : '';
     let remindCap = '';
     if (timeOk) remindCap = (s.day === 0 && toMin(s.time) - 120 <= 680) ? 'Wagt ýakyn — ýatlatma iberilmeýär.' : dayWord + ', ' + fmt(toMin(s.time) - 120) + ' · SMS bilen';
@@ -502,6 +515,8 @@ class Component extends DCLogic {
       mbarCls: sent ? 'mbar hidden' : 'mbar',
       parties,
       big,
+      callText,
+      ruleText: callText + '.',
       days,
       stripCls: s.wk ? 'strip-in p1' : 'strip-in',
       wkPrevDis: !s.wk,
@@ -523,10 +538,17 @@ class Component extends DCLogic {
       phone: s.phone,
       phoneFmt,
       phoneCls: s.phoneErr ? 'inp is-e' : 'inp',
-      phoneErr: s.phoneErr,
-      onPhone: (e) => this.setState({ phone: val(e), phoneErr: false }),
-      sendCode: () => { if (digits.length === 8) this.setState({ auth: 'code', code: '', codeErr: false }); else this.setState({ phoneErr: true }); },
-      editPhone: () => this.setState({ switched: true, auth: 'phone', code: '', codeErr: false, phoneErr: false }),
+      phoneShort: s.phoneErr === 'short',
+      phoneLand: s.phoneErr === 'land',
+      phoneInvalid: s.phoneErr ? 'true' : 'false',
+      onPhone: (e) => this.setState({ phone: val(e), phoneErr: '' }),
+      // C1: 8 digits, and codes go only to mobile numbers (+993 6x / 7x) — a landline like 12 34 56 78 is refused
+      sendCode: () => {
+        if (digits.length !== 8) this.setState({ phoneErr: 'short' });
+        else if ('67'.indexOf(digits.charAt(0)) < 0) this.setState({ phoneErr: 'land' });
+        else this.setState({ auth: 'code', code: '', codeErr: false, phoneErr: '' });
+      },
+      editPhone: () => this.setState({ switched: true, auth: 'phone', code: '', codeErr: false, phoneErr: '' }),
       code: s.code,
       codeBoxes,
       codeErr: s.codeErr,
@@ -556,7 +578,7 @@ class Component extends DCLogic {
       cantSend: !!missing,
       send: () => { if (!missing) this.setState({ sent: true }); },
       barText: di.short + ' · ' + (timeOk ? s.time : 'wagt saýlaň'),
-      barSub: big ? '9+ adam · jaň ediň' : sumParty + ' · ' + (areaOk ? areaName : 'ýer saýlaň'),
+      barSub: big ? bigLbl + ' adam · jaň ediň' : sumParty + ' · ' + (areaOk ? areaName : 'ýer saýlaň'),
       remindCap,
       holdCap: timeOk ? fmt(toMin(s.time) + 15) + '-e çenli gelmeseňiz, stol boşadylyp bilner.' : '',
       addIcs: () => this.setState({ ics: true }),
