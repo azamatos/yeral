@@ -1,18 +1,21 @@
 # Active context
 
-_Last updated: 2026-10-16_
+_Last updated: 2026-10-17_
 
 ## Current focus
 
-**M2 is merged** (#12–#19, 2026-10-16) after a code review of every PR: #17–#19 were fixed before merging, the merged
-#13–#16 in #21 (each fix with a test that failed first; details in `progress.md`). The api serves every client screen on
-Postgres; not deployed (production api comes with M3; no staging, ADR 0020). **Design export v0.4 arrived**: the business
-workspace is fully designed (rounds 4–5), design system v0.4 with two new boards and `docs/design/COMPONENTS.md` (the
-component map), tokens v0.4 mapped into `@yeral/ui`. **Released 2026-10-16** (#20): `@yeral/ui@0.2.0`, api, domain,
-contract, sdk, lib, i18n `0.1.0`, Storybook `0.1.1` — tags and GitHub Releases only; yeral.app still serves
-`apps/legacy` until M3 replaces it. **Design round 6 requested** (`docs/design-requests/2026-10-16-round-6.md`, 18 logic
-gaps for export v0.5). **Waiting for design export v0.5**: the owner settles the design first; nothing new is built for
-yeral.app until it's in.
+**Strategy reset (2026-10-17, [ADR 0021](../decisions/0021-product-book-first.md)): the product book comes first.**
+All design and coding work is paused until [`docs/product/`](../product/README.md) describes the whole product (vision,
+norms, roles, rules, limits, MVP scope, every flow, notifications) with no open question. Then the full design, then
+components in Storybook, then code. The owner reads and answers on the book's page
+(https://claude.ai/artifact/LY9U6jrQRo3MfoHTg3JpyN); Claude writes the answers back into the book. Claude Code writes
+every prompt for Claude Design; the owner pastes it; Claude Code checks the result on the canvas.
+
+Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16): monorepo and CI, `@yeral/ui` (38
+components), domain, contract, sdk, an api for every client screen on Postgres (not deployed). yeral.app still serves
+`apps/legacy`. **Design export v0.5** (round 6 parts A and B, 16–17.10.2026, incl. `ROUND6-ANSWERS.md`) is in the main
+checkout's `docs/design/` but not committed yet; the book uses it as its newest design source. The version PR #26
+(`@yeral/lib@0.2.0`, `@yeral/api@0.1.1`, staging removed) is open and waits for the owner.
 
 ## Owner's direction
 
@@ -26,6 +29,10 @@ yeral.app until it's in.
 - 2026-10-16: review every PR before merging (the agent merges after review and green CI).
 - 2026-10-16: Ýeral is free for now (no plans, no commission); no staging, only local and production (ADR 0020); don't
   build the new yeral.app until the design is clarified and exported again (v0.5).
+- 2026-10-17: stop everything and reorganise: first document the whole product (ideas, norms, rules, roles, limits,
+  features, MVP in and out, every flow, with visuals) until no question is left; then the full design and
+  components/Storybook; then code. Claude Code writes the prompts for Claude Design, the owner pastes them, Claude Code
+  reads the canvas to check the result (ADR 0021).
 
 ## Decisions
 
@@ -54,24 +61,34 @@ client records; a branch is its own business; only verified businesses are publi
 [0019](../decisions/0019-own-phone-login-and-sessions.md) (in PR #16) own phone-code login and database sessions
 instead of Better Auth (the design's attempts/lock/resend rules, no placeholder e-mails, endpoints in the contract).
 
+2026-10-16: [0020](../decisions/0020-local-and-production-only.md) local and production only, no staging.
+
+2026-10-17: [0021](../decisions/0021-product-book-first.md) product book first (`docs/product/`), then design,
+Storybook, code; Claude Code writes the Claude Design prompts and checks the canvas.
+
 ## Open questions
 
-| # | Question | Who | Blocks |
-|---|---|---|---|
-| 1 | Business workspace: checkout / POS and a table/class setup wizard aren't designed (round 5 covered the rest) | owner (Claude Design) | parts of M5 |
-| 16 | Moving table and class bookings: "Başga wagta geçir" is drawn on every confirmed booking, but their rule texts only mention cancelling; the api answers `not_bookable` (design round 6, A4) | owner (design) | M3 booking detail |
-| 17 | Design v0.4 open items still open: font sizes 28 / 24 / 80 (mapped to h2 / h3 / display for now), businesses open past midnight (billing details are moot while Ýeral is free) | owner (design) | M3 polish |
-| 18 | Design round 6 (`docs/design-requests/2026-10-16-round-6.md`; replaces the old questions 11 and 12): client side of declines, expiries, waiting moves, undo failures, phone-only clients, hidden prices, mobile-only login, party limit as a setting, midnight, overlapping special days, unverified businesses, reviews under moderation | owner (Claude Design → export v0.5) | M3 states, M5 |
-| 2 | CMS design (six modules) | owner (Claude Design round 3) | M6 |
-| 4 | Real average bills for restaurant cards; official App Store / Google Play badges | owner | M3 polish |
-| 5 | Native Turkmen review of all copy; RU/EN drafts written by Claude need a check too | owner | public launch |
-| 6 | SMS provider and sender name | owner + research | production SMS (M8) |
-| 7 | Final name and domain (`yeral.app`, `yeral.com`, other)? | owner | public launch |
-| 10 | Real business photos and texts to replace the demo seed | owner | public launch |
+Product questions now live in **`docs/product/questions.md`**, one ID each (ADR 0021); answer them on the book's page.
+Where the old questions went (2026-10-17):
+
+| Old # | Question | Now |
+|---|---|---|
+| 16, 18 | Moving tables/classes; the round-6 logic gaps | answered by design v0.5 (`docs/design/ROUND6-ANSWERS.md`) |
+| 17 | Font sizes 28 / 24 / 80; open past midnight | font sizes: keep the code's mapping (v0.5, H); past midnight: feature F-109 in chapter 6 |
+| 1 | Checkout / POS; table/class setup wizard | features F-221 and F-116 in chapter 6; Q-030 |
+| 2 | CMS design | Q-010, Q-011, Q-012 |
+| 4 | Average bills; store badges | Q-103; feature F-004 |
+| 5 | Native copy review | Q-101 |
+| 6 | SMS provider and sender name | Q-109; chapter 8 (notifications) |
+| 7 | Final name and domain | Q-003 |
+| 10 | Real business photos and texts | Q-002 |
 
 ## Next steps
 
-1. The owner runs the round-6 request in Claude Design and drops export v0.5 into `docs/design/`.
-2. Process v0.5: its CHANGELOG "To do in the repo", rule changes in the domain/api with tests, tokens, memory bank.
-3. Then, on the owner's word: `@yeral/ui` from `docs/design/COMPONENTS.md` in its order, and M3 (client site) screen by
-   screen, built only from components with stories; the production api ships with it (operations.md).
+1. The owner reads the product book page and answers its questions; Claude writes each answer into `docs/product/`
+   (chapters, `questions.md`, chapter 9) and republishes the page.
+2. Commit design export v0.5 as the owner dropped it (it's the book's newest design source), together with
+   `--ring-selected` mapped in `packages/ui/src/styles/theme.css`: the token sync test fails without it.
+3. When chapters close: Claude writes the Claude Design prompts for what's undrawn or changed; the owner pastes them;
+   Claude checks the canvas.
+4. Then components in Storybook and code, re-planned from the book's scope chapter (M3/M5 order is open: question Q-001).

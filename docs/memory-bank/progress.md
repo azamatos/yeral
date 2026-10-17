@@ -120,8 +120,18 @@
   14/20, `text-micro`, `rounded-xs/sm`, `shadow-control`, `shadow-focus-inset`, `shadow-input-warning`, modal 560, chart
   colours); product rules (pricing: two plans + a commission layer; reviews under moderation aren't counted) in
   productContext; ADR 0012 revised (look up every screen piece in `COMPONENTS.md`; the boards win over drifted screens).
+- **2026-10-17 · Design export v0.5 received** (in the main checkout, not committed yet): round 6 part A (free MVP, one
+  account with several workspaces, fixed access levels + permission matrix, who answers requests, status icons, internal
+  statuses, "Başga ýerde", phone web; `B-Login`, `B-Mobile`) and part B (`ROUND6-ANSWERS.md`: every item of the round-6
+  request answered as the owner's decision; new `Booking-Link`; rule change A5: a move never swaps the specialist).
+- **2026-10-17 · Strategy reset** ([ADR 0021](../decisions/0021-product-book-first.md)): all design and code paused; the
+  product book (`docs/product/`) is written first, with its page for the owner's answers
+  (https://claude.ai/artifact/LY9U6jrQRo3MfoHTg3JpyN).
 
 ## Roadmap
+
+**Paused (ADR 0021, 2026-10-17):** M3 onwards waits for the product book. The order of M3 (client site) and M5 (business
+workspace) is open (book question Q-001); the scope chapter will re-plan the milestones.
 
 Infrastructure first (owner, 2026-10-13). Each milestone ends reviewed, merged, memory bank updated; production
 deploys come from releases (no staging, ADR 0020).

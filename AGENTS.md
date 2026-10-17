@@ -10,6 +10,8 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 ## Read first
 
 1. `docs/memory-bank/activeContext.md`: current focus, open questions, next steps.
+   **Product book first (ADR 0021):** `docs/product/` is the source of product rules, roles, limits, scope and flows;
+   nothing is designed or built from a chapter with open questions (`docs/product/questions.md`).
 2. `docs/memory-bank/systemPatterns.md` before writing code: monorepo map, FSD, data flow, state, rendering, auth, i18n.
 3. As the task needs: `productContext.md` (product rules, glossary), `techContext.md` (libraries, why, where shared
    helpers live), `operations.md` (environments, Docker, CI/CD, versioning, parallel work), `docs/decisions/` (ADRs).
