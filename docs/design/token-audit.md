@@ -127,3 +127,15 @@ Summary: 10 non-token hex colours, 10 non-token rgba values, 24 non-token shadow
 --chart-area: #efecfe; --chart-compare: #b0b0b8; --chart-grid: #f0f0f3; --chart-axis: #6e6e78;
 ```
 `tokens.test.ts` must be updated with them (theme.css is checked 1:1).
+
+
+## 8. Round 6 additions (16.10.2026)
+| Value | Where | Decision |
+|---|---|---|
+| `0 0 0 2px #fff, 0 0 0 4px #101014` | selected calendar block, timeline bar, class session, floor table (B-Calendar, B-Tables, B-Classes, B-Mobile) | **New** `--ring-selected` (v0.5) — ink, so selection never looks like "Tassyklandy" violet or the focus ring |
+| `1.5px dashed #dc8b0b` | request blocks (no opacity any more) | border = `--st-pending-dot`; no token needed |
+| `1px dashed #7b8ea3` on white | cancelled blocks (outline only) | border = `--st-cancelled-dot` |
+| `1px dashed #b0b0b8` on `#f6f6f8` | "Başga ýerde" layer | n-400 used as a decorative border only (not text) |
+| `rgba(16,16,20,.1)` → `.16` | internal-status chip ring (B-Calendar) | unified to `.16` on DS-Business |
+| `rgba(68,41,214,.32)` → `.3` | phone "+" FAB shadow (B-Mobile) | unified to `--primary-shadow` values |
+| 26/32 | login / auth card title (B-Login) | open — map to h2-phone 26/30 or keep as AuthCard size |

@@ -54,9 +54,12 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .pg{width:36px;height:36px;border-radius:10px;border:1px solid transparent;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .pg:hover{background:#f4f4f6}
 .pg:disabled{color:#b0b0b8;background:transparent;cursor:default}
-.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
-.dot{width:6px;height:6px;border-radius:999px}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.badge svg{flex:none}
 .st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
+.st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
+.tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
+.tag-n{background:#f4f4f6;border:1px solid #e6e6ea;color:#41505f}
 .sep{height:1px;background:#e6e6ea}
 .chip:focus-visible,.slot:focus-visible,.pg:focus-visible,.dy:focus-visible,.opt:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .fh{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;height:72px;padding:0 24px;background:#ffffff;border-bottom:1px solid #e6e6ea}
@@ -117,7 +120,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .lead{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
 .pfx{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;flex:none}
 .cbx{width:56px;height:56px;padding:0;text-align:center;font-size:24px;font-weight:600;flex:none;font-variant-numeric:tabular-nums}
-.err{display:inline-flex;align-items:center;gap:6px;color:#a3251b}
+.err{display:inline-flex;align-items:flex-start;gap:6px;color:#a3251b}
+.err svg{flex:none;margin-top:2px}
 .lnk{display:inline-flex;align-items:center;min-height:32px;border:0;background:transparent;padding:0;font-family:inherit;font-size:14px;font-weight:600;color:#4429d6;cursor:pointer;white-space:nowrap}
 .lnk:hover{color:#3520a6;text-decoration:underline}
 .lnk:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4;border-radius:4px}
@@ -130,6 +134,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .sline{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:20px;color:#101014}
 .sline svg{flex:none;margin-top:1px;color:#5a5a64}
 .sline.gone{color:#6e6e78;text-decoration:line-through}
+.sline.mute{color:#5a5a64}
 .mbar{display:none}
 .sentcol{width:100%;max-width:640px;margin:0 auto;padding:56px 24px 96px;display:flex;flex-direction:column;gap:40px}
 .okc{width:64px;height:64px;border-radius:999px;background:#efecfe;color:#5a3ff0;display:flex;align-items:center;justify-content:center}
@@ -145,15 +150,39 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .tli.done .tlm{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
 .tlb{display:flex;flex-direction:column;gap:2px;padding-top:3px;min-width:0}
 .tlt{font-size:15px;line-height:22px;font-weight:600}
+.pr{color:#101014;font-weight:600}
+.pr.hid{color:#5a5a64;font-weight:500}
+.sp{flex:none;font-size:15px;line-height:20px;font-weight:600;white-space:nowrap;text-align:right}
+.sp.hid{flex:0 1 auto;max-width:136px;font-size:14px;font-weight:500;color:#5a5a64;white-space:normal}
+.tot{font-size:19px;line-height:24px;font-weight:700;white-space:nowrap;text-align:right}
+.tot.hid{font-size:15px;line-height:22px;font-weight:600;color:#5a5a64;white-space:normal}
+.mvt{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin-bottom:28px}
+.code{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:#f4f4f6;border:1px solid #e6e6ea;font-size:13px;line-height:18px;font-weight:600;color:#41505f;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lockb{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:#f6f6f8}
+.lkr{display:flex;align-items:flex-start;gap:10px}
+.lkr svg{flex:none;margin-top:2px;color:#5a5a64}
+.mv{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;padding:20px 24px;border:1px solid #e6e6ea;border-radius:16px;background:#ffffff}
+.mv.flat{padding:20px 24px;border:0;border-bottom:1px solid #e6e6ea;border-radius:0}
+.mvb{display:flex;flex-direction:column;gap:6px;min-width:0}
+.mvo{font-size:17px;line-height:24px;font-weight:600;color:#5a5a64}
+.mvo.gone{color:#6e6e78;text-decoration:line-through}
+.mvn{font-size:17px;line-height:24px;font-weight:700;color:#101014}
+.mva{display:flex;color:#6e6e78}
+.pend{display:inline-flex;align-items:flex-start;gap:8px;font-size:15px;line-height:22px;font-weight:500;color:#101014;text-align:left}
+.pend svg{flex:none;margin-top:3px;color:#93500a}
+.callc{display:flex;flex-direction:column;gap:24px;padding:32px;border:1px solid #e6e6ea;border-radius:16px;background:#ffffff}
+.calli{width:56px;height:56px;border-radius:999px;background:#f4f4f6;color:#101014;display:flex;align-items:center;justify-content:center}
+.telr{display:flex;align-items:center;gap:14px;padding:16px;border-radius:12px;background:#f6f6f8}
+.telr svg{flex:none;color:#5a5a64}
 @media (max-width:1023px){.wrap{padding:0 24px}.hide-md{display:none !important}.show-md{display:flex}.bbody{padding-bottom:40px}.mbar{display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;bottom:0;z-index:5;padding:12px 24px;background:#ffffff;border-top:1px solid #e6e6ea}}
-@media (max-width:767px){.wrap{padding:0 16px}.hide-xs{display:none !important}.fh{padding:0 16px}.stfull{display:none}.stshort{display:inline-flex}.h1{font-size:24px;line-height:30px}.bbody{padding-top:24px}.strip{overflow-x:auto;scrollbar-width:none}.strip-in,.strip-in.p1{transform:none}.dy{flex:0 0 64px}.mbar{padding:12px 16px}.mbar .b-lg{padding:0 18px}.sentcol{padding:40px 16px 64px}.kv{grid-template-columns:96px minmax(0,1fr);padding:16px 20px}.lnk{min-height:44px}}
+@media (max-width:767px){.wrap{padding:0 16px}.hide-xs{display:none !important}.fh{padding:0 16px}.stfull{display:none}.stshort{display:inline-flex}.h1{font-size:24px;line-height:30px}.bbody{padding-top:24px}.strip{overflow-x:auto;scrollbar-width:none}.strip-in,.strip-in.p1{transform:none}.dy{flex:0 0 64px}.mbar{padding:12px 16px}.mbar .b-lg{padding:0 18px}.sentcol{padding:40px 16px 64px}.kv{grid-template-columns:96px minmax(0,1fr);padding:16px 20px}.lnk{min-height:44px}.mv,.mv.flat{grid-template-columns:minmax(0,1fr);gap:10px;padding:16px 20px}.mva{transform:rotate(90deg);justify-self:start}.callc{padding:24px 20px}}
 </style>
 </helmet>
 <div style="min-height: 100%; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column">
 
 <header class="fh">
 <div style="display: flex; align-items: center; min-width: 0">
-<sc-if value="{{isFirst}}" hint-placeholder-val="{{true}}"><a class="b b-gho yza" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>Yza</a></sc-if>
+<sc-if value="{{isFirst}}" hint-placeholder-val="{{true}}"><a class="b b-gho yza" href="{{exitHref}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>Yza</a></sc-if>
 <sc-if value="{{showBack}}" hint-placeholder-val="{{false}}"><button class="b b-gho yza" onClick="{{back}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>Yza</button></sc-if>
 <sc-if value="{{isSent}}" hint-placeholder-val="{{false}}"><a href="Home.dc.html" aria-label="Ýeral baş sahypa" style="display: flex"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 28px; width: auto"></a></sc-if>
 </div>
@@ -173,7 +202,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </sc-if>
 </div>
 <div style="display: flex; justify-content: flex-end; min-width: 0">
-<a class="b b-gho b-ico" href="Venue.dc.html" aria-label="Ýap"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></a>
+<a class="b b-gho b-ico" href="{{exitHref}}" aria-label="Ýap"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></a>
 </div>
 </header>
 
@@ -182,6 +211,13 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="bbody">
 <main class="bmain">
 <div class="bcol">
+
+<sc-if value="{{isMove}}" hint-placeholder-val="{{false}}">
+<div class="mvt">
+<h1 class="h1">Wagty üýtget</h1>
+<span class="code">YR-48213</span>
+</div>
+</sc-if>
 
 <sc-if value="{{isServices}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column">
@@ -201,7 +237,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
 <span style="font-size: 16px; line-height: 22px; font-weight: 600">{{sv.name}}</span>
 <sc-if value="{{sv.hasDesc}}" hint-placeholder-val="{{false}}"><span class="cap">{{sv.desc}}</span></sc-if>
-<span style="font-size: 14px; line-height: 20px; color: #5a5a64">{{sv.duration}} · <span style="color: #101014; font-weight: 600">{{sv.price}}</span></span>
+<span style="font-size: 14px; line-height: 20px; color: #5a5a64">{{sv.duration}} · <span class="{{sv.prCls}}">{{sv.price}}</span></span>
 </div>
 <button class="{{sv.btnCls}}" onClick="{{sv.toggle}}" aria-pressed="{{sv.on}}" aria-label="{{sv.aria}}"><sc-if value="{{sv.on}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Saýlandy</sc-if><sc-if value="{{sv.off}}" hint-placeholder-val="{{true}}">Saýla</sc-if></button>
 </div>
@@ -214,8 +250,17 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 <sc-if value="{{isStaff}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; flex-direction: column; gap: 24px">
+<sc-if value="{{isMove}}" hint-placeholder-val="{{false}}">
+<div class="lockb">
+<sc-for list="{{sumItems}}" as="it" hint-placeholder-count="1">
+<div class="lkr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; line-height: 20px; font-weight: 600">{{it.name}}</span><span class="cap">{{it.dur}}</span></span><span class="{{it.prCls}}">{{it.price}}</span></div>
+</sc-for>
+<span class="cap">Hyzmatlary üýtgetmek üçin ýazylyşy ýatyryp täzeden ýazylyň.</span>
+</div>
+</sc-if>
 <div style="display: flex; flex-direction: column; gap: 8px">
-<h1 class="h1">Hünärmeni saýlaň</h1>
+<sc-if value="{{isBook}}" hint-placeholder-val="{{true}}"><h1 class="h1">Hünärmeni saýlaň</h1></sc-if>
+<sc-if value="{{isMove}}" hint-placeholder-val="{{false}}"><h2 class="sh">Hünärmeni saýlaň</h2></sc-if>
 <p class="sub">«Islendik hünärmen» saýlasaňyz, iň ir boş wagty görkezeris.</p>
 </div>
 <sc-if value="{{noOneDoesAll}}" hint-placeholder-val="{{false}}"><p class="note">Saýlanan hyzmatlary bir hünärmen ýerine ýetirmeýär — her hyzmat üçin boş hünärmen bellener.</p></sc-if>
@@ -225,7 +270,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <sc-if value="{{p.isAny}}" hint-placeholder-val="{{false}}"><span class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span></sc-if>
 <sc-if value="{{p.isPerson}}" hint-placeholder-val="{{true}}"><span class="av" aria-hidden="true">{{p.initial}}</span></sc-if>
 <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1">
-<span style="font-size: 16px; line-height: 22px; font-weight: 600">{{p.name}}</span>
+<span style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px"><span style="font-size: 16px; line-height: 22px; font-weight: 600">{{p.name}}</span><sc-if value="{{p.isCur}}" hint-placeholder-val="{{false}}"><span class="tag tag-n">Häzirki</span></sc-if></span>
 <sc-if value="{{p.isPerson}}" hint-placeholder-val="{{true}}"><span class="cap" style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap">{{p.role}}<span aria-hidden="true">·</span><span class="rt"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>{{p.rating}}</span></span></sc-if>
 <span class="cap">{{p.sub}}</span>
 </span>
@@ -239,7 +284,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <sc-if value="{{isTime}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; flex-direction: column">
 <div style="display: flex; flex-direction: column; gap: 8px">
-<h1 class="h1">Wagty saýlaň</h1>
+<sc-if value="{{isBook}}" hint-placeholder-val="{{true}}"><h1 class="h1">Wagty saýlaň</h1></sc-if>
+<sc-if value="{{isMove}}" hint-placeholder-val="{{false}}"><h2 class="sh">Täze wagty saýlaň</h2></sc-if>
 <p class="sub">{{timeSub}}</p>
 </div>
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 28px">
@@ -278,7 +324,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 </sc-if>
 
-<sc-if value="{{isConfirm}}" hint-placeholder-val="{{false}}">
+<sc-if value="{{isConfirmBook}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; flex-direction: column">
 <h1 class="h1">Ýazylyşy tassyklaň</h1>
 
@@ -298,12 +344,12 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="card show-md" style="margin-top: 24px; gap: 14px; padding: 20px">
 <span class="lbl">Ýazylyşyňyz</span>
 <sc-for list="{{sumItems}}" as="it" hint-placeholder-count="1">
-<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 500">{{it.name}}</span><span class="cap">{{it.dur}}</span></span><span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap">{{it.price}}</span></div>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 500">{{it.name}}</span><span class="cap">{{it.dur}}</span></span><span class="{{it.prCls}}">{{it.price}}</span></div>
 </sc-for>
 <div class="sline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>{{staffName}}</div>
 <sc-if value="{{hasSlot}}" hint-placeholder-val="{{true}}"><div class="{{whenCls}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>{{whenLabel}}</div></sc-if>
 <div class="sep"></div>
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px"><span style="font-size: 15px; font-weight: 600">Jemi</span><span style="font-size: 17px; font-weight: 700">{{totalLabel}}</span></div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px"><span style="font-size: 15px; font-weight: 600">Jemi</span><span class="{{totCls}}">{{totalLabel}}</span></div>
 </div>
 
 <section class="csec" style="margin-top: 24px">
@@ -316,9 +362,10 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <label for="bk-phone">Telefon belgiňiz</label>
 <div style="display: flex; gap: 8px">
 <span class="pfx">+993</span>
-<input id="bk-phone" class="{{phoneCls}}" type="tel" inputmode="numeric" placeholder="65 12 34 56" value="{{phoneFmt}}" onChange="{{onPhone}}">
+<input id="bk-phone" class="{{phoneCls}}" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="65 12 34 56" value="{{phoneFmt}}" aria-invalid="{{phoneInvalid}}" onChange="{{onPhone}}" style="font-variant-numeric: tabular-nums">
 </div>
-<sc-if value="{{phoneErr}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Belgi doly däl: 8 san bolmaly.</span></sc-if>
+<sc-if value="{{phoneShort}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Belgi doly däl: 8 san bolmaly.</span></sc-if>
+<sc-if value="{{phoneLand}}" hint-placeholder-val="{{false}}"><span class="hint err" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>Kod diňe mobil belgä iberilýär. +993 6… ýa-da 7… bilen başlaýan belgi ýazyň.</span></sc-if>
 </div>
 <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
 <button class="b b-sec" onClick="{{sendCode}}">Kod iber</button>
@@ -391,6 +438,40 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 </sc-if>
 
+<sc-if value="{{isConfirmMove}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h2 class="sh">Täze wagty tassyklaň</h2>
+<p class="sub">{{timeSub}}</p>
+</div>
+<div class="mv">
+<div class="mvb"><span class="lbl">Öňki wagt</span><span class="mvo">Penşenbe, 15 okt · 14:30</span></div>
+<span class="mva" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></span>
+<div class="mvb"><span class="lbl">Täze wagt</span><span class="mvn">{{newShort}}</span></div>
+</div>
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}">
+<div class="note show-md" style="align-items: flex-start; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span>Biznes tassyklaýança öňki wagtyňyz saklanýar.</span></div>
+</sc-if>
+<div class="card show-md" style="gap: 14px; padding: 20px">
+<span class="lbl">Ýazylyşyňyz</span>
+<sc-for list="{{sumItems}}" as="it" hint-placeholder-count="1">
+<div class="lkr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; line-height: 20px; font-weight: 500">{{it.name}}</span><span class="cap">{{it.dur}}</span></span><span class="{{it.prCls}}">{{it.price}}</span></div>
+</sc-for>
+<span class="cap">Hyzmatlary üýtgetmek üçin ýazylyşy ýatyryp täzeden ýazylyň.</span>
+<div class="sline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>{{staffName}}</div>
+<div class="sep"></div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px"><span style="font-size: 15px; font-weight: 600">Jemi</span><span class="{{totCls}}">{{totalLabel}}</span></div>
+</div>
+<section class="csec" style="padding-bottom: 0">
+<h2 class="sh">Ýazylyş düzgünleri</h2>
+<ul class="rules">
+<li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg><span>Ýazylyşy 2 sagat öňünden mugt ýatyryp ýa-da üýtgedip bilersiňiz.</span></li>
+<li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>15 minutdan köp gijä galsaňyz, ýazylyş ýatyrylyp bilner.</span></li>
+</ul>
+</section>
+</div>
+</sc-if>
+
 </div>
 </main>
 
@@ -405,10 +486,11 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 </div>
 <div class="sep"></div>
+<sc-if value="{{isBook}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 14px">
 <sc-if value="{{noSel}}" hint-placeholder-val="{{false}}"><span class="cap">Entek hyzmat saýlanmady.</span></sc-if>
 <sc-for list="{{sumItems}}" as="it" hint-placeholder-count="1">
-<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 500">{{it.name}}</span><span class="cap">{{it.dur}}</span></span><span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap">{{it.price}}</span></div>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 500">{{it.name}}</span><span class="cap">{{it.dur}}</span></span><span class="{{it.prCls}}">{{it.price}}</span></div>
 </sc-for>
 </div>
 <sc-if value="{{hasMeta}}" hint-placeholder-val="{{false}}">
@@ -417,14 +499,29 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <sc-if value="{{hasSlot}}" hint-placeholder-val="{{true}}"><div class="{{whenCls}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>{{whenLabel}}</div></sc-if>
 </div>
 </sc-if>
+</sc-if>
+<sc-if value="{{isMove}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{sumItems}}" as="it" hint-placeholder-count="1">
+<div class="lkr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; line-height: 20px; font-weight: 500">{{it.name}}</span><span class="cap">{{it.dur}}</span></span><span class="{{it.prCls}}">{{it.price}}</span></div>
+</sc-for>
+<span class="cap">Hyzmatlary üýtgetmek üçin ýazylyşy ýatyryp täzeden ýazylyň.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div class="sline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>{{staffName}}</div>
+<div class="sline mute"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Öňki wagt: Penşenbe, 15 okt · 14:30</div>
+<sc-if value="{{hasSlot}}" hint-placeholder-val="{{true}}"><div class="sline" style="font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg>Täze wagt: {{newShort}}</div></sc-if>
+</div>
+</sc-if>
 <div class="sep"></div>
 <div style="display: flex; flex-direction: column; gap: 4px">
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px"><span style="font-size: 15px; line-height: 22px; font-weight: 600">Jemi</span><span style="font-size: 19px; line-height: 24px; font-weight: 700">{{totalLabel}}</span></div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px"><span style="font-size: 15px; line-height: 22px; font-weight: 600">Jemi</span><span class="{{totCls}}">{{totalLabel}}</span></div>
 <span class="cap">Töleg ýerinde</span>
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px">
 <button class="b b-pri b-lg" style="width: 100%" disabled="{{ctaDis}}" onClick="{{next}}">{{ctaLabel}}</button>
 <sc-if value="{{hasCtaHint}}" hint-placeholder-val="{{false}}"><span class="cap" style="text-align: center">{{ctaHint}}</span></sc-if>
+<sc-if value="{{hasCtaNote}}" hint-placeholder-val="{{false}}"><span class="cap" style="text-align: center">Biznes tassyklaýança öňki wagtyňyz saklanýar.</span></sc-if>
 </div>
 </div>
 </aside>
@@ -440,13 +537,16 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 </sc-if>
 
-<sc-if value="{{isSent}}" hint-placeholder-val="{{false}}">
+<sc-if value="{{isSentBook}}" hint-placeholder-val="{{false}}">
 <main class="sentcol">
 <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px">
-<span class="okc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></span>
-<h1 class="h1" style="font-size: 32px; line-height: 38px">Ýazylyş ugradyldy</h1>
-<span class="badge st-p"><span class="dot" style="background: #dc8b0b"></span>Garaşylýar</span>
-<p class="sub" style="max-width: 460px">Glow Studio ýazylyşyňyzy tassyklanda SMS ibereris. Adatça 15 minudyň dowamynda.</p>
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><span class="okc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></span></sc-if>
+<sc-if value="{{instant}}" hint-placeholder-val="{{false}}"><span class="okc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span></sc-if>
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><h1 class="h1" style="font-size: 32px; line-height: 38px">Ýazylyş ugradyldy</h1></sc-if>
+<sc-if value="{{instant}}" hint-placeholder-val="{{false}}"><h1 class="h1" style="font-size: 32px; line-height: 38px">Ýazylyş tassyklandy</h1></sc-if>
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span></sc-if>
+<sc-if value="{{instant}}" hint-placeholder-val="{{false}}"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></sc-if>
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><p class="sub" style="max-width: 500px">Glow Studio ýazylyşyňyzy tassyklanda SMS ibereris. Biznes adatça 15 minudyň içinde jogap berýär. Jogap bermese, 30 minutdan soň size başga wagtlary hödürläris.</p></sc-if>
 </div>
 
 <div class="card" style="padding: 0; gap: 0; overflow: hidden">
@@ -466,7 +566,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </dl>
 <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 24px; border-top: 1px solid #e6e6ea">
 <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; line-height: 22px; font-weight: 600">Jemi</span><span class="cap">Töleg ýerinde</span></span>
-<span style="font-size: 19px; line-height: 24px; font-weight: 700">{{totalLabel}}</span>
+<span class="{{totCls}}">{{totalLabel}}</span>
 </div>
 <div class="cap" style="padding: 14px 24px; border-top: 1px solid #e6e6ea; background: #f6f6f8">Ýazylyş belgisi: <span style="color: #101014; font-weight: 600">YR-48213</span></div>
 </div>
@@ -474,10 +574,10 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <section style="display: flex; flex-direction: column; gap: 20px">
 <h2 class="sh">Indi näme bolar?</h2>
 <ol class="tl">
-<li class="tli done"><span class="tlm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><span class="tlb"><span class="tlt">Ugradyldy</span><span class="cap">Şu gün, 11:20</span></span></li>
-<li class="tli"><span class="tlm">2</span><span class="tlb"><span class="tlt">Biznes tassyklar</span><span class="cap">Adatça 15 minudyň dowamynda. Size SMS geler.</span></span></li>
-<li class="tli"><span class="tlm">3</span><span class="tlb"><span class="tlt">Ýatlatma: 1 gün öň</span><span class="cap">SMS bilen ýatladarys.</span></span></li>
-<li class="tli"><span class="tlm">4</span><span class="tlb"><span class="tlt">Siz gelýärsiňiz</span><span class="cap">{{arriveLabel}}</span></span></li>
+<li class="tli done"><span class="tlm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><span class="tlb"><sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><span class="tlt">Ugradyldy</span></sc-if><sc-if value="{{instant}}" hint-placeholder-val="{{false}}"><span class="tlt">Tassyklandy</span></sc-if><span class="cap">Şu gün, 11:20</span></span></li>
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><li class="tli"><span class="tlm">2</span><span class="tlb"><span class="tlt">Biznes tassyklar</span><span class="cap">Adatça 15 minudyň dowamynda. Size SMS geler.</span></span></li></sc-if>
+<li class="tli"><span class="tlm">{{tlRem}}</span><span class="tlb"><span class="tlt">Ýatlatma: 1 gün öň</span><span class="cap">SMS bilen ýatladarys.</span></span></li>
+<li class="tli"><span class="tlm">{{tlArr}}</span><span class="tlb"><span class="tlt">Siz gelýärsiňiz</span><span class="cap">{{arriveLabel}}</span></span></li>
 </ol>
 </section>
 
@@ -488,14 +588,89 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <a class="b b-gho b-lg" href="Home.dc.html">Baş sahypa</a>
 </div>
 <sc-if value="{{icsDone}}" hint-placeholder-val="{{false}}"><span class="cap" role="status">Senenama faýly (.ics) ýüklendi.</span></sc-if>
-<span class="cap" style="text-align: center">Tassyklanýança ýazylyşy mugt ýatyryp bilersiňiz.</span>
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><span class="cap" style="text-align: center">Tassyklanýança ýazylyşy mugt ýatyryp bilersiňiz.</span></sc-if>
+<sc-if value="{{instant}}" hint-placeholder-val="{{false}}"><span class="cap" style="text-align: center">Ýazylyşy 2 sagat öňünden mugt ýatyryp ýa-da üýtgedip bilersiňiz.</span></sc-if>
+</div>
+</main>
+</sc-if>
+
+<sc-if value="{{isSentMove}}" hint-placeholder-val="{{false}}">
+<main class="sentcol">
+<div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px">
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><span class="okc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></span></sc-if>
+<sc-if value="{{instant}}" hint-placeholder-val="{{false}}"><span class="okc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span></sc-if>
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><h1 class="h1" style="font-size: 32px; line-height: 38px; text-wrap: balance">Wagt üýtgetmek haýyşy ugradyldy</h1></sc-if>
+<sc-if value="{{instant}}" hint-placeholder-val="{{false}}"><h1 class="h1" style="font-size: 32px; line-height: 38px">Wagt üýtgedildi</h1></sc-if>
+<span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span>
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><span class="pend"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span>Täze wagt soraldy: {{newShort}} · jogap garaşylýar</span></span></sc-if>
+<sc-if value="{{manual}}" hint-placeholder-val="{{true}}"><p class="sub" style="max-width: 460px">Biznes tassyklaýança öňki wagtyňyz saklanýar.</p></sc-if>
+</div>
+
+<div class="card" style="padding: 0; gap: 0; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 14px; padding: 20px 24px; border-bottom: 1px solid #e6e6ea">
+<img src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="" style="width: 48px; height: 48px; border-radius: 10px; object-fit: cover; display: block; flex: none">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 16px; line-height: 22px; font-weight: 600">Glow Studio</span><span class="cap">Gözellik salony · 3,0 km</span></div>
+</div>
+<div class="mv flat">
+<div class="mvb"><span class="lbl">Öňki wagt</span><span class="{{oldCls}}">Penşenbe, 15 okt · 14:30</span></div>
+<span class="mva" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></span>
+<div class="mvb"><span class="lbl">Täze wagt</span><span class="mvn">{{newShort}}</span></div>
+</div>
+<dl class="kv">
+<dt>{{svcLabel}}</dt>
+<dd><sc-for list="{{sumItems}}" as="it" hint-placeholder-count="1"><span style="display: block">{{it.name}} · {{it.dur}}</span></sc-for></dd>
+<dt>Hünärmen</dt>
+<dd>{{staffName}}</dd>
+<dt>Salgy</dt>
+<dd>Bitarap Türkmenistan şaýoly 247, 2-nji gat</dd>
+</dl>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 24px; border-top: 1px solid #e6e6ea">
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; line-height: 22px; font-weight: 600">Jemi</span><span class="cap">Töleg ýerinde</span></span>
+<span class="{{totCls}}">{{totalLabel}}</span>
+</div>
+<div class="cap" style="padding: 14px 24px; border-top: 1px solid #e6e6ea; background: #f6f6f8">Ýazylyş belgisi: <span style="color: #101014; font-weight: 600">YR-48213</span></div>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px">
+<a class="b b-pri b-lg" href="Account-Bookings.dc.html">Ýazylyşlaryma geç</a>
+<sc-if value="{{instant}}" hint-placeholder-val="{{false}}"><button class="b b-sec b-lg" onClick="{{addIcs}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M10 16h4"></path><path d="M12 14v4"></path></svg>Senenama goş</button></sc-if>
+<a class="b b-gho b-lg" href="Home.dc.html">Baş sahypa</a>
+</div>
+<sc-if value="{{icsDone}}" hint-placeholder-val="{{false}}"><span class="cap" role="status">Senenama faýly (.ics) ýüklendi.</span></sc-if>
+</div>
+</main>
+</sc-if>
+
+<sc-if value="{{showCall}}" hint-placeholder-val="{{false}}">
+<main class="sentcol" style="max-width: 560px">
+<div class="callc">
+<div style="display: flex; align-items: center; gap: 14px">
+<img src="../../assets/photos/buddy-an-LpK2xddrElI-unsplash.jpg" alt="" style="width: 56px; height: 56px; border-radius: 10px; object-fit: cover; display: block; flex: none">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 16px; line-height: 22px; font-weight: 600">Pamyk</span>
+<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 13px; line-height: 18px; font-weight: 600"><svg width="13" height="13" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>5,0<span class="cap">(37)</span></span>
+<span class="cap">Öý haýwanlary · 3,1 km · Parahat 4</span>
+</div>
+</div>
+<div class="sep"></div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="calli"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></span>
+<h1 class="h1" style="text-wrap: balance">Bu biznese telefon arkaly ýazylyp bilersiňiz</h1>
+<p class="sub">Biznes siziň bilen ýazylyşlary jaň arkaly ylalaşmagy haýyş etdi.</p>
+</div>
+<div class="telr">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="cap">Telefon belgisi</span><span style="font-size: 17px; line-height: 24px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap">+993 12 34 56 78</span></span>
+</div>
+<a class="b b-pri b-lg" href="#" style="width: 100%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Jaň et</a>
 </div>
 </main>
 </sc-if>
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["services","staff","time","confirm","sent"],"default":"services","section":"Flow"},"loggedIn":{"editor":"boolean","default":false,"section":"Flow"},"slotTaken":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1600}}'>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["services","staff","time","confirm","sent"],"default":"services","section":"Flow"},"mode":{"editor":"enum","options":["book","move"],"default":"book","section":"Flow"},"confirmMode":{"editor":"enum","options":["manual","instant"],"default":"manual","section":"Flow"},"price":{"editor":"enum","options":["fixed","hidden","mixed"],"default":"fixed","section":"Flow"},"loggedIn":{"editor":"boolean","default":false,"section":"Flow"},"slotTaken":{"editor":"boolean","default":false,"section":"Flow"},"restricted":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1680}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -514,21 +689,36 @@ class Component extends DCLogic {
   renderVals() {
     const P = this.props;
     const f = P.font ?? 'Onest';
-    const FLOW = ['services', 'staff', 'time', 'confirm', 'sent'];
-    const ORDER = ['services', 'staff', 'time', 'confirm'];
-    const propStep = FLOW.indexOf(P.step) >= 0 ? P.step : 'services';
+    // mode: book = new booking; move = "Wagty üýtget" for an existing appointment (round 6 A5)
+    const move = (P.mode ?? 'book') === 'move';
+    // confirmMode: manual (default — the business confirms by hand) · instant
+    const instant = (P.confirmMode ?? 'manual') === 'instant';
+    // restricted: this client may book this business only by phone (round 6 A7, demo business Pamyk)
+    const restricted = !!(P.restricted ?? false);
     const loggedIn = !!(P.loggedIn ?? false);
     const slotTaken = !!(P.slotTaken ?? false);
+    // price: starting selection for the hidden-price demo (round 6 B1, demo-data priceExamples)
+    const PRESET = { fixed: ['s1'], hidden: ['s12'], mixed: ['s12', 's2'] };
+    const price = PRESET[P.price] ? P.price : 'fixed';
+    const FLOW = ['services', 'staff', 'time', 'confirm', 'sent'];
+    // move mode has no services step: Hünärmen · Wagt · Tassykla
+    const ORDER = move ? ['staff', 'time', 'confirm'] : ['services', 'staff', 'time', 'confirm'];
+    let propStep = FLOW.indexOf(P.step) >= 0 ? P.step : 'services';
+    if (move && propStep === 'services') propStep = 'staff';
+    const preview = propStep === 'confirm' || propStep === 'sent';
 
-    const DEF = { step: null, sel: ['s1'], grp: 'all', staff: null, day: 15, wk: 0, slot: undefined, auth: null, phone: '', phoneErr: false, code: ['', '', '', ''], codeErr: false, wrong: 0, name: '', lost: null, resolved: false, ics: false };
-    const tk = propStep + '|' + (loggedIn ? 1 : 0) + '|' + (slotTaken ? 1 : 0);
+    // The appointment being moved: YR-48213 · Aýal saç kesimi · Aýna · Penşenbe, 15 okt · 14:30 (assumed confirmed)
+    const ORIG = { day: 15, t: '14:30', staff: 'ayna', sel: ['s1'] };
+
+    const DEF = { step: null, sel: move ? ORIG.sel.slice() : PRESET[price].slice(), grp: 'all', staff: null, day: move && preview ? 16 : 15, wk: 0, slot: undefined, auth: null, phone: '', phoneErr: '', code: ['', '', '', ''], codeErr: false, wrong: 0, name: '', lost: null, resolved: false, ics: false };
+    const tk = [propStep, loggedIn ? 1 : 0, slotTaken ? 1 : 0, move ? 'move' : 'book', instant ? 'i' : 'm', restricted ? 1 : 0, price].join('|');
     const fresh = this.state.tk !== tk;
     const s = fresh ? DEF : this.state;
     const set = (patch) => this.setState(Object.assign({}, fresh ? DEF : {}, patch, { tk }));
 
-    const preview = propStep === 'confirm' || propStep === 'sent';
     const step = s.step || propStep;
     const idx = ORDER.indexOf(step);
+    const last = ORDER.length - 1;
 
     // ---- Glow Studio (demo-data.json · businesses[0]) ----
     const GROUPS = [
@@ -536,7 +726,8 @@ class Component extends DCLogic {
         { id: 's1', name: 'Aýal saç kesimi', min: 60, price: 80, from: false, desc: 'Ýuwmak, kesmek we düzmek', staff: ['ayna'] },
         { id: 's2', name: 'Saç düzmek', min: 45, price: 60, from: false, desc: '', staff: ['ayna'] },
         { id: 's3', name: 'Saç reňklemek', min: 120, price: 250, from: true, desc: 'Bahasy saçyň uzynlygyna bagly', staff: ['ayna'] },
-        { id: 's4', name: 'Çaga saç kesimi', min: 30, price: 40, from: false, desc: '', staff: ['ayna'] }
+        { id: 's4', name: 'Çaga saç kesimi', min: 30, price: 40, from: false, desc: '', staff: ['ayna'] },
+        { id: 's12', name: 'Gelin saç düzümi', min: 120, price: 0, hidden: true, from: false, desc: 'Synag düzümi bilen; bahasy ylalaşylýar', staff: ['ayna'] }
       ] },
       { id: 'nails', name: 'Dyrnak', items: [
         { id: 's5', name: 'Manikýur', min: 60, price: 70, from: false, desc: '', staff: ['maral'] },
@@ -561,6 +752,8 @@ class Component extends DCLogic {
     const WD = ['Duşenbe', 'Sişenbe', 'Çarşenbe', 'Penşenbe', 'Anna', 'Şenbe', 'Ýekşenbe'];
     const WS = ['Du', 'Si', 'Ça', 'Pe', 'An', 'Şe', 'Ýe'];
     // Booked start times per October day (slot step 30 min). 17 = fully booked. Today (14) also hides times before the specialist's first free time.
+    // Rule (round 6 A5): the grid shows ONLY the chosen specialist's free times ("Islendik" = free with at least one specialist who does all
+    // chosen services); the booking keeps the chosen specialist — no silent swap. In this demo every Glow service has one specialist, so one table serves.
     const BUSY = {
       14: ['17:00', '18:30'],
       15: ['09:00', '09:30', '11:00', '12:30', '13:00', '15:00', '16:30', '17:00', '18:30'],
@@ -585,7 +778,10 @@ class Component extends DCLogic {
     const fmtPhone = (d) => [d.slice(0, 2), d.slice(2, 4), d.slice(4, 6), d.slice(6, 8)].filter(Boolean).join(' ');
     const wdi = (d) => (d - 14 + 2) % 7;
     const dayLong = (d) => WD[wdi(d)] + ', ' + d + ' oktýabr';
-    const priceL = (x) => x.price + ' TMT' + (x.from ? '-den' : '');
+    const dayShort = (d) => WD[wdi(d)] + ', ' + d + ' okt';
+    // hidden price (B1): "Baha ýerinde aýdylýar" (n-600) where the price would be
+    const HIDDEN = 'Baha ýerinde aýdylýar';
+    const priceL = (x) => (x.hidden ? HIDDEN : x.price + ' TMT' + (x.from ? '-den' : ''));
 
     // ---- 1 · services ----
     const all = [];
@@ -593,9 +789,13 @@ class Component extends DCLogic {
     const sel = all.filter((x) => s.sel.indexOf(x.id) >= 0);
     const nSel = sel.length;
     const totalMin = sel.reduce((a, x) => a + x.min, 0);
-    const totalPrice = sel.reduce((a, x) => a + x.price, 0);
-    const anyFrom = sel.some((x) => x.from);
-    const totalLabel = nSel ? totalPrice + ' TMT' + (anyFrom ? '-den' : '') : '—';
+    const priced = sel.filter((x) => !x.hidden);
+    const totalPrice = priced.reduce((a, x) => a + x.price, 0);
+    const anyFrom = priced.some((x) => x.from);
+    const anyHidden = sel.some((x) => x.hidden);
+    const hiddenOnly = nSel > 0 && priced.length === 0;
+    // totals: mixed hidden + priced → "{sum} TMT-den"; hidden only → "Baha ýerinde aýdylýar", no amount
+    const totalLabel = !nSel ? '—' : (hiddenOnly ? HIDDEN : totalPrice + ' TMT' + (anyFrom || anyHidden ? '-den' : ''));
     const toggle = (id) => set({ sel: s.sel.indexOf(id) >= 0 ? s.sel.filter((v) => v !== id) : s.sel.concat([id]) });
     const GC = [['all', 'Ählisi'], ['hair', 'Saç'], ['nails', 'Dyrnak'], ['face', 'Ýüz ideg'], ['massage', 'Massaž']];
     const grpChips = GC.map((c) => ({ t: c[1], on: s.grp === c[0], cls: s.grp === c[0] ? 'chip on' : 'chip', pick: () => set({ grp: c[0] }) }));
@@ -603,14 +803,14 @@ class Component extends DCLogic {
       name: g.name,
       items: g.items.map((x) => {
         const on = s.sel.indexOf(x.id) >= 0;
-        return { name: x.name, desc: x.desc, hasDesc: !!x.desc, duration: fmtDur(x.min), price: priceL(x), on, off: !on, btnCls: on ? 'b b-sm b-tin svb' : 'b b-sm b-sec svb', aria: 'Saýla: ' + x.name, toggle: () => toggle(x.id) };
+        return { name: x.name, desc: x.desc, hasDesc: !!x.desc, duration: fmtDur(x.min), price: priceL(x), prCls: x.hidden ? 'pr hid' : 'pr', on, off: !on, btnCls: on ? 'b b-sm b-tin svb' : 'b b-sm b-sec svb', aria: 'Saýla: ' + x.name, toggle: () => toggle(x.id) };
       })
     }));
-    const sumItems = sel.map((x) => ({ name: x.name, dur: fmtDur(x.min), price: priceL(x) }));
+    const sumItems = sel.map((x) => ({ name: x.name, dur: fmtDur(x.min), price: priceL(x), prCls: x.hidden ? 'sp hid' : 'sp' }));
 
     // ---- 2 · specialist ----
     const can = (pid) => nSel > 0 && sel.every((x) => x.staff.indexOf(pid) >= 0);
-    let staff = s.staff || (preview ? 'ayna' : 'any');
+    let staff = s.staff || (move ? ORIG.staff : (preview ? 'ayna' : 'any'));
     if (staff !== 'any' && !can(staff)) staff = 'any';
     const staffObj = STAFF.filter((p) => p.id === staff)[0] || null;
     const staffName = staffObj ? staffObj.name : 'Islendik hünärmen';
@@ -627,14 +827,14 @@ class Component extends DCLogic {
     const anyNext = anyToday ? 'Şu gün ' + anyToday : 'Ertir 10:00';
     const todayFrom = staffObj ? staffObj.today : anyToday;
     const staffOpts = [{
-      isAny: true, isPerson: false, initial: '', name: 'Islendik hünärmen', role: '', rating: '',
+      isAny: true, isPerson: false, isCur: false, initial: '', name: 'Islendik hünärmen', role: '', rating: '',
       sub: 'Iň ir boş wagt: ' + anyNext, dis: false, on: staff === 'any', cls: staff === 'any' ? 'opt on' : 'opt',
       pick: () => set({ staff: 'any' })
     }].concat(STAFF.map((p) => {
       const ok = can(p.id);
       const on = ok && staff === p.id;
       return {
-        isAny: false, isPerson: true, initial: p.name.charAt(0), name: p.name, role: p.role, rating: p.rating,
+        isAny: false, isPerson: true, isCur: move && p.id === ORIG.staff, initial: p.name.charAt(0), name: p.name, role: p.role, rating: p.rating,
         sub: ok ? 'Indiki boş wagt: ' + p.next : (nSel > 1 ? 'Saýlanan hyzmatlaryň hemmesini etmeýär' : 'Saýlanan hyzmaty etmeýär'),
         dis: !ok, on, cls: on ? 'opt on' : 'opt', pick: () => set({ staff: p.id })
       };
@@ -654,8 +854,10 @@ class Component extends DCLogic {
       const out = [];
       for (let m = start; m + dur <= close; m += 30) {
         const t = toT(m);
-        const free = busy !== 'full' && busy.indexOf(t) < 0 && m >= from && !(d === lostD && t === lostT);
-        out.push({ t, m, free });
+        // move mode: the appointment's own time is not a choice
+        const mine = move && d === ORIG.day && t === ORIG.t;
+        const free = busy !== 'full' && busy.indexOf(t) < 0 && m >= from && !(d === lostD && t === lostT) && !mine;
+        out.push({ t, m, free, mine });
       }
       return out;
     };
@@ -663,7 +865,7 @@ class Component extends DCLogic {
     const day = s.day;
     const slots = daySlots(day);
     const freeTimes = slots.filter((x) => x.free).map((x) => x.t);
-    const slotRaw = s.slot === undefined ? (preview ? '14:30' : null) : s.slot;
+    const slotRaw = s.slot === undefined ? (preview ? (move ? '11:30' : '14:30') : null) : s.slot;
     const slot = slotRaw && freeTimes.indexOf(slotRaw) >= 0 ? slotRaw : null;
     const DAYS = [];
     for (let d = 14; d <= 27; d++) DAYS.push(d);
@@ -677,13 +879,14 @@ class Component extends DCLogic {
       t: g[0],
       slots: slots.filter((x) => x.m >= g[1] && x.m < g[2]).map((x) => ({
         t: x.t, dis: !x.free, on: x.t === slot, cls: x.t === slot ? 'slot on' : 'slot',
-        aria: x.free ? x.t : x.t + ', boş däl', pick: () => set({ slot: x.t })
+        aria: x.free ? x.t : (x.mine ? x.t + ', öňki wagtyňyz' : x.t + ', boş däl'), pick: () => set({ slot: x.t })
       }))
     })).filter((g) => g.slots.length > 0);
     const dayEmpty = freeTimes.length === 0;
     let nextFree = 0;
     for (let d = day + 1; d <= 27; d++) { if (hasFree(d)) { nextFree = d; break; } }
     const whenLabel = slot ? dayLong(day) + ' · ' + slot + '–' + toT(toMin(slot) + dur) : '—';
+    const newShort = slot ? dayShort(day) + ' · ' + slot : '—';
 
     // ---- 4 · confirm: inline login (phone → SMS code → name) ----
     const authStage = s.auth || (loggedIn ? 'done' : 'phone');
@@ -727,9 +930,15 @@ class Component extends DCLogic {
       else set({ auth: 'name', code: ['', '', '', ''], codeErr: false, wrong: 0 });
     };
     const codeErrText = locked ? 'Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň.' : 'Kod nädogry. Ýene ' + (3 - s.wrong) + ' synanyşyk galdy.';
+    // C1: codes go only to mobile numbers (+993 6x / 7x); a landline (e.g. 12 34 56 78) is refused under the field
+    const sendCode = () => {
+      if (s.phone.length !== 8) { set({ phoneErr: 'short' }); return; }
+      if ('67'.indexOf(s.phone.charAt(0)) < 0) { set({ phoneErr: 'land' }); return; }
+      set({ auth: 'code', code: ['', '', '', ''], codeErr: false, wrong: 0, phoneErr: '' });
+    };
 
-    // slot taken meanwhile → banner with the nearest free times of the same day
-    const conflict = slotTaken && !s.resolved && step === 'confirm' && !!slot;
+    // slot taken meanwhile → banner with the nearest free times of the same day (new bookings only)
+    const conflict = !move && slotTaken && !s.resolved && step === 'confirm' && !!slot;
     const lostKey = slot ? day + '|' + slot : null;
     let alts = [];
     if (conflict) {
@@ -746,21 +955,27 @@ class Component extends DCLogic {
 
     // ---- CTA ----
     let valid = false;
-    if (idx === 0 || idx === 1) valid = nSel > 0;
-    else if (idx === 2) valid = !!slot;
-    else if (idx === 3) valid = identified && !conflict && !!slot && nSel > 0;
+    if (step === 'services' || step === 'staff') valid = nSel > 0;
+    else if (step === 'time') valid = !!slot;
+    else if (step === 'confirm') valid = move ? (!!slot && nSel > 0) : (identified && !conflict && !!slot && nSel > 0);
     let ctaHint = '';
     if (!valid) {
-      if (idx <= 1) ctaHint = 'Iň az bir hyzmat saýlaň.';
-      else if (idx === 2) ctaHint = 'Dowam etmek üçin wagt saýlaň.';
+      if (step === 'services' || step === 'staff') ctaHint = 'Iň az bir hyzmat saýlaň.';
+      else if (step === 'time') ctaHint = 'Dowam etmek üçin wagt saýlaň.';
       else if (conflict) ctaHint = 'Ilki täze wagt saýlaň.';
-      else if (!identified) ctaHint = 'Ilki telefon belgiňizi tassyklaň.';
+      else if (!move && !identified) ctaHint = 'Ilki telefon belgiňizi tassyklaň.';
       else ctaHint = 'Dowam etmek üçin wagt saýlaň.';
     }
-    const next = () => { if (valid) set({ step: idx === 3 ? 'sent' : ORDER[idx + 1] }); };
+    const next = () => { if (valid) set({ step: idx === last ? 'sent' : ORDER[idx + 1] }); };
+    const isLast = idx === last;
+    // move: manual business asks ("Täze wagty sora" + caption), instant business moves at once ("Wagty üýtget")
+    const ctaLabel = isLast ? (move ? (instant ? 'Wagty üýtget' : 'Täze wagty sora') : 'Ýazylyşy ugrat') : 'Dowam et';
+    const hasCtaNote = move && !instant && isLast && valid;
 
     // ---- header step indicator ----
-    const STEPS = [['services', 'Hyzmatlar'], ['staff', 'Hünärmen'], ['time', 'Wagt'], ['confirm', 'Tassyklama']];
+    const STEPS = move
+      ? [['staff', 'Hünärmen'], ['time', 'Wagt'], ['confirm', 'Tassykla']]
+      : [['services', 'Hyzmatlar'], ['staff', 'Hünärmen'], ['time', 'Wagt'], ['confirm', 'Tassyklama']];
     const steps = STEPS.map((p, i) => ({
       n: String(i + 1), t: p[1], sep: i > 0, done: i < idx, notDone: i >= idx, dis: i > idx,
       cur: i === idx ? 'step' : 'false',
@@ -768,23 +983,42 @@ class Component extends DCLogic {
       go: i < idx ? () => leave(p[0]) : () => {}
     }));
 
+    const isSentStep = step === 'sent';
+    const showCall = restricted;
+    let barText = nSel ? [nSel + ' hyzmat', totalLabel].concat(slot ? [slot] : []).join(' · ') : 'Hyzmat saýlanmady';
+    let barSub = valid ? 'Töleg ýerinde' : ctaHint;
+    if (move) {
+      barText = slot ? 'Täze wagt: ' + day + ' okt · ' + slot : 'Öňki wagt: 15 okt · 14:30';
+      barSub = valid ? (hasCtaNote ? 'Biznes tassyklaýança öňki wagtyňyz saklanýar.' : staffName + ' · ' + totalLabel) : ctaHint;
+    }
+
     return {
       fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
       // header
-      isFirst: step === 'services',
-      showBack: idx >= 1,
+      exitHref: move ? 'Account-Bookings.dc.html' : 'Venue.dc.html',
+      isFirst: showCall || idx === 0,
+      showBack: !showCall && idx >= 1,
       back: () => { if (idx >= 1) leave(ORDER[idx - 1]); },
-      isSent: step === 'sent',
-      inFlow: step !== 'sent',
-      showSteps: idx >= 0,
+      isSent: !showCall && isSentStep,
+      inFlow: !showCall && !isSentStep,
+      showSteps: !showCall && idx >= 0,
       steps,
-      stepNum: (idx + 1) + ' / 4',
+      stepNum: (idx + 1) + ' / ' + ORDER.length,
       stepName: idx >= 0 ? STEPS[idx][1] : '',
+      // modes
+      isBook: !move,
+      isMove: move,
+      manual: !instant,
+      instant,
+      showCall,
       // step flags
       isServices: step === 'services',
       isStaff: step === 'staff',
       isTime: step === 'time',
-      isConfirm: step === 'confirm',
+      isConfirmBook: !move && step === 'confirm',
+      isConfirmMove: move && step === 'confirm',
+      isSentBook: !showCall && isSentStep && !move,
+      isSentMove: !showCall && isSentStep && move,
       // 1
       grpChips, groups,
       // 2
@@ -815,12 +1049,11 @@ class Component extends DCLogic {
       authDone: identified,
       phoneFmt: fmtPhone(s.phone),
       phoneCls: s.phoneErr ? 'inp is-e' : 'inp',
-      phoneErr: !!s.phoneErr,
-      onPhone: (e) => set({ phone: String((e && e.target && e.target.value) || '').replace(/\D/g, '').slice(0, 8), phoneErr: false }),
-      sendCode: () => {
-        if (s.phone.length !== 8) { set({ phoneErr: true }); return; }
-        set({ auth: 'code', code: ['', '', '', ''], codeErr: false, wrong: 0 });
-      },
+      phoneShort: s.phoneErr === 'short',
+      phoneLand: s.phoneErr === 'land',
+      phoneInvalid: s.phoneErr ? 'true' : 'false',
+      onPhone: (e) => set({ phone: String((e && e.target && e.target.value) || '').replace(/\D/g, '').slice(0, 8), phoneErr: '' }),
+      sendCode,
       phoneShown: fmtPhone(s.phone),
       editPhone: () => set({ auth: 'phone', code: ['', '', '', ''], codeErr: false, wrong: 0 }),
       codeBoxes,
@@ -844,16 +1077,22 @@ class Component extends DCLogic {
       staffName,
       whenLabel,
       whenCls: conflict ? 'sline gone' : 'sline',
+      newShort,
+      oldCls: instant ? 'mvo gone' : 'mvo',
       totalLabel,
-      ctaLabel: idx === 3 ? 'Ýazylyşy ugrat' : 'Dowam et',
+      totCls: hiddenOnly ? 'tot hid' : 'tot',
+      ctaLabel,
       ctaDis: !valid,
       next,
       hasCtaHint: !valid && !!ctaHint,
       ctaHint,
-      barText: nSel ? [nSel + ' hyzmat', totalLabel].concat(slot ? [slot] : []).join(' · ') : 'Hyzmat saýlanmady',
-      barSub: valid ? 'Töleg ýerinde' : ctaHint,
+      hasCtaNote,
+      barText,
+      barSub,
       // 5 · sent
       svcLabel: nSel > 1 ? 'Hyzmatlar' : 'Hyzmat',
+      tlRem: instant ? '2' : '3',
+      tlArr: instant ? '3' : '4',
       arriveLabel: slot ? dayLong(day) + ' · ' + slot + ' · Glow Studio' : '—',
       addIcs: () => set({ ics: true }),
       icsDone: !!s.ics

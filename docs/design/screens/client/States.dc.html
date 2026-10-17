@@ -71,7 +71,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .toast .b:hover{background:#2a2a32;color:#c3b6fb}
 </style>
 </helmet>
-<div style="width: 1440px; min-height: 3760px; padding: 64px; background: #f4f4f6; color: #101014; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; gap: 48px">
+<div style="width: 1440px; min-height: 4320px; padding: 64px; background: #f4f4f6; color: #101014; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; gap: 48px">
 
 <header style="display: flex; flex-direction: column; gap: 8px">
 <span class="lbl">States</span>
@@ -329,6 +329,25 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 <figure class="fig">
 <div class="tile" lang="tk">
+<div style="display: flex; flex-direction: column; border: 1px solid #e6e6ea; border-radius: 12px; overflow: hidden">
+<header style="display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 12px 0 20px; border-bottom: 1px solid #e6e6ea">
+<a href="Home.dc.html" aria-label="Ýeral baş sahypa" style="display: flex"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 26px; width: auto"></a>
+<nav style="display: flex; align-items: center; gap: 4px"><button class="nl" aria-label="Dil: Türkmençe"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>TK</button><a class="b b-sec b-sm" href="#">Giriş</a></nav>
+</header>
+<main style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 48px 24px 56px">
+<div class="ic56" style="margin-bottom: 12px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg></div>
+<h3 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Bu sahypa entek açylmady</h3>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 380px; text-wrap: pretty">Biznes Ýeral-a täze goşuldy we barlagdan geçýär. Adatça 24 sagat çekýär.</p>
+<div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 16px"><a class="b b-pri" href="Search.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>Başga ýerleri gözle</a></div>
+</main>
+<footer style="display: flex; justify-content: space-between; gap: 16px; padding: 14px 20px; border-top: 1px solid #e6e6ea"><span class="cap">© 2026 Ýeral</span><span style="display: flex; gap: 16px"><a class="cap" href="#">Gizlinlik syýasaty</a><a class="cap" href="#">Ulanyş şertleri</a></span></footer>
+</div>
+</div>
+<figcaption class="tc"><span class="tt">11 · Biznes barlagda (salgy bilen gelen myhman)</span><span class="cap">/tk/b/{slug} of a business still in Ýeral verification (demo: taze-gul), opened from a shared link or QR. Differs from 09: the link is valid and starts working after verification, so the copy is friendly, with no “404” and no business details (name, photo, address, phone); one way out to Search. HTTP 404 + noindex, never cached. The signed-in owner and team see their own page with the preview banner instead (Venue · ownerPreview).</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="tile" lang="tk">
 <div style="position: relative; min-height: 196px">
 <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px">
 <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><h3 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.025em">Glow Studio</h3><span style="font-size: 14px; line-height: 20px; color: #5a5a64">4,9 · 96 teswir · Gözellik salony · 3,0 km</span></div>
@@ -362,10 +381,10 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3760}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":4320}}'>
 class Component extends DCLogic {
   renderVals() {
-    
+    const B = '';
     const tomorrow = [
       { name: 'Rahat Spa', alt: 'Rahat Spa', img: '../../assets/photos/engin-akyurt-ZbzYDboN7fg-unsplash.jpg', rating: '4,9', count: '(140)', meta: 'Spa we massaž · 1,9 km', slots: ['12:00', '14:30', '17:00'] },
       { name: 'Glow Studio', alt: 'Glow Studio: ýüz ideg', img: '../../assets/photos/rosa-rafael-Pe9IXUuC6QU-unsplash.jpg', rating: '4,9', count: '(96)', meta: 'Gözellik salony · 3,0 km', slots: ['10:00', '11:30', '15:00'] }

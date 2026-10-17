@@ -10,14 +10,17 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 ## Read first
 
 1. `docs/memory-bank/activeContext.md`: current focus, open questions, next steps.
+   **Product book first (ADR 0021):** `docs/product/` is the source of product rules, roles, limits, scope and flows;
+   nothing is designed or built from a chapter with open questions (`docs/product/questions.md`).
 2. `docs/memory-bank/systemPatterns.md` before writing code: monorepo map, FSD, data flow, state, rendering, auth, i18n.
 3. As the task needs: `productContext.md` (product rules, glossary), `techContext.md` (libraries, why, where shared
    helpers live), `operations.md` (environments, Docker, CI/CD, versioning, parallel work), `docs/decisions/` (ADRs).
-4. **Design source: `docs/design/`** — design export v0.4 (14.10.2026; `CHANGELOG.md` says what each export changed):
-   `README.md` (client spec), `business/README.md` (business workspace spec, rounds 4–5), `CLAUDE.md` (design rules, how
-   to read `.dc.html`), `tokens.css`, `screens/` (client, business and design-system boards + index), `COMPONENTS.md`
-   (every component → package or FSD slice, Storybook title; look a screen's pieces up here before building it),
-   `demo-data.json`. The screen wins on visuals, the design README on behaviour, the DS boards where screens drifted.
+4. **Design source: `docs/design/`** — design export v0.5 (17.10.2026; `CHANGELOG.md` says what each export changed):
+   `README.md` (client spec), `business/README.md` (business workspace spec, rounds 4–6), `ROUND6-ANSWERS.md`,
+   `CLAUDE.md` (design rules, how to read `.dc.html`), `tokens.css`, `screens/` (client, business and design-system
+   boards + index), `COMPONENTS.md` (every component → package or FSD slice, Storybook title; look a screen's pieces up
+   here before building it), `demo-data.json`. **The product book wins on behaviour** (ADR 0021); then the screen wins
+   on visuals, the design README on behaviour the book doesn't cover, the DS boards where screens drifted.
    Where `docs/design/CLAUDE.md` suggests a stack (Next.js, CSS Modules, next-intl), this repo's ADRs win: TanStack,
    Tailwind mapped from `tokens.css`, use-intl. The client site and the business workspace are designed; the CMS isn't.
 

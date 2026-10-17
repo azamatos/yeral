@@ -67,20 +67,13 @@ button.sn:hover{background:#f4f4f6}
 .sgb{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:#5a5a64;cursor:pointer;white-space:nowrap}
 .sgb:hover{color:#101014}
 .sgb.on{background:#ffffff;color:#101014;font-weight:600;box-shadow:0 0 0 1px #e6e6ea}
-.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
-.dot{width:6px;height:6px;border-radius:999px;flex:none;display:inline-block}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.badge svg{flex:none}
 .st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
 .st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
 .st-d{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
 .st-x{background:#eef1f6;border:1px solid #d3dbe6;color:#41505f}
 .st-n{background:#fee4e2;border:1px solid #f6c7c2;color:#a3251b}
-.d-p{background:#dc8b0b}.d-c{background:#5a3ff0}.d-d{background:#12a366}.d-x{background:#7b8ea3}.d-n{background:#d9412f}
-.k-c{background:#efecfe;border-color:#d5cbfb}
-.k-d{background:#e7f8ee;border-color:#bfe6d1}
-.k-n{background:#fee4e2;border-color:#f6c7c2}
-.k-x{background:#eef1f6;border-color:#d3dbe6}
-.k-p{background:transparent;border-color:transparent}
-.k-p::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;z-index:-1;border-radius:7px;background:#fef6e7;border:1px dashed #dc8b0b;opacity:.7}
 .fld{display:flex;flex-direction:column;gap:6px;min-width:0}
 .flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
 .inp{height:44px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:14px;color:#101014;background:#ffffff;outline:none}
@@ -108,8 +101,6 @@ button.sn:hover{background:#f4f4f6}
 .catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
 .chip:focus-visible,.pc:focus-visible,.sgb:focus-visible,.rqc:focus-visible,.sw:focus-visible,.stb:focus-visible,.lnkb:focus-visible,.bar:focus-visible,.tnb:focus-visible,.ftb:focus-visible,.fnr:focus-visible,.tcard:focus-visible,.rr:focus-visible,.xr2:focus-visible,.dch:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 
-.appb{display:none;align-items:flex-start;gap:12px;margin:12px 16px 0;padding:12px 8px 12px 14px;border-radius:12px;background:#f6f6f8}
-.appi{width:36px;height:36px;border-radius:10px;background:#efecfe;color:#4429d6;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .calh{display:flex;flex-direction:column;gap:10px;padding:16px 32px;border-bottom:1px solid #e6e6ea}
 .calbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .navg{display:flex;align-items:center;gap:2px;flex:none}
@@ -125,7 +116,7 @@ button.sn:hover{background:#f4f4f6}
 .sdot{color:#6e6e78}
 .pill{display:inline-flex;align-items:center;gap:3px;height:18px;padding:0 6px;border-radius:999px;background:#ffffff;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:16px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .nowp{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:999px;background:#5a3ff0;color:#ffffff;font-size:11px;line-height:16px;font-weight:700;white-space:nowrap}
-.tv{display:flex;gap:16px;align-items:flex-start;padding:20px 32px 0}
+.tv{display:flex;gap:16px;align-items:flex-start;padding:20px 32px 32px}
 .tlw{flex:1 1 auto;min-width:0;overflow-x:auto;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff}
 .tli{position:relative;display:flex;flex-direction:column;min-width:max-content}
 .thr{display:flex;height:40px;border-bottom:1px solid #e6e6ea}
@@ -162,10 +153,18 @@ button.sn:hover{background:#f4f4f6}
 .fband{position:absolute;top:5px;bottom:5px;z-index:2;display:flex;align-items:center;padding:0 10px;border-radius:8px;border:1.5px dashed #9d88f7;background:rgba(239,236,254,.75);font-size:12px;line-height:16px;font-weight:600;color:#4429d6;white-space:nowrap;overflow:hidden;pointer-events:none}
 .bar{position:absolute;top:4px;height:39px;z-index:4;display:flex;flex-direction:column;justify-content:center;margin:0;padding:0 8px;border-radius:8px;border:1px solid transparent;font-family:inherit;text-align:left;color:#101014;cursor:pointer;overflow:hidden}
 .bar:hover{filter:brightness(.97)}
-.bar.done{opacity:.6}
 .bar.seat{outline:2px solid #5a3ff0;outline-offset:-1px}
-.bar.sel{box-shadow:0 0 0 2px #ffffff,0 0 0 4px #5a3ff0,0 8px 24px rgba(16,16,20,.16);z-index:6}
-.bar.hi{box-shadow:0 0 0 2px #5a3ff0,0 8px 24px rgba(16,16,20,.16);z-index:6}
+.bar.sel{box-shadow:0 0 0 2px #ffffff,0 0 0 4px #101014;z-index:6}
+.bar.hi{box-shadow:0 0 0 2px #ffffff,0 0 0 4px #101014,0 8px 24px rgba(16,16,20,.16);z-index:6}
+.k-c{background:#efecfe;border:1px solid #d5cbfb}
+.k-d{background:#e7f8ee;border:1px solid #bfe6d1}
+.k-n{background:#fee4e2;border:1px solid #f6c7c2}
+.k-p{background:#fef6e7;border:1.5px dashed #dc8b0b}
+.k-x{background:#ffffff;border:1px dashed #7b8ea3;color:#41505f}
+.k-x .bnm{text-decoration:line-through}
+.k-x .bl2{color:#41505f}
+.si{display:inline-flex;flex:none}
+.si-p{color:#93500a}.si-c{color:#4429d6}.si-d{color:#066a41}.si-x{color:#41505f}.si-n{color:#a3251b}
 .bl1{display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap;font-size:13px;line-height:17px;font-weight:600}
 .bpn{display:inline-flex;align-items:center;gap:3px;flex:none;font-variant-numeric:tabular-nums}
 .bnm{min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -187,15 +186,7 @@ button.sn:hover{background:#f4f4f6}
 .fnt{font-size:13px;line-height:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 .fnt.wn{color:#93500a}
 .fns2{font-size:12px;line-height:16px;color:#5a5a64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:16px 32px 32px}
-.lg{display:inline-flex;align-items:center;gap:6px;font-size:12px;line-height:16px;color:#5a5a64;white-space:nowrap}
-.lsw{width:14px;height:14px;border-radius:4px;border:1px solid transparent;flex:none;display:inline-block;position:relative}
-.lsw-p{background:#fef6e7;border:1px dashed #dc8b0b}
-.lsw-s{background:#efecfe;border:2px solid #5a3ff0}
-.lsw-h{background:repeating-linear-gradient(135deg,#d5cbfb 0 3px,#ffffff 3px 6px);border-color:#d5cbfb}
-.lsw-o{background:#f6f6f8;border-color:#e6e6ea}
-.lsr{width:14px;height:14px;border-radius:999px;border:1.5px solid #d8d8de;background:#ffffff;flex:none;display:inline-block}
-.flv{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;padding:20px 32px 0}
+.flv{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;padding:20px 32px 32px}
 .fcol{flex:2 1 360px;min-width:0;display:flex;flex-direction:column;gap:20px}
 .fpan{flex:3 1 520px;min-width:0;display:flex;flex-direction:column;border:1px solid #e6e6ea;border-radius:16px;overflow:hidden;background:#ffffff}
 .fcol .fpan{flex:none}
@@ -210,6 +201,7 @@ button.sn:hover{background:#f4f4f6}
 .ftb.s-busy{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
 .ftb.s-req{background:#fef6e7;border:1.5px dashed #dc8b0b}
 .ftb.hi,.ftb.hi:hover{box-shadow:0 0 0 3px #ffffff,0 0 0 5px #5a3ff0}
+.ftb.sel,.ftb.sel:hover{box-shadow:0 0 0 3px #ffffff,0 0 0 5px #101014}
 .ftb.dim{opacity:.35}
 .ftn{font-size:16px;line-height:20px;font-weight:700;font-variant-numeric:tabular-nums}
 .fts{font-size:11px;line-height:14px;font-weight:600;color:#5a5a64}
@@ -225,7 +217,6 @@ button.sn:hover{background:#f4f4f6}
 .fdoor{position:absolute;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;background:#ffffff;border:1px solid #e6e6ea;color:#5a5a64;font-size:12px;font-weight:600;z-index:1}
 .xsl{display:none;flex-direction:column;padding:12px 16px 24px}
 .xr2{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;min-height:64px;margin:0;padding:10px 4px;border:0;border-bottom:1px solid #e6e6ea;background:#ffffff;font-family:inherit;text-align:left;color:#101014;cursor:pointer}
-.xr2.done{opacity:.6}
 .dscrim{display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:40}
 .drw{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:100%;display:flex;flex-direction:column;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);z-index:41}
 .grab{display:none;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:8px auto 0;flex:none}
@@ -276,7 +267,7 @@ button.sn:hover{background:#f4f4f6}
 .stbox{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid #e6e6ea;font-size:14px;line-height:20px;font-weight:600}
 .stbox.busy{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
 .stbox.later{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
-.stbox.req{background:#fef6e7;border:1px dashed #dc8b0b;color:#93500a}
+.stbox.req{background:#fef6e7;border:1.5px dashed #dc8b0b;color:#93500a}
 .mwrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
 .scrim{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:0}
 .mdl{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;max-width:100%;max-height:100%;overflow-y:auto;padding:24px;border-radius:16px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16)}
@@ -329,26 +320,90 @@ button.sn:hover{background:#f4f4f6}
 .sbar{position:sticky;bottom:16px;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:8px;padding:12px 12px 12px 20px;background:#ffffff;border:1px solid #e6e6ea;border-radius:16px;box-shadow:0 8px 24px rgba(16,16,20,.16)}
 .vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media (max-width:1279px){.dscrim{display:block}.fna{display:none}}
-@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side > div{align-self:stretch}.swb{justify-content:center;width:44px;padding:4px}.swb > span:not(.av),.swb > svg{display:none}.sn{font-size:0;gap:0;width:44px;height:44px;padding:0;justify-content:center;position:relative}.cnt{position:absolute;top:6px;right:6px;width:8px;height:8px;min-width:0;padding:0;border:0;background:#dc8b0b;font-size:0}.cnt-n{background:#7b8ea3}.soon{display:none}.top{padding:0 24px}.gs{width:auto;flex:0 1 300px}.kbd{display:none}.calh{padding:14px 24px}.tv,.flv{padding:16px 24px 0}.legend{padding:14px 24px 24px}.toast{left:96px;max-width:calc(100% - 120px)}.cont{padding:24px 24px 48px}.setl{flex-direction:column;gap:20px}.snav{position:static;width:auto;align-self:stretch;flex-direction:row;overflow-x:auto;gap:8px;margin:0 -24px;padding:0 24px 4px}.snav .sn{flex:none;width:auto;height:44px;padding:0 16px;gap:8px;font-size:14px;border:1px solid #d8d8de;border-radius:999px;white-space:nowrap}.snav .sn.on{border-color:#d5cbfb}.snav .sdv,.snav .sn.off{display:none}.pane{max-width:none;width:100%}}
-@media (max-width:767px){.root{flex-direction:column}.side{position:static !important;height:auto !important;width:100%;flex-direction:row;align-items:center;gap:4px;padding:8px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow:visible !important}.side > :nth-child(2),.side > :nth-child(6),.side > :nth-child(7),.side > :nth-child(9),.side > :nth-child(10),.side > :nth-child(11),.side > :nth-child(12){display:none}.top{height:56px;padding:0 16px;gap:12px}.top h1{font-size:19px !important;line-height:24px !important}.gs{display:none}.appb{display:flex}.calh{padding:12px 16px}.calbar .b-sm,.calbar .b-i36,.rqc{height:44px}.calbar .b-i36{width:44px}.vseg,.fbar,.cfg{display:none}.tv,.flv,.legend{display:none}.xsl{display:flex}.drw{top:auto;left:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.grab{display:block}.drw-h{height:56px;padding:0 8px 0 16px}.drw-b{padding:16px}.drw-f{padding:12px 16px 16px}.drw-f .b{flex:1 1 auto}.dr{grid-template-columns:110px minmax(0,1fr)}.g2,.tcg{grid-template-columns:minmax(0,1fr)}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:16px;max-width:none}.slot,.chip{height:44px}.cont{padding:16px 16px 40px}.snav{margin:0 -16px;padding:0 16px 4px}.sbar{bottom:12px;padding:12px}.sbar .b{flex:1 1 auto}}
-@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}</style>
+@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side > div{align-self:stretch}.swb{justify-content:center;width:44px;padding:4px}.side .swb > span:not(.av),.side .swb > svg{display:none !important}.sn{font-size:0;gap:0;width:44px;height:44px;padding:0;justify-content:center;position:relative}.side .cnt{position:absolute;top:6px;right:6px;width:8px;height:8px;min-width:0;padding:0;border:0;background:#dc8b0b;font-size:0}.side .cnt-n{background:#7b8ea3}.soon{display:none}.top{padding:0 24px}.gs{width:auto;flex:0 1 300px}.kbd{display:none}.calh{padding:14px 24px}.tv,.flv{padding:16px 24px 24px}.toast{left:96px;max-width:calc(100% - 120px)}.cont{padding:24px 24px 48px}.setl{flex-direction:column;gap:20px}.snav{position:static;width:auto;align-self:stretch;flex-direction:row;overflow-x:auto;gap:8px;margin:0 -24px;padding:0 24px 4px}.snav .sn{flex:none;width:auto;height:44px;padding:0 16px;gap:8px;font-size:14px;border:1px solid #d8d8de;border-radius:999px;white-space:nowrap}.snav .sn.on{border-color:#d5cbfb}.snav .sdv,.snav .sn.off{display:none}.pane{max-width:none;width:100%}}
+@media (max-width:767px){.root{flex-direction:column}.side{position:sticky !important;top:0 !important;height:auto !important;width:100%;flex-direction:row;align-items:center;gap:4px;padding:6px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow:visible !important}.top{height:56px;padding:0 16px;gap:12px}.top h1{font-size:19px !important;line-height:24px !important}.gs{display:none}.calh{padding:12px 16px}.calbar .b-sm,.calbar .b-i36,.rqc{height:44px}.calbar .b-i36{width:44px}.vseg,.fbar,.cfg{display:none}.tv,.flv{display:none}.xsl{display:flex}.drw{top:auto;left:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.grab{display:block}.drw-h{height:56px;padding:0 8px 0 16px}.drw-b{padding:16px}.drw-f{padding:12px 16px 16px}.drw-f .b{flex:1 1 auto}.dr{grid-template-columns:110px minmax(0,1fr)}.g2,.tcg{grid-template-columns:minmax(0,1fr)}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:80px;max-width:none}.slot,.chip{height:44px}.cont{padding:16px 16px 40px}.snav{margin:0 -16px;padding:0 16px 4px}.sbar{bottom:12px;padding:12px}.sbar .b{flex:1 1 auto}}
+@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}
+.me{position:relative}
+.b-ic{width:36px;height:36px;padding:0;border-radius:10px;justify-content:center;flex:none}
+.me .b-ic:hover{background:#f6f6f8}
+.me .b-ic:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.popa{position:absolute;z-index:31;display:flex;flex-direction:column}
+.wsp{top:60px;left:12px;width:300px}
+.ump{bottom:60px;left:12px;width:264px}
+.wsr{min-height:52px}
+.mi svg{flex:none}
+.mi.dan{color:#a3251b}
+.mi.dan:hover{background:#fee4e2;color:#a3251b}
+.pdv{height:1px;background:#e6e6ea;margin:6px 4px;flex:none}
+.tabb{display:none;position:fixed;left:0;right:0;bottom:0;z-index:35;height:64px;padding:0 4px;background:#ffffff;border-top:1px solid #e6e6ea;grid-template-columns:repeat(4,minmax(0,1fr))}
+.tbi{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;height:63px;margin:0;padding:0;border:0;border-radius:12px;background:transparent;font-family:inherit;font-size:11px;line-height:14px;font-weight:600;color:#5a5a64;cursor:pointer;text-decoration:none}
+.tbi:hover{color:#101014}
+.tbi.on,.tbi.on:hover{color:#4429d6}
+.tbi:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #7a5ff4}
+.tbc{position:absolute;top:5px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:16px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.kscrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:36;background:rgba(16,16,20,.4)}
+.ksh{position:fixed;left:0;right:0;bottom:64px;z-index:37;max-height:calc(100% - 96px);overflow-y:auto;display:flex;flex-direction:column;padding:4px 8px 12px;background:#ffffff;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}
+.ksh .mi{min-height:48px;font-size:15px}
+.kgrab{display:block;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:4px auto 6px;flex:none}
+@media (min-width:768px){.kscrim,.ksh{display:none}}
+@media (max-width:1023px){.me{flex-direction:column;gap:6px;padding:4px 0 !important}.me > span:not(.av){display:none !important}.ump{bottom:92px}}
+@media (max-width:767px){.side .sn,.side .sdv,.side .sfill,.side .me,.ump{display:none !important}.side .swb{width:auto;max-width:100%;padding:6px 8px}.side .swb > span:not(.av),.side .swb > svg{display:flex !important}.side .swb > svg{display:block !important}.tabb{display:grid}.main{padding-bottom:64px}.wsp{width:min(300px,calc(100vw - 24px))}}
+.lgw{position:relative;flex:none}
+.lgp{position:absolute;top:44px;right:0;z-index:45;width:320px;max-width:calc(100vw - 32px);max-height:calc(100vh - 150px);overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:14px 16px 16px;text-align:left}
+.lgt{margin:0;font-size:15px;line-height:20px;font-weight:600;color:#101014}
+.lgs{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 12px;align-items:center}
+.lgs .badge{justify-self:start}
+.lgm{font-size:12px;line-height:16px;color:#5a5a64}
+.lgr{display:flex;flex-wrap:wrap;gap:6px 16px}
+.lgi{display:inline-flex;align-items:center;gap:8px;min-width:0;font-size:12px;line-height:16px;color:#101014}
+.lgi > svg{flex:none;color:#5a5a64}
+.tcn svg{flex:none}
+.lgg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+.lgsep{height:1px;background:#e6e6ea;flex:none}
+.lgb{display:inline-flex;align-items:center;justify-content:center;width:30px;height:20px;border-radius:6px;flex:none}
+.lgc{width:16px;height:16px;border-radius:999px;border:1.5px solid #d8d8de;background:#ffffff;flex:none;display:inline-block}
+.lgq{width:24px;height:16px;border-radius:4px;flex:none;display:inline-block}
+@media (max-width:767px){.lgp{position:fixed;top:auto;left:0;right:0;bottom:0;width:auto;max-width:none;max-height:85%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:16px 16px 20px}.lgp .b-sm{height:44px}.lgw .catcher{z-index:61;background:rgba(16,16,20,.4)}.lgp{z-index:62}}
+@media (max-width:767px){.side .swb > span:not(.av){display:flex !important}.side .swb > svg{display:block !important}}</style>
 </helmet>
 <div class="root" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
 
-<aside class="side" aria-label="Esasy menýu" style="position: sticky; top: 0; height: 100vh; overflow-y: auto">
-<button class="swb" aria-label="Biznesi çalyş"><img src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bag kafe</span><span class="cap" style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Andalyp köçesi 8</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
-<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<aside class="side" aria-label="Esasy menýu" style="position: sticky; top: 0; height: 100vh; z-index: 20">
+<button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="Iş ýeri: Bag kafe, Eýesi. Çalyşmak" onClick="{{toggleWs}}"><img src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bag kafe</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div class="sdv"></div>
 <a class="{{navT.cls}}" href="B-Tables.dc.html" aria-current="{{navT.cur}}" onClick="{{navT.go}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"></path><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"></path><path d="M5 18v2"></path><path d="M19 18v2"></path></svg>Stollar</a>
 <a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><span class="cnt" aria-label="{{pendAria}}">{{pendCount}}</span></sc-if></a>
 <a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
 <a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
 <a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
 <a class="{{navS.cls}}" href="B-Settings.dc.html" aria-current="{{navS.cur}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
-<div style="flex: 1"></div>
+<div class="sfill" style="flex: 1"></div>
 <a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
 <a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
-<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
-<button class="swb" aria-label="Hasabym"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; font-weight: 600">Myrat Çaryýew</span><span class="cap" style="font-size: 12px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<div class="sdv"></div>
+<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<span class="av">M</span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Myrat Çaryýew</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 48 17 06</span></span>
+<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" aria-expanded="{{umOpen}}" onClick="{{toggleUm}}" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+</div>
+<sc-if value="{{shellPop}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeShell}}"></div></sc-if>
+<sc-if value="{{wsOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa wsp" role="menu" aria-label="Iş ýerleriňiz">
+<div class="lbl" style="padding: 8px 10px 6px">IŞ ÝERLERIŇIZ</div>
+<a class="mi wsr" href="B-Tables.dc.html" role="menuitemradio" aria-checked="true"><img src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Bag kafe</span><span class="cap" style="font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Eýesi · Andalyp köçesi 8</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></a>
+<div class="pdv" role="separator"></div>
+<a class="mi" role="menuitem" href="B-Onboarding.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täze biznes döret</a>
+</div>
+</sc-if>
+<sc-if value="{{umOpen}}" hint-placeholder-val="{{false}}">
+<div class="pop popa ump" role="menu" aria-label="Hasap menýusy">
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profilim</a>
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg>Dil: Türkmençe</a>
+<a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Müşderi hökmünde aç<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<div class="pdv" role="separator"></div>
+<a class="mi dan" role="menuitem" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Çykmak</a>
+</div>
+</sc-if>
 </aside>
 
 <div class="main">
@@ -358,14 +413,6 @@ button.sn:hover{background:#f4f4f6}
 <label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
 <sc-if value="{{showTopPri}}" hint-placeholder-val="{{true}}"><button class="b b-pri b-sm" onClick="{{openNewBlank}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täze bron</button></sc-if>
 </div>
-
-<sc-if value="{{banner}}" hint-placeholder-val="{{true}}">
-<div class="appb" role="region" aria-label="Ýeral Biznes programmasy">
-<span class="appi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg></span>
-<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600">Telefonda Ýeral Biznes programmasy has amatly</span><span class="cap">Gapyda myhmanlary garşylanyňyzda boş stollar we haýyşlar eliňizde bolar.</span><div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 8px"><a class="b b-sec b-sm" href="#">App Store</a><a class="b b-sec b-sm" href="#">Google Play</a></div></div>
-<button class="b b-gho b-i36" aria-label="Ýap" onClick="{{hideBanner}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
-</div>
-</sc-if>
 
 <sc-if value="{{notSettings}}" hint-placeholder-val="{{true}}">
 <div class="calh">
@@ -381,9 +428,28 @@ button.sn:hover{background:#f4f4f6}
 </div>
 <div style="flex: 1"></div>
 <button class="b b-sec b-sm" onClick="{{openWalk}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" x2="19" y1="8" y2="14"></line><line x1="22" x2="16" y1="11" y2="11"></line></svg>Gelip oturdy</button>
-<sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><button class="rqc" aria-label="{{pendChipAria}}" onClick="{{openQueue}}"><span class="dot d-p"></span>{{pendChip}}</button></sc-if>
+<sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><button class="rqc" aria-label="{{pendChipAria}}" onClick="{{openQueue}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{pendChip}}</button></sc-if>
 <sc-if value="{{noPend}}" hint-placeholder-val="{{false}}"><span class="rqc rq0">Täze haýyş ýok</span></sc-if>
 <button class="b b-gho b-i36 cfg" aria-label="Stol sazlamalary" title="Stol sazlamalary" onClick="{{goSettings}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+<div class="lgw">
+<button class="b b-gho b-i36" aria-label="Reňkler we nyşanlar" title="Reňkler we nyşanlar" aria-haspopup="dialog" aria-expanded="{{lgOpen}}" onClick="{{toggleLg}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></button>
+<sc-if value="{{lgOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeLg}}"></div>
+<div class="pop lgp" role="dialog" aria-labelledby="lg-t" onKeyDown="{{lgKey}}">
+<h2 id="lg-t" class="lgt">Reňkler we nyşanlar</h2>
+<span class="lbl">Ýagdaýlar</span>
+<div class="lgs"><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span><span class="lgm">Täze haýyş — jogap garaşýar</span><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span><span class="lgm">Wagt bellenildi, müşderä habar berildi</span><span class="badge st-d"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg>Tamamlandy</span><span class="lgm">Gelşi geçdi (wagty gutarandan soň özi)</span><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span><span class="lgm">Müşderi, biznes ýa-da ulgam ýatyrdy</span><span class="badge st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>Gelmedi</span><span class="lgm">Müşderi gelmedi — «Arz et» arkaly bellenýär</span></div>
+<div class="lgsep"></div>
+<span class="lbl">Çeşme</span>
+<div class="lgr"><span class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Onlaýn</span><span class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Telefon</span><span class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Gelip oturdy</span></div>
+<div class="lgsep"></div>
+<span class="lbl">Stollar</span>
+<div class="lgg"><span class="lgi"><span class="lgc"></span>Boş</span><span class="lgi"><span class="lgc" style="background: #efecfe; border-color: #d5cbfb"></span>Soňrak bronlanan</span><span class="lgi"><span class="lgc" style="background: #5a3ff0; border-color: #5a3ff0"></span>Häzir eýeli</span><span class="lgi"><span class="lgc" style="background: #fef6e7; border: 1.5px dashed #dc8b0b"></span>Haýyş</span><span class="lgi"><span class="lgq" style="background: repeating-linear-gradient(135deg,#d5cbfb 0 3px,#ffffff 3px 6px); box-shadow: inset 0 0 0 1px #d5cbfb"></span>{{holdLegend}}</span><span class="lgi"><span class="lgq" style="background: #efecfe; box-shadow: inset 0 0 0 2px #5a3ff0"></span>Häzir oturan bron</span><span class="lgi"><span class="lgq" style="background: #f6f6f8; box-shadow: inset 0 0 0 1px #e6e6ea"></span>Iş wagtyndan daşary</span><span class="lgi"><span class="lgq" style="background: #ffffff; border: 1px dashed #7b8ea3"></span>Ýatyrylan bron</span><span class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg>Birleşdirilen stollar</span></div>
+<span class="cap" style="font-size: 12px; line-height: 16px">Boş öýjüge ýa-da stola basyň — täze bron.</span>
+<button class="b b-sec b-sm" style="align-self: stretch" onClick="{{closeLg}}">Düşnükli</button>
+</div>
+</sc-if>
+</div>
 </div>
 <div class="fbar">
 <div class="wrap8" role="group" aria-label="Zal boýunça süz">
@@ -391,6 +457,7 @@ button.sn:hover{background:#f4f4f6}
 </div>
 <span class="vsep" aria-hidden="true"></span>
 <button class="{{f2Cls}}" aria-pressed="{{free2}}" disabled="{{f2Dis}}" onClick="{{toggleFree2}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>{{f2Label}}</button>
+<button class="{{xCls}}" aria-pressed="{{showX}}" title="Ýatyrylanlary görkez" onClick="{{toggleX}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>{{xLabel}}</button>
 <div class="calsum">
 <span><b>{{sumBk}}</b> bron</span><span class="sdot">·</span><span><b>{{sumPpl}}</b> adam</span><span class="sdot">·</span><span><b>{{sumReq}}</b> haýyş</span>
 <sc-if value="{{isToday}}" hint-placeholder-val="{{true}}"><span class="sdot">·</span><span>häzir <b>{{sumBusy}}</b> stol eýeli</span></sc-if>
@@ -411,7 +478,7 @@ button.sn:hover{background:#f4f4f6}
 <div class="arh"><div class="tlc"><span class="lbl" style="color: #41505f">{{g.name}}</span><span class="cap" style="font-size: 12px">· {{g.cnt}}</span></div><div style="width: {{axW}}px; flex: none"></div></div>
 <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="6">
 <div class="{{r.cls}}">
-<div class="tlc"><button class="tnb" aria-label="{{r.aria}}" onClick="{{r.open}}"><span class="tnn">{{r.id}}</span><span class="tns"><span class="tnm">{{r.seats}}</span><span class="{{r.stCls}}">{{r.stText}}</span></span><span class="{{r.sdCls}}" aria-hidden="true"></span></button></div>
+<div class="tlc"><button class="tnb" aria-label="{{r.aria}}" onClick="{{r.open}}"><span class="tnn">{{r.id}}</span><span class="tns"><span class="tnm">{{r.seats}}</span><span class="{{r.stCls}}"><sc-if value="{{r.icC}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; color: #4429d6"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{r.icP}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; color: #93500a"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if>{{r.stText}}</span></span><span class="{{r.sdCls}}" aria-hidden="true"></span></button></div>
 <div class="tt" style="width: {{axW}}px">
 <sc-if value="{{hasPast}}" hint-placeholder-val="{{true}}"><div class="pas" style="width: {{pastW}}px"></div></sc-if>
 <div class="osh" style="left: {{oshL}}px; width: {{oshW}}px"></div>
@@ -420,9 +487,10 @@ button.sn:hover{background:#f4f4f6}
 <sc-for list="{{r.bars}}" as="k" hint-placeholder-count="1">
 <button class="{{k.cls}}" style="left: {{k.left}}px; width: {{k.w}}px; padding-left: {{k.pl}}px; padding-right: {{k.pr}}px" aria-label="{{k.aria}}" onClick="{{k.open}}">
 <sc-if value="{{k.hatch}}" hint-placeholder-val="{{false}}"><span class="hold" aria-hidden="true" style="width: {{k.hw}}px"></span></sc-if>
-<span class="bl1"><span class="bpn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>{{k.party}}</span><sc-if value="{{k.showName}}" hint-placeholder-val="{{true}}"><span class="bnm">{{k.name}}</span></sc-if></span>
+<span class="bl1"><span class="{{k.siCls}}"><sc-if value="{{k.icP}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{k.icC}}" hint-placeholder-val="{{true}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{k.icD}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{k.icX}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{k.icN}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if></span><span class="bpn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>{{k.party}}</span><sc-if value="{{k.showName}}" hint-placeholder-val="{{true}}"><span class="bnm">{{k.name}}</span></sc-if></span>
 <span class="bl2"><sc-if value="{{k.seat}}" hint-placeholder-val="{{false}}"><span class="nowp" style="height: 16px; padding: 0 6px; margin-right: 5px; font-size: 10px; vertical-align: 1px">häzir</span></sc-if>{{k.l2}}</span>
 <span class="bic">
+<sc-if value="{{k.link}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg></sc-if>
 <sc-if value="{{k.phone}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></sc-if>
 <sc-if value="{{k.walk}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if>
 <sc-if value="{{k.note}}" hint-placeholder-val="{{false}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></sc-if>
@@ -452,18 +520,6 @@ button.sn:hover{background:#f4f4f6}
 </aside>
 </sc-if>
 </div>
-<div class="legend" aria-label="Belgiler">
-<span class="lg"><span class="lsw k-c"></span>Tassyklandy</span>
-<span class="lg"><span class="lsw lsw-p"></span>Haýyş (garaşylýar)</span>
-<span class="lg"><span class="lsw lsw-s"></span>Häzir oturan</span>
-<span class="lg"><span class="lsw k-d" style="opacity: .6"></span>Tamamlandy</span>
-<span class="lg"><span class="lsw lsw-h"></span>{{holdLegend}}</span>
-<span class="lg"><span class="lsw lsw-o"></span>Iş wagtyndan daşary</span>
-<span class="lg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Telefon arkaly</span>
-<span class="lg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Gelip oturdy</span>
-<span class="lg"><span class="sd sd-busy"></span><span class="sd sd-later"></span><span class="sd sd-req"></span><span class="sd"></span>Stoluň häzirki ýagdaýy</span>
-<span class="lg">Boş öýjüge basyň — täze bron</span>
-</div>
 </sc-if>
 
 <sc-if value="{{isFloor}}" hint-placeholder-val="{{false}}">
@@ -478,7 +534,7 @@ button.sn:hover{background:#f4f4f6}
 <button class="{{t.cls}}" style="left: calc({{t.x}}% - {{t.hw}}px); top: calc({{t.y}}% - {{t.hh}}px); width: {{t.w}}px; height: {{t.h}}px" aria-label="{{t.aria}}" onClick="{{t.open}}">
 <span class="ftn">{{t.id}}</span><span class="fts">{{t.seats}}</span>
 <sc-for list="{{t.dots}}" as="sd" hint-placeholder-count="4"><span class="fsd" aria-hidden="true" style="left: {{sd.l}}px; top: {{sd.t}}px"></span></sc-for>
-<span class="{{t.capCls}}" style="top: {{t.capTop}}px">{{t.cap}}</span>
+<span class="{{t.capCls}}" style="top: {{t.capTop}}px"><sc-if value="{{t.icC}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; color: #4429d6"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{t.icP}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; color: #93500a"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if>{{t.cap}}</span>
 </button>
 </sc-for>
 </div>
@@ -496,7 +552,7 @@ button.sn:hover{background:#f4f4f6}
 <button class="{{t.cls}}" style="left: calc({{t.x}}% - {{t.hw}}px); top: calc({{t.y}}% - {{t.hh}}px); width: {{t.w}}px; height: {{t.h}}px" aria-label="{{t.aria}}" onClick="{{t.open}}">
 <span class="ftn">{{t.id}}</span><span class="fts">{{t.seats}}</span>
 <sc-for list="{{t.dots}}" as="sd" hint-placeholder-count="4"><span class="fsd" aria-hidden="true" style="left: {{sd.l}}px; top: {{sd.t}}px"></span></sc-for>
-<span class="{{t.capCls}}" style="top: {{t.capTop}}px">{{t.cap}}</span>
+<span class="{{t.capCls}}" style="top: {{t.capTop}}px"><sc-if value="{{t.icC}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; color: #4429d6"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{t.icP}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -2px; margin-right: 4px; color: #93500a"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if>{{t.cap}}</span>
 </button>
 </sc-for>
 </div>
@@ -504,13 +560,6 @@ button.sn:hover{background:#f4f4f6}
 </sc-for>
 </div>
 </sc-if>
-</div>
-<div class="legend" aria-label="Belgiler">
-<span class="lg"><span class="lsr"></span>Boş</span>
-<span class="lg"><span class="lsr" style="background: #efecfe; border-color: #d5cbfb"></span>Soňrak bronlanan · häzir boş</span>
-<span class="lg"><span class="lsr" style="background: #5a3ff0; border-color: #5a3ff0"></span>Häzir eýeli</span>
-<span class="lg"><span class="lsr" style="background: #fef6e7; border: 1.5px dashed #dc8b0b"></span>Haýyş</span>
-<span class="lg">Stola basyň — şu günki bronlary we täze bron</span>
 </div>
 </sc-if>
 
@@ -522,7 +571,7 @@ button.sn:hover{background:#f4f4f6}
 <span class="rrt" style="font-size: 15px">{{x.time}}</span>
 <span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{x.name}}</span><span class="cap">{{x.meta}}</span></span>
 <sc-if value="{{x.seat}}" hint-placeholder-val="{{false}}"><span class="nowp">häzir</span></sc-if>
-<sc-if value="{{x.showBadge}}" hint-placeholder-val="{{true}}"><span class="{{x.bCls}}"><span class="{{x.dCls}}"></span>{{x.st}}</span></sc-if>
+<sc-if value="{{x.showBadge}}" hint-placeholder-val="{{true}}"><span class="{{x.bCls}}"><sc-if value="{{x.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{x.icC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{x.icD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{x.icX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{x.icN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{x.st}}</span></sc-if>
 </button>
 </sc-for>
 <sc-if value="{{xsEmpty}}" hint-placeholder-val="{{false}}"><span class="cap" style="padding: 20px 0">Bu gün bron ýok.</span></sc-if>
@@ -537,14 +586,11 @@ button.sn:hover{background:#f4f4f6}
 <a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg>Ýazylyş düzgünleri</a>
 <a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Iş wagty</a>
 <a class="sn on" href="#st-top" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"></path><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"></path><path d="M5 18v2"></path><path d="M19 18v2"></path></svg>Stollar</a>
-<a class="sn" href="B-Services.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path><path d="M7 7h.01"></path></svg>Hyzmatlar</a>
 <a class="sn" href="B-Team.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>Topar</a>
-<a class="sn" href="B-Team.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Roller</a>
+<a class="sn" href="B-Team.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Rugsatlar</a>
 <a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"></rect><rect width="5" height="5" x="16" y="3" rx="1"></rect><rect width="5" height="5" x="3" y="16" rx="1"></rect><path d="M21 16h-3a2 2 0 0 0-2 2v3"></path><path d="M21 21v.01"></path><path d="M12 7v3a2 2 0 0 1-2 2H7"></path><path d="M3 12h.01"></path><path d="M12 3h.01"></path><path d="M12 16v.01"></path><path d="M16 12h1"></path><path d="M21 12v.01"></path><path d="M12 21v-1"></path></svg>Salgy we QR</a>
-<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg>Şahamçalar</a>
 <div class="sdv"></div>
 <a class="sn" href="B-Notifications.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>Habarnamalar</a>
-<a class="sn" href="B-Billing.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"></rect><path d="M2 10h20"></path></svg>Töleg we tarif</a>
 </nav>
 
 <div class="pane">
@@ -645,7 +691,7 @@ button.sn:hover{background:#f4f4f6}
 
 <sc-if value="{{isReq}}" hint-placeholder-val="{{false}}">
 <div class="drw-b">
-<div class="drow"><span class="badge st-p"><span class="dot d-p"></span>Garaşylýar</span><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Onlaýn haýyş</span></div>
+<div class="drow"><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Onlaýn haýyş</span></div>
 <div class="wbox" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="wbt"><span style="font-weight: 600">Jogap bermäge {{rv.hold}} galdy</span><span>{{rv.expire}}</span></span></div>
 <div class="dsec">
 <div class="cli"><span class="av40">{{rv.ini}}</span><span class="clim"><span class="cn">{{rv.name}}</span><span class="cap" style="font-variant-numeric: tabular-nums">{{rv.phone}}</span></span></div>
@@ -662,7 +708,7 @@ button.sn:hover{background:#f4f4f6}
 
 <sc-if value="{{isBook}}" hint-placeholder-val="{{true}}">
 <div class="drw-b">
-<div class="drow"><span class="{{bv.badgeCls}}"><span class="{{bv.dotCls}}"></span>{{bv.status}}</span>
+<div class="drow"><span class="{{bv.badgeCls}}"><sc-if value="{{bv.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{bv.icC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{bv.icD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{bv.icX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{bv.icN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{bv.status}}</span>
 <sc-if value="{{bv.srcOnline}}" hint-placeholder-val="{{true}}"><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Onlaýn</span></sc-if>
 <sc-if value="{{bv.srcPhone}}" hint-placeholder-val="{{false}}"><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Telefon arkaly</span></sc-if>
 <sc-if value="{{bv.srcWalk}}" hint-placeholder-val="{{false}}"><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Gelip oturdy</span></sc-if>
@@ -716,13 +762,23 @@ button.sn:hover{background:#f4f4f6}
 </sc-if>
 </sc-if>
 
+<sc-if value="{{isGone}}" hint-placeholder-val="{{false}}">
+<div class="drw-b">
+<div class="drow"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span><sc-if value="{{gv.byClient}}" hint-placeholder-val="{{false}}"><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Müşderi ýatyrdy</span></sc-if><sc-if value="{{gv.byBiz}}" hint-placeholder-val="{{true}}"><span class="src"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>{{gv.bizText}}</span></sc-if></div>
+<div class="dsec"><div class="cli"><span class="av40" style="background: #f0f0f3; color: #41505f">{{gv.ini}}</span><span class="clim"><span class="cn">{{gv.name}}</span><span class="cap" style="font-variant-numeric: tabular-nums">{{gv.phone}}</span></span></div></div>
+<dl class="dl"><sc-for list="{{gv.details}}" as="gd" hint-placeholder-count="4"><div class="{{gd.cls}}"><dt>{{gd.k}}</dt><dd>{{gd.v}}</dd></div></sc-for></dl>
+<p class="cap" style="margin: 0">Stol boşadyldy we täze bron üçin açyk.</p>
+</div>
+<div class="drw-f"><div style="flex: 1"></div><button class="b b-sec" onClick="{{gv.rebook}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täzeden bron goş</button></div>
+</sc-if>
+
 <sc-if value="{{isWalk}}" hint-placeholder-val="{{false}}">
 <div class="drw-b">
 <p class="cap" style="margin: 0; font-size: 14px; line-height: 20px">Bronsyz gelen myhmanlary häzir boş stola oturdyň — stol wagt çyzgysynda derrew eýeli bolar.</p>
 <section class="nsec" aria-labelledby="wk-p"><span id="wk-p" class="flab">Adam sany</span><div class="wrap8" role="group" aria-labelledby="wk-p"><sc-for list="{{wv.parties}}" as="pp" hint-placeholder-count="8"><button class="{{pp.cls}}" aria-pressed="{{pp.on}}" aria-label="{{pp.aria}}" onClick="{{pp.pick}}">{{pp.t}}</button></sc-for></div></section>
 <section class="nsec" aria-labelledby="wk-t">
 <div class="nsh"><span id="wk-t" class="flab">Häzir boş stollar</span><span class="cap">{{wv.cntLabel}}</span></div>
-<div class="tcg"><sc-for list="{{wv.cards}}" as="tc" hint-placeholder-count="4"><button class="{{tc.cls}}" aria-pressed="{{tc.on}}" aria-label="{{tc.aria}}" onClick="{{tc.pick}}"><span class="tcn">{{tc.id}}<span class="tcs" style="font-weight: 400">{{tc.area}}</span></span><span class="tcs">{{tc.seats}}</span><span class="{{tc.fCls}}">{{tc.free}}</span></button></sc-for></div>
+<div class="tcg"><sc-for list="{{wv.cards}}" as="tc" hint-placeholder-count="4"><button class="{{tc.cls}}" aria-pressed="{{tc.on}}" aria-label="{{tc.aria}}" onClick="{{tc.pick}}"><span class="tcn"><sc-if value="{{tc.combo}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="align-self: center"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg></sc-if>{{tc.id}}<span class="tcs" style="font-weight: 400">{{tc.area}}</span></span><span class="tcs">{{tc.seats}}</span><span class="{{tc.fCls}}">{{tc.free}}</span></button></sc-for></div>
 <sc-if value="{{wv.none}}" hint-placeholder-val="{{false}}"><div class="note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>{{wv.noneText}}</span></div></sc-if>
 </section>
 <section class="nsec" aria-labelledby="wk-g">
@@ -754,8 +810,9 @@ button.sn:hover{background:#f4f4f6}
 <section class="nsec" aria-labelledby="nw-tl">
 <span id="nw-tl" class="flab">Stol</span>
 <sc-if value="{{nv.hasSugs}}" hint-placeholder-val="{{true}}"><div class="wrap8"><sc-for list="{{nv.sugs}}" as="sg" hint-placeholder-count="3"><button class="{{sg.cls}}" aria-pressed="{{sg.on}}" onClick="{{sg.pick}}">{{sg.t}}</button></sc-for></div></sc-if>
+<sc-if value="{{nv.hasCombos}}" hint-placeholder-val="{{false}}"><div class="dsec"><span class="cap">Birleşdirip bolýan stollar</span><div class="wrap8"><sc-for list="{{nv.combos}}" as="nc" hint-placeholder-count="2"><button class="{{nc.cls}}" aria-pressed="{{nc.on}}" onClick="{{nc.pick}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg>{{nc.t}}</button></sc-for></div></div></sc-if>
 <sc-if value="{{nv.hasMsg}}" hint-placeholder-val="{{false}}"><span class="cap warn">{{nv.msg}}</span></sc-if>
-<span class="selw full"><select class="inp isel" aria-labelledby="nw-tl" value="{{nv.tkey}}" onChange="{{nv.setTable}}"><option value="">Stol saýlaň</option><option value="z1" disabled="{{no.z1}}">Stol 1 · Zal · 2 ýer</option><option value="z2" disabled="{{no.z2}}">Stol 2 · Zal · 2 ýer</option><option value="z3" disabled="{{no.z3}}">Stol 3 · Zal · 4 ýer</option><option value="z4" disabled="{{no.z4}}">Stol 4 · Zal · 4 ýer</option><option value="z5" disabled="{{no.z5}}">Stol 5 · Zal · 4 ýer</option><option value="z6" disabled="{{no.z6}}">Stol 6 · Zal · 6 ýer</option><option value="z7" disabled="{{no.z7}}">Stol 7 · Zal · 2 ýer</option><option value="z8" disabled="{{no.z8}}">Stol 8 · Zal · 8 ýer</option><option value="t1" disabled="{{no.t1}}">T1 · Terrasa · 2 ýer</option><option value="t2" disabled="{{no.t2}}">T2 · Terrasa · 2 ýer</option><option value="t3" disabled="{{no.t3}}">T3 · Terrasa · 4 ýer</option><option value="t4" disabled="{{no.t4}}">T4 · Terrasa · 4 ýer</option><option value="t5" disabled="{{no.t5}}">T5 · Terrasa · 6 ýer</option><option value="t6" disabled="{{no.t6}}">T6 · Terrasa · 4 ýer</option><option value="v1" disabled="{{no.v1}}">V1 · VIP otag · 10 ýer</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+<span class="selw full"><select class="inp isel" aria-labelledby="nw-tl" value="{{nv.tkey}}" onChange="{{nv.setTable}}"><option value="">{{nv.selLabel}}</option><option value="z1" disabled="{{no.z1}}">Stol 1 · Zal · 2 ýer</option><option value="z2" disabled="{{no.z2}}">Stol 2 · Zal · 2 ýer</option><option value="z3" disabled="{{no.z3}}">Stol 3 · Zal · 4 ýer</option><option value="z4" disabled="{{no.z4}}">Stol 4 · Zal · 4 ýer</option><option value="z5" disabled="{{no.z5}}">Stol 5 · Zal · 4 ýer</option><option value="z6" disabled="{{no.z6}}">Stol 6 · Zal · 6 ýer</option><option value="z7" disabled="{{no.z7}}">Stol 7 · Zal · 2 ýer</option><option value="z8" disabled="{{no.z8}}">Stol 8 · Zal · 8 ýer</option><option value="t1" disabled="{{no.t1}}">T1 · Terrasa · 2 ýer</option><option value="t2" disabled="{{no.t2}}">T2 · Terrasa · 2 ýer</option><option value="t3" disabled="{{no.t3}}">T3 · Terrasa · 4 ýer</option><option value="t4" disabled="{{no.t4}}">T4 · Terrasa · 4 ýer</option><option value="t5" disabled="{{no.t5}}">T5 · Terrasa · 6 ýer</option><option value="t6" disabled="{{no.t6}}">T6 · Terrasa · 4 ýer</option><option value="v1" disabled="{{no.v1}}">V1 · VIP otag · 10 ýer</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
 </section>
 <section class="nsec" aria-labelledby="nw-rq"><span id="nw-rq" class="flab">Ýörite islegler</span><div class="wrap8"><sc-for list="{{nv.reqs}}" as="rq" hint-placeholder-count="4"><button class="{{rq.cls}}" aria-pressed="{{rq.on}}" onClick="{{rq.pick}}">{{rq.t}}</button></sc-for></div></section>
 <div class="fld"><label class="flab" for="nw-note">Içerki bellik</label><textarea id="nw-note" class="inp ta" value="{{nv.note}}" onInput="{{nv.onNote}}" placeholder="Diňe toparyňyz görer"></textarea></div>
@@ -767,10 +824,10 @@ button.sn:hover{background:#f4f4f6}
 <sc-if value="{{isTbl}}" hint-placeholder-val="{{false}}">
 <div class="drw-b">
 <div class="dsec"><span style="font-size: 15px; line-height: 22px; font-weight: 600">{{tv.line1}}</span><span class="cap">{{tv.line2}}</span></div>
-<div class="{{tv.boxCls}}" role="status"><span class="{{tv.sdCls}}" aria-hidden="true"></span><span>{{tv.state}}</span></div>
+<div class="{{tv.boxCls}}" role="status"><sc-if value="{{tv.dot}}" hint-placeholder-val="{{true}}"><span class="{{tv.sdCls}}" aria-hidden="true"></span></sc-if><sc-if value="{{tv.icC}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{tv.icP}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><span>{{tv.state}}</span></div>
 <section class="nsec" aria-labelledby="tv-l">
 <div class="nsh"><span id="tv-l" class="lbl">Şu günki bronlar</span><span class="cap">{{tv.cnt}}</span></div>
-<div style="border-top: 1px solid #e6e6ea"><sc-for list="{{tv.list}}" as="tr" hint-placeholder-count="2"><button class="{{tr.cls}}" aria-label="{{tr.aria}}" onClick="{{tr.open}}"><span class="rrt">{{tr.time}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{tr.name}}</span><span class="cap">{{tr.meta}}</span></span><sc-if value="{{tr.seat}}" hint-placeholder-val="{{false}}"><span class="nowp">häzir</span></sc-if><sc-if value="{{tr.showBadge}}" hint-placeholder-val="{{true}}"><span class="{{tr.bCls}}"><span class="{{tr.dCls}}"></span>{{tr.st}}</span></sc-if></button></sc-for></div>
+<div style="border-top: 1px solid #e6e6ea"><sc-for list="{{tv.list}}" as="tr" hint-placeholder-count="2"><button class="{{tr.cls}}" aria-label="{{tr.aria}}" onClick="{{tr.open}}"><span class="rrt">{{tr.time}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{tr.name}}</span><span class="cap">{{tr.meta}}</span></span><sc-if value="{{tr.seat}}" hint-placeholder-val="{{false}}"><span class="nowp">häzir</span></sc-if><sc-if value="{{tr.showBadge}}" hint-placeholder-val="{{true}}"><span class="{{tr.bCls}}"><sc-if value="{{tr.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{tr.icC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{tr.icD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{tr.icX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{tr.icN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{tr.st}}</span></sc-if></button></sc-for></div>
 <sc-if value="{{tv.empty}}" hint-placeholder-val="{{false}}"><span class="cap" style="padding-top: 4px">Şu gün bu stola bron ýok.</span></sc-if>
 </section>
 </div>
@@ -835,9 +892,36 @@ button.sn:hover{background:#f4f4f6}
 </div>
 </sc-if>
 
+
+<nav class="tabb" aria-label="Bölümler">
+<a class="{{tabMainCls}}" href="B-Tables.dc.html" aria-current="{{tabMainCur}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"></path><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"></path><path d="M5 18v2"></path><path d="M19 18v2"></path></svg><span>Stollar</span></a>
+<a class="tbi" href="B-Bookings.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span>Ýazylyşlar</span><sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><span class="tbc" aria-label="{{pendAria}}">{{pendCount}}</span></sc-if></a>
+<a class="tbi" href="B-Clients.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Müşderiler</span></a>
+<button class="{{tabKopCls}}" aria-haspopup="dialog" aria-expanded="{{kopOpen}}" onClick="{{toggleKop}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg><span>Köp</span></button>
+</nav>
+<sc-if value="{{kopOpen}}" hint-placeholder-val="{{false}}">
+<div class="kscrim" onClick="{{closeShell}}"></div>
+<div class="ksh" role="dialog" aria-modal="true" aria-label="Köp">
+<span class="kgrab"></span>
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px 10px"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Myrat Çaryýew</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 48 17 06</span></span></div>
+<div class="pdv" role="separator"></div>
+<a class="mi" href="B-Reviews.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
+<a class="mi" href="B-Analytics.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<a class="mi" href="B-Settings.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<a class="mi" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
+<a class="mi" href="B-Help.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
+<div class="pdv" role="separator"></div>
+<a class="mi" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profilim</a>
+<a class="mi" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg>Dil: Türkmençe</a>
+<a class="mi" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Müşderi hökmünde aç<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<div class="pdv"></div>
+<a class="mi dan" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Çykmak</a>
+</div>
+</sc-if>
+
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["timeline","floor","settings"],"default":"timeline","section":"State"},"panel":{"editor":"enum","options":["none","reservation","request","walkin"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1240}}'>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["timeline","floor","settings"],"default":"timeline","section":"State"},"panel":{"editor":"enum","options":["none","reservation","request","walkin","new8"],"default":"none","section":"State"},"legend":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1180}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -845,32 +929,33 @@ class Component extends DCLogic {
   }
   fresh() {
     const d = this.setDefaults();
-    return { ov: {}, added: [], notes: {}, seq: 1, early: false, area: 'all', free2: false, banner: true, set: d, saved: this.copy(d), menuRow: null };
+    return { ov: {}, added: [], notes: {}, seq: 1, early: false, area: 'all', free2: false, showX: false, shell: null, set: d, saved: this.copy(d), menuRow: null };
   }
   copy(o) {
     return JSON.parse(JSON.stringify(o));
   }
   blankNew(o) {
-    return Object.assign({ phone: '', name: '', party: 2, from: null, tid: null, off: 0, reqs: [], note: '', sms: true, tried: false }, o || {});
+    return Object.assign({ phone: '', name: '', party: 2, from: null, tid: null, combo: null, off: 0, reqs: [], note: '', sms: true, tried: false }, o || {});
   }
   blankWalk(o) {
-    return Object.assign({ party: 2, tid: null, phone: '', name: '' }, o || {});
+    return Object.assign({ party: 2, tid: null, combo: null, phone: '', name: '' }, o || {});
   }
   fromTweaks(p) {
     let v = p.view ?? 'timeline';
     if (['timeline', 'floor', 'settings'].indexOf(v) < 0) v = 'timeline';
     const pn = p.panel ?? 'none';
-    const st = { view: v, dayOff: 0, panel: 'none', target: null, modal: null, mvOpen: false, toast: null, hiId: null, nw: this.blankNew(), wk: this.blankWalk(), dReason: null, dText: '', dAlt: false, dSlots: [], cReason: null, cText: '', xReason: null };
+    const st = { view: v, dayOff: 0, panel: 'none', target: null, modal: null, mvOpen: false, toast: null, hiId: null, nw: this.blankNew(), wk: this.blankWalk(), dReason: null, dText: '', dAlt: false, dSlots: [], cReason: null, cText: '', xReason: null, lg: !!p.legend };
     if (v !== 'settings') {
       if (pn === 'reservation') { st.panel = 'res'; st.target = 'r1'; }
       if (pn === 'request') { st.panel = 'res'; st.target = 'r8'; }
       if (pn === 'walkin') st.panel = 'walk';
+      if (pn === 'new8') { st.panel = 'new'; st.nw = this.blankNew({ party: 8, from: 1230, off: 0 }); }
     }
     return st;
   }
   componentDidUpdate(pp) {
     const p = this.props;
-    if (pp.view !== p.view || pp.panel !== p.panel) this.setState(Object.assign(this.fresh(), this.fromTweaks(p)));
+    if (pp.view !== p.view || pp.panel !== p.panel || pp.legend !== p.legend) this.setState(Object.assign(this.fresh(), this.fromTweaks(p)));
   }
   up(patch) {
     this.setState(Object.assign({ toast: null, hiId: null, menuRow: null }, patch));
@@ -1052,10 +1137,18 @@ class Component extends DCLogic {
     if (r.off !== this.state.dayOff) patch.dayOff = r.off;
     this.up(patch);
   }
+  slot(m) {
+    return Math.floor(m / 15) * 15;
+  }
+  pairs() {
+    const out = [];
+    this.D().TABLES.forEach((t) => t.comb.forEach((c) => { if (t.id < c) out.push([t.id, c]); }));
+    return out;
+  }
   firstFree(tid, off, party) {
     const D = this.D();
     const now = this.nowFor(off);
-    let m = off === 0 ? Math.ceil(now / 15) * 15 : 1080;
+    let m = off === 0 ? this.slot(now) : 1080;
     if (m < D.OPEN) m = 1080;
     for (; m <= D.LAST; m += 15) if (this.fits(tid, m, Math.min(m + this.turnFor(party), D.CLOSE), off, null)) return m;
     return null;
@@ -1067,7 +1160,7 @@ class Component extends DCLogic {
     const party = t ? Math.min(Math.max(2, t.min), t.max) : 2;
     let from = o && o.from !== undefined ? o.from : null;
     if (from === null && t) from = this.firstFree(t.id, off, party);
-    if (from === null && !t && off === 0) from = Math.ceil(this.D().NOW / 15) * 15;
+    if (from === null && !t && off === 0) from = this.slot(this.D().NOW);
     this.up({ panel: 'new', target: null, modal: null, mvOpen: false, nw: this.blankNew({ tid: t ? t.id : null, from: from, off: off, party: party }) });
   }
   openWalk(tid) {
@@ -1112,8 +1205,23 @@ class Component extends DCLogic {
     const pageTitle = isSettings ? 'Sazlamalar' : 'Stollar';
     const showTopPri = notSettings;
     const openNewBlank = () => this.openNew({});
-    const banner = !!s.banner && notSettings;
-    const hideBanner = () => this.setState({ banner: false });
+    // D2 shell (workspace switcher, user menu) + D5 phone tab bar
+    const wsOpen = s.shell === 'ws';
+    const umOpen = s.shell === 'um';
+    const kopOpen = s.shell === 'kop';
+    const shellPop = wsOpen || umOpen;
+    const toggleWs = () => this.setState({ shell: wsOpen ? null : 'ws' });
+    const toggleUm = () => this.setState({ shell: umOpen ? null : 'um' });
+    const toggleKop = () => this.setState({ shell: kopOpen ? null : 'kop' });
+    const closeShell = () => this.setState({ shell: null });
+    const tabMainCls = notSettings && !kopOpen ? 'tbi on' : 'tbi';
+    const tabMainCur = notSettings ? 'page' : 'false';
+    const tabKopCls = isSettings || kopOpen ? 'tbi on' : 'tbi';
+    // D4 legend «Reňkler we nyşanlar» (opens by itself on the first visit; tweak "legend")
+    const lgOpen = notSettings && !!s.lg;
+    const toggleLg = () => this.setState({ lg: !s.lg });
+    const closeLg = () => this.setState({ lg: false });
+    const lgKey = (e) => { if (e && e.key === 'Escape') this.setState({ lg: false }); };
     const goToday = () => this.up({ dayOff: 0 });
     const goPrev = () => this.up({ dayOff: off - 1, panel: 'none', target: null, mvOpen: false });
     const goNext = () => this.up({ dayOff: off + 1, panel: 'none', target: null, mvOpen: false });
@@ -1135,6 +1243,12 @@ class Component extends DCLogic {
     const f2Dis = !isToday;
     const f2Label = f2on ? '2 adam üçin boş stollar · ' + f2n : '2 adam üçin boş stollar';
     const toggleFree2 = () => { if (isToday) this.up({ free2: !s.free2 }); };
+    const nX = items.filter((r) => r.status === 'cancelled').length;
+    const showX = !!s.showX;
+    const xCls = showX ? 'chip on' : 'chip';
+    const xLabel = 'Ýatyrylanlar' + (nX ? ' · ' + nX : '');
+    const toggleX = () => this.up({ showX: !s.showX });
+    const barSrc = showX ? items : shown;
     const sumBk = String(shown.length);
     const sumPpl = String(shown.reduce((a, r) => a + r.party, 0));
     const sumReq = String(shown.filter((r) => r.status === 'pending').length);
@@ -1142,7 +1256,7 @@ class Component extends DCLogic {
 
     const stInfo = (t) => {
       const st = ST[t.id];
-      const o = { txt: 'Boş', cls: 'tnm', sd: 'sd', a: (isToday ? 'häzir ' : '') + 'boş' };
+      const o = { txt: 'Boş', cls: 'tnm', sd: 'sd', a: (isToday ? 'häzir ' : '') + 'boş', icC: st.k === 'later', icP: st.k === 'req' };
       if (st.k === 'busy') { o.txt = this.dat(this.hm(st.busy.to)) + ' çenli'; o.cls = 'tnm bz'; o.sd = 'sd sd-busy'; o.a = 'häzir eýeli, ' + o.txt; }
       else if (st.k === 'later') { o.txt = 'Bron ' + this.hm(st.next.from); o.sd = 'sd sd-later'; o.a += ', ' + this.loc(this.hm(st.next.from)) + ' bron'; }
       else if (st.k === 'req') { o.txt = 'Haýyş ' + this.hm(st.next.from); o.cls = 'tnm rq'; o.sd = 'sd sd-req'; o.a += ', ' + this.loc(this.hm(st.next.from)) + ' haýyş'; }
@@ -1187,7 +1301,7 @@ class Component extends DCLogic {
           const m2 = f2on && match2(t);
           const cells = [];
           for (let m = ax0; m < AX1; m += 15) {
-            const dis = off < 0 || (isToday && m < NOW) || m > D.LAST;
+            const dis = off < 0 || (isToday && m + 15 <= NOW) || m > D.LAST;
             cells.push({ dis: dis, aria: 'Stol ' + t.id + ', ' + this.hm(m) + ' — täze bron', pick: () => this.openNew({ tid: t.id, from: m, off: off }) });
           }
           let band = false;
@@ -1203,7 +1317,7 @@ class Component extends DCLogic {
             bandT = 'Boş · ' + this.dat(this.hm(b1)) + ' çenli';
           }
           const bars = [];
-          shown.filter((r) => r.tables.indexOf(t.id) >= 0).forEach((r) => {
+          barSrc.filter((r) => r.tables.indexOf(t.id) >= 0).forEach((r) => {
             const a1 = Math.max(r.from, ax0);
             const b1 = Math.min(r.to, AX1);
             if (b1 <= a1) return;
@@ -1211,19 +1325,19 @@ class Component extends DCLogic {
             const seat = this.seated(r);
             const pend = r.status === 'pending';
             const hatch = this.holdSoon(r);
-            const done = r.status === 'completed' || r.status === 'noshow';
             const w = Math.round((b1 - a1) * PX) - 4;
-            const icons = (r.source === 'phone' ? 1 : 0) + (r.source === 'walkin' ? 1 : 0) + (r.note ? 1 : 0);
+            const link = r.tables.length > 1;
+            const icons = (r.source === 'phone' ? 1 : 0) + (r.source === 'walkin' ? 1 : 0) + (r.note ? 1 : 0) + (link ? 1 : 0);
             let cls = 'bar ' + bd[3];
-            if (done) cls += ' done';
             if (seat) cls += ' seat';
             if (selRes === r.id) cls += ' sel';
             if (s.hiId === r.id) cls += ' hi';
             const time = this.hm(r.from) + '–' + this.hm(r.to);
             bars.push({
               cls: cls, left: px(a1) + 2, w: w, pl: hatch ? holdW + 8 : 8, pr: 8 + icons * 17 + (pend ? 54 : 0), hw: holdW,
+              siCls: 'si si-' + bd[1].slice(2), icP: pend, icC: r.status === 'confirmed', icD: r.status === 'completed', icX: r.status === 'cancelled', icN: r.status === 'noshow',
               party: String(r.party), name: r.name, showName: w > 64,
-              l2: hatch ? this.hm(r.from) + ' · ' + holdMin + ' min saklanýar' : time,
+              l2: hatch ? this.hm(r.from) + ' · ' + holdMin + ' min saklanýar' : time + (link ? ' · ' + r.tables.join('+') : ''), link: link,
               phone: r.source === 'phone', walk: r.source === 'walkin', note: !!r.note, pend: pend, hold: (r.hold || 0) + ' min', seat: seat, hatch: hatch,
               aria: 'Stol ' + r.tables.join('+') + ', ' + time + ', ' + r.name + ', ' + r.party + ' adam, ' + bd[2] + (seat ? ', häzir oturýar' : '') + (pend ? ', jogap bermäge ' + r.hold + ' min galdy' : '') + (hatch ? ', stol ' + this.dat(this.hm(r.from + holdMin)) + ' çenli saklanýar' : ''),
               open: () => this.openRes(r.id)
@@ -1231,7 +1345,7 @@ class Component extends DCLogic {
           });
           const lastRow = gi === areasShown.length - 1 && ti === tl.length - 1;
           return {
-            id: t.id, seats: t.seats + ' ýer', stText: info.txt, stCls: info.cls, sdCls: info.sd,
+            id: t.id, seats: t.seats + ' ýer', stText: info.txt, stCls: info.cls, sdCls: info.sd, icC: info.icC, icP: info.icP,
             cls: 'trow' + (lastRow ? ' last' : '') + (f2on ? (m2 ? ' hl' : ' dim') : ''),
             aria: 'Stol ' + t.id + ', ' + t.seats + ' ýer, ' + a.name + ': ' + info.a + '. Stoluň bronlaryny aç',
             open: () => openTbl(t.id), cells: cells, band: band, bandL: bandL, bandW: bandW, bandT: bandT, bars: bars
@@ -1288,15 +1402,17 @@ class Component extends DCLogic {
           }
           let cap = 'Boş';
           let capCls = 'fcap';
+          const icC = st.k === 'later';
+          const icP = st.k === 'req';
           if (st.k === 'busy') { cap = this.dat(this.hm(st.busy.to)) + ' çenli'; capCls = 'fcap c-busy'; }
           else if (st.k === 'later') { cap = 'Bron ' + this.hm(st.next.from); capCls = 'fcap c-later'; }
           else if (st.k === 'req') { cap = 'Haýyş ' + this.hm(st.next.from); capCls = 'fcap c-req'; }
           else if (!isToday) cap = off < 0 ? '' : 'Bron ýok';
           let cls = 'ftb ' + (z.r ? 'rnd' : 'rct') + (st.k !== 'free' ? ' s-' + st.k : '');
           if (f2on) cls += match2(t) ? ' hi' : ' dim';
-          else if (selTbl === t.id) cls += ' hi';
+          else if (selTbl === t.id) cls += ' sel';
           return {
-            id: t.id, seats: t.seats + ' ýer', x: t.pos[0], y: t.pos[1], w: z.w, h: z.h, hw: z.w / 2, hh: z.h / 2, dots: dots, cap: cap, capCls: capCls, capTop: z.h + 16, cls: cls,
+            id: t.id, seats: t.seats + ' ýer', x: t.pos[0], y: t.pos[1], w: z.w, h: z.h, hw: z.w / 2, hh: z.h / 2, dots: dots, cap: cap, capCls: capCls, capTop: z.h + 16, cls: cls, icC: icC, icP: icP,
             aria: 'Stol ' + t.id + ', ' + t.seats + ' ýer: ' + stInfo(t).a + '. Stoluň bronlaryny aç', open: () => openTbl(t.id)
           };
         })
@@ -1312,8 +1428,8 @@ class Component extends DCLogic {
       const seat = this.seated(r);
       const t0 = this.tbl(r.tables[0]);
       return {
-        cls: 'xr2' + (r.status === 'completed' || r.status === 'noshow' ? ' done' : ''), time: this.hm(r.from), name: r.name,
-        meta: r.party + ' adam · Stol ' + r.tables.join('+') + ' · ' + (t0 ? this.areaName(t0.area) : ''), seat: seat, showBadge: !seat, bCls: 'badge ' + bd[0], dCls: 'dot ' + bd[1], st: bd[2],
+        cls: 'xr2', time: this.hm(r.from), name: r.name,
+        meta: r.party + ' adam · Stol ' + r.tables.join('+') + ' · ' + (t0 ? this.areaName(t0.area) : ''), seat: seat, showBadge: !seat, bCls: 'badge ' + bd[0], icP: bd[1] === 'd-p', icC: bd[1] === 'd-c', icD: bd[1] === 'd-d', icX: bd[1] === 'd-x', icN: bd[1] === 'd-n', st: bd[2],
         aria: this.hm(r.from) + ', ' + r.name + ', ' + r.party + ' adam, Stol ' + r.tables.join('+') + ', ' + (seat ? 'häzir oturýar' : bd[2]), open: () => this.openRes(r.id)
       };
     });
@@ -1373,12 +1489,13 @@ class Component extends DCLogic {
     const tb = notSettings && s.panel === 'res' ? this.find(s.target) : null;
     const isReq = !!tb && tb.status === 'pending';
     const isBook = !!tb && tb.status !== 'pending' && tb.status !== 'cancelled';
+    const isGone = !!tb && tb.status === 'cancelled';
     const isWalk = notSettings && s.panel === 'walk';
     const isNew = notSettings && s.panel === 'new';
     const tt = notSettings && s.panel === 'tbl' ? this.tbl(s.target) : null;
     const isTbl = !!tt;
-    const drawerOpen = isReq || isBook || isWalk || isNew || isTbl;
-    const drawerTitle = isReq ? 'Haýyş' : (isBook ? 'Bron' : (isWalk ? 'Gelip oturdy' : (isNew ? 'Täze bron' : (tt ? 'Stol ' + tt.id : ''))));
+    const drawerOpen = isReq || isBook || isGone || isWalk || isNew || isTbl;
+    const drawerTitle = isGone ? 'Ýatyrylan bron' : isReq ? 'Haýyş' : (isBook ? 'Bron' : (isWalk ? 'Gelip oturdy' : (isNew ? 'Täze bron' : (tt ? 'Stol ' + tt.id : ''))));
     const closePanel = () => this.up({ panel: 'none', target: null, modal: null, mvOpen: false });
     const drawerKey = (e) => { if (e && e.key === 'Escape' && !s.modal) this.up({ panel: 'none', target: null, mvOpen: false }); };
     const qi = isReq ? queue.findIndex((r) => r.id === tb.id) : -1;
@@ -1417,7 +1534,7 @@ class Component extends DCLogic {
       this.say({ ov: this.setOv(tb.id, { status: 'confirmed' }), panel: 'none', target: null, modal: null, hiId: tb.id }, 'Bron tassyklandy · müşderä SMS iberildi', 'ok', rest.length ? { act: 'next' } : null);
     };
 
-    let bv = { badgeCls: 'badge', dotCls: 'dot', status: '', srcOnline: false, srcPhone: false, srcWalk: false, seat: false, hasHold: false, holdText: '', mvCap: '', mvOpts: [], mvNone: false, ini: '', name: '', phoneLine: '', hasPhone: false, callAria: '', ppMin: true, ppMax: true, ppLabel: '', ppDec: () => {}, ppInc: () => {}, capWarn: false, capText: '', date: '', from: '', setTime: () => {}, durCap: '', area: '', setArea: () => {}, tkey: '', setTable: () => {}, comboLabel: '', sugs: [], sugWarn: false, sugWarnText: '', reqs: [], hasNote: false, note: '', inote: '', noteCap: '', hasFoot: false, canSeat: false, canFree: false, canMove: false, canComplain: false, canCancel: false };
+    let bv = { badgeCls: 'badge', icP: false, icC: false, icD: false, icX: false, icN: false, status: '', srcOnline: false, srcPhone: false, srcWalk: false, seat: false, hasHold: false, holdText: '', mvCap: '', mvOpts: [], mvNone: false, ini: '', name: '', phoneLine: '', hasPhone: false, callAria: '', ppMin: true, ppMax: true, ppLabel: '', ppDec: () => {}, ppInc: () => {}, capWarn: false, capText: '', date: '', from: '', setTime: () => {}, durCap: '', area: '', setArea: () => {}, tkey: '', setTable: () => {}, comboLabel: '', sugs: [], sugWarn: false, sugWarnText: '', reqs: [], hasNote: false, note: '', inote: '', noteCap: '', hasFoot: false, canSeat: false, canFree: false, canMove: false, canComplain: false, canCancel: false };
     let bt = mapT(() => false);
     let bo = mapB(() => false);
     if (isBook) {
@@ -1449,7 +1566,7 @@ class Component extends DCLogic {
       const mvTabs = D.TABLES.filter((t) => r.tables.indexOf(t.id) < 0 && t.min <= r.party && t.max >= r.party && this.fits(t.id, Math.max(r.from, seat ? NOW : r.from), r.to, r.off, r.id)).sort((a, b) => a.seats - b.seats);
       const canMove = r.status === 'confirmed' && r.to > rnow;
       bv = {
-        badgeCls: 'badge ' + bd[0], dotCls: 'dot ' + bd[1], status: bd[2],
+        badgeCls: 'badge ' + bd[0], icP: bd[1] === 'd-p', icC: bd[1] === 'd-c', icD: bd[1] === 'd-d', icX: bd[1] === 'd-x', icN: bd[1] === 'd-n', status: bd[2],
         srcOnline: r.source === 'online', srcPhone: r.source === 'phone', srcWalk: r.source === 'walkin', seat: seat,
         hasHold: this.holdSoon(r), holdText: 'Stol ' + this.dat(this.hm(r.from + holdMin)) + ' çenli saklanýar. Myhman gelmese, «Arz et» → «Gelmedi» belläp, stoly başga myhmana beriň.',
         mvCap: r.party + ' adam · ' + this.hm(r.from) + '–' + this.hm(r.to) + ' üçin boş stollar',
@@ -1493,8 +1610,24 @@ class Component extends DCLogic {
         canCancel: r.status === 'confirmed' && !seat && r.from >= rnow
       };
       bv.hasFoot = bv.canSeat || bv.canFree || bv.canMove || bv.canComplain || bv.canCancel;
-      bt = mapT((m) => m !== r.from && (!r.tables.every((id) => this.fits(id, m, Math.min(m + dur, D.CLOSE), r.off, r.id)) || (r.off === 0 && m < NOW) || r.off < 0));
+      bt = mapT((m) => m !== r.from && (!r.tables.every((id) => this.fits(id, m, Math.min(m + dur, D.CLOSE), r.off, r.id)) || (r.off === 0 && m + 15 <= NOW) || r.off < 0));
       bo = mapB((t) => r.tables.indexOf(t.id) < 0 && !this.fits(t.id, r.from, r.to, r.off, r.id));
+    }
+    let gv = { byClient: false, byBiz: false, bizText: '', ini: '', name: '', phone: '', details: [], rebook: () => {} };
+    if (isGone) {
+      const r = tb;
+      const det = [['Adam sany', r.party + ' adam'], ['Sene we wagt', this.dt(r.off) + ' · ' + this.hm(r.from) + '–' + this.hm(r.to)], ['Stol', tLabel(r.tables)]];
+      if (r.reason) det.push(['Sebäbi', r.reason]);
+      gv = {
+        byClient: r.by === 'client', byBiz: r.by !== 'client', bizText: r.declined ? 'Ret edildi' : 'Biznes ýatyrdy',
+        ini: r.name.charAt(0), name: r.name, phone: r.phone || 'Telefon ýazylmady',
+        details: det.map((d, i) => ({ k: d[0], v: d[1], cls: i === det.length - 1 ? 'dr last' : 'dr' })),
+        rebook: () => {
+          const t0 = this.tbl(r.tables[0]);
+          const from = r.off === 0 && r.from + 15 <= NOW ? null : r.from;
+          this.up({ panel: 'new', target: null, modal: null, mvOpen: false, nw: this.blankNew({ tid: t0 ? t0.id : null, from: from, off: Math.max(r.off, 0), party: r.party, phone: (r.phone || '').replace(/\D/g, '').slice(-8), name: r.phone ? r.name : '' }) });
+        }
+      };
     }
     const mvOpen = isBook && !!s.mvOpen;
     const openMv = () => this.setState({ mvOpen: true, toast: null });
@@ -1514,34 +1647,53 @@ class Component extends DCLogic {
     const openCancel = () => this.up({ modal: 'cancel', xReason: null });
 
     const wk = s.wk;
+    const S0 = this.slot(NOW);
     const wTurn = this.turnFor(wk.party);
     const wCards = D.TABLES.filter((t) => this.tState(t.id, 0).k !== 'busy' && t.min <= wk.party && t.max >= wk.party).map((t) => {
       const ws = this.tState(t.id, 0);
-      return { t: t, fu: ws.freeUntil, ok: ws.freeUntil - NOW >= wTurn, rq: ws.k === 'req' };
+      return { t: t, fu: ws.freeUntil, ok: ws.freeUntil - S0 >= wTurn, rq: ws.k === 'req' };
     }).sort((a, b) => (Number(b.ok) - Number(a.ok)) || (a.t.seats - b.t.seats) || (b.fu - a.fu));
-    const wSel = wCards.find((c) => c.t.id === wk.tid) || wCards.find((c) => c.ok) || null;
-    const wEnd = wSel ? Math.min(NOW + wTurn, wSel.fu, D.CLOSE) : NOW;
+    // D3: no free single table for the party -> suggest combinable pairs free for the whole turn
+    const pkey = (p) => p.join('+');
+    let wCombos = [];
+    if (!wCards.some((c) => c.ok) || wk.combo) {
+      wCombos = this.pairs().filter((p) => this.capOf(p) >= wk.party).map((p) => {
+        const st = p.map((id) => this.tState(id, 0));
+        if (st.some((x) => x.k === 'busy')) return null;
+        const fu = Math.min.apply(null, st.map((x) => x.freeUntil));
+        return { p: p, fu: fu, cap: this.capOf(p), area: this.tbl(p[0]).area, ok: fu - S0 >= wTurn };
+      }).filter((c) => c && c.ok).sort((a, b) => (a.cap - b.cap) || (b.fu - a.fu));
+    }
+    const wCombo = wk.combo ? wCombos.find((c) => pkey(c.p) === pkey(wk.combo)) || null : null;
+    const wSel = wCombo ? null : (wCards.find((c) => c.t.id === wk.tid) || wCards.find((c) => c.ok) || null);
+    const wC = wCombo || (!wSel && wCombos.length ? wCombos[0] : null);
+    const wTabs = wC ? wC.p : (wSel ? [wSel.t.id] : null);
+    const wEnd = wTabs ? Math.min(S0 + wTurn, wC ? wC.fu : wSel.fu, D.CLOSE) : S0;
     const wDigits = wk.phone.replace(/\D/g, '');
     const wv = {
-      parties: [1, 2, 3, 4, 5, 6, 7, 8].map((p) => ({ t: String(p), on: wk.party === p, cls: wk.party === p ? 'pc on' : 'pc', aria: p + ' adam', pick: () => this.setWk({ party: p, tid: null }) })),
-      cntLabel: wCards.length + ' stol',
+      parties: [1, 2, 3, 4, 5, 6, 7, 8].map((p) => ({ t: String(p), on: wk.party === p, cls: wk.party === p ? 'pc on' : 'pc', aria: p + ' adam', pick: () => this.setWk({ party: p, tid: null, combo: null }) })),
+      cntLabel: wCards.length + ' stol' + (wCombos.length ? ' · ' + wCombos.length + ' birleşdirme' : ''),
       cards: wCards.map((c) => {
-        const on = !!wSel && wSel.t.id === c.t.id;
+        const on = !wC && !!wSel && wSel.t.id === c.t.id;
         const free = c.ok ? this.dat(this.hm(c.fu)) + ' çenli boş' : this.loc(this.hm(c.fu)) + (c.rq ? ' haýyş' : ' bron') + ' · ' + (c.fu - NOW) + ' min bar';
-        return { id: c.t.id, area: this.areaName(c.t.area), seats: c.t.max + ' ýer', free: free, fCls: c.ok ? 'tcf' : 'tcf wn', on: on, cls: on ? 'tcard on' : 'tcard', aria: 'Stol ' + c.t.id + ', ' + this.areaName(c.t.area) + ', ' + c.t.max + ' ýer, ' + free, pick: () => this.setWk({ tid: c.t.id }) };
-      }),
-      none: wCards.length === 0, noneText: wk.party + ' adam üçin häzir boş stol ýok. Iki stoly birleşdirmek üçin wagt çyzgysynda stoly açyň ýa-da myhmanlara garaşmagy teklip ediň.',
+        return { id: c.t.id, area: this.areaName(c.t.area), seats: c.t.max + ' ýer', free: free, fCls: c.ok ? 'tcf' : 'tcf wn', on: on, cls: on ? 'tcard on' : 'tcard', aria: 'Stol ' + c.t.id + ', ' + this.areaName(c.t.area) + ', ' + c.t.max + ' ýer, ' + free, combo: false, pick: () => this.setWk({ tid: c.t.id, combo: null }) };
+      }).concat(wCombos.map((c) => {
+        const on = !!wC && pkey(wC.p) === pkey(c.p);
+        const free = this.dat(this.hm(c.fu)) + ' çenli boş';
+        return { id: pkey(c.p), area: this.areaName(c.area), seats: 'Birleşdir · ' + c.cap + ' ýer', free: free, fCls: 'tcf', on: on, cls: on ? 'tcard on' : 'tcard', combo: true, aria: 'Stol ' + pkey(c.p) + ' birleşdir, ' + this.areaName(c.area) + ', ' + c.cap + ' ýer, ' + free, pick: () => this.setWk({ combo: c.p, tid: null }) };
+      })),
+      none: wCards.length === 0 && wCombos.length === 0, noneText: wk.party + ' adam üçin häzir boş stol ýok — birleşdirip bolýan stollar hem eýeli. Myhmanlara garaşmagy teklip ediň.',
       phone: this.fmtP(wDigits), onPhone: (e) => this.setWk({ phone: (e && e.target ? e.target.value : '').replace(/\D/g, '').slice(0, 8) }),
       name: wk.name, onName: (e) => this.setWk({ name: (e && e.target ? e.target.value : '').slice(0, 60) }),
-      foot: wSel ? 'Stol ' + wSel.t.id + ' · ' + this.hm(NOW) + '–' + this.hm(wEnd) + ' · ' + wk.party + ' adam' : 'Stol saýlaň',
-      dis: !wSel,
+      foot: wTabs ? 'Stol ' + pkey(wTabs) + ' · ' + this.hm(S0) + '–' + this.hm(wEnd) + ' · ' + wk.party + ' adam' : 'Stol saýlaň',
+      dis: !wTabs,
       go: () => {
-        if (!wSel) return;
+        if (!wTabs) return;
         const id = 'w' + s.seq;
         const ph = wDigits.length === 8 ? '+993 ' + this.fmtP(wDigits) : '';
         const nm = wk.name.trim() || 'Gelip oturdy';
-        const bk = { id: id, off: 0, tables: [wSel.t.id], from: NOW, to: wEnd, party: wk.party, name: nm, phone: ph, status: 'confirmed', source: 'walkin', reqs: [], note: '', hold: 0, arrived: true };
-        this.say({ added: s.added.concat([bk]), seq: s.seq + 1, panel: 'none', wk: this.blankWalk(), hiId: id, dayOff: 0 }, wk.party + ' adam oturdy · Stol ' + wSel.t.id + ' · ' + this.dat(this.hm(wEnd)) + ' çenli', 'ok', undoSnap);
+        const bk = { id: id, off: 0, tables: wTabs.slice(), from: S0, to: wEnd, party: wk.party, name: nm, phone: ph, status: 'confirmed', source: 'walkin', reqs: [], note: '', hold: 0, arrived: true };
+        this.say({ added: s.added.concat([bk]), seq: s.seq + 1, panel: 'none', wk: this.blankWalk(), hiId: id, dayOff: 0 }, wk.party + ' adam oturdy · Stol ' + pkey(wTabs) + ' · ' + this.dat(this.hm(wEnd)) + ' çenli', 'ok', undoSnap);
       }
     };
 
@@ -1550,23 +1702,32 @@ class Component extends DCLogic {
     const nDur = this.turnFor(nw.party);
     const nTo = nw.from === null ? null : Math.min(nw.from + nDur, D.CLOSE);
     const nT = nw.tid ? this.tbl(nw.tid) : null;
-    const nFit = !!nT && nw.from !== null && this.fits(nT.id, nw.from, nTo, nOff, null);
-    const nCapOk = !!nT && nw.party <= nT.max;
+    const nTabs = nw.combo ? nw.combo : (nT ? [nT.id] : null);
+    const nFree = (ids) => nw.from !== null && ids.every((id) => this.fits(id, nw.from, nTo, nOff, null));
+    const nFit = !!nTabs && nFree(nTabs);
+    const nCapOk = !!nTabs && nw.party <= this.capOf(nTabs);
     const nPhoneOk = nw.phone.length === 8;
     const nPhoneErr = nw.tried && !nPhoneOk;
     let nSugT = [];
     if (nw.from !== null) nSugT = D.TABLES.filter((t) => t.min <= nw.party && t.max >= nw.party && this.fits(t.id, nw.from, nTo, nOff, null)).sort((a, b) => (a.seats - b.seats) || (a.area === (nT ? nT.area : 'zal') ? -1 : 0)).slice(0, 4);
+    const nSingleFree = nSugT.length > 0;
     if (nT && nSugT.indexOf(nT) < 0) nSugT = [nT].concat(nSugT.slice(0, 3));
+    // D3: party bigger than any free single table -> combinable pairs free for the whole turn
+    const pk = (p) => p.join('+');
+    let nCombos = [];
+    if (nw.from !== null && (!nSingleFree || nw.combo)) nCombos = this.pairs().filter((p) => this.capOf(p) >= nw.party && nFree(p)).sort((a, b) => this.capOf(a) - this.capOf(b));
+    if (nw.combo && !nCombos.some((p) => pk(p) === pk(nw.combo))) nCombos = [nw.combo].concat(nCombos);
     let nMsg = '';
-    if (nT && nw.from !== null && !nFit) nMsg = 'Stol ' + nT.id + ' ' + this.hm(nw.from) + '–' + this.hm(nTo) + ' aralygynda eýeli — başga stol ýa-da wagt saýlaň.';
-    else if (nT && !nCapOk) nMsg = 'Stol ' + nT.id + ' — ' + nT.max + ' ýer. Has uly stol saýlaň.';
-    else if (nw.from !== null && nSugT.length === 0) nMsg = nw.party + ' adam üçin bu wagt boş stol ýok — başga wagt saýlaň.';
+    if (nTabs && nw.from !== null && !nFit) nMsg = 'Stol ' + pk(nTabs) + ' ' + this.hm(nw.from) + '–' + this.hm(nTo) + ' aralygynda eýeli — başga stol ýa-da wagt saýlaň.';
+    else if (nTabs && !nCapOk) nMsg = 'Stol ' + pk(nTabs) + ' — ' + this.capOf(nTabs) + ' ýer. Has uly stol saýlaň' + (nCombos.length ? ' ýa-da iki stoly birleşdiriň.' : '.');
+    else if (!nTabs && nw.from !== null && !nSingleFree && nCombos.length) nMsg = nw.party + ' adam üçin boş ýeke stol ýok — iki stoly birleşdiriň.';
+    else if (nw.from !== null && nSugT.length === 0 && nCombos.length === 0) nMsg = nw.party + ' adam üçin bu wagt boş stol ýok — başga wagt saýlaň.';
     else if (nw.from === null) nMsg = 'Wagt saýlaň — boş stollar şoňa görä görkeziler.';
     const nValid = nPhoneOk && nw.from !== null && nFit && nCapOk;
     const nMissing = [];
     if (!nPhoneOk) nMissing.push('telefon');
     if (nw.from === null) nMissing.push('wagt');
-    if (!nT) nMissing.push('stol');
+    if (!nTabs) nMissing.push('stol');
     const nv = {
       phone: this.fmtP(nw.phone), phoneCls: nPhoneErr ? 'inp is-e' : 'inp',
       onPhone: (e) => this.setNw({ phone: (e && e.target ? e.target.value : '').replace(/\D/g, '').slice(0, 8) }),
@@ -1580,28 +1741,31 @@ class Component extends DCLogic {
       setTime: (e) => { const v = e && e.target ? e.target.value : ''; this.setNw({ from: v === '' ? null : Number(v) }); },
       durCap: nw.from === null ? this.durL(nDur) + ' — adam sanyna görä' : this.durL(nTo - nw.from) + ' · ' + this.dat(this.hm(nTo)) + ' çenli',
       hasSugs: nSugT.length > 0,
-      sugs: nSugT.map((t) => { const on = nw.tid === t.id; return { t: this.nm(t.id) + ' · ' + t.max + ' ýer · ' + this.areaName(t.area), on: on, cls: on ? 'chip on' : 'chip', pick: () => this.setNw({ tid: t.id }) }; }),
+      sugs: nSugT.map((t) => { const on = !nw.combo && nw.tid === t.id; return { t: this.nm(t.id) + ' · ' + t.max + ' ýer · ' + this.areaName(t.area), on: on, cls: on ? 'chip on' : 'chip', pick: () => this.setNw({ tid: t.id, combo: null }) }; }),
+      hasCombos: nCombos.length > 0,
+      combos: nCombos.map((p) => { const on = !!nw.combo && pk(nw.combo) === pk(p); return { t: this.nm(pk(p)) + ' birleşdir · ' + this.capOf(p) + ' ýer', on: on, cls: on ? 'chip on' : 'chip', pick: () => this.setNw({ combo: p, tid: null }) }; }),
+      selLabel: nw.combo ? 'Birleşdirilen: Stol ' + pk(nw.combo) : 'Stol saýlaň',
       hasMsg: !!nMsg, msg: nMsg,
-      tkey: nT ? nT.key : '', setTable: (e) => { const t = this.byKey(e && e.target ? e.target.value : ''); this.setNw({ tid: t ? t.id : null }); },
+      tkey: !nw.combo && nT ? nT.key : '', setTable: (e) => { const t = this.byKey(e && e.target ? e.target.value : ''); if (t || !nw.combo) this.setNw({ tid: t ? t.id : null, combo: null }); },
       reqs: D.REQS.map((x) => { const on = nw.reqs.indexOf(x) >= 0; return { t: x, on: on, cls: on ? 'chip on' : 'chip', pick: () => this.setNw({ reqs: on ? nw.reqs.filter((y) => y !== x) : nw.reqs.concat([x]) }) }; }),
       note: nw.note, onNote: (e) => this.setNw({ note: (e && e.target ? e.target.value : '').slice(0, 300) }),
       sms: nw.sms, smsCls: nw.sms ? 'sw on' : 'sw', toggleSms: () => this.setNw({ sms: !nw.sms }),
-      foot: nValid ? this.dt(nOff) + ' · ' + this.hm(nw.from) + '–' + this.hm(nTo) + ' · Stol ' + nT.id + ' · ' + nw.party + ' adam' : (nMissing.length ? 'Saýlaň: ' + nMissing.join(', ') : 'Stol bu wagt laýyk däl'),
+      foot: nValid ? this.dt(nOff) + ' · ' + this.hm(nw.from) + '–' + this.hm(nTo) + ' · Stol ' + pk(nTabs) + ' · ' + nw.party + ' adam' : (nMissing.length ? 'Saýlaň: ' + nMissing.join(', ') : 'Stol bu wagt laýyk däl'),
       dis: !nValid,
       submit: () => {
         if (!nValid) { if (!nPhoneOk) this.setNw({ tried: true }); return; }
         const id = 'a' + s.seq;
         const ph = '+993 ' + this.fmtP(nw.phone);
-        const bk = { id: id, off: nOff, tables: [nT.id], from: nw.from, to: nTo, party: nw.party, name: nw.name.trim() || ph, phone: ph, status: 'confirmed', source: 'phone', reqs: nw.reqs.slice(), note: '', hold: 0, arrived: false };
+        const bk = { id: id, off: nOff, tables: nTabs.slice(), from: nw.from, to: nTo, party: nw.party, name: nw.name.trim() || ph, phone: ph, status: 'confirmed', source: 'phone', reqs: nw.reqs.slice(), note: '', hold: 0, arrived: false };
         const notes = Object.assign({}, s.notes);
         if (nw.note.trim()) notes[id] = nw.note.trim();
-        this.say({ added: s.added.concat([bk]), notes: notes, seq: s.seq + 1, panel: 'none', nw: this.blankNew(), hiId: id, dayOff: nOff }, 'Bron goşuldy · Stol ' + nT.id + ' · ' + this.hm(nw.from) + (nw.sms ? ' · müşderä SMS iberildi' : ''));
+        this.say({ added: s.added.concat([bk]), notes: notes, seq: s.seq + 1, panel: 'none', nw: this.blankNew(), hiId: id, dayOff: nOff }, 'Bron goşuldy · Stol ' + pk(nTabs) + ' · ' + this.hm(nw.from) + (nw.sms ? ' · müşderä SMS iberildi' : ''));
       }
     };
-    const nt = mapT((m) => nOff < 0 || (nOff === 0 && m < NOW) || (!!nT && !this.fits(nT.id, m, Math.min(m + nDur, D.CLOSE), nOff, null)));
+    const nt = mapT((m) => nOff < 0 || (nOff === 0 && m + 15 <= NOW) || (!!nTabs && !nTabs.every((id) => this.fits(id, m, Math.min(m + nDur, D.CLOSE), nOff, null))));
     const no = mapB((t) => nw.from !== null && !this.fits(t.id, nw.from, nTo, nOff, null));
 
-    let tv = { line1: '', line2: '', boxCls: 'stbox', sdCls: 'sd', state: '', cnt: '', list: [], empty: true, canSeat: false, seat: () => {}, add: () => {} };
+    let tv = { line1: '', line2: '', boxCls: 'stbox', sdCls: 'sd', dot: true, icC: false, icP: false, state: '', cnt: '', list: [], empty: true, canSeat: false, seat: () => {}, add: () => {} };
     if (isTbl) {
       const t = tt;
       const st = ST[t.id];
@@ -1613,7 +1777,7 @@ class Component extends DCLogic {
       tv = {
         line1: this.areaName(t.area) + ' · ' + t.max + ' ýer (' + t.min + '–' + t.max + ' adam)',
         line2: t.comb.length ? 'Birleşdirip bolýar: ' + t.comb.map((c) => [t.id, c].sort().join('+')).join(', ') : 'Başga stol bilen birleşdirilmeýär',
-        boxCls: 'stbox' + (st.k === 'free' ? '' : ' ' + st.k), sdCls: st.k === 'busy' ? 'sd' : (st.k === 'later' ? 'sd sd-later' : (st.k === 'req' ? 'sd sd-req' : 'sd')),
+        boxCls: 'stbox' + (st.k === 'free' ? '' : ' ' + st.k), sdCls: 'sd', dot: st.k === 'free' || st.k === 'busy', icC: st.k === 'later', icP: st.k === 'req',
         state: state, cnt: L.length + ' bron', empty: L.length === 0,
         list: L.map((r, i) => {
           const bd = D.BADGE[r.status];
@@ -1621,7 +1785,7 @@ class Component extends DCLogic {
           return {
             cls: 'rr' + (r.status === 'completed' || r.status === 'noshow' ? ' done' : ''), time: this.hm(r.from) + '–' + this.hm(r.to), name: r.name,
             meta: r.party + ' adam' + (r.tables.length > 1 ? ' · ' + r.tables.join('+') : '') + (r.source === 'phone' ? ' · telefon arkaly' : (r.source === 'walkin' ? ' · gelip oturdy' : ' · onlaýn')),
-            seat: seat, showBadge: !seat, bCls: 'badge ' + bd[0], dCls: 'dot ' + bd[1], st: bd[2],
+            seat: seat, showBadge: !seat, bCls: 'badge ' + bd[0], icP: bd[1] === 'd-p', icC: bd[1] === 'd-c', icD: bd[1] === 'd-d', icX: bd[1] === 'd-x', icN: bd[1] === 'd-n', st: bd[2],
             aria: this.hm(r.from) + '–' + this.hm(r.to) + ', ' + r.name + ', ' + r.party + ' adam, ' + (seat ? 'häzir oturýar' : bd[2]), open: () => this.openRes(r.id)
           };
         }),
@@ -1651,7 +1815,7 @@ class Component extends DCLogic {
         if (!tb || !s.dReason || (dOther && !s.dText.trim())) return;
         const alts = s.dAlt ? s.dSlots : [];
         const rest = queue.filter((r) => r.id !== tb.id);
-        this.say({ ov: this.setOv(tb.id, { status: 'cancelled', by: 'business', reason: dOther ? s.dText.trim() : s.dReason }), modal: null, panel: 'none', target: null }, 'Haýyş ret edildi · müşderä sebäbi' + (alts.length ? ' we ' + alts.length + ' başga wagt' : '') + ' iberildi', 'ok', rest.length ? { act: 'next' } : null);
+        this.say({ ov: this.setOv(tb.id, { status: 'cancelled', by: 'business', declined: true, reason: dOther ? s.dText.trim() : s.dReason }), modal: null, panel: 'none', target: null }, 'Haýyş ret edildi · müşderä sebäbi' + (alts.length ? ' we ' + alts.length + ' başga wagt' : '') + ' iberildi', 'ok', rest.length ? { act: 'next' } : null);
       }
     };
     const CR = [['Gelmedi', 'Bron «Gelmedi» bolar, stol boşar'], ['Gijä galdy', 'Bron üýtgemeýär'], ['Gödek gylyk', 'Bron üýtgemeýär'], ['Başga', 'Gysgaça ýazyň']];
@@ -1693,7 +1857,8 @@ class Component extends DCLogic {
     const closeToast = () => this.setState({ toast: null });
 
     return {
-      fontStack, navT, navS, hasPend, noPend, pendCount, pendAria, pendChip, pendChipAria, openQueue, pageTitle, showTopPri, openNewBlank, banner, hideBanner,
+      fontStack, navT, navS, hasPend, noPend, pendCount, pendAria, pendChip, pendChipAria, openQueue, pageTitle, showTopPri, openNewBlank,
+      wsOpen, umOpen, kopOpen, shellPop, toggleWs, toggleUm, toggleKop, closeShell, tabMainCls, tabMainCur, tabKopCls, lgOpen, toggleLg, closeLg, lgKey, showX, xCls, xLabel, toggleX,
       notSettings, isSettings, isTimeline, isFloor, isToday, goToday, goPrev, goNext, dateLabel, viewSegs, openWalk, goSettings, goTimeline, areaChips,
       free2, f2Cls, f2Dis, f2Label, toggleFree2, sumBk, sumPpl, sumReq, sumBusy,
       early, earlyLabel, earlyAria, toggleEarly, axW, hourLabels, groups, hasPast, pastW, oshL, oshW, showNow, nowX, nowLabel, holdLegend,
@@ -1701,7 +1866,7 @@ class Component extends DCLogic {
       floorMain, floorSide, hasSide, xsList, xsTitle, xsSum, xsEmpty,
       sAreas, sTables, addTable, closeMenus, tSum, sTurns, sHold, onHold, maxLabel, maxCap, maxMin, maxMax, maxDec, maxInc, sbarText, dirty, clean, revert, save,
       drawerOpen, drawerTitle, closePanel, drawerKey, showPager, pgLabel, pgPrevDis, pgNextDis, pgPrev, pgNext,
-      isReq, rv, openDecline, confirmReq, isBook, bv, bt, bo, mvOpen, openMv, cancelMv, onNote, seatNow, freeTable, openComplaint, openCancel,
+      isReq, rv, openDecline, confirmReq, isBook, isGone, gv, bv, bt, bo, mvOpen, openMv, cancelMv, onNote, seatNow, freeTable, openComplaint, openCancel,
       isWalk, wv, isNew, nv, nt, no, isTbl, tv,
       showDecline, showComplaint, showCancelM, closeModal, modalKey, dv, cv, xv,
       hasToast, toastOk, toastErr, toastText, toastAct, toastUndo, toastNext, undo, closeToast

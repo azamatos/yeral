@@ -44,7 +44,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .slot:disabled{background:#f6f6f8;border-color:#f0f0f3;color:#6e6e78;text-decoration:line-through;cursor:not-allowed}
 .slot-s{height:36px;min-width:52px;padding:0 8px;font-size:13px}
 .slot-g{width:100%;min-width:0;height:44px}
-.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;align-self:flex-start}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;align-self:flex-start}
+.badge svg{flex:none}
 .dot{width:6px;height:6px;border-radius:999px;flex:none}
 .st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
 .st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
@@ -94,9 +95,63 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .brow:hover{color:#101014}
 .srow{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:12px;align-items:center;min-height:48px;border-bottom:1px solid #e6e6ea;font-size:15px;line-height:20px;color:#101014}
 .bar{flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid #e6e6ea;background:#ffffff}
+.sech{display:flex;flex-direction:column;gap:8px;padding-top:24px;border-top:1px solid #d8d8de}
+.bimg{width:64px;height:64px;object-fit:cover;border-radius:12px;display:block}
+.brw{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px 12px;padding:12px 0;border-bottom:1px solid #e6e6ea;color:#101014}
+.brw.new{margin:0 -16px;padding:12px 16px;background:#efecfe;border-bottom-color:#d5cbfb}
+.brw.dim .bimg{opacity:.48}
+.brw.dim .bn,.brw.dim .bw,.brw.dim .bmid>.cap{color:#6e6e78}
+.bmid{display:flex;flex-direction:column;gap:2px;min-width:0}
+.bn{align-self:flex-start;font-size:15px;line-height:20px;font-weight:600;color:#101014}
+.bn:hover{color:#101014;text-decoration:underline}
+.bw{font-size:13px;line-height:18px;font-weight:500;color:#101014}
+.bw s{color:#6e6e78}
+.bst{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;margin-top:6px}
+.bst .badge{align-self:center}
+.bby{display:inline-flex;align-items:center;gap:6px;font-size:13px;line-height:18px;color:#5a5a64;white-space:nowrap}
+.bby svg{flex:none}
+.ofr{grid-column:1 / -1;display:flex;flex-direction:column;gap:8px;min-width:0}
+.rsn{margin:0;font-size:13px;line-height:18px;color:#101014}
+.och{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.slot-o{width:100%;min-width:0;padding:0 6px;font-variant-numeric:tabular-nums}
+.slot:focus-visible,.chip:focus-visible,.tab:focus-visible,.dcell:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.mvl{display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:13px;line-height:18px;color:#93500a}
+.mvl svg{flex:none;margin-top:2px}
+.ufl{grid-column:1 / -1;margin:0;display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:18px;color:#a3251b}
+.ufl svg{flex:none;margin-top:1px}
+.scrim{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:4}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:5;display:flex;flex-direction:column;background:#ffffff;border-radius:20px 20px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}
+.grab{display:block;flex:none;width:32px;height:4px;margin:8px auto 0;border-radius:999px;background:#d8d8de}
+.dline{display:flex;align-items:center;gap:8px;font-size:15px;line-height:22px;font-weight:600;color:#101014}
+.dline svg{flex:none}
+.sep{height:1px;background:#e6e6ea;flex:none}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tli{position:relative;display:grid;grid-template-columns:20px minmax(0,1fr);gap:12px;padding-bottom:14px}
+.tli::before{content:"";position:absolute;left:9px;top:24px;bottom:4px;width:2px;border-radius:2px;background:#e6e6ea}
+.tli.last{padding-bottom:0}
+.tli.last::before{display:none}
+.tm{width:20px;height:20px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#ffffff;margin-top:1px}
+.tm-done{background:#5a3ff0}
+.tm-x{background:#7b8ea3}
+.tlt{font-size:14px;line-height:20px;font-weight:600}
+.mvp{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:12px;background:#fef6e7;border:1px solid #f2ddb0}
+.mvt{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font-size:15px;line-height:22px;color:#101014}
+.lockb{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;background:#f6f6f8}
+.ow{display:grid;grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr);gap:10px;align-items:center}
+.lcard{display:flex;flex-direction:column;border:1px solid #e6e6ea;border-radius:16px;background:#ffffff;overflow:hidden}
+.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.ro{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border:1px solid #e6e6ea;border-radius:8px;background:#f6f6f8;font-size:15px;line-height:20px;color:#101014;font-variant-numeric:tabular-nums}
+.pcard{flex:none;display:flex;flex-direction:column;gap:12px;padding:16px;border-top:1px solid #e6e6ea;background:#ffffff}
+.pr{font-size:15px;line-height:20px;font-weight:600;margin-top:4px}
+.pr-h{font-size:14px;line-height:20px;font-weight:500;color:#5a5a64}
+.toast{position:absolute;left:12px;right:12px;bottom:16px;z-index:6;display:flex;align-items:center;gap:10px;min-height:52px;padding:0 14px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:14px;line-height:20px}
+.toast svg{flex:none}
+.toast.tcol{flex-direction:column;align-items:stretch;gap:2px;padding:12px 4px 4px 14px}
+.tb{background:transparent;color:#c3b6fb;padding:0 10px}
+.tb:hover{background:#2a2a32;color:#c3b6fb}
 </style>
 </helmet>
-<div style="width: 1442px; min-height: 2280px; padding: 64px; background: #f4f4f6; color: #101014; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; gap: 48px">
+<div style="width: 1442px; min-height: 6700px; padding: 64px; background: #f4f4f6; color: #101014; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; gap: 48px">
 
 <header style="display: flex; flex-direction: column; gap: 8px">
 <span class="lbl">Mobile web · 390</span>
@@ -342,7 +397,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span style="font-size: 15px; line-height: 20px; font-weight: 600">{{k.business}}</span>
 <span class="cap ell">{{k.what}}</span>
 <span class="ell" style="font-size: 13px; line-height: 18px; font-weight: 500">{{k.when}}</span>
-<span class="{{k.badgeCls}}" style="margin-top: 6px"><span class="dot" style="background: {{k.dotColor}}"></span>{{k.status}}</span>
+<span class="{{k.badgeCls}}" style="margin-top: 6px"><sc-if value="{{k.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{k.icC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{k.icD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{k.icX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{k.icN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{k.status}}</span>
 </div>
 </a>
 </sc-for>
@@ -351,7 +406,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div role="dialog" aria-modal="true" aria-labelledby="bs-title" style="position: absolute; left: 0; right: 0; bottom: 0; height: 512px; z-index: 5; display: flex; flex-direction: column; background: #ffffff; border-radius: 20px 20px 0 0; box-shadow: 0 -8px 24px rgba(16,16,20,.16)">
 <div style="display: flex; justify-content: center; padding-top: 8px"><span style="width: 32px; height: 4px; border-radius: 999px; background: #d8d8de"></span></div>
 <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 4px 0 16px">
-<span class="badge st-c"><span class="dot" style="background: #5a3ff0"></span>Tassyklandy</span>
+<span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span>
 <button class="b b-gho b-ico" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
 </div>
 <div style="display: flex; flex-direction: column; gap: 2px; padding: 2px 16px 0">
@@ -364,24 +419,726 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="srow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span class="ell">Andalyp köçesi 8 · 0,9 km</span><a class="hit" href="#" style="font-size: 14px; font-weight: 600">Ýol görkez</a></div>
 <div class="srow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span>+993 12 22 33 44</span><a class="hit" href="#" style="font-size: 14px; font-weight: 600">Jaň et</a></div>
 </div>
-<p class="cap" style="margin: 12px 16px 0">Şenbe, 17:00-a çenli mugt üýtgedip ýa-da ýatyryp bilersiňiz. Töleg ýerinde.</p>
+<p class="cap" style="margin: 12px 16px 0">Ýazylyşy 2 sagat öňünden mugt ýatyryp bilersiňiz. Töleg ýerinde.</p>
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 16px 16px 0">
-<a class="b b-sec" href="Booking-Table.dc.html" style="width: 100%">Başga wagta geçir</a>
-<button class="b b-dtx" style="width: 100%">Ýazylyşy ýatyr</button>
+<a class="b b-sec" href="Booking-Table.dc.html" style="width: 100%">Gaýtadan ýazyl</a>
+<button class="b b-dtx" style="width: 100%">Ýatyr</button>
 </div>
 <span class="cap" style="margin: 10px 16px 0; text-align: center; color: #6e6e78">Ýazylyş belgisi: YR-47990</span>
 </div>
 </div>
-<figcaption class="fcap"><span class="ft">6 · Booking detail · /tk/account/bookings/{id}</span><span class="cap">Desktop drawer → bottom sheet over a 40% scrim; drag down, tap the scrim or × to close. Actions follow status; “Ýazylyşy ýatyr” opens a confirm sheet.</span></figcaption>
+<figcaption class="fcap"><span class="ft">6 · Booking detail · /tk/account/bookings/{id}</span><span class="cap">Desktop drawer → bottom sheet over a 40% scrim; drag down, tap the scrim or × to close. Tables and classes can't be moved: “Gaýtadan ýazyl” opens Booking-Table prefilled (party + area) or the same class; “Ýatyr” opens a confirm sheet. Only appointments get “Başga wagta geçir”.</span></figcaption>
+</figure>
+
+</div>
+
+<header class="sech">
+<span class="lbl">Round 6 · client logic gaps · owner decisions 17.10.2026</span>
+<h2 style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -0.025em">After a booking is sent · phone-only clients · hidden prices</h2>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #5a5a64">From ROUND6-CLIENT.md · status badges are icon + label · demo clock Çarşenbe, 14 oktýabr, 11:20 · signed in as Aýjemal Gurbanowa, except the SMS link page (14–15).</p>
+</header>
+
+<div style="display: grid; grid-template-columns: repeat(3, 390px); column-gap: 72px; row-gap: 72px; align-items: start">
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<nav role="tablist" aria-label="Ýazylyşlar" style="flex: none; display: flex; gap: 24px; padding: 0 16px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<button class="tab on" role="tab" aria-selected="true">Gelýän (6)</button>
+<button class="tab" role="tab" aria-selected="false">Geçen (5)</button>
+</nav>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 0 16px">
+<div class="brw">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Saç düzmek · Aýna</span>
+<span class="bw"><s>Penşenbe, 15 oktýabr · 17:00</s></span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>Biznes ret etdi</span></div>
+</div>
+<div class="ofr">
+<p class="rsn"><span style="font-weight: 600">Sebäbi: Bu wagt boş däl</span><span style="color: #5a5a64"> · «Aýna 17:00-da başga müşderide bolar — şu wagtlaryň birini saýlaň.»</span></p>
+<span class="lbl" id="f7-of">Teklip edilen wagtlar</span>
+<div class="och" role="group" aria-labelledby="f7-of">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 18:00">Pe 15 · 18:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 11:00">An 16 · 11:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 15:30">An 16 · 15:30</button>
+</div>
+<span class="cap">Bir basyşda ýazylyň — biznes bu wagtlary özi teklip etdi.</span>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg" alt="Nail Bar Aýna">
+<div class="bmid">
+<a class="bn" href="#">Nail Bar Aýna</a>
+<span class="cap ell">Manikýur · Maral</span>
+<span class="bw"><s>Penşenbe, 15 oktýabr · 10:00</s></span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Wagtynda jogap gelmedi</span></div>
+</div>
+<div class="ofr">
+<span class="cap" id="f7-ex">Nail Bar Aýna 30 minudyň içinde jogap bermedi. Şu boş wagtlaryň birini saýlaň:</span>
+<div class="och" role="group" aria-labelledby="f7-ex">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 12:00">Pe 15 · 12:00</button>
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 16:30">Pe 15 · 16:30</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 10:00">An 16 · 10:00</button>
+</div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Aýal saç kesimi · Aýna</span>
+<span class="bw">Ertir · Penşenbe, 15 oktýabr · 14:30</span>
+<div class="bst"><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span></div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg" alt="Ak Diş">
+<div class="bmid">
+<a class="bn" href="#">Ak Diş</a>
+<span class="cap ell">Barlag · Lukman Döwlet</span>
+<span class="bw">Anna, 16 oktýabr · 10:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+<span class="mvl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Täze wagt soraldy: Şenbe, 17 okt · 11:30 · jogap garaşylýar</span>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="Bag kafe">
+<div class="bmid">
+<a class="bn" href="#">Bag kafe</a>
+<span class="cap ell">Stol · 4 adam · Terrasa</span>
+<span class="bw">Şenbe, 17 oktýabr · 19:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+</div>
+</div>
+</main>
+</div>
+<figcaption class="fcap"><span class="ft">7 · Ýazylyşlarym · offers + a waiting move</span><span class="cap">Scrolled by the header, tabs stuck. Declined (YR-48230) and expired (YR-48241) rows stay on top of Gelýän while an offered time is ahead; the rest soonest first. Chips = .slot 40, short day + time (full date in aria-label). YR-48190 stays Tassyklandy + amber clock line.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<nav role="tablist" aria-label="Ýazylyşlar" style="flex: none; display: flex; gap: 24px; padding: 0 16px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<button class="tab on" role="tab" aria-selected="true">Gelýän (6)</button>
+<button class="tab" role="tab" aria-selected="false">Geçen (5)</button>
+</nav>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 0 16px">
+<div class="brw">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Saç düzmek · Aýna</span>
+<span class="bw"><s>Penşenbe, 15 oktýabr · 17:00</s></span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>Biznes ret etdi</span></div>
+</div>
+<div class="ofr">
+<p class="rsn"><span style="font-weight: 600">Sebäbi: Bu wagt boş däl</span><span style="color: #5a5a64"> · «Aýna 17:00-da başga müşderide bolar — şu wagtlaryň birini saýlaň.»</span></p>
+<span class="lbl" id="f8-of">Teklip edilen wagtlar</span>
+<div class="och" role="group" aria-labelledby="f8-of">
+<button class="slot slot-o hit on" aria-label="Penşenbe, 15 okt · 18:00">Pe 15 · 18:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 11:00">An 16 · 11:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 15:30">An 16 · 15:30</button>
+</div>
+<span class="cap">Bir basyşda ýazylyň — biznes bu wagtlary özi teklip etdi.</span>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg" alt="Nail Bar Aýna">
+<div class="bmid">
+<a class="bn" href="#">Nail Bar Aýna</a>
+<span class="cap ell">Manikýur · Maral</span>
+<span class="bw"><s>Penşenbe, 15 oktýabr · 10:00</s></span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Wagtynda jogap gelmedi</span></div>
+</div>
+<div class="ofr">
+<span class="cap" id="f8-ex">Nail Bar Aýna 30 minudyň içinde jogap bermedi. Şu boş wagtlaryň birini saýlaň:</span>
+<div class="och" role="group" aria-labelledby="f8-ex">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 12:00">Pe 15 · 12:00</button>
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 16:30">Pe 15 · 16:30</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 10:00">An 16 · 10:00</button>
+</div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Aýal saç kesimi · Aýna</span>
+<span class="bw">Ertir · Penşenbe, 15 oktýabr · 14:30</span>
+<div class="bst"><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span></div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg" alt="Ak Diş">
+<div class="bmid">
+<a class="bn" href="#">Ak Diş</a>
+<span class="cap ell">Barlag · Lukman Döwlet</span>
+<span class="bw">Anna, 16 oktýabr · 10:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+<span class="mvl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Täze wagt soraldy: Şenbe, 17 okt · 11:30 · jogap garaşylýar</span>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="Bag kafe">
+<div class="bmid">
+<a class="bn" href="#">Bag kafe</a>
+<span class="cap ell">Stol · 4 adam · Terrasa</span>
+<span class="bw">Şenbe, 17 oktýabr · 19:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+</div>
+</div>
+</main>
+<div class="scrim" aria-hidden="true"></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="f8-t" style="padding: 0 16px 20px">
+<span class="grab"></span>
+<div style="display: flex; align-items: center; gap: 12px; padding-top: 14px">
+<img src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="" style="width: 44px; height: 44px; object-fit: cover; border-radius: 10px; display: block; flex: none">
+<div style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Glow Studio</span><span class="cap">60 TMT · Töleg ýerinde</span></div>
+</div>
+<h2 id="f8-t" style="margin: 16px 0 0; font-size: 20px; line-height: 26px; font-weight: 600; letter-spacing: -0.015em">Penşenbe, 15 okt · 18:00 · Saç düzmek · Aýna — şu wagta ýazylmalymy?</h2>
+<div style="display: flex; gap: 12px; margin-top: 20px">
+<button class="b b-sec b-lg" style="flex: 1">Yza</button>
+<button class="b b-pri b-lg" style="flex: 1">Ýazyl</button>
+</div>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">8 · Offered time → confirm sheet</span><span class="cap">Tapped chip turns solid; a small sheet asks (popover on desktop). “Ýazyl” books at once — the business offered this time, so no new request. “Yza” clears the chip. A chip taken meanwhile: disabled, struck, “Eýýäm eýelendi”.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<header style="flex: none; display: flex; align-items: center; gap: 4px; height: 56px; padding: 0 16px 0 4px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<a class="b b-gho b-ico" href="Home.dc.html" aria-label="Yza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<h1 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">Ýazylyşlarym</h1>
+</header>
+<nav role="tablist" aria-label="Ýazylyşlar" style="flex: none; display: flex; gap: 24px; padding: 0 16px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<button class="tab on" role="tab" aria-selected="true">Gelýän (6)</button>
+<button class="tab" role="tab" aria-selected="false">Geçen (6)</button>
+</nav>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 0 16px">
+<div class="brw">
+<img class="bimg" src="../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg" alt="Nail Bar Aýna">
+<div class="bmid">
+<a class="bn" href="#">Nail Bar Aýna</a>
+<span class="cap ell">Manikýur · Maral</span>
+<span class="bw"><s>Penşenbe, 15 oktýabr · 10:00</s></span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Wagtynda jogap gelmedi</span></div>
+</div>
+<div class="ofr">
+<span class="cap" id="f9-ex">Nail Bar Aýna 30 minudyň içinde jogap bermedi. Şu boş wagtlaryň birini saýlaň:</span>
+<div class="och" role="group" aria-labelledby="f9-ex">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 12:00">Pe 15 · 12:00</button>
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 16:30">Pe 15 · 16:30</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 10:00">An 16 · 10:00</button>
+</div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Aýal saç kesimi · Aýna</span>
+<span class="bw">Ertir · Penşenbe, 15 oktýabr · 14:30</span>
+<div class="bst"><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span></div>
+</div>
+</div>
+<div class="brw new">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Saç düzmek · Aýna</span>
+<span class="bw">Ertir · Penşenbe, 15 oktýabr · 18:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg" alt="Ak Diş">
+<div class="bmid">
+<a class="bn" href="#">Ak Diş</a>
+<span class="cap ell">Barlag · Lukman Döwlet</span>
+<span class="bw">Anna, 16 oktýabr · 10:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+<span class="mvl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Täze wagt soraldy: Şenbe, 17 okt · 11:30 · jogap garaşylýar</span>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg" alt="Bag kafe">
+<div class="bmid">
+<a class="bn" href="#">Bag kafe</a>
+<span class="cap ell">Stol · 4 adam · Terrasa</span>
+<span class="bw">Şenbe, 17 oktýabr · 19:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+</div>
+</div>
+</main>
+<div class="toast" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg><span>Ýazyldyňyz: Penşenbe, 15 okt · 18:00</span></div>
+</div>
+<figcaption class="fcap"><span class="ft">9 · Offer taken → YR-48231 + toast</span><span class="cap">YR-48231 is Tassyklandy at once, placed by date with a short tint. YR-48230 loses its chips and moves to Geçen: “Teklip edilen wagt kabul edildi → YR-48231”. One declined request → at most one booking. All offers past → “Teklip edilen wagtlaryň möhleti geçdi” + “Başga wagt saýla”.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<nav role="tablist" aria-label="Ýazylyşlar" style="flex: none; display: flex; gap: 24px; padding: 0 16px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<button class="tab on" role="tab" aria-selected="true">Gelýän (6)</button>
+<button class="tab" role="tab" aria-selected="false">Geçen (5)</button>
+</nav>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 0 16px">
+<div class="brw">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Saç düzmek · Aýna</span>
+<span class="bw"><s>Penşenbe, 15 oktýabr · 17:00</s></span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>Biznes ret etdi</span></div>
+</div>
+<div class="ofr">
+<p class="rsn"><span style="font-weight: 600">Sebäbi: Bu wagt boş däl</span><span style="color: #5a5a64"> · «Aýna 17:00-da başga müşderide bolar — şu wagtlaryň birini saýlaň.»</span></p>
+<span class="lbl" id="f10b-of">Teklip edilen wagtlar</span>
+<div class="och" role="group" aria-labelledby="f10b-of">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 18:00">Pe 15 · 18:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 11:00">An 16 · 11:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 15:30">An 16 · 15:30</button>
+</div>
+<span class="cap">Bir basyşda ýazylyň — biznes bu wagtlary özi teklip etdi.</span>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg" alt="Nail Bar Aýna">
+<div class="bmid">
+<a class="bn" href="#">Nail Bar Aýna</a>
+<span class="cap ell">Manikýur · Maral</span>
+<span class="bw"><s>Penşenbe, 15 oktýabr · 10:00</s></span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Wagtynda jogap gelmedi</span></div>
+</div>
+<div class="ofr">
+<span class="cap" id="f10b-ex">Nail Bar Aýna 30 minudyň içinde jogap bermedi. Şu boş wagtlaryň birini saýlaň:</span>
+<div class="och" role="group" aria-labelledby="f10b-ex">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 12:00">Pe 15 · 12:00</button>
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 16:30">Pe 15 · 16:30</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 10:00">An 16 · 10:00</button>
+</div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Aýal saç kesimi · Aýna</span>
+<span class="bw">Ertir · Penşenbe, 15 oktýabr · 14:30</span>
+<div class="bst"><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span></div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg" alt="Ak Diş">
+<div class="bmid">
+<a class="bn" href="#">Ak Diş</a>
+<span class="cap ell">Barlag · Lukman Döwlet</span>
+<span class="bw">Anna, 16 oktýabr · 10:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+<span class="mvl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Täze wagt soraldy: Şenbe, 17 okt · 11:30 · jogap garaşylýar</span>
+</div>
+</div>
+</main>
+<div class="scrim" aria-hidden="true"></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="f10-t">
+<span class="grab"></span>
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 4px 0 16px">
+<span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span>
+<button class="b b-gho b-ico" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 2px 16px 0">
+<h2 id="f10-t" style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Nail Bar Aýna</h2>
+<span class="cap">Manikýur · Maral · 70 TMT</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 0">
+<div class="dline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#41505f" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Wagtynda jogap gelmedi</div>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 20px; color: #6e6e78"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><s>Penşenbe, 15 oktýabr · 10:00</s></span>
+<span class="cap" id="f10-ex">Nail Bar Aýna 30 minudyň içinde jogap bermedi. Şu boş wagtlaryň birini saýlaň:</span>
+<div class="och" role="group" aria-labelledby="f10-ex">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 12:00">Pe 15 · 12:00</button>
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 16:30">Pe 15 · 16:30</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 10:00">An 16 · 10:00</button>
+</div>
+</div>
+<div class="sep" style="margin: 18px 16px 0"></div>
+<ol class="tl" aria-label="Ýazylyşyň ýagdaýy" style="padding: 16px 16px 0">
+<li class="tli"><span class="tm tm-done"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="tlt">Haýyş ugradyldy</span><span class="cap">Çarşenbe, 14 okt · 10:42</span></span></li>
+<li class="tli last"><span class="tm tm-x"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg></span><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="tlt">Wagtynda jogap gelmedi</span><span class="cap">Çarşenbe, 14 okt · 11:12</span></span></li>
+</ol>
+<span class="cap" style="margin: 16px 16px 20px; text-align: center; color: #6e6e78">Ýazylyş belgisi: YR-48241</span>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">10 · Expired request · sheet · YR-48241</span><span class="cap">No answer within the hold time (30 min) → the system cancels; badge stays Ýatyryldy, hourglass label, short timeline. Chip → confirm → new request YR-48242 Garaşylýar + toast “Täze haýyş ugradyldy” (Tassyklandy at an instant-confirm business).</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<nav role="tablist" aria-label="Ýazylyşlar" style="flex: none; display: flex; gap: 24px; padding: 0 16px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<button class="tab on" role="tab" aria-selected="true">Gelýän (6)</button>
+<button class="tab" role="tab" aria-selected="false">Geçen (5)</button>
+</nav>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 0 16px">
+<div class="brw">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Saç düzmek · Aýna</span>
+<span class="bw"><s>Penşenbe, 15 oktýabr · 17:00</s></span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>Biznes ret etdi</span></div>
+</div>
+<div class="ofr">
+<p class="rsn"><span style="font-weight: 600">Sebäbi: Bu wagt boş däl</span><span style="color: #5a5a64"> · «Aýna 17:00-da başga müşderide bolar — şu wagtlaryň birini saýlaň.»</span></p>
+<span class="lbl" id="f11b-of">Teklip edilen wagtlar</span>
+<div class="och" role="group" aria-labelledby="f11b-of">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 18:00">Pe 15 · 18:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 11:00">An 16 · 11:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 15:30">An 16 · 15:30</button>
+</div>
+<span class="cap">Bir basyşda ýazylyň — biznes bu wagtlary özi teklip etdi.</span>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg" alt="Nail Bar Aýna">
+<div class="bmid">
+<a class="bn" href="#">Nail Bar Aýna</a>
+<span class="cap ell">Manikýur · Maral</span>
+<span class="bw"><s>Penşenbe, 15 oktýabr · 10:00</s></span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Wagtynda jogap gelmedi</span></div>
+</div>
+<div class="ofr">
+<span class="cap" id="f11b-ex">Nail Bar Aýna 30 minudyň içinde jogap bermedi. Şu boş wagtlaryň birini saýlaň:</span>
+<div class="och" role="group" aria-labelledby="f11b-ex">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 12:00">Pe 15 · 12:00</button>
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 16:30">Pe 15 · 16:30</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 10:00">An 16 · 10:00</button>
+</div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Aýal saç kesimi · Aýna</span>
+<span class="bw">Ertir · Penşenbe, 15 oktýabr · 14:30</span>
+<div class="bst"><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Garaşylýar</span></div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg" alt="Ak Diş">
+<div class="bmid">
+<a class="bn" href="#">Ak Diş</a>
+<span class="cap ell">Barlag · Lukman Döwlet</span>
+<span class="bw">Anna, 16 oktýabr · 10:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+<span class="mvl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Täze wagt soraldy: Şenbe, 17 okt · 11:30 · jogap garaşylýar</span>
+</div>
+</div>
+</main>
+<div class="scrim" aria-hidden="true"></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="f11-t">
+<span class="grab"></span>
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 4px 0 16px">
+<span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span>
+<button class="b b-gho b-ico" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 2px 16px 0">
+<h2 id="f11-t" style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Ak Diş</h2>
+<span class="cap">Barlag · Lukman Döwlet · 50 TMT</span>
+</div>
+<div style="display: flex; flex-direction: column; margin: 12px 16px 0; border-top: 1px solid #e6e6ea">
+<div class="srow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Anna, 16 oktýabr · 10:00</span><span></span></div>
+<div class="srow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span class="ell">Görogly köçesi 52 · 2,1 km</span><a class="hit" href="#" style="font-size: 14px; font-weight: 600">Ýol görkez</a></div>
+</div>
+<section class="mvp" aria-labelledby="f11-mv" style="margin: 14px 16px 0">
+<h3 id="f11-mv" style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 15px; line-height: 20px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Wagt üýtgetmek haýyşy</h3>
+<div class="mvt"><span style="color: #5a5a64">Anna, 16 okt · 10:00</span> <span style="color: #93500a; font-weight: 600">→</span> <span style="font-weight: 600">Şenbe, 17 okt · 11:30</span></div>
+<span class="cap">Biznes tassyklaýança öňki wagtyňyz saklanýar.</span>
+<button class="b b-dtx" style="align-self: flex-start; margin: 2px 0 0 -18px">Haýyşy yzyna al</button>
+</section>
+<p class="cap" style="margin: 12px 16px 0">Ýazylyşy 2 sagat öňünden mugt ýatyryp ýa-da üýtgedip bilersiňiz. Töleg ýerinde.</p>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px 0">
+<a class="b b-sec" href="Booking.dc.html" style="width: 100%">Başga wagta geçir</a>
+<button class="b b-dtx" style="width: 100%">Ýatyr</button>
+</div>
+<span class="cap" style="margin: 10px 16px 20px; text-align: center; color: #6e6e78">Ýazylyş belgisi: YR-48190</span>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">11 · Waiting move · sheet · YR-48190</span><span class="cap">The original time holds until the business answers; “Haýyşy yzyna al” drops the request. Accepted → toast/SMS “Täze wagt tassyklandy: Şenbe, 17 okt · 11:30”. Declined or unanswered → the panel becomes “Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar.”</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<header style="flex: none; display: flex; align-items: center; gap: 4px; height: 56px; padding: 0 16px 0 4px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<a class="b b-gho b-ico" href="Home.dc.html" aria-label="Yza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<h1 style="margin: 0; font-size: 17px; line-height: 22px; font-weight: 600">Ýazylyşlarym</h1>
+</header>
+<nav role="tablist" aria-label="Ýazylyşlar" style="flex: none; display: flex; gap: 24px; padding: 0 16px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<button class="tab on" role="tab" aria-selected="true">Gelýän (6)</button>
+<button class="tab" role="tab" aria-selected="false">Geçen (6)</button>
+</nav>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 0 16px">
+<div class="brw">
+<img class="bimg" src="../../assets/photos/giorgio-trovato-gb6gtiTZKB8-unsplash.jpg" alt="Nail Bar Aýna">
+<div class="bmid">
+<a class="bn" href="#">Nail Bar Aýna</a>
+<span class="cap ell">Manikýur · Maral</span>
+<span class="bw"><s>Penşenbe, 15 oktýabr · 10:00</s></span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>Wagtynda jogap gelmedi</span></div>
+</div>
+<div class="ofr">
+<span class="cap" id="f12-ex">Nail Bar Aýna 30 minudyň içinde jogap bermedi. Şu boş wagtlaryň birini saýlaň:</span>
+<div class="och" role="group" aria-labelledby="f12-ex">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 12:00">Pe 15 · 12:00</button>
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 16:30">Pe 15 · 16:30</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 10:00">An 16 · 10:00</button>
+</div>
+</div>
+</div>
+<div class="brw dim">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Aýal saç kesimi · Aýna</span>
+<span class="bw">Ertir · Penşenbe, 15 oktýabr · 14:30</span>
+<div class="bst"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Siz ýatyrdyňyz</span></div>
+</div>
+<p class="ufl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3251b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Yzyna alyp bolmady — bu wagt eýýäm başga müşderä berildi. <a class="hit" href="Venue.dc.html" style="font-weight: 600">Başga wagt saýla</a></span></p>
+</div>
+<div class="brw new">
+<img class="bimg" src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio">
+<div class="bmid">
+<a class="bn" href="#">Glow Studio</a>
+<span class="cap ell">Saç düzmek · Aýna</span>
+<span class="bw">Ertir · Penşenbe, 15 oktýabr · 18:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+</div>
+</div>
+<div class="brw">
+<img class="bimg" src="../../assets/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg" alt="Ak Diş">
+<div class="bmid">
+<a class="bn" href="#">Ak Diş</a>
+<span class="cap ell">Barlag · Lukman Döwlet</span>
+<span class="bw">Anna, 16 oktýabr · 10:00</span>
+<div class="bst"><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span></div>
+<span class="mvl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Täze wagt soraldy: Şenbe, 17 okt · 11:30 · jogap garaşylýar</span>
+</div>
+</div>
+</main>
+<div class="toast tcol" role="alert">
+<div style="display: flex; align-items: flex-start; gap: 10px; padding-right: 10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f6c7c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Yzyna alyp bolmady — bu wagt eýýäm başga müşderä berildi.</span></div>
+<a class="b b-sm tb hit" href="Venue.dc.html" style="align-self: flex-end">Başga wagt saýla</a>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">12 · Undo failed · toast + greyed row</span><span class="cap">YR-48213 cancelled; “Yzyna al” came after the slot was given away. Toast and row: “Yzyna alyp bolmady — {sebäbi}.” + “Başga wagt saýla” (→ business page). Other reasons: sapakda boş ýer galmady · ýazylyş wagty başlandy · haýyşyň jogap wagty gutardy. No “Yzyna al” after 5 min.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<header style="position: relative; flex: none; display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 4px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<a class="b b-gho b-ico" href="#" aria-label="Yza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<span style="display: flex; flex-direction: column; align-items: center; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Wagty üýtget</span><span style="font-size: 12px; line-height: 16px; color: #5a5a64">YR-48190 · 2 / 3 · Wagt</span></span>
+<a class="b b-gho b-ico" href="Account-Bookings.dc.html" aria-label="Ýap"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></a>
+<span style="position: absolute; left: 0; bottom: -1px; width: 66.67%; height: 2px; background: #5a3ff0" aria-hidden="true"></span>
+</header>
+<main style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: 16px 16px 0">
+<h1 style="margin: 0; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.015em">Wagty saýlaň</h1>
+<span class="cap" style="margin-top: 4px">Ak Diş · Görogly köçesi 52</span>
+<div class="lockb" style="margin-top: 14px">
+<div style="display: flex; align-items: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span style="flex: 1; min-width: 0; font-size: 15px; line-height: 20px; font-weight: 600">Barlag</span><span style="font-size: 15px; line-height: 20px; font-weight: 600">50 TMT</span></div>
+<span class="cap" style="padding-left: 28px">Hyzmatlary üýtgetmek üçin ýazylyşy ýatyryp täzeden ýazylyň.</span>
+</div>
+<div class="hs" role="group" aria-label="Hünärmen" style="gap: 8px; margin: 14px -16px 0; padding: 0 16px">
+<button class="chip hit on" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Lukman Döwlet</button>
+<button class="chip hit" aria-pressed="false">Islendik hünärmen</button>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 12px"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Oktýabr 2026</span><button class="b b-gho b-ico" aria-label="Senenamany aç" style="margin-right: -12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></button></div>
+<div class="hs" role="group" aria-label="Sene" style="gap: 8px; margin: 6px -16px 0; padding: 0 16px">
+<sc-for list="{{moveDays}}" as="d" hint-placeholder-count="7"><button class="{{d.cls}}" aria-pressed="{{d.on}}" aria-label="{{d.aria}}"><span class="dw">{{d.w}}</span><span class="dn">{{d.n}}</span><span class="dm">okt.</span></button></sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 16px; margin-top: 18px">
+<sc-for list="{{moveSlotGroups}}" as="g" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="lbl">{{g.t}}</span>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px"><sc-for list="{{g.slots}}" as="s" hint-placeholder-count="4"><button class="{{s.cls}}" disabled="{{s.dis}}" aria-pressed="{{s.on}}">{{s.t}}</button></sc-for></div>
+</div>
+</sc-for>
+</div>
+</main>
+<div class="bar" style="flex-direction: column; align-items: stretch; gap: 12px">
+<div class="ow">
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="lbl">Öňki wagt</span><span style="font-size: 14px; line-height: 18px; color: #5a5a64">Anna, 16 okt · 10:00</span></span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span class="lbl" style="color: #4429d6">Täze wagt</span><span style="font-size: 14px; line-height: 18px; font-weight: 600">Şenbe, 17 okt · 11:30</span></span>
+</div>
+<a class="b b-pri b-lg" href="#" style="width: 100%">Dowam et</a>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">13 · Move mode · time step · Booking mode = move</span><span class="cap">Steps Hünärmen · Wagt · Tassykla; services locked. Current specialist preselected; the grid shows only their free times (no silent swap), or anyone's with “Islendik hünärmen”. Tassykla: “Täze wagty sora” (manual) / “Wagty üýtget” (instant). Window: 2 sagat öňünden.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk" style="background: #f6f6f8">
+<header style="flex: none; display: flex; align-items: center; justify-content: center; height: 56px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<a href="Home.dc.html" aria-label="Ýeral baş sahypa" style="display: flex"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 24px; width: auto"></a>
+</header>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 16px">
+<article class="lcard" aria-labelledby="f14-t">
+<img src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio: stilist müşderiniň saçyny kesýär" style="width: 100%; height: 140px; object-fit: cover; display: block">
+<div style="display: flex; flex-direction: column; padding: 16px">
+<h1 id="f14-t" style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Glow Studio</h1>
+<span class="cap">Gözellik salony · Bitarap Türkmenistan şaýoly 247, 2-nji gat</span>
+<div style="display: flex; flex-direction: column; gap: 2px; margin-top: 14px">
+<span style="font-size: 15px; line-height: 20px; font-weight: 600">Saç düzmek · Aýna</span>
+<span style="font-size: 14px; line-height: 20px; color: #6e6e78"><s>Penşenbe, 15 oktýabr · 17:00</s></span>
+</div>
+<div class="bst" style="margin-top: 10px"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>Biznes ret etdi</span></div>
+<p class="rsn" style="margin-top: 10px"><span style="font-weight: 600">Sebäbi: Bu wagt boş däl</span><span style="color: #5a5a64"> · «Aýna 17:00-da başga müşderide bolar — şu wagtlaryň birini saýlaň.»</span></p>
+<div class="sep" style="margin: 16px 0 14px"></div>
+<span class="lbl" id="f14-of">Teklip edilen wagtlar</span>
+<div class="och" role="group" aria-labelledby="f14-of" style="margin-top: 8px">
+<button class="slot slot-o hit" aria-label="Penşenbe, 15 okt · 18:00">Pe 15 · 18:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 11:00">An 16 · 11:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 15:30">An 16 · 15:30</button>
+</div>
+<span class="cap" style="margin-top: 8px">Bir basyşda ýazylyň — biznes bu wagtlary özi teklip etdi.</span>
+</div>
+</article>
+<span class="cap" style="display: block; margin-top: 12px; text-align: center; color: #6e6e78">Ýazylyş belgisi: YR-48230</span>
+</main>
+</div>
+<figcaption class="fcap"><span class="ft">14 · SMS link · signed out · yeral.app/b/{code}</span><span class="cap">New page Booking-Link.dc.html: logo-only header, one card — asked time struck, badge + canceller + reason, offered chips. Other states there: confirmed / pending read-only (“Ýol görkez”, “Jaň et”), offers expired → “Başga wagt saýla”, dead link “Bu salgy işlemeýär”.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk" style="background: #f6f6f8">
+<header style="flex: none; display: flex; align-items: center; justify-content: center; height: 56px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<a href="Home.dc.html" aria-label="Ýeral baş sahypa" style="display: flex"><img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 24px; width: auto"></a>
+</header>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 16px">
+<article class="lcard" aria-labelledby="f15-t">
+<img src="../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg" alt="Glow Studio: stilist müşderiniň saçyny kesýär" style="width: 100%; height: 140px; object-fit: cover; display: block">
+<div style="display: flex; flex-direction: column; padding: 16px">
+<h1 id="f15-t" style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em">Glow Studio</h1>
+<span class="cap">Gözellik salony · Bitarap Türkmenistan şaýoly 247, 2-nji gat</span>
+<div style="display: flex; flex-direction: column; gap: 2px; margin-top: 14px">
+<span style="font-size: 15px; line-height: 20px; font-weight: 600">Saç düzmek · Aýna</span>
+<span style="font-size: 14px; line-height: 20px; color: #6e6e78"><s>Penşenbe, 15 oktýabr · 17:00</s></span>
+</div>
+<div class="bst" style="margin-top: 10px"><span class="badge st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Ýatyryldy</span> <span class="bby"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>Biznes ret etdi</span></div>
+<p class="rsn" style="margin-top: 10px"><span style="font-weight: 600">Sebäbi: Bu wagt boş däl</span><span style="color: #5a5a64"> · «Aýna 17:00-da başga müşderide bolar — şu wagtlaryň birini saýlaň.»</span></p>
+<div class="sep" style="margin: 16px 0 14px"></div>
+<span class="lbl" id="f15-of">Teklip edilen wagtlar</span>
+<div class="och" role="group" aria-labelledby="f15-of" style="margin-top: 8px">
+<button class="slot slot-o hit on" aria-label="Penşenbe, 15 okt · 18:00">Pe 15 · 18:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 11:00">An 16 · 11:00</button>
+<button class="slot slot-o hit" aria-label="Anna, 16 okt · 15:30">An 16 · 15:30</button>
+</div>
+<div class="sep" style="margin: 16px 0 14px"></div>
+<span style="font-size: 15px; line-height: 20px; font-weight: 600">Telefon belgiňizi tassyklaň</span>
+<span class="cap" style="margin-top: 4px">Kod ýazylyşdaky telefon belgisine iberiler.</span>
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: 12px">
+<span class="flab" id="f15-ph">Telefon belgiňiz</span>
+<div class="ro" aria-labelledby="f15-ph"><span style="flex: 1">+993 65 •• •• 22</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+</div>
+<button class="b b-pri b-lg" style="width: 100%; margin-top: 14px">Kod al</button>
+</div>
+</article>
+<span class="cap" style="display: block; margin-top: 12px; text-align: center; color: #6e6e78">Ýazylyş belgisi: YR-48230</span>
+</main>
+</div>
+<figcaption class="fcap"><span class="ft">15 · SMS link · inline login</span><span class="cap">Chip tapped while signed out → login inside the card. The booking's own phone, prefilled and masked, not editable: only its owner gets the code. “Kod al” → 4 boxes → confirm (as 8) → success: Tassyklandy + “Ýazylyşlaryma geç”.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<div style="flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column">
+<div style="position: relative; height: 240px; flex: none">
+<img src="../../assets/photos/buddy-an-LpK2xddrElI-unsplash.jpg" alt="Pamyk: öý haýwanyna ideg" style="width: 100%; height: 100%; object-fit: cover; display: block">
+<div style="position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between">
+<a class="ib" href="Search.dc.html" aria-label="Yza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<div style="display: flex; gap: 8px">
+<button class="ib" aria-label="Halanlara goş"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></button>
+<button class="ib" aria-label="Paýlaş"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.59 13.51 6.83 3.98"></path><path d="m15.41 6.51-6.82 3.98"></path></svg></button>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 16px 16px 14px">
+<h1 style="margin: 0 0 2px; font-size: 24px; line-height: 30px; font-weight: 600; letter-spacing: -0.015em">Pamyk</h1>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px"><svg width="14" height="14" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span style="font-weight: 600">5,0</span><span style="color: #5a5a64">·</span><a href="#" style="color: #101014; text-decoration: underline">37 teswir</a></span>
+<span style="font-size: 14px; line-height: 20px; color: #5a5a64">Öý haýwanlary · 3,1 km · Parahat 4</span>
+</div>
+<nav class="hs" role="tablist" aria-label="Bölümler" style="flex: none; gap: 20px; padding: 0 16px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<button class="tab on" role="tab" aria-selected="true">Hyzmatlar</button>
+<button class="tab" role="tab" aria-selected="false">Teswirler</button>
+<button class="tab" role="tab" aria-selected="false">Barada</button>
+</nav>
+<div style="padding: 0 16px">
+<div class="svc"><div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Groming</span><span class="cap">1 sag 30 min</span><span class="pr">80 TMT</span></div></div>
+<div class="svc"><div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Ýuwundyrmak</span><span class="cap">45 min</span><span class="pr">50 TMT</span></div></div>
+<div class="svc"><div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Dyrnak kesmek</span><span class="cap">15 min</span><span class="pr">20 TMT</span></div></div>
+</div>
+</div>
+<aside class="pcard" aria-labelledby="f16-t">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span id="f16-t" style="display: flex; align-items: center; gap: 8px; font-size: 15px; line-height: 20px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Bu biznese telefon arkaly ýazylyp bilersiňiz</span>
+<span class="cap">Biznes siziň bilen ýazylyşlary jaň arkaly ylalaşmagy haýyş etdi.</span>
+</div>
+<a class="b b-pri b-lg" href="#" style="width: 100%"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Jaň et · +993 12 34 56 78</a>
+</aside>
+</div>
+<figcaption class="fcap"><span class="ft">16 · Phone-only client · /tk/b/pamyk</span><span class="cap">Aýjemal may book Pamyk only by phone. The booking bar becomes a calm info card — no blame, no no-show talk. Rows keep their info, no “Saýla”; the flow opened directly shows the same card. Signed out: normal page until login. Offered times after a decline stay bookable online.</span></figcaption>
+</figure>
+
+<figure class="fig">
+<div class="ph" lang="tk">
+<header style="flex: none; display: flex; align-items: center; gap: 4px; height: 56px; padding: 0 4px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<a class="b b-gho b-ico" href="Search.dc.html" aria-label="Yza"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></a>
+<span class="ell" style="flex: 1; font-size: 17px; line-height: 22px; font-weight: 600">Glow Studio</span>
+<button class="b b-gho b-ico" aria-label="Halanlara goş"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></button>
+<button class="b b-gho b-ico" aria-label="Paýlaş"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.59 13.51 6.83 3.98"></path><path d="m15.41 6.51-6.82 3.98"></path></svg></button>
+</header>
+<nav class="hs" role="tablist" aria-label="Bölümler" style="flex: none; gap: 20px; padding: 0 16px; border-bottom: 1px solid #e6e6ea; background: #ffffff">
+<button class="tab on" role="tab" aria-selected="true">Hyzmatlar</button>
+<button class="tab" role="tab" aria-selected="false">Hünärmenler</button>
+<button class="tab" role="tab" aria-selected="false">Teswirler</button>
+<button class="tab" role="tab" aria-selected="false">Barada</button>
+</nav>
+<div class="hs" style="flex: none; gap: 8px; padding: 12px 16px">
+<button class="chip hit on" aria-pressed="true">Saç</button>
+<button class="chip hit" aria-pressed="false">Dyrnak</button>
+<button class="chip hit" aria-pressed="false">Ýüz ideg</button>
+<button class="chip hit" aria-pressed="false">Massaž</button>
+</div>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 0 16px">
+<h2 style="margin: 4px 0 0; font-size: 17px; line-height: 22px; font-weight: 600">Saç</h2>
+<sc-for list="{{hpServices}}" as="sv" hint-placeholder-count="5">
+<div class="svc">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 15px; line-height: 20px; font-weight: 600">{{sv.name}}</span>
+<span class="cap">{{sv.meta}}</span>
+<span class="{{sv.priceCls}}">{{sv.price}}</span>
+</div>
+<sc-if value="{{sv.on}}" hint-placeholder-val="{{false}}"><button class="b b-tin b-sm hit tgl" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Saýlandy</button></sc-if>
+<sc-if value="{{sv.off}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm hit tgl" aria-pressed="false">Saýla</button></sc-if>
+</div>
+</sc-for>
+<h2 style="margin: 20px 0 0; font-size: 17px; line-height: 22px; font-weight: 600">Dyrnak</h2>
+</main>
+<div class="bar">
+<div style="display: flex; flex-direction: column; flex: 1; min-width: 0"><span class="cap">2 hyzmat · 2 sag 45 min</span><span style="font-size: 17px; line-height: 22px; font-weight: 700">60 TMT-den</span></div>
+<a class="b b-pri b-lg" href="Booking.dc.html">Dowam et</a>
+</div>
+</div>
+<figcaption class="fcap"><span class="ft">17 · Hidden price · /tk/b/glow-studio, scrolled</span><span class="cap">s12 shows “Baha ýerinde aýdylýar” (n-600) where the price goes — also in the flow, the summary card and the booking detail. Mixed total = priced sum + “-den”: 60 TMT-den. Hidden only → “Baha ýerinde aýdylýar”, no amount.</span></figcaption>
 </figure>
 
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1442,"height":2280}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1442,"height":6700}}'>
 class Component extends DCLogic {
   renderVals() {
-    
+    const B = '';
     const homeCards = [
       { name: 'Bag kafe', alt: 'Bag kafesiniň terrasy', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', meta: 'Kafe · 0,9 km', rating: '4,8', count: '(119)', slots: ['13:00', '13:30', '18:00'] },
       { name: 'Barber Loft', alt: 'Barber Loft dellekhanasy', img: '../../assets/photos/allef-vinicius-IvQeAVeJULw-unsplash.jpg', meta: 'Dellekhana · 1,2 km', rating: '4,9', count: '(212)', slots: ['14:30', '15:00', '16:15'] },
@@ -439,15 +1196,36 @@ class Component extends DCLogic {
       slots: list.map((x) => ({ t: x, dis: off.includes(x), on: x === '14:30', cls: x === '14:30' ? 'slot slot-g on' : 'slot slot-g' }))
     }));
     const badge = {
-      pending: { badgeCls: 'badge st-p', dotColor: '#dc8b0b', status: 'Garaşylýar' },
-      confirmed: { badgeCls: 'badge st-c', dotColor: '#5a3ff0', status: 'Tassyklandy' }
+      pending: { badgeCls: 'badge st-p', icP: true, icC: false, icD: false, icX: false, icN: false, status: 'Garaşylýar' },
+      confirmed: { badgeCls: 'badge st-c', icP: false, icC: true, icD: false, icX: false, icN: false, status: 'Tassyklandy' }
     };
     const bookings = [
       { business: 'Glow Studio', img: '../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg', alt: 'Glow Studio', what: 'Aýal saç kesimi · Aýna', when: 'Ertir · Penşenbe, 15 oktýabr · 14:30', st: 'pending' },
       { business: 'Bag kafe', img: '../../assets/photos/ruben-ramirez-xhKG01FN2uk-unsplash.jpg', alt: 'Bag kafe', what: 'Stol · 4 adam · Terrasa', when: 'Şenbe, 17 oktýabr · 19:00', st: 'confirmed' },
       { business: 'Aýdyň ýoga', img: '../../assets/photos/christian-harb-qY468agdO7g-unsplash.jpg', alt: 'Aýdyň ýoga', what: 'Irden akym · 1 ýer · Aýgözel', when: 'Duşenbe, 19 oktýabr · 08:00', st: 'confirmed' }
     ].map((k) => ({ ...k, ...badge[k.st] }));
-    return { homeCards, searchChips, searchRows, pins, mapCards, services, days, slotGroups, bookings };
+    // Round 6 · frame 13 (move mode, Ak Diş, Şenbe 17) and frame 17 (hidden price s12)
+    const moveDays = dayDefs.map(([w, n, aria]) => ({ w, n, aria, on: n === '17', cls: 'dcell' + (n === '14' ? ' today' : '') + (n === '17' ? ' on' : '') }));
+    const moveGroups = [
+      ['Irden', ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30'], ['09:30', '11:00']],
+      ['Günortan', ['12:00', '12:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'], ['12:30', '15:00']]
+    ];
+    const moveSlotGroups = moveGroups.map(([t, list, off]) => ({
+      t,
+      slots: list.map((x) => ({ t: x, dis: off.includes(x), on: x === '11:30', cls: x === '11:30' ? 'slot slot-g on' : 'slot slot-g' }))
+    }));
+    const hpServices = [
+      { name: 'Aýal saç kesimi', meta: '60 min · Ýuwmak, kesmek we düzmek', price: '80 TMT', on: false },
+      { name: 'Saç düzmek', meta: '45 min', price: '60 TMT', on: true },
+      { name: 'Saç reňklemek', meta: '2 sag · Bahasy saçyň uzynlygyna bagly', price: '250 TMT-den', on: false },
+      { name: 'Çaga saç kesimi', meta: '30 min', price: '40 TMT', on: false },
+      { name: 'Gelin saç düzümi', meta: '2 sag · Synag düzümi bilen; bahasy ylalaşylýar', price: 'Baha ýerinde aýdylýar', hidden: true, on: true }
+    ].map((s) => ({ ...s, off: !s.on, priceCls: s.hidden ? 'pr pr-h' : 'pr' }));
+    return {
+      homeCards: homeCards, searchChips: searchChips, searchRows: searchRows, pins: pins, mapCards: mapCards,
+      services: services, days: days, slotGroups: slotGroups, bookings: bookings,
+      moveDays: moveDays, moveSlotGroups: moveSlotGroups, hpServices: hpServices
+    };
   }
 }
 </script>

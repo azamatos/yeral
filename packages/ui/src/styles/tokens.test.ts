@@ -71,6 +71,7 @@ const MAP: Record<string, string | null> = {
   '--input-error': '--shadow-input-error',
   '--input-warning': '--shadow-input-warning',
   '--focus-ring-inset': '--shadow-focus-inset',
+  '--ring-selected': '--shadow-ring-selected',
   '--switch-off-ring': '--shadow-switch-off',
   '--shadow-control': '--shadow-control',
   '--r-input': '--radius-input',

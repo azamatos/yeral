@@ -35,6 +35,19 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;white-space:nowrap;flex:none}
 .chip:hover{background:#f6f6f8}
 .chip.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.chip.on:hover{background:#ded7fd}
+.chip.dd{padding:0 12px 0 14px}
+.chip:focus-visible,.pc:focus-visible,.pxb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.frow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:0 24px 14px}
+.pwrap{position:relative;display:inline-flex;flex:none}
+.catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
+.ppop{position:absolute;top:44px;left:0;width:280px;padding:14px 16px 16px;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);z-index:31;display:flex;flex-direction:column;gap:12px}
+.pgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pc{display:inline-flex;align-items:center;justify-content:center;height:44px;min-width:0;padding:0 8px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:15px;font-weight:600;color:#101014;cursor:pointer;font-variant-numeric:tabular-nums}
+.pc:hover{border-color:#5a3ff0;color:#4429d6}
+.pc.on,.pc.on:hover{background:#5a3ff0;border-color:#5a3ff0;color:#ffffff}
+.pxb{display:none;width:44px;height:44px;margin:-10px -10px -10px 0;border:0;border-radius:10px;background:transparent;color:#5a5a64;align-items:center;justify-content:center;cursor:pointer}
+.pxb:hover{background:#f4f4f6;color:#101014}
 .seg{display:inline-flex;padding:3px;background:#f0f0f3;border-radius:10px;gap:2px;flex:none}
 .sgb{height:30px;padding:0 12px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:#5a5a64;cursor:pointer}
 .sgb.on{background:#ffffff;color:#101014;font-weight:600;box-shadow:0 0 0 1px #e6e6ea}
@@ -55,7 +68,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .mctl button{width:40px;height:40px;border:0;background:#ffffff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#101014}
 .mctl button:hover{background:#f4f4f6}
 @media (max-width:1023px){.mapcol{display:none}.res{max-width:none;padding:20px 24px 96px}.mapbtn{display:inline-flex;position:sticky;bottom:20px;align-self:center}.hide-md{display:none !important}}
-@media (max-width:767px){.res{padding:16px 16px 96px}.rr{grid-template-columns:112px minmax(0,1fr);gap:14px;padding:12px;margin:0 -12px}.rr img{width:112px;height:112px}.hide-xs{display:none !important}.qs{height:48px}.qf{padding:0 12px}}
+@media (max-width:767px){.res{padding:16px 16px 96px}.rr{grid-template-columns:112px minmax(0,1fr);gap:14px;padding:12px;margin:0 -12px}.rr img{width:112px;height:112px}.hide-xs{display:none !important}.qs{height:48px}.qf{padding:0 12px}.frow{flex-wrap:nowrap;overflow-x:auto;padding:0 16px 14px}.catcher{background:rgba(16,16,20,.4)}.ppop{position:fixed;top:auto;left:0;right:0;bottom:0;width:auto;border:0;border-radius:16px 16px 0 0;padding:16px 16px 24px;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.pc{height:48px}.pxb{display:inline-flex}}
 </style>
 </helmet>
 <div style="min-height: 100%; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column">
@@ -78,9 +91,23 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <a class="b b-sec b-sm" href="#">Giriş</a>
 </nav>
 </div>
-<div style="display: flex; align-items: center; gap: 8px; padding: 0 24px 14px; overflow-x: auto">
+<div class="frow">
 <sc-for list="{{cats}}" as="c" hint-placeholder-count="8"><button class="{{c.cls}}" onClick="{{c.pick}}" aria-pressed="{{c.on}}">{{c.t}}</button></sc-for>
 <span style="width: 1px; height: 24px; background: #e6e6ea; flex: none; margin: 0 4px"></span>
+<sc-if value="{{showParty}}" hint-placeholder-val="{{false}}">
+<div class="pwrap">
+<button class="chip on dd" aria-haspopup="dialog" aria-expanded="{{partyOpen}}" aria-label="{{partyAria}}" onClick="{{toggleParty}}">Adam sany: {{partyN}}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+<sc-if value="{{partyOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeParty}}"></div>
+<div class="ppop" role="dialog" aria-label="Adam sany">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px"><span class="lbl">Adam sany</span><button class="pxb" aria-label="Ýap" onClick="{{closeParty}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<div class="pgrid" role="radiogroup" aria-label="Adam sany">
+<sc-for list="{{partyOpts}}" as="o" hint-placeholder-count="8"><button class="{{o.cls}}" role="radio" aria-checked="{{o.on}}" aria-label="{{o.aria}}" onClick="{{o.pick}}">{{o.t}}</button></sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
 <button class="chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4h-7"></path><path d="M10 4H3"></path><path d="M21 12h-9"></path><path d="M8 12H3"></path><path d="M21 20h-5"></path><path d="M12 20H3"></path><path d="M14 2v4"></path><path d="M8 10v4"></path><path d="M16 18v4"></path></svg>Süzgüçler</button>
 <button class="chip">Bahasy<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
 <button class="chip">Reýting 4,5+</button>
@@ -154,16 +181,21 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":2780}}'>
+<script type="text/x-dc" data-dc-script data-props='{"party":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":2780}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { cat: 'all', day: 'today', hot: null };
+    this.state = { cat: props.party ? 'food' : 'all', day: 'today', hot: null, party: '2', partyOpen: !!props.party };
+  }
+  componentDidUpdate(prevProps) {
+    if (!!prevProps.party !== !!this.props.party) {
+      this.setState({ cat: this.props.party ? 'food' : 'all', party: '2', partyOpen: !!this.props.party, hot: null });
+    }
   }
   renderVals() {
     const f = this.props.font ?? 'Onest';
     const s = this.state;
-    
+    const B = '';
     const all = [
       { id: 'barber', cat: 'beauty', name: 'Barber Loft', img: '../../assets/photos/allef-vinicius-IvQeAVeJULw-unsplash.jpg', alt: 'Barber Loft', rating: '4,9', count: '(212)', meta: 'Dellekhana · Magtymguly şaýoly 12 · 1,2 km', line: 'Erkek saç kesimi · 40 TMT-den', slots: ['14:30', '15:00', '16:15', '17:00'], more: '+5', x: 40, y: 38 },
       { id: 'glow', cat: 'beauty', name: 'Glow Studio', img: '../../assets/photos/adam-winger-FkAZqQJTbXM-unsplash.jpg', alt: 'Glow Studio', rating: '4,9', count: '(96)', meta: 'Gözellik salony · Bitarap Türkmenistan şaýoly 247 · 3,0 km', line: 'Aýal saç kesimi · 80 TMT', slots: ['15:30', '16:00', '18:00'], more: '+6', x: 52, y: 64, href: 'Venue.dc.html' },
@@ -179,12 +211,46 @@ class Component extends DCLogic {
       { id: 'awto', cat: 'auto', name: 'Awto Ussa', img: '../../assets/photos/christian-buehner-Fd6osyVbtG4-unsplash.jpg', alt: 'Awto Ussa', rating: '4,6', count: '(58)', meta: 'Awtoulag · Gurtly ýoly 2 · 5,1 km', line: 'Diagnostika · 100 TMT', slots: ['12:00', '14:00', '15:30'], more: '', x: 92, y: 86 },
       { id: 'pamyk', cat: 'pets', name: 'Pamyk', img: '../../assets/photos/buddy-an-LpK2xddrElI-unsplash.jpg', alt: 'Pamyk groming', rating: '5,0', count: '(37)', meta: 'Öý haýwanlary · Parahat 4 · 3,1 km', line: 'Groming · 80 TMT-den', slots: ['14:00', '16:30'], more: '', x: 36, y: 88 }
     ];
+    // D2 · party size: only with the Restoran we kafe (table type) category; default 2; options 1–7 and 8+ (8+ = times for 8)
+    const partyDefs = ['1', '2', '3', '4', '5', '6', '7', '8+'];
+    const showParty = s.cat === 'food';
+    const pn = showParty ? s.party : '2';
+    const pIdx = partyDefs.indexOf(pn);
+    const bucket = pIdx <= 1 ? 0 : (pIdx <= 3 ? 1 : (pIdx <= 5 ? 2 : 3));
+    const tableTimes = {
+      bag: [
+        { slots: ['13:00', '13:30', '18:00'], more: '+3' },
+        { slots: ['13:30', '18:00', '19:30'], more: '+2' },
+        { slots: ['18:00', '20:00'], more: '+1' },
+        { slots: ['19:00', '20:00'], more: '' }
+      ],
+      ojak: [
+        { slots: ['19:00', '19:30', '20:45'], more: '+4' },
+        { slots: ['19:30', '20:45', '21:00'], more: '+2' },
+        { slots: ['20:45', '21:15'], more: '' },
+        { slots: ['21:15'], more: '' }
+      ]
+    };
+    // Bag kafe: terrace for up to 4, VIP otag from 6 (CLIENT-SPEC 4.5)
+    const bagNote = pIdx <= 3 ? ' · terrasa bar' : (pIdx >= 5 ? ' · VIP otag bar' : '');
+    const withParty = (r) => {
+      const t = tableTimes[r.id];
+      if (!t) return r;
+      const b = t[bucket];
+      return { ...r, line: 'Stol · ' + pn + ' adam' + (r.id === 'bag' ? bagNote : ''), slots: b.slots, more: b.more };
+    };
+    const partyOpts = partyDefs.map((t) => ({
+      t, on: t === pn ? 'true' : 'false',
+      cls: t === pn ? 'pc on' : 'pc',
+      aria: t + ' adam',
+      pick: () => this.setState({ party: t, partyOpen: false, hot: null })
+    }));
     const catDefs = [['all', 'Ählisi'], ['beauty', 'Gözellik'], ['health', 'Saglyk'], ['food', 'Restoran we kafe'], ['sport', 'Sport'], ['edu', 'Okuw'], ['auto', 'Awtoulag'], ['pets', 'Öý haýwanlary']];
-    const cats = catDefs.map(([id, t]) => ({ t, on: s.cat === id, cls: s.cat === id ? 'chip on' : 'chip', pick: () => this.setState({ cat: id, hot: null }) }));
+    const cats = catDefs.map(([id, t]) => ({ t, on: s.cat === id, cls: s.cat === id ? 'chip on' : 'chip', pick: () => this.setState({ cat: id, hot: null, partyOpen: false }) }));
     const dayDefs = [['today', 'Şu gün'], ['tomorrow', 'Ertir'], ['week', 'Şu hepde']];
     const days = dayDefs.map(([id, t]) => ({ t, cls: s.day === id ? 'sgb on' : 'sgb', pick: () => this.setState({ day: id }) }));
     const km = (r) => parseFloat(r.meta.split('·').pop().replace(',', '.'));
-    const list = (s.cat === 'all' ? all : all.filter((r) => r.cat === s.cat)).slice().sort((a, b) => km(a) - km(b));
+    const list = (s.cat === 'all' ? all : all.filter((r) => r.cat === s.cat)).map(withParty).sort((a, b) => km(a) - km(b));
     const rows = list.map((r) => ({ ...r, href: r.href || '#', hasTag: !!r.tag, cls: s.hot === r.id ? 'rr hot' : 'rr', enter: () => this.setState({ hot: r.id }) }));
     const pins = list.map((r) => ({ x: r.x, y: r.y, t: r.slots[0], cls: s.hot === r.id ? 'pin hot' : 'pin' }));
     const catName = (catDefs.find(([id]) => id === s.cat) || catDefs[0])[1];
@@ -192,6 +258,12 @@ class Component extends DCLogic {
     return {
       fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
       cats, days, rows, pins,
+      showParty, partyOpts,
+      partyN: pn,
+      partyOpen: showParty && s.partyOpen,
+      partyAria: 'Adam sany: ' + pn + '. Üýtgetmek',
+      toggleParty: () => this.setState({ partyOpen: !this.state.partyOpen }),
+      closeParty: () => this.setState({ partyOpen: false }),
       leave: () => this.setState({ hot: null }),
       empty: rows.length === 0,
       whatLabel: s.cat === 'all' ? 'Ähli hyzmatlar' : catName,

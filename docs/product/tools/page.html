@@ -1,0 +1,1237 @@
+<title>Ýeral Product Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" />
+<style>
+  /* Layout: a reading column with a sticky chapter rail; Ýeral's own ink, violet accent and status colours. */
+  :root {
+    --bg: #f6f6f8;
+    --surface: #ffffff;
+    --sunk: #f0f0f3;
+    --ink: #101014;
+    --ink-2: #5a5a64;
+    --ink-3: #6e6e78;
+    --line: #e6e6ea;
+    --line-2: #d8d8de;
+    --accent: #5a3ff0;
+    --accent-ink: #4429d6;
+    --accent-soft: #efecfe;
+    --accent-line: #d5cbfb;
+    --open-bg: #fef6e7;
+    --open-ink: #93500a;
+    --open-line: #f2ddb0;
+    --done-bg: #e7f8ee;
+    --done-ink: #066a41;
+    --done-line: #bfe6d1;
+    --font: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif;
+    --sys: ui-sans-serif, -apple-system, 'Segoe UI', Arial, sans-serif;
+    --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #0e0e12;
+      --surface: #17171d;
+      --sunk: #1f1f27;
+      --ink: #f1f1f4;
+      --ink-2: #b6b6c0;
+      --ink-3: #9a9aa6;
+      --line: #2a2a33;
+      --line-2: #383842;
+      --accent: #8a73ff;
+      --accent-ink: #b9abff;
+      --accent-soft: #241d4d;
+      --accent-line: #43378a;
+      --open-bg: #3a2a0c;
+      --open-ink: #f3c46b;
+      --open-line: #5c4415;
+      --done-bg: #0f3324;
+      --done-ink: #7fdcab;
+      --done-line: #1d5a3f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #0e0e12;
+    --surface: #17171d;
+    --sunk: #1f1f27;
+    --ink: #f1f1f4;
+    --ink-2: #b6b6c0;
+    --ink-3: #9a9aa6;
+    --line: #2a2a33;
+    --line-2: #383842;
+    --accent: #8a73ff;
+    --accent-ink: #b9abff;
+    --accent-soft: #241d4d;
+    --accent-line: #43378a;
+    --open-bg: #3a2a0c;
+    --open-ink: #f3c46b;
+    --open-line: #5c4415;
+    --done-bg: #0f3324;
+    --done-ink: #7fdcab;
+    --done-line: #1d5a3f;
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    scroll-padding-top: 72px;
+  }
+  /* System font until Onest has loaded (the script adds .fonts-ready): diagrams measure their labels with the
+     body's font while they draw, and a web font swapping in afterwards would clip them. */
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sys);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a {
+    color: var(--accent-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .shell {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    padding-block: 24px 96px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  @media (min-width: 1024px) {
+    .shell {
+      grid-template-columns: 248px minmax(0, 1fr);
+      gap: 48px;
+      padding-inline: 32px;
+    }
+  }
+
+  /* Header */
+  .top {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 8px;
+  }
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .brand-name {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    color: var(--accent-ink);
+  }
+  .brand h1 {
+    margin: 0;
+    font-size: clamp(30px, 5vw, 44px);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .brand p {
+    margin: 0;
+    color: var(--ink-2);
+    max-width: 60ch;
+  }
+  .progress {
+    min-width: 240px;
+    flex: 0 1 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .progress strong {
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .bar {
+    height: 8px;
+    border-radius: 99px;
+    background: var(--sunk);
+    overflow: hidden;
+  }
+  .bar-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.3s ease;
+  }
+
+  /* Rail */
+  .rail {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    background: var(--bg);
+    margin-inline: -16px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .rail {
+      top: calc(env(safe-area-inset-top, 0px) + 24px);
+      align-self: start;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      flex-direction: column;
+      gap: 2px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
+  }
+  .rail-label {
+    display: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 12px 10px 6px;
+  }
+  @media (min-width: 1024px) {
+    .rail-label {
+      display: block;
+    }
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.3;
+    white-space: nowrap;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  @media (min-width: 1024px) {
+    .nav-item {
+      white-space: normal;
+      border: 0;
+      background: none;
+    }
+  }
+  .nav-item:hover {
+    background: var(--sunk);
+    color: var(--ink);
+  }
+  .nav-item.is-current {
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+  }
+  .nav-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    min-width: 22px;
+  }
+  .nav-title {
+    flex: 1;
+  }
+  .nav-count {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    padding: 0 7px;
+    border-radius: 99px;
+    background: var(--open-bg);
+    color: var(--open-ink);
+  }
+  .nav-count:empty {
+    display: none;
+  }
+
+  main {
+    min-width: 0;
+    max-width: 820px;
+  }
+
+  /* Overview */
+  .overview h2,
+  .decide h2 {
+    font-size: 22px;
+    letter-spacing: -0.015em;
+    margin: 8px 0 12px;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+  .ch-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 10px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .ch-card:hover {
+    border-color: var(--accent-line);
+  }
+  .ch-num {
+    grid-row: span 2;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-3);
+    padding-top: 2px;
+  }
+  .ch-title {
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .ch-status {
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .ch-bar {
+    grid-column: 2;
+    height: 4px;
+    margin-top: 8px;
+    border-radius: 99px;
+    background: var(--sunk);
+    overflow: hidden;
+  }
+  .ch-bar-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+  }
+
+  .notice {
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    background: var(--sunk);
+    color: var(--ink-2);
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  /* Question index */
+  .decide {
+    margin-bottom: 56px;
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .chip {
+    font: inherit;
+    font-size: 14px;
+    padding: 5px 12px;
+    border-radius: 99px;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
+  }
+  .index-group h3 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 18px 0 6px;
+  }
+  .index {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .index li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-top: 1px solid var(--line);
+    font-size: 15px;
+  }
+  .index li:first-child {
+    border-top: 0;
+  }
+  .index li[hidden] {
+    display: none !important;
+  }
+  .index a {
+    flex: 1;
+    min-width: 0;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .index a:hover {
+    color: var(--accent-ink);
+  }
+
+  .q-id,
+  .f-id {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .q-start {
+    flex: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    white-space: nowrap;
+  }
+  .q-state {
+    flex: none;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 1px 9px;
+    border-radius: 99px;
+    border: 1px solid var(--open-line);
+    background: var(--open-bg);
+    color: var(--open-ink);
+    white-space: nowrap;
+  }
+  .q-state.is-answered {
+    border-color: var(--accent-line);
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+  }
+  .q-state.is-decided {
+    border-color: var(--done-line);
+    background: var(--done-bg);
+    color: var(--done-ink);
+  }
+
+  /* Chapters */
+  .chapter {
+    padding-top: 24px;
+    margin-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+  .chapter h1 {
+    font-size: clamp(28px, 4.4vw, 38px);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin: 0 0 16px;
+    text-wrap: balance;
+  }
+  .chapter h2 {
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    margin: 36px 0 10px;
+    text-wrap: balance;
+  }
+  .chapter h3 {
+    font-size: 19px;
+    line-height: 1.3;
+    margin: 28px 0 8px;
+    text-wrap: balance;
+  }
+  .chapter h4,
+  .chapter h5 {
+    font-size: 16px;
+    margin: 20px 0 6px;
+  }
+  .chapter h2,
+  .chapter h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+  }
+  .anchor {
+    color: inherit;
+    text-decoration: none;
+  }
+  .anchor:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
+  }
+  .comment-btn {
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--ink-3);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 99px;
+    padding: 1px 10px;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+  .comment-btn:hover,
+  .comment-btn:focus-visible {
+    opacity: 1;
+    color: var(--accent-ink);
+    border-color: var(--accent-line);
+  }
+  .chapter p,
+  .chapter li {
+    max-width: 68ch;
+  }
+  .chapter ul,
+  .chapter ol {
+    padding-left: 22px;
+  }
+  .chapter li {
+    margin: 4px 0;
+  }
+  .chapter li > ul,
+  .chapter li > ol {
+    margin: 4px 0;
+  }
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: var(--sunk);
+  }
+  pre.code {
+    background: var(--sunk);
+    padding: 12px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+  }
+  pre.code code {
+    padding: 0;
+    background: none;
+  }
+  blockquote {
+    margin: 16px 0;
+    padding: 4px 16px;
+    border-radius: var(--radius);
+    background: var(--sunk);
+    color: var(--ink-2);
+  }
+  .table-wrap {
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  th,
+  td {
+    text-align: left;
+    vertical-align: top;
+    padding: 9px 12px;
+    border-top: 1px solid var(--line);
+  }
+  th {
+    border-top: 0;
+    background: var(--sunk);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .diagram {
+    overflow-x: auto;
+    margin: 16px 0 22px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .diagram pre.mermaid {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    background: none;
+  }
+
+  /* Question cards */
+  .q {
+    margin: 22px 0;
+    border: 1px solid var(--line-2);
+    border-radius: 14px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .q-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 12px;
+    padding: 14px 16px 10px;
+    background: var(--sunk);
+  }
+  .q-title {
+    flex: 1 1 260px;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.35;
+  }
+  .q-context {
+    padding: 4px 16px 0;
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+  .q-context p {
+    margin: 10px 0;
+  }
+  .opts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 16px 4px;
+  }
+  .opt {
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.45;
+    text-align: left;
+    color: var(--ink);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    cursor: pointer;
+  }
+  .opt:hover:not(:disabled) {
+    border-color: var(--accent-line);
+  }
+  .opt:disabled {
+    cursor: default;
+  }
+  .opt.is-chosen {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+  .opt-key {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    background: var(--sunk);
+    color: var(--ink-2);
+  }
+  .opt.is-chosen .opt-key {
+    background: var(--accent);
+    color: #fff;
+  }
+  .rec {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    padding-top: 3px;
+    white-space: nowrap;
+  }
+  @media (max-width: 520px) {
+    .opt {
+      grid-template-columns: auto 1fr;
+    }
+    .rec {
+      grid-column: 2;
+      padding-top: 0;
+    }
+  }
+  .q-note {
+    padding: 8px 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .q-note label {
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+  textarea {
+    font: inherit;
+    font-size: 15px;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--ink);
+    resize: vertical;
+  }
+  .q-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-quiet {
+    font: inherit;
+    font-size: 14px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .btn-quiet:hover {
+    border-color: var(--accent-line);
+  }
+  .q-saved {
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+  .q-recorded {
+    margin: 8px 16px 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--done-bg);
+    color: var(--done-ink);
+    font-size: 15px;
+  }
+  .qref {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 15px;
+  }
+  .fonts-ready body {
+    font-family: var(--font);
+  }
+  /* Read-only viewers see saved notes and placements, without the buttons that change them. */
+  body.read-only .q-actions button,
+  body.read-only .q-note label {
+    display: none;
+  }
+  .seg:disabled,
+  .opt:disabled {
+    cursor: default;
+  }
+
+  /* Feature board */
+  .features {
+    list-style: none;
+    margin: 12px 0 24px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .f {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-top: 1px solid var(--line);
+    max-width: none !important;
+    margin: 0 !important;
+  }
+  .f:first-child {
+    border-top: 0;
+  }
+  .f-main {
+    flex: 1 1 340px;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+  }
+  .f-name {
+    font-weight: 600;
+  }
+  .f-what {
+    flex-basis: 100%;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+  .f-metas {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+  .f-meta-k {
+    font-weight: 600;
+  }
+  .f-side {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  @media (max-width: 640px) {
+    .f-side {
+      align-items: flex-start;
+    }
+  }
+  .f-proposed {
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .segs {
+    display: inline-flex;
+    border: 1px solid var(--line-2);
+    border-radius: 9px;
+    overflow: hidden;
+  }
+  .seg {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border: 0;
+    border-left: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .seg:first-child {
+    border-left: 0;
+  }
+  .seg.is-proposed {
+    box-shadow: inset 0 -2px 0 var(--accent-line);
+  }
+  .seg.is-chosen {
+    background: var(--accent);
+    color: #fff;
+  }
+  .f.is-moved .f-proposed::after {
+    content: ' · you changed it';
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+
+<div class="shell">
+  <header class="top">
+    <div class="brand">
+      <span class="brand-name">Ýeral</span>
+      <h1>Product book</h1>
+      <p>
+        Everything Ýeral is and does, in one place. Read a chapter, answer the questions where they appear, and leave comments on any
+        section. Updated __UPDATED__.
+      </p>
+    </div>
+    <div class="progress" aria-live="polite">
+      <span><strong id="answered-count">0</strong> of <strong>__TOTAL_Q__</strong> questions answered</span>
+      <span class="bar"><span class="bar-fill" id="answered-bar"></span></span>
+    </div>
+  </header>
+
+  <nav class="rail" aria-label="Chapters">
+    <span class="rail-label">Start</span>
+    <a class="nav-item" href="#overview" data-nav="overview"><span class="nav-num">·</span><span class="nav-title">Overview</span></a>
+    <a class="nav-item" href="#questions" data-nav="questions"
+      ><span class="nav-num">?</span><span class="nav-title">All questions</span><span class="nav-count" id="nav-open-total"></span
+    ></a>
+    <span class="rail-label">Chapters</span>
+    <!--NAV-->
+  </nav>
+
+  <main>
+    <p class="notice" id="mode-notice" hidden></p>
+
+    <section class="overview" id="overview" aria-labelledby="overview-title">
+      <h2 id="overview-title">Chapters</h2>
+      <div class="cards"><!--OVERVIEW--></div>
+    </section>
+
+    <section class="decide" id="questions" aria-labelledby="questions-title">
+      <h2 id="questions-title">All questions</h2>
+      <div class="filters" role="group" aria-label="Show questions">
+        <button type="button" class="chip" data-filter="start" aria-pressed="true">Start here</button>
+        <button type="button" class="chip" data-filter="open" aria-pressed="false">Still open</button>
+        <button type="button" class="chip" data-filter="answered" aria-pressed="false">Answered</button>
+        <button type="button" class="chip" data-filter="all" aria-pressed="false">All</button>
+      </div>
+      <!--INDEX-->
+    </section>
+
+    <!--CHAPTERS-->
+  </main>
+</div>
+
+<script>
+  ;(function () {
+    const BOOK = '__BOOK__'
+    // What the database confirmed, what was clicked but isn't saved yet, and saves that failed.
+    const confirmed = { answers: {}, scope: {} }
+    const pending = { answers: {}, scope: {} }
+    const errors = {}
+    const queues = {}
+    let db = null
+    let canWrite = false
+    let readOnly = false
+    let filter = 'start'
+
+    // Show the page font only once it has loaded: diagrams measure their text with the body's font while they draw.
+    try {
+      if (document.fonts && document.fonts.load) {
+        document.fonts.load('400 16px Onest').then(
+          () => document.documentElement.classList.add('fonts-ready'),
+          () => {},
+        )
+      }
+    } catch (e) {}
+
+    const $all = (sel, root) => Array.from((root || document).querySelectorAll(sel))
+    const fmtTime = (iso) => {
+      try {
+        return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+      } catch (e) {
+        return ''
+      }
+    }
+
+    // Look every element up once; render() runs on each click and each database update.
+    const qEls = {}
+    for (const qid of Object.keys(BOOK.questions)) {
+      const note = document.querySelector('[data-note-for="' + qid + '"]')
+      qEls[qid] = {
+        states: $all('[data-state-for="' + qid + '"]'),
+        opts: $all('.opt[data-qid="' + qid + '"]'),
+        note,
+        noteBox: note ? note.closest('.q-note') : null,
+        saved: document.querySelector('[data-saved-for="' + qid + '"]'),
+        row: document.querySelector('[data-index-q="' + qid + '"]'),
+      }
+    }
+    const chapterEls = {}
+    for (const key of Object.keys(BOOK.chapters)) {
+      chapterEls[key] = {
+        nav: document.querySelector('[data-count-for="' + key + '"]'),
+        status: document.querySelector('[data-status-for="' + key + '"]'),
+        bar: document.querySelector('[data-bar-for="' + key + '"]'),
+      }
+    }
+    const features = $all('.f').map((li) => ({ li, fid: li.dataset.fid, segs: $all('.seg', li) }))
+    const groups = $all('.index-group').map((g) => ({ g, rows: $all('li', g) }))
+
+    const current = (kind, id) => pending[kind][id] || confirmed[kind][id]
+
+    function stateOf(qid) {
+      const q = BOOK.questions[qid]
+      if (q && q.status === 'decided') return 'decided'
+      const a = current('answers', qid)
+      return a && (a.choice || (a.note || '').trim()) ? 'answered' : 'open'
+    }
+
+    function render() {
+      let answeredTotal = 0
+      let openTotal = 0
+      const total = Object.keys(BOOK.questions).length
+      for (const qid of Object.keys(BOOK.questions)) {
+        const st = stateOf(qid)
+        if (st === 'open') openTotal++
+        else answeredTotal++
+        const a = current('answers', qid)
+        const el = qEls[qid]
+        el.states.forEach((s) => {
+          s.textContent =
+            st === 'decided' ? 'Decided' : st === 'answered' ? (a.choice ? 'Answered ' + a.choice : 'Answered in a note') : 'Open'
+          s.classList.toggle('is-answered', st === 'answered')
+          s.classList.toggle('is-decided', st === 'decided')
+        })
+        const q = BOOK.questions[qid]
+        el.opts.forEach((b) => {
+          const chosen = (a && a.choice === b.dataset.key) || (q.status === 'decided' && q.answer.startsWith(b.dataset.key + ' '))
+          b.classList.toggle('is-chosen', !!chosen)
+          b.setAttribute('aria-pressed', chosen ? 'true' : 'false')
+        })
+        const noteText = a && typeof a.note === 'string' ? a.note : ''
+        if (el.note && document.activeElement !== el.note && !el.note.dataset.dirty) el.note.value = noteText
+        if (el.noteBox) el.noteBox.hidden = readOnly && !noteText.trim()
+        const err = errors['answers/' + qid]
+        if (el.saved) {
+          el.saved.textContent = err ? 'Not saved: ' + err : pending.answers[qid] ? 'Saving…' : a && a.at ? 'Saved ' + fmtTime(a.at) : ''
+        }
+        if (el.row) {
+          el.row.hidden =
+            filter === 'start'
+              ? !el.row.hasAttribute('data-start') || st !== 'open'
+              : filter === 'open'
+                ? st !== 'open'
+                : filter === 'answered'
+                  ? st === 'open'
+                  : false
+        }
+      }
+      document.getElementById('answered-count').textContent = String(answeredTotal)
+      document.getElementById('answered-bar').style.width = total ? (answeredTotal / total) * 100 + '%' : '0'
+      document.getElementById('nav-open-total').textContent = openTotal ? String(openTotal) : ''
+      groups.forEach(({ g, rows }) => {
+        g.hidden = rows.every((li) => li.hidden)
+      })
+
+      for (const key of Object.keys(BOOK.chapters)) {
+        const ids = BOOK.chapters[key]
+        const open = ids.filter((id) => stateOf(id) === 'open').length
+        const el = chapterEls[key]
+        if (el.nav) el.nav.textContent = open ? String(open) : ''
+        if (el.status) {
+          el.status.textContent = !ids.length
+            ? 'No questions'
+            : open
+              ? open + ' of ' + ids.length + ' questions open'
+              : 'All ' + ids.length + ' answered'
+        }
+        if (el.bar) el.bar.style.width = ids.length ? ((ids.length - open) / ids.length) * 100 + '%' : '100%'
+      }
+
+      let featureError = ''
+      features.forEach(({ li, fid, segs }) => {
+        const s = current('scope', fid)
+        const chosen = s && s.place
+        segs.forEach((b) => {
+          b.classList.toggle('is-chosen', b.dataset.place === chosen)
+          b.setAttribute('aria-pressed', b.dataset.place === chosen ? 'true' : 'false')
+        })
+        li.classList.toggle('is-moved', !!chosen && chosen !== li.dataset.proposed)
+        if (errors['scope/' + fid]) featureError = fid
+      })
+      if (featureError) notice('The placement of ' + featureError + ' could not be saved. Click it again.')
+    }
+
+    function notice(text) {
+      const el = document.getElementById('mode-notice')
+      el.textContent = text
+      el.hidden = !text
+    }
+
+    // One write at a time per document, in click order; a failed write falls back to what the database holds.
+    function write(kind, id, data) {
+      if (!db || !canWrite) return
+      const key = kind + '/' + id
+      pending[kind][id] = data
+      delete errors[key]
+      render()
+      queues[key] = (queues[key] || Promise.resolve()).then(async () => {
+        try {
+          await db.doc(key).set(data)
+          if (pending[kind][id] === data) {
+            confirmed[kind][id] = data
+            delete pending[kind][id]
+          }
+        } catch (e) {
+          if (pending[kind][id] === data) delete pending[kind][id]
+          errors[key] = e && e.message ? e.message : 'try again'
+        }
+        render()
+      })
+    }
+
+    function saveAnswer(qid, patch) {
+      const prev = current('answers', qid) || {}
+      write('answers', qid, {
+        choice: prev.choice || '',
+        note: prev.note || '',
+        ...patch,
+        at: new Date().toISOString(),
+      })
+    }
+
+    document.addEventListener('click', (ev) => {
+      const opt = ev.target.closest('.opt')
+      if (opt && !opt.disabled) {
+        const qid = opt.dataset.qid
+        const note = qEls[qid] && qEls[qid].note
+        if (note) delete note.dataset.dirty
+        saveAnswer(qid, { choice: opt.dataset.key, note: note ? note.value : '' })
+        return
+      }
+      const saveNote = ev.target.closest('[data-save-note]')
+      if (saveNote) {
+        const qid = saveNote.dataset.saveNote
+        const note = qEls[qid] && qEls[qid].note
+        if (note) delete note.dataset.dirty
+        saveAnswer(qid, { note: note ? note.value : '' })
+        return
+      }
+      const clear = ev.target.closest('[data-clear]')
+      if (clear) {
+        saveAnswer(clear.dataset.clear, { choice: '' })
+        return
+      }
+      const seg = ev.target.closest('.seg')
+      if (seg && !seg.disabled) {
+        const fid = seg.dataset.fid
+        const s = current('scope', fid)
+        const place = s && s.place === seg.dataset.place ? '' : seg.dataset.place
+        notice('')
+        write('scope', fid, { place, at: new Date().toISOString() })
+        return
+      }
+      const chip = ev.target.closest('[data-filter]')
+      if (chip) {
+        filter = chip.dataset.filter
+        $all('[data-filter]').forEach((c) => c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'))
+        render()
+        return
+      }
+    })
+
+    document.addEventListener('input', (ev) => {
+      if (ev.target.matches('[data-note-for]')) ev.target.dataset.dirty = '1'
+    })
+
+    // The current section is the last one whose top has passed a line 30% down the window.
+    const navItems = $all('[data-nav]')
+    const sections = $all('section[id]')
+    let ticking = false
+    const markCurrent = () => {
+      ticking = false
+      const line = window.innerHeight * 0.3
+      let currentSection = sections[0]
+      for (const s of sections) {
+        if (s.getBoundingClientRect().top <= line) currentSection = s
+        else break
+      }
+      navItems.forEach((n) => n.classList.toggle('is-current', !!currentSection && n.dataset.nav === currentSection.id))
+    }
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!ticking) {
+          ticking = true
+          requestAnimationFrame(markCurrent)
+        }
+      },
+      { passive: true },
+    )
+    markCurrent()
+
+    function setReadOnly(message) {
+      readOnly = true
+      document.body.classList.add('read-only')
+      $all('.opt, .seg').forEach((b) => (b.disabled = true))
+      $all('[data-note-for]').forEach((t) => (t.readOnly = true))
+      notice(message)
+      render()
+    }
+
+    render()
+
+    const claude = window.claude
+    if (!claude || typeof claude.use !== 'function') {
+      setReadOnly('Open this page on claude.ai to answer questions and place features. Here it is read-only.')
+      return
+    }
+
+    claude
+      .use('comments')
+      .then((comments) => {
+        if (!comments) return
+        $all('[data-comment]').forEach((btn) => {
+          btn.hidden = false
+          btn.addEventListener('click', () => {
+            const target = btn.closest('h2, h3') || btn
+            comments.openComposer({ element: target }).catch((e) => {
+              if (e && e.code === 'unavailable') $all('[data-comment]').forEach((b) => (b.hidden = true))
+            })
+          })
+        })
+      })
+      .catch(() => {})
+
+    Promise.all([claude.use('db'), claude.use('user').catch(() => null)]).then(async ([store, user]) => {
+      db = store
+      try {
+        // The page declares db rules (only editors write); the platform's own answer wins when it gives one.
+        const can = user ? await user.can('data.write') : null
+        canWrite = can === null ? (user ? await user.canEdit() : false) : can
+      } catch (e) {
+        canWrite = false
+      }
+      if (!db) {
+        setReadOnly('Answers can’t be loaded in this view, so the page is read-only.')
+        return
+      }
+      if (!canWrite) {
+        setReadOnly('You can read the answers and placements here; only editors of this page can change them.')
+      }
+      db.collection('answers').onSnapshot(
+        (snap) => {
+          // Each snapshot is the whole collection: rebuild, so deleted answers disappear too.
+          confirmed.answers = {}
+          snap.docs.forEach((d) => {
+            if (d.exists) confirmed.answers[d.id] = d.data()
+          })
+          render()
+        },
+        () => notice('Live answers stopped updating. Reload the page.'),
+      )
+      db.collection('scope').onSnapshot(
+        (snap) => {
+          confirmed.scope = {}
+          snap.docs.forEach((d) => {
+            if (d.exists) confirmed.scope[d.id] = d.data()
+          })
+          render()
+        },
+        () => notice('Live placements stopped updating. Reload the page.'),
+      )
+    })
+  })()
+</script>
