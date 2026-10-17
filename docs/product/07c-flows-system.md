@@ -289,7 +289,7 @@ flowchart TD
 **Edge cases**
 
 - The business can't delete reviews (business spec §15).
-- The CMS isn't designed yet (owner question 2), so nobody can clear or remove a review.
+- The CMS isn't designed yet (Q-010), so nobody can clear or remove a review.
 - Ýeral has no deadline to decide. A business could report every bad review and keep them all out of its average.
 
 > Open question Q-261: How long a reported review may stay uncounted.
@@ -720,7 +720,7 @@ flowchart TD
 
 **Edge cases**
 
-- The CMS isn't designed yet (owner question 2; business spec §24, "admin panel … for business verification").
+- The CMS isn't designed yet (Q-010; business spec §24, "admin panel … for business verification").
 - Clients can't book online before verification, because nobody else can open the page. Staff can still enter phone bookings (business spec §7).
 - The data has a "rejected" status with a reason, but nothing shows it on screen.
 

@@ -27,7 +27,7 @@ answer: —
 ## Q-003 · The name and domain at launch
 chapter: 01 · status: open
 
-"Ýeral" on yeral.app is a working title (open question 7 in activeContext). The code keeps the name and domain in configuration, so this doesn't block design, but it blocks the launch.
+"Ýeral" on yeral.app is a working title (open question 7 in the memory bank before this book). The code keeps the name and domain in configuration, so this doesn't block design, but it blocks the launch.
 
 - A · Launch as Ýeral on yeral.app. (recommended)
 - B · Move to another domain (for example yeral.com) before launch.
@@ -155,7 +155,7 @@ answer: —
 ## Q-101 · Who checks the Russian and English text
 chapter: 02 · status: open
 
-The design is Turkmen only; Russian and English are written in code from the Turkmen (owner, ROUND6-ANSWERS). The owner checks the Turkmen while coding, and all Turkmen gets a native review before launch (client spec §9). Nobody is named for the Russian and English drafts (activeContext open question 5).
+The design is Turkmen only; Russian and English are written in code from the Turkmen (owner, ROUND6-ANSWERS). The owner checks the Turkmen while coding, and all Turkmen gets a native review before launch (client spec §9). Nobody is named for the Russian and English drafts (Q-101).
 
 - A · A native speaker checks the Russian before public launch; English launches as a draft the owner reads. (recommended)
 - B · Native speakers check both Russian and English before launch.
@@ -177,7 +177,7 @@ answer: —
 ## Q-103 · Who sets a restaurant's average bill
 chapter: 02 · status: open
 
-Restaurants and cafés show *Ortaça hasap* `≈ 150 TMT` on cards and in the table flow (client spec §2, Booking-Table screen). With no online payment Ýeral can't work it out, and no screen lets a business enter it. The demo values are placeholders (activeContext open question 4).
+Restaurants and cafés show *Ortaça hasap* `≈ 150 TMT` on cards and in the table flow (client spec §2, Booking-Table screen). With no online payment Ýeral can't work it out, and no screen lets a business enter it. The demo values are placeholders (Q-103).
 
 - A · The restaurant types it in its profile, optionally; without it no amount shows. (recommended)
 - B · The Ýeral team sets it during verification.
@@ -198,7 +198,7 @@ answer: —
 ## Q-105 · Businesses open past midnight
 chapter: 02 · status: open
 
-A business day may end at 24:00 (ROUND6-ANSWERS E1). Opening past midnight, such as a café open until 02:00, isn't designed (client spec §13, activeContext open question 17). The code ends every day by midnight, and no visit can run past 24:00.
+A business day may end at 24:00 (ROUND6-ANSWERS E1). Opening past midnight, such as a café open until 02:00, isn't designed (client spec §13, Q-105). The code ends every day by midnight, and no visit can run past 24:00.
 
 - A · Not on MVP: late places close at 24:00 in Ýeral and take later guests by phone. (recommended)
 - B · Design it now: hours like 18:00–02:00 and bookings that cross midnight.
@@ -239,7 +239,7 @@ answer: —
 ## Q-109 · SMS sender name
 chapter: 02 · status: open
 
-Every SMS starts with "Ýeral:" in its text (client spec §6). The sender name shown on the phone isn't chosen and depends on the SMS provider (activeContext open question 6). Sender names are usually plain Latin letters, up to 11 characters.
+Every SMS starts with "Ýeral:" in its text (client spec §6). The sender name shown on the phone isn't chosen and depends on the SMS provider (Q-036, Q-109). Sender names are usually plain Latin letters, up to 11 characters.
 
 - A · "Yeral" in plain Latin, which every provider accepts. (recommended)
 - B · "Ýeral", if the provider allows the Turkmen letter.

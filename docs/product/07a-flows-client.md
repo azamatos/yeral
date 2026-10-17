@@ -278,7 +278,7 @@ flowchart TD
 
 **Edge cases**
 
-- Businesses open past midnight are not designed (E1; activeContext open question 17).
+- Businesses open past midnight are not designed (E1; Q-105).
 - Reviews under moderation are shown but not counted (C-07).
 - Heart while signed out: log in first (C-19).
 - A business with several booking types (a gym with classes and personal training): no screen shows how the client picks one.
@@ -409,7 +409,7 @@ flowchart TD
 **Edge cases**
 
 - An unverified business never shows in search, suggestions or favourites (code: `catalog/search.ts`, `me/routes.ts`).
-- A business whose verification was rejected (`rejected`, business spec §10): not designed for visitors; the CMS that verifies businesses isn't designed either (activeContext open question 2).
+- A business whose verification was rejected (`rejected`, business spec §10): not designed for visitors; the CMS that verifies businesses isn't designed either (Q-010).
 - Whether the team can test-book from its preview isn't said.
 
 > Open question Q-153: booking on a page that is still in review.
@@ -599,7 +599,7 @@ flowchart TD
 
 - A card's "from" price ignores hidden services (code: `catalog/map.ts`).
 - The amount of a hidden price never leaves the server (code: `publicPrice`).
-- The demo still has `[AVG BILL]`: real average bills are open (activeContext open question 4).
+- The demo still has `[AVG BILL]`: real average bills are open (Q-103).
 
 **Status:** Design: drawn (Venue · `selection` hidden, mixed; Booking · `price`; Mobile 17) · Code: built (api).
 

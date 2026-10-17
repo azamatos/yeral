@@ -91,8 +91,13 @@ stateDiagram-v2
   Confirmed --> Completed: visit ends
   Confirmed --> NoShow: business files a no-show
   Confirmed --> Cancelled: client or business cancels
+  Cancelled --> Pending: client undoes within 5 minutes · was a request
+  Cancelled --> Confirmed: client undoes within 5 minutes · was confirmed
   Completed --> NoShow: business files a no-show
 ```
+
+Undo ("*Yzyna al*") only applies to the client's own cancel, within 5 minutes, and can fail (see "Changes after
+booking" below).
 
 | Status | Turkmen | Icon | Meaning |
 |---|---|---|---|

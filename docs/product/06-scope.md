@@ -92,7 +92,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-001 | Home page | Hero "Ýeriňi al." with the search card (what / where / when), category photo mosaic, how it works in 3 steps, Ýeral Biznes block and footer. | MVP | drawn (Home, Mobile 1) | not built (data: api built) | M3 first screen after the shells. |
 | F-002 | "Free today near you" cards | Four nearest businesses with their next 3 free times; a time chip opens booking with it preselected. | MVP | drawn (Home) | api built (`/v1/search`, day free times) | Needs F-009 (geolocation). |
 | F-003 | Category grid | 13 launch categories as icon tiles linking to category pages. | MVP | drawn (Home) | api built (`/v1/categories`, 13 seeded) | Category list is seed data until the CMS catalogue (F-181). |
-| F-004 | App download block on Home | "Ýeral telefonyňyzda" with App Store / Google Play buttons. | Later | drawn (Home) | not built | **Conflict:** native apps are later (owner); round 6 removed the business app banner but this client block stayed. Store badges = open question 4. |
+| F-004 | App download block on Home | "Ýeral telefonyňyzda" with App Store / Google Play buttons. | Later | drawn (Home) | not built | **Conflict:** native apps are later (owner); round 6 removed the business app banner but this client block stayed. Store badges come with the native apps. |
 | F-005 | Unknown-location prompt | Banner "Ýakynyňyzdaky ýerleri görkezeliň" (use my location / type an address) above a "popular places" list. | MVP | drawn (Home, States 2) | api built (popularity sort) |  |
 | F-006 | Search results page | List of businesses with type-specific rows (slots, "Stol · 2 adam", seats left) next to a map; "Ýene görkez" loads 12 more. | MVP | drawn (Search) | api built (`/v1/search`, cursor paging) | Big. Map needs F-014. |
 | F-007 | "What?" suggestions | Typing in "Näme?" suggests categories and business names. | Later | not designed | api built (`/v1/search/suggest`) | Code only; no dropdown is drawn. |
@@ -114,7 +114,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-023 | Share business page | "Paýlaş" button on the business page. | MVP | drawn (Venue) | not built |  |
 | F-024 | Favourite heart | Save a business; logged-out tap opens login first. | MVP | drawn (Venue, States 10) | api built (`/v1/me/favorites`) | List is F-080. |
 | F-025 | Hidden exact address | Home-based businesses show only an approximate circle until the booking is confirmed. | MVP | spec only; switch drawn (B-Onboarding 3) | built (api) |  |
-| F-026 | Hidden price display | "Baha ýerinde aýdylýar" instead of a price; mixed totals shown as "{sum} TMT-den". | MVP | drawn (Venue · selection, Booking · price, Mobile 17) | built (domain pricing, i18n fmt) | Round 6 B1; the exact copy still to add. Restaurants show average bill `≈ 150 TMT` (real values: open question 4). |
+| F-026 | Hidden price display | "Baha ýerinde aýdylýar" instead of a price; mixed totals shown as "{sum} TMT-den". | MVP | drawn (Venue · selection, Booking · price, Mobile 17) | built (domain pricing, i18n fmt) | Round 6 B1; the exact copy still to add. Restaurants show average bill `≈ 150 TMT` (real values: Q-103). |
 | F-027 | Hours up to 24:00 | A day may end at 24:00: business end pickers go to 24:00, clients see "09:00–24:00" and "Häzir açyk · 24:00-a çenli". | MVP | drawn (Venue · hoursCase, B-Settings) | built (domain hours) | Round 6 E1. Past midnight: F-109. |
 | F-028 | Table and class page variants | Restaurants get a table widget (party, date, time) in the sticky card; studios get "Indiki sapaklar" and a "Tertip" (schedule) tab. | Later | spec only (README §4.3) | api built (tables info, `/sessions`) |  |
 | F-029 | Restaurant menu (PDF / photos) | Optional "Menýu" tab with a PDF or photos. | Later | spec only | not built (no schema) |  |
@@ -160,7 +160,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-059 | Undo cancel | "Yzyna al" for 5 minutes; failures explained by one of four reasons + "Başga wagt saýla". | MVP | drawn (Account-Bookings · undo, undoFailed; Mobile 12) | api built (`restore`); reason mapping not built | Round 6 A6. |
 | F-060 | Move an appointment | "Wagty üýtget" mode: services locked, current specialist preselected, old → new time, sends a move request (instant: moves at once). | MVP | drawn (Booking · mode=move, Mobile 13) | api built (`reschedule`) | **Rule conflict (A5):** code silently hands the booking to another free specialist; design says the grid follows the chosen specialist only. |
 | F-061 | Waiting move | Booking stays confirmed with "Täze wagt soraldy…"; withdraw, declined, unanswered and accepted outcomes; a second move replaces the first. | MVP | drawn (Account-Bookings · move*) | api partly built (pending move, replace, cancel withdraws) | Round 6 A3; no explicit "withdraw" endpoint. Business side: F-126. |
-| F-062 | No move for tables and classes | Table and class bookings offer cancel + "Gaýtadan ýazyl" (flow prefilled) instead of a move. | MVP | drawn (Account-Bookings, Mobile 6) | api built (`not_bookable`) | Round 6 A4; open question 16 closed. |
+| F-062 | No move for tables and classes | Table and class bookings offer cancel + "Gaýtadan ýazyl" (flow prefilled) instead of a move. | MVP | drawn (Account-Bookings, Mobile 6) | api built (`not_bookable`) | Round 6 A4; old open question 16 closed. |
 | F-063 | Declined request with offered times | Client sees "Biznes ret etdi", the reason and up to 3 offered times; one tap creates a confirmed booking. | MVP | drawn (Account-Bookings · declined*, Mobile 7–9) | api built (`accept-alternative`, one booking per offer) | Round 6 A1; taken / expired chip states to build. |
 | F-064 | Expired request with free times | An unanswered request shows "Wagtynda jogap gelmedi" and 3 free times; a tap sends a new request. | MVP | drawn (Account-Bookings · expired*, Mobile 10) | built (jobs + `accept-alternative`) | Round 6 A2. |
 | F-065 | Phone bookings in the client's account | Bookings the business entered by phone show in the client's list as confirmed with a phone icon. | MVP | spec only (README rule 4) | built (api links phone bookings on login) |  |
@@ -222,14 +222,14 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-106 | Special days | Holidays and special hours, one day or a range, yearly repeat. | MVP | drawn (B-Settings · exceptionModal) | built (domain exceptions + precedence) |  |
 | F-107 | Special day over existing bookings | Adding a closure over bookings asks: cancel and offer 3 times, or keep them. | MVP | drawn (B-Settings) | not built |  |
 | F-108 | Overlapping special days warning | Warning naming which special day wins; saving is allowed. | MVP | drawn (B-Settings · exceptionOverlap) | rule built (domain); warning not built | Round 6 E2. |
-| F-109 | Open past midnight | A business day that runs into the next date. | Later | not designed | not built | Open question 17. |
+| F-109 | Open past midnight | A business day that runs into the next date. | Later | not designed | not built | Q-105. |
 | F-110 | Service catalogue | Groups, services (duration, price type, buffer override, who performs, online switch), service drawer. | MVP | drawn (B-Services) | schema only (`services`, `service_groups`, `staff_services`) |  |
 | F-111 | Team management | Team table (bookable vs management), levels, schedule summary, invite states, drag order in which clients see specialists. | MVP | drawn (B-Team) | schema only (`staff`, `memberships`, `staff.sort`) |  |
 | F-112 | Staff schedules | Own shifts inside business hours, one break per day (may differ by day), personal days off. | MVP | drawn (B-Team staff drawer) | built (domain), schema |  |
 | F-113 | Phone-only staff | "Programmasyz hünärmen": bookable, never logs in, active at once without SMS. | MVP | drawn (B-Team) | schema only (`staff.hasApp`) |  |
 | F-114 | Disable a staff member | Reassign future bookings, keep them, or cancel with 3 offered times; reactivate later. | MVP | drawn (B-Team · disable) | not built |  |
 | F-115 | Link and QR | Public link `yeral.app/tk/b/{slug}`, QR as PNG/SVG, share to WhatsApp, IMO, Telegram or SMS. | MVP | drawn (B-Settings · link, B-Onboarding 8) | not built | "Real QR generation" was listed as not designed in round 4. |
-| F-116 | Table / class setup wizard | Setup steps for restaurants and studios (areas, tables, class types). | Later | not designed | not built | Open question 1; they set up in Settings after the appointment wizard. |
+| F-116 | Table / class setup wizard | Setup steps for restaurants and studios (areas, tables, class types). | Later | not designed | not built | Q-201; they set up in Settings after the appointment wizard. |
 
 ## Business · daily work (calendar, requests, bookings, walk-ins, moves, complaints, internal statuses)
 
@@ -336,7 +336,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
-| F-178 | CMS app and team accounts | cms.yeral.app with its own staff accounts, second factor and Cloudflare Access. | Later | not designed | not built | Open question 2 ("six modules"); M6. |
+| F-178 | CMS app and team accounts | cms.yeral.app with its own staff accounts, second factor and Cloudflare Access. | Later | not designed | not built | Q-010 (the CMS has "six modules"); M6. |
 | F-179 | Business verification | Review new businesses within 24 h; verify or reject with a reason. | MVP | spec only (business §7, ADR 0018) | schema only (`verification`, `verification_history`) | Without it nothing becomes public (F-032). |
 | F-180 | Review moderation | Queue of reported reviews; clear (counted again) or remove. | MVP | spec only (business §15) | not built | Pairs with F-162. |
 | F-181 | Category catalogue | Icons, TK/RU/EN names, booking types, specialist word, starter services, SEO intro; new categories without a release. | Later | spec only | schema only (13 seeded) |  |
@@ -356,13 +356,13 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-190 | Automatic completion | Confirmed visits become Completed after their end time. | MVP | spec only | built (jobs) |  |
 | F-191 | No-show block | After N no-shows (default 2) the client books that business only by phone. | MVP | spec only | built (domain, api) |  |
 | F-192 | Client SMS | Confirmed, declined (+reason), expired (+3 times), reminders 1 day and 2 h before, review ask 2 h after; none on send. | MVP | spec only (README §6) | built (i18n texts, jobs; log adapter) | Messages only go to the log until F-193. |
-| F-193 | Production SMS gateway | A real SMS provider and sender name. | MVP | not designed | not built | Open question 6; M8. Blocks real login and every SMS. |
+| F-193 | Production SMS gateway | A real SMS provider and sender name. | MVP | not designed | not built | Q-036; M8. Blocks real login and every SMS. |
 | F-194 | Live updates | Open screens refresh from an events feed polled every 10 s, on focus and on demand. | MVP | not designed | built (api `/v1/events`, sdk) | A push channel can replace polling later. |
 | F-195 | Availability engine | Free times for appointments (hours, shifts, breaks, buffers, chains), tables and classes; database constraints stop double booking. | MVP | spec only | built (domain, api exclusion constraints) |  |
 | F-196 | Search index | Verified-only listing with geo, popularity, open-now and has-free-time filters, on Postgres. | MVP | spec only | built (api) | No separate search engine. |
 | F-197 | SEO basics | Server-rendered pages, titles, hreflang, JSON-LD, sitemap, noindex for unverified. | MVP | not designed (repo plan) | not built (legacy had JSON-LD) | M3. |
 | F-198 | Link previews | OG images for business and category pages. | Later | not designed | not built | M7. |
-| F-199 | Three languages and formats | TK default, RU, EN with `/tk` `/ru` `/en` URLs; design formats (`40 TMT`, `4,9`, `1,2 km`, dates); business-local time (Asia/Ashgabat). | MVP | spec only (README §8) | built (`@yeral/i18n`, domain time, contract error messages) | RU/EN are Claude's drafts; native review = open question 5. |
+| F-199 | Three languages and formats | TK default, RU, EN with `/tk` `/ru` `/en` URLs; design formats (`40 TMT`, `4,9`, `1,2 km`, dates); business-local time (Asia/Ashgabat). | MVP | spec only (README §8) | built (`@yeral/i18n`, domain time, contract error messages) | RU/EN are Claude's drafts; native review = Q-101. |
 | F-200 | Demo mode | Seeded demo businesses, demo code 1234, demo businesses that answer requests by themselves. | Never | not designed | built (api seed, `demo.answer` job) | Code only; legacy has a demo panel. |
 | F-201 | Client installable app (PWA) | yeral.app installable from the browser. | Later | not designed | not built | M7; legacy shows an "add to home screen" hint. |
 | F-202 | Booking source tracking | Each booking records web / app / phone / walk-in / ai. | MVP | spec only | built (domain, schema) | Shown in the workspace as Onlaýn / Telefon / Gelip. |
@@ -380,7 +380,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-209 | Error tracking and alerts | Sentry for sites and api; uptime checks that alert on failures. | MVP | not designed | not built | Sentry planned (techContext); only a deploy smoke check today. |
 | F-210 | Page analytics | Cloudflare Web Analytics now, Umami on the own server. | Later | not designed | not built | Planned. |
 | F-211 | Backups | Regular database and photo backups with a restore drill. | MVP | not designed | not built | Nothing in the repo; Neon's own history only. |
-| F-212 | Domain and brand in config | Domains, cookie domain and brand name come from configuration. | MVP | not designed | built (`@yeral/lib/site`) | Final name/domain = open question 7. |
+| F-212 | Domain and brand in config | Domains, cookie domain and brand name come from configuration. | MVP | not designed | built (`@yeral/lib/site`) | Final name/domain = Q-003. |
 | F-213 | Legacy site | The first Next.js marketplace (beauty only, Russian, mock data) still serves yeral.app. | Never | not designed | built (`apps/legacy`) | Deleted when M3 replaces it. |
 
 ## Later and non-goals

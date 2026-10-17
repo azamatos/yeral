@@ -13,8 +13,9 @@ every prompt for Claude Design; the owner pastes it; Claude Code checks the resu
 
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16): monorepo and CI, `@yeral/ui` (38
 components), domain, contract, sdk, an api for every client screen on Postgres (not deployed). yeral.app still serves
-`apps/legacy`. **Design export v0.5** (round 6 parts A and B, 16–17.10.2026, incl. `ROUND6-ANSWERS.md`) is in the main
-checkout's `docs/design/` but not committed yet; the book uses it as its newest design source. The version PR #26
+`apps/legacy`. **Design export v0.5** (round 6 parts A and B, 16–17.10.2026, incl. `ROUND6-ANSWERS.md`) is committed
+with the book (#27; `--ring-selected` mapped in the `@yeral/ui` theme); the book uses it as its newest design source.
+The version PR #26
 (`@yeral/lib@0.2.0`, `@yeral/api@0.1.1`, staging removed) is open and waits for the owner.
 
 ## Owner's direction
@@ -87,8 +88,7 @@ Where the old questions went (2026-10-17):
 
 1. The owner reads the product book page and answers its questions; Claude writes each answer into `docs/product/`
    (chapters, `questions.md`, chapter 9) and republishes the page.
-2. Commit design export v0.5 as the owner dropped it (it's the book's newest design source), together with
-   `--ring-selected` mapped in `packages/ui/src/styles/theme.css`: the token sync test fails without it.
-3. When chapters close: Claude writes the Claude Design prompts for what's undrawn or changed; the owner pastes them;
-   Claude checks the canvas.
-4. Then components in Storybook and code, re-planned from the book's scope chapter (M3/M5 order is open: question Q-001).
+2. When chapters close: Claude writes the Claude Design prompts for what's undrawn or changed (chapter 6 lists design
+   fixes already found); the owner pastes them; Claude checks the canvas.
+3. Then components in Storybook and code, re-planned from the book's scope chapter (M3/M5 order is open: question Q-001).
+   The "Code differs" lines across the book list what built code must change.

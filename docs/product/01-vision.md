@@ -72,7 +72,8 @@ These rules hold on every screen, in every app, for every business type. (client
 1. **The business confirms bookings by hand, by default.** The client sees *Garaşylýar* (Pending) and the word "sent",
    never "booked", until the business confirms. A business can switch on instant confirmation.
 2. **A request doesn't wait forever.** If the business doesn't answer within its hold time (30 minutes by default), the
-   request is cancelled and the client gets three other free times.
+   request is cancelled and the client is told. For appointments the client gets three other free times; what an
+   expired table or class request offers is still open (Q-252).
 3. **Five statuses with one meaning everywhere:** *Garaşylýar* (Pending) · *Tassyklandy* (Confirmed) · *Tamamlandy*
    (Completed) · *Ýatyryldy* (Cancelled) · *Gelmedi* (No-show). Each has one icon.
 4. **A visit is completed automatically** after it ends, unless the business marks a no-show.

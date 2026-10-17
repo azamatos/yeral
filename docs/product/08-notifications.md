@@ -89,7 +89,7 @@ Notes:
 
 ## SMS texts
 
-These are the Turkmen texts from client spec §6 next to the ones in the code (`packages/i18n/src/messages/tk.json`, keys `sms.*`). The code also has Russian and English versions of every text. Claude wrote those, and a native speaker still needs to check them (owner question 5).
+These are the Turkmen texts from client spec §6 next to the ones in the code (`packages/i18n/src/messages/tk.json`, keys `sms.*`). The code also has Russian and English versions of every text. Claude wrote those, and a native speaker still needs to check them (Q-101).
 
 | Message | Client spec §6 | Code | Match |
 |---|---|---|---|
@@ -107,7 +107,7 @@ These are the Turkmen texts from client spec §6 next to the ones in the code (`
 Notes:
 
 - Every booking SMS links to `yeral.app/b/{code}`, where the code is the booking's *YR-48213* number. This path was the code's choice, and ROUND6 accepts it. Business page addresses must therefore never start with `yr-` (ROUND6 notes). The domain comes from config (AGENTS rule 6). The link page itself isn't built yet (M3).
-- Reminders start with *Ýatlatma:*, and the review ask has no prefix at all. The other texts start with *Ýeral:*. The sender name is still open (owner question 6), and it may make the prefix unnecessary.
+- Reminders start with *Ýatlatma:*, and the review ask has no prefix at all. The other texts start with *Ýeral:*. The sender name is still open (Q-036, Q-109), and it may make the prefix unnecessary.
 - The 2-hour text in the spec says *ertir* (tomorrow), which is wrong two hours before a visit.
 
 > Open question Q-293: The 2-hour reminder text.
@@ -178,7 +178,7 @@ Notes:
 
 ## Not decided
 
-- **SMS provider and sender name.** This is owner question 6 in `activeContext.md`, also listed in client spec §13 and business spec §24. It blocks production SMS (M8).
+- **SMS provider and sender name.** These are Q-036 (provider) and Q-109 (sender name), also listed in client spec §13 and business spec §24. It blocks production SMS (M8).
 - **No SMS gateway in the code.** Every environment, production included, writes SMS to the log (`apps/api/src/deps.ts`, `apps/api/src/ports/sms.ts`). Until a gateway exists, nobody can sign in on production, and real login codes would sit in the production log.
 - **Push and the app channel.** *Programmada* and phone push come with the native apps (business spec §25.6), not before.
 - **Browser notifications while the workspace is closed** (web push) aren't designed. *Brauzerde* means "while Ýeral Biznes is open".

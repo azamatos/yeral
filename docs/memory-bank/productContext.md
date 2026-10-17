@@ -1,8 +1,10 @@
 # Product context
 
-Product truth for code. The full spec, with every screen's behaviour, is [`docs/design/README.md`](../design/README.md);
-this file is the condensed version agents need while coding. Where they differ, the design spec wins on behaviour and
-the `.dc.html` screens win on visuals. Rules are implemented in `@yeral/domain` and `apps/api`; the UI only displays them.
+Product truth for code. **The product book [`docs/product/`](../product/README.md) is the source of product rules**
+(ADR 0021, 2026-10-17); while it has open questions, this file still describes what is built. The design spec
+([`docs/design/README.md`](../design/README.md)) covers behaviour the book doesn't, and the `.dc.html` screens win on
+visuals. Where this file and the book differ, the book wins. Rules are implemented in `@yeral/domain` and `apps/api`;
+the UI only displays them.
 
 ## Booking types: one engine, four types
 

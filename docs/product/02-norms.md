@@ -29,8 +29,8 @@ question.
   word. (design CLAUDE.md, ROUND6-ANSWERS)
 - **Russian and English are written in code** from the Turkmen. (owner, ROUND6-ANSWERS)
 - The owner checks the Turkmen while screens are built. All Turkmen text needs a native review before public launch.
-  (client spec §9, §13; activeContext open question 5)
-- Nobody is named to check the Russian and English. (activeContext open question 5)
+  (client spec §9, §13; Q-101)
+- Nobody is named to check the Russian and English. (Q-101)
 - Russian runs about 30% longer: buttons fit their text and never have a fixed width; labels wrap to two lines before
   they're cut. (client spec §8)
 - Plurals: Turkmen and English have one form; Russian has three (1 место, 2 места, 5 мест). (client spec §8)
@@ -110,7 +110,7 @@ All Turkmen copy still needs a native review before launch. (client spec §9)
 - **The business's own figures** (revenue, average check) include its hidden prices. Clients never see those amounts.
   (business spec §4; code: packages/domain/src/pricing.ts)
 - **Restaurants show an average bill:** *Ortaça hasap* `≈ 150 TMT`. (client spec §2; Booking-Table screen) Real amounts
-  for the demo restaurants are still missing. (activeContext open question 4)
+  for the demo restaurants are still missing. (Q-103)
 - **No online payment.** Every summary says *Töleg ýerinde* (pay at the place). Card deposits come later; summaries
   keep a hidden row for them. (client spec §1)
 - **Ýeral is free for businesses.** No plans, commission or billing screens. The business landing says *Mugt* with no
@@ -151,7 +151,7 @@ All Turkmen copy still needs a native review before launch. (client spec §9)
 - **The 24:00 rule.** A day may end at 24:00. Clients then see `09:00–24:00` and *Häzir açyk · 24:00-a çenli* (open now,
   until 24:00). End pickers go up to 24:00; start pickers stop at 23:30. A visit must end by 24:00. (ROUND6-ANSWERS E1,
   business spec §26; code: packages/contract/src/common.ts)
-- **Past midnight** (a bar open until 02:00) isn't designed. (client spec §13, activeContext open question 17)
+- **Past midnight** (a bar open until 02:00) isn't designed. (client spec §13, Q-105)
 
 > Open question Q-105: can a business be open past midnight?
 

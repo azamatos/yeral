@@ -323,7 +323,10 @@ function renderBlocks(md, mode = 'chapter') {
 
 // ---------- build ----------
 
-const questionsMd = readFileSync(join(bookDir, 'questions.md'), 'utf8')
+// Windows line endings would stop the line patterns from matching (and the paragraph loop from advancing).
+const readText = (file) => readFileSync(join(bookDir, file), 'utf8').replace(/\r\n?/g, '\n')
+
+const questionsMd = readText('questions.md')
 const questions = parseQuestions(questionsMd)
 questionsById = new Map(questions.map((q) => [q.id, q]))
 
@@ -332,7 +335,7 @@ const chapterFiles = readdirSync(bookDir)
   .sort()
 
 const chapters = chapterFiles.map((file) => {
-  const md = readFileSync(join(bookDir, file), 'utf8')
+  const md = readText(file)
   const key = file.match(/^(\d{2}[a-z]?)/)[1]
   const number = key.slice(0, 2)
   const title = (md.match(/^# (.+)$/m) || [, file])[1]
@@ -344,10 +347,21 @@ const chapters = chapterFiles.map((file) => {
   return { file, key, number, title, html, placedHere }
 })
 
-// Questions that no chapter points to go at the end of the first file of their chapter.
+// Questions that no chapter points to go at the end of their chapter. Chapter 7 has three files; its questions
+// are numbered by file (150–199 client, 200–249 business, 250–299 system), as the README says.
+const homeKey = (q) => {
+  if (q.chapter !== '07') return q.chapter
+  const n = Number(q.id.slice(2))
+  return n < 200 ? '07a' : n < 250 ? '07b' : '07c'
+}
 for (const q of questions) {
   if (placedQuestions.has(q.id)) continue
-  const ch = chapters.find((c) => c.number === q.chapter) || chapters[chapters.length - 1]
+  const key = homeKey(q)
+  let ch = chapters.find((c) => c.key === key) || chapters.find((c) => c.number === key)
+  if (!ch) {
+    console.warn(`${q.id}: unknown chapter "${q.chapter}", placed in the last chapter`)
+    ch = chapters[chapters.length - 1]
+  }
   if (!ch.extra) ch.extra = []
   ch.extra.push(q)
   ch.placedHere.push(q.id)

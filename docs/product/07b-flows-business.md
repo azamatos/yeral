@@ -2192,7 +2192,7 @@ flowchart TD
 **Steps**
 
 1. *Ýatyr* on a confirmed, not-seated, not-started reservation: reasons *Myhman jaň edip ýatyrdy* (guest called; recorded as cancelled by the client), *Ýörite çäre — kafe ýapyk* (special event, closed), *Başga sebäp*. "Müşderä SMS bilen habar bereris we sebäbini görkezeris." or, without a phone, "Stol derrew boşar." (§20).
-2. A late party: the table is held for the hold time (default 15 min). "Myhman gijä galsa, stol şu wagta çenli saklanýar. Soňra stoly başga myhmana berip, bronda «Arz et → Gelmedi» belläp bilersiňiz." (table settings).
+2. A late party: the table is held for the late-party hold, a table setting separate from the request hold time (default 15 min). "Myhman gijä galsa, stol şu wagta çenli saklanýar. Soňra stoly başga myhmana berip, bronda «Arz et → Gelmedi» belläp bilersiňiz." (table settings).
 3. *Arz et*: *Gelmedi* ("Bron «Gelmedi» bolar, stol boşar"), *Gijä galdy*, *Gödek gylyk*, *Başga*. "«Gelmedi» bellendi · stol boşady".
 4. "2 gezek gelmedik müşderi diňe jaň arkaly bronlap biler." (same no-show limit as B-35).
 
@@ -2213,7 +2213,7 @@ flowchart TD
   A --> C["Tables, seats min to max"]
   C --> D["Birleşdirip bolýar pairs"]
   A --> E["Turn time per party size"]
-  A --> F["Hold time 15 min"]
+  A --> F["Late-party hold 15 min"]
   A --> G["Max party online 8"]
   B --> H["Save bar"]
 ```

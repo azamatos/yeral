@@ -24,6 +24,7 @@
     --done-ink: #066a41;
     --done-line: #bfe6d1;
     --font: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif;
+    --sys: ui-sans-serif, -apple-system, 'Segoe UI', Arial, sans-serif;
     --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
     --radius: 10px;
   }
@@ -78,10 +79,12 @@
   html {
     scroll-padding-top: 72px;
   }
+  /* System font until Onest has loaded (the script adds .fonts-ready): diagrams measure their labels with the
+     body's font while they draw, and a web font swapping in afterwards would clip them. */
   body {
     background: var(--bg);
     color: var(--ink);
-    font-family: var(--font);
+    font-family: var(--sys);
     font-size: 16px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -580,16 +583,6 @@
     border-radius: var(--radius);
     background: var(--surface);
   }
-  /* Diagrams use a system font: text is measured before the web font loads, and a wider font would be clipped. */
-  .diagram,
-  .diagram pre.mermaid {
-    font-family:
-      ui-sans-serif,
-      -apple-system,
-      'Segoe UI',
-      Arial,
-      sans-serif;
-  }
   .diagram pre.mermaid {
     margin: 0;
     display: flex;
@@ -752,9 +745,17 @@
     align-items: center;
     font-size: 15px;
   }
-  body.read-only .q-note,
-  body.read-only .segs {
+  .fonts-ready body {
+    font-family: var(--font);
+  }
+  /* Read-only viewers see saved notes and placements, without the buttons that change them. */
+  body.read-only .q-actions button,
+  body.read-only .q-note label {
     display: none;
+  }
+  .seg:disabled,
+  .opt:disabled {
+    cursor: default;
   }
 
   /* Feature board */
@@ -915,30 +916,66 @@
 <script>
   ;(function () {
     const BOOK = '__BOOK__'
-    const answers = {}
-    const scope = {}
+    // What the database confirmed, what was clicked but isn't saved yet, and saves that failed.
+    const confirmed = { answers: {}, scope: {} }
+    const pending = { answers: {}, scope: {} }
+    const errors = {}
+    const queues = {}
     let db = null
     let canWrite = false
+    let readOnly = false
     let filter = 'start'
+
+    // Show the page font only once it has loaded: diagrams measure their text with the body's font while they draw.
+    try {
+      if (document.fonts && document.fonts.load) {
+        document.fonts.load('400 16px Onest').then(
+          () => document.documentElement.classList.add('fonts-ready'),
+          () => {},
+        )
+      }
+    } catch (e) {}
 
     const $all = (sel, root) => Array.from((root || document).querySelectorAll(sel))
     const fmtTime = (iso) => {
       try {
-        return new Date(iso).toLocaleString('en-GB', {
-          day: 'numeric',
-          month: 'short',
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+        return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
       } catch (e) {
         return ''
       }
     }
 
+    // Look every element up once; render() runs on each click and each database update.
+    const qEls = {}
+    for (const qid of Object.keys(BOOK.questions)) {
+      const note = document.querySelector('[data-note-for="' + qid + '"]')
+      qEls[qid] = {
+        states: $all('[data-state-for="' + qid + '"]'),
+        opts: $all('.opt[data-qid="' + qid + '"]'),
+        note,
+        noteBox: note ? note.closest('.q-note') : null,
+        saved: document.querySelector('[data-saved-for="' + qid + '"]'),
+        row: document.querySelector('[data-index-q="' + qid + '"]'),
+      }
+    }
+    const chapterEls = {}
+    for (const key of Object.keys(BOOK.chapters)) {
+      chapterEls[key] = {
+        nav: document.querySelector('[data-count-for="' + key + '"]'),
+        status: document.querySelector('[data-status-for="' + key + '"]'),
+        bar: document.querySelector('[data-bar-for="' + key + '"]'),
+      }
+    }
+    const features = $all('.f').map((li) => ({ li, fid: li.dataset.fid, segs: $all('.seg', li) }))
+    const groups = $all('.index-group').map((g) => ({ g, rows: $all('li', g) }))
+
+    const current = (kind, id) => pending[kind][id] || confirmed[kind][id]
+
     function stateOf(qid) {
       const q = BOOK.questions[qid]
       if (q && q.status === 'decided') return 'decided'
-      return answers[qid] && answers[qid].choice ? 'answered' : 'open'
+      const a = current('answers', qid)
+      return a && (a.choice || (a.note || '').trim()) ? 'answered' : 'open'
     }
 
     function render() {
@@ -949,30 +986,31 @@
         const st = stateOf(qid)
         if (st === 'open') openTotal++
         else answeredTotal++
-        const a = answers[qid]
-        $all('[data-state-for="' + qid + '"]').forEach((el) => {
-          el.textContent = st === 'decided' ? 'Decided' : st === 'answered' ? 'Answered ' + (a.choice || '') : 'Open'
-          el.classList.toggle('is-answered', st === 'answered')
-          el.classList.toggle('is-decided', st === 'decided')
+        const a = current('answers', qid)
+        const el = qEls[qid]
+        el.states.forEach((s) => {
+          s.textContent =
+            st === 'decided' ? 'Decided' : st === 'answered' ? (a.choice ? 'Answered ' + a.choice : 'Answered in a note') : 'Open'
+          s.classList.toggle('is-answered', st === 'answered')
+          s.classList.toggle('is-decided', st === 'decided')
         })
-        $all('.opt[data-qid="' + qid + '"]').forEach((b) => {
-          const chosen =
-            (a && a.choice === b.dataset.key) ||
-            (BOOK.questions[qid].status === 'decided' && BOOK.questions[qid].answer.startsWith(b.dataset.key + ' '))
+        const q = BOOK.questions[qid]
+        el.opts.forEach((b) => {
+          const chosen = (a && a.choice === b.dataset.key) || (q.status === 'decided' && q.answer.startsWith(b.dataset.key + ' '))
           b.classList.toggle('is-chosen', !!chosen)
           b.setAttribute('aria-pressed', chosen ? 'true' : 'false')
         })
-        const note = document.querySelector('[data-note-for="' + qid + '"]')
-        if (note && document.activeElement !== note && a && typeof a.note === 'string' && !note.dataset.dirty) {
-          note.value = a.note
+        const noteText = a && typeof a.note === 'string' ? a.note : ''
+        if (el.note && document.activeElement !== el.note && !el.note.dataset.dirty) el.note.value = noteText
+        if (el.noteBox) el.noteBox.hidden = readOnly && !noteText.trim()
+        const err = errors['answers/' + qid]
+        if (el.saved) {
+          el.saved.textContent = err ? 'Not saved: ' + err : pending.answers[qid] ? 'Saving…' : a && a.at ? 'Saved ' + fmtTime(a.at) : ''
         }
-        const saved = document.querySelector('[data-saved-for="' + qid + '"]')
-        if (saved) saved.textContent = a && a.at ? 'Saved ' + fmtTime(a.at) : ''
-        const row = document.querySelector('[data-index-q="' + qid + '"]')
-        if (row) {
-          row.hidden =
+        if (el.row) {
+          el.row.hidden =
             filter === 'start'
-              ? !row.hasAttribute('data-start') || st !== 'open'
+              ? !el.row.hasAttribute('data-start') || st !== 'open'
               : filter === 'open'
                 ? st !== 'open'
                 : filter === 'answered'
@@ -983,36 +1021,37 @@
       document.getElementById('answered-count').textContent = String(answeredTotal)
       document.getElementById('answered-bar').style.width = total ? (answeredTotal / total) * 100 + '%' : '0'
       document.getElementById('nav-open-total').textContent = openTotal ? String(openTotal) : ''
-      $all('.index-group').forEach((g) => {
-        g.hidden = $all('li', g).every((li) => li.hidden)
+      groups.forEach(({ g, rows }) => {
+        g.hidden = rows.every((li) => li.hidden)
       })
 
       for (const key of Object.keys(BOOK.chapters)) {
         const ids = BOOK.chapters[key]
         const open = ids.filter((id) => stateOf(id) === 'open').length
-        const navCount = document.querySelector('[data-count-for="' + key + '"]')
-        if (navCount) navCount.textContent = open ? String(open) : ''
-        const status = document.querySelector('[data-status-for="' + key + '"]')
-        if (status) {
-          status.textContent = !ids.length
+        const el = chapterEls[key]
+        if (el.nav) el.nav.textContent = open ? String(open) : ''
+        if (el.status) {
+          el.status.textContent = !ids.length
             ? 'No questions'
             : open
               ? open + ' of ' + ids.length + ' questions open'
               : 'All ' + ids.length + ' answered'
         }
-        const bar = document.querySelector('[data-bar-for="' + key + '"]')
-        if (bar) bar.style.width = ids.length ? ((ids.length - open) / ids.length) * 100 + '%' : '100%'
+        if (el.bar) el.bar.style.width = ids.length ? ((ids.length - open) / ids.length) * 100 + '%' : '100%'
       }
 
-      $all('.f').forEach((li) => {
-        const fid = li.dataset.fid
-        const chosen = scope[fid] && scope[fid].place
-        $all('.seg', li).forEach((b) => {
+      let featureError = ''
+      features.forEach(({ li, fid, segs }) => {
+        const s = current('scope', fid)
+        const chosen = s && s.place
+        segs.forEach((b) => {
           b.classList.toggle('is-chosen', b.dataset.place === chosen)
           b.setAttribute('aria-pressed', b.dataset.place === chosen ? 'true' : 'false')
         })
         li.classList.toggle('is-moved', !!chosen && chosen !== li.dataset.proposed)
+        if (errors['scope/' + fid]) featureError = fid
       })
+      if (featureError) notice('The placement of ' + featureError + ' could not be saved. Click it again.')
     }
 
     function notice(text) {
@@ -1021,59 +1060,67 @@
       el.hidden = !text
     }
 
-    async function saveAnswer(qid, patch) {
+    // One write at a time per document, in click order; a failed write falls back to what the database holds.
+    function write(kind, id, data) {
       if (!db || !canWrite) return
-      const prev = answers[qid] || {}
-      const next = {
+      const key = kind + '/' + id
+      pending[kind][id] = data
+      delete errors[key]
+      render()
+      queues[key] = (queues[key] || Promise.resolve()).then(async () => {
+        try {
+          await db.doc(key).set(data)
+          if (pending[kind][id] === data) {
+            confirmed[kind][id] = data
+            delete pending[kind][id]
+          }
+        } catch (e) {
+          if (pending[kind][id] === data) delete pending[kind][id]
+          errors[key] = e && e.message ? e.message : 'try again'
+        }
+        render()
+      })
+    }
+
+    function saveAnswer(qid, patch) {
+      const prev = current('answers', qid) || {}
+      write('answers', qid, {
         choice: prev.choice || '',
         note: prev.note || '',
         ...patch,
         at: new Date().toISOString(),
-      }
-      answers[qid] = next
-      render()
-      try {
-        await db.doc('answers/' + qid).set(next)
-      } catch (e) {
-        const saved = document.querySelector('[data-saved-for="' + qid + '"]')
-        if (saved) saved.textContent = 'Not saved: ' + (e && e.message ? e.message : 'try again')
-      }
+      })
     }
 
-    document.addEventListener('click', async (ev) => {
+    document.addEventListener('click', (ev) => {
       const opt = ev.target.closest('.opt')
       if (opt && !opt.disabled) {
         const qid = opt.dataset.qid
-        const note = document.querySelector('[data-note-for="' + qid + '"]')
+        const note = qEls[qid] && qEls[qid].note
         if (note) delete note.dataset.dirty
-        await saveAnswer(qid, { choice: opt.dataset.key, note: note ? note.value : '' })
+        saveAnswer(qid, { choice: opt.dataset.key, note: note ? note.value : '' })
         return
       }
       const saveNote = ev.target.closest('[data-save-note]')
       if (saveNote) {
         const qid = saveNote.dataset.saveNote
-        const note = document.querySelector('[data-note-for="' + qid + '"]')
+        const note = qEls[qid] && qEls[qid].note
         if (note) delete note.dataset.dirty
-        await saveAnswer(qid, { note: note ? note.value : '' })
+        saveAnswer(qid, { note: note ? note.value : '' })
         return
       }
       const clear = ev.target.closest('[data-clear]')
       if (clear) {
-        const qid = clear.dataset.clear
-        await saveAnswer(qid, { choice: '' })
+        saveAnswer(clear.dataset.clear, { choice: '' })
         return
       }
       const seg = ev.target.closest('.seg')
-      if (seg && db && canWrite) {
+      if (seg && !seg.disabled) {
         const fid = seg.dataset.fid
-        const place = scope[fid] && scope[fid].place === seg.dataset.place ? '' : seg.dataset.place
-        scope[fid] = { place, at: new Date().toISOString() }
-        render()
-        try {
-          await db.doc('scope/' + fid).set(scope[fid])
-        } catch (e) {
-          notice('A placement could not be saved. Try again.')
-        }
+        const s = current('scope', fid)
+        const place = s && s.place === seg.dataset.place ? '' : seg.dataset.place
+        notice('')
+        write('scope', fid, { place, at: new Date().toISOString() })
         return
       }
       const chip = ev.target.closest('[data-filter]')
@@ -1089,7 +1136,6 @@
       if (ev.target.matches('[data-note-for]')) ev.target.dataset.dirty = '1'
     })
 
-    // Highlight the chapter in view.
     // The current section is the last one whose top has passed a line 30% down the window.
     const navItems = $all('[data-nav]')
     const sections = $all('section[id]')
@@ -1097,12 +1143,12 @@
     const markCurrent = () => {
       ticking = false
       const line = window.innerHeight * 0.3
-      let current = sections[0]
+      let currentSection = sections[0]
       for (const s of sections) {
-        if (s.getBoundingClientRect().top <= line) current = s
+        if (s.getBoundingClientRect().top <= line) currentSection = s
         else break
       }
-      navItems.forEach((n) => n.classList.toggle('is-current', !!current && n.dataset.nav === current.id))
+      navItems.forEach((n) => n.classList.toggle('is-current', !!currentSection && n.dataset.nav === currentSection.id))
     }
     window.addEventListener(
       'scroll',
@@ -1116,12 +1162,20 @@
     )
     markCurrent()
 
+    function setReadOnly(message) {
+      readOnly = true
+      document.body.classList.add('read-only')
+      $all('.opt, .seg').forEach((b) => (b.disabled = true))
+      $all('[data-note-for]').forEach((t) => (t.readOnly = true))
+      notice(message)
+      render()
+    }
+
     render()
 
     const claude = window.claude
     if (!claude || typeof claude.use !== 'function') {
-      document.body.classList.add('read-only')
-      notice('Open this page on claude.ai to answer questions and place features. Here it is read-only.')
+      setReadOnly('Open this page on claude.ai to answer questions and place features. Here it is read-only.')
       return
     }
 
@@ -1144,26 +1198,25 @@
     Promise.all([claude.use('db'), claude.use('user').catch(() => null)]).then(async ([store, user]) => {
       db = store
       try {
-        canWrite = user ? await user.canEdit() : false
+        // The page declares db rules (only editors write); the platform's own answer wins when it gives one.
+        const can = user ? await user.can('data.write') : null
+        canWrite = can === null ? (user ? await user.canEdit() : false) : can
       } catch (e) {
         canWrite = false
       }
       if (!db) {
-        document.body.classList.add('read-only')
-        notice('Answers can’t be loaded in this view, so the page is read-only.')
+        setReadOnly('Answers can’t be loaded in this view, so the page is read-only.')
         return
       }
       if (!canWrite) {
-        document.body.classList.add('read-only')
-        $all('.opt').forEach((b) => (b.disabled = true))
-        notice('You can read the answers here; only editors of this page can change them.')
+        setReadOnly('You can read the answers and placements here; only editors of this page can change them.')
       }
       db.collection('answers').onSnapshot(
         (snap) => {
           // Each snapshot is the whole collection: rebuild, so deleted answers disappear too.
-          Object.keys(answers).forEach((k) => delete answers[k])
+          confirmed.answers = {}
           snap.docs.forEach((d) => {
-            if (d.exists) answers[d.id] = d.data()
+            if (d.exists) confirmed.answers[d.id] = d.data()
           })
           render()
         },
@@ -1171,9 +1224,9 @@
       )
       db.collection('scope').onSnapshot(
         (snap) => {
-          Object.keys(scope).forEach((k) => delete scope[k])
+          confirmed.scope = {}
           snap.docs.forEach((d) => {
-            if (d.exists) scope[d.id] = d.data()
+            if (d.exists) confirmed.scope[d.id] = d.data()
           })
           render()
         },

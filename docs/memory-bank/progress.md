@@ -120,7 +120,8 @@
   14/20, `text-micro`, `rounded-xs/sm`, `shadow-control`, `shadow-focus-inset`, `shadow-input-warning`, modal 560, chart
   colours); product rules (pricing: two plans + a commission layer; reviews under moderation aren't counted) in
   productContext; ADR 0012 revised (look up every screen piece in `COMPONENTS.md`; the boards win over drifted screens).
-- **2026-10-17 · Design export v0.5 received** (in the main checkout, not committed yet): round 6 part A (free MVP, one
+- **2026-10-17 · Design export v0.5 received and committed** (#27; tokens v0.5 `--ring-selected` → theme
+  `shadow-ring-selected`): round 6 part A (free MVP, one
   account with several workspaces, fixed access levels + permission matrix, who answers requests, status icons, internal
   statuses, "Başga ýerde", phone web; `B-Login`, `B-Mobile`) and part B (`ROUND6-ANSWERS.md`: every item of the round-6
   request answered as the owner's decision; new `Booking-Link`; rule change A5: a move never swaps the specialist).

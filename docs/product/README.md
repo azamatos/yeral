@@ -88,7 +88,9 @@ node docs/product/tools/build.mjs
 ```
 
 writes `docs/product/tools/dist/product-book.html` (not committed). Claude publishes it to the same claude.ai page each
-time (Artifact tool, `url` of the existing page) with the capabilities `db` (answers and placements, only editors write),
-`user` and `comments` (composer only). Answers live in the page's database: collection `answers` (one document per
+time (Artifact tool, `url` of the existing page). The page's capabilities are stored with it and carried forward when a
+publish leaves `capabilities` out; if they ever have to be declared again, declare exactly
+`{"db": {"rules": [{"path": "", "read": "interact", "write": "admin"}]}, "user": {}, "comments": {"composer_only": true}}`
+(anyone who can open the page reads; only its editors write answers and placements). Answers live in the page's database: collection `answers` (one document per
 question: `choice`, `note`, `at`) and `scope` (one per feature: `place` = `mvp` · `later` · `never`, `at`). Claude reads
 them with the ArtifactData tool and writes them back into this folder.
