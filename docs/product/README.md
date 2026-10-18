@@ -52,7 +52,8 @@ flowchart LR
 
 ## Writing rules for this folder
 
-- Plain English, short sentences. Turkmen UI words in italics with English: *Garaşylýar* (Pending).
+- Plain English, short sentences. UI words in English (ADR 0022); where a Turkmen word from design v0.5 is quoted,
+  put it in italics with the English: *Garaşylýar* (Pending).
 - Every fact carries its source in brackets: "(business spec §25)", "(ROUND6-ANSWERS A3)", "(ADR 0017)", "(code: …)".
 - Which source wins: the owner's answers in this book → the owner's direction in `docs/memory-bank/activeContext.md` →
   the latest design export (`docs/design`) → older specs and ADRs → code. Code that differs from a decided rule is noted
@@ -76,6 +77,12 @@ answer: —
 
 When answered: `status: decided` and `answer: B · the owner's note (dd.mm.yyyy)`. Questions that unblock the most
 carry `· priority: high` after the status; the page lists them under "Start here".
+
+Claude doesn't take an answer for granted (owner, 18.10.2026). When an answer looks weaker than another option, risky, or
+in conflict with another decision, Claude records it as given and adds one line under it:
+`concern: what worries Claude and the better option (dd.mm.yyyy)`. The page shows the card as "Claude has a concern",
+under its own filter, with the options open again: the owner keeps the answer or changes it, and Claude then removes
+the line (or rewrites the answer).
 - Feature tables in chapter 6 start with the columns `ID | Feature | What it is | Proposed`; the page adds the
   MVP / Later / Never control to each row.
 - Question numbers by chapter: 001–099 vision, roles, rules and scope · 100–149 norms and limits · 150–199 client

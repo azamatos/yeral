@@ -1,6 +1,7 @@
 # 0016. Turkmen first, then Russian and English; every client URL carries its language
 
-- Status: Accepted 2026-10-14 — amends [0008](0008-i18n-use-intl.md) (the library stays use-intl)
+- Status: Accepted 2026-10-14 — amends [0008](0008-i18n-use-intl.md) (the library stays use-intl); Turkmen default and
+  "Turkmen first" superseded by [0022](0022-english-first-any-country.md) (English first, languages per market)
 - Decided by: the web design spec (14.10.2026), accepted by the owner
 
 ## Context

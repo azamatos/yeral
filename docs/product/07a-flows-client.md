@@ -4,7 +4,7 @@ This chapter walks through everything a client does on yeral.app, one scenario a
 
 ## Who the client is
 
-The client is anyone who books time at a business through yeral.app: a haircut, a dentist visit, a restaurant table, a seat in a yoga class. They use the site on a phone or a computer, in Turkmen (default), Russian or English (ADR 0016). They pay at the place; there is no online payment yet (client spec §1).
+The client is anyone who books time at a business through yeral.app: a haircut, a dentist visit, a restaurant table, a seat in a yoga class. They use the site on a phone or a computer, in their own language: English while Ýeral is built; Turkmen, Russian and English in Turkmenistan (ADR 0022). They pay at the place; there is no online payment yet (client spec §1).
 
 **Signed out**, a client can see the home page, search, open business pages, read reviews and go through a booking up to its last step. Logging in is needed only to send a booking, to save favourites and to open *Ýazylyşlarym* (My bookings). Login is by phone only: a +993 mobile number and a 4-digit SMS code, no password (client spec §4.7, ADR 0019). The page an SMS link opens (`yeral.app/b/{code}`) also works signed out (client spec §14).
 
@@ -591,7 +591,7 @@ flowchart TD
 
 **Steps**
 
-1. Prices are fixed (`80 TMT`), from (`250 TMT-den`), free (*Mugt*) or hidden; restaurants show an average bill (`≈ 150 TMT`, "Ortaça hasap ≈ … TMT") (client spec §2).
+1. Prices are fixed (`80 TMT`), from (`250 TMT-den`), free (*Mugt*) or hidden (client spec §2). Restaurants show no average bill (Q-103).
 2. A hidden price reads "Baha ýerinde aýdylýar" (The price is told at the place) in the row, the flow, the summary and the booking detail (B1).
 3. A total that mixes hidden and priced services is the priced sum with "-den": "60 TMT-den"; a total of hidden services only shows no amount, just "Baha ýerinde aýdylýar" (B1; Mobile 17).
 
@@ -599,7 +599,7 @@ flowchart TD
 
 - A card's "from" price ignores hidden services (code: `catalog/map.ts`).
 - The amount of a hidden price never leaves the server (code: `publicPrice`).
-- The demo still has `[AVG BILL]`: real average bills are open (Q-103).
+- The average bill is dropped (Q-103): the design's "Ortaça hasap" lines and the demo's `[AVG BILL]` go.
 
 **Status:** Design: drawn (Venue · `selection` hidden, mixed; Booking · `price`; Mobile 17) · Code: built (api).
 
@@ -631,7 +631,7 @@ flowchart TD
 3. *Sene* (Date) strip and *Wagt* (Time) chips; changing the day clears a time that isn't free that day (screens README).
 4. "Nirede oturmak isleýärsiňiz?" (Where would you like to sit?): Zal "Kondisionerli · boş", Terrasa "Açyk howada · Az galdy", VIP otag "6–10 adam · Diňe 6 we has köp adam üçin" (VIP rooms need 6 or more) (Booking-Table).
 5. "Goşmaça islegler" (Special requests) chips: Doglan gün, Çaga oturgyjy, Penjiräniň ýanynda, Sessiz ýer, with "Kafe mümkin boldugyça göz öňünde tutar."; "Bellik (hökman däl)" (Booking-Table).
-6. Rules: "Stol 15 minut saklanýar" (The table is held 15 minutes) and "{time}-e çenli gelmeseňiz, stol boşadylyp bilner."; "Ortaça hasap ≈ … TMT · Töleg ýerinde" (Booking-Table).
+6. Rules: "Stol 15 minut saklanýar" (The table is held 15 minutes) and "{time}-e çenli gelmeseňiz, stol boşadylyp bilner."; "Töleg ýerinde" (pay at the place); the drawn "Ortaça hasap ≈ … TMT" goes (Q-103) (Booking-Table).
 7. Login if needed (C-18), then "Stoly bronla" (Book the table) and the sent screen "Stol bronlamak haýyşy ugradyldy" (C-21).
 
 **Edge cases**

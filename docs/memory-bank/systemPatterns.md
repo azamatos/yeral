@@ -124,7 +124,7 @@ params (zod); unsaved form input → TanStack Form; one subtree → `useState`; 
 
 | App | Mode | Notes |
 |---|---|---|
-| client | SSR for home, search, category and business pages; `ssr: false` for account, booking, login | `/` → saved language or `/tk`; `/b/{slug}` → `/{lang}/b/{slug}`; loaders `ensureQueryData` → dehydrated into the page; `head()` gives title, description, canonical, hreflang, OG, JSON-LD |
+| client | SSR for home, search, category and business pages; `ssr: false` for account, booking, login | `/` → saved language, else open (book Q-132; code: `/tk`); `/b/{slug}` → `/{lang}/b/{slug}`; loaders `ensureQueryData` → dehydrated into the page; `head()` gives title, description, canonical, hreflang, OG, JSON-LD |
 | business, cms, storybook | static SPA, `index.html` fallback | `noindex` |
 
 ## Backend (`apps/api`)
@@ -170,10 +170,11 @@ apps/api/src/
 ## i18n
 
 - `use-intl` (the framework-free core of next-intl): today's `useTranslations` calls and ICU messages carry over.
-- Locales: `tk` (default), `ru`, `en` (ADR 0016). Shared namespaces (`common`, `categories`, `status`, `errors`, units) in
+- Locales: English is the source; each market adds its own (Turkmenistan: `tk`, `ru`) (ADR 0022; the code still
+  defaults to `tk`, ADR 0016). Shared namespaces (`common`, `categories`, `status`, `errors`, units) in
   `@yeral/i18n`; app namespaces in `apps/<app>/messages/{tk,ru,en}.json`. Keys are typed per app; CI checks all three exist.
-- The client site puts the locale first in every URL (`/tk/b/{slug}`); business and cms take it from the user's settings.
-- Turkmen copy comes verbatim from the design screens; no city names in copy.
+- The client site puts the locale first in every URL (`/{lang}/b/{slug}`); business and cms take it from the user's settings.
+- English is the source copy; screens drawn in Turkmen are the reference for `tk`; no city names written into copy.
 - Numbers, money, dates, distances and plurals only through `useFmt()` / ICU, in the business's time zone (`Asia/Ashgabat` today).
 
 ## Conventions the whole system relies on

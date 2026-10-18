@@ -58,7 +58,7 @@ One booking engine, three types now and one later. A business has one or more; i
 
 - **Price types:** fixed (`80 TMT`), from (`250 TMT-den`), free (*Mugt*), hidden ("*Baha ýerinde aýdylýar*", said at
   the place). A total that mixes hidden and priced services shows "from" the priced sum; a hidden-only total shows no
-  amount. Restaurants show an average bill (`≈ 150 TMT`). (client spec §2, ROUND6-ANSWERS B1)
+  amount. Restaurants show no average bill (Q-103). (client spec §2, ROUND6-ANSWERS B1)
 - Every service shows its duration. (client spec §2)
 - **No online payment and no deposits.** Clients pay at the place. (client spec §1)
 

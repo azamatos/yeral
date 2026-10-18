@@ -42,7 +42,8 @@ source (`web` | `app` | `phone` | `walkin` | `ai`). Manat prices for plans and c
 
 ## Market and constraints
 
-- Turkmen (default), Russian, English. Money in manats, shown as `40 TMT`; decimal comma (`4,9`, `1,2 km`); phones `+993`.
+- Built in English; each market adds its languages (Turkmenistan: Turkmen, Russian; ADR 0022). Turkmenistan: money in
+  manats, shown as `40 TMT`; formats follow the language (`4,9` in Turkmen and Russian, `4.9` in English); phones `+993`.
 - Business-local time: `Asia/Ashgabat` (UTC+5, no daylight saving) for every business today.
 - **Hosting:** Cloudflare now; later an own server (likely in Turkmenistan, where Cloudflare is reported filtered) running
   everything in Docker behind nginx, with Cloudflare kept for DNS

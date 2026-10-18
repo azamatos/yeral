@@ -1,6 +1,6 @@
 # 6. Features and MVP scope
 
-Every feature Ýeral has, wants or once had, in one list (237 of them), each with a **proposed** place: in the
+Every feature Ýeral has, wants or once had, in one list (240 of them), each with a **proposed** place: in the
 **MVP**, **Later**, or **Never**. The proposal is Claude's; the decision is the owner's. On the page, each row has an
 MVP · Later · Never switch: click to move a feature, and the change is saved for Claude to write back here.
 
@@ -44,6 +44,12 @@ works end to end.
 
 These are drawn but go against a decision; they go into the next prompt for Claude Design once this chapter is closed.
 
+- Every board is drawn in Turkmen; future boards are drawn in English (Q-101, ADR 0022), and whether the existing ones
+  are redrawn is Q-133.
+- Restaurant cards and the table flow show *Ortaça hasap* `≈ 150 TMT`; the average bill is dropped (Q-103).
+- The business spec draws workspace links with `/tk/`; they carry no language (Q-100).
+- Hours stop at 24:00; a business may be open past midnight (Q-105, F-109).
+- No city choice is drawn, and addresses show no city (Q-107, F-240).
 - The Home page still has an "app on your phone" block with store buttons (F-004), but native apps come later.
 - The client footer still links to "Bahalar" (prices) on every screen (F-033), but Ýeral is free.
 - The business landing page's FAQ promises card payment and prepayment "ýakynda" (soon) (F-176, F-219), which isn't
@@ -55,6 +61,12 @@ These are drawn but go against a decision; they go into the next prompt for Clau
 
 What's already built and doesn't match a decision; fixed when coding resumes, not asked again.
 
+- Languages: `@yeral/i18n` and the apps default to Turkmen and ship tk, ru and en; English is the source, and a
+  market's languages come with its launch. Turkmenistan's values (TMT, +993, Asia/Ashgabat) are constants, not market
+  settings. Business texts require Turkmen (Q-102 decided any one language). (ADR 0022)
+- The average bill is still in the code (Q-103 dropped it).
+- Every day and visit ends by 24:00; Q-105 allows past midnight (F-109).
+- Addresses carry no city, and the city comes only from the internet address (Q-107, F-240).
 - Access: the code still has round 4's editable roles; round 6 decided three fixed levels and a matrix (F-088, F-089).
 - Invites: the code activates an invite at the first login; the design has accept or decline, 7 days, resend (F-085).
 - Moving: when the chosen specialist is busy, the code gives the booking to another one; round 6 forbids that (F-060).
@@ -67,12 +79,12 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | Area | MVP | Later | Never |
 |---|---|---|---|
-| Client · discovery (home, search, map, categories, business page) | 28 | 8 | 1 |
+| Client · discovery (home, search, map, categories, business page) | 29 | 8 | 1 |
 | Client · booking (per type) | 12 | 5 | 0 |
 | Client · after booking (my bookings, cancel, move, reviews, SMS link page) | 14 | 2 | 2 |
 | Client · account | 9 | 1 | 0 |
 | Business · access (login, workspaces, invites, levels, permissions, ownership) | 10 | 4 | 0 |
-| Business · setup (wizard, profile, services, hours, rules, link & QR) | 16 | 4 | 0 |
+| Business · setup (wizard, profile, services, hours, rules, link & QR) | 17 | 3 | 0 |
 | Business · daily work (calendar, requests, bookings, walk-ins, moves, complaints, internal statuses) | 19 | 3 | 0 |
 | Business · clients (CRM) | 8 | 1 | 0 |
 | Business · tables | 0 | 6 | 0 |
@@ -81,11 +93,11 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | Business · analytics | 0 | 6 | 0 |
 | Business · notifications and help | 2 | 4 | 0 |
 | Business · marketing (B2B landing) | 3 | 0 | 0 |
-| Ýeral team (verification, moderation, categories, support, CMS modules) | 3 | 8 | 0 |
+| Ýeral team (verification, moderation, categories, support, CMS modules) | 5 | 7 | 0 |
 | System (jobs, SMS, live updates, search indexing, SEO, i18n) | 11 | 2 | 1 |
 | Platform (hosting, own server, Storybook, monitoring) | 8 | 2 | 1 |
-| Later and non-goals | 0 | 22 | 2 |
-| **All** | **146** | **84** | **7** |
+| Later and non-goals | 0 | 23 | 2 |
+| **All** | **150** | **83** | **7** |
 
 ## Client · discovery (home, search, map, categories, business page)
 
@@ -100,7 +112,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-007 | "What?" suggestions | Typing in "Näme?" suggests categories and business names. | Later | not designed | api built (`/v1/search/suggest`) | Code only; no dropdown is drawn. |
 | F-008 | "Where?" place suggestions | Typing an address, district or landmark in "Nirede?" offers up to 6 places. | MVP | spec only (README §5) | api built (`/v1/places/suggest`, `places` table) | Places are seeded; nobody maintains them (see F-187). |
 | F-009 | Near-me location and radius | Browser geolocation as "Ýakynymda" with a 1 / 3 / 5 / 10 / 25 km radius chip (5 km default). | MVP | drawn (Search) | built (domain geo, api) |  |
-| F-010 | Location-denied fallback | IP-based city shown only inside "Nirede?", distances hidden, sort by rating × reviews, help sheet to allow location. | MVP | drawn (States 3) | api built (`/v1/places/ip`, popularity sort) | No city name anywhere else in copy. |
+| F-010 | Location-denied fallback | IP-based city shown only inside "Nirede?", distances hidden, sort by rating × reviews, help sheet to allow location. | MVP | drawn (States 3) | api built (`/v1/places/ip`, popularity sort) | The city becomes a choice (Q-107, F-240). |
 | F-011 | Search filters and sort | Category chips, day toggle Şu gün / Ertir / Şu hepde, filters drawer (price, rating 4.5+, open now, booking type, women only) and sort nearest / rating / price. | MVP | drawn (Search chips); drawer contents spec only | api built (`cat`, `date`, `week`, `maxPrice`, `minRating`, `openNow`, `type`, `womenOnly`, `sort`) | Results are limited to businesses with free time on the chosen day. |
 | F-012 | Specialist gender filter | Beauty searches can filter by the specialist's gender. | Later | spec only (README §4.2) | schema only (`staff.gender`) | Not in the search api. |
 | F-013 | Party-size filter for restaurants | "Adam sany: 2 ▾" chip (1–7, 8+) when the restaurant/café category is on; rows show times for that party. | Later | drawn (Search · party) | api built (`party` 1–8, default 2) | Round 6 D2 calls it new, but the api already has it; design range 1–7 + 8+ vs api max 8. |
@@ -128,6 +140,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-035 | Error, empty and loading states | 404, no results, closed today, network error toast, loading skeletons. | MVP | drawn (States) | built (ui: EmptyState, Skeleton, Toast) |  |
 | F-036 | Legacy home sections | Browse by district, "Recommended" (top-rated) and "New on Ýeral" sections. | Never | not designed | legacy only | The new design names no city or district in copy. |
 | F-037 | Instant-confirmation filter | Search filter for businesses that confirm at once. | Later | not designed | legacy only |  |
+| F-240 | City choice | The person's location preselects a city; they can pick another; an address shows its city when it differs from the selected one. | MVP | not designed | not built | Q-107 (decided 18.10.2026). |
 
 ## Client · booking (per type)
 
@@ -224,7 +237,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-106 | Special days | Holidays and special hours, one day or a range, yearly repeat. | MVP | drawn (B-Settings · exceptionModal) | built (domain exceptions + precedence) |  |
 | F-107 | Special day over existing bookings | Adding a closure over bookings asks: cancel and offer 3 times, or keep them. | MVP | drawn (B-Settings) | not built |  |
 | F-108 | Overlapping special days warning | Warning naming which special day wins; saving is allowed. | MVP | drawn (B-Settings · exceptionOverlap) | rule built (domain); warning not built | Round 6 E2. |
-| F-109 | Open past midnight | A business day that runs into the next date. | Later | not designed | not built | Q-105. |
+| F-109 | Open past midnight | A business day that runs into the next date, and bookings that cross midnight. | MVP | not designed | not built | Q-105 (decided 18.10.2026). |
 | F-110 | Service catalogue | Groups, services (duration, price type, buffer override, who performs, online switch), service drawer. | MVP | drawn (B-Services) | schema only (`services`, `service_groups`, `staff_services`) |  |
 | F-111 | Team management | Team table (bookable vs management), levels, schedule summary, invite states, drag order in which clients see specialists. | MVP | drawn (B-Team) | schema only (`staff`, `memberships`, `staff.sort`) |  |
 | F-112 | Staff schedules | Own shifts inside business hours, one break per day (may differ by day), personal days off. | MVP | drawn (B-Team staff drawer) | built (domain), schema |  |
@@ -265,7 +278,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
 | F-139 | Client list and segments | Search by name/phone; chips Regular, New, Lapsed, Reported; visits, last visit, total, next booking. | MVP | drawn (B-Clients) | built (domain `clientSegments`), schema |  |
-| F-140 | Client card | Stats (visits, average bill, last visit, no-shows), upcoming, history, complaints. | MVP | drawn (B-Client) | built (domain `clientStats`), schema |  |
+| F-140 | Client card | Stats (visits, average bill, last visit, no-shows), upcoming, history, complaints. | MVP | drawn (B-Client) | built (domain `clientStats`), schema | Money figures: Q-134. |
 | F-141 | Team notes and alert notes | Notes with author and date; "show when booking" notes appear on blocks and drawers. | MVP | drawn (B-Client · composer) | schema only (`client_notes.alert`) |  |
 | F-142 | Add a client by hand | Only the phone is required; name, birthday, source, tags, note; "save and book". | MVP | drawn (B-Clients · modal) | schema only |  |
 | F-143 | No reminder SMS for a client | Switch when the client asked not to get reminders. | MVP | drawn (B-Client) | built (jobs honour `noRemindersSms`) |  |
@@ -338,7 +351,8 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
-| F-178 | CMS app and team accounts | cms.yeral.app with its own staff accounts, second factor and Cloudflare Access. | Later | not designed | not built | Q-010 (the CMS has "six modules"); M6. |
+| F-178 | CMS app and team accounts | cms.yeral.app with its own staff accounts, second factor and Cloudflare Access. | MVP | not designed | not built | Part of the launch (Q-001, Q-002); what it holds at launch is Q-010. |
+| F-238 | Add a business for its owner | The Ýeral team creates a business in the CMS for an owner it has met. | MVP | not designed | not built | Q-002 (decided 17.10.2026). |
 | F-179 | Business verification | Review new businesses within 24 h; verify or reject with a reason. | MVP | spec only (business §7, ADR 0018) | schema only (`verification`, `verification_history`) | Without it nothing becomes public (F-032). |
 | F-180 | Review moderation | Queue of reported reviews; clear (counted again) or remove. | MVP | spec only (business §15) | not built | Pairs with F-162. |
 | F-181 | Category catalogue | Icons, TK/RU/EN names, booking types, specialist word, starter services, SEO intro; new categories without a release. | Later | spec only | schema only (13 seeded) |  |
@@ -364,7 +378,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-196 | Search index | Verified-only listing with geo, popularity, open-now and has-free-time filters, on Postgres. | MVP | spec only | built (api) | No separate search engine. |
 | F-197 | SEO basics | Server-rendered pages, titles, hreflang, JSON-LD, sitemap, noindex for unverified. | MVP | not designed (repo plan) | not built (legacy had JSON-LD) | M3. |
 | F-198 | Link previews | OG images for business and category pages. | Later | not designed | not built | M7. |
-| F-199 | Three languages and formats | TK default, RU, EN with `/tk` `/ru` `/en` URLs; design formats (`40 TMT`, `4,9`, `1,2 km`, dates); business-local time (Asia/Ashgabat). | MVP | spec only (README §8) | built (`@yeral/i18n`, domain time, contract error messages) | RU/EN are Claude's drafts; native review = Q-101. |
+| F-199 | Languages and formats | English while building; each market adds its languages with `/{lang}` links (Turkmenistan: Turkmen, Russian); number formats follow the language (`4.9` in English, `4,9` in Turkmen and Russian); money, phone rules and time zone come from the market (Turkmenistan: `40 TMT`, +993, Asia/Ashgabat). | MVP | spec only (README §8) | built (`@yeral/i18n`, domain time, contract error messages) | Q-101, Q-104 decided; ADR 0022. |
 | F-200 | Demo mode | Seeded demo businesses, demo code 1234, demo businesses that answer requests by themselves. | Never | not designed | built (api seed, `demo.answer` job) | Code only; legacy has a demo panel. |
 | F-201 | Client installable app (PWA) | yeral.app installable from the browser. | Later | not designed | not built | M7; legacy shows an "add to home screen" hint. |
 | F-202 | Booking source tracking | Each booking records web / app / phone / walk-in / ai. | MVP | spec only | built (domain, schema) | Shown in the workspace as Onlaýn / Telefon / Gelip. |
@@ -413,3 +427,4 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-235 | Message all class attendees | One message to everyone in a session. | Later | spec only ("later", business §21) | not built |  |
 | F-236 | Review photos | Clients attach photos to reviews. | Later | spec only ("later", business §15) | not built |  |
 | F-237 | Notify me when booking reopens | Client asks to be told when a paused business takes online bookings again. | Later | not designed | legacy only |  |
+| F-239 | Menu | A restaurant's or café's menu on its page. | Later | not designed | not built | Owner, Q-103: "maybe in some future". |
