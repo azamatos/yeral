@@ -3,7 +3,7 @@
 Every question the owner has to answer before design and code, by number. Answer them on the product book page; Claude records the answers here (`status: decided`, `answer: …`) and in chapter 9. Format and numbering: see README.md.
 
 ## Q-001 · Launch order of the two apps
-chapter: 01 · status: open · priority: high
+chapter: 01 · status: decided · priority: high
 
 The current roadmap builds the client site first (M3), then the business workspace (M5). Online bookings are requests by default, and only the workspace can answer them, so a client site without the workspace can't take a real booking: it would only be a demo.
 
@@ -11,10 +11,10 @@ The current roadmap builds the client site first (M3), then the business workspa
 - B · Client site first, as planned; the workspace follows. Until then no real bookings.
 - C · Workspace first: businesses use it for phone bookings and their own link; the marketplace opens once enough businesses are on it.
 
-answer: —
+answer: A · One launch with all three web apps: the client site, the business app and the CMS; the business flow doesn't work without all three. Web first, fully working on phones; native iPhone and Android apps come later, and the business flow never depends on them. (17.10.2026)
 
 ## Q-002 · How the first businesses get onto Ýeral
-chapter: 01 · status: open · priority: high
+chapter: 01 · status: decided · priority: high
 
 Sign-up is self-service (setup wizard) and the Ýeral team verifies each new business within 24 hours. Nothing says how the first businesses are found, and a marketplace needs businesses before clients come.
 
@@ -22,10 +22,10 @@ Sign-up is self-service (setup wizard) and the Ýeral team verifies each new bus
 - B · Self sign-up only.
 - C · Invite-only at first: the Ýeral team creates the first businesses; open sign-up later.
 
-answer: —
+answer: A · The team adds the first businesses in the CMS after meeting their owners and showing them the product; some owners may set up by themselves to learn the product; big companies the team sets up. (17.10.2026)
 
 ## Q-003 · The name and domain at launch
-chapter: 01 · status: open
+chapter: 01 · status: decided
 
 "Ýeral" on yeral.app is a working title (open question 7 in the memory bank before this book). The code keeps the name and domain in configuration, so this doesn't block design, but it blocks the launch.
 
@@ -33,17 +33,17 @@ chapter: 01 · status: open
 - B · Move to another domain (for example yeral.com) before launch.
 - C · Rename before launch.
 
-answer: —
+answer: A · Launch as Ýeral on yeral.app; investors or future owners may change the domain later. (17.10.2026)
+concern: You chose the name for its sound, not its Turkmen meaning (Q-109), so one thing is left: the spelling. The "Ý" can't be typed on most keyboards outside Turkmenistan, and people will search for "Yeral"; the SMS sender is already "Yeral" (Q-109). Better: write the brand "Yeral" everywhere, and keep "Ýeral" at most as a styling in Turkmen. (18.10.2026)
 
 ## Q-010 · What the Ýeral team can do at launch, and with which tool
 chapter: 03 · status: open · priority: high
 
-Verifying businesses, handling reported reviews, managing categories, writing help articles and answering the support chat all need the Ýeral team, but the CMS (six modules) isn't designed. Without at least verification, no business can become public.
+Verifying businesses, handling reported reviews, managing categories, writing help articles and answering the support chat all need the Ýeral team, but the CMS (six modules) isn't designed. Without at least verification, no business can become public. Decided since (Q-001, Q-002, 17.10.2026): the CMS is part of the launch, and the team adds the first businesses there.
 
 - A · Design a small admin tool for launch: verify businesses and handle reported reviews. Categories, help articles and support chat come later. (recommended)
 - B · Design the full CMS before launch.
-- C · No tool at launch: developers verify businesses and handle reports by hand in the database.
-- D · No verification at launch: every new business is public at once until the tool exists.
+- C · No verification at launch: every new business is public at once.
 
 answer: —
 
@@ -154,17 +154,17 @@ Every login and every booking message is an SMS, and today no SMS reaches a phon
 answer: —
 
 ## Q-100 · Language in business workspace links
-chapter: 02 · status: open
+chapter: 02 · status: decided
 
 ADR 0016 (14.10.2026) says the business workspace and the CMS carry no language in their links and use each person's own language setting. The business spec draws every workspace link with one: `business.yeral.app/tk/giris`, `/tk/calendar`, `/tk/settings/…` (business spec §1, §4). The workspace isn't built yet.
 
 - A · No language in workspace links; each person sees their own language, so a link shared between staff opens in the reader's language. (recommended)
 - B · A language in every link, like the client site (`/tk/`, `/ru/`, `/en/`).
 
-answer: —
+answer: A · No language in workspace and CMS links. The owner asked why sites put the language in links at all: public pages need it (a search engine indexes a language only at its own address, a shared link opens in the same language, pages can be cached), so the client site keeps it; apps behind a login don't. (18.10.2026)
 
 ## Q-101 · Who checks the Russian and English text
-chapter: 02 · status: open
+chapter: 02 · status: decided
 
 The design is Turkmen only; Russian and English are written in code from the Turkmen (owner, ROUND6-ANSWERS). The owner checks the Turkmen while coding, and all Turkmen gets a native review before launch (client spec §9). Nobody is named for the Russian and English drafts (Q-101).
 
@@ -172,10 +172,11 @@ The design is Turkmen only; Russian and English are written in code from the Tur
 - B · Native speakers check both Russian and English before launch.
 - C · The owner checks all three languages.
 
-answer: —
+answer: C · English is the source from now on, the design included; Claude writes the other languages and the owner checks them. The Turkmen design was there to see how Turkmen looks with the font. (18.10.2026)
+concern: Claude's Turkmen is the weakest of the three languages, and Turkmen is the launch market's main language. Your check is enough if you read Turkmen natively; otherwise one proofread by a native Turkmen and a native Russian speaker before launch is worth the few hours it costs. Also: screens drawn in English hide longer texts (Russian runs about 30% longer), so each design prompt should ask Claude Design to check the screen with Russian text too. (18.10.2026)
 
 ## Q-102 · Which language a business must fill in
-chapter: 02 · status: open
+chapter: 02 · status: decided
 
 Texts a business writes (description, service names and descriptions) have TK, RU and EN tabs (business spec §8). Nothing says which are required. The code requires the Turkmen text and shows it whenever another language is missing. Many businesses may write in Russian only.
 
@@ -183,10 +184,10 @@ Texts a business writes (description, service names and descriptions) have TK, R
 - B · Turkmen is required, the others are optional (code today).
 - C · All three are required.
 
-answer: —
+answer: A · Any one language is required; a missing language shows the one written. Owner's note: "let them choose on settings which lang to use. Clients can be different people, maybe for some of them they want russian, some of them english. I saw that some business do 2 copies, one in russian another in turkmen of the same context." (18.10.2026)
 
 ## Q-103 · Who sets a restaurant's average bill
-chapter: 02 · status: open
+chapter: 02 · status: decided
 
 Restaurants and cafés show *Ortaça hasap* `≈ 150 TMT` on cards and in the table flow (client spec §2, Booking-Table screen). With no online payment Ýeral can't work it out, and no screen lets a business enter it. The demo values are placeholders (Q-103).
 
@@ -194,50 +195,54 @@ Restaurants and cafés show *Ortaça hasap* `≈ 150 TMT` on cards and in the ta
 - B · The Ýeral team sets it during verification.
 - C · Drop the average bill.
 
-answer: —
+answer: C · Drop the average bill: billing isn't Ýeral's job, booking a place is. A menu may come later. (18.10.2026)
+concern: Dropping the amount is right. One thing worth keeping later: an optional price level (₼ to ₼₼₼₼, like Google Maps) set by the restaurant. It isn't billing, and it's one of the first things people look at when choosing where to eat. (18.10.2026)
 
 ## Q-104 · Number format in English
-chapter: 02 · status: open
+chapter: 02 · status: decided
 
 The design uses a decimal comma and a space between thousands: `4,9`, `1 410 TMT` (client spec §8), and describes only Turkmen. The code writes Russian like Turkmen and English the English way: `4.9`, `1,410 TMT`.
 
 - A · English uses `4.9` and `1,410` (code today). (recommended)
 - B · Every language uses `4,9` and `1 410`.
 
-answer: —
+answer: A · Formats follow the language. Ýeral isn't a Turkmen platform: it launches in Turkmenistan but isn't bound to it. Build English only, and add each country's languages when Ýeral lands there (for Uzbekistan, for example, Uzbek, English and Russian). (18.10.2026)
+concern: English only until launch is a launch risk: Turkmenistan is the launch market, so every Turkmen and Russian text would be translated and checked at the very end. Better: add Turkmen and Russian screen by screen as each one is built (Claude writes them, you check in small batches), so the launch never waits on translation. And "not bound to one country" should stay cheap now: country settings kept in one place, but no multi-country features until a second country is real. (18.10.2026)
 
 ## Q-105 · Businesses open past midnight
-chapter: 02 · status: open
+chapter: 02 · status: decided
 
 A business day may end at 24:00 (ROUND6-ANSWERS E1). Opening past midnight, such as a café open until 02:00, isn't designed (client spec §13, Q-105). The code ends every day by midnight, and no visit can run past 24:00.
 
 - A · Not on MVP: late places close at 24:00 in Ýeral and take later guests by phone. (recommended)
 - B · Design it now: hours like 18:00–02:00 and bookings that cross midnight.
 
-answer: —
+answer: B · Design it now: hours like 18:00–02:00 and bookings that cross midnight. Owner's note: no hard limits on such things; organise everything flexibly, because we can't predict which options businesses will want. (18.10.2026)
+concern: Crossing midnight is worth it for bars and late restaurants. The general rule worries me more: "no limits, everything flexible" turns every option into a setting, and each setting means more screens, more rules to test and more ways for a business to get confused. Better: flexible where businesses really differ (hours, hold time, cancellation rules), with good defaults, and new options added when real businesses ask for them. (18.10.2026)
 
 ## Q-106 · Whole kilometres: 3,0 km or 3 km
-chapter: 02 · status: open
+chapter: 02 · status: decided
 
 The screens and the demo data show `3,0 km` (Glow Studio). The code drops a trailing ",0" and shows `3 km`, and from 10 km it shows whole numbers (`12 km`). The spec gives only `1,2 km` and `850 m` (client spec §5).
 
 - A · `3 km` (code today). (recommended)
 - B · Always one decimal under 10 km: `3,0 km`.
 
-answer: —
+answer: A · `3 km`. Formats follow the rules of the country and its language, the way that country's common platforms show them. (18.10.2026)
 
 ## Q-107 · The city in a business address
-chapter: 02 · status: open
+chapter: 02 · status: decided
 
 No text names a city (client spec §1, §8). Addresses in the demo have no city ("Andalyp köçesi 8"). That works while Ýeral is in one city; once a second city opens, a street name alone can be unclear on the business page and in SMS reminders.
 
 - A · No city while Ýeral works in one city; add it to the full address on the business page when a second city opens. (recommended)
 - B · Store and show the city in the full address from the start.
 
-answer: —
+answer: B · Store and show the city. The person's location preselects a city, and they can pick another one (booking in a city they're moving to, or for relatives). An address shows its city when it differs from the selected one. (18.10.2026)
+concern: Guessing the city from the internet address is weak in Turkmenistan: many people use a VPN, so the address often points to another country. Better: the phone's location when the person allows it, otherwise ask once and remember the city; the internet address only as a last guess. (18.10.2026)
 
 ## Q-108 · Which map app "Ýol görkez" opens
-chapter: 02 · status: open
+chapter: 02 · status: decided
 
 *Ýol görkez* (directions) opens a map link (screens README); the app isn't named. Maps on the site are MapLibre with OpenFreeMap tiles (owner 14.10.2026), which show the place but don't give directions.
 
@@ -245,10 +250,10 @@ chapter: 02 · status: open
 - B · Always Google Maps.
 - C · Always Yandex Maps.
 
-answer: —
+answer: A · The phone's own choice (Apple Maps on iPhone, the app chooser on Android), Google Maps on a computer: use what works now, add more later. (18.10.2026)
 
 ## Q-109 · SMS sender name
-chapter: 02 · status: open
+chapter: 02 · status: decided
 
 Every SMS starts with "Ýeral:" in its text (client spec §6). The sender name shown on the phone isn't chosen and depends on the SMS provider (Q-036, Q-109). Sender names are usually plain Latin letters, up to 11 characters.
 
@@ -256,7 +261,7 @@ Every SMS starts with "Ýeral:" in its text (client spec §6). The sender name s
 - B · "Ýeral", if the provider allows the Turkmen letter.
 - C · A number without a name.
 
-answer: —
+answer: A · "Yeral" in plain Latin. The name isn't bound to Turkmen: the owner chose it because it sounds good and is uncommon, not for its Turkmen meaning. (18.10.2026)
 
 ## Q-112 · Party size in search and each restaurant's limit
 chapter: 05 · status: open
@@ -402,6 +407,46 @@ Opening pickers start at 06:00 and step by 30 minutes (business spec §11). Clas
 
 - A · Hours from 00:00 to 24:00 in 30-minute steps; classes any time inside the hours, in 15-minute steps. (recommended)
 - B · Keep the drawn ranges.
+
+answer: —
+
+## Q-131 · How Ýeral separates countries
+chapter: 02 · status: open · priority: high
+
+The owner decided (18.10.2026, Q-104) that Ýeral isn't bound to Turkmenistan: it's built in English and each country it launches in adds its own languages. Today everything country-specific is spread through the book and the code: Turkmen words, manats, +993 phones, Asia/Ashgabat time, Turkmen SMS. Countries also make their own data rules: Turkmenistan's law says personal data must also be stored inside the country (Q-037), and Uzbekistan has had a similar rule since 16.04.2021 (law on personal data, article 27¹; kun.uz reports it has mostly not been enforced). Fresha, the reference product, runs one site for every country. Each option keeps a country's settings in one place: languages, currency and money format, phone code and number rules, time zone, SMS provider, legal texts.
+
+- A · One code base, one deployment per country: each country gets its own server, database and address, built from that country's settings. Data stays in the country by design. Turkmenistan is the first. (recommended)
+- B · One site and one database for every country, like Fresha; each business belongs to a country.
+answer: —
+
+## Q-132 · A new visitor's first language
+chapter: 02 · status: open
+
+While Ýeral is built it has only English. At a country's launch it gets that country's languages (Turkmenistan: Turkmen and Russian, plus English). ADR 0016 opened `/` in Turkmen. A person's own choice is always remembered (chapter 2); this is only about someone who hasn't chosen yet.
+
+- A · The phone's or browser's language if Ýeral has it, else the country's main language. (recommended)
+- B · Always the country's main language (Turkmen in Turkmenistan).
+- C · Always English.
+
+answer: —
+
+## Q-133 · Redraw the existing boards in English
+chapter: 02 · status: open
+
+Future design pages are drawn in English (Q-101, 18.10.2026). Design v0.5 has every client and business board in Turkmen. The book's answers will change many boards anyway (chapter 6, "design to fix").
+
+- A · Redraw every board in English in the design pass that follows the book; Turkmen comes back as a translation. (recommended)
+- B · Only new and changed boards in English; unchanged boards stay Turkmen.
+
+answer: —
+
+## Q-134 · Money figures in the business app
+chapter: 02 · status: open
+
+Q-103 dropped the restaurant's average bill: "billing isn't our job". The business app also shows money figures worked out from the prices of completed visits, not from payments: the average check on the client card (F-140, MVP) and revenue and average check in analytics (F-163, F-164, later). No payment goes through Ýeral either way.
+
+- A · Keep them: they come from service prices, so no billing is involved. (recommended)
+- B · Drop money figures from the business app too; show visits and bookings only.
 
 answer: —
 
@@ -1114,7 +1159,7 @@ chapter: 08 · status: open
 
 Screens promise SMS that have no text: a business moving the booking ("Müşderä SMS iberilsin"), a client's move accepted, a booking entered by staff ("Müşderä SMS bilen habar ber"), a specialist changed after staff are removed, a class cancelled or moved by the studio, a team invite, and a new owner after a transfer. The code has its own texts for a business cancel and for the login code. It reuses the confirmed text when a move is accepted.
 
-- A · Claude drafts the Turkmen texts in the style of client spec §6, and the owner checks them while coding, as for all copy. (recommended)
+- A · Claude writes them in English, the source language, with the market's translations (ADR 0022), in the style of client spec §6; the owner checks them. (recommended)
 - B · The design writes them first, in the next export.
 
 answer: —
@@ -1155,7 +1200,7 @@ chapter: 08 · status: open
 
 SMS go out in the person's language (client spec §6). A client the business entered by phone may have no Ýeral account and no language set. The code then writes to them in Turkmen.
 
-- A · Turkmen, until the person signs in and chooses a language. (recommended)
+- A · The market's main language (Turkmen in Turkmenistan), until the person signs in and chooses a language. (recommended)
 - B · The business sets the client's language on the client card.
 
 answer: —

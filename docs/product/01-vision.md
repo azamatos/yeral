@@ -2,9 +2,13 @@
 
 ## What Ýeral is
 
-**Ýeral** comes from *ýer al*, Turkmen for "take a place". It is a booking service for any business that sells its time:
+**Ýeral** is a booking service for any business that sells its time:
 barbers and beauty salons, dentists and doctors, physio, restaurants and cafés, gyms and yoga studios, tutors, mechanics,
 groomers, home services. Every booking is a place: a chair, a table, a mat, a lesson. (client spec §1)
+
+**Ýeral isn't bound to one country** (owner, 18.10.2026). It's built in English and launches country by country, each
+country adding its own languages and settings. Turkmenistan is the first. (Q-104, ADR 0022) The name isn't Turkmen-bound
+either: the owner chose it because it sounds good and is uncommon, not for its meaning (*ýer al*, take a place). (Q-109)
 
 It has two sides that share one account and one set of rules:
 
@@ -39,19 +43,28 @@ flowchart LR
 ```
 
 - **yeral.app** is the marketplace: home, search with a map, category pages, business pages, booking, the client's
-  account. Turkmen, Russian and English, each with its own address (`/tk`, `/ru`, `/en`). (ADR 0015, ADR 0016)
+  account. English while it's built; each country adds its languages, each with its own address (`/en`, and `/tk`,
+  `/ru` for Turkmenistan). (ADR 0015, ADR 0022)
 - **business.yeral.app** is the workspace for business teams, plus a page that tells businesses why to join. (business spec)
-- **The CMS** is for the Ýeral team. It isn't designed yet. (business spec §24)
-- Native phone apps come later. The web works fully on phones in the meantime. (business spec §25)
+- **The CMS** is for the Ýeral team and is part of the launch: the team adds the first businesses there. It isn't
+  designed yet. (business spec §24; Q-001, Q-002)
+- Native phone apps come after the launch, and the business flow never depends on them. The web works fully on
+  phones. (business spec §25; Q-001)
 
-## The market
+## Markets
 
-- **Turkmenistan**, Ashgabat first. The interface never names a city: everything is relative to where the user is
-  ("Ýakynymda", near me). (client spec §1)
-- **Languages:** Turkmen first, then Russian and English. (ADR 0016)
+A market is one country with its own settings: languages, money, phone numbers, time zone, SMS provider, legal texts.
+How countries are kept apart is open (Q-131). **Turkmenistan is the first market:**
+
+- **Ashgabat first.** Lists stay relative to the person ("Ýakynymda", near me). The person's location preselects a
+  city and they can pick another; an address shows its city when it differs from the selected one. (client spec §1;
+  Q-107)
+- **Languages:** English, plus Turkmen and Russian added before the launch. (Q-101, Q-104, ADR 0022)
 - **Money:** manats, shown `40 TMT`. Clients pay at the place; there is no online payment. (client spec §1)
 - **Phones:** every account is a +993 mobile number with an SMS code. (ADR 0019, ROUND6-ANSWERS C1)
-- **Hosting:** Cloudflare for now, the team's own server later, because Cloudflare is reported filtered in Turkmenistan. (ADR 0007)
+- **Hosting:** Cloudflare for now, the team's own server later, because Cloudflare is reported filtered in
+  Turkmenistan. (ADR 0007) Whether people can reach it and whether the law wants the data inside the country is open
+  (Q-032, Q-037).
 
 ## How Ýeral makes money
 
@@ -81,7 +94,20 @@ These rules hold on every screen, in every app, for every business type. (client
 6. **The category decides how a business is found and booked:** its booking type, search filters and starter services.
 7. **Only verified businesses are public.** A new business uses its workspace at once, but clients find it only after
    the Ýeral team checks it.
-8. **No city names in the interface,** and one gradient primary button per screen.
+8. **No city names written into the copy:** a city appears only as data, as the selected city or in an address in
+   another city (Q-107). One gradient primary button per screen.
+9. **Nothing is bound to one country.** Languages, money, phone numbers, time zones and legal rules come from the
+   market's settings, never from code. (owner, 18.10.2026; ADR 0022)
+
+## Launch
+
+Decided by the owner on 17.10.2026:
+
+- **One launch with all three web apps:** the client site, the business app and the CMS. The business flow doesn't
+  work without all three. (Q-001)
+- **The first businesses** are added by the Ýeral team in the CMS after meeting their owners and showing them the
+  product; some owners set up by themselves to learn the product; sign-up stays open to anyone. (Q-002)
+- **Name and domain:** Ýeral on yeral.app; investors or future owners may change them later. (Q-003)
 
 ## Reference product
 

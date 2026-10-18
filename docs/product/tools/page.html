@@ -739,6 +739,20 @@
     color: var(--done-ink);
     font-size: 15px;
   }
+  .q-concern {
+    margin: 8px 16px 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--open-line);
+    background: var(--open-bg);
+    color: var(--open-ink);
+    font-size: 15px;
+  }
+  .q-concern-ask {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+  }
   .qref {
     display: flex;
     gap: 10px;
@@ -904,6 +918,7 @@
         <button type="button" class="chip" data-filter="start" aria-pressed="true">Start here</button>
         <button type="button" class="chip" data-filter="open" aria-pressed="false">Still open</button>
         <button type="button" class="chip" data-filter="answered" aria-pressed="false">Answered</button>
+        <button type="button" class="chip" data-filter="concern" aria-pressed="false">Claude's concerns</button>
         <button type="button" class="chip" data-filter="all" aria-pressed="false">All</button>
       </div>
       <!--INDEX-->
@@ -973,7 +988,7 @@
 
     function stateOf(qid) {
       const q = BOOK.questions[qid]
-      if (q && q.status === 'decided') return 'decided'
+      if (q && q.status === 'decided') return q.concern ? 'concern' : 'decided'
       const a = current('answers', qid)
       return a && (a.choice || (a.note || '').trim()) ? 'answered' : 'open'
     }
@@ -990,13 +1005,22 @@
         const el = qEls[qid]
         el.states.forEach((s) => {
           s.textContent =
-            st === 'decided' ? 'Decided' : st === 'answered' ? (a.choice ? 'Answered ' + a.choice : 'Answered in a note') : 'Open'
+            st === 'decided'
+              ? 'Decided'
+              : st === 'concern'
+                ? 'Claude has a concern'
+                : st === 'answered'
+                  ? a.choice
+                    ? 'Answered ' + a.choice
+                    : 'Answered in a note'
+                  : 'Open'
           s.classList.toggle('is-answered', st === 'answered')
           s.classList.toggle('is-decided', st === 'decided')
         })
         const q = BOOK.questions[qid]
         el.opts.forEach((b) => {
-          const chosen = (a && a.choice === b.dataset.key) || (q.status === 'decided' && q.answer.startsWith(b.dataset.key + ' '))
+          // A fresh choice on the page wins over the recorded one (a reply to Claude's concern).
+          const chosen = a && a.choice ? a.choice === b.dataset.key : q.status === 'decided' && q.answer.startsWith(b.dataset.key + ' ')
           b.classList.toggle('is-chosen', !!chosen)
           b.setAttribute('aria-pressed', chosen ? 'true' : 'false')
         })
@@ -1015,7 +1039,9 @@
                 ? st !== 'open'
                 : filter === 'answered'
                   ? st === 'open'
-                  : false
+                  : filter === 'concern'
+                    ? st !== 'concern'
+                    : false
         }
       }
       document.getElementById('answered-count').textContent = String(answeredTotal)

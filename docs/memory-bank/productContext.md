@@ -124,7 +124,7 @@ turns it on.
 | `Slot` | free time | boş wagt |
 | `Review` | review | teswir |
 
-Full UI glossary: design spec §9. All Turkmen copy needs a native review before launch.
+Full UI glossary: design spec §9. The owner checks every translation before a market launches (book Q-101).
 
 ## Demo data
 

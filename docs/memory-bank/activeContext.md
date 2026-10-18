@@ -39,6 +39,11 @@ The version PR #26
   Build an own decisions app only when a second person decides regularly or syncing becomes a bottleneck. Next: the
   owner answers every book question; then an exact plan for yeral.app, the business app, the CMS and the backend,
   including when and what server to buy.
+- 2026-10-18 (book answers): Ýeral isn't a Turkmen-only platform: it's built in English, and each country it launches
+  in adds its own languages and settings (Turkmenistan first: Turkmen, Russian); ADR 0022. One launch with the client
+  site, the business app and the CMS; the team adds the first businesses in the CMS; Ýeral on yeral.app; no average
+  bill; businesses may be open past midnight and options stay flexible; the city is a choice (book Q-001–Q-003,
+  Q-100–Q-109).
 
 ## Decisions
 
@@ -71,6 +76,9 @@ instead of Better Auth (the design's attempts/lock/resend rules, no placeholder 
 
 2026-10-17: [0021](../decisions/0021-product-book-first.md) product book first (`docs/product/`), then design,
 Storybook, code; Claude Code writes the Claude Design prompts and checks the canvas.
+
+2026-10-18: [0022](../decisions/0022-english-first-any-country.md) built in English, not bound to one country; each
+market adds its languages (supersedes 0016's Turkmen first).
 
 ## Open questions
 

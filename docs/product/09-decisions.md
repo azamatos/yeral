@@ -5,7 +5,21 @@ question in this book, the answer is added here with its date, and the chapters 
 
 ## Answered in this book
 
-None yet. Answers from the page land here first.
+| Date | Question | Decision |
+|---|---|---|
+| 18.10.2026 | Q-109 | SMS sender "Yeral" in plain Latin; the name was chosen for its sound, not its Turkmen meaning |
+| 18.10.2026 | Q-108 | "Directions" opens the phone's own map app; Google Maps on a computer |
+| 18.10.2026 | Q-107 | The city is data: preselected from the person's location, changeable; an address shows its city when it differs |
+| 18.10.2026 | Q-106 | `3 km`; formats follow what the country's common platforms show |
+| 18.10.2026 | Q-105 | Businesses may be open past midnight, and bookings may cross midnight; options stay flexible |
+| 18.10.2026 | Q-104 | Ýeral isn't bound to one country: built in English; each country it launches in adds its languages and settings. Number formats follow the language (ADR 0022) |
+| 18.10.2026 | Q-103 | No average bill for restaurants; a menu may come later |
+| 18.10.2026 | Q-102 | A business fills in any one language; a missing language shows the one written |
+| 18.10.2026 | Q-101 | English is the source text, the design included; Claude translates, the owner checks |
+| 18.10.2026 | Q-100 | No language in workspace and CMS links; the client site keeps it in every link |
+| 17.10.2026 | Q-003 | Launch as Ýeral on yeral.app |
+| 17.10.2026 | Q-002 | The team adds the first businesses in the CMS; sign-up stays open |
+| 17.10.2026 | Q-001 | One launch with the client site, the business app and the CMS; native apps later |
 
 ## How we work
 
@@ -29,7 +43,7 @@ None yet. Answers from the page land here first.
 | 14.10.2026 | Manual confirmation is the default; a business can switch on instant confirmation; requests expire after the business's hold time (default 30 minutes) with 3 other times for the client | owner, through business design round 4 | ADR 0017 |
 | 14.10.2026 | Declines carry a reason and up to 3 offered times; complaints replace a "came" button; after N no-shows a client books only by phone | business design round 4 | ADR 0017 |
 | 14.10.2026 | One booking engine with appointment, table and class types (resource later) and five statuses | design v0.3 | ADR 0017 |
-| 14.10.2026 | Turkmen first, then Russian and English; every client address carries its language | owner | ADR 0016 |
+| 14.10.2026 | Turkmen first, then Russian and English; every client address carries its language (Turkmen first replaced by English first, 18.10.2026) | owner | ADR 0016, ADR 0022 |
 | 14.10.2026 | The marketplace lives on yeral.app; there's no separate landing site; businesses use business.yeral.app | owner | ADR 0015 |
 | 14.10.2026 | Maps: MapLibre with OpenFreeMap tiles | owner | activeContext |
 | 14.10.2026 | The old mobile designs are removed: the web has its own design and logic | owner | activeContext |

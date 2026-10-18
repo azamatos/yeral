@@ -67,12 +67,14 @@ function parseQuestions(md) {
       status: 'open',
       options: [],
       answer: '',
+      concern: '',
       context: [],
     }
     for (const line of lines.slice(1)) {
       const meta = line.match(/^chapter:\s*(\w+)\s*·\s*status:\s*(\w+)(?:\s*·\s*priority:\s*(\w+))?/)
       const opt = line.match(/^- ([A-Z]) · (.+)$/)
       const ans = line.match(/^answer:\s*(.*)$/)
+      const con = line.match(/^concern:\s*(.*)$/)
       if (meta) {
         q.chapter = meta[1]
         q.status = meta[2]
@@ -82,6 +84,8 @@ function parseQuestions(md) {
         q.options.push({ key: opt[1], text: opt[2].replace(/\s*\(recommended\)\s*$/, ''), rec })
       } else if (ans) {
         q.answer = ans[1].trim() === '—' ? '' : ans[1].trim()
+      } else if (con) {
+        q.concern = con[1].trim() === '—' ? '' : con[1].trim()
       } else {
         q.context.push(line)
       }
@@ -94,10 +98,14 @@ function parseQuestions(md) {
 
 function questionCard(q) {
   const decided = q.status === 'decided'
+  // A decided question with Claude's concern stays answerable: the owner keeps or changes the answer.
+  const concern = decided && q.concern
+  const locked = decided && !concern
+  const label = decided ? (concern ? 'Claude has a concern' : 'Decided') : 'Open'
   const options = q.options
     .map(
       (o) => `
-      <button type="button" class="opt" data-qid="${q.id}" data-key="${o.key}"${decided ? ' disabled' : ''}>
+      <button type="button" class="opt" data-qid="${q.id}" data-key="${o.key}"${locked ? ' disabled' : ''}>
         <span class="opt-key">${o.key}</span>
         <span class="opt-text">${inline(o.text)}</span>
         ${o.rec ? '<span class="rec">Recommended</span>' : ''}
@@ -110,13 +118,19 @@ function questionCard(q) {
       <span class="q-id">${q.id}</span>
       <h4 class="q-title">${inline(q.title)}</h4>
       ${q.start ? '<span class="q-start">Start here</span>' : ''}
-      <span class="q-state" data-state-for="${q.id}">${decided ? 'Decided' : 'Open'}</span>
+      <span class="q-state" data-state-for="${q.id}">${label}</span>
     </header>
     <div class="q-context">${q.contextHtml}</div>
     <div class="opts" role="group" aria-label="Options for ${q.id}">${options}</div>
+    ${decided ? `<p class="q-recorded"><strong>Decided:</strong> ${inline(q.answer)}</p>` : ''}
     ${
-      decided
-        ? `<p class="q-recorded"><strong>Decided:</strong> ${inline(q.answer)}</p>`
+      concern
+        ? `<aside class="q-concern"><strong>Claude's concern:</strong> ${inline(q.concern)}<span class="q-concern-ask">Keep your answer or change it: pick an option or write a note.</span></aside>`
+        : ''
+    }
+    ${
+      locked
+        ? ''
         : `<div class="q-note">
       <label for="note-${q.id}">Your note (optional)</label>
       <textarea id="note-${q.id}" data-note-for="${q.id}" rows="2" maxlength="2000" placeholder="Anything to add, or your own option"></textarea>
@@ -406,7 +420,7 @@ const index = chapters
       .map((id) => questionsById.get(id))
       .map(
         (q) =>
-          `<li data-index-q="${q.id}"${q.start ? ' data-start' : ''}><a href="#${qAnchor(q.id)}"><span class="q-id">${q.id}</span> ${inline(q.title)}</a>${q.start ? '<span class="q-start">Start here</span>' : ''}<span class="q-state" data-state-for="${q.id}">${q.status === 'decided' ? 'Decided' : 'Open'}</span></li>`,
+          `<li data-index-q="${q.id}"${q.start ? ' data-start' : ''}><a href="#${qAnchor(q.id)}"><span class="q-id">${q.id}</span> ${inline(q.title)}</a>${q.start ? '<span class="q-start">Start here</span>' : ''}<span class="q-state" data-state-for="${q.id}">${q.status === 'decided' ? (q.concern ? 'Claude has a concern' : 'Decided') : 'Open'}</span></li>`,
       )
       .join('')
     return `<div class="index-group"><h3>${escapeHtml(c.title)}</h3><ul class="index">${rows}</ul></div>`
@@ -417,7 +431,14 @@ const book = {
   questions: Object.fromEntries(
     questions.map((q) => [
       q.id,
-      { chapter: q.chapter, status: q.status, start: !!q.start, options: q.options.map((o) => o.key), answer: q.answer },
+      {
+        chapter: q.chapter,
+        status: q.status,
+        start: !!q.start,
+        concern: !!q.concern,
+        options: q.options.map((o) => o.key),
+        answer: q.answer,
+      },
     ]),
   ),
   chapters: Object.fromEntries(chapters.map((c) => [c.key, c.placedHere])),

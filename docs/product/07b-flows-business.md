@@ -1372,7 +1372,7 @@ flowchart TD
 **Steps**
 
 1. The catalog is grouped (*Topar goş* adds a group: "Topar müşderiler üçin bölüm ady bolup görünýär."). Rows show name, duration, price, buffer override, who performs, online switch (§8). Drag to reorder; "Müşderiler şu tertipde görýär".
-2. *Hyzmat goş* / a row opens the service drawer: name in three languages ("RU we EN ady boş — müşderä türkmençe ady görkeziler."), description per language, group.
+2. *Hyzmat goş* / a row opens the service drawer: name in three languages ("RU we EN ady boş — müşderä türkmençe ady görkeziler."), description per language, group. Q-102 decided otherwise: any one language is enough, and a missing language shows the one written.
 3. Duration and *Hyzmatdan soňky arakesme* (buffer after it): "Bu hyzmatdan soň hünärmen şu wagt boş däl — arassalamak we taýýarlanmak üçin." Default follows the rule ("Umumy düzgün · 10 min").
 4. Price type *Baha görnüşi*: *Kesgitli* (fixed), *-den başlap* (from; "Iň pes bahasy"), *Mugt* (free), *Görkezme* (hidden: "Baha müşderä görkezilmeýär, ýöne girdeji hasabynda ulanylýar." — the client sees "Baha ýerinde aýdylýar", B1).
 5. *Kim edýär* (Who does it): staff chips. "Müşderi diňe saýlanan hünärmenleriň boş wagtyny görýär." None picked: "Hünärmen saýlanmady — müşderiler bu hyzmata ýazylyp bilmez."

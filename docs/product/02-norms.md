@@ -6,98 +6,119 @@ question.
 
 ## Languages
 
-- **Three languages:** Turkmen (*TK*, the default), Russian (*RU*) and English (*EN*). (client spec §1, ADR 0016)
-- **The client site carries the language in every link:** `/tk/…`, `/ru/…`, `/en/…`. Opening `/` goes to the saved
-  language, else Turkmen. Every public page tells search engines where its other two languages are. (client spec §3,
-  ADR 0016)
+- **English is the build language.** Ýeral is designed, written and built in English first. It isn't a Turkmen-only
+  product: it launches in Turkmenistan first and must work for any country. (owner, 18.10.2026; Q-101, Q-104,
+  ADR 0022)
+- **Each market adds its own languages** when Ýeral launches there: Turkmenistan gets Turkmen (*TK*) and Russian (*RU*)
+  next to English (*EN*); a later country brings its own, for example Uzbek and Russian. (owner, 18.10.2026)
+- **Every text goes through translations from day one,** so adding a language means translating, not rewriting.
+  (AGENTS rule 4)
+- **The client site carries the language in every link:** `/en/…` now; `/tk/…` and `/ru/…` when Turkmenistan
+  launches. Public pages need it: a search engine indexes a language only at its own address, a shared link opens in
+  the same language for everyone, and pages can be cached. Every public page tells search engines where its other
+  languages are. Links in this book are written with `/tk/`, from the Turkmen design: read them as `/{language}/`.
+  (client spec §3; Q-100; ADR 0016, ADR 0022)
+- **Opening `/`** goes to the saved language; for someone who hasn't chosen yet it's open (Q-132).
 - **Each person has one language.** It's saved in their profile when they log in and follows them to every device.
   The switch is in the site header (icon and code) and the footer (full names), and in the business workspace in the
   person's menu as *Dil* (Language). (client spec §3, §8; business spec §1)
-- **Business workspace links:** ADR 0016 says they carry no language and use the person's setting. The business spec
-  draws them with one: `business.yeral.app/tk/giris`, `/tk/calendar`. (ADR 0016, business spec §1, §4)
-- **SMS** go in the client's language. A client without a Ýeral account (a phone booking) gets Turkmen. The login code
+- **The business workspace and the CMS carry no language in their links.** They're behind a login, so each person
+  sees their own language, and a link shared between staff opens in the reader's language. The business spec's
+  `business.yeral.app/tk/giris` and `/tk/calendar` lose the `/tk`. (Q-100, decided 18.10.2026; ADR 0016)
+- **SMS** go in the client's language. Which language a client without a Ýeral account (a phone booking) gets is
+  open (Q-292); the code sends Turkmen. The login code
   goes in the saved language, else the language of the page. (client spec §6; code: apps/api/src/modules/jobs/run.ts,
   apps/api/src/modules/auth/routes.ts)
-- **Category names, hints and specialist words** come from Ýeral's catalogue, in all three languages. (ADR 0017; code:
+- **Category names, hints and specialist words** come from Ýeral's catalogue, in every language of the market.
+  (ADR 0017; code:
   apps/api/src/db/seed/categories.ts)
 
 > Open question Q-100: do business workspace links carry the language?
 
+> Open question Q-131: how does Ýeral keep countries apart?
+
+> Open question Q-132: which language does a new visitor see first?
+
 ### Who writes which text
 
-- The design is **Turkmen only**. The Turkmen text in the screens is the final draft and goes into the product word for
-  word. (design CLAUDE.md, ROUND6-ANSWERS)
-- **Russian and English are written in code** from the Turkmen. (owner, ROUND6-ANSWERS)
-- The owner checks the Turkmen while screens are built. All Turkmen text needs a native review before public launch.
-  (client spec §9, §13; Q-101)
-- Nobody is named to check the Russian and English. (Q-101)
+- **English is the source text** from 18.10.2026, the design included: future boards are drawn in English. Design
+  v0.5 is Turkmen; it showed how Turkmen looks with the font and stays the reference for the Turkmen translation.
+  (Q-101)
+- **Claude writes the translations** into each market's languages; the owner checks all of them before the market
+  launches. (Q-101, decided 18.10.2026)
 - Russian runs about 30% longer: buttons fit their text and never have a fixed width; labels wrap to two lines before
   they're cut. (client spec §8)
 - Plurals: Turkmen and English have one form; Russian has three (1 место, 2 места, 5 мест). (client spec §8)
-- **Text a business writes** (description, service names) has TK, RU and EN tabs. (business spec §8) The code requires
-  the Turkmen text and shows it whenever another language is missing. (code: packages/domain/src/model.ts)
+- **Text a business writes** (description, service names) has a tab per language of its market. (business spec §8)
+  Any one language is required; a missing language shows the one that was written. Some businesses write two copies,
+  for example Russian and Turkmen. (Q-102, decided 18.10.2026) **Code differs:** the code requires the Turkmen text.
+  (code: packages/domain/src/model.ts)
 
 > Open question Q-101: who checks the Russian and English text before launch?
+
+> Open question Q-133: are the existing boards redrawn in English?
 
 > Open question Q-102: which language must a business fill in?
 
 ## Words we use
 
-Use these exact Turkmen words. A status means the same thing on every screen, in every app and in every SMS.
-(client spec §9, business spec §12, ROUND6-ANSWERS)
+The product's words. English is the source (ADR 0022); the Turkmen column is the Turkmenistan translation, as drawn in
+design v0.5. A status means the same thing on every screen, in every app and in every SMS. (client spec §9, business
+spec §12, ROUND6-ANSWERS)
 
-| Turkmen | English | Notes |
+| English | Turkmen | Notes |
 |---|---|---|
-| *Ýeral* | "ýer al", take a place | the product's name (working title) |
-| *Biznes*, *ýer* | business, place | any business that sells its time |
-| *Iş ýeri* | workspace | one business at one address; a second address is another workspace |
-| *Hünärmen* · *Islendik hünärmen* | specialist · any specialist | *Hünärmen* is also the name of an access level |
-| *Lukman*, *mugallym*, *tälimçi*, *ussa* | doctor, teacher, trainer, master | category words that replace *hünärmen* |
-| *Stilist*, *dellek*, *dyrnak ussasy* | stylist, barber, nail artist | beauty role names |
-| *Müşderi* · *Müşderiler* | client · clients | a business's client and its client list |
-| *Ýazylyş* · *Ýazylmak* | booking · to book | the main button on a business page is *Ýazylmak* |
-| *Ýazylyşy ugrat* | send booking | the client sends a request; it isn't booked yet |
-| *Haýyş* | request | a booking waiting for the business's answer |
-| *Boş wagt* | free time | a time the client can pick |
-| *Hyzmat* · *Hyzmatlar* | service · services | |
-| *Wagt bellemek* · *Stol bronlamak* · *Topar sapagy* · *Ýer kärendesi* | appointment · table · class · resource | the booking types; resource comes later |
-| *Stoly bronla* · *Ýer al* | book a table · take a seat | main buttons of the table and class flows |
-| *Adam sany* · *Sapak* | party size · class session | |
-| *Zal*, *Terrasa*, *VIP otag* | hall, terrace, VIP room | seating areas |
-| *Teswir* · *Baha ber* | review · rate | |
-| *Garaşylýar* | Pending | status, clock icon |
-| *Tassyklandy* | Confirmed | status, check icon |
-| *Tamamlandy* | Completed | status, double check icon |
-| *Ýatyryldy* | Cancelled | status, x icon |
-| *Gelmedi* | No-show | status, person-with-x icon |
-| *Siz ýatyrdyňyz* · *Biznes ýatyrdy* · *Biznes ret etdi* · *Wagtynda jogap gelmedi* | you cancelled · the business cancelled · the business declined · no answer in time | who cancelled; *ret etdi* when it was never confirmed |
-| *Tassykla* · *Ret et* | confirm · decline | |
-| *Başga wagta geçir* · *Wagty üýtget* | move to another time · change the time | the second is the title of the move flow |
-| *Ýazylyşy ýatyr* · *Yzyna al* · *Gaýtadan ýazyl* | cancel booking · undo · book again | |
-| *Arz et* | report, complaint | the business reports a no-show or a problem; also reporting a review |
-| *Eýesi* · *Administrator* · *Hünärmen* · *Programmasyz hünärmen* | owner · admin · specialist · phone-only specialist | access levels (*Dereje*) |
-| *Topar* · *Çakylyk* · *Rugsatlar* | team · invite · permissions | |
-| *Içerki ýagdaý* | internal status | team only, never shown to clients |
-| *Başga ýerde* | busy elsewhere | a person working in another workspace at that time |
-| *Çeşme*: *Onlaýn* · *Telefon* · *Gelip ýazyldy* | source: online · phone · walk-in | |
-| *Iş wagty* · *Arakesme* · *Aýratyn günler* · *Dynç güni* | hours · break · special days · day off | |
-| *Hyzmatdan soňky arakesme* | buffer | free time after a service |
-| *Ýazylyş düzgünleri* · *Derrew tassyklama* | booking rules · instant confirmation | |
-| *Barlagda* | in review | a new business before the Ýeral team verifies it |
-| *Senenama* | calendar | |
-| *Töleg ýerinde* · *Mugt* | pay at the place · free | |
-| *Ýakynymda* · *Golaýyňyzda* | near me · near you | never a city name |
-| *Ýazylyşlarym* · *Halanlarym* | my bookings · favourites | |
-| *Gelýän* · *Geçen* | upcoming · past | tabs in my bookings |
-| *Girdeji* · *Ortaça çek* · *Gelşi* | revenue · average check · visit | business figures |
-| *Yzygiderli* · *Täze* · *Köpden bäri gelmedik* · *Arz edilen* | regular · new · lapsed · reported | client segments |
+| Ýeral | *Ýeral* | the product's name, chosen for its sound (Q-109) |
+| business, place | *Biznes*, *ýer* | any business that sells its time |
+| workspace | *Iş ýeri* | one business at one address; a second address is another workspace |
+| specialist · any specialist | *Hünärmen* · *Islendik hünärmen* | *Hünärmen* is also the name of an access level |
+| doctor, teacher, trainer, master | *Lukman*, *mugallym*, *tälimçi*, *ussa* | category words that replace *hünärmen* |
+| stylist, barber, nail artist | *Stilist*, *dellek*, *dyrnak ussasy* | beauty role names |
+| client · clients | *Müşderi* · *Müşderiler* | a business's client and its client list |
+| booking · to book | *Ýazylyş* · *Ýazylmak* | the main button on a business page is *Ýazylmak* |
+| send booking | *Ýazylyşy ugrat* | the client sends a request; it isn't booked yet |
+| request | *Haýyş* | a booking waiting for the business's answer |
+| free time | *Boş wagt* | a time the client can pick |
+| service · services | *Hyzmat* · *Hyzmatlar* | |
+| appointment · table · class · resource | *Wagt bellemek* · *Stol bronlamak* · *Topar sapagy* · *Ýer kärendesi* | the booking types; resource comes later |
+| book a table · take a seat | *Stoly bronla* · *Ýer al* | main buttons of the table and class flows |
+| party size · class session | *Adam sany* · *Sapak* | |
+| hall, terrace, VIP room | *Zal*, *Terrasa*, *VIP otag* | seating areas |
+| review · rate | *Teswir* · *Baha ber* | |
+| Pending | *Garaşylýar* | status, clock icon |
+| Confirmed | *Tassyklandy* | status, check icon |
+| Completed | *Tamamlandy* | status, double check icon |
+| Cancelled | *Ýatyryldy* | status, x icon |
+| No-show | *Gelmedi* | status, person-with-x icon |
+| you cancelled · the business cancelled · the business declined · no answer in time | *Siz ýatyrdyňyz* · *Biznes ýatyrdy* · *Biznes ret etdi* · *Wagtynda jogap gelmedi* | who cancelled; *ret etdi* when it was never confirmed |
+| confirm · decline | *Tassykla* · *Ret et* | |
+| move to another time · change the time | *Başga wagta geçir* · *Wagty üýtget* | the second is the title of the move flow |
+| cancel booking · undo · book again | *Ýazylyşy ýatyr* · *Yzyna al* · *Gaýtadan ýazyl* | |
+| report, complaint | *Arz et* | the business reports a no-show or a problem; also reporting a review |
+| owner · admin · specialist · phone-only specialist | *Eýesi* · *Administrator* · *Hünärmen* · *Programmasyz hünärmen* | access levels (*Dereje*) |
+| team · invite · permissions | *Topar* · *Çakylyk* · *Rugsatlar* | |
+| internal status | *Içerki ýagdaý* | team only, never shown to clients |
+| busy elsewhere | *Başga ýerde* | a person working in another workspace at that time |
+| source: online · phone · walk-in | *Çeşme*: *Onlaýn* · *Telefon* · *Gelip ýazyldy* | |
+| hours · break · special days · day off | *Iş wagty* · *Arakesme* · *Aýratyn günler* · *Dynç güni* | |
+| buffer | *Hyzmatdan soňky arakesme* | free time after a service |
+| booking rules · instant confirmation | *Ýazylyş düzgünleri* · *Derrew tassyklama* | |
+| in review | *Barlagda* | a new business before the Ýeral team verifies it |
+| calendar | *Senenama* | |
+| pay at the place · free | *Töleg ýerinde* · *Mugt* | |
+| near me · near you | *Ýakynymda* · *Golaýyňyzda* | never a city name |
+| my bookings · favourites | *Ýazylyşlarym* · *Halanlarym* | |
+| upcoming · past | *Gelýän* · *Geçen* | tabs in my bookings |
+| revenue · average check · visit | *Girdeji* · *Ortaça çek* · *Gelşi* | business figures |
+| regular · new · lapsed · reported | *Yzygiderli* · *Täze* · *Köpden bäri gelmedik* · *Arz edilen* | client segments |
 
-All Turkmen copy still needs a native review before launch. (client spec §9)
+The owner checks every translation before a market launches. (Q-101)
 
 ## Money
 
-- **Manats, whole numbers only,** written `40 TMT`. Large amounts group with a space: `1 410 TMT`. (client spec §1,
-  business spec §4; code: packages/i18n/src/fmt.ts)
+- **Money is in the market's currency.** Turkmenistan: manats, whole numbers only, written `40 TMT`. Large amounts
+  group as the language does: `1 410 TMT` in Turkmen and Russian, `1,410 TMT` in English. (client spec §1, business
+  spec §4; Q-104; code: packages/i18n/src/fmt.ts)
 - **Four price types** on a service (client spec §2, ROUND6-ANSWERS B1; B-Services screen):
   - fixed: `80 TMT`;
   - from: `250 TMT-den` (Russian "от 250 TMT", English "from 250 TMT");
@@ -109,26 +130,28 @@ All Turkmen copy still needs a native review before launch. (client spec §9)
   packages/domain/src/pricing.ts)
 - **The business's own figures** (revenue, average check) include its hidden prices. Clients never see those amounts.
   (business spec §4; code: packages/domain/src/pricing.ts)
-- **Restaurants show an average bill:** *Ortaça hasap* `≈ 150 TMT`. (client spec §2; Booking-Table screen) Real amounts
-  for the demo restaurants are still missing. (Q-103)
+- **No average bill.** Restaurants show no expected amount: billing isn't Ýeral's job, booking a place is. A menu may
+  come later (F-239). (Q-103, decided 18.10.2026) The design's *Ortaça hasap* `≈ 150 TMT` goes.
 - **No online payment.** Every summary says *Töleg ýerinde* (pay at the place). Card deposits come later; summaries
   keep a hidden row for them. (client spec §1)
 - **Ýeral is free for businesses.** No plans, commission or billing screens. The business landing says *Mugt* with no
   "for now" and no future prices. (owner 16.10.2026; business spec §19, §25)
-- **Decimals use a comma** in Turkmen and Russian: `4,9`. (client spec §8) The code writes English as `4.9` and
-  `1,410`. (code: packages/i18n/src/fmt.ts)
+- **Number formats follow the language:** a decimal comma in Turkmen and Russian (`4,9`), a point in English (`4.9`).
+  (client spec §8; Q-104, decided 18.10.2026; code: packages/i18n/src/fmt.ts)
 
-**Code differs:** a hidden price prints the average bill or nothing instead of *Baha ýerinde aýdylýar*
-(code: packages/i18n/src/fmt.ts).
+**Code differs:** a hidden price prints the average bill or nothing instead of *Baha ýerinde aýdylýar*, and the
+average bill is still in the code (code: packages/i18n/src/fmt.ts).
 
 > Open question Q-103: who sets a restaurant's average bill?
 
 > Open question Q-104: which number format does English use?
 
+> Open question Q-134: does the business app keep its money figures?
+
 ## Time and dates
 
-- **Business-local time.** Every time is the business's own clock, whatever the phone or the server says. All
-  businesses are in Asia/Ashgabat: UTC+5, no daylight saving. A 14:30 visit shows 14:30 everywhere. (AGENTS rule 5;
+- **Business-local time.** Every time is the business's own clock, whatever the phone or the server says. The time
+  zone comes from the market; every business in Turkmenistan is in Asia/Ashgabat: UTC+5, no daylight saving. A 14:30 visit shows 14:30 everywhere. (AGENTS rule 5;
   code: packages/domain/src/time.ts)
 - The week starts on Monday.
 
@@ -151,12 +174,14 @@ All Turkmen copy still needs a native review before launch. (client spec §9)
 - **The 24:00 rule.** A day may end at 24:00. Clients then see `09:00–24:00` and *Häzir açyk · 24:00-a çenli* (open now,
   until 24:00). End pickers go up to 24:00; start pickers stop at 23:30. A visit must end by 24:00. (ROUND6-ANSWERS E1,
   business spec §26; code: packages/contract/src/common.ts)
-- **Past midnight** (a bar open until 02:00) isn't designed. (client spec §13, Q-105)
+- **Past midnight:** a business may be open past midnight (`18:00–02:00`), and a booking may cross midnight. It isn't
+  designed yet. (client spec §13; Q-105, decided 18.10.2026) **Code differs:** every day and every visit ends by 24:00.
 
 > Open question Q-105: can a business be open past midnight?
 
 ## Phones
 
+- **Phone rules come from the market.** These are Turkmenistan's.
 - **Turkmen numbers:** +993 and 8 digits. The phone field has a fixed +993 in front and also accepts the local form
   `8 65 …`. (client spec §4.4; code: packages/domain/src/phone.ts)
 - **Mobile numbers start with 6 or 7** (61–65 and 71 today). Only they can receive a login code. (ROUND6-ANSWERS C1;
@@ -174,22 +199,27 @@ All Turkmen copy still needs a native review before launch. (client spec §9)
 
 ## Places and distance
 
-- **No city name in any text:** not in headings, titles, the footer or SMS. Everything is relative to the person:
+- **No city name written into the copy:** headings, titles, the footer and SMS stay relative to the person:
   *Ýakynymda* (near me), *Golaýyňyzda* (near you). (client spec §1, §8; design CLAUDE.md)
+- **The city is data** (Q-107, decided 18.10.2026): the person's location preselects a city; they can pick another one
+  (booking in a city they're moving to, or for relatives); a business address shows its city when it differs from the
+  selected one. Not designed yet (F-240).
 - **Location denied:** the city from the internet address may appear only inside the *Nirede?* (where?) field, with
   *Ýerleşiş ýapyk — şäher boýunça görkezilýär* (location is off, showing by city). Distances are hidden; lists sort by
   rating × number of reviews. (client spec §5)
 - **Location unknown:** a banner *Ýakynyňyzdaky ýerleri görkezeliň* (let us show places near you) above
   *Meşhur ýerler* (popular places). (client spec §4.1)
 - **Distances:** `1,2 km`; under 1 km in metres: `850 m`. (client spec §5) The code rounds to 10 m and shows whole
-  kilometres from 10 km (`12 km`). (code: packages/i18n/src/fmt.ts)
+  kilometres from 10 km (`12 km`). (code: packages/i18n/src/fmt.ts) Whole kilometres drop the ",0": `3 km`; formats
+  follow what the country's common platforms show. (Q-106, decided 18.10.2026)
 - **Where distance shows:** cards `category · distance`; search rows `category · street · distance`; the business page
   shows the full address. (client spec §5)
 - **Home-based businesses** hide the exact address until the booking is confirmed; the map shows an approximate circle.
   (client spec §2, business spec §7)
 - **Entrance note:** *Girelge nirede?* (where is the entrance?) next to the address. (business spec §7)
-- **Maps:** MapLibre with OpenFreeMap tiles. (owner 14.10.2026) *Ýol görkez* (directions) opens a map link.
-  (screens README)
+- **Maps:** MapLibre with OpenFreeMap tiles. (owner 14.10.2026) *Ýol görkez* (directions) opens the phone's own
+  choice (Apple Maps on iPhone, the app chooser on Android), Google Maps on a computer. (screens README; Q-108, decided
+  18.10.2026)
 
 > Open question Q-106: whole kilometres: `3,0 km` or `3 km`?
 
@@ -240,8 +270,9 @@ text (code: packages/i18n/src/messages/tk.json).
 
 ## Brand and look
 
-- **Name:** *Ýeral*, from "ýer al" (take a place). (client spec §1) The business product is *Ýeral Biznes*.
-  (business spec §19)
+- **Name:** *Ýeral*, chosen because it sounds good and is uncommon, not for its Turkmen meaning ("ýer al", take a
+  place). (client spec §1; Q-109) The business product is *Ýeral Biznes*. (business spec §19)
+- **SMS sender name:** "Yeral" in plain Latin. (Q-109, decided 18.10.2026)
 - **Name and domain are working titles.** Every app reads them from one setting, so a rename is a configuration
   change. (owner 13.10.2026; AGENTS rule 6; code: packages/lib/src/site.ts, translation key `common.brand`) The final
   name and domain are open question Q-003 in chapter 1.

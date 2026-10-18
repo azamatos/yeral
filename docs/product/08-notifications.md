@@ -166,7 +166,7 @@ Notes:
 - **Summaries:** *Ertirki ýazylyşlar* in the evening and *Gündelik jemleme* in the morning, one message each, never by SMS (chapter 7c, S-18; Q-280).
 - **Sound:** there's a *Ses bilen* (with sound) switch, but only on the first two business events (business spec §22).
 - **Browser permission:** a banner asks for it: *Brauzer habarnamalary ýapyk — täze haýyşlary sekuntda görmek üçin açyň.* with *Rugsat ber*. The denied state isn't drawn, so it uses the same banner with *Brauzer sazlamalarynda açyň* (business spec §16, §22).
-- **Language:** messages go in the person's language: *Saýt we SMS habarnamalar şu dilde bolar.* (Account-Profile). Turkmen is the default. RU and EN are written in code from the TK text (ROUND6 copy note). The code uses the saved language, or Turkmen if there's none (Q-292).
+- **Language:** messages go in the person's language: *Saýt we SMS habarnamalar şu dilde bolar.* (Account-Profile). English is the source and each market's languages are translations (ADR 0022). Without a saved language the code uses Turkmen; what it should be is Q-292.
 - **Programmasyz staff** get nothing, and their requests go to the owner and admin (business spec §2).
 - **Mobile numbers only:** SMS go only to mobile numbers (ROUND6 C1), so a phone client saved with a landline gets no SMS.
 - **The SMS link** works signed out. Any action on it logs in with the booking's own phone, shown masked and not editable (ROUND6 A1).

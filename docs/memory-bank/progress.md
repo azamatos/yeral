@@ -131,6 +131,10 @@
 - **2026-10-18 · Decision room considered and dropped:** a brief for "Karar" (#28) was written and removed; the repo
   and the book page stay the way decisions are made and recorded. New book question Q-037 (Turkmen law 519-V: personal
   data also stored in Turkmenistan), Q-032 updated with the 2025 IP-range blocking.
+- **2026-10-18 · Book answers, batch 1:** Q-001–Q-003 and Q-100–Q-109 written into the book; ADR 0022 (English
+  first, languages per market); Claude's concerns recorded on Q-003, Q-101, Q-103, Q-104, Q-105, Q-107 (new `concern:`
+  line, shown on the page); new questions Q-131–Q-134; features F-238 (add a business for its owner), F-240 (city
+  choice) and F-109 (past midnight) in the MVP, F-239 (menu) later; F-178 CMS moved to MVP.
 
 ## Roadmap
 

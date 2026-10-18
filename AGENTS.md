@@ -30,10 +30,12 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 2. State has one owner: server data → TanStack Query via `@yeral/sdk`; shareable → URL search params; form input →
    TanStack Form; local → `useState`; shared client-only → a Zustand store in the owning slice (ADR 0011).
 3. UI talks to the API only through `@yeral/sdk`. No `fetch` in components.
-4. No user-visible string in code, `aria-label` included: i18n in `tk` (default, verbatim from the screens), `ru`, `en`.
-   No city names in copy.
+4. No user-visible string in code, `aria-label` included: i18n with English as the source; each market adds its
+   languages (Turkmenistan: `tk`, `ru`), and for screens still drawn in Turkmen their Turkmen is the reference for `tk`
+   (ADR 0022). No city names written into copy; a city is data (book Q-107).
 5. Business dates/times through `@yeral/domain/time` (business-local, `Asia/Ashgabat` today; `YYYY-MM-DD`, minutes).
-   Money = whole manats, shown `40 TMT`.
+   Money = whole manats, shown `40 TMT`. Nothing country-specific is hard-coded: currency, phone rules and time zone
+   become market settings (ADR 0022; the code still has Turkmenistan's as constants).
 5a. UI follows `docs/design`: exact values from the screens, nothing invented; anything undrawn follows the nearest
    drawn pattern (design `CLAUDE.md` → "When something isn't drawn"); ask about the design's open questions.
 6. Domains, cookie domain and brand name come from config (`@yeral/lib/site`); never hard-code `yeral.app`.
@@ -46,7 +48,8 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 
 ## Working with the owner
 
-- The owner writes in English; the product UI is Russian (Turkmen next).
+- The owner writes in English. The product is built in English; each market adds its languages at launch
+  (Turkmenistan: Turkmen, Russian; ADR 0022).
 - Finished work: review it (skill `code-review`, fix what it finds), then commit, push and merge on green CI without
   asking. There is no staging (ADR 0020): prove changes locally. Production changes only from a release (the version PR),
   and the owner decides when one ships.
