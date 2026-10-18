@@ -1020,8 +1020,7 @@
         const q = BOOK.questions[qid]
         el.opts.forEach((b) => {
           // A fresh choice on the page wins over the recorded one (a reply to Claude's concern).
-          const chosen =
-            a && a.choice ? a.choice === b.dataset.key : q.status === 'decided' && q.answer.startsWith(b.dataset.key + ' ')
+          const chosen = a && a.choice ? a.choice === b.dataset.key : q.status === 'decided' && q.answer.startsWith(b.dataset.key + ' ')
           b.classList.toggle('is-chosen', !!chosen)
           b.setAttribute('aria-pressed', chosen ? 'true' : 'false')
         })
