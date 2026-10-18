@@ -53,10 +53,11 @@ question in this book, the answer is added here with its date, and the chapters 
 | 18.10.2026 | Q-253 | Show the real deadline as a clock time; Claude writes it in English, the owner checks it | owner |
 | 18.10.2026 | Q-252 | Tables get the 3 nearest times for the same party size and area, classes get the next 3 sessions of the same class with seats, and if nothing is free the SMS drops the times and says "Başga wagt saýlaň" | owner |
 | 18.10.2026 | Q-250 | Every minute, as built, accepting the database cost | owner |
+| 18.10.2026 | Q-216 | Specialists without the app stay, as an option on Hünärmen (phone required), not a separate level | owner |
 | 18.10.2026 | Q-215 | A relocation may change the address and keeps everything, perhaps with a new Ýeral check; only a second, simultaneous location needs a new workspace | Claude (delegated) |
 | 18.10.2026 | Q-214 | Tables: the owner and administrators answer requests (the setting is hidden); a Hünärmen sees the whole timeline and can seat, free tables and add walk-ins, but can't answer requests or change settings | Claude (delegated) |
 | 18.10.2026 | Q-213 | No self-service delete on MVP: switching online booking off pauses the business, and closing a workspace goes through Ýeral support (future bookings cancelled with SMS, page hidden, data kept) | Claude (delegated) |
-| 18.10.2026 | Q-212 | Changing the level sends the normal 7-day SMS invite; until they accept they stay phone-only (bookable, requests go to the owner and administrators), and their bookings stay with them | Claude (delegated) |
+| 18.10.2026 | Q-212 | Switching the app on for a specialist who works without it sends the normal 7-day invite; their bookings stay with them | Claude (delegated) |
 | 18.10.2026 | Q-211 | Same pattern as special days: on save, list the affected bookings with "Ýazylyşlary galdyr" or "Ýatyr we müşderilere 3 başga wagt hödürle"; new bookings follow the new hours either way | Claude (delegated) |
 | 18.10.2026 | Q-210 | Allowed: future bookings stay as they are with the copied name and price, the modal warns how many there are, and the service disappears from new bookings | Claude (delegated) |
 | 18.10.2026 | Q-209 | Drop "Başga wagta geçir" from the bulk bar on MVP; bookings move one at a time | Claude (delegated) |
@@ -116,6 +117,7 @@ question in this book, the answer is added here with its date, and the chapters 
 | 18.10.2026 | Q-101 | English is the source text, the design included; Claude translates, the owner checks | owner |
 | 18.10.2026 | Q-100 | No language in workspace and CMS links; the client site keeps it in every link | owner |
 | 18.10.2026 | Q-037 | For the first launch the data lives abroad (Cloudflare, the database in Frankfurt); the Turkmenistan deployment gets its own servers and database in the country | owner |
+| 18.10.2026 | Q-036 | No real SMS at the first launch: the sign-in code shows on the screen; real SMS start with the Turkmenistan launch | owner |
 | 18.10.2026 | Q-033 | Claude drafts both from this book's rules, in English for the first launch; each market's translation is checked by a lawyer there before that market launches | owner |
 | 18.10.2026 | Q-032 | Launch on Cloudflare: early users and investors in Turkmenistan reach it through a VPN; own servers in Turkmenistan come once marketing starts and investment arrives | owner |
 | 18.10.2026 | Q-031 | Both at launch (the owner placed F-094 and F-104 in the MVP). "Başga ýerde" never shows anything from the other workspace: the time shows only as reserved, and nobody can book it | owner |
@@ -125,6 +127,8 @@ question in this book, the answer is added here with its date, and the chapters 
 | 18.10.2026 | Q-012 | The team can hide a business (with a reason to the owner); no Ýeral-wide client blocks at launch; client karma later (F-241) | owner |
 | 18.10.2026 | Q-011 | One role at launch: every team member can do everything in the admin tool | owner |
 | 18.10.2026 | Q-010 | Design a small admin tool for launch: verify businesses and handle reported reviews | owner |
+| 18.10.2026 | Q-005 | "Ýeral" everywhere, as in the logo; "Yeral" only where the letter can't be used (domain, SMS sender) | owner |
+| 18.10.2026 | Q-004 | The first launch is an English pilot with Turkmenistan's settings: example businesses beside real ones, and a nightly-reset demo of the business app | owner |
 | 17.10.2026 | Q-003 | Launch as Ýeral on yeral.app | owner |
 | 17.10.2026 | Q-002 | The team adds the first businesses in the CMS; sign-up stays open | owner |
 | 17.10.2026 | Q-001 | One launch with the client site, the business app and the CMS; native apps later | owner |

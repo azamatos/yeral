@@ -135,6 +135,9 @@
   first, languages per market); Claude's concerns recorded on Q-003, Q-101, Q-103, Q-104, Q-105, Q-107 (new `concern:`
   line, shown on the page); new questions Q-131–Q-134; features F-238 (add a business for its owner), F-240 (city
   choice) and F-109 (past midnight) in the MVP, F-239 (menu) later; F-178 CMS moved to MVP.
+- **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
+  demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
+  the app as an option). Build plan written as book chapter 10.
 - **2026-10-18 · Book answers, batch 2:** 106 more answers written into the book: the owner's for most questions, the
   recommended option for the rest (owner delegated non-critical questions; marked "Claude (delegated)" in chapter 9).
   Two launches: first in English on Cloudflare, then Turkmenistan on its own servers; [ADR 0023](../decisions/0023-one-deployment-per-market.md)
@@ -145,8 +148,9 @@
 
 ## Roadmap
 
-**Paused (ADR 0021, 2026-10-17):** M3 onwards waits for the product book. The order of M3 (client site) and M5 (business
-workspace) is open (book question Q-001); the scope chapter will re-plan the milestones.
+**Re-planned 2026-10-18:** the product book is closed and its chapter 10 (`docs/product/10-plan.md`) is the build plan:
+P1 design pass in English, P2 backend to the book, P3 components, P4 apps slice by slice, P5 first launch on
+Cloudflare, P6 Turkmenistan launch. The M3–M8 rows below are kept for reference only.
 
 Infrastructure first (owner, 2026-10-13). Each milestone ends reviewed, merged, memory bank updated; production
 deploys come from releases (no staging, ADR 0020).

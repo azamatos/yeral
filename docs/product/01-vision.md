@@ -64,7 +64,8 @@ from that country's settings, so a country's data stays where its law wants it. 
 - **Languages:** English at the first launch; Turkmen and Russian come with the Turkmenistan launch. (Q-101, Q-104,
   Q-133, ADR 0022)
 - **Money:** manats, shown `40 TMT`. Clients pay at the place; there is no online payment. (client spec §1)
-- **Phones:** every account is a +993 mobile number with an SMS code. (ADR 0019, ROUND6-ANSWERS C1)
+- **Phones:** every account is a +993 mobile number with a sign-in code: by SMS from the Turkmenistan launch, on
+  the screen at the first launch. (ADR 0019, ROUND6-ANSWERS C1; Q-036)
 - **Hosting:** the first launch runs on Cloudflare, with the database in Frankfurt; people in Turkmenistan reach it
   through a VPN. Servers in Turkmenistan, which also keep personal data inside the country as its law asks, come with
   the Turkmenistan launch. (Q-032, Q-037, decided 18.10.2026; ADR 0007, ADR 0023)
@@ -110,11 +111,16 @@ Decided by the owner on 17 and 18.10.2026:
   work without all three. (Q-001)
 - **Two steps.** The first launch is in English on Cloudflare: investors and early users see it (from Turkmenistan
   through a VPN), and it's also a portfolio piece. The Turkmenistan launch follows once marketing starts and investment
-  arrives: Turkmen and Russian, servers and database in Turkmenistan, legal texts checked by a lawyer there. (Q-032, Q-033, Q-037, Q-133, Q-292) Who uses the first launch, and with what data, is open (Q-004).
+  arrives: Turkmen and Russian, servers and database in Turkmenistan, legal texts checked by a lawyer there. (Q-032, Q-033, Q-037, Q-133, Q-292)
+- **The first launch is an English pilot** with Turkmenistan's settings. Example businesses from the design,
+  marked "Example", confirm bookings at once and sit beside the real businesses the team adds; "Try the business
+  app" opens a demo workspace that resets every night. No SMS goes out: anyone signs in with their own number and
+  the code shows on the screen. (Q-004, Q-036)
 - **The first businesses** are added by the Ýeral team in the CMS after meeting their owners and showing them the
   product; some owners set up by themselves to learn the product; sign-up stays open to anyone. (Q-002)
-- **Name and domain:** Ýeral on yeral.app; investors or future owners may change them later. (Q-003) How the name is
-  spelled, "Yeral" or "Ýeral", is open (Q-005).
+- **Name and domain:** Ýeral on yeral.app; investors or future owners may change them later. (Q-003) The name is
+  written *Ýeral* everywhere, as in the logo; "Yeral" only where the letter can't be used: the domain and the
+  SMS sender. (Q-005)
 - **Booking types:** appointments at launch; tables and classes after the MVP. (Q-030)
 
 ```mermaid

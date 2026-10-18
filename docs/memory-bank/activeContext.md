@@ -44,6 +44,10 @@ The version PR #26
   site, the business app and the CMS; the team adds the first businesses in the CMS; Ýeral on yeral.app; no average
   bill; businesses may be open past midnight and options stay flexible; the city is a choice (book Q-001–Q-003,
   Q-100–Q-109).
+- 2026-10-18 (book closed): the first launch is an English pilot with Turkmenistan's settings: example businesses
+  marked "Example" beside real ones, a nightly-reset demo of the business app, no SMS (codes on screen); the name is
+  written *Ýeral*, "Yeral" only where the letter can't be used; a specialist may work without the app (an option, not a
+  level). Plan: product book chapter 10.
 - 2026-10-18 (book answers, batch 2): the owner answers only critical questions; Claude decides the rest with the
   recommended option and records it ("Claude (delegated)"), and says so where it disagrees (a concern). Two launches:
   first in English on Cloudflare (investors and early users, from Turkmenistan through a VPN; also a portfolio piece),
@@ -107,13 +111,12 @@ Where the old questions went (2026-10-17):
 
 ## Next steps
 
-1. The owner answers the four critical questions on the book's page: Q-004 (who the first launch is for), Q-005 (how
-   the name is spelled), Q-036 (SMS at the first launch: paying for it), Q-216 (specialists who don't use the app).
-   Every other question is decided; the owner may still change any on the page ("Decided by Claude" filter; replies
-   show as "Changed"). Claude records answers and replies, then republishes the page.
-2. Then: an exact plan for yeral.app, the business app, the CMS and the backend. Hosting is settled for the first
-   launch (Cloudflare + Neon, ADR 0007, ADR 0023): no server to buy until the Turkmenistan launch.
-3. Claude writes the Claude Design prompts: every board redrawn in English (Q-133), plus the design fixes in chapter 6
-   and the "Design to fix" lines in the flow chapters; the owner pastes them; Claude checks the canvas.
-4. Then components in Storybook and code, re-planned from the book's scope chapter (one launch, appointments first).
-   The "Code differs" lines across the book list what built code must change.
+The product book is closed (2026-10-18, no open question). The build plan is its chapter 10
+(`docs/product/10-plan.md`):
+
+1. **P1 · Design pass in English:** Claude writes the Claude Design prompts round by round (foundations, business app,
+   client site, admin tool, fixes); the owner pastes them; Claude checks the canvas; result: export v0.6.
+2. **P2 · Backend to the book** alongside P1, if the owner agrees (ADR 0021 put code after design): market settings,
+   fixed access levels, the "Code differs" fixes, business and admin endpoints, first-launch mode.
+3. **P3 · Components, P4 · apps slice by slice** (Q-001 order), **P5 · first launch** on Cloudflare,
+   **P6 · Turkmenistan launch** with its own server (buy it about a month before that launch).

@@ -180,11 +180,11 @@ Notes:
 
 ## Not decided
 
-- **SMS at the first launch** (Q-036, open again). No SMS service sends to real numbers for free, and how many SMS go out depends on who uses the first launch (Q-004). Until it's answered, production sends no SMS. The sender name is decided: "Yeral" in plain Latin (Q-109). (client spec §13, business spec §24)
+- **SMS at the first launch:** none. Every text below is written and goes to the log, the sign-in code shows on the screen, and clients see every outcome on screen in *Ýazylyşlarym*. Real SMS, with a provider, start with the Turkmenistan launch. The sender name is decided: "Yeral" in plain Latin. (Q-036, Q-109, decided 18.10.2026)
 - **No SMS gateway in the code.** Every environment, production included, writes SMS to the log (`apps/api/src/deps.ts`, `apps/api/src/ports/sms.ts`). Until a gateway exists, nobody can sign in on production, and real login codes would sit in the production log.
 - **Push and the app channel.** *Programmada* and phone push come with the native apps (business spec §25.6), not before.
 - **Browser notifications while the workspace is closed** (web push) aren't designed. *Brauzerde* means "while Ýeral Biznes is open".
 - **A client inbox or bell** isn't designed. The client sees changes on the booking itself.
 - **E-mail** isn't used anywhere.
 
-> Open question Q-036: which SMS provider at launch.
+> Open question Q-036: SMS at the first launch.

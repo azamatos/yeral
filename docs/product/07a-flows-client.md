@@ -730,7 +730,7 @@ flowchart TD
 
 - A code is valid for 5 minutes (ADR 0019). An expired code: "Koduň wagty geçdi. Täze kod alyň." (code `tk.json`; not drawn).
 - Too many code requests (5 per number or 100 per internet address in an hour): the message says how many minutes to wait (Q-267, decided 18.10.2026; see the limits chapter).
-- Outside production the code is always `1234` and no SMS goes out (ADR 0019).
+- At the first launch no SMS goes out: the sign-in code shows on the screen (Q-036, decided 18.10.2026). Outside production the code is always `1234` (ADR 0019).
 - The client turns out to be phone-only at this business: the calm card replaces sending (C-11).
 - Logging in links the phone bookings businesses made under this phone, if upcoming or from the last 6 months: they appear in "Ýazylyşlarym" with a phone icon (client spec §1 rule 4; Q-270, decided 18.10.2026).
 - A recycled number: when a phone signs in to an account unused for 6 months, Ýeral first asks "Is this you?" with the account's first name; "No" starts a fresh account and leaves the old history unlinked. There is no password (Q-270, decided 18.10.2026).

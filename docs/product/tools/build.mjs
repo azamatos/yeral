@@ -247,7 +247,7 @@ function renderFeatures(header, body) {
           <span class="f-metas">${meta}</span>
         </div>
         <div class="f-side">
-          <span class="f-proposed">Proposed: <strong>${escapeHtml(r[iProposed] || '—')}</strong></span>
+          <span class="f-proposed">Placed: <strong>${escapeHtml(r[iProposed] || '—')}</strong></span>
           <div class="segs" role="group" aria-label="Placement of ${id}">${seg}</div>
         </div>
       </li>`
