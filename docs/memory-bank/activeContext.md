@@ -1,6 +1,6 @@
 # Active context
 
-_Last updated: 2026-10-17_
+_Last updated: 2026-10-18_
 
 ## Current focus
 
@@ -34,6 +34,9 @@ The version PR #26
   features, MVP in and out, every flow, with visuals) until no question is left; then the full design and
   components/Storybook; then code. Claude Code writes the prompts for Claude Design, the owner pastes them, Claude Code
   reads the canvas to check the result (ADR 0021).
+- 2026-10-18: a shared decision room for future business decisions with partners, investors or future owners: people
+  sign in, choose their language, comment, and the page shows who said and decided what; decisions are saved in this
+  repo for agents. Claude named it Karar and wrote the build brief (`docs/karar/brief.md`); a separate session builds it.
 
 ## Decisions
 
@@ -90,5 +93,7 @@ Where the old questions went (2026-10-17):
    (chapters, `questions.md`, chapter 9) and republishes the page.
 2. When chapters close: Claude writes the Claude Design prompts for what's undrawn or changed (chapter 6 lists design
    fixes already found); the owner pastes them; Claude checks the canvas.
-3. Then components in Storybook and code, re-planned from the book's scope chapter (M3/M5 order is open: question Q-001).
+3. Karar (`docs/karar/brief.md`): a separate session starts with Step 0 (can people outside the owner's claude.ai
+   organization be identified?), asks the owner the brief's open questions, then builds Phase 1.
+4. Then components in Storybook and code, re-planned from the book's scope chapter (M3/M5 order is open: question Q-001).
    The "Code differs" lines across the book list what built code must change.
