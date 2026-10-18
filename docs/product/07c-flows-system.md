@@ -6,7 +6,7 @@ How to read the status line at the end of each flow:
 
 - **Design** says where the rule is decided or drawn.
 - **Code** says what the api does today. **Built** means the system part works in the api, **partly** means some of it does, and **not built** means none of it exists yet. The new client site (M3) and the business workspace (M5) aren't built yet, so none of these flows shows on a screen today.
-- No SMS reaches a phone yet. Every environment, production included, writes SMS to a log. How SMS go out at the first launch is open (Q-036; chapter 8, "Not decided").
+- No SMS reaches a phone yet. Every environment, production included, writes SMS to a log. At the first launch no SMS goes out: texts go to the log and the sign-in code shows on the screen (Q-036, decided 18.10.2026).
 
 Sources in brackets: *client spec* = `docs/design/README.md`; *business spec* = `docs/design/business/README.md`; *ROUND6* = `docs/design/ROUND6-ANSWERS.md` (the owner's final decisions); screen names such as *B-Login* are files in `docs/design/screens/`. Code paths are under `apps/api/src` and `packages/`.
 
@@ -456,6 +456,7 @@ flowchart TD
 | After the lock | the code is used up; the screen offers to send a new one | Q-268; code |
 | Limits | 5 codes per phone per hour; 100 per internet address per hour; the wait is shown in minutes | Q-267 (code differs) |
 | Outside production | the code is always 1234 and SMS go to the log | code; ADR 0019 |
+| First launch | no SMS: the code shows on the screen, texts go to the log | Q-036, decided 18.10.2026 |
 | SMS text | *Ýeral kody: {code}* | code only |
 | On the SMS link page | the code goes only to the booking's own phone, shown masked and not editable | ROUND6 A1 |
 
@@ -814,9 +815,9 @@ flowchart LR
 
 ## Behind the scenes
 
-### S-20 · Demo data stays out of production
+### S-20 · Demo data and example businesses
 
-**Goal.** The design's demo businesses and test shortcuts never reach real people.
+**Goal.** Test shortcuts never reach real people; at the first launch, example businesses and a demo workspace let anyone try Ýeral (Q-004, decided 18.10.2026).
 
 **Trigger.** Event: the database is set up or reset.
 
@@ -841,7 +842,8 @@ flowchart TD
 
 **Edge cases**
 
-- Whether production shows demo businesses before real ones join depends on who the first launch is for (ADR 0020).
+- **First launch** (Q-004, decided 18.10.2026): production also gets example businesses from the design's demo data, marked "Example" everywhere they appear and set to confirm bookings at once. Bookings visitors make there show only in their own *Ýazylyşlarym*. "Try the business app" opens a shared demo workspace with seeded clients only, so no visitor sees another visitor's phone; it resets every night. Real businesses sit beside the examples.
+- **Code differs:** production refuses all demo data, and nothing marks a business as an example or resets a demo workspace.
 
 > Open question Q-004: who the first launch is for.
 
@@ -874,7 +876,7 @@ flowchart TD
 
 - Login codes are sent straight away, not queued. If sending fails, the person sees an error and can ask again after the 59-second wait (S-10).
 - A reminder that would arrive after the visit has started is dropped (Q-284). **Code differs:** a retried reminder can still go out after the start.
-- There's no SMS gateway yet, so every environment writes SMS to the log. How SMS go out at the first launch is open (Q-036; chapter 8, "Not decided").
+- There's no SMS gateway yet, so every environment writes SMS to the log. At the first launch no SMS goes out: texts go to the log and the sign-in code shows on the screen (Q-036, decided 18.10.2026).
 
 > Open question Q-284: An SMS that can't be delivered.
 

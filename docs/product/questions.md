@@ -36,7 +36,7 @@ chapter: 01 · status: decided
 answer: A · Launch as Ýeral on yeral.app; investors or future owners may change the domain later. How the name is spelled is Q-005. (17.10.2026)
 
 ## Q-004 · Who the first launch is for
-chapter: 01 · status: open · priority: high
+chapter: 01 · status: decided · priority: high
 
 The owner's answers on 18.10.2026 shape the first launch: English only (Q-104, Q-133), on Cloudflare and reached from Turkmenistan through a VPN (Q-032), with the data abroad (Q-037), and also a portfolio piece (Q-133). Turkmen, Russian and servers in Turkmenistan come with the Turkmenistan launch, after investment. One deployment serves one country (Q-131), so the first launch still needs one country's settings: money, phone numbers, time zone. Open: who uses it, and with what data. This replaces Q-283 (demo businesses on the live site) and decides how many real SMS go out (Q-036).
 
@@ -44,17 +44,17 @@ The owner's answers on 18.10.2026 shape the first launch: English only (Q-104, Q
 - B · The same pilot with real businesses only: no examples, so the site looks empty until businesses join.
 - C · A closed demo for investors: only invited people sign in, example data only; real businesses wait for the Turkmenistan launch.
 
-answer: —
+answer: A · An English pilot with Turkmenistan's settings (manats, +993 numbers, Ashgabat time). Example businesses from the design, marked "Example" and confirming bookings at once, sit beside the real businesses the team adds, so anyone can try the whole loop; a "Try the business app" button opens a demo workspace that resets every night. (18.10.2026)
 
 ## Q-005 · How the name is spelled
-chapter: 01 · status: open · priority: high
+chapter: 01 · status: decided · priority: high
 
 The owner chose the name for its sound, not its Turkmen meaning (Q-109), and the product is built in English (ADR 0022). The design writes *Ýeral*; the SMS sender is "Yeral", because sender names take plain Latin letters (Q-109). Outside Turkmenistan the "Ý" can't be typed on most keyboards, and people search for what they can type. The next design pass draws every board in English with the logo (Q-133), so the spelling is needed now.
 
 - A · "Yeral" everywhere, in every language: logo, texts, SMS. (recommended)
 - B · "Ýeral" everywhere, and "Yeral" only where the letter can't be used (the domain, the SMS sender).
 
-answer: —
+answer: B · "Ýeral" everywhere, and "Yeral" only where the letter can't be used (the domain, the SMS sender). Owner: keep the original wherever possible, since the logo uses it; better-sounding ideas are welcome. (18.10.2026)
 
 ## Q-010 · What the Ýeral team can do at launch, and with which tool
 chapter: 03 · status: decided · priority: high
@@ -164,14 +164,15 @@ The design has pages for privacy and terms, but no texts exist. Ýeral stores ph
 answer: A · Claude drafts both from this book's rules, in English for the first launch; each market's translation is checked by a lawyer there before that market launches. (18.10.2026)
 
 ## Q-036 · SMS at the first launch
-chapter: 08 · status: open · priority: high
+chapter: 08 · status: decided · priority: high
 
 Every sign-in code and booking message is an SMS (ADR 0019), and today none reaches a phone: every environment writes them to a log (chapter 8). The owner's note (18.10.2026): use free global options, nothing Turkmen-specific. No SMS service sends to real numbers for free: global providers charge per message, from under a cent to tens of cents depending on the country, and free trials send only to numbers verified by hand. How many go out depends on who uses the first launch (Q-004).
 
 - A · A pay-as-you-go global provider for real numbers, with a monthly spending cap; example and demo accounts sign in with test numbers and a fixed code, which send nothing. Claude compares providers when the backend goes live; the owner opens the account. (recommended)
 - B · No real SMS at the first launch: only test numbers and invited people with a fixed code; real SMS start with the Turkmenistan launch.
 
-answer: —
+answer: B · No real SMS at the first launch. Anyone signs in with their own phone number and the code shows on the screen, so testers (a recruiter trying the platform, for example) get in easily; floods are accepted for now. Every SMS text is still written and goes to the log, and clients see every outcome on screen. Real SMS start with the Turkmenistan launch. (18.10.2026)
+concern: With the code on the screen, a phone number proves nothing: anyone who knows a business owner's number can sign in as them, open their workspace and read their clients' names and phones. Harmless for example businesses and testers, not for the real businesses Q-004 puts next to them. Better: real SMS only for members of real (non-example) workspaces, a handful of people and cents a month; or keep real businesses off the first launch until SMS is on. (18.10.2026)
 
 ## Q-100 · Language in business workspace links
 chapter: 02 · status: decided
@@ -790,7 +791,7 @@ The access level select in the staff drawer offers Administrator, Hünärmen and
 - A · Changing the level sends the normal 7-day SMS invite; until they accept they stay phone-only (bookable, requests go to the owner and administrators), and their bookings stay with them. (recommended)
 - B · Not allowed: remove them and invite them as a new person.
 
-answer: A · Changing the level sends the normal 7-day SMS invite; until they accept they stay phone-only (bookable, requests go to the owner and administrators), and their bookings stay with them. Applies only if phone-only staff come back: the owner set F-113 to Never (see Q-216). Claude picked the recommended option; the owner delegated non-critical questions. (18.10.2026)
+answer: A · Switching the app on for a specialist who works without it sends the normal 7-day invite; until they accept they keep working without it (bookable, requests go to the owner and administrators), and their bookings stay with them. Claude picked the recommended option; the owner delegated non-critical questions. (18.10.2026)
 
 ## Q-213 · Closing or deleting a workspace
 chapter: 07 · status: decided
@@ -825,14 +826,14 @@ Each workspace is one address. "Salgyny üýtget" opens the map with "Her iş ý
 answer: A · A relocation may change the address and keeps everything, perhaps with a new Ýeral check; only a second, simultaneous location needs a new workspace. Claude picked the recommended option; the owner delegated non-critical questions. (18.10.2026)
 
 ## Q-216 · Specialists who don't use the app
-chapter: 07 · status: open · priority: high
+chapter: 07 · status: decided · priority: high
 
 The owner set F-113 (phone-only staff, *Programmasyz hünärmen*) to Never on 18.10.2026. Then every specialist must accept an SMS invite and sign in before clients can book them: invited people don't appear on the client site until they accept (COMPONENTS InviteRow). In many salons the masters don't use apps and the reception keeps their book; the team setting up the first businesses (Q-002) would wait for every master's sign-in. Fresha, the reference product, lets owners add team members who never sign in. The setting is drawn (B-Team) and the database already has it.
 
 - A · Keep phone-only staff in the MVP: bookable at once, the owner and administrators handle their requests. (recommended)
 - B · Never: every specialist signs in.
 
-answer: —
+answer: A · Keep specialists who don't use the app, but as an option, not a separate level: when adding a *Hünärmen*, the owner switches off "uses the app". A phone number is still required, so the person can later start using the app (the owner switches it on, which sends the usual invite) or open their own workspace with the same number. They are bookable at once; the owner and administrators handle their requests. (18.10.2026)
 
 ## Q-250 · How often the system checks the clock
 chapter: 07 · status: decided

@@ -991,6 +991,11 @@
     // Saved after the page was built: a reply Claude hasn't recorded yet.
     const fresh = (a) => said(a) && !!a.at && a.at > BOOK.builtAt
 
+    function placedSince(fid) {
+      const s = current('scope', fid)
+      return s && s.place && s.at && s.at > BOOK.builtAt ? s.place : ''
+    }
+
     function stateOf(qid) {
       const q = BOOK.questions[qid]
       const a = current('answers', qid)
@@ -1088,8 +1093,8 @@
 
       let featureError = ''
       features.forEach(({ li, fid, segs }) => {
-        const s = current('scope', fid)
-        const chosen = s && s.place
+        // Placements saved before the build are already in the book's column; only newer ones show as moves.
+        const chosen = placedSince(fid)
         segs.forEach((b) => {
           b.classList.toggle('is-chosen', b.dataset.place === chosen)
           b.setAttribute('aria-pressed', b.dataset.place === chosen ? 'true' : 'false')
@@ -1165,8 +1170,7 @@
       const seg = ev.target.closest('.seg')
       if (seg && !seg.disabled) {
         const fid = seg.dataset.fid
-        const s = current('scope', fid)
-        const place = s && s.place === seg.dataset.place ? '' : seg.dataset.place
+        const place = placedSince(fid) === seg.dataset.place ? '' : seg.dataset.place
         notice('')
         write('scope', fid, { place, at: new Date().toISOString() })
         return

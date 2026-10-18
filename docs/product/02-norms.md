@@ -97,7 +97,7 @@ spec §12, ROUND6-ANSWERS)
 | move to another time · change the time | *Başga wagta geçir* · *Wagty üýtget* | the second is the title of the move flow |
 | cancel booking · undo · book again | *Ýazylyşy ýatyr* · *Yzyna al* · *Gaýtadan ýazyl* | |
 | report, complaint | *Arz et* | the business reports a no-show or a problem; also reporting a review |
-| owner · admin · specialist · phone-only specialist | *Eýesi* · *Administrator* · *Hünärmen* · *Programmasyz hünärmen* | access levels (*Dereje*) |
+| owner · admin · specialist | *Eýesi* · *Administrator* · *Hünärmen* | access levels (*Dereje*); a specialist may work without the app (*programmasyz*), an option, not a level (Q-216) |
 | team · invite · permissions | *Topar* · *Çakylyk* · *Rugsatlar* | |
 | internal status | *Içerki ýagdaý* | team only, never shown to clients |
 | busy elsewhere | *Başga ýerde* | a person working in another workspace at that time |
@@ -279,7 +279,8 @@ text (code: packages/i18n/src/messages/tk.json).
 - **SMS sender name:** "Yeral" in plain Latin. (Q-109, decided 18.10.2026)
 - **Name and domain are working titles.** Every app reads them from one setting, so a rename is a configuration
   change. (owner 13.10.2026; AGENTS rule 6; code: packages/lib/src/site.ts, translation key `common.brand`) The launch name
-  and domain are decided (Q-003); how the name is spelled is open (Q-005).
+  and domain are decided (Q-003). The name is written *Ýeral*; "Yeral" only where the letter can't be
+  used, such as the domain and the SMS sender (Q-005).
 - **Font:** Onest, weights 400–800, with every Turkmen letter (ä ç ž ň ö ş ü ý) and Cyrillic; served by Ýeral itself.
   (client spec §8, techContext)
 - **Look:** design tokens v0.5 (v0.4 plus one selection ring). White base, thin dividers instead of boxes, one violet

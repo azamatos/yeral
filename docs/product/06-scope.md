@@ -1,6 +1,6 @@
 # 6. Features and MVP scope
 
-Every feature Ýeral has, wants or once had, in one list (241 of them), each with a **proposed** place: in the
+Every feature Ýeral has, wants or once had, in one list (242 of them), each with a **proposed** place: in the
 **MVP**, **Later**, or **Never**. The proposal is Claude's; the decision is the owner's. On the page, each row has an
 MVP · Later · Never switch: click to move a feature, and the change is saved for Claude to write back here. The owner
 placed F-001–F-116 and F-240 on 18.10.2026; every other feature keeps the proposal (the owner delegated it), except
@@ -95,7 +95,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | Client · after booking (my bookings, cancel, move, reviews, SMS link page) | 13 | 4 | 1 |
 | Client · account | 9 | 1 | 0 |
 | Business · access (login, workspaces, invites, levels, permissions, ownership) | 12 | 2 | 0 |
-| Business · setup (wizard, profile, services, hours, rules, link & QR) | 17 | 2 | 1 |
+| Business · setup (wizard, profile, services, hours, rules, link & QR) | 18 | 2 | 0 |
 | Business · daily work (calendar, requests, bookings, walk-ins, moves, complaints, internal statuses) | 20 | 2 | 0 |
 | Business · clients (CRM) | 8 | 1 | 0 |
 | Business · tables | 0 | 6 | 0 |
@@ -103,12 +103,12 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | Business · reviews | 3 | 0 | 0 |
 | Business · analytics | 0 | 6 | 0 |
 | Business · notifications and help | 2 | 4 | 0 |
-| Business · marketing (B2B landing) | 3 | 0 | 0 |
+| Business · marketing (B2B landing) | 4 | 0 | 0 |
 | Ýeral team (verification, moderation, categories, support, CMS modules) | 5 | 7 | 0 |
-| System (jobs, SMS, live updates, search indexing, SEO, i18n) | 11 | 2 | 1 |
+| System (jobs, SMS, live updates, search indexing, SEO, i18n) | 11 | 3 | 0 |
 | Platform (hosting, own server, Storybook, monitoring) | 8 | 2 | 1 |
 | Later and non-goals | 0 | 24 | 2 |
-| **All** | **152** | **83** | **6** |
+| **All** | **154** | **84** | **4** |
 
 ## Client · discovery (home, search, map, categories, business page)
 
@@ -202,7 +202,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
-| F-073 | Phone login | Phone (+993) → 4-digit SMS code (auto-submit, resend after 0:59, 3 wrong tries → 60 s lock) → name for new users, as a 400 px modal (bottom sheet on phones). | MVP | drawn (Auth) | api built (ADR 0019, rate limits per phone and IP); ui CodeInput, PhoneInput built | No passwords. Real codes need F-193. |
+| F-073 | Phone login | Phone (+993) → 4-digit SMS code (auto-submit, resend after 0:59, 3 wrong tries → 60 s lock) → name for new users, as a 400 px modal (bottom sheet on phones). | MVP | drawn (Auth) | api built (ADR 0019, rate limits per phone and IP); ui CodeInput, PhoneInput built | No passwords. Real codes need F-193. At the first launch the code shows on the screen, no SMS (Q-036). |
 | F-074 | Mobile numbers only | Landlines refused with "Kod diňe mobil belgä iberilýär…". | MVP | drawn (Auth, B-Login · phoneLandline) | api built (`not_mobile`); message not built | Round 6 C1. |
 | F-075 | One account for client and business | The same phone account books on yeral.app and works in business workspaces. | MVP | spec only (business §1) | built (shared users, cookie on the parent domain, sessions 60 days) |  |
 | F-076 | Avatar menu and log out | Logged-in menu: My bookings · Favourites · Profile · Language · Log out. | MVP | drawn (Auth) | api built (logout); menu not built |  |
@@ -222,7 +222,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-085 | Invites by SMS | Owner invites by phone with an access level; SMS link valid 7 days; accept / decline / expired; resend or revoke. | MVP | drawn (B-Login · invite, B-Team · invite) | schema only (`memberships.status = invited`) | **Conflict:** code turns every invite active on first login; no 7-day expiry, no decline screen. |
 | F-086 | No-workspace state | "Entek iş ýeriňiz ýok" with "Biznesimi döret" and how to ask an owner for an invite. | MVP | drawn (B-Login · empty) | not built |  |
 | F-087 | Workspace switcher | One person in several businesses, each with its own level and request count; the only switch in the app. | MVP | drawn (B-Shell) | schema only (`memberships`) | Round 6. |
-| F-088 | Access levels | Fixed levels Eýesi / Administrator / Hünärmen plus phone-only staff; no custom roles. | MVP | drawn (B-Team, B-Shell sidebars) | built as older model (domain role templates + `roles` table with custom names) | **Conflict:** code follows round 4 (editable roles); ADR 0018 and productContext still describe roles. |
+| F-088 | Access levels | Fixed levels Eýesi / Administrator / Hünärmen; a Hünärmen may work without the app (F-113); no custom roles. | MVP | drawn (B-Team, B-Shell sidebars) | built as older model (domain role templates + `roles` table with custom names) | **Conflict:** code follows round 4 (editable roles); ADR 0018 and productContext still describe roles. |
 | F-089 | Permissions matrix | Owner switches what Administrator and Hünärmen may do (none / own / all / view) across 11 rows. | Later | drawn (B-Team · permissions) | built as older model (8 keys, visibility own/all) | Conflict as above; the matrix rows differ (reviews reply, analytics, team view). |
 | F-090 | Hidden, not disabled | What a level can't use is hidden; opening it by URL lands on the calendar with a toast. | MVP | spec only | not built | api must enforce and redact (ADR 0018). |
 | F-091 | Who answers requests | Setting: owner & admin / each specialist / both (default); per-person override; read-only footer for others. | MVP | drawn (B-Settings rules, B-Team staff) | not built (no field) | Round 6. Hidden for one-person businesses. |
@@ -252,7 +252,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-110 | Service catalogue | Groups, services (duration, price type, buffer override, who performs, online switch), service drawer. | MVP | drawn (B-Services) | schema only (`services`, `service_groups`, `staff_services`) |  |
 | F-111 | Team management | Team table (bookable vs management), levels, schedule summary, invite states, drag order in which clients see specialists. | MVP | drawn (B-Team) | schema only (`staff`, `memberships`, `staff.sort`) |  |
 | F-112 | Staff schedules | Own shifts inside business hours, one break per day (may differ by day), personal days off. | MVP | drawn (B-Team staff drawer) | built (domain), schema |  |
-| F-113 | Phone-only staff | "Programmasyz hünärmen": bookable, never logs in, active at once without SMS. | Never | drawn (B-Team) | schema only (`staff.hasApp`) | Owner: Never (18.10.2026). Claude asks again in Q-216: without it every specialist must sign in before clients can book them. |
+| F-113 | Specialist without the app | An option on *Hünärmen*, not a level: "uses the app" off; phone number required; bookable at once; the owner and administrators handle their requests; switching the app on sends the usual invite. | MVP | drawn (B-Team) | schema only (`staff.hasApp`) | Owner, Q-216 (decided 18.10.2026): kept, but as an option, not a separate level; the phone links the person later. |
 | F-114 | Disable a staff member | Reassign future bookings, keep them, or cancel with 3 offered times; reactivate later. | MVP | drawn (B-Team · disable) | not built |  |
 | F-115 | Link and QR | Public link `yeral.app/tk/b/{slug}`, QR as PNG/SVG, share to WhatsApp, IMO, Telegram or SMS. | MVP | drawn (B-Settings · link, B-Onboarding 8) | not built | "Real QR generation" was listed as not designed in round 4. |
 | F-116 | Table / class setup wizard | Setup steps for restaurants and studios (areas, tables, class types). | Later | not designed | not built | Q-201; they set up in Settings after the appointment wizard. |
@@ -355,8 +355,9 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
 | F-175 | B2B landing page | business.yeral.app logged out: hero with calendar mock, who it's for, 6 features, 3 steps, FAQ, CTA band; "Mugt başla" opens the setup wizard, "Giriş" the login. | MVP | drawn (B-Landing) | not built |  |
-| F-176 | "Free" band | "Ýeral Biznes mugt": all features, unlimited staff, free SMS reminders, no card; no future pricing. | MVP | drawn (B-Landing) | not built | Legacy for-business page still shows three paid plans. FAQ says card payment and prepayment come "ýakynda" (F-219). |
+| F-176 | "Free" band | "Ýeral Biznes mugt": all features, unlimited staff, free SMS reminders, no card; no future pricing. | MVP | drawn (B-Landing) | not built | Legacy for-business page still shows three paid plans. FAQ says card payment and prepayment come "ýakynda" (F-219). Promises free SMS reminders; there are none at the first launch (Q-036). |
 | F-177 | Business entry points on yeral.app | "Biznes üçin" header link and the Ýeral Biznes block on Home. | MVP | drawn (Home, headers) | not built |  |
+| F-242 | Business app demo | "Try the business app" opens a shared demo workspace with seeded clients, without signing in; it resets every night. | MVP | not designed | not built | Q-004 (decided 18.10.2026). Visitors' own bookings at example businesses never show there. |
 
 ## Ýeral team (verification, moderation, categories, support, CMS modules)
 
@@ -383,14 +384,14 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-190 | Automatic completion | Confirmed visits become Completed after their end time. | MVP | spec only | built (jobs) |  |
 | F-191 | No-show block | After N no-shows (default 2) the client books that business only by phone. | MVP | spec only | built (domain, api) |  |
 | F-192 | Client SMS | Confirmed, declined (+reason), expired (+3 times), reminders 1 day and 2 h before; none on send; no review ask (Q-259). | MVP | spec only (README §6) | built (i18n texts, jobs; log adapter) | Messages only go to the log until F-193. |
-| F-193 | Production SMS gateway | A real SMS provider and sender name. | MVP | not designed | not built | How it works at the first launch is Q-036 (open). Blocks real login and every SMS. |
+| F-193 | Production SMS gateway | A real SMS provider and sender name. | Later | not designed | not built | No SMS at the first launch: the code shows on the screen (Q-036, decided 18.10.2026). Comes with the Turkmenistan launch. |
 | F-194 | Live updates | Open screens refresh from an events feed polled every 10 s, on focus and on demand. | MVP | not designed | built (api `/v1/events`, sdk) | A push channel can replace polling later. |
 | F-195 | Availability engine | Free times for appointments (hours, shifts, breaks, buffers, chains), tables and classes; database constraints stop double booking. | MVP | spec only | built (domain, api exclusion constraints) |  |
 | F-196 | Search index | Verified-only listing with geo, popularity, open-now and has-free-time filters, on Postgres. | MVP | spec only | built (api) | No separate search engine. |
 | F-197 | SEO basics | Server-rendered pages, titles, hreflang, JSON-LD, sitemap, noindex for unverified. | MVP | not designed (repo plan) | not built (legacy had JSON-LD) | M3. |
 | F-198 | Link previews | OG images for business and category pages. | Later | not designed | not built | M7. |
 | F-199 | Languages and formats | English while building; each market adds its languages with `/{lang}` links (Turkmenistan: Turkmen, Russian); number formats follow the language (`4.9` in English, `4,9` in Turkmen and Russian); money, phone rules and time zone come from the market (Turkmenistan: `40 TMT`, +993, Asia/Ashgabat). | MVP | spec only (README §8) | built (`@yeral/i18n`, domain time, contract error messages) | Q-101, Q-104 decided; ADR 0022. |
-| F-200 | Demo mode | Seeded demo businesses, demo code 1234, demo businesses that answer requests by themselves. | Never | not designed | built (api seed, `demo.answer` job) | Code only; legacy has a demo panel. Example businesses may come back with the first launch (Q-004). |
+| F-200 | First-launch mode | Example businesses from the design's demo data, marked "Example" and confirming at once; the sign-in code shown on the screen instead of an SMS; no SMS sent. | MVP | not designed | built (api seed, `demo.answer` job) | Q-004, Q-036 (decided 18.10.2026). Built today only outside production (seed, demo code 1234, `demo.answer` job). |
 | F-201 | Client installable app (PWA) | yeral.app installable from the browser. | Later | not designed | not built | M7; legacy shows an "add to home screen" hint. |
 | F-202 | Booking source tracking | Each booking records web / app / phone / walk-in / ai. | MVP | spec only | built (domain, schema) | Shown in the workspace as Onlaýn / Telefon / Gelip. |
 

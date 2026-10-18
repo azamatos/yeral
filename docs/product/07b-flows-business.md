@@ -128,7 +128,7 @@ flowchart TD
 
 1. The wizard opens at `/tk/signup` with a left step list ("8 ädim · takmynan 5 minut · mugt") (§7).
 2. Step 1 *Telefon*: "Telefon belgiňizi ýazyň — size 4 sanly SMS kod ibereris. Parol gerek däl." Hint: "Ýeral-y müşderi hökmünde ulanýan bolsaňyz, şol belgini ýazyň — bir hasap ikisi üçin hem ýeterlik." (use the same number as on yeral.app; one account covers both).
-3. *Kod al* (Get code) sends a 4-digit SMS code. The code field auto-checks on the 4th digit; resend is possible after 0:59.
+3. *Kod al* (Get code) sends a 4-digit SMS code. The code field auto-checks on the 4th digit; resend is possible after 0:59. At the first launch no SMS goes out: the sign-in code shows on the screen (Q-036, decided 18.10.2026).
 4. A new person is asked their name (required), surname (optional) and an optional photo: "Ýeral hasabyňyz üçin — toparyňyz sizi şu at bilen görer. Siz biznesiň eýesi bolarsyňyz." (the team sees this name; you'll be the owner) (§11: the name is asked after the code).
 5. The wizard moves to step 2 (B-03).
 6. *Soňra dowam et* (Continue later) saves progress with the toast "Ýatda saklandy. Şu belgi bilen girip, galan ýerinden dowam edersiňiz." (log in with this number to continue where you left off).
@@ -736,7 +736,7 @@ flowchart TD
 - The timer pill turns "hot" at 15 minutes or less; the notification "Haýyşyň wagty gutarýar" comes 5 minutes before (§16).
 - Two requests for overlapping times with the same specialist can't both exist: a request holds its slot (ADR 0017).
 
-Code differs: outside production, demo businesses answer their own requests automatically. This is a testing aid, not a product rule.
+Code differs: outside production, demo businesses answer their own requests automatically. At the first launch, example businesses confirm at once instead (Q-004, decided 18.10.2026).
 
 > Open question Q-004: who the first launch is for.
 
@@ -1588,7 +1588,7 @@ The team page *Topar* splits people into *Hünärmenler* (bookable, shown to cli
 flowchart TD
   A["Işgär çagyr"] --> B["Step 1 phone, names, level"]
   B --> C{"Level"}
-  C -->|"Programmasyz"| D["Added at once, no SMS"]
+  C -->|"Hünärmen without the app"| D["Added at once, no invite"]
   C -->|"Hünärmen or Administrator"| E["Step 2 services"]
   E --> F["Step 3 check and send"]
   F --> G["SMS link, 7 days"]
@@ -1641,14 +1641,14 @@ flowchart TD
 
 **Status** — Design: drawn (B-Team · invite states; DS-Business InviteRow) · Code: not built.
 
-### B-46 · Add a phone-only specialist
+### B-46 · Add a specialist without the app
 
-**Goal** — Make someone bookable online who will never log in (*Programmasyz hünärmen*).
+**Goal** — Make someone bookable online who doesn't use Ýeral yet: a *Hünärmen* with "uses the app" switched off (Q-216, decided 18.10.2026).
 **Who** — Owner.
 
 ```mermaid
 flowchart LR
-  A["Işgär çagyr"] --> B["Level Programmasyz"]
+  A["Işgär çagyr"] --> B["Hünärmen, app off"]
   B --> C["Services and schedule"]
   C --> D["Işgäri goş, active now"]
   D --> E["Owner and admins answer"]
@@ -1656,15 +1656,16 @@ flowchart LR
 
 **Steps**
 
-1. In the invite steps, pick *Programmasyz hünärmen*: "programma girmeýär, SMS iberilmeýär. Müşderiler oňa derrew onlaýn ýazylyp biler." (§11: added without SMS, active immediately).
-2. The phone is kept but "Programmasyz işgär girmeýär. Belgi diňe size we administratora görünýär."
+1. In the invite steps, pick *Hünärmen* and switch off "uses the app": "programma girmeýär, SMS iberilmeýär. Müşderiler oňa derrew onlaýn ýazylyp biler." (§11: added without SMS, active immediately).
+2. The phone number is required, so the person can start using the app or open their own workspace with it later: "Programmasyz işgär girmeýär. Belgi diňe size we administratora görünýär." (Q-216)
 3. Pick services; *Işgäri goş* (Add staff).
 4. In the calendar their column head says "programmasyz". Their requests always go to the owner and administrators (§2).
 
 **Edge cases**
 
 - They are not in the permission matrix and can't become owner (B-49, B-51).
-- Turning them into a login user: changing the level sends the normal 7-day SMS invite; until they accept they stay phone-only (bookable, requests go to the owner and administrators), and their bookings stay with them (Q-212, decided 18.10.2026). This applies only if phone-only staff stay (Q-216).
+- Switching the app on sends the normal 7-day invite; until they accept they keep working without it (bookable, requests go to the owner and administrators), and their bookings stay with them (Q-212, decided 18.10.2026).
+- **Design to fix:** *Programmasyz hünärmen* is drawn as a level in the *Dereje* select; it becomes a "uses the app" switch on *Hünärmen*, with the phone required (Q-216).
 
 > Open question Q-212: turning a phone-only specialist into a login user.
 
@@ -1726,7 +1727,7 @@ flowchart TD
 
 **Steps**
 
-1. *Dereje* select: Administrator / Hünärmen / Programmasyz hünärmen, with a generated summary such as "Diňe öz senenamasyny görýär, öz haýyşlaryna jogap berýär … öz gazanjyny görýär." and *Rugsatlary gör* (see permissions) (COMPONENTS AccessLevelField).
+1. *Dereje* select: Administrator / Hünärmen, plus a "uses the app" switch for a *Hünärmen* (Q-216), with a generated summary such as "Diňe öz senenamasyny görýär, öz haýyşlaryna jogap berýär … öz gazanjyny görýär." and *Rugsatlary gör* (see permissions) (COMPONENTS AccessLevelField).
 2. "Bir derejedäki ähli işgärleriň rugsatlary birmeňzeş." (everyone at one level has the same permissions).
 3. *Öz haýyşlaryna jogap berip biler* (Can answer own requests): shown only for people who log in and when the rule lets specialists answer. Default caption: "Umumy düzgün boýunça: «Ikisi hem» — kim ilki jogap berse. Öçürseňiz, {name} öz haýyşlaryny görer, ýöne jogap bermez." When changed: "… üçin aýratyn sazlandy."
 4. The owner's own row shows a lock box: "Eýesi — ähli rugsatlar, şol sanda topar we rugsatlar. Bir iş ýerinde bir eýe bolýar." + *Eýeçiligi geçir* (B-51).
@@ -1734,7 +1735,8 @@ flowchart TD
 **Edge cases**
 
 - Phone-only: "Programmasyz hünärmen programma girmeýär. Onuň haýyşlaryna eýesi we administrator jogap berýär."
-- Changing a phone-only person to a login level sends the normal 7-day SMS invite; they stay phone-only until they accept (Q-212, decided 18.10.2026; applies only if phone-only staff stay, Q-216).
+- Switching the app on for a specialist who works without it sends the normal 7-day invite; they keep working without it until they accept (Q-212, Q-216, decided 18.10.2026).
+- At the first launch no SMS goes out (Q-036): an invited person signs in at business.yeral.app with the invited phone and finds the invite there, so the owner tells them in person.
 
 **Status** — Design: drawn (B-Team · `panel=access`) · Code: not built (code has per-business editable roles instead).
 

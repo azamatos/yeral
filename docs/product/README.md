@@ -22,6 +22,7 @@ Answer questions and place features there; comment on any section.
 | 7c | [07c-flows-system.md](07c-flows-system.md) | what the system does by itself |
 | 8 | [08-notifications.md](08-notifications.md) | who is told what, how and when |
 | 9 | [09-decisions.md](09-decisions.md) | every decision, with date and source |
+| 10 | [10-plan.md](10-plan.md) | the build plan: phases to the first launch and the Turkmenistan launch, costs, the server |
 | — | [questions.md](questions.md) | every open and answered question |
 
 ## How the work flows
@@ -109,4 +110,5 @@ question: `choice`, `note`, `at`) and `scope` (one per feature: `place` = `mvp` 
 them with the ArtifactData tool and writes them back into this folder. The page treats answers saved before its build
 (`builtAt`) as recorded: a decided card shows the recorded option, a reopened question shows as open. So always record
 the page's new answers before rebuilding it. Answers saved after the build on a card with a concern, or one Claude
-decided, show as "Changed": those are the owner's replies to record next.
+decided, show as "Changed": those are the owner's replies to record next. Feature placements work the same way:
+the "Placed" column is the record, and only a move saved after the build shows as "you changed it".

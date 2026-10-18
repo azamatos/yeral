@@ -38,14 +38,15 @@ calm "book by phone" card and the number. Times the business itself offered afte
 
 ## The business team
 
-Three fixed access levels plus a specialist without a login. There are no custom roles. (business spec §1, §25)
+Three fixed access levels. There are no custom roles. A specialist may work without the app: an option on
+*Hünärmen*, not a fourth level. (business spec §1, §25; Q-216, decided 18.10.2026)
 
 | Level | Who it's for | By default sees and can |
 |---|---|---|
 | **Eýesi** (owner) | the person who created the workspace; exactly one | everything: all calendars, money, team, permissions, settings. Can hand ownership to another member |
 | **Administrator** | front desk, manager | all calendars, bookings and clients; answers reviews; analytics without money; settings; sees the team but can't change it |
 | **Hünärmen** (specialist) | a stylist, doctor, trainer… with their own login | their own column, bookings and requests; their own clients with phone numbers; reviews about them (read only); their own numbers and earnings; no settings |
-| **Programmasyz hünärmen** (phone-only specialist) | a specialist who doesn't use Ýeral | no login. Clients can book them online; the owner and administrators handle their bookings and requests |
+| *Hünärmen* without the app (*programmasyz*) | a specialist who doesn't use Ýeral yet | no login, but a phone number is required. Clients can book them online; the owner and administrators handle their bookings and requests. Switching the app on sends the usual invite, and the same number lets them open their own workspace later (Q-216, Q-212) |
 
 > Open question Q-216: specialists who don't use the app.
 

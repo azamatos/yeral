@@ -26,6 +26,7 @@ How to read the tables:
 | Codes per internet address | 100 an hour | Fixed | Q-267, decided 18.10.2026 |
 | Too many codes asked for | the message shows the wait in minutes | Fixed | Q-267, decided 18.10.2026 |
 | Test code outside production | `1234`; on the design canvases `0000` is wrong and any other code works | Fixed | ADR 0019, productContext |
+| Sign-in code at the first launch | shown on the screen; no SMS goes out | Fixed | Q-036, decided 18.10.2026 |
 | Name | asked once, at the first login; 1–80 characters | Client | client spec §4.7; length code only: packages/contract/src/account.ts |
 | Staying signed in | 60 days, renewed to 60 whenever fewer than 30 are left; no "sign out on all devices" button on MVP | Fixed | Q-269, decided 18.10.2026; code: apps/api/src/modules/auth/session.ts |
 | Changing the phone | a code goes to the new number; every other device is signed out | Client | client spec §4.8; sign-out code only: apps/api/src/modules/me/routes.ts |
@@ -270,10 +271,10 @@ apps/api/src/modules/bookings/actions.ts). The code still sends a review ask by 
 | What | Value | Who can change it | Source |
 |---|---|---|---|
 | Owners per workspace | exactly 1; handed over to an active member who logs in | Owner | business spec §1, §8 |
-| Access levels | 3 (*Eýesi*, *Administrator*, *Hünärmen*) plus phone-only staff; no custom levels | Fixed | business spec §1 |
+| Access levels | 3 (*Eýesi*, *Administrator*, *Hünärmen*); a *Hünärmen* may work without the app; no custom levels | Fixed | business spec §1; Q-216, decided 18.10.2026 |
 | Team size | no limit | Fixed | business spec §19 |
 | Invite link | sent by SMS; valid 7 days; can be sent again; expired: "*Çakylygyň möhleti geçdi*" | Owner/admin | business spec §1, §8 |
-| Phone-only staff | no SMS, active at once | Owner/admin | business spec §11 |
+| Specialist without the app | phone number required, no invite, active at once | Owner/admin | business spec §11; Q-216 |
 | Workspaces per person | no limit; one address each | Fixed | business spec §1 |
 | Busy elsewhere (*Başga ýerde*) | always on, in the MVP: the specialist's confirmed bookings and waiting requests in other workspaces, with their buffers, block the time as a reserved gap with no details | Fixed | business spec §1; Q-031, Q-271, Q-272, decided 18.10.2026 |
 | Who answers requests | both (see booking rules); each person can be allowed to answer their own | Owner/admin | business spec §2, §8 |

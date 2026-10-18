@@ -24,7 +24,8 @@ an own server (Docker + nginx) later.
   format, phone code and number rules, time zone, SMS provider and sender, legal texts, map area. Nothing
   country-specific is hard-coded (AGENTS rule 5).
 - **The first launch** is one market on Cloudflare as in ADR 0007 (Workers, Neon in Frankfurt, R2), in English, with
-  Turkmenistan's settings (manats, +993, Ashgabat time). Who uses it, and with what data, is product book Q-004.
+  Turkmenistan's settings (manats, +993, Ashgabat time). It's a pilot: example businesses beside real ones, and no SMS (the sign-in code shows on the screen) (product book
+  Q-004, Q-036).
 - **The Turkmenistan launch** moves that market, or starts a new one, onto servers in Turkmenistan with the Docker
   Compose stack (ADR 0007's "later"), adding Turkmen and Russian. Its operator and addresses are decided then.
 - **One account per market.** A person who uses two markets has two accounts. Cross-market features (one login, search
