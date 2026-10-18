@@ -34,6 +34,8 @@ works end to end.
 
 > Open question Q-032: can people in Turkmenistan open the site, and where do we host at launch?
 
+> Open question Q-037: must personal data be stored in Turkmenistan?
+
 > Open question Q-033: who writes the privacy policy and the terms?
 
 > Open question Q-103: who sets a restaurant's average bill.

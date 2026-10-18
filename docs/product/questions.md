@@ -114,11 +114,22 @@ answer: —
 ## Q-032 · Can people in Turkmenistan open the site, and where do we host at launch?
 chapter: 06 · status: open · priority: high
 
-Cloudflare is reported to be filtered in Turkmenistan (projectbrief, ADR 0007). The plan is Cloudflare now and the team's own server later (milestone M8). If clients in Ashgabat can't open yeral.app without a VPN, the launch fails, and nobody has tested it yet. The old site already runs on Cloudflare at yeral.app, so it can be tested today.
+Cloudflare is reported to be filtered in Turkmenistan (projectbrief, ADR 0007). The plan is Cloudflare now and the team's own server later (milestone M8). If clients in Ashgabat can't open yeral.app without a VPN, the launch fails, and nobody has tested it yet. The old site already runs on Cloudflare at yeral.app, so it can be tested today. In summer 2025 Turkmenistan added many whole IP ranges (/16 subnets) to its blocklist (Turkmen.News, reported by The Times of Central Asia), so any server abroad can be unreachable, not only Cloudflare. Where the data must live is Q-037.
 
-- A · Test now from Ashgabat (home and mobile internet, several providers). If Cloudflare is blocked, the own server becomes part of the MVP. (recommended)
+- A · Test now from Ashgabat (home and mobile internet, several providers): yeral.app, and a test address of each candidate host (a European host, a Turkish host, Turkmentelecom). If Cloudflare is blocked, the own server becomes part of the MVP. (recommended)
 - B · Launch on Cloudflare as planned and move later.
 - C · Launch on the own server from day one, whatever the test says.
+
+answer: —
+
+## Q-037 · Must personal data be stored in Turkmenistan?
+chapter: 06 · status: open · priority: high
+
+Turkmenistan's law No. 519-V "On information about private life and its protection" (20.03.2017) says personal data transferred outside Turkmenistan "shall also be stored in the territory of Turkmenistan" (DLA Piper, Data Protection Laws of the World: Turkmenistan, updated 23.12.2022). No registration of a database is required. Ýeral stores clients' phone numbers, names and booking history, and businesses keep their own client records, so hosting only abroad (Cloudflare, a European server) may break this law. Turkmentelecom has rented virtual servers (KVM) in Turkmenistan since January 2021, priced in manats (turkmenportal.com, telecom.tm/ru/hosting). How the law applies to Ýeral is a lawyer's call; this decides where we host (Q-032) and what server to buy.
+
+- A · Ask a lawyer in Turkmenistan before choosing hosting; until they answer, plan the database on a server in Turkmenistan. (recommended)
+- B · Host abroad and keep a copy of the database on a server in Turkmenistan.
+- C · Host abroad only and accept the risk.
 
 answer: —
 

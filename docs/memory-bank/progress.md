@@ -128,9 +128,9 @@
 - **2026-10-17 · Strategy reset** ([ADR 0021](../decisions/0021-product-book-first.md)): all design and code paused; the
   product book (`docs/product/`) is written first, with its page for the owner's answers
   (https://claude.ai/artifact/LY9U6jrQRo3MfoHTg3JpyN).
-- **2026-10-18 · Karar brief** (`docs/karar/brief.md`): the decision room for the owner and future partners (claude.ai
-  sign-in and sharing, languages, positions, notes, owner decides, Claude syncs decisions into the repo). Not built;
-  Step 0 proves identity for people outside the owner's organization first.
+- **2026-10-18 · Decision room considered and dropped:** a brief for "Karar" (#28) was written and removed; the repo
+  and the book page stay the way decisions are made and recorded. New book question Q-037 (Turkmen law 519-V: personal
+  data also stored in Turkmenistan), Q-032 updated with the 2025 IP-range blocking.
 
 ## Roadmap
 
