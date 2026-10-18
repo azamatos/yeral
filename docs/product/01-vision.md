@@ -54,17 +54,20 @@ flowchart LR
 ## Markets
 
 A market is one country with its own settings: languages, money, phone numbers, time zone, SMS provider, legal texts.
-How countries are kept apart is open (Q-131). **Turkmenistan is the first market:**
+**Each country gets its own deployment:** one code base, and per country its own servers, database and address, built
+from that country's settings, so a country's data stays where its law wants it. (Q-131, decided 18.10.2026; ADR 0023)
+**Turkmenistan is the first market:**
 
 - **Ashgabat first.** Lists stay relative to the person ("Ýakynymda", near me). The person's location preselects a
   city and they can pick another; an address shows its city when it differs from the selected one. (client spec §1;
   Q-107)
-- **Languages:** English, plus Turkmen and Russian added before the launch. (Q-101, Q-104, ADR 0022)
+- **Languages:** English at the first launch; Turkmen and Russian come with the Turkmenistan launch. (Q-101, Q-104,
+  Q-133, ADR 0022)
 - **Money:** manats, shown `40 TMT`. Clients pay at the place; there is no online payment. (client spec §1)
 - **Phones:** every account is a +993 mobile number with an SMS code. (ADR 0019, ROUND6-ANSWERS C1)
-- **Hosting:** Cloudflare for now, the team's own server later, because Cloudflare is reported filtered in
-  Turkmenistan. (ADR 0007) Whether people can reach it and whether the law wants the data inside the country is open
-  (Q-032, Q-037).
+- **Hosting:** the first launch runs on Cloudflare, with the database in Frankfurt; people in Turkmenistan reach it
+  through a VPN. Servers in Turkmenistan, which also keep personal data inside the country as its law asks, come with
+  the Turkmenistan launch. (Q-032, Q-037, decided 18.10.2026; ADR 0007, ADR 0023)
 
 ## How Ýeral makes money
 
@@ -85,8 +88,8 @@ These rules hold on every screen, in every app, for every business type. (client
 1. **The business confirms bookings by hand, by default.** The client sees *Garaşylýar* (Pending) and the word "sent",
    never "booked", until the business confirms. A business can switch on instant confirmation.
 2. **A request doesn't wait forever.** If the business doesn't answer within its hold time (30 minutes by default), the
-   request is cancelled and the client is told. For appointments the client gets three other free times; what an
-   expired table or class request offers is still open (Q-252).
+   request is cancelled and the client is told, with three other free times: for tables the nearest times for the same
+   party and area, for classes the next sessions with seats. (Q-252)
 3. **Five statuses with one meaning everywhere:** *Garaşylýar* (Pending) · *Tassyklandy* (Confirmed) · *Tamamlandy*
    (Completed) · *Ýatyryldy* (Cancelled) · *Gelmedi* (No-show). Each has one icon.
 4. **A visit is completed automatically** after it ends, unless the business marks a no-show.
@@ -101,13 +104,25 @@ These rules hold on every screen, in every app, for every business type. (client
 
 ## Launch
 
-Decided by the owner on 17.10.2026:
+Decided by the owner on 17 and 18.10.2026:
 
 - **One launch with all three web apps:** the client site, the business app and the CMS. The business flow doesn't
   work without all three. (Q-001)
+- **Two steps.** The first launch is in English on Cloudflare: investors and early users see it (from Turkmenistan
+  through a VPN), and it's also a portfolio piece. The Turkmenistan launch follows once marketing starts and investment
+  arrives: Turkmen and Russian, servers and database in Turkmenistan, legal texts checked by a lawyer there. (Q-032, Q-033, Q-037, Q-133, Q-292) Who uses the first launch, and with what data, is open (Q-004).
 - **The first businesses** are added by the Ýeral team in the CMS after meeting their owners and showing them the
   product; some owners set up by themselves to learn the product; sign-up stays open to anyone. (Q-002)
-- **Name and domain:** Ýeral on yeral.app; investors or future owners may change them later. (Q-003)
+- **Name and domain:** Ýeral on yeral.app; investors or future owners may change them later. (Q-003) How the name is
+  spelled, "Yeral" or "Ýeral", is open (Q-005).
+- **Booking types:** appointments at launch; tables and classes after the MVP. (Q-030)
+
+```mermaid
+flowchart LR
+  A["First launch · English · Cloudflare"] --> B["Investment, marketing"]
+  B --> C["Turkmenistan launch · Turkmen + Russian · servers in Turkmenistan"]
+  C -.-> D["Next country · its own deployment"]
+```
 
 ## Reference product
 
@@ -140,3 +155,7 @@ stays on yeral.app until the new one replaces it.
 > Open question Q-002: how do the first businesses get onto Ýeral?
 
 > Open question Q-003: is "Ýeral" on yeral.app the name we launch with?
+
+> Open question Q-004: who the first launch is for.
+
+> Open question Q-005: how the name is spelled.

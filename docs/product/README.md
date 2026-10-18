@@ -82,7 +82,13 @@ Claude doesn't take an answer for granted (owner, 18.10.2026). When an answer lo
 in conflict with another decision, Claude records it as given and adds one line under it:
 `concern: what worries Claude and the better option (dd.mm.yyyy)`. The page shows the card as "Claude has a concern",
 under its own filter, with the options open again: the owner keeps the answer or changes it, and Claude then removes
-the line (or rewrites the answer).
+the line (or rewrites the answer). A concern never blocks: without a reply, the owner's answer stands.
+
+Only critical questions go to the owner (owner, 18.10.2026): those that change what the product is, cost money, carry
+legal risk, or would make the next design pass redraw a lot. Claude decides every other question with its recommended
+option and records it as `answer: A · … Claude picked the recommended option; the owner delegated non-critical
+questions. (dd.mm.yyyy)`; chapter 9 marks it "Claude (delegated)". The owner can still change any of them on the page.
+Critical questions carry `· priority: high`.
 - Feature tables in chapter 6 start with the columns `ID | Feature | What it is | Proposed`; the page adds the
   MVP / Later / Never control to each row.
 - Question numbers by chapter: 001–099 vision, roles, rules and scope · 100–149 norms and limits · 150–199 client
@@ -100,4 +106,7 @@ publish leaves `capabilities` out; if they ever have to be declared again, decla
 `{"db": {"rules": [{"path": "", "read": "interact", "write": "admin"}]}, "user": {}, "comments": {"composer_only": true}}`
 (anyone who can open the page reads; only its editors write answers and placements). Answers live in the page's database: collection `answers` (one document per
 question: `choice`, `note`, `at`) and `scope` (one per feature: `place` = `mvp` · `later` · `never`, `at`). Claude reads
-them with the ArtifactData tool and writes them back into this folder.
+them with the ArtifactData tool and writes them back into this folder. The page treats answers saved before its build
+(`builtAt`) as recorded: a decided card shows the recorded option, a reopened question shows as open. So always record
+the page's new answers before rebuilding it. Answers saved after the build on a card with a concern, or one Claude
+decided, show as "Changed": those are the owner's replies to record next.

@@ -61,7 +61,7 @@ flowchart TD
 
 - *Administrator we eýesi* (Administrator and owner): specialists see their own requests but can't answer.
 - *Her hünärmen özi* (Each specialist themself): each specialist answers their own; administrators only see.
-- *Ikisi hem* (Both, the default): whoever answers first. The others see the answer at once.
+- *Ikisi hem* (Both, the default): whoever answers first. The others see the answer within about 10 seconds (Q-273).
 - The owner can always answer (B-Settings caption "Eýesi hemişe jogap berip bilýär").
 - A per-person switch in the staff drawer, *Öz haýyşlaryna jogap berip biler* (Can answer own requests), can take the right away from one specialist (B-48).
 - In a one-person workspace the setting is hidden: the owner answers everything.
@@ -139,6 +139,7 @@ flowchart TD
 - Wrong code: "Kod nädogry. Ýene N synanyşyk galdy." After 3 wrong tries a 60-second lock: "Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň."
 - A person who already has an account skips the name step.
 - "Eýýäm hasabyňyz barmy? Giriş" sends people with a workspace to login (B-07).
+- A half-finished setup: the business exists as a draft from step 2. At the next login the wizard reopens at the saved step instead of the no-workspace card, and the draft joins the workspace switcher only when it's finished (Q-200, decided 18.10.2026).
 
 > Open question Q-200: where a half-finished setup continues.
 
@@ -178,7 +179,9 @@ flowchart TD
 **Edge cases**
 
 - Name empty: "Biznesiň adyny ýazyň." No category: "Kategoriýa saýlaň." Address not from the list: "Salgyny sanawdan saýlaň."
-- Table and class businesses go through the same appointment steps 4–5; a table- or class-specific wizard is not designed (§7, §24).
+- Table and class businesses skip the services step and the specialist part of the team step; step 8 ends with a checklist pointing to *Stollar* or *Sapaklar*, and online booking opens once at least one table or class exists (Q-201, decided 18.10.2026). This applies when tables and classes come, after the MVP (Q-030).
+
+**Design to fix:** when tables and classes come, the wizard's table and class path: the skipped steps and the step 8 checklist (Q-201).
 
 > Open question Q-201: setup for table and class businesses.
 
@@ -216,6 +219,7 @@ flowchart TD
 - No day open: "Iň az bir gün açyk bolmaly." Closing before opening: "Ýapylýan wagt açylýan wagtdan soň bolmaly." Break outside the day: "Arakesme iş wagtynyň içinde bolmaly."
 - No service selected: "Iň az bir hyzmat saýlaň." A category without a starter list: "Bu kategoriýa üçin taýýar sanaw entek ýok. Hyzmatlaryňyzy aşakdan goşuň — 2–3 hyzmat başlamak üçin ýeterlik."
 - Team chosen but nobody added: "Işgär goşuň ýa-da «Ýeke işleýärin» saýlaň." Missing name or phone: "Her işgäriň adyny we 8 sanly belgisini ýazyň."
+- Table and class categories skip step 5 and the specialist part of step 6 (Q-201, decided 18.10.2026; after the MVP, Q-030).
 
 > Open question Q-201: setup for table and class businesses.
 
@@ -245,13 +249,14 @@ flowchart TD
 2. Manual: "Haýyşa näçe wagtda jogap berersiňiz?" Hold time 15 min, 30 min (default), 1, 2, 6 or 24 hours. "Bu wagtda jogap bermeseňiz, haýyş ýatyrylar we müşderä başga wagtlar hödürlener." (unanswered requests are cancelled and the client is offered other times).
 3. Manual with a team: *Haýyşlara kim jogap berýär?* with the three options (see "Who answers a request" above). Caption: "Siz hemişe jogap berip bilýärsiňiz." (you can always answer).
 4. Instant: "Müşderi derrew «Ýazylyş tassyklandy» görer. Boş däl wagtlaryňyzy senenamada ýapyp goýuň." (block your busy times in the calendar).
-5. *Müşderi ýatyryp biler* (Client may cancel until…) and *Hyzmatdan soňky arakesme* (buffer after a service; default 10 min, "Arakesme ýok" for none).
+5. *Müşderi ýatyryp biler* (Client may cancel until…), with the same choices as in settings: any time, 1, 2, 6, 12, 24 or 48 hours before (Q-119, decided 18.10.2026); and *Hyzmatdan soňky arakesme* (buffer after a service; default 10 min, "Arakesme ýok" for none).
 6. "Bularyň ählisini soňra Sazlamalarda üýtgedip bilersiňiz." (everything can be changed later).
 
 **Edge cases**
 
-- The cancellation choices drawn in the wizard (any time, 1, 2, 4, 12, 24 hours) differ from the settings list in §11 and in code (any time, 1, 2, 6, 12, 24, 48 hours).
-- "Block your busy times in the calendar" assumes a way to block time, which isn't designed (B-18).
+- Busy times are blocked with *Wagty ýap* from an empty calendar slot (B-18, Q-204).
+
+**Design to fix:** the wizard draws the cancel choices any time, 1, 2, 4, 12, 24 hours; it takes the settings list (§11, code): any time, 1, 2, 6, 12, 24, 48 hours (Q-119).
 
 > Open question Q-119: free-cancel choices in the setup wizard and in settings.
 
@@ -287,6 +292,7 @@ flowchart TD
 
 - Created from the workspace switcher (B-10): "Täze iş ýeri çep menýunyň ýokarsyndaky iş ýeri çalyşyjysynda peýda bolar — Glow Studio-a şol ýerden gaýdyp bilersiňiz." (the new workspace appears in the switcher).
 - QR codes are not generated for real in the design (§11 "real QR generation" not designed).
+- Table and class businesses (after the MVP): step 8 ends with a checklist pointing to *Stollar* or *Sapaklar* (Q-201, B-03).
 
 **Status** — Design: drawn (B-Onboarding · `step=8`, `fromSwitcher`) · Code: rule only (the api already hides unverified businesses from the public); the step is not built.
 
@@ -313,7 +319,7 @@ flowchart TD
 1. Login page *Ýeral Biznes-e giriň*: same phone step as sign-up, with "Biznesiňiz entek ýokmy? Mugt başlaň" for newcomers (B-Login).
 2. Code step: "SMS kody ýazyň", *Belgini üýtget* (change number), resend countdown, auto-check on the 4th digit.
 3. A new person gives a name: "Adyňyz näme? Belgiňiz tassyklandy. Ýeral hasabyňyz üçin adyňyzy ýazyň — toparyňyz sizi şu at bilen görer."
-4. Routing (§1): a pending invite first (B-08); no workspace → B-09; otherwise the **last used workspace** opens with "Glow Studio açylýar…", the person's level and address.
+4. Routing (§1): a pending invite first (B-08); a half-finished setup → the wizard at its saved step (Q-200, decided 18.10.2026); no workspace → B-09; otherwise the **last used workspace** opens with "Glow Studio açylýar…", the person's level and address.
 5. With several workspaces: "Siziň 2 iş ýeriňiz bar. Soňky işlän ýeriňizi açýarys; beýlekisini çep menýunyň ýokarsyndan saýlap bilersiňiz." A button *Garaşman, senenamany aç* skips the wait.
 
 **Edge cases**
@@ -407,7 +413,7 @@ flowchart TD
 
 1. The switcher sits at the top of the sidebar: logo, name, the person's level (§9). It is the only switch in the app (§1).
 2. The popover *Iş ýerleriňiz* lists each workspace with "level · address" and an amber count of unanswered requests this person can answer there; the current one has a check.
-3. Picking a row changes everything: calendar, team, clients, settings, numbers, and the person's level (B-Shell). Its calendar opens.
+3. Picking a row changes everything: calendar, team, clients, settings, numbers, and the person's level (B-Shell). Its calendar opens. Every page address names the workspace, for example `/tk/w/{slug}/calendar`, so links, tabs and notifications always open the right workspace; the switcher just changes the address (Q-202, decided 18.10.2026).
 4. *+ Täze biznes döret* opens the wizard from step 2, already signed in ("Her iş ýeri — bir biznes we bir salgy… Hasabyňyz şol bir galýar, siz täze biznesiň eýesi bolarsyňyz."). The left panel says "7 ädim".
 5. On a tablet the logo at the top of the icon rail opens the switcher; on a phone it sits in the top strip (§9).
 
@@ -416,6 +422,8 @@ flowchart TD
 - A request in another workspace raises only the count in the switcher; toasts and sounds are for the current workspace (B-Shell).
 - The bottom user block is a menu, not a switcher (§1).
 - A new workspace is a new business, so it goes through the Ýeral check again (B-11).
+
+**Design to fix:** the screens draw workspace pages without the workspace (`/tk/calendar`, `/tk/settings/…`); every page address carries it (`/tk/w/{slug}/…`, Q-202).
 
 > Open question Q-202: does the page address name the workspace.
 
@@ -434,12 +442,12 @@ flowchart TD
   B --> E["Calendar works for phone bookings"]
   B --> F{"Ýeral team decision"}
   F -->|"Verified"| G["Search, page, online booking open"]
-  F -->|"Rejected"| H["Not designed"]
+  F -->|"Rejected"| H["Banner with reason, fix and send again"]
 ```
 
 **Steps**
 
-1. A new business has status *Barlagda* (In review). The Ýeral team checks new businesses, usually within 24 hours (§7).
+1. A new business has status *Barlagda* (In review). The Ýeral team checks new businesses, usually within 24 hours (§7): a call to the business phone, then a look at the name, the address on the map, the category and the photos (Q-276, decided 18.10.2026).
 2. A banner sits above every page until verified and can't be dismissed: "Sahypaňyz barlagda — häzir ony diňe siz we toparyňyz görýärsiňiz. Barlagdan soň gözlegde we salgyňyzda hemmä açylar. Senenamany häzirden ulanyp bilersiňiz." (§26 F1, B-Shell).
 3. Until then: the business is not in search; a visitor at the link sees "Bu sahypa entek açylmady" with "Biznes Ýeral-a täze goşuldy we barlagdan geçýär. Adatça 24 sagat çekýär." and *Başga ýerleri gözle*, with no business details (F1). The owner and team see their own page with the preview banner.
 4. Online booking opens only after the check; the calendar works at once for phone and walk-in bookings (B-Onboarding step 8).
@@ -447,8 +455,10 @@ flowchart TD
 
 **Edge cases**
 
-- Rejected verification: the data model has a "rejected" status with a reason (§10), but no screen shows it.
-- No admin panel (CMS) is designed, so it's undefined who checks businesses and how (§24).
+- Rejected verification (the data model's "rejected" status with a reason, §10): the workspace shows a banner with the reason and a way to fix and send again; visitors keep seeing "Bu sahypa entek açylmady" (Q-274, decided 18.10.2026).
+- The Ýeral team verifies businesses in a small admin tool designed for launch (Q-010, decided 18.10.2026).
+
+**Design to fix:** the rejected-business banner with the reason and a way to fix and send again (Q-274); the launch admin tool for the Ýeral team (Q-010).
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.
 
@@ -483,7 +493,7 @@ flowchart TD
 3. Name and photo: "Toparlaryňyz sizi şu at bilen görýär." Saved with *Ýatda sakla*.
 4. Phone with *Belgini üýtget* (B-13).
 5. *Iş ýerlerim* (My workspaces): each workspace with the person's level and specialization. The specialization is read-only: "Hünäriňizi her iş ýeriniň eýesi Topar bölüminde belleýär." (each owner sets it in Topar).
-6. The busy-elsewhere switch (B-14) and leaving a workspace (B-15) sit at the bottom.
+6. Leaving a workspace (B-15) sits at the bottom. The drawn busy-elsewhere switch is dropped: "Başga ýerde" always applies (B-14, Q-271).
 
 **Edge cases**
 
@@ -525,37 +535,36 @@ flowchart TD
 
 ### B-14 · Show my other bookings as "Başga ýerde"
 
-**Goal** — A person who works in two workspaces never gets double-booked across them.
+**Goal** — A person who works in two workspaces never gets double-booked across them. Part of the MVP (Q-031, decided 18.10.2026).
 **Who** — Anyone who is bookable in two or more workspaces.
 
 ```mermaid
 flowchart TD
-  A["Booking in workspace A"] --> B{"Switch on? default yes"}
-  B -->|"Yes"| C["Workspace B shows Başga ýerde"]
+  A["Booking or request in workspace A"] --> C["Workspace B shows Başga ýerde"]
   C --> D["No details, not clickable"]
   C --> E["Online booking skips that time"]
   C --> F["Staff cannot book there"]
-  B -->|"No"| G["Workspace B shows nothing"]
 ```
 
 **Steps**
 
-1. In Profilim the switch "Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez" is on by default and saves at once (§1, B-Shell).
-2. Caption: "Beýleki iş ýeriňizdäki ýazylyşlar her senenamada jikme-jiksiz «Başga ýerde» bolup görünýär we ol wagtlar onlaýn ýazylyşda hödürlenmeýär."
-3. In the other workspace's calendar her bookings appear as a dashed grey block with a briefcase, "Başga ýerde", without client or service (§4 layers).
+1. There is no switch: "Başga ýerde" always blocks the time and never shows details. The drawn Profilim switch "Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez" is dropped (Q-271, decided 18.10.2026).
+2. What blocks: confirmed bookings and waiting requests where she is the specialist, with their buffers, and nothing else (Q-272, decided 18.10.2026).
+3. In the other workspace's calendar that time appears as a dashed grey block with a briefcase, "Başga ýerde": a reserved gap that nobody can book, with nothing from the other workspace, no client, service or business (§4 layers; Q-031).
 4. Clicking an empty slot under it, or dropping a booking there, is refused with a toast: "Aýna 19:00–20:00 aralygynda başga ýerde işleýär — bu wagta ýazylyş goşup bolmaýar." (for herself: "Siz … başga ýerde işleýärsiňiz").
 5. Online booking and the "nearest free times" in the new-booking drawer skip those times.
 
 **Edge cases**
 
-- Switched off: the other workspace can book her at the same time; that's her choice.
-- Her pending requests in the other workspace: the spec speaks of bookings, and the demo data shows only her confirmed 19:00–20:00 booking as "Başga ýerde", not her pending 20:15–21:00 request.
+- Her waiting requests in the other workspace block too (Q-272); the demo data shows only her confirmed 19:00–20:00 booking as "Başga ýerde", not her pending 20:15–21:00 request.
+
+**Design to fix:** drop the Profilim switch and its caption (B-Shell, ProfileDrawer); show her waiting requests and the buffers as "Başga ýerde" too, still with no details (Q-271, Q-272).
 
 > Open question Q-271: what the «Başga ýerde» switch controls.
 
 > Open question Q-272: which bookings block a person elsewhere.
 
-**Status** — Design: drawn (B-Shell; B-Calendar · Aýna 19:00–20:00; B-Mobile) · Code: not built (availability doesn't look at other workspaces; no switch on the account).
+**Status** — Design: drawn (B-Shell; B-Calendar · Aýna 19:00–20:00; B-Mobile) · Code: not built (availability doesn't look at other workspaces).
 
 ### B-15 · Leave a workspace
 
@@ -577,13 +586,15 @@ flowchart TD
 
 1. In Profilim, *Bu biznesden çyk* (Leave this business) applies to the current workspace only.
 2. Confirm: "Glow Studio-dan çykýarsyňyzmy?" *Hawa, çyk* / *Yza*.
-3. The account and other workspaces stay. Her future bookings stay; the owner reassigns them, the same way as when removing a staff member (B-Shell, B-50).
+3. The account and other workspaces stay. Leaving works like *Işgäri öçür* with *Bolşy ýaly galdyr* (B-50): she is no longer bookable, her future bookings stay in her column, and the owner gets a notification that opens the remove flow to move or cancel them (Q-203, decided 18.10.2026).
 4. The owner instead sees: "Siz Glow Studio-nyň eýesi. Biznesden çykmak üçin ilki eýeçiligi başga adama geçiriň: Topar → «Eýeçiligi geçir»." with *Topara geç*.
 
 **Edge cases**
 
 - Leaving the only workspace: the next login shows "Entek iş ýeriňiz ýok" (B-09).
-- What clients see and whether she stays bookable while the owner hasn't reassigned her bookings is not defined.
+- Until the owner acts, her bookings stay as they are for the clients (Q-203).
+
+**Design to fix:** the owner's notification that someone left, which opens the remove flow (B-50) for their future bookings (Q-203).
 
 > Open question Q-203: what happens to bookings when a specialist leaves.
 
@@ -602,7 +613,7 @@ flowchart TD
   B --> C["Summary line"]
   B --> D["Columns per specialist"]
   D --> E{"Clicks what?"}
-  E -->|"Empty slot"| F["New booking prefilled B-23"]
+  E -->|"Empty slot"| F["New booking B-23 or block time B-18"]
   E -->|"Booking block"| G["Booking drawer"]
   E -->|"Request block"| H["Request drawer B-19"]
   E -->|"N haýyş chip"| H
@@ -653,7 +664,7 @@ flowchart TD
 2. A specialist always gets this view of their own column. Their summary shows their own planned earnings, not the business revenue (§4).
 3. *Hepde · Ähli işgärler* (Week, all staff): rows = staff, columns = 7 days; each cell = a load bar (booked minutes / working minutes) and "5 ýazylyş · 1 haýyş"; clicking a cell opens that day. Caption: "Zolak — iş wagtynyň näçe bölegi ýazylyşlar bilen dolandygyny görkezýär."
 4. *Hepde · Bir işgär* (Week, one staff): 7 day columns with textless blocks (status colour only); clicking opens that day.
-5. Phone (under 768 px): bottom tab bar *Senenama · Ýazylyşlar · Müşderiler · Köp*; the day calendar shows one staff column at a time with staff chips (amber dot when they have requests); a date strip; it opens at one hour before now; swiping changes the day; tapping an empty slot or the round "+" opens the quick booking sheet (B-24). Tablets get a 72 px icon rail (§1, §9).
+5. Phone (under 768 px): bottom tab bar *Senenama · Ýazylyşlar · Müşderiler · Köp*; the day calendar shows one staff column at a time with staff chips (amber dot when they have requests); a date strip; it opens at one hour before now; swiping changes the day; tapping the round "+" opens the quick booking sheet (B-24); tapping an empty slot first offers *Täze ýazylyş* or *Wagty ýap*, as on a computer (Q-204). Tablets get a 72 px icon rail (§1, §9).
 
 **Edge cases**
 
@@ -665,24 +676,26 @@ flowchart TD
 ### B-18 · Block time in the calendar
 
 **Goal** — Close part of a day for one person ("Ýapyk · Okuw", a training, a personal errand) so nobody books it.
-**Who** — Not defined.
+**Who** — The same people who may add bookings: Owner, Administrator; a Specialist for themself (Q-204, decided 18.10.2026).
 
 ```mermaid
 flowchart LR
   A["Needs time blocked"] --> B{"How?"}
   B -->|"Whole days"| C["Personal special day B-47"]
-  B -->|"Part of a day"| D["Not designed"]
+  B -->|"Part of a day"| D["Empty slot, Wagty ýap"]
 ```
 
 **Steps**
 
 1. The calendar draws blocked time as a grey block with a lock and a reason, part of the staff schedule (§4: "Ýapyk · Okuw", Jeren 16:30–17:30).
 2. The setup wizard tells instant-confirmation businesses "Boş däl wagtlaryňyzy senenamada ýapyp goýuň." (block your busy times in the calendar).
-3. No screen shows how to create, edit or delete such a block. Whole days off are designed as personal special days (B-47).
+3. Clicking an empty slot offers *Täze ýazylyş* (New booking) or *Wagty ýap* (Block time). Block time asks for the person, from–to, a reason and an optional repeat (Q-204, decided 18.10.2026). Whole days off stay personal special days (B-47).
 
 **Edge cases**
 
-- A block over existing bookings: undefined.
+- A block can't cover existing bookings (Q-204).
+
+**Design to fix:** the empty-slot choice *Täze ýazylyş* / *Wagty ýap* and the block-time form: person, from–to, reason, optional repeat (Q-204).
 
 > Open question Q-204: how to block time in the calendar.
 
@@ -713,7 +726,7 @@ flowchart TD
 3. The drawer shows: the timer "Jogap bermäge 18 min galdy"; the client (name, phone, "3-nji gelşi" or *Täze müşderi*, no-show count if any, alert notes); services with duration and total price; specialist; date and time; the client's note; "Jogap berilmese, haýyş {time} awtomatik ýatyrylar we müşderä 3 başga wagt teklip ediler."; link *Müşderiniň kartyna geç* (§4).
 4. *Tassykla* (Confirm): the booking becomes *Tassyklandy*; toast "Ýazylyş tassyklandy · müşderä SMS iberildi". The client gets "Ýeral: {business} ýazylyşyňyzy tassyklady…" (client spec §6).
 5. After answering, an *Indiki haýyş* (Next request) button appears when more are waiting (§11).
-6. With *Ikisi hem*, whoever answers first wins; the others see the answer at once (B-Settings).
+6. With *Ikisi hem*, whoever answers first wins; the others see the answer within about 10 seconds (B-Settings; Q-273).
 
 **Edge cases**
 
@@ -725,7 +738,7 @@ flowchart TD
 
 Code differs: outside production, demo businesses answer their own requests automatically. This is a testing aid, not a product rule.
 
-> Open question Q-283: demo businesses on the live site.
+> Open question Q-004: who the first launch is for.
 
 **Status** — Design: drawn (B-Calendar · `panel=request`, `answers`; B-Bookings; B-Mobile) · Code: rule only (domain: who can answer before expiry; confirming in the api is used only by instant mode and demo businesses); no business endpoint.
 
@@ -759,7 +772,7 @@ flowchart TD
 **Edge cases**
 
 - An offered time gets taken before the client taps it: the client sees "Eýýäm eýelendi" on that chip (A1).
-- All offered times have passed: the client sees "Teklip edilen wagtlaryň möhleti geçdi" + *Başga wagt saýla* (A1).
+- All offered times have passed: the client sees "Teklip edilen wagtlaryň möhleti geçdi" + *Başga wagt saýla* (A1). An offered time counts as past once it's earlier than now plus the lead time, like any other booking (Q-264, decided 18.10.2026).
 - One booking per declined request: after the client takes one time, the other chips go (A1).
 - A client blocked to phone-only (B-35) can still take times the business offered (A7).
 - Bulk decline from the list asks one reason for all and offers no times (B-31).
@@ -797,7 +810,7 @@ flowchart TD
 
 **Edge cases**
 
-- No answer within the hold time: the request is dropped and the booking stays; the client sees "Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar." (A3).
+- No answer within the hold time: the request is dropped and the booking stays; the client sees "Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar." (A3). A move's deadline never runs past the original visit's start (Q-263, decided 18.10.2026).
 - The client asks a second move: it replaces the first (A3).
 - The client cancels the booking: the waiting move is withdrawn too (A3).
 - The client withdraws the request (*Haýyşy yzyna al*): the ghost disappears.
@@ -829,7 +842,7 @@ flowchart TD
 
 **Steps**
 
-1. Each request holds its slot until the business's hold time ends (15 min – 24 h, default 30 min), never past the visit start (§2, §11).
+1. Each request holds its slot until the business's hold time ends (15 min – 24 h, default 30 min), never past the visit start (§2, §11). The hold runs only during the business's opening hours (Q-120, decided 18.10.2026).
 2. Five minutes before the end, people who answer get *Haýyşyň wagty gutarýar* (§16).
 3. Unanswered: the booking becomes *Ýatyryldy* with "cancelled by system"; the slot frees up (§2).
 4. The client gets an SMS with 3 free times: "Ýeral: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: …" (client spec §6). Tapping a time sends a **new request** (or a confirmed booking at an instant business) (A2).
@@ -839,6 +852,9 @@ flowchart TD
 
 - A move request that runs out: dropped, no offered times; the booking stays (B-21).
 - A request made shortly before the visit: its hold ends at the visit start.
+- A request sent while the business is closed: its hold starts counting when the business opens.
+
+**Code differs:** the code counts the hold straight through closed hours (Q-120).
 
 > Open question Q-120: hold time while the business is closed.
 
@@ -865,7 +881,7 @@ flowchart TD
 
 **Steps**
 
-1. *Täze ýazylyş* or a click on an empty slot opens the drawer; a slot pre-fills staff and time (§4).
+1. *Täze ýazylyş*, or *Täze ýazylyş* in an empty slot's choice (B-18, Q-204), opens the drawer; a slot pre-fills staff and time (§4).
 2. The source switch on top: *Telefon jaňy* (Phone call, default) / *Gelip ýazyldy* (Walk-in, B-25).
 3. **Phone first**: "Belgini ýazyň — müşderi bazada bar bolsa, ady we bellikleri özi doldurylar." From 3 digits, up to 3 matching clients appear; at 8 digits a known client's card shows (name, visits, average bill, alert note box, "Diňe jaň arkaly" tag if blocked), or "Bu belgi bazada ýok — täze müşderi hökmünde goşular. Müşderä SMS şu belgä gider." with *Ady · hökman däl* (name, optional). *Ady boýunça gözle* switches to search by name (COMPONENTS NewBookingDrawer).
 4. Services: grouped checkbox rows with durations and prices, and a total.
@@ -906,7 +922,7 @@ flowchart TD
 
 **Steps**
 
-1. The round "+" button or an empty slot opens a bottom sheet (B-Mobile 5a–5c).
+1. The round "+" button opens a bottom sheet (B-Mobile 5a–5c); an empty slot first offers *Täze ýazylyş* (this sheet) or *Wagty ýap* (block time, B-18) (Q-204, decided 18.10.2026).
 2. The phone field opens with the number keypad; the client card shows on the 8th digit (with any alert), or *Täze müşderi* with an optional name.
 3. Service chips: this client's usual services first, *Başga hyzmat* for the full list.
 4. *Iň ýakyn boş wagtlar* as a 3-column grid (time, "day · staff"); *Başga wagt saýla* for any time.
@@ -975,7 +991,7 @@ flowchart TD
 - Refused with a toast (§4, §11): the specialist doesn't do the service ("… bu hyzmaty etmeýär — başga hünärmene geçirip bolmaýar"); it doesn't fit with the buffer ("Bu wagta sygmaýar — … we arakesme gerek"); outside hours; day off (*Dynç güni*); "Başga ýerde" ("… aralygynda başga ýerde işleýär — ýazylyşy bu wagta geçirip bolmaýar"); overlap with another booking.
 - Only confirmed bookings that haven't started can be moved (B-Calendar).
 - A booking with an open move request can't be dragged (B-21).
-- Moving several bookings at once is not designed (§11; B-31).
+- Bookings move one at a time; there is no bulk move on MVP (Q-209, decided 18.10.2026; B-31).
 - Table bookings move between tables (B-62); classes move as a whole session (B-69).
 
 Code differs: the domain also allows the business to move a pending request; no screen offers that.
@@ -1044,9 +1060,14 @@ flowchart TD
 
 **Edge cases**
 
-- The design shows *Arz et* on confirmed bookings that haven't started yet; the code and ADR 0017 allow it only from the start time; classes allow "Gelmedi" only after the session starts (§22).
-- A mistaken "Gelmedi": the class drawer can remove the mark, the calendar can't (B-67).
+- *Gelmedi* can be chosen only from the start time; *Gijä galdy*, *Gödek gylyk* and *Başga* any time on a confirmed or completed booking (Q-206, decided 18.10.2026). Classes allow "Gelmedi" only after the session starts (§22).
+- A no-show can be marked until 24 hours after the end; a review the client wrote before stays (Q-254, decided 18.10.2026).
+- A mistaken complaint: the team can remove it from the booking drawer within 7 days. A no-show goes back to *Tamamlandy*, the no-show count drops, and the client gets no message (Q-207, decided 18.10.2026). The class drawer removes a class mark (B-67).
 - Code: one complaint per booking.
+
+**Code differs:** the code and ADR 0017 allow every complaint type only from the start time (Q-206).
+
+**Design to fix:** the design offers *Arz et* with *Gelmedi* on confirmed bookings that haven't started; before the start *Gelmedi* isn't offered (Q-206). The booking drawer needs a way to remove a complaint within 7 days (Q-207).
 
 > Open question Q-206: when "Arz et" is allowed on an appointment.
 
@@ -1058,7 +1079,7 @@ flowchart TD
 
 ### B-29 · Internal statuses
 
-**Goal** — Mark a booking with a team-only marker such as *Geldi* (Arrived) or *Başlandy* (Started), without changing its real status.
+**Goal** — Mark a booking with a team-only marker such as *Geldi* (Arrived) or *Başlandy* (Started), without changing its real status. Part of the MVP (Q-031, decided 18.10.2026).
 **Who** — The owner sets them up (settings); anyone who can open a confirmed booking sets one.
 
 ```mermaid
@@ -1132,21 +1153,21 @@ flowchart TD
   B --> C{"Action"}
   C -->|"Tassykla"| D["All confirmed, SMS each"]
   C -->|"Ret et"| E["One reason for all"]
-  C -->|"Başga wagta geçir"| F["Not designed"]
   C -->|"Eksport"| G["CSV file"]
 ```
 
 **Steps**
 
-1. Ticking rows shows an ink bar "2 saýlandy" with *Tassykla* · *Ret et* · *Başga wagta geçir* · *Eksport (CSV)* (§5).
+1. Ticking rows shows an ink bar "2 saýlandy" with *Tassykla* · *Ret et* · *Eksport (CSV)* (§5). There is no bulk move on MVP: bookings move one at a time (Q-209, decided 18.10.2026).
 2. *Tassykla*: "2 haýyş tassyklandy · müşderilere SMS iberildi".
 3. *Ret et*: a modal "2 haýyşy ret etmek" with reason chips and an optional note to clients; no offered times; "2 haýyş ret edildi · müşderilere SMS iberildi".
 4. *Eksport*: "CSV faýl taýýarlandy · N setir".
 
 **Edge cases**
 
-- Moving several bookings at once is not designed (§11); in the screen the button only links to the calendar.
 - Rows the viewer can't answer are left out of bulk answers (COMPONENTS BookingRow).
+
+**Design to fix:** drop *Başga wagta geçir* from the bulk bar; in the screen it only links to the calendar (Q-209).
 
 > Open question Q-209: bulk move in the bookings list.
 
@@ -1268,16 +1289,16 @@ flowchart TD
 2. When a client reaches N no-shows, the card switch *Diňe jaň arkaly ýazylyp biler* turns on by itself ("2 gezek gelmedik müşderilerde awtomatik açylýar"). Caption in the rules: "Müşderi 2 gezek gelmese, indiki gezek diňe jaň arkaly ýazylyp biler. Müşderiniň kartyndan gaýtadan açyp bilersiňiz." (you can reopen it from the client card).
 3. The business can also switch it on by hand for any client; toast "Indi diňe jaň arkaly ýazylyp biler".
 4. Online, the client sees a calm card "Bu biznese telefon arkaly ýazylyp bilersiňiz" + *Jaň et* (A7). The team sees the tag "Diňe jaň arkaly" on the client wherever they appear.
-5. Switching it off: toast "Onlaýn ýazylyş açyldy".
+5. Switching it off: toast "Onlaýn ýazylyş açyldy". The no-show count starts again from zero (Q-127, decided 18.10.2026).
 
 **Edge cases**
 
 - Times the business offered after a decline can still be taken online by a blocked client (A7).
-- After the business lifts the block, what makes it come back is not defined.
+- After the business lifts the block, it comes back by itself only when the client reaches N new no-shows (Q-127).
 
 > Open question Q-127: what counts as a no-show and how the limit ends.
 
-Code differs: the code treats a client as blocked whenever their no-show count reaches N, so switching the block off on the card would have no effect. The design lets the business lift it.
+Code differs: the code treats a client as blocked whenever their no-show count reaches N, so switching the block off on the card would have no effect. Q-127 lets the business lift it and starts the count again from zero.
 
 **Status** — Design: drawn (B-Client · settings; Venue and Booking · `restricted`) · Code: rule only (domain: block after N no-shows or by hand).
 
@@ -1301,8 +1322,10 @@ flowchart LR
 
 **Edge cases**
 
-- The client has upcoming bookings: not defined.
+- The client has upcoming bookings or waiting requests: deleting isn't allowed; the modal asks to cancel them first (Q-208, decided 18.10.2026).
 - The client books online again later: a new client record is created from their phone (ADR 0018).
+
+**Design to fix:** the delete modal's state for a client with upcoming bookings or waiting requests, asking to cancel them first (Q-208).
 
 > Open question Q-208: deleting a client with upcoming bookings.
 
@@ -1324,17 +1347,17 @@ flowchart TD
   A --> D["Photos, first is cover"]
   A --> E["Phone and amenities"]
   A --> F["Address block"]
-  F --> G{"New location?"}
+  F --> G{"Second location?"}
   G -->|"Yes"| H["Täze biznes döret"]
-  G -->|"No"| I["Adjust pin and entrance"]
+  G -->|"No"| I["Change address, pin, entrance"]
   B --> J["Save bar"]
 ```
 
 **Steps**
 
 1. Logo (square, at least 400 × 400 px); name ("Müşderiler gözlegde, ýazylyşda we SMS-lerde şu ady görýär."); category ("Kategoriýa müşderileriň sizi nädip tapjakdygyny we ýazylyş görnüşini kesgitleýär") (§8).
-2. Description per language (TK / RU / EN tabs): "Näme edýärsiňiz we näme üçin size gelmeli — 2–3 sözlem ýeterlik." Empty RU or EN falls back to Turkmen ("Doldurylmasa, türkmençe görkeziler").
-3. Photos: grid, drag to reorder, the first is the cover in search and on the page ("Esasy et" makes one the cover); 3+ recommended.
+2. Description per language (TK / RU / EN tabs): "Näme edýärsiňiz we näme üçin size gelmeli — 2–3 sözlem ýeterlik." Empty RU or EN falls back to Turkmen ("Doldurylmasa, türkmençe görkeziler"). Any one language is required, and a missing one shows the one written (Q-102, decided 18.10.2026). **Design to fix:** the tabs follow the market's languages and the caption names no fixed fallback.
+3. Photos: grid, drag to reorder, the first is the cover in search and on the page ("Esasy et" makes one the cover); 3+ recommended; up to 20 photos, each up to 10 MB (JPG, PNG or WebP), made smaller on upload (Q-115, decided 18.10.2026).
 4. *Habarlaşmak telefony* (contact phone; the page's *Jaň et* calls it) and amenities (shown in the page's *Barada* section).
 5. Address block with map preview and *Salgyny üýtget*: "Her iş ýeri — bir salgy. Başga salgyda hem işleýän bolsaňyz, ony aýry iş ýeri hökmünde dörediň:" + *Täze biznes döret*. Home-based switch: "Takyk salgyny diňe ýazylyş tassyklanandan soň görkez".
 6. *Sahypany gör* opens the public page (with the preview banner before verification).
@@ -1342,8 +1365,8 @@ flowchart TD
 **Edge cases**
 
 - Switching to a table category: "Bu kategoriýa stol bronlamak bilen işleýär — zallary we stollary «Stollar» bölüminde gurnaň."
-- Whether a business that moves to a new address may change it, or must open a new workspace, is not clear.
-- Closing or deleting a workspace is not designed anywhere.
+- A business that moves may change its address and keeps everything, perhaps with a new Ýeral check; only a second, simultaneous location needs a new workspace (Q-215, decided 18.10.2026).
+- No self-service delete on MVP: switching online booking off pauses the business (B-41), and closing a workspace goes through the Ýeral team: the owner contacts them (help page contacts) and cancels the future bookings, each client getting an SMS; the team hides the page in the admin tool (Q-012), and the data is kept (Q-213, decided 18.10.2026).
 
 > Open question Q-215: a business moves to a new address.
 
@@ -1384,7 +1407,9 @@ flowchart TD
 - *Hyzmaty poz* (Delete service) shows a toast with *Yzyna al* (Undo).
 - A group can be deleted only when empty: "Ilki hyzmatlary başga topara geçiriň ýa-da pozuň".
 - Past bookings keep a copy of the service name and price (code: services are archived, bookings keep snapshots).
-- What happens to future bookings of a deleted service is not defined.
+- Deleting a service with future bookings is allowed: they stay as they are with the copied name and price, the delete step warns how many there are, and the service disappears from new bookings (Q-210, decided 18.10.2026).
+
+**Design to fix:** a warning before deleting a service that says how many future bookings it has; the screen has only the undo toast (Q-210).
 
 > Open question Q-210: deleting a service with future bookings.
 
@@ -1406,14 +1431,16 @@ flowchart LR
 **Steps**
 
 1. Weekly table: day, open switch (*Açyk* / *Ýapyk · dynç güni*), from–to, one optional break per day (§8, §11). Caption: "Müşderiler diňe şu wagtlarda onlaýn ýazylyp bilýär." and "Hünärmenleriň smenalary şu wagtyň içinde bolýar." (staff shifts sit inside these hours).
-2. Time pickers: starts 06:00–23:30 in 30-minute steps; ends may go to **24:00** (§26 E1). Clients then see "09:00–24:00" and "Häzir açyk · 24:00-a çenli".
+2. Time pickers: from 00:00 in 30-minute steps (Q-128, decided 18.10.2026); ends may go to **24:00** (§26 E1). Clients then see "09:00–24:00" and "Häzir açyk · 24:00-a çenli".
 3. Save with the sticky bar.
 
 **Edge cases**
 
 - Closing before opening: "Ýapylýan wagt açylýan wagtdan soň bolmaly." Break outside the day: "Arakesme iş wagtynyň içinde bolmaly."
 - Open past midnight (for example 18:00–02:00): not designed (E1; covered in the limits chapter).
-- Existing bookings that fall outside new hours: not designed.
+- Existing bookings that fall outside the new hours: on save, the affected bookings are listed with *Ýazylyşlary galdyr* (Keep bookings) or *Ýatyr we müşderilere 3 başga wagt hödürle* (Cancel and offer clients 3 other times), as for special days (B-40). New bookings follow the new hours either way (Q-211, decided 18.10.2026).
+
+**Design to fix:** the list of affected bookings with the two choices when hours (here) or a staff shift (B-47) change (Q-211); start pickers that begin at 00:00, not 06:00 (Q-128).
 
 > Open question Q-211: changing hours or a shift with bookings outside.
 
@@ -1480,14 +1507,14 @@ flowchart TD
 2. *Ýazylyşlar nähili gelýär*: *Men tassyklaýaryn* (each booking arrives as a request; the client sees *Garaşylýar*) or *Derrew tassykla* (the client is confirmed at once). Caption: "Özüňiz ýazan ýazylyşlar (telefon ýa-da gelip ýazylan) hemişe derrew tassyklanýar." (§2).
 3. Manual only: *Haýyş saklanýar* (hold time) 15 min · 30 min · 1 h · 2 h · 6 h · 24 h, and *Haýyşlara kim jogap berýär?* (B-42).
 4. *Iň az öňünden* (lead time; 0 = *Çäk ýok*), *Senenama näçe gün öňünden açyk* (7 / 14 / 30 / 60 / 90 days), *Hyzmatdan soňky arakesme* (buffer: *Ýok*, presets, *Başga…* 1–120 min; service overrides listed), *Wagt ädimi* (start every 15 or 30 min: "Müşderilere boş wagtlar şeýle görkezilýär: 10:00, 10:15, 10:30…") (§11).
-5. *Müşderi ýatyryp biler* (client may cancel until): any time, 1, 2, 6, 12, 24, 48 hours before. "Şundan giç müşderi onlaýn ýatyryp bilmeýär — size jaň etmeli bolar." *Ýatyrylanda sebäp sora* (ask the reason when the client cancels).
+5. *Müşderi ýatyryp biler* (client may cancel until): any time, 1, 2, 6, 12, 24, 48 hours before. "Şundan giç müşderi onlaýn ýatyryp bilmeýär — size jaň etmeli bolar." *Ýatyrylanda sebäp sora* (ask the reason when the client cancels). The lateness rule shows a fixed 15 minutes in the MVP; a setting next to the cancel window (none, 5, 10, 15, 20 or 30 min) comes with F-103 after the MVP (Q-118, decided 18.10.2026).
 6. *Gelmedikden soň onlaýn ýazylyşy ýap* (0–5) (B-35). *Ýazylyş ýagdaýlary* (B-29).
 7. A side preview *Müşderi nähili görýär* shows the client's sent screen for the current mode; "Düzgünleri üýtgedeniňizde bu ýer derrew täzelenýär."
 
 **Edge cases**
 
 - Online booking off: existing bookings and requests don't change.
-- Switching manual to instant (or changing the hold time) while requests are waiting: not defined.
+- Switching manual to instant (or changing the hold time) while requests are waiting: they stay requests with their original timers; only new bookings follow the new setting (Q-205, decided 18.10.2026).
 
 > Open question Q-205: changing confirmation settings while requests wait.
 
@@ -1637,9 +1664,11 @@ flowchart LR
 **Edge cases**
 
 - They are not in the permission matrix and can't become owner (B-49, B-51).
-- Turning them into a login user later: not designed.
+- Turning them into a login user: changing the level sends the normal 7-day SMS invite; until they accept they stay phone-only (bookable, requests go to the owner and administrators), and their bookings stay with them (Q-212, decided 18.10.2026). This applies only if phone-only staff stay (Q-216).
 
 > Open question Q-212: turning a phone-only specialist into a login user.
+
+> Open question Q-216: specialists who don't use the app.
 
 **Status** — Design: drawn (B-Team · invite with Programmasyz; staff drawer) · Code: schema only (staff "has app" flag).
 
@@ -1673,7 +1702,7 @@ flowchart TD
 **Edge cases**
 
 - End before start: "Gutarýan senesi başlaýan senesinden öň bolup bilmez."
-- Changing a shift so existing bookings fall outside it: not designed.
+- Changing a shift so existing bookings fall outside it: the same list and choices as for business hours (B-39); new bookings follow the new shift either way (Q-211, decided 18.10.2026).
 
 > Open question Q-211: changing hours or a shift with bookings outside.
 
@@ -1705,7 +1734,7 @@ flowchart TD
 **Edge cases**
 
 - Phone-only: "Programmasyz hünärmen programma girmeýär. Onuň haýyşlaryna eýesi we administrator jogap berýär."
-- Changing a phone-only person to a login level: not designed (Q-212).
+- Changing a phone-only person to a login level sends the normal 7-day SMS invite; they stay phone-only until they accept (Q-212, decided 18.10.2026; applies only if phone-only staff stay, Q-216).
 
 **Status** — Design: drawn (B-Team · `panel=access`) · Code: not built (code has per-business editable roles instead).
 
@@ -1824,7 +1853,7 @@ flowchart LR
 
 1. What a level can't use is hidden, not disabled: menu items, money, buttons (§1, B-Shell).
 2. Opening a hidden page by its address goes to *Senenama* with the toast "Bu bölüm siziň üçin ýapyk" (This section is closed to you) (B-Shell).
-3. Examples: a specialist opening `/tk/settings/…`; an administrator without "See revenue" sees analytics without money, not a blocked page.
+3. Examples: a specialist opening `/tk/w/{slug}/settings/…` (Q-202); an administrator without "See revenue" sees analytics without money, not a blocked page.
 
 **Edge cases**
 
@@ -1888,12 +1917,15 @@ flowchart TD
 1. *Arz et* ("Ýalan, kemsidiji ýa-da mahabat bolsa") opens "Teswiri arz etmek · Näme üçin arz edýärsiňiz?" (§15).
 2. Reasons: *Ýalan — bu müşderi gelmedi* (Fake, didn't come), *Kemsidiji sözler* (Insulting), *Başga biznes barada* (About another business), *Mahabat ýa-da spam* (Ad or spam), *Başga sebäp*; *Düşündiriş (hökman däl)*.
 3. "Ýeral topary 48 sagadyň içinde barlar. Teswir şu wagta çenli görünýär." → toast "Arz ugradyldy · Ýeral topary 48 sagadyň içinde barlar".
-4. The review shows "Barlanýar · Ýeral moderasiýasy". It stays visible on both sides but is **not counted** in the average, count or star bars until Ýeral clears it; removed → it disappears (§15, F2). Clients see "Ýeral barlaýar · ortaça baha hasaplanmaýar".
+4. The review shows "Barlanýar · Ýeral moderasiýasy". It stays visible on both sides but is **not counted** in the average, count or star bars until Ýeral clears it; removed → it disappears (§15, F2). Clients see "Ýeral barlaýar · ortaça baha hasaplanmaýar". If Ýeral hasn't decided within 48 hours, the review counts again (Q-261, decided 18.10.2026).
 5. The business can still reply to a review under moderation.
 
 **Edge cases**
 
-- Who moderates without the CMS is not defined (§24).
+- The Ýeral team handles reported reviews in the small admin tool designed for launch (Q-010, decided 18.10.2026).
+- A cleared review can't be reported again (Q-261).
+
+**Design to fix:** a review Ýeral cleared shows no *Arz et* (Q-261).
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.
 
@@ -1955,7 +1987,7 @@ flowchart TD
 
 **Steps**
 
-1. "Haýsy habaryň haçan we nirä geljegini saýlaň. Bu sazlamalar diňe size degişli." (§16).
+1. "Haýsy habaryň haçan we nirä geljegini saýlaň. Bu sazlamalar diňe size degişli." (§16). Each person has one set per workspace, starting from that workspace's level defaults; quiet hours are shared across all their workspaces (Q-281, decided 18.10.2026).
 2. Browser permission banner when not granted: "Brauzer habarnamalary ýapyk — täze haýyşlary sekuntda görmek üçin açyň." + *Rugsat ber*.
 3. Ten events, each with "when" and "who gets it": *Täze haýyş* (at once; you, admins and the specialist), *Haýyşyň wagty gutarýar* (5 min left), *Müşderi ýatyrdy*, *Müşderi wagtyny üýtgetdi*, *Kärdeşiňiz ýazylyş goşdy* (a colleague added a phone or walk-in booking), *Täze teswir*, *Ertirki ýazylyşlar* (evening summary), *Gündelik jemleme* (morning summary), *Topar* (invite accepted), *Ýeral: barlag we täzelikler* (verification and news; owner only).
 4. Channels on MVP: *Brauzerde* (in the browser) and *SMS*. *Programmada* (in the app) appears only when the native business app ships (§16, §25.6).
@@ -1967,7 +1999,9 @@ flowchart TD
 
 - A summary time inside quiet hours: "Bu wagt gijeki dymyşlyga düşýär — ses we push bolmaz."
 - Denied browser permission isn't drawn; the banner says "Brauzer sazlamalarynda açyň" (§22).
-- The screen says SMS comes "only when the app can't deliver", but on MVP there is no app.
+- New-request SMS is off by default; each person can switch it on, and it never goes at night or to someone who has the workspace open (Q-297, decided 18.10.2026).
+
+**Design to fix:** the screen says SMS comes "only when the app can't deliver"; on MVP there is no app, so it says the SMS skips anyone who has the workspace open (Q-297). Quiet hours say they apply in every workspace (Q-281).
 
 > Open question Q-297: new-request SMS to staff before the app exists.
 
@@ -2000,7 +2034,8 @@ flowchart TD
 **Edge cases**
 
 - No article found: "Başga söz bilen ýazyp görüň ýa-da soragyňyzy goldaw çatyna ýazyň."
-- Support phone and Telegram are placeholders (§24). Articles come from the CMS, which isn't designed.
+- Support phone and Telegram are placeholders (§24).
+- Help articles and the support chat come after launch; the launch admin tool covers businesses and reported reviews (chapter 3, "The Ýeral team"; Q-010, decided 18.10.2026).
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.
 
@@ -2008,14 +2043,16 @@ flowchart TD
 
 ## 9. Tables workspace
 
-Restaurants and cafés book tables, not specialists. The sidebar shows *Stollar* instead of *Senenama* (or both for a business with several booking types) (§20, §22). Demo: Bag kafe. Build order: the appointment workspace first, then tables and classes (business spec, scope).
+Restaurants and cafés book tables, not specialists. The sidebar shows *Stollar* instead of *Senenama* (or both for a business with several booking types) (§20, §22). Demo: Bag kafe. Tables and classes come after the MVP; the first launch takes appointments only (Q-030, decided 18.10.2026). The rules below apply when they come.
+
+Access in a table workspace (Q-214, decided 18.10.2026; applies when tables come): the owner and administrators answer requests, and the "who answers" setting is hidden. A *Hünärmen* sees the whole timeline and can seat guests, free tables and add walk-ins, but can't answer requests or change settings.
 
 > Open question Q-214: access levels in table and class workspaces.
 
 ### B-58 · Tables timeline and floor plan
 
 **Goal** — See which tables are free, booked or taken right now and through the evening.
-**Who** — Owner and Administrator (see Q-214 for others).
+**Who** — Owner, Administrator and *Hünärmen*: everyone sees the whole timeline (Q-214).
 
 ```mermaid
 flowchart TD
@@ -2049,7 +2086,7 @@ flowchart TD
 ### B-59 · Answer a table request
 
 **Goal** — Confirm or decline an online table request, with a table already picked.
-**Who** — Owner and Administrator (see Q-214).
+**Who** — Owner and Administrator; a *Hünärmen* can't answer, and the "who answers" setting is hidden (Q-214).
 
 ```mermaid
 flowchart TD
@@ -2078,7 +2115,7 @@ flowchart TD
 ### B-60 · New reservation by phone
 
 **Goal** — Book a table for a caller, combining two tables for a big party if needed.
-**Who** — Owner and Administrator (see Q-214).
+**Who** — Owner and Administrator (Q-214).
 
 ```mermaid
 flowchart TD
@@ -2114,7 +2151,7 @@ Code differs: code gives each reservation one table and one sitting time (120 mi
 ### B-61 · Walk-in guests (Gelip oturdy)
 
 **Goal** — Seat guests who arrive without a reservation, at a table free now.
-**Who** — Owner and Administrator (see Q-214).
+**Who** — Owner, Administrator and *Hünärmen* (Q-214).
 
 ```mermaid
 flowchart TD
@@ -2145,7 +2182,7 @@ flowchart TD
 ### B-62 · Seat, free or move a table
 
 **Goal** — Handle the evening: guests arrive, leave early, or need another table.
-**Who** — Owner and Administrator (see Q-214).
+**Who** — Owner and Administrator; a *Hünärmen* can seat guests and free tables (Q-214).
 
 ```mermaid
 flowchart TD
@@ -2175,7 +2212,7 @@ flowchart TD
 ### B-63 · Cancel or no-show a reservation
 
 **Goal** — Cancel a reservation, or mark a party that didn't come after the hold time.
-**Who** — Owner and Administrator (see Q-214).
+**Who** — Owner and Administrator (Q-214).
 
 ```mermaid
 flowchart TD
@@ -2198,7 +2235,7 @@ flowchart TD
 
 **Edge cases**
 
-- When "Arz et" is allowed and whether a no-show can be undone follow the appointment questions (Q-206, Q-207).
+- When "Arz et" is allowed and how a mistaken no-show is undone follow the appointment rules (B-28; Q-206, Q-207, decided 18.10.2026).
 
 **Status** — Design: drawn (B-Tables · drawers) · Code: rule only (lifecycle shared with appointments); no business endpoint.
 
@@ -2225,6 +2262,7 @@ flowchart TD
 3. *Stol näçe wagt eýelenýär* (turn time by party size): 1–2 people 1 h 30 min, 3–4 people 2 h, 5+ 2 h 30 min. "Wagt çyzgysyndaky zolaklar we boş wagtlar şu sazlama bilen hasaplanýar."
 4. *Stol saklanýar* (hold for late guests): 15 min.
 5. *Onlaýn bronda iň köp adam* (max party online): 8. "9 we ondan köp adam bolsa, müşderä «Jaň ediň» diýip görkezýäris." The client's party chips follow this limit (D1).
+6. The last reservation starts 1 hour before closing, online and by staff, and the table is held until closing (Q-117, decided 18.10.2026).
 
 **Edge cases**
 
@@ -2237,12 +2275,14 @@ Code differs: the online party limit is a fixed 8 in code, not a setting; there 
 
 ## 10. Classes workspace
 
-Studios and gyms book seats in group sessions. The sidebar shows *Sapaklar* (§21). Demo: Aýdyň ýoga.
+Studios and gyms book seats in group sessions. The sidebar shows *Sapaklar* (§21). Demo: Aýdyň ýoga. Like tables, classes come after the MVP (Q-030, decided 18.10.2026).
+
+Access in a class workspace (Q-214, decided 18.10.2026; applies when classes come): for a trainer (*Hünärmen*), "own" means the sessions they teach; they mark attendance and answer requests for those.
 
 ### B-65 · Week schedule and session drawer
 
 **Goal** — See the week's classes and who is coming to each.
-**Who** — Owner and Administrator (see Q-214 for trainers).
+**Who** — Owner and Administrator; a trainer (*Hünärmen*) for the sessions they teach (Q-214).
 
 ```mermaid
 flowchart TD
@@ -2271,7 +2311,7 @@ flowchart TD
 ### B-66 · Answer class requests and add attendees
 
 **Goal** — Confirm or decline seat requests, and add people who call.
-**Who** — Owner and Administrator (see Q-214).
+**Who** — Owner and Administrator; a trainer answers requests for the sessions they teach (Q-214).
 
 ```mermaid
 flowchart TD

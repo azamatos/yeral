@@ -18,15 +18,17 @@ question.
   the same language for everyone, and pages can be cached. Every public page tells search engines where its other
   languages are. Links in this book are written with `/tk/`, from the Turkmen design: read them as `/{language}/`.
   (client spec §3; Q-100; ADR 0016, ADR 0022)
-- **Opening `/`** goes to the saved language; for someone who hasn't chosen yet it's open (Q-132).
+- **Opening `/`** goes to the saved language; someone who hasn't chosen yet gets their phone's or browser's language
+  if Ýeral has it, else the market's main language. (Q-132, decided 18.10.2026)
 - **Each person has one language.** It's saved in their profile when they log in and follows them to every device.
   The switch is in the site header (icon and code) and the footer (full names), and in the business workspace in the
   person's menu as *Dil* (Language). (client spec §3, §8; business spec §1)
 - **The business workspace and the CMS carry no language in their links.** They're behind a login, so each person
   sees their own language, and a link shared between staff opens in the reader's language. The business spec's
   `business.yeral.app/tk/giris` and `/tk/calendar` lose the `/tk`. (Q-100, decided 18.10.2026; ADR 0016)
-- **SMS** go in the client's language. Which language a client without a Ýeral account (a phone booking) gets is
-  open (Q-292); the code sends Turkmen. The login code
+- **SMS** go in the client's language. A client without a Ýeral account (a phone booking) gets the market's main
+  language until they sign in and choose one: English for now, Turkmen when Turkmenistan launches. (Q-292, decided
+  18.10.2026) **Code differs:** the code sends Turkmen. The login code
   goes in the saved language, else the language of the page. (client spec §6; code: apps/api/src/modules/jobs/run.ts,
   apps/api/src/modules/auth/routes.ts)
 - **Category names, hints and specialist words** come from Ýeral's catalogue, in every language of the market.
@@ -41,9 +43,9 @@ question.
 
 ### Who writes which text
 
-- **English is the source text** from 18.10.2026, the design included: future boards are drawn in English. Design
-  v0.5 is Turkmen; it showed how Turkmen looks with the font and stays the reference for the Turkmen translation.
-  (Q-101)
+- **English is the source text** from 18.10.2026, the design included: every board is redrawn in English in the
+  design pass that follows the book, and Turkmen comes back as a translation. Design v0.5 is Turkmen; it showed how
+  Turkmen looks with the font and stays the reference for the Turkmen translation. (Q-101; Q-133, decided 18.10.2026)
 - **Claude writes the translations** into each market's languages; the owner checks all of them before the market
   launches. (Q-101, decided 18.10.2026)
 - Russian runs about 30% longer: buttons fit their text and never have a fixed width; labels wrap to two lines before
@@ -128,7 +130,9 @@ The owner checks every translation before a market launches. (Q-101)
 - **Totals:** if any service is "from" or hidden, the total is "from" the priced sum (`60 TMT-den`). If every service is
   hidden, the total shows no amount, only *Baha ýerinde aýdylýar*. All free: *Mugt*. (ROUND6-ANSWERS B1; code:
   packages/domain/src/pricing.ts)
-- **The business's own figures** (revenue, average check) include its hidden prices. Clients never see those amounts.
+- **The business's own figures** (revenue, average check) stay: they're worked out from the prices of completed
+  visits, so no billing is involved. They include the business's hidden prices; clients never see those amounts.
+  (Q-134, decided 18.10.2026)
   (business spec §4; code: packages/domain/src/pricing.ts)
 - **No average bill.** Restaurants show no expected amount: billing isn't Ýeral's job, booking a place is. A menu may
   come later (F-239). (Q-103, decided 18.10.2026) The design's *Ortaça hasap* `≈ 150 TMT` goes.
@@ -172,7 +176,7 @@ average bill is still in the code (code: packages/i18n/src/fmt.ts).
 | "Until" | *20:00-a çenli*, *21:00-e*, *20:00-ä* | the ending follows the vowel of the number (business spec §22) |
 
 - **The 24:00 rule.** A day may end at 24:00. Clients then see `09:00–24:00` and *Häzir açyk · 24:00-a çenli* (open now,
-  until 24:00). End pickers go up to 24:00; start pickers stop at 23:30. A visit must end by 24:00. (ROUND6-ANSWERS E1,
+  until 24:00). End pickers go up to 24:00; start pickers stop at 23:30. (ROUND6-ANSWERS E1,
   business spec §26; code: packages/contract/src/common.ts)
 - **Past midnight:** a business may be open past midnight (`18:00–02:00`), and a booking may cross midnight. It isn't
   designed yet. (client spec §13; Q-105, decided 18.10.2026) **Code differs:** every day and every visit ends by 24:00.
@@ -274,8 +278,8 @@ text (code: packages/i18n/src/messages/tk.json).
   place). (client spec §1; Q-109) The business product is *Ýeral Biznes*. (business spec §19)
 - **SMS sender name:** "Yeral" in plain Latin. (Q-109, decided 18.10.2026)
 - **Name and domain are working titles.** Every app reads them from one setting, so a rename is a configuration
-  change. (owner 13.10.2026; AGENTS rule 6; code: packages/lib/src/site.ts, translation key `common.brand`) The final
-  name and domain are open question Q-003 in chapter 1.
+  change. (owner 13.10.2026; AGENTS rule 6; code: packages/lib/src/site.ts, translation key `common.brand`) The launch name
+  and domain are decided (Q-003); how the name is spelled is open (Q-005).
 - **Font:** Onest, weights 400–800, with every Turkmen letter (ä ç ž ň ö ş ü ý) and Cyrillic; served by Ýeral itself.
   (client spec §8, techContext)
 - **Look:** design tokens v0.5 (v0.4 plus one selection ring). White base, thin dividers instead of boxes, one violet

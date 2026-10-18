@@ -44,6 +44,12 @@ The version PR #26
   site, the business app and the CMS; the team adds the first businesses in the CMS; Ýeral on yeral.app; no average
   bill; businesses may be open past midnight and options stay flexible; the city is a choice (book Q-001–Q-003,
   Q-100–Q-109).
+- 2026-10-18 (book answers, batch 2): the owner answers only critical questions; Claude decides the rest with the
+  recommended option and records it ("Claude (delegated)"), and says so where it disagrees (a concern). Two launches:
+  first in English on Cloudflare (investors and early users, from Turkmenistan through a VPN; also a portfolio piece),
+  then Turkmenistan with Turkmen, Russian and its own servers and database, after investment; one deployment per
+  country (ADR 0023). No server to buy for the first launch. Appointments first, tables and classes after the MVP; no
+  review-ask SMS; "Başga ýerde", internal statuses and the business PWA in the MVP; client karma later.
 
 ## Decisions
 
@@ -77,7 +83,9 @@ instead of Better Auth (the design's attempts/lock/resend rules, no placeholder 
 2026-10-17: [0021](../decisions/0021-product-book-first.md) product book first (`docs/product/`), then design,
 Storybook, code; Claude Code writes the Claude Design prompts and checks the canvas.
 
-2026-10-18: [0022](../decisions/0022-english-first-any-country.md) built in English, not bound to one country; each
+2026-10-18: [0023](../decisions/0023-one-deployment-per-market.md) one code base, one deployment per market; first
+launch on Cloudflare, Turkmenistan later on its own servers ·
+[0022](../decisions/0022-english-first-any-country.md) built in English, not bound to one country; each
 market adds its languages (supersedes 0016's Turkmen first).
 
 ## Open questions
@@ -99,11 +107,13 @@ Where the old questions went (2026-10-17):
 
 ## Next steps
 
-1. The owner reads the product book page and answers its questions; Claude writes each answer into `docs/product/`
-   (chapters, `questions.md`, chapter 9) and republishes the page.
-2. When chapters close: Claude writes the Claude Design prompts for what's undrawn or changed (chapter 6 lists design
-   fixes already found); the owner pastes them; Claude checks the canvas.
-3. With the answers: an exact plan for yeral.app, the business app, the CMS and the backend, with hosting (Q-032,
-   Q-037: Turkmen law may require personal data stored in Turkmenistan) and when to buy which server.
-4. Then components in Storybook and code, re-planned from the book's scope chapter (M3/M5 order is open: question Q-001).
+1. The owner answers the four critical questions on the book's page: Q-004 (who the first launch is for), Q-005 (how
+   the name is spelled), Q-036 (SMS at the first launch: paying for it), Q-216 (specialists who don't use the app).
+   Every other question is decided; the owner may still change any on the page ("Decided by Claude" filter; replies
+   show as "Changed"). Claude records answers and replies, then republishes the page.
+2. Then: an exact plan for yeral.app, the business app, the CMS and the backend. Hosting is settled for the first
+   launch (Cloudflare + Neon, ADR 0007, ADR 0023): no server to buy until the Turkmenistan launch.
+3. Claude writes the Claude Design prompts: every board redrawn in English (Q-133), plus the design fixes in chapter 6
+   and the "Design to fix" lines in the flow chapters; the owner pastes them; Claude checks the canvas.
+4. Then components in Storybook and code, re-planned from the book's scope chapter (one launch, appointments first).
    The "Code differs" lines across the book list what built code must change.

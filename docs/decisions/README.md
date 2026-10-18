@@ -28,6 +28,7 @@ before any code used them were edited in place (marked "revised").
 | [0020](0020-local-and-production-only.md) | Local and production only: no staging | Accepted 2026-10-16 |
 | [0021](0021-product-book-first.md) | Product book first; Claude Code writes the design prompts | Accepted 2026-10-17 |
 | [0022](0022-english-first-any-country.md) | Built in English, not bound to one country; each market adds its languages | Accepted 2026-10-18 |
+| [0023](0023-one-deployment-per-market.md) | One code base, one deployment per market; first launch on Cloudflare | Accepted 2026-10-18 |
 
 New record: copy [`_template.md`](_template.md), take the next number, add a row here, update the affected
 memory-bank file in the same commit.

@@ -96,12 +96,18 @@ function parseQuestions(md) {
   return questions
 }
 
+const isDelegated = (q) => /the owner delegated non-critical questions/.test(q.answer)
+const stateLabel = (q) =>
+  q.status !== 'decided' ? 'Open' : q.concern ? 'Claude has a concern' : isDelegated(q) ? 'Decided by Claude' : 'Decided'
+
 function questionCard(q) {
   const decided = q.status === 'decided'
-  // A decided question with Claude's concern stays answerable: the owner keeps or changes the answer.
+  // A decided question with Claude's concern, or one Claude decided for the owner, stays answerable: the owner keeps
+  // or changes the answer.
   const concern = decided && q.concern
-  const locked = decided && !concern
-  const label = decided ? (concern ? 'Claude has a concern' : 'Decided') : 'Open'
+  const delegated = decided && isDelegated(q)
+  const locked = decided && !concern && !delegated
+  const label = decided ? stateLabel(q) : 'Open'
   const options = q.options
     .map(
       (o) => `
@@ -420,7 +426,7 @@ const index = chapters
       .map((id) => questionsById.get(id))
       .map(
         (q) =>
-          `<li data-index-q="${q.id}"${q.start ? ' data-start' : ''}><a href="#${qAnchor(q.id)}"><span class="q-id">${q.id}</span> ${inline(q.title)}</a>${q.start ? '<span class="q-start">Start here</span>' : ''}<span class="q-state" data-state-for="${q.id}">${q.status === 'decided' ? (q.concern ? 'Claude has a concern' : 'Decided') : 'Open'}</span></li>`,
+          `<li data-index-q="${q.id}"${q.start ? ' data-start' : ''}><a href="#${qAnchor(q.id)}"><span class="q-id">${q.id}</span> ${inline(q.title)}</a>${q.start ? '<span class="q-start">Start here</span>' : ''}<span class="q-state" data-state-for="${q.id}">${stateLabel(q)}</span></li>`,
       )
       .join('')
     return `<div class="index-group"><h3>${escapeHtml(c.title)}</h3><ul class="index">${rows}</ul></div>`
@@ -436,12 +442,15 @@ const book = {
         status: q.status,
         start: !!q.start,
         concern: !!q.concern,
+        delegated: q.status === 'decided' && isDelegated(q),
         options: q.options.map((o) => o.key),
         answer: q.answer,
       },
     ]),
   ),
   chapters: Object.fromEntries(chapters.map((c) => [c.key, c.placedHere])),
+  // Answers saved on the page after this build are replies Claude hasn't recorded yet.
+  builtAt: new Date().toISOString(),
 }
 
 const updated = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })

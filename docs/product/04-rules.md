@@ -38,18 +38,20 @@ flowchart TD
 
 ## Booking types
 
-One booking engine, three types now and one later. A business has one or more; its category sets the default. (client spec §2)
+One booking engine, three types designed and one later. (client spec §2) The MVP launches with appointments only;
+tables and classes come after the MVP (Q-030, decided 18.10.2026). A business has one booking type, set by its
+category; several types in one business come later (Q-022, decided 18.10.2026).
 
 | Type | Turkmen | The client chooses | Used by |
 |---|---|---|---|
 | Appointment | *Wagt bellemek* | service(s) → specialist or "any" → date and time → send | barbers, salons, dentists, physio, tutors, mechanics, groomers, home services |
-| Table | *Stol bronlamak* | party size → date and time → seating area → send | restaurants, cafés, tea houses |
-| Class | *Topar sapagy* | a session from the schedule → seats → send | yoga, group fitness, courses |
+| Table (after the MVP) | *Stol bronlamak* | party size → date and time → seating area → send | restaurants, cafés, tea houses |
+| Class (after the MVP) | *Topar sapagy* | a session from the schedule → seats → send | yoga, group fitness, courses |
 | Resource (later) | *Ýer kärendesi* | a resource → a time range → send | pitches, saunas, studios |
 
-- **Where it happens:** at the business by default; at the client's address (home services) or online (tutors) are in
-  the spec. A business that works from home can hide its exact address until a booking is confirmed; the map then shows
-  a circle. (client spec §2, business spec §7)
+- **Where it happens:** at the business only. A business that works from home can hide its exact address until a
+  booking is confirmed; the map then shows a circle. At the client's address (home services) and online (tutors) are in
+  the spec but come later. (client spec §2, business spec §7; Q-020, decided 18.10.2026)
 - **Several services in one appointment** run back to back, with one specialist where possible; "any specialist" lets
   Ýeral pick per service. A time is free only if the whole chain fits. (client spec §2)
 - **A solo business** skips the specialist step. (client spec §2)
@@ -68,7 +70,8 @@ For appointments, a start time is offered only if all of this holds (ADR 0017, b
 
 1. it's inside the business's hours for that day, not in its break, not on a closed special day;
 2. the specialist works then (their own hours inside the business's, their break, their days off) and isn't
-   busy elsewhere (*Başga ýerde*);
+   busy elsewhere (*Başga ýerde*: the specialist on a confirmed booking or a waiting request in another workspace, with
+   its buffers; Q-272, decided 18.10.2026);
 3. the whole service chain plus the break after it fits before closing and before the next booking;
 4. it's on the business's time grid (every 15 or 30 minutes from opening);
 5. it's at least the business's minimum notice from now, and not further ahead than its booking window;
@@ -78,7 +81,8 @@ Tables: a time is free for a party if a table of the right size is free (the sma
 automatically; VIP areas need 6 or more people). Classes: a session is bookable while it has seats left. (client spec §2,
 business spec §20–§21)
 
-A business day ends at midnight at the latest: hours can end at 24:00, but not later. (ROUND6-ANSWERS E1)
+A business may stay open past midnight: hours like 18:00–02:00, and a booking may cross midnight. (Q-105, decided
+18.10.2026; ROUND6-ANSWERS E1 drew hours up to 24:00) **Code differs:** every day and visit ends by 24:00.
 
 ## The life of a booking
 
@@ -113,7 +117,8 @@ Who cancelled shows everywhere: "*Siz ýatyrdyňyz*" (you cancelled), "*Biznes �
 cancelled / declined), "*Wagtynda jogap gelmedi*" (no answer in time, hourglass icon). (ROUND6-ANSWERS A2)
 
 **Internal statuses** are optional team-only markers on top of the five (*Geldi* arrived, *Başlandy* started, or the
-business's own, up to 5). Clients never see them and they never change the real status. Off by default. (business spec §3)
+business's own, up to 5). Clients never see them and they never change the real status. Off by default; in the
+MVP. (business spec §3; Q-031, decided 18.10.2026)
 
 ## Confirmation
 
@@ -121,10 +126,16 @@ business's own, up to 5). Clients never see them and they never change the real 
   sees and up to 3 other times. (business spec §2)
 - **Instant (a business setting):** online bookings are confirmed at once. (business spec §2)
 - **Staff bookings** (by phone, walk-ins) are always confirmed. (ADR 0017)
-- **Hold time:** a request holds its time for the business's hold time (default 30 minutes), never past the start. No
-  answer by then: the system cancels it and offers the client 3 other free times. (business spec §2)
+- **Hold time:** a request holds its time for the business's hold time (default 30 minutes), counted only during the
+  business's opening hours and never past the start. No answer by then: the system cancels it and offers the client 3
+  other free times; if nothing is free, the SMS drops the times and says *Başga wagt saýlaň*. (business spec §2; Q-120,
+  Q-252, decided 18.10.2026) **Code differs:** the hold counts clock time, day and night, and when nothing is free the
+  SMS keeps an empty list (*Şu boş wagtlar bar: —*).
 - **Declined with offered times:** taking an offered time creates a confirmed booking at once (the business offered it).
   One declined request gives at most one booking; the other chips disappear. (ROUND6-ANSWERS A1)
+- **Each offered or free time names one specialist** and is booked with that person only; if they're no longer free,
+  the chip shows *Eýýäm eýelendi*. (Q-159, decided 18.10.2026) **Code differs:** free times after an expiry may be with
+  any specialist, and a taken time falls back to anyone free.
 - **Expired with free times:** taking one sends a new request (confirmed at once at an instant business). (ROUND6-ANSWERS A2)
 
 ## Changes after booking
@@ -149,7 +160,10 @@ business's own, up to 5). Clients never see them and they never change the real 
   (no-show, sets the status), *Gijä galdy* (late), *Gödek gylyk* (rude), *Başga* (other). Complaints are team-only and
   go to the client's card. (business spec §3)
 - After a set number of no-shows at one business (default 2), that client can book there only by phone.
-  (business spec §3, §8)
+  (business spec §3, §8) Reaching the number turns on the client card's switch *Diňe jaň arkaly ýazylyp biler*; the
+  business can turn it off, and counting starts again from zero. (Q-127, decided 18.10.2026) **Code differs:** every
+  no-show ever counts, and turning the switch off doesn't lift a limit that came from the count.
+- There are no Ýeral-wide client blocks at launch; client karma comes later (F-241; Q-012, decided 18.10.2026).
 
 ## The business's clients
 
@@ -159,15 +173,23 @@ business's own, up to 5). Clients never see them and they never change the real 
   away), *Arz edilen* (has complaints). (productContext)
 - Notes are team-only; a note marked as an alert shows on every booking of that client. (ADR 0018)
 - Deleting a client keeps their past bookings for reports, without the name. (ADR 0018)
+- A client who deletes their Ýeral account: upcoming bookings are cancelled; the account, favourites and reviews are
+  deleted; each business keeps its own visit records, no longer linked to a Ýeral account. (Q-172, decided 18.10.2026)
+  **Code differs:** the reviews stay.
 
 ## Reviews
 
 - Only after a completed visit, one per booking, editable for 7 days, shown with the first name and an initial
-  ("Aýjemal G."). (productContext)
+  ("Aýjemal G."), or the first name alone when there's no surname. (productContext; Q-156, decided 18.10.2026)
+  **Code differs:** the name is one field, split at the first space.
+- There's no review ask: clients write reviews from *Ýazylyşlarym* (My bookings) and from the booking link after a
+  completed visit. (Q-259, Q-170, decided 18.10.2026)
 - The business can't delete a review. It can reply, edit or delete its reply, and report a review to the Ýeral team.
   (business spec §15)
 - A reported review stays visible on both sides with "*Ýeral barlaýar · ortaça baha hasaplanmaýar*" and isn't counted in
-  the rating until the team clears it. Removed means gone. (ROUND6-ANSWERS F2)
+  the rating until the team clears it. Removed means gone. (ROUND6-ANSWERS F2) The team decides within 48 hours;
+  otherwise the review counts again. A cleared review can't be reported again. (Q-261, decided 18.10.2026)
+  **Code differs:** there's no moderation yet; every review counts as soon as it's written.
 
 ## Verification
 
@@ -177,7 +199,9 @@ business's own, up to 5). Clients never see them and they never change the real 
 
 ## Booking codes and sources
 
-- Every booking has a short code like `YR-48213`, used in SMS links (`yeral.app/b/{code}`). (productContext, ROUND6-ANSWERS)
+- Every booking has a short code like `YR-48213`, shown to the client and read out on the phone. It never opens
+  anything by itself: SMS links carry a long random token on their own path. (productContext, ROUND6-ANSWERS; Q-168,
+  decided 18.10.2026) **Code differs:** SMS links open the booking from its code (`yeral.app/b/{code}`).
 - Every booking remembers where it came from: online (web, later app), phone, walk-in. The workspace shows web and app as
   "*Onlaýn*". (ADR 0017)
 

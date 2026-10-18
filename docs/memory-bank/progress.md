@@ -135,6 +135,13 @@
   first, languages per market); Claude's concerns recorded on Q-003, Q-101, Q-103, Q-104, Q-105, Q-107 (new `concern:`
   line, shown on the page); new questions Q-131–Q-134; features F-238 (add a business for its owner), F-240 (city
   choice) and F-109 (past midnight) in the MVP, F-239 (menu) later; F-178 CMS moved to MVP.
+- **2026-10-18 · Book answers, batch 2:** 106 more answers written into the book: the owner's for most questions, the
+  recommended option for the rest (owner delegated non-critical questions; marked "Claude (delegated)" in chapter 9).
+  Two launches: first in English on Cloudflare, then Turkmenistan on its own servers; [ADR 0023](../decisions/0023-one-deployment-per-market.md)
+  (one deployment per market). No review-ask SMS (Q-259); "Başga ýerde", internal statuses and the business PWA in the
+  MVP; phone-only staff set to Never by the owner, reopened as Q-216; client karma later (F-241). Four critical
+  questions left: Q-004 (who the first launch is for), Q-005 (name spelling), Q-036 (paying for SMS), Q-216. The page
+  keeps Claude's decisions changeable ("Decided by Claude" filter) and marks the owner's later replies as "Changed".
 
 ## Roadmap
 
@@ -154,4 +161,4 @@ deploys come from releases (no staging, ADR 0020).
 | M5 | **Business workspace** | designed in rounds 4–5 (`docs/design/business/`, design v0.4), built in the design's order: shell (sidebar, switcher, top bar, rail) → calendar (day all staff → request/booking/new drawers, decline and complaint modals, drag to move → day one staff → week) → bookings and requests table → clients + client card → setup wizard (8 steps) → settings (profile, rules, hours + special days, link + QR, branches) → services → team, invite, roles; phone login; PWA; then reviews and replies, analytics, notification settings, help, billing, B2B landing + pricing, tables, classes (round 5). Known gap: the online party limit is a business setting in B-Tables (2–12, default 8) but a constant (`MAX_ONLINE_PARTY`) in the code | e2e: client sends → business confirms → client sees it; a specialist with own visibility sees "Bes" |
 | M6 | **CMS** | waits for the designer's round 3 (six modules): staff accounts, businesses (onboarding, moderation), users, complaints, category catalogue (icons, TK/RU/EN names, booking types, starter services), content; Cloudflare Access | the team can onboard a business and add a category without a release |
 | M7 | **Growth and SEO** | OG images, client PWA, performance budgets, analytics, store badges and app links | Lighthouse targets met; previews render in messengers |
-| M8 | **Own server** | when the owner buys it: reachability test from Ashgabat, Compose stack live, data moved from Neon/R2, DNS switched, CI deploys over SSH; production SMS gateway and push | the sites open in Ashgabat without a VPN |
+| M8 | **Own server** | for the Turkmenistan launch, after investment (ADR 0023; not needed for the first launch): reachability test from Ashgabat, Compose stack live, data moved from Neon/R2, DNS switched, CI deploys over SSH; the market's SMS provider and push (SMS at the first launch: book Q-036) | the sites open in Ashgabat without a VPN |
