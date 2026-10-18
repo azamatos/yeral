@@ -1,8 +1,10 @@
 # 6. Features and MVP scope
 
-Every feature Ýeral has, wants or once had, in one list (240 of them), each with a **proposed** place: in the
+Every feature Ýeral has, wants or once had, in one list (241 of them), each with a **proposed** place: in the
 **MVP**, **Later**, or **Never**. The proposal is Claude's; the decision is the owner's. On the page, each row has an
-MVP · Later · Never switch: click to move a feature, and the change is saved for Claude to write back here.
+MVP · Later · Never switch: click to move a feature, and the change is saved for Claude to write back here. The owner
+placed F-001–F-116 and F-240 on 18.10.2026; every other feature keeps the proposal (the owner delegated it), except
+F-133, which follows F-104 into the MVP.
 
 ## How the proposal was made
 
@@ -44,8 +46,8 @@ works end to end.
 
 These are drawn but go against a decision; they go into the next prompt for Claude Design once this chapter is closed.
 
-- Every board is drawn in Turkmen; future boards are drawn in English (Q-101, ADR 0022), and whether the existing ones
-  are redrawn is Q-133.
+- Every board is drawn in Turkmen; every board is redrawn in English in the next design pass (Q-101, Q-133,
+  ADR 0022).
 - Restaurant cards and the table flow show *Ortaça hasap* `≈ 150 TMT`; the average bill is dropped (Q-103).
 - The business spec draws workspace links with `/tk/`; they carry no language (Q-100).
 - Hours stop at 24:00; a business may be open past midnight (Q-105, F-109).
@@ -56,6 +58,11 @@ These are drawn but go against a decision; they go into the next prompt for Clau
   planned.
 - The search party filter offers 1–7 and "8+" while the table flow's limit is a business setting up to 12 (F-013,
   F-050).
+- The answers of 18.10.2026 add their own fixes, each marked **Design to fix** in chapters 7a–7c. The main ones: the
+  Ýeral team's admin tool (undrawn); *Wagty ýap* (block time) on an empty slot; the workspace in business links; the
+  rejected-business banner; the client's review-ask switch and the *Başga ýerde* switch dropped; the finished-visit
+  state of the booking link page; the "Is this you?" sign-in step; one shared code step with a visible button; the
+  optional surname; hiding moves and free-time chips for a client who must call.
 
 ## Found while listing: code differs
 
@@ -74,18 +81,22 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 - Only in code, never designed: "What?" search suggestions (F-007), the places list behind "Where?" (F-187), demo
   businesses that answer by themselves (F-200), a stored "typical confirmation time" the design says is computed
   (F-021), a late-tolerance setting no screen shows (F-103), the `ai` booking source (F-230).
+- The answers of 18.10.2026 add **Code differs** lines across chapters 5 and 7a–7c. The main ones: the api still plans
+  review-ask SMS (Q-259); SMS links use `/b/{code}` instead of a long token (Q-168); holds run through closed hours
+  (Q-120); the no-show count never restarts (Q-127); signing in links every booking under the phone, with no "Is this
+  you?" check (Q-270); 20 codes an hour per internet address instead of 100 (Q-267); reminders go at night (Q-285).
 
 ## Totals by area
 
 | Area | MVP | Later | Never |
 |---|---|---|---|
-| Client · discovery (home, search, map, categories, business page) | 29 | 8 | 1 |
+| Client · discovery (home, search, map, categories, business page) | 29 | 9 | 0 |
 | Client · booking (per type) | 12 | 5 | 0 |
-| Client · after booking (my bookings, cancel, move, reviews, SMS link page) | 14 | 2 | 2 |
+| Client · after booking (my bookings, cancel, move, reviews, SMS link page) | 13 | 4 | 1 |
 | Client · account | 9 | 1 | 0 |
-| Business · access (login, workspaces, invites, levels, permissions, ownership) | 10 | 4 | 0 |
-| Business · setup (wizard, profile, services, hours, rules, link & QR) | 17 | 3 | 0 |
-| Business · daily work (calendar, requests, bookings, walk-ins, moves, complaints, internal statuses) | 19 | 3 | 0 |
+| Business · access (login, workspaces, invites, levels, permissions, ownership) | 12 | 2 | 0 |
+| Business · setup (wizard, profile, services, hours, rules, link & QR) | 17 | 2 | 1 |
+| Business · daily work (calendar, requests, bookings, walk-ins, moves, complaints, internal statuses) | 20 | 2 | 0 |
 | Business · clients (CRM) | 8 | 1 | 0 |
 | Business · tables | 0 | 6 | 0 |
 | Business · classes | 0 | 6 | 0 |
@@ -96,8 +107,8 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | Ýeral team (verification, moderation, categories, support, CMS modules) | 5 | 7 | 0 |
 | System (jobs, SMS, live updates, search indexing, SEO, i18n) | 11 | 2 | 1 |
 | Platform (hosting, own server, Storybook, monitoring) | 8 | 2 | 1 |
-| Later and non-goals | 0 | 23 | 2 |
-| **All** | **150** | **83** | **7** |
+| Later and non-goals | 0 | 24 | 2 |
+| **All** | **152** | **83** | **6** |
 
 ## Client · discovery (home, search, map, categories, business page)
 
@@ -128,7 +139,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-023 | Share business page | "Paýlaş" button on the business page. | MVP | drawn (Venue) | not built |  |
 | F-024 | Favourite heart | Save a business; logged-out tap opens login first. | MVP | drawn (Venue, States 10) | api built (`/v1/me/favorites`) | List is F-080. |
 | F-025 | Hidden exact address | Home-based businesses show only an approximate circle until the booking is confirmed. | MVP | spec only; switch drawn (B-Onboarding 3) | built (api) |  |
-| F-026 | Hidden price display | "Baha ýerinde aýdylýar" instead of a price; mixed totals shown as "{sum} TMT-den". | MVP | drawn (Venue · selection, Booking · price, Mobile 17) | built (domain pricing, i18n fmt) | Round 6 B1; the exact copy still to add. Restaurants show average bill `≈ 150 TMT` (real values: Q-103). |
+| F-026 | Hidden price display | "Baha ýerinde aýdylýar" instead of a price; mixed totals shown as "{sum} TMT-den". | MVP | drawn (Venue · selection, Booking · price, Mobile 17) | built (domain pricing, i18n fmt) | Round 6 B1; the exact copy still to add. The restaurant average bill is dropped (Q-103). |
 | F-027 | Hours up to 24:00 | A day may end at 24:00: business end pickers go to 24:00, clients see "09:00–24:00" and "Häzir açyk · 24:00-a çenli". | MVP | drawn (Venue · hoursCase, B-Settings) | built (domain hours) | Round 6 E1. Past midnight: F-109. |
 | F-028 | Table and class page variants | Restaurants get a table widget (party, date, time) in the sticky card; studios get "Indiki sapaklar" and a "Tertip" (schedule) tab. | Later | spec only (README §4.3) | api built (tables info, `/sessions`) |  |
 | F-029 | Restaurant menu (PDF / photos) | Optional "Menýu" tab with a PDF or photos. | Later | spec only | not built (no schema) |  |
@@ -138,7 +149,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-033 | Page chrome | Marketing header, search header with the what / where / when query bar, focused booking header, footer (links incl. "Biznes girişi", "Bahalar"). | MVP | drawn (all client screens) | ui partly built (QueryBar, CompactSearch, HeroSearch); shells not built | Footer link "Bahalar" (prices) survives on every client screen although there is no pricing in the free MVP. |
 | F-034 | Static pages | About, help, privacy, terms: header + 720 px text column + footer. | MVP | spec only (pattern) | not built | Privacy and terms texts don't exist yet. |
 | F-035 | Error, empty and loading states | 404, no results, closed today, network error toast, loading skeletons. | MVP | drawn (States) | built (ui: EmptyState, Skeleton, Toast) |  |
-| F-036 | Legacy home sections | Browse by district, "Recommended" (top-rated) and "New on Ýeral" sections. | Never | not designed | legacy only | The new design names no city or district in copy. |
+| F-036 | Legacy home sections | Browse by district, "Recommended" (top-rated) and "New on Ýeral" sections. | Later | not designed | legacy only | The new design names no city or district in copy. Owner: Later (18.10.2026). |
 | F-037 | Instant-confirmation filter | Search filter for businesses that confirm at once. | Later | not designed | legacy only |  |
 | F-240 | City choice | The person's location preselects a city; they can pick another; an address shows its city when it differs from the selected one. | MVP | not designed | not built | Q-107 (decided 18.10.2026). |
 
@@ -175,14 +186,14 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-059 | Undo cancel | "Yzyna al" for 5 minutes; failures explained by one of four reasons + "Başga wagt saýla". | MVP | drawn (Account-Bookings · undo, undoFailed; Mobile 12) | api built (`restore`); reason mapping not built | Round 6 A6. |
 | F-060 | Move an appointment | "Wagty üýtget" mode: services locked, current specialist preselected, old → new time, sends a move request (instant: moves at once). | MVP | drawn (Booking · mode=move, Mobile 13) | api built (`reschedule`) | **Rule conflict (A5):** code silently hands the booking to another free specialist; design says the grid follows the chosen specialist only. |
 | F-061 | Waiting move | Booking stays confirmed with "Täze wagt soraldy…"; withdraw, declined, unanswered and accepted outcomes; a second move replaces the first. | MVP | drawn (Account-Bookings · move*) | api partly built (pending move, replace, cancel withdraws) | Round 6 A3; no explicit "withdraw" endpoint. Business side: F-126. |
-| F-062 | No move for tables and classes | Table and class bookings offer cancel + "Gaýtadan ýazyl" (flow prefilled) instead of a move. | MVP | drawn (Account-Bookings, Mobile 6) | api built (`not_bookable`) | Round 6 A4; old open question 16 closed. |
+| F-062 | No move for tables and classes | Table and class bookings offer cancel + "Gaýtadan ýazyl" (flow prefilled) instead of a move. | Later | drawn (Account-Bookings, Mobile 6) | api built (`not_bookable`) | Round 6 A4; old open question 16 closed. Owner: Later (18.10.2026), with tables and classes (Q-030). |
 | F-063 | Declined request with offered times | Client sees "Biznes ret etdi", the reason and up to 3 offered times; one tap creates a confirmed booking. | MVP | drawn (Account-Bookings · declined*, Mobile 7–9) | api built (`accept-alternative`, one booking per offer) | Round 6 A1; taken / expired chip states to build. |
 | F-064 | Expired request with free times | An unanswered request shows "Wagtynda jogap gelmedi" and 3 free times; a tap sends a new request. | MVP | drawn (Account-Bookings · expired*, Mobile 10) | built (jobs + `accept-alternative`) | Round 6 A2. |
 | F-065 | Phone bookings in the client's account | Bookings the business entered by phone show in the client's list as confirmed with a phone icon. | MVP | spec only (README rule 4) | built (api links phone bookings on login) |  |
 | F-066 | Book again | "Gaýtadan ýazyl" from completed, cancelled or no-show bookings. | MVP | drawn (Account-Bookings) | not built |  |
 | F-067 | Leave a review | Stars (required), quick tags, text up to 500 chars; one per completed booking, editable for 7 days, shown as "Aýjemal G.". | MVP | drawn (Account-Bookings · review) | built (api) | Only after a Completed booking. |
-| F-068 | SMS link page | `yeral.app/b/{code}` works signed out: booking card, status, offered times, inline login limited to the booking's masked phone. | MVP | drawn (Booking-Link, Mobile 14–15) | not built (SMS texts already link there) | Round 6 A1; needs a signed-out booking endpoint. |
-| F-069 | Business-proposed new time | The business proposes another time and the client accepts or keeps the old one. | Never | not designed | legacy only | Design has decline-with-offers instead. |
+| F-068 | SMS link page | The SMS token link (Q-168) works signed out: booking card, status, offered times, inline login limited to the booking's masked phone. | MVP | drawn (Booking-Link, Mobile 14–15) | not built (SMS texts already link there) | Round 6 A1; needs a signed-out booking endpoint. |
+| F-069 | Business-proposed new time | The business proposes another time and the client accepts or keeps the old one. | Later | not designed | legacy only | Design has decline-with-offers instead. Owner: Later (18.10.2026). |
 | F-070 | "This isn't me" on phone bookings | A client reports a phone booking made with their number by mistake. | Later | not designed | legacy only |  |
 | F-071 | Confirm visit the day before | After repeated no-shows the client must confirm the day before or lose the slot. | Never | not designed | legacy only | Design uses "phone only after N no-shows" instead (F-191). |
 | F-072 | My reviews page | A list of the client's own reviews with edit / delete. | Later | not designed | legacy only |  |
@@ -197,7 +208,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-076 | Avatar menu and log out | Logged-in menu: My bookings · Favourites · Profile · Language · Log out. | MVP | drawn (Auth) | api built (logout); menu not built |  |
 | F-077 | Profile and phone change | Edit name; change phone via an SMS code to the new number. | MVP | drawn (Account-Profile) | built (api `/v1/me`, `/v1/me/phone/*`) |  |
 | F-078 | Language preference | TK / RU / EN saved to the profile and carried across sites. | MVP | drawn (Account-Profile) | built (api) |  |
-| F-079 | SMS notification switches | Confirmation, reminder 1 day before, reminder 2 h before, review request. | MVP | drawn (Account-Profile) | built (api, jobs honour them) |  |
+| F-079 | SMS notification switches | Confirmation, reminder 1 day before, reminder 2 h before. | MVP | drawn (Account-Profile) | built (api, jobs honour them) | No review request: there are no review asks (Q-259). |
 | F-080 | Favourites list | Grid of saved businesses with remove + undo. | MVP | drawn (Account-Profile · favourites) | api built |  |
 | F-081 | Delete account | Danger action with a confirm modal. | MVP | drawn (Account-Profile) | built (api `DELETE /v1/me`) |  |
 | F-082 | Client browser notifications | Browser notifications about answers, moves and reminders. | Later | not designed | legacy only | Client push comes with native apps (F-224). |
@@ -216,10 +227,10 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-090 | Hidden, not disabled | What a level can't use is hidden; opening it by URL lands on the calendar with a toast. | MVP | spec only | not built | api must enforce and redact (ADR 0018). |
 | F-091 | Who answers requests | Setting: owner & admin / each specialist / both (default); per-person override; read-only footer for others. | MVP | drawn (B-Settings rules, B-Team staff) | not built (no field) | Round 6. Hidden for one-person businesses. |
 | F-092 | Ownership transfer | Owner hands the business to an active member and becomes Administrator. | Later | drawn (B-Team · transfer) | not built |  |
-| F-093 | Profilim | Name, photo, phone change, specialization per workspace (read-only), busy-elsewhere switch, "Bu biznesden çyk" (leave, not for the owner). | MVP | drawn (B-Shell drawers) | partly (api phone change) |  |
-| F-094 | Busy elsewhere | A person in two workspaces shows as "Başga ýerde" in the other calendar; online booking can't use that time. | Later | drawn (B-Calendar) | not built | Different from the code's "Bes" redaction for own-visibility specialists. |
+| F-093 | Profilim | Name, photo, phone change, specialization per workspace (read-only), "Bu biznesden çyk" (leave, not for the owner). | MVP | drawn (B-Shell drawers) | partly (api phone change) |  |
+| F-094 | Busy elsewhere | A person in two workspaces shows as "Başga ýerde" in the other calendar; online booking can't use that time. | MVP | drawn (B-Calendar) | not built | Different from the code's "Bes" redaction for own-visibility specialists. Owner: MVP (18.10.2026); shows only a reserved gap, never details from the other workspace (Q-031, Q-271, Q-272). |
 | F-095 | Open as client | "Müşderi hökmünde aç" jumps from the workspace to yeral.app with the same account. | MVP | drawn (B-Shell user menu) | not built |  |
-| F-096 | Installable business app (PWA) | business.yeral.app installable on phones. | Later | not designed | not built | Planned in systemPatterns / M5. |
+| F-096 | Installable business app (PWA) | business.yeral.app installable on phones. | MVP | not designed | not built | Planned in systemPatterns / M5. Owner: MVP (18.10.2026). |
 
 ## Business · setup (wizard, profile, services, hours, rules, link & QR)
 
@@ -231,8 +242,8 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-100 | Business profile | Logo, name, category, description TK/RU/EN, photos (reorder, first = cover), phone, amenities, "Sahypany gör". | MVP | drawn (B-Settings · profile) | schema only |  |
 | F-101 | Photo upload and storage | Upload, reorder and store business and staff photos. | MVP | spec only (upload preview not designed) | not built | R2 planned (techContext); demo photos served from disk. |
 | F-102 | Booking rules | Online on/off, manual / instant, hold time, lead time, window, buffer, slot step, cancel window, ask cancel reason, no-show block. | MVP | drawn (B-Settings · rules) | built (domain `rules` + options, schema) | No endpoints yet. |
-| F-103 | Late tolerance | How late a client may be; shown in the business's rules. | Later | spec only (client README §7) | schema only (`lateToleranceMinutes`) | Not on the business settings screen. |
-| F-104 | Internal statuses | Up to 5 team-only markers (presets Geldi, Başlandy; name, icon, colour); off by default. | Later | drawn (B-Settings · statusModal, B-Calendar · internal) | not built | Round 6. |
+| F-103 | Late tolerance | How late a client may be; shown in the business's rules. | Later | spec only (client README §7) | schema only (`lateToleranceMinutes`) | Not on the business settings screen. Q-118 (decided 18.10.2026) shapes it: a setting next to the cancel window, none to 30 min, default 15. The owner placed it Later, so in the MVP every business shows the fixed 15 min. |
+| F-104 | Internal statuses | Up to 5 team-only markers (presets Geldi, Başlandy; name, icon, colour); off by default. | MVP | drawn (B-Settings · statusModal, B-Calendar · internal) | not built | Round 6. Owner: MVP (18.10.2026); Q-031. |
 | F-105 | Weekly opening hours | Day on/off, from–to, one break per day; "same every weekday" shortcut. | MVP | drawn (B-Settings · hours, B-Onboarding 4) | built (domain hours) |  |
 | F-106 | Special days | Holidays and special hours, one day or a range, yearly repeat. | MVP | drawn (B-Settings · exceptionModal) | built (domain exceptions + precedence) |  |
 | F-107 | Special day over existing bookings | Adding a closure over bookings asks: cancel and offer 3 times, or keep them. | MVP | drawn (B-Settings) | not built |  |
@@ -241,7 +252,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-110 | Service catalogue | Groups, services (duration, price type, buffer override, who performs, online switch), service drawer. | MVP | drawn (B-Services) | schema only (`services`, `service_groups`, `staff_services`) |  |
 | F-111 | Team management | Team table (bookable vs management), levels, schedule summary, invite states, drag order in which clients see specialists. | MVP | drawn (B-Team) | schema only (`staff`, `memberships`, `staff.sort`) |  |
 | F-112 | Staff schedules | Own shifts inside business hours, one break per day (may differ by day), personal days off. | MVP | drawn (B-Team staff drawer) | built (domain), schema |  |
-| F-113 | Phone-only staff | "Programmasyz hünärmen": bookable, never logs in, active at once without SMS. | MVP | drawn (B-Team) | schema only (`staff.hasApp`) |  |
+| F-113 | Phone-only staff | "Programmasyz hünärmen": bookable, never logs in, active at once without SMS. | Never | drawn (B-Team) | schema only (`staff.hasApp`) | Owner: Never (18.10.2026). Claude asks again in Q-216: without it every specialist must sign in before clients can book them. |
 | F-114 | Disable a staff member | Reassign future bookings, keep them, or cancel with 3 offered times; reactivate later. | MVP | drawn (B-Team · disable) | not built |  |
 | F-115 | Link and QR | Public link `yeral.app/tk/b/{slug}`, QR as PNG/SVG, share to WhatsApp, IMO, Telegram or SMS. | MVP | drawn (B-Settings · link, B-Onboarding 8) | not built | "Real QR generation" was listed as not designed in round 4. |
 | F-116 | Table / class setup wizard | Setup steps for restaurants and studios (areas, tables, class types). | Later | not designed | not built | Q-201; they set up in Settings after the appointment wizard. |
@@ -266,9 +277,9 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-130 | Drag to move | Drag a block, confirm "14:30 → 16:00 · SMS to client"; conflicts refused with a reason. | MVP | drawn (B-Calendar · move) | built (domain `checkPlan`, `shiftPlan`) |  |
 | F-131 | Business cancel | Cancel with a reason; the client is notified. | MVP | drawn (B-Calendar) | domain built (`canBusinessCancel`) |  |
 | F-132 | Complaint ("Arz et") | No-show / late / rude / other; no-show sets the status; goes to the client card. | MVP | drawn (B-Calendar · complaint) | built (domain, schema) | No "came" button. |
-| F-133 | Internal status on a booking | Set a team-only marker from the drawer; shows as a chip on the block. | Later | drawn (B-Calendar · internal) | not built | Needs F-104. |
+| F-133 | Internal status on a booking | Set a team-only marker from the drawer; shows as a chip on the block. | MVP | drawn (B-Calendar · internal) | not built | Needs F-104, so it moved to the MVP with it (18.10.2026). |
 | F-134 | Status legend | "Reňkler we nyşanlar" popover explaining statuses, sources and layers; opens itself on first visit. | MVP | drawn (B-Calendar · legend, B-Bookings, B-Tables, B-Classes) | not built |  |
-| F-135 | Bookings and requests list | Tabs Requests / Today / Upcoming / Past / Cancelled with filters, row drawers, bulk confirm / decline / move and CSV export. | MVP | drawn (B-Bookings) | not built |  |
+| F-135 | Bookings and requests list | Tabs Requests / Today / Upcoming / Past / Cancelled with filters, row drawers, bulk confirm / decline and CSV export; no bulk move (Q-209). | MVP | drawn (B-Bookings) | not built |  |
 | F-136 | Global search | Find clients, phones and booking codes from the top bar (⌘K). | Later | drawn (B-Shell top bar) | not built |  |
 | F-137 | Phone layout of the workspace | Bottom tab bar, "Köp" sheet, one-staff day with staff chips, bottom sheets, quick booking sheet. | MVP | drawn (B-Mobile) | not built | No "download the app" banner. |
 | F-138 | Multi-booking move | Move several bookings at once. | Later | not designed | not built | Listed as not designed in round 4. |
@@ -353,7 +364,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 |---|---|---|---|---|---|---|
 | F-178 | CMS app and team accounts | cms.yeral.app with its own staff accounts, second factor and Cloudflare Access. | MVP | not designed | not built | Part of the launch (Q-001, Q-002); what it holds at launch is Q-010. |
 | F-238 | Add a business for its owner | The Ýeral team creates a business in the CMS for an owner it has met. | MVP | not designed | not built | Q-002 (decided 17.10.2026). |
-| F-179 | Business verification | Review new businesses within 24 h; verify or reject with a reason. | MVP | spec only (business §7, ADR 0018) | schema only (`verification`, `verification_history`) | Without it nothing becomes public (F-032). |
+| F-179 | Business verification | Review new businesses within 24 h; verify or reject with a reason; hide or un-verify a live business, with a reason to the owner (Q-012, Q-275). | MVP | spec only (business §7, ADR 0018) | schema only (`verification`, `verification_history`) | Without it nothing becomes public (F-032). |
 | F-180 | Review moderation | Queue of reported reviews; clear (counted again) or remove. | MVP | spec only (business §15) | not built | Pairs with F-162. |
 | F-181 | Category catalogue | Icons, TK/RU/EN names, booking types, specialist word, starter services, SEO intro; new categories without a release. | Later | spec only | schema only (13 seeded) |  |
 | F-182 | Help articles authoring | Write and update help-centre articles. | Later | spec only (business §22) | not built |  |
@@ -371,15 +382,15 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-189 | Request expiry | Unanswered requests are cancelled at the hold time (never past the start) with 3 free times and an SMS. | MVP | spec only | built (jobs runner every minute, domain `holdUntil`) | Hold time options 15 min – 24 h. Unanswered move requests just lapse. |
 | F-190 | Automatic completion | Confirmed visits become Completed after their end time. | MVP | spec only | built (jobs) |  |
 | F-191 | No-show block | After N no-shows (default 2) the client books that business only by phone. | MVP | spec only | built (domain, api) |  |
-| F-192 | Client SMS | Confirmed, declined (+reason), expired (+3 times), reminders 1 day and 2 h before, review ask 2 h after; none on send. | MVP | spec only (README §6) | built (i18n texts, jobs; log adapter) | Messages only go to the log until F-193. |
-| F-193 | Production SMS gateway | A real SMS provider and sender name. | MVP | not designed | not built | Q-036; M8. Blocks real login and every SMS. |
+| F-192 | Client SMS | Confirmed, declined (+reason), expired (+3 times), reminders 1 day and 2 h before; none on send; no review ask (Q-259). | MVP | spec only (README §6) | built (i18n texts, jobs; log adapter) | Messages only go to the log until F-193. |
+| F-193 | Production SMS gateway | A real SMS provider and sender name. | MVP | not designed | not built | How it works at the first launch is Q-036 (open). Blocks real login and every SMS. |
 | F-194 | Live updates | Open screens refresh from an events feed polled every 10 s, on focus and on demand. | MVP | not designed | built (api `/v1/events`, sdk) | A push channel can replace polling later. |
 | F-195 | Availability engine | Free times for appointments (hours, shifts, breaks, buffers, chains), tables and classes; database constraints stop double booking. | MVP | spec only | built (domain, api exclusion constraints) |  |
 | F-196 | Search index | Verified-only listing with geo, popularity, open-now and has-free-time filters, on Postgres. | MVP | spec only | built (api) | No separate search engine. |
 | F-197 | SEO basics | Server-rendered pages, titles, hreflang, JSON-LD, sitemap, noindex for unverified. | MVP | not designed (repo plan) | not built (legacy had JSON-LD) | M3. |
 | F-198 | Link previews | OG images for business and category pages. | Later | not designed | not built | M7. |
 | F-199 | Languages and formats | English while building; each market adds its languages with `/{lang}` links (Turkmenistan: Turkmen, Russian); number formats follow the language (`4.9` in English, `4,9` in Turkmen and Russian); money, phone rules and time zone come from the market (Turkmenistan: `40 TMT`, +993, Asia/Ashgabat). | MVP | spec only (README §8) | built (`@yeral/i18n`, domain time, contract error messages) | Q-101, Q-104 decided; ADR 0022. |
-| F-200 | Demo mode | Seeded demo businesses, demo code 1234, demo businesses that answer requests by themselves. | Never | not designed | built (api seed, `demo.answer` job) | Code only; legacy has a demo panel. |
+| F-200 | Demo mode | Seeded demo businesses, demo code 1234, demo businesses that answer requests by themselves. | Never | not designed | built (api seed, `demo.answer` job) | Code only; legacy has a demo panel. Example businesses may come back with the first launch (Q-004). |
 | F-201 | Client installable app (PWA) | yeral.app installable from the browser. | Later | not designed | not built | M7; legacy shows an "add to home screen" hint. |
 | F-202 | Booking source tracking | Each booking records web / app / phone / walk-in / ai. | MVP | spec only | built (domain, schema) | Shown in the workspace as Onlaýn / Telefon / Gelip. |
 
@@ -428,3 +439,4 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-236 | Review photos | Clients attach photos to reviews. | Later | spec only ("later", business §15) | not built |  |
 | F-237 | Notify me when booking reopens | Client asks to be told when a paused business takes online bookings again. | Later | not designed | legacy only |  |
 | F-239 | Menu | A restaurant's or café's menu on its page. | Later | not designed | not built | Owner, Q-103: "maybe in some future". |
+| F-241 | Client karma | No-shows and floods of bookings lower a client's karma across Ýeral; below a set level the client can't book online, and each business chooses the lowest karma it accepts. | Later | not designed | not built | Owner's idea on Q-012 (18.10.2026). Needs first: a way to dispute a no-show (Q-166), karma that recovers over time, and a screen that tells the client why they're limited. |

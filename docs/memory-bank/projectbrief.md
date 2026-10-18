@@ -45,10 +45,11 @@ source (`web` | `app` | `phone` | `walkin` | `ai`). Manat prices for plans and c
 - Built in English; each market adds its languages (Turkmenistan: Turkmen, Russian; ADR 0022). Turkmenistan: money in
   manats, shown as `40 TMT`; formats follow the language (`4,9` in Turkmen and Russian, `4.9` in English); phones `+993`.
 - Business-local time: `Asia/Ashgabat` (UTC+5, no daylight saving) for every business today.
-- **Hosting:** Cloudflare now; later an own server (likely in Turkmenistan, where Cloudflare is reported filtered) running
-  everything in Docker behind nginx, with Cloudflare kept for DNS
+- **Hosting:** one deployment per market ([ADR 0023](../decisions/0023-one-deployment-per-market.md)). The first launch
+  (English) runs on Cloudflare with Neon; people in Turkmenistan reach it through a VPN. The Turkmenistan launch, after
+  investment, gets its own servers in Turkmenistan running everything in Docker behind nginx
   ([ADR 0007](../decisions/0007-hosting-cloudflare-now-docker-later.md)).
-- The repository is public by the owner's choice until the product is ready; it will go private then. Never commit secrets.
+- The repository is private (checked 2026-10-18). Never commit secrets.
 
 ## Goals
 

@@ -47,6 +47,8 @@ Three fixed access levels plus a specialist without a login. There are no custom
 | **Hünärmen** (specialist) | a stylist, doctor, trainer… with their own login | their own column, bookings and requests; their own clients with phone numbers; reviews about them (read only); their own numbers and earnings; no settings |
 | **Programmasyz hünärmen** (phone-only specialist) | a specialist who doesn't use Ýeral | no login. Clients can book them online; the owner and administrators handle their bookings and requests |
 
+> Open question Q-216: specialists who don't use the app.
+
 Anything a level can't use is **hidden, not greyed out**. Opening a hidden page by its address goes back to the calendar
 with a short message. (business spec §1)
 
@@ -108,19 +110,36 @@ flowchart LR
   or to "any free specialist". (business spec §8, §11)
 - **Handing over ownership:** the owner picks an active member who signs in; that person becomes *Eýesi* and the old
   owner becomes an Administrator. (business spec §8)
-- **Busy elsewhere:** someone in two workspaces is blocked in each calendar while they have a booking in the other one,
-  shown as *Başga ýerde* without details. They can switch this off in *Profilim*. (business spec §1)
+- **Busy elsewhere** (in the MVP): someone in two workspaces is blocked in each calendar while they're the specialist
+  on a confirmed booking or a waiting request in the other one, with its buffers. The calendar shows only a reserved
+  gap, *Başga ýerde*, never anything from the other workspace, and nobody can book that time. There's no switch to
+  turn it off. (business spec §1; Q-031, Q-271, Q-272, decided 18.10.2026) **Design to fix:** drop the *Profilim*
+  switch *Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez*.
 
 ## The Ýeral team
 
-The people who run Ýeral itself. Their tool, the CMS (cms.yeral.app), isn't designed. (business spec §24)
-What they will need to do, from the specs:
+The people who run Ýeral itself. At launch they work in a small admin tool, the CMS (cms.yeral.app), which isn't
+designed yet. There is one role: every team member can do everything in it. (business spec §24; Q-010, Q-011, decided
+18.10.2026)
 
-- verify new businesses within 24 hours, so they become public (business spec §7);
-- handle reported reviews: clear them or remove them (ROUND6-ANSWERS F2);
+At launch the team:
+
+- verifies new businesses within 24 hours, so they become public (business spec §7);
+- handles reported reviews: clears them or removes them (ROUND6-ANSWERS F2);
+- adds a business for an owner it has met (Q-002, F-238);
+- can hide a business from search and from its page, with a reason sent to the owner, and un-verify a live business
+  by hand (Q-012, Q-275, decided 18.10.2026);
+- closes a workspace when its owner asks: hides the page and keeps the data (Q-213, decided 18.10.2026).
+
+Later, from the specs (Q-010):
+
 - manage categories: icons, names in three languages, booking types, starter services (ADR 0017);
 - write help articles for businesses (business spec §17);
 - answer the support chat from businesses (business spec §17).
+
+There are no Ýeral-wide client blocks at launch: only a business can limit a client to phone bookings. The owner's idea
+for later is client karma (F-241): no-shows and floods of bookings lower it, below a set level the client can't book
+online, and each business chooses the lowest karma it accepts. (Q-012, decided 18.10.2026)
 
 > Open question Q-010: what can the Ýeral team do at launch, and with which tool?
 

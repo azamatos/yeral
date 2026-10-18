@@ -1,6 +1,6 @@
 # 0007. Hosting: Cloudflare now, own server with Docker + nginx later
 
-- Status: Accepted 2026-10-13 (revised the same day after the owner's review); staging dropped by [0020](0020-local-and-production-only.md)
+- Status: Accepted 2026-10-13 (revised the same day after the owner's review); staging dropped by [0020](0020-local-and-production-only.md); one deployment per market, the own server for the Turkmenistan launch: [0023](0023-one-deployment-per-market.md)
 - Decided by: owner (Cloudflare now, own server later, Docker + nginx, Cloudflare for the domain) + Claude (topology)
 
 ## Context

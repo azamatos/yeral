@@ -6,7 +6,7 @@ How to read the status line at the end of each flow:
 
 - **Design** says where the rule is decided or drawn.
 - **Code** says what the api does today. **Built** means the system part works in the api, **partly** means some of it does, and **not built** means none of it exists yet. The new client site (M3) and the business workspace (M5) aren't built yet, so none of these flows shows on a screen today.
-- No SMS reaches a phone yet. Every environment, production included, writes SMS to a log (chapter 8, "Not decided").
+- No SMS reaches a phone yet. Every environment, production included, writes SMS to a log. How SMS go out at the first launch is open (Q-036; chapter 8, "Not decided").
 
 Sources in brackets: *client spec* = `docs/design/README.md`; *business spec* = `docs/design/business/README.md`; *ROUND6* = `docs/design/ROUND6-ANSWERS.md` (the owner's final decisions); screen names such as *B-Login* are files in `docs/design/screens/`. Code paths are under `apps/api/src` and `packages/`.
 
@@ -22,10 +22,10 @@ flowchart LR
 - Every minute the system makes one pass (code: `modules/jobs/run.ts`, `modules/jobs/tick.ts`; ADR 0017):
   1. It ends requests and move requests whose answer time ran out (S-01, S-07).
   2. It marks finished visits *Tamamlandy* (S-02).
-  3. It sends what's queued: SMS, reminders, review asks (S-04, S-05, S-21). Outside production it also sends the demo businesses' own answers (S-20).
+  3. It sends what's queued: SMS and reminders (S-04, S-21). Outside production it also sends the demo businesses' own answers (S-20). **Code differs:** it also sends review asks, which aren't in the MVP (S-05; Q-259).
 - Two passes never run at the same time. Each pass handles up to 100 items of each kind, and the rest wait for the next minute.
 - Screens don't wait for the pass. From the exact deadline, a request already shows as expired and a finished visit as completed (code: `packages/domain/src/lifecycle.ts`). The pass then saves what people already see.
-- The operations notes ask for the pace to be set before the production api goes live. A pass every minute keeps the database awake, and that costs compute hours on a free product (`docs/memory-bank/operations.md`).
+- A pass every minute keeps the database awake, and that costs compute hours on a free product (`docs/memory-bank/operations.md`). Ýeral accepts that cost: the pass runs every minute, as built (Q-250, decided 18.10.2026).
 
 > Open question Q-250: How often the system checks the clock.
 
@@ -37,7 +37,7 @@ flowchart LR
 | S-02 | Marks a finished visit *Tamamlandy* | visit end | built |
 | S-03 | Limits a client to phone bookings | no-shows reach the limit | built |
 | S-04 | Sends reminders | 24 h and 2 h before | built |
-| S-05 | Asks for a review | 2 h after the end | built |
+| S-05 | Asks for a review: not in the MVP (Q-259) | none | built, must stop |
 | S-06 | Stops counting a reported review | the business reports it | not built |
 | S-07 | Drops an unanswered move | move deadline | built |
 | S-08 | Treats offered times as taken or past | time passes, someone books | partly |
@@ -61,7 +61,7 @@ flowchart LR
 
 **Goal.** A client never waits forever. If the business doesn't answer in time, the slot is freed and the client gets three other times.
 
-**Trigger.** Time: the request's answer deadline passes. The deadline is the time the request was sent plus the business's hold time, but never later than the visit start (business spec §2, §11). Hold time options are 15 min, 30 min (default), 1 h, 2 h, 6 h and 24 h. This applies only to businesses that confirm by hand. At an instant business nothing waits.
+**Trigger.** Time: the request's answer deadline passes. The deadline is the time the request was sent plus the business's hold time, but never later than the visit start (business spec §2, §11). The hold runs only during the business's opening hours (Q-120, decided 18.10.2026). Hold time options are 15 min, 30 min (default), 1 h, 2 h, 6 h and 24 h. This applies only to businesses that confirm by hand. At an instant business nothing waits.
 
 ```mermaid
 flowchart TD
@@ -81,10 +81,10 @@ flowchart TD
 1. The client sends a request. The system sets its deadline and holds the slot (client spec §1 rule 1; business spec §2).
 2. The business sees a timer on the request. Five minutes before the deadline, the owner and admin get *Haýyşyň wagty gutarýar* (S-16).
 3. The deadline passes with no answer. The booking becomes *Ýatyryldy*, cancelled by the system (business spec §2; ADR 0017).
-4. The system picks 3 free times for the same services. It looks on the same day first, nearest to the time asked for, then on the next days with free time (code: `modules/jobs/run.ts`; the spec only says "3 alternative times").
-5. The client gets the expiry SMS with the times and the booking link, in their own language (client spec §6).
+4. The system picks 3 free times for the same services, each with one named specialist (Q-159, decided 18.10.2026). It looks on the same day first, nearest to the time asked for, then on the next days with free time (code: `modules/jobs/run.ts`; the spec only says "3 alternative times"). For a table it picks the 3 nearest times for the same party size and area, and for a class the next 3 sessions of the same class with seats (Q-252, decided 18.10.2026); tables and classes come after the MVP (Q-030).
+5. The client gets the expiry SMS with the times and the booking link, in their own language (client spec §6). If nothing is free, the SMS drops the times and says *Başga wagt saýlaň* (pick another time) (Q-252).
 6. Everywhere the booking shows, it carries the hourglass label *Wagtynda jogap gelmedi* (no answer in time), with the 3 times as chips (ROUND6 A2).
-7. Tapping a chip sends a **new request** for that time. It is *Garaşylýar*, or *Tassyklandy* at once at an instant business (ROUND6 A2).
+7. Tapping a chip sends a **new request** for that time, with that time's specialist (Q-159). It is *Garaşylýar*, or *Tassyklandy* at once at an instant business (ROUND6 A2).
 
 **Edge cases**
 
@@ -92,22 +92,23 @@ flowchart TD
 - Screens show the request as expired from the exact deadline, even if the pass runs up to a minute later (code).
 - A move request that runs out works differently: no times, no SMS, and the booking stays (S-07).
 - The 3 times aren't held for the client, so someone else may take them (S-08).
-- The times can be with any specialist, not just the one the client chose (code).
+- Each time belongs to one named specialist and is booked with that person only. If they're no longer free, the chip shows *Eýýäm eýelendi* (Q-159, decided 18.10.2026). **Code differs:** the code finds the times with any specialist, and when the client takes one it gives the booking to anyone free if the first specialist isn't (code: `modules/jobs/run.ts`; `modules/bookings/create.ts`).
 
 > Open question Q-159: which specialist an offered or free time is for.
 
-- Table and class requests get no times in the code. Their SMS then reads *Şu boş wagtlar bar: —* with an empty list. The same broken text goes out when an appointment has no free time to offer.
+- **Code differs:** table and class requests get no times in the code. Their SMS then reads *Şu boş wagtlar bar: —* with an empty list. The same broken text goes out when an appointment has no free time to offer.
 
 > Open question Q-252: What an expired table or class request offers.
 
-- At a manual business, the sent screen promises *Jogap bermese, {N} minutdan soň size başga wagtlary hödürläris.*, with N = the hold time (ROUND6 A2). When the visit starts before N minutes are up, the real wait is shorter. A 6 h or 24 h hold would read "360 minutdan" or "1440 minutdan".
+- At a manual business, the sent screen shows the real deadline as a clock time, since the visit start and closed hours move it away from the plain hold time; Claude writes the sentence in English and the owner checks it (Q-253, decided 18.10.2026). **Design to fix:** the sent screen draws *Jogap bermese, {N} minutdan soň size başga wagtlary hödürläris.*, with N = the hold time (ROUND6 A2), which reads "360 minutdan" or "1440 minutdan" for a 6 h or 24 h hold.
 
 > Open question Q-253: The answer time the client is shown.
 
-- For expiry SMS at night, see chapter 8, Q-285. For expiry SMS when the client has switched confirmations off, see Q-286.
-- A client who is now limited to phone bookings (S-03) can't take these times online. Only times the business offered after a decline are an exception (ROUND6 A7; the code agrees).
+- The expiry SMS goes at any hour, since it's a booking outcome (Q-285, decided 18.10.2026). It goes even when the client has switched off *Tassyklama we üýtgeşmeler* (Q-286, decided 18.10.2026).
+- A client who is now limited to phone bookings (S-03), or whose business has paused online booking, can't take these times online: the chips are hidden and the *Jaň et* card shows instead (Q-154, decided 18.10.2026). Only times the business offered after a decline are an exception (ROUND6 A7; the code agrees).
+- **Code differs:** the code counts the hold straight through closed hours (code: `packages/domain/src/lifecycle.ts`; Q-120).
 
-**Status.** Design: decided and drawn (client spec §1, §6; business spec §2; ROUND6 A2; Account-Bookings, Booking-Link) · Code: built in the api, except times for tables and classes.
+**Status.** Design: decided and drawn (client spec §1, §6; business spec §2; ROUND6 A2; Account-Bookings, Booking-Link) · Code: built in the api, with the differences above (specialist, opening hours, times for tables and classes).
 
 ### S-02 · A visit completes by itself
 
@@ -119,7 +120,7 @@ flowchart TD
 flowchart TD
   A["Confirmed visit ends"] --> B["System marks it Tamamlandy"]
   B --> C["Review becomes possible"]
-  C --> D["Review ask 2 hours later"]
+  C --> D["Review from Ýazylyşlarym or the link"]
   B --> E{"Staff report Gelmedi?"}
   E -->|"Yes"| F["Status becomes Gelmedi"]
   E -->|"No"| G["Stays Tamamlandy"]
@@ -128,17 +129,17 @@ flowchart TD
 **Steps**
 
 1. A confirmed booking's end time passes, and the system marks it *Tamamlandy* (client spec §1 rule 3; business spec §3).
-2. The client can now write a review. The review ask goes out 2 hours later (S-05).
+2. The client can now write a review from *Ýazylyşlarym* (My bookings) or the booking link. No review ask is sent (S-05; Q-259, decided 18.10.2026).
 3. The visit counts toward the client's visits and the business's revenue, which is the sum of completed visits' prices (business spec §6, §14).
-4. If the client didn't come, staff use *Arz et → Gelmedi* and the booking becomes *Gelmedi* (business spec §3). Staff can do this before or after the automatic completion.
+4. If the client didn't come, staff use *Arz et → Gelmedi* and the booking becomes *Gelmedi* (business spec §3). Staff can do this before or after the automatic completion, from the start time until 24 hours after the end (Q-206, Q-254, decided 18.10.2026).
 
 **Edge cases**
 
 - A request never completes, because it expires at the visit start at the latest (S-01).
 - Team-only statuses such as *Geldi* or *Başlandy* don't change the system status (business spec §3).
-- Classes: every attendee completes after the session. Staff mark single no-shows, and only after the session starts (business spec §21, §22).
-- Tables: a confirmed table past its start counts as seated. The table is held 15 minutes for late guests (*Stol saklanýar*). After that, staff may give it away and mark *Gelmedi*; the system frees nothing by itself (business spec §20, §22; B-Tables).
-- No time limit is set for marking a no-show. The code allows it at any time after the start, with no end. A review written before the no-show is marked stays.
+- Classes (after the MVP, Q-030): every attendee completes after the session. Staff mark single no-shows, and only after the session starts (business spec §21, §22).
+- Tables (after the MVP, Q-030): a confirmed table past its start counts as seated. The table is held 15 minutes for late guests (*Stol saklanýar*). After that, staff may give it away and mark *Gelmedi*; the system frees nothing by itself (business spec §20, §22; B-Tables).
+- A no-show can be marked until 24 hours after the end. A review written before the no-show is marked stays (Q-254, decided 18.10.2026). **Code differs:** the code allows it at any time after the start, with no end.
 
 > Open question Q-254: How long after a visit a no-show can be marked.
 
@@ -163,24 +164,23 @@ flowchart TD
 
 1. Staff mark *Gelmedi* through *Arz et* (S-02).
 2. The system counts this client's no-shows at this business.
-3. The limit is set in *Ýazylyş düzgünleri*: *N gelmedikden soň onlaýn ýazylyşy ýap* (1–5, default 2; 0 = never). When the count reaches it, the client can book this business only by phone (business spec §3, §8, §11).
+3. The limit is set in *Ýazylyş düzgünleri*: *N gelmedikden soň onlaýn ýazylyşy ýap* (1–5, default 2; 0 = never). When the count reaches it, the system switches on *Diňe jaň arkaly ýazylyp biler* on the client card, and the client can book this business only by phone (business spec §3, §8, §11; Q-127, decided 18.10.2026).
 4. Next time the client opens the business page or the booking flow signed in, they see a calm card. It reads *Bu biznese telefon arkaly ýazylyp bilersiňiz* (you can book this business by phone) and *Biznes siziň bilen ýazylyşlary jaň arkaly ylalaşmagy haýyş etdi.*, with a *Jaň et* button (ROUND6 A7). Signed out, everything looks normal until they log in.
-5. The business can also set this by hand on the client card with *Diňe jaň arkaly ýazylyp biler* (business spec §6).
+5. The business can also set this by hand on the client card with *Diňe jaň arkaly ýazylyp biler* (business spec §6). Turning it off lifts the limit, and counting starts again from zero (Q-127).
 
 **Edge cases**
 
-- The limit is per business, so other businesses aren't affected (business spec §3; code).
+- The limit is per business, so other businesses aren't affected (business spec §3; code). There are no Ýeral-wide client blocks at launch; client karma comes later (F-241; Q-012).
 - The client can still take times the business offered after a decline online (ROUND6 A7).
-- The code counts at the moment of each online booking. A new limit therefore applies to every client at once, and setting it to 0 lifts every automatic block.
-- No-shows never expire, and the client-card switch can't lift an automatic block (code).
+- **Code differs:** the code doesn't switch anything on. It counts every no-show ever at the moment of each online booking, so a new limit applies to every client at once, setting it to 0 lifts every automatic block, and the client-card switch can't lift a block that came from the count.
 
 > Open question Q-127: no-shows: what counts and how the limit ends.
 
-- Bookings the client already has stay as they are. The code refuses moving them online and refuses the free times offered after an expiry.
+- Bookings the client already has stay as they are. For this client, or while the business has paused online booking, *Başga wagta geçir* and the free-time chips are hidden and the *Jaň et* card shows instead; only times the business offered after a decline stay bookable online (Q-154, decided 18.10.2026). The code already refuses both. **Design to fix:** the booking screens draw *Başga wagta geçir* and the free-time chips with no phone-only or paused state.
 
 > Open question Q-154: moves and free times for a client who must call.
 
-- The client isn't told when the limit starts (chapter 8, Q-290).
+- The client gets no SMS when the limit starts: the no-show and the limit show on screen only, as designed (Q-290, decided 18.10.2026).
 
 **Status.** Design: decided and drawn (business spec §3, §8; ROUND6 A7; Venue and Booking tweak `restricted`) · Code: built for the check in the api. Marking no-shows isn't built.
 
@@ -203,35 +203,34 @@ flowchart TD
 
 **Steps**
 
-1. A booking can become *Tassyklandy* in four ways: the business confirms it, the business confirms instantly, the client takes an offered time, or a move is confirmed. Each time, the system plans the two reminders and the review ask (code: `modules/bookings/confirm.ts`).
+1. A booking can become *Tassyklandy* in four ways: the business confirms it, the business confirms instantly, the client takes an offered time, or a move is confirmed. Each time, the system plans the two reminders (code: `modules/bookings/confirm.ts`). **Code differs:** it also plans a review ask, which isn't in the MVP (S-05; Q-259).
 2. At the planned time the system checks four things. The booking is still confirmed and still at the same time. The client's switch is on (*Ýatlatma: 1 gün öň*, *Ýatlatma: 2 sagat öň*; Account-Profile). The business hasn't stopped reminders for this client (*Ýatlatma SMS-lerini iberme*, business spec §6).
-3. If all pass, it sends the SMS: *Ýatlatma: ertir {time} {business}, {address}.* (client spec §6).
+3. If all pass, it sends the SMS: *Ýatlatma: ertir {time} {business}, {address}.* a day before (client spec §6), and the code's separate *Ýatlatma: şu gün {time} {business}, {address}.* (today) 2 hours before (Q-293, decided 18.10.2026).
 
 **Edge cases**
 
 - A moved booking gets new reminders for the new time, and the old ones stay quiet (code).
 - A cancelled booking or a no-show gets nothing (code).
-- A booking made less than 24 h ahead gets no day reminder. One made less than 2 h ahead gets no reminder at all (code).
+- A booking made less than 24 h ahead gets no day reminder. One made less than 2 h ahead gets no reminder at all, since the confirmed SMS has just told the client (code; Q-257, decided 18.10.2026).
 
 > Open question Q-257: Reminders for bookings made at short notice.
 
-- Early-morning visits get the 2-hour reminder at night: a 07:00 visit means an SMS at 05:00 (chapter 8, Q-285).
-- Once staff can enter phone bookings (M5), the same reminders go to the number the business entered. Only mobile numbers can receive SMS (ROUND6 C1).
-- For the text of the 2-hour reminder, see chapter 8, Q-293.
+- A reminder that falls between 22:00 and 08:00 moves to 21:30 the evening before: a 07:00 visit gets its 2-hour reminder at 21:30 the day before, not at 05:00 (Q-285, decided 18.10.2026). A moved reminder goes at 21:30 the evening before the visit, with the *ertir* (tomorrow) text; when both reminders land on that evening, only one goes (Claude, following Q-285 and Q-293). **Code differs:** the code sends reminders at any hour.
+- Once staff can enter phone bookings (M5), the same reminders go to the number the business entered, in the market's main language until the person signs in and chooses one, English for now (Q-292). Only mobile numbers can receive SMS (ROUND6 C1).
 
-**Status.** Design: decided (client spec §6; Account-Profile switches) · Code: built in the api.
+**Status.** Design: decided (client spec §6; Account-Profile switches) · Code: built in the api, except the night rule.
 
-### S-05 · The review ask after a visit
+### S-05 · The review ask after a visit (not in the MVP)
 
-**Goal.** Collect honest reviews from real visits.
+**Goal.** Collect honest reviews from real visits, without pushing clients to write them.
 
-**Trigger.** Time: 2 hours after the end of the visit (client spec §6).
+**Trigger.** None. Ýeral sends no review ask: no SMS and no automation (Q-259, decided 18.10.2026). Client spec §6 had an SMS 2 hours after the end; the owner wants no aggressive asking.
 
 ```mermaid
 flowchart TD
-  A["Visit ends"] --> B["2 hours pass"]
-  B --> C{"Completed and switch on?"}
-  C -->|"Yes"| D["Review ask SMS"]
+  A["Visit ends"] --> B["Marked Tamamlandy"]
+  B --> C{"Client taps Teswir ýaz?"}
+  C -->|"Yes"| D["Review form"]
   C -->|"No"| E["Nothing is sent"]
   D --> F["Client writes a review"]
   F --> G["Average is updated"]
@@ -239,29 +238,31 @@ flowchart TD
 
 **Steps**
 
-1. The ask is planned together with the reminders when the booking is confirmed (S-04).
-2. Two hours after the end, the system checks three things. The visit is completed, not a no-show and not cancelled. The client's *Teswir haýyşy* switch is on. The business hasn't stopped SMS for this client.
-3. If all pass, it sends *{business}-da bolşuňyz nähili boldy? Baha beriň: {link}*.
-4. On screen, the completed booking shows *Teswir ýaz* (write a review). Client spec §6 calls this "review request (SMS + in-app)".
+1. The visit completes (S-02). Nothing is planned or sent to ask for a review (Q-259).
+2. The completed booking shows *Teswir ýaz* (write a review) in *Ýazylyşlarym* (My bookings) and on the booking link page. On the link page it logs in with the booking's masked phone and opens the review (Q-170). Client spec §6 calls this "review request (SMS + in-app)"; only the on-screen part stays.
+3. A specialist may ask the client in person (Q-259).
+4. The client can write the review up to 30 days after the visit (Q-126).
 5. The review counts in the average at once (code) unless it's reported (S-06). There is one review per booking, and it can be edited for 7 days (client spec §4.8).
 
 **Edge cases**
 
-- The client may already have written a review on screen before the SMS goes. The code sends the ask anyway.
+- A review that already exists needs no ask. If asks ever return, the SMS is skipped when a review exists (Q-258, decided 18.10.2026).
 
 > Open question Q-258: Review ask when a review already exists.
 
-- The link opens the booking link page `/b/{code}`. That page has no state for a finished visit; it's drawn only for declined, expired, confirmed, pending, offers expired and not found (Booking-Link).
+- There's no review-ask link. The booking link page (a token link, Q-168) shows a completed visit with *Teswir ýaz* (Q-170). **Design to fix:** Booking-Link has no state for a finished visit; it's drawn only for declined, expired, confirmed, pending, offers expired and not found.
 
 > Open question Q-259: Where the review-ask link lands.
 
-- Nothing says whether bookings entered by staff (phone, walk-in) get an ask.
+- Bookings entered by staff (phone, walk-in) get no ask either: there are no review asks at all (Q-260, decided 18.10.2026).
 
 > Open question Q-260: Review asks for bookings made by staff.
 
-- A visit that ends late in the evening means an SMS at night (chapter 8, Q-285).
+- With no ask, no review SMS goes at night after a late visit (Q-285).
+- **Code differs:** the api plans a review ask with each confirmation and sends *{business}-da bolşuňyz nähili boldy? Baha beriň: {link}* 2 hours after the end, at any hour, while the client's *Teswir haýyşy* switch is on (code: `modules/bookings/confirm.ts`, `modules/jobs/run.ts`). It must stop.
+- **Design to fix:** drop the *Teswir haýyşy* switch from Account-Profile, leaving 3 client SMS switches (Q-259).
 
-**Status.** Design: decided (client spec §6, §4.8) · Code: built in the api, without the checks above.
+**Status.** Not in the MVP (Q-259) · Design: *Teswir ýaz* on the completed booking drawn (client spec §4.8); the link page's completed state not drawn (Q-170) · Code: the review ask is built in the api and must stop.
 
 ### S-06 · A reported review stops counting
 
@@ -283,18 +284,18 @@ flowchart TD
 1. The business picks a reason and may add text (business spec §15). The reasons are *Ýalan / bu müşderi gelmedi*, *Kemsidiji sözler*, *Başga biznes barada*, *Mahabat / spam* and *Başga*.
 2. The review is marked *Barlanýar* (being checked). It stays visible on both sides with a grey line: *Ýeral barlaýar · ortaça baha hasaplanmaýar* (Ýeral is checking · not counted in the average) (ROUND6 F2).
 3. From that moment it stops counting in the average, the review count and the star bars (business spec §15).
-4. The Ýeral team decides in the CMS. If they **clear** it, it counts again. If they **remove** it, it disappears (business spec §15; ROUND6 F2).
+4. The Ýeral team decides in its admin tool (Q-010). If they **clear** it, it counts again. If they **remove** it, it disappears (business spec §15; ROUND6 F2).
 5. The business can reply while the review is being checked (business spec §15).
 
 **Edge cases**
 
 - The business can't delete reviews (business spec §15).
-- The CMS isn't designed yet (Q-010), so nobody can clear or remove a review.
-- Ýeral has no deadline to decide. A business could report every bad review and keep them all out of its average.
+- At launch the Ýeral team works in a small admin tool that verifies businesses and handles reported reviews (Q-010, decided 18.10.2026). **Design to fix:** the tool isn't drawn yet, and until it exists nobody can clear or remove a review.
+- Ýeral decides within 48 hours. If it doesn't, the review counts again. A cleared review can't be reported again, so a business can't keep bad reviews out of its average (Q-261, decided 18.10.2026).
 
 > Open question Q-261: How long a reported review may stay uncounted.
 
-- Nobody is told the result.
+- Only the business is told the result; the author isn't (Q-262, decided 18.10.2026).
 
 > Open question Q-262: Who hears the moderation result.
 
@@ -314,16 +315,16 @@ flowchart TD
   D -->|"Accepts"| E["Booking moves to new time"]
   D -->|"Declines"| F["Booking stays at old time"]
   D -->|"No answer"| F
-  F --> G["Client sees it on screen"]
+  F --> G["Client told on screen and by SMS"]
 ```
 
 **Steps**
 
 1. The client asks for a new time in move mode (ROUND6 A5). At a manual business the booking stays *Tassyklandy* and shows *Täze wagt soraldy: … · jogap garaşylýar* (new time asked · waiting) (ROUND6 A3).
 2. The new time is held. The business sees a *Wagt üýtgetmek* request with a timer, plus a dashed ghost block *Täze wagt?* (business spec §26).
-3. The deadline is the business's hold time counted from the moment the client asked. It never runs past the new time's start (code; the same rule as S-01).
+3. The deadline is the business's hold time counted from the moment the client asked. It never runs past the new time's start (code; the same rule as S-01) or the original visit's start (Q-263, decided 18.10.2026).
 4. If nobody answers, the request is dropped and the new time is freed. The booking stays at its old time (business spec §26).
-5. The client sees *Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar.* (new time not accepted; your booking stays at its old time) (ROUND6 A3). No other times are offered.
+5. The client sees *Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar.* (new time not accepted; your booking stays at its old time) (ROUND6 A3). They also get an SMS with that sentence and the booking link (Q-289, decided 18.10.2026). No other times are offered.
 
 **Edge cases**
 
@@ -331,13 +332,13 @@ flowchart TD
 - At an instant business the move happens at once, and nothing waits (ROUND6 A3).
 - Code differs: the booking detail hides the move action while a move waits, so a second move can't be started from there. ROUND6 A3 says the second move replaces the first.
 - Code differs: if the chosen specialist is busy at the new time, the code gives the move to another free specialist. ROUND6 A5 says there's no silent swap.
-- If the business allows cancelling at any time (*Islendik wagt*), a client can ask to move shortly before the visit. The move can then still be waiting when the original visit starts.
+- If the business allows cancelling at any time (*Islendik wagt*), a client can ask to move shortly before the visit. The move's deadline then ends at the original visit's start at the latest, so it never waits past it (Q-263, decided 18.10.2026). **Code differs:** only the new time's start limits the deadline.
 
 > Open question Q-263: A waiting move that outlives the original time.
 
-- No SMS is sent when the move isn't accepted (chapter 8, Q-289).
+- **Code differs:** no SMS is sent when the move isn't accepted (Q-289).
 
-**Status.** Design: decided and drawn (ROUND6 A3, A5; business spec §26; Account-Bookings, B-Calendar) · Code: built in the api, with the two differences above.
+**Status.** Design: decided and drawn (ROUND6 A3, A5; business spec §26; Account-Bookings, B-Calendar) · Code: built in the api, with the differences above.
 
 ### S-08 · Offered times go past or get taken
 
@@ -363,7 +364,7 @@ flowchart TD
 **Steps**
 
 1. The times show as chips on the booking, in the account and on the SMS link page (ROUND6 A1, A2).
-2. Nobody holds them. A chip whose time someone else took shows *Eýýäm eýelendi* (already taken).
+2. Nobody holds them. A chip whose time someone else took, or whose specialist is no longer free, shows *Eýýäm eýelendi* (already taken) (Q-159).
 3. When every offered time is past, the client sees *Teklip edilen wagtlaryň möhleti geçdi* (the offered times have expired) and *Başga wagt saýla* (pick another time).
 4. After a decline, a declined request can turn into only one booking. Once a time is taken, the other chips go. The declined booking moves to *Geçen* with *Teklip edilen wagt kabul edildi → YR-…* (ROUND6 A1).
 
@@ -371,11 +372,11 @@ flowchart TD
 
 - Phone-only clients (S-03) can still take times the business offered (ROUND6 A7).
 - Code: when the client taps a time, the system checks it's still free and refuses a taken one. The api doesn't mark chips as taken or past for display, so the screens must work that out themselves.
-- "Past" isn't defined. It could mean at the start, or earlier by the business's lead time.
+- An offered time counts as past once it's earlier than now plus the business's lead time, like any other booking (Q-264, decided 18.10.2026).
 
 > Open question Q-264: When an offered time counts as past.
 
-- The code also allows only one booking from the times offered after an expiry. The design states this only for declines.
+- An expired request also turns into only one booking: once a time is taken, the other chips go, as for declines and in the code (Q-265, decided 18.10.2026).
 
 > Open question Q-265: One booking from the times offered after an expiry.
 
@@ -414,11 +415,11 @@ flowchart TD
 - Only the client's own cancel can be undone. A business cancel or an expiry can't be (code).
 - Code differs: "visit started" and "answer time ran out" come back as the same error (*Yzyna almak wagty geçdi.*), so the screen can't show which of the four reasons applies.
 - A reminder that fell due inside the 5 minutes isn't sent later (code).
-- If the cancel also withdrew a waiting move (S-07), the code's undo brings back only the booking.
+- If the cancel also withdrew a waiting move (S-07), undo brings back only the booking, as the code does. The client asks for the move again if they still want it (Q-266, decided 18.10.2026).
 
 > Open question Q-266: Undo after a cancel that withdrew a waiting move.
 
-- For what the business hears when the client undoes, see chapter 8, Q-298.
+- When the client undoes, the business's earlier *Müşderi ýatyrdy* notice is updated on screen, and nothing new is sent (Q-298, decided 18.10.2026).
 
 **Status.** Design: decided and drawn (ROUND6 A6; Account-Bookings) · Code: built in the api, with one difference.
 
@@ -451,9 +452,9 @@ flowchart TD
 | Resend | after 0:59 | client spec §4.4; code |
 | Wrong code | *Kod nädogry. Ýene N synanyşyk galdy.* | client spec §4.4; code |
 | Lock | 60 seconds after 3 wrong tries | client spec §4.4; code |
-| Code valid for | 5 minutes | code only (ADR 0019) |
-| After the lock | the code is used up; ask for a new one | code only |
-| Limits | 5 codes per phone per hour; 20 per internet address per hour | code only |
+| Code valid for | 5 minutes | Q-267; code (ADR 0019) |
+| After the lock | the code is used up; the screen offers to send a new one | Q-268; code |
+| Limits | 5 codes per phone per hour; 100 per internet address per hour; the wait is shown in minutes | Q-267 (code differs) |
 | Outside production | the code is always 1234 and SMS go to the log | code; ADR 0019 |
 | SMS text | *Ýeral kody: {code}* | code only |
 | On the SMS link page | the code goes only to the booking's own phone, shown masked and not editable | ROUND6 A1 |
@@ -464,18 +465,18 @@ flowchart TD
 2. The system checks the lock, the 59-second resend wait and the hourly limits.
 3. It sends a new 4-digit code by SMS, valid for 5 minutes, and any earlier code stops working.
 4. Each try uses up one of the 3 attempts before the code is checked. A right code signs the person in (S-11). If they're new, they're asked for their name.
-5. The third wrong try starts a 60-second lock, and the code is used up.
+5. The third wrong try starts a 60-second lock, and the code is used up. After the lock, the screen offers to send a new code (Q-268).
 
 **Edge cases**
 
-- Code differs on wording. The code's lock text is *Synanyşyk köp boldy. {N} sekuntdan soň gaýtalaň.* The design has *Köp synanyşyk. 60 sekuntdan soň gaýtadan synanyşyň.* (Auth). The design itself differs between screens: Booking-Link has *Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň.*
-- No screen draws the message for the hourly limit (*Haýyş köp boldy. Biraz garaşyň.*). It also doesn't say the wait can be up to an hour.
-- Mobile operators often put many phones behind one internet address, so 20 codes per address per hour could block real people.
+- Code differs on wording. The code's lock text is *Synanyşyk köp boldy. {N} sekuntdan soň gaýtalaň.* The design has *Köp synanyşyk. 60 sekuntdan soň gaýtadan synanyşyň.* (Auth). The design itself differs between screens: Booking-Link has *Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň.* **Design to fix:** one shared code step with one lock message on every screen (Q-157).
+- The message for the hourly limit shows the wait in minutes (Q-267, decided 18.10.2026). **Design to fix:** no screen draws it. **Code differs:** the code's text, *Haýyş köp boldy. Biraz garaşyň.*, gives no wait.
+- Mobile operators often put many phones behind one internet address, so the address limit is 100 codes an hour (Q-267). **Code differs:** the code allows 20 (code: `modules/auth/codes.ts`).
 
 > Open question Q-267: Login code limits that only the code sets.
 
 - If sending the SMS fails, the 59-second wait has already started (code).
-- The design doesn't say whether the same code works after the lock.
+- The same code doesn't work after the lock: a new one is needed, and the screen offers to send it (Q-268, decided 18.10.2026). The code already uses the code up.
 
 > Open question Q-268: After the 60-second lock, a new code or the same one.
 
@@ -505,19 +506,19 @@ flowchart TD
 3. One sign-in covers both yeral.app and the business workspace in the same browser. That follows from one Ýeral account (business spec §1) and the *Müşderi hökmünde aç* menu item. *Çykmak* signs out of both on that browser.
 4. *Çykmak* signs out only this browser, and other devices stay signed in.
 5. Changing the phone signs out every other device (code; ADR 0019).
-6. Deleting the account signs the person out and cancels their upcoming bookings, and the businesses are told. The design says all bookings, reviews and favourites are deleted (Account-Profile: *Gelýän 3 ýazylyşyňyz ýatyrylar we bizneslere habar bereris.*; code).
+6. Deleting the account signs the person out and cancels their upcoming bookings, and the businesses are told (Account-Profile: *Gelýän 3 ýazylyşyňyz ýatyrylar we bizneslere habar bereris.*). The account, favourites and reviews are deleted; businesses keep their own visit records, no longer linked to a Ýeral account (Q-172, decided 18.10.2026; code). **Design to fix:** the delete modal says all bookings are deleted; its copy changes to say this.
 
 **Edge cases**
 
-- No "sign out on all devices" button is designed or built.
+- There's no "sign out on all devices" button on MVP (Q-269, decided 18.10.2026).
 - Native apps (later) will use the same sign-in with a token (ADR 0019).
-- The CMS will get separate staff accounts with a second sign-in step (ADR 0019; not designed).
+- The CMS, at launch a small admin tool (Q-010), will get separate staff accounts with a second sign-in step (ADR 0019; not designed).
 - Removing someone from a workspace removes their access to it, but their Ýeral sign-in stays (business spec §1, §8).
-- The design doesn't set how long a sign-in lasts. 60 days was Claude's choice, and the owner can reverse it (ADR 0019).
+- A sign-in lasts 60 days and renews with use, as built (Q-269; ADR 0019).
 
 > Open question Q-269: How long a sign-in lasts, and signing out everywhere.
 
-**Status.** Design: not specified · Code: built in the api.
+**Status.** Design: decided (Q-269), nothing to draw · Code: built in the api.
 
 ### S-12 · Signing in links what the phone already has
 
@@ -529,7 +530,7 @@ flowchart TD
 flowchart TD
   A["Phone signs in"] --> B{"Account exists?"}
   B -->|"No"| C["Account created, name asked"]
-  B -->|"Yes"| D["Link bookings with this phone"]
+  B -->|"Yes"| D["Link upcoming and recent bookings"]
   C --> D
   D --> E["Link business client records"]
   E --> F["Activate waiting invites"]
@@ -537,19 +538,19 @@ flowchart TD
 
 **Steps** (code: `modules/auth/routes.ts`)
 
-1. If there's no account for this phone, the system creates one and asks for the name (client spec §4.7; business spec §1).
-2. Bookings made with this phone, such as phone bookings a business entered, are linked to the account. They then show in *Ýazylyşlarym*.
+1. If there's no account for this phone, the system creates one and asks for the name (client spec §4.7; business spec §1). If the account hasn't been used for 6 months, Ýeral first asks *Is this you?* with the account's first name. *No* starts a fresh account and leaves the old history unlinked. There's no password (Q-270, decided 18.10.2026).
+2. Bookings made with this phone, such as phone bookings a business entered, are linked to the account if they're upcoming or from the last 6 months (Q-270). They then show in *Ýazylyşlarym*.
 3. Businesses' client records with this phone are linked to the account.
 4. Team invites waiting for this phone become active at once. S-13 describes what the design wants instead.
 5. In the workspace, routing follows the design: a pending invite first, then *Entek iş ýeriňiz ýok* if there's no workspace, otherwise the last workspace used (business spec §1; B-Login).
 
 **Edge cases**
 
-- The linking is the code's choice; no design shows it. If a phone number passes to a new person, that person would see the previous owner's bookings.
+- A phone number that passes to a new person is covered by the 6-month limit and the *Is this you?* check, so the new person doesn't see the previous owner's older history (Q-270, decided 18.10.2026). **Code differs:** the code links every booking and client record with this phone at every sign-in and never asks (code: `modules/auth/routes.ts`). **Design to fix:** draw the *Is this you?* step at sign-in.
 
 > Open question Q-270: Linking bookings made under the same phone.
 
-**Status.** Design: routing drawn (B-Login), linking not shown · Code: built in the api.
+**Status.** Design: routing drawn (B-Login); linking decided (Q-270), the *Is this you?* step not drawn · Code: built in the api, with the difference above.
 
 ### S-13 · Invite links expire after 7 days
 
@@ -573,14 +574,14 @@ flowchart TD
 1. The owner invites a person with their phone number (their Ýeral login), name, specialization, access level and services (business spec §8).
 2. The person gets an SMS link that's valid for 7 days. The team list shows *Çagyryldy · 19 oktýabra çenli* (invited · until 19 October), with *Täzeden iber* (resend) and *Çakylygy ýatyr* (withdraw) (business spec §8; B-Team).
 3. The person signs in with that phone, and the invite screen comes first: *Kabul et* / *Ret et* (accept / decline) (business spec §1; B-Login).
-4. If they accept, they become a member with the chosen access level, and the owner hears *Topar: işgär çakylygy kabul edende* (business spec §16). If they decline, the inviter is told (*… habar alar*), and joining later needs a new invite (B-Login).
+4. If they accept, they become a member with the chosen access level, and the owner hears *Topar: işgär çakylygy kabul edende* (business spec §16). If they decline, the inviter is told (*… habar alar*) through the *Topar* notification row (Q-298, decided 18.10.2026), and joining later needs a new invite (B-Login).
 5. After 7 days the invite expires. Signing in then shows *Çakylygyň möhleti geçdi* with *Her çakylyk 7 gün işleýär… Eýesinden täzeden ibermegini haýyş ediň* (B-Login).
 6. A resend starts a new 7 days (B-Team).
 
 **Edge cases**
 
 - *Programmasyz* staff (no login) get no SMS and are active at once (business spec §11).
-- The invite SMS text isn't designed (chapter 8, Q-288).
+- The design has no invite SMS text. Claude writes it in English, the source language, with the market's translations, and the owner checks it (Q-288, decided 18.10.2026).
 - Code differs: invites never expire. They're accepted automatically at the next sign-in, with no *Kabul et* / *Ret et*. No invite SMS is sent (code: `modules/auth/routes.ts`; the workspace isn't built).
 
 **Status.** Design: decided and drawn (business spec §1, §8; B-Login, B-Team) · Code: partly.
@@ -595,31 +596,29 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  A["Booking for her in A"] --> B{"Başga ýerde switch on?"}
-  B -->|"Yes"| C["Block shown in B"]
+  A["Booking for her in A"] --> C["Block shown in B"]
   C --> D["B cannot book that time"]
-  B -->|"No"| E["Not defined"]
 ```
 
 **Steps**
 
 1. Aýna works in Glow Studio and also owns her own studio (business spec §1, demo).
-2. A booking for her in one workspace shows in the other workspace's calendar as a dashed grey *Başga ýerde* block with a briefcase icon. It has no details and can't be clicked (business spec §1, §4).
+2. A confirmed booking or a waiting request where she is the specialist, with its buffers, shows in the other workspace's calendar as a dashed grey *Başga ýerde* block with a briefcase icon (Q-272, decided 18.10.2026). It never shows anything from the other workspace: it has no details and can't be clicked (business spec §1, §4; Q-031, decided 18.10.2026).
 3. The other workspace's online booking doesn't offer that time, and its staff can't book her then. Times under the block are refused with a toast (business spec §1, §4).
-4. She controls this in *Profilim* with the switch *Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez* (show my time in other workspaces as "Başga ýerde"). It's on by default (business spec §1).
+4. There's no switch: the block always applies and never shows details, so there's nothing to hide (Q-271, decided 18.10.2026).
 
 **Edge cases**
 
 - *Programmasyz* staff have no account, so nothing links them across workspaces.
-- What turning the switch off does isn't defined.
+- **Design to fix:** drop the *Profilim* switch *Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez* (show my time in other workspaces as "Başga ýerde") (business spec §1; Q-271).
 
 > Open question Q-271: What the "Başga ýerde" switch controls.
 
-- Which bookings count isn't defined: requests, buffers, or her own bookings as a client.
+- Nothing else blocks her elsewhere: not her breaks, her days off or her own bookings as a client (Q-272).
 
 > Open question Q-272: Which bookings block a person elsewhere.
 
-**Status.** Design: decided and drawn (business spec §1, §4; B-Calendar, DS-Business) · Code: not built. Free times count only the same business's bookings.
+**Status.** Design: decided and drawn, in the MVP (business spec §1, §4; Q-031; B-Calendar, DS-Business) · Code: not built. Free times count only the same business's bookings.
 
 ### S-15 · Live updates on open screens
 
@@ -649,13 +648,13 @@ sequenceDiagram
 **Edge cases**
 
 - Public pages (search, business page) don't refresh by themselves. If someone takes a time meanwhile, the client finds out when sending: *Bu wagt ýaňy alyndy. Golaý boş wagtlar:* plus the 3 nearest times (client spec §4.4).
-- Code differs: a hidden tab doesn't ask at all. A workspace tab in the background therefore never learns of a new request, but B-Shell wants a browser notification exactly then ("Browser notification when the tab is in the background").
+- Code differs: a hidden tab doesn't ask at all. A workspace tab in the background therefore never learns of a new request, but B-Shell wants a browser notification exactly then ("Browser notification when the tab is in the background"), and Q-273 includes background workspace tabs.
 - A push connection can replace the asking later on the own server, and screens stay the same (`systemPatterns.md`).
-- The design wants new requests to show "on arrival" but sets no maximum delay.
+- Changes reach open screens within about 10 seconds by asking, including a workspace tab in the background (Q-273, decided 18.10.2026).
 
 > Open question Q-273: How fast changes must reach open screens.
 
-**Status.** Design: implied (business spec §2; B-Shell) · Code: built (the asking), with the background-tab difference.
+**Status.** Design: decided (business spec §2; B-Shell; Q-273) · Code: built (the asking), with the background-tab difference.
 
 ### S-16 · A new request reaches the business
 
@@ -688,7 +687,7 @@ flowchart TD
 
 - During quiet hours there's no sound and no alert (S-18).
 - Requests for *Programmasyz* staff go to the owner and admin (business spec §2).
-- For new-request SMS before the app exists, see chapter 8, Q-297.
+- Before the app exists, new-request SMS to staff are off by default. Each person can switch them on, and they never go at night or to someone who has the workspace open (Q-297, decided 18.10.2026).
 
 **Status.** Design: decided and drawn (business spec §2, §16; B-Shell, B-Calendar, B-Bookings) · Code: partly. The change note exists, but the workspace, toasts and warnings aren't built.
 
@@ -706,7 +705,7 @@ flowchart TD
   B --> E{"Ýeral team decides"}
   E -->|"Verified"| F["Public in search and link"]
   F --> G["Owner is notified"]
-  E -->|"Rejected"| H["Not designed"]
+  E -->|"Rejected"| H["Banner with reason, fix and send again"]
 ```
 
 **Steps**
@@ -715,26 +714,26 @@ flowchart TD
 2. Setup step 8 says *Salgyňyz we QR kodyňyz taýýar — barlagdan soň müşderiler üçin açylar.* (your link and QR code are ready and open to clients after review) (ROUND6 F1).
 3. The owner and team see their own page with the banner *Sahypaňyz barlagda — häzir ony diňe siz we toparyňyz görýärsiňiz. Barlagdan soň gözlegde we salgyňyzda hemmä açylar.* (ROUND6 F1; B-Shell).
 4. Visitors at the link see *Bu sahypa entek açylmady* and *Biznes Ýeral-a täze goşuldy we barlagdan geçýär. Adatça 24 sagat çekýär.*, with a *Başga ýerleri gözle* button. They see no business details. ROUND6 F1 also suggests telling search engines the page doesn't exist (States tile 11).
-5. The Ýeral team verifies the business in the CMS, usually within 24 hours (business spec §7).
+5. The Ýeral team verifies the business in its admin tool (Q-010), usually within 24 hours (business spec §7).
 6. Once verified, the business appears in search, on category pages, at its link and among similar places. The owner hears *Ýeral: barlag we täzelikler*, by browser and SMS by default (business spec §16).
 
 **Edge cases**
 
-- The CMS isn't designed yet (Q-010; business spec §24, "admin panel … for business verification").
+- At launch the Ýeral team works in a small admin tool that verifies businesses and handles reported reviews; categories, help articles and support chat come later (Q-010, decided 18.10.2026; business spec §24, "admin panel … for business verification").
 - Clients can't book online before verification, because nobody else can open the page. Staff can still enter phone bookings (business spec §7).
-- The data has a "rejected" status with a reason, but nothing shows it on screen.
+- A rejected business sees a banner with the reason and a way to fix things and send the business again. Visitors keep seeing *Bu sahypa entek açylmady* (Q-274, decided 18.10.2026). The data already has a "rejected" status with a reason. **Design to fix:** draw the rejected banner and the send-again action.
 
 > Open question Q-274: What a rejected business sees.
 
-- Nothing says whether changes after verification send the business back to review.
+- Changes after verification don't send the business back to review on MVP, but the Ýeral team can un-verify a business by hand (Q-275, decided 18.10.2026).
 
 > Open question Q-275: Re-checking a verified business after changes.
 
-- What the team checks isn't written anywhere.
+- Before verifying, the team calls the business phone, then looks at the name, the address on the map, the category and the photos (Q-276, decided 18.10.2026).
 
 > Open question Q-276: What the Ýeral team checks before verifying.
 
-- There's no way to verify a business until the CMS exists.
+- **Design to fix:** the admin tool isn't drawn yet, and without it no business can become public (Q-010).
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.
 
@@ -760,26 +759,26 @@ flowchart TD
 2. Quiet hours (*Gijeki dymyşlyk*) are on by default from 22:00 to 08:00. The start can be 19:00–00:00 and the end 05:00–10:00, in 30-minute steps (B-Notifications).
 3. During quiet hours there's no sound and no alert in the browser or the app. SMS never go at night, even with quiet hours off: *SMS gije hiç haçan iberilmeýär* (B-Notifications; business spec §16, §22).
 4. There are two summaries, each sent as one message:
-  - *Ertirki ýazylyşlar* (tomorrow's bookings): who comes tomorrow, every evening, default 20:00 (range 17:00–23:00). Each specialist gets their own bookings.
+  - *Ertirki ýazylyşlar* (tomorrow's bookings): who comes tomorrow, every evening, default 20:00 (range 17:00–23:00). Each specialist gets their own bookings. On MVP it's off by default, and each person switches it on (Q-296, decided 18.10.2026).
   - *Gündelik jemleme* (daily summary): today's bookings and requests, every morning, default 08:00 (range 05:00–10:00). This one goes to the owner.
 5. A summary time inside quiet hours shows *Bu wagt gijeki dymyşlyga düşýär — ses we push bolmaz.* (this time falls in quiet hours; no sound or push).
 6. Summaries can't go by SMS. SMS is allowed only for *Täze haýyş* and *Ýeral* (business spec §22).
 
 **Edge cases**
 
-- What "night" means for SMS when quiet hours are off or moved isn't defined.
+- For SMS, night is the person's quiet hours, or 22:00–08:00 when quiet hours are off (Q-278, decided 18.10.2026).
 
 > Open question Q-278: What "night" means for business SMS.
 
-- It isn't defined whether an SMS that falls at night is dropped or sent in the morning.
+- A *Täze haýyş* SMS that falls in the night is dropped, since the morning summary covers it. A *Ýeral* SMS waits until the morning (Q-279, decided 18.10.2026).
 
 > Open question Q-279: A business SMS that falls in the night.
 
-- On MVP the browser is the only alert channel, and it works only while Ýeral Biznes is open (*Ýeral Biznes açyk bolanda*). A morning summary reaches nobody whose workspace isn't open at that time.
+- On MVP the browser is the only alert channel, and it works only while Ýeral Biznes is open (*Ýeral Biznes açyk bolanda*). The summaries stay as drawn: a browser notification if the workspace is open at that time, so a summary reaches nobody whose workspace isn't open then (Q-280, decided 18.10.2026).
 
 > Open question Q-280: Summaries while the browser is the only channel.
 
-- For a person in two workspaces, it isn't defined whether there's one set of settings or one per workspace.
+- A person in two workspaces has one set of settings per workspace, with that workspace's role defaults. Quiet hours are shared across their workspaces (Q-281, decided 18.10.2026).
 
 > Open question Q-281: Notification settings per workspace or per person.
 
@@ -789,7 +788,7 @@ flowchart TD
 
 **Goal.** Set the client's expectations before and after they send a request.
 
-**Trigger.** Time: the system works it out from past answers. The spec says "computed" but doesn't say when.
+**Trigger.** Time: the system works it out from the answers of the last 30 days (Q-113, decided 18.10.2026). The spec says "computed" but doesn't say when.
 
 ```mermaid
 flowchart LR
@@ -805,13 +804,13 @@ flowchart LR
 
 **Edge cases**
 
-- How it's computed, how often, and what a new business with no answers shows aren't defined.
+- It's the median answer time over the last 30 days, rounded (15 min, 1 sagat …). Both lines stay hidden until the business has answered 5 requests (Q-113, decided 18.10.2026).
 - Code differs: each business stores a fixed number, set only by the demo data (default 20 minutes). Nothing computes it.
 - Instant businesses don't need it.
 
 > Open question Q-113: how the typical answer time is worked out.
 
-**Status.** Design: decided (client spec §4.3; ROUND6 A2) · Code: not built (only a stored number).
+**Status.** Design: decided (client spec §4.3; ROUND6 A2; Q-113) · Code: not built (only a stored number).
 
 ## Behind the scenes
 
@@ -842,9 +841,9 @@ flowchart TD
 
 **Edge cases**
 
-- Whether production shows demo businesses before real ones join is left open (ADR 0020).
+- Whether production shows demo businesses before real ones join depends on who the first launch is for (ADR 0020).
 
-> Open question Q-283: Demo businesses on the live site.
+> Open question Q-004: who the first launch is for.
 
 **Status.** Design: not a design topic · Code: built.
 
@@ -867,15 +866,15 @@ flowchart TD
 **Steps** (code: `modules/jobs/run.ts`)
 
 1. Booking SMS go into a queue with their planned time.
-2. Right before sending, the system checks the booking again: its state, its time and the switches (S-04, S-05).
+2. Right before sending, the system checks the booking again: its state, its time and the switches (S-04).
 3. If sending fails, it tries again after 1, 2, 4 and 8 minutes.
-4. After 5 failed tries, about 15 minutes in all, it gives up and keeps the record for the team to look at. Nobody is told.
+4. After 5 failed tries, about 15 minutes in all, it gives up, keeps the record and alerts the Ýeral team (Q-284, decided 18.10.2026). **Code differs:** nobody is alerted.
 
 **Edge cases**
 
 - Login codes are sent straight away, not queued. If sending fails, the person sees an error and can ask again after the 59-second wait (S-10).
-- A retried reminder could arrive close to the visit.
-- There's no SMS gateway yet, so every environment writes SMS to the log (chapter 8, "Not decided").
+- A reminder that would arrive after the visit has started is dropped (Q-284). **Code differs:** a retried reminder can still go out after the start.
+- There's no SMS gateway yet, so every environment writes SMS to the log. How SMS go out at the first launch is open (Q-036; chapter 8, "Not decided").
 
 > Open question Q-284: An SMS that can't be delivered.
 

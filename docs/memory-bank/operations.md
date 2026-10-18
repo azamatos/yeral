@@ -31,7 +31,7 @@ the DNS record and the certificate. No dashboard work per subdomain.
 | `storybook.yeral.app` | `yeral-storybook` | static assets |
 
 **Cost now:** Workers Free (100k requests/day, 10 ms CPU per request) until SSR and the api need more, then Workers Paid
-$5/month; Neon, R2 (10 GB), Sentry and Cloudflare Web Analytics on free tiers. **No VPS needed** until the move.
+$5/month; Neon, R2 (10 GB), Sentry and Cloudflare Web Analytics on free tiers. **No VPS needed** until the Turkmenistan launch, which gets its own servers (ADR 0023).
 
 **Owner's one-time steps** (when the milestone needs them): Neon account (M2), Cloudflare API token for CI (M0),
 Workers Paid when limits are hit, Access policy for `cms.` (M6).

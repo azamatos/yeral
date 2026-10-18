@@ -1,19 +1,20 @@
 # 7a. Client flows
 
-This chapter walks through everything a client does on yeral.app, one scenario at a time, from the first visit to deleting the account. Each flow says what is already decided and where that decision lives. Where nothing is decided, or the sources disagree, the flow points to an open question (Q-150 to Q-172) for the owner to answer.
+This chapter walks through everything a client does on yeral.app, one scenario at a time, from the first visit to deleting the account. Each flow says what is decided and where that decision lives. Where the sources disagreed, the flow points to its question (Q-150 to Q-172); all of them are decided (18.10.2026), and the flows state the answers.
 
 ## Who the client is
 
 The client is anyone who books time at a business through yeral.app: a haircut, a dentist visit, a restaurant table, a seat in a yoga class. They use the site on a phone or a computer, in their own language: English while Ýeral is built; Turkmen, Russian and English in Turkmenistan (ADR 0022). They pay at the place; there is no online payment yet (client spec §1).
 
-**Signed out**, a client can see the home page, search, open business pages, read reviews and go through a booking up to its last step. Logging in is needed only to send a booking, to save favourites and to open *Ýazylyşlarym* (My bookings). Login is by phone only: a +993 mobile number and a 4-digit SMS code, no password (client spec §4.7, ADR 0019). The page an SMS link opens (`yeral.app/b/{code}`) also works signed out (client spec §14).
+**Signed out**, a client can see the home page, search, open business pages, read reviews and go through a booking up to its last step. Logging in is needed only to send a booking, to save favourites and to open *Ýazylyşlarym* (My bookings). Login is by phone only: a +993 mobile number and a 4-digit SMS code, no password (client spec §4.7, ADR 0019). The page an SMS link opens also works signed out; the link carries a long random token on a path of its own, never the booking code (client spec §14; Q-168, decided 18.10.2026).
 
 **Signed in**, the header shows the avatar menu: *Ýazylyşlarym* (My bookings) · *Halanlarym* (Favourites) · *Profil* · *Dil* (Language) · *Çykmak* (Log out) (client spec §3). One Ýeral account serves both sides: the same person can be a client and a team member of a business (CHANGELOG v0.5 part A).
 
 Rules that run through every flow:
 
 - **The business confirms by hand by default.** A sent booking is *Garaşylýar* (Pending) and the copy says "sent", never "booked". A business may switch on instant confirmation; then the booking is *Tassyklandy* (Confirmed) at once (client spec §1, ADR 0017).
-- **Hold time.** An unanswered request expires after the business's hold time (15 min to 24 h, default 30 min, never past the visit start) and the client is offered 3 other times (client spec §1, ROUND6-ANSWERS A2).
+- **Hold time.** An unanswered request expires after the business's hold time (15 min to 24 h, default 30 min, never past the visit start) and the client is offered 3 other times (client spec §1, ROUND6-ANSWERS A2). The hold runs only during the business's opening hours (Q-120, decided 18.10.2026).
+- **Appointments first.** The MVP takes appointments only; tables and classes come after it, so the table and class parts of these flows (C-16, C-17, C-32 and the table and class lines elsewhere) apply then. One business has one booking type at launch (Q-030, Q-022, decided 18.10.2026).
 - **Money** is whole manats, shown `40 TMT`; payment at the place. **No city name** ever appears in the copy (client spec §1, §8).
 - **Ýeral is free** for businesses and clients for now (owner, activeContext 2026-10-16).
 
@@ -72,7 +73,7 @@ flowchart TD
   C --> D{"Client chooses"}
   D -->|"Ýerleşişimi görkez"| F{"Browser allows?"}
   F -->|"Allowed"| H
-  F -->|"Denied or failed"| G["IP city inside Nirede field"]
+  F -->|"Denied or failed"| G["City asked once, inside Nirede field"]
   G --> I["No distances, popular first"]
   D -->|"Salgy ýazaýyn"| E["Pick from address suggestions"]
   E --> H
@@ -84,14 +85,16 @@ flowchart TD
 1. The site never asks for location when a page loads; only the button does (States tile 02).
 2. While the location is unknown, a banner sits above the list: "Ýakynyňyzdaky ýerleri görkezeliň" (Let us show places near you) and "Brauzer ýerleşişiňizi soraýar — diňe aralygy hasaplamak üçin." (The browser will ask for your location, only to work out distances), with "Ýerleşişimi görkez" (Show my location) and "Salgy ýazaýyn" (I'll type an address). Below it: *Meşhur ýerler* (Popular places), "Reýting we teswir sany boýunça" (by rating and number of reviews), without distances (States tile 02, client spec §4.1).
 3. Location allowed: *Nirede?* shows *Ýakynymda* (Near me), radius 5 km with a chip for 1 / 3 / 5 / 10 / 25 km; lists sort nearest first; distances read `1,2 km`, or `850 m` under a kilometre (client spec §5).
-4. Location denied or failed: the city found from the IP address appears only inside the *Nirede?* field, with "Ýerleşiş ýapyk — şäher boýunça görkezilýär" (Location off — showing by city). Distances are hidden, rows show category and street, and lists sort by rating × number of reviews. "Sazlamalary aç" (Open settings) opens a short help sheet on allowing location in the browser (client spec §5, States tile 03).
+4. Location denied or failed: the client picks a city, asked once and remembered; the city found from the IP address is only a last guess, since many people use a VPN, and they can pick another city any time (Q-107, decided 18.10.2026). The city appears only inside the *Nirede?* field, with "Ýerleşiş ýapyk — şäher boýunça görkezilýär" (Location off — showing by city). Distances are hidden, rows show category and street, and lists sort by rating × number of reviews. "Sazlamalary aç" (Open settings) opens a short help sheet on allowing location in the browser (client spec §5, States tile 03).
 5. Typing in *Nirede?*: an address, district or landmark, with up to 6 suggestions (client spec §5).
 
 **Edge cases**
 
-- The IP lookup finds nothing: the field stays empty and the popular list shows. Today the lookup works only on Cloudflare, which adds the caller's city to the request; on the own server (ADR 0007) it returns nothing (code: `apps/api/src/modules/catalog/routes.ts`, `/v1/places/ip`).
-- A city name never appears in titles, cards or the footer, only inside the field (client spec §5, §8).
+- No city picked and the IP lookup finds nothing: the field stays empty and the popular list shows. The lookup works only on Cloudflare, which adds the caller's city to the request: the first launch runs there (Q-032), but through a VPN it finds the VPN's city, and on a country's own servers (Q-131) it returns nothing (code: `apps/api/src/modules/catalog/routes.ts`, `/v1/places/ip`).
+- A city name is never written into titles, cards or the footer; the city shows only as data: inside the field, and in an address whose city differs from the selected one (client spec §5, §8; Q-107).
 - After moving the map, the client can search the visible area instead (C-04).
+
+**Design to fix:** the one-time city choice when location is denied or failed, and picking another city later (Q-107, F-240).
 
 **Status:** Design: drawn (States · tiles 02, 03); the location help sheet is text only · Code: built (api) — search by position and radius, IP place.
 
@@ -115,7 +118,7 @@ flowchart TD
 
 **Steps**
 
-1. `/` redirects to the saved language (cookie, then the profile), else to `/tk` (ADR 0016).
+1. `/` redirects to the saved language (cookie, then the profile), else to the phone's or browser's language if Ýeral has it, else to the country's main language (ADR 0016; Q-132, decided 18.10.2026).
 2. The hero explains the name: "Ýeriňi al." (Take your place) and "Dellegiň kreslosy, restoranyň stoly ýa-da ýoga sapagyndaky ýer — boş wagty görüň we bir minutda ýazylyň." Below it, the search card *Näme?* (What?) / *Nirede?* (Where?, default *Ýakynymda*) / *Haçan?* (When?) and "Boş wagtlary görkez" (Show free times) (Home).
 3. "Golaýyňyzda şu gün boş" (Free today near you): 4 cards, nearest first, each with its next free times, "Ýerleşişiňiz boýunça · üýtget" and "Ählisini gör" (See all) (client spec §4.1).
 4. Then the 13 category tiles, "Nähili işleýär?" (How it works: *Gözläň* · *Wagt saýlaň* · *Tassyklama alyň*), the Ýeral Biznes block, app links and the footer.
@@ -163,7 +166,8 @@ flowchart TD
 **Edge cases**
 
 - Nothing found: "Bu ýerde boş wagt ýok" (No free time here) and "Aralygy ulaldyň, başga güni saýlaň ýa-da süzgüçleri aýyryň.", with "Aralygy 10 km et" (widens the radius one step) and "Süzgüçleri arassala" (Clear filters); below, up to 2 rows of the same search for tomorrow and "Ählisini gör", which switches the day to *Ertir* (States tile 01).
-- Only places with a free time on the chosen day are listed, so a fully booked place, one that paused online booking or one that takes phone bookings only doesn't appear (Search count line; code: `catalog/search.ts`).
+- Only places with a free time on the chosen day are listed, so a fully booked place, one that paused online booking or one that takes phone bookings only doesn't appear (Search count line; code: `catalog/search.ts`; Q-150, decided 18.10.2026).
+- A restaurant whose online party limit is below the chosen party stays in the list with *Jaň et* instead of times (Q-112, decided 18.10.2026).
 - Location denied: no distances, sorted by rating × reviews (C-01).
 - Loading: skeleton rows in the real row shape (200 × 150 photo, 3 lines, 3 time pills), shown only after 300 ms (States tile 08).
 - Phones: list only, with a floating "Karta" (Map) button; the filter button opens *Süzgüçler* with the sort as a sheet; rows drop the street (Mobile 2).
@@ -236,7 +240,7 @@ flowchart LR
 **Edge cases**
 
 - Unknown category: the 404 page (States tile 09).
-- Same "free time only" rule as search (C-03, Q-150).
+- Category pages follow the same "free time only" rule as search (C-03; Q-150, decided 18.10.2026).
 
 **Status:** Design: text only (pattern of Search) · Code: built (api) — categories with their intro text, search by category.
 
@@ -281,12 +285,14 @@ flowchart TD
 - Businesses open past midnight are not designed (E1; Q-105).
 - Reviews under moderation are shown but not counted (C-07).
 - Heart while signed out: log in first (C-19).
-- A business with several booking types (a gym with classes and personal training): no screen shows how the client picks one.
-- The typical answer time is called "computed" (client spec §4.3) but nothing says how.
+- A business has one booking type at launch, so the client never picks one; several types in one business (a gym with classes and personal training) come later (Q-022, decided 18.10.2026).
+- The typical answer time is the median answer time over the last 30 days, rounded (15 min, 1 sagat …), and hidden until the business has answered 5 requests (client spec §4.3; Q-113, decided 18.10.2026).
 
 > Open question Q-022: several booking types in one business.
 
 > Open question Q-253: the answer time the client is shown.
+
+**Code differs:** the typical answer time is a stored number per business that nothing works out (code: `apps/api/src/db/schema/business.ts`).
 
 **Status:** Design: drawn (Venue · `selection`, `hoursCase`; States 06; Mobile 4); the table and class page variants are text only · Code: built (api) — `GET /v1/businesses/{slug}`.
 
@@ -312,7 +318,7 @@ flowchart TD
 1. The summary: average, count and 5-to-1 star bars (client spec §4.3).
 2. Each review: name as first name plus surname initial ("Gülälek N."), stars, date ("2 gün öň"), service · specialist, text, and the business's reply ("Glow Studio-nyň jogaby") (Venue).
 3. "Ähli teswirler" (All reviews) loads more. A line explains: "Diňe ýazylyp gelen müşderiler baha berip bilýär." (Only clients who booked and came can rate) (Venue).
-4. A review the business reported stays in the list with a grey line and an info icon: "Ýeral barlaýar · ortaça baha hasaplanmaýar" (Ýeral is checking · not counted in the average). It isn't counted in the average, the count or the bars until Ýeral clears it; if Ýeral removes it, it disappears (F2; business spec §15).
+4. A review the business reported stays in the list with a grey line and an info icon: "Ýeral barlaýar · ortaça baha hasaplanmaýar" (Ýeral is checking · not counted in the average). It isn't counted in the average, the count or the bars until Ýeral clears it; if Ýeral removes it, it disappears (F2; business spec §15). Ýeral decides within 48 hours, otherwise the review counts again; a cleared review can't be reported again (Q-261, decided 18.10.2026).
 
 **Edge cases**
 
@@ -380,7 +386,7 @@ flowchart TD
 
 - The business disappears from search, which lists only places with free time (C-03, Q-150).
 - Opening a booking link directly: the api refuses with "Bu ýer häzir onlaýn ýazylyşy kabul etmeýär" (code: `online_disabled`); the flow screen for this isn't drawn.
-- Existing bookings stay as they are; moving them or taking free times after an expiry is refused by the code (Q-154).
+- Existing bookings stay as they are. While the business is paused, their detail hides "Başga wagta geçir" and the free-time chips after an expiry and shows the "Jaň et" card; only decline offers stay bookable online (Q-154, decided 18.10.2026; C-11).
 
 **Status:** Design: drawn (States 05) · Code: built (api) — no times and no sending while paused.
 
@@ -409,10 +415,12 @@ flowchart TD
 **Edge cases**
 
 - An unverified business never shows in search, suggestions or favourites (code: `catalog/search.ts`, `me/routes.ts`).
-- A business whose verification was rejected (`rejected`, business spec §10): not designed for visitors; the CMS that verifies businesses isn't designed either (Q-010).
-- Whether the team can test-book from its preview isn't said.
+- A business whose verification was rejected (`rejected`, business spec §10): visitors keep seeing "Bu sahypa entek açylmady"; the owner sees a banner with the reason and a way to fix and send again (Q-274, decided 18.10.2026). The Ýeral team verifies businesses in a small admin tool designed for launch (Q-010, decided 18.10.2026).
+- No bookings before verification: the preview shows the booking buttons disabled (Q-153, decided 18.10.2026).
 
 > Open question Q-153: booking on a page that is still in review.
+
+**Design to fix:** the owner preview (Venue · `ownerPreview`) with "Ýazylmak", "Saýla" and the time chips disabled (Q-153).
 
 **Code differs**
 
@@ -441,7 +449,7 @@ flowchart TD
 
 **Steps**
 
-1. A client becomes phone-only at one business when the business marks them "Diňe jaň arkaly ýazylyp biler", or automatically after a number of no-shows there (default 2, setting 0–5) (business spec §3; ADR 0017).
+1. A client becomes phone-only at one business when the business marks them "Diňe jaň arkaly ýazylyp biler", or automatically after a number of no-shows there (default 2, setting 0–5) (business spec §3; ADR 0017). Reaching that number switches the mark on; the business can switch it off, and counting starts again from zero (Q-127, decided 18.10.2026).
 2. That client sees a calm card instead of the booking bar: "Bu biznese telefon arkaly ýazylyp bilersiňiz" (You can book this business by phone) and "Biznes siziň bilen ýazylyşlary jaň arkaly ylalaşmagy haýyş etdi." (The business asked to arrange bookings with you by phone), with "Jaň et" and the number. No blame, no talk of no-shows (A7; Mobile 16).
 3. Service rows keep their information but lose "Saýla"; the booking flow opened directly shows the same card (A7).
 4. Signed out, the page is normal until the client logs in, then the card appears (A7).
@@ -450,9 +458,11 @@ flowchart TD
 **Edge cases**
 
 - If the client logs in at the confirm step of a booking, the card replaces the send button there (A7 "normal until login, then the card").
-- A move or the free times after an unanswered request are new online requests too; no screen shows them for this client.
+- A move or the free times after an unanswered request are new online requests too, so for this client, and while the business is paused, the booking detail and the link page hide "Başga wagta geçir" and the free-time chips and show the "Jaň et" card; only decline offers stay bookable online (Q-154, decided 18.10.2026).
 
 > Open question Q-154: moves and free times for a client who must call.
+
+**Design to fix:** the booking detail and the link page for a phone-only client or a paused business: no "Başga wagta geçir", no free-time chips, the "Jaň et" card instead (Q-154).
 
 **Code differs**
 
@@ -503,7 +513,7 @@ flowchart TD
 - A time chip on a card stands for one service: the code uses the service matching the search words, else the first in the menu (code: `catalog/cards.ts`).
 - Network failure while sending: a toast with retry (C-48).
 - Phones: the summary card becomes a bottom bar that opens as a sheet; taken times stay visible, struck through (Mobile 5).
-- Nothing stops a client from holding overlapping bookings at different places.
+- A client may hold overlapping bookings at different places; businesses handle no-shows with "Arz et" (Q-155, decided 18.10.2026).
 
 > Open question Q-155: two bookings at the same time.
 
@@ -644,7 +654,7 @@ flowchart TD
 
 - The online party limit is fixed at 8 for every business (code: `packages/domain` `MAX_ONLINE_PARTY`); D1 says the chips follow each business's own limit (2–12, default 8).
 
-**Status:** Design: drawn (Booking-Table · `maxParty`, `sent`, `loggedIn`) · Code: partly — tables, areas, VIP, requests built; the per-business limit isn't.
+**Status:** After the MVP (Q-030) · Design: drawn (Booking-Table · `maxParty`, `sent`, `loggedIn`) · Code: partly — tables, areas, VIP, requests built; the per-business limit isn't.
 
 ### C-17 · Book a seat in a class
 
@@ -676,9 +686,11 @@ flowchart TD
 
 - Two clients take the last seat at once: the second gets "Sapak doly." (code: `session_full`).
 - Sessions sooner than the business's lead time can't be booked online (code: `availability/routes.ts`).
-- A same-day session past the free-cancel window shows "Mugt ýatyrmak wagty geçdi — ýatyrsaňyz, studiýa habar beriler." instead of the rule line (client spec §4.6; see Q-162 in C-28).
+- A same-day session past the free-cancel window shows a line saying so instead of the rule line: once confirmed, it can be cancelled only by calling the studio, as for every booking type (Q-162, Q-125, decided 18.10.2026). The drawn "Mugt ýatyrmak wagty geçdi — ýatyrsaňyz, studiýa habar beriler." (client spec §4.6) reads as if an online cancel stays possible, so it's reworded.
 
-**Status:** Design: drawn (Booking-Class · `sent`, `loggedIn`) · Code: built (api) — sessions and seats, counted under a lock.
+**Design to fix:** reword the class line past the free-cancel window so it says only a call can cancel (Q-162).
+
+**Status:** After the MVP (Q-030) · Design: drawn (Booking-Class · `sent`, `loggedIn`) · Code: built (api) — sessions and seats, counted under a lock.
 
 ### C-18 · Log in inside a booking
 
@@ -699,7 +711,7 @@ flowchart TD
   I -->|"No"| F
   I -->|"Yes"| J["60-second lock"]
   G -->|"Right"| K{"First time here?"}
-  K -->|"Yes"| L["Ask the name"]
+  K -->|"Yes"| L["Ask name and surname"]
   K -->|"No"| M["Name card, booking goes on"]
   L --> M
 ```
@@ -709,22 +721,33 @@ flowchart TD
 1. "Siziň maglumatlaryňyz" (Your details) and "Ýazylyşy ugratmak üçin telefon belgiňizi tassyklaň. Parol gerek däl." (Confirm your phone to send. No password needed) (Booking).
 2. "Telefon belgiňiz" with a fixed +993 and 8 digits; "Kod iber" (Send code), "Size 4 sanly SMS kod ibereris" (client spec §4.4).
 3. A short number: "Belgi doly däl: 8 san bolmaly."; a landline: "Kod diňe mobil belgä iberilýär. +993 6… ýa-da 7… bilen başlaýan belgi ýazyň." (Codes go only to mobile numbers) (C1).
-4. "Kod +993 … belgä iberildi" and "Belgini üýtget" (Change number); four boxes, numeric keyboard, the phone can fill the code from the SMS, pasting fills all, it checks by itself on the fourth digit, and "Tassykla" stays visible as a fallback; "Täzeden iber (0:59)" unlocks after 59 seconds (client spec §4.4; screens README).
-5. A wrong code: "Kod nädogry. Ýene 2 synanyşyk galdy." (Wrong code. 2 tries left). After the third wrong code the input locks for 60 seconds: "Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň." (Booking).
-6. First time: "Belgiňiz tassyklandy. Ilkinji gezek ýazylýarsyňyz — adyňyzy ýazyň.", "Adyňyz" (Your name), "Biznes sizi şu at bilen görer." (The business will see you under this name), "Dowam et". The table and class flows say "Kafe…" and "Studiýa…" (Booking, Booking-Table, Booking-Class).
+4. "Kod +993 … belgä iberildi" and "Belgini üýtget" (Change number); four boxes, numeric keyboard, the phone can fill the code from the SMS, pasting fills all, it checks by itself on the fourth digit, and "Tassykla" stays visible as a fallback; "Täzeden iber (0:59)" unlocks after 59 seconds (client spec §4.4; screens README). This is the one code step shared by every login (Q-157, decided 18.10.2026).
+5. A wrong code: "Kod nädogry. Ýene 2 synanyşyk galdy." (Wrong code. 2 tries left). After the third wrong code the input locks for 60 seconds with one lock message, the same in every login; Booking draws it as "Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň." The code is then used up: after the lock the screen offers to send a new one (Q-157, Q-268, decided 18.10.2026).
+6. First time: "Belgiňiz tassyklandy. Ilkinji gezek ýazylýarsyňyz — adyňyzy ýazyň.", "Adyňyz" (Your name), "Biznes sizi şu at bilen görer." (The business will see you under this name), "Dowam et". The table and class flows say "Kafe…" and "Studiýa…" (Booking, Booking-Table, Booking-Class). Like the login modal (C-19), the step also asks for the surname, optional; name and surname are stored as two fields (Q-156, decided 18.10.2026).
 7. A returning client sees a card with name, phone and "Üýtget"; the booking keeps everything chosen (Booking · `loggedIn`).
 
 **Edge cases**
 
 - A code is valid for 5 minutes (ADR 0019). An expired code: "Koduň wagty geçdi. Täze kod alyň." (code `tk.json`; not drawn).
-- Too many code requests (5 per number or 20 per connection in an hour): "Haýyş köp boldy. Biraz garaşyň." (code: `auth/codes.ts`; see the limits chapter).
+- Too many code requests (5 per number or 100 per internet address in an hour): the message says how many minutes to wait (Q-267, decided 18.10.2026; see the limits chapter).
 - Outside production the code is always `1234` and no SMS goes out (ADR 0019).
 - The client turns out to be phone-only at this business: the calm card replaces sending (C-11).
-- Logging in links what the business already has under this phone: phone bookings it made appear in "Ýazylyşlarym" with a phone icon (client spec §1 rule 4; code: `auth/routes.ts`).
+- Logging in links the phone bookings businesses made under this phone, if upcoming or from the last 6 months: they appear in "Ýazylyşlarym" with a phone icon (client spec §1 rule 4; Q-270, decided 18.10.2026).
+- A recycled number: when a phone signs in to an account unused for 6 months, Ýeral first asks "Is this you?" with the account's first name; "No" starts a fresh account and leaves the old history unlinked. There is no password (Q-270, decided 18.10.2026).
 
 > Open question Q-156: asking for a surname.
 
 > Open question Q-157: the code step, after the lock, and the "Tassykla" button.
+
+**Design to fix:** one shared code step for every login (Booking, Booking-Table, Booking-Class, Auth, Booking-Link, the phone change): a visible "Tassykla", one lock message, a "send a new code" button after the lock, and the wait in minutes when too many codes were asked for (Q-157, Q-267, Q-268).
+
+**Design to fix:** the optional surname in the inline name step, and the "Is this you?" step for an account unused for 6 months (Q-156, Q-270).
+
+**Code differs**
+
+- One internet address may ask for 20 codes an hour, not 100, and the message "Haýyş köp boldy. Biraz garaşyň." gives no wait (code: `auth/codes.ts`).
+- Every sign-in links all bookings and client records made under the phone, whatever their age, with no "Is this you?" step (code: `auth/routes.ts`).
+- The api keeps one name field and splits it at the first space (code: `auth/routes.ts`).
 
 **Status:** Design: drawn (Booking, Booking-Table, Booking-Class inline login · `loggedIn`; Auth) · Code: built (api) — `POST /v1/auth/code`, `POST /v1/auth/verify`.
 
@@ -750,15 +773,16 @@ flowchart TD
 **Steps**
 
 1. The login modal (400 px; a bottom sheet on phones): "Ýeral-a giriň" and "Ýazylyşlaryňyzy dolandyrmak üçin telefon belgiňizi ýazyň.", "Kod iber", the consent line, "Dil: Türkmençe" (Auth). `/tk/login` is the fallback route (client spec §3).
-2. "SMS kody ýazyň": four boxes; the modal checks the code by itself on the fourth digit (Auth).
+2. "SMS kody ýazyň": four boxes; the modal checks the code by itself on the fourth digit (Auth) and, as the shared code step, also shows "Tassykla" (C-18; Q-157, decided 18.10.2026).
 3. A new user: "Hoş geldiňiz!", "Biz size nähili ýüzlenmeli?", "Adyňyz", "Familiýaňyz (hökman däl)" (surname, optional), "Dowam et" (Auth).
-4. Wrong code and the 60-second lock as in C-18; the modal's lock line is "Köp synanyşyk. 60 sekuntdan soň gaýtadan synanyşyň." (Auth).
+4. Wrong code and the 60-second lock as in C-18, with the same lock message and a new code after the lock; Auth draws its own lock line, "Köp synanyşyk. 60 sekuntdan soň gaýtadan synanyşyň." (Auth; Q-157, decided 18.10.2026).
 5. A heart while signed out opens a popover: "Halanlaryňyzy saklamak üçin giriň", "Diňe telefon belgiňiz gerek.", "Soňrak" (Later). After login the heart is saved by itself and a toast says "Halanlaryňyza goşuldy" with "Görkez" (Show) (States tile 10).
 6. Language and favourites carry over to the account (client spec §4.7). The header then shows the avatar menu (Auth).
 
 **Edge cases**
 
 - The page under the modal keeps its state, a started booking included (Auth, step 3 caption).
+- An account unused for 6 months asks "Is this you?" first, as in C-18 (Q-270).
 
 **Status:** Design: drawn (Auth; States 10) · Code: built (api).
 
@@ -815,7 +839,7 @@ flowchart TD
 **Steps**
 
 1. Title "Ýazylyş ugradyldy" (Booking sent), badge *Garaşylýar* with a clock (Booking · `step=sent`).
-2. The sentence: "Glow Studio ýazylyşyňyzy tassyklanda SMS ibereris. Biznes adatça 15 minudyň içinde jogap berýär. Jogap bermese, 30 minutdan soň size başga wagtlary hödürläris." — the first number is the business's typical answer time, the second its hold time (A2).
+2. The sentence: "Glow Studio ýazylyşyňyzy tassyklanda SMS ibereris. Biznes adatça 15 minudyň içinde jogap berýär. Jogap bermese, 30 minutdan soň size başga wagtlary hödürläris." — the first number is the business's typical answer time (A2). The second part shows the real deadline as a clock time instead of the hold time, since the hold never runs past the visit start and runs only during opening hours; Claude writes the sentence in English and the owner checks it (Q-253, Q-120, decided 18.10.2026).
 3. The summary: business, services, specialist, time, address, "Jemi · Töleg ýerinde", and "Ýazylyş belgisi: YR-48213" (booking code).
 4. "Indi näme bolar?" (What happens now?): *Ugradyldy* (Sent, "Şu gün, 11:20") → *Biznes tassyklar* ("Adatça 15 minudyň dowamynda. Size SMS geler.") → *Ýatlatma: 1 gün öň* → *Siz gelýärsiňiz*. Under it: "Tassyklanýança ýazylyşy mugt ýatyryp bilersiňiz." (Booking).
 5. Buttons: "Ýazylyşlaryma geç" (Go to my bookings), "Senenama goş" (Add to calendar, downloads an `.ics` file: "Senenama faýly (.ics) ýüklendi."), "Baş sahypa" (Home) (client spec §4.4).
@@ -825,7 +849,9 @@ flowchart TD
 **Edge cases**
 
 - When the visit is close, the reminder step reads "Wagt ýakyn — ýatlatma iberilmeýär." (Too close — no reminder) (Booking-Table, Booking-Class).
-- A request sent shortly before the visit expires at the visit start, sooner than the hold time the sentence names (ADR 0017; Q-253).
+- A request sent shortly before the visit expires at the visit start, sooner than the hold time; the clock time in the sentence shows that real deadline (ADR 0017; Q-253).
+
+**Design to fix:** the sent screen's sentence gives the real deadline as a clock time instead of "30 minutdan soň" (Q-253).
 
 **Status:** Design: drawn (Booking · `step=sent`, `confirmMode=manual`; Booking-Table, Booking-Class · `sent`) · Code: built (api) — the business's hold and typical answer time come with the page data.
 
@@ -850,6 +876,7 @@ flowchart TD
 1. The same screen with title "Ýazylyş tassyklandy" (Booking confirmed), badge *Tassyklandy* with a check, and no "waiting" step in the timeline (client spec §1, §4.4; Booking · `confirmMode=instant`).
 2. The rule line: "Ýazylyşy 2 sagat öňünden mugt ýatyryp ýa-da üýtgedip bilersiňiz." (Booking).
 3. Reminders are planned as for any confirmed booking (C-33).
+4. The confirmed SMS goes too, since it carries the booking link (Q-287, decided 18.10.2026; C-24).
 
 **Edge cases**
 
@@ -956,8 +983,8 @@ flowchart TD
 
 **Edge cases**
 
-- A chip taken meanwhile: disabled, struck through, "Eýýäm eýelendi" (Already taken) (A1; Account-Bookings · `view=declinedTaken`).
-- All offered times passed: "Teklip edilen wagtlaryň möhleti geçdi" and "Başga wagt saýla" (A1; `view=offersExpired`).
+- Each offered time belongs to one named specialist and is booked with that person only. A chip taken meanwhile, or whose specialist is no longer free: disabled, struck through, "Eýýäm eýelendi" (Already taken) (A1; Account-Bookings · `view=declinedTaken`; Q-159, decided 18.10.2026).
+- All offered times passed: "Teklip edilen wagtlaryň möhleti geçdi" and "Başga wagt saýla" (A1; `view=offersExpired`). An offered time counts as past once it's earlier than now plus the business's lead time (Q-264, decided 18.10.2026).
 - A phone-only client can still take offered times (A7).
 - Table declines can offer times too (B-Tables decline modal "Başga wagt teklip et"); class declines don't (B-Classes).
 
@@ -966,6 +993,7 @@ flowchart TD
 **Code differs**
 
 - Declined rows go straight to *Geçen*; Mobile 7 keeps them on top of *Gelýän* while an offer is ahead (code: `bookings/routes.ts`).
+- When the original specialist isn't free, an offered time goes to anyone free who does the services (code: `bookings/create.ts`, `rebook`); Q-159 books the named person only.
 - Offered times after a table decline can't be taken: the api re-books appointments only (code: `bookings/create.ts`, `rebook` → `not_bookable`).
 - The business's decline and the decline SMS come with the workspace (M5); reading and taking offers is built.
 
@@ -997,15 +1025,23 @@ flowchart TD
 2. SMS: "Ýeral: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {t1}, {t2}, {t3} — {link}" (client spec §6).
 3. The row: badge *Ýatyryldy*, an hourglass and "Wagtynda jogap gelmedi"; the lead line "{business} {hold} minudyň içinde jogap bermedi. Şu boş wagtlaryň birini saýlaň:" and the chips "Boş wagtlar" (A2; Account-Bookings · `view=expired`).
 4. A tap and confirm send a **new request**: *Garaşylýar* (YR-48242) with the toast "Täze haýyş ugradyldy", or *Tassyklandy* at an instant business. The old row says "Täze haýyş ugradyldy → YR-48242" (A2; Mobile 10).
+5. One expired request makes at most one booking; the other chips go (Q-265, decided 18.10.2026).
 
 **Edge cases**
 
-- The free times are found for the same services: that day first, then the next free days (code: `jobs/run.ts`).
-- A chip taken meanwhile: "Eýýäm eýelendi" (`view=expiredTaken`).
+- The free times are found for the same services: that day first, then the next free days (code: `jobs/run.ts`). Each belongs to one named specialist and is booked with that person only (Q-159, decided 18.10.2026).
+- A chip taken meanwhile, or whose specialist is no longer free: "Eýýäm eýelendi" (`view=expiredTaken`; Q-159).
 - Between the expiry and the next minute's job run, the row already shows "Wagtynda jogap gelmedi" but its chips arrive a moment later (code: `domain/lifecycle.ts`, jobs every minute).
-- A phone-only client or a paused business: the code refuses these new requests (Q-154).
+- A phone-only client or a paused business: the free-time chips are hidden and the "Jaň et" card shows instead (Q-154, decided 18.10.2026; C-11).
+- No free time found: the SMS drops the times and says "Başga wagt saýlaň" (Q-252, decided 18.10.2026).
+- Tables get the 3 nearest times for the same party size and area; classes get the next 3 sessions of the same class with seats. This applies when tables and classes come (Q-252, Q-030).
 
 > Open question Q-252: what an expired table or class request offers.
+
+**Code differs**
+
+- Table and class requests get no free times, and with none found the SMS reads "Şu boş wagtlar bar: —" (code: `jobs/run.ts`).
+- The free times are found with any specialist, not one named person (code: `jobs/run.ts`).
 
 **Status:** Design: drawn (Account-Bookings · `view=expired`, `expiredTaken`; Booking-Link · `expired`; Mobile 10) · Code: built (api) for appointments — expiry job, SMS, taking a time.
 
@@ -1033,13 +1069,16 @@ flowchart TD
 1. A move by the business (drag in the calendar or "Başga wagta geçir") changes the booking in place and texts the client if "Müşderä SMS iberilsin" is ticked (ADR 0017; B-Calendar).
 2. A cancel by the business asks for a reason; the client is told by SMS with the reason ("Müşderä SMS bilen habar bereris we sebäbini görkezeris.", B-Calendar) and sees "Biznes ýatyrdy: {reason}" with a building icon (client spec §4.8).
 3. The client can book again (client spec §4.8).
-4. The profile switch "Tassyklama we üýtgeşmeler (SMS)" covers confirmations, time changes and cancels by the business (Account-Profile).
+4. The profile switch "Tassyklama we üýtgeşmeler (SMS)" covers confirmations, time changes and cancels by the business (Account-Profile; Q-286, decided 18.10.2026).
+5. The studio cancels a whole class session: it works like a decline with offered times. The client sees "Biznes ýatyrdy" with the reason and up to 3 sessions as chips; one tap books a confirmed seat (Q-161, decided 18.10.2026). This applies when classes come (Q-030).
 
 **Edge cases**
 
-- The text of the SMS for a move by the business isn't among the templates (client spec §6); see the notifications chapter.
+- The SMS for a move by the business has no text among the templates (client spec §6); Claude writes it in English with the market's translations, and the owner checks it (Q-288, decided 18.10.2026).
 
 > Open question Q-161: the studio cancels a whole class session.
+
+**Design to fix:** the client's row, detail and link page for a class session the studio cancelled, with the session chips (Q-161).
 
 **Status:** Design: text only on the client side (business side drawn: B-Calendar, B-Classes) · Code: not built — business actions come with M5 (the cancel SMS text exists: `sms.cancelled`).
 
@@ -1076,12 +1115,16 @@ flowchart TD
 
 - Tables and classes: "Ýatyr" opens a confirm sheet on phones (Mobile 6); class rule example "Sapakdan 12 sagat öň mugt ýatyryp bilersiňiz.".
 - Cancelling a booking with a waiting move also withdraws the move (A3; C-31).
-- A booking made after its deadline had already passed (a same-day class, an instant booking an hour ahead) can't be cancelled online once confirmed (code: `domain/lifecycle.ts`), while client spec §4.6 suggests it can.
-- The business setting "Ýatyrylanda sebäp sora" (ask for a reason) has no visible effect in the modal.
+- A booking made after its deadline had already passed (a same-day class, an instant booking an hour ahead) can't be cancelled online once confirmed: only "Jaň et", for every booking type; the class line is reworded to say so (Q-162, decided 18.10.2026; code: `domain/lifecycle.ts`; C-17).
+- The business setting "Ýatyrylanda sebäp sora" (ask for a reason) decides the reason section: on, the modal shows the reason chips, still optional; off, the modal has no reason section (Q-163, decided 18.10.2026).
 
 > Open question Q-162: cancelling a booking made after the free-cancel deadline.
 
 > Open question Q-163: what "Ýatyrylanda sebäp sora" changes for the client.
+
+**Design to fix:** the cancel modal without the reason section, for a business that switched "Ýatyrylanda sebäp sora" off (Q-163).
+
+**Code differs:** the cancel ignores the business's "Ýatyrylanda sebäp sora" setting (ADR 0017 `askCancelReason`).
 
 **Status:** Design: drawn (Account-Bookings · `view=cancel`, `late`; Mobile 6) · Code: built (api).
 
@@ -1111,7 +1154,7 @@ flowchart TD
 **Edge cases**
 
 - A cancel by the business or the system can't be undone by the client (code).
-- Undoing brings the booking back, but not a move request the cancel withdrew (code).
+- Undoing brings the booking back, but not a move request the cancel withdrew; the client asks for the move again if they still want it (Q-266, decided 18.10.2026; code).
 
 > Open question Q-266: undo after a cancel that withdrew a waiting move.
 
@@ -1154,14 +1197,17 @@ flowchart TD
 
 - A second move replaces a waiting one (C-31).
 - Table and class bookings can't be moved (C-32).
-- A phone-only client or a paused business: the code refuses the move (Q-154).
-- A new time that overlaps the current one with the same specialist is never free today (code).
+- A phone-only client or a paused business: "Başga wagta geçir" is hidden and the "Jaň et" card shows instead (Q-154, decided 18.10.2026; C-11).
+- A new time may overlap the current one: the booking's own time doesn't count as busy for its move (Q-165, decided 18.10.2026).
 
 > Open question Q-165: moving to a time that overlaps the current one.
+
+**Design to fix:** in move mode, times that overlap "öňki wagtyňyz" show as free with the same specialist (Q-165).
 
 **Code differs**
 
 - When the chosen specialist is busy at the new time, the api gives the booking to any free specialist (code: `bookings/create.ts`, `rebook`); A5 forbids this silent swap.
+- With the same specialist, a new time that overlaps the current one is never free, even at an instant business (code: `bookings/actions.ts`).
 
 **Status:** Design: drawn (Booking · `mode=move`, `confirmMode`; Mobile 13) · Code: partly — move requests built; the A5 rule change isn't.
 
@@ -1187,17 +1233,19 @@ flowchart TD
 1. The booking stays *Tassyklandy*; the row adds an amber clock line "Täze wagt soraldy: Şenbe, 17 okt · 11:30 · jogap garaşylýar" (New time asked · waiting for an answer) (A3; Mobile 7).
 2. The detail shows "Wagt üýtgetmek haýyşy" (Request to change the time): old → new, "Biznes tassyklaýança öňki wagtyňyz saklanýar." and "Haýyşy yzyna al" (Withdraw the request); withdrawing shows "Wagt üýtgetmek haýyşy yzyna alyndy" (A3; Account-Bookings · `view=moveWaiting`).
 3. Accepted: the booking takes the new time; toast or SMS "Täze wagt tassyklandy: Şenbe, 17 okt · 11:30"; timeline "Täze wagt tassyklandy" (Mobile 11; `moveAccepted`).
-4. Declined or unanswered within the business's hold time: "Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar." (The new time wasn't accepted — your booking stays at its old time), with "Sebäbi: …" when the business gave one (A3; `moveDeclined`, `moveUnanswered`).
+4. Declined or unanswered within the business's hold time: "Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar." (The new time wasn't accepted — your booking stays at its old time), with "Sebäbi: …" when the business gave one (A3; `moveDeclined`, `moveUnanswered`). A move's deadline never runs past the original visit's start either (Q-263, decided 18.10.2026).
 5. A second move replaces the first: "Öňki haýyşyňyz ({time}) täzesi bilen çalşylar." with "Yza" and "Dowam et" (A3).
 6. Cancelling the booking also withdraws the move: "Wagt üýtgetmek haýyşy hem yzyna alnar." (A3).
 7. On the business side it arrives as a request of type "Wagt üýtgetmek", answered under the same "who answers requests" rule and hold time (business spec §26).
 
 **Edge cases**
 
-- An unanswered move lapses quietly: no SMS is sent (code: `jobs/run.ts`); whether one should go is for the notifications chapter.
+- A declined or unanswered move sends the client an SMS with "Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar." and the link (Q-289, decided 18.10.2026).
 
 **Code differs**
 
+- An unanswered move lapses quietly, with no SMS (code: `jobs/run.ts`).
+- A move's deadline is capped only by the new time's start, not by the original visit's (code).
 - "Haýyşy yzyna al" has no api action: only cancelling the booking or asking a new move withdraws it (A3 "withdraw endpoint (if missing)").
 - After a decline or a lapse the booking detail no longer carries the move, so "Täze wagt kabul edilmedi" can't be shown (code: `bookings/view.ts` returns only a waiting move).
 
@@ -1229,7 +1277,7 @@ flowchart TD
 
 - Past the cancel deadline only "Jaň et" remains (C-28).
 
-**Status:** Design: drawn (Account-Bookings; Mobile 6) · Code: built (api) — moves refused for tables and classes (`not_bookable`); filling in the flow is a screen job.
+**Status:** After the MVP (Q-030) · Design: drawn (Account-Bookings; Mobile 6) · Code: built (api) — moves refused for tables and classes (`not_bookable`); filling in the flow is a screen job.
 
 ## Around the visit
 
@@ -1254,12 +1302,15 @@ flowchart TD
 
 1. SMS one day and two hours before the visit: "Ýatlatma: ertir {time} {business}, {address}." (client spec §6).
 2. Each has its own profile switch: "Ýatlatma: 1 gün öň" and "Ýatlatma: 2 sagat öň" (Account-Profile).
-3. A booking made too close to the visit gets none; the sent screen says "Wagt ýakyn — ýatlatma iberilmeýär." (Booking-Table, Booking-Class).
+3. A booking made too close to the visit gets none; the sent screen says "Wagt ýakyn — ýatlatma iberilmeýär." (Booking-Table, Booking-Class). A reminder whose time has already passed is skipped, since the confirmed SMS has just told the client (Q-257, decided 18.10.2026).
 4. Only confirmed bookings get reminders; a business can switch reminders off for one client (business spec §10, `noRemindersSms`).
+5. A reminder that would fall between 22:00 and 08:00 goes at 21:30 the evening before (Q-285, decided 18.10.2026).
 
 **Edge cases**
 
-- The 2-hour reminder in code reads "şu gün" (today), while client spec §6 has one template with "ertir" (tomorrow) for both; see the notifications chapter.
+- The 2-hour reminder keeps the code's own text with "şu gün" (today); client spec §6 had one template with "ertir" (tomorrow) for both (Q-293, decided 18.10.2026).
+
+**Code differs:** reminders go at any hour, also at night (code: `bookings/confirm.ts`).
 
 **Status:** Design: text only (client spec §6; the sent-screen timeline is drawn) · Code: built (api).
 
@@ -1272,7 +1323,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   A["Visit end time passes"] --> B["Status Tamamlandy"]
-  B --> C["Review SMS 2 hours later"]
+  B --> C["Teswir ýaz in My bookings or the link page"]
   C --> D["Review modal"]
   D --> E["Pick stars"]
   E --> F["Tags and text, optional"]
@@ -1284,14 +1335,20 @@ flowchart TD
 **Steps**
 
 1. A visit counts as *Tamamlandy* by default after its end time, unless the business reports a no-show (client spec §1 rule 3).
-2. Two hours after the end: "{business}-da bolşuňyz nähili boldy? Baha beriň: {link}" unless switched off ("Teswir haýyşy") (client spec §6; Account-Profile).
+2. No review ask: no SMS asks for a review (owner: no aggressive asking). The client writes one from "Teswir ýaz" in *Ýazylyşlarym* (My bookings) or on the booking's link page after a completed visit (C-38); a specialist may ask in person (Q-259, decided 18.10.2026). The drawn review SMS "{business}-da bolşuňyz nähili boldy? Baha beriň: {link}" and the profile switch "Teswir haýyşy" go (client spec §6; Account-Profile; C-45).
 3. The modal: "Bolşuňyz nähili boldy?" (How was it?), stars required (words *Erbet* · *Gowy däl* · *Orta* · *Gowy* · *Ajaýyp*; "Ýyldyz saýlaň" until picked); "Näme gowy boldy?" chips *Wagtynda kabul etdiler* · *Arassa* · *Ussat hünärmen* · *Mähirli* · *Bahasyna laýyk*; "Teswiriňiz (hökman däl)" up to 500 characters; "Teswiriňiz adyňyz we familiýaňyzyň ilkinji harpy bilen görkeziler: Aýjemal G."; "Soňrak" and "Teswiri ugrat" (Account-Bookings · `view=review`).
 4. A toast says "Sag boluň! Teswiriňiz çap edildi."; the row then shows "5 · Baha berdiňiz" (Account-Bookings).
-5. Only a completed booking can be reviewed, once (client spec §4.8).
+5. Only a completed booking can be reviewed, once, up to 30 days after the visit (client spec §4.8; Q-126, decided 18.10.2026).
 
 **Edge cases**
 
-- The review SMS link opens the SMS link page, which has no drawn state for a completed booking (Q-170, C-38).
+- On the link page a completed booking adds "Teswir ýaz", which logs in with the masked phone and opens the review (Q-170, decided 18.10.2026; C-38).
+- A review written before the business marks a no-show stays (Q-254, decided 18.10.2026; C-36).
+
+**Code differs**
+
+- The api still queues a review-ask SMS 2 hours after the end (code: `bookings/confirm.ts`, `reviewAsk`).
+- A review can be written at any time after the visit, with no 30-day limit (code: `bookings/actions.ts`).
 
 **Status:** Design: drawn (Account-Bookings · `view=review`) · Code: built (api).
 
@@ -1338,16 +1395,20 @@ flowchart TD
 
 **Steps**
 
-1. The business reports it through "Arz et" (Complain) from the visit's start time, also after the visit was auto-completed (business spec §3; code: `domain/lifecycle.ts`).
+1. The business reports it through "Arz et" (Complain) from the visit's start time until 24 hours after its end, also after the visit was auto-completed; a review the client wrote before stays (business spec §3; Q-206, Q-254, decided 18.10.2026; code: `domain/lifecycle.ts`).
 2. The client sees badge *Gelmedi* (user-x icon), "Gelmediňiz diýlip bellendi" (Marked as not come) and the business's note, e.g. "Size 11:15-de jaň etdik, jogap bolmady. Täze wagta ýazylyp bilersiňiz." (client spec §4.8; Account-Bookings, YR-43108).
 3. "Gaýtadan ýazyl" is offered (client spec §4.8).
 4. At the business's limit (default 2) the client can book there only by phone (C-11).
 
 **Edge cases**
 
-- No SMS tells the client about a no-show (client spec §6 has none).
+- No SMS tells the client about a no-show or the phone-only limit: both show on screen only (client spec §6; Q-290, decided 18.10.2026).
+- No dispute in the MVP: a client who thinks the mark is wrong calls the business, or writes to Ýeral support from the help pages (Q-166, decided 18.10.2026).
+- The business can remove a mistaken no-show from the booking drawer within 7 days: the status goes back to *Tamamlandy*, the no-show count drops, and the client gets no message (Q-207, decided 18.10.2026).
 
 > Open question Q-166: disputing a no-show.
+
+**Code differs:** "Gelmedi" can be marked at any time after the start, with no end (code: `domain/lifecycle.ts`).
 
 **Status:** Design: drawn (Account-Bookings) · Code: partly — the status and the phone-only rule are built; the business's "Arz et" comes with M5.
 
@@ -1370,10 +1431,11 @@ flowchart TD
 
 1. "Gaýtadan ýazyl" is offered for *Tamamlandy*, *Ýatyryldy* and *Gelmedi* (client spec §4.8; code `bookAgain`).
 2. Tables open with party and area filled in; classes open on the same class (Mobile 6).
+3. An appointment opens with the same services and specialist, at the time step (Q-167, decided 18.10.2026).
 
 **Edge cases**
 
-- What an appointment fills in isn't said.
+- Services or people no longer offered are dropped, and the flow opens at the first step that needs a choice (Q-167).
 
 > Open question Q-167: what "Gaýtadan ýazyl" fills in for an appointment.
 
@@ -1385,7 +1447,7 @@ flowchart TD
 
 **Goal:** see one booking from an SMS without hunting for it.
 
-**Starts from:** a link `yeral.app/b/{code}` in an SMS.
+**Starts from:** a booking link in an SMS: a long random token on a path of its own, never the booking code (Q-168, decided 18.10.2026).
 
 ```mermaid
 flowchart TD
@@ -1410,10 +1472,10 @@ flowchart TD
 
 **Edge cases**
 
-- The path `/b/{code}` sits next to business links `/b/{slug}` (ADR 0015), so business slugs must never start with "yr-" (ROUND6-ANSWERS notes).
-- Booking codes are 5 random digits, easy to guess, and the page shows the booking signed out.
-- The page is drawn only for a signed-out visitor.
-- Completed, cancelled-without-offers and no-show bookings have no drawn state, though the review SMS links here.
+- The design drew the link as `/b/{code}` next to business links `/b/{slug}` (ADR 0015), hence the rule that business slugs never start with "yr-" (ROUND6-ANSWERS notes). Booking links now use a path of their own (Q-168).
+- Booking codes are 5 random digits, easy to guess, so the link carries a long random token instead. The YR code is still shown on the page and read out on the phone, but never opens anything by itself (Q-168, decided 18.10.2026).
+- The page is drawn only for a signed-out visitor. Signed in as the booking's owner, the link opens "Ýazylyşlarym" with that booking's detail; signed in as someone else, it shows the signed-out page with the masked-phone login (Q-169, decided 18.10.2026).
+- Completed, cancelled-without-offers and no-show bookings show the booking card with its status. A completed booking adds "Teswir ýaz", which logs in with the masked phone and opens the review; the others add "Gaýtadan ýazyl" (Q-170, decided 18.10.2026).
 
 > Open question Q-168: can a stranger open someone's booking from its code?
 
@@ -1421,8 +1483,11 @@ flowchart TD
 
 > Open question Q-170: the link page for completed, cancelled and no-show bookings.
 
+**Design to fix:** the link page's finished-visit state with "Teswir ýaz" (masked-phone login, then the review form), and its cancelled and no-show states with "Gaýtadan ýazyl" (Q-170).
+
 **Code differs**
 
+- SMS links carry the booking code (`/b/{code}`), not a token (code: `notify.ts`).
 - There is no public read of a booking: every booking read needs a session (`/v1/me/bookings/{code}`), so the page can't be built yet (A1 "link page route + states"; code: `bookings/routes.ts`).
 
 **Status:** Design: drawn (Booking-Link · `state`; Mobile 14) · Code: not built.
@@ -1453,13 +1518,15 @@ flowchart TD
 
 1. A tap on a chip asks the same question as in My bookings (C-25, C-26).
 2. Login opens inside the card with the booking's own phone, masked and not editable: "Telefon belgiňiz +993 65 •• •• 22" and "Kod diňe ýazylyşdaky belgä iberilýär." (The code goes only to the number on the booking), "Kod al" (Get code), "Yza" (A1; Mobile 15).
-3. "Kod +993 65 •• •• 22 belgä iberildi", "SMS kod", "Tassykla", "Täzeden iber (0:59)"; a wrong code "Kod nädogry. Ýene {N} synanyşyk galdy."; the lock "Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň." (Booking-Link · `loginStep`).
+3. "Kod +993 65 •• •• 22 belgä iberildi", "SMS kod", "Tassykla", "Täzeden iber (0:59)"; a wrong code "Kod nädogry. Ýene {N} synanyşyk galdy."; the lock "Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň." (Booking-Link · `loginStep`). It is the shared code step of C-18, with its one lock message and a new code after the lock (Q-157, decided 18.10.2026).
 4. Success: "Ýazylyş tassyklandy" for a decline offer, or "Täze haýyş ugradyldy" for an expired request's free time; the summary (service, specialist, time, address, "Bahasy · Töleg ýerinde"), "Ýatlatmany 1 gün we 2 sagat öň SMS bilen ibereris." or "Biznes tassyklanda SMS bilen habar bereris.", and "Ýazylyşlaryma geç", "Senenama goş" (Booking-Link · `state=success`).
 5. A phone-only client may still take a decline offer here (A7).
 
 **Edge cases**
 
-- The phone belongs to someone without a Ýeral account (a phone booking made by the business): logging in creates the account (code: `auth/routes.ts`); a name step isn't drawn on this page.
+- The phone belongs to someone without a Ýeral account (a phone booking made by the business): logging in creates the account (code: `auth/routes.ts`) and asks for the name and the optional surname, as in C-18 (Q-156, decided 18.10.2026).
+
+**Design to fix:** the name step on the link page, with the optional surname (Q-156).
 
 **Status:** Design: drawn (Booking-Link · `loginCode`, `loginStep`, `success`; Mobile 15) · Code: not built — login and taking offers exist, but nothing ties the login to the booking's phone and there's no public booking read.
 
@@ -1491,7 +1558,7 @@ flowchart TD
 3. Declined and expired rows with an offered time still ahead stay on top of *Gelýän* (Mobile 7).
 4. A row cancelled here stays greyed in *Gelýän* until the next page load (client spec §4.8).
 5. Empty: "Gelýän ýazylyşyňyz ýok", "Ýakynyňyzdaky ýerleri açyň — boş wagtlar şu ýerde görüner." and "Gözlege geç" (Account-Bookings · `empty`).
-6. Bookings the business made by phone appear too, with a phone icon (client spec §1 rule 4).
+6. Bookings the business made by phone appear too, with a phone icon, if upcoming or from the last 6 months (client spec §1 rule 4; Q-270, decided 18.10.2026).
 
 **Edge cases**
 
@@ -1592,7 +1659,7 @@ flowchart TD
 
 **Code differs**
 
-- The api keeps one name field, while the profile draws name and surname separately (see Q-156 in C-18).
+- The api keeps one name field and splits it at the first space; the decided rule stores name and surname as two fields, and a review shows "Aýjemal G.", or "Aýjemal" without a surname (Q-156, decided 18.10.2026; code: `auth/routes.ts`).
 
 **Status:** Design: drawn (Account-Profile) · Code: built (api) — `PATCH /v1/me`.
 
@@ -1623,9 +1690,11 @@ flowchart TD
 **Edge cases**
 
 - A number that already has a Ýeral account is refused: "Bu belgi başga hasaba degişli." (code `phone_taken`; not drawn).
-- Businesses know their clients by phone number, so the new number looks like a new client to them.
+- Client records follow the Ýeral account: the change updates the phone on every business's record of this person, so their history, no-show count and phone-only mark stay (Q-171, decided 18.10.2026).
 
 > Open question Q-171: changing the phone number and the businesses' client records.
+
+**Code differs:** businesses find their clients by phone number, so the next booking under the new number creates a new client record (code: `bookings/create.ts`, `clientFor`).
 
 **Status:** Design: drawn (Account-Profile) · Code: built (api) — `POST /v1/me/phone/code`, `/verify`.
 
@@ -1640,30 +1709,31 @@ flowchart TD
   A["Habarnamalar section"] --> B["Tassyklama we üýtgeşmeler"]
   A --> C["Ýatlatma 1 gün öň"]
   A --> D["Ýatlatma 2 sagat öň"]
-  A --> E["Teswir haýyşy"]
   B --> F["Ýatda sakla"]
   C --> F
   D --> F
-  E --> F
 ```
 
 **Steps**
 
-1. "SMS {phone} belgä gelýär." and four switches (Account-Profile):
+1. "SMS {phone} belgä gelýär." and three switches (Account-Profile):
   - "Tassyklama we üýtgeşmeler (SMS)": "Biznes ýazylyşyňyzy tassyklanda, wagtyny üýtgedende ýa-da ýatyranda habar bereris."
   - "Ýatlatma: 1 gün öň": "Ýazylyşyňyzdan bir gün öň SMS ibereris."
   - "Ýatlatma: 2 sagat öň": "Ýazylyşyňyzdan 2 sagat öň SMS ibereris."
-  - "Teswir haýyşy": "Ýazylyşyňyz tamamlanandan 2 sagat soň baha bermegi haýyş ederis."
 2. Saved with the same save bar as C-43.
+3. The drawn fourth switch, "Teswir haýyşy" ("Ýazylyşyňyz tamamlanandan 2 sagat soň baha bermegi haýyş ederis."), goes: there are no review asks (Q-259, decided 18.10.2026; C-34).
 
 **Edge cases**
 
 - Login codes are always sent.
-- Whether decline and expiry SMS follow a switch isn't said; see the notifications chapter.
+- Decline and expiry SMS always go, since they carry the offered times; the first switch covers confirmations, time changes and cancels by the business (Q-286, decided 18.10.2026).
+
+**Design to fix:** drop the "Teswir haýyşy" switch from Account-Profile (Q-259).
 
 **Code differs**
 
 - The first switch silences only the "confirmed" SMS today; SMS for business moves and cancels don't exist yet (M5).
+- The api still has the review-ask switch (code: `packages/contract/src/account.ts`, `reviewAsk`).
 
 **Status:** Design: drawn (Account-Profile) · Code: partly.
 
@@ -1710,14 +1780,19 @@ flowchart TD
 1. "Hasaby öçür" with "Ähli ýazylyşlaryňyz we teswirleriňiz pozular. Bu yzyna gaýtarylmaýar." (All your bookings and reviews will be deleted. This can't be undone) (Account-Profile).
 2. The modal: "Hasaby öçürmelimi?" and "Gelýän 3 ýazylyşyňyz ýatyrylar we bizneslere habar bereris. Ähli ýazylyşlaryňyz, teswirleriňiz we halanlaryňyz pozular. Bu yzyna gaýtarylmaýar." with "Yza" and the solid danger "Hawa, öçür" (Account-Profile).
 3. Every upcoming booking is cancelled, those past their cancel deadline included, and the businesses are told (Account-Profile copy; code: `me/routes.ts`).
+4. The account, its favourites and its reviews are deleted (Q-172, decided 18.10.2026).
 
 **Edge cases**
 
-- The code keeps past bookings in the businesses' records and keeps the reviews, which the copy says are deleted.
+- Businesses keep their own visit records of this person, without a link to a Ýeral account, so the drawn copy that says every booking is deleted is adjusted (Q-172).
 
 > Open question Q-172: what deleting an account removes.
 
-**Status:** Design: drawn (Account-Profile) · Code: built (api) — `DELETE /v1/me`; what it keeps differs from the copy.
+**Design to fix:** the "Hasaby öçür" line and the modal copy say that upcoming bookings are cancelled and the account, favourites and reviews deleted, while businesses keep their visit records (Q-172).
+
+**Code differs:** the api keeps the reviews, signed "Aýjemal G." (code: `me/routes.ts`).
+
+**Status:** Design: drawn (Account-Profile) · Code: built (api) — `DELETE /v1/me`; it keeps the reviews.
 
 ## Errors and empty pages
 
