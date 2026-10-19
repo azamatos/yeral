@@ -71,6 +71,39 @@ describe('free times', () => {
     expect((await b.req('/v1/businesses/no-such-place/tables?party=12')).status).toBe(404)
   })
 
+  it('a business open past midnight offers 01:00 on the day before, books it, and won’t sell it twice (book Q-105)', async () => {
+    const [barber] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    const hours = [...barber!.hours]
+    hours[3] = { open: 1080, close: 1560 } // Thursday 18:00–02:00
+    await db.update(businesses).set({ hours }).where(eq(businesses.id, barber!.id))
+    try {
+      const detail = (await b.req('/v1/businesses/barber-loft')).json
+      const svc = detail.serviceGroups.flatMap((g: { services: { id: string; durationMin: number }[] }) => g.services)[0]
+      const who = detail.specialists[0].id
+      const day = (await b.req(`/v1/businesses/barber-loft/availability?services=${svc.id}&staff=${who}&date=2026-10-15`)).json
+      const starts = day.slots.map((s: { start: number }) => s.start)
+      expect(starts).toContain(1440)
+      expect(Math.max(...starts) + svc.durationMin).toBeLessThanOrEqual(1560)
+      const client = browser(testApp(db).app)
+      await client.login('+99365444001', 'Night owl')
+      const body = {
+        type: 'appointment',
+        business: 'barber-loft',
+        serviceIds: [svc.id],
+        staffId: who,
+        date: '2026-10-15',
+        start: 1500 - svc.durationMin,
+      }
+      const made = await client.req('/v1/bookings', { body })
+      expect(made.status).toBe(201)
+      const again = browser(testApp(db).app)
+      await again.login('+99365444002', 'Second owl')
+      expect((await again.req('/v1/bookings', { body })).status).toBe(409)
+    } finally {
+      await db.update(businesses).set({ hours: barber!.hours }).where(eq(businesses.id, barber!.id))
+    }
+  })
+
   it('classes: seats left as the design shows them', async () => {
     const res = await b.req('/v1/businesses/aydyn-yoga/sessions?days=2')
     const today = res.json.items.filter((s: { date: string }) => s.date === '2026-10-14')

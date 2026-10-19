@@ -57,11 +57,13 @@ describe('inputs', () => {
     expect(createBookingSchema.safeParse({ ...appointment, serviceIds: [ID, ID2] }).success).toBe(true)
   })
 
-  it('a start is a time of day: 24:00 is an end, never a start', () => {
+  it('a start may be after midnight on a day open past it, never at the business day’s very end (book Q-105)', () => {
     const appointment = { type: 'appointment', business: 'glow-studio', serviceIds: [ID], staffId: null, date: '2026-10-15' }
     expect(createBookingSchema.safeParse({ ...appointment, start: 1439 }).success).toBe(true)
-    expect(createBookingSchema.safeParse({ ...appointment, start: 1440 }).success).toBe(false)
-    expect(rescheduleSchema.safeParse({ date: '2026-10-15', start: 1440 }).success).toBe(false)
+    // 01:00 the next morning, still the 15th's business day; whether the day runs that late is the api's check
+    expect(createBookingSchema.safeParse({ ...appointment, start: 1500 }).success).toBe(true)
+    expect(createBookingSchema.safeParse({ ...appointment, start: 2880 }).success).toBe(false)
+    expect(rescheduleSchema.safeParse({ date: '2026-10-15', start: 2880 }).success).toBe(false)
   })
 
   it('a big party reaches the api, which answers party_too_large ("9 we ondan köp adam bolsa, jaň ediň")', () => {

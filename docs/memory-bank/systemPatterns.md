@@ -185,8 +185,11 @@ apps/api/src/
 
 ## Conventions the whole system relies on
 
-- Business dates are `YYYY-MM-DD` strings in the business's local time (Ashgabat today); times of day are minutes from midnight (`870` = 14:30);
-  instants are epoch milliseconds. Use `@yeral/domain/time`; never derive a business date from `new Date()` directly.
+- Business dates are `YYYY-MM-DD` strings in the business's local time (the market's zone); times are minutes from the
+  midnight that starts the business day (`870` = 14:30), up to 2880 for a day open past midnight (`1500` = 01:00 the
+  next morning, still that day's); instants are epoch milliseconds. Use `@yeral/domain/time`; never derive a business
+  date from `new Date()` directly. Busy time across midnight: `busyOn()` (`@yeral/domain/availability`); the database
+  compares bookings in absolute minutes (`span`, migration 0007).
 - Money: whole manats (integers).
 - API errors: `{ error: { code, message?, details? } }` with the right HTTP status; codes are an enum in `@yeral/contract`;
   the UI shows `errors.<code>` from i18n. `@yeral/sdk` throws `ApiError`.

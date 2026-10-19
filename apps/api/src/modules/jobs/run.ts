@@ -4,6 +4,7 @@
  * 2. Confirmed visits that ended → completed.
  * 3. Queued work: SMS, reminders, review asks, demo businesses answering.
  */
+import { DAY_MINUTES } from '@yeral/domain/hours'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { nearestSlots, nextFreeSlot } from '@yeral/domain/availability'
@@ -96,10 +97,22 @@ async function skipStale(work: Promise<unknown>): Promise<void> {
 
 async function completeVisits(deps: Deps): Promise<number> {
   const { date, min } = localOf(deps.now())
+  // a visit ends at minute `end` of its business day, which may run past midnight (book Q-105): yesterday's day is
+  // done only once its end, counted into today (end − 1440), has passed
+  const yesterday = addDays(date, -1)
   const due = await deps.db
     .select()
     .from(bookings)
-    .where(and(eq(bookings.status, 'confirmed'), or(lt(bookings.date, date), and(eq(bookings.date, date), lte(bookings.end, min)))))
+    .where(
+      and(
+        eq(bookings.status, 'confirmed'),
+        or(
+          lt(bookings.date, yesterday),
+          and(eq(bookings.date, yesterday), lte(bookings.end, min + DAY_MINUTES)),
+          and(eq(bookings.date, date), lte(bookings.end, min)),
+        ),
+      ),
+    )
     .limit(BATCH)
   for (const b of due) {
     await skipStale(

@@ -1,11 +1,19 @@
 /**
  * Opening hours, special days and staff shifts (business spec §8 "Iş wagty", "Aýratyn günler", team schedules).
- * A business day ends by midnight: hours past midnight are not designed yet (business spec §11).
+ *
+ * A business day may run past midnight (book Q-105): hours like 18:00–02:00 are `open: 1080, close: 1560`, minutes
+ * from the midnight that starts the day, up to 48:00. Everything after midnight still belongs to the day it started:
+ * a booking at 01:00 in a bar open 18:00–02:00 on Friday is Friday's, at minute 1500. A day's part past midnight must
+ * end by the time the next day opens (`weekHoursErrors`), so no moment belongs to two days.
  */
 import type { Interval } from './model'
 import { addDays, diffDays, dow, localOf } from './time'
 
-/** One weekday's hours, minutes from midnight; one optional break ("Arakesme"). */
+/** Minutes in a day; a business day may end up to one more day later. */
+export const DAY_MINUTES = 1440
+export const MAX_DAY_END = 2 * DAY_MINUTES
+
+/** One weekday's hours, minutes from the day's midnight (close may pass 1440); one optional break ("Arakesme"). */
 export interface DayHours {
   open: number
   close: number
@@ -157,10 +165,19 @@ export type OpenState = { open: true; until: number } | { open: false; inDays: n
 
 /**
  * Is the business open right now ("Häzir açyk · 20:00-a çenli"); if not, when it opens next (within a week). The break
- * ("Arakesme") counts as closed: open until it starts, reopening when it ends.
+ * ("Arakesme") counts as closed: open until it starts, reopening when it ends. `until` and `at` are minutes of today
+ * and may pass 1440 ("02:00-a çenli" at 23:00); after midnight, yesterday's late hours count as today's (minus 1440).
  */
 export function openState(b: BusinessHours, now = Date.now()): OpenState {
   const { date, min } = localOf(now)
+  // still inside yesterday's day, past its midnight: open, or on a break there with more of it to come
+  const yesterday = businessDay(b, addDays(date, -1))
+  const lateStretches = yesterday ? workingIntervals(yesterday) : []
+  const asYesterday = min + DAY_MINUTES
+  const late = lateStretches.find((w) => asYesterday >= w.start && asYesterday < w.end)
+  if (late) return { open: true, until: late.end - DAY_MINUTES }
+  const resumes = lateStretches.find((w) => w.start > asYesterday && w.start >= DAY_MINUTES)
+  if (resumes && yesterday && asYesterday < yesterday.close) return { open: false, inDays: 0, at: resumes.start - DAY_MINUTES }
   const day = businessDay(b, date)
   const stretches = day ? workingIntervals(day) : []
   const current = stretches.find((w) => min >= w.start && min < w.end)
@@ -172,4 +189,22 @@ export function openState(b: BusinessHours, now = Date.now()): OpenState {
     if (next) return { open: false, inDays: i, at: next.open }
   }
   return { open: false, inDays: null }
+}
+
+/**
+ * Problems with a week of hours, by weekday (0 = Monday): opening isn't a time of day, closing isn't after it or runs
+ * past 48:00 or a full day, the break isn't inside the hours, or the part past midnight runs into the next day's
+ * opening (Sunday's into Monday's). Empty when valid.
+ */
+export function weekHoursErrors(week: WeekHours): number[] {
+  const bad = new Set<number>()
+  week.forEach((h, i) => {
+    if (!h) return
+    if (!Number.isInteger(h.open) || h.open < 0 || h.open >= DAY_MINUTES) bad.add(i)
+    if (!Number.isInteger(h.close) || h.close <= h.open || h.close > MAX_DAY_END || h.close - h.open > DAY_MINUTES) bad.add(i)
+    if (h.break && (h.break.start < h.open || h.break.end > h.close || h.break.end <= h.break.start)) bad.add(i)
+    const next = week[(i + 1) % 7]
+    if (next && h.close - DAY_MINUTES > next.open) bad.add(i)
+  })
+  return [...bad].sort((a, b) => a - b)
 }

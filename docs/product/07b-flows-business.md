@@ -1446,7 +1446,7 @@ flowchart LR
 
 > Open question Q-105: businesses open past midnight.
 
-**Status** — Design: drawn (B-Settings · `pane=hours`) · Code: rule only (domain: weekly hours with one break, a day ends by midnight).
+**Status** — Design: drawn (B-Settings · `pane=hours`) · Code: rule only (domain: weekly hours with one break; a day may run past midnight up to 48:00, checked by `weekHoursErrors`).
 
 ### B-40 · Special days
 

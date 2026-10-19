@@ -243,14 +243,14 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
         .sort((x, y) => Math.abs(x.start - input.start) - Math.abs(y.start - input.start))
         .slice(0, MAX_ALTERNATIVES)
         .sort((x, y) => x.start - y.start)
-        .map((s) => ({ date: input.date, start: s.start, end: Math.min(1440, s.start + ctx.sittingMinutes) }))
+        .map((s) => ({ date: input.date, start: s.start, end: s.start + ctx.sittingMinutes }))
     if (!tableId) throw new ApiError('slot_taken', { alternatives: nearest() })
     const table = {
       tableId,
       areaId: input.areaId,
       partySize: input.partySize,
       requests: input.requests,
-      end: Math.min(1440, input.start + ctx.sittingMinutes),
+      end: input.start + ctx.sittingMinutes,
     }
     return inTransaction(
       deps,

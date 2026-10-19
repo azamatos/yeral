@@ -1,8 +1,9 @@
 /**
  * Bookings of every type, their items, reviews, events and jobs (ADR 0017).
  *
- * Double booking is impossible at the database level: active booking items exclude each other per specialist and date
- * over `[start, end + buffer)`, and active table bookings per table (exclusion constraints in the migrations, btree_gist).
+ * Double booking is impossible at the database level: active booking items exclude each other per specialist
+ * over `[start, end + buffer)` in absolute minutes (a day may run past midnight), and active table bookings per table
+ * (exclusion constraints in the migrations, btree_gist).
  * Rows keep snapshots (client name and phone, service names, prices) so history survives edits and deletions.
  */
 import type { Localized } from '@yeral/domain/model'
@@ -74,7 +75,10 @@ export const bookings = pgTable(
     areaId: uuid().references(() => tableAreas.id, { onDelete: 'set null' }),
     tableId: uuid().references(() => diningTables.id, { onDelete: 'set null' }),
     tableRequests: text().array().notNull().default([]),
-    span: int4range().generatedAlwaysAs(sql`int4range("start", "end")`),
+    /** Absolute business-local minutes (days since 2000-01-01 × 1440 + minutes), so a day open past midnight overlaps the next one. */
+    span: int4range().generatedAlwaysAs(
+      sql`int4range(("date" - date '2000-01-01') * 1440 + "start", ("date" - date '2000-01-01') * 1440 + "end")`,
+    ),
     // class
     sessionId: uuid().references(() => classSessions.id, { onDelete: 'set null' }),
     seats: integer(),
@@ -113,7 +117,10 @@ export const bookingItems = pgTable(
     priceAmount: integer().notNull(),
     /** Its booking's `active`, copied by a trigger (migration 0003) whenever either row changes. */
     active: boolean().notNull().default(false),
-    span: int4range().generatedAlwaysAs(sql`int4range("start", "end" + "buffer_after")`),
+    /** Absolute business-local minutes, buffer included: an item late on one day and one early the next can collide. */
+    span: int4range().generatedAlwaysAs(
+      sql`int4range(("date" - date '2000-01-01') * 1440 + "start", ("date" - date '2000-01-01') * 1440 + "end" + "buffer_after")`,
+    ),
     sort: integer().notNull().default(0),
   },
   (t) => [index('booking_items_booking_idx').on(t.bookingId), index('booking_items_staff_date_idx').on(t.staffId, t.date)],

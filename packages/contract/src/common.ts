@@ -11,10 +11,13 @@ import { isYmd } from '@yeral/domain/time'
 import { z } from 'zod'
 
 export const ymdSchema = z.string().refine(isYmd, 'Expected a date YYYY-MM-DD').meta({ example: '2026-10-15' })
-/** Minutes from midnight, business-local (870 = 14:30); 1440 = midnight at the end of the day (a closing time, an end). */
-export const minuteSchema = z.number().int().min(0).max(1440).meta({ example: 870 })
-/** A start: a time of day, so 23:59 at the latest (a business day ends by midnight, ADR 0017). */
-export const startMinuteSchema = z.number().int().min(0).max(1439).meta({ example: 870 })
+/**
+ * Minutes from the midnight that starts the business day, business-local (870 = 14:30). A day may run past midnight
+ * (book Q-105), so an end may reach 2880 (1500 = 01:00 the next morning, still the same business day).
+ */
+export const minuteSchema = z.number().int().min(0).max(2880).meta({ example: 870 })
+/** A start: before the business day's last minute (a start after 24:00 belongs to a day open past midnight). */
+export const startMinuteSchema = z.number().int().min(0).max(2879).meta({ example: 870 })
 export const epochSchema = z.number().int().meta({ description: 'Epoch milliseconds' })
 /** Whole units of the market's currency (Turkmenistan: manats). */
 export const moneySchema = z.number().int().min(0)

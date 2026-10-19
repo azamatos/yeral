@@ -50,6 +50,13 @@
       "when": 1792441866207,
       "tag": "0006_drop_roles_memberships",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792443848204,
+      "tag": "0007_past_midnight",
+      "breakpoints": true
     }
   ]
 }

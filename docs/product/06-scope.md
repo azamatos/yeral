@@ -69,7 +69,6 @@ These are drawn but go against a decision; they go into the next prompt for Clau
 What's already built and doesn't match a decision; fixed when coding resumes, not asked again.
 
 - The average bill is still in the code (Q-103 dropped it).
-- Every day and visit ends by 24:00; Q-105 allows past midnight (F-109).
 - Addresses carry no city, and there is no city choice (Q-107, F-240); the lookup by internet address is gone with Cloudflare (ADR 0024).
 - Invites: the code activates an invite at the first login; the design has accept or decline, 7 days, resend (F-085).
 - Moving: when the chosen specialist is busy, the code gives the booking to another one; round 6 forbids that (F-060).
@@ -244,7 +243,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-106 | Special days | Holidays and special hours, one day or a range, yearly repeat. | MVP | drawn (B-Settings · exceptionModal) | built (domain exceptions + precedence) |  |
 | F-107 | Special day over existing bookings | Adding a closure over bookings asks: cancel and offer 3 times, or keep them. | MVP | drawn (B-Settings) | not built |  |
 | F-108 | Overlapping special days warning | Warning naming which special day wins; saving is allowed. | MVP | drawn (B-Settings · exceptionOverlap) | rule built (domain); warning not built | Round 6 E2. |
-| F-109 | Open past midnight | A business day that runs into the next date, and bookings that cross midnight. | MVP | not designed | not built | Q-105 (decided 18.10.2026). |
+| F-109 | Open past midnight | A business day that runs into the next date, and bookings that cross midnight. | MVP | not designed | built (domain hours and free times to 48:00, open state after midnight, `weekHoursErrors`; the database refuses overlaps across midnight; migration 0007) | Q-105 (decided 18.10.2026); the business-day model, chapter 4. |
 | F-110 | Service catalogue | Groups, services (duration, price type, buffer override, who performs, online switch), service drawer. | MVP | drawn (B-Services) | schema only (`services`, `service_groups`, `staff_services`) |  |
 | F-111 | Team management | Team table (bookable vs management), levels, schedule summary, invite states, drag order in which clients see specialists. | MVP | drawn (B-Team) | schema only (`staff`, `memberships`, `staff.sort`) |  |
 | F-112 | Staff schedules | Own shifts inside business hours, one break per day (may differ by day), personal days off. | MVP | drawn (B-Team staff drawer) | built (domain), schema |  |

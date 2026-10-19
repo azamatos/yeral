@@ -4,6 +4,7 @@
  * Words (months, weekdays, units) come from the messages, so the native review covers them. The currency comes from the
  * market (`MARKET.currency`), number marks from the language. Examples below are English, the source (ADR 0022).
  */
+import { DAY_MINUTES } from '@yeral/domain/hours'
 import { MARKET } from '@yeral/domain/market'
 import type { Price } from '@yeral/domain/model'
 import { formatPhone } from '@yeral/domain/phone'
@@ -12,10 +13,9 @@ import { createTranslator } from 'use-intl/core'
 import { messages, type Locale, type SharedMessages } from './messages'
 
 const NBSP = ' '
-const DAY_MIN = 1440
 
-/** A day may end at midnight (`24:00`, as the hours pickers draw it); anything later is the next day's clock time. */
-const clock = (min: number) => hm(min > DAY_MIN ? min % DAY_MIN : min)
+/** A day may end at midnight (`24:00`, as the hours pickers draw it); a later minute of a day open past midnight is the next morning's clock time (`1500` → `01:00`). */
+const clock = (min: number) => hm(min > DAY_MINUTES ? min % DAY_MINUTES : min)
 
 /** Grouping and decimal marks: Turkmen and Russian `1 410` and `4,9` (the calendar header groups 4 digits too); English `1,410` and `4.9`. */
 const MARKS: Record<Locale, { group: string; decimal: string }> = {
