@@ -129,6 +129,8 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   const exact = status === 'confirmed' || status === 'completed'
   const actions = clientActions(state, lb.rules, review ? { createdAt: review.createdAt.getTime() } : null, now)
   const restore =
+    // a withdrawn or replaced move stays withdrawn
+    !row.rescheduleOf &&
     status === 'cancelled' &&
     row.cancelledBy === 'client' &&
     !!row.cancelledAt &&
@@ -156,7 +158,8 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     reschedule: pendingMove
       ? { date: pendingMove.date, start: pendingMove.start, end: pendingMove.end, holdUntil: pendingMove.holdUntil?.getTime() ?? null }
       : null,
-    actions: { ...actions, reschedule: actions.reschedule && !pendingMove && bookOnline, restore },
+    // a second move replaces a waiting one (ROUND6 A3)
+    actions: { ...actions, reschedule: actions.reschedule && bookOnline, restore },
     review: review ? { rating: review.rating, tags: review.tags, text: review.text, createdAt: review.createdAt.getTime() } : null,
   }
 }

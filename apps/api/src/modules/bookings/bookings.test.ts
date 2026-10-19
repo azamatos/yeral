@@ -275,7 +275,8 @@ describe('client bookings', () => {
       date: '2026-10-16',
       start: 1080,
       reschedule: { date: '2026-10-17', start: 600 },
-      actions: { reschedule: false },
+      // a second move may replace this one (ROUND6 A3)
+      actions: { reschedule: true },
     })
     const [request] = await db
       .select()

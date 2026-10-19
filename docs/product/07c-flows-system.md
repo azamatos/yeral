@@ -330,9 +330,7 @@ flowchart TD
 
 - A second move replaces the first (*Öňki haýyşyňyz … täzesi bilen çalşylar.*). Cancelling the booking also withdraws the move (ROUND6 A3; the code agrees).
 - At an instant business the move happens at once, and nothing waits (ROUND6 A3).
-- Code differs: the booking detail hides the move action while a move waits, so a second move can't be started from there. ROUND6 A3 says the second move replaces the first.
-- Code differs: if the chosen specialist is busy at the new time, the code gives the move to another free specialist. ROUND6 A5 says there's no silent swap.
-- If the business allows cancelling at any time (*Islendik wagt*), a client can ask to move shortly before the visit. The move's deadline then ends at the original visit's start at the latest, so it never waits past it (Q-263, decided 18.10.2026). **Code differs:** only the new time's start limits the deadline.
+- If the business allows cancelling at any time (*Islendik wagt*), a client can ask to move shortly before the visit. The move's deadline then ends at the original visit's start at the latest, so it never waits past it (Q-263, decided 18.10.2026; code: `holdCap` in `bookings/create.ts`).
 
 > Open question Q-263: A waiting move that outlives the original time.
 

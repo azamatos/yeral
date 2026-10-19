@@ -10,7 +10,7 @@ import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, jobs } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { emit, type BookingSmsKind } from '../../notify'
-import { setStatus, type BookingRow } from './repo'
+import { lockBooking, setStatus, StaleBooking, type BookingRow } from './repo'
 
 const HOUR = 3_600_000
 
@@ -48,29 +48,36 @@ export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, 
 export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow): Promise<BookingRow> {
   const at = new Date(deps.now())
   if (b.rescheduleOf) {
-    const [original] = await db.select().from(bookings).where(eq(bookings.id, b.rescheduleOf))
-    if (original) {
-      // the original takes the new time and items; the request row goes away
-      await db.delete(bookingItems).where(eq(bookingItems.bookingId, original.id))
-      await db.update(bookingItems).set({ bookingId: original.id }).where(eq(bookingItems.bookingId, b.id))
-      const [moved] = await db
-        .update(bookings)
-        .set({ date: b.date, start: b.start, end: b.end, priceType: b.priceType, priceAmount: b.priceAmount, updatedAt: at })
-        .where(eq(bookings.id, original.id))
-        .returning()
-      await db.delete(bookings).where(eq(bookings.id, b.id))
-      if (moved) {
-        await emit(db, {
-          type: 'booking.moved',
-          businessId: moved.businessId,
-          bookingId: moved.id,
-          bookingCode: moved.code,
-          userId: moved.userId,
-        })
-        await queueBookingSms(db, deps, moved, { confirmed: true })
-        return moved
-      }
-    }
+    // the booking first, then the request (the order moves and cancels lock in); either may have changed meanwhile
+    const original = await lockBooking(db, b.rescheduleOf)
+    const request = await lockBooking(db, b.id)
+    if (request.status !== 'pending' || original.status !== 'confirmed') throw new StaleBooking()
+    // the original takes the new time and items; the request row goes away
+    await db.delete(bookingItems).where(eq(bookingItems.bookingId, original.id))
+    await db.update(bookingItems).set({ bookingId: original.id }).where(eq(bookingItems.bookingId, request.id))
+    const [moved] = await db
+      .update(bookings)
+      .set({
+        date: request.date,
+        start: request.start,
+        end: request.end,
+        priceType: request.priceType,
+        priceAmount: request.priceAmount,
+        updatedAt: at,
+      })
+      .where(eq(bookings.id, original.id))
+      .returning()
+    if (!moved) throw new StaleBooking()
+    await db.delete(bookings).where(eq(bookings.id, request.id))
+    await emit(db, {
+      type: 'booking.moved',
+      businessId: moved.businessId,
+      bookingId: moved.id,
+      bookingCode: moved.code,
+      userId: moved.userId,
+    })
+    await queueBookingSms(db, deps, moved, { confirmed: true })
+    return moved
   }
   const row = await setStatus(db, b, { status: 'confirmed', at })
   await emit(db, { type: 'booking.confirmed', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })

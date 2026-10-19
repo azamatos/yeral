@@ -93,6 +93,15 @@ describe('hold time (counted only while the business is open, book Q-120)', () =
   })
 })
 
+describe('a move’s hold (book Q-263)', () => {
+  it('never outlives the visit it would move', () => {
+    const allDay: BusinessHours = { hours: Array.from({ length: 7 }, () => ({ open: 0, close: 1440 })), exceptions: [] }
+    // asked at 10:00 to move a 10:40 visit to Thursday: a 2-hour hold would end at 12:00
+    expect(holdUntil(NOW, { date: THU, start: 600 }, 120, allDay)).toBe(NOW + 120 * MIN)
+    expect(holdUntil(NOW, { date: THU, start: 600 }, 120, allDay, epochOf(TODAY, 640))).toBe(epochOf(TODAY, 640))
+  })
+})
+
 describe('offered times (book Q-264)', () => {
   it('an offered time is past once it starts earlier than now plus the lead time', () => {
     // now 10:00, lead 60 minutes

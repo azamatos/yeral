@@ -48,15 +48,16 @@ export function initialStatus(source: BookingSource, confirmMode: ConfirmMode): 
  * (book Q-120; a break counts as closed, as in the open state), never past the visit start. A request sent at 23:00 to
  * a business opening at 09:00 with a 30-minute hold waits until 09:30. When the business isn't open at all before the
  * visit (Saturday night for Monday's first hour), the hold counts plain time, so the client isn't kept waiting until
- * the visit itself.
+ * the visit itself. `endBy` caps it further: a move's deadline never outlives the visit it would move (book Q-263).
  */
 export function holdUntil(
   createdAt: number,
   b: Pick<BookingState, 'date' | 'start'>,
   holdMinutes: number,
   business: BusinessHours,
+  endBy = Infinity,
 ): number {
-  const start = startOf(b)
+  const start = Math.min(startOf(b), endBy)
   const hold = holdMinutes * 60_000
   const open = openStretches(business, createdAt, start)
   if (!open.length) return Math.min(createdAt + hold, start)

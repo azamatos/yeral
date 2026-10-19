@@ -1203,12 +1203,9 @@ flowchart TD
 
 **Design to fix:** in move mode, times that overlap "öňki wagtyňyz" show as free with the same specialist (Q-165).
 
-**Code differs**
+(code: `rebookQuery()` books the chosen specialist only, or anyone free for «Islendik hünärmen»; the free times in move mode come from `GET /v1/businesses/{slug}/availability?move={code}`; a move's items share the booking's `family`, so the database lets them overlap its own time)
 
-- When the chosen specialist is busy at the new time, the api gives the booking to any free specialist (code: `bookings/create.ts`, `rebook`); A5 forbids this silent swap.
-- With the same specialist, a new time that overlaps the current one is never free, even at an instant business (code: `bookings/actions.ts`).
-
-**Status:** Design: drawn (Booking · `mode=move`, `confirmMode`; Mobile 13) · Code: partly — move requests built; the A5 rule change isn't.
+**Status:** Design: drawn (Booking · `mode=move`, `confirmMode`; Mobile 13) · Code: built (api).
 
 ### C-31 · Follow a waiting move
 
@@ -1244,7 +1241,6 @@ flowchart TD
 **Code differs**
 
 - An unanswered move lapses quietly, with no SMS (code: `jobs/run.ts`).
-- A move's deadline is capped only by the new time's start, not by the original visit's (code).
 - "Haýyşy yzyna al" has no api action: only cancelling the booking or asking a new move withdraws it (A3 "withdraw endpoint (if missing)").
 - After a decline or a lapse the booking detail no longer carries the move, so "Täze wagt kabul edilmedi" can't be shown (code: `bookings/view.ts` returns only a waiting move).
 

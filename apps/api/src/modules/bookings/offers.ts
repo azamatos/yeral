@@ -1,7 +1,7 @@
 /**
  * Offered times as the client sees them (book Q-159, Q-264): each with its one specialist, and whether it can still be
  * taken — `past` once it starts earlier than now plus the lead time, `taken` once taking it would fail. The check asks
- * the same question as taking it (`rebookQueries`).
+ * the same question as taking it (`rebookQuery`).
  */
 import type { OfferedTime } from '@yeral/contract/bookings'
 import { findAppointmentSlot, type BusyInterval } from '@yeral/domain/availability'
@@ -10,11 +10,11 @@ import { inArray } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { staff, type TimeSlot } from '../../db/schema'
 import { appointmentContext, loadBusy, type LoadedBusiness } from '../availability/context'
-import { bookedServices, rebookQueries } from './create'
+import { bookedServices, rebookQuery } from './create'
 import type { BookingRow } from './repo'
 
-/** Where taking an offered time books: its named specialist, or (an offer made before offers named one) as a move. */
-export const offerTarget = (o: TimeSlot) => ({ date: o.date, start: o.start, ...(o.staffId ? { staffId: o.staffId } : {}) })
+/** Where taking an offered time books: its named specialist, or anyone free when it names nobody. */
+export const offerTarget = (o: TimeSlot) => ({ date: o.date, start: o.start, staffId: o.staffId ?? null })
 
 export async function offeredTimes(
   db: Queryable,
@@ -37,7 +37,7 @@ export async function offeredTimes(
     for (const date of new Set(ahead.map((o) => o.date)))
       for (const b of await loadBusy(db, [lb.business.id], date, date)) busy.set(`${b.bookingId} ${b.staffId} ${b.date} ${b.start}`, b)
     const ctx = appointmentContext(lb, [...busy.values()], now)
-    isFree = (o) => rebookQueries(booked, offerTarget(o)).some((q) => !!findAppointmentSlot(ctx, q, o.start))
+    isFree = (o) => !!findAppointmentSlot(ctx, rebookQuery(booked, offerTarget(o)), o.start)
   }
   return offers.map((o) => ({
     date: o.date,

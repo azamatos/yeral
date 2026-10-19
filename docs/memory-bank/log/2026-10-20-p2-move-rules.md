@@ -1,0 +1,23 @@
+# Move rules, part 1 (feat/p2-3-move-rules)
+
+- Changed: P2 step 3, part 7 (book Q-165, Q-263; ROUND6 A3, A5). A move request's items share their booking's
+  `family` (migration 0010: the column, the trigger that sets it, the exclusion constraint with `family WITH <>`;
+  checked on a scratch database), so a move may overlap the booking's own time with the same specialist. The engine
+  leaves the booking's own time out for its move (`excludeBookingId`), and so does the availability endpoint in move
+  mode (`?move={code}`, the signed-in client's own booking). A move books the chosen specialist only, or anyone free
+  for «Islendik hünärmen» (the current one first at the same start), never someone else silently (`rebookQuery()`, no
+  fallback; a specialist who no longer does the services is `not_found`). A move's deadline is capped at the original
+  visit's start (`holdUntil(…, endBy)`). A second move may be asked while one waits (it replaces it). A move, a cancel
+  and a confirmed move each lock the booking row first (`lockBooking()`, then the move request) and read it again, so
+  they run one after another; migration 0011 keeps one waiting move per booking (a partial unique index), as overlaps
+  no longer guard it. Asking for the booking's own time with no other specialist named keeps it as it is, whatever the
+  rules say now (paused, lead time), and withdraws a waiting move: the way back until "Haýyşy yzyna al" (part 2); to
+  move to another specialist at the same time, the client names them. A withdrawn move writes `booking.cancelled`; one
+  whose hold already ran out is recorded as the system's expiry (`booking.expired`). Five review passes on this PR:
+  the first designs special-cased the own time and repeat taps, and each case grew new edge cases, so they went. A move of a service no longer booked online
+  is `not_bookable`; one whose specialist no longer does the services is `not_found` (`checkStaff()`). The excluded bookings are one domain field, `excludeBookingIds`; `lockBooking()`
+  lives in `bookings/repo.ts`. Move mode (`?move=` on the appointment and specialists availability) counts the booking
+  and its waiting move as free, and only for a confirmed appointment that may still move. A withdrawn or replaced move
+  can't be restored.
+- Decided (Claude, delegated; chapter 9): the move-mode free times and the database rule.
+- Follow-ups: part 2: "Haýyşy yzyna al" (withdraw), the declined or lapsed move on the booking, and its SMS (Q-289).

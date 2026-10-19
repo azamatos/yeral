@@ -19,9 +19,9 @@ import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { loadBusinesses, type LoadedBusiness } from '../availability/context'
 import { visitWhat } from '../catalog/map'
-import { assertOnlineBooking, rebook } from './create'
+import { assertOnlineBooking, bookedServices, rebook } from './create'
 import { offerTarget } from './offers'
-import { isSlotConflict, setStatus, stateOf, type BookingRow } from './repo'
+import { isSlotConflict, lockBooking, pgCode, setStatus, StaleBooking, stateOf, type BookingRow } from './repo'
 import { RESTORE_MINUTES } from './view'
 
 async function businessOf(deps: Deps, b: BookingRow): Promise<LoadedBusiness> {
@@ -47,21 +47,48 @@ const guard = (problem: ReturnType<typeof canClientCancel>) => {
   if (problem) throw new ApiError(problem)
 }
 
-/** Withdraw a pending move of this booking, if there is one. */
-async function dropPendingMove(db: Queryable, b: BookingRow, at: Date) {
-  const moves = await db
+/** The move waiting for this booking, if any. */
+async function waitingMove(db: Queryable, b: BookingRow): Promise<BookingRow | undefined> {
+  const [m] = await db
     .select()
     .from(bookings)
     .where(and(eq(bookings.rescheduleOf, b.id), eq(bookings.status, 'pending')))
-  for (const m of moves) await setStatus(db, m, { status: 'cancelled', cancelledBy: 'client', at })
+  return m
+}
+
+/**
+ * Withdraw a pending move of this booking, if there is one, and tell the business's open screens. One whose hold has
+ * run out lapsed unanswered: it's recorded as the jobs would, not as the client's. One the jobs just settled is gone.
+ */
+async function dropPendingMove(db: Queryable, b: BookingRow, at: Date) {
+  const m = await waitingMove(db, b)
+  if (!m) return
+  const lapsed = effectiveStatus(stateOf(m), at.getTime()).status !== 'pending'
+  try {
+    const row = await setStatus(db, m, { status: 'cancelled', cancelledBy: lapsed ? 'system' : 'client', at })
+    await emit(db, {
+      type: lapsed ? 'booking.expired' : 'booking.cancelled',
+      businessId: row.businessId,
+      bookingId: row.id,
+      bookingCode: row.code,
+      userId: row.userId,
+    })
+  } catch (e) {
+    if (!(e instanceof StaleBooking)) throw e
+  }
 }
 
 export async function cancelBooking(deps: Deps, b: BookingRow, reason?: string): Promise<BookingRow> {
-  guard(canClientCancel(stateOf(b), await rulesOf(deps, b), deps.now()))
+  const rules = await rulesOf(deps, b)
+  guard(canClientCancel(stateOf(b), rules, deps.now()))
   return deps.db.transaction(async (tx) => {
     const at = new Date(deps.now())
-    await dropPendingMove(tx, b, at)
-    const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'client', cancelReason: reason ?? null, at })
+    // a move request cancelled by its own code: its booking first, as everywhere
+    if (b.rescheduleOf) await lockBooking(tx, b.rescheduleOf)
+    const locked = await lockBooking(tx, b.id)
+    guard(canClientCancel(stateOf(locked), rules, deps.now()))
+    await dropPendingMove(tx, locked, at)
+    const row = await setStatus(tx, locked, { status: 'cancelled', cancelledBy: 'client', cancelReason: reason ?? null, at })
     await emit(tx, { type: 'booking.cancelled', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
     return row
   })
@@ -73,6 +100,8 @@ export async function restoreBooking(deps: Deps, b: BookingRow): Promise<Booking
   const ok =
     b.status === 'cancelled' && b.cancelledBy === 'client' && !!b.cancelledAt && now - b.cancelledAt.getTime() < RESTORE_MINUTES * 60_000
   if (!ok || now >= epochOf(b.date, b.start)) throw new ApiError('restore_expired')
+  // a withdrawn or replaced move stays withdrawn: the client asks again
+  if (b.rescheduleOf) throw new ApiError('invalid_status')
   const status = b.confirmedAt ? 'confirmed' : 'pending'
   try {
     return await deps.db.transaction(async (tx) => {
@@ -108,8 +137,9 @@ export async function editNote(deps: Deps, b: BookingRow, note: string): Promise
 
 /**
  * Move to another time: a new request; the original stays confirmed until the business answers (instant businesses move
- * at once). The new time can't overlap the old one with the same specialist while both are held. An earlier pending move
- * is withdrawn in the same transaction, so it stays if the new time can't be had.
+ * at once). The new time may overlap the old one with the same specialist (book Q-165). An earlier pending move is
+ * withdrawn in the same transaction, so it stays if the new time can't be had. The booking is locked first: two moves
+ * asked at once (a double tap) run one after the other, and the second replaces the first.
  */
 export async function rescheduleBooking(
   deps: Deps,
@@ -120,10 +150,22 @@ export async function rescheduleBooking(
   const lb = await businessOf(deps, b)
   guard(canClientReschedule(stateOf(b), lb.rules, deps.now()))
   if (b.type !== 'appointment') throw new ApiError('not_bookable')
-  await assertOnlineBooking(deps.db, lb, user)
   return deps.db.transaction(async (tx) => {
-    await dropPendingMove(tx, b, new Date(deps.now()))
-    await rebook(deps, user, b, to, { status: initialStatus('web', lb.rules.confirmMode), rescheduleOf: b.id, db: tx })
+    // read again under the lock: a cancel or a confirmed move may have landed meanwhile
+    const locked = await lockBooking(tx, b.id)
+    guard(canClientReschedule(stateOf(locked), lb.rules, deps.now()))
+    const booked = await bookedServices(tx, locked.id)
+    await dropPendingMove(tx, locked, new Date(deps.now()))
+    // its own time with no other specialist named: the booking stays as it is, whatever the rules say now, and the
+    // waiting move is withdrawn (to move to another specialist at the same time, the client names them)
+    if (to.date === locked.date && to.start === locked.start && (to.staffId == null || to.staffId === booked.staffId)) return locked
+    await assertOnlineBooking(tx, lb, user)
+    await rebook(deps, user, locked, to, {
+      status: initialStatus('web', lb.rules.confirmMode),
+      rescheduleOf: locked.id,
+      db: tx,
+      booked,
+    })
     const [fresh] = await tx.select().from(bookings).where(eq(bookings.id, b.id))
     if (!fresh) throw new ApiError('not_found')
     return fresh
@@ -153,7 +195,7 @@ export async function acceptAlternative(
   if (offerPast(slot, lb.rules.leadMinutes, deps.now())) throw new ApiError('offer_past')
   if (source === 'expired') await assertOnlineBooking(deps.db, lb, user)
   try {
-    return await rebook(
+    const row = await rebook(
       deps,
       user,
       b,
@@ -161,10 +203,10 @@ export async function acceptAlternative(
       offerTarget(slot),
       { status: source === 'decline' ? 'confirmed' : initialStatus('web', lb.rules.confirmMode), alternativeOf: b.id },
     )
+    return row
   } catch (e) {
     // another request took an offered time from this booking first
-    if ((e as { cause?: { code?: string } }).cause?.code === '23505' || (e as { code?: string }).code === '23505')
-      throw new ApiError('invalid_status')
+    if (pgCode(e) === '23505') throw new ApiError('invalid_status')
     throw e
   }
 }

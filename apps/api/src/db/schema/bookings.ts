@@ -8,7 +8,7 @@
  */
 import type { Localized } from '@yeral/domain/model'
 import { sql } from 'drizzle-orm'
-import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
+import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uniqueIndex, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
 import { users } from './auth'
 import { businesses, classSessions, clients, diningTables, services, staff, tableAreas } from './business'
 import { bookingSource, bookingStatus, bookingType, cancelledBy, complaintType, declineReason, priceType } from './enums'
@@ -96,6 +96,10 @@ export const bookings = pgTable(
     index('bookings_client_idx').on(t.clientId),
     index('bookings_due_idx').on(t.status, t.holdUntil),
     index('bookings_session_idx').on(t.sessionId),
+    // a move may overlap its booking's time (book Q-165), so the database keeps one waiting move per booking
+    uniqueIndex('bookings_one_waiting_move')
+      .on(t.rescheduleOf)
+      .where(sql`${t.status} = 'pending'`),
   ],
 )
 
@@ -119,6 +123,13 @@ export const bookingItems = pgTable(
     priceAmount: integer().notNull(),
     /** Its booking's `active`, copied by a trigger (migration 0003) whenever either row changes. */
     active: boolean().notNull().default(false),
+    /**
+     * The booking whose time this is: a move request's items belong to the booking it would move, so the two may overlap
+     * with the same specialist (book Q-165); everything else may not. Set by the same trigger (migration 0010).
+     */
+    family: uuid()
+      .notNull()
+      .default(sql`gen_random_uuid()`),
     /** Absolute business-local minutes, buffer included: an item late on one day and one early the next can collide. */
     span: int4range().generatedAlwaysAs(
       sql`int4range(("date" - date '2000-01-01') * 1440 + "start", ("date" - date '2000-01-01') * 1440 + "end" + "buffer_after")`,

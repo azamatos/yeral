@@ -18,6 +18,7 @@ import {
 } from '@yeral/domain/availability'
 import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { priceTotal } from '@yeral/domain/pricing'
+import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, classSessions, clients, jobs } from '../../db/schema'
@@ -25,7 +26,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
-import { appointmentContext, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
+import { appointmentContext, checkStaff, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
 import { isPhoneBlocked } from '../clients/online'
 import { servicePrice } from '../catalog/map'
@@ -67,6 +68,8 @@ interface Insert {
   status: 'pending' | 'confirmed'
   note?: string
   rescheduleOf?: string
+  /** A move's deadline never runs past the original visit's start (book Q-263). */
+  holdCap?: number
   alternativeOf?: string
 }
 
@@ -103,10 +106,13 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       holdUntil:
         x.status === 'pending'
           ? new Date(
-              holdUntilOf(now, { date: x.date, start: x.start }, x.lb.rules.holdMinutes, {
-                hours: x.lb.business.hours,
-                exceptions: x.lb.business.exceptions,
-              }),
+              holdUntilOf(
+                now,
+                { date: x.date, start: x.start },
+                x.lb.rules.holdMinutes,
+                { hours: x.lb.business.hours, exceptions: x.lb.business.exceptions },
+                x.holdCap,
+              ),
             )
           : null,
       rescheduleOf: x.rescheduleOf ?? null,
@@ -305,7 +311,13 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
 }
 
 /** A booking's services in the order they run, and the one specialist doing them all (null when split). */
-export async function bookedServices(db: Queryable, bookingId: string): Promise<{ serviceIds: string[]; staffId: string | null }> {
+export interface BookedServices {
+  serviceIds: string[]
+  /** The one specialist doing them all, or null when split. */
+  staffId: string | null
+}
+
+export async function bookedServices(db: Queryable, bookingId: string): Promise<BookedServices> {
   const items = await db.select().from(bookingItems).where(eq(bookingItems.bookingId, bookingId)).orderBy(bookingItems.sort)
   const first = items[0]?.staffId ?? null
   return {
@@ -315,20 +327,18 @@ export async function bookedServices(db: Queryable, bookingId: string): Promise<
 }
 
 /**
- * Who a re-booked time goes to: the named one only when `to` names a specialist (an offered time, book Q-159); else the
- * booking's own specialist, or anyone free when they're busy. The offered times' state asks the same question.
+ * Who a re-booked time goes to, never someone else silently (ROUND6 A5, book Q-159): the specialist `to` names, anyone
+ * free for null («Islendik hünärmen»), or the booking's own specialist when it names none. A move doesn't count the
+ * booking's own time as busy (Q-165). The offered times' state asks the same question.
  */
-export function rebookQueries(
+export function rebookQuery(
   booked: { serviceIds: string[]; staffId: string | null },
   to: { date: string; staffId?: string | null },
-): AppointmentQuery[] {
-  const base = { date: to.date, serviceIds: booked.serviceIds, by: 'client' as const }
-  if (to.staffId !== undefined) return [{ ...base, staffId: to.staffId, oneSpecialist: !!to.staffId }]
-  if (booked.staffId === null) return [{ ...base, staffId: null }]
-  return [
-    { ...base, staffId: booked.staffId },
-    { ...base, staffId: null },
-  ]
+  excludeBookingIds?: readonly string[],
+): AppointmentQuery {
+  const staffId = to.staffId === undefined ? booked.staffId : to.staffId
+  // «Islendik» still tries the booking's own specialist first at the same start
+  return { date: to.date, serviceIds: booked.serviceIds, by: 'client', staffId, preferStaffId: booked.staffId, excludeBookingIds }
 }
 
 /**
@@ -340,21 +350,23 @@ export async function rebook(
   user: User,
   from: BookingRow,
   to: { date: string; start: number; staffId?: string | null },
-  opts: { status: 'pending' | 'confirmed'; rescheduleOf?: string; alternativeOf?: string; db?: Queryable },
+  opts: { status: 'pending' | 'confirmed'; rescheduleOf?: string; alternativeOf?: string; db?: Queryable; booked?: BookedServices },
 ): Promise<BookingRow> {
   const db = opts.db ?? deps.db
   const lb = (await loadBusinesses(db, [from.businessId])).get(from.businessId)
   if (!lb) throw new ApiError('not_found')
   if (from.type !== 'appointment') throw new ApiError('not_bookable')
-  const [first, fallback] = rebookQueries(await bookedServices(db, from.id), to)
-  let slot: AppointmentSlot
-  try {
-    slot = await placeAppointment(deps, lb, first!, to.start, 'client', db)
-  } catch (e) {
-    // the same specialist may be busy now: any free specialist will do
-    if (!fallback) throw e
-    slot = await placeAppointment(deps, lb, fallback, to.start, 'client', db)
+  const move = !!opts.rescheduleOf
+  const booked = opts.booked ?? (await bookedServices(db, from.id))
+  const query = rebookQuery(booked, to, move ? [from.id] : undefined)
+  if (move) {
+    const ctx = appointmentContext(lb, [], deps.now())
+    // a service no longer booked online here can't be moved online; a specialist who left or stopped doing these
+    // services means the client picks another, nobody is swapped in (an offered time is just taken, as its chip says)
+    if (query.serviceIds.some((id) => !ctx.services.some((s) => s.id === id && s.online))) throw new ApiError('not_bookable')
+    checkStaff(ctx, query.serviceIds, query.staffId)
   }
+  const slot = await placeAppointment(deps, lb, query, to.start, 'client', db)
   return inTransaction(
     deps,
     (tx) =>
@@ -368,6 +380,7 @@ export async function rebook(
         status: opts.status,
         note: from.clientNote ?? undefined,
         rescheduleOf: opts.rescheduleOf,
+        holdCap: move ? epochOf(from.date, from.start) : undefined,
         alternativeOf: opts.alternativeOf,
       }),
     () => Promise.resolve([]),
