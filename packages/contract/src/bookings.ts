@@ -28,6 +28,19 @@ import {
 
 const noteSchema = z.string().trim().max(500)
 
+export const OFFER_STATES = ['free', 'taken', 'past'] as const
+
+/** A time offered after a decline or an expiry, as the client sees it now (book Q-159, Q-264). */
+export const offeredTimeSchema = timeSlotSchema
+  .extend({
+    /** The one specialist it's booked with; null for a table or an offer made before offers named one. */
+    staff: z.object({ id: idSchema, name: z.string() }).nullable(),
+    /** `taken`: that specialist isn't free then any more ("Eýýäm eýelendi"); `past`: earlier than now plus the lead time. */
+    state: z.enum(OFFER_STATES),
+  })
+  .meta({ id: 'OfferedTime' })
+export type OfferedTime = z.infer<typeof offeredTimeSchema>
+
 // ── Send ──
 
 export const createBookingSchema = z
@@ -131,11 +144,22 @@ export const bookingDetailSchema = bookingSummarySchema
         reason: z.enum(DECLINE_REASONS),
         text: z.string().nullable(),
         /** Accept one in a tap: the new booking is confirmed at once. */
-        alternatives: z.array(timeSlotSchema).max(MAX_ALTERNATIVES),
+        alternatives: z.array(offeredTimeSchema).max(MAX_ALTERNATIVES),
       })
       .nullable(),
     /** Times offered by the system after an expired request (a new request when picked). */
-    expiredAlternatives: z.array(timeSlotSchema).max(MAX_ALTERNATIVES),
+    expiredAlternatives: z.array(offeredTimeSchema).max(MAX_ALTERNATIVES),
+    /**
+     * The booking made from one of the offered times ("Teklip edilen wagt kabul edildi → YR-48231"): one per declined or
+     * expired request, so the other offers are gone (empty lists).
+     */
+    offerTakenBy: bookingCodeSchema.nullable(),
+    /**
+     * False while the business has paused online booking or this client may book it only by phone (book Q-154): the
+     * free times after an expiry and "Başga wagta geçir" are left out, and the "Jaň et" card shows. Offers after a
+     * decline stay: the business made them.
+     */
+    bookOnline: z.boolean(),
     /** A pending move of this booking: the original stays confirmed until the business answers. */
     reschedule: z.object({ date: ymdSchema, start: startMinuteSchema, end: minuteSchema, holdUntil: epochSchema.nullable() }).nullable(),
     actions: z.object({

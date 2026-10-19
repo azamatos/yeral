@@ -67,14 +67,14 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    team rows linked to accounts, the switcher, invites and the team endpoints.
 3. **The "Code differs" fixes in the booking engine,** in this order, since each needs the one before: past midnight
    (Q-105; done 20.10.2026); holds count only in opening hours (Q-120; done 20.10.2026); reminders at night move to 21:30 the evening before (Q-285; done 20.10.2026);
-   then the city as data (Q-107; done 20.10.2026), offered times tied to one specialist (Q-159), expiry with nothing free (Q-252), the
+   then the city as data (Q-107; done 20.10.2026), offered times tied to one specialist (Q-159; done 20.10.2026), expiry with nothing free (Q-252; done 20.10.2026), the
    no-show count restart (Q-127), move rules (Q-165, Q-263, a second move replaces the first and can be withdrawn:
    ROUND6 A3), token links instead of `/b/{code}` and the signed-out link page (Q-168, F-068), no review asks (Q-259),
    linking by phone only for 6 months plus "Is this you?" (Q-270), a changed phone keeps its client record (Q-171),
    code limits (Q-267), deleting an account (Q-172), name and surname (Q-156), time limits on no-shows, complaints and
    reviews (Q-254, Q-206, Q-126), at most 3 waiting requests per business and 10 in all (Q-124), the cancel reason
    setting (Q-163), the 4 undo reasons (ROUND6 A6), the answer time worked out (Q-113), phone-only clients and paused
-   businesses (Q-154), the owner's preview of an unverified page (F-032), no average bill and the hidden-price text
+   businesses (Q-154; the booking detail done 20.10.2026, the link page comes with Q-168), the owner's preview of an unverified page (F-032), no average bill and the hidden-price text
    (Q-103), lateness fixed at 15 min (Q-118), a price range filter, the failed-SMS alert and late reminders dropped
    (Q-284), the SMS for a move not accepted (Q-289); and the new engine rules: *Başga ýerde* (Q-272), blocked time
    (F-121) and internal statuses (F-104, F-133).

@@ -66,6 +66,10 @@ export interface AppointmentQuery {
   by: 'client' | 'staff'
   /** The booking being moved: its own time doesn't count as busy. */
   excludeBookingId?: string
+  /** One specialist does every service: an offered time names one person (book Q-159), so no split between people. */
+  oneSpecialist?: boolean
+  /** Without a chosen specialist, try this one first: an offered time keeps the client's specialist when they're free. */
+  preferStaffId?: string | null
 }
 
 export interface PlannedItem extends Interval {
@@ -239,16 +243,24 @@ function resolveServices(ctx: AppointmentContext, q: AppointmentQuery): ServiceF
   return out
 }
 
+/** Who may do the whole chain alone, in the order to try them: the chosen one, else the preferred one first. */
+function singlesFor(ctx: AppointmentContext, q: AppointmentQuery): string[] {
+  if (q.staffId) return [q.staffId]
+  const doingAll = staffDoingAll(ctx, q.serviceIds).map((s) => s.id)
+  const prefer = q.preferStaffId
+  return prefer && doingAll.includes(prefer) ? [prefer, ...doingAll.filter((id) => id !== prefer)] : doingAll
+}
+
 /** The plan for one start time, or null when it isn't free. */
 function planAt(
   ctx: AppointmentContext,
   q: AppointmentQuery,
   views: Map<string, StaffDayView>,
   services: ServiceForBooking[],
+  singles: readonly string[],
   start: number,
 ) {
   const ids = q.serviceIds
-  const singles = q.staffId ? [q.staffId] : staffDoingAll(ctx, ids).map((s) => s.id)
   for (const staffId of singles) {
     const view = views.get(staffId)
     if (!view || !ids.every((id) => view.staff.serviceIds.includes(id))) continue
@@ -260,7 +272,7 @@ function planAt(
     )
     if (planFits(views, items)) return items
   }
-  if (!q.staffId && q.by === 'client' && services.length > 1) return splitPlan(ctx, views, services, start)
+  if (!q.staffId && q.by === 'client' && services.length > 1 && !q.oneSpecialist) return splitPlan(ctx, views, services, start)
   return null
 }
 
@@ -285,9 +297,10 @@ function* freeSlots(ctx: AppointmentContext, q: AppointmentQuery, only?: number)
   const total = services.reduce((sum, s) => sum + s.durationMin, 0)
   const first = Math.ceil(day.open / step) * step
   if (only !== undefined && (only < first || (only - first) % step !== 0)) return
+  const singles = singlesFor(ctx, q)
   for (let start = only ?? first; start + total <= day.close; start += step) {
     if (epochOf(q.date, start) >= earliest) {
-      const items = planAt(ctx, q, views, services, start)
+      const items = planAt(ctx, q, views, services, singles, start)
       if (items) yield { start, end: start + total, items }
     }
     if (only !== undefined) return
@@ -309,6 +322,12 @@ export function findAppointmentSlot(ctx: AppointmentContext, q: AppointmentQuery
   return freeSlots(ctx, q, start).next().value ?? null
 }
 
+/** The one specialist a plan books, or null when its services are split between people. */
+export function slotStaffId(slot: Pick<AppointmentSlot, 'items'>): string | null {
+  const first = slot.items[0]?.staffId
+  return first && slot.items.every((i) => i.staffId === first) ? first : null
+}
+
 /** Up to `count` free starts nearest to `start` on the same date ("Bu wagt ýaňy alyndy. Golaý boş wagtlar"). */
 export function nearestSlots(ctx: AppointmentContext, q: AppointmentQuery, start: number, count = MAX_ALTERNATIVES): AppointmentSlot[] {
   return appointmentSlots(ctx, q)
@@ -320,15 +339,17 @@ export function nearestSlots(ctx: AppointmentContext, q: AppointmentQuery, start
 
 /**
  * The first free start from `from` on, at most `days` days ahead ("Indiki boş wagt", "Indiki boş gün"). From today,
- * yesterday's business day comes first while it may still run past midnight.
+ * yesterday's business day comes first while it may still run past midnight; `strict` starts at `from` itself (the
+ * days after a given one).
  */
 export function nextFreeSlot(
   ctx: AppointmentContext,
   q: Omit<AppointmentQuery, 'date'>,
   from = today(ctx.now),
   days = ctx.rules.windowDays,
+  { strict = false }: { strict?: boolean } = {},
 ): { date: string; slot: AppointmentSlot } | null {
-  const first = from === today(ctx.now) ? addDays(from, -1) : from
+  const first = from === today(ctx.now) && !strict ? addDays(from, -1) : from
   for (let i = 0; i <= days + diffDays(from, first); i++) {
     const date = addDays(first, i)
     const slot = freeSlots(ctx, { ...q, date }).next().value

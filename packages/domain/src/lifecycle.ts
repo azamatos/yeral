@@ -126,6 +126,11 @@ export function reminderPlan(visitStart: number, now: number): PlannedReminder[]
   return out.sort((a, b) => a.runAt - b.runAt)
 }
 
+/** An offered time (after a decline or an expiry) is past once it starts earlier than now plus the lead time (book Q-264). */
+export function offerPast(offer: Pick<BookingState, 'date' | 'start'>, leadMinutes: number, now = Date.now()): boolean {
+  return startOf(offer) < now + leadMinutes * 60_000
+}
+
 /** The status people see now, before the jobs have caught up. */
 export function effectiveStatus(b: BookingState, now = Date.now()): { status: BookingStatus; cancelledBy: CancelledBy | null } {
   if (b.status === 'pending' && now >= (b.holdUntil ?? startOf(b))) return { status: 'cancelled', cancelledBy: 'system' }

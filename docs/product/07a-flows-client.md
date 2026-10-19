@@ -993,8 +993,8 @@ flowchart TD
 **Code differs**
 
 - Declined rows go straight to *Geçen*; Mobile 7 keeps them on top of *Gelýän* while an offer is ahead (code: `bookings/routes.ts`).
-- When the original specialist isn't free, an offered time goes to anyone free who does the services (code: `bookings/create.ts`, `rebook`); Q-159 books the named person only.
-- Offered times after a table decline can't be taken: the api re-books appointments only (code: `bookings/create.ts`, `rebook` → `not_bookable`).
+- Times offered after a decline name nobody until the business's decline is built (P2 step 4): taking one goes to anyone free (code: `bookings/actions.ts`, `offerTarget`).
+- Offered times after a table decline can't be taken: the api re-books appointments only, and the booking detail leaves them out (code: `bookings/offers.ts`).
 - The business's decline and the decline SMS come with the workspace (M5); reading and taking offers is built.
 
 **Status:** Design: drawn (Account-Bookings · `view` declined, declinedConfirm, declinedTaken, offersExpired; Mobile 7–9) · Code: partly — taking offers built for appointments; declining comes with M5.
@@ -1040,8 +1040,7 @@ flowchart TD
 
 **Code differs**
 
-- Table and class requests get no free times, and with none found the SMS reads "Şu boş wagtlar bar: —" (code: `jobs/run.ts`).
-- The free times are found with any specialist, not one named person (code: `jobs/run.ts`).
+- Table and class requests get no free times (code: `jobs/run.ts`); they come after the MVP (Q-252, Q-030).
 
 **Status:** Design: drawn (Account-Bookings · `view=expired`, `expiredTaken`; Booking-Link · `expired`; Mobile 10) · Code: built (api) for appointments — expiry job, SMS, taking a time.
 

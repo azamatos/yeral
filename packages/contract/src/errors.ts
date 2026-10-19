@@ -20,6 +20,7 @@ export const ERROR_STATUS = {
   session_full: 409,
   invalid_status: 409,
   request_expired: 409,
+  offer_past: 409,
   cancel_window_passed: 409,
   already_started: 409,
   not_started: 409,

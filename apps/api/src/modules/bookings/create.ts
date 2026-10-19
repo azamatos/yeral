@@ -197,13 +197,24 @@ async function inTransaction<T>(
 
 /** A request the client sends online: the business takes them, and this client isn't limited to phone bookings. */
 export async function assertOnlineBooking(db: Queryable, lb: LoadedBusiness, user: User): Promise<void> {
-  if (!lb.rules.onlineEnabled) throw new ApiError('online_disabled')
+  const refused = await onlineRefusal(db, lb, user.phone)
+  if (refused) throw new ApiError(refused)
+}
+
+/** Why this phone can't book the business online now (paused, or phone-only there), or null when it can. */
+export async function onlineRefusal(
+  db: Queryable,
+  lb: LoadedBusiness,
+  phone: string,
+): Promise<'online_disabled' | 'online_blocked' | null> {
+  if (!lb.rules.onlineEnabled) return 'online_disabled'
   const [known] = await db
     .select()
     .from(clients)
-    .where(and(eq(clients.businessId, lb.business.id), eq(clients.phone, user.phone)))
+    .where(and(eq(clients.businessId, lb.business.id), eq(clients.phone, phone)))
   if (known && isOnlineBlocked({ onlineBlocked: known.onlineBlocked, noShows: await noShowsOf(db, known.id) }, lb.rules))
-    throw new ApiError('online_blocked')
+    return 'online_blocked'
+  return null
 }
 
 export async function createBooking(deps: Deps, user: User, input: CreateBooking): Promise<BookingRow> {
@@ -305,6 +316,33 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
   })
 }
 
+/** A booking's services in the order they run, and the one specialist doing them all (null when split). */
+export async function bookedServices(db: Queryable, bookingId: string): Promise<{ serviceIds: string[]; staffId: string | null }> {
+  const items = await db.select().from(bookingItems).where(eq(bookingItems.bookingId, bookingId)).orderBy(bookingItems.sort)
+  const first = items[0]?.staffId ?? null
+  return {
+    serviceIds: items.flatMap((i) => (i.serviceId ? [i.serviceId] : [])),
+    staffId: first && items.every((i) => i.staffId === first) ? first : null,
+  }
+}
+
+/**
+ * Who a re-booked time goes to: the named one only when `to` names a specialist (an offered time, book Q-159); else the
+ * booking's own specialist, or anyone free when they're busy. The offered times' state asks the same question.
+ */
+export function rebookQueries(
+  booked: { serviceIds: string[]; staffId: string | null },
+  to: { date: string; staffId?: string | null },
+): AppointmentQuery[] {
+  const base = { date: to.date, serviceIds: booked.serviceIds, by: 'client' as const }
+  if (to.staffId !== undefined) return [{ ...base, staffId: to.staffId, oneSpecialist: !!to.staffId }]
+  if (booked.staffId === null) return [{ ...base, staffId: null }]
+  return [
+    { ...base, staffId: booked.staffId },
+    { ...base, staffId: null },
+  ]
+}
+
 /**
  * A new appointment like `from` at another time: a client's move request, or an offered alternative. `opts.db` runs it
  * inside the caller's transaction.
@@ -320,18 +358,14 @@ export async function rebook(
   const lb = (await loadBusinesses(db, [from.businessId])).get(from.businessId)
   if (!lb) throw new ApiError('not_found')
   if (from.type !== 'appointment') throw new ApiError('not_bookable')
-  const items = await db.select().from(bookingItems).where(eq(bookingItems.bookingId, from.id)).orderBy(bookingItems.sort)
-  const serviceIds = items.flatMap((i) => (i.serviceId ? [i.serviceId] : []))
-  const sameStaff = items.length > 0 && items.every((i) => i.staffId === items[0]?.staffId) ? (items[0]?.staffId ?? null) : null
-  const staffId = to.staffId === undefined ? sameStaff : to.staffId
-  const q = { date: to.date, serviceIds, staffId, by: 'client' as const }
+  const [first, fallback] = rebookQueries(await bookedServices(db, from.id), to)
   let slot: AppointmentSlot
   try {
-    slot = await placeAppointment(deps, lb, q, to.start, 'client', db)
+    slot = await placeAppointment(deps, lb, first!, to.start, 'client', db)
   } catch (e) {
     // the same specialist may be busy now: any free specialist will do
-    if (staffId === null || to.staffId !== undefined) throw e
-    slot = await placeAppointment(deps, lb, { ...q, staffId: null }, to.start, 'client', db)
+    if (!fallback) throw e
+    slot = await placeAppointment(deps, lb, fallback, to.start, 'client', db)
   }
   return inTransaction(
     deps,

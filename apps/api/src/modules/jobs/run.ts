@@ -7,40 +7,50 @@
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
-import { nearestSlots, nextFreeSlot } from '@yeral/domain/availability'
+import { nearestSlots, nextFreeSlot, slotStaffId, staffDoingAll, type AppointmentSlot } from '@yeral/domain/availability'
 import { addDays, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
-import { bookingItems, bookings, businesses, clients, jobs, users } from '../../db/schema'
+import { bookings, businesses, clients, jobs, users, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { bookingSmsText, emit, expiredSmsText, queueSms, smsCityOf, type BookingSmsKind } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
+import { bookedServices } from '../bookings/create'
 import { setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100
 const MAX_ATTEMPTS = 5
 
-/** Up to three free times for the same services after an expired request: that day first, then the next free days. */
-async function alternativesFor(deps: Deps, b: BookingRow): Promise<{ date: string; start: number; end: number }[]> {
+/**
+ * Up to three free times for the same services after an expired request: that day first, then the next free days.
+ * Each names one specialist who does every service (book Q-159); at the same start the one asked for comes first.
+ * Services nobody does alone keep being split between people, and those times name nobody.
+ */
+async function alternativesFor(deps: Deps, b: BookingRow): Promise<TimeSlot[]> {
   if (b.type !== 'appointment') return []
   const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
   if (!lb) return []
-  const items = await deps.db.select().from(bookingItems).where(eq(bookingItems.bookingId, b.id))
-  const serviceIds = items.flatMap((i) => (i.serviceId ? [i.serviceId] : []))
-  if (!serviceIds.length) return []
+  const booked = await bookedServices(deps.db, b.id)
+  if (!booked.serviceIds.length) return []
   const now = deps.now()
   const from = localOf(now).date
   const ctx = appointmentContext(lb, await loadBusy(deps.db, [b.businessId], from, addDays(from, lb.rules.windowDays)), now)
-  const q = { serviceIds, staffId: null, by: 'client' as const }
-  const out = nearestSlots(ctx, { ...q, date: b.date }, b.start, MAX_ALTERNATIVES).map((s) => ({
-    date: b.date,
-    start: s.start,
-    end: s.end,
-  }))
+  const q = {
+    serviceIds: booked.serviceIds,
+    staffId: null,
+    by: 'client' as const,
+    oneSpecialist: staffDoingAll(ctx, booked.serviceIds).length > 0,
+    preferStaffId: booked.staffId,
+    // still pending while this runs: its own time mustn't count as busy
+    excludeBookingId: b.id,
+  }
+  const offer = (date: string, s: AppointmentSlot): TimeSlot => ({ date, start: s.start, end: s.end, staffId: slotStaffId(s) })
+  const out = nearestSlots(ctx, { ...q, date: b.date }, b.start, MAX_ALTERNATIVES).map((s) => offer(b.date, s))
+  // the days after the request's own (strict: never back to it, even when it was last night's)
   for (let day = addDays(b.date, 1); out.length < MAX_ALTERNATIVES;) {
-    const next = nextFreeSlot(ctx, q, day, lb.rules.windowDays)
+    const next = nextFreeSlot(ctx, q, day, lb.rules.windowDays, { strict: true })
     if (!next) break
-    out.push({ date: next.date, start: next.slot.start, end: next.slot.end })
+    out.push(offer(next.date, next.slot))
     day = addDays(next.date, 1)
   }
   return out.slice(0, MAX_ALTERNATIVES)
