@@ -346,7 +346,7 @@ export const clients = pgTable(
     noRemindersSms: boolean().notNull().default(false),
     /**
      * "Diňe jaň arkaly ýazylyp biler" switched on by hand. The no-show limit blocks too, worked out from the bookings
-     * (book Q-127, `isClientBlocked`).
+     * (book Q-127, `isPhoneBlocked`).
      */
     onlineBlocked: boolean().notNull().default(false),
     /** When the business last lifted the block: no-shows marked before then don't count toward the limit. */

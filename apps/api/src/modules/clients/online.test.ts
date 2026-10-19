@@ -39,15 +39,16 @@ describe('phone-only after no-shows', () => {
   async function newClient(phone: string) {
     const b = browser(t.app)
     await b.login(phone, 'Läle')
-    /** Books the first free time from Thursday on: 201, or the reason it's refused. */
+    /** Books the first free time in the two weeks from Thursday: 201, or the reason it's refused. */
     const book = async () => {
-      for (let date = THU; ; date = addDays(date, 1)) {
+      for (let date = THU; date < addDays(THU, 14); date = addDays(date, 1)) {
         const slots = (await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&date=${date}`)).json.slots
         if (!slots.length) continue
         return b.req('/v1/bookings', {
           body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: null, date, start: slots[0].start },
         })
       }
+      throw new Error('no free haircut at Glow Studio in two weeks')
     }
     expect((await book()).status).toBe(201)
     const row = async () =>
@@ -57,7 +58,7 @@ describe('phone-only after no-shows', () => {
           .from(clients)
           .where(and(eq(clients.businessId, glowId), eq(clients.phone, phone)))
       )[0]!
-    /** A past visit the business marked "Gelmedi" at `at` (by a complaint, or only by the status change). */
+    /** A past visit the business marked "Gelmedi" at `at` (with a complaint, or only by the status change). */
     const noShow = async (at: number, by: 'complaint' | 'status' = 'complaint') => {
       const [made] = await db
         .insert(bookings)
@@ -96,8 +97,8 @@ describe('phone-only after no-shows', () => {
     await c.noShow(DEMO_NOW - 3 * DAY)
     await c.noShow(DEMO_NOW - 2 * DAY)
     expect((await c.book()).json.error.code).toBe('online_blocked')
-    await setOnlineBlocked(db, await c.row(), false, RULES, new Date(DEMO_NOW - DAY))
-    expect(await noShowsSinceReset(db, await c.row())).toBe(0)
+    await setOnlineBlocked(db, (await c.row()).id, false, RULES, new Date(DEMO_NOW - DAY))
+    expect(await noShowsSinceReset(db, (await c.row()).id)).toBe(0)
     expect((await c.book()).status).toBe(201)
     await c.noShow(DEMO_NOW - 3_600_000)
     expect((await c.book()).status).toBe(201)
@@ -108,7 +109,7 @@ describe('phone-only after no-shows', () => {
   it('saving "off" for a client who isn’t blocked keeps their no-shows', async () => {
     const c = await newClient('+99365444103')
     await c.noShow(DEMO_NOW - 2 * DAY)
-    await setOnlineBlocked(db, await c.row(), false, RULES, new Date(DEMO_NOW - DAY))
+    await setOnlineBlocked(db, (await c.row()).id, false, RULES, new Date(DEMO_NOW - DAY))
     expect((await c.row()).noShowsSince).toBeNull()
     await c.noShow(DEMO_NOW)
     expect((await c.book()).json.error.code).toBe('online_blocked')
@@ -119,7 +120,7 @@ describe('phone-only after no-shows', () => {
     await counted.noShow(DEMO_NOW - 2 * DAY)
     await counted.noShow(DEMO_NOW - DAY)
     const byHand = await newClient('+99365444105')
-    await setOnlineBlocked(db, await byHand.row(), true, RULES, new Date(DEMO_NOW))
+    await setOnlineBlocked(db, (await byHand.row()).id, true, RULES, new Date(DEMO_NOW))
     expect((await counted.book()).json.error.code).toBe('online_blocked')
     await db.update(bookingRules).set({ blockAfterNoShows: 0 }).where(eq(bookingRules.businessId, glowId))
     try {
@@ -130,13 +131,51 @@ describe('phone-only after no-shows', () => {
     }
   })
 
-  it('a no-show marked without a complaint counts by when its status changed', async () => {
+  it('a no-show counts from when it was marked, not from a complaint added later', async () => {
     const c = await newClient('+99365444106')
-    await setOnlineBlocked(db, await c.row(), true, RULES, new Date(DEMO_NOW - 3 * DAY))
-    await setOnlineBlocked(db, await c.row(), false, RULES, new Date(DEMO_NOW - 2 * DAY))
-    await c.noShow(DEMO_NOW - DAY, 'status')
+    const old = await c.noShow(DEMO_NOW - 3 * DAY, 'status')
+    await c.noShow(DEMO_NOW - 3 * DAY, 'status')
+    await setOnlineBlocked(db, (await c.row()).id, false, RULES, new Date(DEMO_NOW - 2 * DAY))
+    expect(await noShowsSinceReset(db, (await c.row()).id)).toBe(0)
+    // a complaint filed on the old one afterwards doesn't bring it back
+    await db
+      .update(bookings)
+      .set({ complaintType: 'late', complaintAt: new Date(DEMO_NOW - DAY) })
+      .where(eq(bookings.id, old.id))
+    expect(await noShowsSinceReset(db, (await c.row()).id)).toBe(0)
+    await c.noShow(DEMO_NOW - 3_600_000, 'status')
     await c.noShow(DEMO_NOW, 'status')
-    expect(await noShowsSinceReset(db, await c.row())).toBe(2)
     expect((await c.book()).json.error.code).toBe('online_blocked')
+  })
+
+  it('"on" saved for a client the count blocks stays the count’s: removing a no-show lifts it', async () => {
+    const c = await newClient('+99365444107')
+    await c.noShow(DEMO_NOW - 2 * DAY)
+    const second = await c.noShow(DEMO_NOW - DAY)
+    await setOnlineBlocked(db, (await c.row()).id, true, RULES, new Date(DEMO_NOW))
+    expect((await c.row()).onlineBlocked).toBe(false)
+    await db.update(bookings).set({ status: 'completed' }).where(eq(bookings.id, second.id))
+    expect((await c.book()).status).toBe(201)
+  })
+
+  it('"off" for a block set only by hand keeps the no-shows below the limit', async () => {
+    const c = await newClient('+99365444108')
+    await c.noShow(DEMO_NOW - 2 * DAY)
+    await setOnlineBlocked(db, (await c.row()).id, true, RULES, new Date(DEMO_NOW - DAY))
+    expect((await c.book()).json.error.code).toBe('online_blocked')
+    await setOnlineBlocked(db, (await c.row()).id, false, RULES, new Date(DEMO_NOW - 3_600_000))
+    expect((await c.row()).noShowsSince).toBeNull()
+    expect((await c.book()).status).toBe(201)
+    await c.noShow(DEMO_NOW)
+    expect((await c.book()).json.error.code).toBe('online_blocked')
+  })
+
+  it('"off" works from the current row: a hand block set meanwhile is cleared too', async () => {
+    const c = await newClient('+99365444109')
+    const id = (await c.row()).id
+    await setOnlineBlocked(db, id, true, RULES, new Date(DEMO_NOW - DAY))
+    await setOnlineBlocked(db, id, false, RULES, new Date(DEMO_NOW))
+    expect((await c.row()).onlineBlocked).toBe(false)
+    expect((await c.book()).status).toBe(201)
   })
 })

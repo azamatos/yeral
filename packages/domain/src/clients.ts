@@ -76,8 +76,8 @@ export function reachesNoShowLimit(noShowsSinceReset: number, rules: Pick<Bookin
  * removing a no-show or setting the limit to 0 lifts a block that came from the count.
  */
 export function isOnlineBlocked(
-  client: { onlineBlocked: boolean; noShows: number },
+  client: { onlineBlocked: boolean; noShowsSinceReset: number },
   rules: Pick<BookingRules, 'blockAfterNoShows'>,
 ): boolean {
-  return client.onlineBlocked || reachesNoShowLimit(client.noShows, rules)
+  return client.onlineBlocked || reachesNoShowLimit(client.noShowsSinceReset, rules)
 }
