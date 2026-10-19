@@ -125,6 +125,5 @@ describe('catalogue', () => {
     expect(s.json.services).toEqual(expect.arrayContaining(['Manikýur']))
     const p = await b.req('/v1/places/suggest?q=magtym')
     expect(p.json.items[0].label).toBe('Magtymguly şaýoly')
-    expect((await b.req('/v1/places/ip')).json).toEqual({ place: null })
   })
 })

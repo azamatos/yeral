@@ -52,10 +52,10 @@ No screens; every rule gets its test (ADR 0013). Runs alongside P1, in this orde
 every **Code differs** line (51 distinct ones; the first draft of this list covered 21) and the api as built: 34
 endpoints for client screens, none for businesses or the Ýeral team, and nothing that checks access levels yet.
 
-0. **The own server only** (owner, 19.10.2026: no Neon): the api's Cloudflare Workers path goes (Worker entry,
-   Wrangler, Hyperdrive, Neon config); the local Docker stack uses Caddy like the server; the city from the internet
-   address is off, since first-launch visitors come through a VPN, and the city choice starts at the market's main
-   city (Q-107).
+0. **The own server only** (owner, 19.10.2026: no Neon; done 19.10.2026, ADR 0024): the api's Cloudflare Workers
+   path went (Worker entry, Wrangler, Hyperdrive, Neon config); the local Docker stack uses Caddy like the server; the
+   city from the internet address is off, since first-launch visitors come through a VPN, and the city choice starts
+   at the market's main city (Q-107).
 1. **Market settings** (ADR 0022, ADR 0023): language, money, phone rules and time zone read from one market config;
    English as the source language; any one language for a business's texts (Q-102); SMS in the market's main language
    for people without one (Q-292). Legal texts, the SMS provider and the map area join the config with their features.
@@ -154,7 +154,7 @@ so there is time to test it from Ashgabat, rehearse the move and fix what breaks
   The law wants personal data stored in the country (Q-037), and servers abroad may be blocked (Q-032). The lawyer
   confirms before buying.
 - **Size:** 4 vCPU, 8 GB RAM, 100 GB SSD or more, Ubuntu 24.04 LTS, one fixed public address. The whole stack runs on
-  it in Docker: Postgres, the api, the jobs and nginx serving the three apps. That's enough for the first thousands of
+  it in Docker: Postgres, the api, the jobs and Caddy serving the three apps (ADR 0024). That's enough for the first thousands of
   users. 2 vCPU and 4 GB is the floor.
 - **Backups:** a daily encrypted copy of the database off the server, to a second place in Turkmenistan (a copy abroad
   only if the lawyer allows it).

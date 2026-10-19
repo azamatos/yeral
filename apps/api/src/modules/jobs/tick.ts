@@ -1,7 +1,6 @@
 /**
- * One jobs tick, the same for both entries (ADR 0005): the Node timer and the Workers Cron Trigger call it every minute.
- * Runs never overlap, across processes and Cron invocations alike: a run first takes a transaction-level advisory lock
- * (`pg_try_advisory_xact_lock`, which works through Hyperdrive's transaction pooling and goes away with a dead runner)
+ * One jobs tick (ADR 0005): the Node entry's timer calls it every minute. Runs never overlap, across processes too: a
+ * run first takes a transaction-level advisory lock (`pg_try_advisory_xact_lock`, which goes away with a dead runner)
  * and skips when another run holds it. The lock's transaction keeps one connection; the work runs on others, so
  * `deps.db` must be a pool. A failed run is logged, never thrown.
  */

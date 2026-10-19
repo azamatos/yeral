@@ -3,7 +3,7 @@ import { createApp } from '../src/app'
 import type { Db } from '../src/db/client'
 import type { Deps } from '../src/deps'
 import { nullLogger } from '../src/ports/log'
-import { logSms } from '../src/ports/sms'
+import { memorySms } from '../src/ports/sms'
 
 /** Demo clock: Wednesday 2026-10-14, 11:20 at the business. */
 export const DEMO_NOW = Date.parse('2026-10-14T06:20:00Z')
@@ -14,7 +14,7 @@ export const ORIGIN = site.urls.client
 /** The app as the entries build it, with a settable clock and captured SMS. */
 export function testApp(db: Db, opts: { now?: number; trustedIpHeader?: Deps['trustedIpHeader'] } = {}) {
   const clock = { now: opts.now ?? DEMO_NOW }
-  const sms = logSms(nullLogger)
+  const sms = memorySms()
   const deps: Deps = {
     db,
     site,

@@ -1,6 +1,7 @@
 # 0010. CI/CD on GitHub Actions
 
-- Status: Accepted 2026-10-13; staging dropped by [0020](0020-local-and-production-only.md)
+- Status: Accepted 2026-10-13; staging dropped by [0020](0020-local-and-production-only.md); the api and the new apps
+  deploy to the own server over SSH, not with `wrangler deploy` ([0024](0024-own-server-docker-caddy.md))
 - Decided by: Claude
 
 ## Context

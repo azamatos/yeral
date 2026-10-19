@@ -29,7 +29,7 @@ describe('siteConfig', () => {
     expect(site.origins).toEqual(['http://localhost:3101', 'http://localhost:3102', 'http://localhost:3103'])
   })
 
-  it('docker: *.localhost behind nginx', () => {
+  it('docker: *.localhost behind Caddy', () => {
     const site = siteConfig({ env: 'docker' })
     expect(site.urls.client).toBe('http://yeral.localhost')
     expect(site.urls.api).toBe('http://api.yeral.localhost')

@@ -9,7 +9,8 @@ services:
       POSTGRES_PASSWORD: yeral
       POSTGRES_DB: yeral
     ports:
-      - '5432:5432'
+      # YERAL_DB_PORT=5433 when another Postgres holds 5432 on this machine; .env.local and TEST_DATABASE_URL follow it
+      - '${YERAL_DB_PORT:-5432}:5432'
     volumes:
       - pgdata:/var/lib/postgresql
     healthcheck:

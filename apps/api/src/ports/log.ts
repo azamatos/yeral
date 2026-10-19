@@ -1,4 +1,4 @@
-/** Structured JSON logs that work the same on Workers and Node. */
+/** Structured JSON logs, one line each, to stdout and stderr (Docker keeps them, rotated). */
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 export interface Logger {
@@ -15,7 +15,7 @@ export function createLogger(level: LogLevel = 'info', base: Record<string, unkn
     if (ORDER[lvl] < ORDER[level]) return
     const line = JSON.stringify({ level: lvl, time: new Date().toISOString(), msg, ...base, ...data })
     if (lvl === 'error' || lvl === 'warn') console.error(line)
-    // eslint-disable-next-line no-console -- the log sink: stdout on Node, Workers Logs on Cloudflare
+    // eslint-disable-next-line no-console -- the log sink: stdout
     else console.log(line)
   }
   return { debug: write('debug'), info: write('info'), warn: write('warn'), error: write('error') }

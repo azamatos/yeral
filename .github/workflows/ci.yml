@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     services:
-      # API tests (apps/api) run against Postgres 18, like Neon and the own server
+      # API tests (apps/api) run against Postgres 18, like the own server
       postgres:
         image: postgres:18
         env:
@@ -67,16 +67,21 @@ jobs:
 
   docker:
     name: Docker stack
-    # the own server's stack (ADR 0007): build the api image, start Postgres + api + nginx, ask for health through nginx
+    # the own server's stack (ADR 0024): build the api image, start Postgres + api + Caddy, ask for health through Caddy
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+      - name: The server's Caddy config is valid
+        run: |
+          docker run --rm -v "$PWD/infra/server/edge/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            -v "$PWD/infra/server/yeral/yeral.caddy:/etc/caddy/sites/yeral.caddy:ro" \
+            caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
       - name: Build and start
         env:
           GITHUB_SHA: ${{ github.sha }}
         run: docker compose -f infra/docker/compose.yml up -d --build --wait
-      - name: Health through nginx
+      - name: Health through Caddy
         run: |
           curl -fsS -H 'Host: api.yeral.localhost' http://localhost/v1/health
           curl -fsS -H 'Host: api.yeral.localhost' 'http://localhost/v1/search?lat=37.95&lng=58.383&limit=1' > /dev/null

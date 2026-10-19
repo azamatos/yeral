@@ -210,7 +210,9 @@ average bill is still in the code (code: packages/i18n/src/fmt.ts).
   selected one. Not designed yet (F-240).
 - **Location denied:** the city from the internet address may appear only inside the *Nirede?* (where?) field, with
   *Ýerleşiş ýapyk — şäher boýunça görkezilýär* (location is off, showing by city). Distances are hidden; lists sort by
-  rating × number of reviews. (client spec §5)
+  rating × number of reviews. (client spec §5) **Code differs:** the api has no city from the internet address since
+  it left Cloudflare (ADR 0024); at the first launch visitors come through a VPN, so the field starts at the market's
+  main city instead (chapter 10, P2 step 0).
 - **Location unknown:** a banner *Ýakynyňyzdaky ýerleri görkezeliň* (let us show places near you) above
   *Meşhur ýerler* (popular places). (client spec §4.1)
 - **Distances:** `1,2 km`; under 1 km in metres: `850 m`. (client spec §5) The code rounds to 10 m and shows whole

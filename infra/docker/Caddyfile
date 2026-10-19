@@ -1,0 +1,16 @@
+# The production-like stack's front door, like the server's shared Caddy (infra/server/edge, yeral.caddy), on plain
+# HTTP: *.localhost resolves to this machine without /etc/hosts. Client, business and cms hosts join with their apps.
+{
+	auto_https off
+}
+
+# Caddy writes the caller's address into X-Forwarded-For and drops what the caller sent (TRUSTED_IP_HEADER)
+http://api.yeral.localhost {
+	encode zstd gzip
+	reverse_proxy api:3004
+}
+
+# unknown hosts get nothing
+:80 {
+	respond 404
+}

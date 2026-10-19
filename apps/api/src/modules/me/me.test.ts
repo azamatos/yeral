@@ -123,7 +123,6 @@ describe('account', () => {
         '/v1/me/favorites/{slug}',
         '/v1/me/phone/code',
         '/v1/me/phone/verify',
-        '/v1/places/ip',
         '/v1/places/suggest',
         '/v1/search',
         '/v1/search/suggest',

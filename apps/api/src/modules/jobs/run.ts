@@ -1,5 +1,5 @@
 /**
- * `runDueJobs(deps)` every minute (ADR 0005): a Cron Trigger on Workers, a timer in the Node process.
+ * `runDueJobs(deps)` every minute (ADR 0005), from the jobs tick in the Node process.
  * 1. Requests whose hold time ran out → cancelled by the system, with 3 alternative times and an SMS.
  * 2. Confirmed visits that ended → completed.
  * 3. Queued work: SMS, reminders, review asks, demo businesses answering.

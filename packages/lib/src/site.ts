@@ -59,7 +59,7 @@ export function siteConfig({ env, domain = 'yeral.app', portBase = 3000 }: SiteO
       }
       break
     case 'docker': {
-      // the production-like stack behind nginx: *.localhost resolves to this machine without /etc/hosts
+      // the production-like stack behind Caddy: *.localhost resolves to this machine without /etc/hosts
       const base = domain.replace(/\.[^.]+$/, '.localhost')
       urls = {
         client: `http://${base}`,

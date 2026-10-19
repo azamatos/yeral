@@ -19,7 +19,7 @@ describe('seedMode', () => {
   })
 
   it('never seeds the demo into a remote database, even with --allow-remote', () => {
-    const remote = { local: false, host: 'ep-x.neon.tech' }
+    const remote = { local: false, host: 'db.example.com' }
     expect(() => assertSeedTarget({ ...remote, demo: true, allowRemote: true })).toThrow(/demo/)
     expect(() => assertSeedTarget({ ...remote, demo: false, allowRemote: false })).toThrow(/--allow-remote/)
     expect(() => assertSeedTarget({ ...remote, demo: false, allowRemote: true })).not.toThrow()

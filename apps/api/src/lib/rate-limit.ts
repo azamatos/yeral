@@ -1,4 +1,4 @@
-/** Fixed-window counters in Postgres (`rate_limits`), so limits hold across Worker isolates and Node processes. */
+/** Fixed-window counters in Postgres (`rate_limits`), so limits hold across processes and restarts. */
 import { sql } from 'drizzle-orm'
 import type { Queryable } from '../db/client'
 
@@ -27,8 +27,9 @@ export async function hit(
 export type TrustedIpHeader = 'cf-connecting-ip' | 'x-forwarded-for'
 
 /**
- * The caller's IP for rate limits, read only from the header our edge sets: Cloudflare's `CF-Connecting-IP` on Workers;
- * on the own server the last `X-Forwarded-For` entry, the one nginx appended. Nothing trusted → one shared bucket.
+ * The caller's IP for rate limits, read only from the header our edge sets: on the own server the last
+ * `X-Forwarded-For` entry, the one Caddy wrote; Cloudflare's `CF-Connecting-IP` if its proxy ever sits in front.
+ * Nothing trusted → one shared bucket.
  */
 export function clientIp(header: (name: string) => string | undefined, trusted?: TrustedIpHeader): string {
   if (trusted === 'cf-connecting-ip') return header('cf-connecting-ip')?.trim() || 'unknown'

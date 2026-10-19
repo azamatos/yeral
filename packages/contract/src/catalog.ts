@@ -167,8 +167,6 @@ export const suggestResponseSchema = z.object({
 export const placeSchema = z.object({ label: z.string(), lat: z.number(), lng: z.number() }).meta({ id: 'Place' })
 export const placeSuggestQuerySchema = langQuerySchema.extend({ q: z.string().trim().min(2).max(80) })
 export const placeListSchema = z.object({ items: z.array(placeSchema).max(6) })
-/** Location denied: the IP city, shown only inside the "Nirede?" field. */
-export const ipPlaceSchema = z.object({ place: placeSchema.nullable() })
 
 // ── Business page ──
 

@@ -1,7 +1,9 @@
 # 0005. TypeScript backend in the monorepo, on Postgres from the start
 
 - Status: Accepted 2026-10-13 (revised the same day: real database from the start instead of a demo memory store); the auth
-  library is revised by [0019](0019-own-phone-login-and-sessions.md) (own phone login and sessions)
+  library is revised by [0019](0019-own-phone-login-and-sessions.md) (own phone login and sessions); Neon, Hyperdrive and
+  the Workers runtime are dropped by [0024](0024-own-server-docker-caddy.md): Postgres 18 in Docker beside the api,
+  `pg` directly, jobs on a timer in the Node process
 - Decided by: owner (TypeScript, in this monorepo; "make a working project") + Claude (libraries)
 
 ## Context

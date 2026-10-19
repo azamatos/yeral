@@ -86,6 +86,6 @@ Every task runs through Turborepo from the root; `--filter=@yeral/<name>...` nar
 | `pnpm changeset` | describe a user-visible change for the next release |
 | `pnpm db:up` · `pnpm db:setup` | Postgres 18 in Docker; create, migrate and seed the database in `apps/api/.env.local` (API tests need it too) |
 | `pnpm db:generate` | a new SQL migration from the Drizzle schema (`apps/api/src/db/schema`) |
-| `pnpm docker:up` · `pnpm docker:down` | the production-like stack: Postgres + api + nginx on `*.yeral.localhost` |
+| `pnpm docker:up` · `pnpm docker:down` | the production-like stack: Postgres + api + Caddy on `*.yeral.localhost` |
 
 Planned with later milestones: `pnpm e2e`, `pnpm gen slice|endpoint`.

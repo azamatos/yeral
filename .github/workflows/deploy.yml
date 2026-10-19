@@ -1,7 +1,8 @@
 name: Deploy
 
 # Reusable: called by release.yml (production; there is no staging, ADR 0020); can also be run by hand.
-# Each app has a `deploy:<environment>` script. Cloudflare today; Docker over SSH on the own server later.
+# Each app has a `deploy:<environment>` script: Storybook and legacy on Cloudflare. The api and the new apps deploy to
+# the own server over SSH (book chapter 10, P2 step 7; by hand until then: infra/server/README.md).
 
 on:
   workflow_call:

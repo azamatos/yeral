@@ -399,8 +399,8 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
-| F-203 | Cloudflare services | DNS, Storybook and R2 for backups; the api and the sites run on the own server, not on Workers (ADR 0023, revised 19.10.2026). | MVP | not designed | DNS and Storybook built; the api's Workers and Neon path goes in P2 step 0 | Workers, Hyperdrive and Neon dropped for the api (owner, 19.10.2026). No staging (ADR 0020). |
-| F-204 | Docker stack | Postgres + api + Caddy in Compose, run locally, in CI and on the server. | MVP | not designed | built (`infra/docker`, `infra/server`); the local stack uses nginx until P2 step 0 |  |
+| F-203 | Cloudflare services | DNS, Storybook and R2 for backups; the api and the sites run on the own server, not on Workers (ADR 0023, revised 19.10.2026). | MVP | not designed | built: DNS, Storybook; the api's Workers and Neon path removed (ADR 0024) | Workers, Hyperdrive and Neon dropped for the api (owner, 19.10.2026). No staging (ADR 0020). |
+| F-204 | Docker stack | Postgres + api + Caddy in Compose, run locally, in CI and on the server. | MVP | not designed | built (`infra/docker`, `infra/server`; ADR 0024) |  |
 | F-205 | Own server | The owner's netcup VPS 1000 in the EU runs every app of the first launch behind a shared Caddy, with Cloudflare for DNS; the Turkmenistan launch gets a second server inside the country. | MVP | not designed | built (`infra/server`, set up 19.10.2026; not public yet) | Moved from Later (owner, 19.10.2026); chapter 10, "The server: when and what". |
 | F-206 | CI/CD and releases | GitHub Actions checks, Changesets releases, deploy with smoke check, rollback, OpenAPI docs at `/docs`. | MVP | not designed | built | Playwright end-to-end flows planned with M3, not built. |
 | F-207 | Storybook design system | `@yeral/ui` (38 components) with stories tested in Chromium with axe, at storybook.yeral.app. | MVP | drawn (DS boards) | built |  |

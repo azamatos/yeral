@@ -1,6 +1,6 @@
 /**
- * The api as one `fetch` handler (ADR 0005): the same app runs on Cloudflare Workers and on Node in Docker.
- * Entries (`entry/*.ts`) provide the dependencies; routes live in `modules/<area>/routes.ts` (systemPatterns.md).
+ * The api as one `fetch` handler (ADR 0005), served by Node in Docker (ADR 0024) and called directly by the tests.
+ * The entry (`entry/node.ts`) provides the dependencies; routes live in `modules/<area>/routes.ts` (systemPatterns.md).
  */
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { Scalar } from '@scalar/hono-api-reference'

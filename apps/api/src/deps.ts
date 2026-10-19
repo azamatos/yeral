@@ -19,15 +19,10 @@ export interface Deps {
   trustedIpHeader?: TrustedIpHeader
 }
 
-/**
- * The dependencies as both entries build them (ADR 0007). `db` may be a function: it's called on first use, so a Worker
- * request opens its database connection only when a handler queries.
- */
-export function createDeps(config: Config, db: Db | (() => Db), log: Logger = createLogger(config.logLevel, { app: 'api' })): Deps {
+/** The dependencies as the Node entry builds them (ADR 0024). */
+export function createDeps(config: Config, db: Db, log: Logger = createLogger(config.logLevel, { app: 'api' })): Deps {
   return {
-    get db() {
-      return typeof db === 'function' ? db() : db
-    },
+    db,
     site: config.site,
     now: Date.now,
     sms: logSms(log),

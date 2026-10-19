@@ -161,12 +161,6 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         queryFn: ({ signal }) => call(v1.places.suggest.$get({ query: { q, lang } }, abortWith(signal))),
         enabled: q.trim().length >= 2,
       }),
-    ipPlace: () =>
-      queryOptions({
-        queryKey: keys.ipPlace(),
-        queryFn: ({ signal }) => call(v1.places.ip.$get(undefined, abortWith(signal))),
-        staleTime: Infinity,
-      }),
     business: (slug: string, lang: Locale, position: { lat: number; lng: number } | null = null) =>
       queryOptions({
         queryKey: keys.business(slug, lang, position),

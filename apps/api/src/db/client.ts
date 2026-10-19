@@ -7,7 +7,7 @@ export type Db = NodePgDatabase<typeof schema>
 export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0]
 export type Queryable = Db | Tx
 
-/** A pool for long-running Node processes; on Workers a client per request through Hyperdrive (M2g). */
+/** One pool per Node process: the api and its jobs tick share it. */
 export function createPool(connectionString: string, max = 10): pg.Pool {
   return new pg.Pool({ connectionString, max })
 }

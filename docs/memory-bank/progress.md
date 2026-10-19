@@ -139,6 +139,12 @@
   (business app part 1) written; the owner's netcup VPS 1000 (EU) set up with a shared Caddy, Postgres and the api
   (#34, `infra/server`); the backend runs alongside the design (ADR 0021 amended); the first launch runs on that
   server (ADR 0023 revised).
+- **2026-10-19 · Backend plan reviewed, P2 step 0 done:** chapter 10's P2 checked against all 51 **Code differs**
+  items and the built api (#36): steps 0–7, with the missing fixes, photos, the address pin, notifications, team
+  accounts with a second factor, deploys, backups and alerts. Step 0: the api's Workers path, Neon and nginx removed;
+  the local Docker stack and CI use Caddy like the server, and CI validates the server's Caddy config;
+  `/v1/places/ip` removed (it only worked on Workers); the SMS log no longer keeps every message in memory;
+  `YERAL_DB_PORT` for machines where 5432 is taken ([ADR 0024](../decisions/0024-own-server-docker-caddy.md)).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.
