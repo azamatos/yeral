@@ -299,8 +299,8 @@ apps/api/src/modules/bookings/actions.ts). The code still sends a review ask by 
 | Full reports | after 30 bookings; returning clients after one full month | Fixed | business spec §14; B-Analytics screen |
 | Insight sentences | at most 1 per report section | Fixed | business spec §14 |
 
-**Code differs:** every no-show ever counts, and turning the switch off doesn't lift a limit that came from the count
-(code: packages/domain/src/clients.ts).
+The phone-only block is worked out from the bookings: on by hand, or while the no-shows since the business last
+lifted it reach the limit (code: `modules/clients/online.ts`; Q-127).
 
 > Open question Q-127: which no-shows count, and how does the phone-only limit end?
 

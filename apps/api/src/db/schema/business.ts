@@ -345,11 +345,11 @@ export const clients = pgTable(
     tags: text().array().notNull().default([]),
     noRemindersSms: boolean().notNull().default(false),
     /**
-     * "Diňe jaň arkaly ýazylyp biler": this client books here only by phone. Set by hand, or by reaching the business's
-     * no-show limit (book Q-127).
+     * "Diňe jaň arkaly ýazylyp biler" switched on by hand. The no-show limit blocks too, worked out from the bookings
+     * (book Q-127, `isClientBlocked`).
      */
     onlineBlocked: boolean().notNull().default(false),
-    /** When the business last turned the switch off: no-shows marked before then don't count toward the limit. */
+    /** When the business last lifted the block: no-shows marked before then don't count toward the limit. */
     noShowsSince: ts(),
     /** The Ýeral account with this phone, once known. */
     userId: uuid().references(() => users.id, { onDelete: 'set null' }),

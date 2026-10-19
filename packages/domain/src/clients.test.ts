@@ -41,15 +41,16 @@ describe('client segments (filter chips)', () => {
 })
 
 describe('online booking block (book Q-127)', () => {
-  it('the switch is the block', () => {
-    expect(isOnlineBlocked({ onlineBlocked: true })).toBe(true)
-    expect(isOnlineBlocked({ onlineBlocked: false })).toBe(false)
+  it('by hand, or while the no-shows since the last reset reach the limit; 0 turns the count off', () => {
+    expect(isOnlineBlocked({ onlineBlocked: false, noShows: 2 }, { blockAfterNoShows: 2 })).toBe(true)
+    expect(isOnlineBlocked({ onlineBlocked: false, noShows: 1 }, { blockAfterNoShows: 2 })).toBe(false)
+    expect(isOnlineBlocked({ onlineBlocked: false, noShows: 5 }, { blockAfterNoShows: 0 })).toBe(false)
+    expect(isOnlineBlocked({ onlineBlocked: true, noShows: 0 }, { blockAfterNoShows: 0 })).toBe(true)
   })
 
-  it('reaching the limit since the last reset turns the switch on; 0 never does', () => {
-    expect(reachesNoShowLimit(2, { blockAfterNoShows: 2 })).toBe(true)
-    expect(reachesNoShowLimit(1, { blockAfterNoShows: 2 })).toBe(false)
-    expect(reachesNoShowLimit(5, { blockAfterNoShows: 0 })).toBe(false)
+  it('the limit: reached at N, never with 0', () => {
     expect(reachesNoShowLimit(1, { blockAfterNoShows: 1 })).toBe(true)
+    expect(reachesNoShowLimit(4, { blockAfterNoShows: 5 })).toBe(false)
+    expect(reachesNoShowLimit(9, { blockAfterNoShows: 0 })).toBe(false)
   })
 })

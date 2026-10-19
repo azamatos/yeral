@@ -16,7 +16,6 @@ import {
   type AppointmentQuery,
   type AppointmentSlot,
 } from '@yeral/domain/availability'
-import { isOnlineBlocked } from '@yeral/domain/clients'
 import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { priceTotal } from '@yeral/domain/pricing'
 import { and, eq, sql } from 'drizzle-orm'
@@ -28,6 +27,7 @@ import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
+import { isClientBlocked } from '../clients/online'
 import { servicePrice } from '../catalog/map'
 import { hasSignedInTeam } from '../team/members'
 import { confirmBooking } from './confirm'
@@ -201,11 +201,11 @@ export async function onlineRefusal(
 ): Promise<'online_disabled' | 'online_blocked' | null> {
   if (!lb.rules.onlineEnabled) return 'online_disabled'
   const [known] = await db
-    .select()
+    .select({ id: clients.id, onlineBlocked: clients.onlineBlocked, noShowsSince: clients.noShowsSince })
     .from(clients)
     .where(and(eq(clients.businessId, lb.business.id), eq(clients.phone, phone)))
-  // the switch is the block; reaching the no-show limit turns it on (book Q-127)
-  if (known && isOnlineBlocked(known)) return 'online_blocked'
+  // by hand, or the no-shows since the business last lifted the block reach its limit (book Q-127)
+  if (known && (await isClientBlocked(db, known, lb.rules))) return 'online_blocked'
   return null
 }
 

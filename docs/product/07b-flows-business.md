@@ -1298,9 +1298,9 @@ flowchart TD
 
 > Open question Q-127: what counts as a no-show and how the limit ends.
 
-Code differs: the client card and *Arz et* have no endpoints yet (P2 step 4); the switch, the count from zero and turning it on at the limit are built (code: `modules/clients/online.ts`).
+Code differs: the client card and *Arz et* have no endpoints yet (P2 step 4); the block, the count from zero and the switch are built (code: `modules/clients/online.ts`).
 
-**Status** — Design: drawn (B-Client · settings; Venue and Booking · `restricted`) · Code: rule only (domain: block after N no-shows or by hand).
+**Status** — Design: drawn (B-Client · settings; Venue and Booking · `restricted`) · Code: the rule and the switch (api `modules/clients/online.ts`); the client card's endpoint comes with P2 step 4.
 
 ### B-36 · Delete a client
 

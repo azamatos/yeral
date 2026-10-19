@@ -166,8 +166,9 @@ MVP. (business spec §3; Q-031, decided 18.10.2026)
 - After a set number of no-shows at one business (default 2), that client can book there only by phone.
   (business spec §3, §8) Reaching the number turns on the client card's switch *Diňe jaň arkaly ýazylyp biler*; the
   business can turn it off, and counting starts again from zero: only no-shows marked after that count. (Q-127,
-  decided 18.10.2026; code: `modules/clients/online.ts`) A new limit applies from the next no-show on; it doesn't
-  switch anyone on or off by itself (Claude (delegated), 20.10.2026).
+  decided 18.10.2026) How: the switch is on by hand, or while the no-shows since the business last turned it off reach the limit; it's worked
+  out from the bookings, so removing a wrong no-show (Q-207) or setting the limit to 0 lifts a block that came from the
+  count (Claude (delegated), 20.10.2026; code: `modules/clients/online.ts`).
 - There are no Ýeral-wide client blocks at launch; client karma comes later (F-241; Q-012, decided 18.10.2026).
 
 ## The business's clients
