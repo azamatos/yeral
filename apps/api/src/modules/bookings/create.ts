@@ -18,6 +18,7 @@ import {
 } from '@yeral/domain/availability'
 import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { priceTotal } from '@yeral/domain/pricing'
+import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, classSessions, clients, jobs } from '../../db/schema'
@@ -67,6 +68,8 @@ interface Insert {
   status: 'pending' | 'confirmed'
   note?: string
   rescheduleOf?: string
+  /** A move's deadline never runs past the original visit's start (book Q-263). */
+  holdCap?: number
   alternativeOf?: string
 }
 
@@ -103,10 +106,13 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       holdUntil:
         x.status === 'pending'
           ? new Date(
-              holdUntilOf(now, { date: x.date, start: x.start }, x.lb.rules.holdMinutes, {
-                hours: x.lb.business.hours,
-                exceptions: x.lb.business.exceptions,
-              }),
+              Math.min(
+                holdUntilOf(now, { date: x.date, start: x.start }, x.lb.rules.holdMinutes, {
+                  hours: x.lb.business.hours,
+                  exceptions: x.lb.business.exceptions,
+                }),
+                x.holdCap ?? Infinity,
+              ),
             )
           : null,
       rescheduleOf: x.rescheduleOf ?? null,
@@ -315,20 +321,17 @@ export async function bookedServices(db: Queryable, bookingId: string): Promise<
 }
 
 /**
- * Who a re-booked time goes to: the named one only when `to` names a specialist (an offered time, book Q-159); else the
- * booking's own specialist, or anyone free when they're busy. The offered times' state asks the same question.
+ * Who a re-booked time goes to, never someone else silently (ROUND6 A5, book Q-159): the specialist `to` names, anyone
+ * free for null («Islendik hünärmen»), or the booking's own specialist when it names none. A move doesn't count the
+ * booking's own time as busy (Q-165). The offered times' state asks the same question.
  */
-export function rebookQueries(
+export function rebookQuery(
   booked: { serviceIds: string[]; staffId: string | null },
   to: { date: string; staffId?: string | null },
-): AppointmentQuery[] {
-  const base = { date: to.date, serviceIds: booked.serviceIds, by: 'client' as const }
-  if (to.staffId !== undefined) return [{ ...base, staffId: to.staffId, oneSpecialist: !!to.staffId }]
-  if (booked.staffId === null) return [{ ...base, staffId: null }]
-  return [
-    { ...base, staffId: booked.staffId },
-    { ...base, staffId: null },
-  ]
+  excludeBookingId?: string,
+): AppointmentQuery {
+  const staffId = to.staffId === undefined ? booked.staffId : to.staffId
+  return { date: to.date, serviceIds: booked.serviceIds, by: 'client', staffId, oneSpecialist: !!staffId, excludeBookingId }
 }
 
 /**
@@ -346,15 +349,9 @@ export async function rebook(
   const lb = (await loadBusinesses(db, [from.businessId])).get(from.businessId)
   if (!lb) throw new ApiError('not_found')
   if (from.type !== 'appointment') throw new ApiError('not_bookable')
-  const [first, fallback] = rebookQueries(await bookedServices(db, from.id), to)
-  let slot: AppointmentSlot
-  try {
-    slot = await placeAppointment(deps, lb, first!, to.start, 'client', db)
-  } catch (e) {
-    // the same specialist may be busy now: any free specialist will do
-    if (!fallback) throw e
-    slot = await placeAppointment(deps, lb, fallback, to.start, 'client', db)
-  }
+  const move = opts.rescheduleOf === from.id
+  const query = rebookQuery(await bookedServices(db, from.id), to, move ? from.id : undefined)
+  const slot = await placeAppointment(deps, lb, query, to.start, 'client', db)
   return inTransaction(
     deps,
     (tx) =>
@@ -368,6 +365,7 @@ export async function rebook(
         status: opts.status,
         note: from.clientNote ?? undefined,
         rescheduleOf: opts.rescheduleOf,
+        holdCap: move ? epochOf(from.date, from.start) : undefined,
         alternativeOf: opts.alternativeOf,
       }),
     () => Promise.resolve([]),

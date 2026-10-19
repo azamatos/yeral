@@ -29,6 +29,8 @@ import type { Deps } from '../../deps'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json } from '../../http/openapi'
+import { requireUser } from '../auth/session'
+import { myBooking } from '../bookings/repo'
 import { publicBusiness } from '../catalog/detail'
 import { text } from '../catalog/map'
 import { appointmentContext, loadBusinesses, loadBusy, loadTableContext } from './context'
@@ -55,7 +57,7 @@ const appointmentRoute = createRoute({
   tags: ['availability'],
   summary: 'Free starts for services (and a specialist or «Islendik»), with the 14-day strip',
   request: { params: slugParam, query: appointmentAvailabilityQuerySchema },
-  responses: { 200: json(appointmentAvailabilitySchema), 404: errors[404] },
+  responses: { 200: json(appointmentAvailabilitySchema), 401: errors[401], 404: errors[404] },
 })
 
 const specialistsRoute = createRoute({
@@ -97,7 +99,10 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const ctx = appointmentContext(lb, await loadBusy(deps.db, [lb.business.id], first, last), now)
     const staffId = q.staff === 'any' ? null : q.staff
     checkQuery(ctx, q.services, staffId)
-    const query = { serviceIds: q.services, staffId, by: 'client' as const }
+    // move mode: the client's own booking doesn't count as busy (book Q-165)
+    const moving = q.move ? await myBooking(deps.db, requireUser(c).id, q.move) : null
+    if (moving && moving.businessId !== lb.business.id) throw new ApiError('not_found')
+    const query = { serviceIds: q.services, staffId, by: 'client' as const, excludeBookingId: moving?.id }
     const online = lb.rules.onlineEnabled
     const slotsOn = (d: string) => (online ? appointmentSlots(ctx, { ...query, date: d }) : [])
     const days = Array.from({ length: q.days }, (_, i) => {

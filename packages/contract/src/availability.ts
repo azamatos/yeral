@@ -3,6 +3,7 @@
  */
 import { z } from 'zod'
 import {
+  bookingCodeSchema,
   epochSchema,
   idListQuery,
   idSchema,
@@ -32,6 +33,11 @@ export const appointmentAvailabilityQuerySchema = langQuerySchema.extend({
   staff: z.union([z.literal('any'), idSchema]).default('any'),
   date: ymdSchema.optional(),
   days: z.coerce.number().int().min(1).max(31).default(14),
+  /**
+   * Move mode (book Q-165): the signed-in client's booking being moved; its own time doesn't count as busy, so a new
+   * time may overlap it with the same specialist.
+   */
+  move: bookingCodeSchema.optional(),
 })
 
 export const appointmentAvailabilitySchema = z

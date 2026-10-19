@@ -71,6 +71,13 @@
       "when": 1792448336944,
       "tag": "0009_noshow_restart",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792449700752,
+      "tag": "0010_move_overlap",
+      "breakpoints": true
     }
   ]
 }

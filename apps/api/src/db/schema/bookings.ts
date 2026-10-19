@@ -119,6 +119,13 @@ export const bookingItems = pgTable(
     priceAmount: integer().notNull(),
     /** Its booking's `active`, copied by a trigger (migration 0003) whenever either row changes. */
     active: boolean().notNull().default(false),
+    /**
+     * The booking whose time this is: a move request's items belong to the booking it would move, so the two may overlap
+     * with the same specialist (book Q-165); everything else may not. Set by the same trigger (migration 0010).
+     */
+    family: uuid()
+      .notNull()
+      .default(sql`gen_random_uuid()`),
     /** Absolute business-local minutes, buffer included: an item late on one day and one early the next can collide. */
     span: int4range().generatedAlwaysAs(
       sql`int4range(("date" - date '2000-01-01') * 1440 + "start", ("date" - date '2000-01-01') * 1440 + "end" + "buffer_after")`,
