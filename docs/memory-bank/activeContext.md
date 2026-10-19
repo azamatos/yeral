@@ -122,5 +122,5 @@ The product book is closed (2026-10-18, no open question). The build plan is its
 2. **P3 · Components** in Storybook from v0.6.
 3. **P4 · Apps slice by slice** (Q-001 order); each slice brings its backend work (P2 list in chapter 10). One track
    at a time (owner, 2026-10-19), so ADR 0021's order stands.
-4. **P5 · First launch** on the owner's netcup VPS 1000 (EU, bought 2026-10-19); server configs come when the apps
+4. **P5 · First launch** on the owner's netcup VPS 1000 (EU, chosen 2026-10-19); server configs come when the apps
    are ready. **P6 · Turkmenistan launch** with a second server inside the country.

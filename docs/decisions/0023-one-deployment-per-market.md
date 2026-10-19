@@ -41,7 +41,7 @@ an own server (Docker + nginx) later.
   countries (the Ýeral team uses each market's CMS).
 - Now: build the market settings as configuration while coding (ADR 0022 lists the constants to replace). Nothing else
   changes for the first launch.
-- Servers: the owner's netcup VPS 1000 (EU, bought 2026-10-19) runs the first launch; the Turkmenistan deployment
+- Servers: the owner's netcup VPS 1000 (EU, chosen 2026-10-19) runs the first launch; the Turkmenistan deployment
   needs a second one inside the country (product book chapter 1,
   "Launch").
 

@@ -109,7 +109,7 @@ The domain yeral.app is already paid for.
 
 ## The server: when and what
 
-**For the first launch:** the owner bought a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB) on 19.10.2026, also for other projects
+**For the first launch:** the owner chose a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB) on 19.10.2026, also for other projects
 later. OVHcloud's plans were out of stock; Hetzner's cheap plans are gone. Its addresses are in ranges Turkmenistan
 blocks, so people there use a VPN, as decided (Q-032).
 

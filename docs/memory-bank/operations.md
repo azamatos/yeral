@@ -31,7 +31,7 @@ the DNS record and the certificate. No dashboard work per subdomain.
 | `storybook.yeral.app` | `yeral-storybook` | static assets |
 
 **Cost now:** Workers Free (100k requests/day, 10 ms CPU per request) until SSR and the api need more, then Workers Paid
-$5/month; Neon, R2 (10 GB), Sentry and Cloudflare Web Analytics on free tiers. The api was never deployed here: on 2026-10-19 the owner bought a netcup VPS 1000 (EU) for the first launch and
+$5/month; Neon, R2 (10 GB), Sentry and Cloudflare Web Analytics on free tiers. The api was never deployed here: on 2026-10-19 the owner chose a netcup VPS 1000 (EU) for the first launch and
 other projects (ADR 0023, revised); its configs are written when the apps are ready to deploy. A Hyperdrive config
 `yeral-production` was created on 2026-10-18 and is unused (free; ask the owner before deleting it).
 
