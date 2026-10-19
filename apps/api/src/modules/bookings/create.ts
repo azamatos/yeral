@@ -50,14 +50,6 @@ async function clientFor(db: Queryable, businessId: string, user: User): Promise
   return row
 }
 
-async function noShowsOf(db: Queryable, clientId: string): Promise<number> {
-  const [row] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(bookings)
-    .where(and(eq(bookings.clientId, clientId), eq(bookings.status, 'noshow')))
-  return row?.n ?? 0
-}
-
 export interface Placement {
   /** Appointment: the plan from the domain. */
   slot?: AppointmentSlot
@@ -212,8 +204,8 @@ export async function onlineRefusal(
     .select()
     .from(clients)
     .where(and(eq(clients.businessId, lb.business.id), eq(clients.phone, phone)))
-  if (known && isOnlineBlocked({ onlineBlocked: known.onlineBlocked, noShows: await noShowsOf(db, known.id) }, lb.rules))
-    return 'online_blocked'
+  // the switch is the block; reaching the no-show limit turns it on (book Q-127)
+  if (known && isOnlineBlocked(known)) return 'online_blocked'
   return null
 }
 

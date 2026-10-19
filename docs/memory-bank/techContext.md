@@ -104,7 +104,8 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | invites | `INVITE_DAYS inviteState() inviteExpiresAt()` | `@yeral/domain/team` |
 | who is on which team (api) | `signsIn` condition, `teamsOf() workspaceIdsOf() hasSignedInTeam()` | `apps/api/src/modules/team/members.ts` |
 | a workspace route's member and actor (api) | `requireMember(c, slug)` (404 when not on the team), `teamRow() issueInvite() members()` | `apps/api/src/modules/team/service.ts` |
-| client stats, segments, online block | `clientStats() clientSegments() isOnlineBlocked()` | `@yeral/domain/clients` |
+| client stats, segments, online block | `clientStats() clientSegments() isOnlineBlocked() reachesNoShowLimit()` | `@yeral/domain/clients` |
+| the phone-only switch and the no-show count (api) | `afterNoShow() setOnlineBlocked() noShowsSinceReset()` | `apps/api/src/modules/clients/online.ts` |
 | price totals, calendar day summary | `priceTotal() daySummary()` | `@yeral/domain/pricing` |
 | distances, radius box, the city a position is in | `distanceM() boundingBox() popularity() nearestCity()`; the market's main city: `MARKET.mainCity` | `@yeral/domain/geo` |
 | the market's cities, a business's city in the reader's language (api) | `loadCities() cityRefOf()` | `apps/api/src/modules/catalog/cities.ts` |

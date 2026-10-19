@@ -62,10 +62,16 @@ export function clientSegments(visits: readonly ClientVisit[], complaints: numbe
   return out
 }
 
-/** Online booking is closed for this client: blocked by hand ("Diňe jaň arkaly"), or too many no-shows. */
-export function isOnlineBlocked(
-  client: { onlineBlocked: boolean; noShows: number },
-  rules: Pick<BookingRules, 'blockAfterNoShows'>,
-): boolean {
-  return client.onlineBlocked || (rules.blockAfterNoShows > 0 && client.noShows >= rules.blockAfterNoShows)
+/**
+ * Online booking is closed for this client: the card's switch "Diňe jaň arkaly ýazylyp biler" is on (book Q-127). The
+ * switch is the only block; reaching the no-show limit turns it on (`reachesNoShowLimit`).
+ */
+export const isOnlineBlocked = (client: { onlineBlocked: boolean }): boolean => client.onlineBlocked
+
+/**
+ * Whether the no-shows counted since the business last turned the switch off reach its limit, which turns the switch
+ * on (book Q-127). A limit of 0 never does.
+ */
+export function reachesNoShowLimit(noShowsSinceReset: number, rules: Pick<BookingRules, 'blockAfterNoShows'>): boolean {
+  return rules.blockAfterNoShows > 0 && noShowsSinceReset >= rules.blockAfterNoShows
 }

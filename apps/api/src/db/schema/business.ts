@@ -344,7 +344,13 @@ export const clients = pgTable(
     source: clientSource(),
     tags: text().array().notNull().default([]),
     noRemindersSms: boolean().notNull().default(false),
+    /**
+     * "Diňe jaň arkaly ýazylyp biler": this client books here only by phone. Set by hand, or by reaching the business's
+     * no-show limit (book Q-127).
+     */
     onlineBlocked: boolean().notNull().default(false),
+    /** When the business last turned the switch off: no-shows marked before then don't count toward the limit. */
+    noShowsSince: ts(),
     /** The Ýeral account with this phone, once known. */
     userId: uuid().references(() => users.id, { onDelete: 'set null' }),
     createdAt: createdAt(),

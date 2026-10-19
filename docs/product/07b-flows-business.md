@@ -1298,7 +1298,7 @@ flowchart TD
 
 > Open question Q-127: what counts as a no-show and how the limit ends.
 
-Code differs: the code treats a client as blocked whenever their no-show count reaches N, so switching the block off on the card would have no effect. Q-127 lets the business lift it and starts the count again from zero.
+Code differs: the client card and *Arz et* have no endpoints yet (P2 step 4); the switch, the count from zero and turning it on at the limit are built (code: `modules/clients/online.ts`).
 
 **Status** — Design: drawn (B-Client · settings; Venue and Booking · `restricted`) · Code: rule only (domain: block after N no-shows or by hand).
 

@@ -172,7 +172,7 @@ flowchart TD
 
 - The limit is per business, so other businesses aren't affected (business spec §3; code). There are no Ýeral-wide client blocks at launch; client karma comes later (F-241; Q-012).
 - The client can still take times the business offered after a decline online (ROUND6 A7).
-- **Code differs:** the code doesn't switch anything on. It counts every no-show ever at the moment of each online booking, so a new limit applies to every client at once, setting it to 0 lifts every automatic block, and the client-card switch can't lift a block that came from the count.
+- A new limit applies from the next no-show on: changing it, or setting it to 0, switches no one on or off by itself (Claude (delegated), 20.10.2026). (code: `modules/clients/online.ts`; *Arz et* calls it with P2 step 4)
 
 > Open question Q-127: no-shows: what counts and how the limit ends.
 
