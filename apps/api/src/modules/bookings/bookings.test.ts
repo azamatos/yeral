@@ -72,7 +72,7 @@ describe('client bookings', () => {
     const ok = await b.req('/v1/bookings', { body: { type: 'class', business: 'aydyn-yoga', sessionId: thuMorning.id, seats: 2 } })
     expect(ok.json).toMatchObject({
       status: 'confirmed',
-      what: { type: 'class', session: 'Irden akym', trainer: 'Aýgözel', seats: 2 },
+      what: { type: 'class', session: 'Morning flow', trainer: 'Aýgözel', seats: 2 },
       price: { amount: 90 },
     })
     const full = sessions.find((s) => s.date === '2026-10-14' && s.start === 1200)!
@@ -91,8 +91,8 @@ describe('client bookings', () => {
     expect(res.status).toBe(201)
     expect(res.json).toMatchObject({
       status: 'pending',
-      business: { slug: 'glow-studio', name: 'Glow Studio', category: 'Gözellik salony' },
-      what: { type: 'appointment', items: [{ service: 'Aýal saç kesimi', staff: 'Aýna', start: 600, end: 660 }] },
+      business: { slug: 'glow-studio', name: 'Glow Studio', category: 'Beauty salon' },
+      what: { type: 'appointment', items: [{ service: "Women's haircut", staff: 'Aýna', start: 600, end: 660 }] },
       price: { type: 'fixed', amount: 80 },
       holdUntil: DEMO_NOW + 30 * MIN,
       clientNote: 'Uzyn saç',
@@ -155,7 +155,7 @@ describe('client bookings', () => {
     await runDueJobs(t.deps)
     expect(t.sms.sent.at(-1)).toEqual({
       to: '+99365111005',
-      text: `Ýeral: Barber Loft ýazylyşyňyzy tassyklady. Penşenbe, 15 oktýabr, 11:00. Üýtgetmek: localhost:3001/b/${res.json.code}`,
+      text: `Ýeral: Barber Loft confirmed your booking. Thursday, 15 October, 11:00. Change: localhost:3001/b/${res.json.code}`,
     })
     // reminders are queued for later
     const queued = await db.select().from(jobs).where(eq(jobs.kind, 'booking.sms'))
@@ -174,7 +174,8 @@ describe('client bookings', () => {
     expect(detail.json).toMatchObject({ status: 'cancelled', cancelledBy: 'system' })
     expect(detail.json.timeline.at(-1).event).toBe('expired')
     expect(detail.json.expiredAlternatives).toHaveLength(3)
-    expect(t.sms.sent.at(-1)?.text).toMatch(/^Ýeral: Glow Studio wagtynda jogap bermedi\. Şu boş wagtlar bar: .+ — localhost:3001\/b\/YR-/)
+    // in the market's main language: this client never chose one (book Q-292)
+    expect(t.sms.sent.at(-1)?.text).toMatch(/^Ýeral: Glow Studio didn't answer in time\. Free times: .+ — localhost:3001\/b\/YR-/)
     // picking one of them sends a new request
     const again = await b.req(`/v1/me/bookings/${json.code}/accept-alternative`, { body: { source: 'expired', index: 0 } })
     expect(again.json).toMatchObject({ status: 'pending' })
@@ -205,7 +206,7 @@ describe('client bookings', () => {
     expect(after!.reviewsCount).toBe(before!.reviewsCount + 1)
     expect((await b.req(`/v1/me/bookings/${json.code}/review`, { body: { rating: 5 } })).json.error.code).toBe('review_exists')
     const reviews = await b.req('/v1/businesses/barber-loft/reviews')
-    expect(reviews.json.items[0]).toMatchObject({ author: 'Sona P.', rating: 4, what: 'Sakgal düzediş · Merdan' })
+    expect(reviews.json.items[0]).toMatchObject({ author: 'Sona P.', rating: 4, what: 'Beard trim · Merdan' })
     const inRussian = await b.req('/v1/businesses/barber-loft/reviews?lang=ru')
     expect(inRussian.json.items[0]).toMatchObject({ what: 'Оформление бороды · Merdan' })
     t.clock.now += 8 * 86_400_000
@@ -218,14 +219,14 @@ describe('client bookings', () => {
     const b = browser(t.app)
     await b.login('+99365111008', 'Gözel')
     const detail = await b.req('/v1/businesses/bag-kafe')
-    const terrace = detail.json.tables.areas.find((a: { name: string }) => a.name === 'Terrasa')
+    const terrace = detail.json.tables.areas.find((a: { name: string }) => a.name === 'Terrace')
     const res = await b.req('/v1/bookings', {
       body: { type: 'table', business: 'bag-kafe', partySize: 3, areaId: terrace.id, date: THU, start: 1140, requests: ['Doglan gün'] },
     })
     expect(res.status).toBe(201)
     expect(res.json).toMatchObject({
       status: 'pending',
-      what: { type: 'table', partySize: 3, area: 'Terrasa', requests: ['Doglan gün'] },
+      what: { type: 'table', partySize: 3, area: 'Terrace', requests: ['Doglan gün'] },
       price: null,
     })
     const [row] = await db.select().from(bookings).where(eq(bookings.code, res.json.code))

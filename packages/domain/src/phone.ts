@@ -1,47 +1,61 @@
 /**
- * Turkmen phone numbers: country code 993 + 8 national digits. Stored as E.164 (`+99365123456`), shown as
- * `+993 65 12 34 56` (design: PhoneInput with a fixed +993 prefix).
+ * Phone numbers by the market's rules (`MARKET.phone`; Turkmenistan: country code 993 + 8 national digits). Stored as
+ * E.164 (`+99365123456`), shown grouped (`+993 65 12 34 56`; design: PhoneInput with a fixed country code in front).
  */
+import { MARKET } from './market'
 
-const NATIONAL_DIGITS = 8
-const COUNTRY = '993'
+const RULES = MARKET.phone
+const COUNTRY = RULES.countryCode
 
 /**
- * The digits after the country code (993) or the trunk prefix (8), as typed. National numbers start with 1–7, never
- * with 8 or 9, so a leading 993 or 8 is always a prefix, even in partial input; a '+' followed by part of 993 is too.
- * The 8 can also follow the 993: a field that shows "+993" gets the local form "8 65 …" typed after it.
+ * The digits after the country code or the trunk prefix, as typed. No national number starts with the trunk prefix or
+ * the country code's first digit (`PhoneRules.valid`), so a leading country code or trunk prefix is always a prefix,
+ * even in partial input; a '+' followed by part of the country code is too. The trunk prefix can also follow the
+ * country code: a field that shows "+993" gets the local form "8 65 …" typed after it.
  */
 function afterPrefix(raw: string): string {
   const digits = raw.replace(/\D/g, '')
   if (raw.trim().startsWith('+') && COUNTRY.startsWith(digits)) return ''
   const rest = digits.startsWith(COUNTRY) ? digits.slice(COUNTRY.length) : digits
-  return rest.startsWith('8') ? rest.slice(1) : rest
+  return rest.startsWith(RULES.trunkPrefix) ? rest.slice(RULES.trunkPrefix.length) : rest
 }
 
-/** The 8 national digits from any input ('+993 65 12-34-56', '99365123456', '8 65 123456'); may be shorter while typing. */
+/** The national digits from any input ('+993 65 12-34-56', '99365123456', '8 65 123456'); may be shorter while typing. */
 export function nationalDigits(raw: string): string {
-  return afterPrefix(raw).slice(0, NATIONAL_DIGITS)
+  return afterPrefix(raw).slice(0, RULES.length)
 }
 
-/** A complete Turkmen number. */
+/** A complete number of this market. */
 export function isPhone(raw: string): boolean {
-  return /^[1-7]\d{7}$/.test(afterPrefix(raw))
+  return RULES.valid.test(afterPrefix(raw))
 }
 
-/** Mobile numbers start with 6 or 7 (61–65, 71 today); only they can receive the login code. */
+/** Only mobile numbers can receive the sign-in code (Turkmenistan: 6 or 7 first, 61–65 and 71 today). */
 export function isMobile(raw: string): boolean {
-  return isPhone(raw) && /^[67]/.test(nationalDigits(raw))
+  return isPhone(raw) && RULES.mobile.test(nationalDigits(raw))
 }
 
 /** E.164 for storage and lookups: '+99365123456'. Throws on an incomplete number; validate with isPhone first. */
 export function toE164(raw: string): string {
-  if (!isPhone(raw)) throw new Error(`Not a Turkmen phone number: ${raw}`)
-  return `+993${nationalDigits(raw)}`
+  if (!isPhone(raw)) throw new Error(`Not a phone number of this market: ${raw}`)
+  return `+${COUNTRY}${nationalDigits(raw)}`
 }
+
+/** E.164 of this market, for schemas: `+993` and the national digits. */
+export const E164 = new RegExp(`^\\+${COUNTRY}\\d{${RULES.length}}$`)
+
+/** The country code as shown in front of the number: '+993'. */
+export const COUNTRY_PREFIX = `+${COUNTRY}`
 
 /** '+993 65 12 34 56'; partial input is grouped as far as it goes. */
 export function formatPhone(raw: string): string {
   const d = nationalDigits(raw)
-  const groups = [d.slice(0, 2), d.slice(2, 4), d.slice(4, 6), d.slice(6, 8)].filter(Boolean)
-  return ['+993', ...groups].join(' ')
+  const groups: string[] = []
+  let at = 0
+  for (const size of RULES.groups) {
+    const part = d.slice(at, at + size)
+    if (part) groups.push(part)
+    at += size
+  }
+  return [COUNTRY_PREFIX, ...groups].join(' ')
 }

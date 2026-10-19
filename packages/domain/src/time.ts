@@ -1,15 +1,17 @@
 /**
  * Business-local time. Every rule runs in the business's time zone, whatever the browser's or the server's zone is:
- * a booking at 15:00 is 15:00 at the place. Today every business is in Asia/Ashgabat (UTC+5, no daylight saving), so
- * the offset is a constant; a second zone would add a `zone` argument here and nowhere else.
+ * a booking at 15:00 is 15:00 at the place. Every business uses the market's zone (Turkmenistan: Asia/Ashgabat, UTC+5,
+ * no daylight saving), so the offset is a constant of the deployment (`MARKET`, ADR 0023).
  *
  * Conventions (systemPatterns.md): dates are 'YYYY-MM-DD' strings, times of day are minutes from midnight
  * (870 = 14:30), instants are epoch milliseconds. Functions that need "now" take it as the last argument
  * (default Date.now()), so the api can pass its clock and tests can pass a fixed instant.
  */
+import { MARKET } from './market'
 
-export const ZONE = 'Asia/Ashgabat'
-const OFFSET_MIN = 5 * 60
+/** The IANA zone every business of this market is in. */
+export const ZONE = MARKET.timeZone
+const OFFSET_MIN = MARKET.utcOffsetMin
 const DAY_MS = 86_400_000
 
 export const pad2 = (n: number) => String(n).padStart(2, '0')
@@ -53,7 +55,7 @@ export function diffDays(a: string, b: string): number {
   return Math.round((parseYmd(a).getTime() - parseYmd(b).getTime()) / DAY_MS)
 }
 
-/** Day of the week, 0 = Monday … 6 = Sunday (Turkmen weeks start on Monday). */
+/** Day of the week, 0 = Monday … 6 = Sunday (the order of stored hours and of the week on screen). */
 export function dow(s: string): number {
   return (parseYmd(s).getUTCDay() + 6) % 7
 }

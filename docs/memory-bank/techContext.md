@@ -89,8 +89,10 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | design-system components | `import { Button } from '@yeral/ui/button'` (subpath per component folder) | `@yeral/ui/*` |
 | logo, brand images | `Logo`, `brand` | `@yeral/ui/brand` |
 | app-wide providers | `UIProvider` (Lucide stroke 1.75, tooltip delay), `Toaster` | `@yeral/ui/provider`, `@yeral/ui/toast` |
+| the market's settings: languages, currency, phone rules, time zone (ADR 0023) | `MARKET` (one per deployment) | `@yeral/domain/market` |
 | business today / now, date maths | `today() nowMin() localOf() epochOf() addDays() diffDays() dow() parseYmd() hm() parseHm()` (pass `now` for a fixed clock) | `@yeral/domain/time` |
-| enums shared with the contract and the database, `Localized` text | `BOOKING_STATUSES BOOKING_SOURCES CONFIRM_MODES …`, `localized()` | `@yeral/domain/model` |
+| enums shared with the contract and the database, `Localized` text | `BOOKING_STATUSES BOOKING_SOURCES CONFIRM_MODES …`, `localized()` (asked language → market's main → any written) | `@yeral/domain/model` |
+| `Localized` jsonb in SQL | `textIn(col, lang)` (same fallback), `anyTextLike(col, …patterns)` (search in every language) | `apps/api/src/db/localized.ts` |
 | booking rules: defaults, option lists, validation | `DEFAULT_RULES RULE_OPTIONS rulesErrors()` | `@yeral/domain/rules` |
 | opening hours, special days, staff shifts and breaks | `businessDay() staffDay() workingIntervals() staffOffReason() openState()` | `@yeral/domain/hours` |
 | free times: appointment, table, class | `appointmentSlots() findAppointmentSlot() nearestSlots() nextFreeSlot() checkPlan() busyOf() tableSlots() assignTable() maxSeats()` | `@yeral/domain/availability` |
@@ -99,10 +101,10 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | client stats, segments, online block | `clientStats() clientSegments() isOnlineBlocked()` | `@yeral/domain/clients` |
 | price totals, calendar day summary | `priceTotal() daySummary()` | `@yeral/domain/pricing` |
 | distances, radius box | `distanceM() boundingBox() popularity()` | `@yeral/domain/geo` |
-| `+993` phones | `isPhone() isMobile() toE164() formatPhone()` | `@yeral/domain/phone` |
+| phones by the market's rules (`+993`) | `isPhone() isMobile() toE164() formatPhone() E164 COUNTRY_PREFIX` | `@yeral/domain/phone` |
 | ids, booking codes | `newId() bookingCode()` | `@yeral/domain/id` |
 | money, prices, durations, distances, dates on screen | `useFmt()` in components, `createFmt(locale)` elsewhere (`money price rating duration distance time timeRange dayMonth shortDate weekdayDate monthYear relativeDay phone`) | `@yeral/i18n` |
-| locales, shared messages (`common`, `status`, `fmt`) | `LOCALES DEFAULT_LOCALE isLocale() messages` | `@yeral/i18n` |
+| locales, shared messages (`common`, `status`, `fmt`, `sms`) | `LOCALES` (translated) `MARKET_LOCALES` (offered) `DEFAULT_LOCALE` (market's main) `isLocale() messages` | `@yeral/i18n` |
 | site URLs, cookie domain and prefix, allowed origins, demo flag | `siteConfig({ env, domain, portBase })`, `siteFromEnv(env, 'VITE_')` | `@yeral/lib/site` |
 | add to calendar *(M3)* | `buildIcs() downloadIcs()` | `@yeral/lib/ics` |
 | directions, call *(M3)* | `directionsUrl() telHref()` | `@yeral/lib/links` |

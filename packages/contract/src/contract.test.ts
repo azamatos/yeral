@@ -95,7 +95,8 @@ describe('query strings', () => {
   it('search coerces text and applies defaults', () => {
     const q = searchQuerySchema.parse({ q: ' saç ', lat: '37.95', lng: '58.38', openNow: '1', bbox: '37.9,58.3,38.0,58.4' })
     expect(q).toMatchObject({
-      lang: 'tk',
+      // the market's main language (English for the first launch)
+      lang: 'en',
       q: 'saç',
       lat: 37.95,
       r: 5,

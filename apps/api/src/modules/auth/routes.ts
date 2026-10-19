@@ -1,6 +1,7 @@
 /** Phone login (ADR 0019): send a code, verify it, log out. */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import { sendCodeResponseSchema, sendCodeSchema, verifyCodeResponseSchema, verifyCodeSchema } from '@yeral/contract/account'
+import { MARKET } from '@yeral/domain/market'
 import { and, eq, isNull } from 'drizzle-orm'
 import { bookings, clients, memberships, staff, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
@@ -38,7 +39,7 @@ export const authRoutes = new OpenAPIHono<AppEnv>()
       phone,
       purpose: 'login',
       ip: clientIp((n) => c.req.header(n), c.var.deps.trustedIpHeader),
-      lang: known?.lang ?? lang ?? 'tk',
+      lang: known?.lang ?? lang ?? MARKET.defaultLanguage,
     })
     return c.json(res, 200)
   })
@@ -52,7 +53,7 @@ export const authRoutes = new OpenAPIHono<AppEnv>()
       if (!user)
         [user] = await tx
           .insert(users)
-          .values({ phone, lang: lang ?? 'tk' })
+          .values({ phone, lang: lang ?? MARKET.defaultLanguage })
           .returning()
       if (!user) throw new Error('user insert failed')
       // the same phone may already be known: an invitation to a team, a business's client list, phone bookings

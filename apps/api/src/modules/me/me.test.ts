@@ -45,7 +45,7 @@ describe('account', () => {
     await b.login('+99365222002', 'Kemal')
     expect((await b.req('/v1/me/phone/code', { body: { phone: '+99365901122' } })).json.error.code).toBe('phone_taken')
     expect((await b.req('/v1/me/phone/code', { body: { phone: '+99365222003' } })).status).toBe(200)
-    expect(t.sms.sent.at(-1)).toEqual({ to: '+99365222003', text: 'Ýeral kody: 1234', secret: true })
+    expect(t.sms.sent.at(-1)).toEqual({ to: '+99365222003', text: 'Ýeral code: 1234', secret: true })
     const res = await b.req('/v1/me/phone/verify', { body: { phone: '+99365222003', code: '1234' } })
     expect(res.json.phone).toBe('+99365222003')
   })

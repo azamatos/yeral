@@ -1,6 +1,7 @@
 # 0023. One code base, one deployment per market
 
-- Status: Accepted 2026-10-18; revised 2026-10-19: the first launch runs on the owner's own server, not on Cloudflare
+- Status: Accepted 2026-10-18; revised 2026-10-19: the first launch runs on the owner's own server, not on Cloudflare,
+  and the market's settings are one constant until a second market exists
 - Decided by: owner (one deployment per country, first launch on Cloudflare, Turkmenistan later on its own servers:
   product book Q-131, Q-032, Q-037, 18.10.2026) + Claude (what a deployment holds, what stays shared)
 
@@ -20,9 +21,13 @@ an own server (Docker + nginx) later.
 
 - **A market is a deployment.** One code base and one release; each market runs its own copy: client site, business
   app, CMS, api, jobs and its own database, under its own addresses. No data is shared between markets.
-- **A market's settings** live in one place and are read at runtime: languages and the default one, currency and money
+- **A market's settings** live in one place, `@yeral/domain/market`: languages and the default one, currency and money
   format, phone code and number rules, time zone, SMS provider and sender, legal texts, map area. Nothing
-  country-specific is hard-coded (AGENTS rule 5).
+  country-specific is hard-coded (AGENTS rule 5). Revised 2026-10-19: while there is one market, `MARKET` is a
+  constant of the code base rather than read at runtime: the Turkmenistan launch keeps these settings and only adds
+  languages, and a runtime choice would thread the market through every time, phone and money function and every
+  schema for nothing. A second market adds its `Market` and picks it per deployment from the environment. Settings
+  with no code yet (legal texts, SMS provider, map area) join with their features.
 - **The first launch** is one market, in English, on the owner's own server: a netcup VPS 1000 in the EU, running the
   Docker stack of ADR 0007 behind a shared HTTPS front door (the server also hosts the owner's other projects), with
   Cloudflare for DNS and R2 for backups (revised 2026-10-19; it was Cloudflare Workers with Neon). It runs with
@@ -39,8 +44,8 @@ an own server (Docker + nginx) later.
   market doesn't touch another.
 - Harder: every release is deployed once per market; migrations run per market; there's no shared view across
   countries (the Ýeral team uses each market's CMS).
-- Now: build the market settings as configuration while coding (ADR 0022 lists the constants to replace). Nothing else
-  changes for the first launch.
+- Done 2026-10-19 (book chapter 10, P2 step 1): `MARKET` = Turkmenistan with English only for the first launch; the
+  constants ADR 0022 listed are gone. Nothing else changes for the first launch.
 - Servers: the owner's netcup VPS 1000 (EU, chosen 2026-10-19) runs the first launch; the Turkmenistan deployment
   needs a second one inside the country (product book chapter 1,
   "Launch").

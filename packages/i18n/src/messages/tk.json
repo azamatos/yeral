@@ -46,20 +46,20 @@
     "other": "Başga sebäp"
   },
   "sms": {
-    "code": "Ýeral kody: {code}",
-    "confirmed": "Ýeral: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: {link}",
-    "declined": "Ýeral: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}",
-    "expired": "Ýeral: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {times} — {link}",
-    "cancelled": "Ýeral: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}",
+    "code": "{brand} kody: {code}",
+    "confirmed": "{brand}: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: {link}",
+    "declined": "{brand}: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}",
+    "expired": "{brand}: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {times} — {link}",
+    "cancelled": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}",
     "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",
     "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}.",
     "reviewAsk": "{business}-da bolşuňyz nähili boldy? Baha beriň: {link}"
   },
   "fmt": {
-    "money": "{amount} TMT",
-    "priceFrom": "{amount} TMT-den",
+    "money": "{amount} {currency}",
+    "priceFrom": "{amount} {currency}-den",
     "priceFree": "Mugt",
-    "priceApprox": "≈ {amount} TMT",
+    "priceApprox": "≈ {amount} {currency}",
     "minutes": "{m} min",
     "hours": "{h} sag",
     "hoursMinutes": "{h} sag {m} min",

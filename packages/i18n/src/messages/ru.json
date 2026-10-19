@@ -46,20 +46,20 @@
     "other": "Другая причина"
   },
   "sms": {
-    "code": "Код Ýeral: {code}",
-    "confirmed": "Ýeral: {business} подтвердил вашу запись. {weekday}, {date}, {time}. Изменить: {link}",
-    "declined": "Ýeral: {business} не может принять запись на {date} {time}: {reason}. Выберите другое время: {link}",
-    "expired": "Ýeral: {business} не ответил вовремя. Есть свободное время: {times} — {link}",
-    "cancelled": "Ýeral: {business} отменил вашу запись на {date} {time}: {reason}. {link}",
+    "code": "Код {brand}: {code}",
+    "confirmed": "{brand}: {business} подтвердил вашу запись. {weekday}, {date}, {time}. Изменить: {link}",
+    "declined": "{brand}: {business} не может принять запись на {date} {time}: {reason}. Выберите другое время: {link}",
+    "expired": "{brand}: {business} не ответил вовремя. Есть свободное время: {times} — {link}",
+    "cancelled": "{brand}: {business} отменил вашу запись на {date} {time}: {reason}. {link}",
     "reminderDay": "Напоминание: завтра в {time} {business}, {address}.",
     "reminder2h": "Напоминание: сегодня в {time} {business}, {address}.",
     "reviewAsk": "Как прошёл визит в {business}? Оцените: {link}"
   },
   "fmt": {
-    "money": "{amount} TMT",
-    "priceFrom": "от {amount} TMT",
+    "money": "{amount} {currency}",
+    "priceFrom": "от {amount} {currency}",
     "priceFree": "Бесплатно",
-    "priceApprox": "≈ {amount} TMT",
+    "priceApprox": "≈ {amount} {currency}",
     "minutes": "{m} мин",
     "hours": "{h} ч",
     "hoursMinutes": "{h} ч {m} мин",

@@ -84,7 +84,7 @@ Notes:
 
 > Open question Q-291: "Ýatlatma SMS-lerini iberme" and review asks.
 
-- A client the business entered by phone may have no account and no language set. They get SMS in the market's main language until they sign in and choose one: English for now; at the Turkmenistan launch the language, the settings and the SMS and notification templates switch to the market's. (Q-292, decided 18.10.2026) **Code differs:** the code writes to them in Turkmen.
+- A client the business entered by phone may have no account and no language set. They get SMS in the market's main language until they sign in and choose one: English for now; at the Turkmenistan launch the language, the settings and the SMS and notification templates switch to the market's. (Q-292, decided 18.10.2026; code: `MARKET.defaultLanguage`, `apps/api/src/modules/jobs/run.ts`)
 
 > Open question Q-292: SMS language for clients without an account.
 
@@ -168,7 +168,7 @@ Notes:
 - **Settings** are one set per person per workspace, with that workspace's role defaults; quiet hours are shared across workspaces. (business spec §16; Q-281, decided 18.10.2026)
 - **Sound:** there's a *Ses bilen* (with sound) switch, but only on the first two business events (business spec §22).
 - **Browser permission:** a banner asks for it: *Brauzer habarnamalary ýapyk — täze haýyşlary sekuntda görmek üçin açyň.* with *Rugsat ber*. The denied state isn't drawn, so it uses the same banner with *Brauzer sazlamalarynda açyň* (business spec §16, §22).
-- **Language:** messages go in the person's language: *Saýt we SMS habarnamalar şu dilde bolar.* (Account-Profile). English is the source and each market's languages are translations (ADR 0022). Without a saved language, SMS go in the market's main language until the person signs in and chooses one: English for now (Q-292, decided 18.10.2026). **Code differs:** the code uses Turkmen.
+- **Language:** messages go in the person's language: *Saýt we SMS habarnamalar şu dilde bolar.* (Account-Profile). English is the source and each market's languages are translations (ADR 0022). Without a saved language, SMS go in the market's main language until the person signs in and chooses one: English for now (Q-292, decided 18.10.2026).
 - **Programmasyz staff** get nothing, and their requests go to the owner and admin (business spec §2).
 - **Mobile numbers only:** SMS go only to mobile numbers (ROUND6 C1), so a phone client saved with a landline gets no SMS.
 - **The SMS link** works signed out. Any action on it logs in with the booking's own phone, shown masked and not editable (ROUND6 A1).
@@ -181,7 +181,7 @@ Notes:
 ## Not decided
 
 - **SMS at the first launch:** none. Every text below is written and goes to the log, the sign-in code shows on the screen, and clients see every outcome on screen in *Ýazylyşlarym*. Real SMS, with a provider, start with the Turkmenistan launch. The sender name is decided: "Yeral" in plain Latin. (Q-036, Q-109, decided 18.10.2026)
-- **No SMS gateway in the code.** Every environment, production included, writes SMS to the log (`apps/api/src/deps.ts`, `apps/api/src/ports/sms.ts`). Until a gateway exists, nobody can sign in on production, and real login codes would sit in the production log.
+- **No SMS gateway in the code.** Every environment, production included, writes SMS to the log (`apps/api/src/deps.ts`, `apps/api/src/ports/sms.ts`). Until a gateway exists or the first-launch mode shows the code on the screen (chapter 10, P2 step 6), nobody can sign in on production; sign-in codes never reach the log (ADR 0024).
 - **Push and the app channel.** *Programmada* and phone push come with the native apps (business spec §25.6), not before.
 - **Browser notifications while the workspace is closed** (web push) aren't designed. *Brauzerde* means "while Ýeral Biznes is open".
 - **A client inbox or bell** isn't designed. The client sees changes on the booking itself.

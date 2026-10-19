@@ -45,10 +45,19 @@ export interface SmsBooking {
 
 export type BookingSmsKind = 'confirmed' | 'reminderDay' | 'reminder2h' | 'reviewAsk'
 
+/** The brand name for SMS texts: a message (`common.brand`), so a rename is configuration (AGENTS rule 6). */
+const brandOf = (t: ReturnType<typeof createT>) => t('common.brand')
+
 export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsKind, b: SmsBooking): string {
   const t = createT(lang)
   const fmt = createFmt(lang)
-  const common = { business: b.businessName, time: fmt.time(b.start), link: bookingLink(site, b.code), address: b.address }
+  const common = {
+    brand: brandOf(t),
+    business: b.businessName,
+    time: fmt.time(b.start),
+    link: bookingLink(site, b.code),
+    address: b.address,
+  }
   switch (kind) {
     case 'confirmed':
       return t('sms.confirmed', { ...common, weekday: fmt.weekday(b.date), date: fmt.dayMonth(b.date) })
@@ -64,9 +73,11 @@ export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsK
 export function expiredSmsText(site: SiteConfig, lang: Locale, b: SmsBooking, times: { date: string; start: number }[]): string {
   const fmt = createFmt(lang)
   const list = times.map((x) => (x.date === b.date ? fmt.time(x.start) : `${fmt.shortDate(x.date)} ${fmt.time(x.start)}`)).join(', ')
-  return createT(lang)('sms.expired', { business: b.businessName, times: list, link: bookingLink(site, b.code) })
+  const t = createT(lang)
+  return t('sms.expired', { brand: brandOf(t), business: b.businessName, times: list, link: bookingLink(site, b.code) })
 }
 
 export function codeSmsText(lang: Locale, code: string): string {
-  return createT(lang)('sms.code', { code })
+  const t = createT(lang)
+  return t('sms.code', { brand: brandOf(t), code })
 }

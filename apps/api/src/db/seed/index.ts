@@ -6,6 +6,7 @@
  */
 import { bookingCode } from '@yeral/domain/id'
 import { holdUntil as holdUntilOf } from '@yeral/domain/lifecycle'
+import { MARKET } from '@yeral/domain/market'
 import type { BookingStatus } from '@yeral/domain/model'
 import { ROLE_TEMPLATES, type RoleTemplate } from '@yeral/domain/permissions'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
@@ -80,7 +81,7 @@ function code(ctx: Ctx, fixed?: string): string {
 async function user(ctx: Ctx, phone: string, name: string | null): Promise<string> {
   const known = ctx.users.get(phone)
   if (known) return known
-  const [row] = await ctx.db.insert(t.users).values({ phone, name }).returning({ id: t.users.id })
+  const [row] = await ctx.db.insert(t.users).values({ phone, name, lang: MARKET.defaultLanguage }).returning({ id: t.users.id })
   if (!row) throw new Error('user insert failed')
   ctx.users.set(phone, row.id)
   return row.id

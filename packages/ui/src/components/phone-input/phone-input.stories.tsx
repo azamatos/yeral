@@ -1,15 +1,18 @@
-/** Phone — DS-Components → Inputs → «Telefon»: fixed +993 box, 8 digits grouped as typed. */
+/** Phone — DS-Components → Inputs → «Telefon»: the country code in a fixed box, the digits grouped as typed. */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { expect, userEvent } from 'storybook/test'
 import { Field } from '../field'
 import { PhoneInput } from './phone-input'
 
+// Turkmenistan's rules, as the apps pass them from the market (`MARKET.phone` in @yeral/domain)
+const TM = { prefix: '+993', groups: [2, 2, 2, 2] } as const
+
 function Demo({ initial = '', error }: { initial?: string; error?: string }) {
   const [value, setValue] = useState(initial)
   return (
     <Field label="Telefon belgisi" error={error} className="max-w-90">
-      <PhoneInput value={value} onValueChange={setValue} />
+      <PhoneInput value={value} onValueChange={setValue} {...TM} />
     </Field>
   )
 }

@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { formatPhone, isMobile, isPhone, nationalDigits, toE164 } from './phone'
+import { E164, formatPhone, isMobile, isPhone, nationalDigits, toE164 } from './phone'
 
-describe('Turkmen phones', () => {
+describe('Turkmen phones (the market of the first launch)', () => {
+  it('stores numbers as E.164 of the market', () => {
+    expect(E164.test('+99365123456')).toBe(true)
+    expect(E164.test('+9936512345')).toBe(false)
+    expect(E164.test('+79161234567')).toBe(false)
+  })
+
   it.each(['99365123456', '+993 65 12 34 56', '65 12-34-56', '(65) 123456', '+993 (65) 12-34-56'])('reads %s', (raw) => {
     expect(nationalDigits(raw)).toBe('65123456')
     expect(formatPhone(raw)).toBe('+993 65 12 34 56')

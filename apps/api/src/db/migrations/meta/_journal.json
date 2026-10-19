@@ -29,6 +29,13 @@
       "when": 1792155511861,
       "tag": "0003_active_from_status",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792440596471,
+      "tag": "0004_users_lang_no_default",
+      "breakpoints": true
     }
   ]
 }

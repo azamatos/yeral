@@ -75,8 +75,8 @@ describe('free times', () => {
     const res = await b.req('/v1/businesses/aydyn-yoga/sessions?days=2')
     const today = res.json.items.filter((s: { date: string }) => s.date === '2026-10-14')
     expect(today.map((s: { name: string; seatsLeft: number; maxSeats: number }) => [s.name, s.seatsLeft, s.maxSeats])).toEqual([
-      ['Hatha ýoga', 3, 2],
-      ['Ýin ýoga', 0, 0],
+      ['Hatha yoga', 3, 2],
+      ['Yin yoga', 0, 0],
     ])
     const tomorrow = res.json.items.filter((s: { date: string }) => s.date === '2026-10-15')
     expect(tomorrow.map((s: { seatsLeft: number }) => s.seatsLeft)).toEqual([7, 9])

@@ -35,9 +35,9 @@ language at all when a cookie could hold it (Q-100).
 - Easier: one language while building; a new country is settings and translation, not a rewrite.
 - Harder: Turkmen and Russian must be translated and checked before the Turkmenistan launch; future design boards are
   drawn in English (whether v0.5's boards are redrawn is book question Q-133).
-- Code differs, fixed when coding resumes (ADR 0021): `@yeral/i18n` and the apps default to `tk` and ship tk, ru and
-  en; Turkmenistan's values (TMT, +993, Asia/Ashgabat) are constants in `@yeral/domain` and `@yeral/i18n`; business
-  texts require Turkmen.
+- Done 2026-10-19 (book chapter 10, P2 step 1): the market's settings live in `@yeral/domain/market` (`MARKET`:
+  languages, currency, phone rules, time zone); English is the default and the source of the message keys; business
+  texts need any one language; SMS take the brand from `common.brand`.
 - Updated with this record: `AGENTS.md` rules 4–5, the `i18n` skill, product book chapters 1, 2, 4, 6, 7a, 7b, 8 and 9,
   the memory bank (`activeContext`, `progress`, `projectbrief`, `systemPatterns`, `productContext`).
 

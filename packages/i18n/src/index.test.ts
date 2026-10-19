@@ -1,4 +1,4 @@
-import { ZONE } from '@yeral/domain/time'
+import { MARKET } from '@yeral/domain/market'
 import { describe, expect, it, vi } from 'vitest'
 
 const locale = vi.hoisted(() => ({ current: 'tk' }))
@@ -14,14 +14,15 @@ describe('useFmt', () => {
     expect(first.locale).toBe('ru')
   })
 
-  it('falls back to the default locale', () => {
+  it("falls back to the market's main language, English for the first launch", () => {
     locale.current = 'de'
     expect(useFmt().locale).toBe(DEFAULT_LOCALE)
+    expect(DEFAULT_LOCALE).toBe('en')
   })
 })
 
 describe('time zone', () => {
-  it('is the business zone from @yeral/domain/time', () => {
-    expect(TIME_ZONE).toBe(ZONE)
+  it("is the market's zone", () => {
+    expect(TIME_ZONE).toBe(MARKET.timeZone)
   })
 })

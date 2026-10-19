@@ -30,10 +30,10 @@ yeral/                           github.com/azamatos/yeral
 │  ├─ storybook/   Storybook 10: stories from packages/* and app slices
 │  └─ legacy/      the first Next.js marketplace (frozen, live on yeral.app until M4)
 ├─ packages/
-│  ├─ domain/      @yeral/domain    types, Ashgabat time, booking rules, phone, ids. Pure TS, zero deps, DOM-free
+│  ├─ domain/      @yeral/domain    market settings, types, business time, booking rules, phone, ids. Pure TS, zero deps
 │  ├─ contract/    @yeral/contract  zod schemas of everything on the wire: DTOs, inputs, enums, error codes
 │  ├─ sdk/         @yeral/sdk       typed API client (Hono RPC), ApiError, query keys, queryOptions, mutations, events poller
-│  ├─ i18n/        @yeral/i18n      use-intl setup, shared messages (ru, tk), formatters
+│  ├─ i18n/        @yeral/i18n      use-intl setup, shared messages (en source; tk, ru), formatters
 │  ├─ ui/          @yeral/ui        design system: tokens, base styles, components (Radix + cva), cn(). No domain, no text
 │  ├─ entities/    @yeral/entities  cross-app entity UI (status badge, staff avatar, price…) — when a 2nd app needs it
 │  ├─ features/    @yeral/features  cross-app user actions (phone login…)                   — when a 2nd app needs it
@@ -171,12 +171,16 @@ apps/api/src/
 ## i18n
 
 - `use-intl` (the framework-free core of next-intl): today's `useTranslations` calls and ICU messages carry over.
-- Locales: English is the source; each market adds its own (Turkmenistan: `tk`, `ru`) (ADR 0022; the code still
-  defaults to `tk`, ADR 0016). Shared namespaces (`common`, `categories`, `status`, `errors`, units) in
-  `@yeral/i18n`; app namespaces in `apps/<app>/messages/{tk,ru,en}.json`. Keys are typed per app; CI checks all three exist.
+- Locales: English is the source of keys and the default; each market adds its own (Turkmenistan: `tk`, `ru`) (ADR
+  0022). `LOCALES` = every language with translations (the database's enum); `MARKET.languages` = what this
+  deployment offers (`['en']` for the first launch). Shared namespaces (`common`, `status`, `errors`, `sms`, units) in
+  `@yeral/i18n`; app namespaces in `apps/<app>/messages/{en,tk,ru}.json`. Keys are typed per app; CI checks all three exist.
+- The api accepts any translated `?lang=`; without one it answers in the market's main language. Texts written per
+  language (`Localized`) fall back: asked → market's main → whichever was written (Q-102); search matches every language.
 - The client site puts the locale first in every URL (`/{lang}/b/{slug}`); business and cms take it from the user's settings.
 - English is the source copy; screens drawn in Turkmen are the reference for `tk`; no city names written into copy.
-- Numbers, money, dates, distances and plurals only through `useFmt()` / ICU, in the business's time zone (`Asia/Ashgabat` today).
+- Numbers, money, dates, distances and plurals only through `useFmt()` / ICU, in the market's time zone and currency
+  (`MARKET`: `Asia/Ashgabat`, `TMT` for Turkmenistan).
 
 ## Conventions the whole system relies on
 

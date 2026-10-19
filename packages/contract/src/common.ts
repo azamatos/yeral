@@ -1,10 +1,12 @@
 /**
  * Building blocks shared by every schema. Conventions (systemPatterns.md): business-local dates `YYYY-MM-DD`, times of
- * day in minutes, instants in epoch ms, money in whole manats. Query strings arrive as text, so query schemas coerce.
+ * day in minutes, instants in epoch ms, money in whole units of the market's currency, phones by the market's rules
+ * (`MARKET`, ADR 0023). Query strings arrive as text, so query schemas coerce.
  */
 import { isBookingCode } from '@yeral/domain/id'
+import { MARKET } from '@yeral/domain/market'
 import { BOOKING_TYPES, LOCALES, PRICE_TYPES } from '@yeral/domain/model'
-import { isMobile, isPhone, toE164 } from '@yeral/domain/phone'
+import { E164, isMobile, isPhone, toE164 } from '@yeral/domain/phone'
 import { isYmd } from '@yeral/domain/time'
 import { z } from 'zod'
 
@@ -14,9 +16,10 @@ export const minuteSchema = z.number().int().min(0).max(1440).meta({ example: 87
 /** A start: a time of day, so 23:59 at the latest (a business day ends by midnight, ADR 0017). */
 export const startMinuteSchema = z.number().int().min(0).max(1439).meta({ example: 870 })
 export const epochSchema = z.number().int().meta({ description: 'Epoch milliseconds' })
-/** Whole manats. */
-export const manatSchema = z.number().int().min(0)
-export const priceSchema = z.object({ type: z.enum(PRICE_TYPES), amount: manatSchema }).meta({ id: 'Price' })
+/** Whole units of the market's currency (Turkmenistan: manats). */
+export const moneySchema = z.number().int().min(0)
+export const priceSchema = z.object({ type: z.enum(PRICE_TYPES), amount: moneySchema }).meta({ id: 'Price' })
+/** Any language the code has translations for; the sites offer their market's (`MARKET.languages`). */
 export const localeSchema = z.enum(LOCALES)
 export type { Locale } from '@yeral/domain/model'
 export const bookingTypeSchema = z.enum(BOOKING_TYPES)
@@ -27,26 +30,23 @@ export const slugSchema = z
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)
   .meta({ example: 'glow-studio' })
 export const bookingCodeSchema = z.string().refine(isBookingCode, 'Expected a booking code YR-12345').meta({ example: 'YR-48213' })
-/** Any way people type a Turkmen number in; E.164 out (`+99365123456`). */
-export const phoneInputSchema = z.string().max(32).refine(isPhone, 'Expected a Turkmen phone number').transform(toE164)
-/** A number that can receive an SMS (login codes): mobile only (61–65, 71). */
+/** Any way people type a number of the market in; E.164 out (`+99365123456`). */
+export const phoneInputSchema = z.string().max(32).refine(isPhone, 'Expected a phone number').transform(toE164)
+/** A number that can receive an SMS (login codes): mobile only (Turkmenistan: 61–65, 71). */
 export const mobileInputSchema = z
   .string()
   .max(32)
-  .refine(isPhone, 'Expected a Turkmen phone number')
-  .refine(isMobile, 'Expected a Turkmen mobile number')
+  .refine(isPhone, 'Expected a phone number')
+  .refine(isMobile, 'Expected a mobile number')
   .transform(toE164)
-export const phoneSchema = z
-  .string()
-  .regex(/^\+993\d{8}$/)
-  .meta({ example: '+99365901122' })
+export const phoneSchema = z.string().regex(E164).meta({ example: '+99365901122' })
 export const latLngSchema = z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) })
 /** A place on the map; `approximate` for home-based businesses until the booking is confirmed (≈ 1 km circle). */
 export const geoSchema = latLngSchema.extend({ approximate: z.boolean() })
 export const photoSchema = z.object({ url: z.string(), alt: z.string() }).meta({ id: 'Photo' })
 
-/** `?lang=` on every endpoint that returns text; Turkmen by default. */
-export const langQuerySchema = z.object({ lang: localeSchema.default('tk') })
+/** `?lang=` on every endpoint that returns text; the market's main language by default (English for the first launch). */
+export const langQuerySchema = z.object({ lang: localeSchema.default(MARKET.defaultLanguage) })
 
 /** Comma-separated ids in a query string: `services=a,b`; an id listed twice counts once. */
 export const idListQuery = z

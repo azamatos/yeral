@@ -2,6 +2,7 @@
  * The vocabulary of the booking engine (ADR 0017, ADR 0018). Enums are `as const` arrays so `@yeral/contract` builds
  * its zod enums from the same lists (`z.enum(BOOKING_STATUSES)`) and the database uses them for its enum types.
  */
+import { MARKET } from './market'
 
 /** How a business is booked. `resource` is designed for later. */
 export const BOOKING_TYPES = ['appointment', 'table', 'class'] as const
@@ -48,15 +49,21 @@ export type StaffStatus = (typeof STAFF_STATUSES)[number]
 export const CLIENT_SOURCES = ['instagram', 'referral', 'yeral', 'walkby', 'other'] as const
 export type ClientSource = (typeof CLIENT_SOURCES)[number]
 
+/**
+ * Every language the code has translations for, in the order of the database's `locale` enum. English is the source
+ * (ADR 0022); a deployment offers its market's subset (`MARKET.languages`).
+ */
 export const LOCALES = ['tk', 'ru', 'en'] as const
 export type Locale = (typeof LOCALES)[number]
-export const DEFAULT_LOCALE: Locale = 'tk'
-/** Text the business writes once per language (service names, descriptions, about). */
-export type Localized = Partial<Record<Locale, string>> & { tk: string }
+/**
+ * Text written per language (service names, descriptions, about, catalogue names). A business fills in any one of its
+ * market's languages, or several (book Q-102); the input schemas require at least one.
+ */
+export type Localized = Partial<Record<Locale, string>>
 
-/** Pick the text for a locale, falling back to Turkmen. */
+/** The text in a language; else in the market's main language; else whichever language it was written in. */
 export function localized(text: Localized, locale: Locale): string {
-  return text[locale] ?? text.tk
+  return text[locale] || text[MARKET.defaultLanguage] || Object.values(text).find(Boolean) || ''
 }
 
 /** A stretch of one business day, minutes from midnight, end excluded. */

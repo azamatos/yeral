@@ -145,6 +145,16 @@
   the local Docker stack and CI use Caddy like the server, and CI validates the server's Caddy config;
   `/v1/places/ip` removed (it only worked on Workers); the SMS log no longer keeps every message in memory;
   `YERAL_DB_PORT` for machines where 5432 is taken ([ADR 0024](../decisions/0024-own-server-docker-caddy.md)).
+  Review fixes: Caddy caps bodies at 10 MB, sets security headers and an access log; sign-in codes never reach the
+  log; `TRUSTED_IP_HEADER` keeps only `x-forwarded-for`; only an A record until Docker's IPv6 is on.
+- **2026-10-19 · P2 step 1, market settings:** `@yeral/domain/market` (`MARKET` = Turkmenistan: English only for the
+  first launch, TMT, +993 rules, Asia/Ashgabat with a test against the zone's real offset); time, phones, money and
+  the default language read it. English is the default and the source of the message keys; `?lang=` defaults to the
+  market's main language; new users and SMS without a chosen language use it (Q-292; migration 0004 drops the
+  database's `'tk'` default). Business texts need any one language (Q-102): `localized()` falls back asked → main →
+  written, the SQL helpers do the same, and search matches every language. SMS take the brand from `common.brand`.
+  `manatSchema` → `moneySchema`; `PhoneInput` takes the market's prefix and groups. ADR 0023 revised: one `MARKET`
+  constant until a second market exists.
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.

@@ -9,7 +9,8 @@ export const users = pgTable('users', {
   phone: text().notNull().unique(),
   /** Asked on the first booking. */
   name: text(),
-  lang: locale().notNull().default('tk'),
+  /** Chosen by the person; until then the language they signed in with, else the market's main one (no database default: the market is configuration). */
+  lang: locale().notNull(),
   notifyConfirmation: boolean().notNull().default(true),
   notifyReminderDay: boolean().notNull().default(true),
   notifyReminder2h: boolean().notNull().default(true),

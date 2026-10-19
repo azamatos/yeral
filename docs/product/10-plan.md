@@ -56,9 +56,10 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    path went (Worker entry, Wrangler, Hyperdrive, Neon config); the local Docker stack uses Caddy like the server; the
    city from the internet address is off, since first-launch visitors come through a VPN, and the city choice starts
    at the market's main city (Q-107).
-1. **Market settings** (ADR 0022, ADR 0023): language, money, phone rules and time zone read from one market config;
-   English as the source language; any one language for a business's texts (Q-102); SMS in the market's main language
-   for people without one (Q-292). Legal texts, the SMS provider and the map area join the config with their features.
+1. **Market settings** (ADR 0022, ADR 0023; done 19.10.2026): language, money, phone rules and time zone read from
+   one market config (`@yeral/domain/market`); English as the source language; any one language for a business's
+   texts (Q-102); SMS in the market's main language for people without one (Q-292), with the brand from the messages.
+   Legal texts, the SMS provider and the map area join the config with their features.
 2. **The business model:** three fixed levels with a fixed permission table, enforced by the api (editing the matrix
    is Later, F-089); each account linked to its staff rows, which *Başga ýerde* needs; the specialist without the app
    (Q-216); invites with accept or decline and 7 days (F-085). With no SMS at the first launch, an invite appears when
