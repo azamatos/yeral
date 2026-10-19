@@ -7,7 +7,7 @@ import {
   idListQuery,
   idSchema,
   langQuerySchema,
-  manatSchema,
+  moneySchema,
   minuteSchema,
   nextFreeSchema,
   startMinuteSchema,
@@ -83,7 +83,7 @@ export const classSessionSchema = z
     trainer: z.object({ id: idSchema, name: z.string() }).nullable(),
     /** "Başlangyç", "Orta", "Ähli derejeler". */
     level: z.string().nullable(),
-    price: manatSchema,
+    price: moneySchema,
     capacity: z.number().int(),
     seatsLeft: z.number().int().min(0),
     /** How many seats the stepper allows now; 0 = full ("Doly"). */

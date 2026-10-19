@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { formatPhone, isMobile, isPhone, nationalDigits, toE164 } from './phone'
+import { E164, formatNational, formatPhone, isMobile, isPhone, nationalDigits, toE164 } from './phone'
 
-describe('Turkmen phones', () => {
+describe('Turkmen phones (the market of the first launch)', () => {
+  it('stores numbers as E.164 of the market', () => {
+    expect(E164.test('+99365123456')).toBe(true)
+    expect(E164.test('+9936512345')).toBe(false)
+    expect(E164.test('+79161234567')).toBe(false)
+  })
+
   it.each(['99365123456', '+993 65 12 34 56', '65 12-34-56', '(65) 123456', '+993 (65) 12-34-56'])('reads %s', (raw) => {
     expect(nationalDigits(raw)).toBe('65123456')
     expect(formatPhone(raw)).toBe('+993 65 12 34 56')
@@ -11,6 +17,9 @@ describe('Turkmen phones', () => {
   it('groups partial input while typing', () => {
     expect(formatPhone('651')).toBe('+993 65 1')
     expect(formatPhone('')).toBe('+993')
+    // the phone field groups the national digits with the same rules
+    expect(formatNational('6590112299')).toBe('65 90 11 22')
+    expect(formatNational('651')).toBe('65 1')
   })
 
   it('drops the country code or the trunk 8 while typing, not only on a full number', () => {

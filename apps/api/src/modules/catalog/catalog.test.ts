@@ -19,10 +19,11 @@ describe('catalogue', () => {
     b = browser(testApp(db).app)
   })
 
-  it('lists the 13 categories in the asked language', async () => {
-    const tk = await b.req('/v1/categories')
-    expect(tk.json.items).toHaveLength(13)
-    expect(tk.json.items[0]).toMatchObject({ id: 'beauty', name: 'Gözellik', icon: 'sparkles', bookingTypes: ['appointment'] })
+  it("lists the 13 categories in the asked language, the market's main one by default", async () => {
+    const en = await b.req('/v1/categories')
+    expect(en.json.items).toHaveLength(13)
+    expect(en.json.items[0]).toMatchObject({ id: 'beauty', name: 'Beauty', icon: 'sparkles', bookingTypes: ['appointment'] })
+    expect((await b.req('/v1/categories?lang=tk')).json.items[0].name).toBe('Gözellik')
     expect((await b.req('/v1/categories?lang=ru')).json.items[1].name).toBe('Барбершоп')
   })
 
@@ -68,8 +69,8 @@ describe('catalogue', () => {
     expect(second.json.items[0].slug).not.toBe(first.json.items[0].slug)
   })
 
-  it('the business page has everything the design shows', async () => {
-    const res = await b.req(`/v1/businesses/glow-studio?${near}`)
+  it('the business page has everything the design shows (in the design’s Turkmen)', async () => {
+    const res = await b.req(`/v1/businesses/glow-studio?${near}&lang=tk`)
     expect(res.status).toBe(200)
     const d = res.json
     expect(d).toMatchObject({
@@ -104,7 +105,7 @@ describe('catalogue', () => {
   })
 
   it('reviews, newest first, with the business reply', async () => {
-    const res = await b.req('/v1/businesses/glow-studio/reviews')
+    const res = await b.req('/v1/businesses/glow-studio/reviews?lang=tk')
     expect(res.json.items.map((r: { author: string }) => r.author)).toEqual(['Gülälek N.', 'Ogulşat M.', 'Bahar A.'])
     expect(res.json.items[0]).toMatchObject({
       rating: 5,
@@ -121,9 +122,28 @@ describe('catalogue', () => {
   })
 
   it('suggests categories, services, businesses and places', async () => {
-    const s = await b.req('/v1/search/suggest?q=ma')
+    const s = await b.req('/v1/search/suggest?q=ma&lang=tk')
     expect(s.json.services).toEqual(expect.arrayContaining(['Manikýur']))
-    const p = await b.req('/v1/places/suggest?q=magtym')
+    const p = await b.req('/v1/places/suggest?q=magtym&lang=tk')
     expect(p.json.items[0].label).toBe('Magtymguly şaýoly')
+  })
+
+  it('finds a text in any language it was written in, and shows it in the asked one (book Q-102)', async () => {
+    // typed in Turkmen, shown in English
+    const s = await b.req('/v1/search/suggest?q=manik%C3%BDur')
+    expect(s.json.services).toEqual(expect.arrayContaining(['Manicure']))
+    // a service written only in Russian shows in Russian to everyone
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const [svc] = await db.select().from(services).where(eq(services.businessId, glow!.id)).limit(1)
+    await db
+      .update(services)
+      .set({ name: { ru: 'Особая стрижка' } })
+      .where(eq(services.id, svc!.id))
+    try {
+      const found = await b.req('/v1/search/suggest?q=%D0%BE%D1%81%D0%BE%D0%B1')
+      expect(found.json.services).toEqual(['Особая стрижка'])
+    } finally {
+      await db.update(services).set({ name: svc!.name }).where(eq(services.id, svc!.id))
+    }
   })
 })

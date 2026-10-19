@@ -33,9 +33,11 @@ describe('account', () => {
   it('profile: language and SMS switches', async () => {
     const b = browser(t.app)
     await b.login('+99365222001', 'Nurana')
-    const res = await b.req('/v1/me', { method: 'PATCH', body: { lang: 'ru', notifications: { reminderDay: false } } })
+    // only the market's languages can be chosen: Russian comes with the Turkmenistan launch
+    expect((await b.req('/v1/me', { method: 'PATCH', body: { lang: 'ru' } })).status).toBe(400)
+    const res = await b.req('/v1/me', { method: 'PATCH', body: { lang: 'en', notifications: { reminderDay: false } } })
     expect(res.json).toMatchObject({
-      lang: 'ru',
+      lang: 'en',
       notifications: { confirmation: true, reminderDay: false, reminder2h: true, reviewAsk: true },
     })
   })
@@ -45,7 +47,7 @@ describe('account', () => {
     await b.login('+99365222002', 'Kemal')
     expect((await b.req('/v1/me/phone/code', { body: { phone: '+99365901122' } })).json.error.code).toBe('phone_taken')
     expect((await b.req('/v1/me/phone/code', { body: { phone: '+99365222003' } })).status).toBe(200)
-    expect(t.sms.sent.at(-1)).toEqual({ to: '+99365222003', text: 'Ýeral kody: 1234', secret: true })
+    expect(t.sms.sent.at(-1)).toEqual({ to: '+99365222003', text: 'Ýeral code: 1234', secret: true })
     const res = await b.req('/v1/me/phone/verify', { body: { phone: '+99365222003', code: '1234' } })
     expect(res.json.phone).toBe('+99365222003')
   })

@@ -28,8 +28,7 @@ question.
   `business.yeral.app/tk/giris` and `/tk/calendar` lose the `/tk`. (Q-100, decided 18.10.2026; ADR 0016)
 - **SMS** go in the client's language. A client without a Ýeral account (a phone booking) gets the market's main
   language until they sign in and choose one: English for now, Turkmen when Turkmenistan launches. (Q-292, decided
-  18.10.2026) **Code differs:** the code sends Turkmen. The login code
-  goes in the saved language, else the language of the page. (client spec §6; code: apps/api/src/modules/jobs/run.ts,
+  18.10.2026) The login code goes in the saved language, else the language of the page, else the market's main one. (client spec §6; code: apps/api/src/modules/jobs/run.ts,
   apps/api/src/modules/auth/routes.ts)
 - **Category names, hints and specialist words** come from Ýeral's catalogue, in every language of the market.
   (ADR 0017; code:
@@ -53,8 +52,8 @@ question.
 - Plurals: Turkmen and English have one form; Russian has three (1 место, 2 места, 5 мест). (client spec §8)
 - **Text a business writes** (description, service names) has a tab per language of its market. (business spec §8)
   Any one language is required; a missing language shows the one that was written. Some businesses write two copies,
-  for example Russian and Turkmen. (Q-102, decided 18.10.2026) **Code differs:** the code requires the Turkmen text.
-  (code: packages/domain/src/model.ts)
+  for example Russian and Turkmen. (Q-102, decided 18.10.2026; code: packages/domain/src/model.ts, `localized()`: the
+  asked language, else the market's main one, else the one written)
 
 > Open question Q-101: who checks the Russian and English text before launch?
 
@@ -289,8 +288,5 @@ text (code: packages/i18n/src/messages/tk.json).
   accent for selection, status and the main button, flat surfaces with shadows only on raised layers, Lucide icons.
   (design CLAUDE.md, tokens.css)
 - **Reference product:** Fresha. Copy its logic, never its look. (client spec §1)
-
-**Code differs:** the SMS texts write "Ýeral" into each template instead of using the configurable brand name
-(code: packages/i18n/src/messages/tk.json, ru.json, en.json).
 
 > Open question Q-109: what sender name do SMS show?

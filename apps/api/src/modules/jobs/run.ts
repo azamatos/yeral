@@ -5,6 +5,7 @@
  * 3. Queued work: SMS, reminders, review asks, demo businesses answering.
  */
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
+import { MARKET } from '@yeral/domain/market'
 import { nearestSlots, nextFreeSlot } from '@yeral/domain/availability'
 import { addDays, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
@@ -72,7 +73,7 @@ async function expireRequests(deps: Deps): Promise<number> {
           if (biz) {
             const text = expiredSmsText(
               deps.site,
-              user?.lang ?? 'tk',
+              user?.lang ?? MARKET.defaultLanguage,
               { code: row.code, date: row.date, start: row.start, businessName: biz.name, address: biz.address },
               alternatives,
             )
@@ -141,7 +142,7 @@ async function sendBookingSms(deps: Deps, bookingId: string, kind: BookingSmsKin
   }
   const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId))
   if (!biz) return
-  const text = bookingSmsText(deps.site, user?.lang ?? 'tk', kind, {
+  const text = bookingSmsText(deps.site, user?.lang ?? MARKET.defaultLanguage, kind, {
     code: b.code,
     date: b.date,
     start: b.start,

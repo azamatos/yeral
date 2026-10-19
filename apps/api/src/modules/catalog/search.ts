@@ -7,6 +7,7 @@ import type { SearchQuery } from '@yeral/contract/catalog'
 import { boundingBox, distanceM, popularity } from '@yeral/domain/geo'
 import { today } from '@yeral/domain/time'
 import { and, between, eq, gte, ilike, or, sql, type SQL } from 'drizzle-orm'
+import { anyTextLike } from '../../db/localized'
 import { businesses, categories, services } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { buildCards } from './cards'
@@ -41,10 +42,9 @@ export async function search(deps: Deps, q: SearchQuery) {
     where.push(
       or(
         ilike(businesses.name, like),
-        sql`${businesses.kind}->>${q.lang} ilike ${like}`,
-        sql`${businesses.kind}->>'tk' ilike ${like}`,
-        sql`exists (select 1 from ${categories} where ${categories.id} = ${businesses.categoryId} and (${categories.name}->>${q.lang} ilike ${like} or ${categories.name}->>'tk' ilike ${like}))`,
-        sql`exists (select 1 from ${services} where ${services.businessId} = ${businesses.id} and not ${services.archived} and (${services.name}->>${q.lang} ilike ${like} or ${services.name}->>'tk' ilike ${like}))`,
+        anyTextLike(businesses.kind, like),
+        sql`exists (select 1 from ${categories} where ${categories.id} = ${businesses.categoryId} and ${anyTextLike(categories.name, like)})`,
+        sql`exists (select 1 from ${services} where ${services.businessId} = ${businesses.id} and not ${services.archived} and ${anyTextLike(services.name, like)})`,
       ) as SQL,
     )
   }

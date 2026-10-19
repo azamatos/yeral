@@ -68,9 +68,6 @@ These are drawn but go against a decision; they go into the next prompt for Clau
 
 What's already built and doesn't match a decision; fixed when coding resumes, not asked again.
 
-- Languages: `@yeral/i18n` and the apps default to Turkmen and ship tk, ru and en; English is the source, and a
-  market's languages come with its launch. Turkmenistan's values (TMT, +993, Asia/Ashgabat) are constants, not market
-  settings. Business texts require Turkmen (Q-102 decided any one language). (ADR 0022)
 - The average bill is still in the code (Q-103 dropped it).
 - Every day and visit ends by 24:00; Q-105 allows past midnight (F-109).
 - Addresses carry no city, and there is no city choice (Q-107, F-240); the lookup by internet address is gone with Cloudflare (ADR 0024).
@@ -390,7 +387,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-196 | Search index | Verified-only listing with geo, popularity, open-now and has-free-time filters, on Postgres. | MVP | spec only | built (api) | No separate search engine. |
 | F-197 | SEO basics | Server-rendered pages, titles, hreflang, JSON-LD, sitemap, noindex for unverified. | MVP | not designed (repo plan) | not built (legacy had JSON-LD) | M3. |
 | F-198 | Link previews | OG images for business and category pages. | Later | not designed | not built | M7. |
-| F-199 | Languages and formats | English while building; each market adds its languages with `/{lang}` links (Turkmenistan: Turkmen, Russian); number formats follow the language (`4.9` in English, `4,9` in Turkmen and Russian); money, phone rules and time zone come from the market (Turkmenistan: `40 TMT`, +993, Asia/Ashgabat). | MVP | spec only (README §8) | built (`@yeral/i18n`, domain time, contract error messages) | Q-101, Q-104 decided; ADR 0022. |
+| F-199 | Languages and formats | English while building; each market adds its languages with `/{lang}` links (Turkmenistan: Turkmen, Russian); number formats follow the language (`4.9` in English, `4,9` in Turkmen and Russian); money, phone rules and time zone come from the market (Turkmenistan: `40 TMT`, +993, Asia/Ashgabat). | MVP | spec only (README §8) | built (`@yeral/i18n` English first, market settings `@yeral/domain/market`, contract error messages) | Q-101, Q-104 decided; ADR 0022. |
 | F-200 | First-launch mode | Example businesses from the design's demo data, marked "Example" and confirming at once; the sign-in code shown on the screen instead of an SMS; no SMS sent. | MVP | not designed | built (api seed, `demo.answer` job) | Q-004, Q-036 (decided 18.10.2026). Built today only outside production (seed, demo code 1234, `demo.answer` job). |
 | F-201 | Client installable app (PWA) | yeral.app installable from the browser. | Later | not designed | not built | M7; legacy shows an "add to home screen" hint. |
 | F-202 | Booking source tracking | Each booking records web / app / phone / walk-in / ai. | MVP | spec only | built (domain, schema) | Shown in the workspace as Onlaýn / Telefon / Gelip. |

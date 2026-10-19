@@ -44,6 +44,7 @@
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:",
-    "@yeral/config": "workspace:*"
+    "@yeral/config": "workspace:*",
+    "@yeral/domain": "workspace:*"
   }
 }

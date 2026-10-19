@@ -21,8 +21,11 @@ References: ADR 0022 (English first, languages per market), ADR 0008 (use-intl),
 
 - **English is the source (ADR 0022).** For screens still drawn in Turkmen, the Turkmen in the design screens
   (`docs/design/screens/**/*.dc.html`) is the reference for `tk`: don't reword it; use the glossary (Ýazylmak, Ýazylyş,
-  Hünärmen, Boş wagt, Garaşylýar…). The owner checks every translation before a market launches. The code still
-  defaults to `tk` (product book chapter 2, "Code differs").
+  Hünärmen, Boş wagt, Garaşylýar…). The owner checks every translation before a market launches. English is the
+  default and the source of the keys (`messages/en.json`); the sites offer the market's languages (`MARKET_LOCALES`,
+  English only for the first launch).
+- **Nothing country-specific in a message:** the currency comes in as `{currency}` (`useFmt().money`), the brand as
+  `{brand}` (`common.brand`), phones through `fmt.phone` (the market's rules).
 - Translations: write every key in each market language (Turkmenistan: Turkmen, Russian) from the English, natural and
   short; Russian runs ~30% longer, so never rely on fixed widths.
 - No city names written into copy ("Ýakynymda", "golaýyňyzda" instead); a city comes from data (book Q-107).

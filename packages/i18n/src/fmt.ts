@@ -1,13 +1,15 @@
 /**
  * Formats every number people read (client spec §8, skill `i18n`). Hand-written instead of `Intl` so the server and
  * every browser print the same thing (Turkmen locale data is missing in some ICU builds, and SSR must match hydration).
- * Words (months, weekdays, units) come from the messages, so the native review covers them.
+ * Words (months, weekdays, units) come from the messages, so the native review covers them. The currency comes from the
+ * market (`MARKET.currency`), number marks from the language. Examples below are English, the source (ADR 0022).
  */
+import { MARKET } from '@yeral/domain/market'
 import type { Price } from '@yeral/domain/model'
 import { formatPhone } from '@yeral/domain/phone'
 import { diffDays, dow, hm, parseYmd } from '@yeral/domain/time'
 import { createTranslator } from 'use-intl/core'
-import { messages, type Locale } from './messages'
+import { messages, type Locale, type SharedMessages } from './messages'
 
 const NBSP = ' '
 const DAY_MIN = 1440
@@ -32,37 +34,38 @@ export function formatNumber(locale: Locale, n: number, fractionDigits = 0): str
 export function createFmt(locale: Locale) {
   const t = createTranslator({ locale, messages: messages[locale], namespace: 'fmt' })
   const num = (n: number, digits = 0) => formatNumber(locale, n, digits)
-  const monthOf = (date: string) => String(parseYmd(date).getUTCMonth() + 1) as keyof (typeof messages)['tk']['fmt']['months']
-  const weekdayOf = (date: string) => String(dow(date)) as keyof (typeof messages)['tk']['fmt']['weekdays']
+  const monthOf = (date: string) => String(parseYmd(date).getUTCMonth() + 1) as keyof SharedMessages['fmt']['months']
+  const weekdayOf = (date: string) => String(dow(date)) as keyof SharedMessages['fmt']['weekdays']
+  const money = (amount: number) => ({ amount: num(amount), currency: MARKET.currency })
 
   const fmt = {
     locale,
     number: num,
     /** `40 TMT` */
-    money: (amount: number) => t('money', { amount: num(amount) }),
-    /** `80 TMT`, `250 TMT-den`, `Mugt`; hidden prices show the average bill when there is one (`≈ 150 TMT`), else nothing. */
+    money: (amount: number) => t('money', money(amount)),
+    /** `80 TMT`, `from 250 TMT`, `Free`; hidden prices show the average bill when there is one (`≈ 150 TMT`), else nothing. */
     price: (p: Price, avgBill?: number | null) => {
       switch (p.type) {
         case 'fixed':
-          return t('money', { amount: num(p.amount) })
+          return t('money', money(p.amount))
         case 'from':
-          return t('priceFrom', { amount: num(p.amount) })
+          return t('priceFrom', money(p.amount))
         case 'free':
           return t('priceFree')
         case 'hidden':
-          return avgBill ? t('priceApprox', { amount: num(avgBill) }) : ''
+          return avgBill ? t('priceApprox', money(avgBill)) : ''
       }
     },
-    /** `4,9` */
+    /** `4.9` (`4,9` in Turkmen and Russian) */
     rating: (r: number) => num(r, 1),
-    /** `60 min`, `1 sag 30 min`, `2 sag`: up to an hour in minutes, then hours. */
+    /** `60 min`, `1 h 30 min`, `2 h`: up to an hour in minutes, then hours. */
     duration: (minutes: number) => {
       if (minutes <= 60) return t('minutes', { m: minutes })
       const h = Math.floor(minutes / 60)
       const m = minutes % 60
       return m ? t('hoursMinutes', { h, m }) : t('hours', { h })
     },
-    /** `850 m`, `1,2 km`, `12 km` */
+    /** `850 m`, `1.2 km`, `12 km` */
     distance: (metres: number) => {
       const rounded = Math.max(10, Math.round(metres / 10) * 10)
       if (rounded < 1000) return t('m', { n: num(rounded) })
@@ -73,27 +76,27 @@ export function createFmt(locale: Locale) {
     time: (min: number) => clock(min),
     /** `14:30–15:30` */
     timeRange: (start: number, end: number) => `${clock(start)}–${clock(end)}`,
-    /** `15 oktýabr` */
+    /** `15 October` */
     dayMonth: (date: string) => t('dayMonth', { day: parseYmd(date).getUTCDate(), month: t(`months.${monthOf(date)}`) }),
-    /** `15 okt.` */
+    /** `15 Oct` */
     shortDate: (date: string) => t('dayMonth', { day: parseYmd(date).getUTCDate(), month: t(`monthsShort.${monthOf(date)}`) }),
-    /** `Penşenbe` */
+    /** `Thursday` */
     weekday: (date: string) => t(`weekdays.${weekdayOf(date)}`),
-    /** `Pe` */
+    /** `Th` */
     weekdayShort: (date: string) => t(`weekdaysShort.${weekdayOf(date)}`),
-    /** `Penşenbe, 15 oktýabr` */
+    /** `Thursday, 15 October` */
     weekdayDate: (date: string) => t('weekdayDate', { weekday: fmt.weekday(date), date: fmt.dayMonth(date) }),
-    /** `Oktýabr 2026` (month picker header) */
+    /** `October 2026` (month picker header) */
     monthYear: (date: string) =>
       t('monthYear', { month: t(`monthsStandalone.${monthOf(date)}`), year: String(parseYmd(date).getUTCFullYear()) }),
-    /** `Şu gün`, `Ertir`, the weekday within the coming week (`Şenbe`), otherwise the date (`21 oktýabr`). */
+    /** `Today`, `Tomorrow`, the weekday within the coming week (`Saturday`), otherwise the date (`21 October`). */
     relativeDay: (date: string, today: string) => {
       const d = diffDays(date, today)
       if (d === 0) return t('today')
       if (d === 1) return t('tomorrow')
       return d > 1 && d < 7 ? fmt.weekday(date) : fmt.dayMonth(date)
     },
-    /** `+993 65 12 34 56` */
+    /** `+993 65 12 34 56`, by the market's phone rules */
     phone: (raw: string) => formatPhone(raw),
   }
   return fmt

@@ -14,7 +14,7 @@ import {
   idSchema,
   langQuerySchema,
   listOf,
-  manatSchema,
+  moneySchema,
   minuteSchema,
   nextFreeSchema,
   phoneSchema,
@@ -90,7 +90,7 @@ export const businessCardSchema = z
     onlineEnabled: z.boolean(),
     /** Lowest service price ("40 TMT-den"); null for tables (average bill instead). */
     priceFrom: priceSchema.nullable(),
-    avgBill: manatSchema.nullable(),
+    avgBill: moneySchema.nullable(),
     open: openStateSchema,
     availability: cardAvailabilitySchema,
   })
@@ -264,7 +264,7 @@ export const businessDetailSchema = z
     /** "Adatça 15 minudyň dowamynda tassyklaýar"; null until there is history. */
     typicalConfirmMinutes: z.number().int().nullable(),
     priceFrom: priceSchema.nullable(),
-    avgBill: manatSchema.nullable(),
+    avgBill: moneySchema.nullable(),
     /** Next free time for the sticky card (appointment), null when nothing is free in the window. */
     nextFree: nextFreeSchema,
     serviceGroups: z.array(serviceGroupSchema),

@@ -15,6 +15,7 @@ import {
 } from '@yeral/contract/catalog'
 import { langQuerySchema, slugSchema } from '@yeral/contract/common'
 import { and, asc, desc, eq, inArray, or, sql, type AnyColumn, type SQL } from 'drizzle-orm'
+import { anyTextLike, textIn } from '../../db/localized'
 import { bookingItems, businesses, categories, places, reviews, services } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
@@ -103,20 +104,14 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
       db
         .select()
         .from(categories)
-        .where(or(matches(sql`${categories.name}->>${lang}`), matches(sql`${categories.name}->>'tk'`)))
+        .where(anyTextLike(categories.name, start, word))
         .orderBy(asc(categories.sort))
         .limit(4),
       db
-        .selectDistinct({ name: sql<string>`coalesce(${services.name}->>${lang}, ${services.name}->>'tk')` })
+        .selectDistinct({ name: textIn(services.name, lang) })
         .from(services)
         .innerJoin(businesses, eq(businesses.id, services.businessId))
-        .where(
-          and(
-            eq(businesses.verification, 'verified'),
-            eq(services.archived, false),
-            or(matches(sql`${services.name}->>${lang}`), matches(sql`${services.name}->>'tk'`)),
-          ),
-        )
+        .where(and(eq(businesses.verification, 'verified'), eq(services.archived, false), anyTextLike(services.name, start, word)))
         .limit(6),
       db
         .select()
@@ -137,11 +132,10 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
   .openapi(placesRoute, async (c) => {
     const { q, lang } = c.req.valid('query')
     const [start, word] = wordStartLikes(q)
-    const label = sql`coalesce(${places.label}->>${lang}, ${places.label}->>'tk')`
     const rows = await c.var.deps.db
       .select()
       .from(places)
-      .where(or(sql`${label} ilike ${start}`, sql`${label} ilike ${word}`, sql`${places.label}->>'tk' ilike ${start}`))
+      .where(anyTextLike(places.label, start, word))
       .limit(6)
     return c.json({ items: rows.map((p) => ({ label: text(p.label, lang), lat: p.lat, lng: p.lng })) }, 200)
   })

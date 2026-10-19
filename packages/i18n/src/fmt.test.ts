@@ -1,6 +1,7 @@
+import { MARKET } from '@yeral/domain/market'
 import { describe, expect, it } from 'vitest'
 import { createFmt, createT, formatNumber } from './fmt'
-import { LOCALES, messages } from './messages'
+import { DEFAULT_LOCALE, LOCALES, MARKET_LOCALES, messages } from './messages'
 
 const tk = createFmt('tk')
 const ru = createFmt('ru')
@@ -14,6 +15,13 @@ describe('numbers and money', () => {
     expect(formatNumber('en', 14100)).toBe('14,100')
     expect(tk.rating(4.9)).toBe('4,9')
     expect(en.rating(4.9)).toBe('4.9')
+  })
+
+  it("writes money in the market's currency (Turkmenistan: manats)", () => {
+    expect(MARKET.currency).toBe('TMT')
+    expect(en.money(1410)).toBe('1,410 TMT')
+    expect(en.price({ type: 'from', amount: 250 })).toBe('from 250 TMT')
+    expect(tk.money(1410)).toBe('1 410 TMT')
   })
 
   it('prints prices the way the design does', () => {
@@ -102,9 +110,22 @@ describe('message catalogues', () => {
   const keys = (o: object, prefix = ''): string[] =>
     Object.entries(o).flatMap(([k, v]) => (typeof v === 'object' && v !== null ? keys(v as object, `${prefix}${k}.`) : [`${prefix}${k}`]))
 
-  it('every key exists in tk, ru and en', () => {
-    const tkKeys = keys(messages.tk).sort()
-    for (const locale of LOCALES) expect(keys(messages[locale]).sort()).toEqual(tkKeys)
+  it('every key of the English source exists in every language', () => {
+    const enKeys = keys(messages.en).sort()
+    for (const locale of LOCALES) expect(keys(messages[locale]).sort()).toEqual(enKeys)
+  })
+
+  it('covers every language of the market, the default among them (ADR 0022)', () => {
+    for (const locale of MARKET_LOCALES) expect(messages[locale]).toBeDefined()
+    expect(MARKET_LOCALES).toContain(DEFAULT_LOCALE)
+  })
+
+  it('one brand in every language, and SMS texts take it as an argument, so a rename is one edit per file', () => {
+    for (const locale of LOCALES) expect(messages[locale].common.brand).toBe(messages.en.common.brand)
+    for (const locale of LOCALES) {
+      const { brand } = messages[locale].common
+      for (const text of Object.values(messages[locale].sms)) expect(text).not.toContain(brand)
+    }
   })
 
   it('the party limit comes in as an argument', () => {

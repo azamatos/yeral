@@ -2,23 +2,21 @@ import type { ComponentProps } from 'react'
 import { cn } from '../../lib/cn'
 import { inputClass, useControlProps } from '../input'
 
-/** «65 12 34 56» from up to 8 digits. */
-export function formatLocalPhone(digits: string): string {
-  const d = digits.replace(/\D/g, '').slice(0, 8)
-  return [d.slice(0, 2), d.slice(2, 4), d.slice(4, 6), d.slice(6, 8)].filter(Boolean).join(' ')
-}
-
 export type PhoneInputProps = Omit<ComponentProps<'input'>, 'value' | 'onChange' | 'type'> & {
-  /** The 8 local digits, without +993. */
+  /** The national digits, without the country code. */
   value: string
   onValueChange: (digits: string) => void
   invalid?: boolean
-  /** Country prefix shown in its own box. */
-  prefix?: string
+  /** The market's country code, shown in its own box: «+993» (`COUNTRY_PREFIX` in @yeral/domain/phone). */
+  prefix: string
+  /** How many national digits a number has (`MARKET.phone.length`). */
+  maxDigits: number
+  /** Groups the digits as they're typed: «65 12 34 56» (`formatNational` in @yeral/domain/phone). */
+  format: (digits: string) => string
 }
 
-/** Turkmen mobile number: fixed «+993» box + 8 digits, grouped as you type (DS-Components → Inputs → Telefon). */
-export function PhoneInput({ value, onValueChange, invalid, prefix = '+993', className, ...props }: PhoneInputProps) {
+/** Phone number: the country code in a fixed box + the national digits, grouped as you type (DS-Components → Inputs → Telefon). */
+export function PhoneInput({ value, onValueChange, invalid, prefix, maxDigits, format, className, ...props }: PhoneInputProps) {
   const control = useControlProps({ ...props, invalid })
   return (
     <div className={cn('flex gap-2', className)}>
@@ -34,8 +32,8 @@ export function PhoneInput({ value, onValueChange, invalid, prefix = '+993', cla
         autoComplete="tel-national"
         {...props}
         {...control}
-        value={formatLocalPhone(value)}
-        onChange={(e) => onValueChange(e.target.value.replace(/\D/g, '').slice(0, 8))}
+        value={format(value)}
+        onChange={(e) => onValueChange(e.target.value.replace(/\D/g, '').slice(0, maxDigits))}
         className={cn(inputClass, 'h-12 tabular-nums')}
       />
     </div>

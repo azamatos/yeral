@@ -7,6 +7,7 @@ import {
   initialStatus,
   REVIEW_EDIT_DAYS,
 } from '@yeral/domain/lifecycle'
+import { MARKET } from '@yeral/domain/market'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -194,8 +195,8 @@ export async function writeReview(deps: Deps, user: User, b: BookingRow, input: 
   const [existing] = await deps.db.select().from(reviews).where(eq(reviews.bookingId, b.id))
   if (existing) throw new ApiError('review_exists')
   const items = await deps.db.select().from(bookingItems).where(eq(bookingItems.bookingId, b.id)).orderBy(bookingItems.sort)
-  // stored in Turkmen for reviews without items; readers get it in their language (catalog reviews)
-  const what = visitWhat(items, 'tk')
+  // stored in the market's main language for reviews without items; readers get it in their language (catalog reviews)
+  const what = visitWhat(items, MARKET.defaultLanguage)
   await deps.db.transaction(async (tx) => {
     await tx.insert(reviews).values({
       bookingId: b.id,
