@@ -1,0 +1,26 @@
+# The shared front door of the server: one Caddy for every project, getting HTTPS certificates by itself.
+# Each project drops a site file into /srv/edge/sites and joins the external Docker network "edge" (setup.sh makes it).
+name: edge
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./sites:/etc/caddy/sites:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [edge]
+    mem_limit: 256m
+
+networks:
+  edge:
+    external: true
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Builds the api image from the source in /srv/yeral/src and (re)starts Ýeral. Run on the server as root:
+#   COMMIT=<git sha> bash /srv/yeral/src/infra/server/yeral/deploy.sh
+# PUBLIC=1 also publishes Ýeral's sites on the shared Caddy (only once the DNS records point here).
+set -euo pipefail
+cd /srv/yeral
+COMMIT=${COMMIT:-unknown}
+
+cp src/infra/server/yeral/compose.yml compose.yml
+if [ ! -f .env ]; then
+  umask 077
+  echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)" >.env
+  echo 'created .env with a new database password'
+fi
+
+image="yeral-api:${COMMIT:0:12}"
+docker build -f src/infra/docker/api.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$image" src
+# the running image is kept in .env, so plain `docker compose ps|logs` in /srv/yeral work too
+sed -i '/^YERAL_API_IMAGE=/d' .env
+echo "YERAL_API_IMAGE=$image" >>.env
+docker compose up -d --wait --remove-orphans
+
+if [ "${PUBLIC:-0}" = 1 ]; then
+  cp src/infra/server/yeral/yeral.caddy /srv/edge/sites/yeral.caddy
+  docker compose -f /srv/edge/compose.yml exec -T caddy caddy reload --config /etc/caddy/Caddyfile
+fi
+
+# the api answers inside its network
+docker compose exec -T api wget -qO- http://127.0.0.1:3004/v1/health
+echo
+docker image prune -f >/dev/null

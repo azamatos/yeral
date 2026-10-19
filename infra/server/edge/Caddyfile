@@ -1,0 +1,8 @@
+# Every project's sites live in sites/*.caddy (one file per project); Caddy reloads with:
+#   docker compose -f /srv/edge/compose.yml exec caddy caddy reload --config /etc/caddy/Caddyfile
+import sites/*.caddy
+
+# Anything else (the bare IP, unknown hosts) gets nothing.
+:80 {
+	respond 404
+}
