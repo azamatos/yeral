@@ -5,7 +5,6 @@
  * them, so the demo day keeps the design's Wednesday whatever weekday it lands on.
  */
 import { bookingCode } from '@yeral/domain/id'
-import { holdUntil as holdUntilOf } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { localized, type BookingStatus } from '@yeral/domain/model'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
@@ -260,7 +259,8 @@ function lifecycle(
       ? ctx.now - (biz.holdMinutes - (b.hold ?? biz.holdMinutes)) * 60_000
       : Math.min(ctx.now, startEpoch) - 3 * 86_400_000
   return {
-    holdUntil: b.status === 'pending' ? new Date(holdUntilOf(createdAt, { date: b.date, start: b.start }, biz.holdMinutes)) : null,
+    // the demo shows `hold` minutes still to go, whenever it's seeded (the nightly reset runs while businesses are closed)
+    holdUntil: b.status === 'pending' ? new Date(Math.min(ctx.now + (b.hold ?? biz.holdMinutes) * 60_000, startEpoch)) : null,
     createdAt: new Date(createdAt),
     confirmedAt: b.status === 'pending' ? null : new Date(createdAt + 10 * 60_000),
     cancelledAt: b.status === 'cancelled' ? new Date(Math.min(ctx.now, startEpoch) - 86_400_000) : null,

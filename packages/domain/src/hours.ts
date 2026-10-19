@@ -7,7 +7,7 @@
  * end by the time the next day opens (`weekHoursErrors`), so no moment belongs to two days.
  */
 import type { Interval } from './model'
-import { addDays, diffDays, dow, localOf } from './time'
+import { addDays, diffDays, dow, epochOf, localOf } from './time'
 
 /** Minutes in a day; a business day may end up to one more day later. */
 export const DAY_MINUTES = 1440
@@ -169,26 +169,34 @@ export type OpenState = { open: true; until: number } | { open: false; inDays: n
  * and may pass 1440 ("02:00-a çenli" at 23:00); after midnight, yesterday's late hours count as today's (minus 1440).
  */
 export function openState(b: BusinessHours, now = Date.now()): OpenState {
-  const { date, min } = localOf(now)
-  // still inside yesterday's day, past its midnight: open, or on a break there with more of it to come
-  const yesterday = businessDay(b, addDays(date, -1))
-  const lateStretches = yesterday ? workingIntervals(yesterday) : []
-  const asYesterday = min + DAY_MINUTES
-  const late = lateStretches.find((w) => asYesterday >= w.start && asYesterday < w.end)
-  if (late) return { open: true, until: late.end - DAY_MINUTES }
-  const resumes = lateStretches.find((w) => w.start > asYesterday && w.start >= DAY_MINUTES)
-  if (resumes && yesterday && asYesterday < yesterday.close) return { open: false, inDays: 0, at: resumes.start - DAY_MINUTES }
-  const day = businessDay(b, date)
-  const stretches = day ? workingIntervals(day) : []
-  const current = stretches.find((w) => min >= w.start && min < w.end)
-  if (current) return { open: true, until: current.end }
-  const later = stretches.find((w) => w.start > min)
-  if (later) return { open: false, inDays: 0, at: later.start }
-  for (let i = 1; i < 8; i++) {
-    const next = businessDay(b, addDays(date, i))
-    if (next) return { open: false, inDays: i, at: next.open }
+  const { date } = localOf(now)
+  const [first] = openStretches(b, now, now + 8 * DAY_MINUTES * 60_000)
+  if (!first) return { open: false, inDays: null }
+  if (first.start <= now) return { open: true, until: Math.round((first.end - epochOf(date, 0)) / 60_000) }
+  const at = localOf(first.start)
+  return { open: false, inDays: diffDays(at.date, date), at: at.min }
+}
+
+/**
+ * When the business is open between two instants: its working stretches (breaks are closed), from yesterday's business
+ * day on (it may run past midnight), as epoch ranges clipped to `[from, to)`, in order and never overlapping (a day's
+ * part past midnight is cut where an earlier stretch already counted). One walk for the open state and the hold time.
+ */
+export function openStretches(b: BusinessHours, from: number, to: number): { start: number; end: number }[] {
+  const out: { start: number; end: number }[] = []
+  let cursor = from
+  for (let date = addDays(localOf(from).date, -1); epochOf(date, 0) < to; date = addDays(date, 1)) {
+    const day = businessDay(b, date)
+    if (!day) continue
+    for (const w of workingIntervals(day)) {
+      const start = Math.max(epochOf(date, w.start), cursor)
+      const end = Math.min(epochOf(date, w.end), to)
+      if (end <= start) continue
+      out.push({ start, end })
+      cursor = end
+    }
   }
-  return { open: false, inDays: null }
+  return out
 }
 
 /**

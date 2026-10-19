@@ -108,7 +108,15 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       clientNote: x.note ?? null,
       priceType: price?.type ?? null,
       priceAmount: price?.amount ?? null,
-      holdUntil: x.status === 'pending' ? new Date(holdUntilOf(now, { date: x.date, start: x.start }, x.lb.rules.holdMinutes)) : null,
+      holdUntil:
+        x.status === 'pending'
+          ? new Date(
+              holdUntilOf(now, { date: x.date, start: x.start }, x.lb.rules.holdMinutes, {
+                hours: x.lb.business.hours,
+                exceptions: x.lb.business.exceptions,
+              }),
+            )
+          : null,
       rescheduleOf: x.rescheduleOf ?? null,
       alternativeOf: x.alternativeOf ?? null,
       partySize: x.placement.table?.partySize ?? null,
