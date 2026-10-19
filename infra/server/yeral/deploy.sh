@@ -15,8 +15,10 @@ fi
 
 image="yeral-api:${COMMIT:0:12}"
 docker build -f src/infra/docker/api.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$image" src
-YERAL_API_IMAGE=$image docker compose up -d --wait --remove-orphans
-echo "$image" >deployed-image
+# the running image is kept in .env, so plain `docker compose ps|logs` in /srv/yeral work too
+sed -i '/^YERAL_API_IMAGE=/d' .env
+echo "YERAL_API_IMAGE=$image" >>.env
+docker compose up -d --wait --remove-orphans
 
 if [ "${PUBLIC:-0}" = 1 ]; then
   cp src/infra/server/yeral/yeral.caddy /srv/edge/sites/yeral.caddy

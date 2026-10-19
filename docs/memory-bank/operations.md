@@ -11,7 +11,7 @@ are two kinds of environment only, local and production (ADR 0020): no staging.
 |---|---|---|---|
 | local | `localhost:3000–3005` (`PORT_BASE` + offset) | Postgres in Docker, one database per worktree | `pnpm dev` |
 | local, production-like | `*.yeral.localhost` through nginx | Postgres container | `pnpm docker:up` |
-| production | `yeral.app` (client), `business.`, `cms.`, `api.`, `storybook.` | Neon branch `production` (categories, no demo) | when a release is cut (Changesets); Storybook on every push to `main` |
+| production | the owner's server `yeral-vps` (api running since 2026-10-19, no public host yet); `yeral.app` still serves legacy on Cloudflare; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
 
 No staging and no PR previews (ADR 0020): a change is proven locally (tests, the Docker stack), reviewed, and merged on
 green CI; production changes only from a release. A risky migration can be rehearsed on a throwaway Neon branch of
@@ -105,7 +105,21 @@ http://api.yeral.localhost/docs. CI's «Docker stack» job does the same and ask
 `pnpm docker:down` stops it (`-v` drops the data). The demo keeps the day of the first `docker:up`; start it over with
 `docker compose -f infra/docker/compose.yml run --rm migrate node dist/cli.js seed`.
 
-## Hosting later: own server with Docker + nginx
+## The own server (since 2026-10-19)
+
+A netcup VPS 1000 (4 vCPU, 8 GB, 128 GB, Ubuntu 24.04, EU), `ssh yeral-vps` from the owner's Mac (key login; the
+owner's Claude Code allows `Bash(ssh yeral-vps:*)`). It also hosts the owner's other projects. Everything about it:
+`infra/server/README.md`.
+
+- `setup.sh` ran on 2026-10-19: keys-only SSH, firewall (SSH, 80, 443), fail2ban, automatic security updates, 2 GB
+  swap, UTC, Docker 29 with log rotation, the `edge` network, a `deploy` user.
+- `/srv/edge`: one Caddy for every project (HTTPS by itself); projects add `sites/<project>.caddy`.
+- `/srv/yeral`: Postgres 18 and the api (image built on the server from a `git archive`), `.env` with the database
+  password (server only). First deploy 2026-10-19 at `382c6bc`: health ok, 13 categories.
+- Not yet: the `api.yeral.app` DNS record (then `PUBLIC=1` adds the Caddy site), GitHub deploys over SSH, nightly
+  backups to R2 (needs an R2 token in `.env`).
+
+## Hosting later (the original plan): own server with Docker + nginx
 
 One VPS to start (≈4 vCPU, 8 GB RAM, 100 GB SSD), everything in Docker Compose (`infra/docker/compose.yml`):
 
