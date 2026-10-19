@@ -119,8 +119,9 @@ const searchFields = langQuerySchema.extend(cursorQuerySchema.shape).extend({
   q: z.string().trim().max(80).optional(),
   cat: slugSchema.optional(),
   /**
-   * "Nirede?" set to a city (book Q-107): the list keeps to it, without a radius; a position still gives distances.
-   * Without a city or a position the list keeps to the market's main city. Ignored with `bbox`.
+   * "Nirede?" set to a city (book Q-107): the list keeps to it. Without a city the market's main one; an unknown city
+   * counts as the main one. Ignored with a position (near me, or around a picked place) and with `bbox`: both cross
+   * city lines.
    */
   city: slugSchema.optional(),
   lat: latQuery.optional(),
@@ -159,12 +160,16 @@ export const searchResponseSchema = listOf(businessCardSchema)
   .extend({
     /** False when there was no position: distances are hidden and the list is sorted by rating × reviews. */
     located: z.boolean(),
-    /** The city the list keeps to (the chosen one, else the market's main one without a position); null near me and in a map area. */
+    /** The city the list keeps to (the chosen one, else the market's main one); null near a position and in a map area. */
     city: slugSchema.nullable(),
   })
   .meta({ id: 'SearchResponse' })
 
-export const suggestQuerySchema = langQuerySchema.extend({ q: z.string().trim().min(1).max(80) })
+export const suggestQuerySchema = langQuerySchema.extend({
+  q: z.string().trim().min(1).max(80),
+  /** Services and businesses in this city only, as search keeps to it (an unknown city counts as the main one). */
+  city: slugSchema.optional(),
+})
 export const suggestResponseSchema = z.object({
   categories: z.array(z.object({ id: slugSchema, name: z.string() })).max(4),
   services: z.array(z.string()).max(6),
@@ -203,7 +208,7 @@ export const cityListSchema = z
 export const placeSchema = z.object({ label: z.string(), lat: z.number(), lng: z.number() }).meta({ id: 'Place' })
 export const placeSuggestQuerySchema = langQuerySchema.extend({
   q: z.string().trim().min(2).max(80),
-  /** Places in this city only. */
+  /** Places in this city only (an unknown city counts as the main one). */
   city: slugSchema.optional(),
 })
 export const placeListSchema = z.object({ items: z.array(placeSchema).max(6) })

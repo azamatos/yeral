@@ -42,13 +42,18 @@ export function browser(app: App) {
 }
 
 /**
- * `GET /v1/events?after=` until something arrives (≤ 5 s): events show once every older transaction on the server has
- * finished, and other test files seed in parallel.
+ * `GET /v1/events?after=` until `ready` holds for the items (≤ 5 s; by default: anything arrived). Events show once every
+ * older transaction on the server has finished, and other test files seed in parallel, so an earlier event can show
+ * while the one a test waits for is still held back: wait for that one.
  */
-export async function eventsAfter(b: ReturnType<typeof browser>, cursor: string) {
+export async function eventsAfter(
+  b: ReturnType<typeof browser>,
+  cursor: string,
+  ready: (items: { type: string; bookingCode: string | null }[]) => boolean = (items) => items.length > 0,
+) {
   for (let i = 0; ; i++) {
     const res = await b.req(`/v1/events?after=${cursor}`)
-    if (res.json.items?.length || i >= 50) return res
+    if (ready(res.json.items ?? []) || i >= 50) return res
     await new Promise((r) => setTimeout(r, 100))
   }
 }

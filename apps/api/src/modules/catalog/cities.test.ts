@@ -6,8 +6,8 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses } from '../../db/schema'
-import { seed } from '../../db/seed'
+import { businesses, cities } from '../../db/schema'
+import { seed, seedCatalogue } from '../../db/seed'
 import { CITIES } from '../../db/seed/cities'
 import { DEMO_CENTER } from '../../db/seed/demo-data'
 
@@ -50,17 +50,23 @@ describe('cities (book Q-107)', () => {
     expect(cityIds(res)).toEqual(res.json.items.map(() => MARKET.mainCity))
   })
 
-  it('a chosen city keeps the list to it, without a radius; a position still gives distances', async () => {
-    const mary = await b.req(`/v1/search?city=mary&${near}&r=1`)
-    expect(mary.json).toMatchObject({ city: 'mary', located: true })
+  it('a chosen city keeps the list to it', async () => {
+    const mary = await b.req('/v1/search?city=mary')
+    expect(mary.json).toMatchObject({ city: 'mary', located: false })
     expect(slugs(mary)).toEqual(['barber-loft'])
     expect(mary.json.items[0].city).toEqual({ id: 'mary', name: 'Mary' })
-    expect(mary.json.items[0].distanceM).toBeGreaterThan(1000)
   })
 
-  it('near me and the map area cross city lines', async () => {
-    const nearMe = await b.req(`/v1/search?${near}&r=25`)
+  it('an unknown city counts as the main one, and says so', async () => {
+    const res = await b.req('/v1/search?city=nowhere')
+    expect(res.json.city).toBe(MARKET.mainCity)
+    expect(res.json.items.length).toBeGreaterThan(0)
+  })
+
+  it('a position (near me, or around a picked place) and the map area cross city lines, the radius kept', async () => {
+    const nearMe = await b.req(`/v1/search?city=ashgabat&${near}&r=25`)
     expect(nearMe.json.city).toBeNull()
+    for (const i of nearMe.json.items) expect(i.distanceM).toBeLessThanOrEqual(25_000)
     expect(cityIds(nearMe)).toEqual(expect.arrayContaining(['mary', 'ashgabat']))
     const area = await b.req('/v1/search?bbox=37.8,58.2,38.1,58.6&city=ashgabat')
     expect(area.json.city).toBeNull()
@@ -75,5 +81,18 @@ describe('cities (book Q-107)', () => {
   it('"Nirede?" suggests places in the chosen city', async () => {
     expect((await b.req('/v1/places/suggest?q=magtym&lang=tk&city=ashgabat')).json.items).toHaveLength(1)
     expect((await b.req('/v1/places/suggest?q=magtym&lang=tk&city=mary')).json.items).toEqual([])
+  })
+
+  it('"Näme?" suggests services and businesses in the chosen city, as search keeps to it', async () => {
+    const names = (res: { json: { businesses: { slug: string }[] } }) => res.json.businesses.map((x) => x.slug)
+    expect(names(await b.req('/v1/search/suggest?q=barber'))).toContain('barber-loft')
+    expect(names(await b.req('/v1/search/suggest?q=barber&city=mary'))).toEqual(['barber-loft'])
+    expect(names(await b.req('/v1/search/suggest?q=barber&city=ashgabat'))).not.toContain('barber-loft')
+  })
+
+  it('setup brings the cities up to date in a database whose demo it keeps', async () => {
+    await db.delete(cities).where(eq(cities.id, 'turkmenabat'))
+    await seedCatalogue(db)
+    expect((await db.select().from(cities)).map((c) => c.id)).toContain('turkmenabat')
   })
 })

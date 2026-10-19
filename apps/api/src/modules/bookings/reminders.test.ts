@@ -1,5 +1,5 @@
 import { epochOf } from '@yeral/domain/time'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { testDatabase } from '../../../test/db'
@@ -85,6 +85,7 @@ describe('reminders and the night (book Q-285)', () => {
   it("a reminder names the city of a business outside the market's main one (book Q-107)", async () => {
     const t = testApp(db)
     const [barber] = await db.update(businesses).set({ cityId: 'mary' }).where(eq(businesses.slug, 'barber-loft')).returning()
+    let bookingId: string | undefined
     try {
       const [row] = await db
         .insert(bookings)
@@ -101,6 +102,7 @@ describe('reminders and the night (book Q-285)', () => {
           clientName: 'Traveller',
         })
         .returning()
+      bookingId = row!.id
       await queueBookingSms(db, t.deps, row!, { confirmed: false })
       t.clock.now = epochOf('2026-10-15', 901)
       await runDueJobs(t.deps)
@@ -108,7 +110,12 @@ describe('reminders and the night (book Q-285)', () => {
         `Reminder: tomorrow at 15:00, Barber Loft, ${barber!.address}, Mary.`,
       )
     } finally {
-      await db.update(businesses).set({ cityId: 'ashgabat' }).where(eq(businesses.id, barber!.id))
+      // later tests in this file share the database: the business goes back, the booking and its SMS go away
+      await db.update(businesses).set({ cityId: 'ashgabat' }).where(eq(businesses.slug, 'barber-loft'))
+      if (bookingId) {
+        await db.delete(jobs).where(sql`${jobs.payload}->>'bookingId' = ${bookingId}`)
+        await db.delete(bookings).where(eq(bookings.id, bookingId))
+      }
     }
   })
 })

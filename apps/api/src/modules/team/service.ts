@@ -17,6 +17,7 @@ import type { AppEnv, User } from '../../http/env'
 import { randomToken, sha256Hex } from '../../lib/crypto'
 import { emit } from '../../notify'
 import { requireUser } from '../auth/session'
+import { cityRefOf, loadCities } from '../catalog/cities'
 import { photoOf, text } from '../catalog/map'
 import { signsIn } from './members'
 
@@ -196,15 +197,19 @@ export async function workspacesOf(deps: Deps, user: User): Promise<{ items: Wor
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
     .where(and(eq(staff.userId, user.id), signsIn))
     .orderBy(asc(businesses.name))
-  const counts = await requestCounts(
-    deps.db,
-    rows.map((r) => ({ businessId: r.business.id, actor: actorOf(r.member) })),
-    now,
-  )
+  const [counts, cities] = await Promise.all([
+    requestCounts(
+      deps.db,
+      rows.map((r) => ({ businessId: r.business.id, actor: actorOf(r.member) })),
+      now,
+    ),
+    loadCities(deps.db),
+  ])
   const items = rows.map(({ business, member }) => ({
     slug: business.slug,
     name: business.name,
     address: business.address,
+    city: cityRefOf(cities, business.cityId, user.lang),
     photo: business.photos[0] ? photoOf(deps, business.photos[0], user.lang) : null,
     level: member.level,
     requestsToAnswer: counts.get(business.id) ?? 0,
@@ -282,6 +287,7 @@ export async function inviteCards(deps: Deps, rows: InviteRow[], lang: Locale): 
         rows.map((r) => r.staffId),
       ),
     )
+  const cities = await loadCities(deps.db)
   // the sender's name as their team knows it
   const senders = rows.flatMap((r) => (r.invitedBy ? [r.invitedBy] : []))
   const senderRows = senders.length
@@ -302,6 +308,7 @@ export async function inviteCards(deps: Deps, rows: InviteRow[], lang: Locale): 
           name: b.name,
           category: text(b.kind, lang),
           address: b.address,
+          city: cityRefOf(cities, b.cityId, lang),
           photo: b.photos[0] ? photoOf(deps, b.photos[0], lang) : null,
         },
         invitedBy: senderRows.find((x) => x.userId === r.invitedBy && x.businessId === r.businessId)?.name ?? null,

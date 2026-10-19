@@ -1,18 +1,17 @@
 /**
- * Search and Home (client spec §4.1–4.2, §5): verified businesses in the map area, in the chosen city, near the position
- * (radius) or, with neither a city nor a position, in the market's main city (book Q-107); filtered by category, type,
- * rating, price, open now and "has free time" on the chosen day(s); nearest first, or by rating × reviews without a
- * position.
+ * Search and Home (client spec §4.1–4.2, §5): verified businesses in the map area, near the position (radius), or in the
+ * chosen city — the market's main one when there is none (book Q-107); filtered by category, type, rating, price, open
+ * now and "has free time" on the chosen day(s); nearest first, or by rating × reviews without a position.
  */
 import type { SearchQuery } from '@yeral/contract/catalog'
 import { boundingBox, distanceM, popularity } from '@yeral/domain/geo'
-import { MARKET } from '@yeral/domain/market'
 import { today } from '@yeral/domain/time'
 import { and, between, eq, gte, ilike, or, sql, type SQL } from 'drizzle-orm'
 import { anyTextLike } from '../../db/localized'
 import { businesses, categories, services } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { buildCards } from './cards'
+import { cityOrMain } from './cities'
 
 const escapeLike = (q: string) => q.replace(/[\\%_]/g, (ch) => `\\${ch}`)
 
@@ -27,9 +26,9 @@ export async function search(deps: Deps, q: SearchQuery) {
   const date = q.date ?? today(deps.now())
   const position = q.lat !== undefined && q.lng !== undefined ? { lat: q.lat, lng: q.lng } : null
 
-  // the map area wins; then a chosen city; near me only without one
-  const city = q.bbox ? null : (q.city ?? (position ? null : MARKET.mainCity))
-  const radius = !q.bbox && !city && position
+  // the map area wins, then the position (near me, or around a picked place); a city only without either
+  const radius = !q.bbox && position
+  const city = q.bbox || position ? null : await cityOrMain(db, q.city)
 
   const where: SQL[] = [eq(businesses.verification, 'verified')]
   if (city) where.push(eq(businesses.cityId, city))

@@ -7,7 +7,7 @@ import { and, eq, inArray } from 'drizzle-orm'
 import { bookingItems, bookings, businesses, classSessions, reviews, staff, tableAreas } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { loadBusinesses } from '../availability/context'
-import { cityRefOf, loadCities } from '../catalog/cities'
+import { cityRef } from '../catalog/cities'
 import { geoOf, photoOf, text } from '../catalog/map'
 import { stateOf, type BookingRow } from './repo'
 
@@ -133,7 +133,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     ...summary,
     timeline: timeline.sort((x, y) => x.at - y.at),
     address: b.hideExactAddress && !exact ? b.street : b.address,
-    city: cityRefOf(await loadCities(deps.db), b.cityId, lang),
+    city: await cityRef(deps.db, b.cityId, lang),
     entranceNote: b.hideExactAddress && !exact ? null : b.entranceNote,
     geo: geoOf(b, exact),
     clientNote: row.clientNote,

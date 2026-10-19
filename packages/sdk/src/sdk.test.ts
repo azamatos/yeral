@@ -128,6 +128,17 @@ describe('sdk', () => {
     }
   })
 
+  it('the cities are cached per kilometre of position, and places carry the chosen city', async () => {
+    const f = fixture(() => json(200, { items: [], main: 'ashgabat', nearest: null }))
+    const a = f.sdk.catalog.cities('en', { lat: 37.95012, lng: 58.38049 })
+    const b = f.sdk.catalog.cities('en', { lat: 37.95031, lng: 58.37951 })
+    expect(a.queryKey).toEqual(b.queryKey)
+    await f.queryClient.fetchQuery(a as never)
+    expect(f.calls[0]?.url.search).toBe('?lang=en&lat=37.95&lng=58.38')
+    await f.queryClient.fetchQuery(f.sdk.catalog.places('Mir', 'en', 'mary') as never)
+    expect(f.calls[1]?.url.searchParams.get('city')).toBe('mary')
+  })
+
   it('reviews are cached per language', () => {
     const f = fixture(() => json(200, {}))
     expect(f.sdk.catalog.reviews('glow-studio', 'ru').queryKey).toEqual(['reviews', 'glow-studio', 'ru'])
@@ -141,8 +152,9 @@ describe('sdk', () => {
       me.get(),
       me.favorites('tk'),
       catalog.categories('tk'),
+      catalog.cities('tk', { lat: 37.95, lng: 58.38 }),
       catalog.suggest('saç', 'tk'),
-      catalog.places('Mir', 'tk'),
+      catalog.places('Mir', 'tk', 'mary'),
       catalog.business('glow-studio', 'tk'),
       availability.appointment('glow-studio', { lang: 'tk', services: [id], staff: 'any' }),
       availability.specialists('glow-studio', { lang: 'tk', services: [id] }),

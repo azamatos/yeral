@@ -7,13 +7,12 @@
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
-import { localized } from '@yeral/domain/model'
 import { nearestSlots, nextFreeSlot } from '@yeral/domain/availability'
 import { addDays, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
-import { bookingItems, bookings, businesses, cities, clients, jobs, users } from '../../db/schema'
+import { bookingItems, bookings, businesses, clients, jobs, users } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { bookingSmsText, emit, expiredSmsText, queueSms, type BookingSmsKind } from '../../notify'
+import { bookingSmsText, emit, expiredSmsText, queueSms, smsCityOf, type BookingSmsKind } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
 import { setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
@@ -165,14 +164,13 @@ async function sendBookingSms(
   const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId))
   if (!biz) return
   const lang = user?.lang ?? MARKET.defaultLanguage
-  const [city] = biz.cityId === MARKET.mainCity ? [] : await deps.db.select().from(cities).where(eq(cities.id, biz.cityId))
   const text = bookingSmsText(deps.site, lang, kind, {
     code: b.code,
     date: b.date,
     start: b.start,
     businessName: biz.name,
     address: biz.address,
-    city: city ? localized(city.name, lang) : null,
+    city: await smsCityOf(deps.db, biz.cityId, lang),
   })
   await deps.sms.send({ to: b.clientPhone, text })
 }

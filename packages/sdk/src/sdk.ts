@@ -135,13 +135,15 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         staleTime: 3_600_000,
       }),
     /** The cities for "Nirede?", the market's main one and, with a position, the one it's in (book Q-107). */
-    cities: (lang: Locale, position: { lat: number; lng: number } | null = null) =>
-      queryOptions({
-        queryKey: keys.cities(lang, position),
-        queryFn: ({ signal }) =>
-          call(v1.cities.$get({ query: clean({ lang, lat: position?.lat, lng: position?.lng }) }, abortWith(signal))),
+    cities: (lang: Locale, position: { lat: number; lng: number } | null = null) => {
+      // about a kilometre: a phone's position moves a little between renders, the city it's in doesn't
+      const near = position && { lat: Math.round(position.lat * 100) / 100, lng: Math.round(position.lng * 100) / 100 }
+      return queryOptions({
+        queryKey: keys.cities(lang, near),
+        queryFn: ({ signal }) => call(v1.cities.$get({ query: clean({ lang, lat: near?.lat, lng: near?.lng }) }, abortWith(signal))),
         staleTime: 3_600_000,
-      }),
+      })
+    },
     search: (p: SearchParams) => {
       const query = clean({
         ...p,

@@ -365,14 +365,17 @@ async function seedClient(
 }
 
 export async function seed(db: Db, opts: { demo: boolean; now: number }): Promise<Record<string, number>> {
-  return db.transaction(async (tx) =>
-    opts.demo ? seedDemo(tx, opts) : { cities: await seedCities(tx), categories: await seedCategories(tx) },
-  )
+  return db.transaction(async (tx) => (opts.demo ? seedDemo(tx, opts) : seedCatalogue(tx)))
+}
+
+/** The market's cities and the category catalogue, kept up to date on every setup, a kept demo included. */
+export async function seedCatalogue(db: Queryable): Promise<Record<string, number>> {
+  return { cities: await seedCities(db), categories: await seedCategories(db) }
 }
 
 async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<string, number>> {
   await wipe(db)
-  const counts: Record<string, number> = { cities: await seedCities(db), categories: await seedCategories(db) }
+  const counts = await seedCatalogue(db)
   const shift = diffDays(today(opts.now), DEMO_DAY)
   const turn = ((shift % 7) + 7) % 7
   const ctx: Ctx = {

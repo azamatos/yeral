@@ -6,8 +6,9 @@ CREATE TABLE "cities" (
 	"sort" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
--- businesses and places made before cities are all in the first market's main city (the demo; production has none):
--- that city comes first, and the seed fills in the rest of the list and the names
+-- A one-time step for databases that existed before cities: the only market then was Turkmenistan, and the only
+-- businesses and places were the demo's, all in its main city. Any other database (production, a new market's) has
+-- none, and gets nothing here; `setup` seeds the market's own list (`seedCatalogue`).
 INSERT INTO "cities" ("id", "name", "lat", "lng", "sort")
 SELECT 'ashgabat', '{"en":"Ashgabat","tk":"Aşgabat","ru":"Ашхабад"}'::jsonb, 37.9601, 58.3261, 0
 WHERE EXISTS (SELECT 1 FROM "businesses") OR EXISTS (SELECT 1 FROM "places");--> statement-breakpoint

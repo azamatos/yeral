@@ -1,8 +1,9 @@
 /**
  * `pnpm db:migrate | db:seed | db:setup` (root: `pnpm db:setup`). Seeding writes demo data, so it runs only against a
  * local database unless `--allow-remote` is passed (production, by hand), and only with YERAL_ENV set (`seedMode()`):
- * production gets the category catalogue only. There is no staging (ADR 0020).
- * `setup` = create the database if missing, migrate, and seed it while it has no businesses. The demo's dates are fixed
+ * production gets the cities and the category catalogue only. There is no staging (ADR 0020).
+ * `setup` = create the database if missing, migrate, and seed it while it has no businesses; a kept demo still gets the
+ * cities and categories brought up to date. The demo's dates are fixed
  * at seed time (the demo day becomes that day), so a long-lived database goes stale: `seed` starts it over on today.
  */
 import { sql } from 'drizzle-orm'
@@ -10,7 +11,7 @@ import pg from 'pg'
 import { loadConfig } from '../config'
 import { createDb } from './client'
 import { runMigrations } from './migrate'
-import { seed } from './seed'
+import { seed, seedCatalogue } from './seed'
 import { assertSeedTarget, seedMode } from './seed/mode'
 
 const [command = 'setup', ...flags] = process.argv.slice(2)
@@ -51,9 +52,11 @@ async function main() {
       const [{ n } = { n: 0 }] = (await db.execute<{ n: number }>(sql`select count(*)::int as n from businesses`)).rows
       if (command === 'setup' && demo && n > 0) {
         console.warn(`the database already has ${n} businesses: kept (db:seed starts the demo over on today's date)`)
+        const counts = await db.transaction((tx) => seedCatalogue(tx))
+        console.warn(`brought the catalogue up to date: ${JSON.stringify(counts)}`)
       } else {
         const counts = await seed(db, { demo, now: Date.now() })
-        console.warn(`seeded ${demo ? 'demo data' : 'the category catalogue'}: ${JSON.stringify(counts)}`)
+        console.warn(`seeded ${demo ? 'demo data' : 'the cities and the category catalogue'}: ${JSON.stringify(counts)}`)
       }
     }
   } finally {

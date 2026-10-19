@@ -23,7 +23,7 @@ import { anyTextLike, textIn } from '../../db/localized'
 import { bookingItems, businesses, categories, places, reviews, services } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
-import { loadCities } from './cities'
+import { cityOrMain, loadCities } from './cities'
 import { businessDetail, publicBusiness } from './detail'
 import { text, visitWhat } from './map'
 import { search, wordStartLikes } from './search'
@@ -123,10 +123,12 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(searchRoute, async (c) => c.json(await search(c.var.deps, c.req.valid('query')), 200))
   .openapi(suggestRoute, async (c) => {
-    const { q, lang } = c.req.valid('query')
+    const { q, lang, city } = c.req.valid('query')
     const { db } = c.var.deps
     const [start, word] = wordStartLikes(q)
     const matches = (col: SQL | AnyColumn) => or(sql`${col} ilike ${start}`, sql`${col} ilike ${word}`)
+    // the businesses search would show: verified, and in the chosen city when there is one
+    const shown = and(eq(businesses.verification, 'verified'), city ? eq(businesses.cityId, await cityOrMain(db, city)) : undefined)
     const [cats, svc, biz] = await Promise.all([
       db
         .select()
@@ -138,12 +140,12 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
         .selectDistinct({ name: textIn(services.name, lang) })
         .from(services)
         .innerJoin(businesses, eq(businesses.id, services.businessId))
-        .where(and(eq(businesses.verification, 'verified'), eq(services.archived, false), anyTextLike(services.name, start, word)))
+        .where(and(shown, eq(services.archived, false), anyTextLike(services.name, start, word)))
         .limit(6),
       db
         .select()
         .from(businesses)
-        .where(and(eq(businesses.verification, 'verified'), matches(businesses.name)))
+        .where(and(shown, matches(businesses.name)))
         .orderBy(desc(businesses.reviewsCount))
         .limit(6),
     ])
@@ -158,11 +160,12 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(placesRoute, async (c) => {
     const { q, lang, city } = c.req.valid('query')
+    const { db } = c.var.deps
     const [start, word] = wordStartLikes(q)
-    const rows = await c.var.deps.db
+    const rows = await db
       .select()
       .from(places)
-      .where(and(anyTextLike(places.label, start, word), city ? eq(places.cityId, city) : undefined))
+      .where(and(anyTextLike(places.label, start, word), city ? eq(places.cityId, await cityOrMain(db, city)) : undefined))
       .limit(6)
     return c.json({ items: rows.map((p) => ({ label: text(p.label, lang), lat: p.lat, lng: p.lng })) }, 200)
   })
