@@ -19,6 +19,8 @@ export interface TimeSlot {
   date: string
   start: number
   end: number
+  /** The one specialist it's booked with (book Q-159); absent on tables and on offers made before. */
+  staffId?: string | null
 }
 
 export const bookings = pgTable(

@@ -55,6 +55,7 @@
     "confirmed": "{brand}: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: {link}",
     "declined": "{brand}: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}",
     "expired": "{brand}: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {times} — {link}",
+    "expiredNoTimes": "{brand}: {business} wagtynda jogap bermedi. Başga wagt saýlaň: {link}",
     "cancelled": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}",
     "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",
     "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}.",

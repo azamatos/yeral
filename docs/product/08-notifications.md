@@ -99,7 +99,7 @@ These are the Turkmen texts from client spec §6 next to the ones in the code (`
 | Request sent | no SMS | no SMS | yes |
 | Confirmed | *Ýeral: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: yeral.app/b/{id}* | the same; the link domain comes from config | yes |
 | Declined | *Ýeral: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}* | the same | yes; nothing sends it yet |
-| Expired | *Ýeral: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {t1}, {t2}, {t3} — {link}* | the same, with *{times}*; a time on another day gets a short date (*16 okt. 10:00*) | yes; with nothing free, the text drops the times and says *Başga wagt saýlaň* (Q-252); the code sends an empty list |
+| Expired | *Ýeral: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {t1}, {t2}, {t3} — {link}* | the same, with *{times}*; a time on another day gets a short date (*16 okt. 10:00*) | yes; with nothing free, the text drops the times and says *Başga wagt saýlaň* (Q-252; code: `sms.expiredNoTimes`) |
 | Cancelled by the business | — | *Ýeral: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}* | only in the code; nothing sends it yet |
 | Reminder 1 day | *Ýatlatma: ertir {time} {business}, {address}.* | the same | yes |
 | Reminder 2 h | the same text as the 1-day reminder, with *ertir* (tomorrow) | *Ýatlatma: şu gün {time} {business}, {address}.* (today) | the code's text is kept (Q-293) |

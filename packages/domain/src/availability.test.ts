@@ -13,6 +13,7 @@ import {
   nextFreeSlot,
   seatsLeft,
   shiftPlan,
+  slotStaffId,
   staffDoingAll,
   tableSlots,
   type AppointmentContext,
@@ -200,6 +201,24 @@ describe('chains and «Islendik hünärmen»', () => {
       { serviceId: 'cut', staffId: 'a', start: 600, end: 660, bufferAfter: 10 },
       { serviceId: 'color', staffId: 'b', start: 660, end: 780, bufferAfter: 15 },
     ])
+  })
+
+  it('an offered time names one specialist: no split, the client’s own first when free (book Q-159)', () => {
+    const c = ctx({ staff: team, busy: [busy('c', THU, 540, 1200)], rules: { ...ctx().rules, bufferMinutes: 10 } })
+    const offer = q({ serviceIds: ['cut', 'color'], staffId: null, oneSpecialist: true })
+    expect(findAppointmentSlot(c, offer, 600)).toBeNull()
+    const free = ctx({ staff: [person('a', ['cut']), person('b', ['cut'])] })
+    expect(slotStaffId(findAppointmentSlot(free, q({ staffId: null, oneSpecialist: true }), 600)!)).toBe('a')
+    expect(slotStaffId(findAppointmentSlot(free, q({ staffId: null, oneSpecialist: true, preferStaffId: 'b' }), 600)!)).toBe('b')
+    // the preferred one busy: someone else free
+    const aBusy = ctx({ staff: [person('a', ['cut']), person('b', ['cut'])], busy: [busy('b', THU, 600, 660)] })
+    expect(slotStaffId(findAppointmentSlot(aBusy, q({ staffId: null, preferStaffId: 'b' }), 600)!)).toBe('a')
+  })
+
+  it('slotStaffId: the one specialist of a plan, or null when it is split', () => {
+    const c = ctx({ staff: team, busy: [busy('c', THU, 540, 1200)], rules: { ...ctx().rules, bufferMinutes: 10 } })
+    expect(slotStaffId(findAppointmentSlot(c, q({ serviceIds: ['cut', 'color'], staffId: null }), 600)!)).toBeNull()
+    expect(slotStaffId(findAppointmentSlot(ctx({ staff: team }), q({ serviceIds: ['cut', 'color'], staffId: null }), 600)!)).toBe('c')
   })
 
   it('a split needs every part to be free', () => {

@@ -86,11 +86,14 @@ export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsK
   }
 }
 
+/** The expiry SMS with the free times; with none free it asks the client to pick another time (book Q-252). */
 export function expiredSmsText(site: SiteConfig, lang: Locale, b: SmsBooking, times: { date: string; start: number }[]): string {
   const fmt = createFmt(lang)
-  const list = times.map((x) => (x.date === b.date ? fmt.time(x.start) : `${fmt.shortDate(x.date)} ${fmt.time(x.start)}`)).join(', ')
   const t = createT(lang)
-  return t('sms.expired', { brand: brandOf(t), business: b.businessName, times: list, link: bookingLink(site, b.code) })
+  const common = { brand: brandOf(t), business: b.businessName, link: bookingLink(site, b.code) }
+  if (!times.length) return t('sms.expiredNoTimes', common)
+  const list = times.map((x) => (x.date === b.date ? fmt.time(x.start) : `${fmt.shortDate(x.date)} ${fmt.time(x.start)}`)).join(', ')
+  return t('sms.expired', { ...common, times: list })
 }
 
 export function codeSmsText(lang: Locale, code: string): string {

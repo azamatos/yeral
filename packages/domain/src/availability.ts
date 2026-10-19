@@ -66,6 +66,10 @@ export interface AppointmentQuery {
   by: 'client' | 'staff'
   /** The booking being moved: its own time doesn't count as busy. */
   excludeBookingId?: string
+  /** One specialist does every service: an offered time names one person (book Q-159), so no split between people. */
+  oneSpecialist?: boolean
+  /** Without a chosen specialist, try this one first: an offered time keeps the client's specialist when they're free. */
+  preferStaffId?: string | null
 }
 
 export interface PlannedItem extends Interval {
@@ -248,7 +252,12 @@ function planAt(
   start: number,
 ) {
   const ids = q.serviceIds
-  const singles = q.staffId ? [q.staffId] : staffDoingAll(ctx, ids).map((s) => s.id)
+  const doingAll = staffDoingAll(ctx, ids).map((s) => s.id)
+  const singles = q.staffId
+    ? [q.staffId]
+    : q.preferStaffId && doingAll.includes(q.preferStaffId)
+      ? [q.preferStaffId, ...doingAll.filter((id) => id !== q.preferStaffId)]
+      : doingAll
   for (const staffId of singles) {
     const view = views.get(staffId)
     if (!view || !ids.every((id) => view.staff.serviceIds.includes(id))) continue
@@ -260,7 +269,7 @@ function planAt(
     )
     if (planFits(views, items)) return items
   }
-  if (!q.staffId && q.by === 'client' && services.length > 1) return splitPlan(ctx, views, services, start)
+  if (!q.staffId && q.by === 'client' && services.length > 1 && !q.oneSpecialist) return splitPlan(ctx, views, services, start)
   return null
 }
 
@@ -307,6 +316,12 @@ export function appointmentSlots(ctx: AppointmentContext, q: AppointmentQuery): 
 /** The plan for one exact start, or null when it's taken (the api answers 409 slot_taken). */
 export function findAppointmentSlot(ctx: AppointmentContext, q: AppointmentQuery, start: number): AppointmentSlot | null {
   return freeSlots(ctx, q, start).next().value ?? null
+}
+
+/** The one specialist a plan books, or null when its services are split between people. */
+export function slotStaffId(slot: Pick<AppointmentSlot, 'items'>): string | null {
+  const first = slot.items[0]?.staffId
+  return first && slot.items.every((i) => i.staffId === first) ? first : null
 }
 
 /** Up to `count` free starts nearest to `start` on the same date ("Bu wagt ýaňy alyndy. Golaý boş wagtlar"). */

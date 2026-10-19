@@ -55,6 +55,7 @@
     "confirmed": "{brand}: {business} подтвердил вашу запись. {weekday}, {date}, {time}. Изменить: {link}",
     "declined": "{brand}: {business} не может принять запись на {date} {time}: {reason}. Выберите другое время: {link}",
     "expired": "{brand}: {business} не ответил вовремя. Есть свободное время: {times} — {link}",
+    "expiredNoTimes": "{brand}: {business} не ответил вовремя. Выберите другое время: {link}",
     "cancelled": "{brand}: {business} отменил вашу запись на {date} {time}: {reason}. {link}",
     "reminderDay": "Напоминание: завтра в {time} {business}, {address}.",
     "reminder2h": "Напоминание: сегодня в {time} {business}, {address}.",

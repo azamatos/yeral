@@ -14,6 +14,7 @@ import {
   holdUntil,
   initialStatus,
   occupiesSlot,
+  offerPast,
   type BookingState,
 } from './lifecycle'
 import type { BusinessHours } from './hours'
@@ -89,6 +90,15 @@ describe('hold time (counted only while the business is open, book Q-120)', () =
     expect(holdUntil(epochOf(TODAY, 1430), booking({ date: '2026-10-16', start: 1200 }), 60, bar)).toBe(epochOf(TODAY, 1490))
     // sent Thursday 00:30 (Wednesday's night): from yesterday's day too
     expect(holdUntil(epochOf(THU, 30), booking({ date: '2026-10-16', start: 1200 }), 30, bar)).toBe(epochOf(THU, 60))
+  })
+})
+
+describe('offered times (book Q-264)', () => {
+  it('an offered time is past once it starts earlier than now plus the lead time', () => {
+    // now 10:00, lead 60 minutes
+    expect(offerPast({ date: TODAY, start: 660 }, 60, NOW)).toBe(false)
+    expect(offerPast({ date: TODAY, start: 659 }, 60, NOW)).toBe(true)
+    expect(offerPast({ date: THU, start: 540 }, 60, NOW)).toBe(false)
   })
 })
 

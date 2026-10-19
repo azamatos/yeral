@@ -132,13 +132,13 @@ MVP. (business spec §3; Q-031, decided 18.10.2026)
 - **Hold time:** a request holds its time for the business's hold time (default 30 minutes), counted only during the
   business's opening hours and never past the start. No answer by then: the system cancels it and offers the client 3
   other free times; if nothing is free, the SMS drops the times and says *Başga wagt saýlaň*. (business spec §2; Q-120,
-  Q-252, decided 18.10.2026) **Code differs:** the hold counts clock time, day and night, and when nothing is free the
-  SMS keeps an empty list (*Şu boş wagtlar bar: —*).
+  Q-252, decided 18.10.2026) (code: `holdUntil()`, `expiredSmsText()`)
 - **Declined with offered times:** taking an offered time creates a confirmed booking at once (the business offered it).
   One declined request gives at most one booking; the other chips disappear. (ROUND6-ANSWERS A1)
 - **Each offered or free time names one specialist** and is booked with that person only; if they're no longer free,
-  the chip shows *Eýýäm eýelendi*. (Q-159, decided 18.10.2026) **Code differs:** free times after an expiry may be with
-  any specialist, and a taken time falls back to anyone free.
+  the chip shows *Eýýäm eýelendi*. (Q-159, decided 18.10.2026) The times after an expiry keep the client's specialist
+  where they're free, and a time is never split between people (Claude (delegated), 20.10.2026). (code:
+  `jobs/run.ts` `alternativesFor`, `bookings/offers.ts`)
 - **Expired with free times:** taking one sends a new request (confirmed at once at an instant business). (ROUND6-ANSWERS A2)
 
 ## Changes after booking

@@ -153,7 +153,8 @@ export async function acceptAlternative(
       deps,
       user,
       b,
-      { date: slot.date, start: slot.start },
+      // with its named specialist only (book Q-159): busy now, it's taken (409 slot_taken)
+      { date: slot.date, start: slot.start, ...(slot.staffId ? { staffId: slot.staffId } : {}) },
       { status: source === 'decline' ? 'confirmed' : initialStatus('web', lb.rules.confirmMode), alternativeOf: b.id },
     )
   } catch (e) {
