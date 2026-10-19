@@ -26,7 +26,7 @@ Apps call it only through `@yeral/sdk`. The frozen `apps/legacy` keeps its own i
 | Favourites | `GET /v1/me/favorites` · `PUT /v1/me/favorites/:slug` · `DELETE /v1/me/favorites/:slug` | `catalog`: `businessCard` |
 | Categories | `GET /v1/categories` | `catalog`: `categoryList` |
 | Search | `GET /v1/search` (Home "Golaýyňyzda şu gün boş" too) · `GET /v1/search/suggest` | `catalog`: `searchQuery` → `searchResponse`, `suggest*` |
-| Places | `GET /v1/places/suggest` · `GET /v1/places/ip` | `catalog`: `placeList`, `ipPlace` |
+| Places | `GET /v1/places/suggest` | `catalog`: `placeList` |
 | Business page | `GET /v1/businesses/:slug` · `GET /v1/businesses/:slug/reviews` | `catalog`: `businessDetail`, `reviewList` |
 | Free times | `GET /v1/businesses/:slug/availability` (appointment) · `GET /v1/businesses/:slug/specialists/availability` · `GET /v1/businesses/:slug/tables` · `GET /v1/businesses/:slug/sessions` | `availability` |
 | Bookings | `POST /v1/bookings` · `GET /v1/me/bookings?tab=upcoming\|past` · `GET /v1/me/bookings/:code` | `bookings`: `createBooking`, `bookingList`, `bookingDetail` |

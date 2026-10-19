@@ -15,7 +15,6 @@ export const keys = {
   search: (params: Record<string, unknown>) => ['search', params] as const,
   suggest: (q: string, lang: Locale) => ['suggest', q, lang] as const,
   places: (q: string, lang: Locale) => ['places', q, lang] as const,
-  ipPlace: () => ['places', 'ip'] as const,
   business: (slug: string, lang: Locale, position: { lat: number; lng: number } | null) => ['business', slug, lang, position] as const,
   businessAll: (slug: string) => ['business', slug] as const,
   reviews: (slug: string, lang: Locale) => ['reviews', slug, lang] as const,

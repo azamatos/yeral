@@ -4,7 +4,6 @@ import {
   businessDetailSchema,
   businessQuerySchema,
   categoryListSchema,
-  ipPlaceSchema,
   placeListSchema,
   placeSuggestQuerySchema,
   reviewListSchema,
@@ -59,14 +58,6 @@ const placesRoute = createRoute({
   summary: '"Nirede?" suggestions',
   request: { query: placeSuggestQuerySchema },
   responses: { 200: json(placeListSchema) },
-})
-
-const ipPlaceRoute = createRoute({
-  method: 'get',
-  path: '/places/ip',
-  tags: ['catalog'],
-  summary: 'Approximate place from the IP address, for the "Nirede?" field when location is denied',
-  responses: { 200: json(ipPlaceSchema) },
 })
 
 const businessRoute = createRoute({
@@ -153,14 +144,6 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
       .where(or(sql`${label} ilike ${start}`, sql`${label} ilike ${word}`, sql`${places.label}->>'tk' ilike ${start}`))
       .limit(6)
     return c.json({ items: rows.map((p) => ({ label: text(p.label, lang), lat: p.lat, lng: p.lng })) }, 200)
-  })
-  .openapi(ipPlaceRoute, (c) => {
-    // Cloudflare adds the caller's approximate location to the request; elsewhere (Node) there is none yet
-    const cf = (c.req.raw as Request & { cf?: { city?: string; latitude?: string; longitude?: string } }).cf
-    const lat = Number(cf?.latitude)
-    const lng = Number(cf?.longitude)
-    const place = cf?.city && Number.isFinite(lat) && Number.isFinite(lng) ? { label: cf.city, lat, lng } : null
-    return c.json({ place }, 200)
   })
   .openapi(businessRoute, async (c) => {
     const { slug } = c.req.valid('param')

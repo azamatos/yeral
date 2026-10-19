@@ -73,7 +73,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
   settings. Business texts require Turkmen (Q-102 decided any one language). (ADR 0022)
 - The average bill is still in the code (Q-103 dropped it).
 - Every day and visit ends by 24:00; Q-105 allows past midnight (F-109).
-- Addresses carry no city, and the city comes only from the internet address (Q-107, F-240).
+- Addresses carry no city, and there is no city choice (Q-107, F-240); the lookup by internet address is gone with Cloudflare (ADR 0024).
 - Access: the code still has round 4's editable roles; round 6 decided three fixed levels and a matrix (F-088, F-089).
 - Invites: the code activates an invite at the first login; the design has accept or decline, 7 days, resend (F-085).
 - Moving: when the chosen specialist is busy, the code gives the booking to another one; round 6 forbids that (F-060).
@@ -123,7 +123,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-007 | "What?" suggestions | Typing in "Näme?" suggests categories and business names. | Later | not designed | api built (`/v1/search/suggest`) | Code only; no dropdown is drawn. |
 | F-008 | "Where?" place suggestions | Typing an address, district or landmark in "Nirede?" offers up to 6 places. | MVP | spec only (README §5) | api built (`/v1/places/suggest`, `places` table) | Places are seeded; nobody maintains them (see F-187). |
 | F-009 | Near-me location and radius | Browser geolocation as "Ýakynymda" with a 1 / 3 / 5 / 10 / 25 km radius chip (5 km default). | MVP | drawn (Search) | built (domain geo, api) |  |
-| F-010 | Location-denied fallback | IP-based city shown only inside "Nirede?", distances hidden, sort by rating × reviews, help sheet to allow location. | MVP | drawn (States 3) | api built (`/v1/places/ip`, popularity sort) | The city becomes a choice (Q-107, F-240). |
+| F-010 | Location-denied fallback | The market's main city inside "Nirede?", distances hidden, sort by rating × reviews, help sheet to allow location. | MVP | drawn (States 3: an IP-based city) | api built (popularity sort); the IP lookup removed (ADR 0024) | The city becomes a choice (Q-107, F-240). The main city joins the market settings with the client site. |
 | F-011 | Search filters and sort | Category chips, day toggle Şu gün / Ertir / Şu hepde, filters drawer (price, rating 4.5+, open now, booking type, women only) and sort nearest / rating / price. | MVP | drawn (Search chips); drawer contents spec only | api built (`cat`, `date`, `week`, `maxPrice`, `minRating`, `openNow`, `type`, `womenOnly`, `sort`) | Results are limited to businesses with free time on the chosen day. |
 | F-012 | Specialist gender filter | Beauty searches can filter by the specialist's gender. | Later | spec only (README §4.2) | schema only (`staff.gender`) | Not in the search api. |
 | F-013 | Party-size filter for restaurants | "Adam sany: 2 ▾" chip (1–7, 8+) when the restaurant/café category is on; rows show times for that party. | Later | drawn (Search · party) | api built (`party` 1–8, default 2) | Round 6 D2 calls it new, but the api already has it; design range 1–7 + 8+ vs api max 8. |
@@ -399,8 +399,8 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
-| F-203 | Cloudflare services | DNS, Storybook and R2 for backups; the api and the sites run on the own server, not on Workers (ADR 0023, revised 19.10.2026). | MVP | not designed | DNS and Storybook built; the api's Workers and Neon path goes in P2 step 0 | Workers, Hyperdrive and Neon dropped for the api (owner, 19.10.2026). No staging (ADR 0020). |
-| F-204 | Docker stack | Postgres + api + Caddy in Compose, run locally, in CI and on the server. | MVP | not designed | built (`infra/docker`, `infra/server`); the local stack uses nginx until P2 step 0 |  |
+| F-203 | Cloudflare services | DNS, Storybook and R2 for backups; the api and the sites run on the own server, not on Workers (ADR 0023, revised 19.10.2026). | MVP | not designed | built: DNS, Storybook; the api's Workers and Neon path removed (ADR 0024) | Workers, Hyperdrive and Neon dropped for the api (owner, 19.10.2026). No staging (ADR 0020). |
+| F-204 | Docker stack | Postgres + api + Caddy in Compose, run locally, in CI and on the server. | MVP | not designed | built (`infra/docker`, `infra/server`; ADR 0024) |  |
 | F-205 | Own server | The owner's netcup VPS 1000 in the EU runs every app of the first launch behind a shared Caddy, with Cloudflare for DNS; the Turkmenistan launch gets a second server inside the country. | MVP | not designed | built (`infra/server`, set up 19.10.2026; not public yet) | Moved from Later (owner, 19.10.2026); chapter 10, "The server: when and what". |
 | F-206 | CI/CD and releases | GitHub Actions checks, Changesets releases, deploy with smoke check, rollback, OpenAPI docs at `/docs`. | MVP | not designed | built | Playwright end-to-end flows planned with M3, not built. |
 | F-207 | Storybook design system | `@yeral/ui` (38 components) with stories tested in Chromium with axe, at storybook.yeral.app. | MVP | drawn (DS boards) | built |  |

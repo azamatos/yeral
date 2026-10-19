@@ -48,8 +48,8 @@ source (`web` | `app` | `phone` | `walkin` | `ai`). Manat prices for plans and c
 - **Hosting:** one deployment per market ([ADR 0023](../decisions/0023-one-deployment-per-market.md)). The first launch
   (English) runs on the owner's netcup VPS 1000 in the EU, in Docker (2026-10-19); people in Turkmenistan reach it
   through a VPN. The Turkmenistan launch, after
-  investment, gets its own servers in Turkmenistan running everything in Docker behind nginx
-  ([ADR 0007](../decisions/0007-hosting-cloudflare-now-docker-later.md)).
+  investment, gets its own servers in Turkmenistan running the same Docker stack behind Caddy
+  ([ADR 0024](../decisions/0024-own-server-docker-caddy.md)).
 - The repository is private (checked 2026-10-18). Never commit secrets.
 
 ## Goals

@@ -12,7 +12,7 @@ before any code used them were edited in place (marked "revised").
 | [0004](0004-feature-sliced-design.md) | Feature-Sliced Design inside apps | Accepted 2026-10-13 |
 | [0005](0005-typescript-backend-in-monorepo.md) | TypeScript backend in the monorepo, on Postgres from the start | Accepted 2026-10-13 (revised); auth revised by 0019 |
 | [0006](0006-contract-and-sdk.md) | zod contract, Hono RPC client, generated OpenAPI | Accepted 2026-10-13 |
-| [0007](0007-hosting-cloudflare-now-docker-later.md) | Hosting: Cloudflare now, own server with Docker + nginx later | Accepted 2026-10-13 (revised) |
+| [0007](0007-hosting-cloudflare-now-docker-later.md) | Hosting: Cloudflare now, own server with Docker + nginx later | Accepted 2026-10-13 (revised); superseded for the api and the new apps by 0024 |
 | [0008](0008-i18n-use-intl.md) | i18n with use-intl | Accepted 2026-10-13, amended by 0016 |
 | [0009](0009-versioning-changesets.md) | Versioning with Changesets, trunk-based flow | Accepted 2026-10-13 |
 | [0010](0010-ci-cd-github-actions.md) | CI/CD on GitHub Actions | Accepted 2026-10-13 (revised) |
@@ -28,7 +28,8 @@ before any code used them were edited in place (marked "revised").
 | [0020](0020-local-and-production-only.md) | Local and production only: no staging | Accepted 2026-10-16 |
 | [0021](0021-product-book-first.md) | Product book first; Claude Code writes the design prompts | Accepted 2026-10-17 |
 | [0022](0022-english-first-any-country.md) | Built in English, not bound to one country; each market adds its languages | Accepted 2026-10-18 |
-| [0023](0023-one-deployment-per-market.md) | One code base, one deployment per market; first launch on Cloudflare | Accepted 2026-10-18 |
+| [0023](0023-one-deployment-per-market.md) | One code base, one deployment per market; first launch on the own server | Accepted 2026-10-18 (revised 2026-10-19) |
+| [0024](0024-own-server-docker-caddy.md) | The own server runs every app: Docker + Caddy, Postgres beside the api, no Neon, no Workers | Accepted 2026-10-19 |
 
 New record: copy [`_template.md`](_template.md), take the next number, add a row here, update the affected
 memory-bank file in the same commit.

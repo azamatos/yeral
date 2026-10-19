@@ -8,13 +8,14 @@ Status 2026-10-13: **target architecture, agreed; migration not started.** The l
 ```
    yeral.app/{tk,ru,en} ── client marketplace (TanStack Start, SSR) ──┐
    business.yeral.app ──── business workspace (SPA, PWA)           ───┼──► api.yeral.app/v1 (Hono) ──► Postgres
-   cms.yeral.app ───────── cms (SPA, access-gated)                 ───┘          │                (Neon now, Docker later)
+   cms.yeral.app ───────── cms (SPA, team accounts + 2nd factor)   ───┘          │                (Docker, beside the api)
    storybook.yeral.app ─── design system (static)                                ├─ @yeral/domain rules (4 booking types)
                                                                                   ├─ jobs: runDueJobs() every minute
-                                                                                  └─ files: S3 API (R2 now, MinIO/disk later)
+                                                                                  └─ files: storage port (server disk)
 ```
 
-Now every box runs on Cloudflare Workers; later on one server in Docker behind nginx (ADR 0007). Site map: ADR 0015.
+The api, its jobs, Postgres and the apps run on the own server in Docker behind a shared Caddy; Cloudflare keeps DNS,
+Storybook and the legacy site (ADR 0024). Site map: ADR 0015.
 One session cookie on the parent domain serves the client site and the business workspace; the CMS has its own accounts and cookie.
 
 ## Monorepo layout
@@ -25,7 +26,7 @@ yeral/                           github.com/azamatos/yeral
 │  ├─ client/      yeral.app — TanStack Start, SSR for public pages, client-only for account/booking; /tk /ru /en
 │  ├─ business/    Vite SPA + TanStack Router, installable (PWA)
 │  ├─ cms/         Vite SPA + TanStack Router
-│  ├─ api/         Hono + zod-openapi + Drizzle; entry/worker.ts (Cloudflare) and entry/node.ts (Docker)
+│  ├─ api/         Hono + zod-openapi + Drizzle; entry/node.ts (Docker on the own server)
 │  ├─ storybook/   Storybook 10: stories from packages/* and app slices
 │  └─ legacy/      the first Next.js marketplace (frozen, live on yeral.app until M4)
 ├─ packages/
@@ -39,8 +40,8 @@ yeral/                           github.com/azamatos/yeral
 │  ├─ lib/         @yeral/lib       framework-free helpers: .ics, maps/tel links, safe storage, env parsing, site config
 │  └─ config/      @yeral/config    tsconfig bases, ESLint, Prettier, Steiger, Vitest presets
 ├─ infra/
-│  ├─ docker/      Dockerfiles per deployable, compose.yml (production-like), compose.dev.yml (Postgres for local work)
-│  └─ nginx/       nginx.conf + one server block per host, TLS, caching, security headers
+│  ├─ docker/      Dockerfiles per deployable, compose.yml + Caddyfile (production-like), compose.dev.yml (Postgres)
+│  └─ server/      the own server: setup.sh, edge/ (shared Caddy), yeral/ (compose, deploy.sh, yeral.caddy)
 ├─ turbo/generators/  `pnpm gen` templates: package (M0); ui-component, slice, endpoint, app (later)
 ├─ scripts/        version-stamp.mjs (/version.json), smoke.sh (post-deploy checks)
 ├─ docs/           memory-bank/ (+ log/), decisions/, design/ (Claude Design export, read-only), API.md
@@ -139,9 +140,9 @@ apps/api/src/
                     analytics, profile, branches, settings} · admin/*
   db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (docs/design demo data + 13 categories)
   jobs/             runDueJobs(): expire requests at holdUntil, complete visits, reminders, review asks, SMS
-  ports/            sms (dev: code 1234 logged), files (S3 API), clock
-  config.ts         one place that reads env on Workers (c.env) and Node (process.env)
-  entry/worker.ts · entry/node.ts
+  ports/            sms (written to the log everywhere until a gateway; dev code 1234), files (server disk), clock
+  config.ts         one place that reads env (process.env)
+  entry/node.ts     one pool, the app, the jobs tick every minute
 ```
 
 - Services hold the rules; routes only validate, authorise, call a service and map the result to contract DTOs.

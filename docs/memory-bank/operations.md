@@ -10,54 +10,42 @@ are two kinds of environment only, local and production (ADR 0020): no staging.
 | Env | Hosts | Database | Deployed |
 |---|---|---|---|
 | local | `localhost:3000–3005` (`PORT_BASE` + offset) | Postgres in Docker, one database per worktree | `pnpm dev` |
-| local, production-like | `*.yeral.localhost` through nginx | Postgres container | `pnpm docker:up` |
+| local, production-like | `*.yeral.localhost` through Caddy | Postgres container | `pnpm docker:up` |
 | production | the owner's server `yeral-vps` (api running since 2026-10-19, no public host yet); `yeral.app` still serves legacy on Cloudflare; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
 
 No staging and no PR previews (ADR 0020): a change is proven locally (tests, the Docker stack), reviewed, and merged on
-green CI; production changes only from a release. A risky migration can be rehearsed on a throwaway Neon branch of
-production. All hosts come from config (`@yeral/lib/site`), so a new domain is a config change.
+green CI; production changes only from a release. A risky migration is rehearsed on a production dump restored into
+the local Postgres. All hosts come from config (`@yeral/lib/site`), so a new domain is a config change.
 
-## Hosting now: Cloudflare
+## Hosting (ADR 0024)
 
-Each deployable is a Worker whose wrangler config declares its host as a custom domain; `wrangler deploy` creates
-the DNS record and the certificate. No dashboard work per subdomain.
+The own server runs the api, its jobs and Postgres, and later the client, business and cms apps, in Docker behind one
+shared Caddy (section "The own server" below). Cloudflare keeps:
 
-| Host | Worker | Bindings |
-|---|---|---|
-| `yeral.app`, `www.yeral.app` | `yeral-client` (`yeral-web` = legacy until M3) | static assets + SSR |
-| `business.yeral.app` | `yeral-business` | static assets, SPA fallback |
-| `cms.yeral.app` | `yeral-cms` | static assets; Cloudflare Access policy (owner sets it up once in Zero Trust, free up to 50 users) |
-| `api.yeral.app` | `yeral-api` | Hyperdrive → Neon, R2 bucket `yeral-media`, Cron Trigger `* * * * *` → `runDueJobs()` |
-| `storybook.yeral.app` | `yeral-storybook` | static assets |
+| What | Where |
+|---|---|
+| DNS for `yeral.app` | records point at the server, not proxied (Caddy gets the certificates) |
+| `storybook.yeral.app` | Worker `yeral-storybook`, deployed from `main` |
+| `yeral.app`, `www` | Worker `yeral-web` = `apps/legacy` until the new client site replaces it |
+| backups | R2 (P2 step 7; needs the owner's token) |
 
-**Cost now:** Workers Free (100k requests/day, 10 ms CPU per request) until SSR and the api need more, then Workers Paid
-$5/month; Neon, R2 (10 GB), Sentry and Cloudflare Web Analytics on free tiers. The api was never deployed here: on 2026-10-19 the owner chose a netcup VPS 1000 (EU) for the first launch and
-other projects (ADR 0023, revised); its configs are written when the apps are ready to deploy. A Hyperdrive config
-`yeral-production` was created on 2026-10-18 and is unused (free; ask the owner before deleting it).
+**Cost:** the server (€16.68 a month, €12.32 on a 12-month term), shared with the owner's other projects; Workers
+Free for Storybook and legacy; R2 free up to 10 GB.
 
-**Owner's one-time steps** (when the milestone needs them): Neon account (M2), Cloudflare API token for CI (M0),
-Workers Paid when limits are hit, Access policy for `cms.` (M6).
+**Left on the owner's accounts, unused** (delete only if the owner asks): the Neon project Yeral (Frankfurt) and the
+Hyperdrive config `yeral-production` (created 2026-10-18).
 
-## Database: Neon (while on Cloudflare)
-
-- Project **Yeral** (`summer-mountain-55668852`), region `aws-eu-central-1` (Frankfurt), Postgres 18, org
-  `org-solitary-credit-03680071`; linked to this repo by `.neon` (gitignored) and described by `neon.ts` (committed).
-- Branch `production`; a throwaway branch may rehearse a risky migration (`neon checkout <name> --create` applies
-  `neon.ts`), deleted afterwards. No staging branch (ADR 0020).
-- Local env: `npx neon@latest env pull` (or `neon deploy`) writes `.env.local` (gitignored): `DATABASE_URL` (pooled,
-  `-pooler` host — app traffic), `DATABASE_URL_UNPOOLED` (direct — migrations, `pg_dump`, `LISTEN/NOTIFY`), `NEON_BRANCH`.
-- Sign-in: the owner's `npx neon@latest login` on this machine (OAuth); agents use that session, never a pasted key.
-- Verified 2026-10-14: SSL connection over both URLs, write/read round trip with node-postgres, extensions `btree_gist`,
-  `pg_trgm`, `cube`, `earthdistance` available.
-- `neon init` also installed Neon plugins/skills/MCP settings into the owner's AI tools (user scope).
+**Owner's one-time steps** (when the milestone needs them): the DNS records when going public, an R2 token for
+backups, accounts for error tracking and uptime checks (P2 step 7).
 
 ## Local database and API tests (since M2d)
 
 - `pnpm db:up` starts Postgres 18 from `infra/docker/compose.dev.yml` (user/password `yeral`, port 5432, a named volume).
+  When another Postgres already holds 5432 on the machine, `YERAL_DB_PORT=5433 pnpm db:up` and use 5433 in
+  `DATABASE_URL` and `TEST_DATABASE_URL`.
 - `apps/api/.env.local` (copy `.env.example`) names this worktree's database: `DATABASE_URL=postgres://yeral:yeral@localhost:5432/yeral`
   (a second worktree uses `…/yeral_<branch>`). `pnpm db:setup` creates it if missing, applies the migrations and seeds the
   demo while the database has no businesses; it never touches a database that has them. `pnpm db:seed` starts the demo over.
-  The root `.env.local` holds the **Neon production** URL for the neon tooling: the api never reads it.
 - Seeding wipes the database, so `db:seed` and `db:setup` refuse any host but localhost/`postgres`/`db` unless
   `--allow-remote` is passed (production, by hand), and refuse without an explicit `YERAL_ENV` (`.env.example` sets
   `local`): `local` and `docker` seed the demo, `production` writes only the category catalogue. The seed is one
@@ -75,33 +63,28 @@ Workers Paid when limits are hit, Access policy for `cms.` (M6).
 - Migrations: `pnpm db:generate` (drizzle-kit, `apps/api/src/db/migrations`); hand-written SQL (extensions, exclusion
   constraints) goes into a `--custom` migration. Never edit a merged migration.
 
-## The api on Cloudflare (prepared in M2g, not deployed yet; production only)
+## The api in production
 
-- `apps/api/src/entry/worker.ts` is the Worker: a node-postgres client per request through Hyperdrive, opened on the
-  request's first query (preflights, `/version.json`, `/docs` never connect); the Cron Trigger (`* * * * *`) runs the jobs
-  tick on a pool of 3. Both entries run `jobsTick()` (`modules/jobs/tick.ts`): a transaction-level advisory lock keeps
-  runs from overlapping (Node processes, Cron invocations), failures are logged. `apps/api/wrangler.jsonc` has one
-  environment, `production` (`yeral-api` on `api.yeral.app`); its top level is a different Worker name with no database
-  binding and no URL, so a deploy without `--env` can't replace production and fails loudly. `pnpm --filter @yeral/api run build:worker` is a dry-run bundle (≈ 300 KiB gzip).
-- Client IPs for rate limits: `TRUSTED_IP_HEADER` names the one header the api trusts — `cf-connecting-ip` on Workers
-  (wrangler vars), `x-forwarded-for` behind our nginx (compose), which sets it and drops a client-sent `CF-Connecting-IP`.
-- Locally in workerd: `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://user:pass@localhost:5432/yeral pnpm --filter @yeral/api exec wrangler dev --env production --local --var YERAL_ENV:local` (local site config: localhost cookies and origins, demo on).
-- **First deploy, when the new client site (M3) ships and with the owner's go-ahead** (Cloudflare resources + the
-  `api.yeral.app` record): a Hyperdrive config `yeral-production` on the Neon production branch's direct connection string
-  (Hyperdrive pools by itself) with query caching off — the api needs fresh reads (sessions, events, free times):
-  `pnpm --filter @yeral/api exec wrangler hyperdrive create yeral-production --connection-string="$DATABASE_URL_UNPOOLED" --caching-disabled`
-  — put its id into `wrangler.jsonc`, migrate and write the catalogue (`YERAL_ENV=production pnpm db:setup --allow-remote`),
-  then `pnpm --filter @yeral/api run deploy:production` (it refuses while the Hyperdrive id is the placeholder) and a
-  deploy job in `release.yml` with a smoke check. Decide before that deploy: the jobs cron cadence (every minute keeps
-  the Neon compute from suspending, which costs compute hours on a free product) and where production photos live.
-- Photos: `MEDIA_BASE_URL=https://yeral.app/media` — the client site serves them from M3.
+- One Node process (`apps/api/src/entry/node.ts`): one `pg` pool, the app, and the jobs tick every minute
+  (`modules/jobs/tick.ts`): a transaction-level advisory lock keeps runs from overlapping if a second process ever
+  runs; failures are logged.
+- Client IPs for rate limits: `TRUSTED_IP_HEADER=x-forwarded-for`, the one header the api trusts: its last entry, which
+  Caddy writes after dropping what the caller sent. A proxy in front of Caddy would need Caddy's `trusted_proxies`.
+  Visitors over IPv6 would arrive as the Docker gateway (the edge network has no IPv6), so `api.yeral.app` gets only an
+  A record until IPv6 is set up (`infra/server/README.md`).
+- Caddy (server and local) caps request bodies at 10 MB, sets `nosniff`, `Referrer-Policy` and `X-Frame-Options`, and
+  writes a JSON access log.
+- Sign-in codes never reach a log: the SMS log adapter writes "(sign-in code hidden)" for them.
+- SMS: every environment writes them to the log (`ports/sms.ts`) until a gateway comes with the Turkmenistan launch.
+- Photos: on the server's disk behind a storage port (P2 step 4); demo photos are served only outside production.
 
 ## The production-like stack (since M2g)
 
 `pnpm docker:up` builds `infra/docker/api.Dockerfile` (turbo prune with the lockfile's turbo → pnpm install → esbuild
 bundle → `node:24-alpine` with only `dist/`), starts Postgres 18, runs `migrate` (`node dist/cli.js setup`: migrations,
-demo seed while empty), the api (jobs tick inside) and nginx (`infra/nginx`, one server block per host):
-http://api.yeral.localhost/docs. CI's «Docker stack» job does the same and asks for health through nginx.
+demo seed while empty), the api (jobs tick inside) and Caddy (`infra/docker/Caddyfile`, plain HTTP, one site per host):
+http://api.yeral.localhost/docs. CI's «Docker stack» job does the same, asks for health through Caddy, and validates
+the server's Caddy config (`infra/server/edge/Caddyfile` with `yeral.caddy`).
 `pnpm docker:down` stops it (`-v` drops the data). The demo keeps the day of the first `docker:up`; start it over with
 `docker compose -f infra/docker/compose.yml run --rm migrate node dist/cli.js seed`.
 
@@ -119,23 +102,9 @@ owner's Claude Code allows `Bash(ssh yeral-vps:*)`). It also hosts the owner's o
 - Not yet: the `api.yeral.app` DNS record (then `PUBLIC=1` adds the Caddy site), GitHub deploys over SSH, nightly
   backups to R2 (needs an R2 token in `.env`).
 
-## Hosting later (the original plan): own server with Docker + nginx
-
-One VPS to start (≈4 vCPU, 8 GB RAM, 100 GB SSD), everything in Docker Compose (`infra/docker/compose.yml`):
-
-| Service | Image | Role |
-|---|---|---|
-| `nginx` | official nginx | TLS (Let's Encrypt via certbot), one server block per host, serves business/cms/storybook static files, proxies `client` and `api`, gzip/brotli, cache and security headers |
-| `client` | `yeral-client` (Node) | TanStack Start SSR |
-| `api` | `yeral-api` (Node) | Hono on `@hono/node-server`, migrations on start |
-| `jobs` | `yeral-api` (same image, `jobs` command) | calls `runDueJobs()` every minute |
-| `postgres` | postgres:18 | data in a volume; nightly `pg_dump` to off-site storage |
-| `minio` (optional) | minio | photos via S3 API (or local disk behind nginx) |
-
-Static apps are built into the nginx image (or a volume). Cloudflare stays as DNS only (grey cloud), since proxied
-Cloudflare IPs may be blocked in Turkmenistan. **Move checklist:** buy server → test from Ashgabat that its IP and
-Cloudflare's nameservers work without VPN → `docker compose up` → restore `pg_dump` from Neon → copy photos from R2 →
-switch DNS records → switch CI's deploy step. The Docker setup exists and is built in CI from M2, so this is a deploy.
+**The Turkmenistan deployment** (ADR 0023) is the same stack on a second server inside the country: buy it about a
+month before that launch → test from Ashgabat that its address and the DNS work without a VPN → run `setup.sh` and the
+stacks → restore the database and photos → switch the DNS records → point the deploy at it (book chapter 10).
 
 ## CI/CD (GitHub Actions)
 
@@ -143,7 +112,7 @@ switch DNS records → switch CI's deploy step. The Docker setup exists and is b
 |---|---|---|
 | `ci.yml` | pull request, push to `main` | pnpm install (cached) → `turbo run lint lint:fsd typecheck test build --affected` → Storybook tests in Vitest browser mode → API tests with a Postgres service → Playwright on affected apps → Docker image builds for affected deployables. Required to merge |
 | `release.yml` | push to `main` | Changesets: opens or updates «Version packages»; when merged, tags `@yeral/<app>@x.y.z`, creates GitHub Releases, deploys those apps to production |
-| `deploy.yml` | called by the two above | build → database migrations (api) → `wrangler deploy` (now) / image push + `docker compose up -d` over SSH (later) → smoke check: `/version.json` shows the commit, key pages answer 200 |
+| `deploy.yml` | called by the two above | build → `wrangler deploy` for Storybook and legacy; the api and the new apps over SSH to the own server from P2 step 7 (by hand until then: `infra/server/README.md`) → smoke check: `/version.json` shows the commit, key pages answer 200 |
 | `ci.yml` → `deploy-storybook` | push to `main` after checks | builds Storybook and deploys it to storybook.yeral.app (no release needed: internal docs) |
 | Renovate | weekly | grouped dependency PRs; dev-dependency patches merge themselves when CI is green |
 
@@ -162,9 +131,9 @@ switch DNS records → switch CI's deploy step. The Docker setup exists and is b
 
 ## Secrets
 
-- GitHub Environment secrets (`production`), never in the repo or in chat: `CLOUDFLARE_API_TOKEN` (Workers
-  Scripts edit, Workers Routes edit, Zone read, Hyperdrive edit, R2 edit), `CLOUDFLARE_ACCOUNT_ID`, `DATABASE_URL` per
-  environment, `BETTER_AUTH_SECRET`, `SENTRY_DSN`; later the SSH deploy key and SMS gateway keys.
+- GitHub secrets, never in the repo or in chat: `CLOUDFLARE_API_TOKEN` (Workers deploys of Storybook and legacy);
+  later the SSH deploy key for the own server, the error tracker's DSN and the SMS gateway keys.
+- On the server: `/srv/yeral/.env` (mode 600) holds the database password, later the R2 token for backups.
 - The owner creates tokens in the providers' dashboards and stores them with `gh secret set NAME --env production`
   (the value is typed into the prompt).
 - Local: `.env.local` per app (gitignored); `.env.example` committed and documents every variable.
@@ -207,5 +176,6 @@ switch DNS records → switch CI's deploy step. The Docker setup exists and is b
 
 ## Rollback
 
-- Cloudflare: `wrangler rollback` per Worker to the previous version.
-- Docker: redeploy the previous image tag. Migrations are backward compatible, so rolling back the app never needs a database rollback.
+- Cloudflare (Storybook, legacy): `wrangler rollback` per Worker to the previous version.
+- The own server: point `YERAL_API_IMAGE` in `/srv/yeral/.env` at an earlier image (`docker images yeral-api`: they
+  stay on the server) and run `docker compose up -d` in `/srv/yeral`, or redeploy the previous commit with `deploy.sh`. Migrations are backward compatible, so rolling back the app never needs a database rollback.

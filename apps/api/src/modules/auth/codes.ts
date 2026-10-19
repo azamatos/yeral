@@ -62,7 +62,7 @@ export async function sendCode(
     .insert(loginCodes)
     .values({ phone: req.phone, purpose: req.purpose, ...row })
     .onConflictDoUpdate({ target: [loginCodes.phone, loginCodes.purpose], set: row })
-  await deps.sms.send({ to: req.phone, text: codeSmsText(req.lang, code) })
+  await deps.sms.send({ to: req.phone, text: codeSmsText(req.lang, code), secret: true })
   return { resendAfterSec: RESEND_SEC, expiresInSec: CODE_TTL_SEC }
 }
 

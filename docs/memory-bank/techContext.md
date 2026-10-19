@@ -43,13 +43,11 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 
 | Tool | Version | Why | Instead of |
 |---|---|---|---|
-| Hono + @hono/node-server | 4.13 / 2.1 | one `fetch` handler that runs on Workers now and Node in Docker later; typed RPC client | Fastify/Express (Node only), NestJS (heavy) |
+| Hono + @hono/node-server | 4.13 / 2.1 | one web-standard `fetch` handler, served by Node in Docker (ADR 0024); typed RPC client | Fastify/Express (Node only), NestJS (heavy) |
 | @hono/zod-openapi + @scalar/hono-api-reference | 1.6 / 0.12 | routes declared with zod → validation + OpenAPI 3.1 + docs page | hand-written OpenAPI |
-| PostgreSQL | 18 | relational data, exclusion constraints against double booking, full-text search | D1/SQLite (ADR 0005) |
-| Neon | — | managed Postgres while on Cloudflare: free tier, a branch per environment, reached through Hyperdrive | Supabase (extras we don't need) |
-| Drizzle ORM / drizzle-kit | 0.45 / 0.31 | TypeScript schema, SQL-like queries, SQL migrations in git, runs on Workers and Node | Prisma 7, Kysely |
-| node-postgres (`pg`) | 8 | driver for Drizzle on both runtimes (Hyperdrive on Workers); Neon's and Cloudflare's recommended pairing | postgres.js, Neon serverless driver |
-| `@neon/config` + `@neon/env` + `neon` CLI | 1.9 / 1.6 | `neon.ts` = the Neon project as code; `neon env pull` writes `DATABASE_URL`(`_UNPOOLED`) to `.env.local` | dashboard clicks |
+| PostgreSQL | 18 | relational data, exclusion constraints against double booking, full-text search; in Docker beside the api on the own server (ADR 0024) | D1/SQLite (ADR 0005), Neon (dropped 2026-10-19) |
+| Drizzle ORM / drizzle-kit | 0.45 / 0.31 | TypeScript schema, SQL-like queries, SQL migrations in git | Prisma 7, Kysely |
+| node-postgres (`pg`) | 8 | driver for Drizzle; one pool per process | postgres.js |
 | Own phone login + sessions | — | 4-digit SMS code with the design's attempts/lock/resend rules, hashed session tokens in Postgres, cookie on the parent domain; teams, roles and invitations are our own tables too (ADR 0018, 0019) | Better Auth (phone plugin rules and e-mail-based users don't fit; its organization plugin: phone-only staff, SMS invites) |
 | tsx / esbuild | 4.23 / 0.28 | run the api and its scripts from TypeScript in dev; bundle the Node entry into one file for Docker | ts-node; tsup (one more layer over esbuild) |
 | jobs table + `runDueJobs()` | — | reminders and expiry without a queue service; Cron Trigger now, a container loop later | pg-boss (needs a long-running process) |
@@ -75,12 +73,12 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 
 | Tool | Why |
 |---|---|
-| Cloudflare Workers + wrangler 4 | hosting now: static assets, SSR, api; custom domains created on deploy |
-| Hyperdrive, R2, Cron Triggers, Access | Postgres connection pooling, photo storage (S3 API), the jobs tick, gate in front of the CMS |
-| Docker + Compose | the production-like stack and the future server: one image per deployable (`turbo prune --docker`, multi-stage) |
-| nginx (official image) | the future server's front door: TLS (Let's Encrypt), reverse proxy to Node services, static apps, caching, headers |
-| GitHub Actions + GHCR | CI/CD; container registry for the server phase |
-| Sentry (free tier, `@sentry/react`, `@sentry/cloudflare`) | error tracking now; self-host or tunnel later if needed |
+| The own server (netcup VPS 1000, EU) | runs the api, its jobs, Postgres and later the apps in Docker (ADR 0024; `infra/server`) |
+| Docker + Compose | the server's stacks and the local production-like stack: one image per deployable (`turbo prune --docker`, multi-stage) |
+| Caddy 2 | the front door on the server (shared by the owner's projects) and locally: HTTPS certificates by itself, reverse proxy, compression |
+| Cloudflare: DNS, Workers + wrangler 4, R2 | DNS (not proxied); Storybook and the legacy site as Workers; R2 for backups |
+| GitHub Actions | CI/CD; deploys to the server over SSH from P2 step 7 |
+| Sentry or similar (free tier) | error tracking and alerts, decided with P2 step 7 |
 | Cloudflare Web Analytics | privacy-friendly page analytics now; Umami on the own server later |
 
 ## Where shared things live
@@ -143,7 +141,7 @@ pnpm check                      # lint, FSD lint, types, tests, format — same 
 pnpm test:stories               # every Storybook story as a Chromium test (render, play, axe)
 pnpm dev --filter=@yeral/storybook   # Storybook on :3005 (PORT_BASE + 5)
 pnpm e2e                        # (M3) Playwright against the local stack
-pnpm docker:up                  # (M2) production-like stack (nginx + images) on *.yeral.localhost
+pnpm docker:up                  # production-like stack (Caddy + images) on *.yeral.localhost
 pnpm changeset                  # describe a user-visible change
 ```
 

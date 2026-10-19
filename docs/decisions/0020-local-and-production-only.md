@@ -1,7 +1,8 @@
 # 0020. Local and production only: no staging
 
 - Status: Accepted 2026-10-16 — replaces the staging parts of [0007](0007-hosting-cloudflare-now-docker-later.md) and
-  [0010](0010-ci-cd-github-actions.md)
+  [0010](0010-ci-cd-github-actions.md); production is the own server since [0024](0024-own-server-docker-caddy.md), so a
+  risky migration is rehearsed on a production dump restored into the local Postgres, not on a Neon branch
 - Decided by: owner ("we can not afford staging, let's fully work with prod and local") + Claude (how)
 
 ## Context

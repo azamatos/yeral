@@ -1,4 +1,4 @@
-/** Environment for the api, read once: `process.env` on Node, the Worker's env on Cloudflare (ADR 0007). */
+/** Environment for the api, read once from `process.env` (ADR 0024). */
 import { parseEnv } from '@yeral/lib/env'
 import { siteFromEnv, type SiteConfig } from '@yeral/lib/site'
 import { z } from 'zod'
@@ -11,8 +11,8 @@ const envSchema = z.object({
   /** Where photos are served from; defaults to `<api>/media`. */
   MEDIA_BASE_URL: z.url().optional(),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
-  /** The header our edge sets with the caller's IP: `cf-connecting-ip` (Workers), `x-forwarded-for` (behind nginx). */
-  TRUSTED_IP_HEADER: z.enum(['cf-connecting-ip', 'x-forwarded-for']).optional(),
+  /** The header our edge sets with the caller's IP: `x-forwarded-for` (behind Caddy, which writes it). */
+  TRUSTED_IP_HEADER: z.enum(['x-forwarded-for']).optional(),
 })
 
 export interface Config {

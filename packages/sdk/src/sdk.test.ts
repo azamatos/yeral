@@ -143,7 +143,6 @@ describe('sdk', () => {
       catalog.categories('tk'),
       catalog.suggest('saç', 'tk'),
       catalog.places('Mir', 'tk'),
-      catalog.ipPlace(),
       catalog.business('glow-studio', 'tk'),
       availability.appointment('glow-studio', { lang: 'tk', services: [id], staff: 'any' }),
       availability.specialists('glow-studio', { lang: 'tk', services: [id] }),

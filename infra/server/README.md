@@ -49,3 +49,7 @@ server.
 - A nightly database backup to Cloudflare R2: needs an R2 token, which the owner creates and puts in the server's
   `.env` (never in chat or git).
 - The client, business and cms sites join `yeral.caddy` with their apps.
+- IPv6: the server has an IPv6 address, but the `edge` network doesn't, so Docker's userland proxy would hand Caddy
+  the gateway's address for every IPv6 visitor, and rate limits would lump them together. Until Docker's IPv6 is on
+  (`"ipv6": true`, `"ip6tables": true`, the `edge` network recreated with IPv6; it touches every project on the
+  server), publish only A records, no AAAA.

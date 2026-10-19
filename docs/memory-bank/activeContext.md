@@ -16,7 +16,7 @@ components), domain, contract, sdk, an api for every client screen, written to t
 Postgres run on the owner's server since 2026-10-19 (not public). yeral.app still serves `apps/legacy`. Design export
 v0.5 (in Turkmen) is the newest export; v0.6 (English) is being drawn. The version PR #26 (`@yeral/lib@0.2.0`,
 `@yeral/api@0.1.1`, staging removed) is merged. The backend plan (chapter 10, P2) was reviewed on 2026-10-19 against
-every **Code differs** line and the built api, and now has steps 0–7.
+every **Code differs** line and the built api, and now has steps 0–7; step 0 (own server only, ADR 0024) is done.
 
 ## Owner's direction
 - 2026-10-13: infrastructure first; Cloudflare now, own server (Docker + nginx, Cloudflare for DNS) later; name/domain in
@@ -96,6 +96,9 @@ launch on Cloudflare, Turkmenistan later on its own servers ·
 [0022](../decisions/0022-english-first-any-country.md) built in English, not bound to one country; each
 market adds its languages (supersedes 0016's Turkmen first).
 
+2026-10-19: [0024](../decisions/0024-own-server-docker-caddy.md) the own server runs every app (Docker + Caddy,
+Postgres beside the api); no Neon, no Workers for the api (supersedes 0007 for them).
+
 ## Open questions
 
 Product questions now live in **`docs/product/questions.md`**, one ID each (ADR 0021); answer them on the book's page.
@@ -123,8 +126,8 @@ checks the canvas (artifact `Hkq5oyUnRVrRV3XSs7EAtt`, read with the Artifact too
 is with Claude Design; round 2 (business app part 1) is written. Next: check round 1, then rounds 3–6 (business app
 part 2, client site, admin tool, fixes) → export v0.6 → P3 components in Storybook → P4 apps.
 
-**Backend track (P2).** The steps are in the book's chapter 10 (reviewed 2026-10-19): 0 the own server only (no
-Neon, no Workers for the api), 1 market settings and English as the source, 2 the business model, 3 the **Code
+**Backend track (P2).** The steps are in the book's chapter 10 (reviewed 2026-10-19): 0 the own server only (done,
+ADR 0024), 1 market settings and English as the source, 2 the business model, 3 the **Code
 differs** fixes in the booking engine (past midnight first), 4 business endpoints (with photos, the address pin,
 notifications), 5 admin endpoints (team accounts with a second factor), 6 first-launch mode, 7 before the launch
 (deploys from GitHub, backups, alerts). Work in a worktree on a branch per step, tests with every rule (ADR 0013), a
