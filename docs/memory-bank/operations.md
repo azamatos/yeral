@@ -68,9 +68,13 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
 - One Node process (`apps/api/src/entry/node.ts`): one `pg` pool, the app, and the jobs tick every minute
   (`modules/jobs/tick.ts`): a transaction-level advisory lock keeps runs from overlapping if a second process ever
   runs; failures are logged.
-- Client IPs for rate limits: `TRUSTED_IP_HEADER` names the one header the api trusts: `x-forwarded-for` behind Caddy
-  (its last entry; Caddy writes it and drops what the caller sent), `cf-connecting-ip` only if Cloudflare's proxy ever
-  sits in front.
+- Client IPs for rate limits: `TRUSTED_IP_HEADER=x-forwarded-for`, the one header the api trusts: its last entry, which
+  Caddy writes after dropping what the caller sent. A proxy in front of Caddy would need Caddy's `trusted_proxies`.
+  Visitors over IPv6 would arrive as the Docker gateway (the edge network has no IPv6), so `api.yeral.app` gets only an
+  A record until IPv6 is set up (`infra/server/README.md`).
+- Caddy (server and local) caps request bodies at 10 MB, sets `nosniff`, `Referrer-Policy` and `X-Frame-Options`, and
+  writes a JSON access log.
+- Sign-in codes never reach a log: the SMS log adapter writes "(sign-in code hidden)" for them.
 - SMS: every environment writes them to the log (`ports/sms.ts`) until a gateway comes with the Turkmenistan launch.
 - Photos: on the server's disk behind a storage port (P2 step 4); demo photos are served only outside production.
 

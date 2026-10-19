@@ -11,8 +11,8 @@ const envSchema = z.object({
   /** Where photos are served from; defaults to `<api>/media`. */
   MEDIA_BASE_URL: z.url().optional(),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
-  /** The header our edge sets with the caller's IP: `x-forwarded-for` (behind Caddy), `cf-connecting-ip` (Cloudflare's proxy). */
-  TRUSTED_IP_HEADER: z.enum(['cf-connecting-ip', 'x-forwarded-for']).optional(),
+  /** The header our edge sets with the caller's IP: `x-forwarded-for` (behind Caddy, which writes it). */
+  TRUSTED_IP_HEADER: z.enum(['x-forwarded-for']).optional(),
 })
 
 export interface Config {

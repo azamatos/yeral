@@ -7,17 +7,19 @@ import type { Logger } from './log'
 export interface SmsMessage {
   to: string
   text: string
+  /** The text holds a sign-in code: anyone who reads it could sign in, so no log ever shows it. */
+  secret?: boolean
 }
 
 export interface SmsPort {
   send(message: SmsMessage): Promise<void>
 }
 
-/** Writes messages to the log and keeps nothing, so a long-running process doesn't grow. */
+/** Writes messages to the log, sign-in codes hidden, and keeps nothing, so a long-running process doesn't grow. */
 export function logSms(log: Logger): SmsPort {
   return {
     send(message) {
-      log.info('sms', { to: message.to, text: message.text })
+      log.info('sms', { to: message.to, text: message.secret ? '(sign-in code hidden)' : message.text })
       return Promise.resolve()
     },
   }

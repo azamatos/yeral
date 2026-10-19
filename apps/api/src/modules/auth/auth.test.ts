@@ -24,7 +24,7 @@ describe('phone login (ADR 0019)', () => {
     const res = await b.req('/v1/auth/code', { body: { phone: '+993 65 00 00 01' } })
     expect(res.status).toBe(200)
     expect(res.json).toEqual({ resendAfterSec: 59, expiresInSec: 300 })
-    expect(t.sms.sent.at(-1)).toEqual({ to: '+99365000001', text: 'Ýeral kody: 1234' })
+    expect(t.sms.sent.at(-1)).toEqual({ to: '+99365000001', text: 'Ýeral kody: 1234', secret: true })
     const again = await b.req('/v1/auth/code', { body: { phone: '+99365000001' } })
     expect(again.status).toBe(429)
     expect(again.json.error).toMatchObject({ code: 'resend_too_soon', details: { retryAfterSec: 59 } })
