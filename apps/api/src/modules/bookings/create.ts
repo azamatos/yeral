@@ -16,7 +16,6 @@ import {
   type AppointmentQuery,
   type AppointmentSlot,
 } from '@yeral/domain/availability'
-import { isOnlineBlocked } from '@yeral/domain/clients'
 import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { priceTotal } from '@yeral/domain/pricing'
 import { and, eq, sql } from 'drizzle-orm'
@@ -28,6 +27,7 @@ import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
+import { isPhoneBlocked } from '../clients/online'
 import { servicePrice } from '../catalog/map'
 import { hasSignedInTeam } from '../team/members'
 import { confirmBooking } from './confirm'
@@ -48,14 +48,6 @@ async function clientFor(db: Queryable, businessId: string, user: User): Promise
     .returning()
   if (!row) throw new Error('client upsert failed')
   return row
-}
-
-async function noShowsOf(db: Queryable, clientId: string): Promise<number> {
-  const [row] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(bookings)
-    .where(and(eq(bookings.clientId, clientId), eq(bookings.status, 'noshow')))
-  return row?.n ?? 0
 }
 
 export interface Placement {
@@ -208,12 +200,8 @@ export async function onlineRefusal(
   phone: string,
 ): Promise<'online_disabled' | 'online_blocked' | null> {
   if (!lb.rules.onlineEnabled) return 'online_disabled'
-  const [known] = await db
-    .select()
-    .from(clients)
-    .where(and(eq(clients.businessId, lb.business.id), eq(clients.phone, phone)))
-  if (known && isOnlineBlocked({ onlineBlocked: known.onlineBlocked, noShows: await noShowsOf(db, known.id) }, lb.rules))
-    return 'online_blocked'
+  // by hand, or the no-shows since the business last lifted the block reach its limit (book Q-127)
+  if (await isPhoneBlocked(db, lb.business.id, phone, lb.rules)) return 'online_blocked'
   return null
 }
 

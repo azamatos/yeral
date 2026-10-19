@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { clientSegments, clientStats, isOnlineBlocked, type ClientVisit } from './clients'
+import { clientSegments, clientStats, isOnlineBlocked, reachesNoShowLimit, type ClientVisit } from './clients'
 
 const TODAY = '2026-10-14'
 const visit = (date: string, price = 80, status: ClientVisit['status'] = 'completed'): ClientVisit => ({ date, price, status })
@@ -40,11 +40,17 @@ describe('client segments (filter chips)', () => {
   })
 })
 
-describe('online booking block', () => {
-  it('blocks after N no-shows, or by hand; 0 turns the rule off', () => {
-    expect(isOnlineBlocked({ onlineBlocked: false, noShows: 2 }, { blockAfterNoShows: 2 })).toBe(true)
-    expect(isOnlineBlocked({ onlineBlocked: false, noShows: 1 }, { blockAfterNoShows: 2 })).toBe(false)
-    expect(isOnlineBlocked({ onlineBlocked: false, noShows: 5 }, { blockAfterNoShows: 0 })).toBe(false)
-    expect(isOnlineBlocked({ onlineBlocked: true, noShows: 0 }, { blockAfterNoShows: 0 })).toBe(true)
+describe('online booking block (book Q-127)', () => {
+  it('by hand, or while the no-shows since the last reset reach the limit; 0 turns the count off', () => {
+    expect(isOnlineBlocked({ onlineBlocked: false, noShowsSinceReset: 2 }, { blockAfterNoShows: 2 })).toBe(true)
+    expect(isOnlineBlocked({ onlineBlocked: false, noShowsSinceReset: 1 }, { blockAfterNoShows: 2 })).toBe(false)
+    expect(isOnlineBlocked({ onlineBlocked: false, noShowsSinceReset: 5 }, { blockAfterNoShows: 0 })).toBe(false)
+    expect(isOnlineBlocked({ onlineBlocked: true, noShowsSinceReset: 0 }, { blockAfterNoShows: 0 })).toBe(true)
+  })
+
+  it('the limit: reached at N, never with 0', () => {
+    expect(reachesNoShowLimit(1, { blockAfterNoShows: 1 })).toBe(true)
+    expect(reachesNoShowLimit(4, { blockAfterNoShows: 5 })).toBe(false)
+    expect(reachesNoShowLimit(9, { blockAfterNoShows: 0 })).toBe(false)
   })
 })

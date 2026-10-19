@@ -11,7 +11,7 @@ import { cityRef } from '../catalog/cities'
 import { geoOf, photoOf, text } from '../catalog/map'
 import { onlineRefusal } from './create'
 import { offeredTimes } from './offers'
-import { stateOf, type BookingRow } from './repo'
+import { noShowMarkedAtOf, stateOf, type BookingRow } from './repo'
 
 /** "Yzyna al" stays possible this long after the client's own cancel. */
 export const RESTORE_MINUTES = 5
@@ -123,8 +123,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     })
   }
   if (status === 'completed') timeline.push({ event: 'completed', at: row.completedAt?.getTime() ?? epochOf(row.date, row.end) })
-  if (status === 'noshow')
-    timeline.push({ event: 'noshow', at: row.complaintAt?.getTime() ?? row.completedAt?.getTime() ?? epochOf(row.date, row.end) })
+  if (status === 'noshow') timeline.push({ event: 'noshow', at: noShowMarkedAtOf(row)?.getTime() ?? epochOf(row.date, row.end) })
 
   // a home-based business shows its exact address only once the booking is confirmed
   const exact = status === 'confirmed' || status === 'completed'
