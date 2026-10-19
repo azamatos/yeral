@@ -42,7 +42,7 @@ async function alternativesFor(deps: Deps, b: BookingRow): Promise<TimeSlot[]> {
     oneSpecialist: staffDoingAll(ctx, booked.serviceIds).length > 0,
     preferStaffId: booked.staffId,
     // still pending while this runs: its own time mustn't count as busy
-    excludeBookingId: b.id,
+    excludeBookingIds: [b.id],
   }
   const offer = (date: string, s: AppointmentSlot): TimeSlot => ({ date, start: s.start, end: s.end, staffId: slotStaffId(s) })
   const out = nearestSlots(ctx, { ...q, date: b.date }, b.start, MAX_ALTERNATIVES).map((s) => offer(b.date, s))

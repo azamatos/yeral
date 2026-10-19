@@ -7,9 +7,11 @@
   mode (`?move={code}`, the signed-in client's own booking). A move books the chosen specialist only, or anyone free
   for «Islendik hünärmen» (the current one first at the same start), never someone else silently (`rebookQuery()`, no
   fallback; a specialist who no longer does the services is `not_found`). A move's deadline is capped at the original
-  visit's start (`holdUntil(…, endBy)`). A second move may be asked while one waits (it replaces it); the booking row
-  is locked while a move is placed, and migration 0011 keeps one waiting move per booking (a partial unique index), as
-  overlaps no longer guard it. Move mode (`?move=` on the appointment and specialists availability) counts the booking
+  visit's start (`holdUntil(…, endBy)`). A second move may be asked while one waits (it replaces it). A move, a cancel
+  and a confirmed move each lock the booking row first (`lockBooking()`, then the move request) and read it again, so
+  they run one after another; migration 0011 keeps one waiting move per booking (a partial unique index), as overlaps
+  no longer guard it. A move to the very same time and specialist is refused (`validation_error`). The excluded
+  bookings are one domain field, `excludeBookingIds`. Move mode (`?move=` on the appointment and specialists availability) counts the booking
   and its waiting move as free, and only for a confirmed appointment that may still move. A withdrawn or replaced move
   can't be restored.
 - Decided (Claude, delegated; chapter 9): the move-mode free times and the database rule.

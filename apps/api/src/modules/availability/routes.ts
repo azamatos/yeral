@@ -13,7 +13,6 @@ import {
 import { slugSchema } from '@yeral/contract/common'
 import type { PartyTooLargeDetails } from '@yeral/contract/errors'
 import {
-  type AppointmentContext,
   appointmentSlots,
   hasAppointmentSlot,
   MAX_ONLINE_PARTY,
@@ -36,7 +35,7 @@ import { requireUser } from '../auth/session'
 import { myBooking, stateOf } from '../bookings/repo'
 import { publicBusiness } from '../catalog/detail'
 import { text } from '../catalog/map'
-import { appointmentContext, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from './context'
+import { appointmentContext, checkQuery, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from './context'
 import { loadSessions } from './sessions'
 
 const slugParam = z.object({ slug: slugSchema })
@@ -49,17 +48,12 @@ async function loaded(deps: Deps, slug: string) {
 }
 
 /** The services must exist and be bookable online; a chosen specialist must do all of them. */
-function checkQuery(ctx: AppointmentContext, serviceIds: string[], staffId: string | null) {
-  for (const id of serviceIds) if (!ctx.services.some((s) => s.id === id && s.online)) throw new ApiError('not_found', { serviceId: id })
-  if (staffId && !staffDoingAll(ctx, serviceIds).some((s) => s.id === staffId)) throw new ApiError('not_found', { staffId })
-}
-
 /**
  * Move mode (book Q-165): the bookings whose time doesn't count as busy — the client's own confirmed appointment being
  * moved, and a move already waiting for it (a second move replaces it). A booking that can't be moved is refused.
  */
-async function movingFamily(c: Context<AppEnv>, lb: LoadedBusiness, code: string | undefined): Promise<Set<string>> {
-  if (!code) return new Set()
+async function movingFamily(c: Context<AppEnv>, lb: LoadedBusiness, code: string | undefined): Promise<string[]> {
+  if (!code) return []
   const { deps } = c.var
   const b = await myBooking(deps.db, requireUser(c).id, code)
   if (b.businessId !== lb.business.id) throw new ApiError('not_found')
@@ -70,13 +64,7 @@ async function movingFamily(c: Context<AppEnv>, lb: LoadedBusiness, code: string
     .select({ id: bookings.id })
     .from(bookings)
     .where(and(eq(bookings.rescheduleOf, b.id), eq(bookings.status, 'pending')))
-  return new Set([b.id, ...waiting.map((w) => w.id)])
-}
-
-/** The business's busy time, less the moving booking's own. */
-async function busyFor(deps: Deps, lb: LoadedBusiness, from: string, to: string, moving: Set<string>) {
-  const busy = await loadBusy(deps.db, [lb.business.id], from, to)
-  return moving.size ? busy.filter((x) => !moving.has(x.bookingId)) : busy
+  return [b.id, ...waiting.map((w) => w.id)]
 }
 
 const appointmentRoute = createRoute({
@@ -121,14 +109,14 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const now = deps.now()
     const q = c.req.valid('query')
     const lb = await loaded(deps, c.req.valid('param').slug)
-    const moving = await movingFamily(c, lb, q.move)
     const first = today(now)
     const date = q.date ?? first
     const last = addDays(first, Math.max(q.days, lb.rules.windowDays + 1))
-    const ctx = appointmentContext(lb, await busyFor(deps, lb, first, last, moving), now)
+    const [moving, busy] = await Promise.all([movingFamily(c, lb, q.move), loadBusy(deps.db, [lb.business.id], first, last)])
+    const ctx = appointmentContext(lb, busy, now)
     const staffId = q.staff === 'any' ? null : q.staff
     checkQuery(ctx, q.services, staffId)
-    const query = { serviceIds: q.services, staffId, by: 'client' as const }
+    const query = { serviceIds: q.services, staffId, by: 'client' as const, excludeBookingIds: moving }
     const online = lb.rules.onlineEnabled
     const slotsOn = (d: string) => (online ? appointmentSlots(ctx, { ...query, date: d }) : [])
     const days = Array.from({ length: q.days }, (_, i) => {
@@ -147,12 +135,17 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const now = deps.now()
     const { services, move } = c.req.valid('query')
     const lb = await loaded(deps, c.req.valid('param').slug)
-    const moving = await movingFamily(c, lb, move)
     const first = today(now)
-    const ctx = appointmentContext(lb, await busyFor(deps, lb, first, addDays(first, lb.rules.windowDays), moving), now)
+    const [moving, busy] = await Promise.all([
+      movingFamily(c, lb, move),
+      loadBusy(deps.db, [lb.business.id], first, addDays(first, lb.rules.windowDays)),
+    ])
+    const ctx = appointmentContext(lb, busy, now)
     checkQuery(ctx, services, null)
     const next = (staffId: string | null) => {
-      const found = lb.rules.onlineEnabled ? nextFreeSlot(ctx, { serviceIds: services, staffId, by: 'client' }, first) : null
+      const found = lb.rules.onlineEnabled
+        ? nextFreeSlot(ctx, { serviceIds: services, staffId, by: 'client', excludeBookingIds: moving }, first)
+        : null
       return found ? { date: found.date, start: found.slot.start } : null
     }
     return c.json({ any: next(null), items: staffDoingAll(ctx, services).map((s) => ({ staffId: s.id, next: next(s.id) })) }, 200)

@@ -142,7 +142,7 @@ describe('appointment slots for one specialist', () => {
   it('frees the time of the booking being moved', () => {
     const c = ctx({ busy: [busy('a', THU, 720, 780, 'b1')] })
     expect(starts(c, q())).not.toContain(720)
-    expect(starts(c, q({ excludeBookingId: 'b1' }))).toContain(720)
+    expect(starts(c, q({ excludeBookingIds: ['b1'] }))).toContain(720)
   })
 
   it('skips breaks: Aýna’s Thursday break 13:30–14:10 leaves 14:30 free (demo data)', () => {

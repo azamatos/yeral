@@ -4,12 +4,13 @@
  * just run out: the database's no-overlap constraints still hold its slot until then, so offering it would only end in
  * 409 slot_taken.
  */
-import type { AppointmentContext, BusyInterval, TableContext } from '@yeral/domain/availability'
+import { staffDoingAll, type AppointmentContext, type BusyInterval, type TableContext } from '@yeral/domain/availability'
 import type { BookingRules } from '@yeral/domain/rules'
 import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, lte } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, businesses, diningTables, services, staff, staffServices, tableAreas } from '../../db/schema'
+import { ApiError } from '../../http/errors'
 
 export type BusinessRow = typeof businesses.$inferSelect
 export type RulesRow = typeof bookingRules.$inferSelect
@@ -102,6 +103,12 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
   return rows.flatMap((r) =>
     r.staffId ? [{ bookingId: r.bookingId, staffId: r.staffId, date: r.date, start: r.start, end: r.end + r.bufferAfter }] : [],
   )
+}
+
+/** The services are booked online here, and the named specialist (if any) does them all; else 404. */
+export function checkQuery(ctx: AppointmentContext, serviceIds: readonly string[], staffId: string | null): void {
+  for (const id of serviceIds) if (!ctx.services.some((s) => s.id === id && s.online)) throw new ApiError('not_found', { serviceId: id })
+  if (staffId && !staffDoingAll(ctx, serviceIds).some((s) => s.id === staffId)) throw new ApiError('not_found', { staffId })
 }
 
 export function appointmentContext(lb: LoadedBusiness, busy: BusyInterval[], now: number): AppointmentContext {

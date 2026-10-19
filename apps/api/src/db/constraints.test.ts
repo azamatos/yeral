@@ -6,6 +6,7 @@ import * as t from './schema'
 /** The database refuses double bookings by itself (migration 0001). */
 describe('no double booking', () => {
   let db: Db
+  let bizId: string
   let staffId: string
   let bookingId: string
   let otherBookingId: string
@@ -41,6 +42,7 @@ describe('no double booking', () => {
         hours: [null, null, null, null, null, null, null],
       })
       .returning()
+    bizId = biz!.id
     const [s] = await db.insert(t.staff).values({ businessId: biz!.id, name: 'A' }).returning()
     staffId = s!.id
     const booking = (code: string, status: 'confirmed' | 'cancelled' = 'confirmed') => ({
@@ -100,6 +102,33 @@ describe('no double booking', () => {
     const nextMorning = (start: number, end: number) => ({ ...item(otherBookingId, start, end), date: '2026-10-16' })
     await expect(db.insert(t.bookingItems).values(nextMorning(60, 120))).rejects.toThrow()
     await db.insert(t.bookingItems).values(nextMorning(90, 150))
+  })
+
+  it('lets a move request overlap its own booking, nobody else’s, and keeps one waiting (book Q-165)', async () => {
+    const move = (code: string, of: string) => ({
+      code,
+      businessId: bizId,
+      type: 'appointment' as const,
+      date: '2026-10-15',
+      start: 900,
+      end: 960,
+      status: 'pending' as const,
+      source: 'web' as const,
+      rescheduleOf: of,
+    })
+    await db.insert(t.bookingItems).values(item(bookingId, 900, 960))
+    const [own] = await db.insert(t.bookings).values(move('YR-10004', bookingId)).returning()
+    // the move's items belong to the booking: they may overlap its 15:00
+    const [moved] = await db
+      .insert(t.bookingItems)
+      .values(item(own!.id, 930, 990))
+      .returning()
+    expect(moved!.family).toBe(bookingId)
+    // another booking's move may not
+    const [others] = await db.insert(t.bookings).values(move('YR-10005', otherBookingId)).returning()
+    await expect(db.insert(t.bookingItems).values(item(others!.id, 940, 1000))).rejects.toThrow()
+    // one waiting move per booking
+    await expect(db.insert(t.bookings).values(move('YR-10006', bookingId))).rejects.toThrow()
   })
 })
 

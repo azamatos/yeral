@@ -12,7 +12,7 @@ import {
   MAX_ONLINE_PARTY,
   maxSeats,
   nearestSlots,
-  staffDoingAll,
+  slotStaffId,
   tableSlots,
   type AppointmentQuery,
   type AppointmentSlot,
@@ -27,7 +27,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
-import { appointmentContext, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
+import { appointmentContext, checkQuery, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
 import { isPhoneBlocked } from '../clients/online'
 import { servicePrice } from '../catalog/map'
@@ -329,11 +329,11 @@ export async function bookedServices(db: Queryable, bookingId: string): Promise<
 export function rebookQuery(
   booked: { serviceIds: string[]; staffId: string | null },
   to: { date: string; staffId?: string | null },
-  excludeBookingId?: string,
+  excludeBookingIds?: readonly string[],
 ): AppointmentQuery {
   const staffId = to.staffId === undefined ? booked.staffId : to.staffId
   // «Islendik» still tries the booking's own specialist first at the same start
-  return { date: to.date, serviceIds: booked.serviceIds, by: 'client', staffId, preferStaffId: booked.staffId, excludeBookingId }
+  return { date: to.date, serviceIds: booked.serviceIds, by: 'client', staffId, preferStaffId: booked.staffId, excludeBookingIds }
 }
 
 /**
@@ -352,11 +352,15 @@ export async function rebook(
   if (!lb) throw new ApiError('not_found')
   if (from.type !== 'appointment') throw new ApiError('not_bookable')
   const move = !!opts.rescheduleOf
-  const query = rebookQuery(await bookedServices(db, from.id), to, move ? from.id : undefined)
-  // the booking's specialist left or stopped doing these services: the client picks another, nobody is swapped in
-  if (query.staffId && !staffDoingAll(appointmentContext(lb, [], deps.now()), query.serviceIds).some((s) => s.id === query.staffId))
-    throw new ApiError('not_found', { staffId: query.staffId })
+  const booked = await bookedServices(db, from.id)
+  const query = rebookQuery(booked, to, move ? [from.id] : undefined)
+  // a move whose specialist left or stopped doing these services: the client picks another, nobody is swapped in (an
+  // offered time is just taken, as its chip says)
+  if (move) checkQuery(appointmentContext(lb, [], deps.now()), query.serviceIds, query.staffId)
   const slot = await placeAppointment(deps, lb, query, to.start, 'client', db)
+  // the very same time with the very same specialist: nothing to move
+  if (move && to.date === from.date && to.start === from.start && slotStaffId(slot) === booked.staffId)
+    throw new ApiError('validation_error', { start: 'unchanged' })
   return inTransaction(
     deps,
     (tx) =>

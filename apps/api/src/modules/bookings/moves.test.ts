@@ -6,9 +6,11 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingRules, bookings, businesses, rateLimits, services, staff, staffServices } from '../../db/schema'
+import { bookingRules, bookings, businesses, rateLimits, services, staff, staffServices, users } from '../../db/schema'
 import { seed } from '../../db/seed'
+import { rescheduleBooking } from './actions'
 import { confirmBooking } from './confirm'
+import { StaleBooking } from './repo'
 
 const FRI = '2026-10-16'
 const SAT = '2026-10-17'
@@ -131,10 +133,12 @@ describe('moves', () => {
 
   it('two moves asked at once leave one waiting move', async () => {
     const { b, code, date, start, id } = await confirmed('+99365444207', FRI)
-    await Promise.all([
+    const both = await Promise.all([
       b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } }),
       b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } }),
     ])
+    // one after the other: the second replaces the first
+    expect(both.map((r) => r.status)).toEqual([200, 200])
     const waiting = await db
       .select()
       .from(bookings)
@@ -181,6 +185,35 @@ describe('moves', () => {
     await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })
     const restored = await b.req(`/v1/me/bookings/${first!.code}/restore`, { method: 'POST' })
     expect(restored.json.error.code).toBe('invalid_status')
+  })
+
+  it('a move from a copy read before a cancel is refused: the booking is read again under its lock', async () => {
+    const { b, code, date, start } = await confirmed('+99365444211', FRI)
+    const [stale] = await db.select().from(bookings).where(eq(bookings.code, code))
+    const [user] = await db.select().from(users).where(eq(users.phone, '+99365444211'))
+    expect((await b.req(`/v1/me/bookings/${code}/cancel`, { body: {} })).status).toBe(200)
+    await expect(rescheduleBooking(t.deps, user!, stale!, { date, start: start + 30 })).rejects.toMatchObject({ code: 'invalid_status' })
+    const moves = await db.select().from(bookings).where(eq(bookings.rescheduleOf, stale!.id))
+    expect(moves).toEqual([])
+  })
+
+  it('the very same time with the very same specialist is no move', async () => {
+    const { b, code, date, start } = await confirmed('+99365444212', FRI)
+    const same = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start } })
+    expect(same.json.error.code).toBe('validation_error')
+  })
+
+  it('a replaced move can’t be confirmed, and offers no "Yzyna al"', async () => {
+    const { b, code, date, start, id } = await confirmed('+99365444213', FRI)
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+    const [first] = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })
+    await expect(db.transaction((tx) => confirmBooking(tx, t.deps, first!))).rejects.toBeInstanceOf(StaleBooking)
+    expect((await b.req(`/v1/me/bookings/${first!.code}`)).json.actions.restore).toBe(false)
+    expect((await b.req(`/v1/me/bookings/${code}`)).json.start).toBe(start)
   })
 
   it('a second move can be asked while one waits, and replaces it (ROUND6 A3)', async () => {

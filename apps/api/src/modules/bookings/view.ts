@@ -129,6 +129,8 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   const exact = status === 'confirmed' || status === 'completed'
   const actions = clientActions(state, lb.rules, review ? { createdAt: review.createdAt.getTime() } : null, now)
   const restore =
+    // a withdrawn or replaced move stays withdrawn
+    !row.rescheduleOf &&
     status === 'cancelled' &&
     row.cancelledBy === 'client' &&
     !!row.cancelledAt &&

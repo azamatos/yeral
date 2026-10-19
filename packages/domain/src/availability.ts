@@ -65,7 +65,8 @@ export interface AppointmentQuery {
    */
   by: 'client' | 'staff'
   /** The booking being moved: its own time doesn't count as busy. */
-  excludeBookingId?: string
+  /** Bookings whose time doesn't count as busy: the one being moved and a move already waiting for it (book Q-165). */
+  excludeBookingIds?: readonly string[]
   /** One specialist does every service: an offered time names one person (book Q-159), so no split between people. */
   oneSpecialist?: boolean
   /** Without a chosen specialist, try this one first: an offered time keeps the client's specialist when they're free. */
@@ -123,13 +124,13 @@ export function busyOn<T extends { date: string; start: number; end: number }>(b
   return out
 }
 
-function dayViews(ctx: AppointmentContext, date: string, excludeBookingId?: string): Map<string, StaffDayView> {
+function dayViews(ctx: AppointmentContext, date: string, exclude: readonly string[] = []): Map<string, StaffDayView> {
   const views = new Map<string, StaffDayView>()
   const onDate = busyOn(ctx.busy, date)
   for (const s of bookableStaff(ctx)) {
     const day = staffDay(ctx.business, s, date)
     if (!day) continue
-    const busy = onDate.filter((b) => b.staffId === s.id && b.bookingId !== excludeBookingId)
+    const busy = onDate.filter((b) => b.staffId === s.id && !exclude.includes(b.bookingId))
     views.set(s.id, { staff: s, working: workingIntervals(day), busy })
   }
   return views
@@ -290,7 +291,7 @@ function* freeSlots(ctx: AppointmentContext, q: AppointmentQuery, only?: number)
   if (!services) return
   const day = businessDay(ctx.business, q.date)
   if (!day) return
-  const views = dayViews(ctx, q.date, q.excludeBookingId)
+  const views = dayViews(ctx, q.date, q.excludeBookingIds)
   if (views.size === 0) return
   const earliest = earliestStart(ctx, q)
   const step = ctx.rules.slotStep
@@ -370,7 +371,7 @@ export function checkPlan(
   items: readonly PlannedItem[],
   excludeBookingId?: string,
 ): PlanProblem | null {
-  const views = dayViews(ctx, date, excludeBookingId)
+  const views = dayViews(ctx, date, excludeBookingId ? [excludeBookingId] : [])
   for (const it of items) {
     const s = ctx.staff.find((x) => x.id === it.staffId)
     if (!s?.serviceIds.includes(it.serviceId)) return 'staff_cannot_do'

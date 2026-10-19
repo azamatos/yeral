@@ -5,12 +5,12 @@
  */
 import { reminderPlan } from '@yeral/domain/lifecycle'
 import { epochOf } from '@yeral/domain/time'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, jobs } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { emit, type BookingSmsKind } from '../../notify'
-import { setStatus, type BookingRow } from './repo'
+import { setStatus, StaleBooking, type BookingRow } from './repo'
 
 const HOUR = 3_600_000
 
@@ -48,7 +48,14 @@ export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, 
 export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow): Promise<BookingRow> {
   const at = new Date(deps.now())
   if (b.rescheduleOf) {
-    const [original] = await db.select().from(bookings).where(eq(bookings.id, b.rescheduleOf))
+    // the booking first, then the request (the order moves and cancels lock in); either may have changed meanwhile
+    const [original] = await db.select().from(bookings).where(eq(bookings.id, b.rescheduleOf)).for('update')
+    const [request] = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.id, b.id), eq(bookings.status, 'pending')))
+      .for('update')
+    if (!request || original?.status !== 'confirmed') throw new StaleBooking()
     if (original) {
       // the original takes the new time and items; the request row goes away
       await db.delete(bookingItems).where(eq(bookingItems.bookingId, original.id))
