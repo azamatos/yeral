@@ -135,6 +135,10 @@
   first, languages per market); Claude's concerns recorded on Q-003, Q-101, Q-103, Q-104, Q-105, Q-107 (new `concern:`
   line, shown on the page); new questions Q-131–Q-134; features F-238 (add a business for its owner), F-240 (city
   choice) and F-109 (past midnight) in the MVP, F-239 (menu) later; F-178 CMS moved to MVP.
+- **2026-10-19 · Two tracks start:** design pass round 1 (design system in English, #33) with Claude Design, round 2
+  (business app part 1) written; the owner's netcup VPS 1000 (EU) set up with a shared Caddy, Postgres and the api
+  (#34, `infra/server`); the backend runs alongside the design (ADR 0021 amended); the first launch runs on that
+  server (ADR 0023 revised).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.

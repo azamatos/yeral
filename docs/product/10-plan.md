@@ -21,14 +21,16 @@ on 18.10.2026 from the book's answers; the owner decides when each launch ships.
 ```mermaid
 flowchart LR
   P1["P1 · Design pass in English"] --> P3["P3 · Components in Storybook"]
-  P3 --> P4["P4 · Apps, slice by slice, with their P2 backend work"]
+  P2["P2 · Backend to the book"] --> P4["P4 · Apps, slice by slice"]
+  P3 --> P4
   P4 --> P5["P5 · First launch"]
   P5 --> P6["P6 · Turkmenistan launch"]
 ```
 
-One track at a time (owner, 19.10.2026): the design pass first, then components, then the apps. The backend work
-listed under P2 is built inside the P4 slices that need it, so ADR 0021's order (design, Storybook, code) stays. The
-design prompts are kept in `docs/product/prompts/`.
+Two tracks (owner, 19.10.2026): the design pass and the backend run side by side, since the book is closed and the
+backend implements its rules, not its screens (ADR 0021, amended). Components and the apps wait for the design.
+Endpoint responses follow the screens, so their exact fields are adjusted when the design export lands. The design
+prompts are kept in `docs/product/prompts/`.
 
 ### P1 · Design pass in English
 
@@ -44,9 +46,9 @@ book (ADR 0021). The result is design export v0.6, every board in English (Q-133
 | 5 | Admin tool (cms.yeral.app), drawn for the first time: verify or reject a business, reported reviews, hide or un-verify a business, add a business for its owner, close a workspace |
 | 6 | Every **Design to fix** line left in chapters 6 and 7a–7c, then the export |
 
-### P2 · Backend to the book (built inside P4)
+### P2 · Backend to the book
 
-No screens; every rule gets its test (ADR 0013). Each P4 slice takes the parts it needs, in this order:
+No screens; every rule gets its test (ADR 0013). Runs alongside P1, in this order:
 
 1. **Market settings** (ADR 0022, ADR 0023): language, money, phone rules, time zone and legal texts read from one
    market config; English as the source language.

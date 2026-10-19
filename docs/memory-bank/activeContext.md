@@ -4,19 +4,18 @@ _Last updated: 2026-10-19_
 
 ## Current focus
 
-**Strategy reset (2026-10-17, [ADR 0021](../decisions/0021-product-book-first.md)): the product book comes first.**
-All design and coding work is paused until [`docs/product/`](../product/README.md) describes the whole product (vision,
-norms, roles, rules, limits, MVP scope, every flow, notifications) with no open question. Then the full design, then
-components in Storybook, then code. The owner reads and answers on the book's page
-(https://claude.ai/artifact/LY9U6jrQRo3MfoHTg3JpyN); Claude writes the answers back into the book. Claude Code writes
-every prompt for Claude Design; the owner pastes it; Claude Code checks the result on the canvas.
+**The product book is closed (2026-10-18; [ADR 0021](../decisions/0021-product-book-first.md)).** `docs/product/` holds
+every rule, flow, limit and feature with no open question; its page is
+https://claude.ai/artifact/LY9U6jrQRo3MfoHTg3JpyN (pinned for the owner; answers and placements sync from its
+database). Chapter 10 is the build plan. **Two tracks now run side by side** (ADR 0021 amended 2026-10-19): the design
+pass in English (P1: Claude writes the Claude Design prompts, the owner pastes them, Claude checks the canvas) and the
+backend to the book (P2). Components in Storybook and the apps wait for design export v0.6.
 
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16): monorepo and CI, `@yeral/ui` (38
-components), domain, contract, sdk, an api for every client screen on Postgres (not deployed). yeral.app still serves
-`apps/legacy`. **Design export v0.5** (round 6 parts A and B, 16–17.10.2026, incl. `ROUND6-ANSWERS.md`) is committed
-with the book (#27; `--ring-selected` mapped in the `@yeral/ui` theme); the book uses it as its newest design source.
-The version PR #26
-(`@yeral/lib@0.2.0`, `@yeral/api@0.1.1`, staging removed) is open and waits for the owner.
+components), domain, contract, sdk, an api for every client screen, written to the rules before the book. The api and
+Postgres run on the owner's server since 2026-10-19 (not public). yeral.app still serves `apps/legacy`. Design export
+v0.5 (in Turkmen) is the newest export; v0.6 (English) is being drawn. The version PR #26 (`@yeral/lib@0.2.0`,
+`@yeral/api@0.1.1`, staging removed) is open and waits for the owner.
 
 ## Owner's direction
 
@@ -44,9 +43,9 @@ The version PR #26
   site, the business app and the CMS; the team adds the first businesses in the CMS; Ýeral on yeral.app; no average
   bill; businesses may be open past midnight and options stay flexible; the city is a choice (book Q-001–Q-003,
   Q-100–Q-109).
-- 2026-10-19: one track at a time: design first, then Storybook, then the apps (the backend comes with each
-  slice); the owner bought a netcup VPS 1000 (EU) for the first launch and other projects; Claude set it up
-  the same day (hardening, a shared Caddy, Postgres and the api; `infra/server/README.md`).
+- 2026-10-19: the backend runs alongside the design (the book is closed: ADR 0021 amended); components and the apps
+  wait for the design. The owner bought a netcup VPS 1000 (EU) for the first launch and other projects; Claude set it
+  up the same day (hardening, a shared Caddy, Postgres and the api; `infra/server/README.md`). Backups to R2 wait.
 - 2026-10-18 (book closed): the first launch is an English pilot with Turkmenistan's settings: example businesses
   marked "Example" beside real ones, a nightly-reset demo of the business app, no SMS (codes on screen); the name is
   written *Ýeral*, "Yeral" only where the letter can't be used; a specialist may work without the app (an option, not a
@@ -114,14 +113,33 @@ Where the old questions went (2026-10-17):
 
 ## Next steps
 
-The product book is closed (2026-10-18, no open question). The build plan is its chapter 10
-(`docs/product/10-plan.md`):
+The product book is closed (2026-10-18). The build plan is its chapter 10 (`docs/product/10-plan.md`). Two tracks
+run side by side (ADR 0021, amended 2026-10-19):
 
-1. **P1 · Design pass in English** (now): Claude writes the Claude Design prompts round by round
-   (`docs/product/prompts/`; round 1 = the design system in English, 2026-10-19); the owner pastes them; Claude checks
-   the canvas; result: export v0.6.
-2. **P3 · Components** in Storybook from v0.6.
-3. **P4 · Apps slice by slice** (Q-001 order); each slice brings its backend work (P2 list in chapter 10). One track
-   at a time (owner, 2026-10-19), so ADR 0021's order stands.
-4. **P5 · First launch** on the owner's netcup VPS 1000 (EU), set up on 2026-10-19 (`infra/server`,
-   `ssh yeral-vps`): Postgres and the api already run there, not public yet; GitHub deploys and backups later. **P6 · Turkmenistan launch** with a second server inside the country.
+**Design track (P1):** Claude writes each Claude Design prompt (`docs/product/prompts/`), the owner pastes it, Claude
+checks the canvas (artifact `Hkq5oyUnRVrRV3XSs7EAtt`, read with the Artifact tool). Round 1 (design system in English)
+is with Claude Design; round 2 (business app part 1) is written. Next: check round 1, then rounds 3–6 (business app
+part 2, client site, admin tool, fixes) → export v0.6 → P3 components in Storybook → P4 apps.
+
+**Backend track (P2), start here in a new session.** Work in a worktree on a branch per step, tests with every rule
+(ADR 0013), a PR each, merged on green CI after review. The rules: the book's chapters 4, 5, 7a–7c and 8 (each
+**Code differs** line is a fix to make; chapter 6 lists the features). Order:
+1. Market settings and English as the source language (ADR 0022, ADR 0023): languages, currency, phone rules, time
+   zone from one market config; `@yeral/i18n` English first; the Turkmenistan constants become the first market.
+2. The business model: three fixed levels and the permission matrix replace the editable roles (ADR 0018, chapter 3);
+   the specialist without the app (Q-216); invites with accept or decline and 7 days.
+3. The **Code differs** fixes in the booking engine and api (chapters 4, 5, 7a–7c): holds only in opening hours
+   (Q-120), past midnight (Q-105), the city as data (Q-107), offered times tied to one specialist (Q-159), the
+   no-show count restart (Q-127), move rules (Q-165, Q-263), token links instead of `/b/{code}` (Q-168), no review
+   asks (Q-259), phone linking for 6 months plus "Is this you?" (Q-270), code limits (Q-267), account deletion (Q-172).
+4. Business endpoints (workspace, calendar, requests, bookings, clients, team, settings, services, hours, reviews,
+   notifications), then admin endpoints (verification, review reports, hiding, adding a business for its owner).
+5. First-launch mode (Q-004, Q-036): example businesses marked "Example" that confirm at once, the sign-in code shown
+   on the screen, a demo workspace reset nightly, no SMS.
+
+**Server:** `ssh yeral-vps` (the owner allowed `Bash(ssh yeral-vps:*)`); deploy by hand with
+`infra/server/README.md` → "Deploying Ýeral by hand". Not public yet (no DNS record). Later: GitHub deploys over SSH,
+nightly backups to R2 (owner's token), the client, business and cms sites.
+
+**Waiting on the owner:** version PR #26; the main checkout needs `git checkout -- docs/design && git clean -fd
+docs/design && git pull`; the unused Hyperdrive config `yeral-production` on Cloudflare (delete only if asked).
