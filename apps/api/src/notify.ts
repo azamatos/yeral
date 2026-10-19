@@ -45,7 +45,7 @@ export interface SmsBooking {
 
 export type BookingSmsKind = 'confirmed' | 'reminderDay' | 'reminder2h' | 'reviewAsk'
 
-/** The brand name for SMS texts: a message (`common.brand`), so a rename is configuration (AGENTS rule 6). */
+/** The brand name for SMS texts: the `common.brand` message, where the brand lives (systemPatterns, "Configuration, domains and brand"). */
 const brandOf = (t: ReturnType<typeof createT>) => t('common.brand')
 
 export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsKind, b: SmsBooking): string {

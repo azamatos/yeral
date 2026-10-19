@@ -139,8 +139,11 @@ describe('catalogue', () => {
       .update(services)
       .set({ name: { ru: 'Особая стрижка' } })
       .where(eq(services.id, svc!.id))
-    const found = await b.req('/v1/search/suggest?q=%D0%BE%D1%81%D0%BE%D0%B1')
-    await db.update(services).set({ name: svc!.name }).where(eq(services.id, svc!.id))
-    expect(found.json.services).toEqual(['Особая стрижка'])
+    try {
+      const found = await b.req('/v1/search/suggest?q=%D0%BE%D1%81%D0%BE%D0%B1')
+      expect(found.json.services).toEqual(['Особая стрижка'])
+    } finally {
+      await db.update(services).set({ name: svc!.name }).where(eq(services.id, svc!.id))
+    }
   })
 })

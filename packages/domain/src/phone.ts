@@ -47,8 +47,8 @@ export const E164 = new RegExp(`^\\+${COUNTRY}\\d{${RULES.length}}$`)
 /** The country code as shown in front of the number: '+993'. */
 export const COUNTRY_PREFIX = `+${COUNTRY}`
 
-/** '+993 65 12 34 56'; partial input is grouped as far as it goes. */
-export function formatPhone(raw: string): string {
+/** '65 12 34 56': the national digits grouped by the market's rules; partial input as far as it goes. */
+export function formatNational(raw: string): string {
   const d = nationalDigits(raw)
   const groups: string[] = []
   let at = 0
@@ -57,5 +57,10 @@ export function formatPhone(raw: string): string {
     if (part) groups.push(part)
     at += size
   }
-  return [COUNTRY_PREFIX, ...groups].join(' ')
+  return groups.join(' ')
+}
+
+/** '+993 65 12 34 56'; partial input is grouped as far as it goes. */
+export function formatPhone(raw: string): string {
+  return [COUNTRY_PREFIX, formatNational(raw)].filter(Boolean).join(' ')
 }

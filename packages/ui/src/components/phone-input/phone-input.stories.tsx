@@ -1,12 +1,14 @@
 /** Phone — DS-Components → Inputs → «Telefon»: the country code in a fixed box, the digits grouped as typed. */
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { MARKET } from '@yeral/domain/market'
+import { COUNTRY_PREFIX, formatNational } from '@yeral/domain/phone'
 import { useState } from 'react'
 import { expect, userEvent } from 'storybook/test'
 import { Field } from '../field'
 import { PhoneInput } from './phone-input'
 
-// Turkmenistan's rules, as the apps pass them from the market (`MARKET.phone` in @yeral/domain)
-const TM = { prefix: '+993', groups: [2, 2, 2, 2] } as const
+// the market's rules, as the apps pass them (Turkmenistan: +993, 8 digits in pairs)
+const TM = { prefix: COUNTRY_PREFIX, maxDigits: MARKET.phone.length, format: formatNational }
 
 function Demo({ initial = '', error }: { initial?: string; error?: string }) {
   const [value, setValue] = useState(initial)

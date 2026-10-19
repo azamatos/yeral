@@ -7,7 +7,7 @@
 import { bookingCode } from '@yeral/domain/id'
 import { holdUntil as holdUntilOf } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
-import type { BookingStatus } from '@yeral/domain/model'
+import { localized, type BookingStatus } from '@yeral/domain/model'
 import { ROLE_TEMPLATES, type RoleTemplate } from '@yeral/domain/permissions'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
 import { addDays, diffDays, dow, epochOf, today } from '@yeral/domain/time'
@@ -501,7 +501,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
       authorName: c.name,
       rating: r.rating,
       text: r.text,
-      what: `${svc.def.name.tk} · ${staffName}`,
+      what: `${localized(svc.def.name, MARKET.defaultLanguage)} · ${staffName}`,
       replyText: r.reply ?? null,
       replyAt: r.reply ? new Date(createdAt + 3_600_000) : null,
       createdAt: new Date(createdAt),
@@ -538,7 +538,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
           userId: ayjemal,
           authorName: 'Aýjemal G.',
           rating: a.review,
-          what: `${svc?.def.name.tk ?? ''} · ${b.staff.get(a.staff)?.name ?? ''}`,
+          what: `${svc ? localized(svc.def.name, MARKET.defaultLanguage) : ''} · ${b.staff.get(a.staff)?.name ?? ''}`,
           createdAt: new Date(epochOf(date, m(a.from)) + 86_400_000),
         })
       }

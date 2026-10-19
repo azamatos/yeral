@@ -2,10 +2,11 @@ import { MAX_ONLINE_PARTY } from '@yeral/domain/availability'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { messages } from '@yeral/i18n/messages'
 import { describe, expect, it } from 'vitest'
-import { sendCodeSchema, verifyCodeSchema } from './account'
+import { sendCodeSchema, updateMeSchema, verifyCodeSchema } from './account'
 import { appointmentAvailabilityQuerySchema, tableAvailabilityQuerySchema } from './availability'
 import { bookingSummarySchema, createBookingSchema, rescheduleSchema, reviewInputSchema } from './bookings'
 import { businessQuerySchema, searchQuerySchema } from './catalog'
+import { langQuerySchema, localizedSchema } from './common'
 import { ERROR_CODES, slotTakenDetailsSchema } from './errors'
 import { eventListSchema, eventsQuerySchema } from './events'
 
@@ -18,6 +19,24 @@ describe('error codes', () => {
       const missing = ERROR_CODES.filter((code) => !(code in messages[locale].errors))
       expect(missing, locale).toEqual([])
     }
+  })
+})
+
+describe('languages (ADR 0022)', () => {
+  it('a person picks only a language the market offers; ?lang= may ask any translated one', () => {
+    expect(updateMeSchema.safeParse({ lang: 'en' }).success).toBe(true)
+    expect(updateMeSchema.safeParse({ lang: 'tk' }).success).toBe(false)
+    expect(sendCodeSchema.safeParse({ phone: '+99365901122', lang: 'ru' }).success).toBe(false)
+    expect(langQuerySchema.parse({ lang: 'tk' }).lang).toBe('tk')
+  })
+
+  it('a text written per language needs at least one language (book Q-102)', () => {
+    const name = localizedSchema(80)
+    expect(name.parse({ en: ' Haircut ' })).toEqual({ en: 'Haircut' })
+    expect(name.safeParse({}).success).toBe(false)
+    expect(name.safeParse({ en: '  ' }).success).toBe(false)
+    expect(name.safeParse({ tk: 'Saç kesimi' }).success).toBe(false) // not a language of this market
+    expect(name.safeParse({ en: 'x'.repeat(81) }).success).toBe(false)
   })
 })
 

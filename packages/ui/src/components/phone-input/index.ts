@@ -1,1 +1,1 @@
-export { PhoneInput, formatLocalPhone, type PhoneInputProps } from './phone-input'
+export { PhoneInput, type PhoneInputProps } from './phone-input'

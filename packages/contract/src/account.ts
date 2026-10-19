@@ -2,12 +2,12 @@
  * Login by phone code, the signed-in person, profile and favourites (client spec §4.7–4.8).
  */
 import { z } from 'zod'
-import { localeSchema, mobileInputSchema, phoneInputSchema, phoneSchema } from './common'
+import { localeSchema, marketLocaleSchema, mobileInputSchema, phoneInputSchema, phoneSchema } from './common'
 
 // ── Login ──
 
 /** `lang`: the site's language, for the SMS text and a new account's language. Codes go to mobile numbers only. */
-export const sendCodeSchema = z.object({ phone: mobileInputSchema, lang: localeSchema.optional() }).meta({ id: 'SendCode' })
+export const sendCodeSchema = z.object({ phone: mobileInputSchema, lang: marketLocaleSchema.optional() }).meta({ id: 'SendCode' })
 export const sendCodeResponseSchema = z.object({
   /** The resend timer ("0:59"). */
   resendAfterSec: z.number().int(),
@@ -18,7 +18,7 @@ export const verifyCodeSchema = z
   .object({
     phone: phoneInputSchema,
     code: z.string().regex(/^\d{4}$/),
-    lang: localeSchema.optional(),
+    lang: marketLocaleSchema.optional(),
   })
   .meta({ id: 'VerifyCode' })
 
@@ -55,7 +55,8 @@ export const verifyCodeResponseSchema = z.object({
 export const updateMeSchema = z
   .object({
     name: z.string().trim().min(1).max(80).optional(),
-    lang: localeSchema.optional(),
+    /** One of the market's languages ("Saýt we SMS habarnamalar şu dilde bolar"). */
+    lang: marketLocaleSchema.optional(),
     notifications: notificationPrefsSchema.partial().optional(),
   })
   .meta({ id: 'UpdateMe' })

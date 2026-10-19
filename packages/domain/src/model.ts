@@ -57,7 +57,7 @@ export const LOCALES = ['tk', 'ru', 'en'] as const
 export type Locale = (typeof LOCALES)[number]
 /**
  * Text written per language (service names, descriptions, about, catalogue names). A business fills in any one of its
- * market's languages, or several (book Q-102); the input schemas require at least one.
+ * market's languages, or several (book Q-102); `localizedSchema` (`@yeral/contract/common`) requires at least one.
  */
 export type Localized = Partial<Record<Locale, string>>
 

@@ -120,7 +120,8 @@ describe('message catalogues', () => {
     expect(MARKET_LOCALES).toContain(DEFAULT_LOCALE)
   })
 
-  it('SMS texts take the brand as an argument, so a rename is configuration (AGENTS rule 6)', () => {
+  it('one brand in every language, and SMS texts take it as an argument, so a rename is one edit per file', () => {
+    for (const locale of LOCALES) expect(messages[locale].common.brand).toBe(messages.en.common.brand)
     for (const locale of LOCALES) {
       const { brand } = messages[locale].common
       for (const text of Object.values(messages[locale].sms)) expect(text).not.toContain(brand)

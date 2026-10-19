@@ -19,8 +19,20 @@ export const epochSchema = z.number().int().meta({ description: 'Epoch milliseco
 /** Whole units of the market's currency (Turkmenistan: manats). */
 export const moneySchema = z.number().int().min(0)
 export const priceSchema = z.object({ type: z.enum(PRICE_TYPES), amount: moneySchema }).meta({ id: 'Price' })
-/** Any language the code has translations for; the sites offer their market's (`MARKET.languages`). */
+/** Any language the code has translations for: what `?lang=` may ask and what responses carry. */
 export const localeSchema = z.enum(LOCALES)
+/** A language a person can choose or sign in with: only the ones the market offers (`MARKET.languages`). */
+export const marketLocaleSchema = z.enum(MARKET.languages)
+
+/**
+ * Text written per language (`Localized`): any language the market offers, at least one written (book Q-102).
+ * `max` is the length of each language's text.
+ */
+export function localizedSchema(max: number) {
+  return z
+    .partialRecord(marketLocaleSchema, z.string().trim().max(max))
+    .refine((t) => Object.values(t).some(Boolean), 'Write the text in at least one language')
+}
 export type { Locale } from '@yeral/domain/model'
 export const bookingTypeSchema = z.enum(BOOKING_TYPES)
 export const idSchema = z.uuid()
