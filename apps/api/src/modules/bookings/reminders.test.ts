@@ -81,4 +81,34 @@ describe('reminders and the night (book Q-285)', () => {
     await runDueJobs(t.deps)
     expect(t.sms.sent.filter((s) => s.to === '+99365555002')).toHaveLength(1)
   })
+
+  it("a reminder names the city of a business outside the market's main one (book Q-107)", async () => {
+    const t = testApp(db)
+    const [barber] = await db.update(businesses).set({ cityId: 'mary' }).where(eq(businesses.slug, 'barber-loft')).returning()
+    try {
+      const [row] = await db
+        .insert(bookings)
+        .values({
+          code: 'YR-99103',
+          businessId: barber!.id,
+          type: 'appointment',
+          date: '2026-10-16',
+          start: 900,
+          end: 960,
+          status: 'confirmed',
+          source: 'web',
+          clientPhone: '+99365555003',
+          clientName: 'Traveller',
+        })
+        .returning()
+      await queueBookingSms(db, t.deps, row!, { confirmed: false })
+      t.clock.now = epochOf('2026-10-15', 901)
+      await runDueJobs(t.deps)
+      expect(t.sms.sent.find((s) => s.to === '+99365555003')?.text).toBe(
+        `Reminder: tomorrow at 15:00, Barber Loft, ${barber!.address}, Mary.`,
+      )
+    } finally {
+      await db.update(businesses).set({ cityId: 'ashgabat' }).where(eq(businesses.id, barber!.id))
+    }
+  })
 })

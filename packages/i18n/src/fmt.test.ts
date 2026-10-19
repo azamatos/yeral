@@ -35,6 +35,13 @@ describe('numbers and money', () => {
   })
 })
 
+describe('addresses', () => {
+  it('writes an address with its city (book Q-107)', () => {
+    expect(en.addressIn('Andalyp street 8', 'Mary')).toBe('Andalyp street 8, Mary')
+    expect(ru.addressIn('ул. Андалиба 8', 'Мары')).toBe('ул. Андалиба 8, Мары')
+  })
+})
+
 describe('durations and distances', () => {
   it.each([
     [30, '30 min'],

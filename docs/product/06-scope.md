@@ -69,7 +69,7 @@ These are drawn but go against a decision; they go into the next prompt for Clau
 What's already built and doesn't match a decision; fixed when coding resumes, not asked again.
 
 - The average bill is still in the code (Q-103 dropped it).
-- Addresses carry no city, and there is no city choice (Q-107, F-240); the lookup by internet address is gone with Cloudflare (ADR 0024).
+- The lookup by internet address is gone with Cloudflare (ADR 0024); the city choice starts at the market's main city (Q-107, F-240).
 - Invites: the code activates an invite at the first login; the design has accept or decline, 7 days, resend (F-085).
 - Moving: when the chosen specialist is busy, the code gives the booking to another one; round 6 forbids that (F-060).
 - The online party limit is a fixed 8 in code; it's a business setting in the design (F-050).
@@ -118,7 +118,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-007 | "What?" suggestions | Typing in "Näme?" suggests categories and business names. | Later | not designed | api built (`/v1/search/suggest`) | Code only; no dropdown is drawn. |
 | F-008 | "Where?" place suggestions | Typing an address, district or landmark in "Nirede?" offers up to 6 places. | MVP | spec only (README §5) | api built (`/v1/places/suggest`, `places` table) | Places are seeded; nobody maintains them (see F-187). |
 | F-009 | Near-me location and radius | Browser geolocation as "Ýakynymda" with a 1 / 3 / 5 / 10 / 25 km radius chip (5 km default). | MVP | drawn (Search) | built (domain geo, api) |  |
-| F-010 | Location-denied fallback | The market's main city inside "Nirede?", distances hidden, sort by rating × reviews, help sheet to allow location. | MVP | drawn (States 3: an IP-based city) | api built (popularity sort); the IP lookup removed (ADR 0024) | The city becomes a choice (Q-107, F-240). The main city joins the market settings with the client site. |
+| F-010 | Location-denied fallback | The market's main city inside "Nirede?", distances hidden, sort by rating × reviews, help sheet to allow location. | MVP | drawn (States 3: an IP-based city) | api built (popularity sort, in the market's main city); the IP lookup removed (ADR 0024) | The city is a choice (Q-107, F-240); the main city is a market setting. |
 | F-011 | Search filters and sort | Category chips, day toggle Şu gün / Ertir / Şu hepde, filters drawer (price, rating 4.5+, open now, booking type, women only) and sort nearest / rating / price. | MVP | drawn (Search chips); drawer contents spec only | api built (`cat`, `date`, `week`, `maxPrice`, `minRating`, `openNow`, `type`, `womenOnly`, `sort`) | Results are limited to businesses with free time on the chosen day. |
 | F-012 | Specialist gender filter | Beauty searches can filter by the specialist's gender. | Later | spec only (README §4.2) | schema only (`staff.gender`) | Not in the search api. |
 | F-013 | Party-size filter for restaurants | "Adam sany: 2 ▾" chip (1–7, 8+) when the restaurant/café category is on; rows show times for that party. | Later | drawn (Search · party) | api built (`party` 1–8, default 2) | Round 6 D2 calls it new, but the api already has it; design range 1–7 + 8+ vs api max 8. |
@@ -146,7 +146,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-035 | Error, empty and loading states | 404, no results, closed today, network error toast, loading skeletons. | MVP | drawn (States) | built (ui: EmptyState, Skeleton, Toast) |  |
 | F-036 | Legacy home sections | Browse by district, "Recommended" (top-rated) and "New on Ýeral" sections. | Later | not designed | legacy only | The new design names no city or district in copy. Owner: Later (18.10.2026). |
 | F-037 | Instant-confirmation filter | Search filter for businesses that confirm at once. | Later | not designed | legacy only |  |
-| F-240 | City choice | The person's location preselects a city; they can pick another; an address shows its city when it differs from the selected one. | MVP | not designed | not built | Q-107 (decided 18.10.2026). |
+| F-240 | City choice | The person's location preselects a city; they can pick another; an address shows its city when it differs from the selected one. | MVP | not designed | api built (20.10.2026): the city list, the nearest city, search and places by city, the city on cards, pages and bookings, the city in reminder SMS outside the main city | Q-107 (decided 18.10.2026). |
 
 ## Client · booking (per type)
 

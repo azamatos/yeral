@@ -4,7 +4,8 @@
  * names a country's values. A second country adds its own `Market` and picks it here (by environment once it exists).
  *
  * Settings without code yet join with their features: legal texts (P4 slice 7), the SMS provider and sender (the
- * Turkmenistan launch), the main city and map area (the client site) — book chapter 10.
+ * Turkmenistan launch), the map area (the client site) — book chapter 10. The market's cities are data (the `cities`
+ * table, book Q-107); only the main one is named here.
  */
 import type { Locale } from './model'
 
@@ -36,6 +37,8 @@ export interface Market {
   timeZone: string
   utcOffsetMin: number
   phone: PhoneRules
+  /** The city a visitor starts in until they allow their location or pick another (book Q-107): a `cities` id. */
+  mainCity: string
 }
 
 /**
@@ -58,6 +61,7 @@ export const TURKMENISTAN: Market = {
     mobile: /^[67]/,
     groups: [2, 2, 2, 2],
   },
+  mainCity: 'ashgabat',
 }
 
 /** The market of this deployment. */

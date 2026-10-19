@@ -11,6 +11,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { buildCards } from './cards'
+import { cityRefOf, loadCities } from './cities'
 import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
 
 const SPECIAL_DAYS_AHEAD = 14
@@ -87,6 +88,7 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
     reviewsCount: b.reviewsCount,
     ratingBreakdown: b.ratingBreakdown,
     address: b.hideExactAddress ? b.street : b.address,
+    city: cityRefOf(await loadCities(db), b.cityId, lang),
     entranceNote: b.hideExactAddress ? null : b.entranceNote,
     hideExactAddress: b.hideExactAddress,
     geo: geoOf(b),

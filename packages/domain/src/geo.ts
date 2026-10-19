@@ -32,3 +32,23 @@ export function boundingBox(center: LatLng, radiusKm: number): { minLat: number;
 
 /** Without a location, lists sort by rating × review count. */
 export const popularity = (rating: number, reviewsCount: number) => rating * reviewsCount
+
+/** A person farther than this from every city's centre is in none of them: the market's main city stands in. */
+export const CITY_REACH_KM = 50
+
+/**
+ * The city a position preselects (book Q-107): the one whose centre is nearest, if it's within `CITY_REACH_KM`. A
+ * visitor abroad, or far from every city, gets null and starts in the market's main city.
+ */
+export function nearestCity<C extends LatLng>(cities: readonly C[], position: LatLng): C | null {
+  let best: C | null = null
+  let bestM = CITY_REACH_KM * 1000
+  for (const c of cities) {
+    const d = distanceM(position, c)
+    if (d <= bestM) {
+      best = c
+      bestM = d
+    }
+  }
+  return best
+}

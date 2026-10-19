@@ -134,6 +134,14 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         queryFn: ({ signal }) => call(v1.categories.$get({ query: { lang } }, abortWith(signal))),
         staleTime: 3_600_000,
       }),
+    /** The cities for "Nirede?", the market's main one and, with a position, the one it's in (book Q-107). */
+    cities: (lang: Locale, position: { lat: number; lng: number } | null = null) =>
+      queryOptions({
+        queryKey: keys.cities(lang, position),
+        queryFn: ({ signal }) =>
+          call(v1.cities.$get({ query: clean({ lang, lat: position?.lat, lng: position?.lng }) }, abortWith(signal))),
+        staleTime: 3_600_000,
+      }),
     search: (p: SearchParams) => {
       const query = clean({
         ...p,
@@ -156,10 +164,11 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         queryFn: ({ signal }) => call(v1.search.suggest.$get({ query: { q, lang } }, abortWith(signal))),
         enabled: q.trim().length > 0,
       }),
-    places: (q: string, lang: Locale) =>
+    /** "Nirede?" suggestions, in the chosen city when there is one. */
+    places: (q: string, lang: Locale, city: string | null = null) =>
       queryOptions({
-        queryKey: keys.places(q, lang),
-        queryFn: ({ signal }) => call(v1.places.suggest.$get({ query: { q, lang } }, abortWith(signal))),
+        queryKey: keys.places(q, lang, city),
+        queryFn: ({ signal }) => call(v1.places.suggest.$get({ query: { q, ...clean({ lang, city }) } }, abortWith(signal))),
         enabled: q.trim().length >= 2,
       }),
     business: (slug: string, lang: Locale, position: { lat: number; lng: number } | null = null) =>

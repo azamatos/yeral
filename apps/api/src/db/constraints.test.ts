@@ -22,6 +22,7 @@ describe('no double booking', () => {
       bookingTypes: ['appointment'],
       specialistWord: { tk: 'hünärmen' },
     })
+    await db.insert(t.cities).values({ id: 'city', name: { en: 'City' }, lat: 37.95, lng: 58.38 })
     const [biz] = await db
       .insert(t.businesses)
       .values({
@@ -32,6 +33,7 @@ describe('no double booking', () => {
         bookingTypes: ['appointment'],
         about: { tk: '' },
         address: 'x',
+        cityId: 'city',
         street: 'x',
         lat: 37.95,
         lng: 58.38,
@@ -121,6 +123,10 @@ describe('a team', () => {
         specialistWord: { en: 'specialist' },
       })
       .onConflictDoNothing()
+    await db
+      .insert(t.cities)
+      .values({ id: 'city', name: { en: 'City' }, lat: 37.95, lng: 58.38 })
+      .onConflictDoNothing()
     const [biz] = await db
       .insert(t.businesses)
       .values({
@@ -131,6 +137,7 @@ describe('a team', () => {
         bookingTypes: ['appointment'],
         about: {},
         address: 'x',
+        cityId: 'city',
         street: 'x',
         lat: 37.95,
         lng: 58.38,

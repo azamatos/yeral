@@ -70,6 +70,7 @@
     "hoursMinutes": "{h} h {m} min",
     "km": "{n} km",
     "m": "{n} m",
+    "addressInCity": "{address}, {city}",
     "today": "Today",
     "tomorrow": "Tomorrow",
     "weekdayDate": "{weekday}, {date}",

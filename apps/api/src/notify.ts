@@ -41,6 +41,8 @@ export interface SmsBooking {
   start: number
   businessName: string
   address: string
+  /** Named after the address when the business isn't in the market's main city: a phone has no chosen city (book Q-107). */
+  city?: string | null
 }
 
 /** `reminderEvening`: a reminder moved out of the night to 21:30 the evening before, worded like the day one ("tomorrow"). */
@@ -57,7 +59,7 @@ export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsK
     business: b.businessName,
     time: fmt.time(b.start),
     link: bookingLink(site, b.code),
-    address: b.address,
+    address: b.city ? fmt.addressIn(b.address, b.city) : b.address,
   }
   switch (kind) {
     case 'confirmed':

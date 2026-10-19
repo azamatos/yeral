@@ -59,6 +59,11 @@ export const latLngSchema = z.object({ lat: z.number().min(-90).max(90), lng: z.
 /** A place on the map; `approximate` for home-based businesses until the booking is confirmed (≈ 1 km circle). */
 export const geoSchema = latLngSchema.extend({ approximate: z.boolean() })
 export const photoSchema = z.object({ url: z.string(), alt: z.string() }).meta({ id: 'Photo' })
+/**
+ * The city of an address (book Q-107): the client shows it beside the address only when it differs from the city the
+ * person chose.
+ */
+export const cityRefSchema = z.object({ id: slugSchema, name: z.string() }).meta({ id: 'CityRef' })
 
 /** `?lang=` on every endpoint that returns text; the market's main language by default (English for the first launch). */
 export const langQuerySchema = z.object({ lang: localeSchema.default(MARKET.defaultLanguage) })

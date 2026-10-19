@@ -1,5 +1,5 @@
 /**
- * Categories, businesses and everything a business sets up: rules, team, invites, services, tables, class sessions,
+ * Cities, categories, businesses and everything a business sets up: rules, team, invites, services, tables, class sessions,
  * its client list (ADR 0017, ADR 0018, ADR 0025). A branch is its own business.
  */
 import type { DateException, WeekHours } from '@yeral/domain/hours'
@@ -47,6 +47,20 @@ export interface StarterService {
   price: { type: 'fixed' | 'from' | 'free' | 'hidden'; amount: number }
 }
 
+/**
+ * The market's cities (book Q-107): a visitor's location preselects one, they can pick another, and an address shows its
+ * city when it differs from the chosen one. Seed data until the CMS manages them; the market names its main one.
+ */
+export const cities = pgTable('cities', {
+  /** Slug: `ashgabat`. */
+  id: text().primaryKey(),
+  name: jsonb().$type<Localized>().notNull(),
+  /** The centre: a position picks the nearest city. */
+  lat: doublePrecision().notNull(),
+  lng: doublePrecision().notNull(),
+  sort: integer().notNull().default(0),
+})
+
 /** The CMS catalogue (seed data until the CMS module exists). */
 export const categories = pgTable('categories', {
   /** Slug: `beauty`, `barber`, `dental` … used in `/{lang}/c/{category}`. */
@@ -74,7 +88,11 @@ export const businesses = pgTable(
     kind: jsonb().$type<Localized>().notNull(),
     bookingTypes: bookingType().array().notNull(),
     about: jsonb().$type<Localized>().notNull(),
+    /** The street address, without the city: `cityId` says which. */
     address: text().notNull(),
+    cityId: text()
+      .notNull()
+      .references(() => cities.id),
     /** The street line on search rows. */
     street: text().notNull(),
     entranceNote: text(),
@@ -106,7 +124,11 @@ export const businesses = pgTable(
     demo: boolean().notNull().default(false),
     createdAt: createdAt(),
   },
-  (t) => [index('businesses_category_idx').on(t.categoryId), index('businesses_geo_idx').on(t.lat, t.lng)],
+  (t) => [
+    index('businesses_category_idx').on(t.categoryId),
+    index('businesses_city_idx').on(t.cityId),
+    index('businesses_geo_idx').on(t.lat, t.lng),
+  ],
 )
 
 /** "Ýazylyş düzgünleri", one row per business (`@yeral/domain/rules`). */
@@ -356,9 +378,12 @@ export const favorites = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.businessId] })],
 )
 
-/** "Nirede?" suggestions: districts, streets, landmarks. */
+/** "Nirede?" suggestions: districts, streets, landmarks, each in a city. */
 export const places = pgTable('places', {
   id: uuid().primaryKey().defaultRandom(),
+  cityId: text()
+    .notNull()
+    .references(() => cities.id),
   label: jsonb().$type<Localized>().notNull(),
   lat: doublePrecision().notNull(),
   lng: doublePrecision().notNull(),

@@ -119,6 +119,7 @@ describe('account', () => {
         '/v1/businesses/{slug}/specialists/availability',
         '/v1/businesses/{slug}/tables',
         '/v1/categories',
+        '/v1/cities',
         '/v1/events',
         '/v1/health',
         '/v1/me',

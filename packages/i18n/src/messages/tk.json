@@ -70,6 +70,7 @@
     "hoursMinutes": "{h} sag {m} min",
     "km": "{n} km",
     "m": "{n} m",
+    "addressInCity": "{address}, {city}",
     "today": "Şu gün",
     "tomorrow": "Ertir",
     "weekdayDate": "{weekday}, {date}",
