@@ -9,6 +9,8 @@ question in this book, the answer is added here with its date, and the chapters 
 
 | Date | Question | Decision | By |
 |---|---|---|---|
+| 19.10.2026 | P2 review | A hold counts the business's opening hours, special days included; a reminder between 22:00 and 08:00 goes at 21:30 before that night, also for visits after midnight; "unused for 6 months" means no sign-in; the `yr-` slug rule goes with `/b/{code}`; a lower no-show limit counts from its change; the failed-SMS alert goes to the error tracker (chapter 10, P2) | Claude (delegated) |
+| 19.10.2026 | Hosting | No Neon and no Cloudflare Workers for the api: the first launch runs on the own server, and Neon is removed (F-203, F-205) | owner |
 | 18.10.2026 | Q-299 | No cap on MVP; the Ýeral team watches a monthly count per business | owner |
 | 18.10.2026 | Q-298 | Show all of these on screen only, plus two small additions: an undo updates the earlier "Müşderi ýatyrdy" notice, and a declined invite uses the "Topar" row | owner |
 | 18.10.2026 | Q-297 | Off by default; each person can switch it on, and it never goes at night or to someone who has the workspace open | Claude (delegated) |

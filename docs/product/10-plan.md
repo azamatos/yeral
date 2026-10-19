@@ -5,7 +5,7 @@ on 18.10.2026 from the book's answers; the owner decides when each launch ships.
 
 ## Where we start
 
-- **The book is closed:** 123 questions answered, 242 features placed (154 in the MVP). (chapters 6 and 9)
+- **The book is closed:** 123 questions answered, 242 features placed (155 in the MVP since the own server joined it on 19.10.2026). (chapters 6 and 9)
 - **Built before the reset** (M0–M2, released 16.10.2026): the monorepo and CI; `@yeral/ui` with 38 components from
   the design system v0.3.1; the booking engine (`@yeral/domain`); the shared contract and client library; an api for
   every client screen on Postgres, not deployed; the Docker stack. (progress.md)
@@ -48,21 +48,53 @@ book (ADR 0021). The result is design export v0.6, every board in English (Q-133
 
 ### P2 · Backend to the book
 
-No screens; every rule gets its test (ADR 0013). Runs alongside P1, in this order:
+No screens; every rule gets its test (ADR 0013). Runs alongside P1, in this order. Reviewed on 19.10.2026 against
+every **Code differs** line (51 distinct ones; the first draft of this list covered 21) and the api as built: 34
+endpoints for client screens, none for businesses or the Ýeral team, and nothing that checks access levels yet.
 
-1. **Market settings** (ADR 0022, ADR 0023): language, money, phone rules, time zone and legal texts read from one
-   market config; English as the source language.
-2. **The business model:** three fixed levels and the permission matrix instead of editable roles; the specialist
-   without the app (Q-216); invites with accept or decline.
-3. **The "Code differs" fixes in the booking engine:** holds count only in opening hours (Q-120), past midnight (Q-105),
-   the city as data (Q-107), offered times tied to one specialist (Q-159), the no-show count restart (Q-127), move
-   rules (Q-165, Q-263), token links instead of `/b/{code}` (Q-168), no review asks (Q-259), linking by phone only for
-   6 months plus "Is this you?" (Q-270), code limits (Q-267), deleting an account (Q-172).
-4. **Business endpoints:** workspace, calendar, requests, bookings, clients, team, settings, services, hours, reviews,
-   notifications. Today the api serves only client screens.
-5. **Admin endpoints:** verification, review reports, hiding a business, adding a business for its owner.
+0. **The own server only** (owner, 19.10.2026: no Neon): the api's Cloudflare Workers path goes (Worker entry,
+   Wrangler, Hyperdrive, Neon config); the local Docker stack uses Caddy like the server; the city from the internet
+   address is off, since first-launch visitors come through a VPN, and the city choice starts at the market's main
+   city (Q-107).
+1. **Market settings** (ADR 0022, ADR 0023): language, money, phone rules and time zone read from one market config;
+   English as the source language; any one language for a business's texts (Q-102); SMS in the market's main language
+   for people without one (Q-292). Legal texts, the SMS provider and the map area join the config with their features.
+2. **The business model:** three fixed levels with a fixed permission table, enforced by the api (editing the matrix
+   is Later, F-089); each account linked to its staff rows, which *Başga ýerde* needs; the specialist without the app
+   (Q-216); invites with accept or decline and 7 days (F-085). With no SMS at the first launch, an invite appears when
+   the invited phone signs in, and the owner can copy its link.
+3. **The "Code differs" fixes in the booking engine,** in this order, since each needs the one before: past midnight
+   (Q-105); holds count only in opening hours (Q-120); reminders at night move to 21:30 the evening before (Q-285);
+   then the city as data (Q-107), offered times tied to one specialist (Q-159), expiry with nothing free (Q-252), the
+   no-show count restart (Q-127), move rules (Q-165, Q-263, a second move replaces the first and can be withdrawn:
+   ROUND6 A3), token links instead of `/b/{code}` and the signed-out link page (Q-168, F-068), no review asks (Q-259),
+   linking by phone only for 6 months plus "Is this you?" (Q-270), a changed phone keeps its client record (Q-171),
+   code limits (Q-267), deleting an account (Q-172), name and surname (Q-156), time limits on no-shows, complaints and
+   reviews (Q-254, Q-206, Q-126), at most 3 waiting requests per business and 10 in all (Q-124), the cancel reason
+   setting (Q-163), the 4 undo reasons (ROUND6 A6), the answer time worked out (Q-113), phone-only clients and paused
+   businesses (Q-154), the owner's preview of an unverified page (F-032), no average bill and the hidden-price text
+   (Q-103), lateness fixed at 15 min (Q-118), a price range filter, the failed-SMS alert and late reminders dropped
+   (Q-284), the SMS for a move not accepted (Q-289); and the new engine rules: *Başga ýerde* (Q-272), blocked time
+   (F-121) and internal statuses (F-104, F-133).
+4. **Business endpoints:** workspace, calendar, requests, bookings with CSV export (F-135), clients, team, settings,
+   services, hours, reviews; photos (F-084, F-101) stored on the server's disk behind a storage port; the address with
+   a map pin (F-099); browser notifications from the live events (F-170) and the staff SMS rule (F-171); the timed jobs
+   for invite expiry, the 5-minute warning and the answer time.
+5. **Admin endpoints:** the Ýeral team's own accounts with a second factor (F-178): with the code on the screen, a
+   phone number must never open the admin tool; verify, reject and send again (Q-274), un-verify or hide a business,
+   close a workspace (Q-213), review reports with the 48-hour recount, adding a business for its owner.
 6. **First-launch mode** (Q-004, Q-036): example businesses marked "Example" that confirm at once, the sign-in code
-   shown on the screen, a shared demo workspace reset every night, no SMS.
+   shown on the screen (never for the admin tool), a separate demo workspace reset every night, no SMS. It doesn't wait
+   for the design: the demo data already has English texts, refreshed at export v0.6.
+7. **Before the first launch:** deploys from GitHub over SSH after the owner approves a release (ADR 0020), nightly
+   backups to Cloudflare R2 with a restore drill (F-211), error tracking and uptime alerts (F-209), sitemap data
+   (F-197).
+
+Settled while reviewing (Claude, delegated, 19.10.2026): a hold counts the business's opening hours, special days
+included, not the specialist's; a reminder that falls between 22:00 and 08:00 goes at 21:30 before that night starts,
+also for visits after midnight; "unused for 6 months" (Q-270) means no sign-in for 6 months; the `yr-` slug rule goes
+with the `/b/{code}` links (Q-168); a lower no-show limit counts from the day it changes; the failed-SMS alert goes to
+the error tracker of F-209, since Ýeral sends no e-mail.
 
 ### P3 · Components in Storybook
 
@@ -80,14 +112,14 @@ The order of Q-001: every slice ends working end to end on a local machine, with
 | 3 · Booking loop | business page, appointment booking, answering in the calendar, my bookings, cancel, move, undo, declines with offered times, expiries |
 | 4 · Daily work | calendar views, bookings list, clients, walk-ins, complaints, internal statuses, *Başga ýerde*, browser notifications, the installable business app |
 | 5 · Discovery | home, search, map, categories, the city choice, search-engine pages |
-| 6 · Admin tool | cms.yeral.app behind Cloudflare Access: verification, reported reviews, hiding businesses, adding a business for its owner |
+| 6 · Admin tool | cms.yeral.app with the Ýeral team's own accounts and a second factor (F-178): verification, reported reviews, hiding businesses, adding a business for its owner |
 | 7 · First-launch mode | example businesses, "Try the business app", privacy policy and terms in English (Q-033) |
 
 ### P5 · First launch
 
 The client site, the business app, the admin tool and the api go to production on the owner's server (a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB)) in Docker, with Cloudflare for DNS (ADR 0007, ADR 0023), from a release the owner approves
-(ADR 0020). Its configs (setup script, a shared HTTPS front door for several projects, backups, deploys from
-GitHub) are written when the apps are ready to deploy. The new client site replaces the old one on
+(ADR 0020). The server, its shared HTTPS front door and the api's stack are set up (19.10.2026, `infra/server`);
+deploys from GitHub and backups come with P2 step 7. The new client site replaces the old one on
 yeral.app. The team adds the first real businesses in the admin tool (Q-002).
 
 ### P6 · Turkmenistan launch
@@ -134,7 +166,7 @@ so there is time to test it from Ashgabat, rehearse the move and fix what breaks
 |---|---|
 | P1 | pastes each design prompt into Claude Design and reviews the result (about six rounds) |
 | P2–P4 | nothing required; reviews progress when Claude reports a finished slice |
-| P5 | approves the release; sets up Cloudflare Access for the admin tool once; meets the first businesses and adds them in the admin tool |
+| P5 | approves the release; adds the DNS records; sets up the second factor of their admin account; meets the first businesses and adds them in the admin tool |
 | P6 | the investment, the lawyer, buying the server, the SMS provider account, the native language check |
 
 ## Risks we carry

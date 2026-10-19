@@ -106,9 +106,9 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | Business · marketing (B2B landing) | 4 | 0 | 0 |
 | Ýeral team (verification, moderation, categories, support, CMS modules) | 5 | 7 | 0 |
 | System (jobs, SMS, live updates, search indexing, SEO, i18n) | 11 | 3 | 0 |
-| Platform (hosting, own server, Storybook, monitoring) | 8 | 2 | 1 |
+| Platform (hosting, own server, Storybook, monitoring) | 9 | 1 | 1 |
 | Later and non-goals | 0 | 24 | 2 |
-| **All** | **154** | **84** | **4** |
+| **All** | **155** | **83** | **4** |
 
 ## Client · discovery (home, search, map, categories, business page)
 
@@ -399,15 +399,15 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
-| F-203 | Cloudflare hosting | Workers for sites and api, Hyperdrive to Neon Postgres, R2 for files, Cron for jobs; only local and production environments. | MVP | not designed | built for legacy; api prepared, not deployed | Production api ships with M3. No staging (ADR 0020). |
-| F-204 | Docker stack | Postgres + api + nginx in Compose, run locally and in CI. | MVP | not designed | built (`infra/docker`, `infra/nginx`) |  |
-| F-205 | Own server | Move everything to a server reachable from Turkmenistan, Cloudflare kept for DNS. | Later | not designed | not built | M8; Cloudflare is reported filtered in TM. |
+| F-203 | Cloudflare services | DNS, Storybook and R2 for backups; the api and the sites run on the own server, not on Workers (ADR 0023, revised 19.10.2026). | MVP | not designed | DNS and Storybook built; the api's Workers and Neon path goes in P2 step 0 | Workers, Hyperdrive and Neon dropped for the api (owner, 19.10.2026). No staging (ADR 0020). |
+| F-204 | Docker stack | Postgres + api + Caddy in Compose, run locally, in CI and on the server. | MVP | not designed | built (`infra/docker`, `infra/server`); the local stack uses nginx until P2 step 0 |  |
+| F-205 | Own server | The owner's netcup VPS 1000 in the EU runs every app of the first launch behind a shared Caddy, with Cloudflare for DNS; the Turkmenistan launch gets a second server inside the country. | MVP | not designed | built (`infra/server`, set up 19.10.2026; not public yet) | Moved from Later (owner, 19.10.2026); chapter 10, "The server: when and what". |
 | F-206 | CI/CD and releases | GitHub Actions checks, Changesets releases, deploy with smoke check, rollback, OpenAPI docs at `/docs`. | MVP | not designed | built | Playwright end-to-end flows planned with M3, not built. |
 | F-207 | Storybook design system | `@yeral/ui` (38 components) with stories tested in Chromium with axe, at storybook.yeral.app. | MVP | drawn (DS boards) | built |  |
 | F-208 | Design system v0.5 components | ~50 new primitives and ~70 domain components from `COMPONENTS.md`. | MVP | drawn (DS-Patterns, DS-Business) | not built | Big. Screens are built only from components with stories. |
 | F-209 | Error tracking and alerts | Sentry for sites and api; uptime checks that alert on failures. | MVP | not designed | not built | Sentry planned (techContext); only a deploy smoke check today. |
 | F-210 | Page analytics | Cloudflare Web Analytics now, Umami on the own server. | Later | not designed | not built | Planned. |
-| F-211 | Backups | Regular database and photo backups with a restore drill. | MVP | not designed | not built | Nothing in the repo; Neon's own history only. |
+| F-211 | Backups | Regular database and photo backups with a restore drill. | MVP | not designed | not built | Nightly to Cloudflare R2 (chapter 10, P2 step 7); needs the owner's R2 token. |
 | F-212 | Domain and brand in config | Domains, cookie domain and brand name come from configuration. | MVP | not designed | built (`@yeral/lib/site`) | Final name/domain = Q-003. |
 | F-213 | Legacy site | The first Next.js marketplace (beauty only, Russian, mock data) still serves yeral.app. | Never | not designed | built (`apps/legacy`) | Deleted when M3 replaces it. |
 
