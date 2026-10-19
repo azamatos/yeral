@@ -354,8 +354,9 @@ flowchart LR
 | Staff SMS | only for "new request" and "Ýeral" messages | Each person | business spec §22 |
 | Staff channels on MVP | browser and SMS; "in the app" once the business app ships | Fixed | business spec §16 |
 
-**Code differs:** client SMS go at any hour, the review ask is still planned 2 h after the visit, and a failed SMS is
-dropped after 5 tries without telling anyone (code: apps/api/src/modules/jobs/run.ts).
+**Code differs:** the review ask is still planned 2 h after the visit, and a failed SMS is dropped after 5 tries without
+telling anyone (code: apps/api/src/modules/jobs/run.ts). Reminders keep out of the night since 20.10.2026
+(`reminderPlan()`, Q-285).
 
 > Open question Q-285: client SMS at night.
 

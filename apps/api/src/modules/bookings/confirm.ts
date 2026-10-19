@@ -3,6 +3,7 @@
  * what follows: reminders and the review ask are queued, the client gets the "confirmed" SMS (client spec §6).
  * A confirmed reschedule request moves the booking it points at.
  */
+import { reminderPlan } from '@yeral/domain/lifecycle'
 import { epochOf } from '@yeral/domain/time'
 import { eq } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -13,19 +14,19 @@ import { setStatus, type BookingRow } from './repo'
 
 const HOUR = 3_600_000
 
-/** Queue the booking's SMS: confirmed now, reminders a day and 2 h before, the review ask 2 h after the end. */
+/**
+ * Queue the booking's SMS: confirmed now, the reminders (a day and 2 h before, none at night: `reminderPlan`), the
+ * review ask 2 h after the end.
+ */
 export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, opts: { confirmed: boolean }): Promise<void> {
   const now = deps.now()
   const start = epochOf(b.date, b.start)
   const end = epochOf(b.date, b.end)
-  const plan: { kind: string; runAt: number }[] = [
-    { kind: 'reminderDay', runAt: start - 24 * HOUR },
-    { kind: 'reminder2h', runAt: start - 2 * HOUR },
+  const due: { kind: string; runAt: number }[] = [
+    ...(opts.confirmed ? [{ kind: 'confirmed', runAt: now }] : []),
+    ...reminderPlan(start, now),
     { kind: 'reviewAsk', runAt: end + 2 * HOUR },
   ]
-  if (opts.confirmed) plan.unshift({ kind: 'confirmed', runAt: now })
-  const due = plan.filter((p) => p.kind === 'confirmed' || p.kind === 'reviewAsk' || p.runAt > now)
-  if (!due.length) return
   await db
     .insert(jobs)
     .values(

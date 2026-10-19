@@ -12,7 +12,7 @@
 import { isOnlineSource, type BookingSource, type BookingStatus, type CancelledBy, type ConfirmMode } from './model'
 import type { BookingRules } from './rules'
 import { openStretches, type BusinessHours } from './hours'
-import { epochOf } from './time'
+import { addDays, epochOf, localOf } from './time'
 
 /** A booking as far as the lifecycle cares: business-local date, start and end minutes, stored state. */
 export interface BookingState {
@@ -66,6 +66,39 @@ export function holdUntil(
     left -= w.end - w.start
   }
   return start
+}
+
+/** No client reminder arrives between 22:00 and 08:00 at the business (book Q-285). */
+export const NIGHT = { from: 22 * 60, to: 8 * 60 } as const
+/** A reminder that would arrive at night goes at 21:30 the evening before the visit instead. */
+export const EVENING_REMINDER_AT = 21 * 60 + 30
+
+/** `reminderEvening`: a reminder moved out of the night, worded "tomorrow". */
+export type ReminderKind = 'reminderDay' | 'reminder2h' | 'reminderEvening'
+
+const isNight = (epoch: number) => {
+  const { min } = localOf(epoch)
+  return min >= NIGHT.from || min < NIGHT.to
+}
+
+/**
+ * When a confirmed visit's reminders go (book Q-257, Q-285): a day before and 2 hours before. One that would arrive at
+ * night goes at 21:30 the evening before the visit instead, worded "tomorrow"; when both would, only one goes. A
+ * reminder already due when the booking is made (short notice) is left out: the "confirmed" SMS has just told the client.
+ */
+export function reminderPlan(visitStart: number, now: number): { kind: ReminderKind; runAt: number }[] {
+  const evening = epochOf(addDays(localOf(visitStart).date, -1), EVENING_REMINDER_AT)
+  const out: { kind: ReminderKind; runAt: number }[] = []
+  const planned: [ReminderKind, number][] = [
+    ['reminderDay', visitStart - 24 * 3_600_000],
+    ['reminder2h', visitStart - 2 * 3_600_000],
+  ]
+  for (const [kind, runAt] of planned) {
+    if (runAt <= now) continue
+    if (!isNight(runAt)) out.push({ kind, runAt })
+    else if (evening > now && !out.some((r) => r.kind === 'reminderEvening')) out.push({ kind: 'reminderEvening', runAt: evening })
+  }
+  return out.sort((a, b) => a.runAt - b.runAt)
 }
 
 /** The status people see now, before the jobs have caught up. */

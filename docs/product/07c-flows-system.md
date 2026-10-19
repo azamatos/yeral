@@ -215,7 +215,7 @@ flowchart TD
 
 > Open question Q-257: Reminders for bookings made at short notice.
 
-- A reminder that falls between 22:00 and 08:00 moves to 21:30 the evening before: a 07:00 visit gets its 2-hour reminder at 21:30 the day before, not at 05:00 (Q-285, decided 18.10.2026). A moved reminder goes at 21:30 the evening before the visit, with the *ertir* (tomorrow) text; when both reminders land on that evening, only one goes (Claude, following Q-285 and Q-293). **Code differs:** the code sends reminders at any hour.
+- A reminder that falls between 22:00 and 08:00 moves to 21:30 the evening before: a 07:00 visit gets its 2-hour reminder at 21:30 the day before, not at 05:00 (Q-285, decided 18.10.2026). A moved reminder goes at 21:30 the evening before the visit, with the *ertir* (tomorrow) text; when both reminders land on that evening, only one goes (Claude, following Q-285 and Q-293). (code: `reminderPlan()`)
 - Once staff can enter phone bookings (M5), the same reminders go to the number the business entered, in the market's main language until the person signs in and chooses one, English for now (Q-292). Only mobile numbers can receive SMS (ROUND6 C1).
 
 **Status.** Design: decided (client spec §6; Account-Profile switches) · Code: built in the api, except the night rule.

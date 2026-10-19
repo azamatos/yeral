@@ -149,6 +149,8 @@ async function sendBookingSms(deps: Deps, bookingId: string, kind: BookingSmsKin
       confirmed: user.notifyConfirmation,
       reminderDay: user.notifyReminderDay,
       reminder2h: user.notifyReminder2h,
+      // the one reminder of a visit early in the morning: either switch asks for it
+      reminderEvening: user.notifyReminderDay || user.notifyReminder2h,
       reviewAsk: user.notifyReviewAsk,
     }[kind]
     if (!pref) return
