@@ -1,6 +1,6 @@
 # Active context
 
-_Last updated: 2026-10-18_
+_Last updated: 2026-10-19_
 
 ## Current focus
 
@@ -44,6 +44,8 @@ The version PR #26
   site, the business app and the CMS; the team adds the first businesses in the CMS; Ýeral on yeral.app; no average
   bill; businesses may be open past midnight and options stay flexible; the city is a choice (book Q-001–Q-003,
   Q-100–Q-109).
+- 2026-10-19: one track at a time: design first, then Storybook, then the apps (the backend comes with each
+  slice); the owner buys a netcup VPS 1000 (EU) for the first launch and other projects, configs later.
 - 2026-10-18 (book closed): the first launch is an English pilot with Turkmenistan's settings: example businesses
   marked "Example" beside real ones, a nightly-reset demo of the business app, no SMS (codes on screen); the name is
   written *Ýeral*, "Yeral" only where the letter can't be used; a specialist may work without the app (an option, not a
@@ -114,9 +116,11 @@ Where the old questions went (2026-10-17):
 The product book is closed (2026-10-18, no open question). The build plan is its chapter 10
 (`docs/product/10-plan.md`):
 
-1. **P1 · Design pass in English:** Claude writes the Claude Design prompts round by round (foundations, business app,
-   client site, admin tool, fixes); the owner pastes them; Claude checks the canvas; result: export v0.6.
-2. **P2 · Backend to the book** alongside P1, if the owner agrees (ADR 0021 put code after design): market settings,
-   fixed access levels, the "Code differs" fixes, business and admin endpoints, first-launch mode.
-3. **P3 · Components, P4 · apps slice by slice** (Q-001 order), **P5 · first launch** on Cloudflare,
-   **P6 · Turkmenistan launch** with its own server (buy it about a month before that launch).
+1. **P1 · Design pass in English** (now): Claude writes the Claude Design prompts round by round
+   (`docs/product/prompts/`; round 1 = the design system in English, 2026-10-19); the owner pastes them; Claude checks
+   the canvas; result: export v0.6.
+2. **P3 · Components** in Storybook from v0.6.
+3. **P4 · Apps slice by slice** (Q-001 order); each slice brings its backend work (P2 list in chapter 10). One track
+   at a time (owner, 2026-10-19), so ADR 0021's order stands.
+4. **P5 · First launch** on the owner's netcup VPS 1000 (EU, bought 2026-10-19); server configs come when the apps
+   are ready. **P6 · Turkmenistan launch** with a second server inside the country.
