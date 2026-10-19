@@ -1,9 +1,10 @@
+import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { loginCodes, rateLimits } from '../../db/schema'
+import { loginCodes, rateLimits, staff } from '../../db/schema'
 import { seed } from '../../db/seed'
 
 describe('phone login (ADR 0019)', () => {
@@ -113,5 +114,13 @@ describe('phone login (ADR 0019)', () => {
     expect(client.me.name).toBe('Aýjemal Gurbanowa')
     const owner = await browser(t.app).login('+99365102030')
     expect(owner.me.hasBusiness).toBe(true)
+  })
+
+  it('signing in with an invited phone doesn’t join the team: the person accepts or declines (book chapter 3)', async () => {
+    // Gülnar is invited to Glow Studio
+    const gulnar = await browser(t.app).login('+99364215590')
+    expect(gulnar.me.hasBusiness).toBe(false)
+    const [row] = await db.select().from(staff).where(eq(staff.phone, '+99364215590'))
+    expect(row).toMatchObject({ status: 'invited', userId: null })
   })
 })

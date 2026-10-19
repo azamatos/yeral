@@ -22,7 +22,7 @@ export interface StaffForBooking extends StaffSchedule {
   serviceIds: readonly string[]
   /** Shown to clients and takes bookings (owner and admin usually don't). */
   bookable: boolean
-  /** false once disabled ("Öçürilen"). */
+  /** false once removed ("Öçürilen") or while invited. */
   active: boolean
 }
 

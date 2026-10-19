@@ -4,10 +4,19 @@
  */
 import type { ConfirmMode } from './model'
 
+/**
+ * Who answers requests in manual mode (book chapter 3): `desk` "Administrator we eýesi", `each` "Her hünärmen özi",
+ * `both` "Ikisi hem" (whoever is first). The owner always can.
+ */
+export const REQUEST_ANSWERERS = ['desk', 'each', 'both'] as const
+export type RequestAnswerers = (typeof REQUEST_ANSWERERS)[number]
+
 export interface BookingRules {
   /** "Onlaýn ýazylyş"; off = the client site shows online booking as paused. */
   onlineEnabled: boolean
   confirmMode: ConfirmMode
+  /** Who answers requests (manual mode). */
+  requestAnswerers: RequestAnswerers
   /** How long a request holds its slot before it expires (manual mode). */
   holdMinutes: number
   /** Minimum time between now and a booking's start; 0 = no limit ("Çäk ýok"). */
@@ -45,6 +54,7 @@ export const BUFFER_MAX = 120
 export const DEFAULT_RULES: BookingRules = {
   onlineEnabled: true,
   confirmMode: 'manual',
+  requestAnswerers: 'both',
   holdMinutes: 30,
   leadMinutes: 60,
   windowDays: 30,
@@ -68,6 +78,7 @@ export function rulesErrors(r: BookingRules): Partial<Record<keyof BookingRules,
   oneOf('slotStep')
   oneOf('cancelWindowMinutes')
   oneOf('blockAfterNoShows')
+  if (!REQUEST_ANSWERERS.includes(r.requestAnswerers)) errors.requestAnswerers = 'invalid'
   if (!Number.isInteger(r.bufferMinutes) || r.bufferMinutes < 0 || r.bufferMinutes > BUFFER_MAX) errors.bufferMinutes = 'invalid'
   if (!Number.isInteger(r.lateToleranceMinutes) || r.lateToleranceMinutes < 0 || r.lateToleranceMinutes > 120) {
     errors.lateToleranceMinutes = 'invalid'

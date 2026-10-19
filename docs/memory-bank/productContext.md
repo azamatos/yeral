@@ -66,16 +66,18 @@ the UI only displays them.
 ## Business workspace (business.yeral.app)
 
 Spec: `docs/design/business/README.md` (round 4: daily work + setup; round 5, design v0.4: analytics, reviews,
-notifications, help, billing, B2B landing, tables, classes; decisions in §22, open questions in §24). Model: ADR 0018.
+notifications, help, billing, B2B landing, tables, classes; decisions in §22, open questions in §24). Model: ADR 0018, levels and team rows ADR 0025.
 
-| Role | Sees | Can (default switches) |
+Three fixed levels (book chapter 3, ADR 0025; the full table is in the book and `@yeral/domain/permissions`):
+
+| Level | Sees | Can |
 |---|---|---|
-| Eýesi (owner, one per business, locked) | everything | everything, incl. revenue, roles, settings |
-| Administrator | whole calendar, all clients | confirm/decline, move/cancel, no-show, clients, invite; no revenue, roles or settings |
-| Hünärmen (specialist) | own bookings; others' time as "Bes" | confirm own requests, move own bookings, no-show |
-| Programmasyz (phone-only) | — (never logs in) | — ; bookable online, owner/admin answer for them |
+| Eýesi (owner, exactly one per workspace) | everything | everything, incl. revenue, the team and invites |
+| Administrator | whole calendar, all clients | answer requests, bookings, no-shows, clients, review replies, services, settings, analytics without money; sees the team |
+| Hünärmen (specialist) | own column only | own requests (by the "who answers" setting), own bookings and clients, own earnings |
+| Hünärmen without the app (*programmasyz*) | — (never signs in; a phone is required) | — ; bookable online, owner/admin answer for them |
 
-- Permission switches: whole calendar · confirm · move/cancel · no-show · clients · services & prices · invite · revenue · settings. Enforced by the api, hidden in the UI.
+- The table is fixed in the MVP (the owner editing it is Later, F-089). Enforced by the api, hidden in the UI.
 - One Ýeral account can be a client and a member of several businesses; a branch is its own business (switcher in the sidebar).
 - New businesses are "Barlagda" (in review) until the Ýeral team verifies them (≤ 24 h); they use the workspace at once but aren't public.
 - Day summary: count = all non-cancelled bookings incl. requests and no-shows; planned revenue = confirmed + pending + completed prices (revenue permission only).
@@ -116,7 +118,7 @@ turns it on.
 | `Category` | category | kategoriýa (Gözellik, Dellekhana, Dyrnak, Spa we massaž, Diş lukmany, Saglyk, Restoran, Kafe we çaýhana, Sport, Okuw, Awtoulag, Öý haýwanlary, Öý hyzmatlary) |
 | `Staff` (bookable = specialist) | specialist / any specialist / team | hünärmen / islendik hünärmen / topar |
 | `Client` | a business's client | müşderi |
-| `Membership`, `Role` | team access, role | rol (Eýesi, Administrator, Hünärmen) |
+| `Staff.level`, `Invite` | access level, invite | dereje (Eýesi, Administrator, Hünärmen), çakylyk |
 | `Service`, `ServiceGroup` | service | hyzmat |
 | `Session` | class session | sapak |
 | `TableArea` | seating area | ýer (Zal, Terrasa, VIP otag) |

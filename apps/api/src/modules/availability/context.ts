@@ -29,6 +29,7 @@ export function toRules(r: RulesRow): BookingRules {
   return {
     onlineEnabled: r.onlineEnabled,
     confirmMode: r.confirmMode,
+    requestAnswerers: r.requestAnswerers,
     holdMinutes: r.holdMinutes,
     leadMinutes: r.leadMinutes,
     windowDays: r.windowDays,
@@ -67,7 +68,7 @@ export async function loadBusinesses(db: Queryable, ids: string[]): Promise<Map<
       rules: toRules(r),
       rulesNote: r.note,
       staff: staffRows
-        .filter((s) => s.businessId === b.id && s.status !== 'disabled')
+        .filter((s) => s.businessId === b.id && s.status === 'active')
         .map((s) => ({ ...s, serviceIds: links.filter((l) => l.staffId === s.id).map((l) => l.serviceId) })),
       services: serviceRows.filter((s) => s.businessId === b.id),
     })
@@ -110,7 +111,7 @@ export function appointmentContext(lb: LoadedBusiness, busy: BusyInterval[], now
       id: s.id,
       serviceIds: s.serviceIds,
       bookable: s.bookable,
-      active: s.status !== 'disabled',
+      active: s.status === 'active',
       shift: s.shift,
       breaks: s.breaks,
       daysOff: s.daysOff,

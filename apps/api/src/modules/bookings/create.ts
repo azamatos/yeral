@@ -21,7 +21,7 @@ import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES } from '@yera
 import { priceTotal } from '@yeral/domain/pricing'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, classSessions, clients, jobs, memberships } from '../../db/schema'
+import { bookingItems, bookings, classSessions, clients, jobs } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
@@ -29,6 +29,7 @@ import { emit } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
 import { servicePrice } from '../catalog/map'
+import { hasSignedInTeam } from '../team/members'
 import { confirmBooking } from './confirm'
 import { freshCode, isSlotConflict, type BookingRow } from './repo'
 
@@ -55,15 +56,6 @@ async function noShowsOf(db: Queryable, clientId: string): Promise<number> {
     .from(bookings)
     .where(and(eq(bookings.clientId, clientId), eq(bookings.status, 'noshow')))
   return row?.n ?? 0
-}
-
-async function hasActiveTeam(db: Queryable, businessId: string): Promise<boolean> {
-  const [m] = await db
-    .select({ id: memberships.id })
-    .from(memberships)
-    .where(and(eq(memberships.businessId, businessId), eq(memberships.status, 'active')))
-    .limit(1)
-  return !!m
 }
 
 export interface Placement {
@@ -154,7 +146,7 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
   }
   await emit(db, { type: 'booking.created', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
   if (x.status === 'confirmed') return confirmBooking(db, deps, row)
-  if (deps.site.demo && x.lb.business.demo && !(await hasActiveTeam(db, row.businessId))) {
+  if (deps.site.demo && x.lb.business.demo && !(await hasSignedInTeam(db, row.businessId))) {
     await db.insert(jobs).values({ kind: 'demo.answer', runAt: new Date(now + DEMO_ANSWER_MS), payload: { bookingId: row.id } })
   }
   return row

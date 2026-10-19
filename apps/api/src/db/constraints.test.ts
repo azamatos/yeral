@@ -91,3 +91,81 @@ describe('no double booking', () => {
     await expect(db.insert(t.bookingItems).values(item(cancelledId, 1400, 1440, 10))).rejects.toThrow()
   })
 })
+
+/** The team's invariants hold in the database too (ADR 0025, migration 0005). */
+describe('a team', () => {
+  let db: Db
+  let businessId: string
+  let userId: string
+
+  beforeAll(async () => {
+    ;({ db } = await testDatabase())
+    await db
+      .insert(t.categories)
+      .values({
+        id: 'beauty',
+        icon: 'sparkles',
+        name: { en: 'Beauty' },
+        hint: {},
+        intro: {},
+        bookingTypes: ['appointment'],
+        specialistWord: { en: 'specialist' },
+      })
+      .onConflictDoNothing()
+    const [biz] = await db
+      .insert(t.businesses)
+      .values({
+        slug: 'team',
+        name: 'Team',
+        categoryId: 'beauty',
+        kind: { en: 'Salon' },
+        bookingTypes: ['appointment'],
+        about: {},
+        address: 'x',
+        street: 'x',
+        lat: 37.95,
+        lng: 58.38,
+        phone: '+99312000001',
+        hours: [null, null, null, null, null, null, null],
+      })
+      .returning()
+    businessId = biz!.id
+    const [u] = await db.insert(t.users).values({ phone: '+99365000101', lang: 'en' }).returning()
+    userId = u!.id
+  })
+
+  it('has exactly one active owner', async () => {
+    await db.insert(t.staff).values({ businessId, name: 'Owner', level: 'owner', userId })
+    await expect(db.insert(t.staff).values({ businessId, name: 'Second', level: 'owner' })).rejects.toThrow()
+    // a removed owner doesn't count
+    await db.insert(t.staff).values({ businessId, name: 'Former', level: 'owner', status: 'removed' })
+  })
+
+  it('keeps one row per person per workspace', async () => {
+    await expect(db.insert(t.staff).values({ businessId, name: 'Again', userId })).rejects.toThrow()
+  })
+
+  it('needs a phone for a specialist without the app, and the owner always has the app', async () => {
+    await expect(db.insert(t.staff).values({ businessId, name: 'Läle', hasApp: false })).rejects.toThrow()
+    await db.insert(t.staff).values({ businessId, name: 'Läle', hasApp: false, phone: '+99365000102' })
+    await expect(
+      db.insert(t.staff).values({ businessId, name: 'X', level: 'owner', hasApp: false, phone: '+99365000103', status: 'removed' }),
+    ).rejects.toThrow()
+  })
+
+  it('keeps one open invite per phone per workspace', async () => {
+    const [s] = await db.insert(t.staff).values({ businessId, name: 'Selbi', status: 'invited' }).returning()
+    const invite = (tokenHash: string, status: 'pending' | 'declined' = 'pending') => ({
+      businessId,
+      staffId: s!.id,
+      phone: '+99365000104',
+      tokenHash,
+      status,
+      sentAt: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 86_400_000),
+    })
+    await db.insert(t.invites).values(invite('a'))
+    await expect(db.insert(t.invites).values(invite('b'))).rejects.toThrow()
+    await db.insert(t.invites).values(invite('c', 'declined'))
+  })
+})

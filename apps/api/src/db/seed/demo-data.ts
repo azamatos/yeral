@@ -8,6 +8,7 @@
  */
 import type { DateException, WeekHours } from '@yeral/domain/hours'
 import type { BookingStatus, BookingType, CancelledBy, Interval, Localized, PriceType } from '@yeral/domain/model'
+import type { Level } from '@yeral/domain/permissions'
 import type { BookingRules } from '@yeral/domain/rules'
 
 export const DEMO_DAY = '2026-10-14'
@@ -95,8 +96,8 @@ export interface DemoStaff {
   breaks?: (Interval | null)[]
   daysOff?: DateException[]
   rating?: number
-  /** Workspace role when this person signs in. */
-  role?: 'owner' | 'admin' | 'specialist'
+  /** Access level when this person signs in (ADR 0025); none = a specialist without an account. */
+  level?: Level
 }
 
 export interface DemoBusiness {
@@ -257,15 +258,15 @@ export const BUSINESSES: DemoBusiness[] = [
       },
     ],
     staff: [
-      { key: 'mays', name: 'Maýsa', fullName: 'Maýsa Annaýewa', phone: '+99365102030', bookable: false, role: 'owner', gender: 'female' },
-      { key: 'selbi', name: 'Selbi', fullName: 'Selbi Hojaýewa', phone: '+99365884102', bookable: false, role: 'admin', gender: 'female' },
+      { key: 'mays', name: 'Maýsa', fullName: 'Maýsa Annaýewa', phone: '+99365102030', bookable: false, level: 'owner', gender: 'female' },
+      { key: 'selbi', name: 'Selbi', fullName: 'Selbi Hojaýewa', phone: '+99365884102', bookable: false, level: 'admin', gender: 'female' },
       {
         key: 'ayna',
         name: 'Aýna',
         fullName: 'Aýna Myradowa',
         specialization: L('Stilist', 'Стилист', 'Stylist'),
         phone: '+99365312210',
-        role: 'specialist',
+        level: 'specialist',
         gender: 'female',
         // Wednesday 14:00–14:40, Thursday 13:30–14:10 (business demo data: so the 14:30 request on Thursday fits)
         breaks: [null, null, { start: m('14:00'), end: m('14:40') }, { start: m('13:30'), end: m('14:10') }, null, null, null],
@@ -278,7 +279,7 @@ export const BUSINESSES: DemoBusiness[] = [
         fullName: 'Maral Sapargeldiýewa',
         specialization: L('Dyrnak ussasy', 'Мастер маникюра', 'Nail technician'),
         phone: '+99361440819',
-        role: 'specialist',
+        level: 'specialist',
         gender: 'female',
         rating: 5.0,
       },
@@ -288,7 +289,7 @@ export const BUSINESSES: DemoBusiness[] = [
         fullName: 'Jeren Ataýewa',
         specialization: L('Kosmetolog', 'Косметолог', 'Beautician'),
         phone: '+99362701533',
-        role: 'specialist',
+        level: 'specialist',
         gender: 'female',
         shift: [
           h('10:00', '19:00'),
@@ -328,7 +329,7 @@ export const BUSINESSES: DemoBusiness[] = [
         phone: '+99364215590',
         bookable: false,
         status: 'invited',
-        role: 'specialist',
+        level: 'specialist',
         gender: 'female',
       },
     ],
@@ -366,7 +367,7 @@ export const BUSINESSES: DemoBusiness[] = [
       },
     ],
     staff: [
-      { key: 'mays', name: 'Maýsa', fullName: 'Maýsa Annaýewa', phone: '+99365102030', bookable: false, role: 'owner', gender: 'female' },
+      { key: 'mays', name: 'Maýsa', fullName: 'Maýsa Annaýewa', phone: '+99365102030', bookable: false, level: 'owner', gender: 'female' },
       {
         key: 'ogulbibi',
         name: 'Ogulbibi',
@@ -467,6 +468,8 @@ export const BUSINESSES: DemoBusiness[] = [
         key: 'aygozel',
         name: 'Aýgözel',
         specialization: L('Tälimçi', 'Тренер', 'Trainer'),
+        // without the app a phone is required: the owner calls them (book Q-216)
+        phone: '+99365440201',
         bookable: false,
         hasApp: false,
         gender: 'female',
@@ -475,6 +478,7 @@ export const BUSINESSES: DemoBusiness[] = [
         key: 'kakajan',
         name: 'Kakajan',
         specialization: L('Tälimçi', 'Тренер', 'Trainer'),
+        phone: '+99365440202',
         bookable: false,
         hasApp: false,
         gender: 'male',

@@ -136,7 +136,7 @@ apps/api/src/
   modules/<name>/   routes.ts (createRoute + handler) · service.ts (use cases) · repo.ts (Drizzle queries)
                     health · auth (codes, sessions) · me (profile, favourites) · catalog (search, cards, pages, reviews)
                     availability · bookings (send, actions, reviews, confirm) · events · jobs (runDueJobs)
-                    later: biz/{calendar, requests, bookings, clients, services, team, roles, rules, hours, reviews,
+                    team (who is on which team) · later: biz/{calendar, requests, bookings, clients, services, team, rules, hours, reviews,
                     analytics, profile, branches, settings} · admin/*
   db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (docs/design demo data + 13 categories)
   jobs/             runDueJobs(): expire requests at holdUntil, complete visits, reminders, review asks, SMS
@@ -154,10 +154,11 @@ apps/api/src/
 
 - Client and business: phone + 4-digit code → httpOnly session cookie on the parent domain (`SameSite=Lax`, `Secure`);
   our own `modules/auth` with `users`, `login_codes`, `sessions`, `rate_limits` tables (ADR 0019).
-- Business access = a row in our `memberships` table (user ↔ business, role, staff row). Roles are per-business
-  (Eýesi locked, Administrator, Hünärmen editable): visibility `own | all` + permission switches. The api checks them with
-  `@yeral/domain/permissions` and redacts: other staff's bookings become "Bes" (busy, no details) for `own` visibility,
-  money totals disappear without `revenue`. One person can be a client and a member of several businesses (branches) at once.
+- Business access = the person's `staff` row in that workspace (ADR 0025): linked to their account (`userId`), active,
+  with the app. Three fixed levels (owner, administrator, specialist) and one fixed permission table
+  (`@yeral/domain/permissions`: `none · own · all`, the team row `view · manage`); the api checks it and leaves out what a
+  level can't see (a specialist sees only their own column; money without `revenue` is left out). Invites are their own
+  table and wait for the person to accept or decline. One person can be a client and on several teams at once.
 - CMS: separate staff accounts and cookie, two-factor, plus Cloudflare Access in front of `cms.` now (IP allow-list or VPN on the own server).
 - Mutations check `Origin` against the configured sites. Mobile apps (later) use bearer tokens.
 

@@ -135,7 +135,7 @@ describe('sdk', () => {
 
   it('every query hands TanStack’s abort signal to its request', async () => {
     const f = fixture(() => json(200, { items: [], cursor: null }))
-    const { me, catalog, availability, bookings } = f.sdk
+    const { me, catalog, availability, bookings, team } = f.sdk
     const id = '0b6f1a4e-6a43-4f8e-9a51-3d3f1c3b9a10'
     const queries = [
       me.get(),
@@ -149,6 +149,10 @@ describe('sdk', () => {
       availability.tables('bag-kafe', { lang: 'tk', party: 2 }),
       availability.sessions('fit-zal', { lang: 'tk' }),
       bookings.detail('YR-48213', 'tk'),
+      team.workspaces(),
+      team.myInvites(),
+      team.invite('a-long-random-token-from-the-link'),
+      team.list('glow-studio'),
     ]
     for (const q of queries) await f.queryClient.fetchQuery(q as never)
     const pages = [catalog.search({ lang: 'tk' }), catalog.reviews('glow-studio', 'tk'), bookings.list('upcoming', 'tk')]
@@ -223,6 +227,14 @@ describe('live events', () => {
     expect(staleKeys({ type: 'review.created', business: 'bag-kafe', bookingCode: null })).toEqual([
       ['reviews', 'bag-kafe'],
       ['business', 'bag-kafe'],
+    ])
+  })
+
+  it('team changes refresh the switcher, the invites and that team', () => {
+    expect(staleKeys({ type: 'team.changed', business: 'glow-studio', bookingCode: null })).toEqual([
+      ['workspaces'],
+      ['invites'],
+      ['team', 'glow-studio'],
     ])
   })
 })

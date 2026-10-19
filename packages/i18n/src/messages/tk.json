@@ -35,6 +35,11 @@
     "too_many_attempts": "Synanyşyk köp boldy. {retryAfterSec} sekuntdan soň gaýtalaň.",
     "resend_too_soon": "Täze kody {retryAfterSec} sekuntdan soň iberip bolar.",
     "phone_taken": "Bu belgi başga hasaba degişli.",
+    "owns_workspace": "Siz Ýeral-da biznesiň eýesi. Hasabyňyzy pozmazdan öň, ony ýapmagy Ýeral toparyndan haýyş ediň.",
+    "already_on_team": "Bu belgi eýýäm toparda ýa-da oňa açyk çakylyk bar.",
+    "invite_expired": "Çakylygyň möhleti geçdi. Täzesini soraň.",
+    "invite_answered": "Bu çakylyga eýýäm jogap berildi.",
+    "owner_cannot_leave": "Eýesi biznesden çykyp bilmeýär.",
     "rate_limited": "Haýyş köp boldy. Biraz garaşyň.",
     "internal": "Näsazlyk ýüze çykdy. Gaýtadan synanyşyň.",
     "network": "Baglanyşyk ýok. Gaýtadan synanyşyň."

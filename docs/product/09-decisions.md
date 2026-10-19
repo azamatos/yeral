@@ -9,6 +9,7 @@ question in this book, the answer is added here with its date, and the chapters 
 
 | Date | Question | Decision | By |
 |---|---|---|---|
+| 19.10.2026 | Team (P2 step 2) | Only the owner invites; the override only takes the right to answer away; the owner can't leave and there's no hand-over in the MVP; an unanswered, declined or cancelled invite keeps its row until the owner resends or removes it; a removed member loses access, and reactivating restores it; the account link stays after leaving, so kept bookings still block the person elsewhere; "own clients" have a booking with the person; an owner can't delete their account while they own a workspace; the copied invite link only opens the invite, which must match the signed-in phone; inviting someone already on the team or with an open invite is refused (ADR 0025) | Claude (delegated) |
 | 19.10.2026 | P2 review | A hold counts the business's opening hours, special days included; a reminder between 22:00 and 08:00 goes at 21:30 before that night, also for visits after midnight; "unused for 6 months" means no sign-in; the `yr-` slug rule goes with `/b/{code}`; a lower no-show limit counts from its change; the failed-SMS alert goes to the error tracker (chapter 10, P2) | Claude (delegated) |
 | 19.10.2026 | Hosting | No Neon and no Cloudflare Workers for the api: the first launch runs on the own server, and Neon is removed (F-203, F-205) | owner |
 | 18.10.2026 | Q-299 | No cap on MVP; the Ýeral team watches a monthly count per business | owner |

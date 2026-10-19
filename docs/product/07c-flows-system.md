@@ -583,7 +583,7 @@ flowchart TD
 
 - *Programmasyz* staff (no login) get no SMS and are active at once (business spec §11).
 - The design has no invite SMS text. Claude writes it in English, the source language, with the market's translations, and the owner checks it (Q-288, decided 18.10.2026).
-- Code differs: invites never expire. They're accepted automatically at the next sign-in, with no *Kabul et* / *Ret et*. No invite SMS is sent (code: `modules/auth/routes.ts`; the workspace isn't built).
+- Code: an invite is valid 7 days and reads as expired after that, with no job; the person accepts or declines it (`/v1/me/invites`), and resending gives a new link and a new 7 days (`modules/team`, ADR 0025). No invite SMS is sent yet: at the first launch the invite shows at the invited phone's sign-in and the owner copies the link.
 
 **Status.** Design: decided and drawn (business spec §1, §8; B-Login, B-Team) · Code: partly.
 

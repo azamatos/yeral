@@ -1,68 +1,137 @@
 /**
- * Who may do what in the business workspace (business spec §1, ADR 0018). The api enforces these and redacts what a
- * role can't see; the UI hides it. Roles are per-business templates; Eýesi (owner) is a locked system role.
+ * Who may do what in a business workspace (book chapter 3, "The business team"; ADR 0025). Three fixed levels, no
+ * custom roles; the permission table is fixed for the MVP (letting the owner edit it is Later, F-089). The api enforces
+ * it and leaves out what a level can't see; the apps hide it ("hidden, not greyed out").
  */
+import type { RequestAnswerers } from './rules'
 
-/** The permission switches, after visibility ("Ähli senenamany görmek" = visibility `all`). */
+/** Eýesi (exactly one per workspace), Administrator, Hünärmen. A specialist without the app is an option, not a level. */
+export const LEVELS = ['owner', 'admin', 'specialist'] as const
+export type Level = (typeof LEVELS)[number]
+
+/**
+ * How far a permission reaches: nothing, the person's own (their column, bookings, clients and earnings), or everyone's.
+ * The team row reads `view` or `manage` instead.
+ */
+export type Scope = 'none' | 'own' | 'all' | 'view' | 'manage'
+
+/** The rows of the table (business demo data `accessLevels`). */
 export const PERMISSIONS = [
-  'confirm', // Ýazylyşlary tassyklamak
-  'move', // Geçirmek we ýatyrmak
-  'noshow', // Gelmedi bellemek (complaints)
-  'clients', // Müşderileri görmek we üýtgetmek
-  'services', // Hyzmatlary we bahalary üýtgetmek
-  'invite', // Işgär çagyrmak
-  'revenue', // Girdejini görmek
-  'settings', // Sazlamalary üýtgetmek
+  'calendar', // every staff member's calendar; `own` = their own column only
+  'answerRequests', // confirm or decline requests; narrowed by the "who answers" setting
+  'bookings', // add, move and cancel bookings; block time
+  'noshow', // mark no-shows and file complaints
+  'clients', // clients with their phone numbers
+  'reviewsReply', // reply to reviews (a specialist reads the reviews about them)
+  'revenue', // money: revenue, earnings
+  'analytics', // numbers; without money unless `revenue` allows it
+  'services', // services and prices
+  'settings', // business settings
+  'team', // the team, invites and levels
 ] as const
 export type Permission = (typeof PERMISSIONS)[number]
 
-export const VISIBILITIES = ['own', 'all'] as const
-/** `own`: a specialist sees their own bookings; others' time shows as "Bes" (busy) without details. */
-export type Visibility = (typeof VISIBILITIES)[number]
-
-export interface RoleGrant {
-  /** The owner role: everything, including roles and billing; can't be edited or removed. */
-  system: boolean
-  visibility: Visibility
-  permissions: readonly Permission[]
+/** The fixed table: the owner's column is everything (book chapter 3). */
+export const PERMISSION_TABLE: Record<Level, Record<Permission, Scope>> = {
+  owner: {
+    calendar: 'all',
+    answerRequests: 'all',
+    bookings: 'all',
+    noshow: 'all',
+    clients: 'all',
+    reviewsReply: 'all',
+    revenue: 'all',
+    analytics: 'all',
+    services: 'all',
+    settings: 'all',
+    team: 'manage',
+  },
+  admin: {
+    calendar: 'all',
+    answerRequests: 'all',
+    bookings: 'all',
+    noshow: 'all',
+    clients: 'all',
+    reviewsReply: 'all',
+    revenue: 'none',
+    analytics: 'all',
+    services: 'all',
+    settings: 'all',
+    team: 'view',
+  },
+  specialist: {
+    calendar: 'own',
+    answerRequests: 'own',
+    bookings: 'own',
+    noshow: 'own',
+    clients: 'own',
+    reviewsReply: 'none',
+    revenue: 'own',
+    analytics: 'own',
+    services: 'none',
+    settings: 'none',
+    team: 'none',
+  },
 }
 
-export const ROLE_TEMPLATES = {
-  owner: { system: true, visibility: 'all', permissions: PERMISSIONS },
-  admin: { system: false, visibility: 'all', permissions: ['confirm', 'move', 'noshow', 'clients', 'invite'] },
-  specialist: { system: false, visibility: 'own', permissions: ['confirm', 'move', 'noshow'] },
-} as const satisfies Record<string, RoleGrant>
-export type RoleTemplate = keyof typeof ROLE_TEMPLATES
-
-/** A signed-in team member acting in one business. */
+/** A signed-in team member acting in one workspace. Every member is a row on the team (`staff`). */
 export interface Actor {
-  role: RoleGrant
-  /** Their row on the team, if they take bookings. */
-  staffId: string | null
+  level: Level
+  staffId: string
+  /** "Öz haýyşlaryna jogap berip biler": the owner can take the right to answer one's own requests away. */
+  canAnswerOwn: boolean
 }
 
-export function can(actor: Actor, permission: Permission): boolean {
-  return actor.role.system || actor.role.permissions.includes(permission)
-}
-
-/** Editing roles and billing stays with the owner. */
-export const canManageRoles = (actor: Actor) => actor.role.system
-
-/** Does the actor see this booking's details, or only that the time is taken ("Bes")? */
-export function seesBooking(actor: Actor, booking: { staffIds: readonly string[] }): boolean {
-  if (actor.role.system || actor.role.visibility === 'all') return true
-  return actor.staffId !== null && booking.staffIds.includes(actor.staffId)
-}
+export const scopeOf = (actor: Actor, permission: Permission): Scope => PERMISSION_TABLE[actor.level][permission]
 
 /**
- * May the actor act on this booking with a permission? Visibility `own` limits actions to their own bookings.
- * Requests for a phone-only specialist ("Programmasyz") are handled by people who see the whole calendar.
+ * The rows `can` and `canOn` answer. Answering requests isn't one of them: its row follows the business's setting
+ * and the override, so it goes through `canAnswerRequest` only.
  */
-export function canActOn(actor: Actor, permission: Permission, booking: { staffIds: readonly string[] }): boolean {
-  return can(actor, permission) && seesBooking(actor, booking)
+export type GatedPermission = Exclude<Permission, 'answerRequests'>
+
+/** Rows that change something; the others let the person see. */
+const ACTIONS: readonly GatedPermission[] = ['bookings', 'noshow']
+
+/** May the actor open this part of the workspace at all? Anything else is hidden. */
+export const can = (actor: Actor, permission: GatedPermission): boolean => scopeOf(actor, permission) !== 'none'
+
+/**
+ * ...for something that belongs to these team members (a booking's specialists, the specialists a client booked)?
+ * With `own`, seeing needs one of them to be the actor; changing needs all of them: a booking shared with another
+ * specialist is moved or cancelled by the owner or an administrator.
+ */
+export function canOn(actor: Actor, permission: GatedPermission, staffIds: readonly string[]): boolean {
+  const scope = scopeOf(actor, permission)
+  if (scope === 'all' || scope === 'manage') return true
+  if (scope !== 'own' || staffIds.length === 0) return false
+  return ACTIONS.includes(permission) ? staffIds.every((id) => id === actor.staffId) : staffIds.includes(actor.staffId)
 }
 
-/** Grants can't go beyond the permission list; the owner role can't change. */
-export function isValidGrant(grant: RoleGrant): boolean {
-  return !grant.system && VISIBILITIES.includes(grant.visibility) && grant.permissions.every((p) => PERMISSIONS.includes(p))
+/** Invite, change levels, remove: the owner only; administrators see the team (book chapter 3). */
+export const canManageTeam = (actor: Actor): boolean => scopeOf(actor, 'team') === 'manage'
+
+/**
+ * May the actor confirm or decline this request (book chapter 3, "Who answers booking requests")? The owner always
+ * can. Requests for a specialist without the app go to the owner and administrators. Otherwise the business's setting
+ * decides: `desk` the owner and administrators, `each` the request's own specialist, `both` whoever is first; "one's
+ * own" needs the override left on.
+ */
+export function canAnswerRequest(
+  actor: Actor,
+  answerers: RequestAnswerers,
+  request: { staffIds: readonly string[]; forPhoneOnlyStaff: boolean },
+): boolean {
+  if (actor.level === 'owner') return true
+  if (request.forPhoneOnlyStaff) return actor.level === 'admin'
+  const desk = actor.level === 'admin'
+  const own = actor.canAnswerOwn && request.staffIds.includes(actor.staffId)
+  switch (answerers) {
+    case 'desk':
+      return desk
+    case 'each':
+      return own
+    case 'both':
+      return desk || own
+  }
 }

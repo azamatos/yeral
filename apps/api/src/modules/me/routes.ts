@@ -5,7 +5,7 @@ import { businessCardSchema } from '@yeral/contract/catalog'
 import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
 import { epochOf, today } from '@yeral/domain/time'
 import { and, desc, eq, inArray } from 'drizzle-orm'
-import { bookings, businesses, favorites, sessions, users } from '../../db/schema'
+import { bookings, businesses, favorites, invites, sessions, staff, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
@@ -41,7 +41,8 @@ const deleteRoute = createRoute({
   path: '/me',
   tags,
   summary: 'Delete my account (upcoming bookings are cancelled; history stays anonymous with the businesses)',
-  responses: { ...noContent, 401: errors[401] },
+  description: 'Refused with `owns_workspace` while the person owns a workspace: the Ýeral team closes it first (book Q-213).',
+  responses: { ...noContent, 401: errors[401], 409: errors[409] },
 })
 const phoneCodeRoute = createRoute({
   method: 'post',
@@ -108,6 +109,19 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const now = deps.now()
     await deps.db.transaction(async (tx) => {
+      // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
+      const rows = await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')
+      if (rows.some((r) => r.level === 'owner' && r.status === 'active')) throw new ApiError('owns_workspace')
+      await tx.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.userId, user.id))
+      // open invites to this phone go too: whoever gets the number next mustn't inherit them
+      const dropped = await tx
+        .update(invites)
+        .set({ status: 'cancelled', answeredAt: new Date(now) })
+        .where(and(eq(invites.phone, user.phone), eq(invites.status, 'pending')))
+        .returning({ businessId: invites.businessId })
+      for (const businessId of new Set([...rows.map((r) => r.businessId), ...dropped.map((d) => d.businessId)])) {
+        await emit(tx, { type: 'team.changed', businessId })
+      }
       const mine = await tx
         .select()
         .from(bookings)

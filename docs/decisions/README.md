@@ -23,13 +23,14 @@ before any code used them were edited in place (marked "revised").
 | [0015](0015-marketplace-on-the-apex.md) | The marketplace lives on yeral.app; no separate landing | Accepted 2026-10-14 |
 | [0016](0016-languages-tk-ru-en.md) | Turkmen first, then Russian and English; every client URL carries its language | Accepted 2026-10-14 (Turkmen first superseded by 0022) |
 | [0017](0017-booking-model.md) | One booking engine for any business that sells time | Accepted 2026-10-14 (revised) |
-| [0018](0018-business-workspace-model.md) | Business workspace model: own teams, roles and client records; Better Auth for identity only | Accepted 2026-10-14 (identity revised by 0019) |
+| [0018](0018-business-workspace-model.md) | Business workspace model: own teams, roles and client records; Better Auth for identity only | Accepted 2026-10-14 (identity revised by 0019; roles and memberships superseded by 0025) |
 | [0019](0019-own-phone-login-and-sessions.md) | Our own phone-code login and database sessions instead of Better Auth | Accepted 2026-10-14 |
 | [0020](0020-local-and-production-only.md) | Local and production only: no staging | Accepted 2026-10-16 |
 | [0021](0021-product-book-first.md) | Product book first; Claude Code writes the design prompts | Accepted 2026-10-17 |
 | [0022](0022-english-first-any-country.md) | Built in English, not bound to one country; each market adds its languages | Accepted 2026-10-18 |
 | [0023](0023-one-deployment-per-market.md) | One code base, one deployment per market; first launch on the own server | Accepted 2026-10-18 (revised 2026-10-19) |
 | [0024](0024-own-server-docker-caddy.md) | The own server runs every app: Docker + Caddy, Postgres beside the api, no Neon, no Workers | Accepted 2026-10-19 |
+| [0025](0025-fixed-levels-team-rows-invites.md) | Three fixed access levels; a team member is one staff row; invites wait for an answer | Accepted 2026-10-19 |
 
 New record: copy [`_template.md`](_template.md), take the next number, add a row here, update the affected
 memory-bank file in the same commit.

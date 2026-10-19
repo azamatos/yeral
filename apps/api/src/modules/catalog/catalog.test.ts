@@ -1,10 +1,10 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, services } from '../../db/schema'
+import { businesses, services, staff, staffServices } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { DEMO_CENTER } from '../../db/seed/demo-data'
 
@@ -90,6 +90,29 @@ describe('catalogue', () => {
     expect(d.photos[0].url).toBe('http://media.test/demo/adam-winger-FkAZqQJTbXM-unsplash.jpg')
     expect(d.distanceM).toBeGreaterThan(2900)
     expect(d.nextFree).not.toBeNull()
+  })
+
+  it('someone invited isn’t on the client site until they accept (book chapter 3)', async () => {
+    // Gülnar is invited to Glow Studio; even bookable and doing a service, she doesn't show yet
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const [gulnar] = await db
+      .update(staff)
+      .set({ bookable: true })
+      .where(and(eq(staff.businessId, glow!.id), eq(staff.name, 'Gülnar')))
+      .returning()
+    const [svc] = await db.select().from(services).where(eq(services.businessId, glow!.id)).limit(1)
+    await db.insert(staffServices).values({ staffId: gulnar!.id, serviceId: svc!.id })
+    try {
+      const shown = async () =>
+        (await b.req('/v1/businesses/glow-studio')).json.specialists.map((s: { name: string }) => s.name) as string[]
+      expect(await shown()).not.toContain('Gülnar')
+      // once she accepts, she's there
+      await db.update(staff).set({ status: 'active' }).where(eq(staff.id, gulnar!.id))
+      expect(await shown()).toContain('Gülnar')
+    } finally {
+      await db.delete(staffServices).where(eq(staffServices.staffId, gulnar!.id))
+      await db.update(staff).set({ bookable: false, status: 'invited' }).where(eq(staff.id, gulnar!.id))
+    }
   })
 
   it('a hidden price stays hidden on the public page', async () => {

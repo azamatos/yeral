@@ -8,11 +8,12 @@ import { bookingCode } from '@yeral/domain/id'
 import { holdUntil as holdUntilOf } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { localized, type BookingStatus } from '@yeral/domain/model'
-import { ROLE_TEMPLATES, type RoleTemplate } from '@yeral/domain/permissions'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
+import { inviteExpiresAt } from '@yeral/domain/team'
 import { addDays, diffDays, dow, epochOf, today } from '@yeral/domain/time'
 import { getTableName, is, sql } from 'drizzle-orm'
 import { PgTable } from 'drizzle-orm/pg-core'
+import { randomToken, sha256Hex } from '../../lib/crypto'
 import type { Db, Queryable } from '../client'
 import * as t from '../schema'
 import { CATEGORIES } from './categories'
@@ -33,8 +34,6 @@ import {
   type DemoBusiness,
   type DemoService,
 } from './demo-data'
-
-const ROLE_NAMES: Record<RoleTemplate, string> = { owner: 'Eýesi', admin: 'Administrator', specialist: 'Hünärmen' }
 
 /** A point `km` away from `from` in direction `bearing` (degrees from north). */
 export function offset(from: { lat: number; lng: number }, km: number, bearing: number) {
@@ -149,30 +148,17 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
   const rules = { ...DEFAULT_RULES, ...ruleOverrides }
   await db.insert(t.bookingRules).values({ businessId: biz.id, ...rules, note: note ?? null })
 
-  const roles = await db
-    .insert(t.roles)
-    .values(
-      (['owner', 'admin', 'specialist'] as const).map((template) => {
-        const grant = ROLE_TEMPLATES[template]
-        return {
-          businessId: biz.id,
-          name: ROLE_NAMES[template],
-          template,
-          system: grant.system,
-          visibility: grant.visibility,
-          permissions: [...grant.permissions],
-        }
-      }),
-    )
-    .returning({ id: t.roles.id, template: t.roles.template })
-  const roleIds = new Map(roles.map((r) => [r.template, r.id]))
-
   const staffIds = new Map<string, { id: string; name: string }>()
   for (const [i, s] of (def.staff ?? []).entries()) {
+    // people with a level sign in with their phone: an account now, or an open invite while they're `invited` (ADR 0025)
+    const invited = s.status === 'invited'
+    const signInPhone = s.level && (s.hasApp ?? true) ? s.phone : undefined
     const [row] = await db
       .insert(t.staff)
       .values({
         businessId: biz.id,
+        userId: signInPhone && !invited ? await user(ctx, signInPhone, s.fullName ?? s.name) : null,
+        level: s.level ?? 'specialist',
         name: s.name,
         fullName: s.fullName ?? null,
         specialization: s.specialization ?? null,
@@ -190,15 +176,16 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       .returning({ id: t.staff.id })
     if (!row) throw new Error('staff insert failed')
     staffIds.set(s.key, { id: row.id, name: s.name })
-    if (s.role && s.phone && (s.hasApp ?? true)) {
-      const invited = s.status === 'invited'
-      await db.insert(t.memberships).values({
+    if (signInPhone && invited) {
+      // sent two days before the demo day, so it shows as pending with five days left
+      const sentAt = ctx.now - 2 * 86_400_000
+      await db.insert(t.invites).values({
         businessId: biz.id,
-        phone: s.phone,
-        userId: invited ? null : await user(ctx, s.phone, s.fullName ?? s.name),
-        roleId: roleIds.get(s.role) ?? '',
         staffId: row.id,
-        status: invited ? 'invited' : 'active',
+        phone: signInPhone,
+        tokenHash: await sha256Hex(randomToken()),
+        sentAt: new Date(sentAt),
+        expiresAt: new Date(inviteExpiresAt(sentAt)),
       })
     }
   }
