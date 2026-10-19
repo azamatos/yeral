@@ -1,5 +1,12 @@
 # @yeral/storybook
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [[`421ac7e`](https://github.com/azamatos/yeral/commit/421ac7e25c29df828f10b6c93436121dae1d71c3)]:
+  - @yeral/ui@0.2.1
+
 ## 0.1.1
 
 ### Patch Changes
