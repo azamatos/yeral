@@ -212,19 +212,34 @@ describe('moves', () => {
     expect(waiting).toEqual([])
   })
 
-  it('asking again for the waiting move’s time keeps that move, code and hold', async () => {
+  it('a waiting move whose hold ran out is recorded as lapsed, not as withdrawn by the client', async () => {
     const { b, code, date, start, id } = await confirmed('+99365444215', FRI)
     await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
-    const pendingOf = () =>
-      db
+    const [first] = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
+    // the hold ran out; the jobs haven't run yet
+    t.clock.now = first!.holdUntil!.getTime() + 1000
+    expect((await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })).status).toBe(200)
+    const [lapsed] = await db.select().from(bookings).where(eq(bookings.id, first!.id))
+    expect(lapsed).toMatchObject({ status: 'cancelled', cancelledBy: 'system' })
+  })
+
+  it('its own time keeps the booking even when the business paused online booking', async () => {
+    const { b, code, date, start, id } = await confirmed('+99365444218', FRI)
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+    await rules({ onlineEnabled: false })
+    try {
+      expect((await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start } })).status).toBe(200)
+      const waiting = await db
         .select()
         .from(bookings)
         .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
-    const [first] = await pendingOf()
-    t.clock.now += 60_000
-    expect((await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })).status).toBe(200)
-    const [again] = await pendingOf()
-    expect(again).toMatchObject({ id: first!.id, code: first!.code, holdUntil: first!.holdUntil })
+      expect(waiting).toEqual([])
+    } finally {
+      await rules({ onlineEnabled: true })
+    }
   })
 
   it('withdrawing a waiting move tells the business (an event)', async () => {
@@ -239,16 +254,12 @@ describe('moves', () => {
     expect(seen.map((e) => e.type)).toContain('booking.cancelled')
   })
 
-  it('«Islendik» at its own time goes to someone free when its specialist can’t do it any more', async () => {
+  it('the same time with another specialist named is a move', async () => {
     const { b, code, date, start } = await confirmed('+99365444217', FRI)
-    await db.delete(staffServices).where(and(eq(staffServices.staffId, who['Aýna']!), eq(staffServices.serviceId, haircut)))
-    try {
-      const moved = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start, staffId: null } })
-      expect(moved.status).toBe(200)
-      expect(moved.json.reschedule).toMatchObject({ date, start })
-    } finally {
-      await db.insert(staffServices).values({ staffId: who['Aýna']!, serviceId: haircut })
-    }
+    expect(await starts(b, date, who.Maral!, code)).toContain(start)
+    const moved = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start, staffId: who.Maral } })
+    expect(moved.status).toBe(200)
+    expect(moved.json.reschedule).toMatchObject({ date, start })
   })
 
   it('a double tap at an instant business moves once and answers both', async () => {

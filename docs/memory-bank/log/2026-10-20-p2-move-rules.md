@@ -10,9 +10,11 @@
   visit's start (`holdUntil(…, endBy)`). A second move may be asked while one waits (it replaces it). A move, a cancel
   and a confirmed move each lock the booking row first (`lockBooking()`, then the move request) and read it again, so
   they run one after another; migration 0011 keeps one waiting move per booking (a partial unique index), as overlaps
-  no longer guard it. A move to the booking's own time that keeps the same people moves nothing (`rebook` returns null),
-  so the booking stays as it is and a waiting move is withdrawn; asking again for the waiting move's own time keeps
-  that move (code and hold). A withdrawn move writes `booking.cancelled`. A move of a service no longer booked online
+  no longer guard it. Asking for the booking's own time with no other specialist named keeps it as it is, whatever the
+  rules say now (paused, lead time), and withdraws a waiting move: the way back until "Haýyşy yzyna al" (part 2); to
+  move to another specialist at the same time, the client names them. A withdrawn move writes `booking.cancelled`; one
+  whose hold already ran out is recorded as the system's expiry (`booking.expired`). Five review passes on this PR:
+  the first designs special-cased the own time and repeat taps, and each case grew new edge cases, so they went. A move of a service no longer booked online
   is `not_bookable`; one whose specialist no longer does the services is `not_found` (`checkStaff()`). The excluded bookings are one domain field, `excludeBookingIds`; `lockBooking()`
   lives in `bookings/repo.ts`. Move mode (`?move=` on the appointment and specialists availability) counts the booking
   and its waiting move as free, and only for a confirmed appointment that may still move. A withdrawn or replaced move

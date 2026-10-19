@@ -56,14 +56,23 @@ async function waitingMove(db: Queryable, b: BookingRow): Promise<BookingRow | u
   return m
 }
 
-/** Withdraw a pending move of this booking, if there is one; one the jobs just let lapse is gone already. */
+/**
+ * Withdraw a pending move of this booking, if there is one, and tell the business's open screens. One whose hold has
+ * run out lapsed unanswered: it's recorded as the jobs would, not as the client's. One the jobs just settled is gone.
+ */
 async function dropPendingMove(db: Queryable, b: BookingRow, at: Date) {
   const m = await waitingMove(db, b)
   if (!m) return
+  const lapsed = effectiveStatus(stateOf(m), at.getTime()).status !== 'pending'
   try {
-    const row = await setStatus(db, m, { status: 'cancelled', cancelledBy: 'client', at })
-    // the business's open request lists drop it
-    await emit(db, { type: 'booking.cancelled', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
+    const row = await setStatus(db, m, { status: 'cancelled', cancelledBy: lapsed ? 'system' : 'client', at })
+    await emit(db, {
+      type: lapsed ? 'booking.expired' : 'booking.cancelled',
+      businessId: row.businessId,
+      bookingId: row.id,
+      bookingCode: row.code,
+      userId: row.userId,
+    })
   } catch (e) {
     if (!(e instanceof StaleBooking)) throw e
   }
@@ -141,20 +150,16 @@ export async function rescheduleBooking(
   const lb = await businessOf(deps, b)
   guard(canClientReschedule(stateOf(b), lb.rules, deps.now()))
   if (b.type !== 'appointment') throw new ApiError('not_bookable')
-  await assertOnlineBooking(deps.db, lb, user)
   return deps.db.transaction(async (tx) => {
     // read again under the lock: a cancel or a confirmed move may have landed meanwhile
     const locked = await lockBooking(tx, b.id)
     guard(canClientReschedule(stateOf(locked), lb.rules, deps.now()))
     const booked = await bookedServices(tx, locked.id)
-    // the very move already waiting (a double tap): it stays as it is
-    const waiting = await waitingMove(tx, locked)
-    const target = to.staffId === undefined ? booked.staffId : to.staffId
-    if (waiting && waiting.date === to.date && waiting.start === to.start) {
-      if (target === null || (await bookedServices(tx, waiting.id)).staffId === target) return locked
-    }
     await dropPendingMove(tx, locked, new Date(deps.now()))
-    // null: its own time with the same people, so the booking stays as it is and a waiting move is withdrawn
+    // its own time with no other specialist named: the booking stays as it is, whatever the rules say now, and the
+    // waiting move is withdrawn (to move to another specialist at the same time, the client names them)
+    if (to.date === locked.date && to.start === locked.start && (to.staffId == null || to.staffId === booked.staffId)) return locked
+    await assertOnlineBooking(tx, lb, user)
     await rebook(deps, user, locked, to, {
       status: initialStatus('web', lb.rules.confirmMode),
       rescheduleOf: locked.id,
@@ -198,8 +203,6 @@ export async function acceptAlternative(
       offerTarget(slot),
       { status: source === 'decline' ? 'confirmed' : initialStatus('web', lb.rules.confirmMode), alternativeOf: b.id },
     )
-    // only a move can keep a booking as it is
-    if (!row) throw new ApiError('invalid_status')
     return row
   } catch (e) {
     // another request took an offered time from this booking first

@@ -313,8 +313,6 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
 /** A booking's services in the order they run, and the one specialist doing them all (null when split). */
 export interface BookedServices {
   serviceIds: string[]
-  /** Who does each service, in order. */
-  staffIds: (string | null)[]
   /** The one specialist doing them all, or null when split. */
   staffId: string | null
 }
@@ -324,7 +322,6 @@ export async function bookedServices(db: Queryable, bookingId: string): Promise<
   const first = items[0]?.staffId ?? null
   return {
     serviceIds: items.flatMap((i) => (i.serviceId ? [i.serviceId] : [])),
-    staffIds: items.map((i) => i.staffId),
     staffId: first && items.every((i) => i.staffId === first) ? first : null,
   }
 }
@@ -346,7 +343,7 @@ export function rebookQuery(
 
 /**
  * A new appointment like `from` at another time: a client's move request, or an offered alternative. `opts.db` runs it
- * inside the caller's transaction. A move to the booking's own time that keeps the same people moves nothing: null.
+ * inside the caller's transaction.
  */
 export async function rebook(
   deps: Deps,
@@ -354,7 +351,7 @@ export async function rebook(
   from: BookingRow,
   to: { date: string; start: number; staffId?: string | null },
   opts: { status: 'pending' | 'confirmed'; rescheduleOf?: string; alternativeOf?: string; db?: Queryable; booked?: BookedServices },
-): Promise<BookingRow | null> {
+): Promise<BookingRow> {
   const db = opts.db ?? deps.db
   const lb = (await loadBusinesses(db, [from.businessId])).get(from.businessId)
   if (!lb) throw new ApiError('not_found')
@@ -370,8 +367,6 @@ export async function rebook(
     checkStaff(ctx, query.serviceIds, query.staffId)
   }
   const slot = await placeAppointment(deps, lb, query, to.start, 'client', db)
-  if (move && to.date === from.date && to.start === from.start && slot.items.every((it, i) => it.staffId === booked.staffIds[i]))
-    return null
   return inTransaction(
     deps,
     (tx) =>
