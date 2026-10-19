@@ -96,6 +96,19 @@ export function expiredSmsText(site: SiteConfig, lang: Locale, b: SmsBooking, ti
   return t('sms.expired', { ...common, times: list })
 }
 
+/** A move the business declined or let lapse: the booking keeps its time (book Q-289). `b` is the booking itself. */
+export function moveRefusedSmsText(site: SiteConfig, lang: Locale, b: SmsBooking): string {
+  const fmt = createFmt(lang)
+  const t = createT(lang)
+  return t('sms.moveRefused', {
+    brand: brandOf(t),
+    business: b.businessName,
+    date: fmt.dayMonth(b.date),
+    time: fmt.time(b.start),
+    link: bookingLink(site, b.code),
+  })
+}
+
 export function codeSmsText(lang: Locale, code: string): string {
   const t = createT(lang)
   return t('sms.code', { brand: brandOf(t), code })

@@ -12,7 +12,7 @@ import { addDays, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
 import { bookings, businesses, clients, jobs, users, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { bookingSmsText, emit, expiredSmsText, queueSms, smsCityOf, type BookingSmsKind } from '../../notify'
+import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, queueSms, smsCityOf, type BookingSmsKind } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
 import { bookedServices } from '../bookings/create'
@@ -78,6 +78,22 @@ async function expireRequests(deps: Deps): Promise<number> {
           bookingCode: row.code,
           userId: row.userId,
         })
+        // a move that lapsed: the booking keeps its time, and the client hears so (book Q-289)
+        if (b.rescheduleOf) {
+          const [original] = await tx.select().from(bookings).where(eq(bookings.id, b.rescheduleOf))
+          const [biz] = await tx.select().from(businesses).where(eq(businesses.id, row.businessId))
+          if (original?.status === 'confirmed' && original.clientPhone && biz) {
+            const [user] = original.userId ? await tx.select().from(users).where(eq(users.id, original.userId)) : []
+            const text = moveRefusedSmsText(deps.site, user?.lang ?? MARKET.defaultLanguage, {
+              code: original.code,
+              date: original.date,
+              start: original.start,
+              businessName: biz.name,
+              address: biz.address,
+            })
+            await queueSms(tx, { to: original.clientPhone, text, runAt: now, dedupeKey: `moveRefused:${row.id}` })
+          }
+        }
         if (!b.rescheduleOf && row.clientPhone) {
           const [biz] = await tx.select().from(businesses).where(eq(businesses.id, row.businessId))
           const [user] = row.userId ? await tx.select().from(users).where(eq(users.id, row.userId)) : []

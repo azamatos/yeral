@@ -334,7 +334,6 @@ flowchart TD
 
 > Open question Q-263: A waiting move that outlives the original time.
 
-- **Code differs:** no SMS is sent when the move isn't accepted (Q-289).
 
 **Status.** Design: decided and drawn (ROUND6 A3, A5; business spec §26; Account-Bookings, B-Calendar) · Code: built in the api, with the differences above.
 

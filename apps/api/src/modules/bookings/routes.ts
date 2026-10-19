@@ -19,7 +19,16 @@ import { bookings } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody } from '../../http/openapi'
 import { requireUser } from '../auth/session'
-import { acceptAlternative, cancelBooking, editNote, editReview, rescheduleBooking, restoreBooking, writeReview } from './actions'
+import {
+  acceptAlternative,
+  cancelBooking,
+  editNote,
+  editReview,
+  rescheduleBooking,
+  restoreBooking,
+  withdrawMove,
+  writeReview,
+} from './actions'
 import { createBooking } from './create'
 import { myBooking, stateOf } from './repo'
 import { detailOf, summaries } from './view'
@@ -80,6 +89,14 @@ const restoreRoute = createRoute({
   responses: detail,
 })
 const rescheduleRoute = action('/me/bookings/{code}/reschedule', 'Ask to move to another time', rescheduleSchema)
+const withdrawMoveRoute = createRoute({
+  method: 'post',
+  path: '/me/bookings/{code}/withdraw-move',
+  tags,
+  summary: '"Haýyşy yzyna al": withdraw my waiting move; the booking keeps its time',
+  request: codeAndLang,
+  responses: detail,
+})
 const alternativeRoute = action('/me/bookings/{code}/accept-alternative', 'Take one of the offered times', acceptAlternativeSchema)
 const reviewRoute = action('/me/bookings/{code}/review', 'Review a completed visit', reviewInputSchema)
 const noteRoute = createRoute({
@@ -143,6 +160,11 @@ export const bookingRoutes = new OpenAPIHono<AppEnv>()
       await myBooking(c.var.deps.db, user.id, c.req.valid('param').code),
       c.req.valid('json').reason,
     )
+    return c.json(await detailOf(c.var.deps, row, c.req.valid('query').lang), 200)
+  })
+  .openapi(withdrawMoveRoute, async (c) => {
+    const user = requireUser(c)
+    const row = await withdrawMove(c.var.deps, await myBooking(c.var.deps.db, user.id, c.req.valid('param').code))
     return c.json(await detailOf(c.var.deps, row, c.req.valid('query').lang), 200)
   })
   .openapi(restoreRoute, async (c) => {

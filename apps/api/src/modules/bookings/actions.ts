@@ -173,6 +173,18 @@ export async function rescheduleBooking(
 }
 
 /**
+ * "Haýyşy yzyna al" (ROUND6 A3): withdraw the move waiting for this booking; the booking stays at its time. Not an
+ * online booking, so it works for a paused business and a phone-only client too. Nothing waiting: nothing to do.
+ */
+export async function withdrawMove(deps: Deps, b: BookingRow): Promise<BookingRow> {
+  return deps.db.transaction(async (tx) => {
+    const locked = await lockBooking(tx, b.id)
+    await dropPendingMove(tx, locked, new Date(deps.now()))
+    return locked
+  })
+}
+
+/**
  * Pick one of the offered times: after a decline the business already agreed (confirmed at once); after an expired
  * request it's a new request like any other. Each offer makes one booking (`alternativeOf` is unique).
  */

@@ -1238,13 +1238,13 @@ flowchart TD
 
 - A declined or unanswered move sends the client an SMS with "Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar." and the link (Q-289, decided 18.10.2026).
 
+(code: "Haýyşy yzyna al" is `POST /v1/me/bookings/{code}/withdraw-move`, which works for a paused business and a phone-only client too; the booking detail's `moveRefused` carries a declined or lapsed move; a lapse sends the SMS from `jobs/run.ts`)
+
 **Code differs**
 
-- An unanswered move lapses quietly, with no SMS (code: `jobs/run.ts`).
-- "Haýyşy yzyna al" has no api action: only cancelling the booking or asking a new move withdraws it (A3 "withdraw endpoint (if missing)").
-- After a decline or a lapse the booking detail no longer carries the move, so "Täze wagt kabul edilmedi" can't be shown (code: `bookings/view.ts` returns only a waiting move).
+- The business's decline of a move comes with the workspace (P2 step 4); its SMS will be the same one.
 
-**Status:** Design: drawn (Account-Bookings · moveWaiting, moveDeclined, moveUnanswered, moveAccepted; Mobile 11) · Code: partly — waiting, replacing and withdraw-by-cancel built; withdraw and outcomes aren't.
+**Status:** Design: drawn (Account-Bookings · moveWaiting, moveDeclined, moveUnanswered, moveAccepted; Mobile 11) · Code: built (api) for the client: waiting, replacing, withdrawing, the outcomes aren't.
 
 ### C-32 · Table or class: cancel and book again instead of moving
 
