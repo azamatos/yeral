@@ -9,7 +9,7 @@ import { eq } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, jobs } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { emit } from '../../notify'
+import { emit, type BookingSmsKind } from '../../notify'
 import { setStatus, type BookingRow } from './repo'
 
 const HOUR = 3_600_000
@@ -22,19 +22,21 @@ export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, 
   const now = deps.now()
   const start = epochOf(b.date, b.start)
   const end = epochOf(b.date, b.end)
-  const due: { kind: string; runAt: number }[] = [
-    ...(opts.confirmed ? [{ kind: 'confirmed', runAt: now }] : []),
+  const due: { kind: BookingSmsKind; runAt: number; covers?: readonly string[] }[] = [
+    ...(opts.confirmed ? [{ kind: 'confirmed' as const, runAt: now }] : []),
     ...reminderPlan(start, now),
     { kind: 'reviewAsk', runAt: end + 2 * HOUR },
   ]
+  if (!due.length) return
   await db
     .insert(jobs)
     .values(
       due.map((p) => ({
         kind: 'booking.sms',
         runAt: new Date(Math.max(p.runAt, now)),
-        // the time it was planned for: after a move the old reminders find another time and stay quiet
-        payload: { bookingId: b.id, kind: p.kind, date: b.date, start: b.start },
+        // the time it was planned for: after a move the old reminders find another time and stay quiet; `covers`: the
+        // reminders a moved one stands for, whose switches decide whether it goes
+        payload: { bookingId: b.id, kind: p.kind, date: b.date, start: b.start, ...(p.covers ? { covers: p.covers } : {}) },
         // a moved booking gets new reminders: the key carries the time
         dedupeKey: `${p.kind}:${b.id}:${b.date}:${b.start}`,
       })),

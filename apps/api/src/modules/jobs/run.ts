@@ -135,7 +135,12 @@ async function completeVisits(deps: Deps): Promise<number> {
  * A booking SMS, if the booking is still in the right state, still at the time the SMS was planned for (`at`; older
  * jobs have none), and the client wants it.
  */
-async function sendBookingSms(deps: Deps, bookingId: string, kind: BookingSmsKind, at: { date?: unknown; start?: unknown }): Promise<void> {
+async function sendBookingSms(
+  deps: Deps,
+  bookingId: string,
+  kind: BookingSmsKind,
+  at: { date?: unknown; start?: unknown; covers?: unknown },
+): Promise<void> {
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
   if (!b?.clientPhone) return
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
@@ -145,15 +150,16 @@ async function sendBookingSms(deps: Deps, bookingId: string, kind: BookingSmsKin
   const [client] = b.clientId ? await deps.db.select().from(clients).where(eq(clients.id, b.clientId)) : []
   if (client?.noRemindersSms && kind !== 'confirmed') return
   if (user) {
-    const pref = {
+    const prefs = {
       confirmed: user.notifyConfirmation,
       reminderDay: user.notifyReminderDay,
       reminder2h: user.notifyReminder2h,
-      // the one reminder of a visit early in the morning: either switch asks for it
-      reminderEvening: user.notifyReminderDay || user.notifyReminder2h,
       reviewAsk: user.notifyReviewAsk,
-    }[kind]
-    if (!pref) return
+    }
+    // a reminder moved out of the night goes if one of the reminders it stands for is wanted
+    const covers = Array.isArray(at.covers) ? (at.covers as (keyof typeof prefs)[]) : []
+    const wantedByPrefs = kind === 'reminderEvening' ? covers.some((k) => prefs[k]) : prefs[kind]
+    if (!wantedByPrefs) return
   }
   const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId))
   if (!biz) return

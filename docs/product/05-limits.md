@@ -342,7 +342,7 @@ flowchart LR
 | Cancelled by the business | SMS with the reason | Client (the *Tassyklama we üýtgeşmeler* switch) | business spec §3; Q-286, decided 18.10.2026; code: packages/i18n/src/messages/tk.json |
 | Reminders | a day (24 h) before and 2 h before; skipped when the booking is made later than that | Client (switches); business ("*Ýatlatma SMS-lerini iberme*" per client) | client spec §6, business spec §6; skipping Q-257, decided 18.10.2026; code: apps/api/src/modules/bookings/confirm.ts |
 | Review ask | none | Fixed | Q-259, decided 18.10.2026 |
-| Client SMS at night | booking outcomes at any hour; a reminder that falls between 22:00 and 08:00 goes at 21:30 the evening before the visit with the "tomorrow" text, and only one reminder goes that evening | Fixed | Q-285, decided 18.10.2026; Q-293 |
+| Client SMS at night | booking outcomes at any hour; a reminder that falls between 22:00 and 08:00 goes at 21:30 the evening before the visit with the "tomorrow" text; at most one reminder on any day before the visit | Fixed | Q-285, decided 18.10.2026; Q-293 |
 | SMS that fail | tried 5 times, waiting 1, 2, 4 and 8 min, then the Ýeral team is alerted; a reminder that would arrive after the visit has started is dropped | Fixed | Q-284, decided 18.10.2026; code: apps/api/src/modules/jobs/run.ts |
 | SMS length | full Turkmen letters; two-part messages accepted; texts shortened where that's easy | Fixed | Q-295, decided 18.10.2026 |
 | SMS per business | no cap on MVP; the Ýeral team watches a monthly count per business | Ýeral team | Q-299, decided 18.10.2026 |

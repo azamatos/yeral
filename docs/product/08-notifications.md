@@ -55,7 +55,7 @@ The *B-Notifications* screen still draws the *Programmada* chip. The spec wins o
 
 Notes:
 
-- Booking outcomes go at any hour. A reminder that falls between 22:00 and 08:00 goes at 21:30 the evening before: a 07:00 visit gets its 2-hour reminder at 21:30 the night before. (Q-285, decided 18.10.2026) A moved reminder goes at 21:30 the evening before the visit, with the *ertir* (tomorrow) text; when both reminders land on that evening, only one goes (Claude, following Q-285 and Q-293). (code: `reminderPlan()` in `@yeral/domain/lifecycle`; the moved reminder is the job kind `reminderEvening`, sent if either reminder switch is on)
+- Booking outcomes go at any hour. A reminder that falls between 22:00 and 08:00 goes at 21:30 the evening before: a 07:00 visit gets its 2-hour reminder at 21:30 the night before. (Q-285, decided 18.10.2026) A moved reminder goes at 21:30 the evening before the visit, with the *ertir* (tomorrow) text; at most one reminder goes on any day before the visit (the later, standing for both), and a moved one within 2 hours of booking is left out: the "confirmed" SMS has just gone (Claude, following Q-285 and Q-293). A moved reminder goes only if the client wants a reminder it stands for. (code: `reminderPlan()` in `@yeral/domain/lifecycle`; the moved reminder is the job kind `reminderEvening`, its `covers` say which switches decide)
 
 > Open question Q-285: Client SMS at night.
 

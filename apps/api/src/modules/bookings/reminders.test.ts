@@ -4,7 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, businesses, jobs } from '../../db/schema'
+import { bookings, businesses, jobs, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 import { queueBookingSms } from './confirm'
@@ -44,5 +44,41 @@ describe('reminders and the night (book Q-285)', () => {
     t.clock.now = epochOf('2026-10-15', 1291)
     await runDueJobs(t.deps)
     expect(t.sms.sent.find((s) => s.to === '+99365555001')?.text).toMatch(/^Reminder: tomorrow at 07:00, Barber Loft/)
+  })
+
+  it('a moved reminder follows the switch of the reminder it stands for', async () => {
+    const t = testApp(db)
+    const [barber] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    // wants the 2-hour reminder only
+    const [user] = await db
+      .insert(users)
+      .values({ phone: '+99365555002', lang: 'en', notifyReminderDay: false, notifyReminder2h: true })
+      .returning()
+    const [row] = await db
+      .insert(bookings)
+      .values({
+        code: 'YR-99102',
+        businessId: barber!.id,
+        userId: user!.id,
+        type: 'appointment',
+        date: '2026-10-16',
+        start: 1380,
+        end: 1440,
+        status: 'confirmed',
+        source: 'web',
+        clientPhone: '+99365555002',
+        clientName: 'Night owl',
+      })
+      .returning()
+    await queueBookingSms(db, t.deps, row!, { confirmed: false })
+
+    // the day reminder (23:00 Thursday) moved to 21:30 Thursday: its switch is off, nothing goes
+    t.clock.now = epochOf('2026-10-15', 1291)
+    await runDueJobs(t.deps)
+    expect(t.sms.sent.filter((s) => s.to === '+99365555002')).toEqual([])
+    // the 2-hour one, 21:00 Friday, goes
+    t.clock.now = epochOf('2026-10-16', 1261)
+    await runDueJobs(t.deps)
+    expect(t.sms.sent.filter((s) => s.to === '+99365555002')).toHaveLength(1)
   })
 })
