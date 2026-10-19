@@ -18,4 +18,4 @@ Market settings and English as the source language (book chapter 10, P2 step 1; 
 - SMS texts take the brand from `common.brand`; money messages take the currency from the market.
 - `manatSchema` is `moneySchema`. `DEFAULT_LOCALE` comes from the market, and `MARKET_LOCALES` lists what the sites
   offer.
-- `PhoneInput` needs `prefix` and `groups` (the market's) instead of defaulting to +993 and 8 digits.
+- `PhoneInput` needs `prefix`, `maxDigits` and `format` (the market's: `COUNTRY_PREFIX`, `formatNational`) instead of defaulting to +993 and 8 digits. A person chooses only among the market's languages (`marketLocaleSchema`); `localizedSchema` requires one language at least.
