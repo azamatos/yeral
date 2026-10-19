@@ -15,10 +15,10 @@ Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16): m
 components), domain, contract, sdk, an api for every client screen, written to the rules before the book. The api and
 Postgres run on the owner's server since 2026-10-19 (not public). yeral.app still serves `apps/legacy`. Design export
 v0.5 (in Turkmen) is the newest export; v0.6 (English) is being drawn. The version PR #26 (`@yeral/lib@0.2.0`,
-`@yeral/api@0.1.1`, staging removed) is open and waits for the owner.
+`@yeral/api@0.1.1`, staging removed) is merged. The backend plan (chapter 10, P2) was reviewed on 2026-10-19 against
+every **Code differs** line and the built api, and now has steps 0–7.
 
 ## Owner's direction
-
 - 2026-10-13: infrastructure first; Cloudflare now, own server (Docker + nginx, Cloudflare for DNS) later; name/domain in
   config; repo public until ready; design system with Storybook and tests; run 2–3 agents in parallel later.
 - 2026-10-14: follow the design's site map (marketplace on yeral.app, no landing app); remove the old mobile designs
@@ -56,6 +56,8 @@ v0.5 (in Turkmen) is the newest export; v0.6 (English) is being drawn. The versi
   then Turkmenistan with Turkmen, Russian and its own servers and database, after investment; one deployment per
   country (ADR 0023). No server to buy for the first launch. Appointments first, tables and classes after the MVP; no
   review-ask SMS; "Başga ýerde", internal statuses and the business PWA in the MVP; client karma later.
+- 2026-10-19 (later): Neon isn't needed; work on the VPS. Review the backend plan for gaps, then build the backend
+  alongside the design.
 
 ## Decisions
 
@@ -121,25 +123,19 @@ checks the canvas (artifact `Hkq5oyUnRVrRV3XSs7EAtt`, read with the Artifact too
 is with Claude Design; round 2 (business app part 1) is written. Next: check round 1, then rounds 3–6 (business app
 part 2, client site, admin tool, fixes) → export v0.6 → P3 components in Storybook → P4 apps.
 
-**Backend track (P2), start here in a new session.** Work in a worktree on a branch per step, tests with every rule
-(ADR 0013), a PR each, merged on green CI after review. The rules: the book's chapters 4, 5, 7a–7c and 8 (each
-**Code differs** line is a fix to make; chapter 6 lists the features). Order:
-1. Market settings and English as the source language (ADR 0022, ADR 0023): languages, currency, phone rules, time
-   zone from one market config; `@yeral/i18n` English first; the Turkmenistan constants become the first market.
-2. The business model: three fixed levels and the permission matrix replace the editable roles (ADR 0018, chapter 3);
-   the specialist without the app (Q-216); invites with accept or decline and 7 days.
-3. The **Code differs** fixes in the booking engine and api (chapters 4, 5, 7a–7c): holds only in opening hours
-   (Q-120), past midnight (Q-105), the city as data (Q-107), offered times tied to one specialist (Q-159), the
-   no-show count restart (Q-127), move rules (Q-165, Q-263), token links instead of `/b/{code}` (Q-168), no review
-   asks (Q-259), phone linking for 6 months plus "Is this you?" (Q-270), code limits (Q-267), account deletion (Q-172).
-4. Business endpoints (workspace, calendar, requests, bookings, clients, team, settings, services, hours, reviews,
-   notifications), then admin endpoints (verification, review reports, hiding, adding a business for its owner).
-5. First-launch mode (Q-004, Q-036): example businesses marked "Example" that confirm at once, the sign-in code shown
-   on the screen, a demo workspace reset nightly, no SMS.
+**Backend track (P2).** The steps are in the book's chapter 10 (reviewed 2026-10-19): 0 the own server only (no
+Neon, no Workers for the api), 1 market settings and English as the source, 2 the business model, 3 the **Code
+differs** fixes in the booking engine (past midnight first), 4 business endpoints (with photos, the address pin,
+notifications), 5 admin endpoints (team accounts with a second factor), 6 first-launch mode, 7 before the launch
+(deploys from GitHub, backups, alerts). Work in a worktree on a branch per step, tests with every rule (ADR 0013), a
+PR each, merged on green CI after review. The rules: the book's chapters 4, 5, 7a–7c and 8 (each **Code differs**
+line is a fix to make; chapter 6 lists the features).
 
 **Server:** `ssh yeral-vps` (the owner allowed `Bash(ssh yeral-vps:*)`); deploy by hand with
-`infra/server/README.md` → "Deploying Ýeral by hand". Not public yet (no DNS record). Later: GitHub deploys over SSH,
-nightly backups to R2 (owner's token), the client, business and cms sites.
+`infra/server/README.md` → "Deploying Ýeral by hand". Checked 2026-10-19: Caddy (no sites), Postgres 18.6 with the 4
+migrations and the 13 categories only, the api from #34, healthy; firewall SSH/80/443, fail2ban, keys only. Not public
+yet (no DNS record), no backups, and the `deploy` user has no key yet (P2 step 7).
 
-**Waiting on the owner:** version PR #26; the main checkout needs `git checkout -- docs/design && git clean -fd
-docs/design && git pull`; the unused Hyperdrive config `yeral-production` on Cloudflare (delete only if asked).
+**Waiting on the owner:** the main checkout needs `git checkout -- docs/design && git clean -fd docs/design && git
+pull`; the unused Hyperdrive config `yeral-production` and the Neon project on their accounts (delete only if asked);
+later an R2 token for backups, accounts for error tracking and uptime checks, the DNS records when going public.
