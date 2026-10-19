@@ -5,7 +5,7 @@ import { businessCardSchema } from '@yeral/contract/catalog'
 import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
 import { epochOf, today } from '@yeral/domain/time'
 import { and, desc, eq, inArray } from 'drizzle-orm'
-import { bookings, businesses, favorites, sessions, staff, users } from '../../db/schema'
+import { bookings, businesses, favorites, invites, sessions, staff, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
@@ -113,6 +113,15 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
       const rows = await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')
       if (rows.some((r) => r.level === 'owner' && r.status === 'active')) throw new ApiError('owns_workspace')
       await tx.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.userId, user.id))
+      // open invites to this phone go too: whoever gets the number next mustn't inherit them
+      const dropped = await tx
+        .update(invites)
+        .set({ status: 'cancelled', answeredAt: new Date(now) })
+        .where(and(eq(invites.phone, user.phone), eq(invites.status, 'pending')))
+        .returning({ businessId: invites.businessId })
+      for (const businessId of new Set([...rows.map((r) => r.businessId), ...dropped.map((d) => d.businessId)])) {
+        await emit(tx, { type: 'team.changed', businessId })
+      }
       const mine = await tx
         .select()
         .from(bookings)

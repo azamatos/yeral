@@ -236,4 +236,65 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     // invites of the business are untouched
     expect((await db.select().from(invites).where(eq(invites.businessId, glow!.id))).length).toBeGreaterThan(0)
   })
+
+  it('deleting an account cancels the open invites to its phone', async () => {
+    const maysa = await as(MAYSA)
+    await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: '+99365333010', name: 'Leaving', level: 'specialist' } })
+    const leaving = await as('+99365333010', 'Leaving')
+    expect((await leaving.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
+    const [open] = await db
+      .select()
+      .from(invites)
+      .where(and(eq(invites.phone, '+99365333010'), eq(invites.status, 'pending')))
+    expect(open).toBeUndefined()
+  })
+
+  it('an empty change is refused, not a server error', async () => {
+    const maysa = await as(MAYSA)
+    const row = await rowOf(AYNA)
+    expect((await maysa.req(`/v1/w/glow-studio/team/${row!.id}`, { method: 'PATCH', body: {} })).status).toBe(400)
+  })
+
+  it('someone removed and invited again waits as invited, and the invite can be resent', async () => {
+    const maysa = await as(MAYSA)
+    const ayna = await as(AYNA)
+    const row = await rowOf(AYNA)
+    await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { method: 'POST' })
+    const sent = await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: AYNA, name: 'Aýna', level: 'specialist' } })
+    // the old row comes back, still linked to her account (her kept bookings keep blocking her elsewhere)
+    expect(sent.json.member).toMatchObject({ id: row!.id, status: 'invited', joined: false, invite: { state: 'pending' } })
+    expect((await maysa.req(`/v1/w/glow-studio/team/${row!.id}/invite`, { method: 'POST' })).status).toBe(201)
+    const [card] = (await ayna.req('/v1/me/invites')).json.items
+    expect((await ayna.req(`/v1/me/invites/${card.id}/accept`, { method: 'POST' })).status).toBe(200)
+    expect(await rowOf(AYNA)).toMatchObject({ id: row!.id, status: 'active' })
+  })
+
+  it('nobody ends up on a team twice', async () => {
+    const maysa = await as(MAYSA)
+    // a removed specialist without the app, added again later: the old row can't come back beside the new one
+    const first = (await maysa.req('/v1/w/glow-studio/team/phone-only', { body: { phone: '+99365333011', name: 'Twice' } })).json
+    await maysa.req(`/v1/w/glow-studio/team/${first.id}/remove`, { method: 'POST' })
+    await maysa.req('/v1/w/glow-studio/team/phone-only', { body: { phone: '+99365333011', name: 'Twice' } })
+    expect((await maysa.req(`/v1/w/glow-studio/team/${first.id}/reactivate`, { method: 'POST' })).json.error.code).toBe('already_on_team')
+    // an invite can't be accepted beside another active row of the same phone
+    await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: '+99365333012', name: 'Dup', level: 'specialist' } })
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    await db.insert(staff).values({ businessId: glow!.id, name: 'Dup', phone: '+99365333012', hasApp: false })
+    const dup = await as('+99365333012', 'Dup')
+    const [card] = (await dup.req('/v1/me/invites')).json.items
+    expect((await dup.req(`/v1/me/invites/${card.id}/accept`, { method: 'POST' })).json.error.code).toBe('already_on_team')
+  })
+
+  it('team changes reach everyone on the team and the person invited', async () => {
+    const ayna = await as(AYNA) // a specialist: hears team changes, not other people's bookings
+    const cursor = (await ayna.req('/v1/events')).json.cursor
+    const invitee = await as('+99365333013', 'Invitee')
+    const inviteeCursor = (await invitee.req('/v1/events')).json.cursor
+    const maysa = await as(MAYSA)
+    await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: '+99365333013', name: 'Invitee', level: 'specialist' } })
+    const seen = (await eventsAfter(ayna, cursor)).json.items.map((e: { type: string }) => e.type)
+    expect(seen).toContain('team.changed')
+    const forInvitee = (await eventsAfter(invitee, inviteeCursor)).json.items.map((e: { type: string }) => e.type)
+    expect(forInvitee).toContain('team.changed')
+  })
 })

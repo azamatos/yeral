@@ -52,12 +52,15 @@ export const eventRoutes = new OpenAPIHono<AppEnv>().openapi(eventsRoute, async 
   const teams = await teamsOf(db, user.id)
   const whole = teams.filter((t) => scopeOf(t.actor, 'calendar') === 'all').map((t) => t.businessId)
   const own = teams.filter((t) => scopeOf(t.actor, 'calendar') === 'own').map((t) => t.actor.staffId)
+  const all = teams.map((t) => t.businessId)
   const mine = or(
     eq(events.userId, user.id),
     whole.length ? inArray(events.businessId, whole) : undefined,
     own.length
       ? sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${events.bookingId} and ${inArray(bookingItems.staffId, own)})`
       : undefined,
+    // everyone on a team hears when the team changes (the switcher, the team list)
+    all.length ? and(eq(events.type, 'team.changed'), inArray(events.businessId, all)) : undefined,
   )
   const rows = await db
     .select({ e: events, slug: businesses.slug })

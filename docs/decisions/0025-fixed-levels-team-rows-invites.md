@@ -57,8 +57,14 @@ on every team (book chapter 3, 07b, 07c S-13, S-14). The backend plan's step 2 b
   other choices of the remove flow (reassign, cancel with offered times) come with the business bookings (step 4).
 - Settled with the review of the first part: a specialist sees a booking shared with another specialist, but only the
   owner or an administrator moves or cancels it; answering requests always goes through `canAnswerRequest`; a deleted
-  account's team rows are removed (off the client site); only the owner adds a specialist without the app (chapter 5
-  said owner or administrator; the team row is "view" for administrators).
+  account's team rows are removed (off the client site) and the open invites to its phone are cancelled; only the
+  owner adds a specialist without the app (chapter 5 said owner or administrator; the team row is "view" for
+  administrators).
+- Settled with the review of the second part: an invited row never counts as joined, whatever it's linked to;
+  inviting someone removed brings back their old row only when it is theirs (linked to the phone's account, or to
+  none), so a number that changed hands doesn't take over someone else's history; nobody ends up on a team twice
+  (reactivating or accepting beside another active row of the same phone or account is refused); `team.changed`
+  reaches everyone on the team and the person concerned (an invitee, someone removed).
 
 ## Alternatives considered
 

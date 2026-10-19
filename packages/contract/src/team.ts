@@ -111,6 +111,7 @@ export const inviteSentSchema = z.object({ member: teamMemberSchema, link: z.url
 
 export const updateMemberSchema = z
   .object({ level: assignableLevelSchema.optional(), canAnswerOwn: z.boolean().optional() })
+  .refine((x) => x.level !== undefined || x.canAnswerOwn !== undefined, 'Change at least one thing')
   .meta({ id: 'UpdateMember' })
 
 export const staffIdParamSchema = z.object({ slug: slugSchema, staffId: idSchema })

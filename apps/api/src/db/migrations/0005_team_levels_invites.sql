@@ -32,13 +32,14 @@ ALTER TABLE "staff" ADD COLUMN "last_opened_at" timestamp with time zone;--> sta
 -- hand-written (ADR 0025): each member's account and level move onto their staff row, open invites into `invites`;
 -- the next migration drops `memberships` and `roles`. Access now comes from the staff row, so a disabled membership
 -- makes its row `removed` (the account stays linked, for its kept bookings).
-INSERT INTO "staff" ("business_id", "name", "phone", "bookable")
-SELECT m."business_id", coalesce(u."name", m."phone"), m."phone", false
-FROM "memberships" m JOIN "users" u ON u."id" = m."user_id"
-WHERE m."staff_id" IS NULL AND m."status" = 'active';--> statement-breakpoint
+-- members and invites without a staff row get one (not bookable; an invited one waits as `invited`)
+INSERT INTO "staff" ("business_id", "name", "phone", "bookable", "status")
+SELECT m."business_id", coalesce(u."name", m."phone"), m."phone", false, CASE WHEN m."status" = 'invited' THEN 'invited'::"staff_status" ELSE 'active'::"staff_status" END
+FROM "memberships" m LEFT JOIN "users" u ON u."id" = m."user_id"
+WHERE m."staff_id" IS NULL AND m."status" IN ('active', 'invited');--> statement-breakpoint
 UPDATE "memberships" m SET "staff_id" = s."id"
 FROM "staff" s
-WHERE m."staff_id" IS NULL AND m."status" = 'active' AND s."business_id" = m."business_id" AND s."phone" = m."phone" AND s."bookable" = false;--> statement-breakpoint
+WHERE m."staff_id" IS NULL AND m."status" IN ('active', 'invited') AND s."business_id" = m."business_id" AND s."phone" = m."phone" AND s."bookable" = false;--> statement-breakpoint
 UPDATE "staff" SET "user_id" = m."user_id", "level" = (CASE r."template" WHEN 'owner' THEN 'owner' WHEN 'admin' THEN 'admin' ELSE 'specialist' END)::"level",
   "status" = CASE WHEN m."status" = 'disabled' THEN 'removed'::"staff_status" ELSE "staff"."status" END
 FROM "memberships" m JOIN "roles" r ON r."id" = m."role_id"
@@ -66,7 +67,8 @@ ALTER TABLE "staff" ADD CONSTRAINT "staff_user_id_users_id_fk" FOREIGN KEY ("use
 CREATE INDEX "staff_user_idx" ON "staff" USING btree ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "staff_business_user" ON "staff" USING btree ("business_id","user_id") WHERE "staff"."user_id" is not null;--> statement-breakpoint
 CREATE UNIQUE INDEX "staff_one_owner" ON "staff" USING btree ("business_id") WHERE "staff"."level" = 'owner' and "staff"."status" = 'active';--> statement-breakpoint
--- hand-written: NOT VALID, so old rows (a specialist without the app and without a phone, from the old demo) don't stop
--- the migration; new and changed rows are checked
-ALTER TABLE "staff" ADD CONSTRAINT "staff_phone_without_app" CHECK ("staff"."has_app" or "staff"."phone" is not null) NOT VALID;--> statement-breakpoint
-ALTER TABLE "staff" ADD CONSTRAINT "staff_owner_has_app" CHECK ("staff"."level" <> 'owner' or "staff"."has_app") NOT VALID;
+-- hand-written: old rows that break the new checks (the old demo had specialists without the app and without a phone)
+-- count as with the app until the owner adds a phone; owners always have the app
+UPDATE "staff" SET "has_app" = true WHERE NOT "has_app" AND ("phone" IS NULL OR "level" = 'owner');--> statement-breakpoint
+ALTER TABLE "staff" ADD CONSTRAINT "staff_phone_without_app" CHECK ("staff"."has_app" or "staff"."phone" is not null);--> statement-breakpoint
+ALTER TABLE "staff" ADD CONSTRAINT "staff_owner_has_app" CHECK ("staff"."level" <> 'owner' or "staff"."has_app");

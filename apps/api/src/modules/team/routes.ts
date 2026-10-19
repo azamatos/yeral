@@ -30,6 +30,7 @@ import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { sha256Hex } from '../../lib/crypto'
 import { requireUser } from '../auth/session'
 import {
+  hasJoined,
   hasServices,
   inviteCards,
   inviteLink,
@@ -37,6 +38,7 @@ import {
   member,
   members,
   requireMember,
+  reusableRow,
   rowsForPhone,
   setServices,
   teamChanged,
@@ -207,10 +209,11 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     const businessId = await deps.db.transaction(async (tx) => {
       const invite = await openInvite(tx, c.req.valid('param').id, user.phone, now)
       const row = await teamRow(tx, invite.businessId, invite.staffId)
-      // this account may already be on the team through another row (a removed one, say)
-      const others = (await rowsForPhone(tx, invite.businessId, user.phone)).filter((r) => r.id !== row.id && r.userId === user.id)
-      if (others.some((r) => r.status !== 'removed')) throw new ApiError('already_on_team')
-      if (others.length) await tx.update(staff).set({ userId: null }).where(eq(staff.id, others[0]!.id))
+      // nobody joins twice: not beside another row with this phone (a specialist without the app, say) or this
+      // account, and not onto a row that belongs to another account (a number that changed hands keeps its history)
+      const { rows } = await rowsForPhone(tx, invite.businessId, user.phone)
+      const twice = rows.some((r) => r.id !== row.id && (r.status !== 'removed' || r.userId === user.id))
+      if (twice || (row.userId && row.userId !== user.id)) throw new ApiError('already_on_team')
       await tx
         .update(staff)
         .set({ userId: user.id, hasApp: true, status: row.status === 'invited' ? 'active' : row.status, lastOpenedAt: new Date(now) })
@@ -219,7 +222,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
         .update(invites)
         .set({ status: 'accepted', answeredAt: new Date(now) })
         .where(eq(invites.id, invite.id))
-      await teamChanged(tx, invite.businessId)
+      await teamChanged(tx, invite.businessId, { userId: user.id })
       return invite.businessId
     })
     const [joined] = await deps.db.select({ slug: businesses.slug }).from(businesses).where(eq(businesses.id, businessId))
@@ -237,7 +240,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
         .update(invites)
         .set({ status: 'declined', answeredAt: new Date(now) })
         .where(eq(invites.id, invite.id))
-      await teamChanged(tx, invite.businessId)
+      await teamChanged(tx, invite.businessId, { userId: user.id })
     })
     return c.body(null, 204)
   })
@@ -264,8 +267,8 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const now = deps.now()
     const result = await deps.db.transaction(async (tx) => {
-      const existing = await rowsForPhone(tx, business.id, body.phone)
-      if (existing.some((r) => r.status !== 'removed')) throw new ApiError('already_on_team')
+      const { rows, accountId } = await rowsForPhone(tx, business.id, body.phone)
+      if (rows.some((r) => r.status !== 'removed')) throw new ApiError('already_on_team')
       const fields = {
         name: body.name,
         fullName: body.fullName ?? null,
@@ -277,7 +280,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
         bookable: (body.serviceIds?.length ?? 0) > 0,
       }
       // someone removed earlier comes back on their old row
-      const reused = existing[0]
+      const reused = reusableRow(rows, accountId)
       const [row] = reused
         ? await tx.update(staff).set(fields).where(eq(staff.id, reused.id)).returning()
         : await tx
@@ -287,7 +290,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       if (!row) throw new Error('staff write failed')
       await setServices(tx, business.id, row.id, body.serviceIds ?? [])
       const { token } = await issueInvite(tx, now, { businessId: business.id, staffId: row.id, phone: body.phone, invitedBy: user.id })
-      await teamChanged(tx, business.id)
+      await teamChanged(tx, business.id, { phone: body.phone })
       return { member: await member(tx, row, user.lang, now), link: inviteLink(deps.site, token) }
     })
     return c.json(result, 201)
@@ -298,8 +301,8 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     const body = c.req.valid('json')
     const { deps } = c.var
     const created = await deps.db.transaction(async (tx) => {
-      const existing = await rowsForPhone(tx, business.id, body.phone)
-      if (existing.some((r) => r.status !== 'removed')) throw new ApiError('already_on_team')
+      const { rows } = await rowsForPhone(tx, business.id, body.phone)
+      if (rows.some((r) => r.status !== 'removed')) throw new ApiError('already_on_team')
       const [row] = await tx
         .insert(staff)
         .values({
@@ -331,11 +334,11 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       const row = await teamRow(tx, business.id, staffId)
       notOwnerRow(row)
       if (row.status === 'removed') throw new ApiError('invalid_status')
-      if (row.userId && row.hasApp) throw new ApiError('already_on_team')
+      if (hasJoined(row)) throw new ApiError('already_on_team')
       // the invite goes to a phone that can get the SMS (book chapter 3)
       if (!row.phone || !isMobile(row.phone)) throw new ApiError('validation_error', { phone: 'not a mobile number' })
       const { token } = await issueInvite(tx, now, { businessId: business.id, staffId: row.id, phone: row.phone, invitedBy: user.id })
-      await teamChanged(tx, business.id)
+      await teamChanged(tx, business.id, { phone: row.phone })
       return { member: await member(tx, row, user.lang, now), link: inviteLink(deps.site, token) }
     })
     return c.json(result, 201)
@@ -350,9 +353,9 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
         .update(invites)
         .set({ status: 'cancelled', answeredAt: new Date(deps.now()) })
         .where(and(eq(invites.businessId, business.id), eq(invites.staffId, staffId), eq(invites.status, 'pending')))
-        .returning({ id: invites.id })
+        .returning({ phone: invites.phone })
       if (!cancelled.length) throw new ApiError('not_found')
-      await teamChanged(tx, business.id)
+      await teamChanged(tx, business.id, { phone: cancelled[0]!.phone })
     })
     return c.body(null, 204)
   })
@@ -373,7 +376,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
         })
         .where(eq(staff.id, row.id))
         .returning()
-      await teamChanged(tx, business.id)
+      await teamChanged(tx, business.id, { userId: row.userId })
       return member(tx, next ?? row, user.lang, deps.now())
     })
     return c.json(updated, 200)
@@ -387,7 +390,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       const row = await teamRow(tx, business.id, staffId)
       notOwnerRow(row)
       await removeRow(tx, row, deps.now())
-      await teamChanged(tx, business.id)
+      await teamChanged(tx, business.id, { userId: row.userId })
     })
     return c.body(null, 204)
   })
@@ -400,14 +403,23 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       const row = await teamRow(tx, business.id, staffId)
       notOwnerRow(row)
       if (row.status !== 'removed') throw new ApiError('invalid_status')
+      // not beside a newer row of the same phone or account
+      const byPhone = row.phone ? (await rowsForPhone(tx, business.id, row.phone)).rows : []
+      const byAccount = row.userId
+        ? await tx
+            .select()
+            .from(staff)
+            .where(and(eq(staff.businessId, business.id), eq(staff.userId, row.userId)))
+        : []
+      if ([...byPhone, ...byAccount].some((r) => r.id !== row.id && r.status !== 'removed')) throw new ApiError('already_on_team')
       // someone who had joined (or works without the app) is back at once; someone who never joined needs an invite
-      const joined = (!!row.userId && row.hasApp) || !row.hasApp
+      const back = hasJoined(row) || !row.hasApp
       const [next] = await tx
         .update(staff)
-        .set({ status: joined ? 'active' : 'invited', bookable: await hasServices(tx, row.id) })
+        .set({ status: back ? 'active' : 'invited', bookable: await hasServices(tx, row.id) })
         .where(eq(staff.id, row.id))
         .returning()
-      await teamChanged(tx, business.id)
+      await teamChanged(tx, business.id, { userId: row.userId })
       return member(tx, next ?? row, user.lang, deps.now())
     })
     return c.json(back, 200)
@@ -418,7 +430,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     await deps.db.transaction(async (tx) => {
       await removeRow(tx, row, deps.now())
-      await teamChanged(tx, business.id)
+      await teamChanged(tx, business.id, { userId: row.userId })
     })
     return c.body(null, 204)
   })

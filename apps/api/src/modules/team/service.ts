@@ -7,7 +7,7 @@ import type { Locale } from '@yeral/domain/model'
 import { canAnswerRequest, type Actor } from '@yeral/domain/permissions'
 import { inviteExpiresAt, inviteState } from '@yeral/domain/team'
 import type { SiteConfig } from '@yeral/lib/site'
-import { and, asc, eq, gt, inArray, or } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, inArray, or } from 'drizzle-orm'
 import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, businesses, invites, services, staff, staffServices, users } from '../../db/schema'
@@ -48,7 +48,16 @@ export async function teamRow(db: Queryable, businessId: string, staffId: string
   return row
 }
 
-export const teamChanged = (db: Queryable, businessId: string) => emit(db, { type: 'team.changed', businessId })
+/**
+ * Tells the team's open screens, and the person concerned (an invitee, someone removed), that the team changed: the
+ * events feed gives `team.changed` to everyone on the team and to that account.
+ */
+export async function teamChanged(db: Queryable, businessId: string, person?: { userId?: string | null; phone?: string | null }) {
+  let userId = person?.userId ?? null
+  if (!userId && person?.phone)
+    [{ id: userId } = { id: null }] = await db.select({ id: users.id }).from(users).where(eq(users.phone, person.phone))
+  await emit(db, { type: 'team.changed', businessId, userId })
+}
 
 /** The invite's link for the owner to copy: the business app's invite page. */
 export const inviteLink = (site: SiteConfig, token: string) => `${site.urls.business}/invite/${token}`
@@ -81,15 +90,31 @@ export async function issueInvite(
 }
 
 /** Is this phone (or the account behind it) already on the team, or invited? A removed row can be reused. */
-export async function rowsForPhone(db: Queryable, businessId: string, phone: string): Promise<StaffRow[]> {
+export async function rowsForPhone(
+  db: Queryable,
+  businessId: string,
+  phone: string,
+): Promise<{ rows: StaffRow[]; accountId: string | null }> {
   const [account] = await db.select({ id: users.id }).from(users).where(eq(users.phone, phone))
-  return db
+  const rows = await db
     .select()
     .from(staff)
     .where(
       and(eq(staff.businessId, businessId), account ? or(eq(staff.phone, phone), eq(staff.userId, account.id)) : eq(staff.phone, phone)),
     )
+  return { rows, accountId: account?.id ?? null }
 }
+
+/**
+ * The removed row an invite to this phone can bring back: the one of the account behind the phone, or one without an
+ * account. A row linked to another account (a number that changed hands) stays theirs: it keeps blocking their time.
+ */
+export const reusableRow = (rows: StaffRow[], accountId: string | null): StaffRow | undefined =>
+  rows.find((r) => r.status === 'removed' && accountId !== null && r.userId === accountId) ??
+  rows.find((r) => r.status === 'removed' && r.userId === null)
+
+/** Has the person behind this row joined (accepted, with the app)? An invited row hasn't, whatever it's linked to. */
+export const hasJoined = (row: StaffRow) => row.status !== 'invited' && !!row.userId && row.hasApp
 
 /** Links a row to the services it does (all of them this business's); any makes the row bookable. */
 export async function setServices(db: Queryable, businessId: string, staffId: string, serviceIds: readonly string[]): Promise<void> {
@@ -112,7 +137,11 @@ export async function hasServices(db: Queryable, staffId: string): Promise<boole
 /** The latest invite of each row (to show "pending until …", "expired", "declined" on the team list). */
 async function latestInvites(db: Queryable, staffIds: string[]): Promise<Map<string, InviteRow>> {
   if (!staffIds.length) return new Map()
-  const rows = await db.select().from(invites).where(inArray(invites.staffId, staffIds)).orderBy(asc(invites.sentAt))
+  const rows = await db
+    .selectDistinctOn([invites.staffId])
+    .from(invites)
+    .where(inArray(invites.staffId, staffIds))
+    .orderBy(invites.staffId, desc(invites.sentAt))
   return new Map(rows.map((r) => [r.staffId, r]))
 }
 
@@ -127,7 +156,7 @@ const inviteSummary = (i: InviteRow | undefined, now: number) =>
     : null
 
 export function toMember(row: StaffRow, invite: InviteRow | undefined, lang: Locale, now: number): TeamMember {
-  const joined = !!row.userId && row.hasApp
+  const joined = hasJoined(row)
   return {
     id: row.id,
     name: row.name,
@@ -210,14 +239,23 @@ async function requestCounts(db: Queryable, teams: { businessId: string; actor: 
     .from(bookingRules)
     .where(inArray(bookingRules.businessId, ids))
   const answerersOf = new Map(rules.map((r) => [r.businessId, r.answerers]))
+  // each waiting request once, grouped by its business
+  const requests = new Map<string, { staffIds: string[]; forPhoneOnlyStaff: boolean }>()
+  for (const i of items) {
+    const r = requests.get(i.bookingId) ?? { staffIds: [], forPhoneOnlyStaff: false }
+    if (i.staffId) r.staffIds.push(i.staffId)
+    r.forPhoneOnlyStaff ||= !i.hasApp
+    requests.set(i.bookingId, r)
+  }
+  const byBusiness = new Map<string, { staffIds: string[]; forPhoneOnlyStaff: boolean }[]>()
+  for (const w of waiting)
+    byBusiness.set(w.businessId, [
+      ...(byBusiness.get(w.businessId) ?? []),
+      requests.get(w.id) ?? { staffIds: [], forPhoneOnlyStaff: false },
+    ])
   for (const { businessId, actor } of teams) {
-    let n = 0
-    for (const w of waiting.filter((x) => x.businessId === businessId)) {
-      const mine = items.filter((i) => i.bookingId === w.id)
-      const request = { staffIds: mine.flatMap((i) => (i.staffId ? [i.staffId] : [])), forPhoneOnlyStaff: mine.some((i) => !i.hasApp) }
-      if (canAnswerRequest(actor, answerersOf.get(businessId) ?? 'both', request)) n++
-    }
-    out.set(businessId, n)
+    const answerers = answerersOf.get(businessId) ?? 'both'
+    out.set(businessId, (byBusiness.get(businessId) ?? []).filter((r) => canAnswerRequest(actor, answerers, r)).length)
   }
   return out
 }
