@@ -383,4 +383,22 @@ describe('moves', () => {
     await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })
     expect((await b.req(`/v1/me/bookings/${code}`)).json.moveRefused).toBeNull()
   })
+
+  it('a move whose hold ran to the visit’s start lapses quietly: the visit has begun', async () => {
+    await rules({ holdMinutes: 120, cancelWindowMinutes: null })
+    try {
+      const { b, code, date, start, id } = await confirmed('+99365444224', SAT)
+      t.clock.now = epochOf(date, start) - 30 * 60_000
+      const next = addDays(date, 1)
+      const nextStart = (await starts(b, next, who['Aýna']!))[0]!
+      await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: next, start: nextStart } })
+      t.clock.now = epochOf(date, start) + 60_000
+      await runDueJobs(t.deps)
+      const [orig] = await db.select().from(bookings).where(eq(bookings.id, id))
+      expect(orig!.moveRefused).toBeNull()
+      expect(t.sms.sent.filter((x) => x.to === '+99365444224' && x.text.includes("didn't accept"))).toEqual([])
+    } finally {
+      await rules({ holdMinutes: 30, cancelWindowMinutes: 120 })
+    }
+  })
 })

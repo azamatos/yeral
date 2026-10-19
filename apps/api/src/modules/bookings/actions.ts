@@ -21,7 +21,7 @@ import { loadBusinesses, type LoadedBusiness } from '../availability/context'
 import { visitWhat } from '../catalog/map'
 import { assertOnlineBooking, bookedServices, rebook } from './create'
 import { offerTarget } from './offers'
-import { isSlotConflict, lockBooking, pgCode, setStatus, StaleBooking, stateOf, type BookingRow } from './repo'
+import { isSlotConflict, lockBooking, pgCode, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from './repo'
 import { RESTORE_MINUTES } from './view'
 
 async function businessOf(deps: Deps, b: BookingRow): Promise<LoadedBusiness> {
@@ -49,7 +49,6 @@ const guard = (problem: ReturnType<typeof canClientCancel>) => {
 
 /** The client moved on from a refused move: the booking stops saying it. */
 async function clearMoveRefused(db: Queryable, b: BookingRow): Promise<BookingRow> {
-  if (!b.moveRefused) return b
   const [row] = await db.update(bookings).set({ moveRefused: null }).where(eq(bookings.id, b.id)).returning()
   return row ?? b
 }
@@ -73,6 +72,8 @@ async function dropPendingMove(db: Queryable, b: BookingRow, at: Date) {
   const lapsed = effectiveStatus(stateOf(m), at.getTime()).status !== 'pending'
   try {
     const row = await setStatus(db, m, { status: 'cancelled', cancelledBy: lapsed ? 'system' : 'client', at })
+    // as the jobs would: the booking says the move wasn't accepted (a cancel and "Yzyna al" keep that)
+    if (lapsed) await recordMoveRefused(db, b, row, { by: 'system', reason: null, text: null }, at.getTime())
     await emit(db, {
       type: lapsed ? 'booking.expired' : 'booking.cancelled',
       businessId: row.businessId,
@@ -159,12 +160,12 @@ export async function rescheduleBooking(
   if (b.type !== 'appointment') throw new ApiError('not_bookable')
   return deps.db.transaction(async (tx) => {
     // read again under the lock: a cancel or a confirmed move may have landed meanwhile
-    const locked = await lockBooking(tx, b.id)
+    let locked = await lockBooking(tx, b.id)
     guard(canClientReschedule(stateOf(locked), lb.rules, deps.now()))
     const booked = await bookedServices(tx, locked.id)
     await dropPendingMove(tx, locked, new Date(deps.now()))
     // the client acts again: an earlier refusal is old news
-    await clearMoveRefused(tx, locked)
+    locked = await clearMoveRefused(tx, locked)
     // its own time with no other specialist named: the booking stays as it is, whatever the rules say now, and the
     // waiting move is withdrawn (to move to another specialist at the same time, the client names them)
     if (to.date === locked.date && to.start === locked.start && (to.staffId == null || to.staffId === booked.staffId)) return locked

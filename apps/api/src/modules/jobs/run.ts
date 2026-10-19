@@ -5,7 +5,7 @@
  * 3. Queued work: SMS, reminders, review asks, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
-import { effectiveStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
+import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { nearestSlots, nextFreeSlot, slotStaffId, staffDoingAll, type AppointmentSlot } from '@yeral/domain/availability'
 import { addDays, localOf } from '@yeral/domain/time'
@@ -16,7 +16,7 @@ import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, queueSms, sms
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
 import { bookedServices } from '../bookings/create'
-import { setStatus, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
+import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100
 const MAX_ATTEMPTS = 5
@@ -69,6 +69,8 @@ async function expireRequests(deps: Deps): Promise<number> {
     // answered meanwhile: setStatus refuses, nothing is sent
     await skipStale(
       deps.db.transaction(async (tx) => {
+        // a move: its booking's lock first, as every client path takes them (no deadlock with a cancel or a new move)
+        const [original] = b.rescheduleOf ? await tx.select().from(bookings).where(eq(bookings.id, b.rescheduleOf)).for('update') : []
         const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'system', at: now })
         await tx.update(bookings).set({ expiredAlternatives: alternatives }).where(eq(bookings.id, row.id))
         await emit(tx, {
@@ -79,15 +81,8 @@ async function expireRequests(deps: Deps): Promise<number> {
           userId: row.userId,
         })
         // a lapsed move: the booking it would move keeps its time, says so, and the client hears so (book Q-289);
-        // a booking that ended or went meanwhile hears nothing
-        const [original] = b.rescheduleOf ? await tx.select().from(bookings).where(eq(bookings.id, b.rescheduleOf)) : []
-        const live = original && effectiveStatus(stateOf(original), now.getTime()).status === 'confirmed'
-        if (original && live) {
-          await tx
-            .update(bookings)
-            .set({ moveRefused: { date: row.date, start: row.start, end: row.end, by: 'system', reason: null, text: null } })
-            .where(eq(bookings.id, original.id))
-        }
+        // a booking already started, over or gone hears nothing
+        const live = !!original && (await recordMoveRefused(tx, original, row, { by: 'system', reason: null, text: null }, now.getTime()))
         const told = b.rescheduleOf ? (live ? original : undefined) : row
         const [biz] = told?.clientPhone ? await tx.select().from(businesses).where(eq(businesses.id, row.businessId)) : []
         if (told?.clientPhone && biz) {

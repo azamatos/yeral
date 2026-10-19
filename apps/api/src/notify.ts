@@ -61,8 +61,9 @@ export async function smsCityOf(db: Queryable, cityId: string, lang: Locale): Pr
 /** `reminderEvening`: a reminder moved out of the night to 21:30 the evening before, worded like the day one ("tomorrow"). */
 export type BookingSmsKind = 'confirmed' | 'reminderDay' | 'reminder2h' | 'reminderEvening' | 'reviewAsk'
 
-/** The calendar day a business-day time falls on: 01:00 after midnight is the next day's (book Q-105). */
-const dayOf = (date: string, start: number) => localOf(epochOf(date, start)).date
+/** The calendar day and clock minute of a business-day time: 01:00 after midnight is the next day's (book Q-105). */
+const wallOf = (date: string, start: number) => localOf(epochOf(date, start))
+const dayOf = (date: string, start: number) => wallOf(date, start).date
 
 /** The brand name for SMS texts: the `common.brand` message, where the brand lives (systemPatterns, "Configuration, domains and brand"). */
 const brandOf = (t: ReturnType<typeof createT>) => t('common.brand')
@@ -73,7 +74,7 @@ export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsK
   const common = {
     brand: brandOf(t),
     business: b.businessName,
-    time: fmt.time(b.start),
+    time: fmt.time(wallOf(b.date, b.start).min),
     link: bookingLink(site, b.code),
     address: b.city ? fmt.addressIn(b.address, b.city) : b.address,
   }
@@ -98,7 +99,10 @@ export function expiredSmsText(site: SiteConfig, lang: Locale, b: SmsBooking, ti
   if (!times.length) return t('sms.expiredNoTimes', common)
   const asked = dayOf(b.date, b.start)
   const list = times
-    .map((x) => (dayOf(x.date, x.start) === asked ? fmt.time(x.start) : `${fmt.shortDate(dayOf(x.date, x.start))} ${fmt.time(x.start)}`))
+    .map((x) => {
+      const at = wallOf(x.date, x.start)
+      return at.date === asked ? fmt.time(at.min) : `${fmt.shortDate(at.date)} ${fmt.time(at.min)}`
+    })
     .join(', ')
   return t('sms.expired', { ...common, times: list })
 }
@@ -111,7 +115,7 @@ export function moveRefusedSmsText(site: SiteConfig, lang: Locale, b: SmsBooking
     brand: brandOf(t),
     business: b.businessName,
     date: fmt.dayMonth(dayOf(b.date, b.start)),
-    time: fmt.time(b.start),
+    time: fmt.time(wallOf(b.date, b.start).min),
     link: bookingLink(site, b.code),
   })
 }

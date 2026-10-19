@@ -1,10 +1,11 @@
 /** Booking rows: lookups, the lifecycle view, status changes, codes. */
 import { bookingCode } from '@yeral/domain/id'
-import type { BookingState } from '@yeral/domain/lifecycle'
+import { effectiveStatus, type BookingState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, CancelledBy } from '@yeral/domain/model'
+import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings } from '../../db/schema'
+import { bookingItems, bookings, type MoveRefused } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 
 export type BookingRow = typeof bookings.$inferSelect
@@ -101,6 +102,27 @@ export async function lockBooking(db: Queryable, id: string): Promise<BookingRow
   const [row] = await db.select().from(bookings).where(eq(bookings.id, id)).for('update')
   if (!row) throw new StaleBooking()
   return row
+}
+
+/**
+ * A move not accepted (lapsed, or declined by the business): the booking it would move keeps its time and says so
+ * (ROUND6 A3), while that booking is still ahead. Every path that refuses a move records it here; true when it did, and
+ * then the client is told by SMS too (book Q-289). The caller holds the booking's lock.
+ */
+export async function recordMoveRefused(
+  db: Queryable,
+  original: BookingRow,
+  move: Pick<BookingRow, 'date' | 'start' | 'end'>,
+  refused: Pick<MoveRefused, 'by' | 'reason' | 'text'>,
+  now: number,
+): Promise<boolean> {
+  const ahead = effectiveStatus(stateOf(original), now).status === 'confirmed' && now < epochOf(original.date, original.start)
+  if (!ahead) return false
+  await db
+    .update(bookings)
+    .set({ moveRefused: { date: move.date, start: move.start, end: move.end, ...refused } })
+    .where(eq(bookings.id, original.id))
+  return true
 }
 
 /** Postgres refused an overlap (exclusion constraint) or a duplicate: the slot went meanwhile. */
