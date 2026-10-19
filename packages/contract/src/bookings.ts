@@ -154,6 +154,12 @@ export const bookingDetailSchema = bookingSummarySchema
      * expired request, so the other offers are gone (empty lists).
      */
     offerTakenBy: bookingCodeSchema.nullable(),
+    /**
+     * False while the business has paused online booking or this client may book it only by phone (book Q-154): the
+     * free times after an expiry and "Başga wagta geçir" are left out, and the "Jaň et" card shows. Offers after a
+     * decline stay: the business made them.
+     */
+    bookOnline: z.boolean(),
     /** A pending move of this booking: the original stays confirmed until the business answers. */
     reschedule: z.object({ date: ymdSchema, start: startMinuteSchema, end: minuteSchema, holdUntil: epochSchema.nullable() }).nullable(),
     actions: z.object({

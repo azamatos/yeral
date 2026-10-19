@@ -8,4 +8,5 @@
 Offered times name one specialist (book Q-159): after an expired request the free times keep the client's specialist
 where they're free, and taking one books that person only. The booking shows each offered time with its specialist
 and as free, taken or past (Q-264), and which booking took one. With nothing free, the expiry SMS asks the client to
-pick another time (Q-252).
+pick another time (Q-252). A paused business or a phone-only client gets no free times or "move" on the booking, and
+`bookOnline: false` for the call card (Q-154).

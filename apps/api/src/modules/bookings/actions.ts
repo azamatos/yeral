@@ -5,6 +5,7 @@ import {
   canEditNote,
   effectiveStatus,
   initialStatus,
+  offerPast,
   REVIEW_EDIT_DAYS,
 } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
@@ -19,6 +20,7 @@ import { emit } from '../../notify'
 import { loadBusinesses, type LoadedBusiness } from '../availability/context'
 import { visitWhat } from '../catalog/map'
 import { assertOnlineBooking, rebook } from './create'
+import { offerTarget } from './offers'
 import { isSlotConflict, setStatus, stateOf, type BookingRow } from './repo'
 import { RESTORE_MINUTES } from './view'
 
@@ -147,6 +149,8 @@ export async function acceptAlternative(
   const [taken] = await deps.db.select({ id: bookings.id }).from(bookings).where(eq(bookings.alternativeOf, b.id))
   if (taken) throw new ApiError('invalid_status')
   const lb = await businessOf(deps, b)
+  // past once it starts earlier than now plus the lead time (book Q-264)
+  if (offerPast(slot, lb.rules.leadMinutes, deps.now())) throw new ApiError('offer_past')
   if (source === 'expired') await assertOnlineBooking(deps.db, lb, user)
   try {
     return await rebook(
@@ -154,7 +158,7 @@ export async function acceptAlternative(
       user,
       b,
       // with its named specialist only (book Q-159): busy now, it's taken (409 slot_taken)
-      { date: slot.date, start: slot.start, ...(slot.staffId ? { staffId: slot.staffId } : {}) },
+      offerTarget(slot),
       { status: source === 'decline' ? 'confirmed' : initialStatus('web', lb.rules.confirmMode), alternativeOf: b.id },
     )
   } catch (e) {

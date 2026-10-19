@@ -1,6 +1,6 @@
 /** A business day that runs past midnight (book Q-105): hours, the open state and free times. */
 import { describe, expect, it } from 'vitest'
-import { appointmentSlots, type AppointmentContext, type AppointmentQuery } from './availability'
+import { appointmentSlots, nextFreeSlot, type AppointmentContext, type AppointmentQuery } from './availability'
 import { businessDay, openState, weekHoursErrors, type BusinessHours, type WeekHours } from './hours'
 
 const WED = '2026-10-14'
@@ -82,5 +82,13 @@ describe('free times past midnight', () => {
     const fromDayBefore = starts(ctx(every(0, 1560), [{ staffId: 'a', date: WED, start: 1380, end: 1500, bookingId: 'y' }]), THU)
     expect(fromDayBefore).not.toContain(0)
     expect(fromDayBefore).toContain(60)
+  })
+
+  it('the next free day from today looks at last night first; strict starts at today', () => {
+    // Thursday 00:00 at the business: with an hour's lead, Wednesday's night still has 01:00
+    const c = { ...ctx(every(1080, 1560)), now: at('2026-10-14T19:00:00Z') }
+    const query = { serviceIds: ['cut'], staffId: 'a', by: 'client' as const }
+    expect(nextFreeSlot(c, query, THU)).toMatchObject({ date: WED, slot: { start: 1500 } })
+    expect(nextFreeSlot(c, query, THU, 30, { strict: true })).toMatchObject({ date: THU, slot: { start: 1080 } })
   })
 })

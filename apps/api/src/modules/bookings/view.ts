@@ -9,6 +9,7 @@ import type { Deps } from '../../deps'
 import { loadBusinesses } from '../availability/context'
 import { cityRef } from '../catalog/cities'
 import { geoOf, photoOf, text } from '../catalog/map'
+import { onlineRefusal } from './create'
 import { offeredTimes } from './offers'
 import { stateOf, type BookingRow } from './repo'
 
@@ -100,6 +101,8 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   // one booking per declined or expired request: once an offer is taken the others go
   const [taker] = await db.select({ code: bookings.code }).from(bookings).where(eq(bookings.alternativeOf, row.id))
   const offersOf = async (list: TimeSlot[]) => (taker ? [] : offeredTimes(db, lb, row, list, now))
+  // a paused business or a phone-only client: no free-time chips, no move, the call card instead (book Q-154)
+  const bookOnline = row.clientPhone ? !(await onlineRefusal(db, lb, row.clientPhone)) : lb.rules.onlineEnabled
 
   const timeline: BookingDetail['timeline'] = [{ event: 'sent', at: row.createdAt.getTime() }]
   if (row.confirmedAt) timeline.push({ event: 'confirmed', at: row.confirmedAt.getTime() })
@@ -147,12 +150,14 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     decline: row.declineReason
       ? { reason: row.declineReason, text: row.declineText, alternatives: await offersOf(row.declineAlternatives) }
       : null,
-    expiredAlternatives: status === 'cancelled' && row.cancelledBy === 'system' ? await offersOf(row.expiredAlternatives) : [],
+    expiredAlternatives:
+      status === 'cancelled' && row.cancelledBy === 'system' && bookOnline ? await offersOf(row.expiredAlternatives) : [],
+    bookOnline,
     offerTakenBy: taker?.code ?? null,
     reschedule: pendingMove
       ? { date: pendingMove.date, start: pendingMove.start, end: pendingMove.end, holdUntil: pendingMove.holdUntil?.getTime() ?? null }
       : null,
-    actions: { ...actions, reschedule: actions.reschedule && !pendingMove, restore },
+    actions: { ...actions, reschedule: actions.reschedule && !pendingMove && bookOnline, restore },
     review: review ? { rating: review.rating, tags: review.tags, text: review.text, createdAt: review.createdAt.getTime() } : null,
   }
 }

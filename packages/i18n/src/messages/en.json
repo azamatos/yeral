@@ -22,6 +22,7 @@
     "session_full": "The class is full.",
     "invalid_status": "This booking has already changed.",
     "request_expired": "The request has expired.",
+    "offer_past": "This offered time has passed. Pick another time.",
     "cancel_window_passed": "Free cancellation has ended.",
     "already_started": "The booking has already started.",
     "not_started": "The booking hasn't started yet.",

@@ -92,7 +92,7 @@ flowchart TD
 - Screens show the request as expired from the exact deadline, even if the pass runs up to a minute later (code).
 - A move request that runs out works differently: no times, no SMS, and the booking stays (S-07).
 - The 3 times aren't held for the client, so someone else may take them (S-08).
-- Each time belongs to one named specialist and is booked with that person only. If they're no longer free, the chip shows *Eýýäm eýelendi* (Q-159, decided 18.10.2026). The client's own specialist comes first where they're free, and one person does every service of a time (Claude (delegated), 20.10.2026). (code: `modules/jobs/run.ts` `alternativesFor`; `modules/bookings/offers.ts` for the chips' state)
+- Each time belongs to one named specialist and is booked with that person only. If they're no longer free, the chip shows *Eýýäm eýelendi* (Q-159, decided 18.10.2026). At the same time the client's own specialist comes first; services nobody does alone are still split between people, and such a time names nobody (Claude (delegated), 20.10.2026). (code: `modules/jobs/run.ts` `alternativesFor`; `modules/bookings/offers.ts` for the chips' state)
 
 > Open question Q-159: which specialist an offered or free time is for.
 

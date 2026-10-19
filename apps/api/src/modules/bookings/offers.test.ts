@@ -1,11 +1,12 @@
 /** Offered times name one specialist (book Q-159), go past with the lead time (Q-264); none free after an expiry (Q-252). */
+import { epochOf } from '@yeral/domain/time'
 import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, rateLimits, services, staff, staffServices } from '../../db/schema'
+import { bookingRules, bookings, businesses, rateLimits, services, staff, staffServices } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 
@@ -94,6 +95,10 @@ describe('offered times', () => {
       },
     })
     expect(took.status).toBe(201)
+    // the other specialist is free then: the old fallback would have booked them
+    const otherId = first!.staff!.name === 'Aýna' ? who.Maral : who['Aýna']
+    const free = await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&staff=${otherId}&date=${first!.date}`)
+    expect(free.json.slots.map((x: { start: number }) => x.start)).toContain(first!.start)
     expect((await offersOf(b, code))[0]?.state).toBe('taken')
     const tried = await b.req(`/v1/me/bookings/${code}/accept-alternative`, { body: { source: 'expired', index: 0 } })
     expect(tried.status).toBe(409)
@@ -117,11 +122,47 @@ describe('offered times', () => {
     await runDueJobs(t.deps)
     const [first] = await offersOf(b, code)
     // Glow Studio's lead time is the default hour: one minute inside it
-    const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
-    const startsAt = new Date(`${first!.date}T00:00:00+05:00`).getTime() + first!.start * MIN
-    t.clock.now = startsAt - 59 * MIN
-    expect(row!.expiredAlternatives[0]?.start).toBe(first!.start)
+    t.clock.now = epochOf(first!.date, first!.start) - 59 * MIN
     expect((await offersOf(b, code))[0]?.state).toBe('past')
+    // taking it says so, not "just taken"
+    const tried = await b.req(`/v1/me/bookings/${code}/accept-alternative`, { body: { source: 'expired', index: 0 } })
+    expect(tried.json.error.code).toBe('offer_past')
+  })
+
+  it('a paused business shows no free times and no move: the client calls instead (book Q-154)', async () => {
+    const { b, code } = await request('+99365444007', 10)
+    t.clock.now += 31 * MIN
+    await runDueJobs(t.deps)
+    expect(await offersOf(b, code)).toHaveLength(3)
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    await db.update(bookingRules).set({ onlineEnabled: false }).where(eq(bookingRules.businessId, glow!.id))
+    try {
+      const detail = (await b.req(`/v1/me/bookings/${code}`)).json
+      expect(detail).toMatchObject({ bookOnline: false, expiredAlternatives: [] })
+      expect(detail.actions.reschedule).toBe(false)
+    } finally {
+      await db.update(bookingRules).set({ onlineEnabled: true }).where(eq(bookingRules.businessId, glow!.id))
+    }
+  })
+
+  it('services nobody does alone still get times, split between people and naming nobody', async () => {
+    const [massage] = await db
+      .select()
+      .from(services)
+      .where(eq(services.name, { tk: 'Arka massažy', ru: 'Массаж спины', en: 'Back massage' }))
+    const pair = [haircut, massage!.id]
+    const c = browser(t.app)
+    await c.login('+99365444008', 'Client')
+    const slots = (await c.req(`/v1/businesses/glow-studio/availability?services=${pair.join(',')}&staff=any&date=${THU}`)).json.slots
+    const made = await c.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: pair, staffId: null, date: THU, start: slots.at(-1).start },
+    })
+    expect(made.status).toBe(201)
+    t.clock.now += 31 * MIN
+    await runDueJobs(t.deps)
+    const offers = await offersOf(c, made.json.code)
+    expect(offers.length).toBeGreaterThan(0)
+    for (const o of offers) expect(o).toMatchObject({ staff: null, state: 'free' })
   })
 
   it('with nothing free the expiry SMS asks for another time (book Q-252)', async () => {

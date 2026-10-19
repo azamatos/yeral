@@ -136,9 +136,10 @@ MVP. (business spec §3; Q-031, decided 18.10.2026)
 - **Declined with offered times:** taking an offered time creates a confirmed booking at once (the business offered it).
   One declined request gives at most one booking; the other chips disappear. (ROUND6-ANSWERS A1)
 - **Each offered or free time names one specialist** and is booked with that person only; if they're no longer free,
-  the chip shows *Eýýäm eýelendi*. (Q-159, decided 18.10.2026) The times after an expiry keep the client's specialist
-  where they're free, and a time is never split between people (Claude (delegated), 20.10.2026). (code:
-  `jobs/run.ts` `alternativesFor`, `bookings/offers.ts`)
+  the chip shows *Eýýäm eýelendi*. (Q-159, decided 18.10.2026) At the same time the client's specialist comes first;
+  services nobody does alone are still split between people, and such a time names nobody (Claude (delegated),
+  20.10.2026). (code: `jobs/run.ts` `alternativesFor`, `bookings/offers.ts`) **Code differs:** times offered after a
+  decline name nobody until the business's decline is built (P2 step 4), so taking one still goes to anyone free.
 - **Expired with free times:** taking one sends a new request (confirmed at once at an instant business). (ROUND6-ANSWERS A2)
 
 ## Changes after booking

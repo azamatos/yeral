@@ -22,6 +22,7 @@
     "session_full": "Sapak doly.",
     "invalid_status": "Bu ýazylyş eýýäm üýtgedi.",
     "request_expired": "Haýyşyň wagty geçdi.",
+    "offer_past": "Teklip edilen wagtyň möhleti geçdi. Başga wagt saýlaň.",
     "cancel_window_passed": "Mugt ýatyrmak wagty geçdi.",
     "already_started": "Ýazylyş eýýäm başlady.",
     "not_started": "Ýazylyş entek başlamady.",

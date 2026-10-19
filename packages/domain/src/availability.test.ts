@@ -211,8 +211,8 @@ describe('chains and «Islendik hünärmen»', () => {
     expect(slotStaffId(findAppointmentSlot(free, q({ staffId: null, oneSpecialist: true }), 600)!)).toBe('a')
     expect(slotStaffId(findAppointmentSlot(free, q({ staffId: null, oneSpecialist: true, preferStaffId: 'b' }), 600)!)).toBe('b')
     // the preferred one busy: someone else free
-    const aBusy = ctx({ staff: [person('a', ['cut']), person('b', ['cut'])], busy: [busy('b', THU, 600, 660)] })
-    expect(slotStaffId(findAppointmentSlot(aBusy, q({ staffId: null, preferStaffId: 'b' }), 600)!)).toBe('a')
+    const bBusy = ctx({ staff: [person('a', ['cut']), person('b', ['cut'])], busy: [busy('b', THU, 600, 660)] })
+    expect(slotStaffId(findAppointmentSlot(bBusy, q({ staffId: null, preferStaffId: 'b' }), 600)!)).toBe('a')
   })
 
   it('slotStaffId: the one specialist of a plan, or null when it is split', () => {
