@@ -1,9 +1,12 @@
 # Move rules, part 2 (feat/p2-3-move-outcomes)
 
 - Changed: P2 step 3, part 8 (ROUND6 A3, book Q-289). "Haýyşy yzyna al" is `POST /v1/me/bookings/{code}/withdraw-move`
-  (`withdrawMove()`, no online check; nothing waiting is nothing to do), with `bookings.withdrawMove` in the sdk. The
-  booking detail's `moveRefused` carries the latest move the business declined or let lapse (also before the jobs run),
-  with the decline reason, while the booking keeps its time and until another move is asked. A lapsed move sends the
-  client `sms.moveRefused` (en, tk and ru drafts), deduplicated per move.
+  (`withdrawMove()`, no online check; nothing waiting is nothing to do), with `bookings.withdrawMove` in the sdk. A move
+  not accepted is kept on the booking (`bookings.move_refused`, migration 0012): the jobs set it when a move lapses (the
+  business's decline will in step 4), and a new move, an accepted move or a withdraw clears it. The booking detail's
+  `moveRefused` shows it, and a move whose hold just ran out before the jobs run. A lapsed move sends the client
+  `sms.moveRefused` (en, tk and ru drafts) while the booking is still ahead. SMS name the calendar day of a time after
+  midnight (`confirmed`, `expired`, `moveRefused`). The review's first finding: reading the outcome from the move rows
+  broke once an accepted move deleted its row.
 - Follow-ups: the business's decline of a move (step 4) sends the same SMS; activeContext: next token links instead of
   `/b/{code}` and the signed-out link page (Q-168, F-068).

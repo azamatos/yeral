@@ -5,6 +5,7 @@
 import type { EventType } from '@yeral/contract/events'
 import { MARKET } from '@yeral/domain/market'
 import { localized, type Locale } from '@yeral/domain/model'
+import { epochOf, localOf } from '@yeral/domain/time'
 import { createFmt, createT } from '@yeral/i18n/fmt'
 import type { SiteConfig } from '@yeral/lib/site'
 import { eq } from 'drizzle-orm'
@@ -60,6 +61,9 @@ export async function smsCityOf(db: Queryable, cityId: string, lang: Locale): Pr
 /** `reminderEvening`: a reminder moved out of the night to 21:30 the evening before, worded like the day one ("tomorrow"). */
 export type BookingSmsKind = 'confirmed' | 'reminderDay' | 'reminder2h' | 'reminderEvening' | 'reviewAsk'
 
+/** The calendar day a business-day time falls on: 01:00 after midnight is the next day's (book Q-105). */
+const dayOf = (date: string, start: number) => localOf(epochOf(date, start)).date
+
 /** The brand name for SMS texts: the `common.brand` message, where the brand lives (systemPatterns, "Configuration, domains and brand"). */
 const brandOf = (t: ReturnType<typeof createT>) => t('common.brand')
 
@@ -75,7 +79,7 @@ export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsK
   }
   switch (kind) {
     case 'confirmed':
-      return t('sms.confirmed', { ...common, weekday: fmt.weekday(b.date), date: fmt.dayMonth(b.date) })
+      return t('sms.confirmed', { ...common, weekday: fmt.weekday(dayOf(b.date, b.start)), date: fmt.dayMonth(dayOf(b.date, b.start)) })
     case 'reminderDay':
     case 'reminderEvening':
       return t('sms.reminderDay', common)
@@ -92,7 +96,10 @@ export function expiredSmsText(site: SiteConfig, lang: Locale, b: SmsBooking, ti
   const t = createT(lang)
   const common = { brand: brandOf(t), business: b.businessName, link: bookingLink(site, b.code) }
   if (!times.length) return t('sms.expiredNoTimes', common)
-  const list = times.map((x) => (x.date === b.date ? fmt.time(x.start) : `${fmt.shortDate(x.date)} ${fmt.time(x.start)}`)).join(', ')
+  const asked = dayOf(b.date, b.start)
+  const list = times
+    .map((x) => (dayOf(x.date, x.start) === asked ? fmt.time(x.start) : `${fmt.shortDate(dayOf(x.date, x.start))} ${fmt.time(x.start)}`))
+    .join(', ')
   return t('sms.expired', { ...common, times: list })
 }
 
@@ -103,7 +110,7 @@ export function moveRefusedSmsText(site: SiteConfig, lang: Locale, b: SmsBooking
   return t('sms.moveRefused', {
     brand: brandOf(t),
     business: b.businessName,
-    date: fmt.dayMonth(b.date),
+    date: fmt.dayMonth(dayOf(b.date, b.start)),
     time: fmt.time(b.start),
     link: bookingLink(site, b.code),
   })

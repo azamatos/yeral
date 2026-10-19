@@ -1244,7 +1244,7 @@ flowchart TD
 
 - The business's decline of a move comes with the workspace (P2 step 4); its SMS will be the same one.
 
-**Status:** Design: drawn (Account-Bookings · moveWaiting, moveDeclined, moveUnanswered, moveAccepted; Mobile 11) · Code: built (api) for the client: waiting, replacing, withdrawing, the outcomes aren't.
+**Status:** Design: drawn (Account-Bookings · moveWaiting, moveDeclined, moveUnanswered, moveAccepted; Mobile 11) · Code: built (api) for the client: waiting, replacing, withdrawing, the outcome and its SMS; the business's decline with P2 step 4.
 
 ### C-32 · Table or class: cancel and book again instead of moving
 

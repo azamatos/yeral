@@ -5,7 +5,7 @@
  * 3. Queued work: SMS, reminders, review asks, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
-import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
+import { effectiveStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { nearestSlots, nextFreeSlot, slotStaffId, staffDoingAll, type AppointmentSlot } from '@yeral/domain/availability'
 import { addDays, localOf } from '@yeral/domain/time'
@@ -16,7 +16,7 @@ import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, queueSms, sms
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
 import { bookedServices } from '../bookings/create'
-import { setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
+import { setStatus, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100
 const MAX_ATTEMPTS = 5
@@ -78,34 +78,28 @@ async function expireRequests(deps: Deps): Promise<number> {
           bookingCode: row.code,
           userId: row.userId,
         })
-        // a move that lapsed: the booking keeps its time, and the client hears so (book Q-289)
-        if (b.rescheduleOf) {
-          const [original] = await tx.select().from(bookings).where(eq(bookings.id, b.rescheduleOf))
-          const [biz] = await tx.select().from(businesses).where(eq(businesses.id, row.businessId))
-          if (original?.status === 'confirmed' && original.clientPhone && biz) {
-            const [user] = original.userId ? await tx.select().from(users).where(eq(users.id, original.userId)) : []
-            const text = moveRefusedSmsText(deps.site, user?.lang ?? MARKET.defaultLanguage, {
-              code: original.code,
-              date: original.date,
-              start: original.start,
-              businessName: biz.name,
-              address: biz.address,
-            })
-            await queueSms(tx, { to: original.clientPhone, text, runAt: now, dedupeKey: `moveRefused:${row.id}` })
-          }
+        // a lapsed move: the booking it would move keeps its time, says so, and the client hears so (book Q-289);
+        // a booking that ended or went meanwhile hears nothing
+        const [original] = b.rescheduleOf ? await tx.select().from(bookings).where(eq(bookings.id, b.rescheduleOf)) : []
+        const live = original && effectiveStatus(stateOf(original), now.getTime()).status === 'confirmed'
+        if (original && live) {
+          await tx
+            .update(bookings)
+            .set({ moveRefused: { date: row.date, start: row.start, end: row.end, by: 'system', reason: null, text: null } })
+            .where(eq(bookings.id, original.id))
         }
-        if (!b.rescheduleOf && row.clientPhone) {
-          const [biz] = await tx.select().from(businesses).where(eq(businesses.id, row.businessId))
-          const [user] = row.userId ? await tx.select().from(users).where(eq(users.id, row.userId)) : []
-          if (biz) {
-            const text = expiredSmsText(
-              deps.site,
-              user?.lang ?? MARKET.defaultLanguage,
-              { code: row.code, date: row.date, start: row.start, businessName: biz.name, address: biz.address },
-              alternatives,
-            )
-            await queueSms(tx, { to: row.clientPhone, text, runAt: now, dedupeKey: `expired:${row.id}` })
-          }
+        const told = b.rescheduleOf ? (live ? original : undefined) : row
+        const [biz] = told?.clientPhone ? await tx.select().from(businesses).where(eq(businesses.id, row.businessId)) : []
+        if (told?.clientPhone && biz) {
+          const [user] = told.userId ? await tx.select().from(users).where(eq(users.id, told.userId)) : []
+          const lang = user?.lang ?? MARKET.defaultLanguage
+          const sms = { code: told.code, date: told.date, start: told.start, businessName: biz.name, address: biz.address }
+          await queueSms(tx, {
+            to: told.clientPhone,
+            text: b.rescheduleOf ? moveRefusedSmsText(deps.site, lang, sms) : expiredSmsText(deps.site, lang, sms, alternatives),
+            runAt: now,
+            dedupeKey: `${b.rescheduleOf ? 'moveRefused' : 'expired'}:${row.id}`,
+          })
         }
       }),
     )

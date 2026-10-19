@@ -311,6 +311,59 @@ describe('moves', () => {
     }
   })
 
+  it('a move the business declined shows its reason, until the client acts again', async () => {
+    const { b, code, date, start, id } = await confirmed('+99365444221', FRI)
+    // the business's decline (P2 step 4) leaves this on the booking
+    await db
+      .update(bookings)
+      .set({ moveRefused: { date, start: start + 30, end: start + 90, by: 'business', reason: 'slot_busy', text: 'Full that hour' } })
+      .where(eq(bookings.id, id))
+    expect((await b.req(`/v1/me/bookings/${code}`)).json.moveRefused).toMatchObject({
+      by: 'business',
+      reason: 'slot_busy',
+      text: 'Full that hour',
+    })
+    await b.req(`/v1/me/bookings/${code}/withdraw-move`, { method: 'POST' })
+    expect((await b.req(`/v1/me/bookings/${code}`)).json.moveRefused).toBeNull()
+  })
+
+  it('a refused move, then an accepted one: the booking no longer says it was refused', async () => {
+    const { b, code, date, start, id } = await confirmed('+99365444222', FRI)
+    await db
+      .update(bookings)
+      .set({ moveRefused: { date, start: start + 30, end: start + 90, by: 'system', reason: null, text: null } })
+      .where(eq(bookings.id, id))
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })
+    const [move] = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
+    await db.transaction((tx) => confirmBooking(tx, t.deps, move!))
+    expect((await b.req(`/v1/me/bookings/${code}`)).json).toMatchObject({ start: start + 60, moveRefused: null })
+  })
+
+  it('withdrawing a move whose hold just ran out leaves no refusal on the booking', async () => {
+    const { b, code, date, start, id } = await confirmed('+99365444223', FRI)
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+    const [move] = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
+    t.clock.now = move!.holdUntil!.getTime() + 1000
+    const withdrawn = await b.req(`/v1/me/bookings/${code}/withdraw-move`, { method: 'POST' })
+    expect(withdrawn.json).toMatchObject({ reschedule: null, moveRefused: null })
+  })
+
+  it('a second move can be asked while one waits, and replaces it (ROUND6 A3)', async () => {
+    const { b, code, date, start } = await confirmed('+99365444206', FRI)
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+    const waiting = (await b.req(`/v1/me/bookings/${code}`)).json
+    expect(waiting.actions.reschedule).toBe(true)
+    const second = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })
+    expect(second.json.reschedule).toMatchObject({ start: start + 60 })
+  })
+
+  // last: it runs the jobs, which settle every other test's rows too
   it('a move left unanswered: the booking says so and the client gets an SMS (book Q-289)', async () => {
     const { b, code, date, start, id } = await confirmed('+99365444220', FRI)
     await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
@@ -329,28 +382,5 @@ describe('moves', () => {
     // a new move asked: the old answer goes
     await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })
     expect((await b.req(`/v1/me/bookings/${code}`)).json.moveRefused).toBeNull()
-  })
-
-  it('a move the business declined shows its reason', async () => {
-    const { b, code, date, start, id } = await confirmed('+99365444221', FRI)
-    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
-    await db
-      .update(bookings)
-      .set({ status: 'cancelled', cancelledBy: 'business', declineReason: 'slot_busy', declineText: 'Full that hour' })
-      .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
-    expect((await b.req(`/v1/me/bookings/${code}`)).json.moveRefused).toMatchObject({
-      by: 'business',
-      reason: 'slot_busy',
-      text: 'Full that hour',
-    })
-  })
-
-  it('a second move can be asked while one waits, and replaces it (ROUND6 A3)', async () => {
-    const { b, code, date, start } = await confirmed('+99365444206', FRI)
-    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
-    const waiting = (await b.req(`/v1/me/bookings/${code}`)).json
-    expect(waiting.actions.reschedule).toBe(true)
-    const second = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })
-    expect(second.json.reschedule).toMatchObject({ start: start + 60 })
   })
 })

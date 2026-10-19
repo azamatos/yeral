@@ -335,7 +335,9 @@ flowchart TD
 > Open question Q-263: A waiting move that outlives the original time.
 
 
-**Status.** Design: decided and drawn (ROUND6 A3, A5; business spec §26; Account-Bookings, B-Calendar) · Code: built in the api, with the differences above.
+- **Code differs:** the business's decline of a move comes with the workspace (P2 step 4).
+
+**Status.** Design: decided and drawn (ROUND6 A3, A5; business spec §26; Account-Bookings, B-Calendar) · Code: built in the api for the client (the move, its lapse with the SMS, withdrawing); the business's side with step 4.
 
 ### S-08 · Offered times go past or get taken
 

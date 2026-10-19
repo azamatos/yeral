@@ -47,6 +47,13 @@ const guard = (problem: ReturnType<typeof canClientCancel>) => {
   if (problem) throw new ApiError(problem)
 }
 
+/** The client moved on from a refused move: the booking stops saying it. */
+async function clearMoveRefused(db: Queryable, b: BookingRow): Promise<BookingRow> {
+  if (!b.moveRefused) return b
+  const [row] = await db.update(bookings).set({ moveRefused: null }).where(eq(bookings.id, b.id)).returning()
+  return row ?? b
+}
+
 /** The move waiting for this booking, if any. */
 async function waitingMove(db: Queryable, b: BookingRow): Promise<BookingRow | undefined> {
   const [m] = await db
@@ -156,6 +163,8 @@ export async function rescheduleBooking(
     guard(canClientReschedule(stateOf(locked), lb.rules, deps.now()))
     const booked = await bookedServices(tx, locked.id)
     await dropPendingMove(tx, locked, new Date(deps.now()))
+    // the client acts again: an earlier refusal is old news
+    await clearMoveRefused(tx, locked)
     // its own time with no other specialist named: the booking stays as it is, whatever the rules say now, and the
     // waiting move is withdrawn (to move to another specialist at the same time, the client names them)
     if (to.date === locked.date && to.start === locked.start && (to.staffId == null || to.staffId === booked.staffId)) return locked
@@ -180,7 +189,7 @@ export async function withdrawMove(deps: Deps, b: BookingRow): Promise<BookingRo
   return deps.db.transaction(async (tx) => {
     const locked = await lockBooking(tx, b.id)
     await dropPendingMove(tx, locked, new Date(deps.now()))
-    return locked
+    return clearMoveRefused(tx, locked)
   })
 }
 

@@ -6,6 +6,7 @@ import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
 import { bookings, businesses, jobs, users } from '../../db/schema'
 import { seed } from '../../db/seed'
+import { bookingSmsText, moveRefusedSmsText } from '../../notify'
 import { runDueJobs } from '../jobs/run'
 import { queueBookingSms } from './confirm'
 
@@ -117,5 +118,13 @@ describe('reminders and the night (book Q-285)', () => {
         await db.delete(bookings).where(eq(bookings.id, bookingId))
       }
     }
+  })
+
+  it('an SMS names the calendar day of a time after midnight (book Q-105)', () => {
+    const t = testApp(db)
+    // the 23rd's business day at 01:00 is the morning of the 24th, a Saturday
+    const late = { code: 'YR-11111', date: '2026-10-23', start: 1500, businessName: 'Night Bar', address: 'x' }
+    expect(moveRefusedSmsText(t.deps.site, 'en', late)).toContain('stays at 24 October 01:00')
+    expect(bookingSmsText(t.deps.site, 'en', 'confirmed', late)).toContain('Saturday, 24 October, 01:00')
   })
 })

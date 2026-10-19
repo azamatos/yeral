@@ -3,7 +3,7 @@ import type { BookingDetail, BookingSummary } from '@yeral/contract/bookings'
 import { cancelDeadline, clientActions, effectiveStatus } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
-import { desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { bookingItems, bookings, businesses, classSessions, reviews, staff, tableAreas, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { loadBusinesses } from '../availability/context'
@@ -93,19 +93,18 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   const state = stateOf(row)
   const { status } = effectiveStatus(state, now)
   const [review] = await db.select().from(reviews).where(eq(reviews.bookingId, row.id))
-  // the move waiting, else the one settled last (declined, lapsed or withdrawn); timestamps can tie, so waiting goes first
-  const [lastMove] = await db
+  const [move] = await db
     .select()
     .from(bookings)
-    .where(eq(bookings.rescheduleOf, row.id))
-    .orderBy(desc(sql`${bookings.status} = 'pending'`), desc(bookings.updatedAt), desc(bookings.createdAt))
-    .limit(1)
-  const lastMoveState = lastMove ? effectiveStatus(stateOf(lastMove), now) : null
-  const pendingMove = lastMoveState?.status === 'pending' ? lastMove : undefined
-  const refusedBy =
-    status === 'confirmed' && lastMoveState?.status === 'cancelled' && lastMoveState.cancelledBy !== 'client'
-      ? lastMoveState.cancelledBy
-      : null
+    .where(and(eq(bookings.rescheduleOf, row.id), eq(bookings.status, 'pending')))
+  const pendingMove = move && effectiveStatus(stateOf(move), now).status === 'pending' ? move : undefined
+  // a move not accepted: kept on the booking; one whose hold just ran out says so before the jobs record it
+  const moveRefused =
+    status !== 'confirmed'
+      ? null
+      : move && !pendingMove
+        ? { date: move.date, start: move.start, end: move.end, by: 'system' as const, reason: null, text: null }
+        : row.moveRefused
   // one booking per declined or expired request: once an offer is taken the others go
   const [taker] = await db.select({ code: bookings.code }).from(bookings).where(eq(bookings.alternativeOf, row.id))
   const offersOf = async (list: TimeSlot[]) => (taker ? [] : offeredTimes(db, lb, row, list, now))
@@ -163,17 +162,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
       status === 'cancelled' && row.cancelledBy === 'system' && bookOnline ? await offersOf(row.expiredAlternatives) : [],
     bookOnline,
     offerTakenBy: taker?.code ?? null,
-    moveRefused:
-      lastMove && refusedBy
-        ? {
-            date: lastMove.date,
-            start: lastMove.start,
-            end: lastMove.end,
-            by: refusedBy,
-            reason: lastMove.declineReason,
-            text: lastMove.declineText,
-          }
-        : null,
+    moveRefused,
     reschedule: pendingMove
       ? { date: pendingMove.date, start: pendingMove.start, end: pendingMove.end, holdUntil: pendingMove.holdUntil?.getTime() ?? null }
       : null,
