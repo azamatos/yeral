@@ -309,7 +309,7 @@ apps/api/src/modules/bookings/actions.ts). The code still sends a review ask by 
 | What | Value | Who can change it | Source |
 |---|---|---|---|
 | Opening and closing pickers | from 00:00 to 24:00, in 30-min steps | Owner/admin | business spec §11, §26; ROUND6-ANSWERS E1; Q-128, decided 18.10.2026 |
-| Latest end of a day | past midnight allowed: hours like 18:00–02:00, and bookings may cross midnight (not drawn yet) | Owner/admin | ROUND6-ANSWERS E1; Q-105, decided 18.10.2026 |
+| Latest end of a day | past midnight allowed: hours like 18:00–02:00, up to 48:00 and never into the next day's opening; bookings may cross midnight and belong to the day that started (not drawn yet) | Owner/admin | ROUND6-ANSWERS E1; Q-105, decided 18.10.2026; chapter 4 |
 | Breaks | 1 per day, may differ per day; each staff member has their own | Owner/admin | business spec §11; ADR 0017 |
 | Staff hours | the business's hours, or their own inside them | Owner/admin | business spec §10; ADR 0017 |
 | "*Iş günleri birmeňzeş*" (same every weekday) | copies Monday to Tuesday–Friday | Owner/admin | business spec §11 |

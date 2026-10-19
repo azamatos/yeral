@@ -6,6 +6,7 @@
  */
 import type { AppointmentContext, BusyInterval, TableContext } from '@yeral/domain/availability'
 import type { BookingRules } from '@yeral/domain/rules'
+import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, lte } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, businesses, diningTables, services, staff, staffServices, tableAreas } from '../../db/schema'
@@ -76,7 +77,7 @@ export async function loadBusinesses(db: Queryable, ids: string[]): Promise<Map<
   return out
 }
 
-/** Busy time per specialist, buffers included, for active bookings between two dates. */
+/** Busy time per specialist, buffers included, for active bookings between two dates and the day either side (past midnight). */
 export async function loadBusy(db: Queryable, businessIds: string[], from: string, to: string): Promise<BusyInterval[]> {
   if (!businessIds.length) return []
   const rows = await db
@@ -94,8 +95,8 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
       and(
         inArray(bookings.businessId, businessIds),
         eq(bookingItems.active, true),
-        gte(bookingItems.date, from),
-        lte(bookingItems.date, to),
+        gte(bookingItems.date, addDays(from, -1)),
+        lte(bookingItems.date, addDays(to, 1)),
       ),
     )
   return rows.flatMap((r) =>
@@ -170,7 +171,15 @@ export async function loadTableContexts(
         bookingId: bookings.id,
       })
       .from(bookings)
-      .where(and(inArray(bookings.businessId, ids), eq(bookings.active, true), gte(bookings.date, from), lte(bookings.date, to))),
+      // a day before and after too: a day may run past midnight (busyOn)
+      .where(
+        and(
+          inArray(bookings.businessId, ids),
+          eq(bookings.active, true),
+          gte(bookings.date, addDays(from, -1)),
+          lte(bookings.date, addDays(to, 1)),
+        ),
+      ),
   ])
   for (const lb of lbs) {
     const areas = areaRows.filter((a) => a.businessId === lb.business.id)

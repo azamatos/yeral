@@ -282,7 +282,7 @@ flowchart TD
 
 **Edge cases**
 
-- Businesses open past midnight are not designed (E1; Q-105).
+- Businesses open past midnight are not designed (E1; Q-105). The api offers their times after 24:00 under the day that started (`01:00` under Friday for a bar open 18:00–02:00 on Friday), and the open state after midnight reads "open until 02:00" (chapter 4).
 - Reviews under moderation are shown but not counted (C-07).
 - Heart while signed out: log in first (C-19).
 - A business has one booking type at launch, so the client never picks one; several types in one business (a gym with classes and personal training) come later (Q-022, decided 18.10.2026).

@@ -87,8 +87,17 @@ describe('no double booking', () => {
     expect(row!.active).toBe(false)
   })
 
-  it('keeps a business day inside midnight', async () => {
-    await expect(db.insert(t.bookingItems).values(item(cancelledId, 1400, 1440, 10))).rejects.toThrow()
+  it('lets a business day run past midnight, up to 48:00 (book Q-105)', async () => {
+    await db.insert(t.bookingItems).values(item(cancelledId, 1400, 1440, 10))
+    await expect(db.insert(t.bookingItems).values(item(cancelledId, 2850, 2880, 10))).rejects.toThrow()
+  })
+
+  it('refuses an overlap across midnight: late on one day, early the next', async () => {
+    // 15th 00:30–01:30 the next morning = minutes 1470–1530 of the 15th
+    await db.insert(t.bookingItems).values(item(bookingId, 1470, 1530))
+    const nextMorning = (start: number, end: number) => ({ ...item(otherBookingId, start, end), date: '2026-10-16' })
+    await expect(db.insert(t.bookingItems).values(nextMorning(60, 120))).rejects.toThrow()
+    await db.insert(t.bookingItems).values(nextMorning(90, 150))
   })
 })
 

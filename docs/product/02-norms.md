@@ -177,8 +177,11 @@ average bill is still in the code (code: packages/i18n/src/fmt.ts).
 - **The 24:00 rule.** A day may end at 24:00. Clients then see `09:00–24:00` and *Häzir açyk · 24:00-a çenli* (open now,
   until 24:00). End pickers go up to 24:00; start pickers stop at 23:30. (ROUND6-ANSWERS E1,
   business spec §26; code: packages/contract/src/common.ts)
-- **Past midnight:** a business may be open past midnight (`18:00–02:00`), and a booking may cross midnight. It isn't
-  designed yet. (client spec §13; Q-105, decided 18.10.2026) **Code differs:** every day and every visit ends by 24:00.
+- **Past midnight:** a business may be open past midnight (`18:00–02:00`), and a booking may cross midnight. Everything
+  after midnight belongs to the day that started: a 01:00 booking at a bar open 18:00–02:00 on Friday is Friday's, shown
+  under Friday as `01:00`. A day's part past midnight ends by the time the next day opens, so no moment belongs to two
+  days. The screens aren't designed yet. (client spec §13; Q-105, decided 18.10.2026; the business-day model: Claude
+  (delegated), 20.10.2026; code: packages/domain/src/hours.ts)
 
 > Open question Q-105: can a business be open past midnight?
 

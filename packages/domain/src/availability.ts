@@ -9,9 +9,10 @@
  * - starts are multiples of the business's slot step; clients also get the lead time and the booking window,
  *   staff booking by phone don't (they choose a specialist who does every service themselves), but they get no time
  *   before the current step either: staff bookings are confirmed at once and would complete as visits that never were;
- * - pending requests block their slot until they expire, like confirmed bookings (the api passes both as busy).
+ * - pending requests block their slot until they expire, like confirmed bookings (the api passes both as busy);
+ * - a day may run past midnight: starts after 24:00 belong to the day that started (minute 1500 = 01:00 next morning).
  */
-import { businessDay, staffDay, workingIntervals, type BusinessHours, type StaffSchedule } from './hours'
+import { businessDay, DAY_MINUTES, staffDay, workingIntervals, type BusinessHours, type StaffSchedule } from './hours'
 import { MAX_ALTERNATIVES } from './lifecycle'
 import { contains, overlaps, type Interval } from './model'
 import type { BookingRules } from './rules'
@@ -101,12 +102,27 @@ interface StaffDayView {
   busy: Interval[]
 }
 
+/**
+ * Busy time that touches a date, in that date's minutes: days may run past midnight (book Q-105), so the day before
+ * (its late bookings, minus 1440) and the day after (its early ones, plus 1440) count too.
+ */
+export function busyOn<T extends { date: string; start: number; end: number }>(busy: readonly T[], date: string): T[] {
+  const out: T[] = []
+  for (const b of busy) {
+    const days = diffDays(b.date, date)
+    if (days === 0) out.push(b)
+    else if (days === -1 || days === 1) out.push({ ...b, start: b.start + days * DAY_MINUTES, end: b.end + days * DAY_MINUTES })
+  }
+  return out
+}
+
 function dayViews(ctx: AppointmentContext, date: string, excludeBookingId?: string): Map<string, StaffDayView> {
   const views = new Map<string, StaffDayView>()
+  const onDate = busyOn(ctx.busy, date)
   for (const s of bookableStaff(ctx)) {
     const day = staffDay(ctx.business, s, date)
     if (!day) continue
-    const busy = ctx.busy.filter((b) => b.staffId === s.id && b.date === date && b.bookingId !== excludeBookingId)
+    const busy = onDate.filter((b) => b.staffId === s.id && b.bookingId !== excludeBookingId)
     views.set(s.id, { staff: s, working: workingIntervals(day), busy })
   }
   return views
@@ -382,10 +398,11 @@ export interface TableSlot {
 }
 
 function freeTable(ctx: TableContext, area: TableArea, date: string, span: Interval, partySize: number, excludeBookingId?: string) {
+  const busy = busyOn(ctx.busy, date)
   return [...area.tables]
     .filter((t) => t.seats >= partySize)
     .sort((a, b) => a.seats - b.seats)
-    .find((t) => !ctx.busy.some((b) => b.tableId === t.id && b.date === date && b.bookingId !== excludeBookingId && overlaps(b, span)))
+    .find((t) => !busy.some((b) => b.tableId === t.id && b.bookingId !== excludeBookingId && overlaps(b, span)))
 }
 
 export function tableSlots(ctx: TableContext, q: { date: string; partySize: number; excludeBookingId?: string }): TableSlot[] {

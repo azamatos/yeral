@@ -82,7 +82,10 @@ automatically; VIP areas need 6 or more people). Classes: a session is bookable 
 business spec §20–§21)
 
 A business may stay open past midnight: hours like 18:00–02:00, and a booking may cross midnight. (Q-105, decided
-18.10.2026; ROUND6-ANSWERS E1 drew hours up to 24:00) **Code differs:** every day and visit ends by 24:00.
+18.10.2026; ROUND6-ANSWERS E1 drew hours up to 24:00) A business day keeps everything after its midnight, up to 48:00:
+free times after 24:00 are offered under the day that started, and a day's part past midnight must end by the next
+day's opening. Late bookings of one day and early ones of the next still can't overlap for the same specialist or
+table. (business-day model: Claude (delegated), 20.10.2026; code: `@yeral/domain/hours`, migration 0007)
 
 ## The life of a booking
 

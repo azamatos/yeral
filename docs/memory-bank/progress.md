@@ -166,6 +166,10 @@
   (list, accept, decline, the link), the owner's team endpoints (invite, resend, cancel, without the app and switching
   it on, level and override, remove with bookings kept, reactivate) and leaving; live events follow the level; a
   deleted account's rows leave their teams; `@yeral/contract/team`, `sdk.team`. P2 step 2 done.
+- **2026-10-20 · P2 step 3, part 1 (past midnight, Q-105):** a business day may run to 48:00
+  (`@yeral/domain/hours`: `MAX_DAY_END`, `weekHoursErrors()`, the open state after midnight); free times count the day
+  before and after (`busyOn()`), and the api loads them; the contract's minutes reach 2880; migration 0007 puts
+  `span` in absolute minutes, so the database refuses overlaps across midnight, and allows minutes to 2880.
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.
