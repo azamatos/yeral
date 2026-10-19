@@ -274,14 +274,13 @@ apps/api/src/modules/bookings/actions.ts). The code still sends a review ask by 
 | Access levels | 3 (*Eýesi*, *Administrator*, *Hünärmen*); a *Hünärmen* may work without the app; no custom levels | Fixed | business spec §1; Q-216, decided 18.10.2026 |
 | Team size | no limit | Fixed | business spec §19 |
 | Invite link | sent by SMS (at the first launch: shown at the invited phone's sign-in, and the owner copies the link); valid 7 days; can be sent again; expired: "*Çakylygyň möhleti geçdi*" | Owner (administrators only see the team: chapter 3; ADR 0025) | business spec §1, §8 |
-| Specialist without the app | phone number required, no invite, active at once | Owner/admin | business spec §11; Q-216 |
+| Specialist without the app | phone number required, no invite, active at once | Owner (ADR 0025) | business spec §11; Q-216 |
 | Workspaces per person | no limit; one address each | Fixed | business spec §1 |
 | Busy elsewhere (*Başga ýerde*) | always on, in the MVP: the specialist's confirmed bookings and waiting requests in other workspaces, with their buffers, block the time as a reserved gap with no details | Fixed | business spec §1; Q-031, Q-271, Q-272, decided 18.10.2026 |
 | Who answers requests | both (see booking rules); each person can be allowed to answer their own | Owner/admin | business spec §2, §8 |
 | Rows in the permission matrix | 11, fixed in the MVP | Fixed (the owner edits it later, F-089) | business demo data (accessLevels); ADR 0025 |
 
-**Code differs:** invitations never expire, and an invited person joins at the first login without the accept or decline
-step (code: apps/api/src/modules/auth/routes.ts).
+(code: apps/api/src/modules/team, `@yeral/domain/team`; ADR 0025)
 
 **Design to fix:** drop the *Profilim* switch *Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez* (Q-271).
 

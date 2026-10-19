@@ -29,10 +29,20 @@ describe('three fixed levels (book chapter 3)', () => {
   it('a specialist sees and acts on their own column, clients and earnings only', () => {
     expect(canOn(ayna, 'calendar', ['ayna'])).toBe(true)
     expect(canOn(ayna, 'calendar', ['maral'])).toBe(false)
-    expect(canOn(ayna, 'bookings', ['ayna', 'maral'])).toBe(true)
+    expect(canOn(ayna, 'bookings', ['ayna'])).toBe(true)
     expect(canOn(ayna, 'clients', ['maral'])).toBe(false)
+    expect(canOn(ayna, 'clients', ['maral', 'ayna'])).toBe(true)
     expect(canOn(ayna, 'revenue', ['ayna'])).toBe(true)
     for (const p of ['reviewsReply', 'services', 'settings', 'team'] as const) expect(can(ayna, p)).toBe(false)
+  })
+
+  it('a booking shared with another specialist: both see it, the owner or an administrator changes it', () => {
+    const shared = ['ayna', 'maral']
+    expect(canOn(ayna, 'calendar', shared)).toBe(true)
+    expect(canOn(ayna, 'bookings', shared)).toBe(false)
+    expect(canOn(ayna, 'noshow', shared)).toBe(false)
+    expect(canOn(admin, 'bookings', shared)).toBe(true)
+    expect(canOn(ayna, 'bookings', [])).toBe(false)
   })
 
   it('every level has a value for every row, and only the team row says view or manage', () => {

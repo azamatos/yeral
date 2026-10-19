@@ -16,6 +16,8 @@ export const EVENT_TYPES = [
   'booking.noshow',
   'booking.updated',
   'review.created',
+  /** Someone joined, declined, left or was invited, removed or changed: the team and the switcher refresh. */
+  'team.changed',
 ] as const
 export type EventType = (typeof EVENT_TYPES)[number]
 

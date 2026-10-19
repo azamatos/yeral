@@ -31,6 +31,7 @@ import type {
 } from '@yeral/contract/bookings'
 import type { searchQuerySchema } from '@yeral/contract/catalog'
 import type { Locale } from '@yeral/contract/common'
+import type { inviteInputSchema, phoneOnlyInputSchema, updateMemberSchema } from '@yeral/contract/team'
 import type { z } from 'zod'
 import { call, isApiError, type Client } from './client'
 import { keys, type BookingTab } from './keys'
@@ -293,7 +294,95 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       ),
   }
 
-  return { auth, me, catalog, availability, bookings }
+  /** The business team (ADR 0025): the switcher, invites, and the team the owner manages. */
+  const w = v1.w[':slug']
+  const teamChanged = (slug?: string) => invalidate(keys.workspaces(), ...(slug ? [keys.team(slug)] : []))
+  const team = {
+    /** The switcher; `current` is the workspace opened last. */
+    workspaces: () =>
+      queryOptions({
+        queryKey: keys.workspaces(),
+        queryFn: ({ signal }) => call(v1.me.workspaces.$get(undefined, abortWith(signal))),
+      }),
+    open: () =>
+      mutationOptions({
+        mutationFn: (slug: string) => call(v1.me.workspaces[':slug'].open.$post({ param: { slug } })),
+        onSuccess: () => teamChanged(),
+      }),
+    /** Open and expired invites for the signed-in phone (shown at sign-in). */
+    myInvites: () =>
+      queryOptions({
+        queryKey: keys.invites(),
+        queryFn: ({ signal }) => call(v1.me.invites.$get(undefined, abortWith(signal))),
+      }),
+    /** The invite behind a link; it never signs anyone in. */
+    invite: (token: string) =>
+      queryOptions({
+        queryKey: keys.invite(token),
+        queryFn: ({ signal }) => call(v1.invites[':token'].$get({ param: { token } }, abortWith(signal))),
+      }),
+    accept: () =>
+      mutationOptions({
+        mutationFn: (id: string) => call(v1.me.invites[':id'].accept.$post({ param: { id } })),
+        onSuccess: () => invalidate(keys.invites(), keys.workspaces(), keys.me()),
+      }),
+    decline: () =>
+      mutationOptions({
+        mutationFn: (id: string) => call(v1.me.invites[':id'].decline.$post({ param: { id } })),
+        onSuccess: () => invalidate(keys.invites()),
+      }),
+    list: (slug: string) =>
+      queryOptions({
+        queryKey: keys.team(slug),
+        queryFn: ({ signal }) => call(w.team.$get({ param: { slug } }, abortWith(signal))),
+      }),
+    /** Returns the link for the owner to copy. */
+    sendInvite: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof inviteInputSchema>) => call(w.team.invites.$post({ param: { slug }, json })),
+        onSuccess: () => teamChanged(slug),
+      }),
+    addPhoneOnly: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof phoneOnlyInputSchema>) => call(w.team['phone-only'].$post({ param: { slug }, json })),
+        onSuccess: () => teamChanged(slug),
+      }),
+    /** Send again, or switch the app on for a specialist without it. */
+    resendInvite: (slug: string) =>
+      mutationOptions({
+        mutationFn: (staffId: string) => call(w.team[':staffId'].invite.$post({ param: { slug, staffId } })),
+        onSuccess: () => teamChanged(slug),
+      }),
+    cancelInvite: (slug: string) =>
+      mutationOptions({
+        mutationFn: (staffId: string) => call(w.team[':staffId'].invite.$delete({ param: { slug, staffId } })),
+        onSuccess: () => teamChanged(slug),
+      }),
+    update: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ staffId, ...json }: { staffId: string } & z.input<typeof updateMemberSchema>) =>
+          call(w.team[':staffId'].$patch({ param: { slug, staffId }, json })),
+        onSuccess: () => teamChanged(slug),
+      }),
+    remove: (slug: string) =>
+      mutationOptions({
+        mutationFn: (staffId: string) => call(w.team[':staffId'].remove.$post({ param: { slug, staffId } })),
+        onSuccess: () => teamChanged(slug),
+      }),
+    reactivate: (slug: string) =>
+      mutationOptions({
+        mutationFn: (staffId: string) => call(w.team[':staffId'].reactivate.$post({ param: { slug, staffId } })),
+        onSuccess: () => teamChanged(slug),
+      }),
+    /** "Bu biznesden çyk": the signed-in person leaves this workspace. */
+    leave: () =>
+      mutationOptions({
+        mutationFn: (slug: string) => call(v1.w[':slug'].leave.$post({ param: { slug } })),
+        onSuccess: () => invalidate(keys.workspaces(), keys.me()),
+      }),
+  }
+
+  return { auth, me, catalog, availability, bookings, team }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

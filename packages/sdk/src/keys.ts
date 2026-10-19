@@ -26,4 +26,9 @@ export const keys = {
   bookingLists: () => ['bookings', 'list'] as const,
   bookingList: (tab: BookingTab, lang: Locale) => ['bookings', 'list', tab, lang] as const,
   booking: (code: string, lang: Locale) => ['bookings', 'detail', code, lang] as const,
+  // the team (ADR 0025)
+  workspaces: () => ['workspaces'] as const,
+  invites: () => ['invites'] as const,
+  invite: (token: string) => ['invites', 'token', token] as const,
+  team: (slug: string) => ['team', slug] as const,
 }

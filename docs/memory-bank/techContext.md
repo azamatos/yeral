@@ -99,7 +99,8 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | statuses, hold time, who may do what with a booking | `initialStatus() holdUntil() effectiveStatus() dueTransition() cancelDeadline() clientActions() canAnswerRequest() canComplain() …` | `@yeral/domain/lifecycle` |
 | access levels and the permission table | `LEVELS PERMISSION_TABLE scopeOf() can() canOn() canManageTeam() canAnswerRequest()` | `@yeral/domain/permissions` |
 | invites | `INVITE_DAYS inviteState() inviteExpiresAt()` | `@yeral/domain/team` |
-| who is on which team (api) | `signsIn` condition, `workspaceIdsOf() hasSignedInTeam()` | `apps/api/src/modules/team/members.ts` |
+| who is on which team (api) | `signsIn` condition, `teamsOf() workspaceIdsOf() hasSignedInTeam()` | `apps/api/src/modules/team/members.ts` |
+| a workspace route's member and actor (api) | `requireMember(c, slug)` (404 when not on the team), `teamRow() issueInvite() members()` | `apps/api/src/modules/team/service.ts` |
 | client stats, segments, online block | `clientStats() clientSegments() isOnlineBlocked()` | `@yeral/domain/clients` |
 | price totals, calendar day summary | `priceTotal() daySummary()` | `@yeral/domain/pricing` |
 | distances, radius box | `distanceM() boundingBox() popularity()` | `@yeral/domain/geo` |

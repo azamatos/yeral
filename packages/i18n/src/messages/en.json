@@ -36,6 +36,10 @@
     "resend_too_soon": "You can get a new code in {retryAfterSec} s.",
     "phone_taken": "This number belongs to another account.",
     "owns_workspace": "You own a business on Ýeral. Ask the Ýeral team to close it before you delete your account.",
+    "already_on_team": "This number is already on the team or has an open invite.",
+    "invite_expired": "This invite has expired. Ask for a new one.",
+    "invite_answered": "This invite has already been answered.",
+    "owner_cannot_leave": "The owner can't leave the business.",
     "rate_limited": "Too many requests. Please wait a moment.",
     "internal": "Something went wrong. Please try again.",
     "network": "No connection. Please try again."

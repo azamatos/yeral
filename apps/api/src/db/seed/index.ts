@@ -9,7 +9,7 @@ import { holdUntil as holdUntilOf } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { localized, type BookingStatus } from '@yeral/domain/model'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
-import { INVITE_DAYS } from '@yeral/domain/team'
+import { inviteExpiresAt } from '@yeral/domain/team'
 import { addDays, diffDays, dow, epochOf, today } from '@yeral/domain/time'
 import { getTableName, is, sql } from 'drizzle-orm'
 import { PgTable } from 'drizzle-orm/pg-core'
@@ -150,14 +150,14 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
 
   const staffIds = new Map<string, { id: string; name: string }>()
   for (const [i, s] of (def.staff ?? []).entries()) {
-    // people with a level sign in: an account now, or an open invite while they're `invited` (ADR 0025)
+    // people with a level sign in with their phone: an account now, or an open invite while they're `invited` (ADR 0025)
     const invited = s.status === 'invited'
-    const signsIn = !!s.level && !!s.phone && (s.hasApp ?? true)
+    const signInPhone = s.level && (s.hasApp ?? true) ? s.phone : undefined
     const [row] = await db
       .insert(t.staff)
       .values({
         businessId: biz.id,
-        userId: signsIn && !invited && s.phone ? await user(ctx, s.phone, s.fullName ?? s.name) : null,
+        userId: signInPhone && !invited ? await user(ctx, signInPhone, s.fullName ?? s.name) : null,
         level: s.level ?? 'specialist',
         name: s.name,
         fullName: s.fullName ?? null,
@@ -176,16 +176,16 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       .returning({ id: t.staff.id })
     if (!row) throw new Error('staff insert failed')
     staffIds.set(s.key, { id: row.id, name: s.name })
-    if (signsIn && invited && s.phone) {
+    if (signInPhone && invited) {
       // sent two days before the demo day, so it shows as pending with five days left
       const sentAt = ctx.now - 2 * 86_400_000
       await db.insert(t.invites).values({
         businessId: biz.id,
         staffId: row.id,
-        phone: s.phone,
+        phone: signInPhone,
         tokenHash: await sha256Hex(randomToken()),
         sentAt: new Date(sentAt),
-        expiresAt: new Date(sentAt + INVITE_DAYS * 86_400_000),
+        expiresAt: new Date(inviteExpiresAt(sentAt)),
       })
     }
   }

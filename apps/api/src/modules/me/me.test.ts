@@ -104,7 +104,7 @@ describe('account', () => {
     expect(far.json.items).toEqual([])
   })
 
-  it('the OpenAPI document lists every client endpoint', async () => {
+  it('the OpenAPI document lists every endpoint', async () => {
     const doc = (await (await t.app.request('/openapi.json')).json()) as { paths: Record<string, unknown> }
     expect(Object.keys(doc.paths).sort()).toEqual(
       [
@@ -137,6 +137,21 @@ describe('account', () => {
         '/v1/places/suggest',
         '/v1/search',
         '/v1/search/suggest',
+        // the team (ADR 0025)
+        '/v1/me/workspaces',
+        '/v1/me/workspaces/{slug}/open',
+        '/v1/me/invites',
+        '/v1/me/invites/{id}/accept',
+        '/v1/me/invites/{id}/decline',
+        '/v1/invites/{token}',
+        '/v1/w/{slug}/team',
+        '/v1/w/{slug}/team/invites',
+        '/v1/w/{slug}/team/phone-only',
+        '/v1/w/{slug}/team/{staffId}',
+        '/v1/w/{slug}/team/{staffId}/invite',
+        '/v1/w/{slug}/team/{staffId}/remove',
+        '/v1/w/{slug}/team/{staffId}/reactivate',
+        '/v1/w/{slug}/leave',
       ].sort(),
     )
   })

@@ -16,8 +16,9 @@ components), domain, contract, sdk, an api for every client screen, written to t
 Postgres run on the owner's server since 2026-10-19 (not public). yeral.app still serves `apps/legacy`. Design export
 v0.5 (in Turkmen) is the newest export; v0.6 (English) is being drawn. The version PR #26 (`@yeral/lib@0.2.0`,
 `@yeral/api@0.1.1`, staging removed) is merged. The backend plan (chapter 10, P2) was reviewed on 2026-10-19 against
-every **Code differs** line and the built api, and now has steps 0–7; step 0 (own server only, ADR 0024) and step 1 (market settings, `@yeral/domain/market`) are
-done.
+every **Code differs** line and the built api, and now has steps 0–7; steps 0 (own server only, ADR 0024), 1 (market
+settings, `@yeral/domain/market`) and 2 (three fixed levels, team rows, invites, ADR 0025) are done; step 3 (the
+booking engine's fixes, past midnight first) is next.
 
 ## Owner's direction
 - 2026-10-13: infrastructure first; Cloudflare now, own server (Docker + nginx, Cloudflare for DNS) later; name/domain in
@@ -128,8 +129,7 @@ is with Claude Design; round 2 (business app part 1) is written. Next: check rou
 part 2, client site, admin tool, fixes) → export v0.6 → P3 components in Storybook → P4 apps.
 
 **Backend track (P2).** The steps are in the book's chapter 10 (reviewed 2026-10-19): 0 the own server only (done,
-ADR 0024), 1 market settings and English as the source (done), 2 the business model (part 1 done: ADR 0025; part 2 next: the
-switcher, invites, team endpoints), 3 the **Code
+ADR 0024), 1 market settings and English as the source (done), 2 the business model (done: ADR 0025), 3 next, 3 the **Code
 differs** fixes in the booking engine (past midnight first), 4 business endpoints (with photos, the address pin,
 notifications), 5 admin endpoints (team accounts with a second factor), 6 first-launch mode, 7 before the launch
 (deploys from GitHub, backups, alerts). Work in a worktree on a branch per step, tests with every rule (ADR 0013), a

@@ -161,7 +161,11 @@
   hashed link, expired read from the time); `roles` and `memberships` dropped by migrations 0005 (data moved) and 0006;
   the database keeps one active owner, one row per account, a phone without the app, the owner with the app. Signing
   in no longer joins a team; invited people aren't on the client site; an owner can't delete their account
-  (`owns_workspace`). [ADR 0025](../decisions/0025-fixed-levels-team-rows-invites.md).
+  (`owns_workspace`). [ADR 0025](../decisions/0025-fixed-levels-team-rows-invites.md). Part 2 in the same PR: the
+  switcher (`/v1/me/workspaces` with request counts by the who-answers rule, the last opened), the person's invites
+  (list, accept, decline, the link), the owner's team endpoints (invite, resend, cancel, without the app and switching
+  it on, level and override, remove with bookings kept, reactivate) and leaving; live events follow the level; a
+  deleted account's rows leave their teams; `@yeral/contract/team`, `sdk.team`. P2 step 2 done.
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.

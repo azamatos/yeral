@@ -51,8 +51,14 @@ on every team (book chapter 3, 07b, 07c S-13, S-14). The backend plan's step 2 b
   no role editor to build or test; the permission table is one constant with tests.
 - Harder: when the owner may edit the table (F-089), the per-level values move into a per-business table; the domain
   functions keep their shape.
-- Built in two steps: this model and its migrations, then the switcher, invites and team endpoints (book chapter 10,
-  P2 step 2).
+- Built 2026-10-19 (book chapter 10, P2 step 2): this model and its migrations, the switcher (`/v1/me/workspaces`),
+  the person's invites (`/v1/me/invites`, the link `/v1/invites/{token}`) and the team the owner manages
+  (`/v1/w/{slug}/team…`); live events follow the level. Removing someone keeps their future bookings as they are; the
+  other choices of the remove flow (reassign, cancel with offered times) come with the business bookings (step 4).
+- Settled with the review of the first part: a specialist sees a booking shared with another specialist, but only the
+  owner or an administrator moves or cancels it; answering requests always goes through `canAnswerRequest`; a deleted
+  account's team rows are removed (off the client site); only the owner adds a specialist without the app (chapter 5
+  said owner or administrator; the team row is "view" for administrators).
 
 ## Alternatives considered
 

@@ -84,14 +84,28 @@ export interface Actor {
 
 export const scopeOf = (actor: Actor, permission: Permission): Scope => PERMISSION_TABLE[actor.level][permission]
 
-/** May the actor open this part of the workspace at all? Anything else is hidden. */
-export const can = (actor: Actor, permission: Permission): boolean => scopeOf(actor, permission) !== 'none'
+/**
+ * The rows `can` and `canOn` answer. Answering requests isn't one of them: its row follows the business's setting
+ * and the override, so it goes through `canAnswerRequest` only.
+ */
+export type GatedPermission = Exclude<Permission, 'answerRequests'>
 
-/** ...and act on something that belongs to these team members (a booking's specialists, a client's)? */
-export function canOn(actor: Actor, permission: Permission, staffIds: readonly string[]): boolean {
+/** Rows that change something; the others let the person see. */
+const ACTIONS: readonly GatedPermission[] = ['bookings', 'noshow']
+
+/** May the actor open this part of the workspace at all? Anything else is hidden. */
+export const can = (actor: Actor, permission: GatedPermission): boolean => scopeOf(actor, permission) !== 'none'
+
+/**
+ * ...for something that belongs to these team members (a booking's specialists, the specialists a client booked)?
+ * With `own`, seeing needs one of them to be the actor; changing needs all of them: a booking shared with another
+ * specialist is moved or cancelled by the owner or an administrator.
+ */
+export function canOn(actor: Actor, permission: GatedPermission, staffIds: readonly string[]): boolean {
   const scope = scopeOf(actor, permission)
   if (scope === 'all' || scope === 'manage') return true
-  return scope === 'own' && staffIds.includes(actor.staffId)
+  if (scope !== 'own' || staffIds.length === 0) return false
+  return ACTIONS.includes(permission) ? staffIds.every((id) => id === actor.staffId) : staffIds.includes(actor.staffId)
 }
 
 /** Invite, change levels, remove: the owner only; administrators see the team (book chapter 3). */

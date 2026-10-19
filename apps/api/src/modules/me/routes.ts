@@ -108,14 +108,11 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     const user = requireUser(c)
     const { deps } = c.var
     const now = deps.now()
-    // a workspace always has its one owner (ADR 0025)
-    const [owned] = await deps.db
-      .select({ id: staff.id })
-      .from(staff)
-      .where(and(eq(staff.userId, user.id), eq(staff.level, 'owner'), eq(staff.status, 'active')))
-      .limit(1)
-    if (owned) throw new ApiError('owns_workspace')
     await deps.db.transaction(async (tx) => {
+      // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
+      const rows = await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')
+      if (rows.some((r) => r.level === 'owner' && r.status === 'active')) throw new ApiError('owns_workspace')
+      await tx.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.userId, user.id))
       const mine = await tx
         .select()
         .from(bookings)

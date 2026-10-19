@@ -1,6 +1,6 @@
 /**
  * Live updates (systemPatterns.md): open screens poll `GET /v1/events?after=<cursor>` and invalidate what changed.
- * A client sees events about their bookings; a team member, events of their businesses.
+ * A client sees events about their bookings; a team member, events of their businesses as far as their level sees.
  *
  * Event ids are taken when a row is inserted but become visible when its transaction commits, so a later id can show
  * up first. Events are read in the order of the transaction that wrote them, and only from transactions older than
@@ -8,12 +8,13 @@
  */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import { eventListSchema, eventsQuerySchema, type EventType } from '@yeral/contract/events'
+import { scopeOf } from '@yeral/domain/permissions'
 import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm'
-import { businesses, events } from '../../db/schema'
+import { bookingItems, businesses, events } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
 import { requireUser } from '../auth/session'
-import { workspaceIdsOf } from '../team/members'
+import { teamsOf } from '../team/members'
 
 const PAGE = 100
 
@@ -47,8 +48,17 @@ export const eventRoutes = new OpenAPIHono<AppEnv>().openapi(eventsRoute, async 
   const [, txid, id] = /^(\d{1,20})\.(\d{1,19})$/.exec(after ?? '') ?? []
   // no cursor yet, one from before this format, or out of range: start from now
   if (!txid || !id || BigInt(txid) > MAX_XID8 || BigInt(id) > MAX_ID) return c.json({ items: [], cursor: await latest() }, 200)
-  const teams = await workspaceIdsOf(db, user.id)
-  const mine = teams.length ? or(eq(events.userId, user.id), inArray(events.businessId, teams)) : eq(events.userId, user.id)
+  // a team member sees what their level sees: the whole calendar, or a specialist's own bookings (ADR 0025)
+  const teams = await teamsOf(db, user.id)
+  const whole = teams.filter((t) => scopeOf(t.actor, 'calendar') === 'all').map((t) => t.businessId)
+  const own = teams.filter((t) => scopeOf(t.actor, 'calendar') === 'own').map((t) => t.actor.staffId)
+  const mine = or(
+    eq(events.userId, user.id),
+    whole.length ? inArray(events.businessId, whole) : undefined,
+    own.length
+      ? sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${events.bookingId} and ${inArray(bookingItems.staffId, own)})`
+      : undefined,
+  )
   const rows = await db
     .select({ e: events, slug: businesses.slug })
     .from(events)
