@@ -45,7 +45,8 @@ The version PR #26
   bill; businesses may be open past midnight and options stay flexible; the city is a choice (book Q-001–Q-003,
   Q-100–Q-109).
 - 2026-10-19: one track at a time: design first, then Storybook, then the apps (the backend comes with each
-  slice); the owner buys a netcup VPS 1000 (EU) for the first launch and other projects, configs later.
+  slice); the owner bought a netcup VPS 1000 (EU) for the first launch and other projects; Claude set it up
+  the same day (hardening, a shared Caddy, Postgres and the api; `infra/server/README.md`).
 - 2026-10-18 (book closed): the first launch is an English pilot with Turkmenistan's settings: example businesses
   marked "Example" beside real ones, a nightly-reset demo of the business app, no SMS (codes on screen); the name is
   written *Ýeral*, "Yeral" only where the letter can't be used; a specialist may work without the app (an option, not a
@@ -122,5 +123,5 @@ The product book is closed (2026-10-18, no open question). The build plan is its
 2. **P3 · Components** in Storybook from v0.6.
 3. **P4 · Apps slice by slice** (Q-001 order); each slice brings its backend work (P2 list in chapter 10). One track
    at a time (owner, 2026-10-19), so ADR 0021's order stands.
-4. **P5 · First launch** on the owner's netcup VPS 1000 (EU, chosen 2026-10-19); server configs come when the apps
-   are ready. **P6 · Turkmenistan launch** with a second server inside the country.
+4. **P5 · First launch** on the owner's netcup VPS 1000 (EU), set up on 2026-10-19 (`infra/server`,
+   `ssh yeral-vps`): Postgres and the api already run there, not public yet; GitHub deploys and backups later. **P6 · Turkmenistan launch** with a second server inside the country.
