@@ -68,6 +68,21 @@ describe('hold time (counted only while the business is open, book Q-120)', () =
     expect(holdUntil(epochOf(TODAY, 1380), booking({ date: '2026-10-16' }), 30, thursdayOff)).toBe(epochOf('2026-10-16', 570))
   })
 
+  it('no open time before the visit: the hold counts plain time, not until the visit', () => {
+    // sent Wednesday 23:00 for Thursday 09:00, the opening: nothing open in between
+    expect(holdUntil(epochOf(TODAY, 1380), booking({ date: THU, start: 540 }), 30, DAYS)).toBe(epochOf(TODAY, 1410))
+  })
+
+  it('overlapping hours (a special day past midnight) aren’t counted twice', () => {
+    // Wednesday a special 18:00–04:00, Thursday opens at 02:00: 02:00–04:00 is one stretch of open time
+    const overlap: BusinessHours = {
+      hours: Array.from({ length: 7 }, () => h(120, 1200)),
+      exceptions: [{ name: 'Gala', from: TODAY, to: TODAY, yearly: false, hours: { open: 1080, close: 1680 } }],
+    }
+    // sent Thursday 01:00 (Wednesday's night), a 6-hour hold: 01:00–07:00 Thursday, open the whole time
+    expect(holdUntil(epochOf(THU, 60), booking({ date: '2026-10-16' }), 360, overlap)).toBe(epochOf(THU, 420))
+  })
+
   it('a night open past midnight keeps counting after it', () => {
     const bar: BusinessHours = { hours: Array.from({ length: 7 }, () => h(1080, 1560)), exceptions: [] }
     // sent Wednesday at 23:50 for Friday, an hour's hold: until Thursday 00:50, still Wednesday's night

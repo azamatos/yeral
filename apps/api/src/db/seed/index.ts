@@ -4,9 +4,7 @@
  * database as it was. Demo dates move with "today"; weekly data (opening hours, shifts, breaks, the yoga week) turns with
  * them, so the demo day keeps the design's Wednesday whatever weekday it lands on.
  */
-import type { BusinessHours } from '@yeral/domain/hours'
 import { bookingCode } from '@yeral/domain/id'
-import { holdUntil as holdUntilOf } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { localized, type BookingStatus } from '@yeral/domain/model'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
@@ -96,8 +94,6 @@ interface SeededBusiness {
   buffer: number
   holdMinutes: number
   sittingMinutes: number
-  /** For the hold time, counted while the business is open (book Q-120). */
-  hours: BusinessHours
 }
 
 async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness> {
@@ -144,12 +140,7 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       tableRequests: def.tableRequests ?? [],
       demo: true,
     })
-    .returning({
-      id: t.businesses.id,
-      sittingMinutes: t.businesses.tableSittingMinutes,
-      hours: t.businesses.hours,
-      exceptions: t.businesses.exceptions,
-    })
+    .returning({ id: t.businesses.id, sittingMinutes: t.businesses.tableSittingMinutes })
   if (!biz) throw new Error('business insert failed')
 
   const { note, ...ruleOverrides } = def.rules ?? {}
@@ -249,7 +240,6 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
     areas,
     buffer: rules.bufferMinutes,
     holdMinutes: rules.holdMinutes,
-    hours: { hours: biz.hours, exceptions: biz.exceptions },
     sittingMinutes: biz.sittingMinutes,
   }
 }
@@ -269,8 +259,8 @@ function lifecycle(
       ? ctx.now - (biz.holdMinutes - (b.hold ?? biz.holdMinutes)) * 60_000
       : Math.min(ctx.now, startEpoch) - 3 * 86_400_000
   return {
-    holdUntil:
-      b.status === 'pending' ? new Date(holdUntilOf(createdAt, { date: b.date, start: b.start }, biz.holdMinutes, biz.hours)) : null,
+    // the demo shows `hold` minutes still to go, whenever it's seeded (the nightly reset runs while businesses are closed)
+    holdUntil: b.status === 'pending' ? new Date(Math.min(ctx.now + (b.hold ?? biz.holdMinutes) * 60_000, startEpoch)) : null,
     createdAt: new Date(createdAt),
     confirmedAt: b.status === 'pending' ? null : new Date(createdAt + 10 * 60_000),
     cancelledAt: b.status === 'cancelled' ? new Date(Math.min(ctx.now, startEpoch) - 86_400_000) : null,

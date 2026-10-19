@@ -94,7 +94,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | enums shared with the contract and the database, `Localized` text | `BOOKING_STATUSES BOOKING_SOURCES CONFIRM_MODES …`, `localized()` (asked language → market's main → any written) | `@yeral/domain/model` |
 | `Localized` jsonb in SQL | `textIn(col, lang)` (same fallback), `anyTextLike(col, …patterns)` (search in every language) | `apps/api/src/db/localized.ts` |
 | booking rules: defaults, option lists, validation | `DEFAULT_RULES RULE_OPTIONS rulesErrors()` | `@yeral/domain/rules` |
-| opening hours, special days, staff shifts and breaks (a day may run past midnight to `MAX_DAY_END`) | `businessDay() staffDay() workingIntervals() staffOffReason() openState() weekHoursErrors()` | `@yeral/domain/hours` |
+| opening hours, special days, staff shifts and breaks (a day may run past midnight to `MAX_DAY_END`) | `businessDay() staffDay() workingIntervals() staffOffReason() openState() openStretches() weekHoursErrors()` | `@yeral/domain/hours` |
 | busy time across midnight | `busyOn(busy, date)` | `@yeral/domain/availability` |
 | free times: appointment, table, class | `appointmentSlots() findAppointmentSlot() nearestSlots() nextFreeSlot() checkPlan() busyOf() tableSlots() assignTable() maxSeats()` | `@yeral/domain/availability` |
 | statuses, hold time, who may do what with a booking | `initialStatus() holdUntil() effectiveStatus() dueTransition() cancelDeadline() clientActions() canAnswerRequest() canComplain() …` | `@yeral/domain/lifecycle` |
