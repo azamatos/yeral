@@ -21,14 +21,14 @@ on 18.10.2026 from the book's answers; the owner decides when each launch ships.
 ```mermaid
 flowchart LR
   P1["P1 · Design pass in English"] --> P3["P3 · Components in Storybook"]
-  P2["P2 · Backend to the book"] --> P4["P4 · Apps, slice by slice"]
-  P3 --> P4
+  P3 --> P4["P4 · Apps, slice by slice, with their P2 backend work"]
   P4 --> P5["P5 · First launch"]
   P5 --> P6["P6 · Turkmenistan launch"]
 ```
 
-P1 and P2 run side by side: the backend implements the book's rules and needs no screens. **This is a proposal:**
-ADR 0021 put all code after the design. If the owner agrees, ADR 0021 is amended; if not, P2 starts after P1.
+One track at a time (owner, 19.10.2026): the design pass first, then components, then the apps. The backend work
+listed under P2 is built inside the P4 slices that need it, so ADR 0021's order (design, Storybook, code) stays. The
+design prompts are kept in `docs/product/prompts/`.
 
 ### P1 · Design pass in English
 
@@ -44,9 +44,9 @@ book (ADR 0021). The result is design export v0.6, every board in English (Q-133
 | 5 | Admin tool (cms.yeral.app), drawn for the first time: verify or reject a business, reported reviews, hide or un-verify a business, add a business for its owner, close a workspace |
 | 6 | Every **Design to fix** line left in chapters 6 and 7a–7c, then the export |
 
-### P2 · Backend to the book
+### P2 · Backend to the book (built inside P4)
 
-No screens; every rule gets its test (ADR 0013). In order:
+No screens; every rule gets its test (ADR 0013). Each P4 slice takes the parts it needs, in this order:
 
 1. **Market settings** (ADR 0022, ADR 0023): language, money, phone rules, time zone and legal texts read from one
    market config; English as the source language.
@@ -83,8 +83,9 @@ The order of Q-001: every slice ends working end to end on a local machine, with
 
 ### P5 · First launch
 
-The client site, the business app, the admin tool and the api go to production on Cloudflare with the Neon database
-(ADR 0007, ADR 0023), from a release the owner approves (ADR 0020). The new client site replaces the old one on
+The client site, the business app, the admin tool and the api go to production on the owner's server (a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB)) in Docker, with Cloudflare for DNS (ADR 0007, ADR 0023), from a release the owner approves
+(ADR 0020). Its configs (setup script, a shared HTTPS front door for several projects, backups, deploys from
+GitHub) are written when the apps are ready to deploy. The new client site replaces the old one on
 yeral.app. The team adds the first real businesses in the admin tool (Q-002).
 
 ### P6 · Turkmenistan launch
@@ -100,18 +101,20 @@ After investment, when the owner sets the date:
 
 | When | What | Monthly |
 |---|---|---|
-| P1–P4 | nothing new: Storybook already runs on Cloudflare | $0 |
-| First launch | Cloudflare Workers (free, then $5 when traffic needs it); Neon (its free plan to start; the jobs that run every minute keep the database awake, which may need a paid plan: Claude checks the price before going live, Q-250); R2 and Sentry free; no SMS | about $0–30 |
+| From now | the server, netcup VPS 1000, shared with the owner's other projects; Storybook stays on Cloudflare | €16.68 a month, €12.32 on a 12-month term (with German VAT) |
+| First launch | nothing more: the same server; database backups to Cloudflare R2 (free up to 10 GB); no SMS | — |
 | Turkmenistan launch | the server, SMS per message, the lawyer once | priced then, in manats |
 
 The domain yeral.app is already paid for.
 
 ## The server: when and what
 
-**Not for the first launch.** It runs on Cloudflare (ADR 0023). Buy the server about a month before the Turkmenistan
-launch date, so there is time to test it from Ashgabat, rehearse the move and fix what breaks.
+**For the first launch:** the owner chose a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB) on 19.10.2026, also for other projects
+later. OVHcloud's plans were out of stock; Hetzner's cheap plans are gone. Its addresses are in ranges Turkmenistan
+blocks, so people there use a VPN, as decided (Q-032).
 
-**What to buy:**
+**For the Turkmenistan launch:** a second server, inside the country. Buy it about a month before that launch date,
+so there is time to test it from Ashgabat, rehearse the move and fix what breaks. What to buy:
 
 - **Where:** a virtual server in Turkmenistan. Turkmentelecom rents KVM servers priced in manats (telecom.tm/ru/hosting).
   The law wants personal data stored in the country (Q-037), and servers abroad may be blocked (Q-032). The lawyer

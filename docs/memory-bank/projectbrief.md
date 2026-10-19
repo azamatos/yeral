@@ -46,7 +46,8 @@ source (`web` | `app` | `phone` | `walkin` | `ai`). Manat prices for plans and c
   manats, shown as `40 TMT`; formats follow the language (`4,9` in Turkmen and Russian, `4.9` in English); phones `+993`.
 - Business-local time: `Asia/Ashgabat` (UTC+5, no daylight saving) for every business today.
 - **Hosting:** one deployment per market ([ADR 0023](../decisions/0023-one-deployment-per-market.md)). The first launch
-  (English) runs on Cloudflare with Neon; people in Turkmenistan reach it through a VPN. The Turkmenistan launch, after
+  (English) runs on the owner's netcup VPS 1000 in the EU, in Docker (2026-10-19); people in Turkmenistan reach it
+  through a VPN. The Turkmenistan launch, after
   investment, gets its own servers in Turkmenistan running everything in Docker behind nginx
   ([ADR 0007](../decisions/0007-hosting-cloudflare-now-docker-later.md)).
 - The repository is private (checked 2026-10-18). Never commit secrets.

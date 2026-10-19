@@ -66,8 +66,8 @@ from that country's settings, so a country's data stays where its law wants it. 
 - **Money:** manats, shown `40 TMT`. Clients pay at the place; there is no online payment. (client spec §1)
 - **Phones:** every account is a +993 mobile number with a sign-in code: by SMS from the Turkmenistan launch, on
   the screen at the first launch. (ADR 0019, ROUND6-ANSWERS C1; Q-036)
-- **Hosting:** the first launch runs on Cloudflare, with the database in Frankfurt; people in Turkmenistan reach it
-  through a VPN. Servers in Turkmenistan, which also keep personal data inside the country as its law asks, come with
+- **Hosting:** the first launch runs on the owner's own server, a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB), in Docker, with
+  Cloudflare for DNS; people in Turkmenistan reach it through a VPN (owner, 19.10.2026). Servers in Turkmenistan, which also keep personal data inside the country as its law asks, come with
   the Turkmenistan launch. (Q-032, Q-037, decided 18.10.2026; ADR 0007, ADR 0023)
 
 ## How Ýeral makes money
@@ -109,7 +109,7 @@ Decided by the owner on 17 and 18.10.2026:
 
 - **One launch with all three web apps:** the client site, the business app and the CMS. The business flow doesn't
   work without all three. (Q-001)
-- **Two steps.** The first launch is in English on Cloudflare: investors and early users see it (from Turkmenistan
+- **Two steps.** The first launch is in English on the owner's server in the EU: investors and early users see it (from Turkmenistan
   through a VPN), and it's also a portfolio piece. The Turkmenistan launch follows once marketing starts and investment
   arrives: Turkmen and Russian, servers and database in Turkmenistan, legal texts checked by a lawyer there. (Q-032, Q-033, Q-037, Q-133, Q-292)
 - **The first launch is an English pilot** with Turkmenistan's settings. Example businesses from the design,
@@ -125,7 +125,7 @@ Decided by the owner on 17 and 18.10.2026:
 
 ```mermaid
 flowchart LR
-  A["First launch · English · Cloudflare"] --> B["Investment, marketing"]
+  A["First launch · English · own server in the EU"] --> B["Investment, marketing"]
   B --> C["Turkmenistan launch · Turkmen + Russian · servers in Turkmenistan"]
   C -.-> D["Next country · its own deployment"]
 ```

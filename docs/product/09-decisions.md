@@ -137,6 +137,7 @@ question in this book, the answer is added here with its date, and the chapters 
 
 | Date | Decision | By | Source |
 |---|---|---|---|
+| 19.10.2026 | One track at a time: the design pass, then Storybook, then the apps slice by slice; each slice brings its backend work | owner | chapter 10 |
 | 18.10.2026 | The owner answers only critical questions; Claude decides the rest with the recommended option and records who decided | owner | this book, README |
 | 18.10.2026 | Claude doesn't take an answer for granted: a weaker or risky answer gets a concern; without a reply the owner's answer stands | owner | this book, README |
 | 18.10.2026 | No separate decisions app: the repository stays the record and this book's page stays where the owner answers | owner | activeContext |
@@ -169,6 +170,7 @@ question in this book, the answer is added here with its date, and the chapters 
 
 | Date | Decision | Source |
 |---|---|---|
+| 19.10.2026 | The first launch runs on the owner's server (netcup VPS 1000, EU) in Docker, not on Cloudflare; the server also hosts other projects | ADR 0023 (revised) |
 | 18.10.2026 | One code base, one deployment per country; the first launch runs on Cloudflare | ADR 0023 |
 | 18.10.2026 | Built in English; each country adds its languages and settings | ADR 0022 |
 | 14.10.2026 | Our own phone-code login and sessions stored in the database | ADR 0019 |
