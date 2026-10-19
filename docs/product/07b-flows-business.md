@@ -854,7 +854,7 @@ flowchart TD
 - A request made shortly before the visit: its hold ends at the visit start.
 - A request sent while the business is closed: its hold starts counting when the business opens.
 
-**Code differs:** the code counts the hold straight through closed hours (Q-120).
+The hold counts the business's opening hours only, special days included and breaks not (code: `holdUntil()` in `@yeral/domain/lifecycle`; Q-120).
 
 > Open question Q-120: hold time while the business is closed.
 

@@ -11,7 +11,8 @@
  */
 import { isOnlineSource, type BookingSource, type BookingStatus, type CancelledBy, type ConfirmMode } from './model'
 import type { BookingRules } from './rules'
-import { epochOf } from './time'
+import { businessDay, workingIntervals, type BusinessHours } from './hours'
+import { addDays, epochOf, localOf } from './time'
 
 /** A booking as far as the lifecycle cares: business-local date, start and end minutes, stored state. */
 export interface BookingState {
@@ -42,9 +43,33 @@ export function initialStatus(source: BookingSource, confirmMode: ConfirmMode): 
   return isOnlineSource(source) && confirmMode === 'manual' ? 'pending' : 'confirmed'
 }
 
-/** When an unanswered request expires: after the hold time, never past the visit start (server-enforced). */
-export function holdUntil(createdAt: number, b: Pick<BookingState, 'date' | 'start'>, holdMinutes: number): number {
-  return Math.min(createdAt + holdMinutes * 60_000, startOf(b))
+/**
+ * When an unanswered request expires (server-enforced): after the hold time counted only while the business is open
+ * (book Q-120; a break counts as closed, as in the open state), never past the visit start. A request sent at 23:00 to
+ * a business opening at 09:00 with a 30-minute hold waits until 09:30.
+ */
+export function holdUntil(
+  createdAt: number,
+  b: Pick<BookingState, 'date' | 'start'>,
+  holdMinutes: number,
+  business: BusinessHours,
+): number {
+  const start = startOf(b)
+  let left = holdMinutes * 60_000
+  // from yesterday's business day (it may still run past midnight) up to the visit's own day
+  const first = addDays(localOf(createdAt).date, -1)
+  for (let date = first; date <= b.date; date = addDays(date, 1)) {
+    const day = businessDay(business, date)
+    if (!day) continue
+    for (const w of workingIntervals(day)) {
+      const from = Math.max(epochOf(date, w.start), createdAt)
+      const to = Math.min(epochOf(date, w.end), start)
+      if (to <= from) continue
+      if (to - from >= left) return from + left
+      left -= to - from
+    }
+  }
+  return start
 }
 
 /** The status people see now, before the jobs have caught up. */

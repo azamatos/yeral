@@ -107,6 +107,16 @@ describe('client bookings', () => {
     expect(t.sms.sent.filter((s) => s.to === '+99365111001')).toHaveLength(1) // the login code only
   })
 
+  it('a request sent after closing holds from the next opening (book Q-120)', async () => {
+    // Wednesday 21:00: Glow Studio (09:00–20:00) is closed until Thursday 09:00
+    const late = testApp(db, { now: epochOf('2026-10-14', 1260) })
+    const b = browser(late.app)
+    await b.login('+99365111030', 'Late')
+    const res = await b.req('/v1/bookings', { body: glow(600, { date: '2026-10-16' }) })
+    expect(res.status).toBe(201)
+    expect(res.json.holdUntil).toBe(epochOf(THU, 540 + 30))
+  })
+
   it('a taken time answers 409 with the three nearest free times', async () => {
     const first = browser(t.app)
     await first.login('+99365111002', 'Aýgul')

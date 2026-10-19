@@ -16,6 +16,7 @@ import {
   occupiesSlot,
   type BookingState,
 } from './lifecycle'
+import type { BusinessHours } from './hours'
 import { epochOf } from './time'
 
 // Wednesday 2026-10-14, 10:00 at the business
@@ -39,13 +40,40 @@ describe('initialStatus', () => {
   })
 })
 
-describe('hold time', () => {
-  it('holds a request for the business’s hold time', () => {
-    expect(holdUntil(NOW, booking(), 30)).toBe(NOW + 30 * MIN)
+describe('hold time (counted only while the business is open, book Q-120)', () => {
+  const h = (open: number, close: number, br?: { start: number; end: number }) => ({ open, close, break: br ?? null })
+  /** every day 09:00–20:00 */
+  const DAYS: BusinessHours = { hours: Array.from({ length: 7 }, () => h(540, 1200)), exceptions: [] }
+
+  it('holds a request for the business’s hold time while it’s open', () => {
+    expect(holdUntil(NOW, booking(), 30, DAYS)).toBe(NOW + 30 * MIN)
   })
 
   it('never past the visit start', () => {
-    expect(holdUntil(NOW, booking({ date: TODAY, start: 615 }), 30)).toBe(epochOf(TODAY, 615))
+    expect(holdUntil(NOW, booking({ date: TODAY, start: 615 }), 30, DAYS)).toBe(epochOf(TODAY, 615))
+  })
+
+  it('sent while closed, the hold starts at the opening; before closing, it carries over to the next day', () => {
+    // sent Wednesday 23:00 for Friday: the 30 minutes run from Thursday 09:00
+    expect(holdUntil(epochOf(TODAY, 1380), booking({ date: '2026-10-16' }), 30, DAYS)).toBe(epochOf(THU, 570))
+    // sent Wednesday 19:50 with an hour's hold: 10 minutes today, 50 from Thursday 09:00
+    expect(holdUntil(epochOf(TODAY, 1190), booking({ date: '2026-10-16' }), 60, DAYS)).toBe(epochOf(THU, 590))
+  })
+
+  it('a break stops the hold; a closed day doesn’t count', () => {
+    const lunch: BusinessHours = { hours: Array.from({ length: 7 }, () => h(540, 1200, { start: 780, end: 840 })), exceptions: [] }
+    // sent Wednesday 12:50 with a 30-minute hold: 10 minutes before the break, 20 after it
+    expect(holdUntil(epochOf(TODAY, 770), booking(), 30, lunch)).toBe(epochOf(TODAY, 860))
+    const thursdayOff: BusinessHours = { hours: DAYS.hours, exceptions: [{ name: 'Baýramçylyk', from: THU, to: THU, yearly: false }] }
+    expect(holdUntil(epochOf(TODAY, 1380), booking({ date: '2026-10-16' }), 30, thursdayOff)).toBe(epochOf('2026-10-16', 570))
+  })
+
+  it('a night open past midnight keeps counting after it', () => {
+    const bar: BusinessHours = { hours: Array.from({ length: 7 }, () => h(1080, 1560)), exceptions: [] }
+    // sent Wednesday at 23:50 for Friday, an hour's hold: until Thursday 00:50, still Wednesday's night
+    expect(holdUntil(epochOf(TODAY, 1430), booking({ date: '2026-10-16', start: 1200 }), 60, bar)).toBe(epochOf(TODAY, 1490))
+    // sent Thursday 00:30 (Wednesday's night): from yesterday's day too
+    expect(holdUntil(epochOf(THU, 30), booking({ date: '2026-10-16', start: 1200 }), 30, bar)).toBe(epochOf(THU, 60))
   })
 })
 

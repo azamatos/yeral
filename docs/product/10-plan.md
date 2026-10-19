@@ -66,7 +66,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    the invited phone signs in, and the owner can copy its link. Done 19.10.2026 (ADR 0025): the levels, the table,
    team rows linked to accounts, the switcher, invites and the team endpoints.
 3. **The "Code differs" fixes in the booking engine,** in this order, since each needs the one before: past midnight
-   (Q-105; done 20.10.2026); holds count only in opening hours (Q-120); reminders at night move to 21:30 the evening before (Q-285);
+   (Q-105; done 20.10.2026); holds count only in opening hours (Q-120; done 20.10.2026); reminders at night move to 21:30 the evening before (Q-285);
    then the city as data (Q-107), offered times tied to one specialist (Q-159), expiry with nothing free (Q-252), the
    no-show count restart (Q-127), move rules (Q-165, Q-263, a second move replaces the first and can be withdrawn:
    ROUND6 A3), token links instead of `/b/{code}` and the signed-out link page (Q-168, F-068), no review asks (Q-259),
