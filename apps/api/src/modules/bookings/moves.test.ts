@@ -6,7 +6,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingRules, bookings, businesses, rateLimits, services, staff, staffServices, users } from '../../db/schema'
+import { bookingRules, bookings, businesses, events, rateLimits, services, staff, staffServices, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { rescheduleBooking } from './actions'
 import { confirmBooking } from './confirm'
@@ -210,6 +210,45 @@ describe('moves', () => {
       .from(bookings)
       .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
     expect(waiting).toEqual([])
+  })
+
+  it('asking again for the waiting move’s time keeps that move, code and hold', async () => {
+    const { b, code, date, start, id } = await confirmed('+99365444215', FRI)
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+    const pendingOf = () =>
+      db
+        .select()
+        .from(bookings)
+        .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
+    const [first] = await pendingOf()
+    t.clock.now += 60_000
+    expect((await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })).status).toBe(200)
+    const [again] = await pendingOf()
+    expect(again).toMatchObject({ id: first!.id, code: first!.code, holdUntil: first!.holdUntil })
+  })
+
+  it('withdrawing a waiting move tells the business (an event)', async () => {
+    const { b, code, date, start, id } = await confirmed('+99365444216', FRI)
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+    const [move] = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start } })
+    const seen = await db.select().from(events).where(eq(events.bookingId, move!.id))
+    expect(seen.map((e) => e.type)).toContain('booking.cancelled')
+  })
+
+  it('«Islendik» at its own time goes to someone free when its specialist can’t do it any more', async () => {
+    const { b, code, date, start } = await confirmed('+99365444217', FRI)
+    await db.delete(staffServices).where(and(eq(staffServices.staffId, who['Aýna']!), eq(staffServices.serviceId, haircut)))
+    try {
+      const moved = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start, staffId: null } })
+      expect(moved.status).toBe(200)
+      expect(moved.json.reschedule).toMatchObject({ date, start })
+    } finally {
+      await db.insert(staffServices).values({ staffId: who['Aýna']!, serviceId: haircut })
+    }
   })
 
   it('a double tap at an instant business moves once and answers both', async () => {

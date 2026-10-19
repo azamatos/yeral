@@ -1,13 +1,14 @@
 import { describe, expect, it, beforeAll } from 'vitest'
 import { testDatabase } from '../../test/db'
 import type { Db } from './client'
+import { pgCode } from '../modules/bookings/repo'
 import * as t from './schema'
 
 /** The SQLSTATE a statement fails with, or null when it succeeds. */
 const sqlState = (q: PromiseLike<unknown>) =>
   Promise.resolve(q).then(
     () => null,
-    (e: { code?: string; cause?: { code?: string } }) => e.code ?? e.cause?.code ?? 'unknown',
+    (e: unknown) => pgCode(e) ?? 'unknown',
   )
 
 /** The database refuses double bookings by itself (migration 0001). */

@@ -67,16 +67,17 @@ export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow): 
       })
       .where(eq(bookings.id, original.id))
       .returning()
+    if (!moved) throw new StaleBooking()
     await db.delete(bookings).where(eq(bookings.id, request.id))
     await emit(db, {
       type: 'booking.moved',
-      businessId: moved!.businessId,
-      bookingId: moved!.id,
-      bookingCode: moved!.code,
-      userId: moved!.userId,
+      businessId: moved.businessId,
+      bookingId: moved.id,
+      bookingCode: moved.code,
+      userId: moved.userId,
     })
-    await queueBookingSms(db, deps, moved!, { confirmed: true })
-    return moved!
+    await queueBookingSms(db, deps, moved, { confirmed: true })
+    return moved
   }
   const row = await setStatus(db, b, { status: 'confirmed', at })
   await emit(db, { type: 'booking.confirmed', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })

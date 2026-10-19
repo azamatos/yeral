@@ -105,6 +105,11 @@ export async function lockBooking(db: Queryable, id: string): Promise<BookingRow
 
 /** Postgres refused an overlap (exclusion constraint) or a duplicate: the slot went meanwhile. */
 export function isSlotConflict(e: unknown): boolean {
-  const code = (e as { code?: string; cause?: { code?: string } }).code ?? (e as { cause?: { code?: string } }).cause?.code
-  return code === '23P01'
+  return pgCode(e) === '23P01'
+}
+
+/** The SQLSTATE of a failed statement, whether Drizzle passes the driver's error on or wraps it. */
+export function pgCode(e: unknown): string | undefined {
+  const err = e as { code?: string; cause?: { code?: string } }
+  return err.code ?? err.cause?.code
 }

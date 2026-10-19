@@ -311,11 +311,20 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
 }
 
 /** A booking's services in the order they run, and the one specialist doing them all (null when split). */
-export async function bookedServices(db: Queryable, bookingId: string): Promise<{ serviceIds: string[]; staffId: string | null }> {
+export interface BookedServices {
+  serviceIds: string[]
+  /** Who does each service, in order. */
+  staffIds: (string | null)[]
+  /** The one specialist doing them all, or null when split. */
+  staffId: string | null
+}
+
+export async function bookedServices(db: Queryable, bookingId: string): Promise<BookedServices> {
   const items = await db.select().from(bookingItems).where(eq(bookingItems.bookingId, bookingId)).orderBy(bookingItems.sort)
   const first = items[0]?.staffId ?? null
   return {
     serviceIds: items.flatMap((i) => (i.serviceId ? [i.serviceId] : [])),
+    staffIds: items.map((i) => i.staffId),
     staffId: first && items.every((i) => i.staffId === first) ? first : null,
   }
 }
@@ -337,26 +346,32 @@ export function rebookQuery(
 
 /**
  * A new appointment like `from` at another time: a client's move request, or an offered alternative. `opts.db` runs it
- * inside the caller's transaction.
+ * inside the caller's transaction. A move to the booking's own time that keeps the same people moves nothing: null.
  */
 export async function rebook(
   deps: Deps,
   user: User,
   from: BookingRow,
   to: { date: string; start: number; staffId?: string | null },
-  opts: { status: 'pending' | 'confirmed'; rescheduleOf?: string; alternativeOf?: string; db?: Queryable },
-): Promise<BookingRow> {
+  opts: { status: 'pending' | 'confirmed'; rescheduleOf?: string; alternativeOf?: string; db?: Queryable; booked?: BookedServices },
+): Promise<BookingRow | null> {
   const db = opts.db ?? deps.db
   const lb = (await loadBusinesses(db, [from.businessId])).get(from.businessId)
   if (!lb) throw new ApiError('not_found')
   if (from.type !== 'appointment') throw new ApiError('not_bookable')
   const move = !!opts.rescheduleOf
-  const booked = await bookedServices(db, from.id)
+  const booked = opts.booked ?? (await bookedServices(db, from.id))
   const query = rebookQuery(booked, to, move ? [from.id] : undefined)
-  // a move whose specialist left or stopped doing these services: the client picks another, nobody is swapped in (an
-  // offered time is just taken, as its chip says)
-  if (move) checkStaff(appointmentContext(lb, [], deps.now()), query.serviceIds, query.staffId)
+  if (move) {
+    const ctx = appointmentContext(lb, [], deps.now())
+    // a service no longer booked online here can't be moved online; a specialist who left or stopped doing these
+    // services means the client picks another, nobody is swapped in (an offered time is just taken, as its chip says)
+    if (query.serviceIds.some((id) => !ctx.services.some((s) => s.id === id && s.online))) throw new ApiError('not_bookable')
+    checkStaff(ctx, query.serviceIds, query.staffId)
+  }
   const slot = await placeAppointment(deps, lb, query, to.start, 'client', db)
+  if (move && to.date === from.date && to.start === from.start && slot.items.every((it, i) => it.staffId === booked.staffIds[i]))
+    return null
   return inTransaction(
     deps,
     (tx) =>
