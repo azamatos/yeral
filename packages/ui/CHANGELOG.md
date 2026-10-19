@@ -1,5 +1,11 @@
 # @yeral/ui
 
+## 0.2.1
+
+### Patch Changes
+
+- [#27](https://github.com/azamatos/yeral/pull/27) [`421ac7e`](https://github.com/azamatos/yeral/commit/421ac7e25c29df828f10b6c93436121dae1d71c3) Thanks [@azamatos](https://github.com/azamatos)! - Theme: `shadow-ring-selected` from design tokens v0.5, the ink ring around a selected calendar block or floor-plan table.
+
 ## 0.2.0
 
 ### Minor Changes

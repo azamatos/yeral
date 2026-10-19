@@ -1,5 +1,11 @@
 # @yeral/lib
 
+## 0.2.0
+
+### Minor Changes
+
+- [#25](https://github.com/azamatos/yeral/pull/25) [`a151384`](https://github.com/azamatos/yeral/commit/a1513849a033a81502c95f8c8993579d57bb2f60) Thanks [@azamatos](https://github.com/azamatos)! - Local and production only: the site configuration no longer has a `staging` environment, the api's Worker is configured for production only (`api.yeral.app`, first deployed with the new client site), and the demo seed never goes into a remote database.
+
 ## 0.1.0
 
 ### Minor Changes
