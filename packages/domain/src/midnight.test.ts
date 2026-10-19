@@ -28,6 +28,17 @@ describe('hours past midnight', () => {
     expect(openState(bar, at('2026-10-17T20:00:00Z'))).toEqual({ open: true, until: 120 })
   })
 
+  it('a break past midnight: closed, reopening after it, not tomorrow evening', () => {
+    // 18:00–03:00 with a break 00:00–01:00
+    const late: BusinessHours = {
+      hours: Array.from({ length: 7 }, () => ({ open: 1080, close: 1620, break: { start: 1440, end: 1500 } })),
+      exceptions: [],
+    }
+    // Thursday 00:30 at the business
+    expect(openState(late, at('2026-10-14T19:30:00Z'))).toEqual({ open: false, inDays: 0, at: 60 })
+    expect(openState(late, at('2026-10-14T20:30:00Z'))).toEqual({ open: true, until: 180 })
+  })
+
   it('a day’s part past midnight must end by the next day’s opening', () => {
     expect(weekHoursErrors(NIGHT)).toEqual([])
     // Monday until 11:00 the next morning runs into Tuesday's 10:00 opening

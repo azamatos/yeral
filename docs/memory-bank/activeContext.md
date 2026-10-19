@@ -18,7 +18,7 @@ v0.5 (in Turkmen) is the newest export; v0.6 (English) is being drawn. The versi
 `@yeral/api@0.1.1`, staging removed) is merged. The backend plan (chapter 10, P2) was reviewed on 2026-10-19 against
 every **Code differs** line and the built api, and now has steps 0–7; steps 0 (own server only, ADR 0024), 1 (market
 settings, `@yeral/domain/market`) and 2 (three fixed levels, team rows, invites, ADR 0025) are done; step 3 (the
-booking engine's fixes) runs: past midnight (Q-105) is done, holds in opening hours (Q-120) are next.
+booking engine's fixes, past midnight first) is next.
 
 ## Owner's direction
 - 2026-10-13: infrastructure first; Cloudflare now, own server (Docker + nginx, Cloudflare for DNS) later; name/domain in

@@ -170,10 +170,14 @@ export type OpenState = { open: true; until: number } | { open: false; inDays: n
  */
 export function openState(b: BusinessHours, now = Date.now()): OpenState {
   const { date, min } = localOf(now)
-  // still inside yesterday's day, past its midnight
+  // still inside yesterday's day, past its midnight: open, or on a break there with more of it to come
   const yesterday = businessDay(b, addDays(date, -1))
-  const late = yesterday ? workingIntervals(yesterday).find((w) => min + DAY_MINUTES >= w.start && min + DAY_MINUTES < w.end) : undefined
+  const lateStretches = yesterday ? workingIntervals(yesterday) : []
+  const asYesterday = min + DAY_MINUTES
+  const late = lateStretches.find((w) => asYesterday >= w.start && asYesterday < w.end)
   if (late) return { open: true, until: late.end - DAY_MINUTES }
+  const resumes = lateStretches.find((w) => w.start > asYesterday && w.start >= DAY_MINUTES)
+  if (resumes && yesterday && asYesterday < yesterday.close) return { open: false, inDays: 0, at: resumes.start - DAY_MINUTES }
   const day = businessDay(b, date)
   const stretches = day ? workingIntervals(day) : []
   const current = stretches.find((w) => min >= w.start && min < w.end)

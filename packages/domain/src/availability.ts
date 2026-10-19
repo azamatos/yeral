@@ -89,10 +89,13 @@ export function staffDoingAll(ctx: Pick<AppointmentContext, 'staff'>, serviceIds
   return bookableStaff(ctx).filter((s) => serviceIds.every((id) => s.serviceIds.includes(id)))
 }
 
-/** The date is inside what the client may book: not in the past, not beyond the window. */
+/**
+ * The date is inside what the client may book: not beyond the window, and not over. Yesterday counts while its
+ * business day may still run past midnight (book Q-105); its starts already gone are left out by time.
+ */
 export function inBookingWindow(rules: Pick<BookingRules, 'windowDays'>, date: string, now = Date.now()): boolean {
   const d = diffDays(date, today(now))
-  return d >= 0 && d <= rules.windowDays
+  return d >= -1 && d <= rules.windowDays
 }
 
 /** One staff member's free-time picture for a date. */
@@ -315,15 +318,19 @@ export function nearestSlots(ctx: AppointmentContext, q: AppointmentQuery, start
     .sort((a, b) => a.start - b.start)
 }
 
-/** The first free start from `from` on, at most `days` days ahead ("Indiki boş wagt", "Indiki boş gün"). */
+/**
+ * The first free start from `from` on, at most `days` days ahead ("Indiki boş wagt", "Indiki boş gün"). From today,
+ * yesterday's business day comes first while it may still run past midnight.
+ */
 export function nextFreeSlot(
   ctx: AppointmentContext,
   q: Omit<AppointmentQuery, 'date'>,
   from = today(ctx.now),
   days = ctx.rules.windowDays,
 ): { date: string; slot: AppointmentSlot } | null {
-  for (let i = 0; i <= days; i++) {
-    const date = addDays(from, i)
+  const first = from === today(ctx.now) ? addDays(from, -1) : from
+  for (let i = 0; i <= days + diffDays(from, first); i++) {
+    const date = addDays(first, i)
     const slot = freeSlots(ctx, { ...q, date }).next().value
     if (slot) return { date, slot }
   }
@@ -397,8 +404,14 @@ export interface TableSlot {
   areaIds: string[]
 }
 
-function freeTable(ctx: TableContext, area: TableArea, date: string, span: Interval, partySize: number, excludeBookingId?: string) {
-  const busy = busyOn(ctx.busy, date)
+/** `busy`: the tables' busy time on the date, from `busyOn` (worked out once per date). */
+function freeTable(
+  busy: TableContext['busy'],
+  area: TableArea,
+  span: Interval,
+  partySize: number,
+  excludeBookingId?: string,
+): TableArea['tables'][number] | undefined {
   return [...area.tables]
     .filter((t) => t.seats >= partySize)
     .sort((a, b) => a.seats - b.seats)
@@ -411,6 +424,7 @@ export function tableSlots(ctx: TableContext, q: { date: string; partySize: numb
   const day = businessDay(ctx.business, q.date)
   if (!day) return []
   const working = workingIntervals(day)
+  const busy = busyOn(ctx.busy, q.date)
   const earliest = ctx.now + ctx.rules.leadMinutes * 60_000
   const areas = ctx.areas.filter((a) => q.partySize >= a.minParty && q.partySize <= a.maxParty)
   const out: TableSlot[] = []
@@ -418,7 +432,7 @@ export function tableSlots(ctx: TableContext, q: { date: string; partySize: numb
   for (let start = Math.ceil(day.open / step) * step; start + ctx.sittingMinutes <= day.close; start += step) {
     const span = { start, end: start + ctx.sittingMinutes }
     if (epochOf(q.date, start) < earliest || !working.some((w) => contains(w, span))) continue
-    const areaIds = areas.filter((a) => freeTable(ctx, a, q.date, span, q.partySize, q.excludeBookingId)).map((a) => a.id)
+    const areaIds = areas.filter((a) => freeTable(busy, a, span, q.partySize, q.excludeBookingId)).map((a) => a.id)
     if (areaIds.length) out.push({ start, areaIds })
   }
   return out
@@ -432,7 +446,8 @@ export function assignTable(
   const area = ctx.areas.find((a) => a.id === q.areaId)
   if (!area || q.partySize < area.minParty || q.partySize > area.maxParty) return null
   if (!tableSlots(ctx, q).some((s) => s.start === q.start && s.areaIds.includes(q.areaId))) return null
-  return freeTable(ctx, area, q.date, { start: q.start, end: q.start + ctx.sittingMinutes }, q.partySize, q.excludeBookingId)?.id ?? null
+  const busy = busyOn(ctx.busy, q.date)
+  return freeTable(busy, area, { start: q.start, end: q.start + ctx.sittingMinutes }, q.partySize, q.excludeBookingId)?.id ?? null
 }
 
 // ── Classes ───────────────────────────────────────────────────────────────────────────────────────────────────────

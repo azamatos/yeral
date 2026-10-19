@@ -533,7 +533,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
       const area = b.areas.get(a.area)
       const table = area?.tables.filter((x) => x.seats >= (a.partySize ?? 2)).sort((x, y) => x.seats - y.seats)[0]
       const start = m(a.from)
-      const end = Math.min(1440, start + b.sittingMinutes)
+      const end = start + b.sittingMinutes
       await db.insert(t.bookings).values({
         code: code(ctx, a.code),
         businessId: b.id,
