@@ -79,7 +79,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 - The answers of 18.10.2026 add **Code differs** lines across chapters 5 and 7a–7c. The main ones: the api still plans
   review-ask SMS (Q-259); SMS links use `/b/{code}` instead of a long token (Q-168); the no-show count never restarts
   (Q-127); signing in links every booking under the phone, with no "Is this
-  you?" check (Q-270); 20 codes an hour per internet address instead of 100 (Q-267); reminders go at night (Q-285).
+  you?" check (Q-270); 20 codes an hour per internet address instead of 100 (Q-267).
 
 ## Totals by area
 

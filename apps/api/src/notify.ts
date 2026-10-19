@@ -43,7 +43,8 @@ export interface SmsBooking {
   address: string
 }
 
-export type BookingSmsKind = 'confirmed' | 'reminderDay' | 'reminder2h' | 'reviewAsk'
+/** `reminderEvening`: a reminder moved out of the night to 21:30 the evening before, worded like the day one ("tomorrow"). */
+export type BookingSmsKind = 'confirmed' | 'reminderDay' | 'reminder2h' | 'reminderEvening' | 'reviewAsk'
 
 /** The brand name for SMS texts: the `common.brand` message, where the brand lives (systemPatterns, "Configuration, domains and brand"). */
 const brandOf = (t: ReturnType<typeof createT>) => t('common.brand')
@@ -62,6 +63,7 @@ export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsK
     case 'confirmed':
       return t('sms.confirmed', { ...common, weekday: fmt.weekday(b.date), date: fmt.dayMonth(b.date) })
     case 'reminderDay':
+    case 'reminderEvening':
       return t('sms.reminderDay', common)
     case 'reminder2h':
       return t('sms.reminder2h', common)

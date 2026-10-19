@@ -12,7 +12,7 @@
 import { isOnlineSource, type BookingSource, type BookingStatus, type CancelledBy, type ConfirmMode } from './model'
 import type { BookingRules } from './rules'
 import { openStretches, type BusinessHours } from './hours'
-import { epochOf } from './time'
+import { addDays, epochOf, localOf } from './time'
 
 /** A booking as far as the lifecycle cares: business-local date, start and end minutes, stored state. */
 export interface BookingState {
@@ -66,6 +66,64 @@ export function holdUntil(
     left -= w.end - w.start
   }
   return start
+}
+
+/** No client reminder arrives between 22:00 and 08:00 at the business (book Q-285). */
+export const NIGHT = { from: 22 * 60, to: 8 * 60 } as const
+/** A reminder that would arrive at night goes at 21:30 the evening before the visit instead. */
+export const EVENING_REMINDER_AT = 21 * 60 + 30
+
+/** The two reminders a client can switch off ("Ertir ýatlatma", "2 sagat öň"). */
+export type Reminder = 'reminderDay' | 'reminder2h'
+/** `reminderEvening`: a reminder moved out of the night, worded "tomorrow". */
+export type ReminderKind = Reminder | 'reminderEvening'
+
+/** A planned reminder; `covers`: the reminders it stands for, whose switches decide whether it goes. */
+export interface PlannedReminder {
+  kind: ReminderKind
+  runAt: number
+  covers: Reminder[]
+}
+
+const HOUR = 3_600_000
+
+const isNight = (epoch: number) => {
+  const { min } = localOf(epoch)
+  return min >= NIGHT.from || min < NIGHT.to
+}
+
+/**
+ * When a confirmed visit's reminders go (book Q-257, Q-285): a day before and 2 hours before. One that would arrive at
+ * night goes at 21:30 the evening before the visit instead, worded "tomorrow". At most one reminder goes on any day
+ * before the visit (the later one, standing for both): no two "tomorrow" texts the same day. A reminder already due when
+ * the booking is made is left out, and so is a moved one that would come within 2 hours of it: the "confirmed" SMS has
+ * just told the client.
+ */
+export function reminderPlan(visitStart: number, now: number): PlannedReminder[] {
+  const evening = epochOf(addDays(localOf(visitStart).date, -1), EVENING_REMINDER_AT)
+  const planned: [Reminder, number][] = [
+    ['reminderDay', visitStart - 24 * HOUR],
+    ['reminder2h', visitStart - 2 * HOUR],
+  ]
+  const out: PlannedReminder[] = []
+  for (const [kind, runAt] of planned) {
+    if (runAt <= now) continue
+    const reminder: PlannedReminder = isNight(runAt)
+      ? { kind: 'reminderEvening', runAt: evening, covers: [kind] }
+      : { kind, runAt, covers: [kind] }
+    if (reminder.kind === 'reminderEvening' && reminder.runAt < now + 2 * HOUR) continue
+    // one a day before the visit: the later stands for both
+    const sameDay = out.find(
+      (r) => localOf(r.runAt).date === localOf(reminder.runAt).date && localOf(reminder.runAt).date !== localOf(visitStart).date,
+    )
+    if (!sameDay) {
+      out.push(reminder)
+      continue
+    }
+    const later = sameDay.runAt >= reminder.runAt ? sameDay : reminder
+    out.splice(out.indexOf(sameDay), 1, { ...later, covers: [...sameDay.covers, ...reminder.covers] })
+  }
+  return out.sort((a, b) => a.runAt - b.runAt)
 }
 
 /** The status people see now, before the jobs have caught up. */

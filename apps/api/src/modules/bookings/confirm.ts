@@ -3,28 +3,30 @@
  * what follows: reminders and the review ask are queued, the client gets the "confirmed" SMS (client spec §6).
  * A confirmed reschedule request moves the booking it points at.
  */
+import { reminderPlan } from '@yeral/domain/lifecycle'
 import { epochOf } from '@yeral/domain/time'
 import { eq } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, jobs } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { emit } from '../../notify'
+import { emit, type BookingSmsKind } from '../../notify'
 import { setStatus, type BookingRow } from './repo'
 
 const HOUR = 3_600_000
 
-/** Queue the booking's SMS: confirmed now, reminders a day and 2 h before, the review ask 2 h after the end. */
+/**
+ * Queue the booking's SMS: confirmed now, the reminders (a day and 2 h before, none at night: `reminderPlan`), the
+ * review ask 2 h after the end.
+ */
 export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, opts: { confirmed: boolean }): Promise<void> {
   const now = deps.now()
   const start = epochOf(b.date, b.start)
   const end = epochOf(b.date, b.end)
-  const plan: { kind: string; runAt: number }[] = [
-    { kind: 'reminderDay', runAt: start - 24 * HOUR },
-    { kind: 'reminder2h', runAt: start - 2 * HOUR },
+  const due: { kind: BookingSmsKind; runAt: number; covers?: readonly string[] }[] = [
+    ...(opts.confirmed ? [{ kind: 'confirmed' as const, runAt: now }] : []),
+    ...reminderPlan(start, now),
     { kind: 'reviewAsk', runAt: end + 2 * HOUR },
   ]
-  if (opts.confirmed) plan.unshift({ kind: 'confirmed', runAt: now })
-  const due = plan.filter((p) => p.kind === 'confirmed' || p.kind === 'reviewAsk' || p.runAt > now)
   if (!due.length) return
   await db
     .insert(jobs)
@@ -32,8 +34,9 @@ export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, 
       due.map((p) => ({
         kind: 'booking.sms',
         runAt: new Date(Math.max(p.runAt, now)),
-        // the time it was planned for: after a move the old reminders find another time and stay quiet
-        payload: { bookingId: b.id, kind: p.kind, date: b.date, start: b.start },
+        // the time it was planned for: after a move the old reminders find another time and stay quiet; `covers`: the
+        // reminders a moved one stands for, whose switches decide whether it goes
+        payload: { bookingId: b.id, kind: p.kind, date: b.date, start: b.start, ...(p.covers ? { covers: p.covers } : {}) },
         // a moved booking gets new reminders: the key carries the time
         dedupeKey: `${p.kind}:${b.id}:${b.date}:${b.start}`,
       })),
