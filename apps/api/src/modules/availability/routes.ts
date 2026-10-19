@@ -47,7 +47,6 @@ async function loaded(deps: Deps, slug: string) {
   return lb
 }
 
-/** The services must exist and be bookable online; a chosen specialist must do all of them. */
 /**
  * Move mode (book Q-165): the bookings whose time doesn't count as busy — the client's own confirmed appointment being
  * moved, and a move already waiting for it (a second move replaces it). A booking that can't be moved is refused.

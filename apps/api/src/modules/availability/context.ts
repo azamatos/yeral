@@ -105,10 +105,15 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
   )
 }
 
+/** The named specialist (if any) still takes bookings and does every one of the services; else 404. */
+export function checkStaff(ctx: AppointmentContext, serviceIds: readonly string[], staffId: string | null): void {
+  if (staffId && !staffDoingAll(ctx, serviceIds).some((s) => s.id === staffId)) throw new ApiError('not_found', { staffId })
+}
+
 /** The services are booked online here, and the named specialist (if any) does them all; else 404. */
 export function checkQuery(ctx: AppointmentContext, serviceIds: readonly string[], staffId: string | null): void {
   for (const id of serviceIds) if (!ctx.services.some((s) => s.id === id && s.online)) throw new ApiError('not_found', { serviceId: id })
-  if (staffId && !staffDoingAll(ctx, serviceIds).some((s) => s.id === staffId)) throw new ApiError('not_found', { staffId })
+  checkStaff(ctx, serviceIds, staffId)
 }
 
 export function appointmentContext(lb: LoadedBusiness, busy: BusyInterval[], now: number): AppointmentContext {

@@ -64,7 +64,6 @@ export interface AppointmentQuery {
    * step is the earliest start (a walk-in at 11:20 can start at 11:15 with a 15-minute step).
    */
   by: 'client' | 'staff'
-  /** The booking being moved: its own time doesn't count as busy. */
   /** Bookings whose time doesn't count as busy: the one being moved and a move already waiting for it (book Q-165). */
   excludeBookingIds?: readonly string[]
   /** One specialist does every service: an offered time names one person (book Q-159), so no split between people. */
@@ -369,9 +368,9 @@ export function checkPlan(
   ctx: AppointmentContext,
   date: string,
   items: readonly PlannedItem[],
-  excludeBookingId?: string,
+  excludeBookingIds: readonly string[] = [],
 ): PlanProblem | null {
-  const views = dayViews(ctx, date, excludeBookingId ? [excludeBookingId] : [])
+  const views = dayViews(ctx, date, excludeBookingIds)
   for (const it of items) {
     const s = ctx.staff.find((x) => x.id === it.staffId)
     if (!s?.serviceIds.includes(it.serviceId)) return 'staff_cannot_do'

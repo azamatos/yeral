@@ -12,7 +12,6 @@ import {
   MAX_ONLINE_PARTY,
   maxSeats,
   nearestSlots,
-  slotStaffId,
   tableSlots,
   type AppointmentQuery,
   type AppointmentSlot,
@@ -27,7 +26,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
-import { appointmentContext, checkQuery, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
+import { appointmentContext, checkStaff, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
 import { isPhoneBlocked } from '../clients/online'
 import { servicePrice } from '../catalog/map'
@@ -356,11 +355,8 @@ export async function rebook(
   const query = rebookQuery(booked, to, move ? [from.id] : undefined)
   // a move whose specialist left or stopped doing these services: the client picks another, nobody is swapped in (an
   // offered time is just taken, as its chip says)
-  if (move) checkQuery(appointmentContext(lb, [], deps.now()), query.serviceIds, query.staffId)
+  if (move) checkStaff(appointmentContext(lb, [], deps.now()), query.serviceIds, query.staffId)
   const slot = await placeAppointment(deps, lb, query, to.start, 'client', db)
-  // the very same time with the very same specialist: nothing to move
-  if (move && to.date === from.date && to.start === from.start && slotStaffId(slot) === booked.staffId)
-    throw new ApiError('validation_error', { start: 'unchanged' })
   return inTransaction(
     deps,
     (tx) =>

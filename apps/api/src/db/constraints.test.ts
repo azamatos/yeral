@@ -3,6 +3,13 @@ import { testDatabase } from '../../test/db'
 import type { Db } from './client'
 import * as t from './schema'
 
+/** The SQLSTATE a statement fails with, or null when it succeeds. */
+const sqlState = (q: PromiseLike<unknown>) =>
+  Promise.resolve(q).then(
+    () => null,
+    (e: { code?: string; cause?: { code?: string } }) => e.code ?? e.cause?.code ?? 'unknown',
+  )
+
 /** The database refuses double bookings by itself (migration 0001). */
 describe('no double booking', () => {
   let db: Db
@@ -124,11 +131,11 @@ describe('no double booking', () => {
       .values(item(own!.id, 930, 990))
       .returning()
     expect(moved!.family).toBe(bookingId)
-    // another booking's move may not
+    // another booking's move may not: the overlap rule refuses it
     const [others] = await db.insert(t.bookings).values(move('YR-10005', otherBookingId)).returning()
-    await expect(db.insert(t.bookingItems).values(item(others!.id, 940, 1000))).rejects.toThrow()
-    // one waiting move per booking
-    await expect(db.insert(t.bookings).values(move('YR-10006', bookingId))).rejects.toThrow()
+    expect(await sqlState(db.insert(t.bookingItems).values(item(others!.id, 940, 1000)))).toBe('23P01')
+    // one waiting move per booking: the unique index refuses a second
+    expect(await sqlState(db.insert(t.bookings).values(move('YR-10006', bookingId)))).toBe('23505')
   })
 })
 

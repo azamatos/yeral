@@ -197,10 +197,34 @@ describe('moves', () => {
     expect(moves).toEqual([])
   })
 
-  it('the very same time with the very same specialist is no move', async () => {
-    const { b, code, date, start } = await confirmed('+99365444212', FRI)
+  it('asking for its own time keeps the booking as it is and withdraws a waiting move', async () => {
+    const { b, code, date, start, id } = await confirmed('+99365444212', FRI)
+    // move mode lists the booking's own time
+    expect(await starts(b, date, who['Aýna']!, code)).toContain(start)
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
     const same = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start } })
-    expect(same.json.error.code).toBe('validation_error')
+    expect(same.status).toBe(200)
+    expect(same.json).toMatchObject({ date, start, reschedule: null })
+    const waiting = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
+    expect(waiting).toEqual([])
+  })
+
+  it('a double tap at an instant business moves once and answers both', async () => {
+    await rules({ confirmMode: 'instant' })
+    try {
+      const { b, code, date, start } = await confirmed('+99365444214', FRI)
+      const both = await Promise.all([
+        b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } }),
+        b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } }),
+      ])
+      expect(both.map((r) => r.status)).toEqual([200, 200])
+      expect((await b.req(`/v1/me/bookings/${code}`)).json).toMatchObject({ start: start + 30, reschedule: null })
+    } finally {
+      await rules({ confirmMode: 'manual' })
+    }
   })
 
   it('a replaced move can’t be confirmed, and offers no "Yzyna al"', async () => {

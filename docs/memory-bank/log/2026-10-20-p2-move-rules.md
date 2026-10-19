@@ -10,8 +10,10 @@
   visit's start (`holdUntil(…, endBy)`). A second move may be asked while one waits (it replaces it). A move, a cancel
   and a confirmed move each lock the booking row first (`lockBooking()`, then the move request) and read it again, so
   they run one after another; migration 0011 keeps one waiting move per booking (a partial unique index), as overlaps
-  no longer guard it. A move to the very same time and specialist is refused (`validation_error`). The excluded
-  bookings are one domain field, `excludeBookingIds`. Move mode (`?move=` on the appointment and specialists availability) counts the booking
+  no longer guard it. Asking for the booking's own time (its specialist or «Islendik») keeps it as it is and withdraws
+  a waiting move, so a double tap at an instant business answers both. A move checks only that its specialist still
+  does the services (`checkStaff()`). The excluded bookings are one domain field, `excludeBookingIds`; `lockBooking()`
+  lives in `bookings/repo.ts`. Move mode (`?move=` on the appointment and specialists availability) counts the booking
   and its waiting move as free, and only for a confirmed appointment that may still move. A withdrawn or replaced move
   can't be restored.
 - Decided (Claude, delegated; chapter 9): the move-mode free times and the database rule.

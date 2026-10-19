@@ -92,6 +92,17 @@ export async function setStatus(db: Queryable, b: BookingRow, change: StatusChan
   return row
 }
 
+/**
+ * The booking, locked for the rest of the transaction and read again: a move, a cancel and a move being confirmed lock
+ * the booking first (then its move request), so they run one after another and each sees what the one before did. A row
+ * gone meanwhile (a confirmed move removes its request) has changed: `StaleBooking`.
+ */
+export async function lockBooking(db: Queryable, id: string): Promise<BookingRow> {
+  const [row] = await db.select().from(bookings).where(eq(bookings.id, id)).for('update')
+  if (!row) throw new StaleBooking()
+  return row
+}
+
 /** Postgres refused an overlap (exclusion constraint) or a duplicate: the slot went meanwhile. */
 export function isSlotConflict(e: unknown): boolean {
   const code = (e as { code?: string; cause?: { code?: string } }).code ?? (e as { cause?: { code?: string } }).cause?.code
