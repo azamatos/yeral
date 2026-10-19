@@ -89,7 +89,7 @@ describe('account', () => {
     const { json } = await b.req('/v1/bookings', {
       body: { type: 'appointment', business: 'barber-loft', serviceIds: [svc], staffId: null, date: '2026-10-16', start: 900 },
     })
-    const res = await eventsAfter(b, cursor)
+    const res = await eventsAfter(b, cursor, (items) => items.length >= 2)
     expect(res.json.items.map((e: { type: string; bookingCode: string; business: string }) => [e.type, e.bookingCode, e.business])).toEqual(
       [
         ['booking.created', json.code, 'barber-loft'],
@@ -119,6 +119,7 @@ describe('account', () => {
         '/v1/businesses/{slug}/specialists/availability',
         '/v1/businesses/{slug}/tables',
         '/v1/categories',
+        '/v1/cities',
         '/v1/events',
         '/v1/health',
         '/v1/me',

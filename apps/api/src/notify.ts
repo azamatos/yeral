@@ -3,11 +3,13 @@
  * screens refresh, and SMS to the client through the jobs queue, in the client's language (client spec §6 templates).
  */
 import type { EventType } from '@yeral/contract/events'
-import type { Locale } from '@yeral/domain/model'
+import { MARKET } from '@yeral/domain/market'
+import { localized, type Locale } from '@yeral/domain/model'
 import { createFmt, createT } from '@yeral/i18n/fmt'
 import type { SiteConfig } from '@yeral/lib/site'
+import { eq } from 'drizzle-orm'
 import type { Queryable } from './db/client'
-import { events, jobs } from './db/schema'
+import { cities, events, jobs } from './db/schema'
 
 export async function emit(
   db: Queryable,
@@ -41,6 +43,18 @@ export interface SmsBooking {
   start: number
   businessName: string
   address: string
+  /** Named after the address (`smsCityOf`). */
+  city?: string | null
+}
+
+/**
+ * The city an SMS names after the address: none in the market's main city, else its name, since a phone has no chosen
+ * city to compare with (book Q-107).
+ */
+export async function smsCityOf(db: Queryable, cityId: string, lang: Locale): Promise<string | null> {
+  if (cityId === MARKET.mainCity) return null
+  const [row] = await db.select().from(cities).where(eq(cities.id, cityId))
+  return row ? localized(row.name, lang) : null
 }
 
 /** `reminderEvening`: a reminder moved out of the night to 21:30 the evening before, worded like the day one ("tomorrow"). */
@@ -57,7 +71,7 @@ export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsK
     business: b.businessName,
     time: fmt.time(b.start),
     link: bookingLink(site, b.code),
-    address: b.address,
+    address: b.city ? fmt.addressIn(b.address, b.city) : b.address,
   }
   switch (kind) {
     case 'confirmed':

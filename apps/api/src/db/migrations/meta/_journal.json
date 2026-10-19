@@ -57,6 +57,13 @@
       "when": 1792443848204,
       "tag": "0007_past_midnight",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792445780601,
+      "tag": "0008_cities",
+      "breakpoints": true
     }
   ]
 }

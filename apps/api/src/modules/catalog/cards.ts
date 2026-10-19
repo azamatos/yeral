@@ -18,6 +18,7 @@ import {
   type ServiceRow,
 } from '../availability/context'
 import { loadSessions } from '../availability/sessions'
+import { cityRefOf, loadCities, type CityRow } from './cities'
 import { geoOf, openOf, photoOf, priceFromOf, text } from './map'
 
 export interface CardOptions {
@@ -30,6 +31,8 @@ export interface CardOptions {
   position: LatLng | null
   /** "Näme?": a matching service is the one whose times the card shows. */
   q?: string
+  /** The cities, when the caller has read them already. */
+  cities?: readonly CityRow[]
 }
 
 const SHOWN = 4
@@ -65,7 +68,7 @@ export async function buildCards(deps: Deps, ids: string[], opts: CardOptions): 
   )
   const classIds = [...loaded.values()].filter((l) => l.business.bookingTypes[0] === 'class').map((l) => l.business.id)
   const sessions = await loadSessions(db, classIds, opts.date, addDays(opts.date, Math.max(opts.days, 14) - 1))
-  const categories = await db.select().from(categoriesTable)
+  const [categories, cities] = await Promise.all([db.select().from(categoriesTable), opts.cities ?? loadCities(db)])
 
   const out: { card: BusinessCard; hasFree: boolean }[] = []
   for (const id of ids) {
@@ -135,6 +138,7 @@ export async function buildCards(deps: Deps, ids: string[], opts: CardOptions): 
         rating: b.rating,
         reviewsCount: b.reviewsCount,
         street: b.street,
+        city: cityRefOf(cities, b.cityId, opts.lang),
         geo: geoOf(b),
         distanceM: opts.position ? distanceM(opts.position, { lat: b.lat, lng: b.lng }) : null,
         bookingType: type,

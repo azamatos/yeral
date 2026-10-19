@@ -40,6 +40,8 @@ describe('the team (book chapter 3, ADR 0025)', () => {
       ['glow-studio', 'owner'],
       ['glow-studio-parahat', 'owner'],
     ])
+    // branches are businesses of their own: the city tells them apart (book Q-107)
+    expect(list.items[0].city).toEqual({ id: 'ashgabat', name: 'Ashgabat' })
     // the branch's two waiting requests are for a specialist without the app: the owner answers them
     expect(list.items[1].requestsToAnswer).toBe(2)
     const ownerCount = list.items[0].requestsToAnswer
@@ -60,7 +62,11 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     const gulnar = await as(GULNAR)
     const cards = (await gulnar.req('/v1/me/invites')).json.items
     expect(cards).toHaveLength(1)
-    expect(cards[0]).toMatchObject({ business: { slug: 'glow-studio', name: 'Glow Studio' }, level: 'specialist', state: 'pending' })
+    expect(cards[0]).toMatchObject({
+      business: { slug: 'glow-studio', name: 'Glow Studio', city: { id: 'ashgabat', name: 'Ashgabat' } },
+      level: 'specialist',
+      state: 'pending',
+    })
     expect(cards[0].expiresAt - cards[0].sentAt).toBe(7 * DAY)
     const joined = await gulnar.req(`/v1/me/invites/${cards[0].id}/accept`, { method: 'POST' })
     expect(joined.status).toBe(200)
@@ -214,7 +220,7 @@ describe('the team (book chapter 3, ADR 0025)', () => {
       },
     })
     expect(made.status).toBe(201)
-    const forSelbi = (await eventsAfter(selbi, selbiCursor)).json.items
+    const forSelbi = (await eventsAfter(selbi, selbiCursor, (items) => items.some((e) => e.bookingCode === made.json.code))).json.items
     expect(forSelbi.map((e: { bookingCode: string }) => e.bookingCode)).toContain(made.json.code)
     const forAyna = (await ayna.req(`/v1/events?after=${aynaCursor}`)).json.items
     expect(forAyna.map((e: { bookingCode: string }) => e.bookingCode)).not.toContain(made.json.code)
@@ -292,9 +298,10 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     const inviteeCursor = (await invitee.req('/v1/events')).json.cursor
     const maysa = await as(MAYSA)
     await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: '+99365333013', name: 'Invitee', level: 'specialist' } })
-    const seen = (await eventsAfter(ayna, cursor)).json.items.map((e: { type: string }) => e.type)
+    const teamChanged = (items: { type: string }[]) => items.some((e) => e.type === 'team.changed')
+    const seen = (await eventsAfter(ayna, cursor, teamChanged)).json.items.map((e: { type: string }) => e.type)
     expect(seen).toContain('team.changed')
-    const forInvitee = (await eventsAfter(invitee, inviteeCursor)).json.items.map((e: { type: string }) => e.type)
+    const forInvitee = (await eventsAfter(invitee, inviteeCursor, teamChanged)).json.items.map((e: { type: string }) => e.type)
     expect(forInvitee).toContain('team.changed')
   })
 })

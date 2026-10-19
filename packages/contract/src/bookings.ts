@@ -8,6 +8,7 @@ import { BOOKING_SOURCES, BOOKING_STATUSES, CANCELLED_BY, DECLINE_REASONS } from
 import { z } from 'zod'
 import {
   bookingCodeSchema,
+  cityRefSchema,
   cursorQuerySchema,
   epochSchema,
   geoSchema,
@@ -116,6 +117,7 @@ export const bookingDetailSchema = bookingSummarySchema
     timeline: z.array(z.object({ event: z.enum(TIMELINE_EVENTS), at: epochSchema })),
     /** The exact address, unless the business hides it until confirmation. */
     address: z.string(),
+    city: cityRefSchema,
     entranceNote: z.string().nullable(),
     geo: geoSchema,
     clientNote: z.string().nullable(),

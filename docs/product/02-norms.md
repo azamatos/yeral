@@ -209,7 +209,8 @@ average bill is still in the code (code: packages/i18n/src/fmt.ts).
   *Ýakynymda* (near me), *Golaýyňyzda* (near you). (client spec §1, §8; design CLAUDE.md)
 - **The city is data** (Q-107, decided 18.10.2026): the person's location preselects a city; they can pick another one
   (booking in a city they're moving to, or for relatives); a business address shows its city when it differs from the
-  selected one. Not designed yet (F-240).
+  selected one. Not designed yet (F-240). (code: the `cities` table, `GET /v1/cities`, `?city=` on search and places,
+  `MARKET.mainCity`)
 - **Location denied:** the city from the internet address may appear only inside the *Nirede?* (where?) field, with
   *Ýerleşiş ýapyk — şäher boýunça görkezilýär* (location is off, showing by city). Distances are hidden; lists sort by
   rating × number of reviews. (client spec §5) **Code differs:** the api has no city from the internet address since

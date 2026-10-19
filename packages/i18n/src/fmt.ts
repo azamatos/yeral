@@ -96,6 +96,8 @@ export function createFmt(locale: Locale) {
       if (d === 1) return t('tomorrow')
       return d > 1 && d < 7 ? fmt.weekday(date) : fmt.dayMonth(date)
     },
+    /** `Andalyp street 8, Mary`: an address with its city, shown when the city isn't the one the person chose (book Q-107) */
+    addressIn: (address: string, city: string) => t('addressInCity', { address, city }),
     /** `+993 65 12 34 56`, by the market's phone rules */
     phone: (raw: string) => formatPhone(raw),
   }

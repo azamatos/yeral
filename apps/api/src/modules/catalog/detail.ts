@@ -11,6 +11,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { buildCards } from './cards'
+import { cityRefOf, loadCities } from './cities'
 import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
 
 const SPECIAL_DAYS_AHEAD = 14
@@ -33,7 +34,7 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
   const lb = (await loadBusinesses(db, [row.id])).get(row.id)
   if (!lb) throw new ApiError('not_found')
   const b = lb.business
-  const [category] = await db.select().from(categories).where(eq(categories.id, b.categoryId))
+  const [[category], cities] = await Promise.all([db.select().from(categories).where(eq(categories.id, b.categoryId)), loadCities(db)])
   const groups = await db.select().from(serviceGroups).where(eq(serviceGroups.businessId, b.id)).orderBy(asc(serviceGroups.sort))
   const online = lb.services.filter((s) => s.online)
   const specialists = lb.staff.filter(
@@ -73,7 +74,7 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
     await buildCards(
       deps,
       nearest.map((x) => x.id),
-      { lang, date: day, days: 1, partySize: 2, position },
+      { lang, date: day, days: 1, partySize: 2, position, cities },
     )
   ).map((x) => x.card)
 
@@ -87,6 +88,7 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
     reviewsCount: b.reviewsCount,
     ratingBreakdown: b.ratingBreakdown,
     address: b.hideExactAddress ? b.street : b.address,
+    city: cityRefOf(cities, b.cityId, lang),
     entranceNote: b.hideExactAddress ? null : b.entranceNote,
     hideExactAddress: b.hideExactAddress,
     geo: geoOf(b),

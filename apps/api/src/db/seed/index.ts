@@ -1,5 +1,5 @@
 /**
- * `seed(db, { demo, now })`: the category catalogue always; with `demo`, the whole design demo (wipes the database
+ * `seed(db, { demo, now })`: the market's cities and the category catalogue always; with `demo`, the whole design demo (wipes the database
  * first — the CLI allows that only on local and docker databases). One transaction: a seed that fails leaves the
  * database as it was. Demo dates move with "today"; weekly data (opening hours, shifts, breaks, the yoga week) turns with
  * them, so the demo day keeps the design's Wednesday whatever weekday it lands on.
@@ -16,6 +16,7 @@ import { randomToken, sha256Hex } from '../../lib/crypto'
 import type { Db, Queryable } from '../client'
 import * as t from '../schema'
 import { CATEGORIES } from './categories'
+import { CITIES } from './cities'
 import {
   AYJEMAL_BOOKINGS,
   BUSINESSES,
@@ -47,6 +48,16 @@ export const TABLES: readonly string[] = Object.values(t).flatMap((x) => (is(x, 
 
 export async function wipe(db: Queryable): Promise<void> {
   await db.execute(sql.raw(`truncate table ${TABLES.map((x) => `"${x}"`).join(', ')} restart identity cascade`))
+}
+
+/** The market's cities; the demo's businesses and places are in its main city. */
+export async function seedCities(db: Queryable): Promise<number> {
+  const list = CITIES[MARKET.code] ?? []
+  for (const [i, c] of list.entries()) {
+    const row = { ...c, sort: i }
+    await db.insert(t.cities).values(row).onConflictDoUpdate({ target: t.cities.id, set: row })
+  }
+  return list.length
 }
 
 export async function seedCategories(db: Queryable): Promise<number> {
@@ -109,6 +120,7 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       bookingTypes: [def.type],
       about: def.about,
       address: def.address,
+      cityId: MARKET.mainCity,
       street: def.street,
       entranceNote: def.entranceNote ?? null,
       lat: geo.lat,
@@ -353,12 +365,17 @@ async function seedClient(
 }
 
 export async function seed(db: Db, opts: { demo: boolean; now: number }): Promise<Record<string, number>> {
-  return db.transaction(async (tx) => (opts.demo ? seedDemo(tx, opts) : { categories: await seedCategories(tx) }))
+  return db.transaction(async (tx) => (opts.demo ? seedDemo(tx, opts) : seedCatalogue(tx)))
+}
+
+/** The market's cities and the category catalogue, kept up to date on every setup, a kept demo included. */
+export async function seedCatalogue(db: Queryable): Promise<Record<string, number>> {
+  return { cities: await seedCities(db), categories: await seedCategories(db) }
 }
 
 async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<string, number>> {
   await wipe(db)
-  const counts: Record<string, number> = { categories: await seedCategories(db) }
+  const counts = await seedCatalogue(db)
   const shift = diffDays(today(opts.now), DEMO_DAY)
   const turn = ((shift % 7) + 7) % 7
   const ctx: Ctx = {
@@ -371,7 +388,9 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
     clients: new Map(),
   }
 
-  await db.insert(t.places).values(PLACES.map((p) => ({ label: p.label, ...offset(DEMO_CENTER, p.distanceKm, p.bearing) })))
+  await db
+    .insert(t.places)
+    .values(PLACES.map((p) => ({ cityId: MARKET.mainCity, label: p.label, ...offset(DEMO_CENTER, p.distanceKm, p.bearing) })))
 
   const seeded = new Map<string, SeededBusiness>()
   for (const def of BUSINESSES) seeded.set(def.slug, await seedBusiness(ctx, def))

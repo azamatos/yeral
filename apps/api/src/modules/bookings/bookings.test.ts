@@ -475,7 +475,7 @@ describe('client bookings', () => {
     expect((await b.req(`/v1/events?after=${cursor}`)).json.items).toEqual([])
     release()
     await slow
-    const res = await eventsAfter(b, cursor)
+    const res = await eventsAfter(b, cursor, (items) => items.length >= 2)
     expect(res.json.items.map((e: { bookingCode: string }) => e.bookingCode)).toEqual(['YR-SLOW', 'YR-FAST'])
     expect((await b.req(`/v1/events?after=${res.json.cursor}`)).json.items).toEqual([])
   })

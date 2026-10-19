@@ -7,6 +7,7 @@ import { LEVELS } from '@yeral/domain/permissions'
 import { STAFF_STATUSES } from '@yeral/domain/model'
 import { z } from 'zod'
 import {
+  cityRefSchema,
   epochSchema,
   idSchema,
   localizedSchema,
@@ -31,6 +32,8 @@ export const workspaceSchema = z
     slug: slugSchema,
     name: z.string(),
     address: z.string(),
+    /** Branches are businesses of their own: the city tells two on the same street name apart (book Q-107). */
+    city: cityRefSchema,
     photo: photoSchema.nullable(),
     level: levelSchema,
     /** Requests waiting for an answer this person may give: the count in the switcher. */
@@ -48,7 +51,14 @@ export const workspaceListSchema = z.object({ items: z.array(workspaceSchema), c
 export const inviteCardSchema = z
   .object({
     id: idSchema,
-    business: z.object({ slug: slugSchema, name: z.string(), category: z.string(), address: z.string(), photo: photoSchema.nullable() }),
+    business: z.object({
+      slug: slugSchema,
+      name: z.string(),
+      category: z.string(),
+      address: z.string(),
+      city: cityRefSchema,
+      photo: photoSchema.nullable(),
+    }),
     /** Who sent it: their name on the team. */
     invitedBy: z.string().nullable(),
     level: assignableLevelSchema,

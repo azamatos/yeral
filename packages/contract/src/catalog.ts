@@ -8,6 +8,7 @@ import { CONFIRM_MODES } from '@yeral/domain/model'
 import { z } from 'zod'
 import {
   bookingTypeSchema,
+  cityRefSchema,
   cursorQuerySchema,
   epochSchema,
   geoSchema,
@@ -83,6 +84,7 @@ export const businessCardSchema = z
     reviewsCount: z.number().int().min(0),
     /** Street line for rows: "Bitarap Türkmenistan şaýoly 247". */
     street: z.string(),
+    city: cityRefSchema,
     geo: geoSchema,
     /** Null when the request has no position (location denied). */
     distanceM: z.number().int().min(0).nullable(),
@@ -116,6 +118,12 @@ const searchFields = langQuerySchema.extend(cursorQuerySchema.shape).extend({
   /** "Näme?": a service, a business name or a category word. */
   q: z.string().trim().max(80).optional(),
   cat: slugSchema.optional(),
+  /**
+   * "Nirede?" set to a city (book Q-107): the list keeps to it. Without a city the market's main one; an unknown city
+   * counts as the main one. Ignored with a position (near me, or around a picked place) and with `bbox`: both cross
+   * city lines.
+   */
+  city: slugSchema.optional(),
   lat: latQuery.optional(),
   lng: lngQuery.optional(),
   r: z.coerce
@@ -152,20 +160,57 @@ export const searchResponseSchema = listOf(businessCardSchema)
   .extend({
     /** False when there was no position: distances are hidden and the list is sorted by rating × reviews. */
     located: z.boolean(),
+    /** The city the list keeps to (the chosen one, else the market's main one); null near a position and in a map area. */
+    city: slugSchema.nullable(),
   })
   .meta({ id: 'SearchResponse' })
 
-export const suggestQuerySchema = langQuerySchema.extend({ q: z.string().trim().min(1).max(80) })
+export const suggestQuerySchema = langQuerySchema.extend({
+  q: z.string().trim().min(1).max(80),
+  /** Services and businesses in this city only, as search keeps to it (an unknown city counts as the main one). */
+  city: slugSchema.optional(),
+})
 export const suggestResponseSchema = z.object({
   categories: z.array(z.object({ id: slugSchema, name: z.string() })).max(4),
   services: z.array(z.string()).max(6),
   businesses: z.array(z.object({ slug: slugSchema, name: z.string(), category: z.string() })).max(6),
 })
 
-// ── Places ("Nirede?") ──
+// ── Cities and places ("Nirede?") ──
+
+export const citySchema = z
+  .object({
+    id: slugSchema,
+    name: z.string(),
+    /** The centre, where the map opens. */
+    lat: z.number(),
+    lng: z.number(),
+  })
+  .meta({ id: 'City' })
+export const citiesQuerySchema = langQuerySchema
+  .extend({
+    /** The person's position, to preselect the city they're in. */
+    lat: latQuery.optional(),
+    lng: lngQuery.optional(),
+  })
+  .superRefine(latWithLng)
+export const cityListSchema = z
+  .object({
+    /** The market's cities in menu order. */
+    items: z.array(citySchema),
+    /** Where a visitor starts with no city chosen and no position. */
+    main: slugSchema,
+    /** The city the position is in (its centre within `CITY_REACH_KM`); null without a position or far from every city. */
+    nearest: slugSchema.nullable(),
+  })
+  .meta({ id: 'CityList' })
 
 export const placeSchema = z.object({ label: z.string(), lat: z.number(), lng: z.number() }).meta({ id: 'Place' })
-export const placeSuggestQuerySchema = langQuerySchema.extend({ q: z.string().trim().min(2).max(80) })
+export const placeSuggestQuerySchema = langQuerySchema.extend({
+  q: z.string().trim().min(2).max(80),
+  /** Places in this city only (an unknown city counts as the main one). */
+  city: slugSchema.optional(),
+})
 export const placeListSchema = z.object({ items: z.array(placeSchema).max(6) })
 
 // ── Business page ──
@@ -235,7 +280,9 @@ export const businessDetailSchema = z
     rating: z.number().min(0).max(5).nullable(),
     reviewsCount: z.number().int().min(0),
     ratingBreakdown: ratingBreakdownSchema,
+    /** The street address; the city is `city`. */
     address: z.string(),
+    city: cityRefSchema,
     entranceNote: z.string().nullable(),
     /** Home-based: the exact address shows only on a confirmed booking; `geo` is then approximate. */
     hideExactAddress: z.boolean(),

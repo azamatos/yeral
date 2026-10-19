@@ -96,7 +96,7 @@ flowchart TD
 
 **Design to fix:** the one-time city choice when location is denied or failed, and picking another city later (Q-107, F-240).
 
-**Status:** Design: drawn (States · tiles 02, 03); the location help sheet is text only · Code: built (api) — search by position and radius, IP place.
+**Status:** Design: drawn (States · tiles 02, 03); the location help sheet is text only · Code: built (api) — search by position and radius, by city (the market's main city without either), the city list with the one a position is in (Q-107); the IP place removed (ADR 0024).
 
 ### C-02 · Use the home page
 

@@ -1,9 +1,11 @@
-/** Public catalogue: categories, search, suggestions, places, business pages, reviews. */
+/** Public catalogue: categories, cities, search, suggestions, places, business pages, reviews. */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import {
   businessDetailSchema,
   businessQuerySchema,
   categoryListSchema,
+  citiesQuerySchema,
+  cityListSchema,
   placeListSchema,
   placeSuggestQuerySchema,
   reviewListSchema,
@@ -14,11 +16,14 @@ import {
   suggestResponseSchema,
 } from '@yeral/contract/catalog'
 import { langQuerySchema, slugSchema } from '@yeral/contract/common'
+import { nearestCity } from '@yeral/domain/geo'
+import { MARKET } from '@yeral/domain/market'
 import { and, asc, desc, eq, inArray, or, sql, type AnyColumn, type SQL } from 'drizzle-orm'
 import { anyTextLike, textIn } from '../../db/localized'
 import { bookingItems, businesses, categories, places, reviews, services } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
+import { cityOrMain, loadCities } from './cities'
 import { businessDetail, publicBusiness } from './detail'
 import { text, visitWhat } from './map'
 import { search, wordStartLikes } from './search'
@@ -32,6 +37,15 @@ const categoriesRoute = createRoute({
   summary: 'The category catalogue',
   request: { query: langQuerySchema },
   responses: { 200: json(categoryListSchema) },
+})
+
+const citiesRoute = createRoute({
+  method: 'get',
+  path: '/cities',
+  tags: ['catalog'],
+  summary: 'The cities for "Nirede?", the main one and the one the position is in',
+  request: { query: citiesQuerySchema },
+  responses: { 200: json(cityListSchema), 400: errors[400] },
 })
 
 const searchRoute = createRoute({
@@ -94,12 +108,27 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
     }))
     return c.json({ items }, 200)
   })
+  .openapi(citiesRoute, async (c) => {
+    const { lang, lat, lng } = c.req.valid('query')
+    const rows = await loadCities(c.var.deps.db)
+    const nearest = lat !== undefined && lng !== undefined ? nearestCity(rows, { lat, lng }) : null
+    return c.json(
+      {
+        items: rows.map((r) => ({ id: r.id, name: text(r.name, lang), lat: r.lat, lng: r.lng })),
+        main: MARKET.mainCity,
+        nearest: nearest?.id ?? null,
+      },
+      200,
+    )
+  })
   .openapi(searchRoute, async (c) => c.json(await search(c.var.deps, c.req.valid('query')), 200))
   .openapi(suggestRoute, async (c) => {
-    const { q, lang } = c.req.valid('query')
+    const { q, lang, city } = c.req.valid('query')
     const { db } = c.var.deps
     const [start, word] = wordStartLikes(q)
     const matches = (col: SQL | AnyColumn) => or(sql`${col} ilike ${start}`, sql`${col} ilike ${word}`)
+    // the businesses search would show: verified, and in the chosen city when there is one
+    const shown = and(eq(businesses.verification, 'verified'), city ? eq(businesses.cityId, await cityOrMain(db, city)) : undefined)
     const [cats, svc, biz] = await Promise.all([
       db
         .select()
@@ -111,12 +140,12 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
         .selectDistinct({ name: textIn(services.name, lang) })
         .from(services)
         .innerJoin(businesses, eq(businesses.id, services.businessId))
-        .where(and(eq(businesses.verification, 'verified'), eq(services.archived, false), anyTextLike(services.name, start, word)))
+        .where(and(shown, eq(services.archived, false), anyTextLike(services.name, start, word)))
         .limit(6),
       db
         .select()
         .from(businesses)
-        .where(and(eq(businesses.verification, 'verified'), matches(businesses.name)))
+        .where(and(shown, matches(businesses.name)))
         .orderBy(desc(businesses.reviewsCount))
         .limit(6),
     ])
@@ -130,12 +159,13 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
     )
   })
   .openapi(placesRoute, async (c) => {
-    const { q, lang } = c.req.valid('query')
+    const { q, lang, city } = c.req.valid('query')
+    const { db } = c.var.deps
     const [start, word] = wordStartLikes(q)
-    const rows = await c.var.deps.db
+    const rows = await db
       .select()
       .from(places)
-      .where(anyTextLike(places.label, start, word))
+      .where(and(anyTextLike(places.label, start, word), city ? eq(places.cityId, await cityOrMain(db, city)) : undefined))
       .limit(6)
     return c.json({ items: rows.map((p) => ({ label: text(p.label, lang), lat: p.lat, lng: p.lng })) }, 200)
   })

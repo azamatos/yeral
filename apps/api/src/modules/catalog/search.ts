@@ -1,7 +1,7 @@
 /**
- * Search and Home (client spec §4.1–4.2, §5): verified businesses near the position (radius) or in the map area,
- * filtered by category, type, rating, price, open now and "has free time" on the chosen day(s); nearest first, or by
- * rating × reviews without a position.
+ * Search and Home (client spec §4.1–4.2, §5): verified businesses in the map area, near the position (radius), or in the
+ * chosen city — the market's main one when there is none (book Q-107); filtered by category, type, rating, price, open
+ * now and "has free time" on the chosen day(s); nearest first, or by rating × reviews without a position.
  */
 import type { SearchQuery } from '@yeral/contract/catalog'
 import { boundingBox, distanceM, popularity } from '@yeral/domain/geo'
@@ -11,6 +11,7 @@ import { anyTextLike } from '../../db/localized'
 import { businesses, categories, services } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { buildCards } from './cards'
+import { cityOrMain } from './cities'
 
 const escapeLike = (q: string) => q.replace(/[\\%_]/g, (ch) => `\\${ch}`)
 
@@ -25,7 +26,12 @@ export async function search(deps: Deps, q: SearchQuery) {
   const date = q.date ?? today(deps.now())
   const position = q.lat !== undefined && q.lng !== undefined ? { lat: q.lat, lng: q.lng } : null
 
+  // the map area wins, then the position (near me, or around a picked place); a city only without either
+  const radius = !q.bbox && position
+  const city = q.bbox || position ? null : await cityOrMain(db, q.city)
+
   const where: SQL[] = [eq(businesses.verification, 'verified')]
+  if (city) where.push(eq(businesses.cityId, city))
   if (q.cat) where.push(eq(businesses.categoryId, q.cat))
   if (q.type) where.push(sql`${q.type} = any(${businesses.bookingTypes})`)
   if (q.womenOnly) where.push(eq(businesses.womenOnly, true))
@@ -33,7 +39,7 @@ export async function search(deps: Deps, q: SearchQuery) {
   if (q.bbox) {
     const [minLat, minLng, maxLat, maxLng] = q.bbox
     where.push(between(businesses.lat, minLat, maxLat), between(businesses.lng, minLng, maxLng))
-  } else if (position) {
+  } else if (radius) {
     const box = boundingBox(position, q.r)
     where.push(between(businesses.lat, box.minLat, box.maxLat), between(businesses.lng, box.minLng, box.maxLng))
   }
@@ -59,7 +65,7 @@ export async function search(deps: Deps, q: SearchQuery) {
     })
     .from(businesses)
     .where(and(...where))
-  if (position && !q.bbox) rows = rows.filter((r) => distanceM(position, r) <= q.r * 1000)
+  if (radius) rows = rows.filter((r) => distanceM(position, r) <= q.r * 1000)
 
   const cards = (
     await buildCards(
@@ -83,5 +89,11 @@ export async function search(deps: Deps, q: SearchQuery) {
 
   const offset = Number(q.cursor ?? 0) || 0
   const items = cards.slice(offset, offset + q.limit)
-  return { items, total: cards.length, cursor: offset + q.limit < cards.length ? String(offset + q.limit) : null, located: !!position }
+  return {
+    items,
+    total: cards.length,
+    cursor: offset + q.limit < cards.length ? String(offset + q.limit) : null,
+    located: !!position,
+    city,
+  }
 }

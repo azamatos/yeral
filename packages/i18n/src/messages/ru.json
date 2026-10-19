@@ -70,6 +70,7 @@
     "hoursMinutes": "{h} ч {m} мин",
     "km": "{n} км",
     "m": "{n} м",
+    "addressInCity": "{address}, {city}",
     "today": "Сегодня",
     "tomorrow": "Завтра",
     "weekdayDate": "{weekday}, {date}",
