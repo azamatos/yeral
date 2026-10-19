@@ -1,6 +1,7 @@
 # 0021. Product book first; Claude Code writes the design prompts
 
-- Status: Accepted 2026-10-17 — changes the order of the roadmap in `progress.md` and how ADR 0012 gets its designs
+- Status: Accepted 2026-10-17 — changes the order of the roadmap in `progress.md` and how ADR 0012 gets its designs;
+  amended 2026-10-19: with the book closed, the backend runs alongside the design (see the last Decision bullet)
 - Decided by: owner ("we need to fully reorganize the strategy … after we finish all possible scenarios, when there is no
   any questions/dilemmas we move to making the full prepared design and components/storybook. We will move to real
   coding") + Claude (how)
@@ -30,6 +31,11 @@ work on 2026-10-17.
   The owner no longer writes separate prompts for Claude Design.
 - **Existing code** (M0–M2: monorepo, CI, `@yeral/ui`, domain, contract, sdk, api) is kept, frozen and adjusted to the
   book once it is closed. yeral.app keeps serving `apps/legacy` until the new client site replaces it.
+- **Amended 2026-10-19 (owner: "why can't we do backend async, we are not depending on design, all business
+  decisions are already done"):** the book closed on 2026-10-18, so the backend that implements its rules (domain,
+  api, jobs, market settings, access model, admin, first-launch mode) runs alongside the design pass. Only what a
+  screen shows (the exact fields of an endpoint's response) follows the design, and the contract is adjusted when
+  the export lands. Components in Storybook and the apps still wait for the design.
 
 ## Consequences
 

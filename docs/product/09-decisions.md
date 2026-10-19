@@ -137,7 +137,7 @@ question in this book, the answer is added here with its date, and the chapters 
 
 | Date | Decision | By | Source |
 |---|---|---|---|
-| 19.10.2026 | One track at a time: the design pass, then Storybook, then the apps slice by slice; each slice brings its backend work | owner | chapter 10 |
+| 19.10.2026 | The backend runs alongside the design pass (the book is closed); components and the apps wait for the design | owner | ADR 0021 (amended), chapter 10 |
 | 18.10.2026 | The owner answers only critical questions; Claude decides the rest with the recommended option and records who decided | owner | this book, README |
 | 18.10.2026 | Claude doesn't take an answer for granted: a weaker or risky answer gets a concern; without a reply the owner's answer stands | owner | this book, README |
 | 18.10.2026 | No separate decisions app: the repository stays the record and this book's page stays where the owner answers | owner | activeContext |
