@@ -35,6 +35,8 @@ export const ERROR_STATUS = {
   too_many_attempts: 429,
   resend_too_soon: 429,
   phone_taken: 409,
+  // account and team
+  owns_workspace: 409,
   rate_limited: 429,
   internal: 500,
 } as const satisfies Record<string, number>

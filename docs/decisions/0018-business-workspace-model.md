@@ -1,6 +1,6 @@
 # 0018. Business workspace model: our own teams, roles and client records; Better Auth for identity only
 
-- Status: Accepted 2026-10-14; identity (Better Auth) revised by [0019](0019-own-phone-login-and-sessions.md) (own phone login and sessions)
+- Status: Accepted 2026-10-14; identity (Better Auth) revised by [0019](0019-own-phone-login-and-sessions.md) (own phone login and sessions); roles, memberships and invitations superseded by [0025](0025-fixed-levels-team-rows-invites.md) (three fixed levels, one staff row per person per workspace, invites with accept or decline)
 - Decided by: the business design spec (`docs/design/business/README.md`, round 4, 14.10.2026) + Claude (model, auth split)
 
 ## Context

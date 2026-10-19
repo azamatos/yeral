@@ -155,6 +155,13 @@
   written, the SQL helpers do the same, and search matches every language. SMS take the brand from `common.brand`.
   `manatSchema` → `moneySchema`; `PhoneInput` takes the market's prefix and groups. ADR 0023 revised: one `MARKET`
   constant until a second market exists.
+- **2026-10-19 · P2 step 2, part 1 (the team model):** three fixed levels and the fixed permission table in
+  `@yeral/domain/permissions` (11 rows, `canAnswerRequest()` with the business's `requestAnswerers` and the per-person
+  override); the `staff` row is the team member (account, level, override, `lastOpenedAt`); `invites` table (7 days,
+  hashed link, expired read from the time); `roles` and `memberships` dropped by migrations 0005 (data moved) and 0006;
+  the database keeps one active owner, one row per account, a phone without the app, the owner with the app. Signing
+  in no longer joins a team; invited people aren't on the client site; an owner can't delete their account
+  (`owns_workspace`). [ADR 0025](../decisions/0025-fixed-levels-team-rows-invites.md).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.

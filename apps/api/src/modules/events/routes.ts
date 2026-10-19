@@ -9,10 +9,11 @@
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import { eventListSchema, eventsQuerySchema, type EventType } from '@yeral/contract/events'
 import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm'
-import { businesses, events, memberships } from '../../db/schema'
+import { businesses, events } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
 import { requireUser } from '../auth/session'
+import { workspaceIdsOf } from '../team/members'
 
 const PAGE = 100
 
@@ -46,19 +47,8 @@ export const eventRoutes = new OpenAPIHono<AppEnv>().openapi(eventsRoute, async 
   const [, txid, id] = /^(\d{1,20})\.(\d{1,19})$/.exec(after ?? '') ?? []
   // no cursor yet, one from before this format, or out of range: start from now
   if (!txid || !id || BigInt(txid) > MAX_XID8 || BigInt(id) > MAX_ID) return c.json({ items: [], cursor: await latest() }, 200)
-  const teams = await db
-    .select({ businessId: memberships.businessId })
-    .from(memberships)
-    .where(and(eq(memberships.userId, user.id), eq(memberships.status, 'active')))
-  const mine = teams.length
-    ? or(
-        eq(events.userId, user.id),
-        inArray(
-          events.businessId,
-          teams.map((t) => t.businessId),
-        ),
-      )
-    : eq(events.userId, user.id)
+  const teams = await workspaceIdsOf(db, user.id)
+  const mine = teams.length ? or(eq(events.userId, user.id), inArray(events.businessId, teams)) : eq(events.userId, user.id)
   const rows = await db
     .select({ e: events, slug: businesses.slug })
     .from(events)

@@ -1,13 +1,38 @@
 /**
- * Categories, businesses and everything a business sets up: rules, team, roles, services, tables, class sessions,
- * its client list (ADR 0017, ADR 0018). A branch is its own business.
+ * Categories, businesses and everything a business sets up: rules, team, invites, services, tables, class sessions,
+ * its client list (ADR 0017, ADR 0018, ADR 0025). A branch is its own business.
  */
 import type { DateException, WeekHours } from '@yeral/domain/hours'
 import type { Interval, Localized } from '@yeral/domain/model'
-import type { Permission } from '@yeral/domain/permissions'
-import { boolean, date, doublePrecision, index, integer, jsonb, pgTable, primaryKey, real, text, unique, uuid } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
+import {
+  boolean,
+  check,
+  date,
+  doublePrecision,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  primaryKey,
+  real,
+  text,
+  unique,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core'
 import { users } from './auth'
-import { bookingType, clientSource, confirmMode, membershipStatus, priceType, staffStatus, verificationStatus, visibility } from './enums'
+import {
+  bookingType,
+  clientSource,
+  confirmMode,
+  inviteStatus,
+  level,
+  priceType,
+  requestAnswerers,
+  staffStatus,
+  verificationStatus,
+} from './enums'
 import { createdAt, ts } from './types'
 
 export interface StoredPhoto {
@@ -91,6 +116,7 @@ export const bookingRules = pgTable('booking_rules', {
     .references(() => businesses.id, { onDelete: 'cascade' }),
   onlineEnabled: boolean().notNull().default(true),
   confirmMode: confirmMode().notNull().default('manual'),
+  requestAnswerers: requestAnswerers().notNull().default('both'),
   holdMinutes: integer().notNull().default(30),
   leadMinutes: integer().notNull().default(60),
   windowDays: integer().notNull().default(30),
@@ -104,7 +130,12 @@ export const bookingRules = pgTable('booking_rules', {
   note: jsonb().$type<Localized>(),
 })
 
-/** Everyone on the team; a bookable, active row is a "specialist" on the client site. */
+/**
+ * The team: one row per person per workspace (ADR 0025). The row is both who they are to clients (a bookable, active
+ * row is a "specialist" on the client site) and their access: the account (`userId`), the level, the override.
+ * Owners and administrators are rows too, usually not bookable. A row without an account is a specialist without the
+ * app ("Programmasyz") or someone invited who hasn't accepted yet.
+ */
 export const staff = pgTable(
   'staff',
   {
@@ -112,16 +143,22 @@ export const staff = pgTable(
     businessId: uuid()
       .notNull()
       .references(() => businesses.id, { onDelete: 'cascade' }),
+    /** The account this person signs in with; kept after they leave, so their kept bookings still block them elsewhere. */
+    userId: uuid().references(() => users.id, { onDelete: 'set null' }),
+    level: level().notNull().default('specialist'),
     /** As shown to clients: "Aýna". */
     name: text().notNull(),
     fullName: text(),
     specialization: jsonb().$type<Localized>(),
+    /** E.164; required without the app (the owner and administrators call them), shown only to them. */
     phone: text(),
     photo: jsonb().$type<StoredPhoto>(),
     gender: text().$type<'female' | 'male'>(),
     bookable: boolean().notNull().default(true),
-    /** false = "Programmasyz": never logs in, owner/admin answer for them. */
+    /** false = "Programmasyz": never signs in; the owner and administrators answer for them. */
     hasApp: boolean().notNull().default(true),
+    /** "Öz haýyşlaryna jogap berip biler": the owner can take it away (book chapter 3). */
+    canAnswerOwn: boolean().notNull().default(true),
     status: staffStatus().notNull().default('active'),
     sort: integer().notNull().default(0),
     /** null = business hours; otherwise 7 entries `{open, close} | null`, Monday first. */
@@ -130,47 +167,58 @@ export const staff = pgTable(
     breaks: jsonb().$type<(Interval | null)[]>().notNull().default([null, null, null, null, null, null, null]),
     daysOff: jsonb().$type<DateException[]>().notNull().default([]),
     rating: real(),
+    /** When this person last opened the workspace: the business app opens the most recent one. */
+    lastOpenedAt: ts(),
     createdAt: createdAt(),
   },
-  (t) => [index('staff_business_idx').on(t.businessId)],
+  (t) => [
+    index('staff_business_idx').on(t.businessId),
+    index('staff_user_idx').on(t.userId),
+    // one row per person per workspace; exactly one active owner
+    uniqueIndex('staff_business_user')
+      .on(t.businessId, t.userId)
+      .where(sql`${t.userId} is not null`),
+    uniqueIndex('staff_one_owner')
+      .on(t.businessId)
+      .where(sql`${t.level} = 'owner' and ${t.status} = 'active'`),
+    check('staff_phone_without_app', sql`${t.hasApp} or ${t.phone} is not null`),
+    check('staff_owner_has_app', sql`${t.level} <> 'owner' or ${t.hasApp}`),
+  ],
 )
 
-/** Per-business roles from templates; Eýesi is the locked system role. */
-export const roles = pgTable(
-  'roles',
+/**
+ * An invite to join a team (book chapter 3, "Joining"): the staff row waits as `invited` (or a specialist without the
+ * app keeps working) until the person with this phone signs in and accepts. Valid 7 days; resending starts a new 7
+ * days and a new link. `pending` past `expiresAt` reads as expired.
+ */
+export const invites = pgTable(
+  'invites',
   {
     id: uuid().primaryKey().defaultRandom(),
     businessId: uuid()
       .notNull()
       .references(() => businesses.id, { onDelete: 'cascade' }),
-    name: text().notNull(),
-    template: text().$type<'owner' | 'admin' | 'specialist'>(),
-    system: boolean().notNull().default(false),
-    visibility: visibility().notNull(),
-    permissions: text().array().$type<Permission[]>().notNull().default([]),
-  },
-  (t) => [index('roles_business_idx').on(t.businessId)],
-)
-
-/** Who can sign in to which business, with which role, as which team member. */
-export const memberships = pgTable(
-  'memberships',
-  {
-    id: uuid().primaryKey().defaultRandom(),
-    userId: uuid().references(() => users.id, { onDelete: 'cascade' }),
-    /** Invites go to a phone; the membership links to the user on their first login. */
+    staffId: uuid()
+      .notNull()
+      .references(() => staff.id, { onDelete: 'cascade' }),
+    /** E.164: only the account with this phone can accept. */
     phone: text().notNull(),
-    businessId: uuid()
-      .notNull()
-      .references(() => businesses.id, { onDelete: 'cascade' }),
-    roleId: uuid()
-      .notNull()
-      .references(() => roles.id),
-    staffId: uuid().references(() => staff.id, { onDelete: 'set null' }),
-    status: membershipStatus().notNull().default('invited'),
+    invitedBy: uuid().references(() => users.id, { onDelete: 'set null' }),
+    /** SHA-256 of the link's token; the link opens the invite, never signs anyone in. */
+    tokenHash: text().notNull().unique(),
+    status: inviteStatus().notNull().default('pending'),
+    sentAt: ts().notNull(),
+    expiresAt: ts().notNull(),
+    answeredAt: ts(),
     createdAt: createdAt(),
   },
-  (t) => [unique('memberships_business_phone').on(t.businessId, t.phone), index('memberships_user_idx').on(t.userId)],
+  (t) => [
+    index('invites_phone_idx').on(t.phone),
+    // one open invite per phone per workspace
+    uniqueIndex('invites_one_pending')
+      .on(t.businessId, t.phone)
+      .where(sql`${t.status} = 'pending'`),
+  ],
 )
 
 export const serviceGroups = pgTable('service_groups', {

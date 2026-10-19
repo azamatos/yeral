@@ -71,7 +71,6 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 - The average bill is still in the code (Q-103 dropped it).
 - Every day and visit ends by 24:00; Q-105 allows past midnight (F-109).
 - Addresses carry no city, and there is no city choice (Q-107, F-240); the lookup by internet address is gone with Cloudflare (ADR 0024).
-- Access: the code still has round 4's editable roles; round 6 decided three fixed levels and a matrix (F-088, F-089).
 - Invites: the code activates an invite at the first login; the design has accept or decline, 7 days, resend (F-085).
 - Moving: when the chosen specialist is busy, the code gives the booking to another one; round 6 forbids that (F-060).
 - The online party limit is a fixed 8 in code; it's a business setting in the design (F-050).
@@ -219,8 +218,8 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-085 | Invites by SMS | Owner invites by phone with an access level; SMS link valid 7 days; accept / decline / expired; resend or revoke. | MVP | drawn (B-Login · invite, B-Team · invite) | schema only (`memberships.status = invited`) | **Conflict:** code turns every invite active on first login; no 7-day expiry, no decline screen. |
 | F-086 | No-workspace state | "Entek iş ýeriňiz ýok" with "Biznesimi döret" and how to ask an owner for an invite. | MVP | drawn (B-Login · empty) | not built |  |
 | F-087 | Workspace switcher | One person in several businesses, each with its own level and request count; the only switch in the app. | MVP | drawn (B-Shell) | schema only (`memberships`) | Round 6. |
-| F-088 | Access levels | Fixed levels Eýesi / Administrator / Hünärmen; a Hünärmen may work without the app (F-113); no custom roles. | MVP | drawn (B-Team, B-Shell sidebars) | built as older model (domain role templates + `roles` table with custom names) | **Conflict:** code follows round 4 (editable roles); ADR 0018 and productContext still describe roles. |
-| F-089 | Permissions matrix | Owner switches what Administrator and Hünärmen may do (none / own / all / view) across 11 rows. | Later | drawn (B-Team · permissions) | built as older model (8 keys, visibility own/all) | Conflict as above; the matrix rows differ (reviews reply, analytics, team view). |
+| F-088 | Access levels | Fixed levels Eýesi / Administrator / Hünärmen; a Hünärmen may work without the app (F-113); no custom roles. | MVP | drawn (B-Team, B-Shell sidebars) | built (levels on the team rows, the fixed table in `@yeral/domain/permissions`; ADR 0025) | Business endpoints that enforce it come with P2 step 4. |
+| F-089 | Permissions matrix | Owner switches what Administrator and Hünärmen may do (none / own / all / view) across 11 rows. | Later | drawn (B-Team · permissions) | the fixed table is built with the 11 rows and their defaults (ADR 0025); editing it isn't | The MVP uses the defaults. |
 | F-090 | Hidden, not disabled | What a level can't use is hidden; opening it by URL lands on the calendar with a toast. | MVP | spec only | not built | api must enforce and redact (ADR 0018). |
 | F-091 | Who answers requests | Setting: owner & admin / each specialist / both (default); per-person override; read-only footer for others. | MVP | drawn (B-Settings rules, B-Team staff) | not built (no field) | Round 6. Hidden for one-person businesses. |
 | F-092 | Ownership transfer | Owner hands the business to an active member and becomes Administrator. | Later | drawn (B-Team · transfer) | not built |  |
@@ -416,7 +415,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-215 | Commission on new clients | % of the first completed visit of a new client found through Ýeral search. | Later | later board | not built | Marked later by owner 16.10.2026. Would need F-216. |
 | F-216 | Search vs own-link attribution | Remember whether a client came from Ýeral search or the business's own link/QR. | Later | spec only (productContext) | not built | Only needed for commission; legacy tracked marketplace / direct / phone. |
 | F-217 | Branches | Several addresses under one brand. | Never | not designed (removed in round 6) | not built | Round 6: each address is its own workspace; ADR 0018, API.md and progress.md still mention branches. |
-| F-218 | Custom roles | Owner-defined roles with their own permissions. | Never | not designed (removed in round 6) | built as older model | Code still has role templates (F-088). |
+| F-218 | Custom roles | Owner-defined roles with their own permissions. | Never | not designed (removed in round 6) | removed (ADR 0025) |  |
 | F-219 | Online payment | Pay for a booking by card online. | Later | spec only ("later", README §1, §12) | not built | Projectbrief non-goal; B-Landing FAQ promises card payment "ýakynda". |
 | F-220 | Deposits | Prepayment on booking; a hidden row is reserved in summaries. | Later | spec only ("later") | not built | Projectbrief non-goal. |
 | F-221 | Checkout / POS | Record what the client actually paid at the visit. | Later | not designed | not built | Business §0: only checkout is still out of scope; revenue = prices of completed visits. |

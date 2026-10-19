@@ -72,7 +72,7 @@ flowchart TD
 
 Request = *haýyş*. Booking = *ýazylyş*. Confirm = *Tassykla*. Decline = *Ret et*. Move = *Başga wagta geçir*. Complaint = *Arz et*. The five statuses, each with one icon everywhere (§3, §25.5): *Garaşylýar* (Pending, clock), *Tassyklandy* (Confirmed, check), *Tamamlandy* (Completed, double check), *Ýatyryldy* (Cancelled, x), *Gelmedi* (No-show, crossed person). Sources: *Onlaýn* (online), *Telefon* (phone), *Gelip ýazyldy* (walk-in).
 
-Code differs (whole chapter): the database and the permission rules in code still follow ADR 0018, which is older than v0.5. They store editable per-business roles with a visibility (own or all) and eight on/off switches; in code an administrator can invite staff but can't change settings or services, and a specialist can't see clients or own earnings. v0.5 has three fixed levels, a matrix with *Ýok* / *Diňe özüniňki* / *Hemmesi* / *Diňe görmek* values, the "who answers requests" setting and a per-person override. ADR 0018 also still mentions branches. None of the v0.5 tables exist yet: invites with a 7-day expiry, level permissions, internal statuses, "busy elsewhere".
+Code differs (whole chapter): the levels, the fixed permission table, the "who answers requests" setting, the per-person override and invites with a 7-day expiry follow v0.5 since 19.10.2026 (ADR 0025); the business endpoints aren't built yet (chapter 10, P2 step 4), and internal statuses and "busy elsewhere" don't exist yet (step 3).
 
 ## 1. Getting in and setting up
 
@@ -1770,7 +1770,7 @@ flowchart TD
 - Phone-only staff are not in the matrix.
 - After an ownership transfer the old owner becomes an administrator and sees this read-only (B-51).
 
-Code differs: code keeps editable roles per business (visibility + eight switches, ADR 0018) with different defaults: administrators can invite but can't change settings or services; specialists get no client or earnings access.
+In the MVP the table is fixed at these defaults (`@yeral/domain/permissions`, ADR 0025); the owner editing it is Later (F-089).
 
 **Status** — Design: drawn (B-Team · `tab=permissions`; B-Shell · default matrix) · Code: not built as designed (old role model in domain and schema).
 

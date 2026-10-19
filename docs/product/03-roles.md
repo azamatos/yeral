@@ -53,10 +53,11 @@ Three fixed access levels. There are no custom roles. A specialist may work with
 Anything a level can't use is **hidden, not greyed out**. Opening a hidden page by its address goes back to the calendar
 with a short message. (business spec §1)
 
-### What the owner can change: the permission matrix
+### The permission table
 
-The owner can tune what Administrators and Specialists may do in *Sazlamalar → Rugsatlar*. The owner's own column is
-locked to "everything". Defaults: (business demo data `accessLevels`)
+In the MVP every level has these permissions, fixed; letting the owner tune them in *Sazlamalar → Rugsatlar* is Later
+(F-089). The owner's own column is "everything". (business demo data `accessLevels`; code: `@yeral/domain/permissions`,
+ADR 0025)
 
 | Permission | Administrator | Hünärmen |
 |---|---|---|

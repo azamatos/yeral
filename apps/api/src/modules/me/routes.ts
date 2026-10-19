@@ -5,7 +5,7 @@ import { businessCardSchema } from '@yeral/contract/catalog'
 import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
 import { epochOf, today } from '@yeral/domain/time'
 import { and, desc, eq, inArray } from 'drizzle-orm'
-import { bookings, businesses, favorites, sessions, users } from '../../db/schema'
+import { bookings, businesses, favorites, sessions, staff, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
@@ -41,7 +41,8 @@ const deleteRoute = createRoute({
   path: '/me',
   tags,
   summary: 'Delete my account (upcoming bookings are cancelled; history stays anonymous with the businesses)',
-  responses: { ...noContent, 401: errors[401] },
+  description: 'Refused with `owns_workspace` while the person owns a workspace: the Ýeral team closes it first (book Q-213).',
+  responses: { ...noContent, 401: errors[401], 409: errors[409] },
 })
 const phoneCodeRoute = createRoute({
   method: 'post',
@@ -107,6 +108,13 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     const user = requireUser(c)
     const { deps } = c.var
     const now = deps.now()
+    // a workspace always has its one owner (ADR 0025)
+    const [owned] = await deps.db
+      .select({ id: staff.id })
+      .from(staff)
+      .where(and(eq(staff.userId, user.id), eq(staff.level, 'owner'), eq(staff.status, 'active')))
+      .limit(1)
+    if (owned) throw new ApiError('owns_workspace')
     await deps.db.transaction(async (tx) => {
       const mine = await tx
         .select()

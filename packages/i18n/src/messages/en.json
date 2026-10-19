@@ -35,6 +35,7 @@
     "too_many_attempts": "Too many tries. Try again in {retryAfterSec} s.",
     "resend_too_soon": "You can get a new code in {retryAfterSec} s.",
     "phone_taken": "This number belongs to another account.",
+    "owns_workspace": "You own a business on Ýeral. Ask the Ýeral team to close it before you delete your account.",
     "rate_limited": "Too many requests. Please wait a moment.",
     "internal": "Something went wrong. Please try again.",
     "network": "No connection. Please try again."

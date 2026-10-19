@@ -37,7 +37,7 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
   const groups = await db.select().from(serviceGroups).where(eq(serviceGroups.businessId, b.id)).orderBy(asc(serviceGroups.sort))
   const online = lb.services.filter((s) => s.online)
   const specialists = lb.staff.filter(
-    (s) => s.bookable && s.status !== 'disabled' && s.serviceIds.some((id) => online.some((o) => o.id === id)),
+    (s) => s.bookable && s.status === 'active' && s.serviceIds.some((id) => online.some((o) => o.id === id)),
   )
   const type = b.bookingTypes[0] ?? 'appointment'
 

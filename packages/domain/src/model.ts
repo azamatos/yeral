@@ -42,7 +42,11 @@ export interface Price {
 export const VERIFICATION_STATUSES = ['pending', 'verified', 'rejected'] as const
 export type VerificationStatus = (typeof VERIFICATION_STATUSES)[number]
 
-export const STAFF_STATUSES = ['active', 'invited', 'disabled'] as const
+/**
+ * A row on the team: `active` works (bookable rows appear on the client site), `invited` waits for the person to accept
+ * (not on the client site), `removed` by the owner or left (*Öçürilen*; the owner can reactivate).
+ */
+export const STAFF_STATUSES = ['active', 'invited', 'removed'] as const
 export type StaffStatus = (typeof STAFF_STATUSES)[number]
 
 /** "Nireden geldi" on a client record. */

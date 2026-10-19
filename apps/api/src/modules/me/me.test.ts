@@ -71,6 +71,15 @@ describe('account', () => {
     expect(again.status).toBe(201)
   })
 
+  it('an owner can’t delete their account: a workspace always has its owner (book Q-213)', async () => {
+    const b = browser(t.app)
+    await b.login('+99365102030') // Maýsa owns Glow Studio
+    const res = await b.req('/v1/me', { method: 'DELETE' })
+    expect(res.status).toBe(409)
+    expect(res.json.error.code).toBe('owns_workspace')
+    expect((await b.req('/v1/me')).status).toBe(200)
+  })
+
   it('events: a client polls changes to their bookings from a cursor', async () => {
     const b = browser(t.app)
     await b.login('+99365222006', 'Jemal')

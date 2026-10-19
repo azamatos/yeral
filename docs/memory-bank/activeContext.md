@@ -128,7 +128,8 @@ is with Claude Design; round 2 (business app part 1) is written. Next: check rou
 part 2, client site, admin tool, fixes) → export v0.6 → P3 components in Storybook → P4 apps.
 
 **Backend track (P2).** The steps are in the book's chapter 10 (reviewed 2026-10-19): 0 the own server only (done,
-ADR 0024), 1 market settings and English as the source (done), 2 the business model (next), 3 the **Code
+ADR 0024), 1 market settings and English as the source (done), 2 the business model (part 1 done: ADR 0025; part 2 next: the
+switcher, invites, team endpoints), 3 the **Code
 differs** fixes in the booking engine (past midnight first), 4 business endpoints (with photos, the address pin,
 notifications), 5 admin endpoints (team accounts with a second factor), 6 first-launch mode, 7 before the launch
 (deploys from GitHub, backups, alerts). Work in a worktree on a branch per step, tests with every rule (ADR 0013), a

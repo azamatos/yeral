@@ -3,7 +3,7 @@ import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import { sendCodeResponseSchema, sendCodeSchema, verifyCodeResponseSchema, verifyCodeSchema } from '@yeral/contract/account'
 import { MARKET } from '@yeral/domain/market'
 import { and, eq, isNull } from 'drizzle-orm'
-import { bookings, clients, memberships, staff, users } from '../../db/schema'
+import { bookings, clients, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { clientIp } from '../../lib/rate-limit'
@@ -56,18 +56,8 @@ export const authRoutes = new OpenAPIHono<AppEnv>()
           .values({ phone, lang: lang ?? MARKET.defaultLanguage })
           .returning()
       if (!user) throw new Error('user insert failed')
-      // the same phone may already be known: an invitation to a team, a business's client list, phone bookings
-      const invited = await tx
-        .update(memberships)
-        .set({ userId: user.id, status: 'active' })
-        .where(and(eq(memberships.phone, phone), isNull(memberships.userId), eq(memberships.status, 'invited')))
-        .returning({ staffId: memberships.staffId })
-      for (const m of invited)
-        if (m.staffId)
-          await tx
-            .update(staff)
-            .set({ status: 'active' })
-            .where(and(eq(staff.id, m.staffId), eq(staff.status, 'invited')))
+      // the same phone may already be known: a business's client list, phone bookings. Team invites wait for the
+      // person to accept or decline them (`/me/invites`, book chapter 3).
       await tx
         .update(clients)
         .set({ userId: user.id })
