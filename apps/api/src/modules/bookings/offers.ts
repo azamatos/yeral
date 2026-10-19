@@ -1,7 +1,7 @@
 /**
  * Offered times as the client sees them (book Q-159, Q-264): each with its one specialist, and whether it can still be
  * taken — `past` once it starts earlier than now plus the lead time, `taken` once taking it would fail. The check asks
- * the same question as taking it (`rebookQueries`).
+ * the same question as taking it (`rebookQuery`).
  */
 import type { OfferedTime } from '@yeral/contract/bookings'
 import { findAppointmentSlot, type BusyInterval } from '@yeral/domain/availability'

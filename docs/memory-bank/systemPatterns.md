@@ -148,7 +148,8 @@ apps/api/src/
 - Services hold the rules; routes only validate, authorise, call a service and map the result to contract DTOs.
 - OpenAPI 3.1 is generated from the routes and served at `/docs` (Scalar).
 - Double booking: Postgres exclusion constraint on staff × time range for active bookings + the domain check → `409 slot_taken`.
-  A move request's items share their booking's `family`, so a move may overlap the booking's own time (book Q-165).
+  A move request's items share their booking's `family`, so a move may overlap the booking's own time (book Q-165); a
+  partial unique index keeps one waiting move per booking.
 - Demo behaviour (code `1234`, demo businesses that answer by themselves) is on outside production only.
 
 ## Auth

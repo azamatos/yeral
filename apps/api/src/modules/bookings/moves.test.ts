@@ -1,5 +1,5 @@
 /** Moving a confirmed appointment (book Q-165, Q-263; ROUND6 A3, A5). */
-import { epochOf } from '@yeral/domain/time'
+import { addDays, epochOf } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
@@ -12,6 +12,8 @@ import { confirmBooking } from './confirm'
 
 const FRI = '2026-10-16'
 const SAT = '2026-10-17'
+// a day the other tests leave alone
+const LATER = '2026-10-21'
 
 describe('moves', () => {
   let db: Db
@@ -47,37 +49,42 @@ describe('moves', () => {
       await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&staff=${staffId}&date=${date}${move ? `&move=${move}` : ''}`)
     ).json.slots.map((x: { start: number }) => x.start) as number[]
 
-  /** A confirmed haircut with Aýna at the first of her free starts on `date` that has an hour free after it. */
-  async function confirmed(phone: string, date: string) {
+  /** A confirmed haircut with Aýna at her first free start, from `from` on, that has an hour free after it. */
+  async function confirmed(phone: string, from: string) {
     const b = browser(t.app)
     await b.login(phone, 'Client')
-    const free = await starts(b, date, who['Aýna']!)
-    const start = free.find((m) => free.includes(m + 30) && free.includes(m + 60))!
+    let date = from
+    let start: number | undefined
+    for (; start === undefined && date < addDays(from, 10); start === undefined && (date = addDays(date, 1))) {
+      const free = await starts(b, date, who['Aýna']!)
+      start = free.find((m) => free.includes(m + 30) && free.includes(m + 60))
+    }
+    if (start === undefined) throw new Error('Aýna has no free hour and a half in ten days')
     const made = await b.req('/v1/bookings', {
       body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: who['Aýna'], date, start },
     })
     expect(made.status).toBe(201)
     const [row] = await db.select().from(bookings).where(eq(bookings.code, made.json.code))
     await db.transaction((tx) => confirmBooking(tx, t.deps, row!))
-    return { b, code: made.json.code as string, start, id: row!.id }
+    return { b, code: made.json.code as string, date, start, id: row!.id }
   }
 
   it('a new time may overlap the current one with the same specialist (book Q-165)', async () => {
-    const { b, code, start } = await confirmed('+99365444201', FRI)
+    const { b, code, date, start } = await confirmed('+99365444201', FRI)
     // without move mode her own booking hides the half hour after it; in move mode it's free
-    expect(await starts(b, FRI, who['Aýna']!)).not.toContain(start + 30)
-    expect(await starts(b, FRI, who['Aýna']!, code)).toContain(start + 30)
-    const asked = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: start + 30 } })
+    expect(await starts(b, date, who['Aýna']!)).not.toContain(start + 30)
+    expect(await starts(b, date, who['Aýna']!, code)).toContain(start + 30)
+    const asked = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
     expect(asked.status).toBe(200)
-    expect(asked.json).toMatchObject({ status: 'confirmed', start, reschedule: { date: FRI, start: start + 30 } })
+    expect(asked.json).toMatchObject({ status: 'confirmed', date, start, reschedule: { date, start: start + 30 } })
   })
 
   it('at an instant business an overlapping move happens at once', async () => {
     await rules({ confirmMode: 'instant' })
     try {
-      const { b, code, start } = await confirmed('+99365444202', FRI)
-      const moved = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: start + 30 } })
-      expect(moved.json).toMatchObject({ status: 'confirmed', date: FRI, start: start + 30, reschedule: null })
+      const { b, code, date, start } = await confirmed('+99365444202', FRI)
+      const moved = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+      expect(moved.json).toMatchObject({ status: 'confirmed', date, start: start + 30, reschedule: null })
     } finally {
       await rules({ confirmMode: 'manual' })
     }
@@ -85,48 +92,103 @@ describe('moves', () => {
 
   it('no silent swap: with the specialist busy at the new time, the move is refused (ROUND6 A5)', async () => {
     const { b, code } = await confirmed('+99365444203', SAT)
-    // someone takes Aýna's time on Friday that Maral has free too
-    const aynaFree = await starts(b, FRI, who['Aýna']!)
-    const maralFree = await starts(b, FRI, who.Maral!)
+    // someone takes a time of Aýna's that Maral has free too
+    const aynaFree = await starts(b, LATER, who['Aýna']!)
+    const maralFree = await starts(b, LATER, who.Maral!)
     const both = aynaFree.find((m) => maralFree.includes(m))!
     const other = browser(t.app)
     await other.login('+99365444204', 'Other')
     const took = await other.req('/v1/bookings', {
-      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: who['Aýna'], date: FRI, start: both },
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: who['Aýna'], date: LATER, start: both },
     })
     expect(took.status).toBe(201)
-    const refused = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: both } })
+    const refused = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: LATER, start: both } })
     expect(refused.json.error?.code).toBe('slot_taken')
     // asked for «Islendik hünärmen», anyone free will do
-    const anyone = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: both, staffId: null } })
+    const anyone = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: LATER, start: both, staffId: null } })
     expect(anyone.status).toBe(200)
   })
 
   it('a waiting move never waits past the original visit (book Q-263)', async () => {
     await rules({ holdMinutes: 120, cancelWindowMinutes: null })
     try {
-      const { b, code, start } = await confirmed('+99365444205', FRI)
-      // an hour before the visit, ask to move to Saturday: the two-hour hold would outlive the visit
-      t.clock.now = epochOf(FRI, start) - 60 * 60_000
-      const satStart = (await starts(b, SAT, who['Aýna']!))[0]!
-      expect((await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: SAT, start: satStart } })).status).toBe(200)
+      const { b, code, date, start } = await confirmed('+99365444205', FRI)
+      // an hour before the visit, ask to move to the next day: the two-hour hold would outlive the visit
+      t.clock.now = epochOf(date, start) - 60 * 60_000
+      const next = addDays(date, 1)
+      const nextStart = (await starts(b, next, who['Aýna']!))[0]!
+      expect((await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: next, start: nextStart } })).status).toBe(200)
       const [orig] = await db.select().from(bookings).where(eq(bookings.code, code))
       const [request] = await db
         .select()
         .from(bookings)
         .where(and(eq(bookings.rescheduleOf, orig!.id), eq(bookings.status, 'pending')))
-      expect(request!.holdUntil!.getTime()).toBe(epochOf(FRI, start))
+      expect(request!.holdUntil!.getTime()).toBe(epochOf(date, start))
     } finally {
       await rules({ holdMinutes: 30, cancelWindowMinutes: 120 })
     }
   })
 
+  it('two moves asked at once leave one waiting move', async () => {
+    const { b, code, date, start, id } = await confirmed('+99365444207', FRI)
+    await Promise.all([
+      b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } }),
+      b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } }),
+    ])
+    const waiting = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
+    expect(waiting).toHaveLength(1)
+  })
+
+  it('move mode counts a waiting move as free too, and refuses a booking that can’t move', async () => {
+    const { b, code, date, start } = await confirmed('+99365444208', FRI)
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+    // the waiting move holds start+30 … start+90: in move mode those times are free again
+    expect(await starts(b, date, who['Aýna']!, code)).toContain(start + 60)
+    // a request still waiting for the business can't be moved
+    const free = await starts(b, SAT, who['Aýna']!)
+    const pending = await b.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: who['Aýna'], date: SAT, start: free[0] },
+    })
+    const refused = await b.req(
+      `/v1/businesses/glow-studio/availability?services=${haircut}&staff=any&date=${SAT}&move=${pending.json.code}`,
+    )
+    expect(refused.json.error.code).toBe('invalid_status')
+    const specialists = await b.req(`/v1/businesses/glow-studio/specialists/availability?services=${haircut}&move=${code}`)
+    expect(specialists.status).toBe(200)
+  })
+
+  it('a specialist who no longer does the service isn’t swapped: the client picks another', async () => {
+    const { b, code, date, start } = await confirmed('+99365444209', FRI)
+    await db.delete(staffServices).where(and(eq(staffServices.staffId, who['Aýna']!), eq(staffServices.serviceId, haircut)))
+    try {
+      const refused = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+      expect(refused.json.error.code).toBe('not_found')
+    } finally {
+      await db.insert(staffServices).values({ staffId: who['Aýna']!, serviceId: haircut })
+    }
+  })
+
+  it('a replaced move can’t be brought back with "Yzyna al"', async () => {
+    const { b, code, date, start, id } = await confirmed('+99365444210', FRI)
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
+    const [first] = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.rescheduleOf, id), eq(bookings.status, 'pending')))
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })
+    const restored = await b.req(`/v1/me/bookings/${first!.code}/restore`, { method: 'POST' })
+    expect(restored.json.error.code).toBe('invalid_status')
+  })
+
   it('a second move can be asked while one waits, and replaces it (ROUND6 A3)', async () => {
-    const { b, code, start } = await confirmed('+99365444206', FRI)
-    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: start + 30 } })
+    const { b, code, date, start } = await confirmed('+99365444206', FRI)
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 30 } })
     const waiting = (await b.req(`/v1/me/bookings/${code}`)).json
     expect(waiting.actions.reschedule).toBe(true)
-    const second = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: start + 60 } })
+    const second = await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })
     expect(second.json.reschedule).toMatchObject({ start: start + 60 })
   })
 })

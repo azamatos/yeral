@@ -196,8 +196,9 @@ export const rescheduleSchema = z.object({
   date: ymdSchema,
   start: startMinuteSchema,
   /**
-   * Omitted = the same specialist as now (any free one if the whole booking had more than one, or if they're busy at the
-   * new time); null = «Islendik hünärmen»; an id = that specialist only.
+   * Omitted = the same specialist as now, never someone else (ROUND6 A5): busy at the new time, the move is refused
+   * (`slot_taken`), and if they no longer take these services it's `not_found`. Null = «Islendik hünärmen» (the current
+   * one first at the same time; anyone free when the booking had more than one); an id = that specialist only.
    */
   staffId: idSchema.nullable().optional(),
 })

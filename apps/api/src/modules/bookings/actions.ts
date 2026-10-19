@@ -73,6 +73,8 @@ export async function restoreBooking(deps: Deps, b: BookingRow): Promise<Booking
   const ok =
     b.status === 'cancelled' && b.cancelledBy === 'client' && !!b.cancelledAt && now - b.cancelledAt.getTime() < RESTORE_MINUTES * 60_000
   if (!ok || now >= epochOf(b.date, b.start)) throw new ApiError('restore_expired')
+  // a withdrawn or replaced move stays withdrawn: the client asks again
+  if (b.rescheduleOf) throw new ApiError('invalid_status')
   const status = b.confirmedAt ? 'confirmed' : 'pending'
   try {
     return await deps.db.transaction(async (tx) => {
@@ -108,8 +110,9 @@ export async function editNote(deps: Deps, b: BookingRow, note: string): Promise
 
 /**
  * Move to another time: a new request; the original stays confirmed until the business answers (instant businesses move
- * at once). The new time can't overlap the old one with the same specialist while both are held. An earlier pending move
- * is withdrawn in the same transaction, so it stays if the new time can't be had.
+ * at once). The new time may overlap the old one with the same specialist (book Q-165). An earlier pending move is
+ * withdrawn in the same transaction, so it stays if the new time can't be had. The booking is locked first: two moves
+ * asked at once (a double tap) run one after the other, and the second replaces the first.
  */
 export async function rescheduleBooking(
   deps: Deps,
@@ -122,6 +125,7 @@ export async function rescheduleBooking(
   if (b.type !== 'appointment') throw new ApiError('not_bookable')
   await assertOnlineBooking(deps.db, lb, user)
   return deps.db.transaction(async (tx) => {
+    await tx.select({ id: bookings.id }).from(bookings).where(eq(bookings.id, b.id)).for('update')
     await dropPendingMove(tx, b, new Date(deps.now()))
     await rebook(deps, user, b, to, { status: initialStatus('web', lb.rules.confirmMode), rescheduleOf: b.id, db: tx })
     const [fresh] = await tx.select().from(bookings).where(eq(bookings.id, b.id))

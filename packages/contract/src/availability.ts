@@ -34,8 +34,8 @@ export const appointmentAvailabilityQuerySchema = langQuerySchema.extend({
   date: ymdSchema.optional(),
   days: z.coerce.number().int().min(1).max(31).default(14),
   /**
-   * Move mode (book Q-165): the signed-in client's booking being moved; its own time doesn't count as busy, so a new
-   * time may overlap it with the same specialist.
+   * Move mode (book Q-165): the signed-in client's confirmed appointment being moved; its own time and a move already
+   * waiting don't count as busy, so a new time may overlap them with the same specialist.
    */
   move: bookingCodeSchema.optional(),
 })
@@ -51,7 +51,11 @@ export const appointmentAvailabilitySchema = z
   .meta({ id: 'AppointmentAvailability' })
 
 /** Step 2: "Indiki boş wagt: ertir 10:00" per specialist and for «Islendik hünärmen». */
-export const specialistsAvailabilityQuerySchema = langQuerySchema.extend({ services: idListQuery })
+export const specialistsAvailabilityQuerySchema = langQuerySchema.extend({
+  services: idListQuery,
+  /** Move mode, as in the appointment availability. */
+  move: bookingCodeSchema.optional(),
+})
 export const specialistsAvailabilitySchema = z
   .object({
     any: nextFreeSchema,

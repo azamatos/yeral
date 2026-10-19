@@ -8,7 +8,7 @@
  */
 import type { Localized } from '@yeral/domain/model'
 import { sql } from 'drizzle-orm'
-import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
+import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uniqueIndex, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
 import { users } from './auth'
 import { businesses, classSessions, clients, diningTables, services, staff, tableAreas } from './business'
 import { bookingSource, bookingStatus, bookingType, cancelledBy, complaintType, declineReason, priceType } from './enums'
@@ -96,6 +96,10 @@ export const bookings = pgTable(
     index('bookings_client_idx').on(t.clientId),
     index('bookings_due_idx').on(t.status, t.holdUntil),
     index('bookings_session_idx').on(t.sessionId),
+    // a move may overlap its booking's time (book Q-165), so the database keeps one waiting move per booking
+    uniqueIndex('bookings_one_waiting_move')
+      .on(t.rescheduleOf)
+      .where(sql`${t.status} = 'pending'`),
   ],
 )
 

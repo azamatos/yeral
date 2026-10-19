@@ -12,6 +12,7 @@ import {
   MAX_ONLINE_PARTY,
   maxSeats,
   nearestSlots,
+  staffDoingAll,
   tableSlots,
   type AppointmentQuery,
   type AppointmentSlot,
@@ -106,12 +107,12 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       holdUntil:
         x.status === 'pending'
           ? new Date(
-              Math.min(
-                holdUntilOf(now, { date: x.date, start: x.start }, x.lb.rules.holdMinutes, {
-                  hours: x.lb.business.hours,
-                  exceptions: x.lb.business.exceptions,
-                }),
-                x.holdCap ?? Infinity,
+              holdUntilOf(
+                now,
+                { date: x.date, start: x.start },
+                x.lb.rules.holdMinutes,
+                { hours: x.lb.business.hours, exceptions: x.lb.business.exceptions },
+                x.holdCap,
               ),
             )
           : null,
@@ -331,7 +332,8 @@ export function rebookQuery(
   excludeBookingId?: string,
 ): AppointmentQuery {
   const staffId = to.staffId === undefined ? booked.staffId : to.staffId
-  return { date: to.date, serviceIds: booked.serviceIds, by: 'client', staffId, oneSpecialist: !!staffId, excludeBookingId }
+  // «Islendik» still tries the booking's own specialist first at the same start
+  return { date: to.date, serviceIds: booked.serviceIds, by: 'client', staffId, preferStaffId: booked.staffId, excludeBookingId }
 }
 
 /**
@@ -349,8 +351,11 @@ export async function rebook(
   const lb = (await loadBusinesses(db, [from.businessId])).get(from.businessId)
   if (!lb) throw new ApiError('not_found')
   if (from.type !== 'appointment') throw new ApiError('not_bookable')
-  const move = opts.rescheduleOf === from.id
+  const move = !!opts.rescheduleOf
   const query = rebookQuery(await bookedServices(db, from.id), to, move ? from.id : undefined)
+  // the booking's specialist left or stopped doing these services: the client picks another, nobody is swapped in
+  if (query.staffId && !staffDoingAll(appointmentContext(lb, [], deps.now()), query.serviceIds).some((s) => s.id === query.staffId))
+    throw new ApiError('not_found', { staffId: query.staffId })
   const slot = await placeAppointment(deps, lb, query, to.start, 'client', db)
   return inTransaction(
     deps,
