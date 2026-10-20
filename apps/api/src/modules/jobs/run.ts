@@ -15,6 +15,7 @@ import type { Deps } from '../../deps'
 import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, queueSms, smsCityOf, type BookingSmsKind } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
+import { newBookingLink } from '../bookings/links'
 import { bookedServices } from '../bookings/create'
 import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
@@ -90,10 +91,11 @@ async function expireRequests(deps: Deps): Promise<number> {
         if (told?.clientPhone && biz) {
           const [user] = told.userId ? await tx.select().from(users).where(eq(users.id, told.userId)) : []
           const lang = user?.lang ?? MARKET.defaultLanguage
-          const sms = { code: told.code, date: told.date, start: told.start, businessName: biz.name, address: biz.address }
+          const link = await newBookingLink(tx, deps.site, told.id, deps.now())
+          const sms = { link, date: told.date, start: told.start, businessName: biz.name, address: biz.address }
           await queueSms(tx, {
             to: told.clientPhone,
-            text: b.rescheduleOf ? moveRefusedSmsText(deps.site, lang, sms) : expiredSmsText(deps.site, lang, sms, alternatives),
+            text: b.rescheduleOf ? moveRefusedSmsText(lang, sms) : expiredSmsText(lang, sms, alternatives),
             runAt: now,
             dedupeKey: `${b.rescheduleOf ? 'moveRefused' : 'expired'}:${row.id}`,
           })
@@ -181,8 +183,10 @@ async function sendBookingSms(
   const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId))
   if (!biz) return
   const lang = user?.lang ?? MARKET.defaultLanguage
-  const text = bookingSmsText(deps.site, lang, kind, {
-    code: b.code,
+  // the texts with a link get one of their own (book Q-168)
+  const link = kind === 'confirmed' || kind === 'reviewAsk' ? await newBookingLink(deps.db, deps.site, b.id, deps.now()) : undefined
+  const text = bookingSmsText(lang, kind, {
+    link,
     date: b.date,
     start: b.start,
     businessName: biz.name,

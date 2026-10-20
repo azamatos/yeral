@@ -24,6 +24,7 @@ export const keys = {
     ['availability', slug, kind, params] as const,
   availabilityAll: (slug: string) => ['availability', slug] as const,
   bookings: () => ['bookings'] as const,
+  link: (token: string, lang: Locale) => ['link', token, lang] as const,
   bookingLists: () => ['bookings', 'list'] as const,
   bookingList: (tab: BookingTab, lang: Locale) => ['bookings', 'list', tab, lang] as const,
   booking: (code: string, lang: Locale) => ['bookings', 'detail', code, lang] as const,

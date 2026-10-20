@@ -13,6 +13,7 @@ import type { AppEnv } from './http/env'
 import { authRoutes } from './modules/auth/routes'
 import { sessionMiddleware } from './modules/auth/session'
 import { availabilityRoutes } from './modules/availability/routes'
+import { linkRoutes } from './modules/bookings/link-routes'
 import { bookingRoutes } from './modules/bookings/routes'
 import { catalogRoutes } from './modules/catalog/routes'
 import { eventRoutes } from './modules/events/routes'
@@ -78,6 +79,7 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     .route('/v1', catalogRoutes)
     .route('/v1', availabilityRoutes)
     .route('/v1', bookingRoutes)
+    .route('/v1', linkRoutes)
     .route('/v1', eventRoutes)
     .route('/v1', teamRoutes)
 

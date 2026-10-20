@@ -207,7 +207,7 @@ MVP. (business spec §3; Q-031, decided 18.10.2026)
 
 - Every booking has a short code like `YR-48213`, shown to the client and read out on the phone. It never opens
   anything by itself: SMS links carry a long random token on their own path. (productContext, ROUND6-ANSWERS; Q-168,
-  decided 18.10.2026) **Code differs:** SMS links open the booking from its code (`yeral.app/b/{code}`).
+  decided 18.10.2026; code: `yeral.app/l/{token}`, one token per SMS, stored hashed, `bookings/links.ts`)
 - Every booking remembers where it came from: online (web, later app), phone, walk-in. The workspace shows web and app as
   "*Onlaýn*". (ADR 0017)
 

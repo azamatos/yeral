@@ -163,10 +163,11 @@ describe('client bookings', () => {
     })
     expect(res.json).toMatchObject({ status: 'confirmed', price: { type: 'from', amount: 40 } })
     await runDueJobs(t.deps)
-    expect(t.sms.sent.at(-1)).toEqual({
-      to: '+99365111005',
-      text: `Ýeral: Barber Loft confirmed your booking. Thursday, 15 October, 11:00. Change: localhost:3001/b/${res.json.code}`,
-    })
+    // the link carries a token of its own, never the booking code (book Q-168)
+    expect(t.sms.sent.at(-1)).toMatchObject({ to: '+99365111005' })
+    expect(t.sms.sent.at(-1)?.text).toMatch(
+      /^Ýeral: Barber Loft confirmed your booking\. Thursday, 15 October, 11:00\. Change: localhost:3001\/l\/[\w-]{40,}$/,
+    )
     // reminders are queued for later
     const queued = await db.select().from(jobs).where(eq(jobs.kind, 'booking.sms'))
     // the day-before reminder would be in the past already (booked at 11:20 for tomorrow 11:00)
@@ -185,7 +186,7 @@ describe('client bookings', () => {
     expect(detail.json.timeline.at(-1).event).toBe('expired')
     expect(detail.json.expiredAlternatives).toHaveLength(3)
     // in the market's main language: this client never chose one (book Q-292)
-    expect(t.sms.sent.at(-1)?.text).toMatch(/^Ýeral: Glow Studio didn't answer in time\. Free times: .+ — localhost:3001\/b\/YR-/)
+    expect(t.sms.sent.at(-1)?.text).toMatch(/^Ýeral: Glow Studio didn't answer in time\. Free times: .+ — localhost:3001\/l\/[\w-]{40,}$/)
     // picking one of them sends a new request
     const again = await b.req(`/v1/me/bookings/${json.code}/accept-alternative`, { body: { source: 'expired', index: 0 } })
     expect(again.json).toMatchObject({ status: 'pending' })

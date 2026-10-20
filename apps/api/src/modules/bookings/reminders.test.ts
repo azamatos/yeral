@@ -121,13 +121,12 @@ describe('reminders and the night (book Q-285)', () => {
   })
 
   it('an SMS names the calendar day of a time after midnight (book Q-105)', () => {
-    const t = testApp(db)
     // the 23rd's business day at 01:00 is the morning of the 24th, a Saturday
-    const late = { code: 'YR-11111', date: '2026-10-23', start: 1500, businessName: 'Night Bar', address: 'x' }
-    expect(moveRefusedSmsText(t.deps.site, 'en', late)).toContain('stays at 24 October 01:00')
-    expect(bookingSmsText(t.deps.site, 'en', 'confirmed', late)).toContain('Saturday, 24 October, 01:00')
+    const late = { link: 'yeral.app/l/x', date: '2026-10-23', start: 1500, businessName: 'Night Bar', address: 'x' }
+    expect(moveRefusedSmsText('en', late)).toContain('stays at 24 October 01:00')
+    expect(bookingSmsText('en', 'confirmed', late)).toContain('Saturday, 24 October, 01:00')
     // midnight itself: the 24th at 00:00, not 24:00
     const midnight = { ...late, start: 1440 }
-    expect(moveRefusedSmsText(t.deps.site, 'en', midnight)).toContain('stays at 24 October 00:00')
+    expect(moveRefusedSmsText('en', midnight)).toContain('stays at 24 October 00:00')
   })
 })

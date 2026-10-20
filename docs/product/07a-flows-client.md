@@ -1480,12 +1480,9 @@ flowchart TD
 
 **Design to fix:** the link page's finished-visit state with "Teswir ýaz" (masked-phone login, then the review form), and its cancelled and no-show states with "Gaýtadan ýazyl" (Q-170).
 
-**Code differs**
+(code: SMS links are `yeral.app/l/{token}`, one token per SMS, stored hashed, valid 90 days; `GET /v1/links/{token}` reads the booking signed out, with the masked phone and `owner` for Q-169)
 
-- SMS links carry the booking code (`/b/{code}`), not a token (code: `notify.ts`).
-- There is no public read of a booking: every booking read needs a session (`/v1/me/bookings/{code}`), so the page can't be built yet (A1 "link page route + states"; code: `bookings/routes.ts`).
-
-**Status:** Design: drawn (Booking-Link · `state`; Mobile 14) · Code: not built.
+**Status:** Design: drawn (Booking-Link · `state`; Mobile 14) · Code: built (api); the page comes with the client site.
 
 ### C-39 · Take an offered time from the link while signed out
 
@@ -1523,7 +1520,7 @@ flowchart TD
 
 **Design to fix:** the name step on the link page, with the optional surname (Q-156).
 
-**Status:** Design: drawn (Booking-Link · `loginCode`, `loginStep`, `success`; Mobile 15) · Code: not built — login and taking offers exist, but nothing ties the login to the booking's phone and there's no public booking read.
+**Status:** Design: drawn (Booking-Link · `loginCode`, `loginStep`, `success`; Mobile 15) · Code: built (api): `POST /v1/links/{token}/code` sends the code only to the booking's phone, `…/verify` signs in with it, then the offered time is taken as in "my bookings".
 
 ## Account
 

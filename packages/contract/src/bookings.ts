@@ -195,6 +195,49 @@ export const bookingDetailSchema = bookingSummarySchema
   .meta({ id: 'BookingDetail' })
 export type BookingDetail = z.infer<typeof bookingDetailSchema>
 
+// ── The SMS link page (book Q-168, Q-169, F-068) ──
+
+/** A link's token: long and random, never the booking code. */
+export const linkTokenSchema = z
+  .string()
+  .min(20)
+  .max(100)
+  .regex(/^[A-Za-z0-9_-]+$/)
+
+/** One booking as its SMS link shows it, signed out: the card, the offers, no note, no actions. */
+export const bookingLinkSchema = bookingDetailSchema
+  .pick({
+    code: true,
+    business: true,
+    what: true,
+    date: true,
+    start: true,
+    end: true,
+    status: true,
+    cancelledBy: true,
+    price: true,
+    address: true,
+    city: true,
+    entranceNote: true,
+    geo: true,
+    holdUntil: true,
+    cancelReason: true,
+    decline: true,
+    expiredAlternatives: true,
+    offerTakenBy: true,
+    moveRefused: true,
+    reschedule: true,
+    bookOnline: true,
+  })
+  .extend({
+    /** "+993 65 •• •• 22": where the login code goes; the page never shows the number. */
+    maskedPhone: z.string(),
+    /** Signed in as the booking's owner: the site opens "Ýazylyşlarym" with this booking instead (book Q-169). */
+    owner: z.boolean(),
+  })
+  .meta({ id: 'BookingLink' })
+export type BookingLink = z.infer<typeof bookingLinkSchema>
+
 export const myBookingsQuerySchema = langQuerySchema.extend(cursorQuerySchema.shape).extend({ tab: z.enum(['upcoming', 'past']) })
 export const bookingListSchema = listOf(bookingSummarySchema)
 export const bookingCodeParamSchema = z.object({ code: bookingCodeSchema })

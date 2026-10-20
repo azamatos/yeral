@@ -378,7 +378,9 @@ describe('moves', () => {
     const detail = (await b.req(`/v1/me/bookings/${code}`)).json
     expect(detail).toMatchObject({ status: 'confirmed', start, reschedule: null, moveRefused: { start: start + 30, by: 'system' } })
     const sms = t.sms.sent.filter((x) => x.to === '+99365444220').at(-1)?.text
-    expect(sms).toMatch(/^Ýeral: Glow Studio didn't accept the new time\. Your booking stays at \d+ \w+ \d\d:\d\d\. localhost:3001\/b\/YR-/)
+    expect(sms).toMatch(
+      /^Ýeral: Glow Studio didn't accept the new time\. Your booking stays at \d+ \w+ \d\d:\d\d\. localhost:3001\/l\/[\w-]{40,}$/,
+    )
     // a new move asked: the old answer goes
     await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date, start: start + 60 } })
     expect((await b.req(`/v1/me/bookings/${code}`)).json.moveRefused).toBeNull()
