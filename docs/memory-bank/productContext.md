@@ -11,7 +11,7 @@ the UI only displays them.
 | Type | TK | Client steps | Card shows | Used by |
 |---|---|---|---|---|
 | Appointment | Wagt bellemek | service(s) → specialist or «Islendik hünärmen» → date & time → details → send | next free slots | barbers, salons, dentists, physio, tutors, mechanics, groomers, home services |
-| Table | Stol bronlamak | party size → date & time → seating area → details → send | times for the party size (default 2), average bill | restaurants, cafés, tea houses |
+| Table | Stol bronlamak | party size → date & time → seating area → details → send | times for the party size (default 2) | restaurants, cafés, tea houses |
 | Class | Topar sapagy | session from the schedule → seats → details → send | next session + seats left | yoga, group fitness, courses |
 | Resource *(later)* | Ýer kärendesi | resource → time range → details → send | free hours strip | pitches, saunas, studios |
 
@@ -21,7 +21,7 @@ the UI only displays them.
 - Specialist word: *hünärmen*; categories rename it (*lukman*, *mugallym*, *tälimçi*, *ussa*, beauty roles). A solo business skips the step.
 - Several services in one appointment run back to back, with one specialist if possible; «Islendik hünärmen» lets the
   system pick per service. A slot is free only if the whole chain fits.
-- Prices: fixed (`80 TMT`), from (`250 TMT-den`), free (`Mugt`), hidden (restaurants show `≈ 150 TMT` average bill). Durations on every service.
+- Prices: fixed (`80 TMT`), from (`250 TMT-den`), free (`Mugt`), hidden ("Price at the place"); no average bill (book Q-103). Durations on every service.
 - Table: party chips 1–8, "9+" means call; VIP areas need ≥ 6; a table is held 15 minutes after the time.
 - Class: seats stepper up to min(2, seats left); full sessions disabled (waitlist later).
 

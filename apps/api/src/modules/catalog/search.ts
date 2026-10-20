@@ -77,13 +77,18 @@ export async function search(deps: Deps, q: SearchQuery) {
     .filter((x) => x.hasFree)
     .map((x) => x.card)
     .filter((c) => !q.openNow || c.open.open)
-    .filter((c) => q.maxPrice === undefined || (c.priceFrom ? c.priceFrom.amount <= q.maxPrice : (c.avgBill ?? 0) <= q.maxPrice))
+    .filter((c) => q.maxPrice === undefined || !c.priceFrom || c.priceFrom.amount <= q.maxPrice)
 
   const byPopularity = (a: (typeof cards)[number], b: (typeof cards)[number]) =>
     popularity(b.rating ?? 0, b.reviewsCount) - popularity(a.rating ?? 0, a.reviewsCount)
   cards.sort((a, b) => {
     if (q.sort === 'rating') return (b.rating ?? 0) - (a.rating ?? 0) || b.reviewsCount - a.reviewsCount
-    if (q.sort === 'price') return (a.priceFrom?.amount ?? a.avgBill ?? Infinity) - (b.priceFrom?.amount ?? b.avgBill ?? Infinity)
+    if (q.sort === 'price') {
+      // places without a price (tables, hidden prices only) go last
+      const x = a.priceFrom?.amount ?? Infinity
+      const y = b.priceFrom?.amount ?? Infinity
+      return x === y ? byPopularity(a, b) : x < y ? -1 : 1
+    }
     return position ? (a.distanceM ?? 0) - (b.distanceM ?? 0) : byPopularity(a, b)
   })
 

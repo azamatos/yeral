@@ -68,14 +68,10 @@ These are drawn but go against a decision; they go into the next prompt for Clau
 
 What's already built and doesn't match a decision; fixed when coding resumes, not asked again.
 
-- The average bill is still in the code (Q-103 dropped it).
-- The lookup by internet address is gone with Cloudflare (ADR 0024); the city choice starts at the market's main city (Q-107, F-240).
-- Invites: the code activates an invite at the first login; the design has accept or decline, 7 days, resend (F-085).
-- Moving: when the chosen specialist is busy, the code gives the booking to another one; round 6 forbids that (F-060).
 - The online party limit is a fixed 8 in code; it's a business setting in the design (F-050).
 - Only in code, never designed: "What?" search suggestions (F-007), the places list behind "Where?" (F-187), demo
-  businesses that answer by themselves (F-200), a stored "typical confirmation time" the design says is computed
-  (F-021), a late-tolerance setting no screen shows (F-103), the `ai` booking source (F-230).
+  businesses that answer by themselves (F-200), a late-tolerance setting no screen shows (F-103), the `ai` booking
+  source (F-230).
 - The answers of 18.10.2026 add **Code differs** lines across chapters 5 and 7a–7c; P2 step 3 works through them
   (chapter 10).
 
@@ -127,12 +123,12 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-018 | Photo gallery viewer | "Ähli suratlar" opens a full-screen photo viewer over the business page. | MVP | spec only (pattern) | not built | Needs photo storage (F-101). |
 | F-019 | Services and specialists tabs | Services grouped with filter chips and a select toggle feeding the summary card; specialists (avatar, role, rating) start booking with that person. | MVP | drawn (Venue) | api built |  |
 | F-020 | Reviews on the business page | Average, count, 5→1 bars, list with business replies, "Ähli teswirler". | MVP | drawn (Venue) | api built (`/v1/businesses/:slug/reviews`) | Moderation part is F-162. |
-| F-021 | About tab | Description, hours (today highlighted), map + directions, amenities, booking rules, pay at the place, typical confirmation time. | MVP | drawn (Venue) | api built | Spec says typical confirmation time is computed; code stores a seeded `typicalConfirmMinutes`. |
+| F-021 | About tab | Description, hours (today highlighted), map + directions, amenities, booking rules, pay at the place, typical confirmation time. | MVP | drawn (Venue) | api built | The typical answer time is worked out from the business's answers (Q-113, 20.10.2026). |
 | F-022 | Nearby similar places | "Golaýdaky ýerler": 4 similar businesses at the bottom of the page. | Later | drawn (Venue) | api built (same category) |  |
 | F-023 | Share business page | "Paýlaş" button on the business page. | MVP | drawn (Venue) | not built |  |
 | F-024 | Favourite heart | Save a business; logged-out tap opens login first. | MVP | drawn (Venue, States 10) | api built (`/v1/me/favorites`) | List is F-080. |
 | F-025 | Hidden exact address | Home-based businesses show only an approximate circle until the booking is confirmed. | MVP | spec only; switch drawn (B-Onboarding 3) | built (api) |  |
-| F-026 | Hidden price display | "Baha ýerinde aýdylýar" instead of a price; mixed totals shown as "{sum} TMT-den". | MVP | drawn (Venue · selection, Booking · price, Mobile 17) | built (domain pricing, i18n fmt) | Round 6 B1; the exact copy still to add. The restaurant average bill is dropped (Q-103). |
+| F-026 | Hidden price display | "Baha ýerinde aýdylýar" instead of a price; mixed totals shown as "{sum} TMT-den". | MVP | drawn (Venue · selection, Booking · price, Mobile 17) | built (domain pricing, i18n fmt) | Round 6 B1; the copy is "Price at the place" (`fmt.price`). The restaurant average bill is dropped (Q-103; gone from the api 20.10.2026). |
 | F-027 | Hours up to 24:00 | A day may end at 24:00: business end pickers go to 24:00, clients see "09:00–24:00" and "Häzir açyk · 24:00-a çenli". | MVP | drawn (Venue · hoursCase, B-Settings) | built (domain hours) | Round 6 E1. Past midnight: F-109. |
 | F-028 | Table and class page variants | Restaurants get a table widget (party, date, time) in the sticky card; studios get "Indiki sapaklar" and a "Tertip" (schedule) tab. | Later | spec only (README §4.3) | api built (tables info, `/sessions`) |  |
 | F-029 | Restaurant menu (PDF / photos) | Optional "Menýu" tab with a PDF or photos. | Later | spec only | not built (no schema) |  |
@@ -177,7 +173,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-057 | Status badges and canceller labels | Five statuses as icon + label (clock, check, check-check, x, user-x), with who cancelled: "Siz ýatyrdyňyz", "Biznes ýatyrdy" / "Biznes ret etdi", "Wagtynda jogap gelmedi" (hourglass). | MVP | drawn (all client screens, DS boards) | api built (`cancelledBy`, decline); ui StatusBadge built with the retired dot | Round 6 visual change, business side too. |
 | F-058 | Cancel a booking | Cancel with an optional reason until the cancellation window (default 2 h); after it only "Jaň et". | MVP | drawn (Account-Bookings · cancel) | built (api, domain) | Cancelled row stays greyed in Upcoming until reload. |
 | F-059 | Undo cancel | "Yzyna al" for 5 minutes; failures explained by one of four reasons + "Başga wagt saýla". | MVP | drawn (Account-Bookings · undo, undoFailed; Mobile 12) | api built (`restore`, each reason its own error) | Round 6 A6. |
-| F-060 | Move an appointment | "Wagty üýtget" mode: services locked, current specialist preselected, old → new time, sends a move request (instant: moves at once). | MVP | drawn (Booking · mode=move, Mobile 13) | api built (`reschedule`) | **Rule conflict (A5):** code silently hands the booking to another free specialist; design says the grid follows the chosen specialist only. |
+| F-060 | Move an appointment | "Wagty üýtget" mode: services locked, current specialist preselected, old → new time, sends a move request (instant: moves at once). | MVP | drawn (Booking · mode=move, Mobile 13) | api built (`reschedule`) | A move books the chosen specialist only, never another one in their place (A5, Q-165; 20.10.2026). |
 | F-061 | Waiting move | Booking stays confirmed with "Täze wagt soraldy…"; withdraw, declined, unanswered and accepted outcomes; a second move replaces the first. | MVP | drawn (Account-Bookings · move*) | api built for the client (waiting, replacing, withdrawing, the outcome and its SMS) | Round 6 A3. Business side: F-126. |
 | F-062 | No move for tables and classes | Table and class bookings offer cancel + "Gaýtadan ýazyl" (flow prefilled) instead of a move. | Later | drawn (Account-Bookings, Mobile 6) | api built (`not_bookable`) | Round 6 A4; old open question 16 closed. Owner: Later (18.10.2026), with tables and classes (Q-030). |
 | F-063 | Declined request with offered times | Client sees "Biznes ret etdi", the reason and up to 3 offered times; one tap creates a confirmed booking. | MVP | drawn (Account-Bookings · declined*, Mobile 7–9) | api built (`accept-alternative`, one booking per offer) | Round 6 A1; taken / expired chip states to build. |

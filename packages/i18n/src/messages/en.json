@@ -80,7 +80,7 @@
     "money": "{amount} {currency}",
     "priceFrom": "from {amount} {currency}",
     "priceFree": "Free",
-    "priceApprox": "≈ {amount} {currency}",
+    "priceHidden": "Price at the place",
     "minutes": "{m} min",
     "hours": "{h} h",
     "hoursMinutes": "{h} h {m} min",

@@ -30,8 +30,10 @@ describe('numbers and money', () => {
     expect(tk.price({ type: 'from', amount: 250 })).toBe('250 TMT-den')
     expect(ru.price({ type: 'from', amount: 250 })).toBe('от 250 TMT')
     expect(tk.price({ type: 'free', amount: 0 })).toBe('Mugt')
-    expect(tk.price({ type: 'hidden', amount: 0 }, 150)).toBe('≈ 150 TMT')
-    expect(tk.price({ type: 'hidden', amount: 0 })).toBe('')
+    // no average bill (book Q-103): a hidden price says it's told at the place (B1)
+    expect(en.price({ type: 'hidden', amount: 0 })).toBe('Price at the place')
+    expect(tk.price({ type: 'hidden', amount: 0 })).toBe('Baha ýerinde aýdylýar')
+    expect(ru.price({ type: 'hidden', amount: 0 })).toBe('Цена на месте')
   })
 })
 

@@ -190,7 +190,6 @@ export async function businessDetail(
     windowDays: lb.rules.windowDays,
     typicalConfirmMinutes: typicalMinutes,
     priceFrom: type === 'table' ? null : priceFromOf(lb.services),
-    avgBill: b.avgBill,
     nextFree,
     serviceGroups: groups
       .map((g) => ({

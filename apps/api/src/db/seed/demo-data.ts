@@ -122,7 +122,6 @@ export interface DemoBusiness {
   about: Localized
   amenities: string[]
   rules?: Partial<BookingRules> & { note?: Localized }
-  avgBill?: number
   groups?: { name: Localized; services: DemoService[] }[]
   staff?: DemoStaff[]
   areas?: { key: string; name: Localized; note?: Localized; minParty: number; maxParty: number; tables: number[] }[]
@@ -399,8 +398,6 @@ export const BUSINESSES: DemoBusiness[] = [
     ),
     amenities: ['wifi', 'parking', 'card_payment'],
     rules: { lateToleranceMinutes: 15, cancelWindowMinutes: 120, slotStep: 30, leadMinutes: 30 },
-    // average bill: a demo value until the owner gives real ones (open question 4)
-    avgBill: 120,
     areas: [
       {
         key: 'hall',
@@ -721,7 +718,6 @@ export const BUSINESSES: DemoBusiness[] = [
     about: L('Milli we ýewropa naharlary.', 'Национальная и европейская кухня.', 'Turkmen and European cuisine.'),
     amenities: ['parking', 'card_payment', 'air_conditioning'],
     rules: { slotStep: 30, leadMinutes: 60 },
-    avgBill: 150,
     areas: [
       { key: 'hall', name: L('Zal', 'Зал', 'Hall'), minParty: 1, maxParty: 8, tables: [2, 4, 4, 6, 8] },
       {

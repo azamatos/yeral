@@ -129,6 +129,28 @@ describe('catalogue', () => {
     expect(shown.price).toEqual({ type: 'hidden', amount: 0 })
   })
 
+  it('a restaurant shows no average bill, on its card or its page (book Q-103)', async () => {
+    const page = await b.req('/v1/businesses/bag-kafe')
+    expect(page.status).toBe(200)
+    expect(page.json).not.toHaveProperty('avgBill')
+    const found = await b.req(`/v1/search?q=${encodeURIComponent(page.json.name)}&${near}`)
+    const card = found.json.items.find((x: { slug: string }) => x.slug === 'bag-kafe')
+    expect(card).toBeDefined()
+    expect(card).not.toHaveProperty('avgBill')
+    expect(card.priceFrom).toBeNull()
+  })
+
+  it('sorting by price: cheapest first, places without a price last, each tie by popularity', async () => {
+    type Card = { slug: string; priceFrom: { amount: number } | null }
+    const byPrice = (await b.req('/v1/search?sort=price&limit=50')).json.items as Card[]
+    const popular = (await b.req('/v1/search?limit=50')).json.items as Card[]
+    const priced = byPrice.filter((c) => c.priceFrom)
+    expect(priced.map((c) => c.priceFrom!.amount)).toEqual(priced.map((c) => c.priceFrom!.amount).sort((x, y) => x - y))
+    const unpriced = byPrice.slice(priced.length)
+    expect(unpriced.length).toBeGreaterThan(1)
+    expect(unpriced.map((c) => c.slug)).toEqual(popular.filter((c) => !c.priceFrom).map((c) => c.slug))
+  })
+
   it('reviews, newest first, with the business reply', async () => {
     const res = await b.req('/v1/businesses/glow-studio/reviews?lang=tk')
     expect(res.json.items.map((r: { author: string }) => r.author)).toEqual(['Gülälek N.', 'Ogulşat M.', 'Bahar A.'])
