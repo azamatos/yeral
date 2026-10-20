@@ -87,11 +87,20 @@ export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking
   }
 }
 
-/** The expiry SMS with the free times; with none free it asks the client to pick another time (book Q-252). */
-export function expiredSmsText(lang: Locale, b: SmsBooking & { link: string }, times: { date: string; start: number }[]): string {
+/**
+ * The expiry SMS with the free times; with none free it asks the client to pick another time (book Q-252); for a
+ * client who can't book this business online now, to call (Q-154).
+ */
+export function expiredSmsText(
+  lang: Locale,
+  b: SmsBooking & { link: string },
+  times: { date: string; start: number }[],
+  opts: { byPhone?: boolean } = {},
+): string {
   const fmt = createFmt(lang)
   const t = createT(lang)
   const common = { brand: brandOf(t), business: b.businessName, link: b.link }
+  if (opts.byPhone) return t('sms.expiredCall', common)
   if (!times.length) return t('sms.expiredNoTimes', common)
   const asked = dayOf(b.date, b.start)
   const list = times

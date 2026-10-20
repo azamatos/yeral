@@ -7,7 +7,7 @@ import { epochOf } from '@yeral/domain/time'
 import type { SiteConfig } from '@yeral/lib/site'
 import { and, eq, gt, lt, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingLinks, bookings } from '../../db/schema'
+import { bookingLinks, bookings, users } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 import { randomToken, sha256Hex } from '../../lib/crypto'
 import type { BookingRow } from './repo'
@@ -47,12 +47,15 @@ export async function pruneBookingLinks(db: Queryable, now: number): Promise<voi
 }
 
 /** The booking a link opens; an unknown or expired link is `not_found` ("Bu salgy işlemeýär"). */
-export async function bookingOfLink(db: Queryable, token: string, now: number): Promise<BookingRow> {
+export async function bookingOfLink(db: Queryable, token: string, now: number): Promise<BookingRow & { phone: string }> {
   const [row] = await db
-    .select({ booking: bookings })
+    .select({ booking: bookings, userPhone: users.phone })
     .from(bookingLinks)
     .innerJoin(bookings, eq(bookings.id, bookingLinks.bookingId))
+    .leftJoin(users, eq(users.id, bookings.userId))
     .where(and(eq(bookingLinks.tokenHash, await sha256Hex(token)), gt(bookingLinks.expiresAt, new Date(now))))
-  if (!row?.booking.clientPhone) throw new ApiError('not_found')
-  return row.booking
+  // a deleted account's booking opens nothing, whatever link a late job made for it
+  const phone = row?.userPhone ?? row?.booking.clientPhone
+  if (!row || !phone || row.booking.accountDeletedAt) throw new ApiError('not_found')
+  return { ...row.booking, phone }
 }

@@ -1,12 +1,23 @@
 /** SMS links to a booking (book Q-168, Q-169, F-068). */
 import { epochOf } from '@yeral/domain/time'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingItems, bookingLinks, bookingRules, bookings, businesses, jobs, rateLimits, services } from '../../db/schema'
+import {
+  bookingItems,
+  bookingLinks,
+  bookingRules,
+  bookings,
+  businesses,
+  clients,
+  invites,
+  jobs,
+  rateLimits,
+  services,
+} from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 import { confirmBooking } from './confirm'
@@ -176,16 +187,48 @@ describe('SMS links', () => {
     expect(past.map((x: { code: string }) => x.code)).not.toContain(code)
   })
 
-  it('a phone change moves the bookings ahead to the new number and ends the old links', async () => {
+  it('a phone change moves the person to the new number: bookings, records, links, invites (book Q-171)', async () => {
     const { b, code, token } = await confirmedWithLink('+99365444311')
+    // a phone booking for the old number since the last sign-in, and an invite to it
+    await db.insert(bookings).values({
+      code: 'YR-99311',
+      businessId: glowId,
+      type: 'appointment',
+      date: THU,
+      start: 1200,
+      end: 1260,
+      status: 'confirmed',
+      source: 'phone',
+      clientPhone: '+99365444311',
+    })
+    const maysa = browser(t.app)
+    await maysa.login('+99365102030')
+    await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: '+99365444311', name: 'Läle', level: 'specialist' } })
     expect((await b.req('/v1/me/phone/code', { body: { phone: '+99365444312' } })).status).toBe(200)
     expect((await b.req('/v1/me/phone/verify', { body: { phone: '+99365444312', code: '1234' } })).status).toBe(200)
     const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
     expect(row!.clientPhone).toBe('+99365444312')
     expect((await browser(t.app).req(`/v1/links/${token}`)).status).toBe(404)
+    // the phone booking joined the account and moved with it
+    expect((await b.req('/v1/me/bookings/YR-99311')).json.code).toBe('YR-99311')
+    const [record] = await db
+      .select()
+      .from(clients)
+      .where(and(eq(clients.businessId, glowId), eq(clients.phone, '+99365444312')))
+    expect(record).toBeTruthy()
+    const [invite] = await db.select().from(invites).where(eq(invites.phone, '+99365444311'))
+    expect(invite!.status).toBe('cancelled')
   })
 
-  it('a paused business’s expiry SMS offers no times: the page wouldn’t either (book Q-154)', async () => {
+  it('a booking of a deleted account opens nothing, even through a link a late job made', async () => {
+    const { b, code } = await confirmedWithLink('+99365444315')
+    const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
+    expect((await b.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
+    const late = await newBookingLink(db, t.deps.site, row!, DEMO_NOW)
+    expect((await browser(t.app).req(`/v1/links/${tokenOf(late.url)}`)).status).toBe(404)
+  })
+
+  it('a paused business’s expiry SMS asks the client to call: the page shows the call card (book Q-154)', async () => {
     const b = browser(t.app)
     await b.login('+99365444313', 'Läle')
     const slots = (await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&date=${THU}`)).json.slots
@@ -196,7 +239,7 @@ describe('SMS links', () => {
     try {
       t.clock.now += 31 * 60_000
       await runDueJobs(t.deps)
-      expect(t.sms.sent.filter((s) => s.to === '+99365444313').at(-1)?.text).toMatch(/Pick another time/)
+      expect(t.sms.sent.filter((s) => s.to === '+99365444313').at(-1)?.text).toMatch(/didn't answer in time\. Call them to book: /)
     } finally {
       await db.update(bookingRules).set({ onlineEnabled: true }).where(eq(bookingRules.businessId, glowId))
     }

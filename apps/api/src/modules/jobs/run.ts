@@ -16,6 +16,7 @@ import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, smsCityOf, ty
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
 import { newBookingLink, pruneBookingLinks } from '../bookings/links'
+import { hideLinkTokens } from '../../ports/sms'
 import { bookedServices, onlineRefusal } from '../bookings/create'
 import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
@@ -157,9 +158,9 @@ type OutcomeSmsKind = 'expired' | 'moveRefused'
  * Send with a link of its own. A failed send keeps its link: the gateway may have delivered it anyway, and an unsent
  * token is known to nobody (only its hash is stored); it's pruned when it expires.
  */
-async function sendWithLink(deps: Deps, b: BookingRow, text: (link: string) => string): Promise<void> {
+async function sendWithLink(deps: Deps, b: BookingRow, to: string, text: (link: string) => string): Promise<void> {
   const link = await newBookingLink(deps.db, deps.site, b, deps.now())
-  await deps.sms.send({ to: b.clientPhone ?? '', text: text(link.url) })
+  await deps.sms.send({ to, text: text(link.url) })
 }
 
 /** An expired request's times, or a move not accepted while the visit is still ahead; the client can't switch these off. */
@@ -176,9 +177,13 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
   const lang = user?.lang ?? MARKET.defaultLanguage
   const sms = { date: b.date, start: b.start, businessName: biz.name, address: biz.address }
   // a paused business or a phone-only client: the page offers no times, so neither does the text (book Q-154)
-  const times = (await onlineRefusal(deps.db, lb, b.clientPhone ?? '')) ? [] : b.expiredAlternatives
-  await sendWithLink(deps, b, (link) =>
-    kind === 'expired' ? expiredSmsText(lang, { ...sms, link }, times) : moveRefusedSmsText(lang, { ...sms, link }),
+  const to = user?.phone ?? b.clientPhone ?? ''
+  // a paused business or a phone-only client: the page offers the call card, so the text asks them to call (Q-154)
+  const byPhone = !!(await onlineRefusal(deps.db, lb, to))
+  await sendWithLink(deps, b, to, (link) =>
+    kind === 'expired'
+      ? expiredSmsText(lang, { ...sms, link }, byPhone ? [] : b.expiredAlternatives, { byPhone })
+      : moveRefusedSmsText(lang, { ...sms, link }),
   )
 }
 
@@ -225,8 +230,10 @@ async function sendBookingSms(
     city: await smsCityOf(deps.db, biz.cityId, lang),
   }
   // the texts with a link get one of their own (book Q-168)
-  if (kind === 'confirmed' || kind === 'reviewAsk') await sendWithLink(deps, b, (link) => bookingSmsText(lang, kind, { ...sms, link }))
-  else await deps.sms.send({ to: b.clientPhone, text: bookingSmsText(lang, kind, sms) })
+  // the person's phone now: a changed number gets them, the old one nothing more (book Q-171)
+  const to = user?.phone ?? b.clientPhone
+  if (kind === 'confirmed' || kind === 'reviewAsk') await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
+  else await deps.sms.send({ to, text: bookingSmsText(lang, kind, sms) })
 }
 
 async function runQueue(deps: Deps): Promise<number> {
@@ -266,13 +273,15 @@ async function runQueue(deps: Deps): Promise<number> {
         .where(eq(jobs.id, job.id))
     } catch (e) {
       const attempts = job.attempts + 1
-      deps.log.warn('job failed', { id: job.id, kind: job.kind, attempts, error: String(e) })
+      // a gateway may echo the text back: no error kept or logged holds a link's token
+      const error = hideLinkTokens(String(e))
+      deps.log.warn('job failed', { id: job.id, kind: job.kind, attempts, error })
       await deps.db
         .update(jobs)
         .set({
           attempts,
           lockedUntil: null,
-          error: String(e).slice(0, 500),
+          error: error.slice(0, 500),
           // back off 1, 2, 4, 8 minutes; then give up (kept for inspection)
           ...(attempts >= MAX_ATTEMPTS ? { doneAt: new Date(deps.now()) } : { runAt: new Date(deps.now() + 2 ** (attempts - 1) * 60_000) }),
         })

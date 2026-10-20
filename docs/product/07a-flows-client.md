@@ -1686,7 +1686,7 @@ flowchart TD
 
 > Open question Q-171: changing the phone number and the businesses' client records.
 
-**Code differs:** businesses find their clients by phone number, so the next booking under the new number creates a new client record (code: `bookings/create.ts`, `clientFor`).
+(code: `/v1/me/phone/verify` moves every business's record of the person to the new number where that business has none for it yet, the bookings ahead and phone bookings made for the old number since the last sign-in, cancels invites to the old number, and ends the links sent to it; SMS go to the account's phone)
 
 **Status:** Design: drawn (Account-Profile) · Code: built (api) — `POST /v1/me/phone/code`, `/verify`.
 

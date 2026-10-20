@@ -70,7 +70,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    then the city as data (Q-107; done 20.10.2026), offered times tied to one specialist (Q-159; done 20.10.2026), expiry with nothing free (Q-252; done 20.10.2026), the
    no-show count restart (Q-127; the rule done 20.10.2026, the client card's switch with step 4), move rules (Q-165, Q-263, a second move replaces the first and can be withdrawn:
    ROUND6 A3; done 20.10.2026, the business's side with step 4), token links instead of `/b/{code}` and the signed-out link page (Q-168, F-068; the api done 20.10.2026), no review asks (Q-259),
-   linking by phone only for 6 months plus "Is this you?" (Q-270), a changed phone keeps its client record (Q-171),
+   linking by phone only for 6 months plus "Is this you?" (Q-270), a changed phone keeps its client record (Q-171; done 20.10.2026),
    code limits (Q-267), deleting an account (Q-172), name and surname (Q-156), time limits on no-shows, complaints and
    reviews (Q-254, Q-206, Q-126), at most 3 waiting requests per business and 10 in all (Q-124), the cancel reason
    setting (Q-163), the 4 undo reasons (ROUND6 A6), the answer time worked out (Q-113), phone-only clients and paused
