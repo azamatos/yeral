@@ -4,7 +4,7 @@
  */
 import type { EventType } from '@yeral/contract/events'
 import { MARKET } from '@yeral/domain/market'
-import { localized, type Locale } from '@yeral/domain/model'
+import { localized, type DeclineReason, type Locale } from '@yeral/domain/model'
 import { epochOf, localOf } from '@yeral/domain/time'
 import { createFmt, createT } from '@yeral/i18n/fmt'
 import { eq } from 'drizzle-orm'
@@ -110,17 +110,77 @@ export function expiredSmsText(
   return t('sms.expired', { ...common, times: list })
 }
 
-/** A move the business declined or let lapse: the booking keeps its time (book Q-289). `b` is the booking itself. */
-export function moveRefusedSmsText(lang: Locale, b: SmsBooking & { link: string }): string {
+/** The reason the business gave, as the client reads it: its label, or "other" in the business's words. */
+const reasonOf = (t: ReturnType<typeof createT>, reason: DeclineReason, text: string | null) =>
+  reason === 'other' && text ? text : t(`declineReasons.${reason}`)
+
+/**
+ * A request the business declined, with the reason it gave and the link to the offered times (B-20); a client who can't
+ * book it online now, with no times offered, is asked to call (Q-154).
+ */
+export function declinedSmsText(
+  lang: Locale,
+  b: SmsBooking & { link: string },
+  reason: DeclineReason,
+  text: string | null,
+  opts: { byPhone?: boolean } = {},
+): string {
   const fmt = createFmt(lang)
   const t = createT(lang)
-  return t('sms.moveRefused', {
+  return t(opts.byPhone ? 'sms.declinedCall' : 'sms.declined', {
     brand: brandOf(t),
     business: b.businessName,
     date: fmt.dayMonth(dayOf(b.date, b.start)),
     time: fmt.time(wallOf(b.date, b.start).min),
+    reason: reasonOf(t, reason, text),
     link: b.link,
   })
+}
+
+/**
+ * A move the business declined, with its reason (B-21), or let lapse: the booking keeps its time (book Q-289). `b` is
+ * the booking itself.
+ */
+export function moveRefusedSmsText(
+  lang: Locale,
+  b: SmsBooking & { link: string },
+  declined?: { reason: DeclineReason; text: string | null },
+): string {
+  const fmt = createFmt(lang)
+  const t = createT(lang)
+  return t(declined ? 'sms.moveDeclined' : 'sms.moveRefused', {
+    brand: brandOf(t),
+    business: b.businessName,
+    date: fmt.dayMonth(dayOf(b.date, b.start)),
+    time: fmt.time(wallOf(b.date, b.start).min),
+    reason: declined ? reasonOf(t, declined.reason, declined.text) : '',
+    link: b.link,
+  })
+}
+
+/** The SMS about an outcome the client didn't choose; they always go (book Q-286, Q-289). */
+export type OutcomeSmsKind = 'expired' | 'moveRefused' | 'declined'
+
+/**
+ * Queue an outcome SMS about `booking` for the jobs to send. The text and its link are made when it's sent, so no stored
+ * row holds a working link; `causeId` (the request that ran out or was declined) sends it once.
+ */
+export async function queueOutcomeSms(
+  db: Queryable,
+  kind: OutcomeSmsKind,
+  booking: { id: string; date: string; start: number },
+  causeId: string,
+  at: Date,
+): Promise<void> {
+  await db
+    .insert(jobs)
+    .values({
+      kind: 'booking.sms',
+      runAt: at,
+      payload: { bookingId: booking.id, kind, date: booking.date, start: booking.start },
+      dedupeKey: `${kind}:${causeId}`,
+    })
+    .onConflictDoNothing({ target: jobs.dedupeKey })
 }
 
 export function codeSmsText(lang: Locale, code: string): string {

@@ -981,11 +981,9 @@ flowchart TD
 
 **Code differs**
 
-- Times offered after a decline name nobody until the business's decline is built (P2 step 4): taking one goes to anyone free (code: `bookings/actions.ts`, `offerTarget`).
 - Offered times after a table decline can't be taken: the api re-books appointments only, and the booking detail leaves them out (code: `bookings/offers.ts`).
-- The business's decline and the decline SMS come with the workspace (M5); reading and taking offers is built.
 
-**Status:** Design: drawn (Account-Bookings · `view` declined, declinedConfirm, declinedTaken, offersExpired; Mobile 7–9) · Code: partly — taking offers built for appointments; declining comes with M5.
+**Status:** Design: drawn (Account-Bookings · `view` declined, declinedConfirm, declinedTaken, offersExpired; Mobile 7–9) · Code: built (api) for appointments — the business's decline with its reason, offered times (each with its specialist) and SMS (`POST /v1/w/{slug}/requests/{code}/decline`, 20.10.2026); taking an offer.
 
 ### C-26 · The request expired, with free times
 
@@ -1224,11 +1222,7 @@ flowchart TD
 
 (code: "Haýyşy yzyna al" is `POST /v1/me/bookings/{code}/withdraw-move`, which works for a paused business and a phone-only client too; the booking detail's `moveRefused` carries a declined or lapsed move; a lapse sends the SMS from `jobs/run.ts`)
 
-**Code differs**
-
-- The business's decline of a move comes with the workspace (P2 step 4); its SMS will be the same one.
-
-**Status:** Design: drawn (Account-Bookings · moveWaiting, moveDeclined, moveUnanswered, moveAccepted; Mobile 11) · Code: built (api) for the client: waiting, replacing, withdrawing, the outcome and its SMS; the business's decline with P2 step 4.
+**Status:** Design: drawn (Account-Bookings · moveWaiting, moveDeclined, moveUnanswered, moveAccepted; Mobile 11) · Code: built (api) for the client: waiting, replacing, withdrawing, the outcome and its SMS; the business's answer (`/v1/w/{slug}/requests/{code}/confirm|decline`, 20.10.2026).
 
 ### C-32 · Table or class: cancel and book again instead of moving
 
