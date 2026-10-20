@@ -6,6 +6,7 @@ import {
   canManageTeam,
   canOn,
   LEVELS,
+  levelCan,
   PERMISSION_TABLE,
   PERMISSIONS,
   scopeOf,
@@ -54,6 +55,11 @@ describe('three fixed levels (book chapter 3)', () => {
     expect(canOn(ayna, 'noshow', shared)).toBe(false)
     expect(canOn(admin, 'bookings', shared)).toBe(true)
     expect(canOn(ayna, 'bookings', [])).toBe(false)
+  })
+
+  it('a level alone says which parts its people see: a specialist has no settings', () => {
+    expect(LEVELS.filter((level) => levelCan(level, 'settings'))).toEqual(['owner', 'admin'])
+    expect(LEVELS.every((level) => levelCan(level, 'calendar') && levelCan(level, 'clients'))).toBe(true)
   })
 
   it('every level has a value for every row, and only the team row says view or manage', () => {

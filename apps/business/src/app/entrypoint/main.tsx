@@ -2,6 +2,7 @@ import { RouterProvider } from '@tanstack/react-router'
 import { brand } from '@yeral/ui/brand'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { startEvents } from '@yeral/sdk'
 import { createApi } from '@/shared/api'
 import { site } from '@/shared/config'
 import { appLocale } from '@/shared/i18n'
@@ -11,6 +12,8 @@ import '../styles.css'
 
 const api = createApi({ baseUrl: site.urls.api })
 const router = createAppRouter(api)
+// live updates while someone is signed in: requests, the team, counts (systemPatterns "Data flow")
+startEvents(api.client, api.queryClient)
 
 // the tab icon is the brand's (a rebrand replaces the files in @yeral/ui/brand, nothing here)
 const icon = document.createElement('link')

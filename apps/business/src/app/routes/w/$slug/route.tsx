@@ -1,23 +1,32 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { sameSectionIn, sectionClosed, WorkspaceShell } from '@/widgets/workspace-shell'
+import { isApiError } from '@yeral/sdk'
+import { placeFor, sectionClosed, WorkspaceShell } from '@/widgets/workspace-shell'
 
 /**
- * Every workspace page (design §27.1: addresses always carry the workspace) needs someone signed in who works there. A
- * workspace that isn't theirs opens their last used one at the same section, with "This section is closed to you";
- * with none at all, the sign-in says what's next (an invite, a setup, no workspace yet).
+ * Every workspace page (design §27.1: addresses always carry the workspace) needs someone signed in who works there, at
+ * a section their level has (`placeFor`: else their last used workspace or the calendar, with "This section is closed
+ * to you"; with no workspace, the sign-in says what's next). A workspace missing from the list held in memory is asked
+ * for again before it's refused (an invite accepted on another device). A redirect is thrown, so it passes the catch.
  */
 export const Route = createFileRoute('/w/$slug')({
-  beforeLoad: async ({ context, params, location, preload }) => {
-    const me = await context.queryClient.ensureQueryData(context.sdk.me.get())
-    if (!me) redirect({ to: '/login', replace: true, throw: true })
-    const { items, current } = await context.queryClient.ensureQueryData(context.sdk.team.workspaces())
-    if (items.some((w) => w.slug === params.slug)) return
-    const home = items.find((w) => w.slug === current) ?? items[0]
-    if (!home) redirect({ to: '/login', replace: true, throw: true })
-    else {
-      if (!preload) sectionClosed()
-      const { section, slug } = sameSectionIn(location.pathname, home.slug)
-      redirect({ to: `/w/$slug/${section}`, params: { slug }, replace: true, throw: true })
+  beforeLoad: async ({ context: { queryClient, sdk }, params, location, preload }) => {
+    const signIn = () => redirect({ to: '/login', replace: true, throw: true })
+    try {
+      const me = await queryClient.ensureQueryData(sdk.me.get())
+      if (!me) return signIn()
+      let workspaces = await queryClient.ensureQueryData(sdk.team.workspaces())
+      if (!workspaces.items.some((w) => w.slug === params.slug))
+        workspaces = await queryClient.fetchQuery({ ...sdk.team.workspaces(), staleTime: 0 })
+      const place = placeFor(location.pathname, params.slug, workspaces)
+      if ('signIn' in place) return signIn()
+      if ('to' in place) {
+        if (!preload) sectionClosed()
+        redirect({ to: `/w/$slug/${place.to.section}`, params: { slug: place.to.slug }, replace: true, throw: true })
+      }
+    } catch (error) {
+      // the session ended meanwhile: the sdk forgets the person, the sign-in takes over
+      if (isApiError(error, 'unauthorized')) signIn()
+      throw error
     }
   },
   component: WorkspaceShell,

@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from '@tanstack/react-router'
-import { formatPhone } from '@yeral/domain/phone'
 import { WorkspaceSwitcher, type WorkspaceItem } from '@yeral/ui/workspace-switcher'
 import { useTranslations } from 'use-intl'
 import { sameSectionIn } from '../model/sections'
+import { useAccount } from '../model/use-account'
 import { useWorkspace } from '../model/use-workspace'
 
 /**
@@ -13,7 +13,8 @@ import { useWorkspace } from '../model/use-workspace'
 export function ShellSwitcher({ variant, className }: { variant: 'sidebar' | 'rail' | 'strip' | 'row'; className?: string }) {
   const t = useTranslations('shell')
   const tl = useTranslations('levels')
-  const { slug, me, workspaces, workspace } = useWorkspace()
+  const { slug, workspaces, workspace } = useWorkspace()
+  const account = useAccount()
   const navigate = useNavigate()
   const pathname = useLocation({ select: (l) => l.pathname })
   if (!workspace || !workspaces) return null
@@ -27,7 +28,6 @@ export function ShellSwitcher({ variant, className }: { variant: 'sidebar' | 'ra
     current: w.slug === slug,
     count: w.requestsToAnswer > 0 ? { count: w.requestsToAnswer, label: t('requests', { count: w.requestsToAnswer }) } : null,
   }))
-  const name = me?.name ?? me?.firstName
   return (
     <WorkspaceSwitcher
       variant={variant}
@@ -35,7 +35,7 @@ export function ShellSwitcher({ variant, className }: { variant: 'sidebar' | 'ra
       level={level}
       logo={workspace.photo?.url}
       items={items}
-      person={me && (name ? t('switcher.person', { name, phone: formatPhone(me.phone) }) : formatPhone(me.phone))}
+      person={account.person && t('switcher.person', { name: account.name, phone: account.phone })}
       copy={{
         title: t('switcher.title'),
         create: t('switcher.create'),
@@ -45,7 +45,10 @@ export function ShellSwitcher({ variant, className }: { variant: 'sidebar' | 'ra
         close: t('switcher.close'),
       }}
       onSelect={(to) => {
-        const target = sameSectionIn(pathname, to)
+        const next = workspaces.items.find((w) => w.slug === to)
+        if (!next) return
+        // the same section there, when the person's level there has it
+        const target = sameSectionIn(pathname, next)
         void navigate({ to: `/w/$slug/${target.section}`, params: { slug: target.slug } })
       }}
       onCreate={() => void navigate({ to: '/setup/$step', params: { step: 'business' } })}

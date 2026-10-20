@@ -1,5 +1,5 @@
 export { sectionClosed } from './model/closed'
-export { canOpen, sameSectionIn, type Section } from './model/sections'
+export { placeFor, type Section } from './model/sections'
 export { useWorkspace } from './model/use-workspace'
 export { WorkspacePage } from './ui/workspace-page'
 export { WorkspaceShell } from './ui/workspace-shell'

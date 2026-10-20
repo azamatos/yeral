@@ -18,7 +18,7 @@
 - Routes: `/w/$slug` beforeLoad: signed in, else `/login`; not one of their workspaces → the last used one (else the
   first) at the same section + "This section is closed to you" (never on a hover preload); none at all → `/login`.
   `/w/$slug/{calendar,bookings,clients,reviews,settings}` render `pages/section` (stand-ins until their slices);
-  `settings` refuses a Specialist the same way. `pages/calendar` (the old stand-in) is gone.
+  a Specialist's `settings` address goes to the calendar the same way. `pages/calendar` (the old stand-in) is gone.
 - `shared/i18n/translate.ts`: `translator()` for words outside components (the route's toast). `PageStory` takes
   `layouts` (a layout route with pages inside).
 - How (for the book): the shell switches at 1024 and 768 as the design's README draws it; a pending invite for someone
@@ -30,6 +30,19 @@
   none; no business status (in review, not approved, hidden) on the workspace for the banners.
 - Not built: Your Ýeral page (the brief's three items; the business's public page waits for its verification state),
   Contact Ýeral (its phone and Telegram are open), the business status and notification banners, the demo sidebar.
+- Review (14 findings; 10 fixed): one resolver `placeFor(pathname, slug, workspaces)` for every address (a foreign
+  workspace → the last used one at the same section where the level there has it; a section the level hasn't got → the
+  calendar; none → sign-in), unit-tested; the switcher lands on an allowed section (Settings → a Specialist workspace
+  opens its calendar, no refusal toast); the route asks for the workspaces again before refusing a slug it doesn't
+  know (an invite accepted elsewhere) and sends a 401 to the sign-in instead of the error page; the business app
+  starts the sdk's live updates (`startEvents` in `main.tsx`), so counts and the list refresh; the page title takes
+  focus on a new page (AppTopBar `focusKey`, #113); one log-out for the shell (shared `mutationKey`, a second tap does
+  nothing); the person's name from one place (`useAccount`); the tab bar's height from `TAB_BAR_HEIGHT`; the domain's
+  `levelCan(level, permission)` (`can()` uses it); `translator()` reads the language the provider set on `<html>`. Not
+  taken: rendering one menu by a width hook instead of three by CSS (CSS shows the right one before any script and
+  never flashes; the cost is a few hidden trees); reusing `login.opening.sub` / `login.who` for the shell's identical
+  phrases (cross-namespace; to fold into `app.*` once #115 is in); a story that runs the routes' `beforeLoad` (the rules
+  are in `placeFor`, tested; the routes only call it).
 - Checked: stories `Business/Shell/Workspace` (owner, switch, create, account menu + log out, specialist, 1024, rail,
   phone, More, invite note, long names); in the browser against the local api at 1440, 1024, 768 and 500: signed in
   as Maýsa, switched Glow Studio → Glow Studio · Parahat from More at Clients (same section, sheet closes, last used

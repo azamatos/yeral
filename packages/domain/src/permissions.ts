@@ -94,7 +94,10 @@ export type GatedPermission = Exclude<Permission, 'answerRequests'>
 const ACTIONS: readonly GatedPermission[] = ['bookings', 'noshow']
 
 /** May the actor open this part of the workspace at all? Anything else is hidden. */
-export const can = (actor: Actor, permission: GatedPermission): boolean => scopeOf(actor, permission) !== 'none'
+export const can = (actor: Actor, permission: GatedPermission): boolean => levelCan(actor.level, permission)
+
+/** The same for a level alone: the parts of the workspace its people see (an app's menu, before any one booking). */
+export const levelCan = (level: Level, permission: GatedPermission): boolean => PERMISSION_TABLE[level][permission] !== 'none'
 
 /**
  * ...for something that belongs to these team members (a booking's specialists, the specialists a client booked)?

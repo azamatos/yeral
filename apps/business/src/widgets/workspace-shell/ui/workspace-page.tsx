@@ -1,3 +1,4 @@
+import { useLocation } from '@tanstack/react-router'
 import { AppTopBar } from '@yeral/ui/app-top-bar'
 import type { ReactNode } from 'react'
 import { usePageTitle } from '@/shared/lib'
@@ -22,10 +23,17 @@ export function WorkspacePage({
   children?: ReactNode
 }) {
   const { workspace } = useWorkspace()
+  // a new page (a menu item, another workspace): its title takes the focus, as the sign-in's steps do
+  const pathname = useLocation({ select: (l) => l.pathname })
   usePageTitle(title, workspace?.name)
   return (
     <>
-      <AppTopBar title={title} actions={actions} leading={switcherOnPhone ? <ShellSwitcher variant="strip" /> : undefined} />
+      <AppTopBar
+        title={title}
+        actions={actions}
+        focusKey={pathname}
+        leading={switcherOnPhone ? <ShellSwitcher variant="strip" /> : undefined}
+      />
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:p-8">
         <InviteNote />
         {children}
