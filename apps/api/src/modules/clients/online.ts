@@ -6,11 +6,10 @@
  * calls `setOnlineBlocked`.
  */
 import { isOnlineBlocked } from '@yeral/domain/clients'
-import { RULE_OPTIONS, type BookingRules } from '@yeral/domain/rules'
+import type { BookingRules } from '@yeral/domain/rules'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingRules, clients } from '../../db/schema'
-import { ApiError } from '../../http/errors'
+import { clients } from '../../db/schema'
 import { noShowMarkedAt } from '../bookings/repo'
 
 type Rules = Pick<BookingRules, 'blockAfterNoShows'>
@@ -39,30 +38,6 @@ export async function isPhoneBlocked(db: Queryable, businessId: string, phone: s
     .from(clients)
     .where(and(eq(clients.businessId, businessId), eq(clients.phone, phone)))
   return !!row && isOnlineBlocked({ onlineBlocked: row.byHand, noShowsSinceReset: row.noShows }, rules)
-}
-
-/**
- * The business sets its no-show limit (the settings, P2 step 4; they must change it here, not on the row). A stricter
- * limit (lower, or on after 0) doesn't reach back (plan review, 19.10.2026): clients it doesn't block now start their
- * count again from this moment, while those the old limit blocked stay blocked. A looser one (higher, or 0) applies at
- * once, lifting blocks from the count.
- */
-export async function setNoShowLimit(db: Queryable, businessId: string, limit: number, at: Date): Promise<void> {
-  if (!(RULE_OPTIONS.blockAfterNoShows as readonly number[]).includes(limit)) throw new ApiError('validation_error')
-  await db.transaction(async (tx) => {
-    const [old] = await tx.select().from(bookingRules).where(eq(bookingRules.businessId, businessId)).for('update')
-    if (!old) throw new ApiError('not_found')
-    const stricter = limit > 0 && (old.blockAfterNoShows === 0 || limit < old.blockAfterNoShows)
-    if (stricter) {
-      // judged by the old limit: who is blocked now keeps it
-      const blockedNow = sql`${clients.onlineBlocked} or ${reached(old)}`
-      await tx
-        .update(clients)
-        .set({ noShowsSince: at })
-        .where(and(eq(clients.businessId, businessId), sql`not (${blockedNow})`))
-    }
-    await tx.update(bookingRules).set({ blockAfterNoShows: limit }).where(eq(bookingRules.businessId, businessId))
-  })
 }
 
 /**

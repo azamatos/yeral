@@ -95,7 +95,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
 Settled while reviewing (Claude, delegated, 19.10.2026): a hold counts the business's opening hours, special days
 included, not the specialist's; a reminder that falls between 22:00 and 08:00 goes at 21:30 the evening before the visit (chapter 8),
 also for visits after midnight; "unused for 6 months" (Q-270) means no sign-in for 6 months; the `yr-` slug rule goes
-with the `/b/{code}` links (Q-168); a lower no-show limit counts from the day it changes; the failed-SMS alert goes to
+with the `/b/{code}` links (Q-168); a changed no-show limit applies to every client at once (revised 20.10.2026, chapter 9); the failed-SMS alert goes to
 the error tracker of F-209, since Ýeral sends no e-mail.
 
 ### P3 · Components in Storybook
