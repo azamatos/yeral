@@ -15,7 +15,6 @@ import {
   idSchema,
   langQuerySchema,
   listOf,
-  moneySchema,
   minuteSchema,
   nextFreeSchema,
   phoneSchema,
@@ -90,9 +89,11 @@ export const businessCardSchema = z
     distanceM: z.number().int().min(0).nullable(),
     bookingType: bookingTypeSchema,
     onlineEnabled: z.boolean(),
-    /** Lowest service price ("40 TMT-den"); null for tables (average bill instead). */
+    /**
+     * Lowest shown service price ("40 TMT-den"); null for tables and for places whose online services are all hidden
+     * ("Price at the place"). No average bill (book Q-103).
+     */
     priceFrom: priceSchema.nullable(),
-    avgBill: moneySchema.nullable(),
     open: openStateSchema,
     availability: cardAvailabilitySchema,
   })
@@ -327,7 +328,6 @@ export const businessDetailSchema = z
      */
     typicalConfirmMinutes: z.number().int().nullable(),
     priceFrom: priceSchema.nullable(),
-    avgBill: moneySchema.nullable(),
     /** Next free time for the sticky card (appointment), null when nothing is free in the window. */
     nextFree: nextFreeSchema,
     serviceGroups: z.array(serviceGroupSchema),

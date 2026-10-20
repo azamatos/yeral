@@ -80,7 +80,7 @@
     "money": "{amount} {currency}",
     "priceFrom": "{amount} {currency}-den",
     "priceFree": "Mugt",
-    "priceApprox": "≈ {amount} {currency}",
+    "priceHidden": "Baha ýerinde aýdylýar",
     "minutes": "{m} min",
     "hours": "{h} sag",
     "hoursMinutes": "{h} sag {m} min",

@@ -144,7 +144,6 @@ export async function buildCards(deps: Deps, ids: string[], opts: CardOptions): 
         bookingType: type,
         onlineEnabled: lb.rules.onlineEnabled,
         priceFrom: type === 'table' ? null : priceFromOf(lb.services),
-        avgBill: b.avgBill,
         open: openOf(b, now),
         availability,
       },

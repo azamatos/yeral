@@ -142,9 +142,6 @@ The owner checks every translation before a market launches. (Q-101)
 - **Number formats follow the language:** a decimal comma in Turkmen and Russian (`4,9`), a point in English (`4.9`).
   (client spec §8; Q-104, decided 18.10.2026; code: packages/i18n/src/fmt.ts)
 
-**Code differs:** a hidden price prints the average bill or nothing instead of *Baha ýerinde aýdylýar*, and the
-average bill is still in the code (code: packages/i18n/src/fmt.ts).
-
 > Open question Q-103: who sets a restaurant's average bill?
 
 > Open question Q-104: which number format does English use?

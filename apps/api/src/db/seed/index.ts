@@ -143,7 +143,6 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       amenities: def.amenities,
       hours: ctx.week(def.hours),
       exceptions: (def.exceptions ?? []).map((e) => (e.yearly ? e : { ...e, from: ctx.day(e.from), to: ctx.day(e.to) })),
-      avgBill: def.avgBill ?? null,
       rating: def.rating,
       reviewsCount: def.reviewsCount,
       ratingBreakdown: def.ratingBreakdown ?? {

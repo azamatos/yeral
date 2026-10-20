@@ -80,7 +80,7 @@
     "money": "{amount} {currency}",
     "priceFrom": "от {amount} {currency}",
     "priceFree": "Бесплатно",
-    "priceApprox": "≈ {amount} {currency}",
+    "priceHidden": "Цена на месте",
     "minutes": "{m} мин",
     "hours": "{h} ч",
     "hoursMinutes": "{h} ч {m} мин",

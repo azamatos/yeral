@@ -43,8 +43,8 @@ export function createFmt(locale: Locale) {
     number: num,
     /** `40 TMT` */
     money: (amount: number) => t('money', money(amount)),
-    /** `80 TMT`, `from 250 TMT`, `Free`; hidden prices show the average bill when there is one (`≈ 150 TMT`), else nothing. */
-    price: (p: Price, avgBill?: number | null) => {
+    /** `80 TMT`, `from 250 TMT`, `Free`, `Price at the place` (hidden; no average bill, book Q-103). */
+    price: (p: Price) => {
       switch (p.type) {
         case 'fixed':
           return t('money', money(p.amount))
@@ -53,7 +53,7 @@ export function createFmt(locale: Locale) {
         case 'free':
           return t('priceFree')
         case 'hidden':
-          return avgBill ? t('priceApprox', money(avgBill)) : ''
+          return t('priceHidden')
       }
     },
     /** `4.9` (`4,9` in Turkmen and Russian) */
