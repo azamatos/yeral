@@ -199,6 +199,11 @@ export function openStretches(b: BusinessHours, from: number, to: number): { sta
   return out
 }
 
+/** Minutes the business is open between two instants (its hours, special days and breaks). */
+export function openMinutesBetween(b: BusinessHours, from: number, to: number): number {
+  return openStretches(b, from, to).reduce((sum, s) => sum + (s.end - s.start) / 60_000, 0)
+}
+
 /**
  * Problems with a week of hours, by weekday (0 = Monday): opening isn't a time of day, closing isn't after it or runs
  * past 48:00 or a full day, the break isn't inside the hours, or the part past midnight runs into the next day's

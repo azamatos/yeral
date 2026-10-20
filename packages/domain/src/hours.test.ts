@@ -4,6 +4,7 @@ import {
   businessDay,
   findException,
   inException,
+  openMinutesBetween,
   openState,
   staffDay,
   staffOffReason,
@@ -13,6 +14,7 @@ import {
   type StaffSchedule,
   type WeekHours,
 } from './hours'
+import { epochOf } from './time'
 
 const WED = '2026-10-14'
 const THU = '2026-10-15'
@@ -134,5 +136,13 @@ describe('openState', () => {
       open: false,
       inDays: null,
     })
+  })
+})
+
+describe('openMinutesBetween', () => {
+  it('counts only the open time between two instants', () => {
+    const b = { hours: [{ open: 540, close: 1080 }, null, null, null, null, null, null], exceptions: [] }
+    // Monday 2026-10-19: 17:00 to Tuesday 09:00 is one open hour
+    expect(openMinutesBetween(b as never, epochOf('2026-10-19', 1020), epochOf('2026-10-20', 540))).toBe(60)
   })
 })

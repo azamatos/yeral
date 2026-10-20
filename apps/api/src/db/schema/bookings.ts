@@ -106,6 +106,11 @@ export const bookings = pgTable(
     seats: integer(),
     createdAt: createdAt(),
     confirmedAt: ts(),
+    /**
+     * When the business answered this request (confirmed or declined it), for the typical answer time (book Q-113);
+     * null for an instant booking, one never answered, and bookings from before it was kept.
+     */
+    answeredAt: ts(),
     cancelledAt: ts(),
     completedAt: ts(),
     updatedAt: ts().notNull().defaultNow(),
@@ -116,6 +121,10 @@ export const bookings = pgTable(
     index('bookings_client_idx').on(t.clientId),
     index('bookings_due_idx').on(t.status, t.holdUntil),
     index('bookings_session_idx').on(t.sessionId),
+    // the business page's typical answer time reads a month of answers (book Q-113)
+    index('bookings_answered_idx')
+      .on(t.businessId, t.answeredAt)
+      .where(sql`${t.answeredAt} is not null`),
     // a move may overlap its booking's time (book Q-165), so the database keeps one waiting move per booking
     uniqueIndex('bookings_one_waiting_move')
       .on(t.rescheduleOf)

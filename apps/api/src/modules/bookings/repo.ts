@@ -66,6 +66,8 @@ export interface StatusChange {
   status: BookingStatus
   cancelledBy?: CancelledBy | null
   cancelReason?: string | null
+  /** The business answered a request (book Q-113): its answer time counts toward the typical one. */
+  answered?: boolean
   at: Date
 }
 
@@ -94,6 +96,7 @@ export async function setStatus(db: Queryable, b: BookingRow, change: StatusChan
       completedAt: change.status === 'completed' || change.status === 'noshow' ? change.at : b.completedAt,
       // kept after a cancel so "Yzyna al" can bring a request back with its remaining hold
       holdUntil: change.status === 'confirmed' || change.status === 'completed' ? null : b.holdUntil,
+      answeredAt: change.answered ? change.at : b.answeredAt,
       updatedAt: change.at,
     })
     .where(and(eq(bookings.id, b.id), eq(bookings.status, b.status)))
