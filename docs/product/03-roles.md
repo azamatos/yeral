@@ -108,8 +108,9 @@ flowchart LR
   resend or cancel a pending invite. (business spec §1, §8)
 - **Phone-only specialist:** added without an SMS and active at once. (business spec §11)
 - **Leaving:** a member can leave a workspace from *Profilim* ("Bu biznesden çyk"); the owner can't. (business spec §1)
-- **Removing a member:** the owner removes them and reassigns their future bookings to someone who does those services,
-  or to "any free specialist". (business spec §8, §11)
+- **Removing a member:** the owner removes them and moves each future booking to someone who does that service, keeps it, or
+  cancels it with 3 other times; a booking nobody else does gets its own choice, never a move to "any free specialist"
+  (business spec §8; design v0.6 round 2; Claude, delegated 20.10.2026)
 - **Handing over ownership:** the owner picks an active member who signs in; that person becomes *Eýesi* and the old
   owner becomes an Administrator. (business spec §8)
 - **Busy elsewhere** (in the MVP): someone in two workspaces is blocked in each calendar while they're the specialist

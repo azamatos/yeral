@@ -282,7 +282,7 @@ flowchart TD
 **Steps**
 
 1. A preview card shows how clients will see the business after the check ("Barlagdan soň müşderiler sizi şeýle görer").
-2. The page address `yeral.app/tk/b/{slug}` with *Göçür* (Copy) and a QR code with *QR-y ýükle* (Download QR): "Salgyňyz we QR kodyňyz taýýar — barlagdan soň müşderiler üçin açylar." (ROUND6-ANSWERS F1).
+2. The page address `yeral.app/b/{slug}` with *Göçür* (Copy) and a QR code with *QR-y ýükle* (Download QR): "Salgyňyz we QR kodyňyz taýýar — barlagdan soň müşderiler üçin açylar." (ROUND6-ANSWERS F1).
 3. The review notice: "Sahypaňyz barlagda — häzir ony diňe siz we toparyňyz görýärsiňiz. Barlagdan soň gözlegde we salgyňyzda hemmä açylar. Adatça 24 sagat çekýär."
 4. "Senenamany häzirden ulanyp bilersiňiz: jaň edip ýa-da gelip ýazylanlary goşuň. Onlaýn ýazylyş barlagdan soň açylar." (use the calendar now for phone and walk-in bookings; online booking opens after the check).
 5. A checklist "Profilyňyzy güýçlendiriň" (0 / 3): logo, 3+ photos, a description.
@@ -1564,7 +1564,7 @@ flowchart LR
 
 **Steps**
 
-1. *Sahypaňyzyň salgysy* `yeral.app/tk/b/{slug}` with *Göçür* (Copy), *Paýlaş* (Share), *SMS bilen iber*. "Instagram profiliňize, WhatsApp statusyna ýa-da wizit kartyňyza goýuň — müşderiler göni ýazylyp biler." (§8).
+1. *Sahypaňyzyň salgysy* `yeral.app/b/{slug}` with *Göçür* (Copy), *Paýlaş* (Share), *SMS bilen iber*. "Instagram profiliňize, WhatsApp statusyna ýa-da wizit kartyňyza goýuň — müşderiler göni ýazylyp biler." (§8).
 2. QR: "Kassanyň ýanyna goýuň — müşderi telefonynda açar"; *PNG ýükle* (for print), *SVG ýükle* (for a designer).
 3. *Ýazylyş düwmesi · ýakynda* (a booking button for websites, later).
 
@@ -1798,7 +1798,7 @@ flowchart TD
 
 1. In the staff drawer, *Işgäri öçür* (Remove staff). The modal says how many future bookings they have (§8).
 2. Choices: *Başga hünärmene geçir* with a *Kime* list ("Müşderä SMS bilen habar bereris · Şol wagt we hyzmat saklanar"); *Bolşy ýaly galdyr — täze ýazylyş kabul edilmez* ("{name} şol ýazylyşlara gelýär, soň senenamadan aýrylýar"); *Ýatyr we müşderilere 3 başga wagt hödürle* ("Müşderi täze wagty bir basyşda kabul edip biler").
-3. The *Kime* list shows only specialists who do the affected services; otherwise each booking falls back to "Islendik boş hünärmen" (any free specialist) (§11).
+3. The *Kime* list shows only specialists who do the affected services; a booking nobody else does gets its own choice in its row (keep or cancel), never a move to "Islendik boş hünärmen" (any free specialist) (design v0.6 round 2; Claude, delegated 20.10.2026).
 4. "Müşderiler oňa ýazylyp bilmez. Taryh we hasabatlar saklanar." → *Öçür*. The row becomes *Öçürilen*.
 5. Later, the row menu *Gaýtadan işjeňleşdir* (Reactivate): "… gaýtadan işjeň".
 

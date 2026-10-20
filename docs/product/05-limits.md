@@ -78,7 +78,7 @@ copy to say businesses keep their visit records (Q-172).
 | "Opens next" looks ahead | 7 days | Fixed | code only: packages/domain/src/hours.ts |
 | Home-based business on the map | a circle of about 1 km until the booking is confirmed | Owner/admin (switch "*Öýde işleýärin*") | client spec §2; size code only: apps/api/src/modules/catalog/map.ts |
 | Verification | usually within 24 h; until then visitors see "*Bu sahypa entek açylmady*" | Ýeral team | business spec §7; ROUND6-ANSWERS F1 |
-| Page link | `yeral.app/tk/b/{slug}`; slug of lowercase letters, digits and dashes, up to 64 characters, never starting with "yr-" | Fixed | business spec §7; ROUND6-ANSWERS notes; length code only: packages/contract/src/common.ts |
+| Page link | `yeral.app/b/{slug}`, which opens the page in the visitor's language (`/en/b/{slug}` at the first launch); slug of lowercase letters, digits and dashes, up to 64 characters, never starting with "yr-" | Fixed | business spec §7; ROUND6-ANSWERS notes; length code only: packages/contract/src/common.ts |
 
 **Code differs:** the typical answer time is a stored number per business that nothing works out
 (code: apps/api/src/db/schema/business.ts). Slugs starting with "yr-" aren't refused yet (code: packages/contract/src/common.ts).
