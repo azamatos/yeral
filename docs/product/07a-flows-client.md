@@ -1110,15 +1110,13 @@ flowchart TD
 - Tables and classes: "Ýatyr" opens a confirm sheet on phones (Mobile 6); class rule example "Sapakdan 12 sagat öň mugt ýatyryp bilersiňiz.".
 - Cancelling a booking with a waiting move also withdraws the move (A3; C-31).
 - A booking made after its deadline had already passed (a same-day class, an instant booking an hour ahead) can't be cancelled online once confirmed: only "Jaň et", for every booking type; the class line is reworded to say so (Q-162, decided 18.10.2026; code: `domain/lifecycle.ts`; C-17).
-- The business setting "Ýatyrylanda sebäp sora" (ask for a reason) decides the reason section: on, the modal shows the reason chips, still optional; off, the modal has no reason section (Q-163, decided 18.10.2026).
+- The business setting "Ýatyrylanda sebäp sora" (ask for a reason) decides the reason section: on, the modal shows the reason chips, still optional; off, the modal has no reason section (Q-163, decided 18.10.2026). The booking detail says which (`askCancelReason`); a reason sent to a business that doesn't ask isn't kept.
 
 > Open question Q-162: cancelling a booking made after the free-cancel deadline.
 
 > Open question Q-163: what "Ýatyrylanda sebäp sora" changes for the client.
 
 **Design to fix:** the cancel modal without the reason section, for a business that switched "Ýatyrylanda sebäp sora" off (Q-163).
-
-**Code differs:** the cancel ignores the business's "Ýatyrylanda sebäp sora" setting (ADR 0017 `askCancelReason`).
 
 **Status:** Design: drawn (Account-Bookings · `view=cancel`, `late`; Mobile 6) · Code: built (api).
 

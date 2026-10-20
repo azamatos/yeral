@@ -310,6 +310,23 @@ describe('client bookings', () => {
     await db.delete(bookings).where(eq(bookings.userId, me.id))
   })
 
+  it('a business that doesn’t ask for a cancel reason gets none (book Q-163)', async () => {
+    const b = browser(t.app)
+    const { me } = await b.login('+99365111043', 'Jeren')
+    const asked = (await request(b, 'glow-studio-parahat')).json.code
+    expect((await b.req(`/v1/me/bookings/${asked}`)).json.askCancelReason).toBe(true)
+    const [parahat] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio-parahat'))
+    await db.update(bookingRules).set({ askCancelReason: false }).where(eq(bookingRules.businessId, parahat!.id))
+    try {
+      expect((await b.req(`/v1/me/bookings/${asked}`)).json.askCancelReason).toBe(false)
+      const cancelled = await b.req(`/v1/me/bookings/${asked}/cancel`, { body: { reason: 'Meýilnamam üýtgedi' } })
+      expect(cancelled.json).toMatchObject({ status: 'cancelled', cancelReason: null })
+    } finally {
+      await db.update(bookingRules).set({ askCancelReason: true }).where(eq(bookingRules.businessId, parahat!.id))
+      await db.delete(bookings).where(eq(bookings.userId, me.id))
+    }
+  })
+
   it('a review can be written until 30 days after the visit (book Q-126)', async () => {
     const b = browser(t.app)
     await b.login('+99365111041', 'Maral')
