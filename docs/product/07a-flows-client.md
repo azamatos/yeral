@@ -985,7 +985,6 @@ flowchart TD
 
 **Code differs**
 
-- Declined rows go straight to *Geçen*; Mobile 7 keeps them on top of *Gelýän* while an offer is ahead (code: `bookings/routes.ts`).
 - Times offered after a decline name nobody until the business's decline is built (P2 step 4): taking one goes to anyone free (code: `bookings/actions.ts`, `offerTarget`).
 - Offered times after a table decline can't be taken: the api re-books appointments only, and the booking detail leaves them out (code: `bookings/offers.ts`).
 - The business's decline and the decline SMS come with the workspace (M5); reading and taking offers is built.
@@ -1540,7 +1539,7 @@ flowchart TD
 - The list pages by 12 (code default).
 - Someone else's booking code: not found (code).
 
-**Status:** Design: drawn (Account-Bookings · `view=list`, `empty`) · Code: built (api) — except keeping offers on top (C-25).
+**Status:** Design: drawn (Account-Bookings · `view=list`, `empty`) · Code: built (api); declined and expired requests with an offered time ahead stay on top (20.10.2026, `bookings/offers.ts` `withOffersAhead`).
 
 ### C-41 · Booking detail
 

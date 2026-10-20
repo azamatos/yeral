@@ -241,6 +241,11 @@ export const bookingLinkSchema = bookingDetailSchema
   .meta({ id: 'BookingLink' })
 export type BookingLink = z.infer<typeof bookingLinkSchema>
 
+/**
+ * `upcoming`: waiting and confirmed bookings, soonest first, under the declined or expired requests that still have an
+ * offered time to take (status `cancelled`; their detail holds the times), soonest offer first. A request that just ran
+ * out keeps its place until the background pass records it (a minute or so). `past`: the rest, newest first (book C-40).
+ */
 export const myBookingsQuerySchema = langQuerySchema.extend(cursorQuerySchema.shape).extend({ tab: z.enum(['upcoming', 'past']) })
 export const bookingListSchema = listOf(bookingSummarySchema)
 export const bookingCodeParamSchema = z.object({ code: bookingCodeSchema })

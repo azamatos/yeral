@@ -25,7 +25,7 @@ import { visitWhat } from '../catalog/map'
 import { shiftRating } from '../reviews/rating'
 import { onlineRefusal } from '../clients/online'
 import { assertOnlineBooking, assertWaitingRoom, bookedServices, rebook } from './create'
-import { offerTarget } from './offers'
+import { offerTarget, offersOf } from './offers'
 import {
   type BookingRow,
   isSlotConflict,
@@ -225,11 +225,9 @@ export async function acceptAlternative(
   source: 'decline' | 'expired',
   index: number,
 ): Promise<BookingRow> {
-  const { status, cancelledBy } = effectiveStatus(stateOf(b), deps.now())
-  const list = source === 'decline' ? b.declineAlternatives : b.expiredAlternatives
-  const wanted = source === 'decline' ? cancelledBy === 'business' : cancelledBy === 'system'
-  const slot = list[index]
-  if (status !== 'cancelled' || !wanted || !slot) throw new ApiError('invalid_status')
+  const offers = offersOf(b, deps.now())
+  const slot = offers?.source === source ? offers.list[index] : undefined
+  if (!slot) throw new ApiError('invalid_status')
   const [taken] = await deps.db.select({ id: bookings.id }).from(bookings).where(eq(bookings.alternativeOf, b.id))
   if (taken) throw new ApiError('invalid_status')
   const lb = await businessOf(deps, b)

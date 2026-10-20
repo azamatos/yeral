@@ -5,16 +5,83 @@
  */
 import type { OfferedTime } from '@yeral/contract/bookings'
 import { findAppointmentSlot, type BusyInterval } from '@yeral/domain/availability'
-import { offerPast } from '@yeral/domain/lifecycle'
+import { effectiveStatus, offerPast } from '@yeral/domain/lifecycle'
+import { epochOf } from '@yeral/domain/time'
 import { inArray } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { staff, type TimeSlot } from '../../db/schema'
-import { appointmentContext, loadBusy, type LoadedBusiness } from '../availability/context'
+import { bookings, staff, type TimeSlot } from '../../db/schema'
+import { appointmentContext, loadBusinesses, loadBusy, type LoadedBusiness } from '../availability/context'
+import { bookOnlineFor } from '../clients/online'
 import { bookedServices, rebookQuery } from './create'
-import type { BookingRow } from './repo'
+import { recipientOf } from './links'
+import { stateOf, type BookingRow } from './repo'
 
 /** Where taking an offered time books: its named specialist, or anyone free when it names nobody. */
 export const offerTarget = (o: TimeSlot) => ({ date: o.date, start: o.start, staffId: o.staffId ?? null })
+
+/**
+ * The offered times a request has, by one rule for the list, the detail and taking one: after the business declined it,
+ * the times it offered; after it ran out, the free times the jobs found (none until they've run). `source` is what the
+ * client sends back to take one.
+ */
+export function offersOf(b: BookingRow, now: number): { source: 'decline' | 'expired'; list: TimeSlot[] } | null {
+  const { status, cancelledBy } = effectiveStatus(stateOf(b), now)
+  if (status !== 'cancelled') return null
+  if (cancelledBy === 'business') return { source: 'decline', list: b.declineAlternatives }
+  if (cancelledBy === 'system') return { source: 'expired', list: b.expiredAlternatives }
+  return null
+}
+
+/**
+ * The declined and expired requests that stay on top of "Upcoming" (book C-25, C-26, C-40), each with the start of its
+ * soonest offered time that can still be taken. These are the detail's free chips, so a row whose times are all past or
+ * taken goes to Past; after an expiry, only while the client may book online, checked as the detail checks it.
+ */
+export async function withOffersAhead(
+  db: Queryable,
+  rows: readonly BookingRow[],
+  accountPhone: string,
+  now: number,
+): Promise<Map<string, number>> {
+  // most rows stop here without a query: offers that already started can't count, whatever the lead time
+  const picked = rows.flatMap((r) => {
+    const offers = offersOf(r, now)
+    return r.type === 'appointment' && offers?.list.some((o) => !offerPast(o, 0, now)) ? [{ r, offers }] : []
+  })
+  if (!picked.length) return new Map()
+  const [taken, businesses] = await Promise.all([
+    db
+      .select({ of: bookings.alternativeOf })
+      .from(bookings)
+      .where(
+        inArray(
+          bookings.alternativeOf,
+          picked.map((p) => p.r.id),
+        ),
+      ),
+    loadBusinesses(db, [...new Set(picked.map((p) => p.r.businessId))]),
+  ])
+  const takenFrom = new Set(taken.map((t) => t.of))
+  // every row is the signed-in client's: one check per business and phone
+  const online = new Map<string, Promise<boolean>>()
+  const bookOnline = (lb: LoadedBusiness, r: BookingRow) => {
+    const phone = recipientOf(r, accountPhone)
+    const key = `${lb.business.id} ${phone}`
+    const known = online.get(key) ?? bookOnlineFor(db, lb, phone)
+    online.set(key, known)
+    return known
+  }
+  const soonest = await Promise.all(
+    picked.map(async ({ r, offers }) => {
+      const lb = businesses.get(r.businessId)
+      if (!lb || takenFrom.has(r.id)) return null
+      if (offers.source === 'expired' && !(await bookOnline(lb, r))) return null
+      const free = (await offeredTimes(db, lb, r, offers.list, now)).filter((o) => o.state === 'free')
+      return free.length ? Math.min(...free.map((o) => epochOf(o.date, o.start))) : null
+    }),
+  )
+  return new Map(picked.flatMap(({ r }, i) => (soonest[i] == null ? [] : [[r.id, soonest[i]] as const])))
+}
 
 export async function offeredTimes(
   db: Queryable,
