@@ -25,25 +25,28 @@ export async function newBookingLink(
   booking: Pick<BookingRow, 'id' | 'date' | 'end'>,
   sentTo: string,
   now: number,
-): Promise<{ url: string; tokenHash: string }> {
+): Promise<{ url: string; token: string; tokenHash: string }> {
   const token = randomToken(16)
   const tokenHash = await sha256Hex(token)
   const from = Math.max(now, epochOf(booking.date, booking.end))
   await db.insert(bookingLinks).values({ tokenHash, bookingId: booking.id, sentTo, expiresAt: new Date(from + LINK_DAYS * 86_400_000) })
-  return { url: `${site.urls.client.replace(/^https?:\/\//, '')}/l/${token}`, tokenHash }
+  return { url: `${site.urls.client.replace(/^https?:\/\//, '')}/l/${token}`, token, tokenHash }
 }
 
+type RecipientFields = Pick<BookingRow, 'userId' | 'clientPhone' | 'accountDeletedAt'>
+
 /**
- * The phone a booking's SMS go to: its account's phone now, else the phone it was booked with; none once the person
- * deleted their account or the business removed the client. Links are checked against it when opened.
+ * The phone a booking's SMS go to, given its account's phone: the account's phone now, else the phone it was booked
+ * with; none once the person deleted their account or the booking has no phone. Links are checked against it.
  */
-export async function bookingRecipient(
-  db: Queryable,
-  b: Pick<BookingRow, 'userId' | 'clientPhone' | 'accountDeletedAt'>,
-): Promise<string | null> {
+export function recipientOf(b: RecipientFields, accountPhone: string | null | undefined): string | null {
   if (!b.clientPhone || b.accountDeletedAt) return null
+  return accountPhone ?? b.clientPhone
+}
+
+export async function bookingRecipient(db: Queryable, b: RecipientFields): Promise<string | null> {
   const [user] = b.userId ? await db.select({ phone: users.phone }).from(users).where(eq(users.id, b.userId)) : []
-  return user?.phone ?? b.clientPhone
+  return recipientOf(b, user?.phone)
 }
 
 /** A booking moved: its links work until 90 days after the new visit too. */
@@ -62,14 +65,16 @@ export async function pruneBookingLinks(db: Queryable, now: number): Promise<voi
 
 /** The booking a link opens; an unknown or expired link is `not_found` ("Bu salgy işlemeýär"). */
 export async function bookingOfLink(db: Queryable, token: string, now: number): Promise<BookingRow & { phone: string }> {
+  // one read of the link, the booking and the account: an account deletion lands wholly before it or after it
   const [row] = await db
-    .select({ booking: bookings, sentTo: bookingLinks.sentTo })
+    .select({ booking: bookings, sentTo: bookingLinks.sentTo, accountPhone: users.phone })
     .from(bookingLinks)
     .innerJoin(bookings, eq(bookings.id, bookingLinks.bookingId))
+    .leftJoin(users, eq(users.id, bookings.userId))
     .where(and(eq(bookingLinks.tokenHash, await sha256Hex(token)), gt(bookingLinks.expiresAt, new Date(now))))
-  // a link works only while it went to the booking's phone now: not after a phone change, an account deletion or the
-  // client's removal, whatever a late job sent
-  const phone = row ? await bookingRecipient(db, row.booking) : null
+  // a link works only while it went to the booking's phone now: not after a phone change or an account deletion,
+  // whatever a late job sent
+  const phone = row ? recipientOf(row.booking, row.accountPhone) : null
   if (!row || !phone || phone !== row.sentTo) throw new ApiError('not_found')
   return { ...row.booking, phone }
 }

@@ -1,5 +1,5 @@
 {
-  "id": "44302321-0c78-4774-a8bd-d673bd86909e",
+  "id": "497b8717-4a06-43a7-a213-617f3280afcf",
   "prevId": "9350501a-18c1-4f7a-aa50-d6beb6a1aabd",
   "version": "7",
   "dialect": "postgresql",
@@ -512,12 +512,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "sent_to": {
-          "name": "sent_to",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -702,12 +696,6 @@
         "move_refused": {
           "name": "move_refused",
           "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "account_deleted_at": {
-          "name": "account_deleted_at",
-          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },

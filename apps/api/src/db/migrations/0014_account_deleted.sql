@@ -1,0 +1,1 @@
+ALTER TABLE "bookings" ADD COLUMN "account_deleted_at" timestamp with time zone;

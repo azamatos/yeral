@@ -20,8 +20,10 @@
 - Third and fourth reviews: each link records the phone it went to (`booking_links.sent_to`) and works only while that
   is still the booking's phone (`bookingRecipient()`: the account's phone now, else the booking's; none after an
   account deletion or the client's removal), which also closes a late job's race. Booking SMS go to that phone; the
-  booking detail's `bookOnline` checks it too. Job errors and Caddy's default log (handler errors) hide tokens, also
-  escaped or encoded ones. A phone-only client's expiry SMS asks them to call (`sms.expiredCall`). The phone change's
+  booking detail's `bookOnline` checks it too. A failed send strips its token from the error itself (any encoding);
+  job errors and logs also pass `hideLinkTokens()`, and Caddy's default log (handler errors) hides `/l/…` paths. The
+  link check reads the link, booking and account in one query. Migrations: 0013 links, 0014 `account_deleted_at`,
+  0015 `sent_to` (older links stop working). A phone-only client's expiry SMS asks them to call (`sms.expiredCall`). The phone change's
   wider rework (client records, the old number's phone bookings, invites) went back out of this PR: it is Q-171's own
   step, with shared helpers for sign-in, phone change and deletion.
 - Server: the next deploy copies `infra/server/edge/Caddyfile` to `/srv/edge/Caddyfile` and reloads Caddy (the

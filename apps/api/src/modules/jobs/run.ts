@@ -160,7 +160,14 @@ type OutcomeSmsKind = 'expired' | 'moveRefused'
  */
 async function sendWithLink(deps: Deps, b: BookingRow, to: string, text: (link: string) => string): Promise<void> {
   const link = await newBookingLink(deps.db, deps.site, b, to, deps.now())
-  await deps.sms.send({ to, text: text(link.url) })
+  try {
+    await deps.sms.send({ to, text: text(link.url) })
+  } catch (e) {
+    // a gateway may echo the text back, escaped or encoded any way; the token's characters survive them all, so it
+    // goes from the error itself before anything keeps or logs it; the original error, token and all, isn't kept
+    // eslint-disable-next-line preserve-caught-error -- a cause would carry the token along
+    throw new Error(String(e).split(link.token).join('…'))
+  }
 }
 
 /** An expired request's times, or a move not accepted while the visit is still ahead; the client can't switch these off. */

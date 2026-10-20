@@ -13,7 +13,7 @@ import { clientIp } from '../../lib/rate-limit'
 import { emit } from '../../notify'
 import { checkCode, sendCode } from '../auth/codes'
 import { endSession, requireUser } from '../auth/session'
-import { setStatus, StaleBooking } from '../bookings/repo'
+import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
 import { buildCards } from '../catalog/cards'
 import { publicBusiness } from '../catalog/detail'
 import { toMe } from './me'
@@ -173,7 +173,16 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     if (userId !== user.id) throw new ApiError('code_expired')
     const [taken] = await c.var.deps.db.select({ id: users.id }).from(users).where(eq(users.phone, phone))
     if (taken) throw new ApiError('phone_taken')
-    const [row] = await c.var.deps.db.update(users).set({ phone }).where(eq(users.id, user.id)).returning()
+    const [row] = await c.var.deps.db
+      .update(users)
+      .set({ phone })
+      .where(eq(users.id, user.id))
+      .returning()
+      .catch((e: unknown) => {
+        // someone took the number between the check and the change
+        if (pgCode(e) === '23505') throw new ApiError('phone_taken')
+        throw e
+      })
     // other devices sign in again with the new number
     const current = c.var.auth?.sessionId
     const others = (await c.var.deps.db.select({ id: sessions.id }).from(sessions).where(eq(sessions.userId, user.id))).filter(
