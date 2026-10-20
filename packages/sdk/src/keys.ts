@@ -54,4 +54,9 @@ export const keys = {
   calendar: (slug: string) => ['calendar', slug] as const,
   freeTimes: (slug: string, params: Record<string, unknown>) => ['calendar', slug, 'free-times', params] as const,
   calendarView: (slug: string, params: Record<string, unknown>) => ['calendar', slug, 'view', params] as const,
+  // the business's clients (book B-32, B-34): the list, the drawer's lookup and each card under its prefix
+  clients: (slug: string) => ['clients', slug] as const,
+  clientList: (slug: string, params: Record<string, unknown>) => ['clients', slug, 'list', params] as const,
+  clientLookup: (slug: string, params: Record<string, unknown>) => ['clients', slug, 'lookup', params] as const,
+  client: (slug: string, id: string, params: Record<string, unknown>) => ['clients', slug, 'card', id, params] as const,
 }

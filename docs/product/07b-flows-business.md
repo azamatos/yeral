@@ -899,7 +899,7 @@ flowchart TD
 - A client blocked from online booking can still be booked by phone; that's the point of the block (B-35).
 - The client asked for no reminder SMS (client card switch): reminders aren't sent (§6).
 
-**Status** — Design: drawn (B-Calendar · `panel=new`; B-Bookings; B-Clients) · Code: api built (`GET /v1/w/{slug}/free-times`, `POST /v1/w/{slug}/bookings`, 20.10.2026): the nearest four free times with their specialist, a day's starts with who is free, the 14-day strip; the booking confirmed at once with the client found or added by the phone; the SMS with the date, time and address once the undo is over. The prefix matches and the known client's card come with the client card.
+**Status** — Design: drawn (B-Calendar · `panel=new`; B-Bookings; B-Clients) · Code: api built (`GET /v1/w/{slug}/free-times`, `POST /v1/w/{slug}/bookings`, 20.10.2026): the nearest four free times with their specialist, a day's starts with who is free, the 14-day strip; the booking confirmed at once with the client found or added by the phone; the SMS with the date, time and address once the undo is over. The prefix matches and the known client's card: `GET /v1/w/{slug}/clients/lookup` (21.10.2026).
 
 ### B-24 · Quick booking on a phone
 
@@ -1201,7 +1201,7 @@ flowchart LR
 - Analytics hides client lists and export from a specialist (§22); the clients page shows a specialist their own clients.
 - Visits, average bill, last visit and no-shows are computed from bookings, not typed in (ADR 0018).
 
-**Status** — Design: drawn (B-Clients · `filter`) · Code: rule only (domain: client stats and the four segments); no business endpoint.
+**Status** — Design: drawn (B-Clients · `filter`) · Code: api built (`GET /v1/w/{slug}/clients`: by name or number, the chips, pages, the most recently seen first; 21.10.2026); adding (B-33) and the bulk actions come next.
 
 ### B-33 · Add a client
 
@@ -1264,7 +1264,7 @@ flowchart TD
 - Alert notes show in the request drawer, booking drawer, new-booking client card, and as an icon on the calendar block (§4).
 - The client never sees notes or complaints.
 
-**Status** — Design: drawn (B-Client · `edit`, `composer`) · Code: schema only for notes with the alert flag; stats rule only (domain).
+**Status** — Design: drawn (B-Client · `edit`, `composer`) · Code: the card's read built (`GET /v1/w/{slug}/clients/{id}`: numbers, notes, bookings ahead and before, reports, switches; 21.10.2026); adding notes, the edit and the switches come next.
 
 ### B-35 · Phone-only clients after no-shows
 

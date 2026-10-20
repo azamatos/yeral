@@ -222,7 +222,8 @@ export const calendarBookingSchema = z
     status: z.enum(BOOKING_STATUSES),
     cancelledBy: z.enum(CANCELLED_BY).nullable(),
     source: z.enum(BOOKING_SOURCES),
-    client: z.object({ name: z.string().nullable(), phone: phoneSchema.nullable() }),
+    /** `id` opens the client card (null once the record is gone). */
+    client: z.object({ id: idSchema.nullable(), name: z.string().nullable(), phone: phoneSchema.nullable() }),
     items: z.array(calendarItemSchema),
     price: priceSchema.nullable(),
     /** One of `internalStatuses` (switched on). */

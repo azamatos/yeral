@@ -257,7 +257,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-121 | Blocked time | A staff member's closed interval inside a day, e.g. "Ýapyk · Okuw". | MVP | drawn (B-Calendar) | api built (20.10.2026: `…/calendar/blocks`, weekly repeat, never over a booking) | Whole days off are the schedule's (B-47). |
 | F-122 | Day summary | "16 ýazylyş · 3 haýyş · planned revenue 1 410 TMT" (revenue only with permission). | MVP | drawn (B-Calendar) | built (domain `daySummary`) |  |
 | F-123 | Request alerts | Sidebar count, "N haýyş" chip, dashed blocks with a timer, toast + sound on arrival. | MVP | drawn (B-Calendar, B-Shell) | not built | Browser notifications: F-170. |
-| F-124 | Request drawer | Timer, client facts (visits, no-shows, alert notes), services, time; Confirm / Decline; most urgent first with a pager. | MVP | drawn (B-Calendar · request, B-Bookings) | api built (`GET /v1/w/{slug}/requests`, confirm; 20.10.2026); alert notes with the client card |  |
+| F-124 | Request drawer | Timer, client facts (visits, no-shows, alert notes), services, time; Confirm / Decline; most urgent first with a pager. | MVP | drawn (B-Calendar · request, B-Bookings) | api built (`GET /v1/w/{slug}/requests`, confirm; 20.10.2026; the client's alert notes and card link 21.10.2026) |  |
 | F-125 | Decline with offered times | Reason chips (+ text) the client sees, plus up to 3 offered times. | MVP | drawn (B-Calendar · decline) | api built (`POST …/requests/{code}/decline`, 20.10.2026) |  |
 | F-126 | Move request handling | A client's move arrives as a "Wagt üýtgetmek" request: row, drawer (old → new), ghost block, confirm / decline. | MVP | drawn (B-Calendar, B-Bookings · move-request) | api built (moves among the requests, confirm and decline; 20.10.2026); the ghost block with the calendar | Round 6 A3. |
 | F-127 | Booking drawer | Status + source, client block with call, services, internal note (autosave), last 3 visits, actions (move, cancel, complaint, "Gaýtadan ýaz" = book again for this client). | MVP | drawn (B-Calendar · booking) | schema only (`internalNote`) |  |
@@ -277,9 +277,9 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
-| F-139 | Client list and segments | Search by name/phone; chips Regular, New, Lapsed, Reported; visits, last visit, total, next booking. | MVP | drawn (B-Clients) | built (domain `clientSegments`), schema |  |
-| F-140 | Client card | Stats (visits, average bill, last visit, no-shows), upcoming, history, complaints. | MVP | drawn (B-Client) | built (domain `clientStats`), schema | Money figures: Q-134. |
-| F-141 | Team notes and alert notes | Notes with author and date; "show when booking" notes appear on blocks and drawers. | MVP | drawn (B-Client · composer) | schema only (`client_notes.alert`) |  |
+| F-139 | Client list and segments | Search by name/phone; chips Regular, New, Lapsed, Reported; visits, last visit, total, next booking. | MVP | drawn (B-Clients) | api built (`GET /v1/w/{slug}/clients`, 21.10.2026) |  |
+| F-140 | Client card | Stats (visits, average bill, last visit, no-shows), upcoming, history, complaints. | MVP | drawn (B-Client) | api built (`GET /v1/w/{slug}/clients/{id}`, 21.10.2026) | Money figures: Q-134. |
+| F-141 | Team notes and alert notes | Notes with author and date; "show when booking" notes appear on blocks and drawers. | MVP | drawn (B-Client · composer) | read built (card, drawer lookup, requests, calendar; 21.10.2026); adding notes next |  |
 | F-142 | Add a client by hand | Only the phone is required; name, birthday, source, tags, note; "save and book". | MVP | drawn (B-Clients · modal) | schema only |  |
 | F-143 | No reminder SMS for a client | Switch when the client asked not to get reminders. | MVP | drawn (B-Client) | built (jobs honour `noRemindersSms`) |  |
 | F-144 | Phone-only client | "Diňe jaň arkaly ýazylyp biler": manual block, or automatic after N no-shows. | MVP | drawn (B-Client) | built (domain, api) | Client side: F-031. |

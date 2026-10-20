@@ -46,8 +46,18 @@ export const requestSchema = z
     note: z.string().nullable(),
     /** A move: the booking's time now ("Öňki wagt"); it keeps it unless the move is confirmed. */
     from: z.object({ date: ymdSchema, start: startMinuteSchema, end: minuteSchema }).nullable(),
-    /** "3-nji gelşi" or a new client; no-shows if any. */
-    client: z.object({ name: z.string(), phone: phoneSchema.nullable(), visits: z.number().int(), noShows: z.number().int() }),
+    /**
+     * "3-nji gelşi" or a new client; no-shows if any (a specialist counts the bookings with them); the notes "shown when
+     * they book", newest first; `id` opens the client card (null once the record is gone).
+     */
+    client: z.object({
+      id: idSchema.nullable(),
+      name: z.string(),
+      phone: phoneSchema.nullable(),
+      visits: z.number().int(),
+      noShows: z.number().int(),
+      alerts: z.array(z.string()),
+    }),
     /** May the viewer confirm or decline it. */
     canAnswer: z.boolean(),
     /** Who answers by the setting: the owner and administrators, the request's specialist, or whoever is first. */

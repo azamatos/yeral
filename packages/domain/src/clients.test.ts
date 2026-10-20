@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { clientSegments, clientStats, isOnlineBlocked, reachesNoShowLimit, type ClientVisit } from './clients'
+import { clientSegments, clientStats, isOnlineBlocked, reachesNoShowLimit, segmentsOf, type ClientVisit } from './clients'
 
 const TODAY = '2026-10-14'
 const visit = (date: string, price = 80, status: ClientVisit['status'] = 'completed'): ClientVisit => ({ date, price, status })
@@ -37,6 +37,15 @@ describe('client segments (filter chips)', () => {
 
   it('flagged: has complaints', () => {
     expect(clientSegments([], 1, TODAY)).toEqual(['flagged'])
+  })
+
+  it('from the totals the api counts: none before a first visit', () => {
+    expect(segmentsOf({ recentVisits: 0, firstVisit: null, lastVisit: null, complaints: 0 }, TODAY)).toEqual([])
+    expect(segmentsOf({ recentVisits: 3, firstVisit: '2026-09-20', lastVisit: '2026-10-01', complaints: 2 }, TODAY)).toEqual([
+      'regular',
+      'new',
+      'flagged',
+    ])
   })
 })
 

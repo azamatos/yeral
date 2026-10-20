@@ -42,24 +42,43 @@ export function clientStats(visits: readonly ClientVisit[]): ClientStats {
 export const CLIENT_SEGMENTS = ['regular', 'new', 'lapsed', 'flagged'] as const
 export type ClientSegment = (typeof CLIENT_SEGMENTS)[number]
 
-const REGULAR_MIN_VISITS = 3
-const REGULAR_WINDOW_DAYS = 183
-const NEW_DAYS = 30
-const LAPSED_DAYS = 60
+/** "Yzygiderli": this many completed visits within `REGULAR_WINDOW_DAYS` (6 months). */
+export const REGULAR_MIN_VISITS = 3
+export const REGULAR_WINDOW_DAYS = 183
+/** "Täze": a first visit at most this many days ago. */
+export const NEW_DAYS = 30
+/** "Köpden bäri gelmedik": no visit for at least this many days. */
+export const LAPSED_DAYS = 60
+
+/** What the segments need of a client's bookings; the api counts it in the database for a whole list at once. */
+export interface ClientSummary {
+  /** Completed visits within `REGULAR_WINDOW_DAYS`. */
+  recentVisits: number
+  firstVisit: string | null
+  lastVisit: string | null
+  /** Bookings with a complaint ("Arz edilen"). */
+  complaints: number
+}
 
 /**
  * Segments for the filter chips: Yzygiderli (≥ 3 visits in 6 months), Täze (first visit ≤ 30 days ago),
- * Köpden bäri gelmedik (no visit for 60+ days), Arz edilen (has complaints).
+ * Köpden bäri gelmedik (no visit for 60+ days), Arz edilen (has complaints). A client with no visit yet has none of
+ * the first three.
  */
+export function segmentsOf(s: ClientSummary, today: string): ClientSegment[] {
+  const out: ClientSegment[] = []
+  if (s.recentVisits >= REGULAR_MIN_VISITS) out.push('regular')
+  if (s.firstVisit && diffDays(today, s.firstVisit) <= NEW_DAYS) out.push('new')
+  if (s.lastVisit && diffDays(today, s.lastVisit) >= LAPSED_DAYS) out.push('lapsed')
+  if (s.complaints > 0) out.push('flagged')
+  return out
+}
+
+/** The segments from a client's bookings (`segmentsOf`). */
 export function clientSegments(visits: readonly ClientVisit[], complaints: number, today: string): ClientSegment[] {
   const stats = clientStats(visits)
-  const recent = visits.filter((v) => v.status === 'completed' && diffDays(today, v.date) <= REGULAR_WINDOW_DAYS).length
-  const out: ClientSegment[] = []
-  if (recent >= REGULAR_MIN_VISITS) out.push('regular')
-  if (stats.firstVisit && diffDays(today, stats.firstVisit) <= NEW_DAYS) out.push('new')
-  if (stats.lastVisit && diffDays(today, stats.lastVisit) >= LAPSED_DAYS) out.push('lapsed')
-  if (complaints > 0) out.push('flagged')
-  return out
+  const recentVisits = visits.filter((v) => v.status === 'completed' && diffDays(today, v.date) <= REGULAR_WINDOW_DAYS).length
+  return segmentsOf({ recentVisits, firstVisit: stats.firstVisit, lastVisit: stats.lastVisit, complaints }, today)
 }
 
 /**
