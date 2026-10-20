@@ -6,7 +6,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, businesses, clients, rateLimits, users } from '../../db/schema'
+import { bookings, businesses, clients, invites, rateLimits, staff, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { newBookingLink } from '../bookings/links'
 
@@ -124,10 +124,44 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     const again = await browser(t.app).req('/v1/auth/identity', { body: { ticket: res.json.isThisYou.ticket, yes: true } })
     expect(again.json.error.code).toBe('code_expired')
     // used now: the next sign-in doesn't ask
+    t.clock.now += 60_000
     expect((await codeAndVerify(phone)).res.status).toBe(200)
   })
 
-  it('"No" lets the old account go, as a deletion does, and starts a fresh one', async () => {
+  it('one answer settles the question: the account’s other open tickets stop working', async () => {
+    const phone = '+99365777006'
+    await account(phone, 'Aýna', 200)
+    const first = (await codeAndVerify(phone)).res.json.isThisYou.ticket
+    t.clock.now += 60_000
+    const second = await codeAndVerify(phone)
+    expect((await second.b.req('/v1/auth/identity', { body: { ticket: second.res.json.isThisYou.ticket, yes: true } })).status).toBe(200)
+    // a "No" from the other ticket can't let go the account just confirmed
+    const no = await browser(t.app).req('/v1/auth/identity', { body: { ticket: first, yes: false } })
+    expect(no.json.error.code).toBe('code_expired')
+    expect(await db.select().from(users).where(eq(users.phone, phone))).toHaveLength(1)
+  })
+
+  it('an account without a name is asked by the name on its bookings; one holding nothing just signs in', async () => {
+    const named = await db
+      .insert(users)
+      .values({ phone: '+99365777007', lang: 'en', lastSeenAt: new Date(DEMO_NOW - 200 * DAY) })
+      .returning()
+    const booked = await phoneBooking({
+      code: 'YR-994008',
+      businessId: barberId,
+      phone: '+99365777007',
+      date: addDays(TODAY, -20),
+      userId: named[0]!.id,
+    })
+    await db.update(bookings).set({ clientName: 'Gülşat Ataýewa' }).where(eq(bookings.id, booked.id))
+    const asked = await codeAndVerify('+99365777007')
+    expect(asked.res.status).toBe(202)
+    expect(asked.res.json.isThisYou.name).toBe('Gülşat')
+    await db.insert(users).values({ phone: '+99365777008', lang: 'en', lastSeenAt: new Date(DEMO_NOW - 200 * DAY) })
+    expect((await codeAndVerify('+99365777008')).res.status).toBe(200)
+  })
+
+  it('"No" lets the old account go and starts a fresh one; what was sent to the number lately stays the holder’s', async () => {
     const phone = '+99365777003'
     const old = await account(phone, 'Earlier Holder', 400)
     const [record] = await db.insert(clients).values({ businessId: glowId, phone, name: 'Earlier Holder', userId: old.id }).returning()
@@ -147,6 +181,18 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
       clientId: record!.id,
       userId: old.id,
     })
+    // made for the number's holder now, a week ago: a phone booking with its SMS link, and a team invite
+    const lately = await phoneBooking({ code: 'YR-994007', businessId: barberId, phone, date: addDays(TODAY, 6) })
+    const link = await newBookingLink(db, t.deps.site, lately, phone, DEMO_NOW)
+    const [row] = await db.insert(staff).values({ businessId: dentistId, name: 'Täze', phone, status: 'invited' }).returning()
+    await db.insert(invites).values({
+      businessId: dentistId,
+      staffId: row!.id,
+      phone,
+      tokenHash: 'q270-test-invite',
+      sentAt: new Date(DEMO_NOW - DAY),
+      expiresAt: new Date(DEMO_NOW + 6 * DAY),
+    })
     const { b, res } = await codeAndVerify(phone)
     const no = await b.req('/v1/auth/identity', { body: { ticket: res.json.isThisYou.ticket, yes: false } })
     expect(no.status).toBe(200)
@@ -161,6 +207,15 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     for (const row of rows) expect(row).toMatchObject({ userId: null, accountDeletedAt: expect.any(Date), clientId: record!.id })
     expect(rows.find((r) => r.id === ahead.id)!.status).toBe('confirmed')
     expect((await b.req('/v1/me/bookings?tab=past')).json.items).toEqual([])
+    // the business's record of the earlier holder keeps its history without the number: it never joins the new one
+    const [kept] = await db.select().from(clients).where(eq(clients.id, record!.id))
+    expect(kept).toMatchObject({ phone: null, userId: null, name: 'Earlier Holder' })
+    // the new holder's own: the phone booking joined and its link works, the invite waits for them
+    const [joined] = await db.select().from(bookings).where(eq(bookings.id, lately.id))
+    expect(joined!.userId).toBe(no.json.me.id)
+    expect((await b.req(`/v1/links/${tokenOf(link.url)}`)).json).toMatchObject({ owner: true })
+    const [invite] = await db.select().from(invites).where(eq(invites.tokenHash, 'q270-test-invite'))
+    expect(invite!.status).toBe('pending')
   })
 
   it('a workspace owner’s account can’t be let go: "No" is refused and the question stays', async () => {
@@ -194,7 +249,7 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     expect((await visitor.req('/v1/me')).status).toBe(401)
   })
 
-  it('a session kept in use counts: renewing it marks the account as used', async () => {
+  it('a session in use counts: the account is marked as used once a day', async () => {
     const phone = '+99365777005'
     const b = browser(t.app)
     const { me } = await b.login(phone, 'Merjen')
@@ -202,11 +257,10 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
       .update(users)
       .set({ lastSeenAt: new Date(DEMO_NOW - 200 * DAY) })
       .where(eq(users.id, me.id))
-    // a 60-day session renews once under 30 days are left
-    t.clock.now += 31 * DAY
     expect((await b.req('/v1/me')).status).toBe(200)
     const [row] = await db.select().from(users).where(eq(users.id, me.id))
     expect(row!.lastSeenAt.getTime()).toBe(t.clock.now)
+    t.clock.now += 60_000
     expect((await codeAndVerify(phone)).res.status).toBe(200)
   })
 })

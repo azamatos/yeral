@@ -68,18 +68,24 @@ describe('account', () => {
       .where(inArray(businesses.slug, ['glow-studio', 'barber-loft', 'ak-dis']))
     const [glow, barber, dentist] = ['glow-studio', 'barber-loft', 'ak-dis'].map((slug) => slugs.find((r) => r.slug === slug)!.id)
     const at = (days: number) => new Date(t.clock.now - days * 86_400_000)
-    const [mine, theirs] = await db
+    const [mine, theirs, atBarber, earlierHolder, sinceSignIn] = await db
       .insert(clients)
       .values([
+        // the block lifted 5 days ago stays lifted
         { businessId: glow!, phone: oldPhone, name: 'Kerim', userId: me.id, tags: ['vip'], noShowsSince: at(5) },
         // the business already wrote the new number down: a phone booking, a note, phone-only
-        { businessId: glow!, phone: newPhone, name: 'Kerim (new)', tags: ['regular'], onlineBlocked: true },
+        { businessId: glow!, phone: newPhone, name: 'Kerim (new)', tags: ['regular'], onlineBlocked: true, createdAt: at(30) },
+        { businessId: barber!, phone: oldPhone, name: 'Kerim', userId: me.id },
+        // a year-old record of the new number's earlier holder: not Kerim's
+        { businessId: barber!, phone: newPhone, name: 'Earlier holder', onlineBlocked: true, createdAt: at(365) },
+        // a phone booking Ak diş made for the old number after Kerim last signed in
+        { businessId: dentist!, phone: oldPhone, name: 'Kerim' },
       ])
       .returning()
     await db.insert(clientNotes).values({ clientId: theirs!.id, text: 'Prefers mornings' })
-    const booking = (code: string, days: number, x: { clientId: string; phone: string; userId?: string }) => ({
+    const booking = (code: string, days: number, x: { clientId: string; phone: string; userId?: string; businessId?: string }) => ({
       code,
-      businessId: glow!,
+      businessId: x.businessId ?? glow!,
       type: 'appointment' as const,
       date: addDays(today(t.clock.now), days),
       start: 600,
@@ -96,9 +102,13 @@ describe('account', () => {
         booking('YR-995001', 2, { clientId: theirs!.id, phone: newPhone }),
         booking('YR-995002', 3, { clientId: mine!.id, phone: oldPhone, userId: me.id }),
         booking('YR-995003', -3, { clientId: mine!.id, phone: oldPhone, userId: me.id }),
+        booking('YR-995004', 5, { clientId: sinceSignIn!.id, phone: oldPhone, businessId: dentist! }),
       ])
-    // on Barber Loft's team, and invited to Ak diş
-    await db.insert(staff).values({ businessId: barber!, userId: me.id, name: 'Kerim', phone: oldPhone })
+    // on Barber Loft's team, once on Glow Studio's, and invited to Ak diş
+    await db.insert(staff).values([
+      { businessId: barber!, userId: me.id, name: 'Kerim', phone: oldPhone },
+      { businessId: glow!, userId: me.id, name: 'Kerim', phone: oldPhone, status: 'removed' as const },
+    ])
     const [row] = await db.insert(staff).values({ businessId: dentist!, name: 'Kerim', phone: oldPhone, status: 'invited' }).returning()
     await db.insert(invites).values({
       businessId: dentist!,
@@ -115,20 +125,40 @@ describe('account', () => {
     const records = await db.select().from(clients).where(eq(clients.businessId, glow!))
     const kerim = records.filter((r) => r.phone === newPhone || r.phone === oldPhone)
     expect(kerim).toHaveLength(1)
-    expect(kerim[0]).toMatchObject({ id: mine!.id, phone: newPhone, userId: me.id, name: 'Kerim', onlineBlocked: true, noShowsSince: null })
+    expect(kerim[0]).toMatchObject({
+      id: mine!.id,
+      phone: newPhone,
+      userId: me.id,
+      name: 'Kerim',
+      onlineBlocked: true,
+      noShowsSince: at(5),
+    })
     expect(kerim[0]!.tags.sort()).toEqual(['regular', 'vip'])
     expect((await db.select().from(clientNotes).where(eq(clientNotes.clientId, mine!.id))).map((n) => n.text)).toEqual(['Prefers mornings'])
     const moved = await db
       .select()
       .from(bookings)
-      .where(inArray(bookings.code, ['YR-995001', 'YR-995002', 'YR-995003']))
+      .where(inArray(bookings.code, ['YR-995001', 'YR-995002', 'YR-995003', 'YR-995004']))
     const byCode = (code: string) => moved.find((m) => m.code === code)!
     // the business's booking for the new number is the person's now; the visits ahead reach the new number
     expect(byCode('YR-995001')).toMatchObject({ clientId: mine!.id, userId: me.id, clientPhone: newPhone })
     expect(byCode('YR-995002')).toMatchObject({ clientId: mine!.id, clientPhone: newPhone })
     expect(byCode('YR-995003')).toMatchObject({ clientId: mine!.id, clientPhone: oldPhone })
-    const [teamRow] = await db.select().from(staff).where(eq(staff.userId, me.id))
-    expect(teamRow!.phone).toBe(newPhone)
+    // made for the old number since the last sign-in: Kerim's, and it moves with him
+    expect(byCode('YR-995004')).toMatchObject({ clientId: sinceSignIn!.id, userId: me.id, clientPhone: newPhone })
+    const byId = async (id: string) => (await db.select().from(clients).where(eq(clients.id, id)))[0]
+    expect(await byId(sinceSignIn!.id)).toMatchObject({ phone: newPhone, userId: me.id })
+    // Barber Loft: Kerim's record takes the number; the earlier holder's keeps its history without it
+    expect(await byId(atBarber!.id)).toMatchObject({ phone: newPhone, userId: me.id, onlineBlocked: false })
+    expect(await byId(earlierHolder!.id)).toMatchObject({ phone: null, userId: null, onlineBlocked: true })
+    const team = await db.select().from(staff).where(eq(staff.userId, me.id))
+    // a team Kerim left doesn't learn the new number
+    expect(team.map((r) => [r.businessId, r.phone]).sort()).toEqual(
+      [
+        [barber, newPhone],
+        [glow, oldPhone],
+      ].sort(),
+    )
     const [invite] = await db.select().from(invites).where(eq(invites.tokenHash, 'q171-test-invite'))
     expect(invite!.status).toBe('cancelled')
     expect((await db.select().from(users).where(eq(users.id, me.id)))[0]!.phone).toBe(newPhone)

@@ -547,8 +547,8 @@ flowchart TD
 **Edge cases**
 
 - A phone number that passes to a new person is covered by the 6-month limit and the *Is this you?* check, so the new person doesn't see the previous owner's older history (Q-270, decided 18.10.2026). **Design to fix:** draw the *Is this you?* step at sign-in.
-- *Unused* means no sign-in and no renewed session for 6 months: a session kept in use renews itself and counts as use. An account without a name never asks: it has made no booking. Nobody is signed in until the answer, which must come within 10 minutes (`POST /v1/auth/identity`); the link page's login asks the same way.
-- *No* lets the old account go as a deletion does (C-47): its team rows leave, invites to the number are cancelled, its links stop working and its bookings never join anyone. Its bookings ahead aren't cancelled: the business keeps them, and no SMS goes to the number. A workspace owner's account can't go this way: the answer is refused (`owns_workspace`) and the Ýeral team sorts the number out.
+- *Unused* means no sign-in and no use for 6 months: an account in use is marked as used once a day. An account without a name is asked by the name on its latest booking or team row; one holding neither signs in as it is. Nobody is signed in until the answer, which must come within 10 minutes (`POST /v1/auth/identity`); one answer settles every open question for the account. The link page's login asks the same way.
+- *No* lets the old account go, much as a deletion does (C-47): its team rows leave, its links stop working and its bookings never join anyone; the businesses' records of the person keep their history without the number, so they never join the new holder or block them. Its bookings ahead aren't cancelled: the business keeps them, and no SMS goes to the number. What was sent to the number lately is the new holder's and stays: invites, and phone bookings no account holds yet with their links. A workspace owner's account can't go this way: the answer is refused (`owns_workspace`) and the Ýeral team sorts the number out.
 
 > Open question Q-270: Linking bookings made under the same phone.
 

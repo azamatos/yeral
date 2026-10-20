@@ -105,7 +105,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     const user = requireUser(c)
     const { deps } = c.var
     const now = deps.now()
-    await deps.db.transaction((tx) => releaseAccount(tx, user, now, { cancelAhead: true }))
+    await deps.db.transaction((tx) => releaseAccount(tx, user, now, 'deleted'))
     await endSession(c)
     return c.body(null, 204)
   })

@@ -1681,9 +1681,9 @@ flowchart TD
 
 - A number that already has a Ýeral account is refused: "Bu belgi başga hasaba degişli." (code `phone_taken`; not drawn).
 - Client records follow the Ýeral account: the change updates the phone on every business's record of this person, so their history, no-show count and phone-only mark stay (Q-171, decided 18.10.2026).
-- A business that already keeps a record for the new number gets the two made into one: bookings and notes join, tags add up, a phone-only or no-reminder mark stays, and the no-show count runs from the earlier restart. Phone bookings made for the new number in the last 6 months join the account, as at a sign-in (Q-270).
+- A business that already keeps a recent record for the new number (made in the last 6 months, or with a booking from them) gets the two made into one: bookings and notes join, tags add up, a phone-only or no-reminder mark stays, and a block the business lifted stays lifted. An older record of the new number is an earlier holder's: it keeps its history without the number. Phone bookings made for the new number in the last 6 months join the account, as at a sign-in, and so do those made for the old number since the last sign-in (Q-270).
 - The bookings ahead reach the new number; past ones keep the number they were made with. Booking SMS go to the account's phone, and links sent to the old number stop working (code: `bookingRecipient()`).
-- Team rows that carried the old number take the new one. Invites to the old number are cancelled, not moved, so no business sees a number it wasn't given (code: `me/account.ts`).
+- Team rows that carried the old number take the new one, except on teams the person has left. Invites to the old number are cancelled, not moved, so no business sees a number it wasn't given (code: `me/account.ts`).
 
 > Open question Q-171: changing the phone number and the businesses' client records.
 

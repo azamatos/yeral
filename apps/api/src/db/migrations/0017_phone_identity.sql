@@ -6,9 +6,8 @@ CREATE TABLE "identity_checks" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+-- existing accounts count as used at this release: none is asked "Is this you?" before 6 months from it (book Q-270)
 ALTER TABLE "users" ADD COLUMN "last_seen_at" timestamp with time zone DEFAULT now() NOT NULL;--> statement-breakpoint
--- an existing account was last seen at its latest session, else when it was made
-UPDATE "users" SET "last_seen_at" = greatest("users"."created_at", coalesce(
-  (SELECT max(greatest("sessions"."last_seen_at", "sessions"."created_at")) FROM "sessions" WHERE "sessions"."user_id" = "users"."id"),
-  "users"."created_at"));--> statement-breakpoint
+-- a business's record of someone whose number passed on keeps its history without the number
+ALTER TABLE "clients" ALTER COLUMN "phone" DROP NOT NULL;--> statement-breakpoint
 ALTER TABLE "identity_checks" ADD CONSTRAINT "identity_checks_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;

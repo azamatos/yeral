@@ -70,13 +70,14 @@ export const sessionMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
           .update(sessions)
           .set({ expiresAt, lastSeenAt: new Date(now()) })
           .where(eq(sessions.id, row.session.id))
-        // the account is in use (book Q-270: "Is this you?" asks only after 6 months without)
+        writeCookie(c, token, expiresAt)
+      }
+      // the account is in use, noted once a day (book Q-270: "Is this you?" asks only after 6 months without)
+      if (now() - row.user.lastSeenAt.getTime() > DAY)
         await db
           .update(users)
           .set({ lastSeenAt: new Date(now()) })
           .where(eq(users.id, row.user.id))
-        writeCookie(c, token, expiresAt)
-      }
     }
   }
   await next()

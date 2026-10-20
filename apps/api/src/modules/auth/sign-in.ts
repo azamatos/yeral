@@ -13,8 +13,12 @@ import type { AppEnv } from '../../http/env'
 import { toMe } from '../me/me'
 import { startSession } from './session'
 
-/** How far back a phone's bookings and client records join its account (book Q-270). */
-export const LINK_BACK_DAYS = 183
+export const DAY = 86_400_000
+/**
+ * Book Q-270's 6 months: how far back a phone's bookings and client records join its account, and how long an account
+ * goes unused before "Is this you?".
+ */
+export const SIX_MONTHS_DAYS = 183
 
 /**
  * The phone may already be known: a business's client list, phone bookings. Only what's upcoming or from the last 6
@@ -30,7 +34,7 @@ export async function linkPhone(tx: Queryable, userId: string, phone: string, no
         eq(bookings.clientPhone, phone),
         isNull(bookings.userId),
         isNull(bookings.accountDeletedAt),
-        gte(bookings.date, addDays(today(now), -LINK_BACK_DAYS)),
+        gte(bookings.date, addDays(today(now), -SIX_MONTHS_DAYS)),
       ),
     )
     .returning({ clientId: bookings.clientId })
@@ -43,7 +47,7 @@ export async function linkPhone(tx: Queryable, userId: string, phone: string, no
         eq(clients.phone, phone),
         isNull(clients.userId),
         or(
-          gte(clients.createdAt, new Date(now - LINK_BACK_DAYS * 86_400_000)),
+          gte(clients.createdAt, new Date(now - SIX_MONTHS_DAYS * DAY)),
           recentClients.length ? inArray(clients.id, recentClients) : undefined,
         ),
       ),
@@ -55,11 +59,15 @@ export async function signIn(c: Context<AppEnv>, phone: string, lang: Locale | u
   return c.var.deps.db.transaction(async (tx) => {
     let [user] = await tx.select().from(users).where(eq(users.phone, phone))
     const isNew = !user?.name
-    if (!user)
-      [user] = await tx
+    if (!user) {
+      ;[user] = await tx
         .insert(users)
         .values({ phone, lang: lang ?? MARKET.defaultLanguage })
+        .onConflictDoNothing({ target: users.phone })
         .returning()
+      // another sign-in with the phone made it meanwhile
+      if (!user) [user] = await tx.select().from(users).where(eq(users.phone, phone))
+    }
     if (!user) throw new Error('user insert failed')
     await tx
       .update(users)
