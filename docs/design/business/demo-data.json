@@ -1849,7 +1849,7 @@
       "Administrator",
       "Hünärmen"
     ],
-    "phoneOnly": "Programmasyz hünärmen — no login; owner/admin manage their bookings",
+    "phoneOnly": "Programmasyz hünärmen — no login; owner/admin manage their bookings — RETIRED in v0.6 round 2: a Specialist with usesApp=false (see v06r2.accessLevels)",
     "permissions": [
       {
         "key": "calendarAll",
@@ -2116,5 +2116,140 @@
       "commissionRowsNote": "Rows dated after the demo clock (14 okt 11:20) are shown as 'meýilleşdirilen' (planned) until the visit is completed."
     }
   },
-  "notificationsNote": "Round 6: 'app' (Programmada) channel becomes available when the native business app ships; on MVP the channels are Brauzerde and SMS."
+  "notificationsNote": "Round 6: 'app' (Programmada) channel becomes available when the native business app ships; on MVP the channels are Brauzerde and SMS.",
+  "v06r2": {
+    "_about": "v0.6 round 2 (20.10.2026): demo facts used by B-Login, B-Onboarding, B-Shell, B-Calendar, B-Bookings, B-Mobile and DS-Business. English. Wins over older keys where they disagree (business/README.md §27).",
+    "slug": "glow-studio",
+    "addresses": {
+      "calendar": "/w/glow-studio/calendar",
+      "bookings": "/w/glow-studio/bookings",
+      "clients": "/w/glow-studio/clients",
+      "reviews": "/w/glow-studio/reviews",
+      "settings": "/w/glow-studio/settings/{section}",
+      "login": "/login",
+      "setup": "/setup/{step}",
+      "setupSteps": [
+        "phone",
+        "business",
+        "address",
+        "hours",
+        "services",
+        "team",
+        "rules",
+        "done"
+      ]
+    },
+    "clock": {
+      "day": "2026-10-14T11:20",
+      "evening": "2026-10-14T20:45"
+    },
+    "hours": {
+      "default": "09:00–20:00",
+      "sunday": "10:00–18:00",
+      "overnightExample": {
+        "day": "Friday",
+        "from": "10:00",
+        "to": "02:00",
+        "label": "until 02:00, next day"
+      }
+    },
+    "busyElsewhere": {
+      "person": "ayna",
+      "date": "2026-10-14",
+      "from": "19:00",
+      "to": "20:00",
+      "bufferMin": 10,
+      "label": "Busy elsewhere",
+      "toast": "Aýna is busy elsewhere 19:00–20:00. Pick another time."
+    },
+    "blocks": [
+      {
+        "person": "jeren",
+        "date": "2026-10-14",
+        "from": "16:30",
+        "to": "17:30",
+        "reason": "Training",
+        "repeat": "weekly",
+        "until": "2026-11-30",
+        "label": "Closed · Training"
+      }
+    ],
+    "blockTimeExample": {
+      "person": "maral",
+      "date": "2026-10-14",
+      "from": "14:30",
+      "to": "15:30",
+      "reason": "Training",
+      "repeat": "weekly",
+      "until": "2026-11-30"
+    },
+    "blockOverlapExample": {
+      "person": "ayna",
+      "from": "15:00",
+      "to": "16:00",
+      "hits": "15:30–16:30 Ejegyz T. · Women's haircut"
+    },
+    "lateRequest": {
+      "client": "Mähri G.",
+      "sentAt": "2026-10-14T20:40",
+      "for": "2026-10-15T13:00",
+      "holdMin": 30,
+      "answerBy": "2026-10-15T09:30",
+      "label": "Answer by 09:30 tomorrow"
+    },
+    "reportExample": {
+      "booking": "Ogulnabat Ç.",
+      "kind": "No-show",
+      "at": "10:25",
+      "by": "Selbi Hojaýewa",
+      "removableUntil": "2026-10-21"
+    },
+    "leave": {
+      "person": "ayna",
+      "bookings": [
+        "b03",
+        "b05",
+        "b06",
+        "b18"
+      ],
+      "notification": "Aýna left: 4 upcoming bookings need a new specialist",
+      "assumes": "Gülnar has accepted her invite; Hair colouring has nobody else → that row falls back to Cancel and offer 3 other times"
+    },
+    "invite": {
+      "person": "Gülnar Öwezowa",
+      "phone": "+993 64 21 55 90",
+      "masked": "+993 64 •• •• 90",
+      "level": "Specialist",
+      "invitedBy": "Maýsa Annaýewa",
+      "sent": "2026-10-14",
+      "validUntil": "2026-10-21"
+    },
+    "continueSetup": {
+      "phone": "+993 62 48 15 30",
+      "note": "invented demo number",
+      "business": "Glow Studio",
+      "step": 4,
+      "of": 8,
+      "stepName": "hours",
+      "path": "/setup/hours"
+    },
+    "statusBanner": {
+      "notApprovedReason": "Add at least 3 photos of your place — the current photos don't show it."
+    },
+    "accessLevels": {
+      "levels": [
+        "Owner",
+        "Admin",
+        "Specialist"
+      ],
+      "usesApp": "Specialist only, default on; off = bookable at once, never signs in, owner and admins handle requests; phone required either way. Admins always use the app.",
+      "retired": "phoneOnly (Programmasyz hünärmen) — replaced by usesApp=false"
+    },
+    "usesAppOffExample": "leyli",
+    "requestsCount": 6,
+    "support": {
+      "phone": "[SUPPORT PHONE]",
+      "telegram": "[TELEGRAM]"
+    }
+  }
 }
