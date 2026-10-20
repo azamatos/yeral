@@ -619,7 +619,7 @@ flowchart TD
 
 > Open question Q-272: Which bookings block a person elsewhere.
 
-**Status.** Design: decided and drawn, in the MVP (business spec §1, §4; Q-031; B-Calendar, DS-Business) · Code: not built. Free times count only the same business's bookings.
+**Status.** Design: decided and drawn, in the MVP (business spec §1, §4; Q-031; B-Calendar, DS-Business) · Code: built in the api (20.10.2026): free times, every booking and a restored cancel count the person's bookings elsewhere (`loadBusy`, `assertFreeElsewhere`); the calendar's block comes with the business endpoints (P2 step 4).
 
 ### S-15 · Live updates on open screens
 

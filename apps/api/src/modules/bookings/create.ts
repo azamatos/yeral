@@ -32,7 +32,7 @@ import { onlineRefusal } from '../clients/online'
 import { servicePrice } from '../catalog/map'
 import { hasSignedInTeam } from '../team/members'
 import { confirmBooking } from './confirm'
-import { awaitingAnswer, freshCode, isSlotConflict, type BookingRow } from './repo'
+import { assertFreeElsewhere, awaitingAnswer, freshCode, isSlotConflict, type BookingRow } from './repo'
 import { accountName } from '../me/me'
 
 /** Demo businesses with nobody to answer confirm requests themselves after this delay (outside production). */
@@ -181,6 +181,7 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
         }
       }),
     )
+    await assertFreeElsewhere(db, row.id)
   }
   await emit(db, { type: 'booking.created', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
   if (x.status === 'confirmed') return confirmBooking(db, deps, row, { instant: true })

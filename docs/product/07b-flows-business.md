@@ -72,7 +72,7 @@ flowchart TD
 
 Request = *haýyş*. Booking = *ýazylyş*. Confirm = *Tassykla*. Decline = *Ret et*. Move = *Başga wagta geçir*. Complaint = *Arz et*. The five statuses, each with one icon everywhere (§3, §25.5): *Garaşylýar* (Pending, clock), *Tassyklandy* (Confirmed, check), *Tamamlandy* (Completed, double check), *Ýatyryldy* (Cancelled, x), *Gelmedi* (No-show, crossed person). Sources: *Onlaýn* (online), *Telefon* (phone), *Gelip ýazyldy* (walk-in).
 
-Code differs (whole chapter): the levels, the fixed permission table, the "who answers requests" setting, the per-person override and invites with a 7-day expiry follow v0.5 since 19.10.2026 (ADR 0025); the business endpoints aren't built yet (chapter 10, P2 step 4), and internal statuses and "busy elsewhere" don't exist yet (step 3).
+Code differs (whole chapter): the levels, the fixed permission table, the "who answers requests" setting, the per-person override and invites with a 7-day expiry follow v0.5 since 19.10.2026 (ADR 0025); the business endpoints aren't built yet (chapter 10, P2 step 4), and internal statuses don't exist yet (step 3); "busy elsewhere" is in the booking engine since 20.10.2026, its calendar block comes with step 4.
 
 ## 1. Getting in and setting up
 

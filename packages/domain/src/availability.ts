@@ -41,6 +41,8 @@ export interface BusyInterval extends Interval {
   staffId: string
   date: string
   bookingId: string
+  /** The same person's booking in another workspace (book Q-272): a reserved gap, never shown with its details. */
+  elsewhere?: true
 }
 
 export interface AppointmentContext {
