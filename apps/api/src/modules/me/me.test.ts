@@ -268,6 +268,27 @@ describe('account', () => {
     expect(again.status).toBe(201)
   })
 
+  it('a review sent twice at once is written once', async () => {
+    const [cafe] = await db.select().from(businesses).where(eq(businesses.slug, 'bag-kafe'))
+    const b = browser(t.app)
+    const { me } = await b.login('+99365222022', 'Döwlet')
+    await db.insert(bookings).values({
+      code: 'YR-995210',
+      businessId: cafe!.id,
+      type: 'appointment',
+      date: addDays(today(t.clock.now), -1),
+      start: 600,
+      end: 660,
+      status: 'completed',
+      completedAt: new Date(t.clock.now - 86_400_000),
+      source: 'web',
+      clientPhone: '+99365222022',
+      userId: me.id,
+    })
+    const sent = await Promise.all([1, 2].map(() => b.req('/v1/me/bookings/YR-995210/review', { body: { rating: 4 } })))
+    expect(sent.map((r) => r.status).sort()).toEqual([200, 409])
+  })
+
   it('two reviews at once both count', async () => {
     const [cafe] = await db.select().from(businesses).where(eq(businesses.slug, 'bag-kafe'))
     const people = await Promise.all(

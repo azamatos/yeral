@@ -49,10 +49,13 @@ export async function cancelInvitesTo(
  * their history without the number, so none joins the new holder, applies its marks to them or comes back for an invite
  * to the number.
  */
-export async function releaseAccount(tx: Queryable, user: User, now: number, how: 'deleted' | 'passedOn'): Promise<void> {
+export async function releaseAccount(tx: Queryable, account: User, now: number, how: 'deleted' | 'passedOn'): Promise<void> {
   const at = new Date(now)
-  // first: whatever the account is writing meanwhile (a review on another device) lands before this, or not at all
-  await tx.select({ id: users.id }).from(users).where(eq(users.id, user.id)).for('update')
+  // the account's row as it is now (a phone change in flight finishes first), held so that a review being written lands
+  // before this or finds the account gone. NO KEY UPDATE leaves other actions' foreign-key share locks on it alone, so
+  // a booking confirmed or a team row changed meanwhile can't deadlock with this
+  const [user] = await tx.select().from(users).where(eq(users.id, account.id)).for('no key update')
+  if (!user) throw new ApiError('unauthorized')
   // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
   const rows = await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')
   if (rows.some((r) => r.level === 'owner' && r.status === 'active')) throw new ApiError('owns_workspace')

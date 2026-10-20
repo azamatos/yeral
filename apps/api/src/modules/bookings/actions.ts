@@ -12,7 +12,7 @@ import { MARKET } from '@yeral/domain/market'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, classSessions, reviews } from '../../db/schema'
+import { bookingItems, bookings, classSessions, reviews, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
@@ -249,18 +249,28 @@ export async function writeReview(deps: Deps, user: User, b: BookingRow, input: 
   // stored in the market's main language for reviews without items; readers get it in their language (catalog reviews)
   const what = visitWhat(items, MARKET.defaultLanguage)
   await deps.db.transaction(async (tx) => {
-    await tx.insert(reviews).values({
-      bookingId: b.id,
-      businessId: b.businessId,
-      userId: user.id,
-      authorName: authorName(user.name),
-      rating: input.rating,
-      tags: input.tags,
-      text: input.text ?? null,
-      what,
-      createdAt: new Date(now),
-      updatedAt: new Date(now),
-    })
+    // the author's account, shared: a deletion in flight finishes first, and then there's no one to review as
+    const [author] = await tx.select({ id: users.id }).from(users).where(eq(users.id, user.id)).for('share')
+    if (!author) throw new ApiError('unauthorized')
+    await tx
+      .insert(reviews)
+      .values({
+        bookingId: b.id,
+        businessId: b.businessId,
+        userId: user.id,
+        authorName: authorName(user.name),
+        rating: input.rating,
+        tags: input.tags,
+        text: input.text ?? null,
+        what,
+        createdAt: new Date(now),
+        updatedAt: new Date(now),
+      })
+      .catch((e: unknown) => {
+        // sent twice at once: the second finds the first
+        if (pgCode(e) === '23505') throw new ApiError('review_exists')
+        throw e
+      })
     await shiftRating(tx, b.businessId, { [input.rating]: 1 })
     await emit(tx, { type: 'review.created', businessId: b.businessId, bookingId: b.id, bookingCode: b.code, userId: user.id })
   })
