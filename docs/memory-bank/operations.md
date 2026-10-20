@@ -110,11 +110,19 @@ stacks → restore the database and photos → switch the DNS records → point 
 
 | Workflow | Trigger | Does |
 |---|---|---|
-| `ci.yml` | pull request, push to `main` | pnpm install (cached) → `turbo run lint lint:fsd typecheck test build --affected` → Storybook tests in Vitest browser mode → API tests with a Postgres service → Playwright on affected apps → Docker image builds for affected deployables. Required to merge |
+| `ci.yml` | pull request, push to `main` | pnpm install (cached) → format check → one `turbo run lint lint:fsd typecheck test build --affected` step (on `main` without `--affected`): the Storybook stories run as Vitest browser tests in Chromium, the api tests against a Postgres 18 service · a Docker job builds and starts the api stack (`infra/docker/compose.yml`) and checks its health through Caddy · the PR title is checked as a Conventional Commit |
 | `release.yml` | push to `main` | Changesets: opens or updates «Version packages»; when merged, tags `@yeral/<app>@x.y.z`, creates GitHub Releases, deploys those apps to production |
 | `deploy.yml` | called by the two above | build → `wrangler deploy` for Storybook and legacy; the api and the new apps over SSH to the own server from P2 step 7 (by hand until then: `infra/server/README.md`) → smoke check: `/version.json` shows the commit, key pages answer 200 |
 | `ci.yml` → `deploy-storybook` | push to `main` after checks | builds Storybook and deploys it to storybook.yeral.app (no release needed: internal docs) |
 | Renovate | weekly | grouped dependency PRs; dev-dependency patches merge themselves when CI is green |
+
+Turborepo's cache: `lint`, `typecheck` and `test` depend on `^transit`, an empty task, so a change in a package's
+dependencies (say `@yeral/ui` for the Storybook tests, `@yeral/contract` for the api) changes their hash and they run
+again instead of replaying a cached result. A new task that reads its dependencies' files needs the same. A task
+that reads a file outside every package lists it as an input with `$TURBO_ROOT$` in its package's `turbo.json`
+(`@yeral/ui#test` reads `docs/design/tokens.css`; the Storybook build and tests and the api tests read
+`docs/design/assets/photos`); otherwise a change there runs no check at all. The frozen legacy app's lint doesn't
+wait for its dependencies.
 
 ## Versioning and releases
 
