@@ -97,7 +97,8 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | opening hours, special days, staff shifts and breaks (a day may run past midnight to `MAX_DAY_END`) | `businessDay() staffDay() workingIntervals() staffOffReason() openState() openStretches() weekHoursErrors()` | `@yeral/domain/hours` |
 | busy time across midnight | `busyOn(busy, date)` | `@yeral/domain/availability` |
 | free times: appointment, table, class | `appointmentSlots() findAppointmentSlot() nearestSlots() nextFreeSlot() planRefusal() shiftPlan() busyOf() tableSlots() assignTable() maxSeats()`; one named specialist: `oneSpecialist`/`preferStaffId` on the query, `slotStaffId()` | `@yeral/domain/availability` |
-| a business, its busy time and hours from the database (api); the hours held against a save | `loadBusiness() loadBusinesses() loadBusy() appointmentContext()`, `loadHours(db, id, { lock })` `lockedHours()` `assertOpenAt()` | `apps/api/src/modules/availability/context.ts` |
+| a business, its busy time and hours from the database (api); the hours held against a save | `loadBusiness() loadBusinesses() loadBusy() appointmentContext()`, `loadHours(db, id, { lock })` `lockedHours()` `assertOpenAt()` `assertStaffFree()`; busy elsewhere alone: `loadElsewhere()` | `apps/api/src/modules/availability/context.ts` |
+| a booking as the team reads it (api): its items and price | `teamItemOf() teamPriceOf()` | `apps/api/src/modules/bookings/team-view.ts` |
 | offered times as the client sees them: specialist, free / taken / past; where taking one books (api) | `offeredTimes() offerTarget()` | `apps/api/src/modules/bookings/offers.ts` |
 | SMS links to a booking: make one per SMS, read the booking by its token (api) | `newBookingLink() bookingOfLink() LINK_DAYS` | `apps/api/src/modules/bookings/links.ts` |
 | sign a phone in after its code (the plain login and the link page's) (api) | `signIn(c, phone, lang)` | `apps/api/src/modules/auth/sign-in.ts` |
@@ -131,6 +132,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | api: rate limits, the caller's IP (only from `TRUSTED_IP_HEADER`), hashes and random digits | `hit() clientIp()`, `sha256Hex() randomDigits()` | `apps/api/src/lib/{rate-limit,crypto}.ts` |
 | api: a value a rule refuses (400 `validation_error` with `issues`), the error class | `invalid(...issues)`, `Issue`, `ApiError` | `apps/api/src/http/errors.ts` |
 | api: independent queries that may run in a transaction (one after another there; pg 9 refuses overlapping ones) | `all(db, [() => …, () => …])` | `apps/api/src/db/client.ts` |
+| a yes or no in a query string | `boolQuery` | `@yeral/contract/common` |
 | request/response schemas, error codes and their HTTP status | `createBookingSchema`, `businessDetailSchema`, `ERROR_STATUS` … | `@yeral/contract/{common,errors,catalog,availability,bookings,account,events}` |
 | API data | `createSdk(createClient({ baseUrl: site.urls.api }), queryClient)` once per app; then `useQuery(sdk.catalog.business(slug, lang))`, `useMutation(sdk.bookings.cancel(lang))`; `startEvents(client, queryClient)` for live updates; errors are `ApiError` (`isApiError(e, 'slot_taken')`) | `@yeral/sdk` |
 | forms | `useAppForm()` with `TextField`, `PhoneField`, `SelectField` … | `@yeral/ui/form` |

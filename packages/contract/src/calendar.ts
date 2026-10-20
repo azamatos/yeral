@@ -233,16 +233,9 @@ export const calendarBookingSchema = z
     internalNote: z.string().nullable(),
     /** A request's answer time ("18 min"). */
     holdUntil: epochSchema.nullable(),
-    /** The client's move waiting for an answer (B-21): drawn at the asked time. */
+    /** The client's move waiting for an answer (B-21): the asked time for the line under the block; its ghost is in `moves`. */
     move: z
-      .object({
-        code: bookingCodeSchema,
-        date: ymdSchema,
-        start: startMinuteSchema,
-        end: minuteSchema,
-        items: z.array(calendarItemSchema),
-        holdUntil: epochSchema.nullable(),
-      })
+      .object({ code: bookingCodeSchema, date: ymdSchema, start: startMinuteSchema, end: minuteSchema, holdUntil: epochSchema.nullable() })
       .nullable(),
   })
   .meta({ id: 'CalendarBooking' })

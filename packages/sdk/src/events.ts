@@ -33,7 +33,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
     out.push(keys.reviewsAll(e.business), keys.businessAll(e.business))
   if (e.type === 'team.changed') {
     out.push(keys.workspaces(), keys.invites())
-    if (e.business) out.push(keys.team(e.business))
+    // the calendar's columns are the team's
+    if (e.business) out.push(keys.team(e.business), keys.calendar(e.business))
   }
   // settings change the page, free times and who answers requests (the switcher's counts)
   if (e.type === 'business.updated' && e.business)

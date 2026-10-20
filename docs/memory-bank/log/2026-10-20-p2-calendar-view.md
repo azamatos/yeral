@@ -9,8 +9,8 @@
     (`staffDay`, `staffOffReason`); someone removed with kept bookings keeps a column (`removed`).
   - Bookings: the effective status, cancelled ones only with `cancelled=true`, the night before's when it runs past
     midnight; items with their buffers; the internal status only while switched on; `alert` from the client's notes
-    "shown when they book"; a waiting move as `move` (its own row isn't listed).
-  - Layers: `blocks` (`blocksBetween`), `elsewhere` (from `loadBusy`, the visit only, no details).
+    "shown when they book"; a waiting move's asked time as `move` (its own row isn't listed; its ghost is in `moves`).
+  - Layers: `blocks` (`blocksBetween`), `elsewhere` (`loadElsewhere`, the visit only, no details).
   - The day's line: `daySummary` over what the business earns (`businessTotal` of the items, hidden prices
     included); the `revenue` right decides: everything, a specialist's own items, an administrator none.
   - sdk: `calendar.view`.
@@ -24,4 +24,10 @@
   layers only when they run past midnight; `boolQuery` shared in `@yeral/contract/common`; the sdk refreshes the
   calendar when a request is answered (and with the statuses, in #94); items grouped once, the off reason only when
   off, a sub-select instead of DISTINCT.
+- Second review (10; 8 fixed): a ghost asked past the last day in view leaked into `moves` (test added); the sdk
+  refreshes the calendar on a team change (its columns); the business, bookings, ghosts, time elsewhere (now for
+  the person in view only) and markers read at once; lists grouped in place, Sets for ids; the team's item and
+  price shared with the requests (`bookings/team-view.ts`); a booking's `move` is the asked time only, its ghost
+  in `moves`; the helpers table and this note. Not taken: the team seeing prices hidden from clients (it charges
+  them), and busy elsewhere up to a minute stale (the view is read, not booked against).
 - Follow-ups: drag to move uses the existing move endpoint; the bookings list and search (B-30) next.

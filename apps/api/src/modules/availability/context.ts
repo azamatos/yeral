@@ -154,8 +154,14 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
  * waiting or confirmed, with their buffers, by the account each item was booked with, as the database counts them
  * (migration 0020); their own bookings as a client, breaks, days off and blocked time there don't count.
  */
-export async function loadElsewhere(db: Queryable, businessIds: string[], from: string, to: string): Promise<BusyInterval[]> {
-  if (!businessIds.length) return []
+export async function loadElsewhere(
+  db: Queryable,
+  businessIds: string[],
+  from: string,
+  to: string,
+  staffIds?: readonly string[],
+): Promise<BusyInterval[]> {
+  if (!businessIds.length || staffIds?.length === 0) return []
   const here = alias(staff, 'here')
   const rows = await db
     .select({
@@ -171,6 +177,7 @@ export async function loadElsewhere(db: Queryable, businessIds: string[], from: 
     .where(
       and(
         inArray(here.businessId, businessIds),
+        staffIds ? inArray(here.id, [...staffIds]) : undefined,
         eq(bookingItems.active, true),
         gte(bookingItems.date, addDays(from, -1)),
         lte(bookingItems.date, addDays(to, 1)),

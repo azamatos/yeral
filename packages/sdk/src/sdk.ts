@@ -371,7 +371,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
 
   /** The business team (ADR 0025): the switcher, invites, and the team the owner manages. */
   const w = v1.w[':slug']
-  const teamChanged = (slug?: string) => invalidate(keys.workspaces(), ...(slug ? [keys.team(slug)] : []))
+  const teamChanged = (slug?: string) => invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug)] : []))
   const team = {
     /** The switcher; `current` is the workspace opened last. */
     workspaces: () =>

@@ -173,6 +173,10 @@ describe('the calendar (book B-16, B-17)', () => {
     await client.req(`/v1/me/bookings/${sent}/reschedule`, { body: { date: next, start: tomorrow[0]!.start } })
     const there = (await maysa.req(`${W}/calendar?date=${next}`)).json as { moves: { of: { code: string; date: string }; date: string }[] }
     expect(there.moves).toEqual([expect.objectContaining({ date: next, of: expect.objectContaining({ code: sent, date: DAY }) })])
+    // seen from the booking's day: the line under it says where it asks to go; no ghost on a day out of view
+    const from = (await maysa.req(`${W}/calendar?date=${DAY}`)).json as View & { moves: unknown[] }
+    expect(from.bookings.find((b) => b.code === sent)!.move).toMatchObject({ date: next })
+    expect(from.moves).toEqual([])
     // its answer time run out: no ghost, nothing waiting on the booking
     t.clock.now += 3 * 86_400_000
     const lapsed = (await maysa.req(`${W}/calendar?date=${next}`)).json as { moves: unknown[] }
