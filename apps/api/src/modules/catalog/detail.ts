@@ -12,7 +12,7 @@ import type { Queryable } from '../../db/client'
 import { bookings, businesses, categories, serviceGroups, staff, tableAreas } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
-import { appointmentContext, loadBusinesses, loadBusy, type BusinessRow } from '../availability/context'
+import { appointmentContext, loadBusiness, loadBusy, type BusinessRow } from '../availability/context'
 import { buildCards } from './cards'
 import { cityRefOf, loadCities } from './cities'
 import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
@@ -99,8 +99,7 @@ export async function businessDetail(
   const now = deps.now()
   const day = today(now)
   const { row, preview } = await visibleBusiness(deps, slug, viewer?.id ?? null)
-  const lb = (await loadBusinesses(db, [row.id])).get(row.id)
-  if (!lb) throw new ApiError('not_found')
+  const lb = await loadBusiness(db, row.id)
   const b = lb.business
   // two more reads, started while the rest are made; caught here so a failure can't go unhandled before it's awaited
   // (a page in review takes no bookings, Q-153)

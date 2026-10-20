@@ -21,7 +21,6 @@ import {
   staffDoingAll,
   tableSlots,
 } from '@yeral/domain/availability'
-import { businessClosedReason } from '@yeral/domain/hours'
 import { canClientReschedule, cancelDeadline } from '@yeral/domain/lifecycle'
 import { addDays, epochOf, today } from '@yeral/domain/time'
 import type { Deps } from '../../deps'
@@ -35,7 +34,7 @@ import { requireUser } from '../auth/session'
 import { myBooking, stateOf } from '../bookings/repo'
 import { visibleBusiness } from '../catalog/detail'
 import { text } from '../catalog/map'
-import { appointmentContext, checkQuery, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from './context'
+import { appointmentContext, checkQuery, dayStrip, loadBusiness, loadBusy, loadTableContext, type LoadedBusiness } from './context'
 import { loadSessions } from './sessions'
 
 const slugParam = z.object({ slug: slugSchema })
@@ -43,8 +42,7 @@ const slugParam = z.object({ slug: slugSchema })
 /** The business's free times: public once verified, and for its own team while in review (book F-032). */
 async function loaded(deps: Deps, slug: string, viewerId: string | null) {
   const { row: b } = await visibleBusiness(deps, slug, viewerId)
-  const lb = (await loadBusinesses(deps.db, [b.id])).get(b.id)
-  if (!lb) throw new ApiError('not_found')
+  const lb = await loadBusiness(deps.db, b.id)
   return lb
 }
 
@@ -119,13 +117,7 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const query = { serviceIds: q.services, staffId, by: 'client' as const, excludeBookingIds: moving }
     const online = lb.rules.onlineEnabled
     const slotsOn = (d: string) => (online ? appointmentSlots(ctx, { ...query, date: d }) : [])
-    const days = Array.from({ length: q.days }, (_, i) => {
-      const d = addDays(first, i)
-      const closed = businessClosedReason(ctx.business, d)
-      if (closed) return { date: d, state: 'closed' as const, closedReason: closed.kind === 'exception' ? closed.name : null }
-      const free = online && hasAppointmentSlot(ctx, { ...query, date: d })
-      return { date: d, state: free ? ('open' as const) : ('full' as const), closedReason: null }
-    })
+    const days = dayStrip(ctx.business, first, q.days, (d) => online && hasAppointmentSlot(ctx, { ...query, date: d }))
     const slots = slotsOn(date).map((s) => ({ start: s.start, end: s.end }))
     const next = !slots.length && online ? nextFreeSlot(ctx, query, addDays(date, 1), lb.rules.windowDays) : null
     return c.json({ date, slots, days, nextFree: next ? { date: next.date, start: next.slot.start } : null }, 200)
@@ -162,12 +154,7 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const ctx = await loadTableContext(deps.db, lb, first, addDays(first, Math.max(q.days, lb.rules.windowDays + 1)), now)
     const online = lb.rules.onlineEnabled
     const slotsOn = (d: string) => (online ? tableSlots(ctx, { date: d, partySize: q.party }) : [])
-    const days = Array.from({ length: q.days }, (_, i) => {
-      const d = addDays(first, i)
-      const closed = businessClosedReason(ctx.business, d)
-      if (closed) return { date: d, state: 'closed' as const, closedReason: closed.kind === 'exception' ? closed.name : null }
-      return { date: d, state: slotsOn(d).length ? ('open' as const) : ('full' as const), closedReason: null }
-    })
+    const days = dayStrip(ctx.business, first, q.days, (d) => slotsOn(d).length > 0)
     const slots = slotsOn(date)
     let nextFree: { date: string; start: number } | null = null
     for (let i = 1; !slots.length && online && i <= lb.rules.windowDays; i++) {

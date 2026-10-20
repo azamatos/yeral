@@ -2,7 +2,7 @@
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
-import { browser } from '../../../test/client'
+import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
 import { bookingItems, bookings, businesses, clients, jobs, rateLimits, services, staff } from '../../db/schema'
@@ -12,10 +12,12 @@ import { runDueJobs } from '../jobs/run'
 const MAYSA = '+99365102030' // owner of Glow Studio
 const SELBI = '+99365884102' // administrator
 const AYNA = '+99365312210' // specialist: hair
+const MARAL = '+99361440819' // specialist: nails
 const BOOKINGS = '/v1/w/glow-studio/bookings'
 const FREE = '/v1/w/glow-studio/free-times'
 const TODAY = '2026-10-14' // DEMO_NOW: Wednesday 11:20 at the business
 const SAT = '2026-10-17'
+const MON = '2026-10-19'
 /** 11:15: the step that holds 11:20 with Glow's 15-minute steps. */
 const NOW_STEP = 11 * 60 + 15
 const UNDO_MS = 10_000
@@ -162,13 +164,19 @@ describe('the business’s own bookings (book B-23, B-24, B-25)', () => {
     const made = await book(selbi, { phone: '+99365800102', start: await maralFree(selbi, SAT, 2), notifyClient: false })
     expect(made.status).toBe(201)
     const row = await rowOf(made.json.code)
-    // a new record takes the account's name when none is typed in
-    expect(row).toMatchObject({ clientName: 'Gözel', userId: expect.any(String), notifyClient: false })
+    // the account's name never reaches the business: a number alone mustn't tell it who holds it
+    expect(row).toMatchObject({ clientName: null, userId: expect.any(String), notifyClient: false })
     const [added] = await db.select().from(clients).where(eq(clients.id, row!.clientId!))
-    expect(added).toMatchObject({ name: 'Gözel', userId: row!.userId })
-    // in the client's own bookings at once
+    expect(added).toMatchObject({ name: null, userId: row!.userId })
+    // in the client's own bookings at once, confirmed from the start: never a request they sent
     const mine = (await client.req('/v1/me/bookings?tab=upcoming')).json.items as { code: string }[]
     expect(mine.map((b) => b.code)).toContain(made.json.code)
+    const detail = (await client.req(`/v1/me/bookings/${made.json.code}`)).json
+    expect(detail).toMatchObject({ status: 'confirmed', source: 'phone', timeline: [{ event: 'confirmed', at: DEMO_NOW }] })
+    // a record not linked yet is linked by the next booking, as an online booking links it
+    await db.update(clients).set({ userId: null }).where(eq(clients.id, added!.id))
+    expect((await book(selbi, { phone: '+99365800102', start: await maralFree(selbi, SAT, 3), notifyClient: false })).status).toBe(201)
+    expect((await db.select().from(clients).where(eq(clients.id, added!.id)))[0]!.userId).toBe(row!.userId)
     t.clock.now += UNDO_MS
     await runDueJobs(t.deps)
     expect(smsTo('+99365800102')).toEqual([])
@@ -212,6 +220,10 @@ describe('the business’s own bookings (book B-23, B-24, B-25)', () => {
     expect(again.json.error.details.alternatives.length).toBeGreaterThan(0)
     for (const a of again.json.error.details.alternatives as { start: number }[]) expect(a.start).not.toBe(start)
     expect((await book(maysa, { phone: '+993 65 80 01', start })).status).toBe(400)
+    // a start off the business's 15-minute steps is wrong input, not a taken time
+    const offStep = await book(maysa, { phone: '+99365800104', start: start + 5 })
+    expect(offStep.status).toBe(400)
+    expect(offStep.json.error.details.issues).toEqual([{ path: ['start'], code: 'off_step' }])
     const unknown = await book(maysa, { phone: '+99365800104', serviceIds: [manicure, haircut], start })
     expect(unknown.status).toBe(400)
     expect(unknown.json.error.details.issues).toEqual([{ path: ['staffId'], code: 'cannot_do' }])
@@ -219,10 +231,17 @@ describe('the business’s own bookings (book B-23, B-24, B-25)', () => {
 
   it('undo deletes the booking and the client it added; no SMS goes; after the undo time it’s refused (B-24)', async () => {
     const maysa = await as(MAYSA)
+    const maral = await as(MARAL)
+    const cursor = (await maral.req('/v1/events')).json.cursor as string
     const start = await maralFree(maysa, SAT, 10)
     const made = await book(maysa, { phone: '+99365800106', name: 'Typo', start })
     const code = made.json.code as string
     expect((await maysa.req(`${BOOKINGS}/${code}/undo`, { method: 'POST' })).status).toBe(204)
+    // Maral sees her own bookings only: the row is gone, yet her calendar hears the undo
+    const heard = await eventsAfter(maral, cursor, (items) => items.some((e) => e.type === 'booking.cancelled' && e.bookingCode === code))
+    expect(
+      (heard.json.items as { type: string; bookingCode: string }[]).filter((e) => e.bookingCode === code).map((e) => e.type),
+    ).toContain('booking.cancelled')
     expect(await rowOf(code)).toBeUndefined()
     expect(await db.select().from(clients).where(eq(clients.phone, '+99365800106'))).toEqual([])
     expect((await freeTimes(maysa, `services=${manicure}&staff=${maralId}&date=${SAT}`)).slots.map((s) => s.start)).toContain(start)
@@ -244,7 +263,7 @@ describe('the business’s own bookings (book B-23, B-24, B-25)', () => {
 
   it('a landline gets no SMS: the job settles unsent', async () => {
     const maysa = await as(MAYSA)
-    const made = await book(maysa, { phone: '+99312456700', start: await maralFree(maysa, SAT, 12) })
+    const made = await book(maysa, { phone: '+99312456700', date: MON, start: await maralFree(maysa, MON) })
     expect(made.status).toBe(201)
     t.clock.now += UNDO_MS
     await runDueJobs(t.deps)

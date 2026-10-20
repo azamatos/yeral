@@ -26,7 +26,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
-import { appointmentContext, checkStaff, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
+import { appointmentContext, checkStaff, loadBusiness, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
 import { onlineRefusal } from '../clients/online'
 import { servicePrice } from '../catalog/map'
@@ -241,8 +241,7 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
   const { db } = deps
   const now = deps.now()
   const b = await publicBusiness(deps, input.business)
-  const lb = (await loadBusinesses(db, [b.id])).get(b.id)
-  if (!lb) throw new ApiError('not_found')
+  const lb = await loadBusiness(db, b.id)
   await assertOnlineBooking(db, lb, user)
   if (!b.bookingTypes.includes(input.type)) throw new ApiError('not_bookable')
   const status = initialStatus('web', lb.rules.confirmMode)
@@ -380,8 +379,7 @@ export async function rebook(
   opts: { status: 'pending' | 'confirmed'; rescheduleOf?: string; alternativeOf?: string; db?: Queryable; booked?: BookedServices },
 ): Promise<BookingRow> {
   const db = opts.db ?? deps.db
-  const lb = (await loadBusinesses(db, [from.businessId])).get(from.businessId)
-  if (!lb) throw new ApiError('not_found')
+  const lb = await loadBusiness(db, from.businessId)
   if (from.type !== 'appointment') throw new ApiError('not_bookable')
   const move = !!opts.rescheduleOf
   const booked = opts.booked ?? (await bookedServices(db, from.id))

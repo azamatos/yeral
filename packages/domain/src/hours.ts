@@ -111,6 +111,17 @@ export function businessDay(b: BusinessHours, date: string): WorkDay | null {
   return { open: h.open, close: h.close, breaks: clipBreak(h.break, h.open, h.close) }
 }
 
+/**
+ * The business day that holds now: yesterday's while it still runs past midnight (book Q-105), else today's. A walk-in
+ * joins it (B-25), and the team's free times start from it.
+ */
+export function currentBusinessDate(b: BusinessHours, now: number): string {
+  const { date, min } = localOf(now)
+  const yesterday = addDays(date, -1)
+  const late = businessDay(b, yesterday)
+  return late && late.close > DAY_MINUTES + min ? yesterday : date
+}
+
 export type ClosedReason = { kind: 'weekly' } | { kind: 'exception'; name: string }
 
 /** Why the business is closed on a date; null when it's open. */

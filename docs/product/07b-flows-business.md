@@ -961,7 +961,7 @@ flowchart LR
 - The specialist is busy now: pick the next free start or another specialist.
 - No back-dating: a visit that already happened can't be entered on MVP (E3).
 
-**Status** — Design: drawn (B-Calendar · walk-in switch, current slot 11:15) · Code: api built (`POST /v1/w/{slug}/bookings` with `source: walkin`, 20.10.2026): today, from the step that holds now, no SMS unless the team asks.
+**Status** — Design: drawn (B-Calendar · walk-in switch, current slot 11:15) · Code: api built (`POST /v1/w/{slug}/bookings` with `source: walkin`, 20.10.2026): the business day that holds now (last night's while it runs past midnight), from the step that holds now, no booking SMS unless the team asks.
 
 ### B-26 · Move a booking
 
