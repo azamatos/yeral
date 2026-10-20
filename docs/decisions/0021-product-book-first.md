@@ -1,7 +1,8 @@
 # 0021. Product book first; Claude Code writes the design prompts
 
 - Status: Accepted 2026-10-17 — changes the order of the roadmap in `progress.md` and how ADR 0012 gets its designs;
-  amended 2026-10-19: with the book closed, the backend runs alongside the design (see the last Decision bullet)
+  amended 2026-10-19: with the book closed, the backend runs alongside the design; amended 2026-10-20: small design
+  iterations, then design only where it's needed (see the last Decision bullets)
 - Decided by: owner ("we need to fully reorganize the strategy … after we finish all possible scenarios, when there is no
   any questions/dilemmas we move to making the full prepared design and components/storybook. We will move to real
   coding") + Claude (how)
@@ -40,6 +41,15 @@ work on 2026-10-17.
   smaller iterations"):** design work goes in small iterations: one Claude Design prompt draws one main board, or two
   small ones, with its own phone frames and design-system pieces, in about ten instructions; fixes a check finds get
   their own short prompt; each iteration is checked before the next is written (product book chapter 10, P1).
+- **Amended 2026-10-20, later (owner: "Do we really need all this detailed design? … we design when it's really
+  necessary for critical details"):** the full redraw stops after round 3.4. The book holds every decision, the
+  design system and the business app are drawn in English (export v0.6, rounds 1–3.4), and every client screen is
+  drawn in export v0.5 (Turkmen; the layout holds in any language). Components in Storybook and the apps start now
+  and no longer wait for an export: they follow the book for behaviour and words, then the drawn boards (v0.6 where
+  drawn, else v0.5) and the nearest drawn pattern for visuals. Claude Design is used only for a critical detail with
+  no drawn pattern, or a key screen where the owner wants to see options, one small prompt each. The owner reviews
+  built screens in Storybook and the local app instead of the canvas; "how" decisions made while building are
+  recorded as "Claude (delegated)" rows in the book's chapter 9.
 
 ## Consequences
 
@@ -49,6 +59,9 @@ work on 2026-10-17.
   points there.
 - The design canvas becomes something Claude Code checks, not only something exported; exports still land in
   `docs/design/` unchanged.
+- Since 2026-10-20 the screens are reviewed where they're built (Storybook, the local app), and the client site's
+  English words are written in the code's English source, not drawn first; the old boards' Turkmen stays the
+  reference for `tk` (ADR 0022).
 - The book must be kept in step with every answer, or it stops being the source of truth; Claude updates it in the same
   session an answer arrives.
 

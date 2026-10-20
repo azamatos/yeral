@@ -6,6 +6,9 @@ the previous one is checked.
 
 ## Prompt 4a.1 — Home
 
+**Not pasted.** The design pass stopped after round 3.4 (owner, 20.10.2026; ADR 0021 amended): what this prompt
+fixes is in the book and gets built from it. Kept for the record.
+
 ```
 Round 4a.1 of the design pass (export v0.6): the client site's Home in English. A small iteration: Home, its phone
 frames on Mobile (frame 1 and the search sheet) and a canvas tidy. Don't touch the other client boards; they come in

@@ -156,6 +156,9 @@ goes into one short prompt, 3.5:
 
 ## Prompt 3.5 — demo facts, names and the hours list
 
+**Not pasted.** The design pass stopped after round 3.4 (owner, 20.10.2026; ADR 0021 amended): what this prompt
+fixes is in the book and gets built from it. Kept for the record.
+
 ```
 Round 3.5 of the design pass (export v0.6): the last small fix pass on the business app, from the check of rounds
 3.1–3.4. Text and demo-data fixes only; change only what's listed, everything else stays as drawn.

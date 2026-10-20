@@ -457,7 +457,7 @@ Future design pages are drawn in English (Q-101, 18.10.2026). Design v0.5 has ev
 - A · Redraw every board in English in the design pass that follows the book; Turkmen comes back as a translation. (recommended)
 - B · Only new and changed boards in English; unchanged boards stay Turkmen.
 
-answer: A · Redraw every board in English in the design pass that follows the book; Turkmen comes back as a translation. Owner: the English MVP comes first; it is also a portfolio piece, and translating services, prices and maps is easy once English exists. (18.10.2026)
+answer: A · Redraw every board in English in the design pass that follows the book; Turkmen comes back as a translation. Owner: the English MVP comes first; it is also a portfolio piece, and translating services, prices and maps is easy once English exists. (18.10.2026) Owner, 20.10.2026: the redraw stops after the business app (export v0.6, rounds 1–3.4); the client site is built in English from the v0.5 boards and the book, and Claude Design draws only critical details with no drawn pattern (ADR 0021, amended).
 
 ## Q-134 · Money figures in the business app
 chapter: 02 · status: decided
