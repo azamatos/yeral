@@ -43,6 +43,11 @@ export const ERROR_STATUS = {
   block_over_bookings: 409,
   /** "Iň köp 5 içerki ýagdaý bolup biler" (B-29). */
   statuses_full: 409,
+  // setting up
+  /** One business is set up at a time (book Q-200): `details.slug` is the one to finish. */
+  setup_in_progress: 409,
+  /** Finishing needs an address, an open day and a service: `details.missing` (B-03, B-04). */
+  setup_incomplete: 409,
   // clients
   /** The number is already one of the business's clients (B-33): `details` has the card to open. */
   client_exists: 409,

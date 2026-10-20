@@ -39,6 +39,8 @@ export const keys = {
   // the team (ADR 0025)
   workspaces: () => ['workspaces'] as const,
   invites: () => ['invites'] as const,
+  /** The person's unfinished setup (book Q-200); finishing it changes the switcher too. */
+  setup: () => ['setup'] as const,
   invite: (token: string) => ['invites', 'token', token] as const,
   team: (slug: string) => ['team', slug] as const,
   blocks: (slug: string, from: string, to: string) => ['calendar', slug, 'blocks', from, to] as const,

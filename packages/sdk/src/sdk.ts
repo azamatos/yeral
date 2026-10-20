@@ -59,6 +59,7 @@ import {
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
 import type { reviewReplyInputSchema, reviewReportInputSchema, teamReviewsQuerySchema } from '@yeral/contract/reviews'
+import type { setupStartSchema, setupStepInputSchema } from '@yeral/contract/setup'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
 import type {
   bookingRulesUpdateSchema,
@@ -925,7 +926,34 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
-  return { auth, me, catalog, availability, bookings, team, settings, requests, calendar, clients, reviews, links }
+  const setup = {
+    /** Where the wizard reopens at sign-in, or `{ setup: null }` (book Q-200). */
+    mine: () =>
+      queryOptions({
+        queryKey: keys.setup(),
+        queryFn: ({ signal }) => call(v1.me.setup.$get({}, abortWith(signal))),
+      }),
+    /** Step 2: the draft with its name and category; `setup_in_progress` names the one to finish first. */
+    start: () =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof setupStartSchema>) => call(v1.setup.$post({ json })),
+        onSuccess: () => invalidate(keys.setup()),
+      }),
+    /** The step the wizard is on. */
+    step: (slug: string) =>
+      mutationOptions({
+        mutationFn: (step: z.input<typeof setupStepInputSchema>['step']) => call(w.setup.$put({ param: { slug }, json: { step } })),
+        onSuccess: () => invalidate(keys.setup()),
+      }),
+    /** "Senenama geç": into the switcher and Ýeral's review; `setup_incomplete` names what's missing. */
+    finish: (slug: string) =>
+      mutationOptions({
+        mutationFn: () => call(w.setup.finish.$post({ param: { slug } })),
+        onSuccess: () => invalidate(keys.setup(), keys.workspaces(), keys.me()),
+      }),
+  }
+
+  return { auth, me, catalog, availability, bookings, team, settings, requests, calendar, clients, reviews, setup, links }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

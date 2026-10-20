@@ -63,6 +63,8 @@
     "cannot_move": "Ýazylyşy bu wagta geçirip bolmaýar.",
     "move_waiting": "Müşderi täze wagt sorady: ilki oňa jogap beriň.",
     "statuses_full": "Iň köp 5 içerki ýagdaý bolup biler.",
+    "setup_in_progress": "Ilki biznesiňizi sazlap gutaryň.",
+    "setup_incomplete": "Ilki salgyny, iş wagtyny we iň az bir hyzmaty goşuň.",
     "client_exists": "Bu belgi eýýäm müşderileriňizde bar.",
     "client_phone_locked": "Müşderi bu belgini öz Ýeral hasabynda üýtgedýär.",
     "client_has_bookings": "Ilki müşderiniň öňdäki ýazylyşlaryny ýatyryň we haýyşlaryny ret ediň.",

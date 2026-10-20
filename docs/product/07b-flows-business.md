@@ -143,7 +143,7 @@ flowchart TD
 
 > Open question Q-200: where a half-finished setup continues.
 
-**Status** — Design: drawn (B-Onboarding · `step`) · Code: built for the phone, code, lock and landline rules (shared login, ADR 0019); the wizard is not built.
+**Status** — Design: drawn (B-Onboarding · `step`) · Code: built for the phone, code, lock and landline rules (shared login, ADR 0019); the wizard's api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026).
 
 ### B-03 · Describe the business: name, category, address
 
@@ -185,7 +185,7 @@ flowchart TD
 
 > Open question Q-201: setup for table and class businesses.
 
-**Status** — Design: drawn (B-Onboarding · `step`, `homeBased`) · Code: schema only (business, category, address, hide-exact-address fields).
+**Status** — Design: drawn (B-Onboarding · `step`, `homeBased`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); the name and category start the draft, the address is the profile's `location` (a draft's first address isn't a move).
 
 ### B-04 · Set hours, services and team
 
@@ -223,7 +223,7 @@ flowchart TD
 
 > Open question Q-201: setup for table and class businesses.
 
-**Status** — Design: drawn (B-Onboarding · `step`) · Code: rule only for hours (domain: weekly hours, breaks, special days); schema only for services and staff; invites not built.
+**Status** — Design: drawn (B-Onboarding · `step`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); hours, services and the team through their settings endpoints (invites from the final step).
 
 ### B-05 · Choose how bookings arrive
 
@@ -260,7 +260,7 @@ flowchart TD
 
 > Open question Q-119: free-cancel choices in the setup wizard and in settings.
 
-**Status** — Design: drawn (B-Onboarding · `step=7`) · Code: rule only (domain: booking rules and their allowed values); no request-handling field yet.
+**Status** — Design: drawn (B-Onboarding · `step=7`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); the rules through `PATCH /v1/w/{slug}/settings/rules`.
 
 ### B-06 · Finish setup: link, QR and review
 
@@ -294,7 +294,7 @@ flowchart TD
 - QR codes are not generated for real in the design (§11 "real QR generation" not designed).
 - Table and class businesses (after the MVP): step 8 ends with a checklist pointing to *Stollar* or *Sapaklar* (Q-201, B-03).
 
-**Status** — Design: drawn (B-Onboarding · `step=8`, `fromSwitcher`) · Code: rule only (the api already hides unverified businesses from the public); the step is not built.
+**Status** — Design: drawn (B-Onboarding · `step=8`, `fromSwitcher`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); finishing needs an address, an open day and a service (`setup_incomplete`), then the workspace joins the switcher and waits for Ýeral's review; the QR and photos come with uploads.
 
 ### B-07 · Log in
 

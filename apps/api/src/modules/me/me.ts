@@ -19,7 +19,7 @@ export const phoneChangeOpen = (deps: Pick<Deps, 'codeOnScreen'>) => !deps.codeO
 
 /** The signed-in person, as the deployment `deps` runs. */
 export async function toMe(db: Queryable, user: User, deps: Pick<Deps, 'codeOnScreen'>): Promise<Me> {
-  const workspaces = await workspaceIdsOf(db, user.id)
+  const workspaces = await workspaceIdsOf(db, user.id, { finished: true })
   return {
     id: user.id,
     name: accountName(user),

@@ -7,7 +7,7 @@ import type { Locale } from '@yeral/domain/model'
 import { answersRequests, canAnswerRequest, type Actor } from '@yeral/domain/permissions'
 import { inviteExpiresAt, inviteState } from '@yeral/domain/team'
 import type { SiteConfig } from '@yeral/lib/site'
-import { and, asc, desc, eq, inArray, or } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNull, or } from 'drizzle-orm'
 import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
 import { bookingRules, bookings, businesses, invites, services, staff, staffServices, users } from '../../db/schema'
@@ -213,7 +213,8 @@ export async function workspacesOf(deps: Deps, user: User): Promise<{ items: Wor
     .select({ business: businesses, member: staff })
     .from(staff)
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
-    .where(and(eq(staff.userId, user.id), signsIn))
+    // a business still being set up joins the switcher when its owner finishes (book Q-200)
+    .where(and(eq(staff.userId, user.id), signsIn, isNull(businesses.setupStep)))
     .orderBy(asc(businesses.name))
   const [counts, cities] = await Promise.all([
     requestCounts(
