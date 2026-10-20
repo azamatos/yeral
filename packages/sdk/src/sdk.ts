@@ -38,6 +38,7 @@ import type {
 } from '@yeral/contract/bookings'
 import type { searchQuerySchema } from '@yeral/contract/catalog'
 import type { Locale } from '@yeral/contract/common'
+import type { bookingRulesUpdateSchema } from '@yeral/contract/settings'
 import type { inviteInputSchema, phoneOnlyInputSchema, updateMemberSchema } from '@yeral/contract/team'
 import type { z } from 'zod'
 import { call, isApiError, type Client } from './client'
@@ -433,6 +434,22 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
+  /** Business settings (book B-37–B-43): the owner and administrators read and change them. */
+  const settingsChanged = (slug: string) =>
+    invalidate(keys.settings(slug), keys.businessAll(slug), keys.availabilityAll(slug), keys.workspaces())
+  const settings = {
+    rules: (slug: string) =>
+      queryOptions({
+        queryKey: keys.rules(slug),
+        queryFn: ({ signal }) => call(w.settings.rules.$get({ param: { slug } }, abortWith(signal))),
+      }),
+    updateRules: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof bookingRulesUpdateSchema>) => call(w.settings.rules.$patch({ param: { slug }, json })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+  }
+
   /** The SMS link page (book Q-168, F-068): the booking by its link's token, and the login with its own phone. */
   const links = {
     view: (token: string, lang: Locale) =>
@@ -453,7 +470,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
-  return { auth, me, catalog, availability, bookings, team, links }
+  return { auth, me, catalog, availability, bookings, team, settings, links }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

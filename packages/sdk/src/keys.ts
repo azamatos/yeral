@@ -36,4 +36,7 @@ export const keys = {
   invites: () => ['invites'] as const,
   invite: (token: string) => ['invites', 'token', token] as const,
   team: (slug: string) => ['team', slug] as const,
+  // business settings (book B-37–B-43): every one of a workspace under its prefix
+  settings: (slug: string) => ['settings', slug] as const,
+  rules: (slug: string) => ['settings', slug, 'rules'] as const,
 }

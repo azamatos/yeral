@@ -1518,7 +1518,7 @@ flowchart TD
 
 > Open question Q-205: changing confirmation settings while requests wait.
 
-**Status** — Design: drawn (B-Settings · `pane=rules`, `dirty`) · Code: rule only (domain: rule values and defaults; schema has every field except who-answers).
+**Status** — Design: drawn (B-Settings · `pane=rules`, `dirty`) · Code: api built (`GET`/`PATCH /v1/w/{slug}/settings/rules`, 20.10.2026); the client preview is the app's.
 
 ### B-42 · Who answers requests (setting)
 
@@ -1548,7 +1548,7 @@ flowchart TD
 - Instant mode: the setting is hidden (no requests).
 - The owner always can answer, whatever the setting.
 
-**Status** — Design: drawn (B-Settings · rules pane; B-Calendar and B-Bookings · `answers`) · Code: not built.
+**Status** — Design: drawn (B-Settings · rules pane; B-Calendar and B-Bookings · `answers`) · Code: the setting is built (`requestAnswerers` in the rules endpoint, 20.10.2026); answering requests by it comes with the requests endpoints (P2 step 4).
 
 ### B-43 · Link and QR
 
