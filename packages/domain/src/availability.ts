@@ -41,7 +41,10 @@ export interface BusyInterval extends Interval {
   staffId: string
   date: string
   bookingId: string
-  /** The same person's booking in another workspace (book Q-272): a reserved gap, never shown with its details. */
+  /**
+   * The same person's booking in another workspace (book Q-272): a reserved gap, never shown with its details; its
+   * `bookingId` is the other workspace's, for this engine only, never sent out.
+   */
   elsewhere?: true
 }
 

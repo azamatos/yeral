@@ -7,7 +7,7 @@
 import { staffDoingAll, type AppointmentContext, type BusyInterval, type TableContext } from '@yeral/domain/availability'
 import type { BookingRules } from '@yeral/domain/rules'
 import { addDays } from '@yeral/domain/time'
-import { and, eq, gte, inArray, lte, ne } from 'drizzle-orm'
+import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, businesses, diningTables, services, staff, staffServices, tableAreas } from '../../db/schema'
@@ -90,9 +90,9 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
     bufferAfter: bookingItems.bufferAfter,
   }
   // busy elsewhere (book Q-272): a person in several workspaces is taken here by their bookings as a specialist there,
-  // waiting or confirmed, with their buffers; their own bookings as a client, breaks and days off don't count
+  // waiting or confirmed, with their buffers, by the account each item was booked with, as the database counts them
+  // (migration 0020); their own bookings as a client, breaks and days off don't count
   const here = alias(staff, 'here')
-  const there = alias(staff, 'there')
   const [own, elsewhere] = await Promise.all([
     db
       .select({ ...item, staffId: bookingItems.staffId })
@@ -102,8 +102,7 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
     db
       .select({ ...item, staffId: here.id })
       .from(bookingItems)
-      .innerJoin(there, eq(there.id, bookingItems.staffId))
-      .innerJoin(here, and(eq(here.userId, there.userId), ne(here.id, there.id)))
+      .innerJoin(here, and(eq(here.userId, bookingItems.person), sql`${here.id} is distinct from ${bookingItems.staffId}`))
       .where(and(inArray(here.businessId, businessIds), days)),
   ])
   return [

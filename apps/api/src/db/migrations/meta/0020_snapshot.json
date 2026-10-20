@@ -1,5 +1,5 @@
 {
-  "id": "181f41e6-a002-4c86-a62c-562e8169c6a7",
+  "id": "983e88ef-2872-4352-9ef1-1e3525ed7b6b",
   "prevId": "965ac125-81ec-410a-9d62-884d91411caa",
   "version": "7",
   "dialect": "postgresql",
@@ -540,6 +540,28 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "booking_items_person_date_idx": {
+          "name": "booking_items_person_date_idx",
+          "columns": [
+            {
+              "expression": "person",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"booking_items\".\"person\" is not null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -575,6 +597,19 @@
           "tableTo": "staff",
           "columnsFrom": [
             "staff_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "booking_items_person_users_id_fk": {
+          "name": "booking_items_person_users_id_fk",
+          "tableFrom": "booking_items",
+          "tableTo": "users",
+          "columnsFrom": [
+            "person"
           ],
           "columnsTo": [
             "id"

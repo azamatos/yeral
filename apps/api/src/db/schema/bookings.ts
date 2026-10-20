@@ -164,14 +164,21 @@ export const bookingItems = pgTable(
      * person's items in different workspaces may not overlap either (busy elsewhere, book Q-272; migration 0020). Linking
      * a staff row to an account later leaves its earlier items as they were.
      */
-    person: uuid(),
+    person: uuid().references(() => users.id, { onDelete: 'set null' }),
     /** Absolute business-local minutes, buffer included: an item late on one day and one early the next can collide. */
     span: int4range().generatedAlwaysAs(
       sql`int4range(("date" - date '2000-01-01') * 1440 + "start", ("date" - date '2000-01-01') * 1440 + "end" + "buffer_after")`,
     ),
     sort: integer().notNull().default(0),
   },
-  (t) => [index('booking_items_booking_idx').on(t.bookingId), index('booking_items_staff_date_idx').on(t.staffId, t.date)],
+  (t) => [
+    index('booking_items_booking_idx').on(t.bookingId),
+    index('booking_items_staff_date_idx').on(t.staffId, t.date),
+    // busy elsewhere: a person's items by day (free times)
+    index('booking_items_person_date_idx')
+      .on(t.person, t.date)
+      .where(sql`${t.person} is not null`),
+  ],
 )
 
 /**

@@ -163,9 +163,22 @@ describe('busy elsewhere (book Q-272)', () => {
     expect(refused).toBe('23P01')
   })
 
+  it('a booking keeps the person it was made with: free times and the database agree after a row loses its account', async () => {
+    const b = await client('+99365600016')
+    const start = await bothFree(b, 1)
+    expect((await book(b, 'barber-loft', id.cut!, id.merdan!, start)).status).toBe(201)
+    await db.update(staff).set({ userId: null }).where(eq(staff.id, id.merdan!))
+    try {
+      expect(await free(b, 'glow-studio', id.haircut!, id.ayna!)).not.toContain(start)
+      expect((await book(b, 'glow-studio', id.haircut!, id.ayna!, start)).status).toBe(409)
+    } finally {
+      await db.update(staff).set({ userId: id.person }).where(eq(staff.id, id.merdan!))
+    }
+  })
+
   it('linking a staff row to an account later leaves its earlier bookings as they were', async () => {
     const b = await client('+99365600015')
-    const start = await bothFree(b, 8)
+    const start = await bothFree(b, 3)
     expect((await book(b, 'glow-studio', id.haircut!, id.ayna!, start)).status).toBe(201)
     // Arslan has a booking at the same time, and turns out to be the same person
     const old = await write('barber-loft', id.cut!, id.arslan!, start)
