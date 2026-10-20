@@ -42,6 +42,7 @@ import type { bookingRulesUpdateSchema } from '@yeral/contract/settings'
 import type { inviteInputSchema, phoneOnlyInputSchema, updateMemberSchema } from '@yeral/contract/team'
 import type { z } from 'zod'
 import { call, isApiError, type Client } from './client'
+import { staleKeys } from './events'
 import { keys, type BookingTab } from './keys'
 
 /**
@@ -435,8 +436,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   }
 
   /** Business settings (book B-37–B-43): the owner and administrators read and change them. */
-  const settingsChanged = (slug: string) =>
-    invalidate(keys.settings(slug), keys.businessAll(slug), keys.availabilityAll(slug), keys.workspaces())
+  // what the team's live events refresh too
+  const settingsChanged = (slug: string) => invalidate(...staleKeys({ type: 'business.updated', business: slug, bookingCode: null }))
   const settings = {
     rules: (slug: string) =>
       queryOptions({

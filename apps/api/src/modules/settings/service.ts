@@ -15,23 +15,12 @@ import { toRules } from '../availability/context'
 type RulesView = z.infer<typeof bookingRulesSchema>
 type RulesChange = z.infer<typeof bookingRulesUpdateSchema>
 
-const viewOf = (r: BookingRules): RulesView => ({
-  onlineEnabled: r.onlineEnabled,
-  confirmMode: r.confirmMode,
-  requestAnswerers: r.requestAnswerers,
-  holdMinutes: r.holdMinutes,
-  leadMinutes: r.leadMinutes,
-  windowDays: r.windowDays,
-  bufferMinutes: r.bufferMinutes,
-  slotStep: r.slotStep,
-  cancelWindowMinutes: r.cancelWindowMinutes,
-  askCancelReason: r.askCancelReason,
-  blockAfterNoShows: r.blockAfterNoShows,
-  lateMinutes: LATE_MINUTES,
-})
+const viewOf = (r: BookingRules): RulesView => ({ ...r, lateMinutes: LATE_MINUTES })
 
-async function storedRules(db: Queryable, businessId: string): Promise<BookingRules> {
-  const [row] = await db.select().from(bookingRules).where(eq(bookingRules.businessId, businessId))
+/** The rules as stored; `lock` holds the row until the change commits, so two saves at once can't answer stale rules. */
+async function storedRules(db: Queryable, businessId: string, opts: { lock?: boolean } = {}): Promise<BookingRules> {
+  const query = db.select().from(bookingRules).where(eq(bookingRules.businessId, businessId))
+  const [row] = opts.lock ? await query.for('update') : await query
   if (!row) throw new ApiError('not_found')
   return toRules(row)
 }
@@ -46,10 +35,16 @@ export async function rulesOf(db: Queryable, businessId: string): Promise<RulesV
  */
 export async function updateRules(db: Queryable, businessId: string, change: RulesChange): Promise<RulesView> {
   return db.transaction(async (tx) => {
-    const next = { ...(await storedRules(tx, businessId)), ...change }
-    const errors = Object.fromEntries(Object.entries(rulesErrors(next)).filter(([field]) => field in change))
-    if (Object.keys(errors).length) throw new ApiError('validation_error', errors)
-    await tx.update(bookingRules).set(change).where(eq(bookingRules.businessId, businessId))
+    const stored = await storedRules(tx, businessId, { lock: true })
+    const next = { ...stored, ...change }
+    const issues = Object.keys(rulesErrors(next))
+      .filter((field) => field in change)
+      .map((field) => ({ path: [field], code: 'invalid' }))
+    if (issues.length) throw new ApiError('validation_error', { issues })
+    // nothing new (an empty save, or the same values): no write, no event
+    const changed = Object.entries(change).filter(([field, value]) => stored[field as keyof BookingRules] !== value)
+    if (!changed.length) return viewOf(stored)
+    await tx.update(bookingRules).set(Object.fromEntries(changed)).where(eq(bookingRules.businessId, businessId))
     await emit(tx, { type: 'business.updated', businessId })
     return viewOf(next)
   })

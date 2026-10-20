@@ -49,11 +49,16 @@ describe('booking rules (book B-41, B-42)', () => {
       lateMinutes: 15,
     })
     const selbi = await as(SELBI)
-    const changed = await selbi.req(RULES, { method: 'PATCH', body: { askCancelReason: false, requestAnswerers: 'desk' } })
-    expect(changed.status).toBe(200)
-    expect(changed.json).toMatchObject({ askCancelReason: false, requestAnswerers: 'desk', holdMinutes: 30 })
-    expect((await maysa.req(RULES)).json).toMatchObject({ askCancelReason: false, requestAnswerers: 'desk' })
-    await maysa.req(RULES, { method: 'PATCH', body: { askCancelReason: true, requestAnswerers: 'both' } })
+    try {
+      const changed = await selbi.req(RULES, { method: 'PATCH', body: { askCancelReason: false, requestAnswerers: 'desk' } })
+      expect(changed.status).toBe(200)
+      expect(changed.json).toMatchObject({ askCancelReason: false, requestAnswerers: 'desk', holdMinutes: 30 })
+      expect((await maysa.req(RULES)).json).toMatchObject({ askCancelReason: false, requestAnswerers: 'desk' })
+    } finally {
+      await maysa.req(RULES, { method: 'PATCH', body: { askCancelReason: true, requestAnswerers: 'both' } })
+    }
+    // a save with nothing in it changes nothing
+    expect((await selbi.req(RULES, { method: 'PATCH', body: {} })).json).toEqual(rules.json)
 
     const ayna = await as(AYNA)
     expect((await ayna.req(RULES)).json.error.code).toBe('forbidden')
@@ -66,13 +71,24 @@ describe('booking rules (book B-41, B-42)', () => {
     const maysa = await as(MAYSA)
     const bad = await maysa.req(RULES, { method: 'PATCH', body: { holdMinutes: 45, bufferMinutes: 121 } })
     expect(bad.status).toBe(400)
-    expect(bad.json.error).toMatchObject({ code: 'validation_error', details: { holdMinutes: 'invalid', bufferMinutes: 'invalid' } })
+    expect(bad.json.error).toMatchObject({
+      code: 'validation_error',
+      details: {
+        issues: [
+          { path: ['holdMinutes'], code: 'invalid' },
+          { path: ['bufferMinutes'], code: 'invalid' },
+        ],
+      },
+    })
     // lateness is fixed in the MVP (book Q-118), and nothing else is a rule
     expect((await maysa.req(RULES, { method: 'PATCH', body: { lateMinutes: 30 } })).status).toBe(400)
     // a custom buffer and "any time" are offered
-    const ok = await maysa.req(RULES, { method: 'PATCH', body: { bufferMinutes: 7, cancelWindowMinutes: null } })
-    expect(ok.json).toMatchObject({ bufferMinutes: 7, cancelWindowMinutes: null })
-    await maysa.req(RULES, { method: 'PATCH', body: { bufferMinutes: 10, cancelWindowMinutes: 120 } })
+    try {
+      const ok = await maysa.req(RULES, { method: 'PATCH', body: { bufferMinutes: 7, cancelWindowMinutes: null } })
+      expect(ok.json).toMatchObject({ bufferMinutes: 7, cancelWindowMinutes: null })
+    } finally {
+      await maysa.req(RULES, { method: 'PATCH', body: { bufferMinutes: 10, cancelWindowMinutes: 120 } })
+    }
   })
 
   it('a change reaches the client page and the team; waiting requests keep their timers (book Q-205)', async () => {
