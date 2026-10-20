@@ -11,6 +11,7 @@
     "./styles.css": "./src/styles/index.css",
     "./cn": "./src/lib/cn.ts",
     "./brand": "./src/brand/index.ts",
+    "./use-media-query": "./src/lib/use-media-query.ts",
     "./*": "./src/components/*/index.ts"
   },
   "scripts": {

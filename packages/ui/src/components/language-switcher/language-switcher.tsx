@@ -9,8 +9,9 @@ export type LanguageOption = {
 }
 
 /**
- * Language switcher (DS-Components → Navigation): globe + code in the header, a radio menu of languages.
- * `actionLabel` is screen-reader text after the code, e.g. «dil saýla».
+ * Language switcher (DS-Components → Navigation): globe + code in the header, a radio menu of languages, English first
+ * and then the market's (DS-Patterns v0.6). With one language it renders nothing: the first launch has no switcher.
+ * `actionLabel` is screen-reader text after the code, e.g. «choose a language».
  */
 export function LanguageSwitcher({
   value,
@@ -25,6 +26,8 @@ export function LanguageSwitcher({
   actionLabel: string
   className?: string
 }) {
+  // nothing to switch to: no control at all, not a disabled one (DS-Patterns «One language»)
+  if (options.length < 2) return null
   return (
     <Menu>
       <MenuTrigger
