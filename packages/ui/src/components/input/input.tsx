@@ -8,6 +8,8 @@ export const inputClass = cn(
   'placeholder:text-n-500 hover:border-n-400',
   'focus:border-a-500 focus:shadow-input-focus focus-visible:shadow-input-focus',
   'aria-invalid:border-error aria-invalid:shadow-input-error',
+  // a warning in the field (a duplicate phone): amber line and halo
+  'data-[status=warning]:border-st-pending-dot data-[status=warning]:shadow-input-warning',
   'disabled:cursor-not-allowed disabled:border-n-200 disabled:bg-n-50 disabled:text-n-500',
 )
 
@@ -20,6 +22,7 @@ function useControlProps(props: { id?: string; disabled?: boolean; invalid?: boo
     disabled: props.disabled ?? field?.disabled,
     'aria-invalid': (props.invalid ?? field?.invalid) ? true : undefined,
     'aria-describedby': props['aria-describedby'] ?? field?.describedBy,
+    'data-status': field?.status === 'warning' ? ('warning' as const) : undefined,
   }
 }
 
