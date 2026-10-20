@@ -18,6 +18,7 @@
     "@tanstack/react-router": "catalog:",
     "@yeral/contract": "workspace:*",
     "@yeral/domain": "workspace:*",
+    "@yeral/features": "workspace:*",
     "@yeral/i18n": "workspace:*",
     "@yeral/lib": "workspace:*",
     "@yeral/sdk": "workspace:*",

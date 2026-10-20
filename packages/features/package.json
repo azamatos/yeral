@@ -1,0 +1,36 @@
+{
+  "name": "@yeral/features",
+  "version": "0.0.0",
+  "private": true,
+  "description": "User actions more than one app needs, in FSD feature slices (@yeral/features/<slice>): the phone sign-in",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@yeral/domain": "workspace:*",
+    "@yeral/i18n": "workspace:*",
+    "@yeral/sdk": "workspace:*",
+    "@yeral/ui": "workspace:*"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.104.0",
+    "react": "^19.3.0",
+    "use-intl": "^4.14.0"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "catalog:",
+    "@types/react": "catalog:",
+    "@yeral/config": "workspace:*",
+    "eslint": "catalog:",
+    "react": "catalog:",
+    "typescript": "catalog:",
+    "use-intl": "catalog:",
+    "vitest": "catalog:"
+  }
+}

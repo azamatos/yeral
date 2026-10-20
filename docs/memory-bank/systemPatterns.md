@@ -36,7 +36,7 @@ yeral/                           github.com/azamatos/yeral
 │  ├─ i18n/        @yeral/i18n      use-intl setup, shared messages (en source; tk, ru), formatters
 │  ├─ ui/          @yeral/ui        design system: tokens, base styles, components (Radix + cva), cn(). No domain, no text
 │  ├─ entities/    @yeral/entities  cross-app entity UI (status badge, staff avatar, price…) — when a 2nd app needs it
-│  ├─ features/    @yeral/features  cross-app user actions (phone login…)                   — when a 2nd app needs it
+│  ├─ features/    @yeral/features  cross-app user actions, one subpath per slice: auth-by-phone (the sign-in steps)
 │  ├─ lib/         @yeral/lib       framework-free helpers: .ics, maps/tel links, safe storage, env parsing, site config
 │  └─ config/      @yeral/config    tsconfig bases, ESLint, Prettier, Steiger, Vitest presets
 ├─ infra/

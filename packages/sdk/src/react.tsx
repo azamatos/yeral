@@ -1,5 +1,6 @@
-import type { Sdk } from '@yeral/sdk'
+/** The sdk in React: the one an app (or a story) made with `createApi()`, above its screens and read in them. */
 import { createContext, use, type ReactNode } from 'react'
+import type { Sdk } from './sdk'
 
 const SdkContext = createContext<Sdk | null>(null)
 
