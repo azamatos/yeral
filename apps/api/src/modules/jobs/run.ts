@@ -283,7 +283,7 @@ async function runQueue(deps: Deps): Promise<number> {
           .from(bookings)
           .where(eq(bookings.id, String(p.bookingId)))
         if (b?.status === 'pending' && (b.holdUntil?.getTime() ?? 0) > deps.now())
-          await skipStale(deps.db.transaction((tx) => confirmBooking(tx, deps, b)))
+          await skipStale(deps.db.transaction((tx) => confirmBooking(tx, deps, b, { answered: true })))
       }
       await deps.db
         .update(jobs)

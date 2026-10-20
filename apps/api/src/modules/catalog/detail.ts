@@ -3,10 +3,12 @@ import type { BusinessDetail } from '@yeral/contract/catalog'
 import { MAX_ONLINE_PARTY, nextFreeSlot } from '@yeral/domain/availability'
 import { distanceM, type LatLng } from '@yeral/domain/geo'
 import { findException } from '@yeral/domain/hours'
+import { TYPICAL_ANSWER_DAYS, typicalAnswerMinutes } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { addDays, today } from '@yeral/domain/time'
-import { and, asc, eq, ne } from 'drizzle-orm'
-import { businesses, categories, serviceGroups, tableAreas } from '../../db/schema'
+import { and, asc, eq, gte, lte, ne, sql } from 'drizzle-orm'
+import type { Queryable } from '../../db/client'
+import { bookings, businesses, categories, serviceGroups, tableAreas } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
@@ -17,6 +19,21 @@ import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
 const SPECIAL_DAYS_AHEAD = 14
 
 /** A verified business by slug, or 404 (unverified businesses aren't public, ADR 0018). */
+/** The business's typical answer time (book Q-113), from its answers of the last 30 days. */
+async function typicalAnswerOf(db: Queryable, businessId: string, now: number): Promise<number | null> {
+  const rows = await db
+    .select({ minutes: sql<number>`extract(epoch from (${bookings.answeredAt} - ${bookings.createdAt})) / 60` })
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.businessId, businessId),
+        gte(bookings.answeredAt, new Date(now - TYPICAL_ANSWER_DAYS * 86_400_000)),
+        lte(bookings.answeredAt, new Date(now)),
+      ),
+    )
+  return typicalAnswerMinutes(rows.map((r) => Number(r.minutes)))
+}
+
 export async function publicBusiness(deps: Deps, slug: string) {
   const [row] = await deps.db
     .select()
@@ -110,7 +127,7 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
     holdMinutes: lb.rules.holdMinutes,
     leadMinutes: lb.rules.leadMinutes,
     windowDays: lb.rules.windowDays,
-    typicalConfirmMinutes: b.typicalConfirmMinutes,
+    typicalConfirmMinutes: await typicalAnswerOf(deps.db, b.id, now),
     priceFrom: type === 'table' ? null : priceFromOf(lb.services),
     avgBill: b.avgBill,
     nextFree,

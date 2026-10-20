@@ -308,7 +308,10 @@ export const businessDetailSchema = z
     holdMinutes: z.number().int(),
     leadMinutes: z.number().int(),
     windowDays: z.number().int(),
-    /** "Adatça 15 minudyň dowamynda tassyklaýar"; null until there is history. */
+    /**
+     * "Adatça 15 minudyň dowamynda tassyklaýar" (book Q-113): the median answer time of the last 30 days, rounded up
+     * (15 min, 1 h …); null until the business has answered 5 requests in them.
+     */
     typicalConfirmMinutes: z.number().int().nullable(),
     priceFrom: priceSchema.nullable(),
     avgBill: moneySchema.nullable(),

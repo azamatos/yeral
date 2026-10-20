@@ -1,12 +1,13 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, services, staff, staffServices } from '../../db/schema'
+import { bookings, businesses, services, staff, staffServices } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { DEMO_CENTER } from '../../db/seed/demo-data'
+import { confirmBooking } from '../bookings/confirm'
 
 const near = `lat=${DEMO_CENTER.lat}&lng=${DEMO_CENTER.lng}`
 
@@ -167,6 +168,80 @@ describe('catalogue', () => {
       expect(found.json.services).toEqual(['Особая стрижка'])
     } finally {
       await db.update(services).set({ name: svc!.name }).where(eq(services.id, svc!.id))
+    }
+  })
+
+  it('the typical answer time: the median of the last 30 days, shown from the fifth answer (book Q-113)', async () => {
+    const [nails] = await db.select().from(businesses).where(eq(businesses.slug, 'nail-bar-ayna'))
+    const typical = async () => (await b.req('/v1/businesses/nail-bar-ayna')).json.typicalConfirmMinutes
+    const answered = (code: string, minutes: number, daysAgo: number) => {
+      const sent = DEMO_NOW - daysAgo * 86_400_000
+      return {
+        code,
+        businessId: nails!.id,
+        type: 'appointment' as const,
+        date: '2026-10-20',
+        start: 600,
+        end: 660,
+        status: 'confirmed' as const,
+        source: 'web' as const,
+        createdAt: new Date(sent),
+        confirmedAt: new Date(sent + minutes * 60_000),
+        answeredAt: new Date(sent + minutes * 60_000),
+      }
+    }
+    try {
+      // four answers, and one from 40 days ago that no longer counts
+      await db
+        .insert(bookings)
+        .values([
+          answered('YR-997001', 4, 1),
+          answered('YR-997002', 6, 2),
+          answered('YR-997003', 8, 3),
+          answered('YR-997004', 12, 4),
+          answered('YR-997005', 2, 40),
+        ])
+      expect(await typical()).toBeNull()
+      await db.insert(bookings).values(answered('YR-997006', 14, 5))
+      // 4, 6, 8, 12, 14: 8 minutes, said as 10
+      expect(await typical()).toBe(10)
+    } finally {
+      await db
+        .delete(bookings)
+        .where(inArray(bookings.code, ['YR-997001', 'YR-997002', 'YR-997003', 'YR-997004', 'YR-997005', 'YR-997006']))
+    }
+  })
+
+  it('a request the business confirms keeps when it was answered; an instant booking doesn’t', async () => {
+    const t = testApp(db)
+    const [nails] = await db.select().from(businesses).where(eq(businesses.slug, 'nail-bar-ayna'))
+    const [row] = await db
+      .insert(bookings)
+      .values({
+        code: 'YR-997010',
+        businessId: nails!.id,
+        type: 'appointment',
+        date: '2026-10-20',
+        start: 600,
+        end: 660,
+        status: 'pending',
+        source: 'web',
+        holdUntil: new Date(DEMO_NOW + 3_600_000),
+      })
+      .returning()
+    try {
+      // as an instant business confirms: not an answer
+      const instant = await db.transaction((tx) => confirmBooking(tx, t.deps, row!))
+      expect(instant.answeredAt).toBeNull()
+      await db
+        .update(bookings)
+        .set({ status: 'pending', confirmedAt: null, holdUntil: new Date(DEMO_NOW + 3_600_000) })
+        .where(eq(bookings.id, row!.id))
+      const [again] = await db.select().from(bookings).where(eq(bookings.id, row!.id))
+      const confirmed = await db.transaction((tx) => confirmBooking(tx, t.deps, again!, { answered: true }))
+      expect(confirmed.answeredAt?.getTime()).toBe(DEMO_NOW)
+    } finally {
+      await db.delete(bookings).where(eq(bookings.code, 'YR-997010'))
     }
   })
 })

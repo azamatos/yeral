@@ -238,6 +238,25 @@ export function keptCancelReason(rules: Pick<BookingRules, 'askCancelReason'>, r
   return (rules.askCancelReason && reason?.trim()) || null
 }
 
+/** The typical answer time counts the answers of this many days (book Q-113)… */
+export const TYPICAL_ANSWER_DAYS = 30
+/** …and shows once the business has answered this many requests in them. */
+export const TYPICAL_ANSWER_MIN_ANSWERS = 5
+/** The steps it's rounded up to, in minutes; past a day, whole days. */
+const ANSWER_STEPS = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 360, 480, 720, 1440]
+
+/**
+ * "Adatça 15 minudyň dowamynda tassyklaýar" (book Q-113): the median of the business's answer times, in minutes, from
+ * the last 30 days, rounded up to a step (15 min, 1 h …); null until it has answered 5 requests in them.
+ */
+export function typicalAnswerMinutes(answers: readonly number[]): number | null {
+  if (answers.length < TYPICAL_ANSWER_MIN_ANSWERS) return null
+  const sorted = [...answers].sort((a, b) => a - b)
+  const mid = sorted.length / 2
+  const median = sorted.length % 2 ? sorted[Math.floor(mid)]! : (sorted[mid - 1]! + sorted[mid]!) / 2
+  return ANSWER_STEPS.find((step) => median <= step) ?? Math.ceil(median / 1440) * 1440
+}
+
 /** "Yzyna al" works this long after the client's own cancel (ROUND6 A6). */
 export const RESTORE_MINUTES = 5
 

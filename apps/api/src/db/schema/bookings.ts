@@ -106,6 +106,11 @@ export const bookings = pgTable(
     seats: integer(),
     createdAt: createdAt(),
     confirmedAt: ts(),
+    /**
+     * When the business answered this request (confirmed or declined it), for the typical answer time (book Q-113);
+     * null for an instant booking, one never answered, and bookings from before it was kept.
+     */
+    answeredAt: ts(),
     cancelledAt: ts(),
     completedAt: ts(),
     updatedAt: ts().notNull().defaultNow(),

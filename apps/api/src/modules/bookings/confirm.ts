@@ -41,8 +41,11 @@ export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, 
     .onConflictDoNothing({ target: jobs.dedupeKey })
 }
 
-/** Confirm a pending booking (or apply a confirmed move). Returns the booking that is now confirmed. */
-export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow): Promise<BookingRow> {
+/**
+ * Confirm a pending booking (or apply a confirmed move). Returns the booking that is now confirmed. `answered`: the
+ * business answered the request (not an instant booking), so it counts toward the typical answer time (book Q-113).
+ */
+export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow, opts: { answered?: boolean } = {}): Promise<BookingRow> {
   const at = new Date(deps.now())
   if (b.rescheduleOf) {
     // the booking first, then the request (the order moves and cancels lock in); either may have changed meanwhile
@@ -78,7 +81,7 @@ export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow): 
     await queueBookingSms(db, deps, moved, { confirmed: true })
     return moved
   }
-  const row = await setStatus(db, b, { status: 'confirmed', at })
+  const row = await setStatus(db, b, { status: 'confirmed', at, answered: opts.answered })
   await emit(db, { type: 'booking.confirmed', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
   await queueBookingSms(db, deps, row, { confirmed: true })
   return row

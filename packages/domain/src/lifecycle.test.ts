@@ -21,6 +21,7 @@ import {
   offerPast,
   type BookingState,
   type RestoreState,
+  typicalAnswerMinutes,
 } from './lifecycle'
 import type { BusinessHours } from './hours'
 import { epochOf } from './time'
@@ -33,6 +34,17 @@ const MIN = 60_000
 
 const booking = (over: Partial<BookingState> = {}): BookingState => ({ date: THU, start: 870, end: 930, status: 'confirmed', ...over })
 const rules = { cancelWindowMinutes: 120 }
+
+describe('typicalAnswerMinutes (book Q-113)', () => {
+  it('the median, rounded up to a step; hidden under 5 answers', () => {
+    expect(typicalAnswerMinutes([3, 4, 6, 8])).toBeNull()
+    expect(typicalAnswerMinutes([3, 4, 6, 8, 9])).toBe(10)
+    expect(typicalAnswerMinutes([12, 14, 15, 2, 300])).toBe(15)
+    expect(typicalAnswerMinutes([40, 50, 70, 80, 90, 100])).toBe(90) // median 75
+    expect(typicalAnswerMinutes([60, 60, 60, 60, 60])).toBe(60)
+    expect(typicalAnswerMinutes([2000, 2000, 2000, 2000, 2000])).toBe(2880)
+  })
+})
 
 describe('canClientRestore (ROUND6 A6)', () => {
   const cancelled = (over: Partial<RestoreState> = {}): RestoreState => ({

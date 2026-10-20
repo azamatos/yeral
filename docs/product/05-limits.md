@@ -68,7 +68,7 @@ copy to say businesses keep their visit records (Q-172).
 |---|---|---|---|
 | Gallery | 1 large + 4 small photos; *Ähli suratlar* (all photos) | Fixed | client spec §4.3 |
 | Photos | 3 or more recommended, up to 20; each up to 10 MB (JPG, PNG or WebP), made smaller on upload; the first is the cover everywhere | Owner/admin | business spec §7, §8; client spec §11; Q-115, decided 18.10.2026 |
-| Typical answer time | "*Adatça 15 minudyň dowamynda tassyklaýar*"; the median answer time over the last 30 days, rounded (15 min, 1 sagat …); hidden until the business has answered 5 requests | Fixed | client spec §4.3; Q-113, decided 18.10.2026 |
+| Typical answer time | "*Adatça 15 minudyň dowamynda tassyklaýar*"; the median answer time over the last 30 days, rounded (15 min, 1 sagat …); hidden until the business has answered 5 requests | Fixed | client spec §4.3; Q-113, decided 18.10.2026; code: packages/domain/src/lifecycle.ts (`typicalAnswerMinutes`) |
 | Rating | average with one decimal (`4,9`), count, bars 5 to 1 | Fixed | client spec §4.3; code: apps/api/src/modules/bookings/actions.ts |
 | Rating shown from | the first review, always with the count: `5,0 (1)` | Fixed | Q-114, decided 18.10.2026; code: apps/api/src/modules/bookings/actions.ts |
 | Reviews under moderation | listed, not counted in the average, count or bars | Ýeral team | ROUND6-ANSWERS F2 |

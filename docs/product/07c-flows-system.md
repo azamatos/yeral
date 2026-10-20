@@ -807,12 +807,12 @@ flowchart LR
 **Edge cases**
 
 - It's the median answer time over the last 30 days, rounded (15 min, 1 sagat …). Both lines stay hidden until the business has answered 5 requests (Q-113, decided 18.10.2026).
-- Code differs: each business stores a fixed number, set only by the demo data (default 20 minutes). Nothing computes it.
+- Worked out when the business page is read, from the requests the business answered (`bookings.answered_at`, set when it confirms one; declines with the business's endpoints, P2 step 4); an instant booking isn't an answer. The rounding steps: 5, 10, 15, 20, 30, 45 min, 1, 1½, 2, 3, 4, 6, 8, 12 h, a day, then whole days (code: `typicalAnswerMinutes`).
 - Instant businesses don't need it.
 
 > Open question Q-113: how the typical answer time is worked out.
 
-**Status.** Design: decided (client spec §4.3; ROUND6 A2; Q-113) · Code: not built (only a stored number).
+**Status.** Design: decided (client spec §4.3; ROUND6 A2; Q-113) · Code: built in the api (`typicalConfirmMinutes` on the business page).
 
 ## Behind the scenes
 
