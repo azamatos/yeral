@@ -82,7 +82,8 @@ export async function setStatus(db: Queryable, b: BookingRow, change: StatusChan
     .set({
       status: change.status,
       cancelledBy: change.status === 'cancelled' ? (change.cancelledBy ?? null) : null,
-      cancelReason: change.status === 'cancelled' ? (change.cancelReason ?? null) : b.cancelReason,
+      // a booking brought back ("Yzyna al") leaves its cancel reason behind
+      cancelReason: change.status === 'cancelled' ? (change.cancelReason ?? null) : null,
       cancelledAt: change.status === 'cancelled' ? change.at : null,
       confirmedAt: change.status === 'confirmed' && !b.confirmedAt ? change.at : b.confirmedAt,
       completedAt: change.status === 'completed' || change.status === 'noshow' ? change.at : b.completedAt,

@@ -159,6 +159,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     clientNote: row.clientNote,
     holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,
     cancelDeadline: cancelDeadline(lb.rules, row),
+    askCancelReason: lb.rules.askCancelReason,
     cancelReason: row.cancelReason,
     decline: row.declineReason
       ? { reason: row.declineReason, text: row.declineText, alternatives: await offersOf(row.declineAlternatives) }

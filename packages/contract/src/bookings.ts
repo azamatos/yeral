@@ -138,6 +138,11 @@ export const bookingDetailSchema = bookingSummarySchema
     holdUntil: epochSchema.nullable(),
     /** Free cancellation and moving end here. */
     cancelDeadline: epochSchema,
+    /**
+     * The business's "Ýatyrylanda sebäp sora" (book Q-163): the cancel modal shows the reason chips, still optional;
+     * false, it has no reason section, and a reason sent anyway isn't kept.
+     */
+    askCancelReason: z.boolean(),
     cancelReason: z.string().nullable(),
     decline: z
       .object({
