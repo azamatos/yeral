@@ -14,16 +14,25 @@ import { addDays, epochOf, today } from '@yeral/domain/time'
 import { and, asc, eq, gte, inArray, isNull, ne } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, invites, staff } from '../../db/schema'
+import { bookingItems, bookings, invites, staff, staffServices } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid } from '../../http/errors'
 import { emit } from '../../notify'
-import { loadHours } from '../availability/context'
+import { appointmentContext, loadBusiness, loadBusy, loadHours, type LoadedBusiness } from '../availability/context'
 import { specialistAccounts } from '../calendar/repo'
 import { queueBookingSms } from '../bookings/confirm'
-import { bookedServicesOf, cancelForBusiness, declineForBusiness } from '../bookings/engine'
-import { alternativesContext, pickAlternatives } from '../bookings/offers'
-import { lockBooking, StaleBooking, stateOf, type BookingRow, type ItemRow } from '../bookings/repo'
+import { bookedServices, cancelForBusiness, declineForBusiness } from '../bookings/engine'
+import { pickAlternatives } from '../bookings/offers'
+import {
+  isSlotConflict,
+  itemsOf,
+  itemsOfBookings,
+  lockBooking,
+  StaleBooking,
+  stateOf,
+  type BookingRow,
+  type ItemRow,
+} from '../bookings/repo'
 import { teamChanged, teamRow, type StaffRow } from './service'
 
 type ScheduleChange = z.infer<typeof staffScheduleUpdateSchema>
@@ -78,23 +87,17 @@ async function bookingsAheadWith(db: Queryable, businessId: string, staffId: str
     )
   const ahead = rows.map((r) => r.b).filter((b) => occupiesSlot(stateOf(b), now) && epochOf(b.date, b.start) > now)
   if (!ahead.length) return []
-  const items = await db
-    .select()
-    .from(bookingItems)
-    .where(
-      inArray(
-        bookingItems.bookingId,
-        ahead.map((b) => b.id),
-      ),
-    )
-    .orderBy(asc(bookingItems.sort))
+  const items = await itemsOfBookings(
+    db,
+    ahead.map((b) => b.id),
+  )
   return ahead
     .sort((x, y) => epochOf(x.date, x.start) - epochOf(y.date, y.start))
     .map((b) => ({ b, items: items.filter((i) => i.bookingId === b.id) }))
 }
 
 /** "{dates}: N ýazylyş bar": the bookings one by one, with the colleagues who do each one's services when removing. */
-function detailsOf(name: string, staffId: string, ahead: readonly Ahead[], colleagues?: StaffRow[]): BookingsAffectedDetails {
+function detailsOf(name: string, staffId: string, ahead: readonly Ahead[], colleagues?: Colleague[]): BookingsAffectedDetails {
   return {
     count: ahead.length,
     byStaff: [{ staffId, name, count: ahead.length }],
@@ -114,13 +117,14 @@ function detailsOf(name: string, staffId: string, ahead: readonly Ahead[], colle
 }
 
 /** The active colleagues who take bookings, in the team's order. */
-async function colleaguesOf(db: Queryable, businessId: string, staffId: string): Promise<(StaffRow & { serviceIds: string[] })[]> {
+type Colleague = StaffRow & { serviceIds: string[] }
+
+async function colleaguesOf(db: Queryable, businessId: string, staffId: string): Promise<Colleague[]> {
   const rows = await db
     .select()
     .from(staff)
     .where(and(eq(staff.businessId, businessId), eq(staff.status, 'active'), eq(staff.bookable, true), ne(staff.id, staffId)))
     .orderBy(asc(staff.sort))
-  const { staffServices } = await import('../../db/schema')
   const links = rows.length
     ? await db
         .select()
@@ -141,12 +145,12 @@ const doesAll = (s: { serviceIds?: string[] }, serviceIds: readonly string[]) =>
 type Settle = { kind: 'keep' } | { kind: 'cancel' } | { kind: 'move'; to?: string; otherwise?: ReadonlyMap<string, 'keep' | 'cancel'> }
 
 /**
- * Settle the specialist's bookings ahead, after the change is saved (the caller holds the business row): the context
+ * Settle the specialist's bookings ahead, after the change is saved (the caller holds the business row): the business
  * is loaded from the transaction, so it already has them off or gone. A booking moved goes to a colleague who does its
  * services and is free then (the named one, or the first free in the team's order), at the same time, and the client
  * hears who does it now; one no colleague can take follows `otherwise`, else is cancelled with 3 other times, as is
- * one cancelled outright. A waiting request is declined instead ("no specialist", B-20). Each booking moved or
- * offered times takes them from the next, so no two clients are offered the same time.
+ * one cancelled outright. A waiting request is declined instead ("no specialist", B-20). Each booking moved or offered
+ * times takes that time from the next, so no two clients get the same one.
  */
 async function settleStaffBookings(
   tx: Queryable,
@@ -160,9 +164,13 @@ async function settleStaffBookings(
   if (settle.kind === 'keep') return { ...out, kept: ahead.length }
   const now = deps.now()
   const at = new Date(now)
-  let ctx: AppointmentContext | null = await alternativesContext(tx, businessId, now)
+  const lb = await loadBusiness(tx, businessId)
+  // busy time on every date a booking may move to or be offered: from today through the window, and the bookings' own
+  const first = today(now)
+  const dates = ahead.map((a) => a.b.date).sort()
+  const last = [addDays(first, lb.rules.windowDays), dates.at(-1)!].sort().at(-1)!
+  let ctx: AppointmentContext = appointmentContext(lb, await loadBusy(tx, [businessId], [first, dates[0]!].sort()[0]!, last), now)
   const exclude = ahead.map((a) => a.b.id)
-  const booked = await bookedServicesOf(tx, exclude)
   const leaving = await specialistAccounts(tx, [staffId])
   for (const { b } of ahead) {
     let row: BookingRow
@@ -172,28 +180,20 @@ async function settleStaffBookings(
       if (e instanceof StaleBooking) continue
       throw e
     }
-    // changed meanwhile: started, cancelled, given to someone else
-    const items = await tx.select().from(bookingItems).where(eq(bookingItems.bookingId, row.id)).orderBy(asc(bookingItems.sort))
+    // read again under its lock: started, cancelled or given to someone else meanwhile
+    const items = await itemsOf(tx, row.id)
     if (!occupiesSlot(stateOf(row), now) || epochOf(row.date, row.start) <= now || !items.some((i) => i.staffId === staffId)) continue
 
-    if (settle.kind === 'move' && ctx && row.type === 'appointment') {
+    if (settle.kind === 'move' && row.type === 'appointment') {
       const plan = moveTo(ctx, row, items, staffId, settle.to)
-      if (plan) {
-        for (const [i, it] of items.entries()) {
-          const to = plan[i]!
-          if (to.staffId === it.staffId && to.bufferAfter === it.bufferAfter) continue
-          const name = ctx.staff.find((s) => s.id === to.staffId) ? await staffName(tx, to.staffId) : it.staffName
-          await tx
-            .update(bookingItems)
-            .set({ staffId: to.staffId, staffName: name, bufferAfter: to.bufferAfter })
-            .where(eq(bookingItems.id, it.id))
-        }
-        const [moved] = await tx.update(bookings).set({ updatedAt: at }).where(eq(bookings.id, row.id)).returning()
+      // the database has the last word on overlaps: a booking made meanwhile leaves this one to the fallback
+      const moved = plan && (await giveTo(tx, lb, row, items, plan, at))
+      if (moved && plan) {
         const event = { type: 'booking.moved' as const, businessId, bookingId: row.id, bookingCode: row.code }
         await emit(tx, { ...event, userId: row.userId })
         for (const userId of leaving) await emit(tx, { ...event, userId })
         // the client hears who does it now (a request hears it when it's answered)
-        if (moved && row.status === 'confirmed') await queueBookingSms(tx, deps, moved, { news: 'moved' })
+        if (row.status === 'confirmed') await queueBookingSms(tx, deps, moved, { news: 'moved' })
         ctx = { ...ctx, busy: [...ctx.busy, ...busyOf(row.id, row.date, plan)] }
         out.moved++
         continue
@@ -205,9 +205,8 @@ async function settleStaffBookings(
     }
 
     let offers: BookingRow['declineAlternatives'] = []
-    const services = booked.get(row.id)
-    if (ctx && services && row.type === 'appointment') {
-      const picked = pickAlternatives(ctx, row, services, exclude)
+    if (row.type === 'appointment') {
+      const picked = pickAlternatives(ctx, row, await bookedServices(tx, row.id), exclude)
       offers = picked.offers
       ctx = { ...ctx, busy: [...ctx.busy, ...picked.held] }
     }
@@ -218,8 +217,37 @@ async function settleStaffBookings(
   return out
 }
 
-const staffName = async (tx: Queryable, id: string) =>
-  (await tx.select({ name: staff.name }).from(staff).where(eq(staff.id, id)))[0]?.name ?? null
+/** Hand the booking's items over as planned, in a savepoint: an overlap the database refuses leaves it as it was. */
+async function giveTo(
+  tx: Queryable,
+  lb: LoadedBusiness,
+  row: BookingRow,
+  items: readonly ItemRow[],
+  plan: readonly PlannedItem[],
+  at: Date,
+): Promise<BookingRow | null> {
+  try {
+    return await tx.transaction(async (sp) => {
+      for (const [i, it] of items.entries()) {
+        const to = plan[i]!
+        if (to.staffId === it.staffId && to.bufferAfter === it.bufferAfter) continue
+        await sp
+          .update(bookingItems)
+          .set({
+            staffId: to.staffId,
+            staffName: lb.staff.find((s) => s.id === to.staffId)?.name ?? it.staffName,
+            bufferAfter: to.bufferAfter,
+          })
+          .where(eq(bookingItems.id, it.id))
+      }
+      const [moved] = await sp.update(bookings).set({ updatedAt: at }).where(eq(bookings.id, row.id)).returning()
+      return moved ?? null
+    })
+  } catch (e) {
+    if (isSlotConflict(e)) return null
+    throw e
+  }
+}
 
 /**
  * The booking with the leaving specialist's part given to one colleague who does those services and is free then:
@@ -298,7 +326,10 @@ export async function updateSchedule(
         items.some((i) => i.staffId === staffId && !withinStaffDay(hours, next, b.date, { start: i.start, end: i.end })),
     )
     if (affected.length && !change.affected) throw new ApiError('bookings_affected', detailsOf(row.name, staffId, affected))
-    await tx.update(staff).set({ shift: next.shift, breaks: next.breaks, daysOff: next.daysOff }).where(eq(staff.id, staffId))
+    await tx
+      .update(staff)
+      .set({ shift: next.shift && [...next.shift], breaks: [...next.breaks], daysOff: [...next.daysOff] })
+      .where(eq(staff.id, staffId))
     await teamChanged(tx, business.id, { userId: row.userId })
     const result = affected.length
       ? await settleStaffBookings(
@@ -318,22 +349,25 @@ export async function updateSchedule(
  * Remove someone from the team (B-50): they lose access and leave the client site. Bookings ahead with them: without
  * a choice it's 409 `bookings_affected`, each with the colleagues who do its services, and nothing changes; `move`
  * gives each to `to` (one `to` can't take follows its row, else is cancelled with 3 other times), `keep` leaves them
- * (they come to those, then go), `cancel` cancels each with 3 other times. The owner can't be removed.
+ * (they come to those, then go), `cancel` cancels each with 3 other times. The owner can't be removed. Someone already
+ * gone (removed, or left by themself) keeps their bookings until the owner settles them here.
  */
 export async function removeMember(deps: Deps, business: Business, staffId: string, input: RemoveInput): Promise<StaffBookingsResult> {
   return deps.db.transaction(async (tx) => {
     const now = deps.now()
     await loadHours(tx, business.id, { lock: 'no key update' })
     const row = await teamRow(tx, business.id, staffId)
+    // "Eýesini öçürip bolmaýar"
     if (row.level === 'owner') throw new ApiError('forbidden')
-    const ahead = row.status === 'removed' ? [] : await bookingsAheadWith(tx, business.id, staffId, now)
+    // someone who left by themself (B-15) leaves their bookings for this same flow
+    const ahead = await bookingsAheadWith(tx, business.id, staffId, now)
     if (ahead.length && !input.affected)
       throw new ApiError('bookings_affected', detailsOf(row.name, staffId, ahead, await colleaguesOf(tx, business.id, staffId)))
     if (input.affected === 'move') {
       const [to] = await colleaguesOf(tx, business.id, staffId).then((all) => all.filter((s) => s.id === input.to))
       if (!to) throw invalid({ path: ['to'], code: 'not_found' })
     }
-    await tx.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.id, row.id))
+    if (row.status !== 'removed') await tx.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.id, row.id))
     await tx
       .update(invites)
       .set({ status: 'cancelled', answeredAt: new Date(now) })

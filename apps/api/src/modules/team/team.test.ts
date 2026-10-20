@@ -183,7 +183,10 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     const shown = async () =>
       ((await browser(t.app).req('/v1/businesses/glow-studio')).json.specialists as { name: string }[]).map((s) => s.name)
     expect(await shown()).toContain('Maral')
-    expect((await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { method: 'POST' })).status).toBe(204)
+    // her bookings ahead come first (B-50): kept, she comes to those
+    const asked = await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { body: {} })
+    expect(asked.json.error.code).toBe('bookings_affected')
+    expect((await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { body: { affected: 'keep' } })).status).toBe(200)
     expect((await maral.req('/v1/me/workspaces')).json.items).toEqual([])
     expect(await shown()).not.toContain('Maral')
     const back = await maysa.req(`/v1/w/glow-studio/team/${row!.id}/reactivate`, { method: 'POST' })
@@ -265,7 +268,7 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     const maysa = await as(MAYSA)
     const ayna = await as(AYNA)
     const row = await rowOf(AYNA)
-    await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { method: 'POST' })
+    await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { body: { affected: 'keep' } })
     const sent = await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: AYNA, name: 'Aýna', level: 'specialist' } })
     // the old row comes back, still linked to her account (her kept bookings keep blocking her elsewhere)
     expect(sent.json.member).toMatchObject({ id: row!.id, status: 'invited', joined: false, invite: { state: 'pending' } })
@@ -294,7 +297,7 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     const maysa = await as(MAYSA)
     // a removed specialist without the app, added again later: the old row can't come back beside the new one
     const first = (await maysa.req('/v1/w/glow-studio/team/phone-only', { body: { phone: '+99365333011', name: 'Twice' } })).json
-    await maysa.req(`/v1/w/glow-studio/team/${first.id}/remove`, { method: 'POST' })
+    await maysa.req(`/v1/w/glow-studio/team/${first.id}/remove`, { body: {} })
     await maysa.req('/v1/w/glow-studio/team/phone-only', { body: { phone: '+99365333011', name: 'Twice' } })
     expect((await maysa.req(`/v1/w/glow-studio/team/${first.id}/reactivate`, { method: 'POST' })).json.error.code).toBe('already_on_team')
     // an invite can't be accepted beside another active row of the same phone
