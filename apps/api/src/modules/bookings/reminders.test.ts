@@ -38,7 +38,7 @@ describe('reminders and the night (book Q-285)', () => {
     await queueBookingSms(db, t.deps, row!, { confirmed: false })
     const queued = await db.select({ payload: jobs.payload, runAt: jobs.runAt }).from(jobs).where(eq(jobs.kind, 'booking.sms'))
     const mine = queued.filter((j) => (j.payload as { bookingId: string }).bookingId === row!.id)
-    expect(mine.map((j) => (j.payload as { kind: string }).kind).sort()).toEqual(['reminderEvening', 'reviewAsk'])
+    expect(mine.map((j) => (j.payload as { kind: string }).kind).sort()).toEqual(['reminderEvening'])
     const evening = mine.find((j) => (j.payload as { kind: string }).kind === 'reminderEvening')!
     expect(evening.runAt.getTime()).toBe(epochOf('2026-10-15', 1290))
 
@@ -128,5 +128,38 @@ describe('reminders and the night (book Q-285)', () => {
     // midnight itself: the 24th at 00:00, not 24:00
     const midnight = { ...late, start: 1440 }
     expect(moveRefusedSmsText('en', midnight)).toContain('stays at 24 October 00:00')
+  })
+
+  it('a review ask queued before they went is dropped, not sent (book Q-259)', async () => {
+    const t = testApp(db)
+    const [barber] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    const [row] = await db
+      .insert(bookings)
+      .values({
+        code: 'YR-991004',
+        businessId: barber!.id,
+        type: 'appointment',
+        date: '2026-10-16',
+        start: 600,
+        end: 660,
+        // confirmed: only the review-ask check stops it, not the status
+        status: 'confirmed',
+        source: 'web',
+        clientPhone: '+99365555004',
+      })
+      .returning()
+    const [job] = await db
+      .insert(jobs)
+      .values({
+        kind: 'booking.sms',
+        runAt: new Date(t.clock.now),
+        payload: { bookingId: row!.id, kind: 'reviewAsk', date: row!.date, start: row!.start },
+      })
+      .returning()
+    await runDueJobs(t.deps)
+    expect(t.sms.sent.filter((s) => s.to === '+99365555004')).toEqual([])
+    const [settled] = await db.select().from(jobs).where(eq(jobs.id, job!.id))
+    expect(settled).toMatchObject({ attempts: 0, error: 'dropped: no review asks (book Q-259)' })
+    expect(settled!.doneAt).not.toBeNull()
   })
 })

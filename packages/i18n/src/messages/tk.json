@@ -61,8 +61,7 @@
     "moveRefused": "{brand}: {business}: täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar: {date} {time}. {link}",
     "cancelled": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}",
     "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",
-    "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}.",
-    "reviewAsk": "{business}-da bolşuňyz nähili boldy? Baha beriň: {link}"
+    "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}."
   },
   "fmt": {
     "money": "{amount} {currency}",

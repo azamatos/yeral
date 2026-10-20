@@ -171,7 +171,9 @@ describe('client bookings', () => {
     // reminders are queued for later
     const queued = await db.select().from(jobs).where(eq(jobs.kind, 'booking.sms'))
     // the day-before reminder would be in the past already (booked at 11:20 for tomorrow 11:00)
-    expect(queued.map((j) => j.payload.kind)).toEqual(expect.arrayContaining(['confirmed', 'reminder2h', 'reviewAsk']))
+    expect(queued.map((j) => j.payload.kind)).toEqual(expect.arrayContaining(['confirmed', 'reminder2h']))
+    // no review ask (book Q-259)
+    expect(queued.map((j) => j.payload.kind)).not.toContain('reviewAsk')
     expect(queued.map((j) => j.payload.kind)).not.toContain('reminderDay')
   })
 

@@ -1342,7 +1342,6 @@ flowchart TD
 
 **Code differs**
 
-- The api still queues a review-ask SMS 2 hours after the end (code: `bookings/confirm.ts`, `reviewAsk`).
 - A review can be written at any time after the visit, with no 30-day limit (code: `bookings/actions.ts`).
 
 **Status:** Design: drawn (Account-Bookings · `view=review`) · Code: built (api).
@@ -1725,7 +1724,7 @@ flowchart TD
 **Code differs**
 
 - The first switch silences only the "confirmed" SMS today; SMS for business moves and cancels don't exist yet (M5).
-- The api still has the review-ask switch (code: `packages/contract/src/account.ts`, `reviewAsk`).
+- The api's `notifications.reviewAsk` stays in /v1 as always false and is ignored on update (code: `packages/contract/src/account.ts`).
 
 **Status:** Design: drawn (Account-Profile) · Code: partly.
 

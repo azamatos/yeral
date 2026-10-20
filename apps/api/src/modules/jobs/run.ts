@@ -2,7 +2,7 @@
  * `runDueJobs(deps)` every minute (ADR 0005), from the jobs tick in the Node process.
  * 1. Requests whose hold time ran out → cancelled by the system, with 3 alternative times and an SMS.
  * 2. Confirmed visits that ended → completed.
- * 3. Queued work: SMS, reminders, review asks, demo businesses answering.
+ * 3. Queued work: SMS, reminders, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
@@ -21,6 +21,11 @@ import { bookedServices, onlineRefusal } from '../bookings/create'
 import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100
+/**
+ * How a review ask is settled unsent (book Q-259), here and in migration 0016: done, never tried (attempts 0), so a
+ * count of failed SMS (attempts reached) leaves it out.
+ */
+const DROPPED_REVIEW_ASK = 'dropped: no review asks (book Q-259)'
 const MAX_ATTEMPTS = 5
 
 /**
@@ -208,8 +213,7 @@ async function sendBookingSms(
   if (!b?.clientPhone || b.accountDeletedAt) return
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   if (kind === 'expired' || kind === 'moveRefused') return sendOutcomeSms(deps, b, kind)
-  const wanted = kind === 'reviewAsk' ? b.status === 'completed' || b.status === 'confirmed' : b.status === 'confirmed'
-  if (!wanted) return
+  if (b.status !== 'confirmed') return
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const [client] = b.clientId ? await deps.db.select().from(clients).where(eq(clients.id, b.clientId)) : []
   if (client?.noRemindersSms && kind !== 'confirmed') return
@@ -218,7 +222,6 @@ async function sendBookingSms(
       confirmed: user.notifyConfirmation,
       reminderDay: user.notifyReminderDay,
       reminder2h: user.notifyReminder2h,
-      reviewAsk: user.notifyReviewAsk,
     }
     // a reminder moved out of the night goes if one of the reminders it stands for is wanted
     const covers = Array.isArray(at.covers) ? (at.covers as (keyof typeof prefs)[]) : []
@@ -238,7 +241,7 @@ async function sendBookingSms(
   // the texts with a link get one of their own (book Q-168)
   // the person's phone now: a changed number gets them, the old one nothing more (book Q-171)
   const to = user?.phone ?? b.clientPhone
-  if (kind === 'confirmed' || kind === 'reviewAsk') await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
+  if (kind === 'confirmed') await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
   else await deps.sms.send({ to, text: bookingSmsText(lang, kind, sms) })
 }
 
@@ -263,6 +266,14 @@ async function runQueue(deps: Deps): Promise<number> {
   for (const job of claimed) {
     try {
       const p = job.payload
+      // a review ask an older api queued (book Q-259): settled unsent, recorded as migration 0016 records them
+      if (job.kind === 'booking.sms' && p.kind === 'reviewAsk') {
+        await deps.db
+          .update(jobs)
+          .set({ doneAt: new Date(deps.now()), lockedUntil: null, error: DROPPED_REVIEW_ASK })
+          .where(eq(jobs.id, job.id))
+        continue
+      }
       if (job.kind === 'sms') await deps.sms.send({ to: String(p.to), text: String(p.text) })
       else if (job.kind === 'booking.sms') await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p)
       else if (job.kind === 'demo.answer') {

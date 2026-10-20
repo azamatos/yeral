@@ -5,7 +5,7 @@ This chapter says who hears about what, how and when. Clients hear by SMS and on
 Where things stand today:
 
 - **Design:** client messages are decided in client spec §6 and ROUND6. Business notifications are decided in business spec §16, §22 and §25, and drawn on *B-Notifications* and *B-Shell*.
-- **Code:** the api writes the client SMS texts. It sends login codes straight away and queues confirmations, expiries, reminders and review asks. Texts for declines and business cancels exist, but nothing sends them yet, because the business side isn't built (M5). Business notifications aren't built at all. **Code differs:** the product has no review ask (Q-259).
+- **Code:** the api writes the client SMS texts. It sends login codes straight away and queues confirmations, expiries and reminders. Texts for declines and business cancels exist, but nothing sends them yet, because the business side isn't built (M5). Business notifications aren't built at all. No review ask (Q-259; the api's ask and its switch are gone).
 - **No SMS reaches a phone yet.** Every environment, production included, writes SMS to a log (see "Not decided").
 
 ## Channels
