@@ -1,0 +1,1 @@
+ALTER TABLE "booking_rules" ADD COLUMN "no_shows_count_from" timestamp with time zone;

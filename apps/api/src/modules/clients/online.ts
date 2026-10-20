@@ -9,7 +9,7 @@ import { isOnlineBlocked } from '@yeral/domain/clients'
 import type { BookingRules } from '@yeral/domain/rules'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { clients } from '../../db/schema'
+import { bookingRules, clients } from '../../db/schema'
 import { noShowMarkedAt } from '../bookings/repo'
 
 type Rules = Pick<BookingRules, 'blockAfterNoShows'>
@@ -21,7 +21,10 @@ type Rules = Pick<BookingRules, 'blockAfterNoShows'>
  */
 const noShowsSince = sql<number>`(select count(*)::int from "bookings" where "bookings"."client_id" = "clients"."id"
   and "bookings"."status" = 'noshow'
-  and ("clients"."no_shows_since" is null or ${noShowMarkedAt} > "clients"."no_shows_since"))`
+  and ("clients"."no_shows_since" is null or ${noShowMarkedAt} > "clients"."no_shows_since")
+  and ${noShowMarkedAt} > coalesce(
+    (select "booking_rules"."no_shows_count_from" from "booking_rules" where "booking_rules"."business_id" = "clients"."business_id"),
+    '-infinity'::timestamptz))`
 
 /** Whether the count reaches the limit, in SQL. */
 const reached = (rules: Rules) => (rules.blockAfterNoShows > 0 ? sql`${noShowsSince} >= ${rules.blockAfterNoShows}` : sql`false`)
@@ -38,6 +41,20 @@ export async function isPhoneBlocked(db: Queryable, businessId: string, phone: s
     .from(clients)
     .where(and(eq(clients.businessId, businessId), eq(clients.phone, phone)))
   return !!row && isOnlineBlocked({ onlineBlocked: row.byHand, noShowsSinceReset: row.noShows }, rules)
+}
+
+/**
+ * The business sets its no-show limit (the settings, P2 step 4). A lower limit counts only no-shows marked from now on
+ * (`noShowsCountFrom`); a higher one, or 0, lifts blocks from the count at once.
+ */
+export async function setNoShowLimit(db: Queryable, businessId: string, limit: number, at: Date): Promise<void> {
+  await db
+    .update(bookingRules)
+    .set({
+      blockAfterNoShows: limit,
+      noShowsCountFrom: sql`case when ${limit} > 0 and ${limit} < ${bookingRules.blockAfterNoShows} then ${at.toISOString()}::timestamptz else ${bookingRules.noShowsCountFrom} end`,
+    })
+    .where(eq(bookingRules.businessId, businessId))
 }
 
 /**

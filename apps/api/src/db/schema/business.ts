@@ -148,6 +148,11 @@ export const bookingRules = pgTable('booking_rules', {
   cancelWindowMinutes: integer().default(120),
   askCancelReason: boolean().notNull().default(true),
   blockAfterNoShows: integer().notNull().default(2),
+  /**
+   * When the business last lowered the no-show limit: a lower limit counts only no-shows marked from then on, so it
+   * doesn't block clients for visits missed under the old one (plan review, 19.10.2026). Raising it lifts at once.
+   */
+  noShowsCountFrom: ts(),
   lateToleranceMinutes: integer().notNull().default(15),
   note: jsonb().$type<Localized>(),
 })

@@ -8,7 +8,7 @@ import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
 import { bookingRules, bookings, businesses, clients, rateLimits, services } from '../../db/schema'
 import { seed } from '../../db/seed'
-import { noShowsSinceReset, setOnlineBlocked } from './online'
+import { noShowsSinceReset, setNoShowLimit, setOnlineBlocked } from './online'
 
 const THU = '2026-10-15'
 const DAY = 86_400_000
@@ -63,7 +63,8 @@ describe('phone-only after no-shows', () => {
       const [made] = await db
         .insert(bookings)
         .values({
-          code: `YR-9${String(codes++).padStart(4, '0')}`,
+          // six digits: random booking codes have five, so the demo seed can't take one of these
+          code: `YR-9${String(codes++).padStart(5, '0')}`,
           businessId: glowId,
           clientId: (await row()).id,
           type: 'appointment',
@@ -177,5 +178,28 @@ describe('phone-only after no-shows', () => {
     await setOnlineBlocked(db, id, false, RULES, new Date(DEMO_NOW))
     expect((await c.row()).onlineBlocked).toBe(false)
     expect((await c.book()).status).toBe(201)
+  })
+
+  it('a lowered limit counts only no-shows from that day; a raised one lifts at once (plan review, 19.10.2026)', async () => {
+    const c = await newClient('+99365444111')
+    await c.noShow(DEMO_NOW - 3 * DAY)
+    await c.noShow(DEMO_NOW - 2 * DAY)
+    // the limit was 3: two old no-shows don't block
+    await setNoShowLimit(db, glowId, 3, new Date(DEMO_NOW - 4 * DAY))
+    expect((await c.book()).status).toBe(201)
+    // lowered to 2 today: the old two don't count against it
+    await setNoShowLimit(db, glowId, 2, new Date(DEMO_NOW - DAY))
+    try {
+      expect((await c.book()).status).toBe(201)
+      await c.noShow(DEMO_NOW - 3_600_000)
+      expect((await c.book()).status).toBe(201)
+      await c.noShow(DEMO_NOW)
+      expect((await c.book()).json.error.code).toBe('online_blocked')
+      // raised again: lifted at once
+      await setNoShowLimit(db, glowId, 3, new Date(DEMO_NOW))
+      expect((await c.book()).status).toBe(201)
+    } finally {
+      await db.update(bookingRules).set({ blockAfterNoShows: 2, noShowsCountFrom: null }).where(eq(bookingRules.businessId, glowId))
+    }
   })
 })

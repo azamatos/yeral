@@ -23,7 +23,7 @@ describe('reminders and the night (book Q-285)', () => {
     const [row] = await db
       .insert(bookings)
       .values({
-        code: 'YR-99101',
+        code: 'YR-991001',
         businessId: barber!.id,
         type: 'appointment',
         date: '2026-10-16',
@@ -58,7 +58,7 @@ describe('reminders and the night (book Q-285)', () => {
     const [row] = await db
       .insert(bookings)
       .values({
-        code: 'YR-99102',
+        code: 'YR-991002',
         businessId: barber!.id,
         userId: user!.id,
         type: 'appointment',
@@ -91,7 +91,7 @@ describe('reminders and the night (book Q-285)', () => {
       const [row] = await db
         .insert(bookings)
         .values({
-          code: 'YR-99103',
+          code: 'YR-991003',
           businessId: barber!.id,
           type: 'appointment',
           date: '2026-10-16',
