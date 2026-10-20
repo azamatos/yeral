@@ -23,13 +23,27 @@ export async function newBookingLink(
   db: Queryable,
   site: SiteConfig,
   booking: Pick<BookingRow, 'id' | 'date' | 'end'>,
+  sentTo: string,
   now: number,
 ): Promise<{ url: string; tokenHash: string }> {
   const token = randomToken(16)
   const tokenHash = await sha256Hex(token)
   const from = Math.max(now, epochOf(booking.date, booking.end))
-  await db.insert(bookingLinks).values({ tokenHash, bookingId: booking.id, expiresAt: new Date(from + LINK_DAYS * 86_400_000) })
+  await db.insert(bookingLinks).values({ tokenHash, bookingId: booking.id, sentTo, expiresAt: new Date(from + LINK_DAYS * 86_400_000) })
   return { url: `${site.urls.client.replace(/^https?:\/\//, '')}/l/${token}`, tokenHash }
+}
+
+/**
+ * The phone a booking's SMS go to: its account's phone now, else the phone it was booked with; none once the person
+ * deleted their account or the business removed the client. Links are checked against it when opened.
+ */
+export async function bookingRecipient(
+  db: Queryable,
+  b: Pick<BookingRow, 'userId' | 'clientPhone' | 'accountDeletedAt'>,
+): Promise<string | null> {
+  if (!b.clientPhone || b.accountDeletedAt) return null
+  const [user] = b.userId ? await db.select({ phone: users.phone }).from(users).where(eq(users.id, b.userId)) : []
+  return user?.phone ?? b.clientPhone
 }
 
 /** A booking moved: its links work until 90 days after the new visit too. */
@@ -49,13 +63,13 @@ export async function pruneBookingLinks(db: Queryable, now: number): Promise<voi
 /** The booking a link opens; an unknown or expired link is `not_found` ("Bu salgy işlemeýär"). */
 export async function bookingOfLink(db: Queryable, token: string, now: number): Promise<BookingRow & { phone: string }> {
   const [row] = await db
-    .select({ booking: bookings, userPhone: users.phone })
+    .select({ booking: bookings, sentTo: bookingLinks.sentTo })
     .from(bookingLinks)
     .innerJoin(bookings, eq(bookings.id, bookingLinks.bookingId))
-    .leftJoin(users, eq(users.id, bookings.userId))
     .where(and(eq(bookingLinks.tokenHash, await sha256Hex(token)), gt(bookingLinks.expiresAt, new Date(now))))
-  // a deleted account's booking opens nothing, whatever link a late job made for it
-  const phone = row?.userPhone ?? row?.booking.clientPhone
-  if (!row || !phone || row.booking.accountDeletedAt) throw new ApiError('not_found')
+  // a link works only while it went to the booking's phone now: not after a phone change, an account deletion or the
+  // client's removal, whatever a late job sent
+  const phone = row ? await bookingRecipient(db, row.booking) : null
+  if (!row || !phone || phone !== row.sentTo) throw new ApiError('not_found')
   return { ...row.booking, phone }
 }

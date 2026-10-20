@@ -170,6 +170,8 @@ export const bookingLinks = pgTable(
     bookingId: uuid()
       .notNull()
       .references(() => bookings.id, { onDelete: 'cascade' }),
+    /** The phone the SMS went to: the link works only while that is still the booking's phone (`bookingOfLink`). */
+    sentTo: text().notNull(),
     createdAt: createdAt(),
     expiresAt: ts().notNull(),
   },

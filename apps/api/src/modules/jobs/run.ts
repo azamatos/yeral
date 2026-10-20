@@ -159,7 +159,7 @@ type OutcomeSmsKind = 'expired' | 'moveRefused'
  * token is known to nobody (only its hash is stored); it's pruned when it expires.
  */
 async function sendWithLink(deps: Deps, b: BookingRow, to: string, text: (link: string) => string): Promise<void> {
-  const link = await newBookingLink(deps.db, deps.site, b, deps.now())
+  const link = await newBookingLink(deps.db, deps.site, b, to, deps.now())
   await deps.sms.send({ to, text: text(link.url) })
 }
 
@@ -176,7 +176,6 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const lang = user?.lang ?? MARKET.defaultLanguage
   const sms = { date: b.date, start: b.start, businessName: biz.name, address: biz.address }
-  // a paused business or a phone-only client: the page offers no times, so neither does the text (book Q-154)
   const to = user?.phone ?? b.clientPhone ?? ''
   // a paused business or a phone-only client: the page offers the call card, so the text asks them to call (Q-154)
   const byPhone = !!(await onlineRefusal(deps.db, lb, to))

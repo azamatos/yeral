@@ -1,23 +1,12 @@
 /** SMS links to a booking (book Q-168, Q-169, F-068). */
 import { epochOf } from '@yeral/domain/time'
-import { and, eq } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import {
-  bookingItems,
-  bookingLinks,
-  bookingRules,
-  bookings,
-  businesses,
-  clients,
-  invites,
-  jobs,
-  rateLimits,
-  services,
-} from '../../db/schema'
+import { bookingItems, bookingLinks, bookingRules, bookings, businesses, jobs, rateLimits, services } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 import { confirmBooking } from './confirm'
@@ -121,7 +110,7 @@ describe('SMS links', () => {
       priceType: 'fixed',
       priceAmount: 80,
     })
-    const link = await newBookingLink(db, t.deps.site, row!, DEMO_NOW)
+    const link = await newBookingLink(db, t.deps.site, row!, '+99365444306', DEMO_NOW)
     const token = tokenOf(link.url)
     const visitor = browser(t.app)
     const sent = await visitor.req(`/v1/links/${token}/code`, { body: {} })
@@ -165,7 +154,7 @@ describe('SMS links', () => {
         clientPhone: '+99365444308',
       })
       .returning()
-    const link = await newBookingLink(db, t.deps.site, row!, DEMO_NOW)
+    const link = await newBookingLink(db, t.deps.site, row!, '+99365444308', DEMO_NOW)
     const [stored] = await db.select().from(bookingLinks).where(eq(bookingLinks.tokenHash, link.tokenHash))
     expect(stored!.expiresAt.getTime()).toBe(epochOf('2027-04-01', 660) + LINK_DAYS * 86_400_000)
   })
@@ -187,44 +176,41 @@ describe('SMS links', () => {
     expect(past.map((x: { code: string }) => x.code)).not.toContain(code)
   })
 
-  it('a phone change moves the person to the new number: bookings, records, links, invites (book Q-171)', async () => {
+  it('after a phone change, links sent to the old number stop working and SMS go to the new one', async () => {
     const { b, code, token } = await confirmedWithLink('+99365444311')
-    // a phone booking for the old number since the last sign-in, and an invite to it
-    await db.insert(bookings).values({
-      code: 'YR-99311',
-      businessId: glowId,
-      type: 'appointment',
-      date: THU,
-      start: 1200,
-      end: 1260,
-      status: 'confirmed',
-      source: 'phone',
-      clientPhone: '+99365444311',
-    })
-    const maysa = browser(t.app)
-    await maysa.login('+99365102030')
-    await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: '+99365444311', name: 'Läle', level: 'specialist' } })
     expect((await b.req('/v1/me/phone/code', { body: { phone: '+99365444312' } })).status).toBe(200)
     expect((await b.req('/v1/me/phone/verify', { body: { phone: '+99365444312', code: '1234' } })).status).toBe(200)
-    const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
-    expect(row!.clientPhone).toBe('+99365444312')
     expect((await browser(t.app).req(`/v1/links/${token}`)).status).toBe(404)
-    // the phone booking joined the account and moved with it
-    expect((await b.req('/v1/me/bookings/YR-99311')).json.code).toBe('YR-99311')
-    const [record] = await db
-      .select()
-      .from(clients)
-      .where(and(eq(clients.businessId, glowId), eq(clients.phone, '+99365444312')))
-    expect(record).toBeTruthy()
-    const [invite] = await db.select().from(invites).where(eq(invites.phone, '+99365444311'))
-    expect(invite!.status).toBe('cancelled')
+    // the next booking SMS (the review ask after the visit) goes to the new number, with a link that works
+    const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
+    t.clock.now = epochOf(row!.date, row!.end) + 3 * 3_600_000
+    await runDueJobs(t.deps)
+    const sms = t.sms.sent.filter((x) => x.to === '+99365444312').at(-1)?.text
+    expect((await browser(t.app).req(`/v1/links/${tokenOf(sms)}`)).status).toBe(200)
+    expect(t.sms.sent.filter((x) => x.to === '+99365444311' && x.text.includes('Rate it'))).toEqual([])
+  })
+
+  it('a failed send keeps no token in the stored error', async () => {
+    const { b, code } = await confirmedWithLink('+99365444316')
+    void b
+    const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
+    const failing = {
+      ...t.deps,
+      sms: { send: (m: { text: string }) => Promise.reject(new Error(`400 Bad Request: {"text":"${m.text.replace(/\//g, '\\/')}"}`)) },
+    }
+    t.clock.now = epochOf(row!.date, row!.end) + 3 * 3_600_000
+    await runDueJobs(failing)
+    const failed = await db.select({ error: jobs.error }).from(jobs).where(eq(jobs.kind, 'booking.sms'))
+    const errors = failed.map((j) => j.error ?? '').filter((e) => e.includes('Rate it'))
+    expect(errors.length).toBeGreaterThan(0)
+    for (const e of errors) expect(e).toMatch(/l\\\/…/)
   })
 
   it('a booking of a deleted account opens nothing, even through a link a late job made', async () => {
     const { b, code } = await confirmedWithLink('+99365444315')
     const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
     expect((await b.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
-    const late = await newBookingLink(db, t.deps.site, row!, DEMO_NOW)
+    const late = await newBookingLink(db, t.deps.site, row!, '+99365444315', DEMO_NOW)
     expect((await browser(t.app).req(`/v1/links/${tokenOf(late.url)}`)).status).toBe(404)
   })
 

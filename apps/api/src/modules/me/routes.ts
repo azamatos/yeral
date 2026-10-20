@@ -4,8 +4,8 @@ import { meSchema, sendCodeResponseSchema, sendCodeSchema, updateMeSchema, verif
 import { businessCardSchema } from '@yeral/contract/catalog'
 import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
 import { epochOf, today } from '@yeral/domain/time'
-import { and, desc, eq, inArray, isNull, or, sql } from 'drizzle-orm'
-import { bookingLinks, bookings, businesses, clients, favorites, invites, sessions, staff, users } from '../../db/schema'
+import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm'
+import { bookingLinks, bookings, businesses, favorites, invites, sessions, staff, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
@@ -13,7 +13,7 @@ import { clientIp } from '../../lib/rate-limit'
 import { emit } from '../../notify'
 import { checkCode, sendCode } from '../auth/codes'
 import { endSession, requireUser } from '../auth/session'
-import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
+import { setStatus, StaleBooking } from '../bookings/repo'
 import { buildCards } from '../catalog/cards'
 import { publicBusiness } from '../catalog/detail'
 import { toMe } from './me'
@@ -173,47 +173,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     if (userId !== user.id) throw new ApiError('code_expired')
     const [taken] = await c.var.deps.db.select({ id: users.id }).from(users).where(eq(users.phone, phone))
     if (taken) throw new ApiError('phone_taken')
-    const { db } = c.var.deps
-    const old = user.phone
-    const row = await db
-      .transaction(async (tx) => {
-        const [updated] = await tx.update(users).set({ phone }).where(eq(users.id, user.id)).returning()
-        // phone bookings made for the old number since the last sign-in are theirs: they join the account
-        await tx
-          .update(bookings)
-          .set({ userId: user.id })
-          .where(and(eq(bookings.clientPhone, old), isNull(bookings.userId), isNull(bookings.accountDeletedAt)))
-        // the bookings ahead text the new number; every link sent to the old one stops working (book Q-168)
-        await tx
-          .update(bookings)
-          .set({ clientPhone: phone })
-          .where(and(eq(bookings.userId, user.id), inArray(bookings.status, ['pending', 'confirmed'])))
-        await tx
-          .delete(bookingLinks)
-          .where(inArray(bookingLinks.bookingId, tx.select({ id: bookings.id }).from(bookings).where(eq(bookings.userId, user.id))))
-        // every business's record of the person follows the number (book Q-171), where that business has no record of
-        // the new number already
-        await tx
-          .update(clients)
-          .set({ phone })
-          .where(
-            and(
-              eq(clients.userId, user.id),
-              sql`not exists (select 1 from ${clients} as other where other.business_id = ${clients.businessId} and other.phone = ${phone})`,
-            ),
-          )
-        // an invite to the old number goes: whoever gets it next mustn't find it
-        await tx
-          .update(invites)
-          .set({ status: 'cancelled', answeredAt: new Date(c.var.deps.now()) })
-          .where(and(eq(invites.phone, old), eq(invites.status, 'pending')))
-        return updated
-      })
-      .catch((e: unknown) => {
-        // someone took the number meanwhile
-        if (pgCode(e) === '23505') throw new ApiError('phone_taken')
-        throw e
-      })
+    const [row] = await c.var.deps.db.update(users).set({ phone }).where(eq(users.id, user.id)).returning()
     // other devices sign in again with the new number
     const current = c.var.auth?.sessionId
     const others = (await c.var.deps.db.select({ id: sessions.id }).from(sessions).where(eq(sessions.userId, user.id))).filter(
