@@ -98,6 +98,8 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | busy time across midnight | `busyOn(busy, date)` | `@yeral/domain/availability` |
 | free times: appointment, table, class | `appointmentSlots() findAppointmentSlot() nearestSlots() nextFreeSlot() checkPlan() busyOf() tableSlots() assignTable() maxSeats()`; one named specialist: `oneSpecialist`/`preferStaffId` on the query, `slotStaffId()` | `@yeral/domain/availability` |
 | offered times as the client sees them: specialist, free / taken / past; where taking one books (api) | `offeredTimes() offerTarget()` | `apps/api/src/modules/bookings/offers.ts` |
+| SMS links to a booking: make one per SMS, read the booking by its token (api) | `newBookingLink() bookingOfLink() LINK_DAYS` | `apps/api/src/modules/bookings/links.ts` |
+| sign a phone in after its code (the plain login and the link page's) (api) | `signIn(c, phone, lang)` | `apps/api/src/modules/auth/sign-in.ts` |
 | a booking's services in order, who a re-booked time goes to, why a phone can't book online (api) | `bookedServices() rebookQuery() onlineRefusal() assertOnlineBooking()` | `apps/api/src/modules/bookings/create.ts` |
 | statuses, hold time, who may do what with a booking | `initialStatus() holdUntil() reminderPlan() offerPast() effectiveStatus() dueTransition() cancelDeadline() clientActions() canAnswerRequest() canComplain() …` | `@yeral/domain/lifecycle` |
 | access levels and the permission table | `LEVELS PERMISSION_TABLE scopeOf() can() canOn() canManageTeam() canAnswerRequest()` | `@yeral/domain/permissions` |
@@ -109,7 +111,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | price totals, calendar day summary | `priceTotal() daySummary()` | `@yeral/domain/pricing` |
 | distances, radius box, the city a position is in | `distanceM() boundingBox() popularity() nearestCity()`; the market's main city: `MARKET.mainCity` | `@yeral/domain/geo` |
 | the market's cities, a business's city in the reader's language (api) | `loadCities() cityRefOf()` | `apps/api/src/modules/catalog/cities.ts` |
-| phones by the market's rules (`+993`) | `isPhone() isMobile() toE164() formatPhone() formatNational() E164 COUNTRY_PREFIX`; a person's language: `marketLocaleSchema`, texts per language: `localizedSchema(max)` (`@yeral/contract/common`) | `@yeral/domain/phone` |
+| phones by the market's rules (`+993`) | `isPhone() isMobile() toE164() formatPhone() formatNational() maskPhone() E164 COUNTRY_PREFIX`; a person's language: `marketLocaleSchema`, texts per language: `localizedSchema(max)` (`@yeral/contract/common`) | `@yeral/domain/phone` |
 | ids, booking codes | `newId() bookingCode()` | `@yeral/domain/id` |
 | money, prices, durations, distances, dates on screen | `useFmt()` in components, `createFmt(locale)` elsewhere (`money price rating duration distance time timeRange dayMonth shortDate weekdayDate monthYear relativeDay addressIn phone`) | `@yeral/i18n` |
 | locales, shared messages (`common`, `status`, `fmt`, `sms`) | `LOCALES` (translated) `MARKET_LOCALES` (offered) `DEFAULT_LOCALE` (market's main) `isLocale() messages` | `@yeral/i18n` |

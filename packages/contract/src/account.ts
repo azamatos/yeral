@@ -46,6 +46,12 @@ export const meSchema = z
   .meta({ id: 'Me' })
 export type Me = z.infer<typeof meSchema>
 
+/** The link page's login: the code goes to the booking's own phone, so only the code is sent (book F-068). */
+export const linkVerifySchema = z
+  .object({ code: z.string().regex(/^\d{4}$/), lang: marketLocaleSchema.optional() })
+  .meta({ id: 'LinkVerify' })
+export const linkCodeSchema = z.object({ lang: marketLocaleSchema.optional() }).meta({ id: 'LinkCode' })
+
 export const verifyCodeResponseSchema = z.object({
   me: meSchema,
   /** First login: ask for the name. */

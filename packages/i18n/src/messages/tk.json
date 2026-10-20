@@ -57,6 +57,7 @@
     "declined": "{brand}: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}",
     "expired": "{brand}: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {times} — {link}",
     "expiredNoTimes": "{brand}: {business} wagtynda jogap bermedi. Başga wagt saýlaň: {link}",
+    "expiredCall": "{brand}: {business} wagtynda jogap bermedi. Ýazylmak üçin jaň ediň: {link}",
     "moveRefused": "{brand}: {business}: täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar: {date} {time}. {link}",
     "cancelled": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}",
     "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",

@@ -31,6 +31,7 @@ Apps call it only through `@yeral/sdk`. The frozen `apps/legacy` keeps its own i
 | Business page | `GET /v1/businesses/:slug` · `GET /v1/businesses/:slug/reviews` | `catalog`: `businessDetail`, `reviewList` |
 | Free times | `GET /v1/businesses/:slug/availability` (appointment; `?move={code}` in move mode) · `GET /v1/businesses/:slug/specialists/availability` · `GET /v1/businesses/:slug/tables` · `GET /v1/businesses/:slug/sessions` | `availability` |
 | Bookings | `POST /v1/bookings` · `GET /v1/me/bookings?tab=upcoming\|past` · `GET /v1/me/bookings/:code` | `bookings`: `createBooking`, `bookingList`, `bookingDetail` |
+| SMS link page | `GET /v1/links/:token` · `POST /v1/links/:token/code` · `POST /v1/links/:token/verify` (book Q-168, F-068) | `bookings`: `bookingLink`; `account`: `linkCode`, `linkVerify` |
 | Booking actions | `POST /v1/me/bookings/:code/cancel` · `…/restore` · `PATCH …/note` · `POST …/reschedule` · `POST …/withdraw-move` · `POST …/accept-alternative` · `POST …/review` · `PATCH …/review` | `bookings` |
 | Live updates | `GET /v1/events?after=` (a team member gets what their level sees) | `events` |
 

@@ -7,7 +7,8 @@
 
 ADR 0003 put a choose-client-or-business landing on `yeral.app` and the marketplace on `client.yeral.app`. The web
 design (v0.3, 14.10.2026) draws the marketplace itself on `yeral.app/tk` with a "Biznes üçin" link in the header and a
-business block on Home, and gives the B2B pricing page to `business.yeral.app`. SMS templates link to `yeral.app/b/{id}`.
+business block on Home, and gives the B2B pricing page to `business.yeral.app`. SMS templates link to `yeral.app/b/{id}`. *Amended 20.10.2026 (book Q-168):* booking SMS links carry a long random
+token on `yeral.app/l/{token}`; a booking code never opens anything by itself.
 
 ## Decision
 

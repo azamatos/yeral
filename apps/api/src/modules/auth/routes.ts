@@ -2,14 +2,14 @@
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import { sendCodeResponseSchema, sendCodeSchema, verifyCodeResponseSchema, verifyCodeSchema } from '@yeral/contract/account'
 import { MARKET } from '@yeral/domain/market'
-import { and, eq, isNull } from 'drizzle-orm'
-import { bookings, clients, users } from '../../db/schema'
+import { eq } from 'drizzle-orm'
+import { users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { clientIp } from '../../lib/rate-limit'
-import { toMe } from '../me/me'
 import { checkCode, sendCode } from './codes'
-import { endSession, startSession } from './session'
+import { endSession } from './session'
+import { signIn } from './sign-in'
 
 const sendCodeRoute = createRoute({
   method: 'post',
@@ -45,31 +45,8 @@ export const authRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(verifyRoute, async (c) => {
     const { phone, code, lang } = c.req.valid('json')
-    const { deps } = c.var
-    await checkCode(deps, { phone, purpose: 'login', code })
-    const result = await deps.db.transaction(async (tx) => {
-      let [user] = await tx.select().from(users).where(eq(users.phone, phone))
-      const isNew = !user?.name
-      if (!user)
-        [user] = await tx
-          .insert(users)
-          .values({ phone, lang: lang ?? MARKET.defaultLanguage })
-          .returning()
-      if (!user) throw new Error('user insert failed')
-      // the same phone may already be known: a business's client list, phone bookings. Team invites wait for the
-      // person to accept or decline them (`/me/invites`, book chapter 3).
-      await tx
-        .update(clients)
-        .set({ userId: user.id })
-        .where(and(eq(clients.phone, phone), isNull(clients.userId)))
-      await tx
-        .update(bookings)
-        .set({ userId: user.id })
-        .where(and(eq(bookings.clientPhone, phone), isNull(bookings.userId)))
-      await startSession(c, tx, user.id)
-      return { me: await toMe(tx, user), isNew }
-    })
-    return c.json(result, 200)
+    await checkCode(c.var.deps, { phone, purpose: 'login', code })
+    return c.json(await signIn(c, phone, lang), 200)
   })
   .openapi(logoutRoute, async (c) => {
     await endSession(c)

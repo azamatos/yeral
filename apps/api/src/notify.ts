@@ -7,7 +7,6 @@ import { MARKET } from '@yeral/domain/market'
 import { localized, type Locale } from '@yeral/domain/model'
 import { epochOf, localOf } from '@yeral/domain/time'
 import { createFmt, createT } from '@yeral/i18n/fmt'
-import type { SiteConfig } from '@yeral/lib/site'
 import { eq } from 'drizzle-orm'
 import type { Queryable } from './db/client'
 import { cities, events, jobs } from './db/schema'
@@ -33,13 +32,9 @@ export async function queueSms(db: Queryable, sms: { to: string; text: string; r
     .onConflictDoNothing({ target: jobs.dedupeKey })
 }
 
-/** `yeral.app/b/YR-48213`: the design's SMS link; the client site sends booking codes to the booking detail (ADR 0015). */
-export function bookingLink(site: SiteConfig, code: string): string {
-  return `${site.urls.client.replace(/^https?:\/\//, '')}/b/${code}`
-}
-
 export interface SmsBooking {
-  code: string
+  /** The booking's SMS link (`newBookingLink`): the texts that carry one refuse to go without it. */
+  link?: string
   date: string
   start: number
   businessName: string
@@ -68,14 +63,15 @@ const dayOf = (date: string, start: number) => wallOf(date, start).date
 /** The brand name for SMS texts: the `common.brand` message, where the brand lives (systemPatterns, "Configuration, domains and brand"). */
 const brandOf = (t: ReturnType<typeof createT>) => t('common.brand')
 
-export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsKind, b: SmsBooking): string {
+export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking): string {
+  if ((kind === 'confirmed' || kind === 'reviewAsk') && !b.link) throw new Error(`the ${kind} SMS needs its link`)
   const t = createT(lang)
   const fmt = createFmt(lang)
   const common = {
     brand: brandOf(t),
     business: b.businessName,
     time: fmt.time(wallOf(b.date, b.start).min),
-    link: bookingLink(site, b.code),
+    link: b.link ?? '',
     address: b.city ? fmt.addressIn(b.address, b.city) : b.address,
   }
   switch (kind) {
@@ -91,11 +87,20 @@ export function bookingSmsText(site: SiteConfig, lang: Locale, kind: BookingSmsK
   }
 }
 
-/** The expiry SMS with the free times; with none free it asks the client to pick another time (book Q-252). */
-export function expiredSmsText(site: SiteConfig, lang: Locale, b: SmsBooking, times: { date: string; start: number }[]): string {
+/**
+ * The expiry SMS with the free times; with none free it asks the client to pick another time (book Q-252); for a
+ * client who can't book this business online now, to call (Q-154).
+ */
+export function expiredSmsText(
+  lang: Locale,
+  b: SmsBooking & { link: string },
+  times: { date: string; start: number }[],
+  opts: { byPhone?: boolean } = {},
+): string {
   const fmt = createFmt(lang)
   const t = createT(lang)
-  const common = { brand: brandOf(t), business: b.businessName, link: bookingLink(site, b.code) }
+  const common = { brand: brandOf(t), business: b.businessName, link: b.link }
+  if (opts.byPhone) return t('sms.expiredCall', common)
   if (!times.length) return t('sms.expiredNoTimes', common)
   const asked = dayOf(b.date, b.start)
   const list = times
@@ -108,7 +113,7 @@ export function expiredSmsText(site: SiteConfig, lang: Locale, b: SmsBooking, ti
 }
 
 /** A move the business declined or let lapse: the booking keeps its time (book Q-289). `b` is the booking itself. */
-export function moveRefusedSmsText(site: SiteConfig, lang: Locale, b: SmsBooking): string {
+export function moveRefusedSmsText(lang: Locale, b: SmsBooking & { link: string }): string {
   const fmt = createFmt(lang)
   const t = createT(lang)
   return t('sms.moveRefused', {
@@ -116,7 +121,7 @@ export function moveRefusedSmsText(site: SiteConfig, lang: Locale, b: SmsBooking
     business: b.businessName,
     date: fmt.dayMonth(dayOf(b.date, b.start)),
     time: fmt.time(wallOf(b.date, b.start).min),
-    link: bookingLink(site, b.code),
+    link: b.link,
   })
 }
 

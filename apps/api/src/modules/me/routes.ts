@@ -4,8 +4,8 @@ import { meSchema, sendCodeResponseSchema, sendCodeSchema, updateMeSchema, verif
 import { businessCardSchema } from '@yeral/contract/catalog'
 import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
 import { epochOf, today } from '@yeral/domain/time'
-import { and, desc, eq, inArray } from 'drizzle-orm'
-import { bookings, businesses, favorites, invites, sessions, staff, users } from '../../db/schema'
+import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm'
+import { bookingLinks, bookings, businesses, favorites, invites, sessions, staff, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
@@ -13,7 +13,7 @@ import { clientIp } from '../../lib/rate-limit'
 import { emit } from '../../notify'
 import { checkCode, sendCode } from '../auth/codes'
 import { endSession, requireUser } from '../auth/session'
-import { setStatus, StaleBooking } from '../bookings/repo'
+import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
 import { buildCards } from '../catalog/cards'
 import { publicBusiness } from '../catalog/detail'
 import { toMe } from './me'
@@ -136,6 +136,15 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
           if (!(e instanceof StaleBooking)) throw e
         }
       }
+      // their bookings are left behind: they never join whoever gets the number next and send no more SMS. Every link
+      // to the number stops working, phone bookings made for it since the last sign-in too; those keep their SMS (the
+      // person still has the number) with new links (book Q-168). Joining an old phone booking later is Q-270's rule.
+      await tx
+        .update(bookings)
+        .set({ accountDeletedAt: new Date(now) })
+        .where(eq(bookings.userId, user.id))
+      const toTheNumber = or(eq(bookings.userId, user.id), and(eq(bookings.clientPhone, user.phone), isNull(bookings.userId)))
+      await tx.delete(bookingLinks).where(inArray(bookingLinks.bookingId, tx.select({ id: bookings.id }).from(bookings).where(toTheNumber)))
       await tx.delete(users).where(eq(users.id, user.id))
     })
     await endSession(c)
@@ -164,7 +173,16 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     if (userId !== user.id) throw new ApiError('code_expired')
     const [taken] = await c.var.deps.db.select({ id: users.id }).from(users).where(eq(users.phone, phone))
     if (taken) throw new ApiError('phone_taken')
-    const [row] = await c.var.deps.db.update(users).set({ phone }).where(eq(users.id, user.id)).returning()
+    const [row] = await c.var.deps.db
+      .update(users)
+      .set({ phone })
+      .where(eq(users.id, user.id))
+      .returning()
+      .catch((e: unknown) => {
+        // someone took the number between the check and the change
+        if (pgCode(e) === '23505') throw new ApiError('phone_taken')
+        throw e
+      })
     // other devices sign in again with the new number
     const current = c.var.auth?.sessionId
     const others = (await c.var.deps.db.select({ id: sessions.id }).from(sessions).where(eq(sessions.userId, user.id))).filter(

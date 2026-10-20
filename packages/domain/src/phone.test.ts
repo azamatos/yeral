@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { E164, formatNational, formatPhone, isMobile, isPhone, nationalDigits, toE164 } from './phone'
+import { E164, formatNational, formatPhone, isMobile, isPhone, maskPhone, nationalDigits, toE164 } from './phone'
 
 describe('Turkmen phones (the market of the first launch)', () => {
   it('stores numbers as E.164 of the market', () => {
@@ -51,5 +51,11 @@ describe('Turkmen phones (the market of the first launch)', () => {
     expect(isMobile('+993 65 12 34 56')).toBe(true)
     expect(isMobile('+993 71 12 34 56')).toBe(true)
     expect(isMobile('+993 12 45 67 89')).toBe(false)
+  })
+})
+
+describe('maskPhone (book F-068)', () => {
+  it('shows the first and last groups only', () => {
+    expect(maskPhone('+99365901122')).toBe('+993 65 •• •• 22')
   })
 })

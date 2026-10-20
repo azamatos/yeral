@@ -68,6 +68,11 @@ export const bookings = pgTable(
      * when another move is asked, one is accepted, or the client withdraws.
      */
     moveRefused: jsonb().$type<MoveRefused>(),
+    /**
+     * The person deleted their account: the booking never joins an account by its phone again (whoever gets the number
+     * next mustn't see it) and sends no more SMS.
+     */
+    accountDeletedAt: ts(),
     complaintType: complaintType(),
     complaintText: text(),
     complaintAt: ts(),
@@ -152,6 +157,25 @@ export const bookingItems = pgTable(
     sort: integer().notNull().default(0),
   },
   (t) => [index('booking_items_booking_idx').on(t.bookingId), index('booking_items_staff_date_idx').on(t.staffId, t.date)],
+)
+
+/**
+ * SMS links to one booking (book Q-168): a long random token on a path of its own, stored hashed, one per SMS. The
+ * booking code is shown and read out on the phone but opens nothing by itself.
+ */
+export const bookingLinks = pgTable(
+  'booking_links',
+  {
+    tokenHash: text().primaryKey(),
+    bookingId: uuid()
+      .notNull()
+      .references(() => bookings.id, { onDelete: 'cascade' }),
+    /** The phone the SMS went to: the link works only while that is still the booking's phone (`bookingOfLink`). */
+    sentTo: text().notNull(),
+    createdAt: createdAt(),
+    expiresAt: ts().notNull(),
+  },
+  (t) => [index('booking_links_booking_idx').on(t.bookingId)],
 )
 
 export const reviews = pgTable(

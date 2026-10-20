@@ -13,7 +13,7 @@
  * schema accepts (`z.input`), query parameters the values it reads them as (`z.output`), turned back into text below.
  */
 import { infiniteQueryOptions, mutationOptions, queryOptions, type QueryClient } from '@tanstack/react-query'
-import type { sendCodeSchema, updateMeSchema, verifyCodeSchema } from '@yeral/contract/account'
+import type { linkCodeSchema, linkVerifySchema, sendCodeSchema, updateMeSchema, verifyCodeSchema } from '@yeral/contract/account'
 import type {
   appointmentAvailabilityQuerySchema,
   sessionsQuerySchema,
@@ -396,7 +396,30 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
-  return { auth, me, catalog, availability, bookings, team }
+  /** The SMS link page (book Q-168, F-068): the booking by its link's token, and the login with its own phone. */
+  const links = {
+    view: (token: string, lang: Locale) =>
+      queryOptions({
+        queryKey: keys.link(token, lang),
+        queryFn: ({ signal }) => call(v1.links[':token'].$get({ param: { token }, query: { lang } }, abortWith(signal))),
+      }),
+    sendCode: (token: string) =>
+      mutationOptions({
+        mutationFn: (body: z.input<typeof linkCodeSchema> = {}) => call(v1.links[':token'].code.$post({ param: { token }, json: body })),
+      }),
+    verify: (token: string) =>
+      mutationOptions({
+        mutationFn: (body: z.input<typeof linkVerifySchema>) => call(v1.links[':token'].verify.$post({ param: { token }, json: body })),
+        // the link page can sign someone in over another person (a shared phone, book Q-169): every query goes back to
+        // empty and the screens on show load again for the new person
+        onSuccess: async (data) => {
+          queryClient.setQueryData(keys.me(), data.me)
+          await queryClient.resetQueries({ predicate: (q) => q.queryKey[0] !== keys.me()[0] })
+        },
+      }),
+  }
+
+  return { auth, me, catalog, availability, bookings, team, links }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

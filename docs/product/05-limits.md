@@ -377,5 +377,5 @@ telling anyone (code: apps/api/src/modules/jobs/run.ts). Reminders keep out of t
 | Text lengths | name 80, note 500, cancel reason 300, review 500, search 80 characters | Fixed | code only: packages/contract/src |
 | Environments | local and production only; no staging | Fixed | owner 16.10.2026; ADR 0020 |
 
-**Code differs:** a hidden tab doesn't ask for changes at all (code: packages/sdk/src/events.ts). SMS links open the
-booking from its code, `yeral.app/b/{code}`.
+**Code differs:** a hidden tab doesn't ask for changes at all (code: packages/sdk/src/events.ts). An SMS link works until
+90 days after the visit (`LINK_DAYS`; Claude (delegated), 20.10.2026).

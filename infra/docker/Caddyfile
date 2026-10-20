@@ -2,6 +2,15 @@
 # HTTP: *.localhost resolves to this machine without /etc/hosts. Client, business and cms hosts join with their apps.
 {
 	auto_https off
+	# a booking link's token opens the booking (book Q-168): handler errors log /l/… and /v1/links/… without it
+	log default {
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp "(/l/|/v1/links/)[^/?]+" "${1}…"
+			}
+		}
+	}
 }
 
 http://api.yeral.localhost {
@@ -15,7 +24,15 @@ http://api.yeral.localhost {
 		X-Frame-Options SAMEORIGIN
 		-Server
 	}
-	log
+	log {
+		# a booking link's token opens the booking (book Q-168): logged as /l/… and /v1/links/…
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp "(/l/|/v1/links/)[^/?]+" "${1}…"
+			}
+		}
+	}
 	# Caddy writes the caller's address into X-Forwarded-For and drops what the caller sent (TRUSTED_IP_HEADER)
 	reverse_proxy api:3004
 }
