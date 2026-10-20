@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MARKET, startsWithOneOf, TURKMENISTAN, type Market } from './market'
+import { MARKET, phoneRules, startsWithOneOf, TURKMENISTAN, type Market } from './market'
 import { LOCALES } from './model'
 
 /** The zone's offset from UTC at an instant, in minutes, from the runtime's time zone data. */
@@ -41,9 +41,11 @@ describe.each<[string, Market]>([['Turkmenistan', TURKMENISTAN]])('market %s', (
       expect(valid.test(number(prefix))).toBe(true)
       expect(mobile.test(number(prefix))).toBe(true)
     }
-    // a valid number that starts with none of them isn't
-    const landlines = ['1', '2', '3', '4', '5', '6', '7'].filter((d) => !mobilePrefixes.some((p) => p.startsWith(d)))
-    for (const first of landlines) expect(mobile.test(number(first))).toBe(false)
+    // every valid number, by its first two digits, is a mobile exactly when it starts with one of them
+    for (let start = 0; start < 100; start++) {
+      const n = number(String(start).padStart(2, '0'))
+      if (valid.test(n)) expect(mobile.test(n), n).toBe(mobilePrefixes.some((p) => n.startsWith(p)))
+    }
   })
 
   it('writes the currency as an ISO 4217 code', () => {
@@ -61,8 +63,24 @@ describe('startsWithOneOf', () => {
   })
 
   it('refuses anything but digits, and an empty list', () => {
-    expect(() => startsWithOneOf([])).toThrow()
-    expect(() => startsWithOneOf(['6|.'])).toThrow()
+    expect(() => startsWithOneOf([])).toThrow('at least one prefix')
+    expect(() => startsWithOneOf(['6|.'])).toThrow('digits only, not: 6|.')
+  })
+})
+
+describe('phoneRules', () => {
+  it('makes the mobile test from the prefixes, so the two never disagree', () => {
+    const rules = phoneRules({
+      countryCode: '998',
+      length: 9,
+      trunkPrefix: '8',
+      valid: /^\d{9}$/,
+      mobilePrefixes: ['9', '33'],
+      groups: [2, 3, 2, 2],
+    })
+    expect(rules.mobile.test('901234567')).toBe(true)
+    expect(rules.mobile.test('331234567')).toBe(true)
+    expect(rules.mobile.test('711234567')).toBe(false)
   })
 })
 
