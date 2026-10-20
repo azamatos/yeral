@@ -33,7 +33,7 @@ export const notificationPrefsSchema = z.object({
    * Deprecated: there are no review asks (book Q-259). Always false; accepted and ignored on update. Kept so /v1 only
    * grows; it goes with /v2.
    */
-  reviewAsk: z.boolean(),
+  reviewAsk: z.boolean().meta({ deprecated: true, description: 'No review asks (book Q-259): always false, ignored on update.' }),
 })
 
 export const meSchema = z

@@ -139,20 +139,27 @@ describe('reminders and the night (book Q-285)', () => {
         code: 'YR-991004',
         businessId: barber!.id,
         type: 'appointment',
-        date: '2026-10-14',
+        date: '2026-10-16',
         start: 600,
         end: 660,
-        status: 'completed',
+        // confirmed: only the review-ask check stops it, not the status
+        status: 'confirmed',
         source: 'web',
         clientPhone: '+99365555004',
       })
       .returning()
-    await db.insert(jobs).values({
-      kind: 'booking.sms',
-      runAt: new Date(t.clock.now),
-      payload: { bookingId: row!.id, kind: 'reviewAsk', date: row!.date, start: row!.start },
-    })
+    const [job] = await db
+      .insert(jobs)
+      .values({
+        kind: 'booking.sms',
+        runAt: new Date(t.clock.now),
+        payload: { bookingId: row!.id, kind: 'reviewAsk', date: row!.date, start: row!.start },
+      })
+      .returning()
     await runDueJobs(t.deps)
     expect(t.sms.sent.filter((s) => s.to === '+99365555004')).toEqual([])
+    const [settled] = await db.select().from(jobs).where(eq(jobs.id, job!.id))
+    expect(settled).toMatchObject({ attempts: 0, error: 'dropped: no review asks (book Q-259)' })
+    expect(settled!.doneAt).not.toBeNull()
   })
 })

@@ -6,6 +6,11 @@
   previous api image still runs (a later release drops it), and `/v1` keeps `notifications.reviewAsk` as always false,
   ignored on update (it goes with `/v2`). A PATCH with nothing left to set answers the profile as it is. Clients review
   from my bookings and the link page (`canReview`, Q-170).
+- Dropped asks are settled unsent the same way by migration 0016 and by the job runner: done, attempts 0, error
+  `dropped: no review asks (book Q-259)`; a count of failed SMS uses attempts. Migration 0016 also puts the column back
+  where an earlier draft of it had dropped it (local databases).
+- Known: during this release's deploy, the old api's job runner may still send a review ask it had already claimed,
+  or queue one; production has no bookings yet.
 - Follow-up: a later release drops `users.notify_review_ask`.
 - Tests: the link tests that used the review ask send a "confirmed" SMS instead; their helper finds the first free day
   from Thursday on.

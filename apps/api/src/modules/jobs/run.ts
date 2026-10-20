@@ -21,6 +21,11 @@ import { bookedServices, onlineRefusal } from '../bookings/create'
 import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100
+/**
+ * How a review ask is settled unsent (book Q-259), here and in migration 0016: done, never tried (attempts 0), so a
+ * count of failed SMS (attempts reached) leaves it out.
+ */
+const DROPPED_REVIEW_ASK = 'dropped: no review asks (book Q-259)'
 const MAX_ATTEMPTS = 5
 
 /**
@@ -200,11 +205,9 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
 async function sendBookingSms(
   deps: Deps,
   bookingId: string,
-  kind: BookingSmsKind | OutcomeSmsKind | 'reviewAsk',
+  kind: BookingSmsKind | OutcomeSmsKind,
   at: { date?: unknown; start?: unknown; covers?: unknown },
 ): Promise<void> {
-  // a review ask queued before they went (book Q-259; migration 0016 settles the rest): dropped
-  if (kind === 'reviewAsk') return
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
   // the person deleted their account: the number may be someone else's now
   if (!b?.clientPhone || b.accountDeletedAt) return
@@ -263,9 +266,16 @@ async function runQueue(deps: Deps): Promise<number> {
   for (const job of claimed) {
     try {
       const p = job.payload
+      // a review ask an older api queued (book Q-259): settled unsent, recorded as migration 0016 records them
+      if (job.kind === 'booking.sms' && p.kind === 'reviewAsk') {
+        await deps.db
+          .update(jobs)
+          .set({ doneAt: new Date(deps.now()), lockedUntil: null, error: DROPPED_REVIEW_ASK })
+          .where(eq(jobs.id, job.id))
+        continue
+      }
       if (job.kind === 'sms') await deps.sms.send({ to: String(p.to), text: String(p.text) })
-      else if (job.kind === 'booking.sms')
-        await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind | 'reviewAsk', p)
+      else if (job.kind === 'booking.sms') await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p)
       else if (job.kind === 'demo.answer') {
         const [b] = await deps.db
           .select()
