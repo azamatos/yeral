@@ -112,6 +112,9 @@ function latWithLng(v: { lat?: number; lng?: number }, ctx: z.RefinementCtx) {
     ctx.addIssue({ code: 'custom', path: [v.lat === undefined ? 'lat' : 'lng'], message: 'lat and lng come together' })
 }
 
+/** A price in a query, up to the largest amount the database stores (a 32-bit integer). */
+const priceQuery = z.coerce.number().int().min(0).max(2_147_483_647)
+
 const latQuery = z.coerce.number().min(-90).max(90)
 const lngQuery = z.coerce.number().min(-180).max(180)
 
@@ -136,7 +139,9 @@ const searchFields = langQuerySchema.extend(cursorQuerySchema.shape).extend({
   week: boolQuery.optional(),
   sort: z.enum(SEARCH_SORTS).default('distance'),
   minRating: z.coerce.number().min(0).max(5).optional(),
-  maxPrice: z.coerce.number().int().min(0).optional(),
+  /** The price range (book C-03): places with a paid online service inside it; one whose services are all free from 0. */
+  minPrice: priceQuery.optional(),
+  maxPrice: priceQuery.optional(),
   openNow: boolQuery.optional(),
   type: bookingTypeSchema.optional(),
   womenOnly: boolQuery.optional(),
@@ -154,7 +159,13 @@ const searchFields = langQuerySchema.extend(cursorQuerySchema.shape).extend({
   party: z.coerce.number().int().min(1).max(MAX_ONLINE_PARTY).default(2),
 })
 
-export const searchQuerySchema = searchFields.superRefine(latWithLng)
+/** A price range runs upwards: a reversed one would find nothing and read as "no places". */
+function priceRange(v: { minPrice?: number; maxPrice?: number }, ctx: z.RefinementCtx) {
+  if (v.minPrice !== undefined && v.maxPrice !== undefined && v.minPrice > v.maxPrice)
+    ctx.addIssue({ code: 'custom', path: ['minPrice'], message: 'minPrice is above maxPrice' })
+}
+
+export const searchQuerySchema = searchFields.superRefine(latWithLng).superRefine(priceRange)
 export type SearchQuery = z.infer<typeof searchQuerySchema>
 
 export const searchResponseSchema = listOf(businessCardSchema)

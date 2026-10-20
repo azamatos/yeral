@@ -22,7 +22,7 @@ export function geoOf(b: BusinessRow, exact = false) {
   return { lat: Math.round(b.lat * 100) / 100, lng: Math.round(b.lng * 100) / 100, approximate: true }
 }
 
-/** The card's "40 TMT-den": the lowest priced service. */
+/** The card's "40 TMT-den": the lowest priced service. Search's price range reads the same prices (`priceWithin`). */
 export function priceFromOf(services: ServiceRow[]): Price | null {
   const priced = services.filter((s) => s.online && s.priceType !== 'hidden')
   if (!priced.length) return null

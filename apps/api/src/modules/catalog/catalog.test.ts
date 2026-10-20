@@ -166,6 +166,48 @@ describe('catalogue', () => {
     for (const c of cheap) expect(c.priceFrom!.amount).toBeLessThanOrEqual(priced[0]!.priceFrom!.amount)
   })
 
+  it('a price range finds places with a paid service inside it; a place whose services are all free, from 0 only', async () => {
+    const slugs = async (query: string) =>
+      ((await b.req(`/v1/search?limit=50&${query}`)).json.items as { slug: string }[]).map((c) => c.slug)
+    // what each place search finds charges online
+    const found = await slugs('')
+    const paid = (
+      await db
+        .select({ slug: businesses.slug, amount: services.priceAmount })
+        .from(services)
+        .innerJoin(businesses, eq(businesses.id, services.businessId))
+        .where(and(eq(services.online, true), eq(services.archived, false), inArray(services.priceType, ['fixed', 'from'])))
+    ).filter((p) => found.includes(p.slug))
+    const amounts = [...new Set(paid.map((p) => p.amount))].sort((x, y) => x - y)
+    expect(amounts.length).toBeGreaterThanOrEqual(4)
+    const has = (slug: string, min: number, max = Infinity) => paid.some((p) => p.slug === slug && p.amount >= min && p.amount <= max)
+
+    const top = amounts.at(-1)!
+    const dear = await slugs(`minPrice=${top}`)
+    expect(dear.length).toBeGreaterThan(0)
+    for (const s of dear) expect(has(s, top)).toBe(true)
+    const [lo, hi] = [amounts[1]!, amounts[3]!]
+    const between = await slugs(`minPrice=${lo}&maxPrice=${hi}`)
+    expect(between.length).toBeGreaterThan(0)
+    for (const s of between) expect(has(s, lo, hi)).toBe(true)
+    // a reversed range is a mistake, not "no places"
+    expect((await b.req(`/v1/search?minPrice=${hi}&maxPrice=${lo}`)).status).toBe(400)
+    // the database stores 32-bit amounts: a larger limit is refused, not a server error
+    expect((await b.req('/v1/search?maxPrice=2147483647')).status).toBe(200)
+    expect((await b.req('/v1/search?maxPrice=10000000000')).status).toBe(400)
+
+    const [barber] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    const own = await db.select().from(services).where(eq(services.businessId, barber!.id))
+    await db.update(services).set({ priceType: 'free', priceAmount: 0 }).where(eq(services.businessId, barber!.id))
+    try {
+      expect(await slugs('maxPrice=0')).toContain('barber-loft')
+      expect(await slugs('minPrice=1')).not.toContain('barber-loft')
+    } finally {
+      for (const s of own)
+        await db.update(services).set({ priceType: s.priceType, priceAmount: s.priceAmount }).where(eq(services.id, s.id))
+    }
+  })
+
   it('reviews, newest first, with the business reply', async () => {
     const res = await b.req('/v1/businesses/glow-studio/reviews?lang=tk')
     expect(res.json.items.map((r: { author: string }) => r.author)).toEqual(['Gülälek N.', 'Ogulşat M.', 'Bahar A.'])
