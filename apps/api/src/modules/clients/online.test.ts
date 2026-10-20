@@ -63,7 +63,8 @@ describe('phone-only after no-shows', () => {
       const [made] = await db
         .insert(bookings)
         .values({
-          code: `YR-9${String(codes++).padStart(4, '0')}`,
+          // six digits: random booking codes have five, so the demo seed can't take one of these
+          code: `YR-9${String(codes++).padStart(5, '0')}`,
           businessId: glowId,
           clientId: (await row()).id,
           type: 'appointment',

@@ -23,7 +23,7 @@ describe('completing visits past midnight (book Q-105)', () => {
     const [late] = await db
       .insert(bookings)
       .values({
-        code: 'YR-99001',
+        code: 'YR-990001',
         businessId: barber!.id,
         type: 'appointment',
         date: '2026-10-14',

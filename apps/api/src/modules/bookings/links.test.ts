@@ -88,7 +88,7 @@ describe('SMS links', () => {
     const [row] = await db
       .insert(bookings)
       .values({
-        code: 'YR-99301',
+        code: 'YR-993001',
         businessId: glowId,
         type: 'appointment',
         date: THU,
@@ -119,7 +119,7 @@ describe('SMS links', () => {
     const signedIn = await visitor.req(`/v1/links/${token}/verify`, { body: { code: '1234' } })
     expect(signedIn.json).toMatchObject({ me: { phone: '+99365444306' }, isNew: true })
     // the booking is theirs now: "my bookings" opens it
-    expect((await visitor.req(`/v1/me/bookings/YR-99301`)).status).toBe(200)
+    expect((await visitor.req(`/v1/me/bookings/YR-993001`)).status).toBe(200)
     const after = await visitor.req(`/v1/links/${token}`)
     expect(after.json, JSON.stringify(after.json)).toMatchObject({ owner: true })
   })
@@ -143,7 +143,7 @@ describe('SMS links', () => {
     const [row] = await db
       .insert(bookings)
       .values({
-        code: 'YR-99302',
+        code: 'YR-993002',
         businessId: glowId,
         type: 'appointment',
         date: '2027-04-01',
