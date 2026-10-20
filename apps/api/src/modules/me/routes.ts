@@ -3,6 +3,7 @@ import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { meSchema, sendCodeResponseSchema, sendCodeSchema, updateMeSchema, verifyCodeSchema } from '@yeral/contract/account'
 import { businessCardSchema } from '@yeral/contract/catalog'
 import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
+import { NAME_MAX, splitName } from '@yeral/domain/names'
 import { today } from '@yeral/domain/time'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { businesses, favorites, sessions, users } from '../../db/schema'
@@ -15,7 +16,7 @@ import { endSession, requireUser } from '../auth/session'
 import { buildCards } from '../catalog/cards'
 import { publicBusiness } from '../catalog/detail'
 import { changePhone, releaseAccount } from './account'
-import { toMe } from './me'
+import { accountName, toMe } from './me'
 
 const tags = ['me']
 const slugParam = z.object({ slug: slugSchema })
@@ -88,9 +89,21 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
   .openapi(meRoute, async (c) => c.json(await toMe(c.var.deps.db, requireUser(c)), 200))
   .openapi(updateRoute, async (c) => {
     const user = requireUser(c)
-    const { name, lang, notifications: n } = c.req.valid('json')
+    const { name, firstName, surname, lang, notifications: n } = c.req.valid('json')
+    // an older client's one field, split at the first space (book Q-156); sent back as it was read, it changes nothing,
+    // so a first name of two words stays one
+    const parts = name !== undefined && name !== accountName(user) ? splitName(name) : undefined
+    if (parts && ((parts.first?.length ?? 0) > NAME_MAX || (parts.surname?.length ?? 0) > NAME_MAX))
+      throw new ApiError('validation_error', { issues: [{ path: ['name'], code: 'too_big' }] })
+    const next = {
+      first: parts ? parts.first : firstName !== undefined ? firstName : user.name,
+      surname: parts ? parts.surname : surname !== undefined ? surname || null : user.surname,
+    }
+    // a surname alone isn't a name
+    if (next.surname && !next.first) throw new ApiError('validation_error', { issues: [{ path: ['firstName'], code: 'required' }] })
     const set = {
-      ...(name !== undefined ? { name } : {}),
+      ...(parts || firstName !== undefined ? { name: next.first } : {}),
+      ...(parts || surname !== undefined ? { surname: next.surname } : {}),
       ...(lang !== undefined ? { lang } : {}),
       ...(n?.confirmation !== undefined ? { notifyConfirmation: n.confirmation } : {}),
       ...(n?.reminderDay !== undefined ? { notifyReminderDay: n.reminderDay } : {}),

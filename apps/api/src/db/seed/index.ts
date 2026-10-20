@@ -7,6 +7,7 @@
 import { bookingCode } from '@yeral/domain/id'
 import { MARKET } from '@yeral/domain/market'
 import { localized, type BookingStatus } from '@yeral/domain/model'
+import { splitName } from '@yeral/domain/names'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
 import { inviteExpiresAt } from '@yeral/domain/team'
 import { addDays, diffDays, dow, epochOf, today } from '@yeral/domain/time'
@@ -90,7 +91,12 @@ function code(ctx: Ctx, fixed?: string): string {
 async function user(ctx: Ctx, phone: string, name: string | null): Promise<string> {
   const known = ctx.users.get(phone)
   if (known) return known
-  const [row] = await ctx.db.insert(t.users).values({ phone, name, lang: MARKET.defaultLanguage }).returning({ id: t.users.id })
+  // the demo's one-field names, in the account's two (book Q-156)
+  const { first, surname } = splitName(name)
+  const [row] = await ctx.db
+    .insert(t.users)
+    .values({ phone, name: first, surname, lang: MARKET.defaultLanguage })
+    .returning({ id: t.users.id })
   if (!row) throw new Error('user insert failed')
   ctx.users.set(phone, row.id)
   return row.id

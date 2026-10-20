@@ -181,13 +181,11 @@ MVP. (business spec §3; Q-031, decided 18.10.2026)
 - Deleting a client keeps their past bookings for reports, without the name. (ADR 0018)
 - A client who deletes their Ýeral account: upcoming bookings are cancelled; the account, favourites and reviews are
   deleted; each business keeps its own visit records, no longer linked to a Ýeral account. (Q-172, decided 18.10.2026)
-  **Code differs:** the reviews stay.
 
 ## Reviews
 
 - Only after a completed visit, one per booking, editable for 7 days, shown with the first name and an initial
   ("Aýjemal G."), or the first name alone when there's no surname. (productContext; Q-156, decided 18.10.2026)
-  **Code differs:** the name is one field, split at the first space.
 - There's no review ask: clients write reviews from *Ýazylyşlarym* (My bookings) and from the booking link after a
   completed visit. (Q-259, Q-170, decided 18.10.2026)
 - The business can't delete a review. It can reply, edit or delete its reply, and report a review to the Ýeral team.

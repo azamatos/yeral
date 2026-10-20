@@ -743,10 +743,6 @@ flowchart TD
 
 **Design to fix:** the optional surname in the inline name step, and the "Is this you?" step for an account unused for 6 months (Q-156, Q-270).
 
-**Code differs**
-
-- The api keeps one name field and splits it at the first space (code: `auth/routes.ts`).
-
 **Status:** Design: drawn (Booking, Booking-Table, Booking-Class inline login · `loggedIn`; Auth) · Code: built (api) — `POST /v1/auth/code`, `POST /v1/auth/verify`.
 
 ### C-19 · Log in from the header or a heart
@@ -1646,9 +1642,7 @@ flowchart TD
 
 - A business keeps the name it already has for the client; past bookings keep the name they were made with (code: `bookings/create.ts`; ADR 0018).
 
-**Code differs**
-
-- The api keeps one name field and splits it at the first space; the decided rule stores name and surname as two fields, and a review shows "Aýjemal G.", or "Aýjemal" without a surname (Q-156, decided 18.10.2026; code: `auth/routes.ts`).
+- Name and surname are two fields, the surname optional; businesses see the whole name, and a review is signed "Aýjemal G.", or "Aýjemal" without a surname (Q-156, decided 18.10.2026; code: `@yeral/domain/names`). `PATCH /v1/me` takes `firstName` and `surname`; an older client's one `name` is split at the first space.
 
 **Status:** Design: drawn (Account-Profile) · Code: built (api) — `PATCH /v1/me`.
 
