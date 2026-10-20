@@ -1,6 +1,6 @@
 {
   "name": "@yeral/contract",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Everything on the wire between the api and the apps: zod schemas of DTOs, inputs, enums and error codes (ADR 0006)",
   "type": "module",
