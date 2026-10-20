@@ -107,8 +107,9 @@ export const EVENING_REMINDER_AT = 21 * 60 + 30
 
 /** The two reminders a client can switch off ("Ertir ýatlatma", "2 sagat öň"). */
 export type Reminder = 'reminderDay' | 'reminder2h'
-/** `reminderEvening`: a reminder moved out of the night, worded "tomorrow". */
-export type ReminderKind = Reminder | 'reminderEvening'
+/** Every reminder SMS; `reminderEvening`: a reminder moved out of the night, worded "tomorrow". */
+export const REMINDER_KINDS = ['reminderDay', 'reminder2h', 'reminderEvening'] as const satisfies readonly (Reminder | 'reminderEvening')[]
+export type ReminderKind = (typeof REMINDER_KINDS)[number]
 
 /** A planned reminder; `covers`: the reminders it stands for, whose switches decide whether it goes. */
 export interface PlannedReminder {

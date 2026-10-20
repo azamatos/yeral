@@ -220,4 +220,74 @@ describe('reminders and the night (book Q-285)', () => {
       { msg: 'job gave up', data: expect.objectContaining({ id: job!.id, kind: 'sms', attempts: 5 }) },
     ])
   })
+
+  it('from the start exactly, every reminder is dropped and a confirmation still goes (book Q-284)', async () => {
+    const t = testApp(db)
+    const [barber] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    const [row] = await db
+      .insert(bookings)
+      .values({
+        code: 'YR-991012',
+        businessId: barber!.id,
+        type: 'appointment',
+        date: '2026-10-16',
+        start: 720,
+        end: 780,
+        status: 'confirmed',
+        source: 'web',
+        clientPhone: '+99365555012',
+      })
+      .returning()
+    const queued = await db
+      .insert(jobs)
+      .values(
+        (['reminderEvening', 'reminderDay', 'confirmed'] as const).map((kind) => ({
+          kind: 'booking.sms',
+          runAt: new Date(epochOf('2026-10-16', 720)),
+          payload: { bookingId: row!.id, kind, date: row!.date, start: row!.start },
+        })),
+      )
+      .returning()
+    t.clock.now = epochOf('2026-10-16', 720)
+    await runDueJobs(t.deps)
+    const sent = t.sms.sent.filter((s) => s.to === '+99365555012')
+    expect(sent).toHaveLength(1)
+    expect(sent[0]!.text).not.toMatch(/^Reminder/)
+    const settled = await db
+      .select()
+      .from(jobs)
+      .where(
+        sql`${jobs.id} in (${sql.join(
+          queued.map((j) => sql`${j.id}`),
+          sql`, `,
+        )})`,
+      )
+    expect(settled.map((j) => j.error ?? 'sent').sort()).toEqual([
+      'dropped: the visit has started (book Q-284)',
+      'dropped: the visit has started (book Q-284)',
+      'sent',
+    ])
+  })
+
+  it('a job whose tries never finished (a hung gateway) is given up without another try, and alerts', async () => {
+    const t = testApp(db)
+    const alerts: { msg: string; data?: Record<string, unknown> }[] = []
+    const log: Logger = { ...nullLogger, error: (msg, data) => alerts.push({ msg, data }) }
+    const [job] = await db
+      .insert(jobs)
+      .values({
+        kind: 'sms',
+        runAt: new Date(t.clock.now - 60_000),
+        attempts: 5,
+        lockedUntil: new Date(t.clock.now - 1),
+        payload: { to: '+99365555013', text: 'Hello' },
+      })
+      .returning()
+    await runDueJobs({ ...t.deps, log })
+    expect(t.sms.sent.filter((s) => s.to === '+99365555013')).toEqual([])
+    const [settled] = await db.select().from(jobs).where(eq(jobs.id, job!.id))
+    expect(settled).toMatchObject({ attempts: 5, error: 'never finished' })
+    expect(settled!.doneAt).not.toBeNull()
+    expect(alerts.filter((a) => a.data?.id === job!.id).map((a) => a.msg)).toEqual(['job gave up'])
+  })
 })
