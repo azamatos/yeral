@@ -65,7 +65,7 @@ Verifying businesses, handling reported reviews, managing categories, writing he
 - B · Design the full CMS before launch.
 - C · No verification at launch: every new business is public at once.
 
-answer: A · Design a small admin tool for launch: verify businesses and handle reported reviews. Categories, help articles and support chat come later. (18.10.2026)
+answer: A · Design a small admin tool for launch: verify businesses and handle reported reviews. Categories, help articles and support chat come later. (18.10.2026) Owner, 20.10.2026: the tool isn't drawn on its own; it's built on the business app's patterns, with a small design prompt only for a critical detail (ADR 0021, amended).
 
 ## Q-011 · Roles inside the Ýeral team
 chapter: 03 · status: decided

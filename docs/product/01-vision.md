@@ -136,7 +136,10 @@ flowchart LR
 
 ## How we build it
 
-The owner reset the plan on 17.10.2026: the product is described completely first, then designed, then built.
+The owner reset the plan on 17.10.2026: the product is described completely first, then designed, then built. On
+20.10.2026 the design was cut back to what's needed: after the business app was drawn in English, components and
+the apps are built from the book and the drawn boards, and Claude Design draws only critical details (ADR 0021,
+amended).
 
 ```mermaid
 flowchart LR
@@ -147,10 +150,11 @@ flowchart LR
 ```
 
 1. **Product book** (this document): every idea, rule, role, limit, feature and flow, with no open question left.
-2. **Design:** Claude Design draws the screens from the book. Claude Code writes every prompt for it; the owner pastes
-   it and reviews the result; Claude Code reads the canvas and checks it against the book.
+2. **Design:** Claude Design drew the design system and the business app from the book (the client site was drawn
+   before, in Turkmen). Now it draws only critical details with no drawn pattern; Claude Code writes the prompt, the
+   owner pastes it, Claude Code checks the canvas.
 3. **Components:** every piece of the design built and tested in Storybook.
-4. **Code:** the apps, built only from closed chapters and finished components.
+4. **Code:** the apps, built only from closed chapters and finished components; the owner reviews the built screens.
 
 Already built and waiting (from before the reset): the monorepo and CI, the design system foundation (38 components),
 the booking engine, the api for every client screen. They're kept, then adjusted to the book. The old Next.js site

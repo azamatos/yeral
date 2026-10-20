@@ -44,12 +44,15 @@ work on 2026-10-17.
 - **Amended 2026-10-20, later (owner: "Do we really need all this detailed design? … we design when it's really
   necessary for critical details"):** the full redraw stops after round 3.4. The book holds every decision, the
   design system and the business app are drawn in English (export v0.6, rounds 1–3.4), and every client screen is
-  drawn in export v0.5 (Turkmen; the layout holds in any language). Components in Storybook and the apps start now
+  drawn in export v0.5 (Turkmen; the layout holds in any language), apart from a few states the book lists as
+  undrawn (the hourly code limit, the finished visit on the link page, "Is this you?"), which follow the nearest drawn
+  pattern. Components in Storybook and the apps start now
   and no longer wait for an export: they follow the book for behaviour and words, then the drawn boards (v0.6 where
   drawn, else v0.5) and the nearest drawn pattern for visuals. Claude Design is used only for a critical detail with
   no drawn pattern, or a key screen where the owner wants to see options, one small prompt each. The owner reviews
   built screens in Storybook and the local app instead of the canvas; "how" decisions made while building are
-  recorded as "Claude (delegated)" rows in the book's chapter 9.
+  recorded as "Claude (delegated)" rows in the book's chapter 9. The Russian-length check (Q-101) moves from the
+  design prompts to the build: a Russian-length story for every component and a check of each slice's screens.
 
 ## Consequences
 
