@@ -20,7 +20,9 @@ describe('names (book Q-156)', () => {
   it('a review is signed with the surname’s initial, or the first name alone', () => {
     expect(reviewName({ first: 'Aýjemal', surname: 'Gurbanowa' })).toBe('Aýjemal G.')
     expect(reviewName({ first: 'Aýjemal', surname: null })).toBe('Aýjemal')
-    // a surname starting with a letter outside ASCII keeps it
+    // a surname starting with a letter outside ASCII keeps it, whole and upper-case
     expect(reviewName({ first: 'Merdan', surname: 'Öwezow' })).toBe('Merdan Ö.')
+    expect(reviewName({ first: 'Merdan', surname: 'öwezow' })).toBe('Merdan Ö.')
+    expect(reviewName({ first: 'Merdan', surname: 'O\u0308wezow' })).toBe('Merdan Ö.')
   })
 })

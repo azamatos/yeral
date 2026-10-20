@@ -45,6 +45,14 @@ describe('account', () => {
     // an older client's one field is split at the first space
     expect((await set({ name: 'Bahar Hojaýewa' })).json).toMatchObject({ firstName: 'Bahar', surname: 'Hojaýewa' })
     expect((await set({ name: 'Bahar', firstName: 'Bahar' })).status).toBe(400)
+    // a first name of two words survives an older client sending back the whole name it read
+    const two = (await set({ firstName: 'Ogul Bibi', surname: 'Orazowa' })).json
+    expect((await set({ name: two.name, lang: 'en' })).json).toMatchObject({ firstName: 'Ogul Bibi', surname: 'Orazowa' })
+    // a surname alone isn't a name; a part over 40 characters is refused
+    const fresh = browser(t.app)
+    await fresh.login('+99365222031')
+    expect((await fresh.req('/v1/me', { method: 'PATCH', body: { surname: 'Orazowa' } })).status).toBe(400)
+    expect((await set({ name: `Aýjemal ${'X'.repeat(41)}` })).status).toBe(400)
   })
 
   it('profile: language and SMS switches', async () => {

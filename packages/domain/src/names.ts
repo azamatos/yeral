@@ -21,8 +21,12 @@ export function fullName(name: PersonName): string | null {
   return name.surname ? `${name.first} ${name.surname}` : name.first
 }
 
-/** A review's signature: "Aýjemal G.", or "Aýjemal" without a surname. */
+/** The longest first name, and surname, an account keeps. */
+export const NAME_MAX = 40
+
+/** A review's signature: "Aýjemal G.", or "Aýjemal" without a surname; the initial whole and upper-case. */
 export function reviewName(name: PersonName): string {
   const first = name.first ?? ''
-  return name.surname ? `${first} ${name.surname.charAt(0)}.` : first
+  const initial = name.surname ? Array.from(name.surname.normalize('NFC'))[0]?.toLocaleUpperCase() : undefined
+  return initial ? `${first} ${initial}.` : first
 }

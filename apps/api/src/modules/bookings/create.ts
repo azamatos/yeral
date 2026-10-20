@@ -17,7 +17,6 @@ import {
   type AppointmentSlot,
 } from '@yeral/domain/availability'
 import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
-import { fullName } from '@yeral/domain/names'
 import { priceTotal } from '@yeral/domain/pricing'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
@@ -34,7 +33,7 @@ import { servicePrice } from '../catalog/map'
 import { hasSignedInTeam } from '../team/members'
 import { confirmBooking } from './confirm'
 import { freshCode, isSlotConflict, type BookingRow } from './repo'
-import { nameOf } from '../me/me'
+import { accountName } from '../me/me'
 
 /** Demo businesses with nobody to answer confirm requests themselves after this delay (outside production). */
 const DEMO_ANSWER_MS = 20_000
@@ -43,7 +42,7 @@ const DEMO_ANSWER_MS = 20_000
 async function clientFor(db: Queryable, businessId: string, user: User): Promise<typeof clients.$inferSelect> {
   const [row] = await db
     .insert(clients)
-    .values({ businessId, phone: user.phone, name: fullName(nameOf(user)), userId: user.id, source: 'yeral' })
+    .values({ businessId, phone: user.phone, name: accountName(user), userId: user.id, source: 'yeral' })
     .onConflictDoUpdate({
       target: [clients.businessId, clients.phone],
       set: { userId: user.id, name: sql`coalesce(${clients.name}, excluded.name)` },
@@ -94,7 +93,7 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       type: x.type,
       clientId: client.id,
       userId: x.user.id,
-      clientName: fullName(nameOf(x.user)) ?? client.name,
+      clientName: accountName(x.user) ?? client.name,
       clientPhone: x.user.phone,
       date: x.date,
       start: x.start,

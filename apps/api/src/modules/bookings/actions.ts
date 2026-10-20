@@ -9,7 +9,7 @@ import {
   REVIEW_EDIT_DAYS,
 } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
-import { reviewName } from '@yeral/domain/names'
+import { reviewName, splitName } from '@yeral/domain/names'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -254,7 +254,8 @@ export async function writeReview(deps: Deps, user: User, b: BookingRow, input: 
         bookingId: b.id,
         businessId: b.businessId,
         userId: user.id,
-        authorName: reviewName(nameOf(user)),
+        // without a name of its own, the account signs with the one on the booking
+        authorName: reviewName(user.name ? nameOf(user) : splitName(b.clientName)),
         rating: input.rating,
         tags: input.tags,
         text: input.text ?? null,

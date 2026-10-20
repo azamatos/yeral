@@ -4,6 +4,7 @@
  * account go and starts a fresh one, so the new person never sees the old history.
  */
 import type { Locale } from '@yeral/domain/model'
+import { splitName } from '@yeral/domain/names'
 import { and, desc, eq, isNotNull, lt } from 'drizzle-orm'
 import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
@@ -17,7 +18,7 @@ import { signIn, unusedSince } from './sign-in'
 const CHECK_MINUTES = 10
 
 /** What the account can be recognised by: its name, else the name on its latest booking, team row or client record. */
-async function nameOf(db: Queryable, user: User): Promise<string | null> {
+async function knownAs(db: Queryable, user: User): Promise<string | null> {
   if (user.name) return user.name
   const [booked] = await db
     .select({ name: bookings.clientName })
@@ -57,14 +58,14 @@ async function ask(c: Context<AppEnv>, user: User, name: string | null): Promise
   await db
     .insert(identityChecks)
     .values({ tokenHash: await sha256Hex(ticket), phone: user.phone, userId: user.id, expiresAt: new Date(now() + CHECK_MINUTES * 60_000) })
-  return { status: 202, body: { isThisYou: { name: name ? name.split(/\s+/)[0] || name : null, ticket } } }
+  return { status: 202, body: { isThisYou: { name: user.name ?? splitName(name).first, ticket } } }
 }
 
 export async function afterCode(c: Context<AppEnv>, phone: string, lang: Locale | undefined): Promise<AfterCode> {
   const { db, now } = c.var.deps
   const [user] = await db.select().from(users).where(eq(users.phone, phone))
   if (user && unusedSince(user.lastSeenAt, now())) {
-    const name = await nameOf(db, user)
+    const name = await knownAs(db, user)
     if (name || (await holdsAnything(db, user.id))) return ask(c, user, name)
     // nothing of a person's in it, favourites at most: not worth a question, and not to be handed on. The number
     // starts afresh, once the account's row is locked and still found unused and empty (as an answer finds it)
@@ -77,7 +78,7 @@ export async function afterCode(c: Context<AppEnv>, phone: string, lang: Locale 
       return row
     })
     // it changed meanwhile: still unused, it's asked about after all; in use again, it signs in as any account does
-    if (still?.phone === phone && unusedSince(still.lastSeenAt, now())) return ask(c, still, await nameOf(db, still))
+    if (still?.phone === phone && unusedSince(still.lastSeenAt, now())) return ask(c, still, await knownAs(db, still))
   }
   return { status: 200, body: await signIn(c, phone, lang) }
 }

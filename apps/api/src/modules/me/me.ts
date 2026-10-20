@@ -7,11 +7,14 @@ import { workspaceIdsOf } from '../team/members'
 /** The account's name, in its two fields (book Q-156). */
 export const nameOf = (user: User): PersonName => ({ first: user.name, surname: user.surname })
 
+/** The whole name businesses see on the client record and the booking ("Aýjemal Gurbanowa"). */
+export const accountName = (user: User): string | null => fullName(nameOf(user))
+
 export async function toMe(db: Queryable, user: User): Promise<Me> {
   const workspaces = await workspaceIdsOf(db, user.id)
   return {
     id: user.id,
-    name: fullName(nameOf(user)),
+    name: accountName(user),
     firstName: user.name,
     surname: user.surname,
     phone: user.phone,

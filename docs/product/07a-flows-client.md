@@ -743,10 +743,6 @@ flowchart TD
 
 **Design to fix:** the optional surname in the inline name step, and the "Is this you?" step for an account unused for 6 months (Q-156, Q-270).
 
-**Code differs**
-
-- The api keeps one name field and splits it at the first space (code: `auth/routes.ts`).
-
 **Status:** Design: drawn (Booking, Booking-Table, Booking-Class inline login · `loggedIn`; Auth) · Code: built (api) — `POST /v1/auth/code`, `POST /v1/auth/verify`.
 
 ### C-19 · Log in from the header or a heart

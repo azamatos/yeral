@@ -1,4 +1,5 @@
 /** A phone's history and a number that passes to someone else (book Q-270). */
+import { splitName } from '@yeral/domain/names'
 import { addDays, today } from '@yeral/domain/time'
 import { eq, inArray } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -61,10 +62,12 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
   }
 
   /** An account last used `daysAgo` days before the demo's now. */
+  /** An account named "first surname" (two fields, book Q-156). */
   async function account(phone: string, name: string, daysAgo: number) {
+    const { first, surname } = splitName(name)
     const [row] = await db
       .insert(users)
-      .values({ phone, name, lang: 'en', lastSeenAt: new Date(DEMO_NOW - daysAgo * DAY) })
+      .values({ phone, name: first, surname, lang: 'en', lastSeenAt: new Date(DEMO_NOW - daysAgo * DAY) })
       .returning()
     return row!
   }
