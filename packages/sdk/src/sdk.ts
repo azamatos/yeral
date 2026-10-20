@@ -36,7 +36,13 @@ import type {
   rescheduleSchema,
   reviewInputSchema,
 } from '@yeral/contract/bookings'
-import type { businessCancelSchema, freeTimesQuerySchema, moveBookingSchema, newBookingSchema } from '@yeral/contract/calendar'
+import type {
+  blockInputSchema,
+  businessCancelSchema,
+  freeTimesQuerySchema,
+  moveBookingSchema,
+  newBookingSchema,
+} from '@yeral/contract/calendar'
 import type { searchQuerySchema } from '@yeral/contract/catalog'
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
@@ -618,6 +624,24 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: ({ code, ...json }: { code: string } & z.input<typeof businessCancelSchema>) =>
           call(w.bookings[':code'].cancel.$post({ param: { slug, code }, json })),
         onSuccess: () => booked(slug),
+      }),
+    /** Blocked time from–to (book B-18): everyone's, or a specialist their own. */
+    blocks: (slug: string, from: string, to: string) =>
+      queryOptions({
+        queryKey: keys.blocks(slug, from, to),
+        queryFn: ({ signal }) => call(w.calendar.blocks.$get({ param: { slug }, query: { from, to } }, abortWith(signal))),
+      }),
+    /** "Wagty ýap"; over a booking it's `block_over_bookings` with `details.bookings`. */
+    block: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof blockInputSchema>) => call(w.calendar.blocks.$post({ param: { slug }, json })),
+        onSuccess: () => Promise.all([invalidate(['calendar', slug]), booked(slug)]),
+      }),
+    unblock: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ id, scope = 'one' }: { id: string; scope?: 'one' | 'series' }) =>
+          call(w.calendar.blocks[':id'].$delete({ param: { slug, id }, query: { scope } })),
+        onSuccess: () => Promise.all([invalidate(['calendar', slug]), booked(slug)]),
       }),
   }
 

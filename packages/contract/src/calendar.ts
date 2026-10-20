@@ -143,6 +143,10 @@ export const blockSchema = z
 export type Block = z.infer<typeof blockSchema>
 
 export const blockListSchema = z.object({ items: z.array(blockSchema) })
+/** The blocks from–to (inclusive, at most 62 days) the reader may see in the calendar: a specialist their own. */
+export const blocksQuerySchema = z
+  .object({ from: ymdSchema, to: ymdSchema })
+  .refine((q) => q.to >= q.from, { path: ['to'], message: 'Not before from' })
 export const blockParamSchema = z.object({ slug: slugSchema, id: idSchema })
 /** `series`: this one and the later ones of its weekly repeat. */
 export const blockDeleteQuerySchema = z.object({ scope: z.enum(['one', 'series']).default('one') })

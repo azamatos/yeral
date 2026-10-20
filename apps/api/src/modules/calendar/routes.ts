@@ -5,6 +5,11 @@
  */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import {
+  blockDeleteQuerySchema,
+  blockInputSchema,
+  blockListSchema,
+  blockParamSchema,
+  blocksQuerySchema,
   businessCancelSchema,
   freeTimesQuerySchema,
   freeTimesSchema,
@@ -17,6 +22,7 @@ import { workspaceParamSchema } from '@yeral/contract/team'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { requireMember } from '../team/service'
+import { addBlock, blocksFor, removeBlock } from './blocks'
 import { addBooking, cancelByBusiness, freeTimes, moveBooking, undoBooking } from './service'
 
 const tags = ['calendar']
@@ -64,7 +70,47 @@ const cancelRoute = createRoute({
   responses: { ...noContent, 400: errors[400], 409: errors[409], ...denied },
 })
 
+const blocksRoute = createRoute({
+  method: 'get',
+  path: '/w/{slug}/calendar/blocks',
+  tags,
+  summary: 'Blocked time from–to the reader may see (a specialist their own)',
+  request: { params: workspaceParamSchema, query: blocksQuerySchema },
+  responses: { 200: json(blockListSchema), 400: errors[400], ...denied },
+})
+const blockRoute = createRoute({
+  method: 'post',
+  path: '/w/{slug}/calendar/blocks',
+  tags,
+  summary: '"Wagty ýap": close part of a day for one person, optionally every week up to a date; never over a booking',
+  request: { params: workspaceParamSchema, ...jsonBody(blockInputSchema) },
+  responses: { 201: json(blockListSchema, 'Blocked'), 400: errors[400], 409: errors[409], ...denied },
+})
+const unblockRoute = createRoute({
+  method: 'delete',
+  path: '/w/{slug}/calendar/blocks/{id}',
+  tags,
+  summary: 'Take blocked time away: this one, or this one and the later ones of its weekly repeat',
+  request: { params: blockParamSchema, query: blockDeleteQuerySchema },
+  responses: { ...noContent, ...denied },
+})
+
 export const calendarRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(blocksRoute, async (c) => {
+    const { business, actor } = await requireMember(c, c.req.valid('param').slug)
+    const { from, to } = c.req.valid('query')
+    return c.json({ items: await blocksFor(c.var.deps.db, business, actor, from, to) }, 200)
+  })
+  .openapi(blockRoute, async (c) => {
+    const { business, actor, user } = await requireMember(c, c.req.valid('param').slug)
+    return c.json({ items: await addBlock(c.var.deps, business, actor, user.id, c.req.valid('json')) }, 201)
+  })
+  .openapi(unblockRoute, async (c) => {
+    const { slug, id } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    await removeBlock(c.var.deps, business, actor, id, c.req.valid('query').scope)
+    return c.body(null, 204)
+  })
   .openapi(freeTimesRoute, async (c) => {
     const { business, actor } = await requireMember(c, c.req.valid('param').slug)
     return c.json(await freeTimes(c.var.deps, business, actor, c.req.valid('query')), 200)
