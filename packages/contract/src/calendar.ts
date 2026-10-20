@@ -8,6 +8,7 @@ import { LEVELS } from '@yeral/domain/permissions'
 import { z } from 'zod'
 import { dayStateSchema } from './availability'
 import {
+  boolQuery,
   bookingCodeSchema,
   bookingTypeSchema,
   epochSchema,
@@ -179,10 +180,7 @@ export const calendarQuerySchema = langQuerySchema.extend({
   /** "Bir işgär": one person's column. */
   staff: idSchema.optional(),
   /** "Ýatyrylanlary görkez". */
-  cancelled: z
-    .enum(['true', 'false'])
-    .default('false')
-    .transform((v) => v === 'true'),
+  cancelled: boolQuery.default(false),
 })
 
 const stretchSchema = z.object({ start: minuteSchema, end: minuteSchema })
@@ -249,12 +247,30 @@ export const calendarBookingSchema = z
   })
   .meta({ id: 'CalendarBooking' })
 
+/**
+ * A client's move waiting for its answer, as a ghost at the asked time (B-21): in the column and on the day it asks
+ * for, whether or not its booking is in view, with the booking's time now ("from Fri, 16 Oct · 10:00").
+ */
+export const calendarMoveSchema = z
+  .object({
+    code: bookingCodeSchema,
+    of: z.object({ code: bookingCodeSchema, date: ymdSchema, start: startMinuteSchema, end: minuteSchema }),
+    date: ymdSchema,
+    start: startMinuteSchema,
+    end: minuteSchema,
+    items: z.array(calendarItemSchema),
+    holdUntil: epochSchema.nullable(),
+    client: z.object({ name: z.string().nullable(), phone: phoneSchema.nullable() }),
+  })
+  .meta({ id: 'CalendarMove' })
+
 export const calendarViewSchema = z
   .object({
     from: ymdSchema,
     to: ymdSchema,
     columns: z.array(calendarColumnSchema),
     bookings: z.array(calendarBookingSchema),
+    moves: z.array(calendarMoveSchema),
     blocks: z.array(blockSchema),
     /** "Başga ýerde" (book Q-272): the person's time taken in another workspace, with no details. */
     elsewhere: z.array(z.object({ staffId: idSchema, date: ymdSchema, start: minuteSchema, end: minuteSchema })),

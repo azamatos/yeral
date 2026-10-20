@@ -8,6 +8,7 @@ import { CONFIRM_MODES } from '@yeral/domain/model'
 import { z } from 'zod'
 import {
   bookingTypeSchema,
+  boolQuery,
   cityRefSchema,
   cursorQuerySchema,
   epochSchema,
@@ -103,8 +104,6 @@ export type BusinessCard = z.infer<typeof businessCardSchema>
 // ── Search ──
 
 export const SEARCH_SORTS = ['distance', 'rating', 'price'] as const
-
-const boolQuery = z.enum(['1', '0', 'true', 'false']).transform((v) => v === '1' || v === 'true')
 
 /** A position is both coordinates or neither: one alone would silently search without a position. */
 function latWithLng(v: { lat?: number; lng?: number }, ctx: z.RefinementCtx) {

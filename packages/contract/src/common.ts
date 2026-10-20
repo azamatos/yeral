@@ -69,6 +69,9 @@ export const cityRefSchema = z.object({ id: slugSchema, name: z.string() }).meta
 export const langQuerySchema = z.object({ lang: localeSchema.default(MARKET.defaultLanguage) })
 
 /** Comma-separated ids in a query string: `services=a,b`; an id listed twice counts once. */
+/** A yes or no in a query string: `1`/`0` or `true`/`false`. */
+export const boolQuery = z.enum(['1', '0', 'true', 'false']).transform((v) => v === '1' || v === 'true')
+
 export const idListQuery = z
   .string()
   .transform((s) => [...new Set(s.split(',').filter(Boolean))])

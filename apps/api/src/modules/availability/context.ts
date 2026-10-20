@@ -111,10 +111,6 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
     end: bookingItems.end,
     bufferAfter: bookingItems.bufferAfter,
   }
-  // busy elsewhere (book Q-272): a person in several workspaces is taken here by their bookings as a specialist there,
-  // waiting or confirmed, with their buffers, by the account each item was booked with, as the database counts them
-  // (migration 0020); their own bookings as a client, breaks and days off don't count
-  const here = alias(staff, 'here')
   const [own, elsewhere, blocks] = await all(db, [
     () =>
       db
@@ -122,12 +118,7 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
         .from(bookingItems)
         .innerJoin(bookings, eq(bookings.id, bookingItems.bookingId))
         .where(and(inArray(bookings.businessId, businessIds), days)),
-    () =>
-      db
-        .select({ ...item, staffId: here.id })
-        .from(bookingItems)
-        .innerJoin(here, and(eq(here.userId, bookingItems.person), sql`${here.id} is distinct from ${bookingItems.staffId}`))
-        .where(and(inArray(here.businessId, businessIds), days)),
+    () => loadElsewhere(db, businessIds, from, to),
     () =>
       db
         .select()
@@ -146,15 +137,7 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
         ? [{ bookingId: r.bookingId, staffId: r.staffId, date: r.date, start: r.start, end: r.end + r.bufferAfter, buffer: r.bufferAfter }]
         : [],
     ),
-    ...elsewhere.map((r) => ({
-      bookingId: r.bookingId,
-      staffId: r.staffId,
-      date: r.date,
-      start: r.start,
-      end: r.end + r.bufferAfter,
-      buffer: r.bufferAfter,
-      elsewhere: true as const,
-    })),
+    ...elsewhere,
     ...blocks.map((b) => ({
       bookingId: `block:${b.id}`,
       staffId: b.staffId,
@@ -164,6 +147,44 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
       blocked: true as const,
     })),
   ]
+}
+
+/**
+ * Busy elsewhere (book Q-272): a person in several workspaces is taken here by their bookings as a specialist there,
+ * waiting or confirmed, with their buffers, by the account each item was booked with, as the database counts them
+ * (migration 0020); their own bookings as a client, breaks, days off and blocked time there don't count.
+ */
+export async function loadElsewhere(db: Queryable, businessIds: string[], from: string, to: string): Promise<BusyInterval[]> {
+  if (!businessIds.length) return []
+  const here = alias(staff, 'here')
+  const rows = await db
+    .select({
+      bookingId: bookingItems.bookingId,
+      date: bookingItems.date,
+      start: bookingItems.start,
+      end: bookingItems.end,
+      bufferAfter: bookingItems.bufferAfter,
+      staffId: here.id,
+    })
+    .from(bookingItems)
+    .innerJoin(here, and(eq(here.userId, bookingItems.person), sql`${here.id} is distinct from ${bookingItems.staffId}`))
+    .where(
+      and(
+        inArray(here.businessId, businessIds),
+        eq(bookingItems.active, true),
+        gte(bookingItems.date, addDays(from, -1)),
+        lte(bookingItems.date, addDays(to, 1)),
+      ),
+    )
+  return rows.map((r) => ({
+    bookingId: r.bookingId,
+    staffId: r.staffId,
+    date: r.date,
+    start: r.start,
+    end: r.end + r.bufferAfter,
+    buffer: r.bufferAfter,
+    elsewhere: true as const,
+  }))
 }
 
 /**

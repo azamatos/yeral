@@ -17,4 +17,11 @@
 - Tests: `calendar/view.test.ts` (the owner's day with a booking, a request, a cancel shown on request, blocked time,
   an internal status and the money; an administrator without money; a specialist's own column and earnings, another's
   403; a week, one person, a personal day off, a waiting move's ghost).
+- Its review (10, all fixed; one in #94): waiting moves only while their answer time runs (`awaitingAnswer`);
+  `moves` gives each ghost on the day and person it asks for, whether or not its booking is in view, with the
+  booking's time now (`of`); one person's view counts only their part of a shared booking's money; a column of one's
+  own only for a specialist; busy elsewhere read on its own (`loadElsewhere`, out of `loadBusy`); the day before's
+  layers only when they run past midnight; `boolQuery` shared in `@yeral/contract/common`; the sdk refreshes the
+  calendar when a request is answered (and with the statuses, in #94); items grouped once, the off reason only when
+  off, a sub-select instead of DISTINCT.
 - Follow-ups: drag to move uses the existing move endpoint; the bookings list and search (B-30) next.

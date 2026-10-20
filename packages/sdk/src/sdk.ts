@@ -39,6 +39,7 @@ import type {
 import type {
   blockInputSchema,
   businessCancelSchema,
+  calendarQuerySchema,
   freeTimesQuerySchema,
   moveBookingSchema,
   newBookingSchema,
@@ -595,7 +596,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   }
 
   /** Booking requests the business answers (book B-19–B-21): the waiting ones, confirm, decline. */
-  const answered = (slug: string) => invalidate(keys.requests(slug), keys.workspaces(), keys.availabilityAll(slug))
+  const answered = (slug: string) => invalidate(keys.requests(slug), keys.workspaces(), keys.availabilityAll(slug), keys.calendar(slug))
   const requests = {
     /** The ones the viewer may see, most urgent first, with whether they may answer each. */
     list: (slug: string) =>
@@ -624,8 +625,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   const booked = (slug: string) => invalidate(keys.calendar(slug), keys.availabilityAll(slug), keys.requests(slug), keys.workspaces())
   const calendar = {
     /** "Senenama" (book B-16, B-17): a day or a week, everyone the reader sees or one person, the day's lines. */
-    view: (slug: string, p: { date: string; days?: 1 | 7; staff?: string; cancelled?: boolean; lang?: Locale }) => {
-      const query = clean({ ...p, cancelled: p.cancelled === undefined ? undefined : String(p.cancelled) })
+    view: (slug: string, p: Params<typeof calendarQuerySchema, 'date'>) => {
+      const query = clean(p)
       return queryOptions({
         queryKey: keys.calendarView(slug, query),
         queryFn: ({ signal }) => call(w.calendar.$get({ param: { slug }, query: query as never }, abortWith(signal))),

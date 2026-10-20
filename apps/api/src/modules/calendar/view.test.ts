@@ -122,6 +122,8 @@ describe('the calendar (book B-16, B-17)', () => {
     const admin = await view(await as(SELBI))
     expect(admin.summary[0]!.revenue).toBeNull()
     expect(admin.columns.length).toBeGreaterThan(1)
+    // she takes no bookings: no column of her own
+    expect(admin.columns.map((c) => c.name)).not.toContain('Selbi')
 
     const maral = await as(MARAL)
     const mine = await view(maral)
@@ -164,6 +166,18 @@ describe('the calendar (book B-16, B-17)', () => {
     await client.req(`/v1/me/bookings/${sent}/reschedule`, { body: { date: DAY, start: later } })
     const moved = (await view(maysa)).bookings.find((b) => b.code === sent)!
     expect(moved).toMatchObject({ status: 'confirmed', move: { date: DAY, start: later } })
+    // asked onto another day: the ghost is there, with the booking's time now
+    const next = '2026-11-06'
+    const tomorrow = (await client.req(`/v1/businesses/glow-studio/availability?services=${manicure}&staff=${maralId}&date=${next}`)).json
+      .slots as { start: number }[]
+    await client.req(`/v1/me/bookings/${sent}/reschedule`, { body: { date: next, start: tomorrow[0]!.start } })
+    const there = (await maysa.req(`${W}/calendar?date=${next}`)).json as { moves: { of: { code: string; date: string }; date: string }[] }
+    expect(there.moves).toEqual([expect.objectContaining({ date: next, of: expect.objectContaining({ code: sent, date: DAY }) })])
+    // its answer time run out: no ghost, nothing waiting on the booking
+    t.clock.now += 3 * 86_400_000
+    const lapsed = (await maysa.req(`${W}/calendar?date=${next}`)).json as { moves: unknown[] }
+    expect(lapsed.moves).toEqual([])
+    t.clock.now -= 3 * 86_400_000
     // the move itself isn't a booking of its own, only the booking's ghost
     const moveCode = (moved.move as unknown as { code: string }).code
     expect((await view(maysa)).bookings.map((b) => b.code)).not.toContain(moveCode)
