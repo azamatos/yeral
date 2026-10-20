@@ -18,8 +18,8 @@ import { bookingItems, bookingRules, bookings, staff, type TimeSlot } from '../.
 import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
 import { appointmentContext, assertStaffFree, loadBusiness, loadBusy, lockedHours, OutsideHours } from '../availability/context'
-import { text } from '../catalog/map'
 import { confirmBooking } from '../bookings/confirm'
+import { teamItemOf, teamPriceOf } from '../bookings/team-view'
 import { bookedServices, declineForBusiness, rebookQuery, refuseMove } from '../bookings/engine'
 import { awaitingAnswer, guard, itemsOf, lockBooking, stateOf, type BookingRow } from '../bookings/repo'
 
@@ -113,16 +113,8 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
         end: r.end,
         holdUntil: r.holdUntil!.getTime(),
         sentAt: r.createdAt.getTime(),
-        items: mine.map(({ item }) => ({
-          serviceId: item.serviceId,
-          service: text(item.serviceName, lang),
-          staffId: item.staffId,
-          staff: item.staffName,
-          start: item.start,
-          end: item.end,
-        })),
-        // the team sees what it charges, a hidden price included
-        price: r.priceType ? { type: r.priceType, amount: r.priceAmount ?? 0 } : null,
+        items: mine.map(({ item }) => teamItemOf(item, lang)),
+        price: teamPriceOf(r),
         note: r.clientNote,
         from: from ? { date: from.date, start: from.start, end: from.end } : null,
         client: { name: r.clientName ?? '', phone: r.clientPhone, visits: seen?.visits ?? 0, noShows: seen?.noShows ?? 0 },
