@@ -73,7 +73,7 @@ async function dropPendingMove(db: Queryable, b: BookingRow, at: Date) {
   try {
     const row = await setStatus(db, m, { status: 'cancelled', cancelledBy: lapsed ? 'system' : 'client', at })
     // as the jobs would: the booking says the move wasn't accepted (a cancel and "Yzyna al" keep that)
-    if (lapsed) await recordMoveRefused(db, b, row, { by: 'system', reason: null, text: null }, at.getTime())
+    if (lapsed) await recordMoveRefused(db, b, row, { by: 'system', reason: null, text: null }, m.holdUntil?.getTime() ?? at.getTime())
     await emit(db, {
       type: lapsed ? 'booking.expired' : 'booking.cancelled',
       businessId: row.businessId,

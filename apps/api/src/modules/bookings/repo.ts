@@ -1,6 +1,6 @@
 /** Booking rows: lookups, the lifecycle view, status changes, codes. */
 import { bookingCode } from '@yeral/domain/id'
-import { effectiveStatus, type BookingState } from '@yeral/domain/lifecycle'
+import type { BookingState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, CancelledBy } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
@@ -105,19 +105,26 @@ export async function lockBooking(db: Queryable, id: string): Promise<BookingRow
 }
 
 /**
+ * Whether a move refused at `refusedAt` counts for its booking: refused before the visit began, while the booking stood.
+ * Judged by when it was refused, not when a job gets to it, so the booking detail and the record agree.
+ */
+export const refusalCounts = (original: Pick<BookingRow, 'date' | 'start' | 'status'>, refusedAt: number) =>
+  original.status === 'confirmed' && refusedAt < epochOf(original.date, original.start)
+
+/**
  * A move not accepted (lapsed, or declined by the business): the booking it would move keeps its time and says so
- * (ROUND6 A3), while that booking is still ahead. Every path that refuses a move records it here; true when it did, and
- * then the client is told by SMS too (book Q-289). The caller holds the booking's lock.
+ * (ROUND6 A3). Every path that refuses a move records it here; true when it did. The caller holds the booking's lock and
+ * decides about the SMS (book Q-289): the jobs send it while the visit is still ahead; a client action that finds a
+ * lapsed move doesn't, the client is on the screen.
  */
 export async function recordMoveRefused(
   db: Queryable,
   original: BookingRow,
   move: Pick<BookingRow, 'date' | 'start' | 'end'>,
   refused: Pick<MoveRefused, 'by' | 'reason' | 'text'>,
-  now: number,
+  refusedAt: number,
 ): Promise<boolean> {
-  const ahead = effectiveStatus(stateOf(original), now).status === 'confirmed' && now < epochOf(original.date, original.start)
-  if (!ahead) return false
+  if (!refusalCounts(original, refusedAt)) return false
   await db
     .update(bookings)
     .set({ moveRefused: { date: move.date, start: move.start, end: move.end, ...refused } })

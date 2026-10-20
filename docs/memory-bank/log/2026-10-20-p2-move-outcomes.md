@@ -9,7 +9,9 @@
   midnight (`confirmed`, `expired`, `moveRefused`). The review's first finding: reading the outcome from the move rows
   broke once an accepted move deleted its row.
 - Every path that refuses a move records it with `recordMoveRefused()` (`bookings/repo.ts`): the jobs, a client action
-  that finds a lapsed move, and the business's decline in step 4. It only records while the booking is still ahead, and
-  the jobs lock the booking before the move, as every client path does.
+  that finds a lapsed move, and the business's decline in step 4. It counts a move refused before the visit began
+  (`refusalCounts()`, judged by when it was refused, which the booking detail uses too); the jobs send the SMS only
+  while the visit is still ahead, checked at that moment. The jobs and account deletion lock a booking before its
+  move, as every client path does.
 - Follow-ups: the business's decline of a move (step 4) calls `recordMoveRefused()` and sends the same SMS; activeContext: next token links instead of
   `/b/{code}` and the signed-out link page (Q-168, F-068).

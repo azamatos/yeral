@@ -8,7 +8,7 @@ import { DAY_MINUTES } from '@yeral/domain/hours'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { nearestSlots, nextFreeSlot, slotStaffId, staffDoingAll, type AppointmentSlot } from '@yeral/domain/availability'
-import { addDays, localOf } from '@yeral/domain/time'
+import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
 import { bookings, businesses, clients, jobs, users, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
@@ -80,10 +80,12 @@ async function expireRequests(deps: Deps): Promise<number> {
           bookingCode: row.code,
           userId: row.userId,
         })
-        // a lapsed move: the booking it would move keeps its time, says so, and the client hears so (book Q-289);
-        // a booking already started, over or gone hears nothing
-        const live = !!original && (await recordMoveRefused(tx, original, row, { by: 'system', reason: null, text: null }, now.getTime()))
-        const told = b.rescheduleOf ? (live ? original : undefined) : row
+        // a lapsed move: the booking it would move keeps its time and says so; the client hears so while the visit is
+        // still ahead (book Q-289), checked now, not when the batch began
+        const lapsedAt = b.holdUntil?.getTime() ?? now.getTime()
+        const recorded = !!original && (await recordMoveRefused(tx, original, row, { by: 'system', reason: null, text: null }, lapsedAt))
+        const ahead = !!original && deps.now() < epochOf(original.date, original.start)
+        const told = b.rescheduleOf ? (recorded && ahead ? original : undefined) : row
         const [biz] = told?.clientPhone ? await tx.select().from(businesses).where(eq(businesses.id, row.businessId)) : []
         if (told?.clientPhone && biz) {
           const [user] = told.userId ? await tx.select().from(users).where(eq(users.id, told.userId)) : []
