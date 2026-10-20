@@ -66,6 +66,11 @@ export const inviteCardSchema = z
     /** Who sent it: their name on the team. */
     invitedBy: z.string().nullable(),
     level: assignableLevelSchema,
+    /**
+     * Whether they'll answer booking requests there (book B-08), worked out from the business's rules ("who answers",
+     * instant or by hand, specialists without the app) and their own switch; the card's line for the level follows it.
+     */
+    answersRequests: z.boolean(),
     state: inviteStateSchema,
     sentAt: epochSchema,
     expiresAt: epochSchema,

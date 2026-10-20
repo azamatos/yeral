@@ -4,7 +4,7 @@
  */
 import type { InviteCard, TeamMember, Workspace } from '@yeral/contract/team'
 import type { Locale } from '@yeral/domain/model'
-import { canAnswerRequest, type Actor } from '@yeral/domain/permissions'
+import { answersRequests, canAnswerRequest, type Actor } from '@yeral/domain/permissions'
 import { inviteExpiresAt, inviteState } from '@yeral/domain/team'
 import type { SiteConfig } from '@yeral/lib/site'
 import { and, asc, desc, eq, inArray, or } from 'drizzle-orm'
@@ -21,7 +21,7 @@ import { cityRefOf, loadCities } from '../catalog/cities'
 import { photoOf, text } from '../catalog/map'
 import { signsIn } from './members'
 import { awaitingAnswer } from '../bookings/repo'
-import { answerFacts, requestItems } from '../requests/service'
+import { answerFacts, answeringOf, requestItems } from '../requests/service'
 
 export type StaffRow = typeof staff.$inferSelect
 export type BusinessRow = typeof businesses.$inferSelect
@@ -290,6 +290,10 @@ export async function inviteCards(deps: Deps, rows: InviteRow[], lang: Locale): 
       ),
     )
   const cities = await loadCities(deps.db)
+  const answering = await answeringOf(
+    deps.db,
+    rows.map((r) => r.businessId),
+  )
   // the sender's name as their team knows it
   const senders = rows.flatMap((r) => (r.invitedBy ? [r.invitedBy] : []))
   const senderRows = senders.length
@@ -315,6 +319,10 @@ export async function inviteCards(deps: Deps, rows: InviteRow[], lang: Locale): 
         },
         invitedBy: senderRows.find((x) => x.userId === r.invitedBy && x.businessId === r.businessId)?.name ?? null,
         level: s.level === 'admin' ? 'admin' : 'specialist',
+        answersRequests: answersRequests(
+          { level: s.level === 'admin' ? 'admin' : 'specialist', canAnswerOwn: s.canAnswerOwn },
+          answering.get(r.businessId)!,
+        ),
         state: inviteState({ status: r.status, expiresAt: r.expiresAt.getTime() }, now),
         sentAt: r.sentAt.getTime(),
         expiresAt: r.expiresAt.getTime(),

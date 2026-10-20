@@ -16,7 +16,7 @@ import { endSession, requireUser } from '../auth/session'
 import { buildCards } from '../catalog/cards'
 import { publicBusiness } from '../catalog/detail'
 import { changePhone, releaseAccount } from './account'
-import { accountName, toMe } from './me'
+import { accountName, phoneChangeOpen, toMe } from './me'
 
 const tags = ['me']
 const slugParam = z.object({ slug: slugSchema })
@@ -86,7 +86,7 @@ const removeFavoriteRoute = createRoute({
 })
 
 export const meRoutes = new OpenAPIHono<AppEnv>()
-  .openapi(meRoute, async (c) => c.json(await toMe(c.var.deps.db, requireUser(c)), 200))
+  .openapi(meRoute, async (c) => c.json(await toMe(c.var.deps.db, requireUser(c), c.var.deps), 200))
   .openapi(updateRoute, async (c) => {
     const user = requireUser(c)
     const { name, firstName, surname, lang, notifications: n } = c.req.valid('json')
@@ -110,9 +110,9 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
       ...(n?.reminder2h !== undefined ? { notifyReminder2h: n.reminder2h } : {}),
     }
     // nothing to change (only the deprecated review-ask switch, say): the profile as it is
-    if (!Object.keys(set).length) return c.json(await toMe(c.var.deps.db, user), 200)
+    if (!Object.keys(set).length) return c.json(await toMe(c.var.deps.db, user, c.var.deps), 200)
     const [row] = await c.var.deps.db.update(users).set(set).where(eq(users.id, user.id)).returning()
-    return c.json(await toMe(c.var.deps.db, row ?? user), 200)
+    return c.json(await toMe(c.var.deps.db, row ?? user, c.var.deps), 200)
   })
   .openapi(deleteRoute, async (c) => {
     const user = requireUser(c)
@@ -126,7 +126,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     const user = requireUser(c)
     // with the code on the screen the number wouldn't be shown to be theirs, and a change merges the businesses'
     // records of it into the account (book Q-036)
-    if (c.var.deps.codeOnScreen) throw new ApiError('phone_change_unavailable')
+    if (!phoneChangeOpen(c.var.deps)) throw new ApiError('phone_change_unavailable')
     const { phone } = c.req.valid('json')
     const [taken] = await c.var.deps.db.select({ id: users.id }).from(users).where(eq(users.phone, phone))
     if (taken) throw new ApiError('phone_taken')
@@ -143,7 +143,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(phoneVerifyRoute, async (c) => {
     const user = requireUser(c)
-    if (c.var.deps.codeOnScreen) throw new ApiError('phone_change_unavailable')
+    if (!phoneChangeOpen(c.var.deps)) throw new ApiError('phone_change_unavailable')
     const { phone, code } = c.req.valid('json')
     const { userId } = await checkCode(c.var.deps, { phone, purpose: 'change_phone', code })
     if (userId !== user.id) throw new ApiError('code_expired')
@@ -163,7 +163,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
           others.map((s) => s.id),
         ),
       )
-    return c.json(await toMe(c.var.deps.db, row), 200)
+    return c.json(await toMe(c.var.deps.db, row, c.var.deps), 200)
   })
   .openapi(favoritesRoute, async (c) => {
     const user = requireUser(c)

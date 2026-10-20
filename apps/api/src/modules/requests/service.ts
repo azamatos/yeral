@@ -10,7 +10,7 @@ import { withinHours } from '@yeral/domain/hours'
 import { canAnswerRequest as requestOpen, offerPast } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { canAnswerRequest, canOn, type Actor } from '@yeral/domain/permissions'
-import type { RequestAnswerers } from '@yeral/domain/rules'
+import { DEFAULT_RULES, type RequestAnswerers } from '@yeral/domain/rules'
 import { and, asc, eq, inArray } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
@@ -37,11 +37,45 @@ function answeredBy(answerers: RequestAnswerers, forPhoneOnlyStaff: boolean): Re
 }
 
 export async function answerersOf(db: Queryable, businessId: string): Promise<RequestAnswerers> {
-  const [rules] = await db
-    .select({ answerers: bookingRules.requestAnswerers })
-    .from(bookingRules)
-    .where(eq(bookingRules.businessId, businessId))
-  return rules?.answerers ?? 'both'
+  return (await answeringOf(db, [businessId])).get(businessId)!.answerers
+}
+
+/**
+ * How requests are answered at these businesses: who answers, whether bookings confirm at once, and whether someone
+ * bookable works without the app (the desk answers for them); the rules' defaults for one without a rules row yet.
+ */
+export async function answeringOf(
+  db: Queryable,
+  businessIds: readonly string[],
+): Promise<Map<string, { answerers: RequestAnswerers; instant: boolean; phoneOnlyStaff: boolean }>> {
+  const ids = [...new Set(businessIds)]
+  const [rules, phoneOnly] = ids.length
+    ? await all(db, [
+        () =>
+          db
+            .select({ businessId: bookingRules.businessId, answerers: bookingRules.requestAnswerers, mode: bookingRules.confirmMode })
+            .from(bookingRules)
+            .where(inArray(bookingRules.businessId, ids)),
+        () =>
+          db
+            .selectDistinct({ businessId: staff.businessId })
+            .from(staff)
+            .where(and(inArray(staff.businessId, ids), eq(staff.hasApp, false), eq(staff.status, 'active'), eq(staff.bookable, true))),
+      ])
+    : [[], []]
+  return new Map(
+    ids.map((id) => {
+      const r = rules.find((x) => x.businessId === id)
+      return [
+        id,
+        {
+          answerers: r?.answerers ?? DEFAULT_RULES.requestAnswerers,
+          instant: (r?.mode ?? DEFAULT_RULES.confirmMode) === 'instant',
+          phoneOnlyStaff: phoneOnly.some((x) => x.businessId === id),
+        },
+      ]
+    }),
+  )
 }
 
 /** The requests' items with whether each specialist has the app, in the booking's order. */
