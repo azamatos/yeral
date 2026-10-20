@@ -12,6 +12,9 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 1. `docs/memory-bank/activeContext.md`: current focus, open questions, next steps.
    **Product book first (ADR 0021):** `docs/product/` is the source of product rules, roles, limits, scope and flows;
    nothing is designed or built from a chapter with open questions (`docs/product/questions.md`).
+   Look entries up by ID instead of reading a chapter whole: `pnpm book show Q-107` (a question, feature row, flow or
+   ADR), `pnpm book refs Q-107` (every other mention), `pnpm book toc 07b` (headings with line ranges, then read the
+   range). Read a chapter whole only when rewriting it.
 2. `docs/memory-bank/systemPatterns.md` before writing code: monorepo map, FSD, data flow, state, rendering, auth, i18n.
 3. As the task needs: `productContext.md` (product rules, glossary), `techContext.md` (libraries, why, where shared
    helpers live), `operations.md` (environments, Docker, CI/CD, versioning, parallel work), `docs/decisions/` (ADRs).
@@ -84,6 +87,7 @@ Every task runs through Turborepo from the root; `--filter=@yeral/<name>...` nar
 | `pnpm test:stories` | every Storybook story as a Chromium test (render, interactions, axe) |
 | `pnpm gen package` · `pnpm gen ui-component` | scaffold an internal package / a design-system component with stories |
 | `pnpm changeset` | describe a user-visible change for the next release |
+| `pnpm book show\|refs <ID>` · `pnpm book toc <doc>` · `pnpm book open` | look the docs up by ID (`Q-107`, `F-012`, `B-05`, `ADR 0021`); outline a doc; questions still open or with a concern |
 | `pnpm db:up` · `pnpm db:setup` | Postgres 18 in Docker; create, migrate and seed the database in `apps/api/.env.local` (API tests need it too) |
 | `pnpm db:generate` | a new SQL migration from the Drizzle schema (`apps/api/src/db/schema`) |
 | `pnpm docker:up` · `pnpm docker:down` | the production-like stack: Postgres + api + Caddy on `*.yeral.localhost` |

@@ -20,4 +20,7 @@ Project skills in `.claude/skills` — use them when the task matches:
 
 - Parallel tasks: start a worktree (`claude --worktree` or the worktree tool) before editing; follow `parallel-work`.
 - The private auto-memory holds only how to work with the owner; project facts belong in `docs/memory-bank`.
+- `.claude/settings.json` enables the TypeScript LSP plugin (`typescript-lsp@claude-plugins-official`; needs
+  `npm i -g typescript-language-server typescript`): ask it where a symbol is defined, who uses it and what type it has
+  before grepping; it also reports type errors right after an edit.
 - The owner may start `/design-sync` to sync `@yeral/ui` with a Claude Design design-system project; don't start it on your own.
