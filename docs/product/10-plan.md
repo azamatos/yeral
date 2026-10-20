@@ -38,20 +38,40 @@ prompts are kept in `docs/product/prompts/`.
 Claude writes each prompt for Claude Design, the owner pastes it, Claude checks the result on the canvas against the
 book (ADR 0021). The result is design export v0.6, every board in English (Q-133), with Russian-length text checked.
 
-Each round takes every **Design to fix** line for the boards it redraws, and the fixes the check of the round before
-found, so no board is drawn twice. Fixes that only matter for tables and classes wait for their own design pass after
-the MVP. Every prompt asks for the Russian-length check on its new screens (Q-101). Reviewed 20.10.2026 after rounds 1
-and 2.
+Each round takes every **Design to fix** line for the boards it redraws, so no board is drawn twice. Fixes that only
+matter for tables and classes wait for their own design pass after the MVP. Every prompt asks for the Russian-length
+check on its new screens (Q-101). Reviewed 20.10.2026 after rounds 1 and 2.
+
+**Small iterations** (owner, 20.10.2026: round 3, seven boards and the fixes to rounds 1–2 in one prompt, took about
+three hours). From round 4 a round is cut into iterations: one prompt draws one main board, or two small ones, with
+its own phone frames and design-system pieces, in about ten instructions. Fixes a check finds get their own short
+prompt instead of riding on the next one. Each iteration is checked before the next is written.
 
 | Round | Boards | What gets drawn or redrawn | Where it stands |
 |---|---|---|---|
 | 1 | the five design-system boards | Foundations: the *Ýeral* wordmark (Q-005), English copy rules, the components with English text; the "Example" badge; the shared code step | drawn 19.10.2026, checked 20.10.2026 (fixes in round 3) |
 | 2 | B-Shell, B-Login, B-Onboarding, B-Calendar, B-Bookings, B-Mobile, DS · Business patterns | Business app: shell, sign-in with the code on screen, setup wizard, calendar (block time, *Başga ýerde* as a plain reserved gap, internal statuses), requests, bookings list (no bulk move); B-Tables, B-Classes, B-Analytics and B-Help moved to "Later" | drawn 20.10.2026, checked 20.10.2026 (fixes in round 3) |
-| 3 | B-Clients, B-Client, B-Team, B-Settings, B-Services, B-Reviews, B-Landing, their phone frames | Business app: clients (specialist view, the average check), team (the "uses the app" switch, invites without SMS, read-only permissions), settings (photos, the city, hours past midnight, booking rules, link and QR states), services, reviews (moderation outcomes), the landing page with "Try the business app" without signing in; B-Notifications moved to "Later" (F-169); the fixes to rounds 1–2 | prompt written 20.10.2026 (`prompts/p1-round-3.md`) |
-| 4a | Home, Search, Client-Map, Venue, States | Client site, finding a place: home without the app block (F-004), search and map with the city choice (Q-107), the business page (owner preview Q-153, phone-only clients Q-154), errors and empty pages, no "Bahalar" footer (F-033); Booking-Table and Booking-Class and the three Home explorations moved to "Later" | |
-| 4b | Booking, Auth, Booking-Link, Account-Bookings, Account-Profile, Mobile | Client site, booking and after: appointment booking with the shared code step, surname and "Is this you?" (Q-156, Q-270), the waiting limit (Q-124), the sent screen with the answer deadline as a clock time and no SMS promise (Q-253, Q-036), my bookings (cancel without a reason Q-163, move overlap Q-165), the booking link page with a finished visit (Q-170), the account without the review-ask switch (Q-259) and the delete copy (Q-172) | |
-| 5 | admin tool (new) | cms.yeral.app, drawn for the first time on the business app's patterns: the team's own sign-in with a second factor (F-178), verify or reject a business, reported reviews with the 48-hour recount (Q-261), hide or un-verify a business with a reason to the owner (Q-012), add a business for its owner, close a workspace (Q-213) | |
-| 6 | every board | The check pass: design-system boards caught up with rounds 3–5, demo data, the drift list, any **Design to fix** line still open, then the export | |
+| 3 | B-Clients, B-Client, B-Team, B-Settings, B-Services, B-Reviews, B-Landing, their phone frames | Business app: clients (specialist view, the average check), team (the "uses the app" switch, invites without SMS, read-only permissions), settings (photos, the city, hours past midnight, booking rules, link and QR states), services, reviews (moderation outcomes), the landing page with "Try the business app" without signing in; B-Notifications moved to "Later" (F-169); the fixes to rounds 1–2 | drawn 20.10.2026 (about 3 hours: too big for one prompt); checked 20.10.2026 |
+| 3.1 | B-Calendar, B-Bookings, B-Shell | Fixes: one report per booking with No-show replacing (Q-206), the notifications banner for everyone, the Hidden by Ýeral banner (Q-012), Admin views shifts only | prompt written 20.10.2026 (`prompts/p1-round-3-fixes.md`) |
+| 3.2 | B-Clients, B-Client | Fixes: a Specialist's own bookings only, the reminders switch (F-143), last visit, Unnamed client, the account link by phone (Q-171), tags, Total | prompt written 20.10.2026 |
+| 3.3 | B-Team, B-Services | Fixes: Admin read-only on the team, Reactivate (F-114), breaks and yearly time off (F-112), the hidden price's amount (B-38), invited people in "Who does it" | prompt written 20.10.2026 |
+| 3.4 | B-Settings, B-Onboarding | Fixes: the launch categories (chapter 4), text limits (chapter 5), special days past midnight (Q-105), every affected booking (Q-211), QR as PNG or SVG | prompt written 20.10.2026 |
+| 4a.1 | Home | Canvas tidy (Booking-Table, Booking-Class and the three Home explorations to "Later"); home in English without the app block (F-004), the business entry (F-177), the Example badge on cards; the client footer without "Bahalar" (F-033) | |
+| 4a.2 | Search, Client-Map | Search and map with the city choice (Q-107), places without a free time (Q-150), Example rows and pins; no party-size filter (tables are Later) | |
+| 4a.3 | Venue | The business page: owner preview with the booking buttons disabled (Q-153), the Call card for a phone-only client or a paused business (Q-154), the Example line, hidden prices, reviews by name and initial and under moderation, hours past midnight | |
+| 4a.4 | States | Errors, empty pages, location help, not found, a page still in review (F1) | |
+| 4b.1 | Auth | The login modal with the shared code step (code on the screen first), name and optional surname (Q-156), "Is this you?" (Q-270) | |
+| 4b.2 | Booking | The appointment flow: steps, the waiting limit refusal (Q-124), the sent screen with the answer time as a clock time and no SMS promise (Q-253, Q-036), instant confirmation, the phone-only card | |
+| 4b.3 | Booking (move mode) | Change the time: specialist kept unless changed, overlapping times allowed (Q-165), a second move replaces the first | |
+| 4b.4 | Account-Bookings, part 1 | My bookings: lists, the detail drawer, who cancelled, the cancel modal with or without a reason (Q-163), undo and its four failures | |
+| 4b.5 | Account-Bookings, part 2 | Declines with offered times, expiries, waiting and refused moves, the phone-only booking (Q-154) | |
+| 4b.6 | Booking-Link | The link page signed out: masked-phone sign-in, every status, the finished visit with "Write a review" (Q-170), cancelled and no-show with "Book again" | |
+| 4b.7 | Account-Profile | Profile, the phone change with the code step, no review-ask switch (Q-259), the delete-account copy (Q-172) | |
+| 5.1 | admin tool: shell and sign-in | cms.yeral.app on the business app's patterns: the team's own sign-in with a second factor and its recovery (F-178), navigation | |
+| 5.2 | admin tool: businesses | Verify, reject with a reason and see it sent again (Q-274), hide or un-verify with a reason to the owner (Q-012), add a business for its owner (F-238), close a workspace (Q-213) | |
+| 5.3 | admin tool: reported reviews | The queue with the 48-hour recount, clear or remove (Q-261, Q-262) | |
+| 6.1 | design-system boards | Catch up with rounds 4–5: every new client and admin piece on its board with its states | |
+| 6.2 | every board | Demo data the same everywhere, the drift list, any **Design to fix** line still open, then the export | |
 
 ### P2 · Backend to the book
 
@@ -173,7 +193,7 @@ so there is time to test it from Ashgabat, rehearse the move and fix what breaks
 
 | Phase | The owner |
 |---|---|
-| P1 | pastes each design prompt into Claude Design and reviews the result (about seven rounds) |
+| P1 | pastes each design prompt into Claude Design and reviews the result (three rounds, then about 17 short iterations) |
 | P2–P4 | nothing required; reviews progress when Claude reports a finished slice |
 | P5 | approves the release; adds the DNS records; sets up the second factor of their admin account; meets the first businesses and adds them in the admin tool |
 | P6 | the investment, the lawyer, buying the server, the SMS provider account, the native language check |
