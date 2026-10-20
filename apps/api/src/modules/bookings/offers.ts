@@ -31,13 +31,13 @@ export const offerTarget = (o: TimeSlot) => ({ date: o.date, start: o.start, sta
 /**
  * The offered times a booking has, by one rule for the list, the detail and taking one: after the business declined it,
  * the times it offered; after the business cancelled it over a closed day or new hours, the free times found then (kept
- * with a decline's); after it ran out, the free times the jobs found (none until they've run). `source` is what the
+ * with a decline's, told apart by its reason); after it ran out, the free times the jobs found (none until they've run). `source` is what the
  * client sends back to take one.
  */
 export function offersOf(b: BookingRow, now: number): { source: OfferSource; list: TimeSlot[] } | null {
   const { status, cancelledBy } = effectiveStatus(stateOf(b), now)
   if (status !== 'cancelled') return null
-  if (cancelledBy === 'business') return { source: b.declineReason ? 'decline' : 'cancel', list: b.declineAlternatives }
+  if (cancelledBy === 'business') return { source: b.businessCancelReason ? 'cancel' : 'decline', list: b.declineAlternatives }
   if (cancelledBy === 'system') return { source: 'expired', list: b.expiredAlternatives }
   return null
 }

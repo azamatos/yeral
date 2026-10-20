@@ -204,6 +204,12 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     expect(await rowOf(lunch)).toMatchObject({ status: 'cancelled', businessCancelReason: 'hours', cancelReason: null })
     await runDueJobs(t.deps)
     expect(smsTo('+99365800304')).toEqual([expect.stringMatching(/cancelled your booking .*: The opening hours changed\./)])
+    // the link page: the code, no words
+    const lunchToken = /\/l\/([\w-]+)/.exec(smsTo('+99365800304').at(-1)!)![1]!
+    expect((await browser(t.app).req(`/v1/links/${lunchToken}`)).json).toMatchObject({
+      cancelReason: null,
+      businessCancel: { reason: 'hours', text: null },
+    })
     // back as it was
     expect((await save(maysa, { ...was, affected: 'keep' })).status).toBe(200)
   })

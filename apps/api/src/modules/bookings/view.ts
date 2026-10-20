@@ -1,7 +1,7 @@
 /** Booking rows → `BookingSummary` / `BookingDetail` (client spec §4.8: cards, detail drawer, actions). */
 import type { BookingDetail, BookingSummary, OfferSource } from '@yeral/contract/bookings'
 import { cancelDeadline, canClientRestore, clientActions, effectiveStatus } from '@yeral/domain/lifecycle'
-import { isOnlineSource, type Locale } from '@yeral/domain/model'
+import { isBusinessSideCancel, isOnlineSource, reasonWords, type Locale } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, inArray } from 'drizzle-orm'
 import { bookingItems, bookings, businesses, classSessions, reviews, staff, tableAreas } from '../../db/schema'
@@ -9,7 +9,6 @@ import type { Deps } from '../../deps'
 import { loadBusinesses } from '../availability/context'
 import { cityRef } from '../catalog/cities'
 import { geoOf, photoOf, text } from '../catalog/map'
-import { businessCancelWords } from '../../notify'
 import { bookOnlineFor } from '../clients/online'
 import { bookingRecipient } from './links'
 import { offeredTimes, offersOf } from './offers'
@@ -160,13 +159,13 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,
     cancelDeadline: cancelDeadline(lb.rules, row),
     askCancelReason: lb.rules.askCancelReason,
-    // the client's own words; a cancel the team entered (as the client asked on the phone, or the business's) has none
-    cancelReason: row.businessCancelReason ? null : row.cancelReason,
+    // the client's own words: a cancel the team entered (as the client asked on the phone, or the business's) has none
+    cancelReason: row.cancelledBy === 'client' && !row.businessCancelReason ? row.cancelReason : null,
     // the business's cancel names its reason as a code, with its words; the client's own, entered by the team when they
     // called, names none
     businessCancel:
-      row.businessCancelReason && row.cancelledBy === 'business'
-        ? { reason: row.businessCancelReason, text: businessCancelWords(row.businessCancelReason, row.cancelReason) }
+      row.businessCancelReason && isBusinessSideCancel(row.businessCancelReason)
+        ? { reason: row.businessCancelReason, text: reasonWords(row.businessCancelReason, row.cancelReason) }
         : null,
     decline: row.declineReason ? { reason: row.declineReason, text: row.declineText, alternatives: await chips('decline') } : null,
     // a business's cancel with offered times (a closed day, new hours): taken as after a decline, whatever the client's

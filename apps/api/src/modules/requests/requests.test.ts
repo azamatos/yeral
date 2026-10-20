@@ -135,6 +135,9 @@ describe('answering requests (book B-19, B-20, B-21)', () => {
     })
     await runDueJobs(t.deps)
     expect(t.sms.sent.filter((s) => s.to === '+99365800003').at(-1)?.text).toMatch(/can't take your booking.*This time isn't free/)
+    // a decline's offers, not a cancel's
+    const asCancel = await client.req(`/v1/me/bookings/${code}/accept-alternative`, { body: { source: 'cancel', index: 0 } })
+    expect(asCancel.json.error.code).toBe('invalid_status')
     const taken = await client.req(`/v1/me/bookings/${code}/accept-alternative`, { body: { source: 'decline', index: 0 } })
     expect(taken.json).toMatchObject({ status: 'confirmed', start: offer })
   })

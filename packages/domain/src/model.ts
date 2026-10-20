@@ -38,6 +38,17 @@ export const BUSINESS_CANCEL_REASONS = ['client_called', 'staff_away', 'other', 
 export type BusinessCancelReason = (typeof BUSINESS_CANCEL_REASONS)[number]
 /** The reasons on the team's cancel modal (B-27). */
 export const TEAM_CANCEL_REASONS = ['client_called', 'staff_away', 'other'] as const satisfies readonly BusinessCancelReason[]
+/** A cancel that stays the business's: every reason but "The client called to cancel", which is the client's own. */
+export const BUSINESS_SIDE_CANCEL_REASONS = ['staff_away', 'other', 'closed', 'hours'] as const satisfies readonly BusinessCancelReason[]
+export type BusinessSideCancelReason = (typeof BUSINESS_SIDE_CANCEL_REASONS)[number]
+export const isBusinessSideCancel = (r: BusinessCancelReason): r is BusinessSideCancelReason => r !== 'client_called'
+
+/**
+ * The business's own words a decline or a cancel carries: "Other reason" in words (B-20, B-27), or the special day's
+ * name it closed for (`closed`, B-40); for any other reason none, and the reason's label says it.
+ */
+export const reasonWords = (reason: DeclineReason | BusinessCancelReason, text: string | null): string | null =>
+  (reason === 'other' || reason === 'closed') && text ? text : null
 
 /** "Arz et" — what happened (business spec §3): Gelmedi, Gijä galdy, Gödek gylyk, Başga. */
 export const COMPLAINT_TYPES = ['noshow', 'late', 'rude', 'other'] as const

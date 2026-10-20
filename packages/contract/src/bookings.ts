@@ -4,7 +4,7 @@
  */
 import { MAX_SEATS_PER_BOOKING } from '@yeral/domain/availability'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
-import { BOOKING_SOURCES, BOOKING_STATUSES, BUSINESS_CANCEL_REASONS, CANCELLED_BY, DECLINE_REASONS } from '@yeral/domain/model'
+import { BOOKING_SOURCES, BOOKING_STATUSES, BUSINESS_SIDE_CANCEL_REASONS, CANCELLED_BY, DECLINE_REASONS } from '@yeral/domain/model'
 import { z } from 'zod'
 import {
   bookingCodeSchema,
@@ -148,9 +148,9 @@ export const bookingDetailSchema = bookingSummarySchema
     /**
      * The business's cancel (cancelled by the business): the reason as a code the app words
      * (`businessCancelReasons.*`), with the business's words for "Other reason" (B-27) or the special day's name it
-     * closed for (`closed`, B-40) in `text`.
+     * closed for (`closed`, B-40) in `text`. "The client called to cancel" is the client's own cancel: not here.
      */
-    businessCancel: z.object({ reason: z.enum(BUSINESS_CANCEL_REASONS), text: z.string().nullable() }).nullable(),
+    businessCancel: z.object({ reason: z.enum(BUSINESS_SIDE_CANCEL_REASONS), text: z.string().nullable() }).nullable(),
     decline: z
       .object({
         reason: z.enum(DECLINE_REASONS),
