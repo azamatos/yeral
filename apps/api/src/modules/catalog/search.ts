@@ -23,16 +23,20 @@ export const wordStartLikes = (q: string) => [`${escapeLike(q)}%`, `% ${escapeLi
 
 /**
  * A price range keeps the places with a known price inside it (book Q-103: no average bill for the rest): one of their
- * paid online services costs between `min` and `max` ("from 250" counts as 250), or, for a range from 0, every one of
- * their online services is free. Tables show no price, so they never match. The same prices the card's `priceFrom` reads.
+ * paid online services costs between `min` and `max` ("from 250" counts as 250), or, for a range from 0, their shown
+ * online services are all free. Tables show no price, so they never match. These are the prices the card's "from"
+ * reads (`priceFromOf`); one pass over the place's services.
  */
 function priceWithin(min: number, max: number | null): SQL {
-  const shown = sql`${services.businessId} = ${businesses.id} and ${services.online} and not ${services.archived}`
   const paid = sql`${services.priceType} in ('fixed', 'from')`
   const inRange = max === null ? sql`${services.priceAmount} >= ${min}` : sql`${services.priceAmount} between ${min} and ${max}`
-  const anyPaid = sql`exists (select 1 from ${services} where ${shown} and ${paid} and ${inRange})`
-  const allFree = sql`(exists (select 1 from ${services} where ${shown} and ${services.priceType} = 'free') and not exists (select 1 from ${services} where ${shown} and ${paid}))`
-  return sql`(${businesses.bookingTypes})[1] <> 'table' and (${anyPaid}${min === 0 ? sql` or ${allFree}` : sql``})`
+  const matches =
+    min === 0
+      ? sql`bool_or(${paid} and ${inRange}) or (bool_or(${services.priceType} = 'free') and not bool_or(${paid}))`
+      : sql`bool_or(${paid} and ${inRange})`
+  const shown = sql`${services.businessId} = ${businesses.id} and ${services.online} and not ${services.archived}`
+  // the card's type is the first booking type, an appointment without one
+  return sql`coalesce((${businesses.bookingTypes})[1], 'appointment') <> 'table' and coalesce((select ${matches} from ${services} where ${shown}), false)`
 }
 
 export async function search(deps: Deps, q: SearchQuery) {

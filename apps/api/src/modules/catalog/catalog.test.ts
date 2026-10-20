@@ -169,13 +169,17 @@ describe('catalogue', () => {
   it('a price range finds places with a paid service inside it; a place whose services are all free, from 0 only', async () => {
     const slugs = async (query: string) =>
       ((await b.req(`/v1/search?limit=50&${query}`)).json.items as { slug: string }[]).map((c) => c.slug)
-    // what each place charges online
-    const paid = await db
-      .select({ slug: businesses.slug, amount: services.priceAmount })
-      .from(services)
-      .innerJoin(businesses, eq(businesses.id, services.businessId))
-      .where(and(eq(services.online, true), eq(services.archived, false), inArray(services.priceType, ['fixed', 'from'])))
+    // what each place search finds charges online
+    const found = await slugs('')
+    const paid = (
+      await db
+        .select({ slug: businesses.slug, amount: services.priceAmount })
+        .from(services)
+        .innerJoin(businesses, eq(businesses.id, services.businessId))
+        .where(and(eq(services.online, true), eq(services.archived, false), inArray(services.priceType, ['fixed', 'from'])))
+    ).filter((p) => found.includes(p.slug))
     const amounts = [...new Set(paid.map((p) => p.amount))].sort((x, y) => x - y)
+    expect(amounts.length).toBeGreaterThanOrEqual(4)
     const has = (slug: string, min: number, max = Infinity) => paid.some((p) => p.slug === slug && p.amount >= min && p.amount <= max)
 
     const top = amounts.at(-1)!
@@ -186,7 +190,11 @@ describe('catalogue', () => {
     const between = await slugs(`minPrice=${lo}&maxPrice=${hi}`)
     expect(between.length).toBeGreaterThan(0)
     for (const s of between) expect(has(s, lo, hi)).toBe(true)
-    expect(await slugs(`minPrice=${hi}&maxPrice=${lo}`)).toEqual([])
+    // a reversed range is a mistake, not "no places"
+    expect((await b.req(`/v1/search?minPrice=${hi}&maxPrice=${lo}`)).status).toBe(400)
+    // the database stores 32-bit amounts: a larger limit is refused, not a server error
+    expect((await b.req('/v1/search?maxPrice=2147483647')).status).toBe(200)
+    expect((await b.req('/v1/search?maxPrice=10000000000')).status).toBe(400)
 
     const [barber] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
     const own = await db.select().from(services).where(eq(services.businessId, barber!.id))
