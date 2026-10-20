@@ -107,6 +107,8 @@ export function CodeInput({
         onChange={(e) => {
           // no maxLength: a pasted «48 21» or «Code: 4821» keeps all four digits
           const next = e.target.value.replace(/\D/g, '').slice(0, length)
+          // a digit typed after a full code is cut off: same code, nothing new to check
+          if (next === value) return
           onValueChange(next)
           if (next.length === length) onComplete?.(next)
         }}

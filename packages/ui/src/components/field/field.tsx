@@ -29,14 +29,21 @@ const messageTone = {
 
 /**
  * A field message (DS-Patterns → 02 Feedback → «Field messages»): 13/18 with a 14 px icon, top-aligned when the text
- * wraps. Errors are `role="alert"`; warnings and successes `role="status"`. Use it on its own for a message that
- * belongs to a form step rather than one field (the sign-in step's «Too many codes» in place of its button).
+ * wraps. Errors are `role="alert"`; warnings and successes `role="status"`; `live={false}` drops the role for a
+ * message that ticks (a countdown) and is announced another way. Use it on its own for a message that belongs to a
+ * form step rather than one field (the sign-in step's «Too many codes» in place of its button).
  */
-export function FieldMessage({ status = 'error', className, children, ...props }: ComponentProps<'span'> & { status?: FieldStatus }) {
+export function FieldMessage({
+  status = 'error',
+  live = true,
+  className,
+  children,
+  ...props
+}: ComponentProps<'span'> & { status?: FieldStatus; live?: boolean }) {
   const Icon = messageIcon[status]
   return (
     <span
-      role={status === 'error' ? 'alert' : 'status'}
+      role={live ? (status === 'error' ? 'alert' : 'status') : undefined}
       {...props}
       // a link in a message («Open client card») is a-600 and underlined, so it isn't told apart by colour alone
       className={cn(
@@ -61,6 +68,8 @@ export type FieldProps = {
   status?: FieldStatus
   /** A message with an icon under the control, in the colour of `status`. */
   message?: ReactNode
+  /** `false` when the message ticks (a countdown) and is announced another way: no live role. */
+  messageLive?: boolean
   disabled?: boolean
   className?: string
   /** Use your own id when the control needs a known one. */
@@ -69,13 +78,14 @@ export type FieldProps = {
 }
 
 /** Label above, always visible; a message (error, warning, success) and a hint below (DS-Components → Inputs). */
-export function Field({ label, hint, error, status, message, disabled, className, id, children }: FieldProps) {
+export function Field({ label, hint, error, status, message, messageLive = true, disabled, className, id, children }: FieldProps) {
   const auto = useId()
   const controlId = id ?? auto
   const labelId = `${controlId}-label`
   const messageId = `${controlId}-message`
   const hintId = `${controlId}-hint`
-  const note = error ?? message
+  // a falsy `error` (`error={failed && text}`) leaves room for the message
+  const note = error ? error : message
   const tone: FieldStatus | undefined = error ? 'error' : message ? (status ?? 'error') : undefined
   const describedBy = [note ? messageId : null, hint ? hintId : null].filter(Boolean).join(' ') || undefined
   return (
@@ -86,7 +96,7 @@ export function Field({ label, hint, error, status, message, disabled, className
         </label>
         {children}
         {note && tone && (
-          <FieldMessage id={messageId} status={tone}>
+          <FieldMessage id={messageId} status={tone} live={messageLive}>
             {note}
           </FieldMessage>
         )}

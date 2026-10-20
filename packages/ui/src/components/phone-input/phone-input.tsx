@@ -84,6 +84,8 @@ function MaskedPhone({ masked, prefix, size = 48, className, id, ...aria }: Mask
         id={id ?? field?.id}
         role="textbox"
         aria-readonly="true"
+        // reachable with Tab like a read-only input, so the number is heard before Send code
+        tabIndex={0}
         aria-labelledby={aria['aria-label'] ? undefined : field?.labelId}
         aria-label={aria['aria-label']}
         aria-describedby={aria['aria-describedby'] ?? field?.describedBy}

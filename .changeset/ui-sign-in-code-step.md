@@ -16,5 +16,6 @@ the business login and the SMS link page:
 - `CodeInput`: `size` 48 / 52 / 56, `responsive` (52 under 768), a read-only checking look, and a paste with spaces or
   words keeps all four digits.
 - `Field`: `status` (`error` · `warning` · `success`) with `message`, each with a 14 px icon; the hint stays under the
-  message; warning turns the control's line amber. `FieldMessage` for a message outside a field.
-- `Button` keeps an `aria-disabled` or `aria-busy` it is given.
+  message; warning turns the control's line amber; `messageLive={false}` for a message that ticks. `FieldMessage` for
+  a message outside a field.
+- `Button`: `loadingText` shows words beside the spinner while loading ("Sending…").

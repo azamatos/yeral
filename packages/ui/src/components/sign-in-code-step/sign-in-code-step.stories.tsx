@@ -182,7 +182,9 @@ export const PhoneTooManyCodes: Story = {
   name: 'Phone · Too many codes',
   args: { step: 'phone', size: 56, phone: '65102030', tooManyCodes: TOO_MANY_CODES },
   play: async ({ args, canvas }) => {
-    await expect(canvas.getByRole('alert')).toHaveTextContent(TOO_MANY_CODES)
+    // the wait ticks (minutes): no alert role, the live region says it once
+    await expect(canvas.queryByRole('alert')).not.toBeInTheDocument()
+    await expect(canvas.getByRole('status')).toHaveTextContent(TOO_MANY_CODES)
     await expect(canvas.queryByRole('button', { name: 'Send code' })).not.toBeInTheDocument()
     await userEvent.type(canvas.getByLabelText('Phone number'), '{Enter}')
     await expect(args.onSendCode).not.toHaveBeenCalled()
@@ -228,6 +230,9 @@ export const CodeTyping: Story = {
   play: async ({ args, canvas }) => {
     await userEvent.type(codeBox(canvas), '1')
     await expect(args.onSubmitCode).toHaveBeenCalledWith('4821')
+    // Enter (or Confirm) before the screen says it's checking doesn't send the same code twice
+    await userEvent.keyboard('{Enter}')
+    await expect(args.onSubmitCode).toHaveBeenCalledOnce()
   },
 }
 
@@ -277,7 +282,10 @@ export const CodeLocked: Story = {
   name: 'Code · Locked',
   args: { locked: 'Too many tries. Try again in 60 seconds.' },
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('alert')).toHaveTextContent('Too many tries. Try again in 60 seconds.')
+    // the lock counts down every second: no alert role, the live region says it once
+    await expect(canvas.queryByRole('alert')).not.toBeInTheDocument()
+    await expect(codeBox(canvas)).toHaveAccessibleDescription('Too many tries. Try again in 60 seconds.')
+    await expect(canvas.getByRole('status')).toHaveTextContent('Too many tries. Try again in 60 seconds.')
     await expect(codeBox(canvas)).toBeDisabled()
     await expect(canvas.queryByText('4821')).not.toBeInTheDocument()
     await expect(canvas.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument()
@@ -325,7 +333,8 @@ export const CodeTooManyCodes: Story = {
   name: 'Code · Too many codes',
   args: { tooManyCodes: TOO_MANY_CODES },
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('alert')).toHaveTextContent(TOO_MANY_CODES)
+    await expect(codeBox(canvas)).toHaveAccessibleDescription(TOO_MANY_CODES)
+    await expect(canvas.getByRole('status')).toHaveTextContent(TOO_MANY_CODES)
     await expect(codeBox(canvas)).toBeDisabled()
     await expect(canvas.queryByText('4821')).not.toBeInTheDocument()
     await expect(canvas.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument()

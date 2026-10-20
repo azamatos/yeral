@@ -1,11 +1,10 @@
-import { useEffect, useRef, type ComponentProps, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ComponentProps, type FormEvent, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Button } from '../button'
 import { Callout } from '../callout'
 import { CodeInput } from '../code-input'
 import { Field, FieldMessage } from '../field'
 import { PhoneInput } from '../phone-input'
-import { Spinner } from '../spinner'
 
 /** Every word the step shows. The first-release copy is the default design; with `sms` the screen passes the SMS words. */
 export type SignInCodeStepCopy = {
@@ -148,6 +147,25 @@ export function SignInCodeStep({
   const blocked = limited || Boolean(locked) || codeExpired
   const wrong = Boolean(codeError) && !blocked
   const hasPhoneError = Boolean(phoneError)
+  // the lock and the rate limit tick (seconds, minutes): shown without a live role, read out once when they start
+  const blockMessage = tooManyCodes ?? (codeExpired ? undefined : locked)
+  const isBlockMessage = Boolean(blockMessage)
+  const [blockSaid, setBlockSaid] = useState<ReactNode>(blockMessage)
+  const [wasBlockMessage, setWasBlockMessage] = useState(isBlockMessage)
+  if (wasBlockMessage !== isBlockMessage) {
+    setWasBlockMessage(isBlockMessage)
+    setBlockSaid(isBlockMessage ? blockMessage : undefined)
+  }
+  // the code sent for checking: the 4th digit and Confirm (or Enter) in one go check it once
+  const sentCode = useRef<string | null>(null)
+  useEffect(() => {
+    if (!checking) sentCode.current = null
+  }, [checking])
+  const check = (entered: string) => {
+    if (checking || blocked || sentCode.current === entered) return
+    sentCode.current = entered
+    onSubmitCode?.(entered)
+  }
 
   // the code step starts in the first box
   useEffect(() => {
@@ -181,22 +199,18 @@ export function SignInCodeStep({
     }
     if (checking || blocked) return
     if (code.length < CODE_LENGTH) codeRef.current?.focus()
-    else onSubmitCode?.(code)
+    else check(code)
   }
 
-  // read out what the buttons and hints say while it happens (errors speak for themselves as alerts)
+  // read out what the buttons, hints and ticking messages say as it happens (a wrong number or code is an alert)
   const spoken =
     step === 'phone'
       ? sending
         ? copy.sending
-        : ''
+        : blockSaid
       : checking
         ? copy.checking
-        : codeExpired && !limited
-          ? copy.codeExpired
-          : resent && !blocked && !wrong
-            ? copy.resent
-            : ''
+        : (blockSaid ?? (codeExpired && !limited ? copy.codeExpired : resent && !blocked && !wrong ? copy.resent : undefined))
 
   return (
     <form noValidate {...props} onSubmit={submit} className={cn('flex flex-col gap-6', className)}>
@@ -218,7 +232,7 @@ export function SignInCodeStep({
           </Field>
           <div className="flex flex-col gap-3">
             {limited ? (
-              <FieldMessage>{tooManyCodes}</FieldMessage>
+              <FieldMessage live={false}>{tooManyCodes}</FieldMessage>
             ) : (
               <SubmitButton size={buttonSize} busy={sending} busyLabel={copy.sending}>
                 {copy.sendCode}
@@ -237,7 +251,8 @@ export function SignInCodeStep({
           <Field
             label={copy.codeLabel}
             // tooManyCodes and the lock are about the step, not a wrong entry: a red message, grey boxes
-            message={tooManyCodes ?? locked ?? (wrong ? codeError : undefined)}
+            message={blockMessage ?? (wrong ? codeError : undefined)}
+            messageLive={!blockMessage}
             hint={
               blocked
                 ? codeExpired && !limited
@@ -254,10 +269,11 @@ export function SignInCodeStep({
             <CodeInput
               ref={codeRef}
               value={code}
-              onValueChange={(next) => onCodeChange?.(next)}
-              onComplete={(full) => {
-                if (!checking && !blocked) onSubmitCode?.(full)
+              onValueChange={(next) => {
+                if (next.length < CODE_LENGTH) sentCode.current = null
+                onCodeChange?.(next)
               }}
+              onComplete={check}
               length={CODE_LENGTH}
               size={size}
               responsive
@@ -301,27 +317,11 @@ export function SignInCodeStep({
   )
 }
 
-/** The step's primary: full width; while busy a spinner + the busy words, same width, clicks ignored. */
+/** The step's primary: full width; while busy a spinner + the busy words, clicks ignored. */
 function SubmitButton({ size, busy, busyLabel, children }: { size: 'm' | 'l'; busy: boolean; busyLabel: string; children: ReactNode }) {
   return (
-    <Button
-      type="submit"
-      variant="primary"
-      size={size}
-      className={cn('w-full', busy && 'cursor-progress active:translate-y-0')}
-      aria-disabled={busy || undefined}
-      onClick={(e) => {
-        if (busy) e.preventDefault()
-      }}
-    >
-      {busy ? (
-        <>
-          <Spinner />
-          {busyLabel}
-        </>
-      ) : (
-        children
-      )}
+    <Button type="submit" variant="primary" size={size} className="w-full" loading={busy} loadingText={busyLabel}>
+      {children}
     </Button>
   )
 }

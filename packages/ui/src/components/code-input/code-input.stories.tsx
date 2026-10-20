@@ -25,6 +25,10 @@ export const Default: Story = {
     await userEvent.type(input, '12a34')
     await expect(input).toHaveValue('1234')
     await expect(args.onComplete).toHaveBeenCalledWith('1234')
+    // a digit after a full code changes nothing and checks nothing again
+    await userEvent.type(input, '5')
+    await expect(input).toHaveValue('1234')
+    await expect(args.onComplete).toHaveBeenCalledOnce()
   },
 }
 

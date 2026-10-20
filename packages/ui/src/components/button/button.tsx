@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Slot } from 'radix-ui'
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Spinner } from '../spinner'
 
@@ -52,6 +52,8 @@ export type ButtonProps = ComponentProps<'button'> &
     loading?: boolean
     /** Accessible name while loading (e.g. «Ýüklenýär»). */
     loadingLabel?: string
+    /** Words beside the spinner while loading («Sending…», «Checking…»): the label reads them; the width follows them. */
+    loadingText?: ReactNode
   }
 
 export function Button({
@@ -62,6 +64,7 @@ export function Button({
   asChild,
   loading,
   loadingLabel,
+  loadingText,
   disabled,
   children,
   type,
@@ -74,8 +77,8 @@ export function Button({
       {...props}
       type={asChild ? undefined : (type ?? 'button')}
       disabled={asChild ? undefined : disabled}
-      aria-busy={loading || props['aria-busy'] || undefined}
-      aria-disabled={loading || props['aria-disabled'] || undefined}
+      aria-busy={loading || undefined}
+      aria-disabled={loading || undefined}
       aria-label={loading && loadingLabel ? loadingLabel : props['aria-label']}
       onClick={(e) => {
         if (loading) e.preventDefault()
@@ -83,7 +86,12 @@ export function Button({
       }}
       className={cn(buttonVariants({ variant, size, iconOnly }), loading && 'cursor-progress active:translate-y-0', className)}
     >
-      {loading ? (
+      {loading && loadingText ? (
+        <>
+          <Spinner />
+          {loadingText}
+        </>
+      ) : loading ? (
         <>
           <span className="invisible inline-flex items-center gap-2" aria-hidden>
             {children}
