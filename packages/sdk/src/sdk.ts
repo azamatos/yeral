@@ -64,6 +64,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   const invalidate = (...queryKeys: readonly (readonly unknown[])[]) =>
     Promise.all(queryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })))
 
+  /**
+   * The person looking changed (signed in or out, another phone): each business page says whether they may book there
+   * online (book Q-154), so the pages refresh, in the background.
+   */
+  const viewerChanged = () => void invalidate(keys.businesses())
+
   /** Someone signed in who may not be the person before: every query goes back to empty and the screens reload. */
   const signedInAnew = async (data: { me: unknown }) => {
     queryClient.setQueryData(keys.me(), data.me)
@@ -82,6 +88,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         onSuccess: (data) => {
           if (!('me' in data)) return
           queryClient.setQueryData(keys.me(), data.me)
+          viewerChanged()
           return invalidate(keys.bookings(), ['favorites'])
         },
       }),
@@ -98,6 +105,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
           queryClient.setQueryData(keys.me(), null)
           queryClient.removeQueries({ queryKey: keys.bookings() })
           queryClient.removeQueries({ queryKey: ['favorites'] })
+          viewerChanged()
         },
       }),
   }
@@ -132,7 +140,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     phoneVerify: () =>
       mutationOptions({
         mutationFn: (body: z.input<typeof verifyCodeSchema>) => call(v1.me.phone.verify.$post({ json: body })),
-        onSuccess: (data) => queryClient.setQueryData(keys.me(), data),
+        // another number: the business pages and the bookings may say otherwise now
+        onSuccess: (data) => {
+          queryClient.setQueryData(keys.me(), data)
+          viewerChanged()
+          return invalidate(keys.bookings())
+        },
       }),
     favorites: (lang: Locale) =>
       queryOptions({
@@ -294,6 +307,9 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: (body: z.input<typeof createBookingSchema>) => call(v1.bookings.$post({ query: { lang }, json: body })),
         onSuccess: (data) => settle(lang, data),
+        // refused for being phone-only or a paused business: the page learns it and shows the "Jaň et" card (book Q-154)
+        onError: (e, body) =>
+          isApiError(e, 'online_blocked') || isApiError(e, 'online_disabled') ? invalidate(keys.businessAll(body.business)) : undefined,
       }),
     cancel: (lang: Locale) =>
       bookingAction<z.input<typeof cancelBookingSchema>>(lang, (code, json) =>

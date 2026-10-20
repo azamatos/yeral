@@ -10,6 +10,7 @@ import type { BookingRules } from '@yeral/domain/rules'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { clients } from '../../db/schema'
+import type { LoadedBusiness } from '../availability/context'
 import { noShowMarkedAt } from '../bookings/repo'
 
 type Rules = Pick<BookingRules, 'blockAfterNoShows'>
@@ -39,6 +40,26 @@ export async function blockedByCount(db: Queryable, clientIds: string[], rules: 
     .from(clients)
     .where(inArray(clients.id, clientIds))
   return new Set(rows.filter((r) => r.blocked).map((r) => r.id))
+}
+
+/** Why this phone can't book the business online now (paused, or phone-only there), or null when it can. */
+export async function onlineRefusal(
+  db: Queryable,
+  lb: Pick<LoadedBusiness, 'business' | 'rules'>,
+  phone: string,
+): Promise<'online_disabled' | 'online_blocked' | null> {
+  if (!lb.rules.onlineEnabled) return 'online_disabled'
+  // by hand, or the no-shows since the business last lifted the block reach its limit (book Q-127)
+  if (await isPhoneBlocked(db, lb.business.id, phone, lb.rules)) return 'online_blocked'
+  return null
+}
+
+/**
+ * Whether `phone` may book the business online now (book A7, Q-154): what the business page, the booking detail and
+ * the link page say. Without a phone (signed out), whether the business takes online bookings at all.
+ */
+export async function bookOnlineFor(db: Queryable, lb: Pick<LoadedBusiness, 'business' | 'rules'>, phone: string | null): Promise<boolean> {
+  return phone ? !(await onlineRefusal(db, lb, phone)) : lb.rules.onlineEnabled
 }
 
 /** Whether this phone is phone-only at the business now (false when the business doesn't know it). */

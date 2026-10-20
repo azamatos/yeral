@@ -16,7 +16,7 @@
     "not_found": "Not found.",
     "slot_taken": "This time was just taken. Nearest free times:",
     "online_disabled": "This place isn't taking online bookings right now",
-    "online_blocked": "You can book here only by phone.",
+    "online_blocked": "You can book this business by phone.",
     "not_bookable": "This time can't be booked.",
     "party_too_large": "For {callFrom} or more people, please call.",
     "session_full": "The class is full.",

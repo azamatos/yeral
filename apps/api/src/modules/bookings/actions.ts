@@ -23,7 +23,8 @@ import { emit } from '../../notify'
 import { loadBusinesses, type LoadedBusiness } from '../availability/context'
 import { visitWhat } from '../catalog/map'
 import { shiftRating } from '../reviews/rating'
-import { assertOnlineBooking, assertWaitingRoom, bookedServices, onlineRefusal, rebook } from './create'
+import { onlineRefusal } from '../clients/online'
+import { assertOnlineBooking, assertWaitingRoom, bookedServices, rebook } from './create'
 import { offerTarget } from './offers'
 import {
   type BookingRow,

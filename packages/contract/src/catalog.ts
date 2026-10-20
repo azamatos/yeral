@@ -304,6 +304,12 @@ export const businessDetailSchema = z
       note: z.string().nullable(),
     }),
     onlineEnabled: z.boolean(),
+    /**
+     * Whether whoever is looking may book online here: false while the business has paused online booking, and for a
+     * signed-in client who may book it only by phone, who sees the "Jaň et" card instead (book A7, Q-154). Signed out,
+     * it follows `onlineEnabled`: the card shows once the client logs in.
+     */
+    bookOnline: z.boolean(),
     confirmMode: z.enum(CONFIRM_MODES),
     holdMinutes: z.number().int(),
     leadMinutes: z.number().int(),

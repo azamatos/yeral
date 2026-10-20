@@ -15,6 +15,7 @@ import { appointmentContext, loadBusinesses, loadBusy, type BusinessRow } from '
 import { buildCards } from './cards'
 import { cityRefOf, loadCities } from './cities'
 import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
+import { bookOnlineFor } from '../clients/online'
 
 const SPECIAL_DAYS_AHEAD = 14
 
@@ -60,7 +61,14 @@ export async function publicBusiness(deps: Deps, slug: string) {
   return row
 }
 
-export async function businessDetail(deps: Deps, slug: string, lang: Locale, position: LatLng | null): Promise<BusinessDetail> {
+/** `viewerPhone`: the signed-in client's, so the page knows whether they may book here online (book A7, Q-154). */
+export async function businessDetail(
+  deps: Deps,
+  slug: string,
+  lang: Locale,
+  position: LatLng | null,
+  viewerPhone: string | null = null,
+): Promise<BusinessDetail> {
   const { db } = deps
   const now = deps.now()
   const day = today(now)
@@ -68,8 +76,9 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
   const lb = (await loadBusinesses(db, [row.id])).get(row.id)
   if (!lb) throw new ApiError('not_found')
   const b = lb.business
-  // one more read, started while the rest are made
-  const typical = typicalAnswerOf(db, b, lb.rules.confirmMode === 'instant', now)
+  // two more reads, started while the rest are made; caught here so a failure can't go unhandled before it's awaited
+  const extra = Promise.all([typicalAnswerOf(db, b, lb.rules.confirmMode === 'instant', now), bookOnlineFor(db, lb, viewerPhone)])
+  extra.catch(() => undefined)
   const [[category], cities] = await Promise.all([db.select().from(categories).where(eq(categories.id, b.categoryId)), loadCities(db)])
   const groups = await db.select().from(serviceGroups).where(eq(serviceGroups.businessId, b.id)).orderBy(asc(serviceGroups.sort))
   const online = lb.services.filter((s) => s.online)
@@ -114,6 +123,8 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
     )
   ).map((x) => x.card)
 
+  const [typicalMinutes, bookOnline] = await extra
+
   return {
     slug: b.slug,
     name: b.name,
@@ -142,11 +153,12 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
       note: lb.rulesNote ? text(lb.rulesNote, lang) : null,
     },
     onlineEnabled: lb.rules.onlineEnabled,
+    bookOnline,
     confirmMode: lb.rules.confirmMode,
     holdMinutes: lb.rules.holdMinutes,
     leadMinutes: lb.rules.leadMinutes,
     windowDays: lb.rules.windowDays,
-    typicalConfirmMinutes: await typical,
+    typicalConfirmMinutes: typicalMinutes,
     priceFrom: type === 'table' ? null : priceFromOf(lb.services),
     avgBill: b.avgBill,
     nextFree,

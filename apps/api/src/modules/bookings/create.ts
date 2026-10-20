@@ -28,7 +28,7 @@ import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { appointmentContext, checkStaff, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
-import { isPhoneBlocked } from '../clients/online'
+import { onlineRefusal } from '../clients/online'
 import { servicePrice } from '../catalog/map'
 import { hasSignedInTeam } from '../team/members'
 import { confirmBooking } from './confirm'
@@ -229,18 +229,6 @@ async function inTransaction<T>(
 export async function assertOnlineBooking(db: Queryable, lb: LoadedBusiness, user: User): Promise<void> {
   const refused = await onlineRefusal(db, lb, user.phone)
   if (refused) throw new ApiError(refused)
-}
-
-/** Why this phone can't book the business online now (paused, or phone-only there), or null when it can. */
-export async function onlineRefusal(
-  db: Queryable,
-  lb: LoadedBusiness,
-  phone: string,
-): Promise<'online_disabled' | 'online_blocked' | null> {
-  if (!lb.rules.onlineEnabled) return 'online_disabled'
-  // by hand, or the no-shows since the business last lifted the block reach its limit (book Q-127)
-  if (await isPhoneBlocked(db, lb.business.id, phone, lb.rules)) return 'online_blocked'
-  return null
 }
 
 export async function createBooking(deps: Deps, user: User, input: CreateBooking): Promise<BookingRow> {
