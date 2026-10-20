@@ -40,6 +40,7 @@ import type {
   blockInputSchema,
   businessCancelSchema,
   calendarQuerySchema,
+  complaintInputSchema,
   freeTimesQuerySchema,
   moveBookingSchema,
   newBookingSchema,
@@ -664,6 +665,19 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: ({ code, ...json }: { code: string } & z.input<typeof businessCancelSchema>) =>
           call(w.bookings[':code'].cancel.$post({ param: { slug, code }, json })),
+        onSuccess: () => booked(slug),
+      }),
+    /** "Arz et" (book B-28): a no-show the client sees, or late, rude, other for the team only. */
+    complain: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ code, ...json }: { code: string } & z.input<typeof complaintInputSchema>) =>
+          call(w.bookings[':code'].complaint.$post({ param: { slug, code }, json })),
+        onSuccess: () => booked(slug),
+      }),
+    /** Take a mistaken complaint back within 7 days (book Q-207). */
+    takeBackComplaint: (slug: string) =>
+      mutationOptions({
+        mutationFn: (code: string) => call(w.bookings[':code'].complaint.$delete({ param: { slug, code } })),
         onSuccess: () => booked(slug),
       }),
     /** "Içerki ýagdaý" on a confirmed booking, or none (book B-29). */

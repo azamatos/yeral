@@ -29,6 +29,7 @@
     "not_started": "Ýazylyş entek başlamady.",
     "already_reported": "Arz eýýäm iberildi.",
     "noshow_window_passed": "Gelmedi diýip bellemek wagty geçdi: ýazylyş gutarandan soň 24 sagadyň içinde bellenýär.",
+    "complaint_locked": "Arzy diňe 7 günüň içinde yzyna alyp bolýar.",
     "restore_expired": "Yzyna almak wagty geçdi.",
     "undo_expired": "Yzyna almaga gijä galdy.",
     "too_many_waiting": "{scope, select, business {Bu ýerde jogap garaşýan {limit} haýyşyňyz bar. Jogaba garaşyň ýa-da birini ýatyryň.} other {Jogap garaşýan {limit} haýyşyňyz bar. Jogaplara garaşyň ýa-da birini ýatyryň.}}",

@@ -29,6 +29,7 @@
     "not_started": "The booking hasn't started yet.",
     "already_reported": "A report was already sent.",
     "noshow_window_passed": "A no-show can be marked up to 24 hours after the visit.",
+    "complaint_locked": "A complaint can be taken back only within 7 days.",
     "restore_expired": "It's too late to restore this booking.",
     "undo_expired": "It's too late to undo.",
     "too_many_waiting": "{scope, select, business {You already have {limit} requests waiting here. Wait for an answer or cancel one.} other {You already have {limit} requests waiting. Wait for the answers or cancel one.}}",

@@ -3,7 +3,7 @@
  * for a client who calls or walks in, confirmed at once, and moving or cancelling one. A specialist books, moves and
  * cancels only their own (chapter 3).
  */
-import { BOOKING_SOURCES, BOOKING_STATUSES, CANCELLED_BY, TEAM_CANCEL_REASONS } from '@yeral/domain/model'
+import { BOOKING_SOURCES, BOOKING_STATUSES, CANCELLED_BY, COMPLAINT_TYPES, TEAM_CANCEL_REASONS } from '@yeral/domain/model'
 import { LEVELS } from '@yeral/domain/permissions'
 import { z } from 'zod'
 import { dayStateSchema } from './availability'
@@ -233,6 +233,8 @@ export const calendarBookingSchema = z
     internalNote: z.string().nullable(),
     /** A request's answer time ("18 min"). */
     holdUntil: epochSchema.nullable(),
+    /** "Arz et" filed (B-28): what happened, in words for "other", and when (taken back within 7 days). */
+    complaint: z.object({ type: z.enum(COMPLAINT_TYPES), text: z.string().nullable(), at: epochSchema }).nullable(),
     /** The client's move waiting for an answer (B-21): the asked time for the line under the block; its ghost is in `moves`. */
     move: z
       .object({ code: bookingCodeSchema, date: ymdSchema, start: startMinuteSchema, end: minuteSchema, holdUntil: epochSchema.nullable() })
@@ -277,3 +279,18 @@ export const calendarViewSchema = z
   })
   .meta({ id: 'CalendarView' })
 export type CalendarView = z.infer<typeof calendarViewSchema>
+
+// ── "Arz et" (B-28) ──
+
+/**
+ * "Näme boldy?": "Gelmedi" (a no-show: the booking becomes one, which the client sees), "Gijä galdy" (late), "Gödek
+ * gylyk" (rude), "Başga" (other, in words). Only the team sees the rest, on the client card.
+ */
+export const complaintInputSchema = z
+  .object({
+    type: z.enum(COMPLAINT_TYPES),
+    text: z.string().trim().min(1).max(300).optional(),
+  })
+  .strict()
+  .refine((c) => c.type !== 'other' || !!c.text, { path: ['text'], message: 'Say what happened' })
+  .meta({ id: 'ComplaintInput' })

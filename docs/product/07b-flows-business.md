@@ -1063,7 +1063,7 @@ flowchart TD
 - A mistaken complaint: the team can remove it from the booking drawer within 7 days. A no-show goes back to *Tamamlandy*, the no-show count drops, and the client gets no message (Q-207, decided 18.10.2026). The class drawer removes a class mark (B-67).
 - Code: one complaint per booking.
 
-The rule is in `canComplain` (`@yeral/domain/lifecycle`); the business's endpoint comes with P2 step 4.
+The rule is in `canComplain` and taking one back in `canRemoveComplaint` (`@yeral/domain/lifecycle`).
 
 **Design to fix:** the design offers *Arz et* with *Gelmedi* on confirmed bookings that haven't started; before the start *Gelmedi* isn't offered (Q-206). The booking drawer needs a way to remove a complaint within 7 days (Q-207).
 
@@ -1073,7 +1073,7 @@ The rule is in `canComplain` (`@yeral/domain/lifecycle`); the business's endpoin
 
 > Open question Q-254: how long after a visit a no-show can be marked.
 
-**Status** — Design: drawn (B-Calendar · `panel=complaint`; B-Bookings) · Code: rule only (domain: complaint once, from the start); schema has complaint type and text; no business endpoint.
+**Status** — Design: drawn (B-Calendar · `panel=complaint`; B-Bookings) · Code: api built (`POST /v1/w/{slug}/bookings/{code}/complaint` files one, `DELETE` takes it back within 7 days; the calendar's booking carries it; 20.10.2026).
 
 ### B-29 · Internal statuses
 

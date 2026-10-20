@@ -1,0 +1,2 @@
+ALTER TABLE "bookings" ADD COLUMN "complaint_by" uuid;--> statement-breakpoint
+ALTER TABLE "bookings" ADD CONSTRAINT "bookings_complaint_by_staff_id_fk" FOREIGN KEY ("complaint_by") REFERENCES "public"."staff"("id") ON DELETE set null ON UPDATE no action;

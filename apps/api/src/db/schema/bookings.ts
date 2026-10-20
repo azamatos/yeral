@@ -92,6 +92,8 @@ export const bookings = pgTable(
     complaintType: complaintType(),
     complaintText: text(),
     complaintAt: ts(),
+    /** Who filed it, for the client card's reports ("who and when"). */
+    complaintBy: uuid().references(() => staff.id, { onDelete: 'set null' }),
     source: bookingSource().notNull(),
     clientNote: text(),
     /** Team only; autosaved in the booking drawer. */
