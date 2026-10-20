@@ -1,6 +1,6 @@
 # Active context
 
-_Last updated: 2026-10-19_
+_Last updated: 2026-10-20_
 
 ## Current focus
 
@@ -9,7 +9,9 @@ every rule, flow, limit and feature with no open question; its page is
 https://claude.ai/artifact/LY9U6jrQRo3MfoHTg3JpyN (pinned for the owner; answers and placements sync from its
 database). Chapter 10 is the build plan. **Two tracks now run side by side** (ADR 0021 amended 2026-10-19): the design
 pass in English (P1: Claude writes the Claude Design prompts, the owner pastes them, Claude checks the canvas) and the
-backend to the book (P2). Components in Storybook and the apps wait for design export v0.6.
+backend to the book (P2). Components in Storybook and the apps wait for design export v0.6. **2026-10-20 was a
+backend day:** P2 step 3 (the **Code differs** fixes in the booking engine) went most of the way, 21 PRs (#41–#61)
+merged, all api and shared packages, no screens; #62 is open.
 
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16): monorepo and CI, `@yeral/ui` (38
 components), domain, contract, sdk, an api for every client screen, written to the rules before the book. The api and
@@ -17,8 +19,9 @@ Postgres run on the owner's server since 2026-10-19 (not public). yeral.app stil
 v0.5 (in Turkmen) is the newest export; v0.6 (English) is being drawn. The version PR #26 (`@yeral/lib@0.2.0`,
 `@yeral/api@0.1.1`, staging removed) is merged. The backend plan (chapter 10, P2) was reviewed on 2026-10-19 against
 every **Code differs** line and the built api, and now has steps 0–7; steps 0 (own server only, ADR 0024), 1 (market
-settings, `@yeral/domain/market`) and 2 (three fixed levels, team rows, invites, ADR 0025) are done; step 3 (the
-booking engine's fixes, past midnight first) is next.
+settings, `@yeral/domain/market`) and 2 (three fixed levels, team rows, invites, ADR 0025) are done; step 3 is
+mostly done (2026-10-20, see Next steps for what's left). Nothing new is deployed: the server still runs the api from
+#34; migrations 0004–0019 run with the next release (the version PR #38 collects the changesets).
 
 ## Owner's direction
 - 2026-10-13: infrastructure first; Cloudflare now, own server (Docker + nginx, Cloudflare for DNS) later; name/domain in
@@ -60,6 +63,8 @@ booking engine's fixes, past midnight first) is next.
   review-ask SMS; "Başga ýerde", internal statuses and the business PWA in the MVP; client karma later.
 - 2026-10-19 (later): Neon isn't needed; work on the VPS. Review the backend plan for gaps, then build the backend
   alongside the design.
+- 2026-10-20: build P2 step 3 one PR at a time, each reviewed with `code-review` (fix what it finds) and merged on
+  green CI. At the end of the day: stop, summarise, continue in another session.
 
 ## Decisions
 
@@ -101,6 +106,12 @@ market adds its languages (supersedes 0016's Turkmen first).
 2026-10-19: [0024](../decisions/0024-own-server-docker-caddy.md) the own server runs every app (Docker + Caddy,
 Postgres beside the api); no Neon, no Workers for the api (supersedes 0007 for them).
 
+2026-10-20: [0017](../decisions/0017-booking-model.md) revised for complaints ("Gelmedi" from the start until 24 h
+after the end and taking the place of an earlier complaint; "Gijä galdy" from the start; others any time). Every
+"how" Claude decided while building step 3 is a 20.10.2026 row in the book's chapter 9 marked "Claude (delegated)":
+the owner should look them over (Q-270, Q-171, Q-172, Q-156, Q-206 revised, Q-254, Q-126, Q-124, Q-163, A6, Q-113,
+Q-267, Q-168, Q-165, Q-127, Q-159, Q-107, Q-120, Q-105).
+
 ## Open questions
 
 Product questions now live in **`docs/product/questions.md`**, one ID each (ADR 0021); answer them on the book's page.
@@ -128,19 +139,43 @@ checks the canvas (artifact `Hkq5oyUnRVrRV3XSs7EAtt`, read with the Artifact too
 is with Claude Design; round 2 (business app part 1) is written. Next: check round 1, then rounds 3–6 (business app
 part 2, client site, admin tool, fixes) → export v0.6 → P3 components in Storybook → P4 apps.
 
-**Backend track (P2).** The steps are in the book's chapter 10 (reviewed 2026-10-19): 0 the own server only (done,
-ADR 0024), 1 market settings and English as the source (done), 2 the business model (done: ADR 0025), 3 next, 3 the **Code
-differs** fixes in the booking engine (past midnight first), 4 business endpoints (with photos, the address pin,
-notifications), 5 admin endpoints (team accounts with a second factor), 6 first-launch mode, 7 before the launch
-(deploys from GitHub, backups, alerts). Work in a worktree on a branch per step, tests with every rule (ADR 0013), a
-PR each, merged on green CI after review. The rules: the book's chapters 4, 5, 7a–7c and 8 (each **Code differs**
-line is a fix to make; chapter 6 lists the features).
+**Backend track (P2).** The steps are in the book's chapter 10: 0 own server only (done), 1 market settings (done),
+2 the business model (done, ADR 0025), **3 the Code differs fixes (mostly done 2026-10-20)**, 4 business endpoints
+(photos, the address pin, notifications), 5 admin endpoints (team accounts with a second factor), 6 first-launch mode,
+7 before the launch (deploys from GitHub, backups, alerts). Rules: the book's chapters 4, 5, 7a–7c and 8. How it's
+worked: a worktree, a branch and a PR per item, tests with every rule, `code-review` on the PR (fix what it finds),
+merge on green CI; a log note `docs/memory-bank/log/2026-10-20-p2-<topic>.md` and a "how" row in chapter 9 per item.
+
+Step 3 done (2026-10-20, #41–#61; details in `log/2026-10-20-p2-*.md` and chapter 10's step 3): past midnight, holds in
+opening hours, night reminders, the city as data, offered times for one specialist, expiry with nothing free, the
+no-show restart, move rules and outcomes, token SMS links and the link page, no review asks, linking by phone for 6
+months with "Is this you?", the phone change keeping client records, code limits, account deletion with reviews,
+name and surname, time limits on no-shows/complaints/reviews, the waiting-requests limit, the cancel reason setting,
+the four undo reasons, the typical answer time, phone-only clients and paused businesses on every page.
+
+**Open now:** PR #62 (the owner's preview of a page in review, F-032; reviewed twice, fixes pushed; its last CI run
+was still going when the session stopped: check it, merge on green). It also fixes a flaky "My bookings" order (no
+tiebreaker). PR #38 is the version PR: the owner decides when to release.
+
+**Step 3 left:** no average bill and the hidden-price text (Q-103), lateness fixed at 15 min (Q-118), a price range
+filter, the failed-SMS alert and dropping late reminders (Q-284), *Başga ýerde* (Q-272), blocked time (F-121),
+internal statuses (F-104, F-133). Then steps 4–7.
+
+**Follow-ups found in step 3, not fixed** (each in its log note): a daily cap or alert on code SMS before SMS go out
+(100 an hour per address reaches many numbers); two "send code" taps at once can send two codes; a business's stale
+record for a recycled number still applies its marks to the new holder (`clientFor`); a workspace owner's stale
+account can't answer "No" (the admin tool needs a way to free the number); cancel reasons are free text, not codes;
+the business endpoints (step 4) must pass the decline's `answered_at`, call `assertWaitingRoom` on an undo of a
+decline, and use `canComplain`; a later release drops `users.notify_review_ask` and
+`businesses.typical_confirm_minutes`; the reviews list pages by offset.
 
 **Server:** `ssh yeral-vps` (the owner allowed `Bash(ssh yeral-vps:*)`); deploy by hand with
 `infra/server/README.md` → "Deploying Ýeral by hand". Checked 2026-10-19: Caddy (no sites), Postgres 18.6 with the 4
 migrations and the 13 categories only, the api from #34, healthy; firewall SSH/80/443, fail2ban, keys only. Not public
 yet (no DNS record), no backups, and the `deploy` user has no key yet (P2 step 7).
 
-**Waiting on the owner:** the main checkout needs `git checkout -- docs/design && git clean -fd docs/design && git
+**Waiting on the owner:** look over the 20.10.2026 "Claude (delegated)" rows in chapter 9; copy
+`infra/server/edge/Caddyfile` to `/srv/edge` and reload Caddy at the next deploy (token-link log filter, #49); decide
+when to release (#38). Earlier: the main checkout needs `git checkout -- docs/design && git clean -fd docs/design && git
 pull`; the unused Hyperdrive config `yeral-production` and the Neon project on their accounts (delete only if asked);
 later an R2 token for backups, accounts for error tracking and uptime checks, the DNS records when going public.

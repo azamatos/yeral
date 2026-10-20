@@ -166,6 +166,20 @@
   (list, accept, decline, the link), the owner's team endpoints (invite, resend, cancel, without the app and switching
   it on, level and override, remove with bookings kept, reactivate) and leaving; live events follow the level; a
   deleted account's rows leave their teams; `@yeral/contract/team`, `sdk.team`. P2 step 2 done.
+- **2026-10-20 · P2 step 3, the booking engine to the book** (21 PRs, each reviewed with `code-review` and fixed
+  before merging; details in `log/2026-10-20-p2-*.md`): past midnight `46f6eba` (#41); holds count only opening hours
+  `926fe24` (#42); night reminders at 21:30 `2ab7a0b` (#43); the city as data `e82254d` (#44); offered times name one
+  specialist `3f95736` (#45); the no-show limit restarts when lifted `8fca4fb` (#46); move rules `25413c8` (#47) and
+  outcomes `e04b213` (#48); token links in SMS and the link page `bb12b70` (#49); one no-show limit rule `d05a647`
+  (#50); no review asks `288bc83` (#51); linking by phone for 6 months, "Is this you?", a phone change keeping client
+  records `0d74925` (#52, migration 0017); login-code limits `2b38b79` (#53); account deletion deletes reviews from the
+  ratings `35119c8` (#54); name and surname `f5ae0ed` (#55, migration 0018); time limits on no-shows, complaints,
+  reviews `c62685c` (#56, ADR 0017 revised); waiting-request limits `49e3e54` (#57); the cancel reason setting
+  `f5d7fdf` (#58); the four undo reasons `b737a56` (#59); the typical answer time `2731729` (#60, migration 0019);
+  phone-only clients and paused businesses on the business page `b7c7822` (#61). Open: #62 (owner's preview, F-032).
+  The reviews found real bugs before merging (deadlocks between deletion and other actions, a way past the waiting
+  limit through "Yzyna al", stale per-viewer caches, an unhandled rejection that could stop the api, racing rating
+  updates). Gaps found, not fixed: see activeContext "Follow-ups found in step 3".
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.
