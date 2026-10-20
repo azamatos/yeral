@@ -994,9 +994,7 @@ flowchart TD
 - Bookings move one at a time; there is no bulk move on MVP (Q-209, decided 18.10.2026; B-31).
 - Table bookings move between tables (B-62); classes move as a whole session (B-69).
 
-Code differs: the domain also allows the business to move a pending request; no screen offers that.
-
-**Status** — Design: drawn (B-Calendar · `panel=move`) · Code: rule only (domain: move checks for service, day off, hours and overlap; no move after start); no business endpoint.
+**Status** — Design: drawn (B-Calendar · `panel=move`) · Code: api built (`POST /v1/w/{slug}/bookings/{code}/move`, 20.10.2026): a confirmed booking before its start, to a new time and another specialist's column; a refusal is `cannot_move` with the reason the toast names (`staff_cannot_do`, `staff_off`, `outside_hours`, `elsewhere` with the busy time, `overlap`, `buffer`); a booking with the client's move waiting is `move_waiting`; the SMS unless the team unticks it.
 
 ### B-27 · Cancel a booking
 
@@ -1028,7 +1026,7 @@ flowchart TD
 - Requests aren't cancelled; they're declined (B-20).
 - Unlike a decline, a cancel offers no other times. Closing a day (B-40) or removing a specialist (B-50) can cancel many bookings with 3 offered times.
 
-**Status** — Design: drawn (B-Calendar · cancel modal; B-Bookings) · Code: rule only (domain: cancel only confirmed bookings before start); no business endpoint.
+**Status** — Design: drawn (B-Calendar · cancel modal; B-Bookings) · Code: api built (`POST /v1/w/{slug}/bookings/{code}/cancel`, 20.10.2026): the three reasons ("Other" in words); "The client called to cancel" is the client's cancel with no undo from the app; the others show the client the reason; a waiting move goes with it; the SMS with the reason.
 
 ### B-28 · Complaint and no-show (Arz et)
 

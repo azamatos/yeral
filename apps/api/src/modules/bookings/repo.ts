@@ -1,7 +1,7 @@
 /** Booking rows: lookups, the lifecycle view, status changes, codes. */
 import { bookingCode } from '@yeral/domain/id'
-import type { BookingState, RestoreState } from '@yeral/domain/lifecycle'
-import type { BookingStatus, CancelledBy } from '@yeral/domain/model'
+import type { BookingState, LifecycleError, RestoreState } from '@yeral/domain/lifecycle'
+import type { BookingStatus, BusinessCancelReason, CancelledBy } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, gt, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -9,6 +9,11 @@ import { bookingItems, bookings, type MoveRefused } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 
 export type BookingRow = typeof bookings.$inferSelect
+
+/** A lifecycle rule's refusal (`@yeral/domain/lifecycle`) as the api's error of the same name. */
+export function guard(problem: LifecycleError | null): void {
+  if (problem) throw new ApiError(problem)
+}
 
 /**
  * When a no-show was marked: its status change (`setStatus` sets `completedAt`), else the complaint. The booking's
@@ -35,7 +40,13 @@ export function stateOf(b: BookingRow): BookingState {
 
 /** A booking as "Yzyna al" reads it (ROUND6 A6). */
 export function restoreStateOf(b: BookingRow): RestoreState {
-  return { ...stateOf(b), cancelledAt: b.cancelledAt?.getTime() ?? null, wasConfirmed: !!b.confirmedAt, isMove: !!b.rescheduleOf }
+  return {
+    ...stateOf(b),
+    cancelledAt: b.cancelledAt?.getTime() ?? null,
+    wasConfirmed: !!b.confirmedAt,
+    isMove: !!b.rescheduleOf,
+    byTeam: !!b.businessCancelReason,
+  }
 }
 
 /** The signed-in client's booking by code (reschedule requests are reached through the booking they move). */
@@ -66,6 +77,8 @@ export interface StatusChange {
   status: BookingStatus
   cancelledBy?: CancelledBy | null
   cancelReason?: string | null
+  /** The reason the business picked when it cancelled (B-27). */
+  businessCancelReason?: BusinessCancelReason | null
   /** The business answered a request (book Q-113): its answer time counts toward the typical one. */
   answered?: boolean
   at: Date
@@ -91,6 +104,7 @@ export async function setStatus(db: Queryable, b: BookingRow, change: StatusChan
       cancelledBy: change.status === 'cancelled' ? (change.cancelledBy ?? null) : null,
       // a booking brought back ("Yzyna al") leaves its cancel reason behind
       cancelReason: change.status === 'cancelled' ? (change.cancelReason ?? null) : null,
+      businessCancelReason: change.status === 'cancelled' ? (change.businessCancelReason ?? null) : null,
       cancelledAt: change.status === 'cancelled' ? change.at : null,
       confirmedAt: change.status === 'confirmed' && !b.confirmedAt ? change.at : b.confirmedAt,
       completedAt: change.status === 'completed' || change.status === 'noshow' ? change.at : b.completedAt,

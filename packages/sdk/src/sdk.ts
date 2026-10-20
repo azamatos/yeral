@@ -36,7 +36,7 @@ import type {
   rescheduleSchema,
   reviewInputSchema,
 } from '@yeral/contract/bookings'
-import type { freeTimesQuerySchema, newBookingSchema } from '@yeral/contract/calendar'
+import type { businessCancelSchema, freeTimesQuerySchema, moveBookingSchema, newBookingSchema } from '@yeral/contract/calendar'
 import type { searchQuerySchema } from '@yeral/contract/catalog'
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
@@ -536,8 +536,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
-  /** The business's own bookings (book B-23–B-25): free times as the team books them, a booking by phone or walk-in, its undo. */
-  const booked = (slug: string) => invalidate(keys.calendar(slug), keys.availabilityAll(slug))
+  /**
+   * The business's own bookings (book B-23–B-27): free times as the team books them, a booking by phone or walk-in and
+   * its undo, moving and cancelling one.
+   */
+  // a move or a cancel may also settle the client's waiting move: the requests and the switcher's counts
+  const booked = (slug: string) => invalidate(keys.calendar(slug), keys.availabilityAll(slug), keys.requests(slug), keys.workspaces())
   const calendar = {
     /** The nearest four, a day's starts with who is free at each, and the 14-day strip; a specialist gets their own. */
     freeTimes: (slug: string, p: Params<typeof freeTimesQuerySchema, 'services'>) => {
@@ -558,6 +562,19 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     undo: (slug: string) =>
       mutationOptions({
         mutationFn: (code: string) => call(w.bookings[':code'].undo.$post({ param: { slug, code } })),
+        onSuccess: () => booked(slug),
+      }),
+    /** A refused move is `cannot_move` with `details.problem` for the toast. */
+    move: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ code, ...json }: { code: string } & z.input<typeof moveBookingSchema>) =>
+          call(w.bookings[':code'].move.$post({ param: { slug, code }, json })),
+        onSuccess: () => booked(slug),
+      }),
+    cancel: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ code, ...json }: { code: string } & z.input<typeof businessCancelSchema>) =>
+          call(w.bookings[':code'].cancel.$post({ param: { slug, code }, json })),
         onSuccess: () => booked(slug),
       }),
   }

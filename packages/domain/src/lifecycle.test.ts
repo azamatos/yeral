@@ -3,6 +3,7 @@ import {
   canAnswerRequest,
   canBusinessCancel,
   canBusinessMove,
+  cancelledByFor,
   canUndoNewBooking,
   canClientCancel,
   canClientReschedule,
@@ -57,6 +58,7 @@ describe('canClientRestore (ROUND6 A6)', () => {
     cancelledAt: NOW,
     wasConfirmed: false,
     isMove: false,
+    byTeam: false,
     ...over,
   })
   it('within 5 minutes of the client’s own cancel, each refusal its own reason', () => {
@@ -66,6 +68,8 @@ describe('canClientRestore (ROUND6 A6)', () => {
     // a second tap, after the first brought it back
     expect(canClientRestore(cancelled({ status: 'pending' }), NOW + MIN)).toBe('invalid_status')
     expect(canClientRestore(cancelled({ isMove: true }), NOW + MIN)).toBe('invalid_status')
+    // "The client called to cancel", entered by the team (B-27): the client calls again
+    expect(canClientRestore(cancelled({ byTeam: true }), NOW + MIN)).toBe('invalid_status')
     // the visit started a minute after the cancel
     expect(canClientRestore(cancelled({ date: TODAY, start: 601 }), NOW + 2 * MIN)).toBe('already_started')
     // the answer time ran out; a confirmed booking has none to run out
@@ -277,7 +281,12 @@ describe('business actions', () => {
     expect(canBusinessCancel(booking(), NOW)).toBeNull()
     expect(canBusinessCancel(booking(), epochOf(THU, 870))).toBe('already_started')
     expect(canBusinessCancel(booking({ status: 'pending', holdUntil: NOW + MIN }), NOW)).toBe('invalid_status')
-    expect(canBusinessMove(booking({ status: 'pending', holdUntil: NOW + MIN }), NOW)).toBeNull()
+    // a request is answered, not moved (B-26)
+    expect(canBusinessMove(booking({ status: 'pending', holdUntil: NOW + MIN }), NOW)).toBe('invalid_status')
+    expect(canBusinessMove(booking(), NOW)).toBeNull()
+    expect(cancelledByFor('client_called')).toBe('client')
+    expect(cancelledByFor('staff_away')).toBe('business')
+    expect(cancelledByFor('other')).toBe('business')
     expect(canBusinessMove(booking(), epochOf(THU, 880))).toBe('already_started')
   })
 

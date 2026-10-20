@@ -3,6 +3,7 @@ import {
   BOOKING_SOURCES,
   BOOKING_STATUSES,
   BOOKING_TYPES,
+  BUSINESS_CANCEL_REASONS,
   CANCELLED_BY,
   CLIENT_SOURCES,
   COMPLAINT_TYPES,
@@ -23,6 +24,7 @@ export const cancelledBy = pgEnum('cancelled_by', CANCELLED_BY)
 export const bookingSource = pgEnum('booking_source', BOOKING_SOURCES)
 export const confirmMode = pgEnum('confirm_mode', CONFIRM_MODES)
 export const declineReason = pgEnum('decline_reason', DECLINE_REASONS)
+export const businessCancelReason = pgEnum('business_cancel_reason', BUSINESS_CANCEL_REASONS)
 export const complaintType = pgEnum('complaint_type', COMPLAINT_TYPES)
 export const priceType = pgEnum('price_type', PRICE_TYPES)
 export const verificationStatus = pgEnum('verification_status', VERIFICATION_STATUSES)

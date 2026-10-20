@@ -12,6 +12,7 @@ import {
   maxSeats,
   nearestSlots,
   nextFreeSlot,
+  planRefusal,
   seatsLeft,
   shiftPlan,
   slotStaffId,
@@ -318,12 +319,41 @@ describe('checking a plan from the workspace', () => {
     expect(checkPlan(c, SUN, plan)).toBe('staff_off')
   })
 
+  it('names a buffer that doesn’t fit apart from an overlap, and time taken elsewhere with its hours (B-26)', () => {
+    const buffered = [{ serviceId: 'cut', staffId: 'a', start: 600, end: 660, bufferAfter: 15 }]
+    // the visit ends at 12:00 where the other booking starts: only the buffer runs into it
+    expect(checkPlan(c, THU, shiftPlan(buffered, 660))).toBe('buffer')
+    // and into the closing time
+    expect(checkPlan(c, THU, shiftPlan(buffered, 1140))).toBe('buffer')
+    expect(checkPlan(c, THU, shiftPlan(buffered, 690))).toBe('overlap')
+    // starting as the one before ends, inside its 10-minute buffer
+    const before = ctx({ staff: team, busy: [{ ...busy('a', THU, 720, 790, 'other'), buffer: 10 }] })
+    expect(checkPlan(before, THU, shiftPlan(plan, 780))).toBe('buffer')
+    expect(checkPlan(before, THU, shiftPlan(plan, 750))).toBe('overlap')
+    // the hours elsewhere leave its buffer out
+    const away = ctx({ staff: team, busy: [{ ...busy('a', THU, 900, 975, 'there'), buffer: 15, elsewhere: true }] })
+    expect(planRefusal(away, THU, shiftPlan(plan, 930))).toEqual({ problem: 'elsewhere', staffId: 'a', busy: { start: 900, end: 960 } })
+    expect(planRefusal(away, THU, shiftPlan(plan, 600))).toBeNull()
+  })
+
+  it('moving every service to one specialist keeps one buffer, after the last (B-26)', () => {
+    const split = [
+      { serviceId: 'cut', staffId: 'a', start: 600, end: 660, bufferAfter: 10 },
+      { serviceId: 'color', staffId: 'b', start: 660, end: 780, bufferAfter: 15 },
+    ]
+    expect(shiftPlan(split, 720, 'a').map((i) => [i.staffId, i.start, i.bufferAfter])).toEqual([
+      ['a', 720, 0],
+      ['a', 780, 15],
+    ])
+    expect(shiftPlan(split, 720).map((i) => i.bufferAfter)).toEqual([10, 15])
+  })
+
   it('busyOf turns a saved plan into busy time, buffer included', () => {
     const items = [
       { serviceId: 'cut', staffId: 'a', start: 600, end: 660, bufferAfter: 0 },
       { serviceId: 'color', staffId: 'a', start: 660, end: 780, bufferAfter: 15 },
     ]
-    expect(busyOf('b9', THU, items)).toEqual([{ bookingId: 'b9', date: THU, staffId: 'a', start: 600, end: 795 }])
+    expect(busyOf('b9', THU, items)).toEqual([{ bookingId: 'b9', date: THU, staffId: 'a', start: 600, end: 795, buffer: 15 }])
   })
 })
 

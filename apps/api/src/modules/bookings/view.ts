@@ -9,6 +9,7 @@ import type { Deps } from '../../deps'
 import { loadBusinesses } from '../availability/context'
 import { cityRef } from '../catalog/cities'
 import { geoOf, photoOf, text } from '../catalog/map'
+import { businessCancelText } from '../../notify'
 import { bookOnlineFor } from '../clients/online'
 import { bookingRecipient } from './links'
 import { offeredTimes, offersOf } from './offers'
@@ -160,7 +161,12 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,
     cancelDeadline: cancelDeadline(lb.rules, row),
     askCancelReason: lb.rules.askCancelReason,
-    cancelReason: row.cancelReason,
+    // the business's cancel names its reason; the client's own (entered by the team when they called) names none
+    cancelReason: row.businessCancelReason
+      ? row.cancelledBy === 'business'
+        ? businessCancelText(lang, row.businessCancelReason, row.cancelReason)
+        : null
+      : row.cancelReason,
     decline: row.declineReason ? { reason: row.declineReason, text: row.declineText, alternatives: await chips('decline') } : null,
     expiredAlternatives: bookOnline ? await chips('expired') : [],
     bookOnline,

@@ -61,7 +61,7 @@ CMS (`/v1/admin/...`, P2 step 5) follows. Their schemas join the contract as the
 | Business profile | `GET`/`PATCH /v1/w/:slug/settings/profile` (owner, administrators; book B-37; the logo and photos come with uploads) | `settings`: `businessProfile`, `businessProfileUpdate`, `location` |
 | Services menu | `GET`/`POST /v1/w/:slug/services` · `PATCH`/`DELETE …/services/:serviceId` · `POST …/services/:serviceId/restore` · `POST …/services/groups` · `PATCH`/`DELETE …/services/groups/:groupId` · `PUT …/services/order` (owner, administrators; book B-38) | `services`: `menu`, `menuGroup`, `menuService`, `serviceInput`, `serviceUpdate`, `groupInput`, `menuOrder` |
 | Requests | `GET /v1/w/:slug/requests` · `POST …/requests/:code/confirm` · `POST …/requests/:code/decline` (who may answer: the "who answers" setting; book B-19–B-21) | `requests`: `request`, `requestList`, `declineInput` |
-| Calendar | `GET /v1/w/:slug/free-times` · `POST /v1/w/:slug/bookings` · `POST …/bookings/:code/undo` (a specialist books only themself; book B-23–B-25) | `calendar`: `freeTimes`, `newBooking`, `newBookingResult` |
+| Calendar | `GET /v1/w/:slug/free-times` · `POST /v1/w/:slug/bookings` · `POST …/bookings/:code/undo` · `POST …/bookings/:code/move` · `POST …/bookings/:code/cancel` (a specialist books, moves and cancels only their own; book B-23–B-27) | `calendar`: `freeTimes`, `newBooking`, `newBookingResult`, `moveBooking`, `businessCancel` |
 
 A settings change writes `business.updated`, which everyone on the team hears.
 

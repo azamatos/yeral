@@ -15,9 +15,11 @@ import { bookings, businesses, clients, jobs, users, type TimeSlot } from '../..
 import type { Deps } from '../../deps'
 import {
   bookingSmsText,
+  businessCancelText,
   declinedSmsText,
   emit,
   expiredSmsText,
+  LINKED_SMS,
   moveRefusedSmsText,
   queueOutcomeSms,
   smsCityOf,
@@ -31,7 +33,7 @@ import { newBookingLink, pruneBookingLinks } from '../bookings/links'
 import { hideLinkTokens } from '../../ports/sms'
 import { bookedServices } from '../bookings/create'
 import { onlineRefusal } from '../clients/online'
-import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
+import { itemsOf, recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100
 /**
@@ -232,7 +234,10 @@ async function sendBookingSms(
     await sendOutcomeSms(deps, b, kind)
     return
   }
-  if (b.status !== 'confirmed') return
+  // a business's cancel goes while the booking stays cancelled by it ("Yzyna al" by the client can't undo those)
+  if (kind === 'cancelled' || kind === 'cancelledAsAsked') {
+    if (b.status !== 'cancelled' || !b.businessCancelReason) return
+  } else if (b.status !== 'confirmed') return
   // a retried reminder can't arrive after the start (book Q-284)
   if (REMINDERS.has(kind) && deps.now() >= epochOf(b.date, b.start)) return DROPPED_STARTED
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
@@ -240,8 +245,13 @@ async function sendBookingSms(
   if (client?.noRemindersSms && REMINDERS.has(kind)) return
   if (user) {
     const prefs = {
+      // "Confirmations and changes": confirmations, moves and the business's cancels (book Q-286)
       confirmed: user.notifyConfirmation,
       booked: user.notifyConfirmation,
+      moved: user.notifyConfirmation,
+      staffChanged: user.notifyConfirmation,
+      cancelled: user.notifyConfirmation,
+      cancelledAsAsked: user.notifyConfirmation,
       reminderDay: user.notifyReminderDay,
       reminder2h: user.notifyReminder2h,
     }
@@ -259,11 +269,16 @@ async function sendBookingSms(
     businessName: biz.name,
     address: biz.address,
     city: await smsCityOf(deps.db, biz.cityId, lang),
+    reason: b.businessCancelReason ? businessCancelText(lang, b.businessCancelReason, b.cancelReason) : undefined,
+    staff:
+      kind === 'staffChanged'
+        ? [...new Set((await itemsOf(deps.db, b.id)).flatMap((i) => (i.staffName ? [i.staffName] : [])))].join(', ')
+        : undefined,
   }
   // the texts with a link get one of their own (book Q-168)
   // the person's phone now: a changed number gets them, the old one nothing more (book Q-171)
   const to = user?.phone ?? b.clientPhone
-  if (kind === 'confirmed' || kind === 'booked') await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
+  if (LINKED_SMS.has(kind)) await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
   else await deps.sms.send({ to, text: bookingSmsText(lang, kind, sms) })
 }
 

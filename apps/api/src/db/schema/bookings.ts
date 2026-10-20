@@ -11,7 +11,16 @@ import { sql } from 'drizzle-orm'
 import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uniqueIndex, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
 import { users } from './auth'
 import { businesses, classSessions, clients, diningTables, services, staff, tableAreas } from './business'
-import { bookingSource, bookingStatus, bookingType, cancelledBy, complaintType, declineReason, priceType } from './enums'
+import {
+  bookingSource,
+  bookingStatus,
+  bookingType,
+  businessCancelReason,
+  cancelledBy,
+  complaintType,
+  declineReason,
+  priceType,
+} from './enums'
 import { createdAt, int4range, ts, xid8 } from './types'
 
 /** A move that wasn't accepted, kept on the booking it would have moved. */
@@ -58,7 +67,13 @@ export const bookings = pgTable(
       .notNull()
       .generatedAlwaysAs(sql`"status" in ('pending', 'confirmed')`),
     cancelledBy: cancelledBy(),
+    /** The client's reason, or the business's in words ("Other reason"). */
     cancelReason: text(),
+    /**
+     * The reason the business picked when it cancelled (B-27), "The client called to cancel" included, which is recorded
+     * as the client's cancel. Null for every other cancel.
+     */
+    businessCancelReason: businessCancelReason(),
     declineReason: declineReason(),
     declineText: text(),
     declineAlternatives: jsonb().$type<TimeSlot[]>().notNull().default([]),

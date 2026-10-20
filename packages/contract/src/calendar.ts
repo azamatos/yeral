@@ -1,7 +1,9 @@
 /**
- * The business's own bookings (book B-23–B-25; `/w/{slug}/…`): free times as the team books them, and a booking
- * entered for a client who calls or walks in, confirmed at once. A specialist books only themself (chapter 3).
+ * The business's own bookings (book B-23–B-27; `/w/{slug}/…`): free times as the team books them, a booking entered
+ * for a client who calls or walks in, confirmed at once, and moving or cancelling one. A specialist books, moves and
+ * cancels only their own (chapter 3).
  */
+import { BUSINESS_CANCEL_REASONS } from '@yeral/domain/model'
 import { z } from 'zod'
 import { dayStateSchema } from './availability'
 import {
@@ -76,3 +78,29 @@ export const newBookingResultSchema = z
   .meta({ id: 'NewBookingResult' })
 
 export const teamBookingParamSchema = z.object({ slug: slugSchema, code: bookingCodeSchema })
+
+/**
+ * "Move to another time" or a dragged block (B-26): the new date and start, and another specialist when the block went
+ * to their column. A refused move is 409 `cannot_move` with the reason the toast names.
+ */
+export const moveBookingSchema = z
+  .object({
+    date: ymdSchema,
+    start: startMinuteSchema,
+    /** Another specialist, who does every service; omitted, each keeps theirs. */
+    staffId: idSchema.optional(),
+    /** "Notify the client": on unless said. */
+    notifyClient: z.boolean().optional(),
+  })
+  .strict()
+  .meta({ id: 'MoveBooking' })
+
+/** "Cancel booking" (B-27): the reason, "Other reason" in words; the client sees it (or "You cancelled"). */
+export const businessCancelSchema = z
+  .object({
+    reason: z.enum(BUSINESS_CANCEL_REASONS),
+    text: z.string().trim().min(1).max(300).optional(),
+  })
+  .strict()
+  .refine((d) => d.reason !== 'other' || !!d.text, { path: ['text'], message: 'Say the reason in words' })
+  .meta({ id: 'BusinessCancel' })
