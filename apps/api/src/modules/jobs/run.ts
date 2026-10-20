@@ -28,6 +28,9 @@ const BATCH = 100
  * count of failed SMS (attempts reached) leaves it out.
  */
 const DROPPED_REVIEW_ASK = 'dropped: no review asks (book Q-259)'
+/** A reminder whose try comes once the visit has started tells the client nothing (book Q-284): settled unsent. */
+const DROPPED_STARTED = 'dropped: the visit has started (book Q-284)'
+const REMINDERS: ReadonlySet<string> = new Set<BookingSmsKind>(['reminderDay', 'reminder2h', 'reminderEvening'])
 const MAX_ATTEMPTS = 5
 
 /**
@@ -202,19 +205,24 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
 
 /**
  * A booking SMS, if the booking is still in the right state, still at the time the SMS was planned for (`at`; older
- * jobs have none), and the client wants it.
+ * jobs have none), and the client wants it. Says why when it settles a reminder unsent that the job should record.
  */
 async function sendBookingSms(
   deps: Deps,
   bookingId: string,
   kind: BookingSmsKind | OutcomeSmsKind,
   at: { date?: unknown; start?: unknown; covers?: unknown },
-): Promise<void> {
+): Promise<string | undefined> {
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
   // the person deleted their account: the number may be someone else's now
   if (!b?.clientPhone || b.accountDeletedAt) return
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
-  if (kind === 'expired' || kind === 'moveRefused') return sendOutcomeSms(deps, b, kind)
+  // a retried reminder can't arrive after the start (book Q-284)
+  if (REMINDERS.has(kind) && deps.now() >= epochOf(b.date, b.start)) return DROPPED_STARTED
+  if (kind === 'expired' || kind === 'moveRefused') {
+    await sendOutcomeSms(deps, b, kind)
+    return
+  }
   if (b.status !== 'confirmed') return
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const [client] = b.clientId ? await deps.db.select().from(clients).where(eq(clients.id, b.clientId)) : []
@@ -276,8 +284,10 @@ async function runQueue(deps: Deps): Promise<number> {
           .where(eq(jobs.id, job.id))
         continue
       }
+      let note: string | undefined
       if (job.kind === 'sms') await deps.sms.send({ to: String(p.to), text: String(p.text) })
-      else if (job.kind === 'booking.sms') await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p)
+      else if (job.kind === 'booking.sms')
+        note = await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p)
       else if (job.kind === 'demo.answer') {
         const [b] = await deps.db
           .select()
@@ -288,13 +298,15 @@ async function runQueue(deps: Deps): Promise<number> {
       }
       await deps.db
         .update(jobs)
-        .set({ doneAt: new Date(deps.now()), lockedUntil: null, error: null })
+        .set({ doneAt: new Date(deps.now()), lockedUntil: null, error: note ?? null })
         .where(eq(jobs.id, job.id))
     } catch (e) {
       const attempts = job.attempts + 1
       // a gateway may echo the text back: no error kept or logged holds a link's token
       const error = hideLinkTokens(String(e))
       deps.log.warn('job failed', { id: job.id, kind: job.kind, attempts, error })
+      // the last try: the error tracker (F-209) turns this line into an alert for the Ýeral team (book Q-284)
+      if (attempts >= MAX_ATTEMPTS) deps.log.error('job gave up', { id: job.id, kind: job.kind, attempts, error })
       await deps.db
         .update(jobs)
         .set({

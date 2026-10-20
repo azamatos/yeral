@@ -83,7 +83,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    setting (Q-163; done 20.10.2026), the 4 undo reasons (ROUND6 A6; done 20.10.2026), the answer time worked out (Q-113; done 20.10.2026, declines count with step 4), phone-only clients and paused
    businesses (Q-154; done 20.10.2026: the business page, the booking detail and the link page), the owner's preview of an unverified page (F-032; done 20.10.2026), no average bill and the hidden-price text
    (Q-103; done 20.10.2026), lateness fixed at 15 min (Q-118; done 20.10.2026), a price range filter (done 20.10.2026), the failed-SMS alert and late reminders dropped
-   (Q-284), the SMS for a move not accepted (Q-289; done 20.10.2026), offered times keeping a request on top of Upcoming (C-40; done 20.10.2026); and the new engine rules: *Başga ýerde* (Q-272), blocked time
+   (Q-284; done 20.10.2026, the alert reaching people with F-209 in step 7), the SMS for a move not accepted (Q-289; done 20.10.2026), offered times keeping a request on top of Upcoming (C-40; done 20.10.2026); and the new engine rules: *Başga ýerde* (Q-272), blocked time
    (F-121) and internal statuses (F-104, F-133).
 4. **Business endpoints:** workspace, calendar, requests, bookings with CSV export (F-135), clients, team, settings,
    services, hours, reviews; photos (F-084, F-101) stored on the server's disk behind a storage port; the address with
@@ -96,7 +96,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    shown on the screen (never for the admin tool), a separate demo workspace reset every night, no SMS. It doesn't wait
    for the design: the demo data already has English texts, refreshed at export v0.6.
 7. **Before the first launch:** deploys from GitHub over SSH after the owner approves a release (ADR 0020), nightly
-   backups to Cloudflare R2 with a restore drill (F-211), error tracking and uptime alerts (F-209), sitemap data
+   backups to Cloudflare R2 with a restore drill (F-211), error tracking and uptime alerts (F-209; it alerts on the `job gave up` line), sitemap data
    (F-197).
 
 Settled while reviewing (Claude, delegated, 19.10.2026): a hold counts the business's opening hours, special days
