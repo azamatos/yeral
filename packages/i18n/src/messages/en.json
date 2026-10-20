@@ -29,6 +29,7 @@
     "already_reported": "A report was already sent.",
     "noshow_window_passed": "A no-show can be marked up to 24 hours after the visit.",
     "restore_expired": "It's too late to restore this booking.",
+    "too_many_waiting": "{scope, select, business {You already have {limit} requests waiting here. Wait for an answer or cancel one.} other {You already have {limit} requests waiting. Wait for the answers or cancel one.}}",
     "review_exists": "You've already reviewed this visit.",
     "review_not_allowed": "You can review only after your visit.",
     "review_locked": "This review can't be edited any more.",

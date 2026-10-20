@@ -42,6 +42,24 @@ export type LifecycleError =
 export const MAX_ALTERNATIVES = 3
 /** A review can be edited this long after it's written. */
 export const REVIEW_EDIT_DAYS = 7
+/** Requests one client may have waiting for an answer at one business, and across Ýeral (book Q-124). */
+export const MAX_WAITING_HERE = 3
+export const MAX_WAITING_IN_ALL = 10
+
+export const WAITING_SCOPES = ['business', 'all'] as const
+// a type, not an interface: it goes into an error's details as it is
+export type WaitingLimit = { scope: (typeof WAITING_SCOPES)[number]; limit: number }
+
+/**
+ * Whether a client with `here` requests waiting at this business, and `inAll` across Ýeral, may have one more waiting
+ * (book Q-124): null, or which limit it would pass. A request holds its time until it's answered or its answer time
+ * (counted in the business's opening hours) runs out.
+ */
+export function waitingLimit(here: number, inAll: number): WaitingLimit | null {
+  if (here >= MAX_WAITING_HERE) return { scope: 'business', limit: MAX_WAITING_HERE }
+  if (inAll >= MAX_WAITING_IN_ALL) return { scope: 'all', limit: MAX_WAITING_IN_ALL }
+  return null
+}
 /** A review can be written until this long after the visit ends (book Q-126). */
 export const REVIEW_WRITE_DAYS = 30
 /** A no-show can be marked until this long after the visit ends (book Q-254). */

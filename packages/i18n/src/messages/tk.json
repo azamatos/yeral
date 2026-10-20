@@ -29,6 +29,7 @@
     "already_reported": "Arz eýýäm iberildi.",
     "noshow_window_passed": "Gelmedi diýip bellemek wagty geçdi: ýazylyş gutarandan soň 24 sagadyň içinde bellenýär.",
     "restore_expired": "Yzyna almak wagty geçdi.",
+    "too_many_waiting": "{scope, select, business {Bu ýerde jogap garaşýan {limit} haýyşyňyz bar. Jogaba garaşyň ýa-da birini ýatyryň.} other {Jogap garaşýan {limit} haýyşyňyz bar. Jogaplara garaşyň ýa-da birini ýatyryň.}}",
     "review_exists": "Teswir eýýäm ýazyldy.",
     "review_not_allowed": "Teswiri diňe gelenden soň ýazyp bolýar.",
     "review_locked": "Teswiri üýtgetmek wagty geçdi.",

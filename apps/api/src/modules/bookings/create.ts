@@ -4,7 +4,7 @@
  * free times). Online bookings wait for the business unless it confirms instantly.
  */
 import type { CreateBooking } from '@yeral/contract/bookings'
-import type { PartyTooLargeDetails } from '@yeral/contract/errors'
+import type { PartyTooLargeDetails, TooManyWaitingDetails } from '@yeral/contract/errors'
 import {
   assignTable,
   canBookSession,
@@ -16,12 +16,12 @@ import {
   type AppointmentQuery,
   type AppointmentSlot,
 } from '@yeral/domain/availability'
-import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
+import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES, waitingLimit } from '@yeral/domain/lifecycle'
 import { priceTotal } from '@yeral/domain/pricing'
 import { epochOf } from '@yeral/domain/time'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, isNull, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, classSessions, clients, jobs } from '../../db/schema'
+import { bookingItems, bookings, classSessions, clients, jobs, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
@@ -32,7 +32,7 @@ import { isPhoneBlocked } from '../clients/online'
 import { servicePrice } from '../catalog/map'
 import { hasSignedInTeam } from '../team/members'
 import { confirmBooking } from './confirm'
-import { freshCode, isSlotConflict, type BookingRow } from './repo'
+import { awaitingAnswer, freshCode, isSlotConflict, type BookingRow } from './repo'
 import { accountName } from '../me/me'
 
 /** Demo businesses with nobody to answer confirm requests themselves after this delay (outside production). */
@@ -74,8 +74,39 @@ interface Insert {
   alternativeOf?: string
 }
 
+/**
+ * A request may wait for an answer only while the client has fewer than 3 waiting at this business and 10 in all
+ * (book Q-124); move requests ride on their booking and don't count. Every way a request starts waiting checks it: a
+ * new one, an offered time taken, one restored. `locked`: the account's row is held first, so requests sent at once
+ * count one after another (the order an account deletion locks in too); without it, a cheap early check before a time
+ * is placed.
+ */
+export async function assertWaitingRoom(
+  db: Queryable,
+  userId: string,
+  businessId: string,
+  now: number,
+  opts: { locked: boolean },
+): Promise<void> {
+  if (opts.locked) {
+    const [held] = await db.select({ id: users.id }).from(users).where(eq(users.id, userId)).for('no key update')
+    // the account went meanwhile
+    if (!held) throw new ApiError('unauthorized')
+  }
+  const [counts] = await db
+    .select({
+      here: sql<number>`count(*) filter (where ${bookings.businessId} = ${businessId})::int`,
+      inAll: sql<number>`count(*)::int`,
+    })
+    .from(bookings)
+    .where(and(eq(bookings.userId, userId), awaitingAnswer(now), isNull(bookings.rescheduleOf)))
+  const over = waitingLimit(counts?.here ?? 0, counts?.inAll ?? 0)
+  if (over) throw new ApiError('too_many_waiting', over satisfies TooManyWaitingDetails)
+}
+
 async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<BookingRow> {
   const now = deps.now()
+  if (x.status === 'pending' && !x.rescheduleOf) await assertWaitingRoom(db, x.user.id, x.lb.business.id, now, { locked: true })
   const client = await clientFor(db, x.lb.business.id, x.user)
   const services = x.placement.slot?.items.map((it) => x.lb.services.find((s) => s.id === it.serviceId)) ?? []
   const price =
@@ -221,6 +252,7 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
   await assertOnlineBooking(db, lb, user)
   if (!b.bookingTypes.includes(input.type)) throw new ApiError('not_bookable')
   const status = initialStatus('web', lb.rules.confirmMode)
+  if (status === 'pending') await assertWaitingRoom(db, user.id, lb.business.id, now, { locked: false })
 
   if (input.type === 'appointment') {
     const q = { date: input.date, serviceIds: input.serviceIds, staffId: input.staffId, by: 'client' as const }
@@ -367,6 +399,7 @@ export async function rebook(
     if (query.serviceIds.some((id) => !ctx.services.some((s) => s.id === id && s.online))) throw new ApiError('not_bookable')
     checkStaff(ctx, query.serviceIds, query.staffId)
   }
+  if (opts.status === 'pending' && !move) await assertWaitingRoom(db, user.id, from.businessId, deps.now(), { locked: false })
   const slot = await placeAppointment(deps, lb, query, to.start, 'client', db)
   return inTransaction(
     deps,

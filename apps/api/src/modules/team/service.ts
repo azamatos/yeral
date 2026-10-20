@@ -7,7 +7,7 @@ import type { Locale } from '@yeral/domain/model'
 import { canAnswerRequest, type Actor } from '@yeral/domain/permissions'
 import { inviteExpiresAt, inviteState } from '@yeral/domain/team'
 import type { SiteConfig } from '@yeral/lib/site'
-import { and, asc, desc, eq, gt, inArray, or } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, or } from 'drizzle-orm'
 import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, businesses, invites, services, staff, staffServices, users } from '../../db/schema'
@@ -20,6 +20,7 @@ import { requireUser } from '../auth/session'
 import { cityRefOf, loadCities } from '../catalog/cities'
 import { photoOf, text } from '../catalog/map'
 import { signsIn } from './members'
+import { awaitingAnswer } from '../bookings/repo'
 
 export type StaffRow = typeof staff.$inferSelect
 export type BusinessRow = typeof businesses.$inferSelect
@@ -227,7 +228,7 @@ async function requestCounts(db: Queryable, teams: { businessId: string; actor: 
   const waiting = await db
     .select({ id: bookings.id, businessId: bookings.businessId })
     .from(bookings)
-    .where(and(inArray(bookings.businessId, ids), eq(bookings.status, 'pending'), gt(bookings.holdUntil, new Date(now))))
+    .where(and(inArray(bookings.businessId, ids), awaitingAnswer(now)))
   if (!waiting.length) return out
   const items = await db
     .select({ bookingId: bookingItems.bookingId, staffId: bookingItems.staffId, hasApp: staff.hasApp })
