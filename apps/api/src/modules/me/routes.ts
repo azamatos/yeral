@@ -4,7 +4,7 @@ import { meSchema, sendCodeResponseSchema, sendCodeSchema, updateMeSchema, verif
 import { businessCardSchema } from '@yeral/contract/catalog'
 import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
 import { epochOf, today } from '@yeral/domain/time'
-import { and, desc, eq, inArray } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm'
 import { bookingLinks, bookings, businesses, favorites, invites, sessions, staff, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
@@ -136,10 +136,14 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
           if (!(e instanceof StaleBooking)) throw e
         }
       }
-      // their SMS links stop working: whoever gets the number next can't open them (book Q-168)
+      // their bookings, and phone bookings made for the number since the last sign-in, are left behind: they never join
+      // whoever gets the number next, their SMS stop, and their links stop working (book Q-168)
+      const theirs = or(eq(bookings.userId, user.id), and(eq(bookings.clientPhone, user.phone), isNull(bookings.userId)))
       await tx
-        .delete(bookingLinks)
-        .where(inArray(bookingLinks.bookingId, tx.select({ id: bookings.id }).from(bookings).where(eq(bookings.userId, user.id))))
+        .update(bookings)
+        .set({ accountDeletedAt: new Date(now) })
+        .where(theirs)
+      await tx.delete(bookingLinks).where(inArray(bookingLinks.bookingId, tx.select({ id: bookings.id }).from(bookings).where(theirs)))
       await tx.delete(users).where(eq(users.id, user.id))
     })
     await endSession(c)
@@ -168,7 +172,20 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     if (userId !== user.id) throw new ApiError('code_expired')
     const [taken] = await c.var.deps.db.select({ id: users.id }).from(users).where(eq(users.phone, phone))
     if (taken) throw new ApiError('phone_taken')
-    const [row] = await c.var.deps.db.update(users).set({ phone }).where(eq(users.id, user.id)).returning()
+    const { db } = c.var.deps
+    const row = await db.transaction(async (tx) => {
+      const [updated] = await tx.update(users).set({ phone }).where(eq(users.id, user.id)).returning()
+      // the bookings ahead text the new number; links sent to the old one stop working (book Q-168; the client records
+      // follow with Q-171)
+      await tx
+        .update(bookings)
+        .set({ clientPhone: phone })
+        .where(and(eq(bookings.userId, user.id), inArray(bookings.status, ['pending', 'confirmed'])))
+      await tx
+        .delete(bookingLinks)
+        .where(inArray(bookingLinks.bookingId, tx.select({ id: bookings.id }).from(bookings).where(eq(bookings.userId, user.id))))
+      return updated
+    })
     // other devices sign in again with the new number
     const current = c.var.auth?.sessionId
     const others = (await c.var.deps.db.select({ id: sessions.id }).from(sessions).where(eq(sessions.userId, user.id))).filter(

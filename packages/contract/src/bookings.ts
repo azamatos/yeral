@@ -198,7 +198,7 @@ export type BookingDetail = z.infer<typeof bookingDetailSchema>
 // ── The SMS link page (book Q-168, Q-169, F-068) ──
 
 /** A link's token: long and random, never the booking code. Anything else, cut short or made up, is just not found. */
-export const linkTokenSchema = z.string().max(200)
+export const linkTokenSchema = z.string()
 
 /** One booking as its SMS link shows it, signed out: the card, the offers, no note, no actions. */
 export const bookingLinkSchema = bookingDetailSchema

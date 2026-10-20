@@ -30,7 +30,7 @@ export async function signIn(c: Context<AppEnv>, phone: string, lang: Locale | u
     await tx
       .update(bookings)
       .set({ userId: user.id })
-      .where(and(eq(bookings.clientPhone, phone), isNull(bookings.userId)))
+      .where(and(eq(bookings.clientPhone, phone), isNull(bookings.userId), isNull(bookings.accountDeletedAt)))
     await startSession(c, tx, user.id)
     return { me: await toMe(tx, user), isNew }
   })

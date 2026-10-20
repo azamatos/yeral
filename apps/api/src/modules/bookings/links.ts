@@ -5,7 +5,7 @@
  */
 import { epochOf } from '@yeral/domain/time'
 import type { SiteConfig } from '@yeral/lib/site'
-import { and, eq, gt, lt } from 'drizzle-orm'
+import { and, eq, gt, lt, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingLinks, bookings } from '../../db/schema'
 import { ApiError } from '../../http/errors'
@@ -32,9 +32,13 @@ export async function newBookingLink(
   return { url: `${site.urls.client.replace(/^https?:\/\//, '')}/l/${token}`, tokenHash }
 }
 
-/** A link whose SMS never went: it opens nothing. */
-export async function dropBookingLink(db: Queryable, tokenHash: string): Promise<void> {
-  await db.delete(bookingLinks).where(eq(bookingLinks.tokenHash, tokenHash))
+/** A booking moved: its links work until 90 days after the new visit too. */
+export async function extendBookingLinks(db: Queryable, booking: Pick<BookingRow, 'id' | 'date' | 'end'>): Promise<void> {
+  const until = new Date(epochOf(booking.date, booking.end) + LINK_DAYS * 86_400_000)
+  await db
+    .update(bookingLinks)
+    .set({ expiresAt: sql`greatest(${bookingLinks.expiresAt}, ${until.toISOString()}::timestamptz)` })
+    .where(eq(bookingLinks.bookingId, booking.id))
 }
 
 /** Links past their time are gone (the jobs, every minute). */

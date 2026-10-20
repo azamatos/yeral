@@ -10,6 +10,7 @@ import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, jobs } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { emit, type BookingSmsKind } from '../../notify'
+import { extendBookingLinks } from './links'
 import { lockBooking, setStatus, StaleBooking, type BookingRow } from './repo'
 
 const HOUR = 3_600_000
@@ -69,6 +70,7 @@ export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow): 
       .where(eq(bookings.id, original.id))
       .returning()
     if (!moved) throw new StaleBooking()
+    await extendBookingLinks(db, moved)
     await db.delete(bookings).where(eq(bookings.id, request.id))
     await emit(db, {
       type: 'booking.moved',

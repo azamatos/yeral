@@ -410,10 +410,11 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     verify: (token: string) =>
       mutationOptions({
         mutationFn: (body: z.input<typeof linkVerifySchema>) => call(v1.links[':token'].verify.$post({ param: { token }, json: body })),
-        // the link page can sign someone in over another person (a shared phone, book Q-169): nothing of theirs stays
-        onSuccess: (data) => {
-          queryClient.clear()
+        // the link page can sign someone in over another person (a shared phone, book Q-169): every query goes back to
+        // empty and the screens on show load again for the new person
+        onSuccess: async (data) => {
           queryClient.setQueryData(keys.me(), data.me)
+          await queryClient.resetQueries({ predicate: (q) => q.queryKey[0] !== keys.me()[0] })
         },
       }),
   }

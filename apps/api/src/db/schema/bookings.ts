@@ -68,6 +68,11 @@ export const bookings = pgTable(
      * when another move is asked, one is accepted, or the client withdraws.
      */
     moveRefused: jsonb().$type<MoveRefused>(),
+    /**
+     * The person deleted their account: the booking never joins an account by its phone again (whoever gets the number
+     * next mustn't see it) and sends no more SMS.
+     */
+    accountDeletedAt: ts(),
     complaintType: complaintType(),
     complaintText: text(),
     complaintAt: ts(),

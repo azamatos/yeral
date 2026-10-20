@@ -5,7 +5,7 @@
  */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { linkCodeSchema, linkVerifySchema, sendCodeResponseSchema, verifyCodeResponseSchema } from '@yeral/contract/account'
-import { bookingLinkSchema, linkTokenSchema } from '@yeral/contract/bookings'
+import { bookingLinkSchema, linkTokenSchema, type BookingLink } from '@yeral/contract/bookings'
 import { langQuerySchema } from '@yeral/contract/common'
 import { MARKET } from '@yeral/domain/market'
 import { maskPhone } from '@yeral/domain/phone'
@@ -54,14 +54,16 @@ export const linkRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const row = await bookingOfLink(deps.db, c.req.valid('param').token, deps.now())
     const d = await detailOf(deps, row, c.req.valid('query').lang)
-    // the contract decides what a signed-out visitor sees: whatever else the detail has (the note, the actions) goes
-    const page = bookingLinkSchema.parse({
+    const full: Record<string, unknown> = {
       ...d,
       maskedPhone: maskPhone(row.clientPhone ?? ''),
       // signed in as someone else (a shared phone): the signed-out page, with the masked-phone login (book Q-169)
       owner: !!row.userId && c.var.auth?.user.id === row.userId,
       canReview: d.actions.review,
-    })
+    }
+    // the contract's fields decide what a signed-out visitor sees: whatever else the detail has (the note, the actions)
+    // goes
+    const page = Object.fromEntries(Object.keys(bookingLinkSchema.shape).map((k) => [k, full[k]])) as BookingLink
     return c.json(page, 200)
   })
   .openapi(codeRoute, async (c) => {

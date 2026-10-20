@@ -15,8 +15,8 @@ import type { Deps } from '../../deps'
 import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, smsCityOf, type BookingSmsKind } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
-import { dropBookingLink, newBookingLink, pruneBookingLinks } from '../bookings/links'
-import { bookedServices } from '../bookings/create'
+import { newBookingLink, pruneBookingLinks } from '../bookings/links'
+import { bookedServices, onlineRefusal } from '../bookings/create'
 import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100
@@ -153,15 +153,13 @@ async function completeVisits(deps: Deps): Promise<number> {
 /** The SMS about an outcome the client didn't choose: they always go (book Q-286, Q-289). */
 type OutcomeSmsKind = 'expired' | 'moveRefused'
 
-/** Send with a link of its own; a link whose SMS failed opens nothing. */
+/**
+ * Send with a link of its own. A failed send keeps its link: the gateway may have delivered it anyway, and an unsent
+ * token is known to nobody (only its hash is stored); it's pruned when it expires.
+ */
 async function sendWithLink(deps: Deps, b: BookingRow, text: (link: string) => string): Promise<void> {
   const link = await newBookingLink(deps.db, deps.site, b, deps.now())
-  try {
-    await deps.sms.send({ to: b.clientPhone ?? '', text: text(link.url) })
-  } catch (e) {
-    await dropBookingLink(deps.db, link.tokenHash)
-    throw e
-  }
+  await deps.sms.send({ to: b.clientPhone ?? '', text: text(link.url) })
 }
 
 /** An expired request's times, or a move not accepted while the visit is still ahead; the client can't switch these off. */
@@ -171,13 +169,16 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
       ? b.status === 'cancelled' && b.cancelledBy === 'system'
       : b.status === 'confirmed' && !!b.moveRefused && deps.now() < epochOf(b.date, b.start)
   if (!still) return
-  const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId))
-  if (!biz) return
+  const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
+  if (!lb) return
+  const biz = lb.business
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const lang = user?.lang ?? MARKET.defaultLanguage
   const sms = { date: b.date, start: b.start, businessName: biz.name, address: biz.address }
+  // a paused business or a phone-only client: the page offers no times, so neither does the text (book Q-154)
+  const times = (await onlineRefusal(deps.db, lb, b.clientPhone ?? '')) ? [] : b.expiredAlternatives
   await sendWithLink(deps, b, (link) =>
-    kind === 'expired' ? expiredSmsText(lang, { ...sms, link }, b.expiredAlternatives) : moveRefusedSmsText(lang, { ...sms, link }),
+    kind === 'expired' ? expiredSmsText(lang, { ...sms, link }, times) : moveRefusedSmsText(lang, { ...sms, link }),
   )
 }
 
@@ -192,7 +193,8 @@ async function sendBookingSms(
   at: { date?: unknown; start?: unknown; covers?: unknown },
 ): Promise<void> {
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
-  if (!b?.clientPhone) return
+  // the person deleted their account: the number may be someone else's now
+  if (!b?.clientPhone || b.accountDeletedAt) return
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   if (kind === 'expired' || kind === 'moveRefused') return sendOutcomeSms(deps, b, kind)
   const wanted = kind === 'reviewAsk' ? b.status === 'completed' || b.status === 'confirmed' : b.status === 'confirmed'

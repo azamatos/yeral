@@ -6,7 +6,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingItems, bookingLinks, bookings, businesses, jobs, rateLimits, services } from '../../db/schema'
+import { bookingItems, bookingLinks, bookingRules, bookings, businesses, jobs, rateLimits, services } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 import { confirmBooking } from './confirm'
@@ -165,13 +165,59 @@ describe('SMS links', () => {
   })
 
   it('deleting the account stops its links: whoever gets the number next can’t open them', async () => {
-    const { b, token } = await confirmedWithLink('+99365444309')
+    const { b, token, code } = await confirmedWithLink('+99365444309')
     expect((await b.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
     expect((await browser(t.app).req(`/v1/links/${token}`)).status).toBe(404)
+    // the next holder of the number signs in: none of it is theirs
+    const next = browser(t.app)
+    await next.login('+99365444309', 'Someone else')
+    expect((await next.req(`/v1/me/bookings/${code}`)).status).toBe(404)
+    const past = (await next.req('/v1/me/bookings?tab=past')).json.items
+    expect(past.map((x: { code: string }) => x.code)).not.toContain(code)
+  })
+
+  it('a phone change moves the bookings ahead to the new number and ends the old links', async () => {
+    const { b, code, token } = await confirmedWithLink('+99365444311')
+    expect((await b.req('/v1/me/phone/code', { body: { phone: '+99365444312' } })).status).toBe(200)
+    expect((await b.req('/v1/me/phone/verify', { body: { phone: '+99365444312', code: '1234' } })).status).toBe(200)
+    const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
+    expect(row!.clientPhone).toBe('+99365444312')
+    expect((await browser(t.app).req(`/v1/links/${token}`)).status).toBe(404)
+  })
+
+  it('a paused business’s expiry SMS offers no times: the page wouldn’t either (book Q-154)', async () => {
+    const b = browser(t.app)
+    await b.login('+99365444313', 'Läle')
+    const slots = (await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&date=${THU}`)).json.slots
+    await b.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: null, date: THU, start: slots[0].start },
+    })
+    await db.update(bookingRules).set({ onlineEnabled: false }).where(eq(bookingRules.businessId, glowId))
+    try {
+      t.clock.now += 31 * 60_000
+      await runDueJobs(t.deps)
+      expect(t.sms.sent.filter((s) => s.to === '+99365444313').at(-1)?.text).toMatch(/Pick another time/)
+    } finally {
+      await db.update(bookingRules).set({ onlineEnabled: true }).where(eq(bookingRules.businessId, glowId))
+    }
   })
 
   it('a finished visit says whether it can still be reviewed (book Q-170)', async () => {
     const { token } = await confirmedWithLink('+99365444310')
     expect((await browser(t.app).req(`/v1/links/${token}`)).json.canReview).toBe(false)
+  })
+
+  it('a confirmed move keeps the links working until 90 days after the new visit', async () => {
+    const { b, code, token } = await confirmedWithLink('+99365444314')
+    const later = '2026-11-12'
+    const slots = (await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&staff=any&date=${later}&move=${code}`)).json
+      .slots
+    await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: later, start: slots[0].start, staffId: null } })
+    const [orig] = await db.select().from(bookings).where(eq(bookings.code, code))
+    const [move] = await db.select().from(bookings).where(eq(bookings.rescheduleOf, orig!.id))
+    await db.transaction((tx) => confirmBooking(tx, t.deps, move!))
+    const [link] = await db.select().from(bookingLinks).where(eq(bookingLinks.bookingId, orig!.id))
+    expect(link!.expiresAt.getTime()).toBe(epochOf(later, move!.end) + LINK_DAYS * 86_400_000)
+    expect((await browser(t.app).req(`/v1/links/${token}`)).json.date).toBe(later)
   })
 })
