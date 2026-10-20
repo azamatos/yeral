@@ -9,11 +9,10 @@
  * The database keeps the stored status; jobs settle expiries and completions every minute. Until a job has run,
  * `effectiveStatus` gives what people must see, so screens never show a stale "pending" or "confirmed".
  */
-import { isOnlineSource, type BookingSource, type BookingStatus, type CancelledBy, type ConfirmMode } from './model'
+import { isOnlineSource, type BookingSource, type BookingStatus, type CancelledBy, type ComplaintType, type ConfirmMode } from './model'
 import type { BookingRules } from './rules'
 import { openStretches, type BusinessHours } from './hours'
 import { addDays, epochOf, localOf } from './time'
-import type { ComplaintType } from './model'
 
 /** A booking as far as the lifecycle cares: business-local date, start and end minutes, stored state. */
 export interface BookingState {
@@ -24,8 +23,8 @@ export interface BookingState {
   cancelledBy?: CancelledBy | null
   /** Epoch ms; pending requests only. */
   holdUntil?: number | null
-  /** A complaint was filed ("Arz et"); one per booking. */
-  hasComplaint?: boolean
+  /** The complaint filed ("Arz et"), if any; one per booking. */
+  complaintType?: ComplaintType | null
 }
 
 export type LifecycleError =
@@ -36,6 +35,8 @@ export type LifecycleError =
   | 'not_started'
   | 'already_reported'
   | 'noshow_window_passed'
+  | 'review_not_allowed'
+  | 'review_window_passed'
 
 /** At most this many alternative times go with a decline or an expiry. */
 export const MAX_ALTERNATIVES = 3
@@ -204,9 +205,10 @@ export interface ClientActions {
   bookAgain: boolean
 }
 
-/** A review can still be written: until 30 days after the visit ends (book Q-126). */
-export function reviewOpen(b: Pick<BookingState, 'date' | 'end'>, now = Date.now()): boolean {
-  return now <= endOf(b) + REVIEW_WRITE_DAYS * 86_400_000
+/** Write a review ("Teswir ýaz"): a completed visit, until 30 days after it ends (book Q-126); one per booking. */
+export function canWriteReview(b: BookingState, now = Date.now()): Guard {
+  if (effectiveStatus(b, now).status !== 'completed') return 'review_not_allowed'
+  return now <= endOf(b) + REVIEW_WRITE_DAYS * 24 * HOUR ? null : 'review_window_passed'
 }
 
 /** What the client can do with a booking ("Client actions by status", client spec §4.8). */
@@ -223,7 +225,7 @@ export function clientActions(
     reschedule: canClientReschedule(b, rules, now) === null,
     editNote: canEditNote(b, now) === null,
     callOnly: status === 'confirmed' && !cancel,
-    review: status === 'completed' && !review && reviewOpen(b, now),
+    review: !review && canWriteReview(b, now) === null,
     editReview: status === 'completed' && !!review && now - review.createdAt < REVIEW_EDIT_DAYS * 86_400_000,
     bookAgain: status === 'completed' || status === 'cancelled' || status === 'noshow',
   }
@@ -251,14 +253,17 @@ export function canBusinessMove(b: BookingState, now = Date.now()): Guard {
 }
 
 /**
- * "Arz et", once, on a confirmed or completed booking. "Gelmedi" (a no-show) from the visit's start until 24 hours after
- * its end (book Q-206, Q-254); being late, rude or anything else any time, a rude call before the visit included.
+ * "Arz et", one per booking, on a confirmed or completed booking (book Q-206, Q-254). "Gelmedi" (a no-show) from the
+ * visit's start until 24 hours after its end, and it takes the place of another complaint filed before (a rude call
+ * the day before mustn't keep the no-show from counting). "Gijä galdy" (late) from the start, since no one is late
+ * before it; rude and anything else any time, a rude call before the visit included.
  */
 export function canComplain(b: BookingState, type: ComplaintType, now = Date.now()): Guard {
-  if (b.hasComplaint) return 'already_reported'
+  if (b.complaintType && (type !== 'noshow' || b.complaintType === 'noshow')) return 'already_reported'
   const { status } = effectiveStatus(b, now)
   if (status !== 'confirmed' && status !== 'completed') return 'invalid_status'
-  if (type !== 'noshow') return null
+  if (type !== 'noshow' && type !== 'late') return null
   if (now < startOf(b)) return 'not_started'
-  return now <= endOf(b) + NOSHOW_MARK_HOURS * 3_600_000 ? null : 'noshow_window_passed'
+  if (type === 'late') return null
+  return now <= endOf(b) + NOSHOW_MARK_HOURS * HOUR ? null : 'noshow_window_passed'
 }

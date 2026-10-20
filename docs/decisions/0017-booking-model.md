@@ -56,7 +56,9 @@ requests, which rules it can change and what it records about a visit; the clien
   expired request start a normal request.
 - **Completed** is automatic after the end time; there is no "came" button. **Complaint** ("Arz et") on a confirmed or
   completed booking from its start time: `complaint { type: noshow | late | rude | other, text? }`; `noshow` sets
-  status `noshow`. Complaints show on the client record (team only). When a client's no-shows at a business reach
+  status `noshow`. Revised 20.10.2026 (book Q-206, Q-254): `noshow` from the start until 24 hours after the end, and it
+  takes the place of another complaint filed before; `late` from the start; `rude` and `other` any time, before the
+  visit too (`canComplain`). Complaints show on the client record (team only). When a client's no-shows at a business reach
   `blockAfterNoShows`, that client can book there only by phone (`clients.onlineBlocked`).
 - **Source**: `web | app | phone | walkin | ai`; the workspace shows web and app as "Onlaýn".
 - **Reschedule** by the client = a new request for the new time; the old time stays held until the business answers; if

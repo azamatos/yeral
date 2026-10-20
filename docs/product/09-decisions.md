@@ -10,6 +10,7 @@ question in this book, the answer is added here with its date, and the chapters 
 | Date | Question | Decision | By |
 |---|---|---|---|
 | 20.10.2026 | Q-254, Q-126 (how) | Both limits count from the visit's end: a no-show up to 24 hours after it (`noshow_window_passed`), a review up to 30 days after it (`review_window_passed`); the client's booking stops offering "Teswir ýaz" then | Claude (delegated) |
+| 20.10.2026 | Q-206 (revised) | "Gijä galdy" only from the visit's start (no one is late before it), not any time; "Gelmedi" takes the place of a complaint of another type filed before, so a rude call the day before doesn't keep the no-show from counting toward the limit | Claude (delegated) |
 | 20.10.2026 | Q-156 (how) | The account's one name field is split at the first space when the two fields arrive (the first word is the first name); the profile keeps answering the whole name as `name`, with `firstName` and `surname` beside it, and an older client's one `name` is split the same way | Claude (delegated) |
 | 20.10.2026 | Q-172 (how) | Deleting an account deletes its reviews and takes them out of the businesses' ratings; "Is this you?" answered "No" keeps the earlier holder's reviews, since they didn't ask to go | Claude (delegated) |
 | 20.10.2026 | Q-267 (how) | The api sends the wait for the hourly code limit in seconds and in whole minutes, rounded up (`retryAfterMin`), so every language can say it in minutes | Claude (delegated) |

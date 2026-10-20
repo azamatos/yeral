@@ -241,8 +241,8 @@ describe('client bookings', () => {
         start: 780,
       },
     })
+    // no jobs run: the booking reads completed by its time alone, and the file's other bookings stay as they are
     t.clock.now = epochOf(THU, json.end) + 30 * 86_400_000 + MIN
-    await runDueJobs(t.deps)
     expect((await b.req(`/v1/me/bookings/${json.code}`)).json).toMatchObject({ status: 'completed', actions: { review: false } })
     const late = await b.req(`/v1/me/bookings/${json.code}/review`, { body: { rating: 5 } })
     expect(late.status).toBe(409)
