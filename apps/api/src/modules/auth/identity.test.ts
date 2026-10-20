@@ -6,7 +6,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, businesses, clients, invites, rateLimits, staff, users } from '../../db/schema'
+import { bookings, businesses, clients, favorites, invites, rateLimits, staff, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { newBookingLink } from '../bookings/links'
 
@@ -141,7 +141,7 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     expect(await db.select().from(users).where(eq(users.phone, phone))).toHaveLength(1)
   })
 
-  it('an account without a name is asked by the name on its bookings; one holding nothing just signs in', async () => {
+  it('an account without a name is asked by the name on its bookings; one holding nothing starts afresh', async () => {
     const named = await db
       .insert(users)
       .values({ phone: '+99365777007', lang: 'en', lastSeenAt: new Date(DEMO_NOW - 200 * DAY) })
@@ -157,8 +157,15 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     const asked = await codeAndVerify('+99365777007')
     expect(asked.res.status).toBe(202)
     expect(asked.res.json.isThisYou.name).toBe('Gülşat')
-    await db.insert(users).values({ phone: '+99365777008', lang: 'en', lastSeenAt: new Date(DEMO_NOW - 200 * DAY) })
-    expect((await codeAndVerify('+99365777008')).res.status).toBe(200)
+    const [bare] = await db
+      .insert(users)
+      .values({ phone: '+99365777008', lang: 'en', lastSeenAt: new Date(DEMO_NOW - 200 * DAY) })
+      .returning()
+    await db.insert(favorites).values({ userId: bare!.id, businessId: glowId })
+    const fresh = await codeAndVerify('+99365777008')
+    expect(fresh.res.status).toBe(200)
+    expect(fresh.res.json.me.id).not.toBe(bare!.id)
+    expect((await fresh.b.req('/v1/me/favorites')).json.items).toEqual([])
   })
 
   it('"No" lets the old account go and starts a fresh one; what was sent to the number lately stays the holder’s', async () => {
@@ -181,8 +188,22 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
       clientId: record!.id,
       userId: old.id,
     })
-    // made for the number's holder now, a week ago: a phone booking with its SMS link, and a team invite
+    // made for the number's holder now: a phone booking with its SMS link, one Glow filed under the old record, and a
+    // team invite; and an invite that brought back the old account's own team row
     const lately = await phoneBooking({ code: 'YR-994007', businessId: barberId, phone, date: addDays(TODAY, 6) })
+    const filed = await phoneBooking({ code: 'YR-994009', businessId: glowId, phone, date: addDays(TODAY, 8), clientId: record!.id })
+    const [oldRow] = await db
+      .insert(staff)
+      .values({ businessId: barberId, userId: old.id, name: 'Earlier', phone, status: 'invited' })
+      .returning()
+    await db.insert(invites).values({
+      businessId: barberId,
+      staffId: oldRow!.id,
+      phone,
+      tokenHash: 'q270-reused-invite',
+      sentAt: new Date(DEMO_NOW - DAY),
+      expiresAt: new Date(DEMO_NOW + 6 * DAY),
+    })
     const link = await newBookingLink(db, t.deps.site, lately, phone, DEMO_NOW)
     const [row] = await db.insert(staff).values({ businessId: dentistId, name: 'Täze', phone, status: 'invited' }).returning()
     await db.insert(invites).values({
@@ -216,6 +237,17 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     expect((await b.req(`/v1/links/${tokenOf(link.url)}`)).json).toMatchObject({ owner: true })
     const [invite] = await db.select().from(invites).where(eq(invites.tokenHash, 'q270-test-invite'))
     expect(invite!.status).toBe('pending')
+    // Glow's booking for the number is the new holder's, on a record of the number of its own
+    const [moved] = await db.select().from(bookings).where(eq(bookings.id, filed.id))
+    expect(moved!.clientId).not.toBe(record!.id)
+    const [own] = await db.select().from(clients).where(eq(clients.id, moved!.clientId!))
+    expect(own).toMatchObject({ phone, userId: no.json.me.id, businessId: glowId })
+    expect(moved!.userId).toBe(no.json.me.id)
+    // the old account's team row keeps its history without the number, and its invite is gone with it
+    const [left] = await db.select().from(staff).where(eq(staff.id, oldRow!.id))
+    expect(left).toMatchObject({ status: 'removed', phone: null, userId: null })
+    const [reused] = await db.select().from(invites).where(eq(invites.tokenHash, 'q270-reused-invite'))
+    expect(reused!.status).toBe('cancelled')
   })
 
   it('a workspace owner’s account can’t be let go: "No" is refused and the question stays', async () => {

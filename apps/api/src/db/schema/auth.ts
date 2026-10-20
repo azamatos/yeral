@@ -16,7 +16,10 @@ export const users = pgTable('users', {
   notifyReminder2h: boolean().notNull().default(true),
   /** Unused since review asks went (book Q-259); kept so the previous api image still runs, dropped in a later release. */
   notifyReviewAsk: boolean().notNull().default(true),
-  /** The last sign-in or session renewal: an account unused for 6 months asks "Is this you?" first (book Q-270). */
+  /**
+   * The last sign-in, or the last day a session was used: an account unused for 6 months asks "Is this you?" first
+   * (book Q-270).
+   */
   lastSeenAt: ts().notNull().defaultNow(),
   createdAt: createdAt(),
 })
@@ -42,15 +45,19 @@ export const sessions = pgTable(
  * "Is this you?" (book Q-270): a phone whose code checked out, signing in to an account unused for 6 months, answers
  * first. The ticket stands for the checked code for a few minutes; only its hash is stored.
  */
-export const identityChecks = pgTable('identity_checks', {
-  tokenHash: text().primaryKey(),
-  phone: text().notNull(),
-  userId: uuid()
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  expiresAt: ts().notNull(),
-  createdAt: createdAt(),
-})
+export const identityChecks = pgTable(
+  'identity_checks',
+  {
+    tokenHash: text().primaryKey(),
+    phone: text().notNull(),
+    userId: uuid()
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    expiresAt: ts().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index('identity_checks_user_idx').on(t.userId)],
+)
 
 export const loginCodes = pgTable(
   'login_codes',

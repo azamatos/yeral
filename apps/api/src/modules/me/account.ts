@@ -1,17 +1,16 @@
 /**
  * An account and its phone number: letting the account go (deleting it, book Q-172, or "Is this you?" answered "No",
- * Q-270), so whoever gets the number next finds nothing of the person's; and moving it to a new number (Q-171).
+ * Q-270), and moving it to a new number (Q-171).
  */
 import { addDays, epochOf, today } from '@yeral/domain/time'
-import { and, eq, gte, inArray, isNull, ne, or } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, isNull, or } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingLinks, bookings, clientNotes, clients, invites, staff, users } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
-import { DAY, linkPhone, SIX_MONTHS_DAYS } from '../auth/sign-in'
+import { linkPhone, recentRecord, SIX_MONTHS_DAYS } from '../auth/sign-in'
 import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
-import { noShowsSinceReset } from '../clients/online'
 import { teamChanged } from '../team/service'
 
 /**
@@ -30,23 +29,45 @@ export async function cancelInvitesTo(db: Queryable, phone: string, at: Date, us
 }
 
 /**
- * The account goes: its team rows leave their teams (an owner can't go: `owns_workspace`), and its bookings are left
- * behind: they never join whoever signs in with the number next and send no more SMS.
+ * The account goes: its team rows leave their teams (an owner can't go: `owns_workspace`) with any invite that brought
+ * one back, and its bookings are left behind: they never join whoever signs in with the number next and send no more
+ * SMS.
  *
  * `deleted` (book Q-172): the bookings ahead are cancelled, invites to the number too, and every link to the number
- * stops working, phone bookings made for it since the last sign-in included.
+ * stops working, phone bookings made for it since the last sign-in included. The businesses' records keep the number:
+ * the person may well come back with it.
  *
  * `passedOn` ("Is this you?" answered "No", Q-270): the number is someone else's now. What was sent to it lately is
- * theirs and stays (invites, the links of phone bookings no account holds yet); the bookings ahead stay with the
- * business, without SMS; the businesses' records of the person keep their history but no longer go by the number, so
- * none joins the new holder or applies its marks to them.
+ * theirs and stays: invites to new rows, and phone bookings no account holds yet, with their links and a client record
+ * of their own. The bookings ahead stay with the business, without SMS. The person's client records and team rows keep
+ * their history without the number, so none joins the new holder, applies its marks to them or comes back for an invite
+ * to the number.
  */
 export async function releaseAccount(tx: Queryable, user: User, now: number, how: 'deleted' | 'passedOn'): Promise<void> {
+  const at = new Date(now)
   // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
   const rows = await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')
   if (rows.some((r) => r.level === 'owner' && r.status === 'active')) throw new ApiError('owns_workspace')
   await tx.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.userId, user.id))
-  const invited = how === 'deleted' ? await cancelInvitesTo(tx, user.phone, new Date(now)) : []
+  if (rows.length)
+    await tx
+      .update(invites)
+      .set({ status: 'cancelled', answeredAt: at })
+      .where(
+        and(
+          inArray(
+            invites.staffId,
+            rows.map((r) => r.id),
+          ),
+          eq(invites.status, 'pending'),
+        ),
+      )
+  if (how === 'passedOn')
+    await tx
+      .update(staff)
+      .set({ phone: null })
+      .where(and(eq(staff.userId, user.id), eq(staff.hasApp, true)))
+  const invited = how === 'deleted' ? await cancelInvitesTo(tx, user.phone, at) : []
   for (const businessId of new Set(rows.map((r) => r.businessId))) if (!invited.includes(businessId)) await teamChanged(tx, businessId)
   if (how === 'deleted') {
     const mine = await tx
@@ -57,25 +78,64 @@ export async function releaseAccount(tx: Queryable, user: User, now: number, how
     const ahead = mine.filter((x) => epochOf(x.date, x.start) > now).sort((x, y) => Number(!!x.rescheduleOf) - Number(!!y.rescheduleOf))
     for (const b of ahead) {
       try {
-        const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'client', at: new Date(now) })
+        const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'client', at })
         await emit(tx, { type: 'booking.cancelled', businessId: row.businessId, bookingId: row.id, bookingCode: row.code })
       } catch (e) {
         if (!(e instanceof StaleBooking)) throw e
       }
     }
   }
-  await tx
-    .update(bookings)
-    .set({ accountDeletedAt: new Date(now) })
-    .where(eq(bookings.userId, user.id))
+  await tx.update(bookings).set({ accountDeletedAt: at }).where(eq(bookings.userId, user.id))
   // links to the number: phone bookings made for it since the last sign-in keep their SMS with new links (book Q-168)
   const linked =
     how === 'deleted'
       ? or(eq(bookings.userId, user.id), and(eq(bookings.clientPhone, user.phone), isNull(bookings.userId)))
       : eq(bookings.userId, user.id)
   await tx.delete(bookingLinks).where(inArray(bookingLinks.bookingId, tx.select({ id: bookings.id }).from(bookings).where(linked)))
-  if (how === 'passedOn') await tx.update(clients).set({ phone: null }).where(eq(clients.userId, user.id))
+  if (how === 'passedOn') await handOnRecords(tx, user, now)
   await tx.delete(users).where(eq(users.id, user.id))
+}
+
+/**
+ * "No" (book Q-270): the person's client records lose the number. Phone bookings a business filed under one of them
+ * for the number in the last 6 months, that no account holds yet, are the new holder's (the sign-in that follows links
+ * them): they move to a new record of the number at that business.
+ */
+async function handOnRecords(tx: Queryable, user: User, now: number): Promise<void> {
+  const records = await tx.update(clients).set({ phone: null }).where(eq(clients.userId, user.id)).returning({ id: clients.id })
+  if (!records.length) return
+  const lately = await tx
+    .select()
+    .from(bookings)
+    .where(
+      and(
+        inArray(
+          bookings.clientId,
+          records.map((r) => r.id),
+        ),
+        eq(bookings.clientPhone, user.phone),
+        isNull(bookings.userId),
+        isNull(bookings.accountDeletedAt),
+        gte(bookings.date, addDays(today(now), -SIX_MONTHS_DAYS)),
+      ),
+    )
+    .orderBy(desc(bookings.createdAt))
+  for (const businessId of new Set(lately.map((b) => b.businessId))) {
+    const theirs = lately.filter((b) => b.businessId === businessId)
+    const [record] = await tx
+      .insert(clients)
+      .values({ businessId, phone: user.phone, name: theirs[0]!.clientName })
+      .returning({ id: clients.id })
+    await tx
+      .update(bookings)
+      .set({ clientId: record!.id })
+      .where(
+        inArray(
+          bookings.id,
+          theirs.map((b) => b.id),
+        ),
+      )
+  }
 }
 
 type ClientRow = typeof clients.$inferSelect
@@ -84,9 +144,9 @@ type ClientRow = typeof clients.$inferSelect
  * The account takes a checked new number (book Q-171). Client records follow the account, so every business keeps the
  * person's history, no-show count and phone-only mark. A business's record for the new number that's recent (Q-270) is
  * the person's too and the two become one; an older one is an earlier holder's: it keeps its history without the
- * number. What businesses made for either number lately joins the account, as at a sign-in. Team rows that carried the
- * old number take the new one (not rows of teams the person left); invites to the old number are cancelled, since it
- * may pass to someone else, and moving them would show the inviting business a number it was never given.
+ * number. What businesses made for either number lately joins the account, as at a sign-in. The person's active team
+ * rows that carried the old number take the new one; invites to the old number are cancelled, since it may pass to
+ * someone else, and neither an invited row nor a moved invite should show a business a number it was never given.
  */
 export async function changePhone(tx: Queryable, user: User, phone: string, now: number): Promise<User> {
   const [row] = await tx
@@ -104,6 +164,7 @@ export async function changePhone(tx: Queryable, user: User, phone: string, now:
   await linkPhone(tx, user.id, user.phone, now)
   const mine = await tx.select().from(clients).where(eq(clients.userId, user.id)).for('update')
   const businessIds = [...new Set(mine.map((r) => r.businessId))]
+  // the business's records of the new number: none is the person's (they'd be in `mine`)
   const atNew = businessIds.length
     ? await tx
         .select()
@@ -111,13 +172,30 @@ export async function changePhone(tx: Queryable, user: User, phone: string, now:
         .where(and(eq(clients.phone, phone), inArray(clients.businessId, businessIds)))
         .for('update')
     : []
-  const recent = await recentRecords(tx, atNew, now)
+  const recent = new Set(
+    atNew.length
+      ? (
+          await tx
+            .select({ id: clients.id })
+            .from(clients)
+            .where(
+              and(
+                inArray(
+                  clients.id,
+                  atNew.map((r) => r.id),
+                ),
+                recentRecord(now),
+              ),
+            )
+        ).map((r) => r.id)
+      : [],
+  )
   for (const businessId of businessIds) {
     const group = mine.filter((r) => r.businessId === businessId)
     // the record the person booked under keeps its id; the others' bookings and notes join it
     const kept = group.find((r) => r.phone === user.phone) ?? group[0]!
-    const theirs = atNew.filter((r) => r.businessId === businessId && !group.some((g) => g.id === r.id))
-    const same = theirs.filter((r) => (r.userId === null || r.userId === user.id) && recent.has(r.id))
+    const theirs = atNew.filter((r) => r.businessId === businessId)
+    const same = theirs.filter((r) => r.userId === null && recent.has(r.id))
     const earlier = theirs.filter((r) => !same.includes(r)).map((r) => r.id)
     if (earlier.length) await tx.update(clients).set({ phone: null }).where(inArray(clients.id, earlier))
     const rest = [...group.filter((r) => r.id !== kept.id), ...same]
@@ -133,7 +211,7 @@ export async function changePhone(tx: Queryable, user: User, phone: string, now:
   const team = await tx
     .update(staff)
     .set({ phone })
-    .where(and(eq(staff.userId, user.id), eq(staff.phone, user.phone), ne(staff.status, 'removed')))
+    .where(and(eq(staff.userId, user.id), eq(staff.phone, user.phone), eq(staff.status, 'active')))
     .returning({ businessId: staff.businessId })
   const invited = await cancelInvitesTo(tx, user.phone, new Date(now), user.id)
   for (const businessId of new Set(team.map((t) => t.businessId)))
@@ -141,42 +219,14 @@ export async function changePhone(tx: Queryable, user: User, phone: string, now:
   return row
 }
 
-/** Records made in the last 6 months, or holding a booking from them that no deleted account left (book Q-270). */
-async function recentRecords(tx: Queryable, rows: ClientRow[], now: number): Promise<Set<string>> {
-  const since = now - SIX_MONTHS_DAYS * DAY
-  const older = rows.filter((r) => r.createdAt.getTime() < since).map((r) => r.id)
-  const booked = older.length
-    ? await tx
-        .selectDistinct({ id: bookings.clientId })
-        .from(bookings)
-        .where(
-          and(
-            inArray(bookings.clientId, older),
-            gte(bookings.date, addDays(today(now), -SIX_MONTHS_DAYS)),
-            isNull(bookings.accountDeletedAt),
-          ),
-        )
-    : []
-  return new Set([...rows.filter((r) => r.createdAt.getTime() >= since).map((r) => r.id), ...booked.flatMap((b) => (b.id ? [b.id] : []))])
-}
-
 /**
  * One business's records of the same person made into `kept`: bookings and notes move over, and no mark the business
- * set is lost. The no-show count runs from the earliest restart of a record still counting no-shows, so none of those
- * is dropped; with none counting, from the latest restart, so none the business lifted comes back.
+ * set is lost. The no-show count runs from the latest time the business lifted a block for any of them: a fresh start
+ * it gave the person stays given.
  */
 async function mergeClients(tx: Queryable, kept: ClientRow, rest: ClientRow[]): Promise<void> {
   const all = [kept, ...rest]
-  const counting: ClientRow[] = []
-  for (const r of all) if ((await noShowsSinceReset(tx, r.id)) > 0) counting.push(r)
-  const times = (rows: ClientRow[]) => rows.flatMap((r) => (r.noShowsSince ? [r.noShowsSince.getTime()] : []))
-  const noShowsSince = counting.length
-    ? counting.some((r) => !r.noShowsSince)
-      ? null
-      : new Date(Math.min(...times(counting)))
-    : times(all).length
-      ? new Date(Math.max(...times(all)))
-      : null
+  const restarts = all.flatMap((r) => (r.noShowsSince ? [r.noShowsSince.getTime()] : []))
   const ids = rest.map((r) => r.id)
   await tx.update(bookings).set({ clientId: kept.id }).where(inArray(bookings.clientId, ids))
   await tx.update(clientNotes).set({ clientId: kept.id }).where(inArray(clientNotes.clientId, ids))
@@ -189,7 +239,7 @@ async function mergeClients(tx: Queryable, kept: ClientRow, rest: ClientRow[]): 
       tags: [...new Set(all.flatMap((r) => r.tags))],
       noRemindersSms: all.some((r) => r.noRemindersSms),
       onlineBlocked: all.some((r) => r.onlineBlocked),
-      noShowsSince,
+      noShowsSince: restarts.length ? new Date(Math.max(...restarts)) : null,
       createdAt: new Date(Math.min(...all.map((r) => r.createdAt.getTime()))),
     })
     .where(eq(clients.id, kept.id))

@@ -11,7 +11,7 @@ import { ApiError } from '../../http/errors'
 import type { AppEnv, User } from '../../http/env'
 import { randomToken, sha256Hex } from '../../lib/crypto'
 
-const DAY = 86_400_000
+export const DAY = 86_400_000
 export const SESSION_DAYS = 60
 const RENEW_UNDER_DAYS = 30
 

@@ -1,5 +1,5 @@
 {
-  "id": "d61d86e6-59f4-4f3a-ae0a-c802c80613cf",
+  "id": "6c6be955-1392-4750-a458-3ce36e7d365a",
   "prevId": "3bc0b1a3-5d26-472d-989d-c7523ecfd68c",
   "version": "7",
   "dialect": "postgresql",
@@ -40,7 +40,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "identity_checks_user_idx": {
+          "name": "identity_checks_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "identity_checks_user_id_users_id_fk": {
           "name": "identity_checks_user_id_users_id_fk",

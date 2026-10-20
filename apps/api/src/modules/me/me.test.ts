@@ -109,7 +109,11 @@ describe('account', () => {
       { businessId: barber!, userId: me.id, name: 'Kerim', phone: oldPhone },
       { businessId: glow!, userId: me.id, name: 'Kerim', phone: oldPhone, status: 'removed' as const },
     ])
-    const [row] = await db.insert(staff).values({ businessId: dentist!, name: 'Kerim', phone: oldPhone, status: 'invited' }).returning()
+    // an invite that brought back a row of Kerim's
+    const [row] = await db
+      .insert(staff)
+      .values({ businessId: dentist!, userId: me.id, name: 'Kerim', phone: oldPhone, status: 'invited' })
+      .returning()
     await db.insert(invites).values({
       businessId: dentist!,
       staffId: row!.id,
@@ -152,11 +156,12 @@ describe('account', () => {
     expect(await byId(atBarber!.id)).toMatchObject({ phone: newPhone, userId: me.id, onlineBlocked: false })
     expect(await byId(earlierHolder!.id)).toMatchObject({ phone: null, userId: null, onlineBlocked: true })
     const team = await db.select().from(staff).where(eq(staff.userId, me.id))
-    // a team Kerim left doesn't learn the new number
+    // a team Kerim left, or one that only invited him, doesn't learn the new number
     expect(team.map((r) => [r.businessId, r.phone]).sort()).toEqual(
       [
         [barber, newPhone],
         [glow, oldPhone],
+        [dentist, oldPhone],
       ].sort(),
     )
     const [invite] = await db.select().from(invites).where(eq(invites.tokenHash, 'q171-test-invite'))

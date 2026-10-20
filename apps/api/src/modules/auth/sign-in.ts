@@ -5,15 +5,14 @@
 import type { Locale } from '@yeral/domain/model'
 import { MARKET } from '@yeral/domain/market'
 import { addDays, today } from '@yeral/domain/time'
-import { and, eq, gte, inArray, isNull, or } from 'drizzle-orm'
+import { and, eq, gte, isNull, or, sql } from 'drizzle-orm'
 import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
 import { bookings, clients, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { toMe } from '../me/me'
-import { startSession } from './session'
+import { DAY, startSession } from './session'
 
-export const DAY = 86_400_000
 /**
  * Book Q-270's 6 months: how far back a phone's bookings and client records join its account, and how long an account
  * goes unused before "Is this you?".
@@ -21,12 +20,24 @@ export const DAY = 86_400_000
 export const SIX_MONTHS_DAYS = 183
 
 /**
+ * A business's client record that belongs to its number's present holder (book Q-270): made in the last 6 months, or
+ * holding a booking from them that no deleted account left. An older one stays with whoever had the number before.
+ */
+export const recentRecord = (now: number) =>
+  or(
+    gte(clients.createdAt, new Date(now - SIX_MONTHS_DAYS * DAY)),
+    // spelled out: in a subquery Drizzle would leave the outer table's columns unqualified
+    sql`exists (select 1 from "bookings" where "bookings"."client_id" = "clients"."id"
+      and "bookings"."date" >= ${addDays(today(now), -SIX_MONTHS_DAYS)} and "bookings"."account_deleted_at" is null)`,
+  )
+
+/**
  * The phone may already be known: a business's client list, phone bookings. Only what's upcoming or from the last 6
  * months joins the account (book Q-270), so a number that passed to someone else doesn't bring them the older history.
  * At a sign-in, and when an account takes a new number (Q-171).
  */
 export async function linkPhone(tx: Queryable, userId: string, phone: string, now: number): Promise<void> {
-  const linked = await tx
+  await tx
     .update(bookings)
     .set({ userId })
     .where(
@@ -37,21 +48,10 @@ export async function linkPhone(tx: Queryable, userId: string, phone: string, no
         gte(bookings.date, addDays(today(now), -SIX_MONTHS_DAYS)),
       ),
     )
-    .returning({ clientId: bookings.clientId })
-  const recentClients = linked.flatMap((b) => (b.clientId ? [b.clientId] : []))
   await tx
     .update(clients)
     .set({ userId })
-    .where(
-      and(
-        eq(clients.phone, phone),
-        isNull(clients.userId),
-        or(
-          gte(clients.createdAt, new Date(now - SIX_MONTHS_DAYS * DAY)),
-          recentClients.length ? inArray(clients.id, recentClients) : undefined,
-        ),
-      ),
-    )
+    .where(and(eq(clients.phone, phone), isNull(clients.userId), recentRecord(now)))
 }
 
 export async function signIn(c: Context<AppEnv>, phone: string, lang: Locale | undefined) {
