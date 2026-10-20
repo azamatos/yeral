@@ -16,12 +16,14 @@ import {
   newBookingResultSchema,
   moveBookingSchema,
   newBookingSchema,
+  setInternalStatusSchema,
   teamBookingParamSchema,
 } from '@yeral/contract/calendar'
 import { workspaceParamSchema } from '@yeral/contract/team'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { requireMember } from '../team/service'
+import { setInternalStatus } from '../settings/statuses'
 import { addBlock, blocksFor, removeBlock } from './blocks'
 import { addBooking, cancelByBusiness, freeTimes, moveBooking, undoBooking } from './service'
 
@@ -95,7 +97,22 @@ const unblockRoute = createRoute({
   responses: { ...noContent, ...denied },
 })
 
+const internalStatusRoute = createRoute({
+  method: 'put',
+  path: '/w/{slug}/bookings/{code}/internal-status',
+  tags,
+  summary: '"Içerki ýagdaý": a team-only marker on a confirmed booking, or none; the client never sees it',
+  request: { params: teamBookingParamSchema, ...jsonBody(setInternalStatusSchema) },
+  responses: { ...noContent, 400: errors[400], 409: errors[409], ...denied },
+})
+
 export const calendarRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(internalStatusRoute, async (c) => {
+    const { slug, code } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    await setInternalStatus(c.var.deps, business, actor, code, c.req.valid('json').statusId)
+    return c.body(null, 204)
+  })
   .openapi(blocksRoute, async (c) => {
     const { business, actor } = await requireMember(c, c.req.valid('param').slug)
     const { from, to } = c.req.valid('query')

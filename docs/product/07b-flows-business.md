@@ -1102,7 +1102,7 @@ flowchart TD
 
 - Switching a status off hides it everywhere without losing history; presets can't be deleted, custom ones can (COMPONENTS StatusSettings).
 
-**Status** — Design: drawn (B-Settings · `statusModal`; B-Calendar · `internal`) · Code: not built.
+**Status** — Design: drawn (B-Settings · `statusModal`; B-Calendar · `internal`) · Code: api built (20.10.2026): `GET`/`POST /v1/w/{slug}/settings/statuses`, `PATCH`/`DELETE …/statuses/{id}` (the whole team reads them; those who change settings change them), `PUT /v1/w/{slug}/bookings/{code}/internal-status` (a confirmed booking, by whoever sees it in the calendar).
 
 ## 4. Bookings and requests list
 

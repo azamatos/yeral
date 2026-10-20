@@ -150,3 +150,8 @@ export const blocksQuerySchema = z
 export const blockParamSchema = z.object({ slug: slugSchema, id: idSchema })
 /** `series`: this one and the later ones of its weekly repeat. */
 export const blockDeleteQuerySchema = z.object({ scope: z.enum(['one', 'series']).default('one') })
+
+// ── An internal status on a booking (B-29, F-133) ──
+
+/** "Içerki ýagdaý" in the drawer of a confirmed booking: one of the enabled statuses, or none. */
+export const setInternalStatusSchema = z.object({ statusId: idSchema.nullable() }).strict().meta({ id: 'SetInternalStatus' })

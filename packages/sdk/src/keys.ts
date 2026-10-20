@@ -47,6 +47,7 @@ export const keys = {
   menu: (slug: string) => ['settings', slug, 'services'] as const,
   profile: (slug: string) => ['settings', slug, 'profile'] as const,
   hours: (slug: string) => ['settings', slug, 'hours'] as const,
+  statuses: (slug: string) => ['settings', slug, 'statuses'] as const,
   // the business's requests (book B-19–B-21)
   requests: (slug: string) => ['requests', slug] as const,
   // the business's own bookings (book B-23–B-27): every query of its calendar under its prefix

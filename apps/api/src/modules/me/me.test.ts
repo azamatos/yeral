@@ -434,6 +434,8 @@ describe('account', () => {
         '/v1/w/{slug}/team/{staffId}/reactivate',
         '/v1/w/{slug}/leave',
         '/v1/w/{slug}/settings/rules',
+        '/v1/w/{slug}/settings/statuses',
+        '/v1/w/{slug}/settings/statuses/{id}',
         '/v1/w/{slug}/settings/profile',
         '/v1/w/{slug}/settings/hours',
         '/v1/w/{slug}/services',
@@ -452,6 +454,7 @@ describe('account', () => {
         '/v1/w/{slug}/bookings/{code}/undo',
         '/v1/w/{slug}/bookings/{code}/move',
         '/v1/w/{slug}/bookings/{code}/cancel',
+        '/v1/w/{slug}/bookings/{code}/internal-status',
       ].sort(),
     )
   })

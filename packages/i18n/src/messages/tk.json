@@ -34,6 +34,7 @@
     "too_many_waiting": "{scope, select, business {Bu ýerde jogap garaşýan {limit} haýyşyňyz bar. Jogaba garaşyň ýa-da birini ýatyryň.} other {Jogap garaşýan {limit} haýyşyňyz bar. Jogaplara garaşyň ýa-da birini ýatyryň.}}",
     "cannot_move": "Ýazylyşy bu wagta geçirip bolmaýar.",
     "move_waiting": "Müşderi täze wagt sorady: ilki oňa jogap beriň.",
+    "statuses_full": "Iň köp 5 içerki ýagdaý bolup biler.",
     "block_over_bookings": "Bu wagtda ýazylyşlar bar: başga wagt ýapyň.",
     "review_exists": "Teswir eýýäm ýazyldy.",
     "review_not_allowed": "Teswiri diňe gelenden soň ýazyp bolýar.",
@@ -60,6 +61,10 @@
     "no_staff": "Hünärmen ýok",
     "cannot_do": "Bu hyzmaty edip bilmeýäris",
     "other": "Başga sebäp"
+  },
+  "internalStatuses": {
+    "arrived": "Geldi",
+    "started": "Başlandy"
   },
   "businessCancelReasons": {
     "client_called": "Müşderi jaň edip ýatyrdy",

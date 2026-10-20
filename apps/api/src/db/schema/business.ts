@@ -4,7 +4,7 @@
  */
 import type { DateException, WeekHours } from '@yeral/domain/hours'
 import type { AddressTold } from '@yeral/domain/lifecycle'
-import type { Interval, Localized } from '@yeral/domain/model'
+import type { InternalStatusPreset, Interval, Localized } from '@yeral/domain/model'
 import { sql } from 'drizzle-orm'
 import {
   boolean,
@@ -140,6 +140,34 @@ export const businesses = pgTable(
     index('businesses_category_idx').on(t.categoryId),
     index('businesses_city_idx').on(t.cityId),
     index('businesses_geo_idx').on(t.lat, t.lng),
+  ],
+)
+
+/**
+ * Internal statuses (book B-29, F-104): a business's team-only markers for its confirmed bookings, the two presets
+ * (`preset`, made when first read, off at first) and up to three of its own. Switched off, one stays on the bookings
+ * that carry it, unseen.
+ */
+export const internalStatuses = pgTable(
+  'internal_statuses',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    businessId: uuid()
+      .notNull()
+      .references(() => businesses.id, { onDelete: 'cascade' }),
+    preset: text().$type<InternalStatusPreset>(),
+    name: text().notNull(),
+    icon: text().notNull(),
+    color: text().notNull(),
+    enabled: boolean().notNull().default(false),
+    sort: integer().notNull().default(0),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex('internal_statuses_name').on(t.businessId, sql`lower(${t.name})`),
+    uniqueIndex('internal_statuses_preset')
+      .on(t.businessId, t.preset)
+      .where(sql`${t.preset} is not null`),
   ],
 )
 

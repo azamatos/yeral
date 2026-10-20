@@ -342,7 +342,15 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
       }
       const [moved] = await tx
         .update(bookings)
-        .set({ date: input.date, start: input.start, end: plan.at(-1)!.end, moveRefused: null, updatedAt: at })
+        // a marker such as "Arrived" was about the old time
+        .set({
+          date: input.date,
+          start: input.start,
+          end: plan.at(-1)!.end,
+          moveRefused: null,
+          internalStatusId: timeChanged ? null : b.internalStatusId,
+          updatedAt: at,
+        })
         .where(eq(bookings.id, b.id))
         .returning()
       if (!moved) throw new Error('booking update failed')

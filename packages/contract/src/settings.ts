@@ -2,10 +2,17 @@
  * Business settings (book chapter 7b, B-37–B-43): what the owner and administrators change for their workspace
  * (`/w/{slug}/settings/…`). Specialists don't see them (403). The booking rules first (B-41, B-42).
  */
-import { AMENITIES, CONFIRM_MODES, VERIFICATION_STATUSES } from '@yeral/domain/model'
+import {
+  AMENITIES,
+  CONFIRM_MODES,
+  INTERNAL_STATUS_COLORS,
+  INTERNAL_STATUS_ICONS,
+  INTERNAL_STATUS_PRESETS,
+  VERIFICATION_STATUSES,
+} from '@yeral/domain/model'
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
 import { z } from 'zod'
-import { latLngSchema, marketLocaleSchema, minuteSchema, phoneInputSchema, phoneSchema, slugSchema, ymdSchema } from './common'
+import { idSchema, latLngSchema, marketLocaleSchema, minuteSchema, phoneInputSchema, phoneSchema, slugSchema, ymdSchema } from './common'
 
 /**
  * The booking rules (B-41). The values each one takes are the settings screen's options (`RULE_OPTIONS` in
@@ -155,3 +162,49 @@ export const businessHoursResultSchema = businessHoursSettingsSchema
     cancelled: z.number().int(),
   })
   .meta({ id: 'BusinessHoursResult' })
+
+// ── Internal statuses (B-29, F-104) ──
+
+/**
+ * A team-only marker for confirmed bookings ("Geldi", "Başlandy"): never shown to clients, never changes the booking's
+ * status. A preset (`arrived`, `started`) is worded by the app in the reader's language; its `name` is the market's.
+ */
+export const internalStatusSchema = z
+  .object({
+    id: idSchema,
+    preset: z.enum(INTERNAL_STATUS_PRESETS).nullable(),
+    name: z.string(),
+    icon: z.enum(INTERNAL_STATUS_ICONS),
+    color: z.enum(INTERNAL_STATUS_COLORS),
+    enabled: z.boolean(),
+  })
+  .meta({ id: 'InternalStatus' })
+export type InternalStatus = z.infer<typeof internalStatusSchema>
+
+/** "Ýazylyş ýagdaýlary": the presets first, then the business's own; "2 / 5 · you can add 3 more". */
+export const internalStatusListSchema = z
+  .object({ items: z.array(internalStatusSchema), max: z.number().int() })
+  .meta({ id: 'InternalStatusList' })
+
+/** "Ýagdaý goş": a name not taken ("Bu at eýýäm bar"), an icon, a colour; the sixth is refused (`statuses_full`). */
+export const internalStatusInputSchema = z
+  .object({
+    name: z.string().trim().min(1).max(20),
+    icon: z.enum(INTERNAL_STATUS_ICONS),
+    color: z.enum(INTERNAL_STATUS_COLORS),
+    enabled: z.boolean().default(true),
+  })
+  .strict()
+  .meta({ id: 'InternalStatusInput' })
+
+/** A preset keeps its name; any status may be switched on or off, or take another icon or colour. Nothing left out changes. */
+export const internalStatusUpdateSchema = z
+  .object({
+    name: z.string().trim().min(1).max(20).optional(),
+    icon: z.enum(INTERNAL_STATUS_ICONS).optional(),
+    color: z.enum(INTERNAL_STATUS_COLORS).optional(),
+    enabled: z.boolean().optional(),
+  })
+  .strict()
+  .meta({ id: 'InternalStatusUpdate' })
+export const internalStatusParamSchema = z.object({ slug: slugSchema, id: idSchema })
