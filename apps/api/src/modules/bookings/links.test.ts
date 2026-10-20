@@ -213,7 +213,10 @@ describe('SMS links', () => {
     void b
     const failing = {
       ...t.deps,
-      sms: { send: (m: { text: string }) => Promise.reject(new Error(`400 Bad Request: {"text":"${m.text.replace(/\//g, '\\/')}"}`)) },
+      sms: {
+        delivers: true,
+        send: (m: { text: string }) => Promise.reject(new Error(`400 Bad Request: {"text":"${m.text.replace(/\//g, '\\/')}"}`)),
+      },
     }
     await queueConfirmed(code)
     await runDueJobs(failing)

@@ -125,7 +125,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    phone number must never open the admin tool; verify, reject and send again (Q-274), un-verify or hide a business,
    close a workspace (Q-213), review reports with the 48-hour recount, adding a business for its owner.
 6. **First-launch mode** (Q-004, Q-036): example businesses marked "Example" that confirm at once, the sign-in code
-   shown on the screen (never for the admin tool), a separate demo workspace reset every night, no SMS; appointments
+   shown on the screen (never for the admin tool; the api's part done 20.10.2026), a separate demo workspace reset every night, no SMS; appointments
    only (Q-030): the seed's table and class examples and the Restaurant and Café & tea house categories stay out of
    lists and search until tables and classes ship. It doesn't wait for the design: the seed's example businesses already
    have English texts; the demo workspace follows the business boards' demo (`docs/design/business/demo-data.json`

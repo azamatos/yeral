@@ -24,7 +24,8 @@ describe('phone login (ADR 0019)', () => {
     const b = browser(t.app)
     const res = await b.req('/v1/auth/code', { body: { phone: '+993 65 00 00 01' } })
     expect(res.status).toBe(200)
-    expect(res.json).toEqual({ resendAfterSec: 59, expiresInSec: 300 })
+    // no SMS reaches a phone yet, so the code comes back for the screen (book Q-036, F-200)
+    expect(res.json).toEqual({ resendAfterSec: 59, expiresInSec: 300, code: '1234' })
     // in the language of the page, else the market's main one (book Q-292)
     expect(t.sms.sent.at(-1)).toEqual({ to: '+99365000001', text: 'Ýeral code: 1234', secret: true })
     // a language the market doesn't offer can't be chosen (English-only first launch)
@@ -34,6 +35,22 @@ describe('phone login (ADR 0019)', () => {
     expect(again.json.error).toMatchObject({ code: 'resend_too_soon', details: { retryAfterSec: 59 } })
     t.clock.now += 60_000
     expect((await b.req('/v1/auth/code', { body: { phone: '+99365000001' } })).status).toBe(200)
+  })
+
+  it('the code on the screen only while no SMS reaches a phone; the same limits', async () => {
+    const live = testApp(db, { smsDelivers: true })
+    const phone = '+99365000021'
+    const sent = await browser(live.app).req('/v1/auth/code', { body: { phone } })
+    expect(sent.json).toEqual({ resendAfterSec: 59, expiresInSec: 300 })
+    expect(live.sms.sent.at(-1)).toMatchObject({ to: phone, secret: true })
+    // production's random code, shown and signing in
+    const prod = testApp(db, { now: DEMO_NOW + 120_000 })
+    prod.deps.site = { ...prod.deps.site, demo: false }
+    const b = browser(prod.app)
+    const res = await b.req('/v1/auth/code', { body: { phone } })
+    expect(res.json.code).toMatch(/^\d{4}$/)
+    expect((await b.req('/v1/auth/code', { body: { phone } })).json.error.code).toBe('resend_too_soon')
+    expect((await b.req('/v1/auth/verify', { body: { phone, code: res.json.code } })).status).toBe(200)
   })
 
   it('only mobile numbers get codes', async () => {

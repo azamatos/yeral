@@ -13,6 +13,11 @@ export interface SmsMessage {
 
 export interface SmsPort {
   send(message: SmsMessage): Promise<void>
+  /**
+   * Whether a message reaches the phone. While none does (the first launch, book Q-036, F-200), a sign-in code is shown
+   * on the screen instead; a gateway that delivers turns that off.
+   */
+  readonly delivers: boolean
 }
 
 /**
@@ -24,6 +29,7 @@ export const hideLinkTokens = (text: string) => text.replace(/(\/|\\\/|%2F)l(\/|
 /** Writes messages to the log, sign-in codes and link tokens hidden, and keeps nothing, so a long-running process doesn't grow. */
 export function logSms(log: Logger): SmsPort {
   return {
+    delivers: false,
     send(message) {
       log.info('sms', { to: message.to, text: message.secret ? '(sign-in code hidden)' : hideLinkTokens(message.text) })
       return Promise.resolve()
@@ -31,11 +37,12 @@ export function logSms(log: Logger): SmsPort {
   }
 }
 
-/** Keeps messages in memory for the tests (`sent`). */
-export function memorySms(): SmsPort & { sent: SmsMessage[] } {
+/** Keeps messages in memory for the tests (`sent`); `delivers` plays a gateway. */
+export function memorySms({ delivers = false } = {}): SmsPort & { sent: SmsMessage[] } {
   const sent: SmsMessage[] = []
   return {
     sent,
+    delivers,
     send(message) {
       sent.push(message)
       return Promise.resolve()

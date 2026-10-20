@@ -12,9 +12,9 @@ export const site = siteConfig({ env: 'local', portBase: 3000 })
 export const ORIGIN = site.urls.client
 
 /** The app as the entries build it, with a settable clock and captured SMS. */
-export function testApp(db: Db, opts: { now?: number; trustedIpHeader?: Deps['trustedIpHeader'] } = {}) {
+export function testApp(db: Db, opts: { now?: number; trustedIpHeader?: Deps['trustedIpHeader']; smsDelivers?: boolean } = {}) {
   const clock = { now: opts.now ?? DEMO_NOW }
-  const sms = memorySms()
+  const sms = memorySms({ delivers: opts.smsDelivers })
   const deps: Deps = {
     db,
     site,

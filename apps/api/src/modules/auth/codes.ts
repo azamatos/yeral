@@ -1,6 +1,8 @@
 /**
  * One-time login codes (client spec §4.4, §4.7; ADR 0019): 4 digits, 5 minutes, resend after 59 s, 3 wrong tries →
- * a 60-second lock and a new code. Outside production the code is always 1234 and SMS go to the log.
+ * a 60-second lock and a new code. Outside production the code is always 1234 and SMS go to the log. While no SMS
+ * reaches a phone (the first launch, book Q-036, F-200) the answer carries the code to show on the screen, under the
+ * same limits.
  */
 import type { Locale } from '@yeral/domain/model'
 import { isMobile } from '@yeral/domain/phone'
@@ -32,7 +34,7 @@ const secondsLeft = (until: Date, now: number) => Math.max(1, Math.ceil((until.g
 export async function sendCode(
   deps: Deps,
   req: { phone: string; purpose: Purpose; ip: string; lang: Locale; userId?: string },
-): Promise<{ resendAfterSec: number; expiresInSec: number }> {
+): Promise<{ resendAfterSec: number; expiresInSec: number; code?: string }> {
   const { db } = deps
   const now = deps.now()
   if (!isMobile(req.phone)) throw invalid({ path: ['phone'], code: 'not_mobile' })
@@ -69,8 +71,9 @@ export async function sendCode(
     .insert(loginCodes)
     .values({ phone: req.phone, purpose: req.purpose, ...row })
     .onConflictDoUpdate({ target: [loginCodes.phone, loginCodes.purpose], set: row })
+  // written to the log as every SMS is (the code hidden), and on the screen while no SMS reaches the phone
   await deps.sms.send({ to: req.phone, text: codeSmsText(req.lang, code), secret: true })
-  return { resendAfterSec: RESEND_SEC, expiresInSec: CODE_TTL_SEC }
+  return { resendAfterSec: RESEND_SEC, expiresInSec: CODE_TTL_SEC, ...(deps.sms.delivers ? {} : { code }) }
 }
 
 /**
