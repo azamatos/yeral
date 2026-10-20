@@ -16,7 +16,7 @@ import { bookingItems, bookingRules, bookings, staff, type TimeSlot } from '../.
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { emit, queueOutcomeSms } from '../../notify'
-import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
+import { appointmentContext, loadBusiness, loadBusy } from '../availability/context'
 import { text } from '../catalog/map'
 import { confirmBooking } from '../bookings/confirm'
 import { bookedServices, rebookQuery } from '../bookings/create'
@@ -168,8 +168,7 @@ async function checkOffers(deps: Deps, b: BookingRow, offers: NonNullable<Declin
   if (!offers.length) return []
   // tables and classes can't be re-booked online yet (after the MVP): nothing to offer
   if (b.type !== 'appointment') throw new ApiError('validation_error', { issues: [{ path: ['offers'], code: 'not_appointment' }] })
-  const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
-  if (!lb) throw new ApiError('not_found')
+  const lb = await loadBusiness(deps.db, b.businessId)
   const dates = offers.map((o) => o.date).sort()
   const [booked, busy] = await Promise.all([bookedServices(deps.db, b.id), loadBusy(deps.db, [b.businessId], dates[0]!, dates.at(-1)!)])
   const ctx = appointmentContext(lb, busy, now)

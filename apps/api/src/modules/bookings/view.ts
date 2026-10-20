@@ -1,7 +1,7 @@
 /** Booking rows → `BookingSummary` / `BookingDetail` (client spec §4.8: cards, detail drawer, actions). */
 import type { BookingDetail, BookingSummary } from '@yeral/contract/bookings'
 import { cancelDeadline, canClientRestore, clientActions, effectiveStatus } from '@yeral/domain/lifecycle'
-import type { Locale } from '@yeral/domain/model'
+import { isOnlineSource, type Locale } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, inArray } from 'drizzle-orm'
 import { bookingItems, bookings, businesses, classSessions, reviews, staff, tableAreas } from '../../db/schema'
@@ -117,8 +117,11 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   const recipient = await bookingRecipient(db, row)
   const bookOnline = await bookOnlineFor(db, lb, recipient)
 
-  const timeline: BookingDetail['timeline'] = [{ event: 'sent', at: row.createdAt.getTime() }]
-  if (row.confirmedAt) timeline.push({ event: 'confirmed', at: row.confirmedAt.getTime() })
+  // a booking the business entered (by phone, for a walk-in) was never a request the client sent: it starts confirmed
+  const timeline: BookingDetail['timeline'] = isOnlineSource(row.source)
+    ? [{ event: 'sent', at: row.createdAt.getTime() }]
+    : [{ event: 'confirmed', at: (row.confirmedAt ?? row.createdAt).getTime() }]
+  if (row.confirmedAt && isOnlineSource(row.source)) timeline.push({ event: 'confirmed', at: row.confirmedAt.getTime() })
   if (pendingMove) timeline.push({ event: 'reschedule_requested', at: pendingMove.createdAt.getTime() })
   if (status === 'cancelled') {
     const at = row.cancelledAt?.getTime() ?? row.holdUntil?.getTime() ?? now

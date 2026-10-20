@@ -46,4 +46,7 @@ export const keys = {
   profile: (slug: string) => ['settings', slug, 'profile'] as const,
   // the business's requests (book B-19–B-21)
   requests: (slug: string) => ['requests', slug] as const,
+  // the business's own bookings (book B-23–B-27): every query of its calendar under its prefix
+  calendar: (slug: string) => ['calendar', slug] as const,
+  freeTimes: (slug: string, params: Record<string, unknown>) => ['calendar', slug, 'free-times', params] as const,
 }

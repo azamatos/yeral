@@ -36,6 +36,7 @@ import type {
   rescheduleSchema,
   reviewInputSchema,
 } from '@yeral/contract/bookings'
+import type { freeTimesQuerySchema, newBookingSchema } from '@yeral/contract/calendar'
 import type { searchQuerySchema } from '@yeral/contract/catalog'
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
@@ -535,6 +536,32 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
+  /** The business's own bookings (book B-23–B-25): free times as the team books them, a booking by phone or walk-in, its undo. */
+  const booked = (slug: string) => invalidate(keys.calendar(slug), keys.availabilityAll(slug))
+  const calendar = {
+    /** The nearest four, a day's starts with who is free at each, and the 14-day strip; a specialist gets their own. */
+    freeTimes: (slug: string, p: Params<typeof freeTimesQuerySchema, 'services'>) => {
+      const query = clean({ ...p, services: p.services.join(',') })
+      return queryOptions({
+        queryKey: keys.freeTimes(slug, query),
+        queryFn: ({ signal }) => call(w['free-times'].$get({ param: { slug }, query: query as never }, abortWith(signal))),
+        enabled: p.services.length > 0,
+        staleTime: 15_000,
+      })
+    },
+    /** "Ýazyp goý": confirmed at once; `undoUntil` says how long "Yzyna al" works. */
+    add: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof newBookingSchema>) => call(w.bookings.$post({ param: { slug }, json })),
+        onSuccess: () => booked(slug),
+      }),
+    undo: (slug: string) =>
+      mutationOptions({
+        mutationFn: (code: string) => call(w.bookings[':code'].undo.$post({ param: { slug, code } })),
+        onSuccess: () => booked(slug),
+      }),
+  }
+
   /** The SMS link page (book Q-168, F-068): the booking by its link's token, and the login with its own phone. */
   const links = {
     view: (token: string, lang: Locale) =>
@@ -555,7 +582,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
-  return { auth, me, catalog, availability, bookings, team, settings, requests, links }
+  return { auth, me, catalog, availability, bookings, team, settings, requests, calendar, links }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

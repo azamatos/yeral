@@ -30,6 +30,7 @@
     "already_reported": "A report was already sent.",
     "noshow_window_passed": "A no-show can be marked up to 24 hours after the visit.",
     "restore_expired": "It's too late to restore this booking.",
+    "undo_expired": "It's too late to undo.",
     "too_many_waiting": "{scope, select, business {You already have {limit} requests waiting here. Wait for an answer or cancel one.} other {You already have {limit} requests waiting. Wait for the answers or cancel one.}}",
     "review_exists": "You've already reviewed this visit.",
     "review_not_allowed": "You can review only after your visit.",
@@ -68,6 +69,7 @@
   "sms": {
     "code": "{brand} code: {code}",
     "confirmed": "{brand}: {business} confirmed your booking. {weekday}, {date}, {time}. Change: {link}",
+    "booked": "{brand}: you're booked: {business}, {weekday}, {date}, {time}, {address}. Change: {link}",
     "declined": "{brand}: {business} can't take your booking on {date} {time}: {reason}. Pick another time: {link}",
     "declinedCall": "{brand}: {business} can't take your booking on {date} {time}: {reason}. Call them to book: {link}",
     "expired": "{brand}: {business} didn't answer in time. Free times: {times} — {link}",

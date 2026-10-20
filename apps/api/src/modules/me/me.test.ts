@@ -443,6 +443,9 @@ describe('account', () => {
         '/v1/w/{slug}/requests',
         '/v1/w/{slug}/requests/{code}/confirm',
         '/v1/w/{slug}/requests/{code}/decline',
+        '/v1/w/{slug}/free-times',
+        '/v1/w/{slug}/bookings',
+        '/v1/w/{slug}/bookings/{code}/undo',
       ].sort(),
     )
   })

@@ -53,8 +53,11 @@ export async function smsCityOf(db: Queryable, cityId: string, lang: Locale): Pr
   return row ? localized(row.name, lang) : null
 }
 
-/** `reminderEvening`: a reminder moved out of the night to 21:30 the evening before, worded like the day one ("tomorrow"). */
-export type BookingSmsKind = 'confirmed' | 'reminderDay' | 'reminder2h' | 'reminderEvening'
+/**
+ * `booked`: a booking the team entered for a client who called (book B-23, Q-288), with the address. `reminderEvening`:
+ * a reminder moved out of the night to 21:30 the evening before, worded like the day one ("tomorrow").
+ */
+export type BookingSmsKind = 'confirmed' | 'booked' | 'reminderDay' | 'reminder2h' | 'reminderEvening'
 
 /** The calendar day and clock minute of a business-day time: 01:00 after midnight is the next day's (book Q-105). */
 const wallOf = (date: string, start: number) => localOf(epochOf(date, start))
@@ -64,7 +67,7 @@ const dayOf = (date: string, start: number) => wallOf(date, start).date
 const brandOf = (t: ReturnType<typeof createT>) => t('common.brand')
 
 export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking): string {
-  if (kind === 'confirmed' && !b.link) throw new Error('the confirmed SMS needs its link')
+  if ((kind === 'confirmed' || kind === 'booked') && !b.link) throw new Error(`the ${kind} SMS needs its link`)
   const t = createT(lang)
   const fmt = createFmt(lang)
   const common = {
@@ -76,7 +79,8 @@ export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking
   }
   switch (kind) {
     case 'confirmed':
-      return t('sms.confirmed', { ...common, weekday: fmt.weekday(dayOf(b.date, b.start)), date: fmt.dayMonth(dayOf(b.date, b.start)) })
+    case 'booked':
+      return t(`sms.${kind}`, { ...common, weekday: fmt.weekday(dayOf(b.date, b.start)), date: fmt.dayMonth(dayOf(b.date, b.start)) })
     case 'reminderDay':
     case 'reminderEvening':
       return t('sms.reminderDay', common)

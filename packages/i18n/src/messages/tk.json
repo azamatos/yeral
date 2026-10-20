@@ -30,6 +30,7 @@
     "already_reported": "Arz eýýäm iberildi.",
     "noshow_window_passed": "Gelmedi diýip bellemek wagty geçdi: ýazylyş gutarandan soň 24 sagadyň içinde bellenýär.",
     "restore_expired": "Yzyna almak wagty geçdi.",
+    "undo_expired": "Yzyna almaga gijä galdy.",
     "too_many_waiting": "{scope, select, business {Bu ýerde jogap garaşýan {limit} haýyşyňyz bar. Jogaba garaşyň ýa-da birini ýatyryň.} other {Jogap garaşýan {limit} haýyşyňyz bar. Jogaplara garaşyň ýa-da birini ýatyryň.}}",
     "review_exists": "Teswir eýýäm ýazyldy.",
     "review_not_allowed": "Teswiri diňe gelenden soň ýazyp bolýar.",
@@ -68,6 +69,7 @@
   "sms": {
     "code": "{brand} kody: {code}",
     "confirmed": "{brand}: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: {link}",
+    "booked": "{brand}: ýazylyşyňyz: {business}, {weekday}, {date}, {time}, {address}. Üýtgetmek: {link}",
     "declined": "{brand}: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}",
     "declinedCall": "{brand}: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Ýazylmak üçin jaň ediň: {link}",
     "expired": "{brand}: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {times} — {link}",

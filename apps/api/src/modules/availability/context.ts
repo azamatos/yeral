@@ -4,7 +4,9 @@
  * just run out: the database's no-overlap constraints still hold its slot until then, so offering it would only end in
  * 409 slot_taken.
  */
+import type { dayStateSchema } from '@yeral/contract/availability'
 import { staffDoingAll, type AppointmentContext, type BusyInterval, type TableContext } from '@yeral/domain/availability'
+import { businessClosedReason, type BusinessHours } from '@yeral/domain/hours'
 import type { BookingRules } from '@yeral/domain/rules'
 import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm'
@@ -12,6 +14,9 @@ import { alias } from 'drizzle-orm/pg-core'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, businesses, diningTables, services, staff, staffServices, tableAreas } from '../../db/schema'
 import { ApiError } from '../../http/errors'
+import type { z } from 'zod'
+
+type DayState = z.infer<typeof dayStateSchema>
 
 export type BusinessRow = typeof businesses.$inferSelect
 export type RulesRow = typeof bookingRules.$inferSelect
@@ -118,6 +123,26 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
       elsewhere: true as const,
     })),
   ]
+}
+
+/** One business with what free times need; 404 when it's gone. */
+export async function loadBusiness(db: Queryable, id: string): Promise<LoadedBusiness> {
+  const lb = (await loadBusinesses(db, [id])).get(id)
+  if (!lb) throw new ApiError('not_found')
+  return lb
+}
+
+/**
+ * The date strip (client spec §4.4, book B-23): `days` days from `first`; a closed day says why (a special day by its
+ * name), an open one is `open` when `free(date)` finds a start, else `full`.
+ */
+export function dayStrip(business: BusinessHours, first: string, days: number, free: (date: string) => boolean): DayState[] {
+  return Array.from({ length: days }, (_, i) => {
+    const date = addDays(first, i)
+    const closed = businessClosedReason(business, date)
+    if (closed) return { date, state: 'closed', closedReason: closed.kind === 'exception' ? closed.name : null }
+    return { date, state: free(date) ? 'open' : 'full', closedReason: null }
+  })
 }
 
 /** The named specialist (if any) still takes bookings and does every one of the services; else 404. */

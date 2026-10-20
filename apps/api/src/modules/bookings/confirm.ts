@@ -14,14 +14,21 @@ import { extendBookingLinks } from './links'
 import { lockBooking, setStatus, StaleBooking, type BookingRow } from './repo'
 
 /**
- * Queue the booking's SMS: confirmed now and the reminders (a day and 2 h before, none at night: `reminderPlan`). No
- * review ask (book Q-259): clients review from my bookings and the link page.
+ * Queue the booking's SMS: the first one (`confirmed`, or `booked` for a booking the team entered) and the reminders (a
+ * day and 2 h before, none at night: `reminderPlan`), none before `notBefore` (a booking that can still be undone,
+ * B-24). No review ask (book Q-259): clients review from my bookings and the link page.
  */
-export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, opts: { confirmed: boolean }): Promise<void> {
+export async function queueBookingSms(
+  db: Queryable,
+  deps: Deps,
+  b: BookingRow,
+  opts: { first: 'confirmed' | 'booked' | null; notBefore?: number },
+): Promise<void> {
   const now = deps.now()
+  const from = Math.max(now, opts.notBefore ?? now)
   const start = epochOf(b.date, b.start)
   const due: { kind: BookingSmsKind; runAt: number; covers?: readonly string[] }[] = [
-    ...(opts.confirmed ? [{ kind: 'confirmed' as const, runAt: now }] : []),
+    ...(opts.first ? [{ kind: opts.first, runAt: from }] : []),
     ...reminderPlan(start, now),
   ]
   if (!due.length) return
@@ -30,7 +37,7 @@ export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, 
     .values(
       due.map((p) => ({
         kind: 'booking.sms',
-        runAt: new Date(Math.max(p.runAt, now)),
+        runAt: new Date(Math.max(p.runAt, from)),
         // the time it was planned for: after a move the old reminders find another time and stay quiet; `covers`: the
         // reminders a moved one stands for, whose switches decide whether it goes
         payload: { bookingId: b.id, kind: p.kind, date: b.date, start: b.start, ...(p.covers ? { covers: p.covers } : {}) },
@@ -79,11 +86,11 @@ export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow, o
       bookingCode: moved.code,
       userId: moved.userId,
     })
-    await queueBookingSms(db, deps, moved, { confirmed: true })
+    await queueBookingSms(db, deps, moved, { first: 'confirmed' })
     return moved
   }
   const row = await setStatus(db, b, { status: 'confirmed', at, answered: !opts.instant })
   await emit(db, { type: 'booking.confirmed', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
-  await queueBookingSms(db, deps, row, { confirmed: true })
+  await queueBookingSms(db, deps, row, { first: 'confirmed' })
   return row
 }

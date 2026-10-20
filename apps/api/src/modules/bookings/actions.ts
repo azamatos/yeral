@@ -20,7 +20,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
-import { loadBusinesses, type LoadedBusiness } from '../availability/context'
+import { loadBusiness, type LoadedBusiness } from '../availability/context'
 import { visitWhat } from '../catalog/map'
 import { shiftRating } from '../reviews/rating'
 import { onlineRefusal } from '../clients/online'
@@ -40,8 +40,7 @@ import {
 import { nameOf } from '../me/me'
 
 async function businessOf(deps: Deps, b: BookingRow): Promise<LoadedBusiness> {
-  const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
-  if (!lb) throw new ApiError('not_found')
+  const lb = await loadBusiness(deps.db, b.businessId)
   return lb
 }
 

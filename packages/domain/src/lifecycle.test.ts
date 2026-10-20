@@ -3,6 +3,7 @@ import {
   canAnswerRequest,
   canBusinessCancel,
   canBusinessMove,
+  canUndoNewBooking,
   canClientCancel,
   canClientReschedule,
   canClientRestore,
@@ -10,6 +11,7 @@ import {
   canEditNote,
   canWriteReview,
   keptCancelReason,
+  NEW_BOOKING_UNDO_MS,
   waitingLimit,
   cancelDeadline,
   clientActions,
@@ -277,6 +279,15 @@ describe('business actions', () => {
     expect(canBusinessCancel(booking({ status: 'pending', holdUntil: NOW + MIN }), NOW)).toBe('invalid_status')
     expect(canBusinessMove(booking({ status: 'pending', holdUntil: NOW + MIN }), NOW)).toBeNull()
     expect(canBusinessMove(booking(), epochOf(THU, 880))).toBe('already_started')
+  })
+
+  it('undoes a booking it just added by phone or for a walk-in, within the undo time (B-24)', () => {
+    const added = { status: 'confirmed' as const, source: 'phone' as const, createdAt: NOW }
+    expect(canUndoNewBooking(added, NOW + NEW_BOOKING_UNDO_MS - 1)).toBeNull()
+    expect(canUndoNewBooking({ ...added, source: 'walkin' }, NOW)).toBeNull()
+    expect(canUndoNewBooking(added, NOW + NEW_BOOKING_UNDO_MS)).toBe('undo_expired')
+    expect(canUndoNewBooking({ ...added, source: 'web' }, NOW)).toBe('invalid_status')
+    expect(canUndoNewBooking({ ...added, status: 'cancelled' }, NOW)).toBe('invalid_status')
   })
 
   it('a no-show from the start until a day after the end; other complaints any time (book Q-206, Q-254)', () => {

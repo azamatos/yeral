@@ -30,6 +30,7 @@
     "already_reported": "Жалоба уже отправлена.",
     "noshow_window_passed": "Отметить неявку можно в течение 24 часов после визита.",
     "restore_expired": "Вернуть запись уже нельзя.",
+    "undo_expired": "Отменить уже поздно.",
     "too_many_waiting": "{scope, select, business {У вас уже {limit, plural, one {# запрос ждёт} few {# запроса ждут} many {# запросов ждут} other {# запроса ждут}} ответа здесь. Дождитесь ответа или отмените один.} other {У вас уже {limit, plural, one {# запрос ждёт} few {# запроса ждут} many {# запросов ждут} other {# запроса ждут}} ответа. Дождитесь ответов или отмените один.}}",
     "review_exists": "Отзыв уже оставлен.",
     "review_not_allowed": "Отзыв можно оставить только после визита.",
@@ -68,6 +69,7 @@
   "sms": {
     "code": "Код {brand}: {code}",
     "confirmed": "{brand}: {business} подтвердил вашу запись. {weekday}, {date}, {time}. Изменить: {link}",
+    "booked": "{brand}: вы записаны: {business}, {weekday}, {date}, {time}, {address}. Изменить: {link}",
     "declined": "{brand}: {business} не может принять запись на {date} {time}: {reason}. Выберите другое время: {link}",
     "declinedCall": "{brand}: {business} не может принять запись на {date} {time}: {reason}. Позвоните, чтобы записаться: {link}",
     "expired": "{brand}: {business} не ответил вовремя. Есть свободное время: {times} — {link}",

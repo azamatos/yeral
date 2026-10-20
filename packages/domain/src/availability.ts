@@ -281,11 +281,19 @@ function planAt(
   return null
 }
 
+/**
+ * The first start the team may give now: the step that holds now (a walk-in at 11:20 starts at 11:15 with 15-minute
+ * steps). Earlier would be a back-dated booking (§26 E3).
+ */
+export function currentStep(now: number, slotStep: number): number {
+  const { date, min } = localOf(now)
+  return epochOf(date, Math.floor(min / slotStep) * slotStep)
+}
+
 /** The earliest instant a start may have: now + lead time for clients, the current step for staff. */
 function earliestStart(ctx: AppointmentContext, q: AppointmentQuery): number {
   if (q.by === 'client') return ctx.now + ctx.rules.leadMinutes * 60_000
-  const { date, min } = localOf(ctx.now)
-  return epochOf(date, Math.floor(min / ctx.rules.slotStep) * ctx.rules.slotStep)
+  return currentStep(ctx.now, ctx.rules.slotStep)
 }
 
 /** Free starts on a date, earliest first; `only` checks that one start. Lazy, so callers can stop at the first. */

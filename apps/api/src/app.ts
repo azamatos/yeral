@@ -15,6 +15,7 @@ import { sessionMiddleware } from './modules/auth/session'
 import { availabilityRoutes } from './modules/availability/routes'
 import { linkRoutes } from './modules/bookings/link-routes'
 import { bookingRoutes } from './modules/bookings/routes'
+import { calendarRoutes } from './modules/calendar/routes'
 import { catalogRoutes } from './modules/catalog/routes'
 import { eventRoutes } from './modules/events/routes'
 import { healthRoutes } from './modules/health/routes'
@@ -88,6 +89,7 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     .route('/v1', settingsRoutes)
     .route('/v1', menuRoutes)
     .route('/v1', requestRoutes)
+    .route('/v1', calendarRoutes)
 
   app.get('/version.json', (c) => c.json({ app: 'api', ...build }))
   app.doc31('/openapi.json', {
