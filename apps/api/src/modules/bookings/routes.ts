@@ -134,7 +134,8 @@ export const bookingRoutes = new OpenAPIHono<AppEnv>()
     const picked = rows
       .filter((r) => upcoming(effectiveStatus(stateOf(r), now).status) === (tab === 'upcoming'))
       .sort((a, b) => {
-        const order = a.date.localeCompare(b.date) || a.start - b.start
+        // the code breaks ties, so a page always holds the same bookings
+        const order = a.date.localeCompare(b.date) || a.start - b.start || a.code.localeCompare(b.code)
         return tab === 'upcoming' ? order : -order
       })
     const offset = Number(cursor ?? 0) || 0
