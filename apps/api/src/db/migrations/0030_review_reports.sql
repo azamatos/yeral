@@ -1,5 +1,6 @@
 CREATE TYPE "public"."review_report_reason" AS ENUM('fake', 'insulting', 'other_business', 'spam', 'other');--> statement-breakpoint
 ALTER TABLE "reviews" ADD COLUMN "reply_by" uuid;--> statement-breakpoint
+ALTER TABLE "reviews" ADD COLUMN "reply_deleted_at" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "reviews" ADD COLUMN "report_reason" "review_report_reason";--> statement-breakpoint
 ALTER TABLE "reviews" ADD COLUMN "report_text" text;--> statement-breakpoint
 ALTER TABLE "reviews" ADD COLUMN "reported_at" timestamp with time zone;--> statement-breakpoint

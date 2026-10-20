@@ -18,15 +18,16 @@ import {
 import { langQuerySchema, slugSchema } from '@yeral/contract/common'
 import { nearestCity } from '@yeral/domain/geo'
 import { MARKET } from '@yeral/domain/market'
-import { and, asc, desc, eq, inArray, or, sql, type AnyColumn, type SQL } from 'drizzle-orm'
+import { and, asc, desc, eq, or, sql, type AnyColumn, type SQL } from 'drizzle-orm'
 import { anyTextLike, textIn } from '../../db/localized'
-import { bookingItems, businesses, categories, places, reviews, services } from '../../db/schema'
+import { businesses, categories, places, reviews, services } from '../../db/schema'
 import { isCounted } from '../reviews/rating'
+import { replyOf, visitsOf } from '../reviews/view'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
 import { cityOrMain, loadCities } from './cities'
 import { businessDetail, visibleBusiness } from './detail'
-import { text, visitWhat } from './map'
+import { text } from './map'
 import { search, wordStartLikes } from './search'
 
 const slugParam = z.object({ slug: slugSchema })
@@ -196,24 +197,20 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
       .limit(limit + 1)
       .offset(offset)
     const page = rows.slice(0, limit)
-    const ids = page.flatMap((r) => (r.bookingId ? [r.bookingId] : []))
-    const visitItems = ids.length
-      ? await c.var.deps.db.select().from(bookingItems).where(inArray(bookingItems.bookingId, ids)).orderBy(asc(bookingItems.sort))
-      : []
-    const items = page.map((r) => ({
-      id: r.id,
-      author: r.authorName,
-      rating: r.rating,
-      tags: r.tags,
-      text: r.text,
-      createdAt: r.createdAt.getTime(),
-      what:
-        visitWhat(
-          visitItems.filter((i) => i.bookingId === r.bookingId),
-          lang,
-        ) || r.what,
-      reply: r.replyText && r.replyAt ? { text: r.replyText, createdAt: r.replyAt.getTime() } : null,
-      underReview: !isCounted(r),
-    }))
+    const visits = await visitsOf(c.var.deps.db, page, lang)
+    const items = page.map((r) => {
+      const reply = replyOf(r)
+      return {
+        id: r.id,
+        author: r.authorName,
+        rating: r.rating,
+        tags: r.tags,
+        text: r.text,
+        createdAt: r.createdAt.getTime(),
+        what: visits.get(r.id) ?? r.what,
+        reply: reply ? { text: reply.text, createdAt: reply.at.getTime() } : null,
+        underReview: !isCounted(r),
+      }
+    })
     return c.json({ items, cursor: rows.length > limit ? String(offset + limit) : null }, 200)
   })

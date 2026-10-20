@@ -10,7 +10,7 @@ import { LAPSED_DAYS, NEW_DAYS, REGULAR_MIN_VISITS, REGULAR_WINDOW_DAYS, segment
 import { MARKET } from '@yeral/domain/market'
 import { scopeOf, type Actor } from '@yeral/domain/permissions'
 import { addDays, localOf } from '@yeral/domain/time'
-import { and, asc, desc, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNull, sql, type AnyColumn, type SQL } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, clientNotes, clients } from '../../db/schema'
 import { ApiError } from '../../http/errors'
@@ -28,8 +28,8 @@ export const aheadAt = (now: number) =>
   sql`(${awaitingAnswer(now)} or (${bookings.status} = 'confirmed' and upper(${bookings.span}) > ${spanMinuteAt(now)}))`
 
 /** The booking has an item with this person. */
-export const withStaff = (staffId: string) =>
-  sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${bookings.id} and ${bookingItems.staffId} = ${staffId})`
+export const withStaff = (staffId: string, bookingId: AnyColumn = bookings.id) =>
+  sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${bookingId} and ${bookingItems.staffId} = ${staffId})`
 
 /**
  * A specialist's client: one with a booking or a move with them (a move onto them they may answer), on the client row

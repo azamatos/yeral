@@ -6,6 +6,8 @@
  */
 import { sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
+import type { EventType } from '@yeral/contract/events'
+import { emit } from '../../notify'
 
 /**
  * A review counts in the stored rating unless the business reported it and Ýeral hasn't decided yet, nor have 48 hours
@@ -32,4 +34,22 @@ export async function shiftRating(db: Queryable, businessId: string, shift: Star
     "reviews_count" = greatest(0, "reviews_count" + ${added}::int),
     "rating" = case when (${total}) = 0 then null else round((${stars})::numeric / (${total}), 1) end
     where "id" = ${businessId}`)
+}
+
+/**
+ * Reviews that came into the rating (`+1`) or left it (`-1`), one change per business in a fixed order (two changes at
+ * once can't wait on each other), each business's screens told. Only reviews that count (`isCounted`) are passed in.
+ */
+export async function shiftReviews(
+  db: Queryable,
+  rows: readonly { businessId: string; rating: number }[],
+  sign: 1 | -1,
+  type: EventType,
+): Promise<void> {
+  for (const businessId of [...new Set(rows.map((r) => r.businessId))].sort()) {
+    const shift: StarShift = {}
+    for (const r of rows) if (r.businessId === businessId) shift[r.rating] = (shift[r.rating] ?? 0) + sign
+    await shiftRating(db, businessId, shift)
+    await emit(db, { type, businessId })
+  }
 }

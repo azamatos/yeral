@@ -813,8 +813,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     },
   }
 
-  // a reply or a report shows on the business's page too
-  const reviewsChanged = (slug: string) => invalidate(keys.reviewsAll(slug), keys.businessAll(slug))
+  // the reviews; a report changes the rating on the business's page too
+  const reviewsChanged = (slug: string, rating = false) => invalidate(keys.reviewsAll(slug), ...(rating ? [keys.businessAll(slug)] : []))
   const reviews = {
     /** "Teswirler" (book B-53): pages of 20, filtered and sorted, with the summary (none for a specialist). */
     list: (slug: string, p: Omit<Params<typeof teamReviewsQuerySchema, 'lang'>, 'cursor'>) => {
@@ -845,7 +845,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: ({ id, ...json }: { id: string } & z.input<typeof reviewReportInputSchema>) =>
           call(w.reviews[':id'].report.$post({ param: { slug, id }, json })),
-        onSuccess: () => reviewsChanged(slug),
+        onSuccess: () => reviewsChanged(slug, true),
       }),
   }
 

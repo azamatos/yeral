@@ -256,5 +256,7 @@ export async function editReview(deps: Deps, b: BookingRow, input: { rating: num
     // a review Ýeral is checking isn't in the rating: its new stars count when it counts again
     if (existing.rating !== input.rating && isCounted(existing))
       await shiftRating(tx, b.businessId, { [existing.rating]: -1, [input.rating]: 1 })
+    // the business's reviews page and its rating
+    await emit(tx, { type: 'review.updated', businessId: b.businessId, bookingId: b.id, bookingCode: b.code })
   })
 }

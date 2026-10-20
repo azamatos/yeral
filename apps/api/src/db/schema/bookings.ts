@@ -265,6 +265,8 @@ export const reviews = pgTable(
     replyAt: ts(),
     /** Who on the team wrote the reply ("Glow Studio · Maýsa"). */
     replyBy: uuid().references(() => staff.id, { onDelete: 'set null' }),
+    /** The reply was taken away ("Jogap pozuldy"): hidden everywhere; its undo brings it back as it was. */
+    replyDeletedAt: ts(),
     /**
      * "Arz et" (B-54): the business reported it to Ýeral. Until Ýeral decides, or 48 hours pass (`recountedAt`), it
      * isn't counted in the rating; `clearedAt`: Ýeral kept it, and it counts and can't be reported again.

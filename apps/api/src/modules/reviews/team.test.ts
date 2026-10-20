@@ -3,7 +3,7 @@ import { addDays, today } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
-import { browser } from '../../../test/client'
+import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
 import { bookingItems, bookings, businesses, rateLimits, services, staff } from '../../db/schema'
@@ -181,5 +181,32 @@ describe('the team’s reviews (book B-53, B-54)', () => {
     await maysa.req(`${W}/reviews/${id}/report`, { body: { reason: 'other' } })
     expect((await client.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
     expect((await ratingOf()).count).toBe(before.count - 1)
+  })
+
+  it('a reply taken away and undone is as it was; the specialist hears it, and the team hears the client’s edit', async () => {
+    const { client, code } = await reviewed('+99365920005', 4, 'Nice')
+    const maysa = await as(MAYSA)
+    const selbi = await as(SELBI)
+    const maral = await as(MARAL)
+    const id = (await page(maysa)).items.find((r) => r.rating === 4 && !r.reply && !r.report)!.id
+    const heard = (await maral.req('/v1/events')).json.cursor as string
+    await maysa.req(`${W}/reviews/${id}/reply`, { method: 'PUT', body: { text: 'Thanks a lot' } })
+    const told = await eventsAfter(maral, heard, (items) => items.some((e) => e.type === 'review.updated'))
+    expect((told.json.items as { type: string }[]).map((e) => e.type)).toContain('review.updated')
+    t.clock.now += 60_000
+    await selbi.req(`${W}/reviews/${id}/reply`, { method: 'DELETE' })
+    expect((await page(maysa)).items.find((r) => r.id === id)!.reply).toBeNull()
+    expect((await page(maysa, '&unanswered=1')).items.map((r) => r.id)).toContain(id)
+    await selbi.req(`${W}/reviews/${id}/reply`, { method: 'PUT', body: { text: 'Thanks a lot' } })
+    expect((await page(maysa)).items.find((r) => r.id === id)!.reply).toMatchObject({ text: 'Thanks a lot', by: 'Maýsa' })
+    const owners = (await maysa.req('/v1/events')).json.cursor as string
+    await client.req(`/v1/me/bookings/${code}/review`, { method: 'PATCH', body: { rating: 3, text: 'Fine' } })
+    const edited = await eventsAfter(maysa, owners, (items) => items.some((e) => e.type === 'review.updated'))
+    expect((edited.json.items as { type: string }[]).map((e) => e.type)).toContain('review.updated')
+    // the summary comes with the first page only; a page past the end still counts
+    const later = (await maysa.req(`${W}/reviews?lang=en&limit=1&cursor=1`)).json
+    expect(later.summary).toBeNull()
+    const past = (await maysa.req(`${W}/reviews?lang=en&cursor=9000`)).json
+    expect([past.items.length, past.total > 0]).toEqual([0, true])
   })
 })

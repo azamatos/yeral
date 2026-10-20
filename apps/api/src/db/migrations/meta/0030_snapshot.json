@@ -1,5 +1,5 @@
 {
-  "id": "409577d6-bddc-4bac-b561-4bef0d53f474",
+  "id": "04b52940-3273-42f2-8f3e-8613e0cd8c56",
   "prevId": "236e25f6-90ef-44d1-a571-e12d7133dd05",
   "version": "7",
   "dialect": "postgresql",
@@ -1668,6 +1668,12 @@
         "reply_by": {
           "name": "reply_by",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reply_deleted_at": {
+          "name": "reply_deleted_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },

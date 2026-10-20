@@ -18,7 +18,7 @@ export async function jobsTick(deps: Deps): Promise<void> {
       return rows[0]?.locked ? runDueJobs(deps) : null
     })
     if (!result) deps.log.debug('jobs: another run is still working')
-    else if (result.expired || result.completed || result.jobs) deps.log.info('jobs', result)
+    else if (result.expired || result.completed || result.recounted || result.jobs) deps.log.info('jobs', result)
   } catch (e) {
     deps.log.error('jobs failed', { error: String(e) })
   }

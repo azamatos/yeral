@@ -472,12 +472,12 @@ async function runQueue(deps: Deps): Promise<number> {
   return claimed.length
 }
 
-export async function runDueJobs(deps: Deps): Promise<{ expired: number; completed: number; jobs: number }> {
+export async function runDueJobs(deps: Deps): Promise<{ expired: number; completed: number; recounted: number; jobs: number }> {
   await pruneBookingLinks(deps.db, deps.now())
   await pruneIdentityChecks(deps.db, deps.now())
   const expired = await expireRequests(deps)
   const completed = await completeVisits(deps)
-  await recountReviews(deps)
+  const recounted = await recountReviews(deps)
   const ran = await runQueue(deps)
-  return { expired, completed, jobs: ran }
+  return { expired, completed, recounted, jobs: ran }
 }
