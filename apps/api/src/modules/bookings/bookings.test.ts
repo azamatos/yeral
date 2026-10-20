@@ -166,7 +166,7 @@ describe('client bookings', () => {
     // the link carries a token of its own, never the booking code (book Q-168)
     expect(t.sms.sent.at(-1)).toMatchObject({ to: '+99365111005' })
     expect(t.sms.sent.at(-1)?.text).toMatch(
-      /^Ýeral: Barber Loft confirmed your booking\. Thursday, 15 October, 11:00\. Change: localhost:3001\/l\/[\w-]{40,}$/,
+      /^Ýeral: Barber Loft confirmed your booking\. Thursday, 15 October, 11:00\. Change: localhost:3001\/l\/[\w-]{20,}$/,
     )
     // reminders are queued for later
     const queued = await db.select().from(jobs).where(eq(jobs.kind, 'booking.sms'))
@@ -186,7 +186,7 @@ describe('client bookings', () => {
     expect(detail.json.timeline.at(-1).event).toBe('expired')
     expect(detail.json.expiredAlternatives).toHaveLength(3)
     // in the market's main language: this client never chose one (book Q-292)
-    expect(t.sms.sent.at(-1)?.text).toMatch(/^Ýeral: Glow Studio didn't answer in time\. Free times: .+ — localhost:3001\/l\/[\w-]{40,}$/)
+    expect(t.sms.sent.at(-1)?.text).toMatch(/^Ýeral: Glow Studio didn't answer in time\. Free times: .+ — localhost:3001\/l\/[\w-]{20,}$/)
     // picking one of them sends a new request
     const again = await b.req(`/v1/me/bookings/${json.code}/accept-alternative`, { body: { source: 'expired', index: 0 } })
     expect(again.json).toMatchObject({ status: 'pending' })

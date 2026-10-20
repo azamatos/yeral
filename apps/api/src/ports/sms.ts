@@ -15,11 +15,14 @@ export interface SmsPort {
   send(message: SmsMessage): Promise<void>
 }
 
-/** Writes messages to the log, sign-in codes hidden, and keeps nothing, so a long-running process doesn't grow. */
+/** A booking link's token opens the booking (book Q-168): logs show the path, not the token. */
+export const hideLinkTokens = (text: string) => text.replace(/\/l\/[\w-]+/g, '/l/…')
+
+/** Writes messages to the log, sign-in codes and link tokens hidden, and keeps nothing, so a long-running process doesn't grow. */
 export function logSms(log: Logger): SmsPort {
   return {
     send(message) {
-      log.info('sms', { to: message.to, text: message.secret ? '(sign-in code hidden)' : message.text })
+      log.info('sms', { to: message.to, text: message.secret ? '(sign-in code hidden)' : hideLinkTokens(message.text) })
       return Promise.resolve()
     },
   }

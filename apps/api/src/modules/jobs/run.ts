@@ -12,10 +12,10 @@ import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
 import { bookings, businesses, clients, jobs, users, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, queueSms, smsCityOf, type BookingSmsKind } from '../../notify'
+import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, smsCityOf, type BookingSmsKind } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
-import { newBookingLink } from '../bookings/links'
+import { dropBookingLink, newBookingLink, pruneBookingLinks } from '../bookings/links'
 import { bookedServices } from '../bookings/create'
 import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
@@ -87,18 +87,18 @@ async function expireRequests(deps: Deps): Promise<number> {
         const recorded = !!original && (await recordMoveRefused(tx, original, row, { by: 'system', reason: null, text: null }, lapsedAt))
         const ahead = !!original && deps.now() < epochOf(original.date, original.start)
         const told = b.rescheduleOf ? (recorded && ahead ? original : undefined) : row
-        const [biz] = told?.clientPhone ? await tx.select().from(businesses).where(eq(businesses.id, row.businessId)) : []
-        if (told?.clientPhone && biz) {
-          const [user] = told.userId ? await tx.select().from(users).where(eq(users.id, told.userId)) : []
-          const lang = user?.lang ?? MARKET.defaultLanguage
-          const link = await newBookingLink(tx, deps.site, told.id, deps.now())
-          const sms = { link, date: told.date, start: told.start, businessName: biz.name, address: biz.address }
-          await queueSms(tx, {
-            to: told.clientPhone,
-            text: b.rescheduleOf ? moveRefusedSmsText(lang, sms) : expiredSmsText(lang, sms, alternatives),
-            runAt: now,
-            dedupeKey: `${b.rescheduleOf ? 'moveRefused' : 'expired'}:${row.id}`,
-          })
+        // the text and its link are made when it's sent: no stored row holds a working link
+        if (told?.clientPhone) {
+          const kind: OutcomeSmsKind = b.rescheduleOf ? 'moveRefused' : 'expired'
+          await tx
+            .insert(jobs)
+            .values({
+              kind: 'booking.sms',
+              runAt: now,
+              payload: { bookingId: told.id, kind, date: told.date, start: told.start },
+              dedupeKey: `${kind}:${row.id}`,
+            })
+            .onConflictDoNothing({ target: jobs.dedupeKey })
         }
       }),
     )
@@ -150,6 +150,37 @@ async function completeVisits(deps: Deps): Promise<number> {
   return due.length
 }
 
+/** The SMS about an outcome the client didn't choose: they always go (book Q-286, Q-289). */
+type OutcomeSmsKind = 'expired' | 'moveRefused'
+
+/** Send with a link of its own; a link whose SMS failed opens nothing. */
+async function sendWithLink(deps: Deps, b: BookingRow, text: (link: string) => string): Promise<void> {
+  const link = await newBookingLink(deps.db, deps.site, b, deps.now())
+  try {
+    await deps.sms.send({ to: b.clientPhone ?? '', text: text(link.url) })
+  } catch (e) {
+    await dropBookingLink(deps.db, link.tokenHash)
+    throw e
+  }
+}
+
+/** An expired request's times, or a move not accepted while the visit is still ahead; the client can't switch these off. */
+async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): Promise<void> {
+  const still =
+    kind === 'expired'
+      ? b.status === 'cancelled' && b.cancelledBy === 'system'
+      : b.status === 'confirmed' && !!b.moveRefused && deps.now() < epochOf(b.date, b.start)
+  if (!still) return
+  const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId))
+  if (!biz) return
+  const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
+  const lang = user?.lang ?? MARKET.defaultLanguage
+  const sms = { date: b.date, start: b.start, businessName: biz.name, address: biz.address }
+  await sendWithLink(deps, b, (link) =>
+    kind === 'expired' ? expiredSmsText(lang, { ...sms, link }, b.expiredAlternatives) : moveRefusedSmsText(lang, { ...sms, link }),
+  )
+}
+
 /**
  * A booking SMS, if the booking is still in the right state, still at the time the SMS was planned for (`at`; older
  * jobs have none), and the client wants it.
@@ -157,12 +188,13 @@ async function completeVisits(deps: Deps): Promise<number> {
 async function sendBookingSms(
   deps: Deps,
   bookingId: string,
-  kind: BookingSmsKind,
+  kind: BookingSmsKind | OutcomeSmsKind,
   at: { date?: unknown; start?: unknown; covers?: unknown },
 ): Promise<void> {
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
   if (!b?.clientPhone) return
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
+  if (kind === 'expired' || kind === 'moveRefused') return sendOutcomeSms(deps, b, kind)
   const wanted = kind === 'reviewAsk' ? b.status === 'completed' || b.status === 'confirmed' : b.status === 'confirmed'
   if (!wanted) return
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
@@ -183,17 +215,16 @@ async function sendBookingSms(
   const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId))
   if (!biz) return
   const lang = user?.lang ?? MARKET.defaultLanguage
-  // the texts with a link get one of their own (book Q-168)
-  const link = kind === 'confirmed' || kind === 'reviewAsk' ? await newBookingLink(deps.db, deps.site, b.id, deps.now()) : undefined
-  const text = bookingSmsText(lang, kind, {
-    link,
+  const sms = {
     date: b.date,
     start: b.start,
     businessName: biz.name,
     address: biz.address,
     city: await smsCityOf(deps.db, biz.cityId, lang),
-  })
-  await deps.sms.send({ to: b.clientPhone, text })
+  }
+  // the texts with a link get one of their own (book Q-168)
+  if (kind === 'confirmed' || kind === 'reviewAsk') await sendWithLink(deps, b, (link) => bookingSmsText(lang, kind, { ...sms, link }))
+  else await deps.sms.send({ to: b.clientPhone, text: bookingSmsText(lang, kind, sms) })
 }
 
 async function runQueue(deps: Deps): Promise<number> {
@@ -218,7 +249,7 @@ async function runQueue(deps: Deps): Promise<number> {
     try {
       const p = job.payload
       if (job.kind === 'sms') await deps.sms.send({ to: String(p.to), text: String(p.text) })
-      else if (job.kind === 'booking.sms') await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind, p)
+      else if (job.kind === 'booking.sms') await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p)
       else if (job.kind === 'demo.answer') {
         const [b] = await deps.db
           .select()
@@ -250,6 +281,7 @@ async function runQueue(deps: Deps): Promise<number> {
 }
 
 export async function runDueJobs(deps: Deps): Promise<{ expired: number; completed: number; jobs: number }> {
+  await pruneBookingLinks(deps.db, deps.now())
   const expired = await expireRequests(deps)
   const completed = await completeVisits(deps)
   const ran = await runQueue(deps)

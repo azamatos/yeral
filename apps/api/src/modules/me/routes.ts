@@ -5,7 +5,7 @@ import { businessCardSchema } from '@yeral/contract/catalog'
 import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
 import { epochOf, today } from '@yeral/domain/time'
 import { and, desc, eq, inArray } from 'drizzle-orm'
-import { bookings, businesses, favorites, invites, sessions, staff, users } from '../../db/schema'
+import { bookingLinks, bookings, businesses, favorites, invites, sessions, staff, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
@@ -136,6 +136,10 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
           if (!(e instanceof StaleBooking)) throw e
         }
       }
+      // their SMS links stop working: whoever gets the number next can't open them (book Q-168)
+      await tx
+        .delete(bookingLinks)
+        .where(inArray(bookingLinks.bookingId, tx.select({ id: bookings.id }).from(bookings).where(eq(bookings.userId, user.id))))
       await tx.delete(users).where(eq(users.id, user.id))
     })
     await endSession(c)

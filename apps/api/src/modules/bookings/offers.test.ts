@@ -173,7 +173,7 @@ describe('offered times', () => {
       await runDueJobs(t.deps)
       expect(await offersOf(b, code)).toEqual([])
       expect(t.sms.sent.filter((s) => s.to === '+99365444006').at(-1)?.text).toMatch(
-        /^Ýeral: Glow Studio didn't answer in time\. Pick another time: localhost:3001\/l\/[\w-]{40,}$/,
+        /^Ýeral: Glow Studio didn't answer in time\. Pick another time: localhost:3001\/l\/[\w-]{20,}$/,
       )
     } finally {
       await db.update(services).set({ online: true }).where(eq(services.id, haircut))

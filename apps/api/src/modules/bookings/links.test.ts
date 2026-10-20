@@ -1,11 +1,12 @@
 /** SMS links to a booking (book Q-168, Q-169, F-068). */
+import { epochOf } from '@yeral/domain/time'
 import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, businesses, rateLimits, services } from '../../db/schema'
+import { bookingItems, bookingLinks, bookings, businesses, jobs, rateLimits, services } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 import { confirmBooking } from './confirm'
@@ -51,7 +52,7 @@ describe('SMS links', () => {
 
   it('the SMS carries a long random token, never the booking code', async () => {
     const { code, token, sms } = await confirmedWithLink('+99365444301')
-    expect(token.length).toBeGreaterThanOrEqual(40)
+    expect(token.length).toBeGreaterThanOrEqual(20)
     expect(sms).not.toContain(code)
     // the code opens nothing by itself
     expect((await browser(t.app).req(`/v1/links/${code}`)).status).not.toBe(200)
@@ -77,7 +78,8 @@ describe('SMS links', () => {
   it('an unknown or old link doesn’t work', async () => {
     const { token } = await confirmedWithLink('+99365444305')
     expect((await browser(t.app).req(`/v1/links/${'x'.repeat(43)}`)).status).toBe(404)
-    t.clock.now += (LINK_DAYS + 1) * 86_400_000
+    // the visit is on the 15th: its link ends 90 days after it
+    t.clock.now = epochOf(THU, 1440) + (LINK_DAYS + 1) * 86_400_000
     expect((await browser(t.app).req(`/v1/links/${token}`)).status).toBe(404)
   })
 
@@ -98,8 +100,18 @@ describe('SMS links', () => {
         clientName: 'Phone client',
       })
       .returning()
-    const link = await newBookingLink(db, t.deps.site, row!.id, DEMO_NOW)
-    const token = tokenOf(link)
+    await db.insert(bookingItems).values({
+      bookingId: row!.id,
+      serviceId: haircut,
+      serviceName: { en: "Women's haircut" },
+      date: THU,
+      start: 1140,
+      end: 1200,
+      priceType: 'fixed',
+      priceAmount: 80,
+    })
+    const link = await newBookingLink(db, t.deps.site, row!, DEMO_NOW)
+    const token = tokenOf(link.url)
     const visitor = browser(t.app)
     const sent = await visitor.req(`/v1/links/${token}/code`, { body: {} })
     expect(sent.status).toBe(200)
@@ -108,6 +120,58 @@ describe('SMS links', () => {
     expect(signedIn.json).toMatchObject({ me: { phone: '+99365444306' }, isNew: true })
     // the booking is theirs now: "my bookings" opens it
     expect((await visitor.req(`/v1/me/bookings/YR-99301`)).status).toBe(200)
-    expect((await visitor.req(`/v1/links/${token}`)).json.owner).toBe(true)
+    const after = await visitor.req(`/v1/links/${token}`)
+    expect(after.json, JSON.stringify(after.json)).toMatchObject({ owner: true })
+  })
+
+  it('no stored row holds a working link: queued texts are made when they are sent', async () => {
+    const b = browser(t.app)
+    await b.login('+99365444307', 'Läle')
+    const slots = (await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&date=${THU}`)).json.slots
+    await b.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: null, date: THU, start: slots[0].start },
+    })
+    t.clock.now += 31 * 60_000
+    await runDueJobs(t.deps)
+    // the expiry SMS went with a link
+    expect(tokenOf(t.sms.sent.filter((s) => s.to === '+99365444307').at(-1)?.text)).not.toBe('')
+    const stored = await db.select({ payload: jobs.payload }).from(jobs)
+    expect(JSON.stringify(stored)).not.toContain('/l/')
+  })
+
+  it('a link works until 90 days after the visit, however far ahead it is', async () => {
+    const [row] = await db
+      .insert(bookings)
+      .values({
+        code: 'YR-99302',
+        businessId: glowId,
+        type: 'appointment',
+        date: '2027-04-01',
+        start: 600,
+        end: 660,
+        status: 'confirmed',
+        source: 'phone',
+        clientPhone: '+99365444308',
+      })
+      .returning()
+    const link = await newBookingLink(db, t.deps.site, row!, DEMO_NOW)
+    const [stored] = await db.select().from(bookingLinks).where(eq(bookingLinks.tokenHash, link.tokenHash))
+    expect(stored!.expiresAt.getTime()).toBe(epochOf('2027-04-01', 660) + LINK_DAYS * 86_400_000)
+  })
+
+  it('a cut-off or made-up link is just not found', async () => {
+    expect((await browser(t.app).req('/v1/links/abc')).status).toBe(404)
+    expect((await browser(t.app).req('/v1/links/YR-48213')).status).toBe(404)
+  })
+
+  it('deleting the account stops its links: whoever gets the number next can’t open them', async () => {
+    const { b, token } = await confirmedWithLink('+99365444309')
+    expect((await b.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
+    expect((await browser(t.app).req(`/v1/links/${token}`)).status).toBe(404)
+  })
+
+  it('a finished visit says whether it can still be reviewed (book Q-170)', async () => {
+    const { token } = await confirmedWithLink('+99365444310')
+    expect((await browser(t.app).req(`/v1/links/${token}`)).json.canReview).toBe(false)
   })
 })

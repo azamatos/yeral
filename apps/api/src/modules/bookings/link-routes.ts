@@ -9,6 +9,8 @@ import { bookingLinkSchema, linkTokenSchema } from '@yeral/contract/bookings'
 import { langQuerySchema } from '@yeral/contract/common'
 import { MARKET } from '@yeral/domain/market'
 import { maskPhone } from '@yeral/domain/phone'
+import { eq } from 'drizzle-orm'
+import { users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody } from '../../http/openapi'
 import { clientIp } from '../../lib/rate-limit'
@@ -52,44 +54,27 @@ export const linkRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const row = await bookingOfLink(deps.db, c.req.valid('param').token, deps.now())
     const d = await detailOf(deps, row, c.req.valid('query').lang)
-    return c.json(
-      {
-        code: d.code,
-        business: d.business,
-        what: d.what,
-        date: d.date,
-        start: d.start,
-        end: d.end,
-        status: d.status,
-        cancelledBy: d.cancelledBy,
-        price: d.price,
-        address: d.address,
-        city: d.city,
-        entranceNote: d.entranceNote,
-        geo: d.geo,
-        holdUntil: d.holdUntil,
-        cancelReason: d.cancelReason,
-        decline: d.decline,
-        expiredAlternatives: d.expiredAlternatives,
-        offerTakenBy: d.offerTakenBy,
-        moveRefused: d.moveRefused,
-        reschedule: d.reschedule,
-        bookOnline: d.bookOnline,
-        maskedPhone: maskPhone(row.clientPhone ?? ''),
-        // signed in as someone else (a shared phone): the signed-out page, with the masked-phone login (book Q-169)
-        owner: !!row.userId && c.var.auth?.user.id === row.userId,
-      },
-      200,
-    )
+    // the contract decides what a signed-out visitor sees: whatever else the detail has (the note, the actions) goes
+    const page = bookingLinkSchema.parse({
+      ...d,
+      maskedPhone: maskPhone(row.clientPhone ?? ''),
+      // signed in as someone else (a shared phone): the signed-out page, with the masked-phone login (book Q-169)
+      owner: !!row.userId && c.var.auth?.user.id === row.userId,
+      canReview: d.actions.review,
+    })
+    return c.json(page, 200)
   })
   .openapi(codeRoute, async (c) => {
     const { deps } = c.var
     const row = await bookingOfLink(deps.db, c.req.valid('param').token, deps.now())
+    const phone = row.clientPhone ?? ''
+    // the language the person chose, as the plain login sends it
+    const [known] = await deps.db.select({ lang: users.lang }).from(users).where(eq(users.phone, phone))
     const res = await sendCode(deps, {
-      phone: row.clientPhone ?? '',
+      phone,
       purpose: 'login',
       ip: clientIp((n) => c.req.header(n), deps.trustedIpHeader),
-      lang: c.req.valid('json').lang ?? MARKET.defaultLanguage,
+      lang: known?.lang ?? c.req.valid('json').lang ?? MARKET.defaultLanguage,
     })
     return c.json(res, 200)
   })

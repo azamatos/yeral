@@ -1480,7 +1480,7 @@ flowchart TD
 
 **Design to fix:** the link page's finished-visit state with "Teswir ýaz" (masked-phone login, then the review form), and its cancelled and no-show states with "Gaýtadan ýazyl" (Q-170).
 
-(code: SMS links are `yeral.app/l/{token}`, one token per SMS, stored hashed, valid 90 days; `GET /v1/links/{token}` reads the booking signed out, with the masked phone and `owner` for Q-169)
+(code: SMS links are `yeral.app/l/{token}`, one token per SMS, stored hashed, valid until 90 days after the visit; `GET /v1/links/{token}` reads the booking signed out, with the masked phone and `owner` for Q-169)
 
 **Status:** Design: drawn (Booking-Link · `state`; Mobile 14) · Code: built (api); the page comes with the client site.
 

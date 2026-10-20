@@ -33,7 +33,7 @@ export async function queueSms(db: Queryable, sms: { to: string; text: string; r
 }
 
 export interface SmsBooking {
-  /** The booking's SMS link (`newBookingLink`), for the texts that carry one. */
+  /** The booking's SMS link (`newBookingLink`): the texts that carry one refuse to go without it. */
   link?: string
   date: string
   start: number
@@ -64,6 +64,7 @@ const dayOf = (date: string, start: number) => wallOf(date, start).date
 const brandOf = (t: ReturnType<typeof createT>) => t('common.brand')
 
 export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking): string {
+  if ((kind === 'confirmed' || kind === 'reviewAsk') && !b.link) throw new Error(`the ${kind} SMS needs its link`)
   const t = createT(lang)
   const fmt = createFmt(lang)
   const common = {
@@ -87,10 +88,10 @@ export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking
 }
 
 /** The expiry SMS with the free times; with none free it asks the client to pick another time (book Q-252). */
-export function expiredSmsText(lang: Locale, b: SmsBooking, times: { date: string; start: number }[]): string {
+export function expiredSmsText(lang: Locale, b: SmsBooking & { link: string }, times: { date: string; start: number }[]): string {
   const fmt = createFmt(lang)
   const t = createT(lang)
-  const common = { brand: brandOf(t), business: b.businessName, link: b.link ?? '' }
+  const common = { brand: brandOf(t), business: b.businessName, link: b.link }
   if (!times.length) return t('sms.expiredNoTimes', common)
   const asked = dayOf(b.date, b.start)
   const list = times
@@ -103,7 +104,7 @@ export function expiredSmsText(lang: Locale, b: SmsBooking, times: { date: strin
 }
 
 /** A move the business declined or let lapse: the booking keeps its time (book Q-289). `b` is the booking itself. */
-export function moveRefusedSmsText(lang: Locale, b: SmsBooking): string {
+export function moveRefusedSmsText(lang: Locale, b: SmsBooking & { link: string }): string {
   const fmt = createFmt(lang)
   const t = createT(lang)
   return t('sms.moveRefused', {
@@ -111,7 +112,7 @@ export function moveRefusedSmsText(lang: Locale, b: SmsBooking): string {
     business: b.businessName,
     date: fmt.dayMonth(dayOf(b.date, b.start)),
     time: fmt.time(wallOf(b.date, b.start).min),
-    link: b.link ?? '',
+    link: b.link,
   })
 }
 

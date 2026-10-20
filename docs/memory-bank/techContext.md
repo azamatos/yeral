@@ -111,7 +111,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | price totals, calendar day summary | `priceTotal() daySummary()` | `@yeral/domain/pricing` |
 | distances, radius box, the city a position is in | `distanceM() boundingBox() popularity() nearestCity()`; the market's main city: `MARKET.mainCity` | `@yeral/domain/geo` |
 | the market's cities, a business's city in the reader's language (api) | `loadCities() cityRefOf()` | `apps/api/src/modules/catalog/cities.ts` |
-| phones by the market's rules (`+993`) | `isPhone() isMobile() toE164() formatPhone() formatNational() E164 COUNTRY_PREFIX`; a person's language: `marketLocaleSchema`, texts per language: `localizedSchema(max)` (`@yeral/contract/common`) | `@yeral/domain/phone` |
+| phones by the market's rules (`+993`) | `isPhone() isMobile() toE164() formatPhone() formatNational() maskPhone() E164 COUNTRY_PREFIX`; a person's language: `marketLocaleSchema`, texts per language: `localizedSchema(max)` (`@yeral/contract/common`) | `@yeral/domain/phone` |
 | ids, booking codes | `newId() bookingCode()` | `@yeral/domain/id` |
 | money, prices, durations, distances, dates on screen | `useFmt()` in components, `createFmt(locale)` elsewhere (`money price rating duration distance time timeRange dayMonth shortDate weekdayDate monthYear relativeDay addressIn phone`) | `@yeral/i18n` |
 | locales, shared messages (`common`, `status`, `fmt`, `sms`) | `LOCALES` (translated) `MARKET_LOCALES` (offered) `DEFAULT_LOCALE` (market's main) `isLocale() messages` | `@yeral/i18n` |
