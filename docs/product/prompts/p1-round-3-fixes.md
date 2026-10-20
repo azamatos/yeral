@@ -17,7 +17,7 @@ of the fixes to rounds 1–2. Most of the designer's ~100 decisions agree with t
 - **Book rules dropped:** the per-client "no reminders" switch (F-143, MVP); Reactivate for removed people (F-114); the
   amount behind "Price at the place" (B-38); last visit = last completed visit (F-140); "Unnamed client" (B-33); a
   Specialist sees only their own bookings on a client card (chapter 3); special days checked past midnight (Q-105); the
-  book's launch categories and text limits (chapters 4, 5); a client record links to an account by phone at sign-in
+  book's launch categories (chapter 4, as seeded) and text limits (chapter 5); a client record links to an account by phone at sign-in
   (Q-171, Q-270).
 - **Weak spots:** a page hidden by Ýeral shows the owner no banner; the notifications banner only for people who
   answer requests; "Access levels are fixed at the first release." hints at a Later feature.
@@ -68,8 +68,9 @@ their pieces on DS · Business patterns. Change only what's listed; everything e
    when it was turned on by hand, just "Online booking is back."
 7. Tags: New = first visit in the last 30 days; a client with no visit yet has no tag (Ejegyz T., Arzygül H.).
 8. The list's money column is "Total" (completed visits), behind See revenue; the average check stays on the card.
-9. Demo: Mähri G.'s request is today 13:00–14:00 everywhere; staff screens show full names ("Aýjemal Gurbanowa");
-   first name + initial is only what clients see.
+9. Demo: Mähri G.'s request is the one from the demo data everywhere (sent 20:40, for tomorrow 13:00–14:00, answer by
+   09:30 tomorrow); staff screens show full names ("Aýjemal Gurbanowa"); first name + initial is only what clients
+   see.
 
 When done, add a short "v0.6 · round 3.2" entry to the CHANGELOG.
 ```
@@ -80,11 +81,13 @@ When done, add a short "v0.6 · round 3.2" entry to the CHANGELOG.
 Round 3.3 of the design pass (export v0.6): a small fix pass on B-Team, B-Services, their phone frames on B-Mobile and
 their pieces on DS · Business patterns. Change only what's listed; everything else stays as drawn.
 
-1. Admins see the team read-only: people, their services, shifts and time off are changed by the owner only. Fix
-   "You can change people's services, hours and time off…" and the permissions row "Shifts and time off" (Admin: view).
+1. Admins see people, shifts and time off read-only; only the owner changes them. Admins still change which services a
+   person does, as in the service drawer. Fix "You can change people's services, hours and time off…" and the
+   permissions row "Shifts and time off" (Admin: view).
 2. A removed person's row keeps "Reactivate" for the owner: it restores their access and makes them bookable again. A
    person who left comes back with a new invite.
-3. Staff drawer, Hours tab: a break per day in a person's own shift, and time off that can repeat every year.
+3. Staff drawer, Hours tab: a break per day, whether the person follows the business hours or their own shift, and time
+   off that can repeat every year.
 4. Remove "Access levels are fixed at the first release."; the table needs no caption about releases.
 5. Invite modal, phone caption: "Required for everyone. With the app on, it's how they sign in."
 6. B-Services drawer: "Price at the place" keeps an amount field that clients don't see: "Clients see 'Price at the
@@ -101,9 +104,10 @@ When done, add a short "v0.6 · round 3.3" entry to the CHANGELOG.
 Round 3.4 of the design pass (export v0.6): a small fix pass on B-Settings, B-Onboarding, their phone frames on
 B-Mobile and their pieces on DS · Business patterns. Change only what's listed; everything else stays as drawn.
 
-1. Categories, in settings and in the setup wizard: the launch categories that take appointments: Beauty ·
-   Barbershop · Nails · Spa and massage · Dentist · Health · Education · Car services · Pets · Home services, plus
-   "Something else". Restaurants, cafés and sport classes come later.
+1. Categories, in settings and in the setup wizard: the launch categories that take appointments, with these names:
+   Beauty · Barbershop · Nails · Spa & massage · Dentist · Health · Fitness · Lessons · Auto · Pets · Home services.
+   Restaurant and Café & tea house come later. No "Something else": when nothing fits, "No category fits? Contact
+   Ýeral."
 2. Text limits: business name up to 80 characters, description up to 1,000, street line up to 120, entrance note up
    to 200 (counter "128 / 1,000").
 3. Special days: hours past midnight are checked against the next day's opening, as in the weekly hours.
@@ -126,4 +130,4 @@ When done, add a short "v0.6 · round 3.4" entry to the CHANGELOG.
   the switch-off captions; tags; Total; demo facts.
 - 3.3: Admin read-only; Reactivate; breaks and yearly time off; no release caption; the invite caption; the hidden
   price amount; invited people in "Who does it"; "Not bookable online".
-- 3.4: the ten categories; text limits; special days past midnight; the captions; every affected booking; PNG or SVG.
+- 3.4: the eleven categories and no catch-all; text limits; special days past midnight; the captions; every affected booking; PNG or SVG.

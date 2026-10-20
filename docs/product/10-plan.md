@@ -40,7 +40,7 @@ book (ADR 0021). The result is design export v0.6, every board in English (Q-133
 
 Each round takes every **Design to fix** line for the boards it redraws, so no board is drawn twice. Fixes that only
 matter for tables and classes wait for their own design pass after the MVP. Every prompt asks for the Russian-length
-check on its new screens (Q-101). Reviewed 20.10.2026 after rounds 1 and 2.
+check on its new screens (Q-101). Reviewed 20.10.2026 after rounds 1–2, and again after round 3.
 
 **Small iterations** (owner, 20.10.2026: round 3, seven boards and the fixes to rounds 1–2 in one prompt, took about
 three hours). From round 4 a round is cut into iterations: one prompt draws one main board, or two small ones, with
@@ -193,7 +193,7 @@ so there is time to test it from Ashgabat, rehearse the move and fix what breaks
 
 | Phase | The owner |
 |---|---|
-| P1 | pastes each design prompt into Claude Design and reviews the result (three rounds, then about 17 short iterations) |
+| P1 | pastes each design prompt into Claude Design and reviews the result (three rounds, then about 20 short iterations) |
 | P2–P4 | nothing required; reviews progress when Claude reports a finished slice |
 | P5 | approves the release; adds the DNS records; sets up the second factor of their admin account; meets the first businesses and adds them in the admin tool |
 | P6 | the investment, the lawyer, buying the server, the SMS provider account, the native language check |

@@ -36,6 +36,10 @@ work on 2026-10-17.
   api, jobs, market settings, access model, admin, first-launch mode) runs alongside the design pass. Only what a
   screen shows (the exact fields of an endpoint's response) follows the design, and the contract is adjusted when
   the export lands. Components in Storybook and the apps still wait for the design.
+- **Amended 2026-10-20 (owner, after design round 3 took about three hours: "We should make decomposition with
+  smaller iterations"):** design work goes in small iterations: one Claude Design prompt draws one main board, or two
+  small ones, with its own phone frames and design-system pieces, in about ten instructions; fixes a check finds get
+  their own short prompt; each iteration is checked before the next is written (product book chapter 10, P1).
 
 ## Consequences
 
