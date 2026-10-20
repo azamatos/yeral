@@ -3,6 +3,7 @@ import {
   canClientCancel,
   canClientReschedule,
   canEditNote,
+  canWriteReview,
   effectiveStatus,
   initialStatus,
   offerPast,
@@ -238,9 +239,10 @@ export async function acceptAlternative(
 
 export async function writeReview(deps: Deps, user: User, b: BookingRow, input: { rating: number; tags: string[]; text?: string }) {
   const now = deps.now()
-  if (effectiveStatus(stateOf(b), now).status !== 'completed') throw new ApiError('review_not_allowed')
+  // one per booking first: a retry after the window says it's written, not that it's too late
   const [existing] = await deps.db.select().from(reviews).where(eq(reviews.bookingId, b.id))
   if (existing) throw new ApiError('review_exists')
+  guard(canWriteReview(stateOf(b), now))
   const items = await deps.db.select().from(bookingItems).where(eq(bookingItems.bookingId, b.id)).orderBy(bookingItems.sort)
   // stored in the market's main language for reviews without items; readers get it in their language (catalog reviews)
   const what = visitWhat(items, MARKET.defaultLanguage)

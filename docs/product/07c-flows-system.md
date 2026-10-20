@@ -139,7 +139,7 @@ flowchart TD
 - Team-only statuses such as *Geldi* or *Başlandy* don't change the system status (business spec §3).
 - Classes (after the MVP, Q-030): every attendee completes after the session. Staff mark single no-shows, and only after the session starts (business spec §21, §22).
 - Tables (after the MVP, Q-030): a confirmed table past its start counts as seated. The table is held 15 minutes for late guests (*Stol saklanýar*). After that, staff may give it away and mark *Gelmedi*; the system frees nothing by itself (business spec §20, §22; B-Tables).
-- A no-show can be marked until 24 hours after the end. A review written before the no-show is marked stays (Q-254, decided 18.10.2026). **Code differs:** the code allows it at any time after the start, with no end.
+- A no-show can be marked until 24 hours after the end. A review written before the no-show is marked stays (Q-254, decided 18.10.2026; code: `canComplain`, `noshow_window_passed`).
 
 > Open question Q-254: How long after a visit a no-show can be marked.
 

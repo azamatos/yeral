@@ -26,7 +26,7 @@ export function stateOf(b: BookingRow): BookingState {
     status: b.status,
     cancelledBy: b.cancelledBy,
     holdUntil: b.holdUntil?.getTime() ?? null,
-    hasComplaint: !!b.complaintType,
+    complaintType: b.complaintType,
   }
 }
 

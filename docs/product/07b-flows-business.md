@@ -1065,7 +1065,7 @@ flowchart TD
 - A mistaken complaint: the team can remove it from the booking drawer within 7 days. A no-show goes back to *Tamamlandy*, the no-show count drops, and the client gets no message (Q-207, decided 18.10.2026). The class drawer removes a class mark (B-67).
 - Code: one complaint per booking.
 
-**Code differs:** the code and ADR 0017 allow every complaint type only from the start time (Q-206).
+The rule is in `canComplain` (`@yeral/domain/lifecycle`); the business's endpoint comes with P2 step 4.
 
 **Design to fix:** the design offers *Arz et* with *Gelmedi* on confirmed bookings that haven't started; before the start *Gelmedi* isn't offered (Q-206). The booking drawer needs a way to remove a complaint within 7 days (Q-207).
 
