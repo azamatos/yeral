@@ -34,7 +34,7 @@ import { and, eq } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, clients } from '../../db/schema'
+import { bookingItems, bookings, clientNotes, clients } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
@@ -256,7 +256,7 @@ export async function undoBooking(deps: Deps, business: Business, actor: Actor, 
     // seen below (each statement reads what has committed by its start)
     const [made] = b.clientId
       ? await tx
-          .select({ id: clients.id })
+          .select()
           .from(clients)
           .where(and(eq(clients.id, b.clientId), eq(clients.createdAt, b.createdAt)))
           .for('update')
@@ -270,7 +270,17 @@ export async function undoBooking(deps: Deps, business: Business, actor: Actor, 
     await tx.delete(bookings).where(eq(bookings.id, b.id))
     if (made) {
       const [other] = await tx.select({ id: bookings.id }).from(bookings).where(eq(bookings.clientId, made.id)).limit(1)
-      if (!other) await tx.delete(clients).where(eq(clients.id, made.id))
+      const [noted] = await tx.select({ id: clientNotes.id }).from(clientNotes).where(eq(clientNotes.clientId, made.id)).limit(1)
+      // the team may have kept something on it meanwhile (B-33–B-35): a note, tags, a switch, a name typed on the card
+      const kept =
+        !!noted ||
+        made.tags.length > 0 ||
+        !!made.birthday ||
+        !!made.source ||
+        made.onlineBlocked ||
+        made.noRemindersSms ||
+        (made.name !== null && made.nameSetBy !== b.id)
+      if (!other && !kept) await tx.delete(clients).where(eq(clients.id, made.id))
     }
     // the row is gone, so the feed can't find its specialists through it: each specialist on it hears it as the person
     // concerned, as the client does (the owner and administrators hear the whole calendar)

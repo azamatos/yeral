@@ -78,6 +78,8 @@ export async function cancelBooking(deps: Deps, b: BookingRow, reason?: string):
 export async function restoreBooking(deps: Deps, b: BookingRow): Promise<BookingRow> {
   const now = deps.now()
   guard(canClientRestore(restoreStateOf(b), now))
+  // the business deleted its client meanwhile (B-36): it doesn't come back as a visit of nobody's
+  if (!b.clientId) throw new ApiError('invalid_status')
   const status = b.confirmedAt ? 'confirmed' : 'pending'
   if (status === 'pending' && b.clientPhone) {
     const refused = await onlineRefusal(deps.db, await businessOf(deps, b), b.clientPhone)

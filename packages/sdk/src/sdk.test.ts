@@ -289,6 +289,14 @@ describe('live events', () => {
     ])
   })
 
+  it('a client change refreshes their pages, the calendar and the requests', () => {
+    expect(staleKeys({ type: 'client.updated', business: 'glow-studio', bookingCode: null })).toEqual([
+      ['clients', 'glow-studio'],
+      ['calendar', 'glow-studio'],
+      ['requests', 'glow-studio'],
+    ])
+  })
+
   it('a settings change refreshes the settings, the page, the free times and the switcher', () => {
     expect(staleKeys({ type: 'business.updated', business: 'glow-studio', bookingCode: null })).toEqual([
       ['settings', 'glow-studio'],

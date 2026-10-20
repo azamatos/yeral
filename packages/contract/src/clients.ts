@@ -3,7 +3,8 @@
  * new-booking drawer's lookup by phone or name, the client card. A specialist sees only clients with a booking with
  * them, and of each only those bookings; sums ("Total", "Average check") only with "See revenue" (the owner).
  */
-import { CLIENT_SEGMENTS } from '@yeral/domain/clients'
+import { TEAM_NOTE_MAX, CLIENT_SEGMENTS, CLIENT_TAG_MAX, CLIENT_TAGS_MAX } from '@yeral/domain/clients'
+import { NAME_MAX } from '@yeral/domain/names'
 import { BOOKING_STATUSES, CLIENT_SOURCES, COMPLAINT_TYPES } from '@yeral/domain/model'
 import { nationalDigits } from '@yeral/domain/phone'
 import { z } from 'zod'
@@ -16,6 +17,7 @@ import {
   listOf,
   minuteSchema,
   moneySchema,
+  phoneInputSchema,
   phoneSchema,
   priceSchema,
   slugSchema,
@@ -181,6 +183,55 @@ export const clientCardSchema = z
     }),
   })
   .meta({ id: 'ClientCard' })
+
+// ── Writes (B-33–B-36): the owner and administrators; a note, anyone who sees the client ──
+
+/** "VIP · Child · + Tag": up to 10, 1–20 characters each; the same one twice (in any case) counts once. */
+export const clientTagsSchema = z
+  .array(z.string().trim().min(1).max(CLIENT_TAG_MAX))
+  .transform((tags) => tags.filter((t, i) => tags.findIndex((u) => u.toLowerCase() === t.toLowerCase()) === i))
+  .refine((tags) => tags.length <= CLIENT_TAGS_MAX, { message: `Up to ${CLIENT_TAGS_MAX} tags` })
+
+/** "Täze müşderi" (B-33): only the number is needed. A birthday can't be ahead. */
+export const clientInputSchema = z
+  .object({
+    phone: phoneInputSchema,
+    name: z.string().trim().min(1).max(NAME_MAX).optional(),
+    birthday: ymdSchema.optional(),
+    source: z.enum(CLIENT_SOURCES).optional(),
+    tags: clientTagsSchema.default([]),
+    /** "Note for the team": its first note. */
+    note: z.string().trim().min(1).max(TEAM_NOTE_MAX).optional(),
+  })
+  .strict()
+  .meta({ id: 'ClientInput' })
+
+/**
+ * The card's edit and switches (B-34, B-35): what's given changes; `null` clears. The number can't change once a Ýeral
+ * account holds it (`client_phone_locked`).
+ */
+export const clientUpdateSchema = z
+  .object({
+    phone: phoneInputSchema.optional(),
+    name: z.string().trim().min(1).max(NAME_MAX).nullable().optional(),
+    birthday: ymdSchema.nullable().optional(),
+    source: z.enum(CLIENT_SOURCES).nullable().optional(),
+    tags: clientTagsSchema.optional(),
+    /** "Diňe jaň arkaly ýazylyp biler" (B-35). */
+    phoneOnly: z.boolean().optional(),
+    /** "Ýatlatma SMS-lerini iberme". */
+    noReminders: z.boolean().optional(),
+  })
+  .strict()
+  .meta({ id: 'ClientUpdate' })
+
+/** "Bellik goş": `alert` shows it on the calendar block and the drawers ("Ýazylanda görkez"). */
+export const clientNoteInputSchema = z
+  .object({ text: z.string().trim().min(1).max(TEAM_NOTE_MAX), alert: z.boolean().default(false) })
+  .strict()
+  .meta({ id: 'ClientNoteInput' })
+
+export const clientCreatedSchema = z.object({ id: idSchema }).meta({ id: 'ClientCreated' })
 
 export type ClientRow = z.infer<typeof clientRowSchema>
 export type ClientCard = z.infer<typeof clientCardSchema>

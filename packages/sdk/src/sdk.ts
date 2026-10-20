@@ -46,7 +46,14 @@ import type {
   newBookingSchema,
 } from '@yeral/contract/calendar'
 import type { searchQuerySchema } from '@yeral/contract/catalog'
-import { lookupReady, type clientCardQuerySchema, type clientListQuerySchema } from '@yeral/contract/clients'
+import {
+  lookupReady,
+  type clientCardQuerySchema,
+  type clientInputSchema,
+  type clientListQuerySchema,
+  type clientNoteInputSchema,
+  type clientUpdateSchema,
+} from '@yeral/contract/clients'
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
@@ -730,6 +737,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
+  // a client's record shows on their pages, the calendar's blocks and the requests
+  const clientsChanged = (slug: string) => invalidate(keys.clients(slug), keys.calendar(slug), keys.requests(slug))
   const clients = {
     /** "Müşderiler" (book B-32): pages of the clients the reader sees, the most recently seen first. */
     list: (slug: string, p: Partial<Omit<z.output<typeof clientListQuerySchema>, 'cursor'>> = {}) => {
@@ -751,6 +760,32 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         enabled: lookupReady(p),
       })
     },
+    /** "Täze müşderi" (B-33); a number already there fails with `client_exists` and the card's id. */
+    add: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof clientInputSchema>) => call(w.clients.$post({ param: { slug }, json })),
+        onSuccess: () => clientsChanged(slug),
+      }),
+    /** The card's edit and switches (B-34, B-35). */
+    update: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ id, ...json }: { id: string } & z.input<typeof clientUpdateSchema>) =>
+          call(w.clients[':id'].$patch({ param: { slug, id }, json })),
+        onSuccess: () => clientsChanged(slug),
+      }),
+    /** "Bellik goş". */
+    addNote: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ id, ...json }: { id: string } & z.input<typeof clientNoteInputSchema>) =>
+          call(w.clients[':id'].notes.$post({ param: { slug, id }, json })),
+        onSuccess: () => clientsChanged(slug),
+      }),
+    /** "Müşderini poz" (B-36); with bookings ahead it fails with `client_has_bookings` listing them. */
+    remove: (slug: string) =>
+      mutationOptions({
+        mutationFn: (id: string) => call(w.clients[':id'].$delete({ param: { slug, id } })),
+        onSuccess: () => clientsChanged(slug),
+      }),
     /** The client card (B-34); `history` asks for more past bookings ("Ýene görkez"). */
     card: (slug: string, id: string, p: Params<typeof clientCardQuerySchema, 'lang'>) => {
       const query = clean(p)

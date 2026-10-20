@@ -4,6 +4,7 @@
  * cancels only their own (chapter 3).
  */
 import { BOOKING_SOURCES, BOOKING_STATUSES, CANCELLED_BY, COMPLAINT_TYPES, TEAM_CANCEL_REASONS } from '@yeral/domain/model'
+import { TEAM_NOTE_MAX } from '@yeral/domain/clients'
 import { LEVELS } from '@yeral/domain/permissions'
 import { z } from 'zod'
 import { dayStateSchema } from './availability'
@@ -72,7 +73,7 @@ export const newBookingSchema = z
     date: ymdSchema,
     start: startMinuteSchema,
     /** The team's note; the client never sees it. */
-    note: z.string().trim().min(1).max(500).optional(),
+    note: z.string().trim().min(1).max(TEAM_NOTE_MAX).optional(),
     /** "Müşderä SMS bilen habar ber": on for a phone call, off for a walk-in, unless said. */
     notifyClient: z.boolean().optional(),
   })

@@ -20,6 +20,8 @@ export const EVENT_TYPES = [
   'review.deleted',
   /** Someone joined, declined, left or was invited, removed or changed: the team and the switcher refresh. */
   'team.changed',
+  /** A client's record or notes changed (B-33–B-36): the clients pages, the calendar's markers and requests refresh. */
+  'client.updated',
   /** The business changed its settings (book B-37–B-43): its page, free times, settings and the switcher refresh. */
   'business.updated',
 ] as const

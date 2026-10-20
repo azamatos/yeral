@@ -473,6 +473,7 @@ describe('account', () => {
         '/v1/w/{slug}/clients',
         '/v1/w/{slug}/clients/lookup',
         '/v1/w/{slug}/clients/{id}',
+        '/v1/w/{slug}/clients/{id}/notes',
       ].sort(),
     )
   })

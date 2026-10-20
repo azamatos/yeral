@@ -2,7 +2,8 @@
  * What a business knows of its clients from their bookings (book B-32, B-34): visits, the first and last, what they
  * cost, no-shows, reports and the next booking, counted, filtered by chip, ordered and paged in the database. A move
  * isn't a booking of its own. As the reader sees it, a specialist counts only the bookings with them and sees only
- * clients they have one with (a waiting move onto them included); as the business sees it, every booking counts. A
+ * clients they have a booking or a move with (one onto them they may answer); as the business sees it, every booking
+ * counts. A
  * visit is completed as people see it now: stored so, or confirmed and ended (`effectiveStatus`).
  */
 import { LAPSED_DAYS, NEW_DAYS, REGULAR_MIN_VISITS, REGULAR_WINDOW_DAYS, segmentsOf, type ClientSegment } from '@yeral/domain/clients'
@@ -35,6 +36,29 @@ export const aheadAt = (now: number) =>
 /** The booking has an item with this person. */
 export const withStaff = (staffId: string) =>
   sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${bookings.id} and ${bookingItems.staffId} = ${staffId})`
+
+/**
+ * A specialist's client: one with a booking or a move with them (a move onto them they may answer), on the client row
+ * in scope (`"clients"."id"`).
+ */
+const hersSql = (staffId: string) =>
+  sql`exists (select 1 from "bookings" b join "booking_items" i on i."booking_id" = b."id"
+    where b."client_id" = "clients"."id" and i."staff_id" = ${staffId})`
+
+/**
+ * The business's client the reader may see, held so it can't go meanwhile (a note on it, B-34): 404 for one they
+ * can't.
+ */
+export async function seenClient(db: Queryable, businessId: string, actor: Actor, id: string): Promise<ClientRecord> {
+  const own = ownOnly(actor)
+  const [row] = await db
+    .select()
+    .from(clients)
+    .where(and(eq(clients.id, id), eq(clients.businessId, businessId), own ? hersSql(own) : undefined))
+    .for('share')
+  if (!row) throw new ApiError('not_found')
+  return row
+}
 
 /** Whose clients the reader sees: everyone's, or a specialist their own; a level without the row sees none. */
 export function ownOnly(actor: Actor): string | null {
@@ -89,11 +113,7 @@ export async function clientFacts(
   const reports = sql<number>`count(*) filter (where ${bookings.complaintType} is not null)::int`
   const added = sql`((${clients.createdAt} at time zone 'UTC') + ${MARKET.utcOffsetMin} * interval '1 minute')::date`
   const latest = sql`coalesce(max(${bookings.date}), ${added})`
-  // a specialist's clients: a booking with them, or a client's waiting move onto them (they may answer it)
-  const visible = own
-    ? sql`(count(${bookings.id}) > 0 or exists (select 1 from "bookings" m join "booking_items" i on i."booking_id" = m."id"
-        where m."client_id" = "clients"."id" and m."reschedule_of" is not null and i."staff_id" = ${own}))`
-    : undefined
+  const visible = own ? hersSql(own) : undefined
   const chip = {
     regular: sql`${recentVisits} >= ${REGULAR_MIN_VISITS}`,
     new: sql`${firstVisit} >= ${addDays(today, -NEW_DAYS)}`,

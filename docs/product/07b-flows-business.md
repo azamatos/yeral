@@ -1232,7 +1232,7 @@ flowchart TD
 - No name: the client shows as *Atsyz müşderi* (Unnamed client).
 - A client also gets added automatically when they book online or are booked by phone (ADR 0018).
 
-**Status** — Design: drawn (B-Clients · `modal`) · Code: schema only (one client per business and phone).
+**Status** — Design: drawn (B-Clients · `modal`) · Code: api built (`POST /v1/w/{slug}/clients`: one client per number, `client_exists` with the card to open; 21.10.2026).
 
 ### B-34 · Client card and notes
 
@@ -1264,7 +1264,7 @@ flowchart TD
 - Alert notes show in the request drawer, booking drawer, new-booking client card, and as an icon on the calendar block (§4).
 - The client never sees notes or complaints.
 
-**Status** — Design: drawn (B-Client · `edit`, `composer`) · Code: the card's read built (`GET /v1/w/{slug}/clients/{id}`: numbers, notes, bookings ahead and before, reports, switches; 21.10.2026); adding notes, the edit and the switches come next.
+**Status** — Design: drawn (B-Client · `edit`, `composer`) · Code: api built (`GET /v1/w/{slug}/clients/{id}` the card, `PATCH` its edit and switches, `POST …/notes` a note; 21.10.2026).
 
 ### B-35 · Phone-only clients after no-shows
 
@@ -1297,9 +1297,7 @@ flowchart TD
 
 > Open question Q-127: what counts as a no-show and how the limit ends.
 
-Code differs: the client card and *Arz et* have no endpoints yet (P2 step 4); the block, the count from zero and the switch are built (code: `modules/clients/online.ts`).
-
-**Status** — Design: drawn (B-Client · settings; Venue and Booking · `restricted`) · Code: the rule and the switch (api `modules/clients/online.ts`); the client card's endpoint comes with P2 step 4.
+**Status** — Design: drawn (B-Client · settings; Venue and Booking · `restricted`) · Code: built (api `modules/clients/online.ts`; the card's switch `PATCH /v1/w/{slug}/clients/{id}` with `phoneOnly`, 21.10.2026).
 
 ### B-36 · Delete a client
 
@@ -1328,7 +1326,7 @@ flowchart LR
 
 > Open question Q-208: deleting a client with upcoming bookings.
 
-**Status** — Design: drawn (B-Client · delete modal) · Code: schema only (bookings keep a name and phone copy that can be blanked).
+**Status** — Design: drawn (B-Client · delete modal) · Code: api built (`DELETE /v1/w/{slug}/clients/{id}`: `client_has_bookings` lists the bookings ahead and requests; 21.10.2026).
 
 ## 6. Business settings
 
