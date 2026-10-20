@@ -58,14 +58,14 @@ prompt instead of riding on the next one. Each iteration is checked before the n
 | 3.4 | B-Settings, B-Onboarding | Fixes: the launch categories (chapter 4), text limits (chapter 5), special days past midnight (Q-105), every affected booking (Q-211), QR as PNG or SVG | prompt written 20.10.2026 |
 | 4a.1 | Home | Canvas tidy (Booking-Table, Booking-Class and the three Home explorations to "Later"); home in English without the app block (F-004), the business entry (F-177), the Example badge on cards; the client footer without "Bahalar" (F-033) | |
 | 4a.2 | Search, Client-Map | Search and map with the city choice (Q-107), places without a free time (Q-150), Example rows and pins; no party-size filter (tables are Later) | |
-| 4a.3 | Venue | The business page: owner preview with the booking buttons disabled (Q-153), the Call card for a phone-only client or a paused business (Q-154), the Example line, hidden prices, reviews by name and initial and under moderation, hours past midnight | |
+| 4a.3 | Venue | The business page: owner preview with the booking buttons disabled (Q-153), the Call card for a phone-only client or a paused business (Q-154), the Example line, hidden prices, reviews by name and initial and under moderation, hours past midnight, "New address" for 30 days after a move (Q-215) | |
 | 4a.4 | States | Errors, empty pages, location help, not found, a page still in review (F1) | |
 | 4b.1 | Auth | The login modal with the shared code step (code on the screen first), name and optional surname (Q-156), "Is this you?" (Q-270) | |
 | 4b.2 | Booking | The appointment flow: steps, the waiting limit refusal (Q-124), the sent screen with the answer time as a clock time and no SMS promise (Q-253, Q-036), instant confirmation, the phone-only card | |
 | 4b.3 | Booking (move mode) | Change the time: specialist kept unless changed, overlapping times allowed (Q-165), a second move replaces the first | |
-| 4b.4 | Account-Bookings, part 1 | My bookings: lists, the detail drawer, who cancelled, the cancel modal with or without a reason (Q-163), undo and its four failures | |
+| 4b.4 | Account-Bookings, part 1 | My bookings: lists, the detail drawer, who cancelled, the cancel modal with or without a reason (Q-163), undo and its four failures, "New address" on a booking ahead after the business moved (Q-215) | |
 | 4b.5 | Account-Bookings, part 2 | Declines with offered times, expiries, waiting and refused moves, the phone-only booking (Q-154) | |
-| 4b.6 | Booking-Link | The link page signed out: masked-phone sign-in, every status, the finished visit with "Write a review" (Q-170), cancelled and no-show with "Book again" | |
+| 4b.6 | Booking-Link | The link page signed out: masked-phone sign-in, every status, the finished visit with "Write a review" (Q-170), cancelled and no-show with "Book again", "New address" as on the booking (Q-215) | |
 | 4b.7 | Account-Profile | Profile, the phone change with the code step, no review-ask switch (Q-259), the delete-account copy (Q-172) | |
 | 5.1 | admin tool: shell and sign-in | cms.yeral.app on the business app's patterns: the team's own sign-in with a second factor and its recovery (F-178), navigation | |
 | 5.2 | admin tool: businesses | Verify, reject with a reason and see it sent again (Q-274), hide or un-verify with a reason to the owner (Q-012), add a business for its owner (F-238), close a workspace (Q-213) | |
@@ -105,7 +105,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    (Q-103; done 20.10.2026), lateness fixed at 15 min (Q-118; done 20.10.2026), a price range filter (done 20.10.2026), the failed-SMS alert and late reminders dropped
    (Q-284; done 20.10.2026, the alert reaching people with F-209 in step 7), the SMS for a move not accepted (Q-289; done 20.10.2026), offered times keeping a request on top of Upcoming (C-40; done 20.10.2026); and the new engine rules: *Başga ýerde* (Q-272; done 20.10.2026, the calendar block with step 4), blocked time
    (F-121) and internal statuses (F-104, F-133).
-4. **Business endpoints** (the booking rules, the services menu, the profile, answering requests, the team's bookings by phone and walk-in, its moves and cancels, and the hours and special days done 20.10.2026): workspace, calendar, requests, bookings with CSV export (F-135), clients, team, settings,
+4. **Business endpoints** (the booking rules, the services menu, the profile with the SMS when the business moves (Q-215), answering requests, the team's bookings by phone and walk-in, its moves and cancels, and the hours and special days done 20.10.2026): workspace, calendar, requests, bookings with CSV export (F-135), clients, team, settings,
    services, hours, reviews; photos (F-084, F-101) stored on the server's disk behind a storage port; the address with
    a map pin (F-099); browser notifications from the live events (F-170) and the staff SMS rule (F-171); the timed jobs
    for invite expiry, the 5-minute warning and the answer time.

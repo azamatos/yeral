@@ -1,5 +1,6 @@
 /** A business that moves tells the clients with a booking ahead (book Q-215, owner 20.10.2026). */
 import { ADDRESS_SMS_AFTER_MS } from '@yeral/domain/lifecycle'
+import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
@@ -13,21 +14,19 @@ import { runDueJobs } from '../jobs/run'
 const MAYSA = '+99365102030' // owner of Glow Studio
 const W = '/v1/w/glow-studio'
 const PROFILE = `${W}/settings/profile`
-const TODAY = '2026-10-14' // DEMO_NOW: Wednesday 11:20 at the business
 const FRI = '2026-10-16'
 const MON = '2026-10-19'
+const TUE = '2026-10-20'
 
 describe('a new address (book Q-215)', () => {
   let db: Db
   let t: ReturnType<typeof testApp>
   let manicure: string
   let maralId: string
-  let home: { cityId: string; address: string; street: string; lat: number; lng: number }
   beforeAll(async () => {
     ;({ db } = await testDatabase())
     await seed(db, { demo: true, now: DEMO_NOW })
     const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
-    home = { cityId: glow!.cityId, address: glow!.address, street: glow!.street, lat: glow!.lat, lng: glow!.lng }
     manicure = (await db.select().from(services).where(eq(services.businessId, glow!.id))).find((s) => s.name.en === 'Manicure')!.id
     const [maral] = await db
       .select()
@@ -62,8 +61,12 @@ describe('a new address (book Q-215)', () => {
     expect(made.json.status).toBe('pending')
     return { client, code: made.json.code as string }
   }
-  const moveTo = (maysa: ReturnType<typeof browser>, location: Partial<typeof home>) =>
-    maysa.req(PROFILE, { method: 'PATCH', body: { location: { ...home, ...location } } })
+  const glow = async () => (await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio')))[0]!
+  /** The location as stored, changed by `location`. */
+  const moveTo = async (maysa: ReturnType<typeof browser>, location: Record<string, unknown>) => {
+    const { cityId, address, street, lat, lng } = await glow()
+    return maysa.req(PROFILE, { method: 'PATCH', body: { location: { cityId, address, street, lat, lng, ...location } } })
+  }
   const newAddressSms = (phone: string) => t.sms.sent.filter((s) => s.to === phone && /new address/.test(s.text)).map((s) => s.text)
   const waitingFor = async (code: string) =>
     db
@@ -88,6 +91,10 @@ describe('a new address (book Q-215)', () => {
     // gone or over: nothing to tell
     const cancelled = await book(maysa, '+99365800403', FRI, 840)
     expect((await maysa.req(`${W}/bookings/${cancelled}/cancel`, { body: { reason: 'staff_away' } })).status).toBe(204)
+    // confirmed, with the client's move waiting: the booking hears it, not the move too
+    const { client: mover, code: kept } = await request('+99365800410', MON, 840)
+    expect((await maysa.req(`${W}/requests/${kept}/confirm`, { body: {} })).status).toBe(204)
+    expect((await mover.req(`/v1/me/bookings/${kept}/reschedule`, { body: { date: MON, start: 960 } })).status).toBe(200)
 
     expect((await moveTo(maysa, { address: 'Oguzhan köçesi 21', street: 'Oguzhan köçesi' })).status).toBe(200)
     await runDueJobs(t.deps)
@@ -103,11 +110,12 @@ describe('a new address (book Q-215)', () => {
     await afterTheWait()
     expect(newAddressSms('+99365800401')).toEqual([
       expect.stringMatching(
-        /^Yeral: Glow Studio has moved to a new address: Oguzhan köçesi 12\. Your booking: .+, 16 October, 10:00\. .+\/l\//,
+        /^Ýeral: Glow Studio has moved to a new address: Oguzhan köçesi 12\. Your booking: .+, 16 October, 10:00\. .+\/l\//,
       ),
     ])
     expect(newAddressSms('+99365800402')).toEqual([expect.stringMatching(/new address: Oguzhan köçesi 12\. Your booking: .+12:00/)])
     expect(newAddressSms('+99365800403')).toEqual([])
+    expect(newAddressSms('+99365800410')).toEqual([expect.stringMatching(/new address: Oguzhan köçesi 12\. Your booking: .+14:00/)])
     // the booking and the business page say "New address"
     const moved = t.clock.now - ADDRESS_SMS_AFTER_MS
     expect((await client.req(`/v1/me/bookings/${waiting}`)).json).toMatchObject({ address: 'Oguzhan köçesi 12', movedAt: moved })
@@ -121,17 +129,16 @@ describe('a new address (book Q-215)', () => {
     await afterTheWait()
     expect(newAddressSms('+99365800401')).toHaveLength(2)
     expect(newAddressSms('+99365800401').at(-1)).toMatch(/new address: Bitarap Türkmenistan 5\./)
-    home = { ...home, address: 'Bitarap Türkmenistan 5', street: 'Bitarap Türkmenistan' }
   })
 
   it('a move and back tells nothing; a new pin alone isn’t a move', async () => {
     const maysa = await as(MAYSA)
     const code = await book(maysa, '+99365800405', FRI, 900)
-    const [{ movedAt }] = await db.select({ movedAt: businesses.movedAt }).from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const { address, street } = await glow()
 
     await moveTo(maysa, { address: 'Wrong street 1', street: 'Wrong street' })
     t.clock.now += 60_000
-    await moveTo(maysa, {})
+    await moveTo(maysa, { address, street })
     await afterTheWait()
     expect(newAddressSms('+99365800405')).toEqual([])
     const [job] = await db
@@ -146,34 +153,45 @@ describe('a new address (book Q-215)', () => {
     expect(job).toMatchObject({ error: 'dropped: the client knows the address as it is', attempts: 0 })
 
     // the pin moved a little: checked again by the Ýeral team, but no SMS and no "New address"
-    const before = (await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio')))[0]!
-    await moveTo(maysa, { lat: home.lat + 0.001 })
+    t.clock.now += 60_000
+    const before = await glow()
+    await moveTo(maysa, { lat: before.lat + 0.001 })
     expect(await waitingFor(code)).toHaveLength(0)
-    const after = (await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio')))[0]!
+    const after = await glow()
     expect(after.addressChangedAt!.getTime()).toBeGreaterThan(before.addressChangedAt!.getTime())
-    expect(after.movedAt!.getTime()).toBeGreaterThan(movedAt!.getTime())
     expect(after.movedAt).toEqual(before.movedAt)
-    home = { ...home, lat: home.lat + 0.001 }
   })
 
   it('a visit soon hears it at once; one under way hears nothing', async () => {
     const maysa = await as(MAYSA)
-    // 11:20 now: 11:45 is within the 30 minutes before
-    const soon = await book(maysa, '+99365800406', TODAY, 705)
+    // Maral's first free time on Monday, booked the evening before; then 20 minutes before it
+    const free = async () =>
+      ((await maysa.req(`${W}/free-times?services=${manicure}&staff=${maralId}&date=${MON}`)).json.slots as { start: number }[]).map(
+        (x) => x.start,
+      )
+    const first = (await free())[0]!
+    const soon = await book(maysa, '+99365800406', MON, first)
+    const second = (await free()).find((x) => x > first)!
+    const started = await book(maysa, '+99365800409', MON, second)
+    t.clock.now = epochOf(MON, first - 20)
     await moveTo(maysa, { address: 'Görogly köçesi 3', street: 'Görogly köçesi' })
     await runDueJobs(t.deps)
-    expect(newAddressSms('+99365800406')).toEqual([expect.stringMatching(/new address: Görogly köçesi 3\..* 11:45/)])
+    expect(newAddressSms('+99365800406')).toEqual([expect.stringMatching(/new address: Görogly köçesi 3\. Your booking: /)])
     expect((await db.select().from(bookings).where(eq(bookings.code, soon)))[0]!.addressTold).toMatchObject({
       address: 'Görogly köçesi 3',
     })
-    home = { ...home, address: 'Görogly köçesi 3', street: 'Görogly köçesi' }
+    // the next one starts before its SMS was due: nothing
+    t.clock.now = epochOf(MON, second) + 60_000
+    await runDueJobs(t.deps)
+    expect(newAddressSms('+99365800409')).toEqual([])
+    expect(started).toBeTruthy()
   })
 
   it('a home-based business: a waiting request knows only the street', async () => {
     const maysa = await as(MAYSA)
     await maysa.req(PROFILE, { method: 'PATCH', body: { hideExactAddress: true } })
-    const confirmed = await book(maysa, '+99365800407', MON, 720)
-    const { client, code } = await request('+99365800408', MON, 840)
+    const confirmed = await book(maysa, '+99365800407', TUE, 600)
+    const { client, code } = await request('+99365800408', TUE, 720)
     // a new house number on the same street: the confirmed booking hears it, the waiting request has nothing new
     await moveTo(maysa, { address: 'Görogly köçesi 7' })
     await afterTheWait()

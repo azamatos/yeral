@@ -823,7 +823,7 @@ Each workspace is one address. "Salgyny üýtget" opens the map with "Her iş ý
 - A · A relocation may change the address and keeps everything, perhaps with a new Ýeral check; only a second, simultaneous location needs a new workspace. (recommended)
 - B · Any new address means a new workspace, and the old one is closed.
 
-answer: A · A relocation may change the address and keeps everything, perhaps with a new Ýeral check; only a second, simultaneous location needs a new workspace. Claude picked the recommended option; the owner delegated non-critical questions. (18.10.2026)
+answer: A · A relocation may change the address and keeps everything, perhaps with a new Ýeral check; only a second, simultaneous location needs a new workspace. Claude picked the recommended option; the owner delegated non-critical questions. (18.10.2026) Owner, 20.10.2026: clients are told when a business moves, above all those with a booking ahead: each booking ahead gets an SMS with the new address, and the booking and the business page say "New address" (chapter 8).
 
 ## Q-216 · Specialists who don't use the app
 chapter: 07 · status: decided · priority: high
