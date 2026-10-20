@@ -46,7 +46,7 @@ import type {
   newBookingSchema,
 } from '@yeral/contract/calendar'
 import type { searchQuerySchema } from '@yeral/contract/catalog'
-import type { clientCardQuerySchema, clientListQuerySchema } from '@yeral/contract/clients'
+import { lookupReady, type clientCardQuerySchema, type clientListQuerySchema } from '@yeral/contract/clients'
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
@@ -598,7 +598,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   }
 
   /** Booking requests the business answers (book B-19–B-21): the waiting ones, confirm, decline. */
-  const answered = (slug: string) => invalidate(keys.requests(slug), keys.workspaces(), keys.availabilityAll(slug), keys.calendar(slug))
+  const answered = (slug: string) =>
+    invalidate(keys.requests(slug), keys.workspaces(), keys.availabilityAll(slug), keys.calendar(slug), keys.clients(slug))
   const requests = {
     /** The ones the viewer may see, most urgent first, with whether they may answer each. */
     list: (slug: string) =>
@@ -747,7 +748,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       return queryOptions({
         queryKey: keys.clientLookup(slug, query),
         queryFn: ({ signal }) => call(w.clients.lookup.$get({ param: { slug }, query }, abortWith(signal))),
-        enabled: p.phone ? p.phone.replace(/\D/g, '').length >= 3 : (p.name?.trim().length ?? 0) >= 2,
+        enabled: lookupReady(p),
       })
     },
     /** The client card (B-34); `history` asks for more past bookings ("Ýene görkez"). */

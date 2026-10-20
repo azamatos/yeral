@@ -296,6 +296,7 @@ describe('live events', () => {
       ['availability', 'glow-studio'],
       ['calendar', 'glow-studio'],
       ['workspaces'],
+      ['clients', 'glow-studio'],
       ['search'],
       ['suggest'],
       ['favorites'],

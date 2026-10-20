@@ -48,7 +48,9 @@ describe('clients (book B-32, B-34)', () => {
     status: 'completed' | 'confirmed' | 'noshow' | 'cancelled' | 'pending'
     staffId: string
     serviceId: string
-    price?: number
+    /** null: a booking without a price. */
+    price?: number | null
+    rescheduleOf?: string
     complaint?: 'late'
   }) {
     const code = `YR-77${String(++seq).padStart(4, '0')}`
@@ -66,8 +68,9 @@ describe('clients (book B-32, B-34)', () => {
         end: 1410,
         status: x.status,
         source: 'phone',
-        priceType: 'fixed',
-        priceAmount: x.price ?? 100,
+        priceType: x.price === null ? null : 'fixed',
+        priceAmount: x.price === null ? null : (x.price ?? 100),
+        rescheduleOf: x.rescheduleOf ?? null,
         holdUntil: x.status === 'pending' ? new Date(DEMO_NOW + 3_600_000) : null,
         ...(x.complaint ? { complaintType: x.complaint, complaintAt: new Date(DEMO_NOW - 86_400_000), complaintBy: maysaId } : {}),
       })
@@ -129,6 +132,7 @@ describe('clients (book B-32, B-34)', () => {
     })
     // new: a first visit 10 days ago
     await booking({ clientId: fresh, date: addDays(TODAY, -10), status: 'completed', staffId: aynaId, serviceId: haircut, price: 80 })
+    await booking({ clientId: fresh, date: addDays(TODAY, -12), status: 'completed', staffId: aynaId, serviceId: haircut, price: null })
     await db.insert(clientNotes).values({ clientId: regular, text: 'Allergic to acetone', alert: true, authorStaffId: maysaId })
     await db.update(clients).set({ onlineBlocked: true }).where(eq(clients.id, fresh))
   })
@@ -243,5 +247,42 @@ describe('clients (book B-32, B-34)', () => {
     expect(requests.find((r) => r.code === code)!.client).toMatchObject({ id: regular, visits: 3, alerts: ['Allergic to acetone'] })
     const day = (await maysa.req(`${W}/calendar?date=${addDays(TODAY, 4)}`)).json.bookings as { code: string; client: { id: string } }[]
     expect(day.find((b) => b.code === code)!.client.id).toBe(regular)
+  })
+
+  it('a specialist finds any of the business’s clients by the whole number in the drawer, only her own by its start', async () => {
+    const maral = await as(MARAL)
+    const lookup = async (q: string) => (await maral.req(`${W}/clients/lookup?${q}`)).json.items as { id: string; avgCheck: unknown }[]
+    expect((await lookup('phone=6590000')).map((x) => x.id)).toEqual([regular])
+    // Aýna's client: the alert notes and phone-only mark matter to whoever books her
+    expect(await lookup('phone=65900003')).toEqual([expect.objectContaining({ id: fresh, phoneOnly: true, avgCheck: null })])
+    expect(await lookup('name=lapsed')).toEqual([])
+  })
+
+  it('a waiting move onto a specialist opens its client’s card for her; her request drawer counts the business’s visits', async () => {
+    const maral = await as(MARAL)
+    const [original] = await db.select().from(bookings).where(eq(bookings.clientId, lapsed))
+    const move = await booking({
+      clientId: lapsed,
+      date: addDays(TODAY, 5),
+      status: 'pending',
+      staffId: maralId,
+      serviceId: manicure,
+      rescheduleOf: original!.id,
+    })
+    expect((await maral.req(`${W}/clients/${lapsed}?lang=en`)).status).toBe(200)
+    const requests = (await maral.req(`${W}/requests`)).json.items as { code: string; client: { id: string; visits: number } }[]
+    expect(requests.find((r) => r.code === move)!.client).toMatchObject({ id: lapsed, visits: 1 })
+  })
+
+  it('the average check leaves out visits without a price; usual services leave out archived ones', async () => {
+    const maysa = await as(MAYSA)
+    const lookup = async () => (await maysa.req(`${W}/clients/lookup?phone=65900003`)).json.items[0] as Record<string, unknown>
+    expect(await lookup()).toMatchObject({ visits: 2, avgCheck: 80, usualServices: [haircut] })
+    await db.update(services).set({ archived: true }).where(eq(services.id, haircut))
+    try {
+      expect((await lookup()).usualServices).toEqual([])
+    } finally {
+      await db.update(services).set({ archived: false }).where(eq(services.id, haircut))
+    }
   })
 })

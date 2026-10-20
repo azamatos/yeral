@@ -3,31 +3,30 @@
  * and the client card. Everything comes from the bookings (ADR 0018); a specialist sees only clients with a booking
  * with them, and of each only those bookings; sums only with "See revenue" (the owner).
  */
-import type {
-  ClientCard,
-  clientCardQuerySchema,
-  clientListQuerySchema,
-  clientLookupQuerySchema,
-  ClientRow,
-  clientMatchSchema,
+import {
+  LOOKUP_MIN_DIGITS,
+  type ClientCard,
+  type clientCardQuerySchema,
+  type clientListQuerySchema,
+  type clientLookupQuerySchema,
+  type ClientRow,
+  type clientMatchSchema,
 } from '@yeral/contract/clients'
 import { effectiveStatus } from '@yeral/domain/lifecycle'
-import { COUNTRY_PREFIX, nationalDigits } from '@yeral/domain/phone'
+import { COUNTRY_PREFIX, isPhone, nationalDigits, toE164 } from '@yeral/domain/phone'
 import { scopeOf, type Actor } from '@yeral/domain/permissions'
-import { reachesNoShowLimit } from '@yeral/domain/clients'
 import { localOf } from '@yeral/domain/time'
-import { and, desc, eq, ilike, inArray, isNotNull, isNull, sql, type SQL } from 'drizzle-orm'
+import { and, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
-import { bookingItems, bookings, clientNotes, clients, staff } from '../../db/schema'
+import { bookingItems, bookings, clientNotes, clients, services, staff } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { itemsOfBookings, stateOf } from '../bookings/repo'
 import { teamItemOf, teamPriceOf } from '../bookings/team-view'
-import { likeOf } from '../catalog/search'
+import { likeOf, wordStartLikes } from '../catalog/search'
 import { rulesOf } from '../settings/service'
-import { bookingsByIds, byRecent, clientFacts, doneAt, ownOnly, phoneOnlyOf, withStaff, type ClientFacts } from './facts'
-import { noShowsSinceReset } from './online'
+import { alertNotesOf, avgCheckOf, bookingsByIds, clientFacts, doneAt, ownOnly, phoneOnlyOf, withStaff, type ClientFacts } from './facts'
 
 interface Business {
   id: string
@@ -39,18 +38,19 @@ type ClientMatch = z.infer<typeof clientMatchSchema>
 
 /** The drawer shows this many matches. */
 const LOOKUP_MAX = 3
-/** Digits typed before the drawer looks a number up. */
-const LOOKUP_MIN_DIGITS = 3
 const USUAL_MAX = 3
 
 /** "See revenue": the owner sees sums; administrators and specialists don't on the clients pages. */
 const seesSums = (actor: Actor) => scopeOf(actor, 'revenue') === 'all'
 
-/** A name, or digits anywhere in the national number. */
+/**
+ * A name with the letters typed, or a number with the digits typed anywhere in it; one typed with its country code
+ * ("+993 65…") is read from after the code.
+ */
 function searchOf(q: string | undefined): SQL | undefined {
   if (!q) return undefined
   if (/^[\d\s()+-]+$/.test(q)) {
-    const digits = nationalDigits(q)
+    const digits = q.startsWith('+') ? nationalDigits(q) : q.replace(/\D/g, '')
     return digits ? sql`substr(${clients.phone}, ${COUNTRY_PREFIX.length + 1}) like ${likeOf(digits)}` : undefined
   }
   return ilike(clients.name, likeOf(q))
@@ -63,21 +63,27 @@ export async function clientList(
   q: ListQuery,
   now: number,
 ): Promise<{ items: ClientRow[]; total: number; cursor: string | null }> {
-  const [facts, rules] = await all(db, [() => clientFacts(db, business.id, actor, now, searchOf(q.q)), () => rulesOf(db, business.id)])
-  const picked = facts.filter((f) => !q.segment || f.segments.includes(q.segment)).sort(byRecent)
   const offset = Number(q.cursor ?? 0) || 0
-  const page = picked.slice(offset, offset + q.limit)
+  const [{ rows, total }, rules] = await all(db, [
+    () => clientFacts(db, business.id, actor, now, { where: searchOf(q.q), segment: q.segment, limit: q.limit, offset }),
+    () => rulesOf(db, business.id),
+  ])
   const [phoneOnly, next] = await all(db, [
-    () => phoneOnlyOf(db, page, rules),
+    () =>
+      phoneOnlyOf(
+        db,
+        rows.map((f) => f.client),
+        rules,
+      ),
     () =>
       bookingsByIds(
         db,
-        page.flatMap((f) => (f.nextId ? [f.nextId] : [])),
+        rows.flatMap((f) => (f.nextId ? [f.nextId] : [])),
       ),
   ])
   const sums = seesSums(actor)
   return {
-    items: page.map((f) => {
+    items: rows.map((f) => {
       const n = next.find((b) => b.id === f.nextId)
       return {
         id: f.client.id,
@@ -85,10 +91,11 @@ export async function clientList(
         phone: f.client.phone,
         tags: f.client.tags,
         segments: f.segments,
-        phoneOnly: phoneOnly.has(f.client.id),
+        phoneOnly: phoneOnly.on.has(f.client.id),
         visits: f.visits,
         lastVisit: f.lastVisit,
         total: sums ? f.total : null,
+        avgCheck: sums ? avgCheckOf(f) : null,
         next: n
           ? {
               code: n.code,
@@ -100,35 +107,46 @@ export async function clientList(
           : null,
       }
     }),
-    total: picked.length,
-    cursor: offset + q.limit < picked.length ? String(offset + q.limit) : null,
+    total,
+    cursor: offset + q.limit < total ? String(offset + q.limit) : null,
   }
 }
 
 /**
- * The new-booking drawer's matches (B-23): a number that starts with the digits typed, or a name with the letters
- * typed; with their alert notes, the phone-only mark and the services they usually take.
+ * The new-booking drawer's matches (B-23): a number that starts with the digits typed, or a name with a word starting
+ * with the letters typed; with their alert notes, the phone-only mark and the services they usually take. A specialist
+ * finds their own clients so, and the business's client with the whole number typed, whoever served them: its alert
+ * notes and phone-only mark matter to whoever books it.
  */
 export async function clientLookup(db: Queryable, business: Business, actor: Actor, q: LookupQuery, now: number): Promise<ClientMatch[]> {
-  let where: SQL
+  const own = ownOnly(actor)
+  let found: ClientFacts[]
   if (q.phone) {
     const digits = nationalDigits(q.phone)
     if (digits.length < LOOKUP_MIN_DIGITS) return []
-    where = sql`${clients.phone} like ${`${COUNTRY_PREFIX}${digits}%`}`
-  } else where = ilike(clients.name, likeOf(q.name!))
-  const [facts, rules] = await all(db, [() => clientFacts(db, business.id, actor, now, where), () => rulesOf(db, business.id)])
-  const found = facts.sort(byRecent).slice(0, LOOKUP_MAX)
+    const prefix = sql`${clients.phone} like ${`${COUNTRY_PREFIX}${digits}%`}`
+    found = (await clientFacts(db, business.id, actor, now, { where: prefix, limit: LOOKUP_MAX })).rows
+    const whole = isPhone(q.phone) ? toE164(q.phone) : null
+    if (own && whole && !found.some((f) => f.client.phone === whole)) {
+      const exact = await clientFacts(db, business.id, actor, now, { where: eq(clients.phone, whole), scope: 'business' })
+      found = [...exact.rows, ...found].slice(0, LOOKUP_MAX)
+    }
+  } else {
+    const words = or(...wordStartLikes(q.name!).map((p) => ilike(clients.name, p)))
+    found = (await clientFacts(db, business.id, actor, now, { where: words, limit: LOOKUP_MAX })).rows
+  }
   if (!found.length) return []
   const ids = found.map((f) => f.client.id)
+  const rules = await rulesOf(db, business.id)
   const [phoneOnly, alerts, usual] = await all(db, [
-    () => phoneOnlyOf(db, found, rules),
     () =>
-      db
-        .select({ clientId: clientNotes.clientId, text: clientNotes.text })
-        .from(clientNotes)
-        .where(and(inArray(clientNotes.clientId, ids), eq(clientNotes.alert, true)))
-        .orderBy(desc(clientNotes.createdAt)),
-    () => usualServices(db, ids, actor, now),
+      phoneOnlyOf(
+        db,
+        found.map((f) => f.client),
+        rules,
+      ),
+    () => alertNotesOf(db, ids),
+    () => usualServices(db, ids, own, now),
   ])
   const sums = seesSums(actor)
   return found.map((f) => ({
@@ -136,16 +154,18 @@ export async function clientLookup(db: Queryable, business: Business, actor: Act
     name: f.client.name,
     phone: f.client.phone,
     visits: f.visits,
-    avgCheck: sums && f.visits ? Math.round(f.total / f.visits) : null,
-    phoneOnly: phoneOnly.has(f.client.id),
-    alerts: alerts.filter((a) => a.clientId === f.client.id).map((a) => a.text),
+    avgCheck: sums ? avgCheckOf(f) : null,
+    phoneOnly: phoneOnly.on.has(f.client.id),
+    alerts: alerts.get(f.client.id) ?? [],
     usualServices: usual.get(f.client.id) ?? [],
   }))
 }
 
-/** The services of each client's completed visits (a specialist: of theirs), the most often first, then the latest. */
-async function usualServices(db: Queryable, clientIds: string[], actor: Actor, now: number): Promise<Map<string, string[]>> {
-  const own = ownOnly(actor)
+/**
+ * The services of each client's completed visits (a specialist: of theirs) that can still be booked, the most often
+ * first, then the latest (an archived one isn't booked anew, book Q-210).
+ */
+async function usualServices(db: Queryable, clientIds: string[], own: string | null, now: number): Promise<Map<string, string[]>> {
   const rows = await db
     .select({
       clientId: bookings.clientId,
@@ -155,11 +175,11 @@ async function usualServices(db: Queryable, clientIds: string[], actor: Actor, n
     })
     .from(bookingItems)
     .innerJoin(bookings, eq(bookings.id, bookingItems.bookingId))
+    .innerJoin(services, and(eq(services.id, bookingItems.serviceId), eq(services.archived, false)))
     .where(
       and(
         inArray(bookings.clientId, clientIds),
         isNull(bookings.rescheduleOf),
-        isNotNull(bookingItems.serviceId),
         doneAt(now),
         own ? eq(bookingItems.staffId, own) : undefined,
       ),
@@ -179,8 +199,8 @@ async function usualServices(db: Queryable, clientIds: string[], actor: Actor, n
 }
 
 /** One client's facts, if the reader may see them (a specialist: one with a booking with them); 404 otherwise. */
-async function visibleClient(db: Queryable, business: Business, actor: Actor, id: string, now: number): Promise<ClientFacts> {
-  const [facts] = await clientFacts(db, business.id, actor, now, eq(clients.id, id))
+export async function visibleClient(db: Queryable, business: Business, actor: Actor, id: string, now: number): Promise<ClientFacts> {
+  const [facts] = (await clientFacts(db, business.id, actor, now, { where: eq(clients.id, id) })).rows
   if (!facts) throw new ApiError('not_found')
   return facts
 }
@@ -190,7 +210,7 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
   const { db } = deps
   const now = deps.now()
   const own = ownOnly(actor)
-  const [facts, rules, rows, notes, sinceReset] = await all(db, [
+  const [facts, rules, rows, notes] = await all(db, [
     () => visibleClient(db, business, actor, id, now),
     () => rulesOf(db, business.id),
     () =>
@@ -212,7 +232,6 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
         .leftJoin(staff, eq(staff.id, clientNotes.authorStaffId))
         .where(eq(clientNotes.clientId, id))
         .orderBy(desc(clientNotes.createdAt)),
-    () => noShowsSinceReset(db, id),
   ])
   const seen = rows.map((row) => ({ row, ...effectiveStatus(stateOf(row), now) }))
   const ahead = seen
@@ -224,13 +243,15 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
     .filter((s) => s.row.complaintType && s.row.complaintAt)
     .sort((a, b) => b.row.complaintAt!.getTime() - a.row.complaintAt!.getTime())
   const authorIds = [...new Set(reported.flatMap((s) => (s.row.complaintBy ? [s.row.complaintBy] : [])))]
-  const [items, authors] = await all(db, [
+  const c = facts.client
+  const [items, authors, phoneOnly] = await all(db, [
     () =>
       itemsOfBookings(
         db,
         [...ahead, ...history].map((s) => s.row.id),
       ),
     async () => (authorIds.length ? db.select({ id: staff.id, name: staff.name }).from(staff).where(inArray(staff.id, authorIds)) : []),
+    () => phoneOnlyOf(db, [c], rules),
   ])
   const view = ({ row, status }: (typeof seen)[number]) => ({
     code: row.code,
@@ -242,8 +263,6 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
     items: items.filter((i) => i.bookingId === row.id).map((i) => teamItemOf(i, q.lang)),
     price: teamPriceOf(row),
   })
-  const c = facts.client
-  const byCount = reachesNoShowLimit(sinceReset, rules)
   return {
     id: c.id,
     name: c.name,
@@ -256,7 +275,7 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
     since: localOf(c.createdAt.getTime()).date,
     stats: {
       visits: facts.visits,
-      avgCheck: seesSums(actor) && facts.visits ? Math.round(facts.total / facts.visits) : null,
+      avgCheck: seesSums(actor) ? avgCheckOf(facts) : null,
       lastVisit: facts.lastVisit,
       noShows: facts.noShows,
     },
@@ -272,6 +291,6 @@ export async function clientCard(deps: Deps, business: Business, actor: Actor, i
       by: authors.find((a) => a.id === row.complaintBy)?.name ?? null,
       at: row.complaintAt!.getTime(),
     })),
-    settings: { phoneOnly: c.onlineBlocked || byCount, phoneOnlyByCount: byCount, noReminders: c.noRemindersSms },
+    settings: { phoneOnly: phoneOnly.on.has(c.id), phoneOnlyByCount: phoneOnly.byCount.has(c.id), noReminders: c.noRemindersSms },
   }
 }

@@ -5,6 +5,7 @@
  */
 import { CLIENT_SEGMENTS } from '@yeral/domain/clients'
 import { BOOKING_STATUSES, CLIENT_SOURCES, COMPLAINT_TYPES } from '@yeral/domain/model'
+import { nationalDigits } from '@yeral/domain/phone'
 import { z } from 'zod'
 import {
   bookingCodeSchema,
@@ -53,6 +54,8 @@ export const clientRowSchema = z
     lastVisit: ymdSchema.nullable(),
     /** "Total": what the completed visits cost; null without "See revenue". */
     total: moneySchema.nullable(),
+    /** "Average check" of the completed visits with a price; null without "See revenue" or before one. */
+    avgCheck: moneySchema.nullable(),
     next: clientNextSchema.nullable(),
   })
   .meta({ id: 'ClientRow' })
@@ -65,14 +68,23 @@ export const clientListQuerySchema = cursorQuerySchema.extend({
 })
 export const clientListSchema = listOf(clientRowSchema).meta({ id: 'ClientList' })
 
+/** The new-booking drawer looks a number up from this many of its digits, a name from this many letters. */
+export const LOOKUP_MIN_DIGITS = 3
+export const LOOKUP_MIN_LETTERS = 2
+
+/** Whether the drawer has typed enough to look up. */
+export const lookupReady = (q: { phone?: string; name?: string }): boolean =>
+  q.phone ? nationalDigits(q.phone).length >= LOOKUP_MIN_DIGITS : (q.name?.trim().length ?? 0) >= LOOKUP_MIN_LETTERS
+
 /**
- * The new-booking drawer (B-23): up to 3 clients whose number starts with the digits typed (from 3), or whose name has
- * the letters typed ("Ady boýunça gözle", from 2).
+ * The new-booking drawer (B-23): up to 3 clients whose number starts with the digits typed, or with a word of their
+ * name starting with the letters typed ("Ady boýunça gözle"). A specialist finds their own clients so, and any of the
+ * business's by the whole number (its alert notes and phone-only mark matter whoever books it).
  */
 export const clientLookupQuerySchema = z
   .object({
     phone: z.string().trim().max(32).optional(),
-    name: z.string().trim().min(2).max(80).optional(),
+    name: z.string().trim().min(LOOKUP_MIN_LETTERS).max(80).optional(),
   })
   .refine((q) => !!q.phone !== !!q.name, 'A phone or a name')
 

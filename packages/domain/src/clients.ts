@@ -42,11 +42,13 @@ export function clientStats(visits: readonly ClientVisit[]): ClientStats {
 export const CLIENT_SEGMENTS = ['regular', 'new', 'lapsed', 'flagged'] as const
 export type ClientSegment = (typeof CLIENT_SEGMENTS)[number]
 
-const REGULAR_MIN_VISITS = 3
-/** "Yzygiderli" counts the completed visits this many days back (6 months). */
+/** "Yzygiderli": this many completed visits within `REGULAR_WINDOW_DAYS` (6 months). */
+export const REGULAR_MIN_VISITS = 3
 export const REGULAR_WINDOW_DAYS = 183
-const NEW_DAYS = 30
-const LAPSED_DAYS = 60
+/** "Täze": a first visit at most this many days ago. */
+export const NEW_DAYS = 30
+/** "Köpden bäri gelmedik": no visit for at least this many days. */
+export const LAPSED_DAYS = 60
 
 /** What the segments need of a client's bookings; the api counts it in the database for a whole list at once. */
 export interface ClientSummary {

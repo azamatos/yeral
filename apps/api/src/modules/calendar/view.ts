@@ -13,7 +13,7 @@ import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, isNotNull, isNull, lte } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all } from '../../db/client'
-import { bookingItems, bookings, clientNotes, staff } from '../../db/schema'
+import { bookingItems, bookings, staff } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { loadBusiness, loadElsewhere } from '../availability/context'
@@ -21,6 +21,7 @@ import { photoOf } from '../catalog/map'
 import { awaitingAnswer, itemsOfBookings, stateOf, type ItemRow } from '../bookings/repo'
 import { teamItemOf, teamPriceOf } from '../bookings/team-view'
 import { statusesOf } from '../settings/statuses'
+import { alertNotesOf } from '../clients/facts'
 import { blocksBetween } from './blocks'
 import type { Business } from './repo'
 
@@ -90,8 +91,8 @@ export async function calendarView(deps: Deps, business: Business, actor: Actor,
             .where(and(inArray(bookings.rescheduleOf, [...ids]), awaitingAnswer(now)))
         : [],
     () =>
-      clientIdsWithAlert(
-        deps,
+      alertNotesOf(
+        db,
         shown.flatMap((s) => (s.row.clientId ? [s.row.clientId] : [])),
       ),
   ])
@@ -210,14 +211,4 @@ export async function calendarView(deps: Deps, business: Business, actor: Actor,
     summary,
     internalStatuses: enabled,
   }
-}
-
-/** The clients among these with a note "shown when they book" ("Ýazylanda görkez"). */
-async function clientIdsWithAlert(deps: Deps, clientIds: readonly string[]): Promise<Set<string>> {
-  if (!clientIds.length) return new Set()
-  const rows = await deps.db
-    .selectDistinct({ id: clientNotes.clientId })
-    .from(clientNotes)
-    .where(and(inArray(clientNotes.clientId, [...new Set(clientIds)]), eq(clientNotes.alert, true)))
-  return new Set(rows.map((r) => r.id))
 }

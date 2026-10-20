@@ -51,6 +51,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
       keys.availabilityAll(e.business),
       keys.calendar(e.business),
       keys.workspaces(),
+      // the no-show limit decides who is phone-only
+      keys.clients(e.business),
       // its name, category and prices on cards
       keys.searchAll(),
       keys.suggestAll(),
