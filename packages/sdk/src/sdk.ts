@@ -279,6 +279,9 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         call(one.cancel.$post({ param: { code }, query: { lang }, json })),
       ),
     restore: (lang: Locale) => bookingAction<undefined>(lang, (code) => call(one.restore.$post({ param: { code }, query: { lang } }))),
+    /** "Haýyşy yzyna al": withdraw the waiting move. */
+    withdrawMove: (lang: Locale) =>
+      bookingAction<undefined>(lang, (code) => call(one['withdraw-move'].$post({ param: { code }, query: { lang } }))),
     note: (lang: Locale) =>
       bookingAction<z.input<typeof editNoteSchema>>(lang, (code, json) =>
         call(one.note.$patch({ param: { code }, query: { lang }, json })),

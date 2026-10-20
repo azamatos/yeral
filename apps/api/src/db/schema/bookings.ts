@@ -6,13 +6,23 @@
  * (exclusion constraints in the migrations, btree_gist).
  * Rows keep snapshots (client name and phone, service names, prices) so history survives edits and deletions.
  */
-import type { Localized } from '@yeral/domain/model'
+import type { DeclineReason, Localized } from '@yeral/domain/model'
 import { sql } from 'drizzle-orm'
 import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uniqueIndex, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
 import { users } from './auth'
 import { businesses, classSessions, clients, diningTables, services, staff, tableAreas } from './business'
 import { bookingSource, bookingStatus, bookingType, cancelledBy, complaintType, declineReason, priceType } from './enums'
 import { createdAt, int4range, ts, xid8 } from './types'
+
+/** A move that wasn't accepted, kept on the booking it would have moved. */
+export interface MoveRefused {
+  date: string
+  start: number
+  end: number
+  by: 'business' | 'system'
+  reason: DeclineReason | null
+  text: string | null
+}
 
 /** A time offered to the client (decline or expiry alternatives). */
 export interface TimeSlot {
@@ -53,6 +63,11 @@ export const bookings = pgTable(
     declineText: text(),
     declineAlternatives: jsonb().$type<TimeSlot[]>().notNull().default([]),
     expiredAlternatives: jsonb().$type<TimeSlot[]>().notNull().default([]),
+    /**
+     * The last move the business declined or let lapse, while this booking keeps its time (ROUND6 A3): set then, cleared
+     * when another move is asked, one is accepted, or the client withdraws.
+     */
+    moveRefused: jsonb().$type<MoveRefused>(),
     complaintType: complaintType(),
     complaintText: text(),
     complaintAt: ts(),

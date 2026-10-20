@@ -11,7 +11,7 @@ import { cityRef } from '../catalog/cities'
 import { geoOf, photoOf, text } from '../catalog/map'
 import { onlineRefusal } from './create'
 import { offeredTimes } from './offers'
-import { noShowMarkedAtOf, stateOf, type BookingRow } from './repo'
+import { noShowMarkedAtOf, refusalCounts, stateOf, type BookingRow } from './repo'
 
 /** "Yzyna al" stays possible this long after the client's own cancel. */
 export const RESTORE_MINUTES = 5
@@ -98,6 +98,15 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     .from(bookings)
     .where(and(eq(bookings.rescheduleOf, row.id), eq(bookings.status, 'pending')))
   const pendingMove = move && effectiveStatus(stateOf(move), now).status === 'pending' ? move : undefined
+  // a move not accepted: kept on the booking; one whose hold just ran out says so before the jobs record it, by the
+  // same rule they record it by
+  const justLapsed = move && !pendingMove && refusalCounts(row, move.holdUntil?.getTime() ?? now)
+  const moveRefused =
+    status !== 'confirmed'
+      ? null
+      : justLapsed
+        ? { date: move.date, start: move.start, end: move.end, by: 'system' as const, reason: null, text: null }
+        : row.moveRefused
   // one booking per declined or expired request: once an offer is taken the others go
   const [taker] = await db.select({ code: bookings.code }).from(bookings).where(eq(bookings.alternativeOf, row.id))
   const offersOf = async (list: TimeSlot[]) => (taker ? [] : offeredTimes(db, lb, row, list, now))
@@ -155,6 +164,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
       status === 'cancelled' && row.cancelledBy === 'system' && bookOnline ? await offersOf(row.expiredAlternatives) : [],
     bookOnline,
     offerTakenBy: taker?.code ?? null,
+    moveRefused,
     reschedule: pendingMove
       ? { date: pendingMove.date, start: pendingMove.start, end: pendingMove.end, holdUntil: pendingMove.holdUntil?.getTime() ?? null }
       : null,

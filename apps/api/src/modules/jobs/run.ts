@@ -8,15 +8,15 @@ import { DAY_MINUTES } from '@yeral/domain/hours'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { nearestSlots, nextFreeSlot, slotStaffId, staffDoingAll, type AppointmentSlot } from '@yeral/domain/availability'
-import { addDays, localOf } from '@yeral/domain/time'
+import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
 import { bookings, businesses, clients, jobs, users, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { bookingSmsText, emit, expiredSmsText, queueSms, smsCityOf, type BookingSmsKind } from '../../notify'
+import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, queueSms, smsCityOf, type BookingSmsKind } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
 import { bookedServices } from '../bookings/create'
-import { setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
+import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100
 const MAX_ATTEMPTS = 5
@@ -69,6 +69,8 @@ async function expireRequests(deps: Deps): Promise<number> {
     // answered meanwhile: setStatus refuses, nothing is sent
     await skipStale(
       deps.db.transaction(async (tx) => {
+        // a move: its booking's lock first, as every client path takes them (no deadlock with a cancel or a new move)
+        const [original] = b.rescheduleOf ? await tx.select().from(bookings).where(eq(bookings.id, b.rescheduleOf)).for('update') : []
         const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'system', at: now })
         await tx.update(bookings).set({ expiredAlternatives: alternatives }).where(eq(bookings.id, row.id))
         await emit(tx, {
@@ -78,18 +80,23 @@ async function expireRequests(deps: Deps): Promise<number> {
           bookingCode: row.code,
           userId: row.userId,
         })
-        if (!b.rescheduleOf && row.clientPhone) {
-          const [biz] = await tx.select().from(businesses).where(eq(businesses.id, row.businessId))
-          const [user] = row.userId ? await tx.select().from(users).where(eq(users.id, row.userId)) : []
-          if (biz) {
-            const text = expiredSmsText(
-              deps.site,
-              user?.lang ?? MARKET.defaultLanguage,
-              { code: row.code, date: row.date, start: row.start, businessName: biz.name, address: biz.address },
-              alternatives,
-            )
-            await queueSms(tx, { to: row.clientPhone, text, runAt: now, dedupeKey: `expired:${row.id}` })
-          }
+        // a lapsed move: the booking it would move keeps its time and says so; the client hears so while the visit is
+        // still ahead (book Q-289), checked now, not when the batch began
+        const lapsedAt = b.holdUntil?.getTime() ?? now.getTime()
+        const recorded = !!original && (await recordMoveRefused(tx, original, row, { by: 'system', reason: null, text: null }, lapsedAt))
+        const ahead = !!original && deps.now() < epochOf(original.date, original.start)
+        const told = b.rescheduleOf ? (recorded && ahead ? original : undefined) : row
+        const [biz] = told?.clientPhone ? await tx.select().from(businesses).where(eq(businesses.id, row.businessId)) : []
+        if (told?.clientPhone && biz) {
+          const [user] = told.userId ? await tx.select().from(users).where(eq(users.id, told.userId)) : []
+          const lang = user?.lang ?? MARKET.defaultLanguage
+          const sms = { code: told.code, date: told.date, start: told.start, businessName: biz.name, address: biz.address }
+          await queueSms(tx, {
+            to: told.clientPhone,
+            text: b.rescheduleOf ? moveRefusedSmsText(deps.site, lang, sms) : expiredSmsText(deps.site, lang, sms, alternatives),
+            runAt: now,
+            dedupeKey: `${b.rescheduleOf ? 'moveRefused' : 'expired'}:${row.id}`,
+          })
         }
       }),
     )

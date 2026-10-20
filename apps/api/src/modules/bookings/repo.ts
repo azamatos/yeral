@@ -2,9 +2,10 @@
 import { bookingCode } from '@yeral/domain/id'
 import type { BookingState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, CancelledBy } from '@yeral/domain/model'
+import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings } from '../../db/schema'
+import { bookingItems, bookings, type MoveRefused } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 
 export type BookingRow = typeof bookings.$inferSelect
@@ -101,6 +102,34 @@ export async function lockBooking(db: Queryable, id: string): Promise<BookingRow
   const [row] = await db.select().from(bookings).where(eq(bookings.id, id)).for('update')
   if (!row) throw new StaleBooking()
   return row
+}
+
+/**
+ * Whether a move refused at `refusedAt` counts for its booking: refused before the visit began, while the booking stood.
+ * Judged by when it was refused, not when a job gets to it, so the booking detail and the record agree.
+ */
+export const refusalCounts = (original: Pick<BookingRow, 'date' | 'start' | 'status'>, refusedAt: number) =>
+  original.status === 'confirmed' && refusedAt < epochOf(original.date, original.start)
+
+/**
+ * A move not accepted (lapsed, or declined by the business): the booking it would move keeps its time and says so
+ * (ROUND6 A3). Every path that refuses a move records it here; true when it did. The caller holds the booking's lock and
+ * decides about the SMS (book Q-289): the jobs send it while the visit is still ahead; a client action that finds a
+ * lapsed move doesn't, the client is on the screen.
+ */
+export async function recordMoveRefused(
+  db: Queryable,
+  original: BookingRow,
+  move: Pick<BookingRow, 'date' | 'start' | 'end'>,
+  refused: Pick<MoveRefused, 'by' | 'reason' | 'text'>,
+  refusedAt: number,
+): Promise<boolean> {
+  if (!refusalCounts(original, refusedAt)) return false
+  await db
+    .update(bookings)
+    .set({ moveRefused: { date: move.date, start: move.start, end: move.end, ...refused } })
+    .where(eq(bookings.id, original.id))
+  return true
 }
 
 /** Postgres refused an overlap (exclusion constraint) or a duplicate: the slot went meanwhile. */

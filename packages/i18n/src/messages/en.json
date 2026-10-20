@@ -57,6 +57,7 @@
     "declined": "{brand}: {business} can't take your booking on {date} {time}: {reason}. Pick another time: {link}",
     "expired": "{brand}: {business} didn't answer in time. Free times: {times} — {link}",
     "expiredNoTimes": "{brand}: {business} didn't answer in time. Pick another time: {link}",
+    "moveRefused": "{brand}: {business} didn't accept the new time. Your booking stays at {date} {time}. {link}",
     "cancelled": "{brand}: {business} cancelled your booking on {date} {time}: {reason}. {link}",
     "reminderDay": "Reminder: tomorrow at {time}, {business}, {address}.",
     "reminder2h": "Reminder: today at {time}, {business}, {address}.",

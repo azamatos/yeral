@@ -85,6 +85,13 @@
       "when": 1792450431804,
       "tag": "0011_one_waiting_move",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792453601316,
+      "tag": "0012_move_refused",
+      "breakpoints": true
     }
   ]
 }

@@ -13,7 +13,7 @@ import { clientIp } from '../../lib/rate-limit'
 import { emit } from '../../notify'
 import { checkCode, sendCode } from '../auth/codes'
 import { endSession, requireUser } from '../auth/session'
-import { setStatus } from '../bookings/repo'
+import { setStatus, StaleBooking } from '../bookings/repo'
 import { buildCards } from '../catalog/cards'
 import { publicBusiness } from '../catalog/detail'
 import { toMe } from './me'
@@ -126,9 +126,15 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
         .select()
         .from(bookings)
         .where(and(eq(bookings.userId, user.id), eq(bookings.active, true)))
-      for (const b of mine.filter((x) => epochOf(x.date, x.start) > now)) {
-        const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'client', at: new Date(now) })
-        await emit(tx, { type: 'booking.cancelled', businessId: row.businessId, bookingId: row.id, bookingCode: row.code })
+      // bookings before their move requests, the order every path locks them in; one the jobs settled meanwhile is done
+      const ahead = mine.filter((x) => epochOf(x.date, x.start) > now).sort((x, y) => Number(!!x.rescheduleOf) - Number(!!y.rescheduleOf))
+      for (const b of ahead) {
+        try {
+          const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'client', at: new Date(now) })
+          await emit(tx, { type: 'booking.cancelled', businessId: row.businessId, bookingId: row.id, bookingCode: row.code })
+        } catch (e) {
+          if (!(e instanceof StaleBooking)) throw e
+        }
       }
       await tx.delete(users).where(eq(users.id, user.id))
     })

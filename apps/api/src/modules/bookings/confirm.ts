@@ -63,6 +63,7 @@ export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow): 
         end: request.end,
         priceType: request.priceType,
         priceAmount: request.priceAmount,
+        moveRefused: null,
         updatedAt: at,
       })
       .where(eq(bookings.id, original.id))

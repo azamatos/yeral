@@ -73,7 +73,7 @@ Notes:
 
 > Open question Q-288: SMS texts the design doesn't have.
 
-- When a move isn't accepted, an SMS with *Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar.* and the link tells the client. (Q-289, decided 18.10.2026) **Code differs:** the code sends none.
+- When a move isn't accepted, an SMS with *Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar.* and the link tells the client. (Q-289, decided 18.10.2026; code: `sms.moveRefused`, sent when a move lapses; the business's decline sends it with P2 step 4)
 
 > Open question Q-289: SMS when a waiting move isn't accepted.
 
@@ -104,7 +104,8 @@ These are the Turkmen texts from client spec §6 next to the ones in the code (`
 | Reminder 1 day | *Ýatlatma: ertir {time} {business}, {address}.* | the same | yes |
 | Reminder 2 h | the same text as the 1-day reminder, with *ertir* (tomorrow) | *Ýatlatma: şu gün {time} {business}, {address}.* (today) | the code's text is kept (Q-293) |
 | Review ask | *{business}-da bolşuňyz nähili boldy? Baha beriň: {link}* | the same | dropped: no review ask (Q-259) |
-| Moved, move accepted, move not accepted, phone booking, specialist changed, class cancelled, invite, new owner | — | — (an accepted move reuses Confirmed) | missing; Claude writes them (Q-288, Q-289) |
+| Move not accepted | — | *{brand}: {business} didn't accept the new time. Your booking stays at {date} {time}. {link}* (English source; Turkmen and Russian drafts in the messages) | yes, when a move lapses (Q-289) |
+| Moved, move accepted, phone booking, specialist changed, class cancelled, invite, new owner | — | — (an accepted move reuses Confirmed) | missing; Claude writes them (Q-288) |
 
 Notes:
 

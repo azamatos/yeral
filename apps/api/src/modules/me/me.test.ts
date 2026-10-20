@@ -131,6 +131,7 @@ describe('account', () => {
         '/v1/me/bookings/{code}/reschedule',
         '/v1/me/bookings/{code}/restore',
         '/v1/me/bookings/{code}/review',
+        '/v1/me/bookings/{code}/withdraw-move',
         '/v1/me/favorites',
         '/v1/me/favorites/{slug}',
         '/v1/me/phone/code',

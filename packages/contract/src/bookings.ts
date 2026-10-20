@@ -160,6 +160,21 @@ export const bookingDetailSchema = bookingSummarySchema
      * decline stay: the business made them.
      */
     bookOnline: z.boolean(),
+    /**
+     * The last move the business declined or let lapse, while the booking keeps its time: "Täze wagt kabul edilmedi —
+     * ýazylyşyňyz öňki wagtynda galýar." (ROUND6 A3), with the reason when the business gave one. Gone once another
+     * move is asked or the visit is over.
+     */
+    moveRefused: z
+      .object({
+        date: ymdSchema,
+        start: startMinuteSchema,
+        end: minuteSchema,
+        by: z.enum(['business', 'system']),
+        reason: z.enum(DECLINE_REASONS).nullable(),
+        text: z.string().nullable(),
+      })
+      .nullable(),
     /** A pending move of this booking: the original stays confirmed until the business answers. */
     reschedule: z.object({ date: ymdSchema, start: startMinuteSchema, end: minuteSchema, holdUntil: epochSchema.nullable() }).nullable(),
     actions: z.object({
