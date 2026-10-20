@@ -25,10 +25,10 @@ import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
 import { loadHours } from '../availability/context'
-import { bookedServicesOf, cancelForBusiness, declineForBusiness } from '../bookings/engine'
+import { bookedServices, cancelForBusiness, declineForBusiness } from '../bookings/engine'
 import { alternativesContext, pickAlternatives } from '../bookings/offers'
-import { lockBooking, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
-import { bookingsAhead, saveHours, staffOnBookings } from './repo'
+import { itemsOfBookings, lockBooking, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
+import { bookingsAhead, saveHours } from './repo'
 
 type HoursView = z.infer<typeof businessHoursSettingsSchema>
 type HoursChange = z.infer<typeof businessHoursUpdateSchema>
@@ -98,7 +98,7 @@ async function affectedBy(db: Queryable, businessId: string, was: BusinessHours,
 
 /** "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1" (most first), and each booking with its client and specialists. */
 async function detailsOf(db: Queryable, rows: readonly BookingRow[]): Promise<BookingsAffectedDetails> {
-  const items = await staffOnBookings(
+  const items = await itemsOfBookings(
     db,
     rows.map((r) => r.id),
   )
@@ -140,7 +140,6 @@ async function cancelWithOffers(
 ): Promise<number> {
   let ctx = await alternativesContext(tx, businessId, now)
   const exclude = rows.map((r) => r.id)
-  const booked = await bookedServicesOf(tx, exclude)
   const at = new Date(now)
   let cancelled = 0
   for (const b of rows) {
@@ -161,7 +160,8 @@ async function cancelWithOffers(
       continue
     let offers: BookingRow['declineAlternatives'] = []
     if (ctx && row.type === 'appointment') {
-      const picked = pickAlternatives(ctx, row, booked.get(row.id)!, exclude)
+      // read under its lock: a move confirmed meanwhile may have changed them
+      const picked = pickAlternatives(ctx, row, await bookedServices(tx, row.id), exclude)
       offers = picked.offers
       ctx = { ...ctx, busy: [...ctx.busy, ...picked.held] }
     }

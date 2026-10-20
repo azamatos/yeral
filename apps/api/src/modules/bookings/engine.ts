@@ -9,16 +9,16 @@ import { cancelledByFor, effectiveStatus, firstSmsFrom, isConfirmationNews, type
 import { MARKET } from '@yeral/domain/market'
 import { isTeamSource, type BusinessCancelReason, type DeclineReason } from '@yeral/domain/model'
 import { priceTotal } from '@yeral/domain/pricing'
-import { and, asc, eq, inArray } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, type TimeSlot } from '../../db/schema'
+import { bookings, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { emit, queueOutcomeSms } from '../../notify'
-import type { LoadedBusiness } from '../availability/context'
+import { OutsideHours, type LoadedBusiness } from '../availability/context'
 import { servicePrice } from '../catalog/map'
 import { newsJobs } from './confirm'
-import { isSlotConflict, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from './repo'
+import { isSlotConflict, itemsOfBookings, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from './repo'
 
 // ── Items and price ──
 
@@ -52,7 +52,8 @@ export function itemRows(lb: LoadedBusiness, bookingId: string, date: string, sl
 
 /**
  * Run the insert; a race lost to another booking becomes 409 slot_taken with the nearest free times, and so does a time
- * the hours no longer hold (`assertOpenAt`: a save of the hours just committed). Inside a transaction: a savepoint.
+ * the hours no longer hold (`OutsideHours`: a save of the hours just committed), so `alternatives` reads the business
+ * as it stands. Inside a transaction: a savepoint.
  */
 export async function inTransaction<T>(
   deps: Deps,
@@ -63,8 +64,7 @@ export async function inTransaction<T>(
   try {
     return await db.transaction(fn)
   } catch (e) {
-    const outsideHours = e instanceof ApiError && e.code === 'slot_taken' && !(e.details?.alternatives as unknown[] | undefined)?.length
-    if (isSlotConflict(e) || outsideHours) throw new ApiError('slot_taken', { alternatives: await alternatives() })
+    if (isSlotConflict(e) || e instanceof OutsideHours) throw new ApiError('slot_taken', { alternatives: await alternatives() })
     throw e
   }
 }
@@ -80,13 +80,7 @@ export interface BookedServices {
 
 /** `bookedServices` for several bookings in one query. */
 export async function bookedServicesOf(db: Queryable, bookingIds: readonly string[]): Promise<Map<string, BookedServices>> {
-  const items = bookingIds.length
-    ? await db
-        .select({ bookingId: bookingItems.bookingId, serviceId: bookingItems.serviceId, staffId: bookingItems.staffId })
-        .from(bookingItems)
-        .where(inArray(bookingItems.bookingId, [...bookingIds]))
-        .orderBy(asc(bookingItems.sort))
-    : []
+  const items = await itemsOfBookings(db, bookingIds)
   return new Map(
     bookingIds.map((id) => {
       const mine = items.filter((i) => i.bookingId === id)

@@ -148,7 +148,6 @@ export async function rescheduleBooking(
       rescheduleOf: locked.id,
       db: tx,
       booked,
-      lb,
     })
     const [fresh] = await tx.select().from(bookings).where(eq(bookings.id, b.id))
     if (!fresh) throw new ApiError('not_found')

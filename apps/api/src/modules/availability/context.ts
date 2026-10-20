@@ -150,10 +150,19 @@ export async function loadHours(db: Queryable, businessId: string, opts: { lock?
  */
 export const lockedHours = (db: Queryable, businessId: string) => loadHours(db, businessId, { lock: 'share' })
 
-/** A booking about to take its time still falls inside the hours as they stand (`lockedHours`); else 409 slot_taken. */
+/**
+ * A time the hours as they stand no longer hold (book Q-211): 409 `slot_taken`, to which `inTransaction` adds the
+ * nearest free times under those hours.
+ */
+export class OutsideHours extends ApiError {
+  constructor() {
+    super('slot_taken', { alternatives: [] })
+  }
+}
+
+/** A booking about to take its time still falls inside the hours as they stand (`lockedHours`); else `OutsideHours`. */
 export async function assertOpenAt(db: Queryable, businessId: string, b: { date: string; start: number; end: number }): Promise<void> {
-  if (!withinHours(await lockedHours(db, businessId), b.date, { start: b.start, end: b.end }))
-    throw new ApiError('slot_taken', { alternatives: [] })
+  if (!withinHours(await lockedHours(db, businessId), b.date, { start: b.start, end: b.end })) throw new OutsideHours()
 }
 
 /** One business with what free times need; 404 when it's gone. */

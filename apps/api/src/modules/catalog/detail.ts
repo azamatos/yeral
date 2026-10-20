@@ -8,7 +8,7 @@ import type { Locale } from '@yeral/domain/model'
 import { LATE_MINUTES } from '@yeral/domain/rules'
 import { addDays, today } from '@yeral/domain/time'
 import { and, asc, eq, gte, isNull, lte, ne } from 'drizzle-orm'
-import type { Queryable } from '../../db/client'
+import { all, type Queryable } from '../../db/client'
 import { bookings, businesses, categories, serviceGroups, staff, tableAreas } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
@@ -30,24 +30,26 @@ async function typicalAnswerOf(db: Queryable, b: BusinessRow, instant: boolean, 
   if (instant) return null
   const since = new Date(now - TYPICAL_ANSWER_DAYS * 86_400_000)
   const until = new Date(now)
-  const [answered, lapsed] = await Promise.all([
-    db
-      .select({ from: bookings.createdAt, to: bookings.answeredAt })
-      .from(bookings)
-      .where(and(eq(bookings.businessId, b.id), gte(bookings.answeredAt, since), lte(bookings.answeredAt, until))),
-    db
-      .select({ from: bookings.createdAt, to: bookings.cancelledAt })
-      .from(bookings)
-      .where(
-        and(
-          eq(bookings.businessId, b.id),
-          eq(bookings.cancelledBy, 'system'),
-          isNull(bookings.confirmedAt),
-          isNull(bookings.rescheduleOf),
-          gte(bookings.cancelledAt, since),
-          lte(bookings.cancelledAt, until),
+  const [answered, lapsed] = await all(db, [
+    () =>
+      db
+        .select({ from: bookings.createdAt, to: bookings.answeredAt })
+        .from(bookings)
+        .where(and(eq(bookings.businessId, b.id), gte(bookings.answeredAt, since), lte(bookings.answeredAt, until))),
+    () =>
+      db
+        .select({ from: bookings.createdAt, to: bookings.cancelledAt })
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.businessId, b.id),
+            eq(bookings.cancelledBy, 'system'),
+            isNull(bookings.confirmedAt),
+            isNull(bookings.rescheduleOf),
+            gte(bookings.cancelledAt, since),
+            lte(bookings.cancelledAt, until),
+          ),
         ),
-      ),
   ])
   const waits = (rows: { from: Date; to: Date | null }[]) => rows.map((r) => openMinutesBetween(b, r.from.getTime(), r.to!.getTime()))
   return typicalAnswerMinutes(waits(answered), waits(lapsed))

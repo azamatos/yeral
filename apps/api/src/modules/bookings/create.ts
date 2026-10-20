@@ -29,6 +29,7 @@ import { emit } from '../../notify'
 import {
   appointmentContext,
   checkStaff,
+  OutsideHours,
   lockedHours,
   loadBusiness,
   loadBusy,
@@ -127,7 +128,7 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
   // the hours as they stand (an hours save may have just committed): the visit in them, the hold counted by them; a
   // class runs on its session's own schedule
   const hours = await lockedHours(db, x.lb.business.id)
-  if (x.type !== 'class' && !withinHours(hours, x.date, { start: x.start, end })) throw new ApiError('slot_taken', { alternatives: [] })
+  if (x.type !== 'class' && !withinHours(hours, x.date, { start: x.start, end })) throw new OutsideHours()
   const [row] = await db
     .insert(bookings)
     .values({
@@ -243,14 +244,14 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
       throw new ApiError('party_too_large', { callFrom: MAX_ONLINE_PARTY + 1 } satisfies PartyTooLargeDetails)
     const ctx = await loadTableContext(db, lb, input.date, input.date, now)
     const tableId = assignTable(ctx, { date: input.date, start: input.start, partySize: input.partySize, areaId: input.areaId })
-    const nearest = () =>
-      tableSlots(ctx, { date: input.date, partySize: input.partySize })
+    const nearestIn = (c: typeof ctx) =>
+      tableSlots(c, { date: input.date, partySize: input.partySize })
         .filter((s) => s.areaIds.includes(input.areaId) && s.start !== input.start)
         .sort((x, y) => Math.abs(x.start - input.start) - Math.abs(y.start - input.start))
         .slice(0, MAX_ALTERNATIVES)
         .sort((x, y) => x.start - y.start)
-        .map((s) => ({ date: input.date, start: s.start, end: s.start + ctx.sittingMinutes }))
-    if (!tableId) throw new ApiError('slot_taken', { alternatives: nearest() })
+        .map((s) => ({ date: input.date, start: s.start, end: s.start + c.sittingMinutes }))
+    if (!tableId) throw new ApiError('slot_taken', { alternatives: nearestIn(ctx) })
     const table = {
       tableId,
       areaId: input.areaId,
@@ -271,7 +272,8 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
           status,
           note: input.note,
         }),
-      () => Promise.resolve(nearest()),
+      // as the business stands now: its hours may have just changed
+      async () => nearestIn(await loadTableContext(db, await loadBusiness(db, b.id), input.date, input.date, deps.now())),
     )
   }
 

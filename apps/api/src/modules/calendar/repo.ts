@@ -7,7 +7,8 @@ import { ApiError } from '../../http/errors'
 import { unusedSince } from '../auth/sign-in'
 import { awaitingAnswer, itemsOf, type BookingRow, type ItemRow } from '../bookings/repo'
 
-interface Business {
+/** A workspace as the calendar needs it. */
+export interface Business {
   id: string
 }
 

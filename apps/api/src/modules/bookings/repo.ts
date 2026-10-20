@@ -3,7 +3,7 @@ import { bookingCode } from '@yeral/domain/id'
 import type { BookingState, LifecycleError, RestoreState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, BusinessCancelReason, CancelledBy, DeclineReason } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
-import { and, eq, gt, sql } from 'drizzle-orm'
+import { and, asc, eq, gt, inArray, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, type MoveRefused, type TimeSlot } from '../../db/schema'
 import { ApiError } from '../../http/errors'
@@ -60,7 +60,17 @@ export async function myBooking(db: Queryable, userId: string, code: string): Pr
 }
 
 export async function itemsOf(db: Queryable, bookingId: string): Promise<ItemRow[]> {
-  return db.select().from(bookingItems).where(eq(bookingItems.bookingId, bookingId)).orderBy(bookingItems.sort)
+  return itemsOfBookings(db, [bookingId])
+}
+
+/** These bookings' items, each booking's in its order. */
+export async function itemsOfBookings(db: Queryable, bookingIds: readonly string[]): Promise<ItemRow[]> {
+  if (!bookingIds.length) return []
+  return db
+    .select()
+    .from(bookingItems)
+    .where(inArray(bookingItems.bookingId, [...bookingIds]))
+    .orderBy(asc(bookingItems.sort))
 }
 
 /** A fresh code; grows to 6 digits if 5-digit codes keep colliding. */

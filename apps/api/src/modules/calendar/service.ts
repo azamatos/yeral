@@ -52,16 +52,13 @@ import { appointmentPrice, cancelForBusiness, dropPendingMove, inTransaction, it
 import { retimeAddressSms } from '../bookings/address-sms'
 import { extendBookingLinks } from '../bookings/links'
 import { freshCode, guard, isSlotConflict, stateOf, type BookingRow, type ItemRow } from '../bookings/repo'
-import { assertNoWaitingMove, phoneClient, specialistAccounts, teamBooking } from './repo'
+import { assertNoWaitingMove, phoneClient, specialistAccounts, teamBooking, type Business } from './repo'
 
 type FreeTimesQuery = z.infer<typeof freeTimesQuerySchema>
 type FreeTimes = z.infer<typeof freeTimesSchema>
 type NewBooking = z.infer<typeof newBookingSchema>
 type MoveInput = z.infer<typeof moveBookingSchema>
 type CancelInput = z.infer<typeof businessCancelSchema>
-interface Business {
-  id: string
-}
 
 /** "Iň ýakyn boş wagtlar": the first 4 free starts in 14 days (design COMPONENTS, NewBookingDrawer). */
 const NEAREST = 4

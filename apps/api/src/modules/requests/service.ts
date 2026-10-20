@@ -13,7 +13,7 @@ import { canAnswerRequest, canOn, type Actor } from '@yeral/domain/permissions'
 import type { RequestAnswerers } from '@yeral/domain/rules'
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 import type { z } from 'zod'
-import type { Queryable } from '../../db/client'
+import { all, type Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, staff, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
@@ -77,24 +77,26 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
   if (!rows.length) return []
   const originalIds = rows.flatMap((r) => (r.rescheduleOf ? [r.rescheduleOf] : []))
   const clientIds = [...new Set(rows.flatMap((r) => (r.clientId ? [r.clientId] : [])))]
-  const [items, answerers, originals, history] = await Promise.all([
-    requestItems(
-      db,
-      rows.map((r) => r.id),
-    ),
-    answerersOf(db, business.id),
-    originalIds.length ? db.select().from(bookings).where(inArray(bookings.id, originalIds)) : [],
-    clientIds.length
-      ? db
-          .select({
-            clientId: bookings.clientId,
-            visits: sql<number>`count(*) filter (where ${bookings.status} = 'completed')::int`,
-            noShows: sql<number>`count(*) filter (where ${bookings.status} = 'noshow')::int`,
-          })
-          .from(bookings)
-          .where(and(eq(bookings.businessId, business.id), inArray(bookings.clientId, clientIds)))
-          .groupBy(bookings.clientId)
-      : [],
+  const [items, answerers, originals, history] = await all(db, [
+    () =>
+      requestItems(
+        db,
+        rows.map((r) => r.id),
+      ),
+    () => answerersOf(db, business.id),
+    async () => (originalIds.length ? db.select().from(bookings).where(inArray(bookings.id, originalIds)) : []),
+    async () =>
+      clientIds.length
+        ? db
+            .select({
+              clientId: bookings.clientId,
+              visits: sql<number>`count(*) filter (where ${bookings.status} = 'completed')::int`,
+              noShows: sql<number>`count(*) filter (where ${bookings.status} = 'noshow')::int`,
+            })
+            .from(bookings)
+            .where(and(eq(bookings.businessId, business.id), inArray(bookings.clientId, clientIds)))
+            .groupBy(bookings.clientId)
+        : [],
   ])
   return rows.flatMap((r) => {
     const mine = items.filter((i) => i.item.bookingId === r.id)

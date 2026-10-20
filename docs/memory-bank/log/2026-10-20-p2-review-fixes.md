@@ -63,12 +63,16 @@ It found 15 issues; all hold. The plan, one PR each, reviewed before merging, in
    `lockedHours` on it); the "heard" window in the domain (`firstSmsFrom`, used by `queueBookingSms`, `clientUnaware`
    and the address SMS) and the booking sources tested; one `invalid()` (`http/errors.ts`), which also gives two team
    endpoints the contract's `issues` shape; `setStatus` writes a decline's reason and offered times in its one update;
-   the booked services loaded together for an hours cancel and for "Upcoming"; `checkPlan` gone (tests use
-   `planRefusal`); the client's move reads the business once (`rebook` takes it). Two from PR 2's list: a time the
-   hours closed meanwhile comes back with the nearest free times (`inTransaction` fills a refusal that names none,
-   from the business as it stands); independent queries go through `all(db, [...])`, one after another in a
-   transaction (pg 9 refuses overlapping ones; the test run's deprecation warnings are gone). techContext's "Where
-   shared things live" and systemPatterns' module map follow.
+   the booked services loaded together for "Upcoming" (an hours cancel reads each booking's under its lock); one
+   items query for many bookings (`itemsOfBookings`); `checkPlan` gone (tests use `planRefusal`); an offered time
+   taken reads the business once (`rebook` takes it; a client's move still loads it inside its transaction, under the
+   hours' lock). Two from PR 2's list: a time the hours closed meanwhile comes back with the nearest free times
+   (`OutsideHours`, which `inTransaction` fills from the business as it stands, tables too); independent queries go
+   through `all(db, [...])`, one after another in a transaction (pg 9 refuses overlapping ones; the test run's
+   deprecation warnings are gone). techContext's "Where shared things live" and systemPatterns' module map follow.
+   Its review (8 findings, all fixed): the table path's stale times, the client's move with a business read before
+   its lock, the empty-list sentinel (now the `OutsideHours` class), services read before the lock, four more
+   `Promise.all` on a `Queryable`, the repeated items query, a duplicated type, services loaded for dropped rows.
 5. **SMS caps** (P2 step 7, before SMS go out): a daily cap and rate limit per business on the SMS its team sends to
    numbers it types in, none from a business in review. In chapter 10's step 7.
 
