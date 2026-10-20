@@ -29,7 +29,6 @@ export const notificationPrefsSchema = z.object({
   confirmation: z.boolean(),
   reminderDay: z.boolean(),
   reminder2h: z.boolean(),
-  reviewAsk: z.boolean(),
 })
 
 export const meSchema = z

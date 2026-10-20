@@ -38,7 +38,7 @@ describe('reminders and the night (book Q-285)', () => {
     await queueBookingSms(db, t.deps, row!, { confirmed: false })
     const queued = await db.select({ payload: jobs.payload, runAt: jobs.runAt }).from(jobs).where(eq(jobs.kind, 'booking.sms'))
     const mine = queued.filter((j) => (j.payload as { bookingId: string }).bookingId === row!.id)
-    expect(mine.map((j) => (j.payload as { kind: string }).kind).sort()).toEqual(['reminderEvening', 'reviewAsk'])
+    expect(mine.map((j) => (j.payload as { kind: string }).kind).sort()).toEqual(['reminderEvening'])
     const evening = mine.find((j) => (j.payload as { kind: string }).kind === 'reminderEvening')!
     expect(evening.runAt.getTime()).toBe(epochOf('2026-10-15', 1290))
 

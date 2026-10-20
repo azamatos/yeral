@@ -22,7 +22,7 @@ flowchart LR
 - Every minute the system makes one pass (code: `modules/jobs/run.ts`, `modules/jobs/tick.ts`; ADR 0017):
   1. It ends requests and move requests whose answer time ran out (S-01, S-07).
   2. It marks finished visits *Tamamlandy* (S-02).
-  3. It sends what's queued: SMS and reminders (S-04, S-21). Outside production it also sends the demo businesses' own answers (S-20). **Code differs:** it also sends review asks, which aren't in the MVP (S-05; Q-259).
+  3. It sends what's queued: SMS and reminders (S-04, S-21). Outside production it also sends the demo businesses' own answers (S-20). No review asks (S-05; Q-259).
 - Two passes never run at the same time. Each pass handles up to 100 items of each kind, and the rest wait for the next minute.
 - Screens don't wait for the pass. From the exact deadline, a request already shows as expired and a finished visit as completed (code: `packages/domain/src/lifecycle.ts`). The pass then saves what people already see.
 - A pass every minute keeps the database awake, and that costs compute hours on a free product (`docs/memory-bank/operations.md`). Ýeral accepts that cost: the pass runs every minute, as built (Q-250, decided 18.10.2026).
@@ -262,7 +262,7 @@ flowchart TD
 - **Code differs:** the api plans a review ask with each confirmation and sends *{business}-da bolşuňyz nähili boldy? Baha beriň: {link}* 2 hours after the end, at any hour, while the client's *Teswir haýyşy* switch is on (code: `modules/bookings/confirm.ts`, `modules/jobs/run.ts`). It must stop.
 - **Design to fix:** drop the *Teswir haýyşy* switch from Account-Profile, leaving 3 client SMS switches (Q-259).
 
-**Status.** Not in the MVP (Q-259) · Design: *Teswir ýaz* on the completed booking drawn (client spec §4.8); the link page's completed state not drawn (Q-170) · Code: the review ask is built in the api and must stop.
+**Status.** Not in the MVP (Q-259) · Design: *Teswir ýaz* on the completed booking drawn (client spec §4.8); the link page's completed state not drawn (Q-170) · Code: no review ask (stopped 20.10.2026; asks queued before are dropped).
 
 ### S-06 · A reported review stops counting
 

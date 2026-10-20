@@ -14,7 +14,6 @@ export async function toMe(db: Queryable, user: User): Promise<Me> {
       confirmation: user.notifyConfirmation,
       reminderDay: user.notifyReminderDay,
       reminder2h: user.notifyReminder2h,
-      reviewAsk: user.notifyReviewAsk,
     },
     hasBusiness: workspaces.length > 0,
   }

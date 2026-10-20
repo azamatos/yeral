@@ -200,7 +200,7 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
 async function sendBookingSms(
   deps: Deps,
   bookingId: string,
-  kind: BookingSmsKind | OutcomeSmsKind,
+  kind: BookingSmsKind | OutcomeSmsKind | 'reviewAsk',
   at: { date?: unknown; start?: unknown; covers?: unknown },
 ): Promise<void> {
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
@@ -208,8 +208,8 @@ async function sendBookingSms(
   if (!b?.clientPhone || b.accountDeletedAt) return
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   if (kind === 'expired' || kind === 'moveRefused') return sendOutcomeSms(deps, b, kind)
-  const wanted = kind === 'reviewAsk' ? b.status === 'completed' || b.status === 'confirmed' : b.status === 'confirmed'
-  if (!wanted) return
+  // review asks queued before they went (book Q-259) are dropped
+  if (kind === 'reviewAsk' || b.status !== 'confirmed') return
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const [client] = b.clientId ? await deps.db.select().from(clients).where(eq(clients.id, b.clientId)) : []
   if (client?.noRemindersSms && kind !== 'confirmed') return
@@ -218,7 +218,6 @@ async function sendBookingSms(
       confirmed: user.notifyConfirmation,
       reminderDay: user.notifyReminderDay,
       reminder2h: user.notifyReminder2h,
-      reviewAsk: user.notifyReviewAsk,
     }
     // a reminder moved out of the night goes if one of the reminders it stands for is wanted
     const covers = Array.isArray(at.covers) ? (at.covers as (keyof typeof prefs)[]) : []
@@ -238,7 +237,7 @@ async function sendBookingSms(
   // the texts with a link get one of their own (book Q-168)
   // the person's phone now: a changed number gets them, the old one nothing more (book Q-171)
   const to = user?.phone ?? b.clientPhone
-  if (kind === 'confirmed' || kind === 'reviewAsk') await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
+  if (kind === 'confirmed') await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
   else await deps.sms.send({ to, text: bookingSmsText(lang, kind, sms) })
 }
 
@@ -264,7 +263,8 @@ async function runQueue(deps: Deps): Promise<number> {
     try {
       const p = job.payload
       if (job.kind === 'sms') await deps.sms.send({ to: String(p.to), text: String(p.text) })
-      else if (job.kind === 'booking.sms') await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p)
+      else if (job.kind === 'booking.sms')
+        await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind | 'reviewAsk', p)
       else if (job.kind === 'demo.answer') {
         const [b] = await deps.db
           .select()

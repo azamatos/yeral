@@ -13,20 +13,16 @@ import { emit, type BookingSmsKind } from '../../notify'
 import { extendBookingLinks } from './links'
 import { lockBooking, setStatus, StaleBooking, type BookingRow } from './repo'
 
-const HOUR = 3_600_000
-
 /**
  * Queue the booking's SMS: confirmed now, the reminders (a day and 2 h before, none at night: `reminderPlan`), the
- * review ask 2 h after the end.
+ * no review ask (book Q-259: clients review from my bookings and the link page).
  */
 export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, opts: { confirmed: boolean }): Promise<void> {
   const now = deps.now()
   const start = epochOf(b.date, b.start)
-  const end = epochOf(b.date, b.end)
   const due: { kind: BookingSmsKind; runAt: number; covers?: readonly string[] }[] = [
     ...(opts.confirmed ? [{ kind: 'confirmed' as const, runAt: now }] : []),
     ...reminderPlan(start, now),
-    { kind: 'reviewAsk', runAt: end + 2 * HOUR },
   ]
   if (!due.length) return
   await db

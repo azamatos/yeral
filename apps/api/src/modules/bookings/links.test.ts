@@ -1,5 +1,5 @@
 /** SMS links to a booking (book Q-168, Q-169, F-068). */
-import { epochOf } from '@yeral/domain/time'
+import { addDays, epochOf } from '@yeral/domain/time'
 import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
@@ -35,13 +35,29 @@ describe('SMS links', () => {
     t = testApp(db)
   })
 
+  /** One more "confirmed" SMS for the booking, as a business answer sends (a key of its own, so it isn't a duplicate). */
+  let resent = 0
+  async function queueConfirmed(code: string) {
+    const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
+    await db.insert(jobs).values({
+      kind: 'booking.sms',
+      runAt: new Date(t.clock.now),
+      payload: { bookingId: row!.id, kind: 'confirmed', date: row!.date, start: row!.start },
+      dedupeKey: `test-confirmed-${resent++}`,
+    })
+  }
+
   /** A confirmed booking of `phone` and the token from its "confirmed" SMS. */
   async function confirmedWithLink(phone: string) {
     const b = browser(t.app)
     await b.login(phone, 'Läle')
-    const slots = (await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&date=${THU}`)).json.slots
+    // the first free time from Thursday on: the tests in this file fill Thursday up
+    let date = THU
+    let slots: { start: number }[] = []
+    for (; !slots.length && date < addDays(THU, 14); slots.length || (date = addDays(date, 1)))
+      slots = (await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&date=${date}`)).json.slots
     const made = await b.req('/v1/bookings', {
-      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: null, date: THU, start: slots[0].start },
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: null, date, start: slots[0]!.start },
     })
     const [row] = await db.select().from(bookings).where(eq(bookings.code, made.json.code))
     await db.transaction((tx) => confirmBooking(tx, t.deps, row!))
@@ -181,27 +197,26 @@ describe('SMS links', () => {
     expect((await b.req('/v1/me/phone/code', { body: { phone: '+99365444312' } })).status).toBe(200)
     expect((await b.req('/v1/me/phone/verify', { body: { phone: '+99365444312', code: '1234' } })).status).toBe(200)
     expect((await browser(t.app).req(`/v1/links/${token}`)).status).toBe(404)
-    // the next booking SMS (the review ask after the visit) goes to the new number, with a link that works
-    const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
-    t.clock.now = epochOf(row!.date, row!.end) + 3 * 3_600_000
+    // the next booking SMS with a link goes to the new number, and the link works
+    await queueConfirmed(code)
     await runDueJobs(t.deps)
     const sms = t.sms.sent.filter((x) => x.to === '+99365444312').at(-1)?.text
     expect((await browser(t.app).req(`/v1/links/${tokenOf(sms)}`)).status).toBe(200)
-    expect(t.sms.sent.filter((x) => x.to === '+99365444311' && x.text.includes('Rate it'))).toEqual([])
+    // the old number got only the first confirmation, before the change
+    expect(t.sms.sent.filter((x) => x.to === '+99365444311' && x.text.includes('confirmed your booking')).length).toBe(1)
   })
 
   it('a failed send keeps no token in the stored error', async () => {
     const { b, code } = await confirmedWithLink('+99365444316')
     void b
-    const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
     const failing = {
       ...t.deps,
       sms: { send: (m: { text: string }) => Promise.reject(new Error(`400 Bad Request: {"text":"${m.text.replace(/\//g, '\\/')}"}`)) },
     }
-    t.clock.now = epochOf(row!.date, row!.end) + 3 * 3_600_000
+    await queueConfirmed(code)
     await runDueJobs(failing)
     const failed = await db.select({ error: jobs.error }).from(jobs).where(eq(jobs.kind, 'booking.sms'))
-    const errors = failed.map((j) => j.error ?? '').filter((e) => e.includes('Rate it'))
+    const errors = failed.map((j) => j.error ?? '').filter((e) => e.includes('confirmed your booking'))
     expect(errors.length).toBeGreaterThan(0)
     for (const e of errors) expect(e).toMatch(/l\\\/…/)
   })
@@ -239,8 +254,9 @@ describe('SMS links', () => {
   it('a confirmed move keeps the links working until 90 days after the new visit', async () => {
     const { b, code, token } = await confirmedWithLink('+99365444314')
     const later = '2026-11-12'
-    const slots = (await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&staff=any&date=${later}&move=${code}`)).json
-      .slots
+    const res = await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&staff=any&date=${later}&move=${code}`)
+    const slots = res.json.slots
+    expect(slots?.length, JSON.stringify(res.json)).toBeGreaterThan(0)
     await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: later, start: slots[0].start, staffId: null } })
     const [orig] = await db.select().from(bookings).where(eq(bookings.code, code))
     const [move] = await db.select().from(bookings).where(eq(bookings.rescheduleOf, orig!.id))

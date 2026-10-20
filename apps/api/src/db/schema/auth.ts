@@ -14,7 +14,6 @@ export const users = pgTable('users', {
   notifyConfirmation: boolean().notNull().default(true),
   notifyReminderDay: boolean().notNull().default(true),
   notifyReminder2h: boolean().notNull().default(true),
-  notifyReviewAsk: boolean().notNull().default(true),
   createdAt: createdAt(),
 })
 

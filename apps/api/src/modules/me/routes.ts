@@ -98,7 +98,6 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
         ...(n?.confirmation !== undefined ? { notifyConfirmation: n.confirmation } : {}),
         ...(n?.reminderDay !== undefined ? { notifyReminderDay: n.reminderDay } : {}),
         ...(n?.reminder2h !== undefined ? { notifyReminder2h: n.reminder2h } : {}),
-        ...(n?.reviewAsk !== undefined ? { notifyReviewAsk: n.reviewAsk } : {}),
       })
       .where(eq(users.id, user.id))
       .returning()

@@ -61,8 +61,7 @@
     "moveRefused": "{brand}: {business} не принял новое время — запись остаётся на {date} {time}. {link}",
     "cancelled": "{brand}: {business} отменил вашу запись на {date} {time}: {reason}. {link}",
     "reminderDay": "Напоминание: завтра в {time} {business}, {address}.",
-    "reminder2h": "Напоминание: сегодня в {time} {business}, {address}.",
-    "reviewAsk": "Как прошёл визит в {business}? Оцените: {link}"
+    "reminder2h": "Напоминание: сегодня в {time} {business}, {address}."
   },
   "fmt": {
     "money": "{amount} {currency}",

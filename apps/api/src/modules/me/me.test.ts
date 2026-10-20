@@ -38,7 +38,7 @@ describe('account', () => {
     const res = await b.req('/v1/me', { method: 'PATCH', body: { lang: 'en', notifications: { reminderDay: false } } })
     expect(res.json).toMatchObject({
       lang: 'en',
-      notifications: { confirmation: true, reminderDay: false, reminder2h: true, reviewAsk: true },
+      notifications: { confirmation: true, reminderDay: false, reminder2h: true },
     })
   })
 
