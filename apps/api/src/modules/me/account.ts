@@ -5,11 +5,12 @@
 import { epochOf, today } from '@yeral/domain/time'
 import { and, desc, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingLinks, bookingRules, bookings, clientNotes, clients, invites, staff, users } from '../../db/schema'
+import { bookingLinks, bookingRules, bookings, clientNotes, clients, invites, reviews, staff, users } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { linkPhone, recentRecord, unheldBooking } from '../auth/sign-in'
+import { refreshRating } from '../bookings/actions'
 import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
 import { blockedByCount } from '../clients/online'
 import { teamChanged } from '../team/service'
@@ -38,8 +39,8 @@ export async function cancelInvitesTo(
  * one back, and its bookings are left behind: they never join whoever signs in with the number next and send no more
  * SMS.
  *
- * `deleted` (book Q-172): the bookings ahead are cancelled, invites to the number too, and every link to the number
- * stops working, phone bookings made for it since the last sign-in included. The businesses' records keep the number:
+ * `deleted` (book Q-172): the bookings ahead are cancelled, the reviews deleted, invites to the number cancelled, and
+ * every link to the number stops working, phone bookings made for it since the last sign-in included. The businesses' records keep the number:
  * the person may well come back with it.
  *
  * `passedOn` ("Is this you?" answered "No", Q-270): the number is someone else's now. What was sent to it lately is
@@ -89,6 +90,15 @@ export async function releaseAccount(tx: Queryable, user: User, now: number, how
         if (!(e instanceof StaleBooking)) throw e
       }
     }
+  }
+  // a deleted account's reviews go, and the businesses' ratings no longer count them (book Q-172); a number that passed
+  // on leaves the earlier holder's reviews standing, signed as they were
+  if (how === 'deleted') {
+    const gone = await tx
+      .delete(reviews)
+      .where(eq(reviews.userId, user.id))
+      .returning({ businessId: reviews.businessId, rating: reviews.rating })
+    for (const r of gone) await refreshRating(tx, r.businessId, { remove: r.rating })
   }
   await tx.update(bookings).set({ accountDeletedAt: at }).where(eq(bookings.userId, user.id))
   // links to the number: phone bookings made for it since the last sign-in keep their SMS with new links (book Q-168)

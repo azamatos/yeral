@@ -5,7 +5,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingRules, bookings, businesses, clientNotes, clients, invites, rateLimits, staff, users } from '../../db/schema'
+import { bookingRules, bookings, businesses, clientNotes, clients, invites, rateLimits, reviews, staff, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 
 describe('account', () => {
@@ -211,9 +211,28 @@ describe('account', () => {
     expect(leyla[0]).toMatchObject({ id: mine!.id, phone: newPhone, noShowsSince: at(5) })
   })
 
-  it('deleting the account cancels upcoming bookings and signs out', async () => {
+  it('deleting the account cancels upcoming bookings, deletes the reviews and signs out (book Q-172)', async () => {
     const b = browser(t.app)
-    await b.login('+99365222004', 'Aman')
+    const { me } = await b.login('+99365222004', 'Aman')
+    // a visit yesterday, reviewed
+    const [loft] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    await db.insert(bookings).values({
+      code: 'YR-995101',
+      businessId: loft!.id,
+      type: 'appointment',
+      date: addDays(today(t.clock.now), -1),
+      start: 600,
+      end: 660,
+      status: 'completed',
+      completedAt: new Date(t.clock.now - 86_400_000),
+      source: 'web',
+      clientPhone: '+99365222004',
+      clientName: 'Aman',
+      userId: me.id,
+    })
+    expect((await b.req('/v1/me/bookings/YR-995101/review', { body: { rating: 1, text: 'Ýaramady' } })).status).toBe(200)
+    const [reviewed] = await db.select().from(businesses).where(eq(businesses.id, loft!.id))
+    expect(reviewed!.reviewsCount).toBe(loft!.reviewsCount + 1)
     const svc = (await b.req('/v1/businesses/barber-loft')).json.serviceGroups[0].services[0].id
     const { json } = await b.req('/v1/bookings', {
       body: { type: 'appointment', business: 'barber-loft', serviceIds: [svc], staffId: null, date: '2026-10-16', start: 660 },
@@ -221,6 +240,10 @@ describe('account', () => {
     expect(json.status).toBe('confirmed')
     expect((await b.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
     expect((await b.req('/v1/me')).status).toBe(401)
+    // the review is gone, and the rating is what it was before it
+    expect(await db.select().from(reviews).where(eq(reviews.authorName, 'Aman'))).toEqual([])
+    const [after] = await db.select().from(businesses).where(eq(businesses.id, loft!.id))
+    expect(after).toMatchObject({ reviewsCount: loft!.reviewsCount, rating: loft!.rating, ratingBreakdown: loft!.ratingBreakdown })
     // the time is free again
     const other = browser(t.app)
     await other.login('+99365222005', 'Serdar')

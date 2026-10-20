@@ -239,8 +239,10 @@ export function authorName(name: string | null): string {
   return last ? `${first} ${last.charAt(0)}.` : first
 }
 
-async function refreshRating(db: Queryable, businessId: string, change: { add?: number; remove?: number }) {
-  const [b] = await db.select().from(businesses).where(eq(businesses.id, businessId))
+/** The business's stored rating after a review is added, changed (both) or removed (a deleted account's, book Q-172). */
+export async function refreshRating(db: Queryable, businessId: string, change: { add?: number; remove?: number }) {
+  // locked: two reviews at once mustn't both count from the same old figures
+  const [b] = await db.select().from(businesses).where(eq(businesses.id, businessId)).for('update')
   if (!b) return
   const breakdown = { ...b.ratingBreakdown }
   if (change.remove)
@@ -252,7 +254,7 @@ async function refreshRating(db: Queryable, businessId: string, change: { add?: 
     .update(businesses)
     .set({
       ratingBreakdown: breakdown,
-      reviewsCount: b.reviewsCount + (change.add && !change.remove ? 1 : 0),
+      reviewsCount: Math.max(0, b.reviewsCount + (change.add ? 1 : 0) - (change.remove ? 1 : 0)),
       rating: count ? Math.round((sum / count) * 10) / 10 : null,
     })
     .where(eq(businesses.id, businessId))
