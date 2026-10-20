@@ -29,6 +29,7 @@ import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { sha256Hex } from '../../lib/crypto'
 import { requireUser } from '../auth/session'
+import { unusedSince } from '../auth/sign-in'
 import {
   hasJoined,
   hasServices,
@@ -267,7 +268,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const now = deps.now()
     const result = await deps.db.transaction(async (tx) => {
-      const { rows, accountId } = await rowsForPhone(tx, business.id, body.phone)
+      const { rows, accountId, accountLastSeen } = await rowsForPhone(tx, business.id, body.phone)
       if (rows.some((r) => r.status !== 'removed')) throw new ApiError('already_on_team')
       const fields = {
         name: body.name,
@@ -279,8 +280,9 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
         status: 'invited' as const,
         bookable: (body.serviceIds?.length ?? 0) > 0,
       }
-      // someone removed earlier comes back on their old row
-      const reused = reusableRow(rows, accountId)
+      // someone removed earlier comes back on their old row; not the row of an account unused for 6 months, whose
+      // number may well be someone else's now (book Q-270)
+      const reused = reusableRow(rows, accountLastSeen && !unusedSince(accountLastSeen, now) ? accountId : null)
       const [row] = reused
         ? await tx.update(staff).set(fields).where(eq(staff.id, reused.id)).returning()
         : await tx
@@ -414,6 +416,8 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       if ([...byPhone, ...byAccount].some((r) => r.id !== row.id && r.status !== 'removed')) throw new ApiError('already_on_team')
       // someone who had joined (or works without the app) is back at once; someone who never joined needs an invite
       const back = hasJoined(row) || !row.hasApp
+      // a row whose number passed to someone else (book Q-270) has no one to invite: the person is invited anew
+      if (!back && !row.phone) throw new ApiError('invalid_status')
       const [next] = await tx
         .update(staff)
         .set({ status: back ? 'active' : 'invited', bookable: await hasServices(tx, row.id) })

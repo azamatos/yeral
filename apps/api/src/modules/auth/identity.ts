@@ -12,13 +12,11 @@ import type { AppEnv, User } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { randomToken, sha256Hex } from '../../lib/crypto'
 import { releaseAccount } from '../me/account'
-import { DAY } from './session'
-import { SIX_MONTHS_DAYS, signIn } from './sign-in'
+import { signIn, unusedSince } from './sign-in'
 
 const CHECK_MINUTES = 10
 
-/** No sign-in and no use of a session for 6 months (book Q-270). */
-const unused = (user: User, now: number) => user.lastSeenAt.getTime() < now - SIX_MONTHS_DAYS * DAY
+const unused = (user: User, now: number) => unusedSince(user.lastSeenAt, now)
 
 /** What the account can be recognised by: its name, else the name on its latest booking, team row or client record. */
 async function nameOf(db: Queryable, user: User): Promise<string | null> {
@@ -41,25 +39,38 @@ async function nameOf(db: Queryable, user: User): Promise<string | null> {
   return record?.name ?? null
 }
 
+/** Whether the account holds anything of a person's: a booking, a team row or a business's client record. */
+async function holdsAnything(db: Queryable, userId: string): Promise<boolean> {
+  const [booked] = await db.select({ id: bookings.id }).from(bookings).where(eq(bookings.userId, userId)).limit(1)
+  if (booked) return true
+  const [row] = await db.select({ id: staff.id }).from(staff).where(eq(staff.userId, userId)).limit(1)
+  if (row) return true
+  const [record] = await db.select({ id: clients.id }).from(clients).where(eq(clients.userId, userId)).limit(1)
+  return !!record
+}
+
 export type AfterCode =
-  { status: 200; body: Awaited<ReturnType<typeof signIn>> } | { status: 202; body: { isThisYou: { name: string; ticket: string } } }
+  { status: 200; body: Awaited<ReturnType<typeof signIn>> } | { status: 202; body: { isThisYou: { name: string | null; ticket: string } } }
 
 export async function afterCode(c: Context<AppEnv>, phone: string, lang: Locale | undefined): Promise<AfterCode> {
   const { db, now } = c.var.deps
   const [user] = await db.select().from(users).where(eq(users.phone, phone))
   if (user && unused(user, now())) {
     const name = await nameOf(db, user)
-    if (!name) {
-      // nothing to ask by: no booking, team row or client record, at most some favourites. Not worth a question, and
-      // not to be handed on: the number starts afresh
-      await db.transaction((tx) => releaseAccount(tx, user, now(), 'passedOn'))
-      return { status: 200, body: await signIn(c, phone, lang) }
+    if (name || (await holdsAnything(db, user.id))) {
+      const ticket = randomToken(16)
+      await db
+        .insert(identityChecks)
+        .values({ tokenHash: await sha256Hex(ticket), phone, userId: user.id, expiresAt: new Date(now() + CHECK_MINUTES * 60_000) })
+      return { status: 202, body: { isThisYou: { name: name ? name.split(/\s+/)[0] || name : null, ticket } } }
     }
-    const ticket = randomToken(16)
-    await db
-      .insert(identityChecks)
-      .values({ tokenHash: await sha256Hex(ticket), phone, userId: user.id, expiresAt: new Date(now() + CHECK_MINUTES * 60_000) })
-    return { status: 202, body: { isThisYou: { name: name.split(/\s+/)[0] || name, ticket } } }
+    // nothing of a person's in it, favourites at most: not worth a question, and not to be handed on. The number
+    // starts afresh, once the account's row is locked and still found unused and empty (as an answer finds it)
+    await db.transaction(async (tx) => {
+      const [row] = await tx.select().from(users).where(eq(users.id, user.id)).for('update')
+      if (row?.phone === phone && !row.name && unused(row, now()) && !(await holdsAnything(tx, row.id)))
+        await releaseAccount(tx, row, now(), 'passedOn')
+    })
   }
   return { status: 200, body: await signIn(c, phone, lang) }
 }

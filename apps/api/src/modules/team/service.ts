@@ -95,15 +95,15 @@ export async function rowsForPhone(
   db: Queryable,
   businessId: string,
   phone: string,
-): Promise<{ rows: StaffRow[]; accountId: string | null }> {
-  const [account] = await db.select({ id: users.id }).from(users).where(eq(users.phone, phone))
+): Promise<{ rows: StaffRow[]; accountId: string | null; accountLastSeen: Date | null }> {
+  const [account] = await db.select({ id: users.id, lastSeenAt: users.lastSeenAt }).from(users).where(eq(users.phone, phone))
   const rows = await db
     .select()
     .from(staff)
     .where(
       and(eq(staff.businessId, businessId), account ? or(eq(staff.phone, phone), eq(staff.userId, account.id)) : eq(staff.phone, phone)),
     )
-  return { rows, accountId: account?.id ?? null }
+  return { rows, accountId: account?.id ?? null, accountLastSeen: account?.lastSeenAt ?? null }
 }
 
 /**

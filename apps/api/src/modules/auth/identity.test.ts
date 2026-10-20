@@ -157,6 +157,22 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     const asked = await codeAndVerify('+99365777007')
     expect(asked.res.status).toBe(202)
     expect(asked.res.json.isThisYou.name).toBe('Gülşat')
+    // a booking without a name: asked all the same, without one
+    const [unnamed] = await db
+      .insert(users)
+      .values({ phone: '+99365777010', lang: 'en', lastSeenAt: new Date(DEMO_NOW - 200 * DAY) })
+      .returning()
+    const ahead = await phoneBooking({
+      code: 'YR-994010',
+      businessId: barberId,
+      phone: '+99365777010',
+      date: addDays(TODAY, 30),
+      userId: unnamed!.id,
+    })
+    await db.update(bookings).set({ clientName: null }).where(eq(bookings.id, ahead.id))
+    const nameless = await codeAndVerify('+99365777010')
+    expect(nameless.res.status).toBe(202)
+    expect(nameless.res.json.isThisYou.name).toBeNull()
     const [bare] = await db
       .insert(users)
       .values({ phone: '+99365777008', lang: 'en', lastSeenAt: new Date(DEMO_NOW - 200 * DAY) })
@@ -248,6 +264,30 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     expect(left).toMatchObject({ status: 'removed', phone: null, userId: null })
     const [reused] = await db.select().from(invites).where(eq(invites.tokenHash, 'q270-reused-invite'))
     expect(reused!.status).toBe('cancelled')
+  })
+
+  it('an invite to an unused account’s number doesn’t bring back its old team row, which stays out after "No"', async () => {
+    const phone = '+99365777011'
+    const old = await account(phone, 'Old Stylist', 200)
+    const [oldRow] = await db
+      .insert(staff)
+      .values({ businessId: glowId, userId: old.id, name: 'Old Stylist', phone, status: 'removed' })
+      .returning()
+    await db
+      .update(users)
+      .set({ lastSeenAt: new Date(t.clock.now) })
+      .where(eq(users.phone, '+99365102030'))
+    const maysa = browser(t.app)
+    await maysa.login('+99365102030') // Glow Studio's owner
+    const sent = await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone, name: 'New Person', level: 'specialist' } })
+    expect(sent.status).toBe(201)
+    expect(sent.json.member.id).not.toBe(oldRow!.id)
+    const { b, res } = await codeAndVerify(phone)
+    expect((await b.req('/v1/auth/identity', { body: { ticket: res.json.isThisYou.ticket, yes: false } })).status).toBe(200)
+    // the invite to the number waits for its holder; the old row has no number left to invite
+    expect((await db.select().from(invites).where(eq(invites.staffId, sent.json.member.id)))[0]!.status).toBe('pending')
+    const back = await maysa.req(`/v1/w/glow-studio/team/${oldRow!.id}/reactivate`, { method: 'POST' })
+    expect(back.json.error.code).toBe('invalid_status')
   })
 
   it('a workspace owner’s account can’t be let go: "No" is refused and the question stays', async () => {

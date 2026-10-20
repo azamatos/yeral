@@ -5,7 +5,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, businesses, clientNotes, clients, invites, rateLimits, staff, users } from '../../db/schema'
+import { bookingRules, bookings, businesses, clientNotes, clients, invites, rateLimits, staff, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 
 describe('account', () => {
@@ -83,6 +83,8 @@ describe('account', () => {
       ])
       .returning()
     await db.insert(clientNotes).values({ clientId: theirs!.id, text: 'Prefers mornings' })
+    // the new number's record is phone-only by its count: 2 no-shows at a limit of 2
+    await db.update(bookingRules).set({ blockAfterNoShows: 2 }).where(eq(bookingRules.businessId, glow!))
     const booking = (code: string, days: number, x: { clientId: string; phone: string; userId?: string; businessId?: string }) => ({
       code,
       businessId: x.businessId ?? glow!,
@@ -103,6 +105,8 @@ describe('account', () => {
         booking('YR-995002', 3, { clientId: mine!.id, phone: oldPhone, userId: me.id }),
         booking('YR-995003', -3, { clientId: mine!.id, phone: oldPhone, userId: me.id }),
         booking('YR-995004', 5, { clientId: sinceSignIn!.id, phone: oldPhone, businessId: dentist! }),
+        { ...booking('YR-995005', -10, { clientId: theirs!.id, phone: newPhone }), status: 'noshow' as const, completedAt: at(10) },
+        { ...booking('YR-995006', -11, { clientId: theirs!.id, phone: newPhone }), status: 'noshow' as const, completedAt: at(11) },
       ])
     // on Barber Loft's team, once on Glow Studio's, and invited to Ak diş
     await db.insert(staff).values([
@@ -135,7 +139,7 @@ describe('account', () => {
       userId: me.id,
       name: 'Kerim',
       onlineBlocked: true,
-      noShowsSince: at(5),
+      noShowsSince: null,
     })
     expect(kerim[0]!.tags.sort()).toEqual(['regular', 'vip'])
     expect((await db.select().from(clientNotes).where(eq(clientNotes.clientId, mine!.id))).map((n) => n.text)).toEqual(['Prefers mornings'])
@@ -156,7 +160,9 @@ describe('account', () => {
     expect(await byId(atBarber!.id)).toMatchObject({ phone: newPhone, userId: me.id, onlineBlocked: false })
     expect(await byId(earlierHolder!.id)).toMatchObject({ phone: null, userId: null, onlineBlocked: true })
     const team = await db.select().from(staff).where(eq(staff.userId, me.id))
-    // a team Kerim left, or one that only invited him, doesn't learn the new number
+    // a team Kerim left, or one that only invited him, doesn't learn the new number; the invited row is as it was before
+    // the invite brought it back
+    expect(team.find((r) => r.businessId === dentist)!.status).toBe('removed')
     expect(team.map((r) => [r.businessId, r.phone]).sort()).toEqual(
       [
         [barber, newPhone],

@@ -19,6 +19,18 @@ import { DAY, startSession } from './session'
  */
 export const SIX_MONTHS_DAYS = 183
 
+/** No sign-in and no use of a session for 6 months (book Q-270). */
+export const unusedSince = (lastSeenAt: Date, now: number) => lastSeenAt.getTime() < now - SIX_MONTHS_DAYS * DAY
+
+/** A booking for the number that no account holds, upcoming or from the last 6 months (book Q-270). */
+export const unheldBooking = (phone: string, now: number) =>
+  and(
+    eq(bookings.clientPhone, phone),
+    isNull(bookings.userId),
+    isNull(bookings.accountDeletedAt),
+    gte(bookings.date, addDays(today(now), -SIX_MONTHS_DAYS)),
+  )
+
 /**
  * A business's client record that belongs to its number's present holder (book Q-270): made in the last 6 months, or
  * holding a booking from them that no deleted account left. An older one stays with whoever had the number before.
@@ -37,17 +49,7 @@ export const recentRecord = (now: number) =>
  * At a sign-in, and when an account takes a new number (Q-171).
  */
 export async function linkPhone(tx: Queryable, userId: string, phone: string, now: number): Promise<void> {
-  await tx
-    .update(bookings)
-    .set({ userId })
-    .where(
-      and(
-        eq(bookings.clientPhone, phone),
-        isNull(bookings.userId),
-        isNull(bookings.accountDeletedAt),
-        gte(bookings.date, addDays(today(now), -SIX_MONTHS_DAYS)),
-      ),
-    )
+  await tx.update(bookings).set({ userId }).where(unheldBooking(phone, now))
   await tx
     .update(clients)
     .set({ userId })
