@@ -15,4 +15,12 @@
   the edit onto bookings ahead only, another's number, the switches and clearing, an account's number locked; notes
   by a specialist on her own client, 404 on another, alert notes in the lookup; delete refused with both kinds,
   then the bookings without the name); sdk `client.updated`.
+- Review (13; 13 fixed): a switch alone crashed the edit (an empty update; now skipped); delete blanked bookings
+  that could still come back (now it waits for an unsettled request too, and "Yzyna al" refuses a booking whose
+  client is gone); specialists didn't hear `client.updated` (now team-wide in the feed); a record added by hand
+  didn't join the number's account (now it does, as `phoneClient`); the unique clash was caught around the whole
+  transaction and could lose the card to open (now checked inside, the clash its own error); a note raced a delete
+  (now `seenClient` holds the record, a cheap check shared with the facts' visibility); the 10-second undo deleted a
+  record the team had kept something on (now kept); tags counted before their duplicates went; the delete route's
+  400; the conditional spreads; one `TEAM_NOTE_MAX` for client and booking notes.
 - Follow-ups: editing or deleting a note isn't drawn; bulk SMS and the clients export are after the MVP.

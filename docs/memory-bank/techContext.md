@@ -118,7 +118,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | a workspace route's member and actor (api) | `requireMember(c, slug)` (404 when not on the team), `teamRow() issueInvite() members()` | `apps/api/src/modules/team/service.ts` |
 | client stats, segments, online block | `clientStats() clientSegments() segmentsOf() isOnlineBlocked() reachesNoShowLimit()` | `@yeral/domain/clients` |
 | a business's clients from their bookings (api): visits, totals, the next booking, in one query | `clientFacts()` (chips, order and pages in SQL; `scope: 'business'` for every booking) `avgCheckOf() phoneOnlyOf() alertNotesOf()`; SQL `doneAt() aheadAt() withStaff()`, `ownOnly(actor)` | `apps/api/src/modules/clients/facts.ts` |
-| keeping clients (api): add, edit and switches, notes, delete | `addClient() updateClient() addNote() deleteClient()`; limits `CLIENT_TAGS_MAX CLIENT_TAG_MAX CLIENT_NOTE_MAX` (`@yeral/domain/clients`) | `apps/api/src/modules/clients/write.ts` |
+| keeping clients (api): add, edit and switches, notes, delete | `addClient() updateClient() addNote() deleteClient()`; limits `CLIENT_TAGS_MAX CLIENT_TAG_MAX TEAM_NOTE_MAX` (`@yeral/domain/clients`) | `apps/api/src/modules/clients/write.ts` |
 | the phone-only block and the no-show count (api) | `isPhoneBlocked() setOnlineBlocked() noShowsSinceReset()`; when a no-show was marked: `noShowMarkedAt` (`bookings/repo.ts`) | `apps/api/src/modules/clients/online.ts` |
 | price totals, calendar day summary | `priceTotal() daySummary()` | `@yeral/domain/pricing` |
 | distances, radius box, the city a position is in | `distanceM() boundingBox() popularity() nearestCity()`; the market's main city: `MARKET.mainCity` | `@yeral/domain/geo` |

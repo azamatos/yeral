@@ -235,6 +235,16 @@ describe('the business’s own bookings (book B-23, B-24, B-25)', () => {
     expect(unknown.json.error.details.issues).toEqual([{ path: ['staffId'], code: 'cannot_do' }])
   })
 
+  it('undo keeps the client it added once the team kept something on the card', async () => {
+    const maysa = await as(MAYSA)
+    const start = await maralFree(maysa, SAT, 12)
+    const made = await book(maysa, { phone: '+99365800109', name: 'Kept', start })
+    const [record] = await db.select().from(clients).where(eq(clients.phone, '+99365800109'))
+    expect((await maysa.req(`/v1/w/glow-studio/clients/${record!.id}`, { method: 'PATCH', body: { tags: ['VIP'] } })).status).toBe(204)
+    expect((await maysa.req(`${BOOKINGS}/${made.json.code}/undo`, { method: 'POST' })).status).toBe(204)
+    expect(await db.select().from(clients).where(eq(clients.id, record!.id))).toHaveLength(1)
+  })
+
   it('undo deletes the booking and the client it added; no SMS goes; after the undo time it’s refused (B-24)', async () => {
     const maysa = await as(MAYSA)
     const maral = await as(MARAL)

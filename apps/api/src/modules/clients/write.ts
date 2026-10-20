@@ -7,16 +7,17 @@ import type { ClientExistsDetails, ClientHasBookingsDetails } from '@yeral/contr
 import type { clientInputSchema, clientNoteInputSchema, clientUpdateSchema } from '@yeral/contract/clients'
 import { scopeOf, type Actor } from '@yeral/domain/permissions'
 import { today } from '@yeral/domain/time'
-import { and, asc, eq, isNull } from 'drizzle-orm'
+import { and, asc, eq, isNull, or } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
-import { bookings, clientNotes, clients } from '../../db/schema'
+import { bookings, clientNotes, clients, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid } from '../../http/errors'
 import { emit } from '../../notify'
 import { pgCode } from '../bookings/repo'
 import { rulesOf } from '../settings/service'
-import { aheadAt, clientFacts } from './facts'
+import { unusedSince } from '../auth/sign-in'
+import { aheadAt, seenClient } from './facts'
 import { setOnlineBlocked } from './online'
 
 interface Business {
@@ -35,15 +36,26 @@ function assertBirthday(birthday: string | null | undefined, now: number): void 
   if (birthday && birthday > today(now)) throw invalid({ path: ['birthday'], code: 'in_future' })
 }
 
-/** The business's client already holding this number: the card to open instead. */
-async function exists(db: Queryable, businessId: string, phone: string): Promise<never> {
+/** The business's client holding this number, if any. */
+async function holderOf(db: Queryable, businessId: string, phone: string): Promise<ClientExistsDetails | null> {
   const [held] = await db
     .select({ id: clients.id, name: clients.name })
     .from(clients)
     .where(and(eq(clients.businessId, businessId), eq(clients.phone, phone)))
-  const details: ClientExistsDetails | undefined = held ? { id: held.id, name: held.name } : undefined
-  throw new ApiError('client_exists', details)
+  return held ? { id: held.id, name: held.name } : null
 }
+
+/**
+ * The account a record of this number joins, as a team's booking joins it (`phoneClient`): the holder's, unless the
+ * account went unused for 6 months (the number may be someone else's now; book Q-270).
+ */
+async function holderAccount(db: Queryable, phone: string, now: number): Promise<string | null> {
+  const [account] = await db.select().from(users).where(eq(users.phone, phone))
+  return account && !unusedSince(account.lastSeenAt, now) ? account.id : null
+}
+
+/** Two saves for one number at once: the database refuses the second (`clients_business_phone`). */
+class NumberTaken extends Error {}
 
 const clientChanged = (db: Queryable, businessId: string) => emit(db, { type: 'client.updated', businessId })
 
@@ -62,11 +74,13 @@ export async function addClient(deps: Deps, business: Business, actor: Actor, in
         birthday: input.birthday ?? null,
         source: input.source ?? null,
         tags: input.tags,
+        userId: await holderAccount(tx, input.phone, now),
         createdAt: new Date(now),
       })
       .onConflictDoNothing({ target: [clients.businessId, clients.phone] })
       .returning({ id: clients.id })
-    if (!row) return exists(tx, business.id, input.phone)
+    // the conflict waited for the other save to commit, so its record is there to open
+    if (!row) throw new ApiError('client_exists', (await holderOf(tx, business.id, input.phone)) ?? undefined)
     if (input.note)
       await tx
         .insert(clientNotes)
@@ -89,7 +103,8 @@ async function lockedClient(db: Queryable, businessId: string, id: string) {
 
 /**
  * The card's edit and switches (B-34, B-35). A new name or number also goes on the bookings ahead the team made for
- * them without an account, which their SMS go to; an account's bookings keep what the account says.
+ * them without an account, which their SMS go to; an account's bookings keep what the account says. A new number
+ * joins its holder's account, as a team's booking for it would.
  */
 export async function updateClient(deps: Deps, business: Business, actor: Actor, id: string, change: ClientUpdate): Promise<void> {
   assertManages(actor)
@@ -100,34 +115,42 @@ export async function updateClient(deps: Deps, business: Business, actor: Actor,
       const c = await lockedClient(tx, business.id, id)
       const phone = change.phone !== undefined && change.phone !== c.phone ? change.phone : undefined
       if (phone && c.userId) throw new ApiError('client_phone_locked')
-      await tx
-        .update(clients)
-        .set({
-          ...(phone ? { phone } : {}),
+      if (phone) {
+        const held = await holderOf(tx, business.id, phone)
+        if (held) throw new ApiError('client_exists', held)
+      }
+      const set = Object.fromEntries(
+        Object.entries({
+          phone,
+          userId: phone ? await holderAccount(tx, phone, now) : undefined,
+          name: change.name,
           // a name the team typed is theirs: a booking's undo no longer takes it back (B-24)
-          ...(change.name !== undefined ? { name: change.name, nameSetBy: null } : {}),
-          ...(change.birthday !== undefined ? { birthday: change.birthday } : {}),
-          ...(change.source !== undefined ? { source: change.source } : {}),
-          ...(change.tags !== undefined ? { tags: change.tags } : {}),
-          ...(change.noReminders !== undefined ? { noRemindersSms: change.noReminders } : {}),
-        })
-        .where(eq(clients.id, c.id))
-      if (phone || change.name !== undefined) {
+          nameSetBy: change.name !== undefined ? null : undefined,
+          birthday: change.birthday,
+          source: change.source,
+          tags: change.tags,
+          noRemindersSms: change.noReminders,
+        }).filter(([, v]) => v !== undefined),
+      )
+      if (Object.keys(set).length)
+        await tx
+          .update(clients)
+          .set(set)
+          .where(eq(clients.id, c.id))
+          .catch((e: unknown) => {
+            throw pgCode(e) === '23505' ? new NumberTaken() : e
+          })
+      if (phone || change.name !== undefined)
         await tx
           .update(bookings)
-          .set({
-            ...(phone ? { clientPhone: phone } : {}),
-            ...(change.name !== undefined ? { clientName: change.name } : {}),
-            updatedAt: new Date(now),
-          })
+          .set({ clientPhone: phone, clientName: change.name, updatedAt: new Date(now) })
           .where(and(eq(bookings.clientId, c.id), isNull(bookings.userId), aheadAt(now)))
-      }
       if (change.phoneOnly !== undefined) await setOnlineBlocked(tx, c.id, change.phoneOnly, await rulesOf(tx, business.id), new Date(now))
       await clientChanged(tx, business.id)
     })
   } catch (e) {
-    // the number is another client's
-    if (pgCode(e) === '23505' && change.phone) return exists(deps.db, business.id, change.phone)
+    // another save took the number between the check and the change
+    if (e instanceof NumberTaken) throw new ApiError('client_exists', (await holderOf(deps.db, business.id, change.phone!)) ?? undefined)
     throw e
   }
 }
@@ -135,9 +158,9 @@ export async function updateClient(deps: Deps, business: Business, actor: Actor,
 /** "Bellik goş" (B-34): by anyone who sees the client; the author and the time go with it. */
 export async function addNote(deps: Deps, business: Business, actor: Actor, id: string, input: NoteInput): Promise<{ id: string }> {
   const now = deps.now()
-  const [seen] = await clientFacts(deps.db, business.id, actor, now, eq(clients.id, id))
-  if (!seen) throw new ApiError('not_found')
   return deps.db.transaction(async (tx) => {
+    // held: a delete waits until the note is in
+    await seenClient(tx, business.id, actor, id)
     const [row] = await tx
       .insert(clientNotes)
       .values({ clientId: id, text: input.text, alert: input.alert, authorStaffId: actor.staffId, createdAt: new Date(now) })
@@ -148,9 +171,10 @@ export async function addNote(deps: Deps, business: Business, actor: Actor, id: 
 }
 
 /**
- * "Müşderini poz" (B-36): not while they have bookings ahead or waiting requests (Q-208; `details` lists them). The
- * record and its notes go; their bookings stay for the numbers, without the record, the name or the number. A booking
- * they make later starts a new record.
+ * "Müşderini poz" (B-36): not while they have bookings ahead or waiting requests (Q-208; `details` lists them), a
+ * request the jobs haven't settled yet included. The record and its notes go; their bookings stay for the numbers,
+ * without the record, the name or the number, and one the client cancelled doesn't come back ("Yzyna al") without
+ * them. A booking they make later starts a new record.
  */
 export async function deleteClient(deps: Deps, business: Business, actor: Actor, id: string): Promise<void> {
   assertManages(actor)
@@ -160,7 +184,7 @@ export async function deleteClient(deps: Deps, business: Business, actor: Actor,
     const ahead = await tx
       .select()
       .from(bookings)
-      .where(and(eq(bookings.clientId, c.id), isNull(bookings.rescheduleOf), aheadAt(now)))
+      .where(and(eq(bookings.clientId, c.id), isNull(bookings.rescheduleOf), or(aheadAt(now), eq(bookings.status, 'pending'))))
       .orderBy(asc(bookings.date), asc(bookings.start))
     if (ahead.length) {
       const details: ClientHasBookingsDetails = {

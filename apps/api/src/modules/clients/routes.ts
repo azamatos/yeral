@@ -82,7 +82,7 @@ const deleteRoute = createRoute({
   tags,
   summary: '"Müşderini poz": not with bookings ahead or waiting requests; past bookings stay without the name',
   request: { params: clientParamSchema },
-  responses: { ...noContent, 409: errors[409], ...denied },
+  responses: { ...noContent, 400: errors[400], 409: errors[409], ...denied },
 })
 
 export const clientRoutes = new OpenAPIHono<AppEnv>()

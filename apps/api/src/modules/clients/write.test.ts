@@ -3,7 +3,7 @@ import { addDays, today } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
-import { browser } from '../../../test/client'
+import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
 import { bookingItems, bookings, businesses, clientNotes, clients, rateLimits, services, staff, users } from '../../db/schema'
@@ -185,5 +185,73 @@ describe('keeping clients (book B-33–B-36)', () => {
     expect(kept).toMatchObject({ clientId: null, clientName: null, clientPhone: null, priceAmount: 100 })
     expect(await db.select().from(clientNotes).where(eq(clientNotes.clientId, id))).toEqual([])
     expect((await maysa.req(`${W}/clients/${id}?lang=en`)).status).toBe(404)
+  })
+
+  it('a switch alone saves; an empty change is nothing; tags count after their duplicates go', async () => {
+    const maysa = await as(MAYSA)
+    const id = (await maysa.req(`${W}/clients`, { body: { phone: '+99365910050' } })).json.id as string
+    expect((await maysa.req(`${W}/clients/${id}`, { method: 'PATCH', body: { phoneOnly: true } })).status).toBe(204)
+    expect((await maysa.req(`${W}/clients/${id}`, { method: 'PATCH', body: { phone: '+99365910050' } })).status).toBe(204)
+    expect((await maysa.req(`${W}/clients/${id}`, { method: 'PATCH', body: {} })).status).toBe(204)
+    const tags = ['VIP', 'vip', ...Array.from({ length: 9 }, (_, i) => `T${i}`)]
+    expect((await maysa.req(`${W}/clients/${id}`, { method: 'PATCH', body: { tags } })).status).toBe(204)
+    expect(await card(maysa, id)).toMatchObject({ settings: { phoneOnly: true } })
+    expect((await card(maysa, id)).tags).toHaveLength(10)
+  })
+
+  it('a number held by an account joins it when the team adds it; a specialist hears client changes', async () => {
+    const maysa = await as(MAYSA)
+    const maral = await as(MARAL)
+    await as('+99365910060')
+    const cursor = (await maral.req('/v1/events')).json.cursor as string
+    const id = (await maysa.req(`${W}/clients`, { body: { phone: '+99365910060', name: 'Known' } })).json.id as string
+    expect(await card(maysa, id)).toMatchObject({ account: true })
+    expect((await maysa.req(`${W}/clients/${id}`, { method: 'PATCH', body: { phone: '+99365910061' } })).json.error.code).toBe(
+      'client_phone_locked',
+    )
+    const heard = await eventsAfter(maral, cursor, (items) => items.some((e) => e.type === 'client.updated'))
+    expect((heard.json.items as { type: string }[]).map((e) => e.type)).toContain('client.updated')
+  })
+
+  it('a request the jobs haven’t settled holds the delete; a cancel doesn’t come back once the client is gone', async () => {
+    const maysa = await as(MAYSA)
+    const client = await as('+99365910070')
+    const id = (await maysa.req(`${W}/clients`, { body: { phone: '+99365910070' } })).json.id as string
+    const stale = await booking(id, addDays(TODAY, 1), 'pending')
+    await db
+      .update(bookings)
+      .set({ holdUntil: new Date(DEMO_NOW - 60_000) })
+      .where(eq(bookings.id, stale.id))
+    const held = await maysa.req(`${W}/clients/${id}`, { method: 'DELETE' })
+    expect(held.json.error.details.bookings).toEqual([expect.objectContaining({ code: stale.code, status: 'pending' })])
+    await db.update(bookings).set({ status: 'cancelled', cancelledBy: 'system' }).where(eq(bookings.id, stale.id))
+    // the client cancelled a visit a minute ago: "Yzyna al" is open to them
+    const [account] = await db.select().from(users).where(eq(users.phone, '+99365910070'))
+    const [cancelled] = await db
+      .insert(bookings)
+      .values({
+        code: 'YR-789901',
+        businessId: glowId,
+        type: 'appointment',
+        clientId: id,
+        userId: account!.id,
+        clientName: 'Mine',
+        clientPhone: '+99365910070',
+        date: addDays(TODAY, 6),
+        start: 600,
+        end: 660,
+        status: 'cancelled',
+        cancelledBy: 'client',
+        cancelledAt: new Date(DEMO_NOW - 60_000),
+        confirmedAt: new Date(DEMO_NOW - 86_400_000),
+        source: 'web',
+        priceType: 'fixed',
+        priceAmount: 100,
+      })
+      .returning()
+    expect((await maysa.req(`${W}/clients/${id}`, { method: 'DELETE' })).status).toBe(204)
+    const back = await client.req(`/v1/me/bookings/${cancelled!.code}/restore`, { method: 'POST' })
+    expect(back.status).toBe(409)
+    expect(back.json.error.code).toBe('invalid_status')
   })
 })
