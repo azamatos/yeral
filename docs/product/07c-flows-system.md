@@ -453,7 +453,7 @@ flowchart TD
 | Lock | 60 seconds after 3 wrong tries | client spec §4.4; code |
 | Code valid for | 5 minutes | Q-267; code (ADR 0019) |
 | After the lock | the code is used up; the screen offers to send a new one | Q-268; code |
-| Limits | 5 codes per phone per hour; 100 per internet address per hour; the wait is shown in minutes | Q-267 (code differs) |
+| Limits | 5 codes per phone per hour; 100 per internet address per hour; the wait is shown in minutes | Q-267; code: `modules/auth/codes.ts` |
 | Outside production | the code is always 1234 and SMS go to the log | code; ADR 0019 |
 | First launch | no SMS: the code shows on the screen, texts go to the log | Q-036, decided 18.10.2026 |
 | SMS text | *Ýeral kody: {code}* | code only |
@@ -470,8 +470,8 @@ flowchart TD
 **Edge cases**
 
 - Code differs on wording. The code's lock text is *Synanyşyk köp boldy. {N} sekuntdan soň gaýtalaň.* The design has *Köp synanyşyk. 60 sekuntdan soň gaýtadan synanyşyň.* (Auth). The design itself differs between screens: Booking-Link has *Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň.* **Design to fix:** one shared code step with one lock message on every screen (Q-157).
-- The message for the hourly limit shows the wait in minutes (Q-267, decided 18.10.2026). **Design to fix:** no screen draws it. **Code differs:** the code's text, *Haýyş köp boldy. Biraz garaşyň.*, gives no wait.
-- Mobile operators often put many phones behind one internet address, so the address limit is 100 codes an hour (Q-267). **Code differs:** the code allows 20 (code: `modules/auth/codes.ts`).
+- The message for the hourly limit shows the wait in minutes (Q-267, decided 18.10.2026). **Design to fix:** no screen draws it. The api sends the wait in seconds and in minutes, rounded up (`retryAfterMin`); an hour runs from the first code asked for, so the wait is at most an hour.
+- Mobile operators often put many phones behind one internet address, so the address limit is 100 codes an hour (Q-267; code: `modules/auth/codes.ts`).
 
 > Open question Q-267: Login code limits that only the code sets.
 

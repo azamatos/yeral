@@ -17,6 +17,12 @@ export const RESEND_SEC = 59
 export const MAX_ATTEMPTS = 3
 export const LOCK_SEC = 60
 export const DEMO_CODE = '1234'
+/**
+ * Codes one phone, and one internet address, may ask for in an hour (book Q-267). Mobile operators put many phones
+ * behind one address, so the address gets far more.
+ */
+export const CODES_PER_PHONE = 5
+export const CODES_PER_ADDRESS = 100
 
 type Purpose = 'login' | 'change_phone'
 
@@ -42,11 +48,12 @@ export async function sendCode(
     throw new ApiError('resend_too_soon', { retryAfterSec: secondsLeft(new Date(existing.sentAt.getTime() + RESEND_SEC * 1000), now) })
   }
   for (const [key, limit] of [
-    [`code:phone:${req.phone}`, 5],
-    [`code:ip:${req.ip}`, 20],
+    [`code:phone:${req.phone}`, CODES_PER_PHONE],
+    [`code:ip:${req.ip}`, CODES_PER_ADDRESS],
   ] as const) {
     const r = await hit(db, key, limit, 3600, now)
-    if (!r.ok) throw new ApiError('rate_limited', { retryAfterSec: r.retryAfterSec })
+    // the message gives the wait in minutes (book Q-267)
+    if (!r.ok) throw new ApiError('rate_limited', { retryAfterSec: r.retryAfterSec, retryAfterMin: Math.ceil(r.retryAfterSec / 60) })
   }
 
   const code = deps.site.demo ? DEMO_CODE : randomDigits(4)

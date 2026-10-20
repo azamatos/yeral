@@ -71,7 +71,11 @@ export type PartyTooLargeDetails = z.infer<typeof partyTooLargeDetailsSchema>
 export const codeInvalidDetailsSchema = z.object({ attemptsLeft: z.number().int().min(0) })
 
 /** `too_many_attempts`, `resend_too_soon`, `rate_limited`. */
-export const retryDetailsSchema = z.object({ retryAfterSec: z.number().int().min(0) })
+export const retryDetailsSchema = z.object({
+  retryAfterSec: z.number().int().min(0),
+  /** `rate_limited`: the same wait in whole minutes, rounded up, for its message (book Q-267). */
+  retryAfterMin: z.number().int().min(0).optional(),
+})
 
 /** `validation_error`: which fields, with zod's issue codes. */
 export const validationDetailsSchema = z.object({

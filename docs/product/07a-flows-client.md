@@ -745,7 +745,6 @@ flowchart TD
 
 **Code differs**
 
-- One internet address may ask for 20 codes an hour, not 100, and the message "Haýyş köp boldy. Biraz garaşyň." gives no wait (code: `auth/codes.ts`).
 - The api keeps one name field and splits it at the first space (code: `auth/routes.ts`).
 
 **Status:** Design: drawn (Booking, Booking-Table, Booking-Class inline login · `loggedIn`; Auth) · Code: built (api) — `POST /v1/auth/code`, `POST /v1/auth/verify`.

@@ -85,8 +85,24 @@ describe('phone login (ADR 0019)', () => {
         body: { phone: `+993657${String(i).padStart(5, '0')}` },
         headers: { 'cf-connecting-ip': `10.0.0.${i}`, 'x-forwarded-for': `10.9.9.${i}, 192.0.2.7` },
       })
-    for (let i = 0; i < 20; i++) expect((await send(i)).status).toBe(200)
-    expect((await send(20)).json.error.code).toBe('rate_limited')
+    // 100 an hour: operators put many phones behind one address (book Q-267)
+    for (let i = 0; i < 100; i++) expect((await send(i)).status).toBe(200)
+    expect((await send(100)).json.error.code).toBe('rate_limited')
+  })
+
+  it('five codes an hour per phone; the sixth says how many minutes to wait (book Q-267)', async () => {
+    const b = browser(t.app)
+    const phone = '+99365000012'
+    for (let i = 0; i < 5; i++) {
+      expect((await b.req('/v1/auth/code', { body: { phone } })).status).toBe(200)
+      t.clock.now += 60_000
+    }
+    const sixth = await b.req('/v1/auth/code', { body: { phone } })
+    expect(sixth.status).toBe(429)
+    // the hour runs from the first code, 5 minutes ago
+    expect(sixth.json.error).toMatchObject({ code: 'rate_limited', details: { retryAfterSec: 3300, retryAfterMin: 55 } })
+    t.clock.now += 3300_000
+    expect((await b.req('/v1/auth/code', { body: { phone } })).status).toBe(200)
   })
 
   it('a code expires after 5 minutes', async () => {
