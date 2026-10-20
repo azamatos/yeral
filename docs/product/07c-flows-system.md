@@ -96,7 +96,7 @@ flowchart TD
 
 > Open question Q-159: which specialist an offered or free time is for.
 
-- **Code differs:** table and class requests get no times in the code. Their SMS then reads *Şu boş wagtlar bar: —* with an empty list. The same broken text goes out when an appointment has no free time to offer.
+- **Code differs:** table and class requests get no times yet; they come with tables and classes after the MVP (Q-030). Their SMS asks for another time, as it does when an appointment has nothing free.
 
 > Open question Q-252: What an expired table or class request offers.
 
@@ -106,9 +106,7 @@ flowchart TD
 
 - The expiry SMS goes at any hour, since it's a booking outcome (Q-285, decided 18.10.2026). It goes even when the client has switched off *Tassyklama we üýtgeşmeler* (Q-286, decided 18.10.2026).
 - A client who is now limited to phone bookings (S-03), or whose business has paused online booking, can't take these times online: the chips are hidden and the *Jaň et* card shows instead (Q-154, decided 18.10.2026). Only times the business offered after a decline are an exception (ROUND6 A7; the code agrees).
-- **Code differs:** the code counts the hold straight through closed hours (code: `packages/domain/src/lifecycle.ts`; Q-120).
-
-**Status.** Design: decided and drawn (client spec §1, §6; business spec §2; ROUND6 A2; Account-Bookings, Booking-Link) · Code: built in the api, with the differences above (specialist, opening hours, times for tables and classes).
+**Status.** Design: decided and drawn (client spec §1, §6; business spec §2; ROUND6 A2; Account-Bookings, Booking-Link) · Code: built in the api; times for tables and classes come after the MVP.
 
 ### S-02 · A visit completes by itself
 
