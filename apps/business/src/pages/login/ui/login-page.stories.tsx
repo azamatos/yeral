@@ -38,12 +38,22 @@ const workspace = (slug: string, name: string, level: Workspace['level'], lastOp
   lastOpenedAt,
 })
 
-const invite = (state: InviteCard['state'], expiresAt: number): InviteCard => ({
-  id: 'inv-1',
-  business: { slug: 'glow-studio', name: 'Glow Studio', category: 'Beauty', address: '247 Bitarap Türkmenistan Avenue', city, photo: null },
+const invite = (
+  state: InviteCard['state'],
+  expiresAt: number,
+  {
+    id = 'inv-1',
+    slug = 'glow-studio',
+    name = 'Glow Studio',
+    level = 'specialist',
+    answersRequests = true,
+  }: Partial<{ id: string; slug: string; name: string; level: InviteCard['level']; answersRequests: boolean }> = {},
+): InviteCard => ({
+  id,
+  business: { slug, name, category: 'Beauty', address: '247 Bitarap Türkmenistan Avenue', city, photo: null },
   invitedBy: 'Maýsa Annaýewa',
-  level: 'specialist',
-  answersRequests: true,
+  level,
+  answersRequests,
   state,
   sentAt: expiresAt - 7 * DAY,
   expiresAt,
@@ -73,6 +83,37 @@ const PEOPLE: Record<string, Account> = {
     invites: [invite('pending', Date.now() + 3 * DAY)],
   },
   '+99362481530': { me: person('+99362481530', 'Jeren'), workspaces: [], current: null, invites: [invite('expired', Date.now() - DAY)] },
+  // the invite ended over a week ago: the no-workspace card has taken over
+  '+99362481531': {
+    me: person('+99362481531', 'Jeren'),
+    workspaces: [],
+    current: null,
+    invites: [invite('expired', Date.now() - 8 * DAY)],
+  },
+  // two businesses invited the same number: one card after the other
+  '+99363110022': {
+    me: person('+99363110022', 'Merjen', 'Annaýewa'),
+    workspaces: [],
+    current: null,
+    invites: [
+      invite('pending', Date.now() + 3 * DAY),
+      // an Admin where each specialist answers their own requests: no requests line
+      invite('pending', Date.now() + 5 * DAY, {
+        id: 'inv-2',
+        slug: 'glow-nails',
+        name: 'Glow Nails',
+        level: 'admin',
+        answersRequests: false,
+      }),
+    ],
+  },
+  // a member with an invite: a decline goes on to the workspace used last
+  '+99365884102': {
+    me: person('+99365884102', 'Selbi', 'Hojaýewa'),
+    workspaces: [workspace('selbi-studio', 'Selbi’s studio', 'owner', 1)],
+    current: 'selbi-studio',
+    invites: [invite('pending', Date.now() + 3 * DAY)],
+  },
   '+99365312210': {
     me: person('+99365312210', 'Aýna', 'Myradowa'),
     workspaces: [workspace('glow-studio', 'Glow Studio', 'specialist', 1)],
@@ -354,7 +395,7 @@ export const InviteDeclined: Story = {
   },
 }
 
-/** Accept: the person joins, and that workspace opens. */
+/** Accept: the person joins, and that workspace's calendar opens at once, as drawn (no "Opening…" card). */
 export const InviteAccepted: Story = {
   name: 'Invite · accepted',
   args: { server: fakeApi() },
@@ -362,21 +403,62 @@ export const InviteAccepted: Story = {
     await sendCode(canvas, '64215590')
     await userEvent.keyboard('4821')
     await userEvent.click(await canvas.findByRole('button', { name: 'Accept' }))
-    await expect(await canvas.findByRole('heading', { level: 1, name: 'Opening Glow Studio…' })).toBeVisible()
-    await expect(canvas.getByText('Specialist · Ashgabat')).toBeVisible()
-    await expect(await canvas.findByText('Calendar of glow-studio', {}, { timeout: 4000 })).toBeVisible()
+    await expect(await canvas.findByText('Calendar of glow-studio', {}, { timeout: 2000 })).toBeVisible()
+    await expect(canvas.queryByText('Opening Glow Studio…')).not.toBeInTheDocument()
   },
 }
 
-/** Signed in already, no workspace, and the invite ran out: the expired card says why. */
+/** Two invites: after the first Accept the second card shows; accepting that one opens its calendar. */
+export const TwoInvites: Story = {
+  name: 'Invite · two waiting',
+  args: { server: fakeApi() },
+  play: async ({ canvas }) => {
+    await sendCode(canvas, '63110022')
+    await userEvent.keyboard('4821')
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio invites you to the team' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Accept' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Nails invites you to the team' })).toBeVisible()
+    await expect(canvas.getByText('As an Admin')).toBeVisible()
+    await expect(canvas.getByText('You’ll see every calendar, booking and client')).toBeVisible()
+    await expect(canvas.queryByText('You can answer requests and reply to reviews')).not.toBeInTheDocument()
+    await userEvent.click(canvas.getByRole('button', { name: 'Accept' }))
+    await expect(await canvas.findByText('Calendar of glow-nails', {}, { timeout: 2000 })).toBeVisible()
+  },
+}
+
+/** A member declines: the decline is confirmed on the card that opens the workspace used last. */
+export const InviteDeclinedByMember: Story = {
+  name: 'Invite · declined by a member',
+  args: { server: fakeApi({ signedIn: '+99365884102' }) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Decline' }))
+    await userEvent.click(await canvas.findByRole('button', { name: 'Decline invite' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Opening Selbi’s studio…' })).toBeVisible()
+    await expect(canvas.getByText('You declined Glow Studio’s invite.')).toBeVisible()
+    await expect(await canvas.findByText('Calendar of selbi-studio', {}, { timeout: 4000 })).toBeVisible()
+  },
+}
+
+/** Signed in already, no workspace, and the invite ran out: the expired card says why, with the number masked. */
 export const InviteExpired: Story = {
   name: 'Invite · expired',
   args: { server: fakeApi({ signedIn: '+99362481530' }) },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'The invite has expired' })).toBeVisible()
     await expect(canvas.getByText(/Each invite works for 7 days\. The invite Glow Studio sent on/)).toBeVisible()
+    await expect(canvas.getByText('Jeren · +993 62 •• •• 30')).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'Log in with another number' }))
     await expect(await canvas.findByLabelText('Phone number')).toBeVisible()
+  },
+}
+
+/** An invite that ended over a week ago: "You don't have a workspace yet", with a way to create one. */
+export const InviteExpiredLongAgo: Story = {
+  name: 'Invite · expired over a week ago',
+  args: { server: fakeApi({ signedIn: '+99362481531' }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'You don’t have a workspace yet' })).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Create a business' })).toBeVisible()
   },
 }
 

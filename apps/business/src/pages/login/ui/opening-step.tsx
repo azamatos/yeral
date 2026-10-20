@@ -8,15 +8,27 @@ import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { AuthPage, textLink } from '@/shared/ui'
 import { BusinessMark } from './business-mark'
+import { DeclinedLine } from './no-workspace-steps'
 
 /** How long "Opening Glow Studio…" stays before the calendar opens; «Open the calendar now» skips it. */
 export const OPENING_MS = 1500
 
 /**
  * The last used workspace opens (B-Login `step=routing`, book B-07 step 4): its logo, name, the person's level and
- * city, and with several workspaces where to find the others.
+ * city, and with several workspaces where to find the others. Right after declining an invite, the decline is
+ * confirmed on top, as on the no-workspace card (book chapter 9, 21.10.2026).
  */
-export function OpeningStep({ workspace, count, current }: { workspace: Workspace; count: number; current: string | null }) {
+export function OpeningStep({
+  workspace,
+  count,
+  current,
+  declined = null,
+}: {
+  workspace: Workspace
+  count: number
+  current: string | null
+  declined?: string | null
+}) {
   const t = useTranslations()
   const sdk = useSdk()
   const navigate = useNavigate()
@@ -38,7 +50,12 @@ export function OpeningStep({ workspace, count, current }: { workspace: Workspac
     <AuthPage
       focusKey="opening"
       align="center"
-      media={<BusinessMark name={workspace.name} photo={workspace.photo} size={64} />}
+      media={
+        <>
+          {declined && <DeclinedLine business={declined} />}
+          <BusinessMark name={workspace.name} photo={workspace.photo} size={64} />
+        </>
+      }
       title={title}
       lead={t('login.opening.sub', { level: t(`levels.${workspace.level}`), city: workspace.city.name })}
     >

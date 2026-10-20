@@ -12,6 +12,17 @@ import { AccountLine } from './account-line'
 
 const iconTile = 'flex size-12 flex-none items-center justify-center rounded-pill bg-group [&_svg]:size-5.5'
 
+/** "You declined Glow Studio's invite." on top of the card that comes after a decline (B-Login `declined`). */
+export function DeclinedLine({ business }: { business: string }) {
+  const t = useTranslations('login')
+  return (
+    <p role="status" className="m-0 flex items-center gap-2.5 self-stretch rounded-m border border-n-200 bg-n-50 px-4 py-3 text-small">
+      <Check aria-hidden className="size-4.5 flex-none text-n-600" />
+      {t('invite.declined', { business })}
+    </p>
+  )
+}
+
 /**
  * "You don't have a workspace yet" (B-Login `step=empty`, book B-09): create a business, or ask for an invite. After
  * declining an invite it says so on top. "Try the business app" waits for the demo workspace (P2 step 6).
@@ -33,15 +44,7 @@ export function NoWorkspaceStep({
       focusKey="empty"
       media={
         <>
-          {declined && (
-            <p
-              role="status"
-              className="m-0 flex items-center gap-2.5 self-stretch rounded-m border border-n-200 bg-n-50 px-4 py-3 text-small"
-            >
-              <Check aria-hidden className="size-4.5 flex-none text-n-600" />
-              {t('invite.declined', { business: declined })}
-            </p>
-          )}
+          {declined && <DeclinedLine business={declined} />}
           <span aria-hidden className={iconTile}>
             <Store />
           </span>

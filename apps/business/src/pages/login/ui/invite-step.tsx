@@ -10,17 +10,23 @@ import { AuthPage } from '@/shared/ui'
 import { AccountLine } from './account-line'
 import { BusinessMark } from './business-mark'
 
-/** What each level may do, in three lines (the fixed permission table, design §28.1). */
-const CAN: Record<InviteCard['level'], [LucideIcon, 'admin1' | 'admin2' | 'admin3' | 'specialist1' | 'specialist2' | 'specialist3'][]> = {
+type Line = 'admin1' | 'admin2' | 'admin3' | 'specialist1' | 'specialist2' | 'specialist3'
+
+/**
+ * What each level may do, in three lines (the fixed permission table, design §28.1). The requests line (`answers`)
+ * shows only when the invite says they'll answer requests there: the business's "who answers", instant confirmation
+ * and their own switch decide it (book B-08, chapter 9 21.10.2026); the level says how far (the desk's, or their own).
+ */
+const CAN: Record<InviteCard['level'], { icon: LucideIcon; line: Line; answers?: true }[]> = {
   admin: [
-    [Calendar, 'admin1'],
-    [Bell, 'admin2'],
-    [Settings, 'admin3'],
+    { icon: Calendar, line: 'admin1' },
+    { icon: Bell, line: 'admin2', answers: true },
+    { icon: Settings, line: 'admin3' },
   ],
   specialist: [
-    [Calendar, 'specialist1'],
-    [Bell, 'specialist2'],
-    [UsersRound, 'specialist3'],
+    { icon: Calendar, line: 'specialist1' },
+    { icon: Bell, line: 'specialist2', answers: true },
+    { icon: UsersRound, line: 'specialist3' },
   ],
 }
 
@@ -93,14 +99,16 @@ export function InviteStep({
           {t('login.invite.as', { level: invite.level })}
         </span>
         <ul aria-labelledby="invite-can" className="m-0 flex list-none flex-col gap-3 p-0">
-          {CAN[invite.level].map(([Icon, key]) => (
-            <li key={key} className="flex items-center gap-3 text-body">
-              <span className="inline-flex size-9 flex-none items-center justify-center rounded-pill bg-group">
-                <Icon aria-hidden className="size-4.5" />
-              </span>
-              {t(`login.invite.${key}`)}
-            </li>
-          ))}
+          {CAN[invite.level]
+            .filter(({ answers }) => !answers || invite.answersRequests)
+            .map(({ icon: Icon, line }) => (
+              <li key={line} className="flex items-center gap-3 text-body">
+                <span className="inline-flex size-9 flex-none items-center justify-center rounded-pill bg-group">
+                  <Icon aria-hidden className="size-4.5" />
+                </span>
+                {t(`login.invite.${line}`)}
+              </li>
+            ))}
         </ul>
       </div>
       <p className="m-0 flex items-center gap-2 text-small font-medium">
