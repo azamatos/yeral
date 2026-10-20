@@ -78,6 +78,6 @@ export async function signIn(c: Context<AppEnv>, phone: string, lang: Locale | u
     // Team invites wait for the person to accept or decline them (`/me/invites`, book chapter 3).
     await linkPhone(tx, user.id, phone, now)
     await startSession(c, tx, user.id)
-    return { me: await toMe(tx, user, c.var.deps.codeOnScreen), isNew }
+    return { me: await toMe(tx, user, c.var.deps), isNew }
   })
 }

@@ -136,3 +136,17 @@ export function canAnswerRequest(
       return desk || own
   }
 }
+
+/**
+ * Whether someone joining at this level will answer booking requests there (the invite card's line, book B-08), by
+ * `canAnswerRequest`'s rule: never where bookings confirm at once; an administrator where the desk answers, or for the
+ * specialists who work without the app; a specialist where each answers their own, unless the owner took that away.
+ */
+export function answersRequests(
+  member: { level: Exclude<Level, 'owner'>; canAnswerOwn: boolean },
+  business: { answerers: RequestAnswerers; instant: boolean; phoneOnlyStaff: boolean },
+): boolean {
+  if (business.instant) return false
+  if (member.level === 'admin') return business.answerers !== 'each' || business.phoneOnlyStaff
+  return business.answerers !== 'desk' && member.canAnswerOwn
+}

@@ -74,7 +74,9 @@ describe('account', () => {
   it('no phone change while the sign-in code shows on the screen (book Q-036)', async () => {
     const on = testApp(db, { codeOnScreen: true })
     const b = browser(on.app)
-    await b.login('+99365222009', 'Merjen')
+    const { me } = await b.login('+99365222009', 'Merjen')
+    // the sign-in's account says it too
+    expect(me.canChangePhone).toBe(false)
     // the account says so before anyone taps "Change number"
     expect((await b.req('/v1/me')).json.canChangePhone).toBe(false)
     const off = browser(t.app)

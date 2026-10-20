@@ -366,7 +366,7 @@ flowchart TD
 - The invite was for a number the person no longer uses: only the owner can send a new invite to the new number (B-45).
 - Several pending invites at once: not drawn.
 
-**Status** — Design: drawn (B-Login · `step=invite`, `inviteExpired`) · Code: built (api: invites with a 7-day expiry, accept and decline, ADR 0025; the login's invite steps, #102). **Code differs** (being fixed, 21.10.2026 rows in chapter 9): a decline by someone with a workspace isn't confirmed; the expired card shows for any expired invite and with the number in full; the invite card's lines don't follow the business's request setting (the invite doesn't carry it yet).
+**Status** — Design: drawn (B-Login · `step=invite`, `inviteExpired`) · Code: built (api: invites with a 7-day expiry, accept and decline, ADR 0025; the login's invite steps, #102). **Code differs** (being fixed, 21.10.2026 rows in chapter 9): a decline by someone with a workspace isn't confirmed; the expired card shows for any expired invite and with the number in full; the invite card's lines don't follow the business's request setting yet (the api says it: `answersRequests`, 21.10.2026).
 
 ### B-09 · No workspace yet
 

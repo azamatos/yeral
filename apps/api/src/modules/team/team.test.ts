@@ -4,7 +4,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, invites, rateLimits, staff } from '../../db/schema'
+import { bookingRules, businesses, invites, rateLimits, staff } from '../../db/schema'
 import { seed } from '../../db/seed'
 
 // the demo team of Glow Studio
@@ -66,10 +66,25 @@ describe('the team (book chapter 3, ADR 0025)', () => {
       business: { slug: 'glow-studio', name: 'Glow Studio', city: { id: 'ashgabat', name: 'Ashgabat' } },
       level: 'specialist',
       // the card's lines for the level follow who answers requests there (book B-08)
-      requestAnswerers: 'both',
+      answersRequests: true,
       state: 'pending',
     })
     expect(cards[0].expiresAt - cards[0].sentAt).toBe(7 * DAY)
+    // where the owner and administrators answer, a specialist doesn't; nor where bookings confirm at once
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const [rules] = await db.select().from(bookingRules).where(eq(bookingRules.businessId, glow!.id))
+    const answers = async () => (await gulnar.req('/v1/me/invites')).json.items[0].answersRequests as boolean
+    try {
+      await db.update(bookingRules).set({ requestAnswerers: 'desk' }).where(eq(bookingRules.businessId, glow!.id))
+      expect(await answers()).toBe(false)
+      await db.update(bookingRules).set({ requestAnswerers: 'each', confirmMode: 'instant' }).where(eq(bookingRules.businessId, glow!.id))
+      expect(await answers()).toBe(false)
+    } finally {
+      await db
+        .update(bookingRules)
+        .set({ requestAnswerers: rules!.requestAnswerers, confirmMode: rules!.confirmMode })
+        .where(eq(bookingRules.businessId, glow!.id))
+    }
     const joined = await gulnar.req(`/v1/me/invites/${cards[0].id}/accept`, { method: 'POST' })
     expect(joined.status).toBe(200)
     expect(joined.json).toMatchObject({ slug: 'glow-studio', level: 'specialist' })

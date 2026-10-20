@@ -5,7 +5,6 @@
  */
 import { LEVELS } from '@yeral/domain/permissions'
 import { STAFF_STATUSES } from '@yeral/domain/model'
-import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
 import { z } from 'zod'
 import {
   bookingCodeSchema,
@@ -68,10 +67,10 @@ export const inviteCardSchema = z
     invitedBy: z.string().nullable(),
     level: assignableLevelSchema,
     /**
-     * Who answers booking requests there ("Haýyşlara kim jogap berýär?", the booking rules): the owner and
-     * administrators, each specialist their own, or both. The card's lines for the level follow it (book B-08).
+     * Whether they'll answer booking requests there (book B-08), worked out from the business's rules ("who answers",
+     * instant or by hand, specialists without the app) and their own switch; the card's line for the level follows it.
      */
-    requestAnswerers: z.enum(REQUEST_ANSWERERS),
+    answersRequests: z.boolean(),
     state: inviteStateSchema,
     sentAt: epochSchema,
     expiresAt: epochSchema,

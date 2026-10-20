@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { can, canAnswerRequest, canManageTeam, canOn, LEVELS, PERMISSION_TABLE, PERMISSIONS, scopeOf, type Actor } from './permissions'
+import {
+  answersRequests,
+  can,
+  canAnswerRequest,
+  canManageTeam,
+  canOn,
+  LEVELS,
+  PERMISSION_TABLE,
+  PERMISSIONS,
+  scopeOf,
+  type Actor,
+} from './permissions'
 
 const owner: Actor = { level: 'owner', staffId: 'mays', canAnswerOwn: true }
 const admin: Actor = { level: 'admin', staffId: 'selbi', canAnswerOwn: true }
@@ -96,5 +107,35 @@ describe('who answers requests (book chapter 3)', () => {
       expect(canAnswerRequest(admin, setting, phoneOnly)).toBe(true)
       expect(canAnswerRequest(ayna, setting, phoneOnly)).toBe(false)
     }
+  })
+})
+
+describe('who will answer requests, for the invite card (book B-08)', () => {
+  const at = (answerers: 'desk' | 'each' | 'both', more: { instant?: boolean; phoneOnlyStaff?: boolean } = {}) => ({
+    answerers,
+    instant: more.instant ?? false,
+    phoneOnlyStaff: more.phoneOnlyStaff ?? false,
+  })
+  const admin = { level: 'admin' as const, canAnswerOwn: true }
+  const specialist = { level: 'specialist' as const, canAnswerOwn: true }
+  it('an administrator: where the desk answers, or for specialists without the app', () => {
+    expect([answersRequests(admin, at('desk')), answersRequests(admin, at('both')), answersRequests(admin, at('each'))]).toEqual([
+      true,
+      true,
+      false,
+    ])
+    expect(answersRequests(admin, at('each', { phoneOnlyStaff: true }))).toBe(true)
+  })
+  it('a specialist: their own where each answers, unless the owner took it away', () => {
+    expect([
+      answersRequests(specialist, at('desk')),
+      answersRequests(specialist, at('each')),
+      answersRequests(specialist, at('both')),
+    ]).toEqual([false, true, true])
+    expect(answersRequests({ ...specialist, canAnswerOwn: false }, at('both'))).toBe(false)
+  })
+  it('nobody where bookings confirm at once', () => {
+    expect(answersRequests(admin, at('desk', { instant: true }))).toBe(false)
+    expect(answersRequests(specialist, at('both', { instant: true }))).toBe(false)
   })
 })
