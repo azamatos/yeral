@@ -1413,7 +1413,7 @@ flowchart TD
 
 > Open question Q-210: deleting a service with future bookings.
 
-**Status** — Design: drawn (B-Services · `drawer`) · Code: schema only (groups, price types, buffer override, online switch, who performs, archive).
+**Status** — Design: drawn (B-Services · `drawer`) · Code: api built (`/v1/w/{slug}/services…`, 20.10.2026): groups, services with every language, who does each, the order, delete with undo; the limits are `serviceErrors` (`@yeral/domain/services`).
 
 ### B-39 · Weekly hours and breaks
 

@@ -47,6 +47,8 @@ export const ERROR_STATUS = {
   invite_expired: 409,
   invite_answered: 409,
   owner_cannot_leave: 409,
+  // business settings
+  group_not_empty: 409,
   rate_limited: 429,
   internal: 500,
 } as const satisfies Record<string, number>

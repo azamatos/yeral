@@ -58,6 +58,7 @@ CMS (`/v1/admin/...`, P2 step 5) follows. Their schemas join the contract as the
 | Area | Endpoint | Schemas (`@yeral/contract/…`) |
 |---|---|---|
 | Booking rules | `GET`/`PATCH /v1/w/:slug/settings/rules` (owner, administrators; book B-41, B-42) | `settings`: `bookingRules`, `bookingRulesUpdate` |
+| Services menu | `GET`/`POST /v1/w/:slug/services` · `PATCH`/`DELETE …/services/:serviceId` · `POST …/services/:serviceId/restore` · `POST …/services/groups` · `PATCH`/`DELETE …/services/groups/:groupId` · `PUT …/services/order` (owner, administrators; book B-38) | `services`: `menu`, `menuGroup`, `menuService`, `serviceInput`, `serviceUpdate`, `groupInput`, `menuOrder` |
 
 A settings change writes `business.updated`, which everyone on the team hears.
 

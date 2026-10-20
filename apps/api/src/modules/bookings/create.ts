@@ -380,6 +380,8 @@ export async function rebook(
   const move = !!opts.rescheduleOf
   const booked = opts.booked ?? (await bookedServices(db, from.id))
   const query = rebookQuery(booked, to, move ? [from.id] : undefined)
+  // a service deleted from the menu stays on the bookings that hold it, but nothing new is booked with it (book Q-210)
+  if (query.serviceIds.some((id) => !lb.services.some((s) => s.id === id))) throw new ApiError('not_bookable')
   if (move) {
     const ctx = appointmentContext(lb, [], deps.now())
     // a service no longer booked online here can't be moved online; a specialist who left or stopped doing these

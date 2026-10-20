@@ -190,6 +190,7 @@ describe('sdk', () => {
       team.invite('a-long-random-token-from-the-link'),
       team.list('glow-studio'),
       settings.rules('glow-studio'),
+      settings.menu('glow-studio'),
       links.view('a-long-random-token-from-the-sms-link', 'tk'),
     ]
     for (const q of queries) await f.queryClient.fetchQuery(q as never)

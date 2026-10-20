@@ -97,8 +97,8 @@ copy to say businesses keep their visit records (Q-172).
 | Start times | every 15 or 30 min from opening | Owner/admin | client spec §4.4, business spec §8 |
 | Time groups | *Irden* before 12:00 · *Günortan* 12:00–17:00 · *Agşam* from 17:00 | Fixed | Booking screen |
 | Nearest times when a time was just taken | 3, same day | Fixed | client spec §4.4; code: packages/domain/src/availability.ts |
-| Service length | 5–240 min in 5-min steps | Owner/admin | B-Services screen; code: at least 5, no maximum |
-| Service price | whole manats, up to 5 digits (99 999 TMT) | Owner/admin | B-Services screen; code: no maximum |
+| Service length | 5–240 min in 5-min steps | Owner/admin | B-Services screen; code: packages/domain/src/services.ts |
+| Service price | whole manats, up to 5 digits (99 999 TMT); fixed and "from" at least 1, free 0 | Owner/admin | B-Services screen; code: packages/domain/src/services.ts |
 | Buffer after one service | the business's buffer, or its own: none, 5, 10, 15, 20, 30 min | Owner/admin | business spec §4, §8; B-Services screen |
 | Note to the business | optional, up to 500 characters; editable while the request waits | Client | client spec §4.4, §4.8; length code only: packages/contract/src/bookings.ts |
 | Staff bookings: earliest start | the slot that holds "now" (11:20 → 11:15 with a 15-min step) | Fixed | ROUND6-ANSWERS E3; code: packages/domain/src/availability.ts |
