@@ -36,3 +36,26 @@
   for tests; `createApi`/`useSdk` in `@yeral/sdk` (another session owns it; move it with the second app).
 - Follow-ups: the main bundle is ~178 kB gzip (zod comes in with `@yeral/lib/site`; routes split automatically as they
   arrive); the business app's typecheck takes ~50 s because the sdk's types reach into the api's routes.
+- PR 2, the sign-in (`/login`, B-Login; book B-07–B-09):
+  - `@yeral/ui` `AuthCard` (Display/AuthCard): header, centred card (max 440, pad 32, r16), `media`, `eyebrow`,
+    `title` (26/32, 24/30 on phones, focused on `focusKey` changes), `lead`, children, `footer`; frameless on phones.
+  - `pages/login`: `model/sign-in.ts` (a reducer of the phone and code steps: the tries left, the lock and the code
+    dead after it, the resend timer, 5 codes an hour per number, `resend_too_soon` back to the code step; the waits in
+    seconds and minutes from the api's `retryAfterSec`), `use-sign-in.ts` (`auth.sendCode`/`verify`, one ticker),
+    `entry.ts` (a waiting invite, oldest first → the last used workspace → an expired invite when there's no
+    workspace → no workspace). Steps: phone and code (SignInCodeStep, boxes 56, the code callout from the typed
+    `code` of #98), "Is this you?" (Q-270; not drawn: the invite card's pattern), the name (`me.update`), the invite
+    (Accept → that workspace opens; Decline asks in place), expired, no workspace, opening (1.5 s, then
+    `/w/{slug}/calendar`; `team.open` when it wasn't the last used). The entry step owns the invite answers, since the
+    card goes as soon as the invites reload.
+  - Routes: `/` → `/login`; `/login`; `/w/$slug` (signed in, else `/login`) with a stand-in calendar (name, level,
+    Log out); `/setup/$step` stand-in. «Log in with another number» signs out and drops the cache but `me`.
+  - Tests: unit (the reducer, the entry, the phone checks), stories `Business/Pages/Login` (12, over a contract-shaped
+    fake api: phone checks, member with a wrong code, no code on screen, new person, invite declined and accepted,
+    expired, the lock and a new code, too many codes, "Is this you?", offline), `Display/AuthCard` (10); checked end
+    to end against the local api (`SIGN_IN_CODE_ON_SCREEN=true`): owner → Glow Studio, new person → name → no
+    workspace, landline refused.
+  - Missing pieces (not built in the api): where an unfinished setup stopped (Q-200, ContinueSetupCard), the photo
+    upload for the name step (P2 step 4), the demo workspace behind "Try the business app" (P2 step 6), the legal
+    pages the "By tapping Send code…" line links to (P4 slice 7). `auth.verify` in the sdk doesn't refresh
+    `workspaces`/`invites` and `auth.logout` leaves them cached; the page drops everything but `me` on sign-out.

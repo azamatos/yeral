@@ -2,3 +2,13 @@
 @import 'tailwindcss';
 @import '@yeral/ui/styles.css';
 @source '../../../../packages/ui/src/**/*.{ts,tsx}';
+
+/* "Opening Glow Studio…": the bar's segment runs across (B-Login .bar; still with reduced motion) */
+@keyframes opening {
+  from {
+    left: -40%;
+  }
+  to {
+    left: 100%;
+  }
+}

@@ -10,33 +10,78 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as SetupStepRouteImport } from './routes/setup/$step'
+import { Route as WSlugRouteRouteImport } from './routes/w/$slug/route'
+import { Route as WSlugCalendarRouteImport } from './routes/w/$slug/calendar'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupStepRoute = SetupStepRouteImport.update({
+  id: '/setup/$step',
+  path: '/setup/$step',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WSlugRouteRoute = WSlugRouteRouteImport.update({
+  id: '/w/$slug',
+  path: '/w/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WSlugCalendarRoute = WSlugCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => WSlugRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/w/$slug': typeof WSlugRouteRouteWithChildren
+  '/setup/$step': typeof SetupStepRoute
+  '/w/$slug/calendar': typeof WSlugCalendarRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/w/$slug': typeof WSlugRouteRouteWithChildren
+  '/setup/$step': typeof SetupStepRoute
+  '/w/$slug/calendar': typeof WSlugCalendarRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/w/$slug': typeof WSlugRouteRouteWithChildren
+  '/setup/$step': typeof SetupStepRoute
+  '/w/$slug/calendar': typeof WSlugCalendarRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/login' | '/w/$slug' | '/setup/$step' | '/w/$slug/calendar'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/login' | '/w/$slug' | '/setup/$step' | '/w/$slug/calendar'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/w/$slug'
+    | '/setup/$step'
+    | '/w/$slug/calendar'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
+  WSlugRouteRoute: typeof WSlugRouteRouteWithChildren
+  SetupStepRoute: typeof SetupStepRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +93,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup/$step': {
+      id: '/setup/$step'
+      path: '/setup/$step'
+      fullPath: '/setup/$step'
+      preLoaderRoute: typeof SetupStepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/w/$slug': {
+      id: '/w/$slug'
+      path: '/w/$slug'
+      fullPath: '/w/$slug'
+      preLoaderRoute: typeof WSlugRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/w/$slug/calendar': {
+      id: '/w/$slug/calendar'
+      path: '/calendar'
+      fullPath: '/w/$slug/calendar'
+      preLoaderRoute: typeof WSlugCalendarRouteImport
+      parentRoute: typeof WSlugRouteRoute
+    }
   }
 }
 
+interface WSlugRouteRouteChildren {
+  WSlugCalendarRoute: typeof WSlugCalendarRoute
+}
+
+const WSlugRouteRouteChildren: WSlugRouteRouteChildren = {
+  WSlugCalendarRoute: WSlugCalendarRoute,
+}
+
+const WSlugRouteRouteWithChildren = WSlugRouteRoute._addFileChildren(
+  WSlugRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
+  WSlugRouteRoute: WSlugRouteRouteWithChildren,
+  SetupStepRoute: SetupStepRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

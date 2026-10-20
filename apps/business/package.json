@@ -16,6 +16,8 @@
   "dependencies": {
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
+    "@yeral/contract": "workspace:*",
+    "@yeral/domain": "workspace:*",
     "@yeral/i18n": "workspace:*",
     "@yeral/lib": "workspace:*",
     "@yeral/sdk": "workspace:*",
@@ -23,7 +25,8 @@
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "use-intl": "catalog:"
+    "use-intl": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@babel/core": "catalog:",
