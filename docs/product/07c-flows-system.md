@@ -870,12 +870,12 @@ flowchart TD
 1. Booking SMS go into a queue with their planned time.
 2. Right before sending, the system checks the booking again: its state, its time and the switches (S-04).
 3. If sending fails, it tries again after 1, 2, 4 and 8 minutes.
-4. After 5 failed tries, about 15 minutes in all, it gives up, keeps the record and alerts the Ýeral team (Q-284, decided 18.10.2026). **Code differs:** nobody is alerted.
+4. After 5 failed tries, about 15 minutes in all, it gives up, keeps the record and alerts the Ýeral team (Q-284, decided 18.10.2026). **Code differs:** the give-up writes an error line, `job gave up`, that error tracking (F-209, P2 step 7) turns into an alert; until then nobody is told.
 
 **Edge cases**
 
 - Login codes are sent straight away, not queued. If sending fails, the person sees an error and can ask again after the 59-second wait (S-10).
-- A reminder that would arrive after the visit has started is dropped (Q-284). **Code differs:** a retried reminder can still go out after the start.
+- A reminder that would arrive after the visit has started is dropped (Q-284).
 - There's no SMS gateway yet, so every environment writes SMS to the log. At the first launch no SMS goes out: texts go to the log and the sign-in code shows on the screen (Q-036, decided 18.10.2026).
 
 > Open question Q-284: An SMS that can't be delivered.

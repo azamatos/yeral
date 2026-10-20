@@ -7,6 +7,7 @@ import type { Db } from '../../db/client'
 import { bookings, businesses, jobs, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { bookingSmsText, moveRefusedSmsText } from '../../notify'
+import { nullLogger, type Logger } from '../../ports/log'
 import { runDueJobs } from '../jobs/run'
 import { queueBookingSms } from './confirm'
 
@@ -161,5 +162,132 @@ describe('reminders and the night (book Q-285)', () => {
     const [settled] = await db.select().from(jobs).where(eq(jobs.id, job!.id))
     expect(settled).toMatchObject({ attempts: 0, error: 'dropped: no review asks (book Q-259)' })
     expect(settled!.doneAt).not.toBeNull()
+  })
+
+  it('a reminder that would go after the visit has started is dropped, not sent (book Q-284)', async () => {
+    const t = testApp(db)
+    const [barber] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    const [row] = await db
+      .insert(bookings)
+      .values({
+        code: 'YR-991010',
+        businessId: barber!.id,
+        type: 'appointment',
+        date: '2026-10-16',
+        start: 600,
+        end: 660,
+        status: 'confirmed',
+        source: 'web',
+        clientPhone: '+99365555010',
+      })
+      .returning()
+    // the 2-hour reminder kept failing; its next try comes a minute after the start
+    const [job] = await db
+      .insert(jobs)
+      .values({
+        kind: 'booking.sms',
+        runAt: new Date(epochOf('2026-10-16', 601)),
+        attempts: 3,
+        payload: { bookingId: row!.id, kind: 'reminder2h', date: row!.date, start: row!.start },
+      })
+      .returning()
+    t.clock.now = epochOf('2026-10-16', 601)
+    await runDueJobs(t.deps)
+    expect(t.sms.sent.filter((s) => s.to === '+99365555010')).toEqual([])
+    const [settled] = await db.select().from(jobs).where(eq(jobs.id, job!.id))
+    expect(settled).toMatchObject({ attempts: 3, error: 'dropped: the visit has started (book Q-284)' })
+    expect(settled!.doneAt).not.toBeNull()
+  })
+
+  it('an SMS that fails 5 times is given up and kept, and the error log alerts the team (book Q-284)', async () => {
+    const t = testApp(db)
+    const alerts: { msg: string; data?: Record<string, unknown> }[] = []
+    const log: Logger = { ...nullLogger, error: (msg, data) => alerts.push({ msg, data }) }
+    const deps = { ...t.deps, log, sms: { send: () => Promise.reject(new Error('gateway down')) } }
+    const [job] = await db
+      .insert(jobs)
+      .values({ kind: 'sms', runAt: new Date(t.clock.now), payload: { to: '+99365555011', text: 'Hello' } })
+      .returning()
+    // tries now, then after 1, 2, 4 and 8 minutes
+    for (let i = 0; i < 5; i++) {
+      await runDueJobs(deps)
+      t.clock.now += 9 * 60_000
+    }
+    const [settled] = await db.select().from(jobs).where(eq(jobs.id, job!.id))
+    expect(settled).toMatchObject({ attempts: 5, error: 'Error: gateway down' })
+    expect(settled!.doneAt).not.toBeNull()
+    expect(alerts.filter((a) => a.data?.id === job!.id)).toEqual([
+      { msg: 'job gave up', data: expect.objectContaining({ id: job!.id, kind: 'sms', attempts: 5 }) },
+    ])
+  })
+
+  it('from the start exactly, every reminder is dropped and a confirmation still goes (book Q-284)', async () => {
+    const t = testApp(db)
+    const [barber] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    const [row] = await db
+      .insert(bookings)
+      .values({
+        code: 'YR-991012',
+        businessId: barber!.id,
+        type: 'appointment',
+        date: '2026-10-16',
+        start: 720,
+        end: 780,
+        status: 'confirmed',
+        source: 'web',
+        clientPhone: '+99365555012',
+      })
+      .returning()
+    const queued = await db
+      .insert(jobs)
+      .values(
+        (['reminderEvening', 'reminderDay', 'confirmed'] as const).map((kind) => ({
+          kind: 'booking.sms',
+          runAt: new Date(epochOf('2026-10-16', 720)),
+          payload: { bookingId: row!.id, kind, date: row!.date, start: row!.start },
+        })),
+      )
+      .returning()
+    t.clock.now = epochOf('2026-10-16', 720)
+    await runDueJobs(t.deps)
+    const sent = t.sms.sent.filter((s) => s.to === '+99365555012')
+    expect(sent).toHaveLength(1)
+    expect(sent[0]!.text).not.toMatch(/^Reminder/)
+    const settled = await db
+      .select()
+      .from(jobs)
+      .where(
+        sql`${jobs.id} in (${sql.join(
+          queued.map((j) => sql`${j.id}`),
+          sql`, `,
+        )})`,
+      )
+    expect(settled.map((j) => j.error ?? 'sent').sort()).toEqual([
+      'dropped: the visit has started (book Q-284)',
+      'dropped: the visit has started (book Q-284)',
+      'sent',
+    ])
+  })
+
+  it('a job whose tries never finished (a hung gateway) is given up without another try, and alerts', async () => {
+    const t = testApp(db)
+    const alerts: { msg: string; data?: Record<string, unknown> }[] = []
+    const log: Logger = { ...nullLogger, error: (msg, data) => alerts.push({ msg, data }) }
+    const [job] = await db
+      .insert(jobs)
+      .values({
+        kind: 'sms',
+        runAt: new Date(t.clock.now - 60_000),
+        attempts: 5,
+        lockedUntil: new Date(t.clock.now - 1),
+        payload: { to: '+99365555013', text: 'Hello' },
+      })
+      .returning()
+    await runDueJobs({ ...t.deps, log })
+    expect(t.sms.sent.filter((s) => s.to === '+99365555013')).toEqual([])
+    const [settled] = await db.select().from(jobs).where(eq(jobs.id, job!.id))
+    expect(settled).toMatchObject({ attempts: 5, error: 'never finished' })
+    expect(settled!.doneAt).not.toBeNull()
+    expect(alerts.filter((a) => a.data?.id === job!.id).map((a) => a.msg)).toEqual(['job gave up'])
   })
 })

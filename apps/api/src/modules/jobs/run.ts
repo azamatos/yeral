@@ -5,7 +5,7 @@
  * 3. Queued work: SMS, reminders, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
-import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
+import { MAX_ALTERNATIVES, REMINDER_KINDS } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { nearestSlots, nextFreeSlot, slotStaffId, staffDoingAll, type AppointmentSlot } from '@yeral/domain/availability'
 import { addDays, epochOf, localOf } from '@yeral/domain/time'
@@ -28,6 +28,9 @@ const BATCH = 100
  * count of failed SMS (attempts reached) leaves it out.
  */
 const DROPPED_REVIEW_ASK = 'dropped: no review asks (book Q-259)'
+/** A reminder whose try comes once the visit has started tells the client nothing (book Q-284): settled unsent. */
+const DROPPED_STARTED = 'dropped: the visit has started (book Q-284)'
+const REMINDERS: ReadonlySet<string> = new Set(REMINDER_KINDS)
 const MAX_ATTEMPTS = 5
 
 /**
@@ -202,20 +205,25 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
 
 /**
  * A booking SMS, if the booking is still in the right state, still at the time the SMS was planned for (`at`; older
- * jobs have none), and the client wants it.
+ * jobs have none), and the client wants it. Says why when it settles a reminder unsent that the job should record.
  */
 async function sendBookingSms(
   deps: Deps,
   bookingId: string,
   kind: BookingSmsKind | OutcomeSmsKind,
   at: { date?: unknown; start?: unknown; covers?: unknown },
-): Promise<void> {
+): Promise<string | undefined> {
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
   // the person deleted their account: the number may be someone else's now
   if (!b?.clientPhone || b.accountDeletedAt) return
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
-  if (kind === 'expired' || kind === 'moveRefused') return sendOutcomeSms(deps, b, kind)
+  if (kind === 'expired' || kind === 'moveRefused') {
+    await sendOutcomeSms(deps, b, kind)
+    return
+  }
   if (b.status !== 'confirmed') return
+  // a retried reminder can't arrive after the start (book Q-284)
+  if (REMINDERS.has(kind) && deps.now() >= epochOf(b.date, b.start)) return DROPPED_STARTED
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const [client] = b.clientId ? await deps.db.select().from(clients).where(eq(clients.id, b.clientId)) : []
   if (client?.noRemindersSms && kind !== 'confirmed') return
@@ -247,9 +255,19 @@ async function sendBookingSms(
   else await deps.sms.send({ to, text: bookingSmsText(lang, kind, sms) })
 }
 
+/** The last try failed or never finished: kept for inspection, and the error tracker (F-209) alerts on this line (book Q-284). */
+async function giveUp(deps: Deps, job: { id: number; kind: string }, attempts: number, error: string): Promise<void> {
+  deps.log.error('job gave up', { id: job.id, kind: job.kind, attempts, error })
+  await deps.db
+    .update(jobs)
+    .set({ attempts, doneAt: new Date(deps.now()), lockedUntil: null, error })
+    .where(eq(jobs.id, job.id))
+}
+
 async function runQueue(deps: Deps): Promise<number> {
   const now = new Date(deps.now())
-  // claim a batch: other runners skip locked rows
+  // claim a batch: other runners skip locked rows. A try counts when it starts, so one that hangs or dies past its
+  // lock still counts toward giving up
   const claimed = await deps.db.transaction(async (tx) => {
     const rows = await tx
       .select()
@@ -261,23 +279,31 @@ async function runQueue(deps: Deps): Promise<number> {
     for (const j of rows)
       await tx
         .update(jobs)
-        .set({ lockedUntil: new Date(now.getTime() + 60_000) })
+        .set({ lockedUntil: new Date(now.getTime() + 60_000), attempts: j.attempts + 1 })
         .where(eq(jobs.id, j.id))
     return rows
   })
   for (const job of claimed) {
+    const attempts = job.attempts + 1
+    // tried as often as allowed, the last tries never finishing (a hung gateway, a restart): not tried again
+    if (attempts > MAX_ATTEMPTS) {
+      await giveUp(deps, job, job.attempts, job.error ?? 'never finished')
+      continue
+    }
     try {
       const p = job.payload
       // a review ask an older api queued (book Q-259): settled unsent, recorded as migration 0016 records them
       if (job.kind === 'booking.sms' && p.kind === 'reviewAsk') {
         await deps.db
           .update(jobs)
-          .set({ doneAt: new Date(deps.now()), lockedUntil: null, error: DROPPED_REVIEW_ASK })
+          .set({ attempts: job.attempts, doneAt: new Date(deps.now()), lockedUntil: null, error: DROPPED_REVIEW_ASK })
           .where(eq(jobs.id, job.id))
         continue
       }
+      let note: string | undefined
       if (job.kind === 'sms') await deps.sms.send({ to: String(p.to), text: String(p.text) })
-      else if (job.kind === 'booking.sms') await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p)
+      else if (job.kind === 'booking.sms')
+        note = await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p)
       else if (job.kind === 'demo.answer') {
         const [b] = await deps.db
           .select()
@@ -288,22 +314,21 @@ async function runQueue(deps: Deps): Promise<number> {
       }
       await deps.db
         .update(jobs)
-        .set({ doneAt: new Date(deps.now()), lockedUntil: null, error: null })
+        // settled unsent with a note: not a try
+        .set({ ...(note ? { attempts: job.attempts } : {}), doneAt: new Date(deps.now()), lockedUntil: null, error: note ?? null })
         .where(eq(jobs.id, job.id))
     } catch (e) {
-      const attempts = job.attempts + 1
       // a gateway may echo the text back: no error kept or logged holds a link's token
-      const error = hideLinkTokens(String(e))
+      const error = hideLinkTokens(String(e)).slice(0, 500)
+      if (attempts >= MAX_ATTEMPTS) {
+        await giveUp(deps, job, attempts, error)
+        continue
+      }
       deps.log.warn('job failed', { id: job.id, kind: job.kind, attempts, error })
       await deps.db
         .update(jobs)
-        .set({
-          attempts,
-          lockedUntil: null,
-          error: error.slice(0, 500),
-          // back off 1, 2, 4, 8 minutes; then give up (kept for inspection)
-          ...(attempts >= MAX_ATTEMPTS ? { doneAt: new Date(deps.now()) } : { runAt: new Date(deps.now() + 2 ** (attempts - 1) * 60_000) }),
-        })
+        // back off 1, 2, 4, 8 minutes
+        .set({ lockedUntil: null, error, runAt: new Date(deps.now() + 2 ** (attempts - 1) * 60_000) })
         .where(eq(jobs.id, job.id))
     }
   }
