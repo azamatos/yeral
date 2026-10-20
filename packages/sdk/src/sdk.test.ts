@@ -268,6 +268,7 @@ describe('live events', () => {
       ['business', 'glow-studio'],
       ['requests', 'glow-studio'],
       ['calendar', 'glow-studio'],
+      ['clients', 'glow-studio'],
     ])
     expect(staleKeys({ type: 'review.created', business: 'bag-kafe', bookingCode: null })).toEqual([
       ['reviews', 'bag-kafe'],

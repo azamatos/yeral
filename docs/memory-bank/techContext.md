@@ -116,7 +116,8 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | invites | `INVITE_DAYS inviteState() inviteExpiresAt()` | `@yeral/domain/team` |
 | who is on which team (api) | `signsIn` condition, `teamsOf() workspaceIdsOf() hasSignedInTeam()` | `apps/api/src/modules/team/members.ts` |
 | a workspace route's member and actor (api) | `requireMember(c, slug)` (404 when not on the team), `teamRow() issueInvite() members()` | `apps/api/src/modules/team/service.ts` |
-| client stats, segments, online block | `clientStats() clientSegments() isOnlineBlocked() reachesNoShowLimit()` | `@yeral/domain/clients` |
+| client stats, segments, online block | `clientStats() clientSegments() segmentsOf() isOnlineBlocked() reachesNoShowLimit()` | `@yeral/domain/clients` |
+| a business's clients from their bookings (api): visits, totals, the next booking, in one query | `clientFacts() byRecent() phoneOnlyOf()`; SQL `doneAt() aheadAt() withStaff()`, `ownOnly(actor)` | `apps/api/src/modules/clients/facts.ts` |
 | the phone-only block and the no-show count (api) | `isPhoneBlocked() setOnlineBlocked() noShowsSinceReset()`; when a no-show was marked: `noShowMarkedAt` (`bookings/repo.ts`) | `apps/api/src/modules/clients/online.ts` |
 | price totals, calendar day summary | `priceTotal() daySummary()` | `@yeral/domain/pricing` |
 | distances, radius box, the city a position is in | `distanceM() boundingBox() popularity() nearestCity()`; the market's main city: `MARKET.mainCity` | `@yeral/domain/geo` |

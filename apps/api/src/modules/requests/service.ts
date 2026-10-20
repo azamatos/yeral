@@ -11,15 +11,16 @@ import { canAnswerRequest as requestOpen, offerPast } from '@yeral/domain/lifecy
 import type { Locale } from '@yeral/domain/model'
 import { canAnswerRequest, canOn, type Actor } from '@yeral/domain/permissions'
 import type { RequestAnswerers } from '@yeral/domain/rules'
-import { and, asc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
-import { bookingItems, bookingRules, bookings, staff, type TimeSlot } from '../../db/schema'
+import { bookingItems, bookingRules, bookings, clientNotes, staff, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
 import { appointmentContext, assertStaffFree, loadBusiness, loadBusy, lockedHours, OutsideHours } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
 import { teamItemOf, teamPriceOf } from '../bookings/team-view'
+import { doneAt, ownOnly, withStaff } from '../clients/facts'
 import { bookedServices, declineForBusiness, rebookQuery, refuseMove } from '../bookings/engine'
 import { awaitingAnswer, guard, itemsOf, lockBooking, stateOf, type BookingRow } from '../bookings/repo'
 
@@ -76,7 +77,7 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
   if (!rows.length) return []
   const originalIds = rows.flatMap((r) => (r.rescheduleOf ? [r.rescheduleOf] : []))
   const clientIds = [...new Set(rows.flatMap((r) => (r.clientId ? [r.clientId] : [])))]
-  const [items, answerers, originals, history] = await all(db, [
+  const [items, answerers, originals, history, alerts] = await all(db, [
     () =>
       requestItems(
         db,
@@ -84,17 +85,35 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
       ),
     () => answerersOf(db, business.id),
     async () => (originalIds.length ? db.select().from(bookings).where(inArray(bookings.id, originalIds)) : []),
-    async () =>
-      clientIds.length
+    // as the client card counts them (`clients/facts.ts`): visits completed as seen now, a specialist's own
+    async () => {
+      const own = ownOnly(actor)
+      return clientIds.length
         ? db
             .select({
               clientId: bookings.clientId,
-              visits: sql<number>`count(*) filter (where ${bookings.status} = 'completed')::int`,
+              visits: sql<number>`count(*) filter (where ${doneAt(now)})::int`,
               noShows: sql<number>`count(*) filter (where ${bookings.status} = 'noshow')::int`,
             })
             .from(bookings)
-            .where(and(eq(bookings.businessId, business.id), inArray(bookings.clientId, clientIds)))
+            .where(
+              and(
+                eq(bookings.businessId, business.id),
+                inArray(bookings.clientId, clientIds),
+                isNull(bookings.rescheduleOf),
+                own ? withStaff(own) : undefined,
+              ),
+            )
             .groupBy(bookings.clientId)
+        : []
+    },
+    async () =>
+      clientIds.length
+        ? db
+            .select({ clientId: clientNotes.clientId, text: clientNotes.text })
+            .from(clientNotes)
+            .where(and(inArray(clientNotes.clientId, clientIds), eq(clientNotes.alert, true)))
+            .orderBy(desc(clientNotes.createdAt))
         : [],
   ])
   return rows.flatMap((r) => {
@@ -117,7 +136,14 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
         price: teamPriceOf(r),
         note: r.clientNote,
         from: from ? { date: from.date, start: from.start, end: from.end } : null,
-        client: { name: r.clientName ?? '', phone: r.clientPhone, visits: seen?.visits ?? 0, noShows: seen?.noShows ?? 0 },
+        client: {
+          id: r.clientId,
+          name: r.clientName ?? '',
+          phone: r.clientPhone,
+          visits: seen?.visits ?? 0,
+          noShows: seen?.noShows ?? 0,
+          alerts: alerts.filter((a) => a.clientId === r.clientId).map((a) => a.text),
+        },
         canAnswer: canAnswerRequest(actor, answerers, facts),
         answeredBy: answeredBy(answerers, facts.forPhoneOnlyStaff),
       },

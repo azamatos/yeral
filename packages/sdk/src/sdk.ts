@@ -46,6 +46,7 @@ import type {
   newBookingSchema,
 } from '@yeral/contract/calendar'
 import type { searchQuerySchema } from '@yeral/contract/catalog'
+import type { clientCardQuerySchema, clientListQuerySchema } from '@yeral/contract/clients'
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
@@ -287,7 +288,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       const query = clean(p)
       return queryOptions({
         queryKey: keys.availability(slug, 'sessions', query),
-        queryFn: ({ signal }) => call(v1.businesses[':slug'].sessions.$get({ param: { slug }, query: query }, abortWith(signal))),
+        queryFn: ({ signal }) => call(v1.businesses[':slug'].sessions.$get({ param: { slug }, query }, abortWith(signal))),
         staleTime: 15_000,
       })
     },
@@ -623,7 +624,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
    * its undo, moving and cancelling one.
    */
   // a move or a cancel may also settle the client's waiting move: the requests and the switcher's counts
-  const booked = (slug: string) => invalidate(keys.calendar(slug), keys.availabilityAll(slug), keys.requests(slug), keys.workspaces())
+  const booked = (slug: string) =>
+    invalidate(keys.calendar(slug), keys.availabilityAll(slug), keys.requests(slug), keys.workspaces(), keys.clients(slug))
   const calendar = {
     /** "Senenama" (book B-16, B-17): a day or a week, everyone the reader sees or one person, the day's lines. */
     view: (slug: string, p: Params<typeof calendarQuerySchema, 'date'>) => {
@@ -727,7 +729,38 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
-  return { auth, me, catalog, availability, bookings, team, settings, requests, calendar, links }
+  const clients = {
+    /** "Müşderiler" (book B-32): pages of the clients the reader sees, the most recently seen first. */
+    list: (slug: string, p: Partial<Omit<z.output<typeof clientListQuerySchema>, 'cursor'>> = {}) => {
+      const query = clean(p)
+      return infiniteQueryOptions({
+        queryKey: keys.clientList(slug, query),
+        queryFn: ({ pageParam, signal }) =>
+          call(w.clients.$get({ param: { slug }, query: clean({ ...query, cursor: pageParam }) }, abortWith(signal))),
+        initialPageParam: '',
+        getNextPageParam: (last) => last.cursor ?? undefined,
+      })
+    },
+    /** The new-booking drawer (B-23): up to 3 matches from 3 digits of the number, or 2 letters of the name. */
+    lookup: (slug: string, p: { phone?: string; name?: string }) => {
+      const query = clean(p)
+      return queryOptions({
+        queryKey: keys.clientLookup(slug, query),
+        queryFn: ({ signal }) => call(w.clients.lookup.$get({ param: { slug }, query }, abortWith(signal))),
+        enabled: p.phone ? p.phone.replace(/\D/g, '').length >= 3 : (p.name?.trim().length ?? 0) >= 2,
+      })
+    },
+    /** The client card (B-34); `history` asks for more past bookings ("Ýene görkez"). */
+    card: (slug: string, id: string, p: Params<typeof clientCardQuerySchema, 'lang'>) => {
+      const query = clean(p)
+      return queryOptions({
+        queryKey: keys.client(slug, id, query),
+        queryFn: ({ signal }) => call(w.clients[':id'].$get({ param: { slug, id }, query }, abortWith(signal))),
+      })
+    },
+  }
+
+  return { auth, me, catalog, availability, bookings, team, settings, requests, calendar, clients, links }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

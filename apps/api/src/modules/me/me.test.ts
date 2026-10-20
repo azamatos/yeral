@@ -470,6 +470,9 @@ describe('account', () => {
         '/v1/w/{slug}/bookings/{code}/cancel',
         '/v1/w/{slug}/bookings/{code}/complaint',
         '/v1/w/{slug}/bookings/{code}/internal-status',
+        '/v1/w/{slug}/clients',
+        '/v1/w/{slug}/clients/lookup',
+        '/v1/w/{slug}/clients/{id}',
       ].sort(),
     )
   })
