@@ -119,6 +119,11 @@ export const businesses = pgTable(
     verification: verificationStatus().notNull().default('pending'),
     /** A verified business moved (book Q-215): the Ýeral team checks it again and clears this; the page stays public. */
     addressChangedAt: ts(),
+    /**
+     * When the business last moved: its address line, street or city changed (book Q-215). Its page and the bookings
+     * ahead say "New address" for a while; a new pin alone isn't a move.
+     */
+    movedAt: ts(),
     verificationReason: text(),
     /** Table businesses: how long a party keeps a table, and the special-request chips. */
     tableSittingMinutes: integer().notNull().default(120),

@@ -154,6 +154,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     address: b.hideExactAddress && !exact ? b.street : b.address,
     city: await cityRef(deps.db, b.cityId, lang),
     entranceNote: b.hideExactAddress && !exact ? null : b.entranceNote,
+    movedAt: b.movedAt && b.movedAt > row.createdAt && (status === 'pending' || status === 'confirmed') ? b.movedAt.getTime() : null,
     geo: geoOf(b, exact),
     clientNote: row.clientNote,
     holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,

@@ -17,6 +17,7 @@ import { bookingRules, businesses, categories, cities } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 import { emit } from '../../notify'
 import { toRules } from '../availability/context'
+import { queueAddressSms, sameAddress } from './address'
 
 type RulesView = z.infer<typeof bookingRulesSchema>
 type RulesChange = z.infer<typeof bookingRulesUpdateSchema>
@@ -85,7 +86,8 @@ export async function profileOf(db: Queryable, businessId: string): Promise<Prof
 /**
  * Change some of the profile (B-37). A new category must offer every kind of booking the business takes, and the card's
  * "what it is" becomes its name. A new address keeps everything, the page and its verification included, and marks the
- * business for the Ýeral team to check again (book Q-215: `addressChangedAt`, cleared by the admin tool).
+ * business for the Ýeral team to check again (book Q-215: `addressChangedAt`, cleared by the admin tool); a new line,
+ * street or city is a move (`movedAt`), which every client with a booking ahead hears by SMS (`queueAddressSms`).
  */
 export async function updateProfile(db: Queryable, businessId: string, change: ProfileChange, now: number): Promise<ProfileView> {
   return db.transaction(async (tx) => {
@@ -106,9 +108,10 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
     if (issues.length) throw new ApiError('validation_error', { issues })
 
     const { location, categoryId, amenities, ...rest } = change
-    const moved =
-      !!location &&
-      (location.address !== row.address || location.cityId !== row.cityId || location.lat !== row.lat || location.lng !== row.lng)
+    const before = { address: row.address, street: row.street, cityId: row.cityId }
+    // a new pin alone is checked again, but the address the clients read is the same
+    const relocated = !!location && !sameAddress(before, location)
+    const moved = relocated || (!!location && (location.lat !== row.lat || location.lng !== row.lng))
     const set: Partial<typeof businesses.$inferInsert> = {
       ...rest,
       ...(about ? { about } : {}),
@@ -117,9 +120,11 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
       ...(recategorized ? { categoryId, kind: category!.name } : {}),
       ...location,
       ...(moved ? { addressChangedAt: new Date(now) } : {}),
+      ...(relocated ? { movedAt: new Date(now) } : {}),
     }
     if (!Object.keys(set).length) return profileView(row)
     const [saved] = await tx.update(businesses).set(set).where(eq(businesses.id, businessId)).returning()
+    if (relocated) await queueAddressSms(tx, businessId, before, now)
     await emit(tx, { type: 'business.updated', businessId })
     return profileView(saved!)
   })

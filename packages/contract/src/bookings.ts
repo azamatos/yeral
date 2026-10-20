@@ -132,6 +132,11 @@ export const bookingDetailSchema = bookingSummarySchema
     address: z.string(),
     city: cityRefSchema,
     entranceNote: z.string().nullable(),
+    /**
+     * When the business moved, if it did after this booking was made and the visit is still ahead: the booking says
+     * "New address" (book Q-215; the client heard it by SMS too).
+     */
+    movedAt: epochSchema.nullable(),
     geo: geoSchema,
     clientNote: z.string().nullable(),
     /** When an unanswered request expires; pending only. */
@@ -232,6 +237,7 @@ export const bookingLinkSchema = bookingDetailSchema
     address: true,
     city: true,
     entranceNote: true,
+    movedAt: true,
     geo: true,
     holdUntil: true,
     cancelReason: true,

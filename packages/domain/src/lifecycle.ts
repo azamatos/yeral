@@ -374,6 +374,34 @@ export const NEW_BOOKING_UNDO_MS = 10_000
  */
 export const NEW_BOOKING_SMS_AFTER_MS = NEW_BOOKING_UNDO_MS + 5_000
 
+// ── A new address (book Q-215) ──
+
+/**
+ * A business that moves tells every client with a booking ahead (owner, 20.10.2026): the SMS goes this long after the
+ * save that changed the address, so a typo fixed straight after makes one SMS, or none when it's back as it was.
+ */
+export const ADDRESS_SMS_AFTER_MS = 10 * 60_000
+/** A visit sooner than the wait hears it this long before it starts, or at once. */
+export const ADDRESS_SMS_LEAD_MS = 30 * 60_000
+
+/** A business's address as a client knows it: the line, the street a home-based business shows first, the city. */
+export interface AddressTold {
+  address: string
+  street: string
+  cityId: string
+}
+
+/** When the SMS about a new address goes for a visit starting at `visitStart` (epoch ms). */
+export const addressSmsAt = (now: number, visitStart: number): number =>
+  Math.max(now, Math.min(now + ADDRESS_SMS_AFTER_MS, visitStart - ADDRESS_SMS_LEAD_MS))
+
+/** The business page says "New address" this long after the business moved. */
+export const NEW_ADDRESS_DAYS = 30
+
+/** When the business moved, while its page still says so; else null. */
+export const newAddressSince = (movedAt: number | null, now: number): number | null =>
+  movedAt !== null && movedAt <= now && now - movedAt < NEW_ADDRESS_DAYS * 86_400_000 ? movedAt : null
+
 /**
  * Undo a booking the team just added by phone or for a walk-in: it goes as if never made, while the undo time runs and
  * it's still confirmed (`undo_expired` after).

@@ -169,6 +169,24 @@ function timesText(fmt: ReturnType<typeof createFmt>, b: Pick<SmsBooking, 'date'
 }
 
 /**
+ * The business moved (book Q-215): its new address, and the booking it's for. `b.address` is the address the booking
+ * shows: the street only while a home-based business's request waits.
+ */
+export function addressSmsText(lang: Locale, b: SmsBooking & { link: string }): string {
+  const t = createT(lang)
+  const fmt = createFmt(lang)
+  return t('sms.addressChanged', {
+    brand: brandOf(t),
+    business: b.businessName,
+    address: b.city ? fmt.addressIn(b.address, b.city) : b.address,
+    weekday: fmt.weekday(dayOf(b.date, b.start)),
+    date: fmt.dayMonth(dayOf(b.date, b.start)),
+    time: fmt.time(wallOf(b.date, b.start).min),
+    link: b.link,
+  })
+}
+
+/**
  * A business's cancel reason as the client reads it: its label, or the business's words ("Other reason", B-27), or the
  * special day's name it closed for (B-40).
  */

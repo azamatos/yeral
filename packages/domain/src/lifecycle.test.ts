@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  ADDRESS_SMS_AFTER_MS,
+  addressSmsAt,
+  newAddressSince,
   canAnswerRequest,
   canBusinessCancel,
   canBusinessMove,
@@ -357,5 +360,23 @@ describe('business actions', () => {
     expect(canWriteReview(booking(), end + 30 * 24 * 60 * MIN + 1)).toBe('review_window_passed')
     expect(clientActions(booking(), rules, null, end + 30 * 24 * 60 * MIN).review).toBe(true)
     expect(clientActions(booking(), rules, null, end + 30 * 24 * 60 * MIN + 1).review).toBe(false)
+  })
+})
+
+describe('a new address (book Q-215)', () => {
+  const now = epochOf('2026-10-14', 680)
+  it('the SMS waits 10 minutes; a visit sooner hears it 30 minutes before, or at once', () => {
+    expect(addressSmsAt(now, epochOf('2026-10-15', 600))).toBe(now + ADDRESS_SMS_AFTER_MS)
+    // 11:20 now, the visit at 12:00: at 11:30
+    expect(addressSmsAt(now, epochOf('2026-10-14', 720))).toBe(epochOf('2026-10-14', 690))
+    // the visit at 11:40: at once
+    expect(addressSmsAt(now, epochOf('2026-10-14', 700))).toBe(now)
+  })
+
+  it('the page says so for 30 days', () => {
+    expect(newAddressSince(null, now)).toBeNull()
+    expect(newAddressSince(now - 86_400_000, now)).toBe(now - 86_400_000)
+    expect(newAddressSince(now - 29 * 86_400_000, now)).toBe(now - 29 * 86_400_000)
+    expect(newAddressSince(now - 30 * 86_400_000, now)).toBeNull()
   })
 })

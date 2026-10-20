@@ -96,6 +96,7 @@
     "cancelledOffers": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. Boş wagtlar: {times} — {link}",
     "cancelledOffersNoTimes": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. Başga wagt saýlaň: {link}",
     "cancelledOffersCall": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. Ýazylmak üçin jaň ediň: {link}",
+    "addressChanged": "{brand}: {business} täze salga göçdi: {address}. Ýazylyşyňyz: {weekday}, {date}, {time}. {link}",
     "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",
     "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}."
   },

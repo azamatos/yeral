@@ -183,6 +183,13 @@
       "when": 1792511141346,
       "tag": "0025_client_name_set_by",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792520680663,
+      "tag": "0026_new_address",
+      "breakpoints": true
     }
   ]
 }

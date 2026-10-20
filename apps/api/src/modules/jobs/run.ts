@@ -5,7 +5,16 @@
  * 3. Queued work: SMS, reminders, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
-import { NEWS_QUEUED, newsSms, REMINDER_KINDS, toldOf, type NewsQueued, type Told } from '@yeral/domain/lifecycle'
+import {
+  effectiveStatus,
+  NEWS_QUEUED,
+  newsSms,
+  REMINDER_KINDS,
+  toldOf,
+  type AddressTold,
+  type NewsQueued,
+  type Told,
+} from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { isOnlineSource, type Locale } from '@yeral/domain/model'
 import { isMobile } from '@yeral/domain/phone'
@@ -14,6 +23,7 @@ import { and, asc, eq, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import { bookings, businesses, clients, jobs, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import {
+  addressSmsText,
   bookingSmsText,
   businessCancelText,
   cancelledOffersSmsText,
@@ -35,7 +45,8 @@ import { pruneIdentityChecks } from '../auth/identity'
 import { newBookingLink, pruneBookingLinks } from '../bookings/links'
 import { hideLinkTokens } from '../../ports/sms'
 import { onlineRefusal } from '../clients/online'
-import { itemsOf, recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
+import { itemsOf, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
+import { ADDRESS_SMS } from '../settings/address'
 
 const BATCH = 100
 /**
@@ -50,6 +61,8 @@ const DROPPED_STARTED = 'dropped: the visit has started (book Q-284)'
 const REMINDERS: ReadonlySet<string> = new Set(REMINDER_KINDS)
 /** SMS go to mobile numbers only (ROUND6 C1): a client the team saved with a landline gets none. */
 const DROPPED_NOT_MOBILE = 'dropped: not a mobile number (ROUND6 C1)'
+/** The business moved and back, or the client was told since: they know the address as it is (book Q-215). */
+const DROPPED_SAME_ADDRESS = 'dropped: the client knows the address as it is'
 const MAX_ATTEMPTS = 5
 
 async function expireRequests(deps: Deps): Promise<number> {
@@ -309,6 +322,49 @@ async function sendBookingSms(
   if (told) await noteTold(deps, b, told)
 }
 
+/**
+ * The SMS about a new address (book Q-215). It goes whatever the client's switches, like a decline: without it they'd go
+ * to the old place. Worded from the address as it is when it goes, against the one the client last heard
+ * (`addressTold`): the same, it settles unsent. While a home-based business's request waits, the client knows only its
+ * street, and that's what it compares and tells.
+ */
+async function sendAddressSms(deps: Deps, bookingId: string): Promise<string | undefined> {
+  const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
+  if (!b?.clientPhone || b.accountDeletedAt) return
+  const now = deps.now()
+  const { status } = effectiveStatus(stateOf(b), now)
+  if (status !== 'pending' && status !== 'confirmed') return
+  if (now >= epochOf(b.date, b.start)) return DROPPED_STARTED
+  if (!b.userId && !isMobile(b.clientPhone)) return DROPPED_NOT_MOBILE
+  // a profile save under way finishes first: this tells the address as it's saved
+  const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId)).for('share')
+  if (!biz) return
+  const current: AddressTold = { address: biz.address, street: biz.street, cityId: biz.cityId }
+  const streetOnly = biz.hideExactAddress && status !== 'confirmed'
+  const shown = (a: AddressTold) => `${a.cityId} ${streetOnly ? a.street : a.address}`
+  if (b.addressTold && shown(b.addressTold) === shown(current)) return DROPPED_SAME_ADDRESS
+  const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
+  const lang = user?.lang ?? MARKET.defaultLanguage
+  const sms = {
+    date: b.date,
+    start: b.start,
+    businessName: biz.name,
+    address: streetOnly ? biz.street : biz.address,
+    city: await smsCityOf(deps.db, biz.cityId, lang),
+  }
+  await sendWithLink(deps, b, user?.phone ?? b.clientPhone, (link) => addressSmsText(lang, { ...sms, link }))
+  // what the client heard: the next move compares with it, unless another save changed it since the job read it
+  await deps.db
+    .update(bookings)
+    .set({ addressTold: current })
+    .where(
+      and(
+        eq(bookings.id, b.id),
+        sql`${bookings.addressTold} is not distinct from ${b.addressTold === null ? null : JSON.stringify(b.addressTold)}::jsonb`,
+      ),
+    )
+}
+
 /** The last try failed or never finished: kept for inspection, and the error tracker (F-209) alerts on this line (book Q-284). */
 async function giveUp(deps: Deps, job: { id: number; kind: string }, attempts: number, error: string): Promise<void> {
   deps.log.error('job gave up', { id: job.id, kind: job.kind, attempts, error })
@@ -356,6 +412,7 @@ async function runQueue(deps: Deps): Promise<number> {
       }
       let note: string | undefined
       if (job.kind === 'sms') await deps.sms.send({ to: String(p.to), text: String(p.text) })
+      else if (job.kind === 'booking.sms' && p.kind === ADDRESS_SMS) note = await sendAddressSms(deps, String(p.bookingId))
       else if (job.kind === 'booking.sms')
         note = await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p)
       else if (job.kind === 'demo.answer') {

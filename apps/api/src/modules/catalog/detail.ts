@@ -3,7 +3,7 @@ import type { BusinessDetail } from '@yeral/contract/catalog'
 import { MAX_ONLINE_PARTY, nextFreeSlot } from '@yeral/domain/availability'
 import { distanceM, type LatLng } from '@yeral/domain/geo'
 import { findException, openMinutesBetween } from '@yeral/domain/hours'
-import { TYPICAL_ANSWER_DAYS, typicalAnswerMinutes } from '@yeral/domain/lifecycle'
+import { newAddressSince, TYPICAL_ANSWER_DAYS, typicalAnswerMinutes } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { LATE_MINUTES } from '@yeral/domain/rules'
 import { addDays, today } from '@yeral/domain/time'
@@ -167,6 +167,7 @@ export async function businessDetail(
     city: cityRefOf(cities, b.cityId, lang),
     entranceNote: b.hideExactAddress ? null : b.entranceNote,
     hideExactAddress: b.hideExactAddress,
+    movedAt: newAddressSince(b.movedAt?.getTime() ?? null, now),
     geo: geoOf(b),
     distanceM: position ? distanceM(position, b) : null,
     phone: b.phone,
