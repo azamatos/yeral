@@ -35,6 +35,7 @@ export type LifecycleError =
   | 'not_started'
   | 'already_reported'
   | 'noshow_window_passed'
+  | 'restore_expired'
   | 'review_not_allowed'
   | 'review_window_passed'
 
@@ -235,6 +236,32 @@ export function canWriteReview(b: BookingState, now = Date.now()): Guard {
  */
 export function keptCancelReason(rules: Pick<BookingRules, 'askCancelReason'>, reason: string | null | undefined): string | null {
   return (rules.askCancelReason && reason?.trim()) || null
+}
+
+/** "Yzyna al" works this long after the client's own cancel (ROUND6 A6). */
+export const RESTORE_MINUTES = 5
+
+/** A cancelled booking as "Yzyna al" reads it. */
+export interface RestoreState extends BookingState {
+  /** Epoch ms of the cancel. */
+  cancelledAt: number | null
+  /** It had been confirmed: it comes back confirmed, a request comes back waiting. */
+  wasConfirmed: boolean
+  /** A move request: withdrawn or replaced, it stays so (the client asks again). */
+  isMove: boolean
+}
+
+/**
+ * "Yzyna al": the client's own cancel, undone within 5 minutes (ROUND6 A6). Not their cancel (or already undone, a
+ * second tap): `invalid_status`; the 5 minutes passed: `restore_expired`; the visit has started: `already_started`; a
+ * request whose answer time ran out: `request_expired`. The time taken and a full class are found when it comes back.
+ */
+export function canClientRestore(b: RestoreState, now = Date.now()): Guard {
+  if (b.status !== 'cancelled' || b.cancelledBy !== 'client' || b.cancelledAt === null || b.isMove) return 'invalid_status'
+  if (now - b.cancelledAt >= RESTORE_MINUTES * 60_000) return 'restore_expired'
+  if (now >= startOf(b)) return 'already_started'
+  if (!b.wasConfirmed && !(b.holdUntil && b.holdUntil > now)) return 'request_expired'
+  return null
 }
 
 /** What the client can do with a booking ("Client actions by status", client spec §4.8). */

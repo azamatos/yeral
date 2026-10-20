@@ -54,6 +54,15 @@
     "cannot_do": "Bu hyzmaty edip bilmeýäris",
     "other": "Başga sebäp"
   },
+  "undo": {
+    "failed": "Yzyna alyp bolmady — {reason}.",
+    "reasons": {
+      "slot_taken": "bu wagt eýýäm başga müşderä berildi",
+      "session_full": "sapakda boş ýer galmady",
+      "already_started": "ýazylyş wagty başlandy",
+      "request_expired": "haýyşyň jogap wagty gutardy"
+    }
+  },
   "sms": {
     "code": "{brand} kody: {code}",
     "confirmed": "{brand}: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: {link}",

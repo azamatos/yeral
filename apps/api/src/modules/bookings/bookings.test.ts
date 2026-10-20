@@ -1,11 +1,11 @@
-import { addDays, epochOf } from '@yeral/domain/time'
+import { addDays, epochOf, nowMin, today } from '@yeral/domain/time'
 import { and, eq, inArray } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingRules, bookings, businesses, classSessions, jobs, rateLimits, services, staff, users } from '../../db/schema'
+import { bookingItems, bookingRules, bookings, businesses, classSessions, jobs, rateLimits, services, staff, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { emit } from '../../notify'
 import { runDueJobs } from '../jobs/run'
@@ -143,9 +143,57 @@ describe('client bookings', () => {
     })
     const restored = await b.req(`/v1/me/bookings/${json.code}/restore`, { method: 'POST' })
     expect(restored.json).toMatchObject({ status: 'pending', cancelledBy: null, cancelReason: null })
+    // a second tap finds it back already
+    expect((await b.req(`/v1/me/bookings/${json.code}/restore`, { method: 'POST' })).json.error.code).toBe('invalid_status')
     await b.req(`/v1/me/bookings/${json.code}/cancel`, { body: {} })
     t.clock.now += 6 * MIN
     expect((await b.req(`/v1/me/bookings/${json.code}/restore`, { method: 'POST' })).json.error.code).toBe('restore_expired')
+  })
+
+  it('an undo that fails says why, each reason on its own (ROUND6 A6)', async () => {
+    const b = browser(t.app)
+    const { me } = await b.login('+99365111044', 'Gülälek')
+    const [parahat] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio-parahat'))
+    const other = browser(t.app)
+    const { me: aman } = await other.login('+99365111045', 'Aman')
+    try {
+      const sent = await request(b, 'glow-studio-parahat')
+      expect(sent.status, JSON.stringify(sent.json)).toBe(201)
+      const { code } = sent.json
+      await b.req(`/v1/me/bookings/${code}/cancel`, { body: {} })
+      const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
+      const undo = async () => (await b.req(`/v1/me/bookings/${code}/restore`, { method: 'POST' })).json.error?.code
+      const set = (to: Partial<typeof bookings.$inferInsert>) => db.update(bookings).set(to).where(eq(bookings.code, code))
+      t.clock.now += MIN
+      // the visit has started; its answer time still runs
+      await set({ date: today(t.clock.now), start: nowMin(t.clock.now) - 1, end: nowMin(t.clock.now) + 59 })
+      expect(await undo()).toBe('already_started')
+      // back at its time, but the answer time ran out
+      await set({ date: row!.date, start: row!.start, end: row!.end, holdUntil: new Date(t.clock.now - 1) })
+      expect(await undo()).toBe('request_expired')
+      // the answer time back; the business has paused online booking meanwhile
+      await set({ holdUntil: row!.holdUntil })
+      await db.update(bookingRules).set({ onlineEnabled: false }).where(eq(bookingRules.businessId, parahat!.id))
+      expect(await undo()).toBe('online_disabled')
+      await db.update(bookingRules).set({ onlineEnabled: true }).where(eq(bookingRules.businessId, parahat!.id))
+      // someone else took the time with the same specialist
+      const [item] = await db.select().from(bookingItems).where(eq(bookingItems.bookingId, row!.id))
+      const took = await other.req('/v1/bookings', {
+        body: {
+          type: 'appointment',
+          business: 'glow-studio-parahat',
+          serviceIds: [item!.serviceId],
+          staffId: item!.staffId,
+          date: row!.date,
+          start: row!.start,
+        },
+      })
+      expect(took.status, JSON.stringify(took.json)).toBe(201)
+      expect(await undo()).toBe('slot_taken')
+    } finally {
+      await db.update(bookingRules).set({ onlineEnabled: true }).where(eq(bookingRules.businessId, parahat!.id))
+      await db.delete(bookings).where(inArray(bookings.userId, [me.id, aman.id]))
+    }
   })
 
   it('an instant business confirms at once and sends the confirmation SMS', async () => {

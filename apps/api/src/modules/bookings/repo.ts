@@ -1,6 +1,6 @@
 /** Booking rows: lookups, the lifecycle view, status changes, codes. */
 import { bookingCode } from '@yeral/domain/id'
-import type { BookingState } from '@yeral/domain/lifecycle'
+import type { BookingState, RestoreState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, CancelledBy } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, gt, sql } from 'drizzle-orm'
@@ -31,6 +31,11 @@ export function stateOf(b: BookingRow): BookingState {
     holdUntil: b.holdUntil?.getTime() ?? null,
     complaintType: b.complaintType,
   }
+}
+
+/** A booking as "Yzyna al" reads it (ROUND6 A6). */
+export function restoreStateOf(b: BookingRow): RestoreState {
+  return { ...stateOf(b), cancelledAt: b.cancelledAt?.getTime() ?? null, wasConfirmed: !!b.confirmedAt, isMove: !!b.rescheduleOf }
 }
 
 /** The signed-in client's booking by code (reschedule requests are reached through the booking they move). */

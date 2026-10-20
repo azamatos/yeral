@@ -162,6 +162,17 @@ describe('message catalogues', () => {
     expect(say('ru', 'all', 10)).toBe('У вас уже 10 запросов ждут ответа. Дождитесь ответов или отмените один.')
   })
 
+  it('an undo that failed says which of the four reasons (ROUND6 A6)', () => {
+    const say = (locale: 'en' | 'tk' | 'ru', code: string) => {
+      const t = createT(locale)
+      return t('undo.failed', { reason: t(`undo.reasons.${code}` as 'undo.reasons.slot_taken') })
+    }
+    expect(say('tk', 'slot_taken')).toBe('Yzyna alyp bolmady — bu wagt eýýäm başga müşderä berildi.')
+    expect(say('tk', 'request_expired')).toBe('Yzyna alyp bolmady — haýyşyň jogap wagty gutardy.')
+    expect(say('en', 'already_started')).toBe('Couldn’t undo — the booking time has started.'.replace('’', "'"))
+    expect(say('ru', 'session_full')).toBe('Не удалось вернуть — на занятии не осталось мест.')
+  })
+
   it('no empty messages', () => {
     for (const locale of LOCALES) {
       const empty = keys(messages[locale]).filter(

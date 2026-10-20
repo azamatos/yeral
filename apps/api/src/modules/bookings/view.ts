@@ -1,6 +1,6 @@
 /** Booking rows → `BookingSummary` / `BookingDetail` (client spec §4.8: cards, detail drawer, actions). */
 import type { BookingDetail, BookingSummary } from '@yeral/contract/bookings'
-import { cancelDeadline, clientActions, effectiveStatus } from '@yeral/domain/lifecycle'
+import { cancelDeadline, canClientRestore, clientActions, effectiveStatus } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, inArray } from 'drizzle-orm'
@@ -12,10 +12,9 @@ import { geoOf, photoOf, text } from '../catalog/map'
 import { onlineRefusal } from './create'
 import { bookingRecipient } from './links'
 import { offeredTimes } from './offers'
-import { noShowMarkedAtOf, refusalCounts, stateOf, type BookingRow } from './repo'
+import { noShowMarkedAtOf, refusalCounts, restoreStateOf, stateOf, type BookingRow } from './repo'
 
 /** "Yzyna al" stays possible this long after the client's own cancel. */
-export const RESTORE_MINUTES = 5
 
 export async function summaries(deps: Deps, rows: BookingRow[], lang: Locale): Promise<BookingSummary[]> {
   if (!rows.length) return []
@@ -140,14 +139,10 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   // a home-based business shows its exact address only once the booking is confirmed
   const exact = status === 'confirmed' || status === 'completed'
   const actions = clientActions(state, lb.rules, review ? { createdAt: review.createdAt.getTime() } : null, now)
-  const restore =
-    // a withdrawn or replaced move stays withdrawn
-    !row.rescheduleOf &&
-    status === 'cancelled' &&
-    row.cancelledBy === 'client' &&
-    !!row.cancelledAt &&
-    now - row.cancelledAt.getTime() < RESTORE_MINUTES * 60_000 &&
-    now < epochOf(row.date, row.start)
+  // offered while the 5 minutes run and the visit hasn't started; a request whose answer time ran out is offered too,
+  // and tapping it says so (ROUND6 A6)
+  const why = canClientRestore(restoreStateOf(row), now)
+  const restore = why === null || why === 'request_expired'
 
   return {
     ...summary,
