@@ -247,7 +247,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-112 | Staff schedules | Own shifts inside business hours, one break per day (may differ by day), personal days off. | MVP | drawn (B-Team staff drawer) | built (domain), schema |  |
 | F-113 | Specialist without the app | An option on *Hünärmen*, not a level: "uses the app" off; phone number required; bookable at once; the owner and administrators handle their requests; switching the app on sends the usual invite. | MVP | drawn (B-Team) | api built (`/v1/w/{slug}/team/phone-only`; switching the app on sends the invite; a phone is required) | Owner, Q-216 (decided 18.10.2026): kept, but as an option, not a separate level; the phone links the person later. |
 | F-114 | Disable a staff member | Reassign future bookings, keep them, or cancel with 3 offered times; reactivate later. | MVP | partly (remove with bookings kept, reactivate; reassigning and cancelling come with the business bookings, P2 step 4) |  |
-| F-115 | Link and QR | Public link `yeral.app/tk/b/{slug}`, QR as PNG/SVG, share to WhatsApp, IMO, Telegram or SMS. | MVP | drawn (B-Settings · link, B-Onboarding 8) | not built | "Real QR generation" was listed as not designed in round 4. |
+| F-115 | Link and QR | Public link `yeral.app/b/{slug}` (opens in the visitor's language), QR as PNG/SVG, share to WhatsApp, IMO, Telegram or SMS. | MVP | drawn (B-Settings · link, B-Onboarding 8) | not built | "Real QR generation" was listed as not designed in round 4. |
 | F-116 | Table / class setup wizard | Setup steps for restaurants and studios (areas, tables, class types). | Later | not designed | not built | Q-201; they set up in Settings after the appointment wizard. |
 
 ## Business · daily work (calendar, requests, bookings, walk-ins, moves, complaints, internal statuses)
@@ -337,7 +337,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
 | F-169 | Notification settings | 10 events, one sentence each ("Haçan…", "Kim alýar…"), channel chips Browser / SMS (App later). | Later | drawn (B-Notifications) | not built |  |
-| F-170 | Browser notifications and sound | New requests and changes as browser notifications with sound; permission banner. | MVP | drawn (B-Notifications, B-Shell toast) | not built |  |
+| F-170 | Browser notifications and sound | New requests and changes as browser notifications with sound; permission banner. | MVP | drawn (B-Shell toast); the permission banner moves to the shell in design round 3 | not built | Settings are Later (F-169): each level's defaults apply. |
 | F-171 | SMS to staff | SMS only for critical events (new request, Ýeral notices), never at night; Ýeral pays. | MVP | spec only (business §16, §22) | not built | Cost on Ýeral while free. |
 | F-172 | Quiet hours and summaries | Quiet hours 22:00–08:00, evening "tomorrow's bookings" and morning daily summary. | Later | drawn (B-Notifications) | not built |  |
 | F-173 | Help centre | Search, categories, popular articles, article page with "was this helpful?"; "?" buttons in settings open the article in a drawer (spec only). | Later | drawn (B-Help) | not built | Articles come from the CMS (F-182). |
@@ -367,7 +367,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-185 | Complaints handling | Handle complaints about businesses or clients. | Later | not designed (projectbrief "complaints") | not built | Scope unclear. |
 | F-186 | Site content | Landing texts, banners and SEO texts kept in the database. | Later | not designed (ADR 0008) | not built |  |
 | F-187 | Places catalogue | Landmarks and districts behind "Where?" suggestions. | Later | not designed | schema only (`places`, seeded) | Code only. |
-| F-188 | Ýeral notices to businesses | "Ýeral: barlag we täzelikler" (verification result and news) as a notification event. | MVP | spec only (B-Notifications event) | not built |  |
+| F-188 | Ýeral notices to businesses | "Ýeral: barlag we täzelikler" (verification result and news) as a notification event. | MVP | spec only (B-Notifications event) | not built | On MVP the verification result shows as the shell's status banners (In review, Not approved, hidden) and a browser notification; news waits for a notifications list (Later). |
 
 ## System (jobs, SMS, live updates, search indexing, SEO, i18n)
 

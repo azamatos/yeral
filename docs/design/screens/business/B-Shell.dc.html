@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="tk">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Ýeral Biznes · app shell</title>
+<title>Ýeral Business · app shell</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -17,6 +17,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .cap{font-size:13px;line-height:18px;color:#5a5a64}
 .dev{font-size:13px;line-height:18px;color:#5a5a64;max-width:560px}
 .dev b{color:#101014;font-weight:600}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:12px;line-height:16px;color:#5a5a64}
 .h2{margin:0;font-size:28px;line-height:34px;font-weight:700;letter-spacing:-0.02em}
 .shd{display:flex;flex-direction:column;gap:8px}
 .b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-family:inherit;font-size:15px;line-height:20px;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
@@ -27,10 +28,12 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
 .b-gho{background:transparent;color:#101014}
 .b-gho:hover{background:#f4f4f6}
+.b-red{background:#b42318;color:#ffffff}
+.b-red:hover{background:#912018;color:#ffffff}
 .b-ico{width:40px;height:40px;padding:0;min-width:0}
 .b-ic{width:36px;height:36px;min-width:0;padding:0;border-radius:10px;justify-content:center;flex:none;color:#101014}
 .b-ic:hover{background:#f6f6f8;color:#101014}
-.b:focus-visible,.sn:focus-visible,.swb:focus-visible,.mi:focus-visible,.lnk:focus-visible,.lnkd:focus-visible,.sw:focus-visible,.tbi:focus-visible,.rlb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.b:focus-visible,.sn:focus-visible,.swb:focus-visible,.mi:focus-visible,.lnk:focus-visible,.lnkd:focus-visible,.sw:focus-visible,.tbi:focus-visible,.rlb:focus-visible,.opt:focus-visible,.shr:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .shell{display:flex;background:#ffffff;border:1px solid #d8d8de;border-radius:16px;overflow:hidden;color:#101014}
 .side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
 .swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
@@ -38,17 +41,16 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014}
 .sn:hover{background:#f4f4f6;color:#101014}
 .sn.on{background:#efecfe;color:#4429d6;font-weight:600}
-.sn.off{color:#6e6e78;cursor:default}
-.sn.off:hover{background:transparent;color:#6e6e78}
 .sdv{height:1px;background:#e6e6ea;margin:8px 4px;flex:none}
 .cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}
-.soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
 .me{min-width:0}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
 .gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
 .kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
+.url{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 10px;border-radius:999px;background:#ffffff;border:1px solid #e6e6ea;align-self:flex-start}
+.url svg{color:#6e6e78;flex:none}
 .pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
 .pdv{height:1px;background:#e6e6ea;margin:6px 4px}
 .mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
@@ -66,6 +68,14 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .wpl{width:32px;height:32px;border-radius:8px;border:1px dashed #b0b0b8;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .av64{width:64px;height:64px;font-size:24px}
+.y-pill{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;border:1px solid transparent;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
+.y-pill.s{height:20px;padding:0 7px}
+.t-neu{background:#f4f4f6;border-color:#e6e6ea;color:#5a5a64}
+.y-exb svg{flex:none}
+.badge{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;line-height:18px;font-weight:600;white-space:nowrap;flex:none}
+.badge svg{flex:none}
+.st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
+.st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
 .tile{display:flex;flex-direction:column;gap:10px;padding:20px;background:#ffffff;border-radius:16px;border:1px solid #e6e6ea}
 .strip{padding:12px;background:#ffffff;border:1px solid #e6e6ea;border-radius:16px}
 .col{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -76,6 +86,11 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .tbi:hover{color:#101014}
 .tbi.on{color:#4429d6}
 .tbd{position:absolute;top:4px;left:calc(50% + 4px);min-width:18px;height:16px;padding:0 5px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.sht{display:flex;flex-direction:column;padding:8px 8px 12px;border-top:1px solid #e6e6ea;background:#ffffff;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.12)}
+.grab{width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:0 auto 8px;flex:none}
+.shr{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 10px;border-radius:10px;font-size:14px;color:#101014}
+.shr svg{flex:none;color:#5a5a64}
+.shr:hover{background:#f4f4f6;color:#101014}
 .hid{margin:0;padding:0 0 0 16px;font-size:13px;line-height:18px;color:#5a5a64}
 .hid li{margin:0 0 4px}
 .hid b{color:#101014;font-weight:600}
@@ -98,6 +113,9 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .fld label,.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
 .inp{height:44px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
 .inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.selw{position:relative;display:inline-flex;min-width:0}
+.selw > svg{position:absolute;right:10px;top:50%;margin-top:-8px;pointer-events:none;color:#5a5a64}
+.sel{appearance:none;-webkit-appearance:none;height:36px;padding:0 32px 0 10px;font-size:13px;cursor:pointer}
 .ro{display:flex;align-items:center;gap:8px;height:44px;padding:0 8px 0 14px;border:1px solid #e6e6ea;border-radius:8px;background:#f6f6f8;font-size:15px;color:#101014}
 .pfx{display:inline-flex;align-items:center;height:44px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;background:#f6f6f8;font-size:15px;font-weight:500;color:#101014;flex:none}
 .hint{font-size:13px;line-height:18px;color:#5a5a64}
@@ -111,9 +129,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .wrow{display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 0;border-bottom:1px solid #e6e6ea}
 .wrow:first-child{border-top:1px solid #e6e6ea}
 .spv{display:flex;flex-direction:column;align-items:flex-end;text-align:right;flex:none}
-.swr{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-.swt{font-size:15px;line-height:22px;font-weight:600}
-.sw{width:52px;height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;flex:none;margin:-10px -6px 0 0}
+.sw{width:52px;height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;flex:none}
 .trk{position:relative;width:40px;height:24px;border-radius:999px;background:#e6e6ea;box-shadow:inset 0 0 0 1.5px #6e6e78}
 .sw.on .trk{background:#5a3ff0;box-shadow:none}
 .knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:999px;background:#ffffff;box-shadow:0 1px 2px rgba(16,16,20,.2)}
@@ -122,53 +138,95 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .obox svg{flex:none;margin-top:1px}
 .pbox{display:flex;flex-direction:column;gap:14px;padding:16px;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff}
 .otp{display:flex;gap:10px}
-.ob{width:48px;height:48px;border:1px solid #d8d8de;border-radius:8px;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:#101014;font-variant-numeric:tabular-nums}
+.ob{width:48px;height:48px;border:1px solid #d8d8de;border-radius:8px;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:#101014;font-variant-numeric:tabular-nums}
 .ob.f{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
-.caret{width:2px;height:24px;border-radius:1px;background:#101014}
+.caret{width:2px;height:22px;border-radius:1px;background:#101014}
+.fcl{display:flex;align-items:center;padding:12px 14px;border-radius:12px;background:#f4f4f6;font-size:15px;line-height:22px;color:#101014}
+.fcd{font-size:17px;line-height:22px;font-weight:600;letter-spacing:.08em;font-variant-numeric:tabular-nums;margin-left:4px}
 .stl{font-size:14px;line-height:20px;font-weight:600;color:#101014}
+.bnr{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:12px;border:1px solid transparent;font-size:14px;line-height:20px}
+.bnt{flex:1;min-width:0}
+.bnt b{font-weight:600}
+.c-war{background:#fef6e7;border-color:#f2ddb0;color:#93500a}
+.c-dan{background:#fee4e2;border-color:#f6c7c2;color:#a3251b}
+.c-neu{background:#f4f4f6;border-color:#e6e6ea;color:#101014}
+.c-neu > svg{color:#5a5a64}
+.mini{display:flex;flex-direction:column;background:#ffffff;border:1px solid #d8d8de;border-radius:16px;overflow:hidden}
+.mtop{display:flex;align-items:center;gap:12px;height:56px;padding:0 20px 0 24px;border-bottom:1px solid #e6e6ea}
+.mdl{display:flex;flex-direction:column;gap:20px;padding:24px;border-radius:16px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);color:#101014}
+.mt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
+.mp{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
+.mact{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.toast{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 8px 8px 16px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:14px;line-height:20px}
+.toast svg{flex:none}
+.tb{background:transparent;color:#c3b6fb;padding:0 10px;min-width:0}
+.tb:hover{background:#2a2a32;color:#c3b6fb}
+.ntf{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:12px;background:#ffffff;color:#101014}
+.ntf:hover{background:#f6f6f8;color:#101014}
+.ntfi{width:36px;height:36px;border-radius:999px;background:#fef6e7;color:#93500a;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.udot{width:8px;height:8px;border-radius:999px;background:#5a3ff0;flex:none;margin-top:6px}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid #e6e6ea;border-radius:12px;background:#ffffff;cursor:pointer}
+.opt.on{background:#efecfe;border-color:#d5cbfb}
+.rad{width:20px;height:20px;border-radius:999px;border:1.5px solid #6e6e78;background:#ffffff;flex:none;margin-top:1px}
+.opt.on .rad{border:6px solid #5a3ff0}
+.optt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.optn{font-size:15px;line-height:20px;font-weight:600}
+.abl{display:flex;flex-direction:column;border-top:1px solid #e6e6ea}
+.abr{display:grid;grid-template-columns:92px minmax(0,1fr) auto;grid-template-areas:"w m b" "w r r";column-gap:12px;row-gap:6px;align-items:center;padding:10px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.abr-w{grid-area:w;display:flex;flex-direction:column;align-self:start;font-variant-numeric:tabular-nums}
+.abr-d{font-size:12px;line-height:16px;color:#5a5a64}
+.abr-t{font-weight:600}
+.abr-m{grid-area:m;display:flex;flex-direction:column;min-width:0}
+.abr-c{font-weight:600}
+.abr > .badge{grid-area:b}
+.abr-r{grid-area:r;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.abr-to{display:inline-flex;align-items:center;gap:6px;font-size:13px;line-height:18px;color:#101014}
+.abr-to svg{color:#5a5a64}
+.abr-no{display:inline-flex;align-items:center;gap:6px;font-size:13px;line-height:18px;color:#93500a;font-weight:600}
+.abr-no svg{flex:none}
 </style>
 </helmet>
-<div style="width: 1600px; min-height: 6000px; padding: 64px 80px; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; color: #101014; display: flex; flex-direction: column; gap: 56px">
+<div style="width: 1600px; min-height: 8300px; padding: 64px 80px; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; color: #101014; display: flex; flex-direction: column; gap: 56px">
 
 <div style="display: flex; flex-direction: column; gap: 10px">
-<span class="lbl">business.yeral.app · app shell · round 6</span>
-<h1 style="margin: 0; font-size: 44px; line-height: 48px; font-weight: 700; letter-spacing: -0.03em">Ýeral Biznes — workspace shell</h1>
-<p class="dev" style="max-width: 980px; font-size: 15px; line-height: 22px">Every business screen sits in this shell: sidebar 248 (workspace switcher, sections for the person's access level, Ýeral sahypaňyz, Kömek, user block), top bar 64 (title, global search ⌘K, one primary action), content padded 32. Copy this markup for every business artboard. One Ýeral account (phone + SMS, same as yeral.app) can belong to several workspaces with a different role in each; a workspace = one business at one address; a second location is simply another workspace. Desktop-first ≥1024; tablet 768–1023 → 72 px icon rail; under 768 → bottom tab bar (see B-Mobile). Login: B-Login (/tk/giris).</p>
+<span class="lbl">business.yeral.app · app shell · v0.6 round 2</span>
+<h1 style="margin: 0; font-size: 44px; line-height: 48px; font-weight: 700; letter-spacing: -0.03em">Ýeral Business — workspace shell</h1>
+<p class="dev" style="max-width: 1000px; font-size: 15px; line-height: 22px">Every business screen sits in this shell: sidebar 248 (workspace switcher · Calendar · Bookings · Clients · Reviews · Settings · user block), top bar 64 (title, global search ⌘K, one primary action), content padded 32. First release = appointments only, so no Reports, Tables, Classes or Help in the sidebar; help is “Contact Ýeral” in the account menu. One Ýeral account (phone + code, the same as yeral.app) can belong to several workspaces with a different access level in each; a workspace = one business at one address. Addresses carry the workspace and no language: business.yeral.app/w/{slug}/… · log in at /login (B-Login) · setup at /setup/{step}. Tablet 768–1023 → 72 px icon rail; under 768 → bottom tab bar (B-Mobile).</p>
 </div>
 
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="url mono"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>business.yeral.app/w/glow-studio/calendar</span>
 <div class="shell" style="height: 860px">
-<aside class="side" aria-label="Esasy menýu">
-<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak">
+<aside class="side" aria-label="Main menu">
+<button class="swb" aria-haspopup="menu" aria-label="Workspace: Glow Studio, Owner. Switch">
 <img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
-<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Owner</span></span>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
 </button>
 <div class="sdv"></div>
-<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
-<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
-<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
-<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
-<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
-<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Calendar</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Bookings<span class="cnt" aria-label="5 requests">5</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Clients</a>
+<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<span class="cnt cnt-n" aria-label="4 unanswered reviews">4</span></a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a>
 <div style="flex: 1"></div>
-<a class="sn" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
-<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
 <div class="sdv"></div>
 <div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
 <span class="av">M</span>
 <span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 10 20 30</span></span>
-<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+<button class="b b-gho b-ic" aria-label="Account menu" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
 </div>
 </aside>
 <div class="main">
 <div class="top">
-<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Senenama</h1>
+<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Calendar</h1>
 <div style="flex: 1"></div>
-<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
-<a class="b b-pri b-sm" href="B-Calendar.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täze ýazylyş</a>
+<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Search" placeholder="Client, phone or booking code" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
+<a class="b b-pri b-sm" href="B-Calendar.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>New booking</a>
 </div>
 <div style="flex: 1; padding: 32px; display: flex">
-<div style="flex: 1; border: 1.5px dashed #d8d8de; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px"><span style="font-size: 15px; font-weight: 600; color: #5a5a64">Page content</span><span class="cap">padding 32 · tables and calendar use full width · forms max 720</span></div>
+<div style="flex: 1; border: 1.5px dashed #d8d8de; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px"><span style="font-size: 15px; font-weight: 600; color: #5a5a64">Page content</span><span class="cap">padding 32 · a business status banner, when there is one, sits at the top · tables and calendar use full width · forms max 720</span></div>
+</div>
 </div>
 </div>
 </div>
@@ -177,249 +235,303 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="col">
 <span class="lbl">Workspace switcher · closed → open</span>
 <div class="strip" style="width: 272px">
-<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak">
+<button class="swb" aria-haspopup="menu" aria-label="Workspace: Glow Studio, Owner. Switch">
 <img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
-<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Owner</span></span>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
 </button>
 </div>
-<div class="pop" role="menu" aria-label="Iş ýerleriňiz" style="width: 300px">
-<div class="lbl" style="padding: 8px 10px 6px">Iş ýerleriňiz</div>
-<a class="mi wsi on" role="menuitemradio" aria-checked="true" href="B-Calendar.dc.html"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Eýesi · Bitarap Türkmenistan şaýoly</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></a>
-<a class="mi wsi" role="menuitemradio" aria-checked="false" href="B-Calendar.dc.html"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio · Parahat</span><span class="wsc">Eýesi · Parahat 7</span></span><span class="cnt" aria-label="2 haýyş">2</span></a>
+<div class="pop" role="menu" aria-label="Your workspaces" style="width: 300px">
+<div class="lbl" style="padding: 8px 10px 6px">Your workspaces</div>
+<a class="mi wsi on" role="menuitemradio" aria-checked="true" href="B-Calendar.dc.html"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Owner · Bitarap Türkmenistan Avenue</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></a>
+<a class="mi wsi" role="menuitemradio" aria-checked="false" href="B-Calendar.dc.html"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Nails</span><span class="wsc">Owner · 15 Oguzhan Street</span></span><span class="cnt" aria-label="2 requests">2</span></a>
 <div class="pdv" role="separator"></div>
-<a class="mi" role="menuitem" href="B-Onboarding.dc.html"><span class="wpl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Täze biznes döret</a>
+<a class="mi" role="menuitem" href="B-Onboarding.dc.html"><span class="wpl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Create a business</a>
 </div>
-<span class="cap">The ONLY switch. Popover 300 · raised · r12 · padding 6. Row: logo 32 r8 · name 14/600 · “role · address” 12 · right: amber count of unanswered requests, or tint + check for the current one. Picking a row switches the whole workspace and opens its Senenama. «Täze biznes döret» → setup wizard from step 2, already signed in.</span>
+<span class="cap">The only switch. Popover 300 · raised · r12 · padding 6. Row: logo 32 r8 · name 14/600 · “access level · address” 12 · right: amber count of requests this person may answer, or tint + check for the current one. Picking a row opens the same section of that workspace: /w/glow-studio/calendar → /w/glow-nails/calendar. “Create a business” → /setup (already signed in).</span>
 </div>
 <div class="col">
-<span class="lbl">User block · menu</span>
-<div class="pop" role="menu" aria-label="Hasap" style="width: 300px">
-<a class="mi" role="menuitem" href="#profilim"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profilim</a>
-<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Dil: Türkmençe<span class="cap" style="margin-left: auto">TK</span></a>
-<a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Müşderi hökmünde aç<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<span class="lbl">User block · account menu</span>
+<div class="pop" role="menu" aria-label="Account" style="width: 300px">
+<a class="mi" role="menuitem" href="#my-profile"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>My profile</a>
+<a class="mi" role="menuitem" href="#" aria-haspopup="menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Language<span class="cap" style="margin-left: auto">English</span></a>
+<a class="mi" role="menuitem" href="Venue.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Your Ýeral page</a>
+<a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Open as a client<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<a class="mi" role="menuitem" href="#contact" aria-haspopup="menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg>Contact Ýeral<span style="margin-left: auto; display: inline-flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></a>
 <div class="pdv" role="separator"></div>
-<a class="mi mi-dan" role="menuitem" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Çykmak</a>
+<a class="mi mi-dan" role="menuitem" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Log out</a>
 </div>
 <div class="strip" style="width: 272px">
 <div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
 <span class="av">M</span>
 <span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 10 20 30</span></span>
-<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+<button class="b b-gho b-ic" aria-label="Account menu" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
 </div>
 </div>
-<span class="cap">Not a switcher: no box, no chevron. Only the dots button (ghost 36) opens the menu, above the block. Profilim → right drawer 480 (below). Müşderi hökmünde aç → yeral.app, same account. Çykmak → /tk/giris (B-Login).</span>
+<span class="lbl" style="padding-top: 8px">Contact Ýeral · submenu</span>
+<div id="contact" class="pop" role="menu" aria-label="Contact Ýeral" style="width: 300px">
+<div class="lbl" style="padding: 8px 10px 6px">Contact Ýeral</div>
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span class="wst"><span class="wsn">Call</span><span class="wsc">[SUPPORT PHONE]</span></span></a>
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg><span class="wst"><span class="wsn">Write on Telegram</span><span class="wsc">[TELEGRAM]</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+</div>
+<span class="cap">Not a switcher: only the dots button (ghost 36) opens the menu, above the block. My profile → right drawer 480 (below). Language only when the market has more than one (English first). Your Ýeral page → the public page; Open as a client → yeral.app, same account. Contact Ýeral opens a submenu: call [SUPPORT PHONE] or write on Telegram. Log out → /login.</span>
 </div>
 <div class="col">
 <span class="lbl">Tablet 768–1023 · icon rail 72</span>
-<div class="shell" style="height: 540px; width: 560px">
+<div class="shell" style="height: 470px; width: 560px">
 <div style="width: 72px; flex: none; border-right: 1px solid #e6e6ea; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 0">
-<button class="rlb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak" style="margin-bottom: 8px"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"></button>
-<a class="sn on" href="B-Calendar.dc.html" aria-label="Senenama" aria-current="page" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></a>
-<a class="sn" href="B-Bookings.dc.html" aria-label="Ýazylyşlar, 5 haýyş" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #dc8b0b"></span></a>
-<a class="sn" href="B-Clients.dc.html" aria-label="Müşderiler" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></a>
-<a class="sn" href="B-Reviews.dc.html" aria-label="Teswirler, 4 jogapsyz" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #6e6e78"></span></a>
-<a class="sn" href="B-Analytics.dc.html" aria-label="Hasabatlar" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg></a>
-<a class="sn" href="B-Settings.dc.html" aria-label="Sazlamalar" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></a>
+<button class="rlb" aria-haspopup="menu" aria-label="Workspace: Glow Studio, Owner. Switch" style="margin-bottom: 8px"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"></button>
+<a class="sn on" href="B-Calendar.dc.html" aria-label="Calendar" aria-current="page" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg></a>
+<a class="sn" href="B-Bookings.dc.html" aria-label="Bookings, 5 requests" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #dc8b0b"></span></a>
+<a class="sn" href="B-Clients.dc.html" aria-label="Clients" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></a>
+<a class="sn" href="B-Reviews.dc.html" aria-label="Reviews, 4 unanswered" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 999px; background: #6e6e78"></span></a>
+<a class="sn" href="B-Settings.dc.html" aria-label="Settings" style="width: 44px; height: 44px; padding: 0; justify-content: center; position: relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></a>
 <div style="flex: 1"></div>
-<a class="sn" href="Venue.dc.html" aria-label="Ýeral sahypaňyz" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
-<a class="sn" href="B-Help.dc.html" aria-label="Kömek" style="width: 44px; height: 44px; padding: 0; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></a>
-<button class="rlb" aria-haspopup="menu" aria-label="Hasap menýusy: Maýsa Annaýewa"><span class="av">M</span></button>
+<button class="rlb" aria-haspopup="menu" aria-label="Account menu: Maýsa Annaýewa"><span class="av">M</span></button>
 </div>
-<div style="flex: 1; display: flex; flex-direction: column"><div style="height: 56px; border-bottom: 1px solid #e6e6ea; display: flex; align-items: center; padding: 0 20px; gap: 12px"><span style="font-size: 19px; font-weight: 700">Senenama</span><div style="flex: 1"></div><a class="b b-pri b-sm b-ico" href="B-Calendar.dc.html" aria-label="Täze ýazylyş" style="width: 36px; height: 36px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></a></div><div style="flex: 1; margin: 20px; border: 1.5px dashed #d8d8de; border-radius: 12px"></div></div>
+<div style="flex: 1; display: flex; flex-direction: column"><div style="height: 56px; border-bottom: 1px solid #e6e6ea; display: flex; align-items: center; padding: 0 20px; gap: 12px"><span style="font-size: 19px; font-weight: 700">Calendar</span><div style="flex: 1"></div><a class="b b-pri b-sm b-ico" href="B-Calendar.dc.html" aria-label="New booking" style="width: 36px; height: 36px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></a></div><div style="flex: 1; margin: 20px; border: 1.5px dashed #d8d8de; border-radius: 12px"></div></div>
 </div>
-<span class="cap" style="max-width: 560px">Rail tooltips on hover. The workspace switcher opens from the logo at the top, the user menu from the avatar at the bottom (same popovers as on desktop). Ýeral sahypaňyz and Kömek stay as the last two icons above the avatar.</span>
+<span class="cap" style="max-width: 560px">Rail tooltips on hover. The workspace switcher opens from the logo at the top, the account menu from the avatar at the bottom (same popovers as on desktop).</span>
 </div>
 </div>
 
 <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: start">
-<div class="tile"><span class="lbl">Request toast · new booking arrives</span>
-<div role="status" style="display: flex; align-items: center; gap: 12px; padding: 12px 8px 12px 16px; border-radius: 12px; background: #101014; color: #ffffff; box-shadow: 0 8px 24px rgba(16,16,20,.16); font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f2ddb0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span style="flex: 1">Täze haýyş: Ejegyz T. · Aýna · şu gün 15:30</span><a class="b b-sm" href="B-Bookings.dc.html" style="background: transparent; color: #c3b6fb; min-width: 0">Aç</a></div>
-<span class="cap">Bottom-left (left 272, clear of the sidebar), 6 s, soft sound. Browser notification when the tab is in the background. Only for requests this person can see in the current workspace; requests in other workspaces only raise the count in the switcher.</span></div>
-<div class="tile"><span class="lbl">Verification banner · new business</span>
-<div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: #fef6e7; border: 1px solid #f2ddb0; color: #93500a; font-size: 14px; line-height: 20px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span><b>Sahypaňyz barlagda</b> — häzir ony diňe siz we toparyňyz görýärsiňiz. Barlagdan soň gözlegde we salgyňyzda hemmä açylar. Senenamany häzirden ulanyp bilersiňiz.</span></div>
-<span class="cap">Sits above page content until verified (CMS moderation, usually within 24 h). Dismiss not allowed. Until then, visitors at the public link see the «Bu sahypa entek açylmady» page (States) — no business details; owner and team see their own page.</span></div>
+<div class="tile"><span class="lbl">Request toast · a new request arrives</span>
+<div class="toast" role="status"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f2ddb0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span style="flex: 1">New request: Ejegyz T. · Aýna · today 15:30</span><a class="b b-sm tb" href="B-Bookings.dc.html">Open</a></div>
+<span class="cap">Bottom-left (left 272, clear of the sidebar), 6 s, soft sound; a browser notification when the tab is in the background. Only for requests this person may answer in the current workspace; requests in other workspaces only raise the count in the switcher.</span></div>
 <div class="tile"><span class="lbl">Phone · under 768</span>
-<div style="width: 100%; max-width: 360px; border: 1px solid #d8d8de; border-radius: 16px; overflow: hidden; background: #ffffff">
-<div style="height: 40px; background: #f6f6f8"></div>
-<nav class="tbar" aria-label="Esasy menýu">
-<a class="tbi on" href="B-Calendar.dc.html" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Senenama</span></a>
-<a class="tbi" href="B-Bookings.dc.html" aria-label="Ýazylyşlar, 5 haýyş"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span aria-hidden="true">Ýazylyşlar</span><span class="tbd" aria-hidden="true">5</span></a>
-<a class="tbi" href="B-Clients.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Müşderiler</span></a>
-<button class="tbi" aria-haspopup="menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg><span>Köp</span></button>
+<div style="width: 100%; max-width: 360px; border: 1px solid #d8d8de; border-radius: 16px; overflow: hidden; background: #f6f6f8">
+<div class="sht" role="menu" aria-label="More">
+<span class="grab" aria-hidden="true"></span>
+<a class="shr" role="menuitem" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<span class="cnt cnt-n" aria-label="4 unanswered reviews">4</span></a>
+<a class="shr" role="menuitem" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a>
+<div class="pdv" role="separator"></div>
+<a class="shr" role="menuitem" href="#my-profile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>My profile</a>
+<a class="shr" role="menuitem" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Your Ýeral page</a>
+<a class="shr" role="menuitem" href="Home.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Open as a client</a>
+<a class="shr" role="menuitem" href="#contact"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg>Contact Ýeral</a>
+<a class="shr mi-dan" role="menuitem" href="B-Login.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a3251b" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Log out</a>
+</div>
+<nav class="tbar" aria-label="Main menu">
+<a class="tbi on" href="B-Calendar.dc.html" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Calendar</span></a>
+<a class="tbi" href="B-Bookings.dc.html" aria-label="Bookings, 5 requests"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span aria-hidden="true">Bookings</span><span class="tbd" aria-hidden="true">5</span></a>
+<a class="tbi" href="B-Clients.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Clients</span></a>
+<button class="tbi" aria-haspopup="menu" aria-expanded="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg><span>More</span></button>
 </nav>
 </div>
-<span class="cap">The web app is fully usable on phones — no app banner, no store links. Bottom tab bar Senenama · Ýazylyşlar · Müşderiler · Köp; Köp opens a sheet with the rest of the sidebar (Teswirler, Hasabatlar, Sazlamalar, Ýeral sahypaňyz, Kömek), the workspace switcher and the user menu. Drawers become bottom sheets. See B-Mobile.</span></div>
+<span class="cap">Fully usable on phones — no app banner, no store links. Tab bar Calendar · Bookings · Clients · More; More opens a sheet with Reviews · Settings and the account items (Language too when the market has several). The workspace switcher sits in the page header. Drawers become bottom sheets. See B-Mobile.</span></div>
+<div class="tile"><span class="lbl">Addresses · no language, always the workspace</span>
+<div class="mono" style="display: flex; flex-direction: column; gap: 6px; color: #101014">
+<span>business.yeral.app/login</span>
+<span>business.yeral.app/setup/{step}</span>
+<span>business.yeral.app/w/glow-studio/calendar</span>
+<span>business.yeral.app/w/glow-studio/bookings</span>
+<span>business.yeral.app/w/glow-studio/clients</span>
+<span>business.yeral.app/w/glow-studio/reviews</span>
+<span>business.yeral.app/w/glow-studio/settings/{section}</span>
+</div>
+<span class="cap">The language is a person’s setting, not part of the address. The tab title is “Calendar · Glow Studio”. Opening /w/{slug}/… of a workspace you don’t belong to goes to your last used workspace with the toast “This section is closed to you”.</span></div>
 </div>
 
+<section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-bn">
+<div class="shd"><span class="lbl">Business status · one banner at a time · under the top bar · no dismiss</span><h2 id="s-bn" class="h2">In review · Not approved · Demo</h2></div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; align-items: start">
+<div class="col" style="gap: 20px">
+<span class="lbl">1 · In review · a new business, until the Ýeral team checks it</span>
+<div class="mini">
+<div class="mtop"><span style="font-size: 19px; line-height: 24px; font-weight: 700">Calendar</span><span style="flex: 1"></span><a class="b b-pri b-sm" href="B-Calendar.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>New booking</a></div>
+<div style="padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 16px">
+<div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnt"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div>
+<div style="height: 72px; border: 1.5px dashed #d8d8de; border-radius: 12px"></div>
+</div>
+</div>
+<span class="cap">Pending tones, clock icon. Visitors at the link see the “This page isn’t open yet” page until the review passes; the owner and team see their own page.</span>
+<span class="lbl" style="padding-top: 8px">2 · Not approved · the Ýeral team sent it back</span>
+<div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnt"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div>
+<span class="cap">Danger tones; the reason is the Ýeral team’s text. “Fix and send again” opens the settings section the reason points to (here Business profile → photos); saving there sends the page for review again and the banner goes back to In review. The calendar keeps working; the page stays hidden from clients.</span>
+<span class="lbl" style="padding-top: 8px">3 · Demo · for people who chose “Try the business app”</span>
+<div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnt"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div>
+<span class="cap">Neutral tones, flask icon (the ExampleBadge icon). Sample data; no client ever sees it and nothing is sent to anyone. “Create your business” → /setup; the demo stays in the switcher until the person leaves it.</span>
+</div>
+<div class="col">
+<span class="lbl">Demo workspace in the switcher · ExampleBadge</span>
+<div class="strip" style="width: 272px">
+<button class="swb" aria-haspopup="menu" aria-label="Workspace: Glow Studio, example, Owner. Switch">
+<img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span></span><span class="cap" style="font-size: 12px; line-height: 16px">Owner</span></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+</button>
+</div>
+<div class="pop" role="menu" aria-label="Your workspaces" style="width: 300px">
+<div class="lbl" style="padding: 8px 10px 6px">Your workspaces</div>
+<a class="mi wsi on" role="menuitemradio" aria-checked="true" href="B-Calendar.dc.html"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="wsn">Glow Studio</span><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span></span><span class="wsc">Owner · demo workspace</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></a>
+<div class="pdv" role="separator"></div>
+<a class="mi" role="menuitem" href="B-Onboarding.dc.html"><span class="wpl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Create a business</a>
+</div>
+<span class="cap">The ExampleBadge (S 20, neutral, never violet) sits after the name wherever the demo workspace shows; screen readers hear “Glow Studio, example”.</span>
+</div>
+</div>
+</section>
+
 <section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-ws">
-<div class="shd"><span class="lbl">Workspaces · Aýna Myradowa</span><h2 id="s-ws" class="h2">Bir adam — birnäçe iş ýeri</h2></div>
+<div class="shd"><span class="lbl">Workspaces · Aýna Myradowa</span><h2 id="s-ws" class="h2">One person — several workspaces</h2></div>
 <div style="display: grid; grid-template-columns: 300px 300px minmax(0, 1fr); gap: 40px; align-items: start">
 <div class="col">
 <span class="lbl">In Glow Studio · open</span>
 <div class="strip" style="width: 272px">
-<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Hünärmen. Çalyşmak">
+<button class="swb" aria-haspopup="menu" aria-label="Workspace: Glow Studio, Specialist. Switch">
 <img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
-<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Hünärmen</span></span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Specialist</span></span>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
 </button>
 </div>
-<div class="pop" role="menu" aria-label="Iş ýerleriňiz" style="width: 300px">
-<div class="lbl" style="padding: 8px 10px 6px">Iş ýerleriňiz</div>
-<a class="mi wsi on" role="menuitemradio" aria-checked="true" href="B-Calendar.dc.html"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Hünärmen · Bitarap Türkmenistan şaýoly</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></a>
-<a class="mi wsi" role="menuitemradio" aria-checked="false" href="B-Calendar.dc.html"><span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 8px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: #f0f0f3; color: #41505f; font-size: 14px; font-weight: 700">A</span><span class="wst"><span class="wsn">Aýnanyň saç studiýasy</span><span class="wsc">Eýesi · Öýde kabul edýär · Parahat 2</span></span><span class="cnt" aria-label="1 haýyş">1</span></a>
+<div class="pop" role="menu" aria-label="Your workspaces" style="width: 300px">
+<div class="lbl" style="padding: 8px 10px 6px">Your workspaces</div>
+<a class="mi wsi on" role="menuitemradio" aria-checked="true" href="B-Calendar.dc.html"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Specialist · Bitarap Türkmenistan Avenue</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></a>
+<a class="mi wsi" role="menuitemradio" aria-checked="false" href="B-Calendar.dc.html"><span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 8px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: #f0f0f3; color: #41505f; font-size: 14px; font-weight: 700">A</span><span class="wst"><span class="wsn">Aýnanyň saç studiýasy</span><span class="wsc">Owner · Works from home</span></span><span class="cnt" aria-label="1 request">1</span></a>
 <div class="pdv" role="separator"></div>
-<a class="mi" role="menuitem" href="B-Onboarding.dc.html"><span class="wpl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Täze biznes döret</a>
+<a class="mi" role="menuitem" href="B-Onboarding.dc.html"><span class="wpl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Create a business</a>
 </div>
 </div>
 <div class="col">
 <span class="lbl">After picking her own studio</span>
 <div class="strip" style="width: 272px">
-<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Aýnanyň saç studiýasy, Eýesi. Çalyşmak">
+<button class="swb" aria-haspopup="menu" aria-label="Workspace: Aýnanyň saç studiýasy, Owner. Switch">
 <span aria-hidden="true" style="width: 36px; height: 36px; border-radius: 10px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: #f0f0f3; color: #41505f; font-size: 15px; font-weight: 700">A</span>
-<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Aýnanyň saç studiýasy</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Aýnanyň saç studiýasy</span><span class="cap" style="font-size: 12px; line-height: 16px">Owner</span></span>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
 </button>
 </div>
-<span class="cap">Solo workspace: she is Eýesi there, so her sidebar shows everything incl. Sazlamalar; «Haýyşlara kim jogap berýär?» is hidden (one-person business).</span>
+<span class="cap">Solo workspace: she is the Owner there, so her sidebar shows everything incl. Settings; “Who answers requests?” is hidden (one-person business).</span>
 </div>
 <div class="col" style="max-width: 620px">
-<p class="dev" style="margin: 0; max-width: none; font-size: 15px; line-height: 22px; color: #101014">Switching changes the whole workspace — calendar, team, clients, settings, numbers — and the role with it: Aýna is Hünärmen in Glow Studio (own column, no Sazlamalar) and Eýesi in “Aýnanyň saç studiýasy”.</p>
+<p class="dev" style="margin: 0; max-width: none; font-size: 15px; line-height: 22px; color: #101014">Switching changes the whole workspace — calendar, team, clients, settings, numbers — and the access level with it: Aýna is a Specialist in Glow Studio (own column, no Settings) and the Owner of “Aýnanyň saç studiýasy”.</p>
 <ul class="hid">
 <li>After login the <b>last used</b> workspace opens (accounts.*.lastUsed) — no picker each time.</li>
-<li>Counts in the popover = unanswered requests this person can answer in that workspace.</li>
-<li>Her bookings in one workspace show in the other as a <b>«Başga ýerde»</b> block without details (today 18:30–19:30 in Glow Studio), and online booking doesn't offer those times. She can turn this off in Profilim.</li>
+<li>Counts in the popover = requests this person may answer in that workspace.</li>
+<li><b>Busy elsewhere is automatic</b>: her confirmed bookings and waiting requests in one workspace block that time (and its buffer) in the other as a plain “Busy elsewhere” block — never a name, service or client — and it can’t be booked. There is no setting for it.</li>
 </ul>
 </div>
 </div>
 </section>
 
 <section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-lv">
-<div class="shd"><span class="lbl">Access levels · sidebar</span><h2 id="s-lv" class="h2">Eýesi · Administrator · Hünärmen</h2><p class="dev" style="max-width: 980px">Three fixed access levels, no custom roles. What a level can't use is <b>hidden, not disabled</b> — menu items, money, buttons. Same shell markup; only the items, counts and the role under the workspace name change.</p></div>
+<div class="shd"><span class="lbl">Access levels · sidebar</span><h2 id="s-lv" class="h2">Owner · Admin · Specialist</h2><p class="dev" style="max-width: 1000px">Three fixed access levels, no custom roles. What a level can’t use is <b>hidden, not disabled</b> — menu items, money, buttons. Same shell markup; only the items, the counts and the level under the workspace name change.</p></div>
 <div style="display: grid; grid-template-columns: 250px 250px 250px minmax(0, 1fr); gap: 40px; align-items: start">
 <div class="col">
-<span class="lbl">Eýesi · Maýsa Annaýewa</span>
-<div class="shell" style="height: 600px">
-<aside class="side" aria-label="Esasy menýu" style="border-right: 0">
-<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak">
+<span class="lbl">Owner · Maýsa Annaýewa</span>
+<div class="shell" style="height: 560px">
+<aside class="side" aria-label="Main menu" style="border-right: 0">
+<button class="swb" aria-haspopup="menu" aria-label="Workspace: Glow Studio, Owner. Switch">
 <img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
-<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Owner</span></span>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
 </button>
 <div class="sdv"></div>
-<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
-<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
-<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
-<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
-<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
-<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Calendar</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Bookings<span class="cnt" aria-label="5 requests">5</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Clients</a>
+<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<span class="cnt cnt-n" aria-label="4 unanswered reviews">4</span></a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a>
 <div style="flex: 1"></div>
-<a class="sn" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
-<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
 <div class="sdv"></div>
 <div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
 <span class="av">M</span>
 <span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 10 20 30</span></span>
-<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+<button class="b b-gho b-ic" aria-label="Account menu" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
 </div>
 </aside>
 </div>
 <ul class="hid">
-<li>Nothing hidden: money everywhere, Sazlamalar incl. Topar and Rugsatlar.</li>
-<li>One Eýesi per workspace; can't leave until «Eýeçiligi geçir» (Topar).</li>
+<li>Nothing hidden: money everywhere, Settings incl. Team and Permissions.</li>
+<li>One Owner per workspace; can’t leave until “Transfer ownership” (Team).</li>
 </ul>
 </div>
 <div class="col">
-<span class="lbl">Administrator · Selbi Hojaýewa</span>
-<div class="shell" style="height: 600px">
-<aside class="side" aria-label="Esasy menýu" style="border-right: 0">
-<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Administrator. Çalyşmak">
+<span class="lbl">Admin · Selbi Hojaýewa</span>
+<div class="shell" style="height: 560px">
+<aside class="side" aria-label="Main menu" style="border-right: 0">
+<button class="swb" aria-haspopup="menu" aria-label="Workspace: Glow Studio, Admin. Switch">
 <img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
-<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Administrator</span></span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Admin</span></span>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
 </button>
 <div class="sdv"></div>
-<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
-<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
-<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
-<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
-<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
-<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Calendar</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Bookings<span class="cnt" aria-label="5 requests">5</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Clients</a>
+<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<span class="cnt cnt-n" aria-label="4 unanswered reviews">4</span></a>
+<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a>
 <div style="flex: 1"></div>
-<a class="sn" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
-<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
 <div class="sdv"></div>
 <div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
 <span class="av">S</span>
 <span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Selbi Hojaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 88 41 02</span></span>
-<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+<button class="b b-gho b-ic" aria-label="Account menu" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
 </div>
 </aside>
 </div>
 <ul class="hid">
-<li>Hidden: <b>money</b> — Girdeji in Hasabatlar and the calendar summary, client «jemi» — unless the owner gives «Girdejini görmek».</li>
-<li><b>Topar</b> and Rugsatlar are view-only (no invite / edit / remove buttons).</li>
-<li>Answers requests (count 5) and reviews (count 4).</li>
+<li>Hidden: <b>money</b> — the calendar summary’s revenue and the client “total” — unless the owner gives “See revenue”.</li>
+<li><b>Team</b> and Permissions are view-only (no invite / edit / remove).</li>
+<li>Answers requests (5) and reviews (4).</li>
 </ul>
 </div>
 <div class="col">
-<span class="lbl">Hünärmen · Aýna Myradowa</span>
-<div class="shell" style="height: 600px">
-<aside class="side" aria-label="Esasy menýu" style="border-right: 0">
-<button class="swb" aria-haspopup="menu" aria-label="Iş ýeri: Glow Studio, Hünärmen. Çalyşmak">
+<span class="lbl">Specialist · Aýna Myradowa</span>
+<div class="shell" style="height: 560px">
+<aside class="side" aria-label="Main menu" style="border-right: 0">
+<button class="swb" aria-haspopup="menu" aria-label="Workspace: Glow Studio, Specialist. Switch">
 <img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover">
-<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Hünärmen</span></span>
+<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Specialist</span></span>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
 </button>
 <div class="sdv"></div>
-<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
-<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="2 haýyş">2</span></a>
-<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
-<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler</a>
-<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
+<a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Calendar</a>
+<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Bookings<span class="cnt" aria-label="2 requests">2</span></a>
+<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Clients</a>
+<a class="sn" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews</a>
 <div style="flex: 1"></div>
-<a class="sn" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
-<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
 <div class="sdv"></div>
 <div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
 <span class="av">A</span>
 <span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Aýna Myradowa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 31 22 10</span></span>
-<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+<button class="b b-gho b-ic" aria-label="Account menu" aria-haspopup="menu" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
 </div>
 </aside>
 </div>
 <ul class="hid">
-<li>Hidden: <b>Sazlamalar</b> (own profile via the user menu → Profilim).</li>
-<li>Senenama: own column; others' time shows as «Bes». Ýazylyşlar / Müşderiler: own only (count 2 = her requests).</li>
-<li>Teswirler: about her, read-only (no count, no reply). Hasabatlar: own numbers and own earnings.</li>
+<li>Hidden: <b>Settings</b> (her own profile is in the account menu → My profile).</li>
+<li>Calendar: own column; others’ time shows as “Busy”. Bookings / Clients: own only (2 = her requests).</li>
+<li>Reviews about her, read-only (no count, no reply).</li>
 </ul>
 </div>
 <div class="col">
 <span class="lbl">Rules</span>
 <ul class="hid">
-<li>Programmasyz hünärmen has no login; owner / admin handle their bookings and requests.</li>
-<li>Who answers requests is set in Sazlamalar → Ýazylyş düzgünleri → «Haýyşlara kim jogap berýär?» (default «Ikisi hem») with a per-person override in the staff drawer. The Ýazylyşlar count = requests this person may answer; when specialists only see theirs («Administrator we eýesi»), a Hünärmen gets no count.</li>
-<li>Workspaces with tables or classes show «Stollar» / «Sapaklar» in place of (or next to) «Senenama».</li>
-<li>Direct URL to a hidden page → redirect to Senenama with a toast «Bu bölüm siziň üçin ýapyk».</li>
+<li><b>“Uses the app”</b> (Specialist, on by default) replaces the old phone-only level. Off → bookable at once, never logs in, the owner and admins handle their requests; a phone number is still required — “They can start using the app later with this number.”</li>
+<li>“Who answers requests?” (Settings → Booking rules: Owner and admins · Each specialist · Both, default Both) with a per-person override in the team drawer. The Bookings count = requests this person may answer; a Specialist under “Owner and admins” gets no count.</li>
+<li>A direct URL to a hidden page redirects to Calendar with the toast “This section is closed to you”.</li>
+<li>First release: appointments only — one booking type per business, so no Reports, Tables or Classes items.</li>
 </ul>
 </div>
 </div>
 </section>
 
 <section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-mx">
-<div class="shd"><span class="lbl">Default access · business-demo.json → accessLevels.permissions</span><h2 id="s-mx" class="h2">Rugsatlar</h2></div>
+<div class="shd"><span class="lbl">Default access · business-demo.json → accessLevels.permissions</span><h2 id="s-mx" class="h2">Permissions</h2></div>
 <div style="display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 40px; align-items: start">
-<div class="tcard" role="table" aria-label="Deslapky rugsatlar">
-<div class="mx-r mx-h" role="row"><span class="lbl" role="columnheader">Rugsat</span><span class="mx-hc lbl" role="columnheader"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Eýesi<span class="sr">, üýtgedip bolmaýar</span></span><span class="mx-hc lbl" role="columnheader">Administrator</span><span class="mx-hc lbl" role="columnheader">Hünärmen</span></div>
-<sc-for list="{{matrix}}" as="r" hint-placeholder-count="11">
+<div class="tcard" role="table" aria-label="Default permissions">
+<div class="mx-r mx-h" role="row"><span class="lbl" role="columnheader">Permission</span><span class="mx-hc lbl" role="columnheader"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Owner<span class="sr">, can’t be changed</span></span><span class="mx-hc lbl" role="columnheader">Admin</span><span class="mx-hc lbl" role="columnheader">Specialist</span></div>
+<sc-for list="{{matrix}}" as="r" hint-placeholder-count="10">
 <div class="mx-r" role="row">
 <span class="mx-n" role="rowheader"><span>{{r.t}}</span><sc-if value="{{r.hasSub}}" hint-placeholder-val="{{false}}"><span class="cap" style="font-weight: 400">{{r.sub}}</span></sc-if></span>
 <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="3">
 <span class="mx-c" role="cell">
-<sc-if value="{{c.yes}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span class="sr">Hawa</span></sc-if>
-<sc-if value="{{c.no}}" hint-placeholder-val="{{false}}"><span class="mx-no" aria-hidden="true">—</span><span class="sr">Ýok</span></sc-if>
-<sc-if value="{{c.own}}" hint-placeholder-val="{{false}}"><span class="pl">Diňe özüniňki</span></sc-if>
-<sc-if value="{{c.view}}" hint-placeholder-val="{{false}}"><span class="pl">Diňe görmek</span></sc-if>
+<sc-if value="{{c.yes}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101014" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span class="sr">Yes</span></sc-if>
+<sc-if value="{{c.no}}" hint-placeholder-val="{{false}}"><span class="mx-no" aria-hidden="true">—</span><span class="sr">None</span></sc-if>
+<sc-if value="{{c.own}}" hint-placeholder-val="{{false}}"><span class="pl">Own only</span></sc-if>
+<sc-if value="{{c.view}}" hint-placeholder-val="{{false}}"><span class="pl">View only</span></sc-if>
 </span>
 </sc-for>
 </div>
@@ -427,98 +539,145 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 <div class="col">
 <ul class="hid">
-<li>Drawn in Sazlamalar → <b>Rugsatlar</b> as this matrix: permission rows × Administrator / Hünärmen columns. The owner toggles cells; the <b>Eýesi</b> column is locked all-on.</li>
-<li><b>«Diňe özüniňki»</b> (“own”) = only their own bookings, clients or numbers. Cells that can be “own” toggle Ýok / Diňe özüniňki / Hawa; others are on/off.</li>
-<li>«Haýyşlara jogap bermek» for Hünärmen follows «Haýyşlara kim jogap berýär?» (Ýazylyş düzgünleri).</li>
-<li>A Hünärmen always reads reviews about themself; replying is the owner's / admin's.</li>
-<li>Programmasyz hünärmen: no login, not in the matrix.</li>
+<li>Edited in Settings → Team → <b>Permissions</b> as this matrix: permission rows × Admin / Specialist columns. The owner changes cells; the <b>Owner</b> column is locked all-on.</li>
+<li><b>“Own only”</b> = only their own bookings, clients and earnings. Cells that can be “own” are a select None / Own only / All; the others are switches; Team is None / View only / Manage.</li>
+<li>“Answer requests” for a Specialist follows “Who answers requests?” (Booking rules).</li>
+<li>A Specialist always reads reviews about them; replying is the owner’s and admins’.</li>
+<li>A Specialist with “Uses the app” off never logs in, so these permissions don’t apply to them.</li>
+<li>No “Reports” row at the first release (no Reports section).</li>
 </ul>
 </div>
 </div>
 </section>
 
-<section id="profilim" style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-pf">
-<div class="shd"><span class="lbl">User menu → Profilim · right drawer 480 (bottom sheet under 768)</span><h2 id="s-pf" class="h2">Profilim</h2><p class="dev" style="max-width: 980px">The <b>person</b>, not the business: name, photo, phone (= login, change via SMS), specialization per workspace (read-only, set by each owner in Topar), the «Başga ýerde» switch, and leaving a workspace. Same drawer in every workspace and for every access level; only the bottom differs for the owner.</p></div>
+<section id="my-profile" style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-pf">
+<div class="shd"><span class="lbl">Account menu → My profile · right drawer 480 (bottom sheet under 768)</span><h2 id="s-pf" class="h2">My profile</h2><p class="dev" style="max-width: 1000px">The <b>person</b>, not the business: name, photo, phone (= login, changed with a code), specialization per workspace (read-only, set by each owner in Team) and leaving a workspace. No “busy elsewhere” switch any more — it’s automatic. Same drawer in every workspace and for every access level; only the bottom differs for the owner.</p></div>
 <div style="display: grid; grid-template-columns: 480px 480px minmax(0, 1fr); gap: 40px; align-items: start">
 <div class="col">
-<span class="lbl">Maýsa · Eýesi in Glow Studio</span>
+<span class="lbl">Maýsa · Owner of Glow Studio</span>
 <aside class="pdr" role="dialog" aria-labelledby="pf1-t">
 <div class="pdr-h">
-<div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0"><h3 id="pf1-t" class="dt">Profilim</h3><span class="cap">Ýeral hasabyňyz — ähli iş ýerleriňizde birmeňzeş</span></div>
-<button class="b b-gho b-ic" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+<div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0"><h3 id="pf1-t" class="dt">My profile</h3><span class="cap">Your Ýeral account — the same in every workspace</span></div>
+<button class="b b-gho b-ic" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
 </div>
 <div class="pdr-b">
-<div style="display: flex; align-items: center; gap: 16px"><span class="av av64" aria-hidden="true">M</span><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px"><button class="b b-sec b-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Surat goş</button><span class="cap">Hökman däl · JPG ýa-da PNG</span></div></div>
-<div class="fld"><label for="pf1-n">Adyňyz we familiýaňyz</label><input id="pf1-n" class="inp" value="Maýsa Annaýewa"><span class="hint">Toparlaryňyz sizi şu at bilen görýär.</span></div>
-<div class="fld"><span class="flab" id="pf1-pl">Telefon belgisi</span><div class="ro" role="group" aria-labelledby="pf1-pl"><span style="font-variant-numeric: tabular-nums; font-weight: 500">+993 65 10 20 30</span><span style="flex: 1"></span><button class="lnk">Belgini üýtget</button></div><span class="hint">Şu belgi bilen Ýeral Biznes-e we yeral.app-a girýärsiňiz. Täze belgä SMS kod ibereris.</span></div>
+<div style="display: flex; align-items: center; gap: 16px"><span class="av av64" aria-hidden="true">M</span><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px"><button class="b b-sec b-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Add photo</button><span class="cap">Optional · JPG or PNG</span></div></div>
+<div class="fld"><label for="pf1-n">First and last name</label><input id="pf1-n" class="inp" value="Maýsa Annaýewa"><span class="hint">Your teams see you by this name.</span></div>
+<div class="fld"><span class="flab" id="pf1-pl">Phone number</span><div class="ro" role="group" aria-labelledby="pf1-pl"><span style="font-variant-numeric: tabular-nums; font-weight: 500">+993 65 10 20 30</span><span style="flex: 1"></span><button class="lnk">Change number</button></div><span class="hint">You log in to Ýeral Business and yeral.app with this number. To change it, confirm the new number with a code.</span></div>
 <div class="dsep"></div>
-<div class="fld" style="gap: 10px"><span class="ntl">Iş ýerlerim</span>
+<div class="fld" style="gap: 10px"><span class="ntl">My workspaces</span>
 <div style="display: flex; flex-direction: column">
-<div class="wrow"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Eýesi</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Hünäri</span><span style="font-size: 14px; line-height: 20px; color: #6e6e78">Bellenmedi</span></span></div>
-<div class="wrow"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio · Parahat</span><span class="wsc">Eýesi</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Hünäri</span><span style="font-size: 14px; line-height: 20px; color: #6e6e78">Bellenmedi</span></span></div>
+<div class="wrow"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Owner</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Specialization</span><span style="font-size: 14px; line-height: 20px; color: #6e6e78">Not set</span></span></div>
+<div class="wrow"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Nails</span><span class="wsc">Owner</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Specialization</span><span style="font-size: 14px; line-height: 20px; color: #6e6e78">Not set</span></span></div>
 </div>
-<span class="cap">Hünäriňizi her iş ýeriniň eýesi Topar bölüminde belleýär.</span>
+<span class="cap">Each workspace’s owner sets your specialization in Team.</span>
 </div>
-<div class="dsep"></div>
-<div class="swr"><span style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><span id="pf1-sw" class="swt">Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez</span><span class="cap">Beýleki iş ýeriňizdäki ýazylyşlar her senenamada jikme-jiksiz «Başga ýerde» bolup görünýär we ol wagtlar onlaýn ýazylyşda hödürlenmeýär.</span></span><button class="sw on" role="switch" aria-checked="true" aria-labelledby="pf1-sw"><span class="trk"><span class="knob"></span></span></button></div>
-<div class="obox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Siz Glow Studio-nyň eýesi. Biznesden çykmak üçin ilki eýeçiligi başga adama geçiriň: Topar → «Eýeçiligi geçir». <a href="B-Team.dc.html" style="font-weight: 600">Topara geç</a></span></div>
+<div class="obox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>You’re the owner of Glow Studio. To leave the business, first transfer ownership to someone else: Team → “Transfer ownership”. <a href="B-Team.dc.html" style="font-weight: 600">Go to Team</a></span></div>
 </div>
 <div class="pdr-f">
-<span style="flex: 1"></span><button class="b b-pri">Ýatda sakla</button>
+<span style="flex: 1"></span><button class="b b-pri">Save</button>
 </div>
 </aside>
-<span class="cap">Owner: no «Bu biznesden çyk». The box points to Topar → «Eýeçiligi geçir» (B-Team).</span>
+<span class="cap">Owner: no “Leave this business”. The box points to Team → “Transfer ownership” (B-Team).</span>
 </div>
 <div class="col">
-<span class="lbl">Aýna · Hünärmen in Glow Studio</span>
+<span class="lbl">Aýna · Specialist in Glow Studio</span>
 <aside class="pdr" role="dialog" aria-labelledby="pf2-t">
 <div class="pdr-h">
-<div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0"><h3 id="pf2-t" class="dt">Profilim</h3><span class="cap">Ýeral hasabyňyz — ähli iş ýerleriňizde birmeňzeş</span></div>
-<button class="b b-gho b-ic" aria-label="Ýap"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+<div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0"><h3 id="pf2-t" class="dt">My profile</h3><span class="cap">Your Ýeral account — the same in every workspace</span></div>
+<button class="b b-gho b-ic" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
 </div>
 <div class="pdr-b">
-<div style="display: flex; align-items: center; gap: 16px"><span class="av av64" aria-hidden="true">A</span><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px"><button class="b b-sec b-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Surat goş</button><span class="cap">Hökman däl · JPG ýa-da PNG</span></div></div>
-<div class="fld"><label for="pf2-n">Adyňyz we familiýaňyz</label><input id="pf2-n" class="inp" value="Aýna Myradowa"><span class="hint">Toparlaryňyz sizi şu at bilen görýär.</span></div>
-<div class="fld"><span class="flab" id="pf2-pl">Telefon belgisi</span><div class="ro" role="group" aria-labelledby="pf2-pl"><span style="font-variant-numeric: tabular-nums; font-weight: 500">+993 65 31 22 10</span><span style="flex: 1"></span><button class="lnk">Belgini üýtget</button></div><span class="hint">Şu belgi bilen Ýeral Biznes-e we yeral.app-a girýärsiňiz. Täze belgä SMS kod ibereris.</span></div>
+<div style="display: flex; align-items: center; gap: 16px"><span class="av av64" aria-hidden="true">A</span><div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px"><button class="b b-sec b-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>Add photo</button><span class="cap">Optional · JPG or PNG</span></div></div>
+<div class="fld"><label for="pf2-n">First and last name</label><input id="pf2-n" class="inp" value="Aýna Myradowa"><span class="hint">Your teams see you by this name.</span></div>
+<div class="fld"><span class="flab" id="pf2-pl">Phone number</span><div class="ro" role="group" aria-labelledby="pf2-pl"><span style="font-variant-numeric: tabular-nums; font-weight: 500">+993 65 31 22 10</span><span style="flex: 1"></span><button class="lnk">Change number</button></div><span class="hint">You log in to Ýeral Business and yeral.app with this number. To change it, confirm the new number with a code.</span></div>
 <div class="dsep"></div>
-<div class="fld" style="gap: 10px"><span class="ntl">Iş ýerlerim</span>
+<div class="fld" style="gap: 10px"><span class="ntl">My workspaces</span>
 <div style="display: flex; flex-direction: column">
-<div class="wrow"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Hünärmen</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Hünäri</span><span style="font-size: 14px; line-height: 20px; font-weight: 500">Stilist</span></span></div>
-<div class="wrow"><span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 8px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: #f0f0f3; color: #41505f; font-size: 14px; font-weight: 700">A</span><span class="wst"><span class="wsn">Aýnanyň saç studiýasy</span><span class="wsc">Eýesi</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Hünäri</span><span style="font-size: 14px; line-height: 20px; font-weight: 500">Stilist</span></span></div>
+<div class="wrow"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Specialist</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Specialization</span><span style="font-size: 14px; line-height: 20px; font-weight: 500">Stylist</span></span></div>
+<div class="wrow"><span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 8px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: #f0f0f3; color: #41505f; font-size: 14px; font-weight: 700">A</span><span class="wst"><span class="wsn">Aýnanyň saç studiýasy</span><span class="wsc">Owner</span></span><span class="spv"><span class="cap" style="font-size: 12px; line-height: 16px">Specialization</span><span style="font-size: 14px; line-height: 20px; font-weight: 500">Stylist</span></span></div>
 </div>
-<span class="cap">Hünäriňizi her iş ýeriniň eýesi Topar bölüminde belleýär.</span>
+<span class="cap">Each workspace’s owner sets your specialization in Team.</span>
 </div>
-<div class="dsep"></div>
-<div class="swr"><span style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><span id="pf2-sw" class="swt">Beýleki iş ýerlerimdäki wagtymy «Başga ýerde» görkez</span><span class="cap">Beýleki iş ýeriňizdäki ýazylyşlar her senenamada jikme-jiksiz «Başga ýerde» bolup görünýär we ol wagtlar onlaýn ýazylyşda hödürlenmeýär.</span></span><button class="sw on" role="switch" aria-checked="true" aria-labelledby="pf2-sw"><span class="trk"><span class="knob"></span></span></button></div>
 </div>
 <div class="pdr-f">
-<button class="lnkd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Bu biznesden çyk</button>
-<span style="flex: 1"></span><button class="b b-pri">Ýatda sakla</button>
+<button class="lnkd" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Leave this business</button>
+<span style="flex: 1"></span><button class="b b-pri">Save</button>
 </div>
 </aside>
-<span class="cap">«Bu biznesden çyk» (current workspace only) → confirm modal «Glow Studio-dan çykýarsyňyzmy?» · «Hawa, çyk» / «Yza». Her future bookings stay; the owner reassigns them (same flow as «Işgäri öçür»). Account and other workspaces stay.</span>
+<span class="cap">“Leave this business” (the current workspace only, never for the owner) → the confirm below.</span>
 </div>
 <div class="col">
-<span class="lbl">Belgini üýtget · expands in place</span>
+<span class="lbl">Change number · expands in place</span>
 <div class="tile" style="gap: 16px">
-<span class="stl">1 · Täze belgi</span>
+<span class="stl">1 · New number</span>
 <div class="pbox">
-<div class="fld"><label for="pc-ph">Täze telefon belgisi</label><div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="pc-ph" class="inp" type="tel" inputmode="numeric" value="61 05 77 32" style="font-variant-numeric: tabular-nums"></div></div>
-<div style="display: flex; justify-content: flex-end; gap: 8px"><button class="b b-gho b-sm">Ýatyr</button><button class="b b-sec b-sm">Kod iber</button></div>
+<div class="fld"><label for="pc-ph">New phone number</label><div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="pc-ph" class="inp" type="tel" inputmode="numeric" value="61 05 77 32" style="font-variant-numeric: tabular-nums"></div></div>
+<div style="display: flex; justify-content: flex-end; gap: 8px"><button class="b b-gho b-sm">Cancel</button><button class="b b-sec b-sm">Send code</button></div>
 </div>
-<span class="stl">2 · SMS kod</span>
+<span class="stl">2 · Code · first release (code on screen)</span>
 <div class="pbox">
-<p class="hint" style="margin: 0">Kod <span style="white-space: nowrap; color: #101014; font-weight: 600">+993 61 05 77 32</span> belgä iberildi.</p>
-<div class="otp" role="group" aria-label="SMS kod"><span class="ob">3</span><span class="ob">8</span><span class="ob f"><span class="caret"></span></span><span class="ob"></span></div>
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><button class="lnk" disabled="{{true}}">Täzeden iber (0:42)</button><button class="b b-gho b-sm">Ýatyr</button></div>
-<span class="hint">Täze belgi tassyklanýança köne belgi bilen girip bilersiňiz.</span>
+<p class="hint" style="margin: 0">To change to <span style="white-space: nowrap; color: #101014; font-weight: 600">+993 61 05 77 32</span>.</p>
+<div class="fcl" role="status"><span>Your code: <b class="fcd">4821</b></span></div>
+<div class="fld" style="gap: 8px"><span class="flab" id="pc-cl">Code</span><div class="otp" role="group" aria-labelledby="pc-cl"><span class="ob">4</span><span class="ob">8</span><span class="ob f"><span class="caret"></span></span><span class="ob"></span></div><span class="hint">It checks itself after the 4th digit.</span></div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px"><button class="lnk" disabled="{{true}}" style="padding: 0">Send a new code in 0:42</button><button class="b b-gho b-sm">Cancel</button></div>
+<span class="hint">Until the new number is verified you can log in with the old one.</span>
 </div>
 </div>
 <ul class="hid">
-<li>Code goes to the <b>new</b> number; verifies on the 4th digit (code 0000 = wrong, as in B-Login), then the row collapses and a toast says «Telefon belgisi üýtgedildi».</li>
-<li>The login phone changes for every workspace and for yeral.app; teams see the new number.</li>
-<li>Number already on another Ýeral account → field error «Bu belgi başga hasapda ulanylýar».</li>
-<li>Name / photo save with «Ýatda sakla»; the «Başga ýerde» switch saves at once (default on).</li>
+<li>The code step is SignInCodeStep (boxes 48) with all its states; while SMS isn’t live it shows the code on screen (firstLaunchCode). Wrong code 0000, as in B-Login.</li>
+<li>Verified → the row collapses and a toast says “Phone number changed”. The login phone changes for every workspace and for yeral.app; teams see the new number.</li>
+<li>A number already on another Ýeral account → field error “This number is used by another account”.</li>
+<li>Name and photo save with “Save”.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-lf">
+<div class="shd"><span class="lbl">Leave this business → the owner is told → the remove-staff flow</span><h2 id="s-lf" class="h2">Someone leaves</h2><p class="dev" style="max-width: 1000px">Demo: Aýna leaves Glow Studio with 4 upcoming bookings. Her bookings stay with the business; nothing is cancelled until the owner (or an admin with “Manage the team”) chooses. Gülnar Öwezowa has accepted her invite (B-Login) and does 3 of the 4 services.</p></div>
+<div style="display: grid; grid-template-columns: 440px 360px 560px; gap: 40px; align-items: start">
+<div class="col">
+<span class="lbl">1 · Aýna · confirm (Modal S)</span>
+<div class="mdl" role="dialog" aria-modal="true" aria-labelledby="lv-t">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h3 id="lv-t" class="mt">Leave Glow Studio?</h3><button class="b b-gho b-ic" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<p class="mp">You’ll stop seeing its calendar. Your 4 upcoming bookings stay with the business — the owner will choose who takes them.</p>
+<div class="mact"><button class="b b-sec">Cancel</button><button class="b b-red">Leave Glow Studio</button></div>
+</div>
+<span class="cap">Danger button, focus starts on “Cancel”. After leaving: Glow Studio disappears from her switcher, her account and other workspaces stay, and she lands in her last used other workspace (or “You don’t have a workspace yet”). Her future busy-elsewhere blocks in Glow Studio go away.</span>
+</div>
+<div class="col">
+<span class="lbl">2 · Maýsa · toast</span>
+<div class="toast" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f2ddb0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="22" x2="16" y1="11" y2="11"></line></svg><span style="flex: 1">Aýna left: 4 upcoming bookings need a new specialist</span><a class="b b-sm tb" href="#remove-staff">Choose</a></div>
+<span class="lbl" style="padding-top: 12px">Notification item · notifications list</span>
+<div class="pop" style="padding: 6px">
+<a class="ntf" href="#remove-staff"><span class="ntfi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="22" x2="16" y1="11" y2="11"></line></svg></span><span class="wst" style="gap: 2px"><span style="font-size: 14px; line-height: 20px; font-weight: 600; color: #101014">Aýna left: 4 upcoming bookings need a new specialist</span><span class="cap" style="font-size: 12px; line-height: 16px">Glow Studio · just now</span></span><span class="udot" aria-hidden="true"></span><span class="sr">Unread</span></a>
+</div>
+<span class="cap">Goes to the owner and admins who manage the team. The toast stays until opened or closed (it needs a decision); the item stays in the list until all 4 bookings are settled. Both open the flow on the right. Aýna leaves the team list as “Left”.</span>
+</div>
+<div id="remove-staff" class="col">
+<span class="lbl">3 · Maýsa · remove-staff flow · AffectedBookingsList</span>
+<div class="mdl" role="dialog" aria-modal="true" aria-labelledby="rs-t" style="gap: 18px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div style="display: flex; flex-direction: column; gap: 4px"><h3 id="rs-t" class="mt">Who takes Aýna’s bookings?</h3><p class="mp" style="font-size: 14px; line-height: 20px">Aýna left Glow Studio. She has 4 upcoming bookings.</p></div><button class="b b-gho b-ic" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<div role="radiogroup" aria-label="What happens to the bookings" style="display: flex; flex-direction: column; gap: 8px">
+<div class="opt on" role="radio" aria-checked="true" tabindex="0"><span class="rad" aria-hidden="true"></span><span class="optt"><span class="optn">Move to another specialist</span><span class="cap">The time and service stay the same. The client sees the new specialist in My bookings.</span><span class="fld" style="margin-top: 8px"><label class="flab" for="rs-to">To</label><span class="selw" style="max-width: 260px"><select id="rs-to" class="inp sel" style="height: 40px; font-size: 14px"><option>Gülnar Öwezowa</option><option>Any free specialist</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span><span class="cap">Only specialists who do these services are listed.</span></span></span></div>
+<div class="opt" role="radio" aria-checked="false" tabindex="-1"><span class="rad" aria-hidden="true"></span><span class="optt"><span class="optn">Keep them</span><span class="cap">They stay in the calendar as they are. No new bookings for Aýna.</span></span></div>
+<div class="opt" role="radio" aria-checked="false" tabindex="-1"><span class="rad" aria-hidden="true"></span><span class="optt"><span class="optn">Cancel and offer 3 other times</span><span class="cap">Each client picks a new time in one tap in My bookings.</span></span></div>
+</div>
+<div class="fld" style="gap: 8px"><span class="lbl" id="rs-l">4 bookings</span>
+<div class="abl" role="list" aria-labelledby="rs-l">
+<div class="abr" role="listitem"><span class="abr-w"><span class="abr-d">Today</span><span class="abr-t">11:30–13:30</span></span><span class="abr-m"><span class="abr-c">Gülälek N.</span><span class="cap">Hair colouring</span></span><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Confirmed</span><span class="abr-r"><span class="abr-no"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>Nobody else does Hair colouring</span></span><span class="selw"><select class="inp sel" aria-label="Gülälek N., Today 11:30–13:30: what happens"><option>Cancel and offer 3 other times</option><option>Keep it</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></span></div>
+<div class="abr" role="listitem"><span class="abr-w"><span class="abr-d">Today</span><span class="abr-t">17:00–17:30</span></span><span class="abr-m"><span class="abr-c">Döwlet B.</span><span class="cap">Children’s haircut</span></span><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Confirmed</span><span class="abr-r"><span class="abr-to"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span>Gülnar Öwezowa</span></span></span></div>
+<div class="abr" role="listitem"><span class="abr-w"><span class="abr-d">Today</span><span class="abr-t">18:00–18:45</span></span><span class="abr-m"><span class="abr-c">Aýsoltan R.</span><span class="cap">Hair styling</span></span><span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Confirmed</span><span class="abr-r"><span class="abr-to"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span>Gülnar Öwezowa</span></span></span></div>
+<div class="abr" role="listitem"><span class="abr-w"><span class="abr-d">Tomorrow</span><span class="abr-t">14:30–15:30</span></span><span class="abr-m"><span class="abr-c">Aýjemal Gurbanowa</span><span class="cap">Women’s haircut</span></span><span class="badge st-p"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Pending</span><span class="abr-r"><span class="abr-to"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span>Gülnar Öwezowa</span></span></span></div>
+</div>
+</div>
+<div class="mact"><button class="b b-sec">Close</button><button class="b b-pri">Save</button></div>
+</div>
+<ul class="hid">
+<li>Default choice: <b>Move to another specialist</b>. Each row shows its result; a booking nobody else can take gets a row select (<b>Cancel and offer 3 other times</b> by default, or Keep it).</li>
+<li>Waiting requests stay requests and move with the booking (Pending badge); the new specialist or the owner answers them.</li>
+<li>“Close” keeps the item in the notifications list; nothing changes until “Save”. Same list in round 3 when hours or a shift change (AffectedBookingsList).</li>
 </ul>
 </div>
 </div>
@@ -526,22 +685,21 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":6000}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":8300}}'>
 class Component extends DCLogic {
   renderVals() {
-    // business-demo.json → accessLevels.permissions (Eýesi column is locked all-on)
+    // business-demo.json → accessLevels.permissions (Owner column locked all-on); no Reports row at the first release
     const PERMS = [
-      ['Ähli işgärleriň senenamasyny görmek', '', true, true, false],
-      ['Haýyşlara jogap bermek', '«Haýyşlara kim jogap berýär?» sazlamasyna bagly', true, true, 'own'],
-      ['Ýazylyş goşmak, geçirmek, ýatyrmak', '', true, true, 'own'],
-      ['Gelmedi bellemek we arz etmek', '', true, true, 'own'],
-      ['Müşderileri görmek (telefon bilen)', '', true, true, 'own'],
-      ['Teswirlere jogap bermek', 'Hünärmen özi baradaky teswirleri okaýar', true, true, false],
-      ['Girdejini görmek', '', true, false, 'own'],
-      ['Hasabatlar', '', true, true, 'own'],
-      ['Hyzmatlary we bahalary üýtgetmek', '', true, true, false],
-      ['Biznes sazlamalaryny üýtgetmek', '', true, true, false],
-      ['Topary we rugsatlary dolandyrmak', '', true, 'view', false]
+      ['See everyone’s calendar', 'When off — only their own column; others’ time shows as “Busy”', true, true, false],
+      ['Answer requests', 'From the “Who answers requests?” setting', true, true, 'own'],
+      ['Add, move and cancel bookings', '', true, true, 'own'],
+      ['Mark no-shows and report', '', true, true, 'own'],
+      ['See clients (with phone numbers)', '', true, true, 'own'],
+      ['Reply to reviews', 'A specialist can always read reviews about them', true, true, false],
+      ['See revenue', 'Money totals in the calendar and client cards', true, false, 'own'],
+      ['Change services and prices', '', true, true, false],
+      ['Change business settings', '', true, true, false],
+      ['Manage the team and permissions', '', true, 'view', false]
     ];
     const cell = (v) => ({ yes: v === true, no: v === false, own: v === 'own', view: v === 'view' });
     return {

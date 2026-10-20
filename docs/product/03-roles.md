@@ -95,7 +95,7 @@ Only matters when the business confirms by hand. Set in *Sazlamalar → Ýazyly�
 
 ```mermaid
 flowchart LR
-  I["Owner invites by phone"] --> S["SMS link · valid 7 days"]
+  I["Owner invites by phone"] --> S["Invite · valid 7 days"]
   S --> L["Person signs in"]
   L --> D{"Accepts?"}
   D -->|"Yes"| AC["Member with the chosen level"]
@@ -104,14 +104,17 @@ flowchart LR
 ```
 
 - **Invite:** the owner enters a phone number, name, specialization and access level, then the services the person
-  does. The person gets an SMS link valid for 7 days. They sign in with that phone and accept or decline. The owner can
+  does. The invite is valid for 7 days: it shows when the person signs in with that phone, and the owner can copy its
+  link (no SMS at the first launch; an SMS link once SMS is live). They accept or decline. The owner can
   resend or cancel a pending invite. (business spec §1, §8)
-- **Phone-only specialist:** added without an SMS and active at once. (business spec §11)
+- **Specialist who doesn't use the app:** a Specialist with "Uses the app" off, added without an invite and active at
+  once. (business spec §11; Q-216)
 - **Leaving:** a member can leave a workspace from *Profilim* ("Bu biznesden çyk"); the owner can't. (business spec §1)
-- **Removing a member:** the owner removes them and reassigns their future bookings to someone who does those services,
-  or to "any free specialist". (business spec §8, §11)
-- **Handing over ownership:** the owner picks an active member who signs in; that person becomes *Eýesi* and the old
-  owner becomes an Administrator. (business spec §8)
+- **Removing a member:** the owner removes them and moves each future booking to someone who does that service, keeps it, or
+  cancels it with 3 other times; a booking nobody else does gets its own choice, never a move to "any free specialist"
+  . (business spec §8; design v0.6 round 2; Claude, delegated 20.10.2026)
+- **Handing over ownership** (Later, F-092; not in the MVP, so the owner can't leave): the owner picks an active
+  member who signs in; that person becomes *Eýesi* and the old owner becomes an Administrator. (business spec §8)
 - **Busy elsewhere** (in the MVP): someone in two workspaces is blocked in each calendar while they're the specialist
   on a confirmed booking or a waiting request in the other one, with its buffers. The calendar shows only a reserved
   gap, *Başga ýerde*, never anything from the other workspace, and nobody can book that time. There's no switch to

@@ -2,7 +2,7 @@
 
 This chapter walks through everything a business does in **Ýeral Biznes**, the workspace at `business.yeral.app`: getting in, setting up, the daily calendar, requests, clients, team, settings, reviews, and the table and class workspaces. Each scenario is numbered **B-01, B-02…** so other chapters can point at it. The client side of each exchange is in the client flows chapter (7a); notifications and SMS texts are in the system flows chapter.
 
-Sources, strongest first: the owner's direction (Ýeral is free for now: no plans, billing or commission) → design export v0.5: the business spec `docs/design/business/README.md` (§25 and §26 win where older sections disagree), `ROUND6-ANSWERS.md` (the owner's final decisions), the screens in `docs/design/screens/business/` → older spec sections → ADRs and the memory bank → code. Where a rule is decided, its source is in brackets. Where it isn't, there is an open question.
+Sources, strongest first: the owner's direction (Ýeral is free for now: no plans, billing or commission) → design export v0.6: the business spec `docs/design/business/README.md` (§27 wins for login, setup, shell, calendar, bookings and phones; §25 and §26 win where older sections disagree), `ROUND6-ANSWERS.md` (the owner's final decisions), the screens in `docs/design/screens/business/` → older spec sections → ADRs and the memory bank → code. Where a rule is decided, its source is in brackets. Where it isn't, there is an open question.
 
 ## How to read a flow
 
@@ -282,7 +282,7 @@ flowchart TD
 **Steps**
 
 1. A preview card shows how clients will see the business after the check ("Barlagdan soň müşderiler sizi şeýle görer").
-2. The page address `yeral.app/tk/b/{slug}` with *Göçür* (Copy) and a QR code with *QR-y ýükle* (Download QR): "Salgyňyz we QR kodyňyz taýýar — barlagdan soň müşderiler üçin açylar." (ROUND6-ANSWERS F1).
+2. The page address `yeral.app/b/{slug}` with *Göçür* (Copy) and a QR code with *QR-y ýükle* (Download QR): "Salgyňyz we QR kodyňyz taýýar — barlagdan soň müşderiler üçin açylar." (ROUND6-ANSWERS F1).
 3. The review notice: "Sahypaňyz barlagda — häzir ony diňe siz we toparyňyz görýärsiňiz. Barlagdan soň gözlegde we salgyňyzda hemmä açylar. Adatça 24 sagat çekýär."
 4. "Senenamany häzirden ulanyp bilersiňiz: jaň edip ýa-da gelip ýazylanlary goşuň. Onlaýn ýazylyş barlagdan soň açylar." (use the calendar now for phone and walk-in bookings; online booking opens after the check).
 5. A checklist "Profilyňyzy güýçlendiriň" (0 / 3): logo, 3+ photos, a description.
@@ -1060,7 +1060,7 @@ flowchart TD
 
 **Edge cases**
 
-- *Gelmedi* can be chosen only from the start time; *Gijä galdy*, *Gödek gylyk* and *Başga* any time on a confirmed or completed booking (Q-206, decided 18.10.2026). Classes allow "Gelmedi" only after the session starts (§22).
+- *Gelmedi* and *Gijä galdy* can be chosen only from the start time; *Gödek gylyk* and *Başga* any time on a confirmed or completed booking; *Gelmedi* takes the place of an earlier complaint of another type (Q-206, decided 18.10.2026, revised 20.10.2026). Classes allow "Gelmedi" only after the session starts (§22).
 - A no-show can be marked until 24 hours after the end; a review the client wrote before stays (Q-254, decided 18.10.2026).
 - A mistaken complaint: the team can remove it from the booking drawer within 7 days. A no-show goes back to *Tamamlandy*, the no-show count drops, and the client gets no message (Q-207, decided 18.10.2026). The class drawer removes a class mark (B-67).
 - Code: one complaint per booking.
@@ -1145,7 +1145,7 @@ flowchart TD
 ### B-31 · Bulk actions and export
 
 **Goal** — Answer several requests at once, or export bookings.
-**Who** — Bulk answer: only rows the viewer may answer. Export: not limited in the spec.
+**Who** — Bulk answer: only rows the viewer may answer. Export: Owner and Administrator; hidden for a Specialist (design v0.6 round 2; Claude, delegated 20.10.2026).
 
 ```mermaid
 flowchart TD
@@ -1564,7 +1564,7 @@ flowchart LR
 
 **Steps**
 
-1. *Sahypaňyzyň salgysy* `yeral.app/tk/b/{slug}` with *Göçür* (Copy), *Paýlaş* (Share), *SMS bilen iber*. "Instagram profiliňize, WhatsApp statusyna ýa-da wizit kartyňyza goýuň — müşderiler göni ýazylyp biler." (§8).
+1. *Sahypaňyzyň salgysy* `yeral.app/b/{slug}` with *Göçür* (Copy), *Paýlaş* (Share), *SMS bilen iber*. "Instagram profiliňize, WhatsApp statusyna ýa-da wizit kartyňyza goýuň — müşderiler göni ýazylyp biler." (§8).
 2. QR: "Kassanyň ýanyna goýuň — müşderi telefonynda açar"; *PNG ýükle* (for print), *SVG ýükle* (for a designer).
 3. *Ýazylyş düwmesi · ýakynda* (a booking button for websites, later).
 
@@ -1797,8 +1797,8 @@ flowchart TD
 **Steps**
 
 1. In the staff drawer, *Işgäri öçür* (Remove staff). The modal says how many future bookings they have (§8).
-2. Choices: *Başga hünärmene geçir* with a *Kime* list ("Müşderä SMS bilen habar bereris · Şol wagt we hyzmat saklanar"); *Bolşy ýaly galdyr — täze ýazylyş kabul edilmez* ("{name} şol ýazylyşlara gelýär, soň senenamadan aýrylýar"); *Ýatyr we müşderilere 3 başga wagt hödürle* ("Müşderi täze wagty bir basyşda kabul edip biler").
-3. The *Kime* list shows only specialists who do the affected services; otherwise each booking falls back to "Islendik boş hünärmen" (any free specialist) (§11).
+2. Choices: *Başga hünärmene geçir* with a *Kime* list ("Müşderä habar bereris · Şol wagt we hyzmat saklanar"; the client is notified, no SMS at the first launch); *Bolşy ýaly galdyr — täze ýazylyş kabul edilmez* ("{name} şol ýazylyşlara gelýär, soň senenamadan aýrylýar"); *Ýatyr we müşderilere 3 başga wagt hödürle* ("Müşderi täze wagty bir basyşda kabul edip biler").
+3. The *Kime* list shows only specialists who do the affected services; a booking nobody else does gets its own choice in its row (keep or cancel), never a move to "Islendik boş hünärmen" (any free specialist) (design v0.6 round 2; Claude, delegated 20.10.2026).
 4. "Müşderiler oňa ýazylyp bilmez. Taryh we hasabatlar saklanar." → *Öçür*. The row becomes *Öçürilen*.
 5. Later, the row menu *Gaýtadan işjeňleşdir* (Reactivate): "… gaýtadan işjeň".
 
@@ -2009,7 +2009,7 @@ flowchart TD
 
 > Open question Q-281: notification settings per workspace or per person.
 
-**Status** — Design: drawn (B-Notifications · `permission`, `dirty`) · Code: not built (only client SMS exist).
+**Status** — Later (F-169): the settings page and B-Notifications move to "Later" in design round 3; on MVP everyone gets their level's defaults, and the browser-permission banner lives in the shell (F-170). Design: drawn (B-Notifications · `permission`, `dirty`) · Code: not built (only client SMS exist).
 
 ### B-57 · Help and support chat
 

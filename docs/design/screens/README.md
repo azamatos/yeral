@@ -1,6 +1,6 @@
 # Screens index
 
-Hi-fi screens exported from the "Ýeral Web" canvas (14.10.2026, export v0.5 — see `../CHANGELOG.md`). Each `.dc.html` = one artboard. See `../CLAUDE.md` → "How to read a .dc.html screen".
+Hi-fi screens exported from the "Ýeral Web" canvas (export **v0.6 round 2**, 20.10.2026 — see `../CHANGELOG.md`). English: the system boards (round 1) and the business login, setup, shell, calendar, bookings and phone layouts (round 2, spec `../business/README.md` §27). Still Turkmen until rounds 3–4: the client screens and the other business screens. Each `.dc.html` = one artboard. See `../CLAUDE.md` → "How to read a .dc.html screen".
 Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to 360); boards are fixed sheets.
 
 ## client/ — yeral.app
@@ -21,37 +21,45 @@ Frame = size on the canvas. Pages are fluid (designed at 1440, must work down to
 | `States.dc.html` | — | board · 1440×4320 | No results · location ask · location denied · slot taken · not bookable online · closed today · network error · loading skeleton · 404 · login required for favourite · 11 unverified business ("Bu sahypa entek açylmady") |
 | `Client-Map.dc.html` | — | board · 1440×2860 | Site map, flow, inventory, decisions log |
 
-## business/ — business.yeral.app (spec: `../business/README.md`)
+## business/ — business.yeral.app (spec: `../business/README.md`; round 2 = §27)
+
+Round 3 redraws in English: B-Clients, B-Client, B-Settings, B-Services, B-Team, B-Notifications, B-Reviews, B-Landing (until then they show `/tk/` routes, Reports/Help in the nav and the no-app level — §27 wins).
 
 | File | Route | Kind · frame | States / tweaks |
 |---|---|---|---|
-| `B-Login.dc.html` | `/tk/giris` | page · 1440×1160 | Phone → code (wrong, locked) → name → routing; invite (Kabul et / Ret et), invite expired, no workspace; tweak `step` (phone · phoneLandline · code · name · invite · inviteExpired · empty · routing); Play: 65 10 20 30 = Maýsa, 64 21 55 90 = Gülnar (invite), other numbers = new person |
-| `B-Mobile.dc.html` | — | board · 1696×3480 | Phone layouts 390: login, calendar day, requests, booking sheet, quick phone booking (3 frames), Aýna's workspace switcher, Köp sheet, legend sheet |
-| `B-Shell.dc.html` | — | board · 1600×6000 | Sidebar with workspace switcher (+ popover) and user block (+ menu), top bar, tablet rail, phone tab bar note, request toast, verification banner, "Bir adam — birnäçe iş ýeri" (Aýna's switcher), sidebars for Eýesi / Administrator / Hünärmen, default Rugsatlar matrix, Profilim drawers |
-| `B-Calendar.dc.html` | `/tk/calendar` | page · 1440×1360 | Tweaks `view` (dayAll · dayOne · weekAll · weekOne), `panel` (none · request · booking · new · decline · complaint · move), `role` (owner · admin · specialist), `answers` (both · each · desk), `legend`, `internal`, `panel=move-request` (Wagt üýtgetmek); current-slot start 11:15, walk-in switch; status icons, Başga ýerde (Aýna 19:00–20:00), phone-first new booking, phone tab bar |
-| `B-Bookings.dc.html` | `/tk/bookings` | page · 1440×1320 | Tabs Haýyşlar/Şu gün/Gelýän/Geçen/Ýatyrylan, filters, bulk bar, drawers, decline modal, legend; tweaks `tab`, `panel` (incl. `move-request`), `selected`, `role`, `answers` |
+| `B-Login.dc.html` | `/login` | page · 1440×1160 | **English (round 2).** SignInCodeStep (phone → code, visible Confirm, wrong / locked / lock over / resend / rate limit) → name → routing; invite accept / decline (inline confirm) / expired; **Continue setting up** (→ `/setup/hours`); no workspace (+ Try the business app); tweaks `step` (phone · phoneSending · phoneIncomplete · phoneLandline · phoneLimit · code · codeChecking · codeWrong · codeLocked · codeLockOver · codeResendReady · codeResent · codeLimit · name · invite · inviteDecline · inviteExpired · setup · empty · routing), `codeOnScreen` (first release: "Your code: 4821"); Play: 65 10 20 30 = Maýsa, 64 21 55 90 = Gülnar (invite), 62 48 15 30 = unfinished setup, other numbers = new person, 0000 = wrong code |
+| `B-Mobile.dc.html` | `/login`, `/w/glow-studio/calendar`, `/w/glow-studio/bookings` | board · 1696×5260 | **English (round 2).** 15 phone frames 390: 1 log in · 1b code on screen · 2 calendar (plain Busy elsewhere) · 2b slot sheet (New booking · Block time) · 2c Block time sheet + overlap error · 3 requests (timer) · 3b arrived while closed ("By 09:30 tomorrow") · 4 booking sheet + report sheet · 4b reported booking (Remove report) · 5a–c phone-first new booking · 6 workspace switcher · 7 More · 8 legend; notes panel |
+| `B-Shell.dc.html` | `/w/{slug}/…` | board · 1600×8300 | **English (round 2).** Address line, sidebar Calendar · Bookings · Clients · Reviews · Settings + user block, workspace switcher (+ demo with ExampleBadge), account menu + Contact Ýeral submenu, top bar, tablet rail, phone tab bar + More sheet, request toast, Addresses tile, **banners** In review / Not approved / Demo, "One person — several workspaces" (Aýna), sidebars per access level, permissions matrix, My profile drawers, **Someone leaves** (leave confirm → owner toast + notification → "Who takes Aýna's bookings?" with AffectedBookingsList) |
+| `B-Calendar.dc.html` | `/w/{slug}/calendar` | page · 1440×1360 | **English (round 2).** Tweaks `view` (dayAll · dayOne · weekAll · weekOne), `panel` (none · request · move-request · booking · new · slot-menu · block-time · block-error · decline · report-menu · report-noshow · reported · complaint · move), `legend`, `internal`, `role` (owner · admin · specialist), `answers` (both · each · desk), `clock` (day · evening = timer while closed), `banner` (none · inReview · notApproved · demo); plain Busy elsewhere (Aýna 19:00–20:00 + buffer, refusal toast), slot menu → Block time (Jeren "Closed · Training" weekly), report menu + Remove report, current-slot start 11:15, walk-in switch, phone-first new booking ("Notify the client") |
+| `B-Bookings.dc.html` | `/w/{slug}/bookings` | page · 1440×1320 | **English (round 2).** Tabs Requests / Today / Upcoming / Past / Cancelled, filters, bulk bar **Confirm · Decline · Export CSV**, drawers, row menu (Report…), decline modal, legend; tweaks `tab`, `panel` (none · request · move-request · booking · decline · report-menu · report-noshow · reported), `selected`, `role`, `answers`, `clock`, `banner` |
 | `B-Clients.dc.html` | `/tk/clients` | page · 1440×1120 | Filter chips, search, bulk bar, new-client modal (phone only required); tweaks `filter`, `modal` |
 | `B-Client.dc.html` | `/tk/clients/{id}` | page · 1440×1680 | Stats, notes (alert notes), upcoming, history, complaints, settings; tweaks `edit`, `composer` |
-| `B-Onboarding.dc.html` | `/tk/signup` → `/tk/setup/{step}` | page · 1440×1100 | 8 steps (step 1 = same phone + SMS as login); tweaks `step`, `homeBased`, `fromSwitcher` ("Täze biznes döret" for a logged-in person, starts at step 2) |
+| `B-Onboarding.dc.html` | `/setup/{step}` (phone · business · address · hours · services · team · rules · done) | page · 1440×1100 (team ≈ 1290) | **English (round 2).** 8 steps: SignInCodeStep + name · appointment categories · address · hours 00:00–24:00 with overnight days · services · team (Admin / Specialist + Uses the app, phone required) · booking rules (free-cancel list, "Client sees") · done (In review, link + QR, Send invites); Continue later on steps 1–7; tweaks `step`, `signIn` (14 sign-in states), `codeOnScreen`, `homeBased`, `overnight`, `fromSwitcher` ("Create a business", starts at step 2) |
 | `B-Settings.dc.html` | `/tk/settings/{profile,rules,hours,link}` | page · 1440×2720 | Rules pane: Haýyşlara kim jogap berýär?, Ýazylyş ýagdaýlary (system + internal, add modal); tweaks `pane`, `dirty`, `exceptionModal`, `exceptionOverlap`, `statusModal`; end pickers up to 24:00 |
 | `B-Services.dc.html` | `/tk/settings/services` | page · 1440×1440 | Catalog + service drawer; tweak `drawer` |
 | `B-Team.dc.html` | `/tk/settings/team`, `/permissions` | page · 1440×1400 | Team table with Dereje + invite states, staff drawer (access level, own-requests override), invite (3 steps, SMS link 7 days), disable modal, Rugsatlar matrix, ownership transfer; tweaks `tab` (team · permissions), `panel` (none · staff · access · invite · disable · owner · transfer) |
-| `B-Analytics.dc.html` | `/tk/analytics[/staff[/{id}]\|/services\|/clients]` | page · 1440×1160 | Overview, staff, one staff, services, clients, first weeks; tweaks `view`, `role` (owner · specialist — own earnings only) |
 | `B-Reviews.dc.html` | `/tk/reviews` | page · 1440×1980 | Summary + distribution, filters (Jogapsyz, stars, Hünärmen popover), sort, reply composer, edit/delete reply + undo, report modal → "Barlanýar"; tweaks `filter`, `composer`, `report` |
 | `B-Notifications.dc.html` | `/tk/settings/notifications` | page · 1440×2060 | Browser-permission banner, 10 event rows (Haçan / Kim alýar + channel chips Brauzerde · Programmada · SMS), sound switches, quiet hours, summary times, save bar; tweaks `permission`, `dirty` |
+| `B-Landing.dc.html` | `business.yeral.app` (logged out) | page · 1440×4020 | Header (Giriş → B-Login) + phone menu, hero with drawn calendar mock, Kimler üçin, features, 3 steps, "Mugt" band, FAQ (first: Ýeral Biznes mugtmy?), CTA band, footer |
+
+## later/ — not in the first release (kept unchanged, Turkmen; see `later/README.md`)
+
+| File | Was | Kind · frame | What |
+|---|---|---|---|
+| `B-Analytics.dc.html` | `/tk/analytics[/staff[/{id}]\|/services\|/clients]` | page · 1440×1160 | Overview, staff, one staff, services, clients, first weeks; tweaks `view`, `role` (owner · specialist — own earnings only) |
 | `B-Help.dc.html` | `/tk/help[/{article}]` | page · 1440×1260 | Search, categories (incl. Profil we iş ýerleri), articles, contact band, support-chat drawer; tweaks `view` (home · article), `chat` |
 | `B-Tables.dc.html` | `/tk/tables`, `/tk/settings/tables` | page · 1440×1180 | Bag kafe: timeline with status icons, cancelled chip + read-only drawer, floor plan, legend, drawers, table settings; tweaks `view` (timeline · floor · settings), `panel` (none · reservation · request · walkin · new8 = combined tables), `legend`; current slot 18:30 |
 | `B-Classes.dc.html` | `/tk/classes`, `/tk/settings/classes` | page · 1440×1240 | Aýdyň ýoga: week grid with status icons, session drawer, move / cancel / add modals, catalog, legend; tweaks `view` (week · catalog), `panel` (session · cancel · add · none), `legend` |
-| `B-Landing.dc.html` | `business.yeral.app` (logged out) | page · 1440×4020 | Header (Giriş → B-Login) + phone menu, hero with drawn calendar mock, Kimler üçin, features, 3 steps, "Mugt" band, FAQ (first: Ýeral Biznes mugtmy?), CTA band, footer |
+| `B-Billing.dc.html` | settings pane (removed) | page · 1440×2120 | Plan & billing (round 5) — everything is free on MVP |
 
-## system/ — design system (v0.5)
+## system/ — design system (v0.6 · English)
 | File | Kind · frame | What |
 |---|---|---|
-| `Main.dc.html` | board · 1440×3260 | Foundations: colour, type, layout, spacing (v0.3.1; v0.4 token additions are listed in `../COMPONENTS.md` Part 3) |
-| `DS-Components.dc.html` | board · 1440×3900 | v0.3 components with hover/focus/pressed/disabled — the base of today's `@yeral/ui` + Storybook |
-| `DS-Booking.dc.html` | board · 1440×2500 | Categories × booking types |
-| `DS-Patterns.dc.html` | board · 1440×34800 | **v0.5 · Product components** — new domain-free components and new variants of existing ones (→ `@yeral/ui`). 8 sections: status & labels, feedback, data display, charts, inputs, navigation & layout, overlays, new variants |
-| `DS-Business.dc.html` | board · 1440×69600 | **v0.5 · Business patterns** — domain components (→ FSD entities / features / widgets). 14 sections: calendar, requests & bookings, clients, team & services, settings & onboarding, reviews, notifications, analytics, access & accounts, landing (free), tables, classes, client site, phone |
+| `Main.dc.html` | board · 1440×5400 | Foundations (English): colour, type, **Voice** (copy rules, do/don't, prices, brand, English first), layout, spacing; status table with icons |
+| `DS-Components.dc.html` | board · 1440×5280 | v0.3 components with hover/focus/pressed/disabled (English) — the base of today's `@yeral/ui` + Storybook |
+| `DS-Booking.dc.html` | board · 1440×2960 | Categories × booking types (English); tables, classes and resources marked **Later** |
+| `DS-Patterns.dc.html` | board · 1440×38800 | **v0.6 · Product components** (English; + ExampleBadge, SignInCodeStep, LanguageSwitcher, Long-text check) — new domain-free components and new variants of existing ones (→ `@yeral/ui`). 8 sections: status & labels, feedback, data display, charts, inputs, navigation & layout, overlays, new variants |
+| `DS-Business.dc.html` | board · 1440×79200 | **v0.6 round 2 · Business patterns** (English; round 2 adds busy-elsewhere block, slot menu + Block time, timer closed state, report menu + Remove report, Uses the app switch, status banners, Contact Ýeral, Continue setting up, someone left + AffectedBookingsList) — domain components (→ FSD entities / features / widgets). 14 sections: calendar, requests & bookings, clients, team & services, settings & onboarding, reviews, notifications, analytics, access & accounts, landing (free), tables, classes, client site, phone |
 
 Every drawing has a caption `Name · package · Storybook: … · from: …`; the full map is `../COMPONENTS.md`. Board heights are estimates (drawn without rendering) — some white space at the bottom is expected.
 
