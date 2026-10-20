@@ -13,6 +13,11 @@
     `recordMoveRefused(by business, reason)` and no offers. Both write `booking.declined` and queue the SMS
     (`declined` is a new outcome SMS kind in the jobs: `declinedSmsText`, the reason label or the words).
 - Errors: someone who may see but not answer gets 403; a request they can't see 404; answered or expired 409.
+- Review fixes: `canAnswerRequest` (domain) counts a request as one's own only when every service is theirs (a
+  shared one goes to the desk, as `canOn` does for changes); `answerFacts`/`requestItems` feed both the switcher's
+  count and the list; the team sees hidden prices' amounts; `queueOutcomeSms` (notify) queues every outcome SMS;
+  new texts `sms.moveDeclined` (the reason on a business's move decline) and `sms.declinedCall` (a client who can't
+  book online, with no offers); offers only for appointments (`not_appointment`), busy loaded once.
 - sdk: `requests.list/confirm/decline`; every booking event refreshes `['requests', slug]`.
 - Follow-ups: the request drawer's alert notes come with the client card; the calendar's ghost block for moves; an
   undo of a decline must call `assertWaitingRoom`; the 5-minute warning and the answer-time jobs (step 4's timed jobs).

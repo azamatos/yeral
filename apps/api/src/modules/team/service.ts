@@ -10,7 +10,7 @@ import type { SiteConfig } from '@yeral/lib/site'
 import { and, asc, desc, eq, inArray, or } from 'drizzle-orm'
 import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookingRules, bookings, businesses, invites, services, staff, staffServices, users } from '../../db/schema'
+import { bookingRules, bookings, businesses, invites, services, staff, staffServices, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { AppEnv, User } from '../../http/env'
@@ -21,6 +21,7 @@ import { cityRefOf, loadCities } from '../catalog/cities'
 import { photoOf, text } from '../catalog/map'
 import { signsIn } from './members'
 import { awaitingAnswer } from '../bookings/repo'
+import { answerFacts, requestItems } from '../requests/service'
 
 export type StaffRow = typeof staff.$inferSelect
 export type BusinessRow = typeof businesses.$inferSelect
@@ -230,35 +231,19 @@ async function requestCounts(db: Queryable, teams: { businessId: string; actor: 
     .from(bookings)
     .where(and(inArray(bookings.businessId, ids), awaitingAnswer(now)))
   if (!waiting.length) return out
-  const items = await db
-    .select({ bookingId: bookingItems.bookingId, staffId: bookingItems.staffId, hasApp: staff.hasApp })
-    .from(bookingItems)
-    .innerJoin(staff, eq(staff.id, bookingItems.staffId))
-    .where(
-      inArray(
-        bookingItems.bookingId,
-        waiting.map((w) => w.id),
-      ),
-    )
+  const items = await requestItems(
+    db,
+    waiting.map((w) => w.id),
+  )
   const rules = await db
     .select({ businessId: bookingRules.businessId, answerers: bookingRules.requestAnswerers })
     .from(bookingRules)
     .where(inArray(bookingRules.businessId, ids))
   const answerersOf = new Map(rules.map((r) => [r.businessId, r.answerers]))
-  // each waiting request once, grouped by its business
-  const requests = new Map<string, { staffIds: string[]; forPhoneOnlyStaff: boolean }>()
-  for (const i of items) {
-    const r = requests.get(i.bookingId) ?? { staffIds: [], forPhoneOnlyStaff: false }
-    if (i.staffId) r.staffIds.push(i.staffId)
-    r.forPhoneOnlyStaff ||= !i.hasApp
-    requests.set(i.bookingId, r)
-  }
-  const byBusiness = new Map<string, { staffIds: string[]; forPhoneOnlyStaff: boolean }[]>()
+  // each waiting request once, grouped by its business, by the same facts the requests list reads
+  const byBusiness = new Map<string, ReturnType<typeof answerFacts>[]>()
   for (const w of waiting)
-    byBusiness.set(w.businessId, [
-      ...(byBusiness.get(w.businessId) ?? []),
-      requests.get(w.id) ?? { staffIds: [], forPhoneOnlyStaff: false },
-    ])
+    byBusiness.set(w.businessId, [...(byBusiness.get(w.businessId) ?? []), answerFacts(items.filter((i) => i.item.bookingId === w.id))])
   for (const { businessId, actor } of teams) {
     const answerers = answerersOf.get(businessId) ?? 'both'
     out.set(businessId, (byBusiness.get(businessId) ?? []).filter((r) => canAnswerRequest(actor, answerers, r)).length)

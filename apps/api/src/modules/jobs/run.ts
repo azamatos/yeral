@@ -12,7 +12,17 @@ import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
 import { bookings, businesses, clients, jobs, users, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { bookingSmsText, declinedSmsText, emit, expiredSmsText, moveRefusedSmsText, smsCityOf, type BookingSmsKind } from '../../notify'
+import {
+  bookingSmsText,
+  declinedSmsText,
+  emit,
+  expiredSmsText,
+  moveRefusedSmsText,
+  queueOutcomeSms,
+  smsCityOf,
+  type BookingSmsKind,
+  type OutcomeSmsKind,
+} from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
 import { pruneIdentityChecks } from '../auth/identity'
@@ -98,19 +108,7 @@ async function expireRequests(deps: Deps): Promise<number> {
         const recorded = !!original && (await recordMoveRefused(tx, original, row, { by: 'system', reason: null, text: null }, lapsedAt))
         const ahead = !!original && deps.now() < epochOf(original.date, original.start)
         const told = b.rescheduleOf ? (recorded && ahead ? original : undefined) : row
-        // the text and its link are made when it's sent: no stored row holds a working link
-        if (told?.clientPhone) {
-          const kind: OutcomeSmsKind = b.rescheduleOf ? 'moveRefused' : 'expired'
-          await tx
-            .insert(jobs)
-            .values({
-              kind: 'booking.sms',
-              runAt: now,
-              payload: { bookingId: told.id, kind, date: told.date, start: told.start },
-              dedupeKey: `${kind}:${row.id}`,
-            })
-            .onConflictDoNothing({ target: jobs.dedupeKey })
-        }
+        if (told?.clientPhone) await queueOutcomeSms(tx, b.rescheduleOf ? 'moveRefused' : 'expired', told, row.id, now)
       }),
     )
   }
@@ -161,9 +159,6 @@ async function completeVisits(deps: Deps): Promise<number> {
   return due.length
 }
 
-/** The SMS about an outcome the client didn't choose: they always go (book Q-286, Q-289). */
-type OutcomeSmsKind = 'expired' | 'moveRefused' | 'declined'
-
 /**
  * Send with a link of its own. A failed send keeps its link: the gateway may have delivered it anyway, and an unsent
  * token is known to nobody (only its hash is stored); it's pruned when it expires.
@@ -202,8 +197,15 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
     kind === 'expired'
       ? expiredSmsText(lang, { ...sms, link }, byPhone ? [] : b.expiredAlternatives, { byPhone })
       : kind === 'declined'
-        ? declinedSmsText(lang, { ...sms, link }, b.declineReason!, b.declineText)
-        : moveRefusedSmsText(lang, { ...sms, link }),
+        ? // offered times can be taken whatever the client's online status (A7); with none, they call
+          declinedSmsText(lang, { ...sms, link }, b.declineReason!, b.declineText, { byPhone: byPhone && !b.declineAlternatives.length })
+        : moveRefusedSmsText(
+            lang,
+            { ...sms, link },
+            b.moveRefused?.by === 'business' && b.moveRefused.reason
+              ? { reason: b.moveRefused.reason, text: b.moveRefused.text }
+              : undefined,
+          ),
   )
 }
 

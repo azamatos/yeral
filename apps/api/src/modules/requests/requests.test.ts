@@ -5,7 +5,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, rateLimits, services, staff } from '../../db/schema'
+import { bookingRules, businesses, rateLimits, services, staff } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 
@@ -156,7 +156,16 @@ describe('answering requests (book B-19, B-20, B-21)', () => {
     expect((await decline({ reason: 'slot_busy', offers: four })).status).toBe(400)
     // still waiting after all that
     expect((await listOf(maysa)).map((r) => r.code)).toContain(code)
-    expect((await decline({ reason: 'other', text: 'We close early that day' })).status).toBe(204)
+    // a paused business declines without offers: the client is told the reason and asked to call
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    await db.update(bookingRules).set({ onlineEnabled: false }).where(eq(bookingRules.businessId, glow!.id))
+    try {
+      expect((await decline({ reason: 'other', text: 'We close early that day' })).status).toBe(204)
+      await runDueJobs(t.deps)
+      expect(t.sms.sent.filter((s) => s.to === '+99365800004').at(-1)?.text).toMatch(/We close early that day\. Call them to book/)
+    } finally {
+      await db.update(bookingRules).set({ onlineEnabled: true }).where(eq(bookingRules.businessId, glow!.id))
+    }
   })
 
   it('who answers: with "desk" a specialist only looks; the request expired is refused', async () => {
@@ -196,7 +205,9 @@ describe('answering requests (book B-19, B-20, B-21)', () => {
     const kept = (await client.req(`/v1/me/bookings/${code}`)).json
     expect(kept).toMatchObject({ status: 'confirmed', start, moveRefused: { by: 'business', reason: 'no_staff' } })
     await runDueJobs(t.deps)
-    expect(t.sms.sent.filter((s) => s.to === '+99365800006').at(-1)?.text).toMatch(/didn't accept the new time/)
+    expect(t.sms.sent.filter((s) => s.to === '+99365800006').at(-1)?.text).toMatch(
+      /didn't accept the new time: No specialist available\. Your booking stays/,
+    )
 
     expect((await client.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: to } })).status).toBeLessThan(300)
     const again = (await listOf(maysa)).find((r) => r.kind === 'move' && r.from?.start === start)!

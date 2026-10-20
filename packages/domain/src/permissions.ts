@@ -115,7 +115,7 @@ export const canManageTeam = (actor: Actor): boolean => scopeOf(actor, 'team') =
  * May the actor confirm or decline this request (book chapter 3, "Who answers booking requests")? The owner always
  * can. Requests for a specialist without the app go to the owner and administrators. Otherwise the business's setting
  * decides: `desk` the owner and administrators, `each` the request's own specialist, `both` whoever is first; "one's
- * own" needs the override left on.
+ * own" needs the override left on, and every service of the request to be theirs.
  */
 export function canAnswerRequest(
   actor: Actor,
@@ -125,7 +125,8 @@ export function canAnswerRequest(
   if (actor.level === 'owner') return true
   if (request.forPhoneOnlyStaff) return actor.level === 'admin'
   const desk = actor.level === 'admin'
-  const own = actor.canAnswerOwn && request.staffIds.includes(actor.staffId)
+  // one's own only: a request shared with another specialist is answered by the desk, as its booking is changed (canOn)
+  const own = actor.canAnswerOwn && request.staffIds.length > 0 && request.staffIds.every((id) => id === actor.staffId)
   switch (answerers) {
     case 'desk':
       return desk

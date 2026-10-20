@@ -7,16 +7,15 @@ import type { declineInputSchema, requestSchema } from '@yeral/contract/requests
 import { findAppointmentSlot } from '@yeral/domain/availability'
 import { canAnswerRequest as requestOpen, offerPast } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
-import { canAnswerRequest, scopeOf, type Actor } from '@yeral/domain/permissions'
+import { canAnswerRequest, canOn, type Actor } from '@yeral/domain/permissions'
 import type { RequestAnswerers } from '@yeral/domain/rules'
-import { epochOf } from '@yeral/domain/time'
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookingRules, bookings, jobs, staff, type TimeSlot } from '../../db/schema'
+import { bookingItems, bookingRules, bookings, staff, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
-import { emit } from '../../notify'
+import { emit, queueOutcomeSms } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { text } from '../catalog/map'
 import { confirmBooking } from '../bookings/confirm'
@@ -39,7 +38,7 @@ function answeredBy(answerers: RequestAnswerers, forPhoneOnlyStaff: boolean): Re
   return answerers === 'each' ? 'specialist' : 'anyone'
 }
 
-async function answerersOf(db: Queryable, businessId: string): Promise<RequestAnswerers> {
+export async function answerersOf(db: Queryable, businessId: string): Promise<RequestAnswerers> {
   const [rules] = await db
     .select({ answerers: bookingRules.requestAnswerers })
     .from(bookingRules)
@@ -47,14 +46,27 @@ async function answerersOf(db: Queryable, businessId: string): Promise<RequestAn
   return rules?.answerers ?? 'both'
 }
 
-/** The request's specialists, and whether one of them works without the app. */
-async function whoFor(db: Queryable, bookingIds: string[]) {
+/** The requests' items with whether each specialist has the app, in the booking's order. */
+export async function requestItems(db: Queryable, bookingIds: string[]) {
+  if (!bookingIds.length) return []
   return db
     .select({ item: bookingItems, hasApp: staff.hasApp })
     .from(bookingItems)
     .leftJoin(staff, eq(staff.id, bookingItems.staffId))
     .where(inArray(bookingItems.bookingId, bookingIds))
     .orderBy(asc(bookingItems.sort), asc(bookingItems.start))
+}
+type RequestItem = Awaited<ReturnType<typeof requestItems>>[number]
+
+/**
+ * What decides who answers one request: its specialists, and whether one of them works without the app (the desk
+ * answers then). The switcher's count and the requests list both read it.
+ */
+export function answerFacts(items: readonly RequestItem[]): { staffIds: string[]; forPhoneOnlyStaff: boolean } {
+  return {
+    staffIds: items.flatMap((i) => (i.item.staffId ? [i.item.staffId] : [])),
+    forPhoneOnlyStaff: items.some((i) => !!i.item.staffId && i.hasApp === false),
+  }
 }
 
 /** The waiting requests the actor may see (a specialist, the ones they're on), the most urgent first. */
@@ -65,11 +77,13 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
     .where(and(eq(bookings.businessId, business.id), awaitingAnswer(now)))
     .orderBy(asc(bookings.holdUntil), asc(bookings.code))
   if (!rows.length) return []
-  const ids = rows.map((r) => r.id)
   const originalIds = rows.flatMap((r) => (r.rescheduleOf ? [r.rescheduleOf] : []))
   const clientIds = [...new Set(rows.flatMap((r) => (r.clientId ? [r.clientId] : [])))]
   const [items, answerers, originals, history] = await Promise.all([
-    whoFor(db, ids),
+    requestItems(
+      db,
+      rows.map((r) => r.id),
+    ),
     answerersOf(db, business.id),
     originalIds.length ? db.select().from(bookings).where(inArray(bookings.id, originalIds)) : [],
     clientIds.length
@@ -84,12 +98,10 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
           .groupBy(bookings.clientId)
       : [],
   ])
-  const own = scopeOf(actor, 'calendar') === 'own'
   return rows.flatMap((r) => {
     const mine = items.filter((i) => i.item.bookingId === r.id)
-    const staffIds = mine.flatMap((i) => (i.item.staffId ? [i.item.staffId] : []))
-    if (own && !staffIds.includes(actor.staffId)) return []
-    const forPhoneOnlyStaff = mine.some((i) => i.item.staffId && i.hasApp === false)
+    const facts = answerFacts(mine)
+    if (!canOn(actor, 'calendar', facts.staffIds)) return []
     const from = originals.find((o) => o.id === r.rescheduleOf)
     const seen = history.find((h) => h.clientId === r.clientId)
     return [
@@ -110,12 +122,13 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
           start: item.start,
           end: item.end,
         })),
-        price: r.priceType ? { type: r.priceType, amount: r.priceType === 'hidden' ? 0 : (r.priceAmount ?? 0) } : null,
+        // the team sees what it charges, a hidden price included
+        price: r.priceType ? { type: r.priceType, amount: r.priceAmount ?? 0 } : null,
         note: r.clientNote,
         from: from ? { date: from.date, start: from.start, end: from.end } : null,
         client: { name: r.clientName ?? '', phone: r.clientPhone, visits: seen?.visits ?? 0, noShows: seen?.noShows ?? 0 },
-        canAnswer: canAnswerRequest(actor, answerers, { staffIds, forPhoneOnlyStaff }),
-        answeredBy: answeredBy(answerers, forPhoneOnlyStaff),
+        canAnswer: canAnswerRequest(actor, answerers, facts),
+        answeredBy: answeredBy(answerers, facts.forPhoneOnlyStaff),
       },
     ]
   })
@@ -128,12 +141,10 @@ async function answerable(db: Queryable, business: Business, actor: Actor, code:
     .from(bookings)
     .where(and(eq(bookings.businessId, business.id), eq(bookings.code, code)))
   if (!b) throw new ApiError('not_found')
-  const mine = await whoFor(db, [b.id])
-  const staffIds = mine.flatMap((i) => (i.item.staffId ? [i.item.staffId] : []))
-  if (scopeOf(actor, 'calendar') === 'own' && !staffIds.includes(actor.staffId)) throw new ApiError('not_found')
+  const facts = answerFacts(await requestItems(db, [b.id]))
+  if (!canOn(actor, 'calendar', facts.staffIds)) throw new ApiError('not_found')
   guard(requestOpen(stateOf(b), now))
-  const forPhoneOnlyStaff = mine.some((i) => i.item.staffId && i.hasApp === false)
-  if (!canAnswerRequest(actor, await answerersOf(db, business.id), { staffIds, forPhoneOnlyStaff })) throw new ApiError('forbidden')
+  if (!canAnswerRequest(actor, await answerersOf(db, business.id), facts)) throw new ApiError('forbidden')
   return b
 }
 
@@ -150,29 +161,32 @@ export async function confirmRequest(deps: Deps, business: Business, actor: Acto
 }
 
 /**
- * The offered times (B-20): each ahead by the lead time (Q-264), at most once, and free now for its specialist with the
- * request's services, the request's own hold counted as free; each keeps its specialist (Q-159).
+ * The offered times (B-20), for appointments: each ahead by the lead time (Q-264), at most once, and free now for its
+ * specialist with the request's services, the request's own hold counted as free; each keeps its specialist (Q-159).
  */
 async function checkOffers(deps: Deps, b: BookingRow, offers: NonNullable<DeclineInput['offers']>, now: number): Promise<TimeSlot[]> {
   if (!offers.length) return []
+  // tables and classes can't be re-booked online yet (after the MVP): nothing to offer
+  if (b.type !== 'appointment') throw new ApiError('validation_error', { issues: [{ path: ['offers'], code: 'not_appointment' }] })
   const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
   if (!lb) throw new ApiError('not_found')
-  const booked = await bookedServices(deps.db, b.id)
+  const dates = offers.map((o) => o.date).sort()
+  const [booked, busy] = await Promise.all([bookedServices(deps.db, b.id), loadBusy(deps.db, [b.businessId], dates[0]!, dates.at(-1)!)])
+  const ctx = appointmentContext(lb, busy, now)
   const issues: { path: (string | number)[]; code: string }[] = []
   const out: TimeSlot[] = []
   for (const [i, o] of offers.entries()) {
-    if (offers.findIndex((x) => x.date === o.date && x.start === o.start && x.staffId === o.staffId) !== i) {
-      issues.push({ path: ['offers', i], code: 'duplicate' })
-      continue
-    }
-    if (offerPast(o, lb.rules.leadMinutes, now)) {
-      issues.push({ path: ['offers', i], code: 'past' })
-      continue
-    }
-    const ctx = appointmentContext(lb, await loadBusy(deps.db, [b.businessId], o.date, o.date), now)
     const slot = findAppointmentSlot(ctx, rebookQuery(booked, { date: o.date, staffId: o.staffId }, [b.id]), o.start)
-    if (!slot) issues.push({ path: ['offers', i], code: 'not_free' })
-    else out.push({ date: o.date, start: o.start, end: slot.end, staffId: o.staffId })
+    const problem =
+      offers.findIndex((x) => x.date === o.date && x.start === o.start && x.staffId === o.staffId) !== i
+        ? 'duplicate'
+        : offerPast(o, lb.rules.leadMinutes, now)
+          ? 'past'
+          : slot
+            ? null
+            : 'not_free'
+    if (problem) issues.push({ path: ['offers', i], code: problem })
+    else out.push({ date: o.date, start: o.start, end: slot!.end, staffId: o.staffId })
   }
   if (issues.length) throw new ApiError('validation_error', { issues })
   return out
@@ -181,7 +195,7 @@ async function checkOffers(deps: Deps, b: BookingRow, offers: NonNullable<Declin
 /**
  * "Ret et": a new request is cancelled by the business with the reason and any offered times, which the client takes
  * in one tap (B-20); a move is refused with the reason only and its booking keeps its time (B-21). The client hears it
- * by SMS either way (book Q-289).
+ * by SMS, with the reason, either way (book Q-289).
  */
 export async function declineRequest(deps: Deps, business: Business, actor: Actor, code: string, input: DeclineInput): Promise<void> {
   const now = deps.now()
@@ -208,20 +222,12 @@ export async function declineRequest(deps: Deps, business: Business, actor: Acto
       bookingCode: declined.code,
       userId: declined.userId,
     })
-    const recorded = !!original && (await recordMoveRefused(tx, original, declined, { by: 'business', ...reason }, at.getTime()))
-    const told = original ? (recorded && at.getTime() < epochOf(original.date, original.start) ? original : undefined) : declined
-    // the text and its link are made when it's sent: no stored row holds a working link
-    if (told?.clientPhone) {
-      const kind = original ? 'moveRefused' : 'declined'
-      await tx
-        .insert(jobs)
-        .values({
-          kind: 'booking.sms',
-          runAt: at,
-          payload: { bookingId: told.id, kind, date: told.date, start: told.start },
-          dedupeKey: `${kind}:${declined.id}`,
-        })
-        .onConflictDoNothing({ target: jobs.dedupeKey })
-    }
+    // a move refused before its booking's visit began is recorded and told; after it, neither (recordMoveRefused)
+    const told = original
+      ? (await recordMoveRefused(tx, original, declined, { by: 'business', ...reason }, at.getTime()))
+        ? original
+        : undefined
+      : declined
+    if (told?.clientPhone) await queueOutcomeSms(tx, original ? 'moveRefused' : 'declined', told, declined.id, at)
   })
 }

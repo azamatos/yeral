@@ -84,6 +84,13 @@ describe('who answers requests (book chapter 3)', () => {
     expect(canAnswerRequest(quietAyna, 'both', aynas)).toBe(false)
   })
 
+  it('a request shared with another specialist is answered by the desk, as its booking would be changed', () => {
+    const shared = { staffIds: ['ayna', 'maral'], forPhoneOnlyStaff: false }
+    for (const setting of ['each', 'both'] as const) expect(canAnswerRequest(ayna, setting, shared)).toBe(false)
+    expect(canAnswerRequest(admin, 'both', shared)).toBe(true)
+    expect(canAnswerRequest(owner, 'each', shared)).toBe(true)
+  })
+
   it('requests for a specialist without the app go to the owner and administrators', () => {
     for (const setting of ['desk', 'each', 'both'] as const) {
       expect(canAnswerRequest(admin, setting, phoneOnly)).toBe(true)
