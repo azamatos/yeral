@@ -333,6 +333,9 @@ describe('checking a plan from the workspace', () => {
     const away = ctx({ staff: team, busy: [{ ...busy('a', THU, 900, 975, 'there'), buffer: 15, elsewhere: true }] })
     expect(planRefusal(away, THU, shiftPlan(plan, 930))).toEqual({ problem: 'elsewhere', staffId: 'a', busy: { start: 900, end: 960 } })
     expect(planRefusal(away, THU, shiftPlan(plan, 600))).toBeNull()
+    // blocked time (B-18) says so, with its hours
+    const closed = ctx({ staff: team, busy: [{ ...busy('a', THU, 960, 1020, 'block:1'), blocked: true }] })
+    expect(planRefusal(closed, THU, shiftPlan(plan, 990))).toEqual({ problem: 'blocked', staffId: 'a', busy: { start: 960, end: 1020 } })
   })
 
   it('moving every service to one specialist keeps one buffer, after the last (B-26)', () => {

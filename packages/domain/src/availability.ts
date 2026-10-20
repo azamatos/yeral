@@ -48,6 +48,8 @@ export interface BusyInterval extends Interval {
    * `bookingId` is the other workspace's, for this engine only, never sent out.
    */
   elsewhere?: true
+  /** Blocked time (book B-18): part of the day closed for this person, "Ýapyk · Okuw"; its `bookingId` is `block:{id}`. */
+  blocked?: true
 }
 
 export interface AppointmentContext {
@@ -385,7 +387,7 @@ export function nextFreeSlot(
  * off, the visit runs outside their hours (a break included), it falls on their time taken elsewhere (book Q-272) or
  * on another booking's visit, or only a buffer doesn't fit, its own or the one before ("… and the break is needed").
  */
-export const PLAN_PROBLEMS = ['staff_cannot_do', 'staff_off', 'outside_hours', 'elsewhere', 'overlap', 'buffer'] as const
+export const PLAN_PROBLEMS = ['staff_cannot_do', 'staff_off', 'outside_hours', 'blocked', 'elsewhere', 'overlap', 'buffer'] as const
 export type PlanProblem = (typeof PLAN_PROBLEMS)[number]
 
 export interface PlanRefusal {
@@ -415,6 +417,8 @@ export function planRefusal(
   for (const { staffId, span } of occupied(items, false)) {
     const view = views.get(staffId)!
     if (!view.working.some((w) => contains(w, span))) return { problem: 'outside_hours', staffId }
+    const closed = view.busy.find((b) => b.blocked && overlaps(visitOf(b), span))
+    if (closed) return { problem: 'blocked', staffId, busy: visitOf(closed) }
     const away = view.busy.find((b) => b.elsewhere && overlaps(visitOf(b), span))
     if (away) return { problem: 'elsewhere', staffId, busy: visitOf(away) }
     if (view.busy.some((b) => overlaps(visitOf(b), span))) return { problem: 'overlap', staffId }
