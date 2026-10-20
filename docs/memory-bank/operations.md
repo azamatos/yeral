@@ -116,6 +116,10 @@ stacks → restore the database and photos → switch the DNS records → point 
 | `ci.yml` → `deploy-storybook` | push to `main` after checks | builds Storybook and deploys it to storybook.yeral.app (no release needed: internal docs) |
 | Renovate | weekly | grouped dependency PRs; dev-dependency patches merge themselves when CI is green |
 
+Turborepo's cache: `lint`, `typecheck` and `test` depend on `^transit`, an empty task, so a change in a package's
+dependencies (say `@yeral/ui` for the Storybook tests, `@yeral/contract` for the api) changes their hash and they run
+again instead of replaying a cached result. A new task that reads its dependencies' files needs the same.
+
 ## Versioning and releases
 
 - **Trunk-based.** `main` is always deployable. Short branches `feat/…`, `fix/…`, `chore/…` → pull request → squash merge.

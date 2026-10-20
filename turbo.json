@@ -9,16 +9,24 @@
       "env": ["NEXT_PUBLIC_*", "VITE_*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "storybook-static/**"]
     },
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
     },
-    "lint": {},
+    "lint": {
+      "dependsOn": ["^transit"]
+    },
     "lint:fsd": {},
-    "typecheck": {},
+    "typecheck": {
+      "dependsOn": ["^transit"]
+    },
     "test": {
       "outputs": ["coverage/**"],
-      "passThroughEnv": ["TEST_DATABASE_URL"]
+      "passThroughEnv": ["TEST_DATABASE_URL"],
+      "dependsOn": ["^transit"]
     },
     "deploy": {
       "cache": false
