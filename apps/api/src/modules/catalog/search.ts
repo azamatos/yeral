@@ -77,10 +77,12 @@ export async function search(deps: Deps, q: SearchQuery) {
     .filter((x) => x.hasFree)
     .map((x) => x.card)
     .filter((c) => !q.openNow || c.open.open)
-    .filter((c) => q.maxPrice === undefined || !c.priceFrom || c.priceFrom.amount <= q.maxPrice)
+    // a price limit keeps the places with a known price inside it (no average bill for the rest, book Q-103)
+    .filter((c) => q.maxPrice === undefined || (c.priceFrom !== null && c.priceFrom.amount <= q.maxPrice))
 
+  // the address breaks ties, so a page always holds the same places
   const byPopularity = (a: (typeof cards)[number], b: (typeof cards)[number]) =>
-    popularity(b.rating ?? 0, b.reviewsCount) - popularity(a.rating ?? 0, a.reviewsCount)
+    popularity(b.rating ?? 0, b.reviewsCount) - popularity(a.rating ?? 0, a.reviewsCount) || a.slug.localeCompare(b.slug)
   cards.sort((a, b) => {
     if (q.sort === 'rating') return (b.rating ?? 0) - (a.rating ?? 0) || b.reviewsCount - a.reviewsCount
     if (q.sort === 'price') {

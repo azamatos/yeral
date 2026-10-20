@@ -149,6 +149,10 @@ describe('catalogue', () => {
     const unpriced = byPrice.slice(priced.length)
     expect(unpriced.length).toBeGreaterThan(1)
     expect(unpriced.map((c) => c.slug)).toEqual(popular.filter((c) => !c.priceFrom).map((c) => c.slug))
+    // a price limit keeps only places with a known price inside it
+    const cheap = (await b.req(`/v1/search?maxPrice=${priced[0]!.priceFrom!.amount}&limit=50`)).json.items as Card[]
+    expect(cheap.length).toBeGreaterThan(0)
+    for (const c of cheap) expect(c.priceFrom!.amount).toBeLessThanOrEqual(priced[0]!.priceFrom!.amount)
   })
 
   it('reviews, newest first, with the business reply', async () => {
