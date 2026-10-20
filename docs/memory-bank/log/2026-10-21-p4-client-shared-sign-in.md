@@ -12,6 +12,6 @@
   `@yeral/features/auth-by-phone` = `model/sign-in.ts` (the reducer and its view), `model/use-sign-in.ts` (the
   requests and the clock; the screen's language only when the market offers it, since the api refuses others; use-intl
   is a peer, so the hook reads the app's provider), `lib/phone.ts` (`PHONE_RULES`,
-  `phoneProblem()`, `mobileStarts()`), moved with their tests from `apps/business/src/pages/login`. The steps' UI stays
+  `phoneProblem()`; `mobileStarts()` went with PR 111, the market lists its mobile prefixes), moved with their tests from `apps/business/src/pages/login`. The steps' UI stays
   in each app: the business app draws them in `AuthPage`, the client site in its login modal.
 - No behaviour changes; no changeset (nothing a user sees).
