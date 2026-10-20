@@ -1,0 +1,46 @@
+{
+  "name": "@yeral/business",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Ýeral Business: the business workspace at business.<domain> (Vite SPA + TanStack Router, installable later)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port $(( ${PORT_BASE:-3000} + 2 )) --strictPort",
+    "build": "vite build && node ../../scripts/version-stamp.mjs business dist",
+    "preview": "vite preview --port $(( ${PORT_BASE:-3000} + 2 )) --strictPort",
+    "lint": "eslint .",
+    "lint:fsd": "steiger ./src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@yeral/i18n": "workspace:*",
+    "@yeral/lib": "workspace:*",
+    "@yeral/sdk": "workspace:*",
+    "@yeral/ui": "workspace:*",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "use-intl": "catalog:"
+  },
+  "devDependencies": {
+    "@babel/core": "catalog:",
+    "@rolldown/plugin-babel": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@tanstack/router-plugin": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@yeral/config": "workspace:*",
+    "babel-plugin-react-compiler": "catalog:",
+    "eslint": "catalog:",
+    "steiger": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}

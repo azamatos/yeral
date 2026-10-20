@@ -82,8 +82,12 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
 
 `pnpm docker:up` builds `infra/docker/api.Dockerfile` (turbo prune with the lockfile's turbo → pnpm install → esbuild
 bundle → `node:24-alpine` with only `dist/`), starts Postgres 18, runs `migrate` (`node dist/cli.js setup`: migrations,
-demo seed while empty), the api (jobs tick inside) and Caddy (`infra/docker/Caddyfile`, plain HTTP, one site per host):
-http://api.yeral.localhost/docs. CI's «Docker stack» job does the same, asks for health through Caddy, and validates
+demo seed while empty), the api (jobs tick inside), the business app and Caddy (`infra/docker/Caddyfile`, plain HTTP,
+one site per host): http://api.yeral.localhost/docs, http://business.yeral.localhost. A single-page app's image
+(`infra/docker/business.Dockerfile`) builds it with its hosts baked in (`YERAL_ENV`, `YERAL_DOMAIN` build arguments →
+`VITE_*`) and serves `dist/` with a small Caddy of its own (`static.Caddyfile`: every app address answers
+`index.html`, hashed files cached for a year, `noindex`); the front door adds the security headers. The server's stack
+takes the apps when they have something to serve (P2 step 7). CI's «Docker stack» job does the same, asks for health through Caddy, and validates
 the server's Caddy config (`infra/server/edge/Caddyfile` with `yeral.caddy`).
 `pnpm docker:down` stops it (`-v` drops the data). The demo keeps the day of the first `docker:up`; start it over with
 `docker compose -f infra/docker/compose.yml run --rm migrate node dist/cli.js seed`.
