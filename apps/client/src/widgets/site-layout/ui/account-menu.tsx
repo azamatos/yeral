@@ -1,8 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import { formatPhone } from '@yeral/domain/phone'
-import { keys } from '@yeral/sdk'
 import { useSdk } from '@yeral/sdk/react'
 import { Avatar } from '@yeral/ui/avatar'
 import { cn } from '@yeral/ui/cn'
@@ -24,7 +23,6 @@ export function AccountMenu({ me }: { me: Me }) {
   const t = useTranslations('account')
   const sdk = useSdk()
   const router = useRouter()
-  const queryClient = useQueryClient()
   const errorText = useErrorText()
   const [menuOpen, setMenuOpen] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -37,8 +35,6 @@ export function AccountMenu({ me }: { me: Me }) {
       onSuccess: () => {
         setMenuOpen(false)
         setSheetOpen(false)
-        // nothing of the last person's stays in the cache but `me`, now null (a phone may be shared)
-        queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== keys.me()[0] })
         // the header says «Log in» again, and a page that needs someone signed in sends the visitor on
         void router.invalidate()
       },

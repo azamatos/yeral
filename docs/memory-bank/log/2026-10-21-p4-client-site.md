@@ -39,8 +39,8 @@
   null at once), once (no retries) and for at most 1.5 s, so a slow api never holds a page; in the browser it asks in
   the background. A cookie the api renews on that call goes on to the browser with the page (else the 30-day renewal
   would be lost). Pages answer `Cache-Control: private, no-cache` and `Vary: Cookie` (they may carry the signed-in
-  person); public caching comes with the public pages. `/` keeps the query string on its redirect. Log out drops every
-  cached query but `me`. The Node server serves only `/assets/*` and `/version.json` from disk; everything else renders.
+  person); public caching comes with the public pages. `/` keeps the query string on its redirect. Log out leaves the
+  cache to the sdk, which forgets the person since #107. The Node server serves only `/assets/*` and `/version.json` from disk; everything else renders.
 - Docker: `infra/docker/client.Dockerfile` (turbo prune → `vite build` with `ssr.noExternal` → esbuild bundles
   `server.mjs` into `dist/node.mjs` → `node:24-alpine` with `dist/` only, 170 MB); `compose.yml` `client` service
   (`API_INTERNAL_URL=http://api:3004`), `Caddyfile` `http://yeral.localhost` (the `/l/…` token filtered from the
