@@ -36,6 +36,7 @@ export type LifecycleError =
   | 'already_reported'
   | 'noshow_window_passed'
   | 'restore_expired'
+  | 'undo_expired'
   | 'review_not_allowed'
   | 'review_window_passed'
 
@@ -306,6 +307,21 @@ export function clientActions(
 }
 
 // ── Business ──
+
+/**
+ * "Yzyna al" on a booking the team just added (B-24): its toast shows for 6 seconds, the undo is taken a little longer
+ * (a slow network), and the client's SMS waits until then, so an undo never leaves a wrong SMS behind.
+ */
+export const NEW_BOOKING_UNDO_MS = 10_000
+
+/**
+ * Undo a booking the team just added by phone or for a walk-in: it goes as if never made, while the undo time runs and
+ * it's still confirmed (`undo_expired` after).
+ */
+export function canUndoNewBooking(b: Pick<BookingState, 'status'> & { source: BookingSource; createdAt: number }, now = Date.now()): Guard {
+  if (b.status !== 'confirmed' || (b.source !== 'phone' && b.source !== 'walkin')) return 'invalid_status'
+  return now < b.createdAt + NEW_BOOKING_UNDO_MS ? null : 'undo_expired'
+}
 
 /** Confirm or decline a request. */
 export function canAnswerRequest(b: BookingState, now = Date.now()): Guard {

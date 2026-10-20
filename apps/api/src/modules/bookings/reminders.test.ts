@@ -36,7 +36,7 @@ describe('reminders and the night (book Q-285)', () => {
         clientName: 'Early bird',
       })
       .returning()
-    await queueBookingSms(db, t.deps, row!, { confirmed: false })
+    await queueBookingSms(db, t.deps, row!, { first: null })
     const queued = await db.select({ payload: jobs.payload, runAt: jobs.runAt }).from(jobs).where(eq(jobs.kind, 'booking.sms'))
     const mine = queued.filter((j) => (j.payload as { bookingId: string }).bookingId === row!.id)
     expect(mine.map((j) => (j.payload as { kind: string }).kind).sort()).toEqual(['reminderEvening'])
@@ -72,7 +72,7 @@ describe('reminders and the night (book Q-285)', () => {
         clientName: 'Night owl',
       })
       .returning()
-    await queueBookingSms(db, t.deps, row!, { confirmed: false })
+    await queueBookingSms(db, t.deps, row!, { first: null })
 
     // the day reminder (23:00 Thursday) moved to 21:30 Thursday: its switch is off, nothing goes
     t.clock.now = epochOf('2026-10-15', 1291)
@@ -105,7 +105,7 @@ describe('reminders and the night (book Q-285)', () => {
         })
         .returning()
       bookingId = row!.id
-      await queueBookingSms(db, t.deps, row!, { confirmed: false })
+      await queueBookingSms(db, t.deps, row!, { first: null })
       t.clock.now = epochOf('2026-10-15', 901)
       await runDueJobs(t.deps)
       expect(t.sms.sent.find((s) => s.to === '+99365555003')?.text).toBe(

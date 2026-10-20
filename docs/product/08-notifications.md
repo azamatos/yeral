@@ -5,7 +5,7 @@ This chapter says who hears about what, how and when. Clients hear by SMS and on
 Where things stand today:
 
 - **Design:** client messages are decided in client spec §6 and ROUND6. Business notifications are decided in business spec §16, §22 and §25, and drawn on *B-Notifications* and *B-Shell*.
-- **Code:** the api writes the client SMS texts. It sends login codes straight away and queues confirmations, expiries and reminders. Texts for declines and business cancels exist, but nothing sends them yet, because the business side isn't built (M5). Business notifications aren't built at all. No review ask (Q-259; the api's ask and its switch are gone).
+- **Code:** the api writes the client SMS texts. It sends login codes straight away and queues confirmations, phone bookings, declines, expiries and reminders. The business-cancel text exists, but nothing sends it yet (P2 step 4). Business notifications aren't built at all. No review ask (Q-259; the api's ask and its switch are gone).
 - **No SMS reaches a phone yet.** Every environment, production included, writes SMS to a log (see "Not decided").
 
 ## Channels
@@ -43,7 +43,7 @@ The *B-Notifications* screen still draws the *Programmada* chip. The spec wins o
 | Business moves the booking | SMS if staff leave *Müşderä SMS iberilsin* on | at once | Claude writes it (Q-288) | Yes, with the same switch | business spec §4; B-Calendar |
 | Client's move accepted | SMS + on screen *Wagt üýtgedildi* | at once | Claude writes it (Q-288); the code reuses the confirmed text | Yes, with the same switch | ROUND6 A3; B-Calendar |
 | Client's move declined or unanswered | SMS with the link + on screen | at once | *Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar.* | No: it always goes, like declines and expiries (Claude, following Q-286) | ROUND6 A3; Q-289, decided 18.10.2026 |
-| Booking entered by staff (phone call) | SMS if staff leave *Müşderä SMS bilen habar ber* on; off for walk-ins | at once | Claude writes it (Q-288) | the business decides per booking | business spec §4, §26 |
+| Booking entered by staff (phone call) | SMS if staff leave *Müşderä SMS bilen habar ber* on; off for walk-ins | once *Yzyna al* can't take the booking back (10 s) | *{brand}: you're booked: {business}, {weekday}, {date}, {time}, {address}. Change: {link}* (Claude, Q-288) | the business decides per booking; the client's *Tassyklama we üýtgeşmeler* too | business spec §4, §26 |
 | Specialist changed because staff were removed | SMS | at once | Claude writes it (Q-288) | not defined | business spec §8; B-Team |
 | Class cancelled or moved by the studio (after the MVP) | Notified, with the reason and other sessions | at once | Claude writes it (Q-288) | not defined | business spec §21 |
 | Reminder 1 day before | SMS | 24 h before; between 22:00 and 08:00 it goes at 21:30 the evening before | *Ýatlatma: ertir {time} {business}, {address}.* | Yes: *Ýatlatma: 1 gün öň*. The business can also stop it per client | client spec §6; business spec §6; Q-285, decided 18.10.2026 |
@@ -105,7 +105,8 @@ These are the Turkmen texts from client spec §6 next to the ones in the code (`
 | Reminder 2 h | the same text as the 1-day reminder, with *ertir* (tomorrow) | *Ýatlatma: şu gün {time} {business}, {address}.* (today) | the code's text is kept (Q-293) |
 | Review ask | *{business}-da bolşuňyz nähili boldy? Baha beriň: {link}* | the same | dropped: no review ask (Q-259) |
 | Move not accepted | — | *{brand}: {business} didn't accept the new time. Your booking stays at {date} {time}. {link}* (English source; Turkmen and Russian drafts in the messages) | yes, when a move lapses (Q-289) |
-| Moved, move accepted, phone booking, specialist changed, class cancelled, invite, new owner | — | — (an accepted move reuses Confirmed) | missing; Claude writes them (Q-288) |
+| Phone booking (B-23) | — | *{brand}: you're booked: {business}, {weekday}, {date}, {time}, {address}. Change: {link}* (English source; Turkmen and Russian drafts in the messages) | Claude wrote it (Q-288, 20.10.2026) |
+| Moved, move accepted, specialist changed, class cancelled, invite, new owner | — | — (an accepted move reuses Confirmed) | missing; Claude writes them (Q-288) |
 
 Notes:
 
@@ -172,7 +173,7 @@ Notes:
 - **Browser permission:** a banner asks for it: *Brauzer habarnamalary ýapyk — täze haýyşlary sekuntda görmek üçin açyň.* with *Rugsat ber*. The denied state isn't drawn, so it uses the same banner with *Brauzer sazlamalarynda açyň* (business spec §16, §22).
 - **Language:** messages go in the person's language: *Saýt we SMS habarnamalar şu dilde bolar.* (Account-Profile). English is the source and each market's languages are translations (ADR 0022). Without a saved language, SMS go in the market's main language until the person signs in and chooses one: English for now (Q-292, decided 18.10.2026).
 - **Programmasyz staff** get nothing, and their requests go to the owner and admin (business spec §2).
-- **Mobile numbers only:** SMS go only to mobile numbers (ROUND6 C1), so a phone client saved with a landline gets no SMS.
+- **Mobile numbers only:** SMS go only to mobile numbers (ROUND6 C1), so a phone client saved with a landline gets no SMS. (code: the jobs settle an SMS to a number the team typed in unsent when it isn't a mobile; an account's number took a sign-in code; 20.10.2026)
 - **The SMS link** works signed out. Any action on it logs in with the booking's own phone, shown masked and not editable (ROUND6 A1).
 - **Planned SMS check again before sending.** A reminder goes only if the booking is still in the right state and at the same time, and the switches allow it (code; chapter 7c, S-04, S-21). A reminder that would arrive after the visit has started is dropped. An SMS that fails 5 times is given up, and the Ýeral team is alerted. (Q-284, decided 18.10.2026) **Code differs:** the give-up writes an error line, `job gave up`, that error tracking (F-209, P2 step 7) turns into an alert; until then nobody is told.
 - **Staff choose per action** whether the client hears about it: *Müşderä SMS iberilsin* when moving a booking, and *Müşderä SMS bilen habar ber* for a new booking (off for walk-ins) (business spec §4, §26).

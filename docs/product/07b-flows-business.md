@@ -899,7 +899,7 @@ flowchart TD
 - A client blocked from online booking can still be booked by phone; that's the point of the block (B-35).
 - The client asked for no reminder SMS (client card switch): reminders aren't sent (§6).
 
-**Status** — Design: drawn (B-Calendar · `panel=new`; B-Bookings; B-Clients) · Code: rule only (domain: nearest free slots, staff who do all chosen services); no business endpoint.
+**Status** — Design: drawn (B-Calendar · `panel=new`; B-Bookings; B-Clients) · Code: api built (`GET /v1/w/{slug}/free-times`, `POST /v1/w/{slug}/bookings`, 20.10.2026): the nearest four free times with their specialist, a day's starts with who is free, the 14-day strip; the booking confirmed at once with the client found or added by the phone; the SMS with the date, time and address once the undo is over. The prefix matches and the known client's card come with the client card.
 
 ### B-24 · Quick booking on a phone
 
@@ -933,7 +933,7 @@ flowchart TD
 
 - *Yzyna al* (Undo) deletes the booking; no SMS goes out.
 
-**Status** — Design: drawn (B-Mobile · quick booking frames) · Code: not built.
+**Status** — Design: drawn (B-Mobile · quick booking frames) · Code: api built (20.10.2026): the same endpoints, and *Yzyna al* (`POST /v1/w/{slug}/bookings/{code}/undo`) for 10 seconds, the client's SMS waiting until then. The client's usual services come with the client card.
 
 ### B-25 · Walk-in client
 
@@ -961,7 +961,7 @@ flowchart LR
 - The specialist is busy now: pick the next free start or another specialist.
 - No back-dating: a visit that already happened can't be entered on MVP (E3).
 
-**Status** — Design: drawn (B-Calendar · walk-in switch, current slot 11:15) · Code: rule only (domain allows source walk-in; the booking is confirmed at once); no business endpoint.
+**Status** — Design: drawn (B-Calendar · walk-in switch, current slot 11:15) · Code: api built (`POST /v1/w/{slug}/bookings` with `source: walkin`, 20.10.2026): today, from the step that holds now, no SMS unless the team asks.
 
 ### B-26 · Move a booking
 

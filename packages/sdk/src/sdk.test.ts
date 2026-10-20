@@ -170,7 +170,7 @@ describe('sdk', () => {
 
   it('every query hands TanStack’s abort signal to its request', async () => {
     const f = fixture(() => json(200, { items: [], cursor: null }))
-    const { me, catalog, availability, bookings, team, settings, requests, links } = f.sdk
+    const { me, catalog, availability, bookings, team, settings, requests, calendar, links } = f.sdk
     const id = '0b6f1a4e-6a43-4f8e-9a51-3d3f1c3b9a10'
     const queries = [
       me.get(),
@@ -193,6 +193,7 @@ describe('sdk', () => {
       settings.menu('glow-studio'),
       settings.profile('glow-studio'),
       requests.list('glow-studio'),
+      calendar.freeTimes('glow-studio', { services: [id] }),
       links.view('a-long-random-token-from-the-sms-link', 'tk'),
     ]
     for (const q of queries) await f.queryClient.fetchQuery(q as never)
@@ -265,6 +266,7 @@ describe('live events', () => {
       ['availability', 'glow-studio'],
       ['business', 'glow-studio'],
       ['requests', 'glow-studio'],
+      ['calendar', 'glow-studio'],
     ])
     expect(staleKeys({ type: 'review.created', business: 'bag-kafe', bookingCode: null })).toEqual([
       ['reviews', 'bag-kafe'],
@@ -289,6 +291,7 @@ describe('live events', () => {
       ['settings', 'glow-studio'],
       ['business', 'glow-studio'],
       ['availability', 'glow-studio'],
+      ['calendar', 'glow-studio'],
       ['workspaces'],
       ['search'],
       ['suggest'],

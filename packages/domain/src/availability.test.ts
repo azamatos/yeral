@@ -6,6 +6,7 @@ import {
   busyOf,
   canBookSession,
   checkPlan,
+  currentStep,
   findAppointmentSlot,
   hasAppointmentSlot,
   maxSeats,
@@ -251,6 +252,13 @@ describe('bookings made by staff', () => {
     expect(starts(c, q({ date: TODAY, by: 'staff' }))[0]).toBe(660)
     expect(starts(c, q({ date: '2026-10-13', by: 'staff' }))).toEqual([])
     expect(findAppointmentSlot(c, q({ date: TODAY, by: 'staff' }), 630)).toBeNull()
+  })
+
+  it('start from the step that holds now (B-25)', () => {
+    const at1120 = Date.parse('2026-10-14T06:20:00Z')
+    expect(currentStep(at1120, 15)).toBe(Date.parse('2026-10-14T06:15:00Z'))
+    expect(currentStep(at1120, 30)).toBe(Date.parse('2026-10-14T06:00:00Z'))
+    expect(currentStep(Date.parse('2026-10-14T06:15:00Z'), 15)).toBe(Date.parse('2026-10-14T06:15:00Z'))
   })
 })
 

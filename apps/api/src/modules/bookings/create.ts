@@ -104,14 +104,41 @@ export async function assertWaitingRoom(
   if (over) throw new ApiError('too_many_waiting', over satisfies TooManyWaitingDetails)
 }
 
+/** What an appointment costs: its services' prices added up. */
+export function appointmentPrice(lb: LoadedBusiness, slot: AppointmentSlot | undefined) {
+  const services = slot?.items.map((it) => lb.services.find((s) => s.id === it.serviceId)) ?? []
+  return priceTotal(services.flatMap((s) => (s ? [servicePrice(s)] : [])))
+}
+
+/** An appointment's items as rows, each with its service's name and price and its specialist's name as booked. */
+export function itemRows(lb: LoadedBusiness, bookingId: string, date: string, slot: AppointmentSlot) {
+  return slot.items.map((it, i) => {
+    const svc = lb.services.find((s) => s.id === it.serviceId)
+    const who = lb.staff.find((s) => s.id === it.staffId)
+    return {
+      bookingId,
+      serviceId: it.serviceId,
+      staffId: it.staffId,
+      serviceName: svc?.name ?? { tk: '' },
+      staffName: who?.name ?? null,
+      date,
+      start: it.start,
+      end: it.end,
+      bufferAfter: it.bufferAfter,
+      priceType: svc?.priceType ?? ('fixed' as const),
+      priceAmount: svc?.priceAmount ?? 0,
+      sort: i,
+    }
+  })
+}
+
 async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<BookingRow> {
   const now = deps.now()
   if (x.status === 'pending' && !x.rescheduleOf) await assertWaitingRoom(db, x.user.id, x.lb.business.id, now, { locked: true })
   const client = await clientFor(db, x.lb.business.id, x.user)
-  const services = x.placement.slot?.items.map((it) => x.lb.services.find((s) => s.id === it.serviceId)) ?? []
   const price =
     x.type === 'appointment'
-      ? priceTotal(services.flatMap((s) => (s ? [servicePrice(s)] : [])))
+      ? appointmentPrice(x.lb, x.placement.slot)
       : x.type === 'class' && x.placement.session
         ? { type: 'fixed' as const, amount: x.placement.session.price * x.placement.session.seats }
         : null
@@ -160,28 +187,7 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
     })
     .returning()
   if (!row) throw new Error('booking insert failed')
-  if (x.placement.slot) {
-    await db.insert(bookingItems).values(
-      x.placement.slot.items.map((it, i) => {
-        const svc = x.lb.services.find((s) => s.id === it.serviceId)
-        const who = x.lb.staff.find((s) => s.id === it.staffId)
-        return {
-          bookingId: row.id,
-          serviceId: it.serviceId,
-          staffId: it.staffId,
-          serviceName: svc?.name ?? { tk: '' },
-          staffName: who?.name ?? null,
-          date: x.date,
-          start: it.start,
-          end: it.end,
-          bufferAfter: it.bufferAfter,
-          priceType: svc?.priceType ?? 'fixed',
-          priceAmount: svc?.priceAmount ?? 0,
-          sort: i,
-        }
-      }),
-    )
-  }
+  if (x.placement.slot) await db.insert(bookingItems).values(itemRows(x.lb, row.id, x.date, x.placement.slot))
   await emit(db, { type: 'booking.created', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
   if (x.status === 'confirmed') return confirmBooking(db, deps, row, { instant: true })
   if (deps.site.demo && x.lb.business.demo && !(await hasSignedInTeam(db, row.businessId))) {
@@ -211,7 +217,7 @@ async function placeAppointment(
 }
 
 /** Run the insert; a race lost to another booking becomes 409 slot_taken. Inside a transaction: a savepoint. */
-async function inTransaction<T>(
+export async function inTransaction<T>(
   deps: Deps,
   fn: (tx: Queryable) => Promise<T>,
   alternatives: () => Promise<unknown[]>,

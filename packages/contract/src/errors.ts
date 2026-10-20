@@ -29,6 +29,8 @@ export const ERROR_STATUS = {
   already_reported: 409,
   noshow_window_passed: 409,
   restore_expired: 409,
+  /** "Yzyna al" on a booking the team just added came after the undo time (B-24). */
+  undo_expired: 409,
   too_many_waiting: 409,
   // reviews
   review_exists: 409,

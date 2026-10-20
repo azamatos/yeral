@@ -7,6 +7,7 @@
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import { MAX_ALTERNATIVES, REMINDER_KINDS } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
+import { isMobile } from '@yeral/domain/phone'
 import { nearestSlots, nextFreeSlot, slotStaffId, staffDoingAll, type AppointmentSlot } from '@yeral/domain/availability'
 import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
@@ -41,6 +42,8 @@ const DROPPED_REVIEW_ASK = 'dropped: no review asks (book Q-259)'
 /** A reminder whose try comes once the visit has started tells the client nothing (book Q-284): settled unsent. */
 const DROPPED_STARTED = 'dropped: the visit has started (book Q-284)'
 const REMINDERS: ReadonlySet<string> = new Set(REMINDER_KINDS)
+/** SMS go to mobile numbers only (ROUND6 C1): a client the team saved with a landline gets none. */
+const DROPPED_NOT_MOBILE = 'dropped: not a mobile number (ROUND6 C1)'
 const MAX_ATTEMPTS = 5
 
 /**
@@ -223,6 +226,8 @@ async function sendBookingSms(
   // the person deleted their account: the number may be someone else's now
   if (!b?.clientPhone || b.accountDeletedAt) return
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
+  // an account's phone took a sign-in code, so it's a mobile; a number the team typed in may not be
+  if (!b.userId && !isMobile(b.clientPhone)) return DROPPED_NOT_MOBILE
   if (kind === 'expired' || kind === 'moveRefused' || kind === 'declined') {
     await sendOutcomeSms(deps, b, kind)
     return
@@ -232,10 +237,11 @@ async function sendBookingSms(
   if (REMINDERS.has(kind) && deps.now() >= epochOf(b.date, b.start)) return DROPPED_STARTED
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const [client] = b.clientId ? await deps.db.select().from(clients).where(eq(clients.id, b.clientId)) : []
-  if (client?.noRemindersSms && kind !== 'confirmed') return
+  if (client?.noRemindersSms && REMINDERS.has(kind)) return
   if (user) {
     const prefs = {
       confirmed: user.notifyConfirmation,
+      booked: user.notifyConfirmation,
       reminderDay: user.notifyReminderDay,
       reminder2h: user.notifyReminder2h,
     }
@@ -257,7 +263,7 @@ async function sendBookingSms(
   // the texts with a link get one of their own (book Q-168)
   // the person's phone now: a changed number gets them, the old one nothing more (book Q-171)
   const to = user?.phone ?? b.clientPhone
-  if (kind === 'confirmed') await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
+  if (kind === 'confirmed' || kind === 'booked') await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
   else await deps.sms.send({ to, text: bookingSmsText(lang, kind, sms) })
 }
 
