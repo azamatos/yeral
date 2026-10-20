@@ -25,16 +25,13 @@ import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
 import { loadHours } from '../availability/context'
-import { bookedServices, cancelForBusiness, declineForBusiness } from '../bookings/engine'
+import { affectedDetails, bookedServices, cancelForBusiness, declineForBusiness } from '../bookings/engine'
 import { alternativesContext, pickAlternatives } from '../bookings/offers'
 import { itemsOfBookings, lockBooking, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
 import { bookingsAhead, saveHours } from './repo'
 
 type HoursView = z.infer<typeof businessHoursSettingsSchema>
 type HoursChange = z.infer<typeof businessHoursUpdateSchema>
-
-/** The affected bookings the 409 lists one by one; the count and the counts per specialist cover them all. */
-const LISTED = 50
 
 const viewOf = (b: BusinessHours): HoursView => ({
   hours: b.hours.map((d) => (d ? { open: d.open, close: d.close, break: d.break ?? null } : null)),
@@ -98,31 +95,13 @@ async function affectedBy(db: Queryable, businessId: string, was: BusinessHours,
 
 /** "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1" (most first), and each booking with its client and specialists. */
 async function detailsOf(db: Queryable, rows: readonly BookingRow[]): Promise<BookingsAffectedDetails> {
-  const items = await itemsOfBookings(
-    db,
-    rows.map((r) => r.id),
+  return affectedDetails(
+    rows,
+    await itemsOfBookings(
+      db,
+      rows.map((r) => r.id),
+    ),
   )
-  const byStaff = new Map<string, { staffId: string; name: string; bookings: Set<string> }>()
-  for (const i of items) {
-    if (!i.staffId) continue
-    const s = byStaff.get(i.staffId) ?? { staffId: i.staffId, name: i.staffName ?? '', bookings: new Set<string>() }
-    s.bookings.add(i.bookingId)
-    byStaff.set(i.staffId, s)
-  }
-  return {
-    count: rows.length,
-    byStaff: [...byStaff.values()]
-      .map((s) => ({ staffId: s.staffId, name: s.name, count: s.bookings.size }))
-      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
-    bookings: rows.slice(0, LISTED).map((r) => ({
-      code: r.code,
-      date: r.date,
-      start: r.start,
-      end: r.end,
-      client: r.clientName,
-      staff: [...new Set(items.filter((i) => i.bookingId === r.id).flatMap((i) => (i.staffName ? [i.staffName] : [])))],
-    })),
-  }
 }
 
 /**

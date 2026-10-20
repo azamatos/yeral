@@ -434,8 +434,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: ({ staffId, ...json }: { staffId: string } & z.input<typeof removeMemberSchema>) =>
           call(w.team[':staffId'].remove.$post({ param: { slug, staffId }, json })),
-        // their bookings moved or cancelled show in the calendar's feed; waiting moves may go with them
-        onSuccess: () => Promise.all([teamChanged(slug), invalidate(keys.requests(slug))]),
+        // their bookings moved or cancelled, and the free times without them
+        onSuccess: () => Promise.all([teamChanged(slug), booked(slug)]),
       }),
     /** A team member's shift, breaks and days off (book B-47). */
     schedule: (slug: string, staffId: string) =>
@@ -448,7 +448,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: (json: z.input<typeof staffScheduleUpdateSchema>) =>
           call(w.team[':staffId'].schedule.$put({ param: { slug, staffId }, json })),
-        onSuccess: () => Promise.all([invalidate(keys.schedule(slug, staffId)), teamChanged(slug), invalidate(keys.requests(slug))]),
+        // the schedule sits under the team's keys; the free times change with it
+        onSuccess: () => Promise.all([teamChanged(slug), booked(slug)]),
       }),
     reactivate: (slug: string) =>
       mutationOptions({

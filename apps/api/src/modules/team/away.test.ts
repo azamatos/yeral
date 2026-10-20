@@ -55,9 +55,16 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
     return made.json.id as string
   }
   /** A booking the team enters, quietly, its undo time over. */
-  const book = async (maysa: ReturnType<typeof browser>, phone: string, staffId: string, date: string, start: number) => {
+  const book = async (
+    maysa: ReturnType<typeof browser>,
+    phone: string,
+    staffId: string,
+    date: string,
+    start: number,
+    notifyClient = false,
+  ) => {
     const made = await maysa.req(`${W}/bookings`, {
-      body: { source: 'phone', phone, serviceIds: [manicure], staffId, date, start, notifyClient: false },
+      body: { source: 'phone', phone, serviceIds: [manicure], staffId, date, start, notifyClient },
     })
     expect(made.status).toBe(201)
     t.clock.now += 15_000
@@ -76,7 +83,10 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
   it('removing someone with bookings ahead asks first; moved to a colleague, the client hears who does it now', async () => {
     const maysa = await as(MAYSA)
     const selbi = await hire(maysa, '+99365800501', 'Selbi')
-    const moved = await book(maysa, '+99365800502', selbi, THU, 600)
+    // told of it on the phone, with SMS from then on
+    const moved = await book(maysa, '+99365800502', selbi, THU, 600, true)
+    // its first SMS has gone
+    await runDueJobs(t.deps)
     const busyThen = await book(maysa, '+99365800503', selbi, THU, 720)
     const kept = await book(maysa, '+99365800504', selbi, FRI, 600)
     // Jeren is busy at 12:00 and on Friday at 10:00
@@ -104,7 +114,10 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
     // the time the moved booking just took with Jeren isn't offered to the one cancelled
     expect((await whoOn(busyThen)).offers).not.toContainEqual(expect.objectContaining({ date: THU, start: 600, staffId: jerenId }))
     await runDueJobs(t.deps)
-    expect(smsTo('+99365800502')).toEqual([expect.stringMatching(/your booking on .+ is now with Jeren/)])
+    expect(smsTo('+99365800502')).toEqual([
+      expect.stringMatching(/you're booked: Glow Studio/),
+      expect.stringMatching(/your booking on .+ is now with Jeren/),
+    ])
     expect(smsTo('+99365800503')).toEqual([expect.stringMatching(/cancelled your booking .*: The specialist can't come in\. Free times: /)])
     expect(smsTo('+99365800504')).toEqual([])
     // gone from the team, off the client site
@@ -234,14 +247,22 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
         .from(bookings)
         .where(eq(bookings.rescheduleOf, (await db.select().from(bookings).where(eq(bookings.code, sent.json.code)))[0]!.id))
     )[0]!
-    // the waiting move isn't asked about: it's answered on its own
+    // the waiting move isn't asked about: the save refuses it, the booking keeping its time
     const saved = await schedule(maysa, nur, {
       ...(await maysa.req(`${W}/team/${nur}/schedule`)).json,
       daysOff: [{ name: 'Leave', from: '2026-10-28', to: '2026-10-28', yearly: false }],
     })
     expect(saved.status).toBe(200)
-    const confirmed = await maysa.req(`${W}/requests/${move.code}/confirm`, { body: {} })
-    expect(confirmed.json.error).toMatchObject({ code: 'cannot_move', details: { problem: 'staff_off', staffId: nur } })
+    expect((await db.select().from(bookings).where(eq(bookings.id, move.id)))[0]).toMatchObject({
+      status: 'cancelled',
+      cancelledBy: 'business',
+    })
+    expect((await client.req(`/v1/me/bookings/${sent.json.code}`)).json).toMatchObject({
+      status: 'confirmed',
+      date: '2026-10-27',
+      moveRefused: { date: '2026-10-28', by: 'business', reason: 'no_staff' },
+    })
+    expect((await maysa.req(`${W}/requests/${move.code}/confirm`, { body: {} })).json.error.code).toBe('invalid_status')
   })
 
   it('a booking being made checks the specialist’s day as it stands, under the business’s lock', async () => {

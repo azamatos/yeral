@@ -143,12 +143,22 @@ export async function offeredTimes(
   }))
 }
 
-/** What offering free times needs at a business, loaded once: its team, rules and busy time over its window from today. */
-export async function alternativesContext(db: Queryable, businessId: string, now: number): Promise<AppointmentContext | null> {
-  const lb = (await loadBusinesses(db, [businessId])).get(businessId)
+/**
+ * What offering free times needs at a business, loaded once: its team, rules and busy time over its window from today
+ * (or `through` a later date).
+ */
+export async function alternativesContext(
+  db: Queryable,
+  business: string | LoadedBusiness,
+  now: number,
+  through?: string,
+): Promise<AppointmentContext | null> {
+  const lb = typeof business === 'string' ? (await loadBusinesses(db, [business])).get(business) : business
   if (!lb) return null
   const from = localOf(now).date
-  return appointmentContext(lb, await loadBusy(db, [businessId], from, addDays(from, lb.rules.windowDays)), now)
+  // through the window, or a later date the caller needs too (the bookings it's settling)
+  const window = addDays(from, lb.rules.windowDays)
+  return appointmentContext(lb, await loadBusy(db, [lb.business.id], from, through && through > window ? through : window), now)
 }
 
 /**

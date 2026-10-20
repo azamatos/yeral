@@ -185,10 +185,16 @@ interface StaffItem {
 
 /**
  * The specialists a booking is about to take still work then (book B-47, B-50): on the team, taking bookings, and each
- * of their items inside their day as their schedule stands. A schedule save or a removal holds the business row as an
+ * of their items inside their day as their schedule stands (unless `day` is false). A schedule save or a removal holds the business row as an
  * hours save does, so read after `lockedHours` this is how it stands; else `OutsideHours`.
  */
-export async function assertStaffFree(db: Queryable, hours: BusinessHours, date: string, items: readonly StaffItem[]): Promise<void> {
+export async function assertStaffFree(
+  db: Queryable,
+  hours: BusinessHours,
+  date: string,
+  items: readonly StaffItem[],
+  opts: { day?: boolean } = {},
+): Promise<void> {
   const ids = [...new Set(items.flatMap((i) => (i.staffId ? [i.staffId] : [])))]
   if (!ids.length) return
   const rows = await db
@@ -203,10 +209,12 @@ export async function assertStaffFree(db: Queryable, hours: BusinessHours, date:
     .from(staff)
     .where(inArray(staff.id, ids))
   for (const it of items) {
-    const s = it.staffId ? rows.find((r) => r.id === it.staffId) : undefined
     if (!it.staffId) continue
-    if (!s || s.status !== 'active' || !s.bookable || !withinStaffDay(hours, s, date, { start: it.start, end: it.end }))
-      throw new OutsideHours(it.staffId)
+    const s = rows.find((r) => r.id === it.staffId)
+    if (!s || s.status !== 'active' || !s.bookable) throw new OutsideHours(it.staffId)
+    // `day: false`: on the team is enough (a confirmed booking brought back as it was)
+    if (opts.day === false) continue
+    if (!withinStaffDay(hours, s, date, { start: it.start, end: it.end })) throw new OutsideHours(it.staffId)
   }
 }
 

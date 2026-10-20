@@ -29,5 +29,13 @@
   the plain cancel SMS; leaving takes the business row too (`removeRow` in `team/service.ts`, shared with the
   removal); a refused move names the specialist who is off (`OutsideHours.staffId`); colleagues come from the business
   as loaded; the client's booking checks the hours and its specialists through `assertOpenAt`.
+- Second review (8; 7 fixed): a move to a colleague texts the client only when the booking wants SMS
+  (`notifyClient`); a move counts the time freed by the bookings cancelled before it; a client's waiting move onto
+  them where they no longer work is refused at the save ("no specialist", the client told: `refuseMovesOnto`, with
+  `refuseMove` shared with the requests' decline); a confirmed booking brought back needs its specialists still on the
+  team (`assertStaffFree(…, { day: false })`); the saves tell open screens the free times changed
+  (`business.updated`) and the sdk refreshes the calendar; one 409 payload (`affectedDetails`) and one offers context
+  (`alternativesContext(…, through)`) shared with the hours; services from the items already read (`bookedFrom`). Not
+  taken: a reminder racing the move SMS (runs never overlap, and one run takes one job at a time).
 - Follow-ups: the calendar shows a day off as the column shaded with its reason (F-121 with the calendar day view);
   the floor and room field the design session added to the address (#88) isn't in the contract yet.
