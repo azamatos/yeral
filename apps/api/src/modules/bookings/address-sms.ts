@@ -8,12 +8,20 @@ import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, eq, gte, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookings, jobs } from '../../db/schema'
+import type { BookingRow } from './repo'
 
 /** The job's kind of booking SMS. */
 export const ADDRESS_SMS = 'addressChanged'
 
-/** Whether a client would notice: the line, the street a home-based business shows first, or the city changed. */
-export const sameAddress = (a: AddressTold, b: AddressTold) => a.address === b.address && a.street === b.street && a.cityId === b.cityId
+/** The address SMS still waiting for these bookings; a runner's claimed one is under way and isn't. */
+const waitingFor = (bookingIds: readonly string[], now: number) =>
+  and(
+    isNull(jobs.doneAt),
+    eq(jobs.kind, 'booking.sms'),
+    sql`${jobs.payload}->>'kind' = ${ADDRESS_SMS}`,
+    inArray(sql`${jobs.payload}->>'bookingId'`, [...bookingIds]),
+    or(isNull(jobs.lockedUntil), lt(jobs.lockedUntil, new Date(now))),
+  )
 
 /**
  * Queue the SMS for every booking ahead at the business: waiting requests and confirmed visits that haven't started,
@@ -23,7 +31,7 @@ export const sameAddress = (a: AddressTold, b: AddressTold) => a.address === b.a
 export async function queueAddressSms(tx: Queryable, businessId: string, before: AddressTold, now: number): Promise<void> {
   // from yesterday's business day, which may run past midnight (book Q-105)
   const rows = await tx
-    .select({ id: bookings.id, date: bookings.date, start: bookings.start })
+    .select({ id: bookings.id, date: bookings.date, start: bookings.start, source: bookings.source, createdAt: bookings.createdAt })
     .from(bookings)
     .where(
       and(
@@ -42,27 +50,32 @@ export async function queueAddressSms(tx: Queryable, businessId: string, before:
     .update(bookings)
     .set({ addressTold: before })
     .where(and(inArray(bookings.id, ids), isNull(bookings.addressTold)))
-  // one waiting per booking: a runner's claimed one is under way, so this save gets its own
+  const runAt = new Map(ahead.map((b) => [b.id, new Date(addressSmsAt({ ...b, createdAt: b.createdAt.getTime() }, now))]))
   const waiting = await tx
     .select({ id: jobs.id, bookingId: sql<string>`${jobs.payload}->>'bookingId'` })
     .from(jobs)
-    .where(
-      and(
-        isNull(jobs.doneAt),
-        eq(jobs.kind, 'booking.sms'),
-        sql`${jobs.payload}->>'kind' = ${ADDRESS_SMS}`,
-        inArray(sql`${jobs.payload}->>'bookingId'`, ids),
-        or(isNull(jobs.lockedUntil), lt(jobs.lockedUntil, new Date(now))),
-      ),
-    )
+    .where(waitingFor(ids, now))
     .for('update')
-  const queued = new Map(waiting.map((j) => [j.bookingId, j.id]))
-  const fresh = []
-  for (const b of ahead) {
-    const runAt = new Date(addressSmsAt(now, epochOf(b.date, b.start)))
-    const jobId = queued.get(b.id)
-    if (jobId !== undefined) await tx.update(jobs).set({ runAt }).where(eq(jobs.id, jobId))
-    else fresh.push({ kind: 'booking.sms', runAt, payload: { bookingId: b.id, kind: ADDRESS_SMS } })
+  // the waiting ones go later, in one statement (the business row stays locked until this commits)
+  if (waiting.length) {
+    const times = sql.join(
+      waiting.map((j) => sql`(${j.id}::bigint, ${runAt.get(j.bookingId)!.toISOString()}::timestamptz)`),
+      sql`, `,
+    )
+    await tx.execute(sql`update ${jobs} set run_at = v.run_at from (values ${times}) as v(id, run_at) where ${jobs.id} = v.id`)
   }
+  const queued = new Set(waiting.map((j) => j.bookingId))
+  const fresh = ahead.flatMap((b) =>
+    queued.has(b.id) ? [] : [{ kind: 'booking.sms', runAt: runAt.get(b.id)!, payload: { bookingId: b.id, kind: ADDRESS_SMS } }],
+  )
   if (fresh.length) await tx.insert(jobs).values(fresh)
+}
+
+/** A booking took another time (a move confirmed, the team's move): its waiting address SMS goes no later than it should now. */
+export async function retimeAddressSms(tx: Queryable, b: BookingRow, now: number): Promise<void> {
+  const at = new Date(addressSmsAt({ ...b, createdAt: b.createdAt.getTime() }, now))
+  await tx
+    .update(jobs)
+    .set({ runAt: sql`least(${jobs.runAt}, ${at.toISOString()}::timestamptz)` })
+    .where(waitingFor([b.id], now))
 }

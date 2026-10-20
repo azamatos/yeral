@@ -11,6 +11,7 @@
  */
 import {
   isOnlineSource,
+  isTeamSource,
   type BookingSource,
   type BookingStatus,
   type BusinessCancelReason,
@@ -374,6 +375,10 @@ export const NEW_BOOKING_UNDO_MS = 10_000
  */
 export const NEW_BOOKING_SMS_AFTER_MS = NEW_BOOKING_UNDO_MS + 5_000
 
+/** When a booking's SMS may go: one the team entered once its undo can't come any more (B-24), any other now. */
+export const firstSmsFrom = (b: { source: BookingSource; createdAt: number }, now: number): number =>
+  Math.max(now, isTeamSource(b.source) ? b.createdAt + NEW_BOOKING_SMS_AFTER_MS : 0)
+
 // ── A new address (book Q-215) ──
 
 /**
@@ -389,11 +394,28 @@ export interface AddressTold {
   address: string
   street: string
   cityId: string
+  /** When an SMS told the client this one as new (the booking says "New address" from then); none: they booked with it. */
+  at?: number
 }
 
-/** When the SMS about a new address goes for a visit starting at `visitStart` (epoch ms). */
-export const addressSmsAt = (now: number, visitStart: number): number =>
-  Math.max(now, Math.min(now + ADDRESS_SMS_AFTER_MS, visitStart - ADDRESS_SMS_LEAD_MS))
+/** A move: the line, the street or the city changed; a new pin alone isn't one. */
+export const sameAddress = (a: AddressTold, b: AddressTold): boolean =>
+  a.address === b.address && a.street === b.street && a.cityId === b.cityId
+
+/** A home-based business shows its exact address once the booking is confirmed (and after the visit); before, the street. */
+export const showsExactAddress = (status: BookingStatus): boolean => status === 'confirmed' || status === 'completed'
+
+/** The address a client reads on a booking in `status`. */
+export const addressAsShown = (a: AddressTold, hideExact: boolean, status: BookingStatus): string =>
+  hideExact && !showsExactAddress(status) ? a.street : a.address
+
+/** Whether a client reading a booking in `status` sees the two addresses alike. */
+export const sameAddressShown = (a: AddressTold, b: AddressTold, hideExact: boolean, status: BookingStatus): boolean =>
+  a.cityId === b.cityId && addressAsShown(a, hideExact, status) === addressAsShown(b, hideExact, status)
+
+/** When the SMS about a new address goes for this booking: the wait, a soon visit's lead, never before its first SMS may. */
+export const addressSmsAt = (b: { source: BookingSource; createdAt: number; date: string; start: number }, now: number): number =>
+  Math.max(firstSmsFrom(b, now), Math.min(now + ADDRESS_SMS_AFTER_MS, epochOf(b.date, b.start) - ADDRESS_SMS_LEAD_MS))
 
 /** The business page says "New address" this long after the business moved. */
 export const NEW_ADDRESS_DAYS = 30

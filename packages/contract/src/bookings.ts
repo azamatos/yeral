@@ -133,8 +133,8 @@ export const bookingDetailSchema = bookingSummarySchema
     city: cityRefSchema,
     entranceNote: z.string().nullable(),
     /**
-     * When the business moved, if it did after this booking was made and the visit is still ahead: the booking says
-     * "New address" (book Q-215; the client heard it by SMS too).
+     * When an SMS told the client the business moved, while the visit is still ahead: the booking says "New address"
+     * (book Q-215).
      */
     movedAt: epochSchema.nullable(),
     geo: geoSchema,

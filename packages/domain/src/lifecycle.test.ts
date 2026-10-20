@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
   ADDRESS_SMS_AFTER_MS,
+  addressAsShown,
   addressSmsAt,
+  firstSmsFrom,
   newAddressSince,
+  sameAddress,
+  sameAddressShown,
   canAnswerRequest,
   canBusinessCancel,
   canBusinessMove,
@@ -365,12 +369,33 @@ describe('business actions', () => {
 
 describe('a new address (book Q-215)', () => {
   const now = epochOf('2026-10-14', 680)
+  const online = { source: 'web' as const, createdAt: now - 86_400_000 }
   it('the SMS waits 10 minutes; a visit sooner hears it 30 minutes before, or at once', () => {
-    expect(addressSmsAt(now, epochOf('2026-10-15', 600))).toBe(now + ADDRESS_SMS_AFTER_MS)
+    expect(addressSmsAt({ ...online, date: '2026-10-15', start: 600 }, now)).toBe(now + ADDRESS_SMS_AFTER_MS)
     // 11:20 now, the visit at 12:00: at 11:30
-    expect(addressSmsAt(now, epochOf('2026-10-14', 720))).toBe(epochOf('2026-10-14', 690))
+    expect(addressSmsAt({ ...online, date: '2026-10-14', start: 720 }, now)).toBe(epochOf('2026-10-14', 690))
     // the visit at 11:40: at once
-    expect(addressSmsAt(now, epochOf('2026-10-14', 700))).toBe(now)
+    expect(addressSmsAt({ ...online, date: '2026-10-14', start: 700 }, now)).toBe(now)
+  })
+
+  it('never before a booking the team just entered can no longer be undone (B-24)', () => {
+    const walkIn = { source: 'walkin' as const, createdAt: now - 3_000, date: '2026-10-14', start: 700 }
+    expect(firstSmsFrom(walkIn, now)).toBe(walkIn.createdAt + NEW_BOOKING_SMS_AFTER_MS)
+    expect(firstSmsFrom(online, now)).toBe(now)
+    expect(addressSmsAt(walkIn, now)).toBe(walkIn.createdAt + NEW_BOOKING_SMS_AFTER_MS)
+  })
+
+  it('a move is a new line, street or city; a home-based business’s request shows the street only', () => {
+    const here = { address: 'Görogly 3', street: 'Görogly', cityId: 'ashgabat' }
+    const nextDoor = { ...here, address: 'Görogly 7' }
+    expect(sameAddress(here, { ...here })).toBe(true)
+    expect(sameAddress(here, nextDoor)).toBe(false)
+    expect(addressAsShown(nextDoor, true, 'pending')).toBe('Görogly')
+    expect(addressAsShown(nextDoor, true, 'confirmed')).toBe('Görogly 7')
+    expect(addressAsShown(nextDoor, false, 'pending')).toBe('Görogly 7')
+    expect(sameAddressShown(here, nextDoor, true, 'pending')).toBe(true)
+    expect(sameAddressShown(here, nextDoor, true, 'confirmed')).toBe(false)
+    expect(sameAddressShown(here, { ...here, cityId: 'mary' }, true, 'pending')).toBe(false)
   })
 
   it('the page says so for 30 days', () => {

@@ -98,7 +98,9 @@
     "cancelledOffersCall": "{brand}: {business} отменил вашу запись на {date} {time}: {reason}. Позвоните, чтобы записаться: {link}",
     "addressChanged": "{brand}: {business}: новый адрес: {address}. Ваша запись: {weekday}, {date}, {time}. {link}",
     "reminderDay": "Напоминание: завтра в {time} {business}, {address}.",
-    "reminder2h": "Напоминание: сегодня в {time} {business}, {address}."
+    "reminder2h": "Напоминание: сегодня в {time} {business}, {address}.",
+    "reminderDayMoved": "Напоминание: завтра в {time} {business}, новый адрес: {address}.",
+    "reminder2hMoved": "Напоминание: сегодня в {time} {business}, новый адрес: {address}."
   },
   "fmt": {
     "money": "{amount} {currency}",

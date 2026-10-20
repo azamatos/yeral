@@ -98,7 +98,9 @@
     "cancelledOffersCall": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. Ýazylmak üçin jaň ediň: {link}",
     "addressChanged": "{brand}: {business} täze salga göçdi: {address}. Ýazylyşyňyz: {weekday}, {date}, {time}. {link}",
     "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",
-    "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}."
+    "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}.",
+    "reminderDayMoved": "Ýatlatma: ertir {time} {business}, täze salgy: {address}.",
+    "reminder2hMoved": "Ýatlatma: şu gün {time} {business}, täze salgy: {address}."
   },
   "fmt": {
     "money": "{amount} {currency}",

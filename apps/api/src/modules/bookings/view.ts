@@ -1,6 +1,13 @@
 /** Booking rows → `BookingSummary` / `BookingDetail` (client spec §4.8: cards, detail drawer, actions). */
 import type { BookingDetail, BookingSummary, OfferSource } from '@yeral/contract/bookings'
-import { cancelDeadline, canClientRestore, clientActions, effectiveStatus } from '@yeral/domain/lifecycle'
+import {
+  addressAsShown,
+  cancelDeadline,
+  canClientRestore,
+  clientActions,
+  effectiveStatus,
+  showsExactAddress,
+} from '@yeral/domain/lifecycle'
 import { isBusinessSideCancel, isOnlineSource, reasonWords, type Locale } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, inArray } from 'drizzle-orm'
@@ -141,7 +148,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   if (status === 'noshow') timeline.push({ event: 'noshow', at: noShowMarkedAtOf(row)?.getTime() ?? epochOf(row.date, row.end) })
 
   // a home-based business shows its exact address only once the booking is confirmed
-  const exact = status === 'confirmed' || status === 'completed'
+  const exact = showsExactAddress(status)
   const actions = clientActions(state, lb.rules, review ? { createdAt: review.createdAt.getTime() } : null, now)
   // offered while the 5 minutes run and the visit hasn't started; a request whose answer time ran out is offered too,
   // and tapping it says so (ROUND6 A6)
@@ -151,10 +158,14 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   return {
     ...summary,
     timeline: timeline.sort((x, y) => x.at - y.at),
-    address: b.hideExactAddress && !exact ? b.street : b.address,
+    address: addressAsShown(b, b.hideExactAddress, status),
     city: await cityRef(deps.db, b.cityId, lang),
     entranceNote: b.hideExactAddress && !exact ? null : b.entranceNote,
-    movedAt: b.movedAt && b.movedAt > row.createdAt && (status === 'pending' || status === 'confirmed') ? b.movedAt.getTime() : null,
+    // an SMS told the client the business moved, and the visit is still ahead
+    movedAt:
+      row.addressTold?.at !== undefined && (status === 'pending' || status === 'confirmed') && now < epochOf(row.date, row.start)
+        ? row.addressTold.at
+        : null,
     geo: geoOf(b, exact),
     clientNote: row.clientNote,
     holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,

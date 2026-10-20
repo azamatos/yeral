@@ -6,10 +6,12 @@
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import {
+  addressAsShown,
   effectiveStatus,
   NEWS_QUEUED,
   newsSms,
   REMINDER_KINDS,
+  sameAddressShown,
   toldOf,
   type AddressTold,
   type NewsQueued,
@@ -46,7 +48,7 @@ import { newBookingLink, pruneBookingLinks } from '../bookings/links'
 import { hideLinkTokens } from '../../ports/sms'
 import { onlineRefusal } from '../clients/online'
 import { itemsOf, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
-import { ADDRESS_SMS } from '../settings/address'
+import { ADDRESS_SMS } from '../bookings/address-sms'
 
 const BATCH = 100
 /**
@@ -59,6 +61,8 @@ const DROPPED_NOTHING_NEW = 'dropped: the client knows the booking as it is'
 /** A reminder whose try comes once the visit has started tells the client nothing (book Q-284): settled unsent. */
 const DROPPED_STARTED = 'dropped: the visit has started (book Q-284)'
 const REMINDERS: ReadonlySet<string> = new Set(REMINDER_KINDS)
+/** The booking SMS that name the address: once the business has moved, each records the one it told (book Q-215). */
+const NAMES_ADDRESS: ReadonlySet<BookingSmsKind> = new Set(['booked', 'bookedWith', 'reminderDay', 'reminder2h', 'reminderEvening'])
 /** SMS go to mobile numbers only (ROUND6 C1): a client the team saved with a landline gets none. */
 const DROPPED_NOT_MOBILE = 'dropped: not a mobile number (ROUND6 C1)'
 /** The business moved and back, or the client was told since: they know the address as it is (book Q-215). */
@@ -305,10 +309,16 @@ async function sendBookingSms(
   const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId))
   if (!biz) return
   const lang = user?.lang ?? MARKET.defaultLanguage
+  // the business moved since the client last heard where it is: a reminder says it's new (book Q-215)
+  const heard =
+    NAMES_ADDRESS.has(kind) && b.addressTold && !sameAddressShown(b.addressTold, addressOf(biz), biz.hideExactAddress, b.status)
+      ? addressOf(biz)
+      : null
   const sms = {
     ...(cancel ? knownTime(b) : { date: b.date, start: b.start }),
     businessName: biz.name,
     address: biz.address,
+    newAddress: !!heard,
     city: await smsCityOf(deps.db, biz.cityId, lang),
     reason: b.businessCancelReason ? businessCancelText(lang, b.businessCancelReason, b.cancelReason) : undefined,
     staff: [...new Set(items.flatMap((i) => (i.staffName ? [i.staffName] : [])))].join(', '),
@@ -320,6 +330,7 @@ async function sendBookingSms(
   else await deps.sms.send({ to, text: bookingSmsText(lang, kind, sms) })
   // what the client knows now: the next news compares with it
   if (told) await noteTold(deps, b, told)
+  if (heard) await noteAddressTold(deps, b, heard)
 }
 
 /**
@@ -329,7 +340,8 @@ async function sendBookingSms(
  * street, and that's what it compares and tells.
  */
 async function sendAddressSms(deps: Deps, bookingId: string): Promise<string | undefined> {
-  const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
+  // a team's undo under way finishes first, and then there's nothing to tell
+  const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId)).for('share')
   if (!b?.clientPhone || b.accountDeletedAt) return
   const now = deps.now()
   const { status } = effectiveStatus(stateOf(b), now)
@@ -339,24 +351,35 @@ async function sendAddressSms(deps: Deps, bookingId: string): Promise<string | u
   // a profile save under way finishes first: this tells the address as it's saved
   const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId)).for('share')
   if (!biz) return
-  const current: AddressTold = { address: biz.address, street: biz.street, cityId: biz.cityId }
-  const streetOnly = biz.hideExactAddress && status !== 'confirmed'
-  const shown = (a: AddressTold) => `${a.cityId} ${streetOnly ? a.street : a.address}`
-  if (b.addressTold && shown(b.addressTold) === shown(current)) return DROPPED_SAME_ADDRESS
+  const current = addressOf(biz)
+  if (b.addressTold && sameAddressShown(b.addressTold, current, biz.hideExactAddress, status)) return DROPPED_SAME_ADDRESS
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const lang = user?.lang ?? MARKET.defaultLanguage
   const sms = {
     date: b.date,
     start: b.start,
     businessName: biz.name,
-    address: streetOnly ? biz.street : biz.address,
+    address: addressAsShown(current, biz.hideExactAddress, status),
     city: await smsCityOf(deps.db, biz.cityId, lang),
   }
   await sendWithLink(deps, b, user?.phone ?? b.clientPhone, (link) => addressSmsText(lang, { ...sms, link }))
-  // what the client heard: the next move compares with it, unless another save changed it since the job read it
+  await noteAddressTold(deps, b, current)
+}
+
+const addressOf = (biz: { address: string; street: string; cityId: string }): AddressTold => ({
+  address: biz.address,
+  street: biz.street,
+  cityId: biz.cityId,
+})
+
+/**
+ * The address an SMS told the client: the next move compares with it (book Q-215), unless something else changed it
+ * since the job read the booking.
+ */
+async function noteAddressTold(deps: Deps, b: BookingRow, heard: AddressTold): Promise<void> {
   await deps.db
     .update(bookings)
-    .set({ addressTold: current })
+    .set({ addressTold: { ...heard, at: deps.now() } })
     .where(
       and(
         eq(bookings.id, b.id),
