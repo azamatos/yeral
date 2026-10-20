@@ -62,6 +62,19 @@ export async function teamChanged(db: Queryable, businessId: string, person?: { 
   await emit(db, { type: 'team.changed', businessId, userId })
 }
 
+/**
+ * Off the team (B-15, B-50): no access, off the client site, open invites cancelled; their bookings ahead are settled
+ * by the removal (`removeMember`), or stay for the owner to settle when they left by themself. The caller holds the
+ * business row, so a booking being made for them waits and then finds them gone.
+ */
+export async function removeRow(db: Queryable, row: StaffRow, now: number): Promise<void> {
+  if (row.status !== 'removed') await db.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.id, row.id))
+  await db
+    .update(invites)
+    .set({ status: 'cancelled', answeredAt: new Date(now) })
+    .where(and(eq(invites.staffId, row.id), eq(invites.status, 'pending')))
+}
+
 /** The invite's link for the owner to copy: the business app's invite page. */
 export const inviteLink = (site: SiteConfig, token: string) => `${site.urls.business}/invite/${token}`
 

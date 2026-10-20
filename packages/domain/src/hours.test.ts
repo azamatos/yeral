@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  staffDayChangedOn,
+  staffScheduleErrors,
+  withinStaffDay,
   businessClosedReason,
   businessDay,
   findException,
@@ -184,5 +187,38 @@ describe('openMinutesBetween', () => {
     const b = { hours: [{ open: 540, close: 1080 }, null, null, null, null, null, null], exceptions: [] }
     // Monday 2026-10-19: 17:00 to Tuesday 09:00 is one open hour
     expect(openMinutesBetween(b as never, epochOf('2026-10-19', 1020), epochOf('2026-10-20', 540))).toBe(60)
+  })
+})
+
+describe('a team member’s schedule (B-47)', () => {
+  const week = { hours: Array.from({ length: 7 }, () => ({ open: 540, close: 1200 })), exceptions: [] }
+  const business = { schedule: { shift: null, breaks: Array(7).fill(null), daysOff: [] } }
+  const THU = '2026-10-15'
+
+  it('a visit fits their day: inside the shift, out of their break, not on a day off', () => {
+    const s = { ...business.schedule, breaks: [null, null, { start: 780, end: 840 }, { start: 780, end: 840 }, null, null, null] }
+    expect(withinStaffDay(week, s, THU, { start: 600, end: 660 })).toBe(true)
+    expect(withinStaffDay(week, s, THU, { start: 800, end: 860 })).toBe(false)
+    const off = { ...s, daysOff: [{ name: 'Holiday', from: THU, to: THU, yearly: false }] }
+    expect(withinStaffDay(week, off, THU, { start: 600, end: 660 })).toBe(false)
+    const late = { ...s, shift: Array.from({ length: 7 }, () => ({ open: 720, close: 1200 })) }
+    expect(withinStaffDay(week, late, THU, { start: 600, end: 660 })).toBe(false)
+  })
+
+  it('a change touches the dates whose day it changes', () => {
+    const off = { ...business.schedule, daysOff: [{ name: 'Holiday', from: THU, to: THU, yearly: false }] }
+    expect(staffDayChangedOn(week, business.schedule, off, THU)).toBe(true)
+    expect(staffDayChangedOn(week, business.schedule, off, '2026-10-16')).toBe(false)
+  })
+
+  it('refuses a shift that closes before it opens, a break outside the shift, a day off that ends before it starts', () => {
+    expect(staffScheduleErrors(business.schedule)).toEqual([])
+    const shift = Array.from({ length: 7 }, () => ({ open: 540, close: 900 }))
+    shift[1] = { open: 900, close: 600 }
+    const breaks = Array(7).fill(null)
+    breaks[2] = { start: 1000, end: 1030 }
+    expect(
+      staffScheduleErrors({ shift, breaks, daysOff: [{ name: 'Trip', from: '2026-10-20', to: '2026-10-18', yearly: false }] }),
+    ).toEqual(['shift.1', 'breaks.2', 'daysOff.0.to'])
   })
 })

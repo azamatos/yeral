@@ -17,12 +17,11 @@ import { all, type Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, staff, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
-import { emit, queueOutcomeSms } from '../../notify'
-import { appointmentContext, loadBusiness, loadBusy, lockedHours } from '../availability/context'
+import { appointmentContext, assertStaffFree, loadBusiness, loadBusy, lockedHours, OutsideHours } from '../availability/context'
 import { text } from '../catalog/map'
 import { confirmBooking } from '../bookings/confirm'
-import { bookedServices, declineForBusiness, rebookQuery } from '../bookings/engine'
-import { awaitingAnswer, guard, lockBooking, recordMoveRefused, setStatus, stateOf, type BookingRow } from '../bookings/repo'
+import { bookedServices, declineForBusiness, rebookQuery, refuseMove } from '../bookings/engine'
+import { awaitingAnswer, guard, itemsOf, lockBooking, stateOf, type BookingRow } from '../bookings/repo'
 
 type RequestView = z.infer<typeof requestSchema>
 type DeclineInput = z.infer<typeof declineInputSchema>
@@ -157,9 +156,19 @@ export async function confirmRequest(deps: Deps, business: Business, actor: Acto
     if (b.rescheduleOf) await lockBooking(tx, b.rescheduleOf)
     const row = await lockBooking(tx, b.id)
     guard(requestOpen(stateOf(row), deps.now()))
-    // a move onto a day the business closed since (a waiting move isn't asked about when the hours change)
+    // a move onto a day the business closed since (a waiting move isn't asked about when the hours change), or one
+    // its specialist no longer works then (a day off, a new shift, gone from the team: B-47, B-50)
     if (row.rescheduleOf && !withinHours(hours, row.date, { start: row.start, end: row.end }))
       throw new ApiError('cannot_move', { problem: 'outside_hours', staffId: '' } satisfies CannotMoveDetails)
+    if (row.rescheduleOf) {
+      const items = await itemsOf(tx, row.id)
+      try {
+        await assertStaffFree(tx, hours, row.date, items)
+      } catch (e) {
+        if (!(e instanceof OutsideHours)) throw e
+        throw new ApiError('cannot_move', { problem: 'staff_off', staffId: e.staffId ?? '' } satisfies CannotMoveDetails)
+      }
+    }
     await confirmBooking(tx, deps, row)
   })
 }
@@ -218,17 +227,6 @@ export async function declineRequest(deps: Deps, business: Business, actor: Acto
       await declineForBusiness(tx, row, at, { ...reason, offers })
       return
     }
-    // a move's answer isn't counted toward the answer time (book Q-113): it isn't a new request
-    const declined = await setStatus(tx, row, { status: 'cancelled', cancelledBy: 'business', at })
-    await emit(tx, {
-      type: 'booking.declined',
-      businessId: declined.businessId,
-      bookingId: declined.id,
-      bookingCode: declined.code,
-      userId: declined.userId,
-    })
-    // a move refused before its booking's visit began is recorded and told; after it, neither (recordMoveRefused)
-    if ((await recordMoveRefused(tx, original, declined, { by: 'business', ...reason }, at.getTime())) && original.clientPhone)
-      await queueOutcomeSms(tx, 'moveRefused', original, declined.id, at)
+    await refuseMove(tx, original, row, at, reason)
   })
 }

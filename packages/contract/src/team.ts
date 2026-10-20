@@ -7,6 +7,7 @@ import { LEVELS } from '@yeral/domain/permissions'
 import { STAFF_STATUSES } from '@yeral/domain/model'
 import { z } from 'zod'
 import {
+  bookingCodeSchema,
   cityRefSchema,
   epochSchema,
   idSchema,
@@ -15,9 +16,12 @@ import {
   phoneInputSchema,
   phoneSchema,
   photoSchema,
+  minuteSchema,
   slugSchema,
   uniqueIdsSchema,
+  ymdSchema,
 } from './common'
+import { hoursMinuteSchema } from './settings'
 
 export const levelSchema = z.enum(LEVELS)
 /** The levels an owner gives; there is exactly one owner. */
@@ -123,6 +127,71 @@ export const updateMemberSchema = z
   .object({ level: assignableLevelSchema.optional(), canAnswerOwn: z.boolean().optional() })
   .refine((x) => x.level !== undefined || x.canAnswerOwn !== undefined, 'Change at least one thing')
   .meta({ id: 'UpdateMember' })
+
+// ── Removing someone (B-50) ──
+
+/**
+ * "Işgäri öçür". Bookings ahead with them make it 409 `bookings_affected` (each with the colleagues who do its
+ * services), removing nothing; it's sent again with the owner's choice: `move` to `to` (the time and the service kept,
+ * the client told), `keep` (they come to those, then go), or `cancel` (each client offered 3 other times). A booking
+ * `to` can't take, busy then or not doing its services, follows its row in `rows`, else is cancelled with 3 other
+ * times (no free colleague, B-Team).
+ */
+export const removeMemberSchema = z
+  .object({
+    affected: z.enum(['move', 'keep', 'cancel']).optional(),
+    to: idSchema.optional(),
+    rows: z
+      .array(z.object({ code: bookingCodeSchema, affected: z.enum(['keep', 'cancel']) }))
+      .max(500)
+      .optional(),
+  })
+  .strict()
+  .refine((x) => x.affected !== 'move' || !!x.to, { path: ['to'], message: 'Required to move' })
+  .meta({ id: 'RemoveMember' })
+
+/** What happened to the bookings ahead: moved to a colleague, kept, cancelled with offered times. */
+export const staffBookingsResultSchema = z
+  .object({ moved: z.number().int(), kept: z.number().int(), cancelled: z.number().int() })
+  .meta({ id: 'StaffBookingsResult' })
+
+// ── A team member's schedule (B-47) ──
+
+/** Breaks go in 5-minute steps (Aýna: Wednesday 14:00–14:40); the shift in the hours' steps. */
+const breakMinute = minuteSchema.refine((m) => m % 5 === 0, 'Every 5 minutes')
+
+/** A personal day off: "Rugsat, doglan gün we ş.m. Diňe biznesiň içinde görünýär." */
+export const dayOffSchema = z.object({ name: z.string().trim().min(1).max(40), from: ymdSchema, to: ymdSchema, yearly: z.boolean() })
+
+/**
+ * "Iş wagty" in the staff drawer: `shift` null works the business hours ("Biznes açyk wagty işleýär"), else own hours
+ * per weekday, Monday first (null = off that weekday), which never open time the business is closed; one break per
+ * weekday, which may differ; personal days off.
+ */
+export const staffScheduleSchema = z
+  .object({
+    shift: z
+      .array(z.object({ open: hoursMinuteSchema, close: hoursMinuteSchema }).nullable())
+      .length(7)
+      .nullable(),
+    breaks: z.array(z.object({ start: breakMinute, end: breakMinute }).nullable()).length(7),
+    daysOff: z.array(dayOffSchema).max(50),
+  })
+  .meta({ id: 'StaffSchedule' })
+export type StaffScheduleView = z.infer<typeof staffScheduleSchema>
+
+/**
+ * The schedule, saved at once (owner). Bookings ahead it leaves outside their day make it 409 `bookings_affected`,
+ * saving nothing; it's sent again with `move` (each to a free colleague who does its services, else 3 other times
+ * offered to the client) or `keep` (they stay; nothing new is booked then). New bookings follow the new schedule
+ * either way (book Q-211).
+ */
+export const staffScheduleUpdateSchema = staffScheduleSchema
+  .extend({ affected: z.enum(['move', 'keep']).optional() })
+  .strict()
+  .meta({ id: 'StaffScheduleUpdate' })
+
+export const staffScheduleResultSchema = staffScheduleSchema.extend(staffBookingsResultSchema.shape).meta({ id: 'StaffScheduleResult' })
 
 export const staffIdParamSchema = z.object({ slug: slugSchema, staffId: idSchema })
 export const workspaceParamSchema = z.object({ slug: slugSchema })

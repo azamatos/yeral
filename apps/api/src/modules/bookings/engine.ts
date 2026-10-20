@@ -4,6 +4,7 @@
  * that turns a lost race into 409 `slot_taken`, the services a booking re-books with, the client's waiting move, and the
  * business declining or cancelling.
  */
+import type { BookingsAffectedDetails } from '@yeral/contract/errors'
 import type { AppointmentQuery, AppointmentSlot } from '@yeral/domain/availability'
 import { cancelledByFor, effectiveStatus, firstSmsFrom, isConfirmationNews, type NewsQueued } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
@@ -18,7 +19,7 @@ import { emit, queueOutcomeSms } from '../../notify'
 import { OutsideHours, type LoadedBusiness } from '../availability/context'
 import { servicePrice } from '../catalog/map'
 import { newsJobs } from './confirm'
-import { isSlotConflict, itemsOfBookings, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from './repo'
+import { isSlotConflict, itemsOfBookings, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow, type ItemRow } from './repo'
 
 // ── Items and price ──
 
@@ -78,22 +79,19 @@ export interface BookedServices {
   staffId: string | null
 }
 
+/** A booking's services and its one specialist, from its items in their order. */
+export function bookedFrom(items: readonly Pick<ItemRow, 'serviceId' | 'staffId'>[]): BookedServices {
+  const first = items[0]?.staffId ?? null
+  return {
+    serviceIds: items.flatMap((i) => (i.serviceId ? [i.serviceId] : [])),
+    staffId: first && items.every((i) => i.staffId === first) ? first : null,
+  }
+}
+
 /** `bookedServices` for several bookings in one query. */
 export async function bookedServicesOf(db: Queryable, bookingIds: readonly string[]): Promise<Map<string, BookedServices>> {
   const items = await itemsOfBookings(db, bookingIds)
-  return new Map(
-    bookingIds.map((id) => {
-      const mine = items.filter((i) => i.bookingId === id)
-      const first = mine[0]?.staffId ?? null
-      return [
-        id,
-        {
-          serviceIds: mine.flatMap((i) => (i.serviceId ? [i.serviceId] : [])),
-          staffId: first && mine.every((i) => i.staffId === first) ? first : null,
-        },
-      ]
-    }),
-  )
+  return new Map(bookingIds.map((id) => [id, bookedFrom(items.filter((i) => i.bookingId === id))]))
 }
 
 export async function bookedServices(db: Queryable, bookingId: string): Promise<BookedServices> {
@@ -231,4 +229,70 @@ export async function cancelForBusiness(
       at,
     )
   return cancelled
+}
+
+// ── The bookings a change leaves out ──
+
+/** The affected bookings a 409 lists one by one; the count and the counts per specialist cover them all. */
+const LISTED = 50
+
+/**
+ * `bookings_affected` (B-39, B-40, B-47, B-50): how many, per specialist (most first), and each booking with its client
+ * and specialists; `colleagues`, when removing someone, names who could take each one.
+ */
+export function affectedDetails(
+  rows: readonly BookingRow[],
+  items: readonly ItemRow[],
+  colleagues?: (b: BookingRow, items: readonly ItemRow[]) => { staffId: string; name: string }[],
+): BookingsAffectedDetails {
+  const byStaff = new Map<string, { staffId: string; name: string; bookings: Set<string> }>()
+  for (const i of items) {
+    if (!i.staffId) continue
+    const s = byStaff.get(i.staffId) ?? { staffId: i.staffId, name: i.staffName ?? '', bookings: new Set<string>() }
+    s.bookings.add(i.bookingId)
+    byStaff.set(i.staffId, s)
+  }
+  return {
+    count: rows.length,
+    byStaff: [...byStaff.values()]
+      .map((s) => ({ staffId: s.staffId, name: s.name, count: s.bookings.size }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
+    bookings: rows.slice(0, LISTED).map((r) => {
+      const mine = items.filter((i) => i.bookingId === r.id)
+      return {
+        code: r.code,
+        date: r.date,
+        start: r.start,
+        end: r.end,
+        client: r.clientName,
+        staff: [...new Set(mine.flatMap((i) => (i.staffName ? [i.staffName] : [])))],
+        ...(colleagues ? { colleagues: colleagues(r, mine) } : {}),
+      }
+    }),
+  }
+}
+
+/**
+ * A client's waiting move refused by the business (the caller holds the booking's lock, then the move's): the booking
+ * keeps its time and says so with the reason, and the client hears it while the visit is ahead (B-21, book Q-289). Its
+ * answer isn't counted toward the answer time (book Q-113): it isn't a new request.
+ */
+export async function refuseMove(
+  tx: Queryable,
+  original: BookingRow,
+  move: BookingRow,
+  at: Date,
+  reason: { reason: DeclineReason; text: string | null },
+): Promise<void> {
+  const declined = await setStatus(tx, move, { status: 'cancelled', cancelledBy: 'business', at })
+  await emit(tx, {
+    type: 'booking.declined',
+    businessId: declined.businessId,
+    bookingId: declined.id,
+    bookingCode: declined.code,
+    userId: declined.userId,
+  })
+  // a move refused before its booking's visit began is recorded and told; after it, neither (recordMoveRefused)
+  if ((await recordMoveRefused(tx, original, declined, { by: 'business', ...reason }, at.getTime())) && original.clientPhone)
+    await queueOutcomeSms(tx, 'moveRefused', original, declined.id, at)
 }

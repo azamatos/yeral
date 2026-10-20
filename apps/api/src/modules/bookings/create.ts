@@ -17,7 +17,6 @@ import {
   type AppointmentSlot,
 } from '@yeral/domain/availability'
 import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES, toldOf, waitingLimit } from '@yeral/domain/lifecycle'
-import { withinHours } from '@yeral/domain/hours'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, isNull, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -28,8 +27,8 @@ import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import {
   appointmentContext,
+  assertOpenAt,
   checkStaff,
-  OutsideHours,
   lockedHours,
   loadBusiness,
   loadBusy,
@@ -127,8 +126,10 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
   const end = x.placement.slot?.end ?? x.placement.table?.end ?? x.placement.session?.end ?? x.start
   // the hours as they stand (an hours save may have just committed): the visit in them, the hold counted by them; a
   // class runs on its session's own schedule
-  const hours = await lockedHours(db, x.lb.business.id)
-  if (x.type !== 'class' && !withinHours(hours, x.date, { start: x.start, end })) throw new OutsideHours()
+  const hours =
+    x.type === 'class'
+      ? await lockedHours(db, x.lb.business.id)
+      : await assertOpenAt(db, x.lb.business.id, { date: x.date, start: x.start, end }, x.placement.slot?.items)
   const [row] = await db
     .insert(bookings)
     .values({

@@ -1705,7 +1705,7 @@ flowchart TD
 
 > Open question Q-211: changing hours or a shift with bookings outside.
 
-**Status** — Design: drawn (B-Team · `panel=staff`) · Code: rule only (domain: shifts inside business hours, one break per day, personal days off); schema has these fields.
+**Status** — Design: drawn (B-Team · `panel=staff`) · Code: api built (20.10.2026): `GET`/`PUT /v1/w/{slug}/team/{staffId}/schedule` (the owner saves, administrators read); bookings ahead it leaves outside the day are asked about first (409 `bookings_affected`), then `move` (each to a free colleague who does its services, else 3 other times) or `keep`; a booking being made checks the specialist's day under the business's lock.
 
 ### B-48 · Change access level and request override
 
@@ -1806,7 +1806,7 @@ flowchart TD
 - No free colleague for a moved booking: the client gets 3 other times (B-Team).
 - A person who leaves by themself (B-15) leaves their bookings for the owner to handle with this same flow.
 
-**Status** — Design: drawn (B-Team · `panel=disable`) · Code: schema only (staff status active, invited, disabled).
+**Status** — Design: drawn (B-Team · `panel=disable`) · Code: api built (20.10.2026): `POST /v1/w/{slug}/team/{staffId}/remove` asks first (409 `bookings_affected`, each booking with the colleagues who do its services), then `move` to one colleague (a booking they can't take follows its row, else 3 other times), `keep` or `cancel` with 3 other times; someone who left by themself is settled the same way; reactivate as before.
 
 ### B-51 · Transfer ownership
 

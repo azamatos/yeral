@@ -11,7 +11,12 @@ import {
   inviteSentSchema,
   inviteTokenParamSchema,
   phoneOnlyInputSchema,
+  removeMemberSchema,
+  staffBookingsResultSchema,
   staffIdParamSchema,
+  staffScheduleResultSchema,
+  staffScheduleSchema,
+  staffScheduleUpdateSchema,
   teamMemberSchema,
   teamSchema,
   updateMemberSchema,
@@ -29,6 +34,8 @@ import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { sha256Hex } from '../../lib/crypto'
 import { requireUser } from '../auth/session'
+import { loadHours } from '../availability/context'
+import { removeMember, scheduleOf, updateSchedule } from './away'
 import {
   hasJoined,
   hasServices,
@@ -37,6 +44,7 @@ import {
   issueInvite,
   member,
   members,
+  removeRow,
   requireMember,
   reusableRow,
   rowsForPhone,
@@ -153,9 +161,25 @@ const removeRoute = createRoute({
   method: 'post',
   path: '/w/{slug}/team/{staffId}/remove',
   tags,
-  summary: 'Remove someone (owner): they lose access and leave the client site; their future bookings stay as they are',
+  summary: 'Remove someone (owner): they lose access and leave the client site; their bookings ahead are moved, kept or cancelled',
+  request: { params: staffIdParamSchema, ...jsonBody(removeMemberSchema) },
+  responses: { 200: json(staffBookingsResultSchema, 'Removed'), 400: errors[400], 409: errors[409], ...ownerOnly },
+})
+const scheduleRoute = createRoute({
+  method: 'get',
+  path: '/w/{slug}/team/{staffId}/schedule',
+  tags,
+  summary: 'A team member’s shift, breaks and days off (owner; administrators read them)',
   request: { params: staffIdParamSchema },
-  responses: { ...noContent, ...ownerOnly },
+  responses: { 200: json(staffScheduleSchema), ...ownerOnly },
+})
+const scheduleUpdateRoute = createRoute({
+  method: 'put',
+  path: '/w/{slug}/team/{staffId}/schedule',
+  tags,
+  summary: 'Save a team member’s schedule (owner); bookings it leaves outside their day are asked about first (409)',
+  request: { params: staffIdParamSchema, ...jsonBody(staffScheduleUpdateSchema) },
+  responses: { 200: json(staffScheduleResultSchema), 400: errors[400], 409: errors[409], ...ownerOnly },
 })
 const reactivateRoute = createRoute({
   method: 'post',
@@ -385,14 +409,19 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     const { slug, staffId } = c.req.valid('param')
     const { business, actor } = await requireMember(c, slug)
     assertOwner(actor)
-    const { deps } = c.var
-    await deps.db.transaction(async (tx) => {
-      const row = await teamRow(tx, business.id, staffId)
-      notOwnerRow(row)
-      await removeRow(tx, row, deps.now())
-      await teamChanged(tx, business.id, { userId: row.userId })
-    })
-    return c.body(null, 204)
+    return c.json(await removeMember(c.var.deps, business, staffId, c.req.valid('json')), 200)
+  })
+  .openapi(scheduleRoute, async (c) => {
+    const { slug, staffId } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    if (!can(actor, 'team')) throw new ApiError('forbidden')
+    return c.json(await scheduleOf(c.var.deps.db, business, staffId), 200)
+  })
+  .openapi(scheduleUpdateRoute, async (c) => {
+    const { slug, staffId } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    assertOwner(actor)
+    return c.json(await updateSchedule(c.var.deps, business, staffId, c.req.valid('json')), 200)
   })
   .openapi(reactivateRoute, async (c) => {
     const { slug, staffId } = c.req.valid('param')
@@ -431,24 +460,13 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     if (row.level === 'owner') throw new ApiError('owner_cannot_leave')
     const { deps } = c.var
     await deps.db.transaction(async (tx) => {
+      // ordered with the bookings being made for them, as a removal is (their bookings stay for the owner, B-15)
+      await loadHours(tx, business.id, { lock: 'no key update' })
       await removeRow(tx, row, deps.now())
       await teamChanged(tx, business.id, { userId: row.userId })
     })
     return c.body(null, 204)
   })
-
-/**
- * Off the team: no access, off the client site; their future bookings stay in their column as they are (the other
- * choices of the remove flow come with the business bookings). The account stays linked, so those bookings still
- * block them elsewhere (Başga ýerde).
- */
-async function removeRow(db: Parameters<typeof teamRow>[0], row: StaffRow, now: number) {
-  await db.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.id, row.id))
-  await db
-    .update(invites)
-    .set({ status: 'cancelled', answeredAt: new Date(now) })
-    .where(and(eq(invites.staffId, row.id), eq(invites.status, 'pending')))
-}
 
 /** An invite the signed-in phone may still answer; someone else's is "not found". */
 async function openInvite(db: Parameters<typeof teamRow>[0], id: string, phone: string, now: number) {
