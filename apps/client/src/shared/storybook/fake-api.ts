@@ -57,20 +57,95 @@ export function fakeFetch(handle: (request: FakeRequest) => Response | Promise<R
   }
 }
 
+/** The codes the fake hands out, one after another (the first launch shows them on the screen). */
+export const CODES = ['4821', '7305', '1946', '5582', '3067']
+
+export interface AuthApiOptions {
+  /** People with an account, by E.164 phone; any other number signs up afresh (no name yet). */
+  people?: Me[]
+  /** Accounts unused for 6 months: "Is this you?" first (book Q-270). */
+  unused?: string[]
+  /** Signed in when the page opens. */
+  signedIn?: Me | null
+  /** First-launch mode: the code comes back with `POST /auth/code` (book Q-036). */
+  showCode?: boolean
+  /** Codes this number already had this hour (5 is the limit, book Q-267). */
+  codes?: number
+  /** How long 3 wrong codes lock (60 on the api). */
+  lockSec?: number
+  /** How soon a new code may be asked for (59 on the api). */
+  resendSec?: number
+  /** The session can't be ended (no connection). */
+  logoutFails?: boolean
+}
+
 /**
- * The account side of the api: who is signed in (`GET /me`) and logging out. `signedIn`: the person when the page
- * opens; `logoutFails`: the session can't be ended (no connection).
+ * The sign-in and the account as the api answers them: codes (3 wrong ones lock, 5 an hour, a new one after 59 s),
+ * "Is this you?", the name (`PATCH /me`), who is signed in, logging out.
  */
-export const accountApi =
-  ({ signedIn = null, logoutFails = false }: { signedIn?: Me | null; logoutFails?: boolean } = {}) =>
+export const authApi =
+  ({
+    people = [],
+    unused = [],
+    signedIn = null,
+    showCode = true,
+    codes = 0,
+    lockSec = 60,
+    resendSec = 59,
+    logoutFails = false,
+  }: AuthApiOptions = {}) =>
   (): typeof fetch => {
+    const accounts = new Map(people.map((p) => [p.phone, structuredClone(p)]))
     let me: Me | null = signedIn && structuredClone(signedIn)
-    return fakeFetch(({ route }) => {
-      if (route === 'GET /me') return me ? json(me) : refuse(401, 'unauthorized')
+    let sent = codes
+    let sentAt = 0
+    let wrong = 0
+    let phone: string | undefined
+    const code = () => CODES[(sent - 1) % CODES.length]
+    return fakeFetch(({ route, body }) => {
+      if (route === 'POST /auth/code') {
+        if (sent >= 5) return refuse(429, 'rate_limited', { retryAfterSec: 2520, retryAfterMin: 42 })
+        if (body.phone === phone && Date.now() - sentAt < resendSec * 1000) return refuse(429, 'resend_too_soon', { retryAfterSec: 50 })
+        phone = String(body.phone)
+        sentAt = Date.now()
+        sent += 1
+        wrong = 0
+        return json({ resendAfterSec: resendSec, expiresInSec: 300, ...(showCode ? { code: code() } : {}) })
+      }
+      if (route === 'POST /auth/verify') {
+        if (wrong >= 3) return refuse(429, 'too_many_attempts', { retryAfterSec: lockSec })
+        if (body.code !== code()) {
+          wrong += 1
+          return wrong >= 3
+            ? refuse(429, 'too_many_attempts', { retryAfterSec: lockSec })
+            : refuse(400, 'code_invalid', { attemptsLeft: 3 - wrong })
+        }
+        const number = String(body.phone)
+        if (unused.includes(number))
+          return json({ isThisYou: { name: accounts.get(number)?.firstName ?? null, ticket: 'ticket-1234567890' } }, 202)
+        me = accounts.get(number) ?? person(number, null)
+        accounts.set(number, me)
+        return json({ me, isNew: !me.firstName })
+      }
+      if (route === 'POST /auth/identity') {
+        if (!phone) return refuse(400, 'code_expired')
+        me = body.yes ? (accounts.get(phone) ?? person(phone, null)) : person(phone, null)
+        accounts.set(phone, me)
+        return json({ me, isNew: !me.firstName })
+      }
       if (route === 'POST /auth/logout') {
         if (logoutFails) return Promise.reject(new TypeError('offline'))
         me = null
         return json(null, 204)
+      }
+      if (route === 'GET /me') return me ? json(me) : refuse(401, 'unauthorized')
+      if (!me) return refuse(401, 'unauthorized')
+      if (route === 'PATCH /me') {
+        const firstName = typeof body.firstName === 'string' ? body.firstName : me.firstName
+        const surname = body.surname === undefined ? me.surname : ((body.surname as string | null) ?? null)
+        me = { ...me, firstName, surname, name: [firstName, surname].filter(Boolean).join(' ') || null }
+        accounts.set(me.phone, me)
+        return json(me)
       }
       return undefined
     })

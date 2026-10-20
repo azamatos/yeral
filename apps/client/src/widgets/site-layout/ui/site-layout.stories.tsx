@@ -4,7 +4,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { accountApi, AYJEMAL, PageStory, person } from '@/shared/storybook'
+import { authApi, AYJEMAL, PageStory, person } from '@/shared/storybook'
 import { SiteLayout } from './site-layout'
 
 function Page() {
@@ -19,7 +19,7 @@ const meta = {
   title: 'Client/Widgets/SiteLayout',
   component: PageStory,
   parameters: { layout: 'fullscreen' },
-  args: { routes: { '/$lang': Page }, server: accountApi() },
+  args: { routes: { '/$lang': Page }, server: authApi() },
 } satisfies Meta<typeof PageStory>
 export default meta
 type Story = StoryObj<typeof meta>
@@ -43,7 +43,7 @@ export const SignedOut: Story = {
 
 /** Signed in: the avatar's menu says who, and «Log out» brings «Log in» back. */
 export const SignedIn: Story = {
-  args: { server: accountApi({ signedIn: AYJEMAL }) },
+  args: { server: authApi({ signedIn: AYJEMAL }) },
   play: async ({ canvas }) => {
     const avatar = await canvas.findByRole('button', { name: 'Account menu: Aýjemal Gurbanowa' })
     await userEvent.click(avatar)
@@ -58,7 +58,7 @@ export const SignedIn: Story = {
 
 /** The menu is a popover: Esc closes it and the avatar has the focus again. */
 export const MenuKeyboard: Story = {
-  args: { server: accountApi({ signedIn: AYJEMAL }) },
+  args: { server: authApi({ signedIn: AYJEMAL }) },
   play: async ({ canvas }) => {
     const avatar = await canvas.findByRole('button', { name: /Account menu/ })
     avatar.focus()
@@ -71,7 +71,7 @@ export const MenuKeyboard: Story = {
 
 /** Logging out failed (no connection): the menu stays, a toast says why. */
 export const LogOutFails: Story = {
-  args: { server: accountApi({ signedIn: AYJEMAL, logoutFails: true }) },
+  args: { server: authApi({ signedIn: AYJEMAL, logoutFails: true }) },
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: /Account menu/ }))
     await userEvent.click(await body.findByRole('menuitem', { name: 'Log out' }))
@@ -84,7 +84,7 @@ export const LogOutFails: Story = {
 
 /** Signed in before giving a name: a person icon, and the menu leads with the phone. */
 export const NoNameYet: Story = {
-  args: { server: accountApi({ signedIn: person('+99364215590', null) }) },
+  args: { server: authApi({ signedIn: person('+99364215590', null) }) },
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: 'Account menu' }))
     const phone = await body.findByText('+993 64 21 55 90')
@@ -95,7 +95,7 @@ export const NoNameYet: Story = {
 
 /** A long name (Russian runs ~30% longer): it wraps in the menu instead of widening it. */
 export const LongName: Story = {
-  args: { server: accountApi({ signedIn: person('+99365901122', 'Aýjemal-Gülälek', 'Gurbanmuhammedowa-Öwezgeldiýewa') }) },
+  args: { server: authApi({ signedIn: person('+99365901122', 'Aýjemal-Gülälek', 'Gurbanmuhammedowa-Öwezgeldiýewa') }) },
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: /Account menu/ }))
     const menu = await body.findByRole('menu')
@@ -107,7 +107,7 @@ export const LongName: Story = {
 /** Phone: 56-high header, no «For business»; the avatar opens a bottom sheet with the same rows. */
 export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
-  args: { server: accountApi({ signedIn: AYJEMAL }) },
+  args: { server: authApi({ signedIn: AYJEMAL }) },
   play: async ({ canvas }) => {
     await expect(canvas.queryByRole('link', { name: 'For business' })).toBeNull()
     await userEvent.click(await canvas.findByRole('button', { name: /Account menu/ }))

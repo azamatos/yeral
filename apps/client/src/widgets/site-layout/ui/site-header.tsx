@@ -5,12 +5,14 @@ import { Logo } from '@yeral/ui/brand'
 import { Button } from '@yeral/ui/button'
 import { LanguageSwitcher } from '@yeral/ui/language-switcher'
 import { NavLink } from '@yeral/ui/nav-link'
+import { useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { LoginModal } from '@/features/log-in'
 import { site } from '@/shared/config'
 import { SITE_LOCALES } from '@/shared/i18n'
 import { wrap } from '@/shared/ui'
 import { useSwitchLanguage } from '../model/use-switch-language'
-import { AccountMenu } from './account-menu'
+import { AccountMenu, visibleAccountTrigger } from './account-menu'
 
 /**
  * The marketing header (Home, Auth «Logged-in header», States 09): the logo home, «For business», the language (none
@@ -23,6 +25,9 @@ export function SiteHeader() {
   const sdk = useSdk()
   const me = useQuery(sdk.me.get())
   const switchLanguage = useSwitchLanguage()
+  const [loggingIn, setLoggingIn] = useState(false)
+  const navRef = useRef<HTMLElement>(null)
+  const logInRef = useRef<HTMLAnchorElement>(null)
   const brand = t('common.brand')
 
   return (
@@ -37,7 +42,7 @@ export function SiteHeader() {
           <Logo alt={brand} height={30} className="max-sm:h-6! max-sm:w-auto" />
         </Link>
         <div className="flex-1" />
-        <nav className="flex items-center gap-1">
+        <nav ref={navRef} className="flex items-center gap-1">
           <NavLink href={site.urls.business} className="max-sm:hidden">
             {t('site.forBusiness')}
           </NavLink>
@@ -53,13 +58,32 @@ export function SiteHeader() {
             <AccountMenu me={me.data} />
           ) : (
             <Button asChild variant="secondary" size="s">
-              <Link to="/$lang/login" params={{ lang: locale }}>
+              {/* the login's address without JavaScript; with it, the modal over this page (client spec §3) */}
+              <Link
+                ref={logInRef}
+                to="/$lang/login"
+                params={{ lang: locale }}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setLoggingIn(true)
+                }}
+              >
                 {t('site.logIn')}
               </Link>
             </Button>
           )}
         </nav>
       </div>
+      <LoginModal
+        open={loggingIn}
+        onOpenChange={setLoggingIn}
+        onSignedIn={() => setLoggingIn(false)}
+        // back on «Log in»; once someone is signed in it's gone, and the avatar that took its place has the focus
+        onCloseAutoFocus={(e) => {
+          e.preventDefault()
+          ;(visibleAccountTrigger(navRef.current) ?? logInRef.current)?.focus()
+        }}
+      />
     </header>
   )
 }
