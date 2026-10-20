@@ -177,7 +177,7 @@ flowchart TD
 
 **Code differs**
 
-- There is no specialist-gender filter (staff have no such field), and *Bahasy* is a maximum price only, not a range (code: `packages/contract/src/catalog.ts`, `maxPrice`).
+- There is no specialist-gender filter (staff have no such field; F-012 is Later).
 - The party filter accepts 1–8 for every restaurant; the business's own online limit (D1) isn't used yet (code: `MAX_ONLINE_PARTY`).
 
 **Status:** Design: drawn (Search · `party`; States 01, 08; Mobile 2); filters drawer text only · Code: built (api) — `GET /v1/search`; no specialist-gender filter.

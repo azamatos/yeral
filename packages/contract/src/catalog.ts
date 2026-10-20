@@ -136,6 +136,8 @@ const searchFields = langQuerySchema.extend(cursorQuerySchema.shape).extend({
   week: boolQuery.optional(),
   sort: z.enum(SEARCH_SORTS).default('distance'),
   minRating: z.coerce.number().min(0).max(5).optional(),
+  /** The price range (book C-03): places with a paid online service inside it; one whose services are all free from 0. */
+  minPrice: z.coerce.number().int().min(0).optional(),
   maxPrice: z.coerce.number().int().min(0).optional(),
   openNow: boolQuery.optional(),
   type: bookingTypeSchema.optional(),

@@ -21,6 +21,20 @@ export const likeOf = (q: string) => `%${escapeLike(q)}%`
 /** At the start of a word (suggestions): `ma` finds "Manikýur", not "massažy" inside "Arka massažy". */
 export const wordStartLikes = (q: string) => [`${escapeLike(q)}%`, `% ${escapeLike(q)}%`] as const
 
+/**
+ * A price range keeps the places with a known price inside it (book Q-103: no average bill for the rest): one of their
+ * paid online services costs between `min` and `max` ("from 250" counts as 250), or, for a range from 0, every one of
+ * their online services is free. Tables show no price, so they never match. The same prices the card's `priceFrom` reads.
+ */
+function priceWithin(min: number, max: number | null): SQL {
+  const shown = sql`${services.businessId} = ${businesses.id} and ${services.online} and not ${services.archived}`
+  const paid = sql`${services.priceType} in ('fixed', 'from')`
+  const inRange = max === null ? sql`${services.priceAmount} >= ${min}` : sql`${services.priceAmount} between ${min} and ${max}`
+  const anyPaid = sql`exists (select 1 from ${services} where ${shown} and ${paid} and ${inRange})`
+  const allFree = sql`(exists (select 1 from ${services} where ${shown} and ${services.priceType} = 'free') and not exists (select 1 from ${services} where ${shown} and ${paid}))`
+  return sql`(${businesses.bookingTypes})[1] <> 'table' and (${anyPaid}${min === 0 ? sql` or ${allFree}` : sql``})`
+}
+
 export async function search(deps: Deps, q: SearchQuery) {
   const { db } = deps
   const date = q.date ?? today(deps.now())
@@ -36,6 +50,7 @@ export async function search(deps: Deps, q: SearchQuery) {
   if (q.type) where.push(sql`${q.type} = any(${businesses.bookingTypes})`)
   if (q.womenOnly) where.push(eq(businesses.womenOnly, true))
   if (q.minRating !== undefined) where.push(gte(businesses.rating, q.minRating))
+  if (q.minPrice !== undefined || q.maxPrice !== undefined) where.push(priceWithin(q.minPrice ?? 0, q.maxPrice ?? null))
   if (q.bbox) {
     const [minLat, minLng, maxLat, maxLng] = q.bbox
     where.push(between(businesses.lat, minLat, maxLat), between(businesses.lng, minLng, maxLng))
@@ -77,8 +92,6 @@ export async function search(deps: Deps, q: SearchQuery) {
     .filter((x) => x.hasFree)
     .map((x) => x.card)
     .filter((c) => !q.openNow || c.open.open)
-    // a price limit keeps the places with a known price inside it (no average bill for the rest, book Q-103)
-    .filter((c) => q.maxPrice === undefined || (c.priceFrom !== null && c.priceFrom.amount <= q.maxPrice))
 
   // the address breaks ties, so a page always holds the same places
   const byPopularity = (a: (typeof cards)[number], b: (typeof cards)[number]) =>

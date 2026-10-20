@@ -82,7 +82,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    reviews (Q-254, Q-206, Q-126; the rules done 20.10.2026, the business's complaint endpoint with step 4), at most 3 waiting requests per business and 10 in all (Q-124; done 20.10.2026), the cancel reason
    setting (Q-163; done 20.10.2026), the 4 undo reasons (ROUND6 A6; done 20.10.2026), the answer time worked out (Q-113; done 20.10.2026, declines count with step 4), phone-only clients and paused
    businesses (Q-154; done 20.10.2026: the business page, the booking detail and the link page), the owner's preview of an unverified page (F-032; done 20.10.2026), no average bill and the hidden-price text
-   (Q-103; done 20.10.2026), lateness fixed at 15 min (Q-118; done 20.10.2026), a price range filter, the failed-SMS alert and late reminders dropped
+   (Q-103; done 20.10.2026), lateness fixed at 15 min (Q-118; done 20.10.2026), a price range filter (done 20.10.2026), the failed-SMS alert and late reminders dropped
    (Q-284), the SMS for a move not accepted (Q-289; done 20.10.2026), offered times keeping a request on top of Upcoming (C-40; done 20.10.2026); and the new engine rules: *Başga ýerde* (Q-272), blocked time
    (F-121) and internal statuses (F-104, F-133).
 4. **Business endpoints:** workspace, calendar, requests, bookings with CSV export (F-135), clients, team, settings,
