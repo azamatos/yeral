@@ -191,7 +191,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .abr-no svg{flex:none}
 </style>
 </helmet>
-<div style="width: 1600px; min-height: 8840px; padding: 64px 80px; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; color: #101014; display: flex; flex-direction: column; gap: 56px">
+<div style="width: 1600px; min-height: 9000px; padding: 64px 80px; font-family: 'Onest', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; color: #101014; display: flex; flex-direction: column; gap: 56px">
 
 <div style="display: flex; flex-direction: column; gap: 10px">
 <span class="lbl">business.yeral.app · app shell · v0.6 round 3</span>
@@ -337,7 +337,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 
 <section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-bn">
-<div class="shd"><span class="lbl">Banners under the top bar · business status (one at a time, no dismiss) · then notifications</span><h2 id="s-bn" class="h2">In review · Not approved · Demo · Notifications</h2></div>
+<div class="shd"><span class="lbl">Banners under the top bar · business status (one at a time, no dismiss) · then notifications</span><h2 id="s-bn" class="h2">In review · Not approved · Hidden by Ýeral · Demo · Notifications</h2></div>
 <div style="display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; align-items: start">
 <div class="col" style="gap: 20px">
 <span class="lbl">1 · In review · a new business, until the Ýeral team checks it</span>
@@ -352,14 +352,17 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <span class="lbl" style="padding-top: 8px">2 · Not approved · the Ýeral team sent it back</span>
 <div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnt"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm bna" href="B-Settings.dc.html">Fix and send again</a></div>
 <span class="cap">Danger tones; the reason is the Ýeral team’s text. “Fix and send again” opens the settings section the reason points to (here Business profile → photos) with the reason on top; saving there sends the page for review again and the banner goes back to In review. The calendar keeps working; the page stays hidden from clients.</span>
-<span class="lbl" style="padding-top: 8px">3 · Demo · “Try the business app”, signed out</span>
+<span class="lbl" style="padding-top: 8px">3 · Hidden by Ýeral · after clients’ reports</span>
+<div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"></path><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"></path><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"></path><path d="m2 2 20 20"></path></svg><span class="bnt"><b>Ýeral has hidden your page:</b> Clients reported that your page shows the wrong address. Clients can’t find or book you.</span><a class="b b-sec b-sm bna" href="#contact">Contact Ýeral</a></div>
+<span class="cap">Danger tones, no dismiss; the owner and admins see it, like Not approved. The reason is the Ýeral team’s text. “Contact Ýeral” opens the same Call / Write on Telegram menu as the account menu. The team keeps working in the calendar; clients can’t find or book the business until Ýeral shows the page again.</span>
+<span class="lbl" style="padding-top: 8px">4 · Demo · “Try the business app”, signed out</span>
 <div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnt"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm bna" href="B-Onboarding.dc.html">Create your business</a></div>
 <span class="cap">Neutral tones, flask icon (the ExampleBadge icon). “Try the business app” (B-Landing, B-Login) opens one shared demo workspace at once, without signing in — it is not a membership and never appears in anyone’s switcher. Sample data; nothing reaches any client. “Create your business” → /setup.</span>
-<span class="lbl" style="padding-top: 8px">4 · Notifications · ask</span>
+<span class="lbl" style="padding-top: 8px">5 · Notifications · ask</span>
 <div class="bnr c-acc" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg><span class="bnt"><b>Turn on notifications to hear new requests.</b></span><a class="b b-sec b-sm bna" href="#">Allow</a></div>
-<span class="lbl" style="padding-top: 8px">5 · Notifications · blocked in this browser</span>
+<span class="lbl" style="padding-top: 8px">6 · Notifications · blocked in this browser</span>
 <div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 0 .6 5"></path><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path><path d="m2 2 20 20"></path></svg><span class="bnt">Notifications are blocked in this browser. Allow them in the browser’s settings.</span><button class="b b-gho b-ic" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
-<span class="cap">For people who may answer requests, until the browser permission is decided. “Allow” opens the browser’s own prompt; allowed → the banner goes away (new requests then come as the toast + a browser notification, with sound). Blocked → the quiet line, which can be closed and stays closed in this browser. Under a business status banner when both show.</span>
+<span class="cap">Shows to everyone who gets notifications in this workspace: the owner and admins hear every new request; a Specialist hears requests and time changes for her. It stays until the browser permission is decided. “Allow” opens the browser’s own prompt; allowed → the banner goes away (new requests then come as the toast + a browser notification, with sound). Blocked → the quiet line, which can be closed and stays closed in this browser. Under a business status banner when both show.</span>
 </div>
 <div class="col">
 <span class="lbl">Demo · signed out · sidebar</span>
@@ -425,7 +428,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </section>
 
 <section style="display: flex; flex-direction: column; gap: 24px" aria-labelledby="s-lv">
-<div class="shd"><span class="lbl">Access levels · sidebar</span><h2 id="s-lv" class="h2">Owner · Admin · Specialist</h2><p class="dev" style="max-width: 1000px">Three fixed access levels, no custom roles; access levels are fixed at the first release. What a level can’t use is <b>hidden, not disabled</b> — menu items, money, buttons. Same shell markup; only the items, the counts and the level under the workspace name change.</p></div>
+<div class="shd"><span class="lbl">Access levels · sidebar</span><h2 id="s-lv" class="h2">Owner · Admin · Specialist</h2><p class="dev" style="max-width: 1000px">Three fixed access levels, no custom roles. What a level can’t use is <b>hidden, not disabled</b> — menu items, money, buttons. Same shell markup; only the items, the counts and the level under the workspace name change.</p></div>
 <div style="display: grid; grid-template-columns: 250px 250px 250px minmax(0, 1fr); gap: 40px; align-items: start">
 <div class="col">
 <span class="lbl">Owner · Maýsa Annaýewa</span>
@@ -482,7 +485,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 <ul class="hid">
 <li>Hidden: <b>sums</b> — revenue lines, client totals and average checks. Booking prices stay visible: they are booking information.</li>
-<li><b>Team</b> and Permissions are view-only (no invite, no remove).</li>
+<li><b>Team</b> (with shifts and time off) and Permissions are view-only — only the owner changes them.</li>
 <li>Answers requests (6) and reviews (4).</li>
 </ul>
 </div>
@@ -547,12 +550,11 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 </div>
 </sc-for>
 </div>
-<span class="cap">Access levels are fixed at the first release.</span>
 </div>
 <div class="col">
 <ul class="hid">
 <li>Read-only everywhere: no switches, no selects, no save bar.</li>
-<li>A Specialist doesn’t see Settings (her profile is in My profile); an Admin sees Team and Permissions read-only.</li>
+<li>A Specialist doesn’t see Settings (her profile is in My profile); an Admin sees Team (shifts and time off included) and Permissions read-only — only the owner changes them.</li>
 <li>“Own” = only their own bookings, clients and earnings; others’ time shows as “Busy”.</li>
 <li>A Specialist with “Uses the app” off never signs in, so the table doesn’t apply to them.</li>
 </ul>
@@ -694,7 +696,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":8840}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":9000}}'>
 class Component extends DCLogic {
   renderVals() {
     // V06-R3-BRIEF §1 · fixed permissions (read-only; the same rows on B-Team and DS-Business)
@@ -711,7 +713,7 @@ class Component extends DCLogic {
       ['Reply to and report reviews', Y, Y, N],
       ['Change services and prices', Y, Y, N],
       ['Change business settings (profile, rules, hours, link and QR)', Y, Y, N],
-      ['Shifts and time off', Y, Y, 'See own'],
+      ['Shifts and time off', Y, 'View only', 'See own'],
       ['Manage the team (invite, remove, access level, “Uses the app”)', Y, 'View only', N]
     ];
     const cell = (v, i) => {

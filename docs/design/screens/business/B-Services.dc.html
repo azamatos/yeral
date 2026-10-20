@@ -486,6 +486,8 @@ button.sn:hover{background:#f4f4f6}
 .ckl .av{width:32px;height:32px}
 .drw .tabs{gap:20px}
 .drw .tab{height:40px}
+.whc{display:flex;flex-direction:column;min-width:0}
+.tginv{background:#fef6e7;color:#93500a}
 /* responsive: 768–1023 icon rail + chip row (Settings media above); lists drop columns into the name cell; under 768 rows stack, drawer and modals are bottom sheets */
 @media (min-width:1280px){.dsc{display:none}}
 @media (max-width:1023px){
@@ -528,9 +530,12 @@ button.sn:hover{background:#f4f4f6}
 .drw-b{padding:20px 16px}
 .drw-f{padding:12px 16px 16px}
 .drw-f .b{flex:1 1 auto}
-.dayr{grid-template-columns:52px 84px minmax(0,1fr)}
-.dayr .tsel{width:88px}
+.dayr{grid-template-columns:46px 84px minmax(0,1fr)}
+.dayr .tsel{width:82px}
 .dtm{flex-wrap:nowrap;gap:4px}
+.dbk{grid-column:2 / 4;justify-content:flex-start}
+.dbk:empty{display:none}
+.dbr .wbl{width:auto;padding-right:6px}
 .sumr{grid-template-columns:96px minmax(0,1fr) auto}
 .stl{display:none}
 .stp.cur .stl{display:inline}
@@ -630,9 +635,9 @@ button.sn:hover{background:#f4f4f6}
 <button class="hdl" aria-label="{{r.dragLabel}}" onKeyDown="{{r.dragKey}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button>
 <div class="sname"><button class="rbtn" aria-haspopup="dialog" onClick="{{r.open}}">{{r.name}}</button><sc-if value="{{r.hasDesc}}" hint-placeholder-val="{{true}}"><span class="cap">{{r.desc}}</span></sc-if><span class="cap c-meta">{{r.meta}}</span></div>
 <div class="cell c-du"><span class="num">{{r.dur}}</span><sc-if value="{{r.hasBuf}}" hint-placeholder-val="{{false}}"><span class="cap">{{r.buf}}</span></sc-if></div>
-<div class="cell c-pr"><span class="num" style="font-weight: 600">{{r.price}}</span></div>
-<div class="who c-wh"><span class="avs" aria-hidden="true"><sc-for list="{{r.staff}}" as="p" hint-placeholder-count="1"><span class="av">{{p.ini}}</span></sc-for></span><span class="{{r.whoCls}}">{{r.whoText}}</span></div>
-<div class="onl c-on"><button class="{{r.swCls}}" role="switch" aria-checked="{{r.online}}" aria-label="{{r.swLabel}}" onClick="{{r.flip}}"><span class="trk"><span class="knob"></span></span></button><sc-if value="{{r.offline}}" hint-placeholder-val="{{false}}"><span class="cap onlc">Phone only</span></sc-if></div>
+<div class="cell c-pr"><span class="num" style="font-weight: 600">{{r.price}}</span><sc-if value="{{r.hasPriceSub}}" hint-placeholder-val="{{false}}"><span class="cap num">{{r.priceSub}}</span></sc-if></div>
+<div class="who c-wh"><span class="avs" aria-hidden="true"><sc-for list="{{r.staff}}" as="p" hint-placeholder-count="1"><span class="av">{{p.ini}}</span></sc-for></span><span class="whc"><span class="{{r.whoCls}}">{{r.whoText}}</span><sc-if value="{{r.hasInv}}" hint-placeholder-val="{{false}}"><span class="cap">{{r.invText}}</span></sc-if></span></div>
+<div class="onl c-on"><button class="{{r.swCls}}" role="switch" aria-checked="{{r.online}}" aria-label="{{r.swLabel}}" onClick="{{r.flip}}"><span class="trk"><span class="knob"></span></span></button><sc-if value="{{r.offline}}" hint-placeholder-val="{{false}}"><span class="cap onlc">Not bookable online</span></sc-if></div>
 <div class="rmw">
 <button class="b b-gho b-ico rm" aria-label="{{r.menuLabel}}" aria-haspopup="menu" aria-expanded="{{r.menuOpen}}" onClick="{{r.toggleMenu}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
 <sc-if value="{{r.menuOpen}}" hint-placeholder-val="{{false}}">
@@ -650,7 +655,7 @@ button.sn:hover{background:#f4f4f6}
 </div>
 </sc-for>
 </div>
-<p class="cap fcap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg><span>Drag a service or a group by its handle, or use the arrow keys on it, to change the order. Services with online booking off don’t show on your page — you add their bookings yourself.</span></p>
+<p class="cap fcap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg><span>Drag a service or a group by its handle, or use the arrow keys on it, to change the order. Services that aren’t bookable online don’t show on your page — you add their bookings yourself.</span></p>
 <sc-if value="{{showBar}}" hint-placeholder-val="{{false}}">
 <div class="sbar" role="region" aria-label="Unsaved changes" style="margin-top: 24px">
 <span style="font-size: 15px; line-height: 22px; font-weight: 600">Save your changes?</span>
@@ -720,7 +725,7 @@ button.sn:hover{background:#f4f4f6}
 </div>
 </sc-if>
 <div class="prev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Clients see: <b>{{d.preview}}</b></span></div>
-<sc-if value="{{d.atPlace}}" hint-placeholder-val="{{false}}"><span class="cap">Tell the client the price at the visit.</span></sc-if>
+<sc-if value="{{d.atPlace}}" hint-placeholder-val="{{false}}"><span class="cap">Clients see “Price at the place”. The amount counts in your totals.</span></sc-if>
 </div>
 
 <div class="dsep"></div>
@@ -729,10 +734,11 @@ button.sn:hover{background:#f4f4f6}
 <span class="flab" id="who-l">Who does it</span>
 <div class="ckl" role="group" aria-labelledby="who-l">
 <sc-for list="{{d.staff}}" as="p" hint-placeholder-count="5">
-<label class="ckr"><input type="checkbox" checked="{{p.on}}" onChange="{{p.flip}}"><span class="av" aria-hidden="true">{{p.ini}}</span><span class="ckt"><span class="ckn">{{p.name}}</span><span class="cap">{{p.spec}}</span></span><sc-if value="{{p.noApp}}" hint-placeholder-val="{{false}}"><span class="tagna">Doesn’t use the app</span></sc-if></label>
+<label class="ckr"><input type="checkbox" checked="{{p.on}}" onChange="{{p.flip}}"><span class="av" aria-hidden="true">{{p.ini}}</span><span class="ckt"><span class="ckn">{{p.name}}</span><span class="cap">{{p.spec}}</span></span><sc-if value="{{p.noApp}}" hint-placeholder-val="{{false}}"><span class="tagna">Doesn’t use the app</span></sc-if><sc-if value="{{p.inv}}" hint-placeholder-val="{{false}}"><span class="tagna tginv">Invited</span></sc-if></label>
 </sc-for>
 </div>
 <sc-if value="{{d.hasStaff}}" hint-placeholder-val="{{true}}"><span class="cap">Clients see free times only for the people you tick.</span></sc-if>
+<sc-if value="{{d.anyInv}}" hint-placeholder-val="{{false}}"><span class="cap">Invited people show to clients once they accept the invite.</span></sc-if>
 <sc-if value="{{d.noStaff}}" hint-placeholder-val="{{false}}"><div class="warn" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>No specialist chosen — clients can’t book this service.</span></div></sc-if>
 </div>
 
@@ -910,10 +916,10 @@ class Component extends DCLogic {
       S('s2', 'g1', L('Hair styling', 'Saç düzmek'), L(''), 45, 'rule', 'fixed', '60', ['ayna', 'gulnar'], true, 5),
       S('s3', 'g1', L('Hair colouring', 'Saç reňklemek'), L('The price depends on hair length', 'Bahasy saçyň uzynlygyna bagly'), 120, '15', 'from', '250', ['ayna'], true, 4),
       S('s4', 'g1', L('Children’s haircut', 'Çaga saç kesimi'), L(''), 30, 'rule', 'fixed', '40', ['ayna', 'gulnar'], false, 2),
-      S('s12', 'g1', L('Bridal hair styling', ''), L('With a trial styling; the price is agreed', ''), 120, 'rule', 'place', '', ['ayna'], true, 0),
-      S('s5', 'g2', L('Manicure', 'Manikýur'), L(''), 60, 'rule', 'fixed', '70', ['maral'], true, 6),
-      S('s6', 'g2', L('Gel manicure', 'Gel-lak bilen manikýur'), L(''), 90, 'rule', 'fixed', '110', ['maral'], true, 4),
-      S('s7', 'g2', L('Pedicure', 'Pedikýur'), L(''), 75, 'rule', 'fixed', '90', ['maral'], true, 3),
+      S('s12', 'g1', L('Bridal hair styling', ''), L('With a trial styling; the price is agreed', ''), 120, 'rule', 'place', '400', ['ayna'], true, 0),
+      S('s5', 'g2', L('Manicure', 'Manikýur'), L(''), 60, 'rule', 'fixed', '70', ['maral', 'yazgul'], true, 6),
+      S('s6', 'g2', L('Gel manicure', 'Gel-lak bilen manikýur'), L(''), 90, 'rule', 'fixed', '110', ['maral', 'yazgul'], true, 4),
+      S('s7', 'g2', L('Pedicure', 'Pedikýur'), L(''), 75, 'rule', 'fixed', '90', ['maral', 'yazgul'], true, 3),
       S('s8', 'g3', L('Facial cleansing', 'Ýüz arassalamak'), L(''), 60, 'rule', 'fixed', '150', ['jeren'], true, 8),
       S('s9', 'g3', L('Brows and lashes', 'Gaş we kirpik'), L(''), 30, 'rule', 'fixed', '50', ['jeren'], true, 4),
       S('s10', 'g4', L('Back massage', 'Arka massažy'), L(''), 30, 'rule', 'fixed', '90', ['leyli'], true, 3),
@@ -921,14 +927,17 @@ class Component extends DCLogic {
     ];
   }
   GROUPS() { return [{ id: 'g1', name: 'Hair' }, { id: 'g2', name: 'Nails' }, { id: 'g3', name: 'Face' }, { id: 'g4', name: 'Massage' }]; }
-  // bookable people (active specialists; invited people appear once they accept)
+  // every team row that isn't removed: specialists, the open invite (marked Invited; clients see them once they accept) and the management
   STAFF() {
     return [
-      { id: 'ayna', name: 'Aýna', spec: 'Stylist', ini: 'A', noApp: false },
-      { id: 'gulnar', name: 'Gülnar', spec: 'Stylist', ini: 'G', noApp: false },
-      { id: 'maral', name: 'Maral', spec: 'Nail technician', ini: 'M', noApp: false },
-      { id: 'jeren', name: 'Jeren', spec: 'Beautician', ini: 'J', noApp: false },
-      { id: 'leyli', name: 'Leýli', spec: 'Massage therapist', ini: 'L', noApp: true }
+      { id: 'ayna', name: 'Aýna', spec: 'Stylist', ini: 'A', noApp: false, inv: false },
+      { id: 'gulnar', name: 'Gülnar', spec: 'Stylist', ini: 'G', noApp: false, inv: false },
+      { id: 'maral', name: 'Maral', spec: 'Nail technician', ini: 'M', noApp: false, inv: false },
+      { id: 'jeren', name: 'Jeren', spec: 'Beautician', ini: 'J', noApp: false, inv: false },
+      { id: 'leyli', name: 'Leýli', spec: 'Massage therapist', ini: 'L', noApp: true, inv: false },
+      { id: 'yazgul', name: 'Ýazgül', spec: 'Nail technician', ini: 'Ý', noApp: false, inv: true },
+      { id: 'mays', name: 'Maýsa', spec: 'Owner', ini: 'M', noApp: false, inv: false },
+      { id: 'selbi', name: 'Selbi', spec: 'Admin', ini: 'S', noApp: false, inv: false }
     ];
   }
   LANGS() { return [['en', 'EN', 'English, main language'], ['tk', 'TK', 'Turkmen'], ['ru', 'RU', 'Russian']]; }
@@ -993,7 +1002,7 @@ class Component extends DCLogic {
     const on = !x.online;
     const patch = { services: s.services.map((v) => (v.id === id ? Object.assign({}, v, { online: on }) : v)), menu: null };
     if (s.draft && s.draft.id === id) patch.draft = Object.assign({}, s.draft, { online: on });
-    this.flash(patch, on ? x.name.en + ' is open for online booking' : x.name.en + ': phone only — it’s hidden from your page');
+    this.flash(patch, on ? x.name.en + ' is open for online booking' : x.name.en + ': not bookable online — it’s hidden from your page');
   }
   // with upcoming bookings → the confirm; without → delete at once with Undo
   askDelete(id) {
@@ -1017,7 +1026,7 @@ class Component extends DCLogic {
     if (!d.name.en.trim() || (needAmt && !String(d.amount || '').trim())) { this.setState({ tried: true }); return; }
     const c = this.copy(d);
     c.name.en = d.name.en.trim();
-    c.amount = needAmt ? String(d.amount || '').replace(/\D/g, '') : '';
+    c.amount = needAmt || d.ptype === 'place' ? String(d.amount || '').replace(/\D/g, '') : '';
     if (s.openId === 'new') {
       const n = s.services.reduce((m, v) => Math.max(m, parseInt(v.id.slice(1), 10) || 0), 12) + 1;
       c.id = 's' + n;
@@ -1070,10 +1079,12 @@ class Component extends DCLogic {
         delGroup: () => { if (!this.state.services.some((x) => x.g === g.id)) this.flash({ groups: this.state.groups.filter((x) => x.id !== g.id), gOrder: this.state.gOrder.filter((x) => x !== g.id), gSaved: this.state.gSaved.filter((x) => x !== g.id), menu: null }, 'Group deleted: ' + g.name); },
         empty: list.length === 0,
         rows: list.map((x) => {
-          const ids = x.staff.filter((id) => byId[id]);
+          const ids = x.staff.filter((id) => byId[id] && !byId[id].inv);
+          const nInv = x.staff.filter((id) => byId[id] && byId[id].inv).length;
           const n = ids.length;
           const who = n === 0 ? 'No one' : (n === 1 ? byId[ids[0]].name : this.pl(n, 'specialist'));
           const price = this.clientPrice(x);
+          const placeAmt = x.ptype === 'place' && String(x.amount || '').trim() ? Number(x.amount).toLocaleString('en-GB') + ' TMT · not shown to clients' : '';
           return {
             name: x.name.en, desc: x.desc.en, hasDesc: !!x.desc.en,
             meta: [this.dur(x.min), price, who].join(' · '),
@@ -1082,9 +1093,9 @@ class Component extends DCLogic {
             dragLabel: 'Drag to reorder: ' + x.name.en + '. Or use the arrow keys',
             dragKey: arrows((dir) => this.move('order', 'order', x.id, dir, x.g)),
             dur: this.dur(x.min), hasBuf: x.buf !== 'rule', buf: x.buf === '0' ? 'no buffer' : '+' + x.buf + ' min buffer',
-            price: price,
+            price: price, hasPriceSub: !!placeAmt, priceSub: placeAmt,
             staff: ids.map((id) => ({ ini: byId[id].ini })),
-            whoText: who, whoCls: n === 0 ? 'whot whon' : 'whot',
+            whoText: who, whoCls: n === 0 ? 'whot whon' : 'whot', hasInv: nInv > 0, invText: '+ ' + nInv + ' invited',
             online: !!x.online, offline: !x.online, swCls: x.online ? 'sw on' : 'sw', swLabel: 'Online booking: ' + x.name.en,
             flip: () => this.flipOnline(x.id),
             menuOpen: s.menu === x.id, menuLabel: x.name.en + ': actions',
@@ -1107,6 +1118,7 @@ class Component extends DCLogic {
     const durOpts = [];
     for (let m = 5; m <= 240; m += 5) durOpts.push({ v: m, t: this.dur(m) });
     const needAmt = d.ptype === 'fixed' || d.ptype === 'from';
+    const hasAmt = needAmt || d.ptype === 'place';
     const nameErr = s.tried && !d.name.en.trim();
     const amtErr = s.tried && needAmt && !String(d.amount || '').trim();
     const nameHint = several && L !== 'en' && !String(d.name[L] || '').trim() ? 'Empty — clients see “' + (d.name.en || '…') + '”.' : '';
@@ -1158,20 +1170,21 @@ class Component extends DCLogic {
         bufOpts: [['rule', 'As in Booking rules · 10 min'], ['0', 'No buffer'], ['5', '5 min'], ['10', '10 min'], ['15', '15 min'], ['20', '20 min'], ['30', '30 min']].map((o) => ({ v: o[0], t: o[1] })),
         buf: d.buf, onBuf: (e) => this.setDraft({ buf: val(e) }),
         ptypes: [['fixed', 'Fixed'], ['from', 'From'], ['free', 'Free'], ['place', 'Price at the place']].map((o) => ({ t: o[1], on: d.ptype === o[0], cls: d.ptype === o[0] ? 'chip on' : 'chip', pick: () => this.setDraft({ ptype: o[0] }) })),
-        showAmount: needAmt,
-        amountLabel: d.ptype === 'from' ? 'Lowest price' : 'Price',
+        showAmount: hasAmt,
+        amountLabel: d.ptype === 'from' ? 'Lowest price' : (d.ptype === 'place' ? 'Amount' : 'Price'),
         amount: d.amount, amtErr: amtErr, amtCls: amtErr ? 'inp i44 is-e' : 'inp i44',
         onAmount: (e) => this.setDraft({ amount: val(e).replace(/\D/g, '').slice(0, 5) }),
         preview: needAmt && !String(d.amount || '').trim() ? (d.ptype === 'from' ? 'from … TMT' : '… TMT') : this.clientPrice(d),
+        anyInv: d.staff.some((id) => byId[id] && byId[id].inv),
         atPlace: d.ptype === 'place',
         staff: STAFF.map((p) => ({
-          ini: p.ini, name: p.name, spec: p.spec, noApp: p.noApp, on: d.staff.indexOf(p.id) >= 0,
+          ini: p.ini, name: p.name, spec: p.spec, noApp: p.noApp, inv: p.inv, on: d.staff.indexOf(p.id) >= 0,
           flip: () => { const c = this.state.draft ? this.state.draft.staff : []; this.setDraft({ staff: c.indexOf(p.id) >= 0 ? c.filter((v) => v !== p.id) : c.concat([p.id]) }); }
         })),
         hasStaff: d.staff.length > 0, noStaff: d.staff.length === 0,
         online: !!d.online, onlineCls: d.online ? 'sw on' : 'sw',
         flipOnline: () => this.setDraft({ online: !(this.state.draft && this.state.draft.online) }),
-        onlineHint: d.online ? 'Clients can book it themselves on your Ýeral page.' : 'Hidden from your page — you add its bookings yourself (phone only).',
+        onlineHint: d.online ? 'Clients can book it themselves on your Ýeral page.' : 'Not bookable online — it’s hidden from your page and you add its bookings yourself.',
         del: () => { if (this.state.draft && this.state.draft.id) this.askDelete(this.state.draft.id); },
         save: () => this.save()
       },

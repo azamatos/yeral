@@ -121,7 +121,7 @@ flowchart TD
 1. `/` redirects to the saved language (cookie, then the profile), else to the phone's or browser's language if Ýeral has it, else to the country's main language (ADR 0016; Q-132, decided 18.10.2026).
 2. The hero explains the name: "Ýeriňi al." (Take your place) and "Dellegiň kreslosy, restoranyň stoly ýa-da ýoga sapagyndaky ýer — boş wagty görüň we bir minutda ýazylyň." Below it, the search card *Näme?* (What?) / *Nirede?* (Where?, default *Ýakynymda*) / *Haçan?* (When?) and "Boş wagtlary görkez" (Show free times) (Home).
 3. "Golaýyňyzda şu gün boş" (Free today near you): 4 cards, nearest first, each with its next free times, "Ýerleşişiňiz boýunça · üýtget" and "Ählisini gör" (See all) (client spec §4.1).
-4. Then the 13 category tiles, "Nähili işleýär?" (How it works: *Gözläň* · *Wagt saýlaň* · *Tassyklama alyň*), the Ýeral Biznes block, app links and the footer.
+4. Then the category tiles (the 11 that take appointments at the first launch; Restaurant and Café & tea house come with tables, Q-030), "Nähili işleýär?" (How it works: *Gözläň* · *Wagt saýlaň* · *Tassyklama alyň*), the Ýeral Biznes block, app links and the footer.
 5. A time chip on a card opens the booking flow with that time preselected; a card opens the business page; a category tile opens `/tk/c/{category}`; "Biznes üçin" leaves for business.yeral.app (client spec §4.1).
 
 **Edge cases**

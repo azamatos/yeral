@@ -67,7 +67,7 @@ copy to say businesses keep their visit records (Q-172).
 | What | Value | Who can change it | Source |
 |---|---|---|---|
 | Gallery | 1 large + 4 small photos; *Ähli suratlar* (all photos) | Fixed | client spec §4.3 |
-| Business profile texts | name 1–80 characters; description up to 1 000 per language; address up to 200, street line up to 120, entrance note up to 200 | Owner/admin | Claude (delegated), 20.10.2026; code: packages/contract/src/settings.ts |
+| Business profile texts | name 1–80 characters; description up to 1 000 per language; address up to 200, street line up to 120, floor and room up to 40, entrance note up to 200 | Owner/admin | Claude (delegated), 20.10.2026; floor and room: design round 3.4; code: packages/contract/src/settings.ts (no floor and room yet) |
 | Amenities | Wi-Fi, air conditioning, parking, card payment (the demo's; the design names no longer list yet) | Owner/admin | Claude (delegated), 20.10.2026; code: packages/domain/src/model.ts |
 | Photos | 3 or more recommended, up to 20; each up to 10 MB (JPG, PNG or WebP), made smaller on upload; the first is the cover everywhere | Owner/admin | business spec §7, §8; client spec §11; Q-115, decided 18.10.2026 |
 | Typical answer time | "*Adatça 15 minudyň dowamynda tassyklaýar*"; the median answer time over the last 30 days, rounded (15 min, 1 sagat …); hidden until the business has answered 5 requests | Fixed | client spec §4.3; Q-113, decided 18.10.2026; code: packages/domain/src/lifecycle.ts (`typicalAnswerMinutes`) |
@@ -298,8 +298,8 @@ lifted it reach the limit (code: `modules/clients/online.ts`; Q-127).
 |---|---|---|---|
 | Opening and closing pickers | from 00:00 to 24:00, in 30-min steps | Owner/admin | business spec §11, §26; ROUND6-ANSWERS E1; Q-128, decided 18.10.2026 |
 | Latest end of a day | past midnight allowed: hours like 18:00–02:00, up to 48:00 and never into the next day's opening; bookings may cross midnight and belong to the day that started (not drawn yet) | Owner/admin | ROUND6-ANSWERS E1; Q-105, decided 18.10.2026; chapter 4 |
-| Breaks | 1 per day, may differ per day; each staff member has their own | Owner/admin | business spec §11; ADR 0017 |
-| Staff hours | the business's hours, or their own inside them | Owner/admin | business spec §10; ADR 0017 |
+| Breaks | 1 per day, may differ per day; each staff member has their own | Owner/admin for the business's; the owner for a staff member's (admins see them) | business spec §11; ADR 0017; chapter 3 |
+| Staff hours | the business's hours, or their own inside them; time off may repeat every year | Owner (admins see them) | business spec §10; ADR 0017; chapter 3; design round 3.3 |
 | "*Iş günleri birmeňzeş*" (same every weekday) | copies Monday to Tuesday–Friday | Owner/admin | business spec §11 |
 | Special days | one day or a range; dated or every year; closed or other hours | Owner/admin | business spec §8 |
 | Overlapping special days | dated beats yearly, shorter beats longer, closed beats other hours; a full tie keeps the existing one; a warning, never a block | Fixed | ROUND6-ANSWERS E2; code: packages/domain/src/hours.ts |

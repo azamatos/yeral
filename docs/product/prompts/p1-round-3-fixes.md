@@ -130,4 +130,62 @@ When done, add a short "v0.6 · round 3.4" entry to the CHANGELOG.
   the switch-off captions; tags; Total; demo facts.
 - 3.3: Admin read-only; Reactivate; breaks and yearly time off; no release caption; the invite caption; the hidden
   price amount; invited people in "Who does it"; "Not bookable online".
-- 3.4: the eleven categories and no catch-all; text limits; special days past midnight; the captions; every affected booking; PNG or SVG.
+- 3.4: the eleven categories and no catch-all; text limits; special days past midnight; the captions; every affected
+  booking; PNG or SVG.
+
+## Check of rounds 3.1–3.4 (20.10.2026)
+
+Every instruction of the four is on the boards it names, and 3.1 and 3.3 need nothing. What's left goes into one short
+prompt, 3.5:
+
+- **3.2, demo facts and names:** Mähri G.'s evening request also shows at the 11:20 day clock, before it's sent; her old
+  16:00 Manicure request survives on B-Team and B-Settings; one client record shows a full name on its card and "Gülälek
+  N." everywhere else; Jemal S. is missing from page 1 of the client list; business/README.md §28.7 still gives
+  reviewers as first name + initial.
+- **3.4, against the book:** a yearly special day past midnight is checked only against this year's weekday (chapter
+  9, "Q-211, B-40, B-24 (how)"); three notes cap the hours list at a week, where the book asks about every booking ahead
+  ("B-39, B-40, Q-211 (how)"); the save toast cancels a waiting request that the book declines.
+- **Small ones from 3.1:** one DS caption ("Replaces the Came late report"), the `hidden` banner tweak missing on B-Team
+  and B-Services, BusinessStatusBanner's Hidden story in COMPONENTS.md.
+- **Noted, not drawn again:** the designer's choices beyond the lists agree with the book (chapter 9, 20.10.2026,
+  "Design rounds 3.1–3.4"). Category search by hidden words (tutor → Lessons) needs keywords the seed doesn't have; it
+  waits for the CMS catalogue (F-181). The address form has Street (120) and Floor, room (40); the contract's endpoint
+  follows the design when it's built.
+
+## Prompt 3.5 — demo facts, names and the hours list
+
+```
+Round 3.5 of the design pass (export v0.6): the last small fix pass on the business app, from the check of rounds
+3.1–3.4. Text and demo-data fixes only; change only what's listed, everything else stays as drawn.
+
+1. Mähri G.'s request (sent 20:40 for tomorrow 13:00–14:00, answer by 09:30) exists only at the evening clock. At the
+   11:20 day clock it isn't sent yet: on B-Clients, B-Mobile 9a and DS · Business patterns (section 03) her Next
+   booking is "—", with no timer.
+2. "Today 16:00–17:00 · Manicure · Maral" is Şemşat K.'s request on B-Team too (Maral's upcoming list) and in
+   B-Settings' AffectedBookingsList.
+3. One client, one name on every staff screen: Gülälek Nurmuhammedowa, Ogulnabat Çaryýewa and Döwlet Berdiýew as
+   B-Client saves them, also on B-Clients, B-Calendar, B-Bookings, B-Mobile and DS · Business patterns ("belongs to
+   …"); B-Settings' "Aýjemal G." becomes "Aýjemal Gurbanowa". Other clients keep their saved names as drawn. First
+   name + initial is only for the client site: say so in business/README.md §28.7, which still gives reviewers as
+   first name + initial.
+4. Page 1 of the client list (B-Clients, B-Mobile 9a, DS section 03) includes Jemal S. (3 visits, last visit 12 Oct,
+   Total 270 TMT, today 13:00 Pedicure · Maral), between Gözel A. and Şemşat K. Ogulşat M.'s Friday 19:00 request in
+   B-Settings has a timer within the 30-min hold and shows as her Next booking on B-Clients.
+5. B-Settings: a special day that repeats every year, with hours past midnight, is checked against every weekday it
+   may fall on (the earliest next-day opening among them), not only this year's.
+6. The hours AffectedBookingsList looks as far ahead as bookings go (the demo shows the coming week): fix the notes
+   that say "the next 7 days" or "the coming week" on DS · Business patterns, in
+   copy/en-choices-r3-onboarding-settings.md and in the 3.4 CHANGELOG entry. Above the rows it gives the count per
+   specialist, and it lists up to 50 bookings.
+7. Cancelling over new hours: a waiting request outside them is declined, not cancelled ("This time isn't free", with
+   the offered times). Toast: "Hours saved · 5 bookings cancelled and 1 request declined — each client picks a new
+   time in My bookings." (B-Settings, DS · Business patterns).
+8. Small ones: DS · Business patterns' "Replaces the Came late report" becomes "Replaces the earlier report"; the
+   `banner` tweak on B-Team and B-Services gains `hidden`; COMPONENTS.md lists BusinessStatusBanner's Hidden story.
+
+When done, add a short "v0.6 · round 3.5" entry to the CHANGELOG.
+```
+
+What to check afterwards: no Mähri request at the day clock; Şemşat K. on B-Team and B-Settings; one name per client
+on every staff screen and §28.7; Jemal S. on page 1; the yearly past-midnight check; no week cap in the notes, the
+count per specialist; "declined" for the request; the three small ones.

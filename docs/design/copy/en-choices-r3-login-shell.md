@@ -43,3 +43,17 @@ Everything in `en-choices-r2-login-shell.md` still holds unless changed below. N
 - Money in the level notes: prices are booking information and stay visible to everyone who sees the booking (Admin included); “See revenue” covers only sums. Owner “Nothing hidden, including every sum: revenue lines, client totals and average checks.” · Admin “Hidden: sums — revenue lines, client totals and average checks. Booking prices stay visible: they are booking information.” · Specialist “Sums: only her own earnings line in the calendar; no client totals or average check. She sees the prices of her own bookings.”
 - Kept: “Turn on notifications to hear new requests.” with its full stop.
 - Checks rerun: check_dc + dccheck + node syntax on both; B-Shell re-rendered at 1600 (content 8764, frame stays 1600 × 8840) normal and +30 % — no new cuts; B-Login invite / decline re-rendered (normal + long) — clean.
+
+## Round 3.1 (owner's words · B-Shell only; frame now 1600 × 9020)
+- **Notifications banner** (“Turn on notifications to hear new requests.” + Allow, and the blocked line) now shows to **everyone who gets notifications in the workspace** — caption: “Shows to everyone who gets notifications in this workspace: the owner and admins hear every new request; a Specialist hears requests and time changes for her. It stays until the browser permission is decided.”
+- **Hidden by Ýeral** added to BusinessStatusBanner (section title “In review · Not approved · Hidden by Ýeral · Demo · Notifications”; labels renumbered 1–6): danger tones, eye-off icon, no dismiss, owner and admins: “**Ýeral has hidden your page:** Clients reported that your page shows the wrong address. Clients can’t find or book you.” + **Contact Ýeral** (opens the same Call / Write on Telegram menu). One banner at a time, as before.
+- **Permissions:** “Shifts and time off” → Owner ✓ · Admin **View only** · Specialist See own. Admin level note → “Team (with shifts and time off) and Permissions are view-only — only the owner changes them.”; table note → “an Admin sees Team (shifts and time off included) and Permissions read-only — only the owner changes them.”
+- Report menu: not drawn on B-Shell (only the “Report clients” permission row), so no change.
+- Wording chosen: lbl “Hidden by Ýeral · after clients’ reports”; caption “The team keeps working in the calendar; clients can’t find or book the business until Ýeral shows the page again.”
+- Checks: check_dc + dccheck + node syntax clean; re-rendered at 1600 normal (content 8944) and +30 % (9239, the long variant only): new banner text wraps, “Contact Ýeral” grows, no cuts; only the known workspace-name ellipsis.
+
+## Round 3.3 (owner · B-Shell, frame now 1600 × 9000)
+- Removed the caption “Access levels are fixed at the first release.” under the permissions table (and the same release remark from the access-levels intro, now “Three fixed access levels, no custom roles.”); the other notes stay. “Shifts and time off” stays Owner ✓ · Admin View only · Specialist See own. Checks rerun (check_dc, dccheck, node syntax; render 8914 normal / 9209 long, no new issues).
+
+## Round 3.4 (B-Login only; frame unchanged 1440 × 1160)
+- Category renamed “Beauty salon” → “Beauty”: invite card “Beauty · Ashgabat”, continue-setup card “Beauty · setup not finished”, done list “Business · Beauty”. Checks rerun (check_dc, dccheck, node syntax).
