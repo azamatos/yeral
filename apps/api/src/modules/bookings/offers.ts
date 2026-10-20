@@ -17,11 +17,11 @@ import {
 import { effectiveStatus, MAX_ALTERNATIVES, offerPast } from '@yeral/domain/lifecycle'
 import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { inArray } from 'drizzle-orm'
-import type { Queryable } from '../../db/client'
+import { all, type Queryable } from '../../db/client'
 import { bookings, staff, type TimeSlot } from '../../db/schema'
 import { appointmentContext, loadBusinesses, loadBusy, type LoadedBusiness } from '../availability/context'
 import { bookOnlineFor } from '../clients/online'
-import { bookedServices, rebookQuery, type BookedServices } from './create'
+import { bookedServices, bookedServicesOf, rebookQuery, type BookedServices } from './engine'
 import { recipientOf } from './links'
 import { stateOf, type BookingRow } from './repo'
 
@@ -59,17 +59,18 @@ export async function withOffersAhead(
     return r.type === 'appointment' && offers?.list.some((o) => !offerPast(o, 0, now)) ? [{ r, offers }] : []
   })
   if (!picked.length) return new Map()
-  const [taken, businesses] = await Promise.all([
-    db
-      .select({ of: bookings.alternativeOf })
-      .from(bookings)
-      .where(
-        inArray(
-          bookings.alternativeOf,
-          picked.map((p) => p.r.id),
+  const [taken, businesses] = await all(db, [
+    () =>
+      db
+        .select({ of: bookings.alternativeOf })
+        .from(bookings)
+        .where(
+          inArray(
+            bookings.alternativeOf,
+            picked.map((p) => p.r.id),
+          ),
         ),
-      ),
-    loadBusinesses(db, [...new Set(picked.map((p) => p.r.businessId))]),
+    () => loadBusinesses(db, [...new Set(picked.map((p) => p.r.businessId))]),
   ])
   const takenFrom = new Set(taken.map((t) => t.of))
   // every row is the signed-in client's: one check per business and phone
@@ -81,24 +82,41 @@ export async function withOffersAhead(
     online.set(key, known)
     return known
   }
-  const soonest = await Promise.all(
-    picked.map(async ({ r, offers }) => {
+  // the rows that still reach their offered times: not taken, an offer ahead of the lead time, and after an expiry
+  // only while the client may book online
+  const kept = await all(
+    db,
+    picked.map(({ r, offers }) => async () => {
       const lb = businesses.get(r.businessId)
-      if (!lb || takenFrom.has(r.id)) return null
-      if (offers.source === 'expired' && !(await bookOnline(lb, r))) return null
-      const free = (await offeredTimes(db, lb, r, offers.list, now)).filter((o) => o.state === 'free')
+      if (!lb || takenFrom.has(r.id) || offers.list.every((o) => offerPast(o, lb.rules.leadMinutes, now))) return false
+      return offers.source !== 'expired' || (await bookOnline(lb, r))
+    }),
+  )
+  const open = picked.filter((_, i) => kept[i])
+  // the services of every row left at once, for each one's offered times
+  const booked = await bookedServicesOf(
+    db,
+    open.map((p) => p.r.id),
+  )
+  const soonest = await all(
+    db,
+    open.map(({ r, offers }) => async () => {
+      const lb = businesses.get(r.businessId)!
+      const free = (await offeredTimes(db, lb, r, offers.list, now, booked.get(r.id))).filter((o) => o.state === 'free')
       return free.length ? Math.min(...free.map((o) => epochOf(o.date, o.start))) : null
     }),
   )
-  return new Map(picked.flatMap(({ r }, i) => (soonest[i] == null ? [] : [[r.id, soonest[i]] as const])))
+  return new Map(open.flatMap(({ r }, i) => (soonest[i] == null ? [] : [[r.id, soonest[i]] as const])))
 }
 
+/** `known`: the booking's services, when the caller loaded them for several bookings at once. */
 export async function offeredTimes(
   db: Queryable,
   lb: LoadedBusiness,
   from: BookingRow,
   offers: readonly TimeSlot[],
   now: number,
+  known?: BookedServices,
 ): Promise<OfferedTime[]> {
   // tables and classes can't be re-booked online yet (they come after the MVP): no chips that can't be taken
   if (!offers.length || from.type !== 'appointment') return []
@@ -108,7 +126,7 @@ export async function offeredTimes(
   const ahead = offers.filter((o) => !offerPast(o, lb.rules.leadMinutes, now))
   let isFree = (_: TimeSlot) => false
   if (ahead.length) {
-    const booked = await bookedServices(db, from.id)
+    const booked = known ?? (await bookedServices(db, from.id))
     // busy time on the offered days only (each load takes the days around it too, for nights past midnight)
     const busy = new Map<string, BusyInterval>()
     for (const date of new Set(ahead.map((o) => o.date)))

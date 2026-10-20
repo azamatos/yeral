@@ -13,9 +13,9 @@ import { AMENITIES, type Amenity, type Localized } from '@yeral/domain/model'
 import { LATE_MINUTES, rulesErrors, type BookingRules } from '@yeral/domain/rules'
 import { eq } from 'drizzle-orm'
 import type { z } from 'zod'
-import type { Queryable } from '../../db/client'
+import { all, type Queryable } from '../../db/client'
 import { bookingRules, businesses, categories, cities } from '../../db/schema'
-import { ApiError } from '../../http/errors'
+import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
 import { toRules } from '../availability/context'
 import { queueAddressSms } from '../bookings/address-sms'
@@ -48,7 +48,7 @@ export async function updateRules(db: Queryable, businessId: string, change: Rul
     const issues = Object.keys(rulesErrors(next))
       .filter((field) => field in change)
       .map((field) => ({ path: [field], code: 'invalid' }))
-    if (issues.length) throw new ApiError('validation_error', { issues })
+    if (issues.length) throw invalid(...issues)
     // nothing new (an empty save, or the same values): no write, no event
     const changed = Object.entries(change).filter(([field, value]) => stored[field as keyof BookingRules] !== value)
     if (!changed.length) return viewOf(stored)
@@ -96,18 +96,18 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
     const [row] = await tx.select().from(businesses).where(eq(businesses.id, businessId)).for('no key update')
     if (!row) throw new ApiError('not_found')
     const recategorized = change.categoryId !== undefined && change.categoryId !== row.categoryId
-    const [[category], [city]] = await Promise.all([
-      recategorized ? tx.select().from(categories).where(eq(categories.id, change.categoryId!)) : [],
-      change.location ? tx.select({ id: cities.id }).from(cities).where(eq(cities.id, change.location.cityId)) : [],
+    const [[category], [city]] = await all(tx, [
+      async () => (recategorized ? tx.select().from(categories).where(eq(categories.id, change.categoryId!)) : []),
+      async () => (change.location ? tx.select({ id: cities.id }).from(cities).where(eq(cities.id, change.location.cityId)) : []),
     ])
-    const issues: { path: string[]; code: string }[] = []
+    const issues: Issue[] = []
     if (recategorized && !(category && row.bookingTypes.every((t) => category.bookingTypes.includes(t))))
       issues.push({ path: ['categoryId'], code: 'invalid' })
     if (change.location && !city) issues.push({ path: ['location', 'cityId'], code: 'invalid' })
     // the languages sent change, an empty one goes, the others stay; one must be left
     const about = change.about && mergeLanguages(row.about, change.about)
     if (about && !Object.keys(about).length) issues.push({ path: ['about'], code: 'invalid' })
-    if (issues.length) throw new ApiError('validation_error', { issues })
+    if (issues.length) throw invalid(...issues)
 
     const { location, categoryId, amenities, ...rest } = change
     const before = addressOf(row)

@@ -1,11 +1,11 @@
 /** Booking rows: lookups, the lifecycle view, status changes, codes. */
 import { bookingCode } from '@yeral/domain/id'
 import type { BookingState, LifecycleError, RestoreState } from '@yeral/domain/lifecycle'
-import type { BookingStatus, BusinessCancelReason, CancelledBy } from '@yeral/domain/model'
+import type { BookingStatus, BusinessCancelReason, CancelledBy, DeclineReason } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
-import { and, eq, gt, sql } from 'drizzle-orm'
+import { and, asc, eq, gt, inArray, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, type MoveRefused } from '../../db/schema'
+import { bookingItems, bookings, type MoveRefused, type TimeSlot } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 
 export type BookingRow = typeof bookings.$inferSelect
@@ -15,13 +15,13 @@ export function guard(problem: LifecycleError | null): void {
   if (problem) throw new ApiError(problem)
 }
 
+/** A request still waiting for its answer: pending and inside its answer time (as `effectiveStatus` reads it). */
+export const awaitingAnswer = (now: number) => and(eq(bookings.status, 'pending'), gt(bookings.holdUntil, new Date(now)))
+
 /**
  * When a no-show was marked: its status change (`setStatus` sets `completedAt`), else the complaint. The booking's
  * timeline and the phone-only count (book Q-127) both read it.
  */
-/** A request still waiting for its answer: pending and inside its answer time (as `effectiveStatus` reads it). */
-export const awaitingAnswer = (now: number) => and(eq(bookings.status, 'pending'), gt(bookings.holdUntil, new Date(now)))
-
 export const noShowMarkedAt = sql<Date>`coalesce(${bookings.completedAt}, ${bookings.complaintAt})`
 export const noShowMarkedAtOf = (b: Pick<BookingRow, 'completedAt' | 'complaintAt'>): Date | null => b.completedAt ?? b.complaintAt
 export type ItemRow = typeof bookingItems.$inferSelect
@@ -60,7 +60,17 @@ export async function myBooking(db: Queryable, userId: string, code: string): Pr
 }
 
 export async function itemsOf(db: Queryable, bookingId: string): Promise<ItemRow[]> {
-  return db.select().from(bookingItems).where(eq(bookingItems.bookingId, bookingId)).orderBy(bookingItems.sort)
+  return itemsOfBookings(db, [bookingId])
+}
+
+/** These bookings' items, each booking's in its order. */
+export async function itemsOfBookings(db: Queryable, bookingIds: readonly string[]): Promise<ItemRow[]> {
+  if (!bookingIds.length) return []
+  return db
+    .select()
+    .from(bookingItems)
+    .where(inArray(bookingItems.bookingId, [...bookingIds]))
+    .orderBy(asc(bookingItems.sort))
 }
 
 /** A fresh code; grows to 6 digits if 5-digit codes keep colliding. */
@@ -81,6 +91,10 @@ export interface StatusChange {
   businessCancelReason?: BusinessCancelReason | null
   /** The business answered a request (book Q-113): its answer time counts toward the typical one. */
   answered?: boolean
+  /** A decline's reason and the business's words (B-20). */
+  decline?: { reason: DeclineReason; text: string | null }
+  /** The times offered with a decline or the business's cancel (B-20, B-39, B-40), taken in one tap. */
+  offers?: TimeSlot[]
   at: Date
 }
 
@@ -111,6 +125,8 @@ export async function setStatus(db: Queryable, b: BookingRow, change: StatusChan
       // kept after a cancel so "Yzyna al" can bring a request back with its remaining hold
       holdUntil: change.status === 'confirmed' || change.status === 'completed' ? null : b.holdUntil,
       answeredAt: change.answered ? change.at : b.answeredAt,
+      ...(change.decline ? { declineReason: change.decline.reason, declineText: change.decline.text } : {}),
+      ...(change.offers ? { declineAlternatives: change.offers } : {}),
       updatedAt: change.at,
     })
     .where(and(eq(bookings.id, b.id), eq(bookings.status, b.status)))

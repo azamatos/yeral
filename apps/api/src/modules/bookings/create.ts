@@ -18,8 +18,6 @@ import {
 } from '@yeral/domain/availability'
 import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES, toldOf, waitingLimit } from '@yeral/domain/lifecycle'
 import { withinHours } from '@yeral/domain/hours'
-import { priceTotal } from '@yeral/domain/pricing'
-import { MARKET } from '@yeral/domain/market'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, isNull, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -31,6 +29,7 @@ import { emit } from '../../notify'
 import {
   appointmentContext,
   checkStaff,
+  OutsideHours,
   lockedHours,
   loadBusiness,
   loadBusy,
@@ -39,11 +38,11 @@ import {
 } from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
 import { onlineRefusal } from '../clients/online'
-import { servicePrice } from '../catalog/map'
 import { hasSignedInTeam } from '../team/members'
 import { addressSmsForNewBooking } from './address-sms'
 import { confirmBooking } from './confirm'
-import { awaitingAnswer, freshCode, isSlotConflict, type BookingRow } from './repo'
+import { appointmentPrice, bookedServices, inTransaction, itemRows, rebookQuery, type BookedServices } from './engine'
+import { awaitingAnswer, freshCode, type BookingRow } from './repo'
 import { accountName } from '../me/me'
 
 /** Demo businesses with nobody to answer confirm requests themselves after this delay (outside production). */
@@ -115,34 +114,6 @@ export async function assertWaitingRoom(
   if (over) throw new ApiError('too_many_waiting', over satisfies TooManyWaitingDetails)
 }
 
-/** What an appointment costs: its services' prices added up. */
-export function appointmentPrice(lb: LoadedBusiness, slot: AppointmentSlot | undefined) {
-  const services = slot?.items.map((it) => lb.services.find((s) => s.id === it.serviceId)) ?? []
-  return priceTotal(services.flatMap((s) => (s ? [servicePrice(s)] : [])))
-}
-
-/** An appointment's items as rows, each with its service's name and price and its specialist's name as booked. */
-export function itemRows(lb: LoadedBusiness, bookingId: string, date: string, slot: AppointmentSlot) {
-  return slot.items.map((it, i) => {
-    const svc = lb.services.find((s) => s.id === it.serviceId)
-    const who = lb.staff.find((s) => s.id === it.staffId)
-    return {
-      bookingId,
-      serviceId: it.serviceId,
-      staffId: it.staffId,
-      serviceName: svc?.name ?? { [MARKET.defaultLanguage]: '' },
-      staffName: who?.name ?? null,
-      date,
-      start: it.start,
-      end: it.end,
-      bufferAfter: it.bufferAfter,
-      priceType: svc?.priceType ?? ('fixed' as const),
-      priceAmount: svc?.priceAmount ?? 0,
-      sort: i,
-    }
-  })
-}
-
 async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<BookingRow> {
   const now = deps.now()
   if (x.status === 'pending' && !x.rescheduleOf) await assertWaitingRoom(db, x.user.id, x.lb.business.id, now, { locked: true })
@@ -157,7 +128,7 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
   // the hours as they stand (an hours save may have just committed): the visit in them, the hold counted by them; a
   // class runs on its session's own schedule
   const hours = await lockedHours(db, x.lb.business.id)
-  if (x.type !== 'class' && !withinHours(hours, x.date, { start: x.start, end })) throw new ApiError('slot_taken', { alternatives: [] })
+  if (x.type !== 'class' && !withinHours(hours, x.date, { start: x.start, end })) throw new OutsideHours()
   const [row] = await db
     .insert(bookings)
     .values({
@@ -227,21 +198,6 @@ async function placeAppointment(
   return slot
 }
 
-/** Run the insert; a race lost to another booking becomes 409 slot_taken. Inside a transaction: a savepoint. */
-export async function inTransaction<T>(
-  deps: Deps,
-  fn: (tx: Queryable) => Promise<T>,
-  alternatives: () => Promise<unknown[]>,
-  db: Queryable = deps.db,
-): Promise<T> {
-  try {
-    return await db.transaction(fn)
-  } catch (e) {
-    if (isSlotConflict(e)) throw new ApiError('slot_taken', { alternatives: await alternatives() })
-    throw e
-  }
-}
-
 /** A request the client sends online: the business takes them, and this client isn't limited to phone bookings. */
 export async function assertOnlineBooking(db: Queryable, lb: LoadedBusiness, user: User): Promise<void> {
   const refused = await onlineRefusal(db, lb, user.phone)
@@ -275,7 +231,8 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
           note: input.note,
         }),
       async () => {
-        const ctx = appointmentContext(lb, await loadBusy(db, [b.id], input.date, input.date), deps.now())
+        // as the business stands now: its hours may have just changed
+        const ctx = appointmentContext(await loadBusiness(db, b.id), await loadBusy(db, [b.id], input.date, input.date), deps.now())
         return nearestSlots(ctx, q, input.start).map((s) => ({ date: input.date, start: s.start, end: s.end }))
       },
     )
@@ -287,14 +244,14 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
       throw new ApiError('party_too_large', { callFrom: MAX_ONLINE_PARTY + 1 } satisfies PartyTooLargeDetails)
     const ctx = await loadTableContext(db, lb, input.date, input.date, now)
     const tableId = assignTable(ctx, { date: input.date, start: input.start, partySize: input.partySize, areaId: input.areaId })
-    const nearest = () =>
-      tableSlots(ctx, { date: input.date, partySize: input.partySize })
+    const nearestIn = (c: typeof ctx) =>
+      tableSlots(c, { date: input.date, partySize: input.partySize })
         .filter((s) => s.areaIds.includes(input.areaId) && s.start !== input.start)
         .sort((x, y) => Math.abs(x.start - input.start) - Math.abs(y.start - input.start))
         .slice(0, MAX_ALTERNATIVES)
         .sort((x, y) => x.start - y.start)
-        .map((s) => ({ date: input.date, start: s.start, end: s.start + ctx.sittingMinutes }))
-    if (!tableId) throw new ApiError('slot_taken', { alternatives: nearest() })
+        .map((s) => ({ date: input.date, start: s.start, end: s.start + c.sittingMinutes }))
+    if (!tableId) throw new ApiError('slot_taken', { alternatives: nearestIn(ctx) })
     const table = {
       tableId,
       areaId: input.areaId,
@@ -315,7 +272,8 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
           status,
           note: input.note,
         }),
-      () => Promise.resolve(nearest()),
+      // as the business stands now: its hours may have just changed
+      async () => nearestIn(await loadTableContext(db, await loadBusiness(db, b.id), input.date, input.date, deps.now())),
     )
   }
 
@@ -347,47 +305,22 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
   })
 }
 
-/** A booking's services in the order they run, and the one specialist doing them all (null when split). */
-export interface BookedServices {
-  serviceIds: string[]
-  /** The one specialist doing them all, or null when split. */
-  staffId: string | null
-}
-
-export async function bookedServices(db: Queryable, bookingId: string): Promise<BookedServices> {
-  const items = await db.select().from(bookingItems).where(eq(bookingItems.bookingId, bookingId)).orderBy(bookingItems.sort)
-  const first = items[0]?.staffId ?? null
-  return {
-    serviceIds: items.flatMap((i) => (i.serviceId ? [i.serviceId] : [])),
-    staffId: first && items.every((i) => i.staffId === first) ? first : null,
-  }
-}
-
-/**
- * Who a re-booked time goes to, never someone else silently (ROUND6 A5, book Q-159): the specialist `to` names, anyone
- * free for null («Islendik hünärmen»), or the booking's own specialist when it names none. A move doesn't count the
- * booking's own time as busy (Q-165). The offered times' state asks the same question.
- */
-export function rebookQuery(
-  booked: { serviceIds: string[]; staffId: string | null },
-  to: { date: string; staffId?: string | null },
-  excludeBookingIds?: readonly string[],
-): AppointmentQuery {
-  const staffId = to.staffId === undefined ? booked.staffId : to.staffId
-  // «Islendik» still tries the booking's own specialist first at the same start
-  return { date: to.date, serviceIds: booked.serviceIds, by: 'client', staffId, preferStaffId: booked.staffId, excludeBookingIds }
-}
-
 /**
  * A new appointment like `from` at another time: a client's move request, or an offered alternative. `opts.db` runs it
- * inside the caller's transaction.
+ * inside the caller's transaction, which reads the business as it stands there.
  */
 export async function rebook(
   deps: Deps,
   user: User,
   from: BookingRow,
   to: { date: string; start: number; staffId?: string | null },
-  opts: { status: 'pending' | 'confirmed'; rescheduleOf?: string; alternativeOf?: string; db?: Queryable; booked?: BookedServices },
+  opts: {
+    status: 'pending' | 'confirmed'
+    rescheduleOf?: string
+    alternativeOf?: string
+    db?: Queryable
+    booked?: BookedServices
+  },
 ): Promise<BookingRow> {
   const db = opts.db ?? deps.db
   const lb = await loadBusiness(db, from.businessId)

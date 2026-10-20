@@ -30,15 +30,14 @@ import { currentBusinessDate } from '@yeral/domain/hours'
 import { canBusinessCancel, canBusinessMove, canUndoNewBooking, NEW_BOOKING_UNDO_MS, toldOf } from '@yeral/domain/lifecycle'
 import { canOn, scopeOf, type Actor } from '@yeral/domain/permissions'
 import { addDays, epochOf } from '@yeral/domain/time'
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, clients, staff, users } from '../../db/schema'
+import { bookingItems, bookings, clients } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { ApiError } from '../../http/errors'
+import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
-import { unusedSince } from '../auth/sign-in'
 import {
   appointmentContext,
   assertOpenAt,
@@ -48,71 +47,27 @@ import {
   lockedHours,
   type LoadedBusiness,
 } from '../availability/context'
-import { dropPendingMove } from '../bookings/actions'
-import { cancelForBusiness } from '../bookings/business-cancel'
 import { queueBookingSms } from '../bookings/confirm'
-import { appointmentPrice, inTransaction, itemRows } from '../bookings/create'
+import { appointmentPrice, cancelForBusiness, dropPendingMove, inTransaction, itemRows } from '../bookings/engine'
 import { retimeAddressSms } from '../bookings/address-sms'
 import { extendBookingLinks } from '../bookings/links'
-import { awaitingAnswer, freshCode, guard, isSlotConflict, itemsOf, stateOf, type BookingRow, type ItemRow } from '../bookings/repo'
+import { freshCode, guard, isSlotConflict, stateOf, type BookingRow, type ItemRow } from '../bookings/repo'
+import { assertNoWaitingMove, phoneClient, specialistAccounts, teamBooking, type Business } from './repo'
 
 type FreeTimesQuery = z.infer<typeof freeTimesQuerySchema>
 type FreeTimes = z.infer<typeof freeTimesSchema>
 type NewBooking = z.infer<typeof newBookingSchema>
 type MoveInput = z.infer<typeof moveBookingSchema>
 type CancelInput = z.infer<typeof businessCancelSchema>
-interface Business {
-  id: string
-}
-interface Issue {
-  path: (string | number)[]
-  code: string
-}
 
 /** "Iň ýakyn boş wagtlar": the first 4 free starts in 14 days (design COMPONENTS, NewBookingDrawer). */
 const NEAREST = 4
 /** The date strip's days, the business day that holds now first. */
 const STRIP_DAYS = 14
 
-const invalid = (...issues: Issue[]) => new ApiError('validation_error', { issues })
-
 /** The owner and administrators book anyone; a specialist only themself ("add, move, cancel bookings: own"). */
 function assertMayBook(actor: Actor, staffId: string): void {
   if (!canOn(actor, 'bookings', [staffId])) throw new ApiError('forbidden')
-}
-
-/** The booking's specialists, in its order. */
-const staffOf = (items: readonly ItemRow[]) => items.flatMap((i) => (i.staffId ? [i.staffId] : []))
-
-/**
- * A booking of this business with its items, which the actor may change: one they can't see is 404, one they see but
- * may not change (a specialist's shared booking) 403. `lock` holds the row for the rest of the transaction.
- */
-async function teamBooking(db: Queryable, business: Business, actor: Actor, code: string, opts: { lock?: boolean } = {}) {
-  const q = db
-    .select()
-    .from(bookings)
-    .where(and(eq(bookings.businessId, business.id), eq(bookings.code, code)))
-  const [b] = opts.lock ? await q.for('update') : await q
-  if (!b) throw new ApiError('not_found')
-  const items = await itemsOf(db, b.id)
-  const staffIds = staffOf(items)
-  if (!canOn(actor, 'calendar', staffIds)) throw new ApiError('not_found')
-  if (!canOn(actor, 'bookings', staffIds)) throw new ApiError('forbidden')
-  return { b, items, staffIds }
-}
-
-/**
- * The accounts of the specialists among these team members. A specialist's feed finds a booking through its items, so
- * those a change leaves (a deleted booking, a move to someone else) hear it as the person concerned (`userId`).
- */
-async function specialistAccounts(db: Queryable, staffIds: readonly string[]): Promise<string[]> {
-  if (!staffIds.length) return []
-  const rows = await db
-    .select({ userId: staff.userId })
-    .from(staff)
-    .where(and(inArray(staff.id, [...staffIds]), eq(staff.level, 'specialist')))
-  return rows.flatMap((r) => (r.userId ? [r.userId] : []))
 }
 
 /** No booking the team gives starts off the business's steps or before the step that holds now (no back-dated visits). */
@@ -195,40 +150,6 @@ export async function freeTimes(deps: Deps, business: Business, actor: Actor, q:
   return { nearest, date, slots: startsOn(date), days }
 }
 
-/**
- * The phone's client at this business (B-23): its record, found by the number, or a new one with the name typed in.
- * An account's name never fills it: a number alone mustn't tell a business who holds it. The booking joins the
- * number's account unless it went unused for 6 months: the number may be someone else's now, and it joins after "Is
- * this you?" at their next sign-in (book Q-270). A record not yet linked is linked as an online booking links it.
- */
-async function phoneClient(tx: Queryable, businessId: string, phone: string, name: string | undefined, now: number, bookingId: string) {
-  const [account] = await tx.select().from(users).where(eq(users.phone, phone))
-  const holder = account && !unusedSince(account.lastSeenAt, now) ? account : undefined
-  const [record] = await tx
-    .insert(clients)
-    // an undo removes a record its booking made: made at the booking's instant, held by no other booking
-    .values({
-      businessId,
-      phone,
-      name: name ?? null,
-      nameSetBy: name ? bookingId : null,
-      userId: holder?.id ?? null,
-      createdAt: new Date(now),
-    })
-    .onConflictDoUpdate({
-      target: [clients.businessId, clients.phone],
-      // a known client keeps their name; a record without one takes the name typed in, which an undo takes back
-      set: {
-        name: sql`coalesce(${clients.name}, excluded.name)`,
-        nameSetBy: sql`case when ${clients.name} is null and excluded.name is not null then ${bookingId}::uuid else ${clients.nameSetBy} end`,
-        userId: sql`coalesce(${clients.userId}, excluded.user_id)`,
-      },
-    })
-    .returning()
-  if (!record) throw new Error('client upsert failed')
-  return { record, holder }
-}
-
 async function insertTeamBooking(
   tx: Queryable,
   deps: Deps,
@@ -306,7 +227,7 @@ export async function addBooking(
     issues.push({ path: ['date'], code: 'not_today' })
   if (issues.length) throw invalid(...issues)
   const q: AppointmentQuery = { date: input.date, serviceIds: input.serviceIds, staffId: input.staffId, by: 'staff' }
-  const contextNow = async () => appointmentContext(lb, await loadBusy(deps.db, [business.id], input.date, input.date), deps.now())
+  const contextNow = async (biz = lb) => appointmentContext(biz, await loadBusy(deps.db, [business.id], input.date, input.date), deps.now())
   const nearest = (ctx: AppointmentContext) =>
     nearestSlots(ctx, q, input.start).map((s) => ({ date: input.date, start: s.start, end: s.end }))
   const ctx = await contextNow()
@@ -316,7 +237,8 @@ export async function addBooking(
   const row = await inTransaction(
     deps,
     (tx) => insertTeamBooking(tx, deps, lb, input, slot),
-    async () => nearest(await contextNow()),
+    // as the business stands now: its hours may have just changed
+    async () => nearest(await contextNow(await loadBusiness(deps.db, business.id))),
   )
   return { code: row.code, undoUntil: row.createdAt.getTime() + NEW_BOOKING_UNDO_MS }
 }
@@ -358,15 +280,6 @@ export async function undoBooking(deps: Deps, business: Business, actor: Actor, 
   })
 }
 
-/** A move the client asked for that still waits for its answer: it's answered first (B-21, B-26). */
-async function assertNoWaitingMove(db: Queryable, b: BookingRow, now: number): Promise<void> {
-  const [waiting] = await db
-    .select({ id: bookings.id })
-    .from(bookings)
-    .where(and(eq(bookings.rescheduleOf, b.id), awaitingAnswer(now)))
-  if (waiting) throw new ApiError('move_waiting')
-}
-
 const asPlanned = (items: readonly ItemRow[]): PlannedItem[] =>
   items.map((i) => ({ serviceId: i.serviceId ?? '', staffId: i.staffId ?? '', start: i.start, end: i.end, bufferAfter: i.bufferAfter }))
 
@@ -393,7 +306,7 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
       const now = deps.now()
       const at = new Date(now)
       // the hours as they stand, before the booking's lock (the order an hours save takes them in)
-      const hours = await lockedHours(tx, business.id)
+      await lockedHours(tx, business.id)
       // all of it again under the booking's lock: a client's move confirmed meanwhile changed its time and items, and
       // a client's move takes this lock before it's asked
       const { b, items, staffIds } = await teamBooking(tx, business, actor, code, { lock: true })
@@ -408,11 +321,9 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
       const timeChanged = input.date !== b.date || input.start !== b.start
       // a drop on its own place, or the same move sent twice
       if (!timeChanged && plan.every((it, i) => it.staffId === items[i]!.staffId)) return
-      const ctx = appointmentContext(
-        { ...lb, business: { ...lb.business, ...hours } },
-        await loadBusy(tx, [business.id], input.date, input.date),
-        now,
-      )
+      // the business as it stands under the lock: its hours, its team and their schedules
+      const fresh = await loadBusiness(tx, business.id)
+      const ctx = appointmentContext(fresh, await loadBusy(tx, [business.id], input.date, input.date), now)
       const refusal = planRefusal(ctx, input.date, plan, excluded)
       if (refusal) throw new ApiError('cannot_move', { ...refusal } satisfies CannotMoveDetails)
       for (const [i, it] of items.entries()) {
@@ -425,7 +336,7 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
             end: to.end,
             bufferAfter: to.bufferAfter,
             staffId: to.staffId,
-            staffName: lb.staff.find((s) => s.id === to.staffId)?.name ?? it.staffName,
+            staffName: fresh.staff.find((s) => s.id === to.staffId)?.name ?? it.staffName,
           })
           .where(eq(bookingItems.id, it.id))
       }

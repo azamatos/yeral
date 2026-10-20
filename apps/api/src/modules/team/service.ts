@@ -12,7 +12,7 @@ import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
 import { bookingRules, bookings, businesses, invites, services, staff, staffServices, users } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { ApiError } from '../../http/errors'
+import { ApiError, invalid } from '../../http/errors'
 import type { AppEnv, User } from '../../http/env'
 import { randomToken, sha256Hex } from '../../lib/crypto'
 import { emit } from '../../notify'
@@ -126,7 +126,10 @@ export async function setServices(db: Queryable, businessId: string, staffId: st
       .select({ id: services.id })
       .from(services)
       .where(and(eq(services.businessId, businessId), inArray(services.id, [...serviceIds])))
-    if (own.length !== serviceIds.length) throw new ApiError('validation_error', { serviceIds: 'unknown service' })
+    if (own.length !== serviceIds.length)
+      throw invalid(
+        ...serviceIds.flatMap((id, i) => (own.some((s) => s.id === id) ? [] : [{ path: ['serviceIds', i], code: 'not_found' }])),
+      )
   }
   await db.delete(staffServices).where(eq(staffServices.staffId, staffId))
   if (serviceIds.length) await db.insert(staffServices).values(serviceIds.map((serviceId) => ({ staffId, serviceId })))

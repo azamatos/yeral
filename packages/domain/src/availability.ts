@@ -427,16 +427,6 @@ export function planRefusal(
   return planFits(views, items) ? null : { problem: 'overlap', staffId: items[0]?.staffId ?? '' }
 }
 
-/** What `planRefusal` refuses, without the details. */
-export function checkPlan(
-  ctx: AppointmentContext,
-  date: string,
-  items: readonly PlannedItem[],
-  excludeBookingIds: readonly string[] = [],
-): PlanProblem | null {
-  return planRefusal(ctx, date, items, excludeBookingIds)?.problem ?? null
-}
-
 /**
  * Move a plan to a new start, keeping durations and buffers; or to one specialist for every service, when the buffer
  * follows the last service only, as when such a plan is booked (each item keeps the buffer it was booked with).

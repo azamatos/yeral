@@ -8,7 +8,7 @@ import { today } from '@yeral/domain/time'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { businesses, favorites, sessions, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
-import { ApiError } from '../../http/errors'
+import { ApiError, invalid } from '../../http/errors'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { clientIp } from '../../lib/rate-limit'
 import { checkCode, sendCode } from '../auth/codes'
@@ -94,13 +94,13 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     // so a first name of two words stays one
     const parts = name !== undefined && name !== accountName(user) ? splitName(name) : undefined
     if (parts && ((parts.first?.length ?? 0) > NAME_MAX || (parts.surname?.length ?? 0) > NAME_MAX))
-      throw new ApiError('validation_error', { issues: [{ path: ['name'], code: 'too_big' }] })
+      throw invalid({ path: ['name'], code: 'too_big' })
     const next = {
       first: parts ? parts.first : firstName !== undefined ? firstName : user.name,
       surname: parts ? parts.surname : surname !== undefined ? surname || null : user.surname,
     }
     // a surname alone isn't a name
-    if (next.surname && !next.first) throw new ApiError('validation_error', { issues: [{ path: ['firstName'], code: 'required' }] })
+    if (next.surname && !next.first) throw invalid({ path: ['firstName'], code: 'required' })
     const set = {
       ...(parts || firstName !== undefined ? { name: next.first } : {}),
       ...(parts || surname !== undefined ? { surname: next.surname } : {}),

@@ -55,10 +55,29 @@ It found 15 issues; all hold. The plan, one PR each, reviewed before merging, in
    a decline by `businessCancelReason`, as the detail does); the seed marks the design's business cancel ("Şol gün
    ýapyk", the business's own words) as "Other reason"; the `{ tk: '' }` fallback is the market's language.
    `Object.hasOwn` in the jobs went with PR 1.
-4. **Structure, no behaviour change:** `bookings/engine.ts` (items, price, `inTransaction`, waiting-move handling,
-   `cancelForBusiness`), `actions.ts` client-only, `repo.ts` files for the calendar and hours queries, the team sources
-   and the "heard" window in the domain with tests, one `invalid()`, techContext's "Where shared things live" and
-   systemPatterns' module map, one write per cancel, booked services loaded together, `checkPlan` gone.
+4. **Structure, no behaviour change** (refactor/p2-structure, 20.10.2026): `bookings/engine.ts` holds what the client's
+   and the team's paths share (items, price, `inTransaction`, the services a booking re-books with and
+   `bookedServicesOf` for many, `rebookQuery`, the waiting move, `clientUnaware`, `declineForBusiness`,
+   `cancelForBusiness`; `business-cancel.ts` is gone), so `actions.ts` is the client's only; `calendar/repo.ts` and
+   `settings/repo.ts` hold the calendar's and the hours' queries; one hours loader (`loadHours(db, id, { lock })`,
+   `lockedHours` on it); the "heard" window in the domain (`firstSmsFrom`, used by `queueBookingSms`, `clientUnaware`
+   and the address SMS) and the booking sources tested; one `invalid()` (`http/errors.ts`), which also gives two team
+   endpoints the contract's `issues` shape; `setStatus` writes a decline's reason and offered times in its one update;
+   the booked services loaded together for "Upcoming", for the rows that still reach their times (an hours cancel
+   reads each booking's under its lock); one items query for many bookings (`itemsOfBookings`); `checkPlan` gone
+   (tests use `planRefusal`); the team's move reads the business under its lock, its team's schedules included (the
+   idea of passing a business loaded earlier to `rebook` was dropped: stale under a lock). Two from PR 2's list: a time the hours closed meanwhile comes back with the nearest free times
+   (`OutsideHours`, which `inTransaction` fills from the business as it stands, tables too); independent queries go
+   through `all(db, [...])`, one after another in a transaction (pg 9 refuses overlapping ones; the test run's
+   deprecation warnings are gone). techContext's "Where shared things live" and systemPatterns' module map follow.
+   Its review (8 findings, all fixed): the table path's stale times, the client's move with a business read before
+   its lock, the empty-list sentinel (now the `OutsideHours` class), services read before the lock, four more
+   `Promise.all` on a `Queryable`, the repeated items query, a duplicated type, services loaded for dropped rows.
+   Second review (9): fixed the offered time's early business read, the team's move's stale team, `all()` on a
+   database made on one client (`$client`), the rows dropped after their services loaded, the last `Promise.all`, the
+   team endpoints' error shapes tested, the changeset's promise (new bookings only); not taken: reading only the
+   hours on a 409 (the team's schedules may have changed too), an endpoint test of the hours race (needs the
+   concurrency harness).
 5. **SMS caps** (P2 step 7, before SMS go out): a daily cap and rate limit per business on the SMS its team sends to
    numbers it types in, none from a business in review. In chapter 10's step 7.
 
