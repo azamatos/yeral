@@ -38,6 +38,7 @@ import type {
 } from '@yeral/contract/bookings'
 import type { searchQuerySchema } from '@yeral/contract/catalog'
 import type { Locale } from '@yeral/contract/common'
+import type { declineInputSchema } from '@yeral/contract/requests'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
 import type { bookingRulesUpdateSchema, businessProfileUpdateSchema } from '@yeral/contract/settings'
 import type { inviteInputSchema, phoneOnlyInputSchema, updateMemberSchema } from '@yeral/contract/team'
@@ -512,6 +513,28 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
+  /** Booking requests the business answers (book B-19–B-21): the waiting ones, confirm, decline. */
+  const answered = (slug: string) => invalidate(keys.requests(slug), keys.workspaces(), keys.availabilityAll(slug))
+  const requests = {
+    /** The ones the viewer may see, most urgent first, with whether they may answer each. */
+    list: (slug: string) =>
+      queryOptions({
+        queryKey: keys.requests(slug),
+        queryFn: ({ signal }) => call(w.requests.$get({ param: { slug } }, abortWith(signal))),
+      }),
+    confirm: (slug: string) =>
+      mutationOptions({
+        mutationFn: (code: string) => call(w.requests[':code'].confirm.$post({ param: { slug, code } })),
+        onSuccess: () => answered(slug),
+      }),
+    decline: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ code, ...json }: { code: string } & z.input<typeof declineInputSchema>) =>
+          call(w.requests[':code'].decline.$post({ param: { slug, code }, json })),
+        onSuccess: () => answered(slug),
+      }),
+  }
+
   /** The SMS link page (book Q-168, F-068): the booking by its link's token, and the login with its own phone. */
   const links = {
     view: (token: string, lang: Locale) =>
@@ -532,7 +555,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
-  return { auth, me, catalog, availability, bookings, team, settings, links }
+  return { auth, me, catalog, availability, bookings, team, settings, requests, links }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

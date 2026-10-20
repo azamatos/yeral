@@ -44,4 +44,6 @@ export const keys = {
   rules: (slug: string) => ['settings', slug, 'rules'] as const,
   menu: (slug: string) => ['settings', slug, 'services'] as const,
   profile: (slug: string) => ['settings', slug, 'profile'] as const,
+  // the business's requests (book B-19–B-21)
+  requests: (slug: string) => ['requests', slug] as const,
 }

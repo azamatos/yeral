@@ -4,7 +4,7 @@
  */
 import type { EventType } from '@yeral/contract/events'
 import { MARKET } from '@yeral/domain/market'
-import { localized, type Locale } from '@yeral/domain/model'
+import { localized, type DeclineReason, type Locale } from '@yeral/domain/model'
 import { epochOf, localOf } from '@yeral/domain/time'
 import { createFmt, createT } from '@yeral/i18n/fmt'
 import { eq } from 'drizzle-orm'
@@ -108,6 +108,20 @@ export function expiredSmsText(
     })
     .join(', ')
   return t('sms.expired', { ...common, times: list })
+}
+
+/** A request the business declined, with the reason it gave ("other" in its words) and the link to the offered times (B-20). */
+export function declinedSmsText(lang: Locale, b: SmsBooking & { link: string }, reason: DeclineReason, text: string | null): string {
+  const fmt = createFmt(lang)
+  const t = createT(lang)
+  return t('sms.declined', {
+    brand: brandOf(t),
+    business: b.businessName,
+    date: fmt.dayMonth(dayOf(b.date, b.start)),
+    time: fmt.time(wallOf(b.date, b.start).min),
+    reason: reason === 'other' && text ? text : t(`declineReasons.${reason}`),
+    link: b.link,
+  })
 }
 
 /** A move the business declined or let lapse: the booking keeps its time (book Q-289). `b` is the booking itself. */

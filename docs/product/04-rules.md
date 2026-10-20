@@ -138,8 +138,8 @@ MVP. (business spec §3; Q-031, decided 18.10.2026)
 - **Each offered or free time names one specialist** and is booked with that person only; if they're no longer free,
   the chip shows *Eýýäm eýelendi*. (Q-159, decided 18.10.2026) At the same time the client's specialist comes first;
   services nobody does alone are still split between people, and such a time names nobody (Claude (delegated),
-  20.10.2026). (code: `jobs/run.ts` `alternativesFor`, `bookings/offers.ts`) **Code differs:** times offered after a
-  decline name nobody until the business's decline is built (P2 step 4), so taking one still goes to anyone free.
+  20.10.2026). (code: `jobs/run.ts` `alternativesFor`, `bookings/offers.ts`; the business's decline names one per
+  offer: `requests/service.ts`, 20.10.2026)
 - **Expired with free times:** taking one sends a new request (confirmed at once at an instant business). (ROUND6-ANSWERS A2)
 
 ## Changes after booking

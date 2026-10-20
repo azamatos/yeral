@@ -740,7 +740,7 @@ Code differs: outside production, demo businesses answer their own requests auto
 
 > Open question Q-004: who the first launch is for.
 
-**Status** — Design: drawn (B-Calendar · `panel=request`, `answers`; B-Bookings; B-Mobile) · Code: rule only (domain: who can answer before expiry; confirming in the api is used only by instant mode and demo businesses); no business endpoint.
+**Status** — Design: drawn (B-Calendar · `panel=request`, `answers`; B-Bookings; B-Mobile) · Code: api built (`GET /v1/w/{slug}/requests`, `POST …/requests/{code}/confirm`, 20.10.2026): the requests each person may see, most urgent first, with the client's visits and no-shows and whether they may answer; alert notes come with the client card.
 
 ### B-20 · Decline a request with offered times
 
@@ -779,7 +779,7 @@ flowchart TD
 
 > Open question Q-264: when an offered time counts as past.
 
-**Status** — Design: drawn (B-Calendar · `panel=decline`; B-Bookings; B-Mobile) · Code: schema only for the decline reason, text and offered times; the client taking an offered time is built (api); the business decline is not built.
+**Status** — Design: drawn (B-Calendar · `panel=decline`; B-Bookings; B-Mobile) · Code: api built (`POST /v1/w/{slug}/requests/{code}/decline`, 20.10.2026): the reason, "other" in words, up to 3 offered times each checked free for its specialist and ahead by the lead time, the SMS with the reason.
 
 ### B-21 · Answer a move request (Wagt üýtgetmek)
 
@@ -822,7 +822,7 @@ Code differs: today a client's move can land on another free specialist when the
 
 > Open question Q-263: a waiting move that outlives the original time.
 
-**Status** — Design: drawn (B-Calendar · `panel=move-request`; B-Bookings · `panel=move-request`; B-Mobile) · Code: built for the client side (a move request holds the new slot; confirming moves the original; expiry drops it without offered times); the business screens and answer endpoint are not built.
+**Status** — Design: drawn (B-Calendar · `panel=move-request`; B-Bookings · `panel=move-request`; B-Mobile) · Code: api built (20.10.2026): moves appear among the requests (`kind: move`, with the old time); confirming moves the booking; declining keeps it, records the reason and texts the client.
 
 ### B-22 · A request runs out of time
 

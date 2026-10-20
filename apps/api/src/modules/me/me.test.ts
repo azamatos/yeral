@@ -440,6 +440,9 @@ describe('account', () => {
         '/v1/w/{slug}/services/groups',
         '/v1/w/{slug}/services/groups/{groupId}',
         '/v1/w/{slug}/services/order',
+        '/v1/w/{slug}/requests',
+        '/v1/w/{slug}/requests/{code}/confirm',
+        '/v1/w/{slug}/requests/{code}/decline',
       ].sort(),
     )
   })

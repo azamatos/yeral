@@ -12,7 +12,7 @@ import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
 import { bookings, businesses, clients, jobs, users, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, smsCityOf, type BookingSmsKind } from '../../notify'
+import { bookingSmsText, declinedSmsText, emit, expiredSmsText, moveRefusedSmsText, smsCityOf, type BookingSmsKind } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
 import { pruneIdentityChecks } from '../auth/identity'
@@ -162,7 +162,7 @@ async function completeVisits(deps: Deps): Promise<number> {
 }
 
 /** The SMS about an outcome the client didn't choose: they always go (book Q-286, Q-289). */
-type OutcomeSmsKind = 'expired' | 'moveRefused'
+type OutcomeSmsKind = 'expired' | 'moveRefused' | 'declined'
 
 /**
  * Send with a link of its own. A failed send keeps its link: the gateway may have delivered it anyway, and an unsent
@@ -180,12 +180,14 @@ async function sendWithLink(deps: Deps, b: BookingRow, to: string, text: (link: 
   }
 }
 
-/** An expired request's times, or a move not accepted while the visit is still ahead; the client can't switch these off. */
+/** An expired request's times, a declined request's reason, or a move not accepted while the visit is still ahead; the client can't switch these off. */
 async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): Promise<void> {
   const still =
     kind === 'expired'
       ? b.status === 'cancelled' && b.cancelledBy === 'system'
-      : b.status === 'confirmed' && !!b.moveRefused && deps.now() < epochOf(b.date, b.start)
+      : kind === 'declined'
+        ? b.status === 'cancelled' && b.cancelledBy === 'business' && !!b.declineReason
+        : b.status === 'confirmed' && !!b.moveRefused && deps.now() < epochOf(b.date, b.start)
   if (!still) return
   const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
   if (!lb) return
@@ -199,7 +201,9 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
   await sendWithLink(deps, b, to, (link) =>
     kind === 'expired'
       ? expiredSmsText(lang, { ...sms, link }, byPhone ? [] : b.expiredAlternatives, { byPhone })
-      : moveRefusedSmsText(lang, { ...sms, link }),
+      : kind === 'declined'
+        ? declinedSmsText(lang, { ...sms, link }, b.declineReason!, b.declineText)
+        : moveRefusedSmsText(lang, { ...sms, link }),
   )
 }
 
@@ -217,7 +221,7 @@ async function sendBookingSms(
   // the person deleted their account: the number may be someone else's now
   if (!b?.clientPhone || b.accountDeletedAt) return
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
-  if (kind === 'expired' || kind === 'moveRefused') {
+  if (kind === 'expired' || kind === 'moveRefused' || kind === 'declined') {
     await sendOutcomeSms(deps, b, kind)
     return
   }
