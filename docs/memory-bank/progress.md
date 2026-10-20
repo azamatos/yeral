@@ -179,7 +179,22 @@
   phone-only clients and paused businesses on the business page `b7c7822` (#61). Open: #62 (owner's preview, F-032).
   The reviews found real bugs before merging (deadlocks between deletion and other actions, a way past the waiting
   limit through "Yzyna al", stale per-viewer caches, an unhandled rejection that could stop the api, racing rating
-  updates). Gaps found, not fixed: see activeContext "Follow-ups found in step 3".
+  updates). Gaps found, not fixed: see activeContext "Follow-ups, not fixed".
+- **2026-10-20 · P2 step 3 finished, step 4 begun, the backend reviewed** (each PR reviewed with `code-review` and
+  fixed before merging; details in `log/2026-10-20-p2-*.md`). Step 3: the owner's preview of a page in review
+  `32d906d` (#62); offers keep a request on top of Upcoming `f285044` (#64); no average bill, "Price at the place"
+  `cb68085` (#67); lateness fixed at 15 min `3eeb085` (#68); a price range filter `041cfb4` (#69); late reminders
+  dropped and the give-up alert line `d8ee90d` (#70); busy elsewhere `420d5d1` (#71, migration 0020). Step 4: booking
+  rules `604464c` (#72); services menu `422547d` (#74); profile with the address pin `7d35f34` (#75, migration 0021);
+  answering requests `a072307` (#76); the team's bookings by phone and walk-in, free times and undo `388f52c` (#78);
+  moving and cancelling `1f5a2ee` (#79, migration 0022); hours and special days with keep or cancel-and-offer
+  `501579f` (#80, migration 0023). Docs lookup `pnpm book show|refs|toc` and the TypeScript LSP for agents `e6fd349`
+  (#73). The owner then had the backend reviewed (#78–#80): 15 findings, a five-PR plan
+  (`log/2026-10-20-p2-review-fixes.md`): one first SMS per booking, worded when it goes from what the client knows
+  (`bookings.told`) `62627b2` (#81, migration 0024); bookings and hours saves ordered under the business row, requests
+  on a closed day declined `276e50f` (#82, migration 0025). The reviews of #81 and #82 found more (an SMS sent before a
+  booking's undo could come, bookings made before `told` never told of a move, lock-order deadlocks), all fixed before
+  merging. Left: PR 3 (contract), PR 4 (structure), PR 5 (SMS caps, step 7).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.
