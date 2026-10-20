@@ -25,6 +25,7 @@ const person = (phone: string, firstName: string | null, surname: string | null 
   notifications,
   hasBusiness: false,
   canChangePhone: true,
+  photo: null,
 })
 
 const workspace = (slug: string, name: string, level: Workspace['level'], lastOpenedAt: number | null): Workspace => ({

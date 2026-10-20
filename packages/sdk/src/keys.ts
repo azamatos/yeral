@@ -50,6 +50,7 @@ export const keys = {
   rules: (slug: string) => ['settings', slug, 'rules'] as const,
   menu: (slug: string) => ['settings', slug, 'services'] as const,
   profile: (slug: string) => ['settings', slug, 'profile'] as const,
+  gallery: (slug: string) => ['settings', slug, 'photos'] as const,
   hours: (slug: string) => ['settings', slug, 'hours'] as const,
   statuses: (slug: string) => ['settings', slug, 'statuses'] as const,
   // the business's requests (book B-19–B-21)

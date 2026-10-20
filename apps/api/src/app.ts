@@ -98,6 +98,12 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     .route('/v1', setupRoutes)
 
   app.get('/version.json', (c) => c.json({ app: 'api', ...build }))
+  // uploaded photos (book F-101): a key never changes what it holds, so browsers keep them
+  app.get('/media/up/*', async (c) => {
+    const file = await c.var.deps.storage.get(c.req.path.replace(/^\/media\//, ''))
+    if (!file) return c.json(errorBody('not_found'), 404)
+    return c.body(file.data, 200, { 'Content-Type': file.type, 'Cache-Control': 'public, max-age=31536000, immutable' })
+  })
   app.doc31('/openapi.json', {
     openapi: '3.1.0',
     info: { title: 'Ýeral API', version: build.version, description: 'Booking for any business that sells time. Guide: docs/API.md' },

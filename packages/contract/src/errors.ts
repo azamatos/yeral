@@ -44,6 +44,9 @@ export const ERROR_STATUS = {
   block_over_bookings: 409,
   /** "Iň köp 5 içerki ýagdaý bolup biler" (B-29). */
   statuses_full: 409,
+  // photos
+  /** "Iň köp 20 surat" (book Q-115). */
+  gallery_full: 409,
   // setting up
   /** One business is set up at a time (book Q-200): `details.slug` is the one to finish. */
   setup_in_progress: 409,

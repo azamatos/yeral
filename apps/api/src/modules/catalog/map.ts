@@ -14,7 +14,7 @@ export function visitWhat(items: { serviceName: Localized; staffName: string | n
   return `${items.map((i) => text(i.serviceName, lang)).join(' + ')}${staffName ? ` · ${staffName}` : ''}`
 }
 
-export const photoOf = (deps: Deps, p: StoredPhoto, lang: Locale) => ({ url: deps.media(p.key), alt: text(p.alt, lang) })
+export const photoOf = (deps: Pick<Deps, 'media'>, p: StoredPhoto, lang: Locale) => ({ url: deps.media(p.key), alt: text(p.alt, lang) })
 
 /** Home-based businesses show an approximate point (≈ 1 km) until the booking is confirmed. */
 export function geoOf(b: BusinessRow, exact = false) {

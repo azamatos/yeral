@@ -2,7 +2,7 @@
  * Login by phone code, the signed-in person, profile and favourites (client spec §4.7–4.8).
  */
 import { z } from 'zod'
-import { localeSchema, marketLocaleSchema, mobileInputSchema, phoneInputSchema, phoneSchema } from './common'
+import { localeSchema, marketLocaleSchema, mobileInputSchema, phoneInputSchema, phoneSchema, photoSchema } from './common'
 import { NAME_MAX } from '@yeral/domain/names'
 
 // ── Login ──
@@ -53,6 +53,8 @@ export const meSchema = z
     phone: phoneSchema,
     lang: localeSchema,
     notifications: notificationPrefsSchema,
+    /** "Profilim": the person's photo, the same in every workspace (book B-12). */
+    photo: photoSchema.nullable(),
     /** Has a business workspace ("Biznes" link). */
     hasBusiness: z.boolean(),
     /**

@@ -1,4 +1,5 @@
 /** Environment for the api, read once from `process.env` (ADR 0024). */
+import { resolve } from 'node:path'
 import { parseEnv } from '@yeral/lib/env'
 import { siteFromEnv, type SiteConfig } from '@yeral/lib/site'
 import { z } from 'zod'
@@ -10,6 +11,8 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).optional(),
   /** Where photos are served from; defaults to `<api>/media`. */
   MEDIA_BASE_URL: z.url().optional(),
+  /** Where uploaded photos are kept on disk (book F-101); defaults to `data/media` under the working directory. */
+  MEDIA_DIR: z.string().min(1).optional(),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   /** The header our edge sets with the caller's IP: `x-forwarded-for` (behind Caddy, which writes it). */
   TRUSTED_IP_HEADER: z.enum(['x-forwarded-for']).optional(),
@@ -25,6 +28,7 @@ export interface Config {
   port: number
   site: SiteConfig
   mediaBaseUrl: string
+  mediaDir: string
   logLevel: 'debug' | 'info' | 'warn' | 'error'
   trustedIpHeader?: TrustedIpHeader
   codeOnScreen: boolean
@@ -38,6 +42,7 @@ export function loadConfig(source: Record<string, unknown>): Config {
     port: env.PORT ?? Number(new URL(site.urls.api).port || 3004),
     site,
     mediaBaseUrl: (env.MEDIA_BASE_URL ?? `${site.urls.api}/media`).replace(/\/$/, ''),
+    mediaDir: resolve(env.MEDIA_DIR ?? 'data/media'),
     logLevel: env.LOG_LEVEL,
     trustedIpHeader: env.TRUSTED_IP_HEADER,
     codeOnScreen: env.SIGN_IN_CODE_ON_SCREEN === 'true',

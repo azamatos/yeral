@@ -178,7 +178,7 @@ const inviteSummary = (i: InviteRow | undefined, now: number) =>
       }
     : null
 
-export function toMember(row: StaffRow, invite: InviteRow | undefined, lang: Locale, now: number): TeamMember {
+export function toMember(deps: Pick<Deps, 'media'>, row: StaffRow, invite: InviteRow | undefined, lang: Locale, now: number): TeamMember {
   const joined = hasJoined(row)
   return {
     id: row.id,
@@ -192,22 +192,24 @@ export function toMember(row: StaffRow, invite: InviteRow | undefined, lang: Loc
     bookable: row.bookable,
     canAnswerOwn: row.canAnswerOwn,
     joined,
+    photo: row.photo ? photoOf(deps, row.photo, lang) : null,
     // once someone has joined, their old invite is history
     invite: joined ? null : inviteSummary(invite, now),
   }
 }
 
-export async function members(db: Queryable, businessId: string, lang: Locale, now: number): Promise<TeamMember[]> {
+export async function members(deps: Pick<Deps, 'db' | 'media'>, businessId: string, lang: Locale, now: number): Promise<TeamMember[]> {
+  const { db } = deps
   const rows = await db.select().from(staff).where(eq(staff.businessId, businessId)).orderBy(asc(staff.sort), asc(staff.createdAt))
   const latest = await latestInvites(
     db,
     rows.map((r) => r.id),
   )
-  return rows.map((r) => toMember(r, latest.get(r.id), lang, now))
+  return rows.map((r) => toMember(deps, r, latest.get(r.id), lang, now))
 }
 
-export async function member(db: Queryable, row: StaffRow, lang: Locale, now: number): Promise<TeamMember> {
-  return toMember(row, (await latestInvites(db, [row.id])).get(row.id), lang, now)
+export async function member(db: Queryable, deps: Pick<Deps, 'media'>, row: StaffRow, lang: Locale, now: number): Promise<TeamMember> {
+  return toMember(deps, row, (await latestInvites(db, [row.id])).get(row.id), lang, now)
 }
 
 /** The switcher: every workspace this account works in, with the requests it may answer there. */

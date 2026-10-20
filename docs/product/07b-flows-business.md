@@ -499,7 +499,7 @@ flowchart TD
 
 - The name in the account is the person's own; the name clients see on the booking site is set by the owner per workspace (B-44).
 
-**Status** — Design: drawn (B-Shell · user menu, Profilim; B-Mobile) · Code: built (api `/me`; the account menu and My profile, #119 and #121, chapter 9's 21.10.2026 rows); the photo waits for the api's upload, specializations per workspace for the api.
+**Status** — Design: drawn (B-Shell · user menu, Profilim; B-Mobile) · Code: built (api `/me`, `PUT`/`DELETE /v1/me/photo`, 21.10.2026; the account menu and My profile, #119 and #121, chapter 9's 21.10.2026 rows); My profile doesn't upload the photo yet, specializations per workspace wait for the api.
 
 ### B-13 · Change my phone number
 
@@ -1369,7 +1369,7 @@ flowchart TD
 
 > Open question Q-213: closing or deleting a workspace.
 
-**Status** — Design: drawn (B-Settings · `pane=profile`, `dirty`) · Code: api built for the texts, phone, amenities, category and address (`GET`/`PATCH /v1/w/{slug}/settings/profile`, 20.10.2026); the logo and photos come with uploads (F-084, F-101).
+**Status** — Design: drawn (B-Settings · `pane=profile`, `dirty`) · Code: api built for the texts, phone, amenities, category and address (`GET`/`PATCH /v1/w/{slug}/settings/profile`, 20.10.2026) and the photos (`/v1/w/{slug}/settings/photos`: add, remove, order; 21.10.2026); the logo isn't built yet.
 
 ### B-38 · Services and groups
 

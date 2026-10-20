@@ -1,6 +1,7 @@
 /** The signed-in person: profile, language, notifications, phone change, account deletion, favourites (client spec §4.8). */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { meSchema, sendCodeResponseSchema, sendCodeSchema, updateMeSchema, verifyCodeSchema } from '@yeral/contract/account'
+import { photoUploadSchema } from '@yeral/contract/common'
 import { businessCardSchema } from '@yeral/contract/catalog'
 import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
 import { NAME_MAX, splitName } from '@yeral/domain/names'
@@ -17,6 +18,7 @@ import { buildCards } from '../catalog/cards'
 import { publicBusiness } from '../catalog/detail'
 import { changePhone, releaseAccount } from './account'
 import { accountName, phoneChangeOpen, toMe } from './me'
+import { removeMyPhoto, setMyPhoto } from './photo'
 
 const tags = ['me']
 const slugParam = z.object({ slug: slugSchema })
@@ -85,7 +87,31 @@ const removeFavoriteRoute = createRoute({
   responses: { ...noContent, 401: errors[401], 404: errors[404] },
 })
 
+const photoRoute = createRoute({
+  method: 'put',
+  path: '/me/photo',
+  tags,
+  summary: '"Profilim": the person\'s photo (JPEG, PNG or WebP, up to 10 MB), the same in every workspace',
+  request: { body: { content: { 'multipart/form-data': { schema: photoUploadSchema } }, required: true } },
+  responses: { 200: json(meSchema), 400: errors[400], 401: errors[401] },
+})
+const removePhotoRoute = createRoute({
+  method: 'delete',
+  path: '/me/photo',
+  tags,
+  summary: "The person's photo goes",
+  responses: { 200: json(meSchema), 401: errors[401] },
+})
+
 export const meRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(photoRoute, async (c) => {
+    const row = await setMyPhoto(c.var.deps, requireUser(c), c.req.valid('form').file)
+    return c.json(await toMe(c.var.deps.db, row, c.var.deps), 200)
+  })
+  .openapi(removePhotoRoute, async (c) => {
+    const row = await removeMyPhoto(c.var.deps, requireUser(c))
+    return c.json(await toMe(c.var.deps.db, row, c.var.deps), 200)
+  })
   .openapi(meRoute, async (c) => c.json(await toMe(c.var.deps.db, requireUser(c), c.var.deps), 200))
   .openapi(updateRoute, async (c) => {
     const user = requireUser(c)

@@ -5,6 +5,7 @@ import type { Db } from './db/client'
 import type { TrustedIpHeader } from './lib/rate-limit'
 import { createLogger, type Logger } from './ports/log'
 import { logSms, type SmsPort } from './ports/sms'
+import { diskStorage, type StoragePort } from './ports/storage'
 
 export interface Deps {
   db: Db
@@ -14,6 +15,8 @@ export interface Deps {
   sms: SmsPort
   /** Media key → public URL. */
   media: (key: string) => string
+  /** The photos people upload (`/media/up/…`). */
+  storage: StoragePort
   log: Logger
   /** Where the caller's IP comes from (`TRUSTED_IP_HEADER`); unset = no header is trusted. */
   trustedIpHeader?: TrustedIpHeader
@@ -35,6 +38,7 @@ export function createDeps(config: Config, db: Db, log: Logger = createLogger(co
     now: Date.now,
     sms,
     media: (key) => `${config.mediaBaseUrl}/${key}`,
+    storage: diskStorage(config.mediaDir),
     log,
     trustedIpHeader: config.trustedIpHeader,
     codeOnScreen: config.codeOnScreen,

@@ -3,6 +3,7 @@
  * owner manages (`/w/{slug}/team…`). Only the owner changes the team; administrators see it; specialists don't.
  */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
+import { photoUploadSchema } from '@yeral/contract/common'
 import {
   inviteCardSchema,
   inviteIdParamSchema,
@@ -36,6 +37,7 @@ import { sha256Hex } from '../../lib/crypto'
 import { requireUser } from '../auth/session'
 import { loadHours } from '../availability/context'
 import { removeMember, scheduleOf, updateSchedule } from './away'
+import { removeStaffPhoto, setStaffPhoto } from './photo'
 import {
   hasJoined,
   hasServices,
@@ -207,7 +209,43 @@ const notOwnerRow = (row: StaffRow) => {
   if (row.level === 'owner') throw new ApiError('forbidden')
 }
 
+const photoRoute = createRoute({
+  method: 'put',
+  path: '/w/{slug}/team/{staffId}/photo',
+  tags,
+  summary: 'The picture clients see beside a team member (JPEG, PNG or WebP, up to 10 MB; owner)',
+  request: {
+    params: staffIdParamSchema,
+    ...{ body: { content: { 'multipart/form-data': { schema: photoUploadSchema } }, required: true } },
+  },
+  responses: { 200: json(teamMemberSchema), 400: errors[400], ...ownerOnly },
+})
+const removePhotoRoute = createRoute({
+  method: 'delete',
+  path: '/w/{slug}/team/{staffId}/photo',
+  tags,
+  summary: "A team member's picture goes (owner)",
+  request: { params: staffIdParamSchema },
+  responses: { 200: json(teamMemberSchema), 400: errors[400], ...ownerOnly },
+})
+
 export const teamRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(photoRoute, async (c) => {
+    const { slug, staffId } = c.req.valid('param')
+    const { business, actor, user } = await requireMember(c, slug)
+    assertOwner(actor)
+    const { deps } = c.var
+    const row = await setStaffPhoto(deps, business.id, staffId, c.req.valid('form').file)
+    return c.json(await member(deps.db, deps, row, user.lang, deps.now()), 200)
+  })
+  .openapi(removePhotoRoute, async (c) => {
+    const { slug, staffId } = c.req.valid('param')
+    const { business, actor, user } = await requireMember(c, slug)
+    assertOwner(actor)
+    const { deps } = c.var
+    const row = await removeStaffPhoto(deps, business.id, staffId)
+    return c.json(await member(deps.db, deps, row, user.lang, deps.now()), 200)
+  })
   .openapi(workspacesRoute, async (c) => c.json(await workspacesOf(c.var.deps, requireUser(c)), 200))
   .openapi(openRoute, async (c) => {
     const { member: row } = await requireMember(c, c.req.valid('param').slug)
@@ -282,7 +320,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
   .openapi(teamRoute, async (c) => {
     const { business, actor, user } = await requireMember(c, c.req.valid('param').slug)
     if (!can(actor, 'team')) throw new ApiError('forbidden')
-    return c.json({ items: await members(c.var.deps.db, business.id, user.lang, c.var.deps.now()) }, 200)
+    return c.json({ items: await members(c.var.deps, business.id, user.lang, c.var.deps.now()) }, 200)
   })
   .openapi(inviteRoute, async (c) => {
     const { business, actor, user } = await requireMember(c, c.req.valid('param').slug)
@@ -315,7 +353,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       await setServices(tx, business.id, row.id, body.serviceIds ?? [])
       const { token } = await issueInvite(tx, now, { businessId: business.id, staffId: row.id, phone: body.phone, invitedBy: user.id })
       await teamChanged(tx, business.id, { phone: body.phone })
-      return { member: await member(tx, row, user.lang, now), link: inviteLink(deps.site, token) }
+      return { member: await member(tx, deps, row, user.lang, now), link: inviteLink(deps.site, token) }
     })
     return c.json(result, 201)
   })
@@ -344,7 +382,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       if (!row) throw new Error('staff insert failed')
       await setServices(tx, business.id, row.id, body.serviceIds ?? [])
       await teamChanged(tx, business.id)
-      return member(tx, row, user.lang, deps.now())
+      return member(tx, deps, row, user.lang, deps.now())
     })
     return c.json(created, 201)
   })
@@ -363,7 +401,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       if (!row.phone || !isMobile(row.phone)) throw invalid({ path: ['phone'], code: 'not_mobile' })
       const { token } = await issueInvite(tx, now, { businessId: business.id, staffId: row.id, phone: row.phone, invitedBy: user.id })
       await teamChanged(tx, business.id, { phone: row.phone })
-      return { member: await member(tx, row, user.lang, now), link: inviteLink(deps.site, token) }
+      return { member: await member(tx, deps, row, user.lang, now), link: inviteLink(deps.site, token) }
     })
     return c.json(result, 201)
   })
@@ -401,7 +439,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
         .where(eq(staff.id, row.id))
         .returning()
       await teamChanged(tx, business.id, { userId: row.userId })
-      return member(tx, next ?? row, user.lang, deps.now())
+      return member(tx, deps, next ?? row, user.lang, deps.now())
     })
     return c.json(updated, 200)
   })
@@ -451,7 +489,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
         .where(eq(staff.id, row.id))
         .returning()
       await teamChanged(tx, business.id, { userId: row.userId })
-      return member(tx, next ?? row, user.lang, deps.now())
+      return member(tx, deps, next ?? row, user.lang, deps.now())
     })
     return c.json(back, 200)
   })

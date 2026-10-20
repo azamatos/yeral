@@ -80,7 +80,10 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
 - The first launch's sign-in code on the screen: `SIGN_IN_CODE_ON_SCREEN=true` (off unless set; the api refuses it
   with a gateway that delivers). With it on, anyone who types a number signs in as it (book Q-036 and its concern), so
   it's set only when the first launch opens; the server's `compose.yml` keeps it `false` until then.
-- Photos: on the server's disk behind a storage port (P2 step 4); demo photos are served only outside production.
+- Photos: the ones people upload on the server's disk behind a storage port (`ports/storage.ts`), in `MEDIA_DIR` (the
+  `media` volume at `/data/media` on the server and in the local stack; `apps/api/data/media` in development),
+  served at `/media/up/…`; demo photos are served only outside production. The nightly backup (step 7) must take the
+  volume along with the database.
 
 ## The production-like stack (since M2g)
 
