@@ -134,10 +134,10 @@ export async function restoreBooking(deps: Deps, b: BookingRow): Promise<Booking
   }
   try {
     return await deps.db.transaction(async (tx) => {
-      // a request back to waiting counts as one sent now (book Q-124)
-      // the business may have closed that day since (book Q-211): the time can't come back
-      if (b.type !== 'class') await assertOpenAt(tx, b.businessId, b)
+      // a request back to waiting counts as one sent now (book Q-124); the account first, the order every path takes
       if (status === 'pending' && b.userId) await assertWaitingRoom(tx, b.userId, b.businessId, now, { locked: true })
+      // a request asks again: not on a day the business closed since (book Q-211); a confirmed booking comes back as it was
+      if (status === 'pending' && b.type !== 'class') await assertOpenAt(tx, b.businessId, b)
       // the seats may have gone meanwhile; tables, specialists and a person's time across workspaces are guarded by
       // the database
       if (b.type === 'class' && b.sessionId && (await seatsLeft(tx, b.sessionId)) < (b.seats ?? 1)) throw new ApiError('session_full')

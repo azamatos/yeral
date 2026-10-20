@@ -86,8 +86,8 @@ function checkChange(change: HoursChange, stored: readonly DateException[], toda
   // other hours past midnight may not run into the next day's opening, nor the day before into theirs
   for (const i of kept) {
     const d = change.specialDays[i]!
-    // a yearly day falls on any weekday some year: checked against all of them
-    if (d.hours && (d.yearly ? yearlyNightOverlaps(next.hours, d.hours) : nightOverlaps(next, addDays(d.from, -1), d.to).length))
+    // its neighbours this time, special days included; a yearly day falls on any weekday some year, so all of them too
+    if (d.hours && (nightOverlaps(next, addDays(d.from, -1), d.to).length || (d.yearly && yearlyNightOverlaps(next.hours, d.hours))))
       issues.push({ path: ['specialDays', i, 'hours'], code: 'overlaps_next_day' })
   }
   if (issues.length) throw new ApiError('validation_error', { issues })
@@ -156,7 +156,7 @@ async function detailsOf(db: Queryable, rows: readonly BookingRow[]): Promise<Bo
 
 /**
  * "Ýatyr we müşderilere 3 başga wagt hödürle": each booking cancelled by the business with the special day's name (or
- * "The opening hours changed") and up to 3 free times under the new hours. The business and its busy time load once;
+ * "The opening hours changed"), a waiting request declined, with up to 3 free times under the new hours. The business and its busy time load once;
  * each client's times are held from the next, so no two clients are offered the same time. Returns how many were
  * cancelled (one that changed meanwhile is left).
  */
@@ -180,7 +180,13 @@ async function cancelWithOffers(
       if (e instanceof StaleBooking) continue
       throw e
     }
-    if (!occupiesSlot(stateOf(row), now) || epochOf(row.date, row.start) < now) continue
+    // moved back inside the hours meanwhile (a move confirmed): it stays
+    if (
+      !occupiesSlot(stateOf(row), now) ||
+      epochOf(row.date, row.start) < now ||
+      withinHours(next, row.date, { start: row.start, end: row.end })
+    )
+      continue
     let offers: BookingRow['declineAlternatives'] = []
     if (ctx && row.type === 'appointment') {
       const picked = pickAlternatives(ctx, row, await bookedServices(tx, row.id), exclude)
@@ -209,8 +215,8 @@ async function cancelWithOffers(
 export async function updateHours(deps: Deps, businessId: string, change: HoursChange): Promise<HoursView & { cancelled: number }> {
   return deps.db.transaction(async (tx) => {
     const now = deps.now()
-    // one save at a time, read against the hours it replaces; the weaker lock leaves bookings (which reference the
-    // business) going in and out meanwhile
+    // one save at a time, read against the hours it replaces. Every way a booking takes its time reads the hours
+    // `for share` (`lockedHours`) and waits for this; plain references (an event, a booking's row) don't
     const [b] = await tx
       .select({ hours: businesses.hours, exceptions: businesses.exceptions })
       .from(businesses)

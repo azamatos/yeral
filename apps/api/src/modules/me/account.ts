@@ -81,6 +81,20 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
   const invited = how === 'deleted' ? (await cancelInvitesTo(tx, user.phone, at)).map((d) => d.businessId) : []
   for (const businessId of new Set(rows.map((r) => r.businessId))) if (!invited.includes(businessId)) await teamChanged(tx, businessId)
   if (how === 'deleted') {
+    // the reviews go, and the businesses' ratings no longer count them (book Q-172), first: a business's row before
+    // any booking's, the order an hours save takes them in; a number that passed on leaves the
+    // earlier holder's reviews standing, signed as they were. One change per business, in one order, so two deletions
+    // at once can't wait on each other
+    const gone = await tx
+      .delete(reviews)
+      .where(eq(reviews.userId, user.id))
+      .returning({ businessId: reviews.businessId, rating: reviews.rating })
+    for (const businessId of [...new Set(gone.map((r) => r.businessId))].sort()) {
+      const shift: StarShift = {}
+      for (const r of gone) if (r.businessId === businessId) shift[r.rating] = (shift[r.rating] ?? 0) - 1
+      await shiftRating(tx, businessId, shift)
+      await emit(tx, { type: 'review.deleted', businessId })
+    }
     const mine = await tx
       .select()
       .from(bookings)
@@ -94,19 +108,6 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
       } catch (e) {
         if (!(e instanceof StaleBooking)) throw e
       }
-    }
-    // the reviews go, and the businesses' ratings no longer count them (book Q-172); a number that passed on leaves the
-    // earlier holder's reviews standing, signed as they were. One change per business, in one order, so two deletions
-    // at once can't wait on each other
-    const gone = await tx
-      .delete(reviews)
-      .where(eq(reviews.userId, user.id))
-      .returning({ businessId: reviews.businessId, rating: reviews.rating })
-    for (const businessId of [...new Set(gone.map((r) => r.businessId))].sort()) {
-      const shift: StarShift = {}
-      for (const r of gone) if (r.businessId === businessId) shift[r.rating] = (shift[r.rating] ?? 0) - 1
-      await shiftRating(tx, businessId, shift)
-      await emit(tx, { type: 'review.deleted', businessId })
     }
   }
   await tx.update(bookings).set({ accountDeletedAt: at }).where(eq(bookings.userId, user.id))

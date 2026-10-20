@@ -206,7 +206,14 @@ async function phoneClient(tx: Queryable, businessId: string, phone: string, nam
   const [record] = await tx
     .insert(clients)
     // an undo removes a record its booking made: made at the booking's instant, held by no other booking
-    .values({ businessId, phone, name: name ?? null, userId: holder?.id ?? null, createdAt: new Date(now) })
+    .values({
+      businessId,
+      phone,
+      name: name ?? null,
+      nameSetBy: name ? bookingId : null,
+      userId: holder?.id ?? null,
+      createdAt: new Date(now),
+    })
     .onConflictDoUpdate({
       target: [clients.businessId, clients.phone],
       // a known client keeps their name; a record without one takes the name typed in, which an undo takes back

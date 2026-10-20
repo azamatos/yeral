@@ -16,6 +16,8 @@ const W = '/v1/w/glow-studio'
 const HOURS = `${W}/settings/hours`
 const THU = '2026-10-22'
 const THU2 = '2026-11-05'
+const FRI2 = '2026-11-06'
+const MON3 = '2026-11-09'
 const WED2 = '2026-10-28'
 const SAT = '2026-10-24'
 const MON2 = '2026-11-09'
@@ -340,6 +342,46 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     ])
     // the same once, on a Saturday: Sunday opens at 10:00, so it fits
     expect((await save(maysa, { ...was, specialDays: [...was.specialDays, { ...night, yearly: false }] })).status).toBe(200)
+    expect((await save(maysa, { ...was, affected: 'keep' })).status).toBe(200)
+    // two yearly days: New Year's Eve until 03:00 runs into a 1 January that opens at 01:00
+    const eve = { name: 'Eve', from: '2026-12-31', to: '2026-12-31', yearly: true, hours: { open: 1200, close: 1620 } }
+    const newYear = { name: 'New Year', from: '2027-01-01', to: '2027-01-01', yearly: true, hours: { open: 60, close: 600 } }
+    expect(
+      (await save(maysa, { ...was, specialDays: [...was.specialDays.filter((d) => d.from !== '2026-01-01'), eve, newYear] })).status,
+    ).toBe(400)
+  })
+
+  it('a client’s move onto a day that closed since can’t be confirmed', async () => {
+    const maysa = await as(MAYSA)
+    const was = (await maysa.req(HOURS)).json as Hours
+    const client = await as('+99365800311', 'Client')
+    const slotsOn = async (date: string) =>
+      (
+        (await client.req(`/v1/businesses/glow-studio/availability?services=${manicure}&staff=${maralId}&date=${date}`)).json.slots as {
+          start: number
+        }[]
+      ).map((x) => x.start)
+    const made = await client.req('/v1/bookings', {
+      body: {
+        type: 'appointment',
+        business: 'glow-studio',
+        serviceIds: [manicure],
+        staffId: maralId,
+        date: FRI2,
+        start: (await slotsOn(FRI2))[0],
+      },
+    })
+    await maysa.req(`${W}/requests/${made.json.code}/confirm`, { method: 'POST' })
+    expect(
+      (await client.req(`/v1/me/bookings/${made.json.code}/reschedule`, { body: { date: MON3, start: (await slotsOn(MON3))[0] } })).status,
+    ).toBeLessThan(300)
+    // the move waits; the owner closes that Monday (the move isn't asked about)
+    const closed = { ...was, specialDays: [...was.specialDays, { name: 'Training', from: MON3, to: MON3, yearly: false, hours: null }] }
+    expect((await save(maysa, { ...closed, affected: 'cancel' })).status).toBe(200)
+    const asked = ((await maysa.req(`${W}/requests`)).json.items as { code: string; kind: string }[]).find((r) => r.kind === 'move')!
+    const confirm = await maysa.req(`${W}/requests/${asked.code}/confirm`, { method: 'POST' })
+    expect(confirm.status).toBe(409)
+    expect(confirm.json.error).toMatchObject({ code: 'cannot_move', details: { problem: 'outside_hours' } })
     expect((await save(maysa, { ...was, affected: 'keep' })).status).toBe(200)
   })
 })
