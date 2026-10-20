@@ -133,19 +133,22 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
 }
 
 /**
+ * A business's week and special days; 404 when it's gone. `lock` holds the row until the transaction ends: `share` as a
+ * booking takes it (`lockedHours`), `no key update` as an hours save does.
+ */
+export async function loadHours(db: Queryable, businessId: string, opts: { lock?: 'share' | 'no key update' } = {}) {
+  const q = db.select({ hours: businesses.hours, exceptions: businesses.exceptions }).from(businesses).where(eq(businesses.id, businessId))
+  const [b] = opts.lock ? await q.for(opts.lock) : await q
+  if (!b) throw new ApiError('not_found')
+  return b
+}
+
+/**
  * The business's hours as they stand, held until the transaction ends (`for share`): an hours save (`for no key update`)
  * waits for it and it for the save, so a booking and a change of hours never pass each other (book Q-211). Taken before
  * any booking's lock, the order the save takes them in.
  */
-export async function lockedHours(db: Queryable, businessId: string) {
-  const [b] = await db
-    .select({ hours: businesses.hours, exceptions: businesses.exceptions })
-    .from(businesses)
-    .where(eq(businesses.id, businessId))
-    .for('share')
-  if (!b) throw new ApiError('not_found')
-  return b
-}
+export const lockedHours = (db: Queryable, businessId: string) => loadHours(db, businessId, { lock: 'share' })
 
 /** A booking about to take its time still falls inside the hours as they stand (`lockedHours`); else 409 slot_taken. */
 export async function assertOpenAt(db: Queryable, businessId: string, b: { date: string; start: number; end: number }): Promise<void> {

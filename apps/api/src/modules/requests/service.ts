@@ -20,9 +20,8 @@ import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit, queueOutcomeSms } from '../../notify'
 import { appointmentContext, loadBusiness, loadBusy, lockedHours } from '../availability/context'
 import { text } from '../catalog/map'
-import { declineForBusiness } from '../bookings/business-cancel'
 import { confirmBooking } from '../bookings/confirm'
-import { bookedServices, rebookQuery } from '../bookings/create'
+import { bookedServices, declineForBusiness, rebookQuery } from '../bookings/engine'
 import { awaitingAnswer, guard, lockBooking, recordMoveRefused, setStatus, stateOf, type BookingRow } from '../bookings/repo'
 
 type RequestView = z.infer<typeof requestSchema>

@@ -6,7 +6,6 @@ import {
   canClientRestore,
   canEditNote,
   canWriteReview,
-  effectiveStatus,
   initialStatus,
   keptCancelReason,
   offerPast,
@@ -25,28 +24,13 @@ import { assertOpenAt, loadBusiness, lockedHours, type LoadedBusiness } from '..
 import { visitWhat } from '../catalog/map'
 import { shiftRating } from '../reviews/rating'
 import { onlineRefusal } from '../clients/online'
-import { assertOnlineBooking, assertWaitingRoom, bookedServices, rebook } from './create'
+import { assertOnlineBooking, assertWaitingRoom, rebook } from './create'
+import { bookedServices, dropPendingMove } from './engine'
 import { offerTarget, offersOf } from './offers'
-import {
-  type BookingRow,
-  guard,
-  isSlotConflict,
-  lockBooking,
-  pgCode,
-  recordMoveRefused,
-  restoreStateOf,
-  setStatus,
-  StaleBooking,
-  stateOf,
-} from './repo'
+import { type BookingRow, guard, isSlotConflict, lockBooking, pgCode, restoreStateOf, setStatus, stateOf } from './repo'
 import { nameOf } from '../me/me'
 
-async function businessOf(deps: Deps, b: BookingRow): Promise<LoadedBusiness> {
-  const lb = await loadBusiness(deps.db, b.businessId)
-  return lb
-}
-
-const rulesOf = async (deps: Deps, b: BookingRow) => (await businessOf(deps, b)).rules
+const businessOf = (deps: Deps, b: BookingRow): Promise<LoadedBusiness> => loadBusiness(deps.db, b.businessId)
 
 /** Seats still free in a class session, counted under a lock on the session row. */
 async function seatsLeft(tx: Queryable, sessionId: string): Promise<number> {
@@ -65,42 +49,8 @@ async function clearMoveRefused(db: Queryable, b: BookingRow): Promise<BookingRo
   return row ?? b
 }
 
-/** The move waiting for this booking, if any. */
-async function waitingMove(db: Queryable, b: BookingRow): Promise<BookingRow | undefined> {
-  const [m] = await db
-    .select()
-    .from(bookings)
-    .where(and(eq(bookings.rescheduleOf, b.id), eq(bookings.status, 'pending')))
-  return m
-}
-
-/**
- * Withdraw a pending move of this booking, if there is one, and tell the business's open screens: the client's (or,
- * when the business cancels the booking, the business's, `by`). One whose hold has run out lapsed unanswered: it's
- * recorded as the jobs would. One the jobs just settled is gone.
- */
-export async function dropPendingMove(db: Queryable, b: BookingRow, at: Date, by: 'client' | 'business' = 'client') {
-  const m = await waitingMove(db, b)
-  if (!m) return
-  const lapsed = effectiveStatus(stateOf(m), at.getTime()).status !== 'pending'
-  try {
-    const row = await setStatus(db, m, { status: 'cancelled', cancelledBy: lapsed ? 'system' : by, at })
-    // as the jobs would: the booking says the move wasn't accepted (a cancel and "Yzyna al" keep that)
-    if (lapsed) await recordMoveRefused(db, b, row, { by: 'system', reason: null, text: null }, m.holdUntil?.getTime() ?? at.getTime())
-    await emit(db, {
-      type: lapsed ? 'booking.expired' : 'booking.cancelled',
-      businessId: row.businessId,
-      bookingId: row.id,
-      bookingCode: row.code,
-      userId: row.userId,
-    })
-  } catch (e) {
-    if (!(e instanceof StaleBooking)) throw e
-  }
-}
-
 export async function cancelBooking(deps: Deps, b: BookingRow, reason?: string): Promise<BookingRow> {
-  const rules = await rulesOf(deps, b)
+  const { rules } = await businessOf(deps, b)
   guard(canClientCancel(stateOf(b), rules, deps.now()))
   return deps.db.transaction(async (tx) => {
     const at = new Date(deps.now())
@@ -198,6 +148,7 @@ export async function rescheduleBooking(
       rescheduleOf: locked.id,
       db: tx,
       booked,
+      lb,
     })
     const [fresh] = await tx.select().from(bookings).where(eq(bookings.id, b.id))
     if (!fresh) throw new ApiError('not_found')
@@ -239,7 +190,7 @@ export async function acceptAlternative(deps: Deps, user: User, b: BookingRow, s
       b,
       // with its named specialist only (book Q-159): busy now, it's taken (409 slot_taken)
       offerTarget(slot),
-      { status: source === 'expired' ? initialStatus('web', lb.rules.confirmMode) : 'confirmed', alternativeOf: b.id },
+      { status: source === 'expired' ? initialStatus('web', lb.rules.confirmMode) : 'confirmed', alternativeOf: b.id, lb },
     )
     return row
   } catch (e) {

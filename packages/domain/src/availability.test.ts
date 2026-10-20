@@ -5,7 +5,6 @@ import {
   bookableStaff,
   busyOf,
   canBookSession,
-  checkPlan,
   currentStep,
   findAppointmentSlot,
   hasAppointmentSlot,
@@ -304,7 +303,7 @@ describe('checking a plan from the workspace', () => {
   const plan = [{ serviceId: 'cut', staffId: 'a', start: 600, end: 660, bufferAfter: 0 }]
 
   it('accepts a free time', () => {
-    expect(checkPlan(c, THU, plan)).toBeNull()
+    expect(planRefusal(c, THU, plan)?.problem ?? null).toBeNull()
   })
 
   it.each([
@@ -312,24 +311,24 @@ describe('checking a plan from the workspace', () => {
     ['outside working hours', shiftPlan(plan, 1170), 'outside_hours'],
     ['over another booking', shiftPlan(plan, 690), 'overlap'],
   ])('refuses %s', (_, items, problem) => {
-    expect(checkPlan(c, THU, items)).toBe(problem)
+    expect(planRefusal(c, THU, items)?.problem ?? null).toBe(problem)
   })
 
   it('refuses a day off', () => {
-    expect(checkPlan(c, SUN, plan)).toBe('staff_off')
+    expect(planRefusal(c, SUN, plan)?.problem ?? null).toBe('staff_off')
   })
 
   it('names a buffer that doesn’t fit apart from an overlap, and time taken elsewhere with its hours (B-26)', () => {
     const buffered = [{ serviceId: 'cut', staffId: 'a', start: 600, end: 660, bufferAfter: 15 }]
     // the visit ends at 12:00 where the other booking starts: only the buffer runs into it
-    expect(checkPlan(c, THU, shiftPlan(buffered, 660))).toBe('buffer')
+    expect(planRefusal(c, THU, shiftPlan(buffered, 660))?.problem ?? null).toBe('buffer')
     // and into the closing time
-    expect(checkPlan(c, THU, shiftPlan(buffered, 1140))).toBe('buffer')
-    expect(checkPlan(c, THU, shiftPlan(buffered, 690))).toBe('overlap')
+    expect(planRefusal(c, THU, shiftPlan(buffered, 1140))?.problem ?? null).toBe('buffer')
+    expect(planRefusal(c, THU, shiftPlan(buffered, 690))?.problem ?? null).toBe('overlap')
     // starting as the one before ends, inside its 10-minute buffer
     const before = ctx({ staff: team, busy: [{ ...busy('a', THU, 720, 790, 'other'), buffer: 10 }] })
-    expect(checkPlan(before, THU, shiftPlan(plan, 780))).toBe('buffer')
-    expect(checkPlan(before, THU, shiftPlan(plan, 750))).toBe('overlap')
+    expect(planRefusal(before, THU, shiftPlan(plan, 780))?.problem ?? null).toBe('buffer')
+    expect(planRefusal(before, THU, shiftPlan(plan, 750))?.problem ?? null).toBe('overlap')
     // the hours elsewhere leave its buffer out
     const away = ctx({ staff: team, busy: [{ ...busy('a', THU, 900, 975, 'there'), buffer: 15, elsewhere: true }] })
     expect(planRefusal(away, THU, shiftPlan(plan, 930))).toEqual({ problem: 'elsewhere', staffId: 'a', busy: { start: 900, end: 960 } })

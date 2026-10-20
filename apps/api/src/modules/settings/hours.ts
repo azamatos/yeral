@@ -19,17 +19,16 @@ import {
 } from '@yeral/domain/hours'
 import { occupiesSlot } from '@yeral/domain/lifecycle'
 import { addDays, epochOf, today } from '@yeral/domain/time'
-import { and, asc, eq, gte, inArray, isNull, ne } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, businesses } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
-import { cancelForBusiness, declineForBusiness } from '../bookings/business-cancel'
-import { bookedServices } from '../bookings/create'
+import { loadHours } from '../availability/context'
+import { bookedServicesOf, cancelForBusiness, declineForBusiness } from '../bookings/engine'
 import { alternativesContext, pickAlternatives } from '../bookings/offers'
 import { lockBooking, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
+import { bookingsAhead, saveHours, staffOnBookings } from './repo'
 
 type HoursView = z.infer<typeof businessHoursSettingsSchema>
 type HoursChange = z.infer<typeof businessHoursUpdateSchema>
@@ -43,12 +42,7 @@ const viewOf = (b: BusinessHours): HoursView => ({
 })
 
 export async function hoursOf(db: Queryable, businessId: string): Promise<HoursView> {
-  const [b] = await db
-    .select({ hours: businesses.hours, exceptions: businesses.exceptions })
-    .from(businesses)
-    .where(eq(businesses.id, businessId))
-  if (!b) throw new ApiError('not_found')
-  return viewOf(b)
+  return viewOf(await loadHours(db, businessId))
 }
 
 const sameDay = (a: DateException, b: DateException) =>
@@ -96,20 +90,7 @@ function checkChange(change: HoursChange, stored: readonly DateException[], toda
  * and tables; a waiting move is answered on its own.
  */
 async function affectedBy(db: Queryable, businessId: string, was: BusinessHours, next: BusinessHours, now: number): Promise<BookingRow[]> {
-  const rows = await db
-    .select()
-    .from(bookings)
-    .where(
-      and(
-        eq(bookings.businessId, businessId),
-        eq(bookings.active, true),
-        ne(bookings.type, 'class'),
-        isNull(bookings.rescheduleOf),
-        // yesterday's business day may still run past midnight (book Q-105)
-        gte(bookings.date, addDays(today(now), -1)),
-      ),
-    )
-  return rows
+  return (await bookingsAhead(db, businessId, now))
     .filter((b) => occupiesSlot(stateOf(b), now) && epochOf(b.date, b.start) >= now)
     .filter((b) => hoursChangedOn(was, next, b.date) && !withinHours(next, b.date, { start: b.start, end: b.end }))
     .sort((a, b) => epochOf(a.date, a.start) - epochOf(b.date, b.start))
@@ -117,16 +98,10 @@ async function affectedBy(db: Queryable, businessId: string, was: BusinessHours,
 
 /** "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1" (most first), and each booking with its client and specialists. */
 async function detailsOf(db: Queryable, rows: readonly BookingRow[]): Promise<BookingsAffectedDetails> {
-  const items = await db
-    .select({ bookingId: bookingItems.bookingId, staffId: bookingItems.staffId, staffName: bookingItems.staffName })
-    .from(bookingItems)
-    .where(
-      inArray(
-        bookingItems.bookingId,
-        rows.map((r) => r.id),
-      ),
-    )
-    .orderBy(asc(bookingItems.sort))
+  const items = await staffOnBookings(
+    db,
+    rows.map((r) => r.id),
+  )
   const byStaff = new Map<string, { staffId: string; name: string; bookings: Set<string> }>()
   for (const i of items) {
     if (!i.staffId) continue
@@ -165,6 +140,7 @@ async function cancelWithOffers(
 ): Promise<number> {
   let ctx = await alternativesContext(tx, businessId, now)
   const exclude = rows.map((r) => r.id)
+  const booked = await bookedServicesOf(tx, exclude)
   const at = new Date(now)
   let cancelled = 0
   for (const b of rows) {
@@ -185,7 +161,7 @@ async function cancelWithOffers(
       continue
     let offers: BookingRow['declineAlternatives'] = []
     if (ctx && row.type === 'appointment') {
-      const picked = pickAlternatives(ctx, row, await bookedServices(tx, row.id), exclude)
+      const picked = pickAlternatives(ctx, row, booked.get(row.id)!, exclude)
       offers = picked.offers
       ctx = { ...ctx, busy: [...ctx.busy, ...picked.held] }
     }
@@ -213,19 +189,11 @@ export async function updateHours(deps: Deps, businessId: string, change: HoursC
     const now = deps.now()
     // one save at a time, read against the hours it replaces. Every way a booking takes its time reads the hours
     // `for share` (`lockedHours`) and waits for this; plain references (an event, a booking's row) don't
-    const [b] = await tx
-      .select({ hours: businesses.hours, exceptions: businesses.exceptions })
-      .from(businesses)
-      .where(eq(businesses.id, businessId))
-      .for('no key update')
-    if (!b) throw new ApiError('not_found')
+    const b = await loadHours(tx, businessId, { lock: 'no key update' })
     const next = checkChange(change, b.exceptions, today(now))
     const affected = await affectedBy(tx, businessId, b, next, now)
     if (affected.length && !change.affected) throw new ApiError('bookings_affected', await detailsOf(tx, affected))
-    await tx
-      .update(businesses)
-      .set({ hours: next.hours, exceptions: [...next.exceptions] })
-      .where(eq(businesses.id, businessId))
+    await saveHours(tx, businessId, next)
     await emit(tx, { type: 'business.updated', businessId })
     const cancelled = change.affected === 'cancel' && affected.length ? await cancelWithOffers(tx, businessId, affected, next, now) : 0
     return { ...viewOf(next), cancelled }

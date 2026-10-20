@@ -9,7 +9,7 @@ import { serviceErrors, type ServiceTerms } from '@yeral/domain/services'
 import { localOf } from '@yeral/domain/time'
 import { and, asc, countDistinct, eq, gt, inArray, max, ne, or, sql } from 'drizzle-orm'
 import type { z } from 'zod'
-import type { Queryable } from '../../db/client'
+import { all, type Queryable } from '../../db/client'
 import { bookingItems, bookings, businesses, serviceGroups, services, staff, staffServices } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid } from '../../http/errors'
@@ -88,8 +88,8 @@ export async function menuOf(db: Queryable, businessId: string, now: number): Pr
     () => db.select().from(serviceGroups).where(eq(serviceGroups.businessId, businessId)).orderBy(asc(serviceGroups.sort)),
     () => db.select().from(services).where(onMenu(businessId)).orderBy(asc(services.sort)),
   ])
-  const all = await viewOf(db, rows, now)
-  return { groups: groups.map((g) => ({ id: g.id, name: g.name, services: all.filter((s) => s.groupId === g.id) })) }
+  const listed = await viewOf(db, rows, now)
+  return { groups: groups.map((g) => ({ id: g.id, name: g.name, services: listed.filter((s) => s.groupId === g.id) })) }
 }
 
 async function serviceRow(db: Queryable, businessId: string, serviceId: string): Promise<ServiceRow> {

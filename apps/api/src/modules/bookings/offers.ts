@@ -21,7 +21,7 @@ import type { Queryable } from '../../db/client'
 import { bookings, staff, type TimeSlot } from '../../db/schema'
 import { appointmentContext, loadBusinesses, loadBusy, type LoadedBusiness } from '../availability/context'
 import { bookOnlineFor } from '../clients/online'
-import { bookedServices, rebookQuery, type BookedServices } from './create'
+import { bookedServices, rebookQuery, type BookedServices } from './engine'
 import { recipientOf } from './links'
 import { stateOf, type BookingRow } from './repo'
 

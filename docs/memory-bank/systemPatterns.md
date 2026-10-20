@@ -133,11 +133,15 @@ params (zod); unsaved form input → TanStack Form; one subtree → `useState`; 
 ```
 apps/api/src/
   app.ts            OpenAPIHono, middleware (request id, logging, CORS for configured sites, auth session, error mapper), /v1
-  modules/<name>/   routes.ts (createRoute + handler) · service.ts (use cases) · repo.ts (Drizzle queries)
-                    health · auth (codes, sessions) · me (profile, favourites) · catalog (search, cards, pages, reviews)
-                    availability · bookings (send, actions, reviews, confirm) · events · jobs (runDueJobs)
-                    team (who is on which team) · later: biz/{calendar, requests, bookings, clients, services, team, rules, hours, reviews,
-                    analytics, profile, branches, settings} · admin/*
+  modules/<name>/   routes.ts (createRoute + handler) · service.ts (use cases) · repo.ts (Drizzle queries, where a module has many)
+                    health · auth (codes, identity, sessions) · me (profile, favourites, account) · catalog (search, cards,
+                    pages, cities) · availability (context: the business and busy time as the domain needs them)
+                    bookings: create.ts and actions.ts (the client's), engine.ts (shared with the team's paths), confirm.ts,
+                      offers.ts, links.ts, address-sms.ts, view.ts (DTOs), repo.ts
+                    calendar (the team's bookings: free times, by phone and walk-in, move, cancel) · requests (answering)
+                    settings (booking rules, profile, hours) · menu (services) · team (levels, invites, who is on which team)
+                    clients (the phone-only block) · reviews (ratings) · events (live feed) · jobs (runDueJobs)
+                    later: the rest of the business endpoints (P2 step 4: schedules, clients, reviews, photos…) · admin/*
   db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (docs/design demo data + 13 categories)
   jobs/             runDueJobs(): expire requests at holdUntil, complete visits, reminders, SMS
   ports/            sms (written to the log everywhere until a gateway; dev code 1234), files (server disk), clock
@@ -146,6 +150,12 @@ apps/api/src/
 ```
 
 - Services hold the rules; routes only validate, authorise, call a service and map the result to contract DTOs.
+- A rule a schema can't express refuses with `invalid(...issues)` (`http/errors.ts`), the same 400 shape zod's give.
+- Independent queries on a `Queryable` go through `all(db, [...])` (`db/client.ts`): parallel on the pool, one after
+  another in a transaction.
+- Paths that change a booking take locks in one order (book Q-211): the account, then the business's hours
+  (`lockedHours`), then the booking, then its move request; `setStatus` writes a status change only from the status
+  it read (`StaleBooking` otherwise).
 - OpenAPI 3.1 is generated from the routes and served at `/docs` (Scalar).
 - Double booking: Postgres exclusion constraint on staff × time range for active bookings + the domain check → `409 slot_taken`.
   A move request's items share their booking's `family`, so a move may overlap the booking's own time (book Q-165); a
