@@ -134,8 +134,9 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | api: independent queries that may run in a transaction (one after another there; pg 9 refuses overlapping ones) | `all(db, [() => …, () => …])` | `apps/api/src/db/client.ts` |
 | a yes or no in a query string | `boolQuery` | `@yeral/contract/common` |
 | request/response schemas, error codes and their HTTP status | `createBookingSchema`, `businessDetailSchema`, `ERROR_STATUS` … | `@yeral/contract/{common,errors,catalog,availability,bookings,account,events}` |
-| API data | `createSdk(createClient({ baseUrl: site.urls.api }), queryClient)` once per app; then `useQuery(sdk.catalog.business(slug, lang))`, `useMutation(sdk.bookings.cancel(lang))`; `startEvents(client, queryClient)` for live updates; errors are `ApiError` (`isApiError(e, 'slot_taken')`) | `@yeral/sdk` |
+| API data | `createSdk(createClient({ baseUrl: site.urls.api }), queryClient)` once per app (the business app: `createApi()` in `shared/api`, read with `useSdk()`, also the router context); then `useQuery(sdk.catalog.business(slug, lang))`, `useMutation(sdk.bookings.cancel(lang))`; `startEvents(client, queryClient)` for live updates; errors are `ApiError` (`isApiError(e, 'slot_taken')`) | `@yeral/sdk` |
 | forms | `useAppForm()` with `TextField`, `PhoneField`, `SelectField` … | `@yeral/ui/form` |
+| the business app's plumbing: the api client and its cache, the sdk in components, the language, tab titles, a screen in a story (with a `fetch` that answers like the api) | `createApi()` `useSdk()` (`shared/api`), `appLocale()` `I18nProvider` (`shared/i18n`), `usePageTitle()` (`shared/lib`), `PageStory` (`shared/storybook`); move them to a package when the client or cms app needs them | `apps/business/src/shared` |
 
 Before writing a helper, look here and in the package; add new shared helpers to the right package and to this table.
 
@@ -164,6 +165,7 @@ pnpm gen ui-component           # scaffold a design-system component + stories; 
 pnpm check                      # lint, FSD lint, types, tests, format — same as CI
 pnpm test:stories               # every Storybook story as a Chromium test (render, play, axe)
 pnpm dev --filter=@yeral/storybook   # Storybook on :3005 (PORT_BASE + 5)
+pnpm dev --filter=@yeral/business --filter=@yeral/api   # the business app on :3002 (PORT_BASE + 2) with the api on :3004
 pnpm e2e                        # (M3) Playwright against the local stack
 pnpm docker:up                  # production-like stack (Caddy + images) on *.yeral.localhost
 pnpm changeset                  # describe a user-visible change

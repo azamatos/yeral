@@ -2,7 +2,7 @@
   "name": "@yeral/config",
   "version": "0.0.2",
   "private": true,
-  "description": "Shared tsconfig bases and ESLint, Prettier and Vitest presets for the Yeral monorepo",
+  "description": "Shared tsconfig bases and ESLint, Prettier, Steiger and Vitest presets for the Yeral monorepo",
   "type": "module",
   "exports": {
     "./tsconfig/base.json": "./tsconfig/base.json",
@@ -16,6 +16,10 @@
       "types": "./prettier/index.d.ts",
       "default": "./prettier/index.js"
     },
+    "./steiger": {
+      "types": "./steiger/index.d.ts",
+      "default": "./steiger/index.js"
+    },
     "./vitest": {
       "types": "./vitest/index.d.ts",
       "default": "./vitest/index.js"
@@ -27,6 +31,7 @@
   },
   "dependencies": {
     "@eslint/js": "catalog:",
+    "@feature-sliced/steiger-plugin": "catalog:",
     "eslint-plugin-react-hooks": "catalog:",
     "globals": "catalog:",
     "prettier-plugin-tailwindcss": "catalog:",

@@ -95,7 +95,14 @@ Below `shared/` sit the packages: they are the cross-app part of the lower layer
   to `packages/` when a second *app* needs it.
 - **Routes stay thin**: `createFileRoute(...)({ validateSearch, loader, head, component })`, with the search schema and
   the component imported from the page slice. The route tree lives in `src/app/routes` (`routesDirectory` config).
-- Enforced by **Steiger** (`pnpm lint:fsd`) per app and by ESLint import rules. Details: skill `fsd`, ADR 0004.
+- **The app layer** (as built in `apps/business`): `app/entrypoint/` (`main.tsx`, the providers, the router),
+  `app/routes/`, `app/routeTree.gen.ts` (written by the router plugin, committed so types check without a build) and
+  `app/styles.css`. Steiger refuses segments named for what they are (`providers`, `components`), hence `entrypoint`.
+- Enforced by **Steiger** (`pnpm lint:fsd`) per app and by ESLint import rules. Details: skill `fsd`, ADR 0004. Each FSD
+  app has a `lint:fsd` script and `steiger.config.js` re-exporting `@yeral/config/steiger` (the plugin's recommended
+  rules: a layer imports only from below, slices never from each other); the `@/` alias resolves through `tsconfig`.
+- An app's screens have stories next to them (`pages/<screen>/ui/*.stories.tsx`, titles `Business/…`); Storybook loads
+  them beside `@yeral/ui`'s and resolves `@/` against the importing file's app (`.storybook/main.ts`).
 
 ## Data flow
 

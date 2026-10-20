@@ -3,11 +3,13 @@ import { toast as sonner, Toaster as SonnerToaster } from 'sonner'
 /**
  * Toast (Account-Bookings `.toast`): ink, bottom-left on desktop and full-width at the bottom on phones, 4–6 s, one at
  * a time, one optional action. Destructive results offer «Yzyna al» (undo) instead of a second confirmation.
- * Mount <Toaster /> once; call `toast('…', { action: { label, onClick } })`.
+ * Mount <Toaster label={t('…')} /> once; call `toast('…', { action: { label, onClick } })`.
  */
-export function Toaster() {
+export function Toaster({ label }: { label?: string }) {
   return (
     <SonnerToaster
+      // the toasts' region as screen readers name it, in the person's language (sonner adds its shortcut, «alt+T»)
+      containerAriaLabel={label}
       position="bottom-left"
       visibleToasts={1}
       duration={5000}

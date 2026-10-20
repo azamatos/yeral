@@ -47,6 +47,16 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  # the business app: its static build, served by its own small Caddy (business.Dockerfile)
+  business:
+    image: yeral-business:local
+    build:
+      context: ../..
+      dockerfile: infra/docker/business.Dockerfile
+      args:
+        GITHUB_SHA: ${GITHUB_SHA:-local}
+        YERAL_ENV: docker
+
   caddy:
     image: caddy:2-alpine
     ports:
@@ -55,6 +65,8 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     depends_on:
       api:
+        condition: service_healthy
+      business:
         condition: service_healthy
 
 volumes:
