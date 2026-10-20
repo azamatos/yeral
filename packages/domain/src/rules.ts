@@ -33,9 +33,13 @@ export interface BookingRules {
   askCancelReason: boolean
   /** After this many no-shows a client can book only by phone; 0 = never. */
   blockAfterNoShows: number
-  /** How late a client may be before the booking can be cancelled (shown in the rules; tables are held this long). */
-  lateToleranceMinutes: number
 }
+
+/**
+ * How late a client may be, shown in every business's rules: 15 minutes everywhere in the MVP (book Q-118). It becomes
+ * a setting next to the cancellation window with F-103 (none to 30 min); tables get their own hold with their flows.
+ */
+export const LATE_MINUTES = 15
 
 export const RULE_OPTIONS = {
   holdMinutes: [15, 30, 60, 120, 360, 1440],
@@ -63,7 +67,6 @@ export const DEFAULT_RULES: BookingRules = {
   cancelWindowMinutes: 120,
   askCancelReason: true,
   blockAfterNoShows: 2,
-  lateToleranceMinutes: 15,
 }
 
 /** Problems with a rules object, by field; empty when valid. */
@@ -80,8 +83,5 @@ export function rulesErrors(r: BookingRules): Partial<Record<keyof BookingRules,
   oneOf('blockAfterNoShows')
   if (!REQUEST_ANSWERERS.includes(r.requestAnswerers)) errors.requestAnswerers = 'invalid'
   if (!Number.isInteger(r.bufferMinutes) || r.bufferMinutes < 0 || r.bufferMinutes > BUFFER_MAX) errors.bufferMinutes = 'invalid'
-  if (!Number.isInteger(r.lateToleranceMinutes) || r.lateToleranceMinutes < 0 || r.lateToleranceMinutes > 120) {
-    errors.lateToleranceMinutes = 'invalid'
-  }
   return errors
 }

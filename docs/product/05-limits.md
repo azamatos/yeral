@@ -124,8 +124,8 @@ Tables come after the MVP; these numbers apply then. (Q-030, decided 18.10.2026)
 | Start times | on the business's time step | Owner/admin | code: packages/domain/src/availability.ts |
 
 **Code differs:** the online party limit is fixed at 8 for every restaurant (code: packages/domain/src/availability.ts);
-one sitting time of 2 h applies to every party (code: apps/api/src/db/schema/business.ts); the table hold reuses the
-appointment lateness number instead of its own setting (code: packages/domain/src/rules.ts); the last online table
+one sitting time of 2 h applies to every party (code: apps/api/src/db/schema/business.ts); tables have no hold of
+their own yet (they come after the MVP); the last online table
 starts at closing minus the sitting time, so 21:00 for a 23:00 close (code: packages/domain/src/availability.ts).
 
 > Open question Q-117: when is the last table reservation of the day?
@@ -168,9 +168,6 @@ packages/domain/src/rules.ts)
 | Phone-only after no-shows | 2 (none, 1–5) | Owner/admin | business spec §11 |
 | Lateness allowed | 15 min for every business in the MVP, shown in the rules; after the MVP a setting next to the free-cancel window: none, 5, 10, 15, 20 or 30 min, default 15 (F-103); tables keep their own hold | Fixed in the MVP; Owner/admin with F-103 | client spec §7 (data model); demo rules; Q-118, decided 18.10.2026; F-103 |
 | Internal statuses | off; up to 5; name up to 20 characters; 8 icons, 6 colours; ready-made *Geldi* (arrived), *Başlandy* (started); in the MVP | Owner/admin | business spec §3, §8; B-Settings screen; Q-031, decided 18.10.2026 |
-
-**Code differs:** lateness is a number per business, 0–120 min, that the table hold also uses (code:
-packages/domain/src/rules.ts).
 
 **Design to fix:** setup wizard step 7 offers the settings list of free-cancel choices (Q-119).
 

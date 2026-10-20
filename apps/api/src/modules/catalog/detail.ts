@@ -5,6 +5,7 @@ import { distanceM, type LatLng } from '@yeral/domain/geo'
 import { findException, openMinutesBetween } from '@yeral/domain/hours'
 import { TYPICAL_ANSWER_DAYS, typicalAnswerMinutes } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
+import { LATE_MINUTES } from '@yeral/domain/rules'
 import { addDays, today } from '@yeral/domain/time'
 import { and, asc, eq, gte, isNull, lte, ne } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -178,7 +179,7 @@ export async function businessDetail(
     open: openOf(b, now),
     rules: {
       cancelWindowMinutes: lb.rules.cancelWindowMinutes,
-      lateToleranceMinutes: lb.rules.lateToleranceMinutes,
+      lateToleranceMinutes: LATE_MINUTES,
       note: lb.rulesNote ? text(lb.rulesNote, lang) : null,
     },
     onlineEnabled: lb.rules.onlineEnabled,

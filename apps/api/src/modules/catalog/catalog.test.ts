@@ -129,6 +129,16 @@ describe('catalogue', () => {
     expect(shown.price).toEqual({ type: 'hidden', amount: 0 })
   })
 
+  it('lateness is 15 minutes at every business in the MVP, whatever was stored (book Q-118)', async () => {
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    await db.update(bookingRules).set({ lateToleranceMinutes: 30 }).where(eq(bookingRules.businessId, glow!.id))
+    try {
+      expect((await b.req('/v1/businesses/glow-studio')).json.rules.lateToleranceMinutes).toBe(15)
+    } finally {
+      await db.update(bookingRules).set({ lateToleranceMinutes: 15 }).where(eq(bookingRules.businessId, glow!.id))
+    }
+  })
+
   it('a restaurant shows no average bill, on its card or its page (book Q-103)', async () => {
     const page = await b.req('/v1/businesses/bag-kafe')
     expect(page.status).toBe(200)
