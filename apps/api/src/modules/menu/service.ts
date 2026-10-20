@@ -12,7 +12,7 @@ import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, businesses, serviceGroups, services, staff, staffServices } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { ApiError } from '../../http/errors'
+import { ApiError, invalid } from '../../http/errors'
 import { emit } from '../../notify'
 
 type Menu = z.infer<typeof menuSchema>
@@ -22,7 +22,8 @@ type ServiceInput = z.infer<typeof serviceInputSchema>
 type ServiceUpdate = z.infer<typeof serviceUpdateSchema>
 type ServiceRow = typeof services.$inferSelect
 
-const invalid = (fields: string[]) => new ApiError('validation_error', { issues: fields.map((f) => ({ path: [f], code: 'invalid' })) })
+/** These fields refused by the menu's rules. */
+const invalidFields = (fields: string[]) => invalid(...fields.map((f) => ({ path: [f], code: 'invalid' })))
 
 /**
  * Menu changes one at a time per business: places at the end of a group, and a group's existence, hold until the
@@ -53,16 +54,17 @@ async function futureCounts(db: Queryable, serviceIds: string[], now: number): P
 
 async function viewOf(db: Queryable, rows: ServiceRow[], now: number): Promise<MenuService[]> {
   const ids = rows.map((s) => s.id)
-  const [links, future] = await Promise.all([
+  const [links, future] = await all(db, [
     // a removed person keeps their links for a reactivation, but doesn't do the service now
-    ids.length
-      ? db
-          .select({ serviceId: staffServices.serviceId, staffId: staffServices.staffId })
-          .from(staffServices)
-          .innerJoin(staff, eq(staff.id, staffServices.staffId))
-          .where(and(inArray(staffServices.serviceId, ids), ne(staff.status, 'removed')))
-      : [],
-    futureCounts(db, ids, now),
+    async () =>
+      ids.length
+        ? db
+            .select({ serviceId: staffServices.serviceId, staffId: staffServices.staffId })
+            .from(staffServices)
+            .innerJoin(staff, eq(staff.id, staffServices.staffId))
+            .where(and(inArray(staffServices.serviceId, ids), ne(staff.status, 'removed')))
+        : [],
+    () => futureCounts(db, ids, now),
   ])
   return rows.map((s) => ({
     id: s.id,
@@ -82,9 +84,9 @@ async function viewOf(db: Queryable, rows: ServiceRow[], now: number): Promise<M
 const onMenu = (businessId: string) => and(eq(services.businessId, businessId), eq(services.archived, false))
 
 export async function menuOf(db: Queryable, businessId: string, now: number): Promise<Menu> {
-  const [groups, rows] = await Promise.all([
-    db.select().from(serviceGroups).where(eq(serviceGroups.businessId, businessId)).orderBy(asc(serviceGroups.sort)),
-    db.select().from(services).where(onMenu(businessId)).orderBy(asc(services.sort)),
+  const [groups, rows] = await all(db, [
+    () => db.select().from(serviceGroups).where(eq(serviceGroups.businessId, businessId)).orderBy(asc(serviceGroups.sort)),
+    () => db.select().from(services).where(onMenu(businessId)).orderBy(asc(services.sort)),
   ])
   const all = await viewOf(db, rows, now)
   return { groups: groups.map((g) => ({ id: g.id, name: g.name, services: all.filter((s) => s.groupId === g.id) })) }
@@ -119,7 +121,7 @@ async function check(db: Queryable, businessId: string, s: ServiceTerms & { grou
       .where(and(eq(staff.businessId, businessId), inArray(staff.id, [...s.staffIds]), ne(staff.status, 'removed')))
     if (team.length !== s.staffIds.length) fields.push('staffIds')
   }
-  if (fields.length) throw invalid(fields)
+  if (fields.length) throw invalidFields(fields)
 }
 
 /**
@@ -278,9 +280,9 @@ export async function deleteGroup(deps: Deps, businessId: string, groupId: strin
 export async function orderMenu(deps: Deps, businessId: string, order: z.infer<typeof menuOrderSchema>): Promise<Menu> {
   return deps.db.transaction(async (tx) => {
     await lockMenu(tx, businessId)
-    const [groups, rows] = await Promise.all([
-      tx.select({ id: serviceGroups.id }).from(serviceGroups).where(eq(serviceGroups.businessId, businessId)),
-      tx.select({ id: services.id }).from(services).where(onMenu(businessId)),
+    const [groups, rows] = await all(tx, [
+      () => tx.select({ id: serviceGroups.id }).from(serviceGroups).where(eq(serviceGroups.businessId, businessId)),
+      () => tx.select({ id: services.id }).from(services).where(onMenu(businessId)),
     ])
     const sameSet = (a: string[], b: string[]) => a.length === b.length && new Set(a).size === a.length && a.every((x) => b.includes(x))
     const fields: string[] = []
@@ -300,7 +302,7 @@ export async function orderMenu(deps: Deps, businessId: string, order: z.infer<t
       )
     )
       fields.push('serviceIds')
-    if (fields.length) throw invalid(fields)
+    if (fields.length) throw invalidFields(fields)
     // two statements, whatever the menu's size
     if (groupIds.length) {
       const groupPlaces = sql.join(

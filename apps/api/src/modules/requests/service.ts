@@ -16,7 +16,7 @@ import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, staff, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { ApiError } from '../../http/errors'
+import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit, queueOutcomeSms } from '../../notify'
 import { appointmentContext, loadBusiness, loadBusy, lockedHours } from '../availability/context'
 import { text } from '../catalog/map'
@@ -170,12 +170,12 @@ export async function confirmRequest(deps: Deps, business: Business, actor: Acto
 async function checkOffers(deps: Deps, b: BookingRow, offers: NonNullable<DeclineInput['offers']>, now: number): Promise<TimeSlot[]> {
   if (!offers.length) return []
   // tables and classes can't be re-booked online yet (after the MVP): nothing to offer
-  if (b.type !== 'appointment') throw new ApiError('validation_error', { issues: [{ path: ['offers'], code: 'not_appointment' }] })
+  if (b.type !== 'appointment') throw invalid({ path: ['offers'], code: 'not_appointment' })
   const lb = await loadBusiness(deps.db, b.businessId)
   const dates = offers.map((o) => o.date).sort()
   const [booked, busy] = await Promise.all([bookedServices(deps.db, b.id), loadBusy(deps.db, [b.businessId], dates[0]!, dates.at(-1)!)])
   const ctx = appointmentContext(lb, busy, now)
-  const issues: { path: (string | number)[]; code: string }[] = []
+  const issues: Issue[] = []
   const out: TimeSlot[] = []
   for (const [i, o] of offers.entries()) {
     const slot = findAppointmentSlot(ctx, rebookQuery(booked, { date: o.date, staffId: o.staffId }, [b.id]), o.start)
@@ -190,7 +190,7 @@ async function checkOffers(deps: Deps, b: BookingRow, offers: NonNullable<Declin
     if (problem) issues.push({ path: ['offers', i], code: problem })
     else out.push({ date: o.date, start: o.start, end: slot!.end, staffId: o.staffId })
   }
-  if (issues.length) throw new ApiError('validation_error', { issues })
+  if (issues.length) throw invalid(...issues)
   return out
 }
 
@@ -202,7 +202,7 @@ async function checkOffers(deps: Deps, b: BookingRow, offers: NonNullable<Declin
 export async function declineRequest(deps: Deps, business: Business, actor: Actor, code: string, input: DeclineInput): Promise<void> {
   const now = deps.now()
   const b = await answerable(deps.db, business, actor, code, now)
-  if (b.rescheduleOf && input.offers?.length) throw new ApiError('validation_error', { issues: [{ path: ['offers'], code: 'move' }] })
+  if (b.rescheduleOf && input.offers?.length) throw invalid({ path: ['offers'], code: 'move' })
   const offers = b.rescheduleOf ? [] : await checkOffers(deps, b, input.offers ?? [], now)
   const reason = { reason: input.reason, text: input.reason === 'other' ? (input.text ?? null) : null }
   await deps.db.transaction(async (tx) => {

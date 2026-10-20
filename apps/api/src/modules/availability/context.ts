@@ -11,7 +11,7 @@ import type { BookingRules } from '@yeral/domain/rules'
 import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
-import type { Queryable } from '../../db/client'
+import { all, type Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, businesses, diningTables, services, staff, staffServices, tableAreas } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 import type { z } from 'zod'
@@ -52,20 +52,22 @@ export function toRules(r: RulesRow): BookingRules {
 export async function loadBusinesses(db: Queryable, ids: string[]): Promise<Map<string, LoadedBusiness>> {
   const out = new Map<string, LoadedBusiness>()
   if (!ids.length) return out
-  const [bizRows, ruleRows, staffRows, links, serviceRows] = await Promise.all([
-    db.select().from(businesses).where(inArray(businesses.id, ids)),
-    db.select().from(bookingRules).where(inArray(bookingRules.businessId, ids)),
-    db.select().from(staff).where(inArray(staff.businessId, ids)).orderBy(staff.sort),
-    db
-      .select({ staffId: staffServices.staffId, serviceId: staffServices.serviceId })
-      .from(staffServices)
-      .innerJoin(staff, eq(staff.id, staffServices.staffId))
-      .where(inArray(staff.businessId, ids)),
-    db
-      .select()
-      .from(services)
-      .where(and(inArray(services.businessId, ids), eq(services.archived, false)))
-      .orderBy(services.sort),
+  const [bizRows, ruleRows, staffRows, links, serviceRows] = await all(db, [
+    () => db.select().from(businesses).where(inArray(businesses.id, ids)),
+    () => db.select().from(bookingRules).where(inArray(bookingRules.businessId, ids)),
+    () => db.select().from(staff).where(inArray(staff.businessId, ids)).orderBy(staff.sort),
+    () =>
+      db
+        .select({ staffId: staffServices.staffId, serviceId: staffServices.serviceId })
+        .from(staffServices)
+        .innerJoin(staff, eq(staff.id, staffServices.staffId))
+        .where(inArray(staff.businessId, ids)),
+    () =>
+      db
+        .select()
+        .from(services)
+        .where(and(inArray(services.businessId, ids), eq(services.archived, false)))
+        .orderBy(services.sort),
   ])
   for (const b of bizRows) {
     const r = ruleRows.find((x) => x.businessId === b.id)
@@ -98,17 +100,19 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
   // waiting or confirmed, with their buffers, by the account each item was booked with, as the database counts them
   // (migration 0020); their own bookings as a client, breaks and days off don't count
   const here = alias(staff, 'here')
-  const [own, elsewhere] = await Promise.all([
-    db
-      .select({ ...item, staffId: bookingItems.staffId })
-      .from(bookingItems)
-      .innerJoin(bookings, eq(bookings.id, bookingItems.bookingId))
-      .where(and(inArray(bookings.businessId, businessIds), days)),
-    db
-      .select({ ...item, staffId: here.id })
-      .from(bookingItems)
-      .innerJoin(here, and(eq(here.userId, bookingItems.person), sql`${here.id} is distinct from ${bookingItems.staffId}`))
-      .where(and(inArray(here.businessId, businessIds), days)),
+  const [own, elsewhere] = await all(db, [
+    () =>
+      db
+        .select({ ...item, staffId: bookingItems.staffId })
+        .from(bookingItems)
+        .innerJoin(bookings, eq(bookings.id, bookingItems.bookingId))
+        .where(and(inArray(bookings.businessId, businessIds), days)),
+    () =>
+      db
+        .select({ ...item, staffId: here.id })
+        .from(bookingItems)
+        .innerJoin(here, and(eq(here.userId, bookingItems.person), sql`${here.id} is distinct from ${bookingItems.staffId}`))
+        .where(and(inArray(here.businessId, businessIds), days)),
   ])
   return [
     ...own.flatMap((r) =>
@@ -225,37 +229,39 @@ export async function loadTableContexts(
   if (!lbs.length) return out
   const ids = lbs.map((lb) => lb.business.id)
   const areaRows = await db.select().from(tableAreas).where(inArray(tableAreas.businessId, ids)).orderBy(tableAreas.sort)
-  const [tables, busy] = await Promise.all([
-    areaRows.length
-      ? db
-          .select()
-          .from(diningTables)
-          .where(
-            inArray(
-              diningTables.areaId,
-              areaRows.map((a) => a.id),
-            ),
-          )
-      : [],
-    db
-      .select({
-        businessId: bookings.businessId,
-        tableId: bookings.tableId,
-        date: bookings.date,
-        start: bookings.start,
-        end: bookings.end,
-        bookingId: bookings.id,
-      })
-      .from(bookings)
-      // a day before and after too: a day may run past midnight (busyOn)
-      .where(
-        and(
-          inArray(bookings.businessId, ids),
-          eq(bookings.active, true),
-          gte(bookings.date, addDays(from, -1)),
-          lte(bookings.date, addDays(to, 1)),
+  const [tables, busy] = await all(db, [
+    async () =>
+      areaRows.length
+        ? db
+            .select()
+            .from(diningTables)
+            .where(
+              inArray(
+                diningTables.areaId,
+                areaRows.map((a) => a.id),
+              ),
+            )
+        : [],
+    () =>
+      db
+        .select({
+          businessId: bookings.businessId,
+          tableId: bookings.tableId,
+          date: bookings.date,
+          start: bookings.start,
+          end: bookings.end,
+          bookingId: bookings.id,
+        })
+        .from(bookings)
+        // a day before and after too: a day may run past midnight (busyOn)
+        .where(
+          and(
+            inArray(bookings.businessId, ids),
+            eq(bookings.active, true),
+            gte(bookings.date, addDays(from, -1)),
+            lte(bookings.date, addDays(to, 1)),
+          ),
         ),
-      ),
   ])
   for (const lb of lbs) {
     const areas = areaRows.filter((a) => a.businessId === lb.business.id)

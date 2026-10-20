@@ -24,7 +24,7 @@ import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, businesses } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { ApiError } from '../../http/errors'
+import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
 import { cancelForBusiness, declineForBusiness } from '../bookings/business-cancel'
 import { bookedServices } from '../bookings/create'
@@ -33,10 +33,6 @@ import { lockBooking, StaleBooking, stateOf, type BookingRow } from '../bookings
 
 type HoursView = z.infer<typeof businessHoursSettingsSchema>
 type HoursChange = z.infer<typeof businessHoursUpdateSchema>
-interface Issue {
-  path: (string | number)[]
-  code: string
-}
 
 /** The affected bookings the 409 lists one by one; the count and the counts per specialist cover them all. */
 const LISTED = 50
@@ -90,7 +86,7 @@ function checkChange(change: HoursChange, stored: readonly DateException[], toda
     if (d.hours && (nightOverlaps(next, addDays(d.from, -1), d.to).length || (d.yearly && yearlyNightOverlaps(next.hours, d.hours))))
       issues.push({ path: ['specialDays', i, 'hours'], code: 'overlaps_next_day' })
   }
-  if (issues.length) throw new ApiError('validation_error', { issues })
+  if (issues.length) throw invalid(...issues)
   return next
 }
 

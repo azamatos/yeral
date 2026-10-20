@@ -36,7 +36,7 @@ import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, clients, staff, users } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { ApiError } from '../../http/errors'
+import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
 import { unusedSince } from '../auth/sign-in'
 import {
@@ -64,17 +64,11 @@ type CancelInput = z.infer<typeof businessCancelSchema>
 interface Business {
   id: string
 }
-interface Issue {
-  path: (string | number)[]
-  code: string
-}
 
 /** "Iň ýakyn boş wagtlar": the first 4 free starts in 14 days (design COMPONENTS, NewBookingDrawer). */
 const NEAREST = 4
 /** The date strip's days, the business day that holds now first. */
 const STRIP_DAYS = 14
-
-const invalid = (...issues: Issue[]) => new ApiError('validation_error', { issues })
 
 /** The owner and administrators book anyone; a specialist only themself ("add, move, cancel bookings: own"). */
 function assertMayBook(actor: Actor, staffId: string): void {

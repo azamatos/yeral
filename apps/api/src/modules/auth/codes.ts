@@ -7,7 +7,7 @@ import { isMobile } from '@yeral/domain/phone'
 import { and, eq, gt, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import { loginCodes } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { ApiError } from '../../http/errors'
+import { ApiError, invalid } from '../../http/errors'
 import { randomDigits, sha256Hex } from '../../lib/crypto'
 import { hit, rateLimited } from '../../lib/rate-limit'
 import { codeSmsText } from '../../notify'
@@ -35,7 +35,7 @@ export async function sendCode(
 ): Promise<{ resendAfterSec: number; expiresInSec: number }> {
   const { db } = deps
   const now = deps.now()
-  if (!isMobile(req.phone)) throw new ApiError('validation_error', { issues: [{ path: ['phone'], code: 'not_mobile' }] })
+  if (!isMobile(req.phone)) throw invalid({ path: ['phone'], code: 'not_mobile' })
 
   const [existing] = await db
     .select()

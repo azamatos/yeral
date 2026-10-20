@@ -24,7 +24,7 @@ import { isMobile } from '@yeral/domain/phone'
 import { inviteState } from '@yeral/domain/team'
 import { and, asc, eq } from 'drizzle-orm'
 import { businesses, invites, staff } from '../../db/schema'
-import { ApiError } from '../../http/errors'
+import { ApiError, invalid } from '../../http/errors'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { sha256Hex } from '../../lib/crypto'
@@ -336,7 +336,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       if (row.status === 'removed') throw new ApiError('invalid_status')
       if (hasJoined(row)) throw new ApiError('already_on_team')
       // the invite goes to a phone that can get the SMS (book chapter 3)
-      if (!row.phone || !isMobile(row.phone)) throw new ApiError('validation_error', { phone: 'not a mobile number' })
+      if (!row.phone || !isMobile(row.phone)) throw invalid({ path: ['phone'], code: 'not_mobile' })
       const { token } = await issueInvite(tx, now, { businessId: business.id, staffId: row.id, phone: row.phone, invitedBy: user.id })
       await teamChanged(tx, business.id, { phone: row.phone })
       return { member: await member(tx, row, user.lang, now), link: inviteLink(deps.site, token) }

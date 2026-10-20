@@ -27,6 +27,15 @@ export function errorResponse(c: Context, e: ApiError) {
   return c.json(errorBody(e.code, e.details, e.message === e.code ? undefined : e.message), e.status)
 }
 
+/** One value's problem in a `validation_error`, reported as zod reports its own (`validationDetails`). */
+export interface Issue {
+  path: (string | number)[]
+  code: string
+}
+
+/** A 400 `validation_error` for values the schema let through but a rule refuses: the one way the api says so. */
+export const invalid = (...issues: Issue[]) => new ApiError('validation_error', { issues })
+
 export function validationDetails(error: ZodError) {
   return { issues: error.issues.map((i) => ({ path: i.path.filter((p) => typeof p !== 'symbol'), code: i.code })) }
 }
