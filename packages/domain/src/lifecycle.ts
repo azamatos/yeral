@@ -325,6 +325,12 @@ export function clientActions(
 export const NEW_BOOKING_UNDO_MS = 10_000
 
 /**
+ * The client's first SMS about a booking the team just added goes this long after it's saved: once "Yzyna al" can't
+ * take it back, with a margin for an undo still on its way, so an undo never leaves an SMS behind (B-24).
+ */
+export const NEW_BOOKING_SMS_AFTER_MS = NEW_BOOKING_UNDO_MS + 5_000
+
+/**
  * Undo a booking the team just added by phone or for a walk-in: it goes as if never made, while the undo time runs and
  * it's still confirmed (`undo_expired` after).
  */

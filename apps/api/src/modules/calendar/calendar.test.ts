@@ -21,6 +21,8 @@ const MON = '2026-10-19'
 /** 11:15: the step that holds 11:20 with Glow's 15-minute steps. */
 const NOW_STEP = 11 * 60 + 15
 const UNDO_MS = 10_000
+/** The first SMS goes 5 seconds after the undo can't come any more (B-24). */
+const SMS_AFTER_MS = 15_000
 
 interface Free {
   nearest: { date: string; start: number; end: number; staffId: string }[]
@@ -153,7 +155,11 @@ describe('the business’s own bookings (book B-23, B-24, B-25)', () => {
     // the SMS waits until the booking can't be undone (B-24), then tells the date, time and address
     await runDueJobs(t.deps)
     expect(smsTo('+99365800101')).toEqual([])
+    // the undo time is over, and an undo sent at its last moment has had time to arrive
     t.clock.now += UNDO_MS
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800101')).toEqual([])
+    t.clock.now += SMS_AFTER_MS - UNDO_MS
     await runDueJobs(t.deps)
     expect(smsTo('+99365800101').map((s) => s.text)).toEqual([expect.stringMatching(/booked.*Glow Studio.*Bitarap Türkmenistan/)])
   })
@@ -265,7 +271,7 @@ describe('the business’s own bookings (book B-23, B-24, B-25)', () => {
     const maysa = await as(MAYSA)
     const made = await book(maysa, { phone: '+99312456700', date: MON, start: await maralFree(maysa, MON) })
     expect(made.status).toBe(201)
-    t.clock.now += UNDO_MS
+    t.clock.now += SMS_AFTER_MS
     await runDueJobs(t.deps)
     expect(t.sms.sent.filter((s) => s.to === '+99312456700')).toEqual([])
     const row = await rowOf(made.json.code)

@@ -16,6 +16,8 @@ import type { Deps } from '../../deps'
 import {
   bookingSmsText,
   businessCancelText,
+  CHANGE_SMS,
+  CONFIRMATION_SMS,
   cancelledOffersSmsText,
   declinedSmsText,
   emit,
@@ -211,12 +213,13 @@ async function sendBookingSms(
   deps: Deps,
   bookingId: string,
   kind: BookingSmsKind | OutcomeSmsKind,
-  at: { date?: unknown; start?: unknown; covers?: unknown },
+  at: { date?: unknown; start?: unknown; covers?: unknown; staff?: unknown },
 ): Promise<string | undefined> {
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
   // the person deleted their account: the number may be someone else's now
   if (!b?.clientPhone || b.accountDeletedAt) return
-  if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
+  // a confirmation tells the booking as it is now; anything else only while it's still at the time it was planned for
+  if (!CONFIRMATION_SMS.has(kind) && at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   // an account's phone took a sign-in code, so it's a mobile; a number the team typed in may not be
   if (!b.userId && !isMobile(b.clientPhone)) return DROPPED_NOT_MOBILE
   if (isOutcome(kind)) {
@@ -229,6 +232,9 @@ async function sendBookingSms(
   } else if (b.status !== 'confirmed') return
   // a retried reminder can't arrive after the start (book Q-284)
   if (REMINDERS.has(kind) && deps.now() >= epochOf(b.date, b.start)) return DROPPED_STARTED
+  const items = await itemsOf(deps.db, b.id)
+  // a change SMS goes only while the booking is with the specialists it names
+  if (CHANGE_SMS.has(kind) && typeof at.staff === 'string' && at.staff !== items.map((i) => i.staffId).join(',')) return
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const [client] = b.clientId ? await deps.db.select().from(clients).where(eq(clients.id, b.clientId)) : []
   if (client?.noRemindersSms && REMINDERS.has(kind)) return
@@ -259,10 +265,7 @@ async function sendBookingSms(
     address: biz.address,
     city: await smsCityOf(deps.db, biz.cityId, lang),
     reason: b.businessCancelReason ? businessCancelText(lang, b.businessCancelReason, b.cancelReason) : undefined,
-    staff:
-      kind === 'staffChanged'
-        ? [...new Set((await itemsOf(deps.db, b.id)).flatMap((i) => (i.staffName ? [i.staffName] : [])))].join(', ')
-        : undefined,
+    staff: kind === 'staffChanged' ? [...new Set(items.flatMap((i) => (i.staffName ? [i.staffName] : [])))].join(', ') : undefined,
   }
   // the texts with a link get one of their own (book Q-168)
   // the person's phone now: a changed number gets them, the old one nothing more (book Q-171)

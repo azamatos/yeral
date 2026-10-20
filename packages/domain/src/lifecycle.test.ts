@@ -12,6 +12,7 @@ import {
   canEditNote,
   canWriteReview,
   keptCancelReason,
+  NEW_BOOKING_SMS_AFTER_MS,
   NEW_BOOKING_UNDO_MS,
   waitingLimit,
   cancelDeadline,
@@ -297,6 +298,8 @@ describe('business actions', () => {
     expect(canUndoNewBooking(added, NOW + NEW_BOOKING_UNDO_MS)).toBe('undo_expired')
     expect(canUndoNewBooking({ ...added, source: 'web' }, NOW)).toBe('invalid_status')
     expect(canUndoNewBooking({ ...added, status: 'cancelled' }, NOW)).toBe('invalid_status')
+    // the client's SMS waits past the last moment an undo is taken
+    expect(NEW_BOOKING_SMS_AFTER_MS).toBeGreaterThan(NEW_BOOKING_UNDO_MS)
   })
 
   it('a no-show from the start until a day after the end; other complaints any time (book Q-206, Q-254)', () => {

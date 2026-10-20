@@ -278,5 +278,11 @@ export const jobs = pgTable(
     error: text(),
     createdAt: createdAt(),
   },
-  (t) => [index('jobs_due_idx').on(t.doneAt, t.runAt)],
+  (t) => [
+    index('jobs_due_idx').on(t.doneAt, t.runAt),
+    // a booking's SMS still to go, found when a later one replaces them (`queueBookingSms`)
+    index('jobs_waiting_booking_idx')
+      .on(sql`(${t.payload}->>'bookingId')`)
+      .where(sql`${t.doneAt} is null`),
+  ],
 )

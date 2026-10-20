@@ -66,6 +66,13 @@ export async function smsCityOf(db: Queryable, cityId: string, lang: Locale): Pr
 export type BookingSmsKind =
   'confirmed' | 'booked' | 'moved' | 'staffChanged' | 'cancelled' | 'cancelledAsAsked' | 'reminderDay' | 'reminder2h' | 'reminderEvening'
 
+/** The first SMS about a booking (one waits at a time: `queueBookingSms`). */
+export type FirstSmsKind = 'confirmed' | 'booked' | 'moved' | 'staffChanged'
+/** The SMS that confirm a booking: they tell it as it is when they go, a change made before included. */
+export const CONFIRMATION_SMS: ReadonlySet<string> = new Set<FirstSmsKind>(['confirmed', 'booked'])
+/** The SMS about a change the business made: they go only while the booking still stands as they say. */
+export const CHANGE_SMS: ReadonlySet<string> = new Set<FirstSmsKind>(['moved', 'staffChanged'])
+
 /** The booking SMS that carry the booking's link (book Q-168); reminders don't. */
 export const LINKED_SMS: ReadonlySet<BookingSmsKind> = new Set([
   'confirmed',

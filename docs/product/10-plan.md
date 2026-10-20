@@ -117,7 +117,9 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    for the design: the demo data already has English texts, refreshed at export v0.6.
 7. **Before the first launch:** deploys from GitHub over SSH after the owner approves a release (ADR 0020), nightly
    backups to Cloudflare R2 with a restore drill (F-211), error tracking and uptime alerts (F-209; it alerts on the `job gave up` line), sitemap data
-   (F-197).
+   (F-197). Before SMS go out: a daily cap and a rate limit per business on the SMS its team's bookings and cancels
+   send to numbers it types in, and none from a business still in review (the backend review of 20.10.2026: they carry
+   the business's own words, "Other reason", under Ýeral's sender).
 
 Settled while reviewing (Claude, delegated, 19.10.2026): a hold counts the business's opening hours, special days
 included, not the specialist's; a reminder that falls between 22:00 and 08:00 goes at 21:30 the evening before the visit (chapter 8),

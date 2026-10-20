@@ -27,7 +27,13 @@ import {
   type PlannedItem,
 } from '@yeral/domain/availability'
 import { currentBusinessDate } from '@yeral/domain/hours'
-import { canBusinessCancel, canBusinessMove, canUndoNewBooking, NEW_BOOKING_UNDO_MS } from '@yeral/domain/lifecycle'
+import {
+  canBusinessCancel,
+  canBusinessMove,
+  canUndoNewBooking,
+  NEW_BOOKING_SMS_AFTER_MS,
+  NEW_BOOKING_UNDO_MS,
+} from '@yeral/domain/lifecycle'
 import { canOn, scopeOf, type Actor } from '@yeral/domain/permissions'
 import { addDays, epochOf } from '@yeral/domain/time'
 import { and, eq, inArray, sql } from 'drizzle-orm'
@@ -41,7 +47,7 @@ import { unusedSince } from '../auth/sign-in'
 import { appointmentContext, dayStrip, loadBusiness, loadBusy, type LoadedBusiness } from '../availability/context'
 import { dropPendingMove } from '../bookings/actions'
 import { cancelForBusiness, unheardUntil } from '../bookings/business-cancel'
-import { queueBookingSms } from '../bookings/confirm'
+import { queueBookingSms, toldOf } from '../bookings/confirm'
 import { appointmentPrice, inTransaction, itemRows } from '../bookings/create'
 import { extendBookingLinks } from '../bookings/links'
 import {
@@ -259,7 +265,7 @@ async function insertTeamBooking(
   await tx.insert(bookingItems).values(itemRows(lb, row.id, input.date, slot))
   await emit(tx, { type: 'booking.created', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
   // nothing reaches the client while "Yzyna al" may still take the booking back (B-24)
-  await queueBookingSms(tx, deps, row, { first: row.notifyClient ? 'booked' : null, notBefore: now + NEW_BOOKING_UNDO_MS })
+  await queueBookingSms(tx, deps, row, { first: row.notifyClient ? 'booked' : null, notBefore: now + NEW_BOOKING_SMS_AFTER_MS })
   return row
 }
 
@@ -409,12 +415,23 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
       await emit(tx, { ...event, userId: moved.userId })
       const left = staffIds.filter((id) => !plan.some((it) => it.staffId === id))
       for (const userId of await specialistAccounts(tx, left)) await emit(tx, { ...event, userId })
-      // a booking the client hasn't heard of yet gets its first SMS for the new time, once "Yzyna al" is over
-      const unheard = unheardUntil(b, now)
+      // a booking the client hasn't heard of yet gets its first SMS for the new time, once "Yzyna al" is over; a
+      // confirmation still waiting tells the change itself (`queueBookingSms`)
+      const unheard = unheardUntil(b, now) !== null
       const notify = input.notifyClient ?? b.notifyClient
       await queueBookingSms(tx, deps, moved, {
         first: !notify ? null : unheard ? 'booked' : timeChanged ? 'moved' : 'staffChanged',
-        notBefore: unheard ?? undefined,
+        notBefore: unheard ? b.createdAt.getTime() + NEW_BOOKING_SMS_AFTER_MS : undefined,
+        change: {
+          was: toldOf(
+            b,
+            items.map((i) => i.staffId),
+          ),
+          now: toldOf(
+            moved,
+            plan.map((it) => it.staffId),
+          ),
+        },
       })
     })
   } catch (e) {
