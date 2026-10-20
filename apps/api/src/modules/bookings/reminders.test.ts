@@ -203,7 +203,7 @@ describe('reminders and the night (book Q-285)', () => {
     const t = testApp(db)
     const alerts: { msg: string; data?: Record<string, unknown> }[] = []
     const log: Logger = { ...nullLogger, error: (msg, data) => alerts.push({ msg, data }) }
-    const deps = { ...t.deps, log, sms: { send: () => Promise.reject(new Error('gateway down')) } }
+    const deps = { ...t.deps, log, sms: { delivers: true, send: () => Promise.reject(new Error('gateway down')) } }
     const [job] = await db
       .insert(jobs)
       .values({ kind: 'sms', runAt: new Date(t.clock.now), payload: { to: '+99365555011', text: 'Hello' } })

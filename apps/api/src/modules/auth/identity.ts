@@ -64,7 +64,8 @@ async function ask(c: Context<AppEnv>, user: User, name: string | null): Promise
 export async function afterCode(c: Context<AppEnv>, phone: string, lang: Locale | undefined): Promise<AfterCode> {
   const { db, now } = c.var.deps
   const [user] = await db.select().from(users).where(eq(users.phone, phone))
-  if (user && unusedSince(user.lastSeenAt, now())) {
+  // with the code on the screen anyone may type the number: the account signs in as it is, never let go
+  if (user && !c.var.deps.codeOnScreen && unusedSince(user.lastSeenAt, now())) {
     const name = await knownAs(db, user)
     if (name || (await holdsAnything(db, user.id))) return ask(c, user, name)
     // nothing of a person's in it, favourites at most: not worth a question, and not to be handed on. The number
@@ -99,6 +100,8 @@ export async function answerIdentity(c: Context<AppEnv>, ticket: string, yes: bo
     const check = settled.find((x) => x.tokenHash === tokenHash && x.expiresAt.getTime() > now())
     // an old ticket, or one already answered: the code step starts again
     if (!old || !check) throw new ApiError('code_expired')
+    // a question asked before the code went on the screen: "No" can't let the account go now
+    if (!yes && c.var.deps.codeOnScreen) throw new ApiError('code_expired')
     // the account moved to another number meanwhile: this one is free, and "No" just starts afresh
     if (!yes && old.phone === check.phone) {
       // in use again since the question: not this answer's to let go

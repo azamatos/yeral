@@ -56,6 +56,7 @@ export const authRoutes = new OpenAPIHono<AppEnv>()
       purpose: 'login',
       ip: clientIp((n) => c.req.header(n), c.var.deps.trustedIpHeader),
       lang: known?.lang ?? lang ?? MARKET.defaultLanguage,
+      onScreen: true,
     })
     return c.json(res, 200)
   })

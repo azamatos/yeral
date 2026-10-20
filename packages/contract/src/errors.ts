@@ -52,6 +52,8 @@ export const ERROR_STATUS = {
   too_many_attempts: 429,
   resend_too_soon: 429,
   phone_taken: 409,
+  /** The number can't be changed while the sign-in code shows on the screen (the first launch, book Q-036). */
+  phone_change_unavailable: 409,
   // account and team
   owns_workspace: 409,
   already_on_team: 409,

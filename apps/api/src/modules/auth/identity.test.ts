@@ -110,6 +110,16 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     expect([linked(oldRecord!.id), linked(recentRecord!.id), linked(oldButBooked!.id)]).toEqual([null, me.id, me.id])
   })
 
+  it('with the code on the screen an unused account signs in as it is: nobody may let it go (book Q-036)', async () => {
+    const phone = '+99365777020'
+    const old = await account(phone, 'Gözel Orazowa', 200)
+    const b = browser(testApp(db, { codeOnScreen: true }).app)
+    await b.req('/v1/auth/code', { body: { phone } })
+    const res = await b.req('/v1/auth/verify', { body: { phone, code: '1234' } })
+    expect(res.status).toBe(200)
+    expect(res.json).toMatchObject({ me: { id: old.id }, isNew: false })
+  })
+
   it('an account unused for 6 months asks "Is this you?" with its first name; yes signs in to it', async () => {
     const phone = '+99365777002'
     const old = await account(phone, 'Bahar Orazowa', 200)

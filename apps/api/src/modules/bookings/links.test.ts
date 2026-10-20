@@ -130,10 +130,12 @@ describe('SMS links', () => {
     })
     const link = await newBookingLink(db, t.deps.site, row!, '+99365444306', DEMO_NOW)
     const token = tokenOf(link.url)
-    const visitor = browser(t.app)
+    // even at the first launch the code isn't shown: the link's holder needs the number, which the page hides
+    const on = testApp(db, { codeOnScreen: true })
+    const visitor = browser(on.app)
     const sent = await visitor.req(`/v1/links/${token}/code`, { body: {} })
-    expect(sent.status).toBe(200)
-    expect(t.sms.sent.at(-1)?.to).toBe('+99365444306')
+    expect(sent.json).toEqual({ resendAfterSec: 59, expiresInSec: 300 })
+    expect(on.sms.sent.at(-1)?.to).toBe('+99365444306')
     const signedIn = await visitor.req(`/v1/links/${token}/verify`, { body: { code: '1234' } })
     expect(signedIn.json).toMatchObject({ me: { phone: '+99365444306' }, isNew: true })
     // the booking is theirs now: "my bookings" opens it
@@ -213,7 +215,10 @@ describe('SMS links', () => {
     void b
     const failing = {
       ...t.deps,
-      sms: { send: (m: { text: string }) => Promise.reject(new Error(`400 Bad Request: {"text":"${m.text.replace(/\//g, '\\/')}"}`)) },
+      sms: {
+        delivers: true,
+        send: (m: { text: string }) => Promise.reject(new Error(`400 Bad Request: {"text":"${m.text.replace(/\//g, '\\/')}"}`)),
+      },
     }
     await queueConfirmed(code)
     await runDueJobs(failing)

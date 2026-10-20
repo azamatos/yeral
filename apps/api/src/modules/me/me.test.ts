@@ -71,6 +71,19 @@ describe('account', () => {
     expect(old.json.notifications.reviewAsk).toBe(false)
   })
 
+  it('no phone change while the sign-in code shows on the screen (book Q-036)', async () => {
+    const on = testApp(db, { codeOnScreen: true })
+    const b = browser(on.app)
+    await b.login('+99365222009', 'Merjen')
+    const refused = await b.req('/v1/me/phone/code', { body: { phone: '+99365222010' } })
+    expect(refused.status).toBe(409)
+    expect(refused.json.error.code).toBe('phone_change_unavailable')
+    expect(on.sms.sent.filter((m) => m.to === '+99365222010')).toEqual([])
+    expect((await b.req('/v1/me/phone/verify', { body: { phone: '+99365222010', code: '1234' } })).json.error.code).toBe(
+      'phone_change_unavailable',
+    )
+  })
+
   it('changing the phone needs a code on the new number, which must be free', async () => {
     const b = browser(t.app)
     await b.login('+99365222002', 'Kemal')

@@ -36,6 +36,35 @@ describe('phone login (ADR 0019)', () => {
     expect((await b.req('/v1/auth/code', { body: { phone: '+99365000001' } })).status).toBe(200)
   })
 
+  it('the code on the screen at the first launch only, never with SMS that reach phones (book Q-036, F-200)', async () => {
+    const phone = '+99365000021'
+    const on = testApp(db, { codeOnScreen: true })
+    expect((await browser(on.app).req('/v1/auth/code', { body: { phone } })).json).toEqual({
+      resendAfterSec: 59,
+      expiresInSec: 300,
+      code: '1234',
+    })
+    // written to the log as every SMS is, the code hidden
+    expect(on.sms.sent.at(-1)).toMatchObject({ to: phone, secret: true })
+    const live = testApp(db, { now: DEMO_NOW + 60_000, codeOnScreen: true, smsDelivers: true })
+    expect((await browser(live.app).req('/v1/auth/code', { body: { phone } })).json).toEqual({ resendAfterSec: 59, expiresInSec: 300 })
+  })
+
+  it('production’s random code: two sends at once make one code, and the code shown signs in', async () => {
+    const phone = '+99365000022'
+    const prod = testApp(db, { demo: false, codeOnScreen: true })
+    const b = browser(prod.app)
+    const both = await Promise.all([1, 2].map(() => b.req('/v1/auth/code', { body: { phone } })))
+    expect(both.map((r) => r.status).sort()).toEqual([200, 429])
+    const won = both.find((r) => r.status === 200)!.json as { code: string }
+    expect(won.code).toMatch(/^\d{4}$/)
+    expect(prod.sms.sent.filter((m) => m.to === phone)).toHaveLength(1)
+    // the same limits: wrong tries count down
+    const wrong = won.code === '0000' ? '1111' : '0000'
+    for (let i = 0; i < 2; i++) await b.req('/v1/auth/verify', { body: { phone, code: wrong } })
+    expect((await b.req('/v1/auth/verify', { body: { phone, code: won.code } })).status).toBe(200)
+  })
+
   it('only mobile numbers get codes', async () => {
     const res = await browser(t.app).req('/v1/auth/code', { body: { phone: '+993 12 45 67 89' } })
     expect(res.status).toBe(400)

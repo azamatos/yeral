@@ -1,6 +1,7 @@
 /**
  * One-time login codes (client spec §4.4, §4.7; ADR 0019): 4 digits, 5 minutes, resend after 59 s, 3 wrong tries →
- * a 60-second lock and a new code. Outside production the code is always 1234 and SMS go to the log.
+ * a 60-second lock and a new code. Outside production the code is always 1234 and SMS go to the log. At the first
+ * launch (`codeOnScreen`, book Q-036, F-200) the sign-in's answer carries the code to show, under the same limits.
  */
 import type { Locale } from '@yeral/domain/model'
 import { isMobile } from '@yeral/domain/phone'
@@ -31,8 +32,19 @@ const secondsLeft = (until: Date, now: number) => Math.max(1, Math.ceil((until.g
 
 export async function sendCode(
   deps: Deps,
-  req: { phone: string; purpose: Purpose; ip: string; lang: Locale; userId?: string },
-): Promise<{ resendAfterSec: number; expiresInSec: number }> {
+  req: {
+    phone: string
+    purpose: Purpose
+    ip: string
+    lang: Locale
+    userId?: string
+    /**
+     * The plain sign-in, whose screen shows the code while `codeOnScreen` is on. Never a booking link's (it would sign
+     * a link's holder in without the number, which the link page hides) nor a phone change's.
+     */
+    onScreen?: boolean
+  },
+): Promise<{ resendAfterSec: number; expiresInSec: number; code?: string }> {
   const { db } = deps
   const now = deps.now()
   if (!isMobile(req.phone)) throw invalid({ path: ['phone'], code: 'not_mobile' })
@@ -65,12 +77,25 @@ export async function sendCode(
     sentAt: new Date(now),
     userId: req.userId ?? null,
   }
-  await db
+  // only while the last code may be replaced: of two sent at once one wins and the other is refused, so the code
+  // sent (or shown) is the one that signs in
+  const [saved] = await db
     .insert(loginCodes)
     .values({ phone: req.phone, purpose: req.purpose, ...row })
-    .onConflictDoUpdate({ target: [loginCodes.phone, loginCodes.purpose], set: row })
+    .onConflictDoUpdate({
+      target: [loginCodes.phone, loginCodes.purpose],
+      set: row,
+      setWhere: and(
+        lte(loginCodes.sentAt, new Date(now - RESEND_SEC * 1000)),
+        or(isNull(loginCodes.lockedUntil), lte(loginCodes.lockedUntil, new Date(now))),
+      ),
+    })
+    .returning({ phone: loginCodes.phone })
+  if (!saved) throw new ApiError('resend_too_soon', { retryAfterSec: RESEND_SEC })
+  // written to the log as every SMS is, the code hidden
   await deps.sms.send({ to: req.phone, text: codeSmsText(req.lang, code), secret: true })
-  return { resendAfterSec: RESEND_SEC, expiresInSec: CODE_TTL_SEC }
+  const shown = req.onScreen && deps.codeOnScreen && !deps.sms.delivers
+  return { resendAfterSec: RESEND_SEC, expiresInSec: CODE_TTL_SEC, ...(shown ? { code } : {}) }
 }
 
 /**
