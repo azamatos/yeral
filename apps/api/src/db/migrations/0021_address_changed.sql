@@ -1,0 +1,1 @@
+ALTER TABLE "businesses" ADD COLUMN "address_changed_at" timestamp with time zone;

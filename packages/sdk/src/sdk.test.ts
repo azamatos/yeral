@@ -288,6 +288,9 @@ describe('live events', () => {
       ['business', 'glow-studio'],
       ['availability', 'glow-studio'],
       ['workspaces'],
+      ['search'],
+      ['suggest'],
+      ['favorites'],
     ])
   })
 })

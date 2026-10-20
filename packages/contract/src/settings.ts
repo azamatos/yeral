@@ -5,7 +5,7 @@
 import { AMENITIES, CONFIRM_MODES, VERIFICATION_STATUSES } from '@yeral/domain/model'
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
 import { z } from 'zod'
-import { localizedSchema, marketLocaleSchema, phoneInputSchema, phoneSchema, slugSchema } from './common'
+import { latLngSchema, marketLocaleSchema, phoneInputSchema, phoneSchema, slugSchema } from './common'
 
 /**
  * The booking rules (B-41). The values each one takes are the settings screen's options (`RULE_OPTIONS` in
@@ -44,16 +44,13 @@ export const bookingRulesSchema = z
 export const bookingRulesUpdateSchema = bookingRulesSchema.omit({ lateMinutes: true }).partial().strict().meta({ id: 'BookingRulesUpdate' })
 
 /** Where the business is: one address per workspace (a second place is a business of its own). */
-export const locationSchema = z.object({
+export const locationSchema = latLngSchema.extend({
   /** One of the market's cities (`GET /v1/cities`). */
   cityId: z.string().max(40),
   /** The street address, without the city: "Oguzhan köçesi 12". */
   address: z.string().trim().min(1).max(200),
   /** The street line on search rows, and all a home-based business shows before a booking is confirmed. */
   street: z.string().trim().min(1).max(120),
-  /** The map pin. */
-  lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
 })
 
 /**
@@ -89,12 +86,20 @@ export const businessProfileUpdateSchema = z
   .object({
     name: z.string().trim().min(1).max(80),
     categoryId: z.string().max(40),
-    about: localizedSchema(1000),
+    /** Only the languages sent change; an empty text removes that language (one must stay). */
+    about: z.partialRecord(marketLocaleSchema, z.string().trim().max(1000)),
     phone: phoneInputSchema,
+    /** The list's amenities on; any the list doesn't know stay as they are. */
     amenities: z.array(z.enum(AMENITIES)).refine((a) => new Set(a).size === a.length, 'Each amenity at most once'),
     womenOnly: z.boolean(),
     location: locationSchema.strict(),
-    entranceNote: z.string().trim().max(200).nullable(),
+    /** Empty = none. */
+    entranceNote: z
+      .string()
+      .trim()
+      .max(200)
+      .nullable()
+      .transform((note) => note || null),
     hideExactAddress: z.boolean(),
   })
   .partial()

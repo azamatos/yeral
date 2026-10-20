@@ -36,7 +36,16 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
   }
   // settings change the page, free times and who answers requests (the switcher's counts)
   if (e.type === 'business.updated' && e.business)
-    out.push(keys.settings(e.business), keys.businessAll(e.business), keys.availabilityAll(e.business), keys.workspaces())
+    out.push(
+      keys.settings(e.business),
+      keys.businessAll(e.business),
+      keys.availabilityAll(e.business),
+      keys.workspaces(),
+      // its name, category and prices on cards
+      keys.searchAll(),
+      keys.suggestAll(),
+      keys.favoritesAll(),
+    )
   return out
 }
 

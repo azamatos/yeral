@@ -5,7 +5,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, rateLimits, verificationHistory } from '../../db/schema'
+import { businesses, rateLimits } from '../../db/schema'
 import { seed } from '../../db/seed'
 
 const MAYSA = '+99365102030' // owner of Glow Studio
@@ -45,6 +45,8 @@ describe('the business profile (book B-37)', () => {
       hideExactAddress: false,
       verification: 'verified',
     })
+    // the seed wrote every language; changing one keeps the others
+    expect(Object.keys(before.json.about).sort()).toEqual(['en', 'ru', 'tk'])
     const changed = await maysa.req(PROFILE, {
       method: 'PATCH',
       body: {
@@ -56,12 +58,16 @@ describe('the business profile (book B-37)', () => {
     })
     expect(changed.status).toBe(200)
     expect(changed.json).toMatchObject({ name: 'Glow Studio & Spa', phone: '+99312345678', amenities: ['wifi', 'parking'] })
+    expect(changed.json.about).toEqual({ ...before.json.about, en: 'Hair, nails and quiet.' })
     expect(await page(maysa)).toMatchObject({
       name: 'Glow Studio & Spa',
       about: 'Hair, nails and quiet.',
       phone: '+99312345678',
       amenities: ['wifi', 'parking'],
     })
+    // an empty text takes that language away while another stays
+    expect((await maysa.req(PROFILE, { method: 'PATCH', body: { about: { en: '' } } })).json.about.en).toBeUndefined()
+    await maysa.req(PROFILE, { method: 'PATCH', body: { about: { en: 'Hair, nails and quiet.' } } })
     const ayna = await as(AYNA)
     expect((await ayna.req(PROFILE)).status).toBe(403)
     expect((await ayna.req(PROFILE, { method: 'PATCH', body: { name: 'Mine' } })).status).toBe(403)
@@ -74,8 +80,9 @@ describe('the business profile (book B-37)', () => {
     expect(moved.json).toMatchObject({ location, entranceNote: 'Second floor', verification: 'verified' })
     expect(await page(maysa)).toMatchObject({ address: 'Oguzhan köçesi 12', entranceNote: 'Second floor' })
     const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
-    const notes = await db.select().from(verificationHistory).where(eq(verificationHistory.businessId, glow!.id))
-    expect(notes.map((n) => [n.status, n.reason])).toContainEqual(['verified', 'address changed'])
+    expect(glow!.addressChangedAt?.getTime()).toBe(t.clock.now)
+    // an empty entrance note is none
+    expect((await maysa.req(PROFILE, { method: 'PATCH', body: { entranceNote: '  ' } })).json.entranceNote).toBeNull()
     // an unknown city
     const lost = await maysa.req(PROFILE, { method: 'PATCH', body: { location: { ...location, cityId: 'atlantis' } } })
     expect(lost.status).toBe(400)
@@ -88,7 +95,7 @@ describe('the business profile (book B-37)', () => {
   it('a category of the same kind of booking only; amenities from the list', async () => {
     const maysa = await as(MAYSA)
     expect((await maysa.req(PROFILE, { method: 'PATCH', body: { categoryId: 'nails' } })).json.categoryId).toBe('nails')
-    expect((await page(maysa)).category).toEqual({ id: 'nails', name: expect.any(String) })
+    expect((await page(maysa)).category).toEqual({ id: 'nails', name: 'Nails' })
     // tables are another kind of booking (and come after the MVP)
     const tables = await maysa.req(PROFILE, { method: 'PATCH', body: { categoryId: 'restaurant' } })
     expect(tables.json.error.details.issues).toEqual([{ path: ['categoryId'], code: 'invalid' }])

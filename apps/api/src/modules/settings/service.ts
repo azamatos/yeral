@@ -8,12 +8,12 @@ import type {
   businessProfileSchema,
   businessProfileUpdateSchema,
 } from '@yeral/contract/settings'
-import { AMENITIES, type Amenity } from '@yeral/domain/model'
+import { AMENITIES, type Amenity, type Localized } from '@yeral/domain/model'
 import { LATE_MINUTES, rulesErrors, type BookingRules } from '@yeral/domain/rules'
 import { eq } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
-import { bookingRules, businesses, categories, cities, verificationHistory } from '../../db/schema'
+import { bookingRules, businesses, categories, cities } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 import { emit } from '../../notify'
 import { toRules } from '../availability/context'
@@ -83,41 +83,53 @@ export async function profileOf(db: Queryable, businessId: string): Promise<Prof
 }
 
 /**
- * Change some of the profile (B-37). A new category keeps the kind of booking (it must offer the business's own), and
- * the card's "what it is" follows it. A new address keeps everything, the page and its verification included, and is
- * noted for the Ýeral team to check again (book Q-215).
+ * Change some of the profile (B-37). A new category must offer every kind of booking the business takes, and the card's
+ * "what it is" becomes its name. A new address keeps everything, the page and its verification included, and marks the
+ * business for the Ýeral team to check again (book Q-215: `addressChangedAt`, cleared by the admin tool).
  */
-export async function updateProfile(db: Queryable, businessId: string, change: ProfileChange): Promise<ProfileView> {
+export async function updateProfile(db: Queryable, businessId: string, change: ProfileChange, now: number): Promise<ProfileView> {
   return db.transaction(async (tx) => {
     const [row] = await tx.select().from(businesses).where(eq(businesses.id, businessId)).for('no key update')
     if (!row) throw new ApiError('not_found')
-    const issues: { path: string[]; code: string }[] = []
     const recategorized = change.categoryId !== undefined && change.categoryId !== row.categoryId
-    if (recategorized) {
-      const [category] = await tx.select().from(categories).where(eq(categories.id, change.categoryId!))
-      if (!category?.bookingTypes.includes(row.bookingTypes[0] ?? 'appointment')) issues.push({ path: ['categoryId'], code: 'invalid' })
-    }
-    if (change.location) {
-      const [city] = await tx.select({ id: cities.id }).from(cities).where(eq(cities.id, change.location.cityId))
-      if (!city) issues.push({ path: ['location', 'cityId'], code: 'invalid' })
-    }
+    const [[category], [city]] = await Promise.all([
+      recategorized ? tx.select().from(categories).where(eq(categories.id, change.categoryId!)) : [],
+      change.location ? tx.select({ id: cities.id }).from(cities).where(eq(cities.id, change.location.cityId)) : [],
+    ])
+    const issues: { path: string[]; code: string }[] = []
+    if (recategorized && !(category && row.bookingTypes.every((t) => category.bookingTypes.includes(t))))
+      issues.push({ path: ['categoryId'], code: 'invalid' })
+    if (change.location && !city) issues.push({ path: ['location', 'cityId'], code: 'invalid' })
+    // the languages sent change, an empty one goes, the others stay; one must be left
+    const about = change.about && mergeLanguages(row.about, change.about)
+    if (about && !Object.keys(about).length) issues.push({ path: ['about'], code: 'invalid' })
     if (issues.length) throw new ApiError('validation_error', { issues })
 
-    const { location, about, categoryId, ...rest } = change
+    const { location, categoryId, amenities, ...rest } = change
     const moved =
       !!location &&
       (location.address !== row.address || location.cityId !== row.cityId || location.lat !== row.lat || location.lng !== row.lng)
     const set: Partial<typeof businesses.$inferInsert> = {
       ...rest,
-      ...(about ? { about: about } : {}),
-      // the card names the new category
-      ...(recategorized ? { categoryId, kind: {} } : {}),
+      ...(about ? { about } : {}),
+      // amenities the list doesn't know (older data) stay
+      ...(amenities ? { amenities: [...amenities, ...row.amenities.filter((a) => !(AMENITIES as readonly string[]).includes(a))] } : {}),
+      ...(recategorized ? { categoryId, kind: category!.name } : {}),
       ...location,
+      ...(moved ? { addressChangedAt: new Date(now) } : {}),
     }
     if (!Object.keys(set).length) return profileView(row)
     const [saved] = await tx.update(businesses).set(set).where(eq(businesses.id, businessId)).returning()
-    if (moved) await tx.insert(verificationHistory).values({ businessId, status: row.verification, reason: 'address changed' })
     await emit(tx, { type: 'business.updated', businessId })
     return profileView(saved!)
   })
+}
+
+function mergeLanguages(stored: Localized, change: Localized): Localized {
+  const out: Localized = { ...stored }
+  for (const [lang, text] of Object.entries(change) as [keyof Localized, string][]) {
+    if (text) out[lang] = text
+    else delete out[lang]
+  }
+  return out
 }

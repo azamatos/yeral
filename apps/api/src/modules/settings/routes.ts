@@ -72,5 +72,5 @@ export const settingsRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(updateProfileRoute, async (c) => {
     const { business } = await requireSettings(c, c.req.valid('param').slug)
-    return c.json(await updateProfile(c.var.deps.db, business.id, c.req.valid('json')), 200)
+    return c.json(await updateProfile(c.var.deps.db, business.id, c.req.valid('json'), c.var.deps.now()), 200)
   })
