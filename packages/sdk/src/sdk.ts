@@ -47,7 +47,13 @@ import type { searchQuerySchema } from '@yeral/contract/catalog'
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
-import type { bookingRulesUpdateSchema, businessHoursUpdateSchema, businessProfileUpdateSchema } from '@yeral/contract/settings'
+import type {
+  bookingRulesUpdateSchema,
+  businessHoursUpdateSchema,
+  businessProfileUpdateSchema,
+  internalStatusInputSchema,
+  internalStatusUpdateSchema,
+} from '@yeral/contract/settings'
 import type {
   inviteInputSchema,
   phoneOnlyInputSchema,
