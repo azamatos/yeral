@@ -38,6 +38,7 @@ import type {
 } from '@yeral/contract/bookings'
 import type { searchQuerySchema } from '@yeral/contract/catalog'
 import type { Locale } from '@yeral/contract/common'
+import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
 import type { bookingRulesUpdateSchema } from '@yeral/contract/settings'
 import type { inviteInputSchema, phoneOnlyInputSchema, updateMemberSchema } from '@yeral/contract/team'
 import type { z } from 'zod'
@@ -447,6 +448,55 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     updateRules: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof bookingRulesUpdateSchema>) => call(w.settings.rules.$patch({ param: { slug }, json })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    /** The services menu (book B-38): groups, services, who does each, the clients' order. */
+    menu: (slug: string) =>
+      queryOptions({
+        queryKey: keys.menu(slug),
+        queryFn: ({ signal }) => call(w.services.$get({ param: { slug } }, abortWith(signal))),
+      }),
+    addService: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof serviceInputSchema>) => call(w.services.$post({ param: { slug }, json })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    updateService: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ serviceId, ...json }: { serviceId: string } & z.input<typeof serviceUpdateSchema>) =>
+          call(w.services[':serviceId'].$patch({ param: { slug, serviceId }, json })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    /** "Hyzmaty poz"; `restoreService` is its undo. */
+    deleteService: (slug: string) =>
+      mutationOptions({
+        mutationFn: (serviceId: string) => call(w.services[':serviceId'].$delete({ param: { slug, serviceId } })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    restoreService: (slug: string) =>
+      mutationOptions({
+        mutationFn: (serviceId: string) => call(w.services[':serviceId'].restore.$post({ param: { slug, serviceId } })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    addGroup: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof groupInputSchema>) => call(w.services.groups.$post({ param: { slug }, json })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    renameGroup: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ groupId, ...json }: { groupId: string } & z.input<typeof groupInputSchema>) =>
+          call(w.services.groups[':groupId'].$patch({ param: { slug, groupId }, json })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    deleteGroup: (slug: string) =>
+      mutationOptions({
+        mutationFn: (groupId: string) => call(w.services.groups[':groupId'].$delete({ param: { slug, groupId } })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    orderMenu: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof menuOrderSchema>) => call(w.services.order.$put({ param: { slug }, json })),
         onSuccess: () => settingsChanged(slug),
       }),
   }

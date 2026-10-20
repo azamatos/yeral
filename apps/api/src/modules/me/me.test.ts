@@ -433,6 +433,12 @@ describe('account', () => {
         '/v1/w/{slug}/team/{staffId}/reactivate',
         '/v1/w/{slug}/leave',
         '/v1/w/{slug}/settings/rules',
+        '/v1/w/{slug}/services',
+        '/v1/w/{slug}/services/{serviceId}',
+        '/v1/w/{slug}/services/{serviceId}/restore',
+        '/v1/w/{slug}/services/groups',
+        '/v1/w/{slug}/services/groups/{groupId}',
+        '/v1/w/{slug}/services/order',
       ].sort(),
     )
   })
