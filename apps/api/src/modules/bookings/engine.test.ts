@@ -13,7 +13,7 @@ describe('inTransaction', () => {
     const refused = inTransaction(
       t.deps,
       () => Promise.reject(new ApiError('slot_taken', { alternatives: [] })),
-      async () => nearest,
+      () => Promise.resolve(nearest),
     )
     await expect(refused).rejects.toMatchObject({ code: 'slot_taken', details: { alternatives: nearest } })
     // a refusal that names its times keeps them; any other error passes as it is
@@ -22,14 +22,14 @@ describe('inTransaction', () => {
       inTransaction(
         t.deps,
         () => Promise.reject(new ApiError('slot_taken', { alternatives: named })),
-        async () => nearest,
+        () => Promise.resolve(nearest),
       ),
     ).rejects.toMatchObject({ details: { alternatives: named } })
     await expect(
       inTransaction(
         t.deps,
         () => Promise.reject(new ApiError('not_found')),
-        async () => nearest,
+        () => Promise.resolve(nearest),
       ),
     ).rejects.toMatchObject({
       code: 'not_found',
