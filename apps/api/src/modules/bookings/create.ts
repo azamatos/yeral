@@ -17,6 +17,7 @@ import {
   type AppointmentSlot,
 } from '@yeral/domain/availability'
 import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES, toldOf, waitingLimit } from '@yeral/domain/lifecycle'
+import { withinHours } from '@yeral/domain/hours'
 import { priceTotal } from '@yeral/domain/pricing'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, isNull, sql } from 'drizzle-orm'
@@ -26,7 +27,15 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
-import { appointmentContext, checkStaff, loadBusiness, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
+import {
+  appointmentContext,
+  checkStaff,
+  lockedHours,
+  loadBusiness,
+  loadBusy,
+  loadTableContext,
+  type LoadedBusiness,
+} from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
 import { onlineRefusal } from '../clients/online'
 import { servicePrice } from '../catalog/map'
@@ -143,6 +152,10 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
         ? { type: 'fixed' as const, amount: x.placement.session.price * x.placement.session.seats }
         : null
   const end = x.placement.slot?.end ?? x.placement.table?.end ?? x.placement.session?.end ?? x.start
+  // the hours as they stand (an hours save may have just committed): the visit in them, the hold counted by them; a
+  // class runs on its session's own schedule
+  const hours = await lockedHours(db, x.lb.business.id)
+  if (x.type !== 'class' && !withinHours(hours, x.date, { start: x.start, end })) throw new ApiError('slot_taken', { alternatives: [] })
   const [row] = await db
     .insert(bookings)
     .values({
@@ -166,15 +179,7 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       priceAmount: price?.amount ?? null,
       holdUntil:
         x.status === 'pending'
-          ? new Date(
-              holdUntilOf(
-                now,
-                { date: x.date, start: x.start },
-                x.lb.rules.holdMinutes,
-                { hours: x.lb.business.hours, exceptions: x.lb.business.exceptions },
-                x.holdCap,
-              ),
-            )
+          ? new Date(holdUntilOf(now, { date: x.date, start: x.start }, x.lb.rules.holdMinutes, hours, x.holdCap))
           : null,
       rescheduleOf: x.rescheduleOf ?? null,
       alternativeOf: x.alternativeOf ?? null,

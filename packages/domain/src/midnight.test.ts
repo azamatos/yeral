@@ -1,7 +1,15 @@
 /** A business day that runs past midnight (book Q-105): hours, the open state and free times. */
 import { describe, expect, it } from 'vitest'
 import { appointmentSlots, nextFreeSlot, type AppointmentContext, type AppointmentQuery } from './availability'
-import { businessDay, currentBusinessDate, openState, weekHoursErrors, type BusinessHours, type WeekHours } from './hours'
+import {
+  businessDay,
+  currentBusinessDate,
+  openState,
+  weekHoursErrors,
+  yearlyNightOverlaps,
+  type BusinessHours,
+  type WeekHours,
+} from './hours'
 
 const WED = '2026-10-14'
 const THU = '2026-10-15'
@@ -36,6 +44,14 @@ describe('hours past midnight', () => {
     expect(currentBusinessDate(bar, at('2026-10-14T22:00:00Z'))).toBe(THU)
     // Wednesday 23:50: Wednesday, though a start after midnight runs into Thursday's calendar date
     expect(currentBusinessDate(bar, at('2026-10-14T18:50:00Z'))).toBe(WED)
+  })
+
+  it('a yearly day is checked against every weekday it may follow or come before', () => {
+    // the bar's nights run to 02:00: a yearly day opening at 00:00 would share those hours, whatever weekday it is
+    expect(yearlyNightOverlaps(NIGHT, { open: 0, close: 360 })).toBe(true)
+    expect(yearlyNightOverlaps(NIGHT, { open: 180, close: 600 })).toBe(false)
+    // its own night until 20:00 the next day runs into the bar's 18:00 opening
+    expect(yearlyNightOverlaps(NIGHT, { open: 1080, close: 2640 })).toBe(true)
   })
 
   it('a break past midnight: closed, reopening after it, not tomorrow evening', () => {

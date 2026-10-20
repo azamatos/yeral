@@ -31,6 +31,7 @@ import { canBusinessCancel, canBusinessMove, canUndoNewBooking, NEW_BOOKING_UNDO
 import { canOn, scopeOf, type Actor } from '@yeral/domain/permissions'
 import { addDays, epochOf } from '@yeral/domain/time'
 import { and, eq, inArray, sql } from 'drizzle-orm'
+import { randomUUID } from 'node:crypto'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, clients, staff, users } from '../../db/schema'
@@ -38,23 +39,21 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { emit } from '../../notify'
 import { unusedSince } from '../auth/sign-in'
-import { appointmentContext, dayStrip, loadBusiness, loadBusy, type LoadedBusiness } from '../availability/context'
+import {
+  appointmentContext,
+  assertOpenAt,
+  dayStrip,
+  loadBusiness,
+  loadBusy,
+  lockedHours,
+  type LoadedBusiness,
+} from '../availability/context'
 import { dropPendingMove } from '../bookings/actions'
 import { cancelForBusiness } from '../bookings/business-cancel'
 import { queueBookingSms } from '../bookings/confirm'
 import { appointmentPrice, inTransaction, itemRows } from '../bookings/create'
 import { extendBookingLinks } from '../bookings/links'
-import {
-  awaitingAnswer,
-  freshCode,
-  guard,
-  isSlotConflict,
-  itemsOf,
-  lockBooking,
-  stateOf,
-  type BookingRow,
-  type ItemRow,
-} from '../bookings/repo'
+import { awaitingAnswer, freshCode, guard, isSlotConflict, itemsOf, stateOf, type BookingRow, type ItemRow } from '../bookings/repo'
 
 type FreeTimesQuery = z.infer<typeof freeTimesQuerySchema>
 type FreeTimes = z.infer<typeof freeTimesSchema>
@@ -201,17 +200,28 @@ export async function freeTimes(deps: Deps, business: Business, actor: Actor, q:
  * number's account unless it went unused for 6 months: the number may be someone else's now, and it joins after "Is
  * this you?" at their next sign-in (book Q-270). A record not yet linked is linked as an online booking links it.
  */
-async function phoneClient(tx: Queryable, businessId: string, phone: string, name: string | undefined, now: number) {
+async function phoneClient(tx: Queryable, businessId: string, phone: string, name: string | undefined, now: number, bookingId: string) {
   const [account] = await tx.select().from(users).where(eq(users.phone, phone))
   const holder = account && !unusedSince(account.lastSeenAt, now) ? account : undefined
   const [record] = await tx
     .insert(clients)
     // an undo removes a record its booking made: made at the booking's instant, held by no other booking
-    .values({ businessId, phone, name: name ?? null, userId: holder?.id ?? null, createdAt: new Date(now) })
+    .values({
+      businessId,
+      phone,
+      name: name ?? null,
+      nameSetBy: name ? bookingId : null,
+      userId: holder?.id ?? null,
+      createdAt: new Date(now),
+    })
     .onConflictDoUpdate({
       target: [clients.businessId, clients.phone],
-      // a known client keeps their name; a record without one takes the name typed in
-      set: { name: sql`coalesce(${clients.name}, excluded.name)`, userId: sql`coalesce(${clients.userId}, excluded.user_id)` },
+      // a known client keeps their name; a record without one takes the name typed in, which an undo takes back
+      set: {
+        name: sql`coalesce(${clients.name}, excluded.name)`,
+        nameSetBy: sql`case when ${clients.name} is null and excluded.name is not null then ${bookingId}::uuid else ${clients.nameSetBy} end`,
+        userId: sql`coalesce(${clients.userId}, excluded.user_id)`,
+      },
     })
     .returning()
   if (!record) throw new Error('client upsert failed')
@@ -227,11 +237,14 @@ async function insertTeamBooking(
 ): Promise<BookingRow> {
   const now = deps.now()
   const at = new Date(now)
-  const { record, holder } = await phoneClient(tx, lb.business.id, input.phone, input.name, now)
+  await assertOpenAt(tx, lb.business.id, { date: input.date, start: input.start, end: slot.end })
+  const id = randomUUID()
+  const { record, holder } = await phoneClient(tx, lb.business.id, input.phone, input.name, now, id)
   const price = appointmentPrice(lb, slot)
   const [row] = await tx
     .insert(bookings)
     .values({
+      id,
       code: await freshCode(tx),
       businessId: lb.business.id,
       type: 'appointment',
@@ -325,6 +338,12 @@ export async function undoBooking(deps: Deps, business: Business, actor: Actor, 
           .where(and(eq(clients.id, b.clientId), eq(clients.createdAt, b.createdAt)))
           .for('update')
       : []
+    // a name this booking gave a record that had none goes with it
+    if (b.clientId)
+      await tx
+        .update(clients)
+        .set({ name: null, nameSetBy: null })
+        .where(and(eq(clients.id, b.clientId), eq(clients.nameSetBy, b.id)))
     await tx.delete(bookings).where(eq(bookings.id, b.id))
     if (made) {
       const [other] = await tx.select({ id: bookings.id }).from(bookings).where(eq(bookings.clientId, made.id)).limit(1)
@@ -372,6 +391,8 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
     await deps.db.transaction(async (tx) => {
       const now = deps.now()
       const at = new Date(now)
+      // the hours as they stand, before the booking's lock (the order an hours save takes them in)
+      const hours = await lockedHours(tx, business.id)
       // all of it again under the booking's lock: a client's move confirmed meanwhile changed its time and items, and
       // a client's move takes this lock before it's asked
       const { b, items, staffIds } = await teamBooking(tx, business, actor, code, { lock: true })
@@ -386,7 +407,11 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
       const timeChanged = input.date !== b.date || input.start !== b.start
       // a drop on its own place, or the same move sent twice
       if (!timeChanged && plan.every((it, i) => it.staffId === items[i]!.staffId)) return
-      const ctx = appointmentContext(lb, await loadBusy(tx, [business.id], input.date, input.date), now)
+      const ctx = appointmentContext(
+        { ...lb, business: { ...lb.business, ...hours } },
+        await loadBusy(tx, [business.id], input.date, input.date),
+        now,
+      )
       const refusal = planRefusal(ctx, input.date, plan, excluded)
       if (refusal) throw new ApiError('cannot_move', { ...refusal } satisfies CannotMoveDetails)
       for (const [i, it] of items.entries()) {
@@ -438,7 +463,8 @@ export async function cancelByBusiness(deps: Deps, business: Business, actor: Ac
   guard(canBusinessCancel(stateOf(b), deps.now()))
   await deps.db.transaction(async (tx) => {
     const at = new Date(deps.now())
-    const row = await lockBooking(tx, b.id)
+    // again under the lock: a client's move confirmed meanwhile may have given it to another specialist
+    const { b: row } = await teamBooking(tx, business, actor, code, { lock: true })
     guard(canBusinessCancel(stateOf(row), at.getTime()))
     await cancelForBusiness(tx, row, at, { reason: input.reason, text: input.reason === 'other' ? (input.text ?? null) : null })
   })

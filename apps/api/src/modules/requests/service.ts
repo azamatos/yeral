@@ -3,8 +3,10 @@
  * confirming or declining one. New requests and clients' moves of confirmed bookings alike; who may answer follows the
  * "who answers" setting and the per-person override (chapter 3).
  */
+import type { CannotMoveDetails } from '@yeral/contract/errors'
 import type { declineInputSchema, requestSchema } from '@yeral/contract/requests'
 import { findAppointmentSlot } from '@yeral/domain/availability'
+import { withinHours } from '@yeral/domain/hours'
 import { canAnswerRequest as requestOpen, offerPast } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { canAnswerRequest, canOn, type Actor } from '@yeral/domain/permissions'
@@ -16,8 +18,9 @@ import { bookingItems, bookingRules, bookings, staff, type TimeSlot } from '../.
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { emit, queueOutcomeSms } from '../../notify'
-import { appointmentContext, loadBusiness, loadBusy } from '../availability/context'
+import { appointmentContext, loadBusiness, loadBusy, lockedHours } from '../availability/context'
 import { text } from '../catalog/map'
+import { declineForBusiness } from '../bookings/business-cancel'
 import { confirmBooking } from '../bookings/confirm'
 import { bookedServices, rebookQuery } from '../bookings/create'
 import { awaitingAnswer, guard, lockBooking, recordMoveRefused, setStatus, stateOf, type BookingRow } from '../bookings/repo'
@@ -148,10 +151,14 @@ async function answerable(db: Queryable, business: Business, actor: Actor, code:
 export async function confirmRequest(deps: Deps, business: Business, actor: Actor, code: string): Promise<void> {
   const b = await answerable(deps.db, business, actor, code, deps.now())
   await deps.db.transaction(async (tx) => {
-    // a move: its booking's lock first, the order every path takes them in
+    // the hours first, then a move's booking, then the request: the order every path takes them in
+    const hours = await lockedHours(tx, business.id)
     if (b.rescheduleOf) await lockBooking(tx, b.rescheduleOf)
     const row = await lockBooking(tx, b.id)
     guard(requestOpen(stateOf(row), deps.now()))
+    // a move onto a day the business closed since (a waiting move isn't asked about when the hours change)
+    if (row.rescheduleOf && !withinHours(hours, row.date, { start: row.start, end: row.end }))
+      throw new ApiError('cannot_move', { problem: 'outside_hours', staffId: '' } satisfies CannotMoveDetails)
     await confirmBooking(tx, deps, row)
   })
 }
@@ -203,13 +210,12 @@ export async function declineRequest(deps: Deps, business: Business, actor: Acto
     const original = b.rescheduleOf ? await lockBooking(tx, b.rescheduleOf) : undefined
     const row = await lockBooking(tx, b.id)
     guard(requestOpen(stateOf(row), deps.now()))
+    if (!original) {
+      await declineForBusiness(tx, row, at, { ...reason, offers })
+      return
+    }
     // a move's answer isn't counted toward the answer time (book Q-113): it isn't a new request
-    const declined = await setStatus(tx, row, { status: 'cancelled', cancelledBy: 'business', at, answered: !original })
-    if (!original)
-      await tx
-        .update(bookings)
-        .set({ declineReason: reason.reason, declineText: reason.text, declineAlternatives: offers })
-        .where(eq(bookings.id, declined.id))
+    const declined = await setStatus(tx, row, { status: 'cancelled', cancelledBy: 'business', at })
     await emit(tx, {
       type: 'booking.declined',
       businessId: declined.businessId,
@@ -218,11 +224,7 @@ export async function declineRequest(deps: Deps, business: Business, actor: Acto
       userId: declined.userId,
     })
     // a move refused before its booking's visit began is recorded and told; after it, neither (recordMoveRefused)
-    const told = original
-      ? (await recordMoveRefused(tx, original, declined, { by: 'business', ...reason }, at.getTime()))
-        ? original
-        : undefined
-      : declined
-    if (told?.clientPhone) await queueOutcomeSms(tx, original ? 'moveRefused' : 'declined', told, declined.id, at)
+    if ((await recordMoveRefused(tx, original, declined, { by: 'business', ...reason }, at.getTime())) && original.clientPhone)
+      await queueOutcomeSms(tx, 'moveRefused', original, declined.id, at)
   })
 }

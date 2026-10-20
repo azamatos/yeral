@@ -3,7 +3,7 @@
  * bookings, with offered times (B-39, B-40).
  */
 import { cancelledByFor, isConfirmationNews, NEW_BOOKING_SMS_AFTER_MS, type NewsQueued } from '@yeral/domain/lifecycle'
-import { isTeamSource, type BusinessCancelReason } from '@yeral/domain/model'
+import { isTeamSource, type BusinessCancelReason, type DeclineReason } from '@yeral/domain/model'
 import { eq } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookings, type TimeSlot } from '../../db/schema'
@@ -21,6 +21,32 @@ export async function clientUnaware(db: Queryable, b: BookingRow, now: number): 
   if (!isTeamSource(b.source)) return false
   if (now < b.createdAt.getTime() + NEW_BOOKING_SMS_AFTER_MS) return true
   return (await newsJobs(db, b.id, { unclaimed: false })).some((j) => isConfirmationNews(j.payload.kind as NewsQueued))
+}
+
+/**
+ * Decline a new request for the business (the caller holds its lock and checked it's still waiting): the reason the
+ * client sees and the times offered (B-20), counted as an answer (book Q-113). The SMS always goes, with the reason.
+ */
+export async function declineForBusiness(
+  tx: Queryable,
+  row: BookingRow,
+  at: Date,
+  d: { reason: DeclineReason; text: string | null; offers: TimeSlot[] },
+): Promise<BookingRow> {
+  const declined = await setStatus(tx, row, { status: 'cancelled', cancelledBy: 'business', at, answered: true })
+  await tx
+    .update(bookings)
+    .set({ declineReason: d.reason, declineText: d.text, declineAlternatives: d.offers })
+    .where(eq(bookings.id, declined.id))
+  await emit(tx, {
+    type: 'booking.declined',
+    businessId: declined.businessId,
+    bookingId: declined.id,
+    bookingCode: declined.code,
+    userId: declined.userId,
+  })
+  if (declined.clientPhone) await queueOutcomeSms(tx, 'declined', declined, declined.id, at)
+  return declined
 }
 
 /**
