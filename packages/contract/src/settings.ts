@@ -80,6 +80,8 @@ export const businessProfileSchema = z
     /** "Diňe aýallar üçin". */
     womenOnly: z.boolean(),
     location: locationSchema,
+    /** "Floor, room": the address's floor or room; a change isn't a move (Q-215). */
+    floor: z.string().nullable(),
     /** "Girelge nirede?" */
     entranceNote: z.string().nullable(),
     /** "Takyk salgyny diňe ýazylyş tassyklanandan soň görkez": home-based. */
@@ -101,6 +103,13 @@ export const businessProfileUpdateSchema = z
     amenities: z.array(z.enum(AMENITIES)).refine((a) => new Set(a).size === a.length, 'Each amenity at most once'),
     womenOnly: z.boolean(),
     location: locationSchema.strict(),
+    /** Empty = none. */
+    floor: z
+      .string()
+      .trim()
+      .max(40)
+      .nullable()
+      .transform((floor) => floor || null),
     /** Empty = none. */
     entranceNote: z
       .string()

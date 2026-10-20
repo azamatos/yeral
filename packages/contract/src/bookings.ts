@@ -131,6 +131,8 @@ export const bookingDetailSchema = bookingSummarySchema
     /** The exact address, unless the business hides it until confirmation. */
     address: z.string(),
     city: cityRefSchema,
+    /** "Floor, room", with the exact address. */
+    floor: z.string().nullable(),
     entranceNote: z.string().nullable(),
     /**
      * When an SMS told the client the business moved, while the visit is still ahead: the booking says "New address"
@@ -236,6 +238,7 @@ export const bookingLinkSchema = bookingDetailSchema
     price: true,
     address: true,
     city: true,
+    floor: true,
     entranceNote: true,
     movedAt: true,
     geo: true,

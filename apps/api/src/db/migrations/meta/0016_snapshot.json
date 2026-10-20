@@ -65,13 +65,9 @@
         "login_codes_user_id_users_id_fk": {
           "name": "login_codes_user_id_users_id_fk",
           "tableFrom": "login_codes",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -79,10 +75,7 @@
       "compositePrimaryKeys": {
         "login_codes_phone_purpose_pk": {
           "name": "login_codes_phone_purpose_pk",
-          "columns": [
-            "phone",
-            "purpose"
-          ]
+          "columns": ["phone", "purpose"]
         }
       },
       "uniqueConstraints": {},
@@ -193,13 +186,9 @@
         "sessions_user_id_users_id_fk": {
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -208,9 +197,7 @@
       "uniqueConstraints": {
         "sessions_tokenHash_unique": {
           "name": "sessions_tokenHash_unique",
-          "columns": [
-            "token_hash"
-          ],
+          "columns": ["token_hash"],
           "nullsNotDistinct": false
         }
       },
@@ -290,9 +277,7 @@
       "uniqueConstraints": {
         "users_phone_unique": {
           "name": "users_phone_unique",
-          "columns": [
-            "phone"
-          ],
+          "columns": ["phone"],
           "nullsNotDistinct": false
         }
       },
@@ -453,39 +438,27 @@
         "booking_items_booking_id_bookings_id_fk": {
           "name": "booking_items_booking_id_bookings_id_fk",
           "tableFrom": "booking_items",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "booking_items_service_id_services_id_fk": {
           "name": "booking_items_service_id_services_id_fk",
           "tableFrom": "booking_items",
-          "columnsFrom": [
-            "service_id"
-          ],
+          "columnsFrom": ["service_id"],
           "tableTo": "services",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "booking_items_staff_id_staff_id_fk": {
           "name": "booking_items_staff_id_staff_id_fk",
           "tableFrom": "booking_items",
-          "columnsFrom": [
-            "staff_id"
-          ],
+          "columnsFrom": ["staff_id"],
           "tableTo": "staff",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -553,13 +526,9 @@
         "booking_links_booking_id_bookings_id_fk": {
           "name": "booking_links_booking_id_bookings_id_fk",
           "tableFrom": "booking_links",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -982,104 +951,72 @@
         "bookings_business_id_businesses_id_fk": {
           "name": "bookings_business_id_businesses_id_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "bookings_client_id_clients_id_fk": {
           "name": "bookings_client_id_clients_id_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "client_id"
-          ],
+          "columnsFrom": ["client_id"],
           "tableTo": "clients",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "bookings_user_id_users_id_fk": {
           "name": "bookings_user_id_users_id_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "bookings_reschedule_of_bookings_id_fk": {
           "name": "bookings_reschedule_of_bookings_id_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "reschedule_of"
-          ],
+          "columnsFrom": ["reschedule_of"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "bookings_alternative_of_bookings_id_fk": {
           "name": "bookings_alternative_of_bookings_id_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "alternative_of"
-          ],
+          "columnsFrom": ["alternative_of"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "bookings_area_id_table_areas_id_fk": {
           "name": "bookings_area_id_table_areas_id_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "area_id"
-          ],
+          "columnsFrom": ["area_id"],
           "tableTo": "table_areas",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "bookings_table_id_dining_tables_id_fk": {
           "name": "bookings_table_id_dining_tables_id_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "table_id"
-          ],
+          "columnsFrom": ["table_id"],
           "tableTo": "dining_tables",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "bookings_session_id_class_sessions_id_fk": {
           "name": "bookings_session_id_class_sessions_id_fk",
           "tableFrom": "bookings",
-          "columnsFrom": [
-            "session_id"
-          ],
+          "columnsFrom": ["session_id"],
           "tableTo": "class_sessions",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -1088,16 +1025,12 @@
       "uniqueConstraints": {
         "bookings_code_unique": {
           "name": "bookings_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "nullsNotDistinct": false
         },
         "bookings_alternativeOf_unique": {
           "name": "bookings_alternativeOf_unique",
-          "columns": [
-            "alternative_of"
-          ],
+          "columns": ["alternative_of"],
           "nullsNotDistinct": false
         }
       },
@@ -1208,39 +1141,27 @@
         "events_business_id_businesses_id_fk": {
           "name": "events_business_id_businesses_id_fk",
           "tableFrom": "events",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "events_booking_id_bookings_id_fk": {
           "name": "events_booking_id_bookings_id_fk",
           "tableFrom": "events",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         },
         "events_user_id_users_id_fk": {
           "name": "events_user_id_users_id_fk",
           "tableFrom": "events",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -1347,9 +1268,7 @@
       "uniqueConstraints": {
         "jobs_dedupeKey_unique": {
           "name": "jobs_dedupeKey_unique",
-          "columns": [
-            "dedupe_key"
-          ],
+          "columns": ["dedupe_key"],
           "nullsNotDistinct": false
         }
       },
@@ -1472,39 +1391,27 @@
         "reviews_booking_id_bookings_id_fk": {
           "name": "reviews_booking_id_bookings_id_fk",
           "tableFrom": "reviews",
-          "columnsFrom": [
-            "booking_id"
-          ],
+          "columnsFrom": ["booking_id"],
           "tableTo": "bookings",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "reviews_business_id_businesses_id_fk": {
           "name": "reviews_business_id_businesses_id_fk",
           "tableFrom": "reviews",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "reviews_user_id_users_id_fk": {
           "name": "reviews_user_id_users_id_fk",
           "tableFrom": "reviews",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -1513,9 +1420,7 @@
       "uniqueConstraints": {
         "reviews_bookingId_unique": {
           "name": "reviews_bookingId_unique",
-          "columns": [
-            "booking_id"
-          ],
+          "columns": ["booking_id"],
           "nullsNotDistinct": false
         }
       },
@@ -1631,13 +1536,9 @@
         "booking_rules_business_id_businesses_id_fk": {
           "name": "booking_rules_business_id_businesses_id_fk",
           "tableFrom": "booking_rules",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -1911,26 +1812,18 @@
         "businesses_category_id_categories_id_fk": {
           "name": "businesses_category_id_categories_id_fk",
           "tableFrom": "businesses",
-          "columnsFrom": [
-            "category_id"
-          ],
+          "columnsFrom": ["category_id"],
           "tableTo": "categories",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "businesses_city_id_cities_id_fk": {
           "name": "businesses_city_id_cities_id_fk",
           "tableFrom": "businesses",
-          "columnsFrom": [
-            "city_id"
-          ],
+          "columnsFrom": ["city_id"],
           "tableTo": "cities",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1939,9 +1832,7 @@
       "uniqueConstraints": {
         "businesses_slug_unique": {
           "name": "businesses_slug_unique",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "nullsNotDistinct": false
         }
       },
@@ -2157,26 +2048,18 @@
         "class_sessions_business_id_businesses_id_fk": {
           "name": "class_sessions_business_id_businesses_id_fk",
           "tableFrom": "class_sessions",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "class_sessions_trainer_id_staff_id_fk": {
           "name": "class_sessions_trainer_id_staff_id_fk",
           "tableFrom": "class_sessions",
-          "columnsFrom": [
-            "trainer_id"
-          ],
+          "columnsFrom": ["trainer_id"],
           "tableTo": "staff",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -2236,26 +2119,18 @@
         "client_notes_client_id_clients_id_fk": {
           "name": "client_notes_client_id_clients_id_fk",
           "tableFrom": "client_notes",
-          "columnsFrom": [
-            "client_id"
-          ],
+          "columnsFrom": ["client_id"],
           "tableTo": "clients",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "client_notes_author_staff_id_staff_id_fk": {
           "name": "client_notes_author_staff_id_staff_id_fk",
           "tableFrom": "client_notes",
-          "columnsFrom": [
-            "author_staff_id"
-          ],
+          "columnsFrom": ["author_staff_id"],
           "tableTo": "staff",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -2370,26 +2245,18 @@
         "clients_business_id_businesses_id_fk": {
           "name": "clients_business_id_businesses_id_fk",
           "tableFrom": "clients",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "clients_user_id_users_id_fk": {
           "name": "clients_user_id_users_id_fk",
           "tableFrom": "clients",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -2398,10 +2265,7 @@
       "uniqueConstraints": {
         "clients_business_phone": {
           "name": "clients_business_phone",
-          "columns": [
-            "business_id",
-            "phone"
-          ],
+          "columns": ["business_id", "phone"],
           "nullsNotDistinct": false
         }
       },
@@ -2444,13 +2308,9 @@
         "dining_tables_area_id_table_areas_id_fk": {
           "name": "dining_tables_area_id_table_areas_id_fk",
           "tableFrom": "dining_tables",
-          "columnsFrom": [
-            "area_id"
-          ],
+          "columnsFrom": ["area_id"],
           "tableTo": "table_areas",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -2490,26 +2350,18 @@
         "favorites_user_id_users_id_fk": {
           "name": "favorites_user_id_users_id_fk",
           "tableFrom": "favorites",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "favorites_business_id_businesses_id_fk": {
           "name": "favorites_business_id_businesses_id_fk",
           "tableFrom": "favorites",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -2517,10 +2369,7 @@
       "compositePrimaryKeys": {
         "favorites_user_id_business_id_pk": {
           "name": "favorites_user_id_business_id_pk",
-          "columns": [
-            "user_id",
-            "business_id"
-          ]
+          "columns": ["user_id", "business_id"]
         }
       },
       "uniqueConstraints": {},
@@ -2646,39 +2495,27 @@
         "invites_business_id_businesses_id_fk": {
           "name": "invites_business_id_businesses_id_fk",
           "tableFrom": "invites",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "invites_staff_id_staff_id_fk": {
           "name": "invites_staff_id_staff_id_fk",
           "tableFrom": "invites",
-          "columnsFrom": [
-            "staff_id"
-          ],
+          "columnsFrom": ["staff_id"],
           "tableTo": "staff",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "invites_invited_by_users_id_fk": {
           "name": "invites_invited_by_users_id_fk",
           "tableFrom": "invites",
-          "columnsFrom": [
-            "invited_by"
-          ],
+          "columnsFrom": ["invited_by"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -2687,9 +2524,7 @@
       "uniqueConstraints": {
         "invites_tokenHash_unique": {
           "name": "invites_tokenHash_unique",
-          "columns": [
-            "token_hash"
-          ],
+          "columns": ["token_hash"],
           "nullsNotDistinct": false
         }
       },
@@ -2738,13 +2573,9 @@
         "places_city_id_cities_id_fk": {
           "name": "places_city_id_cities_id_fk",
           "tableFrom": "places",
-          "columnsFrom": [
-            "city_id"
-          ],
+          "columnsFrom": ["city_id"],
           "tableTo": "cities",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -2791,13 +2622,9 @@
         "service_groups_business_id_businesses_id_fk": {
           "name": "service_groups_business_id_businesses_id_fk",
           "tableFrom": "service_groups",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -2913,26 +2740,18 @@
         "services_business_id_businesses_id_fk": {
           "name": "services_business_id_businesses_id_fk",
           "tableFrom": "services",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "services_group_id_service_groups_id_fk": {
           "name": "services_group_id_service_groups_id_fk",
           "tableFrom": "services",
-          "columnsFrom": [
-            "group_id"
-          ],
+          "columnsFrom": ["group_id"],
           "tableTo": "service_groups",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -3160,26 +2979,18 @@
         "staff_business_id_businesses_id_fk": {
           "name": "staff_business_id_businesses_id_fk",
           "tableFrom": "staff",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "staff_user_id_users_id_fk": {
           "name": "staff_user_id_users_id_fk",
           "tableFrom": "staff",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "set null"
         }
@@ -3221,26 +3032,18 @@
         "staff_services_staff_id_staff_id_fk": {
           "name": "staff_services_staff_id_staff_id_fk",
           "tableFrom": "staff_services",
-          "columnsFrom": [
-            "staff_id"
-          ],
+          "columnsFrom": ["staff_id"],
           "tableTo": "staff",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "staff_services_service_id_services_id_fk": {
           "name": "staff_services_service_id_services_id_fk",
           "tableFrom": "staff_services",
-          "columnsFrom": [
-            "service_id"
-          ],
+          "columnsFrom": ["service_id"],
           "tableTo": "services",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -3248,10 +3051,7 @@
       "compositePrimaryKeys": {
         "staff_services_staff_id_service_id_pk": {
           "name": "staff_services_staff_id_service_id_pk",
-          "columns": [
-            "staff_id",
-            "service_id"
-          ]
+          "columns": ["staff_id", "service_id"]
         }
       },
       "uniqueConstraints": {},
@@ -3315,13 +3115,9 @@
         "table_areas_business_id_businesses_id_fk": {
           "name": "table_areas_business_id_businesses_id_fk",
           "tableFrom": "table_areas",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -3375,13 +3171,9 @@
         "verification_history_business_id_businesses_id_fk": {
           "name": "verification_history_business_id_businesses_id_fk",
           "tableFrom": "verification_history",
-          "columnsFrom": [
-            "business_id"
-          ],
+          "columnsFrom": ["business_id"],
           "tableTo": "businesses",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -3397,154 +3189,82 @@
     "public.booking_source": {
       "name": "booking_source",
       "schema": "public",
-      "values": [
-        "web",
-        "app",
-        "phone",
-        "walkin",
-        "ai"
-      ]
+      "values": ["web", "app", "phone", "walkin", "ai"]
     },
     "public.booking_status": {
       "name": "booking_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "confirmed",
-        "completed",
-        "cancelled",
-        "noshow"
-      ]
+      "values": ["pending", "confirmed", "completed", "cancelled", "noshow"]
     },
     "public.booking_type": {
       "name": "booking_type",
       "schema": "public",
-      "values": [
-        "appointment",
-        "table",
-        "class"
-      ]
+      "values": ["appointment", "table", "class"]
     },
     "public.cancelled_by": {
       "name": "cancelled_by",
       "schema": "public",
-      "values": [
-        "client",
-        "business",
-        "system"
-      ]
+      "values": ["client", "business", "system"]
     },
     "public.client_source": {
       "name": "client_source",
       "schema": "public",
-      "values": [
-        "instagram",
-        "referral",
-        "yeral",
-        "walkby",
-        "other"
-      ]
+      "values": ["instagram", "referral", "yeral", "walkby", "other"]
     },
     "public.code_purpose": {
       "name": "code_purpose",
       "schema": "public",
-      "values": [
-        "login",
-        "change_phone"
-      ]
+      "values": ["login", "change_phone"]
     },
     "public.complaint_type": {
       "name": "complaint_type",
       "schema": "public",
-      "values": [
-        "noshow",
-        "late",
-        "rude",
-        "other"
-      ]
+      "values": ["noshow", "late", "rude", "other"]
     },
     "public.confirm_mode": {
       "name": "confirm_mode",
       "schema": "public",
-      "values": [
-        "manual",
-        "instant"
-      ]
+      "values": ["manual", "instant"]
     },
     "public.decline_reason": {
       "name": "decline_reason",
       "schema": "public",
-      "values": [
-        "slot_busy",
-        "no_staff",
-        "cannot_do",
-        "other"
-      ]
+      "values": ["slot_busy", "no_staff", "cannot_do", "other"]
     },
     "public.invite_status": {
       "name": "invite_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "accepted",
-        "declined",
-        "cancelled"
-      ]
+      "values": ["pending", "accepted", "declined", "cancelled"]
     },
     "public.level": {
       "name": "level",
       "schema": "public",
-      "values": [
-        "owner",
-        "admin",
-        "specialist"
-      ]
+      "values": ["owner", "admin", "specialist"]
     },
     "public.locale": {
       "name": "locale",
       "schema": "public",
-      "values": [
-        "tk",
-        "ru",
-        "en"
-      ]
+      "values": ["tk", "ru", "en"]
     },
     "public.price_type": {
       "name": "price_type",
       "schema": "public",
-      "values": [
-        "fixed",
-        "from",
-        "free",
-        "hidden"
-      ]
+      "values": ["fixed", "from", "free", "hidden"]
     },
     "public.request_answerers": {
       "name": "request_answerers",
       "schema": "public",
-      "values": [
-        "desk",
-        "each",
-        "both"
-      ]
+      "values": ["desk", "each", "both"]
     },
     "public.staff_status": {
       "name": "staff_status",
       "schema": "public",
-      "values": [
-        "active",
-        "invited",
-        "removed"
-      ]
+      "values": ["active", "invited", "removed"]
     },
     "public.verification_status": {
       "name": "verification_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "verified",
-        "rejected"
-      ]
+      "values": ["pending", "verified", "rejected"]
     }
   },
   "schemas": {},

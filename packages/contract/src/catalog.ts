@@ -294,6 +294,8 @@ export const businessDetailSchema = z
     /** The street address; the city is `city`. */
     address: z.string(),
     city: cityRefSchema,
+    /** "Floor, room"; none for a home-based business, as its exact address. */
+    floor: z.string().nullable(),
     entranceNote: z.string().nullable(),
     /** Home-based: the exact address shows only on a confirmed booking; `geo` is then approximate. */
     hideExactAddress: z.boolean(),

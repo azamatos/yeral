@@ -73,6 +73,7 @@ const profileView = (b: BusinessRow): ProfileView => ({
   amenities: b.amenities.filter((a): a is Amenity => (AMENITIES as readonly string[]).includes(a)),
   womenOnly: b.womenOnly,
   location: { cityId: b.cityId, address: b.address, street: b.street, lat: b.lat, lng: b.lng },
+  floor: b.floor,
   entranceNote: b.entranceNote,
   hideExactAddress: b.hideExactAddress,
   verification: b.verification,

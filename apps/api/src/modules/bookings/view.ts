@@ -161,6 +161,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     timeline: timeline.sort((x, y) => x.at - y.at),
     address: addressAsShown(b, b.hideExactAddress, status),
     city: await cityRef(deps.db, b.cityId, lang),
+    floor: b.hideExactAddress && !exact ? null : b.floor,
     entranceNote: b.hideExactAddress && !exact ? null : b.entranceNote,
     // an SMS told the client the business moved, and the booking still hears it
     movedAt: row.addressTold?.at !== undefined && hearsOfMove(status, row, now) ? row.addressTold.at : null,
