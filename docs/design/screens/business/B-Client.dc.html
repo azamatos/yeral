@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="tk">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Ýeral Biznes — müşderiniň karty</title>
+<title>Client · Glow Studio</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -27,6 +27,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .b-red:hover{background:#912018;color:#ffffff}
 .b-ico{width:40px;height:40px;padding:0;min-width:0;flex:none}
 .b-sm.b-ico{width:36px;height:36px}
+.b-ic{width:36px;height:36px;padding:0;min-width:0;border-radius:10px;flex:none}
+.me .b-gho:hover{background:#f6f6f8}
 .b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed}
 .b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
@@ -35,311 +37,491 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014}
 .sn:hover{background:#f4f4f6;color:#101014}
 .sn.on{background:#efecfe;color:#4429d6;font-weight:600}
-.sn.off{color:#6e6e78;cursor:default}
-.sn.off:hover{background:transparent;color:#6e6e78}
 .cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
-.soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
-.gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
-.kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
 .pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
 .mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
 .mi:hover{background:#f4f4f6;color:#101014}
 .av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.cnt.hid,.tn.hid{display:none}
 .popa{position:absolute;z-index:31;display:flex;flex-direction:column}
+button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:pointer;text-align:left}
+.mi:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #7a5ff4}
+.mi-d,.mi-d:hover{color:#a3251b}
+.mi > svg{flex:none;color:#5a5a64}
+.mi-d > svg{color:#a3251b}
+.mi-d:hover{background:#fee4e2}
+.y-pill{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;border:1px solid transparent;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
+.y-pill.s{height:20px;padding:0 7px}
+.t-neu{background:#f4f4f6;border-color:#e6e6ea;color:#5a5a64}
+.y-exb svg{flex:none}
+.bnr{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:12px;border:1px solid transparent;font-size:14px;line-height:20px}
+.bnr > svg{flex:none}
+.bnx{flex:1;min-width:0}
+.bnx b{font-weight:600}
+@media (max-width:767px){.bnr{flex-wrap:wrap}.bnx{flex:1 1 calc(100% - 40px)}}
+.c-war{background:#fef6e7;border-color:#f2ddb0;color:#93500a}
+.c-dan{background:#fee4e2;border-color:#f6c7c2;color:#a3251b}
+.c-neu{background:#f4f4f6;border-color:#e6e6ea;color:#101014}
+.c-neu > svg{color:#5a5a64}
+.swd{display:flex;align-items:center;gap:10px;padding:8px;color:#101014}
+.dlog{width:100%}
+.rpr{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}
+@media (max-width:1023px){.swd{justify-content:center;padding:4px}.swd > span{display:none !important}.dlog{width:44px;padding:0;font-size:0;gap:0}}
+.rpb{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;border:1px solid #f6c7c2;background:#ffffff}
+.rpl{font-size:14px;line-height:20px;font-weight:600;color:#101014}
 .catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
-.back{display:inline-flex;align-items:center;gap:2px;height:36px;padding:0 10px 0 4px;margin-left:-8px;border-radius:10px;font-size:14px;font-weight:500;color:#5a5a64;white-space:nowrap}
-.back:hover{background:#f4f4f6;color:#101014}
-.back:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
-.cols{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start}
-.cmain{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
-.caside{flex:1 1 320px;max-width:320px;min-width:0;display:flex;flex-direction:column;gap:16px;padding:20px;border:1px solid #e6e6ea;border-radius:16px}
-.sec{display:flex;flex-direction:column;gap:12px;padding:28px 0;border-top:1px solid #e6e6ea}
-.sh{margin:0;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
-.shrow{display:flex;align-items:center;gap:10px;min-height:36px}
-.av64{width:64px;height:64px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:26px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
-.tg{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
-.tg-vip{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
-.tg-neu{background:#f4f4f6;border:1px solid #e6e6ea;color:#5a5a64}
-.tg-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
-.stat{display:flex;flex-direction:column;gap:4px;padding:0 24px;border-left:1px solid #e6e6ea;min-width:0}
-.stat.first{padding-left:0;border-left:0}
-.sv{font-size:22px;line-height:28px;font-weight:700;letter-spacing:-0.015em;font-variant-numeric:tabular-nums;white-space:nowrap}
-.note{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
-.note.al{padding:12px 14px;border:1px solid #f2ddb0;border-radius:12px;background:#fef6e7;margin-bottom:8px}
-.note.last{border-bottom:0}
-.urow{display:grid;grid-template-columns:120px minmax(0,1fr) auto 20px;gap:16px;align-items:center;padding:12px 12px;margin:0 -12px;border-radius:12px;color:#101014}
-.urow:hover{background:#f6f6f8;color:#101014}
-.urow:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
-.hr{display:grid;grid-template-columns:120px minmax(0,1fr) 100px 132px;gap:16px;align-items:center;min-height:48px;padding:6px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
-.hr.th{min-height:32px;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
-.num{text-align:right;font-variant-numeric:tabular-nums}
+.mdv{height:1px;background:#e6e6ea;margin:6px 4px}
+.wsp{position:fixed;top:68px;left:12px;z-index:31;width:300px;display:flex;flex-direction:column}
+.ump{position:fixed;bottom:68px;left:12px;z-index:31;width:260px;display:flex;flex-direction:column}
+.wsr{gap:12px}
+.wsi{width:32px;height:32px;border-radius:8px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.wsn{display:flex;flex-direction:column;min-width:0;flex:1}
+.wst{font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wsc{font-size:12px;line-height:16px;color:#5a5a64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mws{display:none;align-items:center;gap:4px;height:44px;margin-left:-6px;padding:0 6px;border:0;border-radius:12px;background:transparent;color:#5a5a64;cursor:pointer;flex:none}
+.mws:hover{background:#f4f4f6}
+.mws:focus-visible,.tbi:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.tabbar{display:none}
+.tbi{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:60px;padding:6px 4px;border:0;background:transparent;font-family:inherit;font-size:11px;line-height:14px;font-weight:600;color:#5a5a64;cursor:pointer}
+.tbi:hover{color:#101014}
+.tbi.on{color:#4429d6}
+.tbc{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:16px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.mscrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:44;background:rgba(16,16,20,.4)}
+.more{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;flex-direction:column;max-height:85%;overflow-y:auto;padding:8px 8px 16px;background:#ffffff;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}
+.more .mi{min-height:48px;gap:12px}
+.more .grab{display:block;margin:0 auto 8px}
+.zup{z-index:35 !important}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px 0 14px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;white-space:nowrap;flex:none}
+.chip:hover{background:#f6f6f8}
+.chip.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.chip.on:hover{background:#ded7fd}
+.tsr{display:flex;align-items:center;gap:8px;height:36px;width:300px;max-width:100%;padding:0 4px 0 12px;border:1px solid #d8d8de;border-radius:10px;background:#ffffff;color:#5a5a64}
+.tsr:hover{border-color:#b0b0b8}
+.tsr:focus-within{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
+.tsr input{border:0;outline:none;font-family:inherit;font-size:14px;color:#101014;background:transparent;flex:1;min-width:0;height:100%;padding:0}
+.tsr input::placeholder{color:#6e6e78}
+.tsx{width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:#5a5a64;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;padding:0}
+.tsx:hover{background:#f4f4f6;color:#101014}
+.tsx:focus-visible{outline:none;box-shadow:0 0 0 2px #7a5ff4}
+.tcard{border:1px solid #e6e6ea;border-radius:16px;background:#ffffff}
+.tr{position:relative;display:grid;column-gap:12px;align-items:center;min-height:56px;padding:6px 8px;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px;color:#101014}
+.tr:hover{background:#f6f6f8}
+.tr.sel,.tr.on,.tr.sel:hover,.tr.on:hover{background:#efecfe}
+.th,.th:hover{min-height:40px;padding-top:0;padding-bottom:0;background:transparent;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78;border-radius:16px 16px 0 0}
+.cell{display:flex;flex-direction:column;min-width:0}
 .ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;justify-self:start}
+.z1{position:relative;z-index:1}
+.ropen{padding:0;border:0;background:none;font-family:inherit;font-size:14px;line-height:20px;font-weight:600;color:#101014;cursor:pointer;text-align:left;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ropen::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0}
+.ropen:focus-visible{outline:none}
+.ropen:focus-visible::after{box-shadow:inset 0 0 0 2px #7a5ff4}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
 .badge svg{flex:none}
+.badge.sm{height:24px}
+.st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
 .st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
 .st-d{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
+.st-x{background:#eef1f6;border:1px solid #d3dbe6;color:#41505f}
 .st-n{background:#fee4e2;border:1px solid #f6c7c2;color:#a3251b}
-.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
-.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
+.i-p{color:#93500a}.i-c{color:#4429d6}.i-d{color:#066a41}.i-x{color:#41505f}.i-n{color:#a3251b}
+.tmr{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tmr.hot{color:#a3251b}
+.tfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:0 16px}
+.empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:48px 32px;border:1px dashed #d8d8de;border-radius:16px;text-align:center}
+.eic{width:56px;height:56px;border-radius:999px;background:#efecfe;color:#5a3ff0;display:flex;align-items:center;justify-content:center}
+.scrim{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:40}
+.grab{display:none;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:8px auto 0;flex:none}
+.wbox{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:14px;line-height:20px}
+.wbox svg{flex:none;margin-top:1px}
+.wbt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.b-dtx{background:transparent;color:#a3251b}
+.b-dtx:hover{background:#fee4e2;color:#a3251b}
 .inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
 .inp::placeholder{color:#6e6e78}
 .inp:hover{border-color:#b0b0b8}
 .inp:focus{border-color:#5a3ff0;box-shadow:0 0 0 3px #efecfe}
-.inp.is-e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
 .ta{height:88px;padding:10px 14px;resize:none;line-height:20px;font-size:14px}
-.pre{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;font-size:15px;font-weight:500;flex:none;background:#f6f6f8}
-.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;white-space:nowrap;flex:none}
-.chip:hover{background:#f6f6f8}
-.chip.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
-.chip:focus-visible,.cbx:focus-visible,.dtx:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
-.cbx{width:18px;height:18px;accent-color:#5a3ff0;margin:0;cursor:pointer;flex:none}
-.dtx{display:inline-flex;align-items:center;gap:8px;padding:0;border:0;background:none;font-family:inherit;font-size:14px;line-height:20px;font-weight:600;color:#a3251b;cursor:pointer;border-radius:6px}
-.dtx:hover{color:#912018;text-decoration:underline}
-.nrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #e6e6ea}
+.fld{display:flex;flex-direction:column;gap:8px;min-width:0}
+.flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
 .sw{width:52px;height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;flex:none}
 .sw:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .trk{position:relative;width:40px;height:24px;border-radius:999px;background:#e6e6ea;box-shadow:inset 0 0 0 1.5px #6e6e78;transition:background .15s}
 .sw.on .trk{background:#5a3ff0;box-shadow:none}
 .knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:999px;background:#ffffff;box-shadow:0 1px 2px rgba(16,16,20,.2);transition:left .15s}
 .sw.on .knob{left:18px}
-.kv{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
-.kv.last{border-bottom:0;padding-bottom:0}
 .mwrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
-.scrim{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:0}
+.mwrap .scrim{position:absolute;z-index:0}
 .mdl{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;max-width:100%;max-height:100%;overflow-y:auto;padding:24px;border-radius:16px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16)}
 .mdl-s{width:480px}
 .mt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
 .mp{margin:0;font-size:15px;line-height:22px;color:#5a5a64}
 .mact{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
-.grab{display:none;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:0 auto;flex:none}
 .toast{position:fixed;left:272px;bottom:24px;z-index:80;display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 8px 0 16px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:15px;line-height:20px;max-width:calc(100% - 296px)}
+.toast .tb{background:transparent;color:#c3b6fb;padding:0 10px}
+.toast .tb:hover{background:#2a2a32;color:#c3b6fb}
 .tsp{width:8px;flex:none}
-@media (max-width:1239px){.caside{max-width:none}}
-@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side .swb{width:44px;padding:4px;justify-content:center}.side .swb > span:not(.av),.side .swb > svg{display:none !important}.sn{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0;position:relative}.sn .cnt{position:absolute;top:6px;right:6px;min-width:0;width:8px;height:8px;padding:0;border:0;background:#dc8b0b;font-size:0}.sn .soon{display:none}.sdv{width:44px;margin:8px 0 !important}.top{padding:0 24px}.gs{width:auto;flex:0 1 280px}.pad{padding:24px !important}.caside{max-width:none}.toast{left:96px;max-width:calc(100% - 120px)}}
-@media (max-width:767px){.app{flex-direction:column}.side{position:sticky !important;top:0 !important;height:auto !important;width:100%;flex-direction:row;align-items:center;gap:4px;padding:6px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow:visible !important}.top{height:56px;padding:0 16px;gap:8px}.top h1{font-size:19px !important;line-height:24px !important}.gs,.tsep{display:none}.pad{padding:16px !important}.b-sm{height:44px;border-radius:12px}.b-sm.b-ico{width:44px;height:44px}.hdr{flex-wrap:wrap}.stats{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:20px}.stat:nth-child(3){padding-left:0;border-left:0}.g2{grid-template-columns:minmax(0,1fr)}.urow{grid-template-columns:minmax(0,1fr) auto}.urow .uchev,.urow .uwhen2{display:none}.hr{grid-template-columns:88px minmax(0,1fr) auto;gap:10px}.hr .hprice{display:none}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:80px;max-width:none}}
+@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side .swb{width:44px;padding:4px;justify-content:center}.side .swb>span,.side .swb>svg{display:none !important}.me{flex-direction:column;gap:4px !important;padding:4px 0 !important}.mex{display:none !important}.ump{bottom:96px;left:8px}.sn{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0;position:relative}.sn .cnt{position:absolute;top:6px;right:6px;min-width:0;width:8px;height:8px;padding:0;border:0;background:#dc8b0b;font-size:0}.sn .soon{display:none}.sdv{width:44px;margin:8px 0 !important}.top{padding:0 24px}.gs{width:auto;flex:0 1 320px}.pad{padding:24px !important}.toast{left:96px;max-width:calc(100% - 120px)}}
+@media (max-width:767px){.app{flex-direction:column}.side{display:none !important}.mws{display:inline-flex}.main{padding-bottom:72px}.tabbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:35;padding:0 4px;background:#ffffff;border-top:1px solid #e6e6ea}.top{height:56px;padding:0 16px;gap:10px}.top h1{font-size:19px !important;line-height:24px !important}.gs{display:none}.pad{padding:16px !important}.tsr{width:100%;height:44px}.chip{height:44px}.b-sm{height:44px;border-radius:12px}.b-sm.b-ico{width:44px;height:44px}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:80px;max-width:none}.wsp{top:60px;left:8px;right:8px;width:auto}}
 .cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}
-.me{position:relative}
-.b-ic{width:36px;height:36px;padding:0;border-radius:10px;justify-content:center;flex:none}
-.me .b-ic:hover{background:#f6f6f8}
-.me .b-ic:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
-.popa{position:absolute;z-index:31;display:flex;flex-direction:column}
-.wsp{top:60px;left:12px;width:300px}
-.ump{bottom:60px;left:12px;width:264px}
-.wsr{min-height:52px}
-.mi svg{flex:none}
-.mi.dan{color:#a3251b}
-.mi.dan:hover{background:#fee4e2;color:#a3251b}
-.pdv{height:1px;background:#e6e6ea;margin:6px 4px;flex:none}
-.tabb{display:none;position:fixed;left:0;right:0;bottom:0;z-index:35;height:64px;padding:0 4px;background:#ffffff;border-top:1px solid #e6e6ea;grid-template-columns:repeat(4,minmax(0,1fr))}
-.tbi{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;height:63px;margin:0;padding:0;border:0;border-radius:12px;background:transparent;font-family:inherit;font-size:11px;line-height:14px;font-weight:600;color:#5a5a64;cursor:pointer;text-decoration:none}
-.tbi:hover{color:#101014}
-.tbi.on,.tbi.on:hover{color:#4429d6}
-.tbi:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #7a5ff4}
-.tbc{position:absolute;top:5px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:16px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
-.kscrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:36;background:rgba(16,16,20,.4)}
-.ksh{position:fixed;left:0;right:0;bottom:64px;z-index:37;max-height:calc(100% - 96px);overflow-y:auto;display:flex;flex-direction:column;padding:4px 8px 12px;background:#ffffff;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}
-.ksh .mi{min-height:48px;font-size:15px}
-.kgrab{display:block;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:4px auto 6px;flex:none}
-@media (min-width:768px){.kscrim,.ksh{display:none}}
-@media (max-width:1023px){.me{flex-direction:column;gap:6px;padding:4px 0 !important}.me > span:not(.av){display:none !important}.ump{bottom:92px}}
-@media (max-width:767px){.side .sn,.side .sdv,.side .sfill,.side .me,.ump{display:none !important}.side .swb{width:auto;max-width:100%;padding:6px 8px}.side .swb > span:not(.av),.side .swb > svg{display:flex !important}.side .swb > svg{display:block !important}.tabb{display:grid}.main{padding-bottom:64px}.wsp{width:min(300px,calc(100vw - 24px))}}
-@media (max-width:767px){.side .swb > span:not(.av){display:flex !important}.side .swb > svg{display:block !important}}</style>
+.back{display:inline-flex;align-items:center;gap:2px;height:36px;padding:0 10px 0 4px;margin-left:-8px;border-radius:10px;font-size:14px;font-weight:500;color:#5a5a64;white-space:nowrap;flex:none}
+.back:hover{background:#f4f4f6;color:#101014}
+.back:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.back svg{flex:none}
+.tsep{width:1px;height:20px;background:#e6e6ea;flex:none}
+.cols{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start}
+.cmain{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
+.caside{flex:1 1 320px;max-width:320px;min-width:0;display:flex;flex-direction:column;gap:12px;padding:20px;border:1px solid #e6e6ea;border-radius:16px}
+.sec{display:flex;flex-direction:column;gap:12px;padding:28px 0;border-top:1px solid #e6e6ea}
+.sh{margin:0;font-size:17px;line-height:24px;font-weight:600;letter-spacing:-0.01em}
+.shrow{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;min-height:36px}
+.hdr{display:flex;gap:20px;align-items:flex-start;padding-bottom:28px}
+.hdm{display:flex;flex-direction:column;gap:10px;min-width:0;flex:1}
+.hnm{margin:0;font-size:28px;line-height:34px;font-weight:700;letter-spacing:-0.02em;overflow-wrap:anywhere}
+.hrw{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.av64{width:64px;height:64px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:26px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.tg{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 7px;border-radius:999px;border:1px solid transparent;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
+.tg svg{flex:none}
+.tg-m{height:24px;padding:0 9px}
+.tg-neu{background:#f4f4f6;border-color:#e6e6ea;color:#5a5a64}
+.tg-new{background:#e7f8ee;border-color:#bfe6d1;color:#066a41}
+.tg-a{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
+.tg-n{background:#fee4e2;border-color:#f6c7c2;color:#a3251b}
+.tg-p{background:#fef6e7;border-color:#f2ddb0;color:#93500a}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:24px 0 28px;border-top:1px solid #e6e6ea}
+.stats.s3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat{display:flex;flex-direction:column;gap:4px;padding:0 24px;border-left:1px solid #e6e6ea;min-width:0}
+.stat.first{padding-left:0;border-left:0}
+.sv{font-size:22px;line-height:28px;font-weight:700;letter-spacing:-0.015em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.note{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.note > svg{flex:none;margin-top:1px}
+.note.al{padding:12px 14px;border:1px solid #f2ddb0;border-radius:12px;background:#fef6e7;margin-bottom:8px}
+.note.last{border-bottom:0}
+.urow{display:grid;grid-template-columns:120px minmax(0,1fr) auto 20px;gap:16px;align-items:center;padding:12px;margin:0 -12px;border-radius:12px;color:#101014}
+.urow:hover{background:#f6f6f8;color:#101014}
+.urow:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.ubd{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px}
+.uchev{color:#6e6e78}
+.hr{display:grid;grid-template-columns:136px minmax(0,1fr) 152px;gap:16px;align-items:center;min-height:48px;padding:6px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.hr.m{grid-template-columns:136px minmax(0,1fr) 100px 152px}
+.hr.th{min-height:32px;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.badge{justify-self:start}
+.rpl2{display:flex;flex-direction:column;border-top:1px solid #e6e6ea}
+.rprow{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:12px;align-items:start;padding:14px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.rpi{width:32px;height:32px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:#f4f4f6;color:#5a5a64}
+.rpi.n{background:#fee4e2;color:#a3251b}
+.rpm{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rpt1{font-weight:600;color:#101014}
+.rpq{font-weight:400;color:#101014}
+.rpa{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.nrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 14px;border-bottom:1px solid #e6e6ea}
+.nrt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.nrl{font-size:14px;line-height:20px;font-weight:600}
+.pso{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:18px;font-weight:600}
+.pso svg{flex:none;margin-top:1px}
+.pw{color:#93500a}
+.pk{color:#066a41}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px}
+.kv.last{border-bottom:0}
+.kvv{font-weight:500;text-align:right}
+.dtx{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;height:36px;margin-left:-10px;padding:0 10px;border:0;border-radius:10px;background:transparent;font-family:inherit;font-size:14px;line-height:20px;font-weight:600;color:#a3251b;cursor:pointer}
+.dtx:hover{background:#fee4e2;color:#a3251b}
+.dtx:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.dtx svg{flex:none}
+.delw{padding-top:8px;border-top:1px solid #e6e6ea}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.pre{display:inline-flex;align-items:center;height:48px;padding:0 12px;border:1px solid #d8d8de;border-radius:8px;font-size:15px;font-weight:500;flex:none;background:#f6f6f8}
+.inp.is-e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
+.inp.ro{background:#f6f6f8;border-color:#e6e6ea;padding-right:40px;cursor:default}
+.inp.ro:hover{border-color:#e6e6ea}
+.inp.ro:focus{border-color:#5a3ff0}
+.rofw{position:relative;flex:1;min-width:0;display:flex}
+.rofw svg{position:absolute;right:14px;top:15px;color:#6e6e78;pointer-events:none}
+.err{color:#a3251b}
+.selw{position:relative;display:block}
+.selw select{appearance:none;padding-right:40px;cursor:pointer}
+.selw svg{position:absolute;right:14px;top:14px;pointer-events:none}
+.chip{padding:0 14px}
+.cbx{width:18px;height:18px;accent-color:#5a3ff0;margin:0;cursor:pointer;flex:none}
+.cbx:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.abl{display:flex;flex-direction:column;margin:0 -8px;border-top:1px solid #e6e6ea}
+.abr{display:grid;grid-template-columns:minmax(0,1fr) auto 20px;column-gap:12px;row-gap:4px;align-items:center;padding:10px 8px;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px;color:#101014}
+.abr:hover{background:#f6f6f8;color:#101014}
+.abr:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.abr-t{font-weight:600;font-variant-numeric:tabular-nums}
+.abr-m{display:flex;flex-direction:column;min-width:0}
+.abr-b{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.abr-c{color:#6e6e78;display:inline-flex}
+.tmr svg{flex:none}
+@media (max-width:1239px){.caside{max-width:none}}
+@media (max-width:1023px){.caside{max-width:none}}
+@media (max-width:767px){.tsep,.bkt,.nbt{display:none}.nbk{width:44px;padding:0}.hr .ell{white-space:normal}.back{padding:0 4px;margin-left:-4px}.hdr{flex-wrap:wrap;gap:16px}.hdm{flex:1 1 220px}.stats,.stats.s3{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:20px}.stat:nth-child(3){padding-left:0;border-left:0}.g2{grid-template-columns:minmax(0,1fr)}.urow{grid-template-columns:minmax(0,1fr) auto}.urow .uchev,.urow .uwhen2{display:none}.hr,.hr.m{grid-template-columns:88px minmax(0,1fr) auto;gap:10px}.hr .hprice{display:none}.rprow{grid-template-columns:32px minmax(0,1fr)}.rpa{grid-column:2;align-items:flex-start}}
+</style>
 </helmet>
 <div class="app" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
 
-<aside class="side" aria-label="Esasy menýu" style="position: sticky; top: 0; height: 100vh; z-index: 20">
-<button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<aside class="side" aria-label="Main menu" style="position: sticky; top: 0; height: 100vh; z-index: 20">
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="cap" style="font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0">{{me.role}}</span></span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><div class="swd"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; overflow-wrap: anywhere">Glow Studio</span><span style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; min-width: 0"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span><span class="cap" style="font-size: 12px; line-height: 16px">Ashgabat</span></span></span></div></sc-if>
 <div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
-<a class="sn" href="B-Calendar.dc.html" aria-label="Senenama"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
-<a class="sn" href="B-Bookings.dc.html" aria-label="Ýazylyşlar, 5 haýyş"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt">5</span></a>
-<a class="sn on" href="B-Clients.dc.html" aria-label="Müşderiler"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
-<a class="sn" href="B-Reviews.dc.html" aria-label="Teswirler, 4 jogapsyz"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-hidden="true">4</span></a>
-<a class="sn" href="B-Analytics.dc.html" aria-label="Hasabatlar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
-<a class="sn" href="B-Settings.dc.html" aria-label="Sazlamalar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
+<a class="sn" href="B-Calendar.dc.html" aria-label="Calendar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Calendar</a>
+<a class="sn" href="B-Bookings.dc.html" aria-label="{{navReqLabel}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Bookings<span class="{{cntCls}}">{{pendingN}}</span></a>
+<a class="sn on" href="B-Clients.dc.html" aria-current="page" aria-label="Clients"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Clients</a>
+<a class="sn" href="B-Reviews.dc.html" aria-label="{{revNavLabel}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<sc-if value="{{showRevBadge}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-hidden="true">4</span></sc-if></a>
+<sc-if value="{{showSettings}}" hint-placeholder-val="{{true}}"><a class="sn" href="B-Settings.dc.html" aria-label="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a></sc-if>
 <div class="sfill" style="flex: 1"></div>
-<a class="sn sx" href="#" aria-label="Ýeral sahypaňyz"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
-<a class="sn sx" href="B-Help.dc.html" aria-label="Kömek"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
 <div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
-<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
-<span class="av">M</span>
-<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 10 20 30</span></span>
-<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" aria-expanded="{{umOpen}}" onClick="{{toggleUm}}" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
-</div>
-<sc-if value="{{shellPop}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeShell}}"></div></sc-if>
-<sc-if value="{{wsOpen}}" hint-placeholder-val="{{false}}">
-<div class="pop popa wsp" role="menu" aria-label="Iş ýerleriňiz">
-<div class="lbl" style="padding: 8px 10px 6px">IŞ ÝERLERIŇIZ</div>
-<a class="mi wsr" href="B-Calendar.dc.html" role="menuitemradio" aria-checked="true"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Eýesi · Bitarap Türkmenistan şaýoly</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></a>
-<a class="mi wsr" href="B-Calendar.dc.html" role="menuitemradio" aria-checked="false"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio · Parahat</span><span class="cap" style="font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Eýesi · Parahat 7</span></span><span class="cnt" aria-label="2 jogapsyz haýyş">2</span></a>
-<div class="pdv" role="separator"></div>
-<a class="mi" role="menuitem" href="B-Onboarding.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Täze biznes döret</a>
-</div>
-</sc-if>
-<sc-if value="{{umOpen}}" hint-placeholder-val="{{false}}">
-<div class="pop popa ump" role="menu" aria-label="Hasap menýusy">
-<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profilim</a>
-<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg>Dil: Türkmençe</a>
-<a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Müşderi hökmünde aç<span class="cap" style="margin-left: auto">yeral.app</span></a>
-<div class="pdv" role="separator"></div>
-<a class="mi dan" role="menuitem" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Çykmak</a>
-</div>
-</sc-if>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<span class="av">{{me.ini}}</span>
+<span class="mex" style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums">{{me.phone}}</span></span>
+<button class="b b-gho b-ic" aria-label="Account menu" aria-haspopup="menu" aria-expanded="{{userOpen}}" onClick="{{toggleUser}}" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+</div></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><a class="b b-sec dlog" href="B-Login.dc.html" aria-label="Log in"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>Log in</a></sc-if>
 </aside>
 
 <div class="main">
 <div class="top">
-<a class="back" href="B-Clients.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>Müşderiler</a>
-<span class="tsep" aria-hidden="true" style="width: 1px; height: 20px; background: #e6e6ea"></span>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><button class="mws" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></sc-if><sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><span class="mws"><img src="../../assets/brand/yeral-icon.png" alt="Glow Studio, example" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"></span></sc-if>
+<a class="back" href="B-Clients.dc.html" aria-label="Back to clients"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg><span class="bkt">Clients</span></a>
+<span class="tsep" aria-hidden="true"></span>
 <h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0">{{shortName}}</h1>
 <div style="flex: 1"></div>
-<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
-<sc-if value="{{viewMode}}" hint-placeholder-val="{{true}}"><a class="b b-pri b-sm" href="B-Calendar.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Ýazyl</a></sc-if>
+<sc-if value="{{showBook}}" hint-placeholder-val="{{true}}"><a class="b b-pri b-sm nbk" href="B-Calendar.dc.html" aria-label="New booking"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg><span class="nbt">New booking</span></a></sc-if>
 </div>
 
-<div class="pad" style="flex: 1; padding: 32px; min-width: 0">
+<div class="pad" style="flex: 1; padding: 32px; display: flex; flex-direction: column; gap: 24px; min-width: 0">
+<sc-if value="{{bnOn}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column">
+<sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnx"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
+<sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
+<sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnx"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
+</div></sc-if>
+
+<sc-if value="{{noAccess}}" hint-placeholder-val="{{false}}">
+<div class="empty">
+<div class="eic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+<div style="font-size: 19px; line-height: 24px; font-weight: 600">This client isn’t in your list</div>
+<div style="font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 400px">You see only clients who have a booking with you.</div>
+<a class="b b-sec b-sm" href="B-Clients.dc.html" style="margin-top: 4px">Back to clients</a>
+</div>
+</sc-if>
+
+<sc-if value="{{hasCard}}" hint-placeholder-val="{{true}}">
 <div class="cols">
-
 <main class="cmain">
-
 <sc-if value="{{viewMode}}" hint-placeholder-val="{{true}}">
-<div class="hdr" style="display: flex; gap: 20px; align-items: flex-start; padding-bottom: 28px">
+<div class="hdr">
 <span class="av64" aria-hidden="true">{{initial}}</span>
-<div style="display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1">
-<h2 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em">{{fullName}}</h2>
-<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<div class="hdm">
+<h2 class="hnm">{{fullName}}</h2>
+<div class="hrw">
 <span style="font-size: 15px; line-height: 22px; font-weight: 500; font-variant-numeric: tabular-nums">{{phone}}</span>
-<button class="b b-gho b-sm b-ico" aria-label="Belgini göçür" title="Belgini göçür" onClick="{{copyPhone}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
-<button class="b b-sec b-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Jaň et</button>
+<button class="b b-gho b-sm b-ico" aria-label="Copy number" title="Copy number" onClick="{{copyPhone}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+<a class="b b-sec b-sm" href="{{telHref}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>Call</a>
+<sc-if value="{{acct}}" hint-placeholder-val="{{true}}"><span class="tg tg-neu tg-m"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m16 11 2 2 4-4"></path></svg>Ýeral account</span></sc-if>
 </div>
-<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<div class="hrw">
 <sc-for list="{{tags}}" as="t" hint-placeholder-count="2"><span class="{{t.cls}}">{{t.t}}</span></sc-for>
 <span class="cap" style="margin-left: 4px">{{sinceText}}</span>
 </div>
 </div>
-<button class="b b-gho b-sm" onClick="{{startEdit}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg>Üýtget</button>
+<sc-if value="{{canManage}}" hint-placeholder-val="{{true}}"><button class="b b-gho b-sm" onClick="{{startEdit}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg>Change</button></sc-if>
 </div>
 </sc-if>
-
 <sc-if value="{{editMode}}" hint-placeholder-val="{{false}}">
-<form class="hdr" aria-labelledby="ed-t" style="display: flex; gap: 20px; align-items: flex-start; padding-bottom: 28px" onSubmit="{{submitEdit}}">
+<form class="hdr" aria-labelledby="ed-t" onSubmit="{{submitEdit}}">
 <span class="av64" aria-hidden="true">{{initial}}</span>
-<div style="display: flex; flex-direction: column; gap: 16px; min-width: 0; flex: 1">
-<h2 id="ed-t" style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Müşderini üýtgetmek</h2>
+<div class="hdm" style="gap: 16px">
+<h2 id="ed-t" style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Client details</h2>
 <div class="g2">
-<div class="fld"><label class="flab" for="ed-name">Ady we familiýasy</label><input id="ed-name" class="inp" value="{{f.full}}" onInput="{{onFull}}" autocomplete="off"></div>
-<div class="fld"><label class="flab" for="ed-ph">Telefon</label><div style="display: flex; gap: 8px"><span class="pre">+993</span><input id="ed-ph" class="{{phCls}}" inputmode="numeric" value="{{f.phFmt}}" onInput="{{onPh}}" aria-describedby="ed-ph-h"></div><sc-if value="{{phBad}}" hint-placeholder-val="{{false}}"><span id="ed-ph-h" class="cap" style="color: #a3251b">Belgi doly däl: 8 san bolmaly.</span></sc-if></div>
+<div class="fld"><label class="flab" for="ed-name">Name and surname</label><input id="ed-name" class="inp" value="{{f.full}}" onInput="{{onFull}}" autocomplete="off"></div>
+<div class="fld"><label class="flab" for="ed-ph">Phone</label>
+<sc-if value="{{acct}}" hint-placeholder-val="{{true}}"><div style="display: flex; gap: 8px"><span class="pre">+993</span><span class="rofw"><input id="ed-ph" class="inp ro" readonly="" value="{{f.phFmt}}" aria-describedby="ed-ph-h"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span></span></div><span id="ed-ph-h" class="cap">The client changes this number in their Ýeral account; it updates here too.</span></sc-if>
+<sc-if value="{{noAcct}}" hint-placeholder-val="{{false}}"><div style="display: flex; gap: 8px"><span class="pre">+993</span><input id="ed-ph" class="{{phCls}}" inputmode="numeric" value="{{f.phFmt}}" onInput="{{onPh}}" aria-describedby="ed-ph-h" aria-invalid="{{phBad}}"></div><sc-if value="{{phBad}}" hint-placeholder-val="{{false}}"><span id="ed-ph-h" class="cap err">The number is incomplete — it needs 8 digits.</span></sc-if></sc-if>
+</div>
 </div>
 <div class="g2">
-<div class="fld"><label class="flab" for="ed-bd">Doglan güni</label><input id="ed-bd" type="date" class="inp" value="{{f.bday}}" onInput="{{onBday}}"></div>
-<div class="fld"><label class="flab" for="ed-src">Nireden geldi</label><div style="position: relative"><select id="ed-src" class="inp" style="appearance: none; padding-right: 40px; cursor: pointer" value="{{f.source}}" onChange="{{onSource}}"><option value="">Saýlaň</option><option value="Instagram">Instagram</option><option value="Tanyş maslahat berdi">Tanyş maslahat berdi</option><option value="Ýeral">Ýeral</option><option value="Köçeden">Köçeden</option><option value="Başga">Başga</option></select><svg style="position: absolute; right: 14px; top: 14px; pointer-events: none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></div></div>
+<div class="fld"><label class="flab" for="ed-bd">Birthday</label><input id="ed-bd" type="date" class="inp" value="{{f.bday}}" onInput="{{onBday}}"></div>
+<div class="fld"><label class="flab" for="ed-src">How they found you</label><span class="selw"><select id="ed-src" class="inp" value="{{f.source}}" onChange="{{onSource}}"><option value="">Select</option><option value="Instagram">Instagram</option><option value="A friend recommended">A friend recommended</option><option value="Ýeral">Ýeral</option><option value="Walked past">Walked past</option><option value="Other">Other</option></select><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></div>
 </div>
 <div class="fld">
-<span class="flab" id="ed-tags">Tegler</span>
-<div role="group" aria-labelledby="ed-tags" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center"><sc-for list="{{tagChips}}" as="c" hint-placeholder-count="2"><button type="button" class="{{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.t}}</button></sc-for><span class="cap">«Yzygiderli» we «Täze» awtomatik goýulýar.</span></div>
+<span class="flab" id="ed-tags">Tags</span>
+<div role="group" aria-labelledby="ed-tags" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center"><sc-for list="{{tagChips}}" as="c" hint-placeholder-count="2"><button type="button" class="{{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.t}}</button></sc-for></div>
+<span class="cap">New, Regular, Lapsed and Reported are set by themselves.</span>
 </div>
-<div style="display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap"><button type="button" class="b b-gho" onClick="{{cancelEdit}}">Ýatyr</button><button type="submit" class="b b-pri" disabled="{{phBad}}">Ýatda sakla</button></div>
-<div style="display: flex; flex-direction: column; gap: 4px; padding-top: 16px; border-top: 1px solid #e6e6ea">
-<button type="button" class="dtx" onClick="{{openDel}}" style="align-self: flex-start"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>Müşderini poz</button>
-<span class="cap">Ýazylyş taryhy hasabatlarda atsyz galar</span>
-</div>
+<div style="display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap"><button type="button" class="b b-gho" onClick="{{cancelEdit}}">Cancel</button><button type="submit" class="b b-pri" disabled="{{phBad}}">Save</button></div>
 </div>
 </form>
 </sc-if>
-
-<div class="stats" style="padding: 24px 0 28px; border-top: 1px solid #e6e6ea" role="list" aria-label="Statistika">
-<div class="stat first" role="listitem"><span class="lbl">Gelşi</span><span class="sv">12</span><span class="cap">jemi 1 740 TMT</span></div>
-<div class="stat" role="listitem"><span class="lbl">Ortaça çek</span><span class="sv">145 TMT</span><span class="cap">tamamlanan gelşlerden</span></div>
-<div class="stat" role="listitem"><span class="lbl">Soňky gelşi</span><span class="sv">Şu gün</span><span class="cap">Saç reňklemek · Aýna</span></div>
-<div class="stat" role="listitem"><span class="lbl">Gelmedik</span><span class="sv">1</span><span class="cap">19 awgust</span></div>
+<div class="{{statsCls}}" role="list" aria-label="Key figures">
+<div class="stat first" role="listitem"><span class="lbl">Visits</span><span class="sv">{{st.visits}}</span><sc-if value="{{seeMoney}}" hint-placeholder-val="{{true}}"><span class="cap">{{st.total}}</span></sc-if></div>
+<sc-if value="{{seeMoney}}" hint-placeholder-val="{{true}}"><div class="stat" role="listitem"><span class="lbl">Average check</span><span class="sv">{{st.avg}}</span><span class="cap">From completed visits</span></div></sc-if>
+<div class="stat" role="listitem"><span class="lbl">Last visit</span><span class="sv">{{st.last}}</span><span class="cap">{{st.lastCap}}</span></div>
+<div class="stat" role="listitem"><span class="lbl">No-shows</span><span class="sv">{{st.ns}}</span><span class="cap">{{st.nsCap}}</span></div>
 </div>
-
 <section class="sec" aria-labelledby="s-notes">
-<div class="shrow"><h2 id="s-notes" class="sh">Bellikler</h2><span class="cap">{{notesCount}}</span><div style="flex: 1"></div><sc-if value="{{noComposer}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm" onClick="{{openComposer}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Bellik goş</button></sc-if></div>
+<div class="shrow"><h2 id="s-notes" class="sh">Notes</h2><span class="cap">{{notesCount}}</span><div style="flex: 1"></div><sc-if value="{{noComposer}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm" onClick="{{openComposer}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Add note</button></sc-if></div>
 <sc-if value="{{composer}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid #d8d8de; border-radius: 12px; margin-bottom: 8px">
-<label class="flab" for="nt-new">Täze bellik</label>
-<textarea id="nt-new" class="inp ta" value="{{draft}}" onInput="{{onDraft}}" placeholder="Meselem: kofe däl, çaý halaýar"></textarea>
+<label class="flab" for="nt-new">New note</label>
+<textarea id="nt-new" class="inp ta" value="{{draft}}" onInput="{{onDraft}}" placeholder="For example: prefers tea to coffee"></textarea>
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap">
-<label style="display: inline-flex; align-items: center; gap: 10px; font-size: 14px; line-height: 20px; cursor: pointer"><input type="checkbox" class="cbx" checked="{{alertChk}}" onChange="{{flipAlert}}">Ýazylanda görkez (duýduryş)</label>
-<div style="display: flex; gap: 8px"><button class="b b-gho b-sm" onClick="{{closeComposer}}">Ýatyr</button><button class="b b-sec b-sm" disabled="{{noDraft}}" onClick="{{saveNote}}">Ýatda sakla</button></div>
+<label style="display: inline-flex; align-items: center; gap: 10px; font-size: 14px; line-height: 20px; cursor: pointer"><input type="checkbox" class="cbx" checked="{{alertChk}}" onChange="{{flipAlert}}">Show when booking (alert)</label>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="b b-gho b-sm" onClick="{{closeComposer}}">Cancel</button><button class="b b-sec b-sm" disabled="{{noDraft}}" onClick="{{saveNote}}">Save</button></div>
 </div>
-<span class="cap">Duýduryş bellikleri senenamadaky ýazylyşda we ýazylyş penjiresinde görünýär. Bellikleri diňe topar görýär.</span>
+<span class="cap">Alert notes show on the booking in the calendar and in the booking drawer. Only the team sees notes.</span>
 </div>
 </sc-if>
-<div style="display: flex; flex-direction: column">
+<sc-if value="{{hasNotes}}" hint-placeholder-val="{{true}}"><div style="display: flex; flex-direction: column">
 <sc-for list="{{notes}}" as="n" hint-placeholder-count="2">
 <div class="{{n.cls}}">
-<sc-if value="{{n.alert}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></sc-if>
-<sc-if value="{{n.plain}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></sc-if>
+<sc-if value="{{n.alert}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></sc-if>
+<sc-if value="{{n.plain}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></sc-if>
 <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1">
 <span style="color: #101014; font-weight: 500">{{n.text}}</span>
-<span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap"><span class="cap">{{n.meta}}</span><sc-if value="{{n.alert}}" hint-placeholder-val="{{true}}"><span class="tg tg-p" style="height: 20px; padding: 0 7px">Ýazylanda görkezilýär</span></sc-if></span>
+<span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap"><span class="cap">{{n.meta}}</span><sc-if value="{{n.alert}}" hint-placeholder-val="{{true}}"><span class="tg tg-p">Shown when booking</span></sc-if></span>
 </div>
 </div>
 </sc-for>
-</div>
+</div></sc-if>
+<sc-if value="{{noNotes}}" hint-placeholder-val="{{false}}"><span class="cap">No notes yet. Only the team sees notes.</span></sc-if>
 </section>
-
 <section class="sec" aria-labelledby="s-up">
-<div class="shrow"><h2 id="s-up" class="sh">Gelýän ýazylyşlar</h2><span class="cap">1</span></div>
-<a class="urow" href="B-Calendar.dc.html" aria-label="Şu gün 11:30, Saç reňklemek, Aýna, Tassyklandy — senenamada aç">
-<span style="display: flex; flex-direction: column"><span style="font-weight: 600">Şu gün</span><span class="cap uwhen2" style="font-variant-numeric: tabular-nums">11:30–13:30</span></span>
-<span style="display: flex; flex-direction: column; min-width: 0"><span class="ell" style="font-size: 14px; line-height: 20px; font-weight: 500">Saç reňklemek · Aýna</span><span class="cap ell">2 sag · 250 TMT · Onlaýn</span></span>
-<span class="badge st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tassyklandy</span>
-<svg class="uchev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+<div class="shrow"><h2 id="s-up" class="sh">Upcoming</h2><span class="cap">{{upCount}}</span></div>
+<sc-if value="{{hasUp}}" hint-placeholder-val="{{true}}"><div style="display: flex; flex-direction: column">
+<sc-for list="{{up}}" as="u" hint-placeholder-count="1">
+<a class="urow" href="{{u.href}}" aria-label="{{u.aria}}">
+<span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{u.day}}</span><span class="cap uwhen2" style="font-variant-numeric: tabular-nums">{{u.time}}</span></span>
+<span style="display: flex; flex-direction: column; min-width: 0"><span class="ell" style="font-size: 14px; line-height: 20px; font-weight: 500">{{u.what}}</span><span class="cap ell">{{u.meta}}</span></span>
+<span class="ubd"><span class="{{u.badgeCls}}"><sc-if value="{{u.iP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{u.iC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{u.iD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{u.iX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{u.iN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{u.label}}</span><sc-if value="{{u.hasTmr}}" hint-placeholder-val="{{false}}"><span class="{{u.tmrCls}}" title="{{u.tmrLabel}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{u.tmrText}}</span></sc-if></span>
+<span class="uchev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span>
 </a>
+</sc-for>
+</div></sc-if>
+<sc-if value="{{noUp}}" hint-placeholder-val="{{false}}"><span class="cap">No upcoming bookings.</span></sc-if>
 </section>
-
 <section class="sec" aria-labelledby="s-hist">
-<div class="shrow"><h2 id="s-hist" class="sh">Taryh</h2><span class="cap">13 ýazylyş</span></div>
+<div class="shrow"><h2 id="s-hist" class="sh">History</h2><span class="cap">{{histTotal}}</span></div>
 <div role="table" aria-labelledby="s-hist">
-<div class="hr th" role="row"><span role="columnheader">Sene</span><span role="columnheader">Hyzmat · hünärmen</span><span role="columnheader" class="num hprice">Baha</span><span role="columnheader">Ýagdaý</span></div>
+<div class="{{hrHead}}" role="row"><span role="columnheader">Date</span><span role="columnheader">Service · specialist</span><span role="columnheader" class="num hprice">Price</span><span role="columnheader">Status</span></div>
 <sc-for list="{{hist}}" as="h" hint-placeholder-count="4">
-<div class="hr" role="row"><span role="cell" style="font-variant-numeric: tabular-nums">{{h.date}}</span><span role="cell" class="ell">{{h.what}}</span><span role="cell" class="num hprice" style="font-weight: 500">{{h.price}}</span><span role="cell"><span class="{{h.badgeCls}}"><sc-if value="{{h.icP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{h.icC}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{h.icD}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{h.icX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{h.icN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{h.label}}</span></span></div>
+<div class="{{h.cls}}" role="row"><span role="cell" style="font-variant-numeric: tabular-nums">{{h.date}}</span><span role="cell" class="ell">{{h.what}}</span><span role="cell" class="num hprice" style="font-weight: 500">{{h.price}}</span><span role="cell"><span class="{{h.badgeCls}}"><sc-if value="{{h.iP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{h.iC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{h.iD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{h.iX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{h.iN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{h.label}}</span></span></div>
 </sc-for>
 </div>
-<div style="display: flex; align-items: center; gap: 12px; padding-top: 4px"><button class="b b-sec b-sm" aria-expanded="{{more}}" onClick="{{toggleMore}}">{{moreLabel}}</button><span class="cap">{{histCount}}</span></div>
+<sc-if value="{{histMore}}" hint-placeholder-val="{{true}}"><div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; padding-top: 4px"><button class="b b-sec b-sm" aria-expanded="{{more}}" onClick="{{toggleMore}}">{{moreLabel}}</button><span class="cap">{{histCount}}</span></div></sc-if>
 </section>
-
-<section class="sec" aria-labelledby="s-cmp">
-<div class="shrow"><h2 id="s-cmp" class="sh">Arzalar</h2><span class="cap">Diňe topar görýär</span></div>
-<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid #e6e6ea; font-size: 14px; line-height: 20px">
-<span style="font-weight: 600; min-width: 96px">19 awgust</span>
-<span class="badge st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>Gelmedi</span>
-<span style="color: #101014">Aýna bellik etdi</span>
-<span class="cap" style="margin-left: auto">Saç düzmek · 60 TMT</span>
+<section class="sec" aria-labelledby="s-rep">
+<div class="shrow"><h2 id="s-rep" class="sh">Reports</h2><span class="cap">{{repCount}}</span><div style="flex: 1"></div><span class="cap">Only the team sees them</span></div>
+<sc-if value="{{hasReps}}" hint-placeholder-val="{{true}}">
+<div class="rpl2" role="list">
+<sc-for list="{{reps}}" as="r" hint-placeholder-count="2">
+<div class="rprow" role="listitem">
+<span class="{{r.icCls}}" aria-hidden="true"><sc-if value="{{r.iN}}" hint-placeholder-val="{{true}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if><sc-if value="{{r.iL}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{r.iR}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M12 7v2"></path><path d="M12 13h.01"></path></svg></sc-if><sc-if value="{{r.iO}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg></sc-if></span>
+<span class="rpm"><span class="rpt1">{{r.type}}<sc-if value="{{r.hasText}}" hint-placeholder-val="{{false}}"><span class="rpq"> · “{{r.text}}”</span></sc-if></span><span class="cap">{{r.booking}}</span><span class="cap">{{r.by}}</span></span>
+<sc-if value="{{r.canRemove}}" hint-placeholder-val="{{false}}"><span class="rpa"><button class="b b-sec b-sm" aria-label="{{r.aria}}" onClick="{{r.remove}}">Remove report</button><sc-if value="{{r.hasUntil}}" hint-placeholder-val="{{false}}"><span class="cap">{{r.until}}</span></sc-if></span></sc-if>
 </div>
+</sc-for>
+</div>
+<span class="cap">{{repCap}}</span>
+</sc-if>
+<sc-if value="{{noReps}}" hint-placeholder-val="{{false}}"><span class="cap">No reports.</span></sc-if>
 </section>
-
 </main>
-
 <aside class="caside" aria-labelledby="s-set">
-<h2 id="s-set" class="sh">Sazlamalar</h2>
+<h2 id="s-set" class="sh">{{asideTitle}}</h2>
 <div style="display: flex; flex-direction: column">
-<div class="nrow" style="padding-top: 0"><div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span id="sw-sms" style="font-size: 14px; line-height: 20px; font-weight: 500">Ýatlatma SMS-lerini iberme</span><span class="cap">Müşderi haýyş eden bolsa açyň.</span></div><button class="{{smsCls}}" role="switch" aria-checked="{{noSms}}" aria-labelledby="sw-sms" onClick="{{flipSms}}"><span class="trk"><span class="knob"></span></span></button></div>
-<div class="nrow"><div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span id="sw-ph" style="font-size: 14px; line-height: 20px; font-weight: 500">Diňe jaň arkaly ýazylyp biler</span><span class="cap">2 gezek gelmedik müşderilerde awtomatik açylýar</span></div><button class="{{phOnlyCls}}" role="switch" aria-checked="{{phOnly}}" aria-labelledby="sw-ph" onClick="{{flipPhOnly}}"><span class="trk"><span class="knob"></span></span></button></div>
-<div class="kv"><span class="cap" style="font-size: 14px; line-height: 20px">Nireden geldi</span><span style="font-weight: 500">{{sourceText}}</span></div>
-<div class="kv last"><span class="cap" style="font-size: 14px; line-height: 20px">Doglan güni</span><span class="{{bdayCls}}">{{bdayText}}</span></div>
+<sc-if value="{{canManage}}" hint-placeholder-val="{{true}}">
+<div class="nrow"><div class="nrt"><span id="sw-po" class="nrl">Phone only</span>
+<sc-if value="{{poIdle}}" hint-placeholder-val="{{true}}"><span id="sw-po-d" class="cap">The client can book only by calling you. Turns on by itself after <span style="white-space: nowrap">2 no-shows</span>.</span></sc-if>
+<sc-if value="{{poWarn}}" hint-placeholder-val="{{false}}"><span id="sw-po-d" class="pso pw" role="status"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>{{poWarnText}}</span></span></sc-if>
+<sc-if value="{{poOk}}" hint-placeholder-val="{{false}}"><span id="sw-po-d" class="pso pk" role="status"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg><span>Online booking is back. The no-show count starts again from zero.</span></span></sc-if>
+</div><button class="{{poCls}}" role="switch" aria-checked="{{po}}" aria-labelledby="sw-po" aria-describedby="sw-po-d" onClick="{{flipPo}}"><span class="trk"><span class="knob"></span></span></button></div>
+</sc-if>
+<div class="kv"><span class="cap" style="font-size: 14px; line-height: 20px">How they found you</span><span class="kvv">{{sourceText}}</span></div>
+<div class="kv last"><span class="cap" style="font-size: 14px; line-height: 20px">Birthday</span><span class="{{bdayCls}}">{{bdayText}}</span></div>
 </div>
+<sc-if value="{{canManage}}" hint-placeholder-val="{{true}}"><div class="delw"><button class="dtx" onClick="{{openDel}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>Delete client</button></div></sc-if>
 </aside>
+</div>
+</sc-if>
+</div>
+</div>
 
-</div>
-</div>
-</div>
-
-<sc-if value="{{delOpen}}" hint-placeholder-val="{{false}}">
+<sc-if value="{{showDel}}" hint-placeholder-val="{{false}}">
 <div class="mwrap" onKeyDown="{{modalKey}}">
 <div class="scrim" onClick="{{closeDel}}"></div>
-<div class="mdl mdl-s" role="dialog" aria-modal="true" aria-labelledby="del-t">
+<div class="mdl mdl-s" role="dialog" aria-modal="true" aria-labelledby="dl-t" aria-describedby="dl-p">
 <span class="grab"></span>
-<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h2 id="del-t" class="mt">Müşderini pozmalymy?</h2><button class="b b-gho b-sm b-ico" aria-label="Ýap" onClick="{{closeDel}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
-<p class="mp">{{delText}}</p>
-<div class="mact"><button class="b b-sec" onClick="{{closeDel}}">Yza</button><a class="b b-red" href="B-Clients.dc.html">Hawa, poz</a></div>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h2 id="dl-t" class="mt">{{dm.title}}</h2><button class="b b-gho b-sm b-ico" aria-label="Close" onClick="{{closeDel}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<p id="dl-p" class="mp">{{dm.lead}}</p>
+<sc-if value="{{dm.blocked}}" hint-placeholder-val="{{false}}">
+<div class="abl" role="list" aria-label="{{dm.listLabel}}">
+<sc-for list="{{dm.items}}" as="it" hint-placeholder-count="1"><a class="abr" role="listitem" href="{{it.href}}" aria-label="{{it.aria}}"><span class="abr-m"><span class="abr-t">{{it.when}}</span><span class="cap">{{it.what}}</span></span><span class="abr-b"><span class="{{it.badgeCls}}"><sc-if value="{{it.iP}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{it.iC}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{it.iD}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{it.iX}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{it.iN}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if>{{it.label}}</span><sc-if value="{{it.hasTmr}}" hint-placeholder-val="{{false}}"><span class="{{it.tmrCls}}" title="{{it.tmrLabel}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{it.tmrText}}</span></sc-if></span><span class="abr-c"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></a></sc-for>
 </div>
+<div class="mact"><button class="b b-sec" onClick="{{closeDel}}">Close</button></div>
+</sc-if>
+<sc-if value="{{dm.allowed}}" hint-placeholder-val="{{true}}">
+<div class="mact"><button class="b b-sec" onClick="{{closeDel}}">Cancel</button><a class="b b-red" href="B-Clients.dc.html">Delete client</a></div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{wsOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeMenus}}"></div>
+<div class="pop wsp" role="menu" aria-label="Your workspaces" onKeyDown="{{menuKey}}">
+<div class="lbl" style="padding: 8px 10px 6px">Your workspaces</div>
+<sc-for list="{{wsList}}" as="w" hint-placeholder-count="2">
+<sc-if value="{{w.cur}}" hint-placeholder-val="{{true}}"><button class="mi wsr" role="menuitemradio" aria-checked="true" aria-label="{{w.aria}}" onClick="{{closeMenus}}"><sc-if value="{{w.logo}}" hint-placeholder-val="{{true}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"></sc-if><sc-if value="{{w.noLogo}}" hint-placeholder-val="{{false}}"><span class="wsi">{{w.ini}}</span></sc-if><span class="wsn"><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="wst">{{w.name}}</span><sc-if value="{{w.example}}" hint-placeholder-val="{{false}}"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span></sc-if></span><span class="wsc">{{w.cap}}</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M20 6 9 17l-5-5"></path></svg></button></sc-if>
+<sc-if value="{{w.other}}" hint-placeholder-val="{{false}}"><a class="mi wsr" role="menuitemradio" aria-checked="false" aria-label="{{w.aria}}" href="B-Clients.dc.html"><sc-if value="{{w.logo}}" hint-placeholder-val="{{true}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"></sc-if><sc-if value="{{w.noLogo}}" hint-placeholder-val="{{false}}"><span class="wsi">{{w.ini}}</span></sc-if><span class="wsn"><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="wst">{{w.name}}</span><sc-if value="{{w.example}}" hint-placeholder-val="{{false}}"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span></sc-if></span><span class="wsc">{{w.cap}}</span></span><sc-if value="{{w.hasPend}}" hint-placeholder-val="{{true}}"><span class="cnt" aria-hidden="true">{{w.pend}}</span></sc-if></a></sc-if>
+</sc-for>
+<div class="mdv"></div>
+<a class="mi wsr" role="menuitem" href="B-Onboarding.dc.html"><span class="wsi" style="background: #ffffff; box-shadow: inset 0 0 0 1px #d8d8de; color: #101014"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Create a business</a>
+</div>
+</sc-if>
+
+<sc-if value="{{userOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeMenus}}"></div>
+<div class="pop ump" role="menu" aria-label="Account menu" onKeyDown="{{menuKey}}">
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>My profile</a>
+<a class="mi" role="menuitem" href="Venue.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Your Ýeral page</a>
+<a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Open as a client<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<button class="mi" role="menuitem" aria-haspopup="menu" onClick="{{openContact}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg>Contact Ýeral<span style="margin-left: auto; display: inline-flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button>
+<div class="mdv"></div>
+<a class="mi mi-d" role="menuitem" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Log out</a>
+</div>
+</sc-if>
+<sc-if value="{{contactOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeMenus}}"></div>
+<div class="pop ump" role="menu" aria-label="Contact Ýeral" onKeyDown="{{menuKey}}">
+<button class="mi" role="menuitem" onClick="{{toggleUser}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg><span class="lbl" style="color: #5a5a64">Contact Ýeral</span></button>
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span class="wsn"><span class="wst">Call</span><span class="wsc">[SUPPORT PHONE]</span></span></a>
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg><span class="wsn"><span class="wst">Write on Telegram</span><span class="wsc">[TELEGRAM]</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+</div>
+</sc-if>
+
+<nav class="tabbar" aria-label="Main sections">
+<a class="tbi" href="B-Calendar.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Calendar</span></a>
+<a class="tbi" href="B-Bookings.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span>Bookings</span><sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><span class="tbc" aria-label="{{pendAria}}">{{pendingN}}</span></sc-if></a>
+<a class="tbi on" href="B-Clients.dc.html" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Clients</span></a>
+<button class="tbi" aria-haspopup="dialog" aria-expanded="{{moreOpen}}" onClick="{{toggleMore}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path></svg><span>More</span></button>
+</nav>
+<sc-if value="{{moreOpen}}" hint-placeholder-val="{{false}}">
+<div class="mscrim" onClick="{{closeMenus}}"></div>
+<div class="more" role="dialog" aria-label="More" onKeyDown="{{menuKey}}">
+<span class="grab"></span>
+<a class="mi" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<sc-if value="{{showRevBadge}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-label="4 unanswered reviews">4</span></sc-if></a>
+<sc-if value="{{showSettings}}" hint-placeholder-val="{{true}}"><a class="mi" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a></sc-if>
+<div class="mdv"></div>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">{{me.ini}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 14px; line-height: 20px; font-weight: 600">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px">{{me.phone}} · {{me.role}}</span></span></div>
+<a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>My profile</a>
+<a class="mi" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Your Ýeral page</a>
+<a class="mi" href="Home.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Open as a client<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg><span class="wsn"><span class="wst">Contact Ýeral</span><span class="wsc">[SUPPORT PHONE] · Telegram</span></span></a>
+<a class="mi mi-d" href="B-Login.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Log out</a></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><a class="mi" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>Log in</a></sc-if>
 </div>
 </sc-if>
 
@@ -347,131 +529,256 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="toast" role="status">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
 <span>{{toastText}}</span>
-<span class="tsp"></span>
-</div>
-</sc-if>
-
-
-<nav class="tabb" aria-label="Bölümler">
-<a class="tbi" href="B-Calendar.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Senenama</span></a>
-<a class="tbi" href="B-Bookings.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span>Ýazylyşlar</span><span class="tbc" aria-label="5 haýyş">5</span></a>
-<a class="tbi on" href="B-Clients.dc.html" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Müşderiler</span></a>
-<button class="{{tabKopCls}}" aria-haspopup="dialog" aria-expanded="{{kopOpen}}" onClick="{{toggleKop}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg><span>Köp</span></button>
-</nav>
-<sc-if value="{{kopOpen}}" hint-placeholder-val="{{false}}">
-<div class="kscrim" onClick="{{closeShell}}"></div>
-<div class="ksh" role="dialog" aria-modal="true" aria-label="Köp">
-<span class="kgrab"></span>
-<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px 10px"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 10 20 30</span></span></div>
-<div class="pdv"></div>
-<a class="mi" href="B-Reviews.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<span class="cnt cnt-n" aria-label="4 jogapsyz teswir">4</span></a>
-<a class="mi" href="B-Analytics.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
-<a class="mi" href="B-Settings.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
-<a class="mi" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
-<a class="mi" href="B-Help.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
-<div class="pdv"></div>
-<a class="mi" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Profilim</a>
-<a class="mi" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg>Dil: Türkmençe</a>
-<a class="mi" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Müşderi hökmünde aç<span class="cap" style="margin-left: auto">yeral.app</span></a>
-<div class="pdv"></div>
-<a class="mi dan" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Çykmak</a>
+<sc-if value="{{toastUndo}}" hint-placeholder-val="{{false}}"><button class="b b-sm tb" onClick="{{undo}}">Undo</button></sc-if>
+<sc-if value="{{toastPlain}}" hint-placeholder-val="{{true}}"><span class="tsp"></span></sc-if>
 </div>
 </sc-if>
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"edit":{"editor":"boolean","default":false,"section":"State"},"composer":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1680}}'>
+<script type="text/x-dc" data-dc-script data-props='{"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"client":{"editor":"enum","options":["regular","phoneOnly","request","noAccount"],"default":"regular","section":"State"},"edit":{"editor":"boolean","default":false,"section":"State"},"composer":{"editor":"boolean","default":false,"section":"State"},"modal":{"editor":"enum","options":["none","delete"],"default":"none","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1720}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    const profile = { full: 'Gülälek Nurmuhammedowa', ph: '65447019', source: 'Instagram', bday: '', vip: true, child: false };
-    this.state = Object.assign({
-      profile: profile,
-      notes: [
-        { text: 'Ammiaksyz reňk ulanmaly — allergiýa.', alert: true, by: 'Aýna', at: '12 awgust' },
-        { text: 'Diňe irden gelip bilýär, günortandan soň ýazmaň.', alert: false, by: 'Selbi', at: '3 iýul' }
-      ],
-      noSms: false, phOnly: false, more: false, side: null, toast: null, delOpen: false
-    }, this.fromProps(props || {}, profile));
+    this.state = Object.assign({ side: null, toast: null }, this.fromProps(props || {}));
   }
-  fromProps(p, profile) {
-    return { edit: !!p.edit, form: Object.assign({}, profile), composer: !!p.composer, draft: '', alertChk: false, delOpen: false };
+  role(p) {
+    const pp = p || this.props || {};
+    if (pp.banner === 'demo') return 'owner';
+    const r = pp.role;
+    return r === 'admin' || r === 'specialist' ? r : 'owner';
+  }
+  pl(n, w) {
+    return n + ' ' + w + (n === 1 ? '' : 's');
+  }
+  kind(p) {
+    const k = (p || this.props || {}).client;
+    return k === 'phoneOnly' || k === 'request' || k === 'noAccount' ? k : 'regular';
+  }
+  data(k) {
+    // upcoming: [day, time, service, specialist, length, price, source, status (c / p), minutes left to answer]
+    // history: [date, service, specialist, price, status] · reports: type, text, booking, reported at, by, days ago, specialist of the booking, history row
+    const D = {
+      regular: {
+        ay: true, full: 'Gülälek Nurmuhammedowa', name: 'Gülälek N.', ph: '65447019', acct: true, since: 'since March 2024', source: 'Instagram', bday: '', custom: ['VIP'], auto: ['reg'],
+        histN: 13,
+        notes: [{ text: 'Use ammonia-free colour — allergy.', alert: true, by: 'Aýna', at: '12 August' }, { text: 'She can only come in the morning — don’t book her after noon.', alert: false, by: 'Selbi', at: '3 July' }],
+        up: [['Today', '11:30–13:30', 'Hair colouring', 'Aýna', '2 h', '250 TMT', 'Online', 'c', 0]],
+        hist: [['28 September', 'Hair colouring', 'Aýna', '250 TMT', 'completed'], ['7 September', 'Women’s haircut', 'Aýna', '80 TMT', 'completed'], ['19 August', 'Hair styling', 'Aýna', '60 TMT', 'noshow'], ['2 August', 'Gel manicure', 'Maral', '110 TMT', 'completed'],
+          ['14 July', 'Women’s haircut', 'Aýna', '80 TMT', 'completed'], ['18 June', 'Hair colouring', 'Aýna', '250 TMT', 'completed'], ['30 May', 'Gel manicure', 'Maral', '110 TMT', 'completed'], ['9 May', 'Hair styling', 'Aýna', '60 TMT', 'completed'],
+          ['22 April', 'Women’s haircut', 'Aýna', '80 TMT', 'completed'], ['4 March', 'Gel manicure', 'Maral', '110 TMT', 'completed'], ['10 February', 'Gel manicure', 'Maral', '110 TMT', 'completed'], ['20 November 2025', 'Hair colouring', 'Aýna', '250 TMT', 'completed'],
+          ['12 March 2024', 'Hair colouring', 'Aýna', '250 TMT', 'completed']],
+        reps: [{ k: 'noshow', text: '', bk: 'Wed, 19 Aug · 15:00 · Hair styling · Aýna', at: '19 Aug · 15:40', by: 'Aýna Myradowa', days: 56, staff: 'Aýna', hi: 2 }],
+        po: false, poAuto: false
+      },
+      phoneOnly: {
+        ay: false, full: 'Ogulnabat Çaryýewa', name: 'Ogulnabat Ç.', ph: '62186005', acct: true, since: 'since August 2026', source: 'Ýeral', bday: '', custom: [], auto: [],
+        histN: 5,
+        notes: [{ text: '2 no-shows — book by phone only.', alert: true, by: 'Selbi', at: 'Today' }],
+        up: [],
+        hist: [['Today', 'Facial cleansing', 'Jeren', '150 TMT', 'noshow'], ['28 September', 'Facial cleansing', 'Jeren', '150 TMT', 'completed'], ['21 September', 'Brows and lashes', 'Jeren', '50 TMT', 'noshow'],
+          ['2 September', 'Facial cleansing', 'Jeren', '150 TMT', 'completed'], ['10 August', 'Facial cleansing', 'Jeren', '150 TMT', 'completed']],
+        reps: [
+          { k: 'noshow', text: '', bk: 'Today · 10:00 · Facial cleansing · Jeren', at: 'today · 10:25', by: 'Selbi Hojaýewa', days: 0, staff: 'Jeren', hi: 0 },
+          { k: 'other', text: 'Brought a friend without booking', bk: 'Mon, 28 Sep · 10:00 · Facial cleansing · Jeren', at: '28 Sep · 11:12', by: 'Jeren Ataýewa', days: 16, staff: 'Jeren', hi: 1 },
+          { k: 'rude', text: '', bk: 'Mon, 28 Sep · 10:00 · Facial cleansing · Jeren', at: '28 Sep · 11:10', by: 'Jeren Ataýewa', days: 16, staff: 'Jeren', hi: 1 },
+          { k: 'noshow', text: '', bk: 'Mon, 21 Sep · 15:00 · Brows and lashes · Jeren', at: '21 Sep · 15:40', by: 'Maýsa Annaýewa', days: 23, staff: 'Jeren', hi: 2 },
+          { k: 'late', text: '', bk: 'Wed, 2 Sep · 10:00 · Facial cleansing · Jeren', at: '2 Sep · 10:20', by: 'Jeren Ataýewa', days: 42, staff: 'Jeren', hi: 3 }
+        ],
+        po: true, poAuto: true
+      },
+      request: {
+        ay: true, full: 'Aýjemal Gurbanowa', name: 'Aýjemal Gurbanowa', ph: '65901122', acct: true, since: 'since July 2026', source: 'Ýeral', bday: '', custom: [], auto: ['reg'],
+        histN: 3,
+        notes: [],
+        up: [['Tomorrow', '14:30–15:30', 'Women’s haircut', 'Aýna', '60 min', '80 TMT', 'Online', 'p', 28]],
+        hist: [['18 September', 'Women’s haircut', 'Aýna', '80 TMT', 'completed'], ['28 August', 'Pedicure', 'Maral', '90 TMT', 'completed'], ['15 July', 'Women’s haircut', 'Aýna', '85 TMT', 'completed']],
+        reps: [], po: false, poAuto: false
+      },
+      noAccount: {
+        ay: true, full: 'Döwlet Berdiýew', name: 'Döwlet B.', ph: '65661022', acct: false, since: 'since February 2026', source: 'A friend recommended', bday: '2018-03-09', custom: ['Child'], auto: ['reg'],
+        histN: 6,
+        notes: [{ text: 'His mother Jahan brings him; the phone is hers.', alert: false, by: 'Aýna', at: '16 September' }],
+        up: [['Today', '17:00–17:30', 'Children’s haircut', 'Aýna', '30 min', '40 TMT', 'Phone', 'c', 0]],
+        hist: [['16 September', 'Children’s haircut', 'Aýna', '40 TMT', 'completed'], ['12 August', 'Children’s haircut', 'Aýna', '40 TMT', 'completed'], ['8 July', 'Children’s haircut', 'Aýna', '40 TMT', 'completed'],
+          ['3 June', 'Children’s haircut', 'Aýna', '40 TMT', 'completed'], ['22 April', 'Children’s haircut', 'Aýna', '40 TMT', 'completed'], ['25 February', 'Children’s haircut', 'Aýna', '40 TMT', 'completed']],
+        reps: [], po: false, poAuto: false
+      }
+    };
+    return D[k];
+  }
+  fromProps(p) {
+    const mg = this.role(p) !== 'specialist';
+    const c = this.data(this.kind(p));
+    const profile = { full: c.full, ph: c.ph, source: c.source, bday: c.bday, custom: c.custom.slice() };
+    return {
+      profile: profile, form: Object.assign({}, profile, { custom: c.custom.slice() }),
+      notes: c.notes.slice(), reps: c.reps.slice(), hist: c.hist.map((h) => h.slice()),
+      po: c.po, poAuto: c.poAuto, poReset: false,
+      edit: mg && !!p.edit, composer: !!p.composer, draft: '', alertChk: false, more: false, delOpen: mg && p.modal === 'delete'
+    };
   }
   componentDidUpdate(pp) {
     const p = this.props;
-    if (pp.edit !== p.edit || pp.composer !== p.composer) this.setState(this.fromProps(p, this.state.profile));
+    if (pp.role !== p.role || pp.client !== p.client || pp.edit !== p.edit || pp.composer !== p.composer || pp.modal !== p.modal || pp.banner !== p.banner) this.setState(Object.assign({ side: null }, this.fromProps(p)));
   }
   componentWillUnmount() { clearTimeout(this.tt); }
   flash(patch, text) {
     clearTimeout(this.tt);
     this.setState(Object.assign({}, patch, { toast: { text: text } }));
-    this.tt = setTimeout(() => this.setState({ toast: null }), 5000);
+    this.tt = setTimeout(() => this.setState({ toast: null }), 6000);
   }
   renderVals() {
     const f = this.props.font ?? 'Onest';
     const s = this.state;
+    const role = this.role();
+    const spec = role === 'specialist';
+    const mg = !spec;
+    const seeMoney = role === 'owner';
+    const c = this.data(this.kind());
+    const noAccess = spec && !c.ay;
+    const PEOPLE = {
+      owner: { name: 'Maýsa Annaýewa', ini: 'M', phone: '+993 65 10 20 30', role: 'Owner', pend: 6, ws: [['Glow Studio', 'Owner · Ashgabat', true, 6, true], ['Glow Nails', 'Owner · Ashgabat', true, 2, false]] },
+      admin: { name: 'Selbi Hojaýewa', ini: 'S', phone: '+993 65 88 41 02', role: 'Admin', pend: 6, ws: [['Glow Studio', 'Admin · Ashgabat', true, 6, true]] },
+      specialist: { name: 'Aýna Myradowa', ini: 'A', phone: '+993 65 31 22 10', role: 'Specialist', pend: 2, ws: [['Glow Studio', 'Specialist · Ashgabat', true, 2, true], ['Aýnanyň saç studiýasy', 'Owner · Ashgabat', false, 1, false]] }
+    };
+    const bannerKind = ['inReview', 'notApproved', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
+    const isDemo = bannerKind === 'demo';
+    const P = PEOPLE[role];
+    const side = s.side;
+    const menuTo = (k) => () => this.setState({ side: side === k ? null : k, menuId: null });
     const pr = s.profile;
     const fm = s.form;
     const fmt = (dg) => dg.replace(/(\d{2})(?=\d)/g, '$1 ');
-    const MON = ['ýanwar', 'fewral', 'mart', 'aprel', 'maý', 'iýun', 'iýul', 'awgust', 'sentýabr', 'oktýabr', 'noýabr', 'dekabr'];
+    const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const fmtDate = (iso) => {
       const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
       return m ? parseInt(m[3], 10) + ' ' + MON[parseInt(m[2], 10) - 1] + ' ' + m[1] : '';
     };
-    const full = pr.full.trim() || 'Atsyz müşderi';
-    const parts = full.split(/\s+/);
-    const shortName = parts.length > 1 ? parts[0] + ' ' + parts[1].charAt(0) + '.' : parts[0];
-    const tags = [];
-    if (pr.vip) tags.push({ t: 'VIP', cls: 'tg tg-vip' });
-    tags.push({ t: 'Yzygiderli', cls: 'tg tg-neu' });
-    if (pr.child) tags.push({ t: 'Çaga', cls: 'tg tg-neu' });
+    const full = pr.full.trim() || '+993 ' + fmt(pr.ph);
+    // the name as saved on the client list (Aýjemal Gurbanowa in full, Gülälek N. as saved); after an edit, the new saved name in full
+    const shortName = pr.full === c.full ? c.name : full;
+    const TAG = { po: ['Phone only', 'tg tg-p tg-m'], rep: ['Reported', 'tg tg-n tg-m'], new: ['New', 'tg tg-new tg-m'], reg: ['Regular', 'tg tg-neu tg-m'], lap: ['Lapsed', 'tg tg-neu tg-m'], VIP: ['VIP', 'tg tg-a tg-m'] };
+    const tagCodes = (s.po ? ['po'] : []).concat(s.reps.length ? ['rep'] : []).concat(c.auto).concat(pr.custom);
+    const tags = tagCodes.map((t) => ({ t: (TAG[t] || [t])[0], cls: (TAG[t] || [t, 'tg tg-neu tg-m'])[1] }));
     const sorted = s.notes.filter((n) => n.alert).concat(s.notes.filter((n) => !n.alert));
-    const notes = sorted.map((n, i) => ({
-      text: n.text, alert: n.alert, plain: !n.alert, meta: n.by + ' · ' + n.at,
-      cls: n.alert ? 'note al' : (i === sorted.length - 1 ? 'note last' : 'note')
-    }));
-    const BADGE = { completed: ['st-d', 'd-d', 'Tamamlandy'], noshow: ['st-n', 'd-n', 'Gelmedi'] };
-    const H = [
-      ['28 sentýabr', 'Saç reňklemek · Aýna', '250 TMT', 'completed'], ['7 sentýabr', 'Aýal saç kesimi · Aýna', '80 TMT', 'completed'],
-      ['19 awgust', 'Saç düzmek · Aýna', '60 TMT', 'noshow'], ['2 awgust', 'Gel-lak bilen manikýur · Maral', '110 TMT', 'completed'],
-      ['14 iýul', 'Aýal saç kesimi · Aýna', '80 TMT', 'completed'], ['18 iýun', 'Saç reňklemek · Aýna', '250 TMT', 'completed'],
-      ['30 maý', 'Gel-lak bilen manikýur · Maral', '110 TMT', 'completed'], ['9 maý', 'Saç düzmek · Aýna', '60 TMT', 'completed']
-    ];
-    const hist = (s.more ? H : H.slice(0, 4)).map((h) => {
-      const b = BADGE[h[3]];
-      return { date: h[0], what: h[1], price: h[2], badgeCls: 'badge ' + b[0], icP: b[1] === 'd-p', icC: b[1] === 'd-c', icD: b[1] === 'd-d', icX: b[1] === 'd-x', icN: b[1] === 'd-n', label: b[2] };
-    });
-    const phBad = fm.ph.length !== 8;
-    const save = () => {
-      const st = this.state;
-      if (st.form.ph.length !== 8) return;
-      this.flash({ profile: Object.assign({}, st.form), edit: false }, 'Üýtgeşmeler ýatda saklandy');
+    const notes = sorted.map((n, i) => ({ text: n.text, alert: n.alert, plain: !n.alert, meta: n.by + ' · ' + n.at, cls: n.alert ? 'note al' : (i === sorted.length - 1 ? 'note last' : 'note') }));
+    const BADGE = { completed: ['badge st-d', 'Completed'], noshow: ['badge st-n', 'No-show'], cancelled: ['badge st-x', 'Cancelled'] };
+    const sti = (st) => ({ iP: st === 'pending', iC: st === 'confirmed', iD: st === 'completed', iX: st === 'cancelled', iN: st === 'noshow' });
+    const H = s.hist;
+    const histRows = (s.more ? H : H.slice(0, 4)).map((h) => Object.assign({ date: h[0], what: h[1] + ' · ' + h[2], price: h[3], badgeCls: BADGE[h[4]][0], label: BADGE[h[4]][1], cls: 'hr m' }, sti(h[4])));
+    const nsRows = H.filter((h) => h[4] === 'noshow');
+    const ns = nsRows.length;
+    const h0 = H[0];
+    const lastShort = (d) => /^\d+ \w+$/.test(d) ? d.replace(/^(\d+) (\w{3})\w*$/, '$1 $2') : d;
+    // visits, total and average check are worked out from the completed visits in the history (removing a No-show makes it a visit again)
+    const done = H.filter((h) => h[4] === 'completed');
+    const sum = done.reduce((a, h) => a + parseInt(h[3], 10), 0);
+    const money = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' TMT';
+    const st = {
+      visits: String(done.length), total: 'total ' + money(sum), avg: done.length ? money(Math.round(sum / done.length)) : '—',
+      last: lastShort(h0[0]), lastCap: (h0[4] === 'noshow' ? 'No-show' : h0[1]) + ' · ' + h0[2],
+      ns: String(ns), nsCap: nsRows.slice(0, 2).map((h) => lastShort(h[0])).join(' and ')
     };
+    const up = c.up.map((u) => {
+      const pend = u[7] === 'p';
+      const label = pend ? 'Pending' : 'Confirmed';
+      return Object.assign({
+        day: u[0], time: u[1], what: u[2] + ' · ' + u[3], meta: u[4] + ' · ' + u[5] + ' · ' + u[6],
+        badgeCls: 'badge ' + (pend ? 'st-p' : 'st-c'), label: label,
+        hasTmr: !!u[8], tmrText: u[8] + ' min', tmrCls: u[8] && u[8] <= 15 ? 'tmr hot' : 'tmr', tmrLabel: u[8] + ' min left to answer',
+        href: pend ? 'B-Bookings.dc.html' : 'B-Calendar.dc.html',
+        aria: u[0] + ' · ' + u[1] + ', ' + u[2] + ', ' + u[3] + ', ' + label + (u[8] ? ', ' + u[8] + ' min left to answer — open the request' : ' — open in the calendar')
+      }, sti(pend ? 'pending' : 'confirmed'));
+    });
+    const RL = { noshow: 'No-show', late: 'Came late', rude: 'Rude behaviour', other: 'Other' };
+    const reps = s.reps.map((r, i) => ({
+      type: RL[r.k], hasText: !!r.text, text: r.text, booking: r.bk, by: 'Reported ' + r.at + ' · ' + r.by,
+      icCls: r.k === 'noshow' ? 'rpi n' : 'rpi', iN: r.k === 'noshow', iL: r.k === 'late', iR: r.k === 'rude', iO: r.k === 'other',
+      canRemove: r.days < 7 && (!spec || r.staff === 'Aýna'), until: 'until ' + (21 - r.days) + ' October', hasUntil: s.reps.length > 1, aria: 'Remove report: ' + RL[r.k] + ', ' + r.bk,
+      remove: () => this.removeRep(i)
+    }));
+    // delete modal
+    const nb = c.up.filter((u) => u[7] === 'c').length;
+    const nr = c.up.filter((u) => u[7] === 'p').length;
+    const dm = { title: '', lead: '', blocked: false, allowed: false, items: [], listLabel: '' };
+    if (nb || nr) {
+      dm.blocked = true;
+      dm.title = 'Can’t delete this client yet';
+      if (nb && nr) dm.lead = shortName + ' has ' + this.pl(nb, 'upcoming booking') + ' and ' + this.pl(nr, 'waiting request') + '. Cancel the booking' + (nb > 1 ? 's' : '') + ' and decline the request' + (nr > 1 ? 's' : '') + ' first — then you can delete the client.';
+      else if (nb) dm.lead = shortName + ' has ' + this.pl(nb, 'upcoming booking') + '. Cancel ' + (nb > 1 ? 'them' : 'it') + ' first — then you can delete the client.';
+      else dm.lead = shortName + ' has ' + this.pl(nr, 'waiting request') + '. Decline ' + (nr > 1 ? 'them' : 'it') + ' first — then you can delete the client.';
+      dm.items = up.map((u) => ({ when: u.day + ' · ' + u.time, what: u.what, badgeCls: u.badgeCls.replace('badge ', 'badge sm '), label: u.label, iP: u.iP, iC: u.iC, iD: false, iX: false, iN: false, hasTmr: u.hasTmr, tmrText: u.tmrText, tmrCls: u.tmrCls, tmrLabel: u.tmrLabel, href: u.href, aria: 'Open: ' + u.aria }));
+      dm.listLabel = [nb ? this.pl(nb, 'upcoming booking') : '', nr ? this.pl(nr, 'waiting request') : ''].filter(Boolean).join(' · ');
+    } else {
+      dm.allowed = true;
+      dm.title = 'Delete this client?';
+      dm.lead = shortName + ' is removed from your clients, with the team’s notes. Past bookings stay in the calendar without the client’s name. You can’t undo this.';
+    }
+    const phBad = !c.acct && fm.ph.length !== 8;
     const setForm = (patch) => this.setState({ form: Object.assign({}, this.state.form, patch) });
-    const tagChips = [['vip', 'VIP'], ['child', 'Çaga']].map(([k, t]) => ({ t: t, on: !!fm[k], cls: fm[k] ? 'chip on' : 'chip', pick: () => setForm({ [k]: !this.state.form[k] }) }));
+    const tagChips = ['VIP', 'Child'].map((t) => {
+      const on = fm.custom.indexOf(t) >= 0;
+      return { t: t, on: on, cls: on ? 'chip on' : 'chip', pick: () => setForm({ custom: on ? this.state.form.custom.filter((x) => x !== t) : this.state.form.custom.concat([t]) }) };
+    });
+    const save = () => {
+      const stt = this.state;
+      if (!c.acct && stt.form.ph.length !== 8) return;
+      this.flash({ profile: Object.assign({}, stt.form, { full: stt.form.full.trim() || stt.profile.full }), edit: false }, 'Changes saved');
+    };
     const bdayText = fmtDate(pr.bday);
+    const me1 = P.name.split(' ')[0];
 
     return {
       fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
-      wsOpen: s.side === 'ws',
-      umOpen: s.side === 'um',
-      kopOpen: s.side === 'kop',
-      shellPop: s.side === 'ws' || s.side === 'um',
-      toggleWs: () => this.setState({ side: s.side === 'ws' ? null : 'ws' }),
-      toggleUm: () => this.setState({ side: s.side === 'um' ? null : 'um' }),
-      toggleKop: () => this.setState({ side: s.side === 'kop' ? null : 'kop' }),
-      closeShell: () => this.setState({ side: null }),
-      tabKopCls: s.side === 'kop' ? 'tbi on' : 'tbi',
-      shortName: shortName,
+      pendingN: String(P.pend),
+      hasPend: P.pend > 0,
+      pendAria: this.pl(P.pend, 'unanswered request'),
+      cntCls: P.pend > 0 ? 'cnt' : 'cnt hid',
+      navReqLabel: P.pend > 0 ? 'Bookings, ' + this.pl(P.pend, 'request') : 'Bookings',
+      me: { name: P.name, ini: P.ini, phone: P.phone, role: P.role },
+      wsAria: 'Workspace: Glow Studio, ' + P.role + '. Switch',
+      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
+      contactOpen: side === 'contact', openContact: () => this.setState({ side: 'contact' }),
+      wsList: P.ws.map((w) => ({
+        example: false,
+        name: w[0], cap: w[1], logo: w[2], noLogo: !w[2], ini: w[0].charAt(0), cur: w[4], other: !w[4], hasPend: w[3] > 0, pend: String(w[3]),
+        aria: w[0] + ', ' + w[1] + (w[4] ? ', current workspace' : (w[3] ? ', ' + this.pl(w[3], 'unanswered request') : ''))
+      })),
+      wsOpen: side === 'ws',
+      userOpen: side === 'user',
+      moreOpen: side === 'more',
+      toggleWs: menuTo('ws'),
+      toggleUser: menuTo('user'),
+      toggleMore: menuTo('more'),
+      closeMenus: () => this.setState({ side: null }),
+      menuKey: (e) => { if (e && e.key === 'Escape') this.setState({ side: null }); },
+      showSettings: !spec,
+      showRevBadge: !spec,
+      revNavLabel: spec ? 'Reviews' : 'Reviews, 4 unanswered',
+      hasToast: !!s.toast,
+      toastText: s.toast ? s.toast.text : '',
+      toastUndo: false,
+      toastPlain: true,
+      undo: () => this.setState({ toast: null }),
+      canManage: mg && !noAccess,
+      seeMoney: seeMoney,
+      noAccess: noAccess,
+      hasCard: !noAccess,
+      showBook: !noAccess && !s.edit,
+      shortName: noAccess ? 'Client' : shortName,
       fullName: full,
       initial: full.charAt(0).toUpperCase(),
       phone: '+993 ' + fmt(pr.ph),
-      copyPhone: () => this.flash({}, 'Belgi göçürildi · +993 ' + fmt(pr.ph)),
+      telHref: 'tel:+993' + pr.ph,
+      acct: !!c.acct,
+      noAcct: !c.acct,
+      copyPhone: () => this.flash({}, 'Number copied · +993 ' + fmt(pr.ph)),
       tags: tags,
-      sinceText: 'mart 2024-den bäri' + (pr.source ? ' · ' + pr.source : ''),
+      sinceText: c.since + (pr.source ? ' · ' + pr.source : ''),
       viewMode: !s.edit,
       editMode: !!s.edit,
-      startEdit: () => this.setState({ edit: true, form: Object.assign({}, this.state.profile) }),
+      startEdit: () => this.setState({ edit: true, form: Object.assign({}, this.state.profile, { custom: this.state.profile.custom.slice() }) }),
       cancelEdit: () => this.setState({ edit: false }),
       submitEdit: (e) => { if (e && e.preventDefault) e.preventDefault(); save(); },
       f: { full: fm.full, phFmt: fmt(fm.ph), bday: fm.bday, source: fm.source },
@@ -482,13 +789,12 @@ class Component extends DCLogic {
       phBad: phBad,
       phCls: phBad ? 'inp is-e' : 'inp',
       tagChips: tagChips,
-      openDel: () => this.setState({ delOpen: true }),
-      closeDel: () => this.setState({ delOpen: false }),
-      delOpen: !!s.delOpen,
-      delText: full + ' we onuň bellikleri pozular. Ýazylyş taryhy hasabatlarda atsyz galar.',
-      modalKey: (e) => { if (e && e.key === 'Escape') this.setState({ delOpen: false }); },
+      statsCls: seeMoney ? 'stats' : 'stats s3',
+      st: st,
       notes: notes,
-      notesCount: String(s.notes.length),
+      hasNotes: notes.length > 0,
+      noNotes: notes.length === 0 && !s.composer,
+      notesCount: notes.length ? String(notes.length) : '',
       composer: !!s.composer,
       noComposer: !s.composer,
       openComposer: () => this.setState({ composer: true, draft: '', alertChk: false }),
@@ -499,28 +805,63 @@ class Component extends DCLogic {
       flipAlert: () => this.setState({ alertChk: !this.state.alertChk }),
       noDraft: !s.draft.trim(),
       saveNote: () => {
-        const st = this.state;
-        const t = st.draft.trim();
+        const stt = this.state;
+        const t = stt.draft.trim();
         if (!t) return;
-        this.flash({ notes: [{ text: t, alert: !!st.alertChk, by: 'Maýsa', at: 'Şu gün' }].concat(st.notes), composer: false, draft: '', alertChk: false }, 'Bellik goşuldy');
+        this.flash({ notes: [{ text: t, alert: !!stt.alertChk, by: me1, at: 'Today' }].concat(stt.notes), composer: false, draft: '', alertChk: false }, 'Note added');
       },
-      hist: hist,
+      up: up,
+      hasUp: up.length > 0,
+      noUp: up.length === 0,
+      upCount: up.length ? String(up.length) : '',
+      hrHead: 'hr m th',
+      hist: histRows,
+      histTotal: this.pl(c.histN, 'booking'),
+      histMore: H.length > 4,
       more: !!s.more,
-      moreLabel: s.more ? 'Az görkez' : 'Ýene görkez',
-      histCount: hist.length + ' / 13 görkezilýär',
+      moreLabel: s.more ? 'Show less' : 'Show all',
+      histCount: histRows.length + ' / ' + c.histN + ' bookings',
       toggleMore: () => this.setState({ more: !this.state.more }),
-      noSms: !!s.noSms,
-      smsCls: s.noSms ? 'sw on' : 'sw',
-      flipSms: () => this.flash({ noSms: !this.state.noSms }, this.state.noSms ? 'Ýatlatma SMS-leri iberiler' : 'Ýatlatma SMS-leri iberilmez'),
-      phOnly: !!s.phOnly,
-      phOnlyCls: s.phOnly ? 'sw on' : 'sw',
-      flipPhOnly: () => this.flash({ phOnly: !this.state.phOnly }, this.state.phOnly ? 'Onlaýn ýazylyş açyldy' : 'Indi diňe jaň arkaly ýazylyp biler'),
-      sourceText: pr.source || 'görkezilmedi',
-      bdayText: bdayText || 'görkezilmedi',
-      bdayCls: bdayText ? '' : 'cap',
-      hasToast: !!s.toast,
-      toastText: s.toast ? s.toast.text : ''
+      reps: reps,
+      hasReps: reps.length > 0,
+      noReps: reps.length === 0,
+      repCount: reps.length ? String(reps.length) : '',
+      repCap: reps.length === 1 && reps[0].canRemove ? 'The client isn’t told. You can remove it ' + reps[0].until + '.' : 'The client isn’t told. You can remove each report for 7 days.',
+      asideTitle: mg ? 'Client settings' : 'Details',
+      po: !!s.po,
+      poCls: s.po ? 'sw on' : 'sw',
+      poIdle: !s.po && !s.poReset,
+      poWarn: !!s.po,
+      poWarnText: s.poAuto ? '2 no-shows — online booking is off for this client' : 'Turned on by hand — online booking is off for this client',
+      poOk: !s.po && !!s.poReset,
+      flipPo: () => {
+        if (this.state.po) this.flash({ po: false, poAuto: false, poReset: true }, 'Phone only is off · online booking is back');
+        else this.flash({ po: true, poAuto: false, poReset: false }, 'Phone only is on · online booking is off for this client');
+      },
+      sourceText: pr.source || 'not given',
+      bdayText: bdayText || 'not given',
+      bdayCls: bdayText ? 'kvv' : 'kvv cap',
+      openDel: () => this.setState({ delOpen: true }),
+      closeDel: () => this.setState({ delOpen: false }),
+      showDel: !!s.delOpen && mg && !noAccess,
+      dm: dm,
+      modalKey: (e) => { if (e && e.key === 'Escape') this.setState({ delOpen: false }); }
     };
+  }
+  removeRep(i) {
+    const st = this.state;
+    const r = st.reps[i];
+    if (!r) return;
+    const patch = { reps: st.reps.filter((x, j) => j !== i) };
+    let text = 'Report removed';
+    if (r.k === 'noshow' && r.hi >= 0 && st.hist[r.hi] && st.hist[r.hi][4] === 'noshow') {
+      const hist = st.hist.map((h) => h.slice());
+      hist[r.hi][4] = 'completed';
+      patch.hist = hist;
+      text = 'Report removed · the booking is Completed again';
+      if (st.po && st.poAuto) { patch.po = false; patch.poAuto = false; text += ' · online booking is back'; }
+    }
+    this.flash(patch, text);
   }
 }
 </script>

@@ -34,10 +34,10 @@
 | Saýla · Dowam et · Yza · Ýap · Ýatda sakla · Ýatyr (in a form/dialog) | Select · Continue · Back · Close · Save · Cancel |
 | Üýtgeşmeleri ýatda saklaňmy? (save bar) | Save your changes? (buttons: Discard · Save) |
 | Ugradyldy / Ýazylyş tassyklandy | Booking sent / Booking confirmed |
-| Hünärmen · Islendik hünärmen · Programmasyz hünärmen | Specialist · Any specialist · Specialist (no app) |
+| Hünärmen · Islendik hünärmen · Programmasyz hünärmen | Specialist · Any specialist · ~~Specialist (no app)~~ → Specialist + "Uses the app" off ("Doesn't use the app") |
 | Eýesi · Administrator · Dereje · Rugsatlar | Owner · Admin · Access level · Permissions |
 | Iş ýeri · Iş ýerleriňiz · Täze biznes döret | Workspace · Your workspaces · Create a business |
-| Profilim · Dil · Müşderi hökmünde aç · Çykmak | My profile · Language · Open as a client · Log out |
+| Profilim · Dil · Müşderi hökmünde aç · Çykmak | My profile · Language (only when a market has several languages) · Open as a client · Log out |
 | Ýeral sahypaňyz | Your Ýeral page |
 | Çakylyk · Çagyryldy · Täzeden iber · Möhleti geçdi | Invite · Invited · Resend invite · Expired |
 | Eýeçiligi geçir | Transfer ownership |
@@ -59,9 +59,9 @@
 | Reňkler we nyşanlar · Düşnükli | Colours and symbols · Got it |
 | Gün · Hepde · Ähli işgärler · Bir işgär · Ýatyrylanlary görkez | Day · Week · All staff · One specialist · Show cancelled |
 | Stollar · Sapaklar · Zal · Terrasa · VIP otag · Adam sany · Stol 3+4 birleşdir | Tables · Classes · Hall · Terrace · VIP room · Party size · Combine tables 3+4 |
-| Doly · N ýer galdy · Garaşýanlar sanawy | Full · N spots left · Waiting list |
+| Doly · N ýer galdy · Garaşýanlar sanawy | Full · N seats left · Waiting list |
 | Ýakynda (later features) | Later |
-| Kod iber / Kod al · Täzeden iber (0:59) | Send code · Send a new code in 0:59 → Send a new code |
+| Kod iber / Kod al · Täzeden iber (0:59) | Send code · Get a new code in 0:59 → Get a new code |
 | Belgi doly däl: 8 san bolmaly. | The number is incomplete — it needs 8 digits. |
 | Kod diňe mobil belgä iberilýär… | Codes go to mobile numbers only. Enter a number starting with 6 or 7. |
 | Kod nädogry. Ýene N synanyşyk galdy. | Wrong code. N tries left. |
@@ -79,3 +79,14 @@ Each board agent writes `copy/en-choices-<board>.md`: one line per English wordi
 - **No SMS promises at the first release:** "Notify the client" · "the client is notified" · "the client sees the reason in My bookings" — never "we sent an SMS".
 - **Addresses:** `business.yeral.app/w/{slug}/…`, `/login`, `/setup/{step}` (no language in the path).
 - Every other wording chosen in round 2: `en-choices-r2-login-shell.md`, `en-choices-r2-onboarding.md`, `en-choices-r2-calendar.md`, `en-choices-r2-mobile.md`, `en-choices-r2-ds-business.md`.
+
+## 6. Round 3 updates (20.10.2026 — business app part 2 + fixes)
+- **Owner's words:** "Get a new code" (with or without SMS) · "Time off" for a person's absence (holidays are the business's special days) · classes have **seats** · **"60 min"** (longer: "1 h 30 min", "2 h") · date and time join with **" · "** ("Thursday, 15 October · 14:30", "Thu, 15 Oct · 14:30", "12 Oct · 15:05"; the compact "Fri 16" only in week headers and date strips) · **"Cancel booking"** for the action, plain "Cancel" only closes a form · save bar **Discard · Save** · "Link and QR" · "Doesn't use the app" · "Average check" (business money, See revenue only) · "Phone only" · "Copy invite link" · "Invited · Expired · Declined · Cancelled · Left · Removed" · "Ýeral is checking · not counted in your rating" · "Pause online booking" · "Hidden by Ýeral" · "Try the business app" · "Start free".
+- **Example badge line:** "This isn't a real business. It's here so you can try Ýeral: bookings are confirmed at once, and nobody waits for you."
+- **Sign-in at the first release:** the code shows on screen ("Your code: 4821", field "Code", "To log in with …", "Enter your phone number — we'll show you a 4-digit code. No password needed."); the SMS copy is the later variant. "Too many codes. Try again in 42 minutes." (after 5 codes for one number in an hour).
+- **One language at the first release (English):** no language tabs, no main-language choice, no Language row, no EN · TK · RU on login pages. Later: a business writes in any one of the market's languages, picks it as its main language in Business profile, and missing texts show in it ("Missing texts show in the main language.").
+- **Workspaces show their city** ("Glow Studio · Ashgabat", switcher rows "Owner · Ashgabat"); never a district. City list (Turkmenistan): Ashgabat · Arkadag · Balkanabat · Dashoguz · Mary · Turkmenabat. Client-site copy still never names a city ("near me").
+- **Names:** a client's saved name shows in full where the record shows ("Aýjemal Gurbanowa"); reviewers are first name + initial ("Aýjemal G."), never "Anonymous". Team and invite captions say "sign in"; login screens say "Log in".
+- **Never drawn at the first release:** editing permissions, ownership transfer, client export, bulk SMS, reports and analytics, the help centre, notification settings, tables, classes, the own-site booking button.
+- Every other wording chosen in round 3: `en-choices-r3-*.md` (login-shell, calendar, onboarding-settings, clients, team-services, reviews-landing, ds, mobile, ds-business).
+

@@ -1,16 +1,15 @@
 <!doctype html>
-<html lang="tk">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Ýeral Biznes — teswirler</title>
+<title>Ýeral Business — reviews</title>
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;family=Golos+Text:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<style>
-body{margin:0;background:#ffffff}
+<style>body{margin:0;background:#ffffff}
 *{box-sizing:border-box}
 a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .lbl{font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78}
@@ -22,8 +21,11 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .b-sec{background:#ffffff;border-color:#d8d8de;color:#101014}
 .b-sec:hover{background:#f6f6f8;border-color:#b0b0b8;color:#101014}
 .b-gho{background:transparent;color:#101014}
-.b-gho:hover{background:#f4f4f6}
-.b-ico{width:40px;height:40px;padding:0;min-width:0}
+.b-gho:hover{background:#f4f4f6;color:#101014}
+.b-ico{width:40px;height:40px;padding:0;min-width:0;flex:none}
+.b-ic{width:36px;height:36px;padding:0;min-width:0;border-radius:10px;flex:none}
+.me .b-gho:hover{background:#f6f6f8}
+.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed}
 .b:focus-visible,.sn:focus-visible,.swb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .side{width:248px;flex:none;display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid #e6e6ea;background:#ffffff}
 .swb{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-radius:12px;background:transparent;font-family:inherit;text-align:left;cursor:pointer;color:#101014}
@@ -31,55 +33,99 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 .sn{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;color:#101014}
 .sn:hover{background:#f4f4f6;color:#101014}
 .sn.on{background:#efecfe;color:#4429d6;font-weight:600}
-.sn.off{color:#6e6e78;cursor:default}
-.sn.off:hover{background:transparent;color:#6e6e78}
 .cnt{margin-left:auto;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
-.cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}
-.soon{margin-left:auto;font-size:11px;font-weight:600;color:#6e6e78;background:#f4f4f6;border-radius:999px;padding:2px 8px}
+.cnt.hid{display:none}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .top{display:flex;align-items:center;gap:16px;height:64px;padding:0 24px 0 32px;border-bottom:1px solid #e6e6ea}
-.gs{display:flex;align-items:center;gap:10px;height:40px;width:380px;padding:0 10px 0 12px;border:1px solid #d8d8de;border-radius:10px;color:#6e6e78;font-size:14px}
-.kbd{margin-left:auto;font-size:12px;font-weight:600;color:#5a5a64;background:#f4f4f6;border:1px solid #e6e6ea;border-radius:6px;padding:1px 6px}
 .pop{background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16);padding:6px}
 .mi{display:flex;align-items:center;gap:10px;min-height:40px;padding:6px 10px;border-radius:8px;font-size:14px;color:#101014}
 .mi:hover{background:#f4f4f6;color:#101014}
 .av{width:32px;height:32px;border-radius:999px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
-.app .side{position:sticky;top:0;height:100vh;overflow-y:auto;z-index:20}
-button.mi{border:0;background:transparent;font-family:inherit;width:100%;cursor:pointer;text-align:left}
-.mi:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
-label.mi:has(input:focus-visible){box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
-.mi.dis,.mi.dis:hover{color:#6e6e78;background:transparent;cursor:default}
-.b:disabled{background:#f0f0f3;border-color:#f0f0f3;color:#6e6e78;box-shadow:none;cursor:not-allowed}
+.popa{position:absolute;z-index:31;display:flex;flex-direction:column}
+button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:pointer;text-align:left}
+label.mi{cursor:pointer}
+label.mi:has(input:focus-visible){box-shadow:inset 0 0 0 2px #7a5ff4}
+.mi:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #7a5ff4}
+.mi-d,.mi-d:hover{color:#a3251b}
+.mi > svg{flex:none;color:#5a5a64}
+.mi-d > svg{color:#a3251b}
+.mi-d:hover{background:#fee4e2}
+.y-pill{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;border:1px solid transparent;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;flex:none}
+.y-pill.s{height:20px;padding:0 7px}
+.y-pill.l{height:28px;padding:0 10px;gap:6px;font-size:13px;line-height:18px}
+.y-pill svg{flex:none}
+.y-pill.wr{white-space:normal;height:auto;min-height:28px;padding-top:4px;padding-bottom:4px;flex:0 1 auto;min-width:0}
+.t-neu{background:#f4f4f6;border-color:#e6e6ea;color:#5a5a64}
+.t-suc{background:#e7f8ee;border-color:#bfe6d1;color:#066a41}
+.t-war{background:#fef6e7;border-color:#f2ddb0;color:#93500a}
+button.y-pill{font-family:inherit;cursor:pointer}
+button.y-pill.t-war:hover{border-color:#dc8b0b}
+button.y-pill:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.y-exb svg{flex:none}
+.bnw{display:flex;flex-direction:column;margin-bottom:24px}
+.bnr{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:12px;border:1px solid transparent;font-size:14px;line-height:20px}
+.bnr > svg{flex:none}
+.bnx{flex:1;min-width:0}
+.bnx b{font-weight:600}
+@media (max-width:767px){.bnr{flex-wrap:wrap}.bnx{flex:1 1 calc(100% - 40px)}}
+.c-war{background:#fef6e7;border-color:#f2ddb0;color:#93500a}
+.c-dan{background:#fee4e2;border-color:#f6c7c2;color:#a3251b}
+.c-neu{background:#f4f4f6;border-color:#e6e6ea;color:#101014}
+.c-neu > svg{color:#5a5a64}
+.swd{display:flex;align-items:center;gap:10px;padding:8px;color:#101014}
+.dlog{width:100%}
+@media (max-width:1023px){.swd{justify-content:center;padding:4px}.swd > span{display:none !important}.dlog{width:44px;padding:0;font-size:0;gap:0}}
+.catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
+.mdv{height:1px;background:#e6e6ea;margin:6px 4px}
+.wsp{position:fixed;top:68px;left:12px;z-index:31;width:300px;display:flex;flex-direction:column}
+.ump{position:fixed;bottom:68px;left:12px;z-index:31;width:260px;display:flex;flex-direction:column}
+.wsr{gap:12px}
+.wsi{width:32px;height:32px;border-radius:8px;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.wsn{display:flex;flex-direction:column;min-width:0;flex:1}
+.wst{font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wsc{font-size:12px;line-height:16px;color:#5a5a64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mws{display:none;align-items:center;gap:4px;height:44px;margin-left:-6px;padding:0 6px;border:0;border-radius:12px;background:transparent;color:#5a5a64;cursor:pointer;flex:none}
+.mws:hover{background:#f4f4f6}
+.mws:focus-visible,.tbi:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.tabbar{display:none}
+.tbi{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:60px;padding:6px 4px;border:0;background:transparent;font-family:inherit;font-size:11px;line-height:14px;font-weight:600;color:#5a5a64;cursor:pointer}
+.tbi:hover{color:#101014}
+.tbi.on{color:#4429d6}
+.tbc{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:16px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.mscrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:44;background:rgba(16,16,20,.4)}
+.more{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;flex-direction:column;max-height:85%;overflow-y:auto;padding:8px 8px 16px;background:#ffffff;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}
+.more .mi{min-height:48px;gap:12px}
+.more .mi.on,.more .mi.on:hover{background:#efecfe;color:#4429d6;font-weight:600}
+.more .mi.on > svg{color:#4429d6}
+.more .grab{display:block;margin:0 auto 8px}
+.cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}
 .vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.cont{flex:1;padding:32px 32px 64px}
+.cont{flex:1;padding:24px 32px 64px;min-width:0}
 .rwrap{max-width:920px;display:flex;flex-direction:column;gap:20px}
 .sum{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;padding-bottom:24px;border-bottom:1px solid #e6e6ea}
 .sumc{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;padding:4px 32px;border-left:1px solid #e6e6ea}
-.sumc.s1{padding-left:0;border-left:0}
+.sumc.s1{padding-left:0;border-left:0;gap:8px}
 .sumc.s2{align-items:stretch}
-.big{font-size:48px;line-height:48px;font-weight:700;letter-spacing:-0.035em}
+.sumc.s3{max-width:280px}
+.big{font-size:48px;line-height:48px;font-weight:700;letter-spacing:-0.035em;font-variant-numeric:tabular-nums}
+.uc{max-width:220px}
 .stars{display:inline-flex;gap:2px;flex:none}
 .bars{display:flex;flex-direction:column;gap:8px;max-width:360px;width:100%}
 .bar{display:grid;grid-template-columns:12px minmax(0,1fr) 28px;align-items:center;gap:12px;font-size:13px;line-height:18px}
 .bt{display:block;height:6px;border-radius:999px;background:#f0f0f3;overflow:hidden}
 .bf{display:block;height:100%;border-radius:999px;background:#5a3ff0}
-.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
-.dot{width:6px;height:6px;border-radius:999px;flex:none}
-.st-p{background:#fef6e7;border:1px solid #f2ddb0;color:#93500a}
-.st-d{background:#e7f8ee;border:1px solid #bfe6d1;color:#066a41}
-button.badge{font-family:inherit;cursor:pointer}
-button.badge.st-p:hover{background:#fcecc9}
-button.badge:focus-visible,.lb:focus-visible,.chip:focus-visible,.xl:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .xl{display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:20px;font-weight:600;border-radius:6px}
+.xl svg{flex:none}
+.xl:focus-visible,.chip:focus-visible,.lb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.sint{display:flex;align-items:flex-start;gap:10px;margin:0;font-size:15px;line-height:22px;color:#5a5a64;max-width:680px}
+.sint svg{flex:none;margin-top:2px}
 .frow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.chg{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chg{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
 .chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px 0 14px;border-radius:999px;border:1px solid #d8d8de;background:#ffffff;font-family:inherit;font-size:14px;font-weight:500;color:#101014;cursor:pointer;white-space:nowrap;flex:none}
 .chip:hover{background:#f6f6f8}
 .chip.on{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
 .chip.on:hover{background:#ded7fd}
-.popa{position:absolute;z-index:31;display:flex;flex-direction:column}
-.catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
-label.mi{cursor:pointer}
+.chip svg{flex:none}
 .cb{width:18px;height:18px;accent-color:#5a3ff0;margin:0;cursor:pointer;flex:none}
 .inp{height:48px;width:100%;border:1px solid #d8d8de;border-radius:8px;padding:0 14px;font-family:inherit;font-size:15px;color:#101014;background:#ffffff;outline:none}
 .inp::placeholder{color:#6e6e78}
@@ -93,6 +139,7 @@ label.mi{cursor:pointer}
 .fld{display:flex;flex-direction:column;gap:8px;min-width:0}
 .flab{font-size:13px;line-height:18px;font-weight:600;color:#101014}
 .rvl{display:flex;flex-direction:column;border-top:1px solid #e6e6ea}
+.rvl.nolist{border-top:0}
 .rv{display:flex;gap:14px;padding:20px 0;border-bottom:1px solid #e6e6ea}
 .rav{width:40px;height:40px;border-radius:999px;background:#f0f0f3;color:#101014;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .rvb{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
@@ -102,27 +149,31 @@ label.mi{cursor:pointer}
 .rvw{font-size:13px;line-height:18px;font-weight:400;color:#5a5a64}
 .rvs{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .rvt{margin:0;font-size:15px;line-height:22px;color:#101014;max-width:680px;text-wrap:pretty}
-.mod{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mod{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;max-width:680px}
 .rep{display:flex;flex-direction:column;gap:4px;max-width:680px;padding:10px 12px 12px 16px;border-radius:12px;background:#f6f6f8}
-.reph{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.reph{display:flex;align-items:center;gap:4px 8px;flex-wrap:wrap;min-height:20px}
 .repa{font-size:13px;line-height:18px;font-weight:600;color:#101014}
 .rept{margin:0;font-size:14px;line-height:20px;color:#101014}
-.lb{display:inline-flex;align-items:center;height:32px;padding:0 8px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:#4429d6;cursor:pointer}
+.lb{display:inline-flex;align-items:center;height:32px;padding:0 8px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:#4429d6;cursor:pointer;white-space:nowrap}
 .lb:hover{background:#ececf0;color:#3520a6}
 .lb-d{color:#a3251b}
 .lb-d:hover{color:#a3251b}
 .cmp{display:flex;flex-direction:column;gap:8px;max-width:680px}
-.cmpf{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.cmpf{display:flex;justify-content:space-between;gap:4px 12px;flex-wrap:wrap}
 .cmpa{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
-.empty{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:20px;padding:48px 32px;border:1px dashed #d8d8de;border-radius:16px;text-align:center}
+.mrow{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:4px}
+.empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:48px 32px;border:1px dashed #d8d8de;border-radius:16px;text-align:center}
+.rvl .empty{margin-top:20px}
 .eic{width:56px;height:56px;border-radius:999px;background:#efecfe;color:#5a3ff0;display:flex;align-items:center;justify-content:center}
 .foot{display:flex;gap:8px;align-items:flex-start;color:#5a5a64}
+.foot svg{flex:none;margin-top:1px}
 .scrim{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(16,16,20,.4);z-index:40}
 .grab{display:none;width:32px;height:4px;border-radius:999px;background:#d8d8de;margin:0 auto;flex:none}
 .mwrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
 .mwrap .scrim{position:absolute;z-index:0}
 .mdl{position:relative;z-index:1;display:flex;flex-direction:column;gap:20px;max-width:100%;max-height:100%;overflow-y:auto;padding:24px;border-radius:16px;background:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16)}
 .mdl-s{width:480px}
+.mhd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 .mt{margin:0;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.015em}
 .mact{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap}
 .qbox{display:flex;flex-direction:column;gap:6px;margin:0;padding:12px 14px;border-radius:12px;background:#f6f6f8}
@@ -131,130 +182,61 @@ label.mi{cursor:pointer}
 .rl{display:flex;align-items:center;gap:10px;min-height:44px;font-size:15px;line-height:20px;color:#101014;cursor:pointer}
 .rl input{width:18px;height:18px;accent-color:#5a3ff0;margin:0;flex:none;cursor:pointer}
 .toast{position:fixed;left:272px;bottom:24px;z-index:80;display:inline-flex;align-items:center;gap:12px;min-height:52px;padding:0 8px 0 16px;border-radius:12px;background:#101014;color:#ffffff;box-shadow:0 8px 24px rgba(16,16,20,.16);font-size:15px;line-height:20px;max-width:calc(100% - 296px)}
+.toast > svg{flex:none}
 .toast .tb{background:transparent;color:#c3b6fb;padding:0 10px}
 .toast .tb:hover{background:#2a2a32;color:#c3b6fb}
 .tsp{width:8px;flex:none}
-@media (max-width:1023px){.side{width:72px;padding:12px 0;align-items:center}.side > div{align-self:stretch}.side .swb{width:44px;height:44px;padding:4px;justify-content:center}.side .swb > span:not(.av),.side .swb > svg{display:none}.side .sn{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0;position:relative}.side .cnt{position:absolute;top:6px;right:6px;min-width:0;width:8px;height:8px;padding:0;border:0;background:#dc8b0b;font-size:0}.side .cnt.cnt-n{background:#7b8ea3}.side .soon{display:none}.top{padding:0 24px}.gs{width:auto;flex:0 1 320px}.cont{padding:24px 24px 48px}.sum{grid-template-columns:auto minmax(0,1fr)}.sumc.s3{grid-column:1 / -1;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:20px;padding:20px 0 0;border-left:0;border-top:1px solid #e6e6ea}.toast{left:96px;max-width:calc(100% - 120px)}}
-@media (max-width:767px){.app{flex-direction:column}.app .side{position:sticky;top:0;height:auto;width:100%;flex-direction:row;align-items:center;gap:4px;padding:6px 12px;border-right:0;border-bottom:1px solid #e6e6ea;overflow-x:auto;overflow-y:hidden}.side > div{display:none}.side .swb,.side .sn{flex:none}.top{height:56px;padding:0 16px}.gs{display:none}.cont{padding:16px 16px 40px}.sum{grid-template-columns:minmax(0,1fr)}.sumc{padding:16px 0 0;border-left:0}.sumc.s1{padding-top:0}.sumc.s2{margin-top:16px;border-top:1px solid #e6e6ea}.sumc.s3{margin-top:16px;padding-top:16px}.chip{height:44px}.b-sm{height:44px;border-radius:12px}.lb{height:44px}.mi{min-height:44px}.frow > .selw,.frow .isel{width:100%}.rv{gap:12px}.rav{width:36px;height:36px;font-size:14px}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:16px;max-width:none}}
-@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}
-.b-ic{width:36px;height:36px;padding:0;min-width:0;border-radius:10px;flex:none}
-.b-gho.b-ic:hover{background:#f6f6f8;color:#101014}
-.catcher{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
-.wsp{position:fixed;z-index:31;top:72px;left:12px;width:300px;max-width:calc(100% - 24px);display:flex;flex-direction:column}
-.usp{position:fixed;z-index:31;bottom:72px;left:12px;width:264px;max-width:calc(100% - 24px);display:flex;flex-direction:column}
-button.mi{border:0;background:transparent;font-family:inherit;width:100%;cursor:pointer;text-align:left}
-.mi:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
-.mi > svg{flex:none}
-.mi-d,.mi-d:hover{color:#a3251b}
-.wsl{width:32px;height:32px;border-radius:8px;flex:none;object-fit:cover}
-.wsi{display:inline-flex;align-items:center;justify-content:center;background:#efecfe;color:#4429d6;font-size:14px;font-weight:700}
-.wsadd{display:inline-flex;align-items:center;justify-content:center;border:1px dashed #d8d8de;color:#5a5a64}
-.wst{display:flex;flex-direction:column;min-width:0;flex:1}
-.wsn{font-size:14px;line-height:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wsc{font-size:12px;line-height:16px;color:#5a5a64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (max-width:1023px){.side .swb > span:not(.av){display:none !important}.side .me{flex-direction:column;gap:6px !important;padding:4px 0 !important}.side .me > span:not(.av){display:none !important}}
-@media (max-width:767px){.side .me{flex-direction:row;flex:none;margin-left:auto;padding:0 !important}.side .me .b-ic{width:44px !important;height:44px !important}.wsp{top:60px}.usp{top:60px;bottom:auto;left:auto;right:12px}}
-.mws{display:none;align-items:center;gap:4px;height:44px;margin-left:-6px;padding:0 6px;border:0;border-radius:12px;background:transparent;color:#5a5a64;cursor:pointer;flex:none}
-.mws:hover{background:#f4f4f6}
-.mdv{height:1px;background:#e6e6ea;margin:6px 4px}
-.tabbar{display:none}
-.tbi{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:60px;padding:6px 4px;border:0;background:transparent;font-family:inherit;font-size:11px;line-height:14px;font-weight:600;color:#5a5a64;cursor:pointer}
-.tbi:hover{color:#101014}
-.tbi.on{color:#4429d6}
-.tbc{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#fef6e7;border:1px solid #f2ddb0;color:#93500a;font-size:11px;line-height:16px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
-.mscrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:44;background:rgba(16,16,20,.4)}
-.more{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;flex-direction:column;max-height:85%;overflow-y:auto;padding:8px 8px 16px;background:#ffffff;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}
-.more .mi{min-height:48px;gap:12px}
-.more .mi.on,.more .mi.on:hover{background:#efecfe;color:#4429d6;font-weight:600}
-.more .grab{display:block;margin:0 auto 8px}
-.tbi:focus-visible,.mws:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
-@media (max-width:767px){.side{display:none !important}.mws{display:inline-flex}.main{padding-bottom:72px}.tabbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:35;padding:0 4px;background:#ffffff;border-top:1px solid #e6e6ea}.top{position:sticky;top:0;z-index:25;background:#ffffff;height:56px;padding:0 16px;gap:10px}.top h1{font-size:19px !important;line-height:24px !important}.wsp{top:60px;left:8px;right:8px;width:auto;max-width:none}.toast{left:16px;right:16px;bottom:80px;max-width:none}}
+@media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side .swb{width:44px;padding:4px;justify-content:center}.side .swb>span,.side .swb>svg{display:none !important}.me{flex-direction:column;gap:4px !important;padding:4px 0 !important}.mex{display:none !important}.ump{bottom:96px;left:8px}.sn{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0;position:relative}.sn .cnt{position:absolute;top:6px;right:6px;min-width:0;width:8px;height:8px;padding:0;border:0;background:#dc8b0b;font-size:0}.side .cnt-n{background:#6e6e78}.sdv{width:44px;margin:8px 0 !important}.top{padding:0 24px}.cont{padding:24px 24px 48px}.sum{grid-template-columns:auto minmax(0,1fr)}.sumc.s3{grid-column:1 / -1;max-width:none;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:20px;padding:20px 0 0;border-left:0;border-top:1px solid #e6e6ea}.toast{left:96px;max-width:calc(100% - 120px)}}
+@media (max-width:767px){.app{flex-direction:column}.side{display:none !important}.mws{display:inline-flex}.main{padding-bottom:72px}.tabbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:35;padding:0 4px;background:#ffffff;border-top:1px solid #e6e6ea}.top{position:sticky;top:0;z-index:25;background:#ffffff;height:56px;padding:0 16px;gap:10px}.top h1{font-size:19px !important;line-height:24px !important}.cont{padding:16px 16px 40px}.bnw{margin-bottom:16px}.sum{grid-template-columns:minmax(0,1fr)}.sumc{padding:16px 0 0;border-left:0}.sumc.s1{padding-top:0}.sumc.s2{margin-top:16px;border-top:1px solid #e6e6ea}.sumc.s3{margin-top:16px;padding-top:16px}.uc{max-width:none}.chip{height:44px}.b-sm{height:44px;border-radius:12px}.b-ic{width:44px;height:44px}.lb{height:44px}.mi{min-height:44px}.frow > .selw,.frow .isel{width:100%}.rv{gap:12px}.rav{width:36px;height:36px;font-size:14px}.mrow .b{width:100%}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block}.mact .b{flex:1 1 auto}.cmpa .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:80px;max-width:none}.wsp{top:60px;left:8px;right:8px;width:auto}.sfp{position:fixed;top:auto !important;left:0 !important;right:0;bottom:0;width:auto !important;z-index:45;padding:8px 8px 16px;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16)}.sfp .mi{min-height:48px}}
 </style>
 </helmet>
 <div class="app" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
 
-<aside class="side" aria-label="Esasy menýu">
-<button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span class="cap" style="font-size: 12px; line-height: 16px">Eýesi</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
-<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
-<a class="sn" href="B-Calendar.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Senenama</a>
-<a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Ýazylyşlar<span class="cnt" aria-label="5 haýyş">5</span></a>
-<a class="sn" href="B-Clients.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Müşderiler</a>
-<a class="sn on" href="B-Reviews.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<sc-if value="{{hasNavCnt}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-label="{{navCntLabel}}">{{unansweredN}}</span></sc-if></a>
-<a class="sn" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
-<a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
-<div style="flex: 1"></div>
-<a class="sn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
-<a class="sn" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
-<div style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
-<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
-<span class="av">M</span>
-<span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 10 20 30</span></span>
-<button class="b b-gho b-ic" aria-label="Hasap menýusy" aria-haspopup="menu" aria-expanded="{{meOpen}}" onClick="{{toggleMe}}" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
-</div>
+<aside class="side" aria-label="Main menu" style="position: sticky; top: 0; height: 100vh; z-index: 20">
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="cap" style="font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0">{{me.role}}</span></span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><div class="swd"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; overflow-wrap: anywhere">Glow Studio</span><span style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; min-width: 0"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span><span class="cap" style="font-size: 12px; line-height: 16px">Ashgabat</span></span></span></div></sc-if>
+<div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<a class="sn" href="B-Calendar.dc.html" aria-label="Calendar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Calendar</a>
+<a class="sn" href="B-Bookings.dc.html" aria-label="{{navReqLabel}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Bookings<span class="{{cntCls}}">{{pendingN}}</span></a>
+<a class="sn" href="B-Clients.dc.html" aria-label="Clients"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Clients</a>
+<a class="sn on" href="B-Reviews.dc.html" aria-current="page" aria-label="{{revNavLabel}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<sc-if value="{{showRevBadge}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-hidden="true">{{unansweredN}}</span></sc-if></a>
+<sc-if value="{{showSettings}}" hint-placeholder-val="{{true}}"><a class="sn" href="B-Settings.dc.html" aria-label="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a></sc-if>
+<div class="sfill" style="flex: 1"></div>
+<div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<span class="av">{{me.ini}}</span>
+<span class="mex" style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums">{{me.phone}}</span></span>
+<button class="b b-gho b-ic" aria-label="Account menu" aria-haspopup="menu" aria-expanded="{{userOpen}}" onClick="{{toggleUser}}" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
+</div></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><a class="b b-sec dlog" href="B-Login.dc.html" aria-label="Log in"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>Log in</a></sc-if>
 </aside>
-<sc-if value="{{shellPop}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeShell}}"></div></sc-if>
-<sc-if value="{{wsOpen}}" hint-placeholder-val="{{false}}">
-<div class="pop wsp" role="menu" aria-label="Iş ýerleriňiz" onKeyDown="{{shellKey}}">
-<div class="lbl" style="padding: 8px 10px 6px">Iş ýerleriňiz</div>
-<button class="mi" role="menuitemradio" aria-checked="true" onClick="{{closeShell}}"><img class="wsl" src="../../assets/brand/yeral-icon.png" alt=""><span class="wst"><span class="wsn">Glow Studio</span><span class="wsc">Eýesi · Bitarap Türkmenistan şaýoly</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4429d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></button>
-<a class="mi" href="B-Calendar.dc.html" role="menuitemradio" aria-checked="false"><img class="wsl" src="../../assets/brand/yeral-icon.png" alt=""><span class="wst"><span class="wsn">Glow Studio · Parahat</span><span class="wsc">Eýesi · Parahat 7</span></span><span class="cnt" aria-label="2 jogapsyz haýyş">2</span></a>
-<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
-<a class="mi" href="B-Onboarding.dc.html" role="menuitem"><span class="wsl wsadd" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Täze biznes döret</a>
-</div>
-</sc-if>
-<sc-if value="{{meOpen}}" hint-placeholder-val="{{false}}">
-<div class="pop usp" role="menu" aria-label="Hasap menýusy" onKeyDown="{{shellKey}}">
-<a class="mi" href="#profilim" role="menuitem"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>Profilim</a>
-<a class="mi" href="#" role="menuitem"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Dil: Türkmençe</a>
-<a class="mi" href="Home.dc.html" role="menuitem"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg><span style="flex: 1">Müşderi hökmünde aç</span><span class="cap" style="font-size: 12px">yeral.app</span></a>
-<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
-<a class="mi mi-d" href="B-Login.dc.html" role="menuitem"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg>Çykmak</a>
-</div>
-</sc-if>
-<nav class="tabbar" aria-label="Esasy bölümler">
-<a class="tbi" href="B-Calendar.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Senenama</span></a>
-<a class="tbi" href="B-Bookings.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span>Ýazylyşlar</span><sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><span class="tbc" aria-label="{{pendAria}}">{{pendCount}}</span></sc-if></a>
-<a class="tbi" href="B-Clients.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Müşderiler</span></a>
-<button class="tbi on" aria-haspopup="dialog" aria-expanded="{{moreOpen}}" onClick="{{toggleMore}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path></svg><span>Köp</span></button>
-</nav>
-<sc-if value="{{moreOpen}}" hint-placeholder-val="{{false}}">
-<div class="mscrim" onClick="{{closeShell}}"></div>
-<div class="more" role="dialog" aria-label="Köp" onKeyDown="{{shellKey}}">
-<span class="grab"></span>
-<a class="mi on" href="B-Reviews.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Teswirler<sc-if value="{{hasNavCnt}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-label="{{navCntLabel}}">{{unansweredN}}</span></sc-if></a>
-<a class="mi" href="B-Analytics.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-9"></path></svg>Hasabatlar</a>
-<a class="mi" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Sazlamalar</a>
-<a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Ýeral sahypaňyz</a>
-<a class="mi" href="B-Help.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Kömek</a>
-<div class="mdv"></div>
-<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">M</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 14px; line-height: 20px; font-weight: 600">Maýsa Annaýewa</span><span class="cap" style="font-size: 12px; line-height: 16px">+993 65 10 20 30 · Eýesi</span></span></div>
-<a class="mi" href="#profilim">Profilim</a>
-<a class="mi" href="#">Dil: Türkmençe</a>
-<a class="mi" href="Home.dc.html">Müşderi hökmünde aç (yeral.app)</a>
-<a class="mi mi-d" href="B-Login.dc.html">Çykmak</a>
-</div>
-</sc-if>
 
 <div class="main">
 <div class="top">
-<button class="mws" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="Iş ýeri: Glow Studio, Eýesi. Çalyşmak" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
-<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Teswirler</h1>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><button class="mws" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></sc-if><sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><span class="mws"><img src="../../assets/brand/yeral-icon.png" alt="Glow Studio, example" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"></span></sc-if>
+<h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Reviews</h1>
 <div style="flex: 1"></div>
-<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Gözleg" placeholder="Müşderi, telefon ýa-da ýazylyş belgisi" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
 </div>
 
 <div class="cont">
+<sc-if value="{{bnOn}}" hint-placeholder-val="{{false}}"><div class="bnw">
+<sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnx"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
+<sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
+<sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnx"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
+</div></sc-if>
 <div class="rwrap">
 
-<section class="sum" aria-label="Teswirleriň jemi">
+<sc-if value="{{showSummary}}" hint-placeholder-val="{{true}}">
+<section class="sum" aria-label="Rating summary">
 <div class="sumc s1">
 <div style="display: flex; align-items: flex-end; gap: 14px">
-<span class="big">4,9</span>
+<span class="big">{{avg}}</span>
 <div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 2px">
-<span class="stars" role="img" aria-label="Ortaça baha: 5-den 4,9"><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="#101014" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></span>
-<span class="cap">96 teswir</span>
+<span class="stars" role="img" aria-label="{{avgAria}}"><sc-for list="{{avgStars}}" as="st" hint-placeholder-count="5"><svg width="16" height="16" viewBox="0 0 24 24" fill="{{st}}" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></sc-for></span>
+<span class="cap">{{countLabel}}</span>
 </div>
 </div>
+<sc-if value="{{hasUncounted}}" hint-placeholder-val="{{true}}"><span class="cap uc">{{uncountedLabel}}</span></sc-if>
 </div>
 <div class="sumc s2">
 <div class="bars">
@@ -264,69 +246,75 @@ button.mi{border:0;background:transparent;font-family:inherit;width:100%;cursor:
 </div>
 </div>
 <div class="sumc s3">
-<sc-if value="{{hasUnanswered}}" hint-placeholder-val="{{true}}"><button class="badge st-p" onClick="{{showUnanswered}}"><span class="dot" style="background: #dc8b0b"></span>Jogapsyz · {{unansweredN}}</button></sc-if>
-<sc-if value="{{allAnswered}}" hint-placeholder-val="{{false}}"><span class="badge st-d"><span class="dot" style="background: #12a366"></span>Ähli teswirlere jogap berildi</span></sc-if>
-<span class="cap">Ortaça jogap wagty: 6 sagat</span>
-<a class="xl" href="Venue.dc.html">Sahypaňyzda görüň<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+<sc-if value="{{hasUnanswered}}" hint-placeholder-val="{{true}}"><button class="y-pill l t-war" aria-label="{{unansweredAria}}" onClick="{{showUnanswered}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>Not answered · {{unansweredN}}</button></sc-if>
+<sc-if value="{{allAnswered}}" hint-placeholder-val="{{false}}"><span class="y-pill l t-suc"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>All reviews answered</span></sc-if>
+<a class="xl" href="Venue.dc.html">See it on your page<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
 </div>
 </section>
+</sc-if>
 
+<sc-if value="{{isSpec}}" hint-placeholder-val="{{false}}"><p class="sint"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Reviews about you, from clients after their visits. The owner and admins reply to them.</span></p></sc-if>
+
+<sc-if value="{{showRemoved}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg><span class="bnx"><b>Ýeral removed a review you reported.</b> {{removedText}}</span><button class="b b-gho b-ic" aria-label="Close" onClick="{{closeRemoved}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></sc-if>
+
+<sc-if value="{{showFilters}}" hint-placeholder-val="{{true}}">
 <div class="frow">
-<div class="chg" role="group" aria-label="Teswirleri süz">
+<div class="chg" role="group" aria-label="Filter reviews">
 <sc-for list="{{chips}}" as="c" hint-placeholder-count="7"><button class="{{c.cls}}" aria-pressed="{{c.on}}" aria-label="{{c.aria}}" onClick="{{c.pick}}">{{c.t}}<sc-if value="{{c.star}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></sc-if></button></sc-for>
-<div style="position: relative; flex: none">
+<sc-if value="{{showStaffFilter}}" hint-placeholder-val="{{true}}"><div style="position: relative; flex: none">
 <button class="{{staffChipCls}}" aria-haspopup="true" aria-expanded="{{staffOpen}}" onClick="{{toggleStaff}}">{{staffChip}}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
 <sc-if value="{{staffOpen}}" hint-placeholder-val="{{false}}">
 <div class="catcher" onClick="{{closePops}}"></div>
-<div class="pop popa" role="group" aria-label="Hünärmen boýunça süz" style="top: 42px; left: 0; width: 260px">
-<div class="lbl" style="padding: 8px 10px 4px">Hünärmenler</div>
+<div class="pop popa sfp" role="group" aria-label="Filter by specialist" style="top: 42px; left: 0; width: 280px" onKeyDown="{{popKey}}">
+<div class="lbl" style="padding: 8px 10px 4px">Specialists</div>
 <sc-for list="{{staffOpts}}" as="o" hint-placeholder-count="4"><label class="mi"><input type="checkbox" class="cb" checked="{{o.on}}" onChange="{{o.flip}}"><span style="flex: 1">{{o.t}}</span><span class="cap">{{o.sub}}</span></label></sc-for>
-<div style="height: 1px; background: #e6e6ea; margin: 6px 4px"></div>
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 2px 2px"><button class="b b-gho b-sm" disabled="{{noStaff}}" onClick="{{clearStaff}}">Arassala</button><button class="b b-sec b-sm" onClick="{{closePops}}">Taýýar</button></div>
+<div class="mdv"></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 2px 2px"><button class="b b-gho b-sm" disabled="{{noStaff}}" onClick="{{clearStaff}}">Clear</button><button class="b b-sec b-sm" onClick="{{closePops}}">Done</button></div>
 </div>
 </sc-if>
+</div></sc-if>
 </div>
+<span class="selw"><select class="inp i36 isel" aria-label="Sort" value="{{sort}}" onChange="{{onSort}}"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="low">Lowest rating first</option><option value="high">Highest rating first</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
 </div>
-<span class="selw"><select class="inp i36 isel" aria-label="Tertip" value="{{sort}}" onChange="{{onSort}}"><option value="new">Iň täzeler</option><option value="old">Iň köneler</option><option value="low">Iň pes bahalar</option><option value="high">Iň ýokary bahalar</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
-</div>
+</sc-if>
 
-<section class="rvl" aria-label="Teswirleriň sanawy">
-<sc-for list="{{reviews}}" as="r" hint-placeholder-count="5">
+<section class="{{listCls}}" aria-label="{{listAria}}">
+<sc-for list="{{reviews}}" as="r" hint-placeholder-count="6">
 <article class="rv" aria-labelledby="{{r.hid}}">
-<sc-if value="{{r.named}}" hint-placeholder-val="{{true}}"><span class="rav" aria-hidden="true">{{r.ini}}</span></sc-if>
-<sc-if value="{{r.anon}}" hint-placeholder-val="{{false}}"><span class="rav" aria-hidden="true" style="color: #5a5a64"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span></sc-if>
+<span class="rav" aria-hidden="true">{{r.ini}}</span>
 <div class="rvb">
 <div class="rvh">
 <div class="rvm">
 <span class="rvn" id="{{r.hid}}">{{r.name}}<span class="rvw"> · {{r.when}}</span></span>
-<span class="rvs"><span class="stars" role="img" aria-label="{{r.starsAria}}"><sc-for list="{{r.stars}}" as="st" hint-placeholder-count="5"><svg width="14" height="14" viewBox="0 0 24 24" fill="{{st}}" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></sc-for></span><sc-if value="{{r.hasSvc}}" hint-placeholder-val="{{true}}"><span class="cap">{{r.svc}}</span></sc-if></span>
+<span class="rvs"><span class="stars" role="img" aria-label="{{r.starsAria}}"><sc-for list="{{r.stars}}" as="st" hint-placeholder-count="5"><svg width="14" height="14" viewBox="0 0 24 24" fill="{{st}}" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></sc-for></span><span class="cap">{{r.svc}}</span></span>
 </div>
-<div style="position: relative; flex: none">
-<button class="b b-gho b-ico" style="width: 36px; height: 36px" aria-label="{{r.menuLabel}}" aria-haspopup="menu" aria-expanded="{{r.menuOpen}}" onClick="{{r.toggleMenu}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></button>
+<sc-if value="{{r.hasMenu}}" hint-placeholder-val="{{true}}"><div style="position: relative; flex: none">
+<button class="b b-gho b-ic" aria-label="{{r.menuLabel}}" aria-haspopup="menu" aria-expanded="{{r.menuOpen}}" onClick="{{r.toggleMenu}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></button>
 <sc-if value="{{r.menuOpen}}" hint-placeholder-val="{{false}}">
 <div class="catcher" onClick="{{closePops}}"></div>
-<div class="pop popa" role="menu" aria-label="{{r.menuLabel}}" style="top: 40px; right: 0; width: 260px">
-<sc-if value="{{r.canReport}}" hint-placeholder-val="{{true}}"><button class="mi" role="menuitem" onClick="{{r.report}}" style="align-items: flex-start"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 500">Arz et</span><span class="cap" style="font-size: 12px; line-height: 16px">Ýalan, kemsidiji ýa-da mahabat bolsa</span></span></button></sc-if>
-<sc-if value="{{r.reported}}" hint-placeholder-val="{{false}}"><span class="mi dis" role="menuitem" aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg>Arz edildi · barlanýar</span></sc-if>
+<div class="pop popa" role="menu" aria-label="{{r.menuLabel}}" style="top: 40px; right: 0; width: 260px" onKeyDown="{{popKey}}">
+<button class="mi" role="menuitem" onClick="{{r.report}}" style="align-items: flex-start"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-top: 1px"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-weight: 500">Report</span><span class="cap" style="font-size: 12px; line-height: 16px">If it’s false, abusive or an ad</span></span></button>
 </div>
 </sc-if>
+</div></sc-if>
 </div>
-</div>
-<p class="rvt">{{r.text}}</p>
-<sc-if value="{{r.reported}}" hint-placeholder-val="{{false}}"><div class="mod"><span class="badge st-p"><span class="dot" style="background: #dc8b0b"></span>Barlanýar · Ýeral moderasiýasy</span><span class="cap">{{r.repCap}}</span></div></sc-if>
+<sc-if value="{{r.hasText}}" hint-placeholder-val="{{true}}"><p class="rvt">{{r.text}}</p></sc-if>
+<sc-if value="{{r.modChecking}}" hint-placeholder-val="{{false}}"><div class="mod"><span class="y-pill l wr t-war"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Ýeral is checking · not counted in your rating</span><span class="cap">{{r.modCap}}</span></div></sc-if>
+<sc-if value="{{r.modCleared}}" hint-placeholder-val="{{false}}"><div class="mod"><span class="y-pill l wr t-neu"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Ýeral kept this review</span><span class="cap">{{r.modCap}}</span></div></sc-if>
+<sc-if value="{{r.modNoDecision}}" hint-placeholder-val="{{false}}"><div class="mod"><span class="y-pill l wr t-neu"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>No decision in 48 hours</span><span class="cap">{{r.modCap}}</span></div></sc-if>
 <sc-if value="{{r.showReply}}" hint-placeholder-val="{{false}}">
 <div class="rep">
-<div class="reph"><span class="repa">Glow Studio · Maýsa</span><span class="cap">{{r.replyWhen}}</span><span style="flex: 1"></span><button class="lb" aria-label="{{r.editLabel}}" onClick="{{r.edit}}">Üýtget</button><button class="lb lb-d" aria-label="{{r.delLabel}}" onClick="{{r.del}}">Poz</button></div>
+<div class="reph"><span class="repa">{{r.replyBy}}</span><span class="cap">{{r.replyWhen}}</span><span style="flex: 1"></span><sc-if value="{{r.canEdit}}" hint-placeholder-val="{{true}}"><button class="lb" aria-label="{{r.editLabel}}" onClick="{{r.edit}}">Change</button><button class="lb lb-d" aria-label="{{r.delLabel}}" onClick="{{r.del}}">Delete</button></sc-if></div>
 <p class="rept">{{r.replyText}}</p>
 </div>
 </sc-if>
-<sc-if value="{{r.showAnswer}}" hint-placeholder-val="{{true}}"><div><button class="b b-sec b-sm" aria-label="{{r.answerLabel}}" onClick="{{r.answer}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>Jogap ber</button></div></sc-if>
+<sc-if value="{{r.showAnswer}}" hint-placeholder-val="{{true}}"><div><button class="b b-sec b-sm" aria-label="{{r.answerLabel}}" onClick="{{r.answer}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>Reply</button></div></sc-if>
 <sc-if value="{{r.showCmp}}" hint-placeholder-val="{{false}}">
 <div class="cmp">
-<label class="flab" for="{{r.cmpId}}">Glow Studio adyndan jogabyňyz</label>
+<label class="flab" for="{{r.cmpId}}">Your reply as Glow Studio</label>
 <textarea id="{{r.cmpId}}" class="inp ta" placeholder="{{r.ph}}" aria-describedby="{{r.cmpCapId}}" value="{{draft}}" onInput="{{onDraft}}"></textarea>
-<div class="cmpf"><span class="cap" id="{{r.cmpCapId}}">Jogabyňyz hemmä görüner. Gysga we hormatly ýazyň.</span><span class="cap" style="font-variant-numeric: tabular-nums; color: {{draftCntColor}}">{{draftCount}} / 500</span></div>
-<div class="cmpa"><button class="b b-gho b-sm" onClick="{{cancelCmp}}">Ýatyr</button><button class="b b-pri b-sm" disabled="{{cantPublish}}" onClick="{{publish}}">{{publishLabel}}</button></div>
+<div class="cmpf"><span class="cap" id="{{r.cmpCapId}}">Everyone will see your reply. Keep it short and polite.</span><span class="cap" style="font-variant-numeric: tabular-nums; color: {{draftCntColor}}">{{draftCount}} / 500</span></div>
+<div class="cmpa"><button class="b b-gho b-sm" onClick="{{cancelCmp}}">Cancel</button><button class="b b-pri b-sm" disabled="{{cantPublish}}" onClick="{{publish}}">{{publishLabel}}</button></div>
 </div>
 </sc-if>
 </div>
@@ -335,14 +323,17 @@ button.mi{border:0;background:transparent;font-family:inherit;width:100%;cursor:
 <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
 <div class="empty">
 <div class="eic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
-<div style="font-size: 19px; line-height: 24px; font-weight: 600">{{emptyTitle}}</div>
-<div style="font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 360px">{{emptyText}}</div>
-<button class="b b-sec b-sm" style="margin-top: 4px" onClick="{{resetFilters}}">{{emptyAction}}</button>
+<h2 style="margin: 0; font-size: 19px; line-height: 24px; font-weight: 600">{{emptyTitle}}</h2>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 400px">{{emptyText}}</p>
+<sc-if value="{{hasEmptyAction}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm" style="margin-top: 4px" onClick="{{resetFilters}}">{{emptyAction}}</button></sc-if>
+<sc-if value="{{hasEmptyLink}}" hint-placeholder-val="{{false}}"><a class="xl" href="Venue.dc.html" style="margin-top: 4px">See your page<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a></sc-if>
 </div>
 </sc-if>
 </section>
 
-<div class="foot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span class="cap">Teswirleri pozup bolmaýar — diňe ýalan ýa-da kemsidiji bolsa arz ediň.</span></div>
+<sc-if value="{{showMore}}" hint-placeholder-val="{{true}}"><div class="mrow"><button class="b b-sec" onClick="{{loadMore}}">Show more</button><sc-if value="{{hasMoreCap}}" hint-placeholder-val="{{true}}"><span class="cap">{{moreCap}}</span></sc-if></div></sc-if>
+
+<sc-if value="{{showFoot}}" hint-placeholder-val="{{true}}"><div class="foot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span class="cap">You can’t delete reviews. Report one only if it’s false, abusive or an ad.</span></div></sc-if>
 
 </div>
 </div>
@@ -353,74 +344,176 @@ button.mi{border:0;background:transparent;font-family:inherit;width:100%;cursor:
 <div class="scrim" onClick="{{closeRep}}"></div>
 <div class="mdl mdl-s" role="dialog" aria-modal="true" aria-labelledby="rp-t" aria-describedby="rp-d">
 <span class="grab"></span>
-<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h2 id="rp-t" class="mt">Teswiri arz etmek</h2><button class="b b-gho b-ico" style="width: 36px; height: 36px" aria-label="Ýap" onClick="{{closeRep}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+<div class="mhd"><h2 id="rp-t" class="mt">Report the review</h2><button class="b b-gho b-ic" aria-label="Close" onClick="{{closeRep}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
 <figure class="qbox">
-<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap"><span style="font-size: 13px; line-height: 18px; font-weight: 600">{{repName}}</span><span class="stars" role="img" aria-label="{{repStarsAria}}"><sc-for list="{{repStars}}" as="st" hint-placeholder-count="5"><svg width="12" height="12" viewBox="0 0 24 24" fill="{{st}}" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></sc-for></span><span class="cap">{{repWhen}}</span></div>
-<blockquote class="qtxt">{{repQuote}}</blockquote>
+<div style="display: flex; align-items: center; gap: 4px 8px; flex-wrap: wrap"><span style="font-size: 13px; line-height: 18px; font-weight: 600">{{repName}}</span><span class="stars" role="img" aria-label="{{repStarsAria}}"><sc-for list="{{repStars}}" as="st" hint-placeholder-count="5"><svg width="12" height="12" viewBox="0 0 24 24" fill="{{st}}" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></sc-for></span><span class="cap">{{repWhen}}</span></div>
+<span class="cap">{{repSvc}}</span>
+<sc-if value="{{repHasText}}" hint-placeholder-val="{{true}}"><blockquote class="qtxt" style="margin: 0">{{repQuote}}</blockquote></sc-if>
 </figure>
 <div class="fld" style="gap: 2px">
-<span class="flab" id="rp-r">Näme üçin arz edýärsiňiz?</span>
+<span class="flab" id="rp-r">Why are you reporting it?</span>
 <div class="rgl" role="radiogroup" aria-labelledby="rp-r">
 <sc-for list="{{repReasons}}" as="o" hint-placeholder-count="5"><label class="rl"><input type="radio" name="rp-reason" checked="{{o.on}}" onChange="{{o.pick}}">{{o.t}}</label></sc-for>
 </div>
 </div>
-<div class="fld"><label class="flab" for="rp-x">{{repTextLabel}}</label><textarea id="rp-x" class="inp ta" style="height: 88px" placeholder="Meselem: bu adam bize hiç haçan ýazylmandy" value="{{repText}}" onInput="{{onRepText}}"></textarea></div>
-<span class="cap" id="rp-d">Ýeral topary 48 sagadyň içinde barlar. Teswir şu wagta çenli görünýär.</span>
-<div class="mact"><button class="b b-sec" onClick="{{closeRep}}">Yza</button><button class="b b-pri" disabled="{{repInvalid}}" onClick="{{submitRep}}">Arz et</button></div>
+<div class="fld"><label class="flab" for="rp-x">{{repTextLabel}}</label><textarea id="rp-x" class="inp ta" style="height: 88px" placeholder="For example: the review is about another salon" value="{{repText}}" onInput="{{onRepText}}"></textarea></div>
+<span class="cap" id="rp-d">The Ýeral team checks it within 48 hours. Until then the review stays visible but isn’t counted in your rating.</span>
+<div class="mact"><button class="b b-sec" onClick="{{closeRep}}">Cancel</button><button class="b b-pri" disabled="{{repInvalid}}" onClick="{{submitRep}}">Report</button></div>
 </div>
+</div>
+</sc-if>
+
+<sc-if value="{{wsOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeMenus}}"></div>
+<div class="pop wsp" role="menu" aria-label="Your workspaces" onKeyDown="{{menuKey}}">
+<div class="lbl" style="padding: 8px 10px 6px">Your workspaces</div>
+<sc-for list="{{wsList}}" as="w" hint-placeholder-count="2">
+<sc-if value="{{w.cur}}" hint-placeholder-val="{{true}}"><button class="mi wsr" role="menuitemradio" aria-checked="true" aria-label="{{w.aria}}" onClick="{{closeMenus}}"><sc-if value="{{w.logo}}" hint-placeholder-val="{{true}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"></sc-if><sc-if value="{{w.noLogo}}" hint-placeholder-val="{{false}}"><span class="wsi">{{w.ini}}</span></sc-if><span class="wsn"><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="wst">{{w.name}}</span><sc-if value="{{w.example}}" hint-placeholder-val="{{false}}"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span></sc-if></span><span class="wsc">{{w.cap}}</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a3ff0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M20 6 9 17l-5-5"></path></svg></button></sc-if>
+<sc-if value="{{w.other}}" hint-placeholder-val="{{false}}"><a class="mi wsr" role="menuitemradio" aria-checked="false" aria-label="{{w.aria}}" href="B-Reviews.dc.html"><sc-if value="{{w.logo}}" hint-placeholder-val="{{true}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"></sc-if><sc-if value="{{w.noLogo}}" hint-placeholder-val="{{false}}"><span class="wsi">{{w.ini}}</span></sc-if><span class="wsn"><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="wst">{{w.name}}</span><sc-if value="{{w.example}}" hint-placeholder-val="{{false}}"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span></sc-if></span><span class="wsc">{{w.cap}}</span></span><sc-if value="{{w.hasPend}}" hint-placeholder-val="{{true}}"><span class="cnt" aria-hidden="true">{{w.pend}}</span></sc-if></a></sc-if>
+</sc-for>
+<div class="mdv"></div>
+<a class="mi wsr" role="menuitem" href="B-Onboarding.dc.html"><span class="wsi" style="background: #ffffff; box-shadow: inset 0 0 0 1px #d8d8de; color: #101014"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></span>Create a business</a>
+</div>
+</sc-if>
+
+<sc-if value="{{userOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeMenus}}"></div>
+<div class="pop ump" role="menu" aria-label="Account menu" onKeyDown="{{menuKey}}">
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>My profile</a>
+<a class="mi" role="menuitem" href="Venue.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Your Ýeral page</a>
+<a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Open as a client<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<button class="mi" role="menuitem" aria-haspopup="menu" onClick="{{openContact}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg>Contact Ýeral<span style="margin-left: auto; display: inline-flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button>
+<div class="mdv"></div>
+<a class="mi mi-d" role="menuitem" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Log out</a>
+</div>
+</sc-if>
+<sc-if value="{{contactOpen}}" hint-placeholder-val="{{false}}">
+<div class="catcher" onClick="{{closeMenus}}"></div>
+<div class="pop ump" role="menu" aria-label="Contact Ýeral" onKeyDown="{{menuKey}}">
+<button class="mi" role="menuitem" onClick="{{toggleUser}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg><span class="lbl" style="color: #5a5a64">Contact Ýeral</span></button>
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span class="wsn"><span class="wst">Call</span><span class="wsc">[SUPPORT PHONE]</span></span></a>
+<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg><span class="wsn"><span class="wst">Write on Telegram</span><span class="wsc">[TELEGRAM]</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>
+</div>
+</sc-if>
+
+<nav class="tabbar" aria-label="Main sections">
+<a class="tbi" href="B-Calendar.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg><span>Calendar</span></a>
+<a class="tbi" href="B-Bookings.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg><span>Bookings</span><sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><span class="tbc" aria-label="{{pendAria}}">{{pendingN}}</span></sc-if></a>
+<a class="tbi" href="B-Clients.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Clients</span></a>
+<button class="tbi on" aria-haspopup="dialog" aria-expanded="{{moreOpen}}" onClick="{{toggleMore}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path></svg><span>More</span></button>
+</nav>
+<sc-if value="{{moreOpen}}" hint-placeholder-val="{{false}}">
+<div class="mscrim" onClick="{{closeMenus}}"></div>
+<div class="more" role="dialog" aria-label="More" onKeyDown="{{menuKey}}">
+<span class="grab"></span>
+<a class="mi on" href="B-Reviews.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<sc-if value="{{showRevBadge}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-label="{{navCntLabel}}">{{unansweredN}}</span></sc-if></a>
+<sc-if value="{{showSettings}}" hint-placeholder-val="{{true}}"><a class="mi" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a></sc-if>
+<div class="mdv"></div>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">{{me.ini}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 14px; line-height: 20px; font-weight: 600">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px">{{me.phone}} · {{me.role}}</span></span></div>
+<a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>My profile</a>
+<a class="mi" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Your Ýeral page</a>
+<a class="mi" href="Home.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Open as a client<span class="cap" style="margin-left: auto">yeral.app</span></a>
+<a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg><span class="wsn"><span class="wst">Contact Ýeral</span><span class="wsc">[SUPPORT PHONE] · Telegram</span></span></a>
+<a class="mi mi-d" href="B-Login.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Log out</a></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><a class="mi" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>Log in</a></sc-if>
 </div>
 </sc-if>
 
 <sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
 <div class="toast" role="status">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#12a366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
 <span>{{toastText}}</span>
-<sc-if value="{{toastUndo}}" hint-placeholder-val="{{false}}"><button class="b b-sm tb" onClick="{{undo}}">Yzyna al</button></sc-if>
+<sc-if value="{{toastUndo}}" hint-placeholder-val="{{false}}"><button class="b b-sm tb" onClick="{{undo}}">Undo</button></sc-if>
 <sc-if value="{{toastPlain}}" hint-placeholder-val="{{true}}"><span class="tsp"></span></sc-if>
 </div>
 </sc-if>
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"filter":{"editor":"enum","options":["all","unanswered"],"default":"all","section":"State"},"composer":{"editor":"boolean","default":true,"section":"State"},"report":{"editor":"boolean","default":false,"section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1980}}'>
+<script type="text/x-dc" data-dc-script data-props='{"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"filter":{"editor":"enum","options":["all","unanswered"],"default":"all","section":"State"},"composer":{"editor":"boolean","default":true,"section":"State"},"report":{"editor":"boolean","default":false,"section":"State"},"moderation":{"editor":"enum","options":["none","checking","cleared","removed","noDecision"],"default":"checking","section":"State"},"first":{"editor":"boolean","default":false,"section":"State"},"empty":{"editor":"boolean","default":false,"section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":4480}}'>
 class Component extends DCLogic {
+  // v0.6 round 3 (V06-R3-BRIEF §6). Demo: business-demo.json → reviews (96 counted, 88 / 6 / 1 / 1 / 0) + Merdan K.'s reported 1-star review.
   constructor(props) {
     super(props);
     const p = props || {};
-    const rep = !!p.report;
     this.state = Object.assign({
-      items: this.seed(rep),
+      items: this.seed(p),
       filter: p.filter === 'unanswered' ? 'unanswered' : 'all',
       staff: [], sort: 'new', staffOpen: false, menuFor: null, keep: [],
-      toast: null, lastDel: null, shell: null
-    }, this.cmpState(p.composer ?? true), this.repState(rep));
+      toast: null, lastDel: null, side: null, removedOpen: true
+    }, this.cmpState(p), this.repState(p));
   }
   componentDidUpdate(pp) {
     const p = this.props;
+    if (pp.role !== p.role || pp.empty !== p.empty || pp.first !== p.first) {
+      this.setState(Object.assign({
+        items: this.seed(p), filter: p.filter === 'unanswered' ? 'unanswered' : 'all',
+        staff: [], keep: [], menuFor: null, staffOpen: false, removedOpen: true, toast: null, side: null
+      }, this.cmpState(p), this.repState(p)));
+      return;
+    }
     if (pp.filter !== p.filter) this.setState({ filter: p.filter === 'unanswered' ? 'unanswered' : 'all', keep: [], staffOpen: false, menuFor: null });
     if (pp.composer !== p.composer) {
-      const on = p.composer ?? true;
+      const on = this.canAct(p) && (p.composer ?? true);
       const d = this.state.items.filter((x) => x.id === 'dowran')[0];
-      this.setState(on && d && d.reply ? { cmpFor: 'dowran', cmpMode: 'edit', draft: d.reply.text } : this.cmpState(on));
+      this.setState(on && d ? (d.reply ? { cmpFor: 'dowran', cmpMode: 'edit', draft: d.reply.text } : { cmpFor: 'dowran', cmpMode: 'new', draft: '' }) : { cmpFor: null, cmpMode: 'new', draft: '' });
     }
-    if (pp.report !== p.report) {
-      const on = !!p.report;
-      const items = this.state.items.map((x) => (x.id === 'anon' ? Object.assign({}, x, { report: on ? null : { reason: 'Başga biznes barada' } }) : x));
-      this.setState(Object.assign({ items: items, menuFor: null }, this.repState(on)));
+    if (pp.report !== p.report || pp.moderation !== p.moderation) {
+      const m = this.modOf(p);
+      const items = this.state.items.map((x) => (x.id === 'merdan' ? Object.assign({}, x, { mod: m, reason: 'About another business' }) : x));
+      this.setState(Object.assign({ items: items, menuFor: null, removedOpen: true }, this.repState(p)));
     }
   }
   componentWillUnmount() { clearTimeout(this.tt); }
-  cmpState(on) { return { cmpFor: on ? 'dowran' : null, cmpMode: 'new', draft: '' }; }
-  repState(on) { return { repFor: on ? 'anon' : null, repReason: on ? 'Başga biznes barada' : null, repText: '' }; }
-  seed(reportOpen) {
+  role(p) { const r = (p || this.props || {}).role; return r === 'admin' || r === 'specialist' ? r : 'owner'; }
+  canAct(p) { return this.role(p) !== 'specialist'; }
+  mode(p) { p = p || this.props || {}; return p.empty ? 'empty' : (p.first ? 'first' : 'demo'); }
+  modOf(p) {
+    p = p || this.props || {};
+    if (p.report && this.canAct(p)) return 'none';
+    return ['none', 'checking', 'cleared', 'removed', 'noDecision'].indexOf(p.moderation) >= 0 ? p.moderation : 'checking';
+  }
+  cmpState(p) {
+    const on = this.canAct(p) && (p.composer ?? true) && this.mode(p) === 'demo';
+    return { cmpFor: on ? 'dowran' : null, cmpMode: 'new', draft: '' };
+  }
+  repState(p) {
+    const on = !!p.report && this.canAct(p) && this.mode(p) === 'demo';
+    return { repFor: on ? 'merdan' : null, repReason: on ? 'About another business' : null, repText: '' };
+  }
+  seed(p) {
+    const m = this.mode(p);
+    if (m === 'empty') return [];
+    // every review comes from a completed booking: service + specialist; reviewer = first name + initial (or first name only)
+    const R = (id, name, when, age, rating, svc, staff, text, reply, extra) => Object.assign({
+      id: id, name: name, when: when, age: age, rating: rating, svc: svc, staff: staff, text: text,
+      reply: reply ? { text: reply[0], when: reply[1], by: reply[2] || 'Glow Studio · Maýsa' } : null, mod: 'none', reason: ''
+    }, extra || {});
+    // B9 (round-3 consistency): every reviewer fits the client data on B-Clients / B-Client / B-Calendar — a completed visit with that
+    // service before the review (price within the client's visits); names not drawn there are other clients of the 148.
+    if (m === 'first') return [R('ogulsat', 'Ogulşat M.', 'Today', 0, 5, 'Women’s haircut', 'Aýna', 'Quick, neat and right on time.', null)];
     return [
-      { id: 'dowran', name: 'Döwran S.', rating: 2, when: 'Şu gün', age: 0, svc: 'Saç düzmek', staff: 'Aýna', text: 'Ýarym sagat garaşdym, hiç kim düşündirmedi. Netije gowy, ýöne wagtymy ýitirdim.', reply: null, report: null },
-      { id: 'mahri', name: 'Mähri G.', rating: 5, when: 'Düýn', age: 1, svc: 'Manikýur', staff: 'Maral', text: 'Elmydama wagtynda, arassa we mähirli.', reply: null, report: null },
-      { id: 'anon', name: 'Anonim', anon: true, rating: 1, when: 'Düýn', age: 1.5, svc: '', staff: '', text: 'Iň erbet salon, «Altyn Gül»-e gidiň!', reply: null, report: reportOpen ? null : { reason: 'Başga biznes barada' } },
-      { id: 'gulalek', name: 'Gülälek N.', rating: 5, when: '2 gün öň', age: 2, svc: 'Aýal saç kesimi', staff: 'Aýna', text: 'Aýna saçymy edil isleýşim ýaly kesdi. Wagtynda kabul etdiler, salon arassa we rahat.', reply: { text: 'Sag boluň, Gülälek! Ýene garaşýarys.', when: '2 gün öň' }, report: null },
-      { id: 'sona', name: 'Sona P.', rating: 5, when: '4 gün öň', age: 4, svc: 'Gaş we kirpik', staff: 'Jeren', text: 'Iň gowy kirpik ussasy!', reply: null, report: null },
-      { id: 'ogulsat', name: 'Ogulşat M.', rating: 5, when: '1 hepde öň', age: 7, svc: 'Gel-lak bilen manikýur', staff: 'Maral', text: 'Maral örän üns berip işleýär. Gel-lak üç hepde saklandy.', reply: { text: 'Sag boluň, Ogulşat! Sözleriňizi Marala ýetireris.', when: '6 gün öň' }, report: null },
-      { id: 'bahar', name: 'Bahar A.', rating: 4, when: '3 hepde öň', age: 21, svc: 'Ýüz arassalamak', staff: 'Jeren', text: 'Hyzmat gowy, ýöne başlamazdan öň biraz garaşmaly boldum.', reply: { text: 'Bahar, garaşdyranymyz üçin bagyşlaň. Indi ýazylyşlaryň arasynda goşmaça wagt goýýarys.', when: '3 hepde öň' }, report: null }
+      R('dowran', 'Döwran S.', 'Today', 0, 2, 'Hair styling', 'Aýna', 'I waited half an hour and no one explained why. The result is good, but I lost my time.', null),
+      R('mahri', 'Mähri G.', 'Yesterday', 1, 5, 'Manicure', 'Maral', 'Always on time, clean and kind.', null),
+      R('gozel', 'Gözel A.', 'Yesterday', 1.2, 5, 'Back massage', 'Leýli', 'Leýli found exactly where it hurt. My back feels so much better.', ['Thank you, Gözel! Come again soon.', 'Yesterday']),
+      R('merdan', 'Merdan K.', 'Yesterday', 1.5, 1, 'Back massage', 'Leýli', 'Worst salon ever, go to “Altyn Gül” instead!', null, { mod: this.modOf(p), reason: 'About another business' }),
+      R('ayjemal', 'Aýjemal G.', '2 days ago', 2, 5, 'Women’s haircut', 'Aýna', '', null),
+      R('sahra', 'Sähra T.', '3 days ago', 3, 5, 'Brows and lashes', 'Jeren', 'Neat brows in half an hour, right on time.', ['Thank you, Sähra! See you next time.', '3 days ago', 'Glow Studio · Selbi']),
+      R('myrat', 'Myrat B.', '5 days ago', 5, 5, 'Full body massage', 'Leýli', 'Good massage in a calm room.', ['Thank you, Myrat!', '5 days ago']),
+      R('bahar', 'Bahar A.', '1 week ago', 7, 4, 'Facial cleansing', 'Jeren', 'The service is good, but I had to wait a little before it started.', ['Bahar, we’re sorry you had to wait. We now leave extra time between bookings.', '1 week ago']),
+      R('ogulsat', 'Ogulşat M.', '1 week ago', 8, 5, 'Gel manicure', 'Maral', 'Maral works with great care. The gel polish lasted three weeks.', ['Thank you, Ogulşat! We’ll pass your words on to Maral.', '1 week ago']),
+      R('annagul', 'Annagül R.', '1 week ago', 10, 4, 'Pedicure', 'Maral', 'A good pedicure, but the room was a bit cold.', ['Thank you, Annagül — the heating is fixed now.', '1 week ago', 'Glow Studio · Selbi']),
+      R('sona', 'Sona P.', '2 weeks ago', 12.5, 5, 'Brows and lashes', 'Jeren', 'The best lash technician!', ['Thank you, Sona! We’ll pass it on to Jeren.', '2 weeks ago']),
+      R('nurjahan', 'Nurjahan A.', '2 weeks ago', 13.5, 5, 'Full body massage', 'Leýli', 'Leýli knows her work. My back stopped hurting after two visits.', ['Thank you, Nurjahan! Leýli will be glad to hear it.', '2 weeks ago']),
+      R('gulalek', 'Gülälek N.', '2 weeks ago', 15, 5, 'Hair colouring', 'Aýna', 'Aýna got the colour exactly right and remembered my allergy. The salon is clean and calm.', ['Thank you, Gülälek! See you again soon.', '2 weeks ago']),
+      R('gyzylgul', 'Gyzylgül', '2 weeks ago', 16, 5, 'Manicure', 'Maral', 'Quick and neat.', ['Thank you, Gyzylgül!', '2 weeks ago', 'Glow Studio · Selbi']),
+      R('jahan', 'Jahan M.', '3 weeks ago', 19, 4, 'Brows and lashes', 'Jeren', 'Neat brows, and booking online was easy.', ['Thank you, Jahan!', '3 weeks ago']),
+      R('aysoltan', 'Aýsoltan R.', '3 weeks ago', 21, 5, 'Hair styling', 'Aýna', 'Styled for a wedding — my hair held all evening.', ['Thank you, Aýsoltan! Congratulations on the wedding.', '3 weeks ago']),
+      R('lale', 'Läle O.', '3 weeks ago', 23, 3, 'Gel manicure', 'Maral', 'The gel polish chipped after a week. Maral fixed it for free.', ['Läle, we’re sorry it chipped so soon. We’re glad Maral could put it right.', '3 weeks ago']),
+      R('aygozel', 'Aýgözel S.', '1 month ago', 33, 5, 'Women’s haircut', 'Aýna', 'Aýna always listens before she cuts.', ['Thank you, Aýgözel!', '1 month ago']),
+      R('jemal', 'Jemal S.', '1 month ago', 35, 5, 'Pedicure', 'Maral', '', ['Thank you, Jemal!', '1 month ago', 'Glow Studio · Selbi']),
+      R('enejan', 'Enejan B.', '1 month ago', 39.5, 5, 'Hair styling', 'Aýna', 'My hair looked great all day.', ['Thank you, Enejan!', '1 month ago']),
+      R('gulsat', 'Gülşat N.', '1 month ago', 41, 5, 'Facial cleansing', 'Jeren', 'Clean, calm and on time.', ['Thank you, Gülşat!', '1 month ago'])
     ];
   }
   flash(patch, text, undo) {
@@ -429,27 +522,59 @@ class Component extends DCLogic {
     this.tt = setTimeout(() => this.setState({ toast: null }), 6000);
   }
   renderVals() {
-    const fnt = this.props.font ?? 'Onest';
+    const f = this.props.font ?? 'Onest';
     const s = this.state;
+    const role = this.role();
+    const canAct = this.canAct();
+    const spec = !canAct;
+    const mode = this.mode();
     const items = s.items;
     const STAR = (n) => [1, 2, 3, 4, 5].map((i) => (i <= n ? '#101014' : '#d8d8de'));
-    const isStar = (f) => /^[1-5]$/.test(f);
+    const isStar = (x) => /^[1-5]$/.test(x);
     const setItem = (id, patch) => this.state.items.map((x) => (x.id === id ? Object.assign({}, x, patch) : x));
-    const unanswered = items.filter((x) => !x.reply).length;
+    const counted = (x) => x.mod === 'none' || x.mod === 'cleared' || x.mod === 'noDecision';
+    const shown = items.filter((x) => x.mod !== 'removed' && (canAct || x.staff === 'Aýna'));
+    const unanswered = canAct ? shown.filter((x) => !x.reply).length : 0;
 
-    // summary (business-demo.json → reviews)
-    const BRK = { 5: 88, 4: 6, 3: 1, 2: 1, 1: 0 };
-    const TOTAL = 96;
-    const bars = [5, 4, 3, 2, 1].map((n) => ({ n: String(n), c: String(BRK[n]), pct: Math.round((BRK[n] / TOTAL) * 1000) / 10, aria: n + ' ýyldyz: ' + BRK[n] + ' teswir' }));
+    // shell (same as B-Calendar / B-Bookings)
+    const PEOPLE = {
+      owner: { name: 'Maýsa Annaýewa', first: 'Maýsa', ini: 'M', phone: '+993 65 10 20 30', role: 'Owner', req: 6, ws: [['Glow Studio', 'Owner · Ashgabat', true, 6, true], ['Glow Nails', 'Owner · Ashgabat', true, 2, false]] },
+      admin: { name: 'Selbi Hojaýewa', first: 'Selbi', ini: 'S', phone: '+993 65 88 41 02', role: 'Admin', req: 6, ws: [['Glow Studio', 'Admin · Ashgabat', true, 6, true]] },
+      specialist: { name: 'Aýna Myradowa', first: 'Aýna', ini: 'A', phone: '+993 65 31 22 10', role: 'Specialist', req: 2, ws: [['Glow Studio', 'Specialist · Ashgabat', true, 2, true], ['Aýnanyň saç studiýasy', 'Owner · Ashgabat', false, 1, false]] }
+    };
+    const P = PEOPLE[role];
+    const bannerKind = ['inReview', 'notApproved', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
+    const isDemo = bannerKind === 'demo';
+    const side = s.side;
+    const menuTo = (k) => () => this.setState({ side: side === k ? null : k, staffOpen: false, menuFor: null });
+    const plReq = (n) => n + (n === 1 ? ' request' : ' requests');
+    const author = isDemo ? 'Glow Studio' : 'Glow Studio · ' + P.first;
+
+    // rating summary: counted reviews only (a review Ýeral is checking stays visible but isn't counted)
+    const BRK = mode === 'first' ? { 5: 1, 4: 0, 3: 0, 2: 0, 1: 0 } : { 5: 88, 4: 6, 3: 1, 2: 1, 1: 0 };
+    if (mode === 'demo') items.forEach((x) => {
+      if (x.id === 'merdan') { if (counted(x)) BRK[x.rating] += 1; }
+      else if (!counted(x)) BRK[x.rating] -= 1;
+    });
+    if (mode === 'first' && !counted(items[0])) BRK[5] = 0;
+    const total = BRK[5] + BRK[4] + BRK[3] + BRK[2] + BRK[1];
+    const avgNum = total ? (5 * BRK[5] + 4 * BRK[4] + 3 * BRK[3] + 2 * BRK[2] + BRK[1]) / total : 0;
+    const avg = total ? avgNum.toFixed(1) : '–';
+    const checkingN = items.filter((x) => x.mod === 'checking').length;
+    const visibleTotal = total + checkingN;
+    const bars = [5, 4, 3, 2, 1].map((n) => ({
+      n: String(n), c: String(BRK[n]), pct: total ? Math.round((BRK[n] / total) * 1000) / 10 : 0,
+      aria: n + (n === 1 ? ' star: ' : ' stars: ') + BRK[n] + (BRK[n] === 1 ? ' review' : ' reviews')
+    }));
 
     // filters
-    const F = [['all', 'Ählisi'], ['unanswered', 'Jogapsyz (' + unanswered + ')'], ['5', '5'], ['4', '4'], ['3', '3'], ['2', '2'], ['1', '1']];
+    const F = (canAct ? [['all', 'All'], ['unanswered', 'Not answered · ' + unanswered]] : [['all', 'All']]).concat([['5', '5'], ['4', '4'], ['3', '3'], ['2', '2'], ['1', '1']]);
     const chips = F.map((c) => ({
-      t: c[1], star: isStar(c[0]), aria: isStar(c[0]) ? c[0] + ' ýyldyz' : c[1],
+      t: c[1], star: isStar(c[0]), aria: isStar(c[0]) ? c[0] + (c[0] === '1' ? ' star' : ' stars') : c[1],
       on: s.filter === c[0], cls: s.filter === c[0] ? 'chip on' : 'chip',
       pick: () => this.setState({ filter: c[0], keep: [], menuFor: null, staffOpen: false })
     }));
-    const ST = [['Aýna', 'Stilist'], ['Maral', 'Dyrnak ussasy'], ['Jeren', 'Kosmetolog'], ['Leýli', 'Massažist']];
+    const ST = [['Aýna', 'Stylist'], ['Maral', 'Nail technician'], ['Jeren', 'Beautician'], ['Leýli', 'Massage therapist']];
     const staffOpts = ST.map((o) => ({
       t: o[0], sub: o[1], on: s.staff.indexOf(o[0]) >= 0,
       flip: () => {
@@ -457,11 +582,11 @@ class Component extends DCLogic {
         this.setState({ staff: cur.indexOf(o[0]) >= 0 ? cur.filter((x) => x !== o[0]) : cur.concat([o[0]]) });
       }
     }));
-    const nSt = s.staff.length;
+    const nSt = canAct ? s.staff.length : 0;
 
     // list
-    const visible = items.filter((x) => {
-      if (s.filter === 'unanswered' && x.reply && s.keep.indexOf(x.id) < 0) return false;
+    const visible = shown.filter((x) => {
+      if (s.filter === 'unanswered' && (x.reply && s.keep.indexOf(x.id) < 0)) return false;
       if (isStar(s.filter) && x.rating !== Number(s.filter)) return false;
       if (nSt && s.staff.indexOf(x.staff) < 0) return false;
       return true;
@@ -472,30 +597,36 @@ class Component extends DCLogic {
       low: (a, b) => a.rating - b.rating || a.age - b.age,
       high: (a, b) => b.rating - a.rating || a.age - b.age
     };
-    const list = visible.slice().sort(SORT[s.sort] || SORT.new);
+    const PAGE = 20;
+    const sorted = visible.slice().sort(SORT[s.sort] || SORT.new);
+    const list = sorted.slice(0, PAGE);
+    const lc = (t) => t.charAt(0).toLowerCase() + t.slice(1);
     const reviews = list.map((r) => {
       const first = r.name.split(' ')[0];
-      const open = s.cmpFor === r.id;
-      const ph = r.anon
-        ? 'Meselem: Bu ýagdaýa düşünmek isleýäris — bize jaň ediň: +993 12 45 67 89'
-        : (r.rating >= 4 ? 'Meselem: Sag boluň, ' + first + '! Ýene garaşýarys.' : 'Meselem: ' + first + ', ýazanyňyz üçin sag boluň. Bu ýagdaýy düzetmek isleýäris…');
+      const open = canAct && s.cmpFor === r.id;
+      const ph = r.id === 'merdan'
+        ? 'For example: We’d like to understand what happened — please call us on +993 12 45 67 89.'
+        : (r.rating >= 4 ? 'For example: Thank you, ' + first + '! See you again soon.' : 'For example: ' + first + ', thank you for writing. We want to put this right…');
+      const MODCAP = { checking: 'Reason: ' + lc(r.reason || 'Another reason'), cleared: 'It counts in your rating again and can’t be reported again.', noDecision: 'It counts in your rating again.' };
       return {
         hid: 'rv-' + r.id, cmpId: 'cmp-' + r.id, cmpCapId: 'cmpc-' + r.id,
-        name: r.name, when: r.when, anon: !!r.anon, named: !r.anon, ini: r.name.charAt(0),
-        stars: STAR(r.rating), starsAria: 'Baha: 5-den ' + r.rating,
-        hasSvc: !!r.svc, svc: r.svc + ' · ' + r.staff,
-        text: r.text,
-        reported: !!r.report, canReport: !r.report,
-        repCap: r.report ? 'Sebäp: ' + r.report.reason : '',
+        name: r.name, when: r.when, ini: r.name.charAt(0),
+        stars: STAR(r.rating), starsAria: r.rating + ' out of 5',
+        svc: r.svc + ' · ' + r.staff,
+        hasText: !!r.text, text: r.text,
+        hasMenu: canAct && r.mod === 'none',
+        modChecking: r.mod === 'checking', modCleared: r.mod === 'cleared', modNoDecision: r.mod === 'noDecision',
+        modCap: MODCAP[r.mod] || '',
         showReply: !!r.reply && !(open && s.cmpMode === 'edit'),
-        replyText: r.reply ? r.reply.text : '', replyWhen: r.reply ? r.reply.when : '',
-        showAnswer: !r.reply && !open,
+        replyBy: r.reply ? r.reply.by : '', replyText: r.reply ? r.reply.text : '', replyWhen: r.reply ? r.reply.when : '',
+        canEdit: canAct,
+        showAnswer: canAct && !r.reply && !open,
         showCmp: open,
         ph: ph,
-        answerLabel: r.name + ' teswirine jogap ber',
-        editLabel: r.name + ' teswirine jogaby üýtget',
-        delLabel: r.name + ' teswirine jogaby poz',
-        menuOpen: s.menuFor === r.id, menuLabel: r.name + ' teswiri: hereketler',
+        answerLabel: 'Reply to ' + r.name,
+        editLabel: 'Change the reply to ' + r.name,
+        delLabel: 'Delete the reply to ' + r.name,
+        menuOpen: s.menuFor === r.id, menuLabel: 'Review by ' + r.name + ': actions',
         answer: () => this.setState({ cmpFor: r.id, cmpMode: 'new', draft: '', menuFor: null, staffOpen: false }),
         edit: () => {
           const cur = this.state.items.filter((x) => x.id === r.id)[0];
@@ -504,7 +635,7 @@ class Component extends DCLogic {
         del: () => {
           const cur = this.state.items.filter((x) => x.id === r.id)[0];
           if (!cur || !cur.reply) return;
-          this.flash({ items: setItem(r.id, { reply: null }), lastDel: { id: r.id, reply: cur.reply }, cmpFor: this.state.cmpFor === r.id ? null : this.state.cmpFor }, 'Jogap pozuldy', true);
+          this.flash({ items: setItem(r.id, { reply: null }), lastDel: { id: r.id, reply: cur.reply }, cmpFor: this.state.cmpFor === r.id ? null : this.state.cmpFor }, 'Reply deleted', true);
         },
         toggleMenu: () => this.setState({ menuFor: this.state.menuFor === r.id ? null : r.id, staffOpen: false }),
         report: () => this.setState({ menuFor: null, repFor: r.id, repReason: null, repText: '' })
@@ -513,67 +644,132 @@ class Component extends DCLogic {
     const isEmpty = reviews.length === 0;
     const allDone = s.filter === 'unanswered' && unanswered === 0 && nSt === 0;
 
+    // 20 per page + "Show more" (the board draws page 1 of the demo; the count is the business's real total)
+    let showMore = false;
+    let moreCap = '';
+    if (mode === 'demo' && list.length && s.filter !== 'unanswered') {
+      if (spec) showMore = s.filter === 'all';
+      else if (nSt) showMore = true;
+      else {
+        const tot = s.filter === 'all' ? visibleTotal : BRK[Number(s.filter)] + items.filter((x) => x.mod === 'checking' && x.rating === Number(s.filter)).length;
+        if (tot > list.length) { showMore = true; moreCap = 'Showing ' + list.length + ' of ' + tot; }
+      }
+    }
+    if (mode === 'demo' && sorted.length > PAGE) showMore = true;
+
     // composer
     const dl = s.draft.length;
 
     // report modal
-    const REASONS = ['Ýalan — bu müşderi gelmedi', 'Kemsidiji sözler', 'Başga biznes barada', 'Mahabat ýa-da spam', 'Başga sebäp'];
-    const rep = s.repFor ? items.filter((x) => x.id === s.repFor)[0] : null;
-    const repOther = s.repReason === 'Başga sebäp';
+    const REASONS = ['False — this client never came', 'Abusive words', 'About another business', 'Ad or spam', 'Another reason'];
+    const rep = canAct && s.repFor ? items.filter((x) => x.id === s.repFor)[0] : null;
+    const repOther = s.repReason === 'Another reason';
     const repInvalid = !s.repReason || (repOther && !s.repText.trim());
     const closeRep = () => this.setState({ repFor: null, repReason: null, repText: '' });
+    const merdan = items.filter((x) => x.id === 'merdan')[0];
+
+    let emptyTitle, emptyText, emptyAction = '';
+    if (mode === 'empty') {
+      emptyTitle = spec ? 'No reviews about you yet' : 'No reviews yet';
+      emptyText = spec ? 'Clients can leave a review after a completed visit with you. Their reviews show here.' : 'Clients can leave a review after a completed visit. Their reviews show here and on your page.';
+    } else if (allDone) {
+      emptyTitle = 'You’ve answered every review';
+      emptyText = 'New reviews show up here.';
+      emptyAction = 'Show all reviews';
+    } else {
+      emptyTitle = 'No reviews match these filters';
+      emptyText = spec ? 'Try another rating.' : 'Try another rating or specialist.';
+      emptyAction = 'Clear filters';
+    }
 
     return {
-      fontStack: "'" + fnt + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
+      fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
 
-      // shell: workspace switcher + user menu (ROUND6 D2)
-      wsOpen: s.shell === 'ws',
-      meOpen: s.shell === 'me',
-      shellPop: !!s.shell,
-      toggleWs: () => this.setState({ shell: this.state.shell === 'ws' ? null : 'ws', staffOpen: false, menuFor: null }),
-      toggleMe: () => this.setState({ shell: this.state.shell === 'me' ? null : 'me', staffOpen: false, menuFor: null }),
-      closeShell: () => this.setState({ shell: null }),
-      shellKey: (e) => { if (e && e.key === 'Escape') this.setState({ shell: null }); },
-      // phone shell (ROUND6 D5): bottom tab bar + Köp sheet, same markup as B-Calendar
-      moreOpen: s.shell === 'more',
-      toggleMore: () => this.setState({ shell: this.state.shell === 'more' ? null : 'more' }),
-      hasPend: true,
-      pendCount: '5',
-      pendAria: '5 haýyş',
-
+      // shell
+      me: { name: P.name, ini: P.ini, phone: P.phone, role: P.role },
+      wsAria: 'Workspace: Glow Studio, ' + P.role + '. Switch',
+      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
+      wsList: P.ws.map((w) => ({
+        example: false,
+        name: w[0], cap: w[1], logo: w[2], noLogo: !w[2], ini: w[0].charAt(0), cur: w[4], other: !w[4], hasPend: w[3] > 0, pend: String(w[3]),
+        aria: w[0] + ', ' + w[1] + (w[4] ? ', current workspace' : (w[3] ? ', ' + w[3] + ' unanswered ' + (w[3] === 1 ? 'request' : 'requests') : ''))
+      })),
+      wsOpen: side === 'ws',
+      userOpen: side === 'user',
+      contactOpen: side === 'contact',
+      moreOpen: side === 'more',
+      toggleWs: menuTo('ws'),
+      toggleUser: menuTo('user'),
+      toggleMore: menuTo('more'),
+      openContact: () => this.setState({ side: 'contact' }),
+      closeMenus: () => this.setState({ side: null }),
+      menuKey: (e) => { if (e && e.key === 'Escape') this.setState({ side: null }); },
+      pendingN: String(P.req),
+      hasPend: P.req > 0,
+      pendAria: P.req + ' unanswered ' + (P.req === 1 ? 'request' : 'requests'),
+      cntCls: 'cnt',
+      navReqLabel: 'Bookings, ' + plReq(P.req),
+      showSettings: canAct,
+      showRevBadge: canAct && unanswered > 0,
       unansweredN: String(unanswered),
-      hasNavCnt: unanswered > 0,
-      navCntLabel: unanswered + ' jogapsyz teswir',
+      navCntLabel: unanswered + ' unanswered ' + (unanswered === 1 ? 'review' : 'reviews'),
+      revNavLabel: canAct && unanswered ? 'Reviews, ' + unanswered + ' unanswered' : 'Reviews',
+
+      // summary (owner and admin; a specialist sees no count)
+      showSummary: canAct && mode !== 'empty',
+      avg: avg,
+      avgStars: STAR(Math.round(avgNum)),
+      avgAria: 'Average rating: ' + avg + ' out of 5',
+      countLabel: total === 1 ? '1 review' : total + ' reviews',
+      hasUncounted: checkingN > 0,
+      uncountedLabel: checkingN === 1 ? '1 more isn’t counted while Ýeral checks it' : checkingN + ' more aren’t counted while Ýeral checks them',
+      bars: bars,
       hasUnanswered: unanswered > 0,
       allAnswered: unanswered === 0,
+      unansweredAria: 'Show ' + unanswered + ' not answered',
       showUnanswered: () => this.setState({ filter: 'unanswered', keep: [], staffOpen: false, menuFor: null }),
-      bars: bars,
+      isSpec: spec && mode !== 'empty',
+      showRemoved: canAct && mode === 'demo' && !!merdan && merdan.mod === 'removed' && s.removedOpen,
+      removedText: 'Merdan K.’s review no longer shows on your page or counts in your rating.',
+      closeRemoved: () => this.setState({ removedOpen: false }),
 
+      showFilters: mode !== 'empty',
       chips: chips,
+      showStaffFilter: canAct,
       staffOpts: staffOpts,
       staffOpen: !!s.staffOpen,
-      staffChip: nSt === 0 ? 'Hünärmen' : (nSt === 1 ? s.staff[0] : 'Hünärmen · ' + nSt),
+      staffChip: nSt === 0 ? 'Specialist' : (nSt === 1 ? s.staff[0] : 'Specialists · ' + nSt),
       staffChipCls: nSt ? 'chip on' : 'chip',
       noStaff: nSt === 0,
       toggleStaff: () => this.setState({ staffOpen: !this.state.staffOpen, menuFor: null }),
       clearStaff: () => this.setState({ staff: [] }),
       closePops: () => this.setState({ staffOpen: false, menuFor: null }),
+      popKey: (e) => { if (e && e.key === 'Escape') this.setState({ staffOpen: false, menuFor: null }); },
       sort: s.sort,
       onSort: (e) => this.setState({ sort: e.target.value }),
 
+      listCls: mode === 'empty' ? 'rvl nolist' : 'rvl',
+      listAria: spec ? 'Reviews about you' : 'Reviews',
       reviews: reviews,
       isEmpty: isEmpty,
-      emptyTitle: allDone ? 'Ähli teswirlere jogap berdiňiz' : 'Bu süzgüç boýunça teswir ýok',
-      emptyText: allDone ? 'Täze teswir gelende size habar bereris.' : 'Başga baha ýa-da hünärmen saýlap görüň.',
-      emptyAction: allDone ? 'Ähli teswirleri görkez' : 'Süzgüçleri arassala',
+      emptyTitle: emptyTitle,
+      emptyText: emptyText,
+      emptyAction: emptyAction,
+      hasEmptyAction: !!emptyAction,
+      hasEmptyLink: mode === 'empty' && canAct,
       resetFilters: () => this.setState({ filter: 'all', staff: [], keep: [], staffOpen: false, menuFor: null }),
+      showMore: showMore,
+      hasMoreCap: !!moreCap,
+      moreCap: moreCap,
+      loadMore: () => this.setState({ staffOpen: false, menuFor: null }),
+      showFoot: canAct && mode !== 'empty',
 
       draft: s.draft,
       draftCount: String(dl),
       draftCntColor: dl >= 500 ? '#a3251b' : (dl >= 450 ? '#93500a' : '#5a5a64'),
       onDraft: (e) => this.setState({ draft: e.target.value.slice(0, 500) }),
       cantPublish: !s.draft.trim(),
-      publishLabel: s.cmpMode === 'edit' ? 'Ýatda sakla' : 'Jogaby çap et',
+      publishLabel: s.cmpMode === 'edit' ? 'Save' : 'Post reply',
       cancelCmp: () => this.setState({ cmpFor: null, cmpMode: 'new', draft: '' }),
       publish: () => {
         const st = this.state;
@@ -581,19 +777,21 @@ class Component extends DCLogic {
         if (!txt || !st.cmpFor) return;
         const id = st.cmpFor;
         const edit = st.cmpMode === 'edit';
-        const next = st.items.map((x) => (x.id === id ? Object.assign({}, x, { reply: { text: txt, when: edit && x.reply ? x.reply.when : 'Şu wagt' } }) : x));
+        const next = st.items.map((x) => (x.id === id ? Object.assign({}, x, { reply: edit && x.reply ? Object.assign({}, x.reply, { text: txt }) : { text: txt, when: 'Just now', by: author } }) : x));
         const keep = st.filter === 'unanswered' && st.keep.indexOf(id) < 0 ? st.keep.concat([id]) : st.keep;
-        this.flash({ items: next, keep: keep, cmpFor: null, cmpMode: 'new', draft: '' }, edit ? 'Jogap üýtgedildi' : 'Jogap çap edildi');
+        this.flash({ items: next, keep: keep, cmpFor: null, cmpMode: 'new', draft: '' }, edit ? 'Reply updated' : 'Reply posted');
       },
 
       repOpen: !!rep,
       repName: rep ? rep.name : '',
       repWhen: rep ? rep.when : '',
-      repQuote: rep ? '«' + rep.text + '»' : '',
+      repSvc: rep ? rep.svc + ' · ' + rep.staff : '',
+      repHasText: !!(rep && rep.text),
+      repQuote: rep ? rep.text : '',
       repStars: STAR(rep ? rep.rating : 0),
-      repStarsAria: 'Baha: 5-den ' + (rep ? rep.rating : 0),
+      repStarsAria: (rep ? rep.rating : 0) + ' out of 5',
       repReasons: REASONS.map((t) => ({ t: t, on: s.repReason === t, pick: () => this.setState({ repReason: t }) })),
-      repTextLabel: repOther ? 'Düşündiriş' : 'Düşündiriş (hökman däl)',
+      repTextLabel: repOther ? 'Explanation' : 'Explanation (optional)',
       repText: s.repText,
       onRepText: (e) => this.setState({ repText: e.target.value.slice(0, 500) }),
       repInvalid: repInvalid,
@@ -601,9 +799,9 @@ class Component extends DCLogic {
       repKey: (e) => { if (e && e.key === 'Escape') closeRep(); },
       submitRep: () => {
         const st = this.state;
-        if (!st.repFor || !st.repReason || (st.repReason === 'Başga sebäp' && !st.repText.trim())) return;
-        const next = st.items.map((x) => (x.id === st.repFor ? Object.assign({}, x, { report: { reason: st.repReason, text: st.repText.trim() } }) : x));
-        this.flash({ items: next, repFor: null, repReason: null, repText: '' }, 'Arz ugradyldy · Ýeral topary 48 sagadyň içinde barlar');
+        if (!st.repFor || !st.repReason || (st.repReason === 'Another reason' && !st.repText.trim())) return;
+        const next = st.items.map((x) => (x.id === st.repFor ? Object.assign({}, x, { mod: 'checking', reason: st.repReason }) : x));
+        this.flash({ items: next, repFor: null, repReason: null, repText: '' }, 'Report sent · Ýeral checks it within 48 hours');
       },
 
       hasToast: !!s.toast,

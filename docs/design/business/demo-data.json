@@ -2251,5 +2251,176 @@
       "phone": "[SUPPORT PHONE]",
       "telegram": "[TELEGRAM]"
     }
+  },
+  "v06r3": {
+    "_about": "v0.6 round 3 (20.10.2026): demo facts shared by every business board (business/README.md §28). English. Wins over v06r2 and older keys where they disagree.",
+    "workspace": {
+      "name": "Glow Studio",
+      "city": "Ashgabat",
+      "slug": "glow-studio",
+      "switcherRow": "Owner · Ashgabat"
+    },
+    "cities": [
+      "Ashgabat",
+      "Arkadag",
+      "Balkanabat",
+      "Dashoguz",
+      "Mary",
+      "Turkmenabat"
+    ],
+    "otherWorkspaces": [
+      {
+        "name": "Glow Nails",
+        "city": "Ashgabat",
+        "pending": 2
+      },
+      {
+        "name": "Aýnanyň saç studiýasy",
+        "city": "Ashgabat",
+        "note": "works from home",
+        "pending": 1
+      }
+    ],
+    "requests": 6,
+    "team": [
+      {
+        "id": "ayna",
+        "name": "Aýna",
+        "level": "Specialist"
+      },
+      {
+        "id": "maral",
+        "name": "Maral",
+        "level": "Specialist"
+      },
+      {
+        "id": "jeren",
+        "name": "Jeren",
+        "level": "Specialist",
+        "timeOff": "2026-11-09/2026-11-13"
+      },
+      {
+        "id": "leyli",
+        "name": "Leýli",
+        "level": "Specialist",
+        "usesApp": false,
+        "pill": "Doesn't use the app"
+      },
+      {
+        "id": "gulnar",
+        "name": "Gülnar Öwezowa",
+        "level": "Specialist",
+        "status": "Active (accepted)",
+        "shiftToday": "12:00–20:00",
+        "bookingsToday": 0,
+        "services": [
+          "Women's haircut",
+          "Hair styling",
+          "Children's haircut"
+        ]
+      }
+    ],
+    "invites": [
+      {
+        "name": "Ýazgül Orazowa",
+        "status": "Invited",
+        "daysLeft": 5
+      },
+      {
+        "name": "Arslan Gurbanow",
+        "status": "Expired"
+      },
+      {
+        "name": "Enejan Nazarowa",
+        "status": "Declined"
+      },
+      {
+        "name": "Dilber Saparowa",
+        "status": "Cancelled"
+      }
+    ],
+    "inviteCaption": "They'll see the invite when they sign in with +993 65 •• •• 22",
+    "services": {
+      "count": 12,
+      "groups": [
+        "Hair",
+        "Nails",
+        "Face",
+        "Massage"
+      ],
+      "s12": {
+        "name": "Bridal hair styling",
+        "group": "Hair",
+        "duration": "2 h",
+        "priceType": "Price at the place",
+        "staff": [
+          "ayna"
+        ],
+        "desc": "With a trial styling; the price is agreed",
+        "sameAs": "client demo-data.json s12"
+      }
+    },
+    "clients": {
+      "total": 148,
+      "newThisMonth": 9,
+      "tags": {
+        "Regular": 38,
+        "New": 9,
+        "Lapsed": 27,
+        "Reported": 3
+      },
+      "specialistAyna": 41,
+      "gozelA": {
+        "visits": 1,
+        "phone": "+993 65 73 26 41"
+      },
+      "gulalekN": {
+        "visits": 12,
+        "total": "1,740 TMT",
+        "averageCheck": "145 TMT",
+        "lastVisit": "28 Sep · Hair colouring · Aýna"
+      },
+      "deleteAllowed": "Merjen K.",
+      "deleteBlocked": "Aýsoltan R. (2 upcoming bookings)"
+    },
+    "maehriG": {
+      "lateRequest": "tomorrow 13:00–14:00, sent 20:40, Answer by 09:30 tomorrow"
+    },
+    "aynaLeaves": {
+      "bookings": 4,
+      "requests": 1,
+      "rows": [
+        "Today · 11:30–13:30 · Gülälek N. · Hair colouring · Confirmed (nobody else → Keep it)",
+        "Today · 15:30–16:30 · Ejegyz T. · Women's haircut · Confirmed (Aýna confirmed it before leaving)",
+        "Today · 17:00–17:30 · Döwlet B. · Children's haircut · Confirmed",
+        "Today · 18:00–18:45 · Aýsoltan R. · Hair styling · Confirmed",
+        "Tomorrow · 14:30–15:30 · Aýjemal Gurbanowa · Women's haircut · Pending"
+      ],
+      "toast": "Aýna left: 4 bookings and 1 request need a new specialist",
+      "to": "Gülnar Öwezowa"
+    },
+    "closedDays": [
+      {
+        "date": "2026-11-02",
+        "name": "Stocktake"
+      }
+    ],
+    "noShowLimit": 2,
+    "reviews": {
+      "counted": 96,
+      "rating": 4.9,
+      "unanswered": 4,
+      "reported": "Merdan K. · Back massage · Leýli",
+      "perPage": 20
+    },
+    "signIn": {
+      "codeOnScreen": "4821",
+      "lockAfterWrong": 3,
+      "lockSeconds": 60,
+      "codesPerHour": 5,
+      "rateLimitWait": "42 minutes"
+    },
+    "money": "Prices are booking information (everyone who sees the booking). See revenue = sums (revenue lines, client totals, average check): Owner; Specialist own earnings only; Admin none.",
+    "permissionsFixed": true
   }
 }

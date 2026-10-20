@@ -67,8 +67,9 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 .y-exb svg{flex:none}
 .bnr{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:12px;border:1px solid transparent;font-size:14px;line-height:20px}
 .bnr > svg{flex:none}
-.bnt{flex:1;min-width:0}
-.bnt b{font-weight:600}
+.bnx{flex:1;min-width:0}
+.bnx b{font-weight:600}
+@media (max-width:767px){.bnr{flex-wrap:wrap}.bnx{flex:1 1 calc(100% - 40px)}}
 .c-war{background:#fef6e7;border-color:#f2ddb0;color:#93500a}
 .c-dan{background:#fee4e2;border-color:#f6c7c2;color:#a3251b}
 .c-neu{background:#f4f4f6;border-color:#e6e6ea;color:#101014}
@@ -76,10 +77,16 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 .rmw{position:relative}
 .rmp{position:absolute;left:0;bottom:52px;z-index:31;width:260px;display:flex;flex-direction:column}
 .rmr{left:auto;right:0}
+.swd{display:flex;align-items:center;gap:10px;padding:8px;color:#101014}
+.dlog{width:100%}
+.ghname{flex-wrap:wrap;row-gap:2px}
+.rpr{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}
+.drw-f .b-dtx{margin-left:auto}
+@media (max-width:1023px){.swd{justify-content:center;padding:4px}.swd > span{display:none !important}.dlog{width:44px;padding:0;font-size:0;gap:0}}
 .rmi{align-items:flex-start}
 .rmt{display:flex;flex-direction:column;min-width:0}
 .rmn{font-size:14px;line-height:20px;font-weight:600}
-.rpb{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;border:1px solid #f6c7c2;background:#fff8f7}
+.rpb{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;border:1px solid #f6c7c2;background:#ffffff}
 .rpt{display:flex;flex-direction:column;gap:2px}
 .rpl{font-size:14px;line-height:20px;font-weight:600;color:#101014}
 .rpa{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -158,7 +165,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 .th,.th:hover{min-height:40px;padding-top:0;padding-bottom:0;background:transparent;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78;border-radius:16px 16px 0 0}
 .c-std{grid-template-columns:36px minmax(150px,1.5fr) minmax(150px,1.5fr) minmax(72px,.7fr) minmax(104px,1fr) minmax(88px,.8fr) 176px 40px}
 .c-req{grid-template-columns:36px minmax(150px,1.4fr) minmax(150px,1.4fr) minmax(72px,.7fr) minmax(104px,1fr) minmax(88px,.8fr) 124px 168px 40px}
-.c-std>.jg{display:none}
+.c-std>.jg{display:none !important}
 .c-std.nost{grid-template-columns:36px minmax(150px,1.5fr) minmax(150px,1.5fr) minmax(104px,1fr) minmax(88px,.8fr) 176px 40px}
 .c-req.nost{grid-template-columns:36px minmax(150px,1.4fr) minmax(150px,1.4fr) minmax(104px,1fr) minmax(88px,.8fr) 124px 168px 40px}
 .nost>.stc{display:none}
@@ -266,7 +273,8 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="app" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
 
 <aside class="side" aria-label="Main menu" style="position: sticky; top: 0; height: 100vh; z-index: 20">
-<button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="cap" style="font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0">{{me.role}}</span><sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span></sc-if></span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="cap" style="font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0">{{me.role}}</span></span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><div class="swd"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; overflow-wrap: anywhere">Glow Studio</span><span style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; min-width: 0"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span><span class="cap" style="font-size: 12px; line-height: 16px">Ashgabat</span></span></span></div></sc-if>
 <div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
 <a class="sn" href="B-Calendar.dc.html" aria-label="Calendar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Calendar</a>
 <a class="sn on" href="B-Bookings.dc.html" aria-current="page" aria-label="{{navReqLabel}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Bookings<span class="{{cntCls}}">{{pendingN}}</span></a>
@@ -275,27 +283,27 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <sc-if value="{{showSettings}}" hint-placeholder-val="{{true}}"><a class="sn" href="B-Settings.dc.html" aria-label="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a></sc-if>
 <div class="sfill" style="flex: 1"></div>
 <div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
-<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
 <span class="av">{{me.ini}}</span>
 <span class="mex" style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums">{{me.phone}}</span></span>
 <button class="b b-gho b-ic" aria-label="Account menu" aria-haspopup="menu" aria-expanded="{{userOpen}}" onClick="{{toggleUser}}" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
-</div>
+</div></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><a class="b b-sec dlog" href="B-Login.dc.html" aria-label="Log in"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>Log in</a></sc-if>
 </aside>
 
 <div class="main">
 <div class="top">
-<button class="mws" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><button class="mws" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></sc-if><sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><span class="mws"><img src="../../assets/brand/yeral-icon.png" alt="Glow Studio, example" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"></span></sc-if>
 <h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Bookings</h1>
 <div style="flex: 1"></div>
-<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Search" placeholder="Client, phone or booking code" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
 <a class="b b-pri b-sm" href="B-Calendar.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>New booking</a>
 </div>
 
 <div class="pad" style="flex: 1; padding: 24px 32px 32px; display: flex; flex-direction: column; gap: 16px; min-width: 0">
 <sc-if value="{{bnOn}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column">
-<sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnt"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
-<sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnt"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
-<sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnt"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
+<sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnx"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
+<sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
+<sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnx"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
 </div></sc-if>
 
 <div role="tablist" aria-label="Bookings" style="display: flex; gap: 28px; border-bottom: 1px solid #e6e6ea; overflow-x: auto">
@@ -345,7 +353,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="lgr"><span class="badge sm st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Confirmed</span><span>Time set, the client was told</span></div>
 <div class="lgr"><span class="badge sm st-d"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg>Completed</span><span>The visit happened (set by itself after the end time)</span></div>
 <div class="lgr"><span class="badge sm st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Cancelled</span><span>The client, the business or the system cancelled</span></div>
-<div class="lgr"><span class="badge sm st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>No-show</span><span>The client didn’t come — marked with Report</span></div>
+<div class="lgr"><span class="badge sm st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>No-show</span><span>The client didn’t come — marked with Report from the visit’s start</span></div>
 </div>
 <div class="lgs"><span class="lbl">Source</span>
 <div class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>Online — the client booked on Ýeral</span></div>
@@ -362,22 +370,22 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span>No answer in time — nobody answered the request in time</span></div>
 </div>
 <div class="lgs"><span class="lbl">Time to answer</span>
-<div class="lgr"><span class="tmr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>24 min</span><span>Time left to answer the request</span></div>
-<div class="lgr"><span class="tmr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>By 09:30 tomorrow</span><span>Arrived while you were closed — the timer waits until you open</span></div>
+<div class="lgr"><span class="tmr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>24 min</span><span>Time left to answer — counts only while you’re open</span></div>
+<div class="lgr"><span class="tmr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>By 09:30</span><span>Arrived while you were closed — answer by this time</span></div>
 <div class="lgr"><span class="tmr hot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>12 min</span><span>Less than 15 min left</span></div>
 </div>
 <div class="lgf"><button class="b b-sec b-sm" onClick="{{closeMenus}}">Got it</button></div>
 </div>
 </sc-if>
 </div>
-<sc-if value="{{canExport}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm" onClick="{{doExport}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Export</button></sc-if>
+<sc-if value="{{canExport}}" hint-placeholder-val="{{true}}"><button class="b b-sec b-sm" onClick="{{doExport}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Export CSV</button></sc-if>
 </div>
 
 <sc-if value="{{showReqEmpty}}" hint-placeholder-val="{{false}}">
 <div class="empty">
 <div class="eic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg></div>
 <div style="font-size: 19px; line-height: 24px; font-weight: 600">No new requests</div>
-<div style="font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 360px">Every request is answered. We’ll let you know when a new one comes in.</div>
+<div style="font-size: 15px; line-height: 22px; color: #5a5a64; max-width: 360px">Every request is answered. New requests show up here.</div>
 <a class="b b-sec b-sm" href="B-Calendar.dc.html" style="margin-top: 4px">Open the calendar</a>
 </div>
 </sc-if>
@@ -491,7 +499,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="fld"><label class="flab" for="drw-note">Internal note</label><textarea id="drw-note" class="inp ta" value="{{d.inote}}" onInput="{{onNote}}" placeholder="For example: a colour code or a special request" aria-describedby="drw-note-c"></textarea><span id="drw-note-c" class="cap">{{d.noteCap}}</span></div>
 </sc-if>
 
-<sc-if value="{{d.hasReport}}" hint-placeholder-val="{{false}}"><div class="rpb"><div class="rpt"><span class="lbl" style="color: #a3251b">Report</span><span class="rpl">{{d.reportLine}}</span></div><div class="rpa"><button class="b b-sec b-sm" onClick="{{removeReport}}">Remove report</button><span class="cap">The client isn’t told. You can remove it until {{d.reportUntil}}.</span></div></div></sc-if>
+<sc-if value="{{d.hasReport}}" hint-placeholder-val="{{false}}"><div class="rpb"><span class="lbl" style="color: #a3251b">{{d.reportHead}}</span><sc-for list="{{d.reports}}" as="rr" hint-placeholder-count="1"><div class="rpr"><span class="rpl">{{rr.line}}</span><button class="b b-sec b-sm" aria-label="{{rr.aria}}" onClick="{{rr.remove}}">Remove report</button></div></sc-for><span class="cap">{{d.reportCap}}</span></div></sc-if>
 <sc-if value="{{d.hasHist}}" hint-placeholder-val="{{false}}">
 <div class="dsec">
 <span class="lbl">Recent visits</span>
@@ -510,11 +518,10 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <sc-if value="{{d.actConfirmed}}" hint-placeholder-val="{{false}}">
 <a class="b b-sec" href="B-Calendar.dc.html">Move to another time</a>
 <sc-if value="{{d.canReport}}" hint-placeholder-val="{{true}}"><div class="rmw"><button class="b b-gho" aria-haspopup="menu" aria-expanded="{{d.rOpen}}" onClick="{{toggleRmenu}}">Report<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><sc-if value="{{d.rOpen}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeRmenu}}"></div><div class="pop rmp rmr" role="menu" aria-label="Report" onKeyDown="{{rmKey}}"><sc-for list="{{d.rItems}}" as="ri" hint-placeholder-count="3"><button class="mi rmi" role="menuitem" onClick="{{ri.pick}}"><span class="rmt"><span class="rmn">{{ri.t}}</span><span class="cap">{{ri.d}}</span></span></button></sc-for></div></sc-if></div></sc-if>
-<div style="flex: 1"></div>
-<button class="b b-dtx" onClick="{{drwCancel}}">Cancel</button>
+<button class="b b-dtx" onClick="{{drwCancel}}">Cancel booking</button>
 </sc-if>
 <sc-if value="{{d.actDone}}" hint-placeholder-val="{{false}}">
-<sc-if value="{{d.canReport}}" hint-placeholder-val="{{true}}"><div class="rmw"><button class="b b-gho" aria-haspopup="menu" aria-expanded="{{d.rOpen2}}" onClick="{{toggleRmenu}}">Report<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><sc-if value="{{d.rOpen2}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeRmenu}}"></div><div class="pop rmp rmr" role="menu" aria-label="Report" onKeyDown="{{rmKey}}"><sc-for list="{{d.rItems}}" as="ri" hint-placeholder-count="3"><button class="mi rmi" role="menuitem" onClick="{{ri.pick}}"><span class="rmt"><span class="rmn">{{ri.t}}</span><span class="cap">{{ri.d}}</span></span></button></sc-for></div></sc-if></div></sc-if>
+<sc-if value="{{d.canReport}}" hint-placeholder-val="{{true}}"><div class="rmw"><button class="b b-gho" aria-haspopup="menu" aria-expanded="{{d.rOpen2}}" onClick="{{toggleRmenu}}">Report<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><sc-if value="{{d.rOpen2}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeRmenu}}"></div><div class="pop rmp" role="menu" aria-label="Report" onKeyDown="{{rmKey}}"><sc-for list="{{d.rItems}}" as="ri" hint-placeholder-count="3"><button class="mi rmi" role="menuitem" onClick="{{ri.pick}}"><span class="rmt"><span class="rmn">{{ri.t}}</span><span class="cap">{{ri.d}}</span></span></button></sc-for></div></sc-if></div></sc-if>
 </sc-if>
 <sc-if value="{{d.actRebook}}" hint-placeholder-val="{{false}}">
 <a class="b b-sec" href="B-Calendar.dc.html">Book again</a>
@@ -530,16 +537,16 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="mdl mdl-s" role="dialog" aria-modal="true" aria-labelledby="md-t">
 <span class="grab"></span>
 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><h2 id="md-t" class="mt">{{m.title}}</h2><button class="b b-gho b-sm b-ico" aria-label="Close" onClick="{{closeModal}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
-<div style="display: flex; flex-direction: column; gap: 4px"><p class="mp">{{m.lead}}</p><span class="cap">{{m.ctx}}</span></div>
-<div class="fld">
+<div style="display: flex; flex-direction: column; gap: 4px"><sc-if value="{{m.hasLead}}" hint-placeholder-val="{{true}}"><p class="mp">{{m.lead}}</p></sc-if><span class="cap">{{m.ctx}}</span></div>
+<sc-if value="{{m.hasChips}}" hint-placeholder-val="{{true}}"><div class="fld">
 <span class="flab" id="md-r">{{m.reasonLabel}}</span>
 <div role="radiogroup" aria-labelledby="md-r" style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{m.chips}}" as="c" hint-placeholder-count="4"><button class="{{c.cls}}" role="radio" aria-checked="{{c.on}}" onClick="{{c.pick}}">{{c.t}}</button></sc-for></div>
 <sc-if value="{{m.hasDesc}}" hint-placeholder-val="{{false}}"><span class="{{m.descCls}}">{{m.desc}}</span></sc-if>
-</div>
+</div></sc-if>
 <sc-if value="{{m.showText}}" hint-placeholder-val="{{true}}">
 <div class="fld">
-<label class="flab" for="md-x">{{m.textLabel}}</label>
-<textarea id="md-x" class="inp ta" value="{{rtext}}" onInput="{{onRtext}}" placeholder="{{m.textPh}}"></textarea>
+<sc-if value="{{m.hasLabel}}" hint-placeholder-val="{{true}}"><label class="flab" for="md-x">{{m.textLabel}}</label></sc-if>
+<textarea id="md-x" class="inp ta" aria-label="{{m.textAria}}" value="{{rtext}}" onInput="{{onRtext}}" placeholder="{{m.textPh}}"></textarea>
 </div>
 </sc-if>
 <sc-if value="{{m.showAlt}}" hint-placeholder-val="{{true}}">
@@ -548,7 +555,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <sc-if value="{{altOn}}" hint-placeholder-val="{{true}}"><div style="display: flex; flex-direction: column; gap: 8px"><div role="group" aria-label="Offered times" style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{m.alts}}" as="a" hint-placeholder-count="3"><button class="{{a.cls}}" aria-pressed="{{a.on}}" onClick="{{a.pick}}">{{a.t}}</button></sc-for></div><span class="cap">{{m.altCount}}</span></div></sc-if>
 </div>
 </sc-if>
-<sc-if value="{{m.hasNote}}" hint-placeholder-val="{{false}}"><p class="cap" style="margin: 0">Saved to the client’s card; only the team sees it. After 2 no-shows the client can only book by phone.</p></sc-if>
+<sc-if value="{{m.hasNote}}" hint-placeholder-val="{{false}}"><p class="cap" style="margin: 0">Saved to the client’s card; only the team sees it. Only no-shows count towards Phone only.</p></sc-if>
 <div class="mact"><button class="b b-sec" onClick="{{closeModal}}">Back</button><button class="{{m.okCls}}" disabled="{{m.okOff}}" onClick="{{doModal}}">{{m.okLabel}}</button></div>
 </div>
 </div>
@@ -571,7 +578,6 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="catcher" onClick="{{closeMenus}}"></div>
 <div class="pop ump" role="menu" aria-label="Account menu" onKeyDown="{{menuKey}}">
 <a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>My profile</a>
-<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Language<span class="cap" style="margin-left: auto">English</span></a>
 <a class="mi" role="menuitem" href="Venue.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Your Ýeral page</a>
 <a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Open as a client<span class="cap" style="margin-left: auto">yeral.app</span></a>
 <button class="mi" role="menuitem" aria-haspopup="menu" onClick="{{openContact}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg>Contact Ýeral<span style="margin-left: auto; display: inline-flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button>
@@ -601,13 +607,13 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <a class="mi" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<sc-if value="{{showRevBadge}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-label="4 unanswered reviews">4</span></sc-if></a>
 <sc-if value="{{showSettings}}" hint-placeholder-val="{{true}}"><a class="mi" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a></sc-if>
 <div class="mdv"></div>
-<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">{{me.ini}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 14px; line-height: 20px; font-weight: 600">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px">{{me.phone}} · {{me.role}}</span></span></div>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">{{me.ini}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 14px; line-height: 20px; font-weight: 600">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px">{{me.phone}} · {{me.role}}</span></span></div>
 <a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>My profile</a>
-<a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Language<span class="cap" style="margin-left: auto">English</span></a>
 <a class="mi" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Your Ýeral page</a>
 <a class="mi" href="Home.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Open as a client<span class="cap" style="margin-left: auto">yeral.app</span></a>
 <a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg><span class="wsn"><span class="wst">Contact Ýeral</span><span class="wsc">[SUPPORT PHONE] · Telegram</span></span></a>
-<a class="mi mi-d" href="B-Login.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Log out</a>
+<a class="mi mi-d" href="B-Login.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Log out</a></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><a class="mi" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>Log in</a></sc-if>
 </div>
 </sc-if>
 
@@ -622,14 +628,16 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["requests","today","upcoming","past","cancelled"],"default":"requests","section":"State"},"panel":{"editor":"enum","options":["none","request","move-request","booking","decline","report-menu","report-noshow","reported"],"default":"none","section":"State"},"selected":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"answers":{"editor":"enum","options":["both","each","desk"],"default":"both","section":"Access"},"clock":{"editor":"enum","options":["day","evening"],"default":"day","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1320}}'>
+<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["requests","today","upcoming","past","cancelled"],"default":"requests","section":"State"},"panel":{"editor":"enum","options":["none","request","move-request","booking","decline","report-menu","report-noshow","report-added","reported","report-past"],"default":"none","section":"State"},"selected":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"answers":{"editor":"enum","options":["both","each","desk"],"default":"both","section":"Access"},"clock":{"editor":"enum","options":["day","evening"],"default":"day","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1320}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.state = Object.assign({ over: {}, notes: {}, toast: null, q: '', fStaff: '', fSvc: '', fDate: 'week', pop: null, side: null }, this.fromProps(props || {}));
   }
   role(p) {
-    const r = (p || this.props || {}).role;
+    const pp = p || this.props || {};
+    if (pp.banner === 'demo') return 'owner';
+    const r = pp.role;
     return r === 'admin' || r === 'specialist' ? r : 'owner';
   }
   answers() {
@@ -653,7 +661,7 @@ class Component extends DCLogic {
     if (!this.closedNow()) return { pill: h + ' min', title: h + ' min left to answer', hot: h <= 15, by: this.now() + h };
     const by = 540 + h;
     const t = String(Math.floor(by / 60)).padStart(2, '0') + ':' + String(by % 60).padStart(2, '0');
-    return { pill: 'By ' + t + ' tomorrow', title: 'Answer by ' + t + ' tomorrow', hot: false, by: 1440 + by, t: t };
+    return { pill: 'By ' + t, title: 'Answer by ' + t + ' tomorrow', hot: false, by: 1440 + by, t: t };
   }
   started(r) {
     const m = parseInt(r.from.slice(0, 2), 10) * 60 + parseInt(r.from.slice(3, 5), 10);
@@ -672,15 +680,45 @@ class Component extends DCLogic {
     const r = this.byId(id);
     if (!r) return;
     const over = Object.assign({}, s.over);
-    const o = Object.assign({}, s.over[id] || {}, { complaint: k, ctext: text || '', rAt: String(Math.floor(this.now() / 60)).padStart(2, '0') + ':' + String(this.now() % 60).padStart(2, '0'), rBy: { owner: 'Maýsa Annaýewa', admin: 'Selbi Hojaýewa', specialist: 'Aýna Myradowa' }[this.role()] });
+    const at = String(Math.floor(this.now() / 60)).padStart(2, '0') + ':' + String(this.now() % 60).padStart(2, '0');
+    const by = { owner: 'Maýsa Annaýewa', admin: 'Selbi Hojaýewa', specialist: 'Aýna Myradowa' }[this.role()];
+    const o = Object.assign({}, s.over[id] || {}, { reports: (r.reports || []).concat([{ k: k, text: text || '', at: at, by: by, off: 0 }]) });
     if (k === 'noshow') o.status = 'noshow';
     over[id] = o;
     this.flash({ over: over, menuId: null, rmenu: false, rmRow: null, modal: null, mIds: [], reason: null, rtext: '' }, k === 'noshow' ? 'Marked as No-show · saved to the client’s card' : 'Report saved to the client’s card', { over: s.over });
   }
+  unreport(id, i) {
+    const s = this.state;
+    const r = this.byId(id);
+    if (!r) return;
+    const reps = (r.reports || []).slice();
+    const gone = reps.splice(i, 1)[0];
+    if (!gone) return;
+    const over = Object.assign({}, s.over);
+    const o = Object.assign({}, s.over[id] || {}, { reports: reps });
+    const wasNo = gone.k === 'noshow' && r.status === 'noshow';
+    if (wasNo) o.status = this.ended(r) ? 'completed' : 'confirmed';
+    over[id] = o;
+    this.flash({ over: over }, wasNo ? 'Report removed · the booking is ' + (this.ended(r) ? 'Completed' : 'Confirmed') + ' again' : 'Report removed', { over: s.over });
+  }
+  reportKinds(r) {
+    const m = parseInt(r.to.slice(0, 2), 10) * 60 + parseInt(r.to.slice(3, 5), 10);
+    const reps = r.reports || [];
+    const has = (k) => reps.some((x) => x.k === k);
+    const started = this.started(r);
+    const sinceEnd = -r.day * 1440 + this.now() - m;
+    const out = [];
+    if (started && !has('late') && !has('noshow') && sinceEnd < 1440) out.push('noshow');
+    if (started && !has('late')) out.push('late');
+    if (!has('rude')) out.push('rude');
+    out.push('other');
+    return out;
+  }
   reportItems(r, after) {
     const RL = { noshow: 'No-show', late: 'Came late', rude: 'Rude behaviour', other: 'Other' };
-    return (this.started(r) ? ['noshow'] : []).concat(['late', 'rude', 'other']).map((k) => ({
-      k: k, t: RL[k] + (k === 'other' ? '…' : ''), d: k === 'noshow' ? 'The booking becomes No-show' : (k === 'other' ? 'Write what happened' : 'The booking doesn’t change'),
+    const RD = { noshow: 'The booking becomes No-show · counts towards Phone only', late: 'The booking doesn’t change', rude: 'The booking doesn’t change', other: 'Write what happened' };
+    return this.reportKinds(r).map((k) => ({
+      k: k, t: RL[k] + (k === 'other' ? '…' : ''), d: RD[k],
       pick: () => { if (after) after(); if (k === 'other') this.setState({ modal: 'complaint', mIds: [r.id], reason: 'Other', rtext: '', menuId: null, rmenu: false, rmRow: null, altOn: false, alts: {} }); else this.report(r.id, k); }
     }));
   }
@@ -701,14 +739,20 @@ class Component extends DCLogic {
     const panel = p.panel ?? 'none';
     const st = { tab: tab, openId: null, modal: null, mIds: [], reason: null, rtext: '', altOn: false, alts: {}, sel: {}, menuId: null, pop: null, rmenu: false, rmRow: null, over: {} };
     if (p.clock === 'evening') st.over = { b04: { status: 'confirmed' }, b10: { status: 'confirmed' }, b15: { status: 'confirmed' }, b18: { status: 'confirmed' }, b19: { status: 'confirmed' }, b20: { day: 3, from: '11:30', to: '12:30', mv: null } };
-    if (panel === 'report-menu') { st.openId = 'b03'; st.rmenu = true; }
-    if (panel === 'report-noshow') { st.openId = 'b08'; st.rmenu = true; }
-    if (panel === 'reported') { st.openId = 'b12'; st.tab = 'past'; }
     if (panel === 'request' || panel === 'decline') st.openId = 'b04';
     if (panel === 'move-request' && this.role(p) !== 'specialist') { st.openId = 'b20'; st.tab = 'requests'; }
     if (panel === 'booking') st.openId = 'b03';
     if (panel === 'decline') { st.modal = 'decline'; st.mIds = ['b04']; st.reason = 'This time isn’t free'; st.altOn = true; st.alts = { 0: true }; }
     if (p.clock === 'evening' && (panel === 'request' || panel === 'decline') && this.role(p) !== 'specialist') { st.openId = 'b21'; if (st.modal) { st.mIds = ['b21']; st.alts = {}; } }
+    // report states (round 3): before the start · from the start · after an earlier report · a No-show · more than 24 h after the visit
+    const pr = this.role(p);
+    const sp = pr === 'specialist';
+    const who = sp ? 'Aýna Myradowa' : (pr === 'admin' ? 'Selbi Hojaýewa' : 'Maýsa Annaýewa');
+    if (panel === 'report-menu') { st.openId = 'b03'; st.rmenu = true; }
+    if (panel === 'report-noshow' || panel === 'report-added') { st.openId = sp ? 'b02' : 'b08'; st.rmenu = true; }
+    if (panel === 'report-added') { st.over = Object.assign({}, st.over); st.over[st.openId] = Object.assign({}, st.over[st.openId] || {}, { reports: [{ k: 'late', text: '', at: '11:15', by: who, off: 0 }] }); }
+    if (panel === 'reported') { st.openId = sp ? 'b02' : 'b12'; st.tab = 'past'; if (sp) st.over = Object.assign({}, st.over, { b02: { status: 'noshow', reports: [{ k: 'noshow', text: '', at: '11:05', by: who, off: 0 }] } }); }
+    if (panel === 'report-past' && !sp) { st.openId = 'p2'; st.rmenu = true; st.tab = 'past'; }
     if (p.selected) {
       const L = this.listFor(tab, st.over, this.role(p));
       const pend = L.filter((r) => r.status === 'pending');
@@ -729,26 +773,26 @@ class Component extends DCLogic {
   data() {
     if (this._d) return this._d;
     const SV = {
-      s1: ['Women’s haircut', '1 h', '80 TMT'], s2: ['Hair styling', '45 min', '60 TMT'], s3: ['Hair colouring', '2 h', 'from 250 TMT'], s4: ['Children’s haircut', '30 min', '40 TMT'],
-      s5: ['Manicure', '1 h', '70 TMT'], s6: ['Gel manicure', '1 h 30 min', '110 TMT'], s7: ['Pedicure', '1 h 15 min', '90 TMT'],
-      s8: ['Facial cleansing', '1 h', '150 TMT'], s9: ['Brows and lashes', '30 min', '50 TMT'],
-      s10: ['Back massage', '30 min', '90 TMT'], s11: ['Full body massage', '1 h', '160 TMT']
+      s1: ['Women’s haircut', '60 min', '80 TMT'], s2: ['Hair styling', '45 min', '60 TMT'], s3: ['Hair colouring', '2 h', 'from 250 TMT'], s4: ['Children’s haircut', '30 min', '40 TMT'],
+      s5: ['Manicure', '60 min', '70 TMT'], s6: ['Gel manicure', '1 h 30 min', '110 TMT'], s7: ['Pedicure', '1 h 15 min', '90 TMT'],
+      s8: ['Facial cleansing', '60 min', '150 TMT'], s9: ['Brows and lashes', '30 min', '50 TMT'],
+      s10: ['Back massage', '30 min', '90 TMT'], s11: ['Full body massage', '60 min', '160 TMT'], s12: ['Bridal hair styling', '2 h', 'Price at the place']
     };
     const CL = {
-      'Ogulşat M.': ['+993 65 21 77 03', 7], 'Aýgül R.': ['+993 65 18 42 07', 5],
-      'Ogulnabat Ç.': ['+993 62 18 60 05', 3, 2, '2 no-shows — book by phone only.', '', [], true],
-      'Merjen K.': ['+993 65 02 91 66', 5], 'Bahar A.': ['+993 65 70 33 18', 9],
-      'Gülälek N.': ['+993 65 44 70 19', 12, 1, 'Use ammonia-free colour — allergy.', '', [['28 Sep', 'Hair colouring · Aýna', 'completed', '250 TMT'], ['7 Sep', 'Women’s haircut · Aýna', 'completed', '80 TMT'], ['19 Aug', 'Hair styling · Aýna', 'noshow', '60 TMT']]],
-      'Nurjahan A.': ['+993 63 51 08 77', 6], 'Jemal S.': ['+993 61 27 90 34', 8], 'Jahan M.': ['+993 61 84 52 19', 2],
-      'Sona P.': ['+993 62 33 81 07', 14], 'Ejegyz T.': ['+993 64 55 12 80', 0], 'Mähri G.': ['+993 61 30 44 92', 4],
-      'Gözel A.': ['+993 65 73 26 41', 1], 'Döwlet B.': ['+993 65 66 10 22', 6], 'Aýsoltan R.': ['+993 64 30 15 62', 2],
-      'Läle O.': ['+993 63 47 25 51', 2], 'Merdan K.': ['+993 62 21 08 40', 3], 'Aýjemal Gurbanowa': ['+993 65 90 11 22', 3],
-      'Arzygül H.': ['+993 64 72 03 18', 0], 'Mahym D.': ['+993 65 37 48 20', 4]
+      'Ogulşat M.': ['+993 65 21 77 03', 7, 0, '', '82 TMT'], 'Aýgül R.': ['+993 61 27 54 09', 6, 0, '', '75 TMT'],
+      'Ogulnabat Ç.': ['+993 62 18 60 05', 3, 2, '2 no-shows — book by phone only.', '150 TMT', [], true],
+      'Merjen K.': ['+993 65 02 91 66', 5, 0, '', '60 TMT'], 'Bahar A.': ['+993 65 70 33 18', 9, 0, '', '98 TMT'],
+      'Gülälek N.': ['+993 65 44 70 19', 12, 1, 'Use ammonia-free colour — allergy.', '145 TMT', [['28 Sep', 'Hair colouring · Aýna', 'completed', '250 TMT'], ['7 Sep', 'Women’s haircut · Aýna', 'completed', '80 TMT'], ['19 Aug', 'Hair styling · Aýna', 'noshow', '60 TMT']]],
+      'Nurjahan A.': ['+993 62 55 07 91', 8, 0, '', '150 TMT'], 'Jemal S.': ['+993 64 90 31 26', 3, 0, '', '90 TMT'], 'Jahan M.': ['+993 65 13 66 48', 2, 0, '', '70 TMT'],
+      'Sona P.': ['+993 62 33 81 07', 14, 0, '', '64 TMT'], 'Ejegyz T.': ['+993 64 55 12 80', 0], 'Mähri G.': ['+993 61 30 44 92', 4, 0, '', '70 TMT'],
+      'Gözel A.': ['+993 65 73 26 41', 1, 0, '', '90 TMT'], 'Döwlet B.': ['+993 65 66 10 22', 6, 0, '', '40 TMT'], 'Aýsoltan R.': ['+993 65 48 19 73', 5, 0, '', '70 TMT'],
+      'Läle O.': ['+993 63 47 25 51', 2, 0, '', '110 TMT'], 'Merdan K.': ['+993 62 21 08 40', 4, 0, '', '90 TMT'], 'Aýjemal Gurbanowa': ['+993 65 90 11 22', 3, 0, '', '85 TMT'],
+      'Arzygül H.': ['+993 64 72 03 18', 0], 'Mahym D.': ['+993 65 37 48 20', 4, 0, '', '75 TMT']
     };
     const R = [
       ['b01', 'YR-48101', 'Ogulşat M.', 's1', 'Aýna', 0, '09:00', '10:00', 'online', 'completed'],
       ['b07', 'YR-48107', 'Aýgül R.', 's5', 'Maral', 0, '09:30', '10:30', 'online', 'completed'],
-      ['b12', 'YR-48112', 'Ogulnabat Ç.', 's8', 'Jeren', 0, '10:00', '11:00', 'online', 'noshow', { complaint: 'noshow', rAt: '10:25', rBy: 'Selbi Hojaýewa' }],
+      ['b12', 'YR-48112', 'Ogulnabat Ç.', 's8', 'Jeren', 0, '10:00', '11:00', 'online', 'noshow', { reports: [{ k: 'noshow', text: '', at: '10:25', by: 'Selbi Hojaýewa', off: 0 }] }],
       ['b02', 'YR-48102', 'Merjen K.', 's2', 'Aýna', 0, '10:15', '11:00', 'phone', 'completed'],
       ['b08', 'YR-48108', 'Bahar A.', 's6', 'Maral', 0, '11:00', '12:30', 'online', 'confirmed'],
       ['b03', 'YR-48103', 'Gülälek N.', 's3', 'Aýna', 0, '11:30', '13:30', 'online', 'confirmed', { price: '250 TMT' }],
@@ -783,15 +827,15 @@ class Component extends DCLogic {
       const x = a[10] || {};
       return {
         id: a[0], ref: a[1], client: a[2], svc: a[3], svcName: sv[0], dur: sv[1], price: x.price || sv[2], staff: a[4], day: a[5], from: a[6], to: a[7], src: a[8], status: a[9],
-        hold: x.hold || 0, mv: x.mv || null, eve: !!x.eve, at: x.at || '', complaint: x.complaint || null, ctext: '', rAt: x.rAt || '', rBy: x.rBy || '', by: x.by || '', why: x.why || '', note: x.note || '',
-        phone: cl[0], visits: cl[1], ns: cl[2] || 0, alert: cl[3] || '', hist: cl[5] || [], blocked: !!cl[6]
+        hold: x.hold || 0, mv: x.mv || null, eve: !!x.eve, at: x.at || '', reports: x.reports || [], by: x.by || '', why: x.why || '', note: x.note || '',
+        phone: cl[0], visits: cl[1], ns: cl[2] || 0, alert: cl[3] || '', avg: cl[4] || '', hist: cl[5] || [], blocked: !!cl[6]
       };
     });
     const ALT = {
-      b04: ['Tomorrow 10:00', 'Tomorrow 16:00', 'Fri 12:00'], b10: ['Tomorrow 12:00', 'Tomorrow 17:00', 'Fri 11:00'], b15: ['Today 19:00', 'Tomorrow 13:00', 'Tomorrow 17:30'],
-      b18: ['Tomorrow 16:00', 'Fri 10:00', 'Fri 14:30'], b19: ['Fri 14:00', 'Sat 10:00', 'Sat 13:00'], b21: ['Tomorrow 15:00', 'Tomorrow 17:30', 'Fri 12:00']
+      b04: ['Tomorrow · 10:00', 'Tomorrow · 16:00', 'Fri, 16 Oct · 12:00'], b10: ['Tomorrow · 12:00', 'Tomorrow · 17:00', 'Fri, 16 Oct · 11:00'], b15: ['Today · 19:00', 'Tomorrow · 13:00', 'Tomorrow · 17:30'],
+      b18: ['Tomorrow · 16:00', 'Fri, 16 Oct · 10:00', 'Fri, 16 Oct · 14:30'], b19: ['Fri, 16 Oct · 14:00', 'Sat, 17 Oct · 10:00', 'Sat, 17 Oct · 13:00'], b21: ['Tomorrow · 15:00', 'Tomorrow · 17:30', 'Fri, 16 Oct · 12:00']
     };
-    const GROUPS = [['Hair', ['s1', 's2', 's3', 's4']], ['Nails', ['s5', 's6', 's7']], ['Face', ['s8', 's9']], ['Massage', ['s10', 's11']]];
+    const GROUPS = [['Hair', ['s1', 's2', 's3', 's4', 's12']], ['Nails', ['s5', 's6', 's7']], ['Face', ['s8', 's9']], ['Massage', ['s10', 's11']]];
     this._d = { rows: rows, SV: SV, ALT: ALT, GROUPS: GROUPS };
     return this._d;
   }
@@ -874,11 +918,13 @@ class Component extends DCLogic {
     const D = this.data();
     const role = this.role();
     const spec = role === 'specialist';
+    const seeMoney = role === 'owner';
+    const showP = true;
     const all = this.allRows().filter((r) => !spec || r.staff === 'Aýna').map((r) => this.cur(r, s.over));
     const byId = {};
     all.forEach((r) => { byId[r.id] = r; });
     const pendingN = all.filter((r) => r.status === 'pending' || this.isMv(r)).length;
-    const DN = { '-2': 'Mon 12', '-1': 'Tue 13', '0': 'Today', '1': 'Thu 15', '2': 'Fri 16', '3': 'Sat 17' };
+    const DN = { '-2': 'Mon, 12 Oct', '-1': 'Tue, 13 Oct', '0': 'Today', '1': 'Thu, 15 Oct', '2': 'Fri, 16 Oct', '3': 'Sat, 17 Oct' };
     const todayN = all.filter((r) => r.day === 0 && r.status !== 'cancelled').length;
     const BADGE = { pending: ['st-p', 'i-p', 'Pending'], confirmed: ['st-c', 'i-c', 'Confirmed'], completed: ['st-d', 'i-d', 'Completed'], cancelled: ['st-x', 'i-x', 'Cancelled'], noshow: ['st-n', 'i-n', 'No-show'] };
     const SRC = { online: 'Online', phone: 'Phone', walkin: 'Walk-in' };
@@ -886,7 +932,7 @@ class Component extends DCLogic {
     const DAYS = { '-2': 'Mon, 12 Oct', '-1': 'Tue, 13 Oct', '0': 'Today', '1': 'Tomorrow, 15 Oct', '2': 'Fri, 16 Oct', '3': 'Sat, 17 Oct' };
     const DAYL = { '-2': 'Monday, 12 October', '-1': 'Tuesday, 13 October', '0': 'Today, 14 October', '1': 'Tomorrow, 15 October', '2': 'Friday, 16 October', '3': 'Saturday, 17 October' };
     const SHORT = { '-2': 'Monday', '-1': 'Tuesday', '0': 'Today', '1': 'Tomorrow', '2': 'Friday', '3': 'Saturday' };
-    const SPEC = { 'Aýna': 'Stylist', 'Maral': 'Nail technician', 'Jeren': 'Beautician', 'Leýli': 'Massage therapist · no app' };
+    const SPEC = { 'Aýna': 'Stylist', 'Maral': 'Nail technician', 'Jeren': 'Beautician', 'Leýli': 'Massage therapist · doesn’t use the app', 'Gülnar': 'Stylist' };
     const BY = { client: 'The client cancelled', business: 'The business cancelled', system: 'No answer in time' };
     const isReq = s.tab === 'requests';
 
@@ -923,10 +969,10 @@ class Component extends DCLogic {
         menu.push(mb('Open booking', openIt));
         if (r.status === 'confirmed') {
           menu.push(ml('Move to another time', 'B-Calendar.dc.html'));
-          if (!r.complaint) menu.push(mb('Report…', () => this.setState({ rmRow: r.id })));
-          menu.push(mb('Cancel', () => this.openModal('cancel', [r.id]), true));
+          menu.push(mb('Report…', () => this.setState({ rmRow: r.id })));
+          menu.push(mb('Cancel booking', () => this.openModal('cancel', [r.id]), true));
         }
-        if (r.status === 'completed' && !r.complaint) menu.push(mb('Report…', () => this.setState({ rmRow: r.id })));
+        if (r.status === 'completed') menu.push(mb('Report…', () => this.setState({ rmRow: r.id })));
         if (r.status === 'cancelled' || r.status === 'noshow') menu.push(ml('Book again', 'B-Calendar.dc.html'));
       }
       menu.push(ml('Open the client’s card', 'B-Client.dc.html'));
@@ -939,7 +985,7 @@ class Component extends DCLogic {
         hasMv: mvq, mvLine: isReq ? 'Time change' : 'New time requested: ' + (mvq ? DN[r.mv.day] + ' · ' + r.mv.from : ''),
         plainTime: !(isReq && mvq), mvTime: isReq && mvq, mvFrom: DN[r.day] + ' · ' + r.from, mvTo: mvq ? DN[r.mv.day] + ' · ' + r.mv.from : '', ansNote: spec ? 'Answers: admins' : 'Answers: ' + r.staff,
         client: r.client, phone: r.phone, isNew: r.visits === 0,
-        svcName: r.svcName, svcMeta: r.dur + ' · ' + r.price, staff: r.staff,
+        svcName: r.svcName, svcMeta: r.dur + (showP ? ' · ' + r.price : ''), staff: r.staff,
         time: r.from + '–' + r.to, day: DAYS[r.day],
         src: SRC[r.src], isOnline: r.src === 'online', isPhone: r.src === 'phone', isWalk: r.src === 'walkin',
         badgeCls: 'badge ' + bd[0], statusLabel: bd[2],
@@ -952,7 +998,7 @@ class Component extends DCLogic {
           this.setState({ sel: n });
         },
         open: openIt,
-        openLabel: r.client + ', ' + DAYS[r.day] + ' ' + r.from + (mvq ? ' → ' + DN[r.mv.day] + ' ' + r.mv.from + ' — open the time change request' : ' — ' + (r.status === 'pending' ? 'open the request' : 'open the booking')),
+        openLabel: r.client + ', ' + DAYS[r.day] + ' · ' + r.from + (mvq ? ' → ' + DN[r.mv.day] + ' · ' + r.mv.from + ' — open the time change request' : ' — ' + (r.status === 'pending' ? 'open the request' : 'open the booking')),
         confirm: () => this.doConfirm([r.id]),
         decline: () => this.openModal('decline', [r.id]),
         menuOpen: mOpen, menuCell: mOpen ? 'z1 zup' : 'z1', menuLabel: 'Actions: ' + r.client,
@@ -969,7 +1015,7 @@ class Component extends DCLogic {
       pick: () => this.setState({ tab: id, sel: {}, menuId: null, pop: null })
     }));
 
-    const STAFF = [['', 'All specialists', ''], ['Aýna', 'Aýna', 'Stylist'], ['Maral', 'Maral', 'Nail technician'], ['Jeren', 'Jeren', 'Beautician'], ['Leýli', 'Leýli', 'Massage therapist']];
+    const STAFF = [['', 'All specialists', ''], ['Aýna', 'Aýna', 'Stylist'], ['Maral', 'Maral', 'Nail technician'], ['Jeren', 'Jeren', 'Beautician'], ['Leýli', 'Leýli', 'Massage therapist'], ['Gülnar', 'Gülnar', 'Stylist']];
     const staffOpts = STAFF.map(([v, t, sub]) => ({ t: t, sub: sub, on: s.fStaff === v, pick: () => this.setState({ fStaff: v, pop: null, sel: {} }) }));
     const svcGroups = D.GROUPS.map(([g, ids]) => ({ t: g, items: ids.map((id) => ({ t: D.SV[id][0], sub: D.SV[id][1], on: s.fSvc === id, pick: () => this.setState({ fSvc: id, pop: null, sel: {} }) })) }));
     const DATE = [['today', 'Today', '14 October'], ['week', 'This week', '12–18 October'], ['all', 'All time', '']];
@@ -985,14 +1031,15 @@ class Component extends DCLogic {
     const selPending = selIds.filter((id) => (byId[id].status === 'pending' || this.isMv(byId[id])) && this.canAns(byId[id]));
 
     const ob = s.openId ? byId[s.openId] : null;
-    let d = { canReport: false, rOpen: false, rOpen2: false, rItems: [], hasReport: false, reportLine: '', reportUntil: '', isMove: false, mvFrom: '', mvTo: '', fitCls: 'cap', fitText: '', okLabel: 'Confirm', hasTimer: false, timerNote: '', title: '', ref: '', badgeCls: 'badge', iP: false, iC: false, iD: false, iX: false, iN: false, statusLabel: '', srcLabel: '', isOnline: false, isPhone: false, isWalk: false, hasBy: false, byText: '', isPending: false, isBooking: false, timerText: '', timerColor: '#93500a', initial: '', client: '', phone: '', isNewCl: false, hasVisits: false, visits: '', hasNs: false, nsText: '', blocked: false, hasAlert: false, alert: '', details: [], hasNote: false, note: '', inote: '', noteCap: '', hasHist: false, hist: [], actPending: false, actConfirmed: false, actDone: false, actRebook: false, hasFoot: false, pendNoAns: false, whoAnswers: '' };
+    let d = { canReport: false, rOpen: false, rOpen2: false, rItems: [], hasReport: false, reportHead: '', reports: [], reportCap: '', isMove: false, mvFrom: '', mvTo: '', fitCls: 'cap', fitText: '', okLabel: 'Confirm', hasTimer: false, timerNote: '', title: '', ref: '', badgeCls: 'badge', iP: false, iC: false, iD: false, iX: false, iN: false, statusLabel: '', srcLabel: '', isOnline: false, isPhone: false, isWalk: false, hasBy: false, byText: '', isPending: false, isBooking: false, timerText: '', timerColor: '#93500a', initial: '', client: '', phone: '', isNewCl: false, hasVisits: false, visits: '', hasNs: false, nsText: '', blocked: false, hasAlert: false, alert: '', details: [], hasNote: false, note: '', inote: '', noteCap: '', hasHist: false, hist: [], actPending: false, actConfirmed: false, actDone: false, actRebook: false, hasFoot: false, pendNoAns: false, whoAnswers: '' };
     if (ob) {
       const bd = BADGE[ob.status];
       const pend = ob.status === 'pending';
       const mvq = this.isMv(ob);
+      const RL = { noshow: 'No-show', late: 'Came late', rude: 'Rude behaviour', other: 'Other' };
       const DL = { 1: 'Thursday, 15 October', 2: 'Friday, 16 October', 3: 'Saturday, 17 October' };
-      const det0 = [['Service', ob.svcName], ['Specialist', ob.staff + ' · ' + SPEC[ob.staff]], ['Date and time', DAYL[ob.day] + ' · ' + ob.from + '–' + ob.to], ['Duration', ob.dur], ['Price', ob.price], ['Source', SRCL[ob.src]], ['Booking code', ob.ref]];
-      const det = ob.at ? det0.concat([['Sent', 'Today, ' + ob.at]]) : det0;
+      const det0 = [['Service', ob.svcName], ['Specialist', ob.staff + ' · ' + SPEC[ob.staff]], ['Date and time', DAYL[ob.day] + ' · ' + ob.from + '–' + ob.to], ['Duration', ob.dur], ...(showP ? [['Price', ob.price]] : []), ['Source', SRCL[ob.src]], ['Booking code', ob.ref]];
+      const det = ob.at ? det0.concat([['Sent', 'Today · ' + ob.at]]) : det0;
       const inote = s.notes[ob.id];
       const canA = this.canAns(ob);
       d = Object.assign({
@@ -1000,8 +1047,10 @@ class Component extends DCLogic {
         isMove: mvq, mvFrom: DAYL[ob.day] + ' · ' + ob.from + '–' + ob.to, mvTo: mvq ? DL[ob.mv.day] + ' · ' + ob.mv.from + '–' + ob.mv.to : '',
         fitCls: 'cap okc', fitText: ob.staff + ' is free at the new time — you can confirm.', okLabel: mvq ? 'Confirm the new time' : 'Confirm',
         hasTimer: pend || mvq, timerNote: this.closedNow() ? 'The timer counts only while you’re open, so it waits until 09:00. If no one answers by ' + this.tmrOf(ob).t + ', the request is cancelled' + (mvq ? ' — the booking stays at its time.' : ' and the client is offered 3 other times.') : (mvq ? 'If no one answers in time, the request is cancelled — the booking stays at its time.' : 'If no one answers in time, the request is cancelled and the client is offered 3 other times.'),
-        canReport: (ob.status === 'confirmed' || ob.status === 'completed') && !ob.complaint, rOpen: !!s.rmenu && ob.status === 'confirmed', rOpen2: !!s.rmenu && ob.status === 'completed', rItems: this.reportItems(ob),
-        hasReport: !!ob.complaint, reportLine: ob.complaint ? ({ noshow: 'No-show', late: 'Came late', rude: 'Rude behaviour', other: 'Other' }[ob.complaint]) + (ob.ctext ? ' · ' + ob.ctext : '') + ' · today ' + ob.rAt + ' · ' + ob.rBy : '', reportUntil: '21 October',
+        canReport: ob.status === 'confirmed' || ob.status === 'completed', rOpen: !!s.rmenu && ob.status === 'confirmed', rOpen2: !!s.rmenu && ob.status === 'completed', rItems: this.reportItems(ob),
+        hasReport: ob.reports.length > 0, reportHead: ob.reports.length > 1 ? 'Reports' : 'Report',
+        reports: ob.reports.map((x, i) => ({ line: RL[x.k] + (x.text ? ' · ' + x.text : '') + ' · ' + (x.off === 0 ? 'today' : DAYS[x.off]) + ' · ' + x.at + ' · ' + x.by, aria: 'Remove report: ' + RL[x.k], remove: () => this.unreport(ob.id, i) })),
+        reportCap: ob.reports.length > 1 ? 'The client isn’t told. You can remove each report for 7 days.' : 'The client isn’t told. You can remove it until 21 October.',
         badgeCls: 'badge ' + bd[0], statusLabel: bd[2],
         pendNoAns: (pend || mvq) && !canA, whoAnswers: spec ? 'The owner and admins answer requests — you can only view them.' : ob.staff + ' answers her own requests — you can only view them.',
         srcLabel: SRCL[ob.src], isOnline: ob.src === 'online', isPhone: ob.src === 'phone', isWalk: ob.src === 'walkin',
@@ -1009,7 +1058,7 @@ class Component extends DCLogic {
         isPending: pend, isBooking: !pend && ob.status !== 'cancelled',
         timerText: this.tmrOf(ob).title, timerColor: this.tmrOf(ob).hot ? '#a3251b' : '#93500a',
         initial: ob.client.charAt(0), client: ob.client, phone: ob.phone,
-        isNewCl: !ob.visits, hasVisits: !!ob.visits, visits: this.pl(ob.visits, 'visit'),
+        isNewCl: !ob.visits, hasVisits: !!ob.visits, visits: this.pl(ob.visits, 'visit') + (seeMoney && ob.avg ? ' · average check ' + ob.avg : ''),
         hasNs: ob.ns > 0, nsText: this.pl(ob.ns, 'no-show'), blocked: ob.blocked,
         hasAlert: !!ob.alert, alert: ob.alert,
         details: det.map(([k, v], i) => ({ k: k, v: v, cls: i === det.length - 1 ? 'dr last' : 'dr' })),
@@ -1018,7 +1067,7 @@ class Component extends DCLogic {
         hasHist: !pend && !mvq && ob.hist.length > 0,
         hist: ob.hist.map((h, i) => {
           const hb = BADGE[h[2]];
-          return Object.assign({ date: h[0], what: h[1], price: h[3], ink: hb[1], label: hb[2], cls: i === ob.hist.length - 1 ? 'hrow last' : 'hrow' }, this.sti(h[2]));
+          return Object.assign({ date: h[0], what: h[1], price: role !== 'specialist' ? h[3] : '', ink: hb[1], label: hb[2], cls: i === ob.hist.length - 1 ? 'hrow last' : 'hrow' }, this.sti(h[2]));
         }),
         actPending: (pend || mvq) && canA, actConfirmed: ob.status === 'confirmed' && !mvq, actDone: ob.status === 'completed', actRebook: ob.status === 'cancelled', hasFoot: ob.status !== 'noshow'
       }, this.sti(ob.status));
@@ -1027,10 +1076,10 @@ class Component extends DCLogic {
     const mRows = s.mIds.map((id) => byId[id]).filter(Boolean);
     const m0 = mRows[0];
     const showModal = !!s.modal && mRows.length > 0;
-    let m = { title: '', lead: '', ctx: '', reasonLabel: 'Reason', textLabel: '', textPh: '', showText: false, showAlt: false, hasDesc: false, desc: '', descCls: 'cap', hasNote: false, okLabel: '', okCls: 'b b-red', okOff: true, chips: [], alts: [], altCount: '' };
+    let m = { hasChips: true, hasLead: true, hasLabel: true, textAria: '', title: '', lead: '', ctx: '', reasonLabel: 'Reason', textLabel: '', textPh: '', showText: false, showAlt: false, hasDesc: false, desc: '', descCls: 'cap', hasNote: false, okLabel: '', okCls: 'b b-red', okOff: true, chips: [], alts: [], altCount: '' };
     if (showModal) {
       const one = mRows.length === 1;
-      const ctx = one ? m0.client + ' · ' + m0.svcName + ' · ' + SHORT[m0.day] + ' ' + m0.from + '–' + m0.to : mRows.map((r) => r.client).join(', ');
+      const ctx = one ? m0.client + ' · ' + m0.svcName + ' · ' + SHORT[m0.day] + ' · ' + m0.from + '–' + m0.to : mRows.map((r) => r.client).join(', ');
       let reasons = [];
       let descs = {};
       if (s.modal === 'decline') {
@@ -1042,14 +1091,18 @@ class Component extends DCLogic {
         reasons = ['The client called to cancel', 'The specialist can’t come in', 'Another reason'];
         m = Object.assign(m, { title: 'Cancel the booking', lead: 'The client is notified and sees the reason in My bookings.', ctx: ctx, okLabel: 'Cancel booking', okCls: 'b b-red' });
       } else {
-        reasons = ['No-show', 'Came late', 'Rude behaviour', 'Other'].filter((x) => x !== 'No-show' || this.started(m0));
+        reasons = [];
         descs = { 'No-show': 'The booking becomes No-show', 'Came late': 'The booking doesn’t change', 'Rude behaviour': 'The booking doesn’t change', 'Other': 'Write a few words' };
-        m = Object.assign(m, { title: 'What happened?', lead: 'Only the team sees reports.', ctx: ctx, reasonLabel: 'Reason', showText: s.reason === 'Other', textLabel: 'What happened, in a few words', textPh: 'Write a few words', hasNote: true, okLabel: 'Save', okCls: 'b b-pri' });
+        m = Object.assign(m, { title: 'What happened?', lead: '', ctx: ctx, reasonLabel: 'Reason', showText: true, textLabel: '', textPh: 'Write a few words', hasNote: true, okLabel: 'Save', okCls: 'b b-pri' });
         m.hasDesc = !!s.reason;
         m.desc = descs[s.reason] || '';
         m.descCls = s.reason === 'No-show' ? 'cap dsc-n' : 'cap';
       }
-      m.okOff = !s.reason || (s.modal === 'complaint' && s.reason === 'Other' && !s.rtext.trim());
+      m.okOff = !s.reason || (s.modal === 'complaint' && !s.rtext.trim());
+      m.hasChips = reasons.length > 0;
+      m.hasLead = !!m.lead;
+      m.hasLabel = !!m.textLabel;
+      m.textAria = m.textLabel || 'What happened, in a few words';
       m.chips = reasons.map((t) => ({ t: t, on: s.reason === t, cls: s.reason === t ? 'chip on' : 'chip', pick: () => this.setState({ reason: t }) }));
       const altN = Object.keys(s.alts).filter((k) => s.alts[k]).length;
       m.altCount = altN ? altN + ' / 3 times selected' : 'You can pick up to 3 times';
@@ -1060,7 +1113,7 @@ class Component extends DCLogic {
     }
 
     let footText = '';
-    if (isReq) footText = this.pl(list.length, 'request') + ' · least time left first';
+    if (isReq) footText = this.pl(list.length, 'request') + ' · most urgent first';
     else if (s.tab === 'today') footText = this.pl(list.length, 'booking') + ' · by time';
     else if (s.tab === 'upcoming') footText = this.pl(list.length, 'booking') + ' · soonest first';
     else footText = this.pl(list.length, 'booking') + ' · newest first';
@@ -1068,9 +1121,9 @@ class Component extends DCLogic {
     const closeAllPops = () => this.setState({ pop: null, menuId: null });
 
     const PEOPLE = {
-      owner: { name: 'Maýsa Annaýewa', ini: 'M', phone: '+993 65 10 20 30', role: 'Owner', ws: [['Glow Studio', 'Owner · Bitarap Türkmenistan Avenue', true, 5, true], ['Glow Nails', 'Owner · 15 Oguzhan Street', true, 2, false]] },
-      admin: { name: 'Selbi Hojaýewa', ini: 'S', phone: '+993 65 88 41 02', role: 'Admin', ws: [['Glow Studio', 'Admin · Bitarap Türkmenistan Avenue', true, 5, true]] },
-      specialist: { name: 'Aýna Myradowa', ini: 'A', phone: '+993 65 31 22 10', role: 'Specialist', ws: [['Glow Studio', 'Specialist · Bitarap Türkmenistan Avenue', true, 2, true], ['Aýnanyň saç studiýasy', 'Owner · Works from home', false, 1, false]] }
+      owner: { name: 'Maýsa Annaýewa', ini: 'M', phone: '+993 65 10 20 30', role: 'Owner', ws: [['Glow Studio', 'Owner · Ashgabat', true, 6, true], ['Glow Nails', 'Owner · Ashgabat', true, 2, false]] },
+      admin: { name: 'Selbi Hojaýewa', ini: 'S', phone: '+993 65 88 41 02', role: 'Admin', ws: [['Glow Studio', 'Admin · Ashgabat', true, 6, true]] },
+      specialist: { name: 'Aýna Myradowa', ini: 'A', phone: '+993 65 31 22 10', role: 'Specialist', ws: [['Glow Studio', 'Specialist · Ashgabat', true, 2, true], ['Aýnanyň saç studiýasy', 'Owner · Ashgabat', false, 1, false]] }
     };
     const bannerKind = ['inReview', 'notApproved', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
     const isDemo = bannerKind === 'demo';
@@ -1087,22 +1140,13 @@ class Component extends DCLogic {
       cntCls: pendingN > 0 ? 'cnt' : 'cnt hid',
       navReqLabel: pendingN > 0 ? 'Bookings, ' + this.pl(pendingN, 'request') : 'Bookings',
       me: { name: P.name, ini: P.ini, phone: P.phone, role: P.role },
-      wsAria: 'Workspace: Glow Studio, ' + (isDemo ? 'example, ' : '') + P.role + '. Switch',
-      isDemo: isDemo, bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
+      wsAria: 'Workspace: Glow Studio, ' + P.role + '. Switch',
+      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
       contactOpen: side === 'contact', openContact: () => this.setState({ side: 'contact' }),
       toggleRmenu: () => this.setState({ rmenu: !s.rmenu }), closeRmenu: () => this.setState({ rmenu: false }), rmKey: (e) => { if (e && e.key === 'Escape') this.setState({ rmenu: false }); },
-      removeReport: () => {
-        if (!ob) return;
-        const over = Object.assign({}, s.over);
-        const o = Object.assign({}, s.over[ob.id] || {}, { complaint: null, ctext: '', rAt: '', rBy: '' });
-        const wasNo = ob.status === 'noshow';
-        if (wasNo) o.status = this.ended(ob) ? 'completed' : 'confirmed';
-        over[ob.id] = o;
-        this.flash({ over: over }, wasNo ? 'Report removed · the booking is ' + (this.ended(ob) ? 'Completed' : 'Confirmed') + ' again' : 'Report removed', { over: s.over });
-      },
       bulkExport: () => this.flash({ pop: null }, 'CSV ready · ' + selIds.length + (selIds.length === 1 ? ' booking' : ' bookings')),
-      wsList: (isDemo ? [['Glow Studio', P.role + ' · demo workspace', true, 0, true]] : P.ws).map((w) => ({
-        example: isDemo,
+      wsList: P.ws.map((w) => ({
+        example: false,
         name: w[0], cap: w[1], logo: w[2], noLogo: !w[2], ini: w[0].charAt(0), cur: w[4], other: !w[4], hasPend: w[3] > 0, pend: String(w[3]),
         aria: w[0] + ', ' + w[1] + (w[4] ? ', current workspace' : (w[3] ? ', ' + this.pl(w[3], 'unanswered request') : ''))
       })),
