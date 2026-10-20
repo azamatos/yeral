@@ -278,4 +278,17 @@ describe('the business’s own bookings (book B-23, B-24, B-25)', () => {
     const queued = (await db.select().from(jobs)).filter((j) => j.payload.bookingId === row!.id && j.payload.kind === 'booked')
     expect(queued).toMatchObject([{ doneAt: expect.any(Date), error: expect.stringMatching(/not a mobile/) }])
   })
+
+  it('undo takes back the name its booking gave a nameless client record (B-24)', async () => {
+    const maysa = await as(MAYSA)
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    // on the list without a name
+    await db.insert(clients).values({ businessId: glow!.id, phone: '+99365800110' })
+    const start = await maralFree(maysa, MON, 3)
+    const made = await book(maysa, { phone: '+99365800110', name: 'Typo', date: MON, start })
+    const record = async () => (await db.select().from(clients).where(eq(clients.phone, '+99365800110')))[0]!
+    expect(await record()).toMatchObject({ name: 'Typo' })
+    expect((await maysa.req(`${BOOKINGS}/${made.json.code}/undo`, { method: 'POST' })).status).toBe(204)
+    expect(await record()).toMatchObject({ name: null, nameSetBy: null })
+  })
 })

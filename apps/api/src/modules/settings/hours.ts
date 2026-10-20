@@ -13,6 +13,7 @@ import {
   specialDayErrors,
   weekHoursErrors,
   withinHours,
+  yearlyNightOverlaps,
   type BusinessHours,
   type DateException,
 } from '@yeral/domain/hours'
@@ -25,10 +26,10 @@ import { bookingItems, bookings, businesses } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { emit } from '../../notify'
-import { cancelForBusiness } from '../bookings/business-cancel'
+import { cancelForBusiness, declineForBusiness } from '../bookings/business-cancel'
 import { bookedServices } from '../bookings/create'
 import { alternativesContext, pickAlternatives } from '../bookings/offers'
-import { lockBooking, stateOf, type BookingRow } from '../bookings/repo'
+import { lockBooking, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
 
 type HoursView = z.infer<typeof businessHoursSettingsSchema>
 type HoursChange = z.infer<typeof businessHoursUpdateSchema>
@@ -85,7 +86,8 @@ function checkChange(change: HoursChange, stored: readonly DateException[], toda
   // other hours past midnight may not run into the next day's opening, nor the day before into theirs
   for (const i of kept) {
     const d = change.specialDays[i]!
-    if (d.hours && nightOverlaps(next, addDays(d.from, -1), d.to).length)
+    // a yearly day falls on any weekday some year: checked against all of them
+    if (d.hours && (d.yearly ? yearlyNightOverlaps(next.hours, d.hours) : nightOverlaps(next, addDays(d.from, -1), d.to).length))
       issues.push({ path: ['specialDays', i, 'hours'], code: 'overlaps_next_day' })
   }
   if (issues.length) throw new ApiError('validation_error', { issues })
@@ -170,7 +172,14 @@ async function cancelWithOffers(
   const at = new Date(now)
   let cancelled = 0
   for (const b of rows) {
-    const row = await lockBooking(tx, b.id)
+    // undone or changed meanwhile: left as it is now
+    let row: BookingRow
+    try {
+      row = await lockBooking(tx, b.id)
+    } catch (e) {
+      if (e instanceof StaleBooking) continue
+      throw e
+    }
     if (!occupiesSlot(stateOf(row), now) || epochOf(row.date, row.start) < now) continue
     let offers: BookingRow['declineAlternatives'] = []
     if (ctx && row.type === 'appointment') {
@@ -179,7 +188,14 @@ async function cancelWithOffers(
       ctx = { ...ctx, busy: [...ctx.busy, ...picked.held] }
     }
     const special = findException(next.exceptions, row.date)
-    await cancelForBusiness(tx, row, at, { reason: special ? 'closed' : 'hours', text: special?.name ?? null, offers })
+    // a request is declined, not cancelled (B-27), with the day's name or "this time isn't free"
+    if (row.status === 'pending')
+      await declineForBusiness(tx, row, at, {
+        reason: special ? 'other' : 'slot_busy',
+        text: special?.name ?? null,
+        offers,
+      })
+    else await cancelForBusiness(tx, row, at, { reason: special ? 'closed' : 'hours', text: special?.name ?? null, offers })
     cancelled++
   }
   return cancelled

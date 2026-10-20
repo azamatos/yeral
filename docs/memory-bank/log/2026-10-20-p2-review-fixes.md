@@ -29,12 +29,16 @@ It found 15 issues; all hold. The plan, one PR each, reviewed before merging, in
      `clientUnaware` counts any confirmation not done; a cancel names the time the client knows; a `staffChanged` job
      from an older api is worded as news; the news kinds live in the domain (`NEWS_QUEUED`, `isConfirmationNews`); the
      share lock is taken for news only; `Object.hasOwn` in the jobs (from PR 3).
-2. **Races and rules:** every path that makes a booking active re-checks the hours under `FOR SHARE` on the business
-   row (a new booking, a taken offer, a restore, the business's move), ordered with an hours save; a listed booking
-   undone during a mass cancel is skipped (`StaleBooking` per row); `cancelByBusiness` re-checks the specialist's right
-   under the lock; waiting requests on a closed day are declined (B-27), not cancelled, with the same offers and
-   `answered`; yearly special days checked against every weekday; an undo restores the name it wrote on a nameless
-   record.
+2. **Races and rules** (fix/p2-booking-races): every path that makes a booking active checks the hours as they
+   stand (`lockedHours`, `assertOpenAt` in `availability/context.ts`: `for share` on the business row, taken before any
+   booking's lock, the order an hours save takes them in): `insertBooking` (a new booking, an offered time taken, a
+   client's move), `insertTeamBooking`, the client's restore, the team's move (its plan checked against those hours),
+   and the client's reschedule takes it before locking its booking; a listed booking undone during a mass cancel is
+   skipped (`StaleBooking` per row); `cancelByBusiness` reads the booking and the specialist's right again under the
+   lock; a waiting request on a closed day is declined (`declineForBusiness` in `bookings/business-cancel.ts`, shared
+   with the requests' decline): `other` with the day's name or `slot_busy`, the same offers, `answered`; a yearly special
+   day is checked against every weekday (`yearlyNightOverlaps`); migration 0025 adds `clients.name_set_by`, the team's
+   booking that gave a nameless record its name, which its undo takes back.
 3. **Contract:** a business cancel as `businessCancel: { reason, text }` (codes, the app translates; `cancelReason`
    only the client's words), its offered times a `cancel` source; `Object.hasOwn` in the jobs; the `{ tk: '' }` fallback
    to the market's language.

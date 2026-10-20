@@ -6,7 +6,7 @@
  */
 import type { dayStateSchema } from '@yeral/contract/availability'
 import { staffDoingAll, type AppointmentContext, type BusyInterval, type TableContext } from '@yeral/domain/availability'
-import { businessClosedReason, type BusinessHours } from '@yeral/domain/hours'
+import { businessClosedReason, withinHours, type BusinessHours } from '@yeral/domain/hours'
 import type { BookingRules } from '@yeral/domain/rules'
 import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm'
@@ -126,6 +126,27 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
       elsewhere: true as const,
     })),
   ]
+}
+
+/**
+ * The business's hours as they stand, held until the transaction ends (`for share`): an hours save (`for no key update`)
+ * waits for it and it for the save, so a booking and a change of hours never pass each other (book Q-211). Taken before
+ * any booking's lock, the order the save takes them in.
+ */
+export async function lockedHours(db: Queryable, businessId: string) {
+  const [b] = await db
+    .select({ hours: businesses.hours, exceptions: businesses.exceptions })
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
+    .for('share')
+  if (!b) throw new ApiError('not_found')
+  return b
+}
+
+/** A booking about to take its time still falls inside the hours as they stand (`lockedHours`); else 409 slot_taken. */
+export async function assertOpenAt(db: Queryable, businessId: string, b: { date: string; start: number; end: number }): Promise<void> {
+  if (!withinHours(await lockedHours(db, businessId), b.date, { start: b.start, end: b.end }))
+    throw new ApiError('slot_taken', { alternatives: [] })
 }
 
 /** One business with what free times need; 404 when it's gone. */

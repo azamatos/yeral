@@ -361,6 +361,11 @@ export const clients = pgTable(
     noShowsSince: ts(),
     /** The Ýeral account with this phone, once known. */
     userId: uuid().references(() => users.id, { onDelete: 'set null' }),
+    /**
+     * The team's booking that gave a nameless record its name (B-23): undoing that booking takes the name back, so a
+     * mistyped number leaves nothing behind (B-24).
+     */
+    nameSetBy: uuid(),
     createdAt: createdAt(),
   },
   (t) => [unique('clients_business_phone').on(t.businessId, t.phone), index('clients_user_idx').on(t.userId)],

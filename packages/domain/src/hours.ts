@@ -150,6 +150,14 @@ export function nightOverlaps(b: BusinessHours, from: string, to: string): strin
   return out
 }
 
+/**
+ * Whether a yearly special day's other hours could run into a neighbouring day's on some year, whatever weekday it falls
+ * on: its part past midnight into a weekday's opening, or a weekday's part past midnight into its opening (book Q-105).
+ */
+export function yearlyNightOverlaps(week: WeekHours, hours: { open: number; close: number }): boolean {
+  return week.some((d) => !!d && (hours.close - DAY_MINUTES > d.open || d.close - DAY_MINUTES > hours.open))
+}
+
 /** A special day runs at most a year ("Birnäçe gün": a range of days). */
 export const SPECIAL_DAY_MAX_DAYS = 366
 

@@ -15,6 +15,7 @@ const AYNA = '+99365312210' // specialist
 const W = '/v1/w/glow-studio'
 const HOURS = `${W}/settings/hours`
 const THU = '2026-10-22'
+const THU2 = '2026-11-05'
 const WED2 = '2026-10-28'
 const SAT = '2026-10-24'
 const MON2 = '2026-11-09'
@@ -279,5 +280,66 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     t.clock.now += 10_000
     await runDueJobs(t.deps)
     expect(smsTo('+99365800305')).toEqual([])
+  })
+
+  it('a waiting request on a day that closes is declined, not cancelled; a client’s undo can’t bring a time back onto it', async () => {
+    const maysa = await as(MAYSA)
+    const was = (await maysa.req(HOURS)).json as Hours
+    const client = await as('+99365800310', 'Client')
+    const free = async () =>
+      (
+        (await client.req(`/v1/businesses/glow-studio/availability?services=${manicure}&staff=${maralId}&date=${THU2}`)).json.slots as {
+          start: number
+        }[]
+      ).map((x) => x.start)
+    const starts = await free()
+    const [first, second] = [starts[0]!, starts.at(-1)!]
+    const request = await client.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [manicure], staffId: maralId, date: THU2, start: first },
+    })
+    expect(request.json.status).toBe('pending')
+    // another request, cancelled by the client a moment ago ("Yzyna al" would bring it back)
+    const undone = await client.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [manicure], staffId: maralId, date: THU2, start: second },
+    })
+    const cancelled = await client.req(`/v1/me/bookings/${undone.json.code}/cancel`, { body: {} })
+    expect(cancelled.status, JSON.stringify(cancelled.json)).toBeLessThan(300)
+
+    const closed = { ...was, specialDays: [...was.specialDays, { name: 'Flooding', from: THU2, to: THU2, yearly: false, hours: null }] }
+    expect((await save(maysa, { ...closed, affected: 'cancel' })).json.cancelled).toBe(1)
+    const row = await rowOf(request.json.code)
+    expect(row).toMatchObject({
+      status: 'cancelled',
+      cancelledBy: 'business',
+      declineReason: 'other',
+      declineText: 'Flooding',
+      businessCancelReason: null,
+    })
+    expect(row.answeredAt).not.toBeNull()
+    expect(row.declineAlternatives).toHaveLength(3)
+    expect((await client.req(`/v1/me/bookings/${request.json.code}`)).json.decline).toMatchObject({ reason: 'other', text: 'Flooding' })
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800310').at(-1)).toMatch(/can't take your booking .*: Flooding\. Pick another time/)
+
+    // the undo of the client's own cancel: the day is closed now
+    const back = await client.req(`/v1/me/bookings/${undone.json.code}/restore`, { method: 'POST' })
+    expect(back.status).toBe(409)
+    expect(back.json.error.code).toBe('slot_taken')
+    expect((await save(maysa, { ...was, affected: 'keep' })).status).toBe(200)
+  })
+
+  it('a yearly day’s night is checked against every weekday it may fall on (Q-105)', async () => {
+    const maysa = await as(MAYSA)
+    const was = (await maysa.req(HOURS)).json as Hours
+    // 20:00 until 10:00 the next morning: one that day runs into Monday's 09:00 opening, some year
+    const night = { name: 'Long night', from: '2026-12-26', to: '2026-12-26', hours: { open: 1200, close: 2040 } }
+    const yearly = await save(maysa, { ...was, specialDays: [...was.specialDays, { ...night, yearly: true }] })
+    expect(yearly.status).toBe(400)
+    expect(yearly.json.error.details.issues).toEqual([
+      { path: ['specialDays', was.specialDays.length, 'hours'], code: 'overlaps_next_day' },
+    ])
+    // the same once, on a Saturday: Sunday opens at 10:00, so it fits
+    expect((await save(maysa, { ...was, specialDays: [...was.specialDays, { ...night, yearly: false }] })).status).toBe(200)
+    expect((await save(maysa, { ...was, affected: 'keep' })).status).toBe(200)
   })
 })

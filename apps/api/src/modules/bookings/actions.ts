@@ -20,7 +20,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
-import { loadBusiness, type LoadedBusiness } from '../availability/context'
+import { assertOpenAt, loadBusiness, lockedHours, type LoadedBusiness } from '../availability/context'
 import { visitWhat } from '../catalog/map'
 import { shiftRating } from '../reviews/rating'
 import { onlineRefusal } from '../clients/online'
@@ -135,6 +135,8 @@ export async function restoreBooking(deps: Deps, b: BookingRow): Promise<Booking
   try {
     return await deps.db.transaction(async (tx) => {
       // a request back to waiting counts as one sent now (book Q-124)
+      // the business may have closed that day since (book Q-211): the time can't come back
+      if (b.type !== 'class') await assertOpenAt(tx, b.businessId, b)
       if (status === 'pending' && b.userId) await assertWaitingRoom(tx, b.userId, b.businessId, now, { locked: true })
       // the seats may have gone meanwhile; tables, specialists and a person's time across workspaces are guarded by
       // the database
@@ -177,6 +179,8 @@ export async function rescheduleBooking(
   guard(canClientReschedule(stateOf(b), lb.rules, deps.now()))
   if (b.type !== 'appointment') throw new ApiError('not_bookable')
   return deps.db.transaction(async (tx) => {
+    // the hours first, as an hours save takes them, then the booking (no deadlock with the save)
+    await lockedHours(tx, b.businessId)
     // read again under the lock: a cancel or a confirmed move may have landed meanwhile
     let locked = await lockBooking(tx, b.id)
     guard(canClientReschedule(stateOf(locked), lb.rules, deps.now()))

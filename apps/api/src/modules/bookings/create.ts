@@ -26,7 +26,15 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
-import { appointmentContext, checkStaff, loadBusiness, loadBusy, loadTableContext, type LoadedBusiness } from '../availability/context'
+import {
+  appointmentContext,
+  assertOpenAt,
+  checkStaff,
+  loadBusiness,
+  loadBusy,
+  loadTableContext,
+  type LoadedBusiness,
+} from '../availability/context'
 import { publicBusiness } from '../catalog/detail'
 import { onlineRefusal } from '../clients/online'
 import { servicePrice } from '../catalog/map'
@@ -143,6 +151,8 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
         ? { type: 'fixed' as const, amount: x.placement.session.price * x.placement.session.seats }
         : null
   const end = x.placement.slot?.end ?? x.placement.table?.end ?? x.placement.session?.end ?? x.start
+  // a class runs on its session's own schedule
+  if (x.type !== 'class') await assertOpenAt(db, x.lb.business.id, { date: x.date, start: x.start, end })
   const [row] = await db
     .insert(bookings)
     .values({
