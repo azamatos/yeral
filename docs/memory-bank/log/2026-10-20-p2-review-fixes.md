@@ -55,10 +55,20 @@ It found 15 issues; all hold. The plan, one PR each, reviewed before merging, in
    a decline by `businessCancelReason`, as the detail does); the seed marks the design's business cancel ("Şol gün
    ýapyk", the business's own words) as "Other reason"; the `{ tk: '' }` fallback is the market's language.
    `Object.hasOwn` in the jobs went with PR 1.
-4. **Structure, no behaviour change:** `bookings/engine.ts` (items, price, `inTransaction`, waiting-move handling,
-   `cancelForBusiness`), `actions.ts` client-only, `repo.ts` files for the calendar and hours queries, the team sources
-   and the "heard" window in the domain with tests, one `invalid()`, techContext's "Where shared things live" and
-   systemPatterns' module map, one write per cancel, booked services loaded together, `checkPlan` gone.
+4. **Structure, no behaviour change** (refactor/p2-structure, 20.10.2026): `bookings/engine.ts` holds what the client's
+   and the team's paths share (items, price, `inTransaction`, the services a booking re-books with and
+   `bookedServicesOf` for many, `rebookQuery`, the waiting move, `clientUnaware`, `declineForBusiness`,
+   `cancelForBusiness`; `business-cancel.ts` is gone), so `actions.ts` is the client's only; `calendar/repo.ts` and
+   `settings/repo.ts` hold the calendar's and the hours' queries; one hours loader (`loadHours(db, id, { lock })`,
+   `lockedHours` on it); the "heard" window in the domain (`firstSmsFrom`, used by `queueBookingSms`, `clientUnaware`
+   and the address SMS) and the booking sources tested; one `invalid()` (`http/errors.ts`), which also gives two team
+   endpoints the contract's `issues` shape; `setStatus` writes a decline's reason and offered times in its one update;
+   the booked services loaded together for an hours cancel and for "Upcoming"; `checkPlan` gone (tests use
+   `planRefusal`); the client's move reads the business once (`rebook` takes it). Two from PR 2's list: a time the
+   hours closed meanwhile comes back with the nearest free times (`inTransaction` fills a refusal that names none,
+   from the business as it stands); independent queries go through `all(db, [...])`, one after another in a
+   transaction (pg 9 refuses overlapping ones; the test run's deprecation warnings are gone). techContext's "Where
+   shared things live" and systemPatterns' module map follow.
 5. **SMS caps** (P2 step 7, before SMS go out): a daily cap and rate limit per business on the SMS its team sends to
    numbers it types in, none from a business in review. In chapter 10's step 7.
 
