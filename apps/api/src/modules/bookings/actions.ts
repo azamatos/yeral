@@ -12,13 +12,14 @@ import { MARKET } from '@yeral/domain/market'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, businesses, classSessions, reviews } from '../../db/schema'
+import { bookingItems, bookings, classSessions, reviews, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { loadBusinesses, type LoadedBusiness } from '../availability/context'
 import { visitWhat } from '../catalog/map'
+import { shiftRating } from '../reviews/rating'
 import { assertOnlineBooking, bookedServices, rebook } from './create'
 import { offerTarget } from './offers'
 import { isSlotConflict, lockBooking, pgCode, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from './repo'
@@ -239,25 +240,6 @@ export function authorName(name: string | null): string {
   return last ? `${first} ${last.charAt(0)}.` : first
 }
 
-async function refreshRating(db: Queryable, businessId: string, change: { add?: number; remove?: number }) {
-  const [b] = await db.select().from(businesses).where(eq(businesses.id, businessId))
-  if (!b) return
-  const breakdown = { ...b.ratingBreakdown }
-  if (change.remove)
-    breakdown[String(change.remove) as keyof typeof breakdown] = Math.max(0, breakdown[String(change.remove) as keyof typeof breakdown] - 1)
-  if (change.add) breakdown[String(change.add) as keyof typeof breakdown] += 1
-  const count = Object.values(breakdown).reduce((s, n) => s + n, 0)
-  const sum = Object.entries(breakdown).reduce((s, [stars, n]) => s + Number(stars) * n, 0)
-  await db
-    .update(businesses)
-    .set({
-      ratingBreakdown: breakdown,
-      reviewsCount: b.reviewsCount + (change.add && !change.remove ? 1 : 0),
-      rating: count ? Math.round((sum / count) * 10) / 10 : null,
-    })
-    .where(eq(businesses.id, businessId))
-}
-
 export async function writeReview(deps: Deps, user: User, b: BookingRow, input: { rating: number; tags: string[]; text?: string }) {
   const now = deps.now()
   if (effectiveStatus(stateOf(b), now).status !== 'completed') throw new ApiError('review_not_allowed')
@@ -267,33 +249,44 @@ export async function writeReview(deps: Deps, user: User, b: BookingRow, input: 
   // stored in the market's main language for reviews without items; readers get it in their language (catalog reviews)
   const what = visitWhat(items, MARKET.defaultLanguage)
   await deps.db.transaction(async (tx) => {
-    await tx.insert(reviews).values({
-      bookingId: b.id,
-      businessId: b.businessId,
-      userId: user.id,
-      authorName: authorName(user.name),
-      rating: input.rating,
-      tags: input.tags,
-      text: input.text ?? null,
-      what,
-      createdAt: new Date(now),
-      updatedAt: new Date(now),
-    })
-    await refreshRating(tx, b.businessId, { add: input.rating })
+    // the author's account, shared: a deletion in flight finishes first, and then there's no one to review as
+    const [author] = await tx.select({ id: users.id }).from(users).where(eq(users.id, user.id)).for('share')
+    if (!author) throw new ApiError('unauthorized')
+    await tx
+      .insert(reviews)
+      .values({
+        bookingId: b.id,
+        businessId: b.businessId,
+        userId: user.id,
+        authorName: authorName(user.name),
+        rating: input.rating,
+        tags: input.tags,
+        text: input.text ?? null,
+        what,
+        createdAt: new Date(now),
+        updatedAt: new Date(now),
+      })
+      .catch((e: unknown) => {
+        // sent twice at once: the second finds the first
+        if (pgCode(e) === '23505') throw new ApiError('review_exists')
+        throw e
+      })
+    await shiftRating(tx, b.businessId, { [input.rating]: 1 })
     await emit(tx, { type: 'review.created', businessId: b.businessId, bookingId: b.id, bookingCode: b.code, userId: user.id })
   })
 }
 
 export async function editReview(deps: Deps, b: BookingRow, input: { rating: number; tags: string[]; text?: string }) {
   const now = deps.now()
-  const [existing] = await deps.db.select().from(reviews).where(eq(reviews.bookingId, b.id))
-  if (!existing) throw new ApiError('not_found')
-  if (now - existing.createdAt.getTime() >= REVIEW_EDIT_DAYS * 86_400_000) throw new ApiError('review_locked')
   await deps.db.transaction(async (tx) => {
+    // read and changed under its lock: two edits at once, or an edit and the account's deletion, count once each
+    const [existing] = await tx.select().from(reviews).where(eq(reviews.bookingId, b.id)).for('update')
+    if (!existing) throw new ApiError('not_found')
+    if (now - existing.createdAt.getTime() >= REVIEW_EDIT_DAYS * 86_400_000) throw new ApiError('review_locked')
     await tx
       .update(reviews)
       .set({ rating: input.rating, tags: input.tags, text: input.text ?? null, updatedAt: new Date(now) })
       .where(eq(reviews.id, existing.id))
-    if (existing.rating !== input.rating) await refreshRating(tx, b.businessId, { add: input.rating, remove: existing.rating })
+    if (existing.rating !== input.rating) await shiftRating(tx, b.businessId, { [existing.rating]: -1, [input.rating]: 1 })
   })
 }

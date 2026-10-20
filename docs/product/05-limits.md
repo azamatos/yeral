@@ -34,8 +34,6 @@ How to read the tables:
 | Accounts per person | 1, for booking and for business work | Fixed | business spec §1 |
 | SMS switches | 3, all on: confirmations and changes, reminder a day before, reminder 2 h before; no review-ask switch | Client | client spec §4.8; Q-259, decided 18.10.2026; defaults code only: apps/api/src/db/schema/auth.ts |
 
-**Code differs:** deleting an account keeps the reviews (code: apps/api/src/modules/me/routes.ts).
-
 **Design to fix:** drop the review-ask switch *Teswir haýyşy* from Account-Profile; adjust the delete-account modal's
 copy to say businesses keep their visit records (Q-172).
 

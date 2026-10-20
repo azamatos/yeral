@@ -39,7 +39,7 @@ const deleteRoute = createRoute({
   method: 'delete',
   path: '/me',
   tags,
-  summary: 'Delete my account (upcoming bookings are cancelled; history stays anonymous with the businesses)',
+  summary: 'Delete my account (upcoming bookings are cancelled, reviews deleted; visit history stays anonymous with the businesses)',
   description: 'Refused with `owns_workspace` while the person owns a workspace: the Ýeral team closes it first (book Q-213).',
   responses: { ...noContent, 401: errors[401], 409: errors[409] },
 })

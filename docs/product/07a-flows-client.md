@@ -1780,9 +1780,9 @@ flowchart TD
 
 **Design to fix:** the "Hasaby öçür" line and the modal copy say that upcoming bookings are cancelled and the account, favourites and reviews deleted, while businesses keep their visit records (Q-172).
 
-**Code differs:** the api keeps the reviews, signed "Aýjemal G." (code: `me/routes.ts`).
+- The businesses' ratings no longer count the deleted reviews (code: `me/account.ts`). A number that passes to someone else ("Is this you?" answered "No", C-18) doesn't delete the earlier holder's reviews.
 
-**Status:** Design: drawn (Account-Profile) · Code: built (api) — `DELETE /v1/me`; it keeps the reviews.
+**Status:** Design: drawn (Account-Profile) · Code: built (api) — `DELETE /v1/me`.
 
 ## Errors and empty pages
 

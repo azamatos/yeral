@@ -5,13 +5,14 @@
 import { epochOf, today } from '@yeral/domain/time'
 import { and, desc, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingLinks, bookingRules, bookings, clientNotes, clients, invites, staff, users } from '../../db/schema'
+import { bookingLinks, bookingRules, bookings, clientNotes, clients, invites, reviews, staff, users } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { linkPhone, recentRecord, unheldBooking } from '../auth/sign-in'
 import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
 import { blockedByCount } from '../clients/online'
+import { shiftRating, type StarShift } from '../reviews/rating'
 import { teamChanged } from '../team/service'
 
 /**
@@ -38,8 +39,8 @@ export async function cancelInvitesTo(
  * one back, and its bookings are left behind: they never join whoever signs in with the number next and send no more
  * SMS.
  *
- * `deleted` (book Q-172): the bookings ahead are cancelled, invites to the number too, and every link to the number
- * stops working, phone bookings made for it since the last sign-in included. The businesses' records keep the number:
+ * `deleted` (book Q-172): the bookings ahead are cancelled, the reviews deleted, invites to the number cancelled, and
+ * every link to the number stops working, phone bookings made for it since the last sign-in included. The businesses' records keep the number:
  * the person may well come back with it.
  *
  * `passedOn` ("Is this you?" answered "No", Q-270): the number is someone else's now. What was sent to it lately is
@@ -48,8 +49,13 @@ export async function cancelInvitesTo(
  * their history without the number, so none joins the new holder, applies its marks to them or comes back for an invite
  * to the number.
  */
-export async function releaseAccount(tx: Queryable, user: User, now: number, how: 'deleted' | 'passedOn'): Promise<void> {
+export async function releaseAccount(tx: Queryable, account: User, now: number, how: 'deleted' | 'passedOn'): Promise<void> {
   const at = new Date(now)
+  // the account's row as it is now (a phone change in flight finishes first), held so that a review being written lands
+  // before this or finds the account gone. NO KEY UPDATE leaves other actions' foreign-key share locks on it alone, so
+  // a booking confirmed or a team row changed meanwhile can't deadlock with this
+  const [user] = await tx.select().from(users).where(eq(users.id, account.id)).for('no key update')
+  if (!user) throw new ApiError('unauthorized')
   // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
   const rows = await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')
   if (rows.some((r) => r.level === 'owner' && r.status === 'active')) throw new ApiError('owns_workspace')
@@ -88,6 +94,19 @@ export async function releaseAccount(tx: Queryable, user: User, now: number, how
       } catch (e) {
         if (!(e instanceof StaleBooking)) throw e
       }
+    }
+    // the reviews go, and the businesses' ratings no longer count them (book Q-172); a number that passed on leaves the
+    // earlier holder's reviews standing, signed as they were. One change per business, in one order, so two deletions
+    // at once can't wait on each other
+    const gone = await tx
+      .delete(reviews)
+      .where(eq(reviews.userId, user.id))
+      .returning({ businessId: reviews.businessId, rating: reviews.rating })
+    for (const businessId of [...new Set(gone.map((r) => r.businessId))].sort()) {
+      const shift: StarShift = {}
+      for (const r of gone) if (r.businessId === businessId) shift[r.rating] = (shift[r.rating] ?? 0) - 1
+      await shiftRating(tx, businessId, shift)
+      await emit(tx, { type: 'review.deleted', businessId })
     }
   }
   await tx.update(bookings).set({ accountDeletedAt: at }).where(eq(bookings.userId, user.id))

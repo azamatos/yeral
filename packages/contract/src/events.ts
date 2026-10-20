@@ -16,6 +16,8 @@ export const EVENT_TYPES = [
   'booking.noshow',
   'booking.updated',
   'review.created',
+  /** A review left with its account (book Q-172): the business's reviews and rating refresh. */
+  'review.deleted',
   /** Someone joined, declined, left or was invited, removed or changed: the team and the switcher refresh. */
   'team.changed',
 ] as const
