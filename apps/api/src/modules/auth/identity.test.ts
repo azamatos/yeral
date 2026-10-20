@@ -6,7 +6,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, businesses, clients, favorites, invites, rateLimits, staff, users } from '../../db/schema'
+import { bookings, businesses, clients, favorites, invites, rateLimits, reviews, staff, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { newBookingLink } from '../bookings/links'
 
@@ -230,10 +230,14 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
       sentAt: new Date(DEMO_NOW - DAY),
       expiresAt: new Date(DEMO_NOW + 6 * DAY),
     })
+    // the earlier holder's review of the past visit
+    await db.insert(reviews).values({ bookingId: past.id, businessId: glowId, userId: old.id, authorName: 'Earlier H.', rating: 4 })
     const { b, res } = await codeAndVerify(phone)
     const no = await b.req('/v1/auth/identity', { body: { ticket: res.json.isThisYou.ticket, yes: false } })
     expect(no.status).toBe(200)
     expect(no.json).toMatchObject({ me: { phone, name: null }, isNew: true })
+    // the review stands: they didn't ask to go (book Q-172)
+    expect(await db.select().from(reviews).where(eq(reviews.bookingId, past.id))).toMatchObject([{ userId: null, rating: 4 }])
     expect(no.json.me.id).not.toBe(old.id)
     expect(await db.select().from(users).where(eq(users.id, old.id))).toEqual([])
     // the old history stays with the business, never with the new person; the visit ahead isn't cancelled

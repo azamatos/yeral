@@ -28,7 +28,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
     out.push(keys.bookings())
     if (e.business) out.push(keys.availabilityAll(e.business), keys.businessAll(e.business))
   }
-  if (e.type === 'review.created' && e.business) out.push(keys.reviewsAll(e.business), keys.businessAll(e.business))
+  if ((e.type === 'review.created' || e.type === 'review.deleted') && e.business)
+    out.push(keys.reviewsAll(e.business), keys.businessAll(e.business))
   if (e.type === 'team.changed') {
     out.push(keys.workspaces(), keys.invites())
     if (e.business) out.push(keys.team(e.business))

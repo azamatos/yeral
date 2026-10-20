@@ -241,6 +241,10 @@ describe('live events', () => {
       ['reviews', 'bag-kafe'],
       ['business', 'bag-kafe'],
     ])
+    expect(staleKeys({ type: 'review.deleted', business: 'bag-kafe', bookingCode: null })).toEqual([
+      ['reviews', 'bag-kafe'],
+      ['business', 'bag-kafe'],
+    ])
   })
 
   it('team changes refresh the switcher, the invites and that team', () => {

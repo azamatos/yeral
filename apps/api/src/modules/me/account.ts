@@ -10,9 +10,9 @@ import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { linkPhone, recentRecord, unheldBooking } from '../auth/sign-in'
-import { refreshRating } from '../bookings/actions'
 import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
 import { blockedByCount } from '../clients/online'
+import { shiftRating, type StarShift } from '../reviews/rating'
 import { teamChanged } from '../team/service'
 
 /**
@@ -51,6 +51,8 @@ export async function cancelInvitesTo(
  */
 export async function releaseAccount(tx: Queryable, user: User, now: number, how: 'deleted' | 'passedOn'): Promise<void> {
   const at = new Date(now)
+  // first: whatever the account is writing meanwhile (a review on another device) lands before this, or not at all
+  await tx.select({ id: users.id }).from(users).where(eq(users.id, user.id)).for('update')
   // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
   const rows = await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')
   if (rows.some((r) => r.level === 'owner' && r.status === 'active')) throw new ApiError('owns_workspace')
@@ -90,15 +92,19 @@ export async function releaseAccount(tx: Queryable, user: User, now: number, how
         if (!(e instanceof StaleBooking)) throw e
       }
     }
-  }
-  // a deleted account's reviews go, and the businesses' ratings no longer count them (book Q-172); a number that passed
-  // on leaves the earlier holder's reviews standing, signed as they were
-  if (how === 'deleted') {
+    // the reviews go, and the businesses' ratings no longer count them (book Q-172); a number that passed on leaves the
+    // earlier holder's reviews standing, signed as they were. One change per business, in one order, so two deletions
+    // at once can't wait on each other
     const gone = await tx
       .delete(reviews)
       .where(eq(reviews.userId, user.id))
       .returning({ businessId: reviews.businessId, rating: reviews.rating })
-    for (const r of gone) await refreshRating(tx, r.businessId, { remove: r.rating })
+    for (const businessId of [...new Set(gone.map((r) => r.businessId))].sort()) {
+      const shift: StarShift = {}
+      for (const r of gone) if (r.businessId === businessId) shift[r.rating] = (shift[r.rating] ?? 0) - 1
+      await shiftRating(tx, businessId, shift)
+      await emit(tx, { type: 'review.deleted', businessId })
+    }
   }
   await tx.update(bookings).set({ accountDeletedAt: at }).where(eq(bookings.userId, user.id))
   // links to the number: phone bookings made for it since the last sign-in keep their SMS with new links (book Q-168)

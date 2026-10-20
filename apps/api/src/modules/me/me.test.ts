@@ -214,25 +214,31 @@ describe('account', () => {
   it('deleting the account cancels upcoming bookings, deletes the reviews and signs out (book Q-172)', async () => {
     const b = browser(t.app)
     const { me } = await b.login('+99365222004', 'Aman')
-    // a visit yesterday, reviewed
-    const [loft] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
-    await db.insert(bookings).values({
-      code: 'YR-995101',
-      businessId: loft!.id,
-      type: 'appointment',
-      date: addDays(today(t.clock.now), -1),
-      start: 600,
-      end: 660,
-      status: 'completed',
-      completedAt: new Date(t.clock.now - 86_400_000),
-      source: 'web',
-      clientPhone: '+99365222004',
-      clientName: 'Aman',
-      userId: me.id,
-    })
-    expect((await b.req('/v1/me/bookings/YR-995101/review', { body: { rating: 1, text: 'Ýaramady' } })).status).toBe(200)
-    const [reviewed] = await db.select().from(businesses).where(eq(businesses.id, loft!.id))
-    expect(reviewed!.reviewsCount).toBe(loft!.reviewsCount + 1)
+    // visits yesterday at two businesses, reviewed
+    const before = await db
+      .select()
+      .from(businesses)
+      .where(inArray(businesses.slug, ['barber-loft', 'bag-kafe']))
+    const visits = await db
+      .insert(bookings)
+      .values(
+        before.map((biz, i) => ({
+          code: `YR-99510${i + 1}`,
+          businessId: biz.id,
+          type: 'appointment' as const,
+          date: addDays(today(t.clock.now), -1),
+          start: 600,
+          end: 660,
+          status: 'completed' as const,
+          completedAt: new Date(t.clock.now - 86_400_000),
+          source: 'web' as const,
+          clientPhone: '+99365222004',
+          clientName: 'Aman',
+          userId: me.id,
+        })),
+      )
+      .returning()
+    for (const v of visits) expect((await b.req(`/v1/me/bookings/${v.code}/review`, { body: { rating: 1 } })).status).toBe(200)
     const svc = (await b.req('/v1/businesses/barber-loft')).json.serviceGroups[0].services[0].id
     const { json } = await b.req('/v1/bookings', {
       body: { type: 'appointment', business: 'barber-loft', serviceIds: [svc], staffId: null, date: '2026-10-16', start: 660 },
@@ -240,10 +246,19 @@ describe('account', () => {
     expect(json.status).toBe('confirmed')
     expect((await b.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
     expect((await b.req('/v1/me')).status).toBe(401)
-    // the review is gone, and the rating is what it was before it
-    expect(await db.select().from(reviews).where(eq(reviews.authorName, 'Aman'))).toEqual([])
-    const [after] = await db.select().from(businesses).where(eq(businesses.id, loft!.id))
-    expect(after).toMatchObject({ reviewsCount: loft!.reviewsCount, rating: loft!.rating, ratingBreakdown: loft!.ratingBreakdown })
+    // the reviews are gone, and each rating is as it was before them: worked out from the stars
+    const ids = visits.map((v) => v.id)
+    expect(await db.select().from(reviews).where(inArray(reviews.bookingId, ids))).toEqual([])
+    for (const biz of before) {
+      const [after] = await db.select().from(businesses).where(eq(businesses.id, biz.id))
+      const n = Object.values(biz.ratingBreakdown).reduce((s, x) => s + x, 0)
+      const stars = Object.entries(biz.ratingBreakdown).reduce((s, [k, x]) => s + Number(k) * x, 0)
+      expect(after).toMatchObject({
+        reviewsCount: biz.reviewsCount,
+        ratingBreakdown: biz.ratingBreakdown,
+        rating: Math.round((stars / n) * 10) / 10,
+      })
+    }
     // the time is free again
     const other = browser(t.app)
     await other.login('+99365222005', 'Serdar')
@@ -251,6 +266,39 @@ describe('account', () => {
       body: { type: 'appointment', business: 'barber-loft', serviceIds: [svc], staffId: null, date: '2026-10-16', start: 660 },
     })
     expect(again.status).toBe(201)
+  })
+
+  it('two reviews at once both count', async () => {
+    const [cafe] = await db.select().from(businesses).where(eq(businesses.slug, 'bag-kafe'))
+    const people = await Promise.all(
+      ['+99365222020', '+99365222021'].map(async (phone, i) => {
+        const b = browser(t.app)
+        const { me } = await b.login(phone, `Guest ${i}`)
+        await db.insert(bookings).values({
+          code: `YR-99520${i}`,
+          businessId: cafe!.id,
+          type: 'appointment',
+          date: addDays(today(t.clock.now), -1),
+          start: 600,
+          end: 660,
+          status: 'completed',
+          completedAt: new Date(t.clock.now - 86_400_000),
+          source: 'web',
+          clientPhone: phone,
+          userId: me.id,
+        })
+        return { b, code: `YR-99520${i}` }
+      }),
+    )
+    const [written] = await Promise.all([
+      people[0]!.b.req(`/v1/me/bookings/${people[0]!.code}/review`, { body: { rating: 5 } }),
+      people[1]!.b.req(`/v1/me/bookings/${people[1]!.code}/review`, { body: { rating: 3 } }),
+    ]).then((rs) => [rs.map((r) => r.status)])
+    expect(written).toEqual([200, 200])
+    const [after] = await db.select().from(businesses).where(eq(businesses.id, cafe!.id))
+    expect(after!.reviewsCount).toBe(cafe!.reviewsCount + 2)
+    expect(after!.ratingBreakdown[5]).toBe(cafe!.ratingBreakdown[5] + 1)
+    expect(after!.ratingBreakdown[3]).toBe(cafe!.ratingBreakdown[3] + 1)
   })
 
   it('an owner can’t delete their account: a workspace always has its owner (book Q-213)', async () => {
