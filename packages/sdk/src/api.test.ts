@@ -1,6 +1,6 @@
 import { ApiError } from './client'
 import { describe, expect, it } from 'vitest'
-import { shouldRetry } from './react'
+import { shouldRetry } from './api'
 
 describe('shouldRetry', () => {
   it.each([

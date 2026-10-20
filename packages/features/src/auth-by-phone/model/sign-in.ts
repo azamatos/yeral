@@ -1,7 +1,8 @@
 /**
  * The phone and code steps of every sign-in (the business login, book B-02, B-07, design §27.2, §28.2; the client
- * site's login, C-18, C-19; ADR 0019; one shared code step, Q-157) as one state and the events that move it. The api holds the rules (3 tries, a 60-second lock, a new code after 59 s, 5 codes an hour for a
- * number, book Q-267); this keeps what the screen shows of them, and when each wait ends. Pure, so every turn is tested.
+ * site's login, C-18, C-19; ADR 0019; one shared code step, Q-157) as one state and the events that move it. The api
+ * holds the rules (3 tries, a 60-second lock, a new code after 59 s, 5 codes an hour for a number, book Q-267); this
+ * keeps what the screen shows of them, and when each wait ends. Pure, so every turn is tested.
  */
 import { isApiError, type ApiError } from '@yeral/sdk'
 

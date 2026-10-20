@@ -16,12 +16,12 @@
     "@yeral/domain": "workspace:*",
     "@yeral/i18n": "workspace:*",
     "@yeral/sdk": "workspace:*",
-    "@yeral/ui": "workspace:*",
-    "use-intl": "catalog:"
+    "@yeral/ui": "workspace:*"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.104.0",
-    "react": "^19.3.0"
+    "react": "^19.3.0",
+    "use-intl": "^4.14.0"
   },
   "devDependencies": {
     "@tanstack/react-query": "catalog:",
@@ -30,6 +30,7 @@
     "eslint": "catalog:",
     "react": "catalog:",
     "typescript": "catalog:",
+    "use-intl": "catalog:",
     "vitest": "catalog:"
   }
 }
