@@ -1372,7 +1372,7 @@ flowchart TD
 
 > Open question Q-213: closing or deleting a workspace.
 
-**Status** — Design: drawn (B-Settings · `pane=profile`, `dirty`) · Code: schema only.
+**Status** — Design: drawn (B-Settings · `pane=profile`, `dirty`) · Code: api built for the texts, phone, amenities, category and address (`GET`/`PATCH /v1/w/{slug}/settings/profile`, 20.10.2026); the logo and photos come with uploads (F-084, F-101).
 
 ### B-38 · Services and groups
 

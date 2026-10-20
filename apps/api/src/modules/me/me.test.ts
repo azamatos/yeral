@@ -433,6 +433,7 @@ describe('account', () => {
         '/v1/w/{slug}/team/{staffId}/reactivate',
         '/v1/w/{slug}/leave',
         '/v1/w/{slug}/settings/rules',
+        '/v1/w/{slug}/settings/profile',
         '/v1/w/{slug}/services',
         '/v1/w/{slug}/services/{serviceId}',
         '/v1/w/{slug}/services/{serviceId}/restore',

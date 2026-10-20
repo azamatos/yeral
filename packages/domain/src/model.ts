@@ -43,6 +43,13 @@ export const VERIFICATION_STATUSES = ['pending', 'verified', 'rejected'] as cons
 export type VerificationStatus = (typeof VERIFICATION_STATUSES)[number]
 
 /**
+ * What a business offers on its page's About section (book B-37). The demo's four; the design names no longer list yet,
+ * so more join here when it does.
+ */
+export const AMENITIES = ['wifi', 'air_conditioning', 'parking', 'card_payment'] as const
+export type Amenity = (typeof AMENITIES)[number]
+
+/**
  * A row on the team: `active` works (bookable rows appear on the client site), `invited` waits for the person to accept
  * (not on the client site), `removed` by the owner or left (*Öçürilen*; the owner can reactivate).
  */

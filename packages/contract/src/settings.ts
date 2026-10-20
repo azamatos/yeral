@@ -2,9 +2,10 @@
  * Business settings (book chapter 7b, B-37–B-43): what the owner and administrators change for their workspace
  * (`/w/{slug}/settings/…`). Specialists don't see them (403). The booking rules first (B-41, B-42).
  */
-import { CONFIRM_MODES } from '@yeral/domain/model'
+import { AMENITIES, CONFIRM_MODES, VERIFICATION_STATUSES } from '@yeral/domain/model'
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
 import { z } from 'zod'
+import { localizedSchema, marketLocaleSchema, phoneInputSchema, phoneSchema, slugSchema } from './common'
 
 /**
  * The booking rules (B-41). The values each one takes are the settings screen's options (`RULE_OPTIONS` in
@@ -41,3 +42,61 @@ export const bookingRulesSchema = z
 
 /** Change some of the rules; the others stay. Changing the mode or the hold leaves waiting requests as they are (Q-205). */
 export const bookingRulesUpdateSchema = bookingRulesSchema.omit({ lateMinutes: true }).partial().strict().meta({ id: 'BookingRulesUpdate' })
+
+/** Where the business is: one address per workspace (a second place is a business of its own). */
+export const locationSchema = z.object({
+  /** One of the market's cities (`GET /v1/cities`). */
+  cityId: z.string().max(40),
+  /** The street address, without the city: "Oguzhan köçesi 12". */
+  address: z.string().trim().min(1).max(200),
+  /** The street line on search rows, and all a home-based business shows before a booking is confirmed. */
+  street: z.string().trim().min(1).max(120),
+  /** The map pin. */
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+})
+
+/**
+ * The business profile (B-37): what the public page says. The logo and photos come with uploads (F-084, F-101). The
+ * owner and administrators ("change business settings").
+ */
+export const businessProfileSchema = z
+  .object({
+    slug: slugSchema,
+    /** As clients see it in search, on bookings and in SMS. */
+    name: z.string(),
+    /** It sets how the business is found and booked: a change keeps the kind of booking. */
+    categoryId: z.string(),
+    /** "Näme edýärsiňiz…", per language as written. */
+    about: z.partialRecord(marketLocaleSchema, z.string()),
+    /** "Habarlaşmak telefony": the page's "Jaň et" calls it. */
+    phone: phoneSchema,
+    amenities: z.array(z.enum(AMENITIES)),
+    /** "Diňe aýallar üçin". */
+    womenOnly: z.boolean(),
+    location: locationSchema,
+    /** "Girelge nirede?" */
+    entranceNote: z.string().nullable(),
+    /** "Takyk salgyny diňe ýazylyş tassyklanandan soň görkez": home-based. */
+    hideExactAddress: z.boolean(),
+    /** Only a verified page is public; an address change asks the Ýeral team to check again (Q-215). */
+    verification: z.enum(VERIFICATION_STATUSES),
+  })
+  .meta({ id: 'BusinessProfile' })
+
+/** Change some of the profile; a new location is given whole. */
+export const businessProfileUpdateSchema = z
+  .object({
+    name: z.string().trim().min(1).max(80),
+    categoryId: z.string().max(40),
+    about: localizedSchema(1000),
+    phone: phoneInputSchema,
+    amenities: z.array(z.enum(AMENITIES)).refine((a) => new Set(a).size === a.length, 'Each amenity at most once'),
+    womenOnly: z.boolean(),
+    location: locationSchema.strict(),
+    entranceNote: z.string().trim().max(200).nullable(),
+    hideExactAddress: z.boolean(),
+  })
+  .partial()
+  .strict()
+  .meta({ id: 'BusinessProfileUpdate' })

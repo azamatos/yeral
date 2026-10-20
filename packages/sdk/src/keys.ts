@@ -40,4 +40,5 @@ export const keys = {
   settings: (slug: string) => ['settings', slug] as const,
   rules: (slug: string) => ['settings', slug, 'rules'] as const,
   menu: (slug: string) => ['settings', slug, 'services'] as const,
+  profile: (slug: string) => ['settings', slug, 'profile'] as const,
 }
