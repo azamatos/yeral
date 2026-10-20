@@ -5,6 +5,7 @@ import {
   canBusinessMove,
   canClientCancel,
   canClientReschedule,
+  canClientRestore,
   canComplain,
   canEditNote,
   canWriteReview,
@@ -19,6 +20,7 @@ import {
   occupiesSlot,
   offerPast,
   type BookingState,
+  type RestoreState,
 } from './lifecycle'
 import type { BusinessHours } from './hours'
 import { epochOf } from './time'
@@ -31,6 +33,29 @@ const MIN = 60_000
 
 const booking = (over: Partial<BookingState> = {}): BookingState => ({ date: THU, start: 870, end: 930, status: 'confirmed', ...over })
 const rules = { cancelWindowMinutes: 120 }
+
+describe('canClientRestore (ROUND6 A6)', () => {
+  const cancelled = (over: Partial<RestoreState> = {}): RestoreState => ({
+    ...booking({ status: 'cancelled', cancelledBy: 'client', holdUntil: NOW + 30 * MIN }),
+    cancelledAt: NOW,
+    wasConfirmed: false,
+    isMove: false,
+    ...over,
+  })
+  it('within 5 minutes of the client’s own cancel, each refusal its own reason', () => {
+    expect(canClientRestore(cancelled(), NOW + MIN)).toBeNull()
+    expect(canClientRestore(cancelled(), NOW + 5 * MIN)).toBe('restore_expired')
+    expect(canClientRestore(cancelled({ cancelledBy: 'business' }), NOW + MIN)).toBe('invalid_status')
+    // a second tap, after the first brought it back
+    expect(canClientRestore(cancelled({ status: 'pending' }), NOW + MIN)).toBe('invalid_status')
+    expect(canClientRestore(cancelled({ isMove: true }), NOW + MIN)).toBe('invalid_status')
+    // the visit started a minute after the cancel
+    expect(canClientRestore(cancelled({ date: TODAY, start: 601 }), NOW + 2 * MIN)).toBe('already_started')
+    // the answer time ran out; a confirmed booking has none to run out
+    expect(canClientRestore(cancelled({ holdUntil: NOW + MIN }), NOW + 2 * MIN)).toBe('request_expired')
+    expect(canClientRestore(cancelled({ holdUntil: null, wasConfirmed: true }), NOW + 2 * MIN)).toBeNull()
+  })
+})
 
 describe('keptCancelReason (book Q-163)', () => {
   it('kept only when the business asks, and never blank', () => {

@@ -412,7 +412,7 @@ flowchart TD
 **Edge cases**
 
 - Only the client's own cancel can be undone. A business cancel or an expiry can't be (code).
-- Each of the four reasons comes back as its own error (`slot_taken`, `session_full`, `already_started`, `request_expired`), with the texts in `undoReasons` (code: `bookings/actions.ts`).
+- Each of the four reasons comes back as its own error (`slot_taken`, `session_full`, `already_started`, `request_expired`), with the texts in `undo.reasons` (code: `canClientRestore`, `bookings/actions.ts`). A request brought back counts as a new one: too many waiting (Q-124) or a business no longer taking it online (Q-154) refuse it with their own message.
 - A reminder that fell due inside the 5 minutes isn't sent later (code).
 - If the cancel also withdrew a waiting move (S-07), undo brings back only the booking, as the code does. The client asks for the move again if they still want it (Q-266, decided 18.10.2026).
 

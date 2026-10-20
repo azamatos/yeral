@@ -2,6 +2,7 @@
 import {
   canClientCancel,
   canClientReschedule,
+  canClientRestore,
   canEditNote,
   canWriteReview,
   effectiveStatus,
@@ -12,7 +13,6 @@ import {
 } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { reviewName, splitName } from '@yeral/domain/names'
-import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, classSessions, reviews, users } from '../../db/schema'
@@ -23,10 +23,19 @@ import { emit } from '../../notify'
 import { loadBusinesses, type LoadedBusiness } from '../availability/context'
 import { visitWhat } from '../catalog/map'
 import { shiftRating } from '../reviews/rating'
-import { assertOnlineBooking, assertWaitingRoom, bookedServices, rebook } from './create'
+import { assertOnlineBooking, assertWaitingRoom, bookedServices, onlineRefusal, rebook } from './create'
 import { offerTarget } from './offers'
-import { isSlotConflict, lockBooking, pgCode, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from './repo'
-import { RESTORE_MINUTES } from './view'
+import {
+  type BookingRow,
+  isSlotConflict,
+  lockBooking,
+  pgCode,
+  recordMoveRefused,
+  restoreStateOf,
+  setStatus,
+  StaleBooking,
+  stateOf,
+} from './repo'
 import { nameOf } from '../me/me'
 
 async function businessOf(deps: Deps, b: BookingRow): Promise<LoadedBusiness> {
@@ -109,33 +118,29 @@ export async function cancelBooking(deps: Deps, b: BookingRow, reason?: string):
 }
 
 /**
- * "Yzyna al": undo the client's own cancel for a few minutes, if the time is still free. When it can't come back, the
- * error says which of the four reasons the screen shows (ROUND6 A6): the time was taken (`slot_taken`), the class is
- * full (`session_full`), the visit has started (`already_started`), the request's answer time ran out
- * (`request_expired`). Past the 5 minutes there's no "Yzyna al" at all (`restore_expired`).
+ * "Yzyna al": undo the client's own cancel for a few minutes, if the time is still free (ROUND6 A6). When it can't come
+ * back, the error is one of the four reasons the screen names: the time was taken (`slot_taken`), the class is full
+ * (`session_full`), the visit has started (`already_started`), the request's answer time ran out (`request_expired`).
+ * Other refusals show their own message: the 5 minutes passed (`restore_expired`), not the client's cancel any more
+ * (`invalid_status`), and for a request, as for a new one, too many waiting (`too_many_waiting`) or the business no
+ * longer taking it online (`online_disabled`, `online_blocked`). A confirmed booking comes back whatever the business
+ * did since: it had taken it.
  */
 export async function restoreBooking(deps: Deps, b: BookingRow): Promise<BookingRow> {
   const now = deps.now()
-  const ok =
-    b.status === 'cancelled' && b.cancelledBy === 'client' && !!b.cancelledAt && now - b.cancelledAt.getTime() < RESTORE_MINUTES * 60_000
-  if (!ok) throw new ApiError('restore_expired')
-  if (now >= epochOf(b.date, b.start)) throw new ApiError('already_started')
-  // a withdrawn or replaced move stays withdrawn: the client asks again
-  if (b.rescheduleOf) throw new ApiError('invalid_status')
+  guard(canClientRestore(restoreStateOf(b), now))
   const status = b.confirmedAt ? 'confirmed' : 'pending'
+  if (status === 'pending' && b.clientPhone) {
+    const refused = await onlineRefusal(deps.db, await businessOf(deps, b), b.clientPhone)
+    if (refused) throw new ApiError(refused)
+  }
   try {
     return await deps.db.transaction(async (tx) => {
       // a request back to waiting counts as one sent now (book Q-124)
       if (status === 'pending' && b.userId) await assertWaitingRoom(tx, b.userId, b.businessId, now, { locked: true })
       // the seats may have gone meanwhile; tables and specialists are guarded by the database
       if (b.type === 'class' && b.sessionId && (await seatsLeft(tx, b.sessionId)) < (b.seats ?? 1)) throw new ApiError('session_full')
-      const row = await setStatus(
-        tx,
-        { ...b, holdUntil: b.holdUntil && b.holdUntil.getTime() > now ? b.holdUntil : null },
-        { status, at: new Date(now) },
-      )
-      // a request whose hold ran out meanwhile can't come back
-      if (status === 'pending' && !row.holdUntil) throw new ApiError('request_expired')
+      const row = await setStatus(tx, b, { status, at: new Date(now) })
       await emit(tx, { type: 'booking.updated', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
       return row
     })

@@ -163,9 +163,14 @@ describe('message catalogues', () => {
   })
 
   it('an undo that failed says which of the four reasons (ROUND6 A6)', () => {
-    const t = createT('tk')
-    expect(t('undoFailed', { reason: t('undoReasons.slot_taken') })).toBe('Yzyna alyp bolmady — bu wagt eýýäm başga müşderä berildi.')
-    expect(t('undoReasons.request_expired')).toBe('haýyşyň jogap wagty gutardy')
+    const say = (locale: 'en' | 'tk' | 'ru', code: string) => {
+      const t = createT(locale)
+      return t('undo.failed', { reason: t(`undo.reasons.${code}` as 'undo.reasons.slot_taken') })
+    }
+    expect(say('tk', 'slot_taken')).toBe('Yzyna alyp bolmady — bu wagt eýýäm başga müşderä berildi.')
+    expect(say('tk', 'request_expired')).toBe('Yzyna alyp bolmady — haýyşyň jogap wagty gutardy.')
+    expect(say('en', 'already_started')).toBe('Couldn’t undo — the booking time has started.'.replace('’', "'"))
+    expect(say('ru', 'session_full')).toBe('Не удалось вернуть — на занятии не осталось мест.')
   })
 
   it('no empty messages', () => {

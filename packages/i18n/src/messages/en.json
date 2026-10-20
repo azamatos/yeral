@@ -54,12 +54,14 @@
     "cannot_do": "We don't offer this service",
     "other": "Other reason"
   },
-  "undoFailed": "Couldn't undo — {reason}.",
-  "undoReasons": {
-    "slot_taken": "this time was already given to another client",
-    "session_full": "no seats left in the class",
-    "already_started": "the booking time has started",
-    "request_expired": "the request's answer time ran out"
+  "undo": {
+    "failed": "Couldn't undo — {reason}.",
+    "reasons": {
+      "slot_taken": "this time was already given to another client",
+      "session_full": "no seats left in the class",
+      "already_started": "the booking time has started",
+      "request_expired": "the request's answer time ran out"
+    }
   },
   "sms": {
     "code": "{brand} code: {code}",

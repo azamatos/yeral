@@ -1150,7 +1150,7 @@ flowchart TD
 
 > Open question Q-266: undo after a cancel that withdrew a waiting move.
 
-- Each reason comes back as its own error: `slot_taken`, `session_full`, `already_started`, `request_expired`; past the 5 minutes `restore_expired` (code: `bookings/actions.ts`). The texts are `undoFailed` with `undoReasons.{code}` (`@yeral/i18n`).
+- Each reason comes back as its own error: `slot_taken`, `session_full`, `already_started`, `request_expired` (code: `canClientRestore` in `@yeral/domain/lifecycle`, `bookings/actions.ts`); the texts are `undo.failed` with `undo.reasons.{code}` (`@yeral/i18n`). Other refusals show their own message: past the 5 minutes `restore_expired`, a second tap `invalid_status`, and for a request, as for a new one, too many waiting (Q-124) or the business no longer taking it online (Q-154). A confirmed booking comes back whatever the business did since.
 
 **Status:** Design: drawn (Account-Bookings · `view=undoFailed`, `undo`; Mobile 12) · Code: built (api).
 
