@@ -111,7 +111,7 @@ export function inBookingWindow(rules: Pick<BookingRules, 'windowDays'>, date: s
 interface StaffDayView {
   staff: StaffForBooking
   working: Interval[]
-  busy: Interval[]
+  busy: BusyInterval[]
 }
 
 /**
@@ -173,15 +173,15 @@ function layOut(
   return items
 }
 
-/** The spans a plan occupies per specialist: each run of items plus its buffer. */
-function occupied(items: readonly PlannedItem[]): { staffId: string; span: Interval }[] {
+/** The spans a plan occupies per specialist: each run of items plus its buffer (or without it: the visit alone). */
+function occupied(items: readonly PlannedItem[], withBuffer = true): { staffId: string; span: Interval }[] {
   const out: { staffId: string; span: Interval }[] = []
   let runStart: number | null = null
   items.forEach((it, i) => {
     runStart ??= it.start
     const next = items[i + 1]
     if (!next || next.staffId !== it.staffId) {
-      out.push({ staffId: it.staffId, span: { start: runStart, end: it.end + it.bufferAfter } })
+      out.push({ staffId: it.staffId, span: { start: runStart, end: it.end + (withBuffer ? it.bufferAfter : 0) } })
       runStart = null
     }
   })
@@ -371,29 +371,61 @@ export function nextFreeSlot(
   return null
 }
 
-export type PlanProblem = 'staff_cannot_do' | 'staff_off' | 'outside_hours' | 'overlap'
+/**
+ * Why a move is refused (B-26), in the order the toast names it: the specialist doesn't do the service, has the day
+ * off, the visit runs outside their hours (a break included), it falls on their time taken elsewhere (book Q-272) or
+ * on another booking, or only its buffer doesn't fit ("… and the break after it is needed").
+ */
+export const PLAN_PROBLEMS = ['staff_cannot_do', 'staff_off', 'outside_hours', 'elsewhere', 'overlap', 'buffer'] as const
+export type PlanProblem = (typeof PLAN_PROBLEMS)[number]
+
+export interface PlanRefusal {
+  problem: PlanProblem
+  staffId: string
+  /** The time taken elsewhere it falls on ("busy elsewhere 19:00–20:00"), in the date's minutes. */
+  busy?: Interval
+}
 
 /**
- * Check a plan the workspace wants to save (drag to move, "Başga wagta geçir"): why it can't be done, or null.
- * Order matches what the toast should say first.
+ * Check a plan the workspace wants to save (drag to move, "Başga wagta geçir"): why it can't be done and for whom, or
+ * null.
  */
+export function planRefusal(
+  ctx: AppointmentContext,
+  date: string,
+  items: readonly PlannedItem[],
+  excludeBookingIds: readonly string[] = [],
+): PlanRefusal | null {
+  const views = dayViews(ctx, date, excludeBookingIds)
+  for (const it of items) {
+    const s = ctx.staff.find((x) => x.id === it.staffId)
+    if (!s?.serviceIds.includes(it.serviceId)) return { problem: 'staff_cannot_do', staffId: it.staffId }
+    if (!views.has(it.staffId)) return { problem: 'staff_off', staffId: it.staffId }
+  }
+  // the visit alone first: what it falls on is what the toast names
+  for (const { staffId, span } of occupied(items, false)) {
+    const view = views.get(staffId)!
+    if (!view.working.some((w) => contains(w, span))) return { problem: 'outside_hours', staffId }
+    const away = view.busy.find((b) => b.elsewhere && overlaps(b, span))
+    if (away) return { problem: 'elsewhere', staffId, busy: { start: away.start, end: away.end } }
+    if (view.busy.some((b) => overlaps(b, span))) return { problem: 'overlap', staffId }
+  }
+  // then its buffer
+  for (const { staffId, span } of occupied(items)) {
+    const view = views.get(staffId)!
+    if (!view.working.some((w) => contains(w, span)) || view.busy.some((b) => overlaps(b, span))) return { problem: 'buffer', staffId }
+  }
+  return planFits(views, items) ? null : { problem: 'overlap', staffId: items[0]?.staffId ?? '' }
+}
+
+/** What `planRefusal` refuses, without the details. */
 export function checkPlan(
   ctx: AppointmentContext,
   date: string,
   items: readonly PlannedItem[],
   excludeBookingIds: readonly string[] = [],
 ): PlanProblem | null {
-  const views = dayViews(ctx, date, excludeBookingIds)
-  for (const it of items) {
-    const s = ctx.staff.find((x) => x.id === it.staffId)
-    if (!s?.serviceIds.includes(it.serviceId)) return 'staff_cannot_do'
-    if (!views.has(it.staffId)) return 'staff_off'
-  }
-  for (const o of occupied(items)) {
-    const view = views.get(o.staffId)
-    if (!view?.working.some((w) => contains(w, o.span))) return 'outside_hours'
-  }
-  return planFits(views, items) ? null : 'overlap'
+  return planRefusal(ctx, date, items, excludeBookingIds)?.problem ?? null
 }
 
 /** Move a plan to a new start (and optionally to one specialist), keeping durations and buffers. */

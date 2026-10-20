@@ -32,6 +32,8 @@
     "restore_expired": "Вернуть запись уже нельзя.",
     "undo_expired": "Отменить уже поздно.",
     "too_many_waiting": "{scope, select, business {У вас уже {limit, plural, one {# запрос ждёт} few {# запроса ждут} many {# запросов ждут} other {# запроса ждут}} ответа здесь. Дождитесь ответа или отмените один.} other {У вас уже {limit, plural, one {# запрос ждёт} few {# запроса ждут} many {# запросов ждут} other {# запроса ждут}} ответа. Дождитесь ответов или отмените один.}}",
+    "cannot_move": "Перенести запись на это время нельзя.",
+    "move_waiting": "Клиент попросил новое время: сначала ответьте на это.",
     "review_exists": "Отзыв уже оставлен.",
     "review_not_allowed": "Отзыв можно оставить только после визита.",
     "review_locked": "Время изменить отзыв прошло.",
@@ -57,6 +59,11 @@
     "cannot_do": "Мы не оказываем эту услугу",
     "other": "Другая причина"
   },
+  "businessCancelReasons": {
+    "client_called": "Клиент позвонил и отменил",
+    "staff_away": "Мастер не может выйти",
+    "other": "Другая причина"
+  },
   "undo": {
     "failed": "Не удалось вернуть — {reason}.",
     "reasons": {
@@ -78,6 +85,8 @@
     "moveRefused": "{brand}: {business} не принял новое время — запись остаётся на {date} {time}. {link}",
     "moveDeclined": "{brand}: {business} не принял новое время: {reason}. Запись остаётся на {date} {time}. {link}",
     "cancelled": "{brand}: {business} отменил вашу запись на {date} {time}: {reason}. {link}",
+    "moved": "{brand}: {business}: ваша запись перенесена на {weekday}, {date}, {time}. Изменить: {link}",
+    "cancelledAsAsked": "{brand}: {business}, {date} {time}: запись отменена по вашей просьбе. {link}",
     "reminderDay": "Напоминание: завтра в {time} {business}, {address}.",
     "reminder2h": "Напоминание: сегодня в {time} {business}, {address}."
   },

@@ -9,7 +9,15 @@
  * The database keeps the stored status; jobs settle expiries and completions every minute. Until a job has run,
  * `effectiveStatus` gives what people must see, so screens never show a stale "pending" or "confirmed".
  */
-import { isOnlineSource, type BookingSource, type BookingStatus, type CancelledBy, type ComplaintType, type ConfirmMode } from './model'
+import {
+  isOnlineSource,
+  type BookingSource,
+  type BookingStatus,
+  type BusinessCancelReason,
+  type CancelledBy,
+  type ComplaintType,
+  type ConfirmMode,
+} from './model'
 import type { BookingRules } from './rules'
 import { DAY_MINUTES, openStretches, type BusinessHours } from './hours'
 import { addDays, epochOf, localOf } from './time'
@@ -271,6 +279,8 @@ export interface RestoreState extends BookingState {
   wasConfirmed: boolean
   /** A move request: withdrawn or replaced, it stays so (the client asks again). */
   isMove: boolean
+  /** The team entered the cancel ("The client called to cancel", B-27): the client calls again instead. */
+  byTeam: boolean
 }
 
 /**
@@ -279,7 +289,7 @@ export interface RestoreState extends BookingState {
  * request whose answer time ran out: `request_expired`. The time taken and a full class are found when it comes back.
  */
 export function canClientRestore(b: RestoreState, now = Date.now()): Guard {
-  if (b.status !== 'cancelled' || b.cancelledBy !== 'client' || b.cancelledAt === null || b.isMove) return 'invalid_status'
+  if (b.status !== 'cancelled' || b.cancelledBy !== 'client' || b.cancelledAt === null || b.isMove || b.byTeam) return 'invalid_status'
   if (now - b.cancelledAt >= RESTORE_MINUTES * 60_000) return 'restore_expired'
   if (now >= startOf(b)) return 'already_started'
   if (!b.wasConfirmed && !(b.holdUntil && b.holdUntil > now)) return 'request_expired'
@@ -335,10 +345,18 @@ export function canBusinessCancel(b: BookingState, now = Date.now()): Guard {
   return now < startOf(b) ? null : 'already_started'
 }
 
-/** Move to another time or specialist (drag in the calendar, "Başga wagta geçir"). */
+/**
+ * "The client called to cancel" is the client's own cancel, which the team enters: the client sees "You cancelled". The
+ * other reasons are the business's, with the reason shown (B-27).
+ */
+export const cancelledByFor = (reason: BusinessCancelReason): CancelledBy => (reason === 'client_called' ? 'client' : 'business')
+
+/**
+ * Move to another time or specialist (drag in the calendar, "Başga wagta geçir"): a confirmed booking that hasn't
+ * started (B-26). A request is answered, not moved.
+ */
 export function canBusinessMove(b: BookingState, now = Date.now()): Guard {
-  const { status } = effectiveStatus(b, now)
-  if (status !== 'pending' && status !== 'confirmed') return 'invalid_status'
+  if (effectiveStatus(b, now).status !== 'confirmed') return 'invalid_status'
   return now < startOf(b) ? null : 'already_started'
 }
 

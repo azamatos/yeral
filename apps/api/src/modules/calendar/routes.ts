@@ -1,12 +1,15 @@
 /**
- * The business's own bookings (book B-23, B-24, B-25; `/w/{slug}/…`): free times as the team books them, a booking for
- * a client who calls or walks in, and its undo. A specialist books only themself (chapter 3).
+ * The business's own bookings (book B-23–B-27; `/w/{slug}/…`): free times as the team books them, a booking for a
+ * client who calls or walks in and its undo, and moving or cancelling a confirmed one. A specialist books, moves and
+ * cancels only their own (chapter 3).
  */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import {
+  businessCancelSchema,
   freeTimesQuerySchema,
   freeTimesSchema,
   newBookingResultSchema,
+  moveBookingSchema,
   newBookingSchema,
   teamBookingParamSchema,
 } from '@yeral/contract/calendar'
@@ -14,7 +17,7 @@ import { workspaceParamSchema } from '@yeral/contract/team'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { requireMember } from '../team/service'
-import { addBooking, freeTimes, undoBooking } from './service'
+import { addBooking, cancelByBusiness, freeTimes, moveBooking, undoBooking } from './service'
 
 const tags = ['calendar']
 const denied = { 401: errors[401], 403: errors[403], 404: errors[404] }
@@ -44,6 +47,23 @@ const undoRoute = createRoute({
   responses: { ...noContent, 409: errors[409], ...denied },
 })
 
+const moveRoute = createRoute({
+  method: 'post',
+  path: '/w/{slug}/bookings/{code}/move',
+  tags,
+  summary: '"Move to another time" or a dragged block: a new time, and another specialist when given',
+  request: { params: teamBookingParamSchema, ...jsonBody(moveBookingSchema) },
+  responses: { ...noContent, 400: errors[400], 409: errors[409], ...denied },
+})
+const cancelRoute = createRoute({
+  method: 'post',
+  path: '/w/{slug}/bookings/{code}/cancel',
+  tags,
+  summary: '"Cancel booking" with the reason the client sees ("The client called to cancel" is their own cancel)',
+  request: { params: teamBookingParamSchema, ...jsonBody(businessCancelSchema) },
+  responses: { ...noContent, 400: errors[400], 409: errors[409], ...denied },
+})
+
 export const calendarRoutes = new OpenAPIHono<AppEnv>()
   .openapi(freeTimesRoute, async (c) => {
     const { business, actor } = await requireMember(c, c.req.valid('param').slug)
@@ -57,5 +77,17 @@ export const calendarRoutes = new OpenAPIHono<AppEnv>()
     const { slug, code } = c.req.valid('param')
     const { business, actor } = await requireMember(c, slug)
     await undoBooking(c.var.deps, business, actor, code)
+    return c.body(null, 204)
+  })
+  .openapi(moveRoute, async (c) => {
+    const { slug, code } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    await moveBooking(c.var.deps, business, actor, code, c.req.valid('json'))
+    return c.body(null, 204)
+  })
+  .openapi(cancelRoute, async (c) => {
+    const { slug, code } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    await cancelByBusiness(c.var.deps, business, actor, code, c.req.valid('json'))
     return c.body(null, 204)
   })

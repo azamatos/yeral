@@ -32,6 +32,8 @@
     "restore_expired": "It's too late to restore this booking.",
     "undo_expired": "It's too late to undo.",
     "too_many_waiting": "{scope, select, business {You already have {limit} requests waiting here. Wait for an answer or cancel one.} other {You already have {limit} requests waiting. Wait for the answers or cancel one.}}",
+    "cannot_move": "The booking can't move there.",
+    "move_waiting": "The client asked for a new time: answer that first.",
     "review_exists": "You've already reviewed this visit.",
     "review_not_allowed": "You can review only after your visit.",
     "review_locked": "This review can't be edited any more.",
@@ -57,6 +59,11 @@
     "cannot_do": "We don't offer this service",
     "other": "Other reason"
   },
+  "businessCancelReasons": {
+    "client_called": "The client called to cancel",
+    "staff_away": "The specialist can't come in",
+    "other": "Other reason"
+  },
   "undo": {
     "failed": "Couldn't undo — {reason}.",
     "reasons": {
@@ -78,6 +85,8 @@
     "moveRefused": "{brand}: {business} didn't accept the new time. Your booking stays at {date} {time}. {link}",
     "moveDeclined": "{brand}: {business} didn't accept the new time: {reason}. Your booking stays at {date} {time}. {link}",
     "cancelled": "{brand}: {business} cancelled your booking on {date} {time}: {reason}. {link}",
+    "moved": "{brand}: {business} moved your booking to {weekday}, {date}, {time}. Change: {link}",
+    "cancelledAsAsked": "{brand}: your booking at {business} on {date} {time} is cancelled, as you asked. {link}",
     "reminderDay": "Reminder: tomorrow at {time}, {business}, {address}.",
     "reminder2h": "Reminder: today at {time}, {business}, {address}."
   },

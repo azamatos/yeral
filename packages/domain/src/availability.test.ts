@@ -12,6 +12,7 @@ import {
   maxSeats,
   nearestSlots,
   nextFreeSlot,
+  planRefusal,
   seatsLeft,
   shiftPlan,
   slotStaffId,
@@ -316,6 +317,18 @@ describe('checking a plan from the workspace', () => {
 
   it('refuses a day off', () => {
     expect(checkPlan(c, SUN, plan)).toBe('staff_off')
+  })
+
+  it('names a buffer that doesn’t fit apart from an overlap, and time taken elsewhere with its hours (B-26)', () => {
+    const buffered = [{ serviceId: 'cut', staffId: 'a', start: 600, end: 660, bufferAfter: 15 }]
+    // the visit ends at 12:00 where the other booking starts: only the buffer runs into it
+    expect(checkPlan(c, THU, shiftPlan(buffered, 660))).toBe('buffer')
+    // and into the closing time
+    expect(checkPlan(c, THU, shiftPlan(buffered, 1140))).toBe('buffer')
+    expect(checkPlan(c, THU, shiftPlan(buffered, 690))).toBe('overlap')
+    const away = ctx({ staff: team, busy: [{ ...busy('a', THU, 900, 960, 'there'), elsewhere: true }] })
+    expect(planRefusal(away, THU, shiftPlan(plan, 930))).toEqual({ problem: 'elsewhere', staffId: 'a', busy: { start: 900, end: 960 } })
+    expect(planRefusal(away, THU, shiftPlan(plan, 600))).toBeNull()
   })
 
   it('busyOf turns a saved plan into busy time, buffer included', () => {

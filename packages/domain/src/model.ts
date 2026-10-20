@@ -27,6 +27,13 @@ export type ConfirmMode = (typeof CONFIRM_MODES)[number]
 export const DECLINE_REASONS = ['slot_busy', 'no_staff', 'cannot_do', 'other'] as const
 export type DeclineReason = (typeof DECLINE_REASONS)[number]
 
+/**
+ * Why the business cancels a confirmed booking (B-27): "The client called to cancel", "The specialist can't come in",
+ * "Other reason" (in words).
+ */
+export const BUSINESS_CANCEL_REASONS = ['client_called', 'staff_away', 'other'] as const
+export type BusinessCancelReason = (typeof BUSINESS_CANCEL_REASONS)[number]
+
 /** "Arz et" — what happened (business spec §3): Gelmedi, Gijä galdy, Gödek gylyk, Başga. */
 export const COMPLAINT_TYPES = ['noshow', 'late', 'rude', 'other'] as const
 export type ComplaintType = (typeof COMPLAINT_TYPES)[number]

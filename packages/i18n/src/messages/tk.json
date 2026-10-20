@@ -32,6 +32,8 @@
     "restore_expired": "Yzyna almak wagty geçdi.",
     "undo_expired": "Yzyna almaga gijä galdy.",
     "too_many_waiting": "{scope, select, business {Bu ýerde jogap garaşýan {limit} haýyşyňyz bar. Jogaba garaşyň ýa-da birini ýatyryň.} other {Jogap garaşýan {limit} haýyşyňyz bar. Jogaplara garaşyň ýa-da birini ýatyryň.}}",
+    "cannot_move": "Ýazylyşy bu wagta geçirip bolmaýar.",
+    "move_waiting": "Müşderi täze wagt sorady: ilki oňa jogap beriň.",
     "review_exists": "Teswir eýýäm ýazyldy.",
     "review_not_allowed": "Teswiri diňe gelenden soň ýazyp bolýar.",
     "review_locked": "Teswiri üýtgetmek wagty geçdi.",
@@ -57,6 +59,11 @@
     "cannot_do": "Bu hyzmaty edip bilmeýäris",
     "other": "Başga sebäp"
   },
+  "businessCancelReasons": {
+    "client_called": "Müşderi jaň edip ýatyrdy",
+    "staff_away": "Hünärmen işe çykyp bilmeýär",
+    "other": "Başga sebäp"
+  },
   "undo": {
     "failed": "Yzyna alyp bolmady — {reason}.",
     "reasons": {
@@ -78,6 +85,8 @@
     "moveRefused": "{brand}: {business}: täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar: {date} {time}. {link}",
     "moveDeclined": "{brand}: {business}: täze wagt kabul edilmedi: {reason}. Ýazylyşyňyz öňki wagtynda galýar: {date} {time}. {link}",
     "cancelled": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}",
+    "moved": "{brand}: {business}: ýazylyşyňyz täze wagta geçirildi: {weekday}, {date}, {time}. Üýtgetmek: {link}",
+    "cancelledAsAsked": "{brand}: {business}, {date} {time}: ýazylyşyňyz haýyşyňyz boýunça ýatyryldy. {link}",
     "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",
     "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}."
   },

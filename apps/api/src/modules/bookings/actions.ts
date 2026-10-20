@@ -77,15 +77,16 @@ async function waitingMove(db: Queryable, b: BookingRow): Promise<BookingRow | u
 }
 
 /**
- * Withdraw a pending move of this booking, if there is one, and tell the business's open screens. One whose hold has
- * run out lapsed unanswered: it's recorded as the jobs would, not as the client's. One the jobs just settled is gone.
+ * Withdraw a pending move of this booking, if there is one, and tell the business's open screens: the client's (or,
+ * when the business cancels the booking, the business's, `by`). One whose hold has run out lapsed unanswered: it's
+ * recorded as the jobs would. One the jobs just settled is gone.
  */
-async function dropPendingMove(db: Queryable, b: BookingRow, at: Date) {
+export async function dropPendingMove(db: Queryable, b: BookingRow, at: Date, by: 'client' | 'business' = 'client') {
   const m = await waitingMove(db, b)
   if (!m) return
   const lapsed = effectiveStatus(stateOf(m), at.getTime()).status !== 'pending'
   try {
-    const row = await setStatus(db, m, { status: 'cancelled', cancelledBy: lapsed ? 'system' : 'client', at })
+    const row = await setStatus(db, m, { status: 'cancelled', cancelledBy: lapsed ? 'system' : by, at })
     // as the jobs would: the booking says the move wasn't accepted (a cancel and "Yzyna al" keep that)
     if (lapsed) await recordMoveRefused(db, b, row, { by: 'system', reason: null, text: null }, m.holdUntil?.getTime() ?? at.getTime())
     await emit(db, {

@@ -446,6 +446,8 @@ describe('account', () => {
         '/v1/w/{slug}/free-times',
         '/v1/w/{slug}/bookings',
         '/v1/w/{slug}/bookings/{code}/undo',
+        '/v1/w/{slug}/bookings/{code}/move',
+        '/v1/w/{slug}/bookings/{code}/cancel',
       ].sort(),
     )
   })

@@ -4,7 +4,7 @@
  */
 import type { EventType } from '@yeral/contract/events'
 import { MARKET } from '@yeral/domain/market'
-import { localized, type DeclineReason, type Locale } from '@yeral/domain/model'
+import { localized, type BusinessCancelReason, type DeclineReason, type Locale } from '@yeral/domain/model'
 import { epochOf, localOf } from '@yeral/domain/time'
 import { createFmt, createT } from '@yeral/i18n/fmt'
 import { eq } from 'drizzle-orm'
@@ -41,6 +41,8 @@ export interface SmsBooking {
   address: string
   /** Named after the address (`smsCityOf`). */
   city?: string | null
+  /** A business's cancel: the reason as the client reads it (`businessCancelText`). */
+  reason?: string
 }
 
 /**
@@ -54,10 +56,16 @@ export async function smsCityOf(db: Queryable, cityId: string, lang: Locale): Pr
 }
 
 /**
- * `booked`: a booking the team entered for a client who called (book B-23, Q-288), with the address. `reminderEvening`:
- * a reminder moved out of the night to 21:30 the evening before, worded like the day one ("tomorrow").
+ * `booked`: a booking the team entered for a client who called (book B-23, Q-288), with the address. `moved`: the
+ * business moved it (B-26). `cancelled`: the business cancelled it, with the reason; `cancelledAsAsked`: the team
+ * entered the client's own cancel ("The client called to cancel", B-27). `reminderEvening`: a reminder moved out of
+ * the night to 21:30 the evening before, worded like the day one ("tomorrow").
  */
-export type BookingSmsKind = 'confirmed' | 'booked' | 'reminderDay' | 'reminder2h' | 'reminderEvening'
+export type BookingSmsKind =
+  'confirmed' | 'booked' | 'moved' | 'cancelled' | 'cancelledAsAsked' | 'reminderDay' | 'reminder2h' | 'reminderEvening'
+
+/** The booking SMS that carry the booking's link (book Q-168); reminders don't. */
+export const LINKED_SMS: ReadonlySet<BookingSmsKind> = new Set(['confirmed', 'booked', 'moved', 'cancelled', 'cancelledAsAsked'])
 
 /** The calendar day and clock minute of a business-day time: 01:00 after midnight is the next day's (book Q-105). */
 const wallOf = (date: string, start: number) => localOf(epochOf(date, start))
@@ -67,7 +75,7 @@ const dayOf = (date: string, start: number) => wallOf(date, start).date
 const brandOf = (t: ReturnType<typeof createT>) => t('common.brand')
 
 export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking): string {
-  if ((kind === 'confirmed' || kind === 'booked') && !b.link) throw new Error(`the ${kind} SMS needs its link`)
+  if (LINKED_SMS.has(kind) && !b.link) throw new Error(`the ${kind} SMS needs its link`)
   const t = createT(lang)
   const fmt = createFmt(lang)
   const common = {
@@ -80,7 +88,12 @@ export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking
   switch (kind) {
     case 'confirmed':
     case 'booked':
+    case 'moved':
       return t(`sms.${kind}`, { ...common, weekday: fmt.weekday(dayOf(b.date, b.start)), date: fmt.dayMonth(dayOf(b.date, b.start)) })
+    case 'cancelled':
+      return t('sms.cancelled', { ...common, date: fmt.dayMonth(dayOf(b.date, b.start)), reason: b.reason ?? '' })
+    case 'cancelledAsAsked':
+      return t('sms.cancelledAsAsked', { ...common, date: fmt.dayMonth(dayOf(b.date, b.start)) })
     case 'reminderDay':
     case 'reminderEvening':
       return t('sms.reminderDay', common)
@@ -112,6 +125,11 @@ export function expiredSmsText(
     })
     .join(', ')
   return t('sms.expired', { ...common, times: list })
+}
+
+/** A business's cancel reason as the client reads it (B-27): its label, or "Other reason" in the business's words. */
+export function businessCancelText(lang: Locale, reason: BusinessCancelReason, text: string | null): string {
+  return reason === 'other' && text ? text : createT(lang)(`businessCancelReasons.${reason}`)
 }
 
 /** The reason the business gave, as the client reads it: its label, or "other" in the business's words. */
@@ -166,12 +184,13 @@ export function moveRefusedSmsText(
 export type OutcomeSmsKind = 'expired' | 'moveRefused' | 'declined'
 
 /**
- * Queue an outcome SMS about `booking` for the jobs to send. The text and its link are made when it's sent, so no stored
- * row holds a working link; `causeId` (the request that ran out or was declined) sends it once.
+ * Queue an SMS about what happened to `booking` (an outcome, a business's cancel) for the jobs to send. The text and its
+ * link are made when it's sent, so no stored row holds a working link; `causeId` (the request that ran out or was
+ * declined, the booking cancelled) sends it once.
  */
 export async function queueOutcomeSms(
   db: Queryable,
-  kind: OutcomeSmsKind,
+  kind: OutcomeSmsKind | 'cancelled' | 'cancelledAsAsked',
   booking: { id: string; date: string; start: number },
   causeId: string,
   at: Date,

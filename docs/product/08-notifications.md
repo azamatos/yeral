@@ -5,7 +5,7 @@ This chapter says who hears about what, how and when. Clients hear by SMS and on
 Where things stand today:
 
 - **Design:** client messages are decided in client spec §6 and ROUND6. Business notifications are decided in business spec §16, §22 and §25, and drawn on *B-Notifications* and *B-Shell*.
-- **Code:** the api writes the client SMS texts. It sends login codes straight away and queues confirmations, phone bookings, declines, expiries and reminders. The business-cancel text exists, but nothing sends it yet (P2 step 4). Business notifications aren't built at all. No review ask (Q-259; the api's ask and its switch are gone).
+- **Code:** the api writes the client SMS texts. It sends login codes straight away and queues confirmations, phone bookings, declines, expiries and reminders. It also queues the business's moves and cancels (P2 step 4). Business notifications aren't built at all. No review ask (Q-259; the api's ask and its switch are gone).
 - **No SMS reaches a phone yet.** Every environment, production included, writes SMS to a log (see "Not decided").
 
 ## Channels
@@ -39,8 +39,8 @@ The *B-Notifications* screen still draws the *Programmada* chip. The spec wins o
 | Business confirms | SMS + on screen | at once | *Ýeral: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: {link}* | Yes: *Tassyklama we üýtgeşmeler* | client spec §6; Account-Profile |
 | Business declines | SMS + on screen with up to 3 offered times | at once | *Ýeral: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}* | No: always goes | client spec §6; ROUND6 A1; Q-286, decided 18.10.2026 |
 | Request expires | SMS + on screen with 3 free times; with nothing free, the SMS drops the times and says *Başga wagt saýlaň* | at the deadline | *Ýeral: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {t1}, {t2}, {t3} — {link}* | No: always goes | client spec §6; ROUND6 A2; Q-252, Q-286, decided 18.10.2026 |
-| Business cancels a confirmed booking | SMS + on screen with the reason | at once | text only in code: *Ýeral: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}* | Yes, with the same switch | business spec §3, §4; B-Calendar; Account-Profile; Q-286 |
-| Business moves the booking | SMS if staff leave *Müşderä SMS iberilsin* on | at once | Claude writes it (Q-288) | Yes, with the same switch | business spec §4; B-Calendar |
+| Business cancels a confirmed booking | SMS + on screen with the reason | at once | *{brand}: {business} cancelled your booking on {date} {time}: {reason}. {link}*; for "The client called to cancel": *{brand}: your booking at {business} on {date} {time} is cancelled, as you asked. {link}* (Claude, Q-288) | Yes, with the same switch | business spec §3, §4; B-Calendar; Account-Profile; Q-286 |
+| Business moves the booking | SMS if staff leave *Müşderä SMS iberilsin* on | at once | *{brand}: {business} moved your booking to {weekday}, {date}, {time}. Change: {link}* (Claude, Q-288) | Yes, with the same switch | business spec §4; B-Calendar |
 | Client's move accepted | SMS + on screen *Wagt üýtgedildi* | at once | Claude writes it (Q-288); the code reuses the confirmed text | Yes, with the same switch | ROUND6 A3; B-Calendar |
 | Client's move declined or unanswered | SMS with the link + on screen | at once | *Täze wagt kabul edilmedi — ýazylyşyňyz öňki wagtynda galýar.* | No: it always goes, like declines and expiries (Claude, following Q-286) | ROUND6 A3; Q-289, decided 18.10.2026 |
 | Booking entered by staff (phone call) | SMS if staff leave *Müşderä SMS bilen habar ber* on; off for walk-ins | once *Yzyna al* can't take the booking back (10 s) | *{brand}: you're booked: {business}, {weekday}, {date}, {time}, {address}. Change: {link}* (Claude, Q-288) | the business decides per booking; the client's *Tassyklama we üýtgeşmeler* too | business spec §4, §26 |
@@ -100,13 +100,15 @@ These are the Turkmen texts from client spec §6 next to the ones in the code (`
 | Confirmed | *Ýeral: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: yeral.app/b/{id}* | the same, with `yeral.app/l/{token}` (Q-168); the link domain comes from config | yes |
 | Declined | *Ýeral: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}* | the same | yes; nothing sends it yet |
 | Expired | *Ýeral: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {t1}, {t2}, {t3} — {link}* | the same, with *{times}*; a time on another day gets a short date (*16 okt. 10:00*) | yes; with nothing free, the text drops the times and says *Başga wagt saýlaň* (Q-252; code: `sms.expiredNoTimes`) |
-| Cancelled by the business | — | *Ýeral: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}* | only in the code; nothing sends it yet |
+| Cancelled by the business | — | *Ýeral: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}* | sent since 20.10.2026 (B-27) |
+| Cancelled as the client asked by phone (B-27) | — | *{brand}: your booking at {business} on {date} {time} is cancelled, as you asked. {link}* | Claude wrote it (Q-288, 20.10.2026) |
+| Moved by the business (B-26) | — | *{brand}: {business} moved your booking to {weekday}, {date}, {time}. Change: {link}* | Claude wrote it (Q-288, 20.10.2026) |
 | Reminder 1 day | *Ýatlatma: ertir {time} {business}, {address}.* | the same | yes |
 | Reminder 2 h | the same text as the 1-day reminder, with *ertir* (tomorrow) | *Ýatlatma: şu gün {time} {business}, {address}.* (today) | the code's text is kept (Q-293) |
 | Review ask | *{business}-da bolşuňyz nähili boldy? Baha beriň: {link}* | the same | dropped: no review ask (Q-259) |
 | Move not accepted | — | *{brand}: {business} didn't accept the new time. Your booking stays at {date} {time}. {link}* (English source; Turkmen and Russian drafts in the messages) | yes, when a move lapses (Q-289) |
 | Phone booking (B-23) | — | *{brand}: you're booked: {business}, {weekday}, {date}, {time}, {address}. Change: {link}* (English source; Turkmen and Russian drafts in the messages) | Claude wrote it (Q-288, 20.10.2026) |
-| Moved, move accepted, specialist changed, class cancelled, invite, new owner | — | — (an accepted move reuses Confirmed) | missing; Claude writes them (Q-288) |
+| Move accepted, specialist changed, class cancelled, invite, new owner | — | — (an accepted move reuses Confirmed) | missing; Claude writes them (Q-288) |
 
 Notes:
 

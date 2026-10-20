@@ -14,15 +14,15 @@ import { extendBookingLinks } from './links'
 import { lockBooking, setStatus, StaleBooking, type BookingRow } from './repo'
 
 /**
- * Queue the booking's SMS: the first one (`confirmed`, or `booked` for a booking the team entered) and the reminders (a
- * day and 2 h before, none at night: `reminderPlan`), none before `notBefore` (a booking that can still be undone,
- * B-24). No review ask (book Q-259): clients review from my bookings and the link page.
+ * Queue the booking's SMS: the first one (`confirmed`; `booked` for a booking the team entered, `moved` for one it
+ * moved) and the reminders (a day and 2 h before, none at night: `reminderPlan`), none before `notBefore` (a booking
+ * that can still be undone, B-24). No review ask (book Q-259): clients review from my bookings and the link page.
  */
 export async function queueBookingSms(
   db: Queryable,
   deps: Deps,
   b: BookingRow,
-  opts: { first: 'confirmed' | 'booked' | null; notBefore?: number },
+  opts: { first: 'confirmed' | 'booked' | 'moved' | null; notBefore?: number },
 ): Promise<void> {
   const now = deps.now()
   const from = Math.max(now, opts.notBefore ?? now)
