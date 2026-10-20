@@ -7,6 +7,7 @@ import {
   CANCELLED_BY,
   CLIENT_SOURCES,
   COMPLAINT_TYPES,
+  REVIEW_REPORT_REASONS,
   CONFIRM_MODES,
   DECLINE_REASONS,
   LOCALES,
@@ -26,6 +27,7 @@ export const confirmMode = pgEnum('confirm_mode', CONFIRM_MODES)
 export const declineReason = pgEnum('decline_reason', DECLINE_REASONS)
 export const businessCancelReason = pgEnum('business_cancel_reason', BUSINESS_CANCEL_REASONS)
 export const complaintType = pgEnum('complaint_type', COMPLAINT_TYPES)
+export const reviewReportReason = pgEnum('review_report_reason', REVIEW_REPORT_REASONS)
 export const priceType = pgEnum('price_type', PRICE_TYPES)
 export const verificationStatus = pgEnum('verification_status', VERIFICATION_STATUSES)
 export const staffStatus = pgEnum('staff_status', STAFF_STATUSES)

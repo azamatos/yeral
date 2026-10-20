@@ -313,9 +313,9 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
-| F-160 | Reviews page | Average, distribution, "unanswered" count, filters (unanswered, stars, specialist), newest first, 20 per page. | MVP | drawn (B-Reviews) | not built (business side) | Specialists read reviews about them. |
-| F-161 | Reply to a review | Public reply (500 chars), edit or delete own reply. | MVP | drawn (B-Reviews · composer) | schema only (`replyText`) | Business can't delete reviews. |
-| F-162 | Report a review | Report to Ýeral (false / didn't come, insulting, other business, spam, other); shown as "Barlanýar" and not counted until cleared. | MVP | drawn (B-Reviews · report, Venue) | not built (no moderation fields) | Round 6 F2. Needs F-180. |
+| F-160 | Reviews page | Average, distribution, "unanswered" count, filters (unanswered, stars, specialist), newest first, 20 per page. | MVP | drawn (B-Reviews) | api built (`GET /v1/w/{slug}/reviews`, 21.10.2026) | Specialists read reviews about them. |
+| F-161 | Reply to a review | Public reply (500 chars), edit or delete own reply. | MVP | drawn (B-Reviews · composer) | api built (`PUT`/`DELETE /v1/w/{slug}/reviews/{id}/reply`, 21.10.2026) | Business can't delete reviews. |
+| F-162 | Report a review | Report to Ýeral (false / didn't come, insulting, other business, spam, other); shown as "Barlanýar" and not counted until cleared. | MVP | drawn (B-Reviews · report, Venue) | api built for the business (`POST /v1/w/{slug}/reviews/{id}/report`, the 48-hour recount; 21.10.2026); Ýeral's decision with step 5 | Round 6 F2. Needs F-180. |
 
 ## Business · analytics
 

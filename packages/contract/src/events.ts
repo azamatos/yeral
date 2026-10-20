@@ -18,6 +18,8 @@ export const EVENT_TYPES = [
   'review.created',
   /** A review left with its account (book Q-172): the business's reviews and rating refresh. */
   'review.deleted',
+  /** A reply, a report or a recount (book B-53, B-54): the reviews and the rating refresh. */
+  'review.updated',
   /** Someone joined, declined, left or was invited, removed or changed: the team and the switcher refresh. */
   'team.changed',
   /** A client's record or notes changed (B-33–B-36): the clients pages, the calendar's markers and requests refresh. */

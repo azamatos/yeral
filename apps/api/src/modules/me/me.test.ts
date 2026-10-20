@@ -475,6 +475,9 @@ describe('account', () => {
         '/v1/w/{slug}/clients/lookup',
         '/v1/w/{slug}/clients/{id}',
         '/v1/w/{slug}/clients/{id}/notes',
+        '/v1/w/{slug}/reviews',
+        '/v1/w/{slug}/reviews/{id}/reply',
+        '/v1/w/{slug}/reviews/{id}/report',
       ].sort(),
     )
   })

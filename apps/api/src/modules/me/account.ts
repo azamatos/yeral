@@ -3,7 +3,7 @@
  * Q-270), and moving it to a new number (Q-171).
  */
 import { epochOf, today } from '@yeral/domain/time'
-import { and, desc, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingLinks, bookingRules, bookings, clientNotes, clients, invites, reviews, staff, users } from '../../db/schema'
 import { ApiError } from '../../http/errors'
@@ -12,7 +12,7 @@ import { emit } from '../../notify'
 import { linkPhone, recentRecord, unheldBooking } from '../auth/sign-in'
 import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
 import { blockedByCount } from '../clients/online'
-import { shiftRating, type StarShift } from '../reviews/rating'
+import { isCounted, shiftReviews } from '../reviews/rating'
 import { teamChanged } from '../team/service'
 
 /**
@@ -85,16 +85,17 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
     // any booking's, the order an hours save takes them in; a number that passed on leaves the
     // earlier holder's reviews standing, signed as they were. One change per business, in one order, so two deletions
     // at once can't wait on each other
-    const gone = await tx
-      .delete(reviews)
-      .where(eq(reviews.userId, user.id))
-      .returning({ businessId: reviews.businessId, rating: reviews.rating })
-    for (const businessId of [...new Set(gone.map((r) => r.businessId))].sort()) {
-      const shift: StarShift = {}
-      for (const r of gone) if (r.businessId === businessId) shift[r.rating] = (shift[r.rating] ?? 0) - 1
-      await shiftRating(tx, businessId, shift)
-      await emit(tx, { type: 'review.deleted', businessId })
-    }
+    // held in the order the 48-hour recount holds them, so the two can't wait on each other
+    await tx.select({ id: reviews.id }).from(reviews).where(eq(reviews.userId, user.id)).orderBy(asc(reviews.id)).for('update')
+    const gone = await tx.delete(reviews).where(eq(reviews.userId, user.id)).returning({
+      businessId: reviews.businessId,
+      rating: reviews.rating,
+      reportedAt: reviews.reportedAt,
+      recountedAt: reviews.recountedAt,
+      clearedAt: reviews.clearedAt,
+    })
+    // one Ýeral was checking had left the rating already
+    await shiftReviews(tx, gone.filter(isCounted), -1, 'review.deleted')
     const mine = await tx
       .select()
       .from(bookings)

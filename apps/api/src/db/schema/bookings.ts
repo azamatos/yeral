@@ -19,6 +19,7 @@ import {
   businessCancelReason,
   cancelledBy,
   complaintType,
+  reviewReportReason,
   declineReason,
   priceType,
 } from './enums'
@@ -262,10 +263,30 @@ export const reviews = pgTable(
     what: text().notNull().default(''),
     replyText: text(),
     replyAt: ts(),
+    /** Who on the team wrote the reply ("Glow Studio · Maýsa"). */
+    replyBy: uuid().references(() => staff.id, { onDelete: 'set null' }),
+    /** The reply was taken away ("Jogap pozuldy"): hidden everywhere; its undo brings it back as it was. */
+    replyDeletedAt: ts(),
+    /**
+     * "Arz et" (B-54): the business reported it to Ýeral. Until Ýeral decides, or 48 hours pass (`recountedAt`), it
+     * isn't counted in the rating; `clearedAt`: Ýeral kept it, and it counts and can't be reported again.
+     */
+    reportReason: reviewReportReason(),
+    reportText: text(),
+    reportedAt: ts(),
+    reportedBy: uuid().references(() => staff.id, { onDelete: 'set null' }),
+    recountedAt: ts(),
+    clearedAt: ts(),
     createdAt: createdAt(),
     updatedAt: ts().notNull().defaultNow(),
   },
-  (t) => [index('reviews_business_idx').on(t.businessId, t.createdAt)],
+  (t) => [
+    index('reviews_business_idx').on(t.businessId, t.createdAt),
+    // the 48-hour recount finds the reports still waiting
+    index('reviews_reported_idx')
+      .on(t.reportedAt)
+      .where(sql`${t.reportedAt} is not null and ${t.recountedAt} is null and ${t.clearedAt} is null`),
+  ],
 )
 
 /** One row per change; open screens poll them (`GET /v1/events`). */

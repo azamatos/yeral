@@ -23,6 +23,7 @@ import { healthRoutes } from './modules/health/routes'
 import { meRoutes } from './modules/me/routes'
 import { menuRoutes } from './modules/menu/routes'
 import { requestRoutes } from './modules/requests/routes'
+import { reviewRoutes } from './modules/reviews/routes'
 import { settingsRoutes } from './modules/settings/routes'
 import { teamRoutes } from './modules/team/routes'
 import { createLogger } from './ports/log'
@@ -92,6 +93,7 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     .route('/v1', requestRoutes)
     .route('/v1', calendarRoutes)
     .route('/v1', clientRoutes)
+    .route('/v1', reviewRoutes)
 
   app.get('/version.json', (c) => c.json({ app: 'api', ...build }))
   app.doc31('/openapi.json', {
