@@ -34,6 +34,7 @@
     "too_many_waiting": "{scope, select, business {Bu ýerde jogap garaşýan {limit} haýyşyňyz bar. Jogaba garaşyň ýa-da birini ýatyryň.} other {Jogap garaşýan {limit} haýyşyňyz bar. Jogaplara garaşyň ýa-da birini ýatyryň.}}",
     "cannot_move": "Ýazylyşy bu wagta geçirip bolmaýar.",
     "move_waiting": "Müşderi täze wagt sorady: ilki oňa jogap beriň.",
+    "block_over_bookings": "Bu wagtda ýazylyşlar bar: başga wagt ýapyň.",
     "review_exists": "Teswir eýýäm ýazyldy.",
     "review_not_allowed": "Teswiri diňe gelenden soň ýazyp bolýar.",
     "review_locked": "Teswiri üýtgetmek wagty geçdi.",

@@ -65,8 +65,8 @@ const NEAREST = 4
 /** The date strip's days, the business day that holds now first. */
 const STRIP_DAYS = 14
 
-/** The owner and administrators book anyone; a specialist only themself ("add, move, cancel bookings: own"). */
-function assertMayBook(actor: Actor, staffId: string): void {
+/** The owner and administrators book anyone (and block their time); a specialist only themself ("add, move, cancel bookings: own"). */
+export function assertMayBook(actor: Actor, staffId: string): void {
   if (!canOn(actor, 'bookings', [staffId])) throw new ApiError('forbidden')
 }
 

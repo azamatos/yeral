@@ -253,6 +253,17 @@ export function staffScheduleErrors(s: StaffSchedule): string[] {
   return bad
 }
 
+/** Blocked time repeats weekly for at most this long (book Q-204). */
+export const BLOCK_REPEAT_DAYS = 366
+
+/** The dates a block falls on: its own, and with a weekly repeat every week after it up to `until` (inclusive). */
+export function blockDates(date: string, until?: string | null): string[] {
+  const out = [date]
+  if (!until) return out
+  for (let d = addDays(date, 7); d <= until && diffDays(d, date) <= BLOCK_REPEAT_DAYS; d = addDays(d, 7)) out.push(d)
+  return out
+}
+
 /** The bookable stretches of a working day: open → close minus the breaks. */
 export function workingIntervals(day: WorkDay): Interval[] {
   const out: Interval[] = []

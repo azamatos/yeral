@@ -254,7 +254,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-118 | Calendar · day, one staff | One wide column; a Hünärmen always sees only her own column and own earnings. | MVP | drawn (B-Calendar · dayOne, role) | not built |  |
 | F-119 | Calendar · week views | All staff = load bars per day; one staff = textless 7-day grid. | MVP | drawn (B-Calendar · weekAll, weekOne) | not built |  |
 | F-120 | Calendar layers | Outside hours, breaks, blocked time, buffers (hatched), busy elsewhere. | MVP | drawn (B-Calendar, DS-Business) | built (domain hours, breaks, buffers) |  |
-| F-121 | Blocked time | A staff member's closed interval inside a day, e.g. "Ýapyk · Okuw". | MVP | drawn (B-Calendar) | not built | Code has whole days off only. |
+| F-121 | Blocked time | A staff member's closed interval inside a day, e.g. "Ýapyk · Okuw". | MVP | drawn (B-Calendar) | api built (20.10.2026: `…/calendar/blocks`, weekly repeat, never over a booking) | Whole days off are the schedule's (B-47). |
 | F-122 | Day summary | "16 ýazylyş · 3 haýyş · planned revenue 1 410 TMT" (revenue only with permission). | MVP | drawn (B-Calendar) | built (domain `daySummary`) |  |
 | F-123 | Request alerts | Sidebar count, "N haýyş" chip, dashed blocks with a timer, toast + sound on arrival. | MVP | drawn (B-Calendar, B-Shell) | not built | Browser notifications: F-170. |
 | F-124 | Request drawer | Timer, client facts (visits, no-shows, alert notes), services, time; Confirm / Decline; most urgent first with a pager. | MVP | drawn (B-Calendar · request, B-Bookings) | api built (`GET /v1/w/{slug}/requests`, confirm; 20.10.2026); alert notes with the client card |  |

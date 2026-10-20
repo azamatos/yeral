@@ -104,3 +104,49 @@ export const businessCancelSchema = z
   .strict()
   .refine((d) => d.reason !== 'other' || !!d.text, { path: ['text'], message: 'Say the reason in words' })
   .meta({ id: 'BusinessCancel' })
+
+// ── Blocked time (B-18, Q-204) ──
+
+/** Blocked time's from–to go in 5-minute steps, as breaks do. */
+const blockMinute = minuteSchema.refine((m) => m % 5 === 0, 'Every 5 minutes')
+
+/**
+ * "Wagty ýap": part of a day closed for one person, with a reason ("Okuw"), optionally every week on that weekday up to
+ * `repeatUntil` (a year at most). The same people who add bookings block time; a specialist only their own. It can't
+ * cover a booking (409 `block_over_bookings`).
+ */
+export const blockInputSchema = z
+  .object({
+    staffId: idSchema,
+    date: ymdSchema,
+    start: blockMinute,
+    end: blockMinute,
+    reason: z.string().trim().max(40).optional(),
+    repeatUntil: ymdSchema.optional(),
+  })
+  .strict()
+  .refine((b) => b.end > b.start, { path: ['end'], message: 'After the start' })
+  .meta({ id: 'BlockInput' })
+
+export const blockSchema = z
+  .object({
+    id: idSchema,
+    staffId: idSchema,
+    date: ymdSchema,
+    start: minuteSchema,
+    end: minuteSchema,
+    reason: z.string().nullable(),
+    /** The weekly repeat it belongs to; null for a one-off. */
+    seriesId: idSchema.nullable(),
+  })
+  .meta({ id: 'Block' })
+export type Block = z.infer<typeof blockSchema>
+
+export const blockListSchema = z.object({ items: z.array(blockSchema) })
+/** The blocks from–to (inclusive, at most 62 days) the reader may see in the calendar: a specialist their own. */
+export const blocksQuerySchema = z
+  .object({ from: ymdSchema, to: ymdSchema })
+  .refine((q) => q.to >= q.from, { path: ['to'], message: 'Not before from' })
+export const blockParamSchema = z.object({ slug: slugSchema, id: idSchema })
+/** `series`: this one and the later ones of its weekly repeat. */
+export const blockDeleteQuerySchema = z.object({ scope: z.enum(['one', 'series']).default('one') })

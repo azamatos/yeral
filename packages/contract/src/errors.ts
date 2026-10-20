@@ -37,6 +37,8 @@ export const ERROR_STATUS = {
   cannot_move: 409,
   /** The booking has the client's new time waiting for an answer: answer it first (B-21, B-26). */
   move_waiting: 409,
+  /** Blocked time over bookings (B-18, Q-204): `details.bookings` are the ones in the way. */
+  block_over_bookings: 409,
   // reviews
   review_exists: 409,
   review_not_allowed: 403,
@@ -108,6 +110,12 @@ export const rateLimitedDetailsSchema = retryDetailsSchema.extend({ retryAfterMi
 export const validationDetailsSchema = z.object({
   issues: z.array(z.object({ path: z.array(z.union([z.string(), z.number()])), code: z.string() })),
 })
+
+/** `block_over_bookings`: the bookings blocked time would cover, soonest first. */
+export const blockOverBookingsDetailsSchema = z.object({
+  bookings: z.array(z.object({ code: bookingCodeSchema, date: ymdSchema, start: startMinuteSchema, end: minuteSchema })),
+})
+export type BlockOverBookingsDetails = z.infer<typeof blockOverBookingsDetailsSchema>
 
 /** `bookings_affected`: "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1", and each booking. */
 export const bookingsAffectedDetailsSchema = z.object({

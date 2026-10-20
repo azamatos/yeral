@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  blockDates,
   staffDayChangedOn,
   staffScheduleErrors,
   withinStaffDay,
@@ -220,5 +221,15 @@ describe('a team member’s schedule (B-47)', () => {
     expect(
       staffScheduleErrors({ shift, breaks, daysOff: [{ name: 'Trip', from: '2026-10-20', to: '2026-10-18', yearly: false }] }),
     ).toEqual(['shift.1', 'breaks.2', 'daysOff.0.to'])
+  })
+})
+
+describe('blocked time that repeats (B-18)', () => {
+  it('falls on its date and every week after it up to the end', () => {
+    expect(blockDates('2026-10-15')).toEqual(['2026-10-15'])
+    expect(blockDates('2026-10-15', '2026-11-05')).toEqual(['2026-10-15', '2026-10-22', '2026-10-29', '2026-11-05'])
+    expect(blockDates('2026-10-15', '2026-10-21')).toEqual(['2026-10-15'])
+    // at most a year
+    expect(blockDates('2026-10-15', '2028-01-01')).toHaveLength(53)
   })
 })
