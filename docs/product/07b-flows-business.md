@@ -639,7 +639,7 @@ flowchart TD
 - Opening a day with special hours or closed (*Ýapyk · Täze ýyl*) shades the columns with the name.
 - Drawers open on the right (480 px) and keep the calendar usable; one at a time; Esc closes (§4, §11).
 
-**Status** — Design: drawn (B-Calendar · `view=dayAll`, `role`, `legend`) · Code: rule only (domain: day summary, staff working day, breaks, special days); no screen.
+**Status** — Design: drawn (B-Calendar · `view=dayAll`, `role`, `legend`) · Code: api built (20.10.2026): `GET /v1/w/{slug}/calendar?date&days&staff&cancelled` gives the columns with each day's working stretch, breaks and why someone's off, the bookings with their status, markers and a waiting move's ghost, blocked time, busy elsewhere, and each day's line with the money the reader may see; no screen.
 
 ### B-17 · One staff, week views and the phone layout
 
@@ -671,7 +671,7 @@ flowchart TD
 - A specialist with "see every staff member's calendar" switched on by the owner gets the all-staff views like an administrator.
 - ADR 0018 plans to send other people's bookings as "busy" without details to a person who can't see them; the v0.5 screens instead show a specialist only their own column.
 
-**Status** — Design: drawn (B-Calendar · `view=dayOne`, `weekAll`, `weekOne`, `role=specialist`; B-Mobile) · Code: not built.
+**Status** — Design: drawn (B-Calendar · `view=dayOne`, `weekAll`, `weekOne`, `role=specialist`; B-Mobile) · Code: api built (20.10.2026): the same endpoint with `days=7` and `staff`; a specialist always gets their own column and earnings; the load bars are drawn from the working stretches and the bookings it gives.
 
 ### B-18 · Block time in the calendar
 
