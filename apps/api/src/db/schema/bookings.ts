@@ -274,6 +274,31 @@ export const events = pgTable(
 )
 
 /** Work for `runDueJobs()`: SMS, reminders, review asks. Expiry and completion scan bookings directly. */
+/**
+ * Blocked time (book B-18, Q-204): part of a day closed for one person ("Ýapyk · Okuw"), so nobody books it; whole
+ * days off are their schedule's (B-47). A weekly repeat is a row per week, sharing `seriesId`.
+ */
+export const staffBlocks = pgTable(
+  'staff_blocks',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    businessId: uuid()
+      .notNull()
+      .references(() => businesses.id, { onDelete: 'cascade' }),
+    staffId: uuid()
+      .notNull()
+      .references(() => staff.id, { onDelete: 'cascade' }),
+    date: date({ mode: 'string' }).notNull(),
+    start: integer().notNull(),
+    end: integer().notNull(),
+    reason: text(),
+    seriesId: uuid(),
+    createdBy: uuid().references(() => users.id, { onDelete: 'set null' }),
+    createdAt: createdAt(),
+  },
+  (t) => [index('staff_blocks_business_date_idx').on(t.businessId, t.date), index('staff_blocks_series_idx').on(t.seriesId)],
+)
+
 export const jobs = pgTable(
   'jobs',
   {

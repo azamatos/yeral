@@ -6,13 +6,25 @@
  */
 import type { dayStateSchema } from '@yeral/contract/availability'
 import { staffDoingAll, type AppointmentContext, type BusyInterval, type TableContext } from '@yeral/domain/availability'
-import { businessClosedReason, withinHours, withinStaffDay, type BusinessHours } from '@yeral/domain/hours'
+import { businessClosedReason, DAY_MINUTES, withinHours, withinStaffDay, type BusinessHours } from '@yeral/domain/hours'
+import { overlaps } from '@yeral/domain/model'
 import type { BookingRules } from '@yeral/domain/rules'
-import { addDays } from '@yeral/domain/time'
+import { addDays, diffDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { all, type Queryable } from '../../db/client'
-import { bookingItems, bookingRules, bookings, businesses, diningTables, services, staff, staffServices, tableAreas } from '../../db/schema'
+import {
+  bookingItems,
+  bookingRules,
+  bookings,
+  businesses,
+  diningTables,
+  services,
+  staff,
+  staffBlocks,
+  staffServices,
+  tableAreas,
+} from '../../db/schema'
 import { ApiError } from '../../http/errors'
 import type { z } from 'zod'
 
@@ -85,7 +97,10 @@ export async function loadBusinesses(db: Queryable, ids: string[]): Promise<Map<
   return out
 }
 
-/** Busy time per specialist, buffers included, for active bookings between two dates and the day either side (past midnight). */
+/**
+ * Busy time per specialist, buffers included, for active bookings between two dates and the day either side (past
+ * midnight), and their blocked time (book B-18).
+ */
 export async function loadBusy(db: Queryable, businessIds: string[], from: string, to: string): Promise<BusyInterval[]> {
   if (!businessIds.length) return []
   const days = and(eq(bookingItems.active, true), gte(bookingItems.date, addDays(from, -1)), lte(bookingItems.date, addDays(to, 1)))
@@ -100,7 +115,7 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
   // waiting or confirmed, with their buffers, by the account each item was booked with, as the database counts them
   // (migration 0020); their own bookings as a client, breaks and days off don't count
   const here = alias(staff, 'here')
-  const [own, elsewhere] = await all(db, [
+  const [own, elsewhere, blocks] = await all(db, [
     () =>
       db
         .select({ ...item, staffId: bookingItems.staffId })
@@ -113,6 +128,17 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
         .from(bookingItems)
         .innerJoin(here, and(eq(here.userId, bookingItems.person), sql`${here.id} is distinct from ${bookingItems.staffId}`))
         .where(and(inArray(here.businessId, businessIds), days)),
+    () =>
+      db
+        .select()
+        .from(staffBlocks)
+        .where(
+          and(
+            inArray(staffBlocks.businessId, businessIds),
+            gte(staffBlocks.date, addDays(from, -1)),
+            lte(staffBlocks.date, addDays(to, 1)),
+          ),
+        ),
   ])
   return [
     ...own.flatMap((r) =>
@@ -128,6 +154,14 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
       end: r.end + r.bufferAfter,
       buffer: r.bufferAfter,
       elsewhere: true as const,
+    })),
+    ...blocks.map((b) => ({
+      bookingId: `block:${b.id}`,
+      staffId: b.staffId,
+      date: b.date,
+      start: b.start,
+      end: b.end,
+      blocked: true as const,
     })),
   ]
 }
@@ -197,17 +231,26 @@ export async function assertStaffFree(
 ): Promise<void> {
   const ids = [...new Set(items.flatMap((i) => (i.staffId ? [i.staffId] : [])))]
   if (!ids.length) return
-  const rows = await db
-    .select({
-      id: staff.id,
-      status: staff.status,
-      bookable: staff.bookable,
-      shift: staff.shift,
-      breaks: staff.breaks,
-      daysOff: staff.daysOff,
-    })
-    .from(staff)
-    .where(inArray(staff.id, ids))
+  const [rows, blocks] = await all(db, [
+    () =>
+      db
+        .select({
+          id: staff.id,
+          status: staff.status,
+          bookable: staff.bookable,
+          shift: staff.shift,
+          breaks: staff.breaks,
+          daysOff: staff.daysOff,
+        })
+        .from(staff)
+        .where(inArray(staff.id, ids)),
+    // their blocked time (B-18), the day before too: it may run past midnight
+    () =>
+      db
+        .select()
+        .from(staffBlocks)
+        .where(and(inArray(staffBlocks.staffId, ids), gte(staffBlocks.date, addDays(date, -1)), lte(staffBlocks.date, addDays(date, 1)))),
+  ])
   for (const it of items) {
     if (!it.staffId) continue
     const s = rows.find((r) => r.id === it.staffId)
@@ -215,8 +258,16 @@ export async function assertStaffFree(
     // `day: false`: on the team is enough (a confirmed booking brought back as it was)
     if (opts.day === false) continue
     if (!withinStaffDay(hours, s, date, { start: it.start, end: it.end })) throw new OutsideHours(it.staffId)
+    const span = { start: absoluteMinute(date, it.start), end: absoluteMinute(date, it.end) }
+    const blocked = blocks.some(
+      (b) => b.staffId === it.staffId && overlaps(span, { start: absoluteMinute(b.date, b.start), end: absoluteMinute(b.date, b.end) }),
+    )
+    if (blocked) throw new OutsideHours(it.staffId)
   }
 }
+
+/** Minutes from 2000-01-01, so a day running past midnight overlaps the next (as `bookings.span` counts them). */
+const absoluteMinute = (date: string, min: number) => diffDays(date, '2000-01-01') * DAY_MINUTES + min
 
 /** One business with what free times need; 404 when it's gone. */
 export async function loadBusiness(db: Queryable, id: string): Promise<LoadedBusiness> {
