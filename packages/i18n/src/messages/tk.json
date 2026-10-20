@@ -49,6 +49,7 @@
     "invite_answered": "Bu çakylyga eýýäm jogap berildi.",
     "owner_cannot_leave": "Eýesi biznesden çykyp bilmeýär.",
     "group_not_empty": "Ilki hyzmatlary başga topara geçiriň ýa-da pozuň.",
+    "bookings_affected": "Täze iş wagtyndan daşarda ýazylyşlar bar: galdyryň ýa-da ýatyryň.",
     "rate_limited": "Haýyş köp boldy. {retryAfterMin} minutdan soň täzeden synanyşyň.",
     "internal": "Näsazlyk ýüze çykdy. Gaýtadan synanyşyň.",
     "network": "Baglanyşyk ýok. Gaýtadan synanyşyň."
@@ -62,7 +63,9 @@
   "businessCancelReasons": {
     "client_called": "Müşderi jaň edip ýatyrdy",
     "staff_away": "Hünärmen işe çykyp bilmeýär",
-    "other": "Başga sebäp"
+    "other": "Başga sebäp",
+    "closed": "Şol gün ýapyk",
+    "hours": "Iş wagty üýtgedi"
   },
   "undo": {
     "failed": "Yzyna alyp bolmady — {reason}.",
@@ -88,6 +91,9 @@
     "moved": "{brand}: {business}: ýazylyşyňyz täze wagta geçirildi: {weekday}, {date}, {time}. Üýtgetmek: {link}",
     "staffChanged": "{brand}: {business}: {weekday}, {date}, {time} ýazylyşyňyz indi {staff} bilen. {link}",
     "cancelledAsAsked": "{brand}: {business}, {date} {time}: ýazylyşyňyz haýyşyňyz boýunça ýatyryldy. {link}",
+    "cancelledOffers": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. Boş wagtlar: {times} — {link}",
+    "cancelledOffersNoTimes": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. Başga wagt saýlaň: {link}",
+    "cancelledOffersCall": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. Ýazylmak üçin jaň ediň: {link}",
     "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",
     "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}."
   },

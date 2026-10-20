@@ -5,7 +5,7 @@
 import { PLAN_PROBLEMS } from '@yeral/domain/availability'
 import { MAX_ALTERNATIVES, WAITING_SCOPES } from '@yeral/domain/lifecycle'
 import { z } from 'zod'
-import { timeSlotSchema } from './common'
+import { bookingCodeSchema, idSchema, minuteSchema, startMinuteSchema, timeSlotSchema, ymdSchema } from './common'
 
 export const ERROR_STATUS = {
   validation_error: 400,
@@ -56,6 +56,8 @@ export const ERROR_STATUS = {
   owner_cannot_leave: 409,
   // business settings
   group_not_empty: 409,
+  /** New hours or a special day leave bookings outside: keep or cancel them (book Q-211), `details` lists them. */
+  bookings_affected: 409,
   rate_limited: 429,
   internal: 500,
 } as const satisfies Record<string, number>
@@ -106,3 +108,20 @@ export const rateLimitedDetailsSchema = retryDetailsSchema.extend({ retryAfterMi
 export const validationDetailsSchema = z.object({
   issues: z.array(z.object({ path: z.array(z.union([z.string(), z.number()])), code: z.string() })),
 })
+
+/** `bookings_affected`: "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1", and each booking. */
+export const bookingsAffectedDetailsSchema = z.object({
+  count: z.number().int().min(1),
+  byStaff: z.array(z.object({ staffId: idSchema, name: z.string(), count: z.number().int().min(1) })),
+  bookings: z.array(
+    z.object({
+      code: bookingCodeSchema,
+      date: ymdSchema,
+      start: startMinuteSchema,
+      end: minuteSchema,
+      client: z.string().nullable(),
+      staff: z.array(z.string()),
+    }),
+  ),
+})
+export type BookingsAffectedDetails = z.infer<typeof bookingsAffectedDetailsSchema>

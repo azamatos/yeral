@@ -5,17 +5,18 @@
  * 3. Queued work: SMS, reminders, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
-import { MAX_ALTERNATIVES, REMINDER_KINDS } from '@yeral/domain/lifecycle'
+import { REMINDER_KINDS } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
+import type { Locale } from '@yeral/domain/model'
 import { isMobile } from '@yeral/domain/phone'
-import { nearestSlots, nextFreeSlot, slotStaffId, staffDoingAll, type AppointmentSlot } from '@yeral/domain/availability'
 import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
-import { bookings, businesses, clients, jobs, users, type TimeSlot } from '../../db/schema'
+import { bookings, businesses, clients, jobs, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import {
   bookingSmsText,
   businessCancelText,
+  cancelledOffersSmsText,
   declinedSmsText,
   emit,
   expiredSmsText,
@@ -25,13 +26,14 @@ import {
   smsCityOf,
   type BookingSmsKind,
   type OutcomeSmsKind,
+  type SmsBooking,
 } from '../../notify'
-import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
+import { loadBusinesses } from '../availability/context'
+import { freeAlternatives } from '../bookings/offers'
 import { confirmBooking } from '../bookings/confirm'
 import { pruneIdentityChecks } from '../auth/identity'
 import { newBookingLink, pruneBookingLinks } from '../bookings/links'
 import { hideLinkTokens } from '../../ports/sms'
-import { bookedServices } from '../bookings/create'
 import { onlineRefusal } from '../clients/online'
 import { itemsOf, recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
@@ -48,41 +50,6 @@ const REMINDERS: ReadonlySet<string> = new Set(REMINDER_KINDS)
 const DROPPED_NOT_MOBILE = 'dropped: not a mobile number (ROUND6 C1)'
 const MAX_ATTEMPTS = 5
 
-/**
- * Up to three free times for the same services after an expired request: that day first, then the next free days.
- * Each names one specialist who does every service (book Q-159); at the same start the one asked for comes first.
- * Services nobody does alone keep being split between people, and those times name nobody.
- */
-async function alternativesFor(deps: Deps, b: BookingRow): Promise<TimeSlot[]> {
-  if (b.type !== 'appointment') return []
-  const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
-  if (!lb) return []
-  const booked = await bookedServices(deps.db, b.id)
-  if (!booked.serviceIds.length) return []
-  const now = deps.now()
-  const from = localOf(now).date
-  const ctx = appointmentContext(lb, await loadBusy(deps.db, [b.businessId], from, addDays(from, lb.rules.windowDays)), now)
-  const q = {
-    serviceIds: booked.serviceIds,
-    staffId: null,
-    by: 'client' as const,
-    oneSpecialist: staffDoingAll(ctx, booked.serviceIds).length > 0,
-    preferStaffId: booked.staffId,
-    // still pending while this runs: its own time mustn't count as busy
-    excludeBookingIds: [b.id],
-  }
-  const offer = (date: string, s: AppointmentSlot): TimeSlot => ({ date, start: s.start, end: s.end, staffId: slotStaffId(s) })
-  const out = nearestSlots(ctx, { ...q, date: b.date }, b.start, MAX_ALTERNATIVES).map((s) => offer(b.date, s))
-  // the days after the request's own (strict: never back to it, even when it was last night's)
-  for (let day = addDays(b.date, 1); out.length < MAX_ALTERNATIVES;) {
-    const next = nextFreeSlot(ctx, q, day, lb.rules.windowDays, { strict: true })
-    if (!next) break
-    out.push(offer(next.date, next.slot))
-    day = addDays(next.date, 1)
-  }
-  return out.slice(0, MAX_ALTERNATIVES)
-}
-
 async function expireRequests(deps: Deps): Promise<number> {
   const now = new Date(deps.now())
   const due = await deps.db
@@ -92,7 +59,7 @@ async function expireRequests(deps: Deps): Promise<number> {
     .limit(BATCH)
   for (const b of due) {
     // a move request that wasn't answered just lapses: the booking it would move stays as it was
-    const alternatives = b.rescheduleOf ? [] : await alternativesFor(deps, b)
+    const alternatives = b.rescheduleOf ? [] : await freeAlternatives(deps.db, b, deps.now())
     // answered meanwhile: setStatus refuses, nothing is sent
     await skipStale(
       deps.db.transaction(async (tx) => {
@@ -180,15 +147,51 @@ async function sendWithLink(deps: Deps, b: BookingRow, to: string, text: (link: 
   }
 }
 
-/** An expired request's times, a declined request's reason, or a move not accepted while the visit is still ahead; the client can't switch these off. */
+interface OutcomeSms {
+  /** The booking is still as the SMS says: nothing changed since it was queued. */
+  still: (b: BookingRow, now: number) => boolean
+  /** Its text; `byPhone`: a paused business or a phone-only client, whom the page offers the call card (Q-154). */
+  text: (lang: Locale, sms: SmsBooking & { link: string }, b: BookingRow, byPhone: boolean) => string
+}
+
+/**
+ * The SMS about an outcome the client didn't choose, which always go: an expired request's times, a declined request's
+ * reason, a business that closed over a booking with its times, a move not accepted while the visit is still ahead.
+ * Offered times can be taken whatever the client's online status (A7); with none, a client who can't book online calls.
+ */
+const OUTCOMES: Record<OutcomeSmsKind, OutcomeSms> = {
+  expired: {
+    still: (b) => b.status === 'cancelled' && b.cancelledBy === 'system',
+    text: (lang, sms, b, byPhone) => expiredSmsText(lang, sms, byPhone ? [] : b.expiredAlternatives, { byPhone }),
+  },
+  declined: {
+    still: (b) => b.status === 'cancelled' && b.cancelledBy === 'business' && !!b.declineReason,
+    text: (lang, sms, b, byPhone) =>
+      declinedSmsText(lang, sms, b.declineReason!, b.declineText, { byPhone: byPhone && !b.declineAlternatives.length }),
+  },
+  cancelledOffers: {
+    still: (b) => b.status === 'cancelled' && (b.businessCancelReason === 'closed' || b.businessCancelReason === 'hours'),
+    text: (lang, sms, b, byPhone) =>
+      cancelledOffersSmsText(lang, sms, businessCancelText(lang, b.businessCancelReason!, b.cancelReason), b.declineAlternatives, {
+        byPhone: byPhone && !b.declineAlternatives.length,
+      }),
+  },
+  moveRefused: {
+    still: (b, now) => b.status === 'confirmed' && !!b.moveRefused && now < epochOf(b.date, b.start),
+    text: (lang, sms, b) =>
+      moveRefusedSmsText(
+        lang,
+        sms,
+        b.moveRefused?.by === 'business' && b.moveRefused.reason ? { reason: b.moveRefused.reason, text: b.moveRefused.text } : undefined,
+      ),
+  },
+}
+
+const isOutcome = (kind: string): kind is OutcomeSmsKind => kind in OUTCOMES
+
 async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): Promise<void> {
-  const still =
-    kind === 'expired'
-      ? b.status === 'cancelled' && b.cancelledBy === 'system'
-      : kind === 'declined'
-        ? b.status === 'cancelled' && b.cancelledBy === 'business' && !!b.declineReason
-        : b.status === 'confirmed' && !!b.moveRefused && deps.now() < epochOf(b.date, b.start)
-  if (!still) return
+  const outcome = OUTCOMES[kind]
+  if (!outcome.still(b, deps.now())) return
   const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
   if (!lb) return
   const biz = lb.business
@@ -196,22 +199,8 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
   const lang = user?.lang ?? MARKET.defaultLanguage
   const sms = { date: b.date, start: b.start, businessName: biz.name, address: biz.address }
   const to = user?.phone ?? b.clientPhone ?? ''
-  // a paused business or a phone-only client: the page offers the call card, so the text asks them to call (Q-154)
   const byPhone = !!(await onlineRefusal(deps.db, lb, to))
-  await sendWithLink(deps, b, to, (link) =>
-    kind === 'expired'
-      ? expiredSmsText(lang, { ...sms, link }, byPhone ? [] : b.expiredAlternatives, { byPhone })
-      : kind === 'declined'
-        ? // offered times can be taken whatever the client's online status (A7); with none, they call
-          declinedSmsText(lang, { ...sms, link }, b.declineReason!, b.declineText, { byPhone: byPhone && !b.declineAlternatives.length })
-        : moveRefusedSmsText(
-            lang,
-            { ...sms, link },
-            b.moveRefused?.by === 'business' && b.moveRefused.reason
-              ? { reason: b.moveRefused.reason, text: b.moveRefused.text }
-              : undefined,
-          ),
-  )
+  await sendWithLink(deps, b, to, (link) => outcome.text(lang, { ...sms, link }, b, byPhone))
 }
 
 /**
@@ -230,7 +219,7 @@ async function sendBookingSms(
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   // an account's phone took a sign-in code, so it's a mobile; a number the team typed in may not be
   if (!b.userId && !isMobile(b.clientPhone)) return DROPPED_NOT_MOBILE
-  if (kind === 'expired' || kind === 'moveRefused' || kind === 'declined') {
+  if (isOutcome(kind)) {
     await sendOutcomeSms(deps, b, kind)
     return
   }

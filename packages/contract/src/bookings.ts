@@ -152,6 +152,11 @@ export const bookingDetailSchema = bookingSummarySchema
         alternatives: z.array(offeredTimeSchema).max(MAX_ALTERNATIVES),
       })
       .nullable(),
+    /**
+     * Times the business offered when it closed that day or changed its hours over the booking (B-39, B-40): taken in
+     * one tap, the new booking confirmed at once, as after a decline.
+     */
+    cancelOffers: z.array(offeredTimeSchema).max(MAX_ALTERNATIVES),
     /** Times offered by the system after an expired request (a new request when picked). */
     expiredAlternatives: z.array(offeredTimeSchema).max(MAX_ALTERNATIVES),
     /**
@@ -224,6 +229,7 @@ export const bookingLinkSchema = bookingDetailSchema
     holdUntil: true,
     cancelReason: true,
     decline: true,
+    cancelOffers: true,
     expiredAlternatives: true,
     offerTakenBy: true,
     moveRefused: true,

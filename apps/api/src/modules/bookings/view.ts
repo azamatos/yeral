@@ -168,6 +168,9 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
         : null
       : row.cancelReason,
     decline: row.declineReason ? { reason: row.declineReason, text: row.declineText, alternatives: await chips('decline') } : null,
+    // a business's cancel with offered times (a closed day, new hours): taken as after a decline, whatever the client's
+    // online status (A7)
+    cancelOffers: row.declineReason ? [] : await chips('decline'),
     expiredAlternatives: bookOnline ? await chips('expired') : [],
     bookOnline,
     offerTakenBy: taker?.code ?? null,

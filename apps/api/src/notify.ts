@@ -133,19 +133,52 @@ export function expiredSmsText(
   const common = { brand: brandOf(t), business: b.businessName, link: b.link }
   if (opts.byPhone) return t('sms.expiredCall', common)
   if (!times.length) return t('sms.expiredNoTimes', common)
+  return t('sms.expired', { ...common, times: timesText(fmt, b, times) })
+}
+
+/** Offered times as an SMS lists them: the booking's own day by time, another day with a short date (`16 okt. 10:00`). */
+function timesText(fmt: ReturnType<typeof createFmt>, b: Pick<SmsBooking, 'date' | 'start'>, times: { date: string; start: number }[]) {
   const asked = dayOf(b.date, b.start)
-  const list = times
+  return times
     .map((x) => {
       const at = wallOf(x.date, x.start)
       return at.date === asked ? fmt.time(at.min) : `${fmt.shortDate(at.date)} ${fmt.time(at.min)}`
     })
     .join(', ')
-  return t('sms.expired', { ...common, times: list })
 }
 
-/** A business's cancel reason as the client reads it (B-27): its label, or "Other reason" in the business's words. */
+/**
+ * A business's cancel reason as the client reads it: its label, or the business's words ("Other reason", B-27), or the
+ * special day's name it closed for (B-40).
+ */
 export function businessCancelText(lang: Locale, reason: BusinessCancelReason, text: string | null): string {
-  return reason === 'other' && text ? text : createT(lang)(`businessCancelReasons.${reason}`)
+  return (reason === 'other' || reason === 'closed') && text ? text : createT(lang)(`businessCancelReasons.${reason}`)
+}
+
+/**
+ * The business closed over the booking (a special day, new hours; B-39, B-40): the reason and up to 3 free times, as an
+ * expiry lists them; none free, pick another time; a client who can't book it online now, call (Q-154).
+ */
+export function cancelledOffersSmsText(
+  lang: Locale,
+  b: SmsBooking & { link: string },
+  reason: string,
+  times: { date: string; start: number }[],
+  opts: { byPhone?: boolean } = {},
+): string {
+  const fmt = createFmt(lang)
+  const t = createT(lang)
+  const common = {
+    brand: brandOf(t),
+    business: b.businessName,
+    date: fmt.dayMonth(dayOf(b.date, b.start)),
+    time: fmt.time(wallOf(b.date, b.start).min),
+    reason,
+    link: b.link,
+  }
+  if (opts.byPhone) return t('sms.cancelledOffersCall', common)
+  if (!times.length) return t('sms.cancelledOffersNoTimes', common)
+  return t('sms.cancelledOffers', { ...common, times: timesText(fmt, b, times) })
 }
 
 /** The reason the business gave, as the client reads it: its label, or "other" in the business's words. */
@@ -196,8 +229,11 @@ export function moveRefusedSmsText(
   })
 }
 
-/** The SMS about an outcome the client didn't choose; they always go (book Q-286, Q-289). */
-export type OutcomeSmsKind = 'expired' | 'moveRefused' | 'declined'
+/**
+ * The SMS about an outcome the client didn't choose; they always go (book Q-286, Q-289). `cancelledOffers`: the
+ * business closed over the booking and offers 3 times (B-39, B-40), which carry the times as a decline does.
+ */
+export type OutcomeSmsKind = 'expired' | 'moveRefused' | 'declined' | 'cancelledOffers'
 /** The business's cancel (B-27): queued like an outcome, but the client's confirmations switch decides (Q-286). */
 export type CancelSmsKind = 'cancelled' | 'cancelledAsAsked'
 

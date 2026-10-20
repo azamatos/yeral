@@ -27,7 +27,7 @@ import {
   type PlannedItem,
 } from '@yeral/domain/availability'
 import { currentBusinessDate } from '@yeral/domain/hours'
-import { canBusinessCancel, canBusinessMove, cancelledByFor, canUndoNewBooking, NEW_BOOKING_UNDO_MS } from '@yeral/domain/lifecycle'
+import { canBusinessCancel, canBusinessMove, canUndoNewBooking, NEW_BOOKING_UNDO_MS } from '@yeral/domain/lifecycle'
 import { canOn, scopeOf, type Actor } from '@yeral/domain/permissions'
 import { addDays, epochOf } from '@yeral/domain/time'
 import { and, eq, inArray, sql } from 'drizzle-orm'
@@ -36,10 +36,11 @@ import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, clients, staff, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
-import { emit, queueOutcomeSms } from '../../notify'
+import { emit } from '../../notify'
 import { unusedSince } from '../auth/sign-in'
 import { appointmentContext, dayStrip, loadBusiness, loadBusy, type LoadedBusiness } from '../availability/context'
 import { dropPendingMove } from '../bookings/actions'
+import { cancelForBusiness, unheardUntil } from '../bookings/business-cancel'
 import { queueBookingSms } from '../bookings/confirm'
 import { appointmentPrice, inTransaction, itemRows } from '../bookings/create'
 import { extendBookingLinks } from '../bookings/links'
@@ -50,7 +51,6 @@ import {
   isSlotConflict,
   itemsOf,
   lockBooking,
-  setStatus,
   stateOf,
   type BookingRow,
   type ItemRow,
@@ -342,12 +342,6 @@ async function assertNoWaitingMove(db: Queryable, b: BookingRow, now: number): P
   if (waiting) throw new ApiError('move_waiting')
 }
 
-/** A booking the team just added that the client hasn't heard of yet: "Yzyna al" still runs, its SMS waits (B-24). */
-const unheardUntil = (b: BookingRow, now: number): number | null => {
-  const until = b.createdAt.getTime() + NEW_BOOKING_UNDO_MS
-  return (b.source === 'phone' || b.source === 'walkin') && now < until ? until : null
-}
-
 const asPlanned = (items: readonly ItemRow[]): PlannedItem[] =>
   items.map((i) => ({ serviceId: i.serviceId ?? '', staffId: i.staffId ?? '', start: i.start, end: i.end, bufferAfter: i.bufferAfter }))
 
@@ -445,23 +439,6 @@ export async function cancelByBusiness(deps: Deps, business: Business, actor: Ac
     const at = new Date(deps.now())
     const row = await lockBooking(tx, b.id)
     guard(canBusinessCancel(stateOf(row), at.getTime()))
-    const cancelledBy = cancelledByFor(input.reason)
-    await dropPendingMove(tx, row, at, 'business')
-    const cancelled = await setStatus(tx, row, {
-      status: 'cancelled',
-      cancelledBy,
-      cancelReason: input.reason === 'other' ? (input.text ?? null) : null,
-      businessCancelReason: input.reason,
-      at,
-    })
-    await emit(tx, {
-      type: 'booking.cancelled',
-      businessId: cancelled.businessId,
-      bookingId: cancelled.id,
-      bookingCode: cancelled.code,
-      userId: cancelled.userId,
-    })
-    if (cancelled.clientPhone && unheardUntil(row, at.getTime()) === null)
-      await queueOutcomeSms(tx, cancelledBy === 'client' ? 'cancelledAsAsked' : 'cancelled', cancelled, cancelled.id, at)
+    await cancelForBusiness(tx, row, at, { reason: input.reason, text: input.reason === 'other' ? (input.text ?? null) : null })
   })
 }
