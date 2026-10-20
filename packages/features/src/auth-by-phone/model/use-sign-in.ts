@@ -15,15 +15,19 @@ export type Verified = Awaited<ReturnType<NonNullable<ReturnType<Sdk['auth']['ve
 const SEND_REFUSALS = ['rate_limited', 'resend_too_soon', 'too_many_attempts', 'validation_error'] as const
 const CODE_REFUSALS = ['code_invalid', 'too_many_attempts', 'code_expired'] as const
 
+/** The screen's language for a request's `lang` (an SMS's words, a new account's language), when the market offers it: the api takes no other. */
+export function useRequestLanguage() {
+  const raw = useLocale()
+  return isLocale(raw) && MARKET_LOCALES.includes(raw) ? raw : undefined
+}
+
 /**
  * The phone and code steps against the api (`auth.sendCode`, `auth.verify`), with the clock the waits count on.
  * `onFailed` gets a failure the step can't show (the screen toasts it); `onVerified` the right code's answer.
  */
 export function useSignIn({ onVerified, onFailed }: { onVerified: (answer: Verified) => void; onFailed: (error: unknown) => void }) {
   const sdk = useSdk()
-  // the screen's language for the SMS text and a new account's, when the market offers it (the api takes no other)
-  const raw = useLocale()
-  const locale = isLocale(raw) && MARKET_LOCALES.includes(raw) ? raw : undefined
+  const locale = useRequestLanguage()
   const [state, dispatch] = useReducer(signInReducer, initialSignIn)
   const [now, setNow] = useState(() => Date.now())
   const send = useMutation(sdk.auth.sendCode())

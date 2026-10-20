@@ -1,14 +1,14 @@
 import { useMutation } from '@tanstack/react-query'
-import { isLocale, MARKET_LOCALES } from '@yeral/i18n'
+import { useRequestLanguage } from '@yeral/features/auth-by-phone'
 import { isApiError, type ApiError } from '@yeral/sdk'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { cn } from '@yeral/ui/cn'
 import { ModalDescription } from '@yeral/ui/modal'
+import { textLink } from '@yeral/ui/text-link'
 import { useEffect, useRef, useState } from 'react'
-import { useLocale, useTranslations } from 'use-intl'
-import { textLink } from '@/shared/ui'
+import { useTranslations } from 'use-intl'
 import { LoginHeader } from './login-header'
 
 /**
@@ -20,12 +20,15 @@ import { LoginHeader } from './login-header'
 export function IdentityStep({
   name,
   ticket,
+  onAnswered,
   onBack,
   onExpired,
   onFailed,
 }: {
   name: string | null
   ticket: string
+  /** Signed in: to this account (yes) or a fresh one (no). */
+  onAnswered: () => void
   /** Another number: back to the phone step. */
   onBack: () => void
   /** The question ran out or was answered elsewhere: the code step again. */
@@ -34,7 +37,7 @@ export function IdentityStep({
 }) {
   const t = useTranslations()
   const sdk = useSdk()
-  const raw = useLocale()
+  const lang = useRequestLanguage()
   const answer = useMutation(sdk.auth.answerIdentity())
   const [ownsWorkspace, setOwnsWorkspace] = useState(false)
   const yesRef = useRef<HTMLButtonElement>(null)
@@ -48,8 +51,9 @@ export function IdentityStep({
   const reply = (yes: boolean) =>
     !pending &&
     answer.mutate(
-      { ticket, yes, lang: isLocale(raw) && MARKET_LOCALES.includes(raw) ? raw : undefined },
+      { ticket, yes, lang },
       {
+        onSuccess: onAnswered,
         onError: (error) => {
           if (isApiError(error, 'code_expired')) onExpired(error)
           else if (isApiError(error, 'owns_workspace')) setOwnsWorkspace(true)

@@ -33,7 +33,8 @@ const body = within(document.body)
 /** «Log in» opens the modal with the focus in the number. */
 async function open(canvas: Canvas) {
   await userEvent.click(await canvas.findByRole('link', { name: 'Log in' }))
-  const dialog = await body.findByRole('dialog', { name: 'Log in to Ýeral' })
+  // the modal's code loads on the first opening
+  const dialog = await body.findByRole('dialog', { name: 'Log in to Ýeral' }, { timeout: 5000 })
   await waitFor(() => expect(dialog).toBeVisible())
   return within(dialog)
 }

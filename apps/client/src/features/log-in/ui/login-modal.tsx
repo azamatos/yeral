@@ -69,6 +69,11 @@ function LoginSteps({ onSignedIn }: { onSignedIn: () => void }) {
     return (
       <IdentityStep
         {...identity}
+        // signed in: the steps and their clocks are done
+        onAnswered={() => {
+          setIdentity(null)
+          signIn.reset()
+        }}
         onBack={() => {
           setIdentity(null)
           signIn.changeNumber()

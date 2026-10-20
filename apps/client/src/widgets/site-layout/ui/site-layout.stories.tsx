@@ -29,7 +29,7 @@ const body = within(document.body)
 /** Nobody signed in: the logo home, «For business», «Log in»; the footer's business links and the copyright. */
 export const SignedOut: Story = {
   play: async ({ canvas }) => {
-    await expect(await canvas.findByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/en/login')
+    await expect(await canvas.findByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/en/login?redirect=%2Fen')
     await expect(canvas.getByRole('link', { name: 'Ýeral home' })).toHaveAttribute('href', '/en')
     await expect(canvas.getByRole('link', { name: 'For business' })).toBeVisible()
     const footer = canvas.getByRole('navigation', { name: 'For business' })

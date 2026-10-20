@@ -4,9 +4,9 @@ import { mobileStarts, PHONE_RULES, type useSignIn } from '@yeral/features/auth-
 import { cn } from '@yeral/ui/cn'
 import { ModalDescription } from '@yeral/ui/modal'
 import { SignInCodeStep, type SignInCodeStepCopy } from '@yeral/ui/sign-in-code-step'
+import { textLink } from '@yeral/ui/text-link'
 import { useEffect, useRef } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
-import { textLink } from '@/shared/ui'
 import { LoginHeader } from './login-header'
 
 const STARTS = mobileStarts()

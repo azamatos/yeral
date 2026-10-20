@@ -25,4 +25,11 @@ describe('returnTo', () => {
     ])
       expect(returnTo('en', away)).toBe('/en')
   })
+
+  it('knows the login however its address is spelled', () => {
+    for (const login of ['/en/./login', '/en/%2e/login', '/en/x/../login?redirect=/en/x/../login', '/en/login/'])
+      expect(returnTo('en', login)).toBe('/en')
+    // a page that only starts with the same letters is a page
+    expect(returnTo('en', '/en/login-help')).toBe('/en/login-help')
+  })
 })

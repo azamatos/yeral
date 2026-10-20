@@ -8,7 +8,8 @@ import { pageHead } from '@/shared/lib'
 // name goes straight on.
 export const Route = createFileRoute('/$lang/_site/login')({
   ssr: false,
-  validateSearch: z.object({ redirect: z.string().optional() }),
+  // a `redirect` that isn't text (`?redirect=123`) is ignored, not an error
+  validateSearch: z.object({ redirect: z.string().optional().catch(undefined) }),
   beforeLoad: async ({ context, params, search }) => {
     const me = await context.queryClient.ensureQueryData(context.sdk.me.get()).catch(() => null)
     if (me?.firstName) redirect({ href: returnTo(params.lang, search.redirect), replace: true, throw: true })

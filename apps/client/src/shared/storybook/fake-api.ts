@@ -139,7 +139,11 @@ export const authApi =
         return json(null, 204)
       }
       if (route === 'GET /me') return me ? json(me) : refuse(401, 'unauthorized')
-      if (!me) return refuse(401, 'unauthorized')
+      // the person's own routes need someone signed in; anything else this fake doesn't know is a 404, as on the api
+      if (!me)
+        return route === 'PATCH /me' || route.startsWith('DELETE /me') || route.startsWith('POST /me/')
+          ? refuse(401, 'unauthorized')
+          : undefined
       if (route === 'PATCH /me') {
         const firstName = typeof body.firstName === 'string' ? body.firstName : me.firstName
         const surname = body.surname === undefined ? me.surname : ((body.surname as string | null) ?? null)

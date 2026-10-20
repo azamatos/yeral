@@ -28,3 +28,10 @@
   closed, a foreign redirect refused); unit `returnTo()`. End to end against the local api
   (`SIGN_IN_CODE_ON_SCREEN=true`): a new number → name → avatar focused; a landline refused; a demo client from
   `/en/login?redirect=…` straight back there.
+- Review of PR 2 (#114), fixed: "Is this you?" answered clears the step and the code step's clocks; `returnTo()` checks
+  the login after resolving the address (`/en/./login`, `%2e`); a `redirect` that isn't text is ignored, not an
+  error; a modified click on «Log in» (new tab) isn't taken over, and its address carries `?redirect=` back to the page;
+  no preload for it; the modal's code loads on the first opening (`lazy`); after a sign-in the page's routes reload;
+  signed in while the focus was lost with «Log in», the avatar gets it; the story fake answers 404, not 401, to
+  routes it doesn't know; `textLink` moved to `@yeral/ui/text-link` (the business app passes it on);
+  `useRequestLanguage()` joined `@yeral/features/auth-by-phone` (the identity step's `lang`).
