@@ -17,9 +17,16 @@ export const staffOf = (items: readonly ItemRow[]) => items.flatMap((i) => (i.st
 
 /**
  * A booking of this business with its items, which the actor may change: one they can't see is 404, one they see but
- * may not change (a specialist's shared booking) 403. `lock` holds the row for the rest of the transaction.
+ * may not change (a specialist's shared booking) 403. `lock` holds the row for the rest of the transaction;
+ * `permission` is the row of the table the change needs (`bookings` to add, move and cancel; `noshow` to complain).
  */
-export async function teamBooking(db: Queryable, business: Business, actor: Actor, code: string, opts: { lock?: boolean } = {}) {
+export async function teamBooking(
+  db: Queryable,
+  business: Business,
+  actor: Actor,
+  code: string,
+  opts: { lock?: boolean; permission?: 'bookings' | 'noshow' } = {},
+) {
   const q = db
     .select()
     .from(bookings)
@@ -29,7 +36,7 @@ export async function teamBooking(db: Queryable, business: Business, actor: Acto
   const items = await itemsOf(db, b.id)
   const staffIds = staffOf(items)
   if (!canOn(actor, 'calendar', staffIds)) throw new ApiError('not_found')
-  if (!canOn(actor, 'bookings', staffIds)) throw new ApiError('forbidden')
+  if (!canOn(actor, opts.permission ?? 'bookings', staffIds)) throw new ApiError('forbidden')
   return { b, items, staffIds }
 }
 

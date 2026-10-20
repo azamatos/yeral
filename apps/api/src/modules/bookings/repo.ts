@@ -95,6 +95,8 @@ export interface StatusChange {
   decline?: { reason: DeclineReason; text: string | null }
   /** The times offered with a decline or the business's cancel (B-20, B-39, B-40), taken in one tap. */
   offers?: TimeSlot[]
+  /** Other columns written in the same update (a complaint, B-28); they win over the ones the status sets. */
+  fields?: Partial<typeof bookings.$inferInsert>
   at: Date
 }
 
@@ -128,6 +130,7 @@ export async function setStatus(db: Queryable, b: BookingRow, change: StatusChan
       ...(change.decline ? { declineReason: change.decline.reason, declineText: change.decline.text } : {}),
       ...(change.offers ? { declineAlternatives: change.offers } : {}),
       updatedAt: change.at,
+      ...change.fields,
     })
     .where(and(eq(bookings.id, b.id), eq(bookings.status, b.status)))
     .returning()

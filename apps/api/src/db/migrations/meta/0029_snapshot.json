@@ -1,5 +1,5 @@
 {
-  "id": "88b5565c-3f74-4977-9a65-a177f00463f3",
+  "id": "236e25f6-90ef-44d1-a571-e12d7133dd05",
   "prevId": "c393a5f5-d2f6-41b2-a133-f2e884dba4f2",
   "version": "7",
   "dialect": "postgresql",
@@ -868,6 +868,12 @@
         "complaint_by": {
           "name": "complaint_by",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "complaint_before": {
+          "name": "complaint_before",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },

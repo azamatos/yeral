@@ -92,7 +92,10 @@ describe('"Arz et" (book B-28)', () => {
     t.clock.now = epochOf('2026-10-30', 700)
     expect((await complain(maysa, code, { type: 'noshow' })).status).toBe(204)
     expect((await maysa.req(`${W}/bookings/${code}/complaint`, { method: 'DELETE' })).status).toBe(204)
-    expect((await rowOf(code)).status).toBe('completed')
+    // completed as the jobs would have made it, at the visit's end
+    const back = await rowOf(code)
+    expect(back.status).toBe('completed')
+    expect(back.completedAt?.getTime()).toBe(epochOf('2026-10-30', back.end))
     // a complaint 7 days old stays
     expect((await complain(maysa, code, { type: 'late' })).status).toBe(204)
     t.clock.now += 7 * 86_400_000
@@ -128,5 +131,37 @@ describe('"Arz et" (book B-28)', () => {
     expect((await tryOnline()).json.error.code).toBe('online_blocked')
     expect((await maral.req(`${W}/bookings/${second}/complaint`, { method: 'DELETE' })).status).toBe(204)
     expect((await tryOnline()).status).toBe(201)
+  })
+
+  it('a no-show taken back brings back the complaint it replaced, locked or not; a specialist takes back only hers', async () => {
+    const maysa = await as(MAYSA)
+    const maral = await as(MARAL)
+    const code = await book(maysa, '+99365800905', '2026-11-03', 600)
+    // rude, filed ten days before the visit
+    expect((await complain(maral, code, { type: 'rude' })).status).toBe(204)
+    const filedAt = (await rowOf(code)).complaintAt!.getTime()
+    t.clock.now = epochOf('2026-11-03', 615)
+    expect((await complain(maysa, code, { type: 'noshow' })).status).toBe(204)
+    // the owner filed the no-show: Maral may not take it back
+    expect((await maral.req(`${W}/bookings/${code}/complaint`, { method: 'DELETE' })).status).toBe(403)
+    expect((await maysa.req(`${W}/bookings/${code}/complaint`, { method: 'DELETE' })).status).toBe(204)
+    expect(await rowOf(code)).toMatchObject({ status: 'confirmed', complaintType: 'rude', complaintBefore: null })
+    expect((await rowOf(code)).complaintAt!.getTime()).toBe(filedAt)
+    // the rude one is past its 7 days: it stays
+    expect((await maral.req(`${W}/bookings/${code}/complaint`, { method: 'DELETE' })).json.error.code).toBe('complaint_locked')
+  })
+
+  it('a running visit takes its time back only while it’s free', async () => {
+    const maysa = await as(MAYSA)
+    const code = await book(maysa, '+99365800906', '2026-11-04', 600)
+    t.clock.now = epochOf('2026-11-04', 610)
+    expect((await complain(maysa, code, { type: 'noshow' })).status).toBe(204)
+    // the freed time is blocked meanwhile
+    const blocked = await maysa.req(`${W}/calendar/blocks`, { body: { staffId: maralId, date: '2026-11-04', start: 620, end: 630 } })
+    expect(blocked.status).toBe(201)
+    const res = await maysa.req(`${W}/bookings/${code}/complaint`, { method: 'DELETE' })
+    expect(res.status).toBe(409)
+    expect(res.json.error.code).toBe('slot_taken')
+    expect((await rowOf(code)).status).toBe('noshow')
   })
 })

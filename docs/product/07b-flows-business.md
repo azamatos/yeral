@@ -1058,9 +1058,10 @@ flowchart TD
 
 **Edge cases**
 
-- *Gelmedi* and *Gijä galdy* can be chosen only from the start time; *Gödek gylyk* and *Başga* any time on a confirmed or completed booking; *Gelmedi* takes the place of an earlier complaint of another type (Q-206, decided 18.10.2026, revised 20.10.2026). Classes allow "Gelmedi" only after the session starts (§22).
+- *Gelmedi* and *Gijä galdy* can be chosen only from the start time; *Gödek gylyk* and *Başga* (its text 1–300 characters) any time on a confirmed or completed booking; *Gelmedi* takes the place of an earlier complaint of another type (Q-206, decided 18.10.2026, revised 20.10.2026). Classes allow "Gelmedi" only after the session starts (§22), in the class drawer (B-67); this flow is for appointments.
 - A no-show can be marked until 24 hours after the end; a review the client wrote before stays (Q-254, decided 18.10.2026).
-- A mistaken complaint: the team can remove it from the booking drawer within 7 days. A no-show goes back to *Tamamlandy*, the no-show count drops, and the client gets no message (Q-207, decided 18.10.2026). The class drawer removes a class mark (B-67).
+- A mistaken complaint: the team can remove it from the booking drawer within 7 days of filing it: the owner and administrators any, a specialist the ones they filed. A no-show goes back to *Tamamlandy* (to confirmed while the visit still runs, if its time is still free), the complaint it took the place of comes back as it was, the no-show count drops, and the client gets no message (Q-207, decided 18.10.2026; chapter 9, 20.10.2026). The class drawer removes a class mark (B-67).
+- The booking keeps who filed the complaint and when, for the client card's reports (B-34).
 - Code: one complaint per booking.
 
 The rule is in `canComplain` and taking one back in `canRemoveComplaint` (`@yeral/domain/lifecycle`).
