@@ -9,7 +9,7 @@ import { loginCodes } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { randomDigits, sha256Hex } from '../../lib/crypto'
-import { hit } from '../../lib/rate-limit'
+import { hit, rateLimited } from '../../lib/rate-limit'
 import { codeSmsText } from '../../notify'
 
 export const CODE_TTL_SEC = 300
@@ -47,13 +47,13 @@ export async function sendCode(
   if (existing && now - existing.sentAt.getTime() < RESEND_SEC * 1000) {
     throw new ApiError('resend_too_soon', { retryAfterSec: secondsLeft(new Date(existing.sentAt.getTime() + RESEND_SEC * 1000), now) })
   }
+  // the address first: a request it refuses doesn't use up one of the phone's codes
   for (const [key, limit] of [
-    [`code:phone:${req.phone}`, CODES_PER_PHONE],
     [`code:ip:${req.ip}`, CODES_PER_ADDRESS],
+    [`code:phone:${req.phone}`, CODES_PER_PHONE],
   ] as const) {
     const r = await hit(db, key, limit, 3600, now)
-    // the message gives the wait in minutes (book Q-267)
-    if (!r.ok) throw new ApiError('rate_limited', { retryAfterSec: r.retryAfterSec, retryAfterMin: Math.ceil(r.retryAfterSec / 60) })
+    if (!r.ok) throw rateLimited(r.retryAfterSec)
   }
 
   const code = deps.site.demo ? DEMO_CODE : randomDigits(4)

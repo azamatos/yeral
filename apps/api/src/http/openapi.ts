@@ -15,7 +15,7 @@ export const errors = {
   403: err('Not allowed'),
   404: err('Not found'),
   409: err('Conflict (`slot_taken` with alternatives, `invalid_status` …)'),
-  429: err('Too many requests (`retryAfterSec`)'),
+  429: err('Too many requests (`retryAfterSec`; `rate_limited` also `retryAfterMin`)'),
 } as const
 
 export const noContent = { 204: { description: 'Done' } } as const

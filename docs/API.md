@@ -14,7 +14,8 @@ Apps call it only through `@yeral/sdk`. The frozen `apps/legacy` keeps its own i
 - Lists: `{ items, total?, cursor? }`; pass `cursor` back for the next page (`null` = last page).
 - Errors: `{ error: { code, message?, details? } }` with the HTTP status from `ERROR_STATUS` (`@yeral/contract/errors`);
   apps show `errors.<code>` from `@yeral/i18n`. `409 slot_taken` carries `details.alternatives` (3 nearest times),
-  `400 code_invalid` carries `details.attemptsLeft`, `429` codes carry `details.retryAfterSec`.
+  `400 code_invalid` carries `details.attemptsLeft`, `429` codes carry `details.retryAfterSec`, and `429 rate_limited`
+  also `details.retryAfterMin` (rounded up), which its message shows.
 - Session: an httpOnly cookie on the parent domain (`@yeral/lib/site` names and scopes it); mutations check `Origin`.
 
 ## Client endpoints (M2)

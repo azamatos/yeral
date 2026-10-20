@@ -1,6 +1,7 @@
 /** Fixed-window counters in Postgres (`rate_limits`), so limits hold across processes and restarts. */
 import { sql } from 'drizzle-orm'
 import type { Queryable } from '../db/client'
+import { ApiError } from '../http/errors'
 
 export async function hit(
   db: Queryable,
@@ -24,6 +25,10 @@ export async function hit(
 }
 
 /** The header our edge writes with the caller's address (`TRUSTED_IP_HEADER`); callers can send any header themselves. */
+/** `rate_limited` for a limit `hit()` refused: the wait in seconds and in whole minutes, rounded up, for its message (book Q-267). */
+export const rateLimited = (retryAfterSec: number) =>
+  new ApiError('rate_limited', { retryAfterSec, retryAfterMin: Math.ceil(retryAfterSec / 60) })
+
 export type TrustedIpHeader = 'x-forwarded-for'
 
 /**

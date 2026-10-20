@@ -142,6 +142,17 @@ describe('message catalogues', () => {
     expect(createT('tk')('errors.party_too_large', { callFrom: 13 })).toBe('13 we ondan köp adam bolsa, jaň ediň.')
   })
 
+  it('too many requests says the wait in minutes (book Q-267)', () => {
+    const say = (locale: 'en' | 'tk' | 'ru', retryAfterMin: number) =>
+      createT(locale)('errors.rate_limited', { retryAfterSec: 0, retryAfterMin })
+    expect(say('en', 1)).toBe('Too many requests. Try again in 1 minute.')
+    expect(say('en', 55)).toBe('Too many requests. Try again in 55 minutes.')
+    expect(say('tk', 55)).toBe('Haýyş köp boldy. 55 minutdan soň täzeden synanyşyň.')
+    expect(say('ru', 1)).toBe('Слишком много запросов. Попробуйте через 1 минуту.')
+    expect(say('ru', 22)).toBe('Слишком много запросов. Попробуйте через 22 минуты.')
+    expect(say('ru', 55)).toBe('Слишком много запросов. Попробуйте через 55 минут.')
+  })
+
   it('no empty messages', () => {
     for (const locale of LOCALES) {
       const empty = keys(messages[locale]).filter(
