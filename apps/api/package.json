@@ -1,6 +1,6 @@
 {
   "name": "@yeral/api",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "description": "\u00dderal REST api (/v1): Hono + zod OpenAPI on Postgres through Drizzle; Node in Docker on the own server",
   "type": "module",
