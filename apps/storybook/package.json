@@ -28,6 +28,7 @@
     "@types/react-dom": "catalog:",
     "@vitest/browser-playwright": "catalog:",
     "@yeral/business": "workspace:*",
+    "@yeral/client": "workspace:*",
     "@yeral/config": "workspace:*",
     "eslint": "catalog:",
     "playwright": "catalog:",

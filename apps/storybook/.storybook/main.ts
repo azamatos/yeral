@@ -18,7 +18,12 @@ const appAlias: Plugin = {
 
 const config: StorybookConfig = {
   framework: '@storybook/react-vite',
-  stories: ['../src/**/*.mdx', '../../../packages/ui/src/**/*.stories.@(ts|tsx)', '../../business/src/**/*.stories.@(ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../../../packages/ui/src/**/*.stories.@(ts|tsx)',
+    '../../business/src/**/*.stories.@(ts|tsx)',
+    '../../client/src/**/*.stories.@(ts|tsx)',
+  ],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y', '@storybook/addon-vitest'],
   core: { disableTelemetry: true },
   staticDirs: ['../public', { from: '../../../docs/design/assets/photos', to: '/photos' }],

@@ -1,0 +1,4 @@
+/* Tailwind with the design system's theme and base styles (@yeral/ui). */
+@import 'tailwindcss';
+@import '@yeral/ui/styles.css';
+@source '../../../../packages/ui/src/**/*.{ts,tsx}';
