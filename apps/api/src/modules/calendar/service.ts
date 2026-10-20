@@ -159,7 +159,7 @@ async function insertTeamBooking(
 ): Promise<BookingRow> {
   const now = deps.now()
   const at = new Date(now)
-  await assertOpenAt(tx, lb.business.id, { date: input.date, start: input.start, end: slot.end })
+  await assertOpenAt(tx, lb.business.id, { date: input.date, start: input.start, end: slot.end }, slot.items)
   const id = randomUUID()
   const { record, holder } = await phoneClient(tx, lb.business.id, input.phone, input.name, now, id)
   const price = appointmentPrice(lb, slot)

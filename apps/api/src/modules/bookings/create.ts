@@ -28,6 +28,7 @@ import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import {
   appointmentContext,
+  assertStaffFree,
   checkStaff,
   OutsideHours,
   lockedHours,
@@ -129,6 +130,8 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
   // class runs on its session's own schedule
   const hours = await lockedHours(db, x.lb.business.id)
   if (x.type !== 'class' && !withinHours(hours, x.date, { start: x.start, end })) throw new OutsideHours()
+  // and its specialists' days as they stand (a schedule save or a removal holds the same row)
+  if (x.placement.slot) await assertStaffFree(db, hours, x.date, x.placement.slot.items)
   const [row] = await db
     .insert(bookings)
     .values({

@@ -6,7 +6,7 @@
  */
 import type { dayStateSchema } from '@yeral/contract/availability'
 import { staffDoingAll, type AppointmentContext, type BusyInterval, type TableContext } from '@yeral/domain/availability'
-import { businessClosedReason, withinHours, type BusinessHours } from '@yeral/domain/hours'
+import { businessClosedReason, withinHours, withinStaffDay, type BusinessHours } from '@yeral/domain/hours'
 import type { BookingRules } from '@yeral/domain/rules'
 import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm'
@@ -151,8 +151,8 @@ export async function loadHours(db: Queryable, businessId: string, opts: { lock?
 export const lockedHours = (db: Queryable, businessId: string) => loadHours(db, businessId, { lock: 'share' })
 
 /**
- * A time the hours as they stand no longer hold (book Q-211): 409 `slot_taken`, to which `inTransaction` adds the
- * nearest free times under those hours.
+ * A time the hours, or a specialist's day, as they stand no longer hold (book Q-211, B-47): 409 `slot_taken`, to which
+ * `inTransaction` adds the nearest free times as the business stands.
  */
 export class OutsideHours extends ApiError {
   constructor() {
@@ -160,9 +160,53 @@ export class OutsideHours extends ApiError {
   }
 }
 
-/** A booking about to take its time still falls inside the hours as they stand (`lockedHours`); else `OutsideHours`. */
-export async function assertOpenAt(db: Queryable, businessId: string, b: { date: string; start: number; end: number }): Promise<void> {
-  if (!withinHours(await lockedHours(db, businessId), b.date, { start: b.start, end: b.end })) throw new OutsideHours()
+/**
+ * A booking about to take its time still falls inside the hours as they stand (`lockedHours`), and its specialists'
+ * days (`assertStaffFree`, when `items` are given); else `OutsideHours`. Returns the hours it read.
+ */
+export async function assertOpenAt(
+  db: Queryable,
+  businessId: string,
+  b: { date: string; start: number; end: number },
+  items?: readonly StaffItem[],
+): Promise<BusinessHours> {
+  const hours = await lockedHours(db, businessId)
+  if (!withinHours(hours, b.date, { start: b.start, end: b.end })) throw new OutsideHours()
+  if (items) await assertStaffFree(db, hours, b.date, items)
+  return hours
+}
+
+interface StaffItem {
+  staffId: string | null
+  start: number
+  end: number
+}
+
+/**
+ * The specialists a booking is about to take still work then (book B-47, B-50): on the team, taking bookings, and each
+ * of their items inside their day as their schedule stands. A schedule save or a removal holds the business row as an
+ * hours save does, so read after `lockedHours` this is how it stands; else `OutsideHours`.
+ */
+export async function assertStaffFree(db: Queryable, hours: BusinessHours, date: string, items: readonly StaffItem[]): Promise<void> {
+  const ids = [...new Set(items.flatMap((i) => (i.staffId ? [i.staffId] : [])))]
+  if (!ids.length) return
+  const rows = await db
+    .select({
+      id: staff.id,
+      status: staff.status,
+      bookable: staff.bookable,
+      shift: staff.shift,
+      breaks: staff.breaks,
+      daysOff: staff.daysOff,
+    })
+    .from(staff)
+    .where(inArray(staff.id, ids))
+  for (const it of items) {
+    const s = it.staffId ? rows.find((r) => r.id === it.staffId) : undefined
+    if (!it.staffId) continue
+    if (!s || s.status !== 'active' || !s.bookable || !withinStaffDay(hours, s, date, { start: it.start, end: it.end }))
+      throw new OutsideHours()
+  }
 }
 
 /** One business with what free times need; 404 when it's gone. */

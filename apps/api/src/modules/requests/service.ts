@@ -18,11 +18,11 @@ import { bookingItems, bookingRules, bookings, staff, type TimeSlot } from '../.
 import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit, queueOutcomeSms } from '../../notify'
-import { appointmentContext, loadBusiness, loadBusy, lockedHours } from '../availability/context'
+import { appointmentContext, assertStaffFree, loadBusiness, loadBusy, lockedHours, OutsideHours } from '../availability/context'
 import { text } from '../catalog/map'
 import { confirmBooking } from '../bookings/confirm'
 import { bookedServices, declineForBusiness, rebookQuery } from '../bookings/engine'
-import { awaitingAnswer, guard, lockBooking, recordMoveRefused, setStatus, stateOf, type BookingRow } from '../bookings/repo'
+import { awaitingAnswer, guard, itemsOf, lockBooking, recordMoveRefused, setStatus, stateOf, type BookingRow } from '../bookings/repo'
 
 type RequestView = z.infer<typeof requestSchema>
 type DeclineInput = z.infer<typeof declineInputSchema>
@@ -157,9 +157,19 @@ export async function confirmRequest(deps: Deps, business: Business, actor: Acto
     if (b.rescheduleOf) await lockBooking(tx, b.rescheduleOf)
     const row = await lockBooking(tx, b.id)
     guard(requestOpen(stateOf(row), deps.now()))
-    // a move onto a day the business closed since (a waiting move isn't asked about when the hours change)
+    // a move onto a day the business closed since (a waiting move isn't asked about when the hours change), or one
+    // its specialist no longer works then (a day off, a new shift, gone from the team: B-47, B-50)
     if (row.rescheduleOf && !withinHours(hours, row.date, { start: row.start, end: row.end }))
       throw new ApiError('cannot_move', { problem: 'outside_hours', staffId: '' } satisfies CannotMoveDetails)
+    if (row.rescheduleOf) {
+      const items = await itemsOf(tx, row.id)
+      try {
+        await assertStaffFree(tx, hours, row.date, items)
+      } catch (e) {
+        if (!(e instanceof OutsideHours)) throw e
+        throw new ApiError('cannot_move', { problem: 'staff_off', staffId: items[0]?.staffId ?? '' } satisfies CannotMoveDetails)
+      }
+    }
     await confirmBooking(tx, deps, row)
   })
 }

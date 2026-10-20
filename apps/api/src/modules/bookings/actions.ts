@@ -27,7 +27,7 @@ import { onlineRefusal } from '../clients/online'
 import { assertOnlineBooking, assertWaitingRoom, rebook } from './create'
 import { bookedServices, dropPendingMove } from './engine'
 import { offerTarget, offersOf } from './offers'
-import { type BookingRow, guard, isSlotConflict, lockBooking, pgCode, restoreStateOf, setStatus, stateOf } from './repo'
+import { type BookingRow, guard, isSlotConflict, itemsOf, lockBooking, pgCode, restoreStateOf, setStatus, stateOf } from './repo'
 import { nameOf } from '../me/me'
 
 const businessOf = (deps: Deps, b: BookingRow): Promise<LoadedBusiness> => loadBusiness(deps.db, b.businessId)
@@ -88,7 +88,7 @@ export async function restoreBooking(deps: Deps, b: BookingRow): Promise<Booking
       // a request back to waiting counts as one sent now (book Q-124); the account first, the order every path takes
       if (status === 'pending' && b.userId) await assertWaitingRoom(tx, b.userId, b.businessId, now, { locked: true })
       // a request asks again: not on a day the business closed since (book Q-211); a confirmed booking comes back as it was
-      if (status === 'pending' && b.type !== 'class') await assertOpenAt(tx, b.businessId, b)
+      if (status === 'pending' && b.type !== 'class') await assertOpenAt(tx, b.businessId, b, await itemsOf(tx, b.id))
       // the seats may have gone meanwhile; tables, specialists and a person's time across workspaces are guarded by
       // the database
       if (b.type === 'class' && b.sessionId && (await seatsLeft(tx, b.sessionId)) < (b.seats ?? 1)) throw new ApiError('session_full')

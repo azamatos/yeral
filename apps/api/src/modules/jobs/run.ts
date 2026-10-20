@@ -195,7 +195,9 @@ const OUTCOMES: Record<OutcomeSmsKind, OutcomeSms> = {
       declinedSmsText(lang, sms, b.declineReason!, b.declineText, { byPhone: byPhone && !b.declineAlternatives.length }),
   },
   cancelledOffers: {
-    still: (b) => b.status === 'cancelled' && (b.businessCancelReason === 'closed' || b.businessCancelReason === 'hours'),
+    still: (b) =>
+      b.status === 'cancelled' &&
+      (b.businessCancelReason === 'closed' || b.businessCancelReason === 'hours' || b.businessCancelReason === 'staff_away'),
     text: (lang, sms, b, byPhone) =>
       cancelledOffersSmsText(lang, sms, businessCancelText(lang, b.businessCancelReason!, b.cancelReason), b.declineAlternatives, {
         byPhone: byPhone && !b.declineAlternatives.length,
