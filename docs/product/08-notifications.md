@@ -109,7 +109,7 @@ These are the Turkmen texts from client spec §6 next to the ones in the code (`
 
 Notes:
 
-- Every booking SMS links to the booking with a long random token on its own path. The booking's code (*YR-48213*) is shown and read out on the phone, but never opens anything by itself. (Q-168, decided 18.10.2026) **Code differs:** the link is `yeral.app/b/{code}`, the code's choice, which ROUND6 accepted; that's why business page addresses must never start with `yr-` (ROUND6 notes). The domain comes from config (AGENTS rule 6). The link page itself isn't built yet (M3).
+- Every booking SMS links to the booking with a long random token on its own path. The booking's code (*YR-48213*) is shown and read out on the phone, but never opens anything by itself. (Q-168, decided 18.10.2026) Built 20.10.2026: the link is `/l/{token}` on the client site's domain, which comes from config (AGENTS rule 6); the api serves the link page (`GET /v1/links/{token}`) and its sign-in, and the client site draws it with P4.
 - Reminders start with *Ýatlatma:*. The other texts start with *Ýeral:*. The sender name is "Yeral" (Q-109), which may make the prefix unnecessary.
 - The 2-hour text in the spec says *ertir* (tomorrow), which is wrong two hours before a visit. The code's *şu gün* (today) text is kept. (Q-293, decided 18.10.2026)
 

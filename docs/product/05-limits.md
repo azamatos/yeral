@@ -80,8 +80,7 @@ copy to say businesses keep their visit records (Q-172).
 | Verification | usually within 24 h; until then visitors see "*Bu sahypa entek açylmady*" | Ýeral team | business spec §7; ROUND6-ANSWERS F1 |
 | Page link | `yeral.app/b/{slug}`, which opens the page in the visitor's language (`/en/b/{slug}` at the first launch); slug of lowercase letters, digits and dashes, up to 64 characters, never starting with "yr-" | Fixed | business spec §7; ROUND6-ANSWERS notes; length code only: packages/contract/src/common.ts |
 
-**Code differs:** the typical answer time is a stored number per business that nothing works out
-(code: apps/api/src/db/schema/business.ts). Slugs starting with "yr-" aren't refused yet (code: packages/contract/src/common.ts).
+**Code differs:** slugs starting with "yr-" aren't refused yet (code: packages/contract/src/common.ts).
 
 > Open question Q-113: how is the typical answer time worked out?
 
@@ -197,10 +196,8 @@ packages/domain/src/rules.ts).
 | Waiting requests per client | at most 3 at one business and 10 in total; move requests don't count | Fixed | Q-124, decided 18.10.2026; code: packages/domain/src/lifecycle.ts (`waitingLimit`), `too_many_waiting` |
 | Demo businesses answer by themselves | after 20 s, outside production only | Fixed | code only: apps/api/src/modules/bookings/create.ts |
 
-**Code differs:** the hold counts clock time, day and night (code: packages/domain/src/lifecycle.ts). Free times after
-an expiry exist only for appointments and may be with any specialist; with none, the SMS keeps an empty list (code:
-apps/api/src/modules/jobs/run.ts). A taken offered time falls back to any free specialist (code:
-apps/api/src/modules/bookings/create.ts). Waiting requests have no limit.
+**Code differs:** free times after an expiry exist only for appointments; tables and classes get theirs with their
+own flows after the MVP (Q-252, Q-030; code: apps/api/src/modules/jobs/run.ts).
 
 **Design to fix:** the sent screen shows the answer deadline as a clock time, not "*{N} minutdan*" (Q-253).
 
@@ -365,9 +362,8 @@ telling anyone (code: apps/api/src/modules/jobs/run.ts). Reminders keep out of t
 | Page size | 12 by default, at most 50 | Fixed | code only: packages/contract/src/common.ts |
 | Free times in one request | 14 days by default, up to 31; classes 7, up to 14 | Fixed | code only: packages/contract/src/availability.ts |
 | Booking code | "YR-" and 5 digits, never starting with 0; one more digit after repeated clashes | Fixed | code only: packages/domain/src/id.ts |
-| SMS link | a long random token on its own path; the booking code never opens anything by itself | Fixed | Q-168, decided 18.10.2026 |
+| SMS link | a long random token on its own path; the booking code never opens anything by itself; works until 90 days after the visit | Fixed | Q-168, decided 18.10.2026; 90 days: Claude (delegated), 20.10.2026; code: apps/api/src/modules/bookings/links.ts (`LINK_DAYS`) |
 | Text lengths | name 80, note 500, cancel reason 300, review 500, search 80 characters | Fixed | code only: packages/contract/src |
 | Environments | local and production only; no staging | Fixed | owner 16.10.2026; ADR 0020 |
 
-**Code differs:** a hidden tab doesn't ask for changes at all (code: packages/sdk/src/events.ts). An SMS link works until
-90 days after the visit (`LINK_DAYS`; Claude (delegated), 20.10.2026).
+**Code differs:** a hidden tab doesn't ask for changes at all (code: packages/sdk/src/events.ts).

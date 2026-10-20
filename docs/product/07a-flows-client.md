@@ -292,8 +292,6 @@ flowchart TD
 
 > Open question Q-253: the answer time the client is shown.
 
-**Code differs:** the typical answer time is a stored number per business that nothing works out (code: `apps/api/src/db/schema/business.ts`).
-
 **Status:** Design: drawn (Venue · `selection`, `hoursCase`; States 06; Mobile 4); the table and class page variants are text only · Code: built (api) — `GET /v1/businesses/{slug}`.
 
 ### C-07 · Read reviews
@@ -910,9 +908,7 @@ flowchart TD
 - The business answers after the hold time ran out: refused, the request has already expired (code: `request_expired`).
 - Outside production, demo businesses with no team confirm by themselves after 20 seconds (code: `bookings/create.ts`).
 
-**Code differs**
-
-- The api accepts a note of up to 500 characters; the design counts to 300 (Account-Bookings).
+**Design to fix:** the note's counter shows "/ 300"; the limit is 500 characters (chapter 5).
 
 **Status:** Design: drawn (Account-Bookings · `view=drawer`) · Code: built (api) — note, cancel, live updates.
 
@@ -1292,8 +1288,6 @@ flowchart TD
 **Edge cases**
 
 - The 2-hour reminder keeps the code's own text with "şu gün" (today); client spec §6 had one template with "ertir" (tomorrow) for both (Q-293, decided 18.10.2026).
-
-**Code differs:** reminders go at any hour, also at night (code: `bookings/confirm.ts`).
 
 **Status:** Design: text only (client spec §6; the sent-screen timeline is drawn) · Code: built (api).
 
