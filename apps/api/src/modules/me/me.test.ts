@@ -462,6 +462,7 @@ describe('account', () => {
         '/v1/w/{slug}/requests/{code}/decline',
         '/v1/w/{slug}/free-times',
         '/v1/w/{slug}/bookings',
+        '/v1/w/{slug}/bookings/export',
         '/v1/w/{slug}/calendar',
         '/v1/w/{slug}/calendar/blocks',
         '/v1/w/{slug}/calendar/blocks/{id}',

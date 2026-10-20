@@ -9,6 +9,33 @@
     "cancelled": "Ýatyryldy",
     "noshow": "Gelmedi"
   },
+  "sources": {
+    "web": "Onlaýn",
+    "app": "Programma",
+    "phone": "Telefon",
+    "walkin": "Gelip",
+    "ai": "Kömekçi"
+  },
+  "cancelledBy": {
+    "client": "Müşderi",
+    "business": "Biznes",
+    "system": "Wagtynda jogap berilmedi"
+  },
+  "bookingsExport": {
+    "code": "Kod",
+    "date": "Sene",
+    "time": "Wagt",
+    "client": "Müşderi",
+    "phone": "Telefon",
+    "services": "Hyzmatlar",
+    "specialists": "Hünärmenler",
+    "source": "Çeşme",
+    "status": "Ýagdaý",
+    "cancelledBy": "Kim ýatyrdy",
+    "price": "Baha",
+    "amount": "Möçber",
+    "unnamed": "Atsyz müşderi"
+  },
   "errors": {
     "validation_error": "Maglumatlary barlaň.",
     "unauthorized": "Dowam etmek üçin giriň.",

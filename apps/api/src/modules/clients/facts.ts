@@ -20,7 +20,7 @@ import { blockedByCount } from './online'
 type ClientRecord = typeof clients.$inferSelect
 
 /** Business-local minutes since 2000-01-01: the scale of `bookings.span`. */
-const spanMinuteOf = (now: number) => {
+export const spanMinuteOf = (now: number) => {
   const { date, min } = localOf(now)
   return diffDays(date, '2000-01-01') * 1440 + min
 }

@@ -39,6 +39,8 @@ import type {
 import type {
   blockInputSchema,
   businessCancelSchema,
+  bookingFiltersSchema,
+  bookingListQuerySchema,
   calendarQuerySchema,
   complaintInputSchema,
   freeTimesQuerySchema,
@@ -643,6 +645,20 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         queryFn: ({ signal }) => call(w.calendar.$get({ param: { slug }, query: query as never }, abortWith(signal))),
       })
     },
+    /** "Ýazylyşlar" (book B-30): pages of a tab, searched and filtered; booking events refresh it with the calendar. */
+    bookings: (slug: string, p: Omit<Params<typeof bookingListQuerySchema, 'tab' | 'lang'>, 'cursor'>) => {
+      const query = clean(p)
+      return infiniteQueryOptions({
+        queryKey: keys.teamBookings(slug, query),
+        queryFn: ({ pageParam, signal }) =>
+          call(w.bookings.$get({ param: { slug }, query: clean({ ...query, cursor: pageParam }) as never }, abortWith(signal))),
+        initialPageParam: '',
+        getNextPageParam: (last) => last.cursor ?? undefined,
+      })
+    },
+    /** "Eksport (CSV)" (B-31): the file's address for the same filters, opened as a download (the owner and administrators). */
+    exportUrl: (slug: string, p: Params<typeof bookingFiltersSchema, 'tab' | 'lang'>) =>
+      w.bookings.export.$url({ param: { slug }, query: clean(p) as never }).toString(),
     /** The nearest four, a day's starts with who is free at each, and the 14-day strip; a specialist gets their own. */
     freeTimes: (slug: string, p: Params<typeof freeTimesQuerySchema, 'services'>) => {
       const query = clean({ ...p, services: p.services.join(',') })

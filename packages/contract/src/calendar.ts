@@ -11,11 +11,13 @@ import { dayStateSchema } from './availability'
 import {
   boolQuery,
   bookingCodeSchema,
+  cursorQuerySchema,
   bookingTypeSchema,
   epochSchema,
   idListQuery,
   idSchema,
   langQuerySchema,
+  listOf,
   minuteSchema,
   moneySchema,
   phoneInputSchema,
@@ -296,3 +298,47 @@ export const complaintInputSchema = z
   .strict()
   .refine((c) => c.type !== 'other' || !!c.text, { path: ['text'], message: 'Say what happened' })
   .meta({ id: 'ComplaintInput' })
+
+// ── "Ýazylyşlar": the bookings list and its export (B-30, B-31) ──
+
+/**
+ * The list's tabs besides "Haýyşlar" (the requests, `/requests`): today's, those ahead and before (cancelled ones
+ * aside), and the cancelled with who cancelled, a request that ran out unanswered included.
+ */
+export const BOOKING_TABS = ['today', 'upcoming', 'past', 'cancelled'] as const
+
+/** The filters: search (client, number or booking code), specialist, service, dates. */
+export const bookingFiltersSchema = langQuerySchema.extend({
+  tab: z.enum(BOOKING_TABS),
+  q: z.string().trim().max(80).optional(),
+  staff: idSchema.optional(),
+  service: idSchema.optional(),
+  from: ymdSchema.optional(),
+  to: ymdSchema.optional(),
+})
+export const bookingListQuerySchema = bookingFiltersSchema.extend(cursorQuerySchema.shape)
+
+export const bookingRowSchema = z
+  .object({
+    code: bookingCodeSchema,
+    type: bookingTypeSchema,
+    date: ymdSchema,
+    start: startMinuteSchema,
+    end: minuteSchema,
+    /** As people see it now. */
+    status: z.enum(BOOKING_STATUSES),
+    cancelledBy: z.enum(CANCELLED_BY).nullable(),
+    source: z.enum(BOOKING_SOURCES),
+    /** `isNew`: a first visit in the last 30 days ("New"); `id` opens the client card. */
+    client: z.object({ id: idSchema.nullable(), name: z.string().nullable(), phone: phoneSchema.nullable(), isNew: z.boolean() }),
+    items: z.array(teamItemSchema),
+    price: priceSchema.nullable(),
+    /** A request's answer time. */
+    holdUntil: epochSchema.nullable(),
+    /** "Arz et" filed (B-28). */
+    complaint: z.object({ type: z.enum(COMPLAINT_TYPES), at: epochSchema }).nullable(),
+  })
+  .meta({ id: 'BookingRow' })
+
+/** Today's and those ahead the soonest first; the past and the cancelled the newest first. */
+export const bookingListSchema = listOf(bookingRowSchema).meta({ id: 'BookingList' })
