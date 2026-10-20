@@ -1,9 +1,11 @@
+import { addDays, today } from '@yeral/domain/time'
+import { eq, inArray } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { rateLimits } from '../../db/schema'
+import { bookings, businesses, clientNotes, clients, invites, rateLimits, staff, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 
 describe('account', () => {
@@ -54,6 +56,82 @@ describe('account', () => {
     expect(t.sms.sent.at(-1)).toEqual({ to: '+99365222003', text: 'Ýeral code: 1234', secret: true })
     const res = await b.req('/v1/me/phone/verify', { body: { phone: '+99365222003', code: '1234' } })
     expect(res.json.phone).toBe('+99365222003')
+  })
+
+  it('a changed phone takes the person’s business records along, made one with a record kept for the new number (book Q-171)', async () => {
+    const [oldPhone, newPhone] = ['+99365222010', '+99365222011']
+    const b = browser(t.app)
+    const { me } = await b.login(oldPhone, 'Kerim')
+    const slugs = await db
+      .select()
+      .from(businesses)
+      .where(inArray(businesses.slug, ['glow-studio', 'barber-loft', 'ak-dis']))
+    const [glow, barber, dentist] = ['glow-studio', 'barber-loft', 'ak-dis'].map((slug) => slugs.find((r) => r.slug === slug)!.id)
+    const at = (days: number) => new Date(t.clock.now - days * 86_400_000)
+    const [mine, theirs] = await db
+      .insert(clients)
+      .values([
+        { businessId: glow!, phone: oldPhone, name: 'Kerim', userId: me.id, tags: ['vip'], noShowsSince: at(5) },
+        // the business already wrote the new number down: a phone booking, a note, phone-only
+        { businessId: glow!, phone: newPhone, name: 'Kerim (new)', tags: ['regular'], onlineBlocked: true },
+      ])
+      .returning()
+    await db.insert(clientNotes).values({ clientId: theirs!.id, text: 'Prefers mornings' })
+    const booking = (code: string, days: number, x: { clientId: string; phone: string; userId?: string }) => ({
+      code,
+      businessId: glow!,
+      type: 'appointment' as const,
+      date: addDays(today(t.clock.now), days),
+      start: 600,
+      end: 660,
+      status: days < 0 ? ('completed' as const) : ('confirmed' as const),
+      source: 'phone' as const,
+      clientId: x.clientId,
+      clientPhone: x.phone,
+      userId: x.userId ?? null,
+    })
+    await db
+      .insert(bookings)
+      .values([
+        booking('YR-995001', 2, { clientId: theirs!.id, phone: newPhone }),
+        booking('YR-995002', 3, { clientId: mine!.id, phone: oldPhone, userId: me.id }),
+        booking('YR-995003', -3, { clientId: mine!.id, phone: oldPhone, userId: me.id }),
+      ])
+    // on Barber Loft's team, and invited to Ak diş
+    await db.insert(staff).values({ businessId: barber!, userId: me.id, name: 'Kerim', phone: oldPhone })
+    const [row] = await db.insert(staff).values({ businessId: dentist!, name: 'Kerim', phone: oldPhone, status: 'invited' }).returning()
+    await db.insert(invites).values({
+      businessId: dentist!,
+      staffId: row!.id,
+      phone: oldPhone,
+      tokenHash: 'q171-test-invite',
+      sentAt: at(1),
+      expiresAt: at(-6),
+    })
+
+    await b.req('/v1/me/phone/code', { body: { phone: newPhone } })
+    expect((await b.req('/v1/me/phone/verify', { body: { phone: newPhone, code: '1234' } })).json.phone).toBe(newPhone)
+
+    const records = await db.select().from(clients).where(eq(clients.businessId, glow!))
+    const kerim = records.filter((r) => r.phone === newPhone || r.phone === oldPhone)
+    expect(kerim).toHaveLength(1)
+    expect(kerim[0]).toMatchObject({ id: mine!.id, phone: newPhone, userId: me.id, name: 'Kerim', onlineBlocked: true, noShowsSince: null })
+    expect(kerim[0]!.tags.sort()).toEqual(['regular', 'vip'])
+    expect((await db.select().from(clientNotes).where(eq(clientNotes.clientId, mine!.id))).map((n) => n.text)).toEqual(['Prefers mornings'])
+    const moved = await db
+      .select()
+      .from(bookings)
+      .where(inArray(bookings.code, ['YR-995001', 'YR-995002', 'YR-995003']))
+    const byCode = (code: string) => moved.find((m) => m.code === code)!
+    // the business's booking for the new number is the person's now; the visits ahead reach the new number
+    expect(byCode('YR-995001')).toMatchObject({ clientId: mine!.id, userId: me.id, clientPhone: newPhone })
+    expect(byCode('YR-995002')).toMatchObject({ clientId: mine!.id, clientPhone: newPhone })
+    expect(byCode('YR-995003')).toMatchObject({ clientId: mine!.id, clientPhone: oldPhone })
+    const [teamRow] = await db.select().from(staff).where(eq(staff.userId, me.id))
+    expect(teamRow!.phone).toBe(newPhone)
+    const [invite] = await db.select().from(invites).where(eq(invites.tokenHash, 'q171-test-invite'))
+    expect(invite!.status).toBe('cancelled')
+    expect((await db.select().from(users).where(eq(users.id, me.id)))[0]!.phone).toBe(newPhone)
   })
 
   it('deleting the account cancels upcoming bookings and signs out', async () => {
@@ -113,6 +191,7 @@ describe('account', () => {
     expect(Object.keys(doc.paths).sort()).toEqual(
       [
         '/v1/auth/code',
+        '/v1/auth/identity',
         '/v1/auth/logout',
         '/v1/auth/verify',
         '/v1/bookings',

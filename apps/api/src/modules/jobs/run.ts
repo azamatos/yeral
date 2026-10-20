@@ -15,6 +15,7 @@ import type { Deps } from '../../deps'
 import { bookingSmsText, emit, expiredSmsText, moveRefusedSmsText, smsCityOf, type BookingSmsKind } from '../../notify'
 import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
+import { pruneIdentityChecks } from '../auth/identity'
 import { newBookingLink, pruneBookingLinks } from '../bookings/links'
 import { hideLinkTokens } from '../../ports/sms'
 import { bookedServices, onlineRefusal } from '../bookings/create'
@@ -310,6 +311,7 @@ async function runQueue(deps: Deps): Promise<number> {
 
 export async function runDueJobs(deps: Deps): Promise<{ expired: number; completed: number; jobs: number }> {
   await pruneBookingLinks(deps.db, deps.now())
+  await pruneIdentityChecks(deps.db, deps.now())
   const expired = await expireRequests(deps)
   const completed = await completeVisits(deps)
   const ran = await runQueue(deps)

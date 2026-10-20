@@ -4,7 +4,13 @@
  * other action.
  */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
-import { linkCodeSchema, linkVerifySchema, sendCodeResponseSchema, verifyCodeResponseSchema } from '@yeral/contract/account'
+import {
+  isThisYouSchema,
+  linkCodeSchema,
+  linkVerifySchema,
+  sendCodeResponseSchema,
+  verifyCodeResponseSchema,
+} from '@yeral/contract/account'
 import { bookingLinkSchema, linkTokenSchema, type BookingLink } from '@yeral/contract/bookings'
 import { langQuerySchema } from '@yeral/contract/common'
 import { MARKET } from '@yeral/domain/market'
@@ -15,7 +21,7 @@ import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody } from '../../http/openapi'
 import { clientIp } from '../../lib/rate-limit'
 import { checkCode, sendCode } from '../auth/codes'
-import { signIn } from '../auth/sign-in'
+import { afterCode } from '../auth/identity'
 import { bookingOfLink } from './links'
 import { detailOf } from './view'
 
@@ -46,7 +52,7 @@ const verifyRoute = createRoute({
   tags,
   summary: "Check the code and sign in with the booking's own phone",
   request: { params: tokenParam, ...jsonBody(linkVerifySchema) },
-  responses: { 200: json(verifyCodeResponseSchema), 400: errors[400], 404: errors[404], 429: errors[429] },
+  responses: { 200: json(verifyCodeResponseSchema), 202: json(isThisYouSchema), 400: errors[400], 404: errors[404], 429: errors[429] },
 })
 
 export const linkRoutes = new OpenAPIHono<AppEnv>()
@@ -86,5 +92,6 @@ export const linkRoutes = new OpenAPIHono<AppEnv>()
     const { code, lang } = c.req.valid('json')
     const { phone } = row
     await checkCode(deps, { phone, purpose: 'login', code })
-    return c.json(await signIn(c, phone, lang), 200)
+    const res = await afterCode(c, phone, lang)
+    return res.status === 202 ? c.json(res.body, 202) : c.json(res.body, 200)
   })

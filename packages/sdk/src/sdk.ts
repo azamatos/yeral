@@ -13,7 +13,14 @@
  * schema accepts (`z.input`), query parameters the values it reads them as (`z.output`), turned back into text below.
  */
 import { infiniteQueryOptions, mutationOptions, queryOptions, type QueryClient } from '@tanstack/react-query'
-import type { linkCodeSchema, linkVerifySchema, sendCodeSchema, updateMeSchema, verifyCodeSchema } from '@yeral/contract/account'
+import type {
+  identityAnswerSchema,
+  linkCodeSchema,
+  linkVerifySchema,
+  sendCodeSchema,
+  updateMeSchema,
+  verifyCodeSchema,
+} from '@yeral/contract/account'
 import type {
   appointmentAvailabilityQuerySchema,
   sessionsQuerySchema,
@@ -57,18 +64,32 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   const invalidate = (...queryKeys: readonly (readonly unknown[])[]) =>
     Promise.all(queryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })))
 
+  /** Someone signed in who may not be the person before: every query goes back to empty and the screens reload. */
+  const signedInAnew = async (data: { me: unknown }) => {
+    queryClient.setQueryData(keys.me(), data.me)
+    await queryClient.resetQueries({ predicate: (q) => q.queryKey[0] !== keys.me()[0] })
+  }
+
   const auth = {
     sendCode: () =>
       mutationOptions({
         mutationFn: (body: z.input<typeof sendCodeSchema>) => call(v1.auth.code.$post({ json: body })),
       }),
+    /** Signs in, or answers `{ isThisYou }` for an account unused for 6 months: then `answerIdentity` (book Q-270). */
     verify: () =>
       mutationOptions({
         mutationFn: (body: z.input<typeof verifyCodeSchema>) => call(v1.auth.verify.$post({ json: body })),
         onSuccess: (data) => {
+          if (!('me' in data)) return
           queryClient.setQueryData(keys.me(), data.me)
           return invalidate(keys.bookings(), ['favorites'])
         },
+      }),
+    /** "Is this you?": yes signs in to that account, no to a fresh one; whoever was on screen before is gone. */
+    answerIdentity: () =>
+      mutationOptions({
+        mutationFn: (body: z.input<typeof identityAnswerSchema>) => call(v1.auth.identity.$post({ json: body })),
+        onSuccess: signedInAnew,
       }),
     logout: () =>
       mutationOptions({
@@ -410,12 +431,9 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     verify: (token: string) =>
       mutationOptions({
         mutationFn: (body: z.input<typeof linkVerifySchema>) => call(v1.links[':token'].verify.$post({ param: { token }, json: body })),
-        // the link page can sign someone in over another person (a shared phone, book Q-169): every query goes back to
-        // empty and the screens on show load again for the new person
-        onSuccess: async (data) => {
-          queryClient.setQueryData(keys.me(), data.me)
-          await queryClient.resetQueries({ predicate: (q) => q.queryKey[0] !== keys.me()[0] })
-        },
+        // the link page can sign someone in over another person (a shared phone, book Q-169); `{ isThisYou }` waits
+        // for `auth.answerIdentity` (Q-270)
+        onSuccess: (data) => ('me' in data ? signedInAnew(data) : undefined),
       }),
   }
 

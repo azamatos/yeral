@@ -536,21 +536,23 @@ flowchart TD
   E --> F["Activate waiting invites"]
 ```
 
-**Steps** (code: `modules/auth/routes.ts`)
+**Steps** (code: `modules/auth/identity.ts`, `modules/auth/sign-in.ts`)
 
 1. If there's no account for this phone, the system creates one and asks for the name (client spec §4.7; business spec §1). If the account hasn't been used for 6 months, Ýeral first asks *Is this you?* with the account's first name. *No* starts a fresh account and leaves the old history unlinked. There's no password (Q-270, decided 18.10.2026).
 2. Bookings made with this phone, such as phone bookings a business entered, are linked to the account if they're upcoming or from the last 6 months (Q-270). They then show in *Ýazylyşlarym*.
-3. Businesses' client records with this phone are linked to the account.
+3. Businesses' client records with this phone are linked to the account if they were made in the last 6 months or hold a booking linked in step 2 (Q-270).
 4. Team invites waiting for this phone become active at once. S-13 describes what the design wants instead.
 5. In the workspace, routing follows the design: a pending invite first, then *Entek iş ýeriňiz ýok* if there's no workspace, otherwise the last workspace used (business spec §1; B-Login).
 
 **Edge cases**
 
-- A phone number that passes to a new person is covered by the 6-month limit and the *Is this you?* check, so the new person doesn't see the previous owner's older history (Q-270, decided 18.10.2026). **Code differs:** the code links every booking and client record with this phone at every sign-in and never asks (code: `modules/auth/routes.ts`). **Design to fix:** draw the *Is this you?* step at sign-in.
+- A phone number that passes to a new person is covered by the 6-month limit and the *Is this you?* check, so the new person doesn't see the previous owner's older history (Q-270, decided 18.10.2026). **Design to fix:** draw the *Is this you?* step at sign-in.
+- *Unused* means no sign-in and no renewed session for 6 months: a session kept in use renews itself and counts as use. An account without a name never asks: it has made no booking. Nobody is signed in until the answer, which must come within 10 minutes (`POST /v1/auth/identity`); the link page's login asks the same way.
+- *No* lets the old account go as a deletion does (C-47): its team rows leave, invites to the number are cancelled, its links stop working and its bookings never join anyone. Its bookings ahead aren't cancelled: the business keeps them, and no SMS goes to the number. A workspace owner's account can't go this way: the answer is refused (`owns_workspace`) and the Ýeral team sorts the number out.
 
 > Open question Q-270: Linking bookings made under the same phone.
 
-**Status.** Design: routing drawn (B-Login); linking decided (Q-270), the *Is this you?* step not drawn · Code: built in the api, with the difference above.
+**Status.** Design: routing drawn (B-Login); linking decided (Q-270), the *Is this you?* step not drawn · Code: built in the api (`POST /v1/auth/verify` answers 202 with the question; `POST /v1/auth/identity`).
 
 ### S-13 · Invite links expire after 7 days
 
