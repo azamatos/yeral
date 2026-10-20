@@ -1139,7 +1139,7 @@ flowchart TD
 - Nothing matches: "Hiç zat tapylmady. Gözlegi ýa-da süzgüçleri üýtgedip görüň."
 - With *Administrator we eýesi*, a specialist gets no request count in the sidebar (B-Shell).
 
-**Status** — Design: drawn (B-Bookings · `tab`, `panel`, `role`, `answers`) · Code: not built (only the client's own booking list exists).
+**Status** — Design: drawn (B-Bookings · `tab`, `panel`, `role`, `answers`) · Code: api built (`GET /v1/w/{slug}/bookings`: the tabs Today, Upcoming, Past, Cancelled with search and filters, pages; Haýyşlar is `GET /v1/w/{slug}/requests`; 21.10.2026).
 
 ### B-31 · Bulk actions and export
 
@@ -1170,7 +1170,7 @@ flowchart TD
 
 > Open question Q-209: bulk move in the bookings list.
 
-**Status** — Design: drawn (B-Bookings · `selected`) · Code: not built.
+**Status** — Design: drawn (B-Bookings · `selected`) · Code: api built for the export (`GET /v1/w/{slug}/bookings/export`, CSV; 21.10.2026); the bulk confirm and decline call each request's own confirm and decline, which check who may answer it.
 
 ## 5. Clients
 

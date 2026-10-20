@@ -9,6 +9,33 @@
     "cancelled": "Отменено",
     "noshow": "Не пришёл"
   },
+  "sources": {
+    "web": "Онлайн",
+    "app": "Онлайн",
+    "phone": "Телефон",
+    "walkin": "Без записи",
+    "ai": "Онлайн"
+  },
+  "cancelledBy": {
+    "client": "Клиент",
+    "business": "Бизнес",
+    "system": "Нет ответа вовремя"
+  },
+  "bookingsExport": {
+    "code": "Код",
+    "date": "Дата",
+    "time": "Время",
+    "client": "Клиент",
+    "phone": "Телефон",
+    "services": "Услуги",
+    "specialists": "Специалисты",
+    "source": "Источник",
+    "status": "Статус",
+    "cancelledBy": "Кто отменил",
+    "price": "Цена",
+    "amount": "Сумма",
+    "unnamed": "Клиент без имени"
+  },
   "errors": {
     "validation_error": "Проверьте данные.",
     "unauthorized": "Войдите, чтобы продолжить.",

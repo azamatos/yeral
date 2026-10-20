@@ -9,6 +9,33 @@
     "cancelled": "Cancelled",
     "noshow": "No-show"
   },
+  "sources": {
+    "web": "Online",
+    "app": "Online",
+    "phone": "Phone",
+    "walkin": "Walk-in",
+    "ai": "Online"
+  },
+  "cancelledBy": {
+    "client": "Client",
+    "business": "Business",
+    "system": "No answer in time"
+  },
+  "bookingsExport": {
+    "code": "Code",
+    "date": "Date",
+    "time": "Time",
+    "client": "Client",
+    "phone": "Phone",
+    "services": "Services",
+    "specialists": "Specialists",
+    "source": "Source",
+    "status": "Status",
+    "cancelledBy": "Cancelled by",
+    "price": "Price",
+    "amount": "Amount",
+    "unnamed": "Unnamed client"
+  },
   "errors": {
     "validation_error": "Please check the details.",
     "unauthorized": "Log in to continue.",

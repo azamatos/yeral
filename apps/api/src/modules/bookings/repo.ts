@@ -2,7 +2,7 @@
 import { bookingCode } from '@yeral/domain/id'
 import type { BookingState, LifecycleError, RestoreState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, BusinessCancelReason, CancelledBy, DeclineReason } from '@yeral/domain/model'
-import { epochOf } from '@yeral/domain/time'
+import { diffDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, gt, inArray, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, type MoveRefused, type TimeSlot } from '../../db/schema'
@@ -17,6 +17,19 @@ export function guard(problem: LifecycleError | null): void {
 
 /** A request still waiting for its answer: pending and inside its answer time (as `effectiveStatus` reads it). */
 export const awaitingAnswer = (now: number) => and(eq(bookings.status, 'pending'), gt(bookings.holdUntil, new Date(now)))
+
+/** Business-local minutes since 2000-01-01: the scale of `bookings.span`. */
+export const spanMinuteAt = (now: number) => {
+  const { date, min } = localOf(now)
+  return diffDays(date, '2000-01-01') * 1440 + min
+}
+
+/**
+ * A request whose answer time ran out (one without an answer time, once its start passed), before the jobs settle it:
+ * cancelled as people see it (`effectiveStatus`). Never null, so `not()` of it is safe.
+ */
+export const ranOutAt = (now: number) =>
+  sql`(${bookings.status} = 'pending' and coalesce(${bookings.holdUntil} <= ${new Date(now)}, lower(${bookings.span}) <= ${spanMinuteAt(now)}))`
 
 /**
  * When a no-show was marked: its status change (`setStatus` sets `completedAt`), else the complaint. The booking's

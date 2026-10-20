@@ -10,25 +10,31 @@ import {
   blockListSchema,
   blockParamSchema,
   blocksQuerySchema,
+  bookingExportQuerySchema,
+  bookingListQuerySchema,
+  bookingListSchema,
   businessCancelSchema,
   calendarQuerySchema,
   calendarViewSchema,
   complaintInputSchema,
   freeTimesQuerySchema,
   freeTimesSchema,
-  newBookingResultSchema,
   moveBookingSchema,
+  newBookingResultSchema,
   newBookingSchema,
   setInternalStatusSchema,
   teamBookingParamSchema,
 } from '@yeral/contract/calendar'
 import { workspaceParamSchema } from '@yeral/contract/team'
+import { today } from '@yeral/domain/time'
+import { z } from 'zod'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { requireMember } from '../team/service'
 import { setInternalStatus } from '../settings/statuses'
 import { addBlock, blocksFor, removeBlock } from './blocks'
 import { fileComplaint, removeComplaint } from './complaints'
+import { bookingList, exportBookings } from './list'
 import { calendarView } from './view'
 import { addBooking, cancelByBusiness, freeTimes, moveBooking, undoBooking } from './service'
 
@@ -137,7 +143,47 @@ const removeComplaintRoute = createRoute({
   responses: { ...noContent, 409: errors[409], ...denied },
 })
 
+const listRoute = createRoute({
+  method: 'get',
+  path: '/w/{slug}/bookings',
+  tags,
+  summary: '"Ýazylyşlar": today, ahead, before or cancelled, searched by client, number or code, by specialist, service, dates',
+  request: { params: workspaceParamSchema, query: bookingListQuerySchema },
+  responses: { 200: json(bookingListSchema), 400: errors[400], ...denied },
+})
+const exportRoute = createRoute({
+  method: 'get',
+  path: '/w/{slug}/bookings/export',
+  tags,
+  summary: '"Eksport (CSV)": the rows the same filters find, in the reader\'s language (the owner and administrators)',
+  request: { params: workspaceParamSchema, query: bookingExportQuerySchema },
+  responses: {
+    200: {
+      description: 'The bookings as a CSV file; `X-Total-Count` is how many matched (the file holds 10,000 at most)',
+      headers: z.object({ 'X-Total-Count': z.string() }),
+      content: { 'text/csv': { schema: z.string() } },
+    },
+    400: errors[400],
+    ...denied,
+  },
+})
+
 export const calendarRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(listRoute, async (c) => {
+    const { business, actor } = await requireMember(c, c.req.valid('param').slug)
+    return c.json(await bookingList(c.var.deps, business, actor, c.req.valid('query')), 200)
+  })
+  .openapi(exportRoute, async (c) => {
+    const { slug } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    const q = c.req.valid('query')
+    const { csv, total } = await exportBookings(c.var.deps, business, actor, q)
+    return c.body(csv, 200, {
+      'X-Total-Count': String(total),
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': `attachment; filename="bookings-${slug}-${q.tab}-${today(c.var.deps.now())}.csv"`,
+    })
+  })
   .openapi(complaintRoute, async (c) => {
     const { slug, code } = c.req.valid('param')
     const { business, actor } = await requireMember(c, slug)

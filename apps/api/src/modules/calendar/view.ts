@@ -13,6 +13,7 @@ import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, isNotNull, isNull, lte } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all } from '../../db/client'
+import { groupBy } from '../../lib/group'
 import { bookingItems, bookings, staff } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
@@ -26,17 +27,6 @@ import { blocksBetween } from './blocks'
 import type { Business } from './repo'
 
 type CalendarQuery = z.infer<typeof calendarQuerySchema>
-
-/** Rows in their lists by a key, in their order. */
-function groupBy<T>(rows: readonly T[], key: (r: T) => string): Map<string, T[]> {
-  const out = new Map<string, T[]>()
-  for (const r of rows) {
-    const list = out.get(key(r))
-    if (list) list.push(r)
-    else out.set(key(r), [r])
-  }
-  return out
-}
 
 const priceOf = (i: Pick<ItemRow, 'priceType' | 'priceAmount'>) => ({ type: i.priceType, amount: i.priceAmount })
 

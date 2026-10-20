@@ -9,29 +9,23 @@
 import { LAPSED_DAYS, NEW_DAYS, REGULAR_MIN_VISITS, REGULAR_WINDOW_DAYS, segmentsOf, type ClientSegment } from '@yeral/domain/clients'
 import { MARKET } from '@yeral/domain/market'
 import { scopeOf, type Actor } from '@yeral/domain/permissions'
-import { addDays, diffDays, localOf } from '@yeral/domain/time'
+import { addDays, localOf } from '@yeral/domain/time'
 import { and, asc, desc, eq, inArray, isNull, sql, type SQL } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, clientNotes, clients } from '../../db/schema'
 import { ApiError } from '../../http/errors'
-import { awaitingAnswer } from '../bookings/repo'
+import { awaitingAnswer, spanMinuteAt } from '../bookings/repo'
 import { blockedByCount } from './online'
 
 type ClientRecord = typeof clients.$inferSelect
 
-/** Business-local minutes since 2000-01-01: the scale of `bookings.span`. */
-const spanMinuteOf = (now: number) => {
-  const { date, min } = localOf(now)
-  return diffDays(date, '2000-01-01') * 1440 + min
-}
-
 /** A completed visit as people see it now. */
 export const doneAt = (now: number) =>
-  sql`(${bookings.status} = 'completed' or (${bookings.status} = 'confirmed' and upper(${bookings.span}) <= ${spanMinuteOf(now)}))`
+  sql`(${bookings.status} = 'completed' or (${bookings.status} = 'confirmed' and upper(${bookings.span}) <= ${spanMinuteAt(now)}))`
 
 /** A waiting request, or a confirmed visit that hasn't ended. */
 export const aheadAt = (now: number) =>
-  sql`(${awaitingAnswer(now)} or (${bookings.status} = 'confirmed' and upper(${bookings.span}) > ${spanMinuteOf(now)}))`
+  sql`(${awaitingAnswer(now)} or (${bookings.status} = 'confirmed' and upper(${bookings.span}) > ${spanMinuteAt(now)}))`
 
 /** The booking has an item with this person. */
 export const withStaff = (staffId: string) =>
