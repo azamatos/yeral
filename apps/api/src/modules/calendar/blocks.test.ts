@@ -5,7 +5,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, rateLimits, services, staff, staffBlocks } from '../../db/schema'
+import { businesses, rateLimits, services, staff } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { assertStaffFree, loadHours, OutsideHours } from '../availability/context'
 
@@ -138,14 +138,37 @@ describe('blocked time (book B-18)', () => {
   })
 
   it('a booking being made checks the person’s blocked time under the business’s lock', async () => {
+    const maysa = await as(MAYSA)
+    const made = await block(maysa, { staffId: aynaId, date: THU, start: 1080, end: 1110, reason: 'Call' })
+    const b = made.json.items[0] as { start: number; end: number }
     const hours = await loadHours(db, glowId)
-    const [b] = await db
-      .select()
-      .from(staffBlocks)
-      .where(and(eq(staffBlocks.staffId, maralId), eq(staffBlocks.date, THU)))
-    await expect(assertStaffFree(db, hours, THU, [{ staffId: maralId, start: b!.start + 15, end: b!.start + 45 }])).rejects.toBeInstanceOf(
+    await expect(assertStaffFree(db, hours, THU, [{ staffId: aynaId, start: b.start + 15, end: b.start + 45 }])).rejects.toMatchObject({
+      why: 'blocked',
+    })
+    await expect(assertStaffFree(db, hours, THU, [{ staffId: aynaId, start: b.end, end: b.end + 30 }])).resolves.toBeUndefined()
+    // a confirmed booking brought back as it was still can't land on it
+    await expect(assertStaffFree(db, hours, THU, [{ staffId: aynaId, start: b.start, end: b.end }], { day: false })).rejects.toBeInstanceOf(
       OutsideHours,
     )
-    await expect(assertStaffFree(db, hours, THU, [{ staffId: maralId, start: b!.end, end: b!.end + 30 }])).resolves.toBeUndefined()
+  })
+
+  it('a block can’t take a booking’s buffer after it; a repeat past a year is refused', async () => {
+    const maysa = await as(MAYSA)
+    // a manicure 10:00–11:00 with its 10 minutes after
+    await maysa.req(`${W}/bookings`, {
+      body: {
+        source: 'phone',
+        phone: '+99365800605',
+        serviceIds: [manicure],
+        staffId: maralId,
+        date: THU,
+        start: 600,
+        notifyClient: false,
+      },
+    })
+    expect((await block(maysa, { staffId: maralId, date: THU, start: 660, end: 690 })).json.error.code).toBe('block_over_bookings')
+    expect((await block(maysa, { staffId: maralId, date: THU, start: 675, end: 690 })).status).toBe(201)
+    const far = await block(maysa, { staffId: maralId, date: THU, start: 1140, end: 1170, repeatUntil: '2028-01-01' })
+    expect(far.json.error.details.issues).toEqual([{ path: ['repeatUntil'], code: 'too_big' }])
   })
 })

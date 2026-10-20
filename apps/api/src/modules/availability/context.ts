@@ -5,11 +5,11 @@
  * 409 slot_taken.
  */
 import type { dayStateSchema } from '@yeral/contract/availability'
-import { staffDoingAll, type AppointmentContext, type BusyInterval, type TableContext } from '@yeral/domain/availability'
-import { businessClosedReason, DAY_MINUTES, withinHours, withinStaffDay, type BusinessHours } from '@yeral/domain/hours'
+import { busyOn, staffDoingAll, type AppointmentContext, type BusyInterval, type TableContext } from '@yeral/domain/availability'
+import { businessClosedReason, withinHours, withinStaffDay, type BusinessHours } from '@yeral/domain/hours'
 import { overlaps } from '@yeral/domain/model'
 import type { BookingRules } from '@yeral/domain/rules'
-import { addDays, diffDays } from '@yeral/domain/time'
+import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { all, type Queryable } from '../../db/client'
@@ -189,8 +189,11 @@ export const lockedHours = (db: Queryable, businessId: string) => loadHours(db, 
  * `inTransaction` adds the nearest free times as the business stands.
  */
 export class OutsideHours extends ApiError {
-  /** `staffId`: the specialist whose day no longer holds it, when that's why. */
-  constructor(readonly staffId?: string) {
+  /** `staffId`: the specialist whose day no longer holds it, when that's why; `blocked`: their blocked time (B-18). */
+  constructor(
+    readonly staffId?: string,
+    readonly why: 'off' | 'blocked' = 'off',
+  ) {
     super('slot_taken', { alternatives: [] })
   }
 }
@@ -255,19 +258,13 @@ export async function assertStaffFree(
     if (!it.staffId) continue
     const s = rows.find((r) => r.id === it.staffId)
     if (!s || s.status !== 'active' || !s.bookable) throw new OutsideHours(it.staffId)
+    // blocked time closes it whatever comes back (a block is made only over free time)
+    if (busyOn(blocks, date).some((b) => b.staffId === it.staffId && overlaps(b, it))) throw new OutsideHours(it.staffId, 'blocked')
     // `day: false`: on the team is enough (a confirmed booking brought back as it was)
     if (opts.day === false) continue
     if (!withinStaffDay(hours, s, date, { start: it.start, end: it.end })) throw new OutsideHours(it.staffId)
-    const span = { start: absoluteMinute(date, it.start), end: absoluteMinute(date, it.end) }
-    const blocked = blocks.some(
-      (b) => b.staffId === it.staffId && overlaps(span, { start: absoluteMinute(b.date, b.start), end: absoluteMinute(b.date, b.end) }),
-    )
-    if (blocked) throw new OutsideHours(it.staffId)
   }
 }
-
-/** Minutes from 2000-01-01, so a day running past midnight overlaps the next (as `bookings.span` counts them). */
-const absoluteMinute = (date: string, min: number) => diffDays(date, '2000-01-01') * DAY_MINUTES + min
 
 /** One business with what free times need; 404 when it's gone. */
 export async function loadBusiness(db: Queryable, id: string): Promise<LoadedBusiness> {

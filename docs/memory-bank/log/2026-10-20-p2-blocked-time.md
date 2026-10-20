@@ -16,5 +16,11 @@
 - Tests: `calendar/blocks.test.ts` (free times, the client's availability, a booking and a move refused, the weekly
   repeat and its removal, over a booking, a week on, the past, a specialist's own and the list, the guard), domain unit
   tests.
+- Its review (10; 9 fixed): a confirmed booking brought back can't land on blocked time; a block can't take a
+  booking's buffer after it; a move confirmed onto blocked time says `blocked` (`OutsideHours.why`); the overlap query
+  reads only the blocks' dates and the days either side; a repeat past a year is refused (`too_big`), not cut short;
+  the jobs table keeps its doc comment; one sdk refresh; `assertMayBook` shared, `busyOn` for the past-midnight
+  overlap; the dead 48:00 check gone and the guard's test makes its own block. Not taken: blocked time in another
+  workspace (busy elsewhere counts bookings only, as breaks and days off there don't count, book Q-272).
 - Follow-ups: the calendar day view draws them (B-16, next); the block form isn't designed yet (a **Design to fix** in
   B-18).

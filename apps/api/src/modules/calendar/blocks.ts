@@ -6,9 +6,9 @@
  */
 import type { BlockOverBookingsDetails } from '@yeral/contract/errors'
 import type { Block, blockInputSchema } from '@yeral/contract/calendar'
-import { blockDates, MAX_DAY_END } from '@yeral/domain/hours'
+import { BLOCK_REPEAT_DAYS, blockDates } from '@yeral/domain/hours'
 import { canOn, type Actor } from '@yeral/domain/permissions'
-import { diffDays, epochOf } from '@yeral/domain/time'
+import { addDays, diffDays, epochOf } from '@yeral/domain/time'
 import { and, asc, eq, gte, inArray, sql } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 import type { z } from 'zod'
@@ -19,6 +19,7 @@ import { ApiError, invalid } from '../../http/errors'
 import { emit } from '../../notify'
 import { loadHours } from '../availability/context'
 import type { Business } from './repo'
+import { assertMayBook } from './service'
 
 type BlockInput = z.infer<typeof blockInputSchema>
 type BlockRow = typeof staffBlocks.$inferSelect
@@ -33,20 +34,17 @@ const viewOf = (b: BlockRow): Block => ({
   seriesId: b.seriesId,
 })
 
-/** The owner and administrators block anyone's time; a specialist only their own (the "add bookings" right). */
-function assertMayBlock(actor: Actor, staffId: string): void {
-  if (!canOn(actor, 'bookings', [staffId])) throw new ApiError('forbidden')
-}
-
 /**
- * Block time for one person: on `date`, and every week after it up to `repeatUntil`. Refused when it ends past the
- * next morning (48:00), lies wholly in the past, or covers a booking of theirs that's waiting or confirmed (409
+ * Block time for one person: on `date`, and every week after it up to `repeatUntil` (a year at most). Refused when it
+ * lies wholly in the past, or covers a booking of theirs that's waiting or confirmed, its buffer after included (409
  * `block_over_bookings`, the bookings in the way). Saved under the business row, as a booking takes it.
  */
 export async function addBlock(deps: Deps, business: Business, actor: Actor, userId: string, input: BlockInput): Promise<Block[]> {
-  assertMayBlock(actor, input.staffId)
-  if (input.end > MAX_DAY_END) throw invalid({ path: ['end'], code: 'invalid' })
+  assertMayBook(actor, input.staffId)
   if (input.repeatUntil && input.repeatUntil < input.date) throw invalid({ path: ['repeatUntil'], code: 'invalid' })
+  // "a year at most": a later end is refused, not cut short
+  if (input.repeatUntil && diffDays(input.repeatUntil, input.date) > BLOCK_REPEAT_DAYS)
+    throw invalid({ path: ['repeatUntil'], code: 'too_big' })
   const now = deps.now()
   if (epochOf(input.date, input.end) <= now) throw invalid({ path: ['date'], code: 'past' })
   const dates = blockDates(input.date, input.repeatUntil)
@@ -82,7 +80,10 @@ export async function addBlock(deps: Deps, business: Business, actor: Actor, use
   })
 }
 
-/** The person's waiting and confirmed bookings whose visit overlaps the block on any of its dates (past midnight too). */
+/**
+ * The person's waiting and confirmed bookings whose visit or buffer after it overlaps the block on any of its dates (past
+ * midnight too), read on those dates and the days either side.
+ */
 async function bookingsUnder(
   db: Queryable,
   businessId: string,
@@ -107,7 +108,8 @@ async function bookingsUnder(
         eq(bookings.businessId, businessId),
         eq(bookingItems.staffId, staffId),
         eq(bookingItems.active, true),
-        sql`int4range((${bookingItems.date} - date '2000-01-01') * 1440 + ${bookingItems.start}, (${bookingItems.date} - date '2000-01-01') * 1440 + ${bookingItems.end}) && any (array[${spans}])`,
+        inArray(bookingItems.date, [...new Set(dates.flatMap((d) => [addDays(d, -1), d, addDays(d, 1)]))]),
+        sql`int4range((${bookingItems.date} - date '2000-01-01') * 1440 + ${bookingItems.start}, (${bookingItems.date} - date '2000-01-01') * 1440 + ${bookingItems.end} + ${bookingItems.bufferAfter}) && any (array[${spans}])`,
       ),
     )
     .orderBy(asc(bookings.date), asc(bookings.start))
@@ -125,7 +127,7 @@ export async function removeBlock(deps: Deps, business: Business, actor: Actor, 
       .from(staffBlocks)
       .where(and(eq(staffBlocks.id, id), eq(staffBlocks.businessId, business.id)))
     if (!block) throw new ApiError('not_found')
-    assertMayBlock(actor, block.staffId)
+    assertMayBook(actor, block.staffId)
     const which =
       scope === 'series' && block.seriesId
         ? and(eq(staffBlocks.seriesId, block.seriesId), gte(staffBlocks.date, block.date))

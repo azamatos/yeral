@@ -635,13 +635,13 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     block: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof blockInputSchema>) => call(w.calendar.blocks.$post({ param: { slug }, json })),
-        onSuccess: () => Promise.all([invalidate(['calendar', slug]), booked(slug)]),
+        onSuccess: () => booked(slug),
       }),
     unblock: (slug: string) =>
       mutationOptions({
         mutationFn: ({ id, scope = 'one' }: { id: string; scope?: 'one' | 'series' }) =>
           call(w.calendar.blocks[':id'].$delete({ param: { slug, id }, query: { scope } })),
-        onSuccess: () => Promise.all([invalidate(['calendar', slug]), booked(slug)]),
+        onSuccess: () => booked(slug),
       }),
   }
 
