@@ -57,8 +57,47 @@
   "account": {
     "menu": "Account menu: {name}",
     "menuNoName": "Account menu",
+    "profile": "Profile",
     "logOut": "Log out",
-    "close": "Close"
+    "close": "Close",
+    "mine": "My account",
+    "sections": "Account sections",
+    "profileAndSettings": "Profile and settings"
+  },
+  "profile": {
+    "title": "Profile and settings",
+    "personal": "Personal details",
+    "personalLead": "Businesses see this name on your bookings.",
+    "first": "First name",
+    "last": "Last name",
+    "firstRequired": "Enter your first name.",
+    "phone": "Phone",
+    "change": "Change",
+    "changeLead": "We’ll send an SMS code to the new number.",
+    "changed": "Your phone number is changed.",
+    "newPhone": {
+      "label": "New phone number",
+      "hint": "{digits} digits. The SMS code comes to this number.",
+      "codeLead": "We sent the code to <b>{phone}</b>.",
+      "changeNumber": "Change number",
+      "cancel": "Cancel",
+      "codeLabel": "SMS code",
+      "resent": "New code sent."
+    },
+    "account": "Account",
+    "accountLead": "Log out of this device or delete your account entirely.",
+    "delete": "Delete account",
+    "deleteLead": "Your upcoming bookings are cancelled, and your account, favourites and reviews are deleted. This can’t be undone.",
+    "deleteTitle": "Delete your account?",
+    "deleteBody": "Your upcoming bookings will be cancelled and the businesses told. Your account, favourites and reviews will be deleted; businesses keep their own records of your visits. This can’t be undone.",
+    "deleteBack": "Back",
+    "deleted": "Your account is deleted.",
+    "unsaved": "Unsaved changes",
+    "saveQuestion": "Save your changes?",
+    "discard": "Discard",
+    "save": "Save",
+    "saving": "Saving",
+    "saved": "Changes saved"
   },
   "footer": {
     "forBusiness": "For business",
