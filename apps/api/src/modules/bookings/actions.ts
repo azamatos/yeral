@@ -9,6 +9,7 @@ import {
   REVIEW_EDIT_DAYS,
 } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
+import { reviewName } from '@yeral/domain/names'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -24,6 +25,7 @@ import { assertOnlineBooking, bookedServices, rebook } from './create'
 import { offerTarget } from './offers'
 import { isSlotConflict, lockBooking, pgCode, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from './repo'
 import { RESTORE_MINUTES } from './view'
+import { nameOf } from '../me/me'
 
 async function businessOf(deps: Deps, b: BookingRow): Promise<LoadedBusiness> {
   const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
@@ -234,12 +236,6 @@ export async function acceptAlternative(
   }
 }
 
-/** "Aýjemal G.": first name and the initial of the last. */
-export function authorName(name: string | null): string {
-  const [first = '', last = ''] = (name ?? '').trim().split(/\s+/)
-  return last ? `${first} ${last.charAt(0)}.` : first
-}
-
 export async function writeReview(deps: Deps, user: User, b: BookingRow, input: { rating: number; tags: string[]; text?: string }) {
   const now = deps.now()
   if (effectiveStatus(stateOf(b), now).status !== 'completed') throw new ApiError('review_not_allowed')
@@ -258,7 +254,7 @@ export async function writeReview(deps: Deps, user: User, b: BookingRow, input: 
         bookingId: b.id,
         businessId: b.businessId,
         userId: user.id,
-        authorName: authorName(user.name),
+        authorName: reviewName(nameOf(user)),
         rating: input.rating,
         tags: input.tags,
         text: input.text ?? null,

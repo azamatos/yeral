@@ -7,8 +7,10 @@ export const users = pgTable('users', {
   id: uuid().primaryKey().defaultRandom(),
   /** E.164 `+99365901122`. */
   phone: text().notNull().unique(),
-  /** Asked on the first booking. */
+  /** The first name (book Q-156); null until the first booking asks for it. */
   name: text(),
+  /** The surname, optional (book Q-156). */
+  surname: text(),
   /** Chosen by the person; until then the language they signed in with, else the market's main one (no database default: the market is configuration). */
   lang: locale().notNull(),
   notifyConfirmation: boolean().notNull().default(true),

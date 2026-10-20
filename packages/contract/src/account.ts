@@ -39,8 +39,11 @@ export const notificationPrefsSchema = z.object({
 export const meSchema = z
   .object({
     id: z.string(),
-    /** Null until the first booking asks for it. */
+    /** The whole name businesses see: the first name and the surname. Null until the first booking asks for it. */
     name: z.string().nullable(),
+    /** The two fields behind `name` (book Q-156): the first name, and the surname, which is optional. */
+    firstName: z.string().nullable(),
+    surname: z.string().nullable(),
     phone: phoneSchema,
     lang: localeSchema,
     notifications: notificationPrefsSchema,
@@ -83,10 +86,19 @@ export const verifyCodeResponseSchema = z.object({
 
 export const updateMeSchema = z
   .object({
+    /** Deprecated: one field, split at the first space into the first name and the surname. Use the two below. */
     name: z.string().trim().min(1).max(80).optional(),
+    /** The first name (book Q-156). */
+    firstName: z.string().trim().min(1).max(60).optional(),
+    /** The surname, optional (book Q-156): null or empty clears it. */
+    surname: z.string().trim().max(60).nullable().optional(),
     /** One of the market's languages ("Saýt we SMS habarnamalar şu dilde bolar"). */
     lang: marketLocaleSchema.optional(),
     notifications: notificationPrefsSchema.partial().optional(),
+  })
+  .refine((x) => x.name === undefined || (x.firstName === undefined && x.surname === undefined), {
+    message: 'send name or firstName and surname, not both',
+    path: ['name'],
   })
   .meta({ id: 'UpdateMe' })
 
