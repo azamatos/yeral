@@ -72,7 +72,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    ROUND6 A3; done 20.10.2026, the business's side with step 4), token links instead of `/b/{code}` and the signed-out link page (Q-168, F-068; the api done 20.10.2026), no review asks (Q-259; done 20.10.2026),
    linking by phone only for 6 months plus "Is this you?" (Q-270; done 20.10.2026), a changed phone keeps its client record (Q-171; done 20.10.2026),
    code limits (Q-267; done 20.10.2026), deleting an account (Q-172; done 20.10.2026), name and surname (Q-156; done 20.10.2026), time limits on no-shows, complaints and
-   reviews (Q-254, Q-206, Q-126), at most 3 waiting requests per business and 10 in all (Q-124), the cancel reason
+   reviews (Q-254, Q-206, Q-126; the rules done 20.10.2026, the business's complaint endpoint with step 4), at most 3 waiting requests per business and 10 in all (Q-124), the cancel reason
    setting (Q-163), the 4 undo reasons (ROUND6 A6), the answer time worked out (Q-113), phone-only clients and paused
    businesses (Q-154; the booking detail done 20.10.2026, the link page comes with Q-168), the owner's preview of an unverified page (F-032), no average bill and the hidden-price text
    (Q-103), lateness fixed at 15 min (Q-118), a price range filter, the failed-SMS alert and late reminders dropped

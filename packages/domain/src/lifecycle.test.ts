@@ -218,11 +218,23 @@ describe('business actions', () => {
     expect(canBusinessMove(booking(), epochOf(THU, 880))).toBe('already_started')
   })
 
-  it('files one complaint once the visit has started', () => {
-    expect(canComplain(booking(), NOW)).toBe('not_started')
-    expect(canComplain(booking(), epochOf(THU, 870))).toBeNull()
-    expect(canComplain(booking(), epochOf(THU, 1000))).toBeNull() // completed by then
-    expect(canComplain(booking({ hasComplaint: true }), epochOf(THU, 900))).toBe('already_reported')
-    expect(canComplain(booking({ status: 'cancelled' }), epochOf(THU, 900))).toBe('invalid_status')
+  it('a no-show from the start until a day after the end; other complaints any time (book Q-206, Q-254)', () => {
+    expect(canComplain(booking(), 'noshow', NOW)).toBe('not_started')
+    expect(canComplain(booking(), 'noshow', epochOf(THU, 870))).toBeNull()
+    expect(canComplain(booking(), 'noshow', epochOf(THU, 1000))).toBeNull() // completed by then
+    // the visit ends at 15:30: until 15:30 the next day
+    expect(canComplain(booking(), 'noshow', epochOf(THU, 930) + 24 * 60 * MIN)).toBeNull()
+    expect(canComplain(booking(), 'noshow', epochOf(THU, 930) + 24 * 60 * MIN + 1)).toBe('noshow_window_passed')
+    // rude on the phone the day before: a complaint already
+    expect(canComplain(booking(), 'rude', NOW)).toBeNull()
+    expect(canComplain(booking(), 'late', epochOf(THU, 930) + 40 * 24 * 60 * MIN)).toBeNull()
+    expect(canComplain(booking({ hasComplaint: true }), 'other', epochOf(THU, 900))).toBe('already_reported')
+    expect(canComplain(booking({ status: 'cancelled' }), 'rude', epochOf(THU, 900))).toBe('invalid_status')
+  })
+
+  it('a review until 30 days after the visit (book Q-126)', () => {
+    const end = epochOf(THU, 930)
+    expect(clientActions(booking(), rules, null, end + 30 * 24 * 60 * MIN).review).toBe(true)
+    expect(clientActions(booking(), rules, null, end + 30 * 24 * 60 * MIN + 1).review).toBe(false)
   })
 })

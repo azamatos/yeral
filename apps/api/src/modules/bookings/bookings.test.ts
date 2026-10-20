@@ -228,6 +228,27 @@ describe('client bookings', () => {
     )
   })
 
+  it('a review can be written until 30 days after the visit (book Q-126)', async () => {
+    const b = browser(t.app)
+    await b.login('+99365111015', 'Maral')
+    const { json } = await b.req('/v1/bookings', {
+      body: {
+        type: 'appointment',
+        business: 'barber-loft',
+        serviceIds: [svc['barber:Sakgal düzediş']],
+        staffId: null,
+        date: THU,
+        start: 780,
+      },
+    })
+    t.clock.now = epochOf(THU, json.end) + 30 * 86_400_000 + MIN
+    await runDueJobs(t.deps)
+    expect((await b.req(`/v1/me/bookings/${json.code}`)).json).toMatchObject({ status: 'completed', actions: { review: false } })
+    const late = await b.req(`/v1/me/bookings/${json.code}/review`, { body: { rating: 5 } })
+    expect(late.status).toBe(409)
+    expect(late.json.error.code).toBe('review_window_passed')
+  })
+
   it('a table: the smallest free table in the area', async () => {
     const b = browser(t.app)
     await b.login('+99365111008', 'Gözel')

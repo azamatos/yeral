@@ -25,11 +25,13 @@ export const ERROR_STATUS = {
   already_started: 409,
   not_started: 409,
   already_reported: 409,
+  noshow_window_passed: 409,
   restore_expired: 409,
   // reviews
   review_exists: 409,
   review_not_allowed: 403,
   review_locked: 409,
+  review_window_passed: 409,
   // login code
   code_invalid: 400,
   code_expired: 400,

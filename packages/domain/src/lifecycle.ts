@@ -13,6 +13,7 @@ import { isOnlineSource, type BookingSource, type BookingStatus, type CancelledB
 import type { BookingRules } from './rules'
 import { openStretches, type BusinessHours } from './hours'
 import { addDays, epochOf, localOf } from './time'
+import type { ComplaintType } from './model'
 
 /** A booking as far as the lifecycle cares: business-local date, start and end minutes, stored state. */
 export interface BookingState {
@@ -28,12 +29,22 @@ export interface BookingState {
 }
 
 export type LifecycleError =
-  'invalid_status' | 'request_expired' | 'cancel_window_passed' | 'already_started' | 'not_started' | 'already_reported'
+  | 'invalid_status'
+  | 'request_expired'
+  | 'cancel_window_passed'
+  | 'already_started'
+  | 'not_started'
+  | 'already_reported'
+  | 'noshow_window_passed'
 
 /** At most this many alternative times go with a decline or an expiry. */
 export const MAX_ALTERNATIVES = 3
 /** A review can be edited this long after it's written. */
 export const REVIEW_EDIT_DAYS = 7
+/** A review can be written until this long after the visit ends (book Q-126). */
+export const REVIEW_WRITE_DAYS = 30
+/** A no-show can be marked until this long after the visit ends (book Q-254). */
+export const NOSHOW_MARK_HOURS = 24
 
 const startOf = (b: Pick<BookingState, 'date' | 'start'>) => epochOf(b.date, b.start)
 const endOf = (b: Pick<BookingState, 'date' | 'end'>) => epochOf(b.date, b.end)
@@ -193,6 +204,11 @@ export interface ClientActions {
   bookAgain: boolean
 }
 
+/** A review can still be written: until 30 days after the visit ends (book Q-126). */
+export function reviewOpen(b: Pick<BookingState, 'date' | 'end'>, now = Date.now()): boolean {
+  return now <= endOf(b) + REVIEW_WRITE_DAYS * 86_400_000
+}
+
 /** What the client can do with a booking ("Client actions by status", client spec §4.8). */
 export function clientActions(
   b: BookingState,
@@ -207,7 +223,7 @@ export function clientActions(
     reschedule: canClientReschedule(b, rules, now) === null,
     editNote: canEditNote(b, now) === null,
     callOnly: status === 'confirmed' && !cancel,
-    review: status === 'completed' && !review,
+    review: status === 'completed' && !review && reviewOpen(b, now),
     editReview: status === 'completed' && !!review && now - review.createdAt < REVIEW_EDIT_DAYS * 86_400_000,
     bookAgain: status === 'completed' || status === 'cancelled' || status === 'noshow',
   }
@@ -234,10 +250,15 @@ export function canBusinessMove(b: BookingState, now = Date.now()): Guard {
   return now < startOf(b) ? null : 'already_started'
 }
 
-/** "Arz et": once the visit has started, on a confirmed or completed booking, once. */
-export function canComplain(b: BookingState, now = Date.now()): Guard {
+/**
+ * "Arz et", once, on a confirmed or completed booking. "Gelmedi" (a no-show) from the visit's start until 24 hours after
+ * its end (book Q-206, Q-254); being late, rude or anything else any time, a rude call before the visit included.
+ */
+export function canComplain(b: BookingState, type: ComplaintType, now = Date.now()): Guard {
   if (b.hasComplaint) return 'already_reported'
   const { status } = effectiveStatus(b, now)
   if (status !== 'confirmed' && status !== 'completed') return 'invalid_status'
-  return now >= startOf(b) ? null : 'not_started'
+  if (type !== 'noshow') return null
+  if (now < startOf(b)) return 'not_started'
+  return now <= endOf(b) + NOSHOW_MARK_HOURS * 3_600_000 ? null : 'noshow_window_passed'
 }

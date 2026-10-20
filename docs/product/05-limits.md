@@ -230,11 +230,6 @@ apps/api/src/modules/bookings/create.ts). Waiting requests have no limit.
 | Complaint (*Arz et*) | *Gelmedi* (no-show) from the visit start until 24 h after its end; *Gijä galdy*, *Gödek gylyk* and *Başga* any time on a confirmed or completed booking; one per booking | Owner/admin and specialists, by permission | ADR 0017; Q-206, Q-254, decided 18.10.2026; code: packages/domain/src/lifecycle.ts |
 | Removing a complaint | from the booking drawer within 7 days; a removed no-show goes back to *Tamamlandy* and the no-show count drops; the client gets no message | Owner/admin and specialists, by permission | Q-207, decided 18.10.2026 |
 
-**Code differs:** the move keeps the booking with any free specialist when the chosen one is busy; the decided rule is no
-silent swap (code: apps/api/src/modules/bookings/create.ts). A booking with a waiting move doesn't offer a second move,
-though a second move should replace the first (code: apps/api/src/modules/bookings/view.ts). A no-show can be marked at
-any time after the start, with no end (code: packages/domain/src/lifecycle.ts).
-
 **Design to fix:** the class line "*Mugt ýatyrmak wagty geçdi — ýatyrsaňyz, studiýa habar beriler*" changes to say
 that only *Jaň et* is left (Q-125).
 
@@ -249,7 +244,7 @@ that only *Jaň et* is left (Q-125).
 | Quick tags | 5 drawn (*Wagtynda kabul etdiler*, *Arassa*, *Ussat hünärmen*, *Mähirli*, *Bahasyna laýyk*); at most 6 per review, 40 characters each | Fixed | Account-Bookings screen; limits code only: packages/contract/src/bookings.ts |
 | Text | optional, up to 500 characters | Client | client spec §4.8 |
 | Editing | for 7 days after writing | Client | client spec §4.8; code: packages/domain/src/lifecycle.ts |
-| Deadline to write one | 30 days after the visit | Fixed | Q-126, decided 18.10.2026 |
+| Deadline to write one | 30 days after the visit | Fixed | Q-126, decided 18.10.2026; code: packages/domain/src/lifecycle.ts |
 | Review ask by SMS | none: clients review from *Ýazylyşlarym* (My bookings) and from the booking link after a completed visit | Fixed | Q-259, Q-170, decided 18.10.2026 |
 | Business reply | up to 500 characters; the business can edit or delete it | Owner/admin | business spec §15 |
 | Reviews per page in the workspace | 20 | Fixed | business spec §15 |
@@ -257,7 +252,6 @@ that only *Jaň et* is left (Q-125).
 | A reported review | visible on both sides, not counted until the Ýeral team clears it; the team decides within 48 h, otherwise it counts again; a cleared review can't be reported again | Ýeral team | business spec §15; ROUND6-ANSWERS F2; Q-261, decided 18.10.2026 |
 
 **Code differs:** there's no moderation yet; every review counts as soon as it's written (code:
-apps/api/src/modules/bookings/actions.ts). A review can be written any time after the visit (code:
 apps/api/src/modules/bookings/actions.ts).
 
 > Open question Q-126: how long after a visit can a client write a review?

@@ -1334,11 +1334,7 @@ flowchart TD
 - On the link page a completed booking adds "Teswir ýaz", which logs in with the masked phone and opens the review (Q-170, decided 18.10.2026; C-38).
 - A review written before the business marks a no-show stays (Q-254, decided 18.10.2026; C-36).
 
-**Code differs**
-
-- A review can be written at any time after the visit, with no 30-day limit (code: `bookings/actions.ts`).
-
-**Status:** Design: drawn (Account-Bookings · `view=review`) · Code: built (api).
+**Status:** Design: drawn (Account-Bookings · `view=review`) · Code: built (api); after 30 days the review is refused with `review_window_passed`.
 
 ### C-35 · Edit a review
 
@@ -1395,8 +1391,6 @@ flowchart TD
 - The business can remove a mistaken no-show from the booking drawer within 7 days: the status goes back to *Tamamlandy*, the no-show count drops, and the client gets no message (Q-207, decided 18.10.2026).
 
 > Open question Q-166: disputing a no-show.
-
-**Code differs:** "Gelmedi" can be marked at any time after the start, with no end (code: `domain/lifecycle.ts`).
 
 **Status:** Design: drawn (Account-Bookings) · Code: partly — the status and the phone-only rule are built; the business's "Arz et" comes with M5.
 
