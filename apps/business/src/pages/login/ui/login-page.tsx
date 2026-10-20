@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from '@yeral/ui/toast'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
-import { useSdk } from '@/shared/api'
+import { useSdk, useSignOut } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { usePageTitle } from '@/shared/lib'
 import { useSignIn } from '../model/use-sign-in'
@@ -20,10 +20,9 @@ import { FailedStep, WaitStep } from './wait-steps'
 export function LoginPage() {
   const t = useTranslations('login')
   const sdk = useSdk()
-  const queryClient = useQueryClient()
   const errorText = useErrorText()
   const me = useQuery(sdk.me.get())
-  const logout = useMutation(sdk.auth.logout())
+  const { signOut, signingOut, sessionEnded } = useSignOut()
   const [identity, setIdentity] = useState<{ name: string | null; ticket: string } | null>(null)
   const [declined, setDeclined] = useState<string | null>(null)
   usePageTitle(t('tabTitle'))
@@ -35,23 +34,19 @@ export function LoginPage() {
     },
     onFailed: failed,
   })
-
-  /** «Log in with another number»: signed out, nothing of this person's left in the cache, the phone step. */
-  const otherNumber = () =>
-    logout.mutate(undefined, {
-      onSuccess: () => {
-        queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== 'me' })
-        setDeclined(null)
-        signIn.reset()
-      },
-      onError: failed,
-    })
+  const startOver = () => {
+    setDeclined(null)
+    signIn.reset()
+  }
 
   if (identity)
     return (
       <IdentityStep
         {...identity}
-        onAnswered={() => setIdentity(null)}
+        onAnswered={() => {
+          setIdentity(null)
+          signIn.reset()
+        }}
         onBack={() => {
           setIdentity(null)
           signIn.changeNumber()
@@ -72,8 +67,13 @@ export function LoginPage() {
       me={me.data}
       declined={declined}
       onDeclined={setDeclined}
-      onOtherNumber={otherNumber}
-      leaving={logout.isPending}
+      // «Log in with another number»: signed out, the phone step from the start
+      onOtherNumber={() => signOut({ onDone: startOver, onFailed: failed })}
+      leaving={signingOut}
+      onSessionEnded={() => {
+        sessionEnded()
+        startOver()
+      }}
       onFailed={failed}
     />
   )

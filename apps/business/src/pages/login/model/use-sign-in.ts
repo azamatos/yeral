@@ -1,16 +1,14 @@
 import { useMutation } from '@tanstack/react-query'
-import type { isThisYouSchema, verifyCodeResponseSchema } from '@yeral/contract/account'
 import { toE164 } from '@yeral/domain/phone'
-import { isApiError, type ApiError } from '@yeral/sdk'
+import { isApiError, type ApiError, type Sdk } from '@yeral/sdk'
 import { useEffect, useReducer, useState } from 'react'
 import { useLocale } from 'use-intl'
-import type { z } from 'zod'
 import { useSdk } from '@/shared/api'
 import { phoneProblem } from '../lib/phone'
 import { initialSignIn, signInReducer, signInView, type SignInEvent } from './sign-in'
 
 /** What the api answers a right code: signed in (`me`, `isNew`), or "Is this you?" first (book Q-270). */
-export type Verified = z.output<typeof verifyCodeResponseSchema> | z.output<typeof isThisYouSchema>
+export type Verified = Awaited<ReturnType<NonNullable<ReturnType<Sdk['auth']['verify']>['mutationFn']>>>
 
 /** Refusals the step shows in place; anything else (no connection, a server error) is the screen's toast. */
 const SEND_REFUSALS = ['rate_limited', 'resend_too_soon', 'too_many_attempts', 'validation_error'] as const
@@ -48,15 +46,16 @@ export function useSignIn({ onVerified, onFailed }: { onVerified: (answer: Verif
     dispatch(event(moment))
   }
 
-  const request = (digits: string) => {
+  const request = (phone: string, resend: boolean) => {
     if (send.isPending) return
     send.mutate(
-      { phone: toE164(digits), lang: locale },
+      { phone: toE164(phone), lang: locale },
       {
-        onSuccess: (sent) => at((moment) => ({ type: 'codeSent', resendAfterSec: sent.resendAfterSec, code: sent.code, now: moment })),
+        onSuccess: (sent) =>
+          at((moment) => ({ type: 'codeSent', phone, resend, resendAfterSec: sent.resendAfterSec, code: sent.code, now: moment })),
         onError: (error) => {
           if (isApiError(error) && (SEND_REFUSALS as readonly string[]).includes(error.code))
-            at((moment) => ({ type: 'sendRefused', error, now: moment }))
+            at((moment) => ({ type: 'sendRefused', phone, resend, error, now: moment }))
           else onFailed(error)
         },
       },
@@ -73,15 +72,19 @@ export function useSignIn({ onVerified, onFailed }: { onVerified: (answer: Verif
     sendCode: () => {
       const problem = phoneProblem(state.phone)
       if (problem) dispatch({ type: 'phoneInvalid', error: problem })
-      else request(state.phone)
+      else request(state.phone, false)
     },
-    resend: () => request(state.sentTo ?? state.phone),
+    resend: () => request(state.sentTo ?? state.phone, true),
     submitCode: (code: string) => {
       if (!state.sentTo || verify.isPending) return
       verify.mutate(
         { phone: toE164(state.sentTo), code, lang: locale },
         {
-          onSuccess: (answer) => onVerified(answer),
+          onSuccess: (answer) => {
+            // signed in: the steps and their clocks are done ("Is this you?" may still send the person back to them)
+            if (!('isThisYou' in answer)) dispatch({ type: 'reset' })
+            onVerified(answer)
+          },
           onError: (error) => {
             if (isApiError(error) && (CODE_REFUSALS as readonly string[]).includes(error.code))
               at((moment) => ({ type: 'codeRefused', error, now: moment }))

@@ -1,6 +1,8 @@
 import { Button } from '@yeral/ui/button'
+import { cn } from '@yeral/ui/cn'
 import { LogOut } from 'lucide-react'
 import { useTranslations } from 'use-intl'
+import { textLink } from '@/shared/ui'
 
 /**
  * «You: Gülnar Öwezowa · +993 64 •• •• 90 · Log in with another number» under every step after the code (B-Login
@@ -34,7 +36,7 @@ export function AccountLine({
           type="button"
           disabled={busy}
           onClick={onOtherNumber}
-          className="hit inline-flex min-h-8 cursor-pointer items-center rounded-xs text-small font-semibold text-a-600 hover:text-a-700 hover:underline focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default disabled:text-n-500 disabled:no-underline"
+          className={cn(textLink, 'hit inline-flex min-h-8 items-center text-small')}
         >
           {t('otherNumber')}
         </button>

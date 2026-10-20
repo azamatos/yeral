@@ -1,11 +1,12 @@
 import { useMutation } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 import type { Workspace } from '@yeral/contract/team'
+import { cn } from '@yeral/ui/cn'
 import { ArrowRight } from 'lucide-react'
 import { useEffect } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { AuthPage } from '@/shared/ui'
+import { AuthPage, textLink } from '@/shared/ui'
 import { BusinessMark } from './business-mark'
 
 /** How long "Opening Glow Studio…" stays before the calendar opens; «Open the calendar now» skips it. */
@@ -45,11 +46,7 @@ export function OpeningStep({ workspace, count, current }: { workspace: Workspac
         <span className="absolute inset-y-0 w-2/5 animate-[opening_1.2s_ease-in-out_infinite] rounded-pill bg-a-500 motion-reduce:left-0 motion-reduce:w-3/5 motion-reduce:animate-none" />
       </div>
       <p className="m-0 max-w-85 text-dense text-n-600">{count > 1 ? t('login.opening.many', { count }) : t('login.opening.one')}</p>
-      <Link
-        to="/w/$slug/calendar"
-        params={{ slug }}
-        className="inline-flex items-center gap-1.5 rounded-xs text-small font-semibold text-a-600 hover:text-a-700 hover:underline focus-visible:shadow-focus focus-visible:outline-none"
-      >
+      <Link to="/w/$slug/calendar" params={{ slug }} className={cn(textLink, 'inline-flex items-center gap-1.5 text-small')}>
         {t('login.opening.now')}
         <ArrowRight aria-hidden className="size-4" />
       </Link>

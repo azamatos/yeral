@@ -95,11 +95,14 @@ const fakeApi =
     signedIn,
     lockSec = 60,
     codes = 0,
-  }: { showCode?: boolean; signedIn?: string; lockSec?: number; codes?: number } = {}) =>
+    resendSec = 59,
+    sessionEnds = false,
+  }: { showCode?: boolean; signedIn?: string; lockSec?: number; codes?: number; resendSec?: number; sessionEnds?: boolean } = {}) =>
   (): typeof fetch => {
     const ACCOUNTS = structuredClone(PEOPLE)
     const CODES = ['4821', '7305', '1946', '5582', '3067']
     let sent = codes
+    let sentAt = 0
     let wrong = 0
     let phone: string | undefined
     let me: Me | null = signedIn ? (ACCOUNTS[signedIn]?.me ?? null) : null
@@ -115,7 +118,10 @@ const fakeApi =
       if (route === 'POST /auth/code') {
         // 5 codes an hour for one number (book Q-267)
         if (sent >= 5) return refuse(429, 'rate_limited', { retryAfterSec: 2520, retryAfterMin: 42 })
+        // the code sent less than a minute ago still works
+        if (body.phone === phone && Date.now() - sentAt < resendSec * 1000) return refuse(429, 'resend_too_soon', { retryAfterSec: 50 })
         phone = String(body.phone)
+        sentAt = Date.now()
         sent += 1
         wrong = 0
         return json({ resendAfterSec: 59, expiresInSec: 300, ...(showCode ? { code: CODES[(sent - 1) % CODES.length] } : {}) })
@@ -144,6 +150,11 @@ const fakeApi =
         return new Response(null, { status: 204 })
       }
       if (!me || !account) return refuse(401, 'unauthorized')
+      // the session ended elsewhere: the page still has `me`, the next questions get 401
+      if (sessionEnds && route !== 'GET /me') {
+        me = null
+        return refuse(401, 'unauthorized')
+      }
       const signedInAs = account
       if (route === 'GET /me') return json(me)
       if (route === 'PATCH /me') {
@@ -190,7 +201,7 @@ function Setup() {
 const routes = { '/login': LoginPage, '/w/$slug/calendar': Calendar, '/setup/$step': Setup }
 
 const meta = {
-  title: 'Business/Pages/Login',
+  title: 'Business/Access/LoginFlow',
   component: PageStory,
   parameters: { layout: 'fullscreen' },
   args: { routes, path: '/login', server: fakeApi() },
@@ -256,6 +267,35 @@ export const Member: Story = {
     await expect(canvas.getByText(/You have 2 workspaces/)).toBeVisible()
     await waitFor(() => expect(opening).toHaveFocus())
     await expect(await canvas.findByText('Calendar of glow-studio', {}, { timeout: 4000 })).toBeVisible()
+  },
+}
+
+/** Change number, then the same number again: the code sent a moment ago still works and stays on screen. */
+export const ChangeNumber: Story = {
+  name: 'Change number',
+  args: { server: fakeApi() },
+  play: async ({ canvas }) => {
+    await sendCode(canvas, '65102030')
+    await expect(canvas.getByText('4821')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Change number' }))
+    const phone = await canvas.findByLabelText('Phone number')
+    // the field takes the focus, not the page
+    await waitFor(() => expect(phone).toHaveFocus())
+    await expect(phone).toHaveValue('65 10 20 30')
+    await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
+    await canvas.findByLabelText('Code')
+    await expect(canvas.getByText('4821')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: /Get a new code in 0:[45]\d/ })).toBeDisabled()
+  },
+}
+
+/** Signed in a moment ago, but the session ended elsewhere: back to the sign-in, not a dead end. */
+export const SessionEnded: Story = {
+  name: 'Session ended',
+  args: { server: fakeApi({ signedIn: '+99365102030', sessionEnds: true }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByLabelText('Phone number', {}, { timeout: 3000 })).toBeVisible()
+    await expect(canvas.queryByText('Something went wrong')).not.toBeInTheDocument()
   },
 }
 
@@ -340,7 +380,7 @@ export const InviteExpired: Story = {
 
 /** Three wrong codes lock the step; when the lock ends the old code is dead and a new one brings the step back. */
 export const Locked: Story = {
-  args: { server: fakeApi({ lockSec: 2 }) },
+  args: { server: fakeApi({ lockSec: 2, resendSec: 0 }) },
   play: async ({ canvas }) => {
     await sendCode(canvas, '65102030')
     await userEvent.keyboard('1111')

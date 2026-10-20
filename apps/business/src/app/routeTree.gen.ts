@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SetupStepRouteImport } from './routes/setup/$step'
 import { Route as WSlugRouteRouteImport } from './routes/w/$slug/route'
+import { Route as WSlugIndexRouteImport } from './routes/w/$slug/index'
 import { Route as WSlugCalendarRouteImport } from './routes/w/$slug/calendar'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const WSlugRouteRoute = WSlugRouteRouteImport.update({
   path: '/w/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WSlugIndexRoute = WSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WSlugRouteRoute,
+} as any)
 const WSlugCalendarRoute = WSlugCalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
@@ -47,13 +53,14 @@ export interface FileRoutesByFullPath {
   '/w/$slug': typeof WSlugRouteRouteWithChildren
   '/setup/$step': typeof SetupStepRoute
   '/w/$slug/calendar': typeof WSlugCalendarRoute
+  '/w/$slug/': typeof WSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/w/$slug': typeof WSlugRouteRouteWithChildren
   '/setup/$step': typeof SetupStepRoute
   '/w/$slug/calendar': typeof WSlugCalendarRoute
+  '/w/$slug': typeof WSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,12 +69,19 @@ export interface FileRoutesById {
   '/w/$slug': typeof WSlugRouteRouteWithChildren
   '/setup/$step': typeof SetupStepRoute
   '/w/$slug/calendar': typeof WSlugCalendarRoute
+  '/w/$slug/': typeof WSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/w/$slug' | '/setup/$step' | '/w/$slug/calendar'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/w/$slug'
+    | '/setup/$step'
+    | '/w/$slug/calendar'
+    | '/w/$slug/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/w/$slug' | '/setup/$step' | '/w/$slug/calendar'
+  to: '/' | '/login' | '/setup/$step' | '/w/$slug/calendar' | '/w/$slug'
   id:
     | '__root__'
     | '/'
@@ -75,6 +89,7 @@ export interface FileRouteTypes {
     | '/w/$slug'
     | '/setup/$step'
     | '/w/$slug/calendar'
+    | '/w/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -114,6 +129,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WSlugRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/w/$slug/': {
+      id: '/w/$slug/'
+      path: '/'
+      fullPath: '/w/$slug/'
+      preLoaderRoute: typeof WSlugIndexRouteImport
+      parentRoute: typeof WSlugRouteRoute
+    }
     '/w/$slug/calendar': {
       id: '/w/$slug/calendar'
       path: '/calendar'
@@ -126,10 +148,12 @@ declare module '@tanstack/react-router' {
 
 interface WSlugRouteRouteChildren {
   WSlugCalendarRoute: typeof WSlugCalendarRoute
+  WSlugIndexRoute: typeof WSlugIndexRoute
 }
 
 const WSlugRouteRouteChildren: WSlugRouteRouteChildren = {
   WSlugCalendarRoute: WSlugCalendarRoute,
+  WSlugIndexRoute: WSlugIndexRoute,
 }
 
 const WSlugRouteRouteWithChildren = WSlugRouteRoute._addFileChildren(

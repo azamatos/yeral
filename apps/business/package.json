@@ -25,8 +25,7 @@
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "use-intl": "catalog:",
-    "zod": "catalog:"
+    "use-intl": "catalog:"
   },
   "devDependencies": {
     "@babel/core": "catalog:",

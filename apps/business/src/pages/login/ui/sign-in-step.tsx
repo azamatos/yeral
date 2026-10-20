@@ -1,12 +1,13 @@
 import { Link } from '@tanstack/react-router'
+import { MARKET } from '@yeral/domain/market'
 import { formatPhone, toE164 } from '@yeral/domain/phone'
+import { cn } from '@yeral/ui/cn'
 import { SignInCodeStep, type SignInCodeStepCopy } from '@yeral/ui/sign-in-code-step'
-import { useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
-import { AuthPage } from '@/shared/ui'
+import { AuthPage, textLink } from '@/shared/ui'
 import { mobileStarts, PHONE_RULES } from '../lib/phone'
 import type { useSignIn } from '../model/use-sign-in'
-import { MARKET } from '@yeral/domain/market'
 
 const STARTS = mobileStarts()
 
@@ -15,9 +16,16 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
   const t = useTranslations()
   const format = useFormatter()
   const titleId = useId()
+  const formRef = useRef<HTMLFormElement>(null)
   const { state, view } = signIn
   const brand = t('common.brand')
   const onCode = state.step === 'code'
+
+  // «Change number» goes away with the code step: the number takes the focus instead of the page (B-Login focusStep)
+  const { changedNumber } = state
+  useEffect(() => {
+    if (changedNumber) formRef.current?.querySelector('input')?.focus()
+  }, [changedNumber])
 
   const copy: SignInCodeStepCopy = {
     phoneLabel: t('login.phoneLabel'),
@@ -53,11 +61,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
               phone: formatPhone(toE164(state.sentTo ?? state.phone)),
               b: (chunks) => <b className="whitespace-nowrap tabular-nums">{chunks}</b>,
             })}{' '}
-            <button
-              type="button"
-              onClick={signIn.changeNumber}
-              className="cursor-pointer rounded-xs font-semibold whitespace-nowrap text-a-600 hover:text-a-700 hover:underline focus-visible:shadow-focus focus-visible:outline-none"
-            >
+            <button type="button" onClick={signIn.changeNumber} className={cn(textLink, 'whitespace-nowrap')}>
               {t('login.changeNumber')}
             </button>
           </>
@@ -67,6 +71,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
       }
     >
       <SignInCodeStep
+        ref={formRef}
         aria-labelledby={titleId}
         step={state.step}
         size={56}
@@ -97,11 +102,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
           <p className="m-0 text-body text-n-600">
             {t.rich('login.noBusiness', {
               start: (chunks) => (
-                <Link
-                  to="/setup/$step"
-                  params={{ step: 'phone' }}
-                  className="rounded-xs font-semibold text-a-600 hover:text-a-700 hover:underline focus-visible:shadow-focus focus-visible:outline-none"
-                >
+                <Link to="/setup/$step" params={{ step: 'phone' }} className={textLink}>
                   {chunks}
                 </Link>
               ),

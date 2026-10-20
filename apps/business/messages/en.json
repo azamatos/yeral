@@ -38,6 +38,7 @@
     "wrongCode": "Wrong code. {left, plural, one {# try} other {# tries}} left.",
     "locked": "Too many tries. Try again in {seconds, plural, one {# second} other {# seconds}}.",
     "you": "You: <b>{who}</b>",
+    "who": "{name} · {phone}",
     "otherNumber": "Log in with another number",
     "loading": "Just a moment…",
     "identity": {
@@ -60,6 +61,7 @@
     },
     "invite": {
       "eyebrow": "Invite",
+      "where": "{category} · {city}",
       "title": "{business} invites you to the team",
       "by": "{name} added you as <b>{level}</b>",
       "byNobody": "You’re invited as <b>{level}</b>",

@@ -3,7 +3,8 @@ import type { Me } from '@yeral/contract/account'
 import type { InviteCard } from '@yeral/contract/team'
 import { formatPhone, maskPhone } from '@yeral/domain/phone'
 import { isApiError } from '@yeral/sdk'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { entryOf, type Entry } from '../model/entry'
 import { InviteStep } from './invite-step'
@@ -21,6 +22,7 @@ export function EntryStep({
   onDeclined,
   onOtherNumber,
   leaving,
+  onSessionEnded,
   onFailed,
 }: {
   me: Me
@@ -28,8 +30,11 @@ export function EntryStep({
   onDeclined: (business: string) => void
   onOtherNumber: () => void
   leaving: boolean
+  /** The api no longer knows this session (it ended while `me` was still cached): back to the sign-in. */
+  onSessionEnded: () => void
   onFailed: (error: unknown) => void
 }) {
+  const t = useTranslations('login')
   const sdk = useSdk()
   const invites = useQuery(sdk.team.myInvites())
   const workspaces = useQuery(sdk.team.workspaces())
@@ -37,11 +42,27 @@ export function EntryStep({
   const decline = useMutation(sdk.team.decline())
   // the invite being answered stays on screen until the answer is in
   const [answering, setAnswering] = useState<InviteCard | null>(null)
-  const name = me.name ?? me.firstName ?? ''
-  const who = (phone: string) => [name, phone].filter(Boolean).join(' · ')
+  const name = me.name ?? me.firstName
+  const who = (phone: string) => (name ? t('who', { name, phone }) : phone)
 
-  if (invites.isPending || workspaces.isPending) return <WaitStep />
-  if (invites.isError || workspaces.isError)
+  const ended = isApiError(invites.error, 'unauthorized') || isApiError(workspaces.error, 'unauthorized')
+  useEffect(() => {
+    if (ended) onSessionEnded()
+  }, [ended, onSessionEnded])
+
+  // accepted: the person is on the team, and that workspace opens (and becomes the last used); a later refetch that
+  // fails doesn't take it away
+  if (accept.isSuccess)
+    return (
+      <OpeningStep
+        workspace={accept.data}
+        count={Math.max(1, workspaces.data?.items.length ?? 1)}
+        current={workspaces.data?.current ?? null}
+      />
+    )
+  // a failed refetch keeps what was loaded on screen; only nothing loaded at all is a failure
+  if (!invites.data || !workspaces.data) {
+    if (!invites.isError && !workspaces.isError) return <WaitStep />
     return (
       <FailedStep
         onRetry={() => {
@@ -50,10 +71,7 @@ export function EntryStep({
         }}
       />
     )
-
-  // accepted: the person is on the team, and that workspace opens (and becomes the last used)
-  if (accept.isSuccess)
-    return <OpeningStep workspace={accept.data} count={Math.max(1, workspaces.data.items.length)} current={workspaces.data.current} />
+  }
 
   // answered or expired meanwhile: the card goes, the invites say what they are now
   const failed = (error: unknown) => {
@@ -63,7 +81,9 @@ export function EntryStep({
     onFailed(error)
   }
 
-  const entry: Entry = answering ? { kind: 'invite', invite: answering } : entryOf(invites.data.items, workspaces.data)
+  const entry: Entry = answering
+    ? { kind: 'invite', invite: answering }
+    : entryOf(invites.data.items, workspaces.data, { declined: declined !== null })
   const line = { who: who(formatPhone(me.phone)), onOtherNumber, leaving }
   switch (entry.kind) {
     case 'invite': {

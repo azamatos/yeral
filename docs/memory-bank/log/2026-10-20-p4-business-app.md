@@ -59,3 +59,15 @@
     upload for the name step (P2 step 4), the demo workspace behind "Try the business app" (P2 step 6), the legal
     pages the "By tapping Send code…" line links to (P4 slice 7). `auth.verify` in the sdk doesn't refresh
     `workspaces`/`invites` and `auth.logout` leaves them cached; the page drops everything but `me` on sign-out.
+  - PR 2's review (15 findings; 13 fixed): `resend_too_soon` after Change number keeps that number's code on screen;
+    a new code that arrives after Change number leaves the person on the phone step (the events carry their number
+    and whether they were a resend); a lapsed session (401 on the team's questions while `me` was cached) goes back
+    to the sign-in (`useSignOut().sessionEnded`); the two "Is this you?" answers block each other; the number takes
+    the focus after Change number; a successful Accept or loaded data survive a failed refetch; right after a
+    decline the no-workspace card with the decline shows, never an older expired invite; `/w/{slug}` opens its
+    calendar; the sign-in's clocks stop once signed in; one sign-out (`shared/api/use-sign-out.ts`); the separators
+    in messages; one `textLink` style; no `zod` in the app (the verify answer's type comes from the sdk); stories
+    titled `Business/Access/LoginFlow`, plus Change number and Session ended. Not taken: the mobile digits in
+    `MARKET.phone` (a domain change; the test fails if the market's rule stops yielding them), and moving the steps
+    into `features/auth-by-phone`, `features/accept-invite` and `widgets/workspace-entry` as COMPONENTS.md maps them
+    (Steiger's `insignificant-slice` refuses a slice with one user; they move when the setup wizard needs them).

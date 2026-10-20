@@ -51,6 +51,10 @@ describe('entryOf', () => {
     expect(entry).toMatchObject({ kind: 'expired', invite: { id: 'b' } })
   })
 
+  it('right after a decline, no workspace yet (with the decline on top), not an older expired invite', () => {
+    expect(entryOf([invite('a', 'expired', 5)], { items: [], current: null }, { declined: true })).toEqual({ kind: 'empty' })
+  })
+
   it('else: no workspace yet', () => {
     expect(entryOf([], { items: [], current: null })).toEqual({ kind: 'empty' })
   })

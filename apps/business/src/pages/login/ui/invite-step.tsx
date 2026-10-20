@@ -70,7 +70,7 @@ export function InviteStep({
           <span className="flex min-w-0 flex-col gap-0.5">
             <span className="text-[17px] leading-6 font-semibold">{business.name}</span>
             <span className="text-dense text-n-600">
-              {business.category} · {business.city.name}
+              {t('login.invite.where', { category: business.category, city: business.city.name })}
             </span>
           </span>
         </div>

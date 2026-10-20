@@ -29,15 +29,26 @@ export interface SignInState {
   resent: boolean
   /** Too many codes for this number: none until then (epoch ms). Codes are counted per number. */
   limit?: { phone: string; until: number }
+  /** Counts «Change number» taps: the phone field takes the focus after each. */
+  changedNumber: number
 }
 
-export const initialSignIn: SignInState = { step: 'phone', phone: '', code: '', resendAt: 0, codeExpired: false, resent: false }
+export const initialSignIn: SignInState = {
+  step: 'phone',
+  phone: '',
+  code: '',
+  resendAt: 0,
+  codeExpired: false,
+  resent: false,
+  changedNumber: 0,
+}
 
 export type SignInEvent =
   | { type: 'phoneChanged'; phone: string }
   | { type: 'phoneInvalid'; error: 'incomplete' | 'notMobile' }
-  | { type: 'codeSent'; resendAfterSec: number; code?: string; now: number }
-  | { type: 'sendRefused'; error: ApiError; now: number }
+  /** `phone`: the number the code went to; `resend`: asked for from the code step («Get a new code»). */
+  | { type: 'codeSent'; phone: string; resend: boolean; resendAfterSec: number; code?: string; now: number }
+  | { type: 'sendRefused'; phone: string; resend: boolean; error: ApiError; now: number }
   | { type: 'codeChanged'; code: string }
   | { type: 'codeRefused'; error: ApiError; now: number }
   | { type: 'changeNumber' }
@@ -67,18 +78,21 @@ export function signInReducer(s: SignInState, e: SignInEvent): SignInState {
     case 'phoneInvalid':
       return { ...s, phoneError: e.error }
     case 'codeSent': {
-      // from the phone step it's the first code; from the code step a new one replacing the old
-      const again = s.step === 'code'
-      const phone = again ? (s.sentTo ?? s.phone) : s.phone
-      return { ...codeStep(s, phone), shownCode: e.code, resendAt: e.now + e.resendAfterSec * 1000, resent: again }
+      const fresh = { shownCode: e.code, resendAt: e.now + e.resendAfterSec * 1000 }
+      // a new code arrived after the person went back to change the number: it's that number's, they stay
+      if (e.resend && s.step === 'phone')
+        return { ...s, ...fresh, sentTo: e.phone, attemptsLeft: undefined, lockedUntil: undefined, codeExpired: false }
+      // the first code, or a new one replacing the old («Here's a new code.»)
+      return { ...codeStep(s, e.phone), ...fresh, resent: e.resend }
     }
     case 'sendRefused': {
-      const phone = s.step === 'code' ? (s.sentTo ?? s.phone) : s.phone
-      const { error, now } = e
+      const { error, now, phone } = e
       if (isApiError(error, 'rate_limited')) return { ...s, resent: false, limit: { phone, until: now + secondsOf(error, 3600) * 1000 } }
-      // a code went to this number less than a minute ago and still works: back to it
+      // the person went back to change the number meanwhile: nothing else to show
+      if (e.resend && s.step === 'phone') return s
+      // a code went to this number less than a minute ago and still works: back to it (and to its code on screen)
       if (isApiError(error, 'resend_too_soon')) {
-        const back = s.step === 'code' ? s : { ...codeStep(s, phone), shownCode: undefined }
+        const back = s.step === 'code' ? s : { ...codeStep(s, phone), shownCode: phone === s.sentTo ? s.shownCode : undefined }
         return { ...back, resendAt: now + secondsOf(error, 59) * 1000 }
       }
       // the number is locked after three wrong codes
@@ -99,7 +113,15 @@ export function signInReducer(s: SignInState, e: SignInEvent): SignInState {
       return s
     }
     case 'changeNumber':
-      return { ...s, step: 'phone', code: '', attemptsLeft: undefined, resent: false, phoneError: undefined }
+      return {
+        ...s,
+        step: 'phone',
+        code: '',
+        attemptsLeft: undefined,
+        resent: false,
+        phoneError: undefined,
+        changedNumber: s.changedNumber + 1,
+      }
     case 'tick': {
       let next = s
       // the lock is over and the old code with it
