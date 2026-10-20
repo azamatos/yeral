@@ -191,6 +191,7 @@ describe('sdk', () => {
       team.list('glow-studio'),
       settings.rules('glow-studio'),
       settings.menu('glow-studio'),
+      settings.profile('glow-studio'),
       links.view('a-long-random-token-from-the-sms-link', 'tk'),
     ]
     for (const q of queries) await f.queryClient.fetchQuery(q as never)
@@ -287,6 +288,9 @@ describe('live events', () => {
       ['business', 'glow-studio'],
       ['availability', 'glow-studio'],
       ['workspaces'],
+      ['search'],
+      ['suggest'],
+      ['favorites'],
     ])
   })
 })

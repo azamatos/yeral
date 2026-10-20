@@ -117,6 +117,8 @@ export const businesses = pgTable(
     typicalConfirmMinutes: integer(),
     /** Only verified businesses are public (ADR 0018). */
     verification: verificationStatus().notNull().default('pending'),
+    /** A verified business moved (book Q-215): the Ýeral team checks it again and clears this; the page stays public. */
+    addressChangedAt: ts(),
     verificationReason: text(),
     /** Table businesses: how long a party keeps a table, and the special-request chips. */
     tableSittingMinutes: integer().notNull().default(120),

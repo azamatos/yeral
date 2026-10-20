@@ -39,7 +39,7 @@ import type {
 import type { searchQuerySchema } from '@yeral/contract/catalog'
 import type { Locale } from '@yeral/contract/common'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
-import type { bookingRulesUpdateSchema } from '@yeral/contract/settings'
+import type { bookingRulesUpdateSchema, businessProfileUpdateSchema } from '@yeral/contract/settings'
 import type { inviteInputSchema, phoneOnlyInputSchema, updateMemberSchema } from '@yeral/contract/team'
 import type { z } from 'zod'
 import { call, isApiError, type Client } from './client'
@@ -448,6 +448,17 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     updateRules: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof bookingRulesUpdateSchema>) => call(w.settings.rules.$patch({ param: { slug }, json })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    /** The business profile (book B-37): what the public page says. */
+    profile: (slug: string) =>
+      queryOptions({
+        queryKey: keys.profile(slug),
+        queryFn: ({ signal }) => call(w.settings.profile.$get({ param: { slug } }, abortWith(signal))),
+      }),
+    updateProfile: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof businessProfileUpdateSchema>) => call(w.settings.profile.$patch({ param: { slug }, json })),
         onSuccess: () => settingsChanged(slug),
       }),
     /** The services menu (book B-38): groups, services, who does each, the clients' order. */

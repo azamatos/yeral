@@ -3,7 +3,7 @@
  * business settings"); a specialist gets 403, someone not on the team 404.
  */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
-import { bookingRulesSchema, bookingRulesUpdateSchema } from '@yeral/contract/settings'
+import { bookingRulesSchema, bookingRulesUpdateSchema, businessProfileSchema, businessProfileUpdateSchema } from '@yeral/contract/settings'
 import { workspaceParamSchema } from '@yeral/contract/team'
 import { can } from '@yeral/domain/permissions'
 import type { Context } from 'hono'
@@ -11,7 +11,7 @@ import { ApiError } from '../../http/errors'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody } from '../../http/openapi'
 import { requireMember } from '../team/service'
-import { rulesOf, updateRules } from './service'
+import { profileOf, rulesOf, updateProfile, updateRules } from './service'
 
 const tags = ['settings']
 const denied = { 401: errors[401], 403: errors[403], 404: errors[404] }
@@ -40,6 +40,23 @@ const updateRulesRoute = createRoute({
   responses: { 200: json(bookingRulesSchema), 400: errors[400], ...denied },
 })
 
+const profileRoute = createRoute({
+  method: 'get',
+  path: '/w/{slug}/settings/profile',
+  tags,
+  summary: 'The business profile (B-37): what the public page says',
+  request: { params: workspaceParamSchema },
+  responses: { 200: json(businessProfileSchema), ...denied },
+})
+const updateProfileRoute = createRoute({
+  method: 'patch',
+  path: '/w/{slug}/settings/profile',
+  tags,
+  summary: 'Change some of the profile; a new address is noted for the Ýeral team (Q-215)',
+  request: { params: workspaceParamSchema, ...jsonBody(businessProfileUpdateSchema) },
+  responses: { 200: json(businessProfileSchema), 400: errors[400], ...denied },
+})
+
 export const settingsRoutes = new OpenAPIHono<AppEnv>()
   .openapi(rulesRoute, async (c) => {
     const { business } = await requireSettings(c, c.req.valid('param').slug)
@@ -48,4 +65,12 @@ export const settingsRoutes = new OpenAPIHono<AppEnv>()
   .openapi(updateRulesRoute, async (c) => {
     const { business } = await requireSettings(c, c.req.valid('param').slug)
     return c.json(await updateRules(c.var.deps.db, business.id, c.req.valid('json')), 200)
+  })
+  .openapi(profileRoute, async (c) => {
+    const { business } = await requireSettings(c, c.req.valid('param').slug)
+    return c.json(await profileOf(c.var.deps.db, business.id), 200)
+  })
+  .openapi(updateProfileRoute, async (c) => {
+    const { business } = await requireSettings(c, c.req.valid('param').slug)
+    return c.json(await updateProfile(c.var.deps.db, business.id, c.req.valid('json'), c.var.deps.now()), 200)
   })
