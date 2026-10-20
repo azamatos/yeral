@@ -27,7 +27,6 @@ import { onlineRefusal } from '../clients/online'
 import { assertOnlineBooking, assertWaitingRoom, bookedServices, rebook } from './create'
 import { offerTarget, offersOf } from './offers'
 import {
-  assertFreeElsewhere,
   type BookingRow,
   isSlotConflict,
   lockBooking,
@@ -140,10 +139,10 @@ export async function restoreBooking(deps: Deps, b: BookingRow): Promise<Booking
     return await deps.db.transaction(async (tx) => {
       // a request back to waiting counts as one sent now (book Q-124)
       if (status === 'pending' && b.userId) await assertWaitingRoom(tx, b.userId, b.businessId, now, { locked: true })
-      // the seats may have gone meanwhile; tables and specialists are guarded by the database
+      // the seats may have gone meanwhile; tables, specialists and a person's time across workspaces are guarded by
+      // the database
       if (b.type === 'class' && b.sessionId && (await seatsLeft(tx, b.sessionId)) < (b.seats ?? 1)) throw new ApiError('session_full')
       const row = await setStatus(tx, b, { status, at: new Date(now) })
-      await assertFreeElsewhere(tx, row.id)
       await emit(tx, { type: 'booking.updated', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
       return row
     })

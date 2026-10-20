@@ -81,51 +81,33 @@ export async function loadBusinesses(db: Queryable, ids: string[]): Promise<Map<
 /** Busy time per specialist, buffers included, for active bookings between two dates and the day either side (past midnight). */
 export async function loadBusy(db: Queryable, businessIds: string[], from: string, to: string): Promise<BusyInterval[]> {
   if (!businessIds.length) return []
-  const rows = await db
-    .select({
-      bookingId: bookingItems.bookingId,
-      staffId: bookingItems.staffId,
-      date: bookingItems.date,
-      start: bookingItems.start,
-      end: bookingItems.end,
-      bufferAfter: bookingItems.bufferAfter,
-    })
-    .from(bookingItems)
-    .innerJoin(bookings, eq(bookings.id, bookingItems.bookingId))
-    .where(
-      and(
-        inArray(bookings.businessId, businessIds),
-        eq(bookingItems.active, true),
-        gte(bookingItems.date, addDays(from, -1)),
-        lte(bookingItems.date, addDays(to, 1)),
-      ),
-    )
+  const days = and(eq(bookingItems.active, true), gte(bookingItems.date, addDays(from, -1)), lte(bookingItems.date, addDays(to, 1)))
+  const item = {
+    bookingId: bookingItems.bookingId,
+    date: bookingItems.date,
+    start: bookingItems.start,
+    end: bookingItems.end,
+    bufferAfter: bookingItems.bufferAfter,
+  }
   // busy elsewhere (book Q-272): a person in several workspaces is taken here by their bookings as a specialist there,
   // waiting or confirmed, with their buffers; their own bookings as a client, breaks and days off don't count
   const here = alias(staff, 'here')
   const there = alias(staff, 'there')
-  const elsewhere = await db
-    .select({
-      bookingId: bookingItems.bookingId,
-      staffId: here.id,
-      date: bookingItems.date,
-      start: bookingItems.start,
-      end: bookingItems.end,
-      bufferAfter: bookingItems.bufferAfter,
-    })
-    .from(bookingItems)
-    .innerJoin(there, eq(there.id, bookingItems.staffId))
-    .innerJoin(here, and(eq(here.userId, there.userId), ne(here.id, there.id)))
-    .where(
-      and(
-        inArray(here.businessId, businessIds),
-        eq(bookingItems.active, true),
-        gte(bookingItems.date, addDays(from, -1)),
-        lte(bookingItems.date, addDays(to, 1)),
-      ),
-    )
+  const [own, elsewhere] = await Promise.all([
+    db
+      .select({ ...item, staffId: bookingItems.staffId })
+      .from(bookingItems)
+      .innerJoin(bookings, eq(bookings.id, bookingItems.bookingId))
+      .where(and(inArray(bookings.businessId, businessIds), days)),
+    db
+      .select({ ...item, staffId: here.id })
+      .from(bookingItems)
+      .innerJoin(there, eq(there.id, bookingItems.staffId))
+      .innerJoin(here, and(eq(here.userId, there.userId), ne(here.id, there.id)))
+      .where(and(inArray(here.businessId, businessIds), days)),
+  ])
   return [
-    ...rows.flatMap((r) =>
+    ...own.flatMap((r) =>
       r.staffId ? [{ bookingId: r.bookingId, staffId: r.staffId, date: r.date, start: r.start, end: r.end + r.bufferAfter }] : [],
     ),
     ...elsewhere.map((r) => ({

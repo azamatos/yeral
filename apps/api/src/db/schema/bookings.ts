@@ -159,6 +159,12 @@ export const bookingItems = pgTable(
     family: uuid()
       .notNull()
       .default(sql`gen_random_uuid()`),
+    /**
+     * The specialist's account when the item was booked (their staff row's `userId`), set by the same trigger: one
+     * person's items in different workspaces may not overlap either (busy elsewhere, book Q-272; migration 0020). Linking
+     * a staff row to an account later leaves its earlier items as they were.
+     */
+    person: uuid(),
     /** Absolute business-local minutes, buffer included: an item late on one day and one early the next can collide. */
     span: int4range().generatedAlwaysAs(
       sql`int4range(("date" - date '2000-01-01') * 1440 + "start", ("date" - date '2000-01-01') * 1440 + "end" + "buffer_after")`,

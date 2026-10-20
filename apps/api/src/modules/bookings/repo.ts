@@ -3,10 +3,9 @@ import { bookingCode } from '@yeral/domain/id'
 import type { BookingState, RestoreState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, CancelledBy } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
-import { and, eq, gt, isNotNull, ne, sql } from 'drizzle-orm'
-import { alias } from 'drizzle-orm/pg-core'
+import { and, eq, gt, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, staff, type MoveRefused } from '../../db/schema'
+import { bookingItems, bookings, type MoveRefused } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 
 export type BookingRow = typeof bookings.$inferSelect
@@ -145,45 +144,12 @@ export async function recordMoveRefused(
   return true
 }
 
-/** The person this booking names was taken in another workspace meanwhile (book Q-272). */
-export class BusyElsewhere extends Error {
-  constructor() {
-    super('busy elsewhere')
-  }
-}
-
-/** Postgres refused an overlap (exclusion constraint) or a duplicate, or the person went elsewhere: the slot went meanwhile. */
-export function isSlotConflict(e: unknown): boolean {
-  return pgCode(e) === '23P01' || e instanceof BusyElsewhere
-}
-
 /**
- * Busy elsewhere (book Q-272), inside the transaction that makes a booking's items active: the database keeps one
- * specialist's bookings apart, not one person's across workspaces. The people the booking names are locked, in a fixed
- * order so two bookings can't wait on each other, and their active bookings elsewhere checked against it, buffers
- * included; a clash throws `BusyElsewhere`, a lost race (409 slot_taken).
+ * Postgres refused an overlap (exclusion constraint) or a duplicate: the slot went meanwhile. The constraints keep one
+ * specialist's bookings apart, and one person's across their workspaces (busy elsewhere, book Q-272; migration 0020).
  */
-export async function assertFreeElsewhere(db: Queryable, bookingId: string): Promise<void> {
-  const people = await db
-    .selectDistinct({ userId: staff.userId })
-    .from(bookingItems)
-    .innerJoin(staff, eq(staff.id, bookingItems.staffId))
-    .where(and(eq(bookingItems.bookingId, bookingId), eq(bookingItems.active, true), isNotNull(staff.userId)))
-  const ids = people.flatMap((p) => (p.userId ? [p.userId] : [])).sort()
-  if (!ids.length) return
-  for (const id of ids) await db.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`person ${id}`}, 0))`)
-  const here = alias(staff, 'here')
-  const there = alias(staff, 'there')
-  const theirs = alias(bookingItems, 'theirs')
-  const [clash] = await db
-    .select({ id: theirs.id })
-    .from(bookingItems)
-    .innerJoin(here, eq(here.id, bookingItems.staffId))
-    .innerJoin(there, and(eq(there.userId, here.userId), ne(there.id, here.id)))
-    .innerJoin(theirs, and(eq(theirs.staffId, there.id), eq(theirs.active, true), sql`${theirs.span} && ${bookingItems.span}`))
-    .where(and(eq(bookingItems.bookingId, bookingId), eq(bookingItems.active, true)))
-    .limit(1)
-  if (clash) throw new BusyElsewhere()
+export function isSlotConflict(e: unknown): boolean {
+  return pgCode(e) === '23P01'
 }
 
 /** The SQLSTATE of a failed statement, whether Drizzle passes the driver's error on or wraps it. */

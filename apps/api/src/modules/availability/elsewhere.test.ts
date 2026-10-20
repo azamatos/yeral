@@ -7,6 +7,7 @@ import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
 import { bookingItems, bookings, businesses, rateLimits, services, staff, users } from '../../db/schema'
 import { seed } from '../../db/seed'
+import { pgCode } from '../bookings/repo'
 
 const FRI = '2026-10-16'
 
@@ -117,5 +118,65 @@ describe('busy elsewhere (book Q-272)', () => {
     const back = await b.req(`/v1/me/bookings/${made.json.code}/restore`, { method: 'POST' })
     expect(back.status).toBe(409)
     expect(back.json.error.code).toBe('slot_taken')
+  })
+
+  /** A confirmed 30-minute booking written straight to the database, as any path in the api would write one. */
+  const write = (slug: string, service: string, who: string, start: number) =>
+    db.transaction(async (tx) => {
+      const [biz] = await tx.select().from(businesses).where(eq(businesses.slug, slug))
+      const [row] = await tx
+        .insert(bookings)
+        .values({
+          code: `YR-${800000 + start}`,
+          businessId: biz!.id,
+          type: 'appointment',
+          date: FRI,
+          start,
+          end: start + 30,
+          status: 'confirmed',
+          source: 'phone',
+          clientPhone: '+99365600099',
+        })
+        .returning()
+      await tx.insert(bookingItems).values({
+        bookingId: row!.id,
+        serviceId: service,
+        staffId: who,
+        serviceName: { en: 'Service' },
+        date: FRI,
+        start,
+        end: start + 30,
+        priceType: 'fixed',
+        priceAmount: 0,
+      })
+      return row!
+    })
+
+  it("the database refuses one person's overlapping bookings in two workspaces, whatever writes them", async () => {
+    const b = await client('+99365600014')
+    const start = await bothFree(b, 6)
+    expect((await book(b, 'barber-loft', id.cut!, id.merdan!, start)).status).toBe(201)
+    const refused = await write('glow-studio', id.haircut!, id.ayna!, start + 15).then(
+      () => null,
+      (e: unknown) => pgCode(e),
+    )
+    expect(refused).toBe('23P01')
+  })
+
+  it('linking a staff row to an account later leaves its earlier bookings as they were', async () => {
+    const b = await client('+99365600015')
+    const start = await bothFree(b, 8)
+    expect((await book(b, 'glow-studio', id.haircut!, id.ayna!, start)).status).toBe(201)
+    // Arslan has a booking at the same time, and turns out to be the same person
+    const old = await write('barber-loft', id.cut!, id.arslan!, start)
+    await db.update(staff).set({ userId: null }).where(eq(staff.id, id.merdan!))
+    try {
+      await db.update(staff).set({ userId: id.person }).where(eq(staff.id, id.arslan!))
+      const [item] = await db.select().from(bookingItems).where(eq(bookingItems.bookingId, old.id))
+      expect(item!.person).toBeNull()
+    } finally {
+      await db.update(staff).set({ userId: null }).where(eq(staff.id, id.arslan!))
+      await db.update(staff).set({ userId: id.person }).where(eq(staff.id, id.merdan!))
+    }
   })
 })
