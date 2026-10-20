@@ -15,15 +15,17 @@
   keep the number (the person may come back with it). "No" (`passedOn`) keeps those for the number's new holder, and
   takes the number off the old account's client records (`clients.phone` is nullable now) and app team rows, so they
   never join the new holder, block them or come back for an invite; recent unlinked phone bookings filed under its
-  records move to a new record of the number. An invite to the number of an account unused for 6 months never
-  reuses its old row (`reusableRow`), and a row left without a number can't be reactivated. A workspace owner's account can't go either way (`owns_workspace`): the ticket stays, and the Ýeral
+  records move to a new, unnamed record of the number. A team row left without a number can't be reactivated. A workspace owner's account can't go either way (`owns_workspace`): the ticket stays, and the Ýeral
   team sorts the number out (admin tool, step 5).
 - The phone change (`changePhone()`): links the old number's recent items first; client records follow the account;
   a business's recent record for the new number is merged into the person's (bookings and notes move, tags add up,
   marks stay; a block the count sets stays, else the count runs from the latest restart), an older one loses the number (one recency rule,
   `recentRecord()`, for sign-in and phone change); the new number's recent phone bookings join; bookings ahead take the new number; active team rows carrying
-  the old number take the new one, and an invited row the cancelled invite had brought back is removed again; invites to the old number are cancelled (not moved: the inviter would see a number
+  the old number take the new one, and an invited row whose invite it cancels is removed again; invites to the old number are cancelled (not moved: the inviter would see a number
   it wasn't given).
+- Known: an invite to the number that brought back the old account's removed team row (`reusableRow` picks the row
+  of the account holding the number) is cancelled by "No"; the business invites the number again, onto a new row.
+  Skipping such rows at invite time was tried and dropped: after "Yes" that invite couldn't be accepted.
 - Known: a business's stale record for a recycled number, at a business the new holder never visited, still applies
   its marks when they book there, since bookings find their record by phone (`clientFor`): it may as well be the same
   person returning after a year, so the business decides. A business-made record for the new number created during a

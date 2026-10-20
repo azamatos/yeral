@@ -18,15 +18,19 @@ import { teamChanged } from '../team/service'
  * Invites to a number that's leaving its person (a deleted account, a changed phone): cancelled, so whoever gets the
  * number next can't accept them; the teams' screens hear it, and `userId`, the person, if their account stays.
  */
-export async function cancelInvitesTo(db: Queryable, phone: string, at: Date, userId: string | null = null): Promise<string[]> {
+export async function cancelInvitesTo(
+  db: Queryable,
+  phone: string,
+  at: Date,
+  userId: string | null = null,
+): Promise<{ businessId: string; staffId: string }[]> {
   const dropped = await db
     .update(invites)
     .set({ status: 'cancelled', answeredAt: at })
     .where(and(eq(invites.phone, phone), eq(invites.status, 'pending')))
-    .returning({ businessId: invites.businessId })
-  const businessIds = [...new Set(dropped.map((d) => d.businessId))]
-  for (const businessId of businessIds) await teamChanged(db, businessId, { userId })
-  return businessIds
+    .returning({ businessId: invites.businessId, staffId: invites.staffId })
+  for (const businessId of new Set(dropped.map((d) => d.businessId))) await teamChanged(db, businessId, { userId })
+  return dropped
 }
 
 /**
@@ -68,7 +72,7 @@ export async function releaseAccount(tx: Queryable, user: User, now: number, how
       .update(staff)
       .set({ phone: null })
       .where(and(eq(staff.userId, user.id), eq(staff.hasApp, true)))
-  const invited = how === 'deleted' ? await cancelInvitesTo(tx, user.phone, at) : []
+  const invited = how === 'deleted' ? (await cancelInvitesTo(tx, user.phone, at)).map((d) => d.businessId) : []
   for (const businessId of new Set(rows.map((r) => r.businessId))) if (!invited.includes(businessId)) await teamChanged(tx, businessId)
   if (how === 'deleted') {
     const mine = await tx
@@ -100,8 +104,7 @@ export async function releaseAccount(tx: Queryable, user: User, now: number, how
 /**
  * "No" (book Q-270): the person's client records lose the number. Phone bookings a business filed under one of them
  * for the number, that no account holds yet and the sign-in that follows links (upcoming or from the last 6 months),
- * are the new holder's: they move to a new record of the number at that business, named as the booking was unless
- * that's just the old record's name.
+ * are the new holder's: they move to a new record of the number at that business.
  */
 async function handOnRecords(tx: Queryable, user: User, now: number): Promise<void> {
   const records = await tx
@@ -125,11 +128,8 @@ async function handOnRecords(tx: Queryable, user: User, now: number): Promise<vo
     .orderBy(desc(bookings.createdAt))
   for (const businessId of new Set(lately.map((b) => b.businessId))) {
     const theirs = lately.filter((b) => b.businessId === businessId)
-    const named = theirs.find((b) => b.clientName && !records.some((r) => r.id === b.clientId && r.name === b.clientName))
-    const [record] = await tx
-      .insert(clients)
-      .values({ businessId, phone: user.phone, name: named?.clientName ?? null })
-      .returning({ id: clients.id })
+    // unnamed: a name filed under the old record may well be the old holder's; the new holder's first booking names it
+    const [record] = await tx.insert(clients).values({ businessId, phone: user.phone }).returning({ id: clients.id })
     await tx
       .update(bookings)
       .set({ clientId: record!.id })
@@ -200,11 +200,22 @@ export async function changePhone(tx: Queryable, user: User, phone: string, now:
     .set({ phone })
     .where(and(eq(staff.userId, user.id), eq(staff.phone, user.phone), eq(staff.status, 'active')))
     .returning({ businessId: staff.businessId })
-  const invited = await cancelInvitesTo(tx, user.phone, new Date(now), user.id)
-  await tx
-    .update(staff)
-    .set({ status: 'removed', bookable: false })
-    .where(and(eq(staff.userId, user.id), eq(staff.status, 'invited')))
+  const dropped = await cancelInvitesTo(tx, user.phone, new Date(now), user.id)
+  if (dropped.length)
+    await tx
+      .update(staff)
+      .set({ status: 'removed', bookable: false })
+      .where(
+        and(
+          inArray(
+            staff.id,
+            dropped.map((d) => d.staffId),
+          ),
+          eq(staff.userId, user.id),
+          eq(staff.status, 'invited'),
+        ),
+      )
+  const invited = dropped.map((d) => d.businessId)
   for (const businessId of new Set(team.map((t) => t.businessId)))
     if (!invited.includes(businessId)) await teamChanged(tx, businessId, { userId: user.id })
   return row

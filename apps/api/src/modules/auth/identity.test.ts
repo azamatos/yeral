@@ -266,7 +266,7 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     expect(reused!.status).toBe('cancelled')
   })
 
-  it('an invite to an unused account’s number doesn’t bring back its old team row, which stays out after "No"', async () => {
+  it('after "No", an invite that brought back the old account’s team row goes with it, and the number is invited anew', async () => {
     const phone = '+99365777011'
     const old = await account(phone, 'Old Stylist', 200)
     const [oldRow] = await db
@@ -280,14 +280,18 @@ describe('linking by phone and "Is this you?" (book Q-270)', () => {
     const maysa = browser(t.app)
     await maysa.login('+99365102030') // Glow Studio's owner
     const sent = await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone, name: 'New Person', level: 'specialist' } })
-    expect(sent.status).toBe(201)
-    expect(sent.json.member.id).not.toBe(oldRow!.id)
+    // the account behind the number comes back on its old row
+    expect(sent.json.member.id).toBe(oldRow!.id)
     const { b, res } = await codeAndVerify(phone)
     expect((await b.req('/v1/auth/identity', { body: { ticket: res.json.isThisYou.ticket, yes: false } })).status).toBe(200)
-    // the invite to the number waits for its holder; the old row has no number left to invite
-    expect((await db.select().from(invites).where(eq(invites.staffId, sent.json.member.id)))[0]!.status).toBe('pending')
+    // that invite was for the old account's row: gone with it; the row has no number left to invite
+    expect((await db.select().from(invites).where(eq(invites.staffId, oldRow!.id)))[0]!.status).toBe('cancelled')
     const back = await maysa.req(`/v1/w/glow-studio/team/${oldRow!.id}/reactivate`, { method: 'POST' })
     expect(back.json.error.code).toBe('invalid_status')
+    // the number's holder is invited on a row of their own
+    const again = await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone, name: 'New Person', level: 'specialist' } })
+    expect(again.status).toBe(201)
+    expect(again.json.member.id).not.toBe(oldRow!.id)
   })
 
   it('a workspace owner’s account can’t be let go: "No" is refused and the question stays', async () => {

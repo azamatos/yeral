@@ -16,8 +16,6 @@ import { signIn, unusedSince } from './sign-in'
 
 const CHECK_MINUTES = 10
 
-const unused = (user: User, now: number) => unusedSince(user.lastSeenAt, now)
-
 /** What the account can be recognised by: its name, else the name on its latest booking, team row or client record. */
 async function nameOf(db: Queryable, user: User): Promise<string | null> {
   if (user.name) return user.name
@@ -52,25 +50,34 @@ async function holdsAnything(db: Queryable, userId: string): Promise<boolean> {
 export type AfterCode =
   { status: 200; body: Awaited<ReturnType<typeof signIn>> } | { status: 202; body: { isThisYou: { name: string | null; ticket: string } } }
 
+/** "Is this you?" for the account, by its first name if it has one to show. */
+async function ask(c: Context<AppEnv>, user: User, name: string | null): Promise<AfterCode> {
+  const { db, now } = c.var.deps
+  const ticket = randomToken(16)
+  await db
+    .insert(identityChecks)
+    .values({ tokenHash: await sha256Hex(ticket), phone: user.phone, userId: user.id, expiresAt: new Date(now() + CHECK_MINUTES * 60_000) })
+  return { status: 202, body: { isThisYou: { name: name ? name.split(/\s+/)[0] || name : null, ticket } } }
+}
+
 export async function afterCode(c: Context<AppEnv>, phone: string, lang: Locale | undefined): Promise<AfterCode> {
   const { db, now } = c.var.deps
   const [user] = await db.select().from(users).where(eq(users.phone, phone))
-  if (user && unused(user, now())) {
+  if (user && unusedSince(user.lastSeenAt, now())) {
     const name = await nameOf(db, user)
-    if (name || (await holdsAnything(db, user.id))) {
-      const ticket = randomToken(16)
-      await db
-        .insert(identityChecks)
-        .values({ tokenHash: await sha256Hex(ticket), phone, userId: user.id, expiresAt: new Date(now() + CHECK_MINUTES * 60_000) })
-      return { status: 202, body: { isThisYou: { name: name ? name.split(/\s+/)[0] || name : null, ticket } } }
-    }
+    if (name || (await holdsAnything(db, user.id))) return ask(c, user, name)
     // nothing of a person's in it, favourites at most: not worth a question, and not to be handed on. The number
     // starts afresh, once the account's row is locked and still found unused and empty (as an answer finds it)
-    await db.transaction(async (tx) => {
+    const still = await db.transaction(async (tx) => {
       const [row] = await tx.select().from(users).where(eq(users.id, user.id)).for('update')
-      if (row?.phone === phone && !row.name && unused(row, now()) && !(await holdsAnything(tx, row.id)))
+      if (row?.phone === phone && !row.name && unusedSince(row.lastSeenAt, now()) && !(await holdsAnything(tx, row.id))) {
         await releaseAccount(tx, row, now(), 'passedOn')
+        return null
+      }
+      return row
     })
+    // it changed meanwhile: still unused, it's asked about after all; in use again, it signs in as any account does
+    if (still?.phone === phone && unusedSince(still.lastSeenAt, now())) return ask(c, still, await nameOf(db, still))
   }
   return { status: 200, body: await signIn(c, phone, lang) }
 }
@@ -94,7 +101,7 @@ export async function answerIdentity(c: Context<AppEnv>, ticket: string, yes: bo
     // the account moved to another number meanwhile: this one is free, and "No" just starts afresh
     if (!yes && old.phone === check.phone) {
       // in use again since the question: not this answer's to let go
-      if (!unused(old, now())) throw new ApiError('code_expired')
+      if (!unusedSince(old.lastSeenAt, now())) throw new ApiError('code_expired')
       await releaseAccount(tx, old, now(), 'passedOn')
     }
     return check.phone

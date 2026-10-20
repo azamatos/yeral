@@ -71,7 +71,7 @@ describe('account', () => {
     const [mine, theirs, atBarber, earlierHolder, sinceSignIn] = await db
       .insert(clients)
       .values([
-        // the block lifted 5 days ago stays lifted
+        // a block lifted 5 days ago, but the new number's record below is blocked by its count: that block stays
         { businessId: glow!, phone: oldPhone, name: 'Kerim', userId: me.id, tags: ['vip'], noShowsSince: at(5) },
         // the business already wrote the new number down: a phone booking, a note, phone-only
         { businessId: glow!, phone: newPhone, name: 'Kerim (new)', tags: ['regular'], onlineBlocked: true, createdAt: at(30) },
@@ -173,6 +173,42 @@ describe('account', () => {
     const [invite] = await db.select().from(invites).where(eq(invites.tokenHash, 'q171-test-invite'))
     expect(invite!.status).toBe('cancelled')
     expect((await db.select().from(users).where(eq(users.id, me.id)))[0]!.phone).toBe(newPhone)
+  })
+
+  it('records made one keep a fresh start the business gave, when no count blocks either', async () => {
+    const [oldPhone, newPhone] = ['+99365222012', '+99365222013']
+    const b = browser(t.app)
+    const { me } = await b.login(oldPhone, 'Leýla')
+    const [pamyk] = await db.select().from(businesses).where(eq(businesses.slug, 'pamyk'))
+    const at = (days: number) => new Date(t.clock.now - days * 86_400_000)
+    const [mine] = await db
+      .insert(clients)
+      .values([
+        // a no-show 10 days ago, forgiven 5 days ago
+        { businessId: pamyk!.id, phone: oldPhone, name: 'Leýla', userId: me.id, noShowsSince: at(5) },
+        { businessId: pamyk!.id, phone: newPhone, name: 'Leýla', createdAt: at(20) },
+      ])
+      .returning()
+    await db.insert(bookings).values({
+      code: 'YR-995007',
+      businessId: pamyk!.id,
+      type: 'appointment',
+      date: addDays(today(t.clock.now), -10),
+      start: 600,
+      end: 660,
+      status: 'noshow',
+      completedAt: at(10),
+      source: 'phone',
+      clientId: mine!.id,
+      clientPhone: oldPhone,
+      userId: me.id,
+    })
+    await b.req('/v1/me/phone/code', { body: { phone: newPhone } })
+    expect((await b.req('/v1/me/phone/verify', { body: { phone: newPhone, code: '1234' } })).status).toBe(200)
+    const records = await db.select().from(clients).where(eq(clients.businessId, pamyk!.id))
+    const leyla = records.filter((r) => r.phone === newPhone || r.phone === oldPhone)
+    expect(leyla).toHaveLength(1)
+    expect(leyla[0]).toMatchObject({ id: mine!.id, phone: newPhone, noShowsSince: at(5) })
   })
 
   it('deleting the account cancels upcoming bookings and signs out', async () => {
