@@ -153,6 +153,15 @@ describe('message catalogues', () => {
     expect(say('ru', 55)).toBe('Слишком много запросов. Попробуйте через 55 минут.')
   })
 
+  it('too many waiting requests names the limit (book Q-124)', () => {
+    const say = (locale: 'en' | 'tk' | 'ru', scope: string, limit: number) => createT(locale)('errors.too_many_waiting', { scope, limit })
+    expect(say('en', 'business', 3)).toBe('You already have 3 requests waiting here. Wait for an answer or cancel one.')
+    expect(say('en', 'all', 10)).toBe('You already have 10 requests waiting. Wait for the answers or cancel one.')
+    expect(say('tk', 'business', 3)).toBe('Bu ýerde jogap garaşýan 3 haýyşyňyz bar. Jogaby garaşyň ýa-da birini ýatyryň.')
+    expect(say('ru', 'business', 3)).toBe('У вас уже 3 запроса ждут ответа здесь. Дождитесь ответа или отмените один.')
+    expect(say('ru', 'all', 10)).toBe('У вас уже 10 запросов ждут ответа. Дождитесь ответов или отмените один.')
+  })
+
   it('no empty messages', () => {
     for (const locale of LOCALES) {
       const empty = keys(messages[locale]).filter(

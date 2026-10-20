@@ -1,4 +1,4 @@
-import { epochOf } from '@yeral/domain/time'
+import { addDays, epochOf } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
@@ -228,9 +228,52 @@ describe('client bookings', () => {
     )
   })
 
+  it('at most 3 requests waiting at one business, and 10 in all (book Q-124)', async () => {
+    const phone = '+99365111040'
+    const b = browser(t.app)
+    await b.login(phone, 'Ogulşat')
+    /** A request for the first free time from Thursday on. */
+    const request = async (slug: string) => {
+      const service = (await b.req(`/v1/businesses/${slug}`)).json.serviceGroups[0].services[0].id
+      for (let d = 0; d < 14; d++) {
+        const date = addDays(THU, d)
+        const slots = (await b.req(`/v1/businesses/${slug}/availability?services=${service}&date=${date}`)).json.slots ?? []
+        if (slots.length)
+          return b.req('/v1/bookings', {
+            body: { type: 'appointment', business: slug, serviceIds: [service], staffId: null, date, start: slots[0].start },
+          })
+      }
+      throw new Error(`no free time at ${slug} in two weeks`)
+    }
+    for (let i = 0; i < 3; i++) expect((await request('glow-studio')).json.status).toBe('pending')
+    const fourth = await request('glow-studio')
+    expect(fourth.status).toBe(409)
+    expect(fourth.json.error).toMatchObject({ code: 'too_many_waiting', details: { scope: 'business', limit: 3 } })
+    // seven more waiting elsewhere: ten in all
+    const [me] = await db.select().from(users).where(eq(users.phone, phone))
+    const [loft] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    await db.insert(bookings).values(
+      Array.from({ length: 7 }, (_, i) => ({
+        code: `YR-99560${i}`,
+        businessId: loft!.id,
+        type: 'appointment' as const,
+        date: addDays(THU, 20 + i),
+        start: 600,
+        end: 660,
+        status: 'pending' as const,
+        source: 'web' as const,
+        clientPhone: phone,
+        userId: me!.id,
+        holdUntil: new Date(t.clock.now + 3_600_000),
+      })),
+    )
+    const eleventh = await request('glow-studio-parahat')
+    expect(eleventh.json.error).toMatchObject({ code: 'too_many_waiting', details: { scope: 'all', limit: 10 } })
+  })
+
   it('a review can be written until 30 days after the visit (book Q-126)', async () => {
     const b = browser(t.app)
-    await b.login('+99365111015', 'Maral')
+    await b.login('+99365111041', 'Maral')
     const { json } = await b.req('/v1/bookings', {
       body: {
         type: 'appointment',

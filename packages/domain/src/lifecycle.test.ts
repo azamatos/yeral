@@ -8,6 +8,7 @@ import {
   canComplain,
   canEditNote,
   canWriteReview,
+  waitingLimit,
   cancelDeadline,
   clientActions,
   dueTransition,
@@ -29,6 +30,15 @@ const MIN = 60_000
 
 const booking = (over: Partial<BookingState> = {}): BookingState => ({ date: THU, start: 870, end: 930, status: 'confirmed', ...over })
 const rules = { cancelWindowMinutes: 120 }
+
+describe('waitingLimit (book Q-124)', () => {
+  it('3 waiting at one business, 10 in all', () => {
+    expect(waitingLimit(2, 9)).toBeNull()
+    expect(waitingLimit(3, 3)).toEqual({ scope: 'business', limit: 3 })
+    expect(waitingLimit(0, 10)).toEqual({ scope: 'all', limit: 10 })
+    expect(waitingLimit(3, 10)).toEqual({ scope: 'business', limit: 3 })
+  })
+})
 
 describe('initialStatus', () => {
   it.each([

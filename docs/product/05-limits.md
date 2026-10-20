@@ -194,7 +194,7 @@ packages/domain/src/rules.ts).
 | Decline | a reason (4 chips; own text for *Başga sebäp*) and up to 3 offered times | Fixed | business spec §2, §4 |
 | An offered time taken | confirmed at once if its named specialist is still free, else the chip shows *Eýýäm eýelendi*; one booking per declined request; all offers past: "*Teklip edilen wagtlaryň möhleti geçdi*" | Fixed | ROUND6-ANSWERS A1; Q-159, decided 18.10.2026 |
 | Move request | same hold time, never past the start of the new time or of the original visit; no answer in time: dropped, the booking stays | Owner/admin (hold time) | ROUND6-ANSWERS A3; business spec §26; Q-263, decided 18.10.2026 |
-| Waiting requests per client | at most 3 at one business and 10 in total | Fixed | Q-124, decided 18.10.2026 |
+| Waiting requests per client | at most 3 at one business and 10 in total; move requests don't count | Fixed | Q-124, decided 18.10.2026; code: packages/domain/src/lifecycle.ts (`waitingLimit`), `too_many_waiting` |
 | Demo businesses answer by themselves | after 20 s, outside production only | Fixed | code only: apps/api/src/modules/bookings/create.ts |
 
 **Code differs:** the hold counts clock time, day and night (code: packages/domain/src/lifecycle.ts). Free times after

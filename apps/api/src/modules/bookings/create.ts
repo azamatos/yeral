@@ -4,7 +4,7 @@
  * free times). Online bookings wait for the business unless it confirms instantly.
  */
 import type { CreateBooking } from '@yeral/contract/bookings'
-import type { PartyTooLargeDetails } from '@yeral/contract/errors'
+import type { PartyTooLargeDetails, TooManyWaitingDetails } from '@yeral/contract/errors'
 import {
   assignTable,
   canBookSession,
@@ -16,12 +16,12 @@ import {
   type AppointmentQuery,
   type AppointmentSlot,
 } from '@yeral/domain/availability'
-import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
+import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES, waitingLimit } from '@yeral/domain/lifecycle'
 import { priceTotal } from '@yeral/domain/pricing'
 import { epochOf } from '@yeral/domain/time'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, count, eq, gt, isNull, or, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, classSessions, clients, jobs } from '../../db/schema'
+import { bookingItems, bookings, classSessions, clients, jobs, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
@@ -74,8 +74,36 @@ interface Insert {
   alternativeOf?: string
 }
 
+/**
+ * A new request may wait for an answer only while the client has fewer than 3 waiting at this business and 10 in all
+ * (book Q-124); move requests ride on their booking and don't count. The account's row is held first, so requests sent
+ * at once count one after another (the order an account deletion locks in too).
+ */
+async function assertWaitingRoom(db: Queryable, user: User, businessId: string, now: number): Promise<void> {
+  await db.select({ id: users.id }).from(users).where(eq(users.id, user.id)).for('no key update')
+  const waiting = await db
+    .select({ businessId: bookings.businessId, n: count() })
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.userId, user.id),
+        eq(bookings.status, 'pending'),
+        isNull(bookings.rescheduleOf),
+        or(isNull(bookings.holdUntil), gt(bookings.holdUntil, new Date(now))),
+      ),
+    )
+    .groupBy(bookings.businessId)
+  const here = waiting.find((w) => w.businessId === businessId)?.n ?? 0
+  const over = waitingLimit(
+    here,
+    waiting.reduce((s, w) => s + w.n, 0),
+  )
+  if (over) throw new ApiError('too_many_waiting', over satisfies TooManyWaitingDetails)
+}
+
 async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<BookingRow> {
   const now = deps.now()
+  if (x.status === 'pending' && !x.rescheduleOf) await assertWaitingRoom(db, x.user, x.lb.business.id, now)
   const client = await clientFor(db, x.lb.business.id, x.user)
   const services = x.placement.slot?.items.map((it) => x.lb.services.find((s) => s.id === it.serviceId)) ?? []
   const price =

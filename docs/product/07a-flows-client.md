@@ -514,6 +514,7 @@ flowchart TD
 - Network failure while sending: a toast with retry (C-48).
 - Phones: the summary card becomes a bottom bar that opens as a sheet; taken times stay visible, struck through (Mobile 5).
 - A client may hold overlapping bookings at different places; businesses handle no-shows with "Arz et" (Q-155, decided 18.10.2026).
+- A request waits only while the client has fewer than 3 waiting at this business and 10 in all; otherwise sending is refused with a message to wait for an answer or cancel one (`too_many_waiting`; Q-124, decided 18.10.2026). An instant business's booking and a move request don't count. **Design to fix:** draw the refusal on the confirm step.
 
 > Open question Q-155: two bookings at the same time.
 
