@@ -2,6 +2,7 @@
 '@yeral/api': minor
 '@yeral/contract': minor
 '@yeral/sdk': minor
+'@yeral/domain': minor
 ---
 
 A business's cancel reaches the app as a code it words: the booking detail and the SMS link page add `businessCancel`
