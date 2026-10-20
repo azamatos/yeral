@@ -46,6 +46,8 @@ export function SideNavItem({
   const link = (
     <Comp
       {...props}
+      // the rail's tooltip repeats the name and count already in the link: read once, not again as a description
+      {...(collapsed ? { 'aria-describedby': undefined } : {})}
       className={cn(
         'relative flex items-center rounded-s text-small font-medium text-n-900 no-underline hover:bg-group hover:text-n-900',
         'focus-visible:shadow-focus focus-visible:outline-none aria-[current=page]:bg-a-50 aria-[current=page]:font-semibold aria-[current=page]:text-a-600',
@@ -55,7 +57,7 @@ export function SideNavItem({
       )}
     >
       {icon}
-      {asChild && <Slot.Slottable>{children}</Slot.Slottable>}
+      {asChild ? <Slot.Slottable>{children}</Slot.Slottable> : children}
       {collapsed ? (
         <>
           <span className="sr-only">{label}</span>

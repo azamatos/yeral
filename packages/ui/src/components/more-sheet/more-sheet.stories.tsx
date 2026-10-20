@@ -13,8 +13,16 @@ import { MoreSheet, MoreSheetDivider, MoreSheetPerson, MoreSheetRow } from './mo
 
 const onLogout = fn()
 
-function More({ level = 'Owner', russian = false }: { level?: 'Owner' | 'Admin' | 'Specialist'; russian?: boolean }) {
-  const [open, setOpen] = useState(true)
+function More({
+  level = 'Owner',
+  russian = false,
+  startOpen = true,
+}: {
+  level?: 'Owner' | 'Admin' | 'Specialist'
+  russian?: boolean
+  startOpen?: boolean
+}) {
+  const [open, setOpen] = useState(startOpen)
   const w = russian
     ? {
         more: 'Ещё',
@@ -123,3 +131,15 @@ export const WorkspaceRow: Story = {
 }
 
 export const RussianLength: Story = { args: { russian: true } }
+
+/** Opened from More (outside the sheet, as the tab bar's button is): closing it puts the focus back there. */
+export const FocusBack: Story = {
+  args: { startOpen: false },
+  play: async ({ canvas }) => {
+    const more = canvas.getByRole('button', { name: 'More' })
+    await userEvent.click(more)
+    await within(document.body).findByRole('dialog', { name: 'More' })
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(more).toHaveFocus())
+  },
+}

@@ -33,14 +33,19 @@ const avatar = cva('inline-flex flex-none items-center justify-center overflow-h
   defaultVariants: { size: 40, shape: 'circle', tone: 'tint' },
 })
 
-/** First letters of the first two words: «Aýjemal Gurbanowa» → «AG»; one word → one letter. */
+/**
+ * First letters of the first two words: «Aýjemal Gurbanowa» → «AG»; one word → one letter. Marks around a name don't
+ * count («Gözel» salon → «GS»), and a word without a letter or digit is skipped (an emoji).
+ */
 export function initials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean)
-  return words
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((word) => [...word].find((ch) => /[\p{L}\p{N}]/u.test(ch)))
+    .filter((ch): ch is string => !!ch)
     .slice(0, 2)
-    .map((w) => w.charAt(0).toLocaleUpperCase('tk'))
+    .map((ch) => ch.toLocaleUpperCase('tk'))
     .join('')
-    .slice(0, words.length > 1 ? 2 : 1)
 }
 
 /**

@@ -20,12 +20,12 @@ const COPY: WorkspaceSwitcherCopy = {
 
 const MAYSA: WorkspaceItem[] = [
   { id: 'glow-studio', name: 'Glow Studio', caption: 'Owner · Ashgabat', logo: brand.icon, current: true },
-  { id: 'glow-nails', name: 'Glow Nails', caption: 'Owner · Ashgabat', logo: brand.icon, count: 2, countLabel: '2 requests' },
+  { id: 'glow-nails', name: 'Glow Nails', caption: 'Owner · Ashgabat', logo: brand.icon, count: { count: 2, label: '2 requests' } },
 ]
 
 const AYNA: WorkspaceItem[] = [
   { id: 'glow-studio', name: 'Glow Studio', caption: 'Specialist · Ashgabat', logo: brand.icon, current: true },
-  { id: 'ayna-studio', name: 'Aýnanyň saç studiýasy', caption: 'Owner · Ashgabat', count: 1, countLabel: '1 request' },
+  { id: 'ayna-studio', name: 'Aýnanyň saç studiýasy', caption: 'Owner · Ashgabat', count: { count: 1, label: '1 request' } },
 ]
 
 const meta = {
@@ -54,6 +54,8 @@ export const Open: Story = {
     const menu = await within(document.body).findByRole('menu', { name: 'Your workspaces' })
     const current = within(menu).getByRole('menuitemradio', { name: /^Glow Studio/, checked: true })
     await waitFor(() => expect(current).toBeVisible())
+    // the board's 300, not the popover's default 280
+    await expect(menu.getBoundingClientRect().width).toBeGreaterThan(290)
     // the current one is already open: nothing to do
     await userEvent.keyboard('{ArrowDown}{Enter}')
     await expect(args.onSelect).not.toHaveBeenCalled()
@@ -116,7 +118,13 @@ export const PhoneSheet: Story = {
     const sheet = await within(document.body).findByRole('dialog', { name: 'Your workspaces' })
     await expect(within(sheet).getByText('Aýna Myradowa · +993 65 31 22 10')).toBeVisible()
     await expect(within(sheet).getByRole('button', { name: /Glow Studio.*current workspace/ })).toHaveAttribute('aria-current', 'true')
-    await userEvent.click(within(sheet).getByRole('button', { name: /Aýnanyň saç studiýasy.*1 request/ }))
+    await userEvent.keyboard('{Escape}')
+    // the focus is back on the strip
+    const strip = canvas.getByRole('button', { name: /Switch/ })
+    await waitFor(() => expect(strip).toHaveFocus())
+    await expect(strip).toHaveAttribute('aria-expanded', 'false')
+    await userEvent.click(strip)
+    await userEvent.click(await within(document.body).findByRole('button', { name: /Aýnanyň saç studiýasy.*1 request/ }))
     await expect(args.onSelect).toHaveBeenCalledWith('ayna-studio')
   },
 }
@@ -131,7 +139,7 @@ export const RussianLength: Story = {
     level: 'Владелец',
     items: [
       { id: 'glow-studio', name: 'Студия красоты «Глоу»', caption: 'Владелец · Ашхабад', logo: brand.icon, current: true },
-      { id: 'glow-nails', name: 'Ногтевая студия «Глоу»', caption: 'Администратор · Ашхабад', count: 12, countLabel: '12 заявок' },
+      { id: 'glow-nails', name: 'Ногтевая студия «Глоу»', caption: 'Администратор · Ашхабад', count: { count: 12, label: '12 заявок' } },
     ],
     copy: {
       title: 'Ваши рабочие места',

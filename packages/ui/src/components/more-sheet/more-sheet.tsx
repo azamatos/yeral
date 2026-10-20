@@ -2,7 +2,7 @@ import { ChevronRight } from 'lucide-react'
 import { Slot } from 'radix-ui'
 import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
-import { Sheet } from '../../lib/sheet'
+import { Sheet, SheetDivider, SheetTitle } from '../../lib/sheet'
 import { Avatar } from '../avatar'
 import { TAB_BAR_HEIGHT } from '../bottom-tab-bar'
 import { CountBadge } from '../count-badge'
@@ -26,7 +26,8 @@ export function MoreSheet({
   children: ReactNode
 }) {
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={label} hideTitle above={TAB_BAR_HEIGHT}>
+    <Sheet open={open} onOpenChange={onOpenChange} above={TAB_BAR_HEIGHT}>
+      <SheetTitle className="sr-only">{label}</SheetTitle>
       <div className="flex flex-col px-2 pb-2">{children}</div>
     </Sheet>
   )
@@ -87,9 +88,7 @@ export function MoreSheetRow({
 }
 
 /** The hairline between the sheet's groups (`.y-hdiv`: 6 12). */
-export function MoreSheetDivider() {
-  return <div role="separator" className="mx-3 my-1.5 h-px flex-none bg-n-200" />
-}
+export const MoreSheetDivider = SheetDivider
 
 /** The person (not a button): avatar 32, name 15/20 600, phone. The account rows follow. */
 export function MoreSheetPerson({ name, phone, photo }: { name: string; phone: string; photo?: string | null }) {

@@ -64,7 +64,11 @@ export function AccountMenu({
       {items.map((item, i) => (
         <Fragment key={item.id}>
           {item.danger && i > 0 && <MenuSeparator className="mx-1" />}
-          <DropdownMenu.Item asChild={!!item.href} onSelect={item.onSelect} className={cn(accountMenuItem, item.danger && dangerItem)}>
+          <DropdownMenu.Item
+            asChild={!!item.href}
+            onSelect={() => item.onSelect?.()}
+            className={cn(accountMenuItem, item.danger && dangerItem)}
+          >
             {item.href ? (
               <a href={item.href} {...(item.external ? { target: '_blank', rel: 'noreferrer' } : {})}>
                 {item.icon}

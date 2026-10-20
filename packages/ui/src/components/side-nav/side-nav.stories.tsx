@@ -92,8 +92,7 @@ function Sidebar({
       name: 'Glow Nails',
       caption: `${w.levels.owner} · Ashgabat`,
       logo: brand.icon,
-      count: 2,
-      countLabel: w.requests(2),
+      count: { count: 2, label: w.requests(2) },
     },
   ]
   const account: AccountMenuItem[] = [

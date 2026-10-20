@@ -1,6 +1,7 @@
 import { Slot } from 'radix-ui'
 import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+import { CountBadge } from '../count-badge'
 
 /** The bar's height above the phone's safe area: a sheet that opens above it (MoreSheet) sits here. */
 export const TAB_BAR_HEIGHT = 'calc(64px + env(safe-area-inset-bottom))'
@@ -9,11 +10,11 @@ export const TAB_BAR_HEIGHT = 'calc(64px + env(safe-area-inset-bottom))'
  * The phone's main menu under 768 (DS-Patterns 06 · BottomTabBar; `.tabb` wins): 64 high plus the safe area, four
  * equal items (Calendar · Bookings · Clients · More).
  */
-export function BottomTabBar({ className, ...props }: ComponentProps<'nav'>) {
+export function BottomTabBar({ className, style, ...props }: ComponentProps<'nav'>) {
   return (
     <nav
       {...props}
-      style={{ height: TAB_BAR_HEIGHT }}
+      style={{ ...style, height: TAB_BAR_HEIGHT }}
       className={cn('grid grid-cols-4 border-t border-n-200 bg-n-0 px-1 pb-[env(safe-area-inset-bottom)]', className)}
     />
   )
@@ -34,12 +35,13 @@ const Name = ({ children }: { children: ReactNode }) => (
 function Count({ count, label }: { count: number; label: string }) {
   return (
     <>
-      <span
+      <CountBadge
         aria-hidden
-        className="absolute top-1.25 left-[calc(50%+6px)] h-4.5 min-w-4.5 rounded-pill border border-st-pending-line bg-st-pending-bg px-1.25 text-center text-[11px] leading-4 font-bold text-st-pending-ink tabular-nums"
+        tone="attention"
+        className="absolute top-1.25 left-[calc(50%+6px)] h-4.5 min-w-4.5 px-1.25 text-[11px] leading-4 font-bold"
       >
-        {count > 99 ? '99+' : count}
-      </span>
+        {count}
+      </CountBadge>
       <span className="sr-only">{label}</span>
     </>
   )

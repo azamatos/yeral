@@ -2,7 +2,7 @@ import { Check, ChevronsUpDown, Plus, X } from 'lucide-react'
 import { DropdownMenu } from 'radix-ui'
 import { useId, useState, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
-import { Sheet, SheetClose, SheetTitle } from '../../lib/sheet'
+import { Sheet, SheetClose, SheetDivider, SheetTitle } from '../../lib/sheet'
 import { Avatar } from '../avatar'
 import { Button } from '../button'
 import { CountBadge } from '../count-badge'
@@ -17,10 +17,8 @@ export interface WorkspaceItem {
   logo?: string | null
   /** The workspace on screen: tint and a check instead of a count. */
   current?: boolean
-  /** Requests this person may answer there (the amber count). */
-  count?: number
-  /** What the count means, read after the row's name: "2 requests". */
-  countLabel?: string
+  /** Requests this person may answer there (the amber count) and what it means, read after the row's name: "2 requests". */
+  count?: { count: number; label: string } | null
 }
 
 export interface WorkspaceSwitcherCopy {
@@ -42,9 +40,9 @@ export interface WorkspaceSwitcherCopy {
  * The only way to change workspace (DS-Patterns 06 · WorkspaceSwitcher; B-Shell, B-Mobile): the closed switcher shows the
  * workspace on screen (logo 36 r10 or its letter tile, name, the person's level, chevrons); `sidebar` and `rail` (the
  * logo alone in a 44 button) open the "Your workspaces" menu (300); `strip` (the phone's header) and `row` (the More
- * sheet's first row) a bottom sheet. Rows
- * are radio items: the current one in tint with a check, the others with their amber request count. Picking one, or
- * "Create a business", is the screen's to do (the address names the workspace).
+ * sheet's first row) a bottom sheet. Rows are radio items: the current one in tint with a check, the others with their
+ * amber request count. Picking another one, or "Create a business", is the screen's to do (the address names the
+ * workspace); picking the one open does nothing.
  */
 export function WorkspaceSwitcher({
   variant = 'sidebar',
@@ -100,63 +98,66 @@ export function WorkspaceSwitcher({
 
   if (variant === 'strip' || variant === 'row')
     return (
-      <>
-        <button type="button" aria-haspopup="dialog" aria-label={copy.trigger} className={trigger} onClick={() => setOpen(true)}>
-          {mark}
-          {label}
-          {chevrons}
-        </button>
-        <Sheet open={open} onOpenChange={setOpen} title={copy.title}>
-          <div className="flex min-h-15 flex-none items-center gap-2 py-0 pr-1 pl-4">
-            <div className="flex min-w-0 flex-1 flex-col">
-              <SheetTitle className="m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900">{copy.title}</SheetTitle>
-              {person && <span className="text-dense text-n-600 tabular-nums">{person}</span>}
-            </div>
-            <SheetClose asChild>
-              <Button variant="ghost" iconOnly aria-label={copy.close}>
-                <X />
-              </Button>
-            </SheetClose>
+      <Sheet
+        open={open}
+        onOpenChange={setOpen}
+        trigger={
+          <button type="button" aria-label={copy.trigger} className={trigger}>
+            {mark}
+            {label}
+            {chevrons}
+          </button>
+        }
+      >
+        <div className="flex min-h-15 flex-none items-center gap-2 py-0 pr-1 pl-4">
+          <div className="flex min-w-0 flex-1 flex-col">
+            <SheetTitle className="m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900">{copy.title}</SheetTitle>
+            {person && <span className="text-dense text-n-600 tabular-nums">{person}</span>}
           </div>
-          <div className="flex flex-col gap-1 px-2 pt-1 pb-5">
-            {items.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                aria-current={item.current || undefined}
-                onClick={() => {
-                  setOpen(false)
-                  if (!item.current) onSelect(item.id)
-                }}
-                className={cn(
-                  'flex min-h-16 w-full cursor-pointer items-center gap-3 rounded-m border-0 px-3 py-2 text-left text-n-900 hover:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none',
-                  item.current ? 'bg-a-50 hover:bg-a-50' : 'bg-transparent',
-                )}
-              >
-                <WorkspaceLogo name={item.name} logo={item.logo} size={40} />
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-[15px] leading-5 font-semibold">{item.name}</span>
-                  <span className="truncate text-dense text-n-600">{item.caption}</span>
-                </span>
-                <RowEnd item={item} currentLabel={copy.current} size={20} />
-              </button>
-            ))}
-            <div role="separator" className="mx-3 my-1.5 h-px flex-none bg-n-200" />
+          <SheetClose asChild>
+            <Button variant="ghost" iconOnly aria-label={copy.close}>
+              <X />
+            </Button>
+          </SheetClose>
+        </div>
+        <div className="flex flex-col gap-1 px-2 pt-1 pb-5">
+          {items.map((item) => (
             <button
+              key={item.id}
               type="button"
+              aria-current={item.current || undefined}
               onClick={() => {
                 setOpen(false)
-                onCreate()
+                if (!item.current) onSelect(item.id)
               }}
-              className="flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-m border-0 bg-transparent px-3 py-2 text-left text-[15px] leading-5 font-semibold text-n-900 hover:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none"
+              className={cn(
+                'flex min-h-16 w-full cursor-pointer items-center gap-3 rounded-m border-0 px-3 py-2 text-left text-n-900 hover:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none',
+                item.current ? 'bg-a-50 hover:bg-a-50' : 'bg-transparent',
+              )}
             >
-              <AddTile size={40} />
-              {copy.create}
+              <WorkspaceLogo name={item.name} logo={item.logo} size={40} />
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-[15px] leading-5 font-semibold">{item.name}</span>
+                <span className="truncate text-dense text-n-600">{item.caption}</span>
+              </span>
+              <RowEnd item={item} currentLabel={copy.current} size={20} />
             </button>
-            <p className="mx-3 mt-1 mb-0 text-dense text-n-600">{copy.note}</p>
-          </div>
-        </Sheet>
-      </>
+          ))}
+          <SheetDivider />
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false)
+              onCreate()
+            }}
+            className="flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-m border-0 bg-transparent px-3 py-2 text-left text-[15px] leading-5 font-semibold text-n-900 hover:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none"
+          >
+            <AddTile size={40} />
+            {copy.create}
+          </button>
+          <p className="mx-3 mt-1 mb-0 text-dense text-n-600">{copy.note}</p>
+        </div>
+      </Sheet>
     )
 
   return (
@@ -201,7 +202,7 @@ export function WorkspaceSwitcher({
         </DropdownMenu.RadioGroup>
         <MenuSeparator className="mx-1" />
         <DropdownMenu.Item
-          onSelect={onCreate}
+          onSelect={() => onCreate()}
           className="flex min-h-10 cursor-pointer items-center gap-2.5 rounded-input px-2.5 py-1.5 text-small text-n-900 outline-none select-none focus-visible:shadow-focus-inset data-highlighted:bg-group"
         >
           <AddTile size={32} />
@@ -226,13 +227,13 @@ function RowEnd({ item, currentLabel, size }: { item: WorkspaceItem; currentLabe
         {currentLabel && <span className="sr-only">{currentLabel}</span>}
       </>
     )
-  if (!item.count) return null
+  if (!item.count || item.count.count <= 0) return null
   return (
     <>
       <CountBadge aria-hidden tone="attention">
-        {item.count}
+        {item.count.count}
       </CountBadge>
-      {item.countLabel && <span className="sr-only">{item.countLabel}</span>}
+      <span className="sr-only">{item.count.label}</span>
     </>
   )
 }

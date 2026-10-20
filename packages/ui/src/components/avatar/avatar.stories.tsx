@@ -25,6 +25,9 @@ export const Sizes: Story = {
   play: async () => {
     await expect(initials('Aýjemal Gurbanowa')).toBe('AG')
     await expect(initials('ýazgül')).toBe('Ý')
+    // marks around a name, an emoji: the letters, never half a character
+    await expect(initials('«Gözel» salon')).toBe('GS')
+    await expect(initials('💅 Nails')).toBe('N')
   },
 }
 

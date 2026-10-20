@@ -21,6 +21,16 @@
   draws its letters with CSS `content`, so a button named "Account menu: …" holds no stray initials (axe
   label-content-name-mismatch); the switcher's trigger has a space between name and level for the same rule; picking
   the current workspace does nothing.
+- Review (15 findings; 14 fixed): a sheet without a trigger beside it puts the focus back on what opened it (the
+  switcher's strip and row now are the sheet's `Dialog.Trigger`, with `aria-expanded`); `cn` knows the container
+  widths (`w-popover` vs `w-75`: the menus were 280) and reads `rounded-s` / `rounded-l` as radii, not the start and
+  left sides (tested in `cn.test.ts`); the More sheet's height stops under the screen's top; the switcher's sheet keeps
+  clear of the home indicator; the login's BusinessMark is square (`shape="square"`); SideNavItem renders its children
+  without `asChild` too; a workspace row's count carries its meaning (`count: { count, label }`); callbacks get no
+  Radix event; the rail's tooltip no longer repeats the name as a description; BottomTabBar merges a passed `style`;
+  `initials()` skips marks and emoji by code point; the tab's count is a CountBadge; one `SheetDivider`; a sheet is
+  named by its own `SheetTitle`. Not taken: building the phone sheets on Drawer (Drawer turns into a right drawer at
+  768 and has no place above a tab bar; the sheets are phone-only).
 - Not built yet: the Contact Ýeral submenu (its phone and Telegram are an open question), AppTopBar's detail variant
   (needs BackLink), the client account's aside (SideNav AccountAside), the demo sidebar (P4 slice 7).
 - Tests: stories for every state on the board, a phone-width and a Russian-length story per component (Storybook

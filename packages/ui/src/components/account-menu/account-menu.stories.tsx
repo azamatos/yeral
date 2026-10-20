@@ -42,6 +42,8 @@ export const Open: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Account menu' }))
     const menu = await within(document.body).findByRole('menu', { name: 'Account' })
     await waitFor(() => expect(menu).toBeVisible())
+    // the board's 300 (the test's narrow frame may take a pixel or two), not the popover's default 280
+    await expect(menu.getBoundingClientRect().width).toBeGreaterThan(290)
     await expect(
       within(menu)
         .getAllByRole('menuitem')
