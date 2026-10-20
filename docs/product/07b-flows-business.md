@@ -1894,7 +1894,7 @@ flowchart TD
 - Only clients with a completed booking can review; one per booking (§15).
 - Empty: "Ähli teswirlere jogap berdiňiz" / "Bu süzgüç boýunça teswir ýok".
 
-**Status** — Design: drawn (B-Reviews · `filter`, `composer`) · Code: schema only (reply text and time on reviews).
+**Status** — Design: drawn (B-Reviews · `filter`, `composer`) · Code: api built (`GET /v1/w/{slug}/reviews` with the summary, filters and sort; `PUT`/`DELETE …/reviews/{id}/reply`; 21.10.2026).
 
 ### B-54 · Report a review
 
@@ -1928,11 +1928,9 @@ flowchart TD
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.
 
-Code differs: reviews have no moderation state yet; every review counts (F2 "moderation pipeline" is on the to-do list).
-
 > Open question Q-261: how long a reported review may stay uncounted.
 
-**Status** — Design: drawn (B-Reviews · `report`; Venue) · Code: not built.
+**Status** — Design: drawn (B-Reviews · `report`; Venue) · Code: api built (`POST /v1/w/{slug}/reviews/{id}/report`; out of the rating while Ýeral checks, counted again after 48 hours by the jobs; the public review says `underReview`; 21.10.2026). Ýeral's own decision (keep or remove) comes with the admin tool (P2 step 5).
 
 ### B-55 · Analytics by access level
 

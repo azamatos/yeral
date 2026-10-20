@@ -22,7 +22,7 @@ import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { assertOpenAt, assertStaffFree, loadBusiness, lockedHours, type LoadedBusiness } from '../availability/context'
 import { visitWhat } from '../catalog/map'
-import { shiftRating } from '../reviews/rating'
+import { isCounted, shiftRating } from '../reviews/rating'
 import { onlineRefusal } from '../clients/online'
 import { assertOnlineBooking, assertWaitingRoom, rebook } from './create'
 import { bookedServices, dropPendingMove } from './engine'
@@ -253,6 +253,8 @@ export async function editReview(deps: Deps, b: BookingRow, input: { rating: num
       .update(reviews)
       .set({ rating: input.rating, tags: input.tags, text: input.text ?? null, updatedAt: new Date(now) })
       .where(eq(reviews.id, existing.id))
-    if (existing.rating !== input.rating) await shiftRating(tx, b.businessId, { [existing.rating]: -1, [input.rating]: 1 })
+    // a review Ýeral is checking isn't in the rating: its new stars count when it counts again
+    if (existing.rating !== input.rating && isCounted(existing))
+      await shiftRating(tx, b.businessId, { [existing.rating]: -1, [input.rating]: 1 })
   })
 }

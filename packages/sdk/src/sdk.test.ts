@@ -289,6 +289,13 @@ describe('live events', () => {
     ])
   })
 
+  it('a reply, a report or a recount refreshes the reviews, the team’s list with them, and the page', () => {
+    expect(staleKeys({ type: 'review.updated', business: 'glow-studio', bookingCode: null })).toEqual([
+      ['reviews', 'glow-studio'],
+      ['business', 'glow-studio'],
+    ])
+  })
+
   it('a client change refreshes their pages, the calendar and the requests', () => {
     expect(staleKeys({ type: 'client.updated', business: 'glow-studio', bookingCode: null })).toEqual([
       ['clients', 'glow-studio'],

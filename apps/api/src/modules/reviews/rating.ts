@@ -7,6 +7,13 @@
 import { sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 
+/**
+ * A review counts in the stored rating unless the business reported it and Ýeral hasn't decided yet, nor have 48 hours
+ * passed (the recount marks them, `recountReviews`). Every path that shifts the rating checks it first.
+ */
+export const isCounted = (r: { reportedAt: Date | null; recountedAt: Date | null; clearedAt: Date | null }) =>
+  !r.reportedAt || !!r.recountedAt || !!r.clearedAt
+
 /** Reviews added (+) or taken away (−) per number of stars. */
 export type StarShift = Partial<Record<number, number>>
 

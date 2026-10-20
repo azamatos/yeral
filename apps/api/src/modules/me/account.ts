@@ -12,7 +12,7 @@ import { emit } from '../../notify'
 import { linkPhone, recentRecord, unheldBooking } from '../auth/sign-in'
 import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
 import { blockedByCount } from '../clients/online'
-import { shiftRating, type StarShift } from '../reviews/rating'
+import { isCounted, shiftRating, type StarShift } from '../reviews/rating'
 import { teamChanged } from '../team/service'
 
 /**
@@ -85,13 +85,17 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
     // any booking's, the order an hours save takes them in; a number that passed on leaves the
     // earlier holder's reviews standing, signed as they were. One change per business, in one order, so two deletions
     // at once can't wait on each other
-    const gone = await tx
-      .delete(reviews)
-      .where(eq(reviews.userId, user.id))
-      .returning({ businessId: reviews.businessId, rating: reviews.rating })
+    const gone = await tx.delete(reviews).where(eq(reviews.userId, user.id)).returning({
+      businessId: reviews.businessId,
+      rating: reviews.rating,
+      reportedAt: reviews.reportedAt,
+      recountedAt: reviews.recountedAt,
+      clearedAt: reviews.clearedAt,
+    })
     for (const businessId of [...new Set(gone.map((r) => r.businessId))].sort()) {
       const shift: StarShift = {}
-      for (const r of gone) if (r.businessId === businessId) shift[r.rating] = (shift[r.rating] ?? 0) - 1
+      // one Ýeral was checking had left the rating already
+      for (const r of gone) if (r.businessId === businessId && isCounted(r)) shift[r.rating] = (shift[r.rating] ?? 0) - 1
       await shiftRating(tx, businessId, shift)
       await emit(tx, { type: 'review.deleted', businessId })
     }

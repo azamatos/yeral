@@ -58,6 +58,7 @@ import {
 } from '@yeral/contract/clients'
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
+import type { reviewReplyInputSchema, reviewReportInputSchema, teamReviewsQuerySchema } from '@yeral/contract/reviews'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
 import type {
   bookingRulesUpdateSchema,
@@ -812,7 +813,43 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     },
   }
 
-  return { auth, me, catalog, availability, bookings, team, settings, requests, calendar, clients, links }
+  // a reply or a report shows on the business's page too
+  const reviewsChanged = (slug: string) => invalidate(keys.reviewsAll(slug), keys.businessAll(slug))
+  const reviews = {
+    /** "Teswirler" (book B-53): pages of 20, filtered and sorted, with the summary (none for a specialist). */
+    list: (slug: string, p: Omit<Params<typeof teamReviewsQuerySchema, 'lang'>, 'cursor'>) => {
+      const query = clean(p)
+      return infiniteQueryOptions({
+        queryKey: keys.teamReviews(slug, query),
+        queryFn: ({ pageParam, signal }) =>
+          call(w.reviews.$get({ param: { slug }, query: clean({ ...query, cursor: pageParam }) }, abortWith(signal))),
+        initialPageParam: '',
+        getNextPageParam: (last) => last.cursor ?? undefined,
+      })
+    },
+    /** "Jogaby çap et" or its edit. */
+    reply: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ id, ...json }: { id: string } & z.input<typeof reviewReplyInputSchema>) =>
+          call(w.reviews[':id'].reply.$put({ param: { slug, id }, json })),
+        onSuccess: () => reviewsChanged(slug),
+      }),
+    /** The reply goes (its undo writes it again with `reply`). */
+    deleteReply: (slug: string) =>
+      mutationOptions({
+        mutationFn: (id: string) => call(w.reviews[':id'].reply.$delete({ param: { slug, id } })),
+        onSuccess: () => reviewsChanged(slug),
+      }),
+    /** "Arz et" (B-54): once per review. */
+    report: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ id, ...json }: { id: string } & z.input<typeof reviewReportInputSchema>) =>
+          call(w.reviews[':id'].report.$post({ param: { slug, id }, json })),
+        onSuccess: () => reviewsChanged(slug),
+      }),
+  }
+
+  return { auth, me, catalog, availability, bookings, team, settings, requests, calendar, clients, reviews, links }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

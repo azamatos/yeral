@@ -72,6 +72,11 @@ export function waitingLimit(here: number, inAll: number): WaitingLimit | null {
   if (inAll >= MAX_WAITING_IN_ALL) return { scope: 'all', limit: MAX_WAITING_IN_ALL }
   return null
 }
+/** The business's reply to a review: this long at most (B-53). */
+export const REVIEW_REPLY_MAX = 500
+/** A reported review isn't counted while Ýeral checks it, this long at most; then it counts again (book Q-261). */
+export const REVIEW_REPORT_HOURS = 48
+
 /** A review can be written until this long after the visit ends (book Q-126). */
 export const REVIEW_WRITE_DAYS = 30
 /** A no-show can be marked until this long after the visit ends (book Q-254). */

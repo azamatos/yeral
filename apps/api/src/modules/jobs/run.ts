@@ -2,7 +2,8 @@
  * `runDueJobs(deps)` every minute (ADR 0005), from the jobs tick in the Node process.
  * 1. Requests whose hold time ran out → cancelled by the system, with 3 alternative times and an SMS.
  * 2. Confirmed visits that ended → completed.
- * 3. Queued work: SMS, reminders, demo businesses answering.
+ * 3. Reported reviews Ýeral didn't decide in 48 hours → counted again (book Q-261).
+ * 4. Queued work: SMS, reminders, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import {
@@ -51,6 +52,7 @@ import { hideLinkTokens } from '../../ports/sms'
 import { onlineRefusal } from '../clients/online'
 import { itemsOf, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
 import { ADDRESS_SMS } from '../bookings/address-sms'
+import { recountReviews } from '../reviews/team'
 
 const BATCH = 100
 /**
@@ -475,6 +477,7 @@ export async function runDueJobs(deps: Deps): Promise<{ expired: number; complet
   await pruneIdentityChecks(deps.db, deps.now())
   const expired = await expireRequests(deps)
   const completed = await completeVisits(deps)
+  await recountReviews(deps)
   const ran = await runQueue(deps)
   return { expired, completed, jobs: ran }
 }

@@ -371,6 +371,8 @@ export const reviewSchema = z
     /** "Aýal saç kesimi · Aýna" */
     what: z.string(),
     reply: z.object({ text: z.string(), createdAt: epochSchema }).nullable(),
+    /** "Ýeral barlaýar · ortaça baha hasaplanmaýar": the business reported it and Ýeral is checking (book B-54). */
+    underReview: z.boolean(),
   })
   .meta({ id: 'Review' })
 export const reviewListSchema = listOf(reviewSchema)

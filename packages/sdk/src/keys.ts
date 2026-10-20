@@ -25,6 +25,8 @@ export const keys = {
   businesses: () => ['business'] as const,
   reviews: (slug: string, lang: Locale) => ['reviews', slug, lang] as const,
   reviewsAll: (slug: string) => ['reviews', slug] as const,
+  /** The team's reviews page (book B-53), under the business's reviews: a review event refreshes both. */
+  teamReviews: (slug: string, params: Record<string, unknown>) => ['reviews', slug, 'team', params] as const,
   availability: (slug: string, kind: 'appointment' | 'specialists' | 'tables' | 'sessions', params: Record<string, unknown>) =>
     ['availability', slug, kind, params] as const,
   availabilityAll: (slug: string) => ['availability', slug] as const,

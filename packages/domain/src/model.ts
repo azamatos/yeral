@@ -54,6 +54,13 @@ export const reasonWords = (reason: DeclineReason | BusinessCancelReason, text: 
 export const COMPLAINT_TYPES = ['noshow', 'late', 'rude', 'other'] as const
 export type ComplaintType = (typeof COMPLAINT_TYPES)[number]
 
+/**
+ * Why a business reports a review to Ýeral (book B-54): fake (the client didn't come), insulting words, about another
+ * business, an ad or spam, another reason.
+ */
+export const REVIEW_REPORT_REASONS = ['fake', 'insulting', 'other_business', 'spam', 'other'] as const
+export type ReviewReportReason = (typeof REVIEW_REPORT_REASONS)[number]
+
 export const PRICE_TYPES = ['fixed', 'from', 'free', 'hidden'] as const
 export type PriceType = (typeof PRICE_TYPES)[number]
 /** Whole manats. `amount` is 0 for free and may be 0 for hidden. */

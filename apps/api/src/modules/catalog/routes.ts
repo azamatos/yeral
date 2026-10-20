@@ -21,6 +21,7 @@ import { MARKET } from '@yeral/domain/market'
 import { and, asc, desc, eq, inArray, or, sql, type AnyColumn, type SQL } from 'drizzle-orm'
 import { anyTextLike, textIn } from '../../db/localized'
 import { bookingItems, businesses, categories, places, reviews, services } from '../../db/schema'
+import { isCounted } from '../reviews/rating'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
 import { cityOrMain, loadCities } from './cities'
@@ -212,6 +213,7 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
           lang,
         ) || r.what,
       reply: r.replyText && r.replyAt ? { text: r.replyText, createdAt: r.replyAt.getTime() } : null,
+      underReview: !isCounted(r),
     }))
     return c.json({ items, cursor: rows.length > limit ? String(offset + limit) : null }, 200)
   })

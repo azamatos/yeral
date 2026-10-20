@@ -36,7 +36,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
         keys.clients(e.business),
       )
   }
-  if ((e.type === 'review.created' || e.type === 'review.deleted') && e.business)
+  // the reviews, the team's list included (under the same prefix), and the rating on the page
+  if ((e.type === 'review.created' || e.type === 'review.deleted' || e.type === 'review.updated') && e.business)
     out.push(keys.reviewsAll(e.business), keys.businessAll(e.business))
   if (e.type === 'team.changed') {
     out.push(keys.workspaces(), keys.invites())
