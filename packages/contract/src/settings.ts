@@ -110,7 +110,8 @@ export const businessProfileUpdateSchema = z
 
 /** The hours' pickers run in 30-minute steps from 00:00 (book Q-128). */
 export const HOURS_STEP = 30
-const hoursMinute = minuteSchema.refine((m) => m % HOURS_STEP === 0, `Every ${HOURS_STEP} minutes`)
+export const hoursMinuteSchema = minuteSchema.refine((m) => m % HOURS_STEP === 0, `Every ${HOURS_STEP} minutes`)
+const hoursMinute = hoursMinuteSchema
 
 /** A weekday: from–to (the end may pass midnight, up to 48:00) and one optional break. */
 export const weekdayHoursSchema = z.object({

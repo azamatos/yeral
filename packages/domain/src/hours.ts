@@ -214,6 +214,45 @@ export function staffOffReason(b: BusinessHours, s: StaffSchedule, date: string)
   return staffDay(b, s, date) ? null : { kind: 'dayoff' }
 }
 
+/**
+ * Whether a visit still falls inside a team member's day (B-47): their shift inside the business day, their breaks
+ * and the business's left out, no personal day off. What a change of schedule leaves outside is listed for the owner.
+ */
+export function withinStaffDay(b: BusinessHours, s: StaffSchedule, date: string, visit: Interval): boolean {
+  const day = staffDay(b, s, date)
+  return !!day && workingIntervals(day).some((w) => contains(w, visit))
+}
+
+/** Whether a date's working day differs between two schedules of one team member: a change touches it. */
+export function staffDayChangedOn(b: BusinessHours, was: StaffSchedule, next: StaffSchedule, date: string): boolean {
+  return JSON.stringify(staffDay(b, was, date)) !== JSON.stringify(staffDay(b, next, date))
+}
+
+/**
+ * Problems with a team member's schedule (B-47), each as the field it's in: a shift day whose opening isn't a time of
+ * day or whose closing isn't after it (past 48:00 or a full day), a break that isn't a stretch of the day, a personal
+ * day off that ends before it starts or runs past a year. Empty when valid.
+ */
+export function staffScheduleErrors(s: StaffSchedule): string[] {
+  const bad: string[] = []
+  s.shift?.forEach((h, i) => {
+    if (!h) return
+    if (!Number.isInteger(h.open) || h.open < 0 || h.open >= DAY_MINUTES) bad.push(`shift.${i}`)
+    else if (!Number.isInteger(h.close) || h.close <= h.open || h.close > MAX_DAY_END || h.close - h.open > DAY_MINUTES)
+      bad.push(`shift.${i}`)
+  })
+  s.breaks.forEach((br, i) => {
+    if (!br) return
+    const day = s.shift?.[i]
+    if (br.end <= br.start || br.start < 0 || br.end > MAX_DAY_END || (day && (br.start < day.open || br.end > day.close)))
+      bad.push(`breaks.${i}`)
+  })
+  s.daysOff.forEach((d, i) => {
+    for (const field of specialDayErrors({ ...d, hours: null })) bad.push(`daysOff.${i}.${field}`)
+  })
+  return bad
+}
+
 /** The bookable stretches of a working day: open → close minus the breaks. */
 export function workingIntervals(day: WorkDay): Interval[] {
   const out: Interval[] = []
