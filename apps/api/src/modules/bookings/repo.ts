@@ -144,7 +144,10 @@ export async function recordMoveRefused(
   return true
 }
 
-/** Postgres refused an overlap (exclusion constraint) or a duplicate: the slot went meanwhile. */
+/**
+ * Postgres refused an overlap (exclusion constraint) or a duplicate: the slot went meanwhile. The constraints keep one
+ * specialist's bookings apart, and one person's across their workspaces (busy elsewhere, book Q-272; migration 0020).
+ */
 export function isSlotConflict(e: unknown): boolean {
   return pgCode(e) === '23P01'
 }

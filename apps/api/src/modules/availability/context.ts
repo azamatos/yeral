@@ -7,7 +7,8 @@
 import { staffDoingAll, type AppointmentContext, type BusyInterval, type TableContext } from '@yeral/domain/availability'
 import type { BookingRules } from '@yeral/domain/rules'
 import { addDays } from '@yeral/domain/time'
-import { and, eq, gte, inArray, lte } from 'drizzle-orm'
+import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, businesses, diningTables, services, staff, staffServices, tableAreas } from '../../db/schema'
 import { ApiError } from '../../http/errors'
@@ -80,28 +81,43 @@ export async function loadBusinesses(db: Queryable, ids: string[]): Promise<Map<
 /** Busy time per specialist, buffers included, for active bookings between two dates and the day either side (past midnight). */
 export async function loadBusy(db: Queryable, businessIds: string[], from: string, to: string): Promise<BusyInterval[]> {
   if (!businessIds.length) return []
-  const rows = await db
-    .select({
-      bookingId: bookingItems.bookingId,
-      staffId: bookingItems.staffId,
-      date: bookingItems.date,
-      start: bookingItems.start,
-      end: bookingItems.end,
-      bufferAfter: bookingItems.bufferAfter,
-    })
-    .from(bookingItems)
-    .innerJoin(bookings, eq(bookings.id, bookingItems.bookingId))
-    .where(
-      and(
-        inArray(bookings.businessId, businessIds),
-        eq(bookingItems.active, true),
-        gte(bookingItems.date, addDays(from, -1)),
-        lte(bookingItems.date, addDays(to, 1)),
-      ),
-    )
-  return rows.flatMap((r) =>
-    r.staffId ? [{ bookingId: r.bookingId, staffId: r.staffId, date: r.date, start: r.start, end: r.end + r.bufferAfter }] : [],
-  )
+  const days = and(eq(bookingItems.active, true), gte(bookingItems.date, addDays(from, -1)), lte(bookingItems.date, addDays(to, 1)))
+  const item = {
+    bookingId: bookingItems.bookingId,
+    date: bookingItems.date,
+    start: bookingItems.start,
+    end: bookingItems.end,
+    bufferAfter: bookingItems.bufferAfter,
+  }
+  // busy elsewhere (book Q-272): a person in several workspaces is taken here by their bookings as a specialist there,
+  // waiting or confirmed, with their buffers, by the account each item was booked with, as the database counts them
+  // (migration 0020); their own bookings as a client, breaks and days off don't count
+  const here = alias(staff, 'here')
+  const [own, elsewhere] = await Promise.all([
+    db
+      .select({ ...item, staffId: bookingItems.staffId })
+      .from(bookingItems)
+      .innerJoin(bookings, eq(bookings.id, bookingItems.bookingId))
+      .where(and(inArray(bookings.businessId, businessIds), days)),
+    db
+      .select({ ...item, staffId: here.id })
+      .from(bookingItems)
+      .innerJoin(here, and(eq(here.userId, bookingItems.person), sql`${here.id} is distinct from ${bookingItems.staffId}`))
+      .where(and(inArray(here.businessId, businessIds), days)),
+  ])
+  return [
+    ...own.flatMap((r) =>
+      r.staffId ? [{ bookingId: r.bookingId, staffId: r.staffId, date: r.date, start: r.start, end: r.end + r.bufferAfter }] : [],
+    ),
+    ...elsewhere.map((r) => ({
+      bookingId: r.bookingId,
+      staffId: r.staffId,
+      date: r.date,
+      start: r.start,
+      end: r.end + r.bufferAfter,
+      elsewhere: true as const,
+    })),
+  ]
 }
 
 /** The named specialist (if any) still takes bookings and does every one of the services; else 404. */
