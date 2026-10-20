@@ -43,19 +43,49 @@ export function ModalContent({
   )
 }
 
-/** Title row with the close button (ghost, 36). */
-export function ModalHeader({ title, closeLabel, children }: { title: ReactNode; closeLabel: string; children?: ReactNode }) {
+/**
+ * Title row with the close button (ghost, 36). With `media` (the login's brand icon, Auth `.mtop`), the media and the
+ * close button share the top row and the title with its lead goes under them, 8 apart.
+ */
+export function ModalHeader({
+  title,
+  closeLabel,
+  media,
+  children,
+}: {
+  title: ReactNode
+  closeLabel: string
+  media?: ReactNode
+  children?: ReactNode
+}) {
+  const close = (
+    <Dialog.Close asChild>
+      <Button variant="ghost" iconOnly aria-label={closeLabel} className="-mt-1 -mr-2 size-9 flex-none rounded-s">
+        <X />
+      </Button>
+    </Dialog.Close>
+  )
+  const heading = <Dialog.Title className="m-0 text-h3 text-n-900">{title}</Dialog.Title>
+  if (media)
+    return (
+      <div className="flex flex-col gap-5">
+        <div className="flex items-start justify-between gap-4">
+          {media}
+          {close}
+        </div>
+        <div className="flex min-w-0 flex-col gap-2">
+          {heading}
+          {children}
+        </div>
+      </div>
+    )
   return (
     <div className="flex items-start justify-between gap-4">
       <div className="flex min-w-0 flex-col gap-1">
-        <Dialog.Title className="m-0 text-h3 text-n-900">{title}</Dialog.Title>
+        {heading}
         {children}
       </div>
-      <Dialog.Close asChild>
-        <Button variant="ghost" iconOnly aria-label={closeLabel} className="-mt-1 -mr-2 size-9 rounded-s">
-          <X />
-        </Button>
-      </Dialog.Close>
+      {close}
     </div>
   )
 }
