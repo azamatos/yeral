@@ -8,7 +8,7 @@ import type {
   businessProfileSchema,
   businessProfileUpdateSchema,
 } from '@yeral/contract/settings'
-import { newAddressSince, sameAddress } from '@yeral/domain/lifecycle'
+import { addressOf, newAddressSince, sameAddress, sameAddressShown } from '@yeral/domain/lifecycle'
 import { AMENITIES, type Amenity, type Localized } from '@yeral/domain/model'
 import { LATE_MINUTES, rulesErrors, type BookingRules } from '@yeral/domain/rules'
 import { eq } from 'drizzle-orm'
@@ -110,13 +110,16 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
     if (issues.length) throw new ApiError('validation_error', { issues })
 
     const { location, categoryId, amenities, ...rest } = change
-    const before = { address: row.address, street: row.street, cityId: row.cityId }
+    const before = addressOf(row)
     // a new pin alone is checked again, but the address the clients read is the same
     const relocated = !!location && !sameAddress(before, location)
     const moved = relocated || (!!location && (location.lat !== row.lat || location.lng !== row.lng))
-    // a fix while the page says "New address" keeps where it moved from; back there, it has nothing new to say
+    // the page says "New address" when what it shows changed (a home-based business shows its street); a fix while it
+    // says so keeps where it moved from, and back there it has nothing new to say
+    const hide = change.hideExactAddress ?? row.hideExactAddress
+    const pageMoved = relocated && !sameAddressShown(before, location, hide, 'pending')
     const from = row.movedFrom && newAddressSince(row.movedAt?.getTime() ?? null, now) !== null ? row.movedFrom : before
-    const movedBack = relocated && sameAddress(from, location)
+    const movedBack = pageMoved && sameAddressShown(from, location, hide, 'pending')
     const set: Partial<typeof businesses.$inferInsert> = {
       ...rest,
       ...(about ? { about } : {}),
@@ -125,7 +128,7 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
       ...(recategorized ? { categoryId, kind: category!.name } : {}),
       ...location,
       ...(moved ? { addressChangedAt: new Date(now) } : {}),
-      ...(relocated ? (movedBack ? { movedAt: null, movedFrom: null } : { movedAt: new Date(now), movedFrom: from }) : {}),
+      ...(pageMoved ? (movedBack ? { movedAt: null, movedFrom: null } : { movedAt: new Date(now), movedFrom: from }) : {}),
     }
     if (!Object.keys(set).length) return profileView(row)
     const [saved] = await tx.update(businesses).set(set).where(eq(businesses.id, businessId)).returning()

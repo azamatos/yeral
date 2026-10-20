@@ -210,6 +210,7 @@ describe('a new address (book Q-215)', () => {
   it('a home-based business: a waiting request knows only the street', async () => {
     const maysa = await as(MAYSA)
     await maysa.req(PROFILE, { method: 'PATCH', body: { hideExactAddress: true } })
+    const pageMoved = (await glow()).movedAt?.getTime()
     const confirmed = await book(maysa, '+99365800407', TUE, 600)
     const { client, code } = await request('+99365800408', TUE, 720)
     // a new house number on the same street: the confirmed booking hears it, the waiting request has nothing new
@@ -217,8 +218,9 @@ describe('a new address (book Q-215)', () => {
     await afterTheWait()
     expect(newAddressSms('+99365800407')).toEqual([expect.stringMatching(/new address: Görogly köçesi 7\./)])
     expect(newAddressSms('+99365800408')).toEqual([])
-    // nothing new on the request's screen either
+    // nothing new on the request's screen, nor on the page, which shows the street too
     expect((await client.req(`/v1/me/bookings/${code}`)).json).toMatchObject({ address: 'Görogly köçesi', movedAt: null })
+    expect((await glow()).movedAt?.getTime()).toBe(pageMoved)
     // another street: the request hears the street only
     await moveTo(maysa, { address: 'Magtymguly şaýoly 40', street: 'Magtymguly şaýoly' })
     await afterTheWait()
@@ -277,6 +279,42 @@ describe('a new address (book Q-215)', () => {
     await runDueJobs(t.deps)
     expect(newAddressSms('+99365800412')).toEqual([])
     await moveTo(maysa, { address, street })
+  })
+
+  it('a booking the client brings back, and one made right after the move, hear it too', async () => {
+    const maysa = await as(MAYSA)
+    // the client's own cancel, brought back after the move
+    const { client, code } = await request('+99365800414', FRI3, 840)
+    expect((await maysa.req(`${W}/requests/${code}/confirm`, { body: {} })).status).toBe(204)
+    expect((await client.req(`/v1/me/bookings/${code}/cancel`, { body: {} })).status).toBe(200)
+    await moveTo(maysa, { address: 'Back lane 3', street: 'Back lane' })
+    t.clock.now += 60_000
+    expect((await client.req(`/v1/me/bookings/${code}/restore`, { method: 'POST' })).status).toBe(200)
+    // booked a minute after the move, from a page loaded before it
+    t.clock.now += 60_000
+    const { code: fresh } = await request('+99365800415', FRI3, 960)
+    await afterTheWait()
+    expect(newAddressSms('+99365800414')).toEqual([expect.stringContaining('new address: Back lane 3.')])
+    expect(newAddressSms('+99365800415')).toEqual([expect.stringContaining('new address: Back lane 3.')])
+    expect(fresh).toBeTruthy()
+  })
+
+  it('a phone booking’s first SMS names the address as agreed; the SMS about the move still goes', async () => {
+    const maysa = await as(MAYSA)
+    const made = await maysa.req(`${W}/bookings`, {
+      body: { source: 'phone', phone: '+99365800416', serviceIds: [manicure], staffId: maralId, date: FRI3, start: 1080 },
+    })
+    expect(made.status).toBe(201)
+    t.clock.now += 5_000
+    await moveTo(maysa, { address: 'Phone row 9', street: 'Phone row' })
+    // its first SMS, once the undo can't come: the address as it is now
+    t.clock.now += 15_000
+    await runDueJobs(t.deps)
+    expect(t.sms.sent.filter((x) => x.to === '+99365800416').map((x) => x.text)).toEqual([
+      expect.stringMatching(/you're booked: Glow Studio, .+, Phone row 9\./),
+    ])
+    await afterTheWait()
+    expect(newAddressSms('+99365800416')).toEqual([expect.stringContaining('has moved to a new address: Phone row 9.')])
   })
 
   it('a booking moved to an earlier time hears it by the new time', async () => {

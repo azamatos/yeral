@@ -34,5 +34,12 @@
   badge, the re-time, one domain rule for the shown address, one statement for the waiting jobs, the sdk out of the
   changeset. Not taken: folding the address into `told` (its news compare time and people; the address has its own
   record, which every SMS naming it now writes).
+- Second review (10 findings, 7 fixed): a booking the client cancelled that "Yzyna al" may bring back is queued too
+  (the jobs send only to one that still hears it, `hearsOfMove`); a booking made in the 10 minutes after a move, from a
+  page that may have shown the old address, hears it (`addressSmsForNewBooking`); a phone booking's first SMS names the
+  address as agreed and no longer counts as telling a move; the page's badge follows what the page shows (a home-based
+  business's street); `addressOf` and `hearsOfMove` in the domain; techContext lists the helpers. Not taken: two runners
+  racing (runs never overlap: the jobs' advisory lock, one job after another), folding the address into `told` (as
+  before), one business read per batch (a move is rare).
 - Follow-ups: the address block's save should say how many clients will get the SMS (a **Design to fix** in B-37); the
   SMS caps of step 7 should count these too (a business moving back and forth sends one SMS per booking each time).

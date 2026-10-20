@@ -3,11 +3,11 @@
  * sent `ADDRESS_SMS_AFTER_MS` after the last save that changed the address, worded by the jobs when it goes
  * (`sendAddressSms`), and nothing when the client already knows the address as it is then.
  */
-import { addressSmsAt, type AddressTold } from '@yeral/domain/lifecycle'
+import { ADDRESS_SMS_AFTER_MS, addressSmsAt, RESTORE_MINUTES, type AddressTold } from '@yeral/domain/lifecycle'
 import { addDays, epochOf, localOf } from '@yeral/domain/time'
-import { and, eq, gte, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
+import { and, eq, gt, gte, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookings, jobs } from '../../db/schema'
+import { bookings, businesses, jobs } from '../../db/schema'
 import type { BookingRow } from './repo'
 
 /** The job's kind of booking SMS. */
@@ -25,8 +25,9 @@ const waitingFor = (bookingIds: readonly string[], now: number) =>
 
 /**
  * Queue the SMS for every booking ahead at the business: waiting requests and confirmed visits that haven't started,
- * not a waiting move (its booking hears it). Each keeps the address its client knew before (`addressTold`, unless an
- * earlier move set it), and one SMS waits per booking: another save before it goes moves its time on.
+ * and the ones the client cancelled that "Yzyna al" may still bring back; not a waiting move (its booking hears it).
+ * Each keeps the address its client knew before (`addressTold`, unless an earlier move set it), and one SMS waits per
+ * booking: another save before it goes moves its time on. The jobs send it only to a booking that still hears it.
  */
 export async function queueAddressSms(tx: Queryable, businessId: string, before: AddressTold, now: number): Promise<void> {
   // from yesterday's business day, which may run past midnight (book Q-105)
@@ -36,7 +37,15 @@ export async function queueAddressSms(tx: Queryable, businessId: string, before:
     .where(
       and(
         eq(bookings.businessId, businessId),
-        inArray(bookings.status, ['pending', 'confirmed']),
+        or(
+          inArray(bookings.status, ['pending', 'confirmed']),
+          and(
+            eq(bookings.status, 'cancelled'),
+            eq(bookings.cancelledBy, 'client'),
+            isNull(bookings.businessCancelReason),
+            gt(bookings.cancelledAt, new Date(now - RESTORE_MINUTES * 60_000)),
+          ),
+        ),
         isNull(bookings.rescheduleOf),
         isNotNull(bookings.clientPhone),
         isNull(bookings.accountDeletedAt),
@@ -78,4 +87,24 @@ export async function retimeAddressSms(tx: Queryable, b: BookingRow, now: number
     .update(jobs)
     .set({ runAt: sql`least(${jobs.runAt}, ${at.toISOString()}::timestamptz)` })
     .where(waitingFor([b.id], now))
+}
+
+/**
+ * A booking made in the minutes after the business moved, from a page that may still have shown the old address: it
+ * hears the new one as the bookings made before did (book Q-215).
+ */
+export async function addressSmsForNewBooking(tx: Queryable, b: BookingRow, now: number): Promise<void> {
+  const [biz] = await tx
+    .select({ movedAt: businesses.movedAt, movedFrom: businesses.movedFrom })
+    .from(businesses)
+    .where(eq(businesses.id, b.businessId))
+  if (!biz?.movedAt || !biz.movedFrom || now - biz.movedAt.getTime() >= ADDRESS_SMS_AFTER_MS || !b.clientPhone) return
+  await tx.update(bookings).set({ addressTold: biz.movedFrom }).where(eq(bookings.id, b.id))
+  await tx
+    .insert(jobs)
+    .values({
+      kind: 'booking.sms',
+      runAt: new Date(addressSmsAt({ ...b, createdAt: b.createdAt.getTime() }, now)),
+      payload: { bookingId: b.id, kind: ADDRESS_SMS },
+    })
 }

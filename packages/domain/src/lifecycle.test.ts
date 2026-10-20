@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   ADDRESS_SMS_AFTER_MS,
   addressAsShown,
+  addressOf,
   addressSmsAt,
+  hearsOfMove,
   firstSmsFrom,
   newAddressSince,
   sameAddress,
@@ -396,6 +398,15 @@ describe('a new address (book Q-215)', () => {
     expect(sameAddressShown(here, nextDoor, true, 'pending')).toBe(true)
     expect(sameAddressShown(here, nextDoor, true, 'confirmed')).toBe(false)
     expect(sameAddressShown(here, { ...here, cityId: 'mary' }, true, 'pending')).toBe(false)
+    expect(addressOf({ ...here, lat: 1, lng: 2 } as typeof here)).toEqual(here)
+  })
+
+  it('a waiting or confirmed booking still ahead hears it', () => {
+    const at = { date: '2026-10-14', start: 720 }
+    expect(hearsOfMove('pending', at, now)).toBe(true)
+    expect(hearsOfMove('confirmed', at, now)).toBe(true)
+    expect(hearsOfMove('confirmed', at, epochOf('2026-10-14', 720))).toBe(false)
+    expect(hearsOfMove('cancelled', at, now)).toBe(false)
   })
 
   it('the page says so for 30 days', () => {

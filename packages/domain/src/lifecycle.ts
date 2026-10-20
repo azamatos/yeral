@@ -398,6 +398,17 @@ export interface AddressTold {
   at?: number
 }
 
+/** A business's address as `AddressTold` keeps it. */
+export const addressOf = (b: { address: string; street: string; cityId: string }): AddressTold => ({
+  address: b.address,
+  street: b.street,
+  cityId: b.cityId,
+})
+
+/** A booking whose client hears that the business moved, and sees it on the booking: waiting or confirmed, still ahead. */
+export const hearsOfMove = (status: BookingStatus, b: { date: string; start: number }, now: number): boolean =>
+  (status === 'pending' || status === 'confirmed') && now < epochOf(b.date, b.start)
+
 /** A move: the line, the street or the city changed; a new pin alone isn't one. */
 export const sameAddress = (a: AddressTold, b: AddressTold): boolean =>
   a.address === b.address && a.street === b.street && a.cityId === b.cityId

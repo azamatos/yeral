@@ -7,7 +7,9 @@
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import {
   addressAsShown,
+  addressOf,
   effectiveStatus,
+  hearsOfMove,
   NEWS_QUEUED,
   newsSms,
   REMINDER_KINDS,
@@ -61,8 +63,12 @@ const DROPPED_NOTHING_NEW = 'dropped: the client knows the booking as it is'
 /** A reminder whose try comes once the visit has started tells the client nothing (book Q-284): settled unsent. */
 const DROPPED_STARTED = 'dropped: the visit has started (book Q-284)'
 const REMINDERS: ReadonlySet<string> = new Set(REMINDER_KINDS)
-/** The booking SMS that name the address: once the business has moved, each records the one it told (book Q-215). */
-const NAMES_ADDRESS: ReadonlySet<BookingSmsKind> = new Set(['booked', 'bookedWith', 'reminderDay', 'reminder2h', 'reminderEvening'])
+/**
+ * The reminders name the address: once the business has moved, one the client hasn't heard of says "new address" and
+ * counts as telling it (book Q-215). A phone booking's first SMS names it too, but as agreed on the phone: if the
+ * business moved since, the SMS about the move still goes.
+ */
+const NAMES_ADDRESS: ReadonlySet<BookingSmsKind> = new Set(['reminderDay', 'reminder2h', 'reminderEvening'])
 /** SMS go to mobile numbers only (ROUND6 C1): a client the team saved with a landline gets none. */
 const DROPPED_NOT_MOBILE = 'dropped: not a mobile number (ROUND6 C1)'
 /** The business moved and back, or the client was told since: they know the address as it is (book Q-215). */
@@ -345,8 +351,7 @@ async function sendAddressSms(deps: Deps, bookingId: string): Promise<string | u
   if (!b?.clientPhone || b.accountDeletedAt) return
   const now = deps.now()
   const { status } = effectiveStatus(stateOf(b), now)
-  if (status !== 'pending' && status !== 'confirmed') return
-  if (now >= epochOf(b.date, b.start)) return DROPPED_STARTED
+  if (!hearsOfMove(status, b, now)) return status === 'pending' || status === 'confirmed' ? DROPPED_STARTED : undefined
   if (!b.userId && !isMobile(b.clientPhone)) return DROPPED_NOT_MOBILE
   // a profile save under way finishes first: this tells the address as it's saved
   const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId)).for('share')
@@ -365,12 +370,6 @@ async function sendAddressSms(deps: Deps, bookingId: string): Promise<string | u
   await sendWithLink(deps, b, user?.phone ?? b.clientPhone, (link) => addressSmsText(lang, { ...sms, link }))
   await noteAddressTold(deps, b, current)
 }
-
-const addressOf = (biz: { address: string; street: string; cityId: string }): AddressTold => ({
-  address: biz.address,
-  street: biz.street,
-  cityId: biz.cityId,
-})
 
 /**
  * The address an SMS told the client: the next move compares with it (book Q-215), unless something else changed it

@@ -6,6 +6,7 @@ import {
   canClientRestore,
   clientActions,
   effectiveStatus,
+  hearsOfMove,
   showsExactAddress,
 } from '@yeral/domain/lifecycle'
 import { isBusinessSideCancel, isOnlineSource, reasonWords, type Locale } from '@yeral/domain/model'
@@ -161,11 +162,8 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     address: addressAsShown(b, b.hideExactAddress, status),
     city: await cityRef(deps.db, b.cityId, lang),
     entranceNote: b.hideExactAddress && !exact ? null : b.entranceNote,
-    // an SMS told the client the business moved, and the visit is still ahead
-    movedAt:
-      row.addressTold?.at !== undefined && (status === 'pending' || status === 'confirmed') && now < epochOf(row.date, row.start)
-        ? row.addressTold.at
-        : null,
+    // an SMS told the client the business moved, and the booking still hears it
+    movedAt: row.addressTold?.at !== undefined && hearsOfMove(status, row, now) ? row.addressTold.at : null,
     geo: geoOf(b, exact),
     clientNote: row.clientNote,
     holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,
