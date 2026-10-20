@@ -18,6 +18,7 @@ const invite = (id: string, state: InviteCard['state'], expiresAt = 0): InviteCa
   business: { slug: 'glow-studio', name: 'Glow Studio', category: 'Beauty', address: '247 Bitarap Türkmenistan Avenue', city, photo: null },
   invitedBy: 'Maýsa Annaýewa',
   level: 'specialist',
+  requestAnswerers: 'both',
   state,
   sentAt: expiresAt - 7 * 86_400_000,
   expiresAt,

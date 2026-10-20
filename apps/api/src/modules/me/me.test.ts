@@ -75,6 +75,11 @@ describe('account', () => {
     const on = testApp(db, { codeOnScreen: true })
     const b = browser(on.app)
     await b.login('+99365222009', 'Merjen')
+    // the account says so before anyone taps "Change number"
+    expect((await b.req('/v1/me')).json.canChangePhone).toBe(false)
+    const off = browser(t.app)
+    await off.login('+99365222009')
+    expect((await off.req('/v1/me')).json.canChangePhone).toBe(true)
     const refused = await b.req('/v1/me/phone/code', { body: { phone: '+99365222010' } })
     expect(refused.status).toBe(409)
     expect(refused.json.error.code).toBe('phone_change_unavailable')

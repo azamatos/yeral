@@ -10,7 +10,8 @@ export const nameOf = (user: User): PersonName => ({ first: user.name, surname: 
 /** The whole name businesses see on the client record and the booking ("Aýjemal Gurbanowa"). */
 export const accountName = (user: User): string | null => fullName(nameOf(user))
 
-export async function toMe(db: Queryable, user: User): Promise<Me> {
+/** The signed-in person; `codeOnScreen`: the deployment's sign-in shows the code (`Deps.codeOnScreen`). */
+export async function toMe(db: Queryable, user: User, codeOnScreen: boolean): Promise<Me> {
   const workspaces = await workspaceIdsOf(db, user.id)
   return {
     id: user.id,
@@ -26,5 +27,6 @@ export async function toMe(db: Queryable, user: User): Promise<Me> {
       reviewAsk: false,
     },
     hasBusiness: workspaces.length > 0,
+    canChangePhone: !codeOnScreen,
   }
 }

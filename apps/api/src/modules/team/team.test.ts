@@ -65,6 +65,8 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     expect(cards[0]).toMatchObject({
       business: { slug: 'glow-studio', name: 'Glow Studio', city: { id: 'ashgabat', name: 'Ashgabat' } },
       level: 'specialist',
+      // the card's lines for the level follow who answers requests there (book B-08)
+      requestAnswerers: 'both',
       state: 'pending',
     })
     expect(cards[0].expiresAt - cards[0].sentAt).toBe(7 * DAY)

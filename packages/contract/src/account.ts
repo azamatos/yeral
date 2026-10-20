@@ -55,6 +55,11 @@ export const meSchema = z
     notifications: notificationPrefsSchema,
     /** Has a business workspace ("Biznes" link). */
     hasBusiness: z.boolean(),
+    /**
+     * Whether "Change number" works here: not while the sign-in code shows on the screen (the first launch, book
+     * Q-036), when `/me/phone/code` answers `phone_change_unavailable`.
+     */
+    canChangePhone: z.boolean(),
   })
   .meta({ id: 'Me' })
 export type Me = z.infer<typeof meSchema>

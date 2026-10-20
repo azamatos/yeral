@@ -24,6 +24,7 @@ const person = (phone: string, firstName: string | null, surname: string | null 
   lang: 'en',
   notifications,
   hasBusiness: false,
+  canChangePhone: true,
 })
 
 const workspace = (slug: string, name: string, level: Workspace['level'], lastOpenedAt: number | null): Workspace => ({
@@ -42,6 +43,7 @@ const invite = (state: InviteCard['state'], expiresAt: number): InviteCard => ({
   business: { slug: 'glow-studio', name: 'Glow Studio', category: 'Beauty', address: '247 Bitarap Türkmenistan Avenue', city, photo: null },
   invitedBy: 'Maýsa Annaýewa',
   level: 'specialist',
+  requestAnswerers: 'both',
   state,
   sentAt: expiresAt - 7 * DAY,
   expiresAt,

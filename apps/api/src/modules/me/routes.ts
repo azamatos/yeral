@@ -86,7 +86,7 @@ const removeFavoriteRoute = createRoute({
 })
 
 export const meRoutes = new OpenAPIHono<AppEnv>()
-  .openapi(meRoute, async (c) => c.json(await toMe(c.var.deps.db, requireUser(c)), 200))
+  .openapi(meRoute, async (c) => c.json(await toMe(c.var.deps.db, requireUser(c), c.var.deps.codeOnScreen), 200))
   .openapi(updateRoute, async (c) => {
     const user = requireUser(c)
     const { name, firstName, surname, lang, notifications: n } = c.req.valid('json')
@@ -110,9 +110,9 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
       ...(n?.reminder2h !== undefined ? { notifyReminder2h: n.reminder2h } : {}),
     }
     // nothing to change (only the deprecated review-ask switch, say): the profile as it is
-    if (!Object.keys(set).length) return c.json(await toMe(c.var.deps.db, user), 200)
+    if (!Object.keys(set).length) return c.json(await toMe(c.var.deps.db, user, c.var.deps.codeOnScreen), 200)
     const [row] = await c.var.deps.db.update(users).set(set).where(eq(users.id, user.id)).returning()
-    return c.json(await toMe(c.var.deps.db, row ?? user), 200)
+    return c.json(await toMe(c.var.deps.db, row ?? user, c.var.deps.codeOnScreen), 200)
   })
   .openapi(deleteRoute, async (c) => {
     const user = requireUser(c)
@@ -163,7 +163,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
           others.map((s) => s.id),
         ),
       )
-    return c.json(await toMe(c.var.deps.db, row), 200)
+    return c.json(await toMe(c.var.deps.db, row, c.var.deps.codeOnScreen), 200)
   })
   .openapi(favoritesRoute, async (c) => {
     const user = requireUser(c)

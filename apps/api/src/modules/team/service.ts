@@ -290,6 +290,15 @@ export async function inviteCards(deps: Deps, rows: InviteRow[], lang: Locale): 
       ),
     )
   const cities = await loadCities(deps.db)
+  const rules = await deps.db
+    .select({ businessId: bookingRules.businessId, answerers: bookingRules.requestAnswerers })
+    .from(bookingRules)
+    .where(
+      inArray(
+        bookingRules.businessId,
+        rows.map((r) => r.businessId),
+      ),
+    )
   // the sender's name as their team knows it
   const senders = rows.flatMap((r) => (r.invitedBy ? [r.invitedBy] : []))
   const senderRows = senders.length
@@ -315,6 +324,8 @@ export async function inviteCards(deps: Deps, rows: InviteRow[], lang: Locale): 
         },
         invitedBy: senderRows.find((x) => x.userId === r.invitedBy && x.businessId === r.businessId)?.name ?? null,
         level: s.level === 'admin' ? 'admin' : 'specialist',
+        // the booking rules' default when a business has none yet
+        requestAnswerers: rules.find((x) => x.businessId === r.businessId)?.answerers ?? 'both',
         state: inviteState({ status: r.status, expiresAt: r.expiresAt.getTime() }, now),
         sentAt: r.sentAt.getTime(),
         expiresAt: r.expiresAt.getTime(),
