@@ -355,7 +355,7 @@ Business pages show "*15 minutdan köp gijä galsaňyz, ýazylyş ýatyrylyp bil
 - B · Fixed 15 min for every business.
 - C · No number: a business writes it in its rules note if it wants.
 
-answer: A · Add a setting next to the cancel window: none, 5, 10, 15, 20 or 30 min, default 15; tables keep their own hold. Owner: where the design needs clarifying, put it in the design prompt. The owner placed the setting (F-103) Later, so the MVP shows a fixed 15 min. (18.10.2026)
+answer: A · Add a setting next to the cancel window: none, 5, 10, 15, 20 or 30 min, default 15; tables keep their own hold. Owner: where the design needs clarifying, put it in the design prompt. The owner placed the setting (F-103) Later, so the MVP shows a fixed 15 min. (18.10.2026) Built 20.10.2026: one constant, `LATE_MINUTES` = 15; the stored per-business number is unused and no table hold borrows it.
 
 ## Q-119 · Free-cancel choices: setup wizard vs settings
 chapter: 05 · status: decided

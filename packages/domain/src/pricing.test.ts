@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { businessTotal, daySummary, priceTotal } from './pricing'
-import { DEFAULT_RULES, rulesErrors } from './rules'
+import { DEFAULT_RULES, LATE_MINUTES, rulesErrors } from './rules'
 
 describe('priceTotal', () => {
   it('adds fixed prices', () => {
@@ -83,5 +83,10 @@ describe('booking rules', () => {
   it('accepts only the offered options, and a custom buffer up to 120', () => {
     expect(rulesErrors({ ...DEFAULT_RULES, holdMinutes: 45, bufferMinutes: 37 })).toEqual({ holdMinutes: 'invalid' })
     expect(rulesErrors({ ...DEFAULT_RULES, bufferMinutes: 121, cancelWindowMinutes: null })).toEqual({ bufferMinutes: 'invalid' })
+  })
+
+  it('lateness is 15 minutes for everyone, not a rule a business sets (book Q-118)', () => {
+    expect(LATE_MINUTES).toBe(15)
+    expect(DEFAULT_RULES).not.toHaveProperty('lateToleranceMinutes')
   })
 })

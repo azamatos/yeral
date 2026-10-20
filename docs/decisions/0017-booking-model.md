@@ -40,7 +40,10 @@ requests, which rules it can change and what it records about a visit; the clien
   | `cancelWindowMinutes` | null (= any time) · 60 · 120 · 360 · 720 · 1440 · 2880 (120) |
   | `askCancelReason` | on/off (on) |
   | `blockAfterNoShows` | 0 (= off) – 5 (2) |
-  | `lateToleranceMinutes`, `note` | shown in the business page's rules (client spec §4.3) |
+  | `note` | shown in the business page's rules (client spec §4.3) |
+
+  Lateness isn't a rule of its own in the MVP: every business shows 15 minutes (`LATE_MINUTES`, book Q-118,
+  20.10.2026); a setting next to `cancelWindowMinutes` comes with F-103.
 
 - **Statuses**: `pending | confirmed | completed | cancelled | noshow` with `cancelledBy: client | business | system`.
 - **Confirmation**: by default every online booking arrives as a request (`pending`) and the business confirms it by hand.
