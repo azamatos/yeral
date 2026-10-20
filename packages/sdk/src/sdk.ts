@@ -82,7 +82,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         onSuccess: (data) => {
           if (!('me' in data)) return
           queryClient.setQueryData(keys.me(), data.me)
-          return invalidate(keys.bookings(), ['favorites'])
+          // a business page says whether this client may book there online (book Q-154)
+          return invalidate(keys.bookings(), ['favorites'], ['business'])
         },
       }),
     /** "Is this you?": yes signs in to that account, no to a fresh one; whoever was on screen before is gone. */
@@ -98,6 +99,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
           queryClient.setQueryData(keys.me(), null)
           queryClient.removeQueries({ queryKey: keys.bookings() })
           queryClient.removeQueries({ queryKey: ['favorites'] })
+          void invalidate(['business'])
         },
       }),
   }

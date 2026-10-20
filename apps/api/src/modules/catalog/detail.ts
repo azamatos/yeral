@@ -15,6 +15,7 @@ import { appointmentContext, loadBusinesses, loadBusy, type BusinessRow } from '
 import { buildCards } from './cards'
 import { cityRefOf, loadCities } from './cities'
 import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
+import { onlineRefusal } from '../bookings/create'
 
 const SPECIAL_DAYS_AHEAD = 14
 
@@ -60,7 +61,14 @@ export async function publicBusiness(deps: Deps, slug: string) {
   return row
 }
 
-export async function businessDetail(deps: Deps, slug: string, lang: Locale, position: LatLng | null): Promise<BusinessDetail> {
+/** `viewerPhone`: the signed-in client's, so the page knows whether they may book here online (book A7, Q-154). */
+export async function businessDetail(
+  deps: Deps,
+  slug: string,
+  lang: Locale,
+  position: LatLng | null,
+  viewerPhone: string | null = null,
+): Promise<BusinessDetail> {
   const { db } = deps
   const now = deps.now()
   const day = today(now)
@@ -142,6 +150,7 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
       note: lb.rulesNote ? text(lb.rulesNote, lang) : null,
     },
     onlineEnabled: lb.rules.onlineEnabled,
+    bookOnline: viewerPhone ? !(await onlineRefusal(db, lb, viewerPhone)) : lb.rules.onlineEnabled,
     confirmMode: lb.rules.confirmMode,
     holdMinutes: lb.rules.holdMinutes,
     leadMinutes: lb.rules.leadMinutes,

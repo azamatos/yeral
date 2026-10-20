@@ -173,7 +173,7 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
     const { slug } = c.req.valid('param')
     const { lang, lat, lng } = c.req.valid('query')
     const position = lat !== undefined && lng !== undefined ? { lat, lng } : null
-    return c.json(await businessDetail(c.var.deps, slug, lang, position), 200)
+    return c.json(await businessDetail(c.var.deps, slug, lang, position, c.var.auth?.user.phone ?? null), 200)
   })
   .openapi(reviewsRoute, async (c) => {
     const { slug } = c.req.valid('param')

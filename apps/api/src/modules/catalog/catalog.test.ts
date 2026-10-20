@@ -4,7 +4,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, businesses, events, jobs, services, staff, staffServices } from '../../db/schema'
+import { bookingRules, bookings, businesses, clients, events, jobs, services, staff, staffServices } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { DEMO_CENTER } from '../../db/seed/demo-data'
 import { confirmBooking } from '../bookings/confirm'
@@ -254,6 +254,29 @@ describe('catalogue', () => {
       await db.delete(jobs).where(sql`${jobs.payload}->>'bookingId' in ${ids.length ? ids : ['none']}`)
       await db.delete(events).where(inArray(events.bookingCode, codes))
       await db.delete(bookings).where(inArray(bookings.code, codes))
+    }
+  })
+
+  it('the business page says whether whoever looks may book online: the "Jaň et" card for a phone-only client (A7, Q-154)', async () => {
+    const t = testApp(db)
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const phone = '+99365777020'
+    const look = async (who: ReturnType<typeof browser>) => (await who.req('/v1/businesses/glow-studio')).json.bookOnline
+    expect(await look(browser(t.app))).toBe(true)
+    const client = browser(t.app)
+    await client.login(phone, 'Maral')
+    expect(await look(client)).toBe(true)
+    const [record] = await db.insert(clients).values({ businessId: glow!.id, phone, name: 'Maral', onlineBlocked: true }).returning()
+    try {
+      expect(await look(client)).toBe(false)
+      // everyone else still books online
+      expect(await look(browser(t.app))).toBe(true)
+      // a paused business: nobody books online
+      await db.update(bookingRules).set({ onlineEnabled: false }).where(eq(bookingRules.businessId, glow!.id))
+      expect(await look(browser(t.app))).toBe(false)
+    } finally {
+      await db.update(bookingRules).set({ onlineEnabled: true }).where(eq(bookingRules.businessId, glow!.id))
+      await db.delete(clients).where(eq(clients.id, record!.id))
     }
   })
 })
