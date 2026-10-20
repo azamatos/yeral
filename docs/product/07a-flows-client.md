@@ -422,7 +422,9 @@ flowchart TD
 
 **Design to fix:** the owner preview (Venue · `ownerPreview`) with "Ýazylmak", "Saýla" and the time chips disabled (Q-153).
 
-- The api tells the two apart: a business in review or rejected answers 404 `in_review` (the friendly page), an unknown slug 404 `not_found` (the plain one); the business's own team gets the page with `preview` (`pending` or `rejected` with the Ýeral team's reason) and `bookOnline` false (code: `catalog/detail.ts`). Its free times and reviews stay public-only.
+**In code**
+
+- The api tells the two apart: a business in review or rejected answers 404 `in_review` (the friendly page), an unknown slug 404 `not_found` (the plain one); the business's own team gets the page with `preview` (`pending` or `rejected`; the Ýeral team's reason for the owner only) and booking off. Its free times and reviews answer the same way, so the preview can draw its disabled chips (code: `catalog/detail.ts`, `visibleBusiness`). None of these answers is cached.
 
 **Status:** Design: drawn (States 11; Venue · `ownerPreview`) · Code: built (api).
 

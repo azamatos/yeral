@@ -307,7 +307,8 @@ export const businessDetailSchema = z
     /**
      * Whether whoever is looking may book online here: false while the business has paused online booking, and for a
      * signed-in client who may book it only by phone, who sees the "Jaň et" card instead (book A7, Q-154). Signed out,
-     * it follows `onlineEnabled`: the card shows once the client logs in.
+     * it follows `onlineEnabled`: the card shows once the client logs in. On a `preview` it's false too, and means
+     * booking is off (the buttons shown disabled, Q-153), not the card: read `preview` first.
      */
     bookOnline: z.boolean(),
     /**

@@ -466,7 +466,7 @@ flowchart TD
 
 > Open question Q-276: what the Ýeral team checks before verifying.
 
-**Status** — Design: drawn (B-Shell · verification banner; Venue · `ownerPreview`; States tile 11) · Code: built for hiding unverified businesses (api returns "not found"); the friendly visitor page, banner and review process are not built.
+**Status** — Design: drawn (B-Shell · verification banner; Venue · `ownerPreview`; States tile 11) · Code: the api answers visitors `in_review` and gives the team its page as a `preview` with the owner's reason (F-032); the banner, the pages and the review process come with the apps and the admin tool.
 
 ## 2. My account
 

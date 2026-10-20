@@ -24,7 +24,7 @@ import { bookingItems, businesses, categories, places, reviews, services } from 
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
 import { cityOrMain, loadCities } from './cities'
-import { businessDetail, publicBusiness } from './detail'
+import { businessDetail, visibleBusiness } from './detail'
 import { text, visitWhat } from './map'
 import { search, wordStartLikes } from './search'
 
@@ -174,16 +174,18 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
     const { lang, lat, lng } = c.req.valid('query')
     const position = lat !== undefined && lng !== undefined ? { lat, lng } : null
     const viewer = c.var.auth ? { id: c.var.auth.user.id, phone: c.var.auth.user.phone } : null
-    const detail = await businessDetail(c.var.deps, slug, lang, position, viewer)
-    // `bookOnline` is for whoever is looking (book Q-154): no shared cache may keep one person's answer for another
-    c.header('Cache-Control', 'private')
+    // the answer is for whoever is looking (`bookOnline`, Q-154; a preview or `in_review`, F-032): no shared cache may
+    // keep one person's for another, a 404 included
+    c.header('Cache-Control', 'private, no-store')
     c.header('Vary', 'Cookie, Authorization')
-    return c.json(detail, 200)
+    return c.json(await businessDetail(c.var.deps, slug, lang, position, viewer), 200)
   })
   .openapi(reviewsRoute, async (c) => {
     const { slug } = c.req.valid('param')
     const { cursor, limit, lang } = c.req.valid('query')
-    const b = await publicBusiness(c.var.deps, slug)
+    c.header('Cache-Control', 'private, no-store')
+    c.header('Vary', 'Cookie, Authorization')
+    const { row: b } = await visibleBusiness(c.var.deps, slug, c.var.auth?.user.id ?? null)
     const offset = Number(cursor ?? 0) || 0
     const rows = await c.var.deps.db
       .select()

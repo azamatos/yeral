@@ -6,9 +6,9 @@ import { findException, openMinutesBetween } from '@yeral/domain/hours'
 import { TYPICAL_ANSWER_DAYS, typicalAnswerMinutes } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { addDays, today } from '@yeral/domain/time'
-import { and, asc, desc, eq, gte, isNull, lte, ne } from 'drizzle-orm'
+import { and, asc, eq, gte, isNull, lte, ne } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookings, businesses, categories, serviceGroups, tableAreas, verificationHistory } from '../../db/schema'
+import { bookings, businesses, categories, serviceGroups, staff, tableAreas } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { appointmentContext, loadBusinesses, loadBusy, type BusinessRow } from '../availability/context'
@@ -16,7 +16,7 @@ import { buildCards } from './cards'
 import { cityRefOf, loadCities } from './cities'
 import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
 import { bookOnlineFor } from '../clients/online'
-import { workspaceIdsOf } from '../team/members'
+import { signsIn } from '../team/members'
 
 const SPECIAL_DAYS_AHEAD = 14
 
@@ -63,26 +63,24 @@ export async function publicBusiness(deps: Deps, slug: string) {
 }
 
 /**
- * A page the viewer may see: a verified business, or one still in review for its own team (book F-032), with the
- * preview's status and, when rejected, the Ýeral team's latest reason. Anyone else gets `in_review` ("Bu sahypa entek
- * açylmady"); an unknown slug `not_found`.
+ * A business the viewer may see (book F-032): a verified one, or one still in review (or rejected) for a signed-in
+ * member of its own team, with the preview's status and, for its owner, the Ýeral team's reason (Q-274). Anyone else
+ * gets `in_review` ("Bu sahypa entek açylmady"); an unknown slug `not_found`. The business page, its free times and its
+ * reviews all ask this, so they answer the same.
  */
-async function visibleBusiness(deps: Deps, slug: string, viewerId: string | null) {
+export async function visibleBusiness(deps: Deps, slug: string, viewerId: string | null) {
   const [row] = await deps.db.select().from(businesses).where(eq(businesses.slug, slug))
   if (!row) throw new ApiError('not_found')
   if (row.verification === 'verified') return { row, preview: null }
-  const mine = viewerId && (await workspaceIdsOf(deps.db, viewerId)).includes(row.id)
-  if (!mine) throw new ApiError('in_review')
-  const [last] =
-    row.verification === 'rejected'
-      ? await deps.db
-          .select({ reason: verificationHistory.reason })
-          .from(verificationHistory)
-          .where(and(eq(verificationHistory.businessId, row.id), eq(verificationHistory.status, 'rejected')))
-          .orderBy(desc(verificationHistory.at))
-          .limit(1)
-      : []
-  return { row, preview: { status: row.verification, reason: last?.reason ?? null } }
+  const [member] = viewerId
+    ? await deps.db
+        .select({ level: staff.level })
+        .from(staff)
+        .where(and(eq(staff.businessId, row.id), eq(staff.userId, viewerId), signsIn))
+        .limit(1)
+    : []
+  if (!member) throw new ApiError('in_review')
+  return { row, preview: { status: row.verification, reason: member.level === 'owner' ? row.verificationReason : null } }
 }
 
 /**
