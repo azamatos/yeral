@@ -196,10 +196,12 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
       businessCancelReason: 'staff_away',
       cancelReason: null,
     })
+    // a code the app words, the client's own words none
     expect((await client.req(`/v1/me/bookings/${code}?lang=en`)).json).toMatchObject({
       status: 'cancelled',
       cancelledBy: 'business',
-      cancelReason: "The specialist can't come in",
+      cancelReason: null,
+      businessCancel: { reason: 'staff_away', text: null },
     })
     await runDueJobs(t.deps)
     expect(smsTo('+99365800207')).toEqual([expect.stringMatching(/Glow Studio cancelled your booking .*The specialist can't come in/)])
@@ -212,7 +214,10 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
     const other = await book(maysa, '+99365800207', THU, 720)
     expect((await cancel(maysa, other, { reason: 'other' })).status).toBe(400)
     expect((await cancel(maysa, other, { reason: 'other', text: 'The power is off' })).status).toBe(204)
-    expect((await client.req(`/v1/me/bookings/${other}`)).json.cancelReason).toBe('The power is off')
+    expect((await client.req(`/v1/me/bookings/${other}`)).json).toMatchObject({
+      cancelReason: null,
+      businessCancel: { reason: 'other', text: 'The power is off' },
+    })
   })
 
   it('“The client called to cancel” is the client’s own cancel: no reason shown, no undo, a short SMS', async () => {
@@ -222,7 +227,7 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
     expect((await cancel(maysa, code, { reason: 'client_called' })).status).toBe(204)
     expect(await rowOf(code)).toMatchObject({ status: 'cancelled', cancelledBy: 'client', businessCancelReason: 'client_called' })
     const detail = (await client.req(`/v1/me/bookings/${code}`)).json
-    expect(detail).toMatchObject({ status: 'cancelled', cancelledBy: 'client', cancelReason: null })
+    expect(detail).toMatchObject({ status: 'cancelled', cancelledBy: 'client', cancelReason: null, businessCancel: null })
     expect(detail.actions.restore).toBe(false)
     await runDueJobs(t.deps)
     expect(smsTo('+99365800208')).toEqual([expect.stringMatching(/your booking at Glow Studio .* is cancelled, as you asked/)])

@@ -60,7 +60,12 @@ describe('client bookings', () => {
     // newest first; her Glow Studio visits from the client list sit in between
     expect(past.json.items.map((x: { code: string }) => x.code).filter((c: string) => demo.includes(c))).toEqual(demo)
     const ojak = await b.req('/v1/me/bookings/YR-44650')
-    expect(ojak.json).toMatchObject({ status: 'cancelled', cancelledBy: 'business', cancelReason: 'Şol gün ýapyk' })
+    expect(ojak.json).toMatchObject({
+      status: 'cancelled',
+      cancelledBy: 'business',
+      cancelReason: null,
+      businessCancel: { reason: 'other', text: 'Şol gün ýapyk' },
+    })
   })
 
   it('a class: seats under a lock; full sessions refuse', async () => {

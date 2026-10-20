@@ -46,9 +46,15 @@ It found 15 issues; all hold. The plan, one PR each, reviewed before merging, in
    the hours under the lock. For PR 4: `assertOpenAt` refuses with no nearest times; tests for the races (a booking
    undone mid-save, a specialist's cancel after a move to another, the lock order) need a concurrency harness; the
    client's move reads the business three times; one loader for a business's hours.
-3. **Contract:** a business cancel as `businessCancel: { reason, text }` (codes, the app translates; `cancelReason`
-   only the client's words), its offered times a `cancel` source; `Object.hasOwn` in the jobs; the `{ tk: '' }` fallback
-   to the market's language.
+3. **Contract** (fix/p2-contract-cleanup, 20.10.2026): a business cancel as `businessCancel: { reason, text }` on the
+   booking detail and the link page (codes the app words, `text` the business's words for "Other reason" or the closed
+   day's name; `reasonWords` in `@yeral/domain/model`, one rule for declines and cancels, the SMS included; the enum
+   leaves out "The client called to cancel", the client's own cancel: `BUSINESS_SIDE_CANCEL_REASONS`); `cancelReason`
+   only the client's own words (cancelled by the client, not entered by the team); the offered times of a business's
+   cancel are taken with their own source, `cancel` (`OFFER_SOURCES` in the contract; `offersOf` tells a cancel from
+   a decline by `businessCancelReason`, as the detail does); the seed marks the design's business cancel ("Şol gün
+   ýapyk", the business's own words) as "Other reason"; the `{ tk: '' }` fallback is the market's language.
+   `Object.hasOwn` in the jobs went with PR 1.
 4. **Structure, no behaviour change:** `bookings/engine.ts` (items, price, `inTransaction`, waiting-move handling,
    `cancelForBusiness`), `actions.ts` client-only, `repo.ts` files for the calendar and hours queries, the team sources
    and the "heard" window in the domain with tests, one `invalid()`, techContext's "Where shared things live" and

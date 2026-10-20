@@ -4,7 +4,7 @@
  */
 import type { EventType } from '@yeral/contract/events'
 import { MARKET } from '@yeral/domain/market'
-import { localized, type BusinessCancelReason, type DeclineReason, type Locale } from '@yeral/domain/model'
+import { localized, reasonWords, type BusinessCancelReason, type DeclineReason, type Locale } from '@yeral/domain/model'
 import { epochOf, localOf } from '@yeral/domain/time'
 import { createFmt, createT } from '@yeral/i18n/fmt'
 import { eq } from 'drizzle-orm'
@@ -173,7 +173,7 @@ function timesText(fmt: ReturnType<typeof createFmt>, b: Pick<SmsBooking, 'date'
  * special day's name it closed for (B-40).
  */
 export function businessCancelText(lang: Locale, reason: BusinessCancelReason, text: string | null): string {
-  return (reason === 'other' || reason === 'closed') && text ? text : createT(lang)(`businessCancelReasons.${reason}`)
+  return reasonWords(reason, text) ?? createT(lang)(`businessCancelReasons.${reason}`)
 }
 
 /**
@@ -204,7 +204,7 @@ export function cancelledOffersSmsText(
 
 /** The reason the business gave, as the client reads it: its label, or "other" in the business's words. */
 const reasonOf = (t: ReturnType<typeof createT>, reason: DeclineReason, text: string | null) =>
-  reason === 'other' && text ? text : t(`declineReasons.${reason}`)
+  reasonWords(reason, text) ?? t(`declineReasons.${reason}`)
 
 /**
  * A request the business declined, with the reason it gave and the link to the offered times (B-20); a client who can't

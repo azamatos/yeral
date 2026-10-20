@@ -145,14 +145,22 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     for (const o of row.declineAlternatives) expect(o.date).not.toBe(THU)
 
     const detail = (await client.req(`/v1/me/bookings/${first}`)).json
-    expect(detail).toMatchObject({ status: 'cancelled', cancelledBy: 'business', cancelReason: 'Repairs', decline: null })
+    expect(detail).toMatchObject({
+      status: 'cancelled',
+      cancelledBy: 'business',
+      cancelReason: null,
+      businessCancel: { reason: 'closed', text: 'Repairs' },
+      decline: null,
+    })
     expect(detail.cancelOffers).toHaveLength(3)
     expect(detail.cancelOffers[0]).toMatchObject({ state: 'free', staff: { id: maralId } })
     await runDueJobs(t.deps)
     expect(smsTo('+99365800301')).toEqual([expect.stringMatching(/Glow Studio cancelled your booking .*: Repairs\. Free times: .+ — /)])
 
-    // one tap: confirmed at the offered time
-    const taken = await client.req(`/v1/me/bookings/${first}/accept-alternative`, { body: { source: 'decline', index: 0 } })
+    // one tap: confirmed at the offered time; they're the cancel's offers, not a decline's
+    const declined = await client.req(`/v1/me/bookings/${first}/accept-alternative`, { body: { source: 'decline', index: 0 } })
+    expect(declined.json.error.code).toBe('invalid_status')
+    const taken = await client.req(`/v1/me/bookings/${first}/accept-alternative`, { body: { source: 'cancel', index: 0 } })
     expect(taken.json).toMatchObject({
       status: 'confirmed',
       date: row.declineAlternatives[0]!.date,
@@ -196,6 +204,12 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     expect(await rowOf(lunch)).toMatchObject({ status: 'cancelled', businessCancelReason: 'hours', cancelReason: null })
     await runDueJobs(t.deps)
     expect(smsTo('+99365800304')).toEqual([expect.stringMatching(/cancelled your booking .*: The opening hours changed\./)])
+    // the link page: the code, no words
+    const lunchToken = /\/l\/([\w-]+)/.exec(smsTo('+99365800304').at(-1)!)![1]!
+    expect((await browser(t.app).req(`/v1/links/${lunchToken}`)).json).toMatchObject({
+      cancelReason: null,
+      businessCancel: { reason: 'hours', text: null },
+    })
     // back as it was
     expect((await save(maysa, { ...was, affected: 'keep' })).status).toBe(200)
   })
@@ -267,7 +281,7 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     const text = smsTo('+99365800307').at(-1)!
     const token = /\/l\/([\w-]+)/.exec(text)![1]!
     const page = (await browser(t.app).req(`/v1/links/${token}`)).json
-    expect(page).toMatchObject({ status: 'cancelled', cancelReason: 'Audit' })
+    expect(page).toMatchObject({ status: 'cancelled', cancelReason: null, businessCancel: { reason: 'closed', text: 'Audit' } })
     expect(page.cancelOffers).toHaveLength(3)
     expect((await save(maysa, { ...was, affected: 'keep' })).status).toBe(200)
   })

@@ -1,4 +1,5 @@
 /** What a client can do with their booking (client spec §4.8 "Client actions by status"; ADR 0017). */
+import type { OfferSource } from '@yeral/contract/bookings'
 import {
   canClientCancel,
   canClientReschedule,
@@ -217,16 +218,11 @@ export async function withdrawMove(deps: Deps, b: BookingRow): Promise<BookingRo
 }
 
 /**
- * Pick one of the offered times: after a decline the business already agreed (confirmed at once); after an expired
- * request it's a new request like any other. Each offer makes one booking (`alternativeOf` is unique).
+ * Pick one of the offered times: after a decline or the business's cancel the business already agreed (confirmed at
+ * once); after an expired request it's a new request like any other. Each offer makes one booking (`alternativeOf` is
+ * unique).
  */
-export async function acceptAlternative(
-  deps: Deps,
-  user: User,
-  b: BookingRow,
-  source: 'decline' | 'expired',
-  index: number,
-): Promise<BookingRow> {
+export async function acceptAlternative(deps: Deps, user: User, b: BookingRow, source: OfferSource, index: number): Promise<BookingRow> {
   const offers = offersOf(b, deps.now())
   const slot = offers?.source === source ? offers.list[index] : undefined
   if (!slot) throw new ApiError('invalid_status')
@@ -243,7 +239,7 @@ export async function acceptAlternative(
       b,
       // with its named specialist only (book Q-159): busy now, it's taken (409 slot_taken)
       offerTarget(slot),
-      { status: source === 'decline' ? 'confirmed' : initialStatus('web', lb.rules.confirmMode), alternativeOf: b.id },
+      { status: source === 'expired' ? initialStatus('web', lb.rules.confirmMode) : 'confirmed', alternativeOf: b.id },
     )
     return row
   } catch (e) {

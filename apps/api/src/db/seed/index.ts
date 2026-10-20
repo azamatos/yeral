@@ -306,6 +306,9 @@ interface AppointmentSeed {
   code?: string
 }
 
+/** The design's business cancels give their reason in words: "Other reason" (B-27). */
+const businessCancelOf = (by: string | undefined, reason: string | undefined) => (by === 'business' && reason ? ('other' as const) : null)
+
 async function seedAppointment(ctx: Ctx, a: AppointmentSeed): Promise<string> {
   const svc = a.biz.services.get(a.serviceKey)
   const who = a.biz.staff.get(a.staffKey)
@@ -328,6 +331,7 @@ async function seedAppointment(ctx: Ctx, a: AppointmentSeed): Promise<string> {
       status: a.status,
       cancelledBy: a.cancelledBy ?? null,
       cancelReason: a.cancelReason ?? null,
+      businessCancelReason: businessCancelOf(a.cancelledBy, a.cancelReason),
       source: a.source,
       clientNote: a.clientNote ?? null,
       priceType: svc.def.price[0],
@@ -585,6 +589,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
         status: a.status,
         cancelledBy: a.cancelledBy ?? null,
         cancelReason: a.reason ?? null,
+        businessCancelReason: businessCancelOf(a.cancelledBy, a.reason),
         source: 'web',
         partySize: a.partySize,
         areaId: area?.id ?? null,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { MARKET } from './market'
-import { localized } from './model'
+import { isBusinessSideCancel, localized, reasonWords } from './model'
 
 describe('localized (book Q-102: any one language is enough)', () => {
   it('picks the asked language', () => {
@@ -20,5 +20,22 @@ describe('localized (book Q-102: any one language is enough)', () => {
   it('treats an empty text as not written', () => {
     expect(localized({ en: '', tk: 'Saç kesimi' }, 'en')).toBe('Saç kesimi')
     expect(localized({}, 'en')).toBe('')
+  })
+})
+
+describe('a reason in the business’s words (B-20, B-27, B-40)', () => {
+  it('"Other reason" and a closed day carry them; any other reason its label', () => {
+    expect(reasonWords('other', 'The power is off')).toBe('The power is off')
+    expect(reasonWords('closed', 'Repairs')).toBe('Repairs')
+    expect(reasonWords('other', null)).toBeNull()
+    expect(reasonWords('staff_away', 'ignored')).toBeNull()
+    expect(reasonWords('hours', 'ignored')).toBeNull()
+    expect(reasonWords('slot_busy', 'ignored')).toBeNull()
+  })
+
+  it('"The client called to cancel" is the client’s own cancel', () => {
+    expect(isBusinessSideCancel('client_called')).toBe(false)
+    expect(isBusinessSideCancel('staff_away')).toBe(true)
+    expect(isBusinessSideCancel('closed')).toBe(true)
   })
 })
