@@ -39,6 +39,50 @@ export const WithError: Story = {
   },
 }
 
+/** DS-Patterns → «Field messages»: every message has a 14 px icon; warning and success are 600 and `role="status"`. */
+export const Messages: Story = {
+  render: () => (
+    <div className="grid max-w-180 gap-6 sm:grid-cols-2">
+      <Field label="Phone" hint="8 digits. If the client is already saved, we’ll show their card.">
+        <Input defaultValue="65 12 34 56" />
+      </Field>
+      <Field label="Phone" error="The number is incomplete — it needs 8 digits.">
+        <Input defaultValue="65 12 34" />
+      </Field>
+      <Field
+        label="Phone"
+        status="warning"
+        message={
+          <>
+            This number belongs to Gülälek N. — <a href="#client">Open client card</a>
+          </>
+        }
+      >
+        <Input defaultValue="65 44 70 19" />
+      </Field>
+      <Field label="Phone" status="success" message="This number isn’t saved yet — a new client">
+        <Input defaultValue="65 30 22 18" />
+      </Field>
+      <Field
+        label="Phone number"
+        error="The number is incomplete — it needs 8 digits."
+        hint="If you already book on Ýeral as a client, use that number — one account works for both."
+        className="sm:col-span-2"
+      >
+        <Input defaultValue="65 10 2" />
+      </Field>
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getAllByRole('alert')).toHaveLength(2)
+    await expect(canvas.getAllByRole('status')).toHaveLength(2)
+    // a message and a hint both describe the control (B-Login keeps the hint under the error)
+    await expect(canvas.getByLabelText('Phone number')).toHaveAccessibleDescription(
+      'The number is incomplete — it needs 8 digits. If you already book on Ýeral as a client, use that number — one account works for both.',
+    )
+  },
+}
+
 export const Disabled: Story = {
   render: () => (
     <Field label="Telefon belgisi" disabled className="max-w-90">

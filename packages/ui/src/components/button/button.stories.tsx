@@ -98,6 +98,17 @@ export const Loading: Story = {
   },
 }
 
+/** The sign-in step's busy primary: the spinner with words beside it («Sending…»), clicks ignored. */
+export const LoadingWithText: Story = {
+  args: { variant: 'primary', loading: true, loadingText: 'Sending…', children: 'Send code' },
+  play: async ({ args, canvas }) => {
+    const button = canvas.getByRole('button', { name: 'Sending…' })
+    await userEvent.click(button)
+    await expect(args.onClick).not.toHaveBeenCalled()
+    await expect(button).toHaveAttribute('aria-disabled', 'true')
+  },
+}
+
 export const AsLink: Story = {
   render: (args) => (
     <Button {...args} asChild>
