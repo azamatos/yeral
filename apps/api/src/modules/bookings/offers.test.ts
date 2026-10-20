@@ -171,9 +171,17 @@ describe('offered times', () => {
     return { upcoming: await codes('upcoming'), past: await codes('past') }
   }
 
+  const glowLead = async () => {
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const [rules] = await db.select().from(bookingRules).where(eq(bookingRules.businessId, glow!.id))
+    return rules!.leadMinutes
+  }
+
   it('an expired request stays on top of upcoming while an offered time is ahead (book C-26, C-40)', async () => {
     const { b, code } = await request('+99365444009', 0, FRI)
     t.clock.now += 31 * MIN
+    // ran out, and the jobs haven't found its times yet: it stays rather than going to past and coming back
+    expect(await tabs(b)).toEqual({ upcoming: [code], past: [] })
     await runDueJobs(t.deps)
     const offers = await offersOf(b, code)
     expect(offers.length).toBeGreaterThan(0)
@@ -187,7 +195,7 @@ describe('offered times', () => {
     expect(made.status).toBe(201)
     expect(await tabs(b)).toEqual({ upcoming: [code, made.json.code], past: [] })
     // every offered time inside the lead time: the row goes to past
-    t.clock.now = Math.max(...offers.map((o) => epochOf(o.date, o.start))) - 59 * MIN
+    t.clock.now = Math.max(...offers.map((o) => epochOf(o.date, o.start))) - ((await glowLead()) - 1) * MIN
     const now = await tabs(b)
     expect(now.upcoming).not.toContain(code)
     expect(now.past).toContain(code)
@@ -210,6 +218,38 @@ describe('offered times', () => {
     const taken = await b.req(`/v1/me/bookings/${code}/accept-alternative`, { body: { source: 'decline', index: 0 } })
     expect(taken.status).toBeLessThan(300)
     expect(await tabs(b)).toEqual({ upcoming: [taken.json.code], past: [code] })
+  })
+
+  it('an expired request whose offered times are all taken goes to past', async () => {
+    const { b, code } = await request('+99365444011', 6, FRI)
+    t.clock.now += 31 * MIN
+    await runDueJobs(t.deps)
+    const offers = await offersOf(b, code)
+    expect(offers.length).toBeGreaterThan(0)
+    // other clients book each offered time with its specialist; one may already cover the next
+    for (const [i, o] of offers.entries()) {
+      const other = browser(t.app)
+      await other.login(`+9936544402${i}`, 'Other')
+      await other.req('/v1/bookings', {
+        body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: o.staff!.id, date: o.date, start: o.start },
+      })
+    }
+    expect((await offersOf(b, code)).map((o) => o.state)).toEqual(offers.map(() => 'taken'))
+    expect(await tabs(b)).toEqual({ upcoming: [], past: [code] })
+  })
+
+  it('an expired request goes to past when the client may no longer book online there (book Q-154)', async () => {
+    const { b, code } = await request('+99365444012', 8, FRI)
+    t.clock.now += 31 * MIN
+    await runDueJobs(t.deps)
+    expect(await tabs(b)).toEqual({ upcoming: [code], past: [] })
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    await db.update(bookingRules).set({ onlineEnabled: false }).where(eq(bookingRules.businessId, glow!.id))
+    try {
+      expect(await tabs(b)).toEqual({ upcoming: [], past: [code] })
+    } finally {
+      await db.update(bookingRules).set({ onlineEnabled: true }).where(eq(bookingRules.businessId, glow!.id))
+    }
   })
 
   it('with nothing free the expiry SMS asks for another time (book Q-252)', async () => {

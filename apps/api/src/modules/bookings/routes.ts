@@ -131,15 +131,20 @@ export const bookingRoutes = new OpenAPIHono<AppEnv>()
       .select()
       .from(bookings)
       .where(and(eq(bookings.userId, user.id), isNull(bookings.rescheduleOf)))
-    // a declined or expired request with an offered time ahead stays on top of upcoming (book C-40)
-    const offers = await withOffersAhead(c.var.deps.db, rows, now)
+    // a declined or expired request with an offered time ahead stays on top of upcoming, soonest offer first (book C-40)
+    const offers = await withOffersAhead(c.var.deps.db, rows, user.phone, now)
     const upcoming = (r: BookingRow) => offers.has(r.id) || ['pending', 'confirmed'].includes(effectiveStatus(stateOf(r), now).status)
+    const onTop = (a: BookingRow, b: BookingRow) => {
+      const x = offers.get(a.id)
+      const y = offers.get(b.id)
+      return x !== undefined && y !== undefined ? x - y : Number(y !== undefined) - Number(x !== undefined)
+    }
     const picked = rows
       .filter((r) => upcoming(r) === (tab === 'upcoming'))
       .sort((a, b) => {
         // the code breaks ties, so a page always holds the same bookings
         const order = a.date.localeCompare(b.date) || a.start - b.start || a.code.localeCompare(b.code)
-        return tab === 'upcoming' ? Number(offers.has(b.id)) - Number(offers.has(a.id)) || order : -order
+        return tab === 'upcoming' ? onTop(a, b) || order : -order
       })
     const offset = Number(cursor ?? 0) || 0
     const page = picked.slice(offset, offset + limit)

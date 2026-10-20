@@ -4,14 +4,14 @@ import { cancelDeadline, canClientRestore, clientActions, effectiveStatus } from
 import type { Locale } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, inArray } from 'drizzle-orm'
-import { bookingItems, bookings, businesses, classSessions, reviews, staff, tableAreas, type TimeSlot } from '../../db/schema'
+import { bookingItems, bookings, businesses, classSessions, reviews, staff, tableAreas } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { loadBusinesses } from '../availability/context'
 import { cityRef } from '../catalog/cities'
 import { geoOf, photoOf, text } from '../catalog/map'
 import { bookOnlineFor } from '../clients/online'
 import { bookingRecipient } from './links'
-import { offeredTimes } from './offers'
+import { offeredTimes, offersOf } from './offers'
 import { noShowMarkedAtOf, refusalCounts, restoreStateOf, stateOf, type BookingRow } from './repo'
 
 /** "Yzyna al" stays possible this long after the client's own cancel. */
@@ -109,7 +109,9 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
         : row.moveRefused
   // one booking per declined or expired request: once an offer is taken the others go
   const [taker] = await db.select({ code: bookings.code }).from(bookings).where(eq(bookings.alternativeOf, row.id))
-  const offersOf = async (list: TimeSlot[]) => (taker ? [] : offeredTimes(db, lb, row, list, now))
+  const offers = offersOf(row, now)
+  const chips = async (source: 'decline' | 'expired') =>
+    offers?.source === source && !taker ? offeredTimes(db, lb, row, offers.list, now) : []
   // a paused business or a phone-only client: no free-time chips, no move, the call card instead (book Q-154)
   // checked for the phone its SMS go to, as the texts are (an account's phone now, after a change too)
   const recipient = await bookingRecipient(db, row)
@@ -156,11 +158,8 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     cancelDeadline: cancelDeadline(lb.rules, row),
     askCancelReason: lb.rules.askCancelReason,
     cancelReason: row.cancelReason,
-    decline: row.declineReason
-      ? { reason: row.declineReason, text: row.declineText, alternatives: await offersOf(row.declineAlternatives) }
-      : null,
-    expiredAlternatives:
-      status === 'cancelled' && row.cancelledBy === 'system' && bookOnline ? await offersOf(row.expiredAlternatives) : [],
+    decline: row.declineReason ? { reason: row.declineReason, text: row.declineText, alternatives: await chips('decline') } : null,
+    expiredAlternatives: bookOnline ? await chips('expired') : [],
     bookOnline,
     offerTakenBy: taker?.code ?? null,
     moveRefused,
