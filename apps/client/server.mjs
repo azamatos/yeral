@@ -16,8 +16,8 @@ const app = new Hono()
 // old chunks, and a page cached under a script's address would break it for a year)
 app.use('/assets/*', serveStatic({ root, onFound: (_path, c) => c.header('Cache-Control', 'public, max-age=31536000, immutable') }))
 app.get('/assets/*', (c) => c.notFound())
-// the build stamp (/version.json) and other files at the top, asked for again each time
-app.use('*', serveStatic({ root, onFound: (_path, c) => c.header('Cache-Control', 'no-cache') }))
+// the build stamp, asked for again each time (no other file sits at the top: pages never pay a disk lookup)
+app.get('/version.json', serveStatic({ root, onFound: (_path, c) => c.header('Cache-Control', 'no-cache') }))
 // every page
 app.all('*', (c) => start.fetch(c.req.raw))
 

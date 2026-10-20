@@ -7,12 +7,16 @@ import { ErrorPage } from '@/pages/error'
 import { NotFoundPage } from '@/pages/not-found'
 import { siteLocale } from '@/shared/i18n'
 import { AppProviders } from '../entrypoint/app-providers'
+import { knowVisitor } from '../entrypoint/site-api'
 import appCss from '../styles.css?url'
 
 export const Route = createRootRouteWithContext<Api>()({
   // who is signed in, asked on the server with the visitor's cookie, so the header is right from the first byte; a
-  // failure here leaves the header at «Log in» and the page goes on
-  loader: ({ context }) => context.queryClient.prefetchQuery(context.sdk.me.get()),
+  // failure or a slow api leaves the header at «Log in» and the page goes on
+  loader: ({ context }) => knowVisitor(context),
+  // a page may carry the signed-in person (the header, the cache sent with it): never kept by a shared cache. Public
+  // pages that every visitor sees alike get their own caching with them (P4 slice 5).
+  headers: () => ({ 'Cache-Control': 'private, no-cache', Vary: 'Cookie' }),
   head: () => ({
     meta: [
       { charSet: 'utf-8' },

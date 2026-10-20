@@ -12,7 +12,7 @@ export function acceptedLanguages(header: string | null | undefined): string[] {
     .split(',')
     .map((part, index) => {
       const [tag = '', ...params] = part.trim().split(';')
-      const q = params.map((p) => /^\s*q=([\d.]+)\s*$/.exec(p)?.[1]).find((v) => v !== undefined)
+      const q = params.map((p) => /^\s*q=([\d.]+)\s*$/i.exec(p)?.[1]).find((v) => v !== undefined)
       return { tag: tag.trim().toLowerCase().split('-')[0] ?? '', q: q === undefined ? 1 : Number(q), index }
     })
     .filter((l) => l.tag && l.tag !== '*' && l.q > 0)

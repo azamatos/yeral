@@ -11,6 +11,8 @@ describe('acceptedLanguages', () => {
   it('keeps the order of equal weights and drops what nobody wants', () => {
     expect(acceptedLanguages('de, fr')).toEqual(['de', 'fr'])
     expect(acceptedLanguages('*, ru;q=0')).toEqual([])
+    // the weight's name is case-insensitive (RFC 9110)
+    expect(acceptedLanguages('ru;Q=0, en')).toEqual(['en'])
   })
 
   it('is empty without a header', () => {
