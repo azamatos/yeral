@@ -18,7 +18,12 @@ export interface PhoneRules {
   trunkPrefix: string
   /** A complete national number. Its first digit is never the trunk prefix or the country code's first digit. */
   valid: RegExp
-  /** National numbers that can receive an SMS (sign-in codes). */
+  /**
+   * What a national number that can receive an SMS (sign-in codes) starts with: `['6', '7']`. The one source of the
+   * rule: `mobile` is built from it, and the screens say it («Enter a number starting with 6 or 7»).
+   */
+  mobilePrefixes: readonly [string, ...string[]]
+  /** `mobilePrefixes` as a test of the national digits (`startsWithOneOf`). */
   mobile: RegExp
   /** How the national digits are grouped on screen: `+993 65 12 34 56` is [2, 2, 2, 2]. */
   groups: readonly number[]
@@ -41,6 +46,15 @@ export interface Market {
   mainCity: string
 }
 
+/** A test that the digits start with one of `prefixes` (digits only): ['6', '71'] → /^(?:6|71)/. */
+export function startsWithOneOf(prefixes: readonly string[]): RegExp {
+  if (!prefixes.length || prefixes.some((p) => !/^\d+$/.test(p))) throw new Error(`mobile prefixes must be digits: ${prefixes.join(', ')}`)
+  return new RegExp(`^(?:${prefixes.join('|')})`)
+}
+
+// mobiles start with 6 or 7 (61–65 and 71 today)
+const TM_MOBILE = ['6', '7'] as const
+
 /**
  * Turkmenistan: manats, +993 numbers, Ashgabat time (UTC+5, no daylight saving). The first launch offers English only;
  * Turkmen and Russian join for the Turkmenistan launch (book chapter 1, "Launch"; ADR 0022).
@@ -56,9 +70,10 @@ export const TURKMENISTAN: Market = {
     countryCode: '993',
     length: 8,
     trunkPrefix: '8',
-    // national numbers start with 1–7; mobiles with 6 or 7 (61–65 and 71 today)
+    // national numbers start with 1–7
     valid: /^[1-7]\d{7}$/,
-    mobile: /^[67]/,
+    mobilePrefixes: TM_MOBILE,
+    mobile: startsWithOneOf(TM_MOBILE),
     groups: [2, 2, 2, 2],
   },
   mainCity: 'ashgabat',

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MARKET, TURKMENISTAN, type Market } from './market'
+import { MARKET, startsWithOneOf, TURKMENISTAN, type Market } from './market'
 import { LOCALES } from './model'
 
 /** The zone's offset from UTC at an instant, in minutes, from the runtime's time zone data. */
@@ -33,8 +33,36 @@ describe.each<[string, Market]>([['Turkmenistan', TURKMENISTAN]])('market %s', (
     expect(groups.reduce((a, b) => a + b, 0)).toBe(length)
   })
 
+  it('tells mobiles by its list of prefixes, which the screens name', () => {
+    const { mobilePrefixes, mobile, valid, length } = market.phone
+    const number = (start: string) => start.padEnd(length, '1')
+    for (const prefix of mobilePrefixes) {
+      // every prefix starts a valid national number, and that number is a mobile
+      expect(valid.test(number(prefix))).toBe(true)
+      expect(mobile.test(number(prefix))).toBe(true)
+    }
+    // a valid number that starts with none of them isn't
+    const landlines = ['1', '2', '3', '4', '5', '6', '7'].filter((d) => !mobilePrefixes.some((p) => p.startsWith(d)))
+    for (const first of landlines) expect(mobile.test(number(first))).toBe(false)
+  })
+
   it('writes the currency as an ISO 4217 code', () => {
     expect(market.currency).toMatch(/^[A-Z]{3}$/)
+  })
+})
+
+describe('startsWithOneOf', () => {
+  it('builds a test of the first digits from the prefixes', () => {
+    expect(startsWithOneOf(['6', '7']).test('65102030')).toBe(true)
+    expect(startsWithOneOf(['6', '7']).test('12456789')).toBe(false)
+    const twoDigits = startsWithOneOf(['61', '62', '71'])
+    expect(['61000000', '71000000'].every((n) => twoDigits.test(n))).toBe(true)
+    expect(twoDigits.test('66000000')).toBe(false)
+  })
+
+  it('refuses anything but digits, and an empty list', () => {
+    expect(() => startsWithOneOf([])).toThrow()
+    expect(() => startsWithOneOf(['6|.'])).toThrow()
   })
 })
 

@@ -1,14 +1,12 @@
 import { Link } from '@tanstack/react-router'
 import { MARKET } from '@yeral/domain/market'
 import { formatPhone, toE164 } from '@yeral/domain/phone'
-import { mobileStarts, PHONE_RULES, type useSignIn } from '@yeral/features/auth-by-phone'
+import { PHONE_RULES, type useSignIn } from '@yeral/features/auth-by-phone'
 import { cn } from '@yeral/ui/cn'
 import { SignInCodeStep, type SignInCodeStepCopy } from '@yeral/ui/sign-in-code-step'
 import { useEffect, useId, useRef } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { AuthPage, textLink } from '@/shared/ui'
-
-const STARTS = mobileStarts()
 
 /** The phone step and the code step (B-Login `step` phone · code and their states), in the shared SignInCodeStep. */
 export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> }) {
@@ -44,9 +42,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
     state.phoneError === 'incomplete'
       ? t('login.incomplete', { digits: MARKET.phone.length })
       : state.phoneError === 'notMobile'
-        ? STARTS
-          ? t('login.notMobile', { starts: format.list(STARTS, { type: 'disjunction' }) })
-          : t('login.notMobilePlain')
+        ? t('login.notMobile', { starts: format.list(MARKET.phone.mobilePrefixes, { type: 'disjunction' }) })
         : undefined
 
   return (
