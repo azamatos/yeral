@@ -131,6 +131,25 @@ export function withinHours(b: BusinessHours, date: string, visit: Interval): bo
   return !!day && workingIntervals(day).some((w) => contains(w, visit))
 }
 
+/** Whether a date's business day differs between two calendars (its hours, its break, open or not): a change touches it. */
+export function hoursChangedOn(a: BusinessHours, b: BusinessHours, date: string): boolean {
+  return JSON.stringify(businessDay(a, date)) !== JSON.stringify(businessDay(b, date))
+}
+
+/**
+ * The dates from `from` to `to` whose part past midnight runs into the next day's opening, as `weekHoursErrors` refuses
+ * for the week (book Q-105): no moment may belong to two business days.
+ */
+export function nightOverlaps(b: BusinessHours, from: string, to: string): string[] {
+  const out: string[] = []
+  for (let d = from; d <= to; d = addDays(d, 1)) {
+    const day = businessDay(b, d)
+    const next = businessDay(b, addDays(d, 1))
+    if (day && next && day.close - DAY_MINUTES > next.open) out.push(d)
+  }
+  return out
+}
+
 /** A special day runs at most a year ("Birnäçe gün": a range of days). */
 export const SPECIAL_DAY_MAX_DAYS = 366
 

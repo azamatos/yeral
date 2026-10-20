@@ -5,18 +5,7 @@
 import { AMENITIES, CONFIRM_MODES, VERIFICATION_STATUSES } from '@yeral/domain/model'
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
 import { z } from 'zod'
-import {
-  bookingCodeSchema,
-  idSchema,
-  latLngSchema,
-  marketLocaleSchema,
-  minuteSchema,
-  phoneInputSchema,
-  phoneSchema,
-  slugSchema,
-  startMinuteSchema,
-  ymdSchema,
-} from './common'
+import { latLngSchema, marketLocaleSchema, minuteSchema, phoneInputSchema, phoneSchema, slugSchema, ymdSchema } from './common'
 
 /**
  * The booking rules (B-41). The values each one takes are the settings screen's options (`RULE_OPTIONS` in
@@ -166,19 +155,3 @@ export const businessHoursResultSchema = businessHoursSettingsSchema
     cancelled: z.number().int(),
   })
   .meta({ id: 'BusinessHoursResult' })
-
-/** `bookings_affected`: "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1", and each booking. */
-export const bookingsAffectedDetailsSchema = z.object({
-  count: z.number().int().min(1),
-  byStaff: z.array(z.object({ staffId: idSchema, name: z.string(), count: z.number().int().min(1) })),
-  bookings: z.array(
-    z.object({
-      code: bookingCodeSchema,
-      date: ymdSchema,
-      start: startMinuteSchema,
-      end: minuteSchema,
-      client: z.string().nullable(),
-      staff: z.array(z.string()),
-    }),
-  ),
-})

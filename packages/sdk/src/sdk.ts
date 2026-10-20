@@ -476,7 +476,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     updateHours: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof businessHoursUpdateSchema>) => call(w.settings.hours.$put({ param: { slug }, json })),
-        onSuccess: () => Promise.all([settingsChanged(slug), invalidate(keys.calendar(slug), keys.requests(slug))]),
+        // the calendar refreshes with the settings (`business.updated`); cancelled bookings may take waiting moves along
+        onSuccess: () => Promise.all([settingsChanged(slug), invalidate(keys.requests(slug))]),
       }),
     /** The services menu (book B-38): groups, services, who does each, the clients' order. */
     menu: (slug: string) =>

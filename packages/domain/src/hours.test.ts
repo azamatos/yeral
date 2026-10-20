@@ -5,6 +5,8 @@ import {
   findException,
   inException,
   openMinutesBetween,
+  hoursChangedOn,
+  nightOverlaps,
   openState,
   specialDayErrors,
   staffDay,
@@ -41,6 +43,21 @@ describe('what new hours leave outside (book Q-211)', () => {
     expect(withinHours(biz(), SUN, { start: 600, end: 660 })).toBe(false)
     expect(withinHours(biz({ exceptions: [ex({})] }), THU, { start: 600, end: 660 })).toBe(false)
     expect(withinHours(biz({ exceptions: [ex({ hours: h(600, 900) })] }), THU, { start: 840, end: 900 })).toBe(true)
+  })
+
+  it('a change touches a date when its hours, its break or whether it opens differ', () => {
+    const lunch: WeekHours = WEEK.map((d) => (d ? { ...d, break: { start: 780, end: 840 } } : null))
+    expect(hoursChangedOn(biz(), biz(), THU)).toBe(false)
+    expect(hoursChangedOn(biz(), biz({ hours: lunch }), THU)).toBe(true)
+    expect(hoursChangedOn(biz(), biz({ exceptions: [ex({})] }), THU)).toBe(true)
+    expect(hoursChangedOn(biz(), biz({ exceptions: [ex({})] }), FRI)).toBe(false)
+  })
+
+  it('a night may not run into the next day’s opening, a special day’s either (Q-105)', () => {
+    const late = biz({ exceptions: [ex({ hours: h(720, 2160) })] })
+    // Thursday 12:00 until Friday 12:00, while Friday opens at 10:00
+    expect(nightOverlaps(late, WED, FRI)).toEqual([THU])
+    expect(nightOverlaps(biz({ exceptions: [ex({ hours: h(1080, 1500) })] }), WED, FRI)).toEqual([])
   })
 
   it('a special day ends on or after it starts, within a year, and other hours are a day’s hours (B-40)', () => {

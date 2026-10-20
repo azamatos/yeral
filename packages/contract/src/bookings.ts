@@ -229,6 +229,7 @@ export const bookingLinkSchema = bookingDetailSchema
     holdUntil: true,
     cancelReason: true,
     decline: true,
+    cancelOffers: true,
     expiredAlternatives: true,
     offerTakenBy: true,
     moveRefused: true,

@@ -17,6 +17,9 @@ const HOURS = `${W}/settings/hours`
 const THU = '2026-10-22'
 const WED2 = '2026-10-28'
 const SAT = '2026-10-24'
+const MON2 = '2026-11-09'
+const TUE2 = '2026-11-10'
+const FRI = '2026-10-30'
 
 interface Hours {
   hours: ({ open: number; close: number; break: { start: number; end: number } | null } | null)[]
@@ -90,9 +93,15 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     const n = now.specialDays.length
     expect(bad.json.error.details.issues).toEqual([
       { path: ['hours', 0], code: 'invalid' },
-      { path: ['specialDays', n, 'from'], code: 'past' },
+      { path: ['specialDays', n, 'to'], code: 'past' },
       { path: ['specialDays', n + 1, 'to'], code: 'invalid' },
     ])
+    // other hours till noon the next day run into Saturday's 09:00 opening (Q-105)
+    const night = await save(maysa, {
+      ...now,
+      specialDays: [...now.specialDays, { name: 'Long night', from: FRI, to: FRI, yearly: false, hours: { open: 720, close: 2160 } }],
+    })
+    expect(night.json.error.details.issues).toEqual([{ path: ['specialDays', n, 'hours'], code: 'overlaps_next_day' }])
     // the pickers run in 30-minute steps (Q-128)
     expect(
       (await save(maysa, { ...now, hours: now.hours.map((d, i) => (i === 0 ? { open: 555, close: 1200, break: null } : d)) })).status,
@@ -184,6 +193,78 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     await runDueJobs(t.deps)
     expect(smsTo('+99365800304')).toEqual([expect.stringMatching(/cancelled your booking .*: The opening hours changed\./)])
     // back as it was
+    expect((await save(maysa, { ...was, affected: 'keep' })).status).toBe(200)
+  })
+
+  it('a day off under way may change; one that ended is dropped; a kept booking is asked about when its day closes', async () => {
+    const maysa = await as(MAYSA)
+    const was = (await maysa.req(HOURS)).json as Hours
+    // stored as they were saved: one ended on Monday, one under way since Monday
+    await db
+      .update(businesses)
+      .set({
+        exceptions: [
+          ...was.specialDays,
+          { name: 'Ended', from: '2026-10-12', to: '2026-10-12', yearly: false, hours: null },
+          { name: 'Painting', from: '2026-10-12', to: '2026-10-16', yearly: false, hours: { open: 720, close: 1200 } },
+        ],
+      })
+      .where(eq(businesses.slug, 'glow-studio'))
+    const stored = (await maysa.req(HOURS)).json as Hours
+    const shorter = {
+      ...stored,
+      specialDays: stored.specialDays.map((d) => (d.name === 'Painting' ? { ...d, to: '2026-10-15' } : d)),
+    }
+    const saved = await save(maysa, { ...shorter, affected: 'keep' })
+    expect(saved.status).toBe(200)
+    expect(saved.json.specialDays.map((d: { name: string }) => d.name)).not.toContain('Ended')
+    expect(saved.json.specialDays.find((d: { name: string }) => d.name === 'Painting')).toMatchObject({ to: '2026-10-15' })
+
+    // Monday opens at 12:00; the 10:00 booking is kept, then a closed day on that Monday asks about it again
+    const kept = await book(maysa, '+99365800306', MON2, 600)
+    const later = {
+      ...saved.json,
+      hours: (saved.json as Hours).hours.map((d, i) => (i === 0 ? { open: 720, close: 1200, break: null } : d)),
+    } as Hours
+    delete (later as Partial<Hours & { cancelled: number }>).cancelled
+    expect((await save(maysa, { ...later, affected: 'keep' })).status).toBe(200)
+    const closed = {
+      ...later,
+      specialDays: [...later.specialDays, { name: 'Inspection', from: MON2, to: MON2, yearly: false, hours: null }],
+    }
+    const asked = await save(maysa, closed)
+    expect(asked.json.error.details.bookings.map((b: { code: string }) => b.code)).toContain(kept)
+    expect((await save(maysa, { ...closed, affected: 'cancel' })).status).toBe(200)
+    expect(await rowOf(kept)).toMatchObject({ status: 'cancelled', cancelReason: 'Inspection' })
+    expect((await save(maysa, { ...was, affected: 'keep' })).status).toBe(200)
+  })
+
+  it('a closed day over several bookings offers each client other times; the SMS link page shows them too', async () => {
+    const maysa = await as(MAYSA)
+    const codes = [
+      await book(maysa, '+99365800307', TUE2, 600),
+      await book(maysa, '+99365800308', TUE2, 720),
+      await book(maysa, '+99365800309', TUE2, 840),
+    ]
+    const was = (await maysa.req(HOURS)).json as Hours
+    const closed = { ...was, specialDays: [...was.specialDays, { name: 'Audit', from: TUE2, to: TUE2, yearly: false, hours: null }] }
+    const asked = await save(maysa, closed)
+    expect(asked.json.error.details.byStaff).toEqual([{ staffId: maralId, name: 'Maral', count: 3 }])
+    expect((await save(maysa, { ...closed, affected: 'cancel' })).json.cancelled).toBe(3)
+    const offered = (await Promise.all(codes.map(rowOf))).flatMap((r) =>
+      r.declineAlternatives.map((o) => `${o.staffId} ${o.date} ${o.start}`),
+    )
+    expect(offered).toHaveLength(9)
+    // no time offered to two clients
+    expect(new Set(offered).size).toBe(9)
+
+    // the SMS link opens the booking signed out, with the times to take
+    await runDueJobs(t.deps)
+    const text = smsTo('+99365800307').at(-1)!
+    const token = /\/l\/([\w-]+)/.exec(text)![1]!
+    const page = (await browser(t.app).req(`/v1/links/${token}`)).json
+    expect(page).toMatchObject({ status: 'cancelled', cancelReason: 'Audit' })
+    expect(page.cancelOffers).toHaveLength(3)
     expect((await save(maysa, { ...was, affected: 'keep' })).status).toBe(200)
   })
 

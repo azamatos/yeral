@@ -4,25 +4,38 @@
  * keep them, or cancel them with up to 3 other times offered to each client. New bookings follow the new hours either
  * way.
  */
-import type { bookingsAffectedDetailsSchema, businessHoursSettingsSchema, businessHoursUpdateSchema } from '@yeral/contract/settings'
-import { findException, specialDayErrors, weekHoursErrors, withinHours, type BusinessHours, type DateException } from '@yeral/domain/hours'
+import type { BookingsAffectedDetails } from '@yeral/contract/errors'
+import type { businessHoursSettingsSchema, businessHoursUpdateSchema } from '@yeral/contract/settings'
+import {
+  findException,
+  hoursChangedOn,
+  nightOverlaps,
+  specialDayErrors,
+  weekHoursErrors,
+  withinHours,
+  type BusinessHours,
+  type DateException,
+} from '@yeral/domain/hours'
 import { occupiesSlot } from '@yeral/domain/lifecycle'
 import { addDays, epochOf, today } from '@yeral/domain/time'
-import { and, eq, gte, inArray, isNull, ne } from 'drizzle-orm'
+import { and, asc, eq, gte, inArray, isNull, ne } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, businesses } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
-import { emit, queueOutcomeSms } from '../../notify'
-import { dropPendingMove } from '../bookings/actions'
-import { freeAlternatives } from '../bookings/offers'
-import { lockBooking, setStatus, stateOf, type BookingRow } from '../bookings/repo'
-import { unheardUntil } from '../calendar/service'
+import { emit } from '../../notify'
+import { cancelForBusiness } from '../bookings/business-cancel'
+import { bookedServices } from '../bookings/create'
+import { alternativesContext, pickAlternatives } from '../bookings/offers'
+import { lockBooking, stateOf, type BookingRow } from '../bookings/repo'
 
 type HoursView = z.infer<typeof businessHoursSettingsSchema>
 type HoursChange = z.infer<typeof businessHoursUpdateSchema>
-type AffectedDetails = z.infer<typeof bookingsAffectedDetailsSchema>
+interface Issue {
+  path: (string | number)[]
+  code: string
+}
 
 /** The affected bookings the 409 lists one by one; the count and the counts per specialist cover them all. */
 const LISTED = 50
@@ -50,31 +63,39 @@ const sameDay = (a: DateException, b: DateException) =>
   (a.hours ?? null)?.close === (b.hours ?? null)?.close
 
 /**
- * The week and the special days as the domain checks them (`weekHoursErrors`, `specialDayErrors`). A special day the
- * business saved before stays as it is; a new one that isn't yearly can't start in the past ("Geçen güni saýlap
- * bolmaýar").
+ * The week and the special days as the domain checks them (`weekHoursErrors`, `specialDayErrors`, `nightOverlaps`). A
+ * one-off day that has ended is dropped when it was saved before (the list never fills up with them) and refused when
+ * it's new ("Geçen güni saýlap bolmaýar"); one under way may still change.
  */
 function checkChange(change: HoursChange, stored: readonly DateException[], todayDate: string): BusinessHours {
-  const next: BusinessHours = {
-    hours: change.hours.map((d) => (d ? { open: d.open, close: d.close, break: d.break } : null)),
-    exceptions: change.specialDays.map((d) => ({ name: d.name, from: d.from, to: d.to, yearly: d.yearly, hours: d.hours })),
-  }
-  const issues: { path: (string | number)[]; code: string }[] = weekHoursErrors(next.hours).map((i) => ({
-    path: ['hours', i],
-    code: 'invalid',
-  }))
-  next.exceptions.forEach((d, i) => {
-    for (const field of specialDayErrors(d)) issues.push({ path: ['specialDays', i, field], code: 'invalid' })
-    if (!d.yearly && d.from < todayDate && !stored.some((s) => sameDay(s, d)))
-      issues.push({ path: ['specialDays', i, 'from'], code: 'past' })
+  const issues: Issue[] = weekHoursErrors(change.hours).map((i) => ({ path: ['hours', i], code: 'invalid' }))
+  const exceptions: DateException[] = []
+  const kept: number[] = []
+  change.specialDays.forEach((d, i) => {
+    const day: DateException = { name: d.name, from: d.from, to: d.to, yearly: d.yearly, hours: d.hours }
+    const ended = !d.yearly && d.to < todayDate
+    if (ended && stored.some((s) => sameDay(s, day))) return
+    const problems = specialDayErrors(day)
+    for (const field of problems) issues.push({ path: ['specialDays', i, field], code: 'invalid' })
+    if (ended) issues.push({ path: ['specialDays', i, 'to'], code: 'past' })
+    if (!problems.length) kept.push(i)
+    exceptions.push(day)
   })
+  const next: BusinessHours = { hours: change.hours.map((d) => (d ? { open: d.open, close: d.close, break: d.break } : null)), exceptions }
+  // other hours past midnight may not run into the next day's opening, nor the day before into theirs
+  for (const i of kept) {
+    const d = change.specialDays[i]!
+    if (d.hours && nightOverlaps(next, addDays(d.from, -1), d.to).length)
+      issues.push({ path: ['specialDays', i, 'hours'], code: 'overlaps_next_day' })
+  }
   if (issues.length) throw new ApiError('validation_error', { issues })
   return next
 }
 
 /**
- * The bookings ahead that were inside the hours and aren't any more: what the team keeps or cancels (Q-211). One kept
- * after an earlier change isn't asked about again. Appointments and tables; a waiting move is answered on its own.
+ * The bookings ahead the change leaves outside the hours, on the dates it changes: what the team keeps or cancels
+ * (Q-211). One kept after an earlier change isn't asked about again until a later change touches its day. Appointments
+ * and tables; a waiting move is answered on its own.
  */
 async function affectedBy(db: Queryable, businessId: string, was: BusinessHours, next: BusinessHours, now: number): Promise<BookingRow[]> {
   const rows = await db
@@ -92,15 +113,12 @@ async function affectedBy(db: Queryable, businessId: string, was: BusinessHours,
     )
   return rows
     .filter((b) => occupiesSlot(stateOf(b), now) && epochOf(b.date, b.start) >= now)
-    .filter((b) => {
-      const visit = { start: b.start, end: b.end }
-      return withinHours(was, b.date, visit) && !withinHours(next, b.date, visit)
-    })
+    .filter((b) => hoursChangedOn(was, next, b.date) && !withinHours(next, b.date, { start: b.start, end: b.end }))
     .sort((a, b) => epochOf(a.date, a.start) - epochOf(b.date, b.start))
 }
 
-/** "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1", and each booking with its client and specialists. */
-async function detailsOf(db: Queryable, rows: readonly BookingRow[]): Promise<AffectedDetails> {
+/** "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1" (most first), and each booking with its client and specialists. */
+async function detailsOf(db: Queryable, rows: readonly BookingRow[]): Promise<BookingsAffectedDetails> {
   const items = await db
     .select({ bookingId: bookingItems.bookingId, staffId: bookingItems.staffId, staffName: bookingItems.staffName })
     .from(bookingItems)
@@ -110,6 +128,7 @@ async function detailsOf(db: Queryable, rows: readonly BookingRow[]): Promise<Af
         rows.map((r) => r.id),
       ),
     )
+    .orderBy(asc(bookingItems.sort))
   const byStaff = new Map<string, { staffId: string; name: string; bookings: Set<string> }>()
   for (const i of items) {
     if (!i.staffId) continue
@@ -119,7 +138,9 @@ async function detailsOf(db: Queryable, rows: readonly BookingRow[]): Promise<Af
   }
   return {
     count: rows.length,
-    byStaff: [...byStaff.values()].map((s) => ({ staffId: s.staffId, name: s.name, count: s.bookings.size })),
+    byStaff: [...byStaff.values()]
+      .map((s) => ({ staffId: s.staffId, name: s.name, count: s.bookings.size }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
     bookings: rows.slice(0, LISTED).map((r) => ({
       code: r.code,
       date: r.date,
@@ -132,36 +153,36 @@ async function detailsOf(db: Queryable, rows: readonly BookingRow[]): Promise<Af
 }
 
 /**
- * "Ýatyr we müşderilere 3 başga wagt hödürle": cancelled by the business with the special day's name (or "the opening
- * hours changed") and up to 3 free times under the new hours, which the client takes in one tap; the SMS lists them. A
- * booking the client hasn't heard of yet (the team's, its undo still running) is cancelled without one. False when the
- * booking changed meanwhile.
+ * "Ýatyr we müşderilere 3 başga wagt hödürle": each booking cancelled by the business with the special day's name (or
+ * "The opening hours changed") and up to 3 free times under the new hours. The business and its busy time load once;
+ * each client's times are held from the next, so no two clients are offered the same time. Returns how many were
+ * cancelled (one that changed meanwhile is left).
  */
-async function cancelWithOffers(tx: Queryable, b: BookingRow, next: BusinessHours, now: number): Promise<boolean> {
-  const row = await lockBooking(tx, b.id)
-  if (!occupiesSlot(stateOf(row), now) || epochOf(row.date, row.start) < now) return false
+async function cancelWithOffers(
+  tx: Queryable,
+  businessId: string,
+  rows: readonly BookingRow[],
+  next: BusinessHours,
+  now: number,
+): Promise<number> {
+  let ctx = await alternativesContext(tx, businessId, now)
+  const exclude = rows.map((r) => r.id)
   const at = new Date(now)
-  if (row.status === 'confirmed') await dropPendingMove(tx, row, at, 'business')
-  const special = findException(next.exceptions, row.date)
-  const cancelled = await setStatus(tx, row, {
-    status: 'cancelled',
-    cancelledBy: 'business',
-    cancelReason: special?.name ?? null,
-    businessCancelReason: special ? 'closed' : 'hours',
-    at,
-  })
-  // the free times as they are now: the new hours saved, this booking's own time freed
-  const offers = await freeAlternatives(tx, cancelled, now)
-  await tx.update(bookings).set({ declineAlternatives: offers }).where(eq(bookings.id, cancelled.id))
-  await emit(tx, {
-    type: 'booking.cancelled',
-    businessId: cancelled.businessId,
-    bookingId: cancelled.id,
-    bookingCode: cancelled.code,
-    userId: cancelled.userId,
-  })
-  if (cancelled.clientPhone && unheardUntil(row, now) === null) await queueOutcomeSms(tx, 'cancelledOffers', cancelled, cancelled.id, at)
-  return true
+  let cancelled = 0
+  for (const b of rows) {
+    const row = await lockBooking(tx, b.id)
+    if (!occupiesSlot(stateOf(row), now) || epochOf(row.date, row.start) < now) continue
+    let offers: BookingRow['declineAlternatives'] = []
+    if (ctx && row.type === 'appointment') {
+      const picked = pickAlternatives(ctx, row, await bookedServices(tx, row.id), exclude)
+      offers = picked.offers
+      ctx = { ...ctx, busy: [...ctx.busy, ...picked.held] }
+    }
+    const special = findException(next.exceptions, row.date)
+    await cancelForBusiness(tx, row, at, { reason: special ? 'closed' : 'hours', text: special?.name ?? null, offers })
+    cancelled++
+  }
+  return cancelled
 }
 
 /**
@@ -172,12 +193,13 @@ async function cancelWithOffers(tx: Queryable, b: BookingRow, next: BusinessHour
 export async function updateHours(deps: Deps, businessId: string, change: HoursChange): Promise<HoursView & { cancelled: number }> {
   return deps.db.transaction(async (tx) => {
     const now = deps.now()
-    // one save at a time: the bookings a change affects are read against the hours it replaces
+    // one save at a time, read against the hours it replaces; the weaker lock leaves bookings (which reference the
+    // business) going in and out meanwhile
     const [b] = await tx
       .select({ hours: businesses.hours, exceptions: businesses.exceptions })
       .from(businesses)
       .where(eq(businesses.id, businessId))
-      .for('update')
+      .for('no key update')
     if (!b) throw new ApiError('not_found')
     const next = checkChange(change, b.exceptions, today(now))
     const affected = await affectedBy(tx, businessId, b, next, now)
@@ -187,8 +209,7 @@ export async function updateHours(deps: Deps, businessId: string, change: HoursC
       .set({ hours: next.hours, exceptions: [...next.exceptions] })
       .where(eq(businesses.id, businessId))
     await emit(tx, { type: 'business.updated', businessId })
-    let cancelled = 0
-    if (change.affected === 'cancel') for (const row of affected) if (await cancelWithOffers(tx, row, next, now)) cancelled++
+    const cancelled = change.affected === 'cancel' && affected.length ? await cancelWithOffers(tx, businessId, affected, next, now) : 0
     return { ...viewOf(next), cancelled }
   })
 }

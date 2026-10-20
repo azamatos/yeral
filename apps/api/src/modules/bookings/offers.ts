@@ -5,12 +5,13 @@
  */
 import type { OfferedTime } from '@yeral/contract/bookings'
 import {
+  busyOf,
   findAppointmentSlot,
   nearestSlots,
   nextFreeSlot,
   slotStaffId,
   staffDoingAll,
-  type AppointmentSlot,
+  type AppointmentContext,
   type BusyInterval,
 } from '@yeral/domain/availability'
 import { effectiveStatus, MAX_ALTERNATIVES, offerPast } from '@yeral/domain/lifecycle'
@@ -20,7 +21,7 @@ import type { Queryable } from '../../db/client'
 import { bookings, staff, type TimeSlot } from '../../db/schema'
 import { appointmentContext, loadBusinesses, loadBusy, type LoadedBusiness } from '../availability/context'
 import { bookOnlineFor } from '../clients/online'
-import { bookedServices, rebookQuery } from './create'
+import { bookedServices, rebookQuery, type BookedServices } from './create'
 import { recipientOf } from './links'
 import { stateOf, type BookingRow } from './repo'
 
@@ -123,37 +124,56 @@ export async function offeredTimes(
   }))
 }
 
+/** What offering free times needs at a business, loaded once: its team, rules and busy time over its window from today. */
+export async function alternativesContext(db: Queryable, businessId: string, now: number): Promise<AppointmentContext | null> {
+  const lb = (await loadBusinesses(db, [businessId])).get(businessId)
+  if (!lb) return null
+  const from = localOf(now).date
+  return appointmentContext(lb, await loadBusy(db, [businessId], from, addDays(from, lb.rules.windowDays)), now)
+}
+
 /**
  * Up to three free times for the same services, as the client would book them: after an expired request, or when the
  * business closes over a booking (B-39, B-40). That day first, then the next free days. Each names one specialist who
  * does every service (book Q-159); at the same start the one booked comes first. Services nobody does alone keep being
- * split between people, and those times name nobody.
+ * split between people, and those times name nobody. `exclude`: bookings whose time doesn't count as busy (the booking
+ * itself, still active while this runs). `held` is the time the offers would take: a batch adds it to the context, so
+ * the next client is offered other times.
  */
-export async function freeAlternatives(db: Queryable, b: BookingRow, now: number): Promise<TimeSlot[]> {
-  if (b.type !== 'appointment') return []
-  const lb = (await loadBusinesses(db, [b.businessId])).get(b.businessId)
-  if (!lb) return []
-  const booked = await bookedServices(db, b.id)
-  if (!booked.serviceIds.length) return []
-  const from = localOf(now).date
-  const ctx = appointmentContext(lb, await loadBusy(db, [b.businessId], from, addDays(from, lb.rules.windowDays)), now)
+export function pickAlternatives(
+  ctx: AppointmentContext,
+  b: Pick<BookingRow, 'id' | 'date' | 'start'>,
+  booked: BookedServices,
+  exclude: readonly string[] = [b.id],
+): { offers: TimeSlot[]; held: BusyInterval[] } {
+  if (!booked.serviceIds.length) return { offers: [], held: [] }
   const q = {
     serviceIds: booked.serviceIds,
     staffId: null,
     by: 'client' as const,
     oneSpecialist: staffDoingAll(ctx, booked.serviceIds).length > 0,
     preferStaffId: booked.staffId,
-    // still active while this runs: its own time mustn't count as busy
-    excludeBookingIds: [b.id],
+    excludeBookingIds: exclude,
   }
-  const offer = (date: string, s: AppointmentSlot): TimeSlot => ({ date, start: s.start, end: s.end, staffId: slotStaffId(s) })
-  const out = nearestSlots(ctx, { ...q, date: b.date }, b.start, MAX_ALTERNATIVES).map((s) => offer(b.date, s))
-  // the days after the request's own (strict: never back to it, even when it was last night's)
-  for (let day = addDays(b.date, 1); out.length < MAX_ALTERNATIVES;) {
-    const next = nextFreeSlot(ctx, q, day, lb.rules.windowDays, { strict: true })
+  const picked = nearestSlots(ctx, { ...q, date: b.date }, b.start, MAX_ALTERNATIVES).map((slot) => ({ date: b.date, slot }))
+  // the days after the booking's own (strict: never back to it, even when it was last night's)
+  for (let day = addDays(b.date, 1); picked.length < MAX_ALTERNATIVES;) {
+    const next = nextFreeSlot(ctx, q, day, ctx.rules.windowDays, { strict: true })
     if (!next) break
-    out.push(offer(next.date, next.slot))
+    picked.push(next)
     day = addDays(next.date, 1)
   }
-  return out.slice(0, MAX_ALTERNATIVES)
+  const top = picked.slice(0, MAX_ALTERNATIVES)
+  return {
+    offers: top.map(({ date, slot }) => ({ date, start: slot.start, end: slot.end, staffId: slotStaffId(slot) })),
+    held: top.flatMap(({ date, slot }) => busyOf(`offer:${b.id}`, date, slot.items)),
+  }
+}
+
+/** `pickAlternatives` for one booking (an expired request), its business loaded for it. */
+export async function freeAlternatives(db: Queryable, b: BookingRow, now: number): Promise<TimeSlot[]> {
+  if (b.type !== 'appointment') return []
+  const ctx = await alternativesContext(db, b.businessId, now)
+  if (!ctx) return []
+  return pickAlternatives(ctx, b, await bookedServices(db, b.id)).offers
 }

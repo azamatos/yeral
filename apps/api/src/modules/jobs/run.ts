@@ -7,6 +7,7 @@
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import { REMINDER_KINDS } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
+import type { Locale } from '@yeral/domain/model'
 import { isMobile } from '@yeral/domain/phone'
 import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
@@ -25,6 +26,7 @@ import {
   smsCityOf,
   type BookingSmsKind,
   type OutcomeSmsKind,
+  type SmsBooking,
 } from '../../notify'
 import { loadBusinesses } from '../availability/context'
 import { freeAlternatives } from '../bookings/offers'
@@ -145,17 +147,51 @@ async function sendWithLink(deps: Deps, b: BookingRow, to: string, text: (link: 
   }
 }
 
-/** An expired request's times, a declined request's reason, or a move not accepted while the visit is still ahead; the client can't switch these off. */
+interface OutcomeSms {
+  /** The booking is still as the SMS says: nothing changed since it was queued. */
+  still: (b: BookingRow, now: number) => boolean
+  /** Its text; `byPhone`: a paused business or a phone-only client, whom the page offers the call card (Q-154). */
+  text: (lang: Locale, sms: SmsBooking & { link: string }, b: BookingRow, byPhone: boolean) => string
+}
+
+/**
+ * The SMS about an outcome the client didn't choose, which always go: an expired request's times, a declined request's
+ * reason, a business that closed over a booking with its times, a move not accepted while the visit is still ahead.
+ * Offered times can be taken whatever the client's online status (A7); with none, a client who can't book online calls.
+ */
+const OUTCOMES: Record<OutcomeSmsKind, OutcomeSms> = {
+  expired: {
+    still: (b) => b.status === 'cancelled' && b.cancelledBy === 'system',
+    text: (lang, sms, b, byPhone) => expiredSmsText(lang, sms, byPhone ? [] : b.expiredAlternatives, { byPhone }),
+  },
+  declined: {
+    still: (b) => b.status === 'cancelled' && b.cancelledBy === 'business' && !!b.declineReason,
+    text: (lang, sms, b, byPhone) =>
+      declinedSmsText(lang, sms, b.declineReason!, b.declineText, { byPhone: byPhone && !b.declineAlternatives.length }),
+  },
+  cancelledOffers: {
+    still: (b) => b.status === 'cancelled' && (b.businessCancelReason === 'closed' || b.businessCancelReason === 'hours'),
+    text: (lang, sms, b, byPhone) =>
+      cancelledOffersSmsText(lang, sms, businessCancelText(lang, b.businessCancelReason!, b.cancelReason), b.declineAlternatives, {
+        byPhone: byPhone && !b.declineAlternatives.length,
+      }),
+  },
+  moveRefused: {
+    still: (b, now) => b.status === 'confirmed' && !!b.moveRefused && now < epochOf(b.date, b.start),
+    text: (lang, sms, b) =>
+      moveRefusedSmsText(
+        lang,
+        sms,
+        b.moveRefused?.by === 'business' && b.moveRefused.reason ? { reason: b.moveRefused.reason, text: b.moveRefused.text } : undefined,
+      ),
+  },
+}
+
+const isOutcome = (kind: string): kind is OutcomeSmsKind => kind in OUTCOMES
+
 async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): Promise<void> {
-  const still =
-    kind === 'expired'
-      ? b.status === 'cancelled' && b.cancelledBy === 'system'
-      : kind === 'declined'
-        ? b.status === 'cancelled' && b.cancelledBy === 'business' && !!b.declineReason
-        : kind === 'cancelledOffers'
-          ? b.status === 'cancelled' && (b.businessCancelReason === 'closed' || b.businessCancelReason === 'hours')
-          : b.status === 'confirmed' && !!b.moveRefused && deps.now() < epochOf(b.date, b.start)
-  if (!still) return
+  const outcome = OUTCOMES[kind]
+  if (!outcome.still(b, deps.now())) return
   const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
   if (!lb) return
   const biz = lb.business
@@ -163,33 +199,8 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
   const lang = user?.lang ?? MARKET.defaultLanguage
   const sms = { date: b.date, start: b.start, businessName: biz.name, address: biz.address }
   const to = user?.phone ?? b.clientPhone ?? ''
-  // a paused business or a phone-only client: the page offers the call card, so the text asks them to call (Q-154)
   const byPhone = !!(await onlineRefusal(deps.db, lb, to))
-  await sendWithLink(deps, b, to, (link) =>
-    kind === 'expired'
-      ? expiredSmsText(lang, { ...sms, link }, byPhone ? [] : b.expiredAlternatives, { byPhone })
-      : kind === 'cancelledOffers'
-        ? // offered times can be taken whatever the client's online status (A7), as after a decline
-          cancelledOffersSmsText(
-            lang,
-            { ...sms, link },
-            businessCancelText(lang, b.businessCancelReason!, b.cancelReason),
-            b.declineAlternatives,
-            {
-              byPhone: byPhone && !b.declineAlternatives.length,
-            },
-          )
-        : kind === 'declined'
-          ? // offered times can be taken whatever the client's online status (A7); with none, they call
-            declinedSmsText(lang, { ...sms, link }, b.declineReason!, b.declineText, { byPhone: byPhone && !b.declineAlternatives.length })
-          : moveRefusedSmsText(
-              lang,
-              { ...sms, link },
-              b.moveRefused?.by === 'business' && b.moveRefused.reason
-                ? { reason: b.moveRefused.reason, text: b.moveRefused.text }
-                : undefined,
-            ),
-  )
+  await sendWithLink(deps, b, to, (link) => outcome.text(lang, { ...sms, link }, b, byPhone))
 }
 
 /**
@@ -208,7 +219,7 @@ async function sendBookingSms(
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   // an account's phone took a sign-in code, so it's a mobile; a number the team typed in may not be
   if (!b.userId && !isMobile(b.clientPhone)) return DROPPED_NOT_MOBILE
-  if (kind === 'expired' || kind === 'moveRefused' || kind === 'declined' || kind === 'cancelledOffers') {
+  if (isOutcome(kind)) {
     await sendOutcomeSms(deps, b, kind)
     return
   }
