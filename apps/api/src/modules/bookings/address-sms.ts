@@ -100,11 +100,9 @@ export async function addressSmsForNewBooking(tx: Queryable, b: BookingRow, now:
     .where(eq(businesses.id, b.businessId))
   if (!biz?.movedAt || !biz.movedFrom || now - biz.movedAt.getTime() >= ADDRESS_SMS_AFTER_MS || !b.clientPhone) return
   await tx.update(bookings).set({ addressTold: biz.movedFrom }).where(eq(bookings.id, b.id))
-  await tx
-    .insert(jobs)
-    .values({
-      kind: 'booking.sms',
-      runAt: new Date(addressSmsAt({ ...b, createdAt: b.createdAt.getTime() }, now)),
-      payload: { bookingId: b.id, kind: ADDRESS_SMS },
-    })
+  await tx.insert(jobs).values({
+    kind: 'booking.sms',
+    runAt: new Date(addressSmsAt({ ...b, createdAt: b.createdAt.getTime() }, now)),
+    payload: { bookingId: b.id, kind: ADDRESS_SMS },
+  })
 }
