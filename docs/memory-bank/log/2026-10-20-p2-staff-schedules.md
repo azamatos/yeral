@@ -23,5 +23,11 @@
 - Tests: `team/away.test.ts` (asked first, moved, a colleague busy, kept rows, cancel, the owner, the schedule read and
   saved, refused values, a day off with move and keep, nothing new on a kept day, the move confirmed onto a day off,
   the guard), domain unit tests; the team tests send the removal's choice.
+- Its review (9 findings, all fixed): the sdk's `team.remove` takes the choice, and `team.schedule` and
+  `updateSchedule` were added; a day off's problem names its own place in the list; offered times count where a booking
+  in the same batch just moved (only the ones cancelled so far free their time); a booking with no times to offer gets
+  the plain cancel SMS; leaving takes the business row too (`removeRow` in `team/service.ts`, shared with the
+  removal); a refused move names the specialist who is off (`OutsideHours.staffId`); colleagues come from the business
+  as loaded; the client's booking checks the hours and its specialists through `assertOpenAt`.
 - Follow-ups: the calendar shows a day off as the column shaded with its reason (F-121 with the calendar day view);
   the floor and room field the design session added to the address (#88) isn't in the contract yet.

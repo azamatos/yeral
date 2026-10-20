@@ -167,7 +167,7 @@ export async function confirmRequest(deps: Deps, business: Business, actor: Acto
         await assertStaffFree(tx, hours, row.date, items)
       } catch (e) {
         if (!(e instanceof OutsideHours)) throw e
-        throw new ApiError('cannot_move', { problem: 'staff_off', staffId: items[0]?.staffId ?? '' } satisfies CannotMoveDetails)
+        throw new ApiError('cannot_move', { problem: 'staff_off', staffId: e.staffId ?? '' } satisfies CannotMoveDetails)
       }
     }
     await confirmBooking(tx, deps, row)

@@ -42,7 +42,13 @@ import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
 import type { bookingRulesUpdateSchema, businessHoursUpdateSchema, businessProfileUpdateSchema } from '@yeral/contract/settings'
-import type { inviteInputSchema, phoneOnlyInputSchema, updateMemberSchema } from '@yeral/contract/team'
+import type {
+  inviteInputSchema,
+  phoneOnlyInputSchema,
+  removeMemberSchema,
+  staffScheduleUpdateSchema,
+  updateMemberSchema,
+} from '@yeral/contract/team'
 import type { z } from 'zod'
 import { call, isApiError, type Client } from './client'
 import { staleKeys } from './events'
@@ -420,10 +426,29 @@ export function createSdk(client: Client, queryClient: QueryClient) {
           call(w.team[':staffId'].$patch({ param: { slug, staffId }, json })),
         onSuccess: () => teamChanged(slug),
       }),
+    /**
+     * "Işgäri öçür" (book B-50): their bookings ahead make it `bookings_affected` (`details` lists them, each with the
+     * colleagues who do it) until it's sent again with `affected: 'move' | 'keep' | 'cancel'`.
+     */
     remove: (slug: string) =>
       mutationOptions({
-        mutationFn: (staffId: string) => call(w.team[':staffId'].remove.$post({ param: { slug, staffId } })),
-        onSuccess: () => teamChanged(slug),
+        mutationFn: ({ staffId, ...json }: { staffId: string } & z.input<typeof removeMemberSchema>) =>
+          call(w.team[':staffId'].remove.$post({ param: { slug, staffId }, json })),
+        // their bookings moved or cancelled show in the calendar's feed; waiting moves may go with them
+        onSuccess: () => Promise.all([teamChanged(slug), invalidate(keys.requests(slug))]),
+      }),
+    /** A team member's shift, breaks and days off (book B-47). */
+    schedule: (slug: string, staffId: string) =>
+      queryOptions({
+        queryKey: keys.schedule(slug, staffId),
+        queryFn: ({ signal }) => call(w.team[':staffId'].schedule.$get({ param: { slug, staffId } }, abortWith(signal))),
+      }),
+    /** Saves it; bookings left outside make it `bookings_affected` until it's sent again with `affected: 'move' | 'keep'`. */
+    updateSchedule: (slug: string, staffId: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof staffScheduleUpdateSchema>) =>
+          call(w.team[':staffId'].schedule.$put({ param: { slug, staffId }, json })),
+        onSuccess: () => Promise.all([invalidate(keys.schedule(slug, staffId)), teamChanged(slug), invalidate(keys.requests(slug))]),
       }),
     reactivate: (slug: string) =>
       mutationOptions({

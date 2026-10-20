@@ -111,13 +111,12 @@ export const businessProfileUpdateSchema = z
 /** The hours' pickers run in 30-minute steps from 00:00 (book Q-128). */
 export const HOURS_STEP = 30
 export const hoursMinuteSchema = minuteSchema.refine((m) => m % HOURS_STEP === 0, `Every ${HOURS_STEP} minutes`)
-const hoursMinute = hoursMinuteSchema
 
 /** A weekday: from–to (the end may pass midnight, up to 48:00) and one optional break. */
 export const weekdayHoursSchema = z.object({
-  open: hoursMinute,
-  close: hoursMinute,
-  break: z.object({ start: hoursMinute, end: hoursMinute }).nullable(),
+  open: hoursMinuteSchema,
+  close: hoursMinuteSchema,
+  break: z.object({ start: hoursMinuteSchema, end: hoursMinuteSchema }).nullable(),
 })
 
 /**
@@ -129,7 +128,7 @@ export const specialDaySettingSchema = z.object({
   from: ymdSchema,
   to: ymdSchema,
   yearly: z.boolean(),
-  hours: z.object({ open: hoursMinute, close: hoursMinute }).nullable(),
+  hours: z.object({ open: hoursMinuteSchema, close: hoursMinuteSchema }).nullable(),
 })
 
 /** "Iş wagty" and "Aýratyn günler": Monday first, null = closed that weekday. */

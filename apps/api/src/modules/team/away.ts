@@ -8,15 +8,22 @@
 import type { BookingsAffectedDetails } from '@yeral/contract/errors'
 import type { removeMemberSchema, StaffScheduleView, staffScheduleUpdateSchema } from '@yeral/contract/team'
 import { busyOf, planRefusal, shiftPlan, staffDoingAll, type AppointmentContext, type PlannedItem } from '@yeral/domain/availability'
-import { staffDayChangedOn, staffScheduleErrors, withinStaffDay, type DateException, type StaffSchedule } from '@yeral/domain/hours'
+import {
+  specialDayErrors,
+  staffDayChangedOn,
+  staffScheduleErrors,
+  withinStaffDay,
+  type DateException,
+  type StaffSchedule,
+} from '@yeral/domain/hours'
 import { occupiesSlot } from '@yeral/domain/lifecycle'
 import { addDays, epochOf, today } from '@yeral/domain/time'
-import { and, asc, eq, gte, inArray, isNull, ne } from 'drizzle-orm'
+import { and, eq, gte, isNull } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, invites, staff, staffServices } from '../../db/schema'
+import { bookingItems, bookings, staff } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { ApiError, invalid } from '../../http/errors'
+import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
 import { appointmentContext, loadBusiness, loadBusy, loadHours, type LoadedBusiness } from '../availability/context'
 import { specialistAccounts } from '../calendar/repo'
@@ -33,7 +40,7 @@ import {
   type BookingRow,
   type ItemRow,
 } from '../bookings/repo'
-import { teamChanged, teamRow, type StaffRow } from './service'
+import { removeRow, teamChanged, teamRow, type StaffRow } from './service'
 
 type ScheduleChange = z.infer<typeof staffScheduleUpdateSchema>
 type RemoveInput = z.infer<typeof removeMemberSchema>
@@ -97,7 +104,8 @@ async function bookingsAheadWith(db: Queryable, businessId: string, staffId: str
 }
 
 /** "{dates}: N ýazylyş bar": the bookings one by one, with the colleagues who do each one's services when removing. */
-function detailsOf(name: string, staffId: string, ahead: readonly Ahead[], colleagues?: Colleague[]): BookingsAffectedDetails {
+function detailsOf(name: string, staffId: string, ahead: readonly Ahead[], lb?: LoadedBusiness): BookingsAffectedDetails {
+  const ctx = lb && appointmentContext(lb, [], 0)
   return {
     count: ahead.length,
     byStaff: [{ staffId, name, count: ahead.length }],
@@ -110,36 +118,17 @@ function detailsOf(name: string, staffId: string, ahead: readonly Ahead[], colle
         end: b.end,
         client: b.clientName,
         staff: [...new Set(items.flatMap((i) => (i.staffName ? [i.staffName] : [])))],
-        ...(colleagues ? { colleagues: colleagues.filter((s) => doesAll(s, theirs)).map((s) => ({ staffId: s.id, name: s.name })) } : {}),
+        ...(ctx
+          ? {
+              colleagues: staffDoingAll(ctx, theirs)
+                .filter((s) => s.id !== staffId)
+                .map((s) => ({ staffId: s.id, name: lb.staff.find((x) => x.id === s.id)?.name ?? '' })),
+            }
+          : {}),
       }
     }),
   }
 }
-
-/** The active colleagues who take bookings, in the team's order. */
-type Colleague = StaffRow & { serviceIds: string[] }
-
-async function colleaguesOf(db: Queryable, businessId: string, staffId: string): Promise<Colleague[]> {
-  const rows = await db
-    .select()
-    .from(staff)
-    .where(and(eq(staff.businessId, businessId), eq(staff.status, 'active'), eq(staff.bookable, true), ne(staff.id, staffId)))
-    .orderBy(asc(staff.sort))
-  const links = rows.length
-    ? await db
-        .select()
-        .from(staffServices)
-        .where(
-          inArray(
-            staffServices.staffId,
-            rows.map((r) => r.id),
-          ),
-        )
-    : []
-  return rows.map((r) => ({ ...r, serviceIds: links.filter((l) => l.staffId === r.id).map((l) => l.serviceId) }))
-}
-
-const doesAll = (s: { serviceIds?: string[] }, serviceIds: readonly string[]) => serviceIds.every((id) => s.serviceIds?.includes(id))
 
 /** What to do with each booking: move (to a named colleague, or to whoever is free), keep, or cancel with offers. */
 type Settle = { kind: 'keep' } | { kind: 'cancel' } | { kind: 'move'; to?: string; otherwise?: ReadonlyMap<string, 'keep' | 'cancel'> }
@@ -155,7 +144,7 @@ type Settle = { kind: 'keep' } | { kind: 'cancel' } | { kind: 'move'; to?: strin
 async function settleStaffBookings(
   tx: Queryable,
   deps: Deps,
-  businessId: string,
+  lb: LoadedBusiness,
   staffId: string,
   ahead: readonly Ahead[],
   settle: Settle,
@@ -164,13 +153,14 @@ async function settleStaffBookings(
   if (settle.kind === 'keep') return { ...out, kept: ahead.length }
   const now = deps.now()
   const at = new Date(now)
-  const lb = await loadBusiness(tx, businessId)
+  const businessId = lb.business.id
   // busy time on every date a booking may move to or be offered: from today through the window, and the bookings' own
   const first = today(now)
   const dates = ahead.map((a) => a.b.date).sort()
   const last = [addDays(first, lb.rules.windowDays), dates.at(-1)!].sort().at(-1)!
   let ctx: AppointmentContext = appointmentContext(lb, await loadBusy(tx, [businessId], [first, dates[0]!].sort()[0]!, last), now)
-  const exclude = ahead.map((a) => a.b.id)
+  // the bookings cancelled so far free their time; one moved holds its new time (and its old one, with the person away)
+  const freed: string[] = []
   const leaving = await specialistAccounts(tx, [staffId])
   for (const { b } of ahead) {
     let row: BookingRow
@@ -204,14 +194,16 @@ async function settleStaffBookings(
       }
     }
 
-    let offers: BookingRow['declineAlternatives'] = []
+    // other times for an appointment (tables and classes are re-booked by phone after the MVP)
+    let offers: BookingRow['declineAlternatives'] | undefined
     if (row.type === 'appointment') {
-      const picked = pickAlternatives(ctx, row, await bookedServices(tx, row.id), exclude)
+      const picked = pickAlternatives(ctx, row, await bookedServices(tx, row.id), [...freed, row.id])
       offers = picked.offers
       ctx = { ...ctx, busy: [...ctx.busy, ...picked.held] }
     }
-    if (row.status === 'pending') await declineForBusiness(tx, row, at, { reason: 'no_staff', text: null, offers })
+    if (row.status === 'pending') await declineForBusiness(tx, row, at, { reason: 'no_staff', text: null, offers: offers ?? [] })
     else await cancelForBusiness(tx, row, at, { reason: 'staff_away', text: null, offers })
+    freed.push(row.id)
     out.cancelled++
   }
   return out
@@ -300,12 +292,14 @@ export async function updateSchedule(
     if (row.status === 'removed') throw new ApiError('invalid_status')
     const was = scheduleOfRow(row)
     const daysOff: DateException[] = []
-    const ended: number[] = []
+    const issues: Issue[] = []
+    // each day off checked by its place in the list sent (one ended and saved before drops out quietly)
     change.daysOff.forEach((d, i) => {
       const day = { name: d.name, from: d.from, to: d.to, yearly: d.yearly, hours: null }
       const over = !d.yearly && d.to < today(now)
       if (over && was.daysOff.some((s) => s.name === d.name && s.from === d.from && s.to === d.to && s.yearly === d.yearly)) return
-      if (over) ended.push(i)
+      for (const field of specialDayErrors(day)) issues.push({ path: ['daysOff', i, field], code: 'invalid' })
+      if (over) issues.push({ path: ['daysOff', i, 'to'], code: 'past' })
       daysOff.push(day)
     })
     const next: StaffSchedule = {
@@ -313,12 +307,11 @@ export async function updateSchedule(
       breaks: change.breaks.map((b) => (b ? { start: b.start, end: b.end } : null)),
       daysOff,
     }
-    const issues = staffScheduleErrors(next).map((field) => ({
-      path: field.split('.').map((p) => (/^\d+$/.test(p) ? Number(p) : p)),
-      code: 'invalid',
-    }))
-    for (const i of ended) issues.push({ path: ['daysOff', i, 'to'], code: 'past' })
-    if (issues.length) throw invalid(...issues)
+    const week = staffScheduleErrors({ ...next, daysOff: [] }).map((field) => {
+      const [name, index] = field.split('.')
+      return { path: [name!, Number(index)], code: 'invalid' }
+    })
+    if (week.length || issues.length) throw invalid(...week, ...issues)
 
     const affected = (await bookingsAheadWith(tx, business.id, staffId, now)).filter(
       ({ b, items }) =>
@@ -335,7 +328,7 @@ export async function updateSchedule(
       ? await settleStaffBookings(
           tx,
           deps,
-          business.id,
+          await loadBusiness(tx, business.id),
           staffId,
           affected,
           change.affected === 'move' ? { kind: 'move' } : { kind: 'keep' },
@@ -362,24 +355,20 @@ export async function removeMember(deps: Deps, business: Business, staffId: stri
     // someone who left by themself (B-15) leaves their bookings for this same flow
     const ahead = await bookingsAheadWith(tx, business.id, staffId, now)
     if (ahead.length && !input.affected)
-      throw new ApiError('bookings_affected', detailsOf(row.name, staffId, ahead, await colleaguesOf(tx, business.id, staffId)))
-    if (input.affected === 'move') {
-      const [to] = await colleaguesOf(tx, business.id, staffId).then((all) => all.filter((s) => s.id === input.to))
-      if (!to) throw invalid({ path: ['to'], code: 'not_found' })
-    }
-    if (row.status !== 'removed') await tx.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.id, row.id))
-    await tx
-      .update(invites)
-      .set({ status: 'cancelled', answeredAt: new Date(now) })
-      .where(and(eq(invites.staffId, row.id), eq(invites.status, 'pending')))
+      throw new ApiError('bookings_affected', detailsOf(row.name, staffId, ahead, await loadBusiness(tx, business.id)))
+    await removeRow(tx, row, now)
     await teamChanged(tx, business.id, { userId: row.userId })
     if (!ahead.length) return { moved: 0, kept: 0, cancelled: 0 }
+    // the team as it is now, without them
+    const lb = await loadBusiness(tx, business.id)
+    if (input.affected === 'move' && !lb.staff.some((s) => s.id === input.to && s.bookable))
+      throw invalid({ path: ['to'], code: 'not_found' })
     const settle: Settle =
       input.affected === 'move'
         ? { kind: 'move', to: input.to, otherwise: new Map((input.rows ?? []).map((r) => [r.code, r.affected])) }
         : input.affected === 'cancel'
           ? { kind: 'cancel' }
           : { kind: 'keep' }
-    return settleStaffBookings(tx, deps, business.id, staffId, ahead, settle)
+    return settleStaffBookings(tx, deps, lb, staffId, ahead, settle)
   })
 }

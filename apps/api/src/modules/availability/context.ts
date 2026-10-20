@@ -155,7 +155,8 @@ export const lockedHours = (db: Queryable, businessId: string) => loadHours(db, 
  * `inTransaction` adds the nearest free times as the business stands.
  */
 export class OutsideHours extends ApiError {
-  constructor() {
+  /** `staffId`: the specialist whose day no longer holds it, when that's why. */
+  constructor(readonly staffId?: string) {
     super('slot_taken', { alternatives: [] })
   }
 }
@@ -205,7 +206,7 @@ export async function assertStaffFree(db: Queryable, hours: BusinessHours, date:
     const s = it.staffId ? rows.find((r) => r.id === it.staffId) : undefined
     if (!it.staffId) continue
     if (!s || s.status !== 'active' || !s.bookable || !withinStaffDay(hours, s, date, { start: it.start, end: it.end }))
-      throw new OutsideHours()
+      throw new OutsideHours(it.staffId)
   }
 }
 

@@ -34,6 +34,7 @@ import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { sha256Hex } from '../../lib/crypto'
 import { requireUser } from '../auth/session'
+import { loadHours } from '../availability/context'
 import { removeMember, scheduleOf, updateSchedule } from './away'
 import {
   hasJoined,
@@ -43,6 +44,7 @@ import {
   issueInvite,
   member,
   members,
+  removeRow,
   requireMember,
   reusableRow,
   rowsForPhone,
@@ -458,24 +460,13 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     if (row.level === 'owner') throw new ApiError('owner_cannot_leave')
     const { deps } = c.var
     await deps.db.transaction(async (tx) => {
+      // ordered with the bookings being made for them, as a removal is (their bookings stay for the owner, B-15)
+      await loadHours(tx, business.id, { lock: 'no key update' })
       await removeRow(tx, row, deps.now())
       await teamChanged(tx, business.id, { userId: row.userId })
     })
     return c.body(null, 204)
   })
-
-/**
- * Off the team: no access, off the client site; their future bookings stay in their column as they are (the other
- * choices of the remove flow come with the business bookings). The account stays linked, so those bookings still
- * block them elsewhere (Başga ýerde).
- */
-async function removeRow(db: Parameters<typeof teamRow>[0], row: StaffRow, now: number) {
-  await db.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.id, row.id))
-  await db
-    .update(invites)
-    .set({ status: 'cancelled', answeredAt: new Date(now) })
-    .where(and(eq(invites.staffId, row.id), eq(invites.status, 'pending')))
-}
 
 /** An invite the signed-in phone may still answer; someone else's is "not found". */
 async function openInvite(db: Parameters<typeof teamRow>[0], id: string, phone: string, now: number) {

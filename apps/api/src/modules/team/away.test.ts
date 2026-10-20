@@ -101,6 +101,8 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
     expect(await whoOn(busyThen)).toMatchObject({ status: 'cancelled', reason: 'staff_away' })
     expect((await whoOn(busyThen)).offers).toHaveLength(3)
     expect(await whoOn(kept)).toMatchObject({ status: 'confirmed', staff: ['Selbi'] })
+    // the time the moved booking just took with Jeren isn't offered to the one cancelled
+    expect((await whoOn(busyThen)).offers).not.toContainEqual(expect.objectContaining({ date: THU, start: 600, staffId: jerenId }))
     await runDueJobs(t.deps)
     expect(smsTo('+99365800502')).toEqual([expect.stringMatching(/your booking on .+ is now with Jeren/)])
     expect(smsTo('+99365800503')).toEqual([expect.stringMatching(/cancelled your booking .*: The specialist can't come in\. Free times: /)])
@@ -158,6 +160,20 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
       { path: ['breaks', 1], code: 'invalid' },
       { path: ['daysOff', 0, 'to'], code: 'past' },
     ])
+    // one that ended, saved before, drops out quietly: the problem after it keeps its own place
+    await db
+      .update(staff)
+      .set({ daysOff: [{ name: 'Ended', from: '2026-10-01', to: '2026-10-02', yearly: false, hours: null }] })
+      .where(eq(staff.id, nur))
+    const second = await schedule(maysa, nur, {
+      ...own,
+      daysOff: [
+        { name: 'Ended', from: '2026-10-01', to: '2026-10-02', yearly: false },
+        { name: 'Backwards', from: '2026-12-05', to: '2026-12-01', yearly: false },
+      ],
+    })
+    expect(second.json.error.details.issues).toEqual([{ path: ['daysOff', 1, 'to'], code: 'invalid' }])
+    await schedule(maysa, nur, own)
   })
 
   it('a day off over bookings asks first; moved to whoever is free, else other times; or kept, with nothing new booked', async () => {
