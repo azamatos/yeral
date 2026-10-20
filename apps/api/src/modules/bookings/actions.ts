@@ -189,7 +189,7 @@ export async function acceptAlternative(deps: Deps, user: User, b: BookingRow, s
       b,
       // with its named specialist only (book Q-159): busy now, it's taken (409 slot_taken)
       offerTarget(slot),
-      { status: source === 'expired' ? initialStatus('web', lb.rules.confirmMode) : 'confirmed', alternativeOf: b.id, lb },
+      { status: source === 'expired' ? initialStatus('web', lb.rules.confirmMode) : 'confirmed', alternativeOf: b.id },
     )
     return row
   } catch (e) {

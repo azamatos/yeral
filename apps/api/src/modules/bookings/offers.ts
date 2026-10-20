@@ -73,12 +73,6 @@ export async function withOffersAhead(
     () => loadBusinesses(db, [...new Set(picked.map((p) => p.r.businessId))]),
   ])
   const takenFrom = new Set(taken.map((t) => t.of))
-  const open = picked.filter(({ r }) => businesses.has(r.businessId) && !takenFrom.has(r.id))
-  // the services of every row left at once, for each one's offered times
-  const booked = await bookedServicesOf(
-    db,
-    open.map((p) => p.r.id),
-  )
   // every row is the signed-in client's: one check per business and phone
   const online = new Map<string, Promise<boolean>>()
   const bookOnline = (lb: LoadedBusiness, r: BookingRow) => {
@@ -88,11 +82,26 @@ export async function withOffersAhead(
     online.set(key, known)
     return known
   }
+  // the rows that still reach their offered times: not taken, an offer ahead of the lead time, and after an expiry
+  // only while the client may book online
+  const kept = await all(
+    db,
+    picked.map(({ r, offers }) => async () => {
+      const lb = businesses.get(r.businessId)
+      if (!lb || takenFrom.has(r.id) || offers.list.every((o) => offerPast(o, lb.rules.leadMinutes, now))) return false
+      return offers.source !== 'expired' || (await bookOnline(lb, r))
+    }),
+  )
+  const open = picked.filter((_, i) => kept[i])
+  // the services of every row left at once, for each one's offered times
+  const booked = await bookedServicesOf(
+    db,
+    open.map((p) => p.r.id),
+  )
   const soonest = await all(
     db,
     open.map(({ r, offers }) => async () => {
       const lb = businesses.get(r.businessId)!
-      if (offers.source === 'expired' && !(await bookOnline(lb, r))) return null
       const free = (await offeredTimes(db, lb, r, offers.list, now, booked.get(r.id))).filter((o) => o.state === 'free')
       return free.length ? Math.min(...free.map((o) => epochOf(o.date, o.start))) : null
     }),

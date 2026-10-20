@@ -275,6 +275,21 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     expect(await rowOf(AYNA)).toMatchObject({ id: row!.id, status: 'active' })
   })
 
+  it('a refused value says which, as everywhere: an unknown service, an invite to a phone that gets no SMS', async () => {
+    const maysa = await as(MAYSA)
+    const unknown = '00000000-0000-4000-8000-000000000000'
+    const bad = await maysa.req('/v1/w/glow-studio/team/invites', {
+      body: { phone: '+99365333021', name: 'Bad', level: 'specialist', serviceIds: [unknown] },
+    })
+    expect(bad.json.error).toMatchObject({
+      code: 'validation_error',
+      details: { issues: [{ path: ['serviceIds', 0], code: 'not_found' }] },
+    })
+    const desk = (await maysa.req('/v1/w/glow-studio/team/phone-only', { body: { phone: '+99312345679', name: 'Desk' } })).json
+    const resend = await maysa.req(`/v1/w/glow-studio/team/${desk.id}/invite`, { method: 'POST' })
+    expect(resend.json.error).toMatchObject({ code: 'validation_error', details: { issues: [{ path: ['phone'], code: 'not_mobile' }] } })
+  })
+
   it('nobody ends up on a team twice', async () => {
     const maysa = await as(MAYSA)
     // a removed specialist without the app, added again later: the old row can't come back beside the new one

@@ -174,7 +174,10 @@ async function checkOffers(deps: Deps, b: BookingRow, offers: NonNullable<Declin
   if (b.type !== 'appointment') throw invalid({ path: ['offers'], code: 'not_appointment' })
   const lb = await loadBusiness(deps.db, b.businessId)
   const dates = offers.map((o) => o.date).sort()
-  const [booked, busy] = await Promise.all([bookedServices(deps.db, b.id), loadBusy(deps.db, [b.businessId], dates[0]!, dates.at(-1)!)])
+  const [booked, busy] = await all(deps.db, [
+    () => bookedServices(deps.db, b.id),
+    () => loadBusy(deps.db, [b.businessId], dates[0]!, dates.at(-1)!),
+  ])
   const ctx = appointmentContext(lb, busy, now)
   const issues: Issue[] = []
   const out: TimeSlot[] = []

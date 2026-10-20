@@ -307,7 +307,7 @@ export async function createBooking(deps: Deps, user: User, input: CreateBooking
 
 /**
  * A new appointment like `from` at another time: a client's move request, or an offered alternative. `opts.db` runs it
- * inside the caller's transaction; `opts.lb`, the business the caller loaded, saves loading it again.
+ * inside the caller's transaction, which reads the business as it stands there.
  */
 export async function rebook(
   deps: Deps,
@@ -320,11 +320,10 @@ export async function rebook(
     alternativeOf?: string
     db?: Queryable
     booked?: BookedServices
-    lb?: LoadedBusiness
   },
 ): Promise<BookingRow> {
   const db = opts.db ?? deps.db
-  const lb = opts.lb ?? (await loadBusiness(db, from.businessId))
+  const lb = await loadBusiness(db, from.businessId)
   if (from.type !== 'appointment') throw new ApiError('not_bookable')
   const move = !!opts.rescheduleOf
   const booked = opts.booked ?? (await bookedServices(db, from.id))

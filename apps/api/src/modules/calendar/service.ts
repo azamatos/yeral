@@ -306,7 +306,7 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
       const now = deps.now()
       const at = new Date(now)
       // the hours as they stand, before the booking's lock (the order an hours save takes them in)
-      const hours = await lockedHours(tx, business.id)
+      await lockedHours(tx, business.id)
       // all of it again under the booking's lock: a client's move confirmed meanwhile changed its time and items, and
       // a client's move takes this lock before it's asked
       const { b, items, staffIds } = await teamBooking(tx, business, actor, code, { lock: true })
@@ -321,11 +321,9 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
       const timeChanged = input.date !== b.date || input.start !== b.start
       // a drop on its own place, or the same move sent twice
       if (!timeChanged && plan.every((it, i) => it.staffId === items[i]!.staffId)) return
-      const ctx = appointmentContext(
-        { ...lb, business: { ...lb.business, ...hours } },
-        await loadBusy(tx, [business.id], input.date, input.date),
-        now,
-      )
+      // the business as it stands under the lock: its hours, its team and their schedules
+      const fresh = await loadBusiness(tx, business.id)
+      const ctx = appointmentContext(fresh, await loadBusy(tx, [business.id], input.date, input.date), now)
       const refusal = planRefusal(ctx, input.date, plan, excluded)
       if (refusal) throw new ApiError('cannot_move', { ...refusal } satisfies CannotMoveDetails)
       for (const [i, it] of items.entries()) {
@@ -338,7 +336,7 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
             end: to.end,
             bufferAfter: to.bufferAfter,
             staffId: to.staffId,
-            staffName: lb.staff.find((s) => s.id === to.staffId)?.name ?? it.staffName,
+            staffName: fresh.staff.find((s) => s.id === to.staffId)?.name ?? it.staffName,
           })
           .where(eq(bookingItems.id, it.id))
       }
