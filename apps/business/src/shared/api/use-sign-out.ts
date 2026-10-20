@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { keys } from '@yeral/sdk'
-import { useSdk } from './sdk-context'
+import { useSdk } from '@yeral/sdk/react'
 
 /**
  * Signing out, and a session that ended on its own (a 401): nothing of the last person's stays in the cache but `me`,

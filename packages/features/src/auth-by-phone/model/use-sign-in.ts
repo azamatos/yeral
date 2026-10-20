@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 import { toE164 } from '@yeral/domain/phone'
+import { isLocale } from '@yeral/i18n/messages'
 import { isApiError, type ApiError, type Sdk } from '@yeral/sdk'
+import { useSdk } from '@yeral/sdk/react'
 import { useEffect, useReducer, useState } from 'react'
 import { useLocale } from 'use-intl'
-import { useSdk } from '@/shared/api'
 import { phoneProblem } from '../lib/phone'
 import { initialSignIn, signInReducer, signInView, type SignInEvent } from './sign-in'
 
@@ -20,7 +21,9 @@ const CODE_REFUSALS = ['code_invalid', 'too_many_attempts', 'code_expired'] as c
  */
 export function useSignIn({ onVerified, onFailed }: { onVerified: (answer: Verified) => void; onFailed: (error: unknown) => void }) {
   const sdk = useSdk()
-  const locale = useLocale()
+  // the screen's language: the SMS text and a new account's language
+  const raw = useLocale()
+  const locale = isLocale(raw) ? raw : undefined
   const [state, dispatch] = useReducer(signInReducer, initialSignIn)
   const [now, setNow] = useState(() => Date.now())
   const send = useMutation(sdk.auth.sendCode())

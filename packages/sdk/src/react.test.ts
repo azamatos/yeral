@@ -1,6 +1,6 @@
-import { ApiError } from '@yeral/sdk'
+import { ApiError } from './client'
 import { describe, expect, it } from 'vitest'
-import { shouldRetry } from './api'
+import { shouldRetry } from './react'
 
 describe('shouldRetry', () => {
   it.each([

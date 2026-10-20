@@ -1,13 +1,12 @@
 import { Link } from '@tanstack/react-router'
 import { MARKET } from '@yeral/domain/market'
 import { formatPhone, toE164 } from '@yeral/domain/phone'
+import { mobileStarts, PHONE_RULES, type useSignIn } from '@yeral/features/auth-by-phone'
 import { cn } from '@yeral/ui/cn'
 import { SignInCodeStep, type SignInCodeStepCopy } from '@yeral/ui/sign-in-code-step'
 import { useEffect, useId, useRef } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { AuthPage, textLink } from '@/shared/ui'
-import { mobileStarts, PHONE_RULES } from '../lib/phone'
-import type { useSignIn } from '../model/use-sign-in'
 
 const STARTS = mobileStarts()
 
