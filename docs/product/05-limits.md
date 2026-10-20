@@ -23,8 +23,8 @@ How to read the tables:
 | "Send again" after | 59 s (timer 0:59) | Fixed | client spec §4.4; code: apps/api/src/modules/auth/codes.ts |
 | Wrong tries | 3, then a 60 s lock; a new code is needed after it | Fixed | client spec §4.4; code: apps/api/src/modules/auth/codes.ts |
 | Codes per phone | 5 an hour | Fixed | Q-267, decided 18.10.2026; code: apps/api/src/modules/auth/codes.ts |
-| Codes per internet address | 100 an hour | Fixed | Q-267, decided 18.10.2026 |
-| Too many codes asked for | the message shows the wait in minutes | Fixed | Q-267, decided 18.10.2026 |
+| Codes per internet address | 100 an hour | Fixed | Q-267, decided 18.10.2026; code: apps/api/src/modules/auth/codes.ts |
+| Too many codes asked for | the message shows the wait in minutes, rounded up | Fixed | Q-267, decided 18.10.2026; code: `rate_limited` with `retryAfterMin` |
 | Test code outside production | `1234`; on the design canvases `0000` is wrong and any other code works | Fixed | ADR 0019, productContext |
 | Sign-in code at the first launch | shown on the screen; no SMS goes out | Fixed | Q-036, decided 18.10.2026 |
 | Name | asked once, at the first login; 1–80 characters | Client | client spec §4.7; length code only: packages/contract/src/account.ts |
@@ -34,8 +34,7 @@ How to read the tables:
 | Accounts per person | 1, for booking and for business work | Fixed | business spec §1 |
 | SMS switches | 3, all on: confirmations and changes, reminder a day before, reminder 2 h before; no review-ask switch | Client | client spec §4.8; Q-259, decided 18.10.2026; defaults code only: apps/api/src/db/schema/auth.ts |
 
-**Code differs:** one internet address may ask for 20 codes an hour, and the message doesn't say how long to wait
-(code: apps/api/src/modules/auth/codes.ts). Deleting an account keeps the reviews (code: apps/api/src/modules/me/routes.ts).
+**Code differs:** deleting an account keeps the reviews (code: apps/api/src/modules/me/routes.ts).
 
 **Design to fix:** drop the review-ask switch *Teswir haýyşy* from Account-Profile; adjust the delete-account modal's
 copy to say businesses keep their visit records (Q-172).

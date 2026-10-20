@@ -76,8 +76,8 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 - Only in code, never designed: "What?" search suggestions (F-007), the places list behind "Where?" (F-187), demo
   businesses that answer by themselves (F-200), a stored "typical confirmation time" the design says is computed
   (F-021), a late-tolerance setting no screen shows (F-103), the `ai` booking source (F-230).
-- The answers of 18.10.2026 add **Code differs** lines across chapters 5 and 7a–7c. The main ones: the no-show count never restarts
-  (Q-127); 20 codes an hour per internet address instead of 100 (Q-267).
+- The answers of 18.10.2026 add **Code differs** lines across chapters 5 and 7a–7c; P2 step 3 works through them
+  (chapter 10).
 
 ## Totals by area
 

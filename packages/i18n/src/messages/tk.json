@@ -41,7 +41,7 @@
     "invite_expired": "Çakylygyň möhleti geçdi. Täzesini soraň.",
     "invite_answered": "Bu çakylyga eýýäm jogap berildi.",
     "owner_cannot_leave": "Eýesi biznesden çykyp bilmeýär.",
-    "rate_limited": "Haýyş köp boldy. Biraz garaşyň.",
+    "rate_limited": "Haýyş köp boldy. {retryAfterMin} minutdan soň täzeden synanyşyň.",
     "internal": "Näsazlyk ýüze çykdy. Gaýtadan synanyşyň.",
     "network": "Baglanyşyk ýok. Gaýtadan synanyşyň."
   },

@@ -9,7 +9,7 @@ import { loginCodes } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { randomDigits, sha256Hex } from '../../lib/crypto'
-import { hit } from '../../lib/rate-limit'
+import { hit, rateLimited } from '../../lib/rate-limit'
 import { codeSmsText } from '../../notify'
 
 export const CODE_TTL_SEC = 300
@@ -17,6 +17,12 @@ export const RESEND_SEC = 59
 export const MAX_ATTEMPTS = 3
 export const LOCK_SEC = 60
 export const DEMO_CODE = '1234'
+/**
+ * Codes one phone, and one internet address, may ask for in an hour (book Q-267). Mobile operators put many phones
+ * behind one address, so the address gets far more.
+ */
+export const CODES_PER_PHONE = 5
+export const CODES_PER_ADDRESS = 100
 
 type Purpose = 'login' | 'change_phone'
 
@@ -41,12 +47,13 @@ export async function sendCode(
   if (existing && now - existing.sentAt.getTime() < RESEND_SEC * 1000) {
     throw new ApiError('resend_too_soon', { retryAfterSec: secondsLeft(new Date(existing.sentAt.getTime() + RESEND_SEC * 1000), now) })
   }
+  // the address first: a request it refuses doesn't use up one of the phone's codes
   for (const [key, limit] of [
-    [`code:phone:${req.phone}`, 5],
-    [`code:ip:${req.ip}`, 20],
+    [`code:ip:${req.ip}`, CODES_PER_ADDRESS],
+    [`code:phone:${req.phone}`, CODES_PER_PHONE],
   ] as const) {
     const r = await hit(db, key, limit, 3600, now)
-    if (!r.ok) throw new ApiError('rate_limited', { retryAfterSec: r.retryAfterSec })
+    if (!r.ok) throw rateLimited(r.retryAfterSec)
   }
 
   const code = deps.site.demo ? DEMO_CODE : randomDigits(4)
