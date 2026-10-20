@@ -19,6 +19,8 @@ export type CancelledBy = (typeof CANCELLED_BY)[number]
 export const BOOKING_SOURCES = ['web', 'app', 'phone', 'walkin', 'ai'] as const
 export type BookingSource = (typeof BOOKING_SOURCES)[number]
 export const isOnlineSource = (s: BookingSource) => s === 'web' || s === 'app' || s === 'ai'
+/** Entered by the team: a phone call or a walk-in (B-23, B-25). */
+export const isTeamSource = (s: BookingSource) => s === 'phone' || s === 'walkin'
 
 export const CONFIRM_MODES = ['manual', 'instant'] as const
 export type ConfirmMode = (typeof CONFIRM_MODES)[number]

@@ -80,6 +80,7 @@
     "code": "Код {brand}: {code}",
     "confirmed": "{brand}: {business} подтвердил вашу запись. {weekday}, {date}, {time}. Изменить: {link}",
     "booked": "{brand}: вы записаны: {business}, {weekday}, {date}, {time}, {address}. Изменить: {link}",
+    "bookedWith": "{brand}: вы записаны: {business}, {weekday}, {date}, {time}, мастер {staff}, {address}. Изменить: {link}",
     "declined": "{brand}: {business} не может принять запись на {date} {time}: {reason}. Выберите другое время: {link}",
     "declinedCall": "{brand}: {business} не может принять запись на {date} {time}: {reason}. Позвоните, чтобы записаться: {link}",
     "expired": "{brand}: {business} не ответил вовремя. Есть свободное время: {times} — {link}",

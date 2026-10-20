@@ -2,24 +2,25 @@
  * A booking cancelled by the business, the same on every path that does it: the team's cancel (B-27) and closing over
  * bookings, with offered times (B-39, B-40).
  */
-import { cancelledByFor, NEW_BOOKING_SMS_AFTER_MS } from '@yeral/domain/lifecycle'
-import type { BusinessCancelReason } from '@yeral/domain/model'
+import { cancelledByFor, isConfirmationNews, NEW_BOOKING_SMS_AFTER_MS, type NewsQueued } from '@yeral/domain/lifecycle'
+import { isTeamSource, type BusinessCancelReason } from '@yeral/domain/model'
 import { eq } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookings, type TimeSlot } from '../../db/schema'
-import { CONFIRMATION_SMS, emit, queueOutcomeSms } from '../../notify'
+import { emit, queueOutcomeSms } from '../../notify'
 import { dropPendingMove } from './actions'
-import { waitingNews } from './confirm'
+import { newsJobs } from './confirm'
 import { setStatus, type BookingRow } from './repo'
 
 /**
- * A booking the team entered that the client has no SMS about yet: its undo may still come, or its confirmation still
- * waits (B-24). They learned of it on the phone or at the desk, so its cancel doesn't text them either.
+ * A booking the team entered that the client has no SMS about yet: its undo may still come, or its confirmation hasn't
+ * gone (a runner may hold it, but it finds the booking cancelled and sends nothing). They learned of it on the phone or
+ * at the desk, so its cancel doesn't text them either (B-24).
  */
 export async function clientUnaware(db: Queryable, b: BookingRow, now: number): Promise<boolean> {
-  if (b.source !== 'phone' && b.source !== 'walkin') return false
+  if (!isTeamSource(b.source)) return false
   if (now < b.createdAt.getTime() + NEW_BOOKING_SMS_AFTER_MS) return true
-  return (await waitingNews(db, b.id, now)).some((j) => CONFIRMATION_SMS.has(String(j.payload.kind)))
+  return (await newsJobs(db, b.id, { unclaimed: false })).some((j) => isConfirmationNews(j.payload.kind as NewsQueued))
 }
 
 /**

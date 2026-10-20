@@ -63,6 +63,8 @@ describe('newsSms (book B-24, B-26)', () => {
 
   it('a confirmation tells the booking as it is; one the client chose online and that changed says what changed', () => {
     expect(newsSms('booked', false, at10, at11)).toBe('booked')
+    // agreed with Maral on the phone, given to Jeren before the SMS went: it names Jeren
+    expect(newsSms('booked', false, at10, jeren10)).toBe('bookedWith')
     expect(newsSms('confirmed', true, at10, at10)).toBe('confirmed')
     expect(newsSms('confirmed', true, at10, at11)).toBe('moved')
     expect(newsSms('confirmed', true, at10, jeren10)).toBe('staffChanged')
@@ -73,6 +75,11 @@ describe('newsSms (book B-24, B-26)', () => {
     expect(newsSms('moved', false, at10, jeren11)).toBe('movedWith')
     expect(newsSms('moved', false, at10, jeren10)).toBe('staffChanged')
     expect(newsSms('moved', true, at10, at10)).toBeNull()
+  })
+
+  it('a booking from before what the client knows was kept: told as queued', () => {
+    expect(newsSms('moved', false, null, at11)).toBe('moved')
+    expect(newsSms('confirmed', true, null, at11)).toBe('confirmed')
   })
 })
 

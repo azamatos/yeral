@@ -80,6 +80,7 @@
     "code": "{brand} kody: {code}",
     "confirmed": "{brand}: {business} ýazylyşyňyzy tassyklady. {weekday}, {date}, {time}. Üýtgetmek: {link}",
     "booked": "{brand}: ýazylyşyňyz: {business}, {weekday}, {date}, {time}, {address}. Üýtgetmek: {link}",
+    "bookedWith": "{brand}: ýazylyşyňyz: {business}, {weekday}, {date}, {time}, {staff} bilen, {address}. Üýtgetmek: {link}",
     "declined": "{brand}: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Başga wagt saýlaň: {link}",
     "declinedCall": "{brand}: {business} {date} {time} ýazylyşyny kabul edip bilmedi: {reason}. Ýazylmak üçin jaň ediň: {link}",
     "expired": "{brand}: {business} wagtynda jogap bermedi. Şu boş wagtlar bar: {times} — {link}",

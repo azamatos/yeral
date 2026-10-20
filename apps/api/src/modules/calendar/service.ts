@@ -27,14 +27,7 @@ import {
   type PlannedItem,
 } from '@yeral/domain/availability'
 import { currentBusinessDate } from '@yeral/domain/hours'
-import {
-  canBusinessCancel,
-  canBusinessMove,
-  canUndoNewBooking,
-  NEW_BOOKING_SMS_AFTER_MS,
-  NEW_BOOKING_UNDO_MS,
-  toldOf,
-} from '@yeral/domain/lifecycle'
+import { canBusinessCancel, canBusinessMove, canUndoNewBooking, NEW_BOOKING_UNDO_MS, toldOf } from '@yeral/domain/lifecycle'
 import { canOn, scopeOf, type Actor } from '@yeral/domain/permissions'
 import { addDays, epochOf } from '@yeral/domain/time'
 import { and, eq, inArray, sql } from 'drizzle-orm'
@@ -271,7 +264,7 @@ async function insertTeamBooking(
   await tx.insert(bookingItems).values(itemRows(lb, row.id, input.date, slot))
   await emit(tx, { type: 'booking.created', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
   // nothing reaches the client while "Yzyna al" may still take the booking back (B-24)
-  await queueBookingSms(tx, deps, row, { news: row.notifyClient ? 'booked' : null, notBefore: now + NEW_BOOKING_SMS_AFTER_MS })
+  await queueBookingSms(tx, deps, row, { news: row.notifyClient ? 'booked' : null })
   return row
 }
 

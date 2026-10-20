@@ -3,21 +3,19 @@
  * what follows: reminders are queued, the client gets the "confirmed" SMS (client spec §6).
  * A confirmed reschedule request moves the booking it points at.
  */
-import { reminderPlan, type NewsQueued } from '@yeral/domain/lifecycle'
+import { isConfirmationNews, NEW_BOOKING_SMS_AFTER_MS, NEWS_QUEUED, reminderPlan, type NewsQueued } from '@yeral/domain/lifecycle'
+import { isTeamSource } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
-import { and, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, jobs } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { CONFIRMATION_SMS, emit, NEWS_SMS } from '../../notify'
+import { emit } from '../../notify'
 import { extendBookingLinks } from './links'
 import { lockBooking, setStatus, StaleBooking, type BookingRow } from './repo'
 
-/**
- * The booking's news SMS still waiting to go, held until the caller's transaction ends. One the jobs have claimed is
- * being sent and isn't among them; a claim under way is waited for (the row lock), then seen as claimed.
- */
-export async function waitingNews(db: Queryable, bookingId: string, now: number) {
+/** The booking's news SMS jobs not done yet; `unclaimed`: only those no runner has picked up. */
+export function newsJobs(db: Queryable, bookingId: string, opts: { unclaimed: boolean }) {
   return db
     .select({ id: jobs.id, payload: jobs.payload })
     .from(jobs)
@@ -26,27 +24,27 @@ export async function waitingNews(db: Queryable, bookingId: string, now: number)
         eq(jobs.kind, 'booking.sms'),
         isNull(jobs.doneAt),
         sql`${jobs.payload}->>'bookingId' = ${bookingId}`,
-        inArray(sql`${jobs.payload}->>'kind'`, [...NEWS_SMS]),
-        or(isNull(jobs.lockedUntil), lt(jobs.lockedUntil, new Date(now))),
+        inArray(sql`${jobs.payload}->>'kind'`, [...NEWS_QUEUED]),
+        opts.unclaimed ? isNull(jobs.lockedUntil) : undefined,
       ),
     )
-    .for('update')
 }
 
 /**
  * The news SMS about a booking, one waiting at a time (book B-24, B-26): its words are chosen when it goes, from what
- * the client knows (`told`) and the booking as it is then (`newsSms` in the domain). A confirmation outranks a change: one asked for
- * while a change waits takes its place; anything else asked for while one waits is already covered by it.
+ * the client knows (`told`) and the booking as it is then (`newsSms`). A confirmation outranks a change: one asked for
+ * while a change waits takes its place; anything else asked for while one waits is covered by it. A job a runner has
+ * picked up may already have read the booking, so it doesn't count; a claim under way is waited for (the row lock).
  */
-async function queueNews(db: Queryable, b: BookingRow, kind: NewsQueued, runAt: number, now: number): Promise<void> {
-  const [waiting] = await waitingNews(db, b.id, now)
+async function queueNews(db: Queryable, b: BookingRow, kind: NewsQueued, runAt: number): Promise<void> {
+  const [waiting] = await newsJobs(db, b.id, { unclaimed: true }).for('update')
   if (!waiting) {
     await db
       .insert(jobs)
       .values({ kind: 'booking.sms', runAt: new Date(runAt), payload: { bookingId: b.id, kind, date: b.date, start: b.start } })
     return
   }
-  if (CONFIRMATION_SMS.has(kind) && !CONFIRMATION_SMS.has(String(waiting.payload.kind)))
+  if (isConfirmationNews(kind) && !isConfirmationNews(waiting.payload.kind as NewsQueued))
     await db
       .update(jobs)
       .set({ payload: { ...waiting.payload, kind } })
@@ -55,19 +53,14 @@ async function queueNews(db: Queryable, b: BookingRow, kind: NewsQueued, runAt: 
 
 /**
  * Queue the booking's SMS: its news (`confirmed`; `booked` for a booking the team entered; `moved` for a change the
- * business made, worded when it goes) and the reminders (a day and 2 h before, none at night: `reminderPlan`), none
- * before `notBefore` (a booking that can still be undone, B-24). No review ask (book Q-259): clients review from my
- * bookings and the link page.
+ * business made, worded when it goes) and the reminders (a day and 2 h before, none at night: `reminderPlan`). None
+ * goes before a booking the team just entered can no longer be undone (`NEW_BOOKING_SMS_AFTER_MS`, B-24), whoever
+ * queues it. No review ask (book Q-259): clients review from my bookings and the link page.
  */
-export async function queueBookingSms(
-  db: Queryable,
-  deps: Deps,
-  b: BookingRow,
-  opts: { news: NewsQueued | null; notBefore?: number },
-): Promise<void> {
+export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, opts: { news: NewsQueued | null }): Promise<void> {
   const now = deps.now()
-  const from = Math.max(now, opts.notBefore ?? now)
-  if (opts.news) await queueNews(db, b, opts.news, from, now)
+  const from = Math.max(now, isTeamSource(b.source) ? b.createdAt.getTime() + NEW_BOOKING_SMS_AFTER_MS : 0)
+  if (opts.news) await queueNews(db, b, opts.news, from)
   const due = reminderPlan(epochOf(b.date, b.start), now)
   if (!due.length) return
   await db

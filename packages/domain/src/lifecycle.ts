@@ -184,20 +184,29 @@ export const toldOf = (b: Pick<BookingState, 'date' | 'start'>, staffIds: readon
 })
 export const sameTold = (a: Told, b: Told) => a.date === b.date && a.start === b.start && a.staff === b.staff
 
-/** A booking's news as queued: a confirmation (`confirmed`; `booked`, entered by the team) or a change it made (`moved`). */
-export type NewsQueued = 'confirmed' | 'booked' | 'moved'
+/**
+ * A booking's news as queued, one waiting at a time: a confirmation (`confirmed`; `booked`, entered by the team) or a
+ * change the business made (`moved`), worded when it goes (`newsSms`).
+ */
+export const NEWS_QUEUED = ['confirmed', 'booked', 'moved'] as const
+export type NewsQueued = (typeof NEWS_QUEUED)[number]
+/** A confirmation outranks a change: one waiting tells a change made meanwhile too. */
+export const isConfirmationNews = (queued: NewsQueued) => queued !== 'moved'
 /** What a news SMS says when it goes. */
-export type NewsSms = 'confirmed' | 'booked' | 'moved' | 'movedWith' | 'staffChanged'
+export type NewsSms = 'confirmed' | 'booked' | 'bookedWith' | 'moved' | 'movedWith' | 'staffChanged'
 
 /**
- * What a booking's news SMS says when it goes (book B-24, B-26), from what the client knows (`told`) and the booking as
- * it is (`now`). A confirmation tells the booking as it is; but one the client chose online and the business changed
- * before the confirmation went is told as the change. A change says what changed since the client knew it: the time
+ * What a booking's news SMS says when it goes (book B-24, B-26), from what the client knows (`told`; null on a booking
+ * from before it was kept) and the booking as it is (`now`). A confirmation tells the booking as it is, naming who does
+ * it when that changed after the client agreed on the phone (`bookedWith`); one the client chose online and the business
+ * changed before it went is told as the change. A change says what changed since the client knew it: the time
  * (`moved`), the time and who (`movedWith`), or who (`staffChanged`); nothing when it's back as they knew it.
  */
-export function newsSms(queued: NewsQueued, chosenOnline: boolean, told: Told, now: Told): NewsSms | null {
+export function newsSms(queued: NewsQueued, chosenOnline: boolean, told: Told | null, now: Told): NewsSms | null {
+  if (!told) return queued
   const changed = !sameTold(told, now)
-  if (queued !== 'moved' && !(chosenOnline && changed)) return queued
+  if (queued === 'booked') return told.staff === now.staff ? 'booked' : 'bookedWith'
+  if (queued === 'confirmed' && !(chosenOnline && changed)) return 'confirmed'
   if (!changed) return null
   if (told.date !== now.date || told.start !== now.start) return told.staff === now.staff ? 'moved' : 'movedWith'
   return 'staffChanged'

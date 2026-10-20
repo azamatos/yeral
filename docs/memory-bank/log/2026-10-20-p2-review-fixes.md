@@ -21,7 +21,14 @@ It found 15 issues; all hold. The plan, one PR each, reviewed before merging, in
    - a team booking's first SMS goes at `NEW_BOOKING_SMS_AFTER_MS` (the 10 s undo + 5 s); a business cancel texts
      nothing while the client is unaware of a team booking (`clientUnaware`: within that time, or its confirmation still
      waiting);
-   - migration 0024 also adds a partial index on the jobs' booking id while unsent.
+   - migration 0024 also adds a partial index on the jobs' booking id while unsent;
+   - second review: 0024 and the seed fill `told` for the bookings made before (`newsSms` tells a null one as queued);
+     the 15 s wait is worked out in `queueBookingSms` from the booking (`isTeamSource`), so every caller gets it; a
+     reminder updates `told`'s time; `told` is written only if unchanged since the job read it; `bookedWith` (new text)
+     names who does it when that changed after the call; a job a runner has picked up never counts as waiting, while
+     `clientUnaware` counts any confirmation not done; a cancel names the time the client knows; a `staffChanged` job
+     from an older api is worded as news; the news kinds live in the domain (`NEWS_QUEUED`, `isConfirmationNews`); the
+     share lock is taken for news only; `Object.hasOwn` in the jobs (from PR 3).
 2. **Races and rules:** every path that makes a booking active re-checks the hours under `FOR SHARE` on the business
    row (a new booking, a taken offer, a restore, the business's move), ordered with an hours save; a listed booking
    undone during a mass cancel is skipped (`StaleBooking` per row); `cancelByBusiness` re-checks the specialist's right
