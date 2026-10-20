@@ -127,10 +127,6 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <header class="lh">
 <div class="wrap" style="display: flex; align-items: center; gap: 16px; height: 72px">
 <a class="hl0" href="B-Landing.dc.html" aria-label="Ýeral Business home" style="display: flex; align-items: center; gap: 10px; flex: none"><img class="lgo" src="../../assets/brand/yeral-lockup-ink.png" alt=""><span class="wtag">Business</span></a>
-<div style="flex: 1"></div>
-<div class="seg" role="radiogroup" aria-label="Language">
-<sc-for list="{{langs}}" as="l" hint-placeholder-count="3"><button class="{{l.cls}}" type="button" role="radio" aria-checked="{{l.on}}" lang="{{l.code}}" aria-label="{{l.name}}" onClick="{{l.pick}}">{{l.short}}</button></sc-for>
-</div>
 </div>
 </header>
 
@@ -157,11 +153,11 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div style="display: flex; flex-direction: column; gap: 12px">
 <sc-if value="{{showSend}}" hint-placeholder-val="{{true}}"><button class="b b-pri b-lg" type="submit" style="width: 100%">Send code</button></sc-if>
 <sc-if value="{{sending}}" hint-placeholder-val="{{false}}"><button class="b b-pri b-lg" type="button" aria-disabled="true" style="width: 100%"><svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>Sending…</button></sc-if>
-<sc-if value="{{phoneLimited}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too many codes. Try again in 15 minutes.</span></span></sc-if>
+<sc-if value="{{phoneLimited}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too many codes. Try again in 42 minutes.</span></span></sc-if>
 <p class="cap" style="margin: 0">By tapping “Send code”, you agree to the <a href="#">Terms of use</a> and the <a href="#">Privacy policy</a>.</p>
 </div>
 <div class="sep"></div>
-<p class="sub">No business yet? <a href="B-Onboarding.dc.html" style="font-weight: 600">Start free</a></p>
+<p class="sub">No business yet? <a href="B-Onboarding.dc.html" style="font-weight: 600">Start free</a> or <a href="B-Calendar.dc.html" style="font-weight: 600">try the business app</a></p>
 </form>
 </sc-if>
 
@@ -171,15 +167,16 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <h1 id="lg-t2" class="h1">Enter the code</h1>
 <p class="sub">{{codeLeadA}}<b class="nw">+993 {{phoneFmt}}</b>. <button class="lnk" type="button" onClick="{{editPhone}}" style="min-height: 0; vertical-align: baseline">Change number</button></p>
 </div>
-<sc-if value="{{onScreen}}" hint-placeholder-val="{{false}}"><div class="co c-neu fcl" role="status"><span>Your code: <b class="fcd">{{shownCode}}</b></span></div></sc-if>
+<sc-if value="{{showCallout}}" hint-placeholder-val="{{true}}"><div class="co c-neu fcl" role="status"><span>Your code: <b class="fcd">{{shownCode}}</b></span></div></sc-if>
 <div class="fld" style="gap: 8px">
 <span class="flab" id="lg-code-l">{{codeLabel}}</span>
 <div class="otp" role="group" aria-labelledby="lg-code-l" aria-busy="{{checking}}">
 <sc-for list="{{codeBoxes}}" as="c" hint-placeholder-count="4"><input class="{{c.cls}}" type="text" inputmode="numeric" autocomplete="{{c.ac}}" aria-label="{{c.aria}}" aria-invalid="{{c.inv}}" value="{{c.v}}" disabled="{{c.dis}}" readonly="{{c.ro}}" onChange="{{c.change}}" onKeyDown="{{c.key}}" ref="{{c.setRef}}"></sc-for>
 </div>
 <sc-if value="{{hasCodeErr}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>{{codeErrText}}</span></span></sc-if>
+<sc-if value="{{codeLimited}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too many codes. Try again in 42 minutes.</span></span></sc-if>
 <sc-if value="{{lockOver}}" hint-placeholder-val="{{false}}"><span class="hint" role="status">The old code no longer works.</span></sc-if>
-<sc-if value="{{showResent}}" hint-placeholder-val="{{false}}"><span class="hint" role="status">New code sent.</span></sc-if>
+<sc-if value="{{showResent}}" hint-placeholder-val="{{false}}"><span class="hint" role="status">{{resentText}}</span></sc-if>
 <sc-if value="{{showAutoHint}}" hint-placeholder-val="{{true}}"><span class="hint">It checks itself after the 4th digit.</span></sc-if>
 </div>
 <sc-if value="{{showConfirm}}" hint-placeholder-val="{{true}}">
@@ -189,8 +186,8 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <sc-if value="{{showResendLink}}" hint-placeholder-val="{{true}}"><button class="lnk" type="button" disabled="{{resendDis}}" onClick="{{resend}}" style="align-self: flex-start">{{resendText}}</button></sc-if>
 </div>
 </sc-if>
-<sc-if value="{{lockOverBtn}}" hint-placeholder-val="{{false}}"><button class="b b-pri b-lg" type="button" onClick="{{newCode}}" style="width: 100%">Send a new code</button></sc-if>
-<sc-if value="{{codeLimited}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert" style="margin-top: -12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too many codes. Try again in 15 minutes.</span></span></sc-if>
+<sc-if value="{{lockOverBtn}}" hint-placeholder-val="{{false}}"><button class="b b-pri b-lg" type="button" onClick="{{newCode}}" style="width: 100%">Get a new code</button></sc-if>
+
 </form>
 </sc-if>
 
@@ -229,7 +226,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="stp">
 <div class="wsr">
 <img class="lg56" src="../../assets/brand/yeral-icon.png" alt="Glow Studio logo">
-<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 17px; line-height: 24px; font-weight: 600">Glow Studio</span><span class="cap">Beauty salon · Bitarap Türkmenistan Avenue</span></span>
+<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 17px; line-height: 24px; font-weight: 600">Glow Studio</span><span class="cap">Beauty salon · Ashgabat</span></span>
 </div>
 <div class="shd">
 <span class="lbl">Invite</span>
@@ -258,7 +255,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <p class="cap" style="margin: 0">Maýsa Annaýewa will be told. To join later you’ll need a new invite.</p>
 <div class="cfa">
 <button class="b b-gho" type="button" onClick="{{cancelDecline}}">Back</button>
-<button class="b b-dan" type="button" onClick="{{doDecline}}">Yes, decline</button>
+<button class="b b-dan" type="button" onClick="{{doDecline}}">Decline invite</button>
 </div>
 </div>
 </sc-if>
@@ -298,7 +295,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 <div class="pg" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="8" aria-valuenow="3" aria-valuetext="3 of 8 steps done"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span></div>
 <ul class="dl" aria-label="Done">
 <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#066a41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Business · Beauty salon</li>
-<li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#066a41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Address · 247 Bitarap Türkmenistan Avenue</li>
+<li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#066a41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Address · 247 Bitarap Türkmenistan Avenue, Ashgabat</li>
 <li style="color: #5a5a64"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>Next: hours, services, team, booking rules</li>
 </ul>
 <a class="b b-pri b-lg" href="B-Onboarding.dc.html" style="width: 100%">Continue</a>
@@ -352,7 +349,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["phone","phoneSending","phoneIncomplete","phoneLandline","phoneLimit","code","codeChecking","codeWrong","codeLocked","codeLockOver","codeResendReady","codeResent","codeLimit","name","invite","inviteDecline","inviteExpired","setup","empty","routing"],"default":"phone","section":"Flow"},"codeOnScreen":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1160}}'>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["phone","phoneSending","phoneIncomplete","phoneLandline","phoneLimit","code","codeChecking","codeWrong","codeLocked","codeLockOver","codeResendReady","codeResent","codeLimit","name","invite","inviteDecline","inviteExpired","setup","empty","routing"],"default":"phone","section":"Flow"},"sms":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1160}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -371,15 +368,14 @@ class Component extends DCLogic {
       step: 'phone', phone: '', phoneErr: false, sending: false, sends: 0, limited: false,
       code: ['', '', '', ''], codeErr: false, wrong: 0, lock: 0, lockOver: false, checking: false,
       left: 0, resent: false, codeIdx: 0, sentTo: '',
-      first: '', last: '', nameErr: false, declineAsk: false, declined: false,
-      lang: 'en'
+      first: '', last: '', nameErr: false, declineAsk: false, declined: false
     };
     const MAYSA = '65102030';
     const code = (patch) => Object.assign(s, { step: 'code', phone: MAYSA, sentTo: MAYSA, sends: 1, left: 42 }, patch);
     if (tw === 'phoneSending') Object.assign(s, { phone: MAYSA, sending: true });
     if (tw === 'phoneIncomplete') Object.assign(s, { phone: '651020', phoneErr: 'short' });
     if (tw === 'phoneLandline') Object.assign(s, { phone: '12456789', phoneErr: 'land' });
-    if (tw === 'phoneLimit') Object.assign(s, { phone: MAYSA, sentTo: MAYSA, sends: 3, limited: true });
+    if (tw === 'phoneLimit') Object.assign(s, { phone: MAYSA, sentTo: MAYSA, sends: 5, limited: true });
     if (tw === 'code') code({});
     if (tw === 'codeChecking') code({ code: ['4', '8', '2', '1'], checking: true, left: 38 });
     if (tw === 'codeWrong') code({ code: ['4', '8', '2', '7'], codeErr: true, wrong: 1, left: 31 });
@@ -387,7 +383,7 @@ class Component extends DCLogic {
     if (tw === 'codeLockOver') code({ wrong: 3, lock: 0, lockOver: true, left: 0 });
     if (tw === 'codeResendReady') code({ code: ['4', '', '', ''], left: 0 });
     if (tw === 'codeResent') code({ sends: 2, left: 59, resent: true, codeIdx: 1 });
-    if (tw === 'codeLimit') code({ code: ['4', '8', '', ''], sends: 3, limited: true, left: 0 });
+    if (tw === 'codeLimit') code({ sends: 5, limited: true, left: 0, codeIdx: 4 });
     if (tw === 'name') Object.assign(s, { step: 'name', phone: '63774512' });
     if (tw === 'invite' || tw === 'inviteDecline' || tw === 'inviteExpired') Object.assign(s, { step: tw === 'inviteExpired' ? 'inviteExpired' : 'invite', phone: '64215590', declineAsk: tw === 'inviteDecline' });
     if (tw === 'setup') Object.assign(s, { step: 'setup', phone: '62481530' });
@@ -459,12 +455,13 @@ class Component extends DCLogic {
   renderVals() {
     const P = this.props;
     const f = P.font ?? 'Onest';
-    const onScreen = !!(P.codeOnScreen ?? false);
+    // first release: the code shows on screen (default); the SMS copy is the later variant (tweak sms)
+    const onScreen = !(P.sms ?? false);
     const s = this.state;
     const set = (patch) => this.setState(patch);
     const val = (e) => String((e && e.target && e.target.value) || '');
     const fmtPhone = (d) => [d.slice(0, 2), d.slice(2, 4), d.slice(4, 6), d.slice(6, 8)].filter(Boolean).join(' ');
-    const MAX_SENDS = 3;
+    const MAX_SENDS = 5; // 5 codes for one number in an hour
 
     // Who is behind each phone (business-demo.json → accounts, team; V06-R2 demo). Others = new person.
     const ACC = {
@@ -497,7 +494,7 @@ class Component extends DCLogic {
     };
 
     // ---------- code step ----------
-    const locked = s.lock > 0 || s.lockOver;
+    const locked = s.lock > 0 || s.lockOver || !!s.limited;
     const route = () => {
       const base = { checking: false, code: ['', '', '', ''], codeErr: false, wrong: 0, left: 0, lock: 0, lockOver: false, resent: false };
       if (acc && acc.invite) set(Object.assign(base, { step: 'invite', declineAsk: false }));
@@ -558,12 +555,12 @@ class Component extends DCLogic {
     };
     const mm = Math.floor(s.left / 60);
     const ss = s.left % 60;
-    const resendText = s.left > 0 ? 'Send a new code in ' + mm + ':' + (ss < 10 ? '0' : '') + ss : 'Send a new code';
+    const resendText = s.left > 0 ? 'Get a new code in ' + mm + ':' + (ss < 10 ? '0' : '') + ss : 'Get a new code';
     const left3 = 3 - s.wrong;
     const codeErrText = s.lock > 0
       ? 'Too many tries. Try again in ' + s.lock + (s.lock === 1 ? ' second.' : ' seconds.')
       : 'Wrong code. ' + left3 + (left3 === 1 ? ' try' : ' tries') + ' left.';
-    const CODES = ['4821', '7305', '1946', '5582'];
+    const CODES = ['4821', '7305', '1946', '5582', '3067'];
 
     // ---------- name ----------
     const firstT = s.first.trim();
@@ -584,11 +581,8 @@ class Component extends DCLogic {
       ? 'You have ' + rAcc.count + ' workspaces. We open the one you used last; pick the other at the top of the left menu.'
       : 'We open the workspace you used last.';
 
-    const LANGS = [['en', 'EN', 'English'], ['tk', 'TK', 'Türkmençe'], ['ru', 'RU', 'Русский']];
-
     return {
       fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
-      langs: LANGS.map((l) => ({ code: l[0], short: l[1], name: l[2], on: s.lang === l[0], cls: s.lang === l[0] ? 'sgb on' : 'sgb', pick: () => set({ lang: l[0] }) })),
       isPhone: s.step === 'phone',
       isCode: s.step === 'code',
       isName: s.step === 'name',
@@ -621,13 +615,15 @@ class Component extends DCLogic {
       codeBoxes: codeBoxes,
       checking: !!s.checking,
       notChecking: !s.checking,
-      hasCodeErr: !!s.codeErr || s.lock > 0,
+      hasCodeErr: (!!s.codeErr || s.lock > 0) && !s.limited,
       codeErrText: codeErrText,
       lockOver: !!s.lockOver,
       lockOverBtn: !!s.lockOver && !s.limited,
       showResent: !!s.resent && !s.codeErr && !locked,
       showAutoHint: !locked && !s.checking && !s.codeErr,
       showConfirm: !locked,
+      showCallout: onScreen && !locked,
+      resentText: onScreen ? 'Here’s a new code.' : 'New code sent.',
       showResendLink: !s.limited,
       codeLimited: !!s.limited,
       resendDis: s.left > 0 || !!s.checking,
@@ -658,9 +654,9 @@ class Component extends DCLogic {
       // setup / empty / expired
       declined: !!s.declined,
       whoLine: whoLine,
-      otherPhone: () => { clearTimeout(this.tt); set(Object.assign(this.init('phone'), { sends: s.sends, sentTo: s.sentTo, limited: s.limited, lang: s.lang })); },
+      otherPhone: () => { clearTimeout(this.tt); set(Object.assign(this.init('phone'), { sends: s.sends, sentTo: s.sentTo, limited: s.limited })); },
       // routing
-      rtSub: rAcc.role + ' · Bitarap Türkmenistan Avenue',
+      rtSub: rAcc.role + ' · Ashgabat',
       rtNote: rtNote
     };
   }

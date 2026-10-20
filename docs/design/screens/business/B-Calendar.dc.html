@@ -107,8 +107,9 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 .bnw{padding:16px 32px 0}
 .bnr{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:12px;border:1px solid transparent;font-size:14px;line-height:20px}
 .bnr > svg{flex:none}
-.bnt{flex:1;min-width:0}
-.bnt b{font-weight:600}
+.bnx{flex:1;min-width:0}
+.bnx b{font-weight:600}
+@media (max-width:767px){.bnr{flex-wrap:wrap}.bnx{flex:1 1 calc(100% - 40px)}}
 .c-war{background:#fef6e7;border-color:#f2ddb0;color:#93500a}
 .c-dan{background:#fee4e2;border-color:#f6c7c2;color:#a3251b}
 .c-neu{background:#f4f4f6;border-color:#e6e6ea;color:#101014}
@@ -124,10 +125,22 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 .rmw{position:relative}
 .rmp{position:absolute;left:0;bottom:52px;z-index:31;width:260px;display:flex;flex-direction:column}
 .rmr{left:auto;right:0}
+.swd{display:flex;align-items:center;gap:10px;padding:8px;color:#101014}
+.dlog{width:100%}
+.ghname{flex-wrap:wrap;row-gap:2px}
+.rpr{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}
+.drw-f .b-dtx{margin-left:auto}
+@media (max-width:1023px){.swd{justify-content:center;padding:4px}.swd > span{display:none !important}.dlog{width:44px;padding:0;font-size:0;gap:0}}
+div.woin{min-width:min-content}
+div.gin{min-width:min-content}
+.wohd .woh .ghm{white-space:normal}
+.wks .ghm{white-space:normal}
+.gh .ghname{white-space:normal}
+.gh .ghm{white-space:normal}
 .rmi{align-items:flex-start}
 .rmt{display:flex;flex-direction:column;min-width:0}
 .rmn{font-size:14px;line-height:20px;font-weight:600}
-.rpb{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;border:1px solid #f6c7c2;background:#fff8f7}
+.rpb{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;border:1px solid #f6c7c2;background:#ffffff}
 .rpt{display:flex;flex-direction:column;gap:2px}
 .rpl{font-size:14px;line-height:20px;font-weight:600;color:#101014}
 .rpa{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -205,7 +218,6 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 .tagna{font-size:11px;line-height:16px;font-weight:600;color:#5a5a64;background:#f0f0f3;border-radius:999px;padding:1px 7px}
 .ghm{font-size:13px;line-height:18px;color:#5a5a64;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ghm .rq{color:#93500a;font-weight:600}
-.ghq{font-size:13px;line-height:18px}
 .ghx{font-size:13px;line-height:18px;color:#5a5a64;white-space:nowrap;font-variant-numeric:tabular-nums}
 .gbody{position:relative;display:flex}
 .gtimes{position:relative;height:1040px}
@@ -225,7 +237,8 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 .gcol .qs.be:hover{background:transparent}
 .gcol .qs.be:hover::after,.mv .qs.be:hover::after{content:none}
 .brk{position:absolute;left:4px;right:4px;z-index:3;display:flex;align-items:flex-start;gap:6px;border-radius:6px;background:#f0f0f3;padding:4px 8px;font-size:12px;line-height:16px;font-weight:600;color:#5a5a64;overflow:hidden;white-space:nowrap}
-.brk svg,.bel{position:absolute;left:4px;right:4px;z-index:4;display:flex;align-items:flex-start;padding:5px 8px;border-radius:8px;background:#f6f6f8;border:1px solid #e6e6ea;font-size:12px;line-height:16px;font-weight:500;color:#5a5a64;pointer-events:none;overflow:hidden;white-space:nowrap}
+.brk svg{flex:none;margin-top:1px}
+.bel{position:absolute;left:4px;right:4px;z-index:4;display:flex;align-items:flex-start;padding:5px 8px;border-radius:8px;background:#f6f6f8;border:1px solid #e6e6ea;font-size:12px;line-height:16px;font-weight:500;color:#5a5a64;pointer-events:none;overflow:hidden;white-space:nowrap}
 .bel.half{left:calc(50% + 2px)}
 .buf{position:absolute;left:4px;right:4px;z-index:3;border-radius:0 0 6px 6px;background:repeating-linear-gradient(135deg,#f0f0f3 0 4px,#ffffff 4px 8px)}
 .bk{position:absolute;left:4px;right:4px;z-index:4;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:1px;margin:0;padding:4px 8px;border-radius:8px;border:1px solid transparent;font-family:inherit;text-align:left;color:#101014;cursor:pointer;overflow:hidden}
@@ -408,7 +421,8 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="root" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
 
 <aside class="side" aria-label="Main menu" style="position: sticky; top: 0; height: 100vh; overflow-y: auto">
-<button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="cap" style="font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0">{{me.role}}</span><sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span></sc-if></span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><button class="swb" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Glow Studio</span><span style="display: flex; align-items: center; gap: 6px; min-width: 0"><span class="cap" style="font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0">{{me.role}}</span></span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6e6e78" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><div class="swd"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 36px; height: 36px; border-radius: 10px; flex: none; object-fit: cover"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; overflow-wrap: anywhere">Glow Studio</span><span style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; min-width: 0"><span class="y-pill s t-neu y-exb"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>Example</span><span class="cap" style="font-size: 12px; line-height: 16px">Ashgabat</span></span></span></div></sc-if>
 <div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
 <a class="sn on" href="B-Calendar.dc.html" aria-current="page"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>Calendar</a>
 <a class="sn" href="B-Bookings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>Bookings<sc-if value="{{hasPend}}" hint-placeholder-val="{{true}}"><span class="cnt" aria-label="{{pendAria}}">{{pendCount}}</span></sc-if></a>
@@ -417,26 +431,26 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <sc-if value="{{showSettings}}" hint-placeholder-val="{{true}}"><a class="sn" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a></sc-if>
 <div class="sfill" style="flex: 1"></div>
 <div class="sdv" style="height: 1px; background: #e6e6ea; margin: 8px 4px"></div>
-<div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px">
 <span class="av">{{me.ini}}</span>
 <span class="mex" style="display: flex; flex-direction: column; min-width: 0; flex: 1"><span style="font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums">{{me.phone}}</span></span>
 <button class="b b-gho b-ic" aria-label="Account menu" aria-haspopup="menu" aria-expanded="{{userOpen}}" onClick="{{toggleUser}}" style="width: 36px; height: 36px; padding: 0; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
-</div>
+</div></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><a class="b b-sec dlog" href="B-Login.dc.html" aria-label="Log in"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>Log in</a></sc-if>
 </aside>
 
 <div class="main">
 <div class="top">
-<button class="mws" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><button class="mws" aria-haspopup="menu" aria-expanded="{{wsOpen}}" aria-label="{{wsAria}}" onClick="{{toggleWs}}"><img src="../../assets/brand/yeral-icon.png" alt="" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></sc-if><sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><span class="mws"><img src="../../assets/brand/yeral-icon.png" alt="Glow Studio, example" style="width: 32px; height: 32px; border-radius: 8px; flex: none; object-fit: cover"></span></sc-if>
 <h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -0.015em">Calendar</h1>
 <div style="flex: 1"></div>
-<label class="gs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input aria-label="Search" placeholder="Client, phone or booking code" style="border: 0; outline: none; font-family: inherit; font-size: 14px; color: #101014; background: transparent; flex: 1; min-width: 0"><span class="kbd">⌘K</span></label>
 <button class="b b-pri b-sm" onClick="{{openNewBlank}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>New booking</button>
 </div>
 
 <sc-if value="{{bnOn}}" hint-placeholder-val="{{false}}"><div class="bnw">
-<sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnt"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
-<sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnt"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
-<sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnt"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
+<sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnx"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
+<sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
+<sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnx"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
 </div></sc-if>
 
 <div class="calh">
@@ -466,7 +480,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <sc-for list="{{modeSegs}}" as="md" hint-placeholder-count="2"><button class="{{md.cls}}" aria-pressed="{{md.on}}" onClick="{{md.pick}}">{{md.t}}</button></sc-for>
 </div></sc-if>
 <div class="{{selCls}}">
-<select class="selc" aria-label="Specialist" value="{{staffId}}" onChange="{{pickStaff}}"><option value="ayna">Aýna</option><option value="maral">Maral</option><option value="jeren">Jeren</option><option value="leyli">Leýli</option></select>
+<select class="selc" aria-label="Specialist" value="{{staffId}}" onChange="{{pickStaff}}"><option value="ayna">Aýna</option><option value="maral">Maral</option><option value="jeren">Jeren</option><option value="leyli">Leýli</option><option value="gulnar">Gülnar</option></select>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
 </div>
 <div style="flex: 1"></div>
@@ -484,7 +498,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="lgr"><span class="badge sm st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Confirmed</span><span>Time set, the client was told</span></div>
 <div class="lgr"><span class="badge sm st-d"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg>Completed</span><span>The visit happened (set by itself after the end time)</span></div>
 <div class="lgr"><span class="badge sm st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Cancelled</span><span>The client, the business or the system cancelled</span></div>
-<div class="lgr"><span class="badge sm st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>No-show</span><span>The client didn’t come — marked with Report</span></div>
+<div class="lgr"><span class="badge sm st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>No-show</span><span>The client didn’t come — marked with Report from the visit’s start</span></div>
 </div>
 <div class="lgs"><span class="lbl">Source</span>
 <div class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>Online — the client booked on Ýeral</span></div>
@@ -500,7 +514,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="lgi"><span class="lsq lsq-e"></span><span>Busy elsewhere — the time is taken in another workspace; no details are shown</span></div>
 <div class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>Alert note about the client</span></div>
 <div class="lgi"><span class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>18 min</span><span>Time left to answer — counts only while you’re open</span></div>
-<div class="lgi"><span class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>by 09:30</span><span>Arrived while you were closed — answer by this time</span></div>
+<div class="lgi"><span class="pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>By 09:30</span><span>Arrived while you were closed — answer by this time</span></div>
 </div>
 <sc-if value="{{internalOn}}" hint-placeholder-val="{{false}}">
 <div class="lgs"><span class="lbl">Internal statuses</span>
@@ -531,10 +545,10 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="ggut"></div>
 <sc-for list="{{cols}}" as="c" hint-placeholder-count="4">
 <sc-if value="{{c.click}}" hint-placeholder-val="{{true}}">
-<button class="{{c.headCls}}" aria-label="{{c.headAria}}" onClick="{{c.focus}}"><span class="av">{{c.ini}}</span><span class="ghn"><span class="ghname">{{c.name}}<sc-if value="{{c.noApp}}" hint-placeholder-val="{{false}}"><span class="tagna">no app</span></sc-if><sc-if value="{{c.hasReq}}" hint-placeholder-val="{{false}}"><span class="rq ghq">{{c.req}}</span></sc-if></span><span class="ghm">{{c.spec}} · {{c.cnt}}</span></span></button>
+<button class="{{c.headCls}}" aria-label="{{c.headAria}}" onClick="{{c.focus}}"><span class="av">{{c.ini}}</span><span class="ghn"><span class="ghname">{{c.name}}<sc-if value="{{c.noApp}}" hint-placeholder-val="{{false}}"><span class="tagna">Doesn’t use the app</span></sc-if></span><span class="ghm">{{c.meta}}<sc-if value="{{c.hasReq}}" hint-placeholder-val="{{false}}"><span class="rq"> · {{c.req}}</span></sc-if></span></span></button>
 </sc-if>
 <sc-if value="{{c.wide}}" hint-placeholder-val="{{false}}">
-<div class="gh wide"><span class="av">{{c.ini}}</span><span class="ghn"><span class="ghname">{{c.name}}<sc-if value="{{c.noApp}}" hint-placeholder-val="{{false}}"><span class="tagna">no app</span></sc-if><sc-if value="{{c.hasReq}}" hint-placeholder-val="{{false}}"><span class="rq ghq">{{c.req}}</span></sc-if></span><span class="ghm">{{c.spec}} · {{c.cnt}}</span></span><span class="ghx">{{c.hoursLabel}}</span></div>
+<div class="gh wide"><span class="av">{{c.ini}}</span><span class="ghn"><span class="ghname">{{c.name}}<sc-if value="{{c.noApp}}" hint-placeholder-val="{{false}}"><span class="tagna">Doesn’t use the app</span></sc-if></span><span class="ghm">{{c.meta}}<sc-if value="{{c.hasReq}}" hint-placeholder-val="{{false}}"><span class="rq"> · {{c.req}}</span></sc-if></span></span><span class="ghx">{{c.hoursLabel}}</span></div>
 </sc-if>
 </sc-for>
 </div>
@@ -553,7 +567,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <sc-for list="{{c.bufs}}" as="u" hint-placeholder-count="4"><div class="buf" style="top: {{u.top}}px; height: {{u.h}}px" title="{{u.title}}"></div></sc-for>
 <sc-for list="{{c.blocks}}" as="k" hint-placeholder-count="5">
 <button class="{{k.cls}}" style="top: {{k.top}}px; height: {{k.h}}px; padding-right: {{k.pr}}px" aria-label="{{k.aria}}" onClick="{{k.open}}" onMouseEnter="{{k.hov}}" onMouseLeave="{{k.unhov}}" draggable="{{k.drag}}" onDragStart="{{k.dragStart}}">
-<span class="bl l1"><sc-if value="{{k.iP}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{k.iC}}" hint-placeholder-val="{{true}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{k.iD}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{k.iX}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{k.iN}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if><span class="bt">{{k.t1}}</span><span class="{{k.nameCls}}">{{k.client}}</span><sc-if value="{{k.wide}}" hint-placeholder-val="{{false}}"><span class="bm">{{k.phoneNo}}</span></sc-if><sc-if value="{{k.wc}}" hint-placeholder-val="{{false}}"><span class="bs">· {{k.svc}} · {{k.priceL}}</span></sc-if></span>
+<span class="bl l1"><sc-if value="{{k.iP}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if><sc-if value="{{k.iC}}" hint-placeholder-val="{{true}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if><sc-if value="{{k.iD}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg></sc-if><sc-if value="{{k.iX}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if><sc-if value="{{k.iN}}" hint-placeholder-val="{{false}}"><svg class="sti" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg></sc-if><span class="bt">{{k.t1}}</span><span class="{{k.nameCls}}">{{k.client}}</span><sc-if value="{{k.wide}}" hint-placeholder-val="{{false}}"><span class="bm">{{k.phoneNo}}</span></sc-if><sc-if value="{{k.wc}}" hint-placeholder-val="{{false}}"><span class="bs">· {{k.svc}}{{k.priceL}}</span></sc-if></span>
 <sc-if value="{{k.l2}}" hint-placeholder-val="{{true}}"><span class="bs">{{k.line2}}</span></sc-if>
 <sc-if value="{{k.l3}}" hint-placeholder-val="{{false}}"><span class="bm">{{k.line3}}</span></sc-if>
 <sc-if value="{{k.showNote}}" hint-placeholder-val="{{false}}"><span class="{{k.noteCls}}"><sc-if value="{{k.nAlert}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93500a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></sc-if><sc-if value="{{k.nOther}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></sc-if>{{k.note}}</span></sc-if>
@@ -591,7 +605,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="wkh wkh0"><span class="lbl">Specialist</span></div>
 <sc-for list="{{wkDays}}" as="wd" hint-placeholder-count="7"><div class="{{wd.cls}}"><span class="wkd">{{wd.label}}</span><span class="cap" style="font-variant-numeric: tabular-nums">{{wd.total}}</span></div></sc-for>
 <sc-for list="{{wkRows}}" as="wr" hint-placeholder-count="4">
-<div class="wks"><span class="av">{{wr.ini}}</span><span class="ghn"><span class="ghname">{{wr.name}}<sc-if value="{{wr.noApp}}" hint-placeholder-val="{{false}}"><span class="tagna">no app</span></sc-if></span><span class="ghm">{{wr.spec}}</span></span></div>
+<div class="wks"><span class="av">{{wr.ini}}</span><span class="ghn"><span class="ghname">{{wr.name}}<sc-if value="{{wr.noApp}}" hint-placeholder-val="{{false}}"><span class="tagna">Doesn’t use the app</span></sc-if></span><span class="ghm">{{wr.spec}}</span></span></div>
 <sc-for list="{{wr.cells}}" as="x" hint-placeholder-count="7">
 <button class="{{x.cls}}" aria-label="{{x.aria}}" onClick="{{x.pick}}">
 <sc-if value="{{x.work}}" hint-placeholder-val="{{true}}"><span class="lbar"><span class="lfill" style="width: {{x.pct}}%"></span></span><span class="wkn"><span>{{x.cnt}}</span><span class="wkp">{{x.pctLabel}}</span></span><sc-if value="{{x.hasReq}}" hint-placeholder-val="{{false}}"><span class="wkr"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{x.req}}</span></sc-if></sc-if>
@@ -685,7 +699,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <a class="lnk" href="B-Client.dc.html">Open the client’s card<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
 </div>
 <dl class="dl"><sc-for list="{{bv.details}}" as="dr" hint-placeholder-count="5"><div class="{{dr.cls}}"><dt>{{dr.k}}</dt><dd>{{dr.v}}</dd></div></sc-for></dl>
-<sc-if value="{{bv.hasReport}}" hint-placeholder-val="{{false}}"><div class="rpb"><div class="rpt"><span class="lbl" style="color: #a3251b">Report</span><span class="rpl">{{bv.reportLine}}</span></div><div class="rpa"><button class="b b-sec b-sm" onClick="{{removeReport}}">Remove report</button><span class="cap">The client isn’t told. You can remove it until {{bv.reportUntil}}.</span></div></div></sc-if>
+<sc-if value="{{bv.hasReport}}" hint-placeholder-val="{{false}}"><div class="rpb"><span class="lbl" style="color: #a3251b">{{bv.reportHead}}</span><sc-for list="{{bv.reports}}" as="rr" hint-placeholder-count="1"><div class="rpr"><span class="rpl">{{rr.line}}</span><button class="b b-sec b-sm" aria-label="{{rr.aria}}" onClick="{{rr.remove}}">Remove report</button></div></sc-for><span class="cap">{{bv.reportCap}}</span></div></sc-if>
 <sc-if value="{{bv.hasCNote}}" hint-placeholder-val="{{false}}"><figure class="qbox"><figcaption class="lbl">Client note</figcaption><blockquote class="qtxt">“{{bv.cnote}}”</blockquote></figure></sc-if>
 <div class="fld"><label class="flab" for="bv-note">Internal note</label><textarea id="bv-note" class="inp ta" value="{{bv.note}}" onInput="{{onNote}}" placeholder="For example: a colour code or a special request" aria-describedby="bv-note-c"></textarea><span id="bv-note-c" class="cap">{{bv.noteCap}}</span></div>
 <div class="dsec">
@@ -698,8 +712,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="drw-f">
 <sc-if value="{{bv.canMove}}" hint-placeholder-val="{{true}}"><button class="b b-sec" onClick="{{startMove}}">Move to another time</button></sc-if>
 <sc-if value="{{bv.canComplain}}" hint-placeholder-val="{{true}}"><div class="rmw"><button class="b b-gho" aria-haspopup="menu" aria-expanded="{{bv.rOpen}}" onClick="{{toggleRmenu}}">Report<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button><sc-if value="{{bv.rOpen}}" hint-placeholder-val="{{false}}"><div class="catcher" onClick="{{closeRmenu}}"></div><div class="{{bv.rmpCls}}" role="menu" aria-label="Report" onKeyDown="{{rmKey}}"><sc-for list="{{bv.rItems}}" as="ri" hint-placeholder-count="3"><button class="mi rmi" role="menuitem" onClick="{{ri.pick}}"><span class="rmt"><span class="rmn">{{ri.t}}</span><span class="cap">{{ri.d}}</span></span></button></sc-for></div></sc-if></div></sc-if>
-<div style="flex: 1"></div>
-<sc-if value="{{bv.canCancel}}" hint-placeholder-val="{{true}}"><button class="b b-dtx" onClick="{{openCancel}}">Cancel</button></sc-if>
+<sc-if value="{{bv.canCancel}}" hint-placeholder-val="{{true}}"><button class="b b-dtx" onClick="{{openCancel}}">Cancel booking</button></sc-if>
 </div>
 </sc-if>
 </sc-if>
@@ -793,9 +806,8 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <span class="grab"></span>
 <div class="mhd"><h2 id="cp-t" class="mt">What happened?</h2><button class="b b-gho b-i36" aria-label="Close" onClick="{{closeModal}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
 <span class="cap" style="margin-top: -8px">{{cv.ctx}}</span>
-<div role="radiogroup" aria-labelledby="cp-t" style="display: flex; flex-direction: column; gap: 8px"><sc-for list="{{cv.reasons}}" as="cz" hint-placeholder-count="4"><label class="{{cz.cls}}"><input type="radio" name="cmp" checked="{{cz.on}}" onChange="{{cz.pick}}"><span style="display: flex; flex-direction: column; gap: 2px"><span class="rlt">{{cz.t}}</span><span class="cap">{{cz.d}}</span></span></label></sc-for></div>
-<sc-if value="{{cv.other}}" hint-placeholder-val="{{false}}"><textarea class="inp ta" aria-label="What happened, in a few words" value="{{cv.text}}" onInput="{{cv.onText}}" placeholder="Write a few words"></textarea></sc-if>
-<p class="cap" style="margin: 0">Saved to the client’s card; only the team sees it. After 2 no-shows the client can only book by phone.</p>
+<textarea class="inp ta" aria-label="What happened, in a few words" value="{{cv.text}}" onInput="{{cv.onText}}" placeholder="Write a few words"></textarea>
+<p class="cap" style="margin: 0">Saved to the client’s card; only the team sees it. Only no-shows count towards Phone only.</p>
 <div class="mact"><button class="b b-sec" onClick="{{closeModal}}">Back</button><button class="b b-pri" disabled="{{cv.dis}}" onClick="{{cv.go}}">Save</button></div>
 </div>
 </div>
@@ -807,7 +819,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="mdl mdl-b" role="dialog" aria-modal="true" aria-labelledby="bt-t">
 <span class="grab"></span>
 <div class="mhd"><h2 id="bt-t" class="mt">Block time</h2><button class="b b-gho b-i36" aria-label="Close" onClick="{{closeModal}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
-<div class="fld"><label class="flab" for="bt-p">Person</label><sc-if value="{{bk.pickPerson}}" hint-placeholder-val="{{true}}"><select id="bt-p" class="inp" value="{{bk.staff}}" onChange="{{bk.onStaff}}"><option value="ayna">Aýna</option><option value="maral">Maral</option><option value="jeren">Jeren</option><option value="leyli">Leýli</option></select></sc-if><sc-if value="{{bk.fixedPerson}}" hint-placeholder-val="{{false}}"><div class="ro">{{bk.personName}}</div></sc-if></div>
+<div class="fld"><label class="flab" for="bt-p">Person</label><sc-if value="{{bk.pickPerson}}" hint-placeholder-val="{{true}}"><select id="bt-p" class="inp" value="{{bk.staff}}" onChange="{{bk.onStaff}}"><option value="ayna">Aýna</option><option value="maral">Maral</option><option value="jeren">Jeren</option><option value="leyli">Leýli</option><option value="gulnar">Gülnar</option></select></sc-if><sc-if value="{{bk.fixedPerson}}" hint-placeholder-val="{{false}}"><div class="ro">{{bk.personName}}</div></sc-if></div>
 <div class="fld"><span class="flab" id="bt-w">Date and time</span><div class="btw" role="group" aria-labelledby="bt-w"><input type="date" class="inp" aria-label="Date" value="{{bk.date}}" min="{{bk.minDate}}" onInput="{{bk.onDate}}"><div class="btt"><select class="inp" aria-label="From" value="{{bk.from}}" onChange="{{bk.onFrom}}"><option value="480">08:00</option><option value="495">08:15</option><option value="510">08:30</option><option value="525">08:45</option><option value="540">09:00</option><option value="555">09:15</option><option value="570">09:30</option><option value="585">09:45</option><option value="600">10:00</option><option value="615">10:15</option><option value="630">10:30</option><option value="645">10:45</option><option value="660">11:00</option><option value="675">11:15</option><option value="690">11:30</option><option value="705">11:45</option><option value="720">12:00</option><option value="735">12:15</option><option value="750">12:30</option><option value="765">12:45</option><option value="780">13:00</option><option value="795">13:15</option><option value="810">13:30</option><option value="825">13:45</option><option value="840">14:00</option><option value="855">14:15</option><option value="870">14:30</option><option value="885">14:45</option><option value="900">15:00</option><option value="915">15:15</option><option value="930">15:30</option><option value="945">15:45</option><option value="960">16:00</option><option value="975">16:15</option><option value="990">16:30</option><option value="1005">16:45</option><option value="1020">17:00</option><option value="1035">17:15</option><option value="1050">17:30</option><option value="1065">17:45</option><option value="1080">18:00</option><option value="1095">18:15</option><option value="1110">18:30</option><option value="1125">18:45</option><option value="1140">19:00</option><option value="1155">19:15</option><option value="1170">19:30</option><option value="1185">19:45</option><option value="1200">20:00</option><option value="1215">20:15</option><option value="1230">20:30</option><option value="1245">20:45</option></select><span aria-hidden="true">–</span><select class="inp" aria-label="To" value="{{bk.to}}" onChange="{{bk.onTo}}"><option value="495">08:15</option><option value="510">08:30</option><option value="525">08:45</option><option value="540">09:00</option><option value="555">09:15</option><option value="570">09:30</option><option value="585">09:45</option><option value="600">10:00</option><option value="615">10:15</option><option value="630">10:30</option><option value="645">10:45</option><option value="660">11:00</option><option value="675">11:15</option><option value="690">11:30</option><option value="705">11:45</option><option value="720">12:00</option><option value="735">12:15</option><option value="750">12:30</option><option value="765">12:45</option><option value="780">13:00</option><option value="795">13:15</option><option value="810">13:30</option><option value="825">13:45</option><option value="840">14:00</option><option value="855">14:15</option><option value="870">14:30</option><option value="885">14:45</option><option value="900">15:00</option><option value="915">15:15</option><option value="930">15:30</option><option value="945">15:45</option><option value="960">16:00</option><option value="975">16:15</option><option value="990">16:30</option><option value="1005">16:45</option><option value="1020">17:00</option><option value="1035">17:15</option><option value="1050">17:30</option><option value="1065">17:45</option><option value="1080">18:00</option><option value="1095">18:15</option><option value="1110">18:30</option><option value="1125">18:45</option><option value="1140">19:00</option><option value="1155">19:15</option><option value="1170">19:30</option><option value="1185">19:45</option><option value="1200">20:00</option><option value="1215">20:15</option><option value="1230">20:30</option><option value="1245">20:45</option><option value="1260">21:00</option></select></div></div><sc-if value="{{bk.hasErr}}" hint-placeholder-val="{{false}}"><span class="ferr" role="alert"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>{{bk.errText}}<sc-if value="{{bk.hasHit}}" hint-placeholder-val="{{true}}"> <button class="lnkb" style="font-size: 13px" onClick="{{bk.openHit}}">Open the booking</button></sc-if></span></span></sc-if></div>
 <div class="fld"><span class="flab" id="bt-r">Reason</span><div role="radiogroup" aria-labelledby="bt-r" style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{bk.reasons}}" as="rc" hint-placeholder-count="4"><button class="{{rc.cls}}" role="radio" aria-checked="{{rc.on}}" onClick="{{rc.pick}}">{{rc.t}}</button></sc-for></div><sc-if value="{{bk.isOther}}" hint-placeholder-val="{{false}}"><input class="inp" aria-label="Reason in a few words" value="{{bk.text}}" onInput="{{bk.onText}}" placeholder="For example: Doctor’s appointment"></sc-if></div>
 <div class="fld"><span class="flab" id="bt-rp">Repeat</span><div class="seg" role="group" aria-labelledby="bt-rp" style="align-self: flex-start"><sc-for list="{{bk.repeats}}" as="rp" hint-placeholder-count="3"><button class="{{rp.cls}}" aria-pressed="{{rp.on}}" onClick="{{rp.pick}}">{{rp.t}}</button></sc-for></div><sc-if value="{{bk.isRepeat}}" hint-placeholder-val="{{false}}"><div class="fld" style="padding-top: 6px"><label class="flab" for="bt-u" style="font-weight: 500">Until</label><input id="bt-u" type="date" class="inp" value="{{bk.until}}" min="{{bk.minUntil}}" onInput="{{bk.onUntil}}"><span class="cap">{{bk.repeatCap}}</span></div></sc-if></div>
@@ -846,7 +858,6 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="catcher" onClick="{{closeMenus}}"></div>
 <div class="pop ump" role="menu" aria-label="Account menu" onKeyDown="{{menuKey}}">
 <a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>My profile</a>
-<a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Language<span class="cap" style="margin-left: auto">English</span></a>
 <a class="mi" role="menuitem" href="Venue.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Your Ýeral page</a>
 <a class="mi" role="menuitem" href="Home.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Open as a client<span class="cap" style="margin-left: auto">yeral.app</span></a>
 <button class="mi" role="menuitem" aria-haspopup="menu" onClick="{{openContact}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg>Contact Ýeral<span style="margin-left: auto; display: inline-flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></span></button>
@@ -876,13 +887,13 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <a class="mi" href="B-Reviews.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Reviews<sc-if value="{{showRevBadge}}" hint-placeholder-val="{{true}}"><span class="cnt cnt-n" aria-label="4 unanswered reviews">4</span></sc-if></a>
 <sc-if value="{{showSettings}}" hint-placeholder-val="{{true}}"><a class="mi" href="B-Settings.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a></sc-if>
 <div class="mdv"></div>
-<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">{{me.ini}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 14px; line-height: 20px; font-weight: 600">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px">{{me.phone}} · {{me.role}}</span></span></div>
+<sc-if value="{{notDemo}}" hint-placeholder-val="{{true}}"><div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px"><span class="av">{{me.ini}}</span><span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 14px; line-height: 20px; font-weight: 600">{{me.name}}</span><span class="cap" style="font-size: 12px; line-height: 16px">{{me.phone}} · {{me.role}}</span></span></div>
 <a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>My profile</a>
-<a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>Language<span class="cap" style="margin-left: auto">English</span></a>
 <a class="mi" href="Venue.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Your Ýeral page</a>
 <a class="mi" href="Home.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Open as a client<span class="cap" style="margin-left: auto">yeral.app</span></a>
 <a class="mi" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg><span class="wsn"><span class="wst">Contact Ýeral</span><span class="wsc">[SUPPORT PHONE] · Telegram</span></span></a>
-<a class="mi mi-d" href="B-Login.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Log out</a>
+<a class="mi mi-d" href="B-Login.dc.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>Log out</a></sc-if>
+<sc-if value="{{isDemo}}" hint-placeholder-val="{{false}}"><a class="mi" href="B-Login.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg>Log in</a></sc-if>
 </div>
 </sc-if>
 
@@ -898,7 +909,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["dayAll","dayOne","weekAll","weekOne"],"default":"dayAll","section":"State"},"panel":{"editor":"enum","options":["none","request","move-request","booking","new","slot-menu","block-time","block-error","decline","report-menu","report-noshow","reported","complaint","move"],"default":"none","section":"State"},"legend":{"editor":"boolean","default":false,"section":"State"},"internal":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"answers":{"editor":"enum","options":["both","each","desk"],"default":"both","section":"Access"},"clock":{"editor":"enum","options":["day","evening"],"default":"day","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1360}}'>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["dayAll","dayOne","weekAll","weekOne"],"default":"dayAll","section":"State"},"panel":{"editor":"enum","options":["none","request","move-request","booking","new","slot-menu","block-time","block-error","decline","report-menu","report-noshow","report-added","reported","complaint","move"],"default":"none","section":"State"},"legend":{"editor":"boolean","default":false,"section":"State"},"internal":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"answers":{"editor":"enum","options":["both","each","desk"],"default":"both","section":"Access"},"clock":{"editor":"enum","options":["day","evening"],"default":"day","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1360}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -912,28 +923,33 @@ class Component extends DCLogic {
   }
   fromTweaks(p) {
     const pn = p.panel ?? 'none';
+    const pr = p.banner === 'demo' ? 'owner' : p.role;
     let v = p.view ?? 'dayAll';
     if (['dayAll', 'dayOne', 'weekAll', 'weekOne'].indexOf(v) < 0) v = 'dayAll';
     const st = { sm: null, bf: null, rmenu: false, view: v, staffId: 'ayna', dayOff: 0, panel: 'none', target: null, modal: null, moveId: null, moveTo: null, moveSms: true, dReason: null, dText: '', dAlt: false, dSlots: [], cReason: null, cText: '', xReason: null, nw: this.blankNew(), datePop: false, toast: null, hiId: null, menu: p.legend ? 'legend' : null, istat: p.internal ? { b08: 'arrived' } : {} };
     if (pn === 'request' || pn === 'decline') { st.panel = 'request'; st.target = 'b04'; }
-    if (pn === 'move-request' && p.role !== 'specialist') { st.panel = 'request'; st.target = 'b20'; st.dayOff = 3; st.staffId = 'maral'; }
+    if (pn === 'move-request' && pr !== 'specialist') { st.panel = 'request'; st.target = 'b20'; st.dayOff = 3; st.staffId = 'maral'; }
     if (pn === 'decline') st.modal = 'decline';
     if (pn === 'booking' || pn === 'complaint' || pn === 'report-menu') { st.panel = 'booking'; st.target = 'b03'; }
-    if (pn === 'report-menu' || pn === 'report-noshow') st.rmenu = true;
-    if (pn === 'report-noshow') { st.panel = 'booking'; st.target = 'b08'; }
-    if (pn === 'reported') { st.panel = 'booking'; st.target = 'b12'; }
     if (pn === 'slot-menu') st.sm = { staff: 'ayna', off: 0, t: 885 };
-    if (pn === 'block-time') { st.modal = 'block'; st.bf = p.role === 'specialist' ? { staff: 'ayna', off: 0, from: 885, to: 930, reason: 'Training', text: '', repeat: 'week', until: 47 } : { staff: 'maral', off: 0, from: 870, to: 930, reason: 'Training', text: '', repeat: 'week', until: 47 }; }
+    if (pn === 'block-time') { st.modal = 'block'; st.bf = pr === 'specialist' ? { staff: 'ayna', off: 0, from: 885, to: 930, reason: 'Training', text: '', repeat: 'week', until: 47 } : { staff: 'maral', off: 0, from: 870, to: 930, reason: 'Training', text: '', repeat: 'week', until: 47 }; }
     if (pn === 'block-error') { st.modal = 'block'; st.bf = { staff: 'ayna', off: 0, from: 900, to: 960, reason: 'Training', text: '', repeat: 'none', until: 28 }; }
     if (pn === 'complaint') st.modal = 'complaint';
     if (pn === 'new') { st.panel = 'new'; st.nw = this.blankNew({ staff: 'ayna', time: 885 }); }
     if (pn === 'move') { st.moveId = 'b05'; st.moveTo = { staff: 'ayna', off: 0, from: 885 }; if (v.indexOf('week') === 0) st.view = 'dayAll'; }
-    if (p.role === 'specialist') { st.staffId = 'ayna'; st.view = st.view.replace('All', 'One'); }
+    if (pr === 'specialist') { st.staffId = 'ayna'; st.view = st.view.replace('All', 'One'); }
     if (p.clock === 'evening') {
       st.ov = { b04: { status: 'confirmed' }, b10: { status: 'confirmed' }, b15: { status: 'confirmed' }, b18: { status: 'confirmed' }, b19: { status: 'confirmed' }, b20: { off: 3, from: 690, to: 750, mv: null } };
       st.added = [{ id: 'b21', staff: 'maral', off: 1, from: 780, to: 840, cid: 'c6', svcs: ['s5'], status: 'pending', source: 'online', hold: 30, at: '20:40' }];
-      if ((pn === 'request' || pn === 'decline') && p.role !== 'specialist') { st.target = 'b21'; st.dayOff = 1; }
+      if ((pn === 'request' || pn === 'decline') && pr !== 'specialist') { st.target = 'b21'; st.dayOff = 1; }
     }
+    // report states (round 3): before the start · from the start · after an earlier report · a No-show (the box replaces the menu)
+    const sp = pr === 'specialist';
+    const who = sp ? 'Aýna Myradowa' : (pr === 'admin' ? 'Selbi Hojaýewa' : 'Maýsa Annaýewa');
+    if (pn === 'report-menu' || pn === 'report-noshow' || pn === 'report-added') st.rmenu = true;
+    if (pn === 'report-noshow' || pn === 'report-added' || pn === 'reported') { st.panel = 'booking'; st.target = sp ? 'b02' : (pn === 'reported' ? 'b12' : 'b08'); }
+    if (pn === 'report-added') { st.ov = Object.assign({}, st.ov); st.ov[st.target] = Object.assign({}, st.ov[st.target] || {}, { reports: [{ k: 'late', text: '', at: '11:15', by: who, off: 0 }] }); }
+    if (pn === 'reported' && sp) st.ov = Object.assign({}, st.ov, { b02: { status: 'noshow', reports: [{ k: 'noshow', text: '', at: '11:05', by: who, off: 0 }] } });
     return st;
   }
   componentDidUpdate(pp) {
@@ -959,36 +975,38 @@ class Component extends DCLogic {
       s8: { n: 'Facial cleansing', d: 60, p: 150, pl: '150 TMT' },
       s9: { n: 'Brows and lashes', d: 30, p: 50, pl: '50 TMT' },
       s10: { n: 'Back massage', d: 30, p: 90, pl: '90 TMT' },
-      s11: { n: 'Full body massage', d: 60, p: 160, pl: '160 TMT' }
+      s11: { n: 'Full body massage', d: 60, p: 160, pl: '160 TMT' },
+      s12: { n: 'Bridal hair styling', d: 120, p: 0, pl: 'Price at the place', atPlace: true, desc: 'With a trial styling; the price is agreed' }
     };
-    const GROUPS = [['Hair', ['s1', 's2', 's3', 's4']], ['Nails', ['s5', 's6', 's7']], ['Face', ['s8', 's9']], ['Massage', ['s10', 's11']]];
+    const GROUPS = [['Hair', ['s1', 's2', 's3', 's4', 's12']], ['Nails', ['s5', 's6', 's7']], ['Face', ['s8', 's9']], ['Massage', ['s10', 's11']]];
     const STAFF = [
-      { id: 'ayna', name: 'Aýna', gen: 'Aýna’s', spec: 'Stylist', from: 540, to: 1200, svcs: ['s1', 's2', 's3', 's4'], noApp: false, wl: [[72, 6, 0], [80, 7, 0], [86, 6, 1], [64, 5, 1], [90, 7, 0], [100, 8, 0], [40, 2, 0]] },
+      { id: 'ayna', name: 'Aýna', gen: 'Aýna’s', spec: 'Stylist', from: 540, to: 1200, svcs: ['s1', 's2', 's3', 's4', 's12'], noApp: false, wl: [[72, 6, 0], [80, 7, 0], [86, 6, 1], [64, 5, 1], [90, 7, 0], [100, 8, 0], [40, 2, 0]] },
       { id: 'maral', name: 'Maral', gen: 'Maral’s', spec: 'Nail technician', from: 540, to: 1200, svcs: ['s5', 's6', 's7'], noApp: false, wl: [[60, 5, 0], [75, 6, 0], [78, 5, 1], [55, 4, 0], [70, 5, 0], [95, 7, 0], [30, 2, 0]] },
       { id: 'jeren', name: 'Jeren', gen: 'Jeren’s', spec: 'Beautician', from: 600, to: 1140, svcs: ['s8', 's9'], noApp: false, wl: [[30, 2, 0], [45, 3, 0], [17, 2, 0], [50, 3, 0], [35, 2, 1], [70, 4, 0], [0, 0, 0]] },
-      { id: 'leyli', name: 'Leýli', gen: 'Leýli’s', spec: 'Massage therapist', from: 720, to: 1200, svcs: ['s10', 's11'], noApp: true, wl: [[50, 3, 0], [38, 2, 0], [38, 3, 1], [62, 4, 0], [50, 3, 0], [88, 5, 0], [25, 1, 0]] }
+      { id: 'leyli', name: 'Leýli', gen: 'Leýli’s', spec: 'Massage therapist', from: 720, to: 1200, svcs: ['s10', 's11'], noApp: true, wl: [[50, 3, 0], [38, 2, 0], [38, 3, 1], [62, 4, 0], [50, 3, 0], [88, 5, 0], [25, 1, 0]] },
+      { id: 'gulnar', name: 'Gülnar', gen: 'Gülnar’s', spec: 'Stylist', from: 720, to: 1200, svcs: ['s1', 's2', 's4'], noApp: false, offDays: [], wl: [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]] }
     ];
     const CL = [
-      { id: 'c1', name: 'Gülälek N.', phone: '+993 65 44 70 19', visits: 12, last: 'Today', alert: 'Use ammonia-free colour — allergy.', hist: [['28 September', 'Hair colouring · Aýna', '250 TMT', 'completed'], ['7 September', 'Women’s haircut · Aýna', '80 TMT', 'completed'], ['19 August', 'Hair styling · Aýna', '60 TMT', 'noshow']] },
-      { id: 'c2', name: 'Ogulşat M.', phone: '+993 65 21 77 03', visits: 7, last: 'Today' },
-      { id: 'c3', name: 'Aýjemal Gurbanowa', phone: '+993 65 90 11 22', visits: 3, last: '18 September' },
-      { id: 'c4', name: 'Sona P.', phone: '+993 62 33 81 07', visits: 14, last: '1 October' },
-      { id: 'c5', name: 'Bahar A.', phone: '+993 65 70 33 18', visits: 9, last: 'Today' },
-      { id: 'c6', name: 'Mähri G.', phone: '+993 61 30 44 92', visits: 4, last: '2 October' },
-      { id: 'c7', name: 'Ogulnabat Ç.', phone: '+993 62 18 60 05', visits: 3, last: 'Today · no-show', noShows: 2, blocked: true, alert: '2 no-shows — book by phone only.' },
-      { id: 'c8', name: 'Merjen K.', phone: '+993 65 02 91 66', visits: 5, last: 'Today' },
-      { id: 'c9', name: 'Läle O.', phone: '+993 63 47 25 51', visits: 2, last: '20 September' },
-      { id: 'c10', name: 'Döwlet B.', phone: '+993 65 66 10 22', visits: 6, last: '16 September' },
-      { id: 'c11', name: 'Mahym D.', phone: '+993 65 37 48 20', visits: 4, last: '3 July' },
-      { id: 'c12', name: 'Ejegyz T.', phone: '+993 64 55 12 80', visits: 0, last: '—' },
-      { id: 'x1', name: 'Aýsoltan R.', phone: '+993 65 48 19 73', visits: 5, last: '23 September' },
-      { id: 'x2', name: 'Aýgül R.', phone: '+993 61 27 54 09', visits: 6, last: 'Today' },
-      { id: 'x3', name: 'Jemal S.', phone: '+993 64 90 31 26', visits: 3, last: '9 September' },
-      { id: 'x4', name: 'Jahan M.', phone: '+993 65 13 66 48', visits: 2, last: '25 September' },
-      { id: 'x5', name: 'Nurjahan A.', phone: '+993 62 55 07 91', visits: 8, last: '30 September' },
-      { id: 'x6', name: 'Gözel A.', phone: '+993 63 70 42 15', visits: 0, last: '—' },
-      { id: 'x7', name: 'Merdan K.', phone: '+993 62 21 08 40', visits: 4, last: '5 October' },
-      { id: 'x8', name: 'Arzygül H.', phone: '+993 64 72 03 18', visits: 0, last: '—' }
+      { id: 'c1', name: 'Gülälek N.', phone: '+993 65 44 70 19', visits: 12, avg: '145 TMT', noShows: 1, last: '28 September', alert: 'Use ammonia-free colour — allergy.', hist: [['28 September', 'Hair colouring · Aýna', '250 TMT', 'completed'], ['7 September', 'Women’s haircut · Aýna', '80 TMT', 'completed'], ['19 August', 'Hair styling · Aýna', '60 TMT', 'noshow']] },
+      { id: 'c2', name: 'Ogulşat M.', phone: '+993 65 21 77 03', visits: 7, avg: '82 TMT', last: 'Today' },
+      { id: 'c3', name: 'Aýjemal Gurbanowa', phone: '+993 65 90 11 22', visits: 3, avg: '85 TMT', last: '18 September' },
+      { id: 'c4', name: 'Sona P.', phone: '+993 62 33 81 07', visits: 14, avg: '64 TMT', last: '1 October' },
+      { id: 'c5', name: 'Bahar A.', phone: '+993 65 70 33 18', visits: 9, avg: '98 TMT', last: '6 October' },
+      { id: 'c6', name: 'Mähri G.', phone: '+993 61 30 44 92', visits: 4, avg: '70 TMT', last: '2 October' },
+      { id: 'c7', name: 'Ogulnabat Ç.', phone: '+993 62 18 60 05', visits: 3, avg: '150 TMT', last: 'Today · no-show', noShows: 2, blocked: true, alert: '2 no-shows — book by phone only.' },
+      { id: 'c8', name: 'Merjen K.', phone: '+993 65 02 91 66', visits: 5, avg: '60 TMT', last: 'Today' },
+      { id: 'c9', name: 'Läle O.', phone: '+993 63 47 25 51', visits: 2, avg: '110 TMT', last: '20 September' },
+      { id: 'c10', name: 'Döwlet B.', phone: '+993 65 66 10 22', visits: 6, avg: '40 TMT', last: '16 September' },
+      { id: 'c11', name: 'Mahym D.', phone: '+993 65 37 48 20', visits: 4, avg: '75 TMT', last: '3 July' },
+      { id: 'c12', name: 'Ejegyz T.', phone: '+993 64 55 12 80', visits: 0, avg: '—', last: '—' },
+      { id: 'x1', name: 'Aýsoltan R.', phone: '+993 65 48 19 73', visits: 5, avg: '70 TMT', last: '23 September' },
+      { id: 'x2', name: 'Aýgül R.', phone: '+993 61 27 54 09', visits: 6, avg: '75 TMT', last: 'Today' },
+      { id: 'x3', name: 'Jemal S.', phone: '+993 64 90 31 26', visits: 3, avg: '90 TMT', last: '9 September' },
+      { id: 'x4', name: 'Jahan M.', phone: '+993 65 13 66 48', visits: 2, avg: '70 TMT', last: '25 September' },
+      { id: 'x5', name: 'Nurjahan A.', phone: '+993 62 55 07 91', visits: 8, avg: '150 TMT', last: '30 September' },
+      { id: 'x6', name: 'Gözel A.', phone: '+993 65 73 26 41', visits: 1, avg: '90 TMT', last: '13 October' },
+      { id: 'x7', name: 'Merdan K.', phone: '+993 62 21 08 40', visits: 4, avg: '90 TMT', last: '5 October' },
+      { id: 'x8', name: 'Arzygül H.', phone: '+993 64 72 03 18', visits: 0, avg: '—', last: '—' }
     ];
     const raw = [
       ['b01', 'ayna', 540, 600, 'c2', 's1', 'completed', 'online'],
@@ -1003,7 +1021,7 @@ class Component extends DCLogic {
       ['b17', 'maral', 900, 960, 'x4', 's5', 'cancelled', 'online', { by: 'client' }],
       ['b10', 'maral', 960, 1020, 'c6', 's5', 'pending', 'online', { hold: 24 }],
       ['b11', 'maral', 1080, 1170, 'c9', 's6', 'confirmed', 'phone'],
-      ['b12', 'jeren', 600, 660, 'c7', 's8', 'noshow', 'online', { complaint: 'noshow', rAt: '10:25', rBy: 'Selbi Hojaýewa' }],
+      ['b12', 'jeren', 600, 660, 'c7', 's8', 'noshow', 'online', { reports: [{ k: 'noshow', text: '', at: '10:25', by: 'Selbi Hojaýewa', off: 0 }] }],
       ['b13', 'jeren', 900, 930, 'c4', 's9', 'confirmed', 'online'],
       ['b14', 'leyli', 720, 780, 'x5', 's11', 'confirmed', 'phone'],
       ['b15', 'leyli', 990, 1020, 'x6', 's10', 'pending', 'online', { hold: 21 }],
@@ -1016,9 +1034,9 @@ class Component extends DCLogic {
     const BADGE = { pending: ['st-p', 'd-p', 'Pending', 'k-p'], confirmed: ['st-c', 'd-c', 'Confirmed', 'k-c'], completed: ['st-d', 'd-d', 'Completed', 'k-d'], cancelled: ['st-x', 'd-x', 'Cancelled', 'k-x'], noshow: ['st-n', 'd-n', 'No-show', 'k-n'] };
     const ROT = ['c2', 'c8', 'c1', 'c10', 'x1', 'x2', 'c5', 'x3', 'c6', 'c9', 'c4', 'x5', 'x7', 'c11', 'c3', 'x4'];
     const PEOPLE = {
-      owner: { name: 'Maýsa Annaýewa', ini: 'M', phone: '+993 65 10 20 30', role: 'Owner', ws: [['Glow Studio', 'Owner · Bitarap Türkmenistan Avenue', true, 6, true], ['Glow Nails', 'Owner · 15 Oguzhan Street', true, 2, false]] },
-      admin: { name: 'Selbi Hojaýewa', ini: 'S', phone: '+993 65 88 41 02', role: 'Admin', ws: [['Glow Studio', 'Admin · Bitarap Türkmenistan Avenue', true, 6, true]] },
-      specialist: { name: 'Aýna Myradowa', ini: 'A', phone: '+993 65 31 22 10', role: 'Specialist', ws: [['Glow Studio', 'Specialist · Bitarap Türkmenistan Avenue', true, 2, true], ['Aýnanyň saç studiýasy', 'Owner · Works from home', false, 1, false]] }
+      owner: { name: 'Maýsa Annaýewa', ini: 'M', phone: '+993 65 10 20 30', role: 'Owner', ws: [['Glow Studio', 'Owner · Ashgabat', true, 6, true], ['Glow Nails', 'Owner · Ashgabat', true, 2, false]] },
+      admin: { name: 'Selbi Hojaýewa', ini: 'S', phone: '+993 65 88 41 02', role: 'Admin', ws: [['Glow Studio', 'Admin · Ashgabat', true, 6, true]] },
+      specialist: { name: 'Aýna Myradowa', ini: 'A', phone: '+993 65 31 22 10', role: 'Specialist', ws: [['Glow Studio', 'Specialist · Ashgabat', true, 2, true], ['Aýnanyň saç studiýasy', 'Owner · Ashgabat', false, 1, false]] }
     };
     const IST = { arrived: { t: 'Arrived', color: '#066a41' }, started: { t: 'Started', color: '#4429d6' } };
     this._d = { SVC: SVC, GROUPS: GROUPS, STAFF: STAFF, CL: CL, BASE: BASE, BADGE: BADGE, ROT: ROT, BREAKS: { ayna: [[840, 880, 'Break']] }, BLK: [{ id: 'k1', staff: 'jeren', off: 0, from: 990, to: 1050, reason: 'Training', text: '', repeat: 'week', until: 47 }], ELSE: { ayna: [[0, 1140, 1200, 10], [1, 540, 600, 10]] }, PEOPLE: PEOPLE, IST: IST, NOW: 680 };
@@ -1030,7 +1048,7 @@ class Component extends DCLogic {
     return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm;
   }
   durL(m) {
-    if (m < 60) return m + ' min';
+    if (m <= 60) return m + ' min';
     const h = Math.floor(m / 60);
     const r = m % 60;
     return h + ' h' + (r ? ' ' + r + ' min' : '');
@@ -1066,10 +1084,18 @@ class Component extends DCLogic {
     if (x.m === 8 && x.d === 27) return 'Closed · Independence Day';
     return '';
   }
+  priceText(ids, withFrom) {
+    const S = this.D().SVC;
+    const fixed = ids.reduce((a, x) => a + (S[x].atPlace ? 0 : S[x].p), 0);
+    const at = ids.some((x) => S[x].atPlace);
+    if (at && !fixed) return 'Price at the place';
+    return (withFrom && ids.some((x) => S[x].from) ? 'from ' : '') + this.money(fixed) + (at ? ' + price at the place' : '');
+  }
   staff(id) {
     return this.D().STAFF.find((x) => x.id === id) || this.D().STAFF[0];
   }
   role() {
+    if (this.props.banner === 'demo') return 'owner';
     const r = this.props.role;
     return r === 'admin' || r === 'specialist' ? r : 'owner';
   }
@@ -1102,7 +1128,7 @@ class Component extends DCLogic {
   timer(hold) {
     if (this.openNow()) return { closed: false, pill: hold + ' min', title: hold + ' min left to answer', aria: hold + ' min left to answer', by: this.now() + hold };
     const by = this.openAt(1) + hold;
-    return { closed: true, pill: 'by ' + this.hm(by), title: 'Answer by ' + this.hm(by) + ' tomorrow', aria: 'answer by ' + this.hm(by) + ' tomorrow', by: by };
+    return { closed: true, pill: 'By ' + this.hm(by), title: 'Answer by ' + this.hm(by) + ' tomorrow', aria: 'answer by ' + this.hm(by) + ' tomorrow', by: by };
   }
   iso(off) {
     return new Date(Date.UTC(2026, 9, 14) + off * 86400000).toISOString().slice(0, 10);
@@ -1152,10 +1178,23 @@ class Component extends DCLogic {
   }
   dShort(off) {
     const x = this.dt(off);
-    return x.wa + ' ' + x.d;
+    return x.wa + ', ' + x.d + ' ' + x.mo.slice(0, 3);
   }
   sti(st) {
     return { iP: st === 'pending', iC: st === 'confirmed', iD: st === 'completed', iX: st === 'cancelled', iN: st === 'noshow' };
+  }
+  reportKinds(b) {
+    const now = this.now();
+    const reps = b.reports || [];
+    const has = (k) => reps.some((r) => r.k === k);
+    const started = b.off < 0 || (b.off === 0 && b.from <= now);
+    const sinceEnd = -b.off * 1440 + now - b.to;
+    const out = [];
+    if (started && !has('late') && !has('noshow') && sinceEnd < 1440) out.push('noshow');
+    if (started && !has('late')) out.push('late');
+    if (!has('rude')) out.push('rude');
+    out.push('other');
+    return out;
   }
   elseAt(stId, off, t) {
     return (this.D().ELSE[stId] || []).find((r) => r[0] === off && t >= r[1] && t < r[2] + r[3]) || null;
@@ -1169,14 +1208,14 @@ class Component extends DCLogic {
     const c = this.closed(off);
     if (c) return { off: c, lock: true };
     const x = this.dt(off);
-    if (st.id === 'jeren' && x.y === 2026 && x.m === 10 && x.d >= 2 && x.d <= 9) return { off: 'Holiday', lock: true };
-    if (st.wl[x.dow][0] === 0) return { off: 'Day off' };
+    if (st.id === 'jeren' && x.y === 2026 && x.m === 10 && x.d >= 2 && x.d <= 9) return { off: 'Time off', lock: true };
+    if (st.offDays ? st.offDays.indexOf(x.dow) >= 0 : st.wl[x.dow][0] === 0) return { off: 'Day off' };
     const b = x.dow === 6 ? [600, 1080] : [540, 1200];
     return { from: Math.max(b[0], st.from), to: Math.min(b[1], st.to) };
   }
   client(id) {
     const c = this.D().CL.find((x) => x.id === id) || this.state.newClients.find((x) => x.id === id);
-    return c || { id: id, name: '—', phone: '', visits: 0, last: '—' };
+    return c || { id: id, name: '—', phone: '', visits: 0, avg: '—', last: '—' };
   }
   bufOf(b) {
     const S = this.D().SVC;
@@ -1298,6 +1337,7 @@ class Component extends DCLogic {
   }
   col(st, ci, n, off, items, wide) {
     const s = this.state;
+    const showP = true;
     const D = this.D();
     const px = (m) => Math.round((m - 480) * 4 / 3 * 100) / 100;
     const ph = (m) => Math.round(m * 4 / 3 * 100) / 100;
@@ -1381,8 +1421,8 @@ class Component extends DCLogic {
       blocks.push(Object.assign({
         cls: cls, top: px(b.from) + 1, h: hgt, pr: 8 + icons * 18 + (pend || mvq ? 60 : 0) + (istD ? (istLabel ? 30 + istD.t.length * 7 : 22) : 0),
         t1: wide ? time : this.hm(b.from), client: cl.name, phoneNo: cl.phone, wide: wide, wc: wide && compact,
-        svc: svc, priceL: this.money(price),
-        l2: !compact, line2: wide ? svc + ' · ' + this.durL(dur) + ' · ' + this.money(price) : svc,
+        svc: svc, priceL: showP ? ' · ' + this.priceText(b.svcs) : '',
+        l2: !compact, line2: wide ? svc + ' · ' + this.durL(dur) + (showP ? ' · ' + this.priceText(b.svcs) : '') : svc,
         l3: !wide && hgt >= 62, line3: mvq ? '→ ' + mvTo + '?' : time + ' · ' + this.durL(dur),
         nameCls: b.status === 'cancelled' ? 'bn strike' : 'bn',
         showNote: wide && !compact && hgt >= 62 && !!note,
@@ -1416,8 +1456,8 @@ class Component extends DCLogic {
       blocks.push(Object.assign({
         cls: cls, top: px(mv.from) + 1, h: hgt, pr: 68,
         t1: wide ? this.hm(mv.from) + '–' + this.hm(mv.to) : this.hm(mv.from), client: 'New time?', phoneNo: cl.name, wide: wide, wc: wide && compact,
-        svc: svc, priceL: this.money(price),
-        l2: !compact, line2: wide ? svc + ' · ' + this.durL(dur) + ' · ' + this.money(price) : cl.name,
+        svc: svc, priceL: showP ? ' · ' + this.priceText(b.svcs) : '',
+        l2: !compact, line2: wide ? svc + ' · ' + this.durL(dur) + (showP ? ' · ' + this.priceText(b.svcs) : '') : cl.name,
         l3: !wide && hgt >= 62, line3: 'from ' + was,
         nameCls: 'bn', showNote: wide && !compact && hgt >= 62, note: 'Previous time: ' + was, noteCls: 'bnt', nAlert: false, nOther: false,
         phone: false, walk: false, alert: false, pend: true, hold: this.timer(mv.hold).pill,
@@ -1442,7 +1482,7 @@ class Component extends DCLogic {
         hasGhost = true;
         gh = {
           top: top, h: ph(dur) - 2, time: this.hm(s.moveTo.from) + '–' + this.hm(s.moveTo.from + dur), client: cl.name,
-          from: (sameDay ? '' : this.dt(mv.off).wa + ' ') + this.hm(mv.from), to: (sameDay ? '' : this.dt(s.moveTo.off).wa + ' ') + this.hm(s.moveTo.from), staff: st.name,
+          from: (sameDay ? '' : this.dShort(mv.off) + ' · ') + this.hm(mv.from), to: (sameDay ? '' : this.dShort(s.moveTo.off) + ' · ') + this.hm(s.moveTo.from), staff: st.name,
           what: cl.name + ' · ' + mv.svcs.map((x) => D.SVC[x].n).join(' + '),
           popTop: Math.min(wide ? top + ph(dur) + 6 : top, 1040 - 180),
           left: wide ? '12px' : (last ? 'auto' : 'calc(100% - 4px)'),
@@ -1457,7 +1497,7 @@ class Component extends DCLogic {
     const sm = { top: smOn ? Math.min(px(smT) + 22, 1040 - 132) : 0, left: smLast ? 'auto' : '8px', right: smLast ? '8px' : 'auto', title: smOn ? this.hm(smT) + ' · ' + st.name : '', book: () => this.openNewAt(st.id, off, smT), block: () => this.openBlock(st.id, off, smT) };
     return {
       hasSm: smOn, sm: sm,
-      id: st.id, name: st.name, ini: st.name.charAt(0), spec: st.spec, noApp: st.noApp,
+      id: st.id, name: st.name, ini: st.name.charAt(0), spec: st.spec, noApp: st.noApp, meta: (wide ? st.spec + ' · ' : '') + (h.off ? h.off : this.pl(live.length, 'booking')),
       cnt: h.off ? h.off : this.pl(live.length, 'booking'), hasReq: nReq > 0, req: this.pl(nReq, 'request'),
       click: !wide, wide: wide,
       colCls: 'gcol' + (ci > 0 ? ' gx' : ''), headCls: 'gh' + (ci > 0 ? ' gx' : ''),
@@ -1499,10 +1539,13 @@ class Component extends DCLogic {
     const isDemo = bannerKind === 'demo';
     const P = D.PEOPLE[role];
     const me = { name: P.name, ini: P.ini, phone: P.phone, role: P.role };
-    const wsAria = 'Workspace: Glow Studio, ' + (isDemo ? 'example, ' : '') + P.role + '. Switch';
-    const wsSrc = isDemo ? [['Glow Studio', P.role + ' · demo workspace', true, 0, true]] : P.ws;
+    const seeMoney = role === 'owner';
+    const showP = true;
+    const avgOf = (c) => (seeMoney && c.avg && c.avg !== '—' ? ' · average check ' + c.avg : '');
+    const wsAria = 'Workspace: Glow Studio, ' + P.role + '. Switch';
+    const wsSrc = P.ws;
     const wsList = wsSrc.map((w) => ({
-      example: isDemo,
+      example: false,
       name: w[0], cap: w[1], logo: w[2], noLogo: !w[2], ini: w[0].charAt(0), cur: w[4], other: !w[4], hasPend: w[3] > 0, pend: String(w[3]),
       aria: w[0] + ', ' + w[1] + (w[4] ? ', current workspace' : (w[3] ? ', ' + this.pl(w[3], 'unanswered request') : ''))
     }));
@@ -1725,8 +1768,8 @@ class Component extends DCLogic {
       const cl = this.client(b.cid);
       const st = this.staff(b.staff);
       const det = isMove
-        ? [['Service', svcOf(b)], ['Specialist', st.name + ' · ' + st.spec + (st.noApp ? ' · no app' : '')], ['Duration', this.durL(b.to - b.from)], ['Price', this.money(priceOf(b))], ['Booking', 'Confirmed · keeps its time until the request is answered'], ['Source', 'Online']]
-        : [['Service', svcOf(b)], ['Specialist', st.name + ' · ' + st.spec + (st.noApp ? ' · no app' : '')], ['Date and time', whenOf(b)], ['Duration', this.durL(b.to - b.from)], ['Price', this.money(priceOf(b))], ['Source', 'Online']].concat(b.at ? [['Sent', 'Today, ' + b.at]] : []);
+        ? [['Service', svcOf(b)], ['Specialist', st.name + ' · ' + st.spec + (st.noApp ? ' · doesn’t use the app' : '')], ['Duration', this.durL(b.to - b.from)], ...(showP ? [['Price', this.priceText(b.svcs)]] : []), ['Booking', 'Confirmed · keeps its time until the request is answered'], ['Source', 'Online']]
+        : [['Service', svcOf(b)], ['Specialist', st.name + ' · ' + st.spec + (st.noApp ? ' · doesn’t use the app' : '')], ['Date and time', whenOf(b)], ['Duration', this.durL(b.to - b.from)], ...(showP ? [['Price', this.priceText(b.svcs)]] : []), ['Source', 'Online']].concat(b.at ? [['Sent', 'Today · ' + b.at]] : []);
       const hold = this.holdOf(b);
       const ms = isMove ? this.staff(b.mv.staff || b.staff) : st;
       const fitsTo = !isMove || this.fits(ms.id, b.mv.off, b.mv.from, b.mv.to - b.mv.from, this.bufOf(b), b.id);
@@ -1742,7 +1785,7 @@ class Component extends DCLogic {
           ? 'The timer counts only while you’re open, so it waits until ' + this.hm(this.openAt(1)) + '. If no one answers by ' + this.hm(this.timer(hold).by) + ', the request is cancelled' + (isMove ? ' — the booking stays at its time.' : ' and the client is offered 3 other times.')
           : 'If no one answers, the request is cancelled at ' + this.hm(this.now() + hold) + (isMove ? ' — the booking stays at its time.' : ' and the client is offered 3 other times.'),
         ini: cl.name.charAt(0), client: cl.name, phone: cl.phone,
-        isNewCl: !cl.visits, hasVisits: !!cl.visits, visits: this.pl(cl.visits, 'visit'),
+        isNewCl: !cl.visits, hasVisits: !!cl.visits, visits: this.pl(cl.visits, 'visit') + avgOf(cl),
         hasNoShow: !!cl.noShows, noShowLabel: this.pl(cl.noShows || 0, 'no-show'),
         hasAlert: !!(b.alert || cl.alert), alert: b.alert || cl.alert || '',
         details: det.map((r, i) => ({ k: r[0], v: r[1], cls: i === det.length - 1 ? 'dr last' : 'dr' })),
@@ -1770,22 +1813,27 @@ class Component extends DCLogic {
       this.say({ ov: ov, panel: 'none', target: null, modal: null, hiId: id }, 'Booking confirmed · the client is notified', 'ok', rest.length ? 'next' : null);
     };
 
-    let bv = { rOpen: false, rItems: [], rmpCls: 'pop rmp', hasReport: false, reportLine: '', reportUntil: '', badgeCls: 'badge', iP: false, iC: false, iD: false, iX: false, iN: false, showIst: false, istVal: '', status: '', srcOnline: false, srcPhone: false, isX: false, xLine: '', hasAlert: false, alert: '', ini: '', client: '', phone: '', callAria: '', stats: '', hasNoShow: false, noShowLabel: '', blocked: false, details: [], hasCNote: false, cnote: '', note: '', noteCap: '', hasHist: false, noHist: true, hist: [], lastLine: '', canMove: false, canComplain: false, canCancel: false, hasFoot: false };
-    const reportAs = (k) => {
+    let bv = { rOpen: false, rItems: [], rmpCls: 'pop rmp', hasReport: false, reportHead: '', reports: [], reportCap: '', badgeCls: 'badge', iP: false, iC: false, iD: false, iX: false, iN: false, showIst: false, istVal: '', status: '', srcOnline: false, srcPhone: false, isX: false, xLine: '', hasAlert: false, alert: '', ini: '', client: '', phone: '', callAria: '', stats: '', hasNoShow: false, noShowLabel: '', blocked: false, details: [], hasCNote: false, cnote: '', note: '', noteCap: '', hasHist: false, noHist: true, hist: [], lastLine: '', canMove: false, canComplain: false, canCancel: false, hasFoot: false };
+    const RL = { noshow: 'No-show', late: 'Came late', rude: 'Rude behaviour', other: 'Other' };
+    const RD = { noshow: 'The booking becomes No-show · counts towards Phone only', late: 'The booking doesn’t change', rude: 'The booking doesn’t change', other: 'Write what happened' };
+    const reportAs = (k, text) => {
       if (!tb) return;
-      if (k === 'other') { this.up({ modal: 'complaint', cReason: 'Other', cText: '' }); return; }
+      if (k === 'other' && !text) { this.up({ modal: 'complaint', cReason: 'Other', cText: '' }); return; }
       const ov = Object.assign({}, s.ov);
-      const o = Object.assign({}, s.ov[tb.id] || {}, { complaint: k, ctext: '', rAt: this.hm(this.now()), rBy: me.name });
+      const o = Object.assign({}, s.ov[tb.id] || {}, { reports: (tb.reports || []).concat([{ k: k, text: text || '', at: this.hm(this.now()), by: me.name, off: 0 }]) });
       if (k === 'noshow') o.status = 'noshow';
       ov[tb.id] = o;
-      this.say({ ov: ov }, k === 'noshow' ? 'Marked as No-show · saved to the client’s card' : 'Report saved to the client’s card');
+      this.say({ ov: ov, modal: null }, k === 'noshow' ? 'Marked as No-show · saved to the client’s card' : 'Report saved to the client’s card');
     };
-    const removeReport = () => {
+    const removeReportAt = (i) => {
       if (!tb) return;
+      const reps = (tb.reports || []).slice();
+      const gone = reps.splice(i, 1)[0];
+      if (!gone) return;
       const ended = tb.off < 0 || (tb.off === 0 && tb.to <= this.now());
       const ov = Object.assign({}, s.ov);
-      const o = Object.assign({}, s.ov[tb.id] || {}, { complaint: null, ctext: '', rAt: '', rBy: '' });
-      const wasNo = tb.status === 'noshow';
+      const o = Object.assign({}, s.ov[tb.id] || {}, { reports: reps });
+      const wasNo = gone.k === 'noshow' && tb.status === 'noshow';
       if (wasNo) o.status = ended ? 'completed' : 'confirmed';
       ov[tb.id] = o;
       this.say({ ov: ov }, wasNo ? 'Report removed · the booking is ' + (ended ? 'Completed' : 'Confirmed') + ' again' : 'Report removed');
@@ -1800,13 +1848,13 @@ class Component extends DCLogic {
       const bd = D.BADGE[b.status];
       const future = b.off > 0 || (b.off === 0 && b.from >= this.now());
       const started = b.off < 0 || (b.off === 0 && b.from <= this.now());
-      const det = [['Service', svcOf(b)], ['Specialist', st.name + ' · ' + st.spec], ['Date and time', whenOf(b)], ['Duration', this.durL(b.to - b.from)], ['Price', this.money(priceOf(b))]];
+      const det = [['Service', svcOf(b)], ['Specialist', st.name + ' · ' + st.spec], ['Date and time', whenOf(b)], ['Duration', this.durL(b.to - b.from)], ...(showP ? [['Price', this.priceText(b.svcs)]] : [])];
       const note = s.notes[b.id] || '';
       const hist = (cl.hist || []).slice(0, 3);
       const canMove = b.status === 'confirmed' && future;
-      const canComplain = (b.status === 'confirmed' || b.status === 'completed') && !b.complaint;
-      const RL = { noshow: 'No-show', late: 'Came late', rude: 'Rude behaviour', other: 'Other' };
-      const rItems = (started ? ['noshow'] : []).concat(['late', 'rude', 'other']).map((k) => ({ t: RL[k] + (k === 'other' ? '…' : ''), d: k === 'noshow' ? 'The booking becomes No-show' : (k === 'other' ? 'Write what happened' : 'The booking doesn’t change'), pick: () => reportAs(k) }));
+      const reps = b.reports || [];
+      const canComplain = b.status === 'confirmed' || b.status === 'completed';
+      const rItems = this.reportKinds(b).map((k) => ({ t: RL[k] + (k === 'other' ? '…' : ''), d: RD[k], pick: () => reportAs(k) }));
       bv = Object.assign({
         badgeCls: 'badge ' + bd[0], status: bd[2],
         showIst: internalOn && b.status === 'confirmed', istVal: s.istat[b.id] || '',
@@ -1814,17 +1862,19 @@ class Component extends DCLogic {
         isX: b.status === 'cancelled', xLine: b.by === 'client' ? 'The client cancelled' + (b.reason ? ' · ' + b.reason : '') : 'The business cancelled' + (b.reason ? ' · ' + b.reason : ''),
         hasAlert: !!(b.alert || cl.alert), alert: b.alert || cl.alert || '',
         ini: cl.name.charAt(0), client: cl.name, phone: cl.phone, callAria: 'Call: ' + cl.name + ', ' + cl.phone,
-        stats: cl.visits ? this.pl(cl.visits, 'visit') : 'New client',
+        stats: cl.visits ? this.pl(cl.visits, 'visit') + avgOf(cl) : 'New client',
         hasNoShow: !!cl.noShows, noShowLabel: this.pl(cl.noShows || 0, 'no-show'), blocked: !!cl.blocked,
         details: det.map((r, i) => ({ k: r[0], v: r[1], cls: i === det.length - 1 ? 'dr last' : 'dr' })),
         hasCNote: !!b.note, cnote: b.note || '',
         note: note, noteCap: note ? 'Only your team sees it · saved' : 'Only your team sees it · saved automatically',
         hasHist: hist.length > 0, noHist: hist.length === 0,
-        hist: hist.map((r, i) => Object.assign({ date: r[0], what: r[1], price: r[2], st: D.BADGE[r[3]][2], ink: 'i-' + D.BADGE[r[3]][0].slice(3), cls: i === hist.length - 1 ? 'hrow last' : 'hrow' }, this.sti(r[3]))),
+        hist: hist.map((r, i) => Object.assign({ date: r[0], what: r[1], price: role !== 'specialist' ? r[2] : '', st: D.BADGE[r[3]][2], ink: 'i-' + D.BADGE[r[3]][0].slice(3), cls: i === hist.length - 1 ? 'hrow last' : 'hrow' }, this.sti(r[3]))),
         lastLine: cl.last && cl.last !== '—' ? 'Last visit: ' + cl.last + ' · full history on the client’s card' : 'No earlier visits',
         canMove: canMove, canComplain: canComplain, canCancel: canMove, hasFoot: canMove || canComplain,
         rOpen: !!s.rmenu && canComplain, rItems: rItems, rmpCls: 'pop rmp' + (canMove ? ' rmr' : ''),
-        hasReport: !!b.complaint, reportLine: b.complaint ? (RL[b.complaint] || b.complaint) + (b.ctext ? ' · ' + b.ctext : '') + ' · today ' + (b.rAt || this.hm(this.now())) + ' · ' + (b.rBy || me.name) : '', reportUntil: this.dDM(7)
+        hasReport: reps.length > 0, reportHead: reps.length > 1 ? 'Reports' : 'Report',
+        reports: reps.map((r, i) => ({ line: RL[r.k] + (r.text ? ' · ' + r.text : '') + ' · ' + (r.off === 0 ? 'today' : this.dDM(r.off)) + ' · ' + r.at + ' · ' + r.by, aria: 'Remove report: ' + RL[r.k], remove: () => removeReportAt(i) })),
+        reportCap: reps.length > 1 ? 'The client isn’t told. You can remove each report for 7 days.' : 'The client isn’t told. You can remove it until ' + this.dDM((reps.length ? reps[0].off : 0) + 7) + '.'
       }, this.sti(b.status));
     }
     const onIst = (e) => {
@@ -1842,7 +1892,9 @@ class Component extends DCLogic {
     const nw = s.nw;
     let nv = {};
     {
-      const allCl = D.CL.concat(s.newClients);
+      const allAll = D.CL.concat(s.newClients);
+      const own = new Set(this.real().filter((b) => b.staff === 'ayna').map((b) => b.cid).concat(s.newClients.map((c) => c.id)));
+      const allCl = spec ? allAll.filter((c) => own.has(c.id)) : allAll;
       const dig8 = (p) => p.replace(/\D/g, '').slice(-8);
       const cl = nw.cid ? this.client(nw.cid) : null;
       const ph = nw.phone;
@@ -1860,7 +1912,7 @@ class Component extends DCLogic {
       qPhone = qPhone.slice(0, 8);
       const startNew = () => {
         if (digitsOnly && qd.length) {
-          const hit = qPhone.length === 8 ? allCl.find((c) => dig8(c.phone) === qPhone) : null;
+          const hit = qPhone.length === 8 ? allAll.find((c) => dig8(c.phone) === qPhone) : null;
           this.setNw({ byName: false, cid: hit ? hit.id : null, phone: qPhone, name: '', q: '' });
         } else this.setNw({ byName: false, cid: null, phone: '', name: nw.q.trim(), q: '' });
       };
@@ -1877,7 +1929,7 @@ class Component extends DCLogic {
         let d = e.target.value.replace(/\D/g, '');
         if (d.length > 8 && d.indexOf('993') === 0) d = d.slice(3);
         d = d.slice(0, 8);
-        const hit = d.length === 8 ? allCl.find((c) => dig8(c.phone) === d) : null;
+        const hit = d.length === 8 ? allAll.find((c) => dig8(c.phone) === d) : null;
         this.setNw({ phone: d, cid: hit ? hit.id : null, tried: false });
       };
       const svcs = nw.svcs;
@@ -1899,7 +1951,7 @@ class Component extends DCLogic {
         items: g.ids.map((id) => {
           const sv = D.SVC[id];
           const on = svcs.indexOf(id) >= 0;
-          return { name: sv.n, meta: this.durL(sv.d) + ' · ' + sv.pl, on: on, cls: on ? 'svr on' : 'svr', toggle: () => this.setNw({ svcs: on ? svcs.filter((x) => x !== id) : svcs.concat([id]) }) };
+          return { name: sv.n, meta: this.durL(sv.d) + (showP ? ' · ' + sv.pl : ''), on: on, cls: on ? 'svr on' : 'svr', toggle: () => this.setNw({ svcs: on ? svcs.filter((x) => x !== id) : svcs.concat([id]) }) };
         })
       }));
       const staffChips = D.STAFF.map((st) => {
@@ -1937,7 +1989,7 @@ class Component extends DCLogic {
         const stn = this.staff(x.st).name;
         return {
           day: x.o === 0 ? 'Today' : (x.o === 1 ? 'Tomorrow' : this.dt(x.o).wd), t: this.hm(x.t), hasSt: multi, st: stn, on: on, cls: on ? 'slot nx on' : 'slot nx',
-          aria: this.dLong(x.o) + ', ' + this.hm(x.t) + (multi ? ', ' + stn : ''), pick: () => this.setNw({ off: x.o, time: x.t, staff: x.st })
+          aria: this.dLong(x.o) + ' · ' + this.hm(x.t) + (multi ? ', ' + stn : ''), pick: () => this.setNw({ off: x.o, time: x.t, staff: x.st })
         };
       });
       let nearMsg = '';
@@ -1977,7 +2029,7 @@ class Component extends DCLogic {
       if (!svcs.length) missing.push('service');
       if (!eff && svcs.length) missing.push('specialist');
       if (!timeOk) missing.push('time');
-      const foot = canSubmit ? this.dLong(nw.off) + ' · ' + this.hm(nw.time) + '–' + this.hm(nw.time + totDur) + ' · ' + effSt.name + ' · ' + (anyFrom ? 'from ' : '') + this.money(totP) : 'Still needed: ' + missing.join(', ');
+      const foot = canSubmit ? this.dLong(nw.off) + ' · ' + this.hm(nw.time) + '–' + this.hm(nw.time + totDur) + ' · ' + effSt.name + (showP ? ' · ' + this.priceText(svcs, true) : '') : 'Still needed: ' + missing.join(', ');
       const submit = () => {
         if (!canSubmit) return;
         const seq = s.seq;
@@ -1986,7 +2038,7 @@ class Component extends DCLogic {
         if (!cid) {
           cid = 'n' + seq;
           const phF = '+993 ' + this.fmtP(nw.phone);
-          patch.newClients = s.newClients.concat([{ id: cid, name: nw.name.trim() || phF, phone: phF, visits: 0, last: '—' }]);
+          patch.newClients = s.newClients.concat([{ id: cid, name: nw.name.trim() || phF, phone: phF, visits: 0, avg: '—', last: '—' }]);
         }
         const id = 'a' + seq;
         const bk = { id: id, off: nw.off, staff: eff, from: nw.time, to: nw.time + totDur, cid: cid, svcs: svcs.slice(), status: 'confirmed', source: isWalk ? 'walkin' : 'phone' };
@@ -2002,7 +2054,7 @@ class Component extends DCLogic {
         this.say(patch, 'Booking saved' + (isWalk ? ' · walk-in' : '') + (nw.sms ? ' · the client is notified' : ''));
       };
       const clv = cl ? {
-        ini: cl.name.charAt(0), name: cl.name, phone: cl.phone, meta: cl.visits ? this.pl(cl.visits, 'visit') : 'New client',
+        ini: cl.name.charAt(0), name: cl.name, phone: cl.phone, meta: cl.visits ? this.pl(cl.visits, 'visit') + avgOf(cl) : 'New client',
         hasAlert: !!cl.alert, alert: cl.alert || '', blocked: !!cl.blocked, hasNs: !!cl.noShows, nsLabel: this.pl(cl.noShows || 0, 'no-show'), hasTags: !!cl.blocked || !!cl.noShows
       } : { ini: '', name: '', phone: '', meta: '', hasAlert: false, alert: '', blocked: false, hasNs: false, nsLabel: '', hasTags: false };
       nv = {
@@ -2022,7 +2074,7 @@ class Component extends DCLogic {
         startNew: startNew,
         canFilter: !!pre && !spec, filterLabel: filtered ? 'Show all services' : 'Only ' + (pre ? pre.gen : '') + ' services',
         toggleAll: () => this.setNw({ allSvc: !nw.allSvc }),
-        groups: groups, hasSvc: svcs.length > 0, totLabel: this.durL(totDur) + ' · ' + (anyFrom ? 'from ' : '') + this.money(totP),
+        groups: groups, hasSvc: svcs.length > 0, totLabel: this.durL(totDur) + (showP ? ' · ' + this.priceText(svcs, true) : ''),
         staffFixed: spec, staffPick: !spec, staff: staffChips, noStaff: svcs.length > 0 && elig.length === 0,
         hasNear: nearL.length > 0, near: nearL, noNear: nearL.length === 0, nearMsg: nearMsg,
         days: days, times: times, hasMsg: !!msg, msg: msg, msgCls: msgCls,
@@ -2069,24 +2121,11 @@ class Component extends DCLogic {
         this.say({ ov: ov, modal: null, panel: 'none', target: null }, 'Request declined · the client sees the reason' + (alts.length ? ' and ' + this.pl(alts.length, 'other time') : ''), 'ok', rest.length ? 'next' : null);
       }
     };
-    const tbStarted = !!tb && (tb.off < 0 || (tb.off === 0 && tb.from <= this.now()));
-    const CR = [['No-show', 'The booking becomes No-show'], ['Came late', 'The booking doesn’t change'], ['Rude behaviour', 'The booking doesn’t change'], ['Other', 'Write a few words']].filter((r) => r[0] !== 'No-show' || tbStarted);
-    const CK = { 'No-show': 'noshow', 'Came late': 'late', 'Rude behaviour': 'rude', 'Other': 'other' };
-    const cOther = s.cReason === 'Other';
     const cv = {
       ctx: tb ? ctxOf(tb) : '',
-      reasons: CR.map((r) => ({ t: r[0], d: r[1], on: s.cReason === r[0], cls: s.cReason === r[0] ? 'rl on' : 'rl', pick: () => this.up({ cReason: r[0] }) })),
-      other: cOther, text: s.cText, onText: (e) => this.setState({ cText: e.target.value.slice(0, 300) }),
-      dis: !s.cReason || (cOther && !s.cText.trim()),
-      go: () => {
-        if (!tb || !s.cReason || (cOther && !s.cText.trim())) return;
-        const isNo = s.cReason === 'No-show';
-        const ov = Object.assign({}, s.ov);
-        const o = Object.assign({}, s.ov[tb.id] || {}, { complaint: CK[s.cReason], ctext: cOther ? s.cText.trim() : '', rAt: this.hm(this.now()), rBy: me.name });
-        if (isNo) o.status = 'noshow';
-        ov[tb.id] = o;
-        this.say({ ov: ov, modal: null }, isNo ? 'Marked as No-show · saved to the client’s card' : 'Report saved to the client’s card');
-      }
+      text: s.cText, onText: (e) => this.setState({ cText: e.target.value.slice(0, 300) }),
+      dis: !s.cText.trim(),
+      go: () => { if (!tb || !s.cText.trim()) return; reportAs('other', s.cText.trim()); }
     };
     const bf = s.bf;
     const showBlock = s.modal === 'block' && !!bf;
@@ -2107,7 +2146,7 @@ class Component extends DCLogic {
       let err = '';
       if (order) err = 'The end must be after the start.';
       else if (past) err = 'This time has passed — pick a time from ' + this.hm(this.slotNow()) + '.';
-      else if (hit) err = 'This time has a booking: ' + (hit.o !== bf.off ? this.dt(hit.o).wa + ', ' + this.dDM(hit.o) + ' · ' : '') + this.hm(hit.b.from) + '–' + this.hm(hit.b.to) + ' ' + this.client(hit.b.cid).name + ' · ' + svcOf(hit.b) + '. Pick another time or move the booking first.';
+      else if (hit) err = 'This time has a booking: ' + (hit.o !== bf.off ? this.dShort(hit.o) + ' · ' : '') + this.hm(hit.b.from) + '–' + this.hm(hit.b.to) + ' ' + this.client(hit.b.cid).name + ' · ' + svcOf(hit.b) + '. Pick another time or move the booking first.';
       const reasonOk = !!bf.reason && (bf.reason !== 'Other' || !!bf.text.trim());
       const blocked = !!err || !reasonOk || untilBad;
       const rLabel = bf.reason === 'Other' ? (bf.text.trim() || 'Other') : (bf.reason || '');
@@ -2163,10 +2202,10 @@ class Component extends DCLogic {
     return {
       fontStack, hasPend, noPend, pendCount, pendAria, pendChip, pendChipAria, openNewBlank,
       me, wsAria, wsList, wsOpen, userOpen, moreOpen, legendOpen, toggleWs, toggleUser, toggleMore, toggleLegend, closeMenus, menuKey,
-      showSettings, showRevBadge, showStaffSeg, showStChips, stChips, internalOn, isDemo, contactOpen, openContact,
+      showSettings, showRevBadge, showStaffSeg, showStChips, stChips, internalOn, isDemo, notDemo: !isDemo, contactOpen, openContact,
       bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
       closeSm: () => this.setState({ sm: null }), smKey: (e) => { if (e && e.key === 'Escape') this.setState({ sm: null }); },
-      showBlock, bk, removeReport, toggleRmenu, closeRmenu, rmKey, sumBkW, sumReqW, wkBkW, wkReqW,
+      showBlock, bk, toggleRmenu, closeRmenu, rmKey, sumBkW, sumReqW, wkBkW, wkReqW,
       goToday, goPrev, goNext, prevLabel, nextLabel, datePop, toggleDate, closeDate, dateKey, goTodayClose, dateLabel, monthLabel, calDays,
       rangeSegs, modeSegs, selCls, staffId, pickStaff, openQueue, showX, toggleX,
       isDay, isWeek, isWeekAll, isWeekOne, sumBk, sumReq, showRev, revLabel, revText, wkBk, wkReq, wkWho,

@@ -1,5 +1,7 @@
 # English choices: DS · Foundations, DS · Components, DS · Categories & booking types (design pass v0.6, round 1, 19.10.2026)
 
+> **Round 3 (20.10.2026) supersedes some lines below:** "60 min" (not "1 h"), " · " between date and time, "Time off" for a person (not "Holiday"), seats for classes (not spots), no average bill = only the restaurant's expected bill on the client site (the business's average check is back behind See revenue), one language at the first release. See `en-choices-r3-ds.md` and `EN-GLOSSARY.md` §6.
+
 Format: Turkmen (as drawn) → English · where · why, when it isn't obvious. Wordings already in EN-GLOSSARY §1–3 are not repeated. Each board ends with the components I added, renamed or removed.
 
 Exceptions to "no Turkmen on screen", kept on purpose:

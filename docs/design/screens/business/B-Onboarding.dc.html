@@ -200,7 +200,7 @@ a{color:#4429d6;text-decoration:none}a:hover{color:#3520a6}
 label.b{position:relative}
 label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .opn{font-weight:400;color:#5a5a64}
-/* v0.6 round 2 · English wizard: SignInCodeStep, LanguageSwitcher, StatusBadge (icon), team "Uses the app", overnight hours */
+/* v0.6 rounds 2–3 · English wizard: SignInCodeStep (first-release copy), StatusBadge (icon), team "Uses the app", overnight hours, city select */
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .otp{display:flex;gap:12px}
 .cbx[readonly]{background:#f6f6f8;border-color:#e6e6ea}
@@ -218,11 +218,6 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 .nw{white-space:nowrap;font-variant-numeric:tabular-nums}
 .sub b{font-weight:600;color:#101014}
 .sic{display:flex;flex-direction:column;gap:24px;margin:0}
-.seg{display:inline-flex;padding:3px;background:#f0f0f3;border-radius:10px;gap:2px;flex:none}
-.sgb{display:inline-flex;align-items:center;height:28px;padding:0 10px;border:0;border-radius:8px;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:#5a5a64;cursor:pointer;white-space:nowrap}
-.sgb:hover{color:#101014}
-.sgb.on{background:#ffffff;color:#101014;box-shadow:0 0 0 1px #e6e6ea}
-.sgb:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
 .nday{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:999px;background:#f4f4f6;border:1px solid #e6e6ea;font-size:12px;line-height:16px;font-weight:600;color:#41505f;white-space:nowrap}
 .nday svg{flex:none}
 .tsub{grid-column:1 / -1;display:flex;align-items:center;gap:4px 12px;flex-wrap:wrap;padding:0 0 4px}
@@ -244,10 +239,6 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <div style="display: flex; align-items: center; gap: 10px; padding: 0 12px">
 <img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral" style="height: 28px; width: auto; display: block">
 <span class="bz">Business</span>
-<span style="flex: 1"></span>
-<div class="seg" role="radiogroup" aria-label="Language">
-<sc-for list="{{langs}}" as="l" hint-placeholder-count="3"><button class="{{l.cls}}" type="button" role="radio" aria-checked="{{l.on}}" lang="{{l.code}}" aria-label="{{l.name}}" onClick="{{l.pick}}">{{l.short}}</button></sc-for>
-</div>
 </div>
 <div style="display: flex; flex-direction: column; gap: 4px; padding: 0 12px">
 <span style="font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em">{{lpTitle}}</span>
@@ -272,9 +263,9 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <div class="mb">
 <div class="mbi">
 <img src="../../assets/brand/yeral-lockup-ink.png" alt="Ýeral Business" style="height: 24px; width: auto; display: block; flex: none">
-<span style="font-size: 14px; line-height: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0"><span style="color: #6e6e78">{{stepNum}}</span> · {{stepName}}</span>
+<span style="font-size: 14px; line-height: 18px; font-weight: 600; min-width: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden"><span style="color: #6e6e78; white-space: nowrap">{{stepNum}}</span> · {{stepName}}</span>
 <div style="flex: 1"></div>
-<sc-if value="{{canSave}}" hint-placeholder-val="{{true}}"><button class="lnk" onClick="{{saveExit}}">Continue later</button></sc-if>
+<sc-if value="{{canSave}}" hint-placeholder-val="{{true}}"><button class="lnk" onClick="{{saveExit}}" style="flex: none; max-width: 50%; text-align: right">Continue later</button></sc-if>
 </div>
 <div class="mbp" role="progressbar" aria-label="Setup steps" aria-valuemin="1" aria-valuemax="8" aria-valuenow="{{stepIdx}}"><div class="mbf" style="width: {{pct}}%"></div></div>
 </div>
@@ -305,22 +296,23 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px">
 <sc-if value="{{showSend}}" hint-placeholder-val="{{true}}"><button class="b b-pri" type="submit" style="width: 100%">Send code</button></sc-if>
 <sc-if value="{{sending}}" hint-placeholder-val="{{false}}"><button class="b b-pri" type="button" aria-disabled="true" style="width: 100%"><svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>Sending…</button></sc-if>
-<sc-if value="{{phoneLimited}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too many codes. Try again in 15 minutes.</span></span></sc-if>
+<sc-if value="{{phoneLimited}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too many codes. Try again in 42 minutes.</span></span></sc-if>
 </div>
 </form>
 </sc-if>
 
 <sc-if value="{{authCode}}" hint-placeholder-val="{{false}}">
 <form class="sic" aria-label="Code" onSubmit="{{confirm}}">
-<sc-if value="{{onScreen}}" hint-placeholder-val="{{false}}"><div class="co c-neu fcl" role="status" style="max-width: 400px"><span>Your code: <b class="fcd">{{shownCode}}</b></span></div></sc-if>
+<sc-if value="{{showCallout}}" hint-placeholder-val="{{true}}"><div class="co c-neu fcl" role="status" style="max-width: 400px"><span>Your code: <b class="fcd">{{shownCode}}</b></span></div></sc-if>
 <div class="fld" style="gap: 8px">
 <span class="flab" id="ob-code-l">{{codeLabel}}</span>
 <div class="otp" role="group" aria-labelledby="ob-code-l" aria-busy="{{checking}}">
 <sc-for list="{{codeBoxes}}" as="c" hint-placeholder-count="4"><input class="{{c.cls}}" type="text" inputmode="numeric" autocomplete="{{c.ac}}" aria-label="{{c.aria}}" aria-invalid="{{c.inv}}" value="{{c.v}}" disabled="{{c.dis}}" readonly="{{c.ro}}" onChange="{{c.change}}" onKeyDown="{{c.key}}" ref="{{c.setRef}}"></sc-for>
 </div>
 <sc-if value="{{hasCodeErr}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>{{codeErrText}}</span></span></sc-if>
+<sc-if value="{{codeLimited}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too many codes. Try again in 42 minutes.</span></span></sc-if>
 <sc-if value="{{lockOver}}" hint-placeholder-val="{{false}}"><span class="hint" role="status">The old code no longer works.</span></sc-if>
-<sc-if value="{{showResent}}" hint-placeholder-val="{{false}}"><span class="hint" role="status">New code sent.</span></sc-if>
+<sc-if value="{{showResent}}" hint-placeholder-val="{{false}}"><span class="hint" role="status">{{resentText}}</span></sc-if>
 <sc-if value="{{showAutoHint}}" hint-placeholder-val="{{true}}"><span class="hint">It checks itself after the 4th digit.</span></sc-if>
 </div>
 <sc-if value="{{showConfirm}}" hint-placeholder-val="{{true}}">
@@ -330,8 +322,7 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <sc-if value="{{showResendLink}}" hint-placeholder-val="{{true}}"><button class="lnk" type="button" disabled="{{resendDis}}" onClick="{{resend}}" style="align-self: flex-start">{{resendText}}</button></sc-if>
 </div>
 </sc-if>
-<sc-if value="{{lockOverBtn}}" hint-placeholder-val="{{false}}"><button class="b b-pri" type="button" onClick="{{newCode}}" style="width: 100%; max-width: 400px">Send a new code</button></sc-if>
-<sc-if value="{{codeLimited}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert" style="margin-top: -12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too many codes. Try again in 15 minutes.</span></span></sc-if>
+<sc-if value="{{lockOverBtn}}" hint-placeholder-val="{{false}}"><button class="b b-pri" type="button" onClick="{{newCode}}" style="width: 100%; max-width: 400px">Get a new code</button></sc-if>
 </form>
 </sc-if>
 
@@ -371,6 +362,7 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <div style="display: flex; flex-direction: column; gap: 12px">
 <p class="cap" style="margin: 0">By tapping “Send code”, you agree to the <a href="#">Terms of use</a> and the <a href="#">Privacy policy</a>.</p>
 <p style="margin: 0; font-size: 15px; line-height: 22px; color: #5a5a64">Already have an account? <a href="B-Login.dc.html" style="font-weight: 600">Log in</a></p>
+<p style="margin: 0; font-size: 15px; line-height: 22px; color: #5a5a64">Want to look around first? <a href="B-Calendar.dc.html" style="font-weight: 600">Try the business app</a> — a demo workspace, no sign-in needed.</p>
 </div>
 </sc-if>
 </section>
@@ -436,6 +428,11 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <h1 class="h1">Where will clients find you?</h1>
 <p class="sub">Search for the address, then fine-tune the pin on the map. Clients use this pin to find their way.</p>
 </header>
+
+<div class="fld" style="max-width: 320px">
+<label for="ob-city">City</label>
+<span class="selw"><select id="ob-city" class="inp sel" style="width: 100%" value="{{city}}" onChange="{{setCity}}"><sc-for list="{{cities}}" as="c" hint-placeholder-count="6"><option value="{{c}}">{{c}}</option></sc-for></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+</div>
 
 <div class="fld">
 <label for="ob-addr">Address</label>
@@ -545,7 +542,7 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 </div>
 </sc-for>
 </div>
-<p class="cap" style="margin: 0">A day can close after midnight: 18:00–02:00 means open until 02:00 the next day. You can add special days (holidays, time off) later in Settings.</p>
+<p class="cap" style="margin: 0">A day can close after midnight: 18:00–02:00 means open until 02:00 the next day. The part after midnight must end before the next day opens. You can add special days (holidays, time off) later in Settings.</p>
 </section>
 </sc-if>
 
@@ -573,7 +570,7 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <div class="{{r.cls}}">
 <input type="checkbox" class="cb" checked="{{r.on}}" onChange="{{r.toggle}}" aria-label="{{r.cbAria}}">
 <input class="inp m nm nmc" placeholder="Service name" aria-label="{{r.nameAria}}" value="{{r.name}}" disabled="{{r.off}}" onChange="{{r.setName}}">
-<span class="selw dur"><select class="inp m sel" style="width: 100%" aria-label="{{r.durAria}}" value="{{r.min}}" disabled="{{r.off}}" onChange="{{r.setMin}}"><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">1 h</option><option value="75">1 h 15 min</option><option value="90">1 h 30 min</option><option value="105">1 h 45 min</option><option value="120">2 h</option><option value="150">2 h 30 min</option><option value="180">3 h</option><option value="240">4 h</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+<span class="selw dur"><select class="inp m sel" style="width: 100%" aria-label="{{r.durAria}}" value="{{r.min}}" disabled="{{r.off}}" onChange="{{r.setMin}}"><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">60 min</option><option value="75">1 h 15 min</option><option value="90">1 h 30 min</option><option value="105">1 h 45 min</option><option value="120">2 h</option><option value="150">2 h 30 min</option><option value="180">3 h</option><option value="240">4 h</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
 <span class="prw"><sc-if value="{{r.isFrom}}" hint-placeholder-val="{{false}}"><span class="pfr">from</span></sc-if><input class="inp m" inputmode="numeric" placeholder="0" aria-label="{{r.priceAria}}" value="{{r.price}}" disabled="{{r.off}}" onChange="{{r.setPrice}}"><span class="sfx">TMT</span></span>
 </div>
 </sc-for>
@@ -630,13 +627,13 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 </sc-for>
 </div>
 <button class="addrow" onClick="{{addStaff}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Add a team member</button>
-<p class="cap" style="margin: 0">A phone number is required for everyone — it’s how they log in. Invites work for 7 days; each person sees theirs when they sign in with the invited number.</p>
+<p class="cap" style="margin: 0">A phone number is required for everyone — it’s how they sign in. Invites work for 7 days; each person sees theirs when they sign in with the invited number.</p>
 <dl class="rl">
 <dt>Specialist</dt><dd>Sees their own calendar, bookings and clients; answers their own requests.</dd>
 <dt>Admin</dt><dd>Manages the whole calendar and all clients; doesn’t see revenue.</dd>
 <dt>Uses the app: off</dt><dd>The specialist is bookable at once but never signs in. You and admins handle their requests.</dd>
 </dl>
-<p class="cap" style="margin: 0">You can change what each access level may do later in Settings → Permissions.</p>
+<p class="cap" style="margin: 0">Access levels are fixed at the first release. See what each one can do in Settings → Permissions.</p>
 </div>
 </sc-if>
 <sc-if value="{{soloOn}}" hint-placeholder-val="{{false}}">
@@ -672,7 +669,7 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <sc-if value="{{manOn}}" hint-placeholder-val="{{true}}">
 <div class="srow">
 <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><label for="ob-hold" class="swt">Hold requests for</label><span class="cap">If no one answers in this time, the request is cancelled and the client is offered other times. The time counts only while you’re open.</span></div>
-<span class="selw"><select id="ob-hold" class="inp sel" style="width: 100%" value="{{hold}}" onChange="{{setHold}}"><option value="15">15 min</option><option value="30">30 min</option><option value="60">1 h</option><option value="120">2 h</option><option value="360">6 h</option><option value="1440">24 h</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+<span class="selw"><select id="ob-hold" class="inp sel" style="width: 100%" value="{{hold}}" onChange="{{setHold}}"><option value="15">15 min</option><option value="30">30 min</option><option value="60">60 min</option><option value="120">2 h</option><option value="360">6 h</option><option value="1440">24 h</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
 </div>
 <sc-if value="{{showWho}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 12px; padding: 20px 0; border-top: 1px solid #e6e6ea">
@@ -728,7 +725,7 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 </div>
 </div>
 <div style="display: flex; flex-direction: column; gap: 12px; min-width: 0">
-<span class="lbl">Your page link</span>
+<span class="lbl">Link and QR</span>
 <span style="font-size: 15px; line-height: 22px; font-weight: 600">Your link and QR code are ready — they open to clients after the review.</span>
 <div class="linkf">
 <span class="mono" style="flex: 1; min-width: 0; font-size: 14px; line-height: 20px; color: #101014; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{slugUrl}}</span>
@@ -797,7 +794,7 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["phone","business","address","hours","services","team","rules","done"],"default":"business","section":"Flow"},"signIn":{"editor":"enum","options":["phone","phoneSending","phoneIncomplete","phoneLandline","phoneLimit","code","codeChecking","codeWrong","codeLocked","codeLockOver","codeResendReady","codeResent","codeLimit","name"],"default":"phone","section":"Flow"},"codeOnScreen":{"editor":"boolean","default":false,"section":"Flow"},"homeBased":{"editor":"boolean","default":false,"section":"Flow"},"overnight":{"editor":"boolean","default":false,"section":"Flow"},"fromSwitcher":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1100}}'>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["phone","business","address","hours","services","team","rules","done"],"default":"business","section":"Flow"},"signIn":{"editor":"enum","options":["phone","phoneSending","phoneIncomplete","phoneLandline","phoneLimit","code","codeChecking","codeWrong","codeLocked","codeLockOver","codeResendReady","codeResent","codeLimit","name"],"default":"phone","section":"Flow"},"sms":{"editor":"boolean","default":false,"section":"Flow"},"homeBased":{"editor":"boolean","default":false,"section":"Flow"},"overnight":{"editor":"enum","options":["off","on","error"],"default":"off","section":"Flow"},"fromSwitcher":{"editor":"boolean","default":false,"section":"Flow"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1100}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -817,28 +814,31 @@ class Component extends DCLogic {
     const pi = ORDER.indexOf(P.step);
     const p0 = Math.max(pi >= 0 ? pi : 1, fs ? 1 : 0);
     const home = !!(P.homeBased ?? false);
-    const late = !!(P.overnight ?? false);
+    // tweak `overnight`: off · on (Friday 10:00–02:00) · error (Monday 10:00–09:30 runs past Tuesday’s 09:00 opening)
+    const ovn = P.overnight === true ? 'on' : (['on', 'error'].indexOf(P.overnight) >= 0 ? P.overnight : 'off');
+    const late = ovn !== 'off';
     const verified = p0 > 0 || fs;
     const fresh = fs && p0 <= 1;
     const picked = p0 > 2 || home;
     const day = (n, sh, from, to) => ({ n, sh, open: true, from, to, brk: null });
     const sv = (id, g, name, min, price, from) => ({ id, g, name, min, price, from: !!from, on: true });
     const s = {
-      cur: p0, reached: p0, lang: 'en',
+      cur: p0, reached: p0,
       // 1 · sign in (SignInCodeStep) + name; the owner = Maýsa (business-demo.json → me)
       auth: verified ? 'ok' : 'phone', phone: verified ? '65102030' : '', phoneErr: false, sending: false, sends: 0, sentTo: '', limited: false,
       code: ['', '', '', ''], codeErr: false, wrong: 0, lock: 0, lockOver: false, checking: false, left: 0, resent: false, codeIdx: 0,
       first: verified ? 'Maýsa' : '', last: verified ? 'Annaýewa' : '', nameErr: false,
       // 2 · business (appointment categories only at the first release)
       biz: fresh ? '' : 'Glow Studio', cat: fresh ? '' : 'Beauty salon', catQ: '',
-      // 3 · address
+      // 3 · address (city first: the market’s cities)
+      city: 'Ashgabat',
       addrQ: picked ? '247 Bitarap Türkmenistan Avenue' : '247 Bitarap Türkmenistan', addr: picked ? 0 : -1,
       pin: { x: 47, y: 52 }, drag: false, off: { dx: 0, dy: 0 }, home: home, floor: '2nd floor',
       entrance: 'Door next to the shopping centre, lift to the 2nd floor',
-      // 4 · hours (business-demo.json → hours); tweak `overnight`: Friday 10:00–02:00
+      // 4 · hours (business-demo.json → hours); tweak `overnight`
       same: !late,
-      days: [day('Monday', 'Mo', '09:00', '20:00'), day('Tuesday', 'Tu', '09:00', '20:00'), day('Wednesday', 'We', '09:00', '20:00'), day('Thursday', 'Th', '09:00', '20:00'),
-        late ? day('Friday', 'Fr', '10:00', '02:00') : day('Friday', 'Fr', '09:00', '20:00'), day('Saturday', 'Sa', '09:00', '20:00'), day('Sunday', 'Su', '10:00', '18:00')],
+      days: [ovn === 'error' ? day('Monday', 'Mo', '10:00', '09:30') : day('Monday', 'Mo', '09:00', '20:00'), day('Tuesday', 'Tu', '09:00', '20:00'), day('Wednesday', 'We', '09:00', '20:00'), day('Thursday', 'Th', '09:00', '20:00'),
+        ovn === 'on' ? day('Friday', 'Fr', '10:00', '02:00') : day('Friday', 'Fr', '09:00', '20:00'), day('Saturday', 'Sa', '09:00', '20:00'), day('Sunday', 'Su', '10:00', '18:00')],
       // 5 · services (demo-data.json → businesses[0], s1–s11)
       svc: [
         sv('s1', 'Hair', 'Women’s haircut', 60, '80'), sv('s2', 'Hair', 'Hair styling', 45, '60'), sv('s3', 'Hair', 'Hair colouring', 120, '250', true), sv('s4', 'Hair', 'Children’s haircut', 30, '40'),
@@ -862,7 +862,7 @@ class Component extends DCLogic {
       copied: false, qr: false, invited: false,
       toast: null
     };
-    // SignInCodeStep states (tweak `signIn`, step 1 only) — the same seeds as B-Login
+    // SignInCodeStep states (tweak `signIn`, step 1 only) — the same seeds as B-Login (5 codes per number per hour)
     if (p0 === 0) {
       const tw = P.signIn ?? 'phone';
       const MAYSA = '65102030';
@@ -870,7 +870,7 @@ class Component extends DCLogic {
       if (tw === 'phoneSending') Object.assign(s, { phone: MAYSA, sending: true });
       if (tw === 'phoneIncomplete') Object.assign(s, { phone: '651020', phoneErr: 'short' });
       if (tw === 'phoneLandline') Object.assign(s, { phone: '12456789', phoneErr: 'land' });
-      if (tw === 'phoneLimit') Object.assign(s, { phone: MAYSA, sentTo: MAYSA, sends: 3, limited: true });
+      if (tw === 'phoneLimit') Object.assign(s, { phone: MAYSA, sentTo: MAYSA, sends: 5, limited: true });
       if (tw === 'code') code({});
       if (tw === 'codeChecking') code({ code: ['4', '8', '2', '1'], checking: true, left: 38 });
       if (tw === 'codeWrong') code({ code: ['4', '8', '2', '7'], codeErr: true, wrong: 1, left: 31 });
@@ -878,7 +878,7 @@ class Component extends DCLogic {
       if (tw === 'codeLockOver') code({ wrong: 3, lock: 0, lockOver: true, left: 0 });
       if (tw === 'codeResendReady') code({ code: ['4', '', '', ''], left: 0 });
       if (tw === 'codeResent') code({ sends: 2, left: 59, resent: true, codeIdx: 1 });
-      if (tw === 'codeLimit') code({ code: ['4', '8', '', ''], sends: 3, limited: true, left: 0 });
+      if (tw === 'codeLimit') code({ sends: 5, limited: true, left: 0, codeIdx: 4 });
       if (tw === 'name') Object.assign(s, { auth: 'ok', phone: MAYSA, first: '', last: '' });
     }
     return s;
@@ -933,7 +933,8 @@ class Component extends DCLogic {
   renderVals() {
     const P = this.props;
     const f = P.font ?? 'Onest';
-    const onScreen = !!(P.codeOnScreen ?? false);
+    // first release: the code shows on the screen (default); the SMS copy is the later variant (tweak `sms`)
+    const onScreen = !(P.sms ?? false);
     const fs = !!(P.fromSwitcher ?? false);
     const s = this.state;
     const set = (patch) => this.setState(patch);
@@ -946,7 +947,7 @@ class Component extends DCLogic {
     const fmtPhone = (d) => [d.slice(0, 2), d.slice(2, 4), d.slice(4, 6), d.slice(6, 8)].filter(Boolean).join(' ');
     const mask = (d) => '+993 ' + d.slice(0, 2) + ' •• •• ' + d.slice(6, 8);
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const MAX_SENDS = 3;
+    const MAX_SENDS = 5;
 
     const cur = s.cur;
     const reached = Math.max(s.reached, cur);
@@ -966,7 +967,7 @@ class Component extends DCLogic {
         code: ['', '', '', ''], codeErr: false, wrong: 0, lock: 0, lockOver: false, checking: false, codeIdx: sends
       }));
     };
-    const locked = s.lock > 0 || s.lockOver;
+    const locked = s.lock > 0 || s.lockOver || !!s.limited;
     const check = (code) => {
       set({ code, codeErr: false, resent: false, checking: true });
       this.later(() => {
@@ -1054,9 +1055,14 @@ class Component extends DCLogic {
       { t: '247/1 Bitarap Türkmenistan Avenue', sub: 'Building · inside the courtyard', x: 55, y: 64 },
       { t: 'Bitarap Türkmenistan Avenue', sub: 'Street · you place the pin yourself', x: 36, y: 46 }
     ];
-    const picked = s.addr >= 0;
-    const addrShort = picked ? SUGS[s.addr].t : '';
-    const sugs = SUGS.map((g, i) => ({ t: g.t, sub: g.sub, pick: () => set({ addr: i, addrQ: g.t, pin: { x: g.x, y: g.y } }) }));
+    // other cities: the typed street as one suggestion, the pin placed by hand
+    const CITIES = ['Ashgabat', 'Arkadag', 'Balkanabat', 'Dashoguz', 'Mary', 'Turkmenabat'];
+    const typed = s.addrQ.trim();
+    const sugList = s.city === 'Ashgabat' ? SUGS : [{ t: typed, sub: 'Street · you place the pin yourself', x: 50, y: 50 }];
+    const picked = s.addr >= 0 && s.addr < sugList.length;
+    const addrShort = picked ? sugList[s.addr].t : '';
+    const addrFull = picked ? addrShort + ', ' + s.city : '';
+    const sugs = sugList.map((g, i) => ({ t: g.t, sub: g.sub + ' · ' + s.city, pick: () => set({ addr: i, addrQ: g.t, pin: { x: g.x, y: g.y } }) }));
     const ptr = (e, off) => {
       const el = e && e.currentTarget;
       const r = el && typeof el.getBoundingClientRect === 'function' ? el.getBoundingClientRect() : null;
@@ -1097,9 +1103,12 @@ class Component extends DCLogic {
       if (b <= a) b += 1440;
       return [a, b];
     };
-    const dayErr = (d) => {
+    // the part after midnight must end before the next day opens (ending as it opens is fine)
+    const dayErr = (d, i) => {
       if (!d.open) return '';
       if (d.to === d.from) return 'Opening and closing can’t be at the same time.';
+      const nx = eff[(i + 1) % 7];
+      if (toMin(d.to) < toMin(d.from) && nx.open && toMin(d.to) > toMin(nx.from)) return 'Closes after ' + nx.n + ' opens. Pick an earlier time.';
       if (d.brk) {
         const sp = span(d);
         const norm = (t) => { let m = toMin(t); if (m < sp[0]) m += 1440; return m; };
@@ -1113,7 +1122,7 @@ class Component extends DCLogic {
     const nextDay = (d) => d.open && toMin(d.to) < toMin(d.from);
     const days = eff.map((d, i) => {
       const mirror = s.same && i >= 1 && i <= 4;
-      const err = dayErr(d);
+      const err = dayErr(d, i);
       const bf = d.brk ? d.brk.from : '13:00';
       const bt = d.brk ? d.brk.to : '14:00';
       const nd = nextDay(d);
@@ -1139,7 +1148,7 @@ class Component extends DCLogic {
       };
     });
     const anyOpen = eff.some((d) => d.open);
-    const v3 = anyOpen && eff.every((d) => !dayErr(d));
+    const v3 = anyOpen && eff.every((d, i) => !dayErr(d, i));
     const h3 = !anyOpen ? 'At least one day must be open.' : 'Check the times.';
     const hp = [];
     for (let k = 0; k < 7;) {
@@ -1201,7 +1210,7 @@ class Component extends DCLogic {
       let cap = '';
       let err = false;
       if (bad) { cap = 'Mobile numbers only — enter a number starting with 6 or 7.'; err = true; }
-      else if (!phoneOk(m.phone)) cap = usesApp ? 'A phone number is required — they log in with it.' : 'A phone number is required. They can start using the app later with this number.';
+      else if (!phoneOk(m.phone)) cap = usesApp ? 'A phone number is required — they sign in with it.' : 'A phone number is required. They can start using the app later with this number.';
       else if (usesApp) cap = 'They’ll see the invite when they sign in with ' + mask(m.phone) + ' · valid 7 days';
       else cap = 'Bookable at once, never signs in — you and admins handle their requests. They can start using the app later with this number.';
       return {
@@ -1227,7 +1236,7 @@ class Component extends DCLogic {
     const invitable = solo ? 0 : filled.filter((m) => complete(m) && (m.role === 'admin' || m.app)).length;
 
     // ---------- 7 · booking rules ----------
-    const HOLD = { '15': '15 min', '30': '30 min', '60': '1 h', '120': '2 h', '360': '6 h', '1440': '24 h' };
+    const HOLD = { '15': '15 min', '30': '30 min', '60': '60 min', '120': '2 h', '360': '6 h', '1440': '24 h' };
     const manual = s.mode === 'manual';
     const rulesSum = manual ? 'I confirm · ' + (HOLD[s.hold] || '30 min') : 'Instant confirmation';
     const who = (id) => ({ on: s.who === id, cls: s.who === id ? 'rro on' : 'rro', pick: () => set({ who: id }) });
@@ -1263,7 +1272,7 @@ class Component extends DCLogic {
     const sums = [
       fs ? ownerFull + ' · +993 ' + fmtPhone(s.phone) : '+993 ' + fmtPhone(s.phone),
       bizName + ' · ' + s.cat,
-      (s.home ? 'From home · ' : '') + addrShort,
+      (s.home ? 'From home · ' : '') + addrFull,
       hoursSum,
       onRows.length + (onRows.length === 1 ? ' service' : ' services'),
       solo ? 'I work alone' : filled.length + (filled.length === 1 ? ' person' : ' people'),
@@ -1285,14 +1294,12 @@ class Component extends DCLogic {
         hasSum: done && !!sums[i], sum: sums[i]
       };
     });
-    const LANGS = [['en', 'EN', 'English'], ['tk', 'TK', 'Türkmençe'], ['ru', 'RU', 'Русский']];
     const signedIn = s.auth === 'ok';
     const authPhone = s.auth === 'phone';
     const authCode = s.auth === 'code';
 
     return {
       fontStack: "'" + f + "', ui-sans-serif, -apple-system, 'Segoe UI', sans-serif",
-      langs: LANGS.map((l) => ({ code: l[0], short: l[1], name: l[2], on: s.lang === l[0], cls: s.lang === l[0] ? 'sgb on' : 'sgb', pick: () => set({ lang: l[0] }) })),
       // left panel + phone progress
       steps: steps,
       fs: fs, notFs: !fs,
@@ -1331,17 +1338,19 @@ class Component extends DCLogic {
       codeBoxes: codeBoxes,
       checking: !!s.checking,
       notChecking: !s.checking,
-      hasCodeErr: !!s.codeErr || s.lock > 0,
+      hasCodeErr: (!!s.codeErr || s.lock > 0) && !s.limited,
       codeErrText: s.lock > 0 ? 'Too many tries. Try again in ' + s.lock + (s.lock === 1 ? ' second.' : ' seconds.') : 'Wrong code. ' + left3 + (left3 === 1 ? ' try' : ' tries') + ' left.',
       lockOver: !!s.lockOver,
       lockOverBtn: !!s.lockOver && !s.limited,
       showResent: !!s.resent && !s.codeErr && !locked,
       showAutoHint: !locked && !s.checking && !s.codeErr,
       showConfirm: !locked,
+      showCallout: onScreen && !locked,
+      resentText: onScreen ? 'Here’s a new code.' : 'New code sent.',
       showResendLink: !s.limited,
       codeLimited: !!s.limited,
       resendDis: s.left > 0 || !!s.checking,
-      resendText: s.left > 0 ? 'Send a new code in ' + mm + ':' + (ss < 10 ? '0' : '') + ss : 'Send a new code',
+      resendText: s.left > 0 ? 'Get a new code in ' + mm + ':' + (ss < 10 ? '0' : '') + ss : 'Get a new code',
       resend: () => { if (s.left > 0 || s.checking) return; sendNew(); },
       newCode: () => sendNew({ wrong: 0, lockOver: false, lock: 0 }),
       confirm: confirm,
@@ -1367,9 +1376,12 @@ class Component extends DCLogic {
       catEmpty: catGroups.length === 0,
       pickOther: () => set({ cat: OTHER, catQ: '' }),
       // 3 · address
+      city: s.city,
+      cities: CITIES,
+      setCity: (e) => { const c = val(e); if (CITIES.indexOf(c) >= 0 && c !== s.city) set({ city: c, addr: -1, addrQ: '' }); },
       addrQ: s.addrQ,
       onAddr: (e) => set({ addrQ: val(e).slice(0, 80), addr: -1 }),
-      showSug: !picked && s.addrQ.trim().length >= 2,
+      showSug: !picked && typed.length >= 2,
       sugs: sugs,
       mapCls: 'map' + (!picked ? ' idle' : '') + (s.drag ? ' drag' : ''),
       mapDown: mapDown, mapMove: mapMove, mapUp: mapUp, pinDown: pinDown, pinKey: pinKey,
@@ -1423,7 +1435,7 @@ class Component extends DCLogic {
       // 8 · done
       doneTitle: bizName + ' is ready!',
       doneName: bizName,
-      cardMeta: s.cat + ' · ' + (s.home ? 'approximate area shown' : addrShort),
+      cardMeta: s.cat + ' · ' + (s.home ? s.city + ' · approximate area shown' : addrFull),
       copied: !!s.copied, notCopied: !s.copied,
       copy: () => set({ copied: true }),
       qrPath: qrPath,
