@@ -11,6 +11,8 @@ import {
   blockParamSchema,
   blocksQuerySchema,
   businessCancelSchema,
+  calendarQuerySchema,
+  calendarViewSchema,
   freeTimesQuerySchema,
   freeTimesSchema,
   newBookingResultSchema,
@@ -25,6 +27,7 @@ import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { requireMember } from '../team/service'
 import { setInternalStatus } from '../settings/statuses'
 import { addBlock, blocksFor, removeBlock } from './blocks'
+import { calendarView } from './view'
 import { addBooking, cancelByBusiness, freeTimes, moveBooking, undoBooking } from './service'
 
 const tags = ['calendar']
@@ -106,7 +109,20 @@ const internalStatusRoute = createRoute({
   responses: { ...noContent, 400: errors[400], 409: errors[409], ...denied },
 })
 
+const calendarRoute = createRoute({
+  method: 'get',
+  path: '/w/{slug}/calendar',
+  tags,
+  summary: '"Senenama": a day or a week, everyone the reader sees or one person, with layers, markers and the day’s line',
+  request: { params: workspaceParamSchema, query: calendarQuerySchema },
+  responses: { 200: json(calendarViewSchema), 400: errors[400], ...denied },
+})
+
 export const calendarRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(calendarRoute, async (c) => {
+    const { business, actor } = await requireMember(c, c.req.valid('param').slug)
+    return c.json(await calendarView(c.var.deps, business, actor, c.req.valid('query')), 200)
+  })
   .openapi(internalStatusRoute, async (c) => {
     const { slug, code } = c.req.valid('param')
     const { business, actor } = await requireMember(c, slug)

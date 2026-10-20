@@ -39,6 +39,7 @@ import type {
 import type {
   blockInputSchema,
   businessCancelSchema,
+  calendarQuerySchema,
   freeTimesQuerySchema,
   moveBookingSchema,
   newBookingSchema,
@@ -623,6 +624,14 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   // a move or a cancel may also settle the client's waiting move: the requests and the switcher's counts
   const booked = (slug: string) => invalidate(keys.calendar(slug), keys.availabilityAll(slug), keys.requests(slug), keys.workspaces())
   const calendar = {
+    /** "Senenama" (book B-16, B-17): a day or a week, everyone the reader sees or one person, the day's lines. */
+    view: (slug: string, p: z.input<typeof calendarQuerySchema>) => {
+      const query = clean(p)
+      return queryOptions({
+        queryKey: keys.calendarView(slug, query),
+        queryFn: ({ signal }) => call(w.calendar.$get({ param: { slug }, query: query as never }, abortWith(signal))),
+      })
+    },
     /** The nearest four, a day's starts with who is free at each, and the 14-day strip; a specialist gets their own. */
     freeTimes: (slug: string, p: Params<typeof freeTimesQuerySchema, 'services'>) => {
       const query = clean({ ...p, services: p.services.join(',') })

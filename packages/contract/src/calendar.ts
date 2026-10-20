@@ -3,21 +3,30 @@
  * for a client who calls or walks in, confirmed at once, and moving or cancelling one. A specialist books, moves and
  * cancels only their own (chapter 3).
  */
-import { TEAM_CANCEL_REASONS } from '@yeral/domain/model'
+import { BOOKING_SOURCES, BOOKING_STATUSES, CANCELLED_BY, TEAM_CANCEL_REASONS } from '@yeral/domain/model'
+import { LEVELS } from '@yeral/domain/permissions'
 import { z } from 'zod'
 import { dayStateSchema } from './availability'
 import {
   bookingCodeSchema,
+  bookingTypeSchema,
   epochSchema,
   idListQuery,
   idSchema,
+  langQuerySchema,
   minuteSchema,
+  moneySchema,
   phoneInputSchema,
+  phoneSchema,
+  photoSchema,
+  priceSchema,
   slugSchema,
   startMinuteSchema,
   uniqueIdsSchema,
   ymdSchema,
 } from './common'
+import { teamItemSchema } from './requests'
+import { internalStatusSchema } from './settings'
 
 export const freeTimesQuerySchema = z.object({
   /** In the order they run. */
@@ -155,3 +164,107 @@ export const blockDeleteQuerySchema = z.object({ scope: z.enum(['one', 'series']
 
 /** "Içerki ýagdaý" in the drawer of a confirmed booking: one of the enabled statuses, or none. */
 export const setInternalStatusSchema = z.object({ statusId: idSchema.nullable() }).strict().meta({ id: 'SetInternalStatus' })
+
+// ── The calendar (B-16, B-17) ──
+
+/** "Senenama": a day or a week from `date`, everyone the reader sees or one person, cancelled bookings on request. */
+export const calendarQuerySchema = langQuerySchema.extend({
+  date: ymdSchema,
+  /** 1 = "Gün" (a day), 7 = "Hepde" (a week). */
+  days: z.coerce
+    .number()
+    .int()
+    .refine((d) => d === 1 || d === 7, 'A day or a week')
+    .default(1),
+  /** "Bir işgär": one person's column. */
+  staff: idSchema.optional(),
+  /** "Ýatyrylanlary görkez". */
+  cancelled: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+})
+
+const stretchSchema = z.object({ start: minuteSchema, end: minuteSchema })
+
+/** One person's day: when they work (their shift inside the business day), their breaks, or why they're off. */
+export const calendarDaySchema = z.object({
+  date: ymdSchema,
+  working: z.object({ open: minuteSchema, close: minuteSchema }).nullable(),
+  breaks: z.array(stretchSchema),
+  /** "Dynç güni", a personal day off by its name, or the business closed (a special day by its name). */
+  off: z.object({ kind: z.enum(['business-closed', 'dayoff', 'exception']), name: z.string().nullable() }).nullable(),
+})
+
+/** A column: one bookable person; someone removed with bookings kept stays while those last. */
+export const calendarColumnSchema = z.object({
+  staffId: idSchema,
+  name: z.string(),
+  photo: photoSchema.nullable(),
+  level: z.enum(LEVELS),
+  /** "programmasyz": works without the app. */
+  hasApp: z.boolean(),
+  removed: z.boolean(),
+  days: z.array(calendarDaySchema),
+})
+
+const calendarItemSchema = teamItemSchema.extend({
+  /** "Hyzmatdan soňky arakesme": not bookable after the item. */
+  bufferAfter: z.number().int().min(0),
+})
+
+/** A booking block: its status as people see it now, who and what, the team's markers; a waiting move as its ghost. */
+export const calendarBookingSchema = z
+  .object({
+    code: bookingCodeSchema,
+    type: bookingTypeSchema,
+    date: ymdSchema,
+    start: startMinuteSchema,
+    end: minuteSchema,
+    status: z.enum(BOOKING_STATUSES),
+    cancelledBy: z.enum(CANCELLED_BY).nullable(),
+    source: z.enum(BOOKING_SOURCES),
+    client: z.object({ name: z.string().nullable(), phone: phoneSchema.nullable() }),
+    items: z.array(calendarItemSchema),
+    price: priceSchema.nullable(),
+    /** One of `internalStatuses` (switched on). */
+    internalStatusId: idSchema.nullable(),
+    /** The client has a note "shown when they book" (a warning icon). */
+    alert: z.boolean(),
+    clientNote: z.string().nullable(),
+    internalNote: z.string().nullable(),
+    /** A request's answer time ("18 min"). */
+    holdUntil: epochSchema.nullable(),
+    /** The client's move waiting for an answer (B-21): drawn at the asked time. */
+    move: z
+      .object({
+        code: bookingCodeSchema,
+        date: ymdSchema,
+        start: startMinuteSchema,
+        end: minuteSchema,
+        items: z.array(calendarItemSchema),
+        holdUntil: epochSchema.nullable(),
+      })
+      .nullable(),
+  })
+  .meta({ id: 'CalendarBooking' })
+
+export const calendarViewSchema = z
+  .object({
+    from: ymdSchema,
+    to: ymdSchema,
+    columns: z.array(calendarColumnSchema),
+    bookings: z.array(calendarBookingSchema),
+    blocks: z.array(blockSchema),
+    /** "Başga ýerde" (book Q-272): the person's time taken in another workspace, with no details. */
+    elsewhere: z.array(z.object({ staffId: idSchema, date: ymdSchema, start: minuteSchema, end: minuteSchema })),
+    /**
+     * Each day's line: "16 ýazylyş · 3 haýyş · Girdeji (meýilleşdirilen): 1 410 TMT". `revenue` only with the right
+     * to see it; a specialist's is their own earnings.
+     */
+    summary: z.array(z.object({ date: ymdSchema, count: z.number().int(), requests: z.number().int(), revenue: moneySchema.nullable() })),
+    /** The ones switched on, for the chips and the legend. */
+    internalStatuses: z.array(internalStatusSchema),
+  })
+  .meta({ id: 'CalendarView' })
+export type CalendarView = z.infer<typeof calendarViewSchema>

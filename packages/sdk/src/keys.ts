@@ -53,4 +53,5 @@ export const keys = {
   // the business's own bookings (book B-23–B-27): every query of its calendar under its prefix
   calendar: (slug: string) => ['calendar', slug] as const,
   freeTimes: (slug: string, params: Record<string, unknown>) => ['calendar', slug, 'free-times', params] as const,
+  calendarView: (slug: string, params: Record<string, unknown>) => ['calendar', slug, 'view', params] as const,
 }
