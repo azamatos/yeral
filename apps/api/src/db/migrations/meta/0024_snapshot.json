@@ -1,5 +1,5 @@
 {
-  "id": "e5ed5620-460a-4925-9f56-f1e15c4bf310",
+  "id": "f24eea41-221e-4627-91bf-1cd04b9f1423",
   "prevId": "065e1328-a1a4-42b9-9611-7f5660435e8f",
   "version": "7",
   "dialect": "postgresql",
@@ -921,6 +921,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": true
+        },
+        "told": {
+          "name": "told",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         },
         "party_size": {
           "name": "party_size",

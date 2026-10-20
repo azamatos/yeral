@@ -168,6 +168,41 @@ export function reminderPlan(visitStart: number, now: number): PlannedReminder[]
   return out.sort((a, b) => a.runAt - b.runAt)
 }
 
+/**
+ * A booking as the client knows it: its date, start, and who does it (the items' staff ids in order). Kept on the
+ * booking when it's made (the client chose it, or agreed to it on the phone or at the desk) and when an SMS tells it.
+ */
+export interface Told {
+  date: string
+  start: number
+  staff: string
+}
+export const toldOf = (b: Pick<BookingState, 'date' | 'start'>, staffIds: readonly (string | null)[]): Told => ({
+  date: b.date,
+  start: b.start,
+  staff: staffIds.join(','),
+})
+export const sameTold = (a: Told, b: Told) => a.date === b.date && a.start === b.start && a.staff === b.staff
+
+/** A booking's news as queued: a confirmation (`confirmed`; `booked`, entered by the team) or a change it made (`moved`). */
+export type NewsQueued = 'confirmed' | 'booked' | 'moved'
+/** What a news SMS says when it goes. */
+export type NewsSms = 'confirmed' | 'booked' | 'moved' | 'movedWith' | 'staffChanged'
+
+/**
+ * What a booking's news SMS says when it goes (book B-24, B-26), from what the client knows (`told`) and the booking as
+ * it is (`now`). A confirmation tells the booking as it is; but one the client chose online and the business changed
+ * before the confirmation went is told as the change. A change says what changed since the client knew it: the time
+ * (`moved`), the time and who (`movedWith`), or who (`staffChanged`); nothing when it's back as they knew it.
+ */
+export function newsSms(queued: NewsQueued, chosenOnline: boolean, told: Told, now: Told): NewsSms | null {
+  const changed = !sameTold(told, now)
+  if (queued !== 'moved' && !(chosenOnline && changed)) return queued
+  if (!changed) return null
+  if (told.date !== now.date || told.start !== now.start) return told.staff === now.staff ? 'moved' : 'movedWith'
+  return 'staffChanged'
+}
+
 /** An offered time (after a decline or an expiry) is past once it starts earlier than now plus the lead time (book Q-264). */
 export function offerPast(offer: Pick<BookingState, 'date' | 'start'>, leadMinutes: number, now = Date.now()): boolean {
   return startOf(offer) < now + leadMinutes * 60_000
@@ -320,7 +355,7 @@ export function clientActions(
 
 /**
  * "Yzyna al" on a booking the team just added (B-24): its toast shows for 6 seconds, the undo is taken a little longer
- * (a slow network), and the client's SMS waits until then, so an undo never leaves a wrong SMS behind.
+ * (a slow network). The client's SMS waits longer still (`NEW_BOOKING_SMS_AFTER_MS`).
  */
 export const NEW_BOOKING_UNDO_MS = 10_000
 

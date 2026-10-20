@@ -89,6 +89,7 @@
     "moveDeclined": "{brand}: {business} didn't accept the new time: {reason}. Your booking stays at {date} {time}. {link}",
     "cancelled": "{brand}: {business} cancelled your booking on {date} {time}: {reason}. {link}",
     "moved": "{brand}: {business} moved your booking to {weekday}, {date}, {time}. Change: {link}",
+    "movedWith": "{brand}: {business} moved your booking to {weekday}, {date}, {time}, with {staff}. Change: {link}",
     "staffChanged": "{brand}: {business}: your booking on {weekday}, {date}, {time} is now with {staff}. {link}",
     "cancelledAsAsked": "{brand}: your booking at {business} on {date} {time} is cancelled, as you asked. {link}",
     "cancelledOffers": "{brand}: {business} cancelled your booking on {date} {time}: {reason}. Free times: {times} — {link}",

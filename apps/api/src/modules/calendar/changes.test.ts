@@ -24,6 +24,7 @@ const TUE2 = '2026-10-27'
 const WED2 = '2026-10-28'
 const THU2 = '2026-10-29'
 const WED3 = '2026-11-11'
+const THU3 = '2026-11-12'
 
 describe('the business moves and cancels bookings (book B-26, B-27)', () => {
   let db: Db
@@ -65,8 +66,8 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
       body: { source: 'phone', phone, serviceIds: [manicure], staffId: maralId, date, start, notifyClient: false },
     })
     expect(made.status).toBe(201)
-    // past "Yzyna al": the client knows of it from here on
-    t.clock.now += 10_000
+    // past "Yzyna al" and the SMS after it: the client knows of it from here on
+    t.clock.now += 15_000
     return made.json.code as string
   }
   const move = (b: ReturnType<typeof browser>, code: string, body: Record<string, unknown>) => b.req(`${W}/bookings/${code}/move`, { body })
@@ -337,7 +338,9 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
     const maysa = await as(MAYSA)
     const jobsOf = async (code: string) => {
       const id = (await rowOf(code)).id
-      return (await db.select().from(jobs)).filter((j) => j.payload.bookingId === id && !String(j.payload.kind).startsWith('reminder'))
+      return (await db.select().from(jobs))
+        .filter((j) => j.payload.bookingId === id && !String(j.payload.kind).startsWith('reminder'))
+        .sort((a, b) => a.id - b.id)
     }
     const enter = async (phone: string, start: number) =>
       (
@@ -372,6 +375,40 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
     expect((await move(maysa, third, { date: WED3, start: 780, notifyClient: true })).status).toBe(204)
     await runDueJobs(t.deps)
     expect(smsTo('+99365800222')).toEqual([expect.stringMatching(/moved your booking to .*13:00/)])
-    expect((await jobsOf(third)).filter((j) => j.error === 'dropped: a later SMS tells the booking as it is')).toHaveLength(2)
+    // the first change's news found the booking back as the client knew it; the second asked for none more
+    expect((await jobsOf(third)).map((j) => j.error)).toEqual(['dropped: the client knows the booking as it is', null])
+    expect((await rowOf(third)).told).toMatchObject({ date: WED3, start: 780, staff: maralId })
+
+    // moved with the client told, then given to Jeren without telling, before the jobs run: the SMS says both
+    const fourth = await book(maysa, '+99365800223', WED3, 1080)
+    const firstMove = await move(maysa, fourth, { date: WED3, start: 1020, notifyClient: true })
+    expect(firstMove.status, JSON.stringify(firstMove.json)).toBe(204)
+    expect((await move(maysa, fourth, { date: WED3, start: 1020, staffId: jerenId, notifyClient: false })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800223')).toEqual([expect.stringMatching(/moved your booking to .*17:00, with Jeren/)])
+  })
+
+  it('a phone booking cancelled before its confirmation went tells nothing; one the client chose online and that moved says so', async () => {
+    const maysa = await as(MAYSA)
+    // the client learned of it on the phone; its "booked" hadn't gone at 12 seconds
+    const made = await maysa.req(`${W}/bookings`, {
+      body: { source: 'phone', phone: '+99365800224', serviceIds: [manicure], staffId: maralId, date: THU3, start: 600 },
+    })
+    t.clock.now += 12_000
+    expect((await cancel(maysa, made.json.code, { reason: 'staff_away' })).status).toBe(204)
+    t.clock.now += 60_000
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800224')).toEqual([])
+
+    // asked online for 13:00, confirmed, then moved to 14:00 before the confirmation went: told as the move
+    const client = await as('+99365800225', 'Client')
+    const request = await client.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [manicure], staffId: maralId, date: THU3, start: 780 },
+    })
+    expect(request.json.status).toBe('pending')
+    await maysa.req(`${W}/requests/${request.json.code}/confirm`, { method: 'POST' })
+    expect((await move(maysa, request.json.code, { date: THU3, start: 840 })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800225')).toEqual([expect.stringMatching(/moved your booking to .*14:00/)])
   })
 })

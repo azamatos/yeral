@@ -89,6 +89,7 @@
     "moveDeclined": "{brand}: {business} не принял новое время: {reason}. Запись остаётся на {date} {time}. {link}",
     "cancelled": "{brand}: {business} отменил вашу запись на {date} {time}: {reason}. {link}",
     "moved": "{brand}: {business}: ваша запись перенесена на {weekday}, {date}, {time}. Изменить: {link}",
+    "movedWith": "{brand}: {business}: ваша запись перенесена на {weekday}, {date}, {time}, мастер {staff}. Изменить: {link}",
     "staffChanged": "{brand}: {business}: ваша запись на {weekday}, {date}, {time} теперь у мастера {staff}. {link}",
     "cancelledAsAsked": "{brand}: {business}, {date} {time}: запись отменена по вашей просьбе. {link}",
     "cancelledOffers": "{brand}: {business} отменил вашу запись на {date} {time}: {reason}. Свободное время: {times} — {link}",

@@ -180,10 +180,13 @@ Notes:
 - **Mobile numbers only:** SMS go only to mobile numbers (ROUND6 C1), so a phone client saved with a landline gets no SMS. (code: the jobs settle an SMS to a number the team typed in unsent when it isn't a mobile; an account's number took a sign-in code; 20.10.2026)
 - **The SMS link** works signed out. Any action on it logs in with the booking's own phone, shown masked and not editable (ROUND6 A1).
 - **Planned SMS check again before sending.** A reminder goes only if the booking is still in the right state and at the same time, and the switches allow it (code; chapter 7c, S-04, S-21). A reminder that would arrive after the visit has started is dropped. An SMS that fails 5 times is given up, and the Ýeral team is alerted. (Q-284, decided 18.10.2026) **Code differs:** the give-up writes an error line, `job gave up`, that error tracking (F-209, P2 step 7) turns into an alert; until then nobody is told.
-- **One first SMS at a time** (code, 20.10.2026): a booking's confirmation (*confirmed*, *booked*) tells it as it is
-  when it goes, so a change made before it went is told in it and no "moved" goes with it; a change SMS (*moved*,
-  *now with …*) replaces one still waiting, and none goes when the booking is back as the client knew it. A booking
-  the team enters is first told 15 seconds after it's saved, once its undo can't come any more (`queueBookingSms`).
+- **What the client knows** (code, 20.10.2026): each booking keeps it (its time and specialists: what the client
+  chose, agreed to on the phone or at the desk, or was last told by SMS). One news SMS waits per booking and is worded
+  when it goes, from that and the booking as it is then: a confirmation tells the booking as it is (one the client chose
+  online and that changed before it went says what changed); a change says what changed (*moved*, *moved … with …*,
+  *now with …*), or nothing when it's back as they knew it. A booking the team enters is first told 15 seconds after
+  it's saved, once its undo can't come any more; cancelled before that SMS went, it texts nothing (the client learned
+  of it on the phone) (`queueBookingSms`, `newsSms`).
 - **Staff choose per action** whether the client hears about it: *Müşderä SMS iberilsin* when moving a booking, and *Müşderä SMS bilen habar ber* for a new booking (off for walk-ins) (business spec §4, §26).
 - **Who pays for SMS:** Ýeral. Business spec §16 says "costs are Ýeral's", and the landing says *SMS ýatlatmalar hem mugt* (SMS reminders are free too). Owner's direction, 2026-10-16: Ýeral is free for now. There's no cap on SMS per business on MVP; the Ýeral team watches a monthly count per business. (Q-299, decided 18.10.2026)
 

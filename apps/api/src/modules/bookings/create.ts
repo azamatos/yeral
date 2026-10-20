@@ -16,7 +16,7 @@ import {
   type AppointmentQuery,
   type AppointmentSlot,
 } from '@yeral/domain/availability'
-import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES, waitingLimit } from '@yeral/domain/lifecycle'
+import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES, toldOf, waitingLimit } from '@yeral/domain/lifecycle'
 import { priceTotal } from '@yeral/domain/pricing'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, isNull, sql } from 'drizzle-orm'
@@ -156,6 +156,8 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
       date: x.date,
       start: x.start,
       end,
+      // the client chose it
+      told: toldOf({ date: x.date, start: x.start }, x.placement.slot?.items.map((it) => it.staffId) ?? []),
       // instant bookings are confirmed right below, so the confirmation runs like any other
       status: 'pending',
       source: 'web',

@@ -4,6 +4,7 @@
  */
 import type { EventType } from '@yeral/contract/events'
 import { MARKET } from '@yeral/domain/market'
+import type { NewsQueued } from '@yeral/domain/lifecycle'
 import { localized, type BusinessCancelReason, type DeclineReason, type Locale } from '@yeral/domain/model'
 import { epochOf, localOf } from '@yeral/domain/time'
 import { createFmt, createT } from '@yeral/i18n/fmt'
@@ -59,25 +60,34 @@ export async function smsCityOf(db: Queryable, cityId: string, lang: Locale): Pr
 
 /**
  * `booked`: a booking the team entered for a client who called (book B-23, Q-288), with the address. `moved`: the
- * business moved it (B-26); `staffChanged`: it gave it to another specialist at the same time. `cancelled`: the business cancelled it, with the reason; `cancelledAsAsked`: the team
+ * business moved it (B-26), `movedWith` to another specialist too; `staffChanged`: it gave it to another specialist at the
+ * same time. `cancelled`: the business cancelled it, with the reason; `cancelledAsAsked`: the team
  * entered the client's own cancel ("The client called to cancel", B-27). `reminderEvening`: a reminder moved out of
  * the night to 21:30 the evening before, worded like the day one ("tomorrow").
  */
 export type BookingSmsKind =
-  'confirmed' | 'booked' | 'moved' | 'staffChanged' | 'cancelled' | 'cancelledAsAsked' | 'reminderDay' | 'reminder2h' | 'reminderEvening'
+  | 'confirmed'
+  | 'booked'
+  | 'moved'
+  | 'movedWith'
+  | 'staffChanged'
+  | 'cancelled'
+  | 'cancelledAsAsked'
+  | 'reminderDay'
+  | 'reminder2h'
+  | 'reminderEvening'
 
-/** The first SMS about a booking (one waits at a time: `queueBookingSms`). */
-export type FirstSmsKind = 'confirmed' | 'booked' | 'moved' | 'staffChanged'
-/** The SMS that confirm a booking: they tell it as it is when they go, a change made before included. */
-export const CONFIRMATION_SMS: ReadonlySet<string> = new Set<FirstSmsKind>(['confirmed', 'booked'])
-/** The SMS about a change the business made: they go only while the booking still stands as they say. */
-export const CHANGE_SMS: ReadonlySet<string> = new Set<FirstSmsKind>(['moved', 'staffChanged'])
+/** A booking's news SMS as queued, one waiting at a time (`queueBookingSms`); its words are chosen when it goes (`newsSms`). */
+export const NEWS_SMS: ReadonlySet<string> = new Set<NewsQueued>(['confirmed', 'booked', 'moved'])
+/** The news that confirm a booking: a change asked for while one waits is told by it. */
+export const CONFIRMATION_SMS: ReadonlySet<string> = new Set<NewsQueued>(['confirmed', 'booked'])
 
 /** The booking SMS that carry the booking's link (book Q-168); reminders don't. */
 export const LINKED_SMS: ReadonlySet<BookingSmsKind> = new Set([
   'confirmed',
   'booked',
   'moved',
+  'movedWith',
   'staffChanged',
   'cancelled',
   'cancelledAsAsked',
@@ -110,8 +120,9 @@ export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking
       return t('sms.cancelled', { ...common, date: fmt.dayMonth(dayOf(b.date, b.start)), reason: b.reason ?? '' })
     case 'cancelledAsAsked':
       return t('sms.cancelledAsAsked', { ...common, date: fmt.dayMonth(dayOf(b.date, b.start)) })
+    case 'movedWith':
     case 'staffChanged':
-      return t('sms.staffChanged', {
+      return t(`sms.${kind}`, {
         ...common,
         weekday: fmt.weekday(dayOf(b.date, b.start)),
         date: fmt.dayMonth(dayOf(b.date, b.start)),

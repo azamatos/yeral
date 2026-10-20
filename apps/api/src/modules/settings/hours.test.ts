@@ -64,7 +64,8 @@ describe('opening hours and special days (book B-39, B-40)', () => {
       body: { source: 'phone', phone, serviceIds: [manicure], staffId: maralId, date, start, notifyClient: opts.notify ?? false },
     })
     expect(made.status, JSON.stringify(made.json)).toBe(201)
-    if (!opts.fresh) t.clock.now += 10_000
+    // past "Yzyna al" and the SMS after it, unless `fresh`
+    if (!opts.fresh) t.clock.now += 15_000
     return made.json.code as string
   }
   const rowOf = async (code: string) => (await db.select().from(bookings).where(eq(bookings.code, code)))[0]!

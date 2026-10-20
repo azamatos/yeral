@@ -5,16 +5,23 @@ It found 15 issues; all hold. The plan, one PR each, reviewed before merging, in
 
 1. **The first SMS** (fix/p2-first-sms, this note's PR). A specialist change inside the undo window sent "booked"
    twice; Maral → Jeren → Maral before the jobs ran sent "now with Maral" twice; a move 11–60 s after saving made
-   "moved" the client's first SMS; an undo at the deadline could still leave "booked" sent. Now:
-   - one first SMS per booking waits at a time (`queueBookingSms` → `queueFirstSms` in `bookings/confirm.ts`): a
-     confirmation (`confirmed`, `booked`) replaces any still waiting and tells the booking as it is when it goes (the
-     jobs no longer drop it after a move); a change (`moved`, `staffChanged`) gives way to a confirmation still
-     waiting, replaces an earlier change, carries `from` (what the client knew) and isn't queued when the booking is
-     back to it; one being sent right now (locked) counts as gone. Replaced jobs settle unsent, never tried, with
-     `dropped: a later SMS tells the booking as it is`;
-   - a change SMS goes only while the booking has the staff it names (`staff` in the payload, checked by the jobs);
-   - a team booking's first SMS goes at `NEW_BOOKING_SMS_AFTER_MS` (the 10 s undo + 5 s);
-   - migration 0024: a partial index on the jobs' booking id while unsent.
+   "moved" the client's first SMS; an undo at the deadline could still leave "booked" sent. The PR's own review
+   showed a first design (the waiting job carrying what the client knew) missed more cases, so it keeps it on the
+   booking instead:
+   - `bookings.told` (migration 0024; `Told`, `toldOf`, `sameTold` in `@yeral/domain/lifecycle`): what the client
+     knows, set when a booking is made (`insertBooking`, `insertTeamBooking`), when the client's own move is confirmed,
+     and by the jobs after a news SMS goes;
+   - one news SMS (`confirmed`, `booked`, `moved`) waits per booking (`queueNews` in `bookings/confirm.ts`, its waiting
+     jobs read `for update`, claimed ones left out): a confirmation outranks a change, anything else asked for while one
+     waits is covered by it;
+   - the jobs word it when it goes (`newsSms` in the domain, with unit tests): a confirmation as the booking is, or the
+     change for a booking the client chose online that changed before it went; a change as `moved`, `movedWith` (new
+     text, en/tk/ru) or `staffChanged`, or nothing (`dropped: the client knows the booking as it is`); they read the
+     booking `for share`, so a team's undo under way is waited for;
+   - a team booking's first SMS goes at `NEW_BOOKING_SMS_AFTER_MS` (the 10 s undo + 5 s); a business cancel texts
+     nothing while the client is unaware of a team booking (`clientUnaware`: within that time, or its confirmation still
+     waiting);
+   - migration 0024 also adds a partial index on the jobs' booking id while unsent.
 2. **Races and rules:** every path that makes a booking active re-checks the hours under `FOR SHARE` on the business
    row (a new booking, a taken offer, a restore, the business's move), ordered with an hours save; a listed booking
    undone during a mass cancel is skipped (`StaleBooking` per row); `cancelByBusiness` re-checks the specialist's right

@@ -1,9 +1,12 @@
 ---
 '@yeral/api': patch
 '@yeral/domain': minor
+'@yeral/i18n': patch
 ---
 
-One first SMS about a booking at a time: a confirmation tells the booking as it is when it goes, so a change made before
-it went no longer sends "moved" or a second "booked"; a change SMS replaces one still waiting, and none goes when the
-booking is back as the client knew it. A booking the team enters is first told 15 seconds after it's saved, so an undo
-at the last moment can't leave an SMS behind. Migration 0024 adds an index for a booking's waiting SMS.
+A booking keeps what the client knows of it, and its one waiting news SMS is worded when it goes: a confirmation tells
+the booking as it is, a change says what changed since the client knew it ("moved", "moved … with …", "now with …"),
+or nothing when it's back as they knew it. No more duplicate "booked" or "now with …" texts, no "moved" for a booking
+the client hadn't been told about, and a phone booking cancelled before its confirmation went texts nothing. A booking
+the team enters is first told 15 seconds after it's saved, so an undo at the last moment can't leave an SMS behind.
+Migration 0024 adds `bookings.told` and an index for a booking's waiting SMS.
