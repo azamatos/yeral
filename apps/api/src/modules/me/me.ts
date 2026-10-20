@@ -34,7 +34,7 @@ export async function toMe(db: Queryable, user: User, deps: Pick<Deps, 'codeOnSc
       reminder2h: user.notifyReminder2h,
       reviewAsk: false,
     },
-    photo: user.photo ? photoOf(deps, user.photo, user.lang) : null,
+    photo: user.photo ? photoOf(deps, user.photo, user.lang, user.name ?? '') : null,
     hasBusiness: business,
     canChangePhone: phoneChangeOpen(deps),
   }

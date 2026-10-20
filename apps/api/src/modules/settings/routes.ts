@@ -22,16 +22,16 @@ import {
 } from '@yeral/contract/settings'
 import { photoUploadSchema } from '@yeral/contract/common'
 import { workspaceParamSchema } from '@yeral/contract/team'
-import { MARKET } from '@yeral/domain/market'
 import { MAX_INTERNAL_STATUSES } from '@yeral/domain/model'
 import { can } from '@yeral/domain/permissions'
 import type { Context } from 'hono'
 import { ApiError } from '../../http/errors'
 import type { AppEnv } from '../../http/env'
-import { errors, json, jsonBody, noContent } from '../../http/openapi'
+import { errors, formBody, json, jsonBody, noContent } from '../../http/openapi'
 import { requireMember } from '../team/service'
 import { hoursOf, updateHours } from './hours'
 import { profileOf, rulesOf, updateProfile, updateRules } from './service'
+import { uploadGuard } from '../media/photos'
 import { addPhoto, galleryOf, orderPhotos, removePhoto } from './photos'
 import { addStatus, deleteStatus, statusesOf, updateStatus } from './statuses'
 
@@ -143,11 +143,9 @@ const addPhotoRoute = createRoute({
   path: '/w/{slug}/settings/photos',
   tags,
   summary: 'A photo at the end of the gallery (JPEG, PNG or WebP, up to 10 MB); `gallery_full` past 20',
-  request: {
-    params: workspaceParamSchema,
-    ...{ body: { content: { 'multipart/form-data': { schema: photoUploadSchema } }, required: true } },
-  },
-  responses: { 201: json(gallerySchema), 400: errors[400], 409: errors[409], ...denied },
+  middleware: [uploadGuard] as const,
+  request: { params: workspaceParamSchema, ...formBody(photoUploadSchema) },
+  responses: { 201: json(gallerySchema), 400: errors[400], 409: errors[409], 429: errors[429], ...denied },
 })
 const removePhotoRoute = createRoute({
   method: 'delete',
@@ -169,20 +167,20 @@ const orderPhotosRoute = createRoute({
 export const settingsRoutes = new OpenAPIHono<AppEnv>()
   .openapi(galleryRoute, async (c) => {
     const { business, user } = await requireSettings(c, c.req.valid('param').slug)
-    return c.json(await galleryOf(c.var.deps, business, user.lang ?? MARKET.defaultLanguage), 200)
+    return c.json(await galleryOf(c.var.deps, business, user.lang), 200)
   })
   .openapi(addPhotoRoute, async (c) => {
     const { business, user } = await requireSettings(c, c.req.valid('param').slug)
-    return c.json(await addPhoto(c.var.deps, business, c.req.valid('form').file, user.lang ?? MARKET.defaultLanguage), 201)
+    return c.json(await addPhoto(c.var.deps, business, c.req.valid('form').file, user.lang), 201)
   })
   .openapi(orderPhotosRoute, async (c) => {
     const { business, user } = await requireSettings(c, c.req.valid('param').slug)
-    return c.json(await orderPhotos(c.var.deps, business, c.req.valid('json').ids, user.lang ?? MARKET.defaultLanguage), 200)
+    return c.json(await orderPhotos(c.var.deps, business, c.req.valid('json').ids, user.lang), 200)
   })
   .openapi(removePhotoRoute, async (c) => {
     const { slug, id } = c.req.valid('param')
     const { business, user } = await requireSettings(c, slug)
-    return c.json(await removePhoto(c.var.deps, business, id, user.lang ?? MARKET.defaultLanguage), 200)
+    return c.json(await removePhoto(c.var.deps, business, id, user.lang), 200)
   })
   .openapi(statusesRoute, async (c) => {
     const { business } = await requireMember(c, c.req.valid('param').slug, { draft: true })

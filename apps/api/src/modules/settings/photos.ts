@@ -3,7 +3,6 @@
  * owner and administrators add, remove and order them ("change business settings"); the page follows at once.
  */
 import type { gallerySchema } from '@yeral/contract/settings'
-import { MARKET } from '@yeral/domain/market'
 import type { Locale } from '@yeral/domain/model'
 import { GALLERY_MAX } from '@yeral/domain/photos'
 import { eq } from 'drizzle-orm'
@@ -27,27 +26,34 @@ async function lockedBusiness(db: Queryable, id: string) {
   return b
 }
 
-const viewOf = (deps: Pick<Deps, 'media'>, photos: (typeof businesses.$inferSelect)['photos'], lang: Locale): Gallery => ({
-  items: photos.map((p) => ({ id: photoIdOf(p.key), ...photoOf(deps, p, lang) })),
+// a photo's text is the business's name as it is when it's read
+const viewOf = (deps: Pick<Deps, 'media'>, b: Pick<typeof businesses.$inferSelect, 'photos' | 'name'>, lang: Locale): Gallery => ({
+  items: b.photos.map((p) => ({ id: photoIdOf(p.key), ...photoOf(deps, p, lang, b.name) })),
 })
 
 export async function galleryOf(deps: Deps, business: Business, lang: Locale): Promise<Gallery> {
-  const [b] = await deps.db.select({ photos: businesses.photos }).from(businesses).where(eq(businesses.id, business.id))
+  const [b] = await deps.db
+    .select({ photos: businesses.photos, name: businesses.name })
+    .from(businesses)
+    .where(eq(businesses.id, business.id))
   if (!b) throw new ApiError('not_found')
-  return viewOf(deps, b.photos, lang)
+  return viewOf(deps, b, lang)
 }
 
-/** A photo at the end of the gallery, its alt text the business's name; `gallery_full` past 20. */
+/** A photo at the end of the gallery; `gallery_full` past 20. */
 export async function addPhoto(deps: Deps, business: Business, file: File, lang: Locale): Promise<Gallery> {
+  // a full gallery keeps nothing, without writing the photo first
+  const [now] = await deps.db.select({ photos: businesses.photos }).from(businesses).where(eq(businesses.id, business.id))
+  if ((now?.photos.length ?? 0) >= GALLERY_MAX) throw new ApiError('gallery_full')
   const key = await savePhoto(deps, `b/${business.id}`, file)
   try {
     return await deps.db.transaction(async (tx) => {
       const b = await lockedBusiness(tx, business.id)
       if (b.photos.length >= GALLERY_MAX) throw new ApiError('gallery_full')
-      const photos = [...b.photos, { key, alt: { [MARKET.defaultLanguage]: b.name } }]
+      const photos = [...b.photos, { key, alt: {} }]
       await tx.update(businesses).set({ photos }).where(eq(businesses.id, b.id))
       await emit(tx, { type: 'business.updated', businessId: b.id })
-      return viewOf(deps, photos, lang)
+      return viewOf(deps, { photos, name: b.name }, lang)
     })
   } catch (e) {
     // not kept: it goes from the store too
@@ -65,7 +71,7 @@ export async function removePhoto(deps: Deps, business: Business, id: string, la
     const photos = b.photos.filter((p) => p !== gone)
     await tx.update(businesses).set({ photos }).where(eq(businesses.id, b.id))
     await emit(tx, { type: 'business.updated', businessId: b.id })
-    return { gallery: viewOf(deps, photos, lang), key: gone.key }
+    return { gallery: viewOf(deps, { photos, name: b.name }, lang), key: gone.key }
   })
   await dropPhoto(deps, key)
   return gallery
@@ -81,6 +87,6 @@ export async function orderPhotos(deps: Deps, business: Business, ids: string[],
     const photos = ids.map((id) => byId.get(id)!)
     await tx.update(businesses).set({ photos }).where(eq(businesses.id, b.id))
     await emit(tx, { type: 'business.updated', businessId: b.id })
-    return viewOf(deps, photos, lang)
+    return viewOf(deps, { photos, name: b.name }, lang)
   })
 }

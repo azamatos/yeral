@@ -490,7 +490,7 @@ describe('live events', () => {
     ])
   })
 
-  it('team changes refresh the switcher, the invites, that team and its calendar columns', () => {
+  it('team changes refresh the switcher, the invites, that team, its calendar columns and its page', () => {
     expect(staleKeys({ type: 'team.changed', business: 'glow-studio', bookingCode: null })).toEqual([
       ['workspaces'],
       ['invites'],
@@ -498,6 +498,7 @@ describe('live events', () => {
       ['me'],
       ['team', 'glow-studio'],
       ['calendar', 'glow-studio'],
+      ['business', 'glow-studio'],
     ])
   })
 

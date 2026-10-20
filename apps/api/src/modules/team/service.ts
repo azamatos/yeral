@@ -10,7 +10,7 @@ import type { SiteConfig } from '@yeral/lib/site'
 import { and, asc, desc, eq, inArray, isNull, or } from 'drizzle-orm'
 import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
-import { bookingRules, bookings, businesses, invites, services, staff, staffServices, users } from '../../db/schema'
+import { bookingRules, bookings, businesses, invites, services, staff, staffServices, users, type StoredPhoto } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid } from '../../http/errors'
 import type { AppEnv, User } from '../../http/env'
@@ -45,12 +45,13 @@ export async function requireMember(c: Context<AppEnv>, slug: string, opts: { dr
   return { user, business: row.business, member: row.member, actor: actorOf(row.member) }
 }
 
-/** A row on this workspace's team, by id. */
-export async function teamRow(db: Queryable, businessId: string, staffId: string): Promise<StaffRow> {
-  const [row] = await db
+/** A row on this workspace's team, by id; `lock` holds it for the transaction. */
+export async function teamRow(db: Queryable, businessId: string, staffId: string, opts: { lock?: boolean } = {}): Promise<StaffRow> {
+  const found = db
     .select()
     .from(staff)
     .where(and(eq(staff.id, staffId), eq(staff.businessId, businessId)))
+  const [row] = await (opts.lock ? found.for('update') : found)
   if (!row) throw new ApiError('not_found')
   return row
 }
@@ -178,7 +179,30 @@ const inviteSummary = (i: InviteRow | undefined, now: number) =>
       }
     : null
 
-export function toMember(deps: Pick<Deps, 'media'>, row: StaffRow, invite: InviteRow | undefined, lang: Locale, now: number): TeamMember {
+/**
+ * The picture the team's own screens show beside each row (the team list, the calendar's columns): the owner's, else
+ * the person's account photo (book B-12: "your teams see you"). Clients see only the owner's (B-44).
+ */
+export async function teamPhotos(db: Queryable, rows: Pick<StaffRow, 'id' | 'userId' | 'photo'>[]): Promise<Map<string, StoredPhoto>> {
+  const need = [...new Set(rows.flatMap((r) => (!r.photo && r.userId ? [r.userId] : [])))]
+  const accounts = need.length ? await db.select({ id: users.id, photo: users.photo }).from(users).where(inArray(users.id, need)) : []
+  const own = new Map(accounts.flatMap((a) => (a.photo ? [[a.id, a.photo] as const] : [])))
+  return new Map(
+    rows.flatMap((r) => {
+      const photo = r.photo ?? (r.userId ? own.get(r.userId) : undefined)
+      return photo ? [[r.id, photo] as const] : []
+    }),
+  )
+}
+
+export function toMember(
+  deps: Pick<Deps, 'media'>,
+  row: StaffRow,
+  invite: InviteRow | undefined,
+  photo: StoredPhoto | undefined,
+  lang: Locale,
+  now: number,
+): TeamMember {
   const joined = hasJoined(row)
   return {
     id: row.id,
@@ -192,7 +216,7 @@ export function toMember(deps: Pick<Deps, 'media'>, row: StaffRow, invite: Invit
     bookable: row.bookable,
     canAnswerOwn: row.canAnswerOwn,
     joined,
-    photo: row.photo ? photoOf(deps, row.photo, lang) : null,
+    photo: photo ? photoOf(deps, photo, lang, row.name) : null,
     // once someone has joined, their old invite is history
     invite: joined ? null : inviteSummary(invite, now),
   }
@@ -205,11 +229,12 @@ export async function members(deps: Pick<Deps, 'db' | 'media'>, businessId: stri
     db,
     rows.map((r) => r.id),
   )
-  return rows.map((r) => toMember(deps, r, latest.get(r.id), lang, now))
+  const photos = await teamPhotos(db, rows)
+  return rows.map((r) => toMember(deps, r, latest.get(r.id), photos.get(r.id), lang, now))
 }
 
 export async function member(db: Queryable, deps: Pick<Deps, 'media'>, row: StaffRow, lang: Locale, now: number): Promise<TeamMember> {
-  return toMember(deps, row, (await latestInvites(db, [row.id])).get(row.id), lang, now)
+  return toMember(deps, row, (await latestInvites(db, [row.id])).get(row.id), (await teamPhotos(db, [row])).get(row.id), lang, now)
 }
 
 /** The switcher: every workspace this account works in, with the requests it may answer there. */
@@ -234,7 +259,7 @@ export async function workspacesOf(deps: Deps, user: User): Promise<{ items: Wor
     name: business.name,
     address: business.address,
     city: cityRefOf(cities, business.cityId, user.lang),
-    photo: business.photos[0] ? photoOf(deps, business.photos[0], user.lang) : null,
+    photo: business.photos[0] ? photoOf(deps, business.photos[0], user.lang, business.name) : null,
     level: member.level,
     requestsToAnswer: counts.get(business.id) ?? 0,
     lastOpenedAt: member.lastOpenedAt?.getTime() ?? null,
@@ -321,7 +346,7 @@ export async function inviteCards(deps: Deps, rows: InviteRow[], lang: Locale): 
           category: text(b.kind, lang),
           address: b.address,
           city: cityRefOf(cities, b.cityId, lang),
-          photo: b.photos[0] ? photoOf(deps, b.photos[0], lang) : null,
+          photo: b.photos[0] ? photoOf(deps, b.photos[0], lang, b.name) : null,
         },
         invitedBy: senderRows.find((x) => x.userId === r.invitedBy && x.businessId === r.businessId)?.name ?? null,
         level: s.level === 'admin' ? 'admin' : 'specialist',

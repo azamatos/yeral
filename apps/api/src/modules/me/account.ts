@@ -49,7 +49,7 @@ export async function cancelInvitesTo(
  * their history without the number, so none joins the new holder, applies its marks to them or comes back for an invite
  * to the number.
  */
-export async function releaseAccount(tx: Queryable, account: User, now: number, how: 'deleted' | 'passedOn'): Promise<void> {
+export async function releaseAccount(tx: Queryable, account: User, now: number, how: 'deleted' | 'passedOn'): Promise<string[]> {
   const at = new Date(now)
   // the account's row as it is now (a phone change in flight finishes first), held so that a review being written lands
   // before this or finds the account gone. NO KEY UPDATE leaves other actions' foreign-key share locks on it alone, so
@@ -59,10 +59,25 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
   // a business still being set up goes with an account that's deleted: nobody else is on it or has booked it (book
   // Q-200); one whose number passed on keeps it, as a person keeps a workspace
   const drafts = await tx
-    .select({ id: businesses.id })
+    .select({ id: businesses.id, photos: businesses.photos })
     .from(staff)
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
     .where(and(eq(staff.userId, user.id), eq(staff.level, 'owner'), isNotNull(businesses.setupStep)))
+  // the photos that go with the account, for the caller to take from the store once this is done: its own, and a
+  // deleted draft's gallery and team pictures
+  const photos = [user.photo?.key]
+  if (how === 'deleted' && drafts.length) {
+    const pictures = await tx
+      .select({ photo: staff.photo })
+      .from(staff)
+      .where(
+        inArray(
+          staff.businessId,
+          drafts.map((d) => d.id),
+        ),
+      )
+    photos.push(...drafts.flatMap((d) => d.photos.map((p) => p.key)), ...pictures.map((p) => p.photo?.key))
+  }
   if (how === 'deleted' && drafts.length)
     await tx.delete(businesses).where(
       inArray(
@@ -143,6 +158,7 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
   await tx.delete(bookingLinks).where(inArray(bookingLinks.bookingId, tx.select({ id: bookings.id }).from(bookings).where(linked)))
   if (how === 'passedOn') await handOnRecords(tx, user, now)
   await tx.delete(users).where(eq(users.id, user.id))
+  return photos.filter((k): k is string => !!k)
 }
 
 /**

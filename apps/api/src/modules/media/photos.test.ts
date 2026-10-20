@@ -1,6 +1,6 @@
 /** Photos (book F-084, F-101, B-12, B-37, Q-115): the gallery, a person's photo, a team member's, served by key. */
 import { GALLERY_MAX, PHOTO_MAX_BYTES } from '@yeral/domain/photos'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, ne } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
@@ -14,8 +14,17 @@ const SELBI = '+99365884102' // administrator
 const MARAL = '+99361440819' // specialist: nails
 const W = '/v1/w/glow-studio'
 
-/** A tiny JPEG (its first bytes are what counts) and a file that only says it's one. */
-const jpeg = (n = 0) => new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe0, n])], 'photo.jpg', { type: 'image/jpeg' })
+/** A tiny JPEG (a scan of one byte), one with a phone's EXIF before it, and a file that only says it's one. */
+const tiny = (n: number) => [0xff, 0xd8, 0xff, 0xda, 0x00, 0x03, n, 0x12, 0xff, 0xd9]
+const jpeg = (n = 0) => new File([new Uint8Array(tiny(n))], 'photo.jpg', { type: 'image/jpeg' })
+const gps = [...'Exif']
+  .map((c) => c.charCodeAt(0))
+  .concat(
+    [0, 0, 0x49, 0x49, 0x2a, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [...'GPS 37.95N'].map((c) => c.charCodeAt(0)),
+  )
+const fromHome = (n: number) =>
+  new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe1, 0, gps.length + 2, ...gps, ...tiny(n).slice(2)])], 'home.jpg', { type: 'image/jpeg' })
 const svg = () => new File(['<svg xmlns="http://www.w3.org/2000/svg"/>'], 'photo.jpg', { type: 'image/jpeg' })
 
 describe('photos (book F-101)', () => {
@@ -50,17 +59,22 @@ describe('photos (book F-101)', () => {
   it('the gallery: added at the end, served by its key, ordered, taken away; checked by its bytes; 20 at most', async () => {
     const maysa = await as(MAYSA)
     const before = (await maysa.req(`${W}/settings/photos`)).json.items as { id: string; url: string }[]
-    const added = await post(maysa, `${W}/settings/photos`, jpeg(1))
+    const added = await post(maysa, `${W}/settings/photos`, fromHome(1))
     expect(added.status).toBe(201)
     const mine = added.json.items.at(-1) as { id: string; url: string; alt: string }
     expect(mine).toMatchObject({ alt: 'Glow Studio' })
     expect(mine.url).toMatch(/^http:\/\/media\.test\/up\/b\/[\w-]+\/[\w-]+\.jpg$/)
-    // served as it was sent, kept by browsers
+    // served without where it was taken, kept by browsers
     const served = await t.app.request(`/media/${keyOf(mine.url)}`)
     expect(served.status).toBe(200)
     expect(served.headers.get('content-type')).toBe('image/jpeg')
     expect(served.headers.get('cache-control')).toContain('immutable')
-    expect([...new Uint8Array(await served.arrayBuffer())]).toEqual([0xff, 0xd8, 0xff, 0xe0, 1])
+    expect([...new Uint8Array(await served.arrayBuffer())]).toEqual(tiny(1))
+    // its text is the business's name as it is now
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    await db.update(businesses).set({ name: 'Glow Beauty' }).where(eq(businesses.id, glow!.id))
+    expect((await maysa.req(`${W}/settings/photos`)).json.items.at(-1).alt).toBe('Glow Beauty')
+    await db.update(businesses).set({ name: glow!.name }).where(eq(businesses.id, glow!.id))
     expect((await t.app.request('/media/up/b/x/missing.jpg')).status).toBe(404)
     // the newest first: the cover on the page now
     const ids = [mine.id, ...before.map((p) => p.id)]
@@ -84,7 +98,6 @@ describe('photos (book F-101)', () => {
     expect(t.storage.files.size).toBe(GALLERY_MAX - before.length)
     // the settings' people only
     expect((await post(await as(MARAL), `${W}/settings/photos`, jpeg())).status).toBe(403)
-    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
     await db
       .update(businesses)
       .set({ photos: glow!.photos.slice(0, before.length) })
@@ -95,6 +108,7 @@ describe('photos (book F-101)', () => {
     const b = await as('+99365940001', 'Aýgül')
     const first = await send(b, '/v1/me/photo', jpeg(1))
     expect(first.status).toBe(200)
+    expect(first.json.photo).toMatchObject({ alt: 'Aýgül' })
     expect(first.json.photo.url).toMatch(/^http:\/\/media\.test\/up\/u\/[\w-]+\/[\w-]+\.jpg$/)
     const second = await send(b, '/v1/me/photo', jpeg(2))
     expect(t.storage.files.has(keyOf(first.json.photo.url))).toBe(false)
@@ -102,6 +116,28 @@ describe('photos (book F-101)', () => {
     const removed = await b.req('/v1/me/photo', { method: 'DELETE' })
     expect(removed.json.photo).toBeNull()
     expect(t.storage.files.has(keyOf(second.json.photo.url))).toBe(false)
+  })
+
+  it('uploads: signed in, so many an hour', async () => {
+    expect((await send(browser(t.app), '/v1/me/photo', jpeg())).status).toBe(401)
+    const b = await as('+99365940002', 'Jeren')
+    const me = (await b.req('/v1/me')).json as { id: string }
+    await db.insert(rateLimits).values({ key: `upload:user:${me.id}`, windowStart: new Date(DEMO_NOW), count: 60 })
+    const refused = await send(b, '/v1/me/photo', jpeg())
+    expect(refused.status).toBe(429)
+    expect(refused.json.error.code).toBe('rate_limited')
+    expect(t.storage.files.size).toBe(0)
+  })
+
+  it('a deleted account takes its photo, and its draft’s gallery, from the store', async () => {
+    const b = await as('+99365940003', 'Bahar')
+    const photo = (await send(b, '/v1/me/photo', jpeg(1))).json.photo.url as string
+    const { slug } = (await b.req('/v1/setup', { body: { name: 'Bahar Nails', categoryId: 'beauty' } })).json as { slug: string }
+    const gallery = (await post(b, `/v1/w/${slug}/settings/photos`, jpeg(2))).json.items[0].url as string
+    expect(t.storage.files.size).toBe(2)
+    expect((await b.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
+    expect(t.storage.files.has(keyOf(photo))).toBe(false)
+    expect(t.storage.files.has(keyOf(gallery))).toBe(false)
   })
 
   it('a team member’s picture, set by the owner, shown beside them', async () => {
@@ -117,8 +153,18 @@ describe('photos (book F-101)', () => {
     const team = (await maysa.req(`${W}/team`)).json.items as { id: string; photo: { url: string } | null }[]
     expect(team.find((m) => m.id === maral!.id)!.photo!.url).toBe(set.json.photo.url)
     expect((await send(await as(SELBI), `${W}/team/${maral!.id}/photo`, jpeg(4))).status).toBe(403)
+    // someone not on this team: refused before anything is kept
+    const kept = t.storage.files.size
+    const [other] = await db.select().from(staff).where(ne(staff.businessId, glow!.id)).limit(1)
+    expect((await send(maysa, `${W}/team/${other!.id}/photo`, jpeg(5))).status).toBe(404)
+    expect(t.storage.files.size).toBe(kept)
+    // without the owner's picture the team sees Maral's own photo; clients don't
+    const hers = (await send(await as(MARAL), '/v1/me/photo', jpeg(6))).json.photo.url as string
     const removed = await maysa.req(`${W}/team/${maral!.id}/photo`, { method: 'DELETE' })
-    expect(removed.json.photo).toBeNull()
+    expect(removed.json.photo).toEqual({ url: hers, alt: 'Maral' })
+    expect(t.storage.files.has(keyOf(set.json.photo.url))).toBe(false)
+    const page = (await browser(t.app).req('/v1/businesses/glow-studio?lang=en')).json.specialists as { id: string; photo: unknown }[]
+    expect(page.find((s) => s.id === maral!.id)!.photo).toBeNull()
     await db.update(staff).set({ photo: maral!.photo }).where(eq(staff.id, maral!.id))
   })
 })

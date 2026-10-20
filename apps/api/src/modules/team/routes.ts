@@ -32,11 +32,12 @@ import { and, asc, eq } from 'drizzle-orm'
 import { businesses, invites, staff } from '../../db/schema'
 import { ApiError, invalid } from '../../http/errors'
 import type { AppEnv } from '../../http/env'
-import { errors, json, jsonBody, noContent } from '../../http/openapi'
+import { errors, formBody, json, jsonBody, noContent } from '../../http/openapi'
 import { sha256Hex } from '../../lib/crypto'
 import { requireUser } from '../auth/session'
 import { loadHours } from '../availability/context'
 import { removeMember, scheduleOf, updateSchedule } from './away'
+import { uploadGuard } from '../media/photos'
 import { removeStaffPhoto, setStaffPhoto } from './photo'
 import {
   hasJoined,
@@ -214,11 +215,9 @@ const photoRoute = createRoute({
   path: '/w/{slug}/team/{staffId}/photo',
   tags,
   summary: 'The picture clients see beside a team member (JPEG, PNG or WebP, up to 10 MB; owner)',
-  request: {
-    params: staffIdParamSchema,
-    ...{ body: { content: { 'multipart/form-data': { schema: photoUploadSchema } }, required: true } },
-  },
-  responses: { 200: json(teamMemberSchema), 400: errors[400], ...ownerOnly },
+  middleware: [uploadGuard] as const,
+  request: { params: staffIdParamSchema, ...formBody(photoUploadSchema) },
+  responses: { 200: json(teamMemberSchema), 400: errors[400], 429: errors[429], ...ownerOnly },
 })
 const removePhotoRoute = createRoute({
   method: 'delete',

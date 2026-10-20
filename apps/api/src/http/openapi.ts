@@ -4,6 +4,9 @@ import type { z } from 'zod'
 
 export const jsonBody = <T extends z.ZodType>(schema: T) => ({ body: { content: { 'application/json': { schema } }, required: true } })
 
+/** A form's body, such as an upload (`photoUploadSchema`). */
+export const formBody = <T extends z.ZodType>(schema: T) => ({ body: { content: { 'multipart/form-data': { schema } }, required: true } })
+
 export const json = <T extends z.ZodType>(schema: T, description = 'OK') => ({ content: { 'application/json': { schema } }, description })
 
 const err = (description: string) => ({ content: { 'application/json': { schema: errorSchema } }, description })

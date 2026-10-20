@@ -76,7 +76,7 @@ export async function summaries(deps: Deps, rows: BookingRow[], lang: Locale): P
         slug: b?.slug ?? '',
         name: b?.name ?? '',
         category: text(b?.kind, lang),
-        photo: b?.photos[0] ? photoOf(deps, b.photos[0], lang) : null,
+        photo: b?.photos[0] ? photoOf(deps, b.photos[0], lang, b.name) : null,
         phone: b?.phone ?? '',
       },
       what,
