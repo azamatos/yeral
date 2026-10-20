@@ -43,6 +43,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
     // the calendar's columns are the team's
     if (e.business) out.push(keys.team(e.business), keys.calendar(e.business))
   }
+  // a client's record or notes: their pages, the calendar's alert markers, the requests' notes
+  if (e.type === 'client.updated' && e.business) out.push(keys.clients(e.business), keys.calendar(e.business), keys.requests(e.business))
   // settings change the page, free times and who answers requests (the switcher's counts)
   if (e.type === 'business.updated' && e.business)
     out.push(

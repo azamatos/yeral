@@ -39,6 +39,12 @@ export function clientStats(visits: readonly ClientVisit[]): ClientStats {
   }
 }
 
+/** The team's own tags on a client ("VIP", "Child"): how many, and how long each. */
+export const CLIENT_TAGS_MAX = 10
+export const CLIENT_TAG_MAX = 20
+/** A team note on a client, as long as a booking's internal note. */
+export const CLIENT_NOTE_MAX = 500
+
 export const CLIENT_SEGMENTS = ['regular', 'new', 'lapsed', 'flagged'] as const
 export type ClientSegment = (typeof CLIENT_SEGMENTS)[number]
 

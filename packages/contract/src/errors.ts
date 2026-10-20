@@ -43,6 +43,13 @@ export const ERROR_STATUS = {
   block_over_bookings: 409,
   /** "Iň köp 5 içerki ýagdaý bolup biler" (B-29). */
   statuses_full: 409,
+  // clients
+  /** The number is already one of the business's clients (B-33): `details` has the card to open. */
+  client_exists: 409,
+  /** The number follows the client's Ýeral account: it can't be changed here (B-34). */
+  client_phone_locked: 409,
+  /** A client with bookings ahead or waiting requests (B-36, Q-208): `details.bookings` are the ones to settle first. */
+  client_has_bookings: 409,
   // reviews
   review_exists: 409,
   review_not_allowed: 403,
@@ -116,6 +123,24 @@ export const rateLimitedDetailsSchema = retryDetailsSchema.extend({ retryAfterMi
 export const validationDetailsSchema = z.object({
   issues: z.array(z.object({ path: z.array(z.union([z.string(), z.number()])), code: z.string() })),
 })
+
+/** `client_exists`: "This number belongs to Gülälek N. — open the card". */
+export const clientExistsDetailsSchema = z.object({ id: idSchema, name: z.string().nullable() })
+export type ClientExistsDetails = z.infer<typeof clientExistsDetailsSchema>
+
+/** `client_has_bookings`: the bookings ahead and the waiting requests, soonest first. */
+export const clientHasBookingsDetailsSchema = z.object({
+  bookings: z.array(
+    z.object({
+      code: bookingCodeSchema,
+      date: ymdSchema,
+      start: startMinuteSchema,
+      end: minuteSchema,
+      status: z.enum(['pending', 'confirmed']),
+    }),
+  ),
+})
+export type ClientHasBookingsDetails = z.infer<typeof clientHasBookingsDetailsSchema>
 
 /** `block_over_bookings`: the bookings blocked time would cover, soonest first. */
 export const blockOverBookingsDetailsSchema = z.object({
