@@ -12,6 +12,7 @@ import { runDueJobs } from '../jobs/run'
 
 const MIN = 60_000
 const THU = '2026-10-15'
+const FRI = '2026-10-16'
 
 interface Offer {
   date: string
@@ -45,18 +46,18 @@ describe('offered times', () => {
   })
 
   /** One of Aýna's free starts on Thursday, a different one per test: the n-th, counted from the end of the day. */
-  const aynaFree = async (b: ReturnType<typeof browser>, n: number) => {
-    const res = await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&staff=${who['Aýna']}&date=${THU}`)
+  const aynaFree = async (b: ReturnType<typeof browser>, n: number, date = THU) => {
+    const res = await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&staff=${who['Aýna']}&date=${date}`)
     const starts = (res.json.slots as { start: number }[]).map((x) => x.start)
     return starts[starts.length - 1 - n]!
   }
-  const request = async (phone: string, n: number) => {
+  const request = async (phone: string, n: number, date = THU) => {
     const b = browser(t.app)
     await b.login(phone, 'Client')
-    const start = await aynaFree(b, n)
+    const start = await aynaFree(b, n, date)
     const staffId = who['Aýna']!
     const made = await b.req('/v1/bookings', {
-      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId, date: THU, start },
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId, date, start },
     })
     expect(made.status).toBe(201)
     return { b, code: made.json.code as string }
@@ -163,6 +164,52 @@ describe('offered times', () => {
     const offers = await offersOf(c, made.json.code)
     expect(offers.length).toBeGreaterThan(0)
     for (const o of offers) expect(o).toMatchObject({ staff: null, state: 'free' })
+  })
+
+  const tabs = async (b: ReturnType<typeof browser>) => {
+    const codes = async (tab: string) => ((await b.req(`/v1/me/bookings?tab=${tab}`)).json.items as { code: string }[]).map((i) => i.code)
+    return { upcoming: await codes('upcoming'), past: await codes('past') }
+  }
+
+  it('an expired request stays on top of upcoming while an offered time is ahead (book C-26, C-40)', async () => {
+    const { b, code } = await request('+99365444009', 0, FRI)
+    t.clock.now += 31 * MIN
+    await runDueJobs(t.deps)
+    const offers = await offersOf(b, code)
+    expect(offers.length).toBeGreaterThan(0)
+    // a newer request, earlier in the day: still below the one with offered times
+    const free = await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&staff=${who['Aýna']}&date=${FRI}`)
+    const sooner = (free.json.slots as { start: number }[])[0]!.start
+    expect(sooner).toBeLessThan((await b.req(`/v1/me/bookings/${code}`)).json.start)
+    const made = await b.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: who['Aýna'], date: FRI, start: sooner },
+    })
+    expect(made.status).toBe(201)
+    expect(await tabs(b)).toEqual({ upcoming: [code, made.json.code], past: [] })
+    // every offered time inside the lead time: the row goes to past
+    t.clock.now = Math.max(...offers.map((o) => epochOf(o.date, o.start))) - 59 * MIN
+    const now = await tabs(b)
+    expect(now.upcoming).not.toContain(code)
+    expect(now.past).toContain(code)
+  })
+
+  it('a declined request stays on top of upcoming until one of its offered times is taken (book C-25, C-40)', async () => {
+    const { b, code } = await request('+99365444010', 2, FRI)
+    const start = await aynaFree(b, 4, FRI)
+    await db
+      .update(bookings)
+      .set({
+        status: 'cancelled',
+        cancelledBy: 'business',
+        cancelledAt: new Date(t.clock.now),
+        declineReason: 'slot_busy',
+        declineAlternatives: [{ date: FRI, start, end: start + 60, staffId: who['Aýna']! }],
+      })
+      .where(eq(bookings.code, code))
+    expect(await tabs(b)).toEqual({ upcoming: [code], past: [] })
+    const taken = await b.req(`/v1/me/bookings/${code}/accept-alternative`, { body: { source: 'decline', index: 0 } })
+    expect(taken.status).toBeLessThan(300)
+    expect(await tabs(b)).toEqual({ upcoming: [taken.json.code], past: [code] })
   })
 
   it('with nothing free the expiry SMS asks for another time (book Q-252)', async () => {

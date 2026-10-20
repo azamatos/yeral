@@ -30,7 +30,8 @@ import {
   writeReview,
 } from './actions'
 import { createBooking } from './create'
-import { myBooking, stateOf } from './repo'
+import { withOffersAhead } from './offers'
+import { myBooking, stateOf, type BookingRow } from './repo'
 import { detailOf, summaries } from './view'
 
 const tags = ['bookings']
@@ -57,7 +58,7 @@ const listRoute = createRoute({
   method: 'get',
   path: '/me/bookings',
   tags,
-  summary: 'My bookings: upcoming (soonest first) or past (newest first)',
+  summary: 'My bookings: upcoming (requests with an offered time ahead first, then soonest first) or past (newest first)',
   request: { query: myBookingsQuerySchema },
   responses: { 200: json(bookingListSchema), 401: errors[401] },
 })
@@ -130,13 +131,15 @@ export const bookingRoutes = new OpenAPIHono<AppEnv>()
       .select()
       .from(bookings)
       .where(and(eq(bookings.userId, user.id), isNull(bookings.rescheduleOf)))
-    const upcoming = (s: string) => s === 'pending' || s === 'confirmed'
+    // a declined or expired request with an offered time ahead stays on top of upcoming (book C-40)
+    const offers = await withOffersAhead(c.var.deps.db, rows, now)
+    const upcoming = (r: BookingRow) => offers.has(r.id) || ['pending', 'confirmed'].includes(effectiveStatus(stateOf(r), now).status)
     const picked = rows
-      .filter((r) => upcoming(effectiveStatus(stateOf(r), now).status) === (tab === 'upcoming'))
+      .filter((r) => upcoming(r) === (tab === 'upcoming'))
       .sort((a, b) => {
         // the code breaks ties, so a page always holds the same bookings
         const order = a.date.localeCompare(b.date) || a.start - b.start || a.code.localeCompare(b.code)
-        return tab === 'upcoming' ? order : -order
+        return tab === 'upcoming' ? Number(offers.has(b.id)) - Number(offers.has(a.id)) || order : -order
       })
     const offset = Number(cursor ?? 0) || 0
     const page = picked.slice(offset, offset + limit)
