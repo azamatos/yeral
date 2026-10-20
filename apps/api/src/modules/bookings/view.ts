@@ -1,5 +1,5 @@
 /** Booking rows → `BookingSummary` / `BookingDetail` (client spec §4.8: cards, detail drawer, actions). */
-import type { BookingDetail, BookingSummary } from '@yeral/contract/bookings'
+import type { BookingDetail, BookingSummary, OfferSource } from '@yeral/contract/bookings'
 import { cancelDeadline, canClientRestore, clientActions, effectiveStatus } from '@yeral/domain/lifecycle'
 import { isOnlineSource, type Locale } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
@@ -9,7 +9,7 @@ import type { Deps } from '../../deps'
 import { loadBusinesses } from '../availability/context'
 import { cityRef } from '../catalog/cities'
 import { geoOf, photoOf, text } from '../catalog/map'
-import { businessCancelText } from '../../notify'
+import { businessCancelWords } from '../../notify'
 import { bookOnlineFor } from '../clients/online'
 import { bookingRecipient } from './links'
 import { offeredTimes, offersOf } from './offers'
@@ -111,8 +111,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   // one booking per declined or expired request: once an offer is taken the others go
   const [taker] = await db.select({ code: bookings.code }).from(bookings).where(eq(bookings.alternativeOf, row.id))
   const offers = offersOf(row, now)
-  const chips = async (source: 'decline' | 'expired') =>
-    offers?.source === source && !taker ? offeredTimes(db, lb, row, offers.list, now) : []
+  const chips = async (source: OfferSource) => (offers?.source === source && !taker ? offeredTimes(db, lb, row, offers.list, now) : [])
   // a paused business or a phone-only client: no free-time chips, no move, the call card instead (book Q-154)
   // checked for the phone its SMS go to, as the texts are (an account's phone now, after a change too)
   const recipient = await bookingRecipient(db, row)
@@ -161,16 +160,18 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,
     cancelDeadline: cancelDeadline(lb.rules, row),
     askCancelReason: lb.rules.askCancelReason,
-    // the business's cancel names its reason; the client's own (entered by the team when they called) names none
-    cancelReason: row.businessCancelReason
-      ? row.cancelledBy === 'business'
-        ? businessCancelText(lang, row.businessCancelReason, row.cancelReason)
-        : null
-      : row.cancelReason,
+    // the client's own words; a cancel the team entered (as the client asked on the phone, or the business's) has none
+    cancelReason: row.businessCancelReason ? null : row.cancelReason,
+    // the business's cancel names its reason as a code, with its words; the client's own, entered by the team when they
+    // called, names none
+    businessCancel:
+      row.businessCancelReason && row.cancelledBy === 'business'
+        ? { reason: row.businessCancelReason, text: businessCancelWords(row.businessCancelReason, row.cancelReason) }
+        : null,
     decline: row.declineReason ? { reason: row.declineReason, text: row.declineText, alternatives: await chips('decline') } : null,
     // a business's cancel with offered times (a closed day, new hours): taken as after a decline, whatever the client's
     // online status (A7)
-    cancelOffers: row.declineReason ? [] : await chips('decline'),
+    cancelOffers: await chips('cancel'),
     expiredAlternatives: bookOnline ? await chips('expired') : [],
     bookOnline,
     offerTakenBy: taker?.code ?? null,

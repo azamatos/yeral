@@ -3,7 +3,7 @@
  * taken — `past` once it starts earlier than now plus the lead time, `taken` once taking it would fail. The check asks
  * the same question as taking it (`rebookQuery`).
  */
-import type { OfferedTime } from '@yeral/contract/bookings'
+import type { OfferedTime, OfferSource } from '@yeral/contract/bookings'
 import {
   busyOf,
   findAppointmentSlot,
@@ -29,14 +29,15 @@ import { stateOf, type BookingRow } from './repo'
 export const offerTarget = (o: TimeSlot) => ({ date: o.date, start: o.start, staffId: o.staffId ?? null })
 
 /**
- * The offered times a request has, by one rule for the list, the detail and taking one: after the business declined it,
- * the times it offered; after it ran out, the free times the jobs found (none until they've run). `source` is what the
+ * The offered times a booking has, by one rule for the list, the detail and taking one: after the business declined it,
+ * the times it offered; after the business cancelled it over a closed day or new hours, the free times found then (kept
+ * with a decline's); after it ran out, the free times the jobs found (none until they've run). `source` is what the
  * client sends back to take one.
  */
-export function offersOf(b: BookingRow, now: number): { source: 'decline' | 'expired'; list: TimeSlot[] } | null {
+export function offersOf(b: BookingRow, now: number): { source: OfferSource; list: TimeSlot[] } | null {
   const { status, cancelledBy } = effectiveStatus(stateOf(b), now)
   if (status !== 'cancelled') return null
-  if (cancelledBy === 'business') return { source: 'decline', list: b.declineAlternatives }
+  if (cancelledBy === 'business') return { source: b.declineReason ? 'decline' : 'cancel', list: b.declineAlternatives }
   if (cancelledBy === 'system') return { source: 'expired', list: b.expiredAlternatives }
   return null
 }

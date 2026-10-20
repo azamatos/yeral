@@ -4,7 +4,7 @@
  */
 import { MAX_SEATS_PER_BOOKING } from '@yeral/domain/availability'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
-import { BOOKING_SOURCES, BOOKING_STATUSES, CANCELLED_BY, DECLINE_REASONS } from '@yeral/domain/model'
+import { BOOKING_SOURCES, BOOKING_STATUSES, BUSINESS_CANCEL_REASONS, CANCELLED_BY, DECLINE_REASONS } from '@yeral/domain/model'
 import { z } from 'zod'
 import {
   bookingCodeSchema,
@@ -143,7 +143,14 @@ export const bookingDetailSchema = bookingSummarySchema
      * false, it has no reason section, and a reason sent anyway isn't kept.
      */
     askCancelReason: z.boolean(),
+    /** The client's own words when they cancelled; null for any other cancel. */
     cancelReason: z.string().nullable(),
+    /**
+     * The business's cancel (cancelled by the business): the reason as a code the app words
+     * (`businessCancelReasons.*`), with the business's words for "Other reason" (B-27) or the special day's name it
+     * closed for (`closed`, B-40) in `text`.
+     */
+    businessCancel: z.object({ reason: z.enum(BUSINESS_CANCEL_REASONS), text: z.string().nullable() }).nullable(),
     decline: z
       .object({
         reason: z.enum(DECLINE_REASONS),
@@ -154,7 +161,7 @@ export const bookingDetailSchema = bookingSummarySchema
       .nullable(),
     /**
      * Times the business offered when it closed that day or changed its hours over the booking (B-39, B-40): taken in
-     * one tap, the new booking confirmed at once, as after a decline.
+     * one tap (source `cancel`), the new booking confirmed at once, as after a decline.
      */
     cancelOffers: z.array(offeredTimeSchema).max(MAX_ALTERNATIVES),
     /** Times offered by the system after an expired request (a new request when picked). */
@@ -228,6 +235,7 @@ export const bookingLinkSchema = bookingDetailSchema
     geo: true,
     holdUntil: true,
     cancelReason: true,
+    businessCancel: true,
     decline: true,
     cancelOffers: true,
     expiredAlternatives: true,
@@ -274,13 +282,16 @@ export const rescheduleSchema = z.object({
    */
   staffId: idSchema.nullable().optional(),
 })
+/** Where an offered time comes from: a decline, an expired request, or the business's cancel (B-39, B-40). */
+export const OFFER_SOURCES = ['decline', 'expired', 'cancel'] as const
+export type OfferSource = (typeof OFFER_SOURCES)[number]
 export const acceptAlternativeSchema = z.object({
   index: z
     .number()
     .int()
     .min(0)
     .max(MAX_ALTERNATIVES - 1),
-  source: z.enum(['decline', 'expired']),
+  source: z.enum(OFFER_SOURCES),
 })
 
 export const reviewInputSchema = z

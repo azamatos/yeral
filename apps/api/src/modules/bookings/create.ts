@@ -19,6 +19,7 @@ import {
 import { holdUntil as holdUntilOf, initialStatus, MAX_ALTERNATIVES, toldOf, waitingLimit } from '@yeral/domain/lifecycle'
 import { withinHours } from '@yeral/domain/hours'
 import { priceTotal } from '@yeral/domain/pricing'
+import { MARKET } from '@yeral/domain/market'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, isNull, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
@@ -128,7 +129,7 @@ export function itemRows(lb: LoadedBusiness, bookingId: string, date: string, sl
       bookingId,
       serviceId: it.serviceId,
       staffId: it.staffId,
-      serviceName: svc?.name ?? { tk: '' },
+      serviceName: svc?.name ?? { [MARKET.defaultLanguage]: '' },
       staffName: who?.name ?? null,
       date,
       start: it.start,

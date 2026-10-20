@@ -173,8 +173,12 @@ function timesText(fmt: ReturnType<typeof createFmt>, b: Pick<SmsBooking, 'date'
  * special day's name it closed for (B-40).
  */
 export function businessCancelText(lang: Locale, reason: BusinessCancelReason, text: string | null): string {
-  return (reason === 'other' || reason === 'closed') && text ? text : createT(lang)(`businessCancelReasons.${reason}`)
+  return businessCancelWords(reason, text) ?? createT(lang)(`businessCancelReasons.${reason}`)
 }
+
+/** The business's own words a cancel carries: "Other reason" in words, or the closed day's name; else none. */
+export const businessCancelWords = (reason: BusinessCancelReason, text: string | null): string | null =>
+  (reason === 'other' || reason === 'closed') && text ? text : null
 
 /**
  * The business closed over the booking (a special day, new hours; B-39, B-40): the reason and up to 3 free times, as an
