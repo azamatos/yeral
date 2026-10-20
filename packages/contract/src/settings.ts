@@ -8,7 +8,6 @@ import {
   INTERNAL_STATUS_COLORS,
   INTERNAL_STATUS_ICONS,
   INTERNAL_STATUS_PRESETS,
-  MAX_INTERNAL_STATUSES,
   VERIFICATION_STATUSES,
 } from '@yeral/domain/model'
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
@@ -184,7 +183,7 @@ export type InternalStatus = z.infer<typeof internalStatusSchema>
 
 /** "Ýazylyş ýagdaýlary": the presets first, then the business's own; "2 / 5 · you can add 3 more". */
 export const internalStatusListSchema = z
-  .object({ items: z.array(internalStatusSchema), max: z.literal(MAX_INTERNAL_STATUSES) })
+  .object({ items: z.array(internalStatusSchema), max: z.number().int() })
   .meta({ id: 'InternalStatusList' })
 
 /** "Ýagdaý goş": a name not taken ("Bu at eýýäm bar"), an icon, a colour; the sixth is refused (`statuses_full`). */
@@ -198,6 +197,14 @@ export const internalStatusInputSchema = z
   .strict()
   .meta({ id: 'InternalStatusInput' })
 
-/** A preset keeps its name; any status may be switched on or off, or take another icon or colour. */
-export const internalStatusUpdateSchema = internalStatusInputSchema.partial().strict().meta({ id: 'InternalStatusUpdate' })
+/** A preset keeps its name; any status may be switched on or off, or take another icon or colour. Nothing left out changes. */
+export const internalStatusUpdateSchema = z
+  .object({
+    name: z.string().trim().min(1).max(20).optional(),
+    icon: z.enum(INTERNAL_STATUS_ICONS).optional(),
+    color: z.enum(INTERNAL_STATUS_COLORS).optional(),
+    enabled: z.boolean().optional(),
+  })
+  .strict()
+  .meta({ id: 'InternalStatusUpdate' })
 export const internalStatusParamSchema = z.object({ slug: slugSchema, id: idSchema })

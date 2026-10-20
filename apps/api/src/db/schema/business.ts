@@ -143,7 +143,6 @@ export const businesses = pgTable(
   ],
 )
 
-/** "Ýazylyş düzgünleri", one row per business (`@yeral/domain/rules`). */
 /**
  * Internal statuses (book B-29, F-104): a business's team-only markers for its confirmed bookings, the two presets
  * (`preset`, made when first read, off at first) and up to three of its own. Switched off, one stays on the bookings
@@ -172,6 +171,7 @@ export const internalStatuses = pgTable(
   ],
 )
 
+/** "Ýazylyş düzgünleri", one row per business (`@yeral/domain/rules`). */
 export const bookingRules = pgTable('booking_rules', {
   businessId: uuid()
     .primaryKey()

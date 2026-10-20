@@ -10,7 +10,8 @@ import { MARKET } from '@yeral/domain/market'
 import { INTERNAL_STATUS_PRESETS, MAX_INTERNAL_STATUSES, type InternalStatusPreset } from '@yeral/domain/model'
 import { canOn, type Actor } from '@yeral/domain/permissions'
 import { createT } from '@yeral/i18n/fmt'
-import { and, asc, eq, max, sql } from 'drizzle-orm'
+import { LOCALES } from '@yeral/i18n'
+import { and, asc, eq, isNotNull, max, sql } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
 import { bookings, businesses, internalStatuses } from '../../db/schema'
@@ -40,6 +41,11 @@ const viewOf = (r: StatusRow): InternalStatus => ({
 
 /** The presets are made the first time a business's statuses are read, named in the market's main language. */
 async function withPresets(db: Queryable, businessId: string): Promise<void> {
+  const [made] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(internalStatuses)
+    .where(and(eq(internalStatuses.businessId, businessId), isNotNull(internalStatuses.preset)))
+  if ((made?.n ?? 0) >= INTERNAL_STATUS_PRESETS.length) return
   const t = createT(MARKET.defaultLanguage)
   await db
     .insert(internalStatuses)
@@ -68,6 +74,14 @@ export async function statusesOf(db: Queryable, businessId: string): Promise<Int
 /** "Bu at eýýäm bar — başga at saýlaň": a name another status has, whatever its case. */
 const nameTaken = (e: unknown) => pgCode(e) === '23505'
 
+/** The presets' names in every language the app words them in: none of the business's own may take one. */
+const PRESET_NAMES = new Set(
+  LOCALES.flatMap((lang) => INTERNAL_STATUS_PRESETS.map((p) => createT(lang)(`internalStatuses.${p}`).toLocaleLowerCase())),
+)
+function assertNameFree(name: string | undefined): void {
+  if (name !== undefined && PRESET_NAMES.has(name.toLocaleLowerCase())) throw invalid({ path: ['name'], code: 'taken' })
+}
+
 /** "Ýagdaý goş": one more of the business's own, after the others; the sixth is `statuses_full`. */
 export async function addStatus(db: Queryable, businessId: string, input: StatusInput): Promise<InternalStatus> {
   return db.transaction(async (tx) => {
@@ -79,19 +93,18 @@ export async function addStatus(db: Queryable, businessId: string, input: Status
       .from(internalStatuses)
       .where(eq(internalStatuses.businessId, businessId))
     if ((counted?.n ?? 0) >= MAX_INTERNAL_STATUSES) throw new ApiError('statuses_full')
-    try {
-      const [row] = await tx.transaction((sp) =>
-        sp
-          .insert(internalStatuses)
-          .values({ businessId, ...input, sort: (counted?.last ?? 0) + 1 })
-          .returning(),
-      )
-      await emit(tx, { type: 'business.updated', businessId })
-      return viewOf(row!)
-    } catch (e) {
-      if (nameTaken(e)) throw invalid({ path: ['name'], code: 'taken' })
-      throw e
-    }
+    assertNameFree(input.name)
+    const row = await tx
+      .insert(internalStatuses)
+      .values({ businessId, ...input, sort: (counted?.last ?? 0) + 1 })
+      .returning()
+      .then(([r]) => r!)
+      .catch((e: unknown) => {
+        if (nameTaken(e)) throw invalid({ path: ['name'], code: 'taken' })
+        throw e
+      })
+    await emit(tx, { type: 'business.updated', businessId })
+    return viewOf(row)
   })
 }
 
@@ -108,15 +121,20 @@ async function statusRow(db: Queryable, businessId: string, id: string): Promise
 export async function updateStatus(db: Queryable, businessId: string, id: string, change: StatusChange): Promise<InternalStatus> {
   const row = await statusRow(db, businessId, id)
   if (row.preset && change.name !== undefined && change.name !== row.name) throw invalid({ path: ['name'], code: 'preset' })
+  if (!row.preset) assertNameFree(change.name)
   if (!Object.keys(change).length) return viewOf(row)
-  try {
-    const [saved] = await db.update(internalStatuses).set(change).where(eq(internalStatuses.id, row.id)).returning()
-    await emit(db, { type: 'business.updated', businessId })
-    return viewOf(saved!)
-  } catch (e) {
-    if (nameTaken(e)) throw invalid({ path: ['name'], code: 'taken' })
-    throw e
-  }
+  const saved = await db
+    .update(internalStatuses)
+    .set(change)
+    .where(eq(internalStatuses.id, row.id))
+    .returning()
+    .then(([r]) => r!)
+    .catch((e: unknown) => {
+      if (nameTaken(e)) throw invalid({ path: ['name'], code: 'taken' })
+      throw e
+    })
+  await emit(db, { type: 'business.updated', businessId })
+  return viewOf(saved)
 }
 
 /** Only the business's own are deleted; the bookings carrying one lose it. A preset is switched off instead. */
@@ -128,8 +146,9 @@ export async function deleteStatus(db: Queryable, businessId: string, id: string
 }
 
 /**
- * "Içerki ýagdaý" in the booking drawer: one of the enabled statuses on a confirmed booking, or none. Anyone who sees
- * the booking in the calendar may set it; a booking they can't see is 404.
+ * "Içerki ýagdaý" in the booking drawer: one of the enabled statuses on a confirmed booking, or none (taken off any
+ * booking, a finished one included). Anyone who sees the booking in the calendar may set it; a booking they can't see is
+ * 404. Read and written under the booking's lock, so a cancel or a move meanwhile is seen.
  */
 export async function setInternalStatus(
   deps: Deps,
@@ -138,22 +157,26 @@ export async function setInternalStatus(
   code: string,
   statusId: string | null,
 ): Promise<void> {
-  const { db } = deps
-  const [b] = await db
-    .select()
-    .from(bookings)
-    .where(and(eq(bookings.businessId, business.id), eq(bookings.code, code)))
-  if (!b) throw new ApiError('not_found')
-  const staffIds = (await itemsOf(db, b.id)).flatMap((i) => (i.staffId ? [i.staffId] : []))
-  if (!canOn(actor, 'calendar', staffIds)) throw new ApiError('not_found')
-  if (effectiveStatus(stateOf(b), deps.now()).status !== 'confirmed') throw new ApiError('invalid_status')
-  if (statusId) {
-    const [status] = await db
+  await deps.db.transaction(async (tx) => {
+    const [b] = await tx
       .select()
-      .from(internalStatuses)
-      .where(and(eq(internalStatuses.id, statusId), eq(internalStatuses.businessId, business.id), eq(internalStatuses.enabled, true)))
-    if (!status) throw invalid({ path: ['statusId'], code: 'not_found' })
-  }
-  await db.update(bookings).set({ internalStatusId: statusId }).where(eq(bookings.id, b.id))
-  await emit(db, { type: 'booking.updated', businessId: business.id, bookingId: b.id, bookingCode: b.code, userId: null })
+      .from(bookings)
+      .where(and(eq(bookings.businessId, business.id), eq(bookings.code, code)))
+      .for('update')
+    if (!b) throw new ApiError('not_found')
+    const staffIds = (await itemsOf(tx, b.id)).flatMap((i) => (i.staffId ? [i.staffId] : []))
+    if (!canOn(actor, 'calendar', staffIds)) throw new ApiError('not_found')
+    if (statusId) {
+      if (effectiveStatus(stateOf(b), deps.now()).status !== 'confirmed') throw new ApiError('invalid_status')
+      // held while this commits: switched off or deleted meanwhile, it waits and then is seen
+      const [status] = await tx
+        .select()
+        .from(internalStatuses)
+        .where(and(eq(internalStatuses.id, statusId), eq(internalStatuses.businessId, business.id), eq(internalStatuses.enabled, true)))
+        .for('share')
+      if (!status) throw invalid({ path: ['statusId'], code: 'not_found' })
+    }
+    await tx.update(bookings).set({ internalStatusId: statusId }).where(eq(bookings.id, b.id))
+    await emit(tx, { type: 'booking.updated', businessId: business.id, bookingId: b.id, bookingCode: b.code, userId: null })
+  })
 }

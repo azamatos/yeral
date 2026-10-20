@@ -85,6 +85,16 @@ describe('internal statuses (book B-29)', () => {
       { path: ['name'], code: 'preset' },
     ])
     expect((await maysa.req(`${STATUSES}/${arrived.id}`, { method: 'DELETE' })).status).toBe(400)
+    // a new colour leaves it as it is: off stays off
+    const started = items.find((s) => s.preset === 'started')!
+    expect((await maysa.req(`${STATUSES}/${started.id}`, { method: 'PATCH', body: { color: '#93500a' } })).json).toMatchObject({
+      enabled: false,
+      color: '#93500a',
+    })
+    // a preset's name in another language is taken too
+    expect((await maysa.req(`${STATUSES}/${own.id}`, { method: 'PATCH', body: { name: 'Geldi' } })).json.error.details.issues).toEqual([
+      { path: ['name'], code: 'taken' },
+    ])
     expect((await maysa.req(`${STATUSES}/${own.id}`, { method: 'PATCH', body: { name: 'Prepaid', color: '#066a41' } })).json).toMatchObject(
       {
         name: 'Prepaid',
@@ -116,6 +126,11 @@ describe('internal statuses (book B-29)', () => {
       b.req(`${W}/bookings/${code}/internal-status`, { method: 'PUT', body: { statusId } })
     expect((await put(maysa, arrived.id)).status).toBe(204)
     expect((await db.select().from(bookings).where(eq(bookings.code, code)))[0]!.internalStatusId).toBe(arrived.id)
+    // moved to another time, it loses the marker that was about the old one
+    t.clock.now += 15_000
+    expect((await maysa.req(`${W}/bookings/${code}/move`, { body: { date: '2026-10-22', start: 660 } })).status).toBe(204)
+    expect((await db.select().from(bookings).where(eq(bookings.code, code)))[0]!.internalStatusId).toBeNull()
+    await put(maysa, arrived.id)
     // Maral sees her own booking and marks it; Aýna doesn't see it
     expect((await put(await as(MARAL), null)).status).toBe(204)
     expect((await put(await as(AYNA), arrived.id)).status).toBe(404)

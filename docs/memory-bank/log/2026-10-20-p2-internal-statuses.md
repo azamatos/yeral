@@ -14,4 +14,11 @@
   - sdk: `settings.statuses`, `addStatus`, `updateStatus`, `deleteStatus`, `calendar.setInternalStatus`.
 - Tests: `settings/statuses.test.ts` (the presets, adding, names taken, five at most, the lists, the team reads, a
   preset kept, a booking marked and cleared, by whom, a status off, a request, the client's view).
+- Its review (10; 9 fixed): the update has no defaults (an edit without `enabled` switched it on: zod fills a default
+  inside `.partial()`), so an empty edit changes nothing; a marker goes when the booking takes another time (the team's
+  move, a client's move confirmed) and can be taken off any booking; it's set under the booking's lock, the status
+  held `for share`; the presets are inserted only when missing; a name a preset has in any language is taken; no
+  useless savepoint; the booking rules keep their doc comment; the limit from the domain (the list's `max` an integer:
+  Hono widens a literal); the sdk refreshes the calendar with the statuses. Not taken: a read of the marker here (the
+  calendar view, next, gives it).
 - Follow-ups: the calendar day view shows the chip (B-16, next).

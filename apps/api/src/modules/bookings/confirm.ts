@@ -103,6 +103,8 @@ export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow, o
         priceType: request.priceType,
         priceAmount: request.priceAmount,
         moveRefused: null,
+        // a marker such as "Arrived" was about the old time
+        internalStatusId: null,
         // the client asked for the new time
         told: request.told,
         updatedAt: at,

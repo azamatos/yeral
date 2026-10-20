@@ -18,6 +18,7 @@ import {
   internalStatusUpdateSchema,
 } from '@yeral/contract/settings'
 import { workspaceParamSchema } from '@yeral/contract/team'
+import { MAX_INTERNAL_STATUSES } from '@yeral/domain/model'
 import { can } from '@yeral/domain/permissions'
 import type { Context } from 'hono'
 import { ApiError } from '../../http/errors'
@@ -125,7 +126,7 @@ const deleteStatusRoute = createRoute({
 export const settingsRoutes = new OpenAPIHono<AppEnv>()
   .openapi(statusesRoute, async (c) => {
     const { business } = await requireMember(c, c.req.valid('param').slug)
-    return c.json({ items: await statusesOf(c.var.deps.db, business.id), max: 5 as const }, 200)
+    return c.json({ items: await statusesOf(c.var.deps.db, business.id), max: MAX_INTERNAL_STATUSES }, 200)
   })
   .openapi(addStatusRoute, async (c) => {
     const { business } = await requireSettings(c, c.req.valid('param').slug)

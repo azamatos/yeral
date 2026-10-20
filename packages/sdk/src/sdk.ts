@@ -527,18 +527,21 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     addStatus: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof internalStatusInputSchema>) => call(w.settings.statuses.$post({ param: { slug }, json })),
-        onSuccess: () => invalidate(keys.statuses(slug)),
+        // the calendar's chips and legend follow them
+        onSuccess: () => invalidate(keys.statuses(slug), keys.calendar(slug)),
       }),
     updateStatus: (slug: string) =>
       mutationOptions({
         mutationFn: ({ id, ...json }: { id: string } & z.input<typeof internalStatusUpdateSchema>) =>
           call(w.settings.statuses[':id'].$patch({ param: { slug, id }, json })),
-        onSuccess: () => invalidate(keys.statuses(slug)),
+        // the calendar's chips and legend follow them
+        onSuccess: () => invalidate(keys.statuses(slug), keys.calendar(slug)),
       }),
     deleteStatus: (slug: string) =>
       mutationOptions({
         mutationFn: (id: string) => call(w.settings.statuses[':id'].$delete({ param: { slug, id } })),
-        onSuccess: () => invalidate(keys.statuses(slug)),
+        // the calendar's chips and legend follow them
+        onSuccess: () => invalidate(keys.statuses(slug), keys.calendar(slug)),
       }),
     /** The services menu (book B-38): groups, services, who does each, the clients' order. */
     menu: (slug: string) =>
