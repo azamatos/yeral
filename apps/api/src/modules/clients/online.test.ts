@@ -180,26 +180,51 @@ describe('phone-only after no-shows', () => {
     expect((await c.book()).status).toBe(201)
   })
 
-  it('a lowered limit counts only no-shows from that day; a raised one lifts at once (plan review, 19.10.2026)', async () => {
-    const c = await newClient('+99365444111')
-    await c.noShow(DEMO_NOW - 3 * DAY)
-    await c.noShow(DEMO_NOW - 2 * DAY)
-    // the limit was 3: two old no-shows don't block
-    await setNoShowLimit(db, glowId, 3, new Date(DEMO_NOW - 4 * DAY))
-    expect((await c.book()).status).toBe(201)
-    // lowered to 2 today: the old two don't count against it
-    await setNoShowLimit(db, glowId, 2, new Date(DEMO_NOW - DAY))
+  it('a stricter limit doesn’t reach back; a client it already blocks stays blocked (plan review, 19.10.2026)', async () => {
+    const restore = () => db.update(bookingRules).set({ blockAfterNoShows: 2 }).where(eq(bookingRules.businessId, glowId))
     try {
+      await setNoShowLimit(db, glowId, 3, new Date(DEMO_NOW - 5 * DAY))
+      // two old no-shows: not blocked under 3
+      const free = await newClient('+99365444111')
+      await free.noShow(DEMO_NOW - 3 * DAY)
+      await free.noShow(DEMO_NOW - 2 * DAY)
+      // three: blocked under 3
+      const blocked = await newClient('+99365444112')
+      for (const d of [4, 3, 2]) await blocked.noShow(DEMO_NOW - d * DAY)
+      expect((await free.book()).status).toBe(201)
+      expect((await blocked.book()).json.error.code).toBe('online_blocked')
+      // lowered to 2: the free one's old two don't count; the blocked one stays blocked
+      await setNoShowLimit(db, glowId, 2, new Date(DEMO_NOW - DAY))
+      expect((await free.book()).status).toBe(201)
+      expect((await blocked.book()).json.error.code).toBe('online_blocked')
+      await free.noShow(DEMO_NOW - 3_600_000)
+      expect((await free.book()).status).toBe(201)
+      await free.noShow(DEMO_NOW)
+      expect((await free.book()).json.error.code).toBe('online_blocked')
+    } finally {
+      await restore()
+    }
+  })
+
+  it('switching the limit on after 0 counts only no-shows from then; switching it off lifts at once', async () => {
+    try {
+      await setNoShowLimit(db, glowId, 0, new Date(DEMO_NOW - 5 * DAY))
+      const c = await newClient('+99365444113')
+      for (const d of [4, 3, 2]) await c.noShow(DEMO_NOW - d * DAY)
+      expect((await c.book()).status).toBe(201)
+      await setNoShowLimit(db, glowId, 2, new Date(DEMO_NOW - DAY))
       expect((await c.book()).status).toBe(201)
       await c.noShow(DEMO_NOW - 3_600_000)
-      expect((await c.book()).status).toBe(201)
       await c.noShow(DEMO_NOW)
       expect((await c.book()).json.error.code).toBe('online_blocked')
-      // raised again: lifted at once
-      await setNoShowLimit(db, glowId, 3, new Date(DEMO_NOW))
+      await setNoShowLimit(db, glowId, 0, new Date(DEMO_NOW))
       expect((await c.book()).status).toBe(201)
     } finally {
-      await db.update(bookingRules).set({ blockAfterNoShows: 2, noShowsCountFrom: null }).where(eq(bookingRules.businessId, glowId))
+      await db.update(bookingRules).set({ blockAfterNoShows: 2 }).where(eq(bookingRules.businessId, glowId))
     }
+  })
+
+  it('a limit outside the allowed values is refused', async () => {
+    await expect(setNoShowLimit(db, glowId, 7, new Date(DEMO_NOW))).rejects.toMatchObject({ code: 'validation_error' })
   })
 })

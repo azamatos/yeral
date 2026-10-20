@@ -6,10 +6,11 @@
  * calls `setOnlineBlocked`.
  */
 import { isOnlineBlocked } from '@yeral/domain/clients'
-import type { BookingRules } from '@yeral/domain/rules'
+import { RULE_OPTIONS, type BookingRules } from '@yeral/domain/rules'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingRules, clients } from '../../db/schema'
+import { ApiError } from '../../http/errors'
 import { noShowMarkedAt } from '../bookings/repo'
 
 type Rules = Pick<BookingRules, 'blockAfterNoShows'>
@@ -21,10 +22,7 @@ type Rules = Pick<BookingRules, 'blockAfterNoShows'>
  */
 const noShowsSince = sql<number>`(select count(*)::int from "bookings" where "bookings"."client_id" = "clients"."id"
   and "bookings"."status" = 'noshow'
-  and ("clients"."no_shows_since" is null or ${noShowMarkedAt} > "clients"."no_shows_since")
-  and ${noShowMarkedAt} > coalesce(
-    (select "booking_rules"."no_shows_count_from" from "booking_rules" where "booking_rules"."business_id" = "clients"."business_id"),
-    '-infinity'::timestamptz))`
+  and ("clients"."no_shows_since" is null or ${noShowMarkedAt} > "clients"."no_shows_since"))`
 
 /** Whether the count reaches the limit, in SQL. */
 const reached = (rules: Rules) => (rules.blockAfterNoShows > 0 ? sql`${noShowsSince} >= ${rules.blockAfterNoShows}` : sql`false`)
@@ -44,17 +42,27 @@ export async function isPhoneBlocked(db: Queryable, businessId: string, phone: s
 }
 
 /**
- * The business sets its no-show limit (the settings, P2 step 4). A lower limit counts only no-shows marked from now on
- * (`noShowsCountFrom`); a higher one, or 0, lifts blocks from the count at once.
+ * The business sets its no-show limit (the settings, P2 step 4; they must change it here, not on the row). A stricter
+ * limit (lower, or on after 0) doesn't reach back (plan review, 19.10.2026): clients it doesn't block now start their
+ * count again from this moment, while those the old limit blocked stay blocked. A looser one (higher, or 0) applies at
+ * once, lifting blocks from the count.
  */
 export async function setNoShowLimit(db: Queryable, businessId: string, limit: number, at: Date): Promise<void> {
-  await db
-    .update(bookingRules)
-    .set({
-      blockAfterNoShows: limit,
-      noShowsCountFrom: sql`case when ${limit} > 0 and ${limit} < ${bookingRules.blockAfterNoShows} then ${at.toISOString()}::timestamptz else ${bookingRules.noShowsCountFrom} end`,
-    })
-    .where(eq(bookingRules.businessId, businessId))
+  if (!(RULE_OPTIONS.blockAfterNoShows as readonly number[]).includes(limit)) throw new ApiError('validation_error')
+  await db.transaction(async (tx) => {
+    const [old] = await tx.select().from(bookingRules).where(eq(bookingRules.businessId, businessId)).for('update')
+    if (!old) throw new ApiError('not_found')
+    const stricter = limit > 0 && (old.blockAfterNoShows === 0 || limit < old.blockAfterNoShows)
+    if (stricter) {
+      // judged by the old limit: who is blocked now keeps it
+      const blockedNow = sql`${clients.onlineBlocked} or ${reached(old)}`
+      await tx
+        .update(clients)
+        .set({ noShowsSince: at })
+        .where(and(eq(clients.businessId, businessId), sql`not (${blockedNow})`))
+    }
+    await tx.update(bookingRules).set({ blockAfterNoShows: limit }).where(eq(bookingRules.businessId, businessId))
+  })
 }
 
 /**
