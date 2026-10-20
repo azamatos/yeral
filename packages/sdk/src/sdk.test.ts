@@ -1,14 +1,14 @@
-import { focusManager, MutationObserver, QueryClient } from '@tanstack/react-query'
+import { focusManager, MutationObserver, QueryClient, QueryObserver } from '@tanstack/react-query'
 import { describe, expect, it, vi } from 'vitest'
 import { ApiError, call, createClient, isApiError } from './client'
 import { staleKeys, startEvents } from './events'
-import { keys } from './keys'
+import { audienceOf, keys } from './keys'
 import { createSdk } from './sdk'
 
 const json = (status: number, body: unknown) =>
   new Response(body === null ? null : JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
-function fixture(respond: (url: URL, init: RequestInit) => Response) {
+function fixture(respond: (url: URL, init: RequestInit) => Response | Promise<Response>) {
   const calls: { url: URL; init: RequestInit }[] = []
   const fetch = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(input instanceof Request ? input.url : String(input))
@@ -103,18 +103,207 @@ describe('sdk', () => {
     expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toEqual([['business', 'glow-studio']])
   })
 
-  it('signing in or out, or another phone, refreshes the business pages (book Q-154)', async () => {
-    const me = { id: 'u', name: null, phone: '+99365000001' }
-    const f = fixture(() => json(200, { me, isNew: false }))
-    const spy = vi.spyOn(f.queryClient, 'invalidateQueries')
-    await f.sdk.auth.verify().onSuccess!({ me, isNew: false } as never, {} as never, undefined, {} as never)
-    expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toContainEqual(['business'])
-    spy.mockClear()
-    f.sdk.auth.logout().onSuccess!(undefined, undefined, undefined, {} as never)
-    expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toContainEqual(['business'])
-    spy.mockClear()
-    await f.sdk.me.phoneVerify().onSuccess!(me as never, {} as never, undefined, {} as never)
-    expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toEqual([['business'], ['bookings']])
+  describe('who is signed in', () => {
+    const before = { id: 'u1', name: 'Aýjemal Gurbanowa', phone: '+99365000001' }
+    const after = { id: 'u2', name: 'Merdan Ataýew', phone: '+99365000002' }
+    // what the person before had in the cache: theirs, what answers per viewer, and the catalogue anyone sees
+    const person = [
+      keys.workspaces(),
+      keys.invites(),
+      keys.team('glow-studio'),
+      keys.calendar('glow-studio'),
+      keys.requests('glow-studio'),
+      keys.clients('glow-studio'),
+      keys.settings('glow-studio'),
+      keys.bookingList('upcoming', 'tk'),
+      keys.favorites('tk'),
+    ]
+    const viewer = [
+      keys.business('glow-studio', 'tk', null),
+      keys.reviews('glow-studio', 'tk'),
+      keys.availability('glow-studio', 'appointment', { move: 'YR-48213' }),
+      keys.invite('a-long-random-token-from-the-link'),
+      keys.link('a-long-random-token-from-the-sms-link', 'tk'),
+    ]
+    const anyone = [keys.categories('tk'), keys.searchAll()]
+    type F = ReturnType<typeof fixture>
+    const seeded = (respond: (url: URL) => Response | Promise<Response> = () => json(200, {})) => {
+      const f = fixture(respond)
+      f.queryClient.setQueryData(keys.me(), before)
+      for (const key of [...person, ...viewer, ...anyone]) f.queryClient.setQueryData(key, { of: before.id })
+      return f
+    }
+    const kept = (f: F) => (key: readonly unknown[]) => f.queryClient.getQueryData(key) !== undefined
+    const stale = (f: F) => (key: readonly unknown[]) => f.queryClient.getQueryState(key)?.isInvalidated === true
+    const signIns = [
+      (f: F, me: unknown) => f.sdk.auth.verify().onSuccess!({ me, isNew: false } as never, {} as never, undefined, {} as never),
+      (f: F, me: unknown) => f.sdk.auth.answerIdentity().onSuccess!({ me, isNew: false } as never, {} as never, undefined, {} as never),
+      // the SMS link page signs in the booking's phone, over whoever was there (book Q-169)
+      (f: F, me: unknown) =>
+        f.sdk.links.verify('a-long-random-token-from-the-sms-link').onSuccess!(
+          { me, isNew: false } as never,
+          {} as never,
+          undefined,
+          {} as never,
+        ),
+    ]
+
+    it('every query key says whose answer it is', () => {
+      expect([...person, keys.me(), keys.schedule('glow-studio', 's1'), keys.booking('YR-48213', 'tk')].map(audienceOf)).toEqual(
+        Array(person.length + 3).fill('person'),
+      )
+      expect(viewer.map(audienceOf)).toEqual(Array(viewer.length).fill('viewer'))
+      expect([...anyone, keys.cities('tk', null), keys.suggestAll(), keys.places('Mir', 'tk', null)].map(audienceOf)).toEqual(
+        Array(anyone.length + 3).fill('anyone'),
+      )
+    })
+
+    it('signing in over someone else empties their queries and what they saw as a team member', async () => {
+      for (const signIn of signIns) {
+        const f = seeded()
+        await signIn(f, after)
+        expect(f.queryClient.getQueryData(keys.me())).toEqual(after)
+        expect([...person, ...viewer].filter(kept(f))).toEqual([])
+        expect(anyone.filter(kept(f))).toEqual(anyone)
+      }
+    })
+
+    it('signing in from nobody, or as the same person again, refreshes the viewer’s answers in the background', async () => {
+      for (const [signIn, was] of signIns.flatMap((s) => [[s, null] as const, [s, before] as const])) {
+        const f = seeded()
+        f.queryClient.setQueryData(keys.me(), was)
+        await signIn(f, before)
+        expect(person.filter(kept(f))).toEqual([])
+        expect(viewer.filter(kept(f))).toEqual(viewer)
+        expect(viewer.filter(stale(f))).toEqual(viewer)
+        expect(anyone.filter(stale(f))).toEqual([])
+      }
+    })
+
+    it('“Is this you?” keeps the person on screen until it’s answered', async () => {
+      const f = seeded()
+      await f.sdk.auth.verify().onSuccess!({ isThisYou: { name: 'Merdan', ticket: 't' } }, {} as never, undefined, {} as never)
+      expect(f.queryClient.getQueryData(keys.me())).toEqual(before)
+      expect([...person, ...viewer].filter(kept(f))).toEqual([...person, ...viewer])
+    })
+
+    it('logging out or deleting the account forgets the person and what they sent; the catalogue stays', async () => {
+      for (const signOut of [
+        (f: F) => f.sdk.auth.logout().onSuccess!(undefined, undefined, undefined, {} as never),
+        (f: F) => f.sdk.me.remove().onSuccess!(undefined, undefined, undefined, {} as never),
+      ]) {
+        const f = seeded()
+        // a finished change with a client's number in it
+        await new MutationObserver(f.queryClient, f.sdk.clients.add('glow-studio')).mutate({ phone: '+99365000003' })
+        // a screen still showing the workspaces: it goes empty, without asking again
+        const onScreen = new QueryObserver(f.queryClient, { queryKey: keys.workspaces(), enabled: false })
+        const off = onScreen.subscribe(() => undefined)
+        void signOut(f)
+        expect(f.queryClient.getQueryData(keys.me())).toBeNull()
+        expect([...person, ...viewer].filter(kept(f))).toEqual([])
+        expect(anyone.filter(kept(f))).toEqual(anyone)
+        expect(onScreen.getCurrentResult().data).toBeUndefined()
+        // the rest leave the cache, so nothing piles up on a shared device
+        expect(f.queryClient.getQueryCache().find({ queryKey: keys.team('glow-studio') })).toBeUndefined()
+        expect(f.queryClient.getMutationCache().getAll()).toEqual([])
+        off()
+      }
+    })
+
+    it('a 401 from any request means the session ended: the person is forgotten', async () => {
+      const ended = () => json(401, { error: { code: 'unauthorized' } })
+      const query = seeded(ended)
+      await query.queryClient.fetchQuery(query.sdk.team.workspaces()).catch(() => undefined)
+      await vi.waitFor(() => expect(query.queryClient.getQueryData(keys.me())).toBeNull())
+      expect([...person, ...viewer].filter(kept(query))).toEqual([])
+
+      const mutation = seeded(ended)
+      await new MutationObserver(mutation.queryClient, mutation.sdk.team.open()).mutate('glow-studio').catch(() => undefined)
+      await vi.waitFor(() => expect(mutation.queryClient.getQueryData(keys.me())).toBeNull())
+
+      // `me` itself answers null, and what the person had goes with it
+      const me = seeded(ended)
+      expect(await me.queryClient.fetchQuery({ ...me.sdk.me.get(), staleTime: 0 })).toBeNull()
+      expect([...person, ...viewer].filter(kept(me))).toEqual([])
+      expect(anyone.filter(kept(me))).toEqual(anyone)
+    })
+
+    it('the first 401 counts, even on a request that would be tried again', async () => {
+      const f = seeded(() => json(401, { error: { code: 'unauthorized' } }))
+      const asking = f.queryClient.fetchQuery({ ...f.sdk.team.workspaces(), retry: 3, retryDelay: 60_000 }).catch(() => undefined)
+      await vi.waitFor(() => expect(f.queryClient.getQueryData(keys.me())).toBeNull())
+      await asking
+    })
+
+    it('a 401 for a request sent before someone signed in here leaves the new person signed in', async () => {
+      let answer: (res: Response) => void = () => undefined
+      const f = seeded((url) => (url.pathname.endsWith('/open') ? new Promise<Response>((resolve) => (answer = resolve)) : json(200, {})))
+      const late = new MutationObserver(f.queryClient, f.sdk.team.open()).mutate('glow-studio').catch(() => undefined)
+      await vi.waitFor(() => expect(f.calls).toHaveLength(1))
+      await new Promise((resolve) => setTimeout(resolve, 2))
+      await f.sdk.auth.verify().onSuccess!({ me: after, isNew: false } as never, {} as never, undefined, {} as never)
+      answer(json(401, { error: { code: 'unauthorized' } }))
+      await late
+      await Promise.resolve()
+      expect(f.queryClient.getQueryData(keys.me())).toEqual(after)
+    })
+
+    it('an answer that lands after the log-out doesn’t bring the person back', async () => {
+      const f = seeded()
+      f.sdk.auth.logout().onSuccess!(undefined, undefined, undefined, {} as never)
+      await f.sdk.me.update().onSuccess!(before as never, {}, undefined, {} as never)
+      await f.sdk.me.phoneVerify().onSuccess!(before as never, {} as never, undefined, {} as never)
+      expect(f.queryClient.getQueryData(keys.me())).toBeNull()
+    })
+
+    it('a 401 while nobody is signed in changes nothing', async () => {
+      const f = seeded(() => json(401, { error: { code: 'unauthorized' } }))
+      f.queryClient.setQueryData(keys.me(), null)
+      await f.queryClient.fetchQuery({ ...f.sdk.me.favorites('en'), staleTime: 0 }).catch(() => undefined)
+      await Promise.resolve()
+      expect([...person, ...viewer].filter(kept(f))).toEqual([...person, ...viewer])
+    })
+
+    it('a /me already on its way can’t bring back the person who logged out', async () => {
+      let answer: (res: Response) => void = () => undefined
+      const f = seeded((url) => (url.pathname === '/v1/me' ? new Promise<Response>((resolve) => (answer = resolve)) : json(204, null)))
+      const asking = f.queryClient.fetchQuery({ ...f.sdk.me.get(), staleTime: 0 }).catch(() => undefined)
+      await vi.waitFor(() => expect(f.calls).toHaveLength(1))
+      f.sdk.auth.logout().onSuccess!(undefined, undefined, undefined, {} as never)
+      answer(json(200, before))
+      await asking
+      expect(f.queryClient.getQueryData(keys.me())).toBeNull()
+    })
+
+    it('leaving a workspace forgets it, and nothing else', async () => {
+      const f = seeded()
+      const nails = [keys.team('glow-nails'), keys.calendar('glow-nails'), keys.business('glow-nails', 'tk', null)]
+      for (const key of nails) f.queryClient.setQueryData(key, { of: before.id })
+      await f.sdk.team.leave().onSuccess!(undefined, 'glow-studio', undefined, {} as never)
+      const studio = [...person, ...viewer].filter((key) => key[1] === 'glow-studio')
+      expect(studio.filter(kept(f))).toEqual([])
+      expect(nails.filter(kept(f))).toEqual(nails)
+      expect(f.queryClient.getQueryData(keys.me())).toEqual(before)
+      // a workspace named like a part of another key takes only its own
+      await f.sdk.team.leave().onSuccess!(undefined, 'tk', undefined, {} as never)
+      await f.sdk.team.leave().onSuccess!(undefined, 'list', undefined, {} as never)
+      expect([keys.favorites('tk'), keys.bookingList('upcoming', 'tk')].filter(kept(f))).toHaveLength(2)
+    })
+
+    it('accepting an invite refreshes what that business shows its team, not every business', async () => {
+      const f = seeded()
+      f.queryClient.setQueryData(keys.business('glow-nails', 'tk', null), { of: before.id })
+      await f.sdk.team.accept().onSuccess!({ slug: 'glow-nails' } as never, 'inv-1', undefined, {} as never)
+      // (the invite link's page sits under the invites, which an accept refreshes anyway)
+      expect(viewer.filter((key) => key[0] !== keys.invites()[0]).filter(stale(f))).toEqual([])
+      expect(f.queryClient.getQueryState(keys.business('glow-nails', 'tk', null))?.isInvalidated).toBe(true)
+    })
+
+    it('another phone refreshes the viewer’s answers, the bookings and the invites (sent to a phone)', async () => {
+      const f = seeded()
+      await f.sdk.me.phoneVerify().onSuccess!(before as never, {} as never, undefined, {} as never)
+      expect([...viewer, keys.bookingList('upcoming', 'tk'), keys.invites()].filter(stale(f))).toHaveLength(viewer.length + 2)
+    })
   })
 
   it('taking an offered time caches the new booking under its own code', async () => {

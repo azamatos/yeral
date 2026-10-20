@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { Button } from '@yeral/ui/button'
 import { toast } from '@yeral/ui/toast'
 import { useTranslations } from 'use-intl'
-import { useSdk, useSignOut } from '@/shared/api'
+import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { usePageTitle } from '@/shared/lib'
 import { AuthPage } from '@/shared/ui'
@@ -19,7 +19,7 @@ export function CalendarPage() {
   const navigate = useNavigate()
   const errorText = useErrorText()
   const workspaces = useQuery(sdk.team.workspaces())
-  const { signOut, signingOut } = useSignOut()
+  const logout = useMutation(sdk.auth.logout())
   const workspace = workspaces.data?.items.find((w) => w.slug === slug)
   const name = workspace?.name ?? slug
   usePageTitle(name)
@@ -34,8 +34,10 @@ export function CalendarPage() {
         variant="secondary"
         size="l"
         className="w-full"
-        loading={signingOut}
-        onClick={() => signOut({ onDone: () => void navigate({ to: '/login' }), onFailed: (error) => void toast(errorText(error)) })}
+        loading={logout.isPending}
+        onClick={() =>
+          logout.mutate(undefined, { onSuccess: () => void navigate({ to: '/login' }), onError: (error) => void toast(errorText(error)) })
+        }
       >
         {t('placeholder.logout')}
       </Button>

@@ -12,7 +12,7 @@
  * Request types come from `@yeral/contract` (ADR 0006), so a contract change fails type-checking here: bodies are what a
  * schema accepts (`z.input`), query parameters the values it reads them as (`z.output`), turned back into text below.
  */
-import { infiniteQueryOptions, mutationOptions, queryOptions, type QueryClient } from '@tanstack/react-query'
+import { infiniteQueryOptions, mutationOptions, notifyManager, queryOptions, type QueryClient } from '@tanstack/react-query'
 import type {
   identityAnswerSchema,
   linkCodeSchema,
@@ -77,7 +77,7 @@ import type {
 import type { z } from 'zod'
 import { call, isApiError, type Client } from './client'
 import { staleKeys } from './events'
-import { keys, type BookingTab } from './keys'
+import { audienceOf, inWorkspace, keys, type Audience, type BookingTab } from './keys'
 
 /**
  * Query strings are text and the api's schemas coerce them; the RPC types describe the coerced values, so calls that
@@ -100,17 +100,84 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   const invalidate = (...queryKeys: readonly (readonly unknown[])[]) =>
     Promise.all(queryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })))
 
-  /**
-   * The person looking changed (signed in or out, another phone): each business page says whether they may book there
-   * online (book Q-154), so the pages refresh, in the background.
-   */
-  const viewerChanged = () => void invalidate(keys.businesses())
+  // ── Who is signed in (`audienceOf` in keys.ts says whose each query is) ──
 
-  /** Someone signed in who may not be the person before: every query goes back to empty and the screens reload. */
-  const signedInAnew = async (data: { me: unknown }) => {
-    queryClient.setQueryData(keys.me(), data.me)
-    await queryClient.resetQueries({ predicate: (q) => q.queryKey[0] !== keys.me()[0] })
+  const queries = queryClient.getQueryCache()
+  const mutations = queryClient.getMutationCache()
+  type KeyTest = (key: readonly unknown[]) => boolean
+  const whose =
+    (audience: Audience, also: KeyTest = () => true) =>
+    (q: { queryKey: readonly unknown[] }) =>
+      q.queryKey[0] !== keys.me()[0] && audienceOf(q.queryKey) === audience && also(q.queryKey)
+  const signedInAs = () => queryClient.getQueryData<{ id: string } | null>(keys.me()) ?? null
+  /** When the person on screen signed in here: a request sent before that answers for an earlier session. */
+  let signedInAt = 0
+  /** Writes what a request answered for the person, unless someone else (or nobody) is signed in by now. */
+  const forThePerson = (id: string | null, write: () => void) => {
+    if (id !== null && signedInAs()?.id === id) write()
   }
+
+  /** The answers that depend on who asks refresh in the background: the person looking changed (another phone, access). */
+  const viewerChanged = (only?: KeyTest) => void queryClient.invalidateQueries({ predicate: whose('viewer', only) })
+
+  /**
+   * Nothing of the person stays: their queries on screen go back to empty without asking again (nobody may ask now)
+   * and the rest leave the cache; what they saw as a team member asks again as a visitor.
+   */
+  const forgetPerson = (only?: KeyTest) => {
+    notifyManager.batch(() => {
+      for (const q of queries.findAll({ predicate: whose('person', only) })) {
+        if (q.getObserversCount() > 0) q.reset()
+        else queries.remove(q)
+      }
+    })
+    void queryClient.resetQueries({ predicate: whose('viewer', only) })
+  }
+
+  /** Nobody is signed in any more (logged out, the session ended, the account deleted). */
+  const signedOut = () => {
+    // a /me already on its way would answer for the person before
+    void queryClient.cancelQueries({ queryKey: keys.me() })
+    queryClient.setQueryData(keys.me(), null)
+    forgetPerson()
+    // what they sent (numbers, names, notes) goes too; a request still running finishes on its own
+    for (const m of mutations.getAll()) if (m.state.status !== 'pending') mutations.remove(m)
+  }
+
+  /**
+   * Someone signed in who may not be the person before (another phone, a shared one, the SMS link over whoever was
+   * there: Q-169): their queries go back to empty, and those on screen ask again as the new person.
+   */
+  const signedIn = async (data: { me: { id: string } }) => {
+    const before = signedInAs()
+    signedInAt = Date.now()
+    await queryClient.cancelQueries({ queryKey: keys.me() })
+    queryClient.setQueryData(keys.me(), data.me)
+    // what someone else saw as a team member goes at once; a visitor's answers just refresh
+    if (before && before.id !== data.me.id) void queryClient.resetQueries({ predicate: whose('viewer') })
+    else viewerChanged()
+    await queryClient.resetQueries({ predicate: whose('person') })
+  }
+
+  // A 401 means the session ended on its own (it ran out, the account went, a log-out on another device): the person
+  // is forgotten once, after which nobody is signed in and later 401s change nothing. A request sent before the latest
+  // sign-in here answers for an earlier session and changes nothing; a retried one counts at its first 401. After the
+  // failed request's own updates, so the reset isn't undone by them.
+  const sessionEnded = (error: unknown, sentAt: number) => {
+    if (!isApiError(error, 'unauthorized') || !signedInAs() || sentAt < signedInAt) return
+    const session = signedInAt
+    queueMicrotask(() => {
+      if (signedInAs() && session === signedInAt) signedOut()
+    })
+  }
+  // the person's queries are cancelled at every sign-in, so a query's 401 is always this session's
+  queries.subscribe((e) => {
+    if (e.type === 'updated' && (e.action.type === 'error' || e.action.type === 'failed')) sessionEnded(e.action.error, Date.now())
+  })
+  mutations.subscribe((e) => {
+    if (e.type === 'updated' && (e.action.type === 'error' || e.action.type === 'failed'))
+      sessionEnded(e.action.error, e.mutation.state.submittedAt)
+  })
 
   const auth = {
     sendCode: () =>
@@ -121,28 +188,18 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     verify: () =>
       mutationOptions({
         mutationFn: (body: z.input<typeof verifyCodeSchema>) => call(v1.auth.verify.$post({ json: body })),
-        onSuccess: (data) => {
-          if (!('me' in data)) return
-          queryClient.setQueryData(keys.me(), data.me)
-          viewerChanged()
-          return invalidate(keys.bookings(), ['favorites'])
-        },
+        onSuccess: (data) => ('me' in data ? signedIn(data) : undefined),
       }),
     /** "Is this you?": yes signs in to that account, no to a fresh one; whoever was on screen before is gone. */
     answerIdentity: () =>
       mutationOptions({
         mutationFn: (body: z.input<typeof identityAnswerSchema>) => call(v1.auth.identity.$post({ json: body })),
-        onSuccess: signedInAnew,
+        onSuccess: signedIn,
       }),
     logout: () =>
       mutationOptions({
         mutationFn: () => call(v1.auth.logout.$post()),
-        onSuccess: () => {
-          queryClient.setQueryData(keys.me(), null)
-          queryClient.removeQueries({ queryKey: keys.bookings() })
-          queryClient.removeQueries({ queryKey: ['favorites'] })
-          viewerChanged()
-        },
+        onSuccess: signedOut,
       }),
   }
 
@@ -152,9 +209,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       queryOptions({
         queryKey: keys.me(),
         queryFn: async ({ signal }) => {
+          const sentAt = Date.now()
           try {
             return await call(v1.me.$get(undefined, abortWith(signal)))
           } catch (e) {
+            // someone was signed in and the session ended on its own: forgotten as any 401 does
+            sessionEnded(e, sentAt)
             if (isApiError(e, 'unauthorized')) return null
             throw e
           }
@@ -164,23 +224,23 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     update: () =>
       mutationOptions({
         mutationFn: (body: z.input<typeof updateMeSchema>) => call(v1.me.$patch({ json: body })),
-        onSuccess: (data) => queryClient.setQueryData(keys.me(), data),
+        onSuccess: (data) => forThePerson(data.id, () => queryClient.setQueryData(keys.me(), data)),
       }),
     remove: () =>
       mutationOptions({
         mutationFn: () => call(v1.me.$delete()),
-        onSuccess: () => queryClient.clear(),
+        onSuccess: signedOut,
       }),
     phoneCode: () =>
       mutationOptions({ mutationFn: (body: z.input<typeof sendCodeSchema>) => call(v1.me.phone.code.$post({ json: body })) }),
     phoneVerify: () =>
       mutationOptions({
         mutationFn: (body: z.input<typeof verifyCodeSchema>) => call(v1.me.phone.verify.$post({ json: body })),
-        // another number: the business pages and the bookings may say otherwise now
+        // another number: the business pages, the bookings and the invites (sent to a phone) may say otherwise now
         onSuccess: (data) => {
-          queryClient.setQueryData(keys.me(), data)
+          forThePerson(data.id, () => queryClient.setQueryData(keys.me(), data))
           viewerChanged()
-          return invalidate(keys.bookings())
+          return invalidate(keys.bookings(), keys.invites())
         },
       }),
     favorites: (lang: Locale) =>
@@ -193,7 +253,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: ({ slug, on }: { slug: string; on: boolean }) =>
           on ? call(v1.me.favorites[':slug'].$put({ param: { slug } })) : call(v1.me.favorites[':slug'].$delete({ param: { slug } })),
-        onSuccess: () => invalidate(['favorites']),
+        onSuccess: () => invalidate(keys.favoritesAll()),
       }),
   }
 
@@ -309,7 +369,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
    * that business's free times refresh, the detail just written doesn't.
    */
   const settle = (lang: Locale, data: BookingDetail, ...stale: (readonly unknown[])[]) => {
-    queryClient.setQueryData(keys.booking(data.code, lang), data)
+    // an answer that lands after a log-out isn't kept (`me` null; undefined is not asked yet)
+    if (queryClient.getQueryData(keys.me()) !== null) queryClient.setQueryData(keys.booking(data.code, lang), data)
     return invalidate(keys.bookingLists(), keys.availabilityAll(data.business.slug), ...stale)
   }
   const bookingAction = <B>(
@@ -411,7 +472,11 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     accept: () =>
       mutationOptions({
         mutationFn: (id: string) => call(v1.me.invites[':id'].accept.$post({ param: { id } })),
-        onSuccess: () => invalidate(keys.invites(), keys.workspaces(), keys.me()),
+        // on the team now: the business, still in review perhaps, shows them its page
+        onSuccess: (joined) => {
+          viewerChanged(inWorkspace(joined.slug))
+          return invalidate(keys.invites(), keys.workspaces(), keys.me())
+        },
       }),
     decline: () =>
       mutationOptions({
@@ -485,7 +550,11 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     leave: () =>
       mutationOptions({
         mutationFn: (slug: string) => call(v1.w[':slug'].leave.$post({ param: { slug } })),
-        onSuccess: () => invalidate(keys.workspaces(), keys.me()),
+        // nothing of that workspace stays (every workspace key names it second), nor what they saw as its team
+        onSuccess: (_, slug) => {
+          forgetPerson(inWorkspace(slug))
+          return invalidate(keys.workspaces(), keys.me())
+        },
       }),
   }
 
@@ -750,7 +819,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: (body: z.input<typeof linkVerifySchema>) => call(v1.links[':token'].verify.$post({ param: { token }, json: body })),
         // the link page can sign someone in over another person (a shared phone, book Q-169); `{ isThisYou }` waits
         // for `auth.answerIdentity` (Q-270)
-        onSuccess: (data) => ('me' in data ? signedInAnew(data) : undefined),
+        onSuccess: (data) => ('me' in data ? signedIn(data) : undefined),
       }),
   }
 

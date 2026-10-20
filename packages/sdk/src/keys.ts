@@ -63,3 +63,45 @@ export const keys = {
   clientLookup: (slug: string, params: Record<string, unknown>) => ['clients', slug, 'lookup', params] as const,
   client: (slug: string, id: string, params: Record<string, unknown>) => ['clients', slug, 'card', id, params] as const,
 }
+
+/**
+ * Whose a query's answer is, which decides what a sign-in, a log-out or another person does to it:
+ * - `anyone`: the catalogue, the same for every visitor;
+ * - `viewer`: anyone may ask, but the answer depends on who asks. A business page says whether they may book there
+ *   online (book Q-154), and a business still in review shows its page, free times and reviews only to its team;
+ *   moving one's own booking leaves it out of the busy times; an invite link answers in the viewer's language; the
+ *   SMS link page shows more to the booking's own account;
+ * - `person`: only the person signed in may ask: their account, bookings, favourites, workspaces and invites, and each
+ *   workspace's data, which their level decides. A new key is the person's until it's listed here, so another person
+ *   never sees it.
+ */
+export type Audience = 'anyone' | 'viewer' | 'person'
+
+const ANYONE: readonly unknown[] = ['categories', 'cities', 'search', 'suggest', 'places']
+const VIEWER: readonly unknown[] = ['business', 'reviews', 'availability']
+
+export function audienceOf(queryKey: readonly unknown[]): Audience {
+  const [head, part] = queryKey
+  if (ANYONE.includes(head)) return 'anyone'
+  if (VIEWER.includes(head)) return 'viewer'
+  // two pages anyone opens from a link sit under the person's prefixes, so their events refresh them: the invite
+  // behind a link (beside the person's own invites) and the SMS link page (beside the person's bookings)
+  const link = keys.link('', 'en')
+  if (head === keys.invites()[0] && part === keys.invite('')[1]) return 'viewer'
+  if (head === link[0] && part === link[1]) return 'viewer'
+  return 'person'
+}
+
+/** Every key of one workspace (each names its slug second): what goes when the person leaves it. */
+const WORKSPACE: readonly unknown[] = [
+  keys.team('')[0],
+  keys.calendar('')[0],
+  keys.settings('')[0],
+  keys.requests('')[0],
+  keys.clients('')[0],
+  ...VIEWER,
+]
+export const inWorkspace =
+  (slug: string) =>
+  (queryKey: readonly unknown[]): boolean =>
+    WORKSPACE.includes(queryKey[0]) && queryKey[1] === slug

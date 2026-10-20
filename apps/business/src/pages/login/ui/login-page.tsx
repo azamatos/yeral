@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useSignIn } from '@yeral/features/auth-by-phone'
 import { toast } from '@yeral/ui/toast'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
-import { useSdk, useSignOut } from '@/shared/api'
+import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { usePageTitle } from '@/shared/lib'
 import { EntryStep } from './entry-step'
@@ -22,10 +22,18 @@ export function LoginPage() {
   const sdk = useSdk()
   const errorText = useErrorText()
   const me = useQuery(sdk.me.get())
-  const { signOut, signingOut, sessionEnded } = useSignOut()
+  const logout = useMutation(sdk.auth.logout())
   const [identity, setIdentity] = useState<{ name: string | null; ticket: string } | null>(null)
   const [declined, setDeclined] = useState<string | null>(null)
   usePageTitle(t('tabTitle'))
+
+  // signed out (or the session ended on its own): the decline was that sign-in's, never the next one's
+  const signedIn = !!me.data
+  const [wasSignedIn, setWasSignedIn] = useState(signedIn)
+  if (signedIn !== wasSignedIn) {
+    setWasSignedIn(signedIn)
+    if (!signedIn) setDeclined(null)
+  }
 
   const failed = (error: unknown) => void toast(errorText(error))
   const signIn = useSignIn({
@@ -68,12 +76,8 @@ export function LoginPage() {
       declined={declined}
       onDeclined={setDeclined}
       // «Log in with another number»: signed out, the phone step from the start
-      onOtherNumber={() => signOut({ onDone: startOver, onFailed: failed })}
-      leaving={signingOut}
-      onSessionEnded={() => {
-        sessionEnded()
-        startOver()
-      }}
+      onOtherNumber={() => logout.mutate(undefined, { onSuccess: startOver, onError: failed })}
+      leaving={logout.isPending}
       onFailed={failed}
     />
   )

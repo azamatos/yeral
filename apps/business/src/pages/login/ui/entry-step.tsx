@@ -3,7 +3,7 @@ import type { Me } from '@yeral/contract/account'
 import type { InviteCard } from '@yeral/contract/team'
 import { formatPhone, maskPhone } from '@yeral/domain/phone'
 import { isApiError } from '@yeral/sdk'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { entryOf, type Entry } from '../model/entry'
@@ -22,7 +22,6 @@ export function EntryStep({
   onDeclined,
   onOtherNumber,
   leaving,
-  onSessionEnded,
   onFailed,
 }: {
   me: Me
@@ -30,8 +29,6 @@ export function EntryStep({
   onDeclined: (business: string) => void
   onOtherNumber: () => void
   leaving: boolean
-  /** The api no longer knows this session (it ended while `me` was still cached): back to the sign-in. */
-  onSessionEnded: () => void
   onFailed: (error: unknown) => void
 }) {
   const t = useTranslations('login')
@@ -44,11 +41,6 @@ export function EntryStep({
   const [answering, setAnswering] = useState<InviteCard | null>(null)
   const name = me.name ?? me.firstName
   const who = (phone: string) => (name ? t('who', { name, phone }) : phone)
-
-  const ended = isApiError(invites.error, 'unauthorized') || isApiError(workspaces.error, 'unauthorized')
-  useEffect(() => {
-    if (ended) onSessionEnded()
-  }, [ended, onSessionEnded])
 
   // accepted: the person is on the team, and that workspace opens (and becomes the last used); a later refetch that
   // fails doesn't take it away
