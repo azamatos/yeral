@@ -33,15 +33,16 @@ import { ApiError } from '../../http/errors'
 import { errors, json } from '../../http/openapi'
 import { requireUser } from '../auth/session'
 import { myBooking, stateOf } from '../bookings/repo'
-import { publicBusiness } from '../catalog/detail'
+import { visibleBusiness } from '../catalog/detail'
 import { text } from '../catalog/map'
 import { appointmentContext, checkQuery, loadBusinesses, loadBusy, loadTableContext, type LoadedBusiness } from './context'
 import { loadSessions } from './sessions'
 
 const slugParam = z.object({ slug: slugSchema })
 
-async function loaded(deps: Deps, slug: string) {
-  const b = await publicBusiness(deps, slug)
+/** The business's free times: public once verified, and for its own team while in review (book F-032). */
+async function loaded(deps: Deps, slug: string, viewerId: string | null) {
+  const { row: b } = await visibleBusiness(deps, slug, viewerId)
   const lb = (await loadBusinesses(deps.db, [b.id])).get(b.id)
   if (!lb) throw new ApiError('not_found')
   return lb
@@ -107,7 +108,7 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const now = deps.now()
     const q = c.req.valid('query')
-    const lb = await loaded(deps, c.req.valid('param').slug)
+    const lb = await loaded(deps, c.req.valid('param').slug, c.var.auth?.user.id ?? null)
     const first = today(now)
     const date = q.date ?? first
     const last = addDays(first, Math.max(q.days, lb.rules.windowDays + 1))
@@ -133,7 +134,7 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const now = deps.now()
     const { services, move } = c.req.valid('query')
-    const lb = await loaded(deps, c.req.valid('param').slug)
+    const lb = await loaded(deps, c.req.valid('param').slug, c.var.auth?.user.id ?? null)
     const first = today(now)
     const [moving, busy] = await Promise.all([
       movingFamily(c, lb, move),
@@ -153,7 +154,7 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const now = deps.now()
     const q = c.req.valid('query')
-    const lb = await loaded(deps, c.req.valid('param').slug)
+    const lb = await loaded(deps, c.req.valid('param').slug, c.var.auth?.user.id ?? null)
     // "9 we ondan köp adam bolsa, jaň ediň" (client spec §4.5)
     if (q.party > MAX_ONLINE_PARTY) throw new ApiError('party_too_large', { callFrom: MAX_ONLINE_PARTY + 1 } satisfies PartyTooLargeDetails)
     const first = today(now)
@@ -181,7 +182,7 @@ export const availabilityRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const now = deps.now()
     const q = c.req.valid('query')
-    const lb = await loaded(deps, c.req.valid('param').slug)
+    const lb = await loaded(deps, c.req.valid('param').slug, c.var.auth?.user.id ?? null)
     const from = q.from ?? today(now)
     const sessions = await loadSessions(deps.db, [lb.business.id], from, addDays(from, q.days - 1))
     const items = sessions

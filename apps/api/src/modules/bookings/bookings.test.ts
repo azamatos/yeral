@@ -55,7 +55,7 @@ describe('client bookings', () => {
       ['YR-47990', 'confirmed'],
       ['YR-47702', 'confirmed'],
     ])
-    const past = await b.req('/v1/me/bookings?tab=past')
+    const past = await b.req('/v1/me/bookings?tab=past&limit=50')
     const demo = ['YR-46511', 'YR-45320', 'YR-44987', 'YR-44650', 'YR-43108']
     // newest first; her Glow Studio visits from the client list sit in between
     expect(past.json.items.map((x: { code: string }) => x.code).filter((c: string) => demo.includes(c))).toEqual(demo)

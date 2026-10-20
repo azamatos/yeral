@@ -7,7 +7,9 @@ Apps call it only through `@yeral/sdk`. The frozen `apps/legacy` keeps its own i
 
 ## Conventions
 
-- Paths start with `/v1`; inside it changes are additive only (breaking changes ship as `/v2`).
+- Paths start with `/v1`; inside it changes are additive only (breaking changes ship as `/v2`). A business page,
+  its free times and its reviews answer 404 `in_review` (not `not_found`) for a business still in review (book F-032);
+  a client treats either 404 as "not here".
 - Business-local dates `YYYY-MM-DD`, times of day in minutes from midnight (`870` = 14:30), instants in epoch ms,
   money in whole manats. Every business is in `Asia/Ashgabat` today.
 - Text endpoints take `?lang=tk|ru|en` (default `tk`) and return resolved strings.

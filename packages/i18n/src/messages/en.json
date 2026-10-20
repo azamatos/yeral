@@ -14,6 +14,7 @@
     "unauthorized": "Log in to continue.",
     "forbidden": "You can't do this.",
     "not_found": "Not found.",
+    "in_review": "This page hasn't opened yet.",
     "slot_taken": "This time was just taken. Nearest free times:",
     "online_disabled": "This place isn't taking online bookings right now",
     "online_blocked": "You can book this business by phone.",

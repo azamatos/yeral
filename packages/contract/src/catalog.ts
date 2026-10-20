@@ -307,9 +307,16 @@ export const businessDetailSchema = z
     /**
      * Whether whoever is looking may book online here: false while the business has paused online booking, and for a
      * signed-in client who may book it only by phone, who sees the "Jaň et" card instead (book A7, Q-154). Signed out,
-     * it follows `onlineEnabled`: the card shows once the client logs in.
+     * it follows `onlineEnabled`: the card shows once the client logs in. On a `preview` it's false too, and means
+     * booking is off (the buttons shown disabled, Q-153), not the card: read `preview` first.
      */
     bookOnline: z.boolean(),
+    /**
+     * The owner's and team's own page while Ýeral still checks it (book F-032): "Sahypaňyz barlagda — häzir ony diňe siz
+     * we toparyňyz görýärsiňiz." Nobody else sees it, and nothing can be booked (`bookOnline` false, Q-153). `rejected`
+     * carries the Ýeral team's reason (Q-274). Null on a verified page.
+     */
+    preview: z.object({ status: z.enum(['pending', 'rejected']), reason: z.string().nullable() }).nullable(),
     confirmMode: z.enum(CONFIRM_MODES),
     holdMinutes: z.number().int(),
     leadMinutes: z.number().int(),

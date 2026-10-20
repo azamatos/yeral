@@ -265,7 +265,7 @@ describe('catalogue', () => {
     expect(await look(browser(t.app))).toBe(true)
     // the answer is for whoever looks: no shared cache keeps it
     const headers = (await browser(t.app).req('/v1/businesses/glow-studio')).headers
-    expect(headers.get('cache-control')).toBe('private')
+    expect(headers.get('cache-control')).toBe('private, no-store')
     expect(headers.get('vary')).toMatch(/Cookie, Authorization/)
     const client = browser(t.app)
     await client.login(phone, 'Maral')
@@ -306,5 +306,56 @@ describe('catalogue', () => {
       await db.delete(bookings).where(eq(bookings.code, 'YR-997020'))
       await db.delete(clients).where(eq(clients.id, record!.id))
     }
+  })
+
+  it('a page still in review: "not opened yet" for visitors, a preview for its own team (book F-032)', async () => {
+    const t = testApp(db)
+    const [ojak] = await db.select().from(businesses).where(eq(businesses.slug, 'ojak'))
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const open = (who: ReturnType<typeof browser>, path = '') => who.req(`/v1/businesses/ojak${path}`)
+    const added: string[] = []
+    try {
+      const member = browser(t.app)
+      const { me } = await member.login('+99365777030', 'Döwran')
+      // the owner, and an administrator
+      const [ownerRow] = await db.insert(staff).values({ businessId: ojak!.id, userId: me.id, name: 'Döwran', level: 'owner' }).returning()
+      added.push(ownerRow!.id)
+      const admin = browser(t.app)
+      const { me: adminMe } = await admin.login('+99365777032', 'Jemal')
+      const [adminRow] = await db
+        .insert(staff)
+        .values({ businessId: ojak!.id, userId: adminMe.id, name: 'Jemal', level: 'admin' })
+        .returning()
+      added.push(adminRow!.id)
+      // on another team: a stranger here
+      const elsewhere = browser(t.app)
+      const { me: other } = await elsewhere.login('+99365777031', 'Aýna')
+      const [theirs] = await db.insert(staff).values({ businessId: glow!.id, userId: other.id, name: 'Aýna', level: 'admin' }).returning()
+      added.push(theirs!.id)
+      await db.update(businesses).set({ verification: 'pending' }).where(eq(businesses.id, ojak!.id))
+      for (const who of [browser(t.app), elsewhere]) {
+        const res = await open(who)
+        expect(res.status).toBe(404)
+        expect(res.json.error.code).toBe('in_review')
+        expect(res.headers.get('cache-control')).toBe('private, no-store')
+        expect((await open(who, '/reviews')).json.error.code).toBe('in_review')
+      }
+      const own = await open(member)
+      expect(own.status).toBe(200)
+      expect(own.json).toMatchObject({ slug: 'ojak', preview: { status: 'pending', reason: null }, bookOnline: false })
+      expect((await open(member, '/reviews')).status).toBe(200)
+      // rejected: still "not opened yet" for others; the owner sees why, the rest of the team doesn't
+      await db.update(businesses).set({ verification: 'rejected', verificationReason: 'Salgy doly däl' }).where(eq(businesses.id, ojak!.id))
+      expect((await open(elsewhere)).json.error.code).toBe('in_review')
+      expect((await open(member)).json.preview).toEqual({ status: 'rejected', reason: 'Salgy doly däl' })
+      expect((await open(admin)).json.preview).toEqual({ status: 'rejected', reason: null })
+      // a slug that never existed is plainly not found
+      expect((await browser(t.app).req('/v1/businesses/no-such-place')).json.error.code).toBe('not_found')
+    } finally {
+      await db.update(businesses).set({ verification: 'verified', verificationReason: null }).where(eq(businesses.id, ojak!.id))
+      if (added.length) await db.delete(staff).where(inArray(staff.id, added))
+    }
+    // verified again: everyone sees it, with no preview
+    expect((await open(browser(t.app))).json).toMatchObject({ slug: 'ojak', preview: null })
   })
 })

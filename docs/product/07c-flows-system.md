@@ -739,7 +739,7 @@ flowchart TD
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.
 
-**Status.** Design: decided and drawn for the business and the visitor (business spec §7, §26; ROUND6 F1) · Code: partly. Only verified businesses are public, and an unverified link gives a plain "not found". There's no owner preview, no banner and no verification tool.
+**Status.** Design: decided and drawn for the business and the visitor (business spec §7, §26; ROUND6 F1) · Code: partly. Only verified businesses are public; an unverified link answers `in_review` (the friendly page), and the business's own team gets its page as a preview (F-032). There's no banner yet and no verification tool.
 
 ### S-18 · Quiet hours and summaries for the business
 
