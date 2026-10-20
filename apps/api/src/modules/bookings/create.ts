@@ -183,7 +183,7 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
     )
   }
   await emit(db, { type: 'booking.created', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
-  if (x.status === 'confirmed') return confirmBooking(db, deps, row)
+  if (x.status === 'confirmed') return confirmBooking(db, deps, row, { instant: true })
   if (deps.site.demo && x.lb.business.demo && !(await hasSignedInTeam(db, row.businessId))) {
     await db.insert(jobs).values({ kind: 'demo.answer', runAt: new Date(now + DEMO_ANSWER_MS), payload: { bookingId: row.id } })
   }

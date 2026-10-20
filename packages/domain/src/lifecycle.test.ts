@@ -43,6 +43,9 @@ describe('typicalAnswerMinutes (book Q-113)', () => {
     expect(typicalAnswerMinutes([40, 50, 70, 80, 90, 100])).toBe(90) // median 75
     expect(typicalAnswerMinutes([60, 60, 60, 60, 60])).toBe(60)
     expect(typicalAnswerMinutes([2000, 2000, 2000, 2000, 2000])).toBe(2880)
+    // requests let run out count at the wait the client had; the five are answers only
+    expect(typicalAnswerMinutes([5, 5, 5, 5, 5], [30, 30, 30, 30, 30, 30])).toBe(30)
+    expect(typicalAnswerMinutes([5, 5, 5, 5], [30, 30, 30, 30, 30, 30])).toBeNull()
   })
 })
 

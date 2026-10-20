@@ -153,7 +153,6 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
         2: 0,
         1: 0,
       },
-      typicalConfirmMinutes: def.typicalConfirmMinutes ?? 20,
       verification: 'verified',
       tableRequests: def.tableRequests ?? [],
       demo: true,
@@ -270,7 +269,7 @@ function lifecycle(
   ctx: Ctx,
   biz: SeededBusiness,
   b: { date: string; start: number; end: number; status: BookingStatus; hold?: number },
-): Pick<typeof t.bookings.$inferInsert, 'holdUntil' | 'createdAt' | 'confirmedAt' | 'cancelledAt' | 'completedAt'> {
+): Pick<typeof t.bookings.$inferInsert, 'holdUntil' | 'createdAt' | 'confirmedAt' | 'answeredAt' | 'cancelledAt' | 'completedAt'> {
   const startEpoch = epochOf(b.date, b.start)
   const createdAt =
     b.status === 'pending'
@@ -281,6 +280,8 @@ function lifecycle(
     holdUntil: b.status === 'pending' ? new Date(Math.min(ctx.now + (b.hold ?? biz.holdMinutes) * 60_000, startEpoch)) : null,
     createdAt: new Date(createdAt),
     confirmedAt: b.status === 'pending' ? null : new Date(createdAt + 10 * 60_000),
+    // answered by the business ten minutes after it was sent (book Q-113)
+    answeredAt: b.status === 'pending' ? null : new Date(createdAt + 10 * 60_000),
     cancelledAt: b.status === 'cancelled' ? new Date(Math.min(ctx.now, startEpoch) - 86_400_000) : null,
     completedAt: b.status === 'completed' || b.status === 'noshow' ? new Date(epochOf(b.date, b.end)) : null,
   }

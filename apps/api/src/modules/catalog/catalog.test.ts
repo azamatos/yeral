@@ -1,13 +1,14 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, businesses, services, staff, staffServices } from '../../db/schema'
+import { bookings, businesses, events, jobs, services, staff, staffServices } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { DEMO_CENTER } from '../../db/seed/demo-data'
 import { confirmBooking } from '../bookings/confirm'
+import { runDueJobs } from '../jobs/run'
 
 const near = `lat=${DEMO_CENTER.lat}&lng=${DEMO_CENTER.lng}`
 
@@ -174,8 +175,9 @@ describe('catalogue', () => {
   it('the typical answer time: the median of the last 30 days, shown from the fifth answer (book Q-113)', async () => {
     const [nails] = await db.select().from(businesses).where(eq(businesses.slug, 'nail-bar-ayna'))
     const typical = async () => (await b.req('/v1/businesses/nail-bar-ayna')).json.typicalConfirmMinutes
-    const answered = (code: string, minutes: number, daysAgo: number) => {
+    const row = (code: string, minutes: number, daysAgo: number, lapsed = false) => {
       const sent = DEMO_NOW - daysAgo * 86_400_000
+      const at = new Date(sent + minutes * 60_000)
       return {
         code,
         businessId: nails!.id,
@@ -183,65 +185,75 @@ describe('catalogue', () => {
         date: '2026-10-20',
         start: 600,
         end: 660,
-        status: 'confirmed' as const,
+        status: lapsed ? ('cancelled' as const) : ('confirmed' as const),
         source: 'web' as const,
         createdAt: new Date(sent),
-        confirmedAt: new Date(sent + minutes * 60_000),
-        answeredAt: new Date(sent + minutes * 60_000),
+        ...(lapsed ? { cancelledBy: 'system' as const, cancelledAt: at } : { confirmedAt: at, answeredAt: at }),
       }
     }
+    const codes = ['YR-997001', 'YR-997002', 'YR-997003', 'YR-997004', 'YR-997005', 'YR-997006', 'YR-997007', 'YR-997008']
+    // open round the clock, with no answers of its own yet: the waits are the minutes below
+    await db
+      .update(businesses)
+      .set({ hours: Array.from({ length: 7 }, () => ({ open: 0, close: 1440 })), exceptions: [] })
+      .where(eq(businesses.id, nails!.id))
+    await db.update(bookings).set({ answeredAt: null }).where(eq(bookings.businessId, nails!.id))
     try {
       // four answers, and one from 40 days ago that no longer counts
       await db
         .insert(bookings)
-        .values([
-          answered('YR-997001', 4, 1),
-          answered('YR-997002', 6, 2),
-          answered('YR-997003', 8, 3),
-          answered('YR-997004', 12, 4),
-          answered('YR-997005', 2, 40),
-        ])
+        .values([row(codes[0]!, 4, 1), row(codes[1]!, 6, 2), row(codes[2]!, 8, 3), row(codes[3]!, 12, 4), row(codes[4]!, 2, 40)])
       expect(await typical()).toBeNull()
-      await db.insert(bookings).values(answered('YR-997006', 14, 5))
       // 4, 6, 8, 12, 14: 8 minutes, said as 10
+      await db.insert(bookings).values(row(codes[5]!, 14, 5))
       expect(await typical()).toBe(10)
+      // two requests let run out after an hour count at that hour: 12 minutes, said as 15
+      await db.insert(bookings).values([row(codes[6]!, 60, 6, true), row(codes[7]!, 60, 7, true)])
+      expect(await typical()).toBe(15)
     } finally {
-      await db
-        .delete(bookings)
-        .where(inArray(bookings.code, ['YR-997001', 'YR-997002', 'YR-997003', 'YR-997004', 'YR-997005', 'YR-997006']))
+      await db.delete(bookings).where(inArray(bookings.code, codes))
+      await db.update(businesses).set({ hours: nails!.hours, exceptions: nails!.exceptions }).where(eq(businesses.id, nails!.id))
     }
   })
 
-  it('a request the business confirms keeps when it was answered; an instant booking doesn’t', async () => {
+  it('a request the business confirms keeps when it was answered (the demo answers too); an instant one doesn’t', async () => {
     const t = testApp(db)
     const [nails] = await db.select().from(businesses).where(eq(businesses.slug, 'nail-bar-ayna'))
-    const [row] = await db
-      .insert(bookings)
-      .values({
-        code: 'YR-997010',
-        businessId: nails!.id,
-        type: 'appointment',
-        date: '2026-10-20',
-        start: 600,
-        end: 660,
-        status: 'pending',
-        source: 'web',
-        holdUntil: new Date(DEMO_NOW + 3_600_000),
-      })
-      .returning()
+    const pending = async (code: string) =>
+      (
+        await db
+          .insert(bookings)
+          .values({
+            code,
+            businessId: nails!.id,
+            type: 'appointment',
+            date: '2026-10-20',
+            start: 600,
+            end: 660,
+            status: 'pending',
+            source: 'web',
+            holdUntil: new Date(DEMO_NOW + 3_600_000),
+          })
+          .returning()
+      )[0]!
+    const codes = ['YR-997010', 'YR-997011', 'YR-997012']
     try {
       // as an instant business confirms: not an answer
-      const instant = await db.transaction((tx) => confirmBooking(tx, t.deps, row!))
+      const instant = await db.transaction(async (tx) => confirmBooking(tx, t.deps, await pending(codes[0]!), { instant: true }))
       expect(instant.answeredAt).toBeNull()
-      await db
-        .update(bookings)
-        .set({ status: 'pending', confirmedAt: null, holdUntil: new Date(DEMO_NOW + 3_600_000) })
-        .where(eq(bookings.id, row!.id))
-      const [again] = await db.select().from(bookings).where(eq(bookings.id, row!.id))
-      const confirmed = await db.transaction((tx) => confirmBooking(tx, t.deps, again!, { answered: true }))
-      expect(confirmed.answeredAt?.getTime()).toBe(DEMO_NOW)
+      const answered = await db.transaction(async (tx) => confirmBooking(tx, t.deps, await pending(codes[1]!)))
+      expect(answered.answeredAt?.getTime()).toBe(DEMO_NOW)
+      // a demo business's own answer, from the jobs
+      const demo = await pending(codes[2]!)
+      await db.insert(jobs).values({ kind: 'demo.answer', runAt: new Date(DEMO_NOW), payload: { bookingId: demo.id } })
+      await runDueJobs(t.deps)
+      const [after] = await db.select().from(bookings).where(eq(bookings.id, demo.id))
+      expect(after).toMatchObject({ status: 'confirmed', answeredAt: new Date(DEMO_NOW) })
     } finally {
-      await db.delete(bookings).where(eq(bookings.code, 'YR-997010'))
+      const ids = (await db.select({ id: bookings.id }).from(bookings).where(inArray(bookings.code, codes))).map((r) => r.id)
+      await db.delete(jobs).where(sql`${jobs.payload}->>'bookingId' in ${ids.length ? ids : ['none']}`)
+      await db.delete(events).where(inArray(events.bookingCode, codes))
+      await db.delete(bookings).where(inArray(bookings.code, codes))
     }
   })
 })

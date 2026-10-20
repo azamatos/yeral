@@ -122,7 +122,6 @@ export interface DemoBusiness {
   about: Localized
   amenities: string[]
   rules?: Partial<BookingRules> & { note?: Localized }
-  typicalConfirmMinutes?: number
   avgBill?: number
   groups?: { name: Localized; services: DemoService[] }[]
   staff?: DemoStaff[]
@@ -178,7 +177,6 @@ export const BUSINESSES: DemoBusiness[] = [
       blockAfterNoShows: 2,
       lateToleranceMinutes: 15,
     },
-    typicalConfirmMinutes: 15,
     groups: [
       {
         name: L('Saç', 'Волосы', 'Hair'),
@@ -403,7 +401,6 @@ export const BUSINESSES: DemoBusiness[] = [
     rules: { lateToleranceMinutes: 15, cancelWindowMinutes: 120, slotStep: 30, leadMinutes: 30 },
     // average bill: a demo value until the owner gives real ones (open question 4)
     avgBill: 120,
-    typicalConfirmMinutes: 10,
     areas: [
       {
         key: 'hall',

@@ -2,38 +2,55 @@
 import type { BusinessDetail } from '@yeral/contract/catalog'
 import { MAX_ONLINE_PARTY, nextFreeSlot } from '@yeral/domain/availability'
 import { distanceM, type LatLng } from '@yeral/domain/geo'
-import { findException } from '@yeral/domain/hours'
+import { findException, openMinutesBetween } from '@yeral/domain/hours'
 import { TYPICAL_ANSWER_DAYS, typicalAnswerMinutes } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { addDays, today } from '@yeral/domain/time'
-import { and, asc, eq, gte, lte, ne, sql } from 'drizzle-orm'
+import { and, asc, eq, gte, isNull, lte, ne } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookings, businesses, categories, serviceGroups, tableAreas } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
-import { appointmentContext, loadBusinesses, loadBusy } from '../availability/context'
+import { appointmentContext, loadBusinesses, loadBusy, type BusinessRow } from '../availability/context'
 import { buildCards } from './cards'
 import { cityRefOf, loadCities } from './cities'
 import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
 
 const SPECIAL_DAYS_AHEAD = 14
 
-/** A verified business by slug, or 404 (unverified businesses aren't public, ADR 0018). */
-/** The business's typical answer time (book Q-113), from its answers of the last 30 days. */
-async function typicalAnswerOf(db: Queryable, businessId: string, now: number): Promise<number | null> {
-  const rows = await db
-    .select({ minutes: sql<number>`extract(epoch from (${bookings.answeredAt} - ${bookings.createdAt})) / 60` })
-    .from(bookings)
-    .where(
-      and(
-        eq(bookings.businessId, businessId),
-        gte(bookings.answeredAt, new Date(now - TYPICAL_ANSWER_DAYS * 86_400_000)),
-        lte(bookings.answeredAt, new Date(now)),
+/**
+ * The business's typical answer time (book Q-113), from the last 30 days: the requests it answered, and those it let
+ * run out at the wait the client had, both in the minutes it was open (as a hold counts them, Q-120). None for an
+ * instant business: nothing waits.
+ */
+async function typicalAnswerOf(db: Queryable, b: BusinessRow, instant: boolean, now: number): Promise<number | null> {
+  if (instant) return null
+  const since = new Date(now - TYPICAL_ANSWER_DAYS * 86_400_000)
+  const until = new Date(now)
+  const [answered, lapsed] = await Promise.all([
+    db
+      .select({ from: bookings.createdAt, to: bookings.answeredAt })
+      .from(bookings)
+      .where(and(eq(bookings.businessId, b.id), gte(bookings.answeredAt, since), lte(bookings.answeredAt, until))),
+    db
+      .select({ from: bookings.createdAt, to: bookings.cancelledAt })
+      .from(bookings)
+      .where(
+        and(
+          eq(bookings.businessId, b.id),
+          eq(bookings.cancelledBy, 'system'),
+          isNull(bookings.confirmedAt),
+          isNull(bookings.rescheduleOf),
+          gte(bookings.cancelledAt, since),
+          lte(bookings.cancelledAt, until),
+        ),
       ),
-    )
-  return typicalAnswerMinutes(rows.map((r) => Number(r.minutes)))
+  ])
+  const waits = (rows: { from: Date; to: Date | null }[]) => rows.map((r) => openMinutesBetween(b, r.from.getTime(), r.to!.getTime()))
+  return typicalAnswerMinutes(waits(answered), waits(lapsed))
 }
 
+/** A verified business by slug, or 404 (unverified businesses aren't public, ADR 0018). */
 export async function publicBusiness(deps: Deps, slug: string) {
   const [row] = await deps.db
     .select()
@@ -51,6 +68,8 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
   const lb = (await loadBusinesses(db, [row.id])).get(row.id)
   if (!lb) throw new ApiError('not_found')
   const b = lb.business
+  // one more read, started while the rest are made
+  const typical = typicalAnswerOf(db, b, lb.rules.confirmMode === 'instant', now)
   const [[category], cities] = await Promise.all([db.select().from(categories).where(eq(categories.id, b.categoryId)), loadCities(db)])
   const groups = await db.select().from(serviceGroups).where(eq(serviceGroups.businessId, b.id)).orderBy(asc(serviceGroups.sort))
   const online = lb.services.filter((s) => s.online)
@@ -127,7 +146,7 @@ export async function businessDetail(deps: Deps, slug: string, lang: Locale, pos
     holdMinutes: lb.rules.holdMinutes,
     leadMinutes: lb.rules.leadMinutes,
     windowDays: lb.rules.windowDays,
-    typicalConfirmMinutes: await typicalAnswerOf(deps.db, b.id, now),
+    typicalConfirmMinutes: await typical,
     priceFrom: type === 'table' ? null : priceFromOf(lb.services),
     avgBill: b.avgBill,
     nextFree,

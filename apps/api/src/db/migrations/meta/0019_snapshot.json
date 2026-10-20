@@ -1,5 +1,5 @@
 {
-  "id": "07d49eb6-6b15-4e6b-b8db-db4348174e13",
+  "id": "965ac125-81ec-410a-9d62-884d91411caa",
   "prevId": "de778834-d15d-41f0-aa0b-d661891c99ec",
   "version": "7",
   "dialect": "postgresql",
@@ -1050,6 +1050,28 @@
             }
           ],
           "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "bookings_answered_idx": {
+          "name": "bookings_answered_idx",
+          "columns": [
+            {
+              "expression": "business_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "answered_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"bookings\".\"answered_at\" is not null",
           "concurrently": false,
           "method": "btree",
           "with": {}
