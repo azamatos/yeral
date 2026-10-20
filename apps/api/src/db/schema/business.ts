@@ -149,6 +149,7 @@ export const bookingRules = pgTable('booking_rules', {
   cancelWindowMinutes: integer().default(120),
   askCancelReason: boolean().notNull().default(true),
   blockAfterNoShows: integer().notNull().default(2),
+  /** Unused in the MVP: lateness is a fixed 15 min (`LATE_MINUTES`, book Q-118); the setting comes back with F-103. */
   lateToleranceMinutes: integer().notNull().default(15),
   note: jsonb().$type<Localized>(),
 })

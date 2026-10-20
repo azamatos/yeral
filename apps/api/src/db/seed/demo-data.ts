@@ -174,7 +174,6 @@ export const BUSINESSES: DemoBusiness[] = [
       cancelWindowMinutes: 120,
       askCancelReason: true,
       blockAfterNoShows: 2,
-      lateToleranceMinutes: 15,
     },
     groups: [
       {
@@ -397,7 +396,7 @@ export const BUSINESSES: DemoBusiness[] = [
       'A garden café with a terrace: coffee in the morning, family dinner at night.',
     ),
     amenities: ['wifi', 'parking', 'card_payment'],
-    rules: { lateToleranceMinutes: 15, cancelWindowMinutes: 120, slotStep: 30, leadMinutes: 30 },
+    rules: { cancelWindowMinutes: 120, slotStep: 30, leadMinutes: 30 },
     areas: [
       {
         key: 'hall',

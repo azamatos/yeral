@@ -40,7 +40,6 @@ export function toRules(r: RulesRow): BookingRules {
     cancelWindowMinutes: r.cancelWindowMinutes,
     askCancelReason: r.askCancelReason,
     blockAfterNoShows: r.blockAfterNoShows,
-    lateToleranceMinutes: r.lateToleranceMinutes,
   }
 }
 
