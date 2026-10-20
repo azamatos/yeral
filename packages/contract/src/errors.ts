@@ -121,6 +121,8 @@ export const bookingsAffectedDetailsSchema = z.object({
       end: minuteSchema,
       client: z.string().nullable(),
       staff: z.array(z.string()),
+      /** Removing a specialist (B-50): the colleagues who do this booking's services, for the "Kime" list. */
+      colleagues: z.array(z.object({ staffId: idSchema, name: z.string() })).optional(),
     }),
   ),
 })
