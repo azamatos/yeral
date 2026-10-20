@@ -29,6 +29,8 @@ export const ERROR_STATUS = {
   not_started: 409,
   already_reported: 409,
   noshow_window_passed: 409,
+  /** A complaint is taken back only within 7 days of filing it (book Q-207). */
+  complaint_locked: 409,
   restore_expired: 409,
   /** "Yzyna al" on a booking the team just added came after the undo time (B-24). */
   undo_expired: 409,

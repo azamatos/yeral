@@ -7,7 +7,7 @@
  * Rows keep snapshots (client name and phone, service names, prices) so history survives edits and deletions.
  */
 import type { AddressTold, Told } from '@yeral/domain/lifecycle'
-import type { DeclineReason, Localized } from '@yeral/domain/model'
+import type { ComplaintType, DeclineReason, Localized } from '@yeral/domain/model'
 import { sql } from 'drizzle-orm'
 import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uniqueIndex, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
 import { users } from './auth'
@@ -41,6 +41,15 @@ export interface TimeSlot {
   end: number
   /** The one specialist it's booked with (book Q-159); absent on tables and on offers made before. */
   staffId?: string | null
+}
+
+/** A complaint as it was filed (B-28): kept while a no-show takes its place. */
+export interface FiledComplaint {
+  type: ComplaintType
+  text: string | null
+  /** Epoch ms. */
+  at: number
+  by: string | null
 }
 
 export const bookings = pgTable(
@@ -92,6 +101,10 @@ export const bookings = pgTable(
     complaintType: complaintType(),
     complaintText: text(),
     complaintAt: ts(),
+    /** Who filed it, for the client card's reports ("who and when"). */
+    complaintBy: uuid().references(() => staff.id, { onDelete: 'set null' }),
+    /** The complaint a no-show took the place of: it comes back if the no-show is taken back (book Q-206, Q-207). */
+    complaintBefore: jsonb().$type<FiledComplaint>(),
     source: bookingSource().notNull(),
     clientNote: text(),
     /** Team only; autosaved in the booking drawer. */

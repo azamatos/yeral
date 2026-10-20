@@ -13,6 +13,7 @@ import {
   businessCancelSchema,
   calendarQuerySchema,
   calendarViewSchema,
+  complaintInputSchema,
   freeTimesQuerySchema,
   freeTimesSchema,
   newBookingResultSchema,
@@ -27,6 +28,7 @@ import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { requireMember } from '../team/service'
 import { setInternalStatus } from '../settings/statuses'
 import { addBlock, blocksFor, removeBlock } from './blocks'
+import { fileComplaint, removeComplaint } from './complaints'
 import { calendarView } from './view'
 import { addBooking, cancelByBusiness, freeTimes, moveBooking, undoBooking } from './service'
 
@@ -118,7 +120,36 @@ const calendarRoute = createRoute({
   responses: { 200: json(calendarViewSchema), 400: errors[400], ...denied },
 })
 
+const complaintRoute = createRoute({
+  method: 'post',
+  path: '/w/{slug}/bookings/{code}/complaint',
+  tags,
+  summary: '"Arz et": a no-show (the client sees it), late, rude or other; one per booking',
+  request: { params: teamBookingParamSchema, ...jsonBody(complaintInputSchema) },
+  responses: { ...noContent, 400: errors[400], 409: errors[409], ...denied },
+})
+const removeComplaintRoute = createRoute({
+  method: 'delete',
+  path: '/w/{slug}/bookings/{code}/complaint',
+  tags,
+  summary: 'Take a mistaken complaint back within 7 days; a no-show goes back to the visit it was',
+  request: { params: teamBookingParamSchema },
+  responses: { ...noContent, 409: errors[409], ...denied },
+})
+
 export const calendarRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(complaintRoute, async (c) => {
+    const { slug, code } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    await fileComplaint(c.var.deps, business, actor, code, c.req.valid('json'))
+    return c.body(null, 204)
+  })
+  .openapi(removeComplaintRoute, async (c) => {
+    const { slug, code } = c.req.valid('param')
+    const { business, actor } = await requireMember(c, slug)
+    await removeComplaint(c.var.deps, business, actor, code)
+    return c.body(null, 204)
+  })
   .openapi(calendarRoute, async (c) => {
     const { business, actor } = await requireMember(c, c.req.valid('param').slug)
     return c.json(await calendarView(c.var.deps, business, actor, c.req.valid('query')), 200)

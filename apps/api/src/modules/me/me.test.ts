@@ -468,6 +468,7 @@ describe('account', () => {
         '/v1/w/{slug}/bookings/{code}/undo',
         '/v1/w/{slug}/bookings/{code}/move',
         '/v1/w/{slug}/bookings/{code}/cancel',
+        '/v1/w/{slug}/bookings/{code}/complaint',
         '/v1/w/{slug}/bookings/{code}/internal-status',
       ].sort(),
     )

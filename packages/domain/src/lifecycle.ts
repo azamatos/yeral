@@ -48,6 +48,7 @@ export type LifecycleError =
   | 'undo_expired'
   | 'review_not_allowed'
   | 'review_window_passed'
+  | 'complaint_locked'
 
 /** At most this many alternative times go with a decline or an expiry. */
 export const MAX_ALTERNATIVES = 3
@@ -486,3 +487,16 @@ export function canComplain(b: BookingState, type: ComplaintType, now = Date.now
   if (type === 'late') return null
   return now <= endOf(b) + NOSHOW_MARK_HOURS * HOUR ? null : 'noshow_window_passed'
 }
+
+/** A mistaken complaint is taken back from the booking drawer this long after it was filed (book Q-207). */
+export const COMPLAINT_UNDO_DAYS = 7
+
+/** Take a complaint back (Q-207): one there, filed less than 7 days ago. A no-show goes back to the visit it was. */
+export function canRemoveComplaint(b: { complaintType: ComplaintType | null; complaintAt: number | null }, now = Date.now()): Guard {
+  if (!b.complaintType || b.complaintAt === null) return 'invalid_status'
+  return now - b.complaintAt < COMPLAINT_UNDO_DAYS * 86_400_000 ? null : 'complaint_locked'
+}
+
+/** The status a booking takes back when its no-show is taken back: completed once the visit's end has passed. */
+export const statusWithoutNoShow = (b: Pick<BookingState, 'date' | 'end'>, now = Date.now()): 'confirmed' | 'completed' =>
+  now >= endOf(b) ? 'completed' : 'confirmed'

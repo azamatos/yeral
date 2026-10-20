@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  canRemoveComplaint,
+  statusWithoutNoShow,
   ADDRESS_SMS_AFTER_MS,
   addressAsShown,
   addressOf,
@@ -414,5 +416,16 @@ describe('a new address (book Q-215)', () => {
     expect(newAddressSince(now - 86_400_000, now)).toBe(now - 86_400_000)
     expect(newAddressSince(now - 29 * 86_400_000, now)).toBe(now - 29 * 86_400_000)
     expect(newAddressSince(now - 30 * 86_400_000, now)).toBeNull()
+  })
+})
+
+describe('taking a complaint back (book Q-207)', () => {
+  const now = epochOf('2026-10-14', 680)
+  it('within 7 days of filing it; a no-show goes back to the visit it was', () => {
+    expect(canRemoveComplaint({ complaintType: null, complaintAt: null }, now)).toBe('invalid_status')
+    expect(canRemoveComplaint({ complaintType: 'noshow', complaintAt: now - 6 * 86_400_000 }, now)).toBeNull()
+    expect(canRemoveComplaint({ complaintType: 'late', complaintAt: now - 7 * 86_400_000 }, now)).toBe('complaint_locked')
+    expect(statusWithoutNoShow({ date: '2026-10-14', end: 600 }, now)).toBe('completed')
+    expect(statusWithoutNoShow({ date: '2026-10-14', end: 720 }, now)).toBe('confirmed')
   })
 })
