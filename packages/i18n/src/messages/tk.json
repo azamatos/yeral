@@ -86,6 +86,7 @@
     "moveDeclined": "{brand}: {business}: täze wagt kabul edilmedi: {reason}. Ýazylyşyňyz öňki wagtynda galýar: {date} {time}. {link}",
     "cancelled": "{brand}: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}",
     "moved": "{brand}: {business}: ýazylyşyňyz täze wagta geçirildi: {weekday}, {date}, {time}. Üýtgetmek: {link}",
+    "staffChanged": "{brand}: {business}: {weekday}, {date}, {time} ýazylyşyňyz indi {staff} bilen. {link}",
     "cancelledAsAsked": "{brand}: {business}, {date} {time}: ýazylyşyňyz haýyşyňyz boýunça ýatyryldy. {link}",
     "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",
     "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}."

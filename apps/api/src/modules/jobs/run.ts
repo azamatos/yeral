@@ -33,7 +33,7 @@ import { newBookingLink, pruneBookingLinks } from '../bookings/links'
 import { hideLinkTokens } from '../../ports/sms'
 import { bookedServices } from '../bookings/create'
 import { onlineRefusal } from '../clients/online'
-import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
+import { itemsOf, recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100
 /**
@@ -249,6 +249,7 @@ async function sendBookingSms(
       confirmed: user.notifyConfirmation,
       booked: user.notifyConfirmation,
       moved: user.notifyConfirmation,
+      staffChanged: user.notifyConfirmation,
       cancelled: user.notifyConfirmation,
       cancelledAsAsked: user.notifyConfirmation,
       reminderDay: user.notifyReminderDay,
@@ -269,6 +270,10 @@ async function sendBookingSms(
     address: biz.address,
     city: await smsCityOf(deps.db, biz.cityId, lang),
     reason: b.businessCancelReason ? businessCancelText(lang, b.businessCancelReason, b.cancelReason) : undefined,
+    staff:
+      kind === 'staffChanged'
+        ? [...new Set((await itemsOf(deps.db, b.id)).flatMap((i) => (i.staffName ? [i.staffName] : [])))].join(', ')
+        : undefined,
   }
   // the texts with a link get one of their own (book Q-168)
   // the person's phone now: a changed number gets them, the old one nothing more (book Q-171)

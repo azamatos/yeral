@@ -540,7 +540,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
    * The business's own bookings (book B-23–B-27): free times as the team books them, a booking by phone or walk-in and
    * its undo, moving and cancelling one.
    */
-  const booked = (slug: string) => invalidate(keys.calendar(slug), keys.availabilityAll(slug))
+  // a move or a cancel may also settle the client's waiting move: the requests and the switcher's counts
+  const booked = (slug: string) => invalidate(keys.calendar(slug), keys.availabilityAll(slug), keys.requests(slug), keys.workspaces())
   const calendar = {
     /** The nearest four, a day's starts with who is free at each, and the 14-day strip; a specialist gets their own. */
     freeTimes: (slug: string, p: Params<typeof freeTimesQuerySchema, 'services'>) => {

@@ -14,21 +14,21 @@ import { extendBookingLinks } from './links'
 import { lockBooking, setStatus, StaleBooking, type BookingRow } from './repo'
 
 /**
- * Queue the booking's SMS: the first one (`confirmed`; `booked` for a booking the team entered, `moved` for one it
- * moved) and the reminders (a day and 2 h before, none at night: `reminderPlan`), none before `notBefore` (a booking
+ * Queue the booking's SMS: the first one (`confirmed`; `booked` for a booking the team entered, `moved` or
+ * `staffChanged` for one it moved) and the reminders (a day and 2 h before, none at night: `reminderPlan`), none before `notBefore` (a booking
  * that can still be undone, B-24). No review ask (book Q-259): clients review from my bookings and the link page.
  */
 export async function queueBookingSms(
   db: Queryable,
   deps: Deps,
   b: BookingRow,
-  opts: { first: 'confirmed' | 'booked' | 'moved' | null; notBefore?: number },
+  opts: { first: 'confirmed' | 'booked' | 'moved' | 'staffChanged' | null; notBefore?: number },
 ): Promise<void> {
   const now = deps.now()
   const from = Math.max(now, opts.notBefore ?? now)
   const start = epochOf(b.date, b.start)
-  const due: { kind: BookingSmsKind; runAt: number; covers?: readonly string[] }[] = [
-    ...(opts.first ? [{ kind: opts.first, runAt: from }] : []),
+  const due: { kind: BookingSmsKind; runAt: number; covers?: readonly string[]; once?: true }[] = [
+    ...(opts.first ? [{ kind: opts.first, runAt: from, once: true as const }] : []),
     ...reminderPlan(start, now),
   ]
   if (!due.length) return
@@ -41,8 +41,9 @@ export async function queueBookingSms(
         // the time it was planned for: after a move the old reminders find another time and stay quiet; `covers`: the
         // reminders a moved one stands for, whose switches decide whether it goes
         payload: { bookingId: b.id, kind: p.kind, date: b.date, start: b.start, ...(p.covers ? { covers: p.covers } : {}) },
-        // a moved booking gets new reminders: the key carries the time
-        dedupeKey: `${p.kind}:${b.id}:${b.date}:${b.start}`,
+        // a moved booking gets new reminders: the key carries the time. The first SMS has none: each change is told once,
+        // in its own transaction, a move back to a time the booking had before too
+        dedupeKey: p.once ? null : `${p.kind}:${b.id}:${b.date}:${b.start}`,
       })),
     )
     .onConflictDoNothing({ target: jobs.dedupeKey })

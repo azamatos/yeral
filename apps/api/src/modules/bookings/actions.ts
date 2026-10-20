@@ -28,6 +28,7 @@ import { assertOnlineBooking, assertWaitingRoom, bookedServices, rebook } from '
 import { offerTarget, offersOf } from './offers'
 import {
   type BookingRow,
+  guard,
   isSlotConflict,
   lockBooking,
   pgCode,
@@ -55,10 +56,6 @@ async function seatsLeft(tx: Queryable, sessionId: string): Promise<number> {
     .from(bookings)
     .where(and(eq(bookings.sessionId, sessionId), eq(bookings.active, true)))
   return session.capacity - (taken?.seats ?? 0)
-}
-
-const guard = (problem: ReturnType<typeof canClientCancel>) => {
-  if (problem) throw new ApiError(problem)
 }
 
 /** The client moved on from a refused move: the booking stops saying it. */

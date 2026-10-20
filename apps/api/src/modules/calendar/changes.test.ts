@@ -19,6 +19,10 @@ const TUE = '2026-10-20'
 const THU = '2026-10-22'
 const FRI = '2026-10-23'
 const SAT = '2026-10-24'
+const MON = '2026-10-26'
+const TUE2 = '2026-10-27'
+const WED2 = '2026-10-28'
+const THU2 = '2026-10-29'
 
 describe('the business moves and cancels bookings (book B-26, B-27)', () => {
   let db: Db
@@ -54,12 +58,14 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
     await b.login(phone, name)
     return b
   }
-  /** A booking the team enters with Maral, quietly (no SMS of its own). */
+  /** A booking the team enters with Maral, quietly (no SMS of its own), its undo time over. */
   const book = async (b: ReturnType<typeof browser>, phone: string, date: string, start: number) => {
     const made = await b.req(`${W}/bookings`, {
       body: { source: 'phone', phone, serviceIds: [manicure], staffId: maralId, date, start, notifyClient: false },
     })
     expect(made.status).toBe(201)
+    // past "Yzyna al": the client knows of it from here on
+    t.clock.now += 10_000
     return made.json.code as string
   }
   const move = (b: ReturnType<typeof browser>, code: string, body: Record<string, unknown>) => b.req(`${W}/bookings/${code}/move`, { body })
@@ -77,7 +83,7 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
     const maysa = await as(MAYSA)
     const maral = await as(MARAL)
     const code = await book(maysa, '+99365800201', TUE, 600)
-    expect((await move(maysa, code, { date: TUE, start: 720 })).status).toBe(204)
+    expect((await move(maysa, code, { date: TUE, start: 720, notifyClient: true })).status).toBe(204)
     expect(await rowOf(code)).toMatchObject({ date: TUE, start: 720, end: 780, status: 'confirmed' })
     expect(await itemsOf(code)).toMatchObject([{ date: TUE, start: 720, end: 780, staffId: maralId, bufferAfter: 10 }])
     await runDueJobs(t.deps)
@@ -235,5 +241,94 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
     const original = await rowOf(made.json.code)
     const [asked] = await db.select().from(bookings).where(eq(bookings.rescheduleOf, original.id))
     expect(asked).toMatchObject({ status: 'cancelled', cancelledBy: 'business' })
+  })
+
+  it('each change is told, a move back included; nothing changed tells nothing; a new specialist alone says who', async () => {
+    const maysa = await as(MAYSA)
+    const code = await book(maysa, '+99365800210', MON, 600)
+    // the jobs run between the changes, as they do every minute (a time already left again isn't told)
+    const moved = async (body: Record<string, unknown>) => {
+      expect((await move(maysa, code, { date: MON, notifyClient: true, ...body })).status).toBe(204)
+      await runDueJobs(t.deps)
+    }
+    await moved({ start: 720 })
+    await moved({ start: 600 })
+    // back to 12:00, a time it had: still told
+    await moved({ start: 720 })
+    // dropped on its own place
+    await moved({ start: 720 })
+    await moved({ start: 720, staffId: jerenId })
+    expect(smsTo('+99365800210')).toEqual([
+      expect.stringMatching(/moved your booking to .*12:00/),
+      expect.stringMatching(/moved your booking to .*10:00/),
+      expect.stringMatching(/moved your booking to .*12:00/),
+      expect.stringMatching(/your booking on .*12:00 is now with Jeren/),
+    ])
+    // the booking's own setting by default: this one was saved quietly
+    expect((await move(maysa, code, { date: MON, start: 780 })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800210')).toHaveLength(4)
+  })
+
+  it('a booking the client hasn’t heard of yet: a move tells the new time once the undo is over, a cancel tells nothing', async () => {
+    const maysa = await as(MAYSA)
+    const made = await maysa.req(`${W}/bookings`, {
+      body: { source: 'phone', phone: '+99365800211', serviceIds: [manicure], staffId: maralId, date: TUE2, start: 600 },
+    })
+    expect((await move(maysa, made.json.code, { date: TUE2, start: 720 })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800211')).toEqual([])
+    t.clock.now += 10_000
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800211')).toEqual([expect.stringMatching(/you're booked: Glow Studio, .*12:00/)])
+    const other = await maysa.req(`${W}/bookings`, {
+      body: { source: 'phone', phone: '+99365800212', serviceIds: [manicure], staffId: maralId, date: TUE2, start: 900 },
+    })
+    expect((await cancel(maysa, other.json.code, { reason: 'staff_away' })).status).toBe(204)
+    t.clock.now += 10_000
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800212')).toEqual([])
+  })
+
+  it('a booking whose specialist left needs one; a client’s move whose answer time ran out doesn’t hold it up', async () => {
+    const maysa = await as(MAYSA)
+    const orphan = await book(maysa, '+99365800213', WED2, 600)
+    await db
+      .update(bookingItems)
+      .set({ staffId: null })
+      .where(eq(bookingItems.bookingId, (await rowOf(orphan)).id))
+    const pick = await move(maysa, orphan, { date: WED2, start: 660 })
+    expect(pick.status).toBe(400)
+    expect(pick.json.error.details.issues).toEqual([{ path: ['staffId'], code: 'required' }])
+    expect((await move(maysa, orphan, { date: WED2, start: 660, staffId: jerenId })).status).toBe(204)
+    expect(await itemsOf(orphan)).toMatchObject([{ staffId: jerenId, start: 660 }])
+
+    // the client asks for a new time; nobody answers within the 30 minutes, and the jobs haven't run yet
+    const client = await as('+99365800214', 'Client')
+    const slots = (await client.req(`/v1/businesses/glow-studio/availability?services=${manicure}&staff=${maralId}&date=${WED2}`)).json
+      .slots as { start: number }[]
+    const made = await client.req('/v1/bookings', {
+      body: {
+        type: 'appointment',
+        business: 'glow-studio',
+        serviceIds: [manicure],
+        staffId: maralId,
+        date: WED2,
+        start: slots.at(-1)!.start,
+      },
+    })
+    await maysa.req(`${W}/requests/${made.json.code}/confirm`, { method: 'POST' })
+    const later = (await client.req(`/v1/businesses/glow-studio/availability?services=${manicure}&staff=${maralId}&date=${THU2}`)).json
+      .slots as { start: number }[]
+    await client.req(`/v1/me/bookings/${made.json.code}/reschedule`, { body: { date: THU2, start: later[0]!.start } })
+    t.clock.now += 31 * 60_000
+    expect((await move(maysa, made.json.code, { date: WED2, start: 900 })).status).toBe(204)
+    const [asked] = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.rescheduleOf, (await rowOf(made.json.code)).id))
+    expect(asked).toMatchObject({ status: 'cancelled', cancelledBy: 'system' })
+    // the booking took the team's time; the refused move isn't held against it
+    expect(await rowOf(made.json.code)).toMatchObject({ date: WED2, start: 900, moveRefused: null })
   })
 })

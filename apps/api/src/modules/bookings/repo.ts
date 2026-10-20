@@ -1,6 +1,6 @@
 /** Booking rows: lookups, the lifecycle view, status changes, codes. */
 import { bookingCode } from '@yeral/domain/id'
-import type { BookingState, RestoreState } from '@yeral/domain/lifecycle'
+import type { BookingState, LifecycleError, RestoreState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, BusinessCancelReason, CancelledBy } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, gt, sql } from 'drizzle-orm'
@@ -9,6 +9,11 @@ import { bookingItems, bookings, type MoveRefused } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 
 export type BookingRow = typeof bookings.$inferSelect
+
+/** A lifecycle rule's refusal (`@yeral/domain/lifecycle`) as the api's error of the same name. */
+export function guard(problem: LifecycleError | null): void {
+  if (problem) throw new ApiError(problem)
+}
 
 /**
  * When a no-show was marked: its status change (`setStatus` sets `completedAt`), else the complaint. The booking's

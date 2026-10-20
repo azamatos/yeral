@@ -46,6 +46,7 @@ import { extendBookingLinks } from '../bookings/links'
 import {
   awaitingAnswer,
   freshCode,
+  guard,
   isSlotConflict,
   itemsOf,
   lockBooking,
@@ -332,10 +333,6 @@ export async function undoBooking(deps: Deps, business: Business, actor: Actor, 
   })
 }
 
-const guard = (problem: ReturnType<typeof canBusinessMove>) => {
-  if (problem) throw new ApiError(problem)
-}
-
 /** A move the client asked for that still waits for its answer: it's answered first (B-21, B-26). */
 async function assertNoWaitingMove(db: Queryable, b: BookingRow, now: number): Promise<void> {
   const [waiting] = await db
@@ -345,49 +342,54 @@ async function assertNoWaitingMove(db: Queryable, b: BookingRow, now: number): P
   if (waiting) throw new ApiError('move_waiting')
 }
 
-/**
- * The booking's items at the new start, each with its specialist, or all with `staffId` (the block went to their
- * column). One specialist for everything takes the buffer after the last service only, as a new booking would.
- */
-function movedPlan(lb: LoadedBusiness, items: readonly ItemRow[], start: number, staffId: string | undefined): PlannedItem[] {
-  const plan = shiftPlan(
-    items.map((i) => ({ serviceId: i.serviceId ?? '', staffId: i.staffId ?? '', start: i.start, end: i.end, bufferAfter: i.bufferAfter })),
-    start,
-    staffId,
-  )
-  if (!staffId) return plan
-  const last = lb.services.find((s) => s.id === plan.at(-1)?.serviceId)
-  return plan.map((it, i) => ({ ...it, bufferAfter: i === plan.length - 1 ? (last?.bufferMin ?? lb.rules.bufferMinutes) : 0 }))
+/** A booking the team just added that the client hasn't heard of yet: "Yzyna al" still runs, its SMS waits (B-24). */
+const unheardUntil = (b: BookingRow, now: number): number | null => {
+  const until = b.createdAt.getTime() + NEW_BOOKING_UNDO_MS
+  return (b.source === 'phone' || b.source === 'walkin') && now < until ? until : null
 }
+
+const asPlanned = (items: readonly ItemRow[]): PlannedItem[] =>
+  items.map((i) => ({ serviceId: i.serviceId ?? '', staffId: i.staffId ?? '', start: i.start, end: i.end, bufferAfter: i.bufferAfter }))
 
 /**
  * "Move to another time" or a dragged block (B-26): a confirmed booking that hasn't started goes to the new time, and
- * to another specialist's column when given. A move that doesn't fit is 409 `cannot_move` with the reason the toast
- * names; one the client asked for waits for its answer first. The client hears it unless the team says not to; the
- * reminders follow the new time.
+ * to another specialist's column when given (one whose specialist left needs one). A move that doesn't fit is 409
+ * `cannot_move` with the reason the toast names; one the client asked for is answered first. The client hears it
+ * unless the team says not to (the booking's own setting by default): the new time, or the new specialist when only
+ * that changed. A move that changes nothing does nothing.
  */
 export async function moveBooking(deps: Deps, business: Business, actor: Actor, code: string, input: MoveInput): Promise<void> {
-  const now = deps.now()
-  const { b, items, staffIds } = await teamBooking(deps.db, business, actor, code)
+  const first = await teamBooking(deps.db, business, actor, code)
   if (input.staffId) assertMayBook(actor, input.staffId)
   // tables move between tables and classes as a whole session, after the MVP (B-62, B-69)
-  if (b.type !== 'appointment') throw new ApiError('not_bookable')
-  guard(canBusinessMove(stateOf(b), now))
+  if (first.b.type !== 'appointment') throw new ApiError('not_bookable')
+  guard(canBusinessMove(stateOf(first.b), deps.now()))
   const lb = await loadBusiness(deps.db, business.id)
-  const issues = startIssues(input.date, input.start, lb.rules.slotStep, now)
+  const issues = startIssues(input.date, input.start, lb.rules.slotStep, deps.now())
   if (issues.length) throw invalid(...issues)
-  await assertNoWaitingMove(deps.db, b, now)
-  const plan = movedPlan(lb, items, input.start, input.staffId)
-  const ctx = appointmentContext(lb, await loadBusy(deps.db, [business.id], input.date, input.date), now)
-  const refusal = planRefusal(ctx, input.date, plan, [b.id])
-  if (refusal) throw new ApiError('cannot_move', { ...refusal } satisfies CannotMoveDetails)
+  let plan: PlannedItem[] = []
+  let excluded: string[] = []
   try {
     await deps.db.transaction(async (tx) => {
-      const at = new Date(deps.now())
-      // a client's move takes the booking's lock before it's asked, so one asked meanwhile shows here
-      const row = await lockBooking(tx, b.id)
-      guard(canBusinessMove(stateOf(row), at.getTime()))
-      await assertNoWaitingMove(tx, row, at.getTime())
+      const now = deps.now()
+      const at = new Date(now)
+      // all of it again under the booking's lock: a client's move confirmed meanwhile changed its time and items, and
+      // a client's move takes this lock before it's asked
+      const { b, items, staffIds } = await teamBooking(tx, business, actor, code, { lock: true })
+      guard(canBusinessMove(stateOf(b), now))
+      await assertNoWaitingMove(tx, b, now)
+      // one whose answer time ran out before the jobs got to it is settled now, as they would
+      await dropPendingMove(tx, b, at)
+      // a specialist who left (book B-50): the team picks who takes it
+      if (!input.staffId && items.some((i) => !i.staffId)) throw invalid({ path: ['staffId'], code: 'required' })
+      plan = shiftPlan(asPlanned(items), input.start, input.staffId)
+      excluded = [b.id]
+      const timeChanged = input.date !== b.date || input.start !== b.start
+      // a drop on its own place, or the same move sent twice
+      if (!timeChanged && plan.every((it, i) => it.staffId === items[i]!.staffId)) return
+      const ctx = appointmentContext(lb, await loadBusy(tx, [business.id], input.date, input.date), now)
+      const refusal = planRefusal(ctx, input.date, plan, excluded)
+      if (refusal) throw new ApiError('cannot_move', { ...refusal } satisfies CannotMoveDetails)
       for (const [i, it] of items.entries()) {
         const to = plan[i]!
         await tx
@@ -405,7 +407,7 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
       const [moved] = await tx
         .update(bookings)
         .set({ date: input.date, start: input.start, end: plan.at(-1)!.end, moveRefused: null, updatedAt: at })
-        .where(eq(bookings.id, row.id))
+        .where(eq(bookings.id, b.id))
         .returning()
       if (!moved) throw new Error('booking update failed')
       await extendBookingLinks(tx, moved)
@@ -413,19 +415,28 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
       await emit(tx, { ...event, userId: moved.userId })
       const left = staffIds.filter((id) => !plan.some((it) => it.staffId === id))
       for (const userId of await specialistAccounts(tx, left)) await emit(tx, { ...event, userId })
-      await queueBookingSms(tx, deps, moved, { first: (input.notifyClient ?? true) ? 'moved' : null })
+      // a booking the client hasn't heard of yet gets its first SMS for the new time, once "Yzyna al" is over
+      const unheard = unheardUntil(b, now)
+      const notify = input.notifyClient ?? b.notifyClient
+      await queueBookingSms(tx, deps, moved, {
+        first: !notify ? null : unheard ? 'booked' : timeChanged ? 'moved' : 'staffChanged',
+        notBefore: unheard ?? undefined,
+      })
     })
   } catch (e) {
-    // another booking took the time meanwhile
-    if (isSlotConflict(e)) throw new ApiError('cannot_move', { problem: 'overlap', staffId: plan[0]!.staffId } satisfies CannotMoveDetails)
-    throw e
+    if (!isSlotConflict(e)) throw e
+    // another booking took the time meanwhile: say why as it stands now
+    const ctx = appointmentContext(lb, await loadBusy(deps.db, [business.id], input.date, input.date), deps.now())
+    const now = planRefusal(ctx, input.date, plan, excluded) ?? { problem: 'overlap' as const, staffId: plan[0]?.staffId ?? '' }
+    throw new ApiError('cannot_move', { ...now } satisfies CannotMoveDetails)
   }
 }
 
 /**
  * "Cancel booking" (B-27): a confirmed booking that hasn't started, with the reason the team picked. "The client called
  * to cancel" is the client's own cancel ("You cancelled"); the others are the business's, and the client sees the
- * reason. A move the client asked for goes with it. The client hears it by SMS (their switch decides, book Q-286).
+ * reason. A move the client asked for goes with it. The client hears it by SMS (their switch decides, book Q-286),
+ * unless they never heard of the booking: one the team added seconds ago, its "Yzyna al" still running.
  */
 export async function cancelByBusiness(deps: Deps, business: Business, actor: Actor, code: string, input: CancelInput): Promise<void> {
   const { b } = await teamBooking(deps.db, business, actor, code)
@@ -450,7 +461,7 @@ export async function cancelByBusiness(deps: Deps, business: Business, actor: Ac
       bookingCode: cancelled.code,
       userId: cancelled.userId,
     })
-    if (cancelled.clientPhone)
+    if (cancelled.clientPhone && unheardUntil(row, at.getTime()) === null)
       await queueOutcomeSms(tx, cancelledBy === 'client' ? 'cancelledAsAsked' : 'cancelled', cancelled, cancelled.id, at)
   })
 }

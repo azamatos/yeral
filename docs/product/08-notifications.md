@@ -103,6 +103,7 @@ These are the Turkmen texts from client spec §6 next to the ones in the code (`
 | Cancelled by the business | — | *Ýeral: {business} {date} {time} ýazylyşyňyzy ýatyrdy: {reason}. {link}* | sent since 20.10.2026 (B-27) |
 | Cancelled as the client asked by phone (B-27) | — | *{brand}: your booking at {business} on {date} {time} is cancelled, as you asked. {link}* | Claude wrote it (Q-288, 20.10.2026) |
 | Moved by the business (B-26) | — | *{brand}: {business} moved your booking to {weekday}, {date}, {time}. Change: {link}* | Claude wrote it (Q-288, 20.10.2026) |
+| Specialist changed by the business, same time (B-26) | — | *{brand}: {business}: your booking on {weekday}, {date}, {time} is now with {staff}. {link}* | Claude wrote it (Q-288, 20.10.2026); B-50 can reuse it |
 | Reminder 1 day | *Ýatlatma: ertir {time} {business}, {address}.* | the same | yes |
 | Reminder 2 h | the same text as the 1-day reminder, with *ertir* (tomorrow) | *Ýatlatma: şu gün {time} {business}, {address}.* (today) | the code's text is kept (Q-293) |
 | Review ask | *{business}-da bolşuňyz nähili boldy? Baha beriň: {link}* | the same | dropped: no review ask (Q-259) |

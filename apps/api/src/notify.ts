@@ -43,6 +43,8 @@ export interface SmsBooking {
   city?: string | null
   /** A business's cancel: the reason as the client reads it (`businessCancelText`). */
   reason?: string
+  /** `staffChanged`: who does it now. */
+  staff?: string
 }
 
 /**
@@ -57,15 +59,22 @@ export async function smsCityOf(db: Queryable, cityId: string, lang: Locale): Pr
 
 /**
  * `booked`: a booking the team entered for a client who called (book B-23, Q-288), with the address. `moved`: the
- * business moved it (B-26). `cancelled`: the business cancelled it, with the reason; `cancelledAsAsked`: the team
+ * business moved it (B-26); `staffChanged`: it gave it to another specialist at the same time. `cancelled`: the business cancelled it, with the reason; `cancelledAsAsked`: the team
  * entered the client's own cancel ("The client called to cancel", B-27). `reminderEvening`: a reminder moved out of
  * the night to 21:30 the evening before, worded like the day one ("tomorrow").
  */
 export type BookingSmsKind =
-  'confirmed' | 'booked' | 'moved' | 'cancelled' | 'cancelledAsAsked' | 'reminderDay' | 'reminder2h' | 'reminderEvening'
+  'confirmed' | 'booked' | 'moved' | 'staffChanged' | 'cancelled' | 'cancelledAsAsked' | 'reminderDay' | 'reminder2h' | 'reminderEvening'
 
 /** The booking SMS that carry the booking's link (book Q-168); reminders don't. */
-export const LINKED_SMS: ReadonlySet<BookingSmsKind> = new Set(['confirmed', 'booked', 'moved', 'cancelled', 'cancelledAsAsked'])
+export const LINKED_SMS: ReadonlySet<BookingSmsKind> = new Set([
+  'confirmed',
+  'booked',
+  'moved',
+  'staffChanged',
+  'cancelled',
+  'cancelledAsAsked',
+])
 
 /** The calendar day and clock minute of a business-day time: 01:00 after midnight is the next day's (book Q-105). */
 const wallOf = (date: string, start: number) => localOf(epochOf(date, start))
@@ -94,6 +103,13 @@ export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking
       return t('sms.cancelled', { ...common, date: fmt.dayMonth(dayOf(b.date, b.start)), reason: b.reason ?? '' })
     case 'cancelledAsAsked':
       return t('sms.cancelledAsAsked', { ...common, date: fmt.dayMonth(dayOf(b.date, b.start)) })
+    case 'staffChanged':
+      return t('sms.staffChanged', {
+        ...common,
+        weekday: fmt.weekday(dayOf(b.date, b.start)),
+        date: fmt.dayMonth(dayOf(b.date, b.start)),
+        staff: b.staff ?? '',
+      })
     case 'reminderDay':
     case 'reminderEvening':
       return t('sms.reminderDay', common)
@@ -182,6 +198,8 @@ export function moveRefusedSmsText(
 
 /** The SMS about an outcome the client didn't choose; they always go (book Q-286, Q-289). */
 export type OutcomeSmsKind = 'expired' | 'moveRefused' | 'declined'
+/** The business's cancel (B-27): queued like an outcome, but the client's confirmations switch decides (Q-286). */
+export type CancelSmsKind = 'cancelled' | 'cancelledAsAsked'
 
 /**
  * Queue an SMS about what happened to `booking` (an outcome, a business's cancel) for the jobs to send. The text and its
@@ -190,7 +208,7 @@ export type OutcomeSmsKind = 'expired' | 'moveRefused' | 'declined'
  */
 export async function queueOutcomeSms(
   db: Queryable,
-  kind: OutcomeSmsKind | 'cancelled' | 'cancelledAsAsked',
+  kind: OutcomeSmsKind | CancelSmsKind,
   booking: { id: string; date: string; start: number },
   causeId: string,
   at: Date,

@@ -41,6 +41,8 @@ export interface BusyInterval extends Interval {
   staffId: string
   date: string
   bookingId: string
+  /** Minutes at its end that are the buffer after the visit, not the visit (a move refused names which it ran into). */
+  buffer?: number
   /**
    * The same person's booking in another workspace (book Q-272): a reserved gap, never shown with its details; its
    * `bookingId` is the other workspace's, for this engine only, never sent out.
@@ -173,20 +175,27 @@ function layOut(
   return items
 }
 
-/** The spans a plan occupies per specialist: each run of items plus its buffer (or without it: the visit alone). */
-function occupied(items: readonly PlannedItem[], withBuffer = true): { staffId: string; span: Interval }[] {
-  const out: { staffId: string; span: Interval }[] = []
+/**
+ * The spans a plan occupies per specialist: each run of items plus its buffer (or without it: the visit alone), and how
+ * long that buffer is.
+ */
+function occupied(items: readonly PlannedItem[], withBuffer = true): { staffId: string; span: Interval; buffer: number }[] {
+  const out: { staffId: string; span: Interval; buffer: number }[] = []
   let runStart: number | null = null
   items.forEach((it, i) => {
     runStart ??= it.start
     const next = items[i + 1]
     if (!next || next.staffId !== it.staffId) {
-      out.push({ staffId: it.staffId, span: { start: runStart, end: it.end + (withBuffer ? it.bufferAfter : 0) } })
+      const buffer = withBuffer ? it.bufferAfter : 0
+      out.push({ staffId: it.staffId, span: { start: runStart, end: it.end + buffer }, buffer })
       runStart = null
     }
   })
   return out
 }
+
+/** A busy interval's visit, without the buffer after it. */
+const visitOf = (b: BusyInterval): Interval => ({ start: b.start, end: b.end - (b.buffer ?? 0) })
 
 function planFits(views: Map<string, StaffDayView>, items: readonly PlannedItem[]): boolean {
   const taken: { staffId: string; span: Interval }[] = []
@@ -374,7 +383,7 @@ export function nextFreeSlot(
 /**
  * Why a move is refused (B-26), in the order the toast names it: the specialist doesn't do the service, has the day
  * off, the visit runs outside their hours (a break included), it falls on their time taken elsewhere (book Q-272) or
- * on another booking, or only its buffer doesn't fit ("… and the break after it is needed").
+ * on another booking's visit, or only a buffer doesn't fit, its own or the one before ("… and the break is needed").
  */
 export const PLAN_PROBLEMS = ['staff_cannot_do', 'staff_off', 'outside_hours', 'elsewhere', 'overlap', 'buffer'] as const
 export type PlanProblem = (typeof PLAN_PROBLEMS)[number]
@@ -382,7 +391,7 @@ export type PlanProblem = (typeof PLAN_PROBLEMS)[number]
 export interface PlanRefusal {
   problem: PlanProblem
   staffId: string
-  /** The time taken elsewhere it falls on ("busy elsewhere 19:00–20:00"), in the date's minutes. */
+  /** The visit elsewhere it falls on ("busy elsewhere 19:00–20:00", its buffer left out), in the date's minutes. */
   busy?: Interval
 }
 
@@ -406,11 +415,11 @@ export function planRefusal(
   for (const { staffId, span } of occupied(items, false)) {
     const view = views.get(staffId)!
     if (!view.working.some((w) => contains(w, span))) return { problem: 'outside_hours', staffId }
-    const away = view.busy.find((b) => b.elsewhere && overlaps(b, span))
-    if (away) return { problem: 'elsewhere', staffId, busy: { start: away.start, end: away.end } }
-    if (view.busy.some((b) => overlaps(b, span))) return { problem: 'overlap', staffId }
+    const away = view.busy.find((b) => b.elsewhere && overlaps(visitOf(b), span))
+    if (away) return { problem: 'elsewhere', staffId, busy: visitOf(away) }
+    if (view.busy.some((b) => overlaps(visitOf(b), span))) return { problem: 'overlap', staffId }
   }
-  // then its buffer
+  // then the buffers: its own, or another booking's that it runs into
   for (const { staffId, span } of occupied(items)) {
     const view = views.get(staffId)!
     if (!view.working.some((w) => contains(w, span)) || view.busy.some((b) => overlaps(b, span))) return { problem: 'buffer', staffId }
@@ -428,17 +437,26 @@ export function checkPlan(
   return planRefusal(ctx, date, items, excludeBookingIds)?.problem ?? null
 }
 
-/** Move a plan to a new start (and optionally to one specialist), keeping durations and buffers. */
+/**
+ * Move a plan to a new start, keeping durations and buffers; or to one specialist for every service, when the buffer
+ * follows the last service only, as when such a plan is booked (each item keeps the buffer it was booked with).
+ */
 export function shiftPlan(items: readonly PlannedItem[], start: number, staffId?: string): PlannedItem[] {
   const first = items[0]
   if (!first) return []
   const delta = start - first.start
-  return items.map((it) => ({ ...it, start: it.start + delta, end: it.end + delta, staffId: staffId ?? it.staffId }))
+  return items.map((it, i) => ({
+    ...it,
+    start: it.start + delta,
+    end: it.end + delta,
+    staffId: staffId ?? it.staffId,
+    bufferAfter: staffId && i < items.length - 1 ? 0 : it.bufferAfter,
+  }))
 }
 
 /** Busy intervals a saved booking contributes (what the api loads into `AppointmentContext.busy`). */
 export function busyOf(bookingId: string, date: string, items: readonly PlannedItem[]): BusyInterval[] {
-  return occupied(items).map((o) => ({ bookingId, date, staffId: o.staffId, ...o.span }))
+  return occupied(items).map((o) => ({ bookingId, date, staffId: o.staffId, ...o.span, buffer: o.buffer }))
 }
 
 // ── Tables ────────────────────────────────────────────────────────────────────────────────────────────────────────

@@ -20,5 +20,15 @@
   (`LINKED_SMS`) and under the client's confirmations switch (Q-286); `queueOutcomeSms` queues the cancels.
 - Errors `cannot_move`, `move_waiting`; i18n `businessCancelReasons`, `sms.moved`, `sms.cancelledAsAsked` (en/tk/ru).
 - sdk: `calendar.move`, `calendar.cancel`.
+- Review fixes: the move plans under the booking's lock with its items read again (a client's move confirmed
+  meanwhile can't leave the row and its items apart); a lost race says why as it stands; a client's move whose answer
+  time ran out is settled first (`dropPendingMove`); a move that changes nothing does nothing; a column change alone
+  sends `staffChanged` (new text); the SMS defaults to the booking's `notifyClient`; within a new booking's undo time a
+  move re-queues `booked` for the new time and a cancel sends nothing (`unheardUntil`); the first SMS has no dedupe key
+  (a move back to an earlier time is told); a booking whose specialist left needs `staffId` (`required`).
+  `BusyInterval.buffer` (loaded and from `busyOf`): `planRefusal` names running into another booking's buffer
+  `buffer`, and busy-elsewhere hours leave the buffer out. `shiftPlan` to one specialist keeps one buffer (the domain
+  owns the rule). One `guard` in `bookings/repo.ts` for every lifecycle refusal; `CancelSmsKind` for the switchable
+  cancels; the sdk's calendar mutations refresh the requests and the switcher.
 - Follow-ups: the booking drawer and the calendar's day view (F-127, the cancelled toggle) come with the calendar
   endpoint; a client's move confirmed to another specialist doesn't tell the specialist it left (requests module).

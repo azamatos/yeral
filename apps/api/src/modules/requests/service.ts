@@ -20,16 +20,12 @@ import { appointmentContext, loadBusiness, loadBusy } from '../availability/cont
 import { text } from '../catalog/map'
 import { confirmBooking } from '../bookings/confirm'
 import { bookedServices, rebookQuery } from '../bookings/create'
-import { awaitingAnswer, lockBooking, recordMoveRefused, setStatus, stateOf, type BookingRow } from '../bookings/repo'
+import { awaitingAnswer, guard, lockBooking, recordMoveRefused, setStatus, stateOf, type BookingRow } from '../bookings/repo'
 
 type RequestView = z.infer<typeof requestSchema>
 type DeclineInput = z.infer<typeof declineInputSchema>
 interface Business {
   id: string
-}
-
-const guard = (problem: ReturnType<typeof requestOpen>) => {
-  if (problem) throw new ApiError(problem)
 }
 
 /** Who answers a request by the setting: a specialist without the app has the desk answer for them. */

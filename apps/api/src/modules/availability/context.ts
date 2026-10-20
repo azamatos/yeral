@@ -112,7 +112,9 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
   ])
   return [
     ...own.flatMap((r) =>
-      r.staffId ? [{ bookingId: r.bookingId, staffId: r.staffId, date: r.date, start: r.start, end: r.end + r.bufferAfter }] : [],
+      r.staffId
+        ? [{ bookingId: r.bookingId, staffId: r.staffId, date: r.date, start: r.start, end: r.end + r.bufferAfter, buffer: r.bufferAfter }]
+        : [],
     ),
     ...elsewhere.map((r) => ({
       bookingId: r.bookingId,
@@ -120,6 +122,7 @@ export async function loadBusy(db: Queryable, businessIds: string[], from: strin
       date: r.date,
       start: r.start,
       end: r.end + r.bufferAfter,
+      buffer: r.bufferAfter,
       elsewhere: true as const,
     })),
   ]
