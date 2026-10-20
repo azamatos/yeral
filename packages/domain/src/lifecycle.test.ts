@@ -8,6 +8,7 @@ import {
   canComplain,
   canEditNote,
   canWriteReview,
+  keptCancelReason,
   waitingLimit,
   cancelDeadline,
   clientActions,
@@ -30,6 +31,15 @@ const MIN = 60_000
 
 const booking = (over: Partial<BookingState> = {}): BookingState => ({ date: THU, start: 870, end: 930, status: 'confirmed', ...over })
 const rules = { cancelWindowMinutes: 120 }
+
+describe('keptCancelReason (book Q-163)', () => {
+  it('kept only when the business asks, and never blank', () => {
+    expect(keptCancelReason({ askCancelReason: true }, 'Meýilnamam üýtgedi')).toBe('Meýilnamam üýtgedi')
+    expect(keptCancelReason({ askCancelReason: true }, '   ')).toBeNull()
+    expect(keptCancelReason({ askCancelReason: true }, undefined)).toBeNull()
+    expect(keptCancelReason({ askCancelReason: false }, 'Meýilnamam üýtgedi')).toBeNull()
+  })
+})
 
 describe('waitingLimit (book Q-124)', () => {
   it('3 waiting at one business, 10 in all', () => {

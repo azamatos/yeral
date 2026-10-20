@@ -142,7 +142,7 @@ describe('client bookings', () => {
       actions: { restore: true },
     })
     const restored = await b.req(`/v1/me/bookings/${json.code}/restore`, { method: 'POST' })
-    expect(restored.json).toMatchObject({ status: 'pending', cancelledBy: null })
+    expect(restored.json).toMatchObject({ status: 'pending', cancelledBy: null, cancelReason: null })
     await b.req(`/v1/me/bookings/${json.code}/cancel`, { body: {} })
     t.clock.now += 6 * MIN
     expect((await b.req(`/v1/me/bookings/${json.code}/restore`, { method: 'POST' })).json.error.code).toBe('restore_expired')
@@ -313,11 +313,13 @@ describe('client bookings', () => {
   it('a business that doesn’t ask for a cancel reason gets none (book Q-163)', async () => {
     const b = browser(t.app)
     const { me } = await b.login('+99365111043', 'Jeren')
-    const asked = (await request(b, 'glow-studio-parahat')).json.code
-    expect((await b.req(`/v1/me/bookings/${asked}`)).json.askCancelReason).toBe(true)
     const [parahat] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio-parahat'))
-    await db.update(bookingRules).set({ askCancelReason: false }).where(eq(bookingRules.businessId, parahat!.id))
     try {
+      const sent = await request(b, 'glow-studio-parahat')
+      expect(sent.status, JSON.stringify(sent.json)).toBe(201)
+      const asked = sent.json.code
+      expect((await b.req(`/v1/me/bookings/${asked}`)).json.askCancelReason).toBe(true)
+      await db.update(bookingRules).set({ askCancelReason: false }).where(eq(bookingRules.businessId, parahat!.id))
       expect((await b.req(`/v1/me/bookings/${asked}`)).json.askCancelReason).toBe(false)
       const cancelled = await b.req(`/v1/me/bookings/${asked}/cancel`, { body: { reason: 'Meýilnamam üýtgedi' } })
       expect(cancelled.json).toMatchObject({ status: 'cancelled', cancelReason: null })

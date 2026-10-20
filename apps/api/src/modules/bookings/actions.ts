@@ -6,6 +6,7 @@ import {
   canWriteReview,
   effectiveStatus,
   initialStatus,
+  keptCancelReason,
   offerPast,
   REVIEW_EDIT_DAYS,
 } from '@yeral/domain/lifecycle'
@@ -100,8 +101,7 @@ export async function cancelBooking(deps: Deps, b: BookingRow, reason?: string):
     const locked = await lockBooking(tx, b.id)
     guard(canClientCancel(stateOf(locked), rules, deps.now()))
     await dropPendingMove(tx, locked, at)
-    // a business that doesn't ask for a reason doesn't get one (book Q-163)
-    const cancelReason = rules.askCancelReason ? (reason ?? null) : null
+    const cancelReason = keptCancelReason(rules, reason)
     const row = await setStatus(tx, locked, { status: 'cancelled', cancelledBy: 'client', cancelReason, at })
     await emit(tx, { type: 'booking.cancelled', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
     return row

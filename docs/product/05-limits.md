@@ -224,7 +224,7 @@ apps/api/src/modules/bookings/create.ts). Waiting requests have no limit.
 | Moves waiting at once | 1; a second move replaces the first | Fixed | ROUND6-ANSWERS A3 |
 | Undo a cancel (*Yzyna al*) | 5 min after the client's own cancel, and only before the visit starts | Fixed | ROUND6-ANSWERS A6; code: apps/api/src/modules/bookings/view.ts |
 | A cancelled booking in *Gelýän* | stays, greyed, until the next page load | Fixed | client spec §4.8 |
-| Cancel reason from the client | optional, up to 300 characters | Client | business spec §8; length code only: packages/contract/src/bookings.ts |
+| Cancel reason from the client | optional, up to 300 characters; kept only when the business asks for one (*Ýatyrylanda sebäp sora*) | Client | business spec §8; Q-163, decided 18.10.2026; code: packages/domain/src/lifecycle.ts (`keptCancelReason`); length code only: packages/contract/src/bookings.ts |
 | Business cancels or moves | any time before the start | Owner/admin and specialists, by permission | business spec §3; code: packages/domain/src/lifecycle.ts |
 | SMS to the client when the business moves | on by default (a box on the confirm popover) | Staff, per move | business spec §4 |
 | Complaint (*Arz et*) | *Gelmedi* (no-show) from the visit start until 24 h after its end, taking the place of an earlier complaint of another type; *Gijä galdy* from the start; *Gödek gylyk* and *Başga* any time on a confirmed or completed booking; one per booking | Owner/admin and specialists, by permission | ADR 0017; Q-206, Q-254, decided 18.10.2026; code: packages/domain/src/lifecycle.ts |

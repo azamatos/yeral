@@ -229,6 +229,14 @@ export function canWriteReview(b: BookingState, now = Date.now()): Guard {
   return now <= endOf(b) + REVIEW_WRITE_DAYS * 24 * HOUR ? null : 'review_window_passed'
 }
 
+/**
+ * The reason kept with a client's cancel (book Q-163): only when the business asks for one ("Ýatyrylanda sebäp sora"),
+ * and never a blank one.
+ */
+export function keptCancelReason(rules: Pick<BookingRules, 'askCancelReason'>, reason: string | null | undefined): string | null {
+  return (rules.askCancelReason && reason?.trim()) || null
+}
+
 /** What the client can do with a booking ("Client actions by status", client spec §4.8). */
 export function clientActions(
   b: BookingState,
