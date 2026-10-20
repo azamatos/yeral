@@ -15,7 +15,12 @@ export function BottomTabBar({ className, style, ...props }: ComponentProps<'nav
     <nav
       {...props}
       style={{ ...style, height: TAB_BAR_HEIGHT }}
-      className={cn('grid grid-cols-4 border-t border-n-200 bg-n-0 px-1 pb-[env(safe-area-inset-bottom)]', className)}
+      className={cn(
+        'grid grid-cols-4 border-t border-n-200 bg-n-0 px-1 pb-[env(safe-area-inset-bottom)]',
+        // while More is open it alone is in accent (B-Mobile frame 7); the page stays current for screen readers
+        'has-[[aria-expanded=true]]:[&_[aria-current=page]:not([aria-expanded])]:text-n-600',
+        className,
+      )}
     />
   )
 }

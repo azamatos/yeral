@@ -29,3 +29,22 @@ export const Undo: Story = {
     await expect(undo).toHaveBeenCalled()
   },
 }
+
+/** Inside the business shell: the layout says where toasts start (here 272 from the left, as beside the sidebar). */
+export const ShellOffset: Story = {
+  decorators: [
+    (Story) => (
+      <>
+        <style>{':root { --toast-left: 272px; --toast-bottom: 24px }'}</style>
+        {Story()}
+      </>
+    ),
+  ],
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Ugrat' }))
+    const message = await screen.findByText('Ýazylyş ugradyldy — tassyklanyşyna garaşyň')
+    await waitFor(() => expect(message).toBeVisible())
+    const list = message.closest('[data-sonner-toaster]')
+    await expect(list && getComputedStyle(list).getPropertyValue('--offset-left').trim()).toBe('272px')
+  },
+}

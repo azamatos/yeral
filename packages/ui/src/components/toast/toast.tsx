@@ -4,6 +4,10 @@ import { toast as sonner, Toaster as SonnerToaster } from 'sonner'
  * Toast (Account-Bookings `.toast`): ink, bottom-left on desktop and full-width at the bottom on phones, 4–6 s, one at
  * a time, one optional action. Destructive results offer «Yzyna al» (undo) instead of a second confirmation.
  * Mount <Toaster label={t('…')} /> once; call `toast('…', { action: { label, onClick } })`.
+ *
+ * Where toasts start (DS-Patterns Toast · ShellOffset): 24 from the corner, 16 on phones, unless a layout sets
+ * `--toast-left` and `--toast-bottom` (the business shell: 272 beside its sidebar, 96 beside the rail, 12 from the
+ * sides and 12 above the tab bar on phones).
  */
 export function Toaster({ label }: { label?: string }) {
   return (
@@ -13,8 +17,8 @@ export function Toaster({ label }: { label?: string }) {
       position="bottom-left"
       visibleToasts={1}
       duration={5000}
-      offset={24}
-      mobileOffset={16}
+      offset={{ left: 'var(--toast-left, 24px)', bottom: 'var(--toast-bottom, 24px)' }}
+      mobileOffset={{ left: 'var(--toast-left, 16px)', right: 'var(--toast-left, 16px)', bottom: 'var(--toast-bottom, 16px)' }}
       toastOptions={{
         unstyled: true,
         classNames: {

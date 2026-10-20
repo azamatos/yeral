@@ -52,7 +52,8 @@ export function AccountMenu({
   triggerLabel: string
   className?: string
 }) {
-  const avatar = <Avatar decorative name={name} src={photo} size={32} />
+  // one letter, as the board draws the person (B-Shell `.me`: "M")
+  const avatar = <Avatar decorative name={name} src={photo} size={32} letters={1} />
   const menu = (
     <MenuContent
       aria-label={menuLabel}

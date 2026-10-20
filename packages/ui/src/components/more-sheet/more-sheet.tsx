@@ -94,7 +94,7 @@ export const MoreSheetDivider = SheetDivider
 export function MoreSheetPerson({ name, phone, photo }: { name: string; phone: string; photo?: string | null }) {
   return (
     <div className="flex min-h-13 items-center gap-3.5 px-3">
-      <Avatar decorative name={name} src={photo} size={32} />
+      <Avatar decorative name={name} src={photo} size={32} letters={1} />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[15px] leading-5 font-semibold text-n-900">{name}</span>
         <span className="truncate text-micro text-n-600 tabular-nums">{phone}</span>

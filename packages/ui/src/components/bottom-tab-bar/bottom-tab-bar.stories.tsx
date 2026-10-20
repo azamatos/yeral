@@ -11,16 +11,19 @@ import { BottomTab, BottomTabBar, BottomTabButton } from './bottom-tab-bar'
 function Bar({
   requests = 6,
   moreOpen = false,
+  current = !moreOpen,
   words = { menu: 'Main menu', calendar: 'Calendar', bookings: 'Bookings', clients: 'Clients', more: 'More', requests: 'requests' },
 }: {
   requests?: number
   moreOpen?: boolean
+  /** The calendar is the page on screen. */
+  current?: boolean
   words?: Record<'menu' | 'calendar' | 'bookings' | 'clients' | 'more' | 'requests', string>
 }) {
   return (
     <div className="w-97.5 rounded-m border border-n-200">
       <BottomTabBar aria-label={words.menu}>
-        <BottomTab href="#calendar" aria-current={moreOpen ? undefined : 'page'} icon={<CalendarDays />} label={words.calendar} />
+        <BottomTab href="#calendar" aria-current={current ? 'page' : undefined} icon={<CalendarDays />} label={words.calendar} />
         <BottomTab
           href="#bookings"
           icon={<List />}
@@ -62,8 +65,16 @@ export const ManyRequests: Story = {
   },
 }
 
-/** More open: More in accent, the sheet above (MoreSheet). */
-export const MoreOpen: Story = { args: { moreOpen: true } }
+/** More open: More alone in accent (the page underneath stays current for screen readers), the sheet above. */
+export const MoreOpen: Story = {
+  args: { moreOpen: true, current: true },
+  play: async ({ canvas }) => {
+    const calendar = canvas.getByRole('link', { name: 'Calendar' })
+    await expect(calendar).toHaveAttribute('aria-current', 'page')
+    await expect(getComputedStyle(calendar).color).toBe('rgb(90, 90, 100)')
+    await expect(getComputedStyle(canvas.getByRole('button', { name: 'More' })).color).toBe('rgb(68, 41, 214)')
+  },
+}
 
 /** Russian on a 320 phone: labels wrap to two lines before they're cut. */
 export const RussianLength: Story = {
