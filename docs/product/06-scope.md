@@ -337,7 +337,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
 | F-169 | Notification settings | 10 events, one sentence each ("Haçan…", "Kim alýar…"), channel chips Browser / SMS (App later). | Later | drawn (B-Notifications) | not built |  |
-| F-170 | Browser notifications and sound | New requests and changes as browser notifications with sound; permission banner. | MVP | drawn (B-Notifications, B-Shell toast) | not built |  |
+| F-170 | Browser notifications and sound | New requests and changes as browser notifications with sound; permission banner. | MVP | drawn (B-Shell toast); the permission banner moves to the shell in design round 3 | not built | Settings are Later (F-169): each level's defaults apply. |
 | F-171 | SMS to staff | SMS only for critical events (new request, Ýeral notices), never at night; Ýeral pays. | MVP | spec only (business §16, §22) | not built | Cost on Ýeral while free. |
 | F-172 | Quiet hours and summaries | Quiet hours 22:00–08:00, evening "tomorrow's bookings" and morning daily summary. | Later | drawn (B-Notifications) | not built |  |
 | F-173 | Help centre | Search, categories, popular articles, article page with "was this helpful?"; "?" buttons in settings open the article in a drawer (spec only). | Later | drawn (B-Help) | not built | Articles come from the CMS (F-182). |
@@ -367,7 +367,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-185 | Complaints handling | Handle complaints about businesses or clients. | Later | not designed (projectbrief "complaints") | not built | Scope unclear. |
 | F-186 | Site content | Landing texts, banners and SEO texts kept in the database. | Later | not designed (ADR 0008) | not built |  |
 | F-187 | Places catalogue | Landmarks and districts behind "Where?" suggestions. | Later | not designed | schema only (`places`, seeded) | Code only. |
-| F-188 | Ýeral notices to businesses | "Ýeral: barlag we täzelikler" (verification result and news) as a notification event. | MVP | spec only (B-Notifications event) | not built |  |
+| F-188 | Ýeral notices to businesses | "Ýeral: barlag we täzelikler" (verification result and news) as a notification event. | MVP | spec only (B-Notifications event) | not built | On MVP the verification result shows as the shell's status banners (In review, Not approved, hidden) and a browser notification; news waits for a notifications list (Later). |
 
 ## System (jobs, SMS, live updates, search indexing, SEO, i18n)
 

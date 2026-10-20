@@ -228,6 +228,8 @@ apps/api/src/modules/bookings/create.ts). Waiting requests have no limit.
 | Business cancels or moves | any time before the start | Owner/admin and specialists, by permission | business spec §3; code: packages/domain/src/lifecycle.ts |
 | SMS to the client when the business moves | on by default (a box on the confirm popover) | Staff, per move | business spec §4 |
 | Complaint (*Arz et*) | *Gelmedi* (no-show) from the visit start until 24 h after its end, taking the place of an earlier complaint of another type; *Gijä galdy* from the start; *Gödek gylyk* and *Başga* any time on a confirmed or completed booking; one per booking | Owner/admin and specialists, by permission | ADR 0017; Q-206, Q-254, decided 18.10.2026; code: packages/domain/src/lifecycle.ts |
+| Undo after the team saves a booking | 6 s toast; the client is notified only after it closes | Fixed | chapter 7b (B-24); design v0.6 round 2 |
+| Block time | 15-min steps, never in the past; a Specialist blocks only their own time | Fixed | Q-204; design v0.6 round 2 |
 | Removing a complaint | from the booking drawer within 7 days; a removed no-show goes back to *Tamamlandy* and the no-show count drops; the client gets no message | Owner/admin and specialists, by permission | Q-207, decided 18.10.2026 |
 
 **Design to fix:** the class line "*Mugt ýatyrmak wagty geçdi — ýatyrsaňyz, studiýa habar beriler*" changes to say
