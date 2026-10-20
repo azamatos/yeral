@@ -219,8 +219,10 @@ const fakeApi =
         if (!found) return refuse(404, 'not_found')
         found.state = answer[2] === 'accept' ? 'accepted' : 'declined'
         if (answer[2] === 'decline') return new Response(null, { status: 204 })
-        const joined = workspace(found.business.slug, found.business.name, found.level, null)
+        // as the api: joining makes it the workspace opened last
+        const joined = workspace(found.business.slug, found.business.name, found.level, Date.now())
         signedInAs.workspaces.push(joined)
+        signedInAs.current = joined.slug
         return json(joined)
       }
       const opened = /^POST \/me\/workspaces\/([^/]+)\/open$/.exec(route)
@@ -403,7 +405,8 @@ export const InviteAccepted: Story = {
     await sendCode(canvas, '64215590')
     await userEvent.keyboard('4821')
     await userEvent.click(await canvas.findByRole('button', { name: 'Accept' }))
-    await expect(await canvas.findByText('Calendar of glow-studio', {}, { timeout: 2000 })).toBeVisible()
+    // at once: well before the 1.5 s an "Opening …" card would take
+    await expect(await canvas.findByText('Calendar of glow-studio', {}, { timeout: 1000 })).toBeVisible()
     await expect(canvas.queryByText('Opening Glow Studio…')).not.toBeInTheDocument()
   },
 }
@@ -422,11 +425,28 @@ export const TwoInvites: Story = {
     await expect(canvas.getByText('You’ll see every calendar, booking and client')).toBeVisible()
     await expect(canvas.queryByText('You can answer requests and reply to reviews')).not.toBeInTheDocument()
     await userEvent.click(canvas.getByRole('button', { name: 'Accept' }))
-    await expect(await canvas.findByText('Calendar of glow-nails', {}, { timeout: 2000 })).toBeVisible()
+    await expect(await canvas.findByText('Calendar of glow-nails', {}, { timeout: 1000 })).toBeVisible()
   },
 }
 
 /** A member declines: the decline is confirmed on the card that opens the workspace used last. */
+/** Accept one, then decline the other: the decline is the latest answer, confirmed on the card opening the one joined. */
+export const AcceptThenDecline: Story = {
+  name: 'Invite · accept one, decline the other',
+  args: { server: fakeApi() },
+  play: async ({ canvas }) => {
+    await sendCode(canvas, '63110022')
+    await userEvent.keyboard('4821')
+    await userEvent.click(await canvas.findByRole('button', { name: 'Accept' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Nails invites you to the team' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Decline' }))
+    await userEvent.click(await canvas.findByRole('button', { name: 'Decline invite' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Opening Glow Studio…' })).toBeVisible()
+    await expect(canvas.getByText('You declined Glow Nails’s invite.')).toBeVisible()
+    await expect(await canvas.findByText('Calendar of glow-studio', {}, { timeout: 4000 })).toBeVisible()
+  },
+}
+
 export const InviteDeclinedByMember: Story = {
   name: 'Invite · declined by a member',
   args: { server: fakeApi({ signedIn: '+99365884102' }) },

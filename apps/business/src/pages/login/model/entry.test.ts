@@ -1,6 +1,7 @@
 import type { InviteCard, Workspace } from '@yeral/contract/team'
 import { describe, expect, it } from 'vitest'
-import { EXPIRED_CARD_MS, entryOf } from './entry'
+import { EXPIRED_INVITE_SHOWN_DAYS } from '@yeral/domain/team'
+import { entryOf } from './entry'
 
 const city = { id: 'ashgabat', name: 'Ashgabat' }
 const workspace = (slug: string, lastOpenedAt: number | null = null): Workspace => ({
@@ -61,8 +62,9 @@ describe('entryOf', () => {
 
   it('an invite that ended over a week ago gives way to no workspace yet (the expired card has no way on)', () => {
     const ended = (ago: number) => entryOf([invite('a', 'expired', now - ago)], { items: [], current: null }, { now })
-    expect(ended(EXPIRED_CARD_MS)).toMatchObject({ kind: 'expired' })
-    expect(ended(EXPIRED_CARD_MS + 1)).toEqual({ kind: 'empty' })
+    const week = EXPIRED_INVITE_SHOWN_DAYS * 86_400_000
+    expect(ended(week - 1)).toMatchObject({ kind: 'expired' })
+    expect(ended(week)).toEqual({ kind: 'empty' })
   })
 
   it('right after a decline, no workspace yet (with the decline on top), not an older expired invite', () => {

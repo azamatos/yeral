@@ -67,7 +67,8 @@ export function LoginPage() {
       />
     )
   if (me.isPending) return <WaitStep />
-  if (me.isError) return <FailedStep onRetry={() => void me.refetch()} />
+  // a failed refetch keeps the person on screen; only not knowing who is signed in at all is a failure
+  if (me.isError && me.data === undefined) return <FailedStep onRetry={() => void me.refetch()} />
   if (!me.data) return <SignInStep signIn={signIn} />
   if (!me.data.firstName) return <NameStep phone={me.data.phone} onFailed={failed} />
   return (

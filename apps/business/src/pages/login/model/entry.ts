@@ -5,12 +5,7 @@
  * stopped.
  */
 import type { InviteCard, Workspace } from '@yeral/contract/team'
-
-/**
- * How long the expired card shows after an invite ended: it offers no way to create a business, and an unanswered
- * invite stays in the list, so after a week the no-workspace card takes over (book chapter 9, 21.10.2026).
- */
-export const EXPIRED_CARD_MS = 7 * 86_400_000
+import { showsExpiredInvite } from '@yeral/domain/team'
 
 export type Entry =
   | { kind: 'invite'; invite: InviteCard }
@@ -36,7 +31,7 @@ export function entryOf(
   if (last) return { kind: 'opening', workspace: last, count: items.length }
   const expired = declined
     ? undefined
-    : invites.filter((i) => i.state === 'expired' && now - i.expiresAt <= EXPIRED_CARD_MS).sort((a, b) => b.expiresAt - a.expiresAt)[0]
+    : invites.filter((i) => i.state === 'expired' && showsExpiredInvite(i.expiresAt, now)).sort((a, b) => b.expiresAt - a.expiresAt)[0]
   if (expired) return { kind: 'expired', invite: expired }
   return { kind: 'empty' }
 }

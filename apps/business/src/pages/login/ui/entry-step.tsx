@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { Navigate } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import type { InviteCard } from '@yeral/contract/team'
 import { formatPhone, maskPhone } from '@yeral/domain/phone'
@@ -34,14 +34,16 @@ export function EntryStep({
 }) {
   const t = useTranslations('login')
   const sdk = useSdk()
-  const queryClient = useQueryClient()
-  const navigate = useNavigate()
   const invites = useQuery(sdk.team.myInvites())
   const workspaces = useQuery(sdk.team.workspaces())
   const accept = useMutation(sdk.team.accept())
   const decline = useMutation(sdk.team.decline())
   // the invite being answered stays on screen until the answer is in
   const [answering, setAnswering] = useState<InviteCard | null>(null)
+  // invites answered here leave the list at once, whatever a refetch says (it may fail)
+  const [answered, setAnswered] = useState<readonly string[]>([])
+  // the workspace just joined, while that Accept is the latest answer: with no invite left, its calendar opens at once
+  const [joined, setJoined] = useState<string | null>(null)
   // when the person arrived: the expired card's week counts from here
   const [now] = useState(() => Date.now())
   const name = me.name ?? me.firstName
@@ -68,9 +70,12 @@ export function EntryStep({
     onFailed(error)
   }
 
+  const open = invites.data.items.filter((i) => !answered.includes(i.id))
   const entry: Entry = answering
     ? { kind: 'invite', invite: answering }
-    : entryOf(invites.data.items, workspaces.data, { declined: declined !== null, now })
+    : entryOf(open, workspaces.data, { declined: declined !== null, now })
+  // accepted with nothing else waiting: straight into its calendar, as drawn (B-07; the api made it the last used)
+  if (joined && entry.kind !== 'invite') return <Navigate to="/w/$slug/calendar" params={{ slug: joined }} replace />
   const line = { who: who(formatPhone(me.phone)), onOtherNumber, leaving }
   // the invited number is masked on the invite and expired cards (B-Login), as on the owner's invite row
   const masked = who(maskPhone(me.phone))
@@ -88,14 +93,11 @@ export function EntryStep({
           onAccept={() => {
             setAnswering(invite)
             accept.mutate(invite.id, {
-              // the invites have reloaded by now: another one waiting shows next; with none, the workspace just joined
-              // opens at once, as drawn (the api made it the last used)
-              onSuccess: (joined) => {
-                const waiting = queryClient
-                  .getQueryData(sdk.team.myInvites().queryKey)
-                  ?.items.some((i) => i.state === 'pending' && i.id !== invite.id)
-                if (waiting) setAnswering(null)
-                else void navigate({ to: '/w/$slug/calendar', params: { slug: joined.slug } })
+              // another invite waiting shows next; with none, the workspace just joined opens (above)
+              onSuccess: (workspace) => {
+                setAnswered((ids) => [...ids, invite.id])
+                setJoined(workspace.slug)
+                setAnswering(null)
               },
               onError: failed,
             })
@@ -103,7 +105,10 @@ export function EntryStep({
           onDecline={() => {
             setAnswering(invite)
             decline.mutate(invite.id, {
+              // the decline is the latest answer: it's confirmed on the card that comes next, even after an Accept
               onSuccess: () => {
+                setAnswered((ids) => [...ids, invite.id])
+                setJoined(null)
                 setAnswering(null)
                 onDeclined(invite.business.name)
               },

@@ -5,23 +5,13 @@ import { localOf } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
-import { CalendarX2, Check, Info, Store, UsersRound } from 'lucide-react'
+import { CalendarX2, Info, Store, UsersRound } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { AuthPage } from '@/shared/ui'
 import { AccountLine } from './account-line'
+import { DeclinedLine } from './declined-line'
 
 const iconTile = 'flex size-12 flex-none items-center justify-center rounded-pill bg-group [&_svg]:size-5.5'
-
-/** "You declined Glow Studio's invite." on top of the card that comes after a decline (B-Login `declined`). */
-export function DeclinedLine({ business }: { business: string }) {
-  const t = useTranslations('login')
-  return (
-    <p role="status" className="m-0 flex items-center gap-2.5 self-stretch rounded-m border border-n-200 bg-n-50 px-4 py-3 text-small">
-      <Check aria-hidden className="size-4.5 flex-none text-n-600" />
-      {t('invite.declined', { business })}
-    </p>
-  )
-}
 
 /**
  * "You don't have a workspace yet" (B-Login `step=empty`, book B-09): create a business, or ask for an invite. After

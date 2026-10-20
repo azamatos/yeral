@@ -18,3 +18,12 @@ export function inviteState(
 
 /** When an invite sent at `sentAt` stops being valid. */
 export const inviteExpiresAt = (sentAt: number): number => sentAt + INVITE_DAYS * 86_400_000
+
+/**
+ * How long the sign-in shows an invite that ran out ("The invite has expired"): a week after it ended, then "You don't
+ * have a workspace yet" takes over, since the expired card offers no way to create a business and an unanswered
+ * invite stays listed (book chapter 9, 21.10.2026).
+ */
+export const EXPIRED_INVITE_SHOWN_DAYS = 7
+
+export const showsExpiredInvite = (expiresAt: number, now = Date.now()): boolean => now - expiresAt < EXPIRED_INVITE_SHOWN_DAYS * 86_400_000
