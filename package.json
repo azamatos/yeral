@@ -19,6 +19,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "gen": "turbo gen",
+    "book": "node scripts/book.mjs",
     "changeset": "changeset",
     "db:up": "docker compose -f infra/docker/compose.dev.yml up -d --wait",
     "db:down": "docker compose -f infra/docker/compose.dev.yml down",
