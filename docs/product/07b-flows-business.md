@@ -331,7 +331,7 @@ flowchart TD
 > Open question Q-200: where a half-finished setup continues.
 
 
-**Status** — Design: drawn (B-Login · `step` phone, phoneLandline, code, name, routing) · Code: built for phone login (api, ADR 0019); workspace routing not built.
+**Status** — Design: drawn (B-Login · `step` phone, phoneLandline, code, name, routing) · Code: built (api, ADR 0019; the business app's login, #99 and #102, chapter 9's 21.10.2026 rows); the name step has no photo until the api takes photos, and the unfinished-setup card waits for Q-200's api. **Code differs:** after an Accept the login shows "Opening …" and skips other waiting invites (being fixed).
 
 ### B-08 · Accept or decline an invite
 
@@ -366,7 +366,7 @@ flowchart TD
 - The invite was for a number the person no longer uses: only the owner can send a new invite to the new number (B-45).
 - Several pending invites at once: not drawn.
 
-**Status** — Design: drawn (B-Login · `step=invite`, `inviteExpired`) · Code: schema only (memberships have an "invited" status, no expiry date) · not built.
+**Status** — Design: drawn (B-Login · `step=invite`, `inviteExpired`) · Code: built (api: invites with a 7-day expiry, accept and decline, ADR 0025; the login's invite steps, #102). **Code differs** (being fixed, 21.10.2026 rows in chapter 9): a decline by someone with a workspace isn't confirmed; the expired card shows for any expired invite and with the number in full; the invite card's lines don't follow the business's request setting (the invite doesn't carry it yet).
 
 ### B-09 · No workspace yet
 
@@ -392,7 +392,7 @@ flowchart LR
 
 - A person who left their only workspace (B-15) lands here at the next login.
 
-**Status** — Design: drawn (B-Login · `step=empty`) · Code: not built.
+**Status** — Design: drawn (B-Login · `step=empty`) · Code: built (#102); "Create a business" opens the setup wizard, a stand-in until P4 slice 2.
 
 ### B-10 · Switch workspace or create another one
 

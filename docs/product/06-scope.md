@@ -192,7 +192,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
 | F-073 | Phone login | Phone (+993) → 4-digit SMS code (auto-submit, resend after 0:59, 3 wrong tries → 60 s lock) → name for new users, as a 400 px modal (bottom sheet on phones). | MVP | drawn (Auth) | api built (ADR 0019, rate limits per phone and IP); ui CodeInput, PhoneInput built | No passwords. Real codes need F-193. At the first launch the code shows on the screen, no SMS (Q-036). |
-| F-074 | Mobile numbers only | Landlines refused with "Kod diňe mobil belgä iberilýär…". | MVP | drawn (Auth, B-Login · phoneLandline) | api built (`not_mobile`); message not built | Round 6 C1. |
+| F-074 | Mobile numbers only | Landlines refused with "Kod diňe mobil belgä iberilýär…". | MVP | drawn (Auth, B-Login · phoneLandline) | api built (`not_mobile`); message built in the business login (#102) | Round 6 C1. |
 | F-075 | One account for client and business | The same phone account books on yeral.app and works in business workspaces. | MVP | spec only (business §1) | built (shared users, cookie on the parent domain, sessions 60 days) |  |
 | F-076 | Avatar menu and log out | Logged-in menu: My bookings · Favourites · Profile · Language · Log out. | MVP | drawn (Auth) | api built (logout); menu not built |  |
 | F-077 | Profile and phone change | Edit name; change phone via an SMS code to the new number. | MVP | drawn (Account-Profile) | built (api `/v1/me`, `/v1/me/phone/*`) |  |
@@ -206,10 +206,10 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
-| F-083 | Business login and routing | business.yeral.app login with the same phone account → pending invite, or "no workspace yet", or the last used workspace. | MVP | drawn (B-Login, B-Mobile) | api built (auth); routing not built |  |
-| F-084 | First-login profile | New person enters name and an optional photo after the code. | MVP | drawn (B-Login · name) | not built (no user photo) |  |
+| F-083 | Business login and routing | business.yeral.app login with the same phone account → pending invite, or "no workspace yet", or the last used workspace. | MVP | drawn (B-Login, B-Mobile) | built (#102); **Code differs:** after an Accept other waiting invites are skipped (being fixed) |  |
+| F-084 | First-login profile | New person enters name and an optional photo after the code. | MVP | drawn (B-Login · name) | built without the photo (#102; the api takes no photos yet) |  |
 | F-085 | Invites by SMS | Owner invites by phone with an access level; SMS link valid 7 days; accept / decline / expired; resend or revoke. | MVP | drawn (B-Login · invite, B-Team · invite) | api built (`/v1/w/{slug}/team/invites`, `/v1/me/invites`, accept / decline / expired / resend / cancel, the copied link; ADR 0025); no SMS yet | At the first launch the invite shows at the invited phone's sign-in. |
-| F-086 | No-workspace state | "Entek iş ýeriňiz ýok" with "Biznesimi döret" and how to ask an owner for an invite. | MVP | drawn (B-Login · empty) | not built |  |
+| F-086 | No-workspace state | "Entek iş ýeriňiz ýok" with "Biznesimi döret" and how to ask an owner for an invite. | MVP | drawn (B-Login · empty) | built (#102) |  |
 | F-087 | Workspace switcher | One person in several businesses, each with its own level and request count; the only switch in the app. | MVP | drawn (B-Shell) | api built (`/v1/me/workspaces`: level, request count, the last opened) | Round 6. |
 | F-088 | Access levels | Fixed levels Eýesi / Administrator / Hünärmen; a Hünärmen may work without the app (F-113); no custom roles. | MVP | drawn (B-Team, B-Shell sidebars) | built (levels on the team rows, the fixed table in `@yeral/domain/permissions`; ADR 0025) | Business endpoints that enforce it come with P2 step 4. |
 | F-089 | Permissions matrix | Owner switches what Administrator and Hünärmen may do (none / own / all / view) across 11 rows. | Later | drawn (B-Team · permissions) | the fixed table is built with the 11 rows and their defaults (ADR 0025); editing it isn't | The MVP uses the defaults. |
