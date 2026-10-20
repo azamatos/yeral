@@ -1,4 +1,4 @@
-/** The timed jobs' notices (book S-01, S-13): a request's 5-minute warning, an invite whose 7 days ran out. */
+/** The timed notices (book S-01, S-13): when a request's 5-minute warning is due, an invite whose 7 days ran out. */
 import { addDays, today } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -33,7 +33,7 @@ describe('the timed notices (book S-01, S-13)', () => {
     return b
   }
 
-  it('"Haýyşyň wagty gutarýar" once, 5 minutes before a request’s answer time ends', async () => {
+  it('a request says when "Haýyşyň wagty gutarýar" is due: 5 open minutes before its answer time ends', async () => {
     const [manicure] = await db
       .select()
       .from(services)
@@ -56,7 +56,9 @@ describe('the timed notices (book S-01, S-13)', () => {
         end: 1410,
         status: 'pending',
         source: 'web',
-        holdUntil: new Date(DEMO_NOW + 10 * 60_000),
+        // sent at 11:20 while Glow Studio is open, with 30 minutes to answer
+        holdUntil: new Date(DEMO_NOW + 30 * 60_000),
+        createdAt: new Date(DEMO_NOW),
       })
       .returning()
     await db.insert(bookingItems).values({
@@ -70,34 +72,27 @@ describe('the timed notices (book S-01, S-13)', () => {
       priceType: 'fixed',
       priceAmount: 80,
     })
-    const maysa = await as(MAYSA)
-    const cursor = (await maysa.req('/v1/events')).json.cursor as string
-    const warnedAt = async () => (await db.select().from(bookings).where(eq(bookings.id, b!.id)))[0]!.expiryWarnedAt
-    // ten minutes left: not yet (the demo's own requests may be warned meanwhile)
-    await runDueJobs(t.deps)
-    expect(await warnedAt()).toBeNull()
-    t.clock.now += 5 * 60_000 + 1
-    expect((await runDueJobs(t.deps)).warned).toBeGreaterThanOrEqual(1)
-    expect(await warnedAt()).not.toBeNull()
-    expect((await runDueJobs(t.deps)).warned).toBe(0)
-    const heard = await eventsAfter(maysa, cursor, (items) => items.some((e) => e.type === 'request.expiring'))
-    const warnings = (heard.json.items as { type: string; bookingCode: string }[]).filter((e) => e.type === 'request.expiring')
-    // once for this request
-    expect(warnings.filter((e) => e.bookingCode === 'YR-810001')).toHaveLength(1)
+    const items = (await (await as(MAYSA)).req('/v1/w/glow-studio/requests')).json.items as { code: string; warnAt: number | null }[]
+    expect(items.find((r) => r.code === 'YR-810001')!.warnAt).toBe(DEMO_NOW + 25 * 60_000)
   })
 
-  it('an invite’s 7 days run out: the team’s screens and the invitee’s hear it once', async () => {
+  it('an invite’s 7 days run out: the owner’s screens and the invitee’s hear it, once', async () => {
     const [invite] = await db
       .select()
       .from(invites)
       .where(and(eq(invites.businessId, glowId), eq(invites.phone, GULNAR)))
-    const gulnar = await as(GULNAR)
-    const cursor = (await gulnar.req('/v1/events')).json.cursor as string
+    const [maysa, gulnar] = [await as(MAYSA), await as(GULNAR)]
+    const ownerCursor = (await maysa.req('/v1/events')).json.cursor as string
+    const guestCursor = (await gulnar.req('/v1/events')).json.cursor as string
     t.clock.now = invite!.expiresAt.getTime() + 60_000
-    expect((await runDueJobs(t.deps)).invitesExpired).toBeGreaterThanOrEqual(1)
+    expect((await runDueJobs(t.deps)).invitesExpired).toBe(1)
     expect((await runDueJobs(t.deps)).invitesExpired).toBe(0)
-    const heard = await eventsAfter(gulnar, cursor, (items) => items.some((e) => e.type === 'team.changed'))
-    expect((heard.json.items as { type: string }[]).map((e) => e.type)).toContain('team.changed')
+    const changes = async (b: ReturnType<typeof browser>, cursor: string) =>
+      ((await eventsAfter(b, cursor, (items) => items.some((e) => e.type === 'team.changed'))).json.items as { type: string }[]).filter(
+        (e) => e.type === 'team.changed',
+      )
+    expect(await changes(maysa, ownerCursor)).toHaveLength(1)
+    expect(await changes(gulnar, guestCursor)).toHaveLength(1)
     expect((await gulnar.req('/v1/me/invites')).json.items[0].state).toBe('expired')
   })
 })

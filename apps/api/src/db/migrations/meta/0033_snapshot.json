@@ -1,5 +1,5 @@
 {
-  "id": "9be543dd-ce0c-4a10-bc15-93d98573f125",
+  "id": "24dc782c-e307-43df-9d53-e53f67746ee0",
   "prevId": "80fca027-a4e2-41cf-8591-dc0fbd992ba0",
   "version": "7",
   "dialect": "postgresql",
@@ -917,12 +917,6 @@
         },
         "hold_until": {
           "name": "hold_until",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "expiry_warned_at": {
-          "name": "expiry_warned_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
@@ -3271,6 +3265,22 @@
             }
           ],
           "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "invites_untold_idx": {
+          "name": "invites_untold_idx",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"invites\".\"status\" = 'pending' and \"invites\".\"expiry_told_at\" is null",
           "concurrently": false,
           "method": "btree",
           "with": {}

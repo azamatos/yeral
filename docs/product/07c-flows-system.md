@@ -582,7 +582,7 @@ flowchart TD
 
 - *Programmasyz* staff (no login) get no SMS and are active at once (business spec §11).
 - The design has no invite SMS text. Claude writes it in English, the source language, with the market's translations, and the owner checks it (Q-288, decided 18.10.2026).
-- Code: an invite is valid 7 days and reads as expired after that, with no job; the person accepts or declines it (`/v1/me/invites`), and resending gives a new link and a new 7 days (`modules/team`, ADR 0025). No invite SMS is sent yet: at the first launch the invite shows at the invited phone's sign-in and the owner copies the link.
+- Code: an invite is valid 7 days and reads as expired after that, worked out from the time; when the 7 days run out the jobs tell the team's and the invitee's open screens once (`team.changed`, 21.10.2026); the person accepts or declines it (`/v1/me/invites`), and resending gives a new link and a new 7 days (`modules/team`, ADR 0025). No invite SMS is sent yet: at the first launch the invite shows at the invited phone's sign-in and the owner copies the link.
 
 **Status.** Design: decided and drawn (business spec §1, §8; B-Login, B-Team) · Code: built (api: invites with a 7-day expiry worked out from the time, a resend a new invite; when the 7 days run out the jobs tell the team's and the invitee's open screens once, 21.10.2026).
 
@@ -689,7 +689,7 @@ flowchart TD
 - Requests for *Programmasyz* staff go to the owner and admin (business spec §2).
 - Before the app exists, new-request SMS to staff are off by default. Each person can switch them on, and they never go at night or to someone who has the workspace open (Q-297, decided 18.10.2026).
 
-**Status.** Design: decided and drawn (business spec §2, §16; B-Shell, B-Calendar, B-Bookings) · Code: the api's part built: every new request and move is an event the team's open screens hear, and 5 minutes before its answer time ends the jobs send `request.expiring` once (21.10.2026); the toasts, sound and browser notifications are the business app's, and quiet hours (S-18) aren't built.
+**Status.** Design: decided and drawn (business spec §2, §16; B-Shell, B-Calendar, B-Bookings) · Code: the api's part built: every new request and move is an event the team's open screens hear, and each request says when its 5-minute warning is due (`warnAt`: 5 minutes of open time before its answer time ends, none for 10 minutes or less; 21.10.2026), so the app's own timer warns even in a background tab; the toasts, sound and browser notifications are the business app's, and quiet hours (S-18) aren't built.
 
 ### S-17 · A new business is verified
 

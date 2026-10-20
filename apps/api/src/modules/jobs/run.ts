@@ -3,8 +3,7 @@
  * 1. Requests whose hold time ran out → cancelled by the system, with 3 alternative times and an SMS.
  * 2. Confirmed visits that ended → completed.
  * 3. Reported reviews Ýeral didn't decide in 48 hours → counted again (book Q-261).
- * 4. Requests 5 minutes from the end of their answer time → "Haýyşyň wagty gutarýar" to the team (S-01); invites
- *    whose 7 days ran out → the open team screens refresh (S-13).
+ * 4. Invites whose 7 days ran out → the team's and the invitee's open screens refresh (S-13).
  * 5. Queued work: SMS, reminders, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
@@ -12,7 +11,6 @@ import {
   addressAsShown,
   addressOf,
   effectiveStatus,
-  EXPIRY_WARNING_MINUTES,
   hearsOfMove,
   NEWS_QUEUED,
   newsSms,
@@ -27,7 +25,7 @@ import { MARKET } from '@yeral/domain/market'
 import { isOnlineSource, type Locale } from '@yeral/domain/model'
 import { isMobile } from '@yeral/domain/phone'
 import { addDays, epochOf, localOf } from '@yeral/domain/time'
-import { and, asc, eq, isNull, lt, lte, or, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import { bookings, businesses, clients, invites, jobs, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import {
@@ -53,7 +51,7 @@ import { pruneIdentityChecks } from '../auth/identity'
 import { newBookingLink, pruneBookingLinks } from '../bookings/links'
 import { hideLinkTokens } from '../../ports/sms'
 import { onlineRefusal } from '../clients/online'
-import { awaitingAnswer, itemsOf, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
+import { itemsOf, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
 import { ADDRESS_SMS } from '../bookings/address-sms'
 import { recountReviews } from '../reviews/team'
 import { teamChanged } from '../team/service'
@@ -82,39 +80,39 @@ const DROPPED_SAME_ADDRESS = 'dropped: the client knows the address as it is'
 const MAX_ATTEMPTS = 5
 
 /**
- * "Haýyşyň wagty gutarýar" (book S-01, business spec §16): once per request (a move included), 5 minutes before its
- * answer time ends, an event the team's open screens hear (the owner and administrators, its specialist through the
- * booking); each is marked in the statement that finds it, so a second runner doesn't tell it twice.
- */
-async function warnExpiringRequests(deps: Deps): Promise<number> {
-  const now = deps.now()
-  return deps.db.transaction(async (tx) => {
-    const due = await tx
-      .update(bookings)
-      .set({ expiryWarnedAt: new Date(now) })
-      .where(
-        and(awaitingAnswer(now), lte(bookings.holdUntil, new Date(now + EXPIRY_WARNING_MINUTES * 60_000)), isNull(bookings.expiryWarnedAt)),
-      )
-      .returning({ id: bookings.id, code: bookings.code, businessId: bookings.businessId })
-    for (const b of due) await emit(tx, { type: 'request.expiring', businessId: b.businessId, bookingId: b.id, bookingCode: b.code })
-    return due.length
-  })
-}
-
-/**
  * An invite's 7 days ran out unanswered (book S-13): the team's screens and the invitee's refresh (it shows
  * "expired" now). Nothing changes in the invite: its state is worked out from the time.
  */
 async function tellExpiredInvites(deps: Deps): Promise<number> {
   const now = new Date(deps.now())
   return deps.db.transaction(async (tx) => {
+    // a batch at a time, the rows someone else holds left for the next tick
     const due = await tx
+      .select({ id: invites.id })
+      .from(invites)
+      .where(and(eq(invites.status, 'pending'), lte(invites.expiresAt, now), isNull(invites.expiryToldAt)))
+      .orderBy(asc(invites.id))
+      .limit(BATCH)
+      .for('update', { skipLocked: true })
+    if (!due.length) return 0
+    const told = await tx
       .update(invites)
       .set({ expiryToldAt: now })
-      .where(and(eq(invites.status, 'pending'), lte(invites.expiresAt, now), isNull(invites.expiryToldAt)))
+      .where(
+        inArray(
+          invites.id,
+          due.map((d) => d.id),
+        ),
+      )
       .returning({ businessId: invites.businessId, phone: invites.phone })
-    for (const i of due) await teamChanged(tx, i.businessId, { phone: i.phone })
-    return due.length
+    // once per business and person, however many of their invites ran out
+    const seen = new Set<string>()
+    for (const i of told) {
+      if (seen.has(`${i.businessId}:${i.phone}`)) continue
+      seen.add(`${i.businessId}:${i.phone}`)
+      await teamChanged(tx, i.businessId, { phone: i.phone })
+    }
+    return told.length
   })
 }
 
@@ -515,14 +513,13 @@ async function runQueue(deps: Deps): Promise<number> {
 
 export async function runDueJobs(
   deps: Deps,
-): Promise<{ expired: number; completed: number; recounted: number; warned: number; invitesExpired: number; jobs: number }> {
+): Promise<{ expired: number; completed: number; recounted: number; invitesExpired: number; jobs: number }> {
   await pruneBookingLinks(deps.db, deps.now())
   await pruneIdentityChecks(deps.db, deps.now())
   const expired = await expireRequests(deps)
   const completed = await completeVisits(deps)
   const recounted = await recountReviews(deps)
-  const warned = await warnExpiringRequests(deps)
   const invitesExpired = await tellExpiredInvites(deps)
   const ran = await runQueue(deps)
-  return { expired, completed, recounted, warned, invitesExpired, jobs: ran }
+  return { expired, completed, recounted, invitesExpired, jobs: ran }
 }

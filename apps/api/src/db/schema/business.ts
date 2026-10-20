@@ -285,6 +285,10 @@ export const invites = pgTable(
   },
   (t) => [
     index('invites_phone_idx').on(t.phone),
+    // the jobs look for the ones whose 7 days ran out untold
+    index('invites_untold_idx')
+      .on(t.expiresAt)
+      .where(sql`${t.status} = 'pending' and ${t.expiryToldAt} is null`),
     // one open invite per phone per workspace
     uniqueIndex('invites_one_pending')
       .on(t.businessId, t.phone)

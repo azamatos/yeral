@@ -119,6 +119,27 @@ export function holdUntil(
   return start
 }
 
+/**
+ * When "Haýyşyň wagty gutarýar" is due (book S-01, business spec §16): 5 minutes of answer time before the end, counted
+ * as the hold counts them, only while the business is open (so it never comes while it's closed, nor across a break).
+ * None for a request whose whole answer time is 10 minutes or less: its new-request alert is warning enough.
+ */
+export function expiryWarningAt(sentAt: number, until: number, business: BusinessHours): number | null {
+  const warn = EXPIRY_WARNING_MINUTES * 60_000
+  const open = openStretches(business, sentAt, until)
+    .map((w) => ({ start: Math.max(w.start, sentAt), end: Math.min(w.end, until) }))
+    .filter((w) => w.end > w.start)
+  // a hold that ran on plain time (nothing open before the visit) counts plain time here too
+  const stretches = open.length ? open : [{ start: sentAt, end: until }]
+  if (stretches.reduce((sum, w) => sum + w.end - w.start, 0) <= 2 * warn) return null
+  let left = warn
+  for (const w of [...stretches].reverse()) {
+    if (w.end - w.start >= left) return w.end - left
+    left -= w.end - w.start
+  }
+  return null
+}
+
 /** No client reminder arrives between 22:00 and 08:00 at the business (book Q-285). */
 export const NIGHT = { from: 22 * 60, to: 8 * 60 } as const
 /** A reminder that would arrive at night goes at 21:30 the evening before the visit instead. */

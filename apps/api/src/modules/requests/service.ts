@@ -7,7 +7,7 @@ import type { CannotMoveDetails } from '@yeral/contract/errors'
 import type { declineInputSchema, requestSchema } from '@yeral/contract/requests'
 import { findAppointmentSlot } from '@yeral/domain/availability'
 import { withinHours } from '@yeral/domain/hours'
-import { canAnswerRequest as requestOpen, offerPast } from '@yeral/domain/lifecycle'
+import { expiryWarningAt, canAnswerRequest as requestOpen, offerPast } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { canAnswerRequest, canOn, type Actor } from '@yeral/domain/permissions'
 import { DEFAULT_RULES, type RequestAnswerers } from '@yeral/domain/rules'
@@ -17,7 +17,7 @@ import { all, type Queryable } from '../../db/client'
 import { bookingItems, bookingRules, bookings, clients, staff, type TimeSlot } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
-import { appointmentContext, assertStaffFree, loadBusiness, loadBusy, lockedHours, OutsideHours } from '../availability/context'
+import { appointmentContext, assertStaffFree, loadBusiness, loadBusy, loadHours, lockedHours, OutsideHours } from '../availability/context'
 import { confirmBooking } from '../bookings/confirm'
 import { teamItemOf, teamPriceOf } from '../bookings/team-view'
 import { alertNotesOf, clientFacts } from '../clients/facts'
@@ -111,7 +111,7 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
   if (!rows.length) return []
   const originalIds = rows.flatMap((r) => (r.rescheduleOf ? [r.rescheduleOf] : []))
   const clientIds = [...new Set(rows.flatMap((r) => (r.clientId ? [r.clientId] : [])))]
-  const [items, answerers, originals, history, alerts] = await all(db, [
+  const [items, answerers, originals, history, alerts, hours] = await all(db, [
     () =>
       requestItems(
         db,
@@ -125,6 +125,7 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
         ? (await clientFacts(db, business.id, actor, now, { where: inArray(clients.id, clientIds), scope: 'business' })).rows
         : [],
     () => alertNotesOf(db, clientIds),
+    () => loadHours(db, business.id),
   ])
   return rows.flatMap((r) => {
     const mine = items.filter((i) => i.item.bookingId === r.id)
@@ -141,6 +142,7 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
         start: r.start,
         end: r.end,
         holdUntil: r.holdUntil!.getTime(),
+        warnAt: expiryWarningAt(r.createdAt.getTime(), r.holdUntil!.getTime(), hours),
         sentAt: r.createdAt.getTime(),
         items: mine.map(({ item }) => teamItemOf(item, lang)),
         price: teamPriceOf(r),
