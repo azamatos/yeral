@@ -6,7 +6,7 @@
  * a booking at 01:00 in a bar open 18:00–02:00 on Friday is Friday's, at minute 1500. A day's part past midnight must
  * end by the time the next day opens (`weekHoursErrors`), so no moment belongs to two days.
  */
-import type { Interval } from './model'
+import { contains, type Interval } from './model'
 import { addDays, diffDays, dow, epochOf, localOf } from './time'
 
 /** Minutes in a day; a business day may end up to one more day later. */
@@ -120,6 +120,33 @@ export function currentBusinessDate(b: BusinessHours, now: number): string {
   const yesterday = addDays(date, -1)
   const late = businessDay(b, yesterday)
   return late && late.close > DAY_MINUTES + min ? yesterday : date
+}
+
+/**
+ * Whether a visit still falls inside the business's hours on its date, the break left out (book Q-211): what a change
+ * of hours or a special day leaves outside is listed for the business to keep or cancel.
+ */
+export function withinHours(b: BusinessHours, date: string, visit: Interval): boolean {
+  const day = businessDay(b, date)
+  return !!day && workingIntervals(day).some((w) => contains(w, visit))
+}
+
+/** A special day runs at most a year ("Birnäçe gün": a range of days). */
+export const SPECIAL_DAY_MAX_DAYS = 366
+
+/**
+ * Problems with a special day (B-40): `to` before `from` or more than a year after it ("Soňy başlangyçdan öň bolup
+ * bilmeýär"); other hours that aren't a day's hours (opening a time of day, closing after it, at most a day long and by
+ * 48:00). Empty when valid.
+ */
+export function specialDayErrors(e: Pick<DateException, 'from' | 'to' | 'hours'>): ('to' | 'hours')[] {
+  const out: ('to' | 'hours')[] = []
+  const days = diffDays(e.to, e.from)
+  if (days < 0 || days >= SPECIAL_DAY_MAX_DAYS) out.push('to')
+  const h = e.hours
+  if (h && (h.open < 0 || h.open >= DAY_MINUTES || h.close <= h.open || h.close > MAX_DAY_END || h.close - h.open > DAY_MINUTES))
+    out.push('hours')
+  return out
 }
 
 export type ClosedReason = { kind: 'weekly' } | { kind: 'exception'; name: string }

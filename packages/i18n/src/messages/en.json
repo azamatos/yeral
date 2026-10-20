@@ -49,6 +49,7 @@
     "invite_answered": "This invite has already been answered.",
     "owner_cannot_leave": "The owner can't leave the business.",
     "group_not_empty": "Move this group's services to another group or delete them first.",
+    "bookings_affected": "Some bookings fall outside the new hours: keep them or cancel them.",
     "rate_limited": "Too many requests. Try again in {retryAfterMin, plural, one {# minute} other {# minutes}}.",
     "internal": "Something went wrong. Please try again.",
     "network": "No connection. Please try again."
@@ -62,7 +63,9 @@
   "businessCancelReasons": {
     "client_called": "The client called to cancel",
     "staff_away": "The specialist can't come in",
-    "other": "Other reason"
+    "other": "Other reason",
+    "closed": "We're closed that day",
+    "hours": "The opening hours changed"
   },
   "undo": {
     "failed": "Couldn't undo — {reason}.",
@@ -88,6 +91,9 @@
     "moved": "{brand}: {business} moved your booking to {weekday}, {date}, {time}. Change: {link}",
     "staffChanged": "{brand}: {business}: your booking on {weekday}, {date}, {time} is now with {staff}. {link}",
     "cancelledAsAsked": "{brand}: your booking at {business} on {date} {time} is cancelled, as you asked. {link}",
+    "cancelledOffers": "{brand}: {business} cancelled your booking on {date} {time}: {reason}. Free times: {times} — {link}",
+    "cancelledOffersNoTimes": "{brand}: {business} cancelled your booking on {date} {time}: {reason}. Pick another time: {link}",
+    "cancelledOffersCall": "{brand}: {business} cancelled your booking on {date} {time}: {reason}. Call them to book: {link}",
     "reminderDay": "Reminder: tomorrow at {time}, {business}, {address}.",
     "reminder2h": "Reminder: today at {time}, {business}, {address}."
   },

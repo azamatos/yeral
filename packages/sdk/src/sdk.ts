@@ -41,7 +41,7 @@ import type { searchQuerySchema } from '@yeral/contract/catalog'
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
-import type { bookingRulesUpdateSchema, businessProfileUpdateSchema } from '@yeral/contract/settings'
+import type { bookingRulesUpdateSchema, businessHoursUpdateSchema, businessProfileUpdateSchema } from '@yeral/contract/settings'
 import type { inviteInputSchema, phoneOnlyInputSchema, updateMemberSchema } from '@yeral/contract/team'
 import type { z } from 'zod'
 import { call, isApiError, type Client } from './client'
@@ -462,6 +462,21 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: (json: z.input<typeof businessProfileUpdateSchema>) => call(w.settings.profile.$patch({ param: { slug }, json })),
         onSuccess: () => settingsChanged(slug),
+      }),
+    /** The week and the special days (book B-39, B-40). */
+    hours: (slug: string) =>
+      queryOptions({
+        queryKey: keys.hours(slug),
+        queryFn: ({ signal }) => call(w.settings.hours.$get({ param: { slug } }, abortWith(signal))),
+      }),
+    /**
+     * Saves both; bookings left outside make it `bookings_affected` (`details` lists them) until it's sent again with
+     * `affected: 'keep' | 'cancel'`; `cancelled` says how many clients were told.
+     */
+    updateHours: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof businessHoursUpdateSchema>) => call(w.settings.hours.$put({ param: { slug }, json })),
+        onSuccess: () => Promise.all([settingsChanged(slug), invalidate(keys.calendar(slug), keys.requests(slug))]),
       }),
     /** The services menu (book B-38): groups, services, who does each, the clients' order. */
     menu: (slug: string) =>

@@ -6,8 +6,10 @@ import {
   inException,
   openMinutesBetween,
   openState,
+  specialDayErrors,
   staffDay,
   staffOffReason,
+  withinHours,
   workingIntervals,
   type BusinessHours,
   type DateException,
@@ -28,6 +30,27 @@ const biz = (over: Partial<BusinessHours> = {}): BusinessHours => ({ hours: WEEK
 const ex = (over: Partial<DateException>): DateException => ({ name: 'Baýramçylyk', from: THU, to: THU, yearly: false, ...over })
 const staff = (over: Partial<StaffSchedule> = {}): StaffSchedule => ({ shift: null, breaks: [], daysOff: [], ...over })
 const at = (iso: string) => Date.parse(iso)
+
+describe('what new hours leave outside (book Q-211)', () => {
+  const lunch: WeekHours = WEEK.map((d) => (d ? { ...d, break: { start: 780, end: 840 } } : null))
+  it('a visit inside the hours stays; outside them, over the break or on a closed day it doesn’t', () => {
+    expect(withinHours(biz(), THU, { start: 600, end: 660 })).toBe(true)
+    expect(withinHours(biz(), THU, { start: 1170, end: 1230 })).toBe(false)
+    expect(withinHours(biz({ hours: lunch }), THU, { start: 750, end: 810 })).toBe(false)
+    expect(withinHours(biz({ hours: lunch }), THU, { start: 840, end: 900 })).toBe(true)
+    expect(withinHours(biz(), SUN, { start: 600, end: 660 })).toBe(false)
+    expect(withinHours(biz({ exceptions: [ex({})] }), THU, { start: 600, end: 660 })).toBe(false)
+    expect(withinHours(biz({ exceptions: [ex({ hours: h(600, 900) })] }), THU, { start: 840, end: 900 })).toBe(true)
+  })
+
+  it('a special day ends on or after it starts, within a year, and other hours are a day’s hours (B-40)', () => {
+    expect(specialDayErrors({ from: THU, to: THU, hours: null })).toEqual([])
+    expect(specialDayErrors({ from: THU, to: WED, hours: null })).toEqual(['to'])
+    expect(specialDayErrors({ from: THU, to: '2027-10-16', hours: null })).toEqual(['to'])
+    expect(specialDayErrors({ from: THU, to: FRI, hours: h(600, 540) })).toEqual(['hours'])
+    expect(specialDayErrors({ from: THU, to: FRI, hours: h(1080, 1560) })).toEqual([])
+  })
+})
 
 describe('business days', () => {
   it('uses the weekday hours', () => {

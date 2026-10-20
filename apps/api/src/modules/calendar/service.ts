@@ -343,7 +343,7 @@ async function assertNoWaitingMove(db: Queryable, b: BookingRow, now: number): P
 }
 
 /** A booking the team just added that the client hasn't heard of yet: "Yzyna al" still runs, its SMS waits (B-24). */
-const unheardUntil = (b: BookingRow, now: number): number | null => {
+export const unheardUntil = (b: BookingRow, now: number): number | null => {
   const until = b.createdAt.getTime() + NEW_BOOKING_UNDO_MS
   return (b.source === 'phone' || b.source === 'walkin') && now < until ? until : null
 }

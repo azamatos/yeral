@@ -1055,7 +1055,8 @@ flowchart TD
 2. A cancel by the business asks for a reason; the client is told by SMS with the reason ("Müşderä SMS bilen habar bereris we sebäbini görkezeris.", B-Calendar) and sees "Biznes ýatyrdy: {reason}" with a building icon (client spec §4.8).
 3. The client can book again (client spec §4.8).
 4. The profile switch "Tassyklama we üýtgeşmeler (SMS)" covers confirmations, time changes and cancels by the business (Account-Profile; Q-286, decided 18.10.2026).
-5. The studio cancels a whole class session: it works like a decline with offered times. The client sees "Biznes ýatyrdy" with the reason and up to 3 sessions as chips; one tap books a confirmed seat (Q-161, decided 18.10.2026). This applies when classes come (Q-030).
+5. The business closes a day (a special day) or changes its hours over the booking and cancels it (B-39, B-40): it works like a decline with offered times. The client sees "Biznes ýatyrdy" with the day's name (or "The opening hours changed") and up to 3 free times as chips; one tap books a confirmed one; the SMS lists them, and goes whatever the switch says, as a decline's does (Claude, following Q-286).
+6. The studio cancels a whole class session: it works like a decline with offered times. The client sees "Biznes ýatyrdy" with the reason and up to 3 sessions as chips; one tap books a confirmed seat (Q-161, decided 18.10.2026). This applies when classes come (Q-030).
 
 **Edge cases**
 
@@ -1065,7 +1066,7 @@ flowchart TD
 
 **Design to fix:** the client's row, detail and link page for a class session the studio cancelled, with the session chips (Q-161).
 
-**Status:** Design: text only on the client side (business side drawn: B-Calendar, B-Classes) · Code: not built — business actions come with M5 (the cancel SMS text exists: `sms.cancelled`).
+**Status:** Design: text only on the client side (business side drawn: B-Calendar, B-Classes) · Code: built (api, 20.10.2026): the business's move and cancel with their SMS (B-26, B-27), and a closed day's cancel with offered times (`cancelOffers` on the booking detail, the `cancelledOffers` SMS); class sessions after the MVP.
 
 ## Changing a booking
 

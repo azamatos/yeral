@@ -5,7 +5,18 @@
 import { AMENITIES, CONFIRM_MODES, VERIFICATION_STATUSES } from '@yeral/domain/model'
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
 import { z } from 'zod'
-import { latLngSchema, marketLocaleSchema, phoneInputSchema, phoneSchema, slugSchema } from './common'
+import {
+  bookingCodeSchema,
+  idSchema,
+  latLngSchema,
+  marketLocaleSchema,
+  minuteSchema,
+  phoneInputSchema,
+  phoneSchema,
+  slugSchema,
+  startMinuteSchema,
+  ymdSchema,
+} from './common'
 
 /**
  * The booking rules (B-41). The values each one takes are the settings screen's options (`RULE_OPTIONS` in
@@ -105,3 +116,69 @@ export const businessProfileUpdateSchema = z
   .partial()
   .strict()
   .meta({ id: 'BusinessProfileUpdate' })
+
+// ── Hours and special days (B-39, B-40) ──
+
+/** The hours' pickers run in 30-minute steps from 00:00 (book Q-128). */
+export const HOURS_STEP = 30
+const hoursMinute = minuteSchema.refine((m) => m % HOURS_STEP === 0, `Every ${HOURS_STEP} minutes`)
+
+/** A weekday: from–to (the end may pass midnight, up to 48:00) and one optional break. */
+export const weekdayHoursSchema = z.object({
+  open: hoursMinute,
+  close: hoursMinute,
+  break: z.object({ start: hoursMinute, end: hoursMinute }).nullable(),
+})
+
+/**
+ * A holiday or an unusual day (B-40): its name (clients see it if a booking is cancelled for it), the dates, yearly or
+ * not, and closed (`hours` null) or other hours.
+ */
+export const specialDaySettingSchema = z.object({
+  name: z.string().trim().min(1).max(40),
+  from: ymdSchema,
+  to: ymdSchema,
+  yearly: z.boolean(),
+  hours: z.object({ open: hoursMinute, close: hoursMinute }).nullable(),
+})
+
+/** "Iş wagty" and "Aýratyn günler": Monday first, null = closed that weekday. */
+export const businessHoursSettingsSchema = z
+  .object({
+    hours: z.array(weekdayHoursSchema.nullable()).length(7),
+    specialDays: z.array(specialDaySettingSchema).max(100),
+  })
+  .meta({ id: 'BusinessHoursSettings' })
+
+/**
+ * The week and every special day, saved at once (the special-day modal sends the list with its day added or taken out).
+ * Bookings ahead that the change leaves outside the hours make it 409 `bookings_affected`, saving nothing; it's sent
+ * again with the team's choice (book Q-211): `keep` them, or `cancel` them with 3 other times offered to each client.
+ */
+export const businessHoursUpdateSchema = businessHoursSettingsSchema
+  .extend({ affected: z.enum(['keep', 'cancel']).optional() })
+  .strict()
+  .meta({ id: 'BusinessHoursUpdate' })
+
+export const businessHoursResultSchema = businessHoursSettingsSchema
+  .extend({
+    /** Bookings cancelled with offered times: "3 müşderä SMS iberildi". */
+    cancelled: z.number().int(),
+  })
+  .meta({ id: 'BusinessHoursResult' })
+
+/** `bookings_affected`: "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1", and each booking. */
+export const bookingsAffectedDetailsSchema = z.object({
+  count: z.number().int().min(1),
+  byStaff: z.array(z.object({ staffId: idSchema, name: z.string(), count: z.number().int().min(1) })),
+  bookings: z.array(
+    z.object({
+      code: bookingCodeSchema,
+      date: ymdSchema,
+      start: startMinuteSchema,
+      end: minuteSchema,
+      client: z.string().nullable(),
+      staff: z.array(z.string()),
+    }),
+  ),
+})

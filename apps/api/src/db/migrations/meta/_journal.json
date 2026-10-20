@@ -162,6 +162,13 @@
       "when": 1792503036470,
       "tag": "0022_business_cancel_reason",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792505071522,
+      "tag": "0023_closing_cancel_reasons",
+      "breakpoints": true
     }
   ]
 }

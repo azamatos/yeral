@@ -56,6 +56,8 @@ export const ERROR_STATUS = {
   owner_cannot_leave: 409,
   // business settings
   group_not_empty: 409,
+  /** New hours or a special day leave bookings outside: keep or cancel them (book Q-211), `details` lists them. */
+  bookings_affected: 409,
   rate_limited: 429,
   internal: 500,
 } as const satisfies Record<string, number>

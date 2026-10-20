@@ -4,9 +4,17 @@
  * the same question as taking it (`rebookQuery`).
  */
 import type { OfferedTime } from '@yeral/contract/bookings'
-import { findAppointmentSlot, type BusyInterval } from '@yeral/domain/availability'
-import { effectiveStatus, offerPast } from '@yeral/domain/lifecycle'
-import { epochOf } from '@yeral/domain/time'
+import {
+  findAppointmentSlot,
+  nearestSlots,
+  nextFreeSlot,
+  slotStaffId,
+  staffDoingAll,
+  type AppointmentSlot,
+  type BusyInterval,
+} from '@yeral/domain/availability'
+import { effectiveStatus, MAX_ALTERNATIVES, offerPast } from '@yeral/domain/lifecycle'
+import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { inArray } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookings, staff, type TimeSlot } from '../../db/schema'
@@ -113,4 +121,39 @@ export async function offeredTimes(
     staff: names.find((n) => n.id === o.staffId) ?? null,
     state: offerPast(o, lb.rules.leadMinutes, now) ? 'past' : isFree(o) ? 'free' : 'taken',
   }))
+}
+
+/**
+ * Up to three free times for the same services, as the client would book them: after an expired request, or when the
+ * business closes over a booking (B-39, B-40). That day first, then the next free days. Each names one specialist who
+ * does every service (book Q-159); at the same start the one booked comes first. Services nobody does alone keep being
+ * split between people, and those times name nobody.
+ */
+export async function freeAlternatives(db: Queryable, b: BookingRow, now: number): Promise<TimeSlot[]> {
+  if (b.type !== 'appointment') return []
+  const lb = (await loadBusinesses(db, [b.businessId])).get(b.businessId)
+  if (!lb) return []
+  const booked = await bookedServices(db, b.id)
+  if (!booked.serviceIds.length) return []
+  const from = localOf(now).date
+  const ctx = appointmentContext(lb, await loadBusy(db, [b.businessId], from, addDays(from, lb.rules.windowDays)), now)
+  const q = {
+    serviceIds: booked.serviceIds,
+    staffId: null,
+    by: 'client' as const,
+    oneSpecialist: staffDoingAll(ctx, booked.serviceIds).length > 0,
+    preferStaffId: booked.staffId,
+    // still active while this runs: its own time mustn't count as busy
+    excludeBookingIds: [b.id],
+  }
+  const offer = (date: string, s: AppointmentSlot): TimeSlot => ({ date, start: s.start, end: s.end, staffId: slotStaffId(s) })
+  const out = nearestSlots(ctx, { ...q, date: b.date }, b.start, MAX_ALTERNATIVES).map((s) => offer(b.date, s))
+  // the days after the request's own (strict: never back to it, even when it was last night's)
+  for (let day = addDays(b.date, 1); out.length < MAX_ALTERNATIVES;) {
+    const next = nextFreeSlot(ctx, q, day, lb.rules.windowDays, { strict: true })
+    if (!next) break
+    out.push(offer(next.date, next.slot))
+    day = addDays(next.date, 1)
+  }
+  return out.slice(0, MAX_ALTERNATIVES)
 }

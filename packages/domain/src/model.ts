@@ -28,11 +28,14 @@ export const DECLINE_REASONS = ['slot_busy', 'no_staff', 'cannot_do', 'other'] a
 export type DeclineReason = (typeof DECLINE_REASONS)[number]
 
 /**
- * Why the business cancels a confirmed booking (B-27): "The client called to cancel", "The specialist can't come in",
- * "Other reason" (in words).
+ * Why the business cancels a booking. The team picks one of the first three (B-27): "The client called to cancel",
+ * "The specialist can't come in", "Other reason" (in words). The others come with a cancel and 3 offered times when the
+ * business closes on a special day (`closed`, its name kept) or its hours change (`hours`) over bookings (B-39, B-40).
  */
-export const BUSINESS_CANCEL_REASONS = ['client_called', 'staff_away', 'other'] as const
+export const BUSINESS_CANCEL_REASONS = ['client_called', 'staff_away', 'other', 'closed', 'hours'] as const
 export type BusinessCancelReason = (typeof BUSINESS_CANCEL_REASONS)[number]
+/** The reasons on the team's cancel modal (B-27). */
+export const TEAM_CANCEL_REASONS = ['client_called', 'staff_away', 'other'] as const satisfies readonly BusinessCancelReason[]
 
 /** "Arz et" — what happened (business spec §3): Gelmedi, Gijä galdy, Gödek gylyk, Başga. */
 export const COMPLAINT_TYPES = ['noshow', 'late', 'rude', 'other'] as const

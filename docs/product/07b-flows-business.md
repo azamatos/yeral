@@ -1444,7 +1444,7 @@ flowchart LR
 
 > Open question Q-105: businesses open past midnight.
 
-**Status** — Design: drawn (B-Settings · `pane=hours`) · Code: rule only (domain: weekly hours with one break; a day may run past midnight up to 48:00, checked by `weekHoursErrors`).
+**Status** — Design: drawn (B-Settings · `pane=hours`) · Code: api built (`GET`/`PUT /v1/w/{slug}/settings/hours`, 20.10.2026): the week in 30-minute steps (`weekHoursErrors`); bookings ahead the change leaves outside the hours make it `bookings_affected` with the list, sent again with keep or cancel (each cancelled with up to 3 free times under the new hours, "The opening hours changed").
 
 ### B-40 · Special days
 
@@ -1480,7 +1480,7 @@ flowchart TD
 - A past date: "Geçen güni saýlap bolmaýar." End before start: "Soňy başlangyçdan öň bolup bilmeýär."
 - One specialist's leave belongs on their own schedule, not here (B-47; help article tip).
 
-**Status** — Design: drawn (B-Settings · `exceptionModal`, `exceptionOverlap`) · Code: rule only (domain: which special day wins); the warning and the booking conflict choice are not built.
+**Status** — Design: drawn (B-Settings · `exceptionModal`, `exceptionOverlap`) · Code: api built (the same endpoint, 20.10.2026): special days saved with the week (the modal sends the list), checked (`specialDayErrors`; a new one-off day not in the past); bookings on them listed ("Aýna 2, Maral 1") and kept or cancelled with 3 offered times under the day's name, the SMS listing them. The overlap warning is drawn from the domain's rule on the screen.
 
 ### B-41 · Booking rules
 

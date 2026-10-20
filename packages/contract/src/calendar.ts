@@ -3,7 +3,7 @@
  * for a client who calls or walks in, confirmed at once, and moving or cancelling one. A specialist books, moves and
  * cancels only their own (chapter 3).
  */
-import { BUSINESS_CANCEL_REASONS } from '@yeral/domain/model'
+import { TEAM_CANCEL_REASONS } from '@yeral/domain/model'
 import { z } from 'zod'
 import { dayStateSchema } from './availability'
 import {
@@ -98,7 +98,7 @@ export const moveBookingSchema = z
 /** "Cancel booking" (B-27): the reason, "Other reason" in words; the client sees it (or "You cancelled"). */
 export const businessCancelSchema = z
   .object({
-    reason: z.enum(BUSINESS_CANCEL_REASONS),
+    reason: z.enum(TEAM_CANCEL_REASONS),
     text: z.string().trim().min(1).max(300).optional(),
   })
   .strict()

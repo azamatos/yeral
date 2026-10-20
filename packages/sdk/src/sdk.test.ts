@@ -192,6 +192,7 @@ describe('sdk', () => {
       settings.rules('glow-studio'),
       settings.menu('glow-studio'),
       settings.profile('glow-studio'),
+      settings.hours('glow-studio'),
       requests.list('glow-studio'),
       calendar.freeTimes('glow-studio', { services: [id] }),
       links.view('a-long-random-token-from-the-sms-link', 'tk'),
