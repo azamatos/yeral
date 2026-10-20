@@ -29,6 +29,11 @@ export const notificationPrefsSchema = z.object({
   confirmation: z.boolean(),
   reminderDay: z.boolean(),
   reminder2h: z.boolean(),
+  /**
+   * Deprecated: there are no review asks (book Q-259). Always false; accepted and ignored on update. Kept so /v1 only
+   * grows; it goes with /v2.
+   */
+  reviewAsk: z.boolean(),
 })
 
 export const meSchema = z

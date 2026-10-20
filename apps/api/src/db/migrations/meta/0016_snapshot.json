@@ -1,5 +1,5 @@
 {
-  "id": "e1708b2e-968c-4439-98c7-887b08d1f258",
+  "id": "3bc0b1a3-5d26-472d-989d-c7523ecfd68c",
   "prevId": "5b7a2557-81f7-4512-ae9c-8d17d4bacc1d",
   "version": "7",
   "dialect": "postgresql",
@@ -65,15 +65,15 @@
         "login_codes_user_id_users_id_fk": {
           "name": "login_codes_user_id_users_id_fk",
           "tableFrom": "login_codes",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -184,34 +184,34 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "sessions_user_id_users_id_fk": {
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "sessions_tokenHash_unique": {
           "name": "sessions_tokenHash_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "token_hash"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -269,6 +269,13 @@
           "notNull": true,
           "default": true
         },
+        "notify_review_ask": {
+          "name": "notify_review_ask",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -283,10 +290,10 @@
       "uniqueConstraints": {
         "users_phone_unique": {
           "name": "users_phone_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "phone"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -392,8 +399,8 @@
           "primaryKey": false,
           "notNull": false,
           "generated": {
-            "as": "int4range((\"date\" - date '2000-01-01') * 1440 + \"start\", (\"date\" - date '2000-01-01') * 1440 + \"end\" + \"buffer_after\")",
-            "type": "stored"
+            "type": "stored",
+            "as": "int4range((\"date\" - date '2000-01-01') * 1440 + \"start\", (\"date\" - date '2000-01-01') * 1440 + \"end\" + \"buffer_after\")"
           }
         },
         "sort": {
@@ -416,9 +423,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "booking_items_staff_date_idx": {
           "name": "booking_items_staff_date_idx",
@@ -437,50 +444,50 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "booking_items_booking_id_bookings_id_fk": {
           "name": "booking_items_booking_id_bookings_id_fk",
           "tableFrom": "booking_items",
-          "tableTo": "bookings",
           "columnsFrom": [
             "booking_id"
           ],
+          "tableTo": "bookings",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "booking_items_service_id_services_id_fk": {
           "name": "booking_items_service_id_services_id_fk",
           "tableFrom": "booking_items",
-          "tableTo": "services",
           "columnsFrom": [
             "service_id"
           ],
+          "tableTo": "services",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "booking_items_staff_id_staff_id_fk": {
           "name": "booking_items_staff_id_staff_id_fk",
           "tableFrom": "booking_items",
-          "tableTo": "staff",
           "columnsFrom": [
             "staff_id"
           ],
+          "tableTo": "staff",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -537,24 +544,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "booking_links_booking_id_bookings_id_fk": {
           "name": "booking_links_booking_id_bookings_id_fk",
           "tableFrom": "booking_links",
-          "tableTo": "bookings",
           "columnsFrom": [
             "booking_id"
           ],
+          "tableTo": "bookings",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -648,8 +655,8 @@
           "primaryKey": false,
           "notNull": true,
           "generated": {
-            "as": "\"status\" in ('pending', 'confirmed')",
-            "type": "stored"
+            "type": "stored",
+            "as": "\"status\" in ('pending', 'confirmed')"
           }
         },
         "cancelled_by": {
@@ -811,8 +818,8 @@
           "primaryKey": false,
           "notNull": false,
           "generated": {
-            "as": "int4range((\"date\" - date '2000-01-01') * 1440 + \"start\", (\"date\" - date '2000-01-01') * 1440 + \"end\")",
-            "type": "stored"
+            "type": "stored",
+            "as": "int4range((\"date\" - date '2000-01-01') * 1440 + \"start\", (\"date\" - date '2000-01-01') * 1440 + \"end\")"
           }
         },
         "session_id": {
@@ -878,9 +885,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "bookings_user_date_idx": {
           "name": "bookings_user_date_idx",
@@ -899,9 +906,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "bookings_client_idx": {
           "name": "bookings_client_idx",
@@ -914,9 +921,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "bookings_due_idx": {
           "name": "bookings_due_idx",
@@ -935,9 +942,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "bookings_session_idx": {
           "name": "bookings_session_idx",
@@ -950,9 +957,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "bookings_one_waiting_move": {
           "name": "bookings_one_waiting_move",
@@ -965,133 +972,133 @@
             }
           ],
           "isUnique": true,
-          "where": "\"bookings\".\"status\" = 'pending'",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "\"bookings\".\"status\" = 'pending'",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "bookings_business_id_businesses_id_fk": {
           "name": "bookings_business_id_businesses_id_fk",
           "tableFrom": "bookings",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "bookings_client_id_clients_id_fk": {
           "name": "bookings_client_id_clients_id_fk",
           "tableFrom": "bookings",
-          "tableTo": "clients",
           "columnsFrom": [
             "client_id"
           ],
+          "tableTo": "clients",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "bookings_user_id_users_id_fk": {
           "name": "bookings_user_id_users_id_fk",
           "tableFrom": "bookings",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "bookings_reschedule_of_bookings_id_fk": {
           "name": "bookings_reschedule_of_bookings_id_fk",
           "tableFrom": "bookings",
-          "tableTo": "bookings",
           "columnsFrom": [
             "reschedule_of"
           ],
+          "tableTo": "bookings",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "bookings_alternative_of_bookings_id_fk": {
           "name": "bookings_alternative_of_bookings_id_fk",
           "tableFrom": "bookings",
-          "tableTo": "bookings",
           "columnsFrom": [
             "alternative_of"
           ],
+          "tableTo": "bookings",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "bookings_area_id_table_areas_id_fk": {
           "name": "bookings_area_id_table_areas_id_fk",
           "tableFrom": "bookings",
-          "tableTo": "table_areas",
           "columnsFrom": [
             "area_id"
           ],
+          "tableTo": "table_areas",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "bookings_table_id_dining_tables_id_fk": {
           "name": "bookings_table_id_dining_tables_id_fk",
           "tableFrom": "bookings",
-          "tableTo": "dining_tables",
           "columnsFrom": [
             "table_id"
           ],
+          "tableTo": "dining_tables",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "bookings_session_id_class_sessions_id_fk": {
           "name": "bookings_session_id_class_sessions_id_fk",
           "tableFrom": "bookings",
-          "tableTo": "class_sessions",
           "columnsFrom": [
             "session_id"
           ],
+          "tableTo": "class_sessions",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "bookings_code_unique": {
           "name": "bookings_code_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "code"
-          ]
+          ],
+          "nullsNotDistinct": false
         },
         "bookings_alternativeOf_unique": {
           "name": "bookings_alternativeOf_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "alternative_of"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1171,9 +1178,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "events_user_idx": {
           "name": "events_user_idx",
@@ -1192,50 +1199,50 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "events_business_id_businesses_id_fk": {
           "name": "events_business_id_businesses_id_fk",
           "tableFrom": "events",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "events_booking_id_bookings_id_fk": {
           "name": "events_booking_id_bookings_id_fk",
           "tableFrom": "events",
-          "tableTo": "bookings",
           "columnsFrom": [
             "booking_id"
           ],
+          "tableTo": "bookings",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "events_user_id_users_id_fk": {
           "name": "events_user_id_users_id_fk",
           "tableFrom": "events",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1330,9 +1337,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -1340,10 +1347,10 @@
       "uniqueConstraints": {
         "jobs_dedupeKey_unique": {
           "name": "jobs_dedupeKey_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "dedupe_key"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1456,60 +1463,60 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "reviews_booking_id_bookings_id_fk": {
           "name": "reviews_booking_id_bookings_id_fk",
           "tableFrom": "reviews",
-          "tableTo": "bookings",
           "columnsFrom": [
             "booking_id"
           ],
+          "tableTo": "bookings",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "reviews_business_id_businesses_id_fk": {
           "name": "reviews_business_id_businesses_id_fk",
           "tableFrom": "reviews",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "reviews_user_id_users_id_fk": {
           "name": "reviews_user_id_users_id_fk",
           "tableFrom": "reviews",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "reviews_bookingId_unique": {
           "name": "reviews_bookingId_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "booking_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1624,15 +1631,15 @@
         "booking_rules_business_id_businesses_id_fk": {
           "name": "booking_rules_business_id_businesses_id_fk",
           "tableFrom": "booking_rules",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1859,9 +1866,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "businesses_city_idx": {
           "name": "businesses_city_idx",
@@ -1874,9 +1881,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "businesses_geo_idx": {
           "name": "businesses_geo_idx",
@@ -1895,47 +1902,47 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "businesses_category_id_categories_id_fk": {
           "name": "businesses_category_id_categories_id_fk",
           "tableFrom": "businesses",
-          "tableTo": "categories",
           "columnsFrom": [
             "category_id"
           ],
+          "tableTo": "categories",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "businesses_city_id_cities_id_fk": {
           "name": "businesses_city_id_cities_id_fk",
           "tableFrom": "businesses",
-          "tableTo": "cities",
           "columnsFrom": [
             "city_id"
           ],
+          "tableTo": "cities",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "businesses_slug_unique": {
           "name": "businesses_slug_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "slug"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2141,37 +2148,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "class_sessions_business_id_businesses_id_fk": {
           "name": "class_sessions_business_id_businesses_id_fk",
           "tableFrom": "class_sessions",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "class_sessions_trainer_id_staff_id_fk": {
           "name": "class_sessions_trainer_id_staff_id_fk",
           "tableFrom": "class_sessions",
-          "tableTo": "staff",
           "columnsFrom": [
             "trainer_id"
           ],
+          "tableTo": "staff",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -2229,28 +2236,28 @@
         "client_notes_client_id_clients_id_fk": {
           "name": "client_notes_client_id_clients_id_fk",
           "tableFrom": "client_notes",
-          "tableTo": "clients",
           "columnsFrom": [
             "client_id"
           ],
+          "tableTo": "clients",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "client_notes_author_staff_id_staff_id_fk": {
           "name": "client_notes_author_staff_id_staff_id_fk",
           "tableFrom": "client_notes",
-          "tableTo": "staff",
           "columnsFrom": [
             "author_staff_id"
           ],
+          "tableTo": "staff",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -2354,48 +2361,48 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "clients_business_id_businesses_id_fk": {
           "name": "clients_business_id_businesses_id_fk",
           "tableFrom": "clients",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "clients_user_id_users_id_fk": {
           "name": "clients_user_id_users_id_fk",
           "tableFrom": "clients",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "clients_business_phone": {
           "name": "clients_business_phone",
-          "nullsNotDistinct": false,
           "columns": [
             "business_id",
             "phone"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2437,15 +2444,15 @@
         "dining_tables_area_id_table_areas_id_fk": {
           "name": "dining_tables_area_id_table_areas_id_fk",
           "tableFrom": "dining_tables",
-          "tableTo": "table_areas",
           "columnsFrom": [
             "area_id"
           ],
+          "tableTo": "table_areas",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2483,28 +2490,28 @@
         "favorites_user_id_users_id_fk": {
           "name": "favorites_user_id_users_id_fk",
           "tableFrom": "favorites",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "favorites_business_id_businesses_id_fk": {
           "name": "favorites_business_id_businesses_id_fk",
           "tableFrom": "favorites",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -2608,9 +2615,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "invites_one_pending": {
           "name": "invites_one_pending",
@@ -2629,61 +2636,61 @@
             }
           ],
           "isUnique": true,
-          "where": "\"invites\".\"status\" = 'pending'",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "\"invites\".\"status\" = 'pending'",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "invites_business_id_businesses_id_fk": {
           "name": "invites_business_id_businesses_id_fk",
           "tableFrom": "invites",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "invites_staff_id_staff_id_fk": {
           "name": "invites_staff_id_staff_id_fk",
           "tableFrom": "invites",
-          "tableTo": "staff",
           "columnsFrom": [
             "staff_id"
           ],
+          "tableTo": "staff",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "invites_invited_by_users_id_fk": {
           "name": "invites_invited_by_users_id_fk",
           "tableFrom": "invites",
-          "tableTo": "users",
           "columnsFrom": [
             "invited_by"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "invites_tokenHash_unique": {
           "name": "invites_tokenHash_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "token_hash"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2731,15 +2738,15 @@
         "places_city_id_cities_id_fk": {
           "name": "places_city_id_cities_id_fk",
           "tableFrom": "places",
-          "tableTo": "cities",
           "columnsFrom": [
             "city_id"
           ],
+          "tableTo": "cities",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2784,15 +2791,15 @@
         "service_groups_business_id_businesses_id_fk": {
           "name": "service_groups_business_id_businesses_id_fk",
           "tableFrom": "service_groups",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2897,37 +2904,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "services_business_id_businesses_id_fk": {
           "name": "services_business_id_businesses_id_fk",
           "tableFrom": "services",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "services_group_id_service_groups_id_fk": {
           "name": "services_group_id_service_groups_id_fk",
           "tableFrom": "services",
-          "tableTo": "service_groups",
           "columnsFrom": [
             "group_id"
           ],
+          "tableTo": "service_groups",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -3091,9 +3098,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "staff_user_idx": {
           "name": "staff_user_idx",
@@ -3106,9 +3113,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "staff_business_user": {
           "name": "staff_business_user",
@@ -3127,10 +3134,10 @@
             }
           ],
           "isUnique": true,
-          "where": "\"staff\".\"user_id\" is not null",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "\"staff\".\"user_id\" is not null",
+          "concurrently": false
         },
         "staff_one_owner": {
           "name": "staff_one_owner",
@@ -3143,38 +3150,38 @@
             }
           ],
           "isUnique": true,
-          "where": "\"staff\".\"level\" = 'owner' and \"staff\".\"status\" = 'active'",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "\"staff\".\"level\" = 'owner' and \"staff\".\"status\" = 'active'",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "staff_business_id_businesses_id_fk": {
           "name": "staff_business_id_businesses_id_fk",
           "tableFrom": "staff",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "staff_user_id_users_id_fk": {
           "name": "staff_user_id_users_id_fk",
           "tableFrom": "staff",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -3214,28 +3221,28 @@
         "staff_services_staff_id_staff_id_fk": {
           "name": "staff_services_staff_id_staff_id_fk",
           "tableFrom": "staff_services",
-          "tableTo": "staff",
           "columnsFrom": [
             "staff_id"
           ],
+          "tableTo": "staff",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "staff_services_service_id_services_id_fk": {
           "name": "staff_services_service_id_services_id_fk",
           "tableFrom": "staff_services",
-          "tableTo": "services",
           "columnsFrom": [
             "service_id"
           ],
+          "tableTo": "services",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -3308,15 +3315,15 @@
         "table_areas_business_id_businesses_id_fk": {
           "name": "table_areas_business_id_businesses_id_fk",
           "tableFrom": "table_areas",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3368,15 +3375,15 @@
         "verification_history_business_id_businesses_id_fk": {
           "name": "verification_history_business_id_businesses_id_fk",
           "tableFrom": "verification_history",
-          "tableTo": "businesses",
           "columnsFrom": [
             "business_id"
           ],
+          "tableTo": "businesses",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -3541,10 +3548,10 @@
     }
   },
   "schemas": {},
+  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

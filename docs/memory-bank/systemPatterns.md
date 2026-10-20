@@ -139,7 +139,7 @@ apps/api/src/
                     team (who is on which team) · later: biz/{calendar, requests, bookings, clients, services, team, rules, hours, reviews,
                     analytics, profile, branches, settings} · admin/*
   db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (docs/design demo data + 13 categories)
-  jobs/             runDueJobs(): expire requests at holdUntil, complete visits, reminders, review asks, SMS
+  jobs/             runDueJobs(): expire requests at holdUntil, complete visits, reminders, SMS
   ports/            sms (written to the log everywhere until a gateway; dev code 1234), files (server disk), clock
   config.ts         one place that reads env (process.env)
   entry/node.ts     one pool, the app, the jobs tick every minute

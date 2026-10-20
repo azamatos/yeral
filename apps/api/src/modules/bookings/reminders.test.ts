@@ -129,4 +129,30 @@ describe('reminders and the night (book Q-285)', () => {
     const midnight = { ...late, start: 1440 }
     expect(moveRefusedSmsText('en', midnight)).toContain('stays at 24 October 00:00')
   })
+
+  it('a review ask queued before they went is dropped, not sent (book Q-259)', async () => {
+    const t = testApp(db)
+    const [barber] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    const [row] = await db
+      .insert(bookings)
+      .values({
+        code: 'YR-991004',
+        businessId: barber!.id,
+        type: 'appointment',
+        date: '2026-10-14',
+        start: 600,
+        end: 660,
+        status: 'completed',
+        source: 'web',
+        clientPhone: '+99365555004',
+      })
+      .returning()
+    await db.insert(jobs).values({
+      kind: 'booking.sms',
+      runAt: new Date(t.clock.now),
+      payload: { bookingId: row!.id, kind: 'reviewAsk', date: row!.date, start: row!.start },
+    })
+    await runDueJobs(t.deps)
+    expect(t.sms.sent.filter((s) => s.to === '+99365555004')).toEqual([])
+  })
 })

@@ -38,8 +38,12 @@ describe('account', () => {
     const res = await b.req('/v1/me', { method: 'PATCH', body: { lang: 'en', notifications: { reminderDay: false } } })
     expect(res.json).toMatchObject({
       lang: 'en',
-      notifications: { confirmation: true, reminderDay: false, reminder2h: true },
+      notifications: { confirmation: true, reminderDay: false, reminder2h: true, reviewAsk: false },
     })
+    // the review-ask switch is gone (book Q-259): accepted, ignored, still false
+    const old = await b.req('/v1/me', { method: 'PATCH', body: { notifications: { reviewAsk: true } } })
+    expect(old.status).toBe(200)
+    expect(old.json.notifications.reviewAsk).toBe(false)
   })
 
   it('changing the phone needs a code on the new number, which must be free', async () => {

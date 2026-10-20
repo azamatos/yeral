@@ -203,7 +203,7 @@ flowchart TD
 
 **Steps**
 
-1. A booking can become *Tassyklandy* in four ways: the business confirms it, the business confirms instantly, the client takes an offered time, or a move is confirmed. Each time, the system plans the two reminders (code: `modules/bookings/confirm.ts`). **Code differs:** it also plans a review ask, which isn't in the MVP (S-05; Q-259).
+1. A booking can become *Tassyklandy* in four ways: the business confirms it, the business confirms instantly, the client takes an offered time, or a move is confirmed. Each time, the system plans the two reminders (code: `modules/bookings/confirm.ts`). No review ask (S-05; Q-259).
 2. At the planned time the system checks four things. The booking is still confirmed and still at the same time. The client's switch is on (*Ýatlatma: 1 gün öň*, *Ýatlatma: 2 sagat öň*; Account-Profile). The business hasn't stopped reminders for this client (*Ýatlatma SMS-lerini iberme*, business spec §6).
 3. If all pass, it sends the SMS: *Ýatlatma: ertir {time} {business}, {address}.* a day before (client spec §6), and the code's separate *Ýatlatma: şu gün {time} {business}, {address}.* (today) 2 hours before (Q-293, decided 18.10.2026).
 
@@ -259,7 +259,7 @@ flowchart TD
 > Open question Q-260: Review asks for bookings made by staff.
 
 - With no ask, no review SMS goes at night after a late visit (Q-285).
-- **Code differs:** the api plans a review ask with each confirmation and sends *{business}-da bolşuňyz nähili boldy? Baha beriň: {link}* 2 hours after the end, at any hour, while the client's *Teswir haýyşy* switch is on (code: `modules/bookings/confirm.ts`, `modules/jobs/run.ts`). It must stop.
+- The api plans no review ask since 20.10.2026; asks queued before were settled unsent (migration 0016).
 - **Design to fix:** drop the *Teswir haýyşy* switch from Account-Profile, leaving 3 client SMS switches (Q-259).
 
 **Status.** Not in the MVP (Q-259) · Design: *Teswir ýaz* on the completed booking drawn (client spec §4.8); the link page's completed state not drawn (Q-170) · Code: no review ask (stopped 20.10.2026; asks queued before are dropped).

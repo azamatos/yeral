@@ -2,7 +2,7 @@
  * `runDueJobs(deps)` every minute (ADR 0005), from the jobs tick in the Node process.
  * 1. Requests whose hold time ran out → cancelled by the system, with 3 alternative times and an SMS.
  * 2. Confirmed visits that ended → completed.
- * 3. Queued work: SMS, reminders, review asks, demo businesses answering.
+ * 3. Queued work: SMS, reminders, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
@@ -203,13 +203,14 @@ async function sendBookingSms(
   kind: BookingSmsKind | OutcomeSmsKind | 'reviewAsk',
   at: { date?: unknown; start?: unknown; covers?: unknown },
 ): Promise<void> {
+  // a review ask queued before they went (book Q-259; migration 0016 settles the rest): dropped
+  if (kind === 'reviewAsk') return
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
   // the person deleted their account: the number may be someone else's now
   if (!b?.clientPhone || b.accountDeletedAt) return
   if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   if (kind === 'expired' || kind === 'moveRefused') return sendOutcomeSms(deps, b, kind)
-  // review asks queued before they went (book Q-259) are dropped
-  if (kind === 'reviewAsk' || b.status !== 'confirmed') return
+  if (b.status !== 'confirmed') return
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const [client] = b.clientId ? await deps.db.select().from(clients).where(eq(clients.id, b.clientId)) : []
   if (client?.noRemindersSms && kind !== 'confirmed') return

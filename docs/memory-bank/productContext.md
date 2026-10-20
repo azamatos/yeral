@@ -49,7 +49,7 @@ the UI only displays them.
 - A booking cancelled from the Upcoming tab stays there greyed (toast with "Yzyna al") until the next page load.
 - Booking codes are human-readable: `YR-48213`.
 - SMS (TK, or the user's language): confirmed, declined (with reason), expired (with 3 times), reminders 1 day and 2 h
-  before, review ask 2 h after the end. No SMS when a request is sent (on-screen only). Templates: design spec §6.
+  before; no review ask (book Q-259). No SMS when a request is sent (on-screen only). Templates: design spec §6.
 
 ## Search and location
 
@@ -61,7 +61,7 @@ the UI only displays them.
 ## Accounts
 
 - Phone-only login: +993 phone → 4-digit SMS code (auto-submit, 3 tries then 60 s lock, resend after 0:59) → name for new users.
-- Language TK/RU/EN saved per user; favourites; notification settings (SMS confirmation, reminders, review asks); delete account.
+- Language TK/RU/EN saved per user; favourites; notification settings (SMS confirmation, reminders); delete account.
 
 ## Business workspace (business.yeral.app)
 

@@ -90,17 +90,16 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
   .openapi(updateRoute, async (c) => {
     const user = requireUser(c)
     const { name, lang, notifications: n } = c.req.valid('json')
-    const [row] = await c.var.deps.db
-      .update(users)
-      .set({
-        ...(name !== undefined ? { name } : {}),
-        ...(lang !== undefined ? { lang } : {}),
-        ...(n?.confirmation !== undefined ? { notifyConfirmation: n.confirmation } : {}),
-        ...(n?.reminderDay !== undefined ? { notifyReminderDay: n.reminderDay } : {}),
-        ...(n?.reminder2h !== undefined ? { notifyReminder2h: n.reminder2h } : {}),
-      })
-      .where(eq(users.id, user.id))
-      .returning()
+    const set = {
+      ...(name !== undefined ? { name } : {}),
+      ...(lang !== undefined ? { lang } : {}),
+      ...(n?.confirmation !== undefined ? { notifyConfirmation: n.confirmation } : {}),
+      ...(n?.reminderDay !== undefined ? { notifyReminderDay: n.reminderDay } : {}),
+      ...(n?.reminder2h !== undefined ? { notifyReminder2h: n.reminder2h } : {}),
+    }
+    // nothing to change (only the deprecated review-ask switch, say): the profile as it is
+    if (!Object.keys(set).length) return c.json(await toMe(c.var.deps.db, user), 200)
+    const [row] = await c.var.deps.db.update(users).set(set).where(eq(users.id, user.id)).returning()
     return c.json(await toMe(c.var.deps.db, row ?? user), 200)
   })
   .openapi(deleteRoute, async (c) => {

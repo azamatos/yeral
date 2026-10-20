@@ -55,7 +55,8 @@ describe('SMS links', () => {
     let date = THU
     let slots: { start: number }[] = []
     for (; !slots.length && date < addDays(THU, 14); slots.length || (date = addDays(date, 1)))
-      slots = (await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&date=${date}`)).json.slots
+      slots = (await b.req(`/v1/businesses/glow-studio/availability?services=${haircut}&date=${date}`)).json.slots ?? []
+    if (!slots.length) throw new Error('no free haircut at Glow Studio in two weeks')
     const made = await b.req('/v1/bookings', {
       body: { type: 'appointment', business: 'glow-studio', serviceIds: [haircut], staffId: null, date, start: slots[0]!.start },
     })
@@ -92,10 +93,11 @@ describe('SMS links', () => {
   })
 
   it('an unknown or old link doesn’t work', async () => {
-    const { token } = await confirmedWithLink('+99365444305')
+    const { token, code } = await confirmedWithLink('+99365444305')
     expect((await browser(t.app).req(`/v1/links/${'x'.repeat(43)}`)).status).toBe(404)
-    // the visit is on the 15th: its link ends 90 days after it
-    t.clock.now = epochOf(THU, 1440) + (LINK_DAYS + 1) * 86_400_000
+    // its link ends 90 days after the visit
+    const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
+    t.clock.now = epochOf(row!.date, row!.end) + (LINK_DAYS + 1) * 86_400_000
     expect((await browser(t.app).req(`/v1/links/${token}`)).status).toBe(404)
   })
 

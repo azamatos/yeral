@@ -36,7 +36,6 @@ How to read the tables:
 
 **Code differs:** one internet address may ask for 20 codes an hour, and the message doesn't say how long to wait
 (code: apps/api/src/modules/auth/codes.ts). Deleting an account keeps the reviews (code: apps/api/src/modules/me/routes.ts).
-The client has a fourth SMS switch, for review asks (code: apps/api/src/db/schema/auth.ts).
 
 **Design to fix:** drop the review-ask switch *Teswir haýyşy* from Account-Profile; adjust the delete-account modal's
 copy to say businesses keep their visit records (Q-172).
@@ -262,7 +261,7 @@ that only *Jaň et* is left (Q-125).
 
 **Code differs:** there's no moderation yet; every review counts as soon as it's written (code:
 apps/api/src/modules/bookings/actions.ts). A review can be written any time after the visit (code:
-apps/api/src/modules/bookings/actions.ts). The code still sends a review ask by SMS 2 h after the visit ends.
+apps/api/src/modules/bookings/actions.ts).
 
 > Open question Q-126: how long after a visit can a client write a review?
 
@@ -354,7 +353,7 @@ flowchart LR
 | Staff SMS | only for "new request" and "Ýeral" messages | Each person | business spec §22 |
 | Staff channels on MVP | browser and SMS; "in the app" once the business app ships | Fixed | business spec §16 |
 
-**Code differs:** the review ask is still planned 2 h after the visit, and a failed SMS is dropped after 5 tries without
+**Code differs:** a failed SMS is dropped after 5 tries without
 telling anyone (code: apps/api/src/modules/jobs/run.ts). Reminders keep out of the night since 20.10.2026
 (`reminderPlan()`, Q-285).
 
