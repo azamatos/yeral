@@ -5,7 +5,7 @@
  */
 import { PRICE_TYPES } from '@yeral/domain/model'
 import { z } from 'zod'
-import { idSchema, localizedSchema, marketLocaleSchema, slugSchema } from './common'
+import { idSchema, localizedSchema, marketLocaleSchema, slugSchema, uniqueIdsSchema } from './common'
 
 /** Text as written, per language (any of the market's). */
 const writtenSchema = z.partialRecord(marketLocaleSchema, z.string())
@@ -47,7 +47,7 @@ const serviceFields = {
   priceAmount: z.number().int(),
   bufferMin: z.number().int().nullable(),
   online: z.boolean(),
-  staffIds: z.array(idSchema).max(100),
+  staffIds: uniqueIdsSchema.max(100),
 }
 
 /** A new service, last in its group; without a description, its own buffer or people, and booked online. */

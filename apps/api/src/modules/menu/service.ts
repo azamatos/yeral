@@ -6,31 +6,47 @@
 import type { menuOrderSchema, menuSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
 import type { Localized } from '@yeral/domain/model'
 import { serviceErrors, type ServiceTerms } from '@yeral/domain/services'
-import { today } from '@yeral/domain/time'
-import { and, asc, count, eq, gte, inArray, max, ne } from 'drizzle-orm'
+import { localOf } from '@yeral/domain/time'
+import { and, asc, countDistinct, eq, gt, inArray, max, ne, or, sql } from 'drizzle-orm'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, serviceGroups, services, staff, staffServices } from '../../db/schema'
+import { bookingItems, bookings, businesses, serviceGroups, services, staff, staffServices } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { emit } from '../../notify'
 
 type Menu = z.infer<typeof menuSchema>
-type MenuService = Menu['groups'][number]['services'][number]
+type MenuGroup = Menu['groups'][number]
+type MenuService = MenuGroup['services'][number]
 type ServiceInput = z.infer<typeof serviceInputSchema>
 type ServiceUpdate = z.infer<typeof serviceUpdateSchema>
 type ServiceRow = typeof services.$inferSelect
 
 const invalid = (fields: string[]) => new ApiError('validation_error', { issues: fields.map((f) => ({ path: [f], code: 'invalid' })) })
 
-/** Bookings ahead that hold each service (waiting or confirmed, from today on). */
+/**
+ * Menu changes one at a time per business: places at the end of a group, and a group's existence, hold until the
+ * change commits. `no key update` leaves bookings (which only check the business exists) free to go on.
+ */
+async function lockMenu(db: Queryable, businessId: string): Promise<void> {
+  await db.select({ id: businesses.id }).from(businesses).where(eq(businesses.id, businessId)).for('no key update')
+}
+
+/** Bookings ahead that hold each service: waiting or confirmed, not yet over. */
 async function futureCounts(db: Queryable, serviceIds: string[], now: number): Promise<Map<string, number>> {
   if (!serviceIds.length) return new Map()
+  const { date, min } = localOf(now)
   const rows = await db
-    .select({ serviceId: bookingItems.serviceId, n: count() })
+    .select({ serviceId: bookingItems.serviceId, n: countDistinct(bookings.id) })
     .from(bookingItems)
     .innerJoin(bookings, eq(bookings.id, bookingItems.bookingId))
-    .where(and(inArray(bookingItems.serviceId, serviceIds), eq(bookings.active, true), gte(bookings.date, today(now))))
+    .where(
+      and(
+        inArray(bookingItems.serviceId, serviceIds),
+        eq(bookings.active, true),
+        or(gt(bookings.date, date), and(eq(bookings.date, date), gt(bookings.end, min))),
+      ),
+    )
     .groupBy(bookingItems.serviceId)
   return new Map(rows.flatMap((r) => (r.serviceId ? [[r.serviceId, r.n] as const] : [])))
 }
@@ -38,7 +54,14 @@ async function futureCounts(db: Queryable, serviceIds: string[], now: number): P
 async function viewOf(db: Queryable, rows: ServiceRow[], now: number): Promise<MenuService[]> {
   const ids = rows.map((s) => s.id)
   const [links, future] = await Promise.all([
-    ids.length ? db.select().from(staffServices).where(inArray(staffServices.serviceId, ids)) : [],
+    // a removed person keeps their links for a reactivation, but doesn't do the service now
+    ids.length
+      ? db
+          .select({ serviceId: staffServices.serviceId, staffId: staffServices.staffId })
+          .from(staffServices)
+          .innerJoin(staff, eq(staff.id, staffServices.staffId))
+          .where(and(inArray(staffServices.serviceId, ids), ne(staff.status, 'removed')))
+      : [],
     futureCounts(db, ids, now),
   ])
   return rows.map((s) => ({
@@ -56,14 +79,12 @@ async function viewOf(db: Queryable, rows: ServiceRow[], now: number): Promise<M
   }))
 }
 
+const onMenu = (businessId: string) => and(eq(services.businessId, businessId), eq(services.archived, false))
+
 export async function menuOf(db: Queryable, businessId: string, now: number): Promise<Menu> {
   const [groups, rows] = await Promise.all([
     db.select().from(serviceGroups).where(eq(serviceGroups.businessId, businessId)).orderBy(asc(serviceGroups.sort)),
-    db
-      .select()
-      .from(services)
-      .where(and(eq(services.businessId, businessId), eq(services.archived, false)))
-      .orderBy(asc(services.sort)),
+    db.select().from(services).where(onMenu(businessId)).orderBy(asc(services.sort)),
   ])
   const all = await viewOf(db, rows, now)
   return { groups: groups.map((g) => ({ id: g.id, name: g.name, services: all.filter((s) => s.groupId === g.id) })) }
@@ -83,7 +104,7 @@ async function oneService(db: Queryable, row: ServiceRow, now: number): Promise<
   return view!
 }
 
-/** The terms pass the screen's limits, the group is this business's, and the people are on its team. */
+/** The terms pass the screen's limits, the group is this business's, and the people are on its team (not removed). */
 async function check(db: Queryable, businessId: string, s: ServiceTerms & { groupId: string; staffIds?: readonly string[] }) {
   const fields: string[] = Object.keys(serviceErrors(s))
   const [group] = await db
@@ -96,15 +117,32 @@ async function check(db: Queryable, businessId: string, s: ServiceTerms & { grou
       .select({ id: staff.id })
       .from(staff)
       .where(and(eq(staff.businessId, businessId), inArray(staff.id, [...s.staffIds]), ne(staff.status, 'removed')))
-    if (team.length !== new Set(s.staffIds).size) fields.push('staffIds')
+    if (team.length !== s.staffIds.length) fields.push('staffIds')
   }
   if (fields.length) throw invalid(fields)
 }
 
+/**
+ * Who does the service, among the team rows not removed (a removed person's links wait for a reactivation). Any service
+ * makes a row bookable and none takes it off, as on the team screen, for everyone gained or lost here.
+ */
 async function setStaff(db: Queryable, serviceId: string, staffIds: readonly string[]) {
-  await db.delete(staffServices).where(eq(staffServices.serviceId, serviceId))
-  const unique = [...new Set(staffIds)]
-  if (unique.length) await db.insert(staffServices).values(unique.map((staffId) => ({ staffId, serviceId })))
+  const before = (
+    await db
+      .select({ staffId: staffServices.staffId })
+      .from(staffServices)
+      .innerJoin(staff, eq(staff.id, staffServices.staffId))
+      .where(and(eq(staffServices.serviceId, serviceId), ne(staff.status, 'removed')))
+  ).map((l) => l.staffId)
+  if (before.length)
+    await db.delete(staffServices).where(and(eq(staffServices.serviceId, serviceId), inArray(staffServices.staffId, before)))
+  if (staffIds.length) await db.insert(staffServices).values(staffIds.map((staffId) => ({ staffId, serviceId })))
+  const touched = [...new Set([...before, ...staffIds])]
+  if (touched.length)
+    await db
+      .update(staff)
+      .set({ bookable: sql`exists (select 1 from ${staffServices} where ${staffServices.staffId} = ${staff.id})` })
+      .where(inArray(staff.id, touched))
 }
 
 /** The next place at the end of a group. */
@@ -119,6 +157,7 @@ async function lastIn(db: Queryable, groupId: string): Promise<number> {
 export async function addService(deps: Deps, businessId: string, input: ServiceInput): Promise<MenuService> {
   const s = { ...input, bufferMin: input.bufferMin ?? null, online: input.online ?? true, staffIds: input.staffIds ?? [] }
   return deps.db.transaction(async (tx) => {
+    await lockMenu(tx, businessId)
     await check(tx, businessId, s)
     const [row] = await tx
       .insert(services)
@@ -143,10 +182,10 @@ export async function addService(deps: Deps, businessId: string, input: ServiceI
 
 export async function updateService(deps: Deps, businessId: string, serviceId: string, change: ServiceUpdate): Promise<MenuService> {
   return deps.db.transaction(async (tx) => {
+    await lockMenu(tx, businessId)
     const row = await serviceRow(tx, businessId, serviceId)
     if (row.archived) throw new ApiError('not_found')
-    const next = { ...row, ...change }
-    await check(tx, businessId, { ...next, staffIds: change.staffIds })
+    await check(tx, businessId, { ...row, ...change, staffIds: change.staffIds })
     const { staffIds, ...fields } = change
     const moved = change.groupId && change.groupId !== row.groupId ? { sort: await lastIn(tx, change.groupId) } : {}
     const set = { ...fields, ...moved } as Partial<typeof services.$inferInsert>
@@ -157,20 +196,29 @@ export async function updateService(deps: Deps, businessId: string, serviceId: s
   })
 }
 
-/** "Hyzmaty poz": off the menu and the client page; bookings keep their copy, the ones ahead stay (book Q-210). */
+/**
+ * "Hyzmaty poz": off the menu and the client page; bookings keep their copy, the ones ahead stay (book Q-210). The undo
+ * puts it back last in its group: the order may have changed since.
+ */
 export async function archiveService(deps: Deps, businessId: string, serviceId: string, archived: boolean): Promise<MenuService> {
   return deps.db.transaction(async (tx) => {
+    await lockMenu(tx, businessId)
     const row = await serviceRow(tx, businessId, serviceId)
     if (row.archived === archived) throw new ApiError('invalid_status')
-    // an undo puts it back in its place
-    const [saved] = await tx.update(services).set({ archived }).where(eq(services.id, serviceId)).returning()
+    const place = archived ? {} : { sort: await lastIn(tx, row.groupId) }
+    const [saved] = await tx
+      .update(services)
+      .set({ archived, ...place })
+      .where(eq(services.id, serviceId))
+      .returning()
     await emit(tx, { type: 'business.updated', businessId })
     return oneService(tx, saved!, deps.now())
   })
 }
 
-export async function addGroup(deps: Deps, businessId: string, name: Localized) {
+export async function addGroup(deps: Deps, businessId: string, name: Localized): Promise<MenuGroup> {
   return deps.db.transaction(async (tx) => {
+    await lockMenu(tx, businessId)
     const [top] = await tx
       .select({ top: max(serviceGroups.sort) })
       .from(serviceGroups)
@@ -184,7 +232,7 @@ export async function addGroup(deps: Deps, businessId: string, name: Localized) 
   })
 }
 
-export async function renameGroup(deps: Deps, businessId: string, groupId: string, name: Localized) {
+export async function renameGroup(deps: Deps, businessId: string, groupId: string, name: Localized): Promise<MenuGroup> {
   return deps.db.transaction(async (tx) => {
     const [row] = await tx
       .update(serviceGroups)
@@ -193,8 +241,12 @@ export async function renameGroup(deps: Deps, businessId: string, groupId: strin
       .returning()
     if (!row) throw new ApiError('not_found')
     await emit(tx, { type: 'business.updated', businessId })
-    const menu = await menuOf(tx, businessId, deps.now())
-    return menu.groups.find((g) => g.id === groupId)!
+    const rows = await tx
+      .select()
+      .from(services)
+      .where(and(onMenu(businessId), eq(services.groupId, groupId)))
+      .orderBy(asc(services.sort))
+    return { id: row.id, name: row.name, services: await viewOf(tx, rows, deps.now()) }
   })
 }
 
@@ -204,11 +256,11 @@ export async function renameGroup(deps: Deps, businessId: string, groupId: strin
  */
 export async function deleteGroup(deps: Deps, businessId: string, groupId: string): Promise<void> {
   await deps.db.transaction(async (tx) => {
+    await lockMenu(tx, businessId)
     const [group] = await tx
       .select()
       .from(serviceGroups)
       .where(and(eq(serviceGroups.id, groupId), eq(serviceGroups.businessId, businessId)))
-      .for('update')
     if (!group) throw new ApiError('not_found')
     const [held] = await tx
       .select({ id: services.id })
@@ -225,33 +277,48 @@ export async function deleteGroup(deps: Deps, businessId: string, groupId: strin
 /** "Müşderiler şu tertipde görýär": the whole menu's order, every group and service once; a service may change group. */
 export async function orderMenu(deps: Deps, businessId: string, order: z.infer<typeof menuOrderSchema>): Promise<Menu> {
   return deps.db.transaction(async (tx) => {
+    await lockMenu(tx, businessId)
     const [groups, rows] = await Promise.all([
-      tx.select({ id: serviceGroups.id }).from(serviceGroups).where(eq(serviceGroups.businessId, businessId)).for('update'),
-      tx
-        .select({ id: services.id })
-        .from(services)
-        .where(and(eq(services.businessId, businessId), eq(services.archived, false))),
+      tx.select({ id: serviceGroups.id }).from(serviceGroups).where(eq(serviceGroups.businessId, businessId)),
+      tx.select({ id: services.id }).from(services).where(onMenu(businessId)),
     ])
     const sameSet = (a: string[], b: string[]) => a.length === b.length && new Set(a).size === a.length && a.every((x) => b.includes(x))
     const fields: string[] = []
+    const groupIds = order.groups.map((g) => g.id)
+    const serviceIds = order.groups.flatMap((g) => g.serviceIds)
     if (
       !sameSet(
-        order.groups.map((g) => g.id),
+        groupIds,
         groups.map((g) => g.id),
       )
     )
       fields.push('groups')
     if (
       !sameSet(
-        order.groups.flatMap((g) => g.serviceIds),
+        serviceIds,
         rows.map((s) => s.id),
       )
     )
       fields.push('serviceIds')
     if (fields.length) throw invalid(fields)
-    for (const [i, g] of order.groups.entries()) {
-      await tx.update(serviceGroups).set({ sort: i }).where(eq(serviceGroups.id, g.id))
-      for (const [j, id] of g.serviceIds.entries()) await tx.update(services).set({ groupId: g.id, sort: j }).where(eq(services.id, id))
+    // two statements, whatever the menu's size
+    if (groupIds.length) {
+      const groupPlaces = sql.join(
+        order.groups.map((g, i) => sql`(${g.id}::uuid, ${i}::int)`),
+        sql`, `,
+      )
+      await tx.execute(
+        sql`update ${serviceGroups} set sort = v.sort from (values ${groupPlaces}) as v(id, sort) where ${serviceGroups.id} = v.id`,
+      )
+    }
+    if (serviceIds.length) {
+      const servicePlaces = sql.join(
+        order.groups.flatMap((g) => g.serviceIds.map((id, j) => sql`(${id}::uuid, ${g.id}::uuid, ${j}::int)`)),
+        sql`, `,
+      )
+      await tx.execute(
+        sql`update ${services} set group_id = v.group_id, sort = v.sort from (values ${servicePlaces}) as v(id, group_id, sort) where ${services.id} = v.id`,
+      )
     }
     await emit(tx, { type: 'business.updated', businessId })
     return menuOf(tx, businessId, deps.now())

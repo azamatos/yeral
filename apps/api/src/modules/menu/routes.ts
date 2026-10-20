@@ -69,7 +69,7 @@ const restoreServiceRoute = createRoute({
   method: 'post',
   path: '/w/{slug}/services/{serviceId}/restore',
   tags,
-  summary: '"Yzyna al": bring a deleted service back to its place',
+  summary: '"Yzyna al": bring a deleted service back, last in its group',
   request: { params: serviceParamSchema },
   responses: { 200: json(menuServiceSchema), 409: errors[409], ...denied },
 })

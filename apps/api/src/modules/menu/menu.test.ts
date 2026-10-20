@@ -5,8 +5,9 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, rateLimits, serviceGroups, staff } from '../../db/schema'
+import { businesses, rateLimits, serviceGroups, staff, staffServices } from '../../db/schema'
 import { seed } from '../../db/seed'
+import { runDueJobs } from '../jobs/run'
 
 const MAYSA = '+99365102030' // owner of Glow Studio
 const AYNA = '+99365312210' // a specialist there
@@ -170,5 +171,52 @@ describe('the services menu (book B-38)', () => {
     // an empty group goes
     const spare = await maysa.req(`${MENU}/groups`, { body: { name: { en: 'Spare' } } })
     expect((await maysa.req(`${MENU}/groups/${spare.json.id}`, { method: 'DELETE' })).status).toBe(204)
+  })
+
+  it('a person picked for a service becomes bookable; someone removed neither shows nor stops a save', async () => {
+    const maysa = await as(MAYSA)
+    const added = await maysa.req('/v1/w/glow-studio/team/phone-only', { body: { phone: '+99312345678', name: 'Jeren' } })
+    expect(added.json).toMatchObject({ bookable: false })
+    const jeren = added.json.id as string
+    const service = (await menuOf(maysa)).flatMap((g) => g.services)[0]!
+    const picked = await maysa.req(`${MENU}/${service.id}`, { method: 'PATCH', body: { staffIds: [...service.staffIds, jeren] } })
+    expect(picked.json.staffIds).toContain(jeren)
+    const [row] = await db.select().from(staff).where(eq(staff.id, jeren))
+    expect(row!.bookable).toBe(true)
+
+    // removed: off the menu's list, and a save of what the screen shows keeps the link for a reactivation
+    expect((await maysa.req(`/v1/w/glow-studio/team/${jeren}/remove`, { method: 'POST' })).status).toBeLessThan(300)
+    const shown = (await menuOf(maysa)).flatMap((g) => g.services).find((s) => s.id === service.id)!
+    expect(shown.staffIds).not.toContain(jeren)
+    expect((await maysa.req(`${MENU}/${service.id}`, { method: 'PATCH', body: { staffIds: shown.staffIds } })).status).toBe(200)
+    const kept = await db
+      .select()
+      .from(staffServices)
+      .where(and(eq(staffServices.staffId, jeren), eq(staffServices.serviceId, service.id)))
+    expect(kept).toHaveLength(1)
+    // someone twice is a mistake
+    expect((await maysa.req(`${MENU}/${service.id}`, { method: 'PATCH', body: { staffIds: [aynaId, aynaId] } })).status).toBe(400)
+  })
+
+  it('a deleted service is not booked again through an offered time: the client is told it can’t be (Q-210)', async () => {
+    const maysa = await as(MAYSA)
+    const [group] = await menuOf(maysa)
+    const made = await maysa.req(MENU, {
+      body: { groupId: group!.id, name: { en: 'Brow tint' }, durationMin: 30, priceType: 'fixed', priceAmount: 40, staffIds: [aynaId] },
+    })
+    const id = made.json.id as string
+    const client = await as('+99365700021', 'Client')
+    const free = (await client.req(`/v1/businesses/glow-studio/availability?services=${id}&staff=any&date=${FRI}`)).json.slots
+    const booked = await client.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [id], staffId: null, date: FRI, start: free[0].start },
+    })
+    expect(booked.status).toBe(201)
+    // nobody answers: the request runs out and gets free times
+    t.clock.now += 31 * 60_000
+    await runDueJobs(t.deps)
+    expect((await client.req(`/v1/me/bookings/${booked.json.code}`)).json.expiredAlternatives.length).toBeGreaterThan(0)
+    expect((await maysa.req(`${MENU}/${id}`, { method: 'DELETE' })).status).toBe(204)
+    const taken = await client.req(`/v1/me/bookings/${booked.json.code}/accept-alternative`, { body: { source: 'expired', index: 0 } })
+    expect(taken.json.error.code).toBe('not_bookable')
   })
 })
