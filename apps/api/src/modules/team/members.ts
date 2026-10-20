@@ -19,15 +19,26 @@ export async function teamsOf(db: Queryable, userId: string): Promise<{ business
   return rows.map(({ businessId, ...actor }) => ({ businessId, actor }))
 }
 
-/** The workspaces this account works in; `finished`: not one still being set up (book Q-200). */
-export async function workspaceIdsOf(db: Queryable, userId: string, opts: { finished?: boolean } = {}): Promise<string[]> {
-  if (!opts.finished) return (await teamsOf(db, userId)).map((t) => t.businessId)
-  const rows = await db
-    .select({ id: staff.businessId })
+/** The workspaces this account works in. */
+export async function workspaceIdsOf(db: Queryable, userId: string): Promise<string[]> {
+  return (await teamsOf(db, userId)).map((t) => t.businessId)
+}
+
+/**
+ * A row that puts its workspace in the switcher (with `businesses` joined): it signs in, and the business isn't still
+ * being set up (it joins when its owner finishes, book Q-200).
+ */
+export const inSwitcher: SQL = and(signsIn, isNull(businesses.setupStep)) as SQL
+
+/** Does this account have a workspace in the switcher (the "Biznes" link)? */
+export async function hasWorkspace(db: Queryable, userId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: staff.id })
     .from(staff)
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
-    .where(and(eq(staff.userId, userId), signsIn, isNull(businesses.setupStep)))
-  return rows.map((r) => r.id)
+    .where(and(eq(staff.userId, userId), inSwitcher))
+    .limit(1)
+  return !!row
 }
 
 /** Does anyone sign in to this workspace (a business with a team answers its own requests, even in the demo)? */

@@ -4,6 +4,7 @@
  */
 import { PLAN_PROBLEMS } from '@yeral/domain/availability'
 import { MAX_ALTERNATIVES, WAITING_SCOPES } from '@yeral/domain/lifecycle'
+import { SETUP_NEEDS } from '@yeral/domain/setup'
 import { z } from 'zod'
 import { bookingCodeSchema, idSchema, minuteSchema, startMinuteSchema, timeSlotSchema, ymdSchema } from './common'
 
@@ -128,6 +129,14 @@ export const rateLimitedDetailsSchema = retryDetailsSchema.extend({ retryAfterMi
 export const validationDetailsSchema = z.object({
   issues: z.array(z.object({ path: z.array(z.union([z.string(), z.number()])), code: z.string() })),
 })
+
+/** `setup_in_progress`: the business to finish setting up first. */
+export const setupInProgressDetailsSchema = z.object({ slug: z.string() })
+export type SetupInProgressDetails = z.infer<typeof setupInProgressDetailsSchema>
+
+/** `setup_incomplete`: what finishing still needs (book B-03, B-04). */
+export const setupIncompleteDetailsSchema = z.object({ missing: z.array(z.enum(SETUP_NEEDS)).min(1) })
+export type SetupIncompleteDetails = z.infer<typeof setupIncompleteDetailsSchema>
 
 /** `client_exists`: "This number belongs to Gülälek N. — open the card". */
 export const clientExistsDetailsSchema = z.object({ id: idSchema, name: z.string().nullable() })

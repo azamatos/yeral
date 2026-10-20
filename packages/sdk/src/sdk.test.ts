@@ -494,6 +494,8 @@ describe('live events', () => {
     expect(staleKeys({ type: 'team.changed', business: 'glow-studio', bookingCode: null })).toEqual([
       ['workspaces'],
       ['invites'],
+      ['setup'],
+      ['me'],
       ['team', 'glow-studio'],
       ['calendar', 'glow-studio'],
     ])
@@ -521,6 +523,7 @@ describe('live events', () => {
       ['availability', 'glow-studio'],
       ['calendar', 'glow-studio'],
       ['workspaces'],
+      ['setup'],
       ['clients', 'glow-studio'],
       ['search'],
       ['suggest'],

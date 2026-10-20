@@ -19,7 +19,7 @@ import { emit } from '../../notify'
 import { requireUser } from '../auth/session'
 import { cityRefOf, loadCities } from '../catalog/cities'
 import { photoOf, text } from '../catalog/map'
-import { signsIn } from './members'
+import { inSwitcher, signsIn } from './members'
 import { awaitingAnswer } from '../bookings/repo'
 import { answerFacts, answeringOf, requestItems } from '../requests/service'
 
@@ -29,14 +29,18 @@ export type InviteRow = typeof invites.$inferSelect
 
 export const actorOf = (row: StaffRow): Actor => ({ level: row.level, staffId: row.id, canAnswerOwn: row.canAnswerOwn })
 
-/** The signed-in person's row on this workspace's team; a workspace they aren't on is "not found". */
-export async function requireMember(c: Context<AppEnv>, slug: string) {
+/**
+ * The signed-in person's row on this workspace's team; a workspace they aren't on is "not found". A business still
+ * being set up is only for the wizard's routes (`draft`: the settings, services, the setup itself, book Q-200): no
+ * bookings, clients, reviews or invites before it's finished.
+ */
+export async function requireMember(c: Context<AppEnv>, slug: string, opts: { draft?: boolean } = {}) {
   const user = requireUser(c)
   const [row] = await c.var.deps.db
     .select({ business: businesses, member: staff })
     .from(staff)
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
-    .where(and(eq(businesses.slug, slug), eq(staff.userId, user.id), signsIn))
+    .where(and(eq(businesses.slug, slug), eq(staff.userId, user.id), signsIn, opts.draft ? undefined : isNull(businesses.setupStep)))
   if (!row) throw new ApiError('not_found')
   return { user, business: row.business, member: row.member, actor: actorOf(row.member) }
 }
@@ -213,8 +217,7 @@ export async function workspacesOf(deps: Deps, user: User): Promise<{ items: Wor
     .select({ business: businesses, member: staff })
     .from(staff)
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
-    // a business still being set up joins the switcher when its owner finishes (book Q-200)
-    .where(and(eq(staff.userId, user.id), signsIn, isNull(businesses.setupStep)))
+    .where(and(eq(staff.userId, user.id), inSwitcher))
     .orderBy(asc(businesses.name))
   const [counts, cities] = await Promise.all([
     requestCounts(

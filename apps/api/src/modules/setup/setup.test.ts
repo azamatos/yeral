@@ -87,4 +87,38 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     // the next business can be started now
     expect((await owner.req('/v1/setup', { body: { name: 'Merjen Nails Two', categoryId: 'nails' } })).status).toBe(201)
   })
+
+  it('a draft is only for the wizard: no calendar, clients or invites yet; its account deleted takes it along', async () => {
+    const owner = await as('+99365930020', 'Läle')
+    const { slug } = (await owner.req('/v1/setup', { body: { name: 'Läle Spa', categoryId: 'spa' } })).json as { slug: string }
+    expect((await owner.req(`/v1/w/${slug}/settings/profile`)).status).toBe(200)
+    expect((await owner.req(`/v1/w/${slug}/calendar?date=2026-10-15`)).status).toBe(404)
+    expect((await owner.req(`/v1/w/${slug}/clients`)).status).toBe(404)
+    expect((await owner.req(`/v1/w/${slug}/team`)).status).toBe(404)
+    // a stranger signed in doesn't learn it exists
+    expect((await (await as('+99365930021')).req(`/v1/businesses/${slug}`)).status).toBe(404)
+    expect((await owner.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
+    expect(await db.select().from(businesses).where(eq(businesses.slug, slug))).toEqual([])
+  })
+
+  it('long names get page addresses that work; a nameless account and a double tap are refused', async () => {
+    const name = 'Glamour Beauty Salon and Spa for Women in Ashgabat City Centre'
+    const slugs: string[] = []
+    for (const phone of ['+99365930030', '+99365930031', '+99365930032']) {
+      const res = await (await as(phone)).req('/v1/setup', { body: { name, categoryId: 'beauty' } })
+      expect(res.status).toBe(201)
+      slugs.push(res.json.slug as string)
+    }
+    expect(new Set(slugs).size).toBe(3)
+    for (const slug of slugs) expect((await browser(t.app).req(`/v1/businesses/${slug}`)).json.error.code).toBe('not_found')
+    // the sign-up's name step comes first
+    const nameless = browser(t.app)
+    await nameless.login('+99365930033')
+    expect((await nameless.req('/v1/setup', { body: { name: 'X', categoryId: 'beauty' } })).json.error.details.issues).toEqual([
+      { path: ['name'], code: 'account_name_required' },
+    ])
+    const tapper = await as('+99365930034')
+    const both = await Promise.all([1, 2].map(() => tapper.req('/v1/setup', { body: { name: 'Twice', categoryId: 'beauty' } })))
+    expect(both.map((r) => r.status).sort()).toEqual([201, 409])
+  })
 })

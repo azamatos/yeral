@@ -82,7 +82,6 @@ copy to say businesses keep their visit records (Q-172).
 | Verification | usually within 24 h; until then visitors see "*Bu sahypa entek açylmady*" | Ýeral team | business spec §7; ROUND6-ANSWERS F1 |
 | Page link | `yeral.app/b/{slug}`, which opens the page in the visitor's language (`/en/b/{slug}` at the first launch); slug of lowercase letters, digits and dashes, up to 64 characters, never starting with "yr-" | Fixed | business spec §7; ROUND6-ANSWERS notes; length code only: packages/contract/src/common.ts |
 
-**Code differs:** slugs starting with "yr-" aren't refused yet (code: packages/contract/src/common.ts).
 
 > Open question Q-113: how is the typical answer time worked out?
 

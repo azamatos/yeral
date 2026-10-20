@@ -34,7 +34,8 @@ const denied = { 401: errors[401], 403: errors[403], 404: errors[404] }
 
 /** A team member who may change business settings. */
 async function requireSettings(c: Context<AppEnv>, slug: string) {
-  const m = await requireMember(c, slug)
+  // the wizard fills a business in through these (book Q-200)
+  const m = await requireMember(c, slug, { draft: true })
   if (!can(m.actor, 'settings')) throw new ApiError('forbidden')
   return m
 }
@@ -125,7 +126,7 @@ const deleteStatusRoute = createRoute({
 
 export const settingsRoutes = new OpenAPIHono<AppEnv>()
   .openapi(statusesRoute, async (c) => {
-    const { business } = await requireMember(c, c.req.valid('param').slug)
+    const { business } = await requireMember(c, c.req.valid('param').slug, { draft: true })
     return c.json({ items: await statusesOf(c.var.deps.db, business.id), max: MAX_INTERNAL_STATUSES }, 200)
   })
   .openapi(addStatusRoute, async (c) => {

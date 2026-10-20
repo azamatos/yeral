@@ -4,7 +4,7 @@
  * puts it in the switcher and in review. At sign-in an unfinished draft reopens the wizard at its step.
  */
 import { NAME_MAX } from '@yeral/domain/names'
-import { SETUP_NEEDS, SETUP_STEPS } from '@yeral/domain/setup'
+import { SETUP_STEPS } from '@yeral/domain/setup'
 import { z } from 'zod'
 import { slugSchema } from './common'
 
@@ -37,6 +37,3 @@ export const setupStepInputSchema = z
   .object({ step: z.enum(SETUP_STEPS) })
   .strict()
   .meta({ id: 'SetupStepInput' })
-
-/** `setup_incomplete`: what finishing still needs. */
-export const setupIncompleteDetailsSchema = z.object({ missing: z.array(z.enum(SETUP_NEEDS)).min(1) })

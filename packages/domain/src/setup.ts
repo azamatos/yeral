@@ -25,6 +25,16 @@ const LETTERS: Record<string, string> = {
   ü: 'u',
   ý: 'y',
   ž: 'z',
+  // other letters that don't come apart into a plain one
+  ı: 'i',
+  ß: 'ss',
+  ø: 'o',
+  æ: 'ae',
+  œ: 'oe',
+  ł: 'l',
+  đ: 'd',
+  ð: 'd',
+  þ: 'th',
   // Russian, as a page address spells it
   а: 'a',
   б: 'b',
@@ -59,11 +69,32 @@ const LETTERS: Record<string, string> = {
   э: 'e',
   ю: 'yu',
   я: 'ya',
+  // the Cyrillic letters of neighbouring languages
+  ә: 'a',
+  ғ: 'g',
+  қ: 'k',
+  ң: 'n',
+  ө: 'o',
+  ұ: 'u',
+  ү: 'u',
+  һ: 'h',
+  і: 'i',
+  ў: 'u',
+  ҳ: 'h',
+}
+
+/** A page address part cut to `max` characters, at a dash past half of it when there is one. */
+export function cutAtWord(slug: string, max: number): string {
+  if (slug.length <= max) return slug
+  const cut = slug.slice(0, max)
+  const dash = cut.lastIndexOf('-')
+  return (dash > max / 2 ? cut.slice(0, dash) : cut).replace(/-+$/, '')
 }
 
 /**
  * The page address a business name gives ("Glow Studio" → `glow-studio`, "Aýna Beauty" → `ayna-beauty`, "Салон Лилия" →
- * `salon-liliya`): Latin letters, digits and single dashes; `business` when nothing is left.
+ * `salon-liliya`): Latin letters, digits and single dashes, cut at a word; `business` when nothing is left. Never
+ * starting "yr-": `/b/` also opens booking codes (`YR-48213`, book chapter 5), so "YR Beauty" is `yrbeauty`.
  */
 export function slugFrom(name: string): string {
   const latin = [...name.toLowerCase()].map((ch) => LETTERS[ch] ?? ch).join('')
@@ -72,10 +103,6 @@ export function slugFrom(name: string): string {
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-  const slug = plain
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, SLUG_MAX)
-    .replace(/-+$/, '')
+  const slug = cutAtWord(plain.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''), SLUG_MAX).replace(/^yr-/, 'yr')
   return slug || 'business'
 }

@@ -40,7 +40,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
   if ((e.type === 'review.created' || e.type === 'review.deleted' || e.type === 'review.updated') && e.business)
     out.push(keys.reviewsAll(e.business), keys.businessAll(e.business))
   if (e.type === 'team.changed') {
-    out.push(keys.workspaces(), keys.invites())
+    // a setup finished joins the switcher and the "Biznes" link
+    out.push(keys.workspaces(), keys.invites(), keys.setup(), keys.me())
     // the calendar's columns are the team's
     if (e.business) out.push(keys.team(e.business), keys.calendar(e.business))
   }
@@ -54,6 +55,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
       keys.availabilityAll(e.business),
       keys.calendar(e.business),
       keys.workspaces(),
+      // a draft's name on the wizard's card
+      keys.setup(),
       // the no-show limit decides who is phone-only
       keys.clients(e.business),
       // its name, category and prices on cards
