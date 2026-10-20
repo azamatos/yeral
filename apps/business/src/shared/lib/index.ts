@@ -1,1 +1,1 @@
-export { useDocumentTitle } from './document-title'
+export { usePageTitle } from './document-title'

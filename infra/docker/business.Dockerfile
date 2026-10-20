@@ -22,7 +22,8 @@ COPY --from=pruned /repo/out/full/ .
 COPY --from=pruned /repo/scripts/version-stamp.mjs scripts/
 ARG GITHUB_SHA=unknown
 ARG YERAL_ENV=production
-ARG YERAL_DOMAIN=yeral.app
+# empty = the domain @yeral/lib/site defaults to; a deployment on another domain passes its own
+ARG YERAL_DOMAIN=
 ENV GITHUB_SHA=$GITHUB_SHA VITE_YERAL_ENV=$YERAL_ENV VITE_YERAL_DOMAIN=$YERAL_DOMAIN
 RUN pnpm --filter @yeral/business run build
 

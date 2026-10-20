@@ -101,6 +101,8 @@ Below `shared/` sit the packages: they are the cross-app part of the lower layer
 - Enforced by **Steiger** (`pnpm lint:fsd`) per app and by ESLint import rules. Details: skill `fsd`, ADR 0004. Each FSD
   app has a `lint:fsd` script and `steiger.config.js` re-exporting `@yeral/config/steiger` (the plugin's recommended
   rules: a layer imports only from below, slices never from each other); the `@/` alias resolves through `tsconfig`.
+- An app's screens have stories next to them (`pages/<screen>/ui/*.stories.tsx`, titles `Business/…`); Storybook loads
+  them beside `@yeral/ui`'s and resolves `@/` against the importing file's app (`.storybook/main.ts`).
 
 ## Data flow
 

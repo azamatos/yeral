@@ -1,12 +1,12 @@
 import { Logo } from '@yeral/ui/brand'
 import { useTranslations } from 'use-intl'
-import { useDocumentTitle } from '@/shared/lib'
+import { usePageTitle } from '@/shared/lib'
 
 /** A placeholder at `/` until the sign-in (P4 slice 1) and the landing come. */
 export function HomePage() {
   const t = useTranslations()
   const brand = t('common.brand')
-  useDocumentTitle(t('app.name', { brand }))
+  usePageTitle()
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6 px-4 py-16 text-center">
       <Logo alt={brand} height={30} />

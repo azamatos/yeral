@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "{brand} Business",
-    "home": "{brand} Business home"
+    "notifications": "Notifications"
   },
   "home": {
     "title": "The business app is on its way",

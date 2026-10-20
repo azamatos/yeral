@@ -56,7 +56,6 @@ services:
       args:
         GITHUB_SHA: ${GITHUB_SHA:-local}
         YERAL_ENV: docker
-        YERAL_DOMAIN: yeral.app
 
   caddy:
     image: caddy:2-alpine

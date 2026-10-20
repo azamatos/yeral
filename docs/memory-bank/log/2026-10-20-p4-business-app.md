@@ -24,5 +24,15 @@
   - Catalog additions: `@tanstack/react-router`, `@tanstack/router-plugin`, `@vitejs/plugin-react`,
     `@rolldown/plugin-babel`, `@babel/core` 7, `babel-plugin-react-compiler`, `steiger`,
     `@feature-sliced/steiger-plugin`.
+- PR 1's review (15 findings; 11 fixed): a missing `/assets/*` file is a 404 and only an existing one is cached a
+  year (`static.Caddyfile` `handle` blocks); the root error page lets failed queries go
+  (`useQueryErrorResetBoundary`) and Try again is `router.invalidate()`; `robots.txt` allows crawling so the noindex
+  is read; `PORT_BASE` joins the build hash (`turbo.json` build `env`); no domain default in the image (empty = the
+  one `@yeral/lib/site` defaults to); the screens have stories (Storybook loads `apps/business/src/**/*.stories.tsx`
+  and resolves `@/` per app; `PageStory` in `shared/storybook`); `Toaster` takes a translated `label`;
+  `usePageTitle()` adds the app's name; no manual `useMemo`; slimmer public APIs; the helpers in techContext. Not
+  taken: Node types out of the app's tsconfig (they come in anyway through the sdk's type import of the api);
+  shipping only one language's shared messages (`@yeral/i18n` imports all three; a package change); one key-flattener
+  for tests; `createApi`/`useSdk` in `@yeral/sdk` (another session owns it; move it with the second app).
 - Follow-ups: the main bundle is ~178 kB gzip (zod comes in with `@yeral/lib/site`; routes split automatically as they
   arrive); the business app's typecheck takes ~50 s because the sdk's types reach into the api's routes.
