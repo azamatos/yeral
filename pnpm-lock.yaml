@@ -452,6 +452,12 @@ importers:
       '@tanstack/react-router':
         specifier: 'catalog:'
         version: 1.170.45(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@yeral/contract':
+        specifier: workspace:*
+        version: link:../../packages/contract
+      '@yeral/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@yeral/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n

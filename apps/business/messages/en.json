@@ -1,11 +1,112 @@
 {
   "app": {
     "name": "{brand} Business",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "tag": "Business",
+    "clientSite": "Book on {brand} as a client"
   },
-  "home": {
-    "title": "The business app is on its way",
-    "lead": "Your calendar, requests, clients and team will live here."
+  "levels": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "specialist": "Specialist"
+  },
+  "login": {
+    "tabTitle": "Log in",
+    "title": "Log in to {app}",
+    "lead": "Enter your phone number — we’ll show you a 4-digit code. No password needed.",
+    "phoneLabel": "Phone number",
+    "phoneHint": "If you already book on {brand} as a client, use that number — one account works for both.",
+    "sendCode": "Send code",
+    "sending": "Sending…",
+    "incomplete": "The number is incomplete — it needs {digits} digits.",
+    "notMobile": "Codes go to mobile numbers only. Enter a number starting with {starts}.",
+    "notMobilePlain": "Codes go to mobile numbers only. Enter a mobile number.",
+    "tooManyCodes": "Too many codes. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
+    "noBusiness": "No business yet? <start>Start free</start>",
+    "codeTitle": "Enter the code",
+    "codeLead": "To log in with <b>{phone}</b>.",
+    "changeNumber": "Change number",
+    "codeLabel": "Code",
+    "codeHint": "It checks itself after the 4th digit.",
+    "yourCode": "Your code:",
+    "confirm": "Confirm",
+    "checking": "Checking…",
+    "resend": "Get a new code",
+    "resendIn": "Get a new code in {time}",
+    "codeExpired": "The old code no longer works.",
+    "resent": "Here’s a new code.",
+    "wrongCode": "Wrong code. {left, plural, one {# try} other {# tries}} left.",
+    "locked": "Too many tries. Try again in {seconds, plural, one {# second} other {# seconds}}.",
+    "you": "You: <b>{who}</b>",
+    "who": "{name} · {phone}",
+    "otherNumber": "Log in with another number",
+    "loading": "Just a moment…",
+    "identity": {
+      "title": "Is this you, {name}?",
+      "titleNoName": "Is this your account?",
+      "lead": "This number’s account hasn’t been used for 6 months. Numbers sometimes pass to someone new, so we ask before you go in.",
+      "yes": "Yes, it’s me",
+      "no": "No, start a new account",
+      "ownsWorkspace": "This account owns a business on {brand}, so it can’t start afresh here. Contact {brand} to sort out the number."
+    },
+    "name": {
+      "title": "What’s your name?",
+      "lead": "Your number is verified. Enter your name for your {brand} account — your team will see you by this name.",
+      "verified": "Number verified",
+      "first": "First name",
+      "firstPlaceholder": "For example: Gülälek",
+      "last": "Last name <optional>(optional)</optional>",
+      "required": "Enter your first name.",
+      "continue": "Continue"
+    },
+    "invite": {
+      "eyebrow": "Invite",
+      "where": "{category} · {city}",
+      "title": "{business} invites you to the team",
+      "by": "{name} added you as <b>{level}</b>",
+      "byNobody": "You’re invited as <b>{level}</b>",
+      "as": "As {level, select, admin {an Admin} other {a Specialist}}",
+      "admin1": "You’ll see every calendar, booking and client",
+      "admin2": "You can answer requests and reply to reviews",
+      "admin3": "You can change services, prices and settings",
+      "specialist1": "You’ll see your own calendar and bookings",
+      "specialist2": "You can answer your own requests",
+      "specialist3": "You’ll see your own clients and earnings",
+      "until": "The invite works until {date}",
+      "accept": "Accept",
+      "decline": "Decline",
+      "declineTitle": "Decline the invite?",
+      "declineLead": "{name} will be told. To join later you’ll need a new invite.",
+      "declineLeadNobody": "The business will be told. To join later you’ll need a new invite.",
+      "back": "Back",
+      "declineConfirm": "Decline invite",
+      "declined": "You declined {business}’s invite."
+    },
+    "expired": {
+      "title": "The invite has expired",
+      "lead": "Each invite works for {days} days. The invite {business} sent on {sent} ended on {ended}.",
+      "note": "Ask the owner to send it again — the new invite will appear here."
+    },
+    "empty": {
+      "title": "You don’t have a workspace yet",
+      "lead": "Open your business: calendar, online booking and a client list — free.",
+      "create": "Create a business",
+      "note": "Work at a business? Ask the owner to send an invite to your phone number — it will appear here."
+    },
+    "opening": {
+      "title": "Opening {business}…",
+      "sub": "{level} · {city}",
+      "one": "We open the workspace you used last.",
+      "many": "You have {count} workspaces. We open the one you used last; pick another at the top of the left menu.",
+      "now": "Open the calendar now"
+    }
+  },
+  "placeholder": {
+    "workspaceLead": "{level} · {city}. The calendar and the rest of the workspace come with the next parts of the app.",
+    "setupTitle": "Create a business",
+    "setupLead": "Setting up a business comes with the next part of the app.",
+    "logout": "Log out",
+    "toLogin": "Back to log in"
   },
   "notFound": {
     "title": "Page not found",

@@ -9,29 +9,31 @@ import {
   type RouteComponent,
 } from '@tanstack/react-router'
 import { UIProvider } from '@yeral/ui/provider'
+import { Toaster } from '@yeral/ui/toast'
 import { useState } from 'react'
+import { useTranslations } from 'use-intl'
 import { createApi, SdkProvider, type Api } from '@/shared/api'
 import { appLocale, I18nProvider } from '@/shared/i18n'
 
-/** A request no story expects: it fails like a lost connection. */
-const offline: typeof fetch = () => Promise.reject(new TypeError('no api in this story'))
+/** No api in the story: every request fails like a lost connection. */
+const offline = (): typeof fetch => () => Promise.reject(new TypeError('no api in this story'))
 
 /**
  * A screen of the app in a story, as the app runs it: the query cache, the sdk, the words and a router (in memory)
- * with the given routes, starting at `path`. `fetch` answers like the api, so the sdk, its errors and its cache run
- * for real (ADR 0013: contract-shaped mocks, never a real api).
+ * with the given routes, starting at `path`. `server` makes a `fetch` that answers like the api, a fresh one on every
+ * mount, so the sdk, its errors and its cache run for real (ADR 0013: contract-shaped mocks, never a real api).
  */
 export function PageStory({
   routes,
   path = '/',
-  fetch = offline,
+  server = offline,
 }: {
   routes: Record<string, RouteComponent>
   path?: string
-  fetch?: typeof globalThis.fetch
+  server?: () => typeof fetch
 }) {
   const [{ api, router }] = useState(() => {
-    const api = createApi({ baseUrl: 'http://api.test', fetch })
+    const api = createApi({ baseUrl: 'http://api.test', fetch: server() })
     // a story fails at once instead of retrying
     api.queryClient.setDefaultOptions({ queries: { retry: false }, mutations: { retry: false } })
     const root = createRootRouteWithContext<Api>()({ component: Outlet })
@@ -49,9 +51,15 @@ export function PageStory({
         <I18nProvider locale={appLocale()}>
           <UIProvider>
             <RouterProvider router={router} />
+            <StoryToaster />
           </UIProvider>
         </I18nProvider>
       </SdkProvider>
     </QueryClientProvider>
   )
+}
+
+function StoryToaster() {
+  const t = useTranslations('app')
+  return <Toaster label={t('notifications')} />
 }
