@@ -6,9 +6,9 @@ import { findException, openMinutesBetween } from '@yeral/domain/hours'
 import { TYPICAL_ANSWER_DAYS, typicalAnswerMinutes } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { addDays, today } from '@yeral/domain/time'
-import { and, asc, eq, gte, isNull, lte, ne } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, isNull, lte, ne } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookings, businesses, categories, serviceGroups, tableAreas } from '../../db/schema'
+import { bookings, businesses, categories, serviceGroups, tableAreas, verificationHistory } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { appointmentContext, loadBusinesses, loadBusy, type BusinessRow } from '../availability/context'
@@ -16,6 +16,7 @@ import { buildCards } from './cards'
 import { cityRefOf, loadCities } from './cities'
 import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
 import { bookOnlineFor } from '../clients/online'
+import { workspaceIdsOf } from '../team/members'
 
 const SPECIAL_DAYS_AHEAD = 14
 
@@ -61,23 +62,53 @@ export async function publicBusiness(deps: Deps, slug: string) {
   return row
 }
 
-/** `viewerPhone`: the signed-in client's, so the page knows whether they may book here online (book A7, Q-154). */
+/**
+ * A page the viewer may see: a verified business, or one still in review for its own team (book F-032), with the
+ * preview's status and, when rejected, the Ýeral team's latest reason. Anyone else gets `in_review` ("Bu sahypa entek
+ * açylmady"); an unknown slug `not_found`.
+ */
+async function visibleBusiness(deps: Deps, slug: string, viewerId: string | null) {
+  const [row] = await deps.db.select().from(businesses).where(eq(businesses.slug, slug))
+  if (!row) throw new ApiError('not_found')
+  if (row.verification === 'verified') return { row, preview: null }
+  const mine = viewerId && (await workspaceIdsOf(deps.db, viewerId)).includes(row.id)
+  if (!mine) throw new ApiError('in_review')
+  const [last] =
+    row.verification === 'rejected'
+      ? await deps.db
+          .select({ reason: verificationHistory.reason })
+          .from(verificationHistory)
+          .where(and(eq(verificationHistory.businessId, row.id), eq(verificationHistory.status, 'rejected')))
+          .orderBy(desc(verificationHistory.at))
+          .limit(1)
+      : []
+  return { row, preview: { status: row.verification, reason: last?.reason ?? null } }
+}
+
+/**
+ * `viewer`: who is signed in, so the page knows whether they may book here online (book A7, Q-154) and whether they
+ * may see it while it's in review (their own business, F-032).
+ */
 export async function businessDetail(
   deps: Deps,
   slug: string,
   lang: Locale,
   position: LatLng | null,
-  viewerPhone: string | null = null,
+  viewer: { id: string; phone: string } | null = null,
 ): Promise<BusinessDetail> {
   const { db } = deps
   const now = deps.now()
   const day = today(now)
-  const row = await publicBusiness(deps, slug)
+  const { row, preview } = await visibleBusiness(deps, slug, viewer?.id ?? null)
   const lb = (await loadBusinesses(db, [row.id])).get(row.id)
   if (!lb) throw new ApiError('not_found')
   const b = lb.business
   // two more reads, started while the rest are made; caught here so a failure can't go unhandled before it's awaited
-  const extra = Promise.all([typicalAnswerOf(db, b, lb.rules.confirmMode === 'instant', now), bookOnlineFor(db, lb, viewerPhone)])
+  // (a page in review takes no bookings, Q-153)
+  const extra = Promise.all([
+    typicalAnswerOf(db, b, lb.rules.confirmMode === 'instant', now),
+    preview ? Promise.resolve(false) : bookOnlineFor(db, lb, viewer?.phone ?? null),
+  ])
   extra.catch(() => undefined)
   const [[category], cities] = await Promise.all([db.select().from(categories).where(eq(categories.id, b.categoryId)), loadCities(db)])
   const groups = await db.select().from(serviceGroups).where(eq(serviceGroups.businessId, b.id)).orderBy(asc(serviceGroups.sort))
@@ -154,6 +185,7 @@ export async function businessDetail(
     },
     onlineEnabled: lb.rules.onlineEnabled,
     bookOnline,
+    preview,
     confirmMode: lb.rules.confirmMode,
     holdMinutes: lb.rules.holdMinutes,
     leadMinutes: lb.rules.leadMinutes,

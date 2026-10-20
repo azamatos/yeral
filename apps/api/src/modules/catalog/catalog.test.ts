@@ -4,7 +4,18 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingRules, bookings, businesses, clients, events, jobs, services, staff, staffServices } from '../../db/schema'
+import {
+  bookingRules,
+  bookings,
+  businesses,
+  clients,
+  events,
+  jobs,
+  services,
+  staff,
+  staffServices,
+  verificationHistory,
+} from '../../db/schema'
 import { seed } from '../../db/seed'
 import { DEMO_CENTER } from '../../db/seed/demo-data'
 import { confirmBooking } from '../bookings/confirm'
@@ -306,5 +317,40 @@ describe('catalogue', () => {
       await db.delete(bookings).where(eq(bookings.code, 'YR-997020'))
       await db.delete(clients).where(eq(clients.id, record!.id))
     }
+  })
+
+  it('a page still in review: "not opened yet" for visitors, a preview for its own team (book F-032)', async () => {
+    const t = testApp(db)
+    const [ojak] = await db.select().from(businesses).where(eq(businesses.slug, 'ojak'))
+    const open = (who: ReturnType<typeof browser>) => who.req('/v1/businesses/ojak')
+    const member = browser(t.app)
+    const { me } = await member.login('+99365777030', 'Döwran')
+    const [row] = await db.insert(staff).values({ businessId: ojak!.id, userId: me.id, name: 'Döwran', level: 'admin' }).returning()
+    const stranger = browser(t.app)
+    await stranger.login('+99365777031', 'Aýna')
+    await db.update(businesses).set({ verification: 'pending' }).where(eq(businesses.id, ojak!.id))
+    try {
+      for (const who of [browser(t.app), stranger]) {
+        const res = await open(who)
+        expect(res.status).toBe(404)
+        expect(res.json.error.code).toBe('in_review')
+      }
+      const own = await open(member)
+      expect(own.status).toBe(200)
+      expect(own.json).toMatchObject({ slug: 'ojak', preview: { status: 'pending', reason: null }, bookOnline: false })
+      // rejected: still "not opened yet" for others; the team sees why
+      await db.update(businesses).set({ verification: 'rejected' }).where(eq(businesses.id, ojak!.id))
+      await db.insert(verificationHistory).values({ businessId: ojak!.id, status: 'rejected', reason: 'Salgy doly däl' })
+      expect((await open(stranger)).json.error.code).toBe('in_review')
+      expect((await open(member)).json.preview).toEqual({ status: 'rejected', reason: 'Salgy doly däl' })
+      // a slug that never existed is plainly not found
+      expect((await browser(t.app).req('/v1/businesses/no-such-place')).json.error.code).toBe('not_found')
+    } finally {
+      await db.update(businesses).set({ verification: 'verified' }).where(eq(businesses.id, ojak!.id))
+      await db.delete(verificationHistory).where(eq(verificationHistory.businessId, ojak!.id))
+      await db.delete(staff).where(eq(staff.id, row!.id))
+    }
+    // verified again: everyone sees it, with no preview
+    expect((await open(stranger)).json).toMatchObject({ slug: 'ojak', preview: null })
   })
 })

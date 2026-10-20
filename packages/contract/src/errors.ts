@@ -11,6 +11,8 @@ export const ERROR_STATUS = {
   unauthorized: 401,
   forbidden: 403,
   not_found: 404,
+  /** A business still in review, or rejected (book F-032): "Bu sahypa entek açylmady", not the plain 404. */
+  in_review: 404,
   // booking
   slot_taken: 409,
   online_disabled: 409,
