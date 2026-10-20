@@ -4,10 +4,11 @@ import { cn } from '../../lib/cn'
 
 const callout = cva('flex text-small text-n-900 [&_b]:font-semibold [&_strong]:font-semibold', {
   variants: {
+    // the icon keeps a colour of its own on the two inky tones; the others draw it in the text colour
     tone: {
       // neutral: a quiet note on the group grey, no line (B-Settings .note, Account .dnote win over the bordered drafts)
-      neutral: 'border-transparent bg-group',
-      accent: 'border-a-line bg-a-50',
+      neutral: 'border-transparent bg-group [&>[data-callout-icon]]:text-n-600',
+      accent: 'border-a-line bg-a-50 [&>[data-callout-icon]]:text-a-600',
       warning: 'border-st-pending-line bg-st-pending-bg text-st-pending-ink',
       danger: 'border-danger-line bg-error-tint text-danger-ink',
       success: 'border-st-completed-line bg-st-completed-bg text-st-completed-ink',
@@ -22,29 +23,23 @@ const callout = cva('flex text-small text-n-900 [&_b]:font-semibold [&_strong]:f
       // full bleed above the page header: the tone's line only at the bottom, no radius, no dismiss
       banner: 'items-start border-b px-6 py-3',
     },
+    // one short action on the right: the row centres on it and the icon drops its 1px nudge
+    inline: { true: 'items-center [&>[data-callout-icon]]:mt-0' },
   },
-  defaultVariants: { tone: 'neutral', size: 'm', layout: 'box' },
+  // a neutral banner has no tinted line of its own: it takes the page's divider
+  compoundVariants: [{ layout: 'banner', tone: 'neutral', class: 'border-n-200' }],
+  defaultVariants: { size: 'm' },
 })
-
-// the icon keeps a little colour of its own on the two inky tones; the others draw it in the text colour
-const iconTone: Record<CalloutTone, string> = {
-  neutral: 'text-n-600',
-  accent: 'text-a-600',
-  warning: '',
-  danger: '',
-  success: '',
-  slate: '',
-}
 
 export type CalloutTone = NonNullable<VariantProps<typeof callout>['tone']>
 
 export type CalloutProps = Omit<ComponentProps<'div'>, 'title'> &
-  Omit<VariantProps<typeof callout>, 'layout'> & {
+  Omit<VariantProps<typeof callout>, 'layout' | 'inline'> & {
     /**
      * `box` (default) sits in the flow; `banner` is the full-width strip above a page header (owner preview, pad
      * 12 24, a bottom line instead of a box); `card` is the calm info card that replaces a booking card (white, n-200
      * line, r16, icon tile 44, title 19/24, body 15/22, `value` and `actions` stacked under it). `card` ignores
-     * `tone` and `size`.
+     * `tone`, `size` and `action`; `banner` is always M.
      */
     layout?: 'box' | 'banner' | 'card'
     /** Lucide icon, 20 (M, banner), 18 (S) or 22 in the card's tile. No icon, no space for one. */
@@ -61,8 +56,10 @@ export type CalloutProps = Omit<ComponentProps<'div'>, 'title'> &
     value?: ReactNode
     /**
      * The callout appeared or changed in answer to something (a failed load, a saved switch, a waiting request):
-     * screen readers hear it — danger as `role="alert"`, every other tone as `role="status"`. Static notes stay
-     * silent. Defaults to on for danger and for the banner, off for the rest.
+     * screen readers hear it — danger as `role="alert"`, every other tone (and the card) as `role="status"`. Static
+     * notes stay silent (`live={false}` for a static danger note). Defaults follow the board: on for danger and the
+     * banner, off for the rest. A status is heard most reliably when it changes while mounted, so a screen that must
+     * be heard keeps the Callout on screen and swaps its children.
      */
     live?: boolean
   }
@@ -89,13 +86,16 @@ export function Callout({
   ...props
 }: CalloutProps) {
   const t = tone ?? 'neutral'
-  const isLive = live ?? (t === 'danger' || layout === 'banner')
-  const role = isLive ? (t === 'danger' ? 'alert' : 'status') : undefined
 
   if (layout === 'card') {
+    // the card is drawn calm whatever the tone: never an alert
     const Title = titleAs ?? 'h3'
     return (
-      <div role={role} {...props} className={cn('flex flex-col gap-5 rounded-card border border-n-200 bg-n-0 p-6 text-n-900', className)}>
+      <div
+        role={live ? 'status' : undefined}
+        {...props}
+        className={cn('flex flex-col gap-5 rounded-card border border-n-200 bg-n-0 p-6 text-n-900', className)}
+      >
         <div className="flex flex-col gap-3.5">
           {icon && (
             <span
@@ -122,20 +122,20 @@ export function Callout({
     )
   }
 
+  const isLive = live ?? (t === 'danger' || layout === 'banner')
   const Title = titleAs ?? 'p'
   return (
     <div
-      role={role}
+      role={isLive ? (t === 'danger' ? 'alert' : 'status') : undefined}
       {...props}
       className={cn(
         // the banner is always drawn at M (pad 12 24, icon 20)
-        callout({ tone: t, size: layout === 'banner' ? 'm' : size, layout }),
-        layout === 'box' && action && 'items-center',
+        callout({ tone: t, size: layout === 'banner' ? 'm' : size, layout, inline: Boolean(action) }),
         className,
       )}
     >
       {icon && (
-        <span data-callout-icon aria-hidden className={cn('flex flex-none', !(layout === 'box' && action) && 'mt-px', iconTone[t])}>
+        <span data-callout-icon aria-hidden className="mt-px flex flex-none">
           {icon}
         </span>
       )}
