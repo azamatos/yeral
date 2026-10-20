@@ -61,6 +61,10 @@
     "cannot_do": "Мы не оказываем эту услугу",
     "other": "Другая причина"
   },
+  "internalStatuses": {
+    "arrived": "Пришёл",
+    "started": "Начато"
+  },
   "businessCancelReasons": {
     "client_called": "Клиент позвонил и отменил",
     "staff_away": "Мастер не может выйти",

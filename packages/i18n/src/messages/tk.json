@@ -61,6 +61,10 @@
     "cannot_do": "Bu hyzmaty edip bilmeýäris",
     "other": "Başga sebäp"
   },
+  "internalStatuses": {
+    "arrived": "Geldi",
+    "started": "Başlandy"
+  },
   "businessCancelReasons": {
     "client_called": "Müşderi jaň edip ýatyrdy",
     "staff_away": "Hünärmen işe çykyp bilmeýär",

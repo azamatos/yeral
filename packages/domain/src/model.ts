@@ -73,6 +73,17 @@ export const AMENITIES = ['wifi', 'air_conditioning', 'parking', 'card_payment']
 export type Amenity = (typeof AMENITIES)[number]
 
 /**
+ * Internal statuses (book B-29, F-104): team-only markers on a confirmed booking ("Geldi", "Başlandy"), which never
+ * change its status and never reach the client. At most 5 with the two presets, which are off at first and can't be
+ * deleted; a name up to 20 characters, unique whatever its case; an icon and a colour from the design's lists.
+ */
+export const MAX_INTERNAL_STATUSES = 5
+export const INTERNAL_STATUS_PRESETS = ['arrived', 'started'] as const
+export type InternalStatusPreset = (typeof INTERNAL_STATUS_PRESETS)[number]
+export const INTERNAL_STATUS_ICONS = ['user-check', 'play', 'hourglass', 'flag', 'star', 'bell', 'message', 'sparkles'] as const
+export const INTERNAL_STATUS_COLORS = ['#4429d6', '#066a41', '#93500a', '#a3251b', '#41505f', '#101014'] as const
+
+/**
  * A row on the team: `active` works (bookable rows appear on the client site), `invited` waits for the person to accept
  * (not on the client site), `removed` by the owner or left (*Öçürilen*; the owner can reactivate).
  */

@@ -11,7 +11,7 @@ import type { DeclineReason, Localized } from '@yeral/domain/model'
 import { sql } from 'drizzle-orm'
 import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uniqueIndex, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
 import { users } from './auth'
-import { businesses, classSessions, clients, diningTables, services, staff, tableAreas } from './business'
+import { businesses, classSessions, clients, diningTables, internalStatuses, services, staff, tableAreas } from './business'
 import {
   bookingSource,
   bookingStatus,
@@ -108,6 +108,8 @@ export const bookings = pgTable(
       .references((): AnyPgColumn => bookings.id, { onDelete: 'set null' }),
     /** Tell the client by SMS about changes made in the workspace (manual bookings). */
     notifyClient: boolean().notNull().default(true),
+    /** The team's marker on a confirmed booking (book B-29); never shown to the client. */
+    internalStatusId: uuid().references(() => internalStatuses.id, { onDelete: 'set null' }),
     /**
      * The booking as the client knows it (`Told`): what the next SMS about a change compares with, so it says what
      * changed, or nothing when it's back as they knew it. Null on bookings made before it was kept.

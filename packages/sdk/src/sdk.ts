@@ -511,6 +511,29 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         // the calendar refreshes with the settings (`business.updated`); cancelled bookings may take waiting moves along
         onSuccess: () => Promise.all([settingsChanged(slug), invalidate(keys.requests(slug))]),
       }),
+    /** The internal statuses (book B-29): the presets and the business's own; the whole team reads them. */
+    statuses: (slug: string) =>
+      queryOptions({
+        queryKey: keys.statuses(slug),
+        queryFn: ({ signal }) => call(w.settings.statuses.$get({ param: { slug } }, abortWith(signal))),
+      }),
+    /** The sixth is `statuses_full`; a name taken is `validation_error` (`name`, `taken`). */
+    addStatus: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof internalStatusInputSchema>) => call(w.settings.statuses.$post({ param: { slug }, json })),
+        onSuccess: () => invalidate(keys.statuses(slug)),
+      }),
+    updateStatus: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ id, ...json }: { id: string } & z.input<typeof internalStatusUpdateSchema>) =>
+          call(w.settings.statuses[':id'].$patch({ param: { slug, id }, json })),
+        onSuccess: () => invalidate(keys.statuses(slug)),
+      }),
+    deleteStatus: (slug: string) =>
+      mutationOptions({
+        mutationFn: (id: string) => call(w.settings.statuses[':id'].$delete({ param: { slug, id } })),
+        onSuccess: () => invalidate(keys.statuses(slug)),
+      }),
     /** The services menu (book B-38): groups, services, who does each, the clients' order. */
     menu: (slug: string) =>
       queryOptions({
@@ -623,6 +646,13 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: ({ code, ...json }: { code: string } & z.input<typeof businessCancelSchema>) =>
           call(w.bookings[':code'].cancel.$post({ param: { slug, code }, json })),
+        onSuccess: () => booked(slug),
+      }),
+    /** "Içerki ýagdaý" on a confirmed booking, or none (book B-29). */
+    setInternalStatus: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ code, statusId }: { code: string; statusId: string | null }) =>
+          call(w.bookings[':code']['internal-status'].$put({ param: { slug, code }, json: { statusId } })),
         onSuccess: () => booked(slug),
       }),
     /** Blocked time from–to (book B-18): everyone's, or a specialist their own. */

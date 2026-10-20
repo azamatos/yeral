@@ -61,6 +61,10 @@
     "cannot_do": "We don't offer this service",
     "other": "Other reason"
   },
+  "internalStatuses": {
+    "arrived": "Arrived",
+    "started": "Started"
+  },
   "businessCancelReasons": {
     "client_called": "The client called to cancel",
     "staff_away": "The specialist can't come in",

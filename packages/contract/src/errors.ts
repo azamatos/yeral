@@ -39,6 +39,8 @@ export const ERROR_STATUS = {
   move_waiting: 409,
   /** Blocked time over bookings (B-18, Q-204): `details.bookings` are the ones in the way. */
   block_over_bookings: 409,
+  /** "Iň köp 5 içerki ýagdaý bolup biler" (B-29). */
+  statuses_full: 409,
   // reviews
   review_exists: 409,
   review_not_allowed: 403,
