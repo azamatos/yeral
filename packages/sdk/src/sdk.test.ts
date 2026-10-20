@@ -93,6 +93,30 @@ describe('sdk', () => {
     ])
   })
 
+  it('a send refused for being phone-only refreshes that business page, so it shows the card (book Q-154)', async () => {
+    const f = fixture(() => json(409, { error: { code: 'online_blocked' } }))
+    const spy = vi.spyOn(f.queryClient, 'invalidateQueries')
+    const m = f.sdk.bookings.create('tk')
+    const body = { type: 'appointment' as const, business: 'glow-studio', serviceIds: ['x'], staffId: null, date: '2026-10-15', start: 870 }
+    const err = await m.mutationFn!(body, {} as never).catch((e: unknown) => e)
+    await m.onError!(err as ApiError, body, undefined, {} as never)
+    expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toEqual([['business', 'glow-studio']])
+  })
+
+  it('signing in or out, or another phone, refreshes the business pages (book Q-154)', async () => {
+    const me = { id: 'u', name: null, phone: '+99365000001' }
+    const f = fixture(() => json(200, { me, isNew: false }))
+    const spy = vi.spyOn(f.queryClient, 'invalidateQueries')
+    await f.sdk.auth.verify().onSuccess!({ me, isNew: false } as never, {} as never, undefined, {} as never)
+    expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toContainEqual(['business'])
+    spy.mockClear()
+    f.sdk.auth.logout().onSuccess!(undefined, undefined, undefined, {} as never)
+    expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toContainEqual(['business'])
+    spy.mockClear()
+    await f.sdk.me.phoneVerify().onSuccess!(me as never, {} as never, undefined, {} as never)
+    expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toEqual([['business'], ['bookings']])
+  })
+
   it('taking an offered time caches the new booking under its own code', async () => {
     const detail = { code: 'YR-48214', business: { slug: 'glow-studio' }, status: 'confirmed' }
     const f = fixture(() => json(200, detail))

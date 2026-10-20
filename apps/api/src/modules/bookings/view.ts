@@ -9,7 +9,7 @@ import type { Deps } from '../../deps'
 import { loadBusinesses } from '../availability/context'
 import { cityRef } from '../catalog/cities'
 import { geoOf, photoOf, text } from '../catalog/map'
-import { onlineRefusal } from './create'
+import { bookOnlineFor } from '../clients/online'
 import { bookingRecipient } from './links'
 import { offeredTimes } from './offers'
 import { noShowMarkedAtOf, refusalCounts, restoreStateOf, stateOf, type BookingRow } from './repo'
@@ -113,7 +113,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   // a paused business or a phone-only client: no free-time chips, no move, the call card instead (book Q-154)
   // checked for the phone its SMS go to, as the texts are (an account's phone now, after a change too)
   const recipient = await bookingRecipient(db, row)
-  const bookOnline = recipient ? !(await onlineRefusal(db, lb, recipient)) : lb.rules.onlineEnabled
+  const bookOnline = await bookOnlineFor(db, lb, recipient)
 
   const timeline: BookingDetail['timeline'] = [{ event: 'sent', at: row.createdAt.getTime() }]
   if (row.confirmedAt) timeline.push({ event: 'confirmed', at: row.confirmedAt.getTime() })

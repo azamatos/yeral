@@ -464,7 +464,7 @@ flowchart TD
 
 **Design to fix:** the booking detail and the link page for a phone-only client or a paused business: no "Başga wagta geçir", no free-time chips, the "Jaň et" card instead (Q-154).
 
-- The business page tells a signed-in client whether they may book there online (`bookOnline`, false for a phone-only client and while the business is paused), so the page and the booking flow show the card before anything is sent; signed out it follows the business's switch. Sending is still refused with `online_blocked`, whose message the card's calmer words replace on screen (code: `catalog/detail.ts`).
+- The business page tells a signed-in client whether they may book there online (`bookOnline`, false for a phone-only client and while the business is paused), so the page and the booking flow show the card before anything is sent; signed out it follows the business's switch. Sending is still refused with `online_blocked`, whose message now says what the card says, "Bu biznese telefon arkaly ýazylyp bilersiňiz.", and the page then shows the card (code: `catalog/detail.ts`, `clients/online.ts`).
 
 **Status:** Design: drawn (Venue · `restricted`; Booking · `restricted`; Mobile 16) · Code: built (api) — `bookOnline` on the business page, the booking detail and the link page; the refusal at sending.
 

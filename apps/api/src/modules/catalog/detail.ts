@@ -15,7 +15,7 @@ import { appointmentContext, loadBusinesses, loadBusy, type BusinessRow } from '
 import { buildCards } from './cards'
 import { cityRefOf, loadCities } from './cities'
 import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
-import { onlineRefusal } from '../bookings/create'
+import { bookOnlineFor } from '../clients/online'
 
 const SPECIAL_DAYS_AHEAD = 14
 
@@ -76,8 +76,9 @@ export async function businessDetail(
   const lb = (await loadBusinesses(db, [row.id])).get(row.id)
   if (!lb) throw new ApiError('not_found')
   const b = lb.business
-  // one more read, started while the rest are made
-  const typical = typicalAnswerOf(db, b, lb.rules.confirmMode === 'instant', now)
+  // two more reads, started while the rest are made; caught here so a failure can't go unhandled before it's awaited
+  const extra = Promise.all([typicalAnswerOf(db, b, lb.rules.confirmMode === 'instant', now), bookOnlineFor(db, lb, viewerPhone)])
+  extra.catch(() => undefined)
   const [[category], cities] = await Promise.all([db.select().from(categories).where(eq(categories.id, b.categoryId)), loadCities(db)])
   const groups = await db.select().from(serviceGroups).where(eq(serviceGroups.businessId, b.id)).orderBy(asc(serviceGroups.sort))
   const online = lb.services.filter((s) => s.online)
@@ -122,6 +123,8 @@ export async function businessDetail(
     )
   ).map((x) => x.card)
 
+  const [typicalMinutes, bookOnline] = await extra
+
   return {
     slug: b.slug,
     name: b.name,
@@ -150,12 +153,12 @@ export async function businessDetail(
       note: lb.rulesNote ? text(lb.rulesNote, lang) : null,
     },
     onlineEnabled: lb.rules.onlineEnabled,
-    bookOnline: viewerPhone ? !(await onlineRefusal(db, lb, viewerPhone)) : lb.rules.onlineEnabled,
+    bookOnline,
     confirmMode: lb.rules.confirmMode,
     holdMinutes: lb.rules.holdMinutes,
     leadMinutes: lb.rules.leadMinutes,
     windowDays: lb.rules.windowDays,
-    typicalConfirmMinutes: await typical,
+    typicalConfirmMinutes: typicalMinutes,
     priceFrom: type === 'table' ? null : priceFromOf(lb.services),
     avgBill: b.avgBill,
     nextFree,

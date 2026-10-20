@@ -263,19 +263,47 @@ describe('catalogue', () => {
     const phone = '+99365777020'
     const look = async (who: ReturnType<typeof browser>) => (await who.req('/v1/businesses/glow-studio')).json.bookOnline
     expect(await look(browser(t.app))).toBe(true)
+    // the answer is for whoever looks: no shared cache keeps it
+    const headers = (await browser(t.app).req('/v1/businesses/glow-studio')).headers
+    expect(headers.get('cache-control')).toBe('private')
+    expect(headers.get('vary')).toMatch(/Cookie, Authorization/)
     const client = browser(t.app)
     await client.login(phone, 'Maral')
     expect(await look(client)).toBe(true)
     const [record] = await db.insert(clients).values({ businessId: glow!.id, phone, name: 'Maral', onlineBlocked: true }).returning()
+    const [rules] = await db.select().from(bookingRules).where(eq(bookingRules.businessId, glow!.id))
+    const other = browser(t.app)
+    await other.login('+99365777021', 'Selbi')
     try {
       expect(await look(client)).toBe(false)
       // everyone else still books online
-      expect(await look(browser(t.app))).toBe(true)
-      // a paused business: nobody books online
+      expect(await look(other)).toBe(true)
+      // phone-only by the no-show count, not by hand
+      await db.update(clients).set({ onlineBlocked: false }).where(eq(clients.id, record!.id))
+      await db.update(bookingRules).set({ blockAfterNoShows: 1 }).where(eq(bookingRules.businessId, glow!.id))
+      await db.insert(bookings).values({
+        code: 'YR-997020',
+        businessId: glow!.id,
+        type: 'appointment',
+        date: '2026-10-10',
+        start: 600,
+        end: 660,
+        status: 'noshow',
+        source: 'web',
+        clientId: record!.id,
+        completedAt: new Date(DEMO_NOW - 4 * 86_400_000),
+      })
+      expect(await look(client)).toBe(false)
+      // a paused business: nobody books online, signed in or not
       await db.update(bookingRules).set({ onlineEnabled: false }).where(eq(bookingRules.businessId, glow!.id))
       expect(await look(browser(t.app))).toBe(false)
+      expect(await look(other)).toBe(false)
     } finally {
-      await db.update(bookingRules).set({ onlineEnabled: true }).where(eq(bookingRules.businessId, glow!.id))
+      await db
+        .update(bookingRules)
+        .set({ onlineEnabled: true, blockAfterNoShows: rules!.blockAfterNoShows })
+        .where(eq(bookingRules.businessId, glow!.id))
+      await db.delete(bookings).where(eq(bookings.code, 'YR-997020'))
       await db.delete(clients).where(eq(clients.id, record!.id))
     }
   })

@@ -18,7 +18,8 @@ import { confirmBooking } from '../bookings/confirm'
 import { pruneIdentityChecks } from '../auth/identity'
 import { newBookingLink, pruneBookingLinks } from '../bookings/links'
 import { hideLinkTokens } from '../../ports/sms'
-import { bookedServices, onlineRefusal } from '../bookings/create'
+import { bookedServices } from '../bookings/create'
+import { onlineRefusal } from '../clients/online'
 import { recordMoveRefused, setStatus, StaleBooking, type BookingRow } from '../bookings/repo'
 
 const BATCH = 100

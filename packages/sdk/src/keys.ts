@@ -18,6 +18,8 @@ export const keys = {
   places: (q: string, lang: Locale, city: string | null) => ['places', q, lang, city] as const,
   business: (slug: string, lang: Locale, position: { lat: number; lng: number } | null) => ['business', slug, lang, position] as const,
   businessAll: (slug: string) => ['business', slug] as const,
+  /** Every business page (each says whether the viewer may book there online). */
+  businesses: () => ['business'] as const,
   reviews: (slug: string, lang: Locale) => ['reviews', slug, lang] as const,
   reviewsAll: (slug: string) => ['reviews', slug] as const,
   availability: (slug: string, kind: 'appointment' | 'specialists' | 'tables' | 'sessions', params: Record<string, unknown>) =>

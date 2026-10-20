@@ -173,7 +173,11 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
     const { slug } = c.req.valid('param')
     const { lang, lat, lng } = c.req.valid('query')
     const position = lat !== undefined && lng !== undefined ? { lat, lng } : null
-    return c.json(await businessDetail(c.var.deps, slug, lang, position, c.var.auth?.user.phone ?? null), 200)
+    const detail = await businessDetail(c.var.deps, slug, lang, position, c.var.auth?.user.phone ?? null)
+    // `bookOnline` is for whoever is looking (book Q-154): no shared cache may keep one person's answer for another
+    c.header('Cache-Control', 'private')
+    c.header('Vary', 'Cookie, Authorization')
+    return c.json(detail, 200)
   })
   .openapi(reviewsRoute, async (c) => {
     const { slug } = c.req.valid('param')
