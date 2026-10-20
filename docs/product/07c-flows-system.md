@@ -289,7 +289,7 @@ flowchart TD
 **Edge cases**
 
 - The business can't delete reviews (business spec §15).
-- At launch the Ýeral team works in a small admin tool that verifies businesses and handles reported reviews (Q-010, decided 18.10.2026). **Design to fix:** the tool isn't drawn yet, and until it exists nobody can clear or remove a review.
+- At launch the Ýeral team works in a small admin tool that verifies businesses and handles reported reviews (Q-010, decided 18.10.2026). **Design to fix:** the tool isn't drawn; it's built on the business app's patterns (Q-010, revised 20.10.2026), and until it exists nobody can clear or remove a review.
 - Ýeral decides within 48 hours. If it doesn't, the review counts again. A cleared review can't be reported again, so a business can't keep bad reviews out of its average (Q-261, decided 18.10.2026).
 
 > Open question Q-261: How long a reported review may stay uncounted.
@@ -733,7 +733,7 @@ flowchart TD
 
 > Open question Q-276: What the Ýeral team checks before verifying.
 
-- **Design to fix:** the admin tool isn't drawn yet, and without it no business can become public (Q-010).
+- **Design to fix:** the admin tool isn't drawn; it's built on the business app's patterns (Q-010, revised 20.10.2026), and without it no business can become public.
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.
 

@@ -65,7 +65,7 @@ Verifying businesses, handling reported reviews, managing categories, writing he
 - B · Design the full CMS before launch.
 - C · No verification at launch: every new business is public at once.
 
-answer: A · Design a small admin tool for launch: verify businesses and handle reported reviews. Categories, help articles and support chat come later. (18.10.2026)
+answer: A · Design a small admin tool for launch: verify businesses and handle reported reviews. Categories, help articles and support chat come later. (18.10.2026) Owner, 20.10.2026: the tool isn't drawn on its own; it's built on the business app's patterns, with a small design prompt only for a critical detail (ADR 0021, amended).
 
 ## Q-011 · Roles inside the Ýeral team
 chapter: 03 · status: decided
@@ -457,7 +457,7 @@ Future design pages are drawn in English (Q-101, 18.10.2026). Design v0.5 has ev
 - A · Redraw every board in English in the design pass that follows the book; Turkmen comes back as a translation. (recommended)
 - B · Only new and changed boards in English; unchanged boards stay Turkmen.
 
-answer: A · Redraw every board in English in the design pass that follows the book; Turkmen comes back as a translation. Owner: the English MVP comes first; it is also a portfolio piece, and translating services, prices and maps is easy once English exists. (18.10.2026)
+answer: A · Redraw every board in English in the design pass that follows the book; Turkmen comes back as a translation. Owner: the English MVP comes first; it is also a portfolio piece, and translating services, prices and maps is easy once English exists. (18.10.2026) Owner, 20.10.2026: the redraw stops after the business app (export v0.6, rounds 1–3.4); the client site is built in English from the v0.5 boards and the book, and Claude Design draws only critical details with no drawn pattern (ADR 0021, amended).
 
 ## Q-134 · Money figures in the business app
 chapter: 02 · status: decided

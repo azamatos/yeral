@@ -34,11 +34,9 @@ flowchart LR
   O --> U["Claude updates chapters and decisions"]
   U --> C{"Chapter has open questions?"}
   C -->|"Yes"| Q
-  C -->|"No"| D["Design prompt for Claude Design"]
-  D --> P["Owner pastes it, Claude Design draws"]
-  P --> V["Claude checks the canvas against the book"]
-  V -->|"Mismatch"| D
-  V -->|"Matches"| S["Components in Storybook, then code"]
+  C -->|"No"| S["Components in Storybook, then the apps"]
+  S --> R["Owner reviews the built screens"]
+  S -.->|"a critical detail with no drawn pattern"| D["One small Claude Design prompt"]
 ```
 
 1. **Drafting.** Claude writes a chapter from what exists (design exports, specs, ADRs, code) and turns every gap,
@@ -46,10 +44,15 @@ flowchart LR
 2. **Answering.** The owner answers on the page (pick an option, add a note) and comments on any section.
 3. **Recording.** Claude reads the answers, writes them into the chapters, marks the question `decided` in
    `questions.md` and logs it in chapter 9.
-4. **Designing.** For closed chapters Claude writes the prompt for Claude Design; the owner pastes and submits it.
-   Claude reads the result straight from the "Ýeral Web" canvas and checks it against the book. Mismatches become the
-   next prompt.
-5. **Building.** Components in Storybook, then code, only from closed chapters.
+4. **Building.** Components in Storybook, then the apps, from closed chapters: the book for behaviour and words, the
+   drawn boards (export v0.6 for the design system and the business app, v0.5 for the client site) and the nearest
+   drawn pattern for visuals. The owner reviews the built screens in Storybook and the local app.
+5. **Designing, only where needed** (ADR 0021, amended 20.10.2026). The English redraw stopped after the business app.
+   For a critical detail with no drawn pattern Claude writes one small prompt for Claude Design, the owner pastes it,
+   and Claude checks the result on the "Ýeral Web" canvas.
+
+**Design to fix** lines across the chapters name places where a drawn board goes against the book. Since 20.10.2026
+no redraw comes for them: build what the book says, not what the board shows.
 
 ## Writing rules for this folder
 

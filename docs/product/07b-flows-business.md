@@ -458,7 +458,7 @@ flowchart TD
 - Rejected verification (the data model's "rejected" status with a reason, §10): the workspace shows a banner with the reason and a way to fix and send again; visitors keep seeing "Bu sahypa entek açylmady" (Q-274, decided 18.10.2026).
 - The Ýeral team verifies businesses in a small admin tool designed for launch (Q-010, decided 18.10.2026).
 
-**Design to fix:** the rejected-business banner with the reason and a way to fix and send again (Q-274); the launch admin tool for the Ýeral team (Q-010).
+**Design to fix:** the rejected-business banner with the reason and a way to fix and send again (Q-274); the launch admin tool for the Ýeral team, built on the business app's patterns (Q-010, revised 20.10.2026).
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.
 

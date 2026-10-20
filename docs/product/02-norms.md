@@ -42,9 +42,10 @@ question.
 
 ### Who writes which text
 
-- **English is the source text** from 18.10.2026, the design included: every board is redrawn in English in the
-  design pass that follows the book, and Turkmen comes back as a translation. Design v0.5 is Turkmen; it showed how
-  Turkmen looks with the font and stays the reference for the Turkmen translation. (Q-101; Q-133, decided 18.10.2026)
+- **English is the source text** from 18.10.2026, the design included: the design system and the business app are
+  drawn in English (export v0.6); the client site is built in English from its v0.5 boards and this book, without
+  a redraw (Q-133, revised 20.10.2026), and Turkmen comes back as a translation. Design v0.5 is Turkmen; it showed how
+  Turkmen looks with the font and stays the reference for the Turkmen translation. (Q-101; Q-133, decided 18.10.2026, revised 20.10.2026)
 - **Claude writes the translations** into each market's languages; the owner checks all of them before the market
   launches. (Q-101, decided 18.10.2026)
 - Russian runs about 30% longer: buttons fit their text and never have a fixed width; labels wrap to two lines before

@@ -18,14 +18,18 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 2. `docs/memory-bank/systemPatterns.md` before writing code: monorepo map, FSD, data flow, state, rendering, auth, i18n.
 3. As the task needs: `productContext.md` (product rules, glossary), `techContext.md` (libraries, why, where shared
    helpers live), `operations.md` (environments, Docker, CI/CD, versioning, parallel work), `docs/decisions/` (ADRs).
-4. **Design source: `docs/design/`** — design export v0.5 (17.10.2026; `CHANGELOG.md` says what each export changed):
-   `README.md` (client spec), `business/README.md` (business workspace spec, rounds 4–6), `ROUND6-ANSWERS.md`,
+4. **Design source: `docs/design/`** — design export v0.6 (20.10.2026; `CHANGELOG.md` says what each export changed):
+   the design system and the business app in English (rounds 1–3.4); the client site's boards are still v0.5 in
+   Turkmen, and the redraw stopped there (ADR 0021 amended 2026-10-20: build from the book and the drawn patterns;
+   Claude Design only for critical undrawn details). `README.md` (client spec), `business/README.md` (business
+   workspace spec; §27–28 win over older sections), `copy/` (English wording logs), `ROUND6-ANSWERS.md`,
    `CLAUDE.md` (design rules, how to read `.dc.html`), `tokens.css`, `screens/` (client, business and design-system
    boards + index), `COMPONENTS.md` (every component → package or FSD slice, Storybook title; look a screen's pieces up
    here before building it), `demo-data.json`. **The product book wins on behaviour** (ADR 0021); then the screen wins
    on visuals, the design README on behaviour the book doesn't cover, the DS boards where screens drifted.
    Where `docs/design/CLAUDE.md` suggests a stack (Next.js, CSS Modules, next-intl), this repo's ADRs win: TanStack,
-   Tailwind mapped from `tokens.css`, use-intl. The client site and the business workspace are designed; the CMS isn't.
+   Tailwind mapped from `tokens.css`, use-intl. The client site and the business workspace are designed; the CMS isn't
+   (build it on the business app's patterns).
 
 ## Rules
 

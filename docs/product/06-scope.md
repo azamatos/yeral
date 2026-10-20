@@ -44,10 +44,11 @@ works end to end.
 
 ## Found while listing: design to fix
 
-These are drawn but go against a decision; they go into the next prompt for Claude Design once this chapter is closed.
+These are drawn but go against a decision. Since 20.10.2026 no redraw comes (Q-133, revised): the build follows the
+book here, not the board.
 
-- Every board is drawn in Turkmen; every board is redrawn in English in the next design pass (Q-101, Q-133,
-  ADR 0022).
+- The client boards are drawn in Turkmen; the client site is built in English from them and this book (Q-101, Q-133,
+  ADR 0022); the design system and the business app are drawn in English (export v0.6).
 - Restaurant cards and the table flow show *Ortaça hasap* `≈ 150 TMT`; the average bill is dropped (Q-103).
 - The business spec draws workspace links with `/tk/`; they carry no language (Q-100).
 - Hours stop at 24:00; a business may be open past midnight (Q-105, F-109).
@@ -104,7 +105,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 |---|---|---|---|---|---|---|
 | F-001 | Home page | Hero "Ýeriňi al." with the search card (what / where / when), category photo mosaic, how it works in 3 steps, Ýeral Biznes block and footer. | MVP | drawn (Home, Mobile 1) | not built (data: api built) | M3 first screen after the shells. |
 | F-002 | "Free today near you" cards | Four nearest businesses with their next 3 free times; a time chip opens booking with it preselected. | MVP | drawn (Home) | api built (`/v1/search`, day free times) | Needs F-009 (geolocation). |
-| F-003 | Category grid | The launch categories that take appointments as icon tiles linking to category pages: 11 of the 13 seeded; Restaurant and Café & tea house come with tables (Q-030). | MVP | drawn (Home); to redraw in round 4a.1 | api built (`/v1/categories`, 13 seeded) | Category list is seed data until the CMS catalogue (F-181). **Code differs:** the api lists all 13 categories and finds the seed's table and class examples (Bag kafe, Ojak, Aýdyň ýoga); the first launch shows appointments only (P2 step 6). |
+| F-003 | Category grid | The launch categories that take appointments as icon tiles linking to category pages: 11 of the 13 seeded; Restaurant and Café & tea house come with tables (Q-030). | MVP | drawn (Home, v0.5); built with the 11 tiles | api built (`/v1/categories`, 13 seeded) | Category list is seed data until the CMS catalogue (F-181). **Code differs:** the api lists all 13 categories and finds the seed's table and class examples (Bag kafe, Ojak, Aýdyň ýoga); the first launch shows appointments only (P2 step 6). |
 | F-004 | App download block on Home | "Ýeral telefonyňyzda" with App Store / Google Play buttons. | Later | drawn (Home) | not built | **Conflict:** native apps are later (owner); round 6 removed the business app banner but this client block stayed. Store badges come with the native apps. |
 | F-005 | Unknown-location prompt | Banner "Ýakynyňyzdaky ýerleri görkezeliň" (use my location / type an address) above a "popular places" list. | MVP | drawn (Home, States 2) | api built (popularity sort) |  |
 | F-006 | Search results page | List of businesses with type-specific rows (slots, "Stol · 2 adam", seats left) next to a map; "Ýene görkez" loads 12 more. | MVP | drawn (Search) | api built (`/v1/search`, cursor paging) | Big. Map needs F-014. |
