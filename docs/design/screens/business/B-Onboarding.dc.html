@@ -229,8 +229,20 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 .badge{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
 .badge svg{flex:none}
 .st-c{background:#efecfe;border:1px solid #d5cbfb;color:#4429d6}
+.fcr{display:flex;justify-content:space-between;align-items:flex-start;gap:4px 12px;flex-wrap:wrap}
+.ccount{margin-left:auto;font-size:13px;line-height:18px;color:#5a5a64;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ccount.over{color:#a3251b;font-weight:600}
+.catnone{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:20px;border:1px solid #e6e6ea;border-radius:12px}
+.obc{position:fixed;top:0;right:0;bottom:0;left:0;z-index:30}
+.obm{position:absolute;left:0;top:calc(100% + 6px);z-index:31;width:280px;display:flex;flex-direction:column;padding:6px;background:#ffffff;border:1px solid #e6e6ea;border-radius:12px;box-shadow:0 8px 24px rgba(16,16,20,.16)}
+.obm a{display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 10px;border-radius:8px;color:#101014;text-decoration:none}
+.obm a:hover{background:#f4f4f6;color:#101014}
+.obm a:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #7a5ff4}
+.obm svg{flex:none;color:#5a5a64}
+.obmt{display:flex;flex-direction:column;min-width:0}
+.obmn{font-size:14px;line-height:20px;font-weight:600}
 .csee{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;line-height:18px;color:#5a5a64}
-@media (max-width:767px){.otp{gap:10px}.cbx{width:52px;height:52px;font-size:22px}.inp{font-size:16px}.tsub .cap{flex-basis:100%}}
+@media (max-width:767px){.obm{position:fixed;top:auto;left:0;right:0;bottom:0;width:auto;border-radius:16px 16px 0 0;z-index:45;padding:8px 8px 16px}.obc{background:rgba(16,16,20,.4);z-index:44}.otp{gap:10px}.cbx{width:52px;height:52px;font-size:22px}.inp{font-size:16px}.tsub .cap{flex-basis:100%}}
 </style>
 </helmet>
 <div class="ob" style="min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
@@ -389,8 +401,9 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 
 <div class="fld">
 <label for="ob-biz">Business name</label>
-<input id="ob-biz" class="inp" placeholder="For example: Glow Studio" value="{{biz}}" onChange="{{onBiz}}">
-<span class="hint">Your page: <span class="mono" style="font-size: 13px; color: #101014">{{slugUrl}}</span></span>
+<input id="ob-biz" class="{{bizCls}}" placeholder="For example: Glow Studio" value="{{biz}}" aria-invalid="{{bizLong}}" aria-describedby="ob-biz-c" onChange="{{onBiz}}">
+<sc-if value="{{bizLong}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too long: up to 80 characters.</span></span></sc-if>
+<div class="fcr"><span class="hint">Your page: <span class="mono" style="font-size: 13px; color: #101014">{{slugUrl}}</span></span><span id="ob-biz-c" class="{{bizCntCls}}">{{bizCount}}</span></div>
 </div>
 
 <div class="fld">
@@ -402,21 +415,18 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
 <input class="inp" type="search" aria-label="Search categories" placeholder="Search, for example: nails, dentist, tutor" value="{{catQ}}" onChange="{{onCatQ}}">
 </div>
+<sc-if value="{{catHas}}" hint-placeholder-val="{{true}}">
 <div class="catbox" role="radiogroup" aria-labelledby="ob-cat-l">
-<sc-for list="{{catGroups}}" as="g" hint-placeholder-count="3">
-<div role="group" aria-label="{{g.name}}" style="display: flex; flex-direction: column">
-<span class="lbl cg">{{g.name}}</span>
-<sc-for list="{{g.items}}" as="c" hint-placeholder-count="4"><button class="{{c.cls}}" role="radio" aria-checked="{{c.on}}" onClick="{{c.pick}}"><span class="rad" aria-hidden="true"></span><span style="flex: 1; min-width: 0">{{c.t}}</span></button></sc-for>
-</div>
-</sc-for>
-<sc-if value="{{catEmpty}}" hint-placeholder-val="{{false}}">
-<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 20px 12px">
-<span style="font-size: 15px; line-height: 22px; font-weight: 600">No category found</span>
-<span class="cap">Try another word, or pick “Something else” and add your services yourself.</span>
-<button class="lnk" onClick="{{pickOther}}">Pick “Something else — I’ll add my services”</button>
+<sc-for list="{{catItems}}" as="c" hint-placeholder-count="11"><button class="{{c.cls}}" role="radio" aria-checked="{{c.on}}" onClick="{{c.pick}}"><span class="rad" aria-hidden="true"></span><span style="flex: 1; min-width: 0">{{c.t}}</span></button></sc-for>
 </div>
 </sc-if>
+<sc-if value="{{catEmpty}}" hint-placeholder-val="{{false}}">
+<div class="catnone" role="status">
+<span style="font-size: 15px; line-height: 22px; font-weight: 600">No category fits? Contact Ýeral.</span>
+<span class="cap">Nothing matches “{{catQ}}”. Try another word, or tell us what you do.</span>
+<span style="position: relative"><button class="b b-sec b-sm" type="button" aria-haspopup="menu" aria-expanded="{{cmenu}}" onClick="{{toggleCmenu}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg>Contact Ýeral</button><sc-if value="{{cmenu}}" hint-placeholder-val="{{false}}"><div class="obc" onClick="{{closeCmenu}}"></div><div class="obm" role="menu" aria-label="Contact Ýeral" onKeyDown="{{cmenuKey}}"><a role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span class="obmt"><span class="obmn">Call</span><span class="cap">[SUPPORT PHONE]</span></span></a><a role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg><span class="obmt"><span class="obmn">Write on Telegram</span><span class="cap">[TELEGRAM]</span></span></a></div></sc-if></span>
 </div>
+</sc-if>
 </div>
 </section>
 </sc-if>
@@ -438,8 +448,9 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <label for="ob-addr">Address</label>
 <div class="srch">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-<input id="ob-addr" class="inp" placeholder="Street and building number" autocomplete="off" aria-autocomplete="list" aria-controls="ob-sug" value="{{addrQ}}" onChange="{{onAddr}}">
+<input id="ob-addr" class="{{addrCls}}" placeholder="Street and building number" autocomplete="off" aria-autocomplete="list" aria-controls="ob-sug" aria-invalid="{{addrLong}}" aria-describedby="ob-addr-c" value="{{addrQ}}" onChange="{{onAddr}}">
 </div>
+<div class="fcr"><sc-if value="{{addrLong}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too long: up to 120 characters.</span></span></sc-if><span id="ob-addr-c" class="{{addrCntCls}}">{{addrCount}}</span></div>
 <sc-if value="{{showSug}}" hint-placeholder-val="{{false}}">
 <div id="ob-sug" class="sugl" role="listbox" aria-label="Address suggestions">
 <sc-for list="{{sugs}}" as="g" hint-placeholder-count="3"><button class="sgi" role="option" aria-selected="false" onClick="{{g.pick}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 15px; line-height: 20px; font-weight: 500">{{g.t}}</span><span class="cap">{{g.sub}}</span></span></button></sc-for>
@@ -493,7 +504,8 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 </div>
 <div class="fld">
 <label for="ob-ent">Where is the entrance?</label>
-<input id="ob-ent" class="inp" placeholder="For example: through the courtyard, green door" value="{{entrance}}" onChange="{{onEntrance}}">
+<input id="ob-ent" class="{{entCls}}" placeholder="For example: through the courtyard, green door" value="{{entrance}}" aria-invalid="{{entLong}}" aria-describedby="ob-ent-c" onChange="{{onEntrance}}">
+<div class="fcr"><sc-if value="{{entLong}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too long: up to 200 characters.</span></span></sc-if><span id="ob-ent-c" class="{{entCntCls}}">{{entCount}}</span></div>
 </div>
 </div>
 <span class="hint" style="margin-top: -20px">This note helps clients find their way.</span>
@@ -542,7 +554,7 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 </div>
 </sc-for>
 </div>
-<p class="cap" style="margin: 0">A day can close after midnight: 18:00–02:00 means open until 02:00 the next day. The part after midnight must end before the next day opens. You can add special days (holidays, time off) later in Settings.</p>
+<p class="cap" style="margin: 0">A day can close after midnight: 18:00–02:00 means open until 02:00 the next day. The part after midnight must end before the next day opens. You can add special days (holidays, closures) later in Settings.</p>
 </section>
 </sc-if>
 
@@ -627,13 +639,13 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 </sc-for>
 </div>
 <button class="addrow" onClick="{{addStaff}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Add a team member</button>
-<p class="cap" style="margin: 0">A phone number is required for everyone — it’s how they sign in. Invites work for 7 days; each person sees theirs when they sign in with the invited number.</p>
+<p class="cap" style="margin: 0">Phone number: required for everyone. With the app on, it’s how they sign in. Invites work for 7 days; each person sees theirs when they sign in with the invited number.</p>
 <dl class="rl">
 <dt>Specialist</dt><dd>Sees their own calendar, bookings and clients; answers their own requests.</dd>
 <dt>Admin</dt><dd>Manages the whole calendar and all clients; doesn’t see revenue.</dd>
 <dt>Uses the app: off</dt><dd>The specialist is bookable at once but never signs in. You and admins handle their requests.</dd>
 </dl>
-<p class="cap" style="margin: 0">Access levels are fixed at the first release. See what each one can do in Settings → Permissions.</p>
+<p class="cap" style="margin: 0">See what each access level can do in Settings → Permissions.</p>
 </div>
 </sc-if>
 <sc-if value="{{soloOn}}" hint-placeholder-val="{{false}}">
@@ -668,7 +680,7 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 <div style="display: flex; flex-direction: column">
 <sc-if value="{{manOn}}" hint-placeholder-val="{{true}}">
 <div class="srow">
-<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><label for="ob-hold" class="swt">Hold requests for</label><span class="cap">If no one answers in this time, the request is cancelled and the client is offered other times. The time counts only while you’re open.</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><label for="ob-hold" class="swt">Hold requests for</label><span class="cap">If no one answers in this time, the request is cancelled and the client is offered other times. The time counts only while you’re open. The hold never runs past the visit’s start.</span></div>
 <span class="selw"><select id="ob-hold" class="inp sel" style="width: 100%" value="{{hold}}" onChange="{{setHold}}"><option value="15">15 min</option><option value="30">30 min</option><option value="60">60 min</option><option value="120">2 h</option><option value="360">6 h</option><option value="1440">24 h</option></select><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
 </div>
 <sc-if value="{{showWho}}" hint-placeholder-val="{{true}}">
@@ -736,8 +748,9 @@ label.b:focus-within{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4
 </div>
 <span class="cap">Print it and put it by the till: after the review clients scan it with their phone and book straight away.</span>
 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
-<button class="b b-sec b-sm" onClick="{{dlQr}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Download QR</button>
-<sc-if value="{{qrDone}}" hint-placeholder-val="{{false}}"><span class="cap" role="status">QR code downloaded (PNG)</span></sc-if>
+<button class="b b-sec b-sm" onClick="{{dlPng}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Download PNG</button>
+<button class="b b-sec b-sm" onClick="{{dlSvg}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Download SVG</button>
+<sc-if value="{{qrDone}}" hint-placeholder-val="{{false}}"><span class="cap" role="status">{{qrText}}</span></sc-if>
 </div>
 </div>
 </div>
@@ -806,6 +819,36 @@ class Component extends DCLogic {
 
   ORDER() { return ['phone', 'business', 'address', 'hours', 'services', 'team', 'rules', 'done']; }
 
+  // the launch categories that take appointments (a flat list) + search words; restaurants and cafés come later
+  CATS() {
+    return [
+      ['Beauty', 'beauty salon hair brows lashes make-up makeup'], ['Barbershop', 'barber men beard haircut'], ['Nails', 'nail manicure pedicure'],
+      ['Spa & massage', 'spa massage wellness'], ['Dentist', 'dental teeth dentistry'], ['Health', 'doctor clinic medical physiotherapy psychologist'],
+      ['Fitness', 'gym personal trainer training yoga stretching sport'], ['Lessons', 'tutor teacher language music lesson course'],
+      ['Auto', 'car wash tyre tire service repair'], ['Pets', 'pet dog cat grooming groomer vet'], ['Home services', 'cleaning repair home plumber electrician']
+    ];
+  }
+
+  // starter services per category (name · minutes · TMT · "from"); Glow Studio = Beauty (demo-data.json → businesses[0], s1–s11)
+  starter(cat) {
+    const L = {
+      'Beauty': [['Hair', 'Women’s haircut', 60, '80'], ['Hair', 'Hair styling', 45, '60'], ['Hair', 'Hair colouring', 120, '250', 1], ['Hair', 'Children’s haircut', 30, '40'],
+        ['Nails', 'Manicure', 60, '70'], ['Nails', 'Gel manicure', 90, '110'], ['Nails', 'Pedicure', 75, '90'],
+        ['Face', 'Facial cleansing', 60, '150'], ['Face', 'Brows and lashes', 30, '50'], ['Massage', 'Back massage', 30, '90'], ['Massage', 'Full body massage', 60, '160']],
+      'Barbershop': [['Haircuts', 'Men’s haircut', 45, '60'], ['Haircuts', 'Children’s haircut', 30, '40'], ['Beard', 'Beard trim', 30, '40'], ['Beard', 'Haircut and beard', 60, '90']],
+      'Nails': [['Hands', 'Manicure', 60, '70'], ['Hands', 'Gel manicure', 90, '110'], ['Feet', 'Pedicure', 75, '90'], ['Feet', 'Gel pedicure', 90, '120']],
+      'Spa & massage': [['Massage', 'Back massage', 30, '90'], ['Massage', 'Full body massage', 60, '160'], ['Spa', 'Facial cleansing', 60, '150'], ['Spa', 'Spa ritual', 90, '250']],
+      'Dentist': [['Visits', 'Check-up', 30, '100'], ['Visits', 'Teeth cleaning', 60, '250'], ['Treatment', 'Filling', 60, '300', 1], ['Treatment', 'Whitening', 90, '600']],
+      'Health': [['Appointments', 'Doctor’s appointment', 30, '150'], ['Appointments', 'Physiotherapy session', 45, '200'], ['Appointments', 'Psychologist session', 60, '250']],
+      'Fitness': [['Training', 'Personal training', 60, '150'], ['Training', 'Trial session', 30, '50'], ['Training', 'Stretching session', 60, '120']],
+      'Lessons': [['Lessons', 'Lesson', 60, '100'], ['Lessons', 'Trial lesson', 30, '50'], ['Lessons', 'Exam preparation', 90, '150']],
+      'Auto': [['Wash', 'Car wash', 30, '60'], ['Wash', 'Interior cleaning', 60, '120'], ['Service', 'Tyre change', 45, '150'], ['Service', 'Oil change', 30, '100', 1]],
+      'Pets': [['Grooming', 'Dog grooming', 90, '200', 1], ['Grooming', 'Cat grooming', 60, '180'], ['Grooming', 'Bath and dry', 45, '120'], ['Grooming', 'Nail trim', 15, '40']],
+      'Home services': [['Home', 'Cleaning', 120, '300', 1], ['Home', 'Repair visit', 60, '150', 1], ['Home', 'Appliance installation', 60, '200']]
+    }[cat] || [];
+    return L.map((r, i) => ({ id: 's' + (i + 1), g: r[0], name: r[1], min: r[2], price: r[3], from: !!r[4], on: true }));
+  }
+
   // A fresh flow for the current tweaks. Steps before the `step` tweak count as filled in.
   // URLs: business.yeral.app/setup/{step} with the same step names.
   init(P) {
@@ -821,7 +864,6 @@ class Component extends DCLogic {
     const fresh = fs && p0 <= 1;
     const picked = p0 > 2 || home;
     const day = (n, sh, from, to) => ({ n, sh, open: true, from, to, brk: null });
-    const sv = (id, g, name, min, price, from) => ({ id, g, name, min, price, from: !!from, on: true });
     const s = {
       cur: p0, reached: p0,
       // 1 · sign in (SignInCodeStep) + name; the owner = Maýsa (business-demo.json → me)
@@ -829,7 +871,7 @@ class Component extends DCLogic {
       code: ['', '', '', ''], codeErr: false, wrong: 0, lock: 0, lockOver: false, checking: false, left: 0, resent: false, codeIdx: 0,
       first: verified ? 'Maýsa' : '', last: verified ? 'Annaýewa' : '', nameErr: false,
       // 2 · business (appointment categories only at the first release)
-      biz: fresh ? '' : 'Glow Studio', cat: fresh ? '' : 'Beauty salon', catQ: '',
+      biz: fresh ? '' : 'Glow Studio', cat: fresh ? '' : 'Beauty', catQ: '', cmenu: false,
       // 3 · address (city first: the market’s cities)
       city: 'Ashgabat',
       addrQ: picked ? '247 Bitarap Türkmenistan Avenue' : '247 Bitarap Türkmenistan', addr: picked ? 0 : -1,
@@ -839,13 +881,8 @@ class Component extends DCLogic {
       same: !late,
       days: [ovn === 'error' ? day('Monday', 'Mo', '10:00', '09:30') : day('Monday', 'Mo', '09:00', '20:00'), day('Tuesday', 'Tu', '09:00', '20:00'), day('Wednesday', 'We', '09:00', '20:00'), day('Thursday', 'Th', '09:00', '20:00'),
         ovn === 'on' ? day('Friday', 'Fr', '10:00', '02:00') : day('Friday', 'Fr', '09:00', '20:00'), day('Saturday', 'Sa', '09:00', '20:00'), day('Sunday', 'Su', '10:00', '18:00')],
-      // 5 · services (demo-data.json → businesses[0], s1–s11)
-      svc: [
-        sv('s1', 'Hair', 'Women’s haircut', 60, '80'), sv('s2', 'Hair', 'Hair styling', 45, '60'), sv('s3', 'Hair', 'Hair colouring', 120, '250', true), sv('s4', 'Hair', 'Children’s haircut', 30, '40'),
-        sv('s5', 'Nails', 'Manicure', 60, '70'), sv('s6', 'Nails', 'Gel manicure', 90, '110'), sv('s7', 'Nails', 'Pedicure', 75, '90'),
-        sv('s8', 'Face', 'Facial cleansing', 60, '150'), sv('s9', 'Face', 'Brows and lashes', 30, '50'),
-        sv('s10', 'Massage', 'Back massage', 30, '90'), sv('s11', 'Massage', 'Full body massage', 60, '160')
-      ],
+      // 5 · services: the category's starter list (picking another category swaps it; own rows stay)
+      svc: this.starter(fresh ? '' : 'Beauty'),
       nextSvc: 1,
       // 6 · team (business-demo.json → team); Leýli doesn't use the app
       team: 'team',
@@ -1031,23 +1068,18 @@ class Component extends DCLogic {
     const TR = { 'ä': 'a', 'ç': 'c', 'ž': 'z', 'ň': 'n', 'ö': 'o', 'ş': 's', 'ü': 'u', 'ý': 'y' };
     const slug = s.biz.toLowerCase().split('').map((ch) => TR[ch] || ch).join('').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
     const slugUrl = 'yeral.app/b/' + (slug || '…');
-    const OTHER = 'Something else — I’ll add my services';
-    const CATS = [
-      { group: 'Beauty', items: ['Beauty salon', 'Barbershop', 'Nail studio', 'Brows and lashes', 'Spa and massage'] },
-      { group: 'Health', items: ['Dentist', 'Medical centre', 'Physiotherapy', 'Psychologist'] },
-      { group: 'Sport', items: ['Personal trainer'] },
-      { group: 'Lessons', items: ['Tutor', 'Language lessons', 'Music lessons'] },
-      { group: 'Auto', items: ['Car wash', 'Tyre service', 'Car service'] },
-      { group: 'Other', items: ['Pet care', 'Home services', OTHER] }
-    ];
+    // text limits (characters): business name 80, address line 120, entrance note 200
+    const LIM = { biz: 80, addr: 120, entrance: 200 };
+    const counter = (v, k) => v.length + ' / ' + LIM[k];
+    const cntCls = (v, k) => (v.length > LIM[k] ? 'ccount over' : 'ccount');
     const q = s.catQ.trim().toLowerCase();
-    const catGroups = CATS.map((g) => {
-      const groupHit = !q || g.group.toLowerCase().indexOf(q) >= 0;
-      const items = g.items.filter((t) => groupHit || t.toLowerCase().indexOf(q) >= 0).map((t) => ({ t, on: s.cat === t, cls: s.cat === t ? 'ci on' : 'ci', pick: () => set({ cat: t }) }));
-      return { name: g.group, items };
-    }).filter((g) => g.items.length > 0);
-    const v1 = s.biz.trim().length > 0 && !!s.cat;
-    const h1 = !s.biz.trim() ? 'Enter the business name.' : 'Pick a category.';
+    const catItems = this.CATS().filter((c) => !q || (c[0] + ' ' + c[1]).toLowerCase().indexOf(q) >= 0).map((c) => ({
+      t: c[0], on: s.cat === c[0], cls: s.cat === c[0] ? 'ci on' : 'ci',
+      pick: () => { if (s.cat !== c[0]) set({ cat: c[0], svc: this.starter(c[0]).concat(s.svc.filter((r) => r.g === 'New services')) }); }
+    }));
+    const bizLong = s.biz.length > LIM.biz;
+    const v1 = s.biz.trim().length > 0 && !bizLong && !!s.cat;
+    const h1 = !s.biz.trim() ? 'Enter the business name.' : (bizLong ? 'Shorten the business name to 80 characters.' : 'Pick a category.');
 
     // ---------- 3 · address + map pin ----------
     const SUGS = [
@@ -1086,8 +1118,10 @@ class Component extends DCLogic {
       if (e.preventDefault) e.preventDefault();
       set({ pin: { x: clamp(s.pin.x + d[0], 5, 95), y: clamp(s.pin.y + d[1], 18, 95) } });
     };
-    const v2 = picked;
-    const h2 = 'Pick the address from the list.';
+    const addrLong = s.addrQ.length > LIM.addr;
+    const entLong = s.entrance.length > LIM.entrance;
+    const v2 = picked && !addrLong && !entLong;
+    const h2 = addrLong ? 'Shorten the address to 120 characters.' : (entLong ? 'Shorten the entrance note to 200 characters.' : 'Pick the address from the list.');
 
     // ---------- 4 · hours: 00:00–24:00 in 30-min steps; a close before the open = next day ----------
     const T = [];
@@ -1162,9 +1196,9 @@ class Component extends DCLogic {
     const hoursSum = hp.join(', ') || 'Closed';
 
     // ---------- 5 · services ----------
-    const GROUPS = ['Hair', 'Nails', 'Face', 'Massage', 'New services'];
-    const starter = s.cat === 'Beauty salon';
-    const visible = s.svc.filter((r) => starter || r.g === 'New services');
+    const starter = this.starter(s.cat).length > 0;
+    const visible = s.svc;
+    const GROUPS = visible.map((r) => r.g).filter((g, i, a) => g !== 'New services' && a.indexOf(g) === i).concat(['New services']);
     const onRows = visible.filter((r) => r.on);
     const updSvc = (ids, fn) => set({ svc: s.svc.map((r) => (ids.indexOf(r.id) >= 0 ? Object.assign({}, r, fn(r)) : r)) });
     const svcGroups = GROUPS.map((gn) => {
@@ -1210,7 +1244,7 @@ class Component extends DCLogic {
       let cap = '';
       let err = false;
       if (bad) { cap = 'Mobile numbers only — enter a number starting with 6 or 7.'; err = true; }
-      else if (!phoneOk(m.phone)) cap = usesApp ? 'A phone number is required — they sign in with it.' : 'A phone number is required. They can start using the app later with this number.';
+      else if (!phoneOk(m.phone)) cap = 'Required for everyone. With the app on, it’s how they sign in.';
       else if (usesApp) cap = 'They’ll see the invite when they sign in with ' + mask(m.phone) + ' · valid 7 days';
       else cap = 'Bookable at once, never signs in — you and admins handle their requests. They can start using the app later with this number.';
       return {
@@ -1366,21 +1400,29 @@ class Component extends DCLogic {
       ownerName: ownerFull || 'You',
       // 2 · business
       biz: s.biz,
-      onBiz: (e) => set({ biz: val(e).slice(0, 60) }),
+      onBiz: (e) => set({ biz: val(e).slice(0, 2 * LIM.biz) }),
+      bizLong: bizLong, bizCls: bizLong ? 'inp is-e' : 'inp',
+      bizCount: counter(s.biz, 'biz'), bizCntCls: cntCls(s.biz, 'biz'),
       slugUrl: slugUrl,
       catQ: s.catQ,
       onCatQ: (e) => set({ catQ: val(e).slice(0, 40) }),
       hasCat: !!s.cat,
       cat: s.cat,
-      catGroups: catGroups,
-      catEmpty: catGroups.length === 0,
-      pickOther: () => set({ cat: OTHER, catQ: '' }),
+      catItems: catItems,
+      catEmpty: catItems.length === 0,
+      catHas: catItems.length > 0,
+      cmenu: !!s.cmenu,
+      toggleCmenu: () => set({ cmenu: !s.cmenu }),
+      closeCmenu: () => set({ cmenu: false }),
+      cmenuKey: (e) => { if (e && e.key === 'Escape') set({ cmenu: false }); },
       // 3 · address
       city: s.city,
       cities: CITIES,
       setCity: (e) => { const c = val(e); if (CITIES.indexOf(c) >= 0 && c !== s.city) set({ city: c, addr: -1, addrQ: '' }); },
       addrQ: s.addrQ,
-      onAddr: (e) => set({ addrQ: val(e).slice(0, 80), addr: -1 }),
+      onAddr: (e) => set({ addrQ: val(e).slice(0, 2 * LIM.addr), addr: -1 }),
+      addrLong: addrLong, addrCls: addrLong ? 'inp is-e' : 'inp',
+      addrCount: counter(s.addrQ, 'addr'), addrCntCls: cntCls(s.addrQ, 'addr'),
       showSug: !picked && typed.length >= 2,
       sugs: sugs,
       mapCls: 'map' + (!picked ? ' idle' : '') + (s.drag ? ' drag' : ''),
@@ -1398,7 +1440,9 @@ class Component extends DCLogic {
       floor: s.floor,
       onFloor: (e) => set({ floor: val(e).slice(0, 40) }),
       entrance: s.entrance,
-      onEntrance: (e) => set({ entrance: val(e).slice(0, 140) }),
+      onEntrance: (e) => set({ entrance: val(e).slice(0, 2 * LIM.entrance) }),
+      entLong: entLong, entCls: entLong ? 'inp is-e' : 'inp',
+      entCount: counter(s.entrance, 'entrance'), entCntCls: cntCls(s.entrance, 'entrance'),
       // 4 · hours
       same: !!s.same,
       sameSwCls: s.same ? 'sw on' : 'sw',
@@ -1407,7 +1451,7 @@ class Component extends DCLogic {
       fromOpts: fromOpts,
       toOpts: toOpts,
       // 5 · services
-      svcTitle: starter ? 'Suggested services for ' + s.cat.toLowerCase() : 'Add your services',
+      svcTitle: starter ? 'Suggested services for ' + s.cat : 'Add your services',
       svcCountText: onRows.length + (onRows.length === 1 ? ' service selected' : ' services selected'),
       noStarter: !starter,
       hasSvcRows: visible.length > 0,
@@ -1440,7 +1484,9 @@ class Component extends DCLogic {
       copy: () => set({ copied: true }),
       qrPath: qrPath,
       qrDone: !!s.qr,
-      dlQr: () => set({ qr: true }),
+      qrText: 'QR code downloaded (' + String(s.qr || 'png').toUpperCase() + ')',
+      dlPng: () => set({ qr: 'png' }),
+      dlSvg: () => set({ qr: 'svg' }),
       canInvite: invitable > 0,
       invited: !!s.invited, notInvited: !s.invited,
       invite: () => { if (!s.invited) set({ invited: true, toast: invitable + (invitable === 1 ? ' invite' : ' invites') + ' sent — each person sees theirs when they sign in with their number. Valid 7 days, until 21 October.' }); },

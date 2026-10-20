@@ -1,7 +1,7 @@
 # English choices: B-Team and B-Services (redrawn in English) · design pass v0.6, round 3 (20.10.2026)
 
 Files:
-- `screens/business/B-Team.dc.html`: page, **1440 × 1440** (was 1400; the "Aýna left" state needs 1425), interactive. Addresses `/w/glow-studio/settings/team` and `/settings/permissions`.
+- `screens/business/B-Team.dc.html`: page, **1440 × 1480** (was 1400; the "Aýna left" state needs 1468 since Round 3.3), interactive. Addresses `/w/glow-studio/settings/team` and `/settings/permissions`.
 - `screens/business/B-Services.dc.html`: page, **1440 × 1440** (unchanged), interactive. Address `/w/glow-studio/settings/services`.
 - Both are generated: (design source) (or `team` / `services`). Sources in (design source):
   - `css/settings_*.css` and `settings_markup_ref.html`: frozen copies of the B-Settings round-3 generator ((design source), 20.10). The shell (sidebar, switcher, account menu with Contact Ýeral, banners, rail, tab bar, More sheet), the settings header and nav, the save bar and the modal styles come from there, so the three settings boards look the same. If B-Settings' shell changes, copy those files again.
@@ -15,7 +15,7 @@ Not repeated here: wordings from EN-GLOSSARY, the round-2/3 briefs (business/REA
 Format: wording · where · why, when it isn't obvious.
 
 ## Tweaks
-- **B-Team:** `tab` team · permissions · `panel` none · staff · invite · inviteError · remove · reassign · shift · timeOff · usesAppOn · `aynaLeft` (boolean, off) · `role` owner · admin · `banner` none · inReview · notApproved · demo · `font`.
+- **B-Team:** `tab` team · permissions · `panel` none · staff · invite · inviteError · remove · removed · reassign · shift · timeOff · usesAppOn · `aynaLeft` (boolean, off) · `role` owner · admin · `banner` none · inReview · notApproved · demo · `font`.
   - staff = Jeren's drawer on Hours. invite = step 1 filled for Nazik Rejepowa. inviteError = Ýazgül's number, which has an open invite. remove = the owner removes Aýna. reassign = Aýna has left, and "Choose" has been pressed ("Who takes Aýna's bookings?"). shift = Jeren's new shift Mon–Sat 12:00–19:00 hits 3 bookings and 1 request. timeOff = Jeren's time off 9–13 November hits 3 bookings. usesAppOn = Leýli after "Uses the app" was turned on and saved: Invited, drawer open on Access level.
   - `aynaLeft`: Aýna's row moves to "No longer on the team" as "Left", and the Team banner shows (owner only).
   - `banner`: the business status banners, as on B-Calendar and B-Bookings. Demo = the signed-out demo workspace.
@@ -46,14 +46,14 @@ Format: wording · where · why, when it isn't obvious.
 - **Remove a member:** RemoveStaffModal with AffectedBookingsList, as on B-Shell: per-row results, and its own choice (default **Keep it**) for a booking nobody else can do. Statuses "Removed" and "Left".
 - **Shift change and time off over bookings:** AffectedBookingsList with Keep them · Cancel and offer 3 other times. The shift version says "New bookings follow the new shift either way."
 - **Team banner:** "Aýna left: 4 bookings and 1 request need a new specialist" + Choose, until settled.
-- **Permissions tab:** the fixed read-only table (13 rows, same strings as B-Shell) + "Access levels are fixed at the first release." Under 768 each row stacks with OWNER / ADMIN / SPECIALIST labels.
+- **Permissions tab:** the fixed read-only table (13 rows, same strings as B-Shell); no caption about releases (Round 3.3). Under 768 each row stacks with OWNER / ADMIN / SPECIALIST labels.
 - **Admin view (`role` = admin):**
   - Team and Permissions are view-only: no Add, invite actions, Copy invite link, remove, drag or Team banner.
-  - The admin can still change a person's services, hours and time off (see Decided while drawing).
+  - The admin can still change which services a person does; shifts and time off are view-only (Round 3.1, see below).
 
 ## B-Services · what changed
 - English, with the same shell, header and nav. Services is current.
-- Price types: Fixed · From · Free · **Price at the place** (was "Hidden"; it has no amount now).
+- Price types: Fixed · From · Free · **Price at the place** (was "Hidden"; since Round 3.3 it keeps an amount clients don't see).
 - Names and descriptions use one language by default. `languages` = several adds EN · TK · RU tabs to the drawer: EN is the main language and required, an empty language gets a dot, and the caption reads "Missing texts show in the main language."
 - **Delete:**
   - With upcoming bookings → modal "Delete Hair colouring?" / "It has 4 upcoming bookings. They stay as they are; new bookings can't choose it." → **Delete service**. The toast after it has no Undo.
@@ -72,13 +72,13 @@ Format: wording · where · why, when it isn't obvious.
 - "Copy invite link" · "Resend invite" · "Cancel invite" · "Remove" · invite row link and menu.
 - "Edit · Hours and time off · Access level · Remove from the team" · member row menu.
 - "Drag a specialist by the handle, or use the arrow keys on it, to change the order clients see." · footnote (owner) / "The owner sets the order clients see." (admin). aria "Drag to reorder: {name}. Or use the arrow keys".
-- "You can change people's services, hours and time off. Only the owner adds and removes people and changes access levels." · admin note on Team.
+- "You can view the team and change which services each person does. Only the owner adds and removes people and changes access levels, shifts and time off." · admin note on Team (Round 3.1).
 - Drawer tabs: "Profile · Services · Hours · Access level".
 - "Name clients see" · "Clients see: Jeren · Beautician" · "Full name (optional)" · "Only your team sees it." · "Specialization (optional)" · placeholder "For example: stylist, colourist" · Profile tab.
 - "Phone number" + "This is their Ýeral login. They change it themselves in My profile." (app user, read-only) · "Required. They can start using the app later with this number." (no app, owner can edit) · "The invite is for this number." (invited).
-- "Only the owner changes names, phone numbers and access levels." · admin note in the drawer (Profile and Access level tabs).
+- "Only the owner changes names, phone numbers and access levels." · admin note in the drawer (Profile and Access level tabs). "Only the owner changes shifts and time off." · admin note on the Hours tab (Round 3.1, coordinator's wording).
 - "What does Jeren do?" · "Clients see Jeren only for these services." · "{Name} doesn't take bookings now. Pick services and clients can book {Name} too." · "All" · Services tab.
-- "Working hours" · "Business hours — Works whenever the business is open" · "Own shift — Set hours for each day" · "Day off" · "The business hours come first: when the business is closed, a shift doesn't open bookings." · Hours tab. aria "Monday: works / starts / ends".
+- "Working hours" · "Business hours — Follows the business hours" · "Own shift — Own hours for each day" · "Day off" · "Break" · captions "Within the business hours: when the business is closed, a shift doesn't open bookings." (own shift) / "Changes with the business hours. A break here is only for Aýna." (business hours) · Hours tab (Round 3.3). aria "Monday: works / starts / ends / add a break / break starts / break ends / remove the break".
 - "Time off" · "Clients can't book Jeren on these days." · "No time off planned." · "Add time off" · "From" · "To (optional)" · "Note (optional)" · placeholder "For example: family trip" · "Only your team sees the note." · "The end date can't be before the start date." · "4 days" · aria "Remove time off: 28–31 December 2026".
 - "Owner — every permission, including the team. One owner per workspace; the owner can't leave it." · owner's Access level box · replaces the transfer box.
 - Level summaries reuse the onboarding team step: "Sees their own calendar, bookings and clients; answers their own requests." / "Manages the whole calendar and all clients; doesn't see revenue."
@@ -93,7 +93,7 @@ Format: wording · where · why, when it isn't obvious.
 - "Leýli's requests go to you and the admins. The permissions don't apply — Leýli never signs in." · no-app box (replaces the "Programmasyz hünärmen…" lock box).
 - "Admins always use the app." (+ " Saving creates an invite: they'll see it when they sign in with … · valid 7 days." when a no-app person is made Admin).
 - Add a team member modal:
-  - "Mobile number" · "Required for everyone — it's how they sign in." · "Name clients see".
+  - "Mobile number" · "Required for everyone. With the app on, it's how they sign in." (Round 3.3) · "Name clients see".
   - Admin caption: "Admins always use the app. They'll see the invite when they sign in with … · valid 7 days."
   - Step 2: "Optional for an admin — pick services and clients can book them too." · "No services selected yet".
   - Review rows: "Mobile number · Name · Specialization · Access level · Uses the app (Yes / No) · Services (None)" + "Change".
@@ -133,15 +133,15 @@ Format: wording · where · why, when it isn't obvious.
 - Group menu "Add a service here" · "Delete group" · disabled with "Move or delete its services first".
 - Row menu "Edit" · "Hide from online booking" / "Open for online booking" · "Delete service".
 - "no buffer" · row sub-line for a 0 buffer (DS has "+15 min buffer").
-- "Drag a service or a group by its handle, or use the arrow keys on it, to change the order. Services with online booking off don't show on your page — you add their bookings yourself." · footnote.
+- "Drag a service or a group by its handle, or use the arrow keys on it, to change the order. Services that aren't bookable online don't show on your page — you add their bookings yourself." · footnote.
 - Drawer:
   - "Edit service" / "New service" · sub "Hair · Hair colouring" / "Goes to Hair".
   - "Name" ("Name · EN" with tabs) · "Description (optional)" · placeholder "What's included and how to get ready".
   - "Group" · "Duration" · "Buffer after the service" with "As in Booking rules · 10 min" and "No buffer", and the caption "The specialist stays free for this long after the service — to clean up and get ready. The general rule is in Booking rules."
-  - "Price" (label of the price-type chips) · "Price" / "Lowest price" (amount) · "Tell the client the price at the visit." (Price at the place).
+  - "Price" (label of the price-type chips) · "Price" / "Lowest price" / "Amount" (Price at the place) · "Clients see “Price at the place”. The amount counts in your totals." (Round 3.3).
   - Errors "Enter the service name." · "Enter the price."
   - "Clients see free times only for the people you tick."
-  - "Online booking" · "Clients can book it themselves on your Ýeral page." / "Hidden from your page — you add its bookings yourself (phone only)."
+  - "Online booking" · "Clients can book it themselves on your Ýeral page." / "Not bookable online — it's hidden from your page and you add its bookings yourself."
 - Language tabs (several): aria "English, main language" · "Turkmen" · "Russian" (+ ", empty") · "Empty — clients see "Hair colouring"." · placeholders "Name in Turkmen" / "Name in Russian".
 - Demo service s12 **Bridal hair styling** (the client site's s12, also on B-Calendar and B-Bookings) · "With a trial styling; the price is agreed" · 2 h · Price at the place · Aýna.
 - Toasts:
@@ -149,7 +149,7 @@ Format: wording · where · why, when it isn't obvious.
   - "New service added: {name}"
   - "Bridal hair styling deleted" (+ Undo)
   - "Hair colouring deleted · its 4 upcoming bookings stay as they are"
-  - "Children's haircut is open for online booking" / "Children's haircut: phone only — it's hidden from your page"
+  - "Children's haircut is open for online booking" / "Children's haircut: not bookable online — it's hidden from your page"
   - "Group added: Beard" / "Group deleted: Beard"
   - "Order saved · clients see your services in this order"
 
@@ -184,13 +184,13 @@ Format: wording · where · why, when it isn't obvious.
    - Dilber Saparowa, cancelled 13 October.
    Resend makes a fresh 7-day invite. Adding a number that has a closed invite replaces that row.
 2. **Gülnar Öwezowa is Active** (she has accepted, per the demo facts) and does Women's haircut, Hair styling and Children's haircut. Nazik Rejepowa is the name typed in the invite modal.
-3. **Left / Removed people** stay in "No longer on the team". They have no drawer and no actions; their past bookings and reviews stay.
+3. **Left / Removed people** stay in "No longer on the team" without a drawer; their past bookings and reviews stay. Since Round 3.3 the owner can **Reactivate** a removed person and **Invite again** someone who left (see below).
 4. **Remove:**
    - Owner only, never the owner row. The owner can't leave or be removed: the owner's Access level tab shows only the lock box.
    - When nobody else does any of the person's services, "Move to another specialist" is hidden and **Keep them** is preselected (least destructive). A single booking nobody else can do gets its own row choice, default **Keep it** (remove and someone-left alike).
    - The final button is the danger "Remove {name}".
 5. **Remove and someone-left share one demo:** `panel` = remove shows the owner removing Aýna (before she leaves) with the brief's 4 bookings + 1 request. `aynaLeft` / `panel` = reassign shows the same list after she left (title and lead as on B-Shell). The banner and Choose are owner only.
-6. **Admin view:** Team and Permissions are view-only, but the admin can change a person's **Services** and **Hours / time off**, because the fixed table gives admins "Shifts and time off" and "Change services and prices". Profile, phone, access level and "Uses the app" are read-only for the admin. The admin gets no add, remove or invite actions, no Copy invite link and no reorder.
+6. **Admin view:** Team and Permissions are view-only, but the admin can change which **Services** a person does ("Change services and prices"). Since Round 3.1 shifts and time off are view-only too. Profile, phone, access level and "Uses the app" are read-only for the admin. The admin gets no add, remove or invite actions, no Copy invite link and no reorder.
 7. **Time off saves at once** (Add time off / the trash button with Undo). A shift change saves with the drawer's Save. Both open the AffectedBookingsList when bookings are hit.
 8. **Jeren's demo bookings** (changed in the consistency pass, see below): Today 15:00 Sona P. and Arzygül H.'s real request (Fri, 16 Oct · 10:00–11:00, Pending, 12 min) from B-Calendar / B-Bookings; the rest are invented clients that B-Clients doesn't draw, all Confirmed:
    - Sat, 17 Oct Bägül A. · Mon, 19 Oct Nurana K. · Tue, 20 Oct Dürdäne B.
@@ -205,14 +205,14 @@ Format: wording · where · why, when it isn't obvious.
 12. **The add-a-member modal keeps 3 steps** (Who · Services · Review). A Specialist with "Uses the app" off is added at once ("Add to the team"), with no invite row.
 13. **Reorder:** the drag handles also move rows with ↑ ↓. A changed order shows the save bar Discard · Save, same for groups and services on B-Services.
 14. **s12 Bridal hair styling** (Hair, 2 h, Price at the place, Aýna, no upcoming bookings) — the client site's existing s12, now on B-Calendar and B-Bookings too. It shows the 4th price type in the list and gives `deleteFree` a service without bookings. So Aýna does 5 services on B-Team; 12 services in 4 groups.
-15. **Price at the place has no amount field** (simplest); the client sees "Price at the place".
+15. **Price at the place** keeps an amount that clients don't see (Round 3.3; it was without an amount before).
 16. **Upcoming bookings per service** (demo):
    - Women's haircut 9 · Hair styling 5 · Hair colouring 4 · Children's haircut 2 · Bridal hair styling 0
    - Manicure 6 · Gel manicure 4 · Pedicure 3
    - Facial cleansing 8 · Brows and lashes 4
    - Back massage 3 · Full body massage 2
    Pending requests count as upcoming bookings in the delete text.
-17. **Who does it** lists only active specialists (Aýna, Gülnar, Maral, Jeren, Leýli); invited people appear after they accept.
+17. **Who does it** lists every team row that isn't removed (Round 3.3): the specialists, the open invite (Ýazgül, tagged "Invited") and the management (Maýsa · Owner, Selbi · Admin).
 18. **`languages` = several:** EN is the main language and required. TK names are filled from the old Turkmen board; RU is empty. The list always shows the main language.
 19. **B-Services `role`:** the owner and the admin see and edit the same page; only the shell differs. A Specialist has no Settings, so there is no specialist view on either board.
 20. The demo (signed-out) workspace shows the owner's Team page.
@@ -231,3 +231,54 @@ Format: wording · where · why, when it isn't obvious.
 - **Client names (B12):** affected-booking rows show the saved client name in full: "Aýjemal Gurbanowa" (others are saved with an initial, e.g. "Gülälek N."). "Aýjemal G." stays only for reviews.
 - **Money rule:** prices are booking information everyone who sees the booking sees, Admin included. "See revenue" covers only sums (revenue lines, client totals, average check, earnings). Nothing changed on these boards: they show prices (service list, the Team service picker) and no sums, and the Admin edits prices.
 - Checks rerun: build, check_dc.py, dccheck.py, node --check, smoke.js (all ok), renders of shift / time off / remove / deleteFree, long text at 390.
+
+## Round 3.1 (owner decision, 20.10.2026): an Admin views shifts and time off, only the owner changes them
+- **Permissions table:** the row "Shifts and time off" is now Owner ✓ · Admin **View only** · Specialist See own (same as B-Shell and DS-Business).
+- **Admin view (`role` = admin), Hours tab of the drawer:**
+  - Read-only: "Working hours" shows "Own shift" / "Business hours" as text, with the week as plain rows ("Monday 10:00–19:00", "Sunday Day off").
+  - No schedule cards, day switches or time pickers. No "Add time off", no time-off form and no trash button.
+  - Lock note on the tab: "Only the owner changes shifts and time off."
+- **Drawer footer for the Admin:** Save shows only on the Services tab (the one thing the Admin may change here). On Profile, Hours and Access level the footer shows **Close**.
+- `panel` = shift or timeOff with `role` = admin opens Jeren's read-only Hours tab, with no AffectedBookingsList.
+- **Team note for the Admin:** "You can view the team and change which services each person does. Only the owner adds and removes people and changes access levels, shifts and time off."
+- **Unchanged:** the Admin still edits a person's services in the drawer's Services tab, and B-Services (services and prices, "Who does it") stays editable for the Admin. B-Services wasn't rebuilt differently (byte-identical output).
+- Checks: build, check_dc.py, dccheck.py, node --check, smoke.js (all ok; new checks for the read-only Hours tab, the Admin's Services save, the shift / timeOff panels for the Admin and the table row). Rendered at 1440 (Admin Team, Hours, Services, Permissions, shift panel) and with the long-text check at 1440 and 390: no cuts or overflow.
+
+## Round 3.3 (owner's words, 20.10.2026): small fix pass
+Frames: B-Team **1440 × 1480** (the "Aýna left" state is 1468 tall now, with the Invite again caption), B-Services 1440 × 1440 (unchanged). New `panel` value **removed** on B-Team (Aýna removed earlier: her row with Reactivate).
+
+1. **Admin = view only for people, shifts and time off** (confirmed). The Permissions row "Shifts and time off" reads Owner ✓ · Admin View only · Specialist See own. The Admin note on Team is "You can view the team and change which services each person does. Only the owner adds and removes people and changes access levels, shifts and time off." The older Admin note that offered changing hours and time off is gone from the board and from this log. The Admin still changes which services a person does (drawer Services tab; B-Services "Who does it").
+2. **Removed → Reactivate** (owner):
+   - The removed row shows the link **Reactivate** (also in its ⋯ menu) and the caption "Reactivate restores Aýna's access and makes Aýna bookable again."
+   - Toast: "Aýna is active again: access is back and clients can book Aýna." (for someone without the app: "Leýli is active again: clients can book Leýli."). The row goes back to Specialists as Active.
+   - Adding a removed person's number in the add-member modal: "This person was removed from the team — reactivate them in Team instead."
+   **Left → Invite again** (my call: a new invite through the add-member flow):
+   - The left row shows the link **Invite again** (also in its ⋯ menu) and the caption "To bring Aýna back, send a new invite."
+   - Invite again opens "Add a team member" filled in with Aýna's number, name, specialization, access level and services ("Uses the app" on). Sending creates the normal invite row in Invites.
+   - The Left row stays until the invite is accepted. Its caption becomes "Invited again — Aýna comes back after accepting the new invite.", and the link disappears.
+3. **Hours tab** (owner edits; Admin reads):
+   - "Working hours": **Business hours** "Follows the business hours" · **Own shift** "Own hours for each day".
+   - Business hours: each day shows the business's times as text ("09:00–20:00"), plus a personal break. Caption "Changes with the business hours. A break here is only for Aýna."
+   - Own shift: a switch and From–To pickers per day, "Day off" when off. Caption "Within the business hours: when the business is closed, a shift doesn't open bookings."
+   - **Break per day:** "+ Break" (aria "Monday: add a break") adds a row "Break [13:00]–[13:30] ×" with 10-minute pickers (aria "Monday: break starts / break ends / remove the break"). Errors (B-Settings' wording): "The break must end after it starts." · "The break must be within the working hours." Save is disabled while one shows.
+   - A break over a booking counts as a shift change, so it opens the AffectedBookingsList on Save.
+   - Demo: Aýna follows the business hours, with breaks Wed 14:00–14:40 and Thu 13:30–14:10 (the calendar's break). Switching between the two modes keeps each day's break.
+   - Admin read-only rows: "Wednesday 09:00–20:00 · break 14:00–14:40".
+   - **Time off repeating every year:** the form gets the checkbox **"Repeat every year"**. The list shows the date without a year and "Every year" in the sub-line: Aýna's "3 May" / "1 day · Every year · Birthday". The toast reads "Time off added: 2 January · every year". A yearly time off checks bookings by day and month.
+4. **Permissions:** the caption "Access levels are fixed at the first release." is removed. The table keeps "Specialists who don't use the app never sign in, so the table doesn't apply to them."
+5. **Add-member phone caption:** "Required for everyone. With the app on, it's how they sign in."
+6. **Price at the place keeps an amount:**
+   - The field is labelled "Amount", with the caption "Clients see “Price at the place”. The amount counts in your totals." The preview stays "Clients see: Price at the place". The amount is optional.
+   - Bridal hair styling: 400 TMT. Its list row reads "Price at the place" / "400 TMT · not shown to clients".
+7. **Who does it:**
+   - Lists every team row that isn't removed: the specialists, the open invite Ýazgül (tag **Invited**, amber like the Invited status), Maýsa (Owner) and Selbi (Admin).
+   - Expired, declined and cancelled invites aren't listed.
+   - Caption when an invited person is ticked: "Invited people show to clients once they accept the invite."
+   - Ýazgül's invite already includes the nail services, so Manicure, Gel manicure and Pedicure list her. Their list rows read "Maral" / "+ 1 invited".
+8. **"Not bookable online"** replaces "Phone only" (that's the client tag) on B-Services:
+   - Row caption "Not bookable online".
+   - Drawer hint "Not bookable online — it's hidden from your page and you add its bookings yourself."
+   - Toast "Children's haircut: not bookable online — it's hidden from your page".
+   - Footnote "Services that aren't bookable online don't show on your page — you add their bookings yourself."
+   - The row menu keeps "Hide from online booking" / "Open for online booking".
+- Checks: `build.py all`, check_dc.py, dccheck.py, node --check, smoke.js (all ok; new checks for Reactivate, Invite again, the removed-number error, breaks and their errors, yearly time off, the Admin's read-only breaks, the release caption, the place amount, Who does it and "Not bookable online"). Rendered at 1440 and 390, and the long-text check (+30 %) at 1440 and 390 on the Hours tab (business and own shift with breaks), the time-off form, the removed and left rows, the services list and the drawer. Fixed one squeeze along the way: the day-row pickers now fit next to "+ Break" (82 px pickers); on phones the break link takes its own line.

@@ -167,7 +167,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 @media (max-width:767px){.app{flex-direction:column}.side{display:none !important}.mws{display:inline-flex}.main{padding-bottom:72px}.tabbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:35;padding:0 4px;background:#ffffff;border-top:1px solid #e6e6ea}.top{height:56px;padding:0 16px;gap:10px}.top h1{font-size:19px !important;line-height:24px !important}.gs{display:none}.pad{padding:16px !important}.tsr{width:100%;height:44px}.chip{height:44px}.b-sm{height:44px;border-radius:12px}.b-sm.b-ico{width:44px;height:44px}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block;margin:0 auto}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:80px;max-width:none}.wsp{top:60px;left:8px;right:8px;width:auto}}
 .cnt-n{background:#f0f0f3;border-color:#e6e6ea;color:#41505f}@media (max-width:1023px){.side .cnt-n{background:#6e6e78}}
 .tbl{min-width:1000px}
-.cl-o{grid-template-columns:minmax(230px,2fr) minmax(150px,1fr) 64px minmax(120px,1fr) minmax(190px,1.3fr) 124px 44px;padding-left:16px}
+.cl-o{grid-template-columns:minmax(230px,2fr) minmax(150px,1fr) 64px minmax(120px,1fr) minmax(190px,1.3fr) 112px 44px;padding-left:16px}
 .cl-n{grid-template-columns:minmax(230px,2fr) minmax(150px,1fr) 64px minmax(120px,1fr) minmax(190px,1.3fr) 44px;padding-left:16px}
 @media (max-width:1359px){.tbx{overflow-x:auto}}
 .tr.on,.tr.on:hover{background:#efecfe}
@@ -181,8 +181,7 @@ a.ropen:hover{color:#101014;text-decoration:underline}
 .tg-a{background:#efecfe;border-color:#d5cbfb;color:#4429d6}
 .tg-n{background:#fee4e2;border-color:#f6c7c2;color:#a3251b}
 .tg-p{background:#fef6e7;border-color:#f2ddb0;color:#93500a}
-.nsl{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:16px;font-weight:600;color:#a3251b}
-.nsl svg{flex:none}
+.unp{flex-basis:100%;font-variant-numeric:tabular-nums}
 .nxt{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-width:0;font-variant-numeric:tabular-nums}
 .tmr svg{flex:none}
 .sumr{display:flex;align-items:baseline;gap:4px 8px;flex-wrap:wrap;font-size:15px;line-height:22px}
@@ -254,6 +253,7 @@ a.ropen:hover{color:#101014;text-decoration:underline}
 <sc-if value="{{bnOn}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column">
 <sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnx"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
 <sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
+<sc-if value="{{bnHidden}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Ýeral has hidden your page:</b> Clients reported that your page shows the wrong address. Clients can’t find or book you.</span><button class="b b-sec b-sm" style="flex: none" onClick="{{openContact}}">Contact Ýeral</button></div></sc-if>
 <sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnx"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
 </div></sc-if>
 
@@ -276,17 +276,17 @@ a.ropen:hover{color:#101014;text-decoration:underline}
 <span role="columnheader" class="num">Visits</span>
 <span role="columnheader" aria-sort="descending" style="display: inline-flex; align-items: center; gap: 4px; color: #101014">Last visit<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
 <span role="columnheader">Next booking</span>
-<sc-if value="{{seeMoney}}" hint-placeholder-val="{{true}}"><span role="columnheader" class="num">Average check</span></sc-if>
+<sc-if value="{{seeMoney}}" hint-placeholder-val="{{true}}"><span role="columnheader" class="num">Total</span></sc-if>
 <span role="columnheader"><span class="sr">Actions</span></span>
 </div>
 <sc-for list="{{rows}}" as="r" hint-placeholder-count="12">
 <div class="{{r.cls}}" role="row">
-<span role="cell" class="cln"><a class="ropen" href="B-Client.dc.html" aria-label="{{r.openLabel}}">{{r.name}}</a><sc-for list="{{r.tags}}" as="t" hint-placeholder-count="1"><span class="{{t.cls}}">{{t.t}}</span></sc-for></span>
+<span role="cell" class="cln"><a class="ropen" href="B-Client.dc.html" aria-label="{{r.openLabel}}">{{r.name}}</a><sc-for list="{{r.tags}}" as="t" hint-placeholder-count="1"><span class="{{t.cls}}">{{t.t}}</span></sc-for><sc-if value="{{r.unnamed}}" hint-placeholder-val="{{false}}"><span class="cap unp">{{r.ph}}</span></sc-if></span>
 <span role="cell" class="ell" style="font-variant-numeric: tabular-nums">{{r.ph}}</span>
 <span role="cell" class="num">{{r.v}}</span>
-<span role="cell" class="cell"><span class="{{r.lastCls}}">{{r.last}}</span><sc-if value="{{r.lastNs}}" hint-placeholder-val="{{false}}"><span class="nsl"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>No-show</span></sc-if></span>
+<span role="cell" class="cell"><span class="{{r.lastCls}}">{{r.last}}</span></span>
 <span role="cell" class="nxt"><span class="{{r.nextCls}}">{{r.next}}</span><sc-if value="{{r.hasTmr}}" hint-placeholder-val="{{false}}"><span class="{{r.tmrCls}}" title="{{r.tmrLabel}}" aria-label="{{r.tmrLabel}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>{{r.tmrText}}</span></sc-if></span>
-<sc-if value="{{seeMoney}}" hint-placeholder-val="{{true}}"><span role="cell" class="num" style="font-weight: 500">{{r.avg}}</span></sc-if>
+<sc-if value="{{seeMoney}}" hint-placeholder-val="{{true}}"><span role="cell" class="num" style="font-weight: 500">{{r.total}}</span></sc-if>
 <span role="cell" class="{{r.menuCell}}" style="display: flex; justify-content: center">
 <button class="b b-gho b-sm b-ico" aria-label="{{r.menuLabel}}" aria-haspopup="menu" aria-expanded="{{r.menuOpen}}" onClick="{{r.toggleMenu}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></button>
 <sc-if value="{{r.menuOpen}}" hint-placeholder-val="{{false}}">
@@ -473,7 +473,7 @@ a.ropen:hover{color:#101014;text-decoration:underline}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"filter":{"editor":"enum","options":["all","regular","new","lapsed","reported"],"default":"all","section":"State"},"modal":{"editor":"enum","options":["none","add","delete","deleteBlocked"],"default":"none","section":"State"},"empty":{"editor":"boolean","default":false,"section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1120}}'>
+<script type="text/x-dc" data-dc-script data-props='{"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"filter":{"editor":"enum","options":["all","regular","new","lapsed","reported"],"default":"all","section":"State"},"modal":{"editor":"enum","options":["none","add","delete","deleteBlocked"],"default":"none","section":"State"},"empty":{"editor":"boolean","default":false,"section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","hidden","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1120}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -512,34 +512,36 @@ class Component extends DCLogic {
   }
   clients() {
     if (this._c) return this._c;
-    // id · name · phone · visits · last visit · sort key (minutes, today = 0) · last visit was a no-show · average check · tags · has a booking with Aýna · upcoming
-    // upcoming item: [day, time, service · specialist, status (c / p), minutes left to answer, time change asked]
+    // id · name · phone · visits · last visit (last completed visit; a No-show doesn't count) · sort key (minutes, today = 0) · total (completed visits) · tags · has a booking with Aýna · upcoming · with Aýna: [visits, last visit, sort key]
+    // upcoming item: [day, time, service · specialist, status (c / p), minutes left to answer, time change asked, closed: answer by]
     const T = (d, m) => d * 1440 + m;
+    const N = -1e9;
     const C = [
-      ['c8', 'Merjen K.', '+993 65 02 91 66', 5, 'Today', T(0, 615), false, '60 TMT', [], true, []],
-      ['c7', 'Ogulnabat Ç.', '+993 62 18 60 05', 3, 'Today', T(0, 600), true, '150 TMT', ['po', 'rep'], false, []],
-      ['x2', 'Aýgül R.', '+993 61 27 54 09', 6, 'Today', T(0, 570), false, '75 TMT', ['reg'], false, [['Tomorrow', '10:00–11:30', 'Gel manicure · Maral', 'c']]],
-      ['c2', 'Ogulşat M.', '+993 65 21 77 03', 7, 'Today', T(0, 540), false, '82 TMT', ['reg'], true, []],
-      ['x6', 'Gözel A.', '+993 65 73 26 41', 1, '13 Oct', T(-1, 1020), false, '90 TMT', ['new'], false, [['Today', '16:30–17:00', 'Back massage · Leýli', 'p', 21]]],
-      ['c5', 'Bahar A.', '+993 65 70 33 18', 9, '6 Oct', T(-8, 660), false, '98 TMT', ['reg'], true, [['Today', '11:00–12:30', 'Gel manicure · Maral', 'c']]],
-      ['x7', 'Merdan K.', '+993 62 21 08 40', 4, '5 Oct', T(-9, 1080), false, '90 TMT', [], false, [['Today', '18:00–18:30', 'Back massage · Leýli', 'c']]],
-      ['c6', 'Mähri G.', '+993 61 30 44 92', 4, '2 Oct', T(-12, 960), false, '70 TMT', [], false, [['Today', '16:00–17:00', 'Manicure · Maral', 'p', 24]]],
-      ['c4', 'Sona P.', '+993 62 33 81 07', 14, '1 Oct', T(-13, 900), false, '64 TMT', ['reg', 'VIP'], false, [['Today', '15:00–15:30', 'Brows and lashes · Jeren', 'c'], ['Fri, 16 Oct', '12:00–12:30', 'Brows and lashes · Jeren', 'c']]],
-      ['x5', 'Nurjahan A.', '+993 62 55 07 91', 8, '30 Sep', T(-14, 720), false, '150 TMT', ['reg'], false, [['Today', '12:00–13:00', 'Full body massage · Leýli', 'c'], ['Tomorrow', '16:00–17:00', 'Facial cleansing · Jeren', 'c']]],
-      ['c1', 'Gülälek N.', '+993 65 44 70 19', 12, '28 Sep', T(-16, 690), false, '145 TMT', ['rep', 'reg', 'VIP'], true, [['Today', '11:30–13:30', 'Hair colouring · Aýna', 'c']]],
-      ['x4', 'Jahan M.', '+993 65 13 66 48', 2, '25 Sep', T(-19, 900), false, '70 TMT', ['new'], false, [['Sat, 17 Oct', '15:00–16:00', 'Manicure · Maral', 'c']]],
-      ['x1', 'Aýsoltan R.', '+993 65 48 19 73', 5, '23 Sep', T(-21, 1080), false, '70 TMT', [], true, [['Today', '18:00–18:45', 'Hair styling · Aýna', 'c'], ['Sat, 17 Oct', '10:00–12:00', 'Hair colouring · Aýna', 'c']]],
-      ['c9', 'Läle O.', '+993 63 47 25 51', 2, '20 Sep', T(-24, 1080), false, '110 TMT', ['new'], false, [['Today', '18:00–19:30', 'Gel manicure · Maral', 'c']]],
-      ['c3', 'Aýjemal Gurbanowa', '+993 65 90 11 22', 3, '18 Sep', T(-26, 870), false, '85 TMT', ['reg'], true, [['Tomorrow', '14:30–15:30', 'Women’s haircut · Aýna', 'p', 28]]],
-      ['c10', 'Döwlet B.', '+993 65 66 10 22', 6, '16 Sep', T(-28, 1020), false, '40 TMT', ['reg', 'Child'], true, [['Today', '17:00–17:30', 'Children’s haircut · Aýna', 'c']]],
-      ['n1', 'Aýgözel S.', '+993 64 18 52 36', 6, '11 Sep', T(-33, 600), false, '80 TMT', ['reg'], true, []],
-      ['n2', 'Enejan B.', '+993 62 40 77 15', 3, '4 Sep', T(-40, 960), false, '70 TMT', [], true, []],
-      ['c11', 'Mahym D.', '+993 65 37 48 20', 4, '3 Jul', T(-103, 600), false, '75 TMT', ['lap'], true, [['Fri, 16 Oct', '10:00–11:00', 'Manicure · Maral', 'c', 26, 'Sat, 17 Oct · 11:30']]],
-      ['n3', 'Ogulgerek M.', '+993 61 09 64 27', 2, '21 Jun', T(-115, 840), false, '60 TMT', ['rep', 'lap'], true, []],
-      ['c12', 'Ejegyz T.', '+993 64 55 12 80', 0, '—', -1e9, false, '—', ['new'], true, [['Today', '15:30–16:30', 'Women’s haircut · Aýna', 'p', 18]]],
-      ['x8', 'Arzygül H.', '+993 64 72 03 18', 0, '—', -1e9 - 1, false, '—', ['new'], false, [['Fri, 16 Oct', '10:00–11:00', 'Facial cleansing · Jeren', 'p', 12]]]
+      ['c8', 'Merjen K.', '+993 65 02 91 66', 5, 'Today', T(0, 615), '300 TMT', [], true, [], [5, 'Today', T(0, 615)]],
+      ['x2', 'Aýgül R.', '+993 61 27 54 09', 6, 'Today', T(0, 570), '450 TMT', ['reg'], false, [['Tomorrow', '10:00–11:30', 'Gel manicure · Maral', 'c']]],
+      ['c2', 'Ogulşat M.', '+993 65 21 77 03', 7, 'Today', T(0, 540), '574 TMT', ['reg'], true, [], [5, 'Today', T(0, 540)]],
+      ['x6', 'Gözel A.', '+993 65 73 26 41', 1, '13 Oct', T(-1, 1020), '90 TMT', ['new'], false, [['Today', '16:30–17:00', 'Back massage · Leýli', 'p', 21]]],
+      ['n4', 'Şemşat K.', '+993 63 18 74 52', 2, '7 Oct', T(-7, 960), '180 TMT', ['new'], false, [['Today', '16:00–17:00', 'Manicure · Maral', 'p', 24]]],
+      ['c5', 'Bahar A.', '+993 65 70 33 18', 9, '6 Oct', T(-8, 660), '882 TMT', ['reg'], true, [['Today', '11:00–12:30', 'Gel manicure · Maral', 'c']], [3, '6 Oct', T(-8, 660)]],
+      ['x7', 'Merdan K.', '+993 62 21 08 40', 4, '5 Oct', T(-9, 1080), '360 TMT', [], false, [['Today', '18:00–18:30', 'Back massage · Leýli', 'c']]],
+      ['c6', 'Mähri G.', '+993 61 30 44 92', 4, '2 Oct', T(-12, 960), '280 TMT', [], false, [['Tomorrow', '13:00–14:00', 'Manicure · Maral', 'p', 0, '', '09:30']]],
+      ['c4', 'Sona P.', '+993 62 33 81 07', 14, '1 Oct', T(-13, 900), '896 TMT', ['reg', 'VIP'], false, [['Today', '15:00–15:30', 'Brows and lashes · Jeren', 'c'], ['Fri, 16 Oct', '12:00–12:30', 'Brows and lashes · Jeren', 'c']]],
+      ['x5', 'Nurjahan A.', '+993 62 55 07 91', 8, '30 Sep', T(-14, 720), '1,200 TMT', ['reg'], false, [['Today', '12:00–13:00', 'Full body massage · Leýli', 'c'], ['Tomorrow', '16:00–17:00', 'Facial cleansing · Jeren', 'c']]],
+      ['c1', 'Gülälek N.', '+993 65 44 70 19', 12, '28 Sep', T(-16, 690), '1,740 TMT', ['rep', 'reg', 'VIP'], true, [['Today', '11:30–13:30', 'Hair colouring · Aýna', 'c']], [8, '28 Sep', T(-16, 690)]],
+      ['c7', 'Ogulnabat Ç.', '+993 62 18 60 05', 3, '28 Sep', T(-16, 600), '450 TMT', ['po', 'rep', 'reg'], false, []],
+      ['x4', 'Jahan M.', '+993 65 13 66 48', 2, '25 Sep', T(-19, 900), '140 TMT', ['new'], false, [['Sat, 17 Oct', '15:00–16:00', 'Manicure · Maral', 'c']]],
+      ['x1', 'Aýsoltan R.', '+993 65 48 19 73', 5, '23 Sep', T(-21, 1080), '350 TMT', [], true, [['Today', '18:00–18:45', 'Hair styling · Aýna', 'c'], ['Sat, 17 Oct', '10:00–12:00', 'Hair colouring · Aýna', 'c']], [5, '23 Sep', T(-21, 1080)]],
+      ['c9', 'Läle O.', '+993 63 47 25 51', 2, '20 Sep', T(-24, 1080), '220 TMT', ['new'], false, [['Today', '18:00–19:30', 'Gel manicure · Maral', 'c']]],
+      ['c3', 'Aýjemal Gurbanowa', '+993 65 90 11 22', 3, '18 Sep', T(-26, 870), '255 TMT', ['reg'], true, [['Tomorrow', '14:30–15:30', 'Women’s haircut · Aýna', 'p', 28]], [2, '18 Sep', T(-26, 870)]],
+      ['c10', 'Döwlet B.', '+993 65 66 10 22', 6, '16 Sep', T(-28, 1020), '240 TMT', ['reg', 'Child'], true, [['Today', '17:00–17:30', 'Children’s haircut · Aýna', 'c']], [6, '16 Sep', T(-28, 1020)]],
+      ['n1', 'Aýgözel S.', '+993 64 18 52 36', 6, '11 Sep', T(-33, 600), '480 TMT', ['reg'], true, [], [6, '11 Sep', T(-33, 600)]],
+      ['n2', 'Enejan B.', '+993 62 40 77 15', 3, '4 Sep', T(-40, 960), '210 TMT', [], true, [], [3, '4 Sep', T(-40, 960)]],
+      ['c11', 'Mahym D.', '+993 65 37 48 20', 4, '3 Jul', T(-103, 600), '300 TMT', ['lap'], true, [['Fri, 16 Oct', '10:00–11:00', 'Manicure · Maral', 'c', 26, 'Sat, 17 Oct · 11:30']], [0, '—', N]],
+      ['n3', 'Ogulgerek M.', '+993 61 09 64 27', 2, '21 Jun', T(-115, 840), '120 TMT', ['rep', 'lap'], true, [], [2, '21 Jun', T(-115, 840)]],
+      ['c12', 'Ejegyz T.', '+993 64 55 12 80', 0, '—', N, '—', [], true, [['Today', '15:30–16:30', 'Women’s haircut · Aýna', 'p', 18]], [0, '—', N]],
+      ['x8', 'Arzygül H.', '+993 64 72 03 18', 0, '—', N - 1, '—', [], false, [['Fri, 16 Oct', '10:00–11:00', 'Facial cleansing · Jeren', 'p', 12]]]
     ];
-    this._c = C.map((a) => ({ id: a[0], name: a[1], ph: a[2], v: a[3], last: a[4], key: a[5], ns: a[6], avg: a[7], tags: a[8], ay: a[9], up: a[10] }));
+    this._c = C.map((a) => ({ id: a[0], name: a[1], ph: a[2], v: a[3], last: a[4], key: a[5], total: a[6], tags: a[7], ay: a[8], up: a[9], sp: a[10] || null }));
     return this._c;
   }
   renderVals() {
@@ -555,7 +557,7 @@ class Component extends DCLogic {
       admin: { name: 'Selbi Hojaýewa', ini: 'S', phone: '+993 65 88 41 02', role: 'Admin', pend: 6, ws: [['Glow Studio', 'Admin · Ashgabat', true, 6, true]] },
       specialist: { name: 'Aýna Myradowa', ini: 'A', phone: '+993 65 31 22 10', role: 'Specialist', pend: 2, ws: [['Glow Studio', 'Specialist · Ashgabat', true, 2, true], ['Aýnanyň saç studiýasy', 'Owner · Ashgabat', false, 1, false]] }
     };
-    const bannerKind = ['inReview', 'notApproved', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
+    const bannerKind = ['inReview', 'notApproved', 'hidden', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
     const isDemo = bannerKind === 'demo';
     const P = PEOPLE[role];
     const side = s.side;
@@ -564,7 +566,8 @@ class Component extends DCLogic {
     const tagOf = (t) => ({ t: (TAG[t] || [t])[0], cls: (TAG[t] || [t, 'tg tg-neu'])[1] });
     const fmt = (dg) => dg.replace(/(\d{2})(?=\d)/g, '$1 ');
     const all = s.added.concat(this.clients()).filter((c) => !s.gone[c.id]);
-    const mine = all.filter((c) => !spec || c.ay);
+    // a Specialist sees only her clients, and on them only her bookings and requests (visits, last visit, next booking)
+    const mine = all.filter((c) => !spec || c.ay).map((c) => (spec && c.sp ? Object.assign({}, c, { v: c.sp[0], last: c.sp[1], key: c.sp[2], up: c.up.filter((u) => / · Aýna$/.test(u[2])) }) : c));
     const FK = { regular: 'reg', new: 'new', lapsed: 'lap', reported: 'rep' };
     const inFilter = (c) => s.filter === 'all' || c.tags.indexOf(FK[s.filter]) >= 0;
     const qd = s.q.trim().toLowerCase();
@@ -578,36 +581,39 @@ class Component extends DCLogic {
     const sorted = mine.filter((c) => inFilter(c) && inQ(c)).sort((a, b) => (fresh.indexOf(b.id) >= 0) - (fresh.indexOf(a.id) >= 0) || b.key - a.key);
     const list = qd || s.filter !== 'all' ? sorted : sorted.slice(0, 12);
     // totals: owner and admin see the whole workspace, a Specialist her own clients
-    const base = spec ? { all: 41, regular: 14, new: 3, lapsed: 6, reported: 2 } : { all: 148, regular: 38, new: 9, lapsed: 27, reported: 3 };
+    const base = spec ? { all: 41, regular: 6, new: 0, lapsed: 2, reported: 2 } : { all: 148, regular: 39, new: 4, lapsed: 27, reported: 3 };
     const goneC = this.clients().filter((c) => s.gone[c.id]).concat(s.added.filter((c) => s.gone[c.id]));
-    const cnt = (k) => base[k] + (k === 'all' || k === 'new' ? s.added.length : 0) - goneC.filter((c) => k === 'all' || c.tags.indexOf(FK[k]) >= 0).length;
+    const cnt = (k) => base[k] + (k === 'all' ? s.added.length : 0) - goneC.filter((c) => k === 'all' || c.tags.indexOf(FK[k]) >= 0).length;
     const FL = [['all', 'All'], ['regular', 'Regular'], ['new', 'New'], ['lapsed', 'Lapsed'], ['reported', 'Reported']];
     const filters = FL.map(([id, t]) => ({ t: t, n: String(cnt(id)), on: s.filter === id, cls: s.filter === id ? 'chip on' : 'chip', pick: () => this.setState({ filter: id, menuId: null }) }));
     const count = cnt(s.filter);
     const upItem = (c, u) => {
       const pend = u[3] === 'p';
       const hot = u[4] && u[4] <= 15;
+      const tm = u[6] ? { t: 'By ' + u[6], l: 'Answer by ' + u[6] + ' tomorrow' } : { t: (u[4] || 0) + ' min', l: (u[4] || 0) + ' min left to answer' };
       const label = pend ? 'Pending' : 'Confirmed';
       return {
         when: u[0] + ' · ' + u[1], what: u[2], label: label, badgeCls: pend ? 'badge sm st-p' : 'badge sm st-c', iP: pend, iC: !pend, iD: false, iX: false, iN: false,
-        hasTmr: !!u[4], tmrText: (u[4] || 0) + ' min', tmrCls: hot ? 'tmr hot' : 'tmr', tmrLabel: (u[4] || 0) + ' min left to answer',
+        hasTmr: !!(u[4] || u[6]), tmrText: tm.t, tmrCls: hot ? 'tmr hot' : 'tmr', tmrLabel: tm.l,
         hasMv: !!u[5], mvText: 'New time requested: ' + (u[5] || ''),
         href: pend || u[5] ? 'B-Bookings.dc.html' : 'B-Calendar.dc.html',
-        aria: 'Open ' + (pend ? 'the request' : 'the booking') + ': ' + u[0] + ' · ' + u[1] + ', ' + u[2] + ', ' + label + (u[4] ? ', ' + u[4] + ' min left to answer' : '')
+        aria: 'Open ' + (pend ? 'the request' : 'the booking') + ': ' + u[0] + ' · ' + u[1] + ', ' + u[2] + ', ' + label + (u[4] || u[6] ? ', ' + tm.l.toLowerCase() : '')
       };
     };
     const rows = list.map((c, idx) => {
       const mOpen = s.menuId === c.id;
       const u = c.up[0];
       const tm = u && u[4];
+      const by = u && u[6];
+      const nm = c.name || 'Unnamed client';
       return {
         cls: 'tr ' + (seeMoney ? 'cl-o' : 'cl-n') + (mOpen || fresh.indexOf(c.id) >= 0 ? ' on' : ''),
-        name: c.name, openLabel: c.name + ' — open the client’s card', ph: c.ph, v: String(c.v), last: c.last, lastCls: c.v || c.ns ? '' : 'cap', lastNs: c.ns,
+        name: nm, unnamed: !c.name, openLabel: nm + ' — open the client’s card', ph: c.ph, v: String(c.v), last: c.last, lastCls: c.v ? '' : 'cap',
         next: u ? u[0] + ' · ' + u[1].slice(0, 5) : '—', nextCls: u ? '' : 'cap',
-        hasTmr: !!tm, tmrText: (tm || 0) + ' min', tmrCls: tm && tm <= 15 ? 'tmr hot' : 'tmr', tmrLabel: 'Request · ' + (tm || 0) + ' min left to answer',
-        avg: c.avg,
+        hasTmr: !!(tm || by), tmrText: by ? 'By ' + by : (tm || 0) + ' min', tmrCls: tm && tm <= 15 ? 'tmr hot' : 'tmr', tmrLabel: by ? 'Request · answer by ' + by + ' tomorrow' : 'Request · ' + (tm || 0) + ' min left to answer',
+        total: c.total,
         tags: c.tags.map(tagOf),
-        menuOpen: mOpen, menuCell: mOpen ? 'z1 zup' : 'z1', menuLabel: 'Actions: ' + c.name,
+        menuOpen: mOpen, menuCell: mOpen ? 'z1 zup' : 'z1', menuLabel: 'Actions: ' + nm,
         menuPos: (idx >= 3 && idx >= list.length - 3 ? 'bottom: 40px' : 'top: 40px') + '; right: 0; width: 240px',
         toggleMenu: () => this.setState({ menuId: mOpen ? null : c.id, side: null }),
         copy: () => this.flash({ menuId: null }, 'Number copied · ' + c.ph),
@@ -620,7 +626,8 @@ class Component extends DCLogic {
     else footText = (FL.find((x) => x[0] === s.filter) || FL[0])[1] + ' · ' + this.pl(count, 'client');
 
     // delete modal
-    const dc = s.modal === 'del' ? all.find((c) => c.id === s.delId) : null;
+    const dc0 = s.modal === 'del' ? all.find((c) => c.id === s.delId) : null;
+    const dc = dc0 ? Object.assign({}, dc0, { name: dc0.name || 'Unnamed client' }) : null;
     const dm = { title: '', lead: '', blocked: false, allowed: false, items: [], listLabel: '' };
     if (dc) {
       const nb = dc.up.filter((u) => u[3] === 'c').length;
@@ -662,7 +669,7 @@ class Component extends DCLogic {
       navReqLabel: P.pend > 0 ? 'Bookings, ' + this.pl(P.pend, 'request') : 'Bookings',
       me: { name: P.name, ini: P.ini, phone: P.phone, role: P.role },
       wsAria: 'Workspace: Glow Studio, ' + P.role + '. Switch',
-      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
+      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none' && !(bannerKind === 'hidden' && role === 'specialist'), bnHidden: bannerKind === 'hidden' && role !== 'specialist', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
       contactOpen: side === 'contact', openContact: () => this.setState({ side: 'contact' }),
       wsList: P.ws.map((w) => ({
         example: false,
@@ -691,7 +698,7 @@ class Component extends DCLogic {
       isEmpty: empty,
       emptyText: spec ? 'Clients show up here after their first booking with you.' : 'Clients show up here after their first booking — online or one you add.',
       totalText: this.pl(cnt('all'), 'client'),
-      subText: spec ? 'everyone who has a booking with you' : (9 + s.added.length) + ' new this month',
+      subText: spec ? 'everyone who has a booking with you' : '2 new this month',
       filters: filters,
       q: s.q,
       hasQ: !!s.q,
@@ -700,7 +707,7 @@ class Component extends DCLogic {
       headCls: 'tr th ' + (seeMoney ? 'cl-o' : 'cl-n'),
       rows: rows,
       showNoMatch: list.length === 0,
-      noMatchText: spec ? 'You see only clients who have a booking with you.' : (qd ? 'Type the full number or add a new client.' : 'No clients with this tag yet.'),
+      noMatchText: !qd ? 'No clients with this tag yet.' : (spec ? 'You see only clients who have a booking with you.' : 'Type the full number or add a new client.'),
       footText: footText,
       showPager: !qd && Math.ceil(count / 12) > 1 && list.length > 0,
       pageBtns: (() => {
@@ -726,7 +733,7 @@ class Component extends DCLogic {
       phIdle: !full,
       phNew: canSave,
       phDup: !!dup,
-      dupName: dup ? dup.name : '',
+      dupName: dup ? (dup.name || 'an unnamed client') : '',
       name: s.name,
       onName: (e) => this.setState({ name: e.target.value.slice(0, 60) }),
       bday: s.bday,
@@ -748,11 +755,11 @@ class Component extends DCLogic {
       saveNew: () => {
         const st = this.state;
         if (st.ph.length !== 8) return;
-        const tags = ['new'].concat(['VIP', 'Child'].concat(st.custom).filter((t) => st.tags[t]));
+        const tags = ['VIP', 'Child'].concat(st.custom).filter((t) => st.tags[t]);
         const phone = '+993 ' + fmt(st.ph);
-        const nm = st.name.trim() || phone;
-        const c = { id: 'a' + (st.added.length + 1), name: nm, ph: phone, v: 0, last: '—', key: -2e9, ns: false, avg: '—', tags: tags, ay: false, up: [] };
-        this.flash(Object.assign({ added: [c].concat(st.added), modal: null, filter: st.filter === 'new' ? 'new' : 'all', q: '' }, this.blankForm(false)), 'Client added · ' + nm);
+        const nm = st.name.trim();
+        const c = { id: 'a' + (st.added.length + 1), name: nm, ph: phone, v: 0, last: '—', key: -2e9, total: '—', tags: tags, ay: false, up: [], sp: null };
+        this.flash(Object.assign({ added: [c].concat(st.added), modal: null, filter: st.filter === 'new' ? 'new' : 'all', q: '' }, this.blankForm(false)), 'Client added · ' + (nm || 'Unnamed client · ' + phone));
       }
     };
   }

@@ -222,6 +222,7 @@ button.y-pill:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px 
 <sc-if value="{{bnOn}}" hint-placeholder-val="{{false}}"><div class="bnw">
 <sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnx"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
 <sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
+<sc-if value="{{bnHidden}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Ýeral has hidden your page:</b> Clients reported that your page shows the wrong address. Clients can’t find or book you.</span><button class="b b-sec b-sm" style="flex: none" onClick="{{openContact}}">Contact Ýeral</button></div></sc-if>
 <sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnx"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
 </div></sc-if>
 <div class="rwrap">
@@ -430,7 +431,7 @@ button.y-pill:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px 
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"filter":{"editor":"enum","options":["all","unanswered"],"default":"all","section":"State"},"composer":{"editor":"boolean","default":true,"section":"State"},"report":{"editor":"boolean","default":false,"section":"State"},"moderation":{"editor":"enum","options":["none","checking","cleared","removed","noDecision"],"default":"checking","section":"State"},"first":{"editor":"boolean","default":false,"section":"State"},"empty":{"editor":"boolean","default":false,"section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":4480}}'>
+<script type="text/x-dc" data-dc-script data-props='{"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"filter":{"editor":"enum","options":["all","unanswered"],"default":"all","section":"State"},"composer":{"editor":"boolean","default":true,"section":"State"},"report":{"editor":"boolean","default":false,"section":"State"},"moderation":{"editor":"enum","options":["none","checking","cleared","removed","noDecision"],"default":"checking","section":"State"},"first":{"editor":"boolean","default":false,"section":"State"},"empty":{"editor":"boolean","default":false,"section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","hidden","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":4480}}'>
 class Component extends DCLogic {
   // v0.6 round 3 (V06-R3-BRIEF §6). Demo: business-demo.json → reviews (96 counted, 88 / 6 / 1 / 1 / 0) + Merdan K.'s reported 1-star review.
   constructor(props) {
@@ -484,7 +485,7 @@ class Component extends DCLogic {
   seed(p) {
     const m = this.mode(p);
     if (m === 'empty') return [];
-    // every review comes from a completed booking: service + specialist; reviewer = first name + initial (or first name only)
+    // every review comes from a completed booking: service + specialist; reviewer = the saved client name (staff screen, round 3.2): full name, name + initial or first name only, as saved
     const R = (id, name, when, age, rating, svc, staff, text, reply, extra) => Object.assign({
       id: id, name: name, when: when, age: age, rating: rating, svc: svc, staff: staff, text: text,
       reply: reply ? { text: reply[0], when: reply[1], by: reply[2] || 'Glow Studio · Maýsa' } : null, mod: 'none', reason: ''
@@ -497,7 +498,7 @@ class Component extends DCLogic {
       R('mahri', 'Mähri G.', 'Yesterday', 1, 5, 'Manicure', 'Maral', 'Always on time, clean and kind.', null),
       R('gozel', 'Gözel A.', 'Yesterday', 1.2, 5, 'Back massage', 'Leýli', 'Leýli found exactly where it hurt. My back feels so much better.', ['Thank you, Gözel! Come again soon.', 'Yesterday']),
       R('merdan', 'Merdan K.', 'Yesterday', 1.5, 1, 'Back massage', 'Leýli', 'Worst salon ever, go to “Altyn Gül” instead!', null, { mod: this.modOf(p), reason: 'About another business' }),
-      R('ayjemal', 'Aýjemal G.', '2 days ago', 2, 5, 'Women’s haircut', 'Aýna', '', null),
+      R('ayjemal', 'Aýjemal Gurbanowa', '2 days ago', 2, 5, 'Women’s haircut', 'Aýna', '', null),
       R('sahra', 'Sähra T.', '3 days ago', 3, 5, 'Brows and lashes', 'Jeren', 'Neat brows in half an hour, right on time.', ['Thank you, Sähra! See you next time.', '3 days ago', 'Glow Studio · Selbi']),
       R('myrat', 'Myrat B.', '5 days ago', 5, 5, 'Full body massage', 'Leýli', 'Good massage in a calm room.', ['Thank you, Myrat!', '5 days ago']),
       R('bahar', 'Bahar A.', '1 week ago', 7, 4, 'Facial cleansing', 'Jeren', 'The service is good, but I had to wait a little before it started.', ['Bahar, we’re sorry you had to wait. We now leave extra time between bookings.', '1 week ago']),
@@ -543,7 +544,7 @@ class Component extends DCLogic {
       specialist: { name: 'Aýna Myradowa', first: 'Aýna', ini: 'A', phone: '+993 65 31 22 10', role: 'Specialist', req: 2, ws: [['Glow Studio', 'Specialist · Ashgabat', true, 2, true], ['Aýnanyň saç studiýasy', 'Owner · Ashgabat', false, 1, false]] }
     };
     const P = PEOPLE[role];
-    const bannerKind = ['inReview', 'notApproved', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
+    const bannerKind = ['inReview', 'notApproved', 'hidden', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
     const isDemo = bannerKind === 'demo';
     const side = s.side;
     const menuTo = (k) => () => this.setState({ side: side === k ? null : k, staffOpen: false, menuFor: null });
@@ -688,7 +689,7 @@ class Component extends DCLogic {
       // shell
       me: { name: P.name, ini: P.ini, phone: P.phone, role: P.role },
       wsAria: 'Workspace: Glow Studio, ' + P.role + '. Switch',
-      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
+      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none' && !(bannerKind === 'hidden' && spec), bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnHidden: bannerKind === 'hidden' && !spec, bnDemo: isDemo,
       wsList: P.ws.map((w) => ({
         example: false,
         name: w[0], cap: w[1], logo: w[2], noLogo: !w[2], ini: w[0].charAt(0), cur: w[4], other: !w[4], hasPend: w[3] > 0, pend: String(w[3]),

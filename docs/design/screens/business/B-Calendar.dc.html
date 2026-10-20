@@ -450,6 +450,7 @@ div.gin{min-width:min-content}
 <sc-if value="{{bnOn}}" hint-placeholder-val="{{false}}"><div class="bnw">
 <sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnx"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
 <sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
+<sc-if value="{{bnHidden}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Ýeral has hidden your page:</b> Clients reported that your page shows the wrong address. Clients can’t find or book you.</span><button class="b b-sec b-sm" style="flex: none" onClick="{{openContact}}">Contact Ýeral</button></div></sc-if>
 <sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnx"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
 </div></sc-if>
 
@@ -498,7 +499,7 @@ div.gin{min-width:min-content}
 <div class="lgr"><span class="badge sm st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Confirmed</span><span>Time set, the client was told</span></div>
 <div class="lgr"><span class="badge sm st-d"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg>Completed</span><span>The visit happened (set by itself after the end time)</span></div>
 <div class="lgr"><span class="badge sm st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Cancelled</span><span>The client, the business or the system cancelled</span></div>
-<div class="lgr"><span class="badge sm st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>No-show</span><span>The client didn’t come — marked with Report from the visit’s start</span></div>
+<div class="lgr"><span class="badge sm st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>No-show</span><span>The client didn’t come — marked with Report, up to 24 h after the visit</span></div>
 </div>
 <div class="lgs"><span class="lbl">Source</span>
 <div class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>Online — the client booked on Ýeral</span></div>
@@ -699,7 +700,7 @@ div.gin{min-width:min-content}
 <a class="lnk" href="B-Client.dc.html">Open the client’s card<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
 </div>
 <dl class="dl"><sc-for list="{{bv.details}}" as="dr" hint-placeholder-count="5"><div class="{{dr.cls}}"><dt>{{dr.k}}</dt><dd>{{dr.v}}</dd></div></sc-for></dl>
-<sc-if value="{{bv.hasReport}}" hint-placeholder-val="{{false}}"><div class="rpb"><span class="lbl" style="color: #a3251b">{{bv.reportHead}}</span><sc-for list="{{bv.reports}}" as="rr" hint-placeholder-count="1"><div class="rpr"><span class="rpl">{{rr.line}}</span><button class="b b-sec b-sm" aria-label="{{rr.aria}}" onClick="{{rr.remove}}">Remove report</button></div></sc-for><span class="cap">{{bv.reportCap}}</span></div></sc-if>
+<sc-if value="{{bv.hasReport}}" hint-placeholder-val="{{false}}"><div class="rpb"><span class="lbl" style="color: #a3251b">Report</span><div class="rpr"><span class="rpl">{{bv.reportLine}}</span><button class="b b-sec b-sm" onClick="{{removeReport}}">Remove report</button></div><span class="cap">{{bv.reportCap}}</span></div></sc-if>
 <sc-if value="{{bv.hasCNote}}" hint-placeholder-val="{{false}}"><figure class="qbox"><figcaption class="lbl">Client note</figcaption><blockquote class="qtxt">“{{bv.cnote}}”</blockquote></figure></sc-if>
 <div class="fld"><label class="flab" for="bv-note">Internal note</label><textarea id="bv-note" class="inp ta" value="{{bv.note}}" onInput="{{onNote}}" placeholder="For example: a colour code or a special request" aria-describedby="bv-note-c"></textarea><span id="bv-note-c" class="cap">{{bv.noteCap}}</span></div>
 <div class="dsec">
@@ -909,7 +910,7 @@ div.gin{min-width:min-content}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["dayAll","dayOne","weekAll","weekOne"],"default":"dayAll","section":"State"},"panel":{"editor":"enum","options":["none","request","move-request","booking","new","slot-menu","block-time","block-error","decline","report-menu","report-noshow","report-added","reported","complaint","move"],"default":"none","section":"State"},"legend":{"editor":"boolean","default":false,"section":"State"},"internal":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"answers":{"editor":"enum","options":["both","each","desk"],"default":"both","section":"Access"},"clock":{"editor":"enum","options":["day","evening"],"default":"day","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1360}}'>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","options":["dayAll","dayOne","weekAll","weekOne"],"default":"dayAll","section":"State"},"panel":{"editor":"enum","options":["none","request","move-request","booking","new","slot-menu","block-time","block-error","decline","report-menu","report-noshow","report-added","reported","complaint","move"],"default":"none","section":"State"},"legend":{"editor":"boolean","default":false,"section":"State"},"internal":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"answers":{"editor":"enum","options":["both","each","desk"],"default":"both","section":"Access"},"clock":{"editor":"enum","options":["day","evening"],"default":"day","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","hidden","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1360}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -993,15 +994,16 @@ class Component extends DCLogic {
       { id: 'c4', name: 'Sona P.', phone: '+993 62 33 81 07', visits: 14, avg: '64 TMT', last: '1 October' },
       { id: 'c5', name: 'Bahar A.', phone: '+993 65 70 33 18', visits: 9, avg: '98 TMT', last: '6 October' },
       { id: 'c6', name: 'Mähri G.', phone: '+993 61 30 44 92', visits: 4, avg: '70 TMT', last: '2 October' },
-      { id: 'c7', name: 'Ogulnabat Ç.', phone: '+993 62 18 60 05', visits: 3, avg: '150 TMT', last: 'Today · no-show', noShows: 2, blocked: true, alert: '2 no-shows — book by phone only.' },
+      { id: 'c7', name: 'Ogulnabat Ç.', phone: '+993 62 18 60 05', visits: 3, avg: '150 TMT', last: '28 September', noShows: 2, blocked: true, alert: '2 no-shows — book by phone only.' },
       { id: 'c8', name: 'Merjen K.', phone: '+993 65 02 91 66', visits: 5, avg: '60 TMT', last: 'Today' },
       { id: 'c9', name: 'Läle O.', phone: '+993 63 47 25 51', visits: 2, avg: '110 TMT', last: '20 September' },
       { id: 'c10', name: 'Döwlet B.', phone: '+993 65 66 10 22', visits: 6, avg: '40 TMT', last: '16 September' },
       { id: 'c11', name: 'Mahym D.', phone: '+993 65 37 48 20', visits: 4, avg: '75 TMT', last: '3 July' },
+      { id: 'c13', name: 'Şemşat K.', phone: '+993 63 18 74 52', visits: 2, avg: '90 TMT', last: '7 October', hist: [['7 October', 'Gel manicure · Maral', '110 TMT', 'completed'], ['2 October', 'Manicure · Maral', '70 TMT', 'completed']] },
       { id: 'c12', name: 'Ejegyz T.', phone: '+993 64 55 12 80', visits: 0, avg: '—', last: '—' },
       { id: 'x1', name: 'Aýsoltan R.', phone: '+993 65 48 19 73', visits: 5, avg: '70 TMT', last: '23 September' },
       { id: 'x2', name: 'Aýgül R.', phone: '+993 61 27 54 09', visits: 6, avg: '75 TMT', last: 'Today' },
-      { id: 'x3', name: 'Jemal S.', phone: '+993 64 90 31 26', visits: 3, avg: '90 TMT', last: '9 September' },
+      { id: 'x3', name: 'Jemal S.', phone: '+993 64 90 31 26', visits: 3, avg: '90 TMT', last: '12 October' },
       { id: 'x4', name: 'Jahan M.', phone: '+993 65 13 66 48', visits: 2, avg: '70 TMT', last: '25 September' },
       { id: 'x5', name: 'Nurjahan A.', phone: '+993 62 55 07 91', visits: 8, avg: '150 TMT', last: '30 September' },
       { id: 'x6', name: 'Gözel A.', phone: '+993 65 73 26 41', visits: 1, avg: '90 TMT', last: '13 October' },
@@ -1019,7 +1021,7 @@ class Component extends DCLogic {
       ['b08', 'maral', 660, 750, 'c5', 's6', 'confirmed', 'online'],
       ['b09', 'maral', 780, 855, 'x3', 's7', 'confirmed', 'online'],
       ['b17', 'maral', 900, 960, 'x4', 's5', 'cancelled', 'online', { by: 'client' }],
-      ['b10', 'maral', 960, 1020, 'c6', 's5', 'pending', 'online', { hold: 24 }],
+      ['b10', 'maral', 960, 1020, 'c13', 's5', 'pending', 'online', { hold: 24 }],
       ['b11', 'maral', 1080, 1170, 'c9', 's6', 'confirmed', 'phone'],
       ['b12', 'jeren', 600, 660, 'c7', 's8', 'noshow', 'online', { reports: [{ k: 'noshow', text: '', at: '10:25', by: 'Selbi Hojaýewa', off: 0 }] }],
       ['b13', 'jeren', 900, 930, 'c4', 's9', 'confirmed', 'online'],
@@ -1189,11 +1191,13 @@ class Component extends DCLogic {
     const has = (k) => reps.some((r) => r.k === k);
     const started = b.off < 0 || (b.off === 0 && b.from <= now);
     const sinceEnd = -b.off * 1440 + now - b.to;
+    // one report per booking: a No-show (from the start until 24 h after the end) may replace an earlier report of another type
+    const nsWin = started && sinceEnd < 1440;
+    if (reps.length) return reps[0].k !== 'noshow' && nsWin ? ['noshow'] : [];
     const out = [];
-    if (started && !has('late') && !has('noshow') && sinceEnd < 1440) out.push('noshow');
-    if (started && !has('late')) out.push('late');
-    if (!has('rude')) out.push('rude');
-    out.push('other');
+    if (nsWin) out.push('noshow');
+    if (started) out.push('late');
+    out.push('rude', 'other');
     return out;
   }
   elseAt(stId, off, t) {
@@ -1237,16 +1241,27 @@ class Component extends DCLogic {
     const base = D.BASE.filter((b) => b.off === 0 && b.status !== 'cancelled');
     const realDay = D.BASE.filter((b) => b.off === off).concat(D.BASE.filter((b) => b.mv && b.mv.off === off).map((b) => ({ staff: b.mv.staff || b.staff, from: b.mv.from, to: b.mv.to })));
     const out = [];
-    const L = D.ROT.length;
+    const pool = off < 0 ? ['c2', 'c8', 'x2'] : D.ROT;
+    const L = pool.length;
     base.forEach((b, i) => {
       if ((i + Math.abs(off)) % 2 !== 0) return;
       const h = this.hrs(this.staff(b.staff), off);
       if (h.off || b.from < h.from || b.to > h.to) return;
       if (realDay.some((r) => r.staff === b.staff && b.from < r.to + 10 && r.from < b.to + 10)) return;
-      const cid = D.ROT[(((i * 3 + off * 7) % L) + L) % L];
+      const cid = pool[(((i * 3 + off * 7) % L) + L) % L];
       out.push({ id: 'g' + off + '_' + b.id, off: off, staff: b.staff, from: b.from, to: b.to, cid: cid, svcs: b.svcs, status: off < 0 ? 'completed' : 'confirmed', source: b.source, gen: true });
     });
-    return out;
+    if (off > 0) return out;
+    // past days: never the same client twice at once (a booking with no free client is left out)
+    const taken = {};
+    return out.sort((a, b) => a.from - b.from).filter((g, k) => {
+      for (let j = 0; j < L; j++) {
+        const cid = pool[(k + j) % L];
+        const t = taken[cid] || [];
+        if (!t.some((r) => g.from < r[1] + 30 && r[0] < g.to + 30)) { t.push([g.from, g.to]); taken[cid] = t; g.cid = cid; return true; }
+      }
+      return false;
+    });
   }
   day(off) {
     const ov = this.state.ov;
@@ -1535,7 +1550,7 @@ class Component extends DCLogic {
     const pendChip = this.pl(pendCount, 'request');
     const pendChipAria = this.pl(pendCount, 'unanswered request') + ' — open the most urgent';
 
-    const bannerKind = ['inReview', 'notApproved', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
+    const bannerKind = ['inReview', 'notApproved', 'hidden', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
     const isDemo = bannerKind === 'demo';
     const P = D.PEOPLE[role];
     const me = { name: P.name, ini: P.ini, phone: P.phone, role: P.role };
@@ -1785,7 +1800,7 @@ class Component extends DCLogic {
           ? 'The timer counts only while you’re open, so it waits until ' + this.hm(this.openAt(1)) + '. If no one answers by ' + this.hm(this.timer(hold).by) + ', the request is cancelled' + (isMove ? ' — the booking stays at its time.' : ' and the client is offered 3 other times.')
           : 'If no one answers, the request is cancelled at ' + this.hm(this.now() + hold) + (isMove ? ' — the booking stays at its time.' : ' and the client is offered 3 other times.'),
         ini: cl.name.charAt(0), client: cl.name, phone: cl.phone,
-        isNewCl: !cl.visits, hasVisits: !!cl.visits, visits: this.pl(cl.visits, 'visit') + avgOf(cl),
+        isNewCl: false, hasVisits: true, visits: this.pl(cl.visits, 'visit') + avgOf(cl),
         hasNoShow: !!cl.noShows, noShowLabel: this.pl(cl.noShows || 0, 'no-show'),
         hasAlert: !!(b.alert || cl.alert), alert: b.alert || cl.alert || '',
         details: det.map((r, i) => ({ k: r[0], v: r[1], cls: i === det.length - 1 ? 'dr last' : 'dr' })),
@@ -1813,22 +1828,23 @@ class Component extends DCLogic {
       this.say({ ov: ov, panel: 'none', target: null, modal: null, hiId: id }, 'Booking confirmed · the client is notified', 'ok', rest.length ? 'next' : null);
     };
 
-    let bv = { rOpen: false, rItems: [], rmpCls: 'pop rmp', hasReport: false, reportHead: '', reports: [], reportCap: '', badgeCls: 'badge', iP: false, iC: false, iD: false, iX: false, iN: false, showIst: false, istVal: '', status: '', srcOnline: false, srcPhone: false, isX: false, xLine: '', hasAlert: false, alert: '', ini: '', client: '', phone: '', callAria: '', stats: '', hasNoShow: false, noShowLabel: '', blocked: false, details: [], hasCNote: false, cnote: '', note: '', noteCap: '', hasHist: false, noHist: true, hist: [], lastLine: '', canMove: false, canComplain: false, canCancel: false, hasFoot: false };
+    let bv = { rOpen: false, rItems: [], rmpCls: 'pop rmp', hasReport: false, reportLine: '', reportCap: '', badgeCls: 'badge', iP: false, iC: false, iD: false, iX: false, iN: false, showIst: false, istVal: '', status: '', srcOnline: false, srcPhone: false, isX: false, xLine: '', hasAlert: false, alert: '', ini: '', client: '', phone: '', callAria: '', stats: '', hasNoShow: false, noShowLabel: '', blocked: false, details: [], hasCNote: false, cnote: '', note: '', noteCap: '', hasHist: false, noHist: true, hist: [], lastLine: '', canMove: false, canComplain: false, canCancel: false, hasFoot: false };
     const RL = { noshow: 'No-show', late: 'Came late', rude: 'Rude behaviour', other: 'Other' };
     const RD = { noshow: 'The booking becomes No-show · counts towards Phone only', late: 'The booking doesn’t change', rude: 'The booking doesn’t change', other: 'Write what happened' };
     const reportAs = (k, text) => {
       if (!tb) return;
       if (k === 'other' && !text) { this.up({ modal: 'complaint', cReason: 'Other', cText: '' }); return; }
       const ov = Object.assign({}, s.ov);
-      const o = Object.assign({}, s.ov[tb.id] || {}, { reports: (tb.reports || []).concat([{ k: k, text: text || '', at: this.hm(this.now()), by: me.name, off: 0 }]) });
+      const had = (tb.reports || []).length > 0;
+      const o = Object.assign({}, s.ov[tb.id] || {}, { reports: [{ k: k, text: text || '', at: this.hm(this.now()), by: me.name, off: 0 }] });
       if (k === 'noshow') o.status = 'noshow';
       ov[tb.id] = o;
-      this.say({ ov: ov, modal: null }, k === 'noshow' ? 'Marked as No-show · saved to the client’s card' : 'Report saved to the client’s card');
+      this.say({ ov: ov, modal: null }, k === 'noshow' ? (had ? 'Marked as No-show · replaces the earlier report' : 'Marked as No-show · saved to the client’s card') : 'Report saved to the client’s card');
     };
-    const removeReportAt = (i) => {
+    const removeReport = () => {
       if (!tb) return;
-      const reps = (tb.reports || []).slice();
-      const gone = reps.splice(i, 1)[0];
+      const reps = [];
+      const gone = (tb.reports || [])[0];
       if (!gone) return;
       const ended = tb.off < 0 || (tb.off === 0 && tb.to <= this.now());
       const ov = Object.assign({}, s.ov);
@@ -1853,8 +1869,8 @@ class Component extends DCLogic {
       const hist = (cl.hist || []).slice(0, 3);
       const canMove = b.status === 'confirmed' && future;
       const reps = b.reports || [];
-      const canComplain = b.status === 'confirmed' || b.status === 'completed';
-      const rItems = this.reportKinds(b).map((k) => ({ t: RL[k] + (k === 'other' ? '…' : ''), d: RD[k], pick: () => reportAs(k) }));
+      const canComplain = (b.status === 'confirmed' || b.status === 'completed') && this.reportKinds(b).length > 0;
+      const rItems = this.reportKinds(b).map((k) => ({ t: RL[k] + (k === 'other' ? '…' : ''), d: k === 'noshow' && reps.length ? 'Replaces the earlier report · the booking becomes No-show' : RD[k], pick: () => reportAs(k) }));
       bv = Object.assign({
         badgeCls: 'badge ' + bd[0], status: bd[2],
         showIst: internalOn && b.status === 'confirmed', istVal: s.istat[b.id] || '',
@@ -1862,7 +1878,7 @@ class Component extends DCLogic {
         isX: b.status === 'cancelled', xLine: b.by === 'client' ? 'The client cancelled' + (b.reason ? ' · ' + b.reason : '') : 'The business cancelled' + (b.reason ? ' · ' + b.reason : ''),
         hasAlert: !!(b.alert || cl.alert), alert: b.alert || cl.alert || '',
         ini: cl.name.charAt(0), client: cl.name, phone: cl.phone, callAria: 'Call: ' + cl.name + ', ' + cl.phone,
-        stats: cl.visits ? this.pl(cl.visits, 'visit') + avgOf(cl) : 'New client',
+        stats: this.pl(cl.visits, 'visit') + avgOf(cl),
         hasNoShow: !!cl.noShows, noShowLabel: this.pl(cl.noShows || 0, 'no-show'), blocked: !!cl.blocked,
         details: det.map((r, i) => ({ k: r[0], v: r[1], cls: i === det.length - 1 ? 'dr last' : 'dr' })),
         hasCNote: !!b.note, cnote: b.note || '',
@@ -1872,9 +1888,9 @@ class Component extends DCLogic {
         lastLine: cl.last && cl.last !== '—' ? 'Last visit: ' + cl.last + ' · full history on the client’s card' : 'No earlier visits',
         canMove: canMove, canComplain: canComplain, canCancel: canMove, hasFoot: canMove || canComplain,
         rOpen: !!s.rmenu && canComplain, rItems: rItems, rmpCls: 'pop rmp' + (canMove ? ' rmr' : ''),
-        hasReport: reps.length > 0, reportHead: reps.length > 1 ? 'Reports' : 'Report',
-        reports: reps.map((r, i) => ({ line: RL[r.k] + (r.text ? ' · ' + r.text : '') + ' · ' + (r.off === 0 ? 'today' : this.dDM(r.off)) + ' · ' + r.at + ' · ' + r.by, aria: 'Remove report: ' + RL[r.k], remove: () => removeReportAt(i) })),
-        reportCap: reps.length > 1 ? 'The client isn’t told. You can remove each report for 7 days.' : 'The client isn’t told. You can remove it until ' + this.dDM((reps.length ? reps[0].off : 0) + 7) + '.'
+        hasReport: reps.length > 0,
+        reportLine: reps.length ? RL[reps[0].k] + (reps[0].text ? ' · ' + reps[0].text : '') + ' · ' + (reps[0].off === 0 ? 'today' : this.dDM(reps[0].off)) + ' · ' + reps[0].at + ' · ' + reps[0].by : '',
+        reportCap: 'The client isn’t told. You can remove it until ' + this.dDM((reps.length ? reps[0].off : 0) + 7) + '.'
       }, this.sti(b.status));
     }
     const onIst = (e) => {
@@ -1904,7 +1920,7 @@ class Component extends DCLogic {
       if (!q) res = allCl.filter((c) => c.visits > 0).sort((a, b) => b.visits - a.visits).slice(0, 4);
       else res = allCl.filter((c) => c.name.toLowerCase().indexOf(q) >= 0 || (qd.length >= 2 && c.phone.replace(/\D/g, '').indexOf(qd) >= 0)).slice(0, 6);
       const pickCl = (c) => this.setNw({ cid: c.id, phone: dig8(c.phone), byName: false, q: '', tried: false });
-      const rowOf = (c) => ({ ini: c.name.charAt(0), name: c.name, phone: c.phone, meta: c.visits ? this.pl(c.visits, 'visit') : 'New', hasFlag: !!c.blocked, pick: () => pickCl(c) });
+      const rowOf = (c) => ({ ini: c.name.charAt(0), name: c.name, phone: c.phone, meta: this.pl(c.visits, 'visit'), hasFlag: !!c.blocked, pick: () => pickCl(c) });
       const results = res.map(rowOf);
       const digitsOnly = /^[\d\s+]+$/.test(nw.q.trim());
       let qPhone = qd;
@@ -2054,7 +2070,7 @@ class Component extends DCLogic {
         this.say(patch, 'Booking saved' + (isWalk ? ' · walk-in' : '') + (nw.sms ? ' · the client is notified' : ''));
       };
       const clv = cl ? {
-        ini: cl.name.charAt(0), name: cl.name, phone: cl.phone, meta: cl.visits ? this.pl(cl.visits, 'visit') + avgOf(cl) : 'New client',
+        ini: cl.name.charAt(0), name: cl.name, phone: cl.phone, meta: this.pl(cl.visits, 'visit') + avgOf(cl),
         hasAlert: !!cl.alert, alert: cl.alert || '', blocked: !!cl.blocked, hasNs: !!cl.noShows, nsLabel: this.pl(cl.noShows || 0, 'no-show'), hasTags: !!cl.blocked || !!cl.noShows
       } : { ini: '', name: '', phone: '', meta: '', hasAlert: false, alert: '', blocked: false, hasNs: false, nsLabel: '', hasTags: false };
       nv = {
@@ -2203,9 +2219,9 @@ class Component extends DCLogic {
       fontStack, hasPend, noPend, pendCount, pendAria, pendChip, pendChipAria, openNewBlank,
       me, wsAria, wsList, wsOpen, userOpen, moreOpen, legendOpen, toggleWs, toggleUser, toggleMore, toggleLegend, closeMenus, menuKey,
       showSettings, showRevBadge, showStaffSeg, showStChips, stChips, internalOn, isDemo, notDemo: !isDemo, contactOpen, openContact,
-      bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
+      bnOn: bannerKind !== 'none' && !(bannerKind === 'hidden' && role === 'specialist'), bnHidden: bannerKind === 'hidden' && role !== 'specialist', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
       closeSm: () => this.setState({ sm: null }), smKey: (e) => { if (e && e.key === 'Escape') this.setState({ sm: null }); },
-      showBlock, bk, toggleRmenu, closeRmenu, rmKey, sumBkW, sumReqW, wkBkW, wkReqW,
+      showBlock, bk, removeReport, toggleRmenu, closeRmenu, rmKey, sumBkW, sumReqW, wkBkW, wkReqW,
       goToday, goPrev, goNext, prevLabel, nextLabel, datePop, toggleDate, closeDate, dateKey, goTodayClose, dateLabel, monthLabel, calDays,
       rangeSegs, modeSegs, selCls, staffId, pickStaff, openQueue, showX, toggleX,
       isDay, isWeek, isWeekAll, isWeekOne, sumBk, sumReq, showRev, revLabel, revText, wkBk, wkReq, wkWho,

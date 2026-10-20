@@ -326,6 +326,10 @@ button.sn:hover{background:#f4f4f6}
 .mhd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 .mhd > div{display:flex;flex-direction:column;gap:4px;min-width:0}
 .mi:focus-visible,.tbi:focus-visible,.mws:focus-visible,.opt:focus-visible,.sgb:focus-visible,.wsr:focus-visible{outline:none;box-shadow:0 0 0 2px #ffffff,0 0 0 4px #7a5ff4}
+.fcr{display:flex;justify-content:space-between;align-items:flex-start;gap:4px 12px;flex-wrap:wrap}
+.ccount{margin-left:auto;font-size:13px;line-height:18px;color:#5a5a64;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ccount.over{color:#a3251b;font-weight:600}
+.inp.ta.is-e{border-color:#d9412f;box-shadow:0 0 0 3px #fee4e2}
 @media (max-width:1407px){.pv{flex-basis:100%;max-width:720px;position:static}}
 @media (max-width:1023px){.side{width:72px;padding:12px 14px;align-items:center}.side > div{align-self:stretch}.side .swb{justify-content:center;width:44px;padding:4px}.side .swb > span,.side .swb > svg{display:none !important}.side .sn{font-size:0;gap:0;width:44px;height:44px;padding:0;justify-content:center;position:relative}.side .sn .cnt{position:absolute;top:6px;right:6px;width:8px;height:8px;min-width:0;padding:0;border:0;background:#dc8b0b;font-size:0}.side .sn .cnt-n{background:#6e6e78}.me{flex-direction:column;gap:4px !important;padding:4px 0 !important}.mex{display:none !important}.ump{bottom:96px;left:8px}.top{padding:0 24px}.toast{left:96px;max-width:calc(100% - 120px)}.bnw{padding:14px 24px 0}.cont{padding:24px 24px 48px}.setl{flex-direction:column;gap:20px}.snav{position:static;width:auto;align-self:stretch;flex-direction:row;overflow-x:auto;gap:8px;margin:0 -24px;padding:0 24px 4px}.snav .sn{flex:none;width:auto;height:44px;padding:0 16px;gap:8px;border:1px solid #d8d8de;border-radius:999px;white-space:nowrap;font-size:14px}.snav .sn.on{border-color:#d5cbfb}.pwrap{width:100%;flex:none}}
 @media (max-width:767px){.app{flex-direction:column}.side{display:none !important}.mws{display:inline-flex}.main{padding-bottom:72px}.tabbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:35;padding:0 4px;background:#ffffff;border-top:1px solid #e6e6ea}.top{height:56px;padding:0 16px;gap:10px}.top h1{font-size:19px !important;line-height:24px !important}.bnw{padding:12px 16px 0}.wsp{top:60px;left:8px;right:8px;width:auto}.cont{padding:16px 16px 40px}.snav{margin:0 -16px;padding:0 16px 4px}.scw{flex-basis:100%}.isel{min-width:0;width:100%}.sr > .selw{width:100%}.qrc{padding:16px}.sbar{bottom:80px;padding:12px}.sbar .b{flex:1 1 auto}.g2,.gad{grid-template-columns:minmax(0,1fr)}.mwrap{align-items:flex-end;padding:0}.mdl{width:100%;max-height:92%;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(16,16,20,.16);padding:12px 16px 20px}.mdl .grab{display:block}.mact .b{flex:1 1 auto}.toast{left:16px;right:16px;bottom:80px;max-width:none}.str{grid-template-columns:minmax(0,1fr)}.icg{grid-template-columns:repeat(4,minmax(0,1fr))}.wkb{overflow-x:visible}.wr{min-width:0;grid-template-columns:minmax(0,1fr) 52px}.wr.wh{display:none}.wr .wt,.wbr,.werr{grid-column:1 / -1}.amap{height:220px}.cmenu{position:fixed;top:auto;left:0;right:0;bottom:0;width:auto;border-radius:16px 16px 0 0;z-index:45;padding:8px 8px 16px}.cmenu .mi{min-height:48px}.cmenu .grab{display:block}.cdim{background:rgba(16,16,20,.4);z-index:44}}
@@ -361,6 +365,7 @@ button.sn:hover{background:#f4f4f6}
 <sc-if value="{{bnOn}}" hint-placeholder-val="{{false}}"><div class="bnw">
 <sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnx"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
 <sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Your page wasn’t approved:</b> {{reasonText}}</span><button class="b b-sec b-sm" style="flex: none" onClick="{{goFix}}">Fix and send again</button></div></sc-if>
+<sc-if value="{{bnHidden}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"></path><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"></path><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"></path><path d="m2 2 20 20"></path></svg><span class="bnx"><b>Ýeral has hidden your page:</b> {{hiddenReason}} Clients can’t find or book you.</span><span style="position: relative; flex: none"><button class="b b-sec b-sm" aria-haspopup="menu" aria-expanded="{{cbnOpen}}" onClick="{{toggleCbn}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"></path><path d="M21 16v2a4 4 0 0 1-4 4h-5"></path></svg>Contact Ýeral</button><sc-if value="{{cbnOpen}}" hint-placeholder-val="{{false}}"><div class="catcher cdim" onClick="{{closeMenus}}"></div><div class="pop rmenu cmenu" role="menu" aria-label="Contact Ýeral" onKeyDown="{{menuKey}}"><span class="grab" style="margin-bottom: 8px"></span><a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span class="wsn"><span class="wst">Call</span><span class="wsc">[SUPPORT PHONE]</span></span></a><a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg><span class="wsn"><span class="wst">Write on Telegram</span><span class="wsc">[TELEGRAM]</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a></div></sc-if></span></div></sc-if>
 <sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnx"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
 </div></sc-if>
 
@@ -405,12 +410,13 @@ button.sn:hover{background:#f4f4f6}
 </div>
 <div class="sr">
 <div class="sl"><label class="sll" for="bp-name">Business name</label><span class="cap">Clients see this name in search and when they book.</span></div>
-<div class="scw"><input id="bp-name" class="{{nameCls}}" value="{{f.name}}" aria-invalid="{{nameErr}}" onInput="{{onName}}"><sc-if value="{{nameErr}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Enter the business name.</span></span></sc-if></div>
+<div class="scw"><input id="bp-name" class="{{nameCls}}" value="{{f.name}}" aria-invalid="{{nameBad}}" aria-describedby="bp-name-c" onInput="{{onName}}"><div class="fcr"><sc-if value="{{nameErr}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Enter the business name.</span></span></sc-if><sc-if value="{{nameLong}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too long: up to 80 characters.</span></span></sc-if><span id="bp-name-c" class="{{nameCntCls}}">{{nameCount}}</span></div></div>
 </div>
 <div class="sr">
 <div class="sl"><label class="sll" for="bp-cat">Category</label><span class="cap">Helps clients find you in search.</span></div>
 <div class="scw">
-<span class="selw" style="width: 100%"><select id="bp-cat" class="inp i44 isel" value="{{f.cat}}" onChange="{{onCat}}"><sc-for list="{{catGroups}}" as="g" hint-placeholder-count="6"><optgroup label="{{g.name}}"><sc-for list="{{g.items}}" as="c" hint-placeholder-count="4"><option value="{{c}}">{{c}}</option></sc-for></optgroup></sc-for></select><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+<span class="selw" style="width: 100%"><select id="bp-cat" class="inp i44 isel" value="{{f.cat}}" onChange="{{onCat}}"><sc-for list="{{cats}}" as="c" hint-placeholder-count="11"><option value="{{c}}">{{c}}</option></sc-for></select><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+<span class="cap" style="position: relative">No category fits? <button class="lnki" aria-haspopup="menu" aria-expanded="{{ccatOpen}}" onClick="{{toggleCcat}}">Contact Ýeral</button><sc-if value="{{ccatOpen}}" hint-placeholder-val="{{false}}"><div class="catcher cdim" onClick="{{closeMenus}}"></div><div class="pop rmenu cmenu" role="menu" aria-label="Contact Ýeral" onKeyDown="{{menuKey}}" style="top: 26px; left: 0; right: auto"><span class="grab" style="margin-bottom: 8px"></span><a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span class="wsn"><span class="wst">Call</span><span class="wsc">[SUPPORT PHONE]</span></span></a><a class="mi" role="menuitem" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg><span class="wsn"><span class="wst">Write on Telegram</span><span class="wsc">[TELEGRAM]</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a></div></sc-if></span>
 </div>
 </div>
 </section>
@@ -427,8 +433,9 @@ button.sn:hover{background:#f4f4f6}
 </div>
 </sc-if>
 <div style="display: flex; flex-direction: column; gap: 8px">
-<textarea id="bp-about" class="inp ta" aria-label="{{aboutAria}}" lang="{{aboutLangAttr}}" value="{{aboutVal}}" onInput="{{onAbout}}" placeholder="{{aboutPh}}"></textarea>
-<div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap"><span class="cap">{{aboutCap}}</span><span class="cap" style="font-variant-numeric: tabular-nums">{{aboutCount}} / 600</span></div>
+<textarea id="bp-about" class="{{aboutCls}}" aria-label="{{aboutAria}}" aria-invalid="{{aboutLong}}" aria-describedby="bp-about-c" lang="{{aboutLangAttr}}" value="{{aboutVal}}" onInput="{{onAbout}}" placeholder="{{aboutPh}}"></textarea>
+<sc-if value="{{aboutLong}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too long: up to 1,000 characters.</span></span></sc-if>
+<div class="fcr"><span class="cap">{{aboutCap}}</span><span id="bp-about-c" class="{{aboutCntCls}}">{{aboutCount}}</span></div>
 </div>
 </section>
 
@@ -472,11 +479,11 @@ button.sn:hover{background:#f4f4f6}
 <div class="sl" style="flex: none"><h3 class="pst" id="bp-s5">Address</h3><span class="cap">Clients see it on the map and in their booking.</span></div>
 <div class="gad">
 <div class="fld"><label class="flab" for="bp-city">City</label><span class="selw" style="width: 100%"><select id="bp-city" class="inp i44 isel" style="min-width: 0" value="{{f.city}}" onChange="{{onCity}}"><sc-for list="{{cities}}" as="c" hint-placeholder-count="6"><option value="{{c}}">{{c}}</option></sc-for></select><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></div>
-<div class="fld"><label class="flab" for="bp-street">Street and building</label><input id="bp-street" class="{{streetCls}}" value="{{f.street}}" aria-invalid="{{streetErr}}" onInput="{{onStreet}}"><sc-if value="{{streetErr}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Enter the street and building number.</span></span></sc-if></div>
+<div class="fld"><label class="flab" for="bp-street">Street and building</label><input id="bp-street" class="{{streetCls}}" value="{{f.street}}" aria-invalid="{{streetBad}}" aria-describedby="bp-street-c" onInput="{{onStreet}}"><div class="fcr"><sc-if value="{{streetErr}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Enter the street and building number.</span></span></sc-if><sc-if value="{{streetLong}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too long: up to 120 characters.</span></span></sc-if><span id="bp-street-c" class="{{streetCntCls}}">{{streetCount}}</span></div></div>
 </div>
 <div class="gad">
 <div class="fld"><label class="flab" for="bp-floor">Floor, room</label><input id="bp-floor" class="inp i44" placeholder="Optional" value="{{f.floor}}" onInput="{{onFloor}}"></div>
-<div class="fld"><label class="flab" for="bp-ent">Where is the entrance?</label><input id="bp-ent" class="inp i44" placeholder="For example: through the courtyard, green door" value="{{f.entrance}}" onInput="{{onEntrance}}"></div>
+<div class="fld"><label class="flab" for="bp-ent">Where is the entrance?</label><input id="bp-ent" class="{{entCls}}" placeholder="For example: through the courtyard, green door" value="{{f.entrance}}" aria-invalid="{{entLong}}" aria-describedby="bp-ent-c" onInput="{{onEntrance}}"><div class="fcr"><sc-if value="{{entLong}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Too long: up to 200 characters.</span></span></sc-if><span id="bp-ent-c" class="{{entCntCls}}">{{entCount}}</span></div></div>
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px">
 <div class="{{mapCls}}" onMouseDown="{{mapDown}}" onMouseMove="{{mapMove}}" onMouseUp="{{mapUp}}" onMouseLeave="{{mapUp}}">
@@ -550,7 +557,7 @@ button.sn:hover{background:#f4f4f6}
 <sc-if value="{{modeChanged}}" hint-placeholder-val="{{false}}"><div class="note" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>Requests already waiting keep their timers; new bookings follow the new setting.</span></div></sc-if>
 <sc-if value="{{isManual}}" hint-placeholder-val="{{true}}">
 <div class="sr">
-<div class="sl"><label class="sll" for="r-hold">Hold requests for</label><span class="cap">If no one answers in this time, the request is cancelled and the client is offered 3 other times. The time counts only while you’re open.</span></div>
+<div class="sl"><label class="sll" for="r-hold">Hold requests for</label><span class="cap">If no one answers in this time, the request is cancelled and the client is offered 3 other times. The time counts only while you’re open. The hold never runs past the visit’s start.</span></div>
 <span class="selw"><select id="r-hold" class="inp i44 isel" value="{{f.hold}}" onChange="{{onHold}}"><option value="15">15 min</option><option value="30">30 min</option><option value="60">60 min</option><option value="120">2 h</option><option value="360">6 h</option><option value="1440">24 h</option></select><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
 </div>
 </sc-if>
@@ -799,8 +806,8 @@ button.sn:hover{background:#f4f4f6}
 <div style="display: flex; flex-direction: column; gap: 12px; flex: 1 1 220px; min-width: 0">
 <div style="display: flex; flex-direction: column; gap: 2px"><span class="sll" style="font-weight: 600">{{f.name}}</span><span class="cap">yeral.app/b/glow-studio</span></div>
 <span style="font-size: 14px; line-height: 20px; color: #101014">Put it by the till — clients open it on their phone and book.</span>
-<div class="lrow"><button class="b b-sec b-sm" onClick="{{dlQr}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Download QR</button></div>
-<span class="cap">A PNG file, ready to print.</span>
+<div class="lrow"><button class="b b-sec b-sm" onClick="{{dlPng}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Download PNG</button><button class="b b-sec b-sm" onClick="{{dlSvg}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>Download SVG</button></div>
+<span class="cap">PNG for printing, SVG for designers.</span>
 </div>
 </div>
 </section>
@@ -842,7 +849,7 @@ button.sn:hover{background:#f4f4f6}
 <span class="selw t"><select class="inp tsel" aria-label="Closes" value="{{ex.hTo}}" onChange="{{onExTo}}"><sc-for list="{{toOpts}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
 <sc-if value="{{exNextDay}}" hint-placeholder-val="{{false}}"><span class="nday"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>{{exNextDayText}}</span></sc-if>
 </div>
-<sc-if value="{{exHoursBad}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Opening and closing can’t be at the same time.</span></span></sc-if>
+<sc-if value="{{exHoursBad}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>{{exHoursErrText}}</span></span></sc-if>
 </sc-if>
 </div>
 <sc-if value="{{exOverlap}}" hint-placeholder-val="{{false}}">
@@ -858,7 +865,7 @@ button.sn:hover{background:#f4f4f6}
 <div class="fld" style="gap: 8px" role="group" aria-labelledby="ex-cf">
 <span class="flab" id="ex-cf" style="display: flex; gap: 8px; align-items: flex-start; color: #93500a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>{{exConflictText}}</span>
 <div role="radiogroup" aria-labelledby="ex-cf" style="display: flex; flex-direction: column; gap: 8px">
-<button class="{{exKeep.cls}}" role="radio" aria-checked="{{exKeep.on}}" onClick="{{exKeep.pick}}"><span class="rad" aria-hidden="true"></span><span class="optt"><span class="optn">Keep them</span><span class="cap">They stay in the calendar as they are. No new online bookings on those days.</span></span></button>
+<button class="{{exKeep.cls}}" role="radio" aria-checked="{{exKeep.on}}" onClick="{{exKeep.pick}}"><span class="rad" aria-hidden="true"></span><span class="optt"><span class="optn">Keep them</span><span class="cap">{{exKeepCap}}</span></span></button>
 <button class="{{exCancelBk.cls}}" role="radio" aria-checked="{{exCancelBk.on}}" onClick="{{exCancelBk.pick}}"><span class="rad" aria-hidden="true"></span><span class="optt"><span class="optn">Cancel and offer 3 other times</span><span class="cap">Each client picks a new time in one tap in My bookings.</span></span></button>
 </div>
 </div>
@@ -997,7 +1004,7 @@ button.sn:hover{background:#f4f4f6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"pane":{"editor":"enum","options":["profile","rules","hours","link"],"default":"profile","section":"State"},"dirty":{"editor":"boolean","default":false,"section":"State"},"languages":{"editor":"enum","options":["one","several"],"default":"one","section":"State"},"photos":{"editor":"enum","options":["normal","uploading","tooBig","wrongType"],"default":"normal","section":"State"},"overnight":{"editor":"enum","options":["off","on","error"],"default":"off","section":"State"},"exceptionModal":{"editor":"boolean","default":false,"section":"State"},"exceptionOverlap":{"editor":"boolean","default":false,"section":"State"},"statusModal":{"editor":"boolean","default":false,"section":"State"},"affected":{"editor":"boolean","default":false,"section":"State"},"linkState":{"editor":"enum","options":["live","inReview","notApproved","hidden"],"default":"live","section":"Page"},"demo":{"editor":"boolean","default":false,"section":"Page"},"role":{"editor":"enum","options":["owner","admin"],"default":"owner","section":"Access"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":2320}}'>
+<script type="text/x-dc" data-dc-script data-props='{"pane":{"editor":"enum","options":["profile","rules","hours","link"],"default":"profile","section":"State"},"dirty":{"editor":"boolean","default":false,"section":"State"},"overLimit":{"editor":"boolean","default":false,"section":"State"},"languages":{"editor":"enum","options":["one","several"],"default":"one","section":"State"},"photos":{"editor":"enum","options":["normal","uploading","tooBig","wrongType"],"default":"normal","section":"State"},"overnight":{"editor":"enum","options":["off","on","error"],"default":"off","section":"State"},"exceptionModal":{"editor":"boolean","default":false,"section":"State"},"exceptionOverlap":{"editor":"boolean","default":false,"section":"State"},"statusModal":{"editor":"boolean","default":false,"section":"State"},"affected":{"editor":"boolean","default":false,"section":"State"},"linkState":{"editor":"enum","options":["live","inReview","notApproved","hidden"],"default":"live","section":"Page"},"demo":{"editor":"boolean","default":false,"section":"Page"},"role":{"editor":"enum","options":["owner","admin"],"default":"owner","section":"Access"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":2400}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -1007,7 +1014,7 @@ class Component extends DCLogic {
   }
 
   // URL: business.yeral.app/w/glow-studio/settings/{profile · rules · hours · link}
-  KEYS() { return ['pane', 'dirty', 'languages', 'photos', 'overnight', 'exceptionModal', 'exceptionOverlap', 'statusModal', 'affected', 'linkState', 'demo', 'role']; }
+  KEYS() { return ['pane', 'dirty', 'overLimit', 'languages', 'photos', 'overnight', 'exceptionModal', 'exceptionOverlap', 'statusModal', 'affected', 'linkState', 'demo', 'role']; }
 
   componentDidUpdate(pp) {
     const P = this.props;
@@ -1027,7 +1034,7 @@ class Component extends DCLogic {
   base() {
     const W = [['Monday', '09:00', '20:00'], ['Tuesday', '09:00', '20:00'], ['Wednesday', '09:00', '20:00'], ['Thursday', '09:00', '20:00'], ['Friday', '09:00', '20:00'], ['Saturday', '09:00', '20:00'], ['Sunday', '10:00', '18:00']];
     return {
-      name: 'Glow Studio', cat: 'Beauty salon',
+      name: 'Glow Studio', cat: 'Beauty',
       about: {
         en: 'Hair, nails and skin care in one place. We work only with tested products and see every client on time.',
         tk: 'Saç, dyrnak we ýüz ideg — bir ýerde. Diňe barlanan serişdeler bilen işleýäris; her müşderä wagtynda garaşýarys.',
@@ -1063,8 +1070,15 @@ class Component extends DCLogic {
     }
     if (ov === 'on') { dayPatch(4, { from: '10:00', to: '02:00' }); pane = 'hours'; }
     if (ov === 'error') { dayPatch(0, { from: '10:00', to: '09:30' }); pane = 'hours'; }
+    if (P.overLimit) {
+      // a pasted description over the 1,000-character limit
+      let long = '';
+      while (long.length < 1042) long += f.about.en + ' ';
+      f.about = Object.assign({}, f.about, { en: long.slice(0, 1042) });
+      pane = 'profile';
+    }
     const aff = !!P.affected;
-    if (aff) { dayPatch(2, { to: '18:00' }); pane = 'hours'; }
+    if (aff) { dayPatch(2, { to: '18:00' }); dayPatch(4, { to: '19:00' }); pane = 'hours'; }
     const exOv = !!P.exceptionOverlap;
     const exOpen = !!P.exceptionModal || exOv;
     if (exOpen) pane = 'hours';
@@ -1151,7 +1165,7 @@ class Component extends DCLogic {
     const isDemo = !!P.demo;
     const isOwner = role === 'owner';
     const ls = s.linkState;
-    const bannerKind = isDemo ? 'demo' : (ls === 'inReview' || ls === 'notApproved' ? ls : 'none');
+    const bannerKind = isDemo ? 'demo' : (ls === 'inReview' || ls === 'notApproved' || ls === 'hidden' ? ls : 'none');
     const menu = s.menu;
     const wsList = who0.ws.map((w) => ({
       name: w[0], cap: w[1], cur: w[3], other: !w[3], hasPend: w[2] > 0, pend: String(w[2]),
@@ -1197,14 +1211,13 @@ class Component extends DCLogic {
     };
     const AM = [['wifi', 'Wi-Fi'], ['ac', 'Air conditioning'], ['park', 'Parking'], ['card', 'Card payment at the place'], ['kids', 'Kids’ corner'], ['tea', 'Free tea']];
     const amen = AM.map((a) => ({ t: a[1], on: !!f.amen[a[0]], flip: () => upd({ amen: Object.assign({}, this.state.f.amen, { [a[0]]: !this.state.f.amen[a[0]] }) }) }));
-    const CATS = [
-      { name: 'Beauty', items: ['Beauty salon', 'Barbershop', 'Nail studio', 'Brows and lashes', 'Spa and massage'] },
-      { name: 'Health', items: ['Dentist', 'Medical centre', 'Physiotherapy', 'Psychologist'] },
-      { name: 'Sport', items: ['Personal trainer'] },
-      { name: 'Lessons', items: ['Tutor', 'Language lessons', 'Music lessons'] },
-      { name: 'Auto', items: ['Car wash', 'Tyre service', 'Car service'] },
-      { name: 'Other', items: ['Pet care', 'Home services', 'Something else — I’ll add my services'] }
-    ];
+    // the launch categories that take appointments (a flat list); restaurants and cafés come later
+    const CATS = ['Beauty', 'Barbershop', 'Nails', 'Spa & massage', 'Dentist', 'Health', 'Fitness', 'Lessons', 'Auto', 'Pets', 'Home services'];
+    // text limits (characters)
+    const LIM = { name: 80, about: 1000, street: 120, entrance: 200 };
+    const fmtN = (n) => (n >= 1000 ? Math.floor(n / 1000) + ',' + String(n % 1000).padStart(3, '0') : String(n));
+    const counter = (v, k) => fmtN(v.length) + ' / ' + fmtN(LIM[k]);
+    const cntCls = (v, k) => (v.length > LIM[k] ? 'ccount over' : 'ccount');
     // texts: one language at the first release (no tabs, no main-language choice); tweak `languages` = several draws the later variant
     const several = P.languages === 'several';
     const LG = [['en', 'EN', 'English'], ['tk', 'TK', 'Türkmençe'], ['ru', 'RU', 'Русский']];
@@ -1221,6 +1234,11 @@ class Component extends DCLogic {
       };
     });
     const nameErr = !f.name.trim();
+    const nameLong = f.name.length > LIM.name;
+    const aboutLong = Object.keys(f.about).some((k) => (f.about[k] || '').length > LIM.about);
+    const aboutValLong = (f.about[several ? s.aboutLang : f.mainLang] || '').length > LIM.about;
+    const streetLong = f.street.length > LIM.street;
+    const entLong = f.entrance.length > LIM.entrance;
     const phoneErr = f.phone.replace(/\D/g, '').length !== 8;
     const streetErr = !f.street.trim();
     const CITIES = ['Ashgabat', 'Arkadag', 'Balkanabat', 'Dashoguz', 'Mary', 'Turkmenabat'];
@@ -1323,31 +1341,43 @@ class Component extends DCLogic {
       };
     });
     const hoursBad = f.week.some((d, i) => !!dayErr(d, i));
-    // today's bookings (Wednesday, 11:20): the ones not started yet that the new Wednesday hours leave out
-    const TODAY = [
-      [690, 810, 'Gülälek N.', 'Hair colouring', 'Aýna', 0], [930, 990, 'Ejegyz T.', 'Women’s haircut', 'Aýna', 18], [1020, 1050, 'Döwlet B.', 'Children’s haircut', 'Aýna', 0],
-      [1080, 1125, 'Aýsoltan R.', 'Hair styling', 'Aýna', 0], [780, 855, 'Jemal S.', 'Pedicure', 'Maral', 0], [960, 1020, 'Mähri G.', 'Manicure', 'Maral', 24],
-      [1080, 1170, 'Läle O.', 'Gel manicure', 'Maral', 0], [900, 930, 'Sona P.', 'Brows and lashes', 'Jeren', 0], [720, 780, 'Nurjahan A.', 'Full body massage', 'Leýli', 0],
-      [990, 1020, 'Gözel A.', 'Back massage', 'Leýli', 21], [1080, 1110, 'Merdan K.', 'Back massage', 'Leýli', 0]
+    // upcoming bookings (today = Wednesday 14 October, 11:20; today's ones not started yet) — [days from today, from, to, client, service, specialist, minutes left to answer (requests)]
+    const UPC = [
+      [0, 690, 810, 'Gülälek N.', 'Hair colouring', 'Aýna', 0], [0, 930, 990, 'Ejegyz T.', 'Women’s haircut', 'Aýna', 18], [0, 1020, 1050, 'Döwlet B.', 'Children’s haircut', 'Aýna', 0],
+      [0, 1080, 1125, 'Aýsoltan R.', 'Hair styling', 'Aýna', 0], [0, 780, 855, 'Jemal S.', 'Pedicure', 'Maral', 0], [0, 960, 1020, 'Mähri G.', 'Manicure', 'Maral', 24],
+      [0, 1080, 1170, 'Läle O.', 'Gel manicure', 'Maral', 0], [0, 900, 930, 'Sona P.', 'Brows and lashes', 'Jeren', 0], [0, 720, 780, 'Nurjahan A.', 'Full body massage', 'Leýli', 0],
+      [0, 990, 1020, 'Gözel A.', 'Back massage', 'Leýli', 21], [0, 1080, 1110, 'Merdan K.', 'Back massage', 'Leýli', 0],
+      [1, 870, 930, 'Aýjemal G.', 'Women’s haircut', 'Aýna', 28], [1, 1110, 1170, 'Ogulgerek A.', 'Manicure', 'Maral', 0],
+      [2, 540, 600, 'Ýazgül B.', 'Manicure', 'Maral', 0], [2, 1140, 1185, 'Ogulşat M.', 'Hair styling', 'Aýna', 45], [2, 1140, 1200, 'Arslan M.', 'Back massage', 'Leýli', 0],
+      [3, 570, 630, 'Ogulnabat T.', 'Facial cleansing', 'Jeren', 0], [3, 1110, 1200, 'Aýgözel N.', 'Gel manicure', 'Maral', 0],
+      [4, 990, 1050, 'Leýla D.', 'Full body massage', 'Leýli', 0],
+      [5, 540, 600, 'Jahan R.', 'Women’s haircut', 'Aýna', 0], [5, 1140, 1215, 'Ene K.', 'Pedicure', 'Maral', 0],
+      [6, 1140, 1170, 'Batyr Ç.', 'Back massage', 'Leýli', 0],
+      [7, 1110, 1170, 'Nurgül H.', 'Gel manicure', 'Maral', 0]
     ];
-    const wed = f.week[2];
-    const outside = (b) => {
-      if (!wed.open) return true;
-      const sp = span(wed);
-      if (b[0] < sp[0] || b[1] > sp[1]) return true;
-      if (wed.brk) { const br = inBreak(wed); if (b[0] < br[1] && b[1] > br[0]) return true; }
+    const SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayOf = (off) => (2 + off) % 7;
+    const dayLabel = (off) => (off === 0 ? 'Today' : (off === 1 ? 'Tomorrow' : SHORT[dayOf(off)] + ', ' + (14 + off) + ' Oct'));
+    const changed = f.week.map((d, i) => JSON.stringify(d) !== JSON.stringify(s.saved.week[i]));
+    const outside = (d, b) => {
+      if (!d.open) return true;
+      const sp = span(d);
+      if (b[1] < sp[0] || b[2] > sp[1]) return true;
+      if (d.brk) { const br = inBreak(d); if (b[1] < br[1] && b[2] > br[0]) return true; }
       return false;
     };
-    const affSrc = TODAY.filter(outside).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-    const nReq = affSrc.filter((b) => b[5] > 0).length;
+    // every upcoming booking on a changed day that the new hours leave out
+    const affSrc = UPC.filter((b) => changed[dayOf(b[0])] && outside(f.week[dayOf(b[0])], b)).sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]);
+    const nReq = affSrc.filter((b) => b[6] > 0).length;
     const nBk = affSrc.length - nReq;
     const affRows = affSrc.map((b) => ({
-      when: 'Today · ' + fromMin(b[0]) + '–' + fromMin(b[1]), who: b[2] + ' · ' + b[3] + ' · ' + b[4],
-      conf: !b[5], pend: b[5] > 0, tmr: b[5] + ' min', tmrAria: b[5] + ' min left to answer'
+      when: dayLabel(b[0]) + ' · ' + fromMin(b[1]) + '–' + fromMin(b[2]), who: b[3] + ' · ' + b[4] + ' · ' + b[5],
+      conf: !b[6], pend: b[6] > 0, tmr: b[6] + ' min', tmrAria: b[6] + ' min left to answer'
     }));
     const affWhat = [nBk ? pl(nBk, 'booking') : '', nReq ? pl(nReq, 'request') : ''].filter(Boolean);
     const affTitle = affWhat.join(' and ') + (affSrc.length === 1 ? ' falls' : ' fall') + ' outside the new hours';
-    const wedText = !wed.open ? 'closed' : wed.from + '–' + wed.to + (toMin(wed.to) < toMin(wed.from) ? ' (next day)' : '') + (wed.brk ? ', break ' + wed.brk.from + '–' + wed.brk.to : '');
+    const hoursOf = (d) => (!d.open ? 'closed' : d.from + '–' + d.to + (toMin(d.to) < toMin(d.from) ? ' (next day)' : '') + (d.brk ? ', break ' + d.brk.from + '–' + d.brk.to : ''));
+    const affLead = f.week.filter((d, i) => changed[i]).map((d) => d.d + ' ' + hoursOf(d)).join(' · ') + '. These were booked before the change.';
     const affOpt = (id) => ({ on: s.affChoice === id, cls: s.affChoice === id ? 'opt on' : 'opt', pick: () => set({ affChoice: id }) });
     const closeAff = () => set({ affOpen: false });
 
@@ -1369,7 +1399,15 @@ class Component extends DCLogic {
     const hasDate = !!sIso && !!eIso;
     const past = hasDate && !ex.yearly && ts(eIso) < T0;
     const rangeBad = ex.multi && hasDate && eIso < sIso;
-    const exHoursBad = ex.kind === 'special' && ex.hFrom === ex.hTo;
+    // special-day hours past midnight are checked against the next day's opening, as in the weekly hours
+    const WD = (iso) => (new Date(iso + 'T00:00:00Z').getUTCDay() + 6) % 7;
+    let exHoursErrText = '';
+    if (ex.kind === 'special' && ex.hFrom === ex.hTo) exHoursErrText = 'Opening and closing can’t be at the same time.';
+    else if (ex.kind === 'special' && eIso && toMin(ex.hTo) < toMin(ex.hFrom)) {
+      const nx = f.week[(WD(eIso) + 1) % 7];
+      if (nx.open && toMin(ex.hTo) > toMin(nx.from)) exHoursErrText = 'Closes after ' + nx.d + ' opens. Pick an earlier time.';
+    }
+    const exHoursBad = !!exHoursErrText;
     const limit = T0 + Number(f.win) * 86400000;
     const exConflict = hasDate && !past && !rangeBad && ts(sIso) <= limit && ts(eIso) >= T0;
     const exInvalid = !ex.name.trim() || !hasDate || past || rangeBad || exHoursBad;
@@ -1418,8 +1456,8 @@ class Component extends DCLogic {
 
     // ---------- save bar ----------
     const dirtyReal = JSON.stringify(f) !== JSON.stringify(s.saved);
-    const cantSave = nameErr || phoneErr || streetErr || hoursBad || bufBad;
-    const weekChanged = JSON.stringify(f.week) !== JSON.stringify(s.saved.week);
+    const cantSave = nameErr || nameLong || aboutLong || phoneErr || streetErr || streetLong || entLong || hoursBad || bufBad;
+    const weekChanged = changed.some(Boolean);
     const save = () => {
       if (cantSave) return;
       if (weekChanged && affSrc.length) { set({ affOpen: true, affChoice: 'keep', menu: null }); return; }
@@ -1433,7 +1471,8 @@ class Component extends DCLogic {
       me: me, wsList: wsList, wsAria: 'Workspace: Glow Studio, ' + me.role + '. Switch',
       hasPend: pendCount > 0, pendCount: String(pendCount), pendAria: pl(pendCount, 'unanswered request'),
       isDemo: isDemo, notDemo: !isDemo,
-      bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: bannerKind === 'demo',
+      bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: bannerKind === 'demo', bnHidden: bannerKind === 'hidden',
+      cbnOpen: menu === 'cbn', toggleCbn: toggle('cbn'),
       wsOpen: menu === 'ws', userOpen: menu === 'user', moreOpen: menu === 'more', contactOpen: menu === 'contact',
       toggleWs: toggle('ws'), toggleUser: toggle('user'), toggleMore: toggle('more'),
       openContact: () => set({ menu: 'contact' }),
@@ -1449,9 +1488,12 @@ class Component extends DCLogic {
       sendAgain: () => this.flash({ linkState: 'inReview' }, 'Sent again — your page is in review'),
       // 1 · profile
       nameErr: nameErr,
-      nameCls: nameErr ? 'inp i44 is-e' : 'inp i44',
-      onName: (e) => upd({ name: val(e).slice(0, 60) }),
-      catGroups: CATS,
+      nameCls: nameErr || nameLong ? 'inp i44 is-e' : 'inp i44',
+      nameBad: nameErr || nameLong, nameLong: nameLong,
+      nameCount: counter(f.name, 'name'), nameCntCls: cntCls(f.name, 'name'),
+      onName: (e) => upd({ name: val(e).slice(0, 2 * LIM.name) }),
+      cats: CATS,
+      ccatOpen: menu === 'ccat', toggleCcat: toggle('ccat'),
       onCat: (e) => upd({ cat: val(e) || this.state.f.cat }),
       langSeveral: several,
       langOpts: LG.map((l) => ({ v: l[0], t: l[2] })),
@@ -1462,8 +1504,9 @@ class Component extends DCLogic {
       aboutAria: several ? 'About · ' + lname(aboutLang) : 'About',
       aboutPh: isMainTab ? 'Write a few words about your business' : 'Write the ' + lname(aboutLang) + ' text here',
       aboutCap: !several || isMainTab ? 'Clients read this in “About” on your page.' : (aboutVal.trim() ? 'Clients who use ' + lname(aboutLang) + ' see this text.' : 'Empty — clients who use ' + lname(aboutLang) + ' see the ' + lname(f.mainLang) + ' text.'),
-      aboutCount: String(aboutVal.length),
-      onAbout: (e) => upd({ about: Object.assign({}, this.state.f.about, { [aboutLang]: val(e).slice(0, 600) }) }),
+      aboutCount: counter(aboutVal, 'about'), aboutCntCls: cntCls(aboutVal, 'about'),
+      aboutLong: aboutValLong, aboutCls: aboutValLong ? 'inp ta is-e' : 'inp ta',
+      onAbout: (e) => upd({ about: Object.assign({}, this.state.f.about, { [aboutLang]: val(e).slice(0, 2 * LIM.about) }) }),
       photos: photos,
       photoCount: nPh + ' of 20',
       photoUp: photoUp, photoUpPct: 60, photoUpAria: 'Uploading salon-hall.jpg, 60%',
@@ -1483,10 +1526,14 @@ class Component extends DCLogic {
       cities: CITIES,
       onCity: (e) => { const c = val(e); if (CITIES.indexOf(c) >= 0) upd({ city: c }); },
       streetErr: streetErr,
-      streetCls: streetErr ? 'inp i44 is-e' : 'inp i44',
-      onStreet: (e) => upd({ street: val(e).slice(0, 80) }),
+      streetCls: streetErr || streetLong ? 'inp i44 is-e' : 'inp i44',
+      streetBad: streetErr || streetLong, streetLong: streetLong,
+      streetCount: counter(f.street, 'street'), streetCntCls: cntCls(f.street, 'street'),
+      onStreet: (e) => upd({ street: val(e).slice(0, 2 * LIM.street) }),
       onFloor: (e) => upd({ floor: val(e).slice(0, 40) }),
-      onEntrance: (e) => upd({ entrance: val(e).slice(0, 140) }),
+      entLong: entLong, entCls: entLong ? 'inp i44 is-e' : 'inp i44',
+      entCount: counter(f.entrance, 'entrance'), entCntCls: cntCls(f.entrance, 'entrance'),
+      onEntrance: (e) => upd({ entrance: val(e).slice(0, 2 * LIM.entrance) }),
       mapCls: 'amap' + (s.drag ? ' drag' : ''),
       mapDown: mapDown, mapMove: mapMove, mapUp: mapUp, pinDown: pinDown, pinKey: pinKey,
       stopEv: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
@@ -1519,7 +1566,7 @@ class Component extends DCLogic {
       reasonCls: f.askReason ? 'sw on' : 'sw',
       flipReason: () => upd({ askReason: !this.state.f.askReason }),
       nsLabel: f.noShow === 0 ? 'Off' : pl(f.noShow, 'time'),
-      nsCap: f.noShow === 0 ? 'Off: clients who didn’t come can still book online.' : 'After ' + pl(f.noShow, 'no-show') + ' the client can only book by phone (“Phone only”). Switching Phone only off on the client’s card starts the count again.',
+      nsCap: f.noShow === 0 ? 'Off: clients who didn’t come can still book online.' : 'After ' + pl(f.noShow, 'no-show') + ' the client can only book by phone (“Phone only”). Switching Phone only off on the client’s card starts the count again. A new limit applies to every client right away.',
       nsMin: f.noShow <= 0, nsMax: f.noShow >= 5,
       nsDec: () => upd({ noShow: Math.max(0, this.state.f.noShow - 1) }),
       nsInc: () => upd({ noShow: Math.min(5, this.state.f.noShow + 1) }),
@@ -1585,6 +1632,8 @@ class Component extends DCLogic {
       exNextDay: ex.kind === 'special' && toMin(ex.hTo) < toMin(ex.hFrom),
       exNextDayText: 'until ' + ex.hTo + ', next day',
       exHoursBad: exHoursBad,
+      exHoursErrText: exHoursErrText,
+      exKeepCap: 'They stay in the calendar as they are. ' + (ex.kind === 'closed' ? 'No new online bookings on ' + (ex.multi ? 'those days.' : 'that day.') : 'New bookings follow the new hours.'),
       exOverlap: !!exOv,
       exOverlapText: exOv ? 'These dates overlap “' + exOv.name + '”. On those days “' + exOv.win + '” is used.' : '',
       exConflict: exConflict,
@@ -1605,7 +1654,7 @@ class Component extends DCLogic {
       },
       affOpen: !!s.affOpen && affSrc.length > 0,
       affTitle: affTitle,
-      affLead: 'Today, Wednesday · ' + wedText + '. These were booked before the change.',
+      affLead: affLead,
       affCountLabel: affWhat.join(' · '),
       affRows: affRows,
       affKeep: affOpt('keep'), affCancel: affOpt('cancel'),
@@ -1614,7 +1663,7 @@ class Component extends DCLogic {
       confirmAff: () => {
         const n = affSrc.length;
         const cancel = this.state.affChoice === 'cancel';
-        this.flash({ saved: this.state.f, affOpen: false }, cancel ? 'Hours saved · ' + pl(n, 'booking') + ' cancelled — each client picks a new time in My bookings' : 'Hours saved · ' + pl(n, 'booking') + ' kept as they are');
+        this.flash({ saved: this.state.f, affOpen: false }, cancel ? 'Hours saved · ' + affWhat.join(' and ') + ' cancelled — each client picks a new time in My bookings' : 'Hours saved · ' + affWhat.join(' and ') + (n === 1 ? ' kept as it is' : ' kept as they are'));
       },
       // 4 · link and QR
       lsLive: ls === 'live', lsReview: ls === 'inReview', lsNo: ls === 'notApproved', lsHidden: ls === 'hidden',
@@ -1623,7 +1672,8 @@ class Component extends DCLogic {
       shareOpen: menu === 'share', toggleShare: toggle('share'),
       shareTo: { wa: () => set({ menu: null }), tg: () => set({ menu: null }), imo: () => set({ menu: null }) },
       copyLink: () => this.flash({}, 'Link copied'),
-      dlQr: () => this.flash({}, 'QR code downloaded · PNG'),
+      dlPng: () => this.flash({}, 'QR code downloaded · PNG'),
+      dlSvg: () => this.flash({}, 'QR code downloaded · SVG'),
       // save bar + toast
       showBar: dirtyReal,
       cantSave: cantSave,

@@ -2357,19 +2357,26 @@
           "ayna"
         ],
         "desc": "With a trial styling; the price is agreed",
-        "sameAs": "client demo-data.json s12"
+        "sameAs": "client demo-data.json s12",
+        "amount": "400 TMT (not shown to clients)"
       }
     },
     "clients": {
       "total": 148,
-      "newThisMonth": 9,
+      "newThisMonth": 2,
       "tags": {
-        "Regular": 38,
-        "New": 9,
+        "Regular": 39,
+        "New": 4,
         "Lapsed": 27,
         "Reported": 3
       },
-      "specialistAyna": 41,
+      "specialistAyna": {
+        "all": 41,
+        "Regular": 6,
+        "New": 0,
+        "Lapsed": 2,
+        "Reported": 2
+      },
       "gozelA": {
         "visits": 1,
         "phone": "+993 65 73 26 41"
@@ -2381,10 +2388,37 @@
         "lastVisit": "28 Sep · Hair colouring · Aýna"
       },
       "deleteAllowed": "Merjen K.",
-      "deleteBlocked": "Aýsoltan R. (2 upcoming bookings)"
+      "deleteBlocked": "Aýsoltan R. (2 upcoming bookings)",
+      "newRule": "first visit in the last 30 days; no visit yet = no tag",
+      "lastVisitRule": "last completed visit (No-show doesn't count)",
+      "listMoney": "Total (completed visits), owner only",
+      "unnamed": "Unnamed client",
+      "yeralAccount": "linked when someone signs in to Ýeral with that phone number (booked online or by phone)",
+      "semsatK": {
+        "phone": "+993 63 18 74 52",
+        "visits": 2,
+        "lastVisit": "7 Oct",
+        "total": "180 TMT",
+        "averageCheck": "90 TMT",
+        "tag": "New",
+        "request": "today 16:00–17:00 · Manicure · Maral · Pending · 24 min (b10)"
+      },
+      "ogulnabatC": {
+        "lastVisit": "28 Sep",
+        "tags": [
+          "Phone only",
+          "Reported",
+          "Regular"
+        ],
+        "total": "450 TMT"
+      }
     },
     "maehriG": {
-      "lateRequest": "tomorrow 13:00–14:00, sent 20:40, Answer by 09:30 tomorrow"
+      "request": "sent Wed 20:40, tomorrow 13:00–14:00 · Manicure · Maral · answer by 09:30 tomorrow",
+      "visits": 4,
+      "lastVisit": "2 Oct",
+      "averageCheck": "70 TMT",
+      "onlyRequest": true
     },
     "aynaLeaves": {
       "bookings": 4,
@@ -2421,6 +2455,64 @@
       "rateLimitWait": "42 minutes"
     },
     "money": "Prices are booking information (everyone who sees the booking). See revenue = sums (revenue lines, client totals, average check): Owner; Specialist own earnings only; Admin none.",
-    "permissionsFixed": true
+    "permissionsFixed": true,
+    "hiddenByYeral": {
+      "reason": "Clients reported that your page shows the wrong address.",
+      "banner": "Ýeral has hidden your page: Clients reported that your page shows the wrong address. Clients can't find or book you.",
+      "seenBy": [
+        "Owner",
+        "Admin"
+      ]
+    },
+    "reportsPerBooking": 1,
+    "shiftsAndTimeOff": {
+      "Owner": "change",
+      "Admin": "view only",
+      "Specialist": "see own"
+    },
+    "names": "Staff screens show the full saved name (\"Aýjemal Gurbanowa\"); first name + initial only on the client site.",
+    "round33": {
+      "removedRow": "Reactivate (owner) — access back, bookable again",
+      "leftRow": "Invite again — new invite",
+      "staffHours": {
+        "modes": [
+          "Business hours",
+          "Own shift"
+        ],
+        "breaksPerDay": true,
+        "timeOffRepeatsYearly": true,
+        "aynaBreaks": [
+          "Wed 14:00–14:40",
+          "Thu 13:30–14:10"
+        ],
+        "aynaYearlyTimeOff": "3 May · Birthday"
+      },
+      "whoDoesIt": "every team row that isn't removed, invited people marked Invited",
+      "notBookableOnline": "service caption (Phone only = client tag only)"
+    },
+    "categories": [
+      "Beauty",
+      "Barbershop",
+      "Nails",
+      "Spa & massage",
+      "Dentist",
+      "Health",
+      "Fitness",
+      "Lessons",
+      "Auto",
+      "Pets",
+      "Home services"
+    ],
+    "categoriesLater": [
+      "Restaurant",
+      "Café & tea house"
+    ],
+    "glowStudioCategory": "Beauty",
+    "textLimits": {
+      "businessName": 80,
+      "description": 1000,
+      "street": 120,
+      "entranceNote": 200
+    }
   }
 }

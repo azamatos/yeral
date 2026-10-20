@@ -24,7 +24,7 @@ flowchart TD
 
 | Object | What it is |
 |---|---|
-| **Category** | a kind of business (13 at launch: *Gözellik*, *Dellekhana*, *Dyrnak*, *Spa we massaž*, *Diş lukmany*, *Saglyk*, *Restoran*, *Kafe we çaýhana*, *Sport*, *Okuw*, *Awtoulag*, *Öý haýwanlary*, *Öý hyzmatlary*). It sets the booking type, the word for "specialist", the search filters and the starter services. Run by the Ýeral team. (ADR 0017) |
+| **Category** | a kind of business (13 seeded: *Gözellik*, *Dellekhana*, *Dyrnak*, *Spa we massaž*, *Diş lukmany*, *Saglyk*, *Restoran*, *Kafe we çaýhana*, *Sport*, *Okuw*, *Awtoulag*, *Öý haýwanlary*, *Öý hyzmatlary*; the first launch opens the 11 that take appointments, *Restoran* and *Kafe we çaýhana* come with tables, Q-030). It sets the booking type, the word for "specialist", the search filters and the starter services. Run by the Ýeral team. (ADR 0017) |
 | **Business** (workspace) | one place at one address: profile, photos, hours, special days, booking rules, team, services, clients. Public only when verified. (business spec §1, §10) |
 | **Ýeral account** | a person: phone, name, language, favourites. Books as a client and can be a member of several businesses. (business spec §10) |
 | **Membership** | a person's access level in one business. (chapter 3) |

@@ -164,7 +164,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 .tr.sel,.tr.on,.tr.sel:hover,.tr.on:hover{background:#efecfe}
 .th,.th:hover{min-height:40px;padding-top:0;padding-bottom:0;background:transparent;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#6e6e78;border-radius:16px 16px 0 0}
 .c-std{grid-template-columns:36px minmax(150px,1.5fr) minmax(150px,1.5fr) minmax(72px,.7fr) minmax(104px,1fr) minmax(88px,.8fr) 176px 40px}
-.c-req{grid-template-columns:36px minmax(150px,1.4fr) minmax(150px,1.4fr) minmax(72px,.7fr) minmax(104px,1fr) minmax(88px,.8fr) 124px 168px 40px}
+.c-req{grid-template-columns:36px minmax(150px,1.4fr) minmax(150px,1.4fr) minmax(72px,.7fr) minmax(136px,1fr) minmax(88px,.8fr) 124px 168px 40px}
 .c-std>.jg{display:none !important}
 .c-std.nost{grid-template-columns:36px minmax(150px,1.5fr) minmax(150px,1.5fr) minmax(104px,1fr) minmax(88px,.8fr) 176px 40px}
 .c-req.nost{grid-template-columns:36px minmax(150px,1.4fr) minmax(150px,1.4fr) minmax(104px,1fr) minmax(88px,.8fr) 124px 168px 40px}
@@ -303,6 +303,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <sc-if value="{{bnOn}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column">
 <sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnx"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
 <sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
+<sc-if value="{{bnHidden}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Ýeral has hidden your page:</b> Clients reported that your page shows the wrong address. Clients can’t find or book you.</span><button class="b b-sec b-sm" style="flex: none" onClick="{{openContact}}">Contact Ýeral</button></div></sc-if>
 <sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnx"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
 </div></sc-if>
 
@@ -353,7 +354,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="lgr"><span class="badge sm st-c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Confirmed</span><span>Time set, the client was told</span></div>
 <div class="lgr"><span class="badge sm st-d"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg>Completed</span><span>The visit happened (set by itself after the end time)</span></div>
 <div class="lgr"><span class="badge sm st-x"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Cancelled</span><span>The client, the business or the system cancelled</span></div>
-<div class="lgr"><span class="badge sm st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>No-show</span><span>The client didn’t come — marked with Report from the visit’s start</span></div>
+<div class="lgr"><span class="badge sm st-n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>No-show</span><span>The client didn’t come — marked with Report, up to 24 h after the visit</span></div>
 </div>
 <div class="lgs"><span class="lbl">Source</span>
 <div class="lgi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>Online — the client booked on Ýeral</span></div>
@@ -499,7 +500,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="fld"><label class="flab" for="drw-note">Internal note</label><textarea id="drw-note" class="inp ta" value="{{d.inote}}" onInput="{{onNote}}" placeholder="For example: a colour code or a special request" aria-describedby="drw-note-c"></textarea><span id="drw-note-c" class="cap">{{d.noteCap}}</span></div>
 </sc-if>
 
-<sc-if value="{{d.hasReport}}" hint-placeholder-val="{{false}}"><div class="rpb"><span class="lbl" style="color: #a3251b">{{d.reportHead}}</span><sc-for list="{{d.reports}}" as="rr" hint-placeholder-count="1"><div class="rpr"><span class="rpl">{{rr.line}}</span><button class="b b-sec b-sm" aria-label="{{rr.aria}}" onClick="{{rr.remove}}">Remove report</button></div></sc-for><span class="cap">{{d.reportCap}}</span></div></sc-if>
+<sc-if value="{{d.hasReport}}" hint-placeholder-val="{{false}}"><div class="rpb"><span class="lbl" style="color: #a3251b">Report</span><div class="rpr"><span class="rpl">{{d.reportLine}}</span><button class="b b-sec b-sm" onClick="{{removeReport}}">Remove report</button></div><span class="cap">{{d.reportCap}}</span></div></sc-if>
 <sc-if value="{{d.hasHist}}" hint-placeholder-val="{{false}}">
 <div class="dsec">
 <span class="lbl">Recent visits</span>
@@ -628,7 +629,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["requests","today","upcoming","past","cancelled"],"default":"requests","section":"State"},"panel":{"editor":"enum","options":["none","request","move-request","booking","decline","report-menu","report-noshow","report-added","reported","report-past"],"default":"none","section":"State"},"selected":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"answers":{"editor":"enum","options":["both","each","desk"],"default":"both","section":"Access"},"clock":{"editor":"enum","options":["day","evening"],"default":"day","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1320}}'>
+<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["requests","today","upcoming","past","cancelled"],"default":"requests","section":"State"},"panel":{"editor":"enum","options":["none","request","move-request","booking","decline","report-menu","report-noshow","report-added","reported","report-past"],"default":"none","section":"State"},"selected":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"answers":{"editor":"enum","options":["both","each","desk"],"default":"both","section":"Access"},"clock":{"editor":"enum","options":["day","evening"],"default":"day","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","hidden","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1320}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -682,10 +683,11 @@ class Component extends DCLogic {
     const over = Object.assign({}, s.over);
     const at = String(Math.floor(this.now() / 60)).padStart(2, '0') + ':' + String(this.now() % 60).padStart(2, '0');
     const by = { owner: 'Maýsa Annaýewa', admin: 'Selbi Hojaýewa', specialist: 'Aýna Myradowa' }[this.role()];
-    const o = Object.assign({}, s.over[id] || {}, { reports: (r.reports || []).concat([{ k: k, text: text || '', at: at, by: by, off: 0 }]) });
+    const had = (r.reports || []).length > 0;
+    const o = Object.assign({}, s.over[id] || {}, { reports: [{ k: k, text: text || '', at: at, by: by, off: 0 }] });
     if (k === 'noshow') o.status = 'noshow';
     over[id] = o;
-    this.flash({ over: over, menuId: null, rmenu: false, rmRow: null, modal: null, mIds: [], reason: null, rtext: '' }, k === 'noshow' ? 'Marked as No-show · saved to the client’s card' : 'Report saved to the client’s card', { over: s.over });
+    this.flash({ over: over, menuId: null, rmenu: false, rmRow: null, modal: null, mIds: [], reason: null, rtext: '' }, k === 'noshow' ? (had ? 'Marked as No-show · replaces the earlier report' : 'Marked as No-show · saved to the client’s card') : 'Report saved to the client’s card', { over: s.over });
   }
   unreport(id, i) {
     const s = this.state;
@@ -707,18 +709,20 @@ class Component extends DCLogic {
     const has = (k) => reps.some((x) => x.k === k);
     const started = this.started(r);
     const sinceEnd = -r.day * 1440 + this.now() - m;
+    // one report per booking: a No-show (from the start until 24 h after the end) may replace an earlier report of another type
+    const nsWin = started && sinceEnd < 1440;
+    if (reps.length) return reps[0].k !== 'noshow' && nsWin ? ['noshow'] : [];
     const out = [];
-    if (started && !has('late') && !has('noshow') && sinceEnd < 1440) out.push('noshow');
-    if (started && !has('late')) out.push('late');
-    if (!has('rude')) out.push('rude');
-    out.push('other');
+    if (nsWin) out.push('noshow');
+    if (started) out.push('late');
+    out.push('rude', 'other');
     return out;
   }
   reportItems(r, after) {
     const RL = { noshow: 'No-show', late: 'Came late', rude: 'Rude behaviour', other: 'Other' };
     const RD = { noshow: 'The booking becomes No-show · counts towards Phone only', late: 'The booking doesn’t change', rude: 'The booking doesn’t change', other: 'Write what happened' };
     return this.reportKinds(r).map((k) => ({
-      k: k, t: RL[k] + (k === 'other' ? '…' : ''), d: RD[k],
+      k: k, t: RL[k] + (k === 'other' ? '…' : ''), d: k === 'noshow' && (r.reports || []).length ? 'Replaces the earlier report · the booking becomes No-show' : RD[k],
       pick: () => { if (after) after(); if (k === 'other') this.setState({ modal: 'complaint', mIds: [r.id], reason: 'Other', rtext: '', menuId: null, rmenu: false, rmRow: null, altOn: false, alts: {} }); else this.report(r.id, k); }
     }));
   }
@@ -784,7 +788,7 @@ class Component extends DCLogic {
       'Merjen K.': ['+993 65 02 91 66', 5, 0, '', '60 TMT'], 'Bahar A.': ['+993 65 70 33 18', 9, 0, '', '98 TMT'],
       'Gülälek N.': ['+993 65 44 70 19', 12, 1, 'Use ammonia-free colour — allergy.', '145 TMT', [['28 Sep', 'Hair colouring · Aýna', 'completed', '250 TMT'], ['7 Sep', 'Women’s haircut · Aýna', 'completed', '80 TMT'], ['19 Aug', 'Hair styling · Aýna', 'noshow', '60 TMT']]],
       'Nurjahan A.': ['+993 62 55 07 91', 8, 0, '', '150 TMT'], 'Jemal S.': ['+993 64 90 31 26', 3, 0, '', '90 TMT'], 'Jahan M.': ['+993 65 13 66 48', 2, 0, '', '70 TMT'],
-      'Sona P.': ['+993 62 33 81 07', 14, 0, '', '64 TMT'], 'Ejegyz T.': ['+993 64 55 12 80', 0], 'Mähri G.': ['+993 61 30 44 92', 4, 0, '', '70 TMT'],
+      'Sona P.': ['+993 62 33 81 07', 14, 0, '', '64 TMT'], 'Ejegyz T.': ['+993 64 55 12 80', 0], 'Mähri G.': ['+993 61 30 44 92', 4, 0, '', '70 TMT'], 'Şemşat K.': ['+993 63 18 74 52', 2, 0, '', '90 TMT', [['7 Oct', 'Gel manicure · Maral', 'completed', '110 TMT'], ['2 Oct', 'Manicure · Maral', 'completed', '70 TMT']]],
       'Gözel A.': ['+993 65 73 26 41', 1, 0, '', '90 TMT'], 'Döwlet B.': ['+993 65 66 10 22', 6, 0, '', '40 TMT'], 'Aýsoltan R.': ['+993 65 48 19 73', 5, 0, '', '70 TMT'],
       'Läle O.': ['+993 63 47 25 51', 2, 0, '', '110 TMT'], 'Merdan K.': ['+993 62 21 08 40', 4, 0, '', '90 TMT'], 'Aýjemal Gurbanowa': ['+993 65 90 11 22', 3, 0, '', '85 TMT'],
       'Arzygül H.': ['+993 64 72 03 18', 0], 'Mahym D.': ['+993 65 37 48 20', 4, 0, '', '75 TMT']
@@ -801,7 +805,7 @@ class Component extends DCLogic {
       ['b17', 'YR-48117', 'Jahan M.', 's5', 'Maral', 0, '15:00', '16:00', 'online', 'cancelled', { by: 'client' }],
       ['b13', 'YR-48113', 'Sona P.', 's9', 'Jeren', 0, '15:00', '15:30', 'online', 'confirmed'],
       ['b04', 'YR-48104', 'Ejegyz T.', 's1', 'Aýna', 0, '15:30', '16:30', 'online', 'pending', { hold: 18, note: 'My hair is long — only take 5 cm off the ends' }],
-      ['b10', 'YR-48110', 'Mähri G.', 's5', 'Maral', 0, '16:00', '17:00', 'online', 'pending', { hold: 24 }],
+      ['b10', 'YR-48110', 'Şemşat K.', 's5', 'Maral', 0, '16:00', '17:00', 'online', 'pending', { hold: 24 }],
       ['b15', 'YR-48115', 'Gözel A.', 's10', 'Leýli', 0, '16:30', '17:00', 'online', 'pending', { hold: 21 }],
       ['b05', 'YR-48105', 'Döwlet B.', 's4', 'Aýna', 0, '17:00', '17:30', 'phone', 'confirmed'],
       ['b06', 'YR-48106', 'Aýsoltan R.', 's2', 'Aýna', 0, '18:00', '18:45', 'online', 'confirmed'],
@@ -828,7 +832,7 @@ class Component extends DCLogic {
       return {
         id: a[0], ref: a[1], client: a[2], svc: a[3], svcName: sv[0], dur: sv[1], price: x.price || sv[2], staff: a[4], day: a[5], from: a[6], to: a[7], src: a[8], status: a[9],
         hold: x.hold || 0, mv: x.mv || null, eve: !!x.eve, at: x.at || '', reports: x.reports || [], by: x.by || '', why: x.why || '', note: x.note || '',
-        phone: cl[0], visits: cl[1], ns: cl[2] || 0, alert: cl[3] || '', avg: cl[4] || '', hist: cl[5] || [], blocked: !!cl[6]
+        phone: cl[0], visits: cl[1], newTag: ['Şemşat K.', 'Gözel A.', 'Jahan M.', 'Läle O.'].indexOf(a[2]) >= 0, ns: cl[2] || 0, alert: cl[3] || '', avg: cl[4] || '', hist: cl[5] || [], blocked: !!cl[6]
       };
     });
     const ALT = {
@@ -969,10 +973,10 @@ class Component extends DCLogic {
         menu.push(mb('Open booking', openIt));
         if (r.status === 'confirmed') {
           menu.push(ml('Move to another time', 'B-Calendar.dc.html'));
-          menu.push(mb('Report…', () => this.setState({ rmRow: r.id })));
+          if (this.reportKinds(r).length) menu.push(mb('Report…', () => this.setState({ rmRow: r.id })));
           menu.push(mb('Cancel booking', () => this.openModal('cancel', [r.id]), true));
         }
-        if (r.status === 'completed') menu.push(mb('Report…', () => this.setState({ rmRow: r.id })));
+        if (r.status === 'completed' && this.reportKinds(r).length) menu.push(mb('Report…', () => this.setState({ rmRow: r.id })));
         if (r.status === 'cancelled' || r.status === 'noshow') menu.push(ml('Book again', 'B-Calendar.dc.html'));
       }
       menu.push(ml('Open the client’s card', 'B-Client.dc.html'));
@@ -984,7 +988,7 @@ class Component extends DCLogic {
         canAns: can, noAns: (r.status === 'pending' || mvq) && !can,
         hasMv: mvq, mvLine: isReq ? 'Time change' : 'New time requested: ' + (mvq ? DN[r.mv.day] + ' · ' + r.mv.from : ''),
         plainTime: !(isReq && mvq), mvTime: isReq && mvq, mvFrom: DN[r.day] + ' · ' + r.from, mvTo: mvq ? DN[r.mv.day] + ' · ' + r.mv.from : '', ansNote: spec ? 'Answers: admins' : 'Answers: ' + r.staff,
-        client: r.client, phone: r.phone, isNew: r.visits === 0,
+        client: r.client, phone: r.phone, isNew: r.newTag,
         svcName: r.svcName, svcMeta: r.dur + (showP ? ' · ' + r.price : ''), staff: r.staff,
         time: r.from + '–' + r.to, day: DAYS[r.day],
         src: SRC[r.src], isOnline: r.src === 'online', isPhone: r.src === 'phone', isWalk: r.src === 'walkin',
@@ -1031,7 +1035,7 @@ class Component extends DCLogic {
     const selPending = selIds.filter((id) => (byId[id].status === 'pending' || this.isMv(byId[id])) && this.canAns(byId[id]));
 
     const ob = s.openId ? byId[s.openId] : null;
-    let d = { canReport: false, rOpen: false, rOpen2: false, rItems: [], hasReport: false, reportHead: '', reports: [], reportCap: '', isMove: false, mvFrom: '', mvTo: '', fitCls: 'cap', fitText: '', okLabel: 'Confirm', hasTimer: false, timerNote: '', title: '', ref: '', badgeCls: 'badge', iP: false, iC: false, iD: false, iX: false, iN: false, statusLabel: '', srcLabel: '', isOnline: false, isPhone: false, isWalk: false, hasBy: false, byText: '', isPending: false, isBooking: false, timerText: '', timerColor: '#93500a', initial: '', client: '', phone: '', isNewCl: false, hasVisits: false, visits: '', hasNs: false, nsText: '', blocked: false, hasAlert: false, alert: '', details: [], hasNote: false, note: '', inote: '', noteCap: '', hasHist: false, hist: [], actPending: false, actConfirmed: false, actDone: false, actRebook: false, hasFoot: false, pendNoAns: false, whoAnswers: '' };
+    let d = { canReport: false, rOpen: false, rOpen2: false, rItems: [], hasReport: false, reportLine: '', reportCap: '', isMove: false, mvFrom: '', mvTo: '', fitCls: 'cap', fitText: '', okLabel: 'Confirm', hasTimer: false, timerNote: '', title: '', ref: '', badgeCls: 'badge', iP: false, iC: false, iD: false, iX: false, iN: false, statusLabel: '', srcLabel: '', isOnline: false, isPhone: false, isWalk: false, hasBy: false, byText: '', isPending: false, isBooking: false, timerText: '', timerColor: '#93500a', initial: '', client: '', phone: '', isNewCl: false, hasVisits: false, visits: '', hasNs: false, nsText: '', blocked: false, hasAlert: false, alert: '', details: [], hasNote: false, note: '', inote: '', noteCap: '', hasHist: false, hist: [], actPending: false, actConfirmed: false, actDone: false, actRebook: false, hasFoot: false, pendNoAns: false, whoAnswers: '' };
     if (ob) {
       const bd = BADGE[ob.status];
       const pend = ob.status === 'pending';
@@ -1047,10 +1051,10 @@ class Component extends DCLogic {
         isMove: mvq, mvFrom: DAYL[ob.day] + ' · ' + ob.from + '–' + ob.to, mvTo: mvq ? DL[ob.mv.day] + ' · ' + ob.mv.from + '–' + ob.mv.to : '',
         fitCls: 'cap okc', fitText: ob.staff + ' is free at the new time — you can confirm.', okLabel: mvq ? 'Confirm the new time' : 'Confirm',
         hasTimer: pend || mvq, timerNote: this.closedNow() ? 'The timer counts only while you’re open, so it waits until 09:00. If no one answers by ' + this.tmrOf(ob).t + ', the request is cancelled' + (mvq ? ' — the booking stays at its time.' : ' and the client is offered 3 other times.') : (mvq ? 'If no one answers in time, the request is cancelled — the booking stays at its time.' : 'If no one answers in time, the request is cancelled and the client is offered 3 other times.'),
-        canReport: ob.status === 'confirmed' || ob.status === 'completed', rOpen: !!s.rmenu && ob.status === 'confirmed', rOpen2: !!s.rmenu && ob.status === 'completed', rItems: this.reportItems(ob),
-        hasReport: ob.reports.length > 0, reportHead: ob.reports.length > 1 ? 'Reports' : 'Report',
-        reports: ob.reports.map((x, i) => ({ line: RL[x.k] + (x.text ? ' · ' + x.text : '') + ' · ' + (x.off === 0 ? 'today' : DAYS[x.off]) + ' · ' + x.at + ' · ' + x.by, aria: 'Remove report: ' + RL[x.k], remove: () => this.unreport(ob.id, i) })),
-        reportCap: ob.reports.length > 1 ? 'The client isn’t told. You can remove each report for 7 days.' : 'The client isn’t told. You can remove it until 21 October.',
+        canReport: (ob.status === 'confirmed' || ob.status === 'completed') && this.reportKinds(ob).length > 0, rOpen: !!s.rmenu && ob.status === 'confirmed', rOpen2: !!s.rmenu && ob.status === 'completed', rItems: this.reportItems(ob),
+        hasReport: ob.reports.length > 0,
+        reportLine: ob.reports.length ? RL[ob.reports[0].k] + (ob.reports[0].text ? ' · ' + ob.reports[0].text : '') + ' · ' + (ob.reports[0].off === 0 ? 'today' : DAYS[ob.reports[0].off]) + ' · ' + ob.reports[0].at + ' · ' + ob.reports[0].by : '',
+        reportCap: 'The client isn’t told. You can remove it until 21 October.',
         badgeCls: 'badge ' + bd[0], statusLabel: bd[2],
         pendNoAns: (pend || mvq) && !canA, whoAnswers: spec ? 'The owner and admins answer requests — you can only view them.' : ob.staff + ' answers her own requests — you can only view them.',
         srcLabel: SRCL[ob.src], isOnline: ob.src === 'online', isPhone: ob.src === 'phone', isWalk: ob.src === 'walkin',
@@ -1058,7 +1062,7 @@ class Component extends DCLogic {
         isPending: pend, isBooking: !pend && ob.status !== 'cancelled',
         timerText: this.tmrOf(ob).title, timerColor: this.tmrOf(ob).hot ? '#a3251b' : '#93500a',
         initial: ob.client.charAt(0), client: ob.client, phone: ob.phone,
-        isNewCl: !ob.visits, hasVisits: !!ob.visits, visits: this.pl(ob.visits, 'visit') + (seeMoney && ob.avg ? ' · average check ' + ob.avg : ''),
+        isNewCl: false, hasVisits: true, visits: this.pl(ob.visits, 'visit') + (seeMoney && ob.avg ? ' · average check ' + ob.avg : ''),
         hasNs: ob.ns > 0, nsText: this.pl(ob.ns, 'no-show'), blocked: ob.blocked,
         hasAlert: !!ob.alert, alert: ob.alert,
         details: det.map(([k, v], i) => ({ k: k, v: v, cls: i === det.length - 1 ? 'dr last' : 'dr' })),
@@ -1069,7 +1073,7 @@ class Component extends DCLogic {
           const hb = BADGE[h[2]];
           return Object.assign({ date: h[0], what: h[1], price: role !== 'specialist' ? h[3] : '', ink: hb[1], label: hb[2], cls: i === ob.hist.length - 1 ? 'hrow last' : 'hrow' }, this.sti(h[2]));
         }),
-        actPending: (pend || mvq) && canA, actConfirmed: ob.status === 'confirmed' && !mvq, actDone: ob.status === 'completed', actRebook: ob.status === 'cancelled', hasFoot: ob.status !== 'noshow'
+        actPending: (pend || mvq) && canA, actConfirmed: ob.status === 'confirmed' && !mvq, actDone: ob.status === 'completed', actRebook: ob.status === 'cancelled', hasFoot: ob.status !== 'noshow' && !(ob.status === 'completed' && !this.reportKinds(ob).length)
       }, this.sti(ob.status));
     }
 
@@ -1125,7 +1129,7 @@ class Component extends DCLogic {
       admin: { name: 'Selbi Hojaýewa', ini: 'S', phone: '+993 65 88 41 02', role: 'Admin', ws: [['Glow Studio', 'Admin · Ashgabat', true, 6, true]] },
       specialist: { name: 'Aýna Myradowa', ini: 'A', phone: '+993 65 31 22 10', role: 'Specialist', ws: [['Glow Studio', 'Specialist · Ashgabat', true, 2, true], ['Aýnanyň saç studiýasy', 'Owner · Ashgabat', false, 1, false]] }
     };
-    const bannerKind = ['inReview', 'notApproved', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
+    const bannerKind = ['inReview', 'notApproved', 'hidden', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
     const isDemo = bannerKind === 'demo';
     const P = PEOPLE[role];
     const side = s.side;
@@ -1141,9 +1145,10 @@ class Component extends DCLogic {
       navReqLabel: pendingN > 0 ? 'Bookings, ' + this.pl(pendingN, 'request') : 'Bookings',
       me: { name: P.name, ini: P.ini, phone: P.phone, role: P.role },
       wsAria: 'Workspace: Glow Studio, ' + P.role + '. Switch',
-      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
+      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none' && !(bannerKind === 'hidden' && role === 'specialist'), bnHidden: bannerKind === 'hidden' && role !== 'specialist', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
       contactOpen: side === 'contact', openContact: () => this.setState({ side: 'contact' }),
       toggleRmenu: () => this.setState({ rmenu: !s.rmenu }), closeRmenu: () => this.setState({ rmenu: false }), rmKey: (e) => { if (e && e.key === 'Escape') this.setState({ rmenu: false }); },
+      removeReport: () => { if (ob) this.unreport(ob.id, 0); },
       bulkExport: () => this.flash({ pop: null }, 'CSV ready · ' + selIds.length + (selIds.length === 1 ? ' booking' : ' bookings')),
       wsList: P.ws.map((w) => ({
         example: false,

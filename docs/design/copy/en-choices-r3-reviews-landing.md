@@ -62,7 +62,7 @@ Not repeated here: wordings from the glossary, the round-1/2/3 logs (DS-Business
 - **No decision in 48 hours** counts again and **can’t be reported again** (same as cleared): one report per review, otherwise a business could keep a review out of its rating by reporting it again.
 - **Hidden, not greyed:** after a report the “…” menu disappears (it held only Report). Replying stays possible during and after moderation (spec §15).
 - **Removed:** the review leaves the list (unanswered 4 → 3, “Showing 20 of 96”); a neutral notice sits above the filters until closed, for the owner and admins.
-- **Reported review** = Merdan K. · Back massage · Leýli (was “Anonymous” with no service). Stars-only reviews: Aýjemal G. (not answered) and Jemal S. (answered). First-name-only reviewer: Gyzylgül (a client saved without a surname). Reviewers fit the client data — see B9 below.
+- **Reported review** = Merdan K. · Back massage · Leýli (was “Anonymous” with no service). Stars-only reviews: Aýjemal Gurbanowa (not answered; “Aýjemal G.” until round 3.2) and Jemal S. (answered). First-name-only reviewer: Gyzylgül (a client saved without a surname). Reviewers fit the client data — see B9 below.
 - **20 per page:** the board draws page 1 (20 of 21 drawn reviews). The caption “Showing N of M” shows only when the total is known (owner / admin, All or a star filter, no specialist filter); the Specialist gets “Show more” without a count; the Not answered filter shows all 4. “Show more” doesn’t load anything on the board.
 - **Specialist (Aýna Myradowa):** only reviews about her (6 on page 1), read only; no summary or count, no Not answered chip, no Specialist filter, no footnote, no Reviews badge, no Settings; star chips and sort stay; business replies show without Change / Delete.
 - **Admin = owner on this page** (reply, report, change / delete any business reply). New replies are signed “Glow Studio · Selbi” for the admin, “Glow Studio · Maýsa” for the owner, “Glow Studio” in the demo; changing a reply keeps its author and time.
@@ -76,13 +76,13 @@ Not repeated here: wordings from the glossary, the round-1/2/3 logs (DS-Business
 - **Mock phone line** “Glow Studio answers by 11:38” (18 min left at 11:20), following the brief’s sent-screen line.
 - **No city names** in landing copy (and none in the mock).
 - **Frame heights:** B-Reviews 1440 × 1980 → **1440 × 4480** (20 reviews on page 1; measured 4 476 with Inter after B9); B-Landing stays 1440 × 4020 (measured 3 964). The canvas position of B-Reviews needs the taller frame.
-- For B-Mobile (landing at 390, reviews from More): the first three reviews are unchanged by B9 (Döwran S. · Today, Mähri G. · Yesterday, Merdan K. · Yesterday, reported); the fourth is now Gözel A. · Yesterday · Back massage · Leýli (answered), then Aýjemal G. · 2 days ago (stars only, not answered). Phone rules kept — landing hero buttons fill the width, mock without the phone, menu via tweak `menu`; Reviews summary stacks, chips wrap, sort full width, composer and modal as bottom sheet, specialist filter as bottom sheet.
+- For B-Mobile (landing at 390, reviews from More): the first three reviews are unchanged by B9 (Döwran S. · Today, Mähri G. · Yesterday, Merdan K. · Yesterday, reported); the fourth is now Gözel A. · Yesterday · Back massage · Leýli (answered), then Aýjemal Gurbanowa · 2 days ago (stars only, not answered). Phone rules kept — landing hero buttons fill the width, mock without the phone, menu via tweak `menu`; Reviews summary stacks, chips wrap, sort full width, composer and modal as bottom sheet, specialist filter as bottom sheet.
 
 ## Checks
 `check_dc.py` + `dccheck.py` clean on both (only the known html/body note; the landing script now returns every hole explicitly, so the old “missing holes” report is gone); `node --check` of both scripts; node play-through of the Reviews logic (23 checks: counts per moderation state, reply / change / delete + Undo, report with “Another reason”, filters, page of 20, specialist read-only, admin author, first, empty, demo); local render (expand.js + Chromium) of 23 Reviews states and 4 Landing states at 1440, 900 and 390 — no cuts or overflow except the known false positives (min-height menu rows and tab-bar items) and the landing mock’s by-design ellipses (the same as on the Turkmen board); **long-text check** (every button, chip, pill, tab, label, link and header lengthened by ~30 %) at 1440 and 390 on both pages: labels wrap or buttons grow, nothing new is cut; only the shared account-menu row “Open as a client · yeral.app” wraps to two lines (shell markup from B-Bookings).
 
 ## B9 · round-3 consistency fix (reviewers fit the client data)
-Asked by the coordinator ((design source) item B9): every review must come from a completed booking that fits the client data on B-Clients / B-Client / B-Calendar — the visit is before the review, its service and price fit the client’s visits and average check, and its specialist fits the “has a booking with Aýna” flag. Names not drawn on B-Clients are other clients of the workspace’s 148. Reviews show the first name + initial (“Aýjemal G.” for Aýjemal Gurbanowa), or the first name alone when no surname is saved.
+Asked by the coordinator ((design source) item B9): every review must come from a completed booking that fits the client data on B-Clients / B-Client / B-Calendar — the visit is before the review, its service and price fit the client’s visits and average check, and its specialist fits the “has a booking with Aýna” flag. Names not drawn on B-Clients are other clients of the workspace’s 148. ~~Reviews show the first name + initial~~ — replaced in round 3.2: B-Reviews is a staff screen, so each reviewer shows as the saved client name (see the Round 3.2 line below).
 
 **Removed / changed reviewers**
 - Ejegyz T. and Arzygül H. — 0 visits (New, only a pending request) → removed.
@@ -90,7 +90,7 @@ Asked by the coordinator ((design source) item B9): every review must come from 
 - Läle O. — 2 visits, 220 TMT, no booking with Aýna → **Gel manicure · Maral** (110 TMT × 2), 3 weeks ago (visit 20 Sep), new text and reply.
 - Also fixed: Gülälek N. reviewed a Women’s haircut “2 days ago” but her last visit is 28 Sep Hair colouring → **Hair colouring · Aýna · 2 weeks ago**, new text (mentions the ammonia-free / allergy note) · Mahym D. (last visit 3 Jul, lapsed) and Ogulgerek (Ogulgerek M., last visit 21 Jun) → removed · Aýgözel → **Aýgözel S.** (saved surname) · Women’s haircut · Aýna (80 TMT average, visit 11 Sep) · Jemal S. (last visit 9 Sep on B-Calendar) → 1 month ago · Sona P. → 2 weeks ago (visit 1 Oct) · Aýsoltan R. → 3 weeks ago (visit 23 Sep) · Jahan M. → 3 weeks ago (visit 25 Sep; 2 visits = Pedicure 90 + Brows and lashes 50) · Bahar A. → 1 week ago (visit 6 Oct).
 - `first` state: Ogulşat M. · Today · Women’s haircut · Aýna (her 09:00 visit today, booked online) “Quick, neat and right on time.” (was Gülälek N.).
-- Unanswered stays 4 (Döwran S., Mähri G., Merdan K., Aýjemal G.); totals unchanged (96 counted · 97 visible · 4.9). The first three reviews (B-Mobile frame 12) are unchanged.
+- Unanswered stays 4 (Döwran S., Mähri G., Merdan K., Aýjemal Gurbanowa); totals unchanged (96 counted · 97 visible · 4.9). The first three reviews (B-Mobile frame 12) are unchanged.
 - New names checked against every board: Sähra T., Annagül R., Gyzylgül, Gülşat N. are not used elsewhere (Ýazgül, Bägül and Täzegül are taken on B-Team); Myrat B. appears only on the later B-Tables; Döwran S. and Enejan B. as before / as on B-Clients.
 
 **New list, page 1 (newest first) + the 21st on page 2** — name · service · specialist · age · stars (· reply)
@@ -98,7 +98,7 @@ Asked by the coordinator ((design source) item B9): every review must come from 
 2. Mähri G. · Manicure · Maral · Yesterday · 5★ · not answered (visit 2 Oct)
 3. Gözel A. · Back massage · Leýli · Yesterday · 5★ · “Leýli found exactly where it hurt. My back feels so much better.” → “Thank you, Gözel! Come again soon.” (visit 13 Oct)
 4. Merdan K. · Back massage · Leýli · Yesterday · 1★ · reported, not answered (visit 5 Oct)
-5. Aýjemal G. · Women’s haircut · Aýna · 2 days ago · 5★ · stars only, not answered (visit 18 Sep)
+5. Aýjemal Gurbanowa · Women’s haircut · Aýna · 2 days ago · 5★ · stars only, not answered (visit 18 Sep)
 6. Sähra T. · Brows and lashes · Jeren · 3 days ago · 5★ · “Neat brows in half an hour, right on time.” → “Thank you, Sähra! See you next time.” (Selbi)
 7. Myrat B. · Full body massage · Leýli · 5 days ago · 5★ · “Good massage in a calm room.” → “Thank you, Myrat!”
 8. Bahar A. · Facial cleansing · Jeren · 1 week ago · 4★ (visit 6 Oct)
@@ -115,8 +115,15 @@ Asked by the coordinator ((design source) item B9): every review must come from 
 19. Jemal S. · Pedicure · Maral · 1 month ago · 5★ · stars only → “Thank you, Jemal!” (Selbi; visit 9 Sep)
 20. Enejan B. · Hair styling · Aýna · 1 month ago · 5★ · “My hair looked great all day.” → “Thank you, Enejan!” (visit 4 Sep; 3 visits, 70 TMT average)
 21. (page 2) Gülşat N. · Facial cleansing · Jeren · 1 month ago · 5★ · “Clean, calm and on time.” → “Thank you, Gülşat!”
-Aýna’s specialist view (page 1): Döwran S., Aýjemal G., Gülälek N., Aýsoltan R., Aýgözel S., Enejan B.
+Aýna’s specialist view (page 1): Döwran S., Aýjemal Gurbanowa, Gülälek N., Aýsoltan R., Aýgözel S., Enejan B.
 
 **Note for DS-Business 06 (not my file):** its round-1 sample “Gülälek N. · 2 days ago · Women’s haircut · Aýna” no longer matches; B-Reviews now has her Hair colouring review 2 weeks ago.
 
 **Checks after B9:** rebuilt from the regenerated B-Bookings (14:39; shell identical to the previous build); `check_dc.py` + `dccheck.py` clean; `node --check`; play-through 23/23; renders of all 23 states at 1440 (no issues) and the long-text pass at 1440 and 390 (no new cuts); frame 1440 × 4480 (measured 4 476).
+
+## Round 3.2 · saved client names on staff screens (owner rule)
+- B-Reviews is a staff screen, so each reviewer shows as the **saved client name**: “Aýjemal G.” → **“Aýjemal Gurbanowa”** (her saved name on B-Clients / B-Client). Clients saved with an initial (Döwran S., Mähri G., Gülälek N., Aýgözel S., …) or a first name only (Gyzylgül) stay as saved. First name + initial is only what clients see on the client site. This replaces the round-3 decision “reviewer = first name + initial” on this board (and in the B-Mobile note above). Rebuilt from the current B-Bookings; `check_dc.py` + `dccheck.py` clean, `node --check`, play-through 23/23, 1440 / 390 renders and the long-text pass without new cuts; frame stays 1440 × 4480.
+- Same rebuild: the current B-Bookings shell adds the **Hidden by Ýeral** banner (“Ýeral has hidden your page: …” + Contact Ýeral; not shown to a Specialist), so the B-Reviews `banner` tweak gains **`hidden`** (none · inReview · notApproved · hidden · demo) with the same `bnHidden` logic as B-Bookings.
+
+## Round 3.4 · request hold never runs past the visit’s start (owner)
+- B-Landing FAQ “How do I confirm a booking?”: the hold-time sentence now reads “A request nobody answers within the time you choose (15 min to 24 h, counted only while you’re open, and never past the visit’s start) is cancelled, and the client is offered 3 other times.” Only this clause changed. `check_dc.py` + `dccheck.py` clean, `node --check`, FAQ-open renders at 1440 and 390 (normal and long text) without new cuts; frame stays 1440 × 4020.

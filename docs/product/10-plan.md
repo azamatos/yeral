@@ -52,11 +52,12 @@ prompt instead of riding on the next one. Each iteration is checked before the n
 | 1 | the five design-system boards | Foundations: the *Ýeral* wordmark (Q-005), English copy rules, the components with English text; the "Example" badge; the shared code step | drawn 19.10.2026, checked 20.10.2026 (fixes in round 3) |
 | 2 | B-Shell, B-Login, B-Onboarding, B-Calendar, B-Bookings, B-Mobile, DS · Business patterns | Business app: shell, sign-in with the code on screen, setup wizard, calendar (block time, *Başga ýerde* as a plain reserved gap, internal statuses), requests, bookings list (no bulk move); B-Tables, B-Classes, B-Analytics and B-Help moved to "Later" | drawn 20.10.2026, checked 20.10.2026 (fixes in round 3) |
 | 3 | B-Clients, B-Client, B-Team, B-Settings, B-Services, B-Reviews, B-Landing, their phone frames | Business app: clients (specialist view, the average check), team (the "uses the app" switch, invites without SMS, read-only permissions), settings (photos, the city, hours past midnight, booking rules, link and QR states), services, reviews (moderation outcomes), the landing page with "Try the business app" without signing in; B-Notifications moved to "Later" (F-169); the fixes to rounds 1–2 | drawn 20.10.2026 (about 3 hours: too big for one prompt); checked 20.10.2026 |
-| 3.1 | B-Calendar, B-Bookings, B-Shell | Fixes: one report per booking with No-show replacing (Q-206), the notifications banner for everyone, the Hidden by Ýeral banner (Q-012), Admin views shifts only | prompt written 20.10.2026 (`prompts/p1-round-3-fixes.md`) |
-| 3.2 | B-Clients, B-Client | Fixes: a Specialist's own bookings only, the reminders switch (F-143), last visit, Unnamed client, the account link by phone (Q-171), tags, Total | prompt written 20.10.2026 |
-| 3.3 | B-Team, B-Services | Fixes: Admin read-only on the team, Reactivate (F-114), breaks and yearly time off (F-112), the hidden price's amount (B-38), invited people in "Who does it" | prompt written 20.10.2026 |
-| 3.4 | B-Settings, B-Onboarding | Fixes: the launch categories (chapter 4), text limits (chapter 5), special days past midnight (Q-105), every affected booking (Q-211), QR as PNG or SVG | prompt written 20.10.2026 |
-| 4a.1 | Home | Canvas tidy (Booking-Table, Booking-Class and the three Home explorations to "Later"); home in English without the app block (F-004), the business entry (F-177), the Example badge on cards; the client footer without "Bahalar" (F-033) | |
+| 3.1 | B-Calendar, B-Bookings, B-Shell | Fixes: one report per booking with No-show replacing (Q-206), the notifications banner for everyone, the Hidden by Ýeral banner (Q-012), Admin views shifts only | drawn and checked 20.10.2026 (small fixes in 3.5) |
+| 3.2 | B-Clients, B-Client | Fixes: a Specialist's own bookings only, the reminders switch (F-143), last visit, Unnamed client, the account link by phone (Q-171), tags, Total | drawn and checked 20.10.2026 (fixes in 3.5) |
+| 3.3 | B-Team, B-Services | Fixes: Admin read-only on the team, Reactivate (F-114), breaks and yearly time off (F-112), the hidden price's amount (B-38), invited people in "Who does it" | drawn and checked 20.10.2026 |
+| 3.4 | B-Settings, B-Onboarding | Fixes: the launch categories (chapter 4), text limits (chapter 5), special days past midnight (Q-105), every affected booking (Q-211), QR as PNG or SVG | drawn and checked 20.10.2026 (fixes in 3.5) |
+| 3.5 | B-Clients, B-Client, B-Calendar, B-Bookings, B-Team, B-Services, B-Settings, B-Reviews, B-Mobile, the DS boards | Fixes after the 3.1–3.4 check: demo facts, one name per client record on staff screens and reviewers as first name + initial, the yearly special day past midnight (Q-105), the hours list without a week cap and with a request declined (Q-211), three small ones | prompt written 20.10.2026 (`prompts/p1-round-3-fixes.md`) |
+| 4a.1 | Home | Canvas tidy (Booking-Table, Booking-Class and the three Home explorations to "Later"); home in English without the app block (F-004), the business entry (F-177), the Example badge on cards; the client footer without "Bahalar" (F-033) | prompt written 20.10.2026 (`prompts/p1-round-4a.md`) |
 | 4a.2 | Search, Client-Map | Search and map with the city choice (Q-107), places without a free time (Q-150), Example rows and pins; no party-size filter (tables are Later) | |
 | 4a.3 | Venue | The business page: owner preview with the booking buttons disabled (Q-153), the Call card for a phone-only client or a paused business (Q-154), the Example line, hidden prices, reviews by name and initial and under moderation, hours past midnight, "New address" for 30 days after a move (Q-215) | |
 | 4a.4 | States | Errors, empty pages, location help, not found, a page still in review (F1) | |
@@ -70,7 +71,7 @@ prompt instead of riding on the next one. Each iteration is checked before the n
 | 5.1 | admin tool: shell and sign-in | cms.yeral.app on the business app's patterns: the team's own sign-in with a second factor and its recovery (F-178), navigation | |
 | 5.2 | admin tool: businesses | Verify, reject with a reason and see it sent again (Q-274), hide or un-verify with a reason to the owner (Q-012), add a business for its owner (F-238), close a workspace (Q-213) | |
 | 5.3 | admin tool: reported reviews | The queue with the 48-hour recount, clear or remove (Q-261, Q-262) | |
-| 6.1 | design-system boards | Catch up with rounds 4–5: every new client and admin piece on its board with its states | |
+| 6.1 | design-system boards | Catch up with rounds 4–5: every new client and admin piece on its board with its states; remove the client-site table samples from DS · Business patterns (the Restaurant tile, the table badge) or move them to "Later" | |
 | 6.2 | every board | Demo data the same everywhere, the drift list, any **Design to fix** line still open, then the export | |
 
 ### P2 · Backend to the book
@@ -113,8 +114,10 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    phone number must never open the admin tool; verify, reject and send again (Q-274), un-verify or hide a business,
    close a workspace (Q-213), review reports with the 48-hour recount, adding a business for its owner.
 6. **First-launch mode** (Q-004, Q-036): example businesses marked "Example" that confirm at once, the sign-in code
-   shown on the screen (never for the admin tool), a separate demo workspace reset every night, no SMS. It doesn't wait
-   for the design: the demo data already has English texts, refreshed at export v0.6.
+   shown on the screen (never for the admin tool), a separate demo workspace reset every night, no SMS; appointments
+   only (Q-030): the seed's table and class examples and the Restaurant and Café & tea house categories stay out of
+   lists and search until tables and classes ship. It doesn't wait for the design: the demo data already has English
+   texts, refreshed at export v0.6.
 7. **Before the first launch:** deploys from GitHub over SSH after the owner approves a release (ADR 0020), nightly
    backups to Cloudflare R2 with a restore drill (F-211), error tracking and uptime alerts (F-209; it alerts on the `job gave up` line), sitemap data
    (F-197). Before SMS go out: a daily cap and a rate limit per business on the SMS its team's bookings and cancels

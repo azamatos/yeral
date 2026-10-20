@@ -462,9 +462,17 @@ button.sn:hover{background:#f4f4f6}
 .c-cap{grid-column:2 / 7;padding-left:44px;margin-top:-6px}
 .av-x{background:#f0f0f3;color:#5a5a64}
 .dayl{display:flex;flex-direction:column;border-top:1px solid #e6e6ea}
-.dayr{display:grid;grid-template-columns:52px 104px minmax(0,1fr);align-items:center;gap:8px;min-height:52px;border-bottom:1px solid #e6e6ea}
+.dayr{display:grid;grid-template-columns:46px 86px minmax(0,1fr) auto;align-items:center;column-gap:8px;row-gap:4px;min-height:52px;padding:4px 0;border-bottom:1px solid #e6e6ea}
+.dsw{display:flex;align-items:center}
+.dayr .tsel{width:82px;padding-right:24px}
+.dbz{font-size:14px;line-height:20px;font-variant-numeric:tabular-nums}
+.dbk{display:flex;justify-content:flex-end}
+.dbk .lnk{margin-left:0;height:36px;padding:0 8px}
+.dbr{grid-column:2 / 5;display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-bottom:4px}
+.dbr .wbl{width:86px;font-size:13px;line-height:18px;font-weight:600;color:#5a5a64}
+.derr{grid-column:2 / 5;padding-bottom:6px}
 .dnm{font-size:14px;line-height:20px;font-weight:600}
-.dtm{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dtm{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}
 .dro{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e6e6ea;font-size:14px;line-height:20px;font-variant-numeric:tabular-nums}
 .dro span:first-child{font-weight:600}
 .offl{display:flex;flex-direction:column}
@@ -525,9 +533,12 @@ button.sn:hover{background:#f4f4f6}
 .drw-b{padding:20px 16px}
 .drw-f{padding:12px 16px 16px}
 .drw-f .b{flex:1 1 auto}
-.dayr{grid-template-columns:52px 84px minmax(0,1fr)}
-.dayr .tsel{width:88px}
+.dayr{grid-template-columns:46px 84px minmax(0,1fr)}
+.dayr .tsel{width:82px}
 .dtm{flex-wrap:nowrap;gap:4px}
+.dbk{grid-column:2 / 4;justify-content:flex-start}
+.dbk:empty{display:none}
+.dbr .wbl{width:auto;padding-right:6px}
 .sumr{grid-template-columns:96px minmax(0,1fr) auto}
 .stl{display:none}
 .stp.cur .stl{display:inline}
@@ -585,7 +596,7 @@ button.sn:hover{background:#f4f4f6}
 
 <sc-if value="{{isTeam}}" hint-placeholder-val="{{true}}">
 <sc-if value="{{t.leftBanner}}" hint-placeholder-val="{{false}}"><div class="bnr c-war tbn" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="22" x2="16" y1="11" y2="11"></line></svg><span class="bnx">{{t.leftText}}</span><button class="b b-sec b-sm bna" aria-haspopup="dialog" onClick="{{t.choose}}">Choose</button></div></sc-if>
-<sc-if value="{{isAdmin}}" hint-placeholder-val="{{false}}"><div class="note tbn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>You can change people’s services, hours and time off. Only the owner adds and removes people and changes access levels.</span></div></sc-if>
+<sc-if value="{{isAdmin}}" hint-placeholder-val="{{false}}"><div class="note tbn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg><span>You can view the team and change which services each person does. Only the owner adds and removes people and changes access levels, shifts and time off.</span></div></sc-if>
 <div class="phd">
 <div class="phdl"><h2 class="pt">Team</h2><span class="plead">Clients see specialists in this order.</span></div>
 <sc-if value="{{isOwner}}" hint-placeholder-val="{{true}}"><button class="b b-pri b-sm" aria-haspopup="dialog" onClick="{{t.openInvite}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" x2="19" y1="8" y2="14"></line><line x1="22" x2="16" y1="11" y2="11"></line></svg>Add a team member</button></sc-if>
@@ -648,7 +659,6 @@ button.sn:hover{background:#f4f4f6}
 </sc-for>
 </div>
 <div style="display: flex; flex-direction: column; gap: 4px; padding-top: 12px">
-<span class="cap">Access levels are fixed at the first release.</span>
 <span class="cap">Specialists who don’t use the app never sign in, so the table doesn’t apply to them.</span>
 </div>
 </sc-if>
@@ -679,6 +689,7 @@ button.sn:hover{background:#f4f4f6}
 
 <div class="drw-b" role="tabpanel" aria-label="{{d.tabLabel}}">
 <sc-if value="{{d.roNote}}" hint-placeholder-val="{{false}}"><div class="note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>Only the owner changes names, phone numbers and access levels.</span></div></sc-if>
+<sc-if value="{{d.roHours}}" hint-placeholder-val="{{false}}"><div class="note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a5a64" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>Only the owner changes shifts and time off.</span></div></sc-if>
 
 <sc-if value="{{d.tabProfile}}" hint-placeholder-val="{{false}}">
 <div class="fld"><label class="flab" for="sd-name">Name clients see</label>
@@ -713,36 +724,49 @@ button.sn:hover{background:#f4f4f6}
 </sc-if>
 
 <sc-if value="{{d.tabHours}}" hint-placeholder-val="{{true}}">
+<sc-if value="{{d.hoursEdit}}" hint-placeholder-val="{{true}}">
 <div class="fld" style="gap: 10px">
 <span class="flab" id="sh-l">Working hours</span>
 <div class="g2" role="radiogroup" aria-labelledby="sh-l">
 <sc-for list="{{d.schedOpts}}" as="o" hint-placeholder-count="2"><button class="{{o.cls}}" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}"><span class="rad" aria-hidden="true"></span><span class="optt"><span class="optn">{{o.t}}</span><span class="cap">{{o.c}}</span></span></button></sc-for>
 </div>
 </div>
-<sc-if value="{{d.own}}" hint-placeholder-val="{{true}}">
 <div class="dayl">
 <sc-for list="{{d.days}}" as="dy" hint-placeholder-count="7">
-<div class="dayr">
-<button class="{{dy.swCls}}" role="switch" aria-checked="{{dy.on}}" aria-label="{{dy.swLabel}}" onClick="{{dy.flip}}" style="margin-left: -6px"><span class="trk"><span class="knob"></span></span></button>
+<div class="dayr" role="group" aria-label="{{dy.name}}">
+<span class="dsw"><sc-if value="{{dy.sw}}" hint-placeholder-val="{{true}}"><button class="{{dy.swCls}}" role="switch" aria-checked="{{dy.on}}" aria-label="{{dy.swLabel}}" onClick="{{dy.flip}}" style="margin-left: -6px"><span class="trk"><span class="knob"></span></span></button></sc-if></span>
 <span class="dnm">{{dy.name}}</span>
-<sc-if value="{{dy.on}}" hint-placeholder-val="{{true}}">
 <div class="dtm">
+<sc-if value="{{dy.ownOn}}" hint-placeholder-val="{{true}}">
 <span class="selw t"><select class="inp tsel" aria-label="{{dy.fromLabel}}" value="{{dy.from}}" onChange="{{dy.onFrom}}"><sc-for list="{{dy.fromOpts}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
 <span aria-hidden="true" style="color: #5a5a64">–</span>
 <span class="selw t"><select class="inp tsel" aria-label="{{dy.toLabel}}" value="{{dy.to}}" onChange="{{dy.onTo}}"><sc-for list="{{dy.toOpts}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+</sc-if>
+<sc-if value="{{dy.bizOn}}" hint-placeholder-val="{{false}}"><span class="dbz">{{dy.hoursText}}</span></sc-if>
+<sc-if value="{{dy.off}}" hint-placeholder-val="{{false}}"><span class="wclosed">Day off</span></sc-if>
+</div>
+<span class="dbk"><sc-if value="{{dy.noBreak}}" hint-placeholder-val="{{true}}"><button class="lnk" aria-label="{{dy.addBreakLabel}}" onClick="{{dy.addBreak}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Break</button></sc-if></span>
+<sc-if value="{{dy.hasBreak}}" hint-placeholder-val="{{false}}">
+<div class="dbr">
+<span class="wbl">Break</span>
+<span class="selw t"><select class="inp tsel" aria-label="{{dy.bFromLabel}}" value="{{dy.bFrom}}" onChange="{{dy.onBFrom}}"><sc-for list="{{dy.bOpts}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+<span aria-hidden="true" style="color: #5a5a64">–</span>
+<span class="selw t"><select class="inp tsel" aria-label="{{dy.bToLabel}}" value="{{dy.bTo}}" onChange="{{dy.onBTo}}"><sc-for list="{{dy.bOpts}}" as="o" hint-placeholder-count="6"><option value="{{o}}">{{o}}</option></sc-for></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+<button class="b b-gho b-ico" style="width: 36px; height: 36px" aria-label="{{dy.bRemoveLabel}}" onClick="{{dy.removeBreak}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
 </div>
 </sc-if>
-<sc-if value="{{dy.off}}" hint-placeholder-val="{{false}}"><span class="wclosed">Day off</span></sc-if>
+<sc-if value="{{dy.err}}" hint-placeholder-val="{{false}}"><span class="fm derr" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>{{dy.errText}}</span></span></sc-if>
 </div>
 </sc-for>
 </div>
 </sc-if>
-<sc-if value="{{d.inherit}}" hint-placeholder-val="{{false}}">
+<sc-if value="{{d.hoursRo}}" hint-placeholder-val="{{false}}">
+<div class="fld" style="gap: 2px"><span class="flab">Working hours</span><span class="ntl">{{d.schedText}}</span></div>
 <div class="dayl">
-<sc-for list="{{d.bizRows}}" as="br" hint-placeholder-count="7"><div class="dro"><span>{{br.name}}</span><span>{{br.hours}}</span></div></sc-for>
+<sc-for list="{{d.roRows}}" as="br" hint-placeholder-count="7"><div class="dro"><span>{{br.name}}</span><span>{{br.hours}}</span></div></sc-for>
 </div>
 </sc-if>
-<p class="cap" style="margin: -12px 0 0">The business hours come first: when the business is closed, a shift doesn’t open bookings.</p>
+<p class="cap" style="margin: -12px 0 0">{{d.hoursCap}}</p>
 <div class="dsep"></div>
 <div class="fld" style="gap: 10px">
 <div style="display: flex; flex-direction: column; gap: 2px"><span class="ntl">Time off</span><span class="cap">{{d.offHint}}</span></div>
@@ -762,6 +786,7 @@ button.sn:hover{background:#f4f4f6}
 <div class="fld"><label class="flab" for="to-f">From</label><input id="to-f" type="date" class="inp" min="2026-10-14" value="{{d.offFrom}}" onInput="{{d.onOffFrom}}"></div>
 <div class="fld"><label class="flab" for="to-t">To <span class="opn">(optional)</span></label><input id="to-t" type="date" class="inp" min="2026-10-14" value="{{d.offTo}}" onInput="{{d.onOffTo}}"></div>
 </div>
+<label class="rl" style="align-self: flex-start"><input type="checkbox" checked="{{d.offYearly}}" onChange="{{d.flipOffYearly}}">Repeat every year</label>
 <div class="fld"><label class="flab" for="to-n">Note <span class="opn">(optional)</span></label><input id="to-n" class="inp" value="{{d.offNote}}" onInput="{{d.onOffNote}}" placeholder="For example: family trip"><span class="cap">Only your team sees the note.</span></div>
 <sc-if value="{{d.offBad}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>The end date can’t be before the start date.</span></span></sc-if>
 <div class="pact"><button class="b b-gho b-sm" onClick="{{d.offCancel}}">Cancel</button><button class="b b-sec b-sm" disabled="{{d.offCant}}" onClick="{{d.offAdd}}">Add time off</button></div>
@@ -829,7 +854,7 @@ button.sn:hover{background:#f4f4f6}
 <div class="fld"><label class="flab" for="iv-ph">Mobile number</label>
 <div style="display: flex; gap: 8px"><span class="pfx">+993</span><input id="iv-ph" class="{{iv.phoneCls}}" type="tel" inputmode="numeric" value="{{iv.phoneFmt}}" aria-invalid="{{iv.phoneBad}}" aria-describedby="iv-ph-h" onInput="{{iv.onPhone}}" placeholder="65 12 34 56" style="font-variant-numeric: tabular-nums"></div>
 <sc-if value="{{iv.phoneBad}}" hint-placeholder-val="{{false}}"><span class="fm" role="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>{{iv.phoneErr}}</span></span></sc-if>
-<span class="cap" id="iv-ph-h">Required for everyone — it’s how they sign in.</span>
+<span class="cap" id="iv-ph-h">Required for everyone. With the app on, it’s how they sign in.</span>
 </div>
 <div class="g2">
 <div class="fld"><label class="flab" for="iv-nm">Name clients see</label><input id="iv-nm" class="inp" value="{{iv.name}}" onInput="{{iv.onName}}" placeholder="For example: Gülnar"></div>
@@ -996,7 +1021,7 @@ button.sn:hover{background:#f4f4f6}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["team","permissions"],"default":"team","section":"State"},"panel":{"editor":"enum","options":["none","staff","invite","inviteError","remove","reassign","shift","timeOff","usesAppOn"],"default":"none","section":"State"},"aynaLeft":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin"],"default":"owner","section":"Access"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"Page"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1440}}'>
+<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["team","permissions"],"default":"team","section":"State"},"panel":{"editor":"enum","options":["none","staff","invite","inviteError","remove","removed","reassign","shift","timeOff","usesAppOn"],"default":"none","section":"State"},"aynaLeft":{"editor":"boolean","default":false,"section":"State"},"role":{"editor":"enum","options":["owner","admin"],"default":"owner","section":"Access"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"Page"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1480}}'>
 class Component extends DCLogic {
   // URL: business.yeral.app/w/glow-studio/settings/team · /settings/permissions (v0.6 round 3)
   constructor(props) {
@@ -1067,8 +1092,8 @@ class Component extends DCLogic {
   // ---------- demo data (Glow Studio, Wednesday 14 October 2026 · 11:20) ----------
   TODAY() { return '2026-10-14'; }
   BIZ() { return [['Monday', '09:00', '20:00'], ['Tuesday', '09:00', '20:00'], ['Wednesday', '09:00', '20:00'], ['Thursday', '09:00', '20:00'], ['Friday', '09:00', '20:00'], ['Saturday', '09:00', '20:00'], ['Sunday', '10:00', '18:00']]; }
-  bizDays() { return this.BIZ().map((b) => ({ on: true, from: b[1], to: b[2] })); }
-  ownDays(from, to) { return this.BIZ().map((b, i) => (i < 6 ? { on: true, from: from, to: to } : { on: false, from: b[1], to: b[2] })); }
+  bizDays(brks) { return this.BIZ().map((b, i) => ({ on: true, from: b[1], to: b[2], brk: (brks && brks[i]) || null })); }
+  ownDays(from, to) { return this.BIZ().map((b, i) => (i < 6 ? { on: true, from: from, to: to, brk: null } : { on: false, from: b[1], to: b[2], brk: null })); }
   CAT() {
     return [
       { name: 'Hair', items: [['s1', 'Women’s haircut', '60 min · 80 TMT'], ['s2', 'Hair styling', '45 min · 60 TMT'], ['s3', 'Hair colouring', '2 h · from 250 TMT'], ['s4', 'Children’s haircut', '30 min · 40 TMT'], ['s12', 'Bridal hair styling', '2 h · Price at the place']] },
@@ -1081,9 +1106,9 @@ class Component extends DCLogic {
   seedTeam() {
     const m = (o) => Object.assign({ spec: '', role: 'specialist', app: true, status: 'active', services: [], sched: 'business', days: this.bizDays(), offs: [], answer: null, invSent: '', at: '' }, o);
     return [
-      m({ id: 'ayna', name: 'Aýna', full: 'Aýna Myradowa', spec: 'Stylist', phone: '65312210', services: ['s1', 's2', 's3', 's4', 's12'] }),
+      m({ id: 'ayna', name: 'Aýna', full: 'Aýna Myradowa', spec: 'Stylist', phone: '65312210', services: ['s1', 's2', 's3', 's4', 's12'], days: this.bizDays([null, null, { from: '14:00', to: '14:40' }, { from: '13:30', to: '14:10' }, null, null, null]), offs: [{ id: 'o2', from: '2027-05-03', to: '', note: 'Birthday', yearly: true }] }),
       m({ id: 'maral', name: 'Maral', full: 'Maral Sapargeldiýewa', spec: 'Nail technician', phone: '61440819', services: ['s5', 's6', 's7'] }),
-      m({ id: 'jeren', name: 'Jeren', full: 'Jeren Ataýewa', spec: 'Beautician', phone: '62701533', services: ['s8', 's9'], sched: 'own', days: this.ownDays('10:00', '19:00'), offs: [{ id: 'o1', from: '2026-12-28', to: '2026-12-31', note: '' }] }),
+      m({ id: 'jeren', name: 'Jeren', full: 'Jeren Ataýewa', spec: 'Beautician', phone: '62701533', services: ['s8', 's9'], sched: 'own', days: this.ownDays('10:00', '19:00'), offs: [{ id: 'o1', from: '2026-12-28', to: '2026-12-31', note: '', yearly: false }] }),
       m({ id: 'leyli', name: 'Leýli', full: 'Leýli Garaýewa', spec: 'Massage therapist', phone: '63129047', app: false, services: ['s10', 's11'], sched: 'own', days: this.ownDays('12:00', '20:00') }),
       m({ id: 'gulnar', name: 'Gülnar', full: 'Gülnar Öwezowa', spec: 'Stylist', phone: '64215590', services: ['s1', 's2', 's4'] }),
       m({ id: 'mays', name: 'Maýsa', full: 'Maýsa Annaýewa', role: 'owner', phone: '65102030' }),
@@ -1117,7 +1142,13 @@ class Component extends DCLogic {
   // ---------- helpers ----------
   toMin(t) { return parseInt(String(t).slice(0, 2), 10) * 60 + parseInt(String(t).slice(3, 5), 10); }
   fromMin(m) { const h = Math.floor(m / 60); const r = m % 60; return (h < 10 ? '0' : '') + h + ':' + (r < 10 ? '0' : '') + r; }
-  times(a, b) { const out = []; for (let m = this.toMin(a); m <= this.toMin(b); m += 30) out.push(this.fromMin(m)); return out; }
+  times(a, b, step) { const out = []; for (let m = this.toMin(a); m <= this.toMin(b); m += (step || 30)) out.push(this.fromMin(m)); return out; }
+  brkErr(x) {
+    if (!x.on || !x.brk) return '';
+    if (this.toMin(x.brk.to) <= this.toMin(x.brk.from)) return 'The break must end after it starts.';
+    if (this.toMin(x.brk.from) < this.toMin(x.from) || this.toMin(x.brk.to) > this.toMin(x.to)) return 'The break must be within the working hours.';
+    return '';
+  }
   pl(n, one, many) { return n + ' ' + (n === 1 ? one : (many || one + 's')); }
   fmtPhone(dg) { return String(dg).replace(/(\d{2})(?=\d)/g, '$1 '); }
   full(dg) { return '+993 ' + this.fmtPhone(dg); }
@@ -1169,7 +1200,8 @@ class Component extends DCLogic {
     const left = !!P.aynaLeft || (owner && panel === 'reassign');
     const ayna = team.find((x) => x.id === 'ayna');
     if (left) { ayna.status = 'left'; ayna.at = this.TODAY(); }
-    const order = team.filter((x) => this.kindOf(x) === 'pro').map((x) => x.id);
+    if (panel === 'removed' && !left) { ayna.status = 'removed'; ayna.at = this.TODAY(); }
+    const order = team.filter((x) => this.kindOf(x) === 'pro' && x.status !== 'removed' && x.status !== 'left').map((x) => x.id);
     const s = {
       role: role, tab: P.tab === 'permissions' ? 'perms' : 'team', team: team, invites: invites, order: order, savedOrder: order.slice(),
       settled: !left, menu: null, toast: null, lastUndo: null, seq: 1,
@@ -1177,14 +1209,16 @@ class Component extends DCLogic {
     };
     const open = (id, tab) => { const m = team.find((x) => x.id === id); s.sd = this.copyM(m); s.sdOrig = this.copyM(m); s.stab = tab; };
     if (panel === 'staff') open('jeren', 'hours');
-    if (panel === 'shift') {
+    if (panel === 'shift' && !owner) open('jeren', 'hours');
+    if (panel === 'shift' && owner) {
       open('jeren', 'hours');
       s.sd.days = s.sd.days.map((d, i) => (i < 6 ? { on: true, from: '12:00', to: '19:00' } : d));
       s.af = { kind: 'shift', id: 'jeren', choice: 'keep' };
     }
-    if (panel === 'timeOff') {
+    if (panel === 'timeOff' && !owner) open('jeren', 'hours');
+    if (panel === 'timeOff' && owner) {
       open('jeren', 'hours');
-      s.off = { from: '2026-11-09', to: '2026-11-13', note: 'Family trip' };
+      s.off = { from: '2026-11-09', to: '2026-11-13', note: 'Family trip', yearly: false };
       s.af = { kind: 'off', id: 'jeren', choice: 'keep' };
     }
     if (panel === 'usesAppOn') {
@@ -1238,10 +1272,14 @@ class Component extends DCLogic {
     return (this.UP()[m.id] || []).filter((r) => {
       const d = sched[r[2]];
       if (!d.on) return true;
+      if (d.brk && r[3] < this.toMin(d.brk.to) && r[4] > this.toMin(d.brk.from)) return true;
       return r[3] < this.toMin(d.from) || r[4] > this.toMin(d.to);
     });
   }
-  offHits(m, from, to) { return (this.UP()[m.id] || []).filter((r) => r[1] >= from && r[1] <= (to || from)); }
+  offHits(m, from, to, yearly) {
+    const k = (iso) => (yearly ? iso.slice(5) : iso);
+    return (this.UP()[m.id] || []).filter((r) => k(r[1]) >= k(from) && k(r[1]) <= k(to || from));
+  }
   commitStaff(extraText) {
     const s = this.state;
     const d = s.sd;
@@ -1280,8 +1318,7 @@ class Component extends DCLogic {
     const o = s.sdOrig;
     const shiftChanged = JSON.stringify([d.sched, d.days]) !== JSON.stringify([o.sched, o.days]);
     if (shiftChanged) {
-      const days = d.sched === 'own' ? d.days : this.bizDays();
-      if (this.shiftHits(d, days).length) { this.setState({ af: { kind: 'shift', id: d.id, choice: 'keep' } }); return; }
+      if (this.shiftHits(d, d.days).length) { this.setState({ af: { kind: 'shift', id: d.id, choice: 'keep' } }); return; }
     }
     this.commitStaff();
   }
@@ -1290,17 +1327,17 @@ class Component extends DCLogic {
     const f = s.off;
     const d = s.sd;
     if (!f || !d || !f.from || (f.to && f.to < f.from)) return;
-    if (this.offHits(d, f.from, f.to).length) { this.setState({ af: { kind: 'off', id: d.id, choice: 'keep' } }); return; }
+    if (this.offHits(d, f.from, f.to, f.yearly).length) { this.setState({ af: { kind: 'off', id: d.id, choice: 'keep' } }); return; }
     this.commitOff('');
   }
   commitOff(extra) {
     const s = this.state;
     const f = s.off;
     const d = s.sd;
-    const item = { id: 'o' + (s.seq + 10), from: f.from, to: f.to && f.to !== f.from ? f.to : '', note: f.note.trim() };
+    const item = { id: 'o' + (s.seq + 10), from: f.from, to: f.to && f.to !== f.from ? f.to : '', note: f.note.trim(), yearly: !!f.yearly };
     const m = s.team.find((x) => x.id === d.id);
     const offs = m.offs.concat([item]).sort((a, b) => (a.from < b.from ? -1 : 1));
-    this.flash({ team: this.setMember(d.id, { offs: offs }), sd: Object.assign({}, d, { offs: offs }), off: null, af: null, seq: s.seq + 1 }, 'Time off added: ' + this.fmtRange(item.from, item.to || item.from, false) + extra);
+    this.flash({ team: this.setMember(d.id, { offs: offs }), sd: Object.assign({}, d, { offs: offs }), off: null, af: null, seq: s.seq + 1 }, 'Time off added: ' + this.fmtRange(item.from, item.to || item.from, false) + (item.yearly ? ' · every year' : '') + extra);
   }
   confirmRemove() {
     const s = this.state;
@@ -1347,6 +1384,19 @@ class Component extends DCLogic {
     const invites = old ? s.invites.map((x) => (x.id === old.id ? row : x)) : [row].concat(s.invites);
     this.flash({ invites: invites, inv: null, seq: s.seq + 1 }, 'Invite sent to ' + name + ' · valid until ' + until, { act: () => this.copyLink(name), actText: 'Copy invite link' });
   }
+  reactivate(id) {
+    const s = this.state;
+    const m = s.team.find((x) => x.id === id);
+    if (!m) return;
+    const pro = this.kindOf(m) === 'pro';
+    const text = m.name + ' is active again: ' + (m.app ? 'access is back and clients can book ' + m.name : 'clients can book ' + m.name) + '.';
+    this.flash({ team: this.setMember(id, { status: 'active', at: '' }), order: pro ? s.order.concat([id]) : s.order, savedOrder: pro ? s.savedOrder.concat([id]) : s.savedOrder, menu: null }, text);
+  }
+  inviteAgain(id) {
+    const m = this.state.team.find((x) => x.id === id);
+    if (!m) return;
+    this.setState({ menu: null, inv: { step: 1, phone: m.phone, name: m.name, spec: m.spec, role: m.role === 'admin' ? 'admin' : 'specialist', app: true, services: m.services.slice() } });
+  }
   moveOrder(id, dir) {
     const o = this.state.order.slice();
     const i = o.indexOf(id);
@@ -1379,6 +1429,9 @@ class Component extends DCLogic {
       let st = 'Active'; let stCls = 'stt st-on'; let dot = 'dot d-d'; let stSub = '';
       if (m.status === 'invited') { st = 'Invited'; stCls = 'stt st-inv'; dot = 'dot d-p'; stSub = 'works without the app until they accept'; }
       if (former) { st = m.status === 'left' ? 'Left' : 'Removed'; stCls = 'stt st-neu'; dot = 'dot d-x'; stSub = m.at === this.TODAY() ? 'today' : this.fmtD(m.at); }
+      const removed = m.status === 'removed';
+      const left = m.status === 'left';
+      const reinvited = left && s.invites.some((x) => x.phone === m.phone && x.state === 'open');
       const items = [];
       if (owner && !former) {
         items.push(['Edit', () => this.openStaff(m.id, 'profile')]);
@@ -1387,6 +1440,8 @@ class Component extends DCLogic {
         if (m.status === 'invited') items.push(['Copy invite link', () => this.copyLink(m.name)]);
         if (m.role !== 'owner') { items.push('-'); items.push(['Remove from the team', () => this.setState({ menu: null, rm: this.rmFresh(m.id, 'remove') }), true]); }
       }
+      if (owner && removed) items.push(['Reactivate', () => this.reactivate(m.id)]);
+      if (owner && left && !reinvited) items.push(['Invite again', () => this.inviteAgain(m.id)]);
       const name = m.full || m.name;
       const sub = isMe ? 'You' : (m.spec || this.full(m.phone));
       return base({
@@ -1400,7 +1455,12 @@ class Component extends DCLogic {
         sub: sub, meta: [this.levelName(m.role), pro ? this.pl(svcN, 'service') : '', pro ? hrs + (hrsSub ? ' ' + hrsSub : '') : ''].filter(Boolean).join(' · '),
         level: this.levelName(m.role), svc: pro && !former ? this.pl(svcN, 'service') : '—', hrs: former ? '—' : hrs, hasHrsSub: !former && !!hrsSub, hrsSub: hrsSub,
         st: st, stCls: stCls, dot: dot, hasStSub: !!stSub, stSub: stSub, noApp: m.role === 'specialist' && !m.app && !former,
-        hasLink: owner && m.status === 'invited', linkText: 'Copy invite link', linkAria: 'Copy invite link: ' + name, linkDo: () => this.copyLink(m.name),
+        hasLink: owner && (m.status === 'invited' || removed || (left && !reinvited)),
+        linkText: removed ? 'Reactivate' : (left ? 'Invite again' : 'Copy invite link'),
+        linkAria: (removed ? 'Reactivate: ' : (left ? 'Invite again: ' : 'Copy invite link: ')) + name,
+        linkDo: removed ? () => this.reactivate(m.id) : (left ? () => this.inviteAgain(m.id) : () => this.copyLink(m.name)),
+        hasCap: owner && former,
+        capText: removed ? 'Reactivate restores ' + m.name + '’s access and makes ' + m.name + ' bookable again.' : (reinvited ? 'Invited again — ' + m.name + ' comes back after accepting the new invite.' : 'To bring ' + m.name + ' back, send a new invite.'),
         hasMenu: items.length > 0, menuLabel: name + ': actions', menuOpen: s.menu === m.id, toggleMenu: toggle(m.id), menu: menuOf(items)
       });
     };
@@ -1468,7 +1528,7 @@ class Component extends DCLogic {
       ['Reply to and report reviews', Y, Y, N],
       ['Change services and prices', Y, Y, N],
       ['Change business settings (profile, rules, hours, link and QR)', Y, Y, N],
-      ['Shifts and time off', Y, Y, 'See own'],
+      ['Shifts and time off', Y, 'View only', 'See own'],
       ['Manage the team (invite, remove, access level, “Uses the app”)', Y, 'View only', N]
     ];
     const LV = ['Owner', 'Admin', 'Specialist'];
@@ -1531,30 +1591,45 @@ class Component extends DCLogic {
     });
     // Hours tab
     const DAYN = BIZ.map((b) => b[0]);
+    const own = d.sched === 'own';
+    const setDay = (i, fn) => this.setSd({ days: this.state.sd.days.map((y, j) => (j === i ? fn(y) : y)) });
     const days = d.days.map((x, i) => {
       const close = BIZ[i][2];
       const open = BIZ[i][1];
+      const err = this.brkErr(x);
+      const bOpts = x.on ? this.times(x.from, x.to, 10) : [];
       return {
-        name: DAYN[i], on: !!x.on, off: !x.on, swCls: x.on ? 'sw on' : 'sw', swLabel: DAYN[i] + ': works',
-        flip: () => this.setSd({ days: this.state.sd.days.map((y, j) => (j === i ? Object.assign({}, y, { on: !y.on }) : y)) }),
-        from: x.from, to: x.to,
+        name: DAYN[i], on: !!x.on, off: !x.on, ownOn: own && !!x.on, bizOn: !own && !!x.on, sw: own,
+        swCls: x.on ? 'sw on' : 'sw', swLabel: DAYN[i] + ': works',
+        flip: () => setDay(i, (y) => Object.assign({}, y, { on: !y.on })),
+        from: x.from, to: x.to, hoursText: x.from + '–' + x.to,
         fromOpts: this.times(open, this.fromMin(this.toMin(close) - 30)),
         toOpts: this.times(this.fromMin(Math.min(this.toMin(x.from) + 30, this.toMin(close))), close),
         fromLabel: DAYN[i] + ': starts', toLabel: DAYN[i] + ': ends',
-        onFrom: (e) => {
-          const v = val(e);
-          this.setSd({ days: this.state.sd.days.map((y, j) => (j !== i ? y : Object.assign({}, y, { from: v }, this.toMin(y.to) <= this.toMin(v) ? { to: this.fromMin(Math.min(this.toMin(v) + 30, this.toMin(close))) } : {}))) });
-        },
-        onTo: (e) => { const v = val(e); this.setSd({ days: this.state.sd.days.map((y, j) => (j === i ? Object.assign({}, y, { to: v }) : y)) }); }
+        onFrom: (e) => { const v = val(e); setDay(i, (y) => Object.assign({}, y, { from: v }, this.toMin(y.to) <= this.toMin(v) ? { to: this.fromMin(Math.min(this.toMin(v) + 30, this.toMin(close))) } : {})); },
+        onTo: (e) => { const v = val(e); setDay(i, (y) => Object.assign({}, y, { to: v })); },
+        noBreak: !!x.on && !x.brk, hasBreak: !!x.on && !!x.brk,
+        addBreakLabel: DAYN[i] + ': add a break',
+        addBreak: () => setDay(i, (y) => {
+          const a0 = Math.max(this.toMin(y.from), Math.min(780, this.toMin(y.to) - 30));
+          return Object.assign({}, y, { brk: { from: this.fromMin(a0), to: this.fromMin(Math.min(a0 + 30, this.toMin(y.to))) } });
+        }),
+        bFrom: x.brk ? x.brk.from : '', bTo: x.brk ? x.brk.to : '', bOpts: bOpts,
+        bFromLabel: DAYN[i] + ': break starts', bToLabel: DAYN[i] + ': break ends', bRemoveLabel: DAYN[i] + ': remove the break',
+        onBFrom: (e) => { const v = val(e); setDay(i, (y) => Object.assign({}, y, { brk: Object.assign({}, y.brk, { from: v }) })); },
+        onBTo: (e) => { const v = val(e); setDay(i, (y) => Object.assign({}, y, { brk: Object.assign({}, y.brk, { to: v }) })); },
+        removeBreak: () => setDay(i, (y) => Object.assign({}, y, { brk: null })),
+        err: !!err, errText: err
       };
     });
+    const hoursBad = d.days.some((x) => !!this.brkErr(x));
     const f = s.off;
     const offBad = !!(f && f.from && f.to && f.to < f.from);
     const offs = (live.offs || []).map((x) => {
       const n = x.to ? this.diff(x.from, x.to) + 1 : 1;
       return {
-        text: this.fmtRange(x.from, x.to || x.from, true),
-        sub: this.pl(n, 'day') + (x.note ? ' · ' + x.note : ''),
+        text: this.fmtRange(x.from, x.to || x.from, !x.yearly),
+        sub: this.pl(n, 'day') + (x.yearly ? ' · Every year' : '') + (x.note ? ' · ' + x.note : ''),
         delLabel: 'Remove time off: ' + this.fmtRange(x.from, x.to || x.from, true),
         del: () => {
           const m = this.state.team.find((y) => y.id === d.id);
@@ -1578,7 +1653,7 @@ class Component extends DCLogic {
       tabs: TABS.map((x) => ({ t: x[1], on: s.stab === x[0], cls: s.stab === x[0] ? 'tab on' : 'tab', pick: () => this.setState({ stab: x[0], off: null }) })),
       tabLabel: cur[1],
       tabProfile: tabProfile, tabSvc: s.stab === 'services', tabHours: s.stab === 'hours', tabAccess: tabAccess,
-      ro: ro, roNote: ro && (tabProfile || (tabAccess && !isOwnerRow)),
+      ro: ro, roNote: ro && (tabProfile || (tabAccess && !isOwnerRow)), roHours: ro && s.stab === 'hours',
       name: d.name, fullVal: d.full, spec: d.spec,
       onName: (e) => this.setSd({ name: val(e).slice(0, 30) }),
       onFull: (e) => this.setSd({ full: val(e).slice(0, 60) }),
@@ -1592,21 +1667,32 @@ class Component extends DCLogic {
       svcQ: 'What does ' + nm + ' do?',
       svcHint: pro ? 'Clients see ' + nm + ' only for these services.' : nm + ' doesn’t take bookings now. Pick services and clients can book ' + nm + ' too.',
       groups: groups,
-      schedOpts: [['business', 'Business hours', 'Works whenever the business is open'], ['own', 'Own shift', 'Set hours for each day']].map((x) => ({
+      schedOpts: [['business', 'Business hours', 'Follows the business hours'], ['own', 'Own shift', 'Own hours for each day']].map((x) => ({
         t: x[1], c: x[2], on: d.sched === x[0], cls: d.sched === x[0] ? 'opt on' : 'opt',
-        pick: () => { const c = this.state.sd; if (c) this.setState({ sd: Object.assign({}, c, { sched: x[0] }, x[0] === 'business' ? { days: this.bizDays() } : {}) }); }
+        pick: () => {
+          const c = this.state.sd;
+          if (!c || c.sched === x[0]) return;
+          // switching keeps each day's break; business hours take the business's times
+          const days = x[0] === 'business' ? this.bizDays(c.days.map((y) => y.brk)) : c.days;
+          this.setState({ sd: Object.assign({}, c, { sched: x[0], days: days }) });
+        }
       })),
-      own: d.sched === 'own', inherit: d.sched !== 'own', days: days,
-      bizRows: BIZ.map((b) => ({ name: b[0], hours: b[1] + '–' + b[2] })),
-      canHours: true,
+      hoursEdit: owner, hoursRo: !owner,
+      schedText: own ? 'Own shift' : 'Business hours',
+      days: days,
+      roRows: d.days.map((x, i) => ({ name: DAYN[i], hours: x.on ? x.from + '–' + x.to + (x.brk ? ' · break ' + x.brk.from + '–' + x.brk.to : '') : 'Day off' })),
+      hoursCap: own ? 'Within the business hours: when the business is closed, a shift doesn’t open bookings.' : 'Changes with the business hours. A break here is only for ' + nm + '.',
+      canHours: owner,
       offHint: 'Clients can’t book ' + nm + ' on these days.',
       offs: offs, noOffs: offs.length === 0 && !f,
-      offFormOpen: !!f, offAddBtn: !f,
-      openOff: () => this.setState({ off: { from: '', to: '', note: '' } }),
+      offFormOpen: owner && !!f, offAddBtn: owner && !f,
+      openOff: () => this.setState({ off: { from: '', to: '', note: '', yearly: false } }),
       offFrom: f ? f.from : '', offTo: f ? f.to : '', offNote: f ? f.note : '',
       onOffFrom: (e) => this.setState({ off: Object.assign({}, this.state.off, { from: val(e) }) }),
       onOffTo: (e) => this.setState({ off: Object.assign({}, this.state.off, { to: val(e) }) }),
       onOffNote: (e) => this.setState({ off: Object.assign({}, this.state.off, { note: val(e).slice(0, 40) }) }),
+      offYearly: !!(f && f.yearly),
+      flipOffYearly: () => this.setState({ off: Object.assign({}, this.state.off, { yearly: !(this.state.off && this.state.off.yearly) }) }),
       offBad: offBad, offCant: !(f && f.from) || offBad,
       offCancel: () => this.setState({ off: null }),
       offAdd: () => this.addOff(),
@@ -1630,8 +1716,8 @@ class Component extends DCLogic {
       flipAnswer: () => { const c = this.state.sd; if (!c) return; const on = c.answer === null || c.answer === undefined ? true : !!c.answer; this.setSd({ answer: on ? false : null }); },
       canRemove: canRemove,
       openRemove: () => this.setState({ rm: this.rmFresh(d.id, 'remove') }),
-      canSave: true, cantSaveAny: false,
-      cantSave: !dirty || !d.name.trim() || (phoneEdit && pd !== o.phone && !!phoneErr),
+      canSave: owner || s.stab === 'services', cantSaveAny: !owner && s.stab !== 'services',
+      cantSave: !dirty || !d.name.trim() || hoursBad || (phoneEdit && pd !== o.phone && !!phoneErr),
       save: () => this.saveStaff()
     };
   }
@@ -1643,6 +1729,7 @@ class Component extends DCLogic {
     const ph = v.phone;
     let err = '';
     if (ph.length && !/^[67]/.test(ph)) err = 'Mobile numbers only — enter a number starting with 6 or 7.';
+    else if (ph.length === 8 && s.team.some((x) => x.phone === ph && x.status === 'removed')) err = 'This person was removed from the team — reactivate them in Team instead.';
     else if (ph.length === 8 && s.team.some((x) => x.phone === ph && x.status !== 'left' && x.status !== 'removed')) err = 'This person is already on the team.';
     else if (ph.length === 8 && s.invites.some((x) => x.phone === ph && x.state === 'open')) err = 'There’s already an open invite for this number.';
     const spec = v.role === 'specialist';
@@ -1765,8 +1852,8 @@ class Component extends DCLogic {
     const d = s.sd || s.team.find((x) => x.id === a.id);
     const nm = d ? d.name : '';
     let rows = [];
-    if (d && a.kind === 'shift') rows = this.shiftHits(d, d.sched === 'own' ? d.days : this.bizDays());
-    if (d && a.kind === 'off' && s.off) rows = this.offHits(d, s.off.from, s.off.to);
+    if (d && a.kind === 'shift') rows = this.shiftHits(d, d.days);
+    if (d && a.kind === 'off' && s.off) rows = this.offHits(d, s.off.from, s.off.to, s.off.yearly);
     const n = rows.length;
     const nb = rows.filter((x) => x[7] === 'c').length;
     const nq = n - nb;

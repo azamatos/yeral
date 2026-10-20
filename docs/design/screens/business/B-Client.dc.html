@@ -218,6 +218,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 .rpq{font-weight:400;color:#101014}
 .rpa{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .nrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 14px;border-bottom:1px solid #e6e6ea}
+.nrow2{padding-top:14px}
 .nrt{display:flex;flex-direction:column;gap:4px;min-width:0}
 .nrl{font-size:14px;line-height:20px;font-weight:600}
 .pso{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:18px;font-weight:600}
@@ -258,7 +259,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 .tmr svg{flex:none}
 @media (max-width:1239px){.caside{max-width:none}}
 @media (max-width:1023px){.caside{max-width:none}}
-@media (max-width:767px){.tsep,.bkt,.nbt{display:none}.nbk{width:44px;padding:0}.hr .ell{white-space:normal}.back{padding:0 4px;margin-left:-4px}.hdr{flex-wrap:wrap;gap:16px}.hdm{flex:1 1 220px}.stats,.stats.s3{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:20px}.stat:nth-child(3){padding-left:0;border-left:0}.g2{grid-template-columns:minmax(0,1fr)}.urow{grid-template-columns:minmax(0,1fr) auto}.urow .uchev,.urow .uwhen2{display:none}.hr,.hr.m{grid-template-columns:88px minmax(0,1fr) auto;gap:10px}.hr .hprice{display:none}.rprow{grid-template-columns:32px minmax(0,1fr)}.rpa{grid-column:2;align-items:flex-start}}
+@media (max-width:767px){.top h1{white-space:normal !important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}.tsep,.bkt,.nbt{display:none}.nbk{width:44px;padding:0}.hr .ell{white-space:normal}.back{padding:0 4px;margin-left:-4px}.hdr{flex-wrap:wrap;gap:16px}.hdm{flex:1 1 220px}.stats,.stats.s3{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:20px}.stat:nth-child(3){padding-left:0;border-left:0}.g2{grid-template-columns:minmax(0,1fr)}.urow{grid-template-columns:minmax(0,1fr) auto}.urow .uchev,.urow .uwhen2{display:none}.hr,.hr.m{grid-template-columns:88px minmax(0,1fr) auto;gap:10px}.hr .hprice{display:none}.rprow{grid-template-columns:32px minmax(0,1fr)}.rpa{grid-column:2;align-items:flex-start}}
 </style>
 </helmet>
 <div class="app" style="display: flex; min-height: 100vh; background: #ffffff; color: #101014; font-family: {{fontStack}}; -webkit-font-smoothing: antialiased">
@@ -296,6 +297,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <sc-if value="{{bnOn}}" hint-placeholder-val="{{false}}"><div style="display: flex; flex-direction: column">
 <sc-if value="{{bnReview}}" hint-placeholder-val="{{true}}"><div class="bnr c-war" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="bnx"><b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.</span></div></sc-if>
 <sc-if value="{{bnNo}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Your page wasn’t approved:</b> Add at least 3 photos of your place — the current photos don’t show it.</span><a class="b b-sec b-sm" href="B-Settings.dc.html" style="flex: none">Fix and send again</a></div></sc-if>
+<sc-if value="{{bnHidden}}" hint-placeholder-val="{{false}}"><div class="bnr c-dan" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span class="bnx"><b>Ýeral has hidden your page:</b> Clients reported that your page shows the wrong address. Clients can’t find or book you.</span><button class="b b-sec b-sm" style="flex: none" onClick="{{openContact}}">Contact Ýeral</button></div></sc-if>
 <sc-if value="{{bnDemo}}" hint-placeholder-val="{{false}}"><div class="bnr c-neu" role="status"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg><span class="bnx"><b>This is a demo workspace.</b> Changes reset every night.</span><a class="b b-sec b-sm" href="B-Onboarding.dc.html" style="flex: none">Create your business</a></div></sc-if>
 </div></sc-if>
 
@@ -313,7 +315,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <main class="cmain">
 <sc-if value="{{viewMode}}" hint-placeholder-val="{{true}}">
 <div class="hdr">
-<span class="av64" aria-hidden="true">{{initial}}</span>
+<span class="av64" aria-hidden="true"><sc-if value="{{named}}" hint-placeholder-val="{{true}}">{{initial}}</sc-if><sc-if value="{{unnamed}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if></span>
 <div class="hdm">
 <h2 class="hnm">{{fullName}}</h2>
 <div class="hrw">
@@ -332,7 +334,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 </sc-if>
 <sc-if value="{{editMode}}" hint-placeholder-val="{{false}}">
 <form class="hdr" aria-labelledby="ed-t" onSubmit="{{submitEdit}}">
-<span class="av64" aria-hidden="true">{{initial}}</span>
+<span class="av64" aria-hidden="true"><sc-if value="{{named}}" hint-placeholder-val="{{true}}">{{initial}}</sc-if><sc-if value="{{unnamed}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></sc-if></span>
 <div class="hdm" style="gap: 16px">
 <h2 id="ed-t" style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Client details</h2>
 <div class="g2">
@@ -356,7 +358,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 </form>
 </sc-if>
 <div class="{{statsCls}}" role="list" aria-label="Key figures">
-<div class="stat first" role="listitem"><span class="lbl">Visits</span><span class="sv">{{st.visits}}</span><sc-if value="{{seeMoney}}" hint-placeholder-val="{{true}}"><span class="cap">{{st.total}}</span></sc-if></div>
+<div class="stat first" role="listitem"><span class="lbl">Visits</span><span class="sv">{{st.visits}}</span><sc-if value="{{st.hasVCap}}" hint-placeholder-val="{{true}}"><span class="cap">{{st.vCap}}</span></sc-if></div>
 <sc-if value="{{seeMoney}}" hint-placeholder-val="{{true}}"><div class="stat" role="listitem"><span class="lbl">Average check</span><span class="sv">{{st.avg}}</span><span class="cap">From completed visits</span></div></sc-if>
 <div class="stat" role="listitem"><span class="lbl">Last visit</span><span class="sv">{{st.last}}</span><span class="cap">{{st.lastCap}}</span></div>
 <div class="stat" role="listitem"><span class="lbl">No-shows</span><span class="sv">{{st.ns}}</span><span class="cap">{{st.nsCap}}</span></div>
@@ -436,8 +438,9 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 <div class="nrow"><div class="nrt"><span id="sw-po" class="nrl">Phone only</span>
 <sc-if value="{{poIdle}}" hint-placeholder-val="{{true}}"><span id="sw-po-d" class="cap">The client can book only by calling you. Turns on by itself after <span style="white-space: nowrap">2 no-shows</span>.</span></sc-if>
 <sc-if value="{{poWarn}}" hint-placeholder-val="{{false}}"><span id="sw-po-d" class="pso pw" role="status"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>{{poWarnText}}</span></span></sc-if>
-<sc-if value="{{poOk}}" hint-placeholder-val="{{false}}"><span id="sw-po-d" class="pso pk" role="status"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg><span>Online booking is back. The no-show count starts again from zero.</span></span></sc-if>
+<sc-if value="{{poOk}}" hint-placeholder-val="{{false}}"><span id="sw-po-d" class="pso pk" role="status"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg><span>{{poOkText}}</span></span></sc-if>
 </div><button class="{{poCls}}" role="switch" aria-checked="{{po}}" aria-labelledby="sw-po" aria-describedby="sw-po-d" onClick="{{flipPo}}"><span class="trk"><span class="knob"></span></span></button></div>
+<div class="nrow nrow2"><div class="nrt"><span id="sw-rm" class="nrl">Don’t send reminders</span><span id="sw-rm-d" class="cap">No reminders go to this client.</span></div><button class="{{remCls}}" role="switch" aria-checked="{{noRem}}" aria-labelledby="sw-rm" aria-describedby="sw-rm-d" onClick="{{flipRem}}"><span class="trk"><span class="knob"></span></span></button></div>
 </sc-if>
 <div class="kv"><span class="cap" style="font-size: 14px; line-height: 20px">How they found you</span><span class="kvv">{{sourceText}}</span></div>
 <div class="kv last"><span class="cap" style="font-size: 14px; line-height: 20px">Birthday</span><span class="{{bdayCls}}">{{bdayText}}</span></div>
@@ -536,7 +539,7 @@ button.mi{width:100%;border:0;background:transparent;font-family:inherit;cursor:
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"client":{"editor":"enum","options":["regular","phoneOnly","request","noAccount"],"default":"regular","section":"State"},"edit":{"editor":"boolean","default":false,"section":"State"},"composer":{"editor":"boolean","default":false,"section":"State"},"modal":{"editor":"enum","options":["none","delete"],"default":"none","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1720}}'>
+<script type="text/x-dc" data-dc-script data-props='{"role":{"editor":"enum","options":["owner","admin","specialist"],"default":"owner","section":"Access"},"client":{"editor":"enum","options":["regular","phoneOnly","request","noAccount"],"default":"regular","section":"State"},"edit":{"editor":"boolean","default":false,"section":"State"},"composer":{"editor":"boolean","default":false,"section":"State"},"modal":{"editor":"enum","options":["none","delete"],"default":"none","section":"State"},"banner":{"editor":"enum","options":["none","inReview","notApproved","hidden","demo"],"default":"none","section":"State"},"font":{"editor":"enum","options":["Onest","Golos Text","Manrope"],"default":"Onest","section":"Type"},"$preview":{"width":1440,"height":1720}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -561,7 +564,6 @@ class Component extends DCLogic {
     const D = {
       regular: {
         ay: true, full: 'Gülälek Nurmuhammedowa', name: 'Gülälek N.', ph: '65447019', acct: true, since: 'since March 2024', source: 'Instagram', bday: '', custom: ['VIP'], auto: ['reg'],
-        histN: 13,
         notes: [{ text: 'Use ammonia-free colour — allergy.', alert: true, by: 'Aýna', at: '12 August' }, { text: 'She can only come in the morning — don’t book her after noon.', alert: false, by: 'Selbi', at: '3 July' }],
         up: [['Today', '11:30–13:30', 'Hair colouring', 'Aýna', '2 h', '250 TMT', 'Online', 'c', 0]],
         hist: [['28 September', 'Hair colouring', 'Aýna', '250 TMT', 'completed'], ['7 September', 'Women’s haircut', 'Aýna', '80 TMT', 'completed'], ['19 August', 'Hair styling', 'Aýna', '60 TMT', 'noshow'], ['2 August', 'Gel manicure', 'Maral', '110 TMT', 'completed'],
@@ -573,23 +575,21 @@ class Component extends DCLogic {
       },
       phoneOnly: {
         ay: false, full: 'Ogulnabat Çaryýewa', name: 'Ogulnabat Ç.', ph: '62186005', acct: true, since: 'since August 2026', source: 'Ýeral', bday: '', custom: [], auto: [],
-        histN: 5,
         notes: [{ text: '2 no-shows — book by phone only.', alert: true, by: 'Selbi', at: 'Today' }],
         up: [],
         hist: [['Today', 'Facial cleansing', 'Jeren', '150 TMT', 'noshow'], ['28 September', 'Facial cleansing', 'Jeren', '150 TMT', 'completed'], ['21 September', 'Brows and lashes', 'Jeren', '50 TMT', 'noshow'],
           ['2 September', 'Facial cleansing', 'Jeren', '150 TMT', 'completed'], ['10 August', 'Facial cleansing', 'Jeren', '150 TMT', 'completed']],
         reps: [
           { k: 'noshow', text: '', bk: 'Today · 10:00 · Facial cleansing · Jeren', at: 'today · 10:25', by: 'Selbi Hojaýewa', days: 0, staff: 'Jeren', hi: 0 },
-          { k: 'other', text: 'Brought a friend without booking', bk: 'Mon, 28 Sep · 10:00 · Facial cleansing · Jeren', at: '28 Sep · 11:12', by: 'Jeren Ataýewa', days: 16, staff: 'Jeren', hi: 1 },
           { k: 'rude', text: '', bk: 'Mon, 28 Sep · 10:00 · Facial cleansing · Jeren', at: '28 Sep · 11:10', by: 'Jeren Ataýewa', days: 16, staff: 'Jeren', hi: 1 },
           { k: 'noshow', text: '', bk: 'Mon, 21 Sep · 15:00 · Brows and lashes · Jeren', at: '21 Sep · 15:40', by: 'Maýsa Annaýewa', days: 23, staff: 'Jeren', hi: 2 },
-          { k: 'late', text: '', bk: 'Wed, 2 Sep · 10:00 · Facial cleansing · Jeren', at: '2 Sep · 10:20', by: 'Jeren Ataýewa', days: 42, staff: 'Jeren', hi: 3 }
+          { k: 'late', text: '', bk: 'Wed, 2 Sep · 10:00 · Facial cleansing · Jeren', at: '2 Sep · 10:20', by: 'Jeren Ataýewa', days: 42, staff: 'Jeren', hi: 3 },
+          { k: 'other', text: 'Brought a friend without booking', bk: 'Mon, 10 Aug · 10:00 · Facial cleansing · Jeren', at: '10 Aug · 11:05', by: 'Jeren Ataýewa', days: 65, staff: 'Jeren', hi: 4 }
         ],
         po: true, poAuto: true
       },
       request: {
         ay: true, full: 'Aýjemal Gurbanowa', name: 'Aýjemal Gurbanowa', ph: '65901122', acct: true, since: 'since July 2026', source: 'Ýeral', bday: '', custom: [], auto: ['reg'],
-        histN: 3,
         notes: [],
         up: [['Tomorrow', '14:30–15:30', 'Women’s haircut', 'Aýna', '60 min', '80 TMT', 'Online', 'p', 28]],
         hist: [['18 September', 'Women’s haircut', 'Aýna', '80 TMT', 'completed'], ['28 August', 'Pedicure', 'Maral', '90 TMT', 'completed'], ['15 July', 'Women’s haircut', 'Aýna', '85 TMT', 'completed']],
@@ -597,7 +597,6 @@ class Component extends DCLogic {
       },
       noAccount: {
         ay: true, full: 'Döwlet Berdiýew', name: 'Döwlet B.', ph: '65661022', acct: false, since: 'since February 2026', source: 'A friend recommended', bday: '2018-03-09', custom: ['Child'], auto: ['reg'],
-        histN: 6,
         notes: [{ text: 'His mother Jahan brings him; the phone is hers.', alert: false, by: 'Aýna', at: '16 September' }],
         up: [['Today', '17:00–17:30', 'Children’s haircut', 'Aýna', '30 min', '40 TMT', 'Phone', 'c', 0]],
         hist: [['16 September', 'Children’s haircut', 'Aýna', '40 TMT', 'completed'], ['12 August', 'Children’s haircut', 'Aýna', '40 TMT', 'completed'], ['8 July', 'Children’s haircut', 'Aýna', '40 TMT', 'completed'],
@@ -614,7 +613,7 @@ class Component extends DCLogic {
     return {
       profile: profile, form: Object.assign({}, profile, { custom: c.custom.slice() }),
       notes: c.notes.slice(), reps: c.reps.slice(), hist: c.hist.map((h) => h.slice()),
-      po: c.po, poAuto: c.poAuto, poReset: false,
+      po: c.po, poAuto: c.poAuto, poReset: false, noRem: false,
       edit: mg && !!p.edit, composer: !!p.composer, draft: '', alertChk: false, more: false, delOpen: mg && p.modal === 'delete'
     };
   }
@@ -642,7 +641,7 @@ class Component extends DCLogic {
       admin: { name: 'Selbi Hojaýewa', ini: 'S', phone: '+993 65 88 41 02', role: 'Admin', pend: 6, ws: [['Glow Studio', 'Admin · Ashgabat', true, 6, true]] },
       specialist: { name: 'Aýna Myradowa', ini: 'A', phone: '+993 65 31 22 10', role: 'Specialist', pend: 2, ws: [['Glow Studio', 'Specialist · Ashgabat', true, 2, true], ['Aýnanyň saç studiýasy', 'Owner · Ashgabat', false, 1, false]] }
     };
-    const bannerKind = ['inReview', 'notApproved', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
+    const bannerKind = ['inReview', 'notApproved', 'hidden', 'demo'].indexOf(this.props.banner) >= 0 ? this.props.banner : 'none';
     const isDemo = bannerKind === 'demo';
     const P = PEOPLE[role];
     const side = s.side;
@@ -655,9 +654,13 @@ class Component extends DCLogic {
       const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
       return m ? parseInt(m[3], 10) + ' ' + MON[parseInt(m[2], 10) - 1] + ' ' + m[1] : '';
     };
-    const full = pr.full.trim() || '+993 ' + fmt(pr.ph);
+    // a client saved without a name shows “Unnamed client” (the number is right below it in the header)
+    const unnamed = !pr.full.trim();
+    const full = unnamed ? 'Unnamed client' : pr.full.trim();
     // the name as saved on the client list (Aýjemal Gurbanowa in full, Gülälek N. as saved); after an edit, the new saved name in full
-    const shortName = pr.full === c.full ? c.name : full;
+    const shortName = unnamed ? 'Unnamed client' : (pr.full === c.full ? c.name : full);
+    // a Specialist sees only her own bookings and requests with this client (history, upcoming, reports)
+    const mineB = (staff) => !spec || staff === 'Aýna';
     const TAG = { po: ['Phone only', 'tg tg-p tg-m'], rep: ['Reported', 'tg tg-n tg-m'], new: ['New', 'tg tg-new tg-m'], reg: ['Regular', 'tg tg-neu tg-m'], lap: ['Lapsed', 'tg tg-neu tg-m'], VIP: ['VIP', 'tg tg-a tg-m'] };
     const tagCodes = (s.po ? ['po'] : []).concat(s.reps.length ? ['rep'] : []).concat(c.auto).concat(pr.custom);
     const tags = tagCodes.map((t) => ({ t: (TAG[t] || [t])[0], cls: (TAG[t] || [t, 'tg tg-neu tg-m'])[1] }));
@@ -665,22 +668,24 @@ class Component extends DCLogic {
     const notes = sorted.map((n, i) => ({ text: n.text, alert: n.alert, plain: !n.alert, meta: n.by + ' · ' + n.at, cls: n.alert ? 'note al' : (i === sorted.length - 1 ? 'note last' : 'note') }));
     const BADGE = { completed: ['badge st-d', 'Completed'], noshow: ['badge st-n', 'No-show'], cancelled: ['badge st-x', 'Cancelled'] };
     const sti = (st) => ({ iP: st === 'pending', iC: st === 'confirmed', iD: st === 'completed', iX: st === 'cancelled', iN: st === 'noshow' });
-    const H = s.hist;
+    const H = s.hist.map((h, i) => h.concat([i])).filter((h) => mineB(h[2]));
     const histRows = (s.more ? H : H.slice(0, 4)).map((h) => Object.assign({ date: h[0], what: h[1] + ' · ' + h[2], price: h[3], badgeCls: BADGE[h[4]][0], label: BADGE[h[4]][1], cls: 'hr m' }, sti(h[4])));
     const nsRows = H.filter((h) => h[4] === 'noshow');
     const ns = nsRows.length;
-    const h0 = H[0];
+    const lastDone = H.find((h) => h[4] === 'completed');
     const lastShort = (d) => /^\d+ \w+$/.test(d) ? d.replace(/^(\d+) (\w{3})\w*$/, '$1 $2') : d;
     // visits, total and average check are worked out from the completed visits in the history (removing a No-show makes it a visit again)
     const done = H.filter((h) => h[4] === 'completed');
     const sum = done.reduce((a, h) => a + parseInt(h[3], 10), 0);
     const money = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' TMT';
     const st = {
-      visits: String(done.length), total: 'total ' + money(sum), avg: done.length ? money(Math.round(sum / done.length)) : '—',
-      last: lastShort(h0[0]), lastCap: (h0[4] === 'noshow' ? 'No-show' : h0[1]) + ' · ' + h0[2],
+      visits: String(done.length), avg: done.length ? money(Math.round(sum / done.length)) : '—',
+      hasVCap: seeMoney || spec, vCap: seeMoney ? 'total ' + money(sum) : 'with you',
+      // last visit = the last completed visit; a No-show doesn't count
+      last: lastDone ? lastShort(lastDone[0]) : '—', lastCap: lastDone ? lastDone[1] + ' · ' + lastDone[2] : '',
       ns: String(ns), nsCap: nsRows.slice(0, 2).map((h) => lastShort(h[0])).join(' and ')
     };
-    const up = c.up.map((u) => {
+    const up = c.up.filter((u) => mineB(u[3])).map((u) => {
       const pend = u[7] === 'p';
       const label = pend ? 'Pending' : 'Confirmed';
       return Object.assign({
@@ -692,11 +697,12 @@ class Component extends DCLogic {
       }, sti(pend ? 'pending' : 'confirmed'));
     });
     const RL = { noshow: 'No-show', late: 'Came late', rude: 'Rude behaviour', other: 'Other' };
-    const reps = s.reps.map((r, i) => ({
+    const repsMine = s.reps.map((r, i) => Object.assign({ i: i }, r)).filter((r) => mineB(r.staff));
+    const reps = repsMine.map((r) => ({
       type: RL[r.k], hasText: !!r.text, text: r.text, booking: r.bk, by: 'Reported ' + r.at + ' · ' + r.by,
       icCls: r.k === 'noshow' ? 'rpi n' : 'rpi', iN: r.k === 'noshow', iL: r.k === 'late', iR: r.k === 'rude', iO: r.k === 'other',
-      canRemove: r.days < 7 && (!spec || r.staff === 'Aýna'), until: 'until ' + (21 - r.days) + ' October', hasUntil: s.reps.length > 1, aria: 'Remove report: ' + RL[r.k] + ', ' + r.bk,
-      remove: () => this.removeRep(i)
+      canRemove: r.days < 7 && (!spec || r.staff === 'Aýna'), until: 'until ' + (21 - r.days) + ' October', hasUntil: repsMine.length > 1, aria: 'Remove report: ' + RL[r.k] + ', ' + r.bk,
+      remove: () => this.removeRep(r.i)
     }));
     // delete modal
     const nb = c.up.filter((u) => u[7] === 'c').length;
@@ -724,7 +730,7 @@ class Component extends DCLogic {
     const save = () => {
       const stt = this.state;
       if (!c.acct && stt.form.ph.length !== 8) return;
-      this.flash({ profile: Object.assign({}, stt.form, { full: stt.form.full.trim() || stt.profile.full }), edit: false }, 'Changes saved');
+      this.flash({ profile: Object.assign({}, stt.form, { full: stt.form.full.trim() }), edit: false }, 'Changes saved');
     };
     const bdayText = fmtDate(pr.bday);
     const me1 = P.name.split(' ')[0];
@@ -738,7 +744,7 @@ class Component extends DCLogic {
       navReqLabel: P.pend > 0 ? 'Bookings, ' + this.pl(P.pend, 'request') : 'Bookings',
       me: { name: P.name, ini: P.ini, phone: P.phone, role: P.role },
       wsAria: 'Workspace: Glow Studio, ' + P.role + '. Switch',
-      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
+      isDemo: isDemo, notDemo: !isDemo, bnOn: bannerKind !== 'none' && !(bannerKind === 'hidden' && role === 'specialist'), bnHidden: bannerKind === 'hidden' && role !== 'specialist', bnReview: bannerKind === 'inReview', bnNo: bannerKind === 'notApproved', bnDemo: isDemo,
       contactOpen: side === 'contact', openContact: () => this.setState({ side: 'contact' }),
       wsList: P.ws.map((w) => ({
         example: false,
@@ -769,6 +775,8 @@ class Component extends DCLogic {
       shortName: noAccess ? 'Client' : shortName,
       fullName: full,
       initial: full.charAt(0).toUpperCase(),
+      named: !unnamed,
+      unnamed: unnamed,
       phone: '+993 ' + fmt(pr.ph),
       telHref: 'tel:+993' + pr.ph,
       acct: !!c.acct,
@@ -816,11 +824,11 @@ class Component extends DCLogic {
       upCount: up.length ? String(up.length) : '',
       hrHead: 'hr m th',
       hist: histRows,
-      histTotal: this.pl(c.histN, 'booking'),
+      histTotal: this.pl(H.length, 'booking'),
       histMore: H.length > 4,
       more: !!s.more,
       moreLabel: s.more ? 'Show less' : 'Show all',
-      histCount: histRows.length + ' / ' + c.histN + ' bookings',
+      histCount: histRows.length + ' / ' + H.length + ' bookings',
       toggleMore: () => this.setState({ more: !this.state.more }),
       reps: reps,
       hasReps: reps.length > 0,
@@ -834,8 +842,13 @@ class Component extends DCLogic {
       poWarn: !!s.po,
       poWarnText: s.poAuto ? '2 no-shows — online booking is off for this client' : 'Turned on by hand — online booking is off for this client',
       poOk: !s.po && !!s.poReset,
+      // the reset line only when the no-show count had turned it on
+      poOkText: s.poReset === 'auto' ? 'Online booking is back. The no-show count starts again from zero.' : 'Online booking is back.',
+      noRem: !!s.noRem,
+      remCls: s.noRem ? 'sw on' : 'sw',
+      flipRem: () => this.flash({ noRem: !this.state.noRem }, this.state.noRem ? 'Reminders are back on for this client' : 'No reminders go to this client'),
       flipPo: () => {
-        if (this.state.po) this.flash({ po: false, poAuto: false, poReset: true }, 'Phone only is off · online booking is back');
+        if (this.state.po) this.flash({ po: false, poAuto: false, poReset: this.state.poAuto ? 'auto' : 'hand' }, 'Phone only is off · online booking is back');
         else this.flash({ po: true, poAuto: false, poReset: false }, 'Phone only is on · online booking is off for this client');
       },
       sourceText: pr.source || 'not given',
