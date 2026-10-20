@@ -2,7 +2,7 @@
  * API errors: `{ error: { code, message?, details? } }` with the HTTP status below (ADR 0006). The UI shows
  * `errors.<code>` from i18n, so every code needs a message in tk, ru and en.
  */
-import { MAX_ALTERNATIVES } from '@yeral/domain/lifecycle'
+import { MAX_ALTERNATIVES, WAITING_SCOPES } from '@yeral/domain/lifecycle'
 import { z } from 'zod'
 import { timeSlotSchema } from './common'
 
@@ -71,7 +71,7 @@ export const partyTooLargeDetailsSchema = z.object({ callFrom: z.number().int().
 export type PartyTooLargeDetails = z.infer<typeof partyTooLargeDetailsSchema>
 
 /** `too_many_waiting`: the client already has `limit` requests waiting at this business or across Ýeral (book Q-124). */
-export const tooManyWaitingDetailsSchema = z.object({ scope: z.enum(['business', 'all']), limit: z.number().int().min(1) })
+export const tooManyWaitingDetailsSchema = z.object({ scope: z.enum(WAITING_SCOPES), limit: z.number().int().min(1) })
 export type TooManyWaitingDetails = z.infer<typeof tooManyWaitingDetailsSchema>
 
 /** `code_invalid`: "Kod nädogry. Ýene N synanyşyk galdy." */

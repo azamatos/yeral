@@ -3,7 +3,7 @@ import { bookingCode } from '@yeral/domain/id'
 import type { BookingState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, CancelledBy } from '@yeral/domain/model'
 import { epochOf } from '@yeral/domain/time'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, gt, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, type MoveRefused } from '../../db/schema'
 import { ApiError } from '../../http/errors'
@@ -14,6 +14,9 @@ export type BookingRow = typeof bookings.$inferSelect
  * When a no-show was marked: its status change (`setStatus` sets `completedAt`), else the complaint. The booking's
  * timeline and the phone-only count (book Q-127) both read it.
  */
+/** A request still waiting for its answer: pending and inside its answer time (as `effectiveStatus` reads it). */
+export const awaitingAnswer = (now: number) => and(eq(bookings.status, 'pending'), gt(bookings.holdUntil, new Date(now)))
+
 export const noShowMarkedAt = sql<Date>`coalesce(${bookings.completedAt}, ${bookings.complaintAt})`
 export const noShowMarkedAtOf = (b: Pick<BookingRow, 'completedAt' | 'complaintAt'>): Date | null => b.completedAt ?? b.complaintAt
 export type ItemRow = typeof bookingItems.$inferSelect

@@ -46,11 +46,16 @@ export const REVIEW_EDIT_DAYS = 7
 export const MAX_WAITING_HERE = 3
 export const MAX_WAITING_IN_ALL = 10
 
+export const WAITING_SCOPES = ['business', 'all'] as const
+// a type, not an interface: it goes into an error's details as it is
+export type WaitingLimit = { scope: (typeof WAITING_SCOPES)[number]; limit: number }
+
 /**
- * Whether a client with `here` requests waiting at this business, and `inAll` across Ýeral, may send one more (book
- * Q-124): null, or which limit it would pass. Each request holds a time for up to a day.
+ * Whether a client with `here` requests waiting at this business, and `inAll` across Ýeral, may have one more waiting
+ * (book Q-124): null, or which limit it would pass. A request holds its time until it's answered or its answer time
+ * (counted in the business's opening hours) runs out.
  */
-export function waitingLimit(here: number, inAll: number): { scope: 'business' | 'all'; limit: number } | null {
+export function waitingLimit(here: number, inAll: number): WaitingLimit | null {
   if (here >= MAX_WAITING_HERE) return { scope: 'business', limit: MAX_WAITING_HERE }
   if (inAll >= MAX_WAITING_IN_ALL) return { scope: 'all', limit: MAX_WAITING_IN_ALL }
   return null

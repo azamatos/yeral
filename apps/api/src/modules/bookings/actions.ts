@@ -22,7 +22,7 @@ import { emit } from '../../notify'
 import { loadBusinesses, type LoadedBusiness } from '../availability/context'
 import { visitWhat } from '../catalog/map'
 import { shiftRating } from '../reviews/rating'
-import { assertOnlineBooking, bookedServices, rebook } from './create'
+import { assertOnlineBooking, assertWaitingRoom, bookedServices, rebook } from './create'
 import { offerTarget } from './offers'
 import { isSlotConflict, lockBooking, pgCode, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from './repo'
 import { RESTORE_MINUTES } from './view'
@@ -117,6 +117,8 @@ export async function restoreBooking(deps: Deps, b: BookingRow): Promise<Booking
   const status = b.confirmedAt ? 'confirmed' : 'pending'
   try {
     return await deps.db.transaction(async (tx) => {
+      // a request back to waiting counts as one sent now (book Q-124)
+      if (status === 'pending' && b.userId) await assertWaitingRoom(tx, b.userId, b.businessId, now, { locked: true })
       // the seats may have gone meanwhile; tables and specialists are guarded by the database
       if (b.type === 'class' && b.sessionId && (await seatsLeft(tx, b.sessionId)) < (b.seats ?? 1)) throw new ApiError('session_full')
       const row = await setStatus(

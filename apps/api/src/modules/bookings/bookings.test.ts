@@ -1,5 +1,5 @@
 import { addDays, epochOf } from '@yeral/domain/time'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
@@ -228,34 +228,39 @@ describe('client bookings', () => {
     )
   })
 
-  it('at most 3 requests waiting at one business, and 10 in all (book Q-124)', async () => {
+  /** The first free time at `slug` from Thursday on, for its first service. */
+  async function freeTime(b: ReturnType<typeof browser>, slug: string) {
+    const service = (await b.req(`/v1/businesses/${slug}`)).json.serviceGroups[0].services[0].id
+    for (let d = 0; d < 14; d++) {
+      const date = addDays(THU, d)
+      const slots = (await b.req(`/v1/businesses/${slug}/availability?services=${service}&date=${date}`)).json.slots ?? []
+      if (slots.length) return { service, date, start: slots[0].start as number }
+    }
+    throw new Error(`no free time at ${slug} in two weeks`)
+  }
+  /** A request for the first free time at `slug`. */
+  async function request(b: ReturnType<typeof browser>, slug: string) {
+    const { service, date, start } = await freeTime(b, slug)
+    return b.req('/v1/bookings', { body: { type: 'appointment', business: slug, serviceIds: [service], staffId: null, date, start } })
+  }
+
+  it('at most 3 requests waiting at one business, and 10 in all; an instant booking still goes (book Q-124)', async () => {
     const phone = '+99365111040'
     const b = browser(t.app)
-    await b.login(phone, 'Ogulşat')
-    /** A request for the first free time from Thursday on. */
-    const request = async (slug: string) => {
-      const service = (await b.req(`/v1/businesses/${slug}`)).json.serviceGroups[0].services[0].id
-      for (let d = 0; d < 14; d++) {
-        const date = addDays(THU, d)
-        const slots = (await b.req(`/v1/businesses/${slug}/availability?services=${service}&date=${date}`)).json.slots ?? []
-        if (slots.length)
-          return b.req('/v1/bookings', {
-            body: { type: 'appointment', business: slug, serviceIds: [service], staffId: null, date, start: slots[0].start },
-          })
-      }
-      throw new Error(`no free time at ${slug} in two weeks`)
-    }
-    for (let i = 0; i < 3; i++) expect((await request('glow-studio')).json.status).toBe('pending')
-    const fourth = await request('glow-studio')
+    const { me } = await b.login(phone, 'Ogulşat')
+    for (let i = 0; i < 3; i++) expect((await request(b, 'glow-studio')).json.status).toBe('pending')
+    const fourth = await request(b, 'glow-studio')
     expect(fourth.status).toBe(409)
     expect(fourth.json.error).toMatchObject({ code: 'too_many_waiting', details: { scope: 'business', limit: 3 } })
-    // seven more waiting elsewhere: ten in all
-    const [me] = await db.select().from(users).where(eq(users.phone, phone))
-    const [loft] = await db.select().from(businesses).where(eq(businesses.slug, 'barber-loft'))
+    // seven more waiting at three businesses that answer by hand: ten in all
+    const others = await db
+      .select()
+      .from(businesses)
+      .where(inArray(businesses.slug, ['ak-dis', 'nail-bar-ayna', 'rahat-spa']))
     await db.insert(bookings).values(
       Array.from({ length: 7 }, (_, i) => ({
         code: `YR-99560${i}`,
-        businessId: loft!.id,
+        businessId: others[i % 3]!.id,
         type: 'appointment' as const,
         date: addDays(THU, 20 + i),
         start: 600,
@@ -263,12 +268,46 @@ describe('client bookings', () => {
         status: 'pending' as const,
         source: 'web' as const,
         clientPhone: phone,
-        userId: me!.id,
+        userId: me.id,
         holdUntil: new Date(t.clock.now + 3_600_000),
       })),
     )
-    const eleventh = await request('glow-studio-parahat')
+    const eleventh = await request(b, 'glow-studio-parahat')
     expect(eleventh.json.error).toMatchObject({ code: 'too_many_waiting', details: { scope: 'all', limit: 10 } })
+    // an instant business confirms at once: nothing waits
+    expect((await request(b, 'barber-loft')).json.status).toBe('confirmed')
+    // the file's later tests run the jobs: none of these should wait for them
+    await db.delete(bookings).where(eq(bookings.userId, me.id))
+  })
+
+  it('a restored request counts again; a waiting move and a request past its answer time don’t (book Q-124)', async () => {
+    const b = browser(t.app)
+    const { me } = await b.login('+99365111042', 'Bahar')
+    const code = async (slug = 'glow-studio') => {
+      const res = await request(b, slug)
+      expect(res.status, JSON.stringify(res.json)).toBe(201)
+      return res.json.code as string
+    }
+    const [first, second, third] = [await code(), await code(), await code()]
+    // the business confirms the first: two waiting, and a third again
+    const [row] = await db.select().from(bookings).where(eq(bookings.code, first))
+    await db.transaction((tx) => confirmBooking(tx, t.deps, row!))
+    await code()
+    // moving the confirmed one asks the business, but rides on its booking
+    const to = await freeTime(b, 'glow-studio')
+    expect((await b.req(`/v1/me/bookings/${first}/reschedule`, { body: { date: to.date, start: to.start } })).status).toBe(200)
+    // cancelled, another sent, then the cancelled one restored: four would wait
+    await b.req(`/v1/me/bookings/${second}/cancel`, { body: {} })
+    await code()
+    const restored = await b.req(`/v1/me/bookings/${second}/restore`, { method: 'POST' })
+    expect(restored.json.error).toMatchObject({ code: 'too_many_waiting', details: { scope: 'business', limit: 3 } })
+    // a request whose answer time ran out waits no more
+    await db
+      .update(bookings)
+      .set({ holdUntil: new Date(t.clock.now - MIN) })
+      .where(eq(bookings.code, third))
+    await code()
+    await db.delete(bookings).where(eq(bookings.userId, me.id))
   })
 
   it('a review can be written until 30 days after the visit (book Q-126)', async () => {
