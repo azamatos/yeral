@@ -101,7 +101,8 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | SMS links to a booking: make one per SMS, read the booking by its token (api) | `newBookingLink() bookingOfLink() LINK_DAYS` | `apps/api/src/modules/bookings/links.ts` |
 | sign a phone in after its code (the plain login and the link page's) (api) | `signIn(c, phone, lang)` | `apps/api/src/modules/auth/sign-in.ts` |
 | a booking's services in order, who a re-booked time goes to, why a phone can't book online (api) | `bookedServices() rebookQuery() onlineRefusal() assertOnlineBooking()` | `apps/api/src/modules/bookings/create.ts` |
-| statuses, hold time, who may do what with a booking | `initialStatus() holdUntil() reminderPlan() offerPast() effectiveStatus() dueTransition() cancelDeadline() clientActions() canAnswerRequest() canComplain() …` | `@yeral/domain/lifecycle` |
+| statuses, hold time, who may do what with a booking, when its SMS may go | `initialStatus() holdUntil() reminderPlan() offerPast() effectiveStatus() dueTransition() cancelDeadline() clientActions() canAnswerRequest() canComplain() firstSmsFrom() …` | `@yeral/domain/lifecycle` |
+| a business that moves (book Q-215): what counts, what a client reads, who hears it, when | `addressOf() sameAddress() showsExactAddress() addressAsShown() sameAddressShown() hearsOfMove() addressSmsAt() newAddressSince()`; queued by `queueAddressSms() retimeAddressSms() addressSmsForNewBooking()` (`apps/api/src/modules/bookings/address-sms.ts`) | `@yeral/domain/lifecycle` |
 | access levels and the permission table | `LEVELS PERMISSION_TABLE scopeOf() can() canOn() canManageTeam() canAnswerRequest()` | `@yeral/domain/permissions` |
 | invites | `INVITE_DAYS inviteState() inviteExpiresAt()` | `@yeral/domain/team` |
 | who is on which team (api) | `signsIn` condition, `teamsOf() workspaceIdsOf() hasSignedInTeam()` | `apps/api/src/modules/team/members.ts` |

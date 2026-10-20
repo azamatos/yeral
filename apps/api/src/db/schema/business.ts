@@ -3,6 +3,7 @@
  * its client list (ADR 0017, ADR 0018, ADR 0025). A branch is its own business.
  */
 import type { DateException, WeekHours } from '@yeral/domain/hours'
+import type { AddressTold } from '@yeral/domain/lifecycle'
 import type { Interval, Localized } from '@yeral/domain/model'
 import { sql } from 'drizzle-orm'
 import {
@@ -119,6 +120,14 @@ export const businesses = pgTable(
     verification: verificationStatus().notNull().default('pending'),
     /** A verified business moved (book Q-215): the Ýeral team checks it again and clears this; the page stays public. */
     addressChangedAt: ts(),
+    /**
+     * When the business last moved: its address line, street or city changed (book Q-215). Its page and the bookings
+     * ahead say "New address" for a while; a new pin alone isn't a move, and a move back to `movedFrom` within that
+     * while undoes it.
+     */
+    movedAt: ts(),
+    /** Where it moved from (`movedAt`). */
+    movedFrom: jsonb().$type<AddressTold>(),
     verificationReason: text(),
     /** Table businesses: how long a party keeps a table, and the special-request chips. */
     tableSittingMinutes: integer().notNull().default(120),

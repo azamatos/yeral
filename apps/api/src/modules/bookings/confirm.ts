@@ -3,14 +3,14 @@
  * what follows: reminders are queued, the client gets the "confirmed" SMS (client spec §6).
  * A confirmed reschedule request moves the booking it points at.
  */
-import { isConfirmationNews, NEW_BOOKING_SMS_AFTER_MS, NEWS_QUEUED, reminderPlan, type NewsQueued } from '@yeral/domain/lifecycle'
-import { isTeamSource } from '@yeral/domain/model'
+import { firstSmsFrom, isConfirmationNews, NEWS_QUEUED, reminderPlan, type NewsQueued } from '@yeral/domain/lifecycle'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, jobs } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { emit } from '../../notify'
+import { retimeAddressSms } from './address-sms'
 import { extendBookingLinks } from './links'
 import { lockBooking, setStatus, StaleBooking, type BookingRow } from './repo'
 
@@ -59,7 +59,7 @@ async function queueNews(db: Queryable, b: BookingRow, kind: NewsQueued, runAt: 
  */
 export async function queueBookingSms(db: Queryable, deps: Deps, b: BookingRow, opts: { news: NewsQueued | null }): Promise<void> {
   const now = deps.now()
-  const from = Math.max(now, isTeamSource(b.source) ? b.createdAt.getTime() + NEW_BOOKING_SMS_AFTER_MS : 0)
+  const from = firstSmsFrom({ source: b.source, createdAt: b.createdAt.getTime() }, now)
   if (opts.news) await queueNews(db, b, opts.news, from)
   const due = reminderPlan(epochOf(b.date, b.start), now)
   if (!due.length) return
@@ -111,6 +111,8 @@ export async function confirmBooking(db: Queryable, deps: Deps, b: BookingRow, o
       .returning()
     if (!moved) throw new StaleBooking()
     await extendBookingLinks(db, moved)
+    // a new address waiting to be told goes by the new time
+    await retimeAddressSms(db, moved, at.getTime())
     await db.delete(bookings).where(eq(bookings.id, request.id))
     await emit(db, {
       type: 'booking.moved',

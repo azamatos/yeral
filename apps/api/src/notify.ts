@@ -45,6 +45,8 @@ export interface SmsBooking {
   reason?: string
   /** Who does it now (`bookedWith`, `movedWith`, `staffChanged`). */
   staff?: string
+  /** The address is new to the client: the business moved since they heard (a reminder says so, book Q-215). */
+  newAddress?: boolean
 }
 
 /**
@@ -133,9 +135,9 @@ export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking
       })
     case 'reminderDay':
     case 'reminderEvening':
-      return t('sms.reminderDay', common)
+      return t(b.newAddress ? 'sms.reminderDayMoved' : 'sms.reminderDay', common)
     case 'reminder2h':
-      return t('sms.reminder2h', common)
+      return t(b.newAddress ? 'sms.reminder2hMoved' : 'sms.reminder2h', common)
   }
 }
 
@@ -166,6 +168,24 @@ function timesText(fmt: ReturnType<typeof createFmt>, b: Pick<SmsBooking, 'date'
       return at.date === asked ? fmt.time(at.min) : `${fmt.shortDate(at.date)} ${fmt.time(at.min)}`
     })
     .join(', ')
+}
+
+/**
+ * The business moved (book Q-215): its new address, and the booking it's for. `b.address` is the address the booking
+ * shows: the street only while a home-based business's request waits.
+ */
+export function addressSmsText(lang: Locale, b: SmsBooking & { link: string }): string {
+  const t = createT(lang)
+  const fmt = createFmt(lang)
+  return t('sms.addressChanged', {
+    brand: brandOf(t),
+    business: b.businessName,
+    address: b.city ? fmt.addressIn(b.address, b.city) : b.address,
+    weekday: fmt.weekday(dayOf(b.date, b.start)),
+    date: fmt.dayMonth(dayOf(b.date, b.start)),
+    time: fmt.time(wallOf(b.date, b.start).min),
+    link: b.link,
+  })
 }
 
 /**

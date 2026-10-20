@@ -96,8 +96,11 @@
     "cancelledOffers": "{brand}: {business} cancelled your booking on {date} {time}: {reason}. Free times: {times} — {link}",
     "cancelledOffersNoTimes": "{brand}: {business} cancelled your booking on {date} {time}: {reason}. Pick another time: {link}",
     "cancelledOffersCall": "{brand}: {business} cancelled your booking on {date} {time}: {reason}. Call them to book: {link}",
+    "addressChanged": "{brand}: {business} has moved to a new address: {address}. Your booking: {weekday}, {date}, {time}. {link}",
     "reminderDay": "Reminder: tomorrow at {time}, {business}, {address}.",
-    "reminder2h": "Reminder: today at {time}, {business}, {address}."
+    "reminder2h": "Reminder: today at {time}, {business}, {address}.",
+    "reminderDayMoved": "Reminder: tomorrow at {time}, {business}, new address: {address}.",
+    "reminder2hMoved": "Reminder: today at {time}, {business}, new address: {address}."
   },
   "fmt": {
     "money": "{amount} {currency}",

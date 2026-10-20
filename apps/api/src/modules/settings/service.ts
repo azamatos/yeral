@@ -8,6 +8,7 @@ import type {
   businessProfileSchema,
   businessProfileUpdateSchema,
 } from '@yeral/contract/settings'
+import { addressOf, newAddressSince, sameAddress, sameAddressShown } from '@yeral/domain/lifecycle'
 import { AMENITIES, type Amenity, type Localized } from '@yeral/domain/model'
 import { LATE_MINUTES, rulesErrors, type BookingRules } from '@yeral/domain/rules'
 import { eq } from 'drizzle-orm'
@@ -17,6 +18,7 @@ import { bookingRules, businesses, categories, cities } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 import { emit } from '../../notify'
 import { toRules } from '../availability/context'
+import { queueAddressSms } from '../bookings/address-sms'
 
 type RulesView = z.infer<typeof bookingRulesSchema>
 type RulesChange = z.infer<typeof bookingRulesUpdateSchema>
@@ -85,7 +87,9 @@ export async function profileOf(db: Queryable, businessId: string): Promise<Prof
 /**
  * Change some of the profile (B-37). A new category must offer every kind of booking the business takes, and the card's
  * "what it is" becomes its name. A new address keeps everything, the page and its verification included, and marks the
- * business for the Ýeral team to check again (book Q-215: `addressChangedAt`, cleared by the admin tool).
+ * business for the Ýeral team to check again (book Q-215: `addressChangedAt`, cleared by the admin tool); a new line,
+ * street or city is a move (`movedAt`, `movedFrom`), which every client with a booking ahead hears by SMS
+ * (`queueAddressSms`). Back where it moved from while the page still says "New address", it has nothing new to say.
  */
 export async function updateProfile(db: Queryable, businessId: string, change: ProfileChange, now: number): Promise<ProfileView> {
   return db.transaction(async (tx) => {
@@ -106,9 +110,16 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
     if (issues.length) throw new ApiError('validation_error', { issues })
 
     const { location, categoryId, amenities, ...rest } = change
-    const moved =
-      !!location &&
-      (location.address !== row.address || location.cityId !== row.cityId || location.lat !== row.lat || location.lng !== row.lng)
+    const before = addressOf(row)
+    // a new pin alone is checked again, but the address the clients read is the same
+    const relocated = !!location && !sameAddress(before, location)
+    const moved = relocated || (!!location && (location.lat !== row.lat || location.lng !== row.lng))
+    // the page says "New address" when what it shows changed (a home-based business shows its street); a fix while it
+    // says so keeps where it moved from, and back there it has nothing new to say
+    const hide = change.hideExactAddress ?? row.hideExactAddress
+    const pageMoved = relocated && !sameAddressShown(before, location, hide, 'pending')
+    const from = row.movedFrom && newAddressSince(row.movedAt?.getTime() ?? null, now) !== null ? row.movedFrom : before
+    const movedBack = pageMoved && sameAddressShown(from, location, hide, 'pending')
     const set: Partial<typeof businesses.$inferInsert> = {
       ...rest,
       ...(about ? { about } : {}),
@@ -117,9 +128,11 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
       ...(recategorized ? { categoryId, kind: category!.name } : {}),
       ...location,
       ...(moved ? { addressChangedAt: new Date(now) } : {}),
+      ...(pageMoved ? (movedBack ? { movedAt: null, movedFrom: null } : { movedAt: new Date(now), movedFrom: from }) : {}),
     }
     if (!Object.keys(set).length) return profileView(row)
     const [saved] = await tx.update(businesses).set(set).where(eq(businesses.id, businessId)).returning()
+    if (relocated) await queueAddressSms(tx, businessId, before, now)
     await emit(tx, { type: 'business.updated', businessId })
     return profileView(saved!)
   })

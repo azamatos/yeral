@@ -41,6 +41,7 @@ import { publicBusiness } from '../catalog/detail'
 import { onlineRefusal } from '../clients/online'
 import { servicePrice } from '../catalog/map'
 import { hasSignedInTeam } from '../team/members'
+import { addressSmsForNewBooking } from './address-sms'
 import { confirmBooking } from './confirm'
 import { awaitingAnswer, freshCode, isSlotConflict, type BookingRow } from './repo'
 import { accountName } from '../me/me'
@@ -197,6 +198,8 @@ async function insertBooking(db: Queryable, deps: Deps, x: Insert): Promise<Book
   if (!row) throw new Error('booking insert failed')
   if (x.placement.slot) await db.insert(bookingItems).values(itemRows(x.lb, row.id, x.date, x.placement.slot))
   await emit(db, { type: 'booking.created', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
+  // a move rides on its booking, which hears it
+  if (!x.rescheduleOf) await addressSmsForNewBooking(db, row, now)
   if (x.status === 'confirmed') return confirmBooking(db, deps, row, { instant: true })
   if (deps.site.demo && x.lb.business.demo && !(await hasSignedInTeam(db, row.businessId))) {
     await db.insert(jobs).values({ kind: 'demo.answer', runAt: new Date(now + DEMO_ANSWER_MS), payload: { bookingId: row.id } })

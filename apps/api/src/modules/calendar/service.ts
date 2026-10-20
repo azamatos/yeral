@@ -52,6 +52,7 @@ import { dropPendingMove } from '../bookings/actions'
 import { cancelForBusiness } from '../bookings/business-cancel'
 import { queueBookingSms } from '../bookings/confirm'
 import { appointmentPrice, inTransaction, itemRows } from '../bookings/create'
+import { retimeAddressSms } from '../bookings/address-sms'
 import { extendBookingLinks } from '../bookings/links'
 import { awaitingAnswer, freshCode, guard, isSlotConflict, itemsOf, stateOf, type BookingRow, type ItemRow } from '../bookings/repo'
 
@@ -435,6 +436,7 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
         .returning()
       if (!moved) throw new Error('booking update failed')
       await extendBookingLinks(tx, moved)
+      await retimeAddressSms(tx, moved, now)
       const event = { type: 'booking.moved' as const, businessId: moved.businessId, bookingId: moved.id, bookingCode: moved.code }
       await emit(tx, { ...event, userId: moved.userId })
       const left = staffIds.filter((id) => !plan.some((it) => it.staffId === id))

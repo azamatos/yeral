@@ -11,6 +11,7 @@
  */
 import {
   isOnlineSource,
+  isTeamSource,
   type BookingSource,
   type BookingStatus,
   type BusinessCancelReason,
@@ -373,6 +374,66 @@ export const NEW_BOOKING_UNDO_MS = 10_000
  * take it back, with a margin for an undo still on its way, so an undo never leaves an SMS behind (B-24).
  */
 export const NEW_BOOKING_SMS_AFTER_MS = NEW_BOOKING_UNDO_MS + 5_000
+
+/** When a booking's SMS may go: one the team entered once its undo can't come any more (B-24), any other now. */
+export const firstSmsFrom = (b: { source: BookingSource; createdAt: number }, now: number): number =>
+  Math.max(now, isTeamSource(b.source) ? b.createdAt + NEW_BOOKING_SMS_AFTER_MS : 0)
+
+// ── A new address (book Q-215) ──
+
+/**
+ * A business that moves tells every client with a booking ahead (owner, 20.10.2026): the SMS goes this long after the
+ * save that changed the address, so a typo fixed straight after makes one SMS, or none when it's back as it was.
+ */
+export const ADDRESS_SMS_AFTER_MS = 10 * 60_000
+/** A visit sooner than the wait hears it this long before it starts, or at once. */
+export const ADDRESS_SMS_LEAD_MS = 30 * 60_000
+
+/** A business's address as a client knows it: the line, the street a home-based business shows first, the city. */
+export interface AddressTold {
+  address: string
+  street: string
+  cityId: string
+  /** When an SMS told the client this one as new (the booking says "New address" from then); none: they booked with it. */
+  at?: number
+}
+
+/** A business's address as `AddressTold` keeps it. */
+export const addressOf = (b: { address: string; street: string; cityId: string }): AddressTold => ({
+  address: b.address,
+  street: b.street,
+  cityId: b.cityId,
+})
+
+/** A booking whose client hears that the business moved, and sees it on the booking: waiting or confirmed, still ahead. */
+export const hearsOfMove = (status: BookingStatus, b: { date: string; start: number }, now: number): boolean =>
+  (status === 'pending' || status === 'confirmed') && now < epochOf(b.date, b.start)
+
+/** A move: the line, the street or the city changed; a new pin alone isn't one. */
+export const sameAddress = (a: AddressTold, b: AddressTold): boolean =>
+  a.address === b.address && a.street === b.street && a.cityId === b.cityId
+
+/** A home-based business shows its exact address once the booking is confirmed (and after the visit); before, the street. */
+export const showsExactAddress = (status: BookingStatus): boolean => status === 'confirmed' || status === 'completed'
+
+/** The address a client reads on a booking in `status`. */
+export const addressAsShown = (a: AddressTold, hideExact: boolean, status: BookingStatus): string =>
+  hideExact && !showsExactAddress(status) ? a.street : a.address
+
+/** Whether a client reading a booking in `status` sees the two addresses alike. */
+export const sameAddressShown = (a: AddressTold, b: AddressTold, hideExact: boolean, status: BookingStatus): boolean =>
+  a.cityId === b.cityId && addressAsShown(a, hideExact, status) === addressAsShown(b, hideExact, status)
+
+/** When the SMS about a new address goes for this booking: the wait, a soon visit's lead, never before its first SMS may. */
+export const addressSmsAt = (b: { source: BookingSource; createdAt: number; date: string; start: number }, now: number): number =>
+  Math.max(firstSmsFrom(b, now), Math.min(now + ADDRESS_SMS_AFTER_MS, epochOf(b.date, b.start) - ADDRESS_SMS_LEAD_MS))
+
+/** The business page says "New address" this long after the business moved. */
+export const NEW_ADDRESS_DAYS = 30
+
+/** When the business moved, while its page still says so; else null. */
+export const newAddressSince = (movedAt: number | null, now: number): number | null =>
+  movedAt !== null && movedAt <= now && now - movedAt < NEW_ADDRESS_DAYS * 86_400_000 ? movedAt : null
 
 /**
  * Undo a booking the team just added by phone or for a walk-in: it goes as if never made, while the undo time runs and

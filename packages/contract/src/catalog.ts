@@ -298,6 +298,8 @@ export const businessDetailSchema = z
     entranceNote: z.string().nullable(),
     /** Home-based: the exact address shows only on a confirmed booking; `geo` is then approximate. */
     hideExactAddress: z.boolean(),
+    /** When the business moved here, for 30 days after: the page says "New address" (book Q-215). */
+    movedAt: epochSchema.nullable(),
     geo: geoSchema,
     distanceM: z.number().int().min(0).nullable(),
     phone: phoneSchema,

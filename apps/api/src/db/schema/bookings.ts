@@ -6,7 +6,7 @@
  * (exclusion constraints in the migrations, btree_gist).
  * Rows keep snapshots (client name and phone, service names, prices) so history survives edits and deletions.
  */
-import type { Told } from '@yeral/domain/lifecycle'
+import type { AddressTold, Told } from '@yeral/domain/lifecycle'
 import type { DeclineReason, Localized } from '@yeral/domain/model'
 import { sql } from 'drizzle-orm'
 import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uniqueIndex, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -113,6 +113,11 @@ export const bookings = pgTable(
      * changed, or nothing when it's back as they knew it. Null on bookings made before it was kept.
      */
     told: jsonb().$type<Told>(),
+    /**
+     * The business's address as the client last heard it, kept once the business moves (book Q-215): what the SMS about
+     * a new address compares with, so a move and back tells nothing. Null: as it was when they booked.
+     */
+    addressTold: jsonb().$type<AddressTold>(),
     // table
     partySize: integer(),
     areaId: uuid().references(() => tableAreas.id, { onDelete: 'set null' }),
