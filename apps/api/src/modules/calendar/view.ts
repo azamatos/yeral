@@ -8,7 +8,7 @@ import type { calendarQuerySchema, CalendarView } from '@yeral/contract/calendar
 import { DAY_MINUTES, staffDay, staffOffReason, type BusinessHours } from '@yeral/domain/hours'
 import { effectiveStatus } from '@yeral/domain/lifecycle'
 import { canOn, scopeOf, type Actor } from '@yeral/domain/permissions'
-import { daySummary, priceTotal } from '@yeral/domain/pricing'
+import { businessTotal, daySummary } from '@yeral/domain/pricing'
 import { addDays } from '@yeral/domain/time'
 import { and, eq, gte, inArray, isNull, lte } from 'drizzle-orm'
 import type { z } from 'zod'
@@ -125,13 +125,13 @@ export async function calendarView(deps: Deps, business: Business, actor: Actor,
   const revenue = scopeOf(actor, 'revenue')
   const summary = dates.map((date) => {
     const day = shown.filter((s) => s.row.date === date)
+    // what the business earns from each, hidden prices included (`businessTotal`); a specialist's own items only
     const line = daySummary(
       day.map(({ row, status }) => ({
         status,
-        price:
-          revenue === 'own'
-            ? priceTotal(items.filter((i) => i.bookingId === row.id && i.staffId === actor.staffId).map(priceOf))
-            : (row.priceAmount ?? 0),
+        price: businessTotal(
+          items.filter((i) => i.bookingId === row.id && (revenue !== 'own' || i.staffId === actor.staffId)).map(priceOf),
+        ),
       })),
     )
     return { date, count: line.count, requests: line.requests, revenue: revenue === 'none' ? null : line.plannedRevenue }

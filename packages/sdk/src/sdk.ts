@@ -39,7 +39,6 @@ import type {
 import type {
   blockInputSchema,
   businessCancelSchema,
-  calendarQuerySchema,
   freeTimesQuerySchema,
   moveBookingSchema,
   newBookingSchema,
@@ -625,8 +624,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   const booked = (slug: string) => invalidate(keys.calendar(slug), keys.availabilityAll(slug), keys.requests(slug), keys.workspaces())
   const calendar = {
     /** "Senenama" (book B-16, B-17): a day or a week, everyone the reader sees or one person, the day's lines. */
-    view: (slug: string, p: z.input<typeof calendarQuerySchema>) => {
-      const query = clean(p)
+    view: (slug: string, p: { date: string; days?: 1 | 7; staff?: string; cancelled?: boolean; lang?: Locale }) => {
+      const query = clean({ ...p, cancelled: p.cancelled === undefined ? undefined : String(p.cancelled) })
       return queryOptions({
         queryKey: keys.calendarView(slug, query),
         queryFn: ({ signal }) => call(w.calendar.$get({ param: { slug }, query: query as never }, abortWith(signal))),
