@@ -13,8 +13,16 @@
   field; `phone_change_unavailable` from the api after all: a toast and «Change» goes); «Account»: Log out (goes Home
   from the account area) and Delete account (480 modal with Q-172's words, Back and the solid danger «Delete account»;
   `DELETE /v1/me`; an owner of a business sees why it can't: `owns_workspace`; done: Home and a toast).
-- The header's avatar menu gains «Profile» (and its phone sheet); `features/log-out` (`useLogOut`, `home` for pages
-  that need someone signed in) is shared by the menu, the aside and the page.
+- The header's avatar menu gains «Profile» (and its phone sheet); `features/log-out` (`useLogOut`, one log-out at a
+  time across its triggers) is shared by the menu, the aside and the page. The account layout sends anyone no longer
+  signed in Home (a log-out anywhere, the account deleted, the session ended elsewhere).
+- Review of PR 3 (#118), fixed: `phone_taken` at the code goes back to the number, which says so; the account's own
+  number is refused before a code («This is already your number.»); Cancel waits while a code is checked; the name
+  form keeps only what was typed (a rename elsewhere shows, never saved back) and says «Enter your first name.» only
+  once the name changes; the focus goes back to «Change» (or the number), and to the name after Save or Discard;
+  `/{lang}/account` opens the profile; the code step's wiring is the site's `CodeStep` (`shared/ui`, the login uses
+  it too) and the person's mark `PersonMark`; the SaveBar story clicks Save to submit its form.
+  Not taken: TanStack Form (no `@yeral/ui/form` layer yet; the business app's forms are plain state too).
 - `@yeral/features/auth-by-phone`: `useCodeSteps({ sendCode, verify, onVerified, onFailed, done })` runs the code steps
   against any pair of requests (the sign-in, the phone change); `useSignIn` is it with the sign-in's.
 - `@yeral/ui`: `SaveBar` (Overlays/SaveBar: Dirty, Invalid, Saving, submits a form, Phone, Russian length).

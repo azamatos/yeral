@@ -1,41 +1,40 @@
 import { MARKET } from '@yeral/domain/market'
 import { formatPhone, toE164 } from '@yeral/domain/phone'
-import { mobileStarts, PHONE_RULES, useCodeSteps } from '@yeral/features/auth-by-phone'
+import { useCodeSteps } from '@yeral/features/auth-by-phone'
 import { isApiError } from '@yeral/sdk'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { cn } from '@yeral/ui/cn'
-import { SignInCodeStep, type SignInCodeStepCopy } from '@yeral/ui/sign-in-code-step'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
-import { useEffect, useRef, useState } from 'react'
-import { useFormatter, useTranslations } from 'use-intl'
+import { useState } from 'react'
+import { useTranslations } from 'use-intl'
 import { useErrorText } from '@/shared/i18n'
-
-const STARTS = mobileStarts()
+import { CodeStep } from '@/shared/ui'
 
 /**
  * Changing the phone number (book C-44; Account-Profile's `.pbox` under «Phone»): the new number, then the code sent to
- * it, in the shared code step with the SMS words (codes for a phone change always go by SMS: the api refuses the change
+ * it, in the site's code step with the SMS words (codes for a phone change always go by SMS: the api refuses the change
  * while the sign-in code shows on the screen, `phone_change_unavailable`). Signed in here, other devices log out.
  * `onUnavailable`: the api refused the change after all (the profile hides «Change»).
  */
 export function ChangePhoneBox({
+  currentPhone,
   onDone,
   onCancel,
   onUnavailable,
 }: {
+  /** The account's number (E.164): the same number again isn't a change. */
+  currentPhone: string
   onDone: () => void
   onCancel: () => void
   onUnavailable: () => void
 }) {
   const t = useTranslations()
-  const format = useFormatter()
   const sdk = useSdk()
   const errorText = useErrorText()
-  const formRef = useRef<HTMLFormElement>(null)
-  // a number that has an account already (`phone_taken`): said under the field until it changes
-  const [taken, setTaken] = useState<string | null>(null)
+  // a number refused before a code: someone else's (`phone_taken`, also when checking the code) or this account's own
+  const [refused, setRefused] = useState<{ phone: string; why: 'taken' | 'same' } | null>(null)
   const steps = useCodeSteps({
     sendCode: sdk.me.phoneCode(),
     verify: sdk.me.phoneVerify(),
@@ -47,83 +46,50 @@ export function ChangePhoneBox({
       if (isApiError(error, 'phone_change_unavailable')) {
         toast(errorText(error))
         onUnavailable()
-      } else if (isApiError(error, 'phone_taken')) setTaken(steps.state.phone)
-      else toast(errorText(error))
+      } else if (isApiError(error, 'phone_taken')) {
+        // taken meanwhile (at the code): back to the number, which says so
+        const phone = steps.state.sentTo ?? steps.state.phone
+        if (steps.state.step === 'code') steps.changeNumber()
+        setRefused({ phone, why: 'taken' })
+      } else toast(errorText(error))
     },
   })
-  const { state, view } = steps
-  const onCode = state.step === 'code'
+  const { state } = steps
+  const busy = steps.sending || steps.checking
 
-  // the box opens in the number, and «Change number» brings the focus back to it
-  const { changedNumber } = state
-  useEffect(() => {
-    if (state.step === 'phone') formRef.current?.querySelector('input')?.focus()
-  }, [changedNumber, state.step])
-
-  const copy: SignInCodeStepCopy = {
-    phoneLabel: t('profile.newPhone.label'),
-    sendCode: t('login.sendCode'),
-    sending: t('login.sending'),
-    codeLabel: t('profile.newPhone.codeLabel'),
-    codeHint: t('login.codeHint'),
-    yourCode: t('login.yourCode'),
-    confirm: t('login.confirm'),
-    checking: t('login.checking'),
-    resend: t('login.resend'),
-    resendIn: (time) => t('login.resendIn', { time }),
-    codeExpired: t('login.codeExpired'),
-    resent: t('profile.newPhone.resent'),
+  const sendCode = () => {
+    if (state.phone.length === MARKET.phone.length && toE164(state.phone) === currentPhone) setRefused({ phone: state.phone, why: 'same' })
+    else steps.sendCode()
   }
   const phoneError =
-    taken !== null && taken === state.phone
-      ? t('errors.phone_taken')
-      : state.phoneError === 'incomplete'
-        ? t('login.incomplete', { digits: MARKET.phone.length })
-        : state.phoneError === 'notMobile'
-          ? STARTS
-            ? t('login.notMobile', { starts: format.list(STARTS, { type: 'disjunction' }) })
-            : t('login.notMobilePlain')
-          : undefined
+    refused && refused.phone === state.phone ? (refused.why === 'taken' ? t('errors.phone_taken') : t('profile.newPhone.same')) : undefined
 
   return (
     <div className="flex flex-col gap-3 rounded-m border border-n-200 p-4">
-      {onCode && (
+      {state.step === 'code' && (
         <p className="m-0 text-small text-n-600 [&_b]:font-semibold [&_b]:text-n-900">
           {t.rich('profile.newPhone.codeLead', {
             phone: formatPhone(toE164(state.sentTo ?? state.phone)),
             b: (chunks) => <b className="whitespace-nowrap tabular-nums">{chunks}</b>,
           })}{' '}
-          <button type="button" onClick={steps.changeNumber} className={cn(textLink, 'whitespace-nowrap')}>
+          <button type="button" onClick={steps.changeNumber} disabled={busy} className={cn(textLink, 'whitespace-nowrap')}>
             {t('profile.newPhone.changeNumber')}
           </button>
         </p>
       )}
-      <SignInCodeStep
-        ref={formRef}
-        step={state.step}
-        size={48}
+      <CodeStep
+        steps={{ ...steps, sendCode }}
         sms
-        copy={copy}
-        phoneRules={PHONE_RULES}
-        tooManyCodes={view.tooManyCodesMin ? t('login.tooManyCodes', { minutes: view.tooManyCodesMin }) : undefined}
-        phone={state.phone}
-        onPhoneChange={steps.changePhone}
+        words={{
+          phoneLabel: t('profile.newPhone.label'),
+          codeLabel: t('profile.newPhone.codeLabel'),
+          resent: t('profile.newPhone.resent'),
+        }}
         phoneHint={t('profile.newPhone.hint', { digits: MARKET.phone.length })}
         phoneError={phoneError}
-        sending={steps.sending}
-        onSendCode={steps.sendCode}
-        code={state.code}
-        onCodeChange={steps.changeCode}
-        onSubmitCode={steps.submitCode}
-        checking={steps.checking}
-        codeError={state.attemptsLeft !== undefined ? t('login.wrongCode', { left: state.attemptsLeft }) : undefined}
-        locked={view.locked ? t('login.locked', { seconds: view.lockLeftSec }) : undefined}
-        codeExpired={state.codeExpired}
-        resendIn={view.resendInSec}
-        resent={state.resent}
-        onResend={steps.resend}
       />
-      <Button variant="ghost" size="s" className="self-end" onClick={onCancel}>
+      {/* not while a code is on its way or being checked: the change would finish behind a closed box */}
+      <Button variant="ghost" size="s" className="self-end" disabled={busy} onClick={onCancel}>
         {t('profile.newPhone.cancel')}
       </Button>
     </div>

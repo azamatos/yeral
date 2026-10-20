@@ -134,6 +134,32 @@ export const ChangeRefused: Story = {
   },
 }
 
+/** The account's own number isn't a change: said under the field, no code asked for. */
+export const SameNumber: Story = {
+  name: 'Change to the same number',
+  args: { server: authApi({ people: [CAN_CHANGE], signedIn: CAN_CHANGE }) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Change' }))
+    await userEvent.type(await canvas.findByLabelText('New phone number'), '65901122{Enter}')
+    await expect(await canvas.findByText('This is already your number.')).toBeVisible()
+    await expect(canvas.queryByLabelText('SMS code')).toBeNull()
+  },
+}
+
+/** The new number was taken between the code and its check: back to the number, which says so. */
+export const TakenAtTheCode: Story = {
+  name: 'Number taken at the code',
+  args: { server: authApi({ people: [CAN_CHANGE], signedIn: CAN_CHANGE, takenAtVerify: true }) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Change' }))
+    await userEvent.type(await canvas.findByLabelText('New phone number'), '61057732{Enter}')
+    await canvas.findByLabelText('SMS code')
+    await userEvent.keyboard('4821')
+    await expect(await canvas.findByText('This number belongs to another account.')).toBeVisible()
+    await expect(canvas.getByLabelText('New phone number')).toHaveValue('61 05 77 32')
+  },
+}
+
 /** Cancel closes the change and «Change» is back. */
 export const ChangeCancelled: Story = {
   name: 'Change cancelled',
@@ -183,6 +209,28 @@ export const LogOut: Story = {
     const section = await canvas.findByRole('region', { name: 'Account' })
     await userEvent.click(within(section).getByRole('button', { name: 'Log out' }))
     await expect(await canvas.findByText('Landed on /en')).toBeVisible()
+  },
+}
+
+/** Log out from the header's menu while in the account: the account area sends the visitor Home. */
+export const LogOutFromHeader: Story = {
+  name: 'Log out from the header',
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: /Account menu/ }))
+    await userEvent.click(await body.findByRole('menuitem', { name: 'Log out' }))
+    await expect(await canvas.findByText('Landed on /en')).toBeVisible()
+  },
+}
+
+/** An account without a name yet: empty fields, no error until the name is being changed. */
+export const NoNameYet: Story = {
+  name: 'No name yet',
+  args: { server: authApi({ signedIn: person('+99364215590', null) }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByLabelText('First name')).toHaveValue('')
+    await expect(canvas.queryByRole('alert')).toBeNull()
+    await userEvent.type(canvas.getByLabelText('Last name'), 'Öwezowa')
+    await expect(await canvas.findByText('Enter your first name.')).toBeVisible()
   },
 }
 

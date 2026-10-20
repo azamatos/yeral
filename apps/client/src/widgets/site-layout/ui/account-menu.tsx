@@ -1,14 +1,14 @@
-import { Link, useMatch } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import { formatPhone } from '@yeral/domain/phone'
-import { Avatar } from '@yeral/ui/avatar'
 import { cn } from '@yeral/ui/cn'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from '@yeral/ui/drawer'
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '@yeral/ui/menu'
-import { ChevronDown, ChevronUp, LogOut, User, UserRound } from 'lucide-react'
+import { ChevronDown, ChevronUp, LogOut, User } from 'lucide-react'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useLogOut } from '@/features/log-out'
+import { PersonMark } from '@/shared/ui'
 
 /**
  * The signed-in header's avatar and its menu (Auth «Logged-in header»): the person's name and phone, Profile, then
@@ -25,9 +25,7 @@ export function AccountMenu({ me }: { me: Me }) {
     setMenuOpen(false)
     setSheetOpen(false)
   }
-  // in the account area, which needs someone signed in, logging out goes Home
-  const inAccount = Boolean(useMatch({ from: '/$lang/_site/account', shouldThrow: false }))
-  const { logOut, loggingOut } = useLogOut({ home: inAccount, onDone: close })
+  const { logOut, loggingOut } = useLogOut({ onDone: close })
   const name = me.name ?? me.firstName
   const phone = formatPhone(me.phone)
 
@@ -107,22 +105,6 @@ export function AccountMenu({ me }: { me: Me }) {
         </Drawer>
       </span>
     </>
-  )
-}
-
-/** The person's initial on tint (the boards draw «A» for Aýjemal), or a person icon until they have a name. */
-function PersonMark({ firstName, size }: { firstName: string | null; size: 32 | 40 }) {
-  if (firstName) return <Avatar name={firstName} size={size} aria-hidden />
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        'inline-flex flex-none items-center justify-center rounded-pill bg-a-50 text-a-600',
-        size === 32 ? 'size-8' : 'size-10',
-      )}
-    >
-      <UserRound className={size === 32 ? 'size-4' : 'size-5'} />
-    </span>
   )
 }
 

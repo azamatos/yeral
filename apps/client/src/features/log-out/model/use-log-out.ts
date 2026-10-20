@@ -1,33 +1,35 @@
-import { useMutation } from '@tanstack/react-query'
-import { useNavigate, useRouter } from '@tanstack/react-router'
+import { useIsMutating, useMutation } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import { useSdk } from '@yeral/sdk/react'
 import { toast } from '@yeral/ui/toast'
-import { useLocale } from 'use-intl'
 import { useErrorText } from '@/shared/i18n'
+
+/** One log-out at a time, whichever «Log out» on the screen was pressed. */
+const LOG_OUT = ['log-out'] as const
 
 /**
  * Log out on this device (book C-46; `POST /v1/auth/logout`; the sdk forgets the person). Where the page goes isn't
- * drawn: a public page stays and its routes reload (the header says «Log in» again); with `home` (the account area,
- * which needs someone signed in) it goes Home rather than to the login. A failure is a toast, and the trigger can try
+ * drawn: the page stays and its routes reload, so the header says «Log in» again; the account area, which needs
+ * someone signed in, takes the visitor Home itself (`AccountLayout`). A failure is a toast, and any trigger can try
  * again.
  */
-export function useLogOut({ home = false, onDone }: { home?: boolean; onDone?: () => void } = {}) {
+export function useLogOut({ onDone }: { onDone?: () => void } = {}) {
   const sdk = useSdk()
   const router = useRouter()
-  const navigate = useNavigate()
-  const locale = useLocale()
   const errorText = useErrorText()
-  const logout = useMutation(sdk.auth.logout())
+  const logout = useMutation({ ...sdk.auth.logout(), mutationKey: LOG_OUT })
+  const loggingOut = useIsMutating({ mutationKey: LOG_OUT }) > 0
   return {
-    logOut: () =>
+    logOut: () => {
+      if (loggingOut) return
       logout.mutate(undefined, {
         onSuccess: () => {
           onDone?.()
-          if (home) void navigate({ to: '/$lang', params: { lang: locale }, replace: true })
-          else void router.invalidate()
+          void router.invalidate()
         },
         onError: (error) => void toast(errorText(error)),
-      }),
-    loggingOut: logout.isPending,
+      })
+    },
+    loggingOut,
   }
 }

@@ -62,25 +62,26 @@ export const Saving: Story = {
   },
 }
 
-/** Save submits a form by its id. */
+const onSubmit = fn()
+
+/** Save submits a form by its id, from outside it (the profile's bar sits under every section). */
 export const SubmitsAForm: Story = {
   args: { form: 'profile' },
-  render: (args) => {
-    const submit = fn()
-    return (
+  render: (args) => (
+    <div>
       <form
         id="profile"
         onSubmit={(e) => {
           e.preventDefault()
-          submit()
+          onSubmit()
         }}
-      >
-        <SaveBar {...args} />
-      </form>
-    )
-  },
+      />
+      <SaveBar {...args} />
+    </div>
+  ),
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('button', { name: 'Save' })).toHaveAttribute('type', 'submit')
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }))
+    await expect(onSubmit).toHaveBeenCalledOnce()
   },
 }
 

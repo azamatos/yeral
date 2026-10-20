@@ -9,7 +9,7 @@ import { Input } from '@yeral/ui/input'
 import { SaveBar } from '@yeral/ui/save-bar'
 import { toast } from '@yeral/ui/toast'
 import { LogOut } from 'lucide-react'
-import { useId, useState, type ReactNode } from 'react'
+import { useId, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { useLogOut } from '@/features/log-out'
 import { useErrorText } from '@/shared/i18n'
@@ -62,8 +62,13 @@ function Profile({ me }: { me: Me }) {
   const errorText = useErrorText()
   const update = useMutation(sdk.me.update())
   const formId = useId()
-  const [first, setFirst] = useState(me.firstName ?? '')
-  const [last, setLast] = useState(me.surname ?? '')
+  const firstRef = useRef<HTMLInputElement>(null)
+  const changeRef = useRef<HTMLButtonElement>(null)
+  const phoneRef = useRef<HTMLInputElement>(null)
+  // only what the person typed: the rest shows the account as it is now (a rename elsewhere shows up, never saved back)
+  const [edits, setEdits] = useState<{ first?: string; last?: string }>({})
+  const first = edits.first ?? me.firstName ?? ''
+  const last = edits.last ?? me.surname ?? ''
   const [changing, setChanging] = useState(false)
   // the api refused a change after all (the code shows on the screen): «Change» goes for this visit
   const [changeRefused, setChangeRefused] = useState(false)
@@ -72,15 +77,29 @@ function Profile({ me }: { me: Me }) {
   const canChange = me.canChangePhone && !changeRefused
 
   const discard = () => {
-    setFirst(me.firstName ?? '')
-    setLast(me.surname ?? '')
+    setEdits({})
+    firstRef.current?.focus()
   }
   const save = () => {
     if (firstMissing || update.isPending) return
     update.mutate(
       { firstName: first.trim(), surname: last.trim() || null },
-      { onSuccess: () => void toast(t('saved')), onError: (error) => void toast(errorText(error)) },
+      {
+        onSuccess: () => {
+          setEdits({})
+          toast(t('saved'))
+          // Save went with the save bar: the focus goes back to the name
+          if (!document.activeElement || document.activeElement === document.body) firstRef.current?.focus()
+        },
+        onError: (error) => void toast(errorText(error)),
+      },
     )
+  }
+  /** The phone box closed: the focus goes back to «Change», or to the number when «Change» went. */
+  const closeChange = (refused = false) => {
+    setChanging(false)
+    if (refused) setChangeRefused(true)
+    requestAnimationFrame(() => (changeRef.current ?? phoneRef.current)?.focus())
   }
 
   return (
@@ -95,18 +114,35 @@ function Profile({ me }: { me: Me }) {
           }}
           className="grid grid-cols-2 gap-4 max-sm:grid-cols-1"
         >
-          <Field label={t('first')} error={firstMissing ? t('firstRequired') : undefined}>
-            <Input value={first} maxLength={NAME_MAX} autoComplete="given-name" onChange={(e) => setFirst(e.target.value)} />
+          {/* said once the name is being changed: an account opened without one isn't told off at first sight */}
+          <Field label={t('first')} error={dirty && firstMissing ? t('firstRequired') : undefined}>
+            <Input
+              ref={firstRef}
+              value={first}
+              maxLength={NAME_MAX}
+              autoComplete="given-name"
+              onChange={(e) => setEdits((was) => ({ ...was, first: e.target.value }))}
+            />
           </Field>
           <Field label={t('last')}>
-            <Input value={last} maxLength={NAME_MAX} autoComplete="family-name" onChange={(e) => setLast(e.target.value)} />
+            <Input
+              value={last}
+              maxLength={NAME_MAX}
+              autoComplete="family-name"
+              onChange={(e) => setEdits((was) => ({ ...was, last: e.target.value }))}
+            />
           </Field>
         </form>
         <Field label={t('phone')} hint={canChange && !changing ? t('changeLead') : undefined}>
           <div className="flex items-center gap-2">
-            <Input value={formatPhone(me.phone)} readOnly className="flex-1 border-n-200 bg-n-50 tabular-nums hover:border-n-200" />
+            <Input
+              ref={phoneRef}
+              value={formatPhone(me.phone)}
+              readOnly
+              className="flex-1 border-n-200 bg-n-50 tabular-nums hover:border-n-200"
+            />
             {canChange && !changing && (
-              <Button variant="secondary" size="s" onClick={() => setChanging(true)}>
+              <Button ref={changeRef} variant="secondary" size="s" onClick={() => setChanging(true)}>
                 {t('change')}
               </Button>
             )}
@@ -114,12 +150,10 @@ function Profile({ me }: { me: Me }) {
         </Field>
         {changing && (
           <ChangePhoneBox
-            onDone={() => setChanging(false)}
-            onCancel={() => setChanging(false)}
-            onUnavailable={() => {
-              setChanging(false)
-              setChangeRefused(true)
-            }}
+            currentPhone={me.phone}
+            onDone={() => closeChange()}
+            onCancel={() => closeChange()}
+            onUnavailable={() => closeChange(true)}
           />
         )}
       </Section>
@@ -145,7 +179,7 @@ function Profile({ me }: { me: Me }) {
 /** Log out (C-46) and delete the account (C-47). */
 function AccountSection() {
   const t = useTranslations()
-  const { logOut, loggingOut } = useLogOut({ home: true })
+  const { logOut, loggingOut } = useLogOut()
   return (
     <Section title={t('profile.account')} lead={t('profile.accountLead')}>
       <div>

@@ -81,6 +81,8 @@ export interface AuthApiOptions {
   ownsBusiness?: boolean
   /** The api refuses a phone change (`phone_change_unavailable`) although `me` said it could. */
   phoneChangeRefused?: boolean
+  /** Someone else takes the new number between the code and its check (`phone_taken` at verify). */
+  takenAtVerify?: boolean
 }
 
 /**
@@ -99,6 +101,7 @@ export const authApi =
     logoutFails = false,
     ownsBusiness = false,
     phoneChangeRefused = false,
+    takenAtVerify = false,
   }: AuthApiOptions = {}) =>
   (): typeof fetch => {
     const accounts = new Map(people.map((p) => [p.phone, structuredClone(p)]))
@@ -173,6 +176,7 @@ export const authApi =
         return json({ resendAfterSec: resendSec, expiresInSec: 300 })
       }
       if (route === 'POST /me/phone/verify') {
+        if (takenAtVerify) return refuse(409, 'phone_taken')
         if (body.code !== code()) {
           wrong += 1
           return refuse(400, 'code_invalid', { attemptsLeft: 3 - wrong })

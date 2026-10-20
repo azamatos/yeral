@@ -124,6 +124,9 @@ export function useCodeSteps<TVerified>({ sendCode, verify: verifyOptions, onVer
   }
 }
 
+/** What `useCodeSteps` (and `useSignIn`) hand a screen: the state, the waits and the actions. */
+export type CodeSteps = ReturnType<typeof useCodeSteps<unknown>>
+
 /**
  * The sign-in's phone and code steps (`auth.sendCode`, `auth.verify`). `onFailed` gets a failure the step can't show
  * (the screen toasts it); `onVerified` the right code's answer: signed in, or "Is this you?" first, which keeps the

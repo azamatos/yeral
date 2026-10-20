@@ -80,6 +80,7 @@
       "hint": "{digits} digits. The SMS code comes to this number.",
       "codeLead": "We sent the code to <b>{phone}</b>.",
       "changeNumber": "Change number",
+      "same": "This is already your number.",
       "cancel": "Cancel",
       "codeLabel": "SMS code",
       "resent": "New code sent."

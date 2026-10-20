@@ -15,6 +15,7 @@ import { Route as LangSiteRouteImport } from './routes/$lang/_site'
 import { Route as LangSiteIndexRouteImport } from './routes/$lang/_site/index'
 import { Route as LangSiteAccountRouteRouteImport } from './routes/$lang/_site/account/route'
 import { Route as LangSiteLoginRouteImport } from './routes/$lang/_site/login'
+import { Route as LangSiteAccountIndexRouteImport } from './routes/$lang/_site/account/index'
 import { Route as LangSiteAccountProfileRouteImport } from './routes/$lang/_site/account/profile'
 
 const IndexRoute = IndexRouteImport.update({
@@ -46,6 +47,11 @@ const LangSiteLoginRoute = LangSiteLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => LangSiteRoute,
 } as any)
+const LangSiteAccountIndexRoute = LangSiteAccountIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LangSiteAccountRouteRoute,
+} as any)
 const LangSiteAccountProfileRoute = LangSiteAccountProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -59,13 +65,14 @@ export interface FileRoutesByFullPath {
   '/$lang/login': typeof LangSiteLoginRoute
   '/$lang/': typeof LangSiteIndexRoute
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
+  '/$lang/account/': typeof LangSiteAccountIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$lang': typeof LangSiteIndexRoute
-  '/$lang/account': typeof LangSiteAccountRouteRouteWithChildren
   '/$lang/login': typeof LangSiteLoginRoute
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
+  '/$lang/account': typeof LangSiteAccountIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -76,6 +83,7 @@ export interface FileRoutesById {
   '/$lang/_site/login': typeof LangSiteLoginRoute
   '/$lang/_site/': typeof LangSiteIndexRoute
   '/$lang/_site/account/profile': typeof LangSiteAccountProfileRoute
+  '/$lang/_site/account/': typeof LangSiteAccountIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,13 +94,14 @@ export interface FileRouteTypes {
     | '/$lang/login'
     | '/$lang/'
     | '/$lang/account/profile'
+    | '/$lang/account/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$lang'
-    | '/$lang/account'
     | '/$lang/login'
     | '/$lang/account/profile'
+    | '/$lang/account'
   id:
     | '__root__'
     | '/'
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
     | '/$lang/_site/login'
     | '/$lang/_site/'
     | '/$lang/_site/account/profile'
+    | '/$lang/_site/account/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LangSiteLoginRouteImport
       parentRoute: typeof LangSiteRoute
     }
+    '/$lang/_site/account/': {
+      id: '/$lang/_site/account/'
+      path: '/'
+      fullPath: '/$lang/account/'
+      preLoaderRoute: typeof LangSiteAccountIndexRouteImport
+      parentRoute: typeof LangSiteAccountRouteRoute
+    }
     '/$lang/_site/account/profile': {
       id: '/$lang/_site/account/profile'
       path: '/profile'
@@ -165,10 +182,12 @@ declare module '@tanstack/react-router' {
 
 interface LangSiteAccountRouteRouteChildren {
   LangSiteAccountProfileRoute: typeof LangSiteAccountProfileRoute
+  LangSiteAccountIndexRoute: typeof LangSiteAccountIndexRoute
 }
 
 const LangSiteAccountRouteRouteChildren: LangSiteAccountRouteRouteChildren = {
   LangSiteAccountProfileRoute: LangSiteAccountProfileRoute,
+  LangSiteAccountIndexRoute: LangSiteAccountIndexRoute,
 }
 
 const LangSiteAccountRouteRouteWithChildren =

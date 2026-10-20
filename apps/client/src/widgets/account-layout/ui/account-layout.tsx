@@ -1,14 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { formatPhone } from '@yeral/domain/phone'
 import { useSdk } from '@yeral/sdk/react'
-import { Avatar } from '@yeral/ui/avatar'
 import { cn } from '@yeral/ui/cn'
 import { LogOut, UserRound } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useLogOut } from '@/features/log-out'
-import { wrap } from '@/shared/ui'
+import { PersonMark, wrap } from '@/shared/ui'
 
 /** A place in the account aside (`.sn`): 40 high, 14/500, r10; the current one on tint; pills under 1024. */
 const navItem = cn(
@@ -22,13 +21,19 @@ const navItem = cn(
  * The account area (Account-Profile `.acc`): the client account aside (avatar 56, the name and phone, the account's
  * places, «Log out») beside the page. Under 1024 the aside becomes a row of pills above the page, without the person
  * and «Log out» (they are in the header's menu). My bookings and favourites join with their pages (slices 3 and 5).
+ * Nobody signed in any more (logged out here or in the header, the account deleted, the session ended elsewhere): Home.
  */
 export function AccountLayout({ children }: { children: ReactNode }) {
   const t = useTranslations('account')
   const lang = useLocale()
   const sdk = useSdk()
   const me = useQuery(sdk.me.get())
-  const { logOut, loggingOut } = useLogOut({ home: true })
+  const navigate = useNavigate()
+  const { logOut, loggingOut } = useLogOut()
+  const signedOut = me.data === null
+  useEffect(() => {
+    if (signedOut) void navigate({ to: '/$lang', params: { lang }, replace: true })
+  }, [signedOut, navigate, lang])
   const name = me.data ? (me.data.name ?? me.data.firstName) : null
 
   return (
@@ -37,13 +42,7 @@ export function AccountLayout({ children }: { children: ReactNode }) {
         <aside aria-label={t('mine')} className="flex max-w-65 min-w-0 flex-[1_1_240px] flex-col gap-5 max-md:max-w-none max-md:basis-full">
           {me.data && (
             <div className="flex items-center gap-3.5 px-3 max-md:hidden">
-              {me.data.firstName ? (
-                <Avatar name={me.data.firstName} size={56} aria-hidden />
-              ) : (
-                <span aria-hidden className="inline-flex size-14 flex-none items-center justify-center rounded-pill bg-a-50 text-a-600">
-                  <UserRound className="size-6" />
-                </span>
-              )}
+              <PersonMark firstName={me.data.firstName} size={56} />
               <div className="flex min-w-0 flex-col gap-0.5">
                 {name && <span className="text-[16px] leading-[22px] font-semibold break-words">{name}</span>}
                 <span className="text-dense text-n-600 tabular-nums">{formatPhone(me.data.phone)}</span>
