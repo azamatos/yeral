@@ -39,7 +39,7 @@ import type {
 import type {
   blockInputSchema,
   businessCancelSchema,
-  bookingFiltersSchema,
+  bookingExportQuerySchema,
   bookingListQuerySchema,
   calendarQuerySchema,
   complaintInputSchema,
@@ -657,8 +657,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       })
     },
     /** "Eksport (CSV)" (B-31): the file's address for the same filters, opened as a download (the owner and administrators). */
-    exportUrl: (slug: string, p: Params<typeof bookingFiltersSchema, 'tab' | 'lang'>) =>
-      w.bookings.export.$url({ param: { slug }, query: clean(p) as never }).toString(),
+    exportUrl: (slug: string, p: Omit<Params<typeof bookingExportQuerySchema, 'tab' | 'lang'>, 'codes'> & { codes?: string[] }) =>
+      w.bookings.export.$url({ param: { slug }, query: clean({ ...p, codes: p.codes?.join(',') }) as never }).toString(),
     /** The nearest four, a day's starts with who is free at each, and the 14-day strip; a specialist gets their own. */
     freeTimes: (slug: string, p: Params<typeof freeTimesQuerySchema, 'services'>) => {
       const query = clean({ ...p, services: p.services.join(',') })

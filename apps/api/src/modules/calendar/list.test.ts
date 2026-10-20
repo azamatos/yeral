@@ -41,11 +41,13 @@ describe('the bookings list (book B-30, B-31)', () => {
     status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
     staffId: string
     serviceId: string
-    holdUntil?: number
+    /** null: a request with no answer time (it runs out at its start). */
+    holdUntil?: number | null
     clientId?: string
+    start?: number
   }) {
     const code = `YR-79${String(++seq).padStart(4, '0')}`
-    const start = 1380 - seq * 15
+    const start = x.start ?? 1380 - seq * 15
     const [row] = await db
       .insert(bookings)
       .values({
@@ -63,7 +65,7 @@ describe('the bookings list (book B-30, B-31)', () => {
         source: 'phone',
         priceType: 'fixed',
         priceAmount: 100,
-        holdUntil: x.status === 'pending' ? new Date(x.holdUntil ?? DEMO_NOW + 3_600_000) : null,
+        holdUntil: x.status === 'pending' && x.holdUntil !== null ? new Date(x.holdUntil ?? DEMO_NOW + 3_600_000) : null,
       })
       .returning()
     await db.insert(bookingItems).values({
@@ -144,12 +146,30 @@ describe('the bookings list (book B-30, B-31)', () => {
       serviceId: haircut,
     })
     codes.ranOut = await booking({
-      name: '=HYPERLINK("x")',
+      name: '=Zz List("x")',
       date: addDays(TODAY, 4),
       status: 'pending',
       staffId: maralId,
       serviceId: manicure,
       holdUntil: DEMO_NOW - 60_000,
+    })
+    // a request with no answer time, still ahead: waiting, so on the upcoming tab
+    codes.noHold = await booking({
+      name: 'Zz List NoHold',
+      date: addDays(TODAY, 6),
+      status: 'pending',
+      staffId: aynaId,
+      serviceId: haircut,
+      holdUntil: null,
+    })
+    // late at night: a visit that starts after midnight on the business day (book Q-105)
+    codes.late = await booking({
+      name: 'Zz List Late',
+      date: addDays(TODAY, 7),
+      status: 'confirmed',
+      staffId: maralId,
+      serviceId: manicure,
+      start: 1450,
     })
   })
   beforeEach(async () => {
@@ -168,9 +188,9 @@ describe('the bookings list (book B-30, B-31)', () => {
     const maysa = await as(MAYSA)
     const codesOf = async (tab: string) => (await list(maysa, `tab=${tab}&q=Zz%20List`)).items.map((r) => r.code)
     expect(await codesOf('today')).toEqual([codes.today])
-    expect(await codesOf('upcoming')).toEqual([codes.ahead2, codes.ahead1])
+    expect(await codesOf('upcoming')).toEqual([codes.ahead2, codes.ahead1, codes.noHold, codes.late])
     expect(await codesOf('past')).toEqual([codes.past, codes.firstVisit])
-    const gone = (await list(maysa, 'tab=cancelled&q=YR-79')).items
+    const gone = (await list(maysa, 'tab=cancelled&q=Zz%20List')).items
     expect(gone.map((r) => [r.code, r.status, r.cancelledBy])).toEqual([
       [codes.ranOut, 'cancelled', 'system'],
       [codes.cancelled, 'cancelled', 'client'],
@@ -185,25 +205,28 @@ describe('the bookings list (book B-30, B-31)', () => {
     const found = async (query: string) => (await list(maysa, query)).items.map((r) => r.code)
     expect(await found(`tab=upcoming&q=${codes.ahead1!.slice(3)}`)).toEqual([codes.ahead1])
     expect(await found('tab=upcoming&q=zz%20list%20ahead')).toEqual([codes.ahead2, codes.ahead1])
+    // past the end: no rows, the count still right
+    expect((await list(maysa, 'tab=upcoming&q=zz%20list%20ahead&cursor=40')).total).toBe(2)
+    expect((await maysa.req(`${W}/bookings?lang=en&tab=today&cursor=-1`)).status).toBe(400)
     expect(await found(`tab=past&q=91${codes.past!.slice(-4)}`)).toEqual([codes.past])
-    expect(await found(`tab=upcoming&q=Zz%20List&staff=${aynaId}`)).toEqual([codes.ahead1])
-    expect(await found(`tab=upcoming&q=Zz%20List&service=${manicure}`)).toEqual([codes.ahead2])
+    expect(await found(`tab=upcoming&q=Zz%20List&staff=${aynaId}`)).toEqual([codes.ahead1, codes.noHold])
+    expect(await found(`tab=upcoming&q=Zz%20List&service=${manicure}`)).toEqual([codes.ahead2, codes.late])
     expect(await found(`tab=upcoming&q=Zz%20List&from=${addDays(TODAY, 2)}&to=${addDays(TODAY, 3)}`)).toEqual([codes.ahead1])
     const first = await list(maysa, 'tab=upcoming&q=Zz%20List&limit=1')
-    expect([first.items.length, first.total]).toEqual([1, 2])
+    expect([first.items.length, first.total]).toEqual([1, 4])
     expect((await list(maysa, `tab=upcoming&q=Zz%20List&limit=1&cursor=${first.cursor}`)).items.map((r) => r.code)).toEqual([codes.ahead1])
   })
 
   it('a specialist sees her own rows; another’s column is refused; no export for her', async () => {
     const maral = await as(MARAL)
-    expect((await list(maral, 'tab=upcoming&q=Zz%20List')).items.map((r) => r.code)).toEqual([codes.ahead2])
+    expect((await list(maral, 'tab=upcoming&q=Zz%20List')).items.map((r) => r.code)).toEqual([codes.ahead2, codes.late])
     expect((await maral.req(`${W}/bookings?lang=en&tab=upcoming&staff=${aynaId}`)).status).toBe(403)
     expect((await maral.req(`${W}/bookings/export?lang=en&tab=upcoming`)).status).toBe(403)
   })
 
   it('the export: the same rows as a CSV in the reader’s language, a formula typed as a name kept as text', async () => {
     const selbi = await as(SELBI)
-    const res = await t.app.request(`${W}/bookings/export?lang=en&tab=cancelled&q=YR-79`, { headers: { cookie: selbi.cookie } })
+    const res = await t.app.request(`${W}/bookings/export?lang=en&tab=cancelled&q=Zz%20List`, { headers: { cookie: selbi.cookie } })
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toContain('text/csv')
     expect(res.headers.get('content-disposition')).toMatch(/attachment; filename="bookings-glow-studio-cancelled-\d{4}-\d{2}-\d{2}\.csv"/)
@@ -214,9 +237,18 @@ describe('the bookings list (book B-30, B-31)', () => {
     expect(lines[0]).toBe('Code,Date,Time,Client,Phone,Services,Specialists,Source,Status,Cancelled by,Price,Amount')
     expect(lines).toHaveLength(3)
     expect(lines[1]).toContain(`${codes.ranOut},${addDays(TODAY, 4)},`)
-    expect(lines[1]).toContain(`"'=HYPERLINK(""x"")"`)
+    expect(lines[1]).toContain(`"'=Zz List(""x"")",993 65 91 `)
     expect(lines[1]).toContain(',Manicure,Maral,Phone,Cancelled,No answer in time,100 TMT,100')
-    const tk = await t.app.request(`${W}/bookings/export?lang=tk&tab=cancelled&q=YR-79`, { headers: { cookie: selbi.cookie } })
-    expect((await tk.text()).split('\r\n')[0]).toContain('Kod,Sene,Wagt,Müşderi')
+    expect(res.headers.get('x-total-count')).toBe('2')
+    // Turkmen and Russian spreadsheets split on semicolons
+    const tk = await t.app.request(`${W}/bookings/export?lang=tk&tab=cancelled&q=Zz%20List`, { headers: { cookie: selbi.cookie } })
+    expect((await tk.text()).split('\r\n')[0]).toContain('Kod;Sene;Wagt;Müşderi')
+    // the rows ticked, a time past midnight as the clock reads it
+    const ticked = await t.app.request(`${W}/bookings/export?lang=en&tab=upcoming&codes=${codes.late},${codes.ahead1}`, {
+      headers: { cookie: selbi.cookie },
+    })
+    const rows = (await ticked.text()).trim().split('\r\n').slice(1)
+    expect(rows.map((r) => r.split(',')[0])).toEqual([codes.ahead1, codes.late])
+    expect(rows[1]).toContain(',00:10–00:25,')
   })
 })

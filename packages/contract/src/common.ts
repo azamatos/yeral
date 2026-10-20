@@ -85,8 +85,12 @@ export function listOf<T extends z.ZodType>(item: T) {
   return z.object({ items: z.array(item), total: z.number().int().optional(), cursor: z.string().nullable().optional() })
 }
 
+/** A list's pages: `cursor` is where the next one starts (as the last page gave it). */
 export const cursorQuerySchema = z.object({
-  cursor: z.string().max(200).optional(),
+  cursor: z
+    .string()
+    .regex(/^\d{1,7}$/)
+    .optional(),
   limit: z.coerce.number().int().min(1).max(50).default(12),
 })
 

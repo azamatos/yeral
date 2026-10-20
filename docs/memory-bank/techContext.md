@@ -109,6 +109,9 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | the calendar (book B-16, B-17): a day or a week as a reader sees it (api) | `calendarView()` (`apps/api/src/modules/calendar/view.ts`); the day's line `daySummary() businessTotal()` (`@yeral/domain/pricing`) | api |
 | a team booking the actor may change (api): found, items, 404 or 403 by the permission it needs | `teamBooking(db, business, actor, code, { lock, permission })` | `apps/api/src/modules/calendar/repo.ts` |
 | the team's bookings list and its CSV (api): tabs, search, filters | `bookingList() exportBookings()`, `EXPORT_MAX` | `apps/api/src/modules/calendar/list.ts` |
+| a request run out before the jobs settle it, in SQL; the span's minute scale | `ranOutAt(now)` (beside `awaitingAnswer`), `spanMinuteAt(now)` | `apps/api/src/modules/bookings/repo.ts` |
+| a phone's digits in a search (api) | `phoneLike(column, q)` (beside `likeOf`) | `apps/api/src/modules/catalog/search.ts` |
+| rows grouped by a key, in their order | `groupBy()` | `apps/api/src/lib/group.ts` |
 | complaints (book B-28, api) | `fileComplaint() removeComplaint()` | `apps/api/src/modules/calendar/complaints.ts` |
 | internal statuses (book B-29): the presets, the limits, the lists (api) | `MAX_INTERNAL_STATUSES INTERNAL_STATUS_PRESETS INTERNAL_STATUS_ICONS INTERNAL_STATUS_COLORS` (`@yeral/domain/model`); `statusesOf() addStatus() updateStatus() deleteStatus() setInternalStatus()` (`apps/api/src/modules/settings/statuses.ts`) | `@yeral/domain/model`, api |
 | blocked time (book B-18): the dates a weekly one falls on; add, take away, list (api) | `blockDates() BLOCK_REPEAT_DAYS` (`@yeral/domain/hours`); `addBlock() removeBlock() blocksFor()` (`apps/api/src/modules/calendar/blocks.ts`); busy time: `loadBusy()` gives blocks as `blocked` | `@yeral/domain/hours`, api |

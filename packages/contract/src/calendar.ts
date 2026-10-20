@@ -318,6 +318,23 @@ export const bookingFiltersSchema = langQuerySchema.extend({
 })
 export const bookingListQuerySchema = bookingFiltersSchema.extend(cursorQuerySchema.shape)
 
+/** The export: the filters' rows, or the ones ticked (`codes=YR-1,YR-2`, the bulk bar's "Eksport (CSV)"). */
+export const bookingExportQuerySchema = bookingFiltersSchema.extend({
+  codes: z
+    .string()
+    .max(6000)
+    .transform((s) => [
+      ...new Set(
+        s
+          .split(',')
+          .map((c) => c.trim())
+          .filter(Boolean),
+      ),
+    ])
+    .pipe(z.array(bookingCodeSchema).min(1).max(500))
+    .optional(),
+})
+
 export const bookingRowSchema = z
   .object({
     code: bookingCodeSchema,

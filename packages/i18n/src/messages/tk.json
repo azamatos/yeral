@@ -11,10 +11,10 @@
   },
   "sources": {
     "web": "Onlaýn",
-    "app": "Programma",
+    "app": "Onlaýn",
     "phone": "Telefon",
     "walkin": "Gelip",
-    "ai": "Kömekçi"
+    "ai": "Onlaýn"
   },
   "cancelledBy": {
     "client": "Müşderi",

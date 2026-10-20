@@ -24,7 +24,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { itemsOfBookings, stateOf } from '../bookings/repo'
 import { teamItemOf, teamPriceOf } from '../bookings/team-view'
-import { likeOf, wordStartLikes } from '../catalog/search'
+import { likeOf, phoneLike, wordStartLikes } from '../catalog/search'
 import { rulesOf } from '../settings/service'
 import { alertNotesOf, avgCheckOf, bookingsByIds, clientFacts, doneAt, ownOnly, phoneOnlyOf, withStaff, type ClientFacts } from './facts'
 
@@ -43,16 +43,10 @@ const USUAL_MAX = 3
 /** "See revenue": the owner sees sums; administrators and specialists don't on the clients pages. */
 const seesSums = (actor: Actor) => scopeOf(actor, 'revenue') === 'all'
 
-/**
- * A name with the letters typed, or a number with the digits typed anywhere in it; one typed with its country code
- * ("+993 65…") is read from after the code.
- */
+/** A name with the letters typed, or a number with the digits typed (`phoneLike`). */
 function searchOf(q: string | undefined): SQL | undefined {
   if (!q) return undefined
-  if (/^[\d\s()+-]+$/.test(q)) {
-    const digits = q.startsWith('+') ? nationalDigits(q) : q.replace(/\D/g, '')
-    return digits ? sql`substr(${clients.phone}, ${COUNTRY_PREFIX.length + 1}) like ${likeOf(digits)}` : undefined
-  }
+  if (/^[\d\s()+-]+$/.test(q)) return phoneLike(clients.phone, q)
   return ilike(clients.name, likeOf(q))
 }
 

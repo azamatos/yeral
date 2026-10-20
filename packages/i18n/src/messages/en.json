@@ -11,10 +11,10 @@
   },
   "sources": {
     "web": "Online",
-    "app": "App",
+    "app": "Online",
     "phone": "Phone",
     "walkin": "Walk-in",
-    "ai": "Assistant"
+    "ai": "Online"
   },
   "cancelledBy": {
     "client": "Client",

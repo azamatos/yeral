@@ -6,7 +6,8 @@
 import type { SearchQuery } from '@yeral/contract/catalog'
 import { boundingBox, distanceM, popularity } from '@yeral/domain/geo'
 import { today } from '@yeral/domain/time'
-import { and, between, eq, gte, ilike, or, sql, type SQL } from 'drizzle-orm'
+import { COUNTRY_PREFIX, nationalDigits } from '@yeral/domain/phone'
+import { and, between, eq, gte, ilike, or, sql, type AnyColumn, type SQL } from 'drizzle-orm'
 import { anyTextLike } from '../../db/localized'
 import { businesses, categories, services } from '../../db/schema'
 import type { Deps } from '../../deps'
@@ -17,6 +18,16 @@ const escapeLike = (q: string) => q.replace(/[\\%_]/g, (ch) => `\\${ch}`)
 
 /** Anywhere in the text (search). */
 export const likeOf = (q: string) => `%${escapeLike(q)}%`
+
+/**
+ * A number with the digits typed anywhere in its national part; one typed with "+" and the country code is read from
+ * after the code. Undefined when what's typed isn't digits (a name, a code).
+ */
+export function phoneLike(column: AnyColumn, q: string): SQL | undefined {
+  if (!/^[\d\s()+-]+$/.test(q)) return undefined
+  const digits = q.trim().startsWith('+') ? nationalDigits(q) : q.replace(/\D/g, '')
+  return digits ? sql`substr(${column}, ${COUNTRY_PREFIX.length + 1}) like ${likeOf(digits)}` : undefined
+}
 
 /** At the start of a word (suggestions): `ma` finds "Manikýur", not "massažy" inside "Arka massažy". */
 export const wordStartLikes = (q: string) => [`${escapeLike(q)}%`, `% ${escapeLike(q)}%`] as const

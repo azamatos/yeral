@@ -10,7 +10,7 @@ import {
   blockListSchema,
   blockParamSchema,
   blocksQuerySchema,
-  bookingFiltersSchema,
+  bookingExportQuerySchema,
   bookingListQuerySchema,
   bookingListSchema,
   businessCancelSchema,
@@ -156,9 +156,13 @@ const exportRoute = createRoute({
   path: '/w/{slug}/bookings/export',
   tags,
   summary: '"Eksport (CSV)": the rows the same filters find, in the reader\'s language (the owner and administrators)',
-  request: { params: workspaceParamSchema, query: bookingFiltersSchema },
+  request: { params: workspaceParamSchema, query: bookingExportQuerySchema },
   responses: {
-    200: { description: 'The bookings as a CSV file', content: { 'text/csv': { schema: z.string() } } },
+    200: {
+      description: 'The bookings as a CSV file; `X-Total-Count` is how many matched (the file holds 10,000 at most)',
+      headers: z.object({ 'X-Total-Count': z.string() }),
+      content: { 'text/csv': { schema: z.string() } },
+    },
     400: errors[400],
     ...denied,
   },
@@ -173,8 +177,9 @@ export const calendarRoutes = new OpenAPIHono<AppEnv>()
     const { slug } = c.req.valid('param')
     const { business, actor } = await requireMember(c, slug)
     const q = c.req.valid('query')
-    const csv = await exportBookings(c.var.deps, business, actor, q)
+    const { csv, total } = await exportBookings(c.var.deps, business, actor, q)
     return c.body(csv, 200, {
+      'X-Total-Count': String(total),
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': `attachment; filename="bookings-${slug}-${q.tab}-${today(c.var.deps.now())}.csv"`,
     })
