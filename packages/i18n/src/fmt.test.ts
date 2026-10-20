@@ -162,6 +162,12 @@ describe('message catalogues', () => {
     expect(say('ru', 'all', 10)).toBe('У вас уже 10 запросов ждут ответа. Дождитесь ответов или отмените один.')
   })
 
+  it('an undo that failed says which of the four reasons (ROUND6 A6)', () => {
+    const t = createT('tk')
+    expect(t('undoFailed', { reason: t('undoReasons.slot_taken') })).toBe('Yzyna alyp bolmady — bu wagt eýýäm başga müşderä berildi.')
+    expect(t('undoReasons.request_expired')).toBe('haýyşyň jogap wagty gutardy')
+  })
+
   it('no empty messages', () => {
     for (const locale of LOCALES) {
       const empty = keys(messages[locale]).filter(

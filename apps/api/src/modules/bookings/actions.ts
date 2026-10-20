@@ -108,12 +108,18 @@ export async function cancelBooking(deps: Deps, b: BookingRow, reason?: string):
   })
 }
 
-/** "Yzyna al": undo the client's own cancel for a few minutes, if the time is still free. */
+/**
+ * "Yzyna al": undo the client's own cancel for a few minutes, if the time is still free. When it can't come back, the
+ * error says which of the four reasons the screen shows (ROUND6 A6): the time was taken (`slot_taken`), the class is
+ * full (`session_full`), the visit has started (`already_started`), the request's answer time ran out
+ * (`request_expired`). Past the 5 minutes there's no "Yzyna al" at all (`restore_expired`).
+ */
 export async function restoreBooking(deps: Deps, b: BookingRow): Promise<BookingRow> {
   const now = deps.now()
   const ok =
     b.status === 'cancelled' && b.cancelledBy === 'client' && !!b.cancelledAt && now - b.cancelledAt.getTime() < RESTORE_MINUTES * 60_000
-  if (!ok || now >= epochOf(b.date, b.start)) throw new ApiError('restore_expired')
+  if (!ok) throw new ApiError('restore_expired')
+  if (now >= epochOf(b.date, b.start)) throw new ApiError('already_started')
   // a withdrawn or replaced move stays withdrawn: the client asks again
   if (b.rescheduleOf) throw new ApiError('invalid_status')
   const status = b.confirmedAt ? 'confirmed' : 'pending'
@@ -129,7 +135,7 @@ export async function restoreBooking(deps: Deps, b: BookingRow): Promise<Booking
         { status, at: new Date(now) },
       )
       // a request whose hold ran out meanwhile can't come back
-      if (status === 'pending' && !row.holdUntil) throw new ApiError('restore_expired')
+      if (status === 'pending' && !row.holdUntil) throw new ApiError('request_expired')
       await emit(tx, { type: 'booking.updated', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
       return row
     })

@@ -1150,11 +1150,9 @@ flowchart TD
 
 > Open question Q-266: undo after a cancel that withdrew a waiting move.
 
-**Code differs**
+- Each reason comes back as its own error: `slot_taken`, `session_full`, `already_started`, `request_expired`; past the 5 minutes `restore_expired` (code: `bookings/actions.ts`). The texts are `undoFailed` with `undoReasons.{code}` (`@yeral/i18n`).
 
-- "Visit started", "answer time ran out" and "5 minutes passed" all come back as one error, "Yzyna almak wagty geçdi." (`restore_expired`); A6 needs each reason told apart. "Time taken" and "no seats" are separate already (code: `bookings/actions.ts`).
-
-**Status:** Design: drawn (Account-Bookings · `view=undoFailed`, `undo`; Mobile 12) · Code: partly — undo built; the reasons aren't all told apart.
+**Status:** Design: drawn (Account-Bookings · `view=undoFailed`, `undo`; Mobile 12) · Code: built (api).
 
 ### C-30 · Move an appointment to another time
 

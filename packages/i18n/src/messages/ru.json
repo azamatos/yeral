@@ -54,6 +54,13 @@
     "cannot_do": "Мы не оказываем эту услугу",
     "other": "Другая причина"
   },
+  "undoFailed": "Не удалось вернуть — {reason}.",
+  "undoReasons": {
+    "slot_taken": "это время уже отдали другому клиенту",
+    "session_full": "на занятии не осталось мест",
+    "already_started": "время записи уже началось",
+    "request_expired": "время ответа на запрос истекло"
+  },
   "sms": {
     "code": "Код {brand}: {code}",
     "confirmed": "{brand}: {business} подтвердил вашу запись. {weekday}, {date}, {time}. Изменить: {link}",

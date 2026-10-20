@@ -1,4 +1,4 @@
-import { addDays, epochOf } from '@yeral/domain/time'
+import { addDays, epochOf, nowMin, today } from '@yeral/domain/time'
 import { and, eq, inArray } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
@@ -146,6 +146,32 @@ describe('client bookings', () => {
     await b.req(`/v1/me/bookings/${json.code}/cancel`, { body: {} })
     t.clock.now += 6 * MIN
     expect((await b.req(`/v1/me/bookings/${json.code}/restore`, { method: 'POST' })).json.error.code).toBe('restore_expired')
+  })
+
+  it('an undo that fails says why: the answer time ran out, the visit started (ROUND6 A6)', async () => {
+    const b = browser(t.app)
+    const { me } = await b.login('+99365111044', 'Gülälek')
+    const sent = await request(b, 'glow-studio-parahat')
+    expect(sent.status, JSON.stringify(sent.json)).toBe(201)
+    const { code } = sent.json
+    try {
+      await b.req(`/v1/me/bookings/${code}/cancel`, { body: {} })
+      // a minute after the cancel, the request's answer time has run out
+      t.clock.now += MIN
+      await db
+        .update(bookings)
+        .set({ holdUntil: new Date(t.clock.now - 1) })
+        .where(eq(bookings.code, code))
+      expect((await b.req(`/v1/me/bookings/${code}/restore`, { method: 'POST' })).json.error.code).toBe('request_expired')
+      // the visit has started, still within the 5 minutes
+      await db
+        .update(bookings)
+        .set({ date: today(t.clock.now), start: nowMin(t.clock.now) - 1, end: nowMin(t.clock.now) + 59 })
+        .where(eq(bookings.code, code))
+      expect((await b.req(`/v1/me/bookings/${code}/restore`, { method: 'POST' })).json.error.code).toBe('already_started')
+    } finally {
+      await db.delete(bookings).where(eq(bookings.userId, me.id))
+    }
   })
 
   it('an instant business confirms at once and sends the confirmation SMS', async () => {
