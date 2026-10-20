@@ -5,7 +5,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { CircleHelp, ListFilter, Plus, Search } from 'lucide-react'
-import { expect } from 'storybook/test'
+import { expect, waitFor } from 'storybook/test'
 import { brand } from '../../brand'
 import { Button } from '../button'
 import { WorkspaceSwitcher } from '../workspace-switcher'
@@ -32,6 +32,15 @@ export const Default: Story = {
   globals: { viewport: { value: 'xl' } },
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('heading', { level: 1, name: 'Bookings' })).toBeVisible()
+  },
+}
+
+/** A new page (`focusKey`, its address): the title takes focus, so a screen reader starts there. */
+export const FocusOnNewPage: Story = {
+  globals: { viewport: { value: 'xl' } },
+  args: { focusKey: '/w/glow-studio/bookings' },
+  play: async ({ canvas }) => {
+    await waitFor(() => expect(canvas.getByRole('heading', { level: 1, name: 'Bookings' })).toHaveFocus())
   },
 }
 
