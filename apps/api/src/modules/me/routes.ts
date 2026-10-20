@@ -124,6 +124,9 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(phoneCodeRoute, async (c) => {
     const user = requireUser(c)
+    // with the code on the screen the number wouldn't be shown to be theirs, and a change merges the businesses'
+    // records of it into the account (book Q-036)
+    if (c.var.deps.codeOnScreen) throw new ApiError('phone_change_unavailable')
     const { phone } = c.req.valid('json')
     const [taken] = await c.var.deps.db.select({ id: users.id }).from(users).where(eq(users.phone, phone))
     if (taken) throw new ApiError('phone_taken')
@@ -140,6 +143,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(phoneVerifyRoute, async (c) => {
     const user = requireUser(c)
+    if (c.var.deps.codeOnScreen) throw new ApiError('phone_change_unavailable')
     const { phone, code } = c.req.valid('json')
     const { userId } = await checkCode(c.var.deps, { phone, purpose: 'change_phone', code })
     if (userId !== user.id) throw new ApiError('code_expired')

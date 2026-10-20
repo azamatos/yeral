@@ -13,7 +13,7 @@ export const sendCodeResponseSchema = z.object({
   /** The resend timer ("0:59"). */
   resendAfterSec: z.number().int(),
   expiresInSec: z.number().int(),
-  /** The code to show on the screen while no SMS reaches a phone (the first launch, book Q-036, F-200); absent once SMS go out. */
+  /** The code to show on the screen at the first launch, when no SMS reaches a phone (book Q-036, F-200); absent otherwise. */
   code: z
     .string()
     .regex(/^\d{4}$/)

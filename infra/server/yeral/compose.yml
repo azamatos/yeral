@@ -40,6 +40,9 @@ services:
       PORT: '3004'
       # Caddy sets X-Forwarded-For to the caller's address and drops what the caller sent
       TRUSTED_IP_HEADER: x-forwarded-for
+      # the first launch's sign-in code on the screen (book Q-036): anyone who types a number signs in as it, so it
+      # goes on only when the first launch opens (operations.md)
+      SIGN_IN_CODE_ON_SCREEN: 'false'
     depends_on:
       postgres:
         condition: service_healthy

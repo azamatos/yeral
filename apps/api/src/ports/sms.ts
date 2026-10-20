@@ -13,10 +13,7 @@ export interface SmsMessage {
 
 export interface SmsPort {
   send(message: SmsMessage): Promise<void>
-  /**
-   * Whether a message reaches the phone. While none does (the first launch, book Q-036, F-200), a sign-in code is shown
-   * on the screen instead; a gateway that delivers turns that off.
-   */
+  /** Whether a message reaches the phone: a sign-in code is shown on the screen only while none does (`codeOnScreen`). */
   readonly delivers: boolean
 }
 

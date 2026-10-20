@@ -45,6 +45,7 @@
     "too_many_attempts": "Synanyşyk köp boldy. {retryAfterSec} sekuntdan soň gaýtalaň.",
     "resend_too_soon": "Täze kody {retryAfterSec} sekuntdan soň iberip bolar.",
     "phone_taken": "Bu belgi başga hasaba degişli.",
+    "phone_change_unavailable": "Belgini häzirlikçe üýtgedip bolmaýar.",
     "owns_workspace": "Siz Ýeral-da biznesiň eýesi. Hasabyňyzy pozmazdan öň, ony ýapmagy Ýeral toparyndan haýyş ediň.",
     "already_on_team": "Bu belgi eýýäm toparda ýa-da oňa açyk çakylyk bar.",
     "invite_expired": "Çakylygyň möhleti geçdi. Täzesini soraň.",

@@ -45,6 +45,7 @@
     "too_many_attempts": "Too many tries. Try again in {retryAfterSec} s.",
     "resend_too_soon": "You can get a new code in {retryAfterSec} s.",
     "phone_taken": "This number belongs to another account.",
+    "phone_change_unavailable": "You can't change your number yet.",
     "owns_workspace": "You own a business on Ýeral. Ask the Ýeral team to close it before you delete your account.",
     "already_on_team": "This number is already on the team or has an open invite.",
     "invite_expired": "This invite has expired. Ask for a new one.",

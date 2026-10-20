@@ -13,6 +13,11 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   /** The header our edge sets with the caller's IP: `x-forwarded-for` (behind Caddy, which writes it). */
   TRUSTED_IP_HEADER: z.enum(['x-forwarded-for']).optional(),
+  /**
+   * The first launch's sign-in (book Q-036, F-200): the code comes back for the screen, as no SMS reaches a phone. Off
+   * unless set; refused with an SMS gateway that delivers.
+   */
+  SIGN_IN_CODE_ON_SCREEN: z.enum(['true', 'false']).default('false'),
 })
 
 export interface Config {
@@ -22,6 +27,7 @@ export interface Config {
   mediaBaseUrl: string
   logLevel: 'debug' | 'info' | 'warn' | 'error'
   trustedIpHeader?: TrustedIpHeader
+  codeOnScreen: boolean
 }
 
 export function loadConfig(source: Record<string, unknown>): Config {
@@ -34,5 +40,6 @@ export function loadConfig(source: Record<string, unknown>): Config {
     mediaBaseUrl: (env.MEDIA_BASE_URL ?? `${site.urls.api}/media`).replace(/\/$/, ''),
     logLevel: env.LOG_LEVEL,
     trustedIpHeader: env.TRUSTED_IP_HEADER,
+    codeOnScreen: env.SIGN_IN_CODE_ON_SCREEN === 'true',
   }
 }

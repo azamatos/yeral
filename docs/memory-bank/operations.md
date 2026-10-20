@@ -76,6 +76,9 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
   writes a JSON access log.
 - Sign-in codes never reach a log: the SMS log adapter writes "(sign-in code hidden)" for them.
 - SMS: every environment writes them to the log (`ports/sms.ts`) until a gateway comes with the Turkmenistan launch.
+- The first launch's sign-in code on the screen: `SIGN_IN_CODE_ON_SCREEN=true` (off unless set; the api refuses it
+  with a gateway that delivers). With it on, anyone who types a number signs in as it (book Q-036 and its concern), so
+  it's set only when the first launch opens; the server's `compose.yml` keeps it `false` until then.
 - Photos: on the server's disk behind a storage port (P2 step 4); demo photos are served only outside production.
 
 ## The production-like stack (since M2g)
