@@ -1,6 +1,6 @@
 {
   "name": "@yeral/business",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Ýeral Business: the business workspace at business.<domain> (Vite SPA + TanStack Router, installable later)",
   "type": "module",
