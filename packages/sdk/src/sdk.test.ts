@@ -170,7 +170,7 @@ describe('sdk', () => {
 
   it('every query hands TanStack’s abort signal to its request', async () => {
     const f = fixture(() => json(200, { items: [], cursor: null }))
-    const { me, catalog, availability, bookings, team, links } = f.sdk
+    const { me, catalog, availability, bookings, team, settings, links } = f.sdk
     const id = '0b6f1a4e-6a43-4f8e-9a51-3d3f1c3b9a10'
     const queries = [
       me.get(),
@@ -189,6 +189,7 @@ describe('sdk', () => {
       team.myInvites(),
       team.invite('a-long-random-token-from-the-link'),
       team.list('glow-studio'),
+      settings.rules('glow-studio'),
       links.view('a-long-random-token-from-the-sms-link', 'tk'),
     ]
     for (const q of queries) await f.queryClient.fetchQuery(q as never)
@@ -276,6 +277,15 @@ describe('live events', () => {
       ['workspaces'],
       ['invites'],
       ['team', 'glow-studio'],
+    ])
+  })
+
+  it('a settings change refreshes the settings, the page, the free times and the switcher', () => {
+    expect(staleKeys({ type: 'business.updated', business: 'glow-studio', bookingCode: null })).toEqual([
+      ['settings', 'glow-studio'],
+      ['business', 'glow-studio'],
+      ['availability', 'glow-studio'],
+      ['workspaces'],
     ])
   })
 })

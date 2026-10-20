@@ -59,8 +59,8 @@ export const eventRoutes = new OpenAPIHono<AppEnv>().openapi(eventsRoute, async 
     own.length
       ? sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${events.bookingId} and ${inArray(bookingItems.staffId, own)})`
       : undefined,
-    // everyone on a team hears when the team changes (the switcher, the team list)
-    all.length ? and(eq(events.type, 'team.changed'), inArray(events.businessId, all)) : undefined,
+    // everyone on a team hears when the team or the business's settings change (the switcher, the team list, who answers)
+    all.length ? and(inArray(events.type, ['team.changed', 'business.updated']), inArray(events.businessId, all)) : undefined,
   )
   const rows = await db
     .select({ e: events, slug: businesses.slug })

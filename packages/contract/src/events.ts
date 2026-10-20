@@ -20,6 +20,8 @@ export const EVENT_TYPES = [
   'review.deleted',
   /** Someone joined, declined, left or was invited, removed or changed: the team and the switcher refresh. */
   'team.changed',
+  /** The business changed its settings (book B-37–B-43): its page, free times, settings and the switcher refresh. */
+  'business.updated',
 ] as const
 export type EventType = (typeof EVENT_TYPES)[number]
 

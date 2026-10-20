@@ -19,6 +19,7 @@ import { catalogRoutes } from './modules/catalog/routes'
 import { eventRoutes } from './modules/events/routes'
 import { healthRoutes } from './modules/health/routes'
 import { meRoutes } from './modules/me/routes'
+import { settingsRoutes } from './modules/settings/routes'
 import { teamRoutes } from './modules/team/routes'
 import { createLogger } from './ports/log'
 import { build } from './version'
@@ -82,6 +83,7 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     .route('/v1', linkRoutes)
     .route('/v1', eventRoutes)
     .route('/v1', teamRoutes)
+    .route('/v1', settingsRoutes)
 
   app.get('/version.json', (c) => c.json({ app: 'api', ...build }))
   app.doc31('/openapi.json', {

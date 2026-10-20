@@ -432,6 +432,7 @@ describe('account', () => {
         '/v1/w/{slug}/team/{staffId}/remove',
         '/v1/w/{slug}/team/{staffId}/reactivate',
         '/v1/w/{slug}/leave',
+        '/v1/w/{slug}/settings/rules',
       ].sort(),
     )
   })

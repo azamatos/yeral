@@ -51,9 +51,15 @@ Who may call: catalogue, search, places and free times are public (cacheable exc
 
 ## Business and CMS endpoints
 
-Business workspace (`/v1/biz/...`, M5): calendar, requests, bookings, clients, services, team, roles, rules, hours,
-profile, branches — permissions and redaction per ADR 0018. CMS (`/v1/admin/...`, M6). Their schemas join the contract
-with their milestones.
+The business workspace lives under `/v1/w/:slug/…` (P2 step 4): the team above, then settings, calendar, requests,
+bookings, clients, services, hours and the profile, each checked against the fixed permission table (ADR 0025). The
+CMS (`/v1/admin/...`, P2 step 5) follows. Their schemas join the contract as they're built.
+
+| Area | Endpoint | Schemas (`@yeral/contract/…`) |
+|---|---|---|
+| Booking rules | `GET`/`PATCH /v1/w/:slug/settings/rules` (owner, administrators; book B-41, B-42) | `settings`: `bookingRules`, `bookingRulesUpdate` |
+
+A settings change writes `business.updated`, which everyone on the team hears.
 
 ## Notifications the api sends
 
