@@ -33,7 +33,7 @@ the next iterations. The round-1 words and components hold (ExampleBadge, Langua
    (States tile 01).
 6. Categories: the launch categories that take appointments, with these names and one example line each: Beauty ·
    Barbershop · Nails · Spa & massage · Dentist · Health · Fitness · Lessons · Auto · Pets · Home services (11 tiles;
-   Restaurant and Café & tea house come later). A tile opens /c/{category}.
+   Restaurant and Café & tea house come later). A tile opens its category page (/en/c/{category}).
 7. How it works: Search · Pick a time · Get confirmed, with no tables or classes and no SMS promise: step 3 says the
    business confirms and the client sees it in My bookings, where they can change or cancel it.
 8. The Ýeral Business block, in B-Landing's words: free for everyone (drop "Free for solo specialists" and the
@@ -41,8 +41,8 @@ the next iterations. The round-1 words and components hold (ExampleBadge, Langua
    (the shared demo workspace, without signing in). Remove the app download block ("Ýeral on your phone"): native
    apps come later.
 9. Footer: For clients (Search · Categories · My bookings) · For business (Ýeral Business · Log in) · Ýeral (About ·
-   Help centre · Contact Ýeral) · © 2026 Ýeral · Privacy policy · Terms of use. No Prices link, no Language column
-   while the market has one language, no city name anywhere in the copy.
+   Help · Contact Ýeral; the help centre comes later) · © 2026 Ýeral · Privacy policy · Terms of use. No Prices
+   link, no Language column while the market has one language, no city name anywhere in the copy.
 10. Mobile: frame 1 (Home) and the full-screen search sheet (What, then Where, then When) with the same changes,
     including the location-unknown banner. Check the hero, cards, tiles, the business block and the footer with
     Russian-length text (about 30% longer) and note what wraps.

@@ -2,8 +2,9 @@
 
 - Claude Design drew the four fix prompts (`docs/product/prompts/p1-round-3-fixes.md`) one after another; the export
   (v0.6 rounds 3.1–3.4) is committed with this note. Each was checked against its prompt and the book by a separate
-  checker: every instruction is on its boards; 3.1 and 3.3 need nothing.
-- Round 3.5 (written, not drawn) collects what's left: demo facts and one name per client on staff screens (3.2),
+  checker: every instruction is on its boards; 3.3 needs nothing, 3.1 only three small ones.
+- Round 3.5 (written, not drawn) collects what's left: demo facts, one name per client record on staff screens and
+  reviewers back to first name + initial (3.2; prompt 3.2 had wrongly made reviews show full names),
   the yearly special day past midnight, the hours list without a week cap and a waiting request declined, not
   cancelled (3.4), and three small ones (3.1).
 - Round 4a.1 (Home, `prompts/p1-round-4a.md`) is written: Home in English with appointments only (11 categories, no

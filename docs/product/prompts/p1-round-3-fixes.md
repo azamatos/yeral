@@ -135,13 +135,15 @@ When done, add a short "v0.6 · round 3.4" entry to the CHANGELOG.
 
 ## Check of rounds 3.1–3.4 (20.10.2026)
 
-Every instruction of the four is on the boards it names, and 3.1 and 3.3 need nothing. What's left goes into one short
-prompt, 3.5:
+Every instruction of the four is on the boards it names; 3.3 needs nothing and 3.1 only three small ones. What's left
+goes into one short prompt, 3.5:
 
 - **3.2, demo facts and names:** Mähri G.'s evening request also shows at the 11:20 day clock, before it's sent; her old
   16:00 Manicure request survives on B-Team and B-Settings; one client record shows a full name on its card and "Gülälek
-  N." everywhere else; Jemal S. is missing from page 1 of the client list; business/README.md §28.7 still gives
-  reviewers as first name + initial.
+  N." everywhere else; Jemal S. is missing from page 1 of the client list. Prompt 3.2 itself was wrong on one point:
+  it said staff screens show full names, so B-Reviews and the DS review samples now show "Aýjemal Gurbanowa", but a
+  review shows its writer's account name with the surname's initial, also to the business (07b B-53, Q-156), and an
+  account's name never fills the business's client record.
 - **3.4, against the book:** a yearly special day past midnight is checked only against this year's weekday (chapter
   9, "Q-211, B-40, B-24 (how)"); three notes cap the hours list at a week, where the book asks about every booking ahead
   ("B-39, B-40, Q-211 (how)"); the save toast cancels a waiting request that the book declines.
@@ -149,8 +151,8 @@ prompt, 3.5:
   and B-Services, BusinessStatusBanner's Hidden story in COMPONENTS.md.
 - **Noted, not drawn again:** the designer's choices beyond the lists agree with the book (chapter 9, 20.10.2026,
   "Design rounds 3.1–3.4"). Category search by hidden words (tutor → Lessons) needs keywords the seed doesn't have; it
-  waits for the CMS catalogue (F-181). The address form has Street (120) and Floor, room (40); the contract's endpoint
-  follows the design when it's built.
+  waits for the CMS catalogue (F-181). The address form has Street (120) and Floor, room (40); the profile endpoint (built,
+  #75) has no floor and room yet: a **Code differs** line on F-099.
 
 ## Prompt 3.5 — demo facts, names and the hours list
 
@@ -163,11 +165,13 @@ Round 3.5 of the design pass (export v0.6): the last small fix pass on the busin
    booking is "—", with no timer.
 2. "Today 16:00–17:00 · Manicure · Maral" is Şemşat K.'s request on B-Team too (Maral's upcoming list) and in
    B-Settings' AffectedBookingsList.
-3. One client, one name on every staff screen: Gülälek Nurmuhammedowa, Ogulnabat Çaryýewa and Döwlet Berdiýew as
-   B-Client saves them, also on B-Clients, B-Calendar, B-Bookings, B-Mobile and DS · Business patterns ("belongs to
-   …"); B-Settings' "Aýjemal G." becomes "Aýjemal Gurbanowa". Other clients keep their saved names as drawn. First
-   name + initial is only for the client site: say so in business/README.md §28.7, which still gives reviewers as
-   first name + initial.
+3. Names. A client record shows one saved name wherever it appears on a staff screen (lists, cards, calendar,
+   bookings, requests, the team's and settings' booking lists, toasts and their DS samples, on every business board,
+   B-Mobile and the DS boards): Gülälek Nurmuhammedowa, Ogulnabat Çaryýewa and Döwlet Berdiýew as B-Client saves
+   them, and Aýjemal Gurbanowa (B-Settings still has "Aýjemal G."). Other clients keep their saved names as drawn.
+   A review is different: it shows its writer's account name with the surname's initial ("Aýjemal G.", "Gülälek
+   N."), to the business too, since an account's name never fills the business's record. Put that back on B-Reviews
+   and every review sample on the DS boards (round 3.2 changed them); §28.7 stays as it is.
 4. Page 1 of the client list (B-Clients, B-Mobile 9a, DS section 03) includes Jemal S. (3 visits, last visit 12 Oct,
    Total 270 TMT, today 13:00 Pedicure · Maral), between Gözel A. and Şemşat K. Ogulşat M.'s Friday 19:00 request in
    B-Settings has a timer within the 30-min hold and shows as her Next booking on B-Clients.
@@ -187,5 +191,5 @@ When done, add a short "v0.6 · round 3.5" entry to the CHANGELOG.
 ```
 
 What to check afterwards: no Mähri request at the day clock; Şemşat K. on B-Team and B-Settings; one name per client
-on every staff screen and §28.7; Jemal S. on page 1; the yearly past-midnight check; no week cap in the notes, the
+on every staff screen, reviewers as first name + initial; Jemal S. on page 1; the yearly past-midnight check; no week cap in the notes, the
 count per specialist; "declined" for the request; the three small ones.
