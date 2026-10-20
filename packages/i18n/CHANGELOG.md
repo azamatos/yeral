@@ -1,5 +1,47 @@
 # @yeral/i18n
 
+## 0.3.0
+
+### Minor Changes
+
+- [#86](https://github.com/azamatos/yeral/pull/86) [`46a5546`](https://github.com/azamatos/yeral/commit/46a55461a72145e74900610f8714ea24eeb88cdc) Thanks [@azamatos](https://github.com/azamatos)! - A business that moves tells its clients (book Q-215): when the owner or an administrator changes the address line,
+  street or city, every waiting request and confirmed visit ahead gets an SMS with the new address, 10 minutes after the
+  last change (a quick fix makes one SMS, a move and back none; a visit sooner hears it 30 minutes before, or at once).
+  It goes whatever the client's SMS switches; a reminder that goes first says "new address" instead. The business page
+  adds `movedAt` ("New address" for 30 days; a move back clears it), and a booking ahead adds it once its SMS went.
+  Migration 0026 adds `bookings.address_told`, `businesses.moved_at` and `moved_from`.
+
+- [#104](https://github.com/azamatos/yeral/pull/104) [`7bfaf2b`](https://github.com/azamatos/yeral/commit/7bfaf2b093fea7ad3885342de2fe6d9960f417bd) Thanks [@azamatos](https://github.com/azamatos)! - The business's bookings list (book B-30, B-31): the tabs Today, Upcoming, Past and Cancelled (with who cancelled, a
+  request that ran out included), searched by booking code, client or number, filtered by specialist, service and
+  dates; a specialist sees their own. The owner and administrators export the same rows as a CSV in their language.
+
+- [#103](https://github.com/azamatos/yeral/pull/103) [`d5c9ac2`](https://github.com/azamatos/yeral/commit/d5c9ac2a4cfe6ee174e0840841de068ac4624795) Thanks [@azamatos](https://github.com/azamatos)! - Keeping the business's clients (book B-33–B-36): add one by the number (a number already there opens its card), the
+  card's edit (a number held by a Ýeral account is locked), "Phone only" and "Don't send reminders", team notes with
+  "show when they book", and delete (refused while bookings are ahead or requests wait; past bookings stay without the
+  name). A `client.updated` live event refreshes the clients pages, the calendar and requests.
+
+- [#98](https://github.com/azamatos/yeral/pull/98) [`a362d86`](https://github.com/azamatos/yeral/commit/a362d86e0857e5ef51e738344a791c53820c9613) Thanks [@azamatos](https://github.com/azamatos)! - The sign-in code on the screen at the first launch (book Q-036, F-200), off unless `SIGN_IN_CODE_ON_SCREEN=true`: the
+  sign-in's answer then carries the `code`, under the same limits; a booking link's code is never shown, a phone change
+  is refused (`phone_change_unavailable`), and an unused account signs in without "Is this you?". Two codes asked for at
+  once make one.
+
+- [#100](https://github.com/azamatos/yeral/pull/100) [`124e33c`](https://github.com/azamatos/yeral/commit/124e33cfab8800f95ffbe97b625fe6b33bcf7899) Thanks [@azamatos](https://github.com/azamatos)! - "Arz et" (book B-28): the team files one complaint per appointment booking (no-show from the visit's start until a
+  day after it, late from the start, rude or other any time); a no-show changes the booking's status, which the client
+  sees, and counts toward the phone-only limit. A mistaken one is taken back within 7 days, the booking as it was,
+  the complaint a no-show replaced included. The calendar's booking shows it. Migration 0029 adds
+  `bookings.complaint_by` and `complaint_before`.
+
+- [#94](https://github.com/azamatos/yeral/pull/94) [`029a2d8`](https://github.com/azamatos/yeral/commit/029a2d8cbfa77836a727251c1ea80396259f677e) Thanks [@azamatos](https://github.com/azamatos)! - Internal statuses (book B-29): team-only markers such as "Arrived" and "Started" for confirmed bookings, which never
+  change the booking's status and never reach the client. `…/settings/statuses` lists the two presets (off at first)
+  and up to three of the business's own, with a name, one of 8 icons and one of 6 colours; `PUT
+  …/bookings/{code}/internal-status` puts one on a booking. Migration 0028 adds `internal_statuses` and
+  `bookings.internal_status_id`.
+
+### Patch Changes
+
+- Updated dependencies [[`46a5546`](https://github.com/azamatos/yeral/commit/46a55461a72145e74900610f8714ea24eeb88cdc), [`29643e6`](https://github.com/azamatos/yeral/commit/29643e63fe576a087fd96a138c6f3ab329270d15), [`d5603a8`](https://github.com/azamatos/yeral/commit/d5603a8f5b7c69ab3c803738cc9a73e99ea81a19), [`bbcdae5`](https://github.com/azamatos/yeral/commit/bbcdae53e05deadb98abc119b138abaeded262b3), [`ee5e856`](https://github.com/azamatos/yeral/commit/ee5e8561cf10c5579ff808f16c8802923aa610af), [`d5c9ac2`](https://github.com/azamatos/yeral/commit/d5c9ac2a4cfe6ee174e0840841de068ac4624795), [`124e33c`](https://github.com/azamatos/yeral/commit/124e33cfab8800f95ffbe97b625fe6b33bcf7899), [`029a2d8`](https://github.com/azamatos/yeral/commit/029a2d8cbfa77836a727251c1ea80396259f677e), [`d4afcd0`](https://github.com/azamatos/yeral/commit/d4afcd0e1c97367c74ade23a8fdbca741df1e815), [`25fb650`](https://github.com/azamatos/yeral/commit/25fb65064a4439a10840735885a50c0298b8d621), [`97064a6`](https://github.com/azamatos/yeral/commit/97064a613171e073aa311513f4291b8d4becd40a)]:
+  - @yeral/domain@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

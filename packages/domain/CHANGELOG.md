@@ -1,5 +1,73 @@
 # @yeral/domain
 
+## 0.3.0
+
+### Minor Changes
+
+- [#86](https://github.com/azamatos/yeral/pull/86) [`46a5546`](https://github.com/azamatos/yeral/commit/46a55461a72145e74900610f8714ea24eeb88cdc) Thanks [@azamatos](https://github.com/azamatos)! - A business that moves tells its clients (book Q-215): when the owner or an administrator changes the address line,
+  street or city, every waiting request and confirmed visit ahead gets an SMS with the new address, 10 minutes after the
+  last change (a quick fix makes one SMS, a move and back none; a visit sooner hears it 30 minutes before, or at once).
+  It goes whatever the client's SMS switches; a reminder that goes first says "new address" instead. The business page
+  adds `movedAt` ("New address" for 30 days; a move back clears it), and a booking ahead adds it once its SMS went.
+  Migration 0026 adds `bookings.address_told`, `businesses.moved_at` and `moved_from`.
+
+- [#87](https://github.com/azamatos/yeral/pull/87) [`29643e6`](https://github.com/azamatos/yeral/commit/29643e63fe576a087fd96a138c6f3ab329270d15) Thanks [@azamatos](https://github.com/azamatos)! - A new booking (online or by the team) whose time the business's hours closed just then comes back as 409
+  `slot_taken` with the nearest free times, as one taken by another booking does; a move or an offered time asks for
+  that one time and still comes back without times. Two team endpoints (a team member's services, resending
+  an invite) answer a refused value in the `validation_error` shape every other endpoint uses (`issues`). The domain
+  drops `checkPlan` (`planRefusal` gives the same answer with its details).
+
+- [#93](https://github.com/azamatos/yeral/pull/93) [`d5603a8`](https://github.com/azamatos/yeral/commit/d5603a8f5b7c69ab3c803738cc9a73e99ea81a19) Thanks [@azamatos](https://github.com/azamatos)! - Blocked time (book B-18): `POST /v1/w/{slug}/calendar/blocks` closes part of a day for one person ("Ýapyk · Okuw"),
+  optionally every week up to a date; `GET` lists them and `DELETE …/blocks/{id}` takes one (or the rest of its series)
+  away. Nobody books blocked time: free times leave it out, a move onto it is `cannot_move` with `blocked`, and a block
+  over a booking is refused (`block_over_bookings`). The owner and administrators block anyone's time, a specialist only
+  their own. Migration 0027 adds `staff_blocks`.
+
+- [#84](https://github.com/azamatos/yeral/pull/84) [`bbcdae5`](https://github.com/azamatos/yeral/commit/bbcdae53e05deadb98abc119b138abaeded262b3) Thanks [@azamatos](https://github.com/azamatos)! - A business's cancel reaches the app as a code it words: the booking detail and the SMS link page add `businessCancel`
+  (`{ reason, text }`, with the business's words for "Other reason" or the closed day's name), and `cancelReason` holds
+  only the client's own words. The free times offered when a business closes over a booking are taken with their own
+  source, `cancel` (`accept-alternative`), no longer `decline`.
+
+- [#101](https://github.com/azamatos/yeral/pull/101) [`ee5e856`](https://github.com/azamatos/yeral/commit/ee5e8561cf10c5579ff808f16c8802923aa610af) Thanks [@azamatos](https://github.com/azamatos)! - The business's clients (book B-32, B-34): the list (by name or number, the chips New, Regular, Lapsed, Reported,
+  the most recently seen first), the new-booking drawer's lookup (from 3 digits or 2 letters, with alert notes and usual
+  services) and the client card (numbers, notes, bookings ahead and before, reports, switches). A specialist sees only
+  their own clients and bookings; sums only with "See revenue". Requests carry the client's alert notes and id, the
+  calendar's bookings the client's id.
+
+- [#103](https://github.com/azamatos/yeral/pull/103) [`d5c9ac2`](https://github.com/azamatos/yeral/commit/d5c9ac2a4cfe6ee174e0840841de068ac4624795) Thanks [@azamatos](https://github.com/azamatos)! - Keeping the business's clients (book B-33–B-36): add one by the number (a number already there opens its card), the
+  card's edit (a number held by a Ýeral account is locked), "Phone only" and "Don't send reminders", team notes with
+  "show when they book", and delete (refused while bookings are ahead or requests wait; past bookings stay without the
+  name). A `client.updated` live event refreshes the clients pages, the calendar and requests.
+
+- [#100](https://github.com/azamatos/yeral/pull/100) [`124e33c`](https://github.com/azamatos/yeral/commit/124e33cfab8800f95ffbe97b625fe6b33bcf7899) Thanks [@azamatos](https://github.com/azamatos)! - "Arz et" (book B-28): the team files one complaint per appointment booking (no-show from the visit's start until a
+  day after it, late from the start, rude or other any time); a no-show changes the booking's status, which the client
+  sees, and counts toward the phone-only limit. A mistaken one is taken back within 7 days, the booking as it was,
+  the complaint a no-show replaced included. The calendar's booking shows it. Migration 0029 adds
+  `bookings.complaint_by` and `complaint_before`.
+
+- [#94](https://github.com/azamatos/yeral/pull/94) [`029a2d8`](https://github.com/azamatos/yeral/commit/029a2d8cbfa77836a727251c1ea80396259f677e) Thanks [@azamatos](https://github.com/azamatos)! - Internal statuses (book B-29): team-only markers such as "Arrived" and "Started" for confirmed bookings, which never
+  change the booking's status and never reach the client. `…/settings/statuses` lists the two presets (off at first)
+  and up to three of the business's own, with a name, one of 8 icons and one of 6 colours; `PUT
+  …/bookings/{code}/internal-status` puts one on a booking. Migration 0028 adds `internal_statuses` and
+  `bookings.internal_status_id`.
+
+- [#109](https://github.com/azamatos/yeral/pull/109) [`d4afcd0`](https://github.com/azamatos/yeral/commit/d4afcd0e1c97367c74ade23a8fdbca741df1e815) Thanks [@azamatos](https://github.com/azamatos)! - `GET /v1/me` (and the sign-in's account) says whether the number can be changed now (`canChangePhone`, false while the
+  sign-in code shows on the screen), and an invite card says whether the person will answer booking requests there
+  (`answersRequests`, from the business's rules and their own switch), so the card's lines fit (book B-08).
+
+- [#90](https://github.com/azamatos/yeral/pull/90) [`25fb650`](https://github.com/azamatos/yeral/commit/25fb65064a4439a10840735885a50c0298b8d621) Thanks [@azamatos](https://github.com/azamatos)! - The owner sets each specialist's schedule (book B-47): `GET`/`PUT /v1/w/{slug}/team/{staffId}/schedule` with their
+  shift (or the business hours), one break per weekday and personal days off; administrators read it. Bookings ahead it
+  leaves outside their day are asked about first (409 `bookings_affected`), then moved to a free colleague who does the
+  services (else cancelled with 3 other times) or kept. Removing someone (B-50) now asks about their bookings ahead the
+  same way and moves them to a named colleague, keeps them, or cancels them with 3 other times; it answers 200 with what
+  happened. A booking being made checks its specialist's day as it stands. The sdk's `team.remove` takes the choice, and adds
+  `team.schedule` and `team.updateSchedule`.
+
+- [#106](https://github.com/azamatos/yeral/pull/106) [`97064a6`](https://github.com/azamatos/yeral/commit/97064a613171e073aa311513f4291b8d4becd40a) Thanks [@azamatos](https://github.com/azamatos)! - The business's reviews (book B-53, B-54): the page with the summary, filters and sort (a specialist reads the reviews
+  of their own visits); the reply, written, changed or taken away by the owner and administrators; and a report to
+  Ýeral, which takes the review out of the rating while Ýeral checks it, 48 hours at most, then it counts again. The
+  public review says `underReview`. Migration 0030 adds the reply's author and the report to `reviews`.
+
 ## 0.2.0
 
 ### Minor Changes

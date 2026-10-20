@@ -1,6 +1,6 @@
 {
   "name": "@yeral/features",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "User actions more than one app needs, in FSD feature slices (@yeral/features/<slice>): the phone sign-in",
   "type": "module",
