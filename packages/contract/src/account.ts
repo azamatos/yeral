@@ -56,6 +56,25 @@ export const linkVerifySchema = z
   .meta({ id: 'LinkVerify' })
 export const linkCodeSchema = z.object({ lang: marketLocaleSchema.optional() }).meta({ id: 'LinkCode' })
 
+/**
+ * "Is this you?" (book Q-270): the code checked out, but the phone's account hasn't been used for 6 months, so its first
+ * name is shown and the person answers with `ticket` before anyone signs in (`POST /v1/auth/identity`). HTTP 202.
+ */
+export const isThisYouSchema = z
+  .object({
+    isThisYou: z.object({
+      /** The account's first name; null when it has none to show (the question is asked without one). */
+      name: z.string().nullable(),
+      ticket: z.string(),
+    }),
+  })
+  .meta({ id: 'IsThisYou' })
+
+/** The answer: yes signs in to that account; no lets it go and starts a fresh one for this phone. */
+export const identityAnswerSchema = z
+  .object({ ticket: z.string().max(200), yes: z.boolean(), lang: marketLocaleSchema.optional() })
+  .meta({ id: 'IdentityAnswer' })
+
 export const verifyCodeResponseSchema = z.object({
   me: meSchema,
   /** First login: ask for the name. */

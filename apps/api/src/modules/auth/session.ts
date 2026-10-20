@@ -11,7 +11,7 @@ import { ApiError } from '../../http/errors'
 import type { AppEnv, User } from '../../http/env'
 import { randomToken, sha256Hex } from '../../lib/crypto'
 
-const DAY = 86_400_000
+export const DAY = 86_400_000
 export const SESSION_DAYS = 60
 const RENEW_UNDER_DAYS = 30
 
@@ -72,6 +72,12 @@ export const sessionMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
           .where(eq(sessions.id, row.session.id))
         writeCookie(c, token, expiresAt)
       }
+      // the account is in use, noted once a day (book Q-270: "Is this you?" asks only after 6 months without)
+      if (now() - row.user.lastSeenAt.getTime() > DAY)
+        await db
+          .update(users)
+          .set({ lastSeenAt: new Date(now()) })
+          .where(eq(users.id, row.user.id))
     }
   }
   await next()

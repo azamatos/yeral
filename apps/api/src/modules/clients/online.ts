@@ -7,7 +7,7 @@
  */
 import { isOnlineBlocked } from '@yeral/domain/clients'
 import type { BookingRules } from '@yeral/domain/rules'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { clients } from '../../db/schema'
 import { noShowMarkedAt } from '../bookings/repo'
@@ -29,6 +29,16 @@ const reached = (rules: Rules) => (rules.blockAfterNoShows > 0 ? sql`${noShowsSi
 export async function noShowsSinceReset(db: Queryable, clientId: string): Promise<number> {
   const [row] = await db.select({ n: noShowsSince }).from(clients).where(eq(clients.id, clientId))
   return row?.n ?? 0
+}
+
+/** Which of these records the no-show count blocks now. */
+export async function blockedByCount(db: Queryable, clientIds: string[], rules: Rules): Promise<Set<string>> {
+  if (!clientIds.length) return new Set()
+  const rows = await db
+    .select({ id: clients.id, blocked: sql<boolean>`${reached(rules)}` })
+    .from(clients)
+    .where(inArray(clients.id, clientIds))
+  return new Set(rows.filter((r) => r.blocked).map((r) => r.id))
 }
 
 /** Whether this phone is phone-only at the business now (false when the business doesn't know it). */

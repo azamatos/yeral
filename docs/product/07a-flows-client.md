@@ -746,7 +746,6 @@ flowchart TD
 **Code differs**
 
 - One internet address may ask for 20 codes an hour, not 100, and the message "Haýyş köp boldy. Biraz garaşyň." gives no wait (code: `auth/codes.ts`).
-- Every sign-in links all bookings and client records made under the phone, whatever their age, with no "Is this you?" step (code: `auth/routes.ts`).
 - The api keeps one name field and splits it at the first space (code: `auth/routes.ts`).
 
 **Status:** Design: drawn (Booking, Booking-Table, Booking-Class inline login · `loggedIn`; Auth) · Code: built (api) — `POST /v1/auth/code`, `POST /v1/auth/verify`.
@@ -1682,10 +1681,11 @@ flowchart TD
 
 - A number that already has a Ýeral account is refused: "Bu belgi başga hasaba degişli." (code `phone_taken`; not drawn).
 - Client records follow the Ýeral account: the change updates the phone on every business's record of this person, so their history, no-show count and phone-only mark stay (Q-171, decided 18.10.2026).
+- A business that already keeps a recent record for the new number (made in the last 6 months, or with a booking from them) gets the two made into one: bookings and notes join, tags add up, a phone-only or no-reminder mark stays, and a block the no-show count sets on either stays; otherwise the count runs from the latest time the business lifted a block for either, so a fresh start it gave stays given. An older record of the new number is an earlier holder's: it keeps its history without the number. Phone bookings made for the new number in the last 6 months join the account, as at a sign-in, and so do those made for the old number since the last sign-in (Q-270).
+- The bookings ahead reach the new number; past ones keep the number they were made with. Booking SMS go to the account's phone, and links sent to the old number stop working (code: `bookingRecipient()`).
+- Active team rows that carried the old number take the new one; rows on teams the person has left keep the old one, and a row an invite to the old number brought back is removed again with the invite. Invites to the old number are cancelled, not moved, so no business sees a number it wasn't given (code: `me/account.ts`).
 
 > Open question Q-171: changing the phone number and the businesses' client records.
-
-**Code differs:** businesses find their clients by phone number, so the next booking under the new number creates a new client record (code: `bookings/create.ts`, `clientFor`). Booking SMS already go to the account's phone, and links sent to the old number stop working (code: `bookingRecipient()`).
 
 **Status:** Design: drawn (Account-Profile) · Code: built (api) — `POST /v1/me/phone/code`, `/verify`.
 

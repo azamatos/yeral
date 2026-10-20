@@ -3,19 +3,18 @@ import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { meSchema, sendCodeResponseSchema, sendCodeSchema, updateMeSchema, verifyCodeSchema } from '@yeral/contract/account'
 import { businessCardSchema } from '@yeral/contract/catalog'
 import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
-import { epochOf, today } from '@yeral/domain/time'
-import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm'
-import { bookingLinks, bookings, businesses, favorites, invites, sessions, staff, users } from '../../db/schema'
+import { today } from '@yeral/domain/time'
+import { and, desc, eq, inArray } from 'drizzle-orm'
+import { businesses, favorites, sessions, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { clientIp } from '../../lib/rate-limit'
-import { emit } from '../../notify'
 import { checkCode, sendCode } from '../auth/codes'
 import { endSession, requireUser } from '../auth/session'
-import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
 import { buildCards } from '../catalog/cards'
 import { publicBusiness } from '../catalog/detail'
+import { changePhone, releaseAccount } from './account'
 import { toMe } from './me'
 
 const tags = ['me']
@@ -106,45 +105,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     const user = requireUser(c)
     const { deps } = c.var
     const now = deps.now()
-    await deps.db.transaction(async (tx) => {
-      // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
-      const rows = await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')
-      if (rows.some((r) => r.level === 'owner' && r.status === 'active')) throw new ApiError('owns_workspace')
-      await tx.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.userId, user.id))
-      // open invites to this phone go too: whoever gets the number next mustn't inherit them
-      const dropped = await tx
-        .update(invites)
-        .set({ status: 'cancelled', answeredAt: new Date(now) })
-        .where(and(eq(invites.phone, user.phone), eq(invites.status, 'pending')))
-        .returning({ businessId: invites.businessId })
-      for (const businessId of new Set([...rows.map((r) => r.businessId), ...dropped.map((d) => d.businessId)])) {
-        await emit(tx, { type: 'team.changed', businessId })
-      }
-      const mine = await tx
-        .select()
-        .from(bookings)
-        .where(and(eq(bookings.userId, user.id), eq(bookings.active, true)))
-      // bookings before their move requests, the order every path locks them in; one the jobs settled meanwhile is done
-      const ahead = mine.filter((x) => epochOf(x.date, x.start) > now).sort((x, y) => Number(!!x.rescheduleOf) - Number(!!y.rescheduleOf))
-      for (const b of ahead) {
-        try {
-          const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'client', at: new Date(now) })
-          await emit(tx, { type: 'booking.cancelled', businessId: row.businessId, bookingId: row.id, bookingCode: row.code })
-        } catch (e) {
-          if (!(e instanceof StaleBooking)) throw e
-        }
-      }
-      // their bookings are left behind: they never join whoever gets the number next and send no more SMS. Every link
-      // to the number stops working, phone bookings made for it since the last sign-in too; those keep their SMS (the
-      // person still has the number) with new links (book Q-168). Joining an old phone booking later is Q-270's rule.
-      await tx
-        .update(bookings)
-        .set({ accountDeletedAt: new Date(now) })
-        .where(eq(bookings.userId, user.id))
-      const toTheNumber = or(eq(bookings.userId, user.id), and(eq(bookings.clientPhone, user.phone), isNull(bookings.userId)))
-      await tx.delete(bookingLinks).where(inArray(bookingLinks.bookingId, tx.select({ id: bookings.id }).from(bookings).where(toTheNumber)))
-      await tx.delete(users).where(eq(users.id, user.id))
-    })
+    await deps.db.transaction((tx) => releaseAccount(tx, user, now, 'deleted'))
     await endSession(c)
     return c.body(null, 204)
   })
@@ -171,16 +132,8 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     if (userId !== user.id) throw new ApiError('code_expired')
     const [taken] = await c.var.deps.db.select({ id: users.id }).from(users).where(eq(users.phone, phone))
     if (taken) throw new ApiError('phone_taken')
-    const [row] = await c.var.deps.db
-      .update(users)
-      .set({ phone })
-      .where(eq(users.id, user.id))
-      .returning()
-      .catch((e: unknown) => {
-        // someone took the number between the check and the change
-        if (pgCode(e) === '23505') throw new ApiError('phone_taken')
-        throw e
-      })
+    const now = c.var.deps.now()
+    const row = await c.var.deps.db.transaction((tx) => changePhone(tx, user, phone, now))
     // other devices sign in again with the new number
     const current = c.var.auth?.sessionId
     const others = (await c.var.deps.db.select({ id: sessions.id }).from(sessions).where(eq(sessions.userId, user.id))).filter(
@@ -193,7 +146,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
           others.map((s) => s.id),
         ),
       )
-    return c.json(await toMe(c.var.deps.db, row ?? user), 200)
+    return c.json(await toMe(c.var.deps.db, row), 200)
   })
   .openapi(favoritesRoute, async (c) => {
     const user = requireUser(c)

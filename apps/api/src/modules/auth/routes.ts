@@ -1,6 +1,13 @@
 /** Phone login (ADR 0019): send a code, verify it, log out. */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
-import { sendCodeResponseSchema, sendCodeSchema, verifyCodeResponseSchema, verifyCodeSchema } from '@yeral/contract/account'
+import {
+  identityAnswerSchema,
+  isThisYouSchema,
+  sendCodeResponseSchema,
+  sendCodeSchema,
+  verifyCodeResponseSchema,
+  verifyCodeSchema,
+} from '@yeral/contract/account'
 import { MARKET } from '@yeral/domain/market'
 import { eq } from 'drizzle-orm'
 import { users } from '../../db/schema'
@@ -9,7 +16,7 @@ import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { clientIp } from '../../lib/rate-limit'
 import { checkCode, sendCode } from './codes'
 import { endSession } from './session'
-import { signIn } from './sign-in'
+import { afterCode, answerIdentity } from './identity'
 
 const sendCodeRoute = createRoute({
   method: 'post',
@@ -26,7 +33,16 @@ const verifyRoute = createRoute({
   tags: ['auth'],
   summary: 'Check the code and sign in (creates the account on first login)',
   request: jsonBody(verifyCodeSchema),
-  responses: { 200: json(verifyCodeResponseSchema), 400: errors[400], 429: errors[429] },
+  responses: { 200: json(verifyCodeResponseSchema), 202: json(isThisYouSchema), 400: errors[400], 429: errors[429] },
+})
+
+const identityRoute = createRoute({
+  method: 'post',
+  path: '/auth/identity',
+  tags: ['auth'],
+  summary: '"Is this you?": yes signs in to the account; no starts a fresh one for this phone',
+  request: jsonBody(identityAnswerSchema),
+  responses: { 200: json(verifyCodeResponseSchema), 400: errors[400], 409: errors[409] },
 })
 
 const logoutRoute = createRoute({ method: 'post', path: '/auth/logout', tags: ['auth'], summary: 'Sign out', responses: noContent })
@@ -46,7 +62,12 @@ export const authRoutes = new OpenAPIHono<AppEnv>()
   .openapi(verifyRoute, async (c) => {
     const { phone, code, lang } = c.req.valid('json')
     await checkCode(c.var.deps, { phone, purpose: 'login', code })
-    return c.json(await signIn(c, phone, lang), 200)
+    const res = await afterCode(c, phone, lang)
+    return res.status === 202 ? c.json(res.body, 202) : c.json(res.body, 200)
+  })
+  .openapi(identityRoute, async (c) => {
+    const { ticket, yes, lang } = c.req.valid('json')
+    return c.json(await answerIdentity(c, ticket, yes, lang), 200)
   })
   .openapi(logoutRoute, async (c) => {
     await endSession(c)

@@ -414,6 +414,8 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       if ([...byPhone, ...byAccount].some((r) => r.id !== row.id && r.status !== 'removed')) throw new ApiError('already_on_team')
       // someone who had joined (or works without the app) is back at once; someone who never joined needs an invite
       const back = hasJoined(row) || !row.hasApp
+      // a row whose number passed to someone else (book Q-270) has no one to invite: the person is invited anew
+      if (!back && !row.phone) throw new ApiError('invalid_status')
       const [next] = await tx
         .update(staff)
         .set({ status: back ? 'active' : 'invited', bookable: await hasServices(tx, row.id) })

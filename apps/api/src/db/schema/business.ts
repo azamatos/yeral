@@ -338,7 +338,11 @@ export const clients = pgTable(
     businessId: uuid()
       .notNull()
       .references(() => businesses.id, { onDelete: 'cascade' }),
-    phone: text().notNull(),
+    /**
+     * E.164: how the business finds the client. null once the number passed to someone else (book Q-270, Q-171): the
+     * record keeps the person's history but never joins the number's next holder.
+     */
+    phone: text(),
     name: text(),
     birthday: date({ mode: 'string' }),
     source: clientSource(),
