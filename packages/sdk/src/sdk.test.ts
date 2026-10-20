@@ -509,6 +509,13 @@ describe('live events', () => {
     ])
   })
 
+  it('a request about to run out refreshes the requests and the calendar', () => {
+    expect(staleKeys({ type: 'request.expiring', business: 'glow-studio', bookingCode: 'YR-810001' })).toEqual([
+      ['requests', 'glow-studio'],
+      ['calendar', 'glow-studio'],
+    ])
+  })
+
   it('a client change refreshes their pages, the calendar and the requests', () => {
     expect(staleKeys({ type: 'client.updated', business: 'glow-studio', bookingCode: null })).toEqual([
       ['clients', 'glow-studio'],

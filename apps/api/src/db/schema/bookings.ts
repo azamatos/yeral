@@ -114,6 +114,8 @@ export const bookings = pgTable(
     priceAmount: integer(),
     /** Pending requests expire here (`@yeral/domain/lifecycle` holdUntil). */
     holdUntil: ts(),
+    /** "Haýyşyň wagty gutarýar" went out, 5 minutes before the answer time ends (book S-01). */
+    expiryWarnedAt: ts(),
     /** A client's move request points at the booking it would replace. */
     rescheduleOf: uuid().references((): AnyPgColumn => bookings.id, { onDelete: 'cascade' }),
     /** Made from a time offered after a decline or an expiry: one booking per offer (unique). */

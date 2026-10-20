@@ -72,6 +72,9 @@ export function waitingLimit(here: number, inAll: number): WaitingLimit | null {
   if (inAll >= MAX_WAITING_IN_ALL) return { scope: 'all', limit: MAX_WAITING_IN_ALL }
   return null
 }
+/** "Haýyşyň wagty gutarýar": this many minutes before a request's answer time ends (book S-01, business spec §16). */
+export const EXPIRY_WARNING_MINUTES = 5
+
 /** The business's reply to a review: this long at most (B-53). */
 export const REVIEW_REPLY_MAX = 500
 /** A reported review isn't counted while Ýeral checks it, this long at most; then it counts again (book Q-261). */

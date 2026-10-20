@@ -15,6 +15,8 @@ export const EVENT_TYPES = [
   'booking.completed',
   'booking.noshow',
   'booking.updated',
+  /** "Haýyşyň wagty gutarýar": a request's answer time ends in 5 minutes (book S-01); those who may answer hear it. */
+  'request.expiring',
   'review.created',
   /** A review left with its account (book Q-172): the business's reviews and rating refresh. */
   'review.deleted',

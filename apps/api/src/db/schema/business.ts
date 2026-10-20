@@ -279,6 +279,8 @@ export const invites = pgTable(
     sentAt: ts().notNull(),
     expiresAt: ts().notNull(),
     answeredAt: ts(),
+    /** Its 7 days ran out unanswered and the open screens were told (book S-13); a resend is a new invite. */
+    expiryToldAt: ts(),
     createdAt: createdAt(),
   },
   (t) => [

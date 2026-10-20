@@ -24,6 +24,8 @@ interface LiveEvent {
 /** Which queries an event makes stale. */
 export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
   const out: (readonly unknown[])[] = []
+  // the timers on the requests list and the calendar's blocks
+  if (e.type === 'request.expiring' && e.business) out.push(keys.requests(e.business), keys.calendar(e.business))
   if (e.type.startsWith('booking.')) {
     out.push(keys.bookings())
     if (e.business)
