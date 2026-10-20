@@ -106,6 +106,7 @@ flowchart TD
 
 - The expiry SMS goes at any hour, since it's a booking outcome (Q-285, decided 18.10.2026). It goes even when the client has switched off *Tassyklama we üýtgeşmeler* (Q-286, decided 18.10.2026).
 - A client who is now limited to phone bookings (S-03), or whose business has paused online booking, can't take these times online: the chips are hidden and the *Jaň et* card shows instead (Q-154, decided 18.10.2026). Only times the business offered after a decline are an exception (ROUND6 A7; the code agrees).
+
 **Status.** Design: decided and drawn (client spec §1, §6; business spec §2; ROUND6 A2; Account-Bookings, Booking-Link) · Code: built in the api; times for tables and classes come after the MVP.
 
 ### S-02 · A visit completes by itself
