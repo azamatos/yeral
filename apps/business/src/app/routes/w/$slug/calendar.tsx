@@ -1,4 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { CalendarPage } from '@/pages/calendar'
+import { SectionPage } from '@/pages/section'
 
-export const Route = createFileRoute('/w/$slug/calendar')({ component: CalendarPage })
+export const Route = createFileRoute('/w/$slug/calendar')({ component: () => <SectionPage section="calendar" /> })
