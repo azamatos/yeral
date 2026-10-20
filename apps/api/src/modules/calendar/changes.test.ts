@@ -6,7 +6,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingItems, bookings, businesses, rateLimits, services, staff, staffServices } from '../../db/schema'
+import { bookingItems, bookings, businesses, jobs, rateLimits, services, staff, staffServices } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 
@@ -23,6 +23,11 @@ const MON = '2026-10-26'
 const TUE2 = '2026-10-27'
 const WED2 = '2026-10-28'
 const THU2 = '2026-10-29'
+const WED3 = '2026-11-11'
+const THU3 = '2026-11-12'
+const FRI3 = '2026-11-13'
+const SAT3 = '2026-11-14'
+const TOMORROW = '2026-10-15'
 
 describe('the business moves and cancels bookings (book B-26, B-27)', () => {
   let db: Db
@@ -64,8 +69,8 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
       body: { source: 'phone', phone, serviceIds: [manicure], staffId: maralId, date, start, notifyClient: false },
     })
     expect(made.status).toBe(201)
-    // past "Yzyna al": the client knows of it from here on
-    t.clock.now += 10_000
+    // past "Yzyna al" and the SMS after it: the client knows of it from here on
+    t.clock.now += 15_000
     return made.json.code as string
   }
   const move = (b: ReturnType<typeof browser>, code: string, body: Record<string, unknown>) => b.req(`${W}/bookings/${code}/move`, { body })
@@ -278,7 +283,7 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
     expect((await move(maysa, made.json.code, { date: TUE2, start: 720 })).status).toBe(204)
     await runDueJobs(t.deps)
     expect(smsTo('+99365800211')).toEqual([])
-    t.clock.now += 10_000
+    t.clock.now += 15_000
     await runDueJobs(t.deps)
     expect(smsTo('+99365800211')).toEqual([expect.stringMatching(/you're booked: Glow Studio, .*12:00/)])
     const other = await maysa.req(`${W}/bookings`, {
@@ -330,5 +335,160 @@ describe('the business moves and cancels bookings (book B-26, B-27)', () => {
     expect(asked).toMatchObject({ status: 'cancelled', cancelledBy: 'system' })
     // the booking took the team's time; the refused move isn't held against it
     expect(await rowOf(made.json.code)).toMatchObject({ date: WED2, start: 900, moveRefused: null })
+  })
+
+  it('one first SMS: a change before it goes is told in it; changes before a change SMS goes are told once, or not at all', async () => {
+    const maysa = await as(MAYSA)
+    const jobsOf = async (code: string) => {
+      const id = (await rowOf(code)).id
+      return (await db.select().from(jobs))
+        .filter((j) => j.payload.bookingId === id && !String(j.payload.kind).startsWith('reminder'))
+        .sort((a, b) => a.id - b.id)
+    }
+    const enter = async (phone: string, start: number) =>
+      (
+        await maysa.req(`${W}/bookings`, {
+          body: { source: 'phone', phone, serviceIds: [manicure], staffId: maralId, date: WED3, start },
+        })
+      ).json.code as string
+
+    // to Jeren's column inside the undo window: one "booked", 5 seconds after the undo time
+    const first = await enter('+99365800220', 600)
+    expect((await jobsOf(first)).map((j) => [j.payload.kind, j.runAt.getTime()])).toEqual([['booked', t.clock.now + 15_000]])
+    expect((await move(maysa, first, { date: WED3, start: 600, staffId: jerenId })).status).toBe(204)
+    t.clock.now += 15_000
+    await runDueJobs(t.deps)
+    // agreed with Maral on the phone: the SMS names Jeren
+    expect(smsTo('+99365800220')).toEqual([expect.stringMatching(/you're booked: Glow Studio, .*10:00, with Jeren,/)])
+
+    // moved 12 seconds after saving, the confirmation not sent yet: it tells the new time, and nothing says "moved"
+    const second = await enter('+99365800221', 840)
+    t.clock.now += 12_000
+    expect((await move(maysa, second, { date: WED3, start: 900 })).status).toBe(204)
+    t.clock.now += 10_000
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800221')).toEqual([expect.stringMatching(/you're booked: Glow Studio, .*15:00/)])
+
+    // told already: Maral, Jeren and back before the jobs run tells nothing; two moves tell the last
+    const third = await book(maysa, '+99365800222', WED3, 1020)
+    expect((await move(maysa, third, { date: WED3, start: 1020, staffId: jerenId, notifyClient: true })).status).toBe(204)
+    expect((await move(maysa, third, { date: WED3, start: 1020, staffId: maralId, notifyClient: true })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800222')).toEqual([])
+    expect((await move(maysa, third, { date: WED3, start: 720, notifyClient: true })).status).toBe(204)
+    expect((await move(maysa, third, { date: WED3, start: 780, notifyClient: true })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800222')).toEqual([expect.stringMatching(/moved your booking to .*13:00/)])
+    // the first change's news found the booking back as the client knew it; the second asked for none more
+    expect((await jobsOf(third)).map((j) => j.error)).toEqual(['dropped: the client knows the booking as it is', null])
+    expect((await rowOf(third)).told).toMatchObject({ date: WED3, start: 780, staff: maralId })
+
+    // moved with the client told, then given to Jeren without telling, before the jobs run: the SMS says both
+    const fourth = await book(maysa, '+99365800223', WED3, 1080)
+    const firstMove = await move(maysa, fourth, { date: WED3, start: 1020, notifyClient: true })
+    expect(firstMove.status, JSON.stringify(firstMove.json)).toBe(204)
+    expect((await move(maysa, fourth, { date: WED3, start: 1020, staffId: jerenId, notifyClient: false })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800223')).toEqual([expect.stringMatching(/moved your booking to .*17:00, with Jeren/)])
+  })
+
+  it('a phone booking cancelled before its confirmation went tells nothing; one the client chose online and that moved says so', async () => {
+    const maysa = await as(MAYSA)
+    // the client learned of it on the phone; its "booked" hadn't gone at 12 seconds
+    const made = await maysa.req(`${W}/bookings`, {
+      body: { source: 'phone', phone: '+99365800224', serviceIds: [manicure], staffId: maralId, date: THU3, start: 600 },
+    })
+    t.clock.now += 12_000
+    expect((await cancel(maysa, made.json.code, { reason: 'staff_away' })).status).toBe(204)
+    t.clock.now += 60_000
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800224')).toEqual([])
+
+    // asked online for 13:00, confirmed, then moved to 14:00 before the confirmation went: told as the move
+    const client = await as('+99365800225', 'Client')
+    const request = await client.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [manicure], staffId: maralId, date: THU3, start: 780 },
+    })
+    expect(request.json.status).toBe('pending')
+    await maysa.req(`${W}/requests/${request.json.code}/confirm`, { method: 'POST' })
+    expect((await move(maysa, request.json.code, { date: THU3, start: 840 })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800225')).toEqual([expect.stringMatching(/moved your booking to .*14:00/)])
+  })
+
+  it('what the client knows: missing on older bookings, kept by reminders, named by a cancel; a quiet booking waits its undo', async () => {
+    const maysa = await as(MAYSA)
+    // a booking from before it was kept: its move is told
+    const older = await book(maysa, '+99365800226', FRI3, 600)
+    await db.update(bookings).set({ told: null }).where(eq(bookings.code, older))
+    expect((await move(maysa, older, { date: FRI3, start: 720, notifyClient: true })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800226')).toEqual([expect.stringMatching(/moved your booking to .*12:00/)])
+
+    // entered quietly and given to Jeren with the SMS on, inside the undo window: nothing until it can't be undone
+    const quiet = (
+      await maysa.req(`${W}/bookings`, {
+        body: {
+          source: 'phone',
+          phone: '+99365800227',
+          serviceIds: [manicure],
+          staffId: maralId,
+          date: FRI3,
+          start: 900,
+          notifyClient: false,
+        },
+      })
+    ).json.code as string
+    expect((await move(maysa, quiet, { date: FRI3, start: 900, staffId: jerenId, notifyClient: true })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800227')).toEqual([])
+    t.clock.now += 15_000
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800227')).toEqual([expect.stringMatching(/your booking on .*15:00 is now with Jeren/)])
+    // the same, undone: nothing at all
+    const undone = (
+      await maysa.req(`${W}/bookings`, {
+        body: {
+          source: 'phone',
+          phone: '+99365800228',
+          serviceIds: [manicure],
+          staffId: maralId,
+          date: FRI3,
+          start: 1020,
+          notifyClient: false,
+        },
+      })
+    ).json.code as string
+    expect((await move(maysa, undone, { date: FRI3, start: 1020, staffId: jerenId, notifyClient: true })).status).toBe(204)
+    expect((await maysa.req(`${W}/bookings/${undone}/undo`, { method: 'POST' })).status).toBe(204)
+    t.clock.now += 15_000
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800228')).toEqual([])
+
+    // told 10:00; moved to 15:00 (its SMS waiting) and cancelled: the cancel names the time the client knows
+    const known = await book(maysa, '+99365800229', SAT3, 600)
+    expect((await move(maysa, known, { date: SAT3, start: 900, notifyClient: true })).status).toBe(204)
+    expect((await cancel(maysa, known, { reason: 'staff_away' })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800229')).toEqual([expect.stringMatching(/cancelled your booking on .* 10:00:/)])
+  })
+
+  it('a reminder tells the time too: a quiet move, its reminder, then a move back is told', async () => {
+    const maysa = await as(MAYSA)
+    // tomorrow 11:00, told; moved to 12:00 without telling
+    const code = await book(maysa, '+99365800230', TOMORROW, 660)
+    expect((await move(maysa, code, { date: TOMORROW, start: 720, notifyClient: false })).status).toBe(204)
+    // the evening reminder and the 2-hour one, by tomorrow at 10:00, say 12:00
+    t.clock.now = epochOf(TOMORROW, 600)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800230')).toEqual([
+      expect.stringMatching(/Reminder: tomorrow at 12:00/),
+      expect.stringMatching(/Reminder: today at 12:00/),
+    ])
+    expect((await rowOf(code)).told).toMatchObject({ date: TOMORROW, start: 720 })
+    // back to 11:00, told
+    expect((await move(maysa, code, { date: TOMORROW, start: 660, notifyClient: true })).status).toBe(204)
+    await runDueJobs(t.deps)
+    expect(smsTo('+99365800230').at(-1)).toMatch(/moved your booking to .*11:00/)
   })
 })

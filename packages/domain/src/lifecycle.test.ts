@@ -12,6 +12,9 @@ import {
   canEditNote,
   canWriteReview,
   keptCancelReason,
+  NEW_BOOKING_SMS_AFTER_MS,
+  newsSms,
+  toldOf,
   NEW_BOOKING_UNDO_MS,
   waitingLimit,
   cancelDeadline,
@@ -49,6 +52,34 @@ describe('typicalAnswerMinutes (book Q-113)', () => {
     // requests let run out count at the wait the client had; the five are answers only
     expect(typicalAnswerMinutes([5, 5, 5, 5, 5], [30, 30, 30, 30, 30, 30])).toBe(30)
     expect(typicalAnswerMinutes([5, 5, 5, 5], [30, 30, 30, 30, 30, 30])).toBeNull()
+  })
+})
+
+describe('newsSms (book B-24, B-26)', () => {
+  const at10 = toldOf({ date: THU, start: 600 }, ['maral'])
+  const at11 = toldOf({ date: THU, start: 660 }, ['maral'])
+  const jeren10 = toldOf({ date: THU, start: 600 }, ['jeren'])
+  const jeren11 = toldOf({ date: THU, start: 660 }, ['jeren'])
+
+  it('a confirmation tells the booking as it is; one the client chose online and that changed says what changed', () => {
+    expect(newsSms('booked', false, at10, at11)).toBe('booked')
+    // agreed with Maral on the phone, given to Jeren before the SMS went: it names Jeren
+    expect(newsSms('booked', false, at10, jeren10)).toBe('bookedWith')
+    expect(newsSms('confirmed', true, at10, at10)).toBe('confirmed')
+    expect(newsSms('confirmed', true, at10, at11)).toBe('moved')
+    expect(newsSms('confirmed', true, at10, jeren10)).toBe('staffChanged')
+  })
+
+  it('a change says what changed since the client knew it, and nothing when it’s back as they knew it', () => {
+    expect(newsSms('moved', false, at10, at11)).toBe('moved')
+    expect(newsSms('moved', false, at10, jeren11)).toBe('movedWith')
+    expect(newsSms('moved', false, at10, jeren10)).toBe('staffChanged')
+    expect(newsSms('moved', true, at10, at10)).toBeNull()
+  })
+
+  it('a booking from before what the client knows was kept: told as queued', () => {
+    expect(newsSms('moved', false, null, at11)).toBe('moved')
+    expect(newsSms('confirmed', true, null, at11)).toBe('confirmed')
   })
 })
 
@@ -297,6 +328,8 @@ describe('business actions', () => {
     expect(canUndoNewBooking(added, NOW + NEW_BOOKING_UNDO_MS)).toBe('undo_expired')
     expect(canUndoNewBooking({ ...added, source: 'web' }, NOW)).toBe('invalid_status')
     expect(canUndoNewBooking({ ...added, status: 'cancelled' }, NOW)).toBe('invalid_status')
+    // the client's SMS waits past the last moment an undo is taken
+    expect(NEW_BOOKING_SMS_AFTER_MS).toBeGreaterThan(NEW_BOOKING_UNDO_MS)
   })
 
   it('a no-show from the start until a day after the end; other complaints any time (book Q-206, Q-254)', () => {

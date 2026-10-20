@@ -27,7 +27,7 @@ import {
   type PlannedItem,
 } from '@yeral/domain/availability'
 import { currentBusinessDate } from '@yeral/domain/hours'
-import { canBusinessCancel, canBusinessMove, canUndoNewBooking, NEW_BOOKING_UNDO_MS } from '@yeral/domain/lifecycle'
+import { canBusinessCancel, canBusinessMove, canUndoNewBooking, NEW_BOOKING_UNDO_MS, toldOf } from '@yeral/domain/lifecycle'
 import { canOn, scopeOf, type Actor } from '@yeral/domain/permissions'
 import { addDays, epochOf } from '@yeral/domain/time'
 import { and, eq, inArray, sql } from 'drizzle-orm'
@@ -40,7 +40,7 @@ import { emit } from '../../notify'
 import { unusedSince } from '../auth/sign-in'
 import { appointmentContext, dayStrip, loadBusiness, loadBusy, type LoadedBusiness } from '../availability/context'
 import { dropPendingMove } from '../bookings/actions'
-import { cancelForBusiness, unheardUntil } from '../bookings/business-cancel'
+import { cancelForBusiness } from '../bookings/business-cancel'
 import { queueBookingSms } from '../bookings/confirm'
 import { appointmentPrice, inTransaction, itemRows } from '../bookings/create'
 import { extendBookingLinks } from '../bookings/links'
@@ -242,6 +242,11 @@ async function insertTeamBooking(
       clientPhone: input.phone,
       date: input.date,
       start: input.start,
+      // agreed on the phone or at the desk
+      told: toldOf(
+        input,
+        slot.items.map((it) => it.staffId),
+      ),
       end: slot.end,
       status: 'confirmed',
       source: input.source,
@@ -259,7 +264,7 @@ async function insertTeamBooking(
   await tx.insert(bookingItems).values(itemRows(lb, row.id, input.date, slot))
   await emit(tx, { type: 'booking.created', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
   // nothing reaches the client while "Yzyna al" may still take the booking back (B-24)
-  await queueBookingSms(tx, deps, row, { first: row.notifyClient ? 'booked' : null, notBefore: now + NEW_BOOKING_UNDO_MS })
+  await queueBookingSms(tx, deps, row, { news: row.notifyClient ? 'booked' : null })
   return row
 }
 
@@ -409,13 +414,9 @@ export async function moveBooking(deps: Deps, business: Business, actor: Actor, 
       await emit(tx, { ...event, userId: moved.userId })
       const left = staffIds.filter((id) => !plan.some((it) => it.staffId === id))
       for (const userId of await specialistAccounts(tx, left)) await emit(tx, { ...event, userId })
-      // a booking the client hasn't heard of yet gets its first SMS for the new time, once "Yzyna al" is over
-      const unheard = unheardUntil(b, now)
-      const notify = input.notifyClient ?? b.notifyClient
-      await queueBookingSms(tx, deps, moved, {
-        first: !notify ? null : unheard ? 'booked' : timeChanged ? 'moved' : 'staffChanged',
-        notBefore: unheard ?? undefined,
-      })
+      // the news is worded when it goes, from what the client knows: a confirmation still waiting tells the change
+      // itself, and a change back to what they knew tells nothing (`queueBookingSms`)
+      await queueBookingSms(tx, deps, moved, { news: (input.notifyClient ?? b.notifyClient) ? 'moved' : null })
     })
   } catch (e) {
     if (!isSlotConflict(e)) throw e

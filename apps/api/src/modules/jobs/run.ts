@@ -5,12 +5,12 @@
  * 3. Queued work: SMS, reminders, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
-import { REMINDER_KINDS } from '@yeral/domain/lifecycle'
+import { NEWS_QUEUED, newsSms, REMINDER_KINDS, toldOf, type NewsQueued, type Told } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
-import type { Locale } from '@yeral/domain/model'
+import { isOnlineSource, type Locale } from '@yeral/domain/model'
 import { isMobile } from '@yeral/domain/phone'
 import { addDays, epochOf, localOf } from '@yeral/domain/time'
-import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm'
+import { and, asc, eq, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import { bookings, businesses, clients, jobs, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import {
@@ -43,6 +43,8 @@ const BATCH = 100
  * count of failed SMS (attempts reached) leaves it out.
  */
 const DROPPED_REVIEW_ASK = 'dropped: no review asks (book Q-259)'
+/** A booking's news when it's back as the client knew it: nothing to tell, settled unsent. */
+const DROPPED_NOTHING_NEW = 'dropped: the client knows the booking as it is'
 /** A reminder whose try comes once the visit has started tells the client nothing (book Q-284): settled unsent. */
 const DROPPED_STARTED = 'dropped: the visit has started (book Q-284)'
 const REMINDERS: ReadonlySet<string> = new Set(REMINDER_KINDS)
@@ -187,7 +189,10 @@ const OUTCOMES: Record<OutcomeSmsKind, OutcomeSms> = {
   },
 }
 
-const isOutcome = (kind: string): kind is OutcomeSmsKind => kind in OUTCOMES
+const isOutcome = (kind: string): kind is OutcomeSmsKind => Object.hasOwn(OUTCOMES, kind)
+
+/** The time a cancel names: the one the client knows, not one a change they weren't told yet moved it to. */
+const knownTime = (b: BookingRow) => ({ date: b.told?.date ?? b.date, start: b.told?.start ?? b.start })
 
 async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): Promise<void> {
   const outcome = OUTCOMES[kind]
@@ -197,38 +202,71 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
   const biz = lb.business
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const lang = user?.lang ?? MARKET.defaultLanguage
-  const sms = { date: b.date, start: b.start, businessName: biz.name, address: biz.address }
+  const at = kind === 'cancelledOffers' ? knownTime(b) : { date: b.date, start: b.start }
+  const sms = { ...at, businessName: biz.name, address: biz.address }
   const to = user?.phone ?? b.clientPhone ?? ''
   const byPhone = !!(await onlineRefusal(deps.db, lb, to))
   await sendWithLink(deps, b, to, (link) => outcome.text(lang, { ...sms, link }, b, byPhone))
 }
 
+/** What the client knows now, written unless something else changed it since the job read the booking. */
+async function noteTold(deps: Deps, b: BookingRow, told: Told): Promise<void> {
+  await deps.db
+    .update(bookings)
+    .set({ told })
+    .where(and(eq(bookings.id, b.id), sql`${bookings.told} is not distinct from ${b.told === null ? null : JSON.stringify(b.told)}::jsonb`))
+}
+
 /**
- * A booking SMS, if the booking is still in the right state, still at the time the SMS was planned for (`at`; older
- * jobs have none), and the client wants it. Says why when it settles a reminder unsent that the job should record.
+ * A booking SMS, if the booking is still in the right state and the client wants it. News (`NEWS_QUEUED`) is worded
+ * from what the client knows and the booking as it is now (`newsSms`); a reminder goes only while the booking is still
+ * at the time it was planned for (`at`). Says why when it settles one unsent that the job should record.
  */
 async function sendBookingSms(
   deps: Deps,
   bookingId: string,
-  kind: BookingSmsKind | OutcomeSmsKind,
+  queuedKind: BookingSmsKind | OutcomeSmsKind | 'staffChanged',
   at: { date?: unknown; start?: unknown; covers?: unknown },
 ): Promise<string | undefined> {
-  const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
+  // a change queued by an older api, worded now like any news
+  const queued = queuedKind === 'staffChanged' ? 'moved' : queuedKind
+  const news = (NEWS_QUEUED as readonly string[]).includes(queued)
+  const read = deps.db.select().from(bookings).where(eq(bookings.id, bookingId))
+  // news about a booking the team may still be undoing waits for the undo, then finds it gone
+  const [b] = news ? await read.for('share') : await read
   // the person deleted their account: the number may be someone else's now
   if (!b?.clientPhone || b.accountDeletedAt) return
-  if (at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
+  if (!news && at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   // an account's phone took a sign-in code, so it's a mobile; a number the team typed in may not be
   if (!b.userId && !isMobile(b.clientPhone)) return DROPPED_NOT_MOBILE
-  if (isOutcome(kind)) {
-    await sendOutcomeSms(deps, b, kind)
+  if (isOutcome(queued)) {
+    await sendOutcomeSms(deps, b, queued)
     return
   }
   // a business's cancel goes while the booking stays cancelled by it ("Yzyna al" by the client can't undo those)
-  if (kind === 'cancelled' || kind === 'cancelledAsAsked') {
+  const cancel = queued === 'cancelled' || queued === 'cancelledAsAsked'
+  if (cancel) {
     if (b.status !== 'cancelled' || !b.businessCancelReason) return
   } else if (b.status !== 'confirmed') return
   // a retried reminder can't arrive after the start (book Q-284)
-  if (REMINDERS.has(kind) && deps.now() >= epochOf(b.date, b.start)) return DROPPED_STARTED
+  if (REMINDERS.has(queued) && deps.now() >= epochOf(b.date, b.start)) return DROPPED_STARTED
+  let kind: BookingSmsKind = queued
+  let items: Awaited<ReturnType<typeof itemsOf>> = []
+  let told: Told | undefined
+  if (news) {
+    // the news says what the client doesn't know yet, or nothing (book B-24, B-26)
+    items = await itemsOf(deps.db, b.id)
+    told = toldOf(
+      b,
+      items.map((i) => i.staffId),
+    )
+    const said = newsSms(queued as NewsQueued, isOnlineSource(b.source), b.told, told)
+    if (!said) return DROPPED_NOTHING_NEW
+    kind = said
+  } else if (REMINDERS.has(queued) && b.told) {
+    // a reminder tells the time
+    told = { ...b.told, date: b.date, start: b.start }
+  }
   const [user] = b.userId ? await deps.db.select().from(users).where(eq(users.id, b.userId)) : []
   const [client] = b.clientId ? await deps.db.select().from(clients).where(eq(clients.id, b.clientId)) : []
   if (client?.noRemindersSms && REMINDERS.has(kind)) return
@@ -237,7 +275,9 @@ async function sendBookingSms(
       // "Confirmations and changes": confirmations, moves and the business's cancels (book Q-286)
       confirmed: user.notifyConfirmation,
       booked: user.notifyConfirmation,
+      bookedWith: user.notifyConfirmation,
       moved: user.notifyConfirmation,
+      movedWith: user.notifyConfirmation,
       staffChanged: user.notifyConfirmation,
       cancelled: user.notifyConfirmation,
       cancelledAsAsked: user.notifyConfirmation,
@@ -253,22 +293,20 @@ async function sendBookingSms(
   if (!biz) return
   const lang = user?.lang ?? MARKET.defaultLanguage
   const sms = {
-    date: b.date,
-    start: b.start,
+    ...(cancel ? knownTime(b) : { date: b.date, start: b.start }),
     businessName: biz.name,
     address: biz.address,
     city: await smsCityOf(deps.db, biz.cityId, lang),
     reason: b.businessCancelReason ? businessCancelText(lang, b.businessCancelReason, b.cancelReason) : undefined,
-    staff:
-      kind === 'staffChanged'
-        ? [...new Set((await itemsOf(deps.db, b.id)).flatMap((i) => (i.staffName ? [i.staffName] : [])))].join(', ')
-        : undefined,
+    staff: [...new Set(items.flatMap((i) => (i.staffName ? [i.staffName] : [])))].join(', '),
   }
   // the texts with a link get one of their own (book Q-168)
   // the person's phone now: a changed number gets them, the old one nothing more (book Q-171)
   const to = user?.phone ?? b.clientPhone
   if (LINKED_SMS.has(kind)) await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
   else await deps.sms.send({ to, text: bookingSmsText(lang, kind, sms) })
+  // what the client knows now: the next news compares with it
+  if (told) await noteTold(deps, b, told)
 }
 
 /** The last try failed or never finished: kept for inspection, and the error tracker (F-209) alerts on this line (book Q-284). */

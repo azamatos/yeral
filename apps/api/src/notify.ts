@@ -43,7 +43,7 @@ export interface SmsBooking {
   city?: string | null
   /** A business's cancel: the reason as the client reads it (`businessCancelText`). */
   reason?: string
-  /** `staffChanged`: who does it now. */
+  /** Who does it now (`bookedWith`, `movedWith`, `staffChanged`). */
   staff?: string
 }
 
@@ -58,19 +58,33 @@ export async function smsCityOf(db: Queryable, cityId: string, lang: Locale): Pr
 }
 
 /**
- * `booked`: a booking the team entered for a client who called (book B-23, Q-288), with the address. `moved`: the
- * business moved it (B-26); `staffChanged`: it gave it to another specialist at the same time. `cancelled`: the business cancelled it, with the reason; `cancelledAsAsked`: the team
+ * `booked`: a booking the team entered for a client who called (book B-23, Q-288), with the address; `bookedWith`
+ * names who does it, when that changed after the call. `moved`: the
+ * business moved it (B-26), `movedWith` to another specialist too; `staffChanged`: it gave it to another specialist at the
+ * same time. `cancelled`: the business cancelled it, with the reason; `cancelledAsAsked`: the team
  * entered the client's own cancel ("The client called to cancel", B-27). `reminderEvening`: a reminder moved out of
  * the night to 21:30 the evening before, worded like the day one ("tomorrow").
  */
 export type BookingSmsKind =
-  'confirmed' | 'booked' | 'moved' | 'staffChanged' | 'cancelled' | 'cancelledAsAsked' | 'reminderDay' | 'reminder2h' | 'reminderEvening'
+  | 'confirmed'
+  | 'booked'
+  | 'bookedWith'
+  | 'moved'
+  | 'movedWith'
+  | 'staffChanged'
+  | 'cancelled'
+  | 'cancelledAsAsked'
+  | 'reminderDay'
+  | 'reminder2h'
+  | 'reminderEvening'
 
 /** The booking SMS that carry the booking's link (book Q-168); reminders don't. */
 export const LINKED_SMS: ReadonlySet<BookingSmsKind> = new Set([
   'confirmed',
   'booked',
+  'bookedWith',
   'moved',
+  'movedWith',
   'staffChanged',
   'cancelled',
   'cancelledAsAsked',
@@ -97,14 +111,21 @@ export function bookingSmsText(lang: Locale, kind: BookingSmsKind, b: SmsBooking
   switch (kind) {
     case 'confirmed':
     case 'booked':
+    case 'bookedWith':
     case 'moved':
-      return t(`sms.${kind}`, { ...common, weekday: fmt.weekday(dayOf(b.date, b.start)), date: fmt.dayMonth(dayOf(b.date, b.start)) })
+      return t(`sms.${kind}`, {
+        ...common,
+        weekday: fmt.weekday(dayOf(b.date, b.start)),
+        date: fmt.dayMonth(dayOf(b.date, b.start)),
+        staff: b.staff ?? '',
+      })
     case 'cancelled':
       return t('sms.cancelled', { ...common, date: fmt.dayMonth(dayOf(b.date, b.start)), reason: b.reason ?? '' })
     case 'cancelledAsAsked':
       return t('sms.cancelledAsAsked', { ...common, date: fmt.dayMonth(dayOf(b.date, b.start)) })
+    case 'movedWith':
     case 'staffChanged':
-      return t('sms.staffChanged', {
+      return t(`sms.${kind}`, {
         ...common,
         weekday: fmt.weekday(dayOf(b.date, b.start)),
         date: fmt.dayMonth(dayOf(b.date, b.start)),

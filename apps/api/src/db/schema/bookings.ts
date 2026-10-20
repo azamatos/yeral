@@ -6,6 +6,7 @@
  * (exclusion constraints in the migrations, btree_gist).
  * Rows keep snapshots (client name and phone, service names, prices) so history survives edits and deletions.
  */
+import type { Told } from '@yeral/domain/lifecycle'
 import type { DeclineReason, Localized } from '@yeral/domain/model'
 import { sql } from 'drizzle-orm'
 import { bigserial, boolean, date, index, integer, jsonb, pgTable, text, uniqueIndex, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -107,6 +108,11 @@ export const bookings = pgTable(
       .references((): AnyPgColumn => bookings.id, { onDelete: 'set null' }),
     /** Tell the client by SMS about changes made in the workspace (manual bookings). */
     notifyClient: boolean().notNull().default(true),
+    /**
+     * The booking as the client knows it (`Told`): what the next SMS about a change compares with, so it says what
+     * changed, or nothing when it's back as they knew it. Null on bookings made before it was kept.
+     */
+    told: jsonb().$type<Told>(),
     // table
     partySize: integer(),
     areaId: uuid().references(() => tableAreas.id, { onDelete: 'set null' }),
@@ -278,5 +284,11 @@ export const jobs = pgTable(
     error: text(),
     createdAt: createdAt(),
   },
-  (t) => [index('jobs_due_idx').on(t.doneAt, t.runAt)],
+  (t) => [
+    index('jobs_due_idx').on(t.doneAt, t.runAt),
+    // a booking's SMS still to go, found when a later one replaces them (`queueBookingSms`)
+    index('jobs_waiting_booking_idx')
+      .on(sql`(${t.payload}->>'bookingId')`)
+      .where(sql`${t.doneAt} is null`),
+  ],
 )

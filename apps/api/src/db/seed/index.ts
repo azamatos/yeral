@@ -370,8 +370,20 @@ async function seedClient(
   return row.id
 }
 
+/** What each client knows of a seeded booking: the booking as seeded, as migration 0024 fills the ones made before it. */
+const FILL_TOLD = sql`UPDATE "bookings" b SET "told" = jsonb_build_object(
+  'date', b."date",
+  'start', b."start",
+  'staff', coalesce((SELECT string_agg(coalesce(i."staff_id"::text, ''), ',' ORDER BY i."sort") FROM "booking_items" i WHERE i."booking_id" = b."id"), '')
+) WHERE b."told" IS NULL`
+
 export async function seed(db: Db, opts: { demo: boolean; now: number }): Promise<Record<string, number>> {
-  return db.transaction(async (tx) => (opts.demo ? seedDemo(tx, opts) : seedCatalogue(tx)))
+  return db.transaction(async (tx) => {
+    if (!opts.demo) return seedCatalogue(tx)
+    const counts = await seedDemo(tx, opts)
+    await tx.execute(FILL_TOLD)
+    return counts
+  })
 }
 
 /** The market's cities and the category catalogue, kept up to date on every setup, a kept demo included. */
