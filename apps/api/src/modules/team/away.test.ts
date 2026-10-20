@@ -16,6 +16,8 @@ const W = '/v1/w/glow-studio'
 const THU = '2026-11-12'
 const FRI = '2026-11-13'
 const SAT = '2026-11-14'
+const FRI2 = '2026-11-20'
+const SAT2 = '2026-11-21'
 
 describe('a specialist away or leaving (book B-47, B-50)', () => {
   let db: Db
@@ -161,11 +163,16 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
   it('a day off over bookings asks first; moved to whoever is free, else other times; or kept, with nothing new booked', async () => {
     const maysa = await as(MAYSA)
     const ogul = await hire(maysa, '+99365800531', 'Ogul')
-    const first = await book(maysa, '+99365800532', ogul, FRI, 900)
-    const second = await book(maysa, '+99365800533', ogul, FRI, 960)
-    // Jeren takes the first, not the second
-    await book(maysa, '+99365800534', jerenId, FRI, 960)
-    const off = { ...businessWeek, daysOff: [{ name: 'Holiday', from: FRI, to: FRI, yearly: false }] }
+    const first = await book(maysa, '+99365800532', ogul, FRI2, 600)
+    const second = await book(maysa, '+99365800533', ogul, FRI2, 720)
+    // everyone else who does manicures is busy at 12:00: the first moves, the second can't
+    const others = await db
+      .select({ id: staff.id })
+      .from(staff)
+      .innerJoin(staffServices, eq(staffServices.staffId, staff.id))
+      .where(and(eq(staff.businessId, glowId), eq(staff.status, 'active'), eq(staffServices.serviceId, manicure)))
+    for (const [i, o] of others.filter((o) => o.id !== ogul).entries()) await book(maysa, `+9936580054${i}`, o.id, FRI2, 720)
+    const off = { ...businessWeek, daysOff: [{ name: 'Holiday', from: FRI2, to: FRI2, yearly: false }] }
     const asked = await schedule(maysa, ogul, off)
     expect(asked.json.error).toMatchObject({ code: 'bookings_affected', details: { count: 2 } })
     expect((await maysa.req(`${W}/team/${ogul}/schedule`)).json.daysOff).toEqual([])
@@ -176,18 +183,49 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
     expect(await whoOn(second)).toMatchObject({ status: 'cancelled', reason: 'staff_away' })
 
     // kept: they stay, and the day takes nothing new
-    const kept = await book(maysa, '+99365800535', ogul, SAT, 600)
-    const saturday = { ...businessWeek, daysOff: [...off.daysOff, { name: 'Trip', from: SAT, to: SAT, yearly: false }] }
+    const kept = await book(maysa, '+99365800535', ogul, SAT2, 600)
+    const saturday = { ...businessWeek, daysOff: [...off.daysOff, { name: 'Trip', from: SAT2, to: SAT2, yearly: false }] }
     expect((await schedule(maysa, ogul, { ...saturday, affected: 'keep' })).json).toMatchObject({ moved: 0, kept: 1, cancelled: 0 })
     expect(await whoOn(kept)).toMatchObject({ status: 'confirmed', staff: ['Ogul'] })
     const refused = await maysa.req(`${W}/bookings`, {
-      body: { source: 'phone', phone: '+99365800536', serviceIds: [manicure], staffId: ogul, date: SAT, start: 720 },
+      body: { source: 'phone', phone: '+99365800536', serviceIds: [manicure], staffId: ogul, date: SAT2, start: 720 },
     })
     expect(refused.status).toBe(409)
     // saved again with no change to Saturday: the kept booking isn't asked about
     expect(
       (await schedule(maysa, ogul, { ...saturday, breaks: [null, null, null, { start: 780, end: 800 }, null, null, null] })).status,
     ).toBe(200)
+  })
+
+  it('a client’s move onto a day the specialist took off since is refused when confirmed', async () => {
+    const maysa = await as(MAYSA)
+    const nur = (
+      await db
+        .select()
+        .from(staff)
+        .where(and(eq(staff.businessId, glowId), eq(staff.name, 'Nur')))
+    )[0]!.id
+    const client = await as('+99365800551', 'Client')
+    const sent = await client.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [manicure], staffId: nur, date: '2026-10-27', start: 660 },
+    })
+    expect((await maysa.req(`${W}/requests/${sent.json.code}/confirm`, { body: {} })).status).toBe(204)
+    const asked = await client.req(`/v1/me/bookings/${sent.json.code}/reschedule`, { body: { date: '2026-10-28', start: 660 } })
+    expect(asked.status).toBe(200)
+    const move = (
+      await db
+        .select()
+        .from(bookings)
+        .where(eq(bookings.rescheduleOf, (await db.select().from(bookings).where(eq(bookings.code, sent.json.code)))[0]!.id))
+    )[0]!
+    // the waiting move isn't asked about: it's answered on its own
+    const saved = await schedule(maysa, nur, {
+      ...(await maysa.req(`${W}/team/${nur}/schedule`)).json,
+      daysOff: [{ name: 'Leave', from: '2026-10-28', to: '2026-10-28', yearly: false }],
+    })
+    expect(saved.status).toBe(200)
+    const confirmed = await maysa.req(`${W}/requests/${move.code}/confirm`, { body: {} })
+    expect(confirmed.json.error).toMatchObject({ code: 'cannot_move', details: { problem: 'staff_off', staffId: nur } })
   })
 
   it('a booking being made checks the specialist’s day as it stands, under the business’s lock', async () => {
