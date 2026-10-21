@@ -85,7 +85,7 @@ export function InviteStep({
       focusKey="invite"
       media={
         <div className="flex min-w-0 items-center gap-3.5">
-          <BusinessMark name={business.name} photo={business.photo} />
+          <BusinessMark name={business.name} logo={business.logo} />
           <span className="flex min-w-0 flex-col gap-0.5">
             <span className="text-[17px] leading-6 font-semibold">{business.name}</span>
             <span className="text-dense text-n-600">

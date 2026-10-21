@@ -105,6 +105,8 @@ export const businesses = pgTable(
     lng: doublePrecision().notNull(),
     phone: text().notNull(),
     photos: jsonb().$type<StoredPhoto[]>().notNull().default([]),
+    /** The logo (B-37): square; the switcher's, the invite's and the profile's picture. None: a letter tile. */
+    logo: jsonb().$type<StoredPhoto>(),
     /** Amenity keys: `wifi`, `air_conditioning`, `parking`, `card_payment` … */
     amenities: text().array().notNull().default([]),
     hours: jsonb().$type<WeekHours>().notNull(),

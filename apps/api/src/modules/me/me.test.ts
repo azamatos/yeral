@@ -491,6 +491,7 @@ describe('account', () => {
         '/v1/w/{slug}/setup',
         '/v1/w/{slug}/setup/finish',
         '/v1/me/photo',
+        '/v1/w/{slug}/settings/logo',
         '/v1/w/{slug}/settings/photos',
         '/v1/w/{slug}/settings/photos/{id}',
         '/v1/w/{slug}/settings/photos/order',

@@ -629,6 +629,17 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: () => call(w.verification.$post({ param: { slug } })),
         onSuccess: () => settingsChanged(slug),
       }),
+    /** The logo (book B-37): square; the app crops and shrinks it first. The switcher and invite cards show it. */
+    setLogo: (slug: string) =>
+      mutationOptions({
+        mutationFn: (file: File) => call(w.settings.logo.$put({ param: { slug }, form: { file } })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    removeLogo: (slug: string) =>
+      mutationOptions({
+        mutationFn: () => call(w.settings.logo.$delete({ param: { slug } })),
+        onSuccess: () => settingsChanged(slug),
+      }),
     /** "Suratlar" (book B-37): up to 20, the first the cover. */
     gallery: (slug: string) =>
       queryOptions({

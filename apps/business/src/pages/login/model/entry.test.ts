@@ -10,13 +10,22 @@ const workspace = (slug: string, lastOpenedAt: number | null = null): Workspace 
   address: '247 Bitarap Türkmenistan Avenue',
   city,
   photo: null,
+  logo: null,
   level: 'owner',
   requestsToAnswer: 0,
   lastOpenedAt,
 })
 const invite = (id: string, state: InviteCard['state'], expiresAt = 0): InviteCard => ({
   id,
-  business: { slug: 'glow-studio', name: 'Glow Studio', category: 'Beauty', address: '247 Bitarap Türkmenistan Avenue', city, photo: null },
+  business: {
+    slug: 'glow-studio',
+    name: 'Glow Studio',
+    category: 'Beauty',
+    address: '247 Bitarap Türkmenistan Avenue',
+    city,
+    photo: null,
+    logo: null,
+  },
   invitedBy: 'Maýsa Annaýewa',
   level: 'specialist',
   answersRequests: true,

@@ -1369,7 +1369,7 @@ flowchart TD
 
 > Open question Q-213: closing or deleting a workspace.
 
-**Status** — Design: drawn (B-Settings · `pane=profile`, `dirty`) · Code: api built for the texts, phone, amenities, category and address (`GET`/`PATCH /v1/w/{slug}/settings/profile`, 20.10.2026) and the photos (`/v1/w/{slug}/settings/photos`: add, remove, order; 21.10.2026); the logo isn't built yet.
+**Status** — Design: drawn (B-Settings · `pane=profile`, `dirty`) · Code: api built for the texts, phone, amenities, category and address (`GET`/`PATCH /v1/w/{slug}/settings/profile`, 20.10.2026) the photos (`/v1/w/{slug}/settings/photos`: add, remove, order; 21.10.2026) and the logo (`PUT`/`DELETE /v1/w/{slug}/settings/logo`, on the profile, the workspaces and the invite cards; 21.10.2026).
 
 ### B-38 · Services and groups
 

@@ -64,13 +64,16 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
     .where(and(eq(staff.userId, user.id), eq(staff.level, 'owner'), isNotNull(businesses.setupStep)))
   // the photos that go with the account, for the caller to take from the store once this is done: its own, and a
-  // deleted draft's team pictures and gallery, as the deletes find them (a photo added meanwhile goes too)
+  // deleted draft's team pictures, gallery and logo, as the deletes find them (a photo added meanwhile goes too)
   const photos = [user.photo?.key]
   if (how === 'deleted' && drafts.length) {
     const ids = drafts.map((d) => d.id)
     const pictures = await tx.delete(staff).where(inArray(staff.businessId, ids)).returning({ photo: staff.photo })
-    const gone = await tx.delete(businesses).where(inArray(businesses.id, ids)).returning({ photos: businesses.photos })
-    photos.push(...pictures.map((p) => p.photo?.key), ...gone.flatMap((b) => b.photos.map((p) => p.key)))
+    const gone = await tx
+      .delete(businesses)
+      .where(inArray(businesses.id, ids))
+      .returning({ photos: businesses.photos, logo: businesses.logo })
+    photos.push(...pictures.map((p) => p.photo?.key), ...gone.flatMap((b) => [...b.photos.map((p) => p.key), b.logo?.key]))
   }
   const kept = how === 'deleted' ? [] : drafts.map((d) => d.id)
   // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)

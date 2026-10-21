@@ -13,7 +13,17 @@ import {
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
 import { GALLERY_MAX } from '@yeral/domain/photos'
 import { z } from 'zod'
-import { idSchema, latLngSchema, marketLocaleSchema, minuteSchema, phoneInputSchema, phoneSchema, slugSchema, ymdSchema } from './common'
+import {
+  idSchema,
+  latLngSchema,
+  marketLocaleSchema,
+  minuteSchema,
+  phoneInputSchema,
+  phoneSchema,
+  photoSchema,
+  slugSchema,
+  ymdSchema,
+} from './common'
 
 /**
  * The booking rules (B-41). The values each one takes are the settings screen's options (`RULE_OPTIONS` in
@@ -62,14 +72,16 @@ export const locationSchema = latLngSchema.extend({
 })
 
 /**
- * The business profile (B-37): what the public page says. The logo and photos come with uploads (F-084, F-101). The
- * owner and administrators ("change business settings").
+ * The business profile (B-37): what the public page says. The logo (`/settings/logo`) and the photos (`/settings/photos`)
+ * are uploads of their own (F-084, F-101). The owner and administrators ("change business settings").
  */
 export const businessProfileSchema = z
   .object({
     slug: slugSchema,
     /** As clients see it in search, on bookings and in SMS. */
     name: z.string(),
+    /** Square (the apps crop it); null: the apps draw a letter tile. */
+    logo: photoSchema.nullable(),
     /** It sets how the business is found and booked: a change keeps the kind of booking. */
     categoryId: z.string(),
     /** "Näme edýärsiňiz…", per language as written. */
@@ -134,6 +146,9 @@ const photoIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/)
 export const galleryPhotoParamSchema = z.object({ slug: slugSchema, id: photoIdSchema })
 
 /** "Suratlar": up to 20, the first the cover on every card and page. */
+/** The logo (B-37) after a change: square, at least 400 × 400 (the apps crop and shrink it first); null once removed. */
+export const businessLogoSchema = z.object({ logo: photoSchema.nullable() }).meta({ id: 'BusinessLogo' })
+
 export const gallerySchema = z
   .object({ items: z.array(z.object({ id: photoIdSchema, url: z.string(), alt: z.string() })) })
   .meta({ id: 'Gallery' })

@@ -24,7 +24,7 @@ export function ShellSwitcher({ variant, className }: { variant: 'sidebar' | 'ra
     id: w.slug,
     name: w.name,
     caption: t('where', { level: tl(w.level), city: w.city.name }),
-    logo: w.photo?.url,
+    logo: w.logo?.url,
     current: w.slug === slug,
     count: w.requestsToAnswer > 0 ? { count: w.requestsToAnswer, label: t('requests', { count: w.requestsToAnswer }) } : null,
   }))
@@ -33,7 +33,7 @@ export function ShellSwitcher({ variant, className }: { variant: 'sidebar' | 'ra
       variant={variant}
       name={workspace.name}
       level={level}
-      logo={workspace.photo?.url}
+      logo={workspace.logo?.url}
       items={items}
       person={account.person && t('switcher.person', { name: account.name, phone: account.phone })}
       copy={{

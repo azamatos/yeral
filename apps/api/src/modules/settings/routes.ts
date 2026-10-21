@@ -19,6 +19,7 @@ import {
   internalStatusParamSchema,
   internalStatusSchema,
   internalStatusUpdateSchema,
+  businessLogoSchema,
 } from '@yeral/contract/settings'
 import { photoUploadSchema } from '@yeral/contract/common'
 import { workspaceParamSchema } from '@yeral/contract/team'
@@ -33,6 +34,7 @@ import { requireMember } from '../team/service'
 import { hoursOf, updateHours } from './hours'
 import { profileOf, rulesOf, updateProfile, updateRules } from './service'
 import { uploadGuard } from '../media/photos'
+import { removeLogo, setLogo } from './logo'
 import { addPhoto, galleryOf, orderPhotos, removePhoto } from './photos'
 import { addStatus, deleteStatus, statusesOf, updateStatus } from './statuses'
 
@@ -140,6 +142,24 @@ const deleteStatusRoute = createRoute({
   responses: { ...noContent, 400: errors[400], ...denied },
 })
 
+const setLogoRoute = createRoute({
+  method: 'put',
+  path: '/w/{slug}/settings/logo',
+  tags,
+  summary: 'The logo (JPEG, PNG or WebP, up to 10 MB; square, the app crops it); the old one goes',
+  middleware: [uploadGuard] as const,
+  request: { params: workspaceParamSchema, ...formBody(photoUploadSchema) },
+  responses: { 200: json(businessLogoSchema), 400: errors[400], 429: errors[429], ...denied },
+})
+const removeLogoRoute = createRoute({
+  method: 'delete',
+  path: '/w/{slug}/settings/logo',
+  tags,
+  summary: 'No logo: the apps draw a letter tile',
+  request: { params: workspaceParamSchema },
+  responses: { 200: json(businessLogoSchema), ...denied },
+})
+
 const galleryRoute = createRoute({
   method: 'get',
   path: '/w/{slug}/settings/photos',
@@ -180,6 +200,14 @@ export const settingsRoutes = new OpenAPIHono<AppEnv>()
     if (member.level !== 'owner') throw new ApiError('forbidden')
     await sendForReview(c.var.deps, business.id)
     return c.body(null, 204)
+  })
+  .openapi(setLogoRoute, async (c) => {
+    const { business, user } = await requireSettings(c, c.req.valid('param').slug)
+    return c.json(await setLogo(c.var.deps, business, c.req.valid('form').file, user.lang), 200)
+  })
+  .openapi(removeLogoRoute, async (c) => {
+    const { business } = await requireSettings(c, c.req.valid('param').slug)
+    return c.json(await removeLogo(c.var.deps, business), 200)
   })
   .openapi(galleryRoute, async (c) => {
     const { business, user } = await requireSettings(c, c.req.valid('param').slug)
@@ -226,12 +254,12 @@ export const settingsRoutes = new OpenAPIHono<AppEnv>()
     return c.json(await updateRules(c.var.deps.db, business.id, c.req.valid('json')), 200)
   })
   .openapi(profileRoute, async (c) => {
-    const { business } = await requireSettings(c, c.req.valid('param').slug)
-    return c.json(await profileOf(c.var.deps.db, business.id), 200)
+    const { business, user } = await requireSettings(c, c.req.valid('param').slug)
+    return c.json(await profileOf(c.var.deps, business.id, user.lang), 200)
   })
   .openapi(updateProfileRoute, async (c) => {
-    const { business } = await requireSettings(c, c.req.valid('param').slug)
-    return c.json(await updateProfile(c.var.deps.db, business.id, c.req.valid('json'), c.var.deps.now()), 200)
+    const { business, user } = await requireSettings(c, c.req.valid('param').slug)
+    return c.json(await updateProfile(c.var.deps, business.id, c.req.valid('json'), user.lang), 200)
   })
   .openapi(hoursRoute, async (c) => {
     const { business } = await requireSettings(c, c.req.valid('param').slug)
