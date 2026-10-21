@@ -9,6 +9,7 @@ import { toast } from '@yeral/ui/toast'
 import { Info, LogOut } from 'lucide-react'
 import { useState, type FormEvent, type RefObject } from 'react'
 import { useTranslations } from 'use-intl'
+import { ContactYeralLink } from '@/features/contact-yeral'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { useAccount } from '../model/use-account'
@@ -123,10 +124,13 @@ function Profile({ onDone }: { onDone: () => void }) {
           </ul>
         </section>
         {owner && (
-          <p className="m-0 flex items-start gap-2.5 rounded-m bg-group px-4 py-3 text-small text-n-900">
+          <div className="flex items-start gap-2.5 rounded-m bg-group px-4 py-3 text-small text-n-900">
             <Info aria-hidden className="mt-0.5 size-4.5 flex-none text-n-600" />
-            {t('shell.profile.ownerCantLeave', { business: workspace.name, brand: t('common.brand') })}
-          </p>
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <p className="m-0">{t('shell.profile.ownerCantLeave', { business: workspace.name, brand: t('common.brand') })}</p>
+              <ContactYeralLink />
+            </div>
+          </div>
         )}
       </DrawerBody>
       <DrawerFooter className="items-center [&>*]:flex-none">

@@ -118,5 +118,10 @@
     "title": "Something went wrong",
     "lead": "Try again. If it keeps happening, reload the page.",
     "action": "Try again"
+  },
+  "support": {
+    "contact": "Contact {brand}",
+    "call": "Call",
+    "write": "Write on Telegram"
   }
 }

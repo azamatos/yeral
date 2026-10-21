@@ -100,7 +100,7 @@ flowchart LR
 **Edge cases**
 
 - Someone already signed in on yeral.app with the same phone: the wizard still starts at the phone step; the account is the same (B-02).
-- Support phone and Telegram links are placeholders in the design (§24 lists them as open owner items).
+- The support phone and Telegram are the market's support line (`MARKET.support`; the owner's own until Ýeral has one, chapter 9, 21.10.2026).
 
 **Status** — Design: drawn (B-Landing) · Code: not built.
 
@@ -427,7 +427,7 @@ flowchart TD
 
 > Open question Q-202: does the page address name the workspace.
 
-**Status** — Design: drawn (B-Shell · switcher; B-Onboarding · `fromSwitcher`; B-Mobile) · Code: built (api `/v1/me/workspaces`; the app's frame and switcher, #113 and #119, chapter 9's 21.10.2026 rows); "Create a business" opens the setup wizard, a stand-in until P4 slice 2.
+**Status** — Design: drawn (B-Shell · switcher; B-Onboarding · `fromSwitcher`; B-Mobile) · Code: built (api `/v1/me/workspaces`; the app's frame and switcher, #113 and #119; the account menu's Contact Ýeral; chapter 9's 21.10.2026 rows); "Create a business" opens the setup wizard, a stand-in until P4 slice 2.
 
 ### B-11 · Verification as the business sees it
 
@@ -598,7 +598,7 @@ flowchart TD
 
 > Open question Q-203: what happens to bookings when a specialist leaves.
 
-**Status** — Design: drawn (B-Shell · Profilim, Aýna) · Code: built for the person (api `/v1/w/{slug}/leave`; My profile, #121, chapter 9's 21.10.2026 rows): the confirm has no counts of the bookings ahead until the api gives them; the owner's notification that opens the remove flow (step 3, Q-203) isn't built.
+**Status** — Design: drawn (B-Shell · Profilim, Aýna) · Code: built for the person (api `/v1/w/{slug}/leave`; My profile, #121, chapter 9's 21.10.2026 rows): the confirm has no counts of the bookings ahead until the api gives them; the owner's box has Contact Ýeral; the owner's notification that opens the remove flow (step 3, Q-203) isn't built.
 
 ## 3. The calendar
 
@@ -2031,7 +2031,7 @@ flowchart TD
 **Edge cases**
 
 - No article found: "Başga söz bilen ýazyp görüň ýa-da soragyňyzy goldaw çatyna ýazyň."
-- Support phone and Telegram are placeholders (§24).
+- The support phone and Telegram are the market's support line (`MARKET.support`; chapter 9, 21.10.2026); the business app's account menu has them as Contact Ýeral.
 - Help articles and the support chat come after launch; the launch admin tool covers businesses and reported reviews (chapter 3, "The Ýeral team"; Q-010, decided 18.10.2026).
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.

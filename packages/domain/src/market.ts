@@ -29,6 +29,14 @@ export interface PhoneRules {
   groups: readonly number[]
 }
 
+/** Ýeral's own support line in a market (book F-174): Contact Ýeral in the business app, the example businesses' phone. */
+export interface Support {
+  /** E.164: `+99364754591`. */
+  phone: string
+  /** A Telegram username, without the `@`. */
+  telegram: string
+}
+
 export interface Market {
   /** ISO 3166-1 alpha-2, lower case. */
   code: string
@@ -44,6 +52,7 @@ export interface Market {
   phone: PhoneRules
   /** The city a visitor starts in until they allow their location or pick another (book Q-107): a `cities` id. */
   mainCity: string
+  support: Support
 }
 
 /** A test that the digits start with one of `prefixes` (digits only): ['6', '71'] → /^(?:6|71)/. */
@@ -80,6 +89,8 @@ export const TURKMENISTAN: Market = {
     groups: [2, 2, 2, 2],
   }),
   mainCity: 'ashgabat',
+  // the owner's own number and Telegram until Ýeral has its own (the owner, 21.10.2026)
+  support: { phone: '+99364754591', telegram: 'eldzhernone' },
 }
 
 /** The market of this deployment. */

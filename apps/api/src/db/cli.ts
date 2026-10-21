@@ -86,8 +86,8 @@ async function main() {
       }
       // the first launch's example businesses (book Q-004): added once each, beside the real ones
       if (!demo && config.exampleBusinesses) {
-        const added = await seedExamples(db, { now: Date.now(), phone: config.examplePhone! })
-        console.warn(`example businesses: ${added} added`)
+        const added = await seedExamples(db, { now: Date.now(), phone: config.examplePhone })
+        console.warn(`example businesses: ${added} added, all showing ${config.examplePhone}`)
       }
     }
   } finally {

@@ -337,7 +337,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-171 | SMS to staff | SMS only for critical events (new request, Ýeral notices), never at night; Ýeral pays. | MVP | spec only (business §16, §22) | not built | Cost on Ýeral while free. |
 | F-172 | Quiet hours and summaries | Quiet hours 22:00–08:00, evening "tomorrow's bookings" and morning daily summary. | Later | drawn (B-Notifications) | not built |  |
 | F-173 | Help centre | Search, categories, popular articles, article page with "was this helpful?"; "?" buttons in settings open the article in a drawer (spec only). | Later | drawn (B-Help) | not built | Articles come from the CMS (F-182). |
-| F-174 | Support chat | Right-drawer chat with Ýeral support ("usually 10 min", working hours). | Later | drawn (B-Help · chat) | not built | Needs F-183. Support phone and Telegram are placeholders (open). |
+| F-174 | Support chat | Right-drawer chat with Ýeral support ("usually 10 min", working hours). | Later | drawn (B-Help · chat) | not built | Needs F-183. The support phone and Telegram are set (`MARKET.support`, 21.10.2026): Contact Ýeral in the business app. |
 
 ## Business · marketing (B2B landing)
 

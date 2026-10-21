@@ -84,7 +84,7 @@ interface Ctx {
    * visitor's booking), no invites, no reviews of their own, and only the design's yearly days off.
    */
   example?: boolean
-  /** The phone an example shows (`EXAMPLE_PHONE`). */
+  /** The phone an example shows: the market's support line, or `EXAMPLE_PHONE`. */
   examplePhone?: string
 }
 
@@ -432,7 +432,7 @@ export async function seedExamples(db: Db, opts: { now: number; phone: string })
         await seedBusiness(ctx, def)
         added++
       }
-    // the phone they show follows `EXAMPLE_PHONE`, a change of it included
+    // the phone they show follows the config's (the market's support line or `EXAMPLE_PHONE`), a change of it included
     const examples = BUSINESSES.filter((d) => d.type === 'appointment').map((d) => d.slug)
     await tx
       .update(t.businesses)

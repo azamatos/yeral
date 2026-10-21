@@ -4,6 +4,7 @@
  * ones lock), so each story walks a sign-in and checks what the board draws at every step.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
 import { useParams } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import type { InviteCard, Workspace } from '@yeral/contract/team'
@@ -76,6 +77,14 @@ const PEOPLE: Record<string, Account> = {
     workspaces: [workspace('glow-studio', 'Glow Studio', 'owner', 2), workspace('maysa-home', 'Maýsa’s studio', 'owner', 1)],
     current: 'glow-studio',
     invites: [],
+  },
+  // an owner unused for 6 months: "No" can't start the number afresh (`owns_workspace`)
+  '+99365400700': {
+    me: person('+99365400700', 'Merdan', 'Ataýew'),
+    workspaces: [workspace('merdan-barber', 'Merdan’s barber', 'owner', 0)],
+    current: 'merdan-barber',
+    invites: [],
+    unused: true,
   },
   '+99364215590': {
     me: person('+99364215590', 'Gülnar', 'Öwezowa'),
@@ -198,6 +207,7 @@ const fakeApi =
       }
       if (route === 'POST /auth/identity') {
         if (!account || !phone) return refuse(400, 'code_expired')
+        if (!body.yes && account.workspaces.some((w) => w.level === 'owner')) return refuse(409, 'owns_workspace')
         account = body.yes ? account : fresh(phone)
         me = account.me
         return json({ me, isNew: !me.firstName })
@@ -574,6 +584,28 @@ export const IsThisYou: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Yes, it’s me' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Opening Glow Studio…' })).toBeVisible()
     await expect(canvas.getByText('Specialist · Ashgabat')).toBeVisible()
+  },
+}
+
+/** "No" from a business's owner: the number can't start afresh; Contact Ýeral takes the focus. */
+export const IsThisYouOwner: Story = {
+  name: 'Is this you? · an owner says no',
+  args: { server: fakeApi() },
+  play: async ({ canvas }) => {
+    await sendCode(canvas, '65400700')
+    await userEvent.keyboard('4821')
+    await canvas.findByRole('heading', { level: 1, name: 'Is this you, Merdan?' })
+    await userEvent.click(canvas.getByRole('button', { name: /No/ }))
+    const alert = await canvas.findByRole('alert')
+    await expect(alert).toHaveTextContent('This account owns a business on Ýeral')
+    // the focus moves from the No button, now off, to Contact Ýeral
+    const contact = within(alert).getByRole('button', { name: 'Contact Ýeral' })
+    await waitFor(() => expect(contact).toHaveFocus())
+    await userEvent.click(contact)
+    const menu = await within(document.body).findByRole('menu', { name: 'Contact Ýeral' })
+    await expect(within(menu).getByRole('menuitem', { name: `Call ${SUPPORT_LINE.phone}` })).toHaveAttribute('href', SUPPORT_LINE.phoneHref)
+    await userEvent.keyboard('{Escape}')
+    await expect(canvas.getByRole('button', { name: /No/ })).toBeDisabled()
   },
 }
 

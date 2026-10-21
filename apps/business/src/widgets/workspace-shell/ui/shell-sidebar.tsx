@@ -2,8 +2,9 @@ import { Link } from '@tanstack/react-router'
 import { AccountMenu } from '@yeral/ui/account-menu'
 import { cn } from '@yeral/ui/cn'
 import { SideNav, SideNavDivider, SideNavItem } from '@yeral/ui/side-nav'
-import { ExternalLink, LogOut, User } from 'lucide-react'
+import { ExternalLink, Headset, LogOut, User } from 'lucide-react'
 import { useTranslations } from 'use-intl'
+import { useContactYeral } from '@/features/contact-yeral'
 import { sectionsFor } from '../model/sections'
 import { useAccount } from '../model/use-account'
 import { useWorkspace } from '../model/use-workspace'
@@ -24,6 +25,7 @@ export function ShellSidebar({
   onProfile: (opener: HTMLElement | null) => void
 }) {
   const t = useTranslations('shell')
+  const contact = useContactYeral()
   const { slug, workspace } = useWorkspace()
   const account = useAccount()
   if (!workspace) return null
@@ -72,6 +74,7 @@ export function ShellSidebar({
             href: account.client.href,
             external: true,
           },
+          { id: 'contact', label: contact.title, icon: <Headset />, links: contact.links },
           { id: 'logout', label: t('account.logout'), icon: <LogOut />, danger: true, onSelect: account.logout },
         ]}
         className={collapsed ? undefined : 'self-stretch'}

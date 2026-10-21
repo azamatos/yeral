@@ -48,7 +48,7 @@ services:
       # the first launch's example businesses (book Q-004): `setup` adds them, marked "Example" and confirming at once;
       # on with the code on the screen when the first launch opens (operations.md)
       EXAMPLE_BUSINESSES: 'false'
-      # the phone every example shows and "Call" reaches: Ýeral's own support line (set it with the examples)
+      # the phone every example shows and "Call" reaches: the market's support line (MARKET.support.phone) unless set
       # EXAMPLE_PHONE: '+993…'
       # the kinds of booking open (book Q-030): appointments until tables and classes ship
       BOOKING_TYPES: appointment

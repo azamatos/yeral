@@ -1,4 +1,5 @@
 /** The api's environment (`config.ts`). */
+import { MARKET } from '@yeral/domain/market'
 import { describe, expect, it } from 'vitest'
 import { DEV_ADMIN_KEY, loadConfig } from './config'
 
@@ -16,8 +17,8 @@ describe('ADMIN_SECRET_KEY (ADR 0026)', () => {
 })
 
 describe('EXAMPLE_BUSINESSES (book Q-004)', () => {
-  it('needs the phone the examples show', () => {
-    expect(() => loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true' })).toThrow(/EXAMPLE_PHONE/)
+  it("shows the market's support line, or EXAMPLE_PHONE", () => {
+    expect(loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true' })).toMatchObject({ examplePhone: MARKET.support.phone })
     expect(loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true', EXAMPLE_PHONE: '+99312000000' })).toMatchObject({
       exampleBusinesses: true,
       examplePhone: '+99312000000',

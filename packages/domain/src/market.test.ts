@@ -48,6 +48,14 @@ describe.each<[string, Market]>([['Turkmenistan', TURKMENISTAN]])('market %s', (
     }
   })
 
+  it('has a support line: one of its own numbers and a Telegram username', () => {
+    const { phone, telegram } = market.support
+    expect(phone.startsWith(`+${market.phone.countryCode}`)).toBe(true)
+    expect(phone.slice(market.phone.countryCode.length + 1)).toMatch(market.phone.valid)
+    // Telegram's rule: 5–32 letters, digits and underscores, starting with a letter; written without the @
+    expect(telegram).toMatch(/^[a-z]\w{4,31}$/i)
+  })
+
   it('writes the currency as an ISO 4217 code', () => {
     expect(market.currency).toMatch(/^[A-Z]{3}$/)
   })

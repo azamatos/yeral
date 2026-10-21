@@ -3,9 +3,10 @@ import { isApiError, type ApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { cn } from '@yeral/ui/cn'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
+import { ContactYeralLink } from '@/features/contact-yeral'
 import { AuthPage, textLink } from '@/shared/ui'
 
 /**
@@ -36,6 +37,11 @@ export function IdentityStep({
   const locale = useLocale()
   const answer = useMutation(sdk.auth.answerIdentity())
   const [ownsWorkspace, setOwnsWorkspace] = useState(false)
+  // "No" is refused and turns off: the focus goes to the way forward, Contact Ýeral
+  const contactLink = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (ownsWorkspace) contactLink.current?.focus()
+  }, [ownsWorkspace])
   const brand = t('common.brand')
 
   // one answer at a time: the ticket settles the question once
@@ -62,7 +68,11 @@ export function IdentityStep({
       title={name ? t('login.identity.title', { name }) : t('login.identity.titleNoName')}
       lead={t('login.identity.lead')}
     >
-      {ownsWorkspace && <Callout tone="danger">{t('login.identity.ownsWorkspace', { brand })}</Callout>}
+      {ownsWorkspace && (
+        <Callout tone="danger" actions={<ContactYeralLink ref={contactLink} />}>
+          {t('login.identity.ownsWorkspace', { brand })}
+        </Callout>
+      )}
       <div className="flex flex-col gap-3">
         <Button variant="primary" size="l" className="w-full" loading={sayingYes} disabled={sayingNo} onClick={() => reply(true)}>
           {t('login.identity.yes')}

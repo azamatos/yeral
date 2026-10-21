@@ -881,6 +881,9 @@ importers:
       '@yeral/ui':
         specifier: workspace:*
         version: link:../ui
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.56.0(@types/react@19.3.0)(react@19.3.0)
     devDependencies:
       '@tanstack/react-query':
         specifier: 'catalog:'
