@@ -318,3 +318,9 @@ export const reviewInputSchema = z
     text: z.string().trim().max(500).optional(),
   })
   .meta({ id: 'ReviewInput' })
+
+/**
+ * "How was it?" (book F-243): the visit My bookings and the home page ask about (the latest completed one still open to
+ * a review, without one, its card not closed), or none. Its stars open the review form; closing it is for good.
+ */
+export const howWasItSchema = z.object({ visit: bookingSummarySchema.nullable() }).meta({ id: 'HowWasIt' })

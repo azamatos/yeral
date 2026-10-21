@@ -513,6 +513,8 @@ describe('account', () => {
         '/v1/me/photo',
         '/v1/w/{slug}/settings/logo',
         '/v1/me/deletion',
+        '/v1/me/how-was-it',
+        '/v1/me/bookings/{code}/how-was-it/close',
         '/v1/w/{slug}/settings/photos',
         '/v1/w/{slug}/settings/photos/{id}',
         '/v1/w/{slug}/settings/photos/order',

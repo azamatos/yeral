@@ -1,0 +1,1 @@
+ALTER TABLE "bookings" ADD COLUMN "how_was_it_closed_at" timestamp with time zone;

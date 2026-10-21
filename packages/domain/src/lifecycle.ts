@@ -336,6 +336,14 @@ export function canWriteReview(b: BookingState, now = Date.now()): Guard {
 }
 
 /**
+ * "How was it?" (book F-243): a completed visit still open to a review (`canWriteReview`: 30 days), without one, the
+ * card not closed. My bookings and the home page show it until then; no SMS asks.
+ */
+export function asksHowItWas(b: BookingState, reviewed: boolean, closed: boolean, now = Date.now()): boolean {
+  return !reviewed && !closed && canWriteReview(b, now) === null
+}
+
+/**
  * The reason kept with a client's cancel (book Q-163): only when the business asks for one ("Ýatyrylanda sebäp sora"),
  * and never a blank one.
  */

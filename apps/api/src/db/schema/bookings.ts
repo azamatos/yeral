@@ -99,6 +99,8 @@ export const bookings = pgTable(
      * next mustn't see it) and sends no more SMS.
      */
     accountDeletedAt: ts(),
+    /** The client closed the "How was it?" card for good (book F-243). */
+    howWasItClosedAt: ts(),
     complaintType: complaintType(),
     complaintText: text(),
     complaintAt: ts(),

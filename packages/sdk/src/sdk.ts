@@ -439,6 +439,18 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         queryKey: keys.booking(code, lang),
         queryFn: ({ signal }) => call(one.$get({ param: { code }, query: { lang } }, abortWith(signal))),
       }),
+    /** "How was it?" (book F-243): the visit My bookings and the home page ask about, or none. */
+    howWasIt: (lang: Locale) =>
+      queryOptions({
+        queryKey: keys.howWasIt(lang),
+        queryFn: ({ signal }) => call(v1.me['how-was-it'].$get({ query: { lang } }, abortWith(signal))),
+      }),
+    /** The card closed for good for this visit; the next one (if any) shows. */
+    closeHowWasIt: () =>
+      mutationOptions({
+        mutationFn: (code: string) => call(one['how-was-it'].close.$post({ param: { code } })),
+        onSuccess: () => invalidate(['bookings', 'how-was-it']),
+      }),
     create: (lang: Locale) =>
       mutationOptions({
         mutationFn: (body: z.input<typeof createBookingSchema>) => call(v1.bookings.$post({ query: { lang }, json: body })),

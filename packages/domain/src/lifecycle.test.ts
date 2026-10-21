@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   aheadAs,
+  asksHowItWas,
   businessSmsAt,
   expiryWarningAt,
   canRemoveComplaint,
@@ -54,6 +55,20 @@ const MIN = 60_000
 
 const booking = (over: Partial<BookingState> = {}): BookingState => ({ date: THU, start: 870, end: 930, status: 'confirmed', ...over })
 const rules = { cancelWindowMinutes: 120 }
+
+describe('asksHowItWas (book F-243)', () => {
+  const visit = { date: '2026-10-20', start: 600, end: 660, status: 'completed' as const }
+  const after = epochOf('2026-10-21', 600)
+  it('a completed visit without a review, its card open, inside the review window', () => {
+    expect(asksHowItWas(visit, false, false, after)).toBe(true)
+  })
+  it('not once it’s reviewed, the card closed, the window past, or the visit not completed', () => {
+    expect(asksHowItWas(visit, true, false, after)).toBe(false)
+    expect(asksHowItWas(visit, false, true, after)).toBe(false)
+    expect(asksHowItWas(visit, false, false, epochOf('2026-12-01', 600))).toBe(false)
+    expect(asksHowItWas({ ...visit, status: 'cancelled', cancelledBy: 'client' }, false, false, after)).toBe(false)
+  })
+})
 
 describe('aheadAs (book B-15, Q-172: what a confirm counts)', () => {
   const at = epochOf('2026-10-20', 600)
