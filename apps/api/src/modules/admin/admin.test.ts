@@ -142,6 +142,7 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
     expect(both.map((r) => r.status).sort()).toEqual([200, 401])
   })
 
+  // about 32 password checks at 600,000 rounds: past the 20 s default on a busy CI runner
   it('tries are limited per address and per login from it, a real login like an unknown one; elsewhere its owner signs in', async () => {
     t = testApp(db, { trustedIpHeader: 'x-forwarded-for' })
     const { secret } = await setUp(cms(), 'limits')
@@ -163,7 +164,7 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
     // and an address has its hour: other logins run out too
     for (let i = 2 * (ADMIN_TRIES_PER_LOGIN + 1); i < ADMIN_TRIES_PER_ADDRESS; i++) expect((await guess(`other${i}`)).status).toBe(401)
     expect((await guess('one.more')).json.error.code).toBe('rate_limited')
-  })
+  }, 60_000)
 
   it('a phone never opens the admin tool, and no other site can use an admin’s cookie', async () => {
     const owner = browser(t.app)
