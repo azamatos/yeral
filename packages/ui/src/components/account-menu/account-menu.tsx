@@ -1,6 +1,6 @@
 import { Ellipsis } from 'lucide-react'
 import { DropdownMenu } from 'radix-ui'
-import { Fragment, type ReactNode } from 'react'
+import { Fragment, useRef, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Avatar } from '../avatar'
 import { MenuContent, MenuSeparator } from '../menu'
@@ -18,6 +18,8 @@ export interface AccountMenuItem {
   href?: string
   external?: boolean
   onSelect?: () => void
+  /** It opens a drawer or a dialog (My profile), which takes the focus: the menu doesn't hand it back to its button. */
+  opensDialog?: boolean
 }
 
 const accountMenuItem = cn(
@@ -54,6 +56,8 @@ export function AccountMenu({
 }) {
   // one letter, as the board draws the person (B-Shell `.me`: "M")
   const avatar = <Avatar decorative name={name} src={photo} size={32} letters={1} />
+  // the row chosen opens a dialog: the focus stays with it when the menu closes
+  const handOver = useRef(false)
   const menu = (
     <MenuContent
       aria-label={menuLabel}
@@ -61,13 +65,20 @@ export function AccountMenu({
       side={variant === 'rail' ? 'right' : 'top'}
       align="end"
       className="w-75"
+      onCloseAutoFocus={(e) => {
+        if (handOver.current) e.preventDefault()
+        handOver.current = false
+      }}
     >
       {items.map((item, i) => (
         <Fragment key={item.id}>
           {item.danger && i > 0 && <MenuSeparator className="mx-1" />}
           <DropdownMenu.Item
             asChild={!!item.href}
-            onSelect={() => item.onSelect?.()}
+            onSelect={() => {
+              handOver.current = !!item.opensDialog
+              item.onSelect?.()
+            }}
             className={cn(accountMenuItem, item.danger && dangerItem)}
           >
             {item.href ? (

@@ -491,3 +491,59 @@ export const FullFlow: StoryObj<typeof Flow> = {
     await waitFor(() => expect(args.onSignedIn).toHaveBeenCalledWith('65102030'), { timeout: 3000 })
   },
 }
+
+// ---------------------------------------------------------------- inline (My profile's "Change number", B-Shell)
+
+const CHANGE: SignInCodeStepCopy = { ...EN, phoneLabel: 'New phone number', cancel: 'Cancel' }
+
+/** Inside a form with its own primary (My profile): S buttons at the row's end, Cancel beside Send code. */
+export const InlinePhone: Story = {
+  name: 'Inline · New number',
+  args: { step: 'phone', layout: 'inline', copy: CHANGE, onCancel: fn() },
+  play: async ({ args, canvas }) => {
+    await userEvent.type(canvas.getByLabelText('New phone number'), '61057732{Enter}')
+    await expect(args.onSendCode).toHaveBeenCalledOnce()
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }))
+    await expect(args.onCancel).toHaveBeenCalledOnce()
+  },
+}
+
+export const InlinePhoneTaken: Story = {
+  name: 'Inline · Number taken',
+  args: { step: 'phone', layout: 'inline', copy: CHANGE, phone: '61057732', phoneError: 'This number is used by another account' },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('alert')).toHaveTextContent('This number is used by another account')
+  },
+}
+
+/** The code: no full-width Confirm (the 4th digit and Enter check it); the resend link and Cancel share a row. */
+export const InlineCode: Story = {
+  name: 'Inline · Code',
+  args: { layout: 'inline', copy: CHANGE, resendIn: 42, onCancel: fn() },
+  play: async ({ args, canvas }) => {
+    await expect(canvas.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument()
+    await expect(canvas.getByRole('button', { name: 'Get a new code in 0:42' })).toBeDisabled()
+    await userEvent.keyboard('4821')
+    await waitFor(() => expect(args.onSubmitCode).toHaveBeenCalledWith('4821'))
+  },
+}
+
+export const InlineLockOver: Story = {
+  name: 'Inline · Lock over',
+  args: { layout: 'inline', copy: CHANGE, codeExpired: true, resendIn: 0 },
+  play: async ({ args, canvas }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Get a new code' }))
+    await expect(args.onResend).toHaveBeenCalled()
+  },
+}
+
+export const InlinePhoneWidth: Story = {
+  name: 'Inline · Code on a phone',
+  args: { layout: 'inline', copy: CHANGE, resendIn: 42 },
+  globals: { viewport: { value: 'xs' } },
+}
+
+export const InlineRussian: Story = {
+  name: 'Inline · Russian length',
+  args: { layout: 'inline', copy: { ...RU, phoneLabel: 'Новый номер телефона', cancel: 'Отменить' }, resendIn: 42 },
+}

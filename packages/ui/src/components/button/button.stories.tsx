@@ -14,7 +14,10 @@ const meta = {
   component: Button,
   args: { children: 'Ýazylmak', variant: 'primary', size: 'm', onClick: fn() },
   argTypes: {
-    variant: { control: 'inline-radio', options: ['primary', 'secondary', 'ghost', 'tint', 'danger', 'danger-solid', 'ink'] },
+    variant: {
+      control: 'inline-radio',
+      options: ['primary', 'secondary', 'ghost', 'tint', 'danger', 'danger-ghost', 'danger-solid', 'ink'],
+    },
     size: { control: 'inline-radio', options: ['s', 'm', 'l'] },
   },
 } satisfies Meta<typeof Button>
@@ -43,6 +46,9 @@ export const Variants: Story = {
       </Button>
       <Button {...args} variant="danger">
         Ýazylyşy ýatyr
+      </Button>
+      <Button {...args} variant="danger-ghost">
+        Leave this business
       </Button>
       <Button {...args} variant="danger-solid">
         Hawa, ýatyr

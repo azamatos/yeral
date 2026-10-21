@@ -1,7 +1,7 @@
 import { Link, useLocation } from '@tanstack/react-router'
 import { BottomTab, BottomTabBar, BottomTabButton } from '@yeral/ui/bottom-tab-bar'
 import { MoreSheet, MoreSheetDivider, MoreSheetPerson, MoreSheetRow } from '@yeral/ui/more-sheet'
-import { ExternalLink, LogOut, Menu } from 'lucide-react'
+import { ExternalLink, LogOut, Menu, User } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { sectionOf, sectionsFor, type Section } from '../model/sections'
@@ -18,7 +18,7 @@ const TABS: readonly Section[] = ['calendar', 'bookings', 'clients']
  * More opens the sheet above the bar: the workspace (its switcher), Reviews and Settings where the level has them, the
  * person, the client site and Log out.
  */
-export function ShellTabBar() {
+export function ShellTabBar({ onProfile }: { onProfile: () => void }) {
   const t = useTranslations('shell')
   const { slug, me, workspace } = useWorkspace()
   const account = useAccount()
@@ -75,6 +75,15 @@ export function ShellTabBar() {
         ))}
         <MoreSheetDivider />
         {me && <MoreSheetPerson name={account.name} phone={account.phone} />}
+        <MoreSheetRow
+          drill
+          icon={<User />}
+          label={t('account.profile')}
+          onClick={() => {
+            setMore(false)
+            onProfile()
+          }}
+        />
         <MoreSheetRow asChild icon={<ExternalLink />} label={t('account.openAsClient')} hint={account.client.host}>
           <a href={account.client.href} target="_blank" rel="noreferrer" />
         </MoreSheetRow>

@@ -6,9 +6,9 @@ import { Button } from '../button'
 import { StatusBadge } from '../status-badge'
 import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, DrawerTrigger } from './drawer'
 
-function BookingDetail({ defaultOpen }: { defaultOpen?: boolean }) {
+function BookingDetail({ defaultOpen, scrim }: { defaultOpen?: boolean; scrim?: 'always' | 'auto' }) {
   return (
-    <Drawer defaultOpen={defaultOpen}>
+    <Drawer defaultOpen={defaultOpen} scrim={scrim}>
       <DrawerTrigger asChild>
         <Button>Jikme-jiklikler</Button>
       </DrawerTrigger>
@@ -66,4 +66,29 @@ export const PhoneSheet: Story = {
   name: 'Open on a phone (bottom sheet)',
   args: { defaultOpen: true },
   globals: { viewport: { value: 'xs' } },
+}
+
+/** The business app (`scrim="auto"`): from 1280 no scrim, the page beside it stays usable; below 1280 it dims as before. */
+export const ScrimAuto: Story = {
+  name: 'Scrim auto · 1440',
+  args: { scrim: 'auto' },
+  globals: { viewport: { value: 'xl' } },
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Jikme-jiklikler' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Glow Studio' })
+    await waitFor(() => expect(dialog).toBeVisible())
+    await expect(document.querySelector('.bg-scrim')).toBeNull()
+    await userEvent.click(screen.getByRole('button', { name: 'Ýap' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  },
+}
+
+export const ScrimAutoTablet: Story = {
+  name: 'Scrim auto · 1024 (dims)',
+  args: { scrim: 'auto', defaultOpen: true },
+  globals: { viewport: { value: 'md' } },
+  play: async () => {
+    await screen.findByRole('dialog', { name: 'Glow Studio' })
+    await expect(document.querySelector('.bg-scrim')).not.toBeNull()
+  },
 }

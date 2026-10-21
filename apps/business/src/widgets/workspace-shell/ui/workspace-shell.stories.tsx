@@ -56,6 +56,8 @@ interface Account {
   workspaces: Workspace[]
   current: string
   invites: InviteCard[]
+  /** Numbers on other accounts: a change to one is refused. */
+  taken?: string[]
 }
 
 const MAYSA: Account = {
@@ -80,9 +82,10 @@ const fakeApi =
   () => {
     const account = structuredClone(who)
     let signedIn = true
-    return (input: RequestInfo | URL, init?: RequestInit) => Promise.resolve(answer(new Request(input, init)))
-    function answer(request: Request): Response {
+    return (input: RequestInfo | URL, init?: RequestInit) => answer(new Request(input, init))
+    async function answer(request: Request): Promise<Response> {
       const route = `${request.method} ${new URL(request.url).pathname.replace(/^\/v1/, '')}`
+      const body = (request.method === 'GET' ? {} : await request.json().catch(() => ({}))) as Record<string, unknown>
       if (route === 'POST /auth/logout') {
         signedIn = false
         return new Response(null, { status: 204 })
@@ -94,6 +97,32 @@ const fakeApi =
       const opened = /^POST \/me\/workspaces\/([^/]+)\/open$/.exec(route)
       if (opened?.[1]) {
         account.current = opened[1]
+        return new Response(null, { status: 204 })
+      }
+      if (route === 'PATCH /me') {
+        const firstName = String(body.firstName)
+        const surname = (body.surname as string | null) ?? null
+        account.me = { ...account.me, firstName, surname, name: [firstName, surname].filter(Boolean).join(' ') }
+        return json(account.me)
+      }
+      // the number change (B-13): the code on the screen, as at the first launch where it's allowed
+      if (route === 'POST /me/phone/code') {
+        if (!account.me.canChangePhone) return json({ error: { code: 'phone_change_unavailable' } }, 409)
+        if (account.taken?.includes(String(body.phone))) return json({ error: { code: 'phone_taken' } }, 409)
+        return json({ resendAfterSec: 59, expiresInSec: 300, code: '4821' })
+      }
+      if (route === 'POST /me/phone/verify') {
+        if (body.code !== '4821') return json({ error: { code: 'code_invalid', details: { attemptsLeft: 2 } } }, 400)
+        account.me = { ...account.me, phone: String(body.phone) }
+        return json(account.me)
+      }
+      const left = /^POST \/w\/([^/]+)\/leave$/.exec(route)
+      if (left?.[1]) {
+        const here = account.workspaces.find((w) => w.slug === left[1])
+        if (!here) return json({ error: { code: 'not_found' } }, 404)
+        if (here.level === 'owner') return json({ error: { code: 'owner_cannot_leave' } }, 409)
+        account.workspaces = account.workspaces.filter((w) => w !== here)
+        account.current = account.workspaces[0]?.slug ?? ''
         return new Response(null, { status: 204 })
       }
       return json({ error: { code: 'not_found' } }, 404)
@@ -136,6 +165,7 @@ const meta = {
 } satisfies Meta<typeof PageStory>
 export default meta
 type Story = StoryObj<typeof meta>
+type Canvas = Parameters<NonNullable<Story['play']>>[0]['canvas']
 
 /** Owner, 1440: the 248 sidebar, Bookings with the 6 requests she may answer; the tab title names the workspace. */
 export const Owner: Story = {
@@ -264,5 +294,109 @@ export const LongNames: Story = {
         workspace('glow-nails', 'Glow Nails dyrnak studiýasy', 'admin', 2),
       ],
     }),
+  },
+}
+
+/** Opens My profile from the visible account menu. */
+async function openProfile(canvas: Canvas) {
+  const button = (await canvas.findAllByRole('button', { name: 'Account menu' })).find((b) => b.checkVisibility())
+  await userEvent.click(button!)
+  await userEvent.click(await within(document.body).findByRole('menuitem', { name: 'My profile' }))
+  const drawer = await within(document.body).findByRole('dialog', { name: 'My profile' })
+  await waitFor(() => expect(drawer).toBeVisible())
+  return within(drawer)
+}
+
+/** My profile, the owner (B-12): the name, the number with Change number, My workspaces; she can't leave. */
+export const MyProfile: Story = {
+  play: async ({ canvas }) => {
+    const drawer = await openProfile(canvas)
+    await expect(drawer.getByText('Your Ýeral account — the same in every workspace')).toBeVisible()
+    await expect(drawer.getByLabelText('First name')).toHaveValue('Maýsa')
+    await expect(drawer.getByText('+993 65 10 20 30')).toBeVisible()
+    await expect(drawer.getByText('Glow Nails')).toBeVisible()
+    await expect(drawer.getByText(/You’re the owner of Glow Studio, so you can’t leave it/)).toBeVisible()
+    await expect(drawer.queryByRole('button', { name: 'Leave this business' })).not.toBeInTheDocument()
+    // the name: saved, and the drawer closes
+    const last = drawer.getByLabelText(/Last name/)
+    await userEvent.clear(last)
+    await userEvent.type(last, 'Myradowa')
+    await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
+    const toastShown = await within(document.body).findByText('Saved')
+    await waitFor(() => expect(toastShown).toBeVisible())
+    await waitFor(() => expect(within(document.body).queryByRole('dialog', { name: 'My profile' })).not.toBeInTheDocument())
+  },
+}
+
+/** A first name is required (Q-156); the surname may go. */
+export const MyProfileNoFirstName: Story = {
+  play: async ({ canvas }) => {
+    const drawer = await openProfile(canvas)
+    await userEvent.clear(drawer.getByLabelText('First name'))
+    await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
+    await expect(drawer.getByRole('alert')).toHaveTextContent('Enter your first name.')
+  },
+}
+
+/** Change number (B-13): the new number, the code on the screen, done → "Phone number changed". */
+export const ChangeNumber: Story = {
+  play: async ({ canvas }) => {
+    const drawer = await openProfile(canvas)
+    await userEvent.click(drawer.getByRole('button', { name: 'Change number' }))
+    await userEvent.type(drawer.getByLabelText('New phone number'), '61057732')
+    await userEvent.click(drawer.getByRole('button', { name: 'Send code' }))
+    await expect(await drawer.findByText('+993 61 05 77 32')).toBeVisible()
+    await expect(drawer.getByText('4821')).toBeVisible()
+    await expect(drawer.getByText('Until the new number is verified you can log in with the old one.')).toBeVisible()
+    await userEvent.keyboard('4821')
+    const toastShown = await within(document.body).findByText('Phone number changed')
+    await waitFor(() => expect(toastShown).toBeVisible())
+    await waitFor(() => expect(drawer.queryByLabelText('Code')).not.toBeInTheDocument())
+  },
+}
+
+/** A number on another account: the field says so. */
+export const ChangeNumberTaken: Story = {
+  args: { server: fakeApi({ ...MAYSA, taken: ['+99361057732'] }) },
+  play: async ({ canvas }) => {
+    const drawer = await openProfile(canvas)
+    await userEvent.click(drawer.getByRole('button', { name: 'Change number' }))
+    await userEvent.type(drawer.getByLabelText('New phone number'), '61057732{Enter}')
+    await expect(await drawer.findByRole('alert')).toHaveTextContent('This number is used by another account')
+  },
+}
+
+/** While the sign-in code shows on the screen the number can't change (`canChangePhone`): not offered at all. */
+export const ChangeNumberUnavailable: Story = {
+  args: { server: fakeApi({ ...MAYSA, me: { ...MAYSA.me, canChangePhone: false } }) },
+  play: async ({ canvas }) => {
+    const drawer = await openProfile(canvas)
+    await expect(drawer.queryByRole('button', { name: 'Change number' })).not.toBeInTheDocument()
+    await expect(drawer.getByText(/with this number\.$/)).toBeVisible()
+  },
+}
+
+/** A Specialist leaves (B-15): asked once (the focus on Cancel), then her own studio opens. */
+export const LeaveWorkspace: Story = {
+  args: { server: fakeApi(AYNA) },
+  play: async ({ canvas }) => {
+    const drawer = await openProfile(canvas)
+    await userEvent.click(drawer.getByRole('button', { name: 'Leave this business' }))
+    const confirm = await within(document.body).findByRole('dialog', { name: 'Leave Glow Studio?' })
+    await waitFor(() => expect(within(confirm).getByRole('button', { name: 'Cancel' })).toHaveFocus())
+    await userEvent.click(within(confirm).getByRole('button', { name: 'Leave Glow Studio' }))
+    await waitFor(() => expect(document.title).toBe('Calendar · Aýnanyň saç studiýasy · Ýeral Business'))
+  },
+}
+
+/** My profile on a phone: from More, as a bottom sheet. */
+export const MyProfilePhone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('heading', { level: 1, name: 'Calendar' })
+    await userEvent.click(canvas.getByRole('button', { name: 'More' }))
+    const sheet = await within(document.body).findByRole('dialog', { name: 'More' })
+    await userEvent.click(within(sheet).getByRole('button', { name: 'My profile' }))
+    await expect(await within(document.body).findByRole('dialog', { name: 'My profile' })).toBeVisible()
   },
 }

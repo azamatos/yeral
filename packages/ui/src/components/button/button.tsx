@@ -25,6 +25,8 @@ export const buttonVariants = cva(
         ghost: 'bg-transparent text-n-900 hover:bg-group',
         tint: 'border-a-line bg-a-50 text-a-600 hover:bg-a-100',
         danger: 'border-danger-line bg-n-0 text-danger-ink hover:bg-error-tint',
+        /** a quiet destructive action beside others: "Leave this business", "Cancel booking" in a drawer's footer */
+        'danger-ghost': 'bg-transparent text-danger-ink hover:bg-error-tint',
         'danger-solid': 'bg-danger-solid text-white hover:bg-danger-solid-hover',
         ink: 'bg-ink-btn text-white hover:bg-ink-btn-hover',
       },

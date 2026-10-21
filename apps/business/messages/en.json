@@ -36,12 +36,50 @@
       "trigger": "Account menu",
       "triggerOf": "Account menu: {name}",
       "openAsClient": "Open as a client",
-      "logout": "Log out"
+      "logout": "Log out",
+      "profile": "My profile"
     },
     "closed": "This section is closed to you",
     "invite": {
       "text": "<b>{business}</b> invites you to the team.",
       "open": "Open"
+    },
+    "profile": {
+      "title": "My profile",
+      "lead": "Your {brand} account — the same in every workspace",
+      "close": "Close",
+      "addPhoto": "Add photo",
+      "changePhoto": "Change photo",
+      "photoHint": "Optional · JPG or PNG",
+      "uploading": "Uploading…",
+      "photoTooBig": "{file} is {size} MB. Photos can be up to {max} MB.",
+      "photoWrongType": "{file} isn’t a photo. Use JPG or PNG.",
+      "first": "First name",
+      "firstRequired": "Enter your first name.",
+      "last": "Last name <optional>(optional)</optional>",
+      "nameHint": "Your teams see you by this name.",
+      "phone": "Phone number",
+      "change": "Change number",
+      "phoneHint": "You log in to {app} and {client} with this number. To change it, confirm the new number with a code.",
+      "phoneHintFixed": "You log in to {app} and {client} with this number.",
+      "newNumber": "New phone number",
+      "changeTo": "To change to <b>{phone}</b>.",
+      "oldWorks": "Until the new number is verified you can log in with the old one.",
+      "taken": "This number is used by another account",
+      "changed": "Phone number changed",
+      "cancel": "Cancel",
+      "workspaces": "My workspaces",
+      "ownerCantLeave": "You’re the owner of {business}, so you can’t leave it. To close this workspace, contact {brand}.",
+      "leave": "Leave this business",
+      "save": "Save",
+      "saved": "Saved"
+    },
+    "leave": {
+      "title": "Leave {business}?",
+      "text": "You’ll stop seeing its calendar. Your bookings and requests stay with the business — the owner will choose who takes them.",
+      "close": "Close",
+      "cancel": "Cancel",
+      "confirm": "Leave {business}"
     }
   },
   "login": {

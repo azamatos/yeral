@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 import { Navigate, Outlet } from '@tanstack/react-router'
 import { TAB_BAR_HEIGHT } from '@yeral/ui/bottom-tab-bar'
-import { useEffect, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { useSdk } from '@/shared/api'
 import { useWorkspace } from '../model/use-workspace'
+import { ProfileDrawer } from './profile-drawer'
 import { ShellSidebar } from './shell-sidebar'
 import { ShellTabBar } from './shell-tab-bar'
 
@@ -28,22 +29,29 @@ export function WorkspaceShell() {
   const { mutate: markOpened } = useMutation(sdk.team.open())
   const current = workspaces?.current
   const member = !!workspace
+  const [profile, setProfile] = useState(false)
 
   useEffect(() => {
     if (member && current !== slug) markOpened(slug)
   }, [member, current, slug, markOpened])
 
-  if (me === null || (workspaces && !workspace)) return <Navigate to="/login" replace />
+  if (me === null) return <Navigate to="/login" replace />
+  // not on this team any more (left from My profile, removed): the last used other workspace, else the sign-in
+  if (workspaces && !workspace) {
+    const next = workspaces.items.find((w) => w.slug === workspaces.current) ?? workspaces.items[0]
+    return next ? <Navigate to="/w/$slug/calendar" params={{ slug: next.slug }} replace /> : <Navigate to="/login" replace />
+  }
   return (
     <div className="flex min-h-dvh bg-n-0">
       <style>{TOASTS}</style>
-      <ShellSidebar />
-      <ShellSidebar collapsed />
+      <ShellSidebar onProfile={() => setProfile(true)} />
+      <ShellSidebar collapsed onProfile={() => setProfile(true)} />
       {/* under 768 the tab bar is fixed at the bottom: the page keeps clear of it */}
       <div className="flex min-w-0 flex-1 flex-col pb-(--tab-bar) sm:pb-0" style={{ '--tab-bar': TAB_BAR_HEIGHT } as CSSProperties}>
         <Outlet />
       </div>
-      <ShellTabBar />
+      <ShellTabBar onProfile={() => setProfile(true)} />
+      <ProfileDrawer open={profile} onOpenChange={setProfile} />
     </div>
   )
 }
