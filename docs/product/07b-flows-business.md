@@ -331,7 +331,7 @@ flowchart TD
 > Open question Q-200: where a half-finished setup continues.
 
 
-**Status** — Design: drawn (B-Login · `step` phone, phoneLandline, code, name, routing) · Code: built (api, ADR 0019; the business app's login, #99 and #102, chapter 9's 21.10.2026 rows); the name step has no photo until the api takes photos, and the unfinished-setup card isn't built yet (its api: `GET /v1/me/setup` with the step, category, logo and address, 21.10.2026). Invites one after another and the accepted workspace opened at once: #115.
+**Status** — Design: drawn (B-Login · `step` phone, phoneLandline, code, name, routing) · Code: built (api, ADR 0019; the business app's login, #99 and #102, and its demo note, chapter 9's 21.10.2026 rows); the name step has no photo until the api takes photos, and the unfinished-setup card isn't built yet (its api: `GET /v1/me/setup` with the step, category, logo and address, 21.10.2026). Invites one after another and the accepted workspace opened at once: #115.
 
 ### B-08 · Accept or decline an invite
 

@@ -61,6 +61,8 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     const modal = await open(canvas)
     await expect(modal.getByText('Enter your phone number to manage your bookings.')).toBeVisible()
+    // the first launch shows the code on the screen: the phone step says it's a demo (book Q-036)
+    await expect(await modal.findByText(/This is a demo of Ýeral: the sign-in code shows here instead of an SMS/)).toBeVisible()
     const phone = modal.getByLabelText('Phone number')
     await waitFor(() => expect(phone).toHaveFocus())
     await userEvent.type(phone, '651020{Enter}')

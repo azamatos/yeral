@@ -114,6 +114,7 @@ export const authApi =
     let phone: string | undefined
     const code = () => CODES[(sent - 1) % CODES.length]
     return fakeFetch(({ route, body }) => {
+      if (route === 'GET /auth/mode') return json({ codeOnScreen: showCode })
       if (route === 'POST /auth/code') {
         if (sent >= 5) return refuse(429, 'rate_limited', { retryAfterSec: 2520, retryAfterMin: 42 })
         if (body.phone === phone && Date.now() - sentAt < resendSec * 1000) return refuse(429, 'resend_too_soon', { retryAfterSec: 50 })

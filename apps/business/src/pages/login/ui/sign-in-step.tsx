@@ -6,7 +6,7 @@ import { SignInCodeStep } from '@yeral/ui/sign-in-code-step'
 import { useEffect, useId, useRef } from 'react'
 import { useTranslations } from 'use-intl'
 import { useCodeStepWords } from '@/shared/i18n'
-import { AuthPage, textLink } from '@/shared/ui'
+import { AuthPage, DemoNote, textLink } from '@/shared/ui'
 
 /** The phone step and the code step (B-Login `step` phone · code and their states), in the shared SignInCodeStep. */
 export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> }) {
@@ -44,6 +44,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
         )
       }
     >
+      {!onCode && <DemoNote />}
       <SignInCodeStep
         ref={formRef}
         aria-labelledby={titleId}

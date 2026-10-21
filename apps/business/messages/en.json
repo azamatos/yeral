@@ -173,7 +173,8 @@
       "one": "We open the workspace you used last.",
       "many": "You have {count} workspaces. We open the one you used last; pick another at the top of the left menu.",
       "now": "Open the calendar now"
-    }
+    },
+    "demoNote": "This is a demo of {brand}: the sign-in code shows here instead of an SMS. Use a made-up number, and don’t type in real people’s names or numbers."
   },
   "placeholder": {
     "setupTitle": "Create a business",

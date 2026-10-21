@@ -4,7 +4,7 @@ import { cn } from '@yeral/ui/cn'
 import { ModalDescription } from '@yeral/ui/modal'
 import { textLink } from '@yeral/ui/text-link'
 import { useTranslations } from 'use-intl'
-import { CodeStep } from '@/shared/ui'
+import { CodeStep, DemoNote } from '@/shared/ui'
 import { LoginHeader } from './login-header'
 
 /**
@@ -36,6 +36,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
           )}
         </ModalDescription>
       </LoginHeader>
+      {!onCode && <DemoNote />}
       <CodeStep steps={signIn} />
     </>
   )
