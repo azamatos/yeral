@@ -30,7 +30,7 @@ export const setupSchema = z
     /** The category's name, as the card says it ("Beauty · setup not finished"). */
     category: z.string(),
     logo: photoSchema.nullable(),
-    /** The address the address step saved; null until the wizard is past it (the draft starts at the city's centre). */
+    /** The address saved (at the address step or in the settings); null while it has none (the draft starts empty). */
     address: z.object({ line: z.string(), city: cityRefSchema }).nullable(),
   })
   .meta({ id: 'Setup' })

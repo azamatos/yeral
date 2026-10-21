@@ -41,6 +41,9 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     expect((await owner.req('/v1/me')).json.hasBusiness).toBe(false)
     expect((await browser(t.app).req('/v1/businesses/ayna-beauty')).status).toBe(404)
     // the wizard moves on, and reopens there
+    // past the address step with none saved (the address didn't go through): still none on the card
+    expect((await owner.req('/v1/w/ayna-beauty/setup', { method: 'PUT', body: { step: 'hours' } })).status).toBe(204)
+    expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({ step: 'hours', address: null })
     const location = {
       cityId: 'ashgabat',
       address: '247 Bitarap Türkmenistan Avenue',
@@ -49,12 +52,18 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
       lng: 58.38,
     }
     expect((await owner.req('/v1/w/ayna-beauty/settings/profile', { method: 'PATCH', body: { location } })).status).toBe(200)
-    expect((await owner.req('/v1/w/ayna-beauty/setup', { method: 'PUT', body: { step: 'hours' } })).status).toBe(204)
-    // past the address step the card says where it is
-    expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({
-      step: 'hours',
-      address: { line: '247 Bitarap Türkmenistan Avenue', city: { id: 'ashgabat', name: 'Ashgabat' } },
-    })
+    const address = { line: '247 Bitarap Türkmenistan Avenue', city: { id: 'ashgabat', name: 'Ashgabat' } }
+    expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({ step: 'hours', address })
+    // back at the address step it keeps the one saved
+    expect((await owner.req('/v1/w/ayna-beauty/setup', { method: 'PUT', body: { step: 'address' } })).status).toBe(204)
+    expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({ step: 'address', address })
+    // and the logo once there is one
+    const form = new FormData()
+    form.set('file', new File([new Uint8Array([0xff, 0xd8, 0xff, 0xda, 0, 3, 1, 0x12, 0xff, 0xd9])], 'logo.jpg', { type: 'image/jpeg' }))
+    const set = await t.app.request('/v1/w/ayna-beauty/settings/logo', { method: 'PUT', body: form, headers: { cookie: owner.cookie } })
+    expect(set.status).toBe(200)
+    const { logo } = (await set.json()) as { logo: { url: string } }
+    expect((await owner.req('/v1/me/setup')).json.setup.logo).toEqual({ url: logo.url, alt: 'Aýna Beauty' })
     // another business of that name gets the next address; tables wait for later
     const other = await as('+99365930002')
     expect((await other.req('/v1/setup', { body: { name: 'Glow Studio', categoryId: 'nails' } })).json).toEqual({ slug: 'glow-studio-2' })

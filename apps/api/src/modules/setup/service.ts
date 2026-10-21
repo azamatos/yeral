@@ -8,7 +8,7 @@ import type { SetupIncompleteDetails } from '@yeral/contract/errors'
 import type { mySetupSchema, setupStartSchema } from '@yeral/contract/setup'
 import { MARKET } from '@yeral/domain/market'
 import type { Actor } from '@yeral/domain/permissions'
-import { cutAtWord, SETUP_STEPS, SLUG_MAX, slugFrom, type SetupNeed, type SetupStep } from '@yeral/domain/setup'
+import { cutAtWord, SLUG_MAX, slugFrom, type SetupNeed, type SetupStep } from '@yeral/domain/setup'
 import { and, asc, eq, isNotNull, like, or } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
@@ -17,45 +17,52 @@ import type { Deps } from '../../deps'
 import type { User } from '../../http/env'
 import { ApiError, invalid } from '../../http/errors'
 import { pgCode } from '../bookings/repo'
-import { cityRefOf, loadCities } from '../catalog/cities'
-import { photoOf, text } from '../catalog/map'
+import { logoOf, text } from '../catalog/map'
 import { accountName } from '../me/me'
 import { teamChanged } from '../team/service'
 
 type Start = z.infer<typeof setupStartSchema>
 type MySetup = z.infer<typeof mySetupSchema>
 
-/** The person's draft: a business they own still being set up. */
+/** The person's draft: a business they own still being set up, with what the sign-in's card shows of it. */
 async function draftOf(db: Queryable, userId: string) {
   const [row] = await db
-    .select({ business: businesses })
+    .select({
+      slug: businesses.slug,
+      name: businesses.name,
+      step: businesses.setupStep,
+      kind: businesses.kind,
+      logo: businesses.logo,
+      address: businesses.address,
+      street: businesses.street,
+      cityId: businesses.cityId,
+      city: cities.name,
+    })
     .from(staff)
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
+    .leftJoin(cities, eq(cities.id, businesses.cityId))
     .where(and(eq(staff.userId, userId), eq(staff.level, 'owner'), eq(staff.status, 'active'), isNotNull(businesses.setupStep)))
     .orderBy(asc(businesses.createdAt))
     .limit(1)
-  return row?.business.setupStep ? { ...row.business, setupStep: row.business.setupStep } : null
+  return row?.step ? { ...row, step: row.step } : null
 }
 
-/** A step the wizard has passed: the saved one is still to do. */
-const past = (step: SetupStep, saved: SetupStep) => SETUP_STEPS.indexOf(step) < SETUP_STEPS.indexOf(saved)
-
 /**
- * Where the wizard reopens at sign-in, if anywhere (Q-200), with what the "Continue setting up" card shows: the
- * category, the logo, and the address once the address step is done (B-Login's ContinueSetupCard).
+ * Where the wizard reopens at sign-in, if anywhere (Q-200), with what the "Continue setting up" card shows (B-Login's
+ * ContinueSetupCard): the category, the logo, and the address once one is saved (the rule finishing reads: a street).
+ * In the account's language, as the workspaces and invites are.
  */
 export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Promise<MySetup> {
   const draft = await draftOf(deps.db, user.id)
   if (!draft) return { setup: null }
-  const cities = past('address', draft.setupStep) ? await loadCities(deps.db) : []
   return {
     setup: {
       slug: draft.slug,
       name: draft.name,
-      step: draft.setupStep,
+      step: draft.step,
       category: text(draft.kind, user.lang),
-      logo: draft.logo ? photoOf(deps, draft.logo, user.lang, draft.name) : null,
-      address: past('address', draft.setupStep) ? { line: draft.address, city: cityRefOf(cities, draft.cityId, user.lang) } : null,
+      logo: logoOf(deps, draft, user.lang),
+      address: draft.street ? { line: draft.address, city: { id: draft.cityId, name: text(draft.city, user.lang) } } : null,
     },
   }
 }
