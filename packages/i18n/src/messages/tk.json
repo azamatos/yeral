@@ -87,6 +87,11 @@
     "owner_cannot_leave": "Eýesi biznesden çykyp bilmeýär.",
     "group_not_empty": "Ilki hyzmatlary başga topara geçiriň ýa-da pozuň.",
     "bookings_affected": "Täze iş wagtyndan daşarda ýazylyşlar bar: galdyryň ýa-da ýatyryň.",
+    "sign_in_failed": "Login, açar sözi ýa-da kod nädogry.",
+    "admin_code_wrong": "Kod gabat gelmedi. Telefonyňyzyň wagtyny barlaň we iň täze kody ýazyň.",
+    "setup_expired": "Bu sazlama salgysynyň möhleti geçdi ýa-da ol ulanyldy. Kärdeşiňizden täzesini soraň.",
+    "login_taken": "Bu login eýýäm alnan.",
+    "admin_unavailable": "Dolandyryş guraly bu serwerde entek sazlanmady.",
     "rate_limited": "Haýyş köp boldy. {retryAfterMin} minutdan soň täzeden synanyşyň.",
     "internal": "Näsazlyk ýüze çykdy. Gaýtadan synanyşyň.",
     "network": "Baglanyşyk ýok. Gaýtadan synanyşyň."

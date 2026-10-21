@@ -80,6 +80,12 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
 - The first launch's sign-in code on the screen: `SIGN_IN_CODE_ON_SCREEN=true` (off unless set; the api refuses it
   with a gateway that delivers). With it on, anyone who types a number signs in as it (book Q-036 and its concern), so
   it's set only when the first launch opens; the server's `compose.yml` keeps it `false` until then.
+- The Ýeral team's admin tool (ADR 0026): `ADMIN_SECRET_KEY` in `/srv/yeral/.env` (deploy.sh makes it once with
+  `openssl rand -base64 32`; development and the local stack use a fixed key) seals the authenticator secrets; without
+  it the admin endpoints answer `admin_unavailable`. Keep it with the backups' secrets: losing it means every account
+  sets up its app again. The first account, or a new link for one that's locked out:
+  `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` prints a
+  setup link (24 hours) to hand over in person; locally `pnpm --filter @yeral/api admin:invite <login> "<name>"`.
 - Photos: the ones people upload on the server's disk behind a storage port (`ports/storage.ts`), in `MEDIA_DIR` (the
   `media` volume at `/data/media` on the server and in the local stack; `apps/api/data/media` in development),
   served at `/media/up/…`; demo photos are served only outside production. The nightly backup (step 7) must take the

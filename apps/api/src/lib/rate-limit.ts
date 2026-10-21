@@ -24,6 +24,15 @@ export async function hit(
   return { ok: row.count <= limit, retryAfterSec: Math.max(1, Math.ceil((started + windowSec * 1000 - now) / 1000)) }
 }
 
+/** Whether `key` is still under `limit` in its window, without counting a try. */
+export async function under(db: Queryable, key: string, limit: number, windowSec: number, now: number): Promise<boolean> {
+  const { rows } = await db.execute<{ count: number; window_start: string }>(
+    sql`select count, window_start from rate_limits where key = ${key}`,
+  )
+  const row = rows[0]
+  return !row || new Date(row.window_start).getTime() <= now - windowSec * 1000 || row.count < limit
+}
+
 /** The header our edge writes with the caller's address (`TRUSTED_IP_HEADER`); callers can send any header themselves. */
 /** `rate_limited` for a limit `hit()` refused: the wait in seconds and in whole minutes, rounded up, for its message (book Q-267). */
 export const rateLimited = (retryAfterSec: number) =>

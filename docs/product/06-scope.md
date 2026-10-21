@@ -352,7 +352,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 
 | ID | Feature | What it is | Proposed | Design | Code | Notes |
 |---|---|---|---|---|---|---|
-| F-178 | CMS app and team accounts | cms.yeral.app with its own staff accounts, second factor and Cloudflare Access. | MVP | not designed | not built | Part of the launch (Q-001, Q-002); what it holds at launch is Q-010. |
+| F-178 | CMS app and team accounts | cms.yeral.app with its own staff accounts and a second factor. | MVP | not designed | api built for the team's accounts: a login, a password and an authenticator code, setup links, invites, resets (ADR 0026, 21.10.2026); the tool itself with P4 | Part of the launch (Q-001, Q-002); what it holds at launch is Q-010. Cloudflare Access went with ADR 0024 (DNS only); the second factor stands without it. |
 | F-238 | Add a business for its owner | The Ýeral team creates a business in the CMS for an owner it has met. | MVP | not designed | not built | Q-002 (decided 17.10.2026). |
 | F-179 | Business verification | Review new businesses within 24 h; verify or reject with a reason; hide or un-verify a live business, with a reason to the owner (Q-012, Q-275). | MVP | spec only (business §7, ADR 0018) | schema only (`verification`, `verification_history`) | Without it nothing becomes public (F-032). |
 | F-180 | Review moderation | Queue of reported reviews; clear (counted again) or remove. | MVP | spec only (business §15) | not built | Pairs with F-162. |

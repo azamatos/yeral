@@ -1,5 +1,6 @@
 import { siteConfig } from '@yeral/lib/site'
 import { createApp } from '../src/app'
+import { DEV_ADMIN_KEY } from '../src/config'
 import type { Db } from '../src/db/client'
 import type { Deps } from '../src/deps'
 import { nullLogger } from '../src/ports/log'
@@ -18,7 +19,14 @@ export const ORIGIN = site.urls.client
  */
 export function testApp(
   db: Db,
-  opts: { now?: number; trustedIpHeader?: Deps['trustedIpHeader']; demo?: boolean; codeOnScreen?: boolean; smsDelivers?: boolean } = {},
+  opts: {
+    now?: number
+    trustedIpHeader?: Deps['trustedIpHeader']
+    demo?: boolean
+    codeOnScreen?: boolean
+    smsDelivers?: boolean
+    adminKey?: Uint8Array<ArrayBuffer> | null
+  } = {},
 ) {
   const clock = { now: opts.now ?? DEMO_NOW }
   const sms = memorySms({ delivers: opts.smsDelivers })
@@ -33,6 +41,7 @@ export function testApp(
     log: nullLogger,
     trustedIpHeader: opts.trustedIpHeader,
     codeOnScreen: opts.codeOnScreen ?? false,
+    adminKey: opts.adminKey === undefined ? DEV_ADMIN_KEY : opts.adminKey,
   }
   const app = createApp(async (c, next) => {
     c.set('deps', deps)

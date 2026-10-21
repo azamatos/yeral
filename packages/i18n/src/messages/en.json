@@ -87,6 +87,11 @@
     "owner_cannot_leave": "The owner can't leave the business.",
     "group_not_empty": "Move this group's services to another group or delete them first.",
     "bookings_affected": "Some bookings fall outside the new hours: keep them or cancel them.",
+    "sign_in_failed": "The login, password or code is wrong.",
+    "admin_code_wrong": "That code didn't match. Check the time on your phone and type the newest code.",
+    "setup_expired": "This setup link has run out or was used. Ask a teammate for a new one.",
+    "login_taken": "This login is taken.",
+    "admin_unavailable": "The admin tool isn't set up on this server yet.",
     "rate_limited": "Too many requests. Try again in {retryAfterMin, plural, one {# minute} other {# minutes}}.",
     "internal": "Something went wrong. Please try again.",
     "network": "No connection. Please try again."

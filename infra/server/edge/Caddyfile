@@ -1,13 +1,14 @@
 # Every project's sites live in sites/*.caddy (one file per project); Caddy reloads with:
 #   docker compose -f /srv/edge/compose.yml exec caddy caddy reload --config /etc/caddy/Caddyfile
-# A booking link's token opens the booking (Ýeral, book Q-168): every log shows /l/… and /v1/links/… without it. The
+# A booking link's token opens the booking (Ýeral, book Q-168), a setup link's an admin account (ADR 0026): every log
+# shows /l/…, /v1/links/…, /setup/… and /v1/admin/setup/… without it. The
 # sites' access logs filter it themselves; this covers the default log, where handler errors (a 502) land.
 {
 	log default {
 		format filter {
 			wrap json
 			fields {
-				request>uri regexp "(/l/|/v1/links/)[^/?]+" "${1}…"
+				request>uri regexp "(^/setup/|/l/|/v1/links/|/v1/admin/setup/)[^/?]+" "${1}…"
 			}
 		}
 	}

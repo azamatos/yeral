@@ -19,6 +19,7 @@ export const errors = {
   404: err('Not found'),
   409: err('Conflict (`slot_taken` with alternatives, `invalid_status` …)'),
   429: err('Too many requests (`retryAfterSec`; `rate_limited` also `retryAfterMin`)'),
+  503: err('The admin tool isn’t set up on this server (`admin_unavailable`)'),
 } as const
 
 export const noContent = { 204: { description: 'Done' } } as const

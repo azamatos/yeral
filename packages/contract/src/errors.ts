@@ -82,6 +82,16 @@ export const ERROR_STATUS = {
   group_not_empty: 409,
   /** New hours or a special day leave bookings outside: keep or cancel them (book Q-211), `details` lists them. */
   bookings_affected: 409,
+  // the Ýeral team's sign-in (ADR 0026)
+  /** The login, the password or the code is wrong: one answer for all three. */
+  sign_in_failed: 401,
+  /** The authenticator code didn't match while setting the app up. */
+  admin_code_wrong: 400,
+  /** A setup link that ran out, was used or never was. */
+  setup_expired: 404,
+  login_taken: 409,
+  /** The server has no `ADMIN_SECRET_KEY`: no admin tool there. */
+  admin_unavailable: 503,
   rate_limited: 429,
   internal: 500,
 } as const satisfies Record<string, number>

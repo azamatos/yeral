@@ -2,12 +2,13 @@
 # HTTP: *.localhost resolves to this machine without /etc/hosts. The cms host joins with its app.
 {
 	auto_https off
-	# a booking link's token opens the booking (book Q-168): handler errors log /l/… and /v1/links/… without it
+	# a booking link's token opens the booking (book Q-168), a setup link's an admin account (ADR 0026): handler errors log
+	# /l/…, /v1/links/…, /setup/… and /v1/admin/setup/… without it
 	log default {
 		format filter {
 			wrap json
 			fields {
-				request>uri regexp "(/l/|/v1/links/)[^/?]+" "${1}…"
+				request>uri regexp "(^/setup/|/l/|/v1/links/|/v1/admin/setup/)[^/?]+" "${1}…"
 			}
 		}
 	}
@@ -26,11 +27,12 @@ http://api.yeral.localhost {
 		-Server
 	}
 	log {
-		# a booking link's token opens the booking (book Q-168): logged as /l/… and /v1/links/…
+		# a booking link's token opens the booking (book Q-168), a setup link's an admin account (ADR 0026): logged as /l/…,
+		# /v1/links/…, /setup/… and /v1/admin/setup/…
 		format filter {
 			wrap json
 			fields {
-				request>uri regexp "(/l/|/v1/links/)[^/?]+" "${1}…"
+				request>uri regexp "(^/setup/|/l/|/v1/links/|/v1/admin/setup/)[^/?]+" "${1}…"
 			}
 		}
 	}

@@ -151,7 +151,7 @@ apps/api/src/
                     calendar (the team's bookings: free times, by phone and walk-in, move, cancel) · requests (answering)
                     settings (booking rules, profile, hours) · menu (services) · team (levels, invites, who is on which team)
                     clients (the phone-only block) · reviews (ratings) · events (live feed) · jobs (runDueJobs)
-                    setup (the wizard's draft) · media (photos kept without their metadata, dropped once nothing
+                    admin (the Ýeral team's sign-in and accounts, `requireAdmin`) · setup (the wizard's draft) · media (photos kept without their metadata, dropped once nothing
                       points at them; `uploadGuard` before an upload's body is read)
                     later: the rest of the business endpoints (P2 step 4: schedules, clients, reviews…) · admin/*
   db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (docs/design demo data + 13 categories)
@@ -184,7 +184,10 @@ apps/api/src/
   (`@yeral/domain/permissions`: `none · own · all`, the team row `view · manage`); the api checks it and leaves out what a
   level can't see (a specialist sees only their own column; money without `revenue` is left out). Invites are their own
   table and wait for the person to accept or decline. One person can be a client and on several teams at once.
-- CMS: separate staff accounts and cookie, two-factor, plus Cloudflare Access in front of `cms.` now (IP allow-list or VPN on the own server).
+- Admin tool (cms.): the Ýeral team's own accounts (`admins`, never a phone account), a login, a password (PBKDF2) and
+  an authenticator code (TOTP) or a recovery code at each sign-in; the secrets sealed under `ADMIN_SECRET_KEY`; its own
+  cookie `<prefix>.admin` on the api's host, `SameSite=Strict`, path `/v1/admin`, 12 hours; `/v1/admin/*` only from
+  the cms origin; every change written to `admin_actions` (ADR 0026).
 - Mutations check `Origin` against the configured sites. Mobile apps (later) use bearer tokens.
 
 ## Configuration, domains and brand

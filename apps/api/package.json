@@ -17,7 +17,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx --env-file-if-exists=.env.local src/db/cli.ts migrate",
     "db:seed": "tsx --env-file-if-exists=.env.local src/db/cli.ts seed",
-    "db:setup": "tsx --env-file-if-exists=.env.local src/db/cli.ts setup"
+    "db:setup": "tsx --env-file-if-exists=.env.local src/db/cli.ts setup",
+    "admin:invite": "tsx --env-file-if-exists=.env.local src/db/cli.ts admin-invite"
   },
   "dependencies": {
     "@hono/node-server": "catalog:",
