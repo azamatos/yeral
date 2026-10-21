@@ -693,7 +693,8 @@ flowchart TD
 
 ### S-17 · A new business is verified
 
-**Goal.** Only real businesses are public.
+**Goal.** Only real businesses are public. While the sign-in code shows on the screen (the first launch) none is
+verified: a number proves nothing then, so only the example businesses are public (Q-036, 21.10.2026).
 
 **Trigger.** Event: a new business finishes setup, including one created from the workspace switcher.
 

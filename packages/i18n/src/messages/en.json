@@ -93,6 +93,7 @@
     "login_taken": "This login is taken.",
     "owner_account_unused": "This number's account hasn't been used for 6 months, so it may belong to someone else now. Ask the owner to sign in once first.",
     "admin_unavailable": "The admin tool isn't set up on this server yet.",
+    "verify_unavailable": "No business is verified while the sign-in code shows on the screen.",
     "rate_limited": "Too many requests. Try again in {retryAfterMin, plural, one {# minute} other {# minutes}}.",
     "internal": "Something went wrong. Please try again.",
     "network": "No connection. Please try again."

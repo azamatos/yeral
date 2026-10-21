@@ -44,7 +44,7 @@ The owner's answers on 18.10.2026 shape the first launch: English only (Q-104, Q
 - B · The same pilot with real businesses only: no examples, so the site looks empty until businesses join.
 - C · A closed demo for investors: only invited people sign in, example data only; real businesses wait for the Turkmenistan launch.
 
-answer: A · An English pilot with Turkmenistan's settings (manats, +993 numbers, Ashgabat time). Example businesses from the design, marked "Example" and confirming bookings at once, sit beside the real businesses the team adds, so anyone can try the whole loop; a "Try the business app" button opens a demo workspace that resets every night. (18.10.2026)
+answer: A · An English pilot with Turkmenistan's settings (manats, +993 numbers, Ashgabat time). Example businesses from the design, marked "Example" and confirming bookings at once, sit beside the real businesses the team adds, so anyone can try the whole loop; a "Try the business app" button opens a demo workspace that resets every night. (18.10.2026; revised by Q-036, 21.10.2026: no real businesses until the Turkmenistan launch)
 
 ## Q-005 · How the name is spelled
 chapter: 01 · status: decided · priority: high
@@ -172,7 +172,8 @@ Every sign-in code and booking message is an SMS (ADR 0019), and today none reac
 - B · No real SMS at the first launch: only test numbers and invited people with a fixed code; real SMS start with the Turkmenistan launch.
 
 answer: B · No real SMS at the first launch. Anyone signs in with their own phone number and the code shows on the screen, so testers (a recruiter trying the platform, for example) get in easily; floods are accepted for now. Every SMS text is still written and goes to the log, and clients see every outcome on screen. Real SMS start with the Turkmenistan launch. (18.10.2026)
-concern: With the code on the screen, a phone number proves nothing: anyone who knows a business owner's number can sign in as them, open their workspace and read their clients' names and phones. Harmless for example businesses and testers, not for the real businesses Q-004 puts next to them. Better: real SMS only for members of real (non-example) workspaces, a handful of people and cents a month; or keep real businesses off the first launch until SMS is on. (18.10.2026)
+concern, settled 21.10.2026: With the code on the screen, a phone number proves nothing: anyone who knows a business owner's number can sign in as them, open their workspace and read their clients' names and phones. Harmless for example businesses and testers, not for the real businesses Q-004 puts next to them. Better: real SMS only for members of real (non-example) workspaces, a handful of people and cents a month; or keep real businesses off the first launch until SMS is on. (18.10.2026)
+settled: No real businesses at the first launch: it's still a demo, with the example businesses and the demo workspace only. Real businesses join with the Turkmenistan launch, which brings real SMS sign-in to protect their numbers. (owner, 21.10.2026) Anyone may still set a business up in the business app to try it, but while the code shows on the screen nothing is verified, so nothing goes public: the api refuses (`verify_unavailable`). (how: Claude, delegated, 21.10.2026)
 
 ## Q-100 · Language in business workspace links
 chapter: 02 · status: decided

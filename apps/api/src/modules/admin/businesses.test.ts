@@ -88,6 +88,27 @@ describe('the admin tool’s businesses (book F-179)', () => {
     expect((await team.req(`${ADMIN}/${draft!.id}/verify`, { method: 'POST' })).json.error.code).toBe('invalid_status')
   })
 
+  it('while the sign-in code shows on the screen nothing is verified: the first launch has no real businesses (book Q-036)', async () => {
+    const pilot = testApp(db, { codeOnScreen: true })
+    const team = await signedInAdmin(pilot, 'pilot')
+    await db
+      .update(businesses)
+      .set({ verification: 'pending', sentForReviewAt: new Date(DEMO_NOW) })
+      .where(eq(businesses.id, glowId))
+    const told = (await smsTo(MAYSA)).length
+    try {
+      const res = await team.req(`${ADMIN}/${glowId}/verify`, { method: 'POST' })
+      expect(res.status).toBe(409)
+      expect(res.json.error.code).toBe('verify_unavailable')
+      const [glow] = await db.select().from(businesses).where(eq(businesses.id, glowId))
+      expect(glow!.verification).toBe('pending')
+      expect(await page()).toBe(404)
+      expect(await smsTo(MAYSA)).toHaveLength(told)
+    } finally {
+      await db.update(businesses).set({ verification: 'verified', sentForReviewAt: null }).where(eq(businesses.id, glowId))
+    }
+  })
+
   it('sent back with a reason, a live page closes; the owner fixes it and sends it again, at night told in the morning', async () => {
     // 23:20 at the business
     t.clock.now = DEMO_NOW + 12 * 3_600_000

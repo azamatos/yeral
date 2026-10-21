@@ -93,6 +93,7 @@
     "login_taken": "Bu login eýýäm alnan.",
     "owner_account_unused": "Bu belginiň hasaby 6 aý ulanylmady, ol indi başga biriniňki bolup biler. Eýesinden ilki bir gezek girmegini haýyş ediň.",
     "admin_unavailable": "Dolandyryş guraly bu serwerde entek sazlanmady.",
+    "verify_unavailable": "Giriş kody ekranda görkezilýärkä hiç bir biznes tassyklanmaýar.",
     "rate_limited": "Haýyş köp boldy. {retryAfterMin} minutdan soň täzeden synanyşyň.",
     "internal": "Näsazlyk ýüze çykdy. Gaýtadan synanyşyň.",
     "network": "Baglanyşyk ýok. Gaýtadan synanyşyň."

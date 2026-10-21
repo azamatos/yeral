@@ -93,6 +93,8 @@ then the apps.
 - 2026-10-21 (later): "delete everything we don't need anymore"; keep `yeral-proto` until all the web apps are live.
   Business decisions: the recommended option when it isn't critical; a critical one goes to the owner in the chat
   before the work starts, with its full description (no IDs to look up).
+- 2026-10-21 (later), on the code on the screen (Q-036): "Go with option B …, its demo version still. When we launch in
+  TKM we will add real phone number code protection." No real businesses at the first launch.
 
 ## Decisions
 
@@ -151,7 +153,9 @@ the first launch, the SMS limits, and slice 1's (#105, #131); they stand (the ow
 unless critical). Six concerns settled the same way (chapter 9, 21.10.2026): Q-299 the SMS safety limit stays, Q-270
 no password, Q-259 a "How was it?" card once per completed visit (F-243, no SMS), Q-105 flexible where businesses
 differ with good defaults, Q-103 a price level later (F-244), Q-101 a native proofread before the Turkmenistan launch.
-Q-036's concern is critical and went to the owner.
+Q-036's concern was critical; the owner chose: no real businesses at the first launch, they come with the Turkmenistan
+launch's real SMS sign-in; while the code shows on the screen the api verifies nothing (`verify_unavailable`). The
+book has no open question or concern left.
 
 ## Open questions
 
@@ -192,13 +196,10 @@ Where the old questions went (2026-10-17):
    `business SMS limit reached`, `admin codes guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`), the
    code-SMS cap; step 4: the business logo, the map address search (F-014, needs a geocoder choice).
 
-**Waiting on the owner:** the cleanup the owner asked for ("delete everything unnecessary"), left to the owner by
-hand since the agents' permission checks block it (`log/2026-10-21-support-line.md`): the 42 merged branches on
-GitHub, the 80 local branches, the unused Hyperdrive config `yeral-production` and the Neon project "Yeral", the
-untracked `.neon` and `apps/api/dist-worker/` in the main checkout, and the repo setting "Allow GitHub Actions to create
-and approve pull requests" (unused since #133); the answer on Q-036's concern, asked in the chat on 21.10 (with the
-code on the screen anyone who types a real member's number signs in as them; it decides whether real businesses can
-join the first launch); later an R2 token, accounts for error tracking and uptime checks, the DNS records when going
+**Waiting on the owner:** the rest of the cleanup, by hand since the agents' permission checks block it: the Neon
+project "Yeral" (done on 21.10 by the owner: the 42 merged branches on GitHub, the 80 local ones, `.neon` and
+`apps/api/dist-worker/` in the main checkout, the Actions setting, the Hyperdrive config `yeral-production`); later an
+R2 token, accounts for error tracking and uptime checks, the DNS records when going
 public. The old Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an early Ýeral prototype) stays until all
 the web apps are live, then goes (the owner, 21.10); the owner's other Pages projects aren't Ýeral's and stay.
 

@@ -32,7 +32,8 @@ an own server (Docker + nginx) later.
   Docker stack of ADR 0007 behind a shared HTTPS front door (the server also hosts the owner's other projects), with
   Cloudflare for DNS and R2 for backups (revised 2026-10-19; it was Cloudflare Workers with Neon). It runs with
   Turkmenistan's settings (manats, +993, Ashgabat time). It's a pilot: example businesses beside real ones, and no SMS (the sign-in code shows on the screen) (product book
-  Q-004, Q-036).
+  Q-004, Q-036). Amended 2026-10-21: no real businesses at the first launch; they come with the Turkmenistan launch's
+  real SMS sign-in (Q-036).
 - **The Turkmenistan launch** moves that market, or starts a new one, onto servers in Turkmenistan with the Docker
   Compose stack (ADR 0007's "later"), adding Turkmen and Russian. Its operator and addresses are decided then.
 - **One account per market.** A person who uses two markets has two accounts. Cross-market features (one login, search

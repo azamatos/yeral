@@ -199,7 +199,7 @@ Notes:
 
 ## Not decided
 
-- **SMS at the first launch:** none. Every text below is written and goes to the log, the sign-in code shows on the screen, and clients see every outcome on screen in *Ýazylyşlarym*. Real SMS, with a provider, start with the Turkmenistan launch. The sender name is decided: "Yeral" in plain Latin. (Q-036, Q-109, decided 18.10.2026)
+- **SMS at the first launch:** none. Every text below is written and goes to the log, the sign-in code shows on the screen, and clients see every outcome on screen in *Ýazylyşlarym*. Real SMS, with a provider, start with the Turkmenistan launch, and real businesses with them: while the code shows on the screen nothing is verified (Q-036, settled 21.10.2026). The sender name is decided: "Yeral" in plain Latin. (Q-036, Q-109, decided 18.10.2026)
 - **No SMS gateway in the code.** Every environment, production included, writes SMS to the log (`apps/api/src/deps.ts`, `apps/api/src/ports/sms.ts`). Until a gateway exists or the first launch switches the code on the screen on (`SIGN_IN_CODE_ON_SCREEN`, off unless set; chapter 10, P2 step 6), nobody can sign in on production; sign-in codes never reach the log (ADR 0024). While it's on, the plain sign-in's answer carries the code, a booking link's never does, a phone change is refused, and an unused account signs in as it is ("Is this you?" isn't asked) (chapter 9, 20.10.2026).
 - **Push and the app channel.** *Programmada* and phone push come with the native apps (business spec §25.6), not before.
 - **Browser notifications while the workspace is closed** (web push) aren't designed. *Brauzerde* means "while Ýeral Biznes is open".
