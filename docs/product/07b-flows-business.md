@@ -331,7 +331,7 @@ flowchart TD
 > Open question Q-200: where a half-finished setup continues.
 
 
-**Status** — Design: drawn (B-Login · `step` phone, phoneLandline, code, name, routing) · Code: built (api, ADR 0019; the business app's login, #99 and #102, chapter 9's 21.10.2026 rows); the name step has no photo until the api takes photos, and the unfinished-setup card waits for Q-200's api. **Code differs:** after an Accept the login shows "Opening …" and skips other waiting invites (being fixed).
+**Status** — Design: drawn (B-Login · `step` phone, phoneLandline, code, name, routing) · Code: built (api, ADR 0019; the business app's login, #99 and #102, chapter 9's 21.10.2026 rows); the name step has no photo until the api takes photos, and the unfinished-setup card waits for Q-200's api. Invites one after another and the accepted workspace opened at once: #115.
 
 ### B-08 · Accept or decline an invite
 
@@ -366,7 +366,7 @@ flowchart TD
 - The invite was for a number the person no longer uses: only the owner can send a new invite to the new number (B-45).
 - Several pending invites at once: not drawn.
 
-**Status** — Design: drawn (B-Login · `step=invite`, `inviteExpired`) · Code: built (api: invites with a 7-day expiry, accept and decline, ADR 0025; the login's invite steps, #102). **Code differs** (being fixed, 21.10.2026 rows in chapter 9): a decline by someone with a workspace isn't confirmed; the expired card shows for any expired invite and with the number in full; the invite card's lines don't follow the business's request setting yet (the api says it: `answersRequests`, 21.10.2026).
+**Status** — Design: drawn (B-Login · `step=invite`, `inviteExpired`) · Code: built (api: invites with a 7-day expiry, accept and decline, ADR 0025; the login's invite steps, #102). The decline confirmed on the opening card, the expired card's 7 days and masked number, and the requests line by `answersRequests`: #115.
 
 ### B-09 · No workspace yet
 
@@ -427,7 +427,7 @@ flowchart TD
 
 > Open question Q-202: does the page address name the workspace.
 
-**Status** — Design: drawn (B-Shell · switcher; B-Onboarding · `fromSwitcher`; B-Mobile) · Code: schema only (one person can have memberships in several businesses) · not built.
+**Status** — Design: drawn (B-Shell · switcher; B-Onboarding · `fromSwitcher`; B-Mobile) · Code: built (api `/v1/me/workspaces`; the app's frame and switcher, #113 and #119, chapter 9's 21.10.2026 rows); "Create a business" opens the setup wizard, a stand-in until P4 slice 2.
 
 ### B-11 · Verification as the business sees it
 
@@ -499,7 +499,7 @@ flowchart TD
 
 - The name in the account is the person's own; the name clients see on the booking site is set by the owner per workspace (B-44).
 
-**Status** — Design: drawn (B-Shell · user menu, Profilim; B-Mobile) · Code: built for name and language on the account (api `/me`); photo, workspaces list and specializations not built.
+**Status** — Design: drawn (B-Shell · user menu, Profilim; B-Mobile) · Code: built (api `/me`; the account menu and My profile, #119 and #121, chapter 9's 21.10.2026 rows); the photo waits for the api's upload, specializations per workspace for the api.
 
 ### B-13 · Change my phone number
 
@@ -531,7 +531,7 @@ flowchart TD
 - An owner can't change a team member's login phone: "Bu belgi — onuň Ýeral hasaby. Belgini işgäriň özi SMS kody bilen üýtgedýär." (B-Team).
 - Code: changing the phone also signs the person out on other devices (ADR 0019); the design doesn't mention this.
 
-**Status** — Design: drawn (B-Shell · Belgini üýtget) · Code: built (api: phone change by SMS code).
+**Status** — Design: drawn (B-Shell · Belgini üýtget) · Code: built (api: phone change by SMS code; My profile, #121, hidden while `canChangePhone` is false).
 
 ### B-14 · Show my other bookings as "Başga ýerde"
 
@@ -598,7 +598,7 @@ flowchart TD
 
 > Open question Q-203: what happens to bookings when a specialist leaves.
 
-**Status** — Design: drawn (B-Shell · Profilim, Aýna) · Code: not built.
+**Status** — Design: drawn (B-Shell · Profilim, Aýna) · Code: built (api `/v1/w/{slug}/leave`; My profile, #121, chapter 9's 21.10.2026 rows); the confirm has no counts of the bookings ahead until the api gives them.
 
 ## 3. The calendar
 
