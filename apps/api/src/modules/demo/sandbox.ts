@@ -3,8 +3,8 @@
  * missing and again every night, so what visitors change lasts a day. On with `DEMO_WORKSPACE`.
  */
 import { addDays, epochOf, today } from '@yeral/domain/time'
-import { eq } from 'drizzle-orm'
-import { businesses } from '../../db/schema'
+import { and, eq, inArray, lt } from 'drizzle-orm'
+import { businesses, sessions, users } from '../../db/schema'
 import { seedSandbox } from '../../db/seed'
 import type { Deps } from '../../deps'
 import { dropPhotos } from '../media/photos'
@@ -32,6 +32,15 @@ export async function keepSandbox(deps: Deps): Promise<boolean> {
   try {
     const { uploads } = await seedSandbox(deps.db, { now })
     await dropPhotos(deps, uploads)
+    // the demo sessions that ran out go with it: a day each, so they'd only pile up
+    await deps.db
+      .delete(sessions)
+      .where(
+        and(
+          lt(sessions.expiresAt, new Date(now)),
+          inArray(sessions.userId, deps.db.select({ id: users.id }).from(users).where(eq(users.demo, true))),
+        ),
+      )
   } catch (error) {
     deps.log.error('demo workspace not made', { error: error instanceof Error ? error.message : String(error) })
     return false

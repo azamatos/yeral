@@ -8,7 +8,7 @@ import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json } from '../../http/openapi'
 import { clientIp, hit, rateLimited } from '../../lib/rate-limit'
-import { DEMO_SESSION_DAYS, startSession } from '../auth/session'
+import { DEMO_SESSION_DAYS, demoCookieName, startSession } from '../auth/session'
 import { toMe } from '../me/me'
 import { signsIn } from '../team/members'
 
@@ -19,26 +19,28 @@ const sessionRoute = createRoute({
   method: 'post',
   path: '/demo/session',
   tags: ['demo'],
-  summary: '"Try the business app" (book F-242): a day in the demo workspace as its owner; whoever was signed in is signed out',
+  summary:
+    '"Try the business app" (book F-242): a day in the demo workspace as its owner, in a cookie the business app reads first; the person’s own session stays',
   responses: { 200: json(demoSessionSchema), 404: errors[404], 429: errors[429] },
 })
 
 export const demoRoutes = new OpenAPIHono<AppEnv>().openapi(sessionRoute, async (c) => {
   const { deps } = c.var
+  if (!deps.demoWorkspace) throw new ApiError('not_found')
   const ip = clientIp((n) => c.req.header(n), deps.trustedIpHeader)
   const r = await hit(deps.db, `demo:ip:${ip}`, DEMO_SESSIONS_PER_HOUR, 3600, deps.now())
   if (!r.ok) throw rateLimited(r.retryAfterSec)
-  const [owner] = deps.demoWorkspace
-    ? await deps.db
-        .select({ user: users })
-        .from(staff)
-        .innerJoin(businesses, eq(businesses.id, staff.businessId))
-        .innerJoin(users, eq(users.id, staff.userId))
-        .where(and(eq(businesses.sandbox, true), eq(staff.level, 'owner'), signsIn))
-    : []
+  const [owner] = await deps.db
+    .select({ user: users })
+    .from(staff)
+    .innerJoin(businesses, eq(businesses.id, staff.businessId))
+    .innerJoin(users, eq(users.id, staff.userId))
+    // a demo account's only: never a real person's, whatever happens to the workspace
+    .where(and(eq(businesses.sandbox, true), eq(staff.level, 'owner'), signsIn, eq(users.demo, true)))
   if (!owner) throw new ApiError('not_found')
-  // whoever was signed in is signed out: their session ends, and the demo's cookie takes its place
-  if (c.var.auth) await deps.db.delete(sessions).where(eq(sessions.id, c.var.auth.sessionId))
-  await startSession(c, deps.db, owner.user.id, DEMO_SESSION_DAYS)
+  // an earlier demo session in this browser ends; the person's own stays for the client site
+  const auth = c.var.auth
+  if (auth?.cookie === demoCookieName(c)) await deps.db.delete(sessions).where(eq(sessions.id, auth.sessionId))
+  await startSession(c, deps.db, owner.user.id, DEMO_SESSION_DAYS, demoCookieName(c))
   return c.json({ me: await toMe(deps.db, owner.user, deps), slug: SANDBOX_SLUG }, 200)
 })

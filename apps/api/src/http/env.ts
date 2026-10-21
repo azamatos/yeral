@@ -10,8 +10,11 @@ export interface AppEnv {
   Variables: {
     deps: Deps
     requestId: string
-    /** Set by the session middleware; null when signed out. */
-    auth: { user: User; sessionId: string } | null
+    /**
+     * Set by the session middleware; null when signed out. `cookie`: the one the session came in (null for a bearer
+     * header), the demo's own for "Try the business app" (book F-242).
+     */
+    auth: { user: User; sessionId: string; cookie: string | null } | null
     /** Set by the admin session middleware on `/v1/admin/*`; null when signed out. */
     admin: { admin: Admin; sessionId: string } | null
   }
