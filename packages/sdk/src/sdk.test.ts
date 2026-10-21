@@ -530,5 +530,9 @@ describe('live events', () => {
       ['suggest'],
       ['favorites'],
     ])
+    // the Ýeral team's review of the page refreshes the same, the banner with it
+    expect(staleKeys({ type: 'business.reviewed', business: 'glow-studio', bookingCode: null })).toEqual(
+      staleKeys({ type: 'business.updated', business: 'glow-studio', bookingCode: null }),
+    )
   })
 })

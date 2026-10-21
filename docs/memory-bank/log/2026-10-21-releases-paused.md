@@ -72,6 +72,12 @@
   code), set up from a link the server command (`admin-invite`) or a teammate makes, reset and turned off by one
   another; sessions of their own on `/v1/admin`. Migration 0035 adds `admins`, `admin_sessions` and `admin_actions`; the
   server needs `ADMIN_SECRET_KEY` (deploy.sh makes it).
+- **@yeral/api** (minor), **@yeral/contract** (minor), **@yeral/domain** (minor), **@yeral/i18n** (minor),
+  **@yeral/sdk** (minor), the admin tool's businesses (#123; book F-179, S-17): the queue to review, a business to
+  check, verified or sent back with a reason (a live one un-verified), hidden from visitors with a reason and shown
+  again, a move checked again; the owner sends a business back for review once fixed, and hears every result on screen
+  and by an SMS that never goes at night. Migration 0036 adds `businesses.sent_for_review_at`, `hidden_at` and
+  `hidden_reason`.
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 

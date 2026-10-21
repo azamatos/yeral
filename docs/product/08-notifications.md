@@ -112,6 +112,7 @@ These are the Turkmen texts from client spec §6 next to the ones in the code (`
 | Move not accepted | — | *{brand}: {business} didn't accept the new time. Your booking stays at {date} {time}. {link}* (English source; Turkmen and Russian drafts in the messages) | yes, when a move lapses (Q-289) |
 | The business moved (Q-215) | — | *{brand}: {business} has moved to a new address: {address}. Your booking: {weekday}, {date}, {time}. {link}*; a home-based business's waiting request names the street only (English source; Turkmen and Russian drafts in the messages) | Claude wrote it (Q-288, 20.10.2026) |
 | Phone booking (B-23) | — | *{brand}: you're booked: {business}, {weekday}, {date}, {time}, {address}. Change: {link}* (English source; Turkmen and Russian drafts in the messages) | Claude wrote it (Q-288, 20.10.2026) |
+| The Ýeral team's review, to the owner (S-17, Q-274, Q-012) | — | *{brand}: {business} is open: clients find it in search and at {link}* · *{brand}: {business} isn't open yet: {reason}. Fix it in your workspace and send it again: {link}* · *{brand}: we've hidden {business}'s page for now: {reason}.* · *{brand}: {business}'s page is open again.* (English source; Turkmen and Russian drafts in the messages) | Claude wrote them (Q-288, 21.10.2026); at night they wait for 08:00 (Q-279) |
 | Move accepted, specialist changed, class cancelled, invite, new owner | — | — (an accepted move reuses Confirmed) | missing; Claude writes them (Q-288) |
 
 Notes:

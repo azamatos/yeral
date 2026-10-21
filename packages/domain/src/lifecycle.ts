@@ -142,6 +142,16 @@ export function expiryWarningAt(sentAt: number, until: number, business: Busines
 
 /** No client reminder arrives between 22:00 and 08:00 at the business (book Q-285). */
 export const NIGHT = { from: 22 * 60, to: 8 * 60 } as const
+/**
+ * A Ýeral SMS to a business (book S-18, Q-278, Q-279: "SMS gije hiç haçan iberilmeýär") that would arrive at night
+ * waits for the morning: 08:00 at the business.
+ */
+export function businessSmsAt(now: number): number {
+  const { date, min } = localOf(now)
+  if (min >= NIGHT.to && min < NIGHT.from) return now
+  return epochOf(min >= NIGHT.from ? addDays(date, 1) : date, NIGHT.to)
+}
+
 /** A reminder that would arrive at night goes at 21:30 the evening before the visit instead. */
 export const EVENING_REMINDER_AT = 21 * 60 + 30
 

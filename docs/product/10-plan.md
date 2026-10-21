@@ -123,8 +123,8 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    for invite expiry, the 5-minute warning and the answer time.
 5. **Admin endpoints:** the Ýeral team's own accounts with a second factor (F-178; done 21.10.2026, ADR 0026: a
    login, a password and an authenticator code): with the code on the screen, a phone number must never open the
-   admin tool; verify, reject and send again (Q-274), un-verify or hide a business,
-   close a workspace (Q-213), review reports with the 48-hour recount, adding a business for its owner.
+   admin tool; verify, reject and send again (Q-274), un-verify or hide a business, check a move again (F-179; done
+   21.10.2026); close a workspace (Q-213), review reports with the 48-hour recount, adding a business for its owner.
 6. **First-launch mode** (Q-004, Q-036): example businesses marked "Example" that confirm at once, the sign-in code
    shown on the screen (never for the admin tool; the api's part done 20.10.2026), a separate demo workspace reset every night, no SMS; appointments
    only (Q-030): the seed's table and class examples and the Restaurant and Café & tea house categories stay out of

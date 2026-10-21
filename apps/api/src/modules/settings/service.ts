@@ -77,6 +77,8 @@ const profileView = (b: BusinessRow): ProfileView => ({
   entranceNote: b.entranceNote,
   hideExactAddress: b.hideExactAddress,
   verification: b.verification,
+  verificationReason: b.verification === 'rejected' ? b.verificationReason : null,
+  hidden: b.hiddenAt ? { reason: b.hiddenReason ?? '' } : null,
 })
 
 export async function profileOf(db: Queryable, businessId: string): Promise<ProfileView> {

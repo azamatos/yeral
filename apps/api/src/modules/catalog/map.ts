@@ -1,7 +1,8 @@
 /** Rows → contract shapes shared by the catalogue, availability and bookings. */
 import { openState } from '@yeral/domain/hours'
 import { localized, type Locale, type Localized, type Price } from '@yeral/domain/model'
-import type { StoredPhoto } from '../../db/schema'
+import { and, eq, isNull } from 'drizzle-orm'
+import { businesses, type StoredPhoto } from '../../db/schema'
 import type { Deps } from '../../deps'
 import type { BusinessRow, ServiceRow } from '../availability/context'
 
@@ -19,6 +20,10 @@ export const photoOf = (deps: Pick<Deps, 'media'>, p: StoredPhoto, lang: Locale,
   url: deps.media(p.key),
   alt: text(p.alt, lang) || fallback,
 })
+
+/** What visitors may see: verified (ADR 0018) and not hidden by the Ýeral team (book Q-012). */
+export const isPublic = () => and(eq(businesses.verification, 'verified'), isNull(businesses.hiddenAt))!
+export const publicRow = (b: Pick<BusinessRow, 'verification' | 'hiddenAt'>) => b.verification === 'verified' && !b.hiddenAt
 
 /** Home-based businesses show an approximate point (≈ 1 km) until the booking is confirmed. */
 export function geoOf(b: BusinessRow, exact = false) {

@@ -132,6 +132,14 @@ export const businesses = pgTable(
     /** Where it moved from (`movedAt`). */
     movedFrom: jsonb().$type<AddressTold>(),
     verificationReason: text(),
+    /** Finished or sent again after a rejection (book Q-274): the review queue's order. */
+    sentForReviewAt: ts(),
+    /**
+     * Hidden by the Ýeral team (book Q-012): out of search, its page closed to visitors, its team told why
+     * (`hiddenReason`); its bookings and its team's work go on.
+     */
+    hiddenAt: ts(),
+    hiddenReason: text(),
     /** Table businesses: how long a party keeps a table, and the special-request chips. */
     tableSittingMinutes: integer().notNull().default(120),
     tableRequests: text().array().notNull().default([]),

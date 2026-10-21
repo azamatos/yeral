@@ -169,7 +169,10 @@ export async function finishSetup(deps: Deps, business: { id: string; setupStep:
     ]
     const details: SetupIncompleteDetails = { missing }
     if (missing.length) throw new ApiError('setup_incomplete', details)
-    await tx.update(businesses).set({ setupStep: null }).where(eq(businesses.id, business.id))
+    await tx
+      .update(businesses)
+      .set({ setupStep: null, sentForReviewAt: new Date(deps.now()) })
+      .where(eq(businesses.id, business.id))
     // the switcher shows it now
     await teamChanged(tx, business.id, { userId: user.id })
   })

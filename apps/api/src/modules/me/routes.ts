@@ -14,6 +14,7 @@ import { clientIp } from '../../lib/rate-limit'
 import { checkCode, sendCode } from '../auth/codes'
 import { endSession, requireUser } from '../auth/session'
 import { buildCards } from '../catalog/cards'
+import { isPublic } from '../catalog/map'
 import { publicBusiness } from '../catalog/detail'
 import { changePhone, releaseAccount } from './account'
 import { accountName, phoneChangeOpen, toMe } from './me'
@@ -200,7 +201,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
       .select({ id: businesses.id })
       .from(favorites)
       .innerJoin(businesses, eq(businesses.id, favorites.businessId))
-      .where(and(eq(favorites.userId, user.id), eq(businesses.verification, 'verified')))
+      .where(and(eq(favorites.userId, user.id), isPublic()))
       .orderBy(desc(favorites.createdAt))
     const cards = await buildCards(
       c.var.deps,

@@ -26,6 +26,11 @@ export const EVENT_TYPES = [
   'client.updated',
   /** The business changed its settings (book B-37–B-43): its page, free times, settings and the switcher refresh. */
   'business.updated',
+  /**
+   * "Ýeral: barlag we täzelikler" (book S-17, Q-274, Q-012): the Ýeral team verified the page, sent it back, hid it or
+   * showed it again; the whole team hears it, the owner gets the notice.
+   */
+  'business.reviewed',
 ] as const
 export type EventType = (typeof EVENT_TYPES)[number]
 

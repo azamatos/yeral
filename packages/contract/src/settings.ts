@@ -88,6 +88,10 @@ export const businessProfileSchema = z
     hideExactAddress: z.boolean(),
     /** Only a verified page is public; an address change asks the Ýeral team to check again (Q-215). */
     verification: z.enum(VERIFICATION_STATUSES),
+    /** Why the Ýeral team sent it back (Q-274): the banner's reason, with "send again" (`POST /w/{slug}/verification`). */
+    verificationReason: z.string().nullable(),
+    /** Hidden by the Ýeral team, and why (Q-012): out of search and closed to visitors until shown again. */
+    hidden: z.object({ reason: z.string() }).nullable(),
   })
   .meta({ id: 'BusinessProfile' })
 

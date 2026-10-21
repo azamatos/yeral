@@ -616,6 +616,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: (json: z.input<typeof businessProfileUpdateSchema>) => call(w.settings.profile.$patch({ param: { slug }, json })),
         onSuccess: () => settingsChanged(slug),
       }),
+    /** The owner sends a business the Ýeral team sent back for review again, once it's fixed (book Q-274). */
+    sendForReview: (slug: string) =>
+      mutationOptions({
+        mutationFn: () => call(w.verification.$post({ param: { slug } })),
+        onSuccess: () => settingsChanged(slug),
+      }),
     /** "Suratlar" (book B-37): up to 20, the first the cover. */
     gallery: (slug: string) =>
       queryOptions({

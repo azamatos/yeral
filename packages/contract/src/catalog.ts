@@ -329,9 +329,9 @@ export const businessDetailSchema = z
     /**
      * The owner's and team's own page while Ýeral still checks it (book F-032): "Sahypaňyz barlagda — häzir ony diňe siz
      * we toparyňyz görýärsiňiz." Nobody else sees it, and nothing can be booked (`bookOnline` false, Q-153). `rejected`
-     * carries the Ýeral team's reason (Q-274). Null on a verified page.
+     * and `hidden` (by the Ýeral team, Q-012) carry the team's reason for the owner (Q-274). Null on a public page.
      */
-    preview: z.object({ status: z.enum(['pending', 'rejected']), reason: z.string().nullable() }).nullable(),
+    preview: z.object({ status: z.enum(['pending', 'rejected', 'hidden']), reason: z.string().nullable() }).nullable(),
     confirmMode: z.enum(CONFIRM_MODES),
     holdMinutes: z.number().int(),
     leadMinutes: z.number().int(),

@@ -2,8 +2,9 @@
  * The Ýeral team's admin tool (book F-178; ADR 0026): its own accounts, signed in with a login, a password and an
  * authenticator code. One role (Q-011): every account can do everything.
  */
+import { VERIFICATION_STATUSES } from '@yeral/domain/model'
 import { z } from 'zod'
-import { epochSchema, idSchema } from './common'
+import { cityRefSchema, epochSchema, idSchema, langQuerySchema, latLngSchema, marketLocaleSchema, photoSchema } from './common'
 
 export const ADMIN_STATUSES = ['invited', 'active', 'disabled'] as const
 /** 3–32 characters: lowercase letters, digits, dots and dashes, starting and ending with a letter or digit. */
@@ -81,6 +82,72 @@ export const adminPasswordChangeSchema = z
   .strict()
   .meta({ id: 'AdminPasswordChange' })
 
+// ── businesses (book F-179, S-17; Q-274, Q-275, Q-276, Q-012, Q-215) ──
+
+/**
+ * The lists: `review` the finished businesses waiting (the longest waiting first), `moved` verified ones to check again
+ * after a move, `rejected` sent back, `hidden` hidden by the team, `verified` the live ones, `all` a search across them.
+ */
+export const ADMIN_BUSINESS_VIEWS = ['review', 'moved', 'rejected', 'hidden', 'verified', 'all'] as const
+export type AdminBusinessView = (typeof ADMIN_BUSINESS_VIEWS)[number]
+export const adminBusinessesQuerySchema = langQuerySchema.extend({
+  view: z.enum(ADMIN_BUSINESS_VIEWS).default('review'),
+  /** The name, the page address or the phone. */
+  q: z.string().trim().max(80).optional(),
+})
+export const adminBusinessParamSchema = z.object({ id: idSchema })
+/** `moved`: the `addressChangedAt` the team looked at, for a move checked again (a newer move is `invalid_status`). */
+export const adminVerifyQuerySchema = z.object({ moved: z.coerce.number().int().optional() })
+
+export const adminBusinessItemSchema = z
+  .object({
+    id: idSchema,
+    slug: z.string(),
+    name: z.string(),
+    category: z.object({ id: z.string(), name: z.string() }),
+    city: cityRefSchema,
+    address: z.string(),
+    /** The business phone the team calls before verifying (Q-276). */
+    phone: z.string(),
+    owner: z.object({ name: z.string().nullable(), phone: z.string() }).nullable(),
+    verification: z.enum(VERIFICATION_STATUSES),
+    /** Why it was sent back, as the owner reads it. */
+    reason: z.string().nullable(),
+    hidden: z.object({ at: epochSchema, reason: z.string() }).nullable(),
+    /** A verified business moved: check it again (Q-215). */
+    addressChangedAt: epochSchema.nullable(),
+    /** When it was finished or sent again: the queue's order. */
+    sentForReviewAt: epochSchema,
+    createdAt: epochSchema,
+  })
+  .meta({ id: 'AdminBusinessItem' })
+
+/** What the team checks (Q-276): the name, the address on the map, the category, the photos; what happened so far. */
+export const adminBusinessSchema = adminBusinessItemSchema
+  .extend({
+    about: z.partialRecord(marketLocaleSchema, z.string()),
+    location: latLngSchema,
+    floor: z.string().nullable(),
+    entranceNote: z.string().nullable(),
+    hideExactAddress: z.boolean(),
+    photos: z.array(photoSchema),
+    /** Services on its menu, and people on its team. */
+    services: z.number().int(),
+    team: z.number().int(),
+    history: z.array(z.object({ status: z.enum(VERIFICATION_STATUSES), reason: z.string().nullable(), at: epochSchema })),
+    /** What the team did with it, the newest first; `by` null for the server command. */
+    actions: z.array(z.object({ action: z.string(), by: z.string().nullable(), reason: z.string().nullable(), at: epochSchema })),
+  })
+  .meta({ id: 'AdminBusiness' })
+
+/** Why: the owner reads it as written. */
+export const adminReasonSchema = z
+  .object({ reason: z.string().trim().min(1).max(500) })
+  .strict()
+  .meta({ id: 'AdminReason' })
+
 export type AdminMe = z.infer<typeof adminMeSchema>
 export type AdminMember = z.infer<typeof adminMemberSchema>
 export type AdminSetupLink = z.infer<typeof adminSetupLinkSchema>
+export type AdminBusinessItem = z.infer<typeof adminBusinessItemSchema>
+export type AdminBusiness = z.infer<typeof adminBusinessSchema>

@@ -505,6 +505,13 @@ describe('account', () => {
         '/v1/admin/team',
         '/v1/admin/team/{id}/reset',
         '/v1/admin/team/{id}/disable',
+        '/v1/admin/businesses',
+        '/v1/admin/businesses/{id}',
+        '/v1/admin/businesses/{id}/verify',
+        '/v1/admin/businesses/{id}/reject',
+        '/v1/admin/businesses/{id}/hide',
+        '/v1/admin/businesses/{id}/show',
+        '/v1/w/{slug}/verification',
       ].sort(),
     )
   })

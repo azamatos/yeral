@@ -27,7 +27,7 @@ import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
 import { cityOrMain, loadCities } from './cities'
 import { businessDetail, visibleBusiness } from './detail'
-import { text } from './map'
+import { isPublic, text } from './map'
 import { search, wordStartLikes } from './search'
 
 const slugParam = z.object({ slug: slugSchema })
@@ -129,8 +129,8 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
     const { db } = c.var.deps
     const [start, word] = wordStartLikes(q)
     const matches = (col: SQL | AnyColumn) => or(sql`${col} ilike ${start}`, sql`${col} ilike ${word}`)
-    // the businesses search would show: verified, and in the chosen city when there is one
-    const shown = and(eq(businesses.verification, 'verified'), city ? eq(businesses.cityId, await cityOrMain(db, city)) : undefined)
+    // the businesses search would show: public, and in the chosen city when there is one
+    const shown = and(isPublic(), city ? eq(businesses.cityId, await cityOrMain(db, city)) : undefined)
     const [cats, svc, biz] = await Promise.all([
       db
         .select()
