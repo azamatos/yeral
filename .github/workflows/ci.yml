@@ -67,7 +67,7 @@ jobs:
 
   docker:
     name: Docker stack
-    # the own server's stack (ADR 0024): build the api and business images, start Postgres + api + business + Caddy, ask for health through Caddy
+    # the own server's stack (ADR 0024): build the api, business and client images, start Postgres + api + business + client + Caddy, ask for health through Caddy
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -88,6 +88,11 @@ jobs:
           # the business app: its build stamp, and an app address answered with the app
           curl -fsS -H 'Host: business.yeral.localhost' http://localhost/version.json
           curl -fsS -H 'Host: business.yeral.localhost' http://localhost/login | grep -q 'id="root"'
+          # the client site: its build stamp, `/` sent to a language, a page rendered on the server, an unknown address a 404
+          curl -fsS -H 'Host: yeral.localhost' http://localhost/version.json
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: yeral.localhost' http://localhost/)" = 307
+          curl -fsS -H 'Host: yeral.localhost' http://localhost/en | grep -q '<html lang="en"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: yeral.localhost' http://localhost/en/nothing-here)" = 404
       - name: Logs
         if: failure()
         run: docker compose -f infra/docker/compose.yml logs --no-color

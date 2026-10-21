@@ -1,4 +1,5 @@
-# Production-like stack on this machine: `pnpm docker:up` → http://api.yeral.localhost/docs (operations.md).
+# Production-like stack on this machine: `pnpm docker:up` → http://yeral.localhost, http://business.yeral.localhost,
+# http://api.yeral.localhost/docs (operations.md).
 # The same api image runs on the own server (infra/server/yeral), behind the same kind of Caddy with TLS and real hosts.
 name: yeral
 services:
@@ -57,6 +58,21 @@ services:
         GITHUB_SHA: ${GITHUB_SHA:-local}
         YERAL_ENV: docker
 
+  # the client site: its server-side renderer on Node (client.Dockerfile); it asks the api inside the stack
+  client:
+    image: yeral-client:local
+    build:
+      context: ../..
+      dockerfile: infra/docker/client.Dockerfile
+      args:
+        GITHUB_SHA: ${GITHUB_SHA:-local}
+        YERAL_ENV: docker
+    environment:
+      API_INTERNAL_URL: http://api:3004
+    depends_on:
+      api:
+        condition: service_healthy
+
   caddy:
     image: caddy:2-alpine
     ports:
@@ -67,6 +83,8 @@ services:
       api:
         condition: service_healthy
       business:
+        condition: service_healthy
+      client:
         condition: service_healthy
 
 volumes:

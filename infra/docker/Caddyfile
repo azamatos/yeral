@@ -1,5 +1,5 @@
 # The production-like stack's front door, like the server's shared Caddy (infra/server/edge, yeral.caddy), on plain
-# HTTP: *.localhost resolves to this machine without /etc/hosts. The client and cms hosts join with their apps.
+# HTTP: *.localhost resolves to this machine without /etc/hosts. The cms host joins with its app.
 {
 	auto_https off
 	# a booking link's token opens the booking (book Q-168): handler errors log /l/… and /v1/links/… without it
@@ -35,6 +35,28 @@ http://api.yeral.localhost {
 	}
 	# Caddy writes the caller's address into X-Forwarded-For and drops what the caller sent (TRUSTED_IP_HEADER)
 	reverse_proxy api:3004
+}
+
+# the client site: its Node server renders the pages and serves the files (client.Dockerfile); this door adds the
+# headers and compresses
+http://yeral.localhost {
+	encode zstd gzip
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options SAMEORIGIN
+		-Server
+	}
+	log {
+		# a booking link's token opens the booking (book Q-168; yeral.app/l/…): logged as /l/…
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp "(/l/|/v1/links/)[^/?]+" "${1}…"
+			}
+		}
+	}
+	reverse_proxy client:3000
 }
 
 # the business app: its image serves the files (static.Caddyfile); this door adds the headers

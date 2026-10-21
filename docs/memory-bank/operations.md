@@ -85,11 +85,17 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
 
 `pnpm docker:up` builds `infra/docker/api.Dockerfile` (turbo prune with the lockfile's turbo → pnpm install → esbuild
 bundle → `node:24-alpine` with only `dist/`), starts Postgres 18, runs `migrate` (`node dist/cli.js setup`: migrations,
-demo seed while empty), the api (jobs tick inside), the business app and Caddy (`infra/docker/Caddyfile`, plain HTTP,
-one site per host): http://api.yeral.localhost/docs, http://business.yeral.localhost. A single-page app's image
+demo seed while empty), the api (jobs tick inside), the business app, the client site and Caddy
+(`infra/docker/Caddyfile`, plain HTTP, one site per host): http://yeral.localhost, http://business.yeral.localhost,
+http://api.yeral.localhost/docs. A single-page app's image
 (`infra/docker/business.Dockerfile`) builds it with its hosts baked in (`YERAL_ENV`, `YERAL_DOMAIN` build arguments →
 `VITE_*`) and serves `dist/` with a small Caddy of its own (`static.Caddyfile`: every app address answers
-`index.html`, hashed files cached for a year, `noindex`); the front door adds the security headers. The server's stack
+`index.html`, hashed files cached for a year, `noindex`); the front door adds the security headers. The client site's
+image (`infra/docker/client.Dockerfile`) bakes its hosts in the same way and runs one Node process with no
+`node_modules`: Vite bundles the renderer (`ssr.noExternal`) and esbuild the server (`apps/client/server.mjs` →
+`dist/node.mjs`: hashed files cached for a year and a missing one a 404, every page rendered by TanStack Start). The
+renderer asks the api inside the stack (`API_INTERNAL_URL=http://api:3004`, read at run time; unset = the public api
+address) and passes the visitor's cookie on. The server's stack
 takes the apps when they have something to serve (P2 step 7). CI's «Docker stack» job does the same, asks for health through Caddy, and validates
 the server's Caddy config (`infra/server/edge/Caddyfile` with `yeral.caddy`).
 `pnpm docker:down` stops it (`-v` drops the data). The demo keeps the day of the first `docker:up`; start it over with

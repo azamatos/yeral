@@ -98,6 +98,10 @@ Below `shared/` sit the packages: they are the cross-app part of the lower layer
 - **The app layer** (as built in `apps/business`): `app/entrypoint/` (`main.tsx`, the providers, the router),
   `app/routes/`, `app/routeTree.gen.ts` (written by the router plugin, committed so types check without a build) and
   `app/styles.css`. Steiger refuses segments named for what they are (`providers`, `components`), hence `entrypoint`.
+  The client site (TanStack Start) has no `main.tsx`: `app/entrypoint/router.tsx` exports `getRouter()` (a router, an
+  `Api` and a query cache per request on the server, once in the browser, with the SSR query integration),
+  `site-api.ts` passes the visitor's cookie on when the server renders, and `routes/__root.tsx` writes the document
+  (`shellComponent`: `<html lang>`, `HeadContent`, `Scripts`, the providers).
 - Enforced by **Steiger** (`pnpm lint:fsd`) per app and by ESLint import rules. Details: skill `fsd`, ADR 0004. Each FSD
   app has a `lint:fsd` script and `steiger.config.js` re-exporting `@yeral/config/steiger` (the plugin's recommended
   rules: a layer imports only from below, slices never from each other); the `@/` alias resolves through `tsconfig`.
@@ -132,7 +136,7 @@ params (zod); unsaved form input → TanStack Form; one subtree → `useState`; 
 
 | App | Mode | Notes |
 |---|---|---|
-| client | SSR for home, search, category and business pages; `ssr: false` for account, booking, login | `/` → saved language, else open (book Q-132; code: `/tk`); `/b/{slug}` → `/{lang}/b/{slug}`; loaders `ensureQueryData` → dehydrated into the page; `head()` gives title, description, canonical, hreflang, OG, JSON-LD |
+| client | SSR for home, search, category and business pages; `ssr: false` for account, booking, login | `/` → the signed-in person's language, else the browser's (`Accept-Language`) when the site has it, else the market's main one (book Q-132; 307); `/{lang}` validated against `MARKET_LOCALES`, anything else the 404 (`notFoundMode: 'root'`, HTTP 404); `/b/{slug}` → `/{lang}/b/{slug}`; the root loader asks for `me` with the visitor's cookie, so the header is right on the server; loaders `ensureQueryData` → dehydrated into the page; `head()` through `pageHead()` gives title, description, canonical, hreflang, OG (JSON-LD with the business pages); pages with the header and footer sit under the pathless `$lang/_site` layout |
 | business, cms, storybook | static SPA, `index.html` fallback | `noindex` |
 
 ## Backend (`apps/api`)

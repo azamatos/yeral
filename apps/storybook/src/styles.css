@@ -2,3 +2,4 @@
 @import '@yeral/ui/styles.css';
 @source '../../../packages/ui/src/**/*.{ts,tsx}';
 @source '../../business/src/**/*.{ts,tsx}';
+@source '../../client/src/**/*.{ts,tsx}';
