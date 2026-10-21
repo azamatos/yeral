@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { INVITE_DAYS, inviteExpiresAt, inviteState } from './team'
+import { EXPIRED_INVITE_SHOWN_DAYS, INVITE_DAYS, inviteExpiresAt, inviteState, showsExpiredInvite } from './team'
 
 const SENT = Date.parse('2026-10-14T06:00:00Z')
 const DAY = 86_400_000
@@ -14,6 +14,13 @@ describe('invites (book chapter 3)', () => {
     const invite = { status: 'pending' as const, expiresAt: inviteExpiresAt(SENT) }
     expect(inviteState(invite, SENT + 6 * DAY)).toBe('pending')
     expect(inviteState(invite, SENT + 7 * DAY)).toBe('expired')
+  })
+
+  it('show as expired at sign-in for a week after they end', () => {
+    const ended = inviteExpiresAt(SENT)
+    expect(EXPIRED_INVITE_SHOWN_DAYS).toBe(7)
+    expect(showsExpiredInvite(ended, ended + 7 * DAY - 1)).toBe(true)
+    expect(showsExpiredInvite(ended, ended + 7 * DAY)).toBe(false)
   })
 
   it('keep their answer', () => {

@@ -8,15 +8,27 @@ import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { AuthPage, textLink } from '@/shared/ui'
 import { BusinessMark } from './business-mark'
+import { DeclinedLine } from './declined-line'
 
 /** How long "Opening Glow Studio…" stays before the calendar opens; «Open the calendar now» skips it. */
 export const OPENING_MS = 1500
 
 /**
  * The last used workspace opens (B-Login `step=routing`, book B-07 step 4): its logo, name, the person's level and
- * city, and with several workspaces where to find the others.
+ * city, and with several workspaces where to find the others. Right after declining an invite, the decline is
+ * confirmed on top, as on the no-workspace card (book chapter 9, 21.10.2026).
  */
-export function OpeningStep({ workspace, count, current }: { workspace: Workspace; count: number; current: string | null }) {
+export function OpeningStep({
+  workspace,
+  count,
+  current,
+  declined = null,
+}: {
+  workspace: Workspace
+  count: number
+  current: string | null
+  declined?: string | null
+}) {
   const t = useTranslations()
   const sdk = useSdk()
   const navigate = useNavigate()
@@ -30,7 +42,8 @@ export function OpeningStep({ workspace, count, current }: { workspace: Workspac
     if (slug !== current) mutate(slug)
   }, [slug, current, mutate])
   useEffect(() => {
-    const timer = setTimeout(() => void navigate({ to: '/w/$slug/calendar', params: { slug } }), OPENING_MS)
+    // in place of the sign-in, so Back doesn't come here to be sent on again
+    const timer = setTimeout(() => void navigate({ to: '/w/$slug/calendar', params: { slug }, replace: true }), OPENING_MS)
     return () => clearTimeout(timer)
   }, [navigate, slug])
 
@@ -38,7 +51,12 @@ export function OpeningStep({ workspace, count, current }: { workspace: Workspac
     <AuthPage
       focusKey="opening"
       align="center"
-      media={<BusinessMark name={workspace.name} photo={workspace.photo} size={64} />}
+      media={
+        <>
+          {declined && <DeclinedLine business={declined} />}
+          <BusinessMark name={workspace.name} photo={workspace.photo} size={64} />
+        </>
+      }
       title={title}
       lead={t('login.opening.sub', { level: t(`levels.${workspace.level}`), city: workspace.city.name })}
     >
@@ -46,7 +64,7 @@ export function OpeningStep({ workspace, count, current }: { workspace: Workspac
         <span className="absolute inset-y-0 w-2/5 animate-[opening_1.2s_ease-in-out_infinite] rounded-pill bg-a-500 motion-reduce:left-0 motion-reduce:w-3/5 motion-reduce:animate-none" />
       </div>
       <p className="m-0 max-w-85 text-dense text-n-600">{count > 1 ? t('login.opening.many', { count }) : t('login.opening.one')}</p>
-      <Link to="/w/$slug/calendar" params={{ slug }} className={cn(textLink, 'inline-flex items-center gap-1.5 text-small')}>
+      <Link to="/w/$slug/calendar" params={{ slug }} replace className={cn(textLink, 'inline-flex items-center gap-1.5 text-small')}>
         {t('login.opening.now')}
         <ArrowRight aria-hidden className="size-4" />
       </Link>
