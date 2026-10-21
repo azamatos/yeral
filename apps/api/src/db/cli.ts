@@ -18,7 +18,7 @@ import { inviteOrReset } from '../modules/admin/accounts'
 import { createLogger } from '../ports/log'
 import { createDb } from './client'
 import { runMigrations } from './migrate'
-import { seed, seedCatalogue } from './seed'
+import { seed, seedCatalogue, seedExamples } from './seed'
 import { assertSeedTarget, seedMode } from './seed/mode'
 
 const [command = 'setup', ...flags] = process.argv.slice(2)
@@ -83,6 +83,11 @@ async function main() {
       } else {
         const counts = await seed(db, { demo, now: Date.now() })
         console.warn(`seeded ${demo ? 'demo data' : 'the cities and the category catalogue'}: ${JSON.stringify(counts)}`)
+      }
+      // the first launch's example businesses (book Q-004): added once each, beside the real ones
+      if (!demo && config.exampleBusinesses) {
+        const added = await seedExamples(db, { now: Date.now() })
+        console.warn(`example businesses: ${added} added`)
       }
     }
   } finally {

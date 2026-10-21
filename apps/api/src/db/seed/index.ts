@@ -79,6 +79,11 @@ interface Ctx {
   usedCodes: Set<string>
   users: Map<string, string>
   clients: Map<string, string>
+  /**
+   * The first launch's examples (book Q-004): confirming at once, with no team anyone signs in to (so nobody sees a
+   * visitor's booking), no invites, no reviews of their own, and only the design's yearly days off.
+   */
+  example?: boolean
 }
 
 function code(ctx: Ctx, fixed?: string): string {
@@ -142,16 +147,21 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       }),
       amenities: def.amenities,
       hours: ctx.week(def.hours),
-      exceptions: (def.exceptions ?? []).map((e) => (e.yearly ? e : { ...e, from: ctx.day(e.from), to: ctx.day(e.to) })),
-      rating: def.rating,
-      reviewsCount: def.reviewsCount,
-      ratingBreakdown: def.ratingBreakdown ?? {
-        5: Math.round(def.reviewsCount * 0.85),
-        4: Math.round(def.reviewsCount * 0.12),
-        3: 0,
-        2: 0,
-        1: 0,
-      },
+      exceptions: (def.exceptions ?? [])
+        .filter((e) => e.yearly || !ctx.example)
+        .map((e) => (e.yearly ? e : { ...e, from: ctx.day(e.from), to: ctx.day(e.to) })),
+      // an example has no reviews of its own: its visitors' are the first
+      rating: ctx.example ? null : def.rating,
+      reviewsCount: ctx.example ? 0 : def.reviewsCount,
+      ratingBreakdown: ctx.example
+        ? { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+        : (def.ratingBreakdown ?? {
+            5: Math.round(def.reviewsCount * 0.85),
+            4: Math.round(def.reviewsCount * 0.12),
+            3: 0,
+            2: 0,
+            1: 0,
+          }),
       verification: 'verified',
       tableRequests: def.tableRequests ?? [],
       demo: true,
@@ -160,14 +170,14 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
   if (!biz) throw new Error('business insert failed')
 
   const { note, ...ruleOverrides } = def.rules ?? {}
-  const rules = { ...DEFAULT_RULES, ...ruleOverrides }
+  const rules = { ...DEFAULT_RULES, ...ruleOverrides, ...(ctx.example ? { confirmMode: 'instant' as const } : {}) }
   await db.insert(t.bookingRules).values({ businessId: biz.id, ...rules, note: note ?? null })
 
   const staffIds = new Map<string, { id: string; name: string }>()
   for (const [i, s] of (def.staff ?? []).entries()) {
     // people with a level sign in with their phone: an account now, or an open invite while they're `invited` (ADR 0025)
     const invited = s.status === 'invited'
-    const signInPhone = s.level && (s.hasApp ?? true) ? s.phone : undefined
+    const signInPhone = s.level && (s.hasApp ?? true) && !ctx.example ? s.phone : undefined
     const [row] = await db
       .insert(t.staff)
       .values({
@@ -180,12 +190,15 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
         phone: s.phone ?? null,
         gender: s.gender ?? null,
         bookable: s.bookable ?? true,
-        hasApp: s.hasApp ?? true,
-        status: s.status ?? 'active',
+        // an example's owner keeps the app (a workspace always has one) but no account: nobody signs in to it
+        hasApp: ctx.example ? s.level === 'owner' : (s.hasApp ?? true),
+        status: ctx.example ? 'active' : (s.status ?? 'active'),
         sort: i,
         shift: s.shift ? ctx.week(s.shift) : null,
         breaks: ctx.week(s.breaks ?? [null, null, null, null, null, null, null]),
-        daysOff: (s.daysOff ?? []).map((e) => (e.yearly ? e : { ...e, from: ctx.day(e.from), to: ctx.day(e.to) })),
+        daysOff: (s.daysOff ?? [])
+          .filter((e) => e.yearly || !ctx.example)
+          .map((e) => (e.yearly ? e : { ...e, from: ctx.day(e.from), to: ctx.day(e.to) })),
         rating: s.rating ?? null,
       })
       .returning({ id: t.staff.id })
@@ -387,6 +400,34 @@ export async function seed(db: Db, opts: { demo: boolean; now: number }): Promis
     const counts = await seedDemo(tx, opts)
     await tx.execute(FILL_TOLD)
     return counts
+  })
+}
+
+/**
+ * The first launch's example businesses (book Q-004, F-200): the design's appointment businesses that aren't there yet
+ * (by page address), marked as examples (`demo`), confirming at once, with no team to sign in to and no reviews of their
+ * own; nothing else is touched, so production keeps its data and visitors' bookings. Their week is the design's.
+ */
+export async function seedExamples(db: Db, opts: { now: number }): Promise<number> {
+  return db.transaction(async (tx) => {
+    const ctx: Ctx = {
+      db: tx,
+      now: opts.now,
+      day: (d) => d,
+      week: <T>(days: readonly T[]): T[] => [...days],
+      usedCodes: new Set(),
+      users: new Map(),
+      clients: new Map(),
+      example: true,
+    }
+    const there = new Set((await tx.select({ slug: t.businesses.slug }).from(t.businesses)).map((b) => b.slug))
+    let added = 0
+    for (const def of BUSINESSES)
+      if (def.type === 'appointment' && !there.has(def.slug)) {
+        await seedBusiness(ctx, def)
+        added++
+      }
+    return added
   })
 }
 

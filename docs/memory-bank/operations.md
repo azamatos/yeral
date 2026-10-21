@@ -86,6 +86,10 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
   sets up its app again. The first account, or a new link for one that's locked out:
   `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` prints a
   setup link (24 hours) to hand over in person; locally `pnpm --filter @yeral/api admin:invite <login> "<name>"`.
+- The first launch (book Q-004, Q-030): `EXAMPLE_BUSINESSES=true` makes `setup` (every deploy's migrate step) add the
+  design's appointment businesses that aren't there yet, marked "Example" and confirming at once, with no team; their
+  photos come in the api's image (`/app/demo-photos`, `DEMO_MEDIA_DIR`). `BOOKING_TYPES=appointment` keeps tables and
+  classes out of lists and search. Both sit in the server's compose; turn the examples on with the code on the screen.
 - Photos: the ones people upload on the server's disk behind a storage port (`ports/storage.ts`), in `MEDIA_DIR` (the
   `media` volume at `/data/media` on the server and in the local stack; `apps/api/data/media` in development),
   served at `/media/up/…`; demo photos are served only outside production. The nightly backup (step 7) must take the

@@ -12,5 +12,7 @@
 **/.dev.vars
 **/.dev.vars.*
 docs/design/assets
+# but the demo photos: the api image serves them for the first launch's example businesses (book Q-004)
+!docs/design/assets/photos
 apps/legacy/.next
 apps/legacy/.open-next

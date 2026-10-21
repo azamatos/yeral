@@ -1,4 +1,5 @@
 /** What every request handler gets: database, site config, clock, SMS, media URLs, logger. */
+import type { BookingType } from '@yeral/domain/model'
 import type { SiteConfig } from '@yeral/lib/site'
 import type { Config } from './config'
 import type { Db } from './db/client'
@@ -26,6 +27,8 @@ export interface Deps {
    * unused account go ("Is this you?").
    */
   codeOnScreen: boolean
+  /** The kinds of booking open now (book Q-030): the others stay out of lists and search. */
+  bookingTypes: readonly BookingType[]
   /** The key the Ýeral team's authenticator secrets are sealed under (ADR 0026); null: no admin tool here. */
   adminKey: Uint8Array<ArrayBuffer> | null
 }
@@ -45,5 +48,6 @@ export function createDeps(config: Config, db: Db, log: Logger = createLogger(co
     trustedIpHeader: config.trustedIpHeader,
     codeOnScreen: config.codeOnScreen,
     adminKey: config.adminKey,
+    bookingTypes: config.bookingTypes,
   }
 }

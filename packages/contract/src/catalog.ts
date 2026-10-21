@@ -78,6 +78,8 @@ export const businessCardSchema = z
   .object({
     slug: slugSchema,
     name: z.string(),
+    /** One of the first launch's example businesses (book Q-004): "Example" beside its name. */
+    example: z.boolean(),
     category: z.object({ id: slugSchema, name: z.string() }),
     photo: photoSchema.nullable(),
     rating: z.number().min(0).max(5).nullable(),
@@ -285,6 +287,8 @@ export const businessDetailSchema = z
   .object({
     slug: slugSchema,
     name: z.string(),
+    /** One of the first launch's example businesses (book Q-004): "Example" beside its name; it confirms at once. */
+    example: z.boolean(),
     category: z.object({ id: slugSchema, name: z.string() }),
     bookingTypes: z.array(bookingTypeSchema).min(1),
     specialistWord: z.string(),

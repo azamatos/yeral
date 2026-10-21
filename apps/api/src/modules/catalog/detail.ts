@@ -15,7 +15,7 @@ import { ApiError } from '../../http/errors'
 import { appointmentContext, loadBusiness, loadBusy, type BusinessRow } from '../availability/context'
 import { buildCards } from './cards'
 import { cityRefOf, loadCities } from './cities'
-import { geoOf, isPublic, openOf, photoOf, priceFromOf, publicPrice, publicRow, text } from './map'
+import { geoOf, isPublic, openOf, photoOf, priceFromOf, publicPrice, publicRow, takesOpenTypes, text } from './map'
 import { bookOnlineFor } from '../clients/online'
 import { signsIn } from '../team/members'
 
@@ -148,7 +148,7 @@ export async function businessDetail(
   const others = await db
     .select({ id: businesses.id, lat: businesses.lat, lng: businesses.lng })
     .from(businesses)
-    .where(and(eq(businesses.categoryId, b.categoryId), isPublic(), ne(businesses.id, b.id)))
+    .where(and(eq(businesses.categoryId, b.categoryId), isPublic(), takesOpenTypes(deps.bookingTypes), ne(businesses.id, b.id)))
   const nearest = others.sort((x, y) => distanceM(b, x) - distanceM(b, y)).slice(0, 4)
   const similar = (
     await buildCards(
@@ -166,6 +166,7 @@ export async function businessDetail(
     category: { id: b.categoryId, name: text(b.kind, lang) || text(category?.name, lang) },
     bookingTypes: b.bookingTypes,
     specialistWord: text(category?.specialistWord, lang),
+    example: b.demo,
     rating: b.rating,
     reviewsCount: b.reviewsCount,
     ratingBreakdown: b.ratingBreakdown,

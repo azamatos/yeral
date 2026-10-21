@@ -1,5 +1,6 @@
 /** Environment for the api, read once from `process.env` (ADR 0024). */
 import { resolve } from 'node:path'
+import { BOOKING_TYPES, type BookingType } from '@yeral/domain/model'
 import { parseEnv } from '@yeral/lib/env'
 import { siteFromEnv, type SiteConfig } from '@yeral/lib/site'
 import { z } from 'zod'
@@ -21,6 +22,20 @@ const envSchema = z.object({
    * unless set; refused with an SMS gateway that delivers.
    */
   SIGN_IN_CODE_ON_SCREEN: z.enum(['true', 'false']).default('false'),
+  /**
+   * The kinds of booking open now (book Q-030): appointments at the first launch; a business or category of another
+   * kind stays out of every list and search. Comma-separated (`appointment,table,class`).
+   */
+  BOOKING_TYPES: z
+    .string()
+    .default('appointment')
+    .transform((list) => list.split(',').map((t) => t.trim()))
+    .pipe(z.array(z.enum(BOOKING_TYPES)).min(1)),
+  /**
+   * The first launch's example businesses (book Q-004, F-200): `setup` adds the design's appointment businesses that
+   * aren't there yet, marked "Example", confirming at once, with no team. Off unless set.
+   */
+  EXAMPLE_BUSINESSES: z.enum(['true', 'false']).default('false'),
   /**
    * The key the Ýeral team's authenticator secrets are sealed under (ADR 0026): 32 random bytes, base64
    * (`openssl rand -base64 32`). Development and tests use a fixed one; production without it has no admin tool.
@@ -49,6 +64,10 @@ export interface Config {
   logLevel: 'debug' | 'info' | 'warn' | 'error'
   trustedIpHeader?: TrustedIpHeader
   codeOnScreen: boolean
+  /** The kinds of booking open now (`BOOKING_TYPES`, book Q-030). */
+  bookingTypes: BookingType[]
+  /** `EXAMPLE_BUSINESSES`: `setup` adds the first launch's example businesses. */
+  exampleBusinesses: boolean
   /** `ADMIN_SECRET_KEY`'s bytes; null in production until it's set (the admin tool answers `admin_unavailable`). */
   adminKey: Uint8Array<ArrayBuffer> | null
 }
@@ -65,6 +84,8 @@ export function loadConfig(source: Record<string, unknown>): Config {
     logLevel: env.LOG_LEVEL,
     trustedIpHeader: env.TRUSTED_IP_HEADER,
     codeOnScreen: env.SIGN_IN_CODE_ON_SCREEN === 'true',
+    bookingTypes: env.BOOKING_TYPES,
+    exampleBusinesses: env.EXAMPLE_BUSINESSES === 'true',
     adminKey: env.ADMIN_SECRET_KEY
       ? Uint8Array.from(atob(env.ADMIN_SECRET_KEY), (ch) => ch.charCodeAt(0))
       : site.env === 'production'

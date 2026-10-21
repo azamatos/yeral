@@ -27,6 +27,9 @@ FROM node:24-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /repo/apps/api/dist ./dist
+# the design's demo photos (free Unsplash licence, CREDITS.md), for the first launch's example businesses (book Q-004)
+COPY --from=pruned /repo/docs/design/assets/photos ./demo-photos
+ENV DEMO_MEDIA_DIR=/app/demo-photos
 # the uploaded photos (MEDIA_DIR): a named volume takes this folder and its owner
 RUN mkdir -p /data/media && chown node:node /data/media
 USER node

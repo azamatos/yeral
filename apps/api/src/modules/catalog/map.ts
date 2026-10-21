@@ -1,8 +1,8 @@
 /** Rows → contract shapes shared by the catalogue, availability and bookings. */
 import { openState } from '@yeral/domain/hours'
-import { localized, type Locale, type Localized, type Price } from '@yeral/domain/model'
-import { and, eq, isNull } from 'drizzle-orm'
-import { businesses, type StoredPhoto } from '../../db/schema'
+import { localized, type BookingType, type Locale, type Localized, type Price } from '@yeral/domain/model'
+import { and, eq, isNull, sql, type AnyColumn } from 'drizzle-orm'
+import { businesses, categories, type StoredPhoto } from '../../db/schema'
 import type { Deps } from '../../deps'
 import type { BusinessRow, ServiceRow } from '../availability/context'
 
@@ -25,6 +25,15 @@ export const photoOf = (deps: Pick<Deps, 'media'>, p: StoredPhoto, lang: Locale,
 export const isPublic = () => and(eq(businesses.verification, 'verified'), isNull(businesses.hiddenAt), isNull(businesses.closedAt))!
 export const publicRow = (b: Pick<BusinessRow, 'verification' | 'hiddenAt' | 'closedAt'>) =>
   b.verification === 'verified' && !b.hiddenAt && !b.closedAt
+
+/** A business that takes one of the kinds of booking open now (book Q-030), in SQL; `categoryTakes` for a category. */
+const overlap = (col: AnyColumn, types: readonly BookingType[]) =>
+  sql`${col} && array[${sql.join(
+    types.map((x) => sql`${x}`),
+    sql`, `,
+  )}]::booking_type[]`
+export const takesOpenTypes = (types: readonly BookingType[]) => overlap(businesses.bookingTypes, types)
+export const categoryTakes = (types: readonly BookingType[]) => overlap(categories.bookingTypes, types)
 
 /** Home-based businesses show an approximate point (≈ 1 km) until the booking is confirmed. */
 export function geoOf(b: BusinessRow, exact = false) {
