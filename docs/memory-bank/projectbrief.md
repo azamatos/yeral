@@ -50,7 +50,8 @@ source (`web` | `app` | `phone` | `walkin` | `ai`). Manat prices for plans and c
   through a VPN. The Turkmenistan launch, after
   investment, gets its own servers in Turkmenistan running the same Docker stack behind Caddy
   ([ADR 0024](../decisions/0024-own-server-docker-caddy.md)).
-- The repository is private (checked 2026-10-18). Never commit secrets.
+- The repository is public (since 2026-10-21, the owner's choice when the private repository ran out of free GitHub
+  Actions minutes). Never commit secrets, keys or server addresses.
 
 ## Goals
 

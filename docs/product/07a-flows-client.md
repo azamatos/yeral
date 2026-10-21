@@ -775,7 +775,7 @@ flowchart TD
 - The page under the modal keeps its state, a started booking included (Auth, step 3 caption).
 - An account unused for 6 months asks "Is this you?" first, as in C-18 (Q-270).
 
-**Status:** Design: drawn (Auth; States 10) · Code: built (api).
+**Status:** Design: drawn (Auth; States 10) · Code: built (api; the client site's header login, #110 and #114, chapter 9's 21.10.2026 rows); the heart's sign-in comes with favourites.
 
 ### C-20 · The time was taken while booking
 
@@ -1621,7 +1621,7 @@ flowchart TD
 
 - Name and surname are two fields, the surname optional; businesses see the whole name, and a review is signed "Aýjemal G.", or "Aýjemal" without a surname (Q-156, decided 18.10.2026; code: `@yeral/domain/names`). `PATCH /v1/me` takes `firstName` and `surname`; an older client's one `name` is split at the first space.
 
-**Status:** Design: drawn (Account-Profile) · Code: built (api) — `PATCH /v1/me`.
+**Status:** Design: drawn (Account-Profile) · Code: built for the name (api `PATCH /v1/me`; the profile, #118); the Language section isn't built and comes with a market's second language (chapter 9's 21.10.2026 rows).
 
 ### C-44 · Change the phone number
 
@@ -1657,7 +1657,7 @@ flowchart TD
 
 > Open question Q-171: changing the phone number and the businesses' client records.
 
-**Status:** Design: drawn (Account-Profile) · Code: built (api) — `POST /v1/me/phone/code`, `/verify`.
+**Status:** Design: drawn (Account-Profile) · Code: built (api `POST /v1/me/phone/code`, `/verify`; the profile, #118, hidden while `canChangePhone` is false).
 
 ### C-45 · Choose SMS notifications
 
@@ -1696,7 +1696,7 @@ flowchart TD
 - The first switch silences only the "confirmed" SMS today; SMS for business moves and cancels don't exist yet (M5).
 - The api's `notifications.reviewAsk` stays in /v1 as always false and is ignored on update (code: `packages/contract/src/account.ts`).
 
-**Status:** Design: drawn (Account-Profile) · Code: partly.
+**Status:** Design: drawn (Account-Profile) · Code: api built; the profile's SMS switches aren't built and come with SMS (the Turkmenistan launch).
 
 ### C-46 · Log out
 
@@ -1719,7 +1719,7 @@ flowchart LR
 
 - Where the page goes after logging out isn't drawn.
 
-**Status:** Design: drawn (Auth avatar menu; Account-Profile) · Code: built (api) — `POST /v1/auth/logout`.
+**Status:** Design: drawn (Auth avatar menu; Account-Profile) · Code: built (api `POST /v1/auth/logout`; the avatar menu, #110, and the profile, #118, chapter 9's 21.10.2026 rows).
 
 ### C-47 · Delete the account
 
@@ -1753,7 +1753,7 @@ flowchart TD
 
 - The businesses' ratings no longer count the deleted reviews (code: `me/account.ts`). A number that passes to someone else ("Is this you?" answered "No", C-18) doesn't delete the earlier holder's reviews.
 
-**Status:** Design: drawn (Account-Profile) · Code: built (api) — `DELETE /v1/me`.
+**Status:** Design: drawn (Account-Profile) · Code: built (api `DELETE /v1/me`; the profile, #118); the confirm has no count of the bookings it cancels until the api gives it.
 
 ## Errors and empty pages
 
@@ -1814,4 +1814,4 @@ flowchart TD
 
 - Someone else's booking in the account area: the api answers not found (code); no screen draws it, so it follows the 404 page.
 
-**Status:** Design: drawn (States 09, 11; Booking-Link · `notFound`) · Code: partly — the api answers 404; the friendly variants aren't built.
+**Status:** Design: drawn (States 09, 11; Booking-Link · `notFound`) · Code: partly — the api answers 404; the client site's 404 page answers 404 (#110) without a Search button until Search exists; the variants that need business pages (in review, removed) and the booking link's come with slice 3.
