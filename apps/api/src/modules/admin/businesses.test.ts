@@ -67,6 +67,8 @@ describe('the admin tool’s businesses (book F-179)', () => {
     const detail = await team.req(`${ADMIN}/${glowId}?lang=en`)
     expect(detail.json).toMatchObject({ slug: 'glow-studio', phone: expect.stringMatching(/^\+993/), verification: 'pending' })
     expect(detail.json.photos.length).toBeGreaterThan(0)
+    // the logo too, once it has one (none in the demo)
+    expect(detail.json.logo).toBeNull()
     expect(detail.json.services).toBeGreaterThan(0)
     const maysa = await as(MAYSA)
     const cursor = (await maysa.req('/v1/events')).json.cursor as string

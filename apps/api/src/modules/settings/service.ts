@@ -20,7 +20,7 @@ import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
 import { toRules } from '../availability/context'
 import { queueAddressSms } from '../bookings/address-sms'
-import { photoOf } from '../catalog/map'
+import { logoOf } from '../catalog/map'
 
 type RulesView = z.infer<typeof bookingRulesSchema>
 type RulesChange = z.infer<typeof bookingRulesUpdateSchema>
@@ -69,7 +69,7 @@ type BusinessRow = typeof businesses.$inferSelect
 const profileView = (deps: Pick<Deps, 'media'>, b: BusinessRow, lang: Locale): ProfileView => ({
   slug: b.slug,
   name: b.name,
-  logo: b.logo ? photoOf(deps, b.logo, lang, b.name) : null,
+  logo: logoOf(deps, b, lang),
   categoryId: b.categoryId,
   about: b.about,
   phone: b.phone,

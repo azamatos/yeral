@@ -36,7 +36,6 @@ const workspace = (slug: string, name: string, level: Workspace['level'], reques
   name,
   address: '247 Bitarap Türkmenistan Avenue',
   city,
-  photo: null,
   logo: null,
   level,
   requestsToAnswer,
@@ -45,7 +44,7 @@ const workspace = (slug: string, name: string, level: Workspace['level'], reques
 
 const invite: InviteCard = {
   id: 'inv-1',
-  business: { slug: 'bag-kafe', name: 'Bag kafe', category: 'Beauty', address: '12 Magtymguly Avenue', city, photo: null, logo: null },
+  business: { slug: 'bag-kafe', name: 'Bag kafe', category: 'Beauty', address: '12 Magtymguly Avenue', city, logo: null },
   invitedBy: 'Merdan Ataýew',
   level: 'specialist',
   answersRequests: true,

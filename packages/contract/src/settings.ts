@@ -80,7 +80,7 @@ export const businessProfileSchema = z
     slug: slugSchema,
     /** As clients see it in search, on bookings and in SMS. */
     name: z.string(),
-    /** Square (the apps crop it); null: the apps draw a letter tile. */
+    /** Square; null: the apps draw a letter tile. */
     logo: photoSchema.nullable(),
     /** It sets how the business is found and booked: a change keeps the kind of booking. */
     categoryId: z.string(),
@@ -139,6 +139,14 @@ export const businessProfileUpdateSchema = z
   .strict()
   .meta({ id: 'BusinessProfileUpdate' })
 
+// ── The logo (B-37) ──
+
+/**
+ * The logo after a change; null once removed. Square: the app crops it, and checks the book's at least 400 × 400 px
+ * before sending (the api takes it as it takes every photo, by its bytes and size).
+ */
+export const businessLogoSchema = z.object({ logo: photoSchema.nullable() }).meta({ id: 'BusinessLogo' })
+
 // ── The gallery (B-37, Q-115) ──
 
 /** A gallery photo id: the end of its key. */
@@ -146,9 +154,6 @@ const photoIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/)
 export const galleryPhotoParamSchema = z.object({ slug: slugSchema, id: photoIdSchema })
 
 /** "Suratlar": up to 20, the first the cover on every card and page. */
-/** The logo (B-37) after a change: square, at least 400 × 400 (the apps crop and shrink it first); null once removed. */
-export const businessLogoSchema = z.object({ logo: photoSchema.nullable() }).meta({ id: 'BusinessLogo' })
-
 export const gallerySchema = z
   .object({ items: z.array(z.object({ id: photoIdSchema, url: z.string(), alt: z.string() })) })
   .meta({ id: 'Gallery' })

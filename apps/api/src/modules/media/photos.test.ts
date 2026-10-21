@@ -6,7 +6,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, rateLimits, staff } from '../../db/schema'
+import { businesses, invites, rateLimits, staff } from '../../db/schema'
 import { seed } from '../../db/seed'
 
 const MAYSA = '+99365102030' // owner of Glow Studio
@@ -105,35 +105,48 @@ describe('photos (book F-101)', () => {
   })
 
   it('the logo: the owner and administrators set and remove it; the profile, the switcher and the invites show it', async () => {
-    const owner = await as(MAYSA)
-    expect((await owner.req(`${W}/settings/profile`)).json.logo).toBeNull()
-    const first = await send(owner, `${W}/settings/logo`, fromHome(1))
-    expect(first.status).toBe(200)
-    expect(first.json.logo).toMatchObject({ alt: 'Glow Studio' })
-    expect(first.json.logo.url).toMatch(/^http:\/\/media\.test\/up\/b\/[\w-]+\/[\w-]+\.jpg$/)
-    // kept without the phone's EXIF, as every photo is
-    const kept = t.storage.files.get(keyOf(first.json.logo.url))!
-    expect(new TextDecoder('latin1').decode(kept)).not.toContain('GPS')
-    expect((await owner.req(`${W}/settings/profile`)).json.logo.url).toBe(first.json.logo.url)
-    const glow = (await owner.req('/v1/me/workspaces')).json.items.find((w: { slug: string }) => w.slug === 'glow-studio')
-    expect(glow.logo.url).toBe(first.json.logo.url)
-    // an administrator replaces it; the old one goes from the store
-    const second = await send(await as(SELBI), `${W}/settings/logo`, jpeg(2))
-    expect(second.status).toBe(200)
-    expect(t.storage.files.has(keyOf(first.json.logo.url))).toBe(false)
-    // an invited person's card shows it
-    const invited = await owner.req(`${W}/team/invites`, { body: { phone: '+99365940010', level: 'specialist', name: 'Ogulgerek' } })
-    expect(invited.status).toBe(201)
-    const card = (await (await as('+99365940010', 'Ogulgerek')).req('/v1/me/invites')).json.items[0]
-    expect(card.business.logo.url).toBe(second.json.logo.url)
-    // a specialist can't; a file that only says it's a photo isn't kept
-    expect((await send(await as(MARAL), `${W}/settings/logo`, jpeg(3))).status).toBe(403)
-    expect((await send(owner, `${W}/settings/logo`, svg())).status).toBe(400)
-    const removed = await owner.req(`${W}/settings/logo`, { method: 'DELETE' })
-    expect(removed.json.logo).toBeNull()
-    expect(t.storage.files.has(keyOf(second.json.logo.url))).toBe(false)
-    expect((await owner.req(`${W}/settings/profile`)).json.logo).toBeNull()
-    expect((await owner.req(`${W}/settings/logo`, { method: 'DELETE' })).json.logo).toBeNull()
+    const INVITED = '+99365940010'
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    try {
+      const owner = await as(MAYSA)
+      expect((await owner.req(`${W}/settings/profile`)).json.logo).toBeNull()
+      const first = await send(owner, `${W}/settings/logo`, fromHome(1))
+      expect(first.status).toBe(200)
+      expect(first.json.logo).toMatchObject({ alt: 'Glow Studio' })
+      expect(first.json.logo.url).toMatch(/^http:\/\/media\.test\/up\/b\/[\w-]+\/[\w-]+\.jpg$/)
+      // kept without the phone's EXIF, as every photo is
+      const kept = t.storage.files.get(keyOf(first.json.logo.url))!
+      expect(new TextDecoder('latin1').decode(kept)).not.toContain('GPS')
+      expect((await owner.req(`${W}/settings/profile`)).json.logo.url).toBe(first.json.logo.url)
+      const mine = (await owner.req('/v1/me/workspaces')).json.items.find((w: { slug: string }) => w.slug === 'glow-studio')
+      expect(mine.logo.url).toBe(first.json.logo.url)
+      // an administrator replaces it; the old one goes from the store
+      const second = await send(await as(SELBI), `${W}/settings/logo`, jpeg(2))
+      expect(second.status).toBe(200)
+      expect(t.storage.files.has(keyOf(first.json.logo.url))).toBe(false)
+      // an invited person's card shows it
+      const invited = await owner.req(`${W}/team/invites`, { body: { phone: INVITED, level: 'specialist', name: 'Ogulgerek' } })
+      expect(invited.status).toBe(201)
+      const card = (await (await as(INVITED, 'Ogulgerek')).req('/v1/me/invites')).json.items[0]
+      expect(card.business.logo.url).toBe(second.json.logo.url)
+      // a specialist can neither set nor remove it; a file that only says it's a photo isn't kept; neither touches it
+      const maral = await as(MARAL)
+      expect((await send(maral, `${W}/settings/logo`, jpeg(3))).status).toBe(403)
+      expect((await maral.req(`${W}/settings/logo`, { method: 'DELETE' })).status).toBe(403)
+      expect((await send(owner, `${W}/settings/logo`, svg())).status).toBe(400)
+      expect((await owner.req(`${W}/settings/profile`)).json.logo.url).toBe(second.json.logo.url)
+      expect(t.storage.files.size).toBe(1)
+      const removed = await owner.req(`${W}/settings/logo`, { method: 'DELETE' })
+      expect(removed.json.logo).toBeNull()
+      expect(t.storage.files.size).toBe(0)
+      expect((await owner.req(`${W}/settings/profile`)).json.logo).toBeNull()
+      expect((await owner.req(`${W}/settings/logo`, { method: 'DELETE' })).json.logo).toBeNull()
+    } finally {
+      // the file's other tests see Glow Studio as seeded
+      await db.update(businesses).set({ logo: null }).where(eq(businesses.id, glow!.id))
+      await db.delete(invites).where(eq(invites.phone, INVITED))
+      await db.delete(staff).where(and(eq(staff.businessId, glow!.id), eq(staff.name, 'Ogulgerek')))
+    }
   })
 
   it('a person’s photo, the same in every workspace; a new one replaces the old', async () => {

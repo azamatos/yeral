@@ -38,8 +38,6 @@ export const workspaceSchema = z
     address: z.string(),
     /** Branches are businesses of their own: the city tells two on the same street name apart (book Q-107). */
     city: cityRefSchema,
-    /** The gallery's cover. */
-    photo: photoSchema.nullable(),
     /** The business's logo, the switcher's picture (B-10); null: a letter tile. */
     logo: photoSchema.nullable(),
     level: levelSchema,
@@ -64,7 +62,6 @@ export const inviteCardSchema = z
       category: z.string(),
       address: z.string(),
       city: cityRefSchema,
-      photo: photoSchema.nullable(),
       /** The card's picture (B-08); null: a letter tile. */
       logo: photoSchema.nullable(),
     }),
