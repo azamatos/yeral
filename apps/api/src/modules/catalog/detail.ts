@@ -83,8 +83,10 @@ export async function visibleBusiness(deps: Deps, slug: string, viewerId: string
         .where(and(eq(staff.businessId, row.id), eq(staff.userId, viewerId), signsIn))
         .limit(1)
     : []
-  // a business still being set up isn't anyone's to know about yet (book Q-200)
-  if (!member) throw new ApiError(row.setupStep || row.hiddenAt ? 'not_found' : 'in_review')
+  // a business still being set up isn't anyone's to know about yet (book Q-200), nor is the demo workspace (F-242)
+  if (!member) throw new ApiError(row.setupStep || row.hiddenAt || row.sandbox ? 'not_found' : 'in_review')
+  // the demo workspace's own team sees its page as it would be
+  if (row.sandbox) return { row, preview: null }
   const owner = member.level === 'owner'
   if (row.hiddenAt) return { row, preview: { status: 'hidden' as const, reason: owner ? row.hiddenReason : null } }
   return { row, preview: { status: row.verification as 'pending' | 'rejected', reason: owner ? row.verificationReason : null } }

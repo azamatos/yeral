@@ -29,10 +29,14 @@ export const logoOf = (deps: Pick<Deps, 'media'>, b: { logo: StoredPhoto | null;
 export const coverOf = (deps: Pick<Deps, 'media'>, b: { photos: StoredPhoto[]; name: string }, lang: Locale) =>
   b.photos[0] ? photoOf(deps, b.photos[0], lang, b.name) : null
 
-/** What visitors may see: verified (ADR 0018), not hidden by the Ýeral team (book Q-012) and not closed (Q-213). */
-export const isPublic = () => and(eq(businesses.verification, 'verified'), isNull(businesses.hiddenAt), isNull(businesses.closedAt))!
-export const publicRow = (b: Pick<BusinessRow, 'verification' | 'hiddenAt' | 'closedAt'>) =>
-  b.verification === 'verified' && !b.hiddenAt && !b.closedAt
+/**
+ * What visitors may see: verified (ADR 0018), not hidden by the Ýeral team (book Q-012), not closed (Q-213) and not the
+ * business app's demo workspace (F-242).
+ */
+export const isPublic = () =>
+  and(eq(businesses.verification, 'verified'), isNull(businesses.hiddenAt), isNull(businesses.closedAt), eq(businesses.sandbox, false))!
+export const publicRow = (b: Pick<BusinessRow, 'verification' | 'hiddenAt' | 'closedAt' | 'sandbox'>) =>
+  b.verification === 'verified' && !b.hiddenAt && !b.closedAt && !b.sandbox
 
 /** A business that takes one of the kinds of booking open now (book Q-030), in SQL; `categoryTakes` for a category. */
 const overlap = (col: AnyColumn, types: readonly BookingType[]) =>

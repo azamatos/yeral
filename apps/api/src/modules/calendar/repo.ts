@@ -2,9 +2,9 @@
 import { canOn, type Actor } from '@yeral/domain/permissions'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookings, clients, staff, users } from '../../db/schema'
+import { bookings, clients, staff } from '../../db/schema'
 import { ApiError } from '../../http/errors'
-import { unusedSince } from '../auth/sign-in'
+import { accountFor } from '../auth/sign-in'
 import { awaitingAnswer, itemsOf, type BookingRow, type ItemRow } from '../bookings/repo'
 
 /** A workspace as the calendar needs it. */
@@ -57,18 +57,19 @@ export async function specialistAccounts(db: Queryable, staffIds: readonly strin
  * The phone's client at this business (B-23): its record, found by the number, or a new one with the name typed in.
  * An account's name never fills it: a number alone mustn't tell a business who holds it. The booking joins the
  * number's account unless it went unused for 6 months: the number may be someone else's now, and it joins after "Is
- * this you?" at their next sign-in (book Q-270). A record not yet linked is linked as an online booking links it.
+ * this you?" at their next sign-in (book Q-270). A record not yet linked is linked as an online booking links it. In the
+ * demo workspace nothing joins an account (book F-242).
  */
 export async function phoneClient(
   tx: Queryable,
-  businessId: string,
+  business: { id: string; sandbox: boolean },
   phone: string,
   name: string | undefined,
   now: number,
   bookingId: string,
 ) {
-  const [account] = await tx.select().from(users).where(eq(users.phone, phone))
-  const holder = account && !unusedSince(account.lastSeenAt, now) ? account : undefined
+  const businessId = business.id
+  const holder = await accountFor(tx, business, phone, now)
   const [record] = await tx
     .insert(clients)
     // an undo removes a record its booking made: made at the booking's instant, held by no other booking

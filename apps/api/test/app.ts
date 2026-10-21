@@ -16,7 +16,8 @@ export const ORIGIN = site.urls.client
 
 /**
  * The app as the entries build it, with a settable clock and captured SMS. `demo: false` plays production (random
- * codes); `codeOnScreen` the first launch's sign-in; `smsDelivers` a gateway that reaches phones.
+ * codes); `codeOnScreen` the first launch's sign-in; `smsDelivers` a gateway that reaches phones; `demoWorkspace` the
+ * business app's demo workspace (book F-242).
  */
 export function testApp(
   db: Db,
@@ -28,6 +29,7 @@ export function testApp(
     smsDelivers?: boolean
     adminKey?: Uint8Array<ArrayBuffer> | null
     bookingTypes?: Deps['bookingTypes']
+    demoWorkspace?: boolean
   } = {},
 ) {
   const clock = { now: opts.now ?? DEMO_NOW }
@@ -46,6 +48,7 @@ export function testApp(
     adminKey: opts.adminKey === undefined ? DEV_ADMIN_KEY : opts.adminKey,
     // every kind, so the table and class paths stay tested; the first launch's rule has its own test
     bookingTypes: opts.bookingTypes ?? BOOKING_TYPES,
+    demoWorkspace: opts.demoWorkspace ?? false,
   }
   const app = createApp(async (c, next) => {
     c.set('deps', deps)

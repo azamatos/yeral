@@ -5,7 +5,7 @@
 import type { Locale } from '@yeral/domain/model'
 import { MARKET } from '@yeral/domain/market'
 import { addDays, today } from '@yeral/domain/time'
-import { and, eq, gte, isNull, or, sql } from 'drizzle-orm'
+import { and, eq, gte, isNull, or, sql, type AnyColumn } from 'drizzle-orm'
 import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
 import { bookings, clients, users } from '../../db/schema'
@@ -44,16 +44,38 @@ export const recentRecord = (now: number) =>
   )
 
 /**
+ * The account a business's record or booking of this number joins when its team types the number in (B-23, B-33): its
+ * holder's, unless the account went unused for 6 months (the number may be someone else's now; book Q-270), and none
+ * in the demo workspace (F-242).
+ */
+export async function accountFor(
+  db: Queryable,
+  business: { sandbox: boolean },
+  phone: string,
+  now: number,
+): Promise<typeof users.$inferSelect | undefined> {
+  if (business.sandbox) return undefined
+  const [account] = await db.select().from(users).where(eq(users.phone, phone))
+  return account && !unusedSince(account.lastSeenAt, now) ? account : undefined
+}
+
+/** Not the demo workspace's (book F-242): whatever number a visitor typed in there joins nobody's account. */
+const outsideSandbox = (businessId: AnyColumn) => sql`${businessId} not in (select "id" from "businesses" where "sandbox")`
+
+/**
  * The phone may already be known: a business's client list, phone bookings. Only what's upcoming or from the last 6
  * months joins the account (book Q-270), so a number that passed to someone else doesn't bring them the older history.
  * At a sign-in, and when an account takes a new number (Q-171).
  */
 export async function linkPhone(tx: Queryable, userId: string, phone: string, now: number): Promise<void> {
-  await tx.update(bookings).set({ userId }).where(unheldBooking(phone, now))
+  await tx
+    .update(bookings)
+    .set({ userId })
+    .where(and(unheldBooking(phone, now), outsideSandbox(bookings.businessId)))
   await tx
     .update(clients)
     .set({ userId })
-    .where(and(eq(clients.phone, phone), isNull(clients.userId), recentRecord(now)))
+    .where(and(eq(clients.phone, phone), isNull(clients.userId), recentRecord(now), outsideSandbox(clients.businessId)))
 }
 
 export async function signIn(c: Context<AppEnv>, phone: string, lang: Locale | undefined) {

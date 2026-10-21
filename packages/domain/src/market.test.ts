@@ -48,6 +48,13 @@ describe.each<[string, Market]>([['Turkmenistan', TURKMENISTAN]])('market %s', (
     }
   })
 
+  it('keeps an unused prefix for the demo workspace: valid numbers, never the support line (book F-242)', () => {
+    const { unusedPrefix, valid, length, countryCode } = market.phone
+    expect(unusedPrefix).toMatch(/^\d+$/)
+    expect(valid.test(unusedPrefix.padEnd(length, '0'))).toBe(true)
+    expect(market.support.phone.startsWith(`+${countryCode}${unusedPrefix}`)).toBe(false)
+  })
+
   it('has a support line: one of its own numbers and a Telegram username', () => {
     const { phone, telegram } = market.support
     expect(phone.startsWith(`+${market.phone.countryCode}`)).toBe(true)
@@ -85,6 +92,7 @@ describe('phoneRules', () => {
       valid: /^\d{9}$/,
       mobilePrefixes: ['9', '33'],
       groups: [2, 3, 2, 2],
+      unusedPrefix: '89',
     })
     expect(rules.mobile.test('901234567')).toBe(true)
     expect(rules.mobile.test('331234567')).toBe(true)

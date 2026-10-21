@@ -8,7 +8,7 @@ import type { SetupIncompleteDetails } from '@yeral/contract/errors'
 import type { mySetupSchema, setupStartSchema } from '@yeral/contract/setup'
 import { MARKET } from '@yeral/domain/market'
 import type { Actor } from '@yeral/domain/permissions'
-import { cutAtWord, SLUG_MAX, slugFrom, type SetupNeed, type SetupStep } from '@yeral/domain/setup'
+import { cutAtWord, DEMO_SLUG, SLUG_MAX, slugFrom, type SetupNeed, type SetupStep } from '@yeral/domain/setup'
 import { and, asc, eq, isNotNull, like, or } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
@@ -77,14 +77,16 @@ const NUMBERED_MAX = 999
 async function freeSlug(db: Queryable, name: string): Promise<string> {
   const base = slugFrom(name)
   const stem = cutAtWord(base, SLUG_MAX - String(NUMBERED_MAX).length - 1)
-  const taken = new Set(
-    (
+  const taken = new Set([
+    // the demo workspace's, made by the jobs whenever it's missing (book F-242)
+    DEMO_SLUG,
+    ...(
       await db
         .select({ slug: businesses.slug })
         .from(businesses)
         .where(or(eq(businesses.slug, base), like(businesses.slug, `${stem}-%`)))
     ).map((r) => r.slug),
-  )
+  ])
   if (!taken.has(base)) return base
   for (let n = 2; n <= NUMBERED_MAX; n++) if (!taken.has(`${stem}-${n}`)) return `${stem}-${n}`
   throw new Error(`no free page address for ${base}`)

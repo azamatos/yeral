@@ -2,6 +2,7 @@
  * SMS goes through this port (ADR 0005): the log adapter in every environment until a gateway comes with the
  * Turkmenistan launch (book chapter 8, Q-036; sender "Yeral", Q-109).
  */
+import { isUnusedNumber } from '@yeral/domain/phone'
 import type { Logger } from './log'
 
 export interface SmsMessage {
@@ -23,11 +24,18 @@ export interface SmsPort {
  */
 export const hideLinkTokens = (text: string) => text.replace(/(\/|\\\/|%2F)l(\/|\\\/|%2F)[\w-]+/gi, '$1l$2…')
 
+/**
+ * Every adapter sends nothing to the market's unused range: the demo workspace's numbers, nobody's (book F-242), the
+ * Ýeral team's notices to its owner included.
+ */
+const goesNowhere = (message: SmsMessage) => isUnusedNumber(message.to)
+
 /** Writes messages to the log, sign-in codes and link tokens hidden, and keeps nothing, so a long-running process doesn't grow. */
 export function logSms(log: Logger): SmsPort {
   return {
     delivers: false,
     send(message) {
+      if (goesNowhere(message)) return Promise.resolve()
       log.info('sms', { to: message.to, text: message.secret ? '(sign-in code hidden)' : hideLinkTokens(message.text) })
       return Promise.resolve()
     },
@@ -41,7 +49,7 @@ export function memorySms({ delivers = false } = {}): SmsPort & { sent: SmsMessa
     sent,
     delivers,
     send(message) {
-      sent.push(message)
+      if (!goesNowhere(message)) sent.push(message)
       return Promise.resolve()
     },
   }

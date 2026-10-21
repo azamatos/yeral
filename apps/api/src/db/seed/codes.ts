@@ -22,16 +22,21 @@ export function seededCodes(start = 0x5eed): () => string {
 
 /**
  * A seed's booking codes: a demo booking keeps its own (one the demo data doesn't list, or gives twice, is a mistake in
- * the data); every other booking gets the next generated code no booking of the seed and no demo booking has.
+ * the data); every other booking gets the next generated code no booking of the seed and no demo booking has. `taken`:
+ * codes the database already holds (the demo workspace's remake in a live database, book F-242): never given, and a
+ * demo booking whose own code is taken gets a generated one.
  */
-export function codeMaker(next: () => string = seededCodes()): (fixed?: string) => string {
-  const used = new Set<string>()
+export function codeMaker(next: () => string = seededCodes(), taken: ReadonlySet<string> = new Set()): (fixed?: string) => string {
+  const used = new Set<string>(taken)
   return (fixed) => {
     if (fixed) {
       if (!DEMO_CODES.has(fixed)) throw new Error(`the booking code ${fixed} isn't one of the demo data's (DEMO_CODES)`)
-      if (used.has(fixed)) throw new Error(`the demo data gives the booking code ${fixed} twice`)
-      used.add(fixed)
-      return fixed
+      // a live booking holds it: a generated one below instead
+      if (!taken.has(fixed)) {
+        if (used.has(fixed)) throw new Error(`the demo data gives the booking code ${fixed} twice`)
+        used.add(fixed)
+        return fixed
+      }
     }
     let c = next()
     while (used.has(c) || DEMO_CODES.has(c)) c = next()
