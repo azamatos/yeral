@@ -77,11 +77,17 @@ export interface AuthApiOptions {
   resendSec?: number
   /** The session can't be ended (no connection). */
   logoutFails?: boolean
+  /** The signed-in person owns a business: the account can't be deleted (`owns_workspace`). */
+  ownsBusiness?: boolean
+  /** The api refuses a phone change (`phone_change_unavailable`) although `me` said it could. */
+  phoneChangeRefused?: boolean
+  /** Someone else takes the new number between the code and its check (`phone_taken` at verify). */
+  takenAtVerify?: boolean
 }
 
 /**
  * The sign-in and the account as the api answers them: codes (3 wrong ones lock, 5 an hour, a new one after 59 s),
- * "Is this you?", the name (`PATCH /me`), who is signed in, logging out.
+ * "Is this you?", the name (`PATCH /me`), who is signed in, logging out, deleting the account, changing the phone.
  */
 export const authApi =
   ({
@@ -93,6 +99,9 @@ export const authApi =
     lockSec = 60,
     resendSec = 59,
     logoutFails = false,
+    ownsBusiness = false,
+    phoneChangeRefused = false,
+    takenAtVerify = false,
   }: AuthApiOptions = {}) =>
   (): typeof fetch => {
     const accounts = new Map(people.map((p) => [p.phone, structuredClone(p)]))
@@ -148,6 +157,32 @@ export const authApi =
         const firstName = typeof body.firstName === 'string' ? body.firstName : me.firstName
         const surname = body.surname === undefined ? me.surname : ((body.surname as string | null) ?? null)
         me = { ...me, firstName, surname, name: [firstName, surname].filter(Boolean).join(' ') || null }
+        accounts.set(me.phone, me)
+        return json(me)
+      }
+      if (route === 'DELETE /me') {
+        if (ownsBusiness) return refuse(409, 'owns_workspace')
+        accounts.delete(me.phone)
+        me = null
+        return json(null, 204)
+      }
+      // a phone change: a code to the new number, never on the screen; refused while the sign-in code is (book Q-036)
+      if (route === 'POST /me/phone/code') {
+        if (phoneChangeRefused) return refuse(409, 'phone_change_unavailable')
+        if (accounts.has(String(body.phone))) return refuse(409, 'phone_taken')
+        phone = String(body.phone)
+        sent += 1
+        wrong = 0
+        return json({ resendAfterSec: resendSec, expiresInSec: 300 })
+      }
+      if (route === 'POST /me/phone/verify') {
+        if (takenAtVerify) return refuse(409, 'phone_taken')
+        if (body.code !== code()) {
+          wrong += 1
+          return refuse(400, 'code_invalid', { attemptsLeft: 3 - wrong })
+        }
+        accounts.delete(me.phone)
+        me = { ...me, phone: String(body.phone) }
         accounts.set(me.phone, me)
         return json(me)
       }
