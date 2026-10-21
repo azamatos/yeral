@@ -94,6 +94,10 @@
   businesses from the design, marked "Example" on cards, pages and bookings and confirming at once, added to production
   by `setup` with `EXAMPLE_BUSINESSES=true` (no team, no reviews of their own; their photos in the api's image);
   `BOOKING_TYPES` keeps tables and classes out of lists and search until they ship.
+- **@yeral/api** (minor), a business's SMS limits (#128; book chapter 10, P2 step 7): a business that isn't verified
+  texts no number its team typed in; past 1000 SMS a day or 30 in 10 minutes per business an SMS waits for the window (a
+  reminder that would then arrive after the visit has started is settled unsent, as any late reminder), and the alerts
+  hear of it once; the notices of a closing are never held.
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 
