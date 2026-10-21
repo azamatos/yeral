@@ -19,8 +19,6 @@ export const users = pgTable('users', {
   notifyConfirmation: boolean().notNull().default(true),
   notifyReminderDay: boolean().notNull().default(true),
   notifyReminder2h: boolean().notNull().default(true),
-  /** Unused since review asks went (book Q-259); kept so the previous api image still runs, dropped in a later release. */
-  notifyReviewAsk: boolean().notNull().default(true),
   /**
    * The last sign-in, or the last day a session was used: an account unused for 6 months asks "Is this you?" first
    * (book Q-270).

@@ -30,7 +30,9 @@ they are until releases come back before the first launch (book chapter 10, P2 s
 ## Rollback
 
 Cloudflare: `cd apps/<app> && pnpm exec wrangler rollback` (pick the previous version), then fix forward with a PR.
-Own server: deploy the previous commit the same way (`infra/server/README.md`); migrations are backward compatible. Record the
+Own server: deploy the previous commit the same way (`infra/server/README.md`); migrations are backward compatible back to
+the newest contract migration (one that drops a column, as 0041 does), so never roll back to an image older than it
+without restoring the backup taken before the deploy (operations.md, "Rollback"). Record the
 incident in a `docs/memory-bank/log/` note.
 
 ## Never

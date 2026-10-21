@@ -50,7 +50,10 @@ export const slugSchema = z
 export const bookingCodeSchema = z.string().refine(isBookingCode, 'Expected a booking code YR-12345').meta({ example: 'YR-48213' })
 /** Any way people type a number of the market in; E.164 out (`+99365123456`). */
 export const phoneInputSchema = z.string().max(32).refine(isPhone, 'Expected a phone number').transform(toE164)
-/** A number that can receive an SMS (login codes): mobile only (Turkmenistan: 61–65, 71). */
+/**
+ * A number that can receive an SMS (login codes): one of the market's mobiles (`MARKET.phone.mobilePrefixes`;
+ * Turkmenistan: starting with 6 or 7), never the unused range the demo's numbers live in (`isMobile`).
+ */
 export const mobileInputSchema = z
   .string()
   .max(32)

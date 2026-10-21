@@ -112,15 +112,11 @@ export const businesses = pgTable(
     hours: jsonb().$type<WeekHours>().notNull(),
     /** Special days ("Aýratyn günler"). */
     exceptions: jsonb().$type<DateException[]>().notNull().default([]),
-    /** Unused since the average bill went (book Q-103); kept so the previous api image still runs, dropped in a later release. */
-    avgBill: integer(),
     womenOnly: boolean().notNull().default(false),
     /** Kept up to date from reviews; seeded for demo businesses. */
     rating: real(),
     reviewsCount: integer().notNull().default(0),
     ratingBreakdown: jsonb().$type<Record<'1' | '2' | '3' | '4' | '5', number>>().notNull().default({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }),
-    /** Median minutes from request to answer over recent requests; null without history. */
-    typicalConfirmMinutes: integer(),
     /** Only verified businesses are public (ADR 0018). */
     verification: verificationStatus().notNull().default('pending'),
     /** A verified business moved (book Q-215): the Ýeral team checks it again and clears this; the page stays public. */

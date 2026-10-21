@@ -215,4 +215,9 @@ wait for its dependencies.
 
 - Cloudflare (Storybook, legacy): `wrangler rollback` per Worker to the previous version.
 - The own server: point `YERAL_API_IMAGE` in `/srv/yeral/.env` at an earlier image (`docker images yeral-api`: they
-  stay on the server) and run `docker compose up -d` in `/srv/yeral`, or redeploy the previous commit with `deploy.sh`. Migrations are backward compatible, so rolling back the app never needs a database rollback.
+  stay on the server) and run `docker compose up -d` in `/srv/yeral`, or redeploy the previous commit with `deploy.sh`. Migrations add before they take away (expand, then contract), so an
+  image runs on a database migrated after it, back to the last contract migration: one that drops what older images
+  read (0041 drops `users.notify_review_ask`, `businesses.avg_bill` and `businesses.typical_confirm_minutes`) ends
+  that. An image older than it can't run on the database after it (Drizzle names every column it knows in its selects
+  and returns), and `/v1/health` doesn't notice: roll back only to an image at or after the newest contract migration,
+  or restore the database from the backup taken before the deploy.
