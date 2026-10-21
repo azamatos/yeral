@@ -106,7 +106,7 @@ describe('appointments only, until tables and classes ship (book Q-030)', () => 
     const slugs = (map.json.businesses as { slug: string; changedAt: number }[]).map((b) => b.slug)
     expect(slugs).toContain('glow-studio')
     expect(slugs).not.toContain('bag-kafe')
-    expect(map.headers.get('cache-control')).toContain('max-age=3600')
+    expect(map.headers.get('cache-control')).toBe('private, max-age=3600')
     // a hidden page isn't listed
     await db
       .update(t.businesses)

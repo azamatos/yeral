@@ -115,8 +115,9 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
         .orderBy(asc(businesses.slug)),
       await db.select({ id: categories.id }).from(categories).where(categoryTakes(bookingTypes)).orderBy(asc(categories.sort)),
     ]
-    // search engines come back for it hourly at most
-    c.header('Cache-Control', 'public, max-age=3600')
+    // the client site's server reads it, an hour at most: private, as a signed-in caller's renewed session cookie may
+    // ride on the answer
+    c.header('Cache-Control', 'private, max-age=3600')
     return c.json(
       {
         businesses: pages.map((p) => ({ slug: p.slug, changedAt: Math.max(p.createdAt.getTime(), p.movedAt?.getTime() ?? 0) })),
