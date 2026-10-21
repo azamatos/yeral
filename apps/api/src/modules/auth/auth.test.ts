@@ -50,6 +50,24 @@ describe('phone login (ADR 0019)', () => {
     expect((await browser(live.app).req('/v1/auth/code', { body: { phone } })).json).toEqual({ resendAfterSec: 59, expiresInSec: 300 })
   })
 
+  it('the sign-in screens learn ahead whether the code will show, by the rule /auth/code follows (book Q-036)', async () => {
+    const cases = [
+      { opts: {}, shown: false },
+      { opts: { codeOnScreen: true }, shown: true },
+      { opts: { codeOnScreen: true, smsDelivers: true }, shown: false },
+    ]
+    for (const [i, { opts, shown }] of cases.entries()) {
+      const b = browser(testApp(db, { now: DEMO_NOW + i * 60_000, ...opts }).app)
+      const mode = await b.req('/v1/auth/mode')
+      expect(mode.status).toBe(200)
+      expect(mode.json).toEqual({ codeOnScreen: shown })
+      // a minute: open pages follow a switch soon
+      expect(mode.headers.get('cache-control')).toBe('public, max-age=60')
+      const sent = await b.req('/v1/auth/code', { body: { phone: `+9936500003${i}` } })
+      expect('code' in sent.json).toBe(shown)
+    }
+  })
+
   it('production’s random code: two sends at once make one code, and the code shown signs in', async () => {
     const phone = '+99365000022'
     const prod = testApp(db, { demo: false, codeOnScreen: true })

@@ -181,6 +181,13 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   })
 
   const auth = {
+    /** Whether the sign-in shows its code on the screen: the phone step then says it's a demo (book Q-036, F-200). */
+    mode: () =>
+      queryOptions({
+        queryKey: keys.authMode(),
+        queryFn: ({ signal }) => call(v1.auth.mode.$get(undefined, abortWith(signal))),
+        staleTime: 60_000,
+      }),
     sendCode: () =>
       mutationOptions({
         mutationFn: (body: z.input<typeof sendCodeSchema>) => call(v1.auth.code.$post({ json: body })),

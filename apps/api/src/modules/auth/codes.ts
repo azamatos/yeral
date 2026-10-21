@@ -10,6 +10,13 @@ import { loginCodes } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid } from '../../http/errors'
 import { randomDigits, sha256Hex } from '../../lib/crypto'
+
+/**
+ * Whether the plain sign-in shows its code on the screen: the first launch's switch is on and no SMS reaches a phone
+ * (book Q-036, F-200). `/auth/code` puts the code in its answer by it, and `/auth/mode` tells the screens ahead, so the
+ * demo note and the code never disagree.
+ */
+export const showsCodeOnScreen = (deps: Pick<Deps, 'codeOnScreen' | 'sms'>): boolean => deps.codeOnScreen && !deps.sms.delivers
 import { hit, rateLimited } from '../../lib/rate-limit'
 import { codeSmsText } from '../../notify'
 
@@ -94,7 +101,7 @@ export async function sendCode(
   if (!saved) throw new ApiError('resend_too_soon', { retryAfterSec: RESEND_SEC })
   // written to the log as every SMS is, the code hidden
   await deps.sms.send({ to: req.phone, text: codeSmsText(req.lang, code), secret: true })
-  const shown = req.onScreen && deps.codeOnScreen && !deps.sms.delivers
+  const shown = req.onScreen && showsCodeOnScreen(deps)
   return { resendAfterSec: RESEND_SEC, expiresInSec: CODE_TTL_SEC, ...(shown ? { code } : {}) }
 }
 

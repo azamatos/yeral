@@ -317,7 +317,7 @@ flowchart TD
 **Steps**
 
 1. Login page *Ýeral Biznes-e giriň*: same phone step as sign-up, with "Biznesiňiz entek ýokmy? Mugt başlaň" for newcomers (B-Login).
-2. Code step: "SMS kody ýazyň", *Belgini üýtget* (change number), resend countdown, auto-check on the 4th digit.
+2. Code step: "SMS kody ýazyň", *Belgini üýtget* (change number), resend countdown, auto-check on the 4th digit. While the code shows on the screen, the phone step says it's a demo: sign in with a made-up number and enter no real names or phone numbers (owner, 21.10.2026; the screens ask `GET /v1/auth/mode`).
 3. A new person gives a name: "Adyňyz näme? Belgiňiz tassyklandy. Ýeral hasabyňyz üçin adyňyzy ýazyň — toparyňyz sizi şu at bilen görer."
 4. Routing (§1): a pending invite first (B-08); a half-finished setup → the wizard at its saved step (Q-200, decided 18.10.2026); no workspace → B-09; otherwise the **last used workspace** opens with "Glow Studio açylýar…", the person's level and address.
 5. With several workspaces: "Siziň 2 iş ýeriňiz bar. Soňky işlän ýeriňizi açýarys; beýlekisini çep menýunyň ýokarsyndan saýlap bilersiňiz." A button *Garaşman, senenamany aç* skips the wait.
