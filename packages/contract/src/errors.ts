@@ -94,6 +94,8 @@ export const ERROR_STATUS = {
   owner_account_unused: 409,
   /** The server has no `ADMIN_SECRET_KEY`: no admin tool there. */
   admin_unavailable: 503,
+  /** The address search has no geocoder here, or it didn't answer (ADR 0027): the pin can be placed by hand. */
+  address_search_unavailable: 503,
   /** Nothing is verified while the sign-in code shows on the screen: the first launch has no real businesses (book Q-036). */
   verify_unavailable: 409,
   // the business app's demo workspace (book F-242)

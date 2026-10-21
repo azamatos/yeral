@@ -93,6 +93,7 @@
     "login_taken": "This login is taken.",
     "owner_account_unused": "This number's account hasn't been used for 6 months, so it may belong to someone else now. Ask the owner to sign in once first.",
     "admin_unavailable": "The admin tool isn't set up on this server yet.",
+    "address_search_unavailable": "The address search isn't working right now. Place the pin on the map yourself.",
     "verify_unavailable": "No business is verified while the sign-in code shows on the screen.",
     "not_in_demo": "That isn't part of the demo. Create your own business to do it.",
     "demo_number": "In the demo, use a made-up number starting with {prefix}.",

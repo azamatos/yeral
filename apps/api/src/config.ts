@@ -51,6 +51,11 @@ const envSchema = z.object({
    */
   DEMO_WORKSPACE: z.enum(['true', 'false']).default('false'),
   /**
+   * The geocoder behind the address search (ADR 0027): a Photon server's origin, the public one by default (fair use,
+   * no guarantee); `off` turns the search off (the pin is placed by hand).
+   */
+  GEOCODER_URL: z.union([z.literal('off'), z.url()]).default('https://photon.komoot.io'),
+  /**
    * The key the Ýeral team's authenticator secrets are sealed under (ADR 0026): 32 random bytes, base64
    * (`openssl rand -base64 32`). Development and tests use a fixed one; production without it has no admin tool.
    */
@@ -85,6 +90,8 @@ export interface Config {
   examplePhone: string
   /** `DEMO_WORKSPACE`: the business app's demo workspace (book F-242). */
   demoWorkspace: boolean
+  /** `GEOCODER_URL`: the address search's Photon server; null when it's off (ADR 0027). */
+  geocoderUrl: string | null
   /** `ADMIN_SECRET_KEY`'s bytes; null in production until it's set (the admin tool answers `admin_unavailable`). */
   adminKey: Uint8Array<ArrayBuffer> | null
 }
@@ -105,6 +112,7 @@ export function loadConfig(source: Record<string, unknown>): Config {
     exampleBusinesses: env.EXAMPLE_BUSINESSES === 'true',
     examplePhone: env.EXAMPLE_PHONE ?? MARKET.support.phone,
     demoWorkspace: env.DEMO_WORKSPACE === 'true',
+    geocoderUrl: env.GEOCODER_URL === 'off' ? null : env.GEOCODER_URL,
     adminKey: env.ADMIN_SECRET_KEY
       ? Uint8Array.from(atob(env.ADMIN_SECRET_KEY), (ch) => ch.charCodeAt(0))
       : site.env === 'production'

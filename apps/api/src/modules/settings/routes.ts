@@ -4,11 +4,14 @@
  */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import {
+  addressSearchQuerySchema,
+  addressSearchSchema,
   bookingRulesSchema,
   bookingRulesUpdateSchema,
   businessHoursResultSchema,
   businessHoursSettingsSchema,
   businessHoursUpdateSchema,
+  businessLogoSchema,
   businessProfileSchema,
   businessProfileUpdateSchema,
   galleryOrderSchema,
@@ -19,7 +22,6 @@ import {
   internalStatusParamSchema,
   internalStatusSchema,
   internalStatusUpdateSchema,
-  businessLogoSchema,
 } from '@yeral/contract/settings'
 import { photoUploadSchema } from '@yeral/contract/common'
 import { workspaceParamSchema } from '@yeral/contract/team'
@@ -34,6 +36,7 @@ import { requireMember } from '../team/service'
 import { hoursOf, updateHours } from './hours'
 import { profileOf, rulesOf, updateProfile, updateRules } from './service'
 import { uploadGuard } from '../media/photos'
+import { searchAddress } from './address-search'
 import { removeLogo, setLogo } from './logo'
 import { addPhoto, galleryOf, orderPhotos, removePhoto } from './photos'
 import { addStatus, deleteStatus, statusesOf, updateStatus } from './statuses'
@@ -142,6 +145,15 @@ const deleteStatusRoute = createRoute({
   responses: { ...noContent, 400: errors[400], ...denied },
 })
 
+const addressSearchRoute = createRoute({
+  method: 'get',
+  path: '/w/{slug}/settings/address-search',
+  tags,
+  summary: 'Addresses to pick for the map pin, in the market and near the city (3 letters or more; ADR 0027)',
+  request: { params: workspaceParamSchema, query: addressSearchQuerySchema },
+  responses: { 200: json(addressSearchSchema), 400: errors[400], 429: errors[429], 503: errors[503], ...denied },
+})
+
 const setLogoRoute = createRoute({
   method: 'put',
   path: '/w/{slug}/settings/logo',
@@ -200,6 +212,11 @@ export const settingsRoutes = new OpenAPIHono<AppEnv>()
     if (member.level !== 'owner') throw new ApiError('forbidden')
     await sendForReview(c.var.deps, business.id)
     return c.body(null, 204)
+  })
+  .openapi(addressSearchRoute, async (c) => {
+    const { user } = await requireSettings(c, c.req.valid('param').slug)
+    const { q, cityId, lang } = c.req.valid('query')
+    return c.json(await searchAddress(c.var.deps, user, q, cityId, lang ?? user.lang), 200)
   })
   .openapi(setLogoRoute, async (c) => {
     const { business, user } = await requireSettings(c, c.req.valid('param').slug)

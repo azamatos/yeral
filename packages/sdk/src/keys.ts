@@ -53,6 +53,7 @@ export const keys = {
   schedule: (slug: string, staffId: string) => ['team', slug, staffId, 'schedule'] as const,
   // business settings (book B-37–B-43): every one of a workspace under its prefix
   settings: (slug: string) => ['settings', slug] as const,
+  addressSearch: (slug: string, params: Record<string, unknown>) => ['settings', slug, 'address-search', params] as const,
   rules: (slug: string) => ['settings', slug, 'rules'] as const,
   menu: (slug: string) => ['settings', slug, 'services'] as const,
   profile: (slug: string) => ['settings', slug, 'profile'] as const,
