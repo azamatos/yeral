@@ -77,7 +77,22 @@ describe('a photo without what it says about where it was taken (book F-101)', (
     expect(clean(jpeg(1))!.bytes).toEqual([0xff, 0xd8, ...jfif, ...icc, ...tables, ...scan, ...seg(0xc4, [7, 7]), ...scan, 0xff, 0xd9])
   })
 
-  it('a PNG loses its EXIF, texts and time, and anything after its end', () => {
+  it('of the other APPn a JPEG keeps JFIF without its thumbnail and Adobe’s, nothing else', () => {
+    const image = [...tables, ...scan, 0xff, 0xd9]
+    // JFIF with a 1×1 thumbnail, JFXX with one of its own, Adobe's colour transform, another APP14
+    const thumbed = seg(0xe0, [...text('JFIF'), 0, 1, 2, 1, 0, 72, 0, 72, 1, 1, 9, 9, 9])
+    const jfxx = seg(0xe0, [...text('JFXX'), 0, 0x10, ...text('THUMBSECRET')])
+    const adobe = seg(0xee, [...text('Adobe'), 0, 100, 0, 0, 0, 0, 1])
+    const other = seg(0xee, text('Notes'))
+    expect(clean([0xff, 0xd8, ...thumbed, ...jfxx, ...adobe, ...other, ...image])!.bytes).toEqual([
+      ...[0xff, 0xd8],
+      ...seg(0xe0, [...text('JFIF'), 0, 1, 2, 1, 0, 72, 0, 72, 0, 0]),
+      ...adobe,
+      ...image,
+    ])
+  })
+
+  it('a PNG loses its EXIF, texts, time and anything else it doesn’t need to show, and what follows its end', () => {
     const chunk = (type: string, data: number[]) => [0, 0, 0, data.length, ...text(type), ...data, 1, 2, 3, 4]
     const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
     const head = chunk('IHDR', [0, 0, 0, 1, 0, 0, 0, 1, 8, 2, 0, 0, 0])
@@ -87,6 +102,8 @@ describe('a photo without what it says about where it was taken (book F-101)', (
       ...chunk('eXIf', text('MM GPS')),
       ...chunk('tEXt', text('Location')),
       ...chunk('tIME', [7, 234, 10, 21, 9, 0, 0]),
+      // Content Credentials, which may hold an EXIF of their own
+      ...chunk('caBX', text('c2pa GPS')),
       ...chunk('IDAT', [1, 2, 3]),
       ...chunk('IEND', []),
       ...text('more'),
@@ -94,14 +111,20 @@ describe('a photo without what it says about where it was taken (book F-101)', (
     expect(clean(png)).toEqual({ kind: 'png', bytes: [...signature, ...head, ...chunk('IDAT', [1, 2, 3]), ...chunk('IEND', [])] })
   })
 
-  it('a WebP loses its EXIF and XMP, and its header no longer claims them', () => {
+  it('a WebP loses its EXIF, XMP and anything else it doesn’t need to show, and its header no longer claims them', () => {
     const le32 = (n: number) => [n & 0xff, (n >> 8) & 0xff, (n >> 16) & 0xff, n >>> 24]
     const chunk = (type: string, data: number[]) => [...text(type), ...le32(data.length), ...data, ...(data.length % 2 ? [0] : [])]
     const riff = (chunks: number[]) => [...text('RIFF'), ...le32(chunks.length + 4), ...text('WEBP'), ...chunks]
     // VP8X: an ICC profile (0x20), EXIF (0x08) and XMP (0x04)
     const header = (flags: number) => chunk('VP8X', [flags, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     const rest = [...chunk('ICCP', [5, 5]), ...chunk('VP8 ', [1, 2, 3])]
-    const webp = riff([...header(0x2c), ...rest, ...chunk('EXIF', text('GPS')), ...chunk('XMP ', text('<x/>'))])
+    const webp = riff([
+      ...header(0x2c),
+      ...rest,
+      ...chunk('EXIF', text('GPS')),
+      ...chunk('XMP ', text('<x/>')),
+      ...chunk('C2PA', text('GPS')),
+    ])
     expect(clean(webp)).toEqual({ kind: 'webp', bytes: riff([...header(0x20), ...rest]) })
   })
 

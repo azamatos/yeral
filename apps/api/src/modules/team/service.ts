@@ -45,13 +45,13 @@ export async function requireMember(c: Context<AppEnv>, slug: string, opts: { dr
   return { user, business: row.business, member: row.member, actor: actorOf(row.member) }
 }
 
-/** A row on this workspace's team, by id; `lock` holds it for the transaction. */
+/** A row on this workspace's team, by id; `lock` holds it for the transaction (NO KEY UPDATE, as other paths do). */
 export async function teamRow(db: Queryable, businessId: string, staffId: string, opts: { lock?: boolean } = {}): Promise<StaffRow> {
   const found = db
     .select()
     .from(staff)
     .where(and(eq(staff.id, staffId), eq(staff.businessId, businessId)))
-  const [row] = await (opts.lock ? found.for('update') : found)
+  const [row] = await (opts.lock ? found.for('no key update') : found)
   if (!row) throw new ApiError('not_found')
   return row
 }
@@ -181,15 +181,20 @@ const inviteSummary = (i: InviteRow | undefined, now: number) =>
 
 /**
  * The picture the team's own screens show beside each row (the team list, the calendar's columns): the owner's, else
- * the person's account photo (book B-12: "your teams see you"). Clients see only the owner's (B-44).
+ * the person's account photo while they're on the team (book B-12: "your teams see you"); a team they left keeps only
+ * the owner's. Clients see only the owner's (B-44).
  */
-export async function teamPhotos(db: Queryable, rows: Pick<StaffRow, 'id' | 'userId' | 'photo'>[]): Promise<Map<string, StoredPhoto>> {
-  const need = [...new Set(rows.flatMap((r) => (!r.photo && r.userId ? [r.userId] : [])))]
+export async function teamPhotos(
+  db: Queryable,
+  rows: Pick<StaffRow, 'id' | 'userId' | 'photo' | 'status'>[],
+): Promise<Map<string, StoredPhoto>> {
+  const own = (r: (typeof rows)[number]) => !r.photo && r.userId && r.status === 'active'
+  const need = [...new Set(rows.flatMap((r) => (own(r) ? [r.userId!] : [])))]
   const accounts = need.length ? await db.select({ id: users.id, photo: users.photo }).from(users).where(inArray(users.id, need)) : []
-  const own = new Map(accounts.flatMap((a) => (a.photo ? [[a.id, a.photo] as const] : [])))
+  const theirs = new Map(accounts.flatMap((a) => (a.photo ? [[a.id, a.photo] as const] : [])))
   return new Map(
     rows.flatMap((r) => {
-      const photo = r.photo ?? (r.userId ? own.get(r.userId) : undefined)
+      const photo = r.photo ?? (own(r) ? theirs.get(r.userId!) : undefined)
       return photo ? [[r.id, photo] as const] : []
     }),
   )

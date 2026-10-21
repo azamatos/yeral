@@ -59,32 +59,19 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
   // a business still being set up goes with an account that's deleted: nobody else is on it or has booked it (book
   // Q-200); one whose number passed on keeps it, as a person keeps a workspace
   const drafts = await tx
-    .select({ id: businesses.id, photos: businesses.photos })
+    .select({ id: businesses.id })
     .from(staff)
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
     .where(and(eq(staff.userId, user.id), eq(staff.level, 'owner'), isNotNull(businesses.setupStep)))
   // the photos that go with the account, for the caller to take from the store once this is done: its own, and a
-  // deleted draft's gallery and team pictures
+  // deleted draft's team pictures and gallery, as the deletes find them (a photo added meanwhile goes too)
   const photos = [user.photo?.key]
   if (how === 'deleted' && drafts.length) {
-    const pictures = await tx
-      .select({ photo: staff.photo })
-      .from(staff)
-      .where(
-        inArray(
-          staff.businessId,
-          drafts.map((d) => d.id),
-        ),
-      )
-    photos.push(...drafts.flatMap((d) => d.photos.map((p) => p.key)), ...pictures.map((p) => p.photo?.key))
+    const ids = drafts.map((d) => d.id)
+    const pictures = await tx.delete(staff).where(inArray(staff.businessId, ids)).returning({ photo: staff.photo })
+    const gone = await tx.delete(businesses).where(inArray(businesses.id, ids)).returning({ photos: businesses.photos })
+    photos.push(...pictures.map((p) => p.photo?.key), ...gone.flatMap((b) => b.photos.map((p) => p.key)))
   }
-  if (how === 'deleted' && drafts.length)
-    await tx.delete(businesses).where(
-      inArray(
-        businesses.id,
-        drafts.map((d) => d.id),
-      ),
-    )
   const kept = how === 'deleted' ? [] : drafts.map((d) => d.id)
   // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
   const rows = (await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')).filter((r) => !kept.includes(r.businessId))

@@ -118,14 +118,22 @@ describe('photos (book F-101)', () => {
     expect(t.storage.files.has(keyOf(second.json.photo.url))).toBe(false)
   })
 
-  it('uploads: signed in, so many an hour', async () => {
+  it('uploads: signed in, so many an hour per account and per address, before the body is read', async () => {
     expect((await send(browser(t.app), '/v1/me/photo', jpeg())).status).toBe(401)
+    // what a body holds doesn't matter before then: too big, or no form at all
+    const huge = new File([new Uint8Array(PHOTO_MAX_BYTES + 1)], 'big.jpg', { type: 'image/jpeg' })
+    expect((await send(browser(t.app), '/v1/me/photo', huge)).status).toBe(401)
+    const raw = await t.app.request('/v1/me/photo', { method: 'PUT', body: 'not a form', headers: { 'content-type': 'text/plain' } })
+    expect(raw.status).toBe(401)
     const b = await as('+99365940002', 'Jeren')
     const me = (await b.req('/v1/me')).json as { id: string }
     await db.insert(rateLimits).values({ key: `upload:user:${me.id}`, windowStart: new Date(DEMO_NOW), count: 60 })
-    const refused = await send(b, '/v1/me/photo', jpeg())
+    const refused = await send(b, '/v1/me/photo', huge)
     expect(refused.status).toBe(429)
     expect(refused.json.error.code).toBe('rate_limited')
+    // the address's hour: another account from it is refused too
+    await db.insert(rateLimits).values({ key: 'upload:ip:unknown', windowStart: new Date(DEMO_NOW), count: 120 })
+    expect((await send(await as('+99365940004', 'Aýna'), '/v1/me/photo', jpeg())).status).toBe(429)
     expect(t.storage.files.size).toBe(0)
   })
 
@@ -165,6 +173,10 @@ describe('photos (book F-101)', () => {
     expect(t.storage.files.has(keyOf(set.json.photo.url))).toBe(false)
     const page = (await browser(t.app).req('/v1/businesses/glow-studio?lang=en')).json.specialists as { id: string; photo: unknown }[]
     expect(page.find((s) => s.id === maral!.id)!.photo).toBeNull()
-    await db.update(staff).set({ photo: maral!.photo }).where(eq(staff.id, maral!.id))
+    // once she's off the team, it sees only the owner's picture
+    await db.update(staff).set({ status: 'removed' }).where(eq(staff.id, maral!.id))
+    const after = (await maysa.req(`${W}/team`)).json.items as { id: string; photo: unknown }[]
+    expect(after.find((m) => m.id === maral!.id)!.photo).toBeNull()
+    await db.update(staff).set({ photo: maral!.photo, status: maral!.status }).where(eq(staff.id, maral!.id))
   })
 })

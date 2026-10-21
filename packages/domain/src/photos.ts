@@ -47,9 +47,9 @@ const spells = (b: Uint8Array, at: number, text: string, zero = false) =>
   [...text].every((ch, i) => b[at + i] === ch.charCodeAt(0)) && (!zero || b[at + text.length] === 0)
 
 /**
- * A JPEG's segments: the tables, the frame and the scans stay; of the APPn only JFIF (APP0), the colour profile (APP2
- * `ICC_PROFILE`) and Adobe's colour transform (APP14); the EXIF becomes its orientation alone; it ends at the image's
- * end marker.
+ * A JPEG's segments: the tables, the frame and the scans stay; of the APPn only JFIF (APP0, without its thumbnail), the
+ * colour profile (APP2 `ICC_PROFILE`) and Adobe's colour transform (APP14 `Adobe`); the EXIF becomes its orientation
+ * alone; it ends at the image's end marker.
  */
 function cleanJpeg(b: Uint8Array): Uint8Array<ArrayBuffer> | null {
   const out: Uint8Array[] = [b.subarray(0, 2)]
@@ -75,8 +75,12 @@ function cleanJpeg(b: Uint8Array): Uint8Array<ArrayBuffer> | null {
     if (end < i + 4 || end > b.length) return null
     const body = b.subarray(i + 4, end)
     const app = marker >= 0xe0 && marker <= 0xef
-    const keep = app ? marker === 0xe0 || marker === 0xee || (marker === 0xe2 && spells(body, 0, 'ICC_PROFILE', true)) : marker !== 0xfe
-    if (keep) out.push(b.subarray(i, end))
+    if (!app && marker !== 0xfe) out.push(b.subarray(i, end))
+    else if (marker === 0xe0 && spells(body, 0, 'JFIF', true) && body.length >= 14)
+      // version, units and densities; no thumbnail
+      out.push(new Uint8Array([0xff, 0xe0, 0x00, 0x10, ...body.subarray(0, 12), 0, 0]))
+    else if ((marker === 0xe2 && spells(body, 0, 'ICC_PROFILE', true)) || (marker === 0xee && spells(body, 0, 'Adobe')))
+      out.push(b.subarray(i, end))
     else if (marker === 0xe1 && !oriented && spells(body, 0, 'Exif', true) && body[5] === 0) {
       const o = orientationOf(body.subarray(6))
       if (o) out.push(orientationSegment(o))
@@ -124,21 +128,46 @@ const orientationSegment = (o: number) =>
     ...[0x00, 0x00, 0x00, 0x00],
   ])
 
-/** A PNG's chunks to `IEND`, without its EXIF, texts and time. */
+/** What a PNG keeps: the image, its colours and transparency, and an animation's frames. */
+const PNG_KEPT = [
+  'IHDR',
+  'PLTE',
+  'IDAT',
+  'IEND',
+  'tRNS',
+  'cHRM',
+  'gAMA',
+  'iCCP',
+  'sBIT',
+  'sRGB',
+  'cICP',
+  'mDCV',
+  'cLLI',
+  'bKGD',
+  'pHYs',
+  'acTL',
+  'fcTL',
+  'fdAT',
+]
+
+/** A PNG's chunks to `IEND`, only those it needs to show (no EXIF, texts, time or anything else). */
 function cleanPng(b: Uint8Array): Uint8Array<ArrayBuffer> | null {
   const out: Uint8Array[] = [b.subarray(0, 8)]
   for (let i = 8; i + 12 <= b.length;) {
     const end = i + 12 + (((b[i]! << 24) | (b[i + 1]! << 16) | (b[i + 2]! << 8) | b[i + 3]!) >>> 0)
     if (end > b.length) return null
     const type = String.fromCharCode(...b.subarray(i + 4, i + 8))
-    if (!['eXIf', 'tEXt', 'iTXt', 'zTXt', 'tIME'].includes(type)) out.push(b.subarray(i, end))
+    if (PNG_KEPT.includes(type)) out.push(b.subarray(i, end))
     if (type === 'IEND') return concat(out)
     i = end
   }
   return null
 }
 
-/** A WebP's chunks without its EXIF and XMP, the extended header told they're gone. */
+/** What a WebP keeps: the image, its alpha, an animation's frames and its colour profile. */
+const WEBP_KEPT = ['VP8 ', 'VP8L', 'VP8X', 'ALPH', 'ANIM', 'ANMF', 'ICCP']
+
+/** A WebP's chunks, only those it needs to show (no EXIF, XMP or anything else), the extended header told so. */
 function cleanWebp(b: Uint8Array): Uint8Array<ArrayBuffer> | null {
   const u32 = (at: number) => (b[at]! | (b[at + 1]! << 8) | (b[at + 2]! << 16)) + b[at + 3]! * 0x1000000
   const riffEnd = 8 + u32(4)
@@ -155,7 +184,7 @@ function cleanWebp(b: Uint8Array): Uint8Array<ArrayBuffer> | null {
       // its EXIF (0x08) and XMP (0x04) flags
       chunk[8] = chunk[8]! & ~0x0c
       out.push(chunk)
-    } else if (!spells(b, i, 'EXIF') && !spells(b, i, 'XMP ')) out.push(b.subarray(i, end))
+    } else if (WEBP_KEPT.some((type) => spells(b, i, type))) out.push(b.subarray(i, end))
     i = end
   }
   const size = out.reduce((n, p) => n + p.length, 4)

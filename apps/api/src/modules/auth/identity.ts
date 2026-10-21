@@ -73,7 +73,7 @@ export async function afterCode(c: Context<AppEnv>, phone: string, lang: Locale 
     // starts afresh, once the account's row is locked and still found unused and empty (as an answer finds it)
     const gone: string[] = []
     const still = await db.transaction(async (tx) => {
-      const [row] = await tx.select().from(users).where(eq(users.id, user.id)).for('update')
+      const [row] = await tx.select().from(users).where(eq(users.id, user.id)).for('no key update')
       if (row?.phone === phone && !row.name && unusedSince(row.lastSeenAt, now()) && !(await holdsAnything(tx, row.id))) {
         gone.push(...(await releaseAccount(tx, row, now(), 'passedOn')))
         return null
@@ -100,7 +100,7 @@ export async function answerIdentity(c: Context<AppEnv>, ticket: string, yes: bo
   const gone: string[] = []
   const phone = await db.transaction(async (tx) => {
     const [asked] = await tx.select({ userId: identityChecks.userId }).from(identityChecks).where(eq(identityChecks.tokenHash, tokenHash))
-    const [old] = asked ? await tx.select().from(users).where(eq(users.id, asked.userId)).for('update') : []
+    const [old] = asked ? await tx.select().from(users).where(eq(users.id, asked.userId)).for('no key update') : []
     const settled = old ? await tx.delete(identityChecks).where(eq(identityChecks.userId, old.id)).returning() : []
     const check = settled.find((x) => x.tokenHash === tokenHash && x.expiresAt.getTime() > now())
     // an old ticket, or one already answered: the code step starts again
