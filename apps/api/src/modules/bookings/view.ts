@@ -118,7 +118,9 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   // one booking per declined or expired request: once an offer is taken the others go
   const [taker] = await db.select({ code: bookings.code }).from(bookings).where(eq(bookings.alternativeOf, row.id))
   const offers = offersOf(row, now)
-  const chips = async (source: OfferSource) => (offers?.source === source && !taker ? offeredTimes(db, lb, row, offers.list, now) : [])
+  // none from a business that has closed (book Q-213)
+  const chips = async (source: OfferSource) =>
+    offers?.source === source && !taker && !lb.business.closedAt ? offeredTimes(db, lb, row, offers.list, now) : []
   // a paused business or a phone-only client: no free-time chips, no move, the call card instead (book Q-154)
   // checked for the phone its SMS go to, as the texts are (an account's phone now, after a change too)
   const recipient = await bookingRecipient(db, row)

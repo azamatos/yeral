@@ -7,7 +7,7 @@ import { DEMO_NOW, site, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookings, businesses, jobs, rateLimits, services, staff } from '../../db/schema'
+import { bookings, businesses, jobs, rateLimits, services, staff, users } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 
@@ -280,6 +280,56 @@ describe('the admin tool’s businesses (book F-179)', () => {
     expect(await page()).toBe(200)
     expect(((await maysa.req('/v1/me/workspaces')).json.items as { slug: string }[]).map((w) => w.slug)).toContain('glow-studio')
     expect((await db.select().from(bookings).where(eq(bookings.code, asked.json.code)))[0]!.status).toBe('cancelled')
+  })
+
+  it('once closed, nothing comes back by an offered time or an undo; its invitee hears it; its owner may leave', async () => {
+    const team = await signedInAdmin(t, 'closer.two')
+    const maysa = await as(MAYSA)
+    const [manicure] = (await db.select().from(services).where(eq(services.businessId, glowId))).filter((x) => x.name.en === 'Manicure')
+    const [maral] = (await db.select().from(staff).where(eq(staff.businessId, glowId))).filter((x) => x.name === 'Maral')
+    const want = (start: number) => ({
+      type: 'appointment',
+      business: 'glow-studio',
+      serviceIds: [manicure!.id],
+      staffId: maral!.id,
+      date: '2026-10-21',
+      start,
+    })
+    // a request declined with an offered time, and a booking the client cancelled, its undo still open
+    const declined = await as('+99365800701', 'Declined')
+    const asked = await declined.req('/v1/bookings', { body: want(600) })
+    const offer = { date: '2026-10-21', start: 720, staffId: maral!.id }
+    expect(
+      (await maysa.req(`/v1/w/glow-studio/requests/${asked.json.code}/decline`, { body: { reason: 'slot_busy', offers: [offer] } })).status,
+    ).toBe(204)
+    const undone = await as('+99365800702', 'Undone')
+    const kept = await undone.req('/v1/bookings', { body: want(840) })
+    await maysa.req(`/v1/w/glow-studio/requests/${kept.json.code}/confirm`, { method: 'POST', body: {} })
+    await undone.req(`/v1/me/bookings/${kept.json.code}/cancel`, { body: {} })
+    // an invitee with the invite on screen
+    const invited = await maysa.req('/v1/w/glow-studio/team/invites', {
+      body: { phone: '+99365800703', level: 'specialist', name: 'Invitee' },
+    })
+    expect(invited.status, JSON.stringify(invited.json)).toBe(201)
+    const gulnar = await as('+99365800703')
+    const cursor = (await gulnar.req('/v1/events')).json.cursor as string
+    await team.req(`${ADMIN}/${glowId}/close`, { body: { reason: 'The owner asked' } })
+    expect((await declined.req(`/v1/me/bookings/${asked.json.code}`)).json.decline.alternatives).toEqual([])
+    expect((await declined.req(`/v1/me/bookings/${asked.json.code}/alternative`, { body: { source: 'decline', index: 0 } })).status).toBe(
+      404,
+    )
+    expect((await undone.req(`/v1/me/bookings/${kept.json.code}/restore`, { method: 'POST' })).status).toBe(404)
+    const heard = await eventsAfter(gulnar, cursor, (items) => items.some((e) => e.type === 'team.changed'))
+    expect((heard.json.items as { type: string }[]).map((e) => e.type)).toContain('team.changed')
+    // the owner of a closed workspace may let their account go (her other one closed too); with no owner it can't open again
+    const owned = await db
+      .select({ id: staff.businessId })
+      .from(staff)
+      .innerJoin(users, eq(users.id, staff.userId))
+      .where(and(eq(users.phone, MAYSA), eq(staff.level, 'owner'), eq(staff.status, 'active')))
+    for (const o of owned.filter((o) => o.id !== glowId)) await team.req(`${ADMIN}/${o.id}/close`, { body: { reason: 'The owner asked' } })
+    expect((await maysa.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
+    expect((await team.req(`${ADMIN}/${glowId}/reopen`, { method: 'POST' })).json.error.code).toBe('invalid_status')
   })
 
   it('only the Ýeral team', async () => {

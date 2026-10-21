@@ -75,7 +75,26 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
   const kept = how === 'deleted' ? [] : drafts.map((d) => d.id)
   // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
   const rows = (await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')).filter((r) => !kept.includes(r.businessId))
-  if (rows.some((r) => r.level === 'owner' && r.status === 'active')) throw new ApiError('owns_workspace')
+  // a workspace the Ýeral team closed (book Q-213) holds nobody back
+  const closed = rows.length
+    ? new Set(
+        (
+          await tx
+            .select({ id: businesses.id })
+            .from(businesses)
+            .where(
+              and(
+                inArray(
+                  businesses.id,
+                  rows.map((r) => r.businessId),
+                ),
+                isNotNull(businesses.closedAt),
+              ),
+            )
+        ).map((c) => c.id),
+      )
+    : new Set<string>()
+  if (rows.some((r) => r.level === 'owner' && r.status === 'active' && !closed.has(r.businessId))) throw new ApiError('owns_workspace')
   await tx
     .update(staff)
     .set({ status: 'removed', bookable: false })

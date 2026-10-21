@@ -14,4 +14,10 @@
   - Routes `POST /v1/admin/businesses/{id}/close` (`{ cancelled }`) and `…/reopen`; the list view `closed`.
 - Tests: `modules/admin/businesses.test.ts` (every booking ahead cancelled and told, hidden from its team too, out of
   the switcher, nothing else done to it, opened again).
+- The review's findings, fixed: every booking path that holds the hours (`lockedHours`: a new booking, an offered time,
+  a move, an undo) refuses a closed business, read after a close in progress commits; a closed business's bookings
+  show no offered times; the close reads its bookings plainly and holds each booking before its move (every path's
+  order), cancels those ahead, and withdraws a move asked of a visit under way as the business's (`dropPendingMove`);
+  its cancelled invites tell their invitees; an owner whose workspace is closed may let their account go (a reopen
+  then refuses: nobody to open it to). The SMS go as each client's switches allow. Tests for each.
 - Follow-ups: adding a business for its owner (F-238) finishes step 5.

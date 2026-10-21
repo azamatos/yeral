@@ -28,8 +28,9 @@ import type { Deps } from '../../deps'
 import type { Admin } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { emit, queueSms } from '../../notify'
-import { cancelForBusiness } from '../bookings/engine'
-import { StaleBooking } from '../bookings/repo'
+import { cancelForBusiness, dropPendingMove } from '../bookings/engine'
+import { lockBooking, StaleBooking } from '../bookings/repo'
+import { teamChanged } from '../team/service'
 import { cityRefOf, loadCities } from '../catalog/cities'
 import { isPublic, photoOf, publicRow, text } from '../catalog/map'
 import { likeOf } from '../catalog/search'
@@ -318,35 +319,42 @@ export async function closeBusiness(deps: Deps, by: Admin, id: string, reason: s
     const b = await rowOf(tx, id, true)
     const at = new Date(deps.now())
     await tx.update(businesses).set({ closedAt: at, closedReason: reason }).where(eq(businesses.id, b.id))
+    const now = at.getTime()
+    // read plainly, then each booking held before its move, the order every path takes them in
     const rows = await tx
       .select()
       .from(bookings)
       .where(
-        and(
-          eq(bookings.businessId, b.id),
-          inArray(bookings.status, ['pending', 'confirmed']),
-          gte(bookings.date, addDays(today(at.getTime()), -1)),
-        ),
+        and(eq(bookings.businessId, b.id), inArray(bookings.status, ['pending', 'confirmed']), gte(bookings.date, addDays(today(now), -1))),
       )
       .orderBy(asc(bookings.id))
-      .for('update')
-    const ahead = rows
-      .filter((r) => epochOf(r.date, r.start) > at.getTime())
-      .sort((x, y) => Number(!!x.rescheduleOf) - Number(!!y.rescheduleOf))
+    const ahead = (r: typeof bookings.$inferSelect) =>
+      (r.status === 'pending' || r.status === 'confirmed') && epochOf(r.date, r.start) > now
+    const originals = rows.filter((r) => !r.rescheduleOf && ahead(r))
     let cancelled = 0
-    for (const r of ahead) {
+    for (const r of originals) {
+      const row = await lockBooking(tx, r.id)
+      if (!ahead(row)) continue
       try {
-        await cancelForBusiness(tx, r, at, { reason: 'business_closed', text: null })
+        // a move it has waiting goes with it (`dropPendingMove`)
+        await cancelForBusiness(tx, row, at, { reason: 'business_closed', text: null })
         cancelled++
       } catch (e) {
-        // a move request its booking's cancel already took along, or one the jobs settled
+        // one the jobs settled meanwhile
         if (!(e instanceof StaleBooking)) throw e
       }
     }
-    await tx
+    // a move asked of a booking under way or over: withdrawn as the business's, its booking as it is
+    const taken = new Set(originals.map((r) => r.id))
+    for (const m of rows.filter((r) => r.rescheduleOf && !taken.has(r.rescheduleOf)))
+      await dropPendingMove(tx, await lockBooking(tx, m.rescheduleOf!), at, 'business')
+    const dropped = await tx
       .update(invites)
       .set({ status: 'cancelled', answeredAt: at })
       .where(and(eq(invites.businessId, b.id), eq(invites.status, 'pending')))
+      .returning({ phone: invites.phone })
+    // the invitees' cards go
+    for (const phone of new Set(dropped.map((d) => d.phone))) await teamChanged(tx, b.id, { phone })
     await recordAction(tx, by, 'business.closed', { businessId: b.id, reason, details: { cancelled } })
     await emit(tx, { type: 'business.updated', businessId: b.id })
     // out of the switcher
@@ -362,6 +370,8 @@ export async function reopenBusiness(deps: Deps, by: Admin, id: string): Promise
     await holdActor(tx, by)
     const b = await rowOf(tx, id, true, { closed: true })
     if (!b.closedAt) throw new ApiError('invalid_status')
+    // its owner let their account go meanwhile: nobody to open it to
+    if (!(await ownerOf(tx, [b.id])).length) throw new ApiError('invalid_status')
     await tx.update(businesses).set({ closedAt: null, closedReason: null }).where(eq(businesses.id, b.id))
     await recordAction(tx, by, 'business.reopened', { businessId: b.id })
     await emit(tx, { type: 'business.updated', businessId: b.id })
