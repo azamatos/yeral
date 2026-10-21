@@ -195,6 +195,24 @@
   on a closed day declined `276e50f` (#82, migration 0025). The reviews of #81 and #82 found more (an SMS sent before a
   booking's undo could come, bookings made before `told` never told of a move, lock-order deadlocks), all fixed before
   merging. Left: PR 3 (contract), PR 4 (structure), PR 5 (SMS caps, step 7).
+- **2026-10-20/21 · P2 steps 4–7 and P4 slice 1** (each PR reviewed with `code-review` and fixed before merging;
+  details in `log/2026-10-20-*` and `log/2026-10-21-*`). Backend, 20.10: a business cancel as a code `bbcdae5` (#84);
+  clients hear when a business moves `46a5546` (#86, migration 0026); the engine's shared pieces `29643e6` (#87);
+  staff schedules and removing someone `25fb650` (#90); blocked time `d5603a8` (#93, 0027); internal statuses
+  `029a2d8` (#94, 0028); the calendar view `88677dd` (#95). 21.10: the code on the screen `a362d86` (#98); complaints
+  and no-shows `124e33c` (#100, 0029); clients `ee5e856` (#101), `d5c9ac2` (#103); the bookings list and export
+  `7bfaf2b` (#104); the team's reviews `97064a6` (#106, 0030); `canChangePhone`, `answersRequests` `d4afcd0` (#109).
+  The stack that waited for Actions, merged in order by web-b2: the setup draft `77f3aa3` (#112, 0031); photos
+  `6933f56` (#116, 0032); the 5-minute warning and invites' expiry `df66427` (#117, 0033); floor and room `c9527e3`
+  (#120, 0034); the Ýeral team's sign-in `c4abb8a` (#122, 0035, ADR 0026); verify, send back, hide `a0daa19` (#123,
+  0036); reported reviews `f2c7cc4` (#124, 0037); closing a workspace `d612d2f` (#125, 0038); adding a business for its
+  owner `91b0028` (#126); the first launch's examples, appointments only `302e886` (#127); a business's SMS limits
+  `a72bfb8` (#128); the sitemap data `1f88435` (#129). Slice 1 (accounts) built: the business app `4422c06` (#99), its
+  sign-in `b8bf3a9` (#102), the sdk forgets the last person `85472bc` (#107), the shared sign-in `5c8d3a6` (#108), the
+  client site `cee0027` (#110), the mobile prefixes `bca2eb6` (#111), the shell's components `dae89a4` (#113), the
+  client's login `5c3985e` (#114), the login's invites `1d7dc04` (#115), the client's profile `9dd5c01` (#118), the
+  business shell `950cc1b` (#119), My account `b5a8adf` (#121), slice 1's how decisions `9ae5baa` (#131). Releases
+  paused `76ed572` (#133, ADR 0009 amended). Gap found, not fixed: a flaky api test (activeContext, Next steps).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.

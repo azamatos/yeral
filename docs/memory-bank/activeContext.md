@@ -4,24 +4,27 @@ _Last updated: 2026-10-21_
 
 ## Current focus
 
-**2026-10-21 was a backend day (P2 steps 4–7); nothing of it is merged yet.** GitHub Actions started no job from
-22:53 UTC on 20.10 (account billing) until the owner made the repo public on 21.10, so 15 PRs wait, stacked in this
-order, each reviewed with its findings fixed and `pnpm check` green locally: #112 the setup wizard's draft, #116
-photos (no metadata kept, guarded uploads), #117 the 5-minute warning (`warnAt`) and invites' expiry, #120 "Floor,
-room", #122 the Ýeral team's sign-in (password + authenticator code, ADR 0026), #123 verify, send back, hide, a move
-checked again, #124 reported reviews kept or removed, #125 close a workspace, #126 add a business for its owner, #127
-the first launch's example businesses and appointments only, #128 a business's SMS limits, #129 the sitemap data and
-the handoff note (`log/2026-10-21-p2-handoff.md`). Migrations 0031–0038 ride in them (0033 and 0035 were replaced in
-review: a development database migrated on an early commit of #117 or #122 must be set up again). The day's lesson,
-from the owner: at a wall, stop, notify, wait (the global CLAUDE.md, "Walls" and "Unattended runs").
+**2026-10-21: the backend stack and P4 slice 1 are merged.** GitHub Actions started no job from 22:53 UTC on 20.10
+(account billing) until the owner made the repo public on 21.10. The 12 backend PRs that waited (P2 steps 4–7) were
+then rebased and merged in order by web-b2: #112 the setup wizard's draft, #116 photos, #117 the 5-minute warning and
+invites' expiry, #120 "Floor, room", #122 the Ýeral team's sign-in (ADR 0026), #123 verify, send back, hide, #124
+reported reviews, #125 close a workspace, #126 add a business for its owner, #127 the first launch's examples and
+appointments only, #128 a business's SMS limits, #129 the sitemap data. Migrations 0031–0038 came in that order
+(0033 and 0035 were replaced in review: a development database migrated on an early commit of #117 or #122 must be
+set up again). On the way: the deleted changesets went into `log/2026-10-21-releases-paused.md` ("Unreleased"), the
+apps' stand-in accounts got `photo: null`, and #122's admin test of the try limits got a 60 s timeout (PBKDF2 at
+600,000 rounds ran past 20 s on CI). P4 slice 1 (accounts) is built: the business app with its sign-in, shell and My
+account, the client site with its login and profile (#99, #102, #107, #108, #110, #111, #113–#115, #118, #119, #121,
+#131; book chapter 10). The day's lesson, from the owner: at a wall, stop, notify, wait (the global CLAUDE.md, "Walls"
+and "Unattended runs").
 
-Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16). The api and Postgres run on the owner's
-server since 2026-10-19 (not public), still the api from #34. yeral.app still serves `apps/legacy`. Releases are removed
-until the MVP works (the owner, 2026-10-21; #133 removes `release.yml` and Changesets, ADR 0009 amended, the `release`
-skill is now `ship`); production goes by hand when the owner asks. P2 steps 0–3 are done; step 4 is done but
-the business logo and the map address search; step 5 (admin endpoints) is done in the stack; step 6 has the examples
-and appointments only (the demo workspace, F-242, isn't built); step 7 has the SMS limits and the sitemap data. The
-design track goes on in another session.
+Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16). Releases are paused until the MVP works
+(#133, ADR 0009 amended; the `release` skill is now `ship`): no versions or changesets, and production goes by hand
+when the owner asks. The api and Postgres run on the owner's server since 2026-10-19 (not public), still the api from
+#34; yeral.app still serves `apps/legacy`. P2: steps 0–3 done; step 4 done but the business logo and the map address
+search; step 5 (admin endpoints) done; step 6 has the examples and appointments only (the demo workspace, F-242, isn't
+built); step 7 has the SMS limits and the sitemap data. P4: slice 1 done, slice 2 (business setup) next. The design
+track goes on in another session.
 
 ## Owner's direction
 - 2026-10-13: infrastructure first; Cloudflare now, own server (Docker + nginx, Cloudflare for DNS) later; name/domain in
@@ -77,6 +80,7 @@ design track goes on in another session.
   review round per PR; an unattended run needs a goal and a budget (global `~/.claude/CLAUDE.md`).
 - 2026-10-21 (later): "Lets remove release logic for now. We are under development. There is no even working MVP
   version." No releases, versions or changesets until the MVP works; they come back before the first launch (P2 step 7).
+- 2026-10-21 (later): the owner had web-b2 fix and merge every open PR; the backend stack merged in order the same day.
 
 ## Decisions
 
@@ -127,11 +131,11 @@ booking rules (B-41, B-42), the menu (B-38), the profile (B-37, Q-215), requests
 (B-23–B-25), move and cancel (B-26, B-27), hours and special days (B-39, B-40, Q-211), the SMS a booking's changes send
 (B-24, B-26: what the client knows, `bookings.told`), and bookings vs an hours save (Q-211).
 
-2026-10-21: [0026](../decisions/0026-team-accounts-password-and-totp.md) (in #122) the Ýeral team's own accounts, a
-password and an authenticator code, never a phone. The day's "how" rows are 21.10.2026 rows in the book's chapter 9
-marked "Claude (delegated)", in the stack's PRs: photos, the timed notices, the floor, the admin tool's sign-in,
-businesses, reviews, closing and adding, the first launch, the SMS limits (with a concern on Q-299, the owner's "no
-cap").
+2026-10-21: [0026](../decisions/0026-team-accounts-password-and-totp.md) the Ýeral team's own accounts, a password and
+an authenticator code, never a phone (#122) · [0009](../decisions/0009-versioning-changesets.md) amended: releases
+paused until the MVP works (#133). The day's "how" rows are 21.10.2026 rows in the book's chapter 9 marked "Claude
+(delegated)": photos, the timed notices, the floor, the admin tool's sign-in, businesses, reviews, closing and adding,
+the first launch, the SMS limits (with a concern on Q-299, the owner's "no cap"), and slice 1's (#105, #131).
 
 ## Open questions
 
@@ -152,22 +156,24 @@ Where the old questions went (2026-10-17):
 
 ## Next steps
 
-1. **Merge the stack**, #112 first, each rebased on `main` and merged on green CI, in the order above; no new review
-   rounds (each was reviewed and fixed). The frontend agents merge the client site, the client login and profile, the
-   business shell and account meanwhile: expect rebases in `packages/ui`, `packages/features` and
-   `packages/domain/market` (`MARKET.phone.mobilePrefixes`, #111). After #133, delete each PR's `.changeset/*.md` as
-   it rebases (a stray one recreates the folder with no config); add no new ones.
-2. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md` for the api, `deploy.yml` for
-   legacy): deploy.sh adds `ADMIN_SECRET_KEY` to `/srv/yeral/.env`; copy
-   `infra/server/edge/Caddyfile` to `/srv/edge` and reload Caddy; the first admin account with
+1. **P4 slice 2, business setup** (the wizard, profile, services, hours, team, booking rules, link and QR; book
+   chapter 10): its endpoints are merged (the setup draft #112, photos #116, the floor #120, step 4's settings). Also
+   wire the photo upload #116 brought into My account (`ProfilePhoto`'s `upload` and `src`: `PUT /v1/me/photo`,
+   `me.photo`).
+2. **The frontend's backend gaps** (from web-b2, small PRs): the unfinished-setup card's category and steps done
+   beside `{slug, name, step}` (Q-200); per workspace in `GET /v1/me/workspaces` the business's status (for banners),
+   the person's specialization and the unanswered reviews count; for leaving a workspace, the person's bookings and
+   requests ahead there; for deleting an account, the upcoming bookings it would cancel; `POST /auth/code`: its own
+   error code for a number that isn't a mobile; the comment on `mobileInputSchema` still names 61–65, 71.
+3. **A flaky api test, not fixed:** on #128's first CI run, `bookings.test.ts` "Aýjemal sees her demo bookings" got a
+   past tab without YR-44650 (Ojak's table booking, cancelled by the business); the re-run was green and it passes
+   locally. The clock is fixed at `DEMO_NOW` and each test file has its own database copy, so something in the list
+   itself drops it (suspects: `summaries()`, `withOffersAhead`). Bug fix rule: a failing test first.
+4. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md` for the api, `deploy.yml` for
+   legacy): every migration since #34 reaches the server with it; deploy.sh adds `ADMIN_SECRET_KEY` to
+   `/srv/yeral/.env`; copy `infra/server/edge/Caddyfile` to `/srv/edge` and reload Caddy; the first admin account with
    `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"`.
-3. **The frontend's backend gaps** (from web-b2, small PRs after the merges): the unfinished-setup card's category and
-   steps done beside `{slug, name, step}` (Q-200); per workspace in `GET /v1/me/workspaces` the business's status (for
-   banners), the person's specialization and the unanswered reviews count; for leaving a workspace, the person's
-   bookings and requests ahead there; for deleting an account, the upcoming bookings it would cancel; `POST /auth/code`:
-   its own error code for a number that isn't a mobile; the comment on `mobileInputSchema` still names 61–65, 71.
-   (The person's photo upload is in #116.)
-4. **P2 left:** step 6's demo workspace (F-242: a session kind that can't act as a client, a nightly reseed of one
+5. **P2 left:** step 6's demo workspace (F-242: a session kind that can't act as a client, a nightly reseed of one
    workspace, demo numbers that can't be real people's); step 7: deploys from GitHub, nightly backups to R2 with a
    restore drill (the `media` volume and `.env` too), error tracking and uptime alerts (they watch `job gave up`,
    `business SMS limit reached`, `admin codes guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`), the
