@@ -92,9 +92,15 @@ const DROPPED_IN_REVIEW = 'dropped: the business is in review'
 export const BUSINESS_SMS_PER_DAY = 1000
 export const BUSINESS_SMS_PER_BURST = 30
 
-/** An SMS past its business's limits: it waits until `until` (not a try). */
+/**
+ * An SMS past its business's limits: it waits until `until`, spread over the `spreadSec` after it so one business's
+ * backlog doesn't stand in front of everyone else's SMS (not a try).
+ */
 class Deferred extends Error {
-  constructor(readonly until: number) {
+  constructor(
+    readonly until: number,
+    readonly spreadSec: number,
+  ) {
     super('waiting for the business SMS limit')
   }
 }
@@ -122,7 +128,8 @@ async function businessSmsLimit(deps: Deps, b: BookingRow, kind: string, firstTr
         businessId: b.businessId,
         per: windowSec === 600 ? '10 minutes' : 'day',
       })
-    throw new Deferred(now + state.retryAfterSec * 1000)
+    // the next 10 minutes, or the next hour of a new day
+    throw new Deferred(now + state.retryAfterSec * 1000, Math.min(windowSec, 3600))
   }
   if (firstTry) for (const [key, limit, windowSec] of limits) await hit(deps.db, key, limit, windowSec, now)
 }
@@ -553,7 +560,7 @@ async function runQueue(deps: Deps): Promise<number> {
       if (e instanceof Deferred) {
         await deps.db
           .update(jobs)
-          .set({ attempts: job.attempts, lockedUntil: null, runAt: new Date(e.until) })
+          .set({ attempts: job.attempts, lockedUntil: null, runAt: new Date(e.until + (job.id % e.spreadSec) * 1000) })
           .where(eq(jobs.id, job.id))
         continue
       }

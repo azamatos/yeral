@@ -94,13 +94,15 @@ describe('a business’s SMS limits', () => {
     const waiting = await firstJob(code)
     expect(waiting).toMatchObject({ doneAt: null, attempts: 0 })
     expect(waiting.runAt.getTime()).toBeGreaterThan(t.clock.now)
-    t.clock.now += 10 * 60_000
+    // the window, and the 10 minutes it's spread over
+    t.clock.now += 20 * 60_000
     await runDueJobs(t.deps)
     expect(sentTo('+99365811003')).toHaveLength(1)
     await used(`sms:business:${glowId}:day`, BUSINESS_SMS_PER_DAY)
     await phoneBooking('+99365811004')
     expect(sentTo('+99365811004')).toEqual([])
-    t.clock.now += 86_400_000
+    // the day, and the hour it's spread over
+    t.clock.now += 25 * 3_600_000
     await runDueJobs(t.deps)
     expect(sentTo('+99365811004')).toHaveLength(1)
   })
