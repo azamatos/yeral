@@ -1,10 +1,8 @@
 import { MARKET } from '@yeral/domain/market'
-import { mobileStarts, PHONE_RULES, type CodeSteps } from '@yeral/features/auth-by-phone'
+import { PHONE_RULES, type CodeSteps } from '@yeral/features/auth-by-phone'
 import { SignInCodeStep, type SignInCodeStepCopy } from '@yeral/ui/sign-in-code-step'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
-
-const STARTS = mobileStarts()
 
 /**
  * The phone and code steps (`@yeral/ui` SignInCodeStep, boxes 48 and M buttons: DS-Patterns v0.6) as the site draws
@@ -57,9 +55,7 @@ export function CodeStep({
     (state.phoneError === 'incomplete'
       ? t('incomplete', { digits: MARKET.phone.length })
       : state.phoneError === 'notMobile'
-        ? STARTS
-          ? t('notMobile', { starts: format.list(STARTS, { type: 'disjunction' }) })
-          : t('notMobilePlain')
+        ? t('notMobile', { starts: format.list(MARKET.phone.mobilePrefixes, { type: 'disjunction' }) })
         : undefined)
 
   return (
