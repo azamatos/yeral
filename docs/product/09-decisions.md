@@ -9,6 +9,8 @@ question in this book, the answer is added here with its date, and the chapters 
 
 | Date | Question | Decision | By |
 |---|---|---|---|
+| 21.10.2026 | Q-036 (concern settled) | No real businesses at the first launch: it's still a demo, with the example businesses and the demo workspace; real businesses join with the Turkmenistan launch and its real SMS sign-in | owner |
+| 21.10.2026 | Q-036 (how) | Anyone may still set a business up to try it, but while the sign-in code shows on the screen the admin tool verifies nothing (the api answers `verify_unavailable`), so no business but the examples goes public | Claude (delegated) |
 | 21.10.2026 | Q-299 (concern settled) | The SMS safety limit built in #128 stays: it never drops an SMS (past 1000 a day or 30 in 10 minutes per business an SMS waits for the window), a business in review texts no number its team typed in; the Ýeral team still watches a monthly count | Claude (delegated) |
 | 21.10.2026 | Q-270 (concern settled) | No password; the 6-month limit and the "Is this you?" check stay | Claude (delegated) |
 | 21.10.2026 | Q-259 (concern settled), F-243 | Still no review-ask SMS; after a completed visit, My bookings and the home page show a small "How was it?" card once for that visit, closed for good with one tap | Claude (delegated) |

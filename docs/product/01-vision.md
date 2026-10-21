@@ -112,11 +112,13 @@ Decided by the owner on 17 and 18.10.2026:
 - **Two steps.** The first launch is in English on the owner's server in the EU: investors and early users see it (from Turkmenistan
   through a VPN), and it's also a portfolio piece. The Turkmenistan launch follows once marketing starts and investment
   arrives: Turkmen and Russian, servers and database in Turkmenistan, legal texts checked by a lawyer there. (Q-032, Q-033, Q-037, Q-133, Q-292)
-- **The first launch is an English pilot** with Turkmenistan's settings. Example businesses from the design,
-  marked "Example", confirm bookings at once and sit beside the real businesses the team adds; "Try the business
-  app" opens a demo workspace that resets every night. No SMS goes out: anyone signs in with their own number and
-  the code shows on the screen. (Q-004, Q-036)
-- **The first businesses** are added by the Ýeral team in the CMS after meeting their owners and showing them the
+- **The first launch is an English pilot** with Turkmenistan's settings, still a demo: example businesses from the
+  design, marked "Example", confirm bookings at once, and "Try the business app" opens a demo workspace that resets
+  every night. No SMS goes out: anyone signs in with their own number and the code shows on the screen, so a number
+  proves nothing and no real business joins yet; nothing is verified while the code shows. (Q-004, Q-036, revised
+  21.10.2026)
+- **The first real businesses** come with the Turkmenistan launch and its real SMS sign-in (Q-036): the Ýeral team
+  adds them in the CMS after meeting their owners and showing them the
   product; some owners set up by themselves to learn the product; sign-up stays open to anyone. (Q-002)
 - **Name and domain:** Ýeral on yeral.app; investors or future owners may change them later. (Q-003) The name is
   written *Ýeral* everywhere, as in the logo; "Yeral" only where the letter can't be used: the domain and the

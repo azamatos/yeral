@@ -174,7 +174,8 @@ The order of Q-001: every slice ends working end to end on a local machine, with
 The client site, the business app, the admin tool and the api go to production on the owner's server (a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB)) in Docker, with Cloudflare for DNS (ADR 0007, ADR 0023), from a release the owner approves
 (ADR 0020). The server, its shared HTTPS front door and the api's stack are set up (19.10.2026, `infra/server`);
 deploys from GitHub and backups come with P2 step 7. The new client site replaces the old one on
-yeral.app. The team adds the first real businesses in the admin tool (Q-002).
+yeral.app. No real businesses yet: it's a demo with the example businesses and the demo workspace, and nothing is
+verified while the sign-in code shows on the screen (Q-036, owner 21.10.2026).
 
 ### P6 · Turkmenistan launch
 
@@ -185,6 +186,8 @@ After investment, when the owner sets the date:
 - A lawyer in Turkmenistan: law 519-V on personal data, the privacy policy and terms (Q-033, Q-037).
 - The server in Turkmenistan (below), the data moved, the addresses switched (ADR 0023).
 - An SMS provider and real SMS sign-in; the first-launch mode switched off for this market (Q-036).
+- The first real businesses, added by the team in the admin tool after meeting their owners (Q-002); verifying
+  opens once the code no longer shows on the screen (Q-036, 21.10.2026).
 
 ## What it costs
 
@@ -227,8 +230,8 @@ so there is time to test it from Ashgabat, rehearse the move and fix what breaks
 
 ## Risks we carry
 
-- **The code on screen** lets anyone sign in as any number, so a real business's data is open to anyone who knows its
-  owner's phone (Claude's concern on Q-036).
+- **The code on screen** lets anyone sign in as any number: harmless while only example businesses exist, which is
+  why no real business joins before real SMS sign-in (Q-036, settled 21.10.2026).
 - **Few reviews** without any ask (Claude's concern on Q-259).
 - **"Everything flexible"** turns every option into a setting (Claude's concern on Q-105).
 - **The database awake all day** for the every-minute jobs costs compute (Q-250).

@@ -228,7 +228,8 @@ async function tellOwner(
 /**
  * Verified (S-17): public in search, at its link and among similar places, and the owner told. A verified business that
  * moved is checked again the same way: it stays public, and nobody is told; `moved` is the move the team looked at
- * (its `addressChangedAt`), so a newer one isn't checked by mistake.
+ * (its `addressChangedAt`), so a newer one isn't checked by mistake. While the sign-in code shows on the screen a number
+ * proves nothing, so nothing is verified: the first launch has only the example businesses (book Q-036).
  */
 export async function verifyBusiness(deps: Deps, by: Admin, id: string, moved?: number): Promise<void> {
   await deps.db.transaction(async (tx) => {
@@ -236,6 +237,7 @@ export async function verifyBusiness(deps: Deps, by: Admin, id: string, moved?: 
     const b = await rowOf(tx, id, true)
     const recheck = b.verification === 'verified'
     if (recheck && (!b.addressChangedAt || b.addressChangedAt.getTime() !== moved)) throw new ApiError('invalid_status')
+    if (!recheck && deps.codeOnScreen) throw new ApiError('verify_unavailable')
     await tx
       .update(businesses)
       .set({ verification: 'verified', verificationReason: null, addressChangedAt: null })
