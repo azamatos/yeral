@@ -4,13 +4,24 @@
  */
 import type { InviteCard, TeamMember, Workspace } from '@yeral/contract/team'
 import type { Locale } from '@yeral/domain/model'
-import { answersRequests, canAnswerRequest, type Actor } from '@yeral/domain/permissions'
+import { answersRequests, canAnswerRequest, scopeOf, type Actor } from '@yeral/domain/permissions'
 import { inviteExpiresAt, inviteState } from '@yeral/domain/team'
 import type { SiteConfig } from '@yeral/lib/site'
-import { and, asc, desc, eq, inArray, isNull, or } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNull, or, sql } from 'drizzle-orm'
 import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
-import { bookingRules, bookings, businesses, invites, services, staff, staffServices, users, type StoredPhoto } from '../../db/schema'
+import {
+  bookingRules,
+  bookings,
+  businesses,
+  invites,
+  reviews,
+  services,
+  staff,
+  staffServices,
+  users,
+  type StoredPhoto,
+} from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid } from '../../http/errors'
 import type { AppEnv, User } from '../../http/env'
@@ -22,6 +33,8 @@ import { logoOf, photoOf, text } from '../catalog/map'
 import { inSwitcher, signsIn } from './members'
 import { awaitingAnswer } from '../bookings/repo'
 import { answerFacts, answeringOf, requestItems } from '../requests/service'
+import { notRemoved } from '../reviews/rating'
+import { unanswered } from '../reviews/team'
 
 export type StaffRow = typeof staff.$inferSelect
 export type BusinessRow = typeof businesses.$inferSelect
@@ -260,13 +273,17 @@ export async function workspacesOf(deps: Deps, user: User): Promise<{ items: Wor
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
     .where(and(eq(staff.userId, user.id), inSwitcher))
     .orderBy(asc(businesses.name))
-  const [counts, cities] = await Promise.all([
+  const [counts, cities, reviewCounts] = await Promise.all([
     requestCounts(
       deps.db,
       rows.map((r) => ({ businessId: r.business.id, actor: actorOf(r.member) })),
       now,
     ),
     loadCities(deps.db),
+    reviewsToAnswer(
+      deps.db,
+      rows.filter((r) => scopeOf(actorOf(r.member), 'reviewsReply') === 'all').map((r) => r.business.id),
+    ),
   ])
   const items = rows.map(({ business, member }) => ({
     slug: business.slug,
@@ -275,11 +292,43 @@ export async function workspacesOf(deps: Deps, user: User): Promise<{ items: Wor
     city: cityRefOf(cities, business.cityId, user.lang),
     logo: logoOf(deps, business, user.lang),
     level: member.level,
+    ...statusOf(business, scopeOf(actorOf(member), 'settings') !== 'none'),
+    specialization: text(member.specialization, user.lang) || null,
+    reviewsToAnswer: reviewCounts.get(business.id) ?? 0,
     requestsToAnswer: counts.get(business.id) ?? 0,
     lastOpenedAt: member.lastOpenedAt?.getTime() ?? null,
   }))
   const current = [...items].sort((a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0))[0]
   return { items, current: current?.lastOpenedAt ? current.slug : null }
+}
+
+/**
+ * The page's state for the banner: hidden by the Ýeral team first (it hides a verified page too), then its review. The
+ * reason goes to those who can act on it (the settings' people: the owner and administrators).
+ */
+function statusOf(
+  b: Pick<typeof businesses.$inferSelect, 'verification' | 'verificationReason' | 'hiddenAt' | 'hiddenReason'>,
+  acts: boolean,
+): Pick<Workspace, 'status' | 'statusReason'> {
+  const [status, reason]: [Workspace['status'], string | null] = b.hiddenAt
+    ? ['hidden', b.hiddenReason]
+    : b.verification === 'rejected'
+      ? ['not_approved', b.verificationReason]
+      : b.verification === 'pending'
+        ? ['in_review', null]
+        : ['live', null]
+  return { status, statusReason: acts ? reason : null }
+}
+
+/** Reviews without a reply, per business, in those where the person replies ("Jogapsyz", B-53). */
+async function reviewsToAnswer(db: Queryable, ids: string[]): Promise<Map<string, number>> {
+  if (!ids.length) return new Map()
+  const rows = await db
+    .select({ businessId: reviews.businessId, n: sql<number>`count(*)::int` })
+    .from(reviews)
+    .where(and(inArray(reviews.businessId, ids), notRemoved(), unanswered))
+    .groupBy(reviews.businessId)
+  return new Map(rows.map((r) => [r.businessId, r.n]))
 }
 
 /** Requests still waiting (not past their hold) that each actor may answer (book chapter 3, "Who answers"). */

@@ -34,7 +34,7 @@ const ORDERS = {
 }
 
 /** No reply to read: never written, or taken away. */
-const unanswered = or(isNull(reviews.replyText), isNotNull(reviews.replyDeletedAt))
+export const unanswered = or(isNull(reviews.replyText), isNotNull(reviews.replyDeletedAt))
 
 /** The report as the team sees it: checking (not counted), counted again after 48 hours, or kept by Ýeral. */
 const stateOf = (r: ReviewRow) => (r.clearedAt ? 'cleared' : r.recountedAt ? 'counted' : 'checking')

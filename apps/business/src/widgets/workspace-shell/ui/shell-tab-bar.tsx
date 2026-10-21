@@ -74,6 +74,11 @@ export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | n
             drill
             icon={<SectionIcon section={section} />}
             label={t(`sections.${section}`)}
+            count={
+              section === 'reviews' && workspace.reviewsToAnswer > 0
+                ? { count: workspace.reviewsToAnswer, tone: 'muted', label: t('reviewsToAnswer', { count: workspace.reviewsToAnswer }) }
+                : null
+            }
             onClick={() => setMore(false)}
           >
             <Link to={`/w/$slug/${section}`} params={{ slug }} />

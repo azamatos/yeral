@@ -38,6 +38,10 @@ const workspace = (slug: string, name: string, level: Workspace['level'], reques
   city,
   logo: null,
   level,
+  status: 'live',
+  statusReason: null,
+  specialization: null,
+  reviewsToAnswer: 0,
   requestsToAnswer,
   lastOpenedAt: 1,
 })

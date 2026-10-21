@@ -31,6 +31,9 @@ export const inviteStateSchema = z.enum(['pending', 'expired', 'accepted', 'decl
 
 // ── The person's workspaces (switcher) ──
 
+/** A workspace's page as its banner says it (B-Shell BusinessStatusBanner). */
+export const WORKSPACE_STATUSES = ['live', 'in_review', 'not_approved', 'hidden'] as const
+
 export const workspaceSchema = z
   .object({
     slug: slugSchema,
@@ -41,6 +44,17 @@ export const workspaceSchema = z
     /** The business's logo, the switcher's picture (B-10); null: a letter tile. */
     logo: photoSchema.nullable(),
     level: levelSchema,
+    /**
+     * The page's state, the shell's banner (B-Shell BusinessStatusBanner, Q-012, Q-274): `live`, `in_review` (only the
+     * team sees it), `not_approved` (sent back by the Ýeral team) or `hidden` (by the Ýeral team).
+     */
+    status: z.enum(WORKSPACE_STATUSES),
+    /** The Ýeral team's reason, for `not_approved` and `hidden`, to the owner and administrators (who can act on it); else null. */
+    statusReason: z.string().nullable(),
+    /** The person's specialization here, as the owner set it (B-12's My workspaces); null: "Not set". */
+    specialization: z.string().nullable(),
+    /** Reviews waiting for a reply, for those who reply (the owner and administrators); 0 for a specialist. */
+    reviewsToAnswer: z.number().int().min(0),
     /** Requests waiting for an answer this person may give: the count in the switcher. */
     requestsToAnswer: z.number().int().min(0),
     lastOpenedAt: epochSchema.nullable(),
