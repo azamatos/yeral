@@ -257,7 +257,8 @@ export async function editReview(deps: Deps, b: BookingRow, input: { rating: num
         text: input.text ?? null,
         updatedAt: new Date(now),
         // kept by Ýeral, then changed: what Ýeral kept is gone, so the business may report the new words (Q-261)
-        ...(existing.clearedAt
+        // (a removed one keeps its record of the report)
+        ...(existing.clearedAt && !existing.removedAt
           ? { clearedAt: null, reportReason: null, reportText: null, reportedAt: null, reportedBy: null, recountedAt: null }
           : {}),
       })
