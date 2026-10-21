@@ -24,7 +24,9 @@ when the owner asks. The api and Postgres run on the owner's server since 2026-1
 #34; yeral.app still serves `apps/legacy`. P2: steps 0–3 done; step 4 done but the business logo and the map address
 search; step 5 (admin endpoints) done; step 6 has the examples and appointments only (the demo workspace, F-242, isn't
 built); step 7 has the SMS limits and the sitemap data. P4: slice 1 done, slice 2 (business setup) next. The design
-track goes on in another session.
+redraw stopped (ADR 0021 amended 2026-10-20): the apps are built from the book and the drawn boards, and Claude Design
+is used only for a critical undrawn detail. The frontend (web-b2) builds slice by slice: components in Storybook, then
+the apps.
 
 ## Owner's direction
 - 2026-10-13: infrastructure first; Cloudflare now, own server (Docker + nginx, Cloudflare for DNS) later; name/domain in
@@ -72,6 +74,8 @@ track goes on in another session.
   review the backend api for best practices, architecture, patterns and the decisions, and make a plan of fixes; work
   the plan PR by PR (PR 1–4 now, PR 5 with step 7), then step 4 goes on. Save the progress at the end of the session.
 - 2026-10-20 (design track): design work goes in small iterations, one main board per prompt (ADR 0021 amended).
+- 2026-10-20 (later): move on from design to building; design only when it's critical (Claude Design for an undrawn
+  detail only); build slice by slice: components in Storybook, then the apps (ADR 0021 amended).
 - 2026-10-21: backend and api only in this session (design in another); clients hear when a business moves (done in
   #86); release when possible, without waiting for the design, Storybook or the frontend.
 - 2026-10-21 (later): the repo is public (Actions run again). At a wall (CI not
@@ -179,8 +183,11 @@ Where the old questions went (2026-10-17):
    `business SMS limit reached`, `admin codes guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`), the
    code-SMS cap; step 4: the business logo, the map address search (F-014, needs a geocoder choice).
 
-**Waiting on the owner:** Ýeral's support phone (`EXAMPLE_PHONE`: the examples show it, never the design's numbers,
-which may be real people's; they can't be switched on without it); the concern on Q-299 (an SMS safety limit that never
+**Waiting on the owner:** Ýeral's support phone and Telegram, maybe one number for both uses: `EXAMPLE_PHONE` (the
+examples show it, never the design's numbers, which may be real people's; they can't be switched on without it) and
+Contact Ýeral (the business account menu's Contact Ýeral and the owner's "can't leave" box wait for it); switching off
+the unused repo setting "Allow GitHub Actions to create and approve pull requests" (unused since #133); the concern on
+Q-299 (an SMS safety limit that never
 drops an SMS, against "no cap"); the 20–21.10.2026 "Claude (delegated)" rows in chapter 9; Q-036's concern stands (with
 the code on the screen anyone who types a real member's number signs in as them); when to deploy; later an R2 token,
 accounts for error tracking and uptime checks, the DNS records when going public. Earlier: the main checkout needs
