@@ -27,6 +27,7 @@ const person = (phone: string, firstName: string, surname: string): Me => ({
   notifications,
   hasBusiness: true,
   canChangePhone: true,
+  photo: null,
 })
 
 const workspace = (slug: string, name: string, level: Workspace['level'], requestsToAnswer: number): Workspace => ({
