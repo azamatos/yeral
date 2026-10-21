@@ -188,5 +188,13 @@
     "title": "Something went wrong",
     "lead": "Try again. If it keeps happening, reload the page.",
     "action": "Try again"
+  },
+  "support": {
+    "contact": "Contact {brand}",
+    "contactCaption": "{phone} · Telegram",
+    "call": "Call",
+    "write": "Write on Telegram",
+    "back": "Back to the menu",
+    "telegramName": "Telegram {name}"
   }
 }

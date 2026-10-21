@@ -1,10 +1,11 @@
 /**
  * Navigation/MoreSheet (DS-Patterns 06; B-Mobile frame 7): the phone's More, a sheet above the tab bar. The workspace row
  * (it opens the switcher's sheet) · Reviews (muted count) · Settings · the person · My profile · Your Ýeral page · Open as
- * a client · Log out. Rows a level can't use are removed: a Specialist has no Settings and no reviews count.
+ * a client · Contact Ýeral (its number and Telegram as a second line) · Log out. Rows a level can't use are removed: a
+ * Specialist has no Settings and no reviews count.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { ExternalLink, Eye, LogOut, Settings, Star, User } from 'lucide-react'
+import { ExternalLink, Eye, Headset, LogOut, Settings, Star, User } from 'lucide-react'
 import { useState } from 'react'
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { brand } from '../../brand'
@@ -31,6 +32,7 @@ function More({
         profile: 'Мой профиль',
         page: 'Ваша страница на Ýeral',
         client: 'Открыть как клиент',
+        contact: 'Связаться с Ýeral',
         logout: 'Выйти',
         unanswered: '4 отзыва без ответа',
       }
@@ -41,6 +43,7 @@ function More({
         profile: 'My profile',
         page: 'Your Ýeral page',
         client: 'Open as a client',
+        contact: 'Contact Ýeral',
         logout: 'Log out',
         unanswered: '4 unanswered',
       }
@@ -80,6 +83,7 @@ function More({
         <MoreSheetRow icon={<User />} label={w.profile} drill />
         <MoreSheetRow icon={<Eye />} label={w.page} />
         <MoreSheetRow icon={<ExternalLink />} label={w.client} hint="yeral.app" />
+        <MoreSheetRow icon={<Headset />} label={w.contact} caption="+993 12 34 56 78 · Telegram" drill />
         <MoreSheetRow icon={<LogOut />} label={w.logout} danger onClick={onLogout} />
       </MoreSheet>
     </>
@@ -99,6 +103,9 @@ export const Owner: Story = {
     const sheet = await within(document.body).findByRole('dialog', { name: 'More' })
     await expect(within(sheet).getByRole('button', { name: 'Reviews 4 unanswered' })).toBeVisible()
     await expect(within(sheet).getByRole('button', { name: 'Settings' })).toBeVisible()
+    // a second line makes the row 56
+    const contact = within(sheet).getByRole('button', { name: 'Contact Ýeral +993 12 34 56 78 · Telegram' })
+    await expect(contact.getBoundingClientRect().height).toBeGreaterThanOrEqual(56)
     await userEvent.click(within(sheet).getByRole('button', { name: 'Log out' }))
     await expect(onLogout).toHaveBeenCalled()
     await userEvent.keyboard('{Escape}')

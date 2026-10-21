@@ -9,6 +9,7 @@ import { ModalDescription } from '@yeral/ui/modal'
 import { textLink } from '@yeral/ui/text-link'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
+import { SupportLinks } from '@/shared/ui'
 import { LoginHeader } from './login-header'
 
 /**
@@ -67,7 +68,11 @@ export function IdentityStep({
       <LoginHeader title={name ? t('login.identity.title', { name }) : t('login.identity.titleNoName')}>
         <ModalDescription>{t('login.identity.lead')}</ModalDescription>
       </LoginHeader>
-      {ownsWorkspace && <Callout tone="danger">{t('login.identity.ownsWorkspace', { brand })}</Callout>}
+      {ownsWorkspace && (
+        <Callout tone="danger" actions={<SupportLinks />}>
+          {t('login.identity.ownsWorkspace', { brand })}
+        </Callout>
+      )}
       <div className="flex flex-col gap-3">
         <Button
           ref={yesRef}

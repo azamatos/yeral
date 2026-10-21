@@ -6,7 +6,7 @@ import { cn } from '@yeral/ui/cn'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { AuthPage, textLink } from '@/shared/ui'
+import { AuthPage, SupportLinks, textLink } from '@/shared/ui'
 
 /**
  * "Is this you?" (book Q-270): the code was right, but the number's account hasn't been used for 6 months, so the
@@ -62,7 +62,11 @@ export function IdentityStep({
       title={name ? t('login.identity.title', { name }) : t('login.identity.titleNoName')}
       lead={t('login.identity.lead')}
     >
-      {ownsWorkspace && <Callout tone="danger">{t('login.identity.ownsWorkspace', { brand })}</Callout>}
+      {ownsWorkspace && (
+        <Callout tone="danger" actions={<SupportLinks />}>
+          {t('login.identity.ownsWorkspace', { brand })}
+        </Callout>
+      )}
       <div className="flex flex-col gap-3">
         <Button variant="primary" size="l" className="w-full" loading={sayingYes} disabled={sayingNo} onClick={() => reply(true)}>
           {t('login.identity.yes')}

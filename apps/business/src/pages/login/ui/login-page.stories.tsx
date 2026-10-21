@@ -77,6 +77,14 @@ const PEOPLE: Record<string, Account> = {
     current: 'glow-studio',
     invites: [],
   },
+  // an owner unused for 6 months: "No" can't start the number afresh (`owns_workspace`)
+  '+99365400700': {
+    me: person('+99365400700', 'Merdan', 'Ataýew'),
+    workspaces: [workspace('merdan-barber', 'Merdan’s barber', 'owner', 0)],
+    current: 'merdan-barber',
+    invites: [],
+    unused: true,
+  },
   '+99364215590': {
     me: person('+99364215590', 'Gülnar', 'Öwezowa'),
     workspaces: [],
@@ -198,6 +206,7 @@ const fakeApi =
       }
       if (route === 'POST /auth/identity') {
         if (!account || !phone) return refuse(400, 'code_expired')
+        if (!body.yes && account.workspaces.some((w) => w.level === 'owner')) return refuse(409, 'owns_workspace')
         account = body.yes ? account : fresh(phone)
         me = account.me
         return json({ me, isNew: !me.firstName })
@@ -574,6 +583,23 @@ export const IsThisYou: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Yes, it’s me' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Opening Glow Studio…' })).toBeVisible()
     await expect(canvas.getByText('Specialist · Ashgabat')).toBeVisible()
+  },
+}
+
+/** "No" from a business's owner: the number can't start afresh; Ýeral's support line is right there. */
+export const IsThisYouOwner: Story = {
+  name: 'Is this you? · an owner says no',
+  args: { server: fakeApi() },
+  play: async ({ canvas }) => {
+    await sendCode(canvas, '65400700')
+    await userEvent.keyboard('4821')
+    await canvas.findByRole('heading', { level: 1, name: 'Is this you, Merdan?' })
+    await userEvent.click(canvas.getByRole('button', { name: /No/ }))
+    const alert = await canvas.findByRole('alert')
+    await expect(alert).toHaveTextContent('This account owns a business on Ýeral')
+    await expect(within(alert).getByRole('link', { name: '+993 64 75 45 91' })).toHaveAttribute('href', 'tel:+99364754591')
+    await expect(within(alert).getByRole('link', { name: 'Telegram @eldzhernone' })).toHaveAttribute('href', 'https://t.me/eldzhernone')
+    await expect(canvas.getByRole('button', { name: /No/ })).toBeDisabled()
   },
 }
 

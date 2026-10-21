@@ -209,13 +209,25 @@ export const CreateBusiness: Story = {
   },
 }
 
-/** The account menu: Open as a client (the client site, same account) and Log out, back to the sign-in. */
+/**
+ * The account menu: Open as a client (the client site, same account), Contact Ýeral (the market's support line: call or
+ * Telegram) and Log out, back to the sign-in.
+ */
 export const AccountMenu: Story = {
   play: async ({ canvas }) => {
     const button = (await canvas.findAllByRole('button', { name: 'Account menu' })).find((b) => b.checkVisibility())
     await userEvent.click(button!)
     const menu = await within(document.body).findByRole('menu', { name: 'Account' })
     await expect(within(menu).getByRole('menuitem', { name: /Open as a client/ })).toHaveAttribute('target', '_blank')
+    within(menu).getByRole('menuitem', { name: 'Contact Ýeral' }).focus()
+    await userEvent.keyboard('{ArrowRight}')
+    const contact = await within(document.body).findByRole('menu', { name: 'Contact Ýeral' })
+    await expect(within(contact).getByRole('menuitem', { name: 'Call +993 64 75 45 91' })).toHaveAttribute('href', 'tel:+99364754591')
+    await expect(within(contact).getByRole('menuitem', { name: 'Write on Telegram @eldzhernone' })).toHaveAttribute(
+      'href',
+      'https://t.me/eldzhernone',
+    )
+    await userEvent.keyboard('{ArrowLeft}')
     await userEvent.click(within(menu).getByRole('menuitem', { name: 'Log out' }))
     await expect(await canvas.findByText('Log in')).toBeVisible()
   },
@@ -260,7 +272,7 @@ export const Phone: Story = {
   },
 }
 
-/** More: the workspace, Reviews and Settings, the person, the client site, Log out. */
+/** More: the workspace, Reviews and Settings, the person, the client site, Contact Ýeral, Log out. */
 export const PhoneMore: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
@@ -268,6 +280,12 @@ export const PhoneMore: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'More' }))
     const sheet = await within(document.body).findByRole('dialog', { name: 'More' })
     await expect(within(sheet).getByText('Maýsa Annaýewa')).toBeVisible()
+    // Contact Ýeral: its two rows in the sheet, and back with the focus on it again
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Contact Ýeral +993 64 75 45 91 · Telegram' }))
+    await expect(within(sheet).getByRole('link', { name: 'Call +993 64 75 45 91' })).toHaveAttribute('href', 'tel:+99364754591')
+    await expect(within(sheet).getByRole('button', { name: 'Back to the menu' })).toHaveFocus()
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Back to the menu' }))
+    await waitFor(() => expect(within(sheet).getByRole('button', { name: 'Contact Ýeral +993 64 75 45 91 · Telegram' })).toHaveFocus())
     await userEvent.click(within(sheet).getByRole('link', { name: 'Reviews' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Reviews' })).toBeVisible()
     await waitFor(() => expect(within(document.body).queryByRole('dialog', { name: 'More' })).not.toBeInTheDocument())
@@ -317,6 +335,7 @@ export const MyProfile: Story = {
     await expect(drawer.getByText('+993 65 10 20 30')).toBeVisible()
     await expect(drawer.getByText('Glow Nails')).toBeVisible()
     await expect(drawer.getByText(/You’re the owner of Glow Studio, so you can’t leave it/)).toBeVisible()
+    await expect(drawer.getByRole('link', { name: '+993 64 75 45 91' })).toHaveAttribute('href', 'tel:+99364754591')
     await expect(drawer.queryByRole('button', { name: 'Leave this business' })).not.toBeInTheDocument()
     // the name: saved, and the drawer closes
     const last = drawer.getByLabelText(/Last name/)

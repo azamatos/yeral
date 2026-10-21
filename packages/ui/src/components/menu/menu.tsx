@@ -26,6 +26,23 @@ export function MenuContent({ className, sideOffset = 8, align = 'end', ...props
   )
 }
 
+/** A submenu beside its row (the account menu's Contact Ýeral): the menu's look, opened by the row or →. */
+export function MenuSubContent({ className, sideOffset = 6, ...props }: ComponentProps<typeof DropdownMenu.SubContent>) {
+  return (
+    <DropdownMenu.Portal>
+      <DropdownMenu.SubContent
+        sideOffset={sideOffset}
+        collisionPadding={16}
+        {...props}
+        className={cn(
+          'z-50 flex w-popover max-w-[calc(100vw-32px)] flex-col rounded-m border border-n-200 bg-n-0 p-1.5 shadow-raised outline-none data-[state=open]:animate-pop-in',
+          className,
+        )}
+      />
+    </DropdownMenu.Portal>
+  )
+}
+
 const itemClass = cn(
   'flex h-10 w-full cursor-pointer items-center gap-3 rounded-input px-3 text-left text-body text-n-900 outline-none select-none',
   'data-highlighted:bg-group data-disabled:cursor-not-allowed data-disabled:text-n-500',

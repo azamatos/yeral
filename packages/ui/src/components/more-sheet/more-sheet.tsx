@@ -41,12 +41,14 @@ const row = cn(
 
 /**
  * A row (`.y-mr`: 48 min, icon 20, 15/20 500): a page (`drill` adds the chevron), an action, or Log out (`danger`). A
- * count (Reviews, muted) is read after the name; `hint` is quiet text at the end ("yeral.app").
+ * count (Reviews, muted) is read after the name; `hint` is quiet text at the end ("yeral.app"); `caption` a second
+ * line under the name, which makes the row 56 (Contact Ýeral: "+993 64 75 45 91 · Telegram").
  */
 export function MoreSheetRow({
   asChild,
   icon,
   label,
+  caption,
   count,
   hint,
   drill = false,
@@ -58,6 +60,7 @@ export function MoreSheetRow({
   asChild?: boolean
   icon: ReactNode
   label: ReactNode
+  caption?: ReactNode
   count?: { count: number; tone: 'attention' | 'muted'; label: string } | null
   hint?: ReactNode
   drill?: boolean
@@ -68,11 +71,23 @@ export function MoreSheetRow({
     <Comp
       {...(asChild ? {} : { type: 'button' as const })}
       {...props}
-      className={cn(row, danger && 'text-danger-ink hover:bg-error-tint hover:text-danger-ink [&>svg]:text-danger-ink', className)}
+      className={cn(
+        row,
+        caption && 'min-h-14',
+        danger && 'text-danger-ink hover:bg-error-tint hover:text-danger-ink [&>svg]:text-danger-ink',
+        className,
+      )}
     >
       {icon}
       {asChild && <Slot.Slottable>{children}</Slot.Slottable>}
-      <span className="min-w-0">{label}</span>
+      {caption ? (
+        <span className="flex min-w-0 flex-col">
+          <span>{label}</span>
+          <span className="truncate text-micro font-normal text-n-600">{caption}</span>
+        </span>
+      ) : (
+        <span className="min-w-0">{label}</span>
+      )}
       {count && count.count > 0 && (
         <>
           <CountBadge aria-hidden tone={count.tone} className="ml-auto">
