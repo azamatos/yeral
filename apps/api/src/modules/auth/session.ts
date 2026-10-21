@@ -30,13 +30,13 @@ function writeCookie(c: Context<AppEnv>, token: string, expiresAt: Date) {
   })
 }
 
-/** A demo account's session (book F-242): one day, never renewed, however it started. */
+/** "Try the business app"'s session (book F-242): one day, never renewed. */
 export const DEMO_SESSION_DAYS = 1
 
-export async function startSession(c: Context<AppEnv>, db: Queryable, userId: string): Promise<void> {
+/** `days`: how long it lasts before it's renewed; a demo account's isn't renewed (`sessionMiddleware`). */
+export async function startSession(c: Context<AppEnv>, db: Queryable, userId: string, days = SESSION_DAYS): Promise<void> {
   const token = randomToken()
-  const [account] = await db.select({ demo: users.demo }).from(users).where(eq(users.id, userId))
-  const expiresAt = new Date(c.var.deps.now() + (account?.demo ? DEMO_SESSION_DAYS : SESSION_DAYS) * DAY)
+  const expiresAt = new Date(c.var.deps.now() + days * DAY)
   await db
     .insert(sessions)
     .values({ userId, tokenHash: await sha256Hex(token), expiresAt, userAgent: c.req.header('user-agent')?.slice(0, 200) ?? null })

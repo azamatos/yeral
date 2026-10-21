@@ -8,7 +8,7 @@ import type { AppEnv } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { errors, json } from '../../http/openapi'
 import { clientIp, hit, rateLimited } from '../../lib/rate-limit'
-import { startSession } from '../auth/session'
+import { DEMO_SESSION_DAYS, startSession } from '../auth/session'
 import { toMe } from '../me/me'
 import { signsIn } from '../team/members'
 
@@ -39,6 +39,6 @@ export const demoRoutes = new OpenAPIHono<AppEnv>().openapi(sessionRoute, async 
   if (!owner) throw new ApiError('not_found')
   // whoever was signed in is signed out: their session ends, and the demo's cookie takes its place
   if (c.var.auth) await deps.db.delete(sessions).where(eq(sessions.id, c.var.auth.sessionId))
-  await startSession(c, deps.db, owner.user.id)
+  await startSession(c, deps.db, owner.user.id, DEMO_SESSION_DAYS)
   return c.json({ me: await toMe(deps.db, owner.user, deps), slug: SANDBOX_SLUG }, 200)
 })

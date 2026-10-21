@@ -98,14 +98,13 @@ describe('“Try the business app” (book F-242)', () => {
     expect(made.status, JSON.stringify(made.json)).toBe(201)
   })
 
-  it('a demo number typed into the sign-in gets the same: the demo only, for a day, never renewed', async () => {
-    const b = browser(t.app)
-    await b.login(MAYSA)
-    expect((await b.req('/v1/me/bookings?tab=upcoming&lang=en')).json.error.code).toBe('not_in_demo')
+  it('lasts a day and isn’t renewed; no demo number signs in by code', async () => {
+    const { b } = await tryIt()
     t.clock.now = DEMO_NOW + DAY - 60_000
     expect((await b.req('/v1/me')).status).toBe(200)
     t.clock.now = DEMO_NOW + DAY + 60_000
     expect((await b.req('/v1/me')).status).toBe(401)
+    expect((await browser(t.app).req('/v1/auth/code', { body: { phone: MAYSA } })).status).toBe(400)
   })
 
   it('so many demo sessions an hour from one address', async () => {
