@@ -1,7 +1,7 @@
 /** The Ýeral team's sign-in pieces (ADR 0026): passwords, authenticator codes, sealed secrets. */
 import { describe, expect, it } from 'vitest'
 import { checkPassword, hashPassword } from './password'
-import { sealingKey, seal, unseal } from './sealed'
+import { adminKeys, keyedHash, sealingKey, seal, unseal } from './sealed'
 import { base32, matchTotp, otpauthUri, totpAt } from './totp'
 
 describe('passwords (ADR 0026)', () => {
@@ -51,5 +51,20 @@ describe('sealed secrets (ADR 0026)', () => {
     expect([...(await unseal(key, sealed))]).toEqual([1, 2, 3])
     await expect(unseal(other, sealed)).rejects.toThrow()
     await expect(unseal(key, sealed.slice(0, -2) + (sealed.endsWith('A') ? 'BB' : 'AA'))).rejects.toThrow()
+  })
+})
+
+describe('the keys ADMIN_SECRET_KEY stands for (ADR 0026)', () => {
+  it('a sealing key and a hashing key, each its own and neither the raw key', async () => {
+    const raw = new Uint8Array(32).fill(3)
+    const keys = await adminKeys(raw)
+    const sealed = await seal(keys.sealing, new Uint8Array([4, 5, 6]))
+    expect([...(await unseal(keys.sealing, sealed))]).toEqual([4, 5, 6])
+    await expect(unseal(await sealingKey(raw), sealed)).rejects.toThrow()
+    // the same key, the same hash; another key, another hash
+    const hash = await keyedHash(keys.recovery, 'admin:abcdefgh')
+    expect(hash).toMatch(/^[0-9a-f]{64}$/)
+    expect(await keyedHash(keys.recovery, 'admin:abcdefgh')).toBe(hash)
+    expect(await keyedHash((await adminKeys(new Uint8Array(32).fill(4))).recovery, 'admin:abcdefgh')).not.toBe(hash)
   })
 })

@@ -140,8 +140,7 @@ export const adminRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const input = c.req.valid('json')
     await guardAddress(deps, ipOf(c), input.login)
-    const admin = await signIn(deps, input)
-    await startAdminSession(c, deps.db, admin.id)
+    const admin = await signIn(deps, input, (tx, signed) => startAdminSession(c, tx, signed.id))
     return c.json(adminMeOf(admin), 200)
   })
   .openapi(signOutRoute, async (c) => {
@@ -169,8 +168,9 @@ export const adminRoutes = new OpenAPIHono<AppEnv>()
   .openapi(setupConfirmRoute, async (c) => {
     const { deps } = c.var
     await guardAddress(deps, ipOf(c))
-    const { admin, codes } = await confirmSetup(deps, c.req.valid('param').token, c.req.valid('json').code)
-    await startAdminSession(c, deps.db, admin.id)
+    const { codes } = await confirmSetup(deps, c.req.valid('param').token, c.req.valid('json').code, (tx, admin) =>
+      startAdminSession(c, tx, admin.id),
+    )
     return c.json({ codes }, 200)
   })
   .openapi(teamRoute, async (c) => {

@@ -17,7 +17,7 @@ import type { Admin } from '../../http/env'
 import { ApiError, invalid } from '../../http/errors'
 import { randomToken, sha256Hex } from '../../lib/crypto'
 import { checkPassword, hashPassword } from '../../lib/password'
-import { hit, rateLimited } from '../../lib/rate-limit'
+import { hit, rateLimited, under } from '../../lib/rate-limit'
 import { adminKeys, keyedHash, seal, unseal, type SealingKey } from '../../lib/sealed'
 import { base32, matchTotp, newTotpSecret, otpauthUri } from '../../lib/totp'
 
@@ -29,7 +29,15 @@ export const ADMIN_TRIES_PER_ADDRESS = 30
  * login can't be told from an unknown one, and nobody elsewhere can lock the account's owner out.
  */
 export const ADMIN_TRIES_PER_LOGIN = 10
+/**
+ * Wrong codes an hour after the right password, from anywhere: only someone with the password can count them, so a
+ * stranger can't lock the account's owner out, and its owner and the alerts hear of it.
+ */
+export const CODE_MISSES_PER_ACCOUNT = 10
 export const RECOVERY_CODE_COUNT = 10
+
+/** Starts the session in the transaction that signed in, so a reset or a new password meanwhile can't miss it. */
+export type StartSession = (tx: Queryable, admin: Admin) => Promise<void>
 
 type AdminDeps = Pick<Deps, 'db' | 'now' | 'site' | 'adminKey' | 'log'>
 type Keys = Awaited<ReturnType<typeof adminKeys>>
@@ -235,7 +243,12 @@ export async function chooseSetupPassword(deps: AdminDeps, token: string, passwo
 }
 
 /** The app's first code confirms it: the account is active, its link used, and its recovery codes shown once. */
-export async function confirmSetup(deps: AdminDeps, token: string, code: string): Promise<{ admin: Admin; codes: string[] }> {
+export async function confirmSetup(
+  deps: AdminDeps,
+  token: string,
+  code: string,
+  startSession: StartSession,
+): Promise<{ admin: Admin; codes: string[] }> {
   const keys = await keysOf(deps)
   return deps.db.transaction(async (tx) => {
     const row = await setupRow(tx, deps, token, true)
@@ -256,6 +269,7 @@ export async function confirmSetup(deps: AdminDeps, token: string, code: string)
       .where(eq(admins.id, row.id))
       .returning()
     await recordAction(tx, admin!, 'admin.set_up', { targetAdminId: row.id })
+    await startSession(tx, admin!)
     return { admin: admin!, codes: fresh.codes }
   })
 }
@@ -268,24 +282,37 @@ const dummyHash = () => (dummy ??= hashPassword(randomToken()))
 
 /**
  * Login, password and the app's code or a recovery code, all at once (ADR 0026). Any wrong part is `sign_in_failed`,
- * for any login; the tries are limited per address and per login from it (`guardAddress`). A code works once.
+ * for any login; the tries are limited per address and per login from it (`guardAddress`), and wrong codes after the
+ * right password per account (`CODE_MISSES_PER_ACCOUNT`). A code works once.
  */
-export async function signIn(deps: AdminDeps, input: { login: string; password: string; code: string }): Promise<Admin> {
+export async function signIn(
+  deps: AdminDeps,
+  input: { login: string; password: string; code: string },
+  startSession: StartSession,
+): Promise<Admin> {
   const keys = await keysOf(deps)
   const now = deps.now()
+  // the slow password check before any transaction or lock, so tries can't tie up the database's connections
+  const [found] = await deps.db.select().from(admins).where(eq(admins.login, input.login))
+  const usable = found?.status === 'active' && found.passwordHash && found.totpSecret ? found : null
+  // before the password: a secret that won't open says nothing about it
+  const secret = usable ? await openSecret(deps, keys.sealing, usable) : null
+  const passwordOk = await checkPassword(input.password, usable?.passwordHash ?? (await dummyHash()))
+  if (!usable || !secret || !passwordOk) throw new ApiError('sign_in_failed')
+  const misses = `admin:code-miss:${usable.id}`
   const admin = await deps.db.transaction(async (tx) => {
-    // held: two sign-ins with one code can't both use it
-    const [row] = await tx.select().from(admins).where(eq(admins.login, input.login)).for('no key update')
-    if (!row || row.status !== 'active' || !row.passwordHash || !row.totpSecret) {
-      await checkPassword(input.password, await dummyHash())
-      return null
-    }
-    // before the password: a secret that won't open says nothing about it
-    const secret = await openSecret(deps, keys.sealing, row)
-    if (!(await checkPassword(input.password, row.passwordHash))) return null
+    // held: two sign-ins with one code can't both use it; a reset or a new password meanwhile wins
+    const [row] = await tx.select().from(admins).where(eq(admins.id, usable.id)).for('no key update')
+    if (row?.status !== 'active' || row.passwordHash !== usable.passwordHash || row.totpSecret !== usable.totpSecret) return null
+    if (!(await under(tx, misses, CODE_MISSES_PER_ACCOUNT, 3600, now))) return null
     const step = await matchTotp(secret, input.code, now, row.totpLastStep)
     const recovery = step === null ? await recoveryHash(keys, row.id, input.code) : null
-    if (step === null && !row.recoveryCodes.includes(recovery!)) return null
+    if (step === null && !row.recoveryCodes.includes(recovery!)) {
+      await hit(tx, misses, CODE_MISSES_PER_ACCOUNT, 3600, now)
+      if (!(await under(tx, misses, CODE_MISSES_PER_ACCOUNT, 3600, now)))
+        deps.log.error('admin codes guessed with the right password: the account is held for the hour', { login: row.login })
+      return null
+    }
     const [signed] = await tx
       .update(admins)
       .set({
@@ -294,6 +321,7 @@ export async function signIn(deps: AdminDeps, input: { login: string; password: 
       })
       .where(eq(admins.id, row.id))
       .returning()
+    await startSession(tx, signed!)
     return signed!
   })
   if (!admin) throw new ApiError('sign_in_failed')

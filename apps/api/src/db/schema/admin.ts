@@ -20,7 +20,7 @@ export const admins = pgTable('admins', {
   totpSecret: text(),
   /** The 30-second step of the last code used: a code works once. */
   totpLastStep: integer(),
-  /** SHA-256 of each recovery code not used yet. */
+  /** Each recovery code not used yet, as HMAC-SHA256 of the account and the code under a derived key (`lib/sealed.ts`). */
   recoveryCodes: jsonb().$type<string[]>().notNull().default([]),
   /** The setup link waiting: SHA-256 of its token, and when it runs out (24 hours). */
   setupTokenHash: text().unique(),

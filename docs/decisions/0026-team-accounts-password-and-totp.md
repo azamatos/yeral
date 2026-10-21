@@ -23,7 +23,9 @@ of the CMS; since ADR 0024 the apps run on our own server with Cloudflare for DN
   codes stands in for the app's code. Any wrong part gets the same refusal (`sign_in_failed`), for a real login as for
   an unknown one (an unknown one takes as long). An address gets 30 tries an hour, setup steps included, and 10 a
   quarter-hour for any one login (`rate_limited`, the same for every login): guessing stays slow, and nobody can lock
-  an account's owner out from elsewhere, as an account lock would let them.
+  an account's owner out from elsewhere, as an account lock would let them. Wrong codes after the right password count
+  per account from every address: 10 in an hour hold the account for the hour and write an error line for the alerts;
+  only someone who has the password can trip it. The slow password check runs before any transaction or lock.
 - **Web Crypto only** (AGENTS rule 7): passwords are PBKDF2-SHA256 with a random salt and 600,000 rounds (12–128
   characters), and a setup link is checked before its password is hashed. Two keys are derived (HKDF) from
   `ADMIN_SECRET_KEY` (32 bytes, base64; development and tests use a fixed key): the authenticator secrets are sealed
@@ -40,7 +42,8 @@ of the CMS; since ADR 0024 the apps run on our own server with Cloudflare for DN
   One role (Q-011); no one disables themselves or the last active account.
 - **Sessions of their own:** `admin_sessions`, a cookie `<prefix>.admin` on the api's host only (not the parent
   domain the client and business share), `SameSite=Strict`, path `/v1/admin`, 12 hours with no renewal. Signing out,
-  a reset and disabling end them. Every `/v1/admin` request must carry the admin tool's `Origin`: no other site, and no
+  a reset and disabling end them; a session starts inside the transaction that signed in, so none survives a reset or a
+  new password that commits meanwhile. Every `/v1/admin` request must carry the admin tool's `Origin`: no other site, and no
   page the api serves itself (`/docs`), can use the cookie.
 - **Setup tokens stay out of logs:** Caddy's access logs blank them as they do a booking link's (`/setup/…`,
   `/v1/admin/setup/…`).

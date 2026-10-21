@@ -9,7 +9,7 @@ import { admins, rateLimits } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { sha256Hex } from '../../lib/crypto'
 import { stepOf, totpAt } from '../../lib/totp'
-import { ADMIN_TRIES_PER_ADDRESS, ADMIN_TRIES_PER_LOGIN, inviteOrReset } from './accounts'
+import { ADMIN_TRIES_PER_ADDRESS, ADMIN_TRIES_PER_LOGIN, CODE_MISSES_PER_ACCOUNT, inviteOrReset } from './accounts'
 
 const PASSWORD = 'a long enough password'
 
@@ -117,6 +117,24 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
     expect(row!.recoveryCodes).not.toContain(await sha256Hex(`recovery:${codes[1]!.replace('-', '')}`))
   })
 
+  it('wrong codes after the right password are counted per account, from anywhere: the hour holds it', async () => {
+    t = testApp(db, { trustedIpHeader: 'x-forwarded-for' })
+    const { secret } = await setUp(cms(), 'guessed')
+    const from = (n: number, code: string) =>
+      cms().req('/v1/admin/sign-in', {
+        body: { login: 'guessed', password: PASSWORD, code },
+        headers: { 'X-Forwarded-For': `10.0.1.${n}` },
+      })
+    for (let i = 0; i < CODE_MISSES_PER_ACCOUNT; i++) expect((await from(i, '000000')).json.error.code).toBe('sign_in_failed')
+    // even the right code now, from yet another address
+    const right = await totpAt(secret, stepOf(t.clock.now) + 1)
+    expect((await from(99, right)).json.error.code).toBe('sign_in_failed')
+    t.clock.now += 3_600_000
+    expect((await from(100, await totpAt(secret, stepOf(t.clock.now)))).status).toBe(200)
+    // a wrong password doesn't count toward it
+    expect(CODE_MISSES_PER_ACCOUNT).toBeLessThan(ADMIN_TRIES_PER_ADDRESS)
+  })
+
   it('one code, two sign-ins at once: one is in', async () => {
     const { secret } = await setUp(cms(), 'twice')
     const code = await totpAt(secret, stepOf(t.clock.now) + 1)
@@ -129,8 +147,9 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
     const { secret } = await setUp(cms(), 'limits')
     const from = (ip: string) => {
       const b = cms()
-      return (login: string, code = '000000') =>
-        b.req('/v1/admin/sign-in', { body: { login, password: PASSWORD, code }, headers: { 'X-Forwarded-For': ip } })
+      // a guesser without the password; the owner with it
+      return (login: string, code = '000000', password = 'a guessed password') =>
+        b.req('/v1/admin/sign-in', { body: { login, password, code }, headers: { 'X-Forwarded-For': ip } })
     }
     const guess = from('10.0.0.1')
     for (let i = 0; i < ADMIN_TRIES_PER_LOGIN; i++) {
@@ -140,7 +159,7 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
     expect((await guess('limits')).json.error.code).toBe('rate_limited')
     expect((await guess('nobody.here')).json.error.code).toBe('rate_limited')
     // nobody elsewhere can keep the account's owner out
-    expect((await from('10.0.0.2')('limits', await totpAt(secret, stepOf(t.clock.now) + 1))).status).toBe(200)
+    expect((await from('10.0.0.2')('limits', await totpAt(secret, stepOf(t.clock.now) + 1), PASSWORD)).status).toBe(200)
     // and an address has its hour: other logins run out too
     for (let i = 2 * (ADMIN_TRIES_PER_LOGIN + 1); i < ADMIN_TRIES_PER_ADDRESS; i++) expect((await guess(`other${i}`)).status).toBe(401)
     expect((await guess('one.more')).json.error.code).toBe('rate_limited')
