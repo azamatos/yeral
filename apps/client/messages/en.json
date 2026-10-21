@@ -12,6 +12,48 @@
       "ru": "Русский"
     }
   },
+  "login": {
+    "title": "Log in to {brand}",
+    "lead": "Enter your phone number to manage your bookings.",
+    "close": "Close",
+    "phoneLabel": "Phone number",
+    "sendCode": "Send code",
+    "sending": "Sending…",
+    "incomplete": "The number is incomplete — it needs {digits} digits.",
+    "notMobile": "Codes go to mobile numbers only. Enter a number starting with {starts}.",
+    "tooManyCodes": "Too many codes. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
+    "codeTitle": "Enter the code",
+    "codeLead": "To log in with <b>{phone}</b>.",
+    "changeNumber": "Change number",
+    "codeLabel": "Code",
+    "codeHint": "It checks itself after the 4th digit.",
+    "yourCode": "Your code:",
+    "confirm": "Confirm",
+    "checking": "Checking…",
+    "resend": "Get a new code",
+    "resendIn": "Get a new code in {time}",
+    "codeExpired": "The old code no longer works.",
+    "resent": "Here’s a new code.",
+    "wrongCode": "Wrong code. {left, plural, one {# try} other {# tries}} left.",
+    "locked": "Too many tries. Try again in {seconds, plural, one {# second} other {# seconds}}.",
+    "identity": {
+      "title": "Is this you, {name}?",
+      "titleNoName": "Is this your account?",
+      "lead": "This number’s account hasn’t been used for 6 months. Numbers sometimes pass to someone new, so we ask before you go in.",
+      "yes": "Yes, it’s me",
+      "no": "No, start a new account",
+      "ownsWorkspace": "This account owns a business on {brand}, so it can’t start afresh here. Contact {brand} to sort out the number."
+    },
+    "name": {
+      "title": "Welcome!",
+      "lead": "What should we call you?",
+      "verified": "verified",
+      "first": "First name",
+      "last": "Last name <optional>(optional)</optional>",
+      "required": "Enter your first name.",
+      "continue": "Continue"
+    }
+  },
   "account": {
     "menu": "Account menu: {name}",
     "menuNoName": "Account menu",

@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect } from 'storybook/test'
 import { SiteLayout } from '@/widgets/site-layout'
-import { accountApi, PageStory } from '@/shared/storybook'
+import { authApi, PageStory } from '@/shared/storybook'
 import { HomePage } from './home-page'
 
 function Home() {
@@ -17,7 +17,7 @@ const meta = {
   title: 'Client/Pages/Home',
   component: PageStory,
   parameters: { layout: 'fullscreen' },
-  args: { routes: { '/$lang': Home }, server: accountApi() },
+  args: { routes: { '/$lang': Home }, server: authApi() },
 } satisfies Meta<typeof PageStory>
 export default meta
 type Story = StoryObj<typeof meta>

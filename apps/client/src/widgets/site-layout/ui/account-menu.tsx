@@ -142,3 +142,8 @@ function SheetRow({ icon, onClick, busy, children }: { icon: ReactNode; onClick:
     </button>
   )
 }
+
+/** The avatar button the screen shows (the menu's, or the phone sheet's under 768), for the focus to go to. */
+export function visibleAccountTrigger(within: HTMLElement | null): HTMLElement | undefined {
+  return [...(within?.querySelectorAll<HTMLElement>('[data-account-trigger]') ?? [])].find((el) => el.offsetParent !== null)
+}

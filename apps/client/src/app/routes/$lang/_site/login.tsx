@@ -1,13 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { HomePage } from '@/pages/home'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { z } from 'zod'
+import { LoginPage, returnTo } from '@/pages/login'
 import { siteLocale } from '@/shared/i18n'
 import { pageHead } from '@/shared/lib'
 
-// The login's own address (client spec §3: the login opens as a modal over the page; the address is the fallback),
-// rendered in the browser only (systemPatterns "Rendering"). The modal comes with the next part (book C-19); until then
-// the address opens Home.
+// The login's own address, rendered in the browser only (systemPatterns "Rendering"); someone already signed in with a
+// name goes straight on.
 export const Route = createFileRoute('/$lang/_site/login')({
   ssr: false,
+  // a `redirect` that isn't text (`?redirect=123`) is ignored, not an error
+  validateSearch: z.object({ redirect: z.string().optional().catch(undefined) }),
+  beforeLoad: async ({ context, params, search }) => {
+    const me = await context.queryClient.ensureQueryData(context.sdk.me.get()).catch(() => null)
+    if (me?.firstName) redirect({ href: returnTo(params.lang, search.redirect), replace: true, throw: true })
+  },
   head: ({ params }) => pageHead(siteLocale(params.lang), { path: '/login', title: (t) => t('site.logIn'), noindex: true }),
-  component: HomePage,
+  component: LoginPage,
 })

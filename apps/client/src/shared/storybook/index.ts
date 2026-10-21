@@ -1,3 +1,3 @@
 // For stories only: the site never imports this segment.
-export { accountApi, AYJEMAL, fakeFetch, json, offline, person, refuse, type FakeRequest } from './fake-api'
+export { authApi, AYJEMAL, CODES, fakeFetch, json, offline, person, refuse, type AuthApiOptions, type FakeRequest } from './fake-api'
 export { PageStory } from './page-story'
