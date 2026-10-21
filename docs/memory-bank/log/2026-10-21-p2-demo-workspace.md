@@ -1,6 +1,6 @@
-# 2026-10-21 · The business app's demo workspace, part 1: the data (feat/p2-demo-workspace)
+# 2026-10-21 · The business app's demo workspace (feat/p2-demo-workspace, feat/p2-demo-session)
 
-- Changed: migration 0040 (`users.demo`, `businesses.sandbox`); `MARKET.phone.unusedPrefix` (`69`); the seed's Glow
+- Part 1, the data. Changed: migration 0040 (`users.demo`, `businesses.sandbox`); `MARKET.phone.unusedPrefix` (`69`); the seed's Glow
   Studio block is `seedGlow()`, used by development's demo and by `seedSandbox()` (one business into a live database:
   the old one deleted with what visitors added, the design's Glow Studio made again at `/w/demo`, every number moved to
   the unused range by `demoPhones()`, demo accounts kept by number, booking codes skipping the table's);
@@ -16,7 +16,19 @@
   `accountFor()` replaces the two copies of the no-account rule; `businessSmsLimit` takes the row its callers hold.
 - Decided (Claude, delegated; chapter 9, 21.10.2026): the slug, the 04:00 remake, the unused range and demo accounts,
   requests that wait until their visit in the demo.
-- Follow-ups (part 2, the session): `POST /v1/demo/session` signs the visitor in as the demo owner; a demo account may
-  use only its workspace (`/v1/w/demo/…` minus invites), `GET /v1/me`, `/v1/me/workspaces`, events, logout and public
-  reads, else 403; numbers it types must be in the unused range (S-20: no visitor sees another's number); `me.demo`
-  for the Demo banner (web-b2 shows status `demo` in `/me/workspaces`); a demo session lasts a day.
+- Part 2, the session. Changed: `POST /v1/demo/session` (`modules/demo/routes.ts`; off without the switch; 30 an
+  hour per address; the owner must be a demo account) signs the visitor in as the demo owner for a day in the demo's
+  own cookie (`<prefix>.demo`, `demoCookieName`), which `sessionMiddleware` reads first only for the business app's
+  Origin: the client site keeps the person's own session, logout from the demo brings the business app back to it,
+  and a real sign-in from the demo ends the demo's (`startSession`'s `cookie`, `auth.cookie`). `demoGuard` after
+  `sessionMiddleware` (`modules/demo/guard.ts`): a demo account reads anything outside `/v1/w/` and follows events,
+  may use `/v1/auth/*`, `/v1/demo/*` and the link page's sign-in, marks the demo workspace opened, and in
+  `/v1/w/demo/…` reads everything and changes only the day-to-day list (deny by default), else `not_in_demo` (403);
+  `/v1/admin/*` passes (its own sessions); every `phone` in a JSON body (`…+json`, any case; depth 6) must be an
+  unused number, else `demo_number` (400, `details.prefix`). A demo session isn't renewed. `me.demo` (contract,
+  `toMe`; `canChangePhone` false for it); `@yeral/contract/demo` `demoSessionSchema`; `sdk.demo.start()`. The apps'
+  fakes got `demo: false`; the test client keeps several cookies.
+- Decided (chapter 9, 21.10.2026): a day, never renewed; what a demo account reaches; made-up numbers only.
+- Follow-ups (web-b2, the apps): the Demo frame from `me.demo` (signed-out sidebar with "Log in", the Demo banner,
+  status `demo` in `/me/workspaces`), "Try the business app" on the landing, the login and the wizard, and
+  `demo_number`'s hint ("In the demo, use a made-up number starting with 69").

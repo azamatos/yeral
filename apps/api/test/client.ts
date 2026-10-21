@@ -3,10 +3,12 @@ import { ORIGIN } from './app'
 
 type App = ReturnType<typeof createApp>
 
-/** A browser-like client: keeps the session cookie, sends our Origin and JSON. */
+/** A browser-like client: keeps its cookies (the session's, the demo's), sends our Origin and JSON. */
 export function browser(app: App) {
-  let cookie = ''
+  const jar = new Map<string, string>()
+  const cookieHeader = () => [...jar].map(([name, value]) => `${name}=${value}`).join('; ')
   const req = async (path: string, init: { method?: string; body?: unknown; headers?: Record<string, string> } = {}) => {
+    const cookie = cookieHeader()
     const res = await app.request(path, {
       method: init.method ?? (init.body === undefined ? 'GET' : 'POST'),
       headers: {
@@ -17,9 +19,13 @@ export function browser(app: App) {
       },
       ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
     })
-    const set = res.headers.get('set-cookie')
-    if (set) cookie = set.split(';')[0] ?? ''
-    if (set?.includes('Expires=Thu, 01 Jan 1970')) cookie = ''
+    for (const set of res.headers.getSetCookie()) {
+      const [pair = ''] = set.split(';')
+      const at = pair.indexOf('=')
+      const [name, value] = [pair.slice(0, at), pair.slice(at + 1)]
+      if (set.includes('Expires=Thu, 01 Jan 1970') || /Max-Age=0\b/i.test(set)) jar.delete(name)
+      else jar.set(name, value)
+    }
     const text = await res.text()
     const json: any = text ? JSON.parse(text) : null
     return { status: res.status, json, headers: res.headers }
@@ -27,7 +33,7 @@ export function browser(app: App) {
   return {
     req,
     get cookie() {
-      return cookie
+      return cookieHeader()
     },
     /** Sign in with the demo code. */
     async login(phone: string, name?: string) {

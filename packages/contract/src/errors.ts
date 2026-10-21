@@ -96,6 +96,11 @@ export const ERROR_STATUS = {
   admin_unavailable: 503,
   /** Nothing is verified while the sign-in code shows on the screen: the first launch has no real businesses (book Q-036). */
   verify_unavailable: 409,
+  // the business app's demo workspace (book F-242)
+  /** A demo session tries the demo workspace only: this reaches beyond it. */
+  not_in_demo: 403,
+  /** A number typed in the demo must be in the market's unused range: `details.prefix` ("69"). */
+  demo_number: 400,
   rate_limited: 429,
   internal: 500,
 } as const satisfies Record<string, number>

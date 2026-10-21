@@ -3,6 +3,7 @@
  * join no account, it sends no SMS, and every night after 04:00 it's made again, the demo accounts staying and put back.
  */
 import { MARKET } from '@yeral/domain/market'
+import { isUnusedNumber } from '@yeral/domain/phone'
 import { epochOf } from '@yeral/domain/time'
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
@@ -67,9 +68,9 @@ describe('the business app’s demo workspace (book F-242)', () => {
 
   it('every number in it is in the unused range; each one its team signs in or is invited with is a demo account’s', async () => {
     const [demo] = await sandbox()
-    expect(demo!.phone.startsWith(UNUSED)).toBe(true)
+    expect(isUnusedNumber(demo!.phone)).toBe(true)
     const team = await db.select().from(staff).where(eq(staff.businessId, demo!.id))
-    expect(team.every((s) => !s.phone || s.phone.startsWith(UNUSED))).toBe(true)
+    expect(team.every((s) => !s.phone || isUnusedNumber(s.phone))).toBe(true)
     const accounts = await db
       .select()
       .from(users)
@@ -80,16 +81,16 @@ describe('the business app’s demo workspace (book F-242)', () => {
         ),
       )
     expect(accounts.length).toBeGreaterThan(1)
-    expect(accounts.every((u) => u.demo && u.phone.startsWith(UNUSED))).toBe(true)
+    expect(accounts.every((u) => u.demo && isUnusedNumber(u.phone))).toBe(true)
     for (const i of await db.select().from(invites).where(eq(invites.businessId, demo!.id))) {
-      expect(i.phone.startsWith(UNUSED)).toBe(true)
+      expect(isUnusedNumber(i.phone)).toBe(true)
       expect((await db.select().from(users).where(eq(users.phone, i.phone)))[0]?.demo).toBe(true)
     }
     const list = await db.select().from(clients).where(eq(clients.businessId, demo!.id))
     expect(list.length).toBeGreaterThan(5)
-    expect(list.every((c) => (c.phone ?? UNUSED).startsWith(UNUSED) && !c.userId)).toBe(true)
+    expect(list.every((c) => (!c.phone || isUnusedNumber(c.phone)) && !c.userId)).toBe(true)
     const all = await db.select().from(bookings).where(eq(bookings.businessId, demo!.id))
-    expect(all.every((b) => (b.clientPhone ?? UNUSED).startsWith(UNUSED) && !b.userId)).toBe(true)
+    expect(all.every((b) => (!b.clientPhone || isUnusedNumber(b.clientPhone)) && !b.userId)).toBe(true)
     // the design's codes are development's demo's here: the demo workspace's bookings got others
     expect(all.map((b) => b.code)).not.toContain('YR-48213')
     // a request waits until its visit, so visitors can answer it all day; one already past, for the hold time

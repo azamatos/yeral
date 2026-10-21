@@ -1,6 +1,6 @@
 # 0019. Our own phone-code login and database sessions instead of Better Auth
 
-- Status: Accepted 2026-10-14 — revises [0005](0005-typescript-backend-in-monorepo.md) (auth library) and [0018](0018-business-workspace-model.md) (identity)
+- Status: Accepted 2026-10-14 — revises [0005](0005-typescript-backend-in-monorepo.md) (auth library) and [0018](0018-business-workspace-model.md) (identity); amended 2026-10-21 (demo sessions, below)
 - Decided by: Claude, while building the api (M2d); the owner can reverse it before the CMS milestone at no cost
 
 ## Context
@@ -34,6 +34,20 @@ Phone login and sessions are a small module in `apps/api` (`modules/auth`), on o
 - Every endpoint is in the contract and the OpenAPI document like the rest of the api.
 - The CMS (M6) gets its own staff accounts and second factor when it's designed; Better Auth (or a TOTP library) can be
   chosen then for that app alone.
+
+### Amended 2026-10-21: demo sessions (book F-242)
+
+"Try the business app" signs a visitor in without a phone of their own, to the demo workspace's owner, an account of
+its own kind (`users.demo`, its number in the market's unused range, which counts as no mobile, so no code is ever sent
+to it and nobody signs in to it by code):
+
+- `POST /v1/demo/session` (anonymous, 30 an hour per address, off unless `DEMO_WORKSPACE`) starts a session of one day
+  that is never renewed, in a second cookie, `<site.cookiePrefix>.demo`. The api reads it first only for requests from
+  the business app's Origin, so the client site keeps the person's own session; logging out of the demo brings the
+  business app back to it, and a real sign-in from the demo ends the demo's.
+- `demoGuard`, after the session middleware, keeps a demo account to the demo workspace: reads, its day-to-day changes
+  (deny by default), signing out or in; no number outside the unused range in anything it types; its changes counted
+  per address. The admin tool's routes keep their own sessions (ADR 0026) and aren't touched.
 
 ## Consequences
 

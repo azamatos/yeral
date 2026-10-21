@@ -180,6 +180,10 @@ apps/api/src/
 
 - Client and business: phone + 4-digit code → httpOnly session cookie on the parent domain (`SameSite=Lax`, `Secure`);
   our own `modules/auth` with `users`, `login_codes`, `sessions`, `rate_limits` tables (ADR 0019).
+- "Try the business app" (book F-242): a day as the demo workspace's owner (a demo account, `users.demo`) in a second
+  cookie, `<prefix>.demo`, which the api reads first only for the business app's Origin, so the client site keeps the
+  person's own session; `demoGuard` lets a demo account reach the demo workspace's day-to-day routes and nothing else
+  (deny by default) and refuses any real number in what it types (`demo_number`).
 - Business access = the person's `staff` row in that workspace (ADR 0025): linked to their account (`userId`), active,
   with the app. Three fixed levels (owner, administrator, specialist) and one fixed permission table
   (`@yeral/domain/permissions`: `none · own · all`, the team row `view · manage`); the api checks it and leaves out what a
