@@ -332,22 +332,29 @@ export async function closeBusiness(deps: Deps, by: Admin, id: string, reason: s
       (r.status === 'pending' || r.status === 'confirmed') && epochOf(r.date, r.start) > now
     const originals = rows.filter((r) => !r.rescheduleOf && ahead(r))
     let cancelled = 0
-    for (const r of originals) {
-      const row = await lockBooking(tx, r.id)
-      if (!ahead(row)) continue
+    /** The booking held, or none when it's gone meanwhile (the team's undo of a booking it just added). */
+    const held = async (id: string) => {
       try {
-        // a move it has waiting goes with it (`dropPendingMove`)
-        await cancelForBusiness(tx, row, at, { reason: 'business_closed', text: null })
-        cancelled++
+        return await lockBooking(tx, id)
       } catch (e) {
-        // one the jobs settled meanwhile
-        if (!(e instanceof StaleBooking)) throw e
+        if (e instanceof StaleBooking) return null
+        throw e
       }
     }
-    // a move asked of a booking under way or over: withdrawn as the business's, its booking as it is
+    for (const r of originals) {
+      const row = await held(r.id)
+      if (!row || !ahead(row)) continue
+      // a move it has waiting goes with it (`dropPendingMove`)
+      await cancelForBusiness(tx, row, at, { reason: 'business_closed', text: null })
+      cancelled++
+    }
+    // a move asked of a visit under way or over: its hold ran out at the visit's start, so it lapses as the jobs would
+    // record it; the visit stays as it is
     const taken = new Set(originals.map((r) => r.id))
-    for (const m of rows.filter((r) => r.rescheduleOf && !taken.has(r.rescheduleOf)))
-      await dropPendingMove(tx, await lockBooking(tx, m.rescheduleOf!), at, 'business')
+    for (const m of rows.filter((r) => r.rescheduleOf && !taken.has(r.rescheduleOf))) {
+      const original = await held(m.rescheduleOf!)
+      if (original) await dropPendingMove(tx, original, at, 'business')
+    }
     const dropped = await tx
       .update(invites)
       .set({ status: 'cancelled', answeredAt: at })
@@ -370,8 +377,14 @@ export async function reopenBusiness(deps: Deps, by: Admin, id: string): Promise
     await holdActor(tx, by)
     const b = await rowOf(tx, id, true, { closed: true })
     if (!b.closedAt) throw new ApiError('invalid_status')
-    // its owner let their account go meanwhile: nobody to open it to
-    if (!(await ownerOf(tx, [b.id])).length) throw new ApiError('invalid_status')
+    // its owner let their account go meanwhile: nobody to open it to. Held: an account let go at this moment waits,
+    // then finds the workspace open again and its owner kept (`owns_workspace`)
+    const [owner] = await tx
+      .select({ id: staff.id })
+      .from(staff)
+      .where(and(eq(staff.businessId, b.id), eq(staff.level, 'owner'), eq(staff.status, 'active')))
+      .for('share')
+    if (!owner) throw new ApiError('invalid_status')
     await tx.update(businesses).set({ closedAt: null, closedReason: null }).where(eq(businesses.id, b.id))
     await recordAction(tx, by, 'business.reopened', { businessId: b.id })
     await emit(tx, { type: 'business.updated', businessId: b.id })

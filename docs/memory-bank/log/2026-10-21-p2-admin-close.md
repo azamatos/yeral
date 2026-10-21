@@ -17,7 +17,12 @@
 - The review's findings, fixed: every booking path that holds the hours (`lockedHours`: a new booking, an offered time,
   a move, an undo) refuses a closed business, read after a close in progress commits; a closed business's bookings
   show no offered times; the close reads its bookings plainly and holds each booking before its move (every path's
-  order), cancels those ahead, and withdraws a move asked of a visit under way as the business's (`dropPendingMove`);
-  its cancelled invites tell their invitees; an owner whose workspace is closed may let their account go (a reopen
-  then refuses: nobody to open it to). The SMS go as each client's switches allow. Tests for each.
+  order), cancels those ahead, and settles a move asked of a visit under way as lapsed (`dropPendingMove`; its hold
+  ran out at the visit's start); its cancelled invites tell their invitees; an owner whose workspace is closed may let
+  their account go (a reopen then refuses: nobody to open it to). The SMS go as each client's switches allow. Tests:
+  an offered time and an undo refused, the invitee told, the owner leaving, the reopen refused; not the move of a visit
+  under way.
+- The last review's: a booking gone meanwhile (the team's undo) is skipped, not a refusal of the whole close; every
+  undo holds the hours, so a class or a table doesn't come back at a closed business; the reopen holds the owner's row
+  (share), so an account let go at that moment and the reopen can't pass each other.
 - Follow-ups: adding a business for its owner (F-238) finishes step 5.
