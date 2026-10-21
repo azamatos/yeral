@@ -28,6 +28,7 @@ import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import { bookings, businesses, clients, invites, jobs, users } from '../../db/schema'
 import type { Deps } from '../../deps'
+import { hit, peek } from '../../lib/rate-limit'
 import {
   addressSmsText,
   bookingSmsText,
@@ -77,6 +78,61 @@ const NAMES_ADDRESS: ReadonlySet<BookingSmsKind> = new Set(['reminderDay', 'remi
 const DROPPED_NOT_MOBILE = 'dropped: not a mobile number (ROUND6 C1)'
 /** The business moved and back, or the client was told since: they know the address as it is (book Q-215). */
 const DROPPED_SAME_ADDRESS = 'dropped: the client knows the address as it is'
+/**
+ * A business that isn't verified sends no SMS under Ýeral's name to a number its team typed in (chapter 10, P2 step
+ * 7); its clients' own online bookings still hear what happens to them.
+ */
+const DROPPED_IN_REVIEW = 'dropped: the business is in review'
+/**
+ * SMS about a business's bookings: so many a day, reminders included, and so many in 10 minutes from what happens to
+ * them (book chapter 10, P2 step 7). They carry the business's own words under Ýeral's sender, so a team can't send
+ * floods to numbers it made up; past a limit an SMS waits for the window to pass, never dropped, so a client's notice
+ * (a cancel, a move, a new address) still reaches them.
+ */
+export const BUSINESS_SMS_PER_DAY = 1000
+export const BUSINESS_SMS_PER_BURST = 30
+
+/**
+ * An SMS past its business's limits: it waits until `until`, spread over the `spreadSec` after it so one business's
+ * backlog doesn't stand in front of everyone else's SMS (not a try).
+ */
+class Deferred extends Error {
+  constructor(
+    readonly until: number,
+    readonly spreadSec: number,
+  ) {
+    super('waiting for the business SMS limit')
+  }
+}
+
+/**
+ * Checked as an SMS about a booking goes: refused for a business in review to a typed-in number; past a limit it
+ * waits (`Deferred`); else it counts, once: a retry after a failed send doesn't count again (`firstTry`). The closing's
+ * notices are Ýeral's own (book Q-213): never held.
+ */
+async function businessSmsLimit(deps: Deps, b: BookingRow, kind: string, firstTry: boolean): Promise<string | undefined> {
+  if (b.status === 'cancelled' && b.businessCancelReason === 'business_closed') return
+  if (!isOnlineSource(b.source)) {
+    const [biz] = await deps.db.select({ verification: businesses.verification }).from(businesses).where(eq(businesses.id, b.businessId))
+    if (biz?.verification !== 'verified') return DROPPED_IN_REVIEW
+  }
+  const now = deps.now()
+  const limits: [string, number, number][] = [[`sms:business:${b.businessId}:day`, BUSINESS_SMS_PER_DAY, 86_400]]
+  if (!REMINDERS.has(kind)) limits.push([`sms:business:${b.businessId}:burst`, BUSINESS_SMS_PER_BURST, 600])
+  for (const [key, limit, windowSec] of limits) {
+    const state = await peek(deps.db, key, limit, windowSec, now)
+    if (state.ok) continue
+    // the alerts hear it once a window (error tracking, step 7)
+    if ((await hit(deps.db, `${key}:told`, 1, windowSec, now)).ok)
+      deps.log.error('business SMS limit reached: its SMS wait', {
+        businessId: b.businessId,
+        per: windowSec === 600 ? '10 minutes' : 'day',
+      })
+    // the next 10 minutes, or the next hour of a new day
+    throw new Deferred(now + state.retryAfterSec * 1000, Math.min(windowSec, 3600))
+  }
+  if (firstTry) for (const [key, limit, windowSec] of limits) await hit(deps.db, key, limit, windowSec, now)
+}
 const MAX_ATTEMPTS = 5
 
 /**
@@ -260,7 +316,7 @@ const isOutcome = (kind: string): kind is OutcomeSmsKind => Object.hasOwn(OUTCOM
 /** The time a cancel names: the one the client knows, not one a change they weren't told yet moved it to. */
 const knownTime = (b: BookingRow) => ({ date: b.told?.date ?? b.date, start: b.told?.start ?? b.start })
 
-async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): Promise<void> {
+async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind, firstTry: boolean): Promise<string | undefined> {
   const outcome = OUTCOMES[kind]
   if (!outcome.still(b, deps.now())) return
   const lb = (await loadBusinesses(deps.db, [b.businessId])).get(b.businessId)
@@ -272,6 +328,8 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind): 
   const sms = { ...at, businessName: biz.name, address: biz.address }
   const to = user?.phone ?? b.clientPhone ?? ''
   const byPhone = !!(await onlineRefusal(deps.db, lb, to))
+  const limited = await businessSmsLimit(deps, b, kind, firstTry)
+  if (limited) return limited
   await sendWithLink(deps, b, to, (link) => outcome.text(lang, { ...sms, link }, b, byPhone))
 }
 
@@ -293,6 +351,7 @@ async function sendBookingSms(
   bookingId: string,
   queuedKind: BookingSmsKind | OutcomeSmsKind | 'staffChanged',
   at: { date?: unknown; start?: unknown; covers?: unknown },
+  firstTry: boolean,
 ): Promise<string | undefined> {
   // a change queued by an older api, worded now like any news
   const queued = queuedKind === 'staffChanged' ? 'moved' : queuedKind
@@ -305,10 +364,7 @@ async function sendBookingSms(
   if (!news && at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   // an account's phone took a sign-in code, so it's a mobile; a number the team typed in may not be
   if (!b.userId && !isMobile(b.clientPhone)) return DROPPED_NOT_MOBILE
-  if (isOutcome(queued)) {
-    await sendOutcomeSms(deps, b, queued)
-    return
-  }
+  if (isOutcome(queued)) return sendOutcomeSms(deps, b, queued, firstTry)
   // a business's cancel goes while the booking stays cancelled by it ("Yzyna al" by the client can't undo those)
   const cancel = queued === 'cancelled' || queued === 'cancelledAsAsked'
   if (cancel) {
@@ -375,6 +431,8 @@ async function sendBookingSms(
   // the texts with a link get one of their own (book Q-168)
   // the person's phone now: a changed number gets them, the old one nothing more (book Q-171)
   const to = user?.phone ?? b.clientPhone
+  const limited = await businessSmsLimit(deps, b, kind, firstTry)
+  if (limited) return limited
   if (LINKED_SMS.has(kind)) await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
   else await deps.sms.send({ to, text: bookingSmsText(lang, kind, sms) })
   // what the client knows now: the next news compares with it
@@ -388,7 +446,7 @@ async function sendBookingSms(
  * (`addressTold`): the same, it settles unsent. While a home-based business's request waits, the client knows only its
  * street, and that's what it compares and tells.
  */
-async function sendAddressSms(deps: Deps, bookingId: string): Promise<string | undefined> {
+async function sendAddressSms(deps: Deps, bookingId: string, firstTry: boolean): Promise<string | undefined> {
   // a team's undo under way finishes first, and then there's nothing to tell
   const [b] = await deps.db.select().from(bookings).where(eq(bookings.id, bookingId)).for('share')
   if (!b?.clientPhone || b.accountDeletedAt) return
@@ -410,6 +468,8 @@ async function sendAddressSms(deps: Deps, bookingId: string): Promise<string | u
     address: addressAsShown(current, biz.hideExactAddress, status),
     city: await smsCityOf(deps.db, biz.cityId, lang),
   }
+  const limited = await businessSmsLimit(deps, b, ADDRESS_SMS, firstTry)
+  if (limited) return limited
   await sendWithLink(deps, b, user?.phone ?? b.clientPhone, (link) => addressSmsText(lang, { ...sms, link }))
   await noteAddressTold(deps, b, current)
 }
@@ -475,11 +535,13 @@ async function runQueue(deps: Deps): Promise<number> {
           .where(eq(jobs.id, job.id))
         continue
       }
+      // its first try: an SMS counts toward its business's limits when it goes, a retry not again
+      const firstTry = job.attempts === 0
       let note: string | undefined
       if (job.kind === 'sms') await deps.sms.send({ to: String(p.to), text: String(p.text) })
-      else if (job.kind === 'booking.sms' && p.kind === ADDRESS_SMS) note = await sendAddressSms(deps, String(p.bookingId))
+      else if (job.kind === 'booking.sms' && p.kind === ADDRESS_SMS) note = await sendAddressSms(deps, String(p.bookingId), firstTry)
       else if (job.kind === 'booking.sms')
-        note = await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p)
+        note = await sendBookingSms(deps, String(p.bookingId), p.kind as BookingSmsKind | OutcomeSmsKind, p, firstTry)
       else if (job.kind === 'demo.answer') {
         const [b] = await deps.db
           .select()
@@ -494,6 +556,14 @@ async function runQueue(deps: Deps): Promise<number> {
         .set({ ...(note ? { attempts: job.attempts } : {}), doneAt: new Date(deps.now()), lockedUntil: null, error: note ?? null })
         .where(eq(jobs.id, job.id))
     } catch (e) {
+      // past its business's limit: it waits for the window, not a try
+      if (e instanceof Deferred) {
+        await deps.db
+          .update(jobs)
+          .set({ attempts: job.attempts, lockedUntil: null, runAt: new Date(e.until + (job.id % e.spreadSec) * 1000) })
+          .where(eq(jobs.id, job.id))
+        continue
+      }
       // a gateway may echo the text back: no error kept or logged holds a link's token
       const error = hideLinkTokens(String(e)).slice(0, 500)
       if (attempts >= MAX_ATTEMPTS) {

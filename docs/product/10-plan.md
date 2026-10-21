@@ -134,7 +134,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    and the v0.6 boards), while `docs/design/demo-data.json` stays the v0.5 client data in Turkmen.
 7. **Before the first launch:** releases back (paused 21.10.2026, ADR 0009) and deploys from GitHub over SSH after the owner approves a release (ADR 0020), nightly
    backups to Cloudflare R2 with a restore drill (F-211), error tracking and uptime alerts (F-209; it alerts on the `job gave up` line), sitemap data
-   (F-197). Before SMS go out: a daily cap and a rate limit per business on the SMS its team's bookings and cancels
+   (F-197). Before SMS go out: a daily cap and a rate limit per business on the SMS its team's bookings and cancels (done 21.10.2026)
    send to numbers it types in, and none from a business still in review (the backend review of 20.10.2026: they carry
    the business's own words, "Other reason", under Ýeral's sender).
 
