@@ -28,6 +28,7 @@ import { addDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm'
 import { bookings, businesses, clients, invites, jobs, users } from '../../db/schema'
 import type { Deps } from '../../deps'
+import { hit } from '../../lib/rate-limit'
 import {
   addressSmsText,
   bookingSmsText,
@@ -77,6 +78,31 @@ const NAMES_ADDRESS: ReadonlySet<BookingSmsKind> = new Set(['reminderDay', 'remi
 const DROPPED_NOT_MOBILE = 'dropped: not a mobile number (ROUND6 C1)'
 /** The business moved and back, or the client was told since: they know the address as it is (book Q-215). */
 const DROPPED_SAME_ADDRESS = 'dropped: the client knows the address as it is'
+/** A business still in review sends nobody an SMS under Ýeral's name (chapter 10, P2 step 7). */
+const DROPPED_IN_REVIEW = 'dropped: the business is in review'
+const DROPPED_SMS_CAP = "dropped: the business's SMS limit"
+/**
+ * SMS about a business's bookings to numbers its team typed in (a phone or walk-in booking): so many a day, reminders
+ * included, and so many in 10 minutes from the team's own actions (book chapter 10, P2 step 7). They carry the
+ * business's own words under Ýeral's sender, so a team can't send floods to numbers it made up.
+ */
+export const BUSINESS_SMS_PER_DAY = 300
+export const BUSINESS_SMS_PER_BURST = 30
+
+/** Why this booking's SMS mustn't go now (the business's limits), or nothing when it may. */
+async function businessSmsLimit(deps: Deps, b: BookingRow, reminder: boolean): Promise<string | undefined> {
+  const [biz] = await deps.db.select({ verification: businesses.verification }).from(businesses).where(eq(businesses.id, b.businessId))
+  if (biz?.verification !== 'verified') return DROPPED_IN_REVIEW
+  // the client's own booking: the number is theirs
+  if (isOnlineSource(b.source)) return
+  const now = deps.now()
+  const day = await hit(deps.db, `sms:business:${b.businessId}:day`, BUSINESS_SMS_PER_DAY, 86_400, now)
+  const burst = reminder ? { ok: true } : await hit(deps.db, `sms:business:${b.businessId}:burst`, BUSINESS_SMS_PER_BURST, 600, now)
+  if (day.ok && burst.ok) return
+  // the alerts hear it (error tracking, step 7)
+  deps.log.error('business SMS limit reached', { businessId: b.businessId, per: day.ok ? '10 minutes' : 'day' })
+  return DROPPED_SMS_CAP
+}
 const MAX_ATTEMPTS = 5
 
 /**
@@ -305,6 +331,8 @@ async function sendBookingSms(
   if (!news && at.date !== undefined && (at.date !== b.date || at.start !== b.start)) return
   // an account's phone took a sign-in code, so it's a mobile; a number the team typed in may not be
   if (!b.userId && !isMobile(b.clientPhone)) return DROPPED_NOT_MOBILE
+  const limited = await businessSmsLimit(deps, b, REMINDERS.has(queued))
+  if (limited) return limited
   if (isOutcome(queued)) {
     await sendOutcomeSms(deps, b, queued)
     return
@@ -396,6 +424,8 @@ async function sendAddressSms(deps: Deps, bookingId: string): Promise<string | u
   const { status } = effectiveStatus(stateOf(b), now)
   if (!hearsOfMove(status, b, now)) return status === 'pending' || status === 'confirmed' ? DROPPED_STARTED : undefined
   if (!b.userId && !isMobile(b.clientPhone)) return DROPPED_NOT_MOBILE
+  const limited = await businessSmsLimit(deps, b, false)
+  if (limited) return limited
   // a profile save under way finishes first: this tells the address as it's saved
   const [biz] = await deps.db.select().from(businesses).where(eq(businesses.id, b.businessId)).for('share')
   if (!biz) return
