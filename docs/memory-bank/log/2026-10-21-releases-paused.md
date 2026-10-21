@@ -67,6 +67,11 @@
 - **@yeral/api** (minor), **@yeral/contract** (minor), the business profile has "Floor, room" (#120; book F-099, up to
   40 characters) beside the address, shown on the page and on a booking as the exact address is. Migration 0034 adds
   `businesses.floor`.
+- **@yeral/api** (minor), **@yeral/contract** (minor), **@yeral/i18n** (minor), the Ýeral team's sign-in for the admin
+  tool (#122; book F-178, ADR 0026): its own accounts with a login, a password and an authenticator code (or a recovery
+  code), set up from a link the server command (`admin-invite`) or a teammate makes, reset and turned off by one
+  another; sessions of their own on `/v1/admin`. Migration 0035 adds `admins`, `admin_sessions` and `admin_actions`; the
+  server needs `ADMIN_SECRET_KEY` (deploy.sh makes it).
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 
