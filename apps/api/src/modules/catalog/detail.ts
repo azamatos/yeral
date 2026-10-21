@@ -82,7 +82,8 @@ export async function visibleBusiness(deps: Deps, slug: string, viewerId: string
         .where(and(eq(staff.businessId, row.id), eq(staff.userId, viewerId), signsIn))
         .limit(1)
     : []
-  if (!member) throw new ApiError('in_review')
+  // a business still being set up isn't anyone's to know about yet (book Q-200)
+  if (!member) throw new ApiError(row.setupStep ? 'not_found' : 'in_review')
   return { row, preview: { status: row.verification, reason: member.level === 'owner' ? row.verificationReason : null } }
 }
 

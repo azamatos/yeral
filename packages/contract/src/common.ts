@@ -43,6 +43,8 @@ export const slugSchema = z
   .string()
   .max(64)
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)
+  // `/b/` also opens booking codes (`YR-48213`, book chapter 5)
+  .refine((s) => !s.startsWith('yr-'), 'Never starts with "yr-"')
   .meta({ example: 'glow-studio' })
 export const bookingCodeSchema = z.string().refine(isBookingCode, 'Expected a booking code YR-12345').meta({ example: 'YR-48213' })
 /** Any way people type a number of the market in; E.164 out (`+99365123456`). */

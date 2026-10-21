@@ -17,6 +17,7 @@ import {
 } from '@yeral/domain/model'
 import { LEVELS } from '@yeral/domain/permissions'
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
+import { SETUP_STEPS } from '@yeral/domain/setup'
 import { pgEnum } from 'drizzle-orm/pg-core'
 
 export const bookingType = pgEnum('booking_type', BOOKING_TYPES)
@@ -35,6 +36,7 @@ export const clientSource = pgEnum('client_source', CLIENT_SOURCES)
 export const locale = pgEnum('locale', LOCALES)
 export const level = pgEnum('level', LEVELS)
 export const requestAnswerers = pgEnum('request_answerers', REQUEST_ANSWERERS)
+export const setupStep = pgEnum('setup_step', SETUP_STEPS)
 /** An invite's answer; `pending` past its `expiresAt` reads as expired (no job needed). */
 export const inviteStatus = pgEnum('invite_status', ['pending', 'accepted', 'declined', 'cancelled'])
 export const codePurpose = pgEnum('code_purpose', ['login', 'change_phone'])

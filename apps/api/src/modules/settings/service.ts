@@ -96,6 +96,8 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
     const [row] = await tx.select().from(businesses).where(eq(businesses.id, businessId)).for('no key update')
     if (!row) throw new ApiError('not_found')
     const recategorized = change.categoryId !== undefined && change.categoryId !== row.categoryId
+    // a business still being set up has no clients and no page to move: its address is where it starts (Q-200)
+    const draft = !!row.setupStep
     const [[category], [city]] = await all(tx, [
       async () => (recategorized ? tx.select().from(categories).where(eq(categories.id, change.categoryId!)) : []),
       async () => (change.location ? tx.select({ id: cities.id }).from(cities).where(eq(cities.id, change.location.cityId)) : []),
@@ -113,11 +115,11 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
     const before = addressOf(row)
     // a new pin alone is checked again, but the address the clients read is the same
     const relocated = !!location && !sameAddress(before, location)
-    const moved = relocated || (!!location && (location.lat !== row.lat || location.lng !== row.lng))
+    const moved = !draft && (relocated || (!!location && (location.lat !== row.lat || location.lng !== row.lng)))
     // the page says "New address" when what it shows changed (a home-based business shows its street); a fix while it
     // says so keeps where it moved from, and back there it has nothing new to say
     const hide = change.hideExactAddress ?? row.hideExactAddress
-    const pageMoved = relocated && !sameAddressShown(before, location, hide, 'pending')
+    const pageMoved = !draft && relocated && !sameAddressShown(before, location, hide, 'pending')
     const from = row.movedFrom && newAddressSince(row.movedAt?.getTime() ?? null, now) !== null ? row.movedFrom : before
     const movedBack = pageMoved && sameAddressShown(from, location, hide, 'pending')
     const set: Partial<typeof businesses.$inferInsert> = {
@@ -132,7 +134,7 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
     }
     if (!Object.keys(set).length) return profileView(row)
     const [saved] = await tx.update(businesses).set(set).where(eq(businesses.id, businessId)).returning()
-    if (relocated) await queueAddressSms(tx, businessId, before, now)
+    if (relocated && !draft) await queueAddressSms(tx, businessId, before, now)
     await emit(tx, { type: 'business.updated', businessId })
     return profileView(saved!)
   })

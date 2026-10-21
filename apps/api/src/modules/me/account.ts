@@ -3,9 +3,9 @@
  * Q-270), and moving it to a new number (Q-171).
  */
 import { epochOf, today } from '@yeral/domain/time'
-import { and, asc, desc, eq, gte, inArray, isNull, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingLinks, bookingRules, bookings, clientNotes, clients, invites, reviews, staff, users } from '../../db/schema'
+import { bookingLinks, bookingRules, bookings, businesses, clientNotes, clients, invites, reviews, staff, users } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
@@ -56,10 +56,33 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
   // a booking confirmed or a team row changed meanwhile can't deadlock with this
   const [user] = await tx.select().from(users).where(eq(users.id, account.id)).for('no key update')
   if (!user) throw new ApiError('unauthorized')
+  // a business still being set up goes with an account that's deleted: nobody else is on it or has booked it (book
+  // Q-200); one whose number passed on keeps it, as a person keeps a workspace
+  const drafts = await tx
+    .select({ id: businesses.id })
+    .from(staff)
+    .innerJoin(businesses, eq(businesses.id, staff.businessId))
+    .where(and(eq(staff.userId, user.id), eq(staff.level, 'owner'), isNotNull(businesses.setupStep)))
+  if (how === 'deleted' && drafts.length)
+    await tx.delete(businesses).where(
+      inArray(
+        businesses.id,
+        drafts.map((d) => d.id),
+      ),
+    )
+  const kept = how === 'deleted' ? [] : drafts.map((d) => d.id)
   // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
-  const rows = await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')
+  const rows = (await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')).filter((r) => !kept.includes(r.businessId))
   if (rows.some((r) => r.level === 'owner' && r.status === 'active')) throw new ApiError('owns_workspace')
-  await tx.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.userId, user.id))
+  await tx
+    .update(staff)
+    .set({ status: 'removed', bookable: false })
+    .where(
+      inArray(
+        staff.id,
+        rows.map((r) => r.id),
+      ),
+    )
   if (rows.length)
     await tx
       .update(invites)

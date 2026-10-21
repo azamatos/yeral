@@ -31,6 +31,7 @@ import {
   level,
   priceType,
   requestAnswerers,
+  setupStep,
   staffStatus,
   verificationStatus,
 } from './enums'
@@ -134,6 +135,11 @@ export const businesses = pgTable(
     tableRequests: text().array().notNull().default([]),
     /** Demo businesses answer requests by themselves outside production. */
     demo: boolean().notNull().default(false),
+    /**
+     * The setup wizard's saved step while the owner sets the business up (book Q-200): a draft, outside the workspace
+     * switcher and every public list; null once finished (every business made before the wizard).
+     */
+    setupStep: setupStep(),
     createdAt: createdAt(),
   },
   (t) => [

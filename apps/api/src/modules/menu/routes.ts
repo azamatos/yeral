@@ -28,7 +28,8 @@ const denied = { 401: errors[401], 403: errors[403], 404: errors[404] }
 
 /** A team member who may change services and prices. */
 async function requireServices(c: Context<AppEnv>, slug: string) {
-  const m = await requireMember(c, slug)
+  // the wizard's services step (book Q-200)
+  const m = await requireMember(c, slug, { draft: true })
   if (!can(m.actor, 'services')) throw new ApiError('forbidden')
   return m
 }

@@ -485,6 +485,10 @@ describe('account', () => {
         '/v1/w/{slug}/reviews',
         '/v1/w/{slug}/reviews/{id}/reply',
         '/v1/w/{slug}/reviews/{id}/report',
+        '/v1/setup',
+        '/v1/me/setup',
+        '/v1/w/{slug}/setup',
+        '/v1/w/{slug}/setup/finish',
       ].sort(),
     )
   })
