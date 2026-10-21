@@ -15,7 +15,7 @@ import { ApiError } from '../../http/errors'
 import { emit } from '../../notify'
 import { isCounted, shiftReviews } from '../reviews/rating'
 import { replyOf } from '../reviews/view'
-import { recordAction } from './accounts'
+import { holdActor, recordAction } from './accounts'
 import { ADMIN_LIST_MAX } from './businesses'
 
 export type AdminReviewView = 'reported' | 'cleared' | 'removed'
@@ -76,6 +76,7 @@ async function lockedReview(tx: Queryable, id: string) {
 /** Kept: it counts (again, if it was waiting within its 48 hours) and can't be reported again (Q-261). */
 export async function clearReview(deps: Pick<Deps, 'db' | 'now'>, by: Admin, id: string): Promise<void> {
   await deps.db.transaction(async (tx) => {
+    await holdActor(tx, by)
     const r = await lockedReview(tx, id)
     if (!r.reportedAt || r.clearedAt) throw new ApiError('invalid_status')
     const counted = isCounted(r)
@@ -95,6 +96,7 @@ export async function clearReview(deps: Pick<Deps, 'db' | 'now'>, by: Admin, id:
  */
 export async function removeReview(deps: Pick<Deps, 'db' | 'now'>, by: Admin, id: string, reason: string): Promise<void> {
   await deps.db.transaction(async (tx) => {
+    await holdActor(tx, by)
     const r = await lockedReview(tx, id)
     const counted = isCounted(r)
     await tx
