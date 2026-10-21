@@ -1298,3 +1298,5 @@ chapter: 08 · status: decided
 - B · A monthly cap per business; above it, reminders stop and the owner is told.
 
 answer: A · No cap on MVP; the Ýeral team watches a monthly count per business. (18.10.2026)
+
+concern: A monthly count can't stop a team that types made-up numbers into the calendar and sends texts in its own words under Ýeral's sender, and the backend review of 20.10.2026 asked for a guard before SMS go out. The code now has a safety limit that never drops an SMS: past 1000 a day or 30 in 10 minutes per business they wait for the window, a business in review texts no number its team typed in, and the closing's notices are never held. It costs nothing at normal volumes; say if you'd rather have none. (21.10.2026)

@@ -377,6 +377,9 @@ describe('moves', () => {
     await runDueJobs(t.deps)
     const detail = (await b.req(`/v1/me/bookings/${code}`)).json
     expect(detail).toMatchObject({ status: 'confirmed', start, reschedule: null, moveRefused: { start: start + 30, by: 'system' } })
+    // every other test's SMS go in this run too: past the business's 30 in 10 minutes the rest wait for the window
+    t.clock.now += 11 * 60_000
+    await runDueJobs(t.deps)
     const sms = t.sms.sent.filter((x) => x.to === '+99365444220').at(-1)?.text
     expect(sms).toMatch(
       /^Ýeral: Glow Studio didn't accept the new time\. Your booking stays at \d+ \w+ \d\d:\d\d\. localhost:3001\/l\/[\w-]{20,}$/,
