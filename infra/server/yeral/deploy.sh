@@ -12,6 +12,11 @@ if [ ! -f .env ]; then
   echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)" >.env
   echo 'created .env with a new database password'
 fi
+if ! grep -q '^ADMIN_SECRET_KEY=.' .env; then
+  sed -i '/^ADMIN_SECRET_KEY=/d' .env
+  echo "ADMIN_SECRET_KEY=$(openssl rand -base64 32)" >>.env
+  echo 'added a new ADMIN_SECRET_KEY to .env (ADR 0026)'
+fi
 
 image="yeral-api:${COMMIT:0:12}"
 docker build -f src/infra/docker/api.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$image" src

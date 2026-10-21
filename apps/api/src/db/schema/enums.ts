@@ -40,3 +40,5 @@ export const setupStep = pgEnum('setup_step', SETUP_STEPS)
 /** An invite's answer; `pending` past its `expiresAt` reads as expired (no job needed). */
 export const inviteStatus = pgEnum('invite_status', ['pending', 'accepted', 'declined', 'cancelled'])
 export const codePurpose = pgEnum('code_purpose', ['login', 'change_phone'])
+/** The Ýeral team's accounts (ADR 0026). */
+export const adminStatus = pgEnum('admin_status', ['invited', 'active', 'disabled'])

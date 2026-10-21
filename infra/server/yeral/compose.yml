@@ -45,6 +45,8 @@ services:
       # the first launch's sign-in code on the screen (book Q-036): anyone who types a number signs in as it, so it
       # goes on only when the first launch opens (operations.md)
       SIGN_IN_CODE_ON_SCREEN: 'false'
+      # the Ýeral team's authenticator secrets are sealed under it (ADR 0026); deploy.sh makes it once
+      ADMIN_SECRET_KEY: ${ADMIN_SECRET_KEY:?set by deploy.sh}
     depends_on:
       postgres:
         condition: service_healthy

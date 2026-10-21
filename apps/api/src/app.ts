@@ -10,6 +10,8 @@ import { requestId } from 'hono/request-id'
 import type { Deps } from './deps'
 import { ApiError, errorBody, errorResponse, validationDetails } from './http/errors'
 import type { AppEnv } from './http/env'
+import { adminRoutes } from './modules/admin/routes'
+import { adminSessionMiddleware } from './modules/admin/session'
 import { authRoutes } from './modules/auth/routes'
 import { sessionMiddleware } from './modules/auth/session'
 import { availabilityRoutes } from './modules/availability/routes'
@@ -66,6 +68,8 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
   })
 
   app.use('/v1/*', sessionMiddleware)
+  // the Ýeral team's own sessions, from the admin tool's site only (ADR 0026)
+  app.use('/v1/admin/*', adminSessionMiddleware)
 
   app.onError((err, c) => {
     if (err instanceof ApiError) return errorResponse(c, err)
@@ -96,6 +100,7 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     .route('/v1', clientRoutes)
     .route('/v1', reviewRoutes)
     .route('/v1', setupRoutes)
+    .route('/v1', adminRoutes)
 
   app.get('/version.json', (c) => c.json({ app: 'api', ...build }))
   // uploaded photos (book F-101): a key never changes what it holds, so browsers keep them

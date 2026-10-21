@@ -5,10 +5,16 @@
  * `setup` = create the database if missing, migrate, and seed it while it has no businesses; a kept demo still gets the
  * cities and categories brought up to date. The demo's dates are fixed
  * at seed time (the demo day becomes that day), so a long-lived database goes stale: `seed` starts it over on today.
+ *
+ * `admin-invite <login> "<name>"` (`pnpm --filter @yeral/api admin:invite`; on the server `node dist/cli.js
+ * admin-invite` in the api's container): a Ýeral team account and its setup link, or a new link for a login that exists
+ * (ADR 0026).
  */
 import { sql } from 'drizzle-orm'
 import pg from 'pg'
+import { adminLoginSchema } from '@yeral/contract/admin'
 import { loadConfig } from '../config'
+import { inviteOrReset } from '../modules/admin/accounts'
 import { createDb } from './client'
 import { runMigrations } from './migrate'
 import { seed, seedCatalogue } from './seed'
@@ -34,7 +40,25 @@ async function ensureDatabase() {
   await client.end()
 }
 
+/** The setup link goes to the terminal only: whoever runs this on the server hands it over. */
+async function adminInvite(db: ReturnType<typeof createDb>, [login, ...name]: string[]) {
+  const parsed = adminLoginSchema.safeParse(login ?? '')
+  if (!parsed.success || !name.join(' ').trim()) throw new Error('usage: admin-invite <login> "<name>" (login: 3–32 of a-z 0-9 . -)')
+  const link = await inviteOrReset({ db, now: Date.now, site: config.site, adminKey: config.adminKey }, parsed.data, name.join(' ').trim())
+  console.warn(`${link.reset ? 'reset' : 'invited'} ${parsed.data}; the setup link, valid until ${new Date(link.expiresAt).toISOString()}:`)
+  // eslint-disable-next-line no-console -- the link alone on stdout, for whoever runs this
+  console.log(link.url)
+}
+
 async function main() {
+  if (command === 'admin-invite') {
+    const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 1 })
+    try {
+      return await adminInvite(createDb(pool), flags)
+    } finally {
+      await pool.end()
+    }
+  }
   const seeds = command === 'seed' || command === 'setup'
   // checked before anything runs: a misconfigured server gets an error, not a half-done setup
   const demo = seeds && seedMode(process.env.YERAL_ENV) === 'demo'

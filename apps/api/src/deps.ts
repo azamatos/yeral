@@ -26,6 +26,8 @@ export interface Deps {
    * unused account go ("Is this you?").
    */
   codeOnScreen: boolean
+  /** The key the Ýeral team's authenticator secrets are sealed under (ADR 0026); null: no admin tool here. */
+  adminKey: Uint8Array<ArrayBuffer> | null
 }
 
 /** The dependencies as the Node entry builds them (ADR 0024). */
@@ -42,5 +44,6 @@ export function createDeps(config: Config, db: Db, log: Logger = createLogger(co
     log,
     trustedIpHeader: config.trustedIpHeader,
     codeOnScreen: config.codeOnScreen,
+    adminKey: config.adminKey,
   }
 }
