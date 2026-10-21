@@ -193,8 +193,6 @@
     "contact": "Contact {brand}",
     "contactCaption": "{phone} · Telegram",
     "call": "Call",
-    "write": "Write on Telegram",
-    "back": "Back to the menu",
-    "telegramName": "Telegram {name}"
+    "write": "Write on Telegram"
   }
 }

@@ -5,6 +5,7 @@
  * and Glow Nails; Aýna is a Specialist at Glow Studio and owns her own studio.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
 import { useParams } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import type { InviteCard, Workspace } from '@yeral/contract/team'
@@ -222,10 +223,13 @@ export const AccountMenu: Story = {
     within(menu).getByRole('menuitem', { name: 'Contact Ýeral' }).focus()
     await userEvent.keyboard('{ArrowRight}')
     const contact = await within(document.body).findByRole('menu', { name: 'Contact Ýeral' })
-    await expect(within(contact).getByRole('menuitem', { name: 'Call +993 64 75 45 91' })).toHaveAttribute('href', 'tel:+99364754591')
-    await expect(within(contact).getByRole('menuitem', { name: 'Write on Telegram @eldzhernone' })).toHaveAttribute(
+    await expect(within(contact).getByRole('menuitem', { name: `Call ${SUPPORT_LINE.phone}` })).toHaveAttribute(
       'href',
-      'https://t.me/eldzhernone',
+      SUPPORT_LINE.phoneHref,
+    )
+    await expect(within(contact).getByRole('menuitem', { name: `Write on Telegram ${SUPPORT_LINE.telegram}` })).toHaveAttribute(
+      'href',
+      SUPPORT_LINE.telegramHref,
     )
     await userEvent.keyboard('{ArrowLeft}')
     await userEvent.click(within(menu).getByRole('menuitem', { name: 'Log out' }))
@@ -280,12 +284,14 @@ export const PhoneMore: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'More' }))
     const sheet = await within(document.body).findByRole('dialog', { name: 'More' })
     await expect(within(sheet).getByText('Maýsa Annaýewa')).toBeVisible()
-    // Contact Ýeral: its two rows in the sheet, and back with the focus on it again
-    await userEvent.click(within(sheet).getByRole('button', { name: 'Contact Ýeral +993 64 75 45 91 · Telegram' }))
-    await expect(within(sheet).getByRole('link', { name: 'Call +993 64 75 45 91' })).toHaveAttribute('href', 'tel:+99364754591')
-    await expect(within(sheet).getByRole('button', { name: 'Back to the menu' })).toHaveFocus()
-    await userEvent.click(within(sheet).getByRole('button', { name: 'Back to the menu' }))
-    await waitFor(() => expect(within(sheet).getByRole('button', { name: 'Contact Ýeral +993 64 75 45 91 · Telegram' })).toHaveFocus())
+    // Contact Ýeral: its small sheet over More; Esc closes it back to the row
+    const contactRow = within(sheet).getByRole('button', { name: `Contact Ýeral ${SUPPORT_LINE.phone} · Telegram` })
+    await expect(contactRow).toHaveAttribute('aria-haspopup', 'dialog')
+    await userEvent.click(contactRow)
+    const contact = await within(document.body).findByRole('dialog', { name: 'Contact Ýeral' })
+    await expect(within(contact).getByRole('link', { name: `Call ${SUPPORT_LINE.phone}` })).toHaveAttribute('href', SUPPORT_LINE.phoneHref)
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(contactRow).toHaveFocus())
     await userEvent.click(within(sheet).getByRole('link', { name: 'Reviews' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Reviews' })).toBeVisible()
     await waitFor(() => expect(within(document.body).queryByRole('dialog', { name: 'More' })).not.toBeInTheDocument())
@@ -335,7 +341,10 @@ export const MyProfile: Story = {
     await expect(drawer.getByText('+993 65 10 20 30')).toBeVisible()
     await expect(drawer.getByText('Glow Nails')).toBeVisible()
     await expect(drawer.getByText(/You’re the owner of Glow Studio, so you can’t leave it/)).toBeVisible()
-    await expect(drawer.getByRole('link', { name: '+993 64 75 45 91' })).toHaveAttribute('href', 'tel:+99364754591')
+    await userEvent.click(drawer.getByRole('button', { name: 'Contact Ýeral' }))
+    const contact = await within(document.body).findByRole('menu', { name: 'Contact Ýeral' })
+    await waitFor(() => expect(within(contact).getByRole('menuitem', { name: `Call ${SUPPORT_LINE.phone}` })).toBeVisible())
+    await userEvent.keyboard('{Escape}')
     await expect(drawer.queryByRole('button', { name: 'Leave this business' })).not.toBeInTheDocument()
     // the name: saved, and the drawer closes
     const last = drawer.getByLabelText(/Last name/)

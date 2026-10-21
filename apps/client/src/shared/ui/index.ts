@@ -1,4 +1,4 @@
 export { CodeStep } from './code-step'
 export { wrap } from './layout'
 export { PersonMark } from './person-mark'
-export { SupportLinks } from './support-links'
+export { ContactYeralLink } from './contact-yeral'

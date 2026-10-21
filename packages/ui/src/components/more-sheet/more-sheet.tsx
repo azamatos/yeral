@@ -42,7 +42,7 @@ const row = cn(
 /**
  * A row (`.y-mr`: 48 min, icon 20, 15/20 500): a page (`drill` adds the chevron), an action, or Log out (`danger`). A
  * count (Reviews, muted) is read after the name; `hint` is quiet text at the end ("yeral.app"); `caption` a second
- * line under the name, which makes the row 56 (Contact Ýeral: "+993 64 75 45 91 · Telegram").
+ * line under the name, which makes the row 56 (Contact Ýeral: the number · Telegram).
  */
 export function MoreSheetRow({
   asChild,

@@ -16,7 +16,8 @@
     "@yeral/domain": "workspace:*",
     "@yeral/i18n": "workspace:*",
     "@yeral/sdk": "workspace:*",
-    "@yeral/ui": "workspace:*"
+    "@yeral/ui": "workspace:*",
+    "lucide-react": "catalog:"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.104.0",

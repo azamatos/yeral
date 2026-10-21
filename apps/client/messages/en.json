@@ -120,6 +120,8 @@
     "action": "Try again"
   },
   "support": {
-    "telegramName": "Telegram {name}"
+    "contact": "Contact {brand}",
+    "call": "Call",
+    "write": "Write on Telegram"
   }
 }

@@ -37,9 +37,6 @@ export interface Support {
   telegram: string
 }
 
-/** The chat with a Telegram username: `https://t.me/<name>`. */
-export const telegramUrl = (username: string) => `https://t.me/${username}`
-
 export interface Market {
   /** ISO 3166-1 alpha-2, lower case. */
   code: string

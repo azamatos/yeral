@@ -3,13 +3,18 @@
 The owner gave Ýeral's support line until it has its own: their phone +993 64 75 45 91 and Telegram @eldzhernone
 (chapter 9, 21.10.2026).
 
-- `MARKET.support` (`@yeral/domain/market`): one place per deployment; `telegramUrl()` makes the chat link.
-- The business app: Contact Ýeral in the account menu (a submenu: Call, Write on Telegram), in More on phones (its two
-  rows in the sheet, with a row back), in the owner's box in My profile, and in the sign-in's "this account owns a
-  business" note (the client site's too). `@yeral/ui`: `AccountMenu` rows take `links` (a submenu), `MenuSubContent`,
-  `MoreSheetRow` takes a `caption`.
-- The api: the example businesses show `MARKET.support.phone` unless `EXAMPLE_PHONE` is set; it's no longer required
-  with `EXAMPLE_BUSINESSES`.
+- `MARKET.support` (`@yeral/domain/market`): one place per deployment.
+- `@yeral/features/contact-yeral`: `SUPPORT_LINE` (the number written as the market writes it, `tel:`, `@name`,
+  `t.me`) and `supportLinks()` (Call, Write on Telegram), for every app.
+- `@yeral/ui`: `LinkMenu` (a title and links with a second line from any trigger: a menu from 768, a small sheet on
+  phones), `MenuLinkItem`, `MenuTitle`, `MenuSubContent`; `AccountMenu` rows are actions or a submenu of links (typed
+  apart); `MoreSheetRow` takes a `caption`.
+- The business app: `features/contact-yeral` (ContactMenu, Storybook Business/Shell/ContactMenu): the account menu's
+  submenu, More's row (its small sheet over More), the owner's box in My profile, the sign-in's "owns a business" note
+  (focus moves to it). The client site's sign-in note has the same link (`shared/ui`). The Hidden by Ýeral banner,
+  closing a workspace and the category picker's no-match (B-Shell, B-Settings) will use the same `ContactYeral`.
+- The api: the example businesses show `MARKET.support.phone` unless `EXAMPLE_PHONE` is set (no longer required with
+  `EXAMPLE_BUSINESSES`); `setup` logs the phone they show.
 
 ## For the lead to fold in
 

@@ -4,6 +4,7 @@
  * ones lock), so each story walks a sign-in and checks what the board draws at every step.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
 import { useParams } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import type { InviteCard, Workspace } from '@yeral/contract/team'
@@ -586,7 +587,7 @@ export const IsThisYou: Story = {
   },
 }
 
-/** "No" from a business's owner: the number can't start afresh; Ýeral's support line is right there. */
+/** "No" from a business's owner: the number can't start afresh; Contact Ýeral takes the focus. */
 export const IsThisYouOwner: Story = {
   name: 'Is this you? · an owner says no',
   args: { server: fakeApi() },
@@ -597,8 +598,13 @@ export const IsThisYouOwner: Story = {
     await userEvent.click(canvas.getByRole('button', { name: /No/ }))
     const alert = await canvas.findByRole('alert')
     await expect(alert).toHaveTextContent('This account owns a business on Ýeral')
-    await expect(within(alert).getByRole('link', { name: '+993 64 75 45 91' })).toHaveAttribute('href', 'tel:+99364754591')
-    await expect(within(alert).getByRole('link', { name: 'Telegram @eldzhernone' })).toHaveAttribute('href', 'https://t.me/eldzhernone')
+    // the focus moves from the No button, now off, to Contact Ýeral
+    const contact = within(alert).getByRole('button', { name: 'Contact Ýeral' })
+    await waitFor(() => expect(contact).toHaveFocus())
+    await userEvent.click(contact)
+    const menu = await within(document.body).findByRole('menu', { name: 'Contact Ýeral' })
+    await expect(within(menu).getByRole('menuitem', { name: `Call ${SUPPORT_LINE.phone}` })).toHaveAttribute('href', SUPPORT_LINE.phoneHref)
+    await userEvent.keyboard('{Escape}')
     await expect(canvas.getByRole('button', { name: /No/ })).toBeDisabled()
   },
 }

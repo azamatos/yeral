@@ -8,5 +8,9 @@ export {
   MenuRadioItem,
   MenuSeparator,
   MenuLabel,
+  MenuLinkItem,
+  MenuTitle,
+  menuRowClass,
+  type MenuLink,
   MenuSubContent,
 } from './menu'

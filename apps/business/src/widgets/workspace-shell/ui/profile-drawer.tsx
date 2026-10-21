@@ -9,9 +9,9 @@ import { toast } from '@yeral/ui/toast'
 import { Info, LogOut } from 'lucide-react'
 import { useState, type FormEvent, type RefObject } from 'react'
 import { useTranslations } from 'use-intl'
+import { ContactYeralLink } from '@/features/contact-yeral'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
-import { SupportLinks } from '@/shared/ui'
 import { useAccount } from '../model/use-account'
 import { useWorkspace } from '../model/use-workspace'
 import { ChangePhone } from './change-phone'
@@ -128,7 +128,7 @@ function Profile({ onDone }: { onDone: () => void }) {
             <Info aria-hidden className="mt-0.5 size-4.5 flex-none text-n-600" />
             <div className="flex min-w-0 flex-col gap-1.5">
               <p className="m-0">{t('shell.profile.ownerCantLeave', { business: workspace.name, brand: t('common.brand') })}</p>
-              <SupportLinks />
+              <ContactYeralLink />
             </div>
           </div>
         )}

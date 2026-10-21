@@ -1,27 +1,18 @@
-import { ChevronRight, Ellipsis, ExternalLink } from 'lucide-react'
+import { ChevronRight, Ellipsis } from 'lucide-react'
 import { DropdownMenu } from 'radix-ui'
 import { Fragment, useRef, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Avatar } from '../avatar'
-import { MenuContent, MenuSeparator, MenuSubContent } from '../menu'
+import { MenuContent, MenuLinkItem, MenuSeparator, MenuSubContent, MenuTitle, menuRowClass, type MenuLink } from '../menu'
 
-/** A link in a row's submenu (Contact Ýeral: Call, Write on Telegram): its name and a quiet second line. */
-export interface AccountMenuLink {
+interface Row {
   id: string
   label: string
-  /** The second line: the number, the Telegram name. */
-  caption: string
   icon: ReactNode
-  href: string
-  /** Another site (Telegram): a new tab, and the external-link icon at the end. */
-  external?: boolean
 }
 
-/** A row of the account menu: My profile, Your Ýeral page, Open as a client, Contact Ýeral, Log out… */
-export interface AccountMenuItem {
-  id: string
-  label: string
-  icon: ReactNode
+/** A row that is a link or an action: My profile, Your Ýeral page, Open as a client, Log out… */
+export interface AccountMenuAction extends Row {
   /** Quiet text at the row's end: "yeral.app". */
   hint?: string
   /** Log out: danger ink, after a separator. */
@@ -33,38 +24,33 @@ export interface AccountMenuItem {
   onSelect?: (trigger: HTMLElement | null) => void
   /** It opens a drawer or a dialog (My profile), which takes the focus: the menu doesn't hand it back to its button. */
   opensDialog?: boolean
-  /** A submenu of links, titled with the row's label (B-Shell "Contact Ýeral · submenu"). */
-  links?: readonly AccountMenuLink[]
+  links?: never
 }
 
-const accountMenuItem = cn(
-  'flex min-h-10 cursor-pointer items-center gap-2.5 rounded-input px-2.5 py-1.5 text-small text-n-900 no-underline outline-none select-none',
-  'focus-visible:shadow-focus-inset data-highlighted:bg-group [&>svg]:size-4.5 [&>svg]:flex-none [&>svg]:text-n-600',
-)
-const dangerItem = 'text-danger-ink data-highlighted:bg-error-tint [&>svg]:text-danger-ink'
-const end = 'ml-auto size-4! text-n-500!'
+/** A row that opens a submenu of links, titled with its label (B-Shell "Contact Ýeral · submenu"). */
+export interface AccountMenuSubmenu extends Row {
+  links: readonly MenuLink[]
+}
 
-function Submenu({ label, icon, links }: { label: string; icon: ReactNode; links: readonly AccountMenuLink[] }) {
+export type AccountMenuItem = AccountMenuAction | AccountMenuSubmenu
+
+const accountMenuItem = menuRowClass
+const isSubmenu = (item: AccountMenuItem): item is AccountMenuSubmenu => !!item.links
+const dangerItem = 'text-danger-ink data-highlighted:bg-error-tint [&>svg]:text-danger-ink'
+
+function Submenu({ label, icon, links }: AccountMenuSubmenu) {
   return (
     <DropdownMenu.Sub>
       <DropdownMenu.SubTrigger className={cn(accountMenuItem, 'data-[state=open]:bg-group')}>
         {icon}
         {label}
-        <ChevronRight aria-hidden className={end} />
+        <ChevronRight aria-hidden className="ml-auto size-4! text-n-500!" />
       </DropdownMenu.SubTrigger>
-      <MenuSubContent aria-label={label} className="w-75">
-        <DropdownMenu.Label className="px-2.5 pt-2 pb-1.5 text-label text-n-600 uppercase">{label}</DropdownMenu.Label>
+      {/* named by its row, as Radix links them */}
+      <MenuSubContent className="w-75">
+        <MenuTitle>{label}</MenuTitle>
         {links.map((link) => (
-          <DropdownMenu.Item key={link.id} asChild className={accountMenuItem}>
-            <a href={link.href} {...(link.external ? { target: '_blank', rel: 'noreferrer' } : {})}>
-              {link.icon}
-              <span className="flex min-w-0 flex-col">
-                <span>{link.label}</span>
-                <span className="truncate text-micro text-n-600">{link.caption}</span>
-              </span>
-              {link.external && <ExternalLink aria-hidden className={end} />}
-            </a>
-          </DropdownMenu.Item>
+          <MenuLinkItem key={link.id} link={link} />
         ))}
       </MenuSubContent>
     </DropdownMenu.Sub>
@@ -117,32 +103,34 @@ export function AccountMenu({
     >
       {items.map((item, i) => (
         <Fragment key={item.id}>
-          {item.danger && i > 0 && <MenuSeparator className="mx-1" />}
-          {item.links ? (
-            <Submenu label={item.label} icon={item.icon} links={item.links} />
+          {isSubmenu(item) ? (
+            <Submenu {...item} />
           ) : (
-            <DropdownMenu.Item
-              asChild={!!item.href}
-              onSelect={() => {
-                handOver.current = !!item.opensDialog
-                item.onSelect?.(trigger.current)
-              }}
-              className={cn(accountMenuItem, item.danger && dangerItem)}
-            >
-              {item.href ? (
-                <a href={item.href} {...(item.external ? { target: '_blank', rel: 'noreferrer' } : {})}>
-                  {item.icon}
-                  {item.label}
-                  {item.hint && <span className="ml-auto text-dense text-n-600">{item.hint}</span>}
-                </a>
-              ) : (
-                <>
-                  {item.icon}
-                  {item.label}
-                  {item.hint && <span className="ml-auto text-dense text-n-600">{item.hint}</span>}
-                </>
-              )}
-            </DropdownMenu.Item>
+            <>
+              {item.danger && i > 0 && <MenuSeparator className="mx-1" />}
+              <DropdownMenu.Item
+                asChild={!!item.href}
+                onSelect={() => {
+                  handOver.current = !!item.opensDialog
+                  item.onSelect?.(trigger.current)
+                }}
+                className={cn(accountMenuItem, item.danger && dangerItem)}
+              >
+                {item.href ? (
+                  <a href={item.href} {...(item.external ? { target: '_blank', rel: 'noreferrer' } : {})}>
+                    {item.icon}
+                    {item.label}
+                    {item.hint && <span className="ml-auto text-dense text-n-600">{item.hint}</span>}
+                  </a>
+                ) : (
+                  <>
+                    {item.icon}
+                    {item.label}
+                    {item.hint && <span className="ml-auto text-dense text-n-600">{item.hint}</span>}
+                  </>
+                )}
+              </DropdownMenu.Item>
+            </>
           )}
         </Fragment>
       ))}

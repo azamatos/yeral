@@ -9,7 +9,7 @@ import { ModalDescription } from '@yeral/ui/modal'
 import { textLink } from '@yeral/ui/text-link'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
-import { SupportLinks } from '@/shared/ui'
+import { ContactYeralLink } from '@/shared/ui'
 import { LoginHeader } from './login-header'
 
 /**
@@ -41,6 +41,11 @@ export function IdentityStep({
   const lang = useRequestLanguage()
   const answer = useMutation(sdk.auth.answerIdentity())
   const [ownsWorkspace, setOwnsWorkspace] = useState(false)
+  // "No" is refused and turns off: the focus goes to the way forward, Contact Ýeral
+  const contactLink = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (ownsWorkspace) contactLink.current?.focus()
+  }, [ownsWorkspace])
   const yesRef = useRef<HTMLButtonElement>(null)
   const brand = t('common.brand')
 
@@ -69,7 +74,7 @@ export function IdentityStep({
         <ModalDescription>{t('login.identity.lead')}</ModalDescription>
       </LoginHeader>
       {ownsWorkspace && (
-        <Callout tone="danger" actions={<SupportLinks />}>
+        <Callout tone="danger" actions={<ContactYeralLink ref={contactLink} />}>
           {t('login.identity.ownsWorkspace', { brand })}
         </Callout>
       )}
