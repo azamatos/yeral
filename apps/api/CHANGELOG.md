@@ -1,5 +1,14 @@
 # @yeral/api
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [[`bca2eb6`](https://github.com/azamatos/yeral/commit/bca2eb668c596ffdab97a57d8a20ab197eb1917c)]:
+  - @yeral/domain@0.4.0
+  - @yeral/contract@0.3.1
+  - @yeral/i18n@0.3.1
+
 ## 0.3.0
 
 ### Minor Changes

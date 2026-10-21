@@ -1,6 +1,6 @@
 {
   "name": "@yeral/domain",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Ýeral business rules: business-local time, phones, ids, booking lifecycle, hours, availability, permissions, clients, geo. Pure TypeScript, no dependencies",
   "type": "module",

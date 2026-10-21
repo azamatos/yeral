@@ -1,6 +1,6 @@
 {
   "name": "@yeral/i18n",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "\u00dderal languages (tk default, ru, en): shared messages and formatters for money, prices, durations, dates and distances",
   "type": "module",

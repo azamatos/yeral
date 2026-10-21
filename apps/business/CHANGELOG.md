@@ -1,5 +1,31 @@
 # @yeral/business
 
+## 0.2.0
+
+### Minor Changes
+
+- [#119](https://github.com/azamatos/yeral/pull/119) [`950cc1b`](https://github.com/azamatos/yeral/commit/950cc1b125c6e21d8c443d2ab1b7cedffad823db) Thanks [@azamatos](https://github.com/azamatos)! - The workspace shell: every page under `/w/{slug}` sits in the sidebar (from 1024), the icon rail (from 768) or the
+  tab bar with More (phones), with the workspace switcher (the same section in another workspace, which becomes the last
+  used; "Create a business"), the account menu (Open as a client, Log out), the requests count the api gives, and a note
+  when an invite waits. A workspace that isn't the person's, or Settings for a Specialist, opened by its address, goes
+  to the last used workspace or the calendar with "This section is closed to you". Calendar, Bookings, Clients, Reviews
+  and Settings are stand-ins until their slices.
+
+### Patch Changes
+
+- [#111](https://github.com/azamatos/yeral/pull/111) [`bca2eb6`](https://github.com/azamatos/yeral/commit/bca2eb668c596ffdab97a57d8a20ab197eb1917c) Thanks [@azamatos](https://github.com/azamatos)! - The market names what a mobile number starts with (`MARKET.phone.mobilePrefixes`, Turkmenistan `['6', '7']`), the one
+  source of the rule: `MARKET.phone.mobile` is built from it (`startsWithOneOf()`), so the api's `isMobile` checks the same
+  list the screens name. The business login's «Codes go to mobile numbers only. Enter a number starting with 6 or 7.»
+  reads the list instead of parsing the rule (`mobileStarts()` and the message without the digits are gone). A market
+  writes its phone rules through `phoneRules()`, which makes `mobile` from the prefixes.
+- Updated dependencies [[`5c3985e`](https://github.com/azamatos/yeral/commit/5c3985edb0176f57e2d7446359ac5ed7a5500d61), [`cee0027`](https://github.com/azamatos/yeral/commit/cee0027cfc549cac9826fd37c41b2f77423a6952), [`bca2eb6`](https://github.com/azamatos/yeral/commit/bca2eb668c596ffdab97a57d8a20ab197eb1917c), [`dae89a4`](https://github.com/azamatos/yeral/commit/dae89a4e3520e44bfa334519168a09c82551c067)]:
+  - @yeral/ui@0.5.0
+  - @yeral/domain@0.4.0
+  - @yeral/features@0.1.0
+  - @yeral/contract@0.3.1
+  - @yeral/i18n@0.3.1
+  - @yeral/sdk@0.3.1
+
 ## 0.1.0
 
 ### Minor Changes

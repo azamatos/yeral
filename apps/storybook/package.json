@@ -1,6 +1,6 @@
 {
   "name": "@yeral/storybook",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "description": "Ýeral design system docs and component tests (storybook.yeral.app)",
   "type": "module",
