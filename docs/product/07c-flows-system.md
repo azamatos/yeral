@@ -843,7 +843,7 @@ flowchart TD
 **Edge cases**
 
 - **First launch** (Q-004, decided 18.10.2026): production also gets example businesses from the design's demo data, marked "Example" everywhere they appear and set to confirm bookings at once. Bookings visitors make there show only in their own *Ýazylyşlarym*. "Try the business app" opens a shared demo workspace with seeded clients only, so no visitor sees another visitor's phone; it resets every night. Real businesses sit beside the examples.
-- Code (21.10.2026): production's setup adds the examples once each when `EXAMPLE_BUSINESSES` is on (the design's appointment businesses, marked `example`, confirming at once, with no team anyone signs in to and no reviews of their own, their photos served from the api's image); nothing else is touched. **Code differs:** nothing resets a demo workspace yet (F-242).
+- Code (21.10.2026): production's setup adds the examples once each when `EXAMPLE_BUSINESSES` is on (the design's appointment businesses, marked `example`, confirming at once, with no team anyone signs in to and no reviews of their own, their photos served from the api's image); nothing else is touched. The demo workspace (F-242, 21.10.2026): with `DEMO_WORKSPACE` on, the jobs make it when it's missing and again after every 04:00: the design's Glow Studio, never public, sending no SMS, its numbers in the market's unused range, each one its team uses a demo account's (kept from night to night, with their sessions), and nothing in it joins a real account. **Code differs:** signing in to it ("Try the business app") comes next.
 
 > Open question Q-004: who the first launch is for.
 

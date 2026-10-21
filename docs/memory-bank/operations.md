@@ -93,6 +93,11 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
   (`MARKET.support.phone`, or `EXAMPLE_PHONE` when set), never the design's numbers. `BOOKING_TYPES=appointment` keeps tables and classes out of
   lists and search. Both sit in the server's compose; turn the examples on with the code on the screen. When the pilot
   ends, hide them from the admin tool (a close can't be undone for a business with no owner account).
+- The business app's demo workspace (book F-242): `DEMO_WORKSPACE=true` makes the jobs (every minute in the api) create
+  it when it's missing and again after every 04:00, Ashgabat time: the design's Glow Studio at `/w/demo`, its numbers in
+  the market's unused range (`MARKET.phone.unusedPrefix`), each a team member uses held by a demo account (`users.demo`),
+  kept from night to night. It's never public, sends no SMS and links nothing to a real account (`businesses.sandbox`).
+  Turn it on with the examples when the first launch opens.
 - Photos: the ones people upload on the server's disk behind a storage port (`ports/storage.ts`), in `MEDIA_DIR` (the
   `media` volume at `/data/media` on the server and in the local stack; `apps/api/data/media` in development),
   served at `/media/up/…`; the design's demo photos come with the image (above). The nightly backup (step 7) must take the

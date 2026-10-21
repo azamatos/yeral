@@ -347,7 +347,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-175 | B2B landing page | business.yeral.app logged out: hero with calendar mock, who it's for, 6 features, 3 steps, FAQ, CTA band; "Mugt başla" opens the setup wizard, "Giriş" the login. | MVP | drawn (B-Landing) | not built |  |
 | F-176 | "Free" band | "Ýeral Biznes mugt": all features, unlimited staff, free SMS reminders, no card; no future pricing. | MVP | drawn (B-Landing) | not built | Legacy for-business page still shows three paid plans. FAQ says card payment and prepayment come "ýakynda" (F-219). Promises free SMS reminders; there are none at the first launch (Q-036). |
 | F-177 | Business entry points on yeral.app | "Biznes üçin" header link and the Ýeral Biznes block on Home. | MVP | drawn (Home, headers) | partly: "For business" in the client header and footer (#110); the Home block comes with Home (slice 5) |  |
-| F-242 | Business app demo | "Try the business app" opens a shared demo workspace with seeded clients, without signing in; it resets every night. | MVP | not designed | not built | Q-004 (decided 18.10.2026). Visitors' own bookings at example businesses never show there. |
+| F-242 | Business app demo | "Try the business app" opens a shared demo workspace with seeded clients, without signing in; it resets every night. | MVP | not designed | api: the workspace built (21.10.2026: `DEMO_WORKSPACE`, made again after 04:00, never public, no SMS, numbers nobody holds, no account links); signing in to it next | Q-004 (decided 18.10.2026). Visitors' own bookings at example businesses never show there. |
 
 ## Ýeral team (verification, moderation, categories, support, CMS modules)
 

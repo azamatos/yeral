@@ -126,7 +126,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    admin tool; verify, reject and send again (Q-274), un-verify or hide a business, check a move again (F-179; done
    21.10.2026); reported reviews kept or removed with the 48-hour recount (Q-261, Q-262; done 21.10.2026); close a
    workspace and open it again (Q-213; done 21.10.2026); add a business for its owner (F-238; done 21.10.2026).
-6. **First-launch mode** (Q-004, Q-036; the examples and appointments only done 21.10.2026): example businesses marked "Example" that confirm at once, the sign-in code
+6. **First-launch mode** (Q-004, Q-036; the examples and appointments only done 21.10.2026; the demo workspace's data and nightly remake done 21.10.2026, signing in to it next): example businesses marked "Example" that confirm at once, the sign-in code
    shown on the screen (never for the admin tool; the api's part done 20.10.2026), a separate demo workspace reset every night, no SMS; appointments
    only (Q-030): the seed's table and class examples and the Restaurant and Café & tea house categories stay out of
    lists and search until tables and classes ship. It doesn't wait for the design: the seed's example businesses already
