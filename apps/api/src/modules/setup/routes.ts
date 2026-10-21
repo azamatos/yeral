@@ -48,7 +48,7 @@ const finishRoute = createRoute({
 
 export const setupRoutes = new OpenAPIHono<AppEnv>()
   .openapi(startRoute, async (c) => c.json(await startSetup(c.var.deps, requireUser(c), c.req.valid('json')), 201))
-  .openapi(mineRoute, async (c) => c.json(await mySetup(c.var.deps.db, requireUser(c)), 200))
+  .openapi(mineRoute, async (c) => c.json(await mySetup(c.var.deps, requireUser(c)), 200))
   .openapi(stepRoute, async (c) => {
     const { business, actor } = await requireMember(c, c.req.valid('param').slug, { draft: true })
     await saveStep(c.var.deps, business, actor, c.req.valid('json').step)

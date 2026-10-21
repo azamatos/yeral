@@ -17,27 +17,54 @@ import type { Deps } from '../../deps'
 import type { User } from '../../http/env'
 import { ApiError, invalid } from '../../http/errors'
 import { pgCode } from '../bookings/repo'
+import { logoOf, text } from '../catalog/map'
 import { accountName } from '../me/me'
 import { teamChanged } from '../team/service'
 
 type Start = z.infer<typeof setupStartSchema>
 type MySetup = z.infer<typeof mySetupSchema>
 
-/** The person's draft: a business they own still being set up. */
+/** The person's draft: a business they own still being set up, with what the sign-in's card shows of it. */
 async function draftOf(db: Queryable, userId: string) {
   const [row] = await db
-    .select({ slug: businesses.slug, name: businesses.name, step: businesses.setupStep })
+    .select({
+      slug: businesses.slug,
+      name: businesses.name,
+      step: businesses.setupStep,
+      kind: businesses.kind,
+      logo: businesses.logo,
+      address: businesses.address,
+      street: businesses.street,
+      cityId: businesses.cityId,
+      city: cities.name,
+    })
     .from(staff)
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
+    .leftJoin(cities, eq(cities.id, businesses.cityId))
     .where(and(eq(staff.userId, userId), eq(staff.level, 'owner'), eq(staff.status, 'active'), isNotNull(businesses.setupStep)))
     .orderBy(asc(businesses.createdAt))
     .limit(1)
-  return row && row.step ? { slug: row.slug, name: row.name, step: row.step } : null
+  return row?.step ? { ...row, step: row.step } : null
 }
 
-/** Where the wizard reopens at sign-in, if anywhere (Q-200). */
-export async function mySetup(db: Queryable, user: User): Promise<MySetup> {
-  return { setup: await draftOf(db, user.id) }
+/**
+ * Where the wizard reopens at sign-in, if anywhere (Q-200), with what the "Continue setting up" card shows (B-Login's
+ * ContinueSetupCard): the category, the logo, and the address once one is saved (the rule finishing reads: a street).
+ * In the account's language, as the workspaces and invites are.
+ */
+export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Promise<MySetup> {
+  const draft = await draftOf(deps.db, user.id)
+  if (!draft) return { setup: null }
+  return {
+    setup: {
+      slug: draft.slug,
+      name: draft.name,
+      step: draft.step,
+      category: text(draft.kind, user.lang),
+      logo: logoOf(deps, draft, user.lang),
+      address: draft.street ? { line: draft.address, city: { id: draft.cityId, name: text(draft.city, user.lang) } } : null,
+    },
+  }
 }
 
 /** The numbers a page address may take after its name ("glow-studio-2"). */
