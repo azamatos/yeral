@@ -21,7 +21,7 @@ import { MARKET } from '@yeral/domain/market'
 import { and, asc, desc, eq, or, sql, type AnyColumn, type SQL } from 'drizzle-orm'
 import { anyTextLike, textIn } from '../../db/localized'
 import { businesses, categories, places, reviews, services } from '../../db/schema'
-import { isCounted } from '../reviews/rating'
+import { isCounted, notRemoved } from '../reviews/rating'
 import { replyOf, visitsOf } from '../reviews/view'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
@@ -192,7 +192,7 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
     const rows = await c.var.deps.db
       .select()
       .from(reviews)
-      .where(eq(reviews.businessId, b.id))
+      .where(and(eq(reviews.businessId, b.id), notRemoved()))
       .orderBy(desc(reviews.createdAt))
       .limit(limit + 1)
       .offset(offset)

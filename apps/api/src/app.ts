@@ -11,6 +11,7 @@ import type { Deps } from './deps'
 import { ApiError, errorBody, errorResponse, validationDetails } from './http/errors'
 import type { AppEnv } from './http/env'
 import { adminBusinessRoutes } from './modules/admin/business-routes'
+import { adminReviewRoutes } from './modules/admin/review-routes'
 import { adminRoutes } from './modules/admin/routes'
 import { adminSessionMiddleware } from './modules/admin/session'
 import { authRoutes } from './modules/auth/routes'
@@ -103,6 +104,7 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     .route('/v1', setupRoutes)
     .route('/v1', adminRoutes)
     .route('/v1', adminBusinessRoutes)
+    .route('/v1', adminReviewRoutes)
 
   app.get('/version.json', (c) => c.json({ app: 'api', ...build }))
   // uploaded photos (book F-101): a key never changes what it holds, so browsers keep them

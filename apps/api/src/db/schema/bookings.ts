@@ -277,6 +277,12 @@ export const reviews = pgTable(
     reportedBy: uuid().references(() => staff.id, { onDelete: 'set null' }),
     recountedAt: ts(),
     clearedAt: ts(),
+    /**
+     * Ýeral removed it (book ROUND6 F2, Q-262): gone from the page, the team's list and the rating; its author still sees
+     * it on their booking and can't write another for that visit. `removedReason` is the team's own note.
+     */
+    removedAt: ts(),
+    removedReason: text(),
     createdAt: createdAt(),
     updatedAt: ts().notNull().defaultNow(),
   },

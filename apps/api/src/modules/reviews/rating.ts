@@ -4,17 +4,22 @@
  * without locking the row first: a review's insert already holds a share lock on its business (the foreign key), and a
  * lock taken on top of that would deadlock two reviews written at once.
  */
-import { sql } from 'drizzle-orm'
+import { isNull, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
+import { reviews } from '../../db/schema'
 import type { EventType } from '@yeral/contract/events'
 import { emit } from '../../notify'
 
 /**
- * A review counts in the stored rating unless the business reported it and Ýeral hasn't decided yet, nor have 48 hours
- * passed (the recount marks them, `recountReviews`). Every path that shifts the rating checks it first.
+ * A review counts in the stored rating unless Ýeral removed it, or the business reported it and Ýeral hasn't decided
+ * yet, nor have 48 hours passed (the recount marks them, `recountReviews`). Every path that shifts the rating checks it
+ * first.
  */
-export const isCounted = (r: { reportedAt: Date | null; recountedAt: Date | null; clearedAt: Date | null }) =>
-  !r.reportedAt || !!r.recountedAt || !!r.clearedAt
+export const isCounted = (r: { reportedAt: Date | null; recountedAt: Date | null; clearedAt: Date | null; removedAt: Date | null }) =>
+  !r.removedAt && (!r.reportedAt || !!r.recountedAt || !!r.clearedAt)
+
+/** Reviews that show: all but those Ýeral removed. */
+export const notRemoved = () => isNull(reviews.removedAt)
 
 /** Reviews added (+) or taken away (−) per number of stars. */
 export type StarShift = Partial<Record<number, number>>

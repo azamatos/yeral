@@ -38,7 +38,7 @@ flowchart LR
 | S-03 | Limits a client to phone bookings | no-shows reach the limit | built |
 | S-04 | Sends reminders | 24 h and 2 h before | built |
 | S-05 | Asks for a review: not in the MVP (Q-259) | none | built, must stop |
-| S-06 | Stops counting a reported review | the business reports it | not built |
+| S-06 | Stops counting a reported review | the business reports it | built (api) |
 | S-07 | Drops an unanswered move | move deadline | built |
 | S-08 | Treats offered times as taken or past | time passes, someone books | partly |
 | S-09 | Ends the undo window | 5 min after a cancel | built |
@@ -298,7 +298,7 @@ flowchart TD
 
 > Open question Q-262: Who hears the moderation result.
 
-**Status.** Design: decided and drawn (business spec §15; ROUND6 F2; Venue, B-Reviews) · Code: not built. Every review counts as soon as it's written, and there's no report or moderation.
+**Status.** Design: decided and drawn (business spec §15; ROUND6 F2; Venue, B-Reviews) · Code: the api's part built: the business reports a review and it stops counting (B-54, 21.10.2026); 48 hours on it counts again (the jobs); the Ýeral team keeps it (`clear`: it counts, and can't be reported again) or removes it (`remove`: gone from the page, the team's list and the rating; its author still sees it on their booking and can't write another for that visit), from `/v1/admin/reviews` (21.10.2026). Only the business hears the result, on its screens (Q-262). The admin tool comes with the apps.
 
 ### S-07 · A waiting move expires
 
