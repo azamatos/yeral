@@ -1,38 +1,45 @@
-import type * as Ids from '@yeral/domain/id'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { isBookingCode } from '@yeral/domain/id'
+import { describe, expect, it } from 'vitest'
+import { codeMaker, DEMO_CODES, seededCodes } from './codes'
 
-// the codes the "random" generator hands out, in order
-const next = vi.hoisted(() => ({ codes: [] as string[] }))
-vi.mock('@yeral/domain/id', async (actual) => ({
-  ...(await actual<typeof Ids>()),
-  bookingCode: () => next.codes.shift() ?? 'YR-99999',
-}))
-
-const { DEMO_CODES, seedCode } = await import('./codes')
+/** Hands out the given codes in order, and fails rather than spin once they run out. */
+const queue =
+  (...codes: string[]) =>
+  () => {
+    const c = codes.shift()
+    if (!c) throw new Error('no codes left')
+    return c
+  }
 
 describe('booking codes in a seed', () => {
-  beforeEach(() => {
-    next.codes = []
-  })
-
   it('a generated code never takes one of the demo data’s own, which stays on its booking', () => {
-    const used = new Set<string>()
-    next.codes = ['YR-48213', 'YR-12345']
-    expect(seedCode(used)).toBe('YR-12345')
-    expect(seedCode(used, 'YR-48213')).toBe('YR-48213')
+    const code = codeMaker(queue('YR-48213', 'YR-12345'))
+    expect(code()).toBe('YR-12345')
+    expect(code('YR-48213')).toBe('YR-48213')
   })
 
   it('a generated code is new in the seed', () => {
-    const used = new Set(['YR-12345'])
-    next.codes = ['YR-12345', 'YR-23456']
-    expect(seedCode(used)).toBe('YR-23456')
-    expect(used.has('YR-23456')).toBe(true)
+    const code = codeMaker(queue('YR-12345', 'YR-12345', 'YR-23456'))
+    expect(code()).toBe('YR-12345')
+    expect(code()).toBe('YR-23456')
   })
 
-  it('knows every code the demo data gives, and refuses one given twice', () => {
-    for (const c of ['YR-48213', 'YR-47990', 'YR-47702', 'YR-44650', 'YR-43108']) expect(DEMO_CODES.has(c)).toBe(true)
-    const used = new Set<string>()
-    seedCode(used, 'YR-47702')
-    expect(() => seedCode(used, 'YR-47702')).toThrow(/YR-47702/)
+  it('knows every code the demo data gives, and refuses one it doesn’t or gives twice', () => {
+    expect([...DEMO_CODES].sort()).toEqual(
+      ['YR-43108', 'YR-44650', 'YR-44987', 'YR-45320', 'YR-46511', 'YR-47702', 'YR-47990', 'YR-48213'].sort(),
+    )
+    const code = codeMaker(queue())
+    code('YR-47702')
+    expect(() => code('YR-47702')).toThrow(/twice/)
+    expect(() => code('YR-12345')).toThrow(/DEMO_CODES/)
+  })
+
+  it('generates the same booking-shaped codes every run', () => {
+    const a = seededCodes()
+    const b = seededCodes()
+    const first = Array.from({ length: 500 }, a)
+    expect(Array.from({ length: 500 }, b)).toEqual(first)
+    expect(first.every(isBookingCode)).toBe(true)
+    expect(new Set(first).size).toBeGreaterThan(495)
   })
 })

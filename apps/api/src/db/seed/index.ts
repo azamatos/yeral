@@ -17,7 +17,7 @@ import type { Db, Queryable } from '../client'
 import * as t from '../schema'
 import { CATEGORIES } from './categories'
 import { CITIES } from './cities'
-import { seedCode } from './codes'
+import { codeMaker } from './codes'
 import {
   AYJEMAL_BOOKINGS,
   BUSINESSES,
@@ -76,7 +76,8 @@ interface Ctx {
   day: (date: string) => string
   /** A design week (0 = Monday) turned with the dates, so a demo date's weekday data lands on the date it moves to. */
   week: <T>(days: readonly T[]) => T[]
-  usedCodes: Set<string>
+  /** The seed's booking codes (`codeMaker`): a demo booking's own, else the next generated one. */
+  code: (fixed?: string) => string
   users: Map<string, string>
   clients: Map<string, string>
   /**
@@ -87,8 +88,6 @@ interface Ctx {
   /** The phone an example shows: the market's support line, or `EXAMPLE_PHONE`. */
   examplePhone?: string
 }
-
-const code = (ctx: Ctx, fixed?: string) => seedCode(ctx.usedCodes, fixed)
 
 async function user(ctx: Ctx, phone: string, name: string | null): Promise<string> {
   const known = ctx.users.get(phone)
@@ -330,7 +329,7 @@ async function seedAppointment(ctx: Ctx, a: AppointmentSeed): Promise<string> {
   const [row] = await ctx.db
     .insert(t.bookings)
     .values({
-      code: code(ctx, a.code),
+      code: ctx.code(a.code),
       businessId: a.biz.id,
       type: 'appointment',
       clientId: a.clientId,
@@ -414,7 +413,7 @@ export async function seedExamples(db: Db, opts: { now: number; phone: string })
       now: opts.now,
       day: (d) => d,
       week: <T>(days: readonly T[]): T[] => [...days],
-      usedCodes: new Set(),
+      code: codeMaker(),
       users: new Map(),
       clients: new Map(),
       example: true,
@@ -452,7 +451,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
     now: opts.now,
     day: (d) => addDays(d, shift),
     week: <T>(days: readonly T[]): T[] => days.map((_, i) => days[(i - turn + 7) % 7] as T),
-    usedCodes: new Set(),
+    code: codeMaker(),
     users: new Map(),
     clients: new Map(),
   }
@@ -623,7 +622,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
       const start = m(a.from)
       const end = start + b.sittingMinutes
       await db.insert(t.bookings).values({
-        code: code(ctx, a.code),
+        code: ctx.code(a.code),
         businessId: b.id,
         type: 'table',
         clientId,
@@ -685,7 +684,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
     for (const c of clients) ctx.clients.set(`${yoga.id} ${c.phone}`, c.id)
     await db.insert(t.bookings).values(
       clients.map((c) => ({
-        code: code(ctx),
+        code: ctx.code(),
         businessId: yoga.id,
         type: 'class' as const,
         clientId: c.id,
@@ -712,7 +711,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
     if (!sessionId || !s) throw new Error(`no yoga session for ${yogaBooking.code}`)
     const clientId = await seedClient(ctx, yoga.id, { phone: DEMO_USER.phone, name: DEMO_USER.name, userId: ayjemal, source: 'yeral' })
     await db.insert(t.bookings).values({
-      code: code(ctx, yogaBooking.code),
+      code: ctx.code(yogaBooking.code),
       businessId: yoga.id,
       type: 'class',
       clientId,
