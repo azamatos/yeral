@@ -40,6 +40,11 @@ export const requestSchema = z
     end: minuteSchema,
     /** "Jogap bermäge 18 min galdy": the answer is due by then; after it the request runs out (B-22). */
     holdUntil: epochSchema,
+    /**
+     * "Haýyşyň wagty gutarýar" is due then (book S-01): 5 minutes of open time before `holdUntil`; null for a short
+     * answer time. Those who may answer (`canAnswer`) hear it.
+     */
+    warnAt: epochSchema.nullable(),
     sentAt: epochSchema,
     items: z.array(teamItemSchema),
     price: priceSchema.nullable(),

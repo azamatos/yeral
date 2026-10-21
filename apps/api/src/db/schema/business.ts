@@ -279,10 +279,16 @@ export const invites = pgTable(
     sentAt: ts().notNull(),
     expiresAt: ts().notNull(),
     answeredAt: ts(),
+    /** Its 7 days ran out unanswered and the open screens were told (book S-13); a resend is a new invite. */
+    expiryToldAt: ts(),
     createdAt: createdAt(),
   },
   (t) => [
     index('invites_phone_idx').on(t.phone),
+    // the jobs look for the ones whose 7 days ran out untold
+    index('invites_untold_idx')
+      .on(t.expiresAt)
+      .where(sql`${t.status} = 'pending' and ${t.expiryToldAt} is null`),
     // one open invite per phone per workspace
     uniqueIndex('invites_one_pending')
       .on(t.businessId, t.phone)

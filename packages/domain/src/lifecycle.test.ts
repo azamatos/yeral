@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  expiryWarningAt,
   canRemoveComplaint,
   statusWithoutNoShow,
   ADDRESS_SMS_AFTER_MS,
@@ -427,5 +428,25 @@ describe('taking a complaint back (book Q-207)', () => {
     expect(canRemoveComplaint({ complaintType: 'late', complaintAt: now - 7 * 86_400_000 }, now)).toBe('complaint_locked')
     expect(statusWithoutNoShow({ date: '2026-10-14', end: 600 }, now)).toBe('completed')
     expect(statusWithoutNoShow({ date: '2026-10-14', end: 720 }, now)).toBe('confirmed')
+  })
+})
+
+describe('when "Haýyşyň wagty gutarýar" is due (book S-01)', () => {
+  // open 09:00–18:00 every day, a break 13:00–14:00
+  const day = { open: 540, close: 1080, break: { start: 780, end: 840 } }
+  const hours = { hours: [day, day, day, day, day, day, day], exceptions: [] }
+  it('5 open minutes before the end: never while closed, never across a break', () => {
+    // sent 17:33, 30 minutes: 27 today, 3 tomorrow after 09:00 → due at 17:58 today
+    const sent = epochOf('2026-10-14', 17 * 60 + 33)
+    expect(expiryWarningAt(sent, epochOf('2026-10-15', 9 * 60 + 3), hours)).toBe(epochOf('2026-10-14', 17 * 60 + 58))
+    // ending at 14:02 after the break: due at 12:57, before it
+    expect(expiryWarningAt(epochOf('2026-10-14', 12 * 60 + 32), epochOf('2026-10-14', 14 * 60 + 2), hours)).toBe(
+      epochOf('2026-10-14', 12 * 60 + 57),
+    )
+    // in plain open time
+    expect(expiryWarningAt(epochOf('2026-10-14', 600), epochOf('2026-10-14', 630), hours)).toBe(epochOf('2026-10-14', 625))
+  })
+  it('none for an answer time of 10 minutes or less', () => {
+    expect(expiryWarningAt(epochOf('2026-10-14', 600), epochOf('2026-10-14', 610), hours)).toBeNull()
   })
 })

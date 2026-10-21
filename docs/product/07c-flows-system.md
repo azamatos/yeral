@@ -45,10 +45,10 @@ flowchart LR
 | S-10 | Sends, checks and locks login codes | a code is asked for | built |
 | S-11 | Keeps, renews and ends sign-ins | sign-in, visits, sign-out | built |
 | S-12 | Links a phone's bookings and invites | sign-in | built |
-| S-13 | Expires team invites | 7 days after sending | partly |
+| S-13 | Expires team invites | 7 days after sending | built |
 | S-14 | Blocks a person's time in other workspaces | a booking in one workspace | not built |
 | S-15 | Updates open screens | any change | built |
-| S-16 | Alerts the business to a new request | a request is sent | partly |
+| S-16 | Alerts the business to a new request | a request is sent | partly (the api's events and 5-minute warning built) |
 | S-17 | Makes a business public after review | Ýeral verifies it | partly |
 | S-18 | Keeps quiet at night, sends summaries | quiet hours, summary times | not built |
 | S-19 | Works out the typical answer time | past answers | not built |
@@ -582,9 +582,9 @@ flowchart TD
 
 - *Programmasyz* staff (no login) get no SMS and are active at once (business spec §11).
 - The design has no invite SMS text. Claude writes it in English, the source language, with the market's translations, and the owner checks it (Q-288, decided 18.10.2026).
-- Code: an invite is valid 7 days and reads as expired after that, with no job; the person accepts or declines it (`/v1/me/invites`), and resending gives a new link and a new 7 days (`modules/team`, ADR 0025). No invite SMS is sent yet: at the first launch the invite shows at the invited phone's sign-in and the owner copies the link.
+- Code: an invite is valid 7 days and reads as expired after that, worked out from the time; when the 7 days run out the jobs tell the team's and the invitee's open screens once (`team.changed`, 21.10.2026); the person accepts or declines it (`/v1/me/invites`), and resending gives a new link and a new 7 days (`modules/team`, ADR 0025). No invite SMS is sent yet: at the first launch the invite shows at the invited phone's sign-in and the owner copies the link.
 
-**Status.** Design: decided and drawn (business spec §1, §8; B-Login, B-Team) · Code: partly.
+**Status.** Design: decided and drawn (business spec §1, §8; B-Login, B-Team) · Code: built (api: invites with a 7-day expiry worked out from the time, a resend a new invite; when the 7 days run out the jobs tell the team's and the invitee's open screens once, 21.10.2026).
 
 ## Workspaces and businesses
 
@@ -689,7 +689,7 @@ flowchart TD
 - Requests for *Programmasyz* staff go to the owner and admin (business spec §2).
 - Before the app exists, new-request SMS to staff are off by default. Each person can switch them on, and they never go at night or to someone who has the workspace open (Q-297, decided 18.10.2026).
 
-**Status.** Design: decided and drawn (business spec §2, §16; B-Shell, B-Calendar, B-Bookings) · Code: partly. The change note exists, but the workspace, toasts and warnings aren't built.
+**Status.** Design: decided and drawn (business spec §2, §16; B-Shell, B-Calendar, B-Bookings) · Code: the api's part built: every new request and move is an event the team's open screens hear, and each request says when its 5-minute warning is due (`warnAt`: 5 minutes of open time before its answer time ends, none for 10 minutes or less; 21.10.2026), so the app's own timer warns even in a background tab; the toasts, sound and browser notifications are the business app's, and quiet hours (S-18) aren't built.
 
 ### S-17 · A new business is verified
 

@@ -3,7 +3,8 @@
  * 1. Requests whose hold time ran out → cancelled by the system, with 3 alternative times and an SMS.
  * 2. Confirmed visits that ended → completed.
  * 3. Reported reviews Ýeral didn't decide in 48 hours → counted again (book Q-261).
- * 4. Queued work: SMS, reminders, demo businesses answering.
+ * 4. Invites whose 7 days ran out → the team's and the invitee's open screens refresh (S-13).
+ * 5. Queued work: SMS, reminders, demo businesses answering.
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import {
@@ -24,8 +25,8 @@ import { MARKET } from '@yeral/domain/market'
 import { isOnlineSource, type Locale } from '@yeral/domain/model'
 import { isMobile } from '@yeral/domain/phone'
 import { addDays, epochOf, localOf } from '@yeral/domain/time'
-import { and, asc, eq, isNull, lt, lte, or, sql } from 'drizzle-orm'
-import { bookings, businesses, clients, jobs, users } from '../../db/schema'
+import { and, asc, eq, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm'
+import { bookings, businesses, clients, invites, jobs, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import {
   addressSmsText,
@@ -53,6 +54,7 @@ import { onlineRefusal } from '../clients/online'
 import { itemsOf, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
 import { ADDRESS_SMS } from '../bookings/address-sms'
 import { recountReviews } from '../reviews/team'
+import { teamChanged } from '../team/service'
 
 const BATCH = 100
 /**
@@ -76,6 +78,43 @@ const DROPPED_NOT_MOBILE = 'dropped: not a mobile number (ROUND6 C1)'
 /** The business moved and back, or the client was told since: they know the address as it is (book Q-215). */
 const DROPPED_SAME_ADDRESS = 'dropped: the client knows the address as it is'
 const MAX_ATTEMPTS = 5
+
+/**
+ * An invite's 7 days ran out unanswered (book S-13): the team's screens and the invitee's refresh (it shows
+ * "expired" now). Nothing changes in the invite: its state is worked out from the time.
+ */
+async function tellExpiredInvites(deps: Deps): Promise<number> {
+  const now = new Date(deps.now())
+  return deps.db.transaction(async (tx) => {
+    // a batch at a time, the rows someone else holds left for the next tick
+    const due = await tx
+      .select({ id: invites.id })
+      .from(invites)
+      .where(and(eq(invites.status, 'pending'), lte(invites.expiresAt, now), isNull(invites.expiryToldAt)))
+      .orderBy(asc(invites.id))
+      .limit(BATCH)
+      .for('update', { skipLocked: true })
+    if (!due.length) return 0
+    const told = await tx
+      .update(invites)
+      .set({ expiryToldAt: now })
+      .where(
+        inArray(
+          invites.id,
+          due.map((d) => d.id),
+        ),
+      )
+      .returning({ businessId: invites.businessId, phone: invites.phone })
+    // once per business and person, however many of their invites ran out
+    const seen = new Set<string>()
+    for (const i of told) {
+      if (seen.has(`${i.businessId}:${i.phone}`)) continue
+      seen.add(`${i.businessId}:${i.phone}`)
+      await teamChanged(tx, i.businessId, { phone: i.phone })
+    }
+    return told.length
+  })
+}
 
 async function expireRequests(deps: Deps): Promise<number> {
   const now = new Date(deps.now())
@@ -472,12 +511,15 @@ async function runQueue(deps: Deps): Promise<number> {
   return claimed.length
 }
 
-export async function runDueJobs(deps: Deps): Promise<{ expired: number; completed: number; recounted: number; jobs: number }> {
+export async function runDueJobs(
+  deps: Deps,
+): Promise<{ expired: number; completed: number; recounted: number; invitesExpired: number; jobs: number }> {
   await pruneBookingLinks(deps.db, deps.now())
   await pruneIdentityChecks(deps.db, deps.now())
   const expired = await expireRequests(deps)
   const completed = await completeVisits(deps)
   const recounted = await recountReviews(deps)
+  const invitesExpired = await tellExpiredInvites(deps)
   const ran = await runQueue(deps)
-  return { expired, completed, recounted, jobs: ran }
+  return { expired, completed, recounted, invitesExpired, jobs: ran }
 }

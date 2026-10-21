@@ -72,6 +72,9 @@ export function waitingLimit(here: number, inAll: number): WaitingLimit | null {
   if (inAll >= MAX_WAITING_IN_ALL) return { scope: 'all', limit: MAX_WAITING_IN_ALL }
   return null
 }
+/** "Haýyşyň wagty gutarýar": this many minutes before a request's answer time ends (book S-01, business spec §16). */
+export const EXPIRY_WARNING_MINUTES = 5
+
 /** The business's reply to a review: this long at most (B-53). */
 export const REVIEW_REPLY_MAX = 500
 /** A reported review isn't counted while Ýeral checks it, this long at most; then it counts again (book Q-261). */
@@ -114,6 +117,27 @@ export function holdUntil(
     left -= w.end - w.start
   }
   return start
+}
+
+/**
+ * When "Haýyşyň wagty gutarýar" is due (book S-01, business spec §16): 5 minutes of answer time before the end, counted
+ * as the hold counts them, only while the business is open (so it never comes while it's closed, nor across a break).
+ * None for a request whose whole answer time is 10 minutes or less: its new-request alert is warning enough.
+ */
+export function expiryWarningAt(sentAt: number, until: number, business: BusinessHours): number | null {
+  const warn = EXPIRY_WARNING_MINUTES * 60_000
+  const open = openStretches(business, sentAt, until)
+    .map((w) => ({ start: Math.max(w.start, sentAt), end: Math.min(w.end, until) }))
+    .filter((w) => w.end > w.start)
+  // a hold that ran on plain time (nothing open before the visit) counts plain time here too
+  const stretches = open.length ? open : [{ start: sentAt, end: until }]
+  if (stretches.reduce((sum, w) => sum + w.end - w.start, 0) <= 2 * warn) return null
+  let left = warn
+  for (const w of [...stretches].reverse()) {
+    if (w.end - w.start >= left) return w.end - left
+    left -= w.end - w.start
+  }
+  return null
 }
 
 /** No client reminder arrives between 22:00 and 08:00 at the business (book Q-285). */
