@@ -112,8 +112,6 @@ export const businesses = pgTable(
     hours: jsonb().$type<WeekHours>().notNull(),
     /** Special days ("Aýratyn günler"). */
     exceptions: jsonb().$type<DateException[]>().notNull().default([]),
-    /** Unused since the average bill went (book Q-103); kept so the previous api image still runs, dropped in a later release. */
-    avgBill: integer(),
     womenOnly: boolean().notNull().default(false),
     /** Kept up to date from reviews; seeded for demo businesses. */
     rating: real(),

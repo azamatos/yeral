@@ -1,5 +1,5 @@
 {
-  "id": "f6fb0f29-53b5-4639-ba0a-03033dfa7f45",
+  "id": "63716613-07d7-436b-b862-46131c00bde5",
   "prevId": "cf8818b6-d951-49de-8413-3b9465a37eef",
   "version": "7",
   "dialect": "postgresql",
@@ -2633,12 +2633,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'[]'::jsonb"
-        },
-        "avg_bill": {
-          "name": "avg_bill",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         },
         "women_only": {
           "name": "women_only",
