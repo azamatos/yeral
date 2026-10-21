@@ -159,7 +159,7 @@ The order of Q-001: every slice ends working end to end on a local machine, with
 
 | Slice | What works at the end |
 |---|---|
-| 1 · Accounts | sign in with the code on screen, profile, the workspace switcher, invites (under way 21.10.2026: the business app and its login are built, #99 and #102) |
+| 1 · Accounts | sign in with the code on screen, profile, the workspace switcher, invites (built 21.10.2026: the business app, its login, shell and My account, #99, #102, #107, #113, #115, #119, #121; the client site, its login and profile, #108, #110, #111, #114, #118) |
 | 2 · Business setup | the wizard, profile, services, hours, team, booking rules, link and QR |
 | 3 · Booking loop | business page, appointment booking, answering in the calendar, my bookings, cancel, move, undo, declines with offered times, expiries |
 | 4 · Daily work | calendar views, bookings list, clients, walk-ins, complaints, internal statuses, *Başga ýerde*, browser notifications, the installable business app |

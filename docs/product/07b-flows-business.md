@@ -564,7 +564,7 @@ flowchart TD
 
 > Open question Q-272: which bookings block a person elsewhere.
 
-**Status** — Design: drawn (B-Shell; B-Calendar · Aýna 19:00–20:00; B-Mobile) · Code: not built (availability doesn't look at other workspaces).
+**Status** — Design: drawn (B-Shell; B-Calendar · Aýna 19:00–20:00; B-Mobile) · Code: api built (free times and every booking write skip time taken elsewhere; the calendar's `elsewhere` blocks, F-094); the calendar screen comes with slice 4; My profile has no switch (Q-271, #121).
 
 ### B-15 · Leave a workspace
 
@@ -598,7 +598,7 @@ flowchart TD
 
 > Open question Q-203: what happens to bookings when a specialist leaves.
 
-**Status** — Design: drawn (B-Shell · Profilim, Aýna) · Code: built (api `/v1/w/{slug}/leave`; My profile, #121, chapter 9's 21.10.2026 rows); the confirm has no counts of the bookings ahead until the api gives them.
+**Status** — Design: drawn (B-Shell · Profilim, Aýna) · Code: built for the person (api `/v1/w/{slug}/leave`; My profile, #121, chapter 9's 21.10.2026 rows): the confirm has no counts of the bookings ahead until the api gives them; the owner's notification that opens the remove flow (step 3, Q-203) isn't built.
 
 ## 3. The calendar
 
@@ -1859,7 +1859,7 @@ flowchart LR
 - Table and class workspaces show *Stollar* or *Sapaklar* in place of *Senenama*; the redirect target there isn't named.
 - The api must refuse such data too; hiding is not security (ADR 0018).
 
-**Status** — Design: text only (B-Shell note) · Code: not built.
+**Status** — Design: text only (B-Shell note) · Code: built in the business app (#119): a section the level doesn't have, or a workspace the person isn't in, opened by its address goes to the calendar or the last-used workspace with "This section is closed to you".
 
 ## 8. Reviews, analytics, notifications and help
 

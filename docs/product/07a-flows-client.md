@@ -1621,7 +1621,7 @@ flowchart TD
 
 - Name and surname are two fields, the surname optional; businesses see the whole name, and a review is signed "Aýjemal G.", or "Aýjemal" without a surname (Q-156, decided 18.10.2026; code: `@yeral/domain/names`). `PATCH /v1/me` takes `firstName` and `surname`; an older client's one `name` is split at the first space.
 
-**Status:** Design: drawn (Account-Profile) · Code: built (api `PATCH /v1/me`; the profile, #118); no Language section with one language (chapter 9's 21.10.2026 rows).
+**Status:** Design: drawn (Account-Profile) · Code: built for the name (api `PATCH /v1/me`; the profile, #118); the Language section isn't built and comes with a market's second language (chapter 9's 21.10.2026 rows).
 
 ### C-44 · Change the phone number
 
@@ -1696,7 +1696,7 @@ flowchart TD
 - The first switch silences only the "confirmed" SMS today; SMS for business moves and cancels don't exist yet (M5).
 - The api's `notifications.reviewAsk` stays in /v1 as always false and is ignored on update (code: `packages/contract/src/account.ts`).
 
-**Status:** Design: drawn (Account-Profile) · Code: partly; the profile shows no SMS switches at the first launch (no SMS).
+**Status:** Design: drawn (Account-Profile) · Code: api built; the profile's SMS switches aren't built and come with SMS (the Turkmenistan launch).
 
 ### C-46 · Log out
 
@@ -1719,7 +1719,7 @@ flowchart LR
 
 - Where the page goes after logging out isn't drawn.
 
-**Status:** Design: drawn (Auth avatar menu; Account-Profile) · Code: built (api `POST /v1/auth/logout`; the avatar menu and the profile, #114 and #118, chapter 9's 21.10.2026 rows).
+**Status:** Design: drawn (Auth avatar menu; Account-Profile) · Code: built (api `POST /v1/auth/logout`; the avatar menu, #110, and the profile, #118, chapter 9's 21.10.2026 rows).
 
 ### C-47 · Delete the account
 
@@ -1814,4 +1814,4 @@ flowchart TD
 
 - Someone else's booking in the account area: the api answers not found (code); no screen draws it, so it follows the 404 page.
 
-**Status:** Design: drawn (States 09, 11; Booking-Link · `notFound`) · Code: partly — the api answers 404; the client site's 404 page answers 404 (#110) without a Search button until Search exists; the booking link's variant isn't built.
+**Status:** Design: drawn (States 09, 11; Booking-Link · `notFound`) · Code: partly — the api answers 404; the client site's 404 page answers 404 (#110) without a Search button until Search exists; the variants that need business pages (in review, removed) and the booking link's come with slice 3.
