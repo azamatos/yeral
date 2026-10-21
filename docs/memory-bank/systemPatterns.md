@@ -47,7 +47,6 @@ yeral/                           github.com/azamatos/yeral
 ├─ docs/           memory-bank/ (+ log/), decisions/, design/ (Claude Design export, read-only), API.md
 ├─ .claude/        skills/, agents/, settings.json
 ├─ .github/        workflows/, renovate.json, ISSUE_TEMPLATE/
-├─ .changeset/
 └─ AGENTS.md · CLAUDE.md · turbo.json · pnpm-workspace.yaml (catalog) · package.json · lefthook.yml · .node-version
 ```
 

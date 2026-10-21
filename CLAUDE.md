@@ -14,7 +14,7 @@ Project skills in `.claude/skills` — use them when the task matches:
 | `i18n` | any user-visible text, number, price, date, duration or plural |
 | `testing` | choosing and writing the right test (unit, story, API, end to end) |
 | `qa-flows` | click-testing flows in the browser with Claude in Chrome |
-| `release` | changesets, PRs, production releases, rollback |
+| `ship` | finishing work: checks, PR, review, merge, a deploy by hand, rollback |
 | `parallel-work` | starting, running and handing off a task alongside other agents |
 | `memory-bank` | end of a session, after a decision, or "remember this for the project" |
 

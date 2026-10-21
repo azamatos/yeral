@@ -1,6 +1,6 @@
 ---
 name: api-endpoint
-description: Add or change a Yeral API endpoint end to end — zod contract, api route + service + Drizzle repository (+ migration), mirror notification/event, sdk query or mutation, tests, changeset. Use whenever a screen needs data or an action the API doesn't offer yet, or an existing request/response shape changes.
+description: Add or change a Yeral API endpoint end to end — zod contract, api route + service + Drizzle repository (+ migration), mirror notification/event, sdk query or mutation, tests. Use whenever a screen needs data or an action the API doesn't offer yet, or an existing request/response shape changes.
 ---
 
 # API endpoint, end to end
@@ -26,8 +26,7 @@ there, change `contract.ts`, `mock/index.ts` and `hooks.ts` the same way.
    and the event type → invalidation mapping. Apps use only this. Add MSW handlers/fixtures for stories (skill `testing`).
 7. **Tests**: `app.request()` tests on the test database for success, validation error, auth, and conflicts (`409`);
    domain tests for the rule (skill `testing`).
-8. **Ship**: OpenAPI regenerates by itself; update `docs/API.md` only if the guide changes; `pnpm changeset` for `api`
-   (and the apps whose behaviour changes).
+8. **Ship**: OpenAPI regenerates by itself; update `docs/API.md` only if the guide changes (skill `ship`).
 
 ## Conventions
 

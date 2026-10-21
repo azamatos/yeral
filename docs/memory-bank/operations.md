@@ -1,7 +1,8 @@
 # Operations: environments, hosting, Docker, CI/CD, versioning, parallel work
 
-Status 2026-10-13 (M0): production = `apps/legacy` (Next.js) on Cloudflare. `ci.yml`, `release.yml`, `deploy.yml` exist;
-legacy deploys to production from a release (first CI deploy: `@yeral/legacy@0.1.1`, 2026-10-14). The
+Status 2026-10-13 (M0): production = `apps/legacy` (Next.js) on Cloudflare. `ci.yml` and `deploy.yml` exist; releases
+are paused until the MVP works (ADR 0009, amended 2026-10-21: `release.yml` and Changesets removed), so legacy deploys
+by hand (Actions → Deploy). The
 `CLOUDFLARE_API_TOKEN` repository secret is set; without it the deploy job skips with a warning. Since 2026-10-16 there
 are two kinds of environment only, local and production (ADR 0020): no staging.
 
@@ -14,7 +15,7 @@ are two kinds of environment only, local and production (ADR 0020): no staging.
 | production | the owner's server `yeral-vps` (api running since 2026-10-19, no public host yet); `yeral.app` still serves legacy on Cloudflare; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
 
 No staging and no PR previews (ADR 0020): a change is proven locally (tests, the Docker stack), reviewed, and merged on
-green CI; production changes only from a release. A risky migration is rehearsed on a production dump restored into
+green CI; production is deployed by hand, when the owner asks, while releases are paused. A risky migration is rehearsed on a production dump restored into
 the local Postgres. All hosts come from config (`@yeral/lib/site`), so a new domain is a config change.
 
 ## Hosting (ADR 0024)
@@ -124,8 +125,7 @@ stacks → restore the database and photos → switch the DNS records → point 
 | Workflow | Trigger | Does |
 |---|---|---|
 | `ci.yml` | pull request, push to `main` | pnpm install (cached) → format check → one `turbo run lint lint:fsd typecheck test build --affected` step (on `main` without `--affected`): the Storybook stories run as Vitest browser tests in Chromium, the api tests against a Postgres 18 service · a Docker job builds and starts the api stack (`infra/docker/compose.yml`) and checks its health through Caddy · the PR title is checked as a Conventional Commit |
-| `release.yml` | push to `main` | Changesets: opens or updates «Version packages»; when merged, tags `@yeral/<app>@x.y.z`, creates GitHub Releases, deploys those apps to production |
-| `deploy.yml` | called by the two above | build → `wrangler deploy` for Storybook and legacy; the api and the new apps over SSH to the own server from P2 step 7 (by hand until then: `infra/server/README.md`) → smoke check: `/version.json` shows the commit, key pages answer 200 |
+| `deploy.yml` | called by `ci.yml` for Storybook; by hand (Actions → Deploy) for legacy | build → `wrangler deploy` for Storybook and legacy; the api and the new apps over SSH to the own server from P2 step 7 (by hand until then: `infra/server/README.md`) → smoke check: `/version.json` shows the commit, key pages answer 200 |
 | `ci.yml` → `deploy-storybook` | push to `main` after checks | builds Storybook and deploys it to storybook.yeral.app (no release needed: internal docs) |
 | Renovate | weekly | grouped dependency PRs; dev-dependency patches merge themselves when CI is green |
 
@@ -137,16 +137,15 @@ that reads a file outside every package lists it as an input with `$TURBO_ROOT$`
 `docs/design/assets/photos`); otherwise a change there runs no check at all. The frozen legacy app's lint doesn't
 wait for its dependencies.
 
-## Versioning and releases
+## Versioning (releases paused)
 
 - **Trunk-based.** `main` is always deployable. Short branches `feat/…`, `fix/…`, `chore/…` → pull request → squash merge.
   PR titles follow Conventional Commits with the app or package as scope: `feat(client): show free slots on cards`.
-- **Changesets.** A PR that changes something a user or an API consumer can notice adds `.changeset/*.md`
-  (`pnpm changeset`). The Version PR bumps versions and writes `CHANGELOG.md` for each app and package.
-- **SemVer for apps:** patch = fix, minor = feature, major = a release that changes URLs or flows. Apps stay on `0.x`
-  until the public launch (`1.0.0`). Packages are private and versioned for their changelogs; apps use `workspace:*`.
+- **No releases while the MVP is built** (the owner, 2026-10-21; ADR 0009 amended): no changesets, no version PR, no
+  tags or GitHub Releases. Versions and the `CHANGELOG.md` files stay where they are; releases (Changesets or another
+  tool) come back before the first launch (book chapter 10, P2 step 7). Packages use `workspace:*`.
 - **API versions:** path prefix `/v1`; only additive changes inside it; breaking changes ship as `/v2` side by side.
-  CI compares the OpenAPI document with `main` and fails on breaking changes (oasdiff).
+  Planned, not built: CI comparing the OpenAPI document with `main` and failing on breaking changes (oasdiff).
 - **Database:** drizzle-kit SQL migrations in git, forward only, expand → migrate data → contract.
 - **Build stamp:** `/version.json` `{ app, version, commit, builtAt }` in every app; `X-Yeral-Version` from the api.
 
@@ -175,16 +174,12 @@ wait for its dependencies.
 - Hot spots (contract, ui tokens, catalog, turbo/root config, migrations) in small PRs that merge first.
 - Memory notes go to `docs/memory-bank/log/YYYY-MM-DD-<topic>.md` during parallel work; the lead folds them in.
 
-## How the release flow behaves (as built in M0)
+## Deploys and labels
 
-- Every workspace package is versioned (`privatePackages.version/tag: true`); tags look like `@yeral/legacy@0.1.1`.
-- With pending changesets, a push to `main` opens or updates «chore: version packages». With none, the workflow runs
-  `changeset tag`; any package version without a tag gets one, a GitHub Release, and — for apps with a deploy job in
-  `release.yml` — a production deploy.
-- The version PR is opened by GitHub Actions, so its CI run waits for approval: *Approve and run* on the PR, or
-  `gh api -X POST repos/azamatos/yeral/actions/runs/<run-id>/approve`. Then it merges like any PR.
-- Repo setting *Allow GitHub Actions to create and approve pull requests* is on (2026-10-13).
-- Apps deploy to production only (no staging, ADR 0020); smoke checks live in `scripts/smoke.sh`.
+- Apps deploy to production only (no staging, ADR 0020), by hand while releases are paused; smoke checks live in
+  `scripts/smoke.sh`.
+- The repository setting *Allow GitHub Actions to create and approve pull requests* (on since 2026-10-13) served the
+  removed version PR; Renovate doesn't need it.
 - Labels for tasks: `lane:*`, `status:*`, `type:*`; agents add `agent:<name>` when claiming (create it if missing).
 
 ## Local setup notes

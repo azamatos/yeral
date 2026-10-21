@@ -33,7 +33,6 @@ body:
       placeholder: |
         - [ ] …
         - [ ] tests / stories added
-        - [ ] changeset if user-visible
     validations:
       required: true
   - type: textarea

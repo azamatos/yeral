@@ -66,7 +66,6 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | Playwright | 1.64 | end-to-end flows across apps (several origins in one test) |
 | lefthook | 2 | git hooks: format + lint staged files, commit message check |
 | commitlint | 21 | Conventional Commits |
-| Changesets + @changesets/changelog-github | 3 / 1 | versions and changelogs per app and package |
 | Renovate | — | grouped dependency PRs |
 
 ## Infrastructure
@@ -183,7 +182,6 @@ pnpm dev --filter=@yeral/client --filter=@yeral/api     # the client site on :30
 pnpm --filter @yeral/client build && pnpm --filter @yeral/client start   # the built site on Node (PORT, default 3000)
 pnpm e2e                        # (M3) Playwright against the local stack
 pnpm docker:up                  # production-like stack (Caddy + images) on *.yeral.localhost
-pnpm changeset                  # describe a user-visible change
 ```
 
 | client | business | cms | api | storybook | — |
@@ -199,4 +197,4 @@ so one login works in every app locally.
 
 **Today**: `pnpm dev` runs `apps/legacy` on :3000. `apps/client` takes :3000 when it replaces legacy (end of M3); until
 then it runs on :3001 next to legacy.
-`pnpm --filter @yeral/legacy run deploy` builds with OpenNext and publishes to Cloudflare by hand (fallback to the release flow).
+`pnpm --filter @yeral/legacy run deploy` builds with OpenNext and publishes to Cloudflare by hand (or Actions → Deploy from `main`; releases are paused, ADR 0009).

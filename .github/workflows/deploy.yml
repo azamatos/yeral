@@ -1,6 +1,7 @@
 name: Deploy
 
-# Reusable: called by release.yml (production; there is no staging, ADR 0020); can also be run by hand.
+# Reusable: ci.yml calls it for Storybook on every push to main; legacy is deployed by hand (Actions → Deploy). Releases
+# are paused until the MVP works (ADR 0009, amended 2026-10-21); there is no staging (ADR 0020).
 # Each app has a `deploy:<environment>` script: Storybook and legacy on Cloudflare. The api and the new apps deploy to
 # the own server over SSH (book chapter 10, P2 step 7; by hand until then: infra/server/README.md).
 
@@ -32,6 +33,8 @@ permissions:
 jobs:
   deploy:
     name: ${{ inputs.app }} → ${{ inputs.environment }}
+    # production only from main: a run started by hand on another branch does nothing
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment: ${{ inputs.environment }}

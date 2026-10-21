@@ -14,8 +14,8 @@ before any code used them were edited in place (marked "revised").
 | [0006](0006-contract-and-sdk.md) | zod contract, Hono RPC client, generated OpenAPI | Accepted 2026-10-13 |
 | [0007](0007-hosting-cloudflare-now-docker-later.md) | Hosting: Cloudflare now, own server with Docker + nginx later | Accepted 2026-10-13 (revised); superseded for the api and the new apps by 0024 |
 | [0008](0008-i18n-use-intl.md) | i18n with use-intl | Accepted 2026-10-13, amended by 0016 |
-| [0009](0009-versioning-changesets.md) | Versioning with Changesets, trunk-based flow | Accepted 2026-10-13 |
-| [0010](0010-ci-cd-github-actions.md) | CI/CD on GitHub Actions | Accepted 2026-10-13 (revised) |
+| [0009](0009-versioning-changesets.md) | Versioning with Changesets, trunk-based flow | Accepted 2026-10-13 · amended 2026-10-21 (releases paused) |
+| [0010](0010-ci-cd-github-actions.md) | CI/CD on GitHub Actions | Accepted 2026-10-13 (revised; release workflow removed 2026-10-21) |
 | [0011](0011-state-management.md) | State management: each kind of state has one owner | Accepted 2026-10-13 |
 | [0012](0012-design-system-and-storybook.md) | Design system in `@yeral/ui`, documented and tested in Storybook | Accepted 2026-10-13 (revised 2026-10-14) |
 | [0013](0013-testing-strategy.md) | Testing strategy | Accepted 2026-10-13 |
@@ -25,7 +25,7 @@ before any code used them were edited in place (marked "revised").
 | [0017](0017-booking-model.md) | One booking engine for any business that sells time | Accepted 2026-10-14 (revised) |
 | [0018](0018-business-workspace-model.md) | Business workspace model: own teams, roles and client records; Better Auth for identity only | Accepted 2026-10-14 (identity revised by 0019; roles and memberships superseded by 0025) |
 | [0019](0019-own-phone-login-and-sessions.md) | Our own phone-code login and database sessions instead of Better Auth | Accepted 2026-10-14 |
-| [0020](0020-local-and-production-only.md) | Local and production only: no staging | Accepted 2026-10-16 |
+| [0020](0020-local-and-production-only.md) | Local and production only: no staging | Accepted 2026-10-16 (amended 2026-10-21) |
 | [0021](0021-product-book-first.md) | Product book first; Claude Code writes the design prompts | Accepted 2026-10-17 (amended 2026-10-19, 2026-10-20: backend alongside, small design iterations, then design only where it's needed) |
 | [0022](0022-english-first-any-country.md) | Built in English, not bound to one country; each market adds its languages | Accepted 2026-10-18 |
 | [0023](0023-one-deployment-per-market.md) | One code base, one deployment per market; first launch on the own server | Accepted 2026-10-18 (revised 2026-10-19) |
