@@ -180,7 +180,8 @@ yeral.app. The team adds the first real businesses in the admin tool (Q-002).
 
 After investment, when the owner sets the date:
 
-- Turkmen and Russian: Claude translates every text; a native check before launch (Q-101).
+- Turkmen and Russian: Claude translates every text and the owner checks it; a native Turkmen and a native Russian
+  speaker each proofread every text once before launch (Q-101).
 - A lawyer in Turkmenistan: law 519-V on personal data, the privacy policy and terms (Q-033, Q-037).
 - The server in Turkmenistan (below), the data moved, the addresses switched (ADR 0023).
 - An SMS provider and real SMS sign-in; the first-launch mode switched off for this market (Q-036).

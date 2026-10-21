@@ -242,7 +242,7 @@ that only *Jaň et* is left (Q-125).
 | Text | optional, up to 500 characters | Client | client spec §4.8 |
 | Editing | for 7 days after writing | Client | client spec §4.8; code: packages/domain/src/lifecycle.ts |
 | Deadline to write one | 30 days after the visit | Fixed | Q-126, decided 18.10.2026; code: packages/domain/src/lifecycle.ts |
-| Review ask by SMS | none: clients review from *Ýazylyşlarym* (My bookings) and from the booking link after a completed visit | Fixed | Q-259, Q-170, decided 18.10.2026 |
+| Review ask | no SMS; a "How was it?" card once per completed visit on *Ýazylyşlarym* (My bookings) and the home page, closed for good with one tap (F-243); clients also review from *Ýazylyşlarym* and from the booking link after a completed visit | Fixed | Q-259, Q-170, decided 18.10.2026, settled 21.10.2026 |
 | Business reply | up to 500 characters; the business can edit or delete it | Owner/admin | business spec §15 |
 | Reviews per page in the workspace | 20 | Fixed | business spec §15 |
 | Report reasons | 5 | Fixed | business spec §15 |
@@ -317,7 +317,7 @@ flowchart LR
   B --> C["Reminder a day before"]
   C --> D["Reminder 2 h before"]
   D --> E["Visit ends"]
-  E --> F["No review ask (Q-259)"]
+  E --> F["No review-ask SMS (Q-259)"]
 ```
 
 | What | Value | Who can change it | Source |
@@ -328,11 +328,11 @@ flowchart LR
 | No answer in time | SMS at once, with 3 free times and a link, or *Başga wagt saýlaň* when nothing is free; always sent | Fixed | client spec §6; Q-252, Q-286, decided 18.10.2026 |
 | Cancelled by the business | SMS with the reason | Client (the *Tassyklama we üýtgeşmeler* switch) | business spec §3; Q-286, decided 18.10.2026; code: packages/i18n/src/messages/tk.json |
 | Reminders | a day (24 h) before and 2 h before; skipped when the booking is made later than that | Client (switches); business ("*Ýatlatma SMS-lerini iberme*" per client) | client spec §6, business spec §6; skipping Q-257, decided 18.10.2026; code: apps/api/src/modules/bookings/confirm.ts |
-| Review ask | none | Fixed | Q-259, decided 18.10.2026 |
+| Review ask | no SMS; the "How was it?" card in the app instead (F-243) | Fixed | Q-259, decided 18.10.2026, settled 21.10.2026 |
 | Client SMS at night | booking outcomes at any hour; a reminder that falls between 22:00 and 08:00 goes at 21:30 the evening before the visit with the "tomorrow" text; at most one reminder on any day before the visit | Fixed | Q-285, decided 18.10.2026; Q-293 |
 | SMS that fail | tried 5 times, waiting 1, 2, 4 and 8 min, then the Ýeral team is alerted; a reminder that would arrive after the visit has started is dropped | Fixed | Q-284, decided 18.10.2026; code: apps/api/src/modules/jobs/run.ts |
 | SMS length | full Turkmen letters; two-part messages accepted; texts shortened where that's easy | Fixed | Q-295, decided 18.10.2026 |
-| SMS per business | no cap on MVP; the Ýeral team watches a monthly count per business | Ýeral team | Q-299, decided 18.10.2026 |
+| SMS per business | no cap that drops an SMS; past 1000 a day or 30 in 10 minutes per business an SMS waits for the window; a business in review texts no number its team typed in; the Ýeral team watches a monthly count per business | Fixed; the count: Ýeral team | Q-299, decided 18.10.2026, settled 21.10.2026; code: apps/api (#128) |
 | Staff: new request | at once, in the browser with a sound; SMS off by default, each person can switch it on; never at night or to someone who has the workspace open | Each person | business spec §2, §16; Q-297, decided 18.10.2026 |
 | Staff: request about to run out | 5 min before | Each person | business spec §16 |
 | Staff: tomorrow's bookings | 20:00 (17:00–23:00); off by default on MVP | Each person | business spec §16; B-Notifications screen; Q-296, decided 18.10.2026 |

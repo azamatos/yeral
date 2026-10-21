@@ -90,6 +90,9 @@ then the apps.
 - 2026-10-21 (later): the owner had web-b2 fix and merge every open PR; the backend stack merged in order the same day.
 - 2026-10-21 (later): Ýeral's support line is the owner's phone and Telegram until it has its own; deploy main to the
   server by hand (done the same day); "delete everything unnecessary" (left to the owner: Waiting on the owner).
+- 2026-10-21 (later): "delete everything we don't need anymore"; keep `yeral-proto` until all the web apps are live.
+  Business decisions: the recommended option when it isn't critical; a critical one goes to the owner in the chat
+  before the work starts, with its full description (no IDs to look up).
 
 ## Decisions
 
@@ -144,7 +147,11 @@ booking rules (B-41, B-42), the menu (B-38), the profile (B-37, Q-215), requests
 an authenticator code, never a phone (#122) · [0009](../decisions/0009-versioning-changesets.md) amended: releases
 paused until the MVP works (#133). The day's "how" rows are 21.10.2026 rows in the book's chapter 9 marked "Claude
 (delegated)": photos, the timed notices, the floor, the admin tool's sign-in, businesses, reviews, closing and adding,
-the first launch, the SMS limits (with a concern on Q-299, the owner's "no cap"), and slice 1's (#105, #131).
+the first launch, the SMS limits, and slice 1's (#105, #131); they stand (the owner, 21.10: the recommended option
+unless critical). Six concerns settled the same way (chapter 9, 21.10.2026): Q-299 the SMS safety limit stays, Q-270
+no password, Q-259 a "How was it?" card once per completed visit (F-243, no SMS), Q-105 flexible where businesses
+differ with good defaults, Q-103 a price level later (F-244), Q-101 a native proofread before the Turkmenistan launch.
+Q-036's concern is critical and went to the owner.
 
 ## Open questions
 
@@ -187,11 +194,11 @@ Where the old questions went (2026-10-17):
 hand since the agents' permission checks block it (`log/2026-10-21-support-line.md`): the 42 merged branches on
 GitHub, the 80 local branches, the unused Hyperdrive config `yeral-production` and the Neon project "Yeral", the
 untracked `.neon` and `apps/api/dist-worker/` in the main checkout, and the repo setting "Allow GitHub Actions to create
-and approve pull requests" (unused since #133); the concern on Q-299 (an SMS safety limit that never drops an SMS,
-against "no cap"); the 20–21.10.2026 "Claude (delegated)" rows in chapter 9; Q-036's concern stands (with the code on
-the screen anyone who types a real member's number signs in as them); whether to delete the old Cloudflare Pages
-project `yeral-proto` (yeral.azamatos.com, an early Ýeral prototype; the owner's other Pages projects aren't Ýeral's
-and stay); later an R2 token, accounts for error tracking and uptime checks, the DNS records when going public.
+and approve pull requests" (unused since #133); the answer on Q-036's concern, asked in the chat on 21.10 (with the
+code on the screen anyone who types a real member's number signs in as them; it decides whether real businesses can
+join the first launch); later an R2 token, accounts for error tracking and uptime checks, the DNS records when going
+public. The old Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an early Ýeral prototype) stays until all
+the web apps are live, then goes (the owner, 21.10); the owner's other Pages projects aren't Ýeral's and stay.
 
 **Server:** `ssh yeral-vps` (the owner allowed `Bash(ssh yeral-vps:*)`); deploy by hand with `infra/server/README.md` →
 "Deploying Ýeral by hand". Since 2026-10-21 it runs main at a2e0418 (api image `yeral-api:a2e04184e1e3`, deployed by

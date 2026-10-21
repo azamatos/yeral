@@ -194,7 +194,8 @@ The design is Turkmen only; Russian and English are written in code from the Tur
 - C · The owner checks all three languages.
 
 answer: C · English is the source from now on, the design included; Claude writes the other languages and the owner checks them. The Turkmen design was there to see how Turkmen looks with the font. (18.10.2026)
-concern: Claude's Turkmen is the weakest of the three languages, and Turkmen is the launch market's main language. Your check is enough if you read Turkmen natively; otherwise one proofread by a native Turkmen and a native Russian speaker before launch is worth the few hours it costs. Also: screens drawn in English hide longer texts (Russian runs about 30% longer), so each design prompt should ask Claude Design to check the screen with Russian text too. (18.10.2026)
+concern, settled 21.10.2026: Claude's Turkmen is the weakest of the three languages, and Turkmen is the launch market's main language. Your check is enough if you read Turkmen natively; otherwise one proofread by a native Turkmen and a native Russian speaker before launch is worth the few hours it costs. Also: screens drawn in English hide longer texts (Russian runs about 30% longer), so each design prompt should ask Claude Design to check the screen with Russian text too. (18.10.2026)
+settled: Claude writes the translations and the owner checks them; before the Turkmenistan launch a native Turkmen and a native Russian speaker each proofread every text once (chapter 10, P6). Every component and each slice's screens are checked with Russian-length text (P3). (Claude, delegated: the owner asked for the recommended option wherever a decision isn't critical, 21.10.2026)
 
 ## Q-102 · Which language a business must fill in
 chapter: 02 · status: decided
@@ -217,7 +218,8 @@ Restaurants and cafés show *Ortaça hasap* `≈ 150 TMT` on cards and in the ta
 - C · Drop the average bill.
 
 answer: C · Drop the average bill: billing isn't Ýeral's job, booking a place is. A menu may come later. (18.10.2026)
-concern: Dropping the amount is right. One thing worth keeping later: an optional price level (₼ to ₼₼₼₼, like Google Maps) set by the restaurant. It isn't billing, and it's one of the first things people look at when choosing where to eat. (18.10.2026)
+concern, settled 21.10.2026: Dropping the amount is right. One thing worth keeping later: an optional price level (₼ to ₼₼₼₼, like Google Maps) set by the restaurant. It isn't billing, and it's one of the first things people look at when choosing where to eat. (18.10.2026)
+settled: No amount. An optional price level, one to four marks set by the restaurant, comes later (F-244). (Claude, delegated: the owner asked for the recommended option wherever a decision isn't critical, 21.10.2026)
 
 ## Q-104 · Number format in English
 chapter: 02 · status: decided
@@ -238,7 +240,8 @@ A business day may end at 24:00 (ROUND6-ANSWERS E1). Opening past midnight, such
 - B · Design it now: hours like 18:00–02:00 and bookings that cross midnight.
 
 answer: B · Design it now: hours like 18:00–02:00 and bookings that cross midnight. Owner's note: no hard limits on such things; organise everything flexibly, because we can't predict which options businesses will want. (18.10.2026)
-concern: Crossing midnight is worth it for bars and late restaurants. The general rule worries me more: "no limits, everything flexible" turns every option into a setting, and each setting means more screens, more rules to test and more ways for a business to get confused. Better: flexible where businesses really differ (hours, hold time, cancellation rules), with good defaults, and new options added when real businesses ask for them. (18.10.2026)
+concern, settled 21.10.2026: Crossing midnight is worth it for bars and late restaurants. The general rule worries me more: "no limits, everything flexible" turns every option into a setting, and each setting means more screens, more rules to test and more ways for a business to get confused. Better: flexible where businesses really differ (hours, hold time, cancellation rules), with good defaults, and new options added when real businesses ask for them. (18.10.2026)
+settled: Past midnight stays as decided and built. As a working rule, options are flexible where businesses really differ (hours, hold time, cancellation rules), each with a good default, and new options come when real businesses ask for them. (Claude, delegated: the owner asked for the recommended option wherever a decision isn't critical, 21.10.2026)
 
 ## Q-106 · Whole kilometres: 3,0 km or 3 km
 chapter: 02 · status: decided
@@ -907,7 +910,8 @@ The review-ask SMS carries the booking link `yeral.app/b/{code}`. The link page 
 - B · Send the link to the login page, then on to the booking in Ýazylyşlarym.
 
 answer: None of these · No review automation: no review-ask SMS. Clients review from Ýazylyşlarym (My bookings) and from the booking link after a completed visit (Q-170); a specialist may ask in person. Owner: no aggressive asking. (18.10.2026)
-concern: Without any ask, few clients write reviews (most people review only when asked), so most businesses would show no rating for months, and ratings decide the order of lists without a location (Q-114). A free middle way: no SMS, but after a completed visit Ýazylyşlarym and the home page show a small "How was it?" card once, closed with one tap. (18.10.2026)
+concern, settled 21.10.2026: Without any ask, few clients write reviews (most people review only when asked), so most businesses would show no rating for months, and ratings decide the order of lists without a location (Q-114). A free middle way: no SMS, but after a completed visit Ýazylyşlarym and the home page show a small "How was it?" card once, closed with one tap. (18.10.2026)
+settled: Still no review-ask SMS. After a completed visit, *Ýazylyşlarym* (My bookings) and the home page show a small "How was it?" card once for that visit; one tap closes it for good, and its stars open the review form (F-243). (Claude, delegated: the owner asked for the recommended option wherever a decision isn't critical, 21.10.2026)
 
 ## Q-260 · Review asks for bookings made by staff
 chapter: 07 · status: decided
@@ -1026,7 +1030,8 @@ Every time a phone signs in, the code links all bookings and business client rec
 - C · Ask the person at their first sign-in before linking.
 
 answer: B · No password. Phone bookings link to an account only if upcoming or from the last 6 months, and when a phone signs in to an account unused for 6 months, Ýeral first asks "Is this you?" with the account's first name; "No" starts a fresh account and leaves the old history unlinked. The owner suggested a password: see the concern. (18.10.2026)
-concern: A password doesn't protect a number that changed owner: "forgot password" would reset it by SMS to that same number, and every client would have one more password to remember. The 6-month limit and the "Is this you?" check cover a recycled number without that cost. If you still want a password, write it here. (18.10.2026)
+concern, settled 21.10.2026: A password doesn't protect a number that changed owner: "forgot password" would reset it by SMS to that same number, and every client would have one more password to remember. The 6-month limit and the "Is this you?" check cover a recycled number without that cost. If you still want a password, write it here. (18.10.2026)
+settled: No password. The 6-month limit and the "Is this you?" check stay as decided. (Claude, delegated: the owner asked for the recommended option wherever a decision isn't critical, 21.10.2026)
 
 ## Q-271 · What the "Başga ýerde" switch controls
 chapter: 07 · status: decided
@@ -1299,4 +1304,5 @@ chapter: 08 · status: decided
 
 answer: A · No cap on MVP; the Ýeral team watches a monthly count per business. (18.10.2026)
 
-concern: A monthly count can't stop a team that types made-up numbers into the calendar and sends texts in its own words under Ýeral's sender, and the backend review of 20.10.2026 asked for a guard before SMS go out. The code now has a safety limit that never drops an SMS: past 1000 a day or 30 in 10 minutes per business they wait for the window, a business in review texts no number its team typed in, and the closing's notices are never held. It costs nothing at normal volumes; say if you'd rather have none. (21.10.2026)
+concern, settled 21.10.2026: A monthly count can't stop a team that types made-up numbers into the calendar and sends texts in its own words under Ýeral's sender, and the backend review of 20.10.2026 asked for a guard before SMS go out. The code now has a safety limit that never drops an SMS: past 1000 a day or 30 in 10 minutes per business they wait for the window, a business in review texts no number its team typed in, and the closing's notices are never held. It costs nothing at normal volumes; say if you'd rather have none. (21.10.2026)
+settled: The safety limit stays as built (#128): it never drops an SMS (past 1000 a day or 30 in 10 minutes per business an SMS waits for the window), a business in review texts no number its team typed in, and the Ýeral team still watches a monthly count per business. (Claude, delegated: the owner asked for the recommended option wherever a decision isn't critical, 21.10.2026)

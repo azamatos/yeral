@@ -47,7 +47,8 @@ question.
   a redraw (Q-133, revised 20.10.2026), and Turkmen comes back as a translation. Design v0.5 is Turkmen; it showed how
   Turkmen looks with the font and stays the reference for the Turkmen translation. (Q-101; Q-133, decided 18.10.2026, revised 20.10.2026)
 - **Claude writes the translations** into each market's languages; the owner checks all of them before the market
-  launches. (Q-101, decided 18.10.2026)
+  launches, and before the Turkmenistan launch a native Turkmen and a native Russian speaker each proofread every text
+  once. (Q-101, decided 18.10.2026, settled 21.10.2026)
 - Russian runs about 30% longer: buttons fit their text and never have a fixed width; labels wrap to two lines before
   they're cut. (client spec §8)
 - Plurals: Turkmen and English have one form; Russian has three (1 место, 2 места, 5 мест). (client spec §8)
