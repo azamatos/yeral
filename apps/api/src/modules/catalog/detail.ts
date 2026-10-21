@@ -15,7 +15,7 @@ import { ApiError } from '../../http/errors'
 import { appointmentContext, loadBusiness, loadBusy, type BusinessRow } from '../availability/context'
 import { buildCards } from './cards'
 import { cityRefOf, loadCities } from './cities'
-import { geoOf, openOf, photoOf, priceFromOf, publicPrice, text } from './map'
+import { geoOf, isPublic, openOf, photoOf, priceFromOf, publicPrice, publicRow, text } from './map'
 import { bookOnlineFor } from '../clients/online'
 import { signsIn } from '../team/members'
 
@@ -60,21 +60,21 @@ export async function publicBusiness(deps: Deps, slug: string) {
   const [row] = await deps.db
     .select()
     .from(businesses)
-    .where(and(eq(businesses.slug, slug), eq(businesses.verification, 'verified')))
+    .where(and(eq(businesses.slug, slug), isPublic()))
   if (!row) throw new ApiError('not_found')
   return row
 }
 
 /**
- * A business the viewer may see (book F-032): a verified one, or one still in review (or rejected) for a signed-in
- * member of its own team, with the preview's status and, for its owner, the Ýeral team's reason (Q-274). Anyone else
- * gets `in_review` ("Bu sahypa entek açylmady"); an unknown slug `not_found`. The business page, its free times and its
- * reviews all ask this, so they answer the same.
+ * A business the viewer may see (book F-032): a public one, or one still in review, rejected or hidden for a signed-in
+ * member of its own team, with the preview's status and, for its owner, the Ýeral team's reason (Q-274, Q-012). Anyone
+ * else gets `in_review` ("Bu sahypa entek açylmady"), or for a hidden one `not_found`, as for an unknown slug. The
+ * business page, its free times and its reviews all ask this, so they answer the same.
  */
 export async function visibleBusiness(deps: Deps, slug: string, viewerId: string | null) {
   const [row] = await deps.db.select().from(businesses).where(eq(businesses.slug, slug))
   if (!row) throw new ApiError('not_found')
-  if (row.verification === 'verified') return { row, preview: null }
+  if (publicRow(row)) return { row, preview: null }
   const [member] = viewerId
     ? await deps.db
         .select({ level: staff.level })
@@ -83,8 +83,10 @@ export async function visibleBusiness(deps: Deps, slug: string, viewerId: string
         .limit(1)
     : []
   // a business still being set up isn't anyone's to know about yet (book Q-200)
-  if (!member) throw new ApiError(row.setupStep ? 'not_found' : 'in_review')
-  return { row, preview: { status: row.verification, reason: member.level === 'owner' ? row.verificationReason : null } }
+  if (!member) throw new ApiError(row.setupStep || row.hiddenAt ? 'not_found' : 'in_review')
+  const owner = member.level === 'owner'
+  if (row.hiddenAt) return { row, preview: { status: 'hidden' as const, reason: owner ? row.hiddenReason : null } }
+  return { row, preview: { status: row.verification as 'pending' | 'rejected', reason: owner ? row.verificationReason : null } }
 }
 
 /**
@@ -145,7 +147,7 @@ export async function businessDetail(
   const others = await db
     .select({ id: businesses.id, lat: businesses.lat, lng: businesses.lng })
     .from(businesses)
-    .where(and(eq(businesses.categoryId, b.categoryId), eq(businesses.verification, 'verified'), ne(businesses.id, b.id)))
+    .where(and(eq(businesses.categoryId, b.categoryId), isPublic(), ne(businesses.id, b.id)))
   const nearest = others.sort((x, y) => distanceM(b, x) - distanceM(b, y)).slice(0, 4)
   const similar = (
     await buildCards(

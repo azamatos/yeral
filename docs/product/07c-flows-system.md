@@ -49,7 +49,7 @@ flowchart LR
 | S-14 | Blocks a person's time in other workspaces | a booking in one workspace | not built |
 | S-15 | Updates open screens | any change | built |
 | S-16 | Alerts the business to a new request | a request is sent | partly (the api's events and 5-minute warning built) |
-| S-17 | Makes a business public after review | Ýeral verifies it | partly |
+| S-17 | Makes a business public after review | Ýeral verifies it | built (api) |
 | S-18 | Keeps quiet at night, sends summaries | quiet hours, summary times | not built |
 | S-19 | Works out the typical answer time | past answers | not built |
 | S-20 | Keeps demo data off production | database setup | built |
@@ -737,7 +737,7 @@ flowchart TD
 
 > Open question Q-010: what the Ýeral team can do at launch, and with which tool.
 
-**Status.** Design: decided and drawn for the business and the visitor (business spec §7, §26; ROUND6 F1) · Code: partly. Only verified businesses are public; an unverified link answers `in_review` (the friendly page), and the business's own team gets its page as a preview (F-032). There's no banner yet and no verification tool.
+**Status.** Design: decided and drawn for the business and the visitor (business spec §7, §26; ROUND6 F1) · Code: the api's part built (21.10.2026): only public businesses (verified, not hidden) show; an unverified link answers `in_review`, a hidden one `not_found`, and the business's own team gets its page as a preview (F-032) with the status and, for the owner, the reason. The admin endpoints keep the queue (finished businesses, the longest waiting first; never a draft), verify, send back with a reason (a live one un-verified), hide and show, and check a move again; the owner sends it back for review (`POST /v1/w/{slug}/verification`) and hears each result on screen (`business.reviewed`) and by a Ýeral SMS that waits for 08:00 at night. The banner and the admin tool come with the apps.
 
 ### S-18 · Quiet hours and summaries for the business
 

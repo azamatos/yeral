@@ -146,7 +146,11 @@
     "reminderDay": "Ýatlatma: ertir {time} {business}, {address}.",
     "reminder2h": "Ýatlatma: şu gün {time} {business}, {address}.",
     "reminderDayMoved": "Ýatlatma: ertir {time} {business}, täze salgy: {address}.",
-    "reminder2hMoved": "Ýatlatma: şu gün {time} {business}, täze salgy: {address}."
+    "reminder2hMoved": "Ýatlatma: şu gün {time} {business}, täze salgy: {address}.",
+    "pageVerified": "{brand}: {business} açyldy: müşderiler ony gözlegde we {link} salgyda tapýarlar",
+    "pageRejected": "{brand}: {business} entek açylmady: {reason}. Iş ýeriňizde düzediň we täzeden iberiň: {link}",
+    "pageHidden": "{brand}: {business} sahypasyny wagtlaýynça gizledik: {reason}.",
+    "pageShown": "{brand}: {business} sahypasy täzeden açyk."
   },
   "fmt": {
     "money": "{amount} {currency}",

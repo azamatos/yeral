@@ -146,7 +146,11 @@
     "reminderDay": "Reminder: tomorrow at {time}, {business}, {address}.",
     "reminder2h": "Reminder: today at {time}, {business}, {address}.",
     "reminderDayMoved": "Reminder: tomorrow at {time}, {business}, new address: {address}.",
-    "reminder2hMoved": "Reminder: today at {time}, {business}, new address: {address}."
+    "reminder2hMoved": "Reminder: today at {time}, {business}, new address: {address}.",
+    "pageVerified": "{brand}: {business} is open: clients find it in search and at {link}",
+    "pageRejected": "{brand}: {business} isn't open yet: {reason}. Fix it in your workspace and send it again: {link}",
+    "pageHidden": "{brand}: we've hidden {business}'s page for now: {reason}.",
+    "pageShown": "{brand}: {business}'s page is open again."
   },
   "fmt": {
     "money": "{amount} {currency}",

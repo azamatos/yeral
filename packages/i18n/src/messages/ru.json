@@ -146,7 +146,11 @@
     "reminderDay": "Напоминание: завтра в {time} {business}, {address}.",
     "reminder2h": "Напоминание: сегодня в {time} {business}, {address}.",
     "reminderDayMoved": "Напоминание: завтра в {time} {business}, новый адрес: {address}.",
-    "reminder2hMoved": "Напоминание: сегодня в {time} {business}, новый адрес: {address}."
+    "reminder2hMoved": "Напоминание: сегодня в {time} {business}, новый адрес: {address}.",
+    "pageVerified": "{brand}: {business} открыт: клиенты находят его в поиске и по ссылке {link}",
+    "pageRejected": "{brand}: {business} пока не открыт: {reason}. Исправьте в рабочем пространстве и отправьте снова: {link}",
+    "pageHidden": "{brand}: мы временно скрыли страницу «{business}»: {reason}.",
+    "pageShown": "{brand}: страница «{business}» снова открыта."
   },
   "fmt": {
     "money": "{amount} {currency}",

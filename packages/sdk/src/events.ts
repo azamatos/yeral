@@ -47,8 +47,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
   }
   // a client's record or notes: their pages, the calendar's alert markers, the requests' notes
   if (e.type === 'client.updated' && e.business) out.push(keys.clients(e.business), keys.calendar(e.business), keys.requests(e.business))
-  // settings change the page, free times and who answers requests (the switcher's counts)
-  if (e.type === 'business.updated' && e.business)
+  // settings change the page, free times and who answers requests (the switcher's counts); a review result the banner
+  if ((e.type === 'business.updated' || e.type === 'business.reviewed') && e.business)
     out.push(
       keys.settings(e.business),
       keys.businessAll(e.business),

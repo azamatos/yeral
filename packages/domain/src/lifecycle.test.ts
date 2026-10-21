@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  businessSmsAt,
   expiryWarningAt,
   canRemoveComplaint,
   statusWithoutNoShow,
@@ -448,5 +449,15 @@ describe('when "Haýyşyň wagty gutarýar" is due (book S-01)', () => {
   })
   it('none for an answer time of 10 minutes or less', () => {
     expect(expiryWarningAt(epochOf('2026-10-14', 600), epochOf('2026-10-14', 610), hours)).toBeNull()
+  })
+})
+
+describe('a Ýeral SMS to a business waits out the night (book Q-279)', () => {
+  it('by day at once; from 22:00 to 08:00 at 08:00', () => {
+    expect(businessSmsAt(epochOf('2026-10-14', 600))).toBe(epochOf('2026-10-14', 600))
+    expect(businessSmsAt(epochOf('2026-10-14', 8 * 60))).toBe(epochOf('2026-10-14', 8 * 60))
+    expect(businessSmsAt(epochOf('2026-10-14', 22 * 60))).toBe(epochOf('2026-10-15', 8 * 60))
+    expect(businessSmsAt(epochOf('2026-10-14', 23 * 60 + 59))).toBe(epochOf('2026-10-15', 8 * 60))
+    expect(businessSmsAt(epochOf('2026-10-15', 3 * 60))).toBe(epochOf('2026-10-15', 8 * 60))
   })
 })

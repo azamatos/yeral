@@ -28,6 +28,7 @@ import type { Context } from 'hono'
 import { ApiError } from '../../http/errors'
 import type { AppEnv } from '../../http/env'
 import { errors, formBody, json, jsonBody, noContent } from '../../http/openapi'
+import { sendForReview } from '../admin/businesses'
 import { requireMember } from '../team/service'
 import { hoursOf, updateHours } from './hours'
 import { profileOf, rulesOf, updateProfile, updateRules } from './service'
@@ -37,6 +38,15 @@ import { addStatus, deleteStatus, statusesOf, updateStatus } from './statuses'
 
 const tags = ['settings']
 const denied = { 401: errors[401], 403: errors[403], 404: errors[404] }
+
+const sendAgainRoute = createRoute({
+  method: 'post',
+  path: '/w/{slug}/verification',
+  tags: ['settings'],
+  summary: 'The owner sends a business the Ýeral team sent back for review again, once it’s fixed (Q-274)',
+  request: { params: workspaceParamSchema },
+  responses: { ...noContent, 409: errors[409], ...denied },
+})
 
 /** A team member who may change business settings. */
 async function requireSettings(c: Context<AppEnv>, slug: string) {
@@ -165,6 +175,12 @@ const orderPhotosRoute = createRoute({
 })
 
 export const settingsRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(sendAgainRoute, async (c) => {
+    const { business, member } = await requireMember(c, c.req.valid('param').slug)
+    if (member.level !== 'owner') throw new ApiError('forbidden')
+    await sendForReview(c.var.deps, business.id)
+    return c.body(null, 204)
+  })
   .openapi(galleryRoute, async (c) => {
     const { business, user } = await requireSettings(c, c.req.valid('param').slug)
     return c.json(await galleryOf(c.var.deps, business, user.lang), 200)
