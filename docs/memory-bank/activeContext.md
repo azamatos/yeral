@@ -189,9 +189,9 @@ GitHub, the 80 local branches, the unused Hyperdrive config `yeral-production` a
 untracked `.neon` and `apps/api/dist-worker/` in the main checkout, and the repo setting "Allow GitHub Actions to create
 and approve pull requests" (unused since #133); the concern on Q-299 (an SMS safety limit that never drops an SMS,
 against "no cap"); the 20–21.10.2026 "Claude (delegated)" rows in chapter 9; Q-036's concern stands (with the code on
-the screen anyone who types a real member's number signs in as them); later an R2 token, accounts for error tracking
-and uptime checks, the DNS records when going public. Earlier: the main checkout needs
-`git checkout -- docs/design && git clean -fd docs/design && git pull`.
+the screen anyone who types a real member's number signs in as them); whether to delete the old Cloudflare Pages
+project `yeral-proto` (yeral.azamatos.com, an early Ýeral prototype; the owner's other Pages projects aren't Ýeral's
+and stay); later an R2 token, accounts for error tracking and uptime checks, the DNS records when going public.
 
 **Server:** `ssh yeral-vps` (the owner allowed `Bash(ssh yeral-vps:*)`); deploy by hand with `infra/server/README.md` →
 "Deploying Ýeral by hand". Since 2026-10-21 it runs main at a2e0418 (api image `yeral-api:a2e04184e1e3`, deployed by
