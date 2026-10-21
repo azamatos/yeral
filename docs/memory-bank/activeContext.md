@@ -180,7 +180,9 @@ Where the old questions went (2026-10-17):
    beside `{slug, name, step}` (Q-200); per workspace in `GET /v1/me/workspaces` the business's status (for banners),
    the person's specialization and the unanswered reviews count; for leaving a workspace, the person's bookings and
    requests ahead there; for deleting an account, the upcoming bookings it would cancel; `POST /auth/code`: its own
-   error code for a number that isn't a mobile; the comment on `mobileInputSchema` still names 61–65, 71.
+   error code for a number that isn't a mobile; the comment on `mobileInputSchema` still names 61–65, 71; for slice
+   3, the "How was it?" card (F-243): a per-booking "card closed" mark and the completed visits that still show a
+   card, on `/v1/me/bookings` or a small endpoint of its own.
 3. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md` for the api, `deploy.yml` for
    legacy). The first admin account isn't made yet: `docker compose -f /srv/yeral/compose.yml run --rm api node
    dist/cli.js admin-invite <login> "<name>"` when the admin tool needs one.
