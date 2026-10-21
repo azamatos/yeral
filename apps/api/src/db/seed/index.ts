@@ -4,7 +4,6 @@
  * database as it was. Demo dates move with "today"; weekly data (opening hours, shifts, breaks, the yoga week) turns with
  * them, so the demo day keeps the design's Wednesday whatever weekday it lands on.
  */
-import { bookingCode } from '@yeral/domain/id'
 import { MARKET } from '@yeral/domain/market'
 import { localized, type BookingStatus } from '@yeral/domain/model'
 import { splitName } from '@yeral/domain/names'
@@ -18,6 +17,7 @@ import type { Db, Queryable } from '../client'
 import * as t from '../schema'
 import { CATEGORIES } from './categories'
 import { CITIES } from './cities'
+import { seedCode } from './codes'
 import {
   AYJEMAL_BOOKINGS,
   BUSINESSES,
@@ -88,12 +88,7 @@ interface Ctx {
   examplePhone?: string
 }
 
-function code(ctx: Ctx, fixed?: string): string {
-  let c = fixed ?? bookingCode()
-  while (ctx.usedCodes.has(c)) c = bookingCode()
-  ctx.usedCodes.add(c)
-  return c
-}
+const code = (ctx: Ctx, fixed?: string) => seedCode(ctx.usedCodes, fixed)
 
 async function user(ctx: Ctx, phone: string, name: string | null): Promise<string> {
   const known = ctx.users.get(phone)
