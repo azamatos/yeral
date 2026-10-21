@@ -81,7 +81,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 |---|---|---|---|
 | Client · discovery (home, search, map, categories, business page) | 29 | 9 | 0 |
 | Client · booking (per type) | 12 | 5 | 0 |
-| Client · after booking (my bookings, cancel, move, reviews, SMS link page) | 13 | 4 | 1 |
+| Client · after booking (my bookings, cancel, move, reviews, SMS link page) | 14 | 4 | 1 |
 | Client · account | 9 | 1 | 0 |
 | Business · access (login, workspaces, invites, levels, permissions, ownership) | 12 | 2 | 0 |
 | Business · setup (wizard, profile, services, hours, rules, link & QR) | 18 | 2 | 0 |
@@ -96,8 +96,8 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | Ýeral team (verification, moderation, categories, support, CMS modules) | 5 | 7 | 0 |
 | System (jobs, SMS, live updates, search indexing, SEO, i18n) | 11 | 3 | 0 |
 | Platform (hosting, own server, Storybook, monitoring) | 9 | 1 | 1 |
-| Later and non-goals | 0 | 24 | 2 |
-| **All** | **155** | **83** | **4** |
+| Later and non-goals | 0 | 25 | 2 |
+| **All** | **156** | **84** | **4** |
 
 ## Client · discovery (home, search, map, categories, business page)
 
@@ -186,6 +186,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-070 | "This isn't me" on phone bookings | A client reports a phone booking made with their number by mistake. | Later | not designed | legacy only |  |
 | F-071 | Confirm visit the day before | After repeated no-shows the client must confirm the day before or lose the slot. | Never | not designed | legacy only | Design uses "phone only after N no-shows" instead (F-191). |
 | F-072 | My reviews page | A list of the client's own reviews with edit / delete. | Later | not designed | legacy only |  |
+| F-243 | "How was it?" card | After a completed visit, *Ýazylyşlarym* (My bookings) and the home page show a small card once for that visit; its stars open the review form (F-067), one tap closes it for good. No SMS. | MVP | not designed (the nearest drawn card pattern) | not built (the api remembers a closed card per booking) | Q-259, settled 21.10.2026 (Claude, delegated). |
 
 ## Client · account
 
@@ -197,7 +198,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-076 | Avatar menu and log out | Logged-in menu: My bookings · Favourites · Profile · Language · Log out. | MVP | drawn (Auth) | built with Log out (#110) and Profile (#118); My bookings and Favourites come with their pages, Language with a market's second language |  |
 | F-077 | Profile and phone change | Edit name; change phone via an SMS code to the new number. | MVP | drawn (Account-Profile) | built (api `/v1/me`, `/v1/me/phone/*`; the client profile, #118) |  |
 | F-078 | Language preference | TK / RU / EN saved to the profile and carried across sites. | MVP | drawn (Account-Profile) | built (api) |  |
-| F-079 | SMS notification switches | Confirmation, reminder 1 day before, reminder 2 h before. | MVP | drawn (Account-Profile) | built (api, jobs honour them) | No review request: there are no review asks (Q-259). |
+| F-079 | SMS notification switches | Confirmation, reminder 1 day before, reminder 2 h before. | MVP | drawn (Account-Profile) | built (api, jobs honour them) | No review-ask SMS (Q-259); the in-app card is F-243. |
 | F-080 | Favourites list | Grid of saved businesses with remove + undo. | MVP | drawn (Account-Profile · favourites) | api built |  |
 | F-081 | Delete account | Danger action with a confirm modal. | MVP | drawn (Account-Profile) | built (api `DELETE /v1/me`; the client profile, #118) |  |
 | F-082 | Client browser notifications | Browser notifications about answers, moves and reminders. | Later | not designed | legacy only | Client push comes with native apps (F-224). |
@@ -372,7 +373,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-189 | Request expiry | Unanswered requests are cancelled at the hold time (never past the start) with 3 free times and an SMS. | MVP | spec only | built (jobs runner every minute, domain `holdUntil`) | Hold time options 15 min – 24 h. Unanswered move requests just lapse. |
 | F-190 | Automatic completion | Confirmed visits become Completed after their end time. | MVP | spec only | built (jobs) |  |
 | F-191 | No-show block | After N no-shows (default 2) the client books that business only by phone. | MVP | spec only | built (domain, api) |  |
-| F-192 | Client SMS | Confirmed, declined (+reason), expired (+3 times), reminders 1 day and 2 h before; none on send; no review ask (Q-259). | MVP | spec only (README §6) | built (i18n texts, jobs; log adapter) | Messages only go to the log until F-193. |
+| F-192 | Client SMS | Confirmed, declined (+reason), expired (+3 times), reminders 1 day and 2 h before; none on send; no review-ask SMS (Q-259). | MVP | spec only (README §6) | built (i18n texts, jobs; log adapter) | Messages only go to the log until F-193. |
 | F-193 | Production SMS gateway | A real SMS provider and sender name. | Later | not designed | not built | No SMS at the first launch: the code shows on the screen (Q-036, decided 18.10.2026). Comes with the Turkmenistan launch. |
 | F-194 | Live updates | Open screens refresh from an events feed polled every 10 s, on focus and on demand. | MVP | not designed | built (api `/v1/events`, sdk) | A push channel can replace polling later. |
 | F-195 | Availability engine | Free times for appointments (hours, shifts, breaks, buffers, chains), tables and classes; database constraints stop double booking. | MVP | spec only | built (domain, api exclusion constraints) |  |
@@ -430,3 +431,4 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-237 | Notify me when booking reopens | Client asks to be told when a paused business takes online bookings again. | Later | not designed | legacy only |  |
 | F-239 | Menu | A restaurant's or café's menu on its page. | Later | not designed | not built | Owner, Q-103: "maybe in some future". |
 | F-241 | Client karma | No-shows and floods of bookings lower a client's karma across Ýeral; below a set level the client can't book online, and each business chooses the lowest karma it accepts. | Later | not designed | not built | Owner's idea on Q-012 (18.10.2026). Needs first: a way to dispute a no-show (Q-166), karma that recovers over time, and a screen that tells the client why they're limited. |
+| F-244 | Price level | An optional price level, one to four marks, that a restaurant or café sets for its page and cards. Not billing. | Later | not designed | not built | Q-103, settled 21.10.2026 (Claude, delegated). |

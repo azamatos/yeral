@@ -186,8 +186,9 @@ MVP. (business spec §3; Q-031, decided 18.10.2026)
 
 - Only after a completed visit, one per booking, editable for 7 days, shown with the first name and an initial
   ("Aýjemal G."), or the first name alone when there's no surname. (productContext; Q-156, decided 18.10.2026)
-- There's no review ask: clients write reviews from *Ýazylyşlarym* (My bookings) and from the booking link after a
-  completed visit. (Q-259, Q-170, decided 18.10.2026)
+- There's no review-ask SMS: clients write reviews from *Ýazylyşlarym* (My bookings) and from the booking link after a
+  completed visit, and a small "How was it?" card shows once after each completed visit (F-243). (Q-259, Q-170,
+  decided 18.10.2026, settled 21.10.2026)
 - The business can't delete a review. It can reply, edit or delete its reply, and report a review to the Ýeral team.
   (business spec §15)
 - A reported review stays visible on both sides with "*Ýeral barlaýar · ortaça baha hasaplanmaýar*" and isn't counted in
