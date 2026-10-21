@@ -84,8 +84,9 @@ export async function clearReview(deps: Pick<Deps, 'db' | 'now'>, by: Admin, id:
       .update(reviews)
       .set({ clearedAt: new Date(deps.now()), updatedAt: new Date(deps.now()) })
       .where(eq(reviews.id, r.id))
-    if (counted) await emit(tx, { type: 'review.updated', businessId: r.businessId, bookingId: r.bookingId })
-    else await shiftReviews(tx, [r], 1, 'review.updated')
+    if (!counted) await shiftReviews(tx, [r], 1, 'review.updated')
+    // with its booking: the visit's specialist hears it too
+    await emit(tx, { type: 'review.updated', businessId: r.businessId, bookingId: r.bookingId })
     await recordAction(tx, by, 'review.cleared', { businessId: r.businessId, reviewId: r.id })
   })
 }
@@ -104,7 +105,7 @@ export async function removeReview(deps: Pick<Deps, 'db' | 'now'>, by: Admin, id
       .set({ removedAt: new Date(deps.now()), removedReason: reason, updatedAt: new Date(deps.now()) })
       .where(eq(reviews.id, r.id))
     if (counted) await shiftReviews(tx, [r], -1, 'review.updated')
-    else await emit(tx, { type: 'review.updated', businessId: r.businessId, bookingId: r.bookingId })
+    await emit(tx, { type: 'review.updated', businessId: r.businessId, bookingId: r.bookingId })
     await recordAction(tx, by, 'review.removed', {
       businessId: r.businessId,
       reviewId: r.id,

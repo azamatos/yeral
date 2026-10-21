@@ -251,7 +251,16 @@ export async function editReview(deps: Deps, b: BookingRow, input: { rating: num
     if (now - existing.createdAt.getTime() >= REVIEW_EDIT_DAYS * 86_400_000) throw new ApiError('review_locked')
     await tx
       .update(reviews)
-      .set({ rating: input.rating, tags: input.tags, text: input.text ?? null, updatedAt: new Date(now) })
+      .set({
+        rating: input.rating,
+        tags: input.tags,
+        text: input.text ?? null,
+        updatedAt: new Date(now),
+        // kept by Ýeral, then changed: what Ýeral kept is gone, so the business may report the new words (Q-261)
+        ...(existing.clearedAt
+          ? { clearedAt: null, reportReason: null, reportText: null, reportedAt: null, reportedBy: null, recountedAt: null }
+          : {}),
+      })
       .where(eq(reviews.id, existing.id))
     // a review Ýeral is checking isn't in the rating: its new stars count when it counts again
     if (existing.rating !== input.rating && isCounted(existing))

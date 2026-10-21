@@ -15,4 +15,9 @@
   - Routes `/v1/admin/reviews`, `…/{id}/clear`, `…/{id}/remove`.
 - Tests: `reviews/team.test.ts` (the queue, kept and never reported again, removed and gone but to its author, removed
   after the 48 hours out of the rating, only the team).
+- The review's findings, fixed: a decision also tells the visit's specialist (`review.updated` with the booking); an
+  author's edit after Ýeral kept a review clears the report (it stays counted, and the business may report the new
+  words); every decision holds its actor. A removed review stays editable by its author, out of every count. The scope
+  table's F-162 and F-180 say so. Tests: a never-reported or kept review removed (−1), the author's edit of a removed one
+  moving nothing, an edit after keeping reportable again.
 - Follow-ups: closing a workspace (Q-213) and adding a business for its owner (F-238) finish step 5.

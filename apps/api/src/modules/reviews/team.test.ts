@@ -270,4 +270,30 @@ describe('the team’s reviews (book B-53, B-54)', () => {
   it('only the Ýeral team decides', async () => {
     expect((await (await as(MAYSA)).req('/v1/admin/reviews', { headers: { Origin: site.urls.cms } })).status).toBe(401)
   })
+
+  it('removing a review never reported, or one kept, takes it out of the rating; an edit after it was kept may be reported again', async () => {
+    const team = await signedInAdmin(t, 'remover')
+    const maysa = await as(MAYSA)
+    const a = await reviewed('+99365920021', 3, 'Never reported')
+    const b = await reviewed('+99365920022', 2, 'Kept then edited')
+    const idOf = async (text: string) => (await page(maysa)).items.find((r) => (r as unknown as { text: string }).text === text)!.id
+    const [aId, bId] = [await idOf('Never reported'), await idOf('Kept then edited')]
+    const before = await ratingOf()
+    expect((await team.req(`/v1/admin/reviews/${aId}/remove`, { body: { reason: 'Spam' } })).status).toBe(204)
+    expect((await ratingOf()).count).toBe(before.count - 1)
+    // the author's edit of a removed review moves nothing
+    await a.client.req(`/v1/me/bookings/${a.code}/review`, { method: 'PATCH', body: { rating: 5, text: 'Edited' } })
+    expect((await ratingOf()).count).toBe(before.count - 1)
+    // kept, then edited: reportable again, still counted
+    await maysa.req(`${W}/reviews/${bId}/report`, { body: { reason: 'fake' } })
+    await team.req(`/v1/admin/reviews/${bId}/clear`, { method: 'POST' })
+    await b.client.req(`/v1/me/bookings/${b.code}/review`, { method: 'PATCH', body: { rating: 1, text: 'Now insulting' } })
+    expect((await page(maysa)).items.find((r) => r.id === bId)!.report).toBeNull()
+    expect((await maysa.req(`${W}/reviews/${bId}/report`, { body: { reason: 'insulting' } })).status).toBe(204)
+    // removed once kept: out of the rating
+    await team.req(`/v1/admin/reviews/${bId}/clear`, { method: 'POST' })
+    const kept = await ratingOf()
+    expect((await team.req(`/v1/admin/reviews/${bId}/remove`, { body: { reason: 'Insults' } })).status).toBe(204)
+    expect((await ratingOf()).count).toBe(kept.count - 1)
+  })
 })

@@ -315,7 +315,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 |---|---|---|---|---|---|---|
 | F-160 | Reviews page | Average, distribution, "unanswered" count, filters (unanswered, stars, specialist), newest first, 20 per page. | MVP | drawn (B-Reviews) | api built (`GET /v1/w/{slug}/reviews`, 21.10.2026) | Specialists read reviews about them. |
 | F-161 | Reply to a review | Public reply (500 chars), edit or delete own reply. | MVP | drawn (B-Reviews · composer) | api built (`PUT`/`DELETE /v1/w/{slug}/reviews/{id}/reply`, 21.10.2026) | Business can't delete reviews. |
-| F-162 | Report a review | Report to Ýeral (false / didn't come, insulting, other business, spam, other); shown as "Barlanýar" and not counted until cleared. | MVP | drawn (B-Reviews · report, Venue) | api built for the business (`POST /v1/w/{slug}/reviews/{id}/report`, the 48-hour recount; 21.10.2026); Ýeral's decision with step 5 | Round 6 F2. Needs F-180. |
+| F-162 | Report a review | Report to Ýeral (false / didn't come, insulting, other business, spam, other); shown as "Barlanýar" and not counted until cleared. | MVP | drawn (B-Reviews · report, Venue) | api built (`POST /v1/w/{slug}/reviews/{id}/report`, the 48-hour recount; Ýeral's decision in the admin tool's api; 21.10.2026) | Round 6 F2. Needs F-180. An author's edit after Ýeral kept a review makes it reportable again. |
 
 ## Business · analytics
 
@@ -355,7 +355,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-178 | CMS app and team accounts | cms.yeral.app with its own staff accounts and a second factor. | MVP | not designed | api built for the team's accounts: a login, a password and an authenticator code, setup links, invites, resets (ADR 0026, 21.10.2026); the tool itself with P4 | Part of the launch (Q-001, Q-002); what it holds at launch is Q-010. Cloudflare Access went with ADR 0024 (DNS only); the second factor stands without it. |
 | F-238 | Add a business for its owner | The Ýeral team creates a business in the CMS for an owner it has met. | MVP | not designed | not built | Q-002 (decided 17.10.2026). |
 | F-179 | Business verification | Review new businesses within 24 h; verify or reject with a reason; hide or un-verify a live business, with a reason to the owner (Q-012, Q-275). | MVP | spec only (business §7, ADR 0018) | api built (the queue, a business to check, verify, send back with a reason, hide and show, a move checked again, the owner's send again, the owner told on screen and by SMS; 21.10.2026); the admin tool with P4 | Without it nothing becomes public (F-032). |
-| F-180 | Review moderation | Queue of reported reviews; clear (counted again) or remove. | MVP | spec only (business §15) | not built | Pairs with F-162. |
+| F-180 | Review moderation | Queue of reported reviews; clear (counted again) or remove. | MVP | spec only (business §15) | api built (`/v1/admin/reviews`, clear and remove; 21.10.2026); the admin tool with P4 | Pairs with F-162. A removed review stays editable by its author, out of every count. |
 | F-181 | Category catalogue | Icons, TK/RU/EN names, booking types, specialist word, starter services, SEO intro; new categories without a release. | Later | spec only | schema only (13 seeded) |  |
 | F-182 | Help articles authoring | Write and update help-centre articles. | Later | spec only (business §22) | not built |  |
 | F-183 | Support inbox | Answer businesses' support chats. | Later | spec only | not built |  |
