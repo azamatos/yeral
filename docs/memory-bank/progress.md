@@ -212,7 +212,8 @@
   client site `cee0027` (#110), the mobile prefixes `bca2eb6` (#111), the shell's components `dae89a4` (#113), the
   client's login `5c3985e` (#114), the login's invites `1d7dc04` (#115), the client's profile `9dd5c01` (#118), the
   business shell `950cc1b` (#119), My account `b5a8adf` (#121), slice 1's how decisions `9ae5baa` (#131). Releases
-  paused `76ed572` (#133, ADR 0009 amended). Gap found, not fixed: a flaky api test (activeContext, Next steps).
+  paused `76ed572` (#133, ADR 0009 amended). Ýeral's support line `580811e` (#134); the flaky demo-bookings test fixed
+  `a2e0418` (#135). Main at a2e0418 deployed to the server by hand (migrations 0000–0038).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.
