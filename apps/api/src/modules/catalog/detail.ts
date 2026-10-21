@@ -73,7 +73,8 @@ export async function publicBusiness(deps: Deps, slug: string) {
  */
 export async function visibleBusiness(deps: Deps, slug: string, viewerId: string | null) {
   const [row] = await deps.db.select().from(businesses).where(eq(businesses.slug, slug))
-  if (!row) throw new ApiError('not_found')
+  // a closed one is nobody's to see, its team's included (Q-213)
+  if (!row || row.closedAt) throw new ApiError('not_found')
   if (publicRow(row)) return { row, preview: null }
   const [member] = viewerId
     ? await deps.db

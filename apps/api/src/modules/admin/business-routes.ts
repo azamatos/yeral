@@ -1,5 +1,5 @@
 /** The admin tool's businesses (book F-179, S-17; Q-274, Q-275, Q-012, Q-215): `/v1/admin/businesses/*`. */
-import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
+import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import {
   adminBusinessesQuerySchema,
   adminBusinessItemSchema,
@@ -11,7 +11,16 @@ import {
 import { langQuerySchema, listOf } from '@yeral/contract/common'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
-import { adminBusiness, adminBusinesses, hideBusiness, rejectBusiness, showBusiness, verifyBusiness } from './businesses'
+import {
+  adminBusiness,
+  adminBusinesses,
+  closeBusiness,
+  hideBusiness,
+  rejectBusiness,
+  reopenBusiness,
+  showBusiness,
+  verifyBusiness,
+} from './businesses'
 import { requireAdmin } from './session'
 
 const tags = ['admin']
@@ -66,7 +75,31 @@ const showRoute = createRoute({
   responses: { ...noContent, 404: errors[404], 409: errors[409], ...signedIn },
 })
 
+const closeRoute = createRoute({
+  method: 'post',
+  path: '/admin/businesses/{id}/close',
+  tags,
+  summary: 'Closed as its owner asked (Q-213): hidden, out of the switcher, its bookings ahead cancelled with SMS; data kept',
+  request: { params: adminBusinessParamSchema, ...jsonBody(adminReasonSchema) },
+  responses: { 200: json(z.object({ cancelled: z.number().int() })), 400: errors[400], 404: errors[404], 409: errors[409], ...signedIn },
+})
+const reopenRoute = createRoute({
+  method: 'post',
+  path: '/admin/businesses/{id}/reopen',
+  tags,
+  summary: 'Opened again after closing; the cancelled bookings stay cancelled',
+  request: { params: adminBusinessParamSchema },
+  responses: { ...noContent, 404: errors[404], 409: errors[409], ...signedIn },
+})
+
 export const adminBusinessRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(closeRoute, async (c) =>
+    c.json(await closeBusiness(c.var.deps, requireAdmin(c), c.req.valid('param').id, c.req.valid('json').reason), 200),
+  )
+  .openapi(reopenRoute, async (c) => {
+    await reopenBusiness(c.var.deps, requireAdmin(c), c.req.valid('param').id)
+    return c.body(null, 204)
+  })
   .openapi(listRoute, async (c) => {
     requireAdmin(c)
     return c.json({ items: await adminBusinesses(c.var.deps.db, c.req.valid('query')) }, 200)

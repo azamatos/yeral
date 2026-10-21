@@ -111,7 +111,8 @@
     "staff_away": "Мастер не может выйти",
     "other": "Другая причина",
     "closed": "В этот день закрыто",
-    "hours": "Изменилось время работы"
+    "hours": "Изменилось время работы",
+    "business_closed": "Заведение закрылось"
   },
   "undo": {
     "failed": "Не удалось вернуть — {reason}.",
@@ -150,7 +151,9 @@
     "pageVerified": "{brand}: {business} открыт: клиенты находят его в поиске и по ссылке {link}",
     "pageRejected": "{brand}: {business} пока не открыт: {reason}. Исправьте в рабочем пространстве и отправьте снова: {link}",
     "pageHidden": "{brand}: мы временно скрыли страницу «{business}»: {reason}.",
-    "pageShown": "{brand}: страница «{business}» снова открыта."
+    "pageShown": "{brand}: страница «{business}» снова открыта.",
+    "pageClosed": "{brand}: «{business}» закрыт, как вы просили: страница скрыта, будущие записи отменены, клиенты оповещены. Ваши данные сохранены.",
+    "pageReopened": "{brand}: «{business}» снова открыт в вашем рабочем пространстве."
   },
   "fmt": {
     "money": "{amount} {currency}",

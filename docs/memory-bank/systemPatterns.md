@@ -152,7 +152,7 @@ apps/api/src/
                     settings (booking rules, profile, hours) · menu (services) · team (levels, invites, who is on which team)
                     clients (the phone-only block) · reviews (ratings) · events (live feed) · jobs (runDueJobs)
                     admin (the Ýeral team's sign-in and accounts, `requireAdmin`; businesses: the review queue, verify,
-                      reject, hide; reported reviews kept or removed) · setup (the wizard's draft) · media (photos kept without their metadata, dropped once nothing
+                      reject, hide, close; reported reviews kept or removed) · setup (the wizard's draft) · media (photos kept without their metadata, dropped once nothing
                       points at them; `uploadGuard` before an upload's body is read)
                     later: the rest of the business endpoints (P2 step 4: schedules, clients, reviews…) · admin/*
   db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (docs/design demo data + 13 categories)

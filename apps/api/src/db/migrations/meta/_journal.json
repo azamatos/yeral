@@ -267,6 +267,13 @@
       "when": 1792543497406,
       "tag": "0037_review_removed",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1792543841178,
+      "tag": "0038_business_closed",
+      "breakpoints": true
     }
   ]
 }

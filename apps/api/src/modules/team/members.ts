@@ -28,7 +28,7 @@ export async function workspaceIdsOf(db: Queryable, userId: string): Promise<str
  * A row that puts its workspace in the switcher (with `businesses` joined): it signs in, and the business isn't still
  * being set up (it joins when its owner finishes, book Q-200).
  */
-export const inSwitcher: SQL = and(signsIn, isNull(businesses.setupStep)) as SQL
+export const inSwitcher: SQL = and(signsIn, isNull(businesses.setupStep), isNull(businesses.closedAt)) as SQL
 
 /** Does this account have a workspace in the switcher (the "Biznes" link)? */
 export async function hasWorkspace(db: Queryable, userId: string): Promise<boolean> {

@@ -7,8 +7,9 @@ import { DEMO_NOW, site, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, jobs, rateLimits, services, staff } from '../../db/schema'
+import { bookings, businesses, jobs, rateLimits, services, staff } from '../../db/schema'
 import { seed } from '../../db/seed'
+import { runDueJobs } from '../jobs/run'
 
 const MAYSA = '+99365102030' // owner of Glow Studio
 const AYNA = '+99365312210' // a specialist there
@@ -219,6 +220,66 @@ describe('the admin tool’s businesses (book F-179)', () => {
     const found = (await team.req(`${ADMIN}?view=all&q=glow&lang=en`)).json.items as { slug: string; name: string }[]
     expect(found.map((b) => b.slug)).toContain('glow-studio')
     expect(found.every((b) => /glow/i.test(b.name + b.slug))).toBe(true)
+  })
+
+  it('closed as its owner asked: hidden from everyone, out of the switcher, its bookings ahead cancelled and told; opened again', async () => {
+    const team = await signedInAdmin(t, 'closer')
+    const maysa = await as(MAYSA)
+    const [manicure] = (await db.select().from(services).where(eq(services.businessId, glowId))).filter((x) => x.name.en === 'Manicure')
+    const [maral] = (await db.select().from(staff).where(eq(staff.businessId, glowId))).filter((x) => x.name === 'Maral')
+    const TUE = '2026-10-20'
+    const booked = await maysa.req('/v1/w/glow-studio/bookings', {
+      body: {
+        source: 'phone',
+        phone: '+99365800501',
+        serviceIds: [manicure!.id],
+        staffId: maral!.id,
+        date: TUE,
+        start: 600,
+        notifyClient: true,
+      },
+    })
+    expect(booked.status).toBe(201)
+    // its undo time over, so the client knows of it
+    t.clock.now += 20_000
+    const client = await as('+99365800502', 'Client')
+    const asked = await client.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [manicure!.id], staffId: maral!.id, date: TUE, start: 720 },
+    })
+    expect(asked.json.status).toBe('pending')
+    // every booking ahead, these two among the demo's
+    const ahead = (await db.select().from(bookings).where(eq(bookings.businessId, glowId))).filter(
+      (r) => (r.status === 'pending' || r.status === 'confirmed') && epochOf(r.date, r.start) > t.clock.now,
+    )
+    const closed = await team.req(`${ADMIN}/${glowId}/close`, { body: { reason: 'The owner asked by phone' } })
+    expect(closed.json).toEqual({ cancelled: ahead.length })
+    // nobody sees it, its team included; it's out of the switcher
+    expect(await page()).toBe(404)
+    expect((await maysa.req('/v1/businesses/glow-studio?lang=en')).status).toBe(404)
+    expect((await maysa.req('/v1/w/glow-studio/calendar?view=day&date=2026-10-20&lang=en')).status).toBe(404)
+    expect(((await maysa.req('/v1/me/workspaces')).json.items as { slug: string }[]).map((w) => w.slug)).not.toContain('glow-studio')
+    // its bookings ahead cancelled, each client told
+    const rows = await db.select().from(bookings).where(eq(bookings.businessId, glowId))
+    for (const code of [booked.json.code, asked.json.code])
+      expect(rows.find((r) => r.code === code)).toMatchObject({ status: 'cancelled', businessCancelReason: 'business_closed' })
+    expect((await client.req(`/v1/me/bookings/${asked.json.code}`)).json.businessCancel).toEqual({ reason: 'business_closed', text: null })
+    // worded when they go, by the jobs
+    await runDueJobs(t.deps)
+    expect(t.sms.sent.filter((m) => m.to === '+99365800502').at(-1)!.text).toMatch(
+      /cancelled your booking on .*: The business has closed\./,
+    )
+    expect((await smsTo(MAYSA))[0]!.payload.text).toMatch(/^Ýeral: Glow Studio is closed, as you asked/)
+    expect((await team.req(`${ADMIN}?view=closed&lang=en`)).json.items[0]).toMatchObject({
+      slug: 'glow-studio',
+      closed: { reason: 'The owner asked by phone' },
+    })
+    // nothing else is done to a closed business but opening it again
+    expect((await team.req(`${ADMIN}/${glowId}/hide`, { body: { reason: 'x' } })).json.error.code).toBe('invalid_status')
+    expect((await team.req(`${ADMIN}/${glowId}/close`, { body: { reason: 'x' } })).json.error.code).toBe('invalid_status')
+    expect((await team.req(`${ADMIN}/${glowId}/reopen`, { method: 'POST' })).status).toBe(204)
+    expect(await page()).toBe(200)
+    expect(((await maysa.req('/v1/me/workspaces')).json.items as { slug: string }[]).map((w) => w.slug)).toContain('glow-studio')
+    expect((await db.select().from(bookings).where(eq(bookings.code, asked.json.code)))[0]!.status).toBe('cancelled')
   })
 
   it('only the Ýeral team', async () => {

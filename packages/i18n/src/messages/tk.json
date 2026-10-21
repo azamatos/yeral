@@ -111,7 +111,8 @@
     "staff_away": "Hünärmen işe çykyp bilmeýär",
     "other": "Başga sebäp",
     "closed": "Şol gün ýapyk",
-    "hours": "Iş wagty üýtgedi"
+    "hours": "Iş wagty üýtgedi",
+    "business_closed": "Biznes ýapyldy"
   },
   "undo": {
     "failed": "Yzyna alyp bolmady — {reason}.",
@@ -150,7 +151,9 @@
     "pageVerified": "{brand}: {business} açyldy: müşderiler ony gözlegde we {link} salgyda tapýarlar",
     "pageRejected": "{brand}: {business} entek açylmady: {reason}. Iş ýeriňizde düzediň we täzeden iberiň: {link}",
     "pageHidden": "{brand}: {business} sahypasyny wagtlaýynça gizledik: {reason}.",
-    "pageShown": "{brand}: {business} sahypasy täzeden açyk."
+    "pageShown": "{brand}: {business} sahypasy täzeden açyk.",
+    "pageClosed": "{brand}: {business} siziň islegiňiz boýunça ýapyldy: sahypasy gizlendi, öňdäki ýazylyşlar ýatyryldy we müşderilere habar berildi. Maglumatlaryňyz saklanýar.",
+    "pageReopened": "{brand}: {business} iş ýeriňizde täzeden açyk."
   },
   "fmt": {
     "money": "{amount} {currency}",
