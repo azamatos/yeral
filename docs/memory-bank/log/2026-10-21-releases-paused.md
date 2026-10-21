@@ -60,6 +60,10 @@
   MB by its bytes, kept without its EXIF (GPS), XMP and comments on the server's disk behind a storage port and served
   at `/media/up/…`. Uploads need a sign-in, 60 an hour per account; the team's screens show a person's own photo where
   the owner set none. Migration 0032 adds `users.photo`; the api's image takes a `media` volume (`MEDIA_DIR`).
+- **@yeral/api** (minor), **@yeral/contract** (minor), **@yeral/domain** (minor), the timed notices (#117; book S-01,
+  S-13): each request says when "Haýyşyň wagty gutarýar" is due (`warnAt`, 5 minutes of open time before its answer time
+  ends), and when an invite's 7 days run out the team's and the invitee's screens refresh once. Migration 0033 adds
+  `invites.expiry_told_at`.
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 
