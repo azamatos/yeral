@@ -4,7 +4,19 @@
  */
 import { REVIEW_REPORT_REASONS, VERIFICATION_STATUSES } from '@yeral/domain/model'
 import { z } from 'zod'
-import { cityRefSchema, epochSchema, idSchema, langQuerySchema, latLngSchema, marketLocaleSchema, photoSchema } from './common'
+import { NAME_MAX } from '@yeral/domain/names'
+import { SETUP_STEPS } from '@yeral/domain/setup'
+import {
+  cityRefSchema,
+  epochSchema,
+  idSchema,
+  langQuerySchema,
+  latLngSchema,
+  marketLocaleSchema,
+  phoneInputSchema,
+  photoSchema,
+} from './common'
+import { setupStartSchema } from './setup'
 
 export const ADMIN_STATUSES = ['invited', 'active', 'disabled'] as const
 /** 3–32 characters: lowercase letters, digits, dots and dashes, starting and ending with a letter or digit. */
@@ -87,9 +99,10 @@ export const adminPasswordChangeSchema = z
 /**
  * The lists: `review` the finished businesses waiting (the longest waiting first), `moved` verified ones to check again
  * after a move, `rejected` sent back, `hidden` hidden by the team, `verified` the live ones (public), `closed` those closed
- * as their owner asked, `all` a search across them.
+ * as their owner asked, `setup` drafts still being set up (one the team added for its owner, F-238), `all` a search
+ * across the finished ones.
  */
-export const ADMIN_BUSINESS_VIEWS = ['review', 'moved', 'rejected', 'hidden', 'verified', 'closed', 'all'] as const
+export const ADMIN_BUSINESS_VIEWS = ['review', 'moved', 'rejected', 'hidden', 'verified', 'closed', 'setup', 'all'] as const
 export type AdminBusinessView = (typeof ADMIN_BUSINESS_VIEWS)[number]
 export const adminBusinessesQuerySchema = langQuerySchema.extend({
   view: z.enum(ADMIN_BUSINESS_VIEWS).default('review'),
@@ -121,6 +134,8 @@ export const adminBusinessItemSchema = z
     addressChangedAt: epochSchema.nullable(),
     /** When it was finished or sent again: the queue's order. */
     sentForReviewAt: epochSchema,
+    /** A draft: the wizard's step its owner reopens at (Q-200); null once finished. */
+    setupStep: z.enum(SETUP_STEPS).nullable(),
     createdAt: epochSchema,
   })
   .meta({ id: 'AdminBusinessItem' })
@@ -142,6 +157,26 @@ export const adminBusinessSchema = adminBusinessItemSchema
     actions: z.array(z.object({ action: z.string(), by: z.string().nullable(), reason: z.string().nullable(), at: epochSchema })),
   })
   .meta({ id: 'AdminBusiness' })
+
+/**
+ * A business the team adds for an owner it has met (F-238, Q-002): its name and category, and the owner, by the phone
+ * they sign in with and their name. It's a draft their sign-in reopens at its next step (Q-200).
+ */
+export const adminAddBusinessSchema = setupStartSchema
+  .extend({
+    owner: z
+      .object({
+        phone: phoneInputSchema,
+        name: z
+          .string()
+          .trim()
+          .min(1)
+          .max(NAME_MAX * 2),
+      })
+      .strict(),
+  })
+  .strict()
+  .meta({ id: 'AdminAddBusiness' })
 
 /** Why: the owner reads it as written. */
 export const adminReasonSchema = z

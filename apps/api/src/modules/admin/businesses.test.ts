@@ -82,9 +82,10 @@ describe('the admin tool’s businesses (book F-179)', () => {
     expect(after.history[0]).toMatchObject({ status: 'verified' })
     expect(after.actions[0]).toMatchObject({ action: 'business.verified', by: 'Verifier' })
     expect((await team.req(`${ADMIN}/${glowId}/verify`, { method: 'POST' })).json.error.code).toBe('invalid_status')
-    // a draft isn't the team's to open
+    // a draft is only to look at
     const [draft] = await db.select().from(businesses).where(eq(businesses.slug, 'half-done'))
-    expect((await team.req(`${ADMIN}/${draft!.id}?lang=en`)).status).toBe(404)
+    expect((await team.req(`${ADMIN}/${draft!.id}?lang=en`)).json).toMatchObject({ slug: 'half-done', setupStep: 'address' })
+    expect((await team.req(`${ADMIN}/${draft!.id}/verify`, { method: 'POST' })).json.error.code).toBe('invalid_status')
   })
 
   it('sent back with a reason, a live page closes; the owner fixes it and sends it again, at night told in the morning', async () => {
@@ -330,6 +331,37 @@ describe('the admin tool’s businesses (book F-179)', () => {
     for (const o of owned.filter((o) => o.id !== glowId)) await team.req(`${ADMIN}/${o.id}/close`, { body: { reason: 'The owner asked' } })
     expect((await maysa.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
     expect((await team.req(`${ADMIN}/${glowId}/reopen`, { method: 'POST' })).json.error.code).toBe('invalid_status')
+  })
+
+  it('a business added for an owner the team met: a draft their first sign-in reopens (F-238)', async () => {
+    const team = await signedInAdmin(t, 'adder', 'Adder')
+    const OWNER = '+99365970001'
+    const added = await team.req(ADMIN, {
+      body: { name: 'Ogulgerek Beauty', categoryId: 'beauty', owner: { phone: '+993 65 97 00 01', name: 'Ogulgerek Amanowa' } },
+    })
+    expect(added.status).toBe(201)
+    expect(added.json.slug).toBe('ogulgerek-beauty')
+    const setups = (await team.req(`${ADMIN}?view=setup&lang=en`)).json.items as { slug: string; setupStep: string; owner: unknown }[]
+    expect(setups.find((b) => b.slug === 'ogulgerek-beauty')).toMatchObject({
+      setupStep: 'address',
+      owner: { name: 'Ogulgerek Amanowa', phone: OWNER },
+    })
+    expect((await team.req(`${ADMIN}/${added.json.id}?lang=en`)).json.actions[0]).toMatchObject({ action: 'business.added', by: 'Adder' })
+    // the owner signs in for the first time: named already, and the wizard reopens at the address
+    const owner = browser(t.app)
+    expect((await owner.login(OWNER)).isNew).toBe(false)
+    expect((await owner.req('/v1/me/setup')).json).toEqual({
+      setup: { slug: 'ogulgerek-beauty', name: 'Ogulgerek Beauty', step: 'address' },
+    })
+    // one setup at a time, and appointments only
+    const again = await team.req(ADMIN, {
+      body: { name: 'Second Place', categoryId: 'beauty', owner: { phone: OWNER, name: 'Ogulgerek' } },
+    })
+    expect(again.json.error).toMatchObject({ code: 'setup_in_progress', details: { slug: 'ogulgerek-beauty' } })
+    const tables = await team.req(ADMIN, {
+      body: { name: 'Cafe', categoryId: 'restaurant', owner: { phone: '+99365970002', name: 'Aman' } },
+    })
+    expect(tables.status).toBe(400)
   })
 
   it('only the Ýeral team', async () => {
