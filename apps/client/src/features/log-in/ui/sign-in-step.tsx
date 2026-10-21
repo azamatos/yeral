@@ -1,6 +1,6 @@
 import { MARKET } from '@yeral/domain/market'
 import { formatPhone, toE164 } from '@yeral/domain/phone'
-import { mobileStarts, PHONE_RULES, type useSignIn } from '@yeral/features/auth-by-phone'
+import { PHONE_RULES, type useSignIn } from '@yeral/features/auth-by-phone'
 import { cn } from '@yeral/ui/cn'
 import { ModalDescription } from '@yeral/ui/modal'
 import { SignInCodeStep, type SignInCodeStepCopy } from '@yeral/ui/sign-in-code-step'
@@ -8,8 +8,6 @@ import { textLink } from '@yeral/ui/text-link'
 import { useEffect, useRef } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { LoginHeader } from './login-header'
-
-const STARTS = mobileStarts()
 
 /**
  * The phone and the code (Auth «1 · Telefon», «2 · SMS kod», «4 · Ýalňyş kod»; book C-19 steps 1, 2, 4) in the shared
@@ -46,9 +44,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
     state.phoneError === 'incomplete'
       ? t('login.incomplete', { digits: MARKET.phone.length })
       : state.phoneError === 'notMobile'
-        ? STARTS
-          ? t('login.notMobile', { starts: format.list(STARTS, { type: 'disjunction' }) })
-          : t('login.notMobilePlain')
+        ? t('login.notMobile', { starts: format.list(MARKET.phone.mobilePrefixes, { type: 'disjunction' }) })
         : undefined
 
   return (

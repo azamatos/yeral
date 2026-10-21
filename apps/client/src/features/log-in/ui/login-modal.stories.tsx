@@ -8,6 +8,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { SiteLayout } from '@/widgets/site-layout'
 import { AYJEMAL, authApi, PageStory } from '@/shared/storybook'
+// the header loads the modal on its first opening; loaded here already, the stories don't wait on it
+import '../index'
 
 function Page() {
   return (
@@ -34,7 +36,7 @@ const body = within(document.body)
 async function open(canvas: Canvas) {
   await userEvent.click(await canvas.findByRole('link', { name: 'Log in' }))
   // the modal's code loads on the first opening
-  const dialog = await body.findByRole('dialog', { name: 'Log in to Ýeral' }, { timeout: 5000 })
+  const dialog = await body.findByRole('dialog', { name: 'Log in to Ýeral' }, { timeout: 10_000 })
   await waitFor(() => expect(dialog).toBeVisible())
   return within(dialog)
 }

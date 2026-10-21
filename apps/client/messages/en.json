@@ -21,7 +21,6 @@
     "sending": "Sending…",
     "incomplete": "The number is incomplete — it needs {digits} digits.",
     "notMobile": "Codes go to mobile numbers only. Enter a number starting with {starts}.",
-    "notMobilePlain": "Codes go to mobile numbers only. Enter a mobile number.",
     "tooManyCodes": "Too many codes. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
     "codeTitle": "Enter the code",
     "codeLead": "To log in with <b>{phone}</b>.",
