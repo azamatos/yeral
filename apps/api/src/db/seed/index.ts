@@ -11,7 +11,7 @@ import { splitName } from '@yeral/domain/names'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
 import { inviteExpiresAt } from '@yeral/domain/team'
 import { addDays, diffDays, dow, epochOf, today } from '@yeral/domain/time'
-import { getTableName, is, sql } from 'drizzle-orm'
+import { and, eq, getTableName, inArray, is, ne, sql } from 'drizzle-orm'
 import { PgTable } from 'drizzle-orm/pg-core'
 import { randomToken, sha256Hex } from '../../lib/crypto'
 import type { Db, Queryable } from '../client'
@@ -432,6 +432,12 @@ export async function seedExamples(db: Db, opts: { now: number; phone: string })
         await seedBusiness(ctx, def)
         added++
       }
+    // the phone they show follows `EXAMPLE_PHONE`, a change of it included
+    const examples = BUSINESSES.filter((d) => d.type === 'appointment').map((d) => d.slug)
+    await tx
+      .update(t.businesses)
+      .set({ phone: opts.phone })
+      .where(and(eq(t.businesses.demo, true), inArray(t.businesses.slug, examples), ne(t.businesses.phone, opts.phone)))
     return added
   })
 }

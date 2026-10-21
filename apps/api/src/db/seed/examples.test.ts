@@ -31,6 +31,10 @@ describe('the first launch’s example businesses (book Q-004, F-200)', () => {
     expect(rows.every((b) => b.demo && b.verification === 'verified' && b.rating === null && b.reviewsCount === 0)).toBe(true)
     // Ýeral's line, never the design's numbers; no invented ratings for their specialists either
     expect(rows.every((b) => b.phone === SUPPORT)).toBe(true)
+    // a new line reaches the examples already there
+    expect(await seedExamples(db, { now: DEMO_NOW, phone: '+99312000001' })).toBe(0)
+    expect((await db.select().from(t.businesses)).every((b) => b.phone === '+99312000001')).toBe(true)
+    await seedExamples(db, { now: DEMO_NOW, phone: SUPPORT })
     expect((await db.select().from(t.bookingRules)).every((r) => r.confirmMode === 'instant')).toBe(true)
     // nobody signs in to them: no accounts, the owner's row alone with the app (and no account), no invites
     expect(await db.select().from(t.users)).toHaveLength(0)

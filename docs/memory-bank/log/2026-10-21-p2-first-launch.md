@@ -19,5 +19,6 @@
   invented ratings; the suggestions leave other kinds' categories out and mark examples; the image's photos are served
   whenever the image has them, so turning the flag off later doesn't break them (hide the examples from the admin tool
   instead; a close can't be undone with no owner account); operations.md says the image carries the photos.
+- The last review's: a changed `EXAMPLE_PHONE` reaches the examples already there (every `setup`).
 - Follow-ups: the business app's demo workspace (F-242), reset every night; when the Turkmenistan launch comes, the
   examples are hidden or closed from the admin tool.
