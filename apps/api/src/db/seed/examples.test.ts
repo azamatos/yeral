@@ -99,4 +99,21 @@ describe('appointments only, until tables and classes ship (book Q-030)', () => 
     const glow = (await open.req('/v1/search/suggest?q=Glow&lang=en')).json.businesses as { slug: string; example: boolean }[]
     expect(glow.find((b) => b.slug === 'glow-studio')).toMatchObject({ example: true })
   })
+
+  it('the sitemap lists the public pages of the open kinds (book F-197)', async () => {
+    const open = browser(testApp(db, { bookingTypes: ['appointment'] }).app)
+    const map = await open.req('/v1/sitemap')
+    const slugs = (map.json.businesses as { slug: string; changedAt: number }[]).map((b) => b.slug)
+    expect(slugs).toContain('glow-studio')
+    expect(slugs).not.toContain('bag-kafe')
+    expect(map.headers.get('cache-control')).toBe('private, max-age=3600')
+    // a hidden page isn't listed
+    await db
+      .update(t.businesses)
+      .set({ hiddenAt: new Date(DEMO_NOW) })
+      .where(eq(t.businesses.slug, 'glow-studio'))
+    expect(((await open.req('/v1/sitemap')).json.businesses as { slug: string }[]).map((b) => b.slug)).not.toContain('glow-studio')
+    await db.update(t.businesses).set({ hiddenAt: null }).where(eq(t.businesses.slug, 'glow-studio'))
+    expect(map.json.categories).not.toContain('restaurant')
+  })
 })

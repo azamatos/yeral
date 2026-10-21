@@ -12,6 +12,7 @@ import {
   reviewsQuerySchema,
   searchQuerySchema,
   searchResponseSchema,
+  sitemapSchema,
   suggestQuerySchema,
   suggestResponseSchema,
 } from '@yeral/contract/catalog'
@@ -39,6 +40,14 @@ const categoriesRoute = createRoute({
   summary: 'The category catalogue',
   request: { query: langQuerySchema },
   responses: { 200: json(categoryListSchema) },
+})
+
+const sitemapRoute = createRoute({
+  method: 'get',
+  path: '/sitemap',
+  tags: ['catalog'],
+  summary: 'The public pages for the client site’s sitemap (book F-197): business pages and category pages',
+  responses: { 200: json(sitemapSchema) },
 })
 
 const citiesRoute = createRoute({
@@ -96,6 +105,27 @@ const reviewsRoute = createRoute({
 })
 
 export const catalogRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(sitemapRoute, async (c) => {
+    const { db, bookingTypes } = c.var.deps
+    const [pages, kinds] = [
+      await db
+        .select({ slug: businesses.slug, createdAt: businesses.createdAt, movedAt: businesses.movedAt })
+        .from(businesses)
+        .where(and(isPublic(), takesOpenTypes(bookingTypes)))
+        .orderBy(asc(businesses.slug)),
+      await db.select({ id: categories.id }).from(categories).where(categoryTakes(bookingTypes)).orderBy(asc(categories.sort)),
+    ]
+    // the client site's server reads it, an hour at most: private, as a signed-in caller's renewed session cookie may
+    // ride on the answer
+    c.header('Cache-Control', 'private, max-age=3600')
+    return c.json(
+      {
+        businesses: pages.map((p) => ({ slug: p.slug, changedAt: Math.max(p.createdAt.getTime(), p.movedAt?.getTime() ?? 0) })),
+        categories: kinds.map((k) => k.id),
+      },
+      200,
+    )
+  })
   .openapi(categoriesRoute, async (c) => {
     const { lang } = c.req.valid('query')
     // the kinds of booking open now only (book Q-030)

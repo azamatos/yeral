@@ -517,6 +517,7 @@ describe('account', () => {
         '/v1/admin/reviews',
         '/v1/admin/reviews/{id}/clear',
         '/v1/admin/reviews/{id}/remove',
+        '/v1/sitemap',
       ].sort(),
     )
   })
