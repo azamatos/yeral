@@ -11,6 +11,10 @@ const workspace = (slug: string, lastOpenedAt: number | null = null): Workspace 
   city,
   logo: null,
   level: 'owner',
+  status: 'live',
+  statusReason: null,
+  specialization: null,
+  reviewsToAnswer: 0,
   requestsToAnswer: 0,
   lastOpenedAt,
 })

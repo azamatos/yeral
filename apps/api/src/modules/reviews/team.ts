@@ -36,6 +36,17 @@ const ORDERS = {
 /** No reply to read: never written, or taken away. */
 const unanswered = or(isNull(reviews.replyText), isNotNull(reviews.replyDeletedAt))
 
+/** "Jogapsyz" per business (B-53): reviews waiting for a reply, not removed; the reviews page's and the switcher's. */
+export async function unansweredCounts(db: Queryable, businessIds: readonly string[]): Promise<Map<string, number>> {
+  if (!businessIds.length) return new Map()
+  const rows = await db
+    .select({ businessId: reviews.businessId, n: sql<number>`count(*)::int` })
+    .from(reviews)
+    .where(and(inArray(reviews.businessId, [...businessIds]), notRemoved(), unanswered))
+    .groupBy(reviews.businessId)
+  return new Map(rows.map((r) => [r.businessId, r.n]))
+}
+
 /** The report as the team sees it: checking (not counted), counted again after 48 hours, or kept by Ýeral. */
 const stateOf = (r: ReviewRow) => (r.clearedAt ? 'cleared' : r.recountedAt ? 'counted' : 'checking')
 
@@ -106,20 +117,16 @@ async function pageOf(db: Queryable, where: SQL, q: Query, offset: number) {
 
 /** The rating as clients see it, and how many reviews wait for a reply ("Jogapsyz · 4"). */
 async function summaryOf(db: Queryable, businessId: string): Promise<NonNullable<TeamReviews['summary']>> {
-  const [[b], [open]] = await all(db, [
+  const [[b], open] = await all(db, [
     () =>
       db
         .select({ rating: businesses.rating, count: businesses.reviewsCount, breakdown: businesses.ratingBreakdown })
         .from(businesses)
         .where(eq(businesses.id, businessId)),
-    () =>
-      db
-        .select({ n: sql<number>`count(*)::int` })
-        .from(reviews)
-        .where(and(eq(reviews.businessId, businessId), notRemoved(), unanswered)),
+    () => unansweredCounts(db, [businessId]),
   ])
   const breakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, ...(b?.breakdown ?? {}) }
-  return { rating: b?.rating ?? null, count: b?.count ?? 0, breakdown, unanswered: open?.n ?? 0 }
+  return { rating: b?.rating ?? null, count: b?.count ?? 0, breakdown, unanswered: open.get(businessId) ?? 0 }
 }
 
 /** "reply to / report reviews": the owner and administrators. */

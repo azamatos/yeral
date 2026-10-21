@@ -4,12 +4,12 @@
  */
 import type { InviteCard, TeamMember, Workspace } from '@yeral/contract/team'
 import type { Locale } from '@yeral/domain/model'
-import { answersRequests, canAnswerRequest, type Actor } from '@yeral/domain/permissions'
+import { answersRequests, canAnswerRequest, levelCan, type Actor, type Level } from '@yeral/domain/permissions'
 import { inviteExpiresAt, inviteState } from '@yeral/domain/team'
 import type { SiteConfig } from '@yeral/lib/site'
 import { and, asc, desc, eq, inArray, isNull, or } from 'drizzle-orm'
 import type { Context } from 'hono'
-import type { Queryable } from '../../db/client'
+import { all, type Queryable } from '../../db/client'
 import { bookingRules, bookings, businesses, invites, services, staff, staffServices, users, type StoredPhoto } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { ApiError, invalid } from '../../http/errors'
@@ -18,10 +18,11 @@ import { randomToken, sha256Hex } from '../../lib/crypto'
 import { emit } from '../../notify'
 import { requireUser } from '../auth/session'
 import { cityRefOf, loadCities } from '../catalog/cities'
-import { logoOf, photoOf, text } from '../catalog/map'
+import { logoOf, pageStateOf, photoOf, text } from '../catalog/map'
 import { inSwitcher, signsIn } from './members'
 import { awaitingAnswer } from '../bookings/repo'
 import { answerFacts, answeringOf, requestItems } from '../requests/service'
+import { unansweredCounts } from '../reviews/team'
 
 export type StaffRow = typeof staff.$inferSelect
 export type BusinessRow = typeof businesses.$inferSelect
@@ -260,13 +261,20 @@ export async function workspacesOf(deps: Deps, user: User): Promise<{ items: Wor
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
     .where(and(eq(staff.userId, user.id), inSwitcher))
     .orderBy(asc(businesses.name))
-  const [counts, cities] = await Promise.all([
-    requestCounts(
-      deps.db,
-      rows.map((r) => ({ businessId: r.business.id, actor: actorOf(r.member) })),
-      now,
-    ),
-    loadCities(deps.db),
+  const [counts, cities, reviewCounts] = await all(deps.db, [
+    () =>
+      requestCounts(
+        deps.db,
+        rows.map((r) => ({ businessId: r.business.id, actor: actorOf(r.member) })),
+        now,
+      ),
+    () => loadCities(deps.db),
+    // "Jogapsyz" for those who reply (B-53)
+    () =>
+      unansweredCounts(
+        deps.db,
+        rows.filter((r) => levelCan(r.member.level, 'reviewsReply')).map((r) => r.business.id),
+      ),
   ])
   const items = rows.map(({ business, member }) => ({
     slug: business.slug,
@@ -275,11 +283,23 @@ export async function workspacesOf(deps: Deps, user: User): Promise<{ items: Wor
     city: cityRefOf(cities, business.cityId, user.lang),
     logo: logoOf(deps, business, user.lang),
     level: member.level,
+    ...workspaceState(business, member.level),
+    specialization: text(member.specialization, user.lang) || null,
+    reviewsToAnswer: reviewCounts.get(business.id) ?? 0,
     requestsToAnswer: counts.get(business.id) ?? 0,
     lastOpenedAt: member.lastOpenedAt?.getTime() ?? null,
   }))
   const current = [...items].sort((a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0))[0]
   return { items, current: current?.lastOpenedAt ? current.slug : null }
+}
+
+/**
+ * The page's state for the banner (`pageStateOf`), the Ýeral team's reason only to the settings' people (the owner and
+ * administrators), who can fix what it points to.
+ */
+function workspaceState(b: typeof businesses.$inferSelect, level: Level): Pick<Workspace, 'status' | 'statusReason'> {
+  const { state, reason } = pageStateOf(b)
+  return { status: state, statusReason: levelCan(level, 'settings') ? reason : null }
 }
 
 /** Requests still waiting (not past their hold) that each actor may answer (book chapter 3, "Who answers"). */

@@ -58,6 +58,68 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     expect((await maysa.req('/v1/me/workspaces/barber-loft/open', { method: 'POST' })).status).toBe(404)
   })
 
+  it('the switcher says each page’s state, the person’s specialization and the reviews waiting for a reply', async () => {
+    const maysa = await as(MAYSA)
+    const ayna = await as(AYNA)
+    const mine = async (b: Awaited<ReturnType<typeof as>>) =>
+      ((await b.req('/v1/me/workspaces')).json.items as { slug: string }[]).find((w) => w.slug === 'glow-studio') as Record<string, unknown>
+    // live; the owner's count is the reviews page's "Jogapsyz"; a specialist (who doesn't reply) has none
+    const unanswered = (await maysa.req('/v1/w/glow-studio/reviews')).json.summary.unanswered as number
+    expect(unanswered).toBeGreaterThan(0)
+    expect(await mine(maysa)).toMatchObject({ status: 'live', statusReason: null, specialization: null, reviewsToAnswer: unanswered })
+    const team = (await maysa.req('/v1/w/glow-studio/team')).json.items as { name: string; specialization: string | null }[]
+    const aynaRow = team.find((m) => m.name.startsWith('Aýna'))!
+    expect(aynaRow.specialization).not.toBeNull()
+    expect(await mine(ayna)).toMatchObject({ status: 'live', specialization: aynaRow.specialization, reviewsToAnswer: 0 })
+    // an administrator replies too, so counts them; a reply takes one off, and taking it away puts it back
+    const selbi = await as(SELBI)
+    expect(await mine(selbi)).toMatchObject({ reviewsToAnswer: unanswered })
+    const open = (await maysa.req('/v1/w/glow-studio/reviews?unanswered=true')).json.items[0] as { id: string }
+    expect((await selbi.req(`/v1/w/glow-studio/reviews/${open.id}/reply`, { method: 'PUT', body: { text: 'Thank you!' } })).status).toBe(
+      204,
+    )
+    expect(await mine(maysa)).toMatchObject({ reviewsToAnswer: unanswered - 1 })
+    expect((await selbi.req(`/v1/w/glow-studio/reviews/${open.id}/reply`, { method: 'DELETE' })).status).toBe(204)
+    expect(await mine(maysa)).toMatchObject({ reviewsToAnswer: unanswered })
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    try {
+      // sent back: the reason to the owner, who can fix it; the specialist sees the state only
+      await db
+        .update(businesses)
+        .set({ verification: 'rejected', verificationReason: 'Add photos of the place' })
+        .where(eq(businesses.id, glow!.id))
+      expect(await mine(maysa)).toMatchObject({ status: 'not_approved', statusReason: 'Add photos of the place' })
+      // an administrator can fix what it points to; the specialist sees the state only
+      expect(await mine(selbi)).toMatchObject({ status: 'not_approved', statusReason: 'Add photos of the place' })
+      expect(await mine(ayna)).toMatchObject({ status: 'not_approved', statusReason: null })
+      // hidden by the Ýeral team wins over the review
+      await db
+        .update(businesses)
+        .set({ hiddenAt: new Date(DEMO_NOW), hiddenReason: 'Wrong address' })
+        .where(eq(businesses.id, glow!.id))
+      expect(await mine(maysa)).toMatchObject({ status: 'hidden', statusReason: 'Wrong address' })
+      await db
+        .update(businesses)
+        .set({ verification: 'pending', verificationReason: null, hiddenAt: null, hiddenReason: null })
+        .where(eq(businesses.id, glow!.id))
+      expect(await mine(maysa)).toMatchObject({ status: 'in_review', statusReason: null })
+      // the shared demo workspace says so, whatever its review (F-242)
+      await db.update(businesses).set({ sandbox: true }).where(eq(businesses.id, glow!.id))
+      expect(await mine(maysa)).toMatchObject({ status: 'demo', statusReason: null })
+    } finally {
+      await db
+        .update(businesses)
+        .set({
+          verification: glow!.verification,
+          verificationReason: glow!.verificationReason,
+          hiddenAt: glow!.hiddenAt,
+          hiddenReason: glow!.hiddenReason,
+          sandbox: false,
+        })
+        .where(eq(businesses.id, glow!.id))
+    }
+  })
+
   it('an invited person sees the invite at sign-in and joins by accepting it', async () => {
     const gulnar = await as(GULNAR)
     const cards = (await gulnar.req('/v1/me/invites')).json.items

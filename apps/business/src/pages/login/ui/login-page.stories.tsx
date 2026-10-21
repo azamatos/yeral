@@ -36,6 +36,10 @@ const workspace = (slug: string, name: string, level: Workspace['level'], lastOp
   city,
   logo: null,
   level,
+  status: 'live',
+  statusReason: null,
+  specialization: null,
+  reviewsToAnswer: 0,
   requestsToAnswer: 0,
   lastOpenedAt,
 })

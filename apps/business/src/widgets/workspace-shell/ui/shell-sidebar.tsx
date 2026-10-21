@@ -13,8 +13,8 @@ import { ShellSwitcher } from './shell-switcher'
 
 /**
  * The sidebar (B-Shell): 248 from 1024, the 72 rail from 768 (`collapsed`). The switcher on top, the sections this
- * person's level has, the person at the bottom. The Bookings count is the requests they may answer here; the reviews
- * count waits for the api.
+ * person's level has, the person at the bottom. The Bookings count is the requests they may answer here; Reviews counts
+ * the reviews waiting for a reply, muted, for those who reply.
  */
 export function ShellSidebar({
   collapsed = false,
@@ -30,6 +30,7 @@ export function ShellSidebar({
   const account = useAccount()
   if (!workspace) return null
   const requests = workspace.requestsToAnswer
+  const reviews = workspace.reviewsToAnswer
   return (
     <aside
       className={cn(
@@ -49,7 +50,9 @@ export function ShellSidebar({
             count={
               section === 'bookings' && requests > 0
                 ? { count: requests, tone: 'attention', label: t('requests', { count: requests }) }
-                : null
+                : section === 'reviews'
+                  ? { count: reviews, tone: 'muted', label: t('reviewsToAnswer', { count: reviews }) }
+                  : null
             }
           >
             <Link to={`/w/$slug/${section}`} params={{ slug }} />
