@@ -25,10 +25,13 @@ const offline = (): typeof fetch => () => Promise.reject(new TypeError('no api i
  */
 export function PageStory({
   routes,
+  layouts = {},
   path = '/',
   server = offline,
 }: {
   routes: Record<string, RouteComponent>
+  /** Layout routes with pages inside (`'/w/$slug': { component: WorkspaceShell, children: { calendar: … } }`). */
+  layouts?: Record<string, { component: RouteComponent; children: Record<string, RouteComponent> }>
   path?: string
   server?: () => typeof fetch
 }) {
@@ -37,7 +40,16 @@ export function PageStory({
     // a story fails at once instead of retrying
     api.queryClient.setDefaultOptions({ queries: { retry: false }, mutations: { retry: false } })
     const root = createRootRouteWithContext<Api>()({ component: Outlet })
-    const pages = Object.entries(routes).map(([path, component]) => createRoute({ getParentRoute: () => root, path, component }))
+    const nested = Object.entries(layouts).map(([path, { component, children }]) => {
+      const layout = createRoute({ getParentRoute: () => root, path, component })
+      return layout.addChildren(
+        Object.entries(children).map(([path, component]) => createRoute({ getParentRoute: () => layout, path, component })),
+      )
+    })
+    const pages = [
+      ...Object.entries(routes).map(([path, component]) => createRoute({ getParentRoute: () => root, path, component })),
+      ...nested,
+    ]
     const router = createRouter({
       routeTree: root.addChildren(pages),
       history: createMemoryHistory({ initialEntries: [path] }),

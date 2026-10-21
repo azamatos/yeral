@@ -14,7 +14,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as SetupStepRouteImport } from './routes/setup/$step'
 import { Route as WSlugRouteRouteImport } from './routes/w/$slug/route'
 import { Route as WSlugIndexRouteImport } from './routes/w/$slug/index'
+import { Route as WSlugBookingsRouteImport } from './routes/w/$slug/bookings'
 import { Route as WSlugCalendarRouteImport } from './routes/w/$slug/calendar'
+import { Route as WSlugClientsRouteImport } from './routes/w/$slug/clients'
+import { Route as WSlugReviewsRouteImport } from './routes/w/$slug/reviews'
+import { Route as WSlugSettingsRouteImport } from './routes/w/$slug/settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -41,9 +45,29 @@ const WSlugIndexRoute = WSlugIndexRouteImport.update({
   path: '/',
   getParentRoute: () => WSlugRouteRoute,
 } as any)
+const WSlugBookingsRoute = WSlugBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => WSlugRouteRoute,
+} as any)
 const WSlugCalendarRoute = WSlugCalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
+  getParentRoute: () => WSlugRouteRoute,
+} as any)
+const WSlugClientsRoute = WSlugClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => WSlugRouteRoute,
+} as any)
+const WSlugReviewsRoute = WSlugReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => WSlugRouteRoute,
+} as any)
+const WSlugSettingsRoute = WSlugSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => WSlugRouteRoute,
 } as any)
 
@@ -52,14 +76,22 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/w/$slug': typeof WSlugRouteRouteWithChildren
   '/setup/$step': typeof SetupStepRoute
+  '/w/$slug/bookings': typeof WSlugBookingsRoute
   '/w/$slug/calendar': typeof WSlugCalendarRoute
+  '/w/$slug/clients': typeof WSlugClientsRoute
+  '/w/$slug/reviews': typeof WSlugReviewsRoute
+  '/w/$slug/settings': typeof WSlugSettingsRoute
   '/w/$slug/': typeof WSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/setup/$step': typeof SetupStepRoute
+  '/w/$slug/bookings': typeof WSlugBookingsRoute
   '/w/$slug/calendar': typeof WSlugCalendarRoute
+  '/w/$slug/clients': typeof WSlugClientsRoute
+  '/w/$slug/reviews': typeof WSlugReviewsRoute
+  '/w/$slug/settings': typeof WSlugSettingsRoute
   '/w/$slug': typeof WSlugIndexRoute
 }
 export interface FileRoutesById {
@@ -68,7 +100,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/w/$slug': typeof WSlugRouteRouteWithChildren
   '/setup/$step': typeof SetupStepRoute
+  '/w/$slug/bookings': typeof WSlugBookingsRoute
   '/w/$slug/calendar': typeof WSlugCalendarRoute
+  '/w/$slug/clients': typeof WSlugClientsRoute
+  '/w/$slug/reviews': typeof WSlugReviewsRoute
+  '/w/$slug/settings': typeof WSlugSettingsRoute
   '/w/$slug/': typeof WSlugIndexRoute
 }
 export interface FileRouteTypes {
@@ -78,17 +114,34 @@ export interface FileRouteTypes {
     | '/login'
     | '/w/$slug'
     | '/setup/$step'
+    | '/w/$slug/bookings'
     | '/w/$slug/calendar'
+    | '/w/$slug/clients'
+    | '/w/$slug/reviews'
+    | '/w/$slug/settings'
     | '/w/$slug/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/setup/$step' | '/w/$slug/calendar' | '/w/$slug'
+  to:
+    | '/'
+    | '/login'
+    | '/setup/$step'
+    | '/w/$slug/bookings'
+    | '/w/$slug/calendar'
+    | '/w/$slug/clients'
+    | '/w/$slug/reviews'
+    | '/w/$slug/settings'
+    | '/w/$slug'
   id:
     | '__root__'
     | '/'
     | '/login'
     | '/w/$slug'
     | '/setup/$step'
+    | '/w/$slug/bookings'
     | '/w/$slug/calendar'
+    | '/w/$slug/clients'
+    | '/w/$slug/reviews'
+    | '/w/$slug/settings'
     | '/w/$slug/'
   fileRoutesById: FileRoutesById
 }
@@ -136,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WSlugIndexRouteImport
       parentRoute: typeof WSlugRouteRoute
     }
+    '/w/$slug/bookings': {
+      id: '/w/$slug/bookings'
+      path: '/bookings'
+      fullPath: '/w/$slug/bookings'
+      preLoaderRoute: typeof WSlugBookingsRouteImport
+      parentRoute: typeof WSlugRouteRoute
+    }
     '/w/$slug/calendar': {
       id: '/w/$slug/calendar'
       path: '/calendar'
@@ -143,16 +203,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WSlugCalendarRouteImport
       parentRoute: typeof WSlugRouteRoute
     }
+    '/w/$slug/clients': {
+      id: '/w/$slug/clients'
+      path: '/clients'
+      fullPath: '/w/$slug/clients'
+      preLoaderRoute: typeof WSlugClientsRouteImport
+      parentRoute: typeof WSlugRouteRoute
+    }
+    '/w/$slug/reviews': {
+      id: '/w/$slug/reviews'
+      path: '/reviews'
+      fullPath: '/w/$slug/reviews'
+      preLoaderRoute: typeof WSlugReviewsRouteImport
+      parentRoute: typeof WSlugRouteRoute
+    }
+    '/w/$slug/settings': {
+      id: '/w/$slug/settings'
+      path: '/settings'
+      fullPath: '/w/$slug/settings'
+      preLoaderRoute: typeof WSlugSettingsRouteImport
+      parentRoute: typeof WSlugRouteRoute
+    }
   }
 }
 
 interface WSlugRouteRouteChildren {
+  WSlugBookingsRoute: typeof WSlugBookingsRoute
   WSlugCalendarRoute: typeof WSlugCalendarRoute
+  WSlugClientsRoute: typeof WSlugClientsRoute
+  WSlugReviewsRoute: typeof WSlugReviewsRoute
+  WSlugSettingsRoute: typeof WSlugSettingsRoute
   WSlugIndexRoute: typeof WSlugIndexRoute
 }
 
 const WSlugRouteRouteChildren: WSlugRouteRouteChildren = {
+  WSlugBookingsRoute: WSlugBookingsRoute,
   WSlugCalendarRoute: WSlugCalendarRoute,
+  WSlugClientsRoute: WSlugClientsRoute,
+  WSlugReviewsRoute: WSlugReviewsRoute,
+  WSlugSettingsRoute: WSlugSettingsRoute,
   WSlugIndexRoute: WSlugIndexRoute,
 }
 

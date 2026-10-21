@@ -10,6 +10,40 @@
     "admin": "Admin",
     "specialist": "Specialist"
   },
+  "shell": {
+    "menu": "Main menu",
+    "sections": {
+      "calendar": "Calendar",
+      "bookings": "Bookings",
+      "clients": "Clients",
+      "reviews": "Reviews",
+      "settings": "Settings"
+    },
+    "more": "More",
+    "requests": "{count, plural, one {# request} other {# requests}}",
+    "where": "{level} · {city}",
+    "switcher": {
+      "title": "Your workspaces",
+      "create": "Create a business",
+      "trigger": "Workspace: {name}, {level}. Switch",
+      "current": "current workspace",
+      "note": "Switching the workspace switches the calendar, clients and settings too.",
+      "close": "Close",
+      "person": "{name} · {phone}"
+    },
+    "account": {
+      "menu": "Account",
+      "trigger": "Account menu",
+      "triggerOf": "Account menu: {name}",
+      "openAsClient": "Open as a client",
+      "logout": "Log out"
+    },
+    "closed": "This section is closed to you",
+    "invite": {
+      "text": "<b>{business}</b> invites you to the team.",
+      "open": "Open"
+    }
+  },
   "login": {
     "tabTitle": "Log in",
     "title": "Log in to {app}",
@@ -101,10 +135,8 @@
     }
   },
   "placeholder": {
-    "workspaceLead": "{level} · {city}. The calendar and the rest of the workspace come with the next parts of the app.",
     "setupTitle": "Create a business",
     "setupLead": "Setting up a business comes with the next part of the app.",
-    "logout": "Log out",
     "toLogin": "Back to log in"
   },
   "notFound": {
