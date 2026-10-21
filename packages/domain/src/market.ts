@@ -18,7 +18,12 @@ export interface PhoneRules {
   trunkPrefix: string
   /** A complete national number. Its first digit is never the trunk prefix or the country code's first digit. */
   valid: RegExp
-  /** National numbers that can receive an SMS (sign-in codes). */
+  /**
+   * What a national number that can receive an SMS (sign-in codes) starts with: `['6', '7']`. The one source of the
+   * rule: `mobile` is built from it, and the screens say it («Enter a number starting with 6 or 7»).
+   */
+  mobilePrefixes: readonly [string, ...string[]]
+  /** `mobilePrefixes` as a test of the national digits, made by `phoneRules()`. */
   mobile: RegExp
   /** How the national digits are grouped on screen: `+993 65 12 34 56` is [2, 2, 2, 2]. */
   groups: readonly number[]
@@ -41,6 +46,19 @@ export interface Market {
   mainCity: string
 }
 
+/** A test that the digits start with one of `prefixes` (digits only): ['6', '71'] → /^(?:6|71)/. */
+export function startsWithOneOf(prefixes: readonly string[]): RegExp {
+  if (!prefixes.length) throw new Error('startsWithOneOf needs at least one prefix')
+  const bad = prefixes.filter((p) => !/^\d+$/.test(p))
+  if (bad.length) throw new Error(`startsWithOneOf takes digits only, not: ${bad.join(', ')}`)
+  return new RegExp(`^(?:${prefixes.join('|')})`)
+}
+
+/** A market's phone rules with `mobile` made from `mobilePrefixes`, so the two can't say different things. */
+export function phoneRules(rules: Omit<PhoneRules, 'mobile'>): PhoneRules {
+  return { ...rules, mobile: startsWithOneOf(rules.mobilePrefixes) }
+}
+
 /**
  * Turkmenistan: manats, +993 numbers, Ashgabat time (UTC+5, no daylight saving). The first launch offers English only;
  * Turkmen and Russian join for the Turkmenistan launch (book chapter 1, "Launch"; ADR 0022).
@@ -52,15 +70,15 @@ export const TURKMENISTAN: Market = {
   currency: 'TMT',
   timeZone: 'Asia/Ashgabat',
   utcOffsetMin: 5 * 60,
-  phone: {
+  phone: phoneRules({
     countryCode: '993',
     length: 8,
     trunkPrefix: '8',
     // national numbers start with 1–7; mobiles with 6 or 7 (61–65 and 71 today)
     valid: /^[1-7]\d{7}$/,
-    mobile: /^[67]/,
+    mobilePrefixes: ['6', '7'],
     groups: [2, 2, 2, 2],
-  },
+  }),
   mainCity: 'ashgabat',
 }
 

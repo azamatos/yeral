@@ -30,7 +30,7 @@ export function isPhone(raw: string): boolean {
   return RULES.valid.test(afterPrefix(raw))
 }
 
-/** Only mobile numbers can receive the sign-in code (Turkmenistan: 6 or 7 first, 61–65 and 71 today). */
+/** Only mobile numbers can receive the sign-in code: those that start with one of the market's `mobilePrefixes`. */
 export function isMobile(raw: string): boolean {
   return isPhone(raw) && RULES.mobile.test(nationalDigits(raw))
 }

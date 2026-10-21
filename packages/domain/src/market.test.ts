@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MARKET, TURKMENISTAN, type Market } from './market'
+import { MARKET, phoneRules, startsWithOneOf, TURKMENISTAN, type Market } from './market'
 import { LOCALES } from './model'
 
 /** The zone's offset from UTC at an instant, in minutes, from the runtime's time zone data. */
@@ -33,8 +33,54 @@ describe.each<[string, Market]>([['Turkmenistan', TURKMENISTAN]])('market %s', (
     expect(groups.reduce((a, b) => a + b, 0)).toBe(length)
   })
 
+  it('tells mobiles by its list of prefixes, which the screens name', () => {
+    const { mobilePrefixes, mobile, valid, length } = market.phone
+    const number = (start: string) => start.padEnd(length, '1')
+    for (const prefix of mobilePrefixes) {
+      // every prefix starts a valid national number, and that number is a mobile
+      expect(valid.test(number(prefix))).toBe(true)
+      expect(mobile.test(number(prefix))).toBe(true)
+    }
+    // every valid number, by its first two digits, is a mobile exactly when it starts with one of them
+    for (let start = 0; start < 100; start++) {
+      const n = number(String(start).padStart(2, '0'))
+      if (valid.test(n)) expect(mobile.test(n), n).toBe(mobilePrefixes.some((p) => n.startsWith(p)))
+    }
+  })
+
   it('writes the currency as an ISO 4217 code', () => {
     expect(market.currency).toMatch(/^[A-Z]{3}$/)
+  })
+})
+
+describe('startsWithOneOf', () => {
+  it('builds a test of the first digits from the prefixes', () => {
+    expect(startsWithOneOf(['6', '7']).test('65102030')).toBe(true)
+    expect(startsWithOneOf(['6', '7']).test('12456789')).toBe(false)
+    const twoDigits = startsWithOneOf(['61', '62', '71'])
+    expect(['61000000', '71000000'].every((n) => twoDigits.test(n))).toBe(true)
+    expect(twoDigits.test('66000000')).toBe(false)
+  })
+
+  it('refuses anything but digits, and an empty list', () => {
+    expect(() => startsWithOneOf([])).toThrow('at least one prefix')
+    expect(() => startsWithOneOf(['6|.'])).toThrow('digits only, not: 6|.')
+  })
+})
+
+describe('phoneRules', () => {
+  it('makes the mobile test from the prefixes, so the two never disagree', () => {
+    const rules = phoneRules({
+      countryCode: '998',
+      length: 9,
+      trunkPrefix: '8',
+      valid: /^\d{9}$/,
+      mobilePrefixes: ['9', '33'],
+      groups: [2, 3, 2, 2],
+    })
+    expect(rules.mobile.test('901234567')).toBe(true)
+    expect(rules.mobile.test('331234567')).toBe(true)
+    expect(rules.mobile.test('711234567')).toBe(false)
   })
 })
 
