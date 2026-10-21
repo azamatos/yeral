@@ -1,6 +1,6 @@
 /** Booking rows: lookups, the lifecycle view, status changes, codes. */
 import { bookingCode } from '@yeral/domain/id'
-import { effectiveStatus, type BookingState, type LifecycleError, type RestoreState } from '@yeral/domain/lifecycle'
+import { aheadAs, type BookingState, type LifecycleError, type RestoreState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, BusinessCancelReason, CancelledBy, DeclineReason } from '@yeral/domain/model'
 import { diffDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, gt, inArray, sql } from 'drizzle-orm'
@@ -52,17 +52,19 @@ export function stateOf(b: BookingRow): BookingState {
 }
 
 /**
- * The bookings ahead and the waiting requests among `rows` (bookings, not their move requests), as they stand at
- * `now`: what a confirm counts (book B-15, Q-172). A request past its hold, or a visit that started, isn't ahead.
+ * The bookings ahead and the waiting requests among `rows`, as they stand at `now` (`aheadAs`): what a confirm counts
+ * (book B-15, Q-172). A move request counts only when its booking doesn't (it started meanwhile), so one visit is
+ * counted once.
  */
 export function countAhead(rows: readonly BookingRow[], now: number): { bookings: number; requests: number } {
+  const counted = new Set(rows.filter((r) => !r.rescheduleOf && aheadAs(stateOf(r), now)).map((r) => r.id))
   let ahead = 0
   let waiting = 0
   for (const r of rows) {
-    if (epochOf(r.date, r.start) <= now) continue
-    const { status } = effectiveStatus(stateOf(r), now)
-    if (status === 'pending') waiting++
-    else if (status === 'confirmed') ahead++
+    if (r.rescheduleOf && counted.has(r.rescheduleOf)) continue
+    const as = aheadAs(stateOf(r), now)
+    if (as === 'request') waiting++
+    else if (as === 'booking') ahead++
   }
   return { bookings: ahead, requests: waiting }
 }

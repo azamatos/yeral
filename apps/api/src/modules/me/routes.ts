@@ -1,8 +1,15 @@
 /** The signed-in person: profile, language, notifications, phone change, account deletion, favourites (client spec §4.8). */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
-import { meSchema, sendCodeResponseSchema, sendCodeSchema, updateMeSchema, verifyCodeSchema } from '@yeral/contract/account'
+import {
+  deletionCountsSchema,
+  meSchema,
+  sendCodeResponseSchema,
+  sendCodeSchema,
+  updateMeSchema,
+  verifyCodeSchema,
+} from '@yeral/contract/account'
 import { businessCardSchema } from '@yeral/contract/catalog'
-import { bookingsAheadSchema, langQuerySchema, listOf, photoUploadSchema, slugSchema } from '@yeral/contract/common'
+import { langQuerySchema, listOf, photoUploadSchema, slugSchema } from '@yeral/contract/common'
 import { NAME_MAX, splitName } from '@yeral/domain/names'
 import { today } from '@yeral/domain/time'
 import { and, desc, eq, inArray } from 'drizzle-orm'
@@ -43,8 +50,9 @@ const deletionCountsRoute = createRoute({
   method: 'get',
   path: '/me/deletion',
   tags,
-  summary: 'What deleting my account cancels: my bookings ahead and waiting requests (the confirm, book Q-172)',
-  responses: { 200: json(bookingsAheadSchema), 401: errors[401] },
+  summary:
+    'What deleting my account touches: my bookings and requests ahead it cancels, and those I’m on as a specialist (the confirm, book Q-172)',
+  responses: { 200: json(deletionCountsSchema), 401: errors[401], 409: errors[409] },
 })
 const deleteRoute = createRoute({
   method: 'delete',

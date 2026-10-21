@@ -2,7 +2,15 @@
  * Login by phone code, the signed-in person, profile and favourites (client spec §4.7–4.8).
  */
 import { z } from 'zod'
-import { localeSchema, marketLocaleSchema, mobileInputSchema, phoneInputSchema, phoneSchema, photoSchema } from './common'
+import {
+  bookingsAheadSchema,
+  localeSchema,
+  marketLocaleSchema,
+  mobileInputSchema,
+  phoneInputSchema,
+  phoneSchema,
+  photoSchema,
+} from './common'
 import { NAME_MAX } from '@yeral/domain/names'
 
 // ── Login ──
@@ -123,3 +131,9 @@ export const updateMeSchema = z
 
 /** Changing the phone: a code goes to the new number. */
 export const changePhoneSchema = verifyCodeSchema
+
+/**
+ * What deleting the account touches (book Q-172's confirm): its own bookings and requests ahead, cancelled; and `team`,
+ * those it's on as a specialist, which stay with each business for its owner.
+ */
+export const deletionCountsSchema = bookingsAheadSchema.extend({ team: bookingsAheadSchema }).meta({ id: 'DeletionCounts' })
