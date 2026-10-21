@@ -598,7 +598,7 @@ flowchart TD
 
 > Open question Q-203: what happens to bookings when a specialist leaves.
 
-**Status** — Design: drawn (B-Shell · Profilim, Aýna) · Code: built for the person (api `/v1/w/{slug}/leave`; My profile, #121, chapter 9's 21.10.2026 rows): the confirm has no counts of the bookings ahead until the api gives them; the owner's box has Contact Ýeral; the owner's notification that opens the remove flow (step 3, Q-203) isn't built.
+**Status** — Design: drawn (B-Shell · Profilim, Aýna) · Code: built for the person (api `/v1/w/{slug}/leave`; My profile, #121, chapter 9's 21.10.2026 rows): the confirm has no counts of the bookings ahead yet (its api: `GET /v1/w/{slug}/leave`, 21.10.2026); the owner's box has Contact Ýeral; the owner's notification that opens the remove flow (step 3, Q-203) isn't built.
 
 ## 3. The calendar
 

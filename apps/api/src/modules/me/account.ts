@@ -10,10 +10,22 @@ import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { linkPhone, recentRecord, unheldBooking } from '../auth/sign-in'
-import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
+import { countAhead, pgCode, setStatus, StaleBooking } from '../bookings/repo'
 import { blockedByCount } from '../clients/online'
 import { isCounted, shiftReviews } from '../reviews/rating'
 import { teamChanged } from '../team/service'
+
+/**
+ * What deleting the account cancels (book Q-172's confirm): its bookings and waiting requests ahead, the ones
+ * `releaseAccount` cancels.
+ */
+export async function deletionCounts(db: Queryable, user: User, now: number) {
+  const mine = await db
+    .select()
+    .from(bookings)
+    .where(and(eq(bookings.userId, user.id), eq(bookings.active, true), isNull(bookings.rescheduleOf)))
+  return countAhead(mine, now)
+}
 
 /**
  * Invites to a number that's leaving its person (a deleted account, a changed phone): cancelled, so whoever gets the

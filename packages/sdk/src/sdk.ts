@@ -245,6 +245,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: () => call(v1.me.photo.$delete()),
         onSuccess: (data) => forThePerson(data.id, () => queryClient.setQueryData(keys.me(), data)),
       }),
+    /** What deleting the account cancels: its bookings ahead and waiting requests (the confirm, book Q-172). */
+    deletionCounts: () =>
+      queryOptions({
+        queryKey: keys.deletionCounts(),
+        queryFn: ({ signal }) => call(v1.me.deletion.$get(undefined, abortWith(signal))),
+      }),
     remove: () =>
       mutationOptions({
         mutationFn: () => call(v1.me.$delete()),
@@ -587,6 +593,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: (staffId: string) => call(w.team[':staffId'].reactivate.$post({ param: { slug, staffId } })),
         onSuccess: () => teamChanged(slug),
+      }),
+    /** What leaving leaves for the owner: the person's bookings ahead and waiting requests here (B-15's confirm). */
+    leaveCounts: (slug: string) =>
+      queryOptions({
+        queryKey: keys.leaveCounts(slug),
+        queryFn: ({ signal }) => call(v1.w[':slug'].leave.$get({ param: { slug } }, abortWith(signal))),
       }),
     /** "Bu biznesden çyk": the signed-in person leaves this workspace. */
     leave: () =>

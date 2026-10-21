@@ -36,6 +36,7 @@ import {
   itemsOf,
   itemsOfBookings,
   lockBooking,
+  countAhead,
   StaleBooking,
   stateOf,
   type BookingRow,
@@ -99,6 +100,14 @@ async function bookingsAheadWith(db: Queryable, businessId: string, staffId: str
   return ahead
     .sort((x, y) => epochOf(x.date, x.start) - epochOf(y.date, y.start))
     .map((b) => ({ b, items: items.filter((i) => i.bookingId === b.id) }))
+}
+
+/** What leaving leaves behind for the owner (B-15's confirm): the person's bookings ahead and waiting requests here. */
+export async function leaveCounts(db: Queryable, businessId: string, staffId: string, now: number) {
+  return countAhead(
+    (await bookingsAheadWith(db, businessId, staffId, now)).map((a) => a.b),
+    now,
+  )
 }
 
 /** "{dates}: N ýazylyş bar": the bookings one by one, with the colleagues who do each one's services when removing. */

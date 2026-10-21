@@ -2,7 +2,7 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { meSchema, sendCodeResponseSchema, sendCodeSchema, updateMeSchema, verifyCodeSchema } from '@yeral/contract/account'
 import { businessCardSchema } from '@yeral/contract/catalog'
-import { langQuerySchema, listOf, photoUploadSchema, slugSchema } from '@yeral/contract/common'
+import { bookingsAheadSchema, langQuerySchema, listOf, photoUploadSchema, slugSchema } from '@yeral/contract/common'
 import { NAME_MAX, splitName } from '@yeral/domain/names'
 import { today } from '@yeral/domain/time'
 import { and, desc, eq, inArray } from 'drizzle-orm'
@@ -16,7 +16,7 @@ import { endSession, requireUser } from '../auth/session'
 import { buildCards } from '../catalog/cards'
 import { isPublic, takesOpenTypes } from '../catalog/map'
 import { publicBusiness } from '../catalog/detail'
-import { changePhone, releaseAccount } from './account'
+import { changePhone, deletionCounts, releaseAccount } from './account'
 import { accountName, phoneChangeOpen, toMe } from './me'
 import { dropPhotos, uploadGuard } from '../media/photos'
 import { removeMyPhoto, setMyPhoto } from './photo'
@@ -38,6 +38,13 @@ const updateRoute = createRoute({
   summary: 'Name, language, SMS notifications',
   request: jsonBody(updateMeSchema),
   responses: { 200: json(meSchema), 400: errors[400], 401: errors[401] },
+})
+const deletionCountsRoute = createRoute({
+  method: 'get',
+  path: '/me/deletion',
+  tags,
+  summary: 'What deleting my account cancels: my bookings ahead and waiting requests (the confirm, book Q-172)',
+  responses: { 200: json(bookingsAheadSchema), 401: errors[401] },
 })
 const deleteRoute = createRoute({
   method: 'delete',
@@ -142,6 +149,7 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     const [row] = await c.var.deps.db.update(users).set(set).where(eq(users.id, user.id)).returning()
     return c.json(await toMe(c.var.deps.db, row ?? user, c.var.deps), 200)
   })
+  .openapi(deletionCountsRoute, async (c) => c.json(await deletionCounts(c.var.deps.db, requireUser(c), c.var.deps.now()), 200))
   .openapi(deleteRoute, async (c) => {
     const user = requireUser(c)
     const { deps } = c.var

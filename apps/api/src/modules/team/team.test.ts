@@ -209,7 +209,11 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     const back = await maysa.req(`/v1/w/glow-studio/team/${row!.id}/reactivate`, { method: 'POST' })
     expect(back.json).toMatchObject({ status: 'active', bookable: true, joined: true })
     expect(await shown()).toContain('Maral')
-    // leaving
+    // leaving: the confirm counts what stays for the owner, the bookings removing her would ask about
+    const left = (await maral.req('/v1/w/glow-studio/leave')).json as { bookings: number; requests: number }
+    expect(left.bookings + left.requests).toBe(asked.json.error.details.count)
+    expect(left.bookings).toBeGreaterThan(0)
+    expect((await maysa.req('/v1/w/glow-studio/leave')).json.error.code).toBe('owner_cannot_leave')
     expect((await maral.req('/v1/w/glow-studio/leave', { method: 'POST' })).status).toBe(204)
     expect(await rowOf(MARAL)).toMatchObject({ status: 'removed', bookable: false })
     // the account stays linked to the row, so the bookings kept there still block the person elsewhere

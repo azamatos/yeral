@@ -254,6 +254,17 @@ describe('account', () => {
     expect(leyla[0]).toMatchObject({ id: mine!.id, phone: newPhone, noShowsSince: at(5) })
   })
 
+  it('the delete confirm counts what deleting cancels: bookings ahead and waiting requests, not the past (book Q-172)', async () => {
+    expect((await browser(t.app).req('/v1/me/deletion')).status).toBe(401)
+    const fresh = browser(t.app)
+    await fresh.login('+99365222010', 'Nobody')
+    expect((await fresh.req('/v1/me/deletion')).json).toEqual({ bookings: 0, requests: 0 })
+    // Aýjemal's demo: the request YR-48213 and two confirmed visits ahead; her history is past
+    const ayjemal = browser(t.app)
+    await ayjemal.login('+99365901122')
+    expect((await ayjemal.req('/v1/me/deletion')).json).toEqual({ bookings: 2, requests: 1 })
+  })
+
   it('deleting the account cancels upcoming bookings, deletes the reviews and signs out (book Q-172)', async () => {
     const b = browser(t.app)
     const { me } = await b.login('+99365222004', 'Aman')
@@ -492,6 +503,7 @@ describe('account', () => {
         '/v1/w/{slug}/setup/finish',
         '/v1/me/photo',
         '/v1/w/{slug}/settings/logo',
+        '/v1/me/deletion',
         '/v1/w/{slug}/settings/photos',
         '/v1/w/{slug}/settings/photos/{id}',
         '/v1/w/{slug}/settings/photos/order',

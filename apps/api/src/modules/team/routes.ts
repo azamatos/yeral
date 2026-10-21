@@ -3,7 +3,7 @@
  * owner manages (`/w/{slug}/team…`). Only the owner changes the team; administrators see it; specialists don't.
  */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
-import { photoUploadSchema } from '@yeral/contract/common'
+import { bookingsAheadSchema, photoUploadSchema } from '@yeral/contract/common'
 import {
   inviteCardSchema,
   inviteIdParamSchema,
@@ -36,7 +36,7 @@ import { errors, formBody, json, jsonBody, noContent } from '../../http/openapi'
 import { sha256Hex } from '../../lib/crypto'
 import { requireUser } from '../auth/session'
 import { loadHours } from '../availability/context'
-import { removeMember, scheduleOf, updateSchedule } from './away'
+import { leaveCounts, removeMember, scheduleOf, updateSchedule } from './away'
 import { uploadGuard } from '../media/photos'
 import { removeStaffPhoto, setStaffPhoto } from './photo'
 import {
@@ -191,6 +191,14 @@ const reactivateRoute = createRoute({
   summary: 'Bring a removed person back (owner); someone who never joined needs a new invite',
   request: { params: staffIdParamSchema },
   responses: { 200: json(teamMemberSchema), 409: errors[409], ...ownerOnly },
+})
+const leaveCountsRoute = createRoute({
+  method: 'get',
+  path: '/w/{slug}/leave',
+  tags,
+  summary: 'What leaving leaves for the owner: the person’s bookings ahead and waiting requests here (the confirm, B-15)',
+  request: { params: workspaceParamSchema },
+  responses: { 200: json(bookingsAheadSchema), 401: errors[401], 404: errors[404], 409: errors[409] },
 })
 const leaveRoute = createRoute({
   method: 'post',
@@ -491,6 +499,11 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       return member(tx, deps, next ?? row, user.lang, deps.now())
     })
     return c.json(back, 200)
+  })
+  .openapi(leaveCountsRoute, async (c) => {
+    const { business, member: row } = await requireMember(c, c.req.valid('param').slug)
+    if (row.level === 'owner') throw new ApiError('owner_cannot_leave')
+    return c.json(await leaveCounts(c.var.deps.db, business.id, row.id, c.var.deps.now()), 200)
   })
   .openapi(leaveRoute, async (c) => {
     const { business, member: row } = await requireMember(c, c.req.valid('param').slug)

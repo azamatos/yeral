@@ -1,6 +1,6 @@
 /** Booking rows: lookups, the lifecycle view, status changes, codes. */
 import { bookingCode } from '@yeral/domain/id'
-import type { BookingState, LifecycleError, RestoreState } from '@yeral/domain/lifecycle'
+import { effectiveStatus, type BookingState, type LifecycleError, type RestoreState } from '@yeral/domain/lifecycle'
 import type { BookingStatus, BusinessCancelReason, CancelledBy, DeclineReason } from '@yeral/domain/model'
 import { diffDays, epochOf, localOf } from '@yeral/domain/time'
 import { and, asc, eq, gt, inArray, sql } from 'drizzle-orm'
@@ -49,6 +49,22 @@ export function stateOf(b: BookingRow): BookingState {
     holdUntil: b.holdUntil?.getTime() ?? null,
     complaintType: b.complaintType,
   }
+}
+
+/**
+ * The bookings ahead and the waiting requests among `rows` (bookings, not their move requests), as they stand at
+ * `now`: what a confirm counts (book B-15, Q-172). A request past its hold, or a visit that started, isn't ahead.
+ */
+export function countAhead(rows: readonly BookingRow[], now: number): { bookings: number; requests: number } {
+  let ahead = 0
+  let waiting = 0
+  for (const r of rows) {
+    if (epochOf(r.date, r.start) <= now) continue
+    const { status } = effectiveStatus(stateOf(r), now)
+    if (status === 'pending') waiting++
+    else if (status === 'confirmed') ahead++
+  }
+  return { bookings: ahead, requests: waiting }
 }
 
 /** A booking as "Yzyna al" reads it (ROUND6 A6). */

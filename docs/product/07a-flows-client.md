@@ -1753,7 +1753,7 @@ flowchart TD
 
 - The businesses' ratings no longer count the deleted reviews (code: `me/account.ts`). A number that passes to someone else ("Is this you?" answered "No", C-18) doesn't delete the earlier holder's reviews.
 
-**Status:** Design: drawn (Account-Profile) · Code: built (api `DELETE /v1/me`; the profile, #118); the confirm has no count of the bookings it cancels until the api gives it.
+**Status:** Design: drawn (Account-Profile) · Code: built (api `DELETE /v1/me`; the profile, #118); the confirm has no count of the bookings it cancels yet (its api: `GET /v1/me/deletion`, 21.10.2026).
 
 ## Errors and empty pages
 
