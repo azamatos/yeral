@@ -1,1 +1,1 @@
-export { Avatar, initials } from './avatar'
+export { AddAvatar, Avatar, initials } from './avatar'

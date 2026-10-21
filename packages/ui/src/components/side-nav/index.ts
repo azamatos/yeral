@@ -1,1 +1,1 @@
-export { SideNav, SideNavItem, SideNavDivider } from './side-nav'
+export { SideNav, SideNavDivider, SideNavItem, type SideNavCount } from './side-nav'
