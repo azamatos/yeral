@@ -16,8 +16,9 @@ review: a development database migrated on an early commit of #117 or #122 must 
 from the owner: at a wall, stop, notify, wait (the global CLAUDE.md, "Walls" and "Unattended runs").
 
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16). The api and Postgres run on the owner's
-server since 2026-10-19 (not public), still the api from #34. yeral.app still serves `apps/legacy`. The version PR #85
-is merged but its release didn't tag (Actions were blocked): run it again. P2 steps 0–3 are done; step 4 is done but
+server since 2026-10-19 (not public), still the api from #34. yeral.app still serves `apps/legacy`. Releases are removed
+until the MVP works (the owner, 2026-10-21; #133 removes `release.yml` and Changesets, ADR 0009 amended, the `release`
+skill is now `ship`); production goes by hand when the owner asks. P2 steps 0–3 are done; step 4 is done but
 the business logo and the map address search; step 5 (admin endpoints) is done in the stack; step 6 has the examples
 and appointments only (the demo workspace, F-242, isn't built); step 7 has the SMS limits and the sitemap data. The
 design track goes on in another session.
@@ -74,6 +75,8 @@ design track goes on in another session.
   running, billing, a missing secret or account, a decision only the owner can make): stop the work that depends on
   it, send a push notification, report, wait; the same failure twice is a wall; no stacking work that can't merge, one
   review round per PR; an unattended run needs a goal and a budget (global `~/.claude/CLAUDE.md`).
+- 2026-10-21 (later): "Lets remove release logic for now. We are under development. There is no even working MVP
+  version." No releases, versions or changesets until the MVP works; they come back before the first launch (P2 step 7).
 
 ## Decisions
 
@@ -152,9 +155,10 @@ Where the old questions went (2026-10-17):
 1. **Merge the stack**, #112 first, each rebased on `main` and merged on green CI, in the order above; no new review
    rounds (each was reviewed and fixed). The frontend agents merge the client site, the client login and profile, the
    business shell and account meanwhile: expect rebases in `packages/ui`, `packages/features` and
-   `packages/domain/market` (`MARKET.phone.mobilePrefixes`, #111).
-2. **Release** (re-run the release for the merged #85, then the version PR with the stack's changesets) and **deploy**
-   by hand (`infra/server/README.md`): deploy.sh adds `ADMIN_SECRET_KEY` to `/srv/yeral/.env`; copy
+   `packages/domain/market` (`MARKET.phone.mobilePrefixes`, #111). After #133, delete each PR's `.changeset/*.md` as
+   it rebases (a stray one recreates the folder with no config); add no new ones.
+2. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md` for the api, `deploy.yml` for
+   legacy): deploy.sh adds `ADMIN_SECRET_KEY` to `/srv/yeral/.env`; copy
    `infra/server/edge/Caddyfile` to `/srv/edge` and reload Caddy; the first admin account with
    `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"`.
 3. **The frontend's backend gaps** (from web-b2, small PRs after the merges): the unfinished-setup card's category and
@@ -172,7 +176,7 @@ Where the old questions went (2026-10-17):
 **Waiting on the owner:** Ýeral's support phone (`EXAMPLE_PHONE`: the examples show it, never the design's numbers,
 which may be real people's; they can't be switched on without it); the concern on Q-299 (an SMS safety limit that never
 drops an SMS, against "no cap"); the 20–21.10.2026 "Claude (delegated)" rows in chapter 9; Q-036's concern stands (with
-the code on the screen anyone who types a real member's number signs in as them); when to release; later an R2 token,
+the code on the screen anyone who types a real member's number signs in as them); when to deploy; later an R2 token,
 accounts for error tracking and uptime checks, the DNS records when going public. Earlier: the main checkout needs
 `git checkout -- docs/design && git clean -fd docs/design && git pull`; the unused Hyperdrive config and Neon project
 (delete only if asked).
