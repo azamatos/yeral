@@ -34,7 +34,7 @@ import { cancelForBusiness, dropPendingMove } from '../bookings/engine'
 import { lockBooking, StaleBooking } from '../bookings/repo'
 import { teamChanged } from '../team/service'
 import { cityRefOf, loadCities } from '../catalog/cities'
-import { isPublic, photoOf, publicRow, text } from '../catalog/map'
+import { isPublic, logoOf, photoOf, publicRow, text } from '../catalog/map'
 import { likeOf } from '../catalog/search'
 import { unusedSince } from '../auth/sign-in'
 import { startSetup } from '../setup/service'
@@ -168,6 +168,7 @@ export async function adminBusiness(deps: Deps, id: string, lang: Locale): Promi
     floor: b.floor,
     entranceNote: b.entranceNote,
     hideExactAddress: b.hideExactAddress,
+    logo: logoOf(deps, b, lang),
     photos: b.photos.map((p) => photoOf(deps, p, lang, b.name)),
     services: menu?.n ?? 0,
     team: team?.n ?? 0,

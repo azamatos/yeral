@@ -18,7 +18,7 @@ import { randomToken, sha256Hex } from '../../lib/crypto'
 import { emit } from '../../notify'
 import { requireUser } from '../auth/session'
 import { cityRefOf, loadCities } from '../catalog/cities'
-import { photoOf, text } from '../catalog/map'
+import { logoOf, photoOf, text } from '../catalog/map'
 import { inSwitcher, signsIn } from './members'
 import { awaitingAnswer } from '../bookings/repo'
 import { answerFacts, answeringOf, requestItems } from '../requests/service'
@@ -273,7 +273,7 @@ export async function workspacesOf(deps: Deps, user: User): Promise<{ items: Wor
     name: business.name,
     address: business.address,
     city: cityRefOf(cities, business.cityId, user.lang),
-    photo: business.photos[0] ? photoOf(deps, business.photos[0], user.lang, business.name) : null,
+    logo: logoOf(deps, business, user.lang),
     level: member.level,
     requestsToAnswer: counts.get(business.id) ?? 0,
     lastOpenedAt: member.lastOpenedAt?.getTime() ?? null,
@@ -360,7 +360,7 @@ export async function inviteCards(deps: Deps, rows: InviteRow[], lang: Locale): 
           category: text(b.kind, lang),
           address: b.address,
           city: cityRefOf(cities, b.cityId, lang),
-          photo: b.photos[0] ? photoOf(deps, b.photos[0], lang, b.name) : null,
+          logo: logoOf(deps, b, lang),
         },
         invitedBy: senderRows.find((x) => x.userId === r.invitedBy && x.businessId === r.businessId)?.name ?? null,
         level: s.level === 'admin' ? 'admin' : 'specialist',

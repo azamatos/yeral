@@ -140,7 +140,7 @@ export const adminBusinessItemSchema = z
   })
   .meta({ id: 'AdminBusinessItem' })
 
-/** What the team checks (Q-276): the name, the address on the map, the category, the photos; what happened so far. */
+/** What the team checks (Q-276): the name, the address on the map, the category, the logo and photos; what happened so far. */
 export const adminBusinessSchema = adminBusinessItemSchema
   .extend({
     about: z.partialRecord(marketLocaleSchema, z.string()),
@@ -148,6 +148,7 @@ export const adminBusinessSchema = adminBusinessItemSchema
     floor: z.string().nullable(),
     entranceNote: z.string().nullable(),
     hideExactAddress: z.boolean(),
+    logo: photoSchema.nullable(),
     photos: z.array(photoSchema),
     /** Services on its menu, and people on its team. */
     services: z.number().int(),

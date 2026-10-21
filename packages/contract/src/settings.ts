@@ -13,7 +13,17 @@ import {
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
 import { GALLERY_MAX } from '@yeral/domain/photos'
 import { z } from 'zod'
-import { idSchema, latLngSchema, marketLocaleSchema, minuteSchema, phoneInputSchema, phoneSchema, slugSchema, ymdSchema } from './common'
+import {
+  idSchema,
+  latLngSchema,
+  marketLocaleSchema,
+  minuteSchema,
+  phoneInputSchema,
+  phoneSchema,
+  photoSchema,
+  slugSchema,
+  ymdSchema,
+} from './common'
 
 /**
  * The booking rules (B-41). The values each one takes are the settings screen's options (`RULE_OPTIONS` in
@@ -62,14 +72,16 @@ export const locationSchema = latLngSchema.extend({
 })
 
 /**
- * The business profile (B-37): what the public page says. The logo and photos come with uploads (F-084, F-101). The
- * owner and administrators ("change business settings").
+ * The business profile (B-37): what the public page says. The logo (`/settings/logo`) and the photos (`/settings/photos`)
+ * are uploads of their own (F-084, F-101). The owner and administrators ("change business settings").
  */
 export const businessProfileSchema = z
   .object({
     slug: slugSchema,
     /** As clients see it in search, on bookings and in SMS. */
     name: z.string(),
+    /** Square; null: the apps draw a letter tile. */
+    logo: photoSchema.nullable(),
     /** It sets how the business is found and booked: a change keeps the kind of booking. */
     categoryId: z.string(),
     /** "Näme edýärsiňiz…", per language as written. */
@@ -126,6 +138,14 @@ export const businessProfileUpdateSchema = z
   .partial()
   .strict()
   .meta({ id: 'BusinessProfileUpdate' })
+
+// ── The logo (B-37) ──
+
+/**
+ * The logo after a change; null once removed. Square: the app crops it, and checks the book's at least 400 × 400 px
+ * before sending (the api takes it as it takes every photo, by its bytes and size).
+ */
+export const businessLogoSchema = z.object({ logo: photoSchema.nullable() }).meta({ id: 'BusinessLogo' })
 
 // ── The gallery (B-37, Q-115) ──
 

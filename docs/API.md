@@ -58,7 +58,7 @@ CMS (`/v1/admin/...`, P2 step 5) follows. Their schemas join the contract as the
 | Area | Endpoint | Schemas (`@yeral/contract/…`) |
 |---|---|---|
 | Booking rules | `GET`/`PATCH /v1/w/:slug/settings/rules` (owner, administrators; book B-41, B-42) | `settings`: `bookingRules`, `bookingRulesUpdate` |
-| Business profile | `GET`/`PATCH /v1/w/:slug/settings/profile` (owner, administrators; book B-37; the logo and photos come with uploads) | `settings`: `businessProfile`, `businessProfileUpdate`, `location` |
+| Business profile | `GET`/`PATCH /v1/w/:slug/settings/profile` (owner, administrators; book B-37) · `PUT`/`DELETE /v1/w/:slug/settings/logo` (a photo form; the logo) · `/v1/w/:slug/settings/photos` (the gallery) | `settings`: `businessProfile`, `businessProfileUpdate`, `location`, `businessLogo`, `gallery` |
 | Hours and special days | `GET`/`PUT /v1/w/:slug/settings/hours` (owner, administrators; book B-39, B-40; bookings left outside: 409 `bookings_affected`, then `affected: keep \| cancel`) | `settings`: `businessHoursSettings`, `businessHoursUpdate`, `businessHoursResult`; `errors`: `bookingsAffectedDetails` |
 | Services menu | `GET`/`POST /v1/w/:slug/services` · `PATCH`/`DELETE …/services/:serviceId` · `POST …/services/:serviceId/restore` · `POST …/services/groups` · `PATCH`/`DELETE …/services/groups/:groupId` · `PUT …/services/order` (owner, administrators; book B-38) | `services`: `menu`, `menuGroup`, `menuService`, `serviceInput`, `serviceUpdate`, `groupInput`, `menuOrder` |
 | Requests | `GET /v1/w/:slug/requests` · `POST …/requests/:code/confirm` · `POST …/requests/:code/decline` (who may answer: the "who answers" setting; book B-19–B-21) | `requests`: `request`, `requestList`, `declineInput` |

@@ -21,6 +21,14 @@ export const photoOf = (deps: Pick<Deps, 'media'>, p: StoredPhoto, lang: Locale,
   alt: text(p.alt, lang) || fallback,
 })
 
+/** A business's logo (B-37), its name the alt; null: the apps draw a letter tile. */
+export const logoOf = (deps: Pick<Deps, 'media'>, b: { logo: StoredPhoto | null; name: string }, lang: Locale) =>
+  b.logo ? photoOf(deps, b.logo, lang, b.name) : null
+
+/** A business's cover: the gallery's first photo (B-37, Q-115). */
+export const coverOf = (deps: Pick<Deps, 'media'>, b: { photos: StoredPhoto[]; name: string }, lang: Locale) =>
+  b.photos[0] ? photoOf(deps, b.photos[0], lang, b.name) : null
+
 /** What visitors may see: verified (ADR 0018), not hidden by the Ýeral team (book Q-012) and not closed (Q-213). */
 export const isPublic = () => and(eq(businesses.verification, 'verified'), isNull(businesses.hiddenAt), isNull(businesses.closedAt))!
 export const publicRow = (b: Pick<BusinessRow, 'verification' | 'hiddenAt' | 'closedAt'>) =>

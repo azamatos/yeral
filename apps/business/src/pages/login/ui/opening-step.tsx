@@ -54,7 +54,7 @@ export function OpeningStep({
       media={
         <>
           {declined && <DeclinedLine business={declined} />}
-          <BusinessMark name={workspace.name} photo={workspace.photo} size={64} />
+          <BusinessMark name={workspace.name} logo={workspace.logo} size={64} />
         </>
       }
       title={title}

@@ -34,7 +34,7 @@ const workspace = (slug: string, name: string, level: Workspace['level'], lastOp
   name,
   address: '247 Bitarap Türkmenistan Avenue',
   city,
-  photo: null,
+  logo: null,
   level,
   requestsToAnswer: 0,
   lastOpenedAt,
@@ -52,7 +52,7 @@ const invite = (
   }: Partial<{ id: string; slug: string; name: string; level: InviteCard['level']; answersRequests: boolean }> = {},
 ): InviteCard => ({
   id,
-  business: { slug, name, category: 'Beauty', address: '247 Bitarap Türkmenistan Avenue', city, photo: null },
+  business: { slug, name, category: 'Beauty', address: '247 Bitarap Türkmenistan Avenue', city, logo: null },
   invitedBy: 'Maýsa Annaýewa',
   level,
   answersRequests,

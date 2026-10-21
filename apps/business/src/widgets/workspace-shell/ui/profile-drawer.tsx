@@ -114,7 +114,7 @@ function Profile({ onDone }: { onDone: () => void }) {
           <ul className="m-0 flex list-none flex-col p-0">
             {workspaces.items.map((w) => (
               <li key={w.slug} className="flex min-h-15 items-center gap-3 border-b border-n-200 py-2 first:border-t">
-                <Avatar decorative name={w.name} src={w.photo?.url} size={32} shape="square" tone="neutral" letters={1} />
+                <Avatar decorative name={w.name} src={w.logo?.url} size={32} shape="square" tone="neutral" letters={1} />
                 <span className="flex min-w-0 flex-col">
                   <span className="truncate text-small font-semibold text-n-900">{w.name}</span>
                   <span className="truncate text-micro text-n-600">{t(`levels.${w.level}`)}</span>

@@ -20,7 +20,8 @@ interface Business {
   id: string
 }
 
-async function lockedBusiness(db: Queryable, id: string) {
+/** The business's row, held for a settings write: of two at once the later sees the earlier. */
+export async function lockedBusiness(db: Queryable, id: string) {
   const [b] = await db.select().from(businesses).where(eq(businesses.id, id)).for('no key update')
   if (!b) throw new ApiError('not_found')
   return b

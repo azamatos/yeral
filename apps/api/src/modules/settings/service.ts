@@ -9,16 +9,18 @@ import type {
   businessProfileUpdateSchema,
 } from '@yeral/contract/settings'
 import { addressOf, newAddressSince, sameAddress, sameAddressShown } from '@yeral/domain/lifecycle'
-import { AMENITIES, type Amenity, type Localized } from '@yeral/domain/model'
+import { AMENITIES, type Amenity, type Locale, type Localized } from '@yeral/domain/model'
 import { LATE_MINUTES, rulesErrors, type BookingRules } from '@yeral/domain/rules'
 import { eq } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
 import { bookingRules, businesses, categories, cities } from '../../db/schema'
+import type { Deps } from '../../deps'
 import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
 import { toRules } from '../availability/context'
 import { queueAddressSms } from '../bookings/address-sms'
+import { logoOf } from '../catalog/map'
 
 type RulesView = z.infer<typeof bookingRulesSchema>
 type RulesChange = z.infer<typeof bookingRulesUpdateSchema>
@@ -64,9 +66,10 @@ type ProfileView = z.infer<typeof businessProfileSchema>
 type ProfileChange = z.infer<typeof businessProfileUpdateSchema>
 type BusinessRow = typeof businesses.$inferSelect
 
-const profileView = (b: BusinessRow): ProfileView => ({
+const profileView = (deps: Pick<Deps, 'media'>, b: BusinessRow, lang: Locale): ProfileView => ({
   slug: b.slug,
   name: b.name,
+  logo: logoOf(deps, b, lang),
   categoryId: b.categoryId,
   about: b.about,
   phone: b.phone,
@@ -81,10 +84,10 @@ const profileView = (b: BusinessRow): ProfileView => ({
   hidden: b.hiddenAt ? { reason: b.hiddenReason ?? '' } : null,
 })
 
-export async function profileOf(db: Queryable, businessId: string): Promise<ProfileView> {
-  const [row] = await db.select().from(businesses).where(eq(businesses.id, businessId))
+export async function profileOf(deps: Pick<Deps, 'db' | 'media'>, businessId: string, lang: Locale): Promise<ProfileView> {
+  const [row] = await deps.db.select().from(businesses).where(eq(businesses.id, businessId))
   if (!row) throw new ApiError('not_found')
-  return profileView(row)
+  return profileView(deps, row, lang)
 }
 
 /**
@@ -94,8 +97,14 @@ export async function profileOf(db: Queryable, businessId: string): Promise<Prof
  * street or city is a move (`movedAt`, `movedFrom`), which every client with a booking ahead hears by SMS
  * (`queueAddressSms`). Back where it moved from while the page still says "New address", it has nothing new to say.
  */
-export async function updateProfile(db: Queryable, businessId: string, change: ProfileChange, now: number): Promise<ProfileView> {
-  return db.transaction(async (tx) => {
+export async function updateProfile(
+  deps: Pick<Deps, 'db' | 'media' | 'now'>,
+  businessId: string,
+  change: ProfileChange,
+  lang: Locale,
+): Promise<ProfileView> {
+  const now = deps.now()
+  return deps.db.transaction(async (tx) => {
     const [row] = await tx.select().from(businesses).where(eq(businesses.id, businessId)).for('no key update')
     if (!row) throw new ApiError('not_found')
     const recategorized = change.categoryId !== undefined && change.categoryId !== row.categoryId
@@ -135,11 +144,11 @@ export async function updateProfile(db: Queryable, businessId: string, change: P
       ...(moved ? { addressChangedAt: new Date(now) } : {}),
       ...(pageMoved ? (movedBack ? { movedAt: null, movedFrom: null } : { movedAt: new Date(now), movedFrom: from }) : {}),
     }
-    if (!Object.keys(set).length) return profileView(row)
+    if (!Object.keys(set).length) return profileView(deps, row, lang)
     const [saved] = await tx.update(businesses).set(set).where(eq(businesses.id, businessId)).returning()
     if (relocated && !draft) await queueAddressSms(tx, businessId, before, now)
     await emit(tx, { type: 'business.updated', businessId })
-    return profileView(saved!)
+    return profileView(deps, saved!, lang)
   })
 }
 

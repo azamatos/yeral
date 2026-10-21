@@ -9,6 +9,7 @@ question in this book, the answer is added here with its date, and the chapters 
 
 | Date | Question | Decision | By |
 |---|---|---|---|
+| 21.10.2026 | B-37, F-100, B-08, B-10 (how) | The business's logo is an upload of its own beside the gallery, taken like every photo (JPEG, PNG or WebP up to 10 MB, kept without its metadata) by the owner and administrators; the app crops it square and checks B-37's at least 400 × 400 px before sending, so the api doesn't read pixels. A new one replaces the old, and removing it leaves the apps' letter tile. The profile, the switcher, the invite card and the admin tool's check show the logo; the workspaces and invite cards carry the logo only (the cover they carried went unused); the gallery's first photo stays the cover on cards and pages. A deleted draft's logo goes with it | Claude (delegated) |
 | 21.10.2026 | F-200, C-18, C-19, B-07 | While the sign-in code shows on the screen, both sign-ins say it's a demo: sign in with a made-up number, enter no real names or phone numbers | owner |
 | 21.10.2026 | F-200 (how) | The screens learn it before a number is typed from `GET /v1/auth/mode` (`{ codeOnScreen }`, public, cached a minute), by the same rule that puts the code in `/auth/code`'s answer; the note's words and place come with the apps | Claude (delegated) |
 | 21.10.2026 | Q-036 (concern settled) | No real businesses at the first launch: it's still a demo, with the example businesses and the demo workspace; real businesses join with the Turkmenistan launch and its real SMS sign-in | owner |
