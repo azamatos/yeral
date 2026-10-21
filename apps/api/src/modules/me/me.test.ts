@@ -512,6 +512,9 @@ describe('account', () => {
         '/v1/admin/businesses/{id}/hide',
         '/v1/admin/businesses/{id}/show',
         '/v1/w/{slug}/verification',
+        '/v1/admin/reviews',
+        '/v1/admin/reviews/{id}/clear',
+        '/v1/admin/reviews/{id}/remove',
       ].sort(),
     )
   })

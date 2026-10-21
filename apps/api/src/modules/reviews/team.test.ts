@@ -2,7 +2,8 @@
 import { addDays, today } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { DEMO_NOW, testApp } from '../../../test/app'
+import { signedInAdmin } from '../../../test/admin'
+import { DEMO_NOW, site, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
@@ -208,5 +209,91 @@ describe('the team’s reviews (book B-53, B-54)', () => {
     expect(later.summary).toBeNull()
     const past = (await maysa.req(`${W}/reviews?lang=en&cursor=9000`)).json
     expect([past.items.length, past.total > 0]).toEqual([0, true])
+  })
+
+  it('Ýeral decides a report (Q-261, Q-262): kept, it counts and can’t be reported again; removed, it’s gone but to its author', async () => {
+    const team = await signedInAdmin(t, 'moderator', 'Moderator')
+    const maysa = await as(MAYSA)
+    const kept = await reviewed('+99365920011', 2, 'Slow but fine')
+    const gone = await reviewed('+99365920012', 1, 'Rude words here')
+    const idOf = async (text: string) => (await page(maysa)).items.find((r) => (r as unknown as { text: string }).text === text)!.id
+    const [keptId, goneId] = [await idOf('Slow but fine'), await idOf('Rude words here')]
+    await maysa.req(`${W}/reviews/${keptId}/report`, { body: { reason: 'fake' } })
+    await maysa.req(`${W}/reviews/${goneId}/report`, { body: { reason: 'insulting', text: 'Swearing' } })
+    const before = await ratingOf()
+    // the queue: the longest waiting first, who reported it and when it counts again
+    const queue = (await team.req('/v1/admin/reviews?view=reported')).json.items as { id: string; report: Record<string, unknown> }[]
+    expect(queue.map((r) => r.id)).toEqual(expect.arrayContaining([keptId, goneId]))
+    expect(queue.find((r) => r.id === goneId)!.report).toMatchObject({
+      reason: 'insulting',
+      by: 'Maýsa',
+      counted: false,
+      countsAgainAt: t.clock.now + 48 * 3_600_000,
+    })
+    // kept: in the rating again, and never reported again
+    expect((await team.req(`/v1/admin/reviews/${keptId}/clear`, { method: 'POST' })).status).toBe(204)
+    expect((await ratingOf()).count).toBe(before.count + 1)
+    expect((await page(maysa)).items.find((r) => r.id === keptId)!.report).toMatchObject({ state: 'cleared' })
+    expect((await maysa.req(`${W}/reviews/${keptId}/report`, { body: { reason: 'spam' } })).json.error.code).toBe('already_reported')
+    expect((await team.req(`/v1/admin/reviews/${keptId}/clear`, { method: 'POST' })).json.error.code).toBe('invalid_status')
+    // removed: not on the page, not in the team's list, not in the rating (it wasn't counted), the author still sees it
+    expect((await team.req(`/v1/admin/reviews/${goneId}/remove`, { body: { reason: 'Insults' } })).status).toBe(204)
+    expect((await ratingOf()).count).toBe(before.count + 1)
+    const pub = (await browser(t.app).req('/v1/businesses/glow-studio/reviews?lang=en&limit=50')).json.items as { id: string }[]
+    expect(pub.map((r) => r.id)).not.toContain(goneId)
+    expect((await page(maysa)).items.map((r) => r.id)).not.toContain(goneId)
+    expect((await maysa.req(`${W}/reviews/${goneId}/reply`, { method: 'PUT', body: { text: 'x' } })).status).toBe(404)
+    expect((await gone.client.req(`/v1/me/bookings/${gone.code}`)).json.review).toMatchObject({ rating: 1 })
+    expect((await gone.client.req(`/v1/me/bookings/${gone.code}/review`, { body: { rating: 5, text: 'Again' } })).status).toBe(409)
+    expect((await team.req('/v1/admin/reviews?view=removed')).json.items[0]).toMatchObject({ id: goneId, removed: { reason: 'Insults' } })
+    expect((await team.req(`/v1/admin/reviews/${goneId}/remove`, { body: { reason: 'Again' } })).json.error.code).toBe('invalid_status')
+    expect(kept.code).toBeTruthy()
+  })
+
+  it('a review removed after its 48 hours leaves the rating', async () => {
+    const maysa = await as(MAYSA)
+    await reviewed('+99365920013', 4, 'Late to decide')
+    const id = (await page(maysa)).items.find((r) => (r as unknown as { text: string }).text === 'Late to decide')!.id
+    await maysa.req(`${W}/reviews/${id}/report`, { body: { reason: 'other' } })
+    t.clock.now += 48 * 3_600_000 + 60_000
+    await runDueJobs(t.deps)
+    const counted = await ratingOf()
+    // a session lasts 12 hours: the team member signs in now
+    const team = await signedInAdmin(t, 'late.moderator')
+    expect((await team.req(`/v1/admin/reviews/${id}/remove`, { body: { reason: 'Not about this place' } })).status).toBe(204)
+    expect(await ratingOf()).toMatchObject({
+      count: counted.count - 1,
+      breakdown: { ...counted.breakdown, 4: counted.breakdown['4']! - 1 },
+    })
+  })
+
+  it('only the Ýeral team decides', async () => {
+    expect((await (await as(MAYSA)).req('/v1/admin/reviews', { headers: { Origin: site.urls.cms } })).status).toBe(401)
+  })
+
+  it('removing a review never reported, or one kept, takes it out of the rating; an edit after it was kept may be reported again', async () => {
+    const team = await signedInAdmin(t, 'remover')
+    const maysa = await as(MAYSA)
+    const a = await reviewed('+99365920021', 3, 'Never reported')
+    const b = await reviewed('+99365920022', 2, 'Kept then edited')
+    const idOf = async (text: string) => (await page(maysa)).items.find((r) => (r as unknown as { text: string }).text === text)!.id
+    const [aId, bId] = [await idOf('Never reported'), await idOf('Kept then edited')]
+    const before = await ratingOf()
+    expect((await team.req(`/v1/admin/reviews/${aId}/remove`, { body: { reason: 'Spam' } })).status).toBe(204)
+    expect((await ratingOf()).count).toBe(before.count - 1)
+    // the author's edit of a removed review moves nothing
+    await a.client.req(`/v1/me/bookings/${a.code}/review`, { method: 'PATCH', body: { rating: 5, text: 'Edited' } })
+    expect((await ratingOf()).count).toBe(before.count - 1)
+    // kept, then edited: reportable again, still counted
+    await maysa.req(`${W}/reviews/${bId}/report`, { body: { reason: 'fake' } })
+    await team.req(`/v1/admin/reviews/${bId}/clear`, { method: 'POST' })
+    await b.client.req(`/v1/me/bookings/${b.code}/review`, { method: 'PATCH', body: { rating: 1, text: 'Now insulting' } })
+    expect((await page(maysa)).items.find((r) => r.id === bId)!.report).toBeNull()
+    expect((await maysa.req(`${W}/reviews/${bId}/report`, { body: { reason: 'insulting' } })).status).toBe(204)
+    // removed once kept: out of the rating
+    await team.req(`/v1/admin/reviews/${bId}/clear`, { method: 'POST' })
+    const kept = await ratingOf()
+    expect((await team.req(`/v1/admin/reviews/${bId}/remove`, { body: { reason: 'Insults' } })).status).toBe(204)
+    expect((await ratingOf()).count).toBe(kept.count - 1)
   })
 })

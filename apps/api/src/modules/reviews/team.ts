@@ -16,7 +16,7 @@ import type { Deps } from '../../deps'
 import { ApiError } from '../../http/errors'
 import { emit } from '../../notify'
 import { withStaff } from '../clients/facts'
-import { shiftRating, shiftReviews } from './rating'
+import { notRemoved, shiftRating, shiftReviews } from './rating'
 import { replyOf, visitsOf } from './view'
 
 interface Business {
@@ -45,6 +45,7 @@ export async function teamReviews(db: Queryable, business: Business, actor: Acto
   const own = scopeOf(actor, 'calendar') === 'own' ? actor.staffId : null
   const where = and(
     eq(reviews.businessId, business.id),
+    notRemoved(),
     own ? withStaff(own, reviews.bookingId) : undefined,
     q.staff ? withStaff(q.staff, reviews.bookingId) : undefined,
     q.unanswered ? unanswered : undefined,
@@ -115,7 +116,7 @@ async function summaryOf(db: Queryable, businessId: string): Promise<NonNullable
       db
         .select({ n: sql<number>`count(*)::int` })
         .from(reviews)
-        .where(and(eq(reviews.businessId, businessId), unanswered)),
+        .where(and(eq(reviews.businessId, businessId), notRemoved(), unanswered)),
   ])
   const breakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, ...(b?.breakdown ?? {}) }
   return { rating: b?.rating ?? null, count: b?.count ?? 0, breakdown, unanswered: open?.n ?? 0 }
@@ -131,7 +132,7 @@ async function lockedReview(db: Queryable, businessId: string, id: string): Prom
   const [r] = await db
     .select()
     .from(reviews)
-    .where(and(eq(reviews.id, id), eq(reviews.businessId, businessId)))
+    .where(and(eq(reviews.id, id), eq(reviews.businessId, businessId), notRemoved()))
     .for('update')
   if (!r) throw new ApiError('not_found')
   return r
@@ -223,6 +224,7 @@ export async function recountReviews(deps: Deps): Promise<number> {
           isNotNull(reviews.reportedAt),
           isNull(reviews.recountedAt),
           isNull(reviews.clearedAt),
+          notRemoved(),
           lte(reviews.reportedAt, new Date(now - REVIEW_REPORT_HOURS * 3_600_000)),
         ),
       )

@@ -78,6 +78,10 @@
   again, a move checked again; the owner sends a business back for review once fixed, and hears every result on screen
   and by an SMS that never goes at night. Migration 0036 adds `businesses.sent_for_review_at`, `hidden_at` and
   `hidden_reason`.
+- **@yeral/api** (minor), **@yeral/contract** (minor), reported reviews in the admin tool (#124; book ROUND6 F2, Q-261,
+  Q-262): the queue of reports waiting, kept (it counts and can't be reported again) or removed (gone from the page, the
+  business's list and the rating; its author still sees it). Migration 0037 adds `reviews.removed_at` and
+  `removed_reason`.
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 

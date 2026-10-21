@@ -118,6 +118,7 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
       reportedAt: reviews.reportedAt,
       recountedAt: reviews.recountedAt,
       clearedAt: reviews.clearedAt,
+      removedAt: reviews.removedAt,
     })
     // one Ýeral was checking had left the rating already
     await shiftReviews(tx, gone.filter(isCounted), -1, 'review.deleted')

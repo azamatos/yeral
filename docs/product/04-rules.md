@@ -193,7 +193,7 @@ MVP. (business spec §3; Q-031, decided 18.10.2026)
 - A reported review stays visible on both sides with "*Ýeral barlaýar · ortaça baha hasaplanmaýar*" and isn't counted in
   the rating until the team clears it. Removed means gone. (ROUND6-ANSWERS F2) The team decides within 48 hours;
   otherwise the review counts again. A cleared review can't be reported again. (Q-261, decided 18.10.2026) Built for the
-  business (21.10.2026); the team's decision comes with the admin tool (chapter 10, P2 step 5).
+  business and the Ýeral team's decision in the api (21.10.2026); the admin tool comes with the apps.
 
 ## Verification
 

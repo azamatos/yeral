@@ -2,7 +2,7 @@
  * The Ýeral team's admin tool (book F-178; ADR 0026): its own accounts, signed in with a login, a password and an
  * authenticator code. One role (Q-011): every account can do everything.
  */
-import { VERIFICATION_STATUSES } from '@yeral/domain/model'
+import { REVIEW_REPORT_REASONS, VERIFICATION_STATUSES } from '@yeral/domain/model'
 import { z } from 'zod'
 import { cityRefSchema, epochSchema, idSchema, langQuerySchema, latLngSchema, marketLocaleSchema, photoSchema } from './common'
 
@@ -146,8 +146,46 @@ export const adminReasonSchema = z
   .strict()
   .meta({ id: 'AdminReason' })
 
+// ── reported reviews (book ROUND6 F2, Q-261, Q-262) ──
+
+/** `reported` waiting for Ýeral (the longest waiting first; after 48 hours they count again meanwhile), `cleared` kept, `removed`. */
+export const ADMIN_REVIEW_VIEWS = ['reported', 'cleared', 'removed'] as const
+export const adminReviewsQuerySchema = z.object({ view: z.enum(ADMIN_REVIEW_VIEWS).default('reported') })
+export const adminReviewParamSchema = z.object({ id: idSchema })
+
+export const adminReviewSchema = z
+  .object({
+    id: idSchema,
+    business: z.object({ id: idSchema, slug: z.string(), name: z.string() }),
+    author: z.string(),
+    rating: z.number().int().min(1).max(5),
+    tags: z.array(z.string()),
+    text: z.string().nullable(),
+    /** "Aýal saç kesimi · Aýna": the visit it's about. */
+    what: z.string(),
+    createdAt: epochSchema,
+    /** The business's reply, as clients read it. */
+    reply: z.string().nullable(),
+    report: z
+      .object({
+        reason: z.enum(REVIEW_REPORT_REASONS),
+        text: z.string().nullable(),
+        at: epochSchema,
+        /** Who on the business's team reported it. */
+        by: z.string().nullable(),
+        /** It counts in the rating again then, if Ýeral hasn't decided (Q-261). */
+        countsAgainAt: epochSchema,
+        counted: z.boolean(),
+      })
+      .nullable(),
+    clearedAt: epochSchema.nullable(),
+    removed: z.object({ at: epochSchema, reason: z.string() }).nullable(),
+  })
+  .meta({ id: 'AdminReview' })
+
 export type AdminMe = z.infer<typeof adminMeSchema>
 export type AdminMember = z.infer<typeof adminMemberSchema>
 export type AdminSetupLink = z.infer<typeof adminSetupLinkSchema>
 export type AdminBusinessItem = z.infer<typeof adminBusinessItemSchema>
 export type AdminBusiness = z.infer<typeof adminBusinessSchema>
+export type AdminReview = z.infer<typeof adminReviewSchema>
