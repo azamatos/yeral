@@ -98,6 +98,9 @@
   texts no number its team typed in; past 1000 SMS a day or 30 in 10 minutes per business an SMS waits for the window (a
   reminder that would then arrive after the visit has started is settled unsent, as any late reminder), and the alerts
   hear of it once; the notices of a closing are never held.
+- **@yeral/api** (minor), **@yeral/contract** (minor), the client site's sitemap data (#129; book F-197): `GET
+  /v1/sitemap` lists every public business page, with when it last changed, and the category pages, for the kinds of
+  booking open now.
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 
