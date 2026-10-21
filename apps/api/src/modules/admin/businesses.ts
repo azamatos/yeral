@@ -8,17 +8,17 @@ import type { AdminBusiness, AdminBusinessItem, AdminBusinessView } from '@yeral
 import { businessSmsAt } from '@yeral/domain/lifecycle'
 import type { Locale } from '@yeral/domain/model'
 import { createT } from '@yeral/i18n/fmt'
-import { and, asc, count, desc, eq, ilike, inArray, isNotNull, isNull, or, sql, type SQL } from 'drizzle-orm'
+import { and, asc, count, desc, eq, ilike, inArray, isNotNull, isNull, lte, or, sql, type SQL } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { adminActions, admins, businesses, categories, services, staff, users, verificationHistory } from '../../db/schema'
+import { adminActions, admins, businesses, categories, jobs, services, staff, users, verificationHistory } from '../../db/schema'
 import type { Deps } from '../../deps'
 import type { Admin } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { emit, queueSms } from '../../notify'
 import { cityRefOf, loadCities } from '../catalog/cities'
-import { photoOf, text } from '../catalog/map'
+import { photoOf, publicRow, text } from '../catalog/map'
 import { likeOf } from '../catalog/search'
-import { recordAction } from './accounts'
+import { holdActor, recordAction } from './accounts'
 
 /** A list holds this many at most: the newest, or the longest waiting. */
 export const ADMIN_LIST_MAX = 200
@@ -150,32 +150,56 @@ export async function adminBusiness(deps: Deps, id: string, lang: Locale): Promi
 type Told = 'verified' | 'rejected' | 'hidden' | 'shown'
 const SMS_KEY = { verified: 'pageVerified', rejected: 'pageRejected', hidden: 'pageHidden', shown: 'pageShown' } as const
 
+/** The reason as an SMS carries it: the start of a long one (the workspace shows it whole). */
+const smsReason = (reason: string) => (reason.length > SMS_REASON_MAX ? `${reason.slice(0, SMS_REASON_MAX - 1).trimEnd()}…` : reason)
+export const SMS_REASON_MAX = 120
+/** Links as booking SMS carry them, without the scheme. */
+const bare = (url: string) => url.replace(/^https?:\/\//, '')
+
 /**
  * "Ýeral: barlag we täzelikler" (business spec §16; chapter 8): the workspace's screens hear it at once, and the owner
- * gets an SMS in their language that waits for the morning at night (Q-279).
+ * gets an SMS in their language that waits for the morning at night (Q-279; one waiting is replaced by the next, so
+ * the morning brings only the last word). `sms: false`: the screens only (a page verified or shown while it still
+ * isn't public).
  */
-async function tellOwner(tx: Queryable, deps: Pick<Deps, 'now' | 'site'>, b: BusinessRow, told: Told, reason?: string) {
+async function tellOwner(
+  tx: Queryable,
+  deps: Pick<Deps, 'now' | 'site'>,
+  b: BusinessRow,
+  told: Told,
+  o: { reason?: string; sms?: boolean } = {},
+) {
   await emit(tx, { type: 'business.reviewed', businessId: b.id })
   const [owner] = await ownerOf(tx, [b.id])
-  if (!owner) return
+  if (!owner || o.sms === false) return
   const t = createT(owner.lang)
-  const link = told === 'rejected' ? deps.site.urls.business : `${deps.site.urls.client}/b/${b.slug}`
+  const link = bare(told === 'rejected' ? deps.site.urls.business : `${deps.site.urls.client}/b/${b.slug}`)
+  const runAt = businessSmsAt(deps.now())
+  const dedupeKey = `business-review:${b.id}:${runAt}`
+  await tx
+    .delete(jobs)
+    .where(
+      and(eq(jobs.dedupeKey, dedupeKey), isNull(jobs.doneAt), or(isNull(jobs.lockedUntil), lte(jobs.lockedUntil, new Date(deps.now())))),
+    )
   await queueSms(tx, {
     to: owner.phone,
-    text: t(`sms.${SMS_KEY[told]}`, { brand: t('common.brand'), business: b.name, reason: reason ?? '', link }),
-    runAt: new Date(businessSmsAt(deps.now())),
+    text: t(`sms.${SMS_KEY[told]}`, { brand: t('common.brand'), business: b.name, reason: smsReason(o.reason ?? ''), link }),
+    runAt: new Date(runAt),
+    dedupeKey,
   })
 }
 
 /**
  * Verified (S-17): public in search, at its link and among similar places, and the owner told. A verified business that
- * moved is checked again the same way: it stays public, and nobody is told.
+ * moved is checked again the same way: it stays public, and nobody is told; `moved` is the move the team looked at
+ * (its `addressChangedAt`), so a newer one isn't checked by mistake.
  */
-export async function verifyBusiness(deps: Deps, by: Admin, id: string): Promise<void> {
+export async function verifyBusiness(deps: Deps, by: Admin, id: string, moved?: number): Promise<void> {
   await deps.db.transaction(async (tx) => {
+    await holdActor(tx, by)
     const b = await rowOf(tx, id, true)
     const recheck = b.verification === 'verified'
-    if (recheck && !b.addressChangedAt) throw new ApiError('invalid_status')
+    if (recheck && (!b.addressChangedAt || b.addressChangedAt.getTime() !== moved)) throw new ApiError('invalid_status')
     await tx
       .update(businesses)
       .set({ verification: 'verified', verificationReason: null, addressChangedAt: null })
@@ -184,7 +208,8 @@ export async function verifyBusiness(deps: Deps, by: Admin, id: string): Promise
     await emit(tx, { type: 'business.updated', businessId: b.id })
     if (recheck) return
     await tx.insert(verificationHistory).values({ businessId: b.id, status: 'verified', at: new Date(deps.now()) })
-    await tellOwner(tx, deps, b, 'verified')
+    // still hidden: "is open" waits for it to be shown
+    await tellOwner(tx, deps, b, 'verified', { sms: publicRow({ ...b, verification: 'verified' }) })
   })
 }
 
@@ -194,6 +219,7 @@ export async function verifyBusiness(deps: Deps, by: Admin, id: string): Promise
  */
 export async function rejectBusiness(deps: Deps, by: Admin, id: string, reason: string): Promise<void> {
   await deps.db.transaction(async (tx) => {
+    await holdActor(tx, by)
     const b = await rowOf(tx, id, true)
     if (b.verification === 'rejected') throw new ApiError('invalid_status')
     await tx
@@ -203,7 +229,7 @@ export async function rejectBusiness(deps: Deps, by: Admin, id: string, reason: 
     await tx.insert(verificationHistory).values({ businessId: b.id, status: 'rejected', reason, at: new Date(deps.now()) })
     await recordAction(tx, by, b.verification === 'verified' ? 'business.unverified' : 'business.rejected', { businessId: b.id, reason })
     await emit(tx, { type: 'business.updated', businessId: b.id })
-    await tellOwner(tx, deps, b, 'rejected', reason)
+    await tellOwner(tx, deps, b, 'rejected', { reason })
   })
 }
 
@@ -213,6 +239,7 @@ export async function rejectBusiness(deps: Deps, by: Admin, id: string, reason: 
  */
 export async function hideBusiness(deps: Deps, by: Admin, id: string, reason: string): Promise<void> {
   await deps.db.transaction(async (tx) => {
+    await holdActor(tx, by)
     const b = await rowOf(tx, id, true)
     if (b.hiddenAt) throw new ApiError('invalid_status')
     await tx
@@ -221,18 +248,20 @@ export async function hideBusiness(deps: Deps, by: Admin, id: string, reason: st
       .where(eq(businesses.id, b.id))
     await recordAction(tx, by, 'business.hidden', { businessId: b.id, reason })
     await emit(tx, { type: 'business.updated', businessId: b.id })
-    await tellOwner(tx, deps, b, 'hidden', reason)
+    await tellOwner(tx, deps, b, 'hidden', { reason })
   })
 }
 
 export async function showBusiness(deps: Deps, by: Admin, id: string): Promise<void> {
   await deps.db.transaction(async (tx) => {
+    await holdActor(tx, by)
     const b = await rowOf(tx, id, true)
     if (!b.hiddenAt) throw new ApiError('invalid_status')
     await tx.update(businesses).set({ hiddenAt: null, hiddenReason: null }).where(eq(businesses.id, b.id))
     await recordAction(tx, by, 'business.shown', { businessId: b.id })
     await emit(tx, { type: 'business.updated', businessId: b.id })
-    await tellOwner(tx, deps, b, 'shown')
+    // not verified: "open again" waits for the verification
+    await tellOwner(tx, deps, b, 'shown', { sms: publicRow({ ...b, hiddenAt: null }) })
   })
 }
 

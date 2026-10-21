@@ -7,12 +7,14 @@ import { DEMO_NOW, site, testApp } from '../../../test/app'
 import { browser, eventsAfter } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, jobs, rateLimits } from '../../db/schema'
+import { businesses, jobs, rateLimits, services, staff } from '../../db/schema'
 import { seed } from '../../db/seed'
 
 const MAYSA = '+99365102030' // owner of Glow Studio
 const AYNA = '+99365312210' // a specialist there
 const ADMIN = '/v1/admin/businesses'
+/** Links as SMS carry them, without the scheme. */
+const bare = (url: string) => url.replace(/^https?:\/\//, '')
 
 describe('the admin tool’s businesses (book F-179)', () => {
   let db: Db
@@ -70,7 +72,7 @@ describe('the admin tool’s businesses (book F-179)', () => {
     expect((await team.req(`${ADMIN}/${glowId}/verify`, { method: 'POST' })).status).toBe(204)
     expect(await page()).toBe(200)
     const [sms] = await smsTo(MAYSA)
-    expect(sms!.payload.text).toBe(`Ýeral: Glow Studio is open: clients find it in search and at ${site.urls.client}/b/glow-studio`)
+    expect(sms!.payload.text).toBe(`Ýeral: Glow Studio is open: clients find it in search and at ${bare(site.urls.client)}/b/glow-studio`)
     // by day it goes at once
     expect(sms!.runAt.getTime()).toBe(DEMO_NOW)
     const heard = await eventsAfter(maysa, cursor, (items) => items.some((e) => e.type === 'business.reviewed'))
@@ -98,7 +100,7 @@ describe('the admin tool’s businesses (book F-179)', () => {
     })
     const [sms] = await smsTo(MAYSA)
     expect(sms!.payload.text).toBe(
-      `Ýeral: Glow Studio isn't open yet: The address is incomplete. Fix it in your workspace and send it again: ${site.urls.business}`,
+      `Ýeral: Glow Studio isn't open yet: The address is incomplete. Fix it in your workspace and send it again: ${bare(site.urls.business)}`,
     )
     expect(sms!.runAt.getTime()).toBe(epochOf(localOf(t.clock.now + 86_400_000).date, 8 * 60))
     expect((await team.req(`${ADMIN}/${glowId}?lang=en`)).json.actions[0]).toMatchObject({
@@ -116,6 +118,10 @@ describe('the admin tool’s businesses (book F-179)', () => {
     }[]
     expect(queue.find((b) => b.slug === 'glow-studio')).toMatchObject({ sentForReviewAt: t.clock.now, reason: null })
     await team.req(`${ADMIN}/${glowId}/verify`, { method: 'POST' })
+    // at night a later word replaces the one waiting: the morning brings only "is open"
+    const waiting = (await smsTo(MAYSA)).filter((m) => m.runAt.getTime() > t.clock.now)
+    expect(waiting).toHaveLength(1)
+    expect(waiting[0]!.payload.text).toMatch(/is open: clients find it/)
   })
 
   it('hidden: out of search and its page closed to visitors, its team told why; shown again', async () => {
@@ -144,6 +150,52 @@ describe('the admin tool’s businesses (book F-179)', () => {
     expect((await smsTo(MAYSA))[0]!.payload.text).toBe("Ýeral: Glow Studio's page is open again.")
   })
 
+  it('while hidden: nothing new booked or moved online, its bookings kept; "open" said only once it is', async () => {
+    const team = await signedInAdmin(t, 'hider.two')
+    const maysa = await as(MAYSA)
+    const [manicure] = (await db.select().from(services).where(eq(services.businessId, glowId))).filter((x) => x.name.en === 'Manicure')
+    const [maral] = (await db.select().from(staff).where(eq(staff.businessId, glowId))).filter((x) => x.name === 'Maral')
+    const client = await as('+99365800601', 'Client')
+    const want = (start: number) => ({
+      type: 'appointment',
+      business: 'glow-studio',
+      serviceIds: [manicure!.id],
+      staffId: maral!.id,
+      date: '2026-10-20',
+      start,
+    })
+    const asked = await client.req('/v1/bookings', { body: want(840) })
+    expect((await maysa.req(`/v1/w/glow-studio/requests/${asked.json.code}/confirm`, { method: 'POST', body: {} })).status).toBe(204)
+    await team.req(`${ADMIN}/${glowId}/hide`, { body: { reason: 'Checking complaints' } })
+    expect((await client.req('/v1/bookings', { body: want(900) })).json.error.code).toBe('not_found')
+    expect((await browser(t.app).req('/v1/businesses/glow-studio/reviews?lang=en')).status).toBe(404)
+    // the booking stays, and is moved by phone only
+    expect((await client.req(`/v1/me/bookings/${asked.json.code}`)).json).toMatchObject({
+      status: 'confirmed',
+      bookOnline: false,
+      actions: { reschedule: false },
+    })
+    const move = await client.req(`/v1/me/bookings/${asked.json.code}/reschedule`, { body: { date: '2026-10-20', start: 900 } })
+    expect(move.json.error.code).toBe('online_disabled')
+    // verified while hidden: no "is open" yet; shown while not verified: no "open again"
+    const sent = (await smsTo(MAYSA)).length
+    await db.update(businesses).set({ verification: 'pending' }).where(eq(businesses.id, glowId))
+    expect((await team.req(`${ADMIN}/${glowId}/verify`, { method: 'POST' })).status).toBe(204)
+    expect(await smsTo(MAYSA)).toHaveLength(sent)
+    await team.req(`${ADMIN}/${glowId}/reject`, { body: { reason: 'Photos' } })
+    expect((await team.req(`${ADMIN}/${glowId}/show`, { method: 'POST' })).status).toBe(204)
+    expect((await smsTo(MAYSA))[0]!.payload.text).toMatch(/isn't open yet: Photos/)
+    // a long reason: its start in the SMS, whole on the screen
+    await team.req(`${ADMIN}/${glowId}/verify`, { method: 'POST' })
+    await team.req(`${ADMIN}/${glowId}/reject`, { body: { reason: 'x'.repeat(400) } })
+    expect((await smsTo(MAYSA))[0]!.payload.text).toContain(`${'x'.repeat(119)}…`)
+    expect((await maysa.req('/v1/w/glow-studio/settings/profile')).json).toMatchObject({
+      verificationReason: 'x'.repeat(400),
+      hidden: null,
+    })
+    await team.req(`${ADMIN}/${glowId}/verify`, { method: 'POST' })
+  })
+
   it('a business that moved is checked again: it stays public, and nobody is told', async () => {
     const team = await signedInAdmin(t, 'mover')
     await db
@@ -151,8 +203,13 @@ describe('the admin tool’s businesses (book F-179)', () => {
       .set({ addressChangedAt: new Date(DEMO_NOW) })
       .where(eq(businesses.id, glowId))
     const sent = (await smsTo(MAYSA)).length
-    expect(((await team.req(`${ADMIN}?view=moved&lang=en`)).json.items as { slug: string }[]).map((b) => b.slug)).toContain('glow-studio')
-    expect((await team.req(`${ADMIN}/${glowId}/verify`, { method: 'POST' })).status).toBe(204)
+    const moved = (await team.req(`${ADMIN}?view=moved&lang=en`)).json.items as { slug: string; addressChangedAt: number }[]
+    expect(moved.map((b) => b.slug)).toContain('glow-studio')
+    // the move the team looked at, not an older or newer one
+    expect((await team.req(`${ADMIN}/${glowId}/verify`, { method: 'POST' })).json.error.code).toBe('invalid_status')
+    expect((await team.req(`${ADMIN}/${glowId}/verify?moved=${DEMO_NOW - 1}`, { method: 'POST' })).json.error.code).toBe('invalid_status')
+    const seen = moved.find((b) => b.slug === 'glow-studio')!.addressChangedAt
+    expect((await team.req(`${ADMIN}/${glowId}/verify?moved=${seen}`, { method: 'POST' })).status).toBe(204)
     expect(((await team.req(`${ADMIN}?view=moved&lang=en`)).json.items as { slug: string }[]).map((b) => b.slug)).not.toContain(
       'glow-studio',
     )

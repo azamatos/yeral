@@ -6,6 +6,7 @@ import {
   adminBusinessParamSchema,
   adminBusinessSchema,
   adminReasonSchema,
+  adminVerifyQuerySchema,
 } from '@yeral/contract/admin'
 import { langQuerySchema, listOf } from '@yeral/contract/common'
 import type { AppEnv } from '../../http/env'
@@ -36,8 +37,8 @@ const verifyRoute = createRoute({
   method: 'post',
   path: '/admin/businesses/{id}/verify',
   tags,
-  summary: 'Verified: public, and the owner told; a verified one that moved is checked again (`invalid_status` otherwise)',
-  request: { params: adminBusinessParamSchema },
+  summary: 'Verified: public, and the owner told; a verified one that moved is checked again with `moved` as seen',
+  request: { params: adminBusinessParamSchema, query: adminVerifyQuerySchema },
   responses: { ...noContent, 404: errors[404], 409: errors[409], ...signedIn },
 })
 const rejectRoute = createRoute({
@@ -75,7 +76,7 @@ export const adminBusinessRoutes = new OpenAPIHono<AppEnv>()
     return c.json(await adminBusiness(c.var.deps, c.req.valid('param').id, c.req.valid('query').lang), 200)
   })
   .openapi(verifyRoute, async (c) => {
-    await verifyBusiness(c.var.deps, requireAdmin(c), c.req.valid('param').id)
+    await verifyBusiness(c.var.deps, requireAdmin(c), c.req.valid('param').id, c.req.valid('query').moved)
     return c.body(null, 204)
   })
   .openapi(rejectRoute, async (c) => {

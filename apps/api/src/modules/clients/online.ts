@@ -5,6 +5,7 @@
  * needs no extra step. Each read and write is one statement on the client's current row. The client card (P2 step 4)
  * calls `setOnlineBlocked`.
  */
+import { publicRow } from '../catalog/map'
 import { isOnlineBlocked } from '@yeral/domain/clients'
 import type { BookingRules } from '@yeral/domain/rules'
 import { and, eq, inArray, sql } from 'drizzle-orm'
@@ -42,13 +43,16 @@ export async function blockedByCount(db: Queryable, clientIds: string[], rules: 
   return new Set(rows.filter((r) => r.blocked).map((r) => r.id))
 }
 
-/** Why this phone can't book the business online now (paused, or phone-only there), or null when it can. */
+/**
+ * Why this phone can't book the business online now (paused, not public: hidden or not verified, or phone-only
+ * there), or null when it can. A booking already made stays, but moves only while the page is public.
+ */
 export async function onlineRefusal(
   db: Queryable,
   lb: Pick<LoadedBusiness, 'business' | 'rules'>,
   phone: string,
 ): Promise<'online_disabled' | 'online_blocked' | null> {
-  if (!lb.rules.onlineEnabled) return 'online_disabled'
+  if (!lb.rules.onlineEnabled || !publicRow(lb.business)) return 'online_disabled'
   // by hand, or the no-shows since the business last lifted the block reach its limit (book Q-127)
   if (await isPhoneBlocked(db, lb.business.id, phone, lb.rules)) return 'online_blocked'
   return null
@@ -59,7 +63,7 @@ export async function onlineRefusal(
  * the link page say. Without a phone (signed out), whether the business takes online bookings at all.
  */
 export async function bookOnlineFor(db: Queryable, lb: Pick<LoadedBusiness, 'business' | 'rules'>, phone: string | null): Promise<boolean> {
-  return phone ? !(await onlineRefusal(db, lb, phone)) : lb.rules.onlineEnabled
+  return phone ? !(await onlineRefusal(db, lb, phone)) : lb.rules.onlineEnabled && publicRow(lb.business)
 }
 
 /** Whether this phone is phone-only at the business now (false when the business doesn't know it). */

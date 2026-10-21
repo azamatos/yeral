@@ -107,7 +107,7 @@ async function freshRecoveryCodes(keys: Keys, adminId: string): Promise<{ codes:
 // ── holding accounts ──
 
 /** The acting account, held, still active; `unauthorized` once it isn't (turned off or reset meanwhile). */
-async function holdActor(tx: Queryable, by: Admin): Promise<void> {
+export async function holdActor(tx: Queryable, by: Admin): Promise<void> {
   const [row] = await tx.select({ status: admins.status }).from(admins).where(eq(admins.id, by.id)).for('no key update')
   if (row?.status !== 'active') throw new ApiError('unauthorized')
 }

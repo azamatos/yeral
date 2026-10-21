@@ -18,5 +18,16 @@
 - Tests: `modules/admin/businesses.test.ts` (the queue without drafts, the check, verify and its SMS and event,
   sent back with the night SMS in the morning and sent again by the owner only, hidden out of search with the team's
   preview, a move checked again, only the team); `lifecycle.test.ts` (`businessSmsAt`); sdk.
+- The review's findings, fixed: a business that isn't public takes no online booking or move (`onlineRefusal`
+  answers `online_disabled`, `bookOnline` and the booking's `reschedule` false), its bookings kept; "is open" and "open
+  again" go only once the page is public (a verify while hidden, a show while not verified: the screens only); a
+  waiting night SMS is replaced by the next (`business-review:<id>:<runAt>`), so the morning brings only the last
+  word; an SMS carries the start of a long reason (120 characters) and links without the scheme; a move is checked
+  again only as seen (`?moved=<addressChangedAt>`, a newer one `invalid_status`); every business action holds its
+  actor, still active (`holdActor`); the workspace's profile carries `verificationReason` (when sent back) and
+  `hidden` for the banner, and the sdk has `settings.sendForReview`; the plan's step 5 line said it twice.
+- Kept: the night is 22:00–08:00 for every business SMS until quiet hours exist (S-18; Q-278 then means the person's);
+  a business with no active owner hears it on its screens only (untested); verifying a pending business whose profile
+  changed during the check isn't refused.
 - Follow-ups: closing a workspace (Q-213), reported reviews (Q-261, Q-262) and adding a business for its owner (F-238)
   come next in step 5.

@@ -96,6 +96,8 @@ export const adminBusinessesQuerySchema = langQuerySchema.extend({
   q: z.string().trim().max(80).optional(),
 })
 export const adminBusinessParamSchema = z.object({ id: idSchema })
+/** `moved`: the `addressChangedAt` the team looked at, for a move checked again (a newer move is `invalid_status`). */
+export const adminVerifyQuerySchema = z.object({ moved: z.coerce.number().int().optional() })
 
 export const adminBusinessItemSchema = z
   .object({
