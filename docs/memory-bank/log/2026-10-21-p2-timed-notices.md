@@ -16,5 +16,8 @@
   - `runDueJobs` returns `invitesExpired`; the tick logs any non-zero count.
 - Tests: `lifecycle.test.ts` (across the night, before a break, plain, none when short), `jobs/warnings.test.ts`
   (`warnAt` on the list; an invite's expiry heard by the owner and the invitee once each, its card expired).
+- Migration 0033 was replaced in the review (`0033_expiry_marks` → `0033_invite_expiry`, a later journal time): a
+  development database migrated on the PR's first commit has the old columns and fails on the new 0033 ("column
+  expiry_told_at already exists"). Drop it and run `pnpm db:setup` again; production never ran the first one.
 - The typical answer time (Q-113) already counts declines: both confirm and decline stamp `answered_at`.
 - Follow-ups: quiet hours (S-18); the business app's toasts, sound and browser notifications (F-170).
