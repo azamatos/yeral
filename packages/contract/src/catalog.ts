@@ -45,6 +45,17 @@ export const categorySchema = z
   .meta({ id: 'Category' })
 export const categoryListSchema = listOf(categorySchema)
 
+/**
+ * What the client site's sitemap lists (book F-197): every public business page (verified, not hidden or closed, of a
+ * kind of booking open now), with when it last changed as far as the api knows, and the category pages.
+ */
+export const sitemapSchema = z
+  .object({
+    businesses: z.array(z.object({ slug: slugSchema, changedAt: epochSchema })),
+    categories: z.array(slugSchema),
+  })
+  .meta({ id: 'Sitemap' })
+
 // ── Opening state ──
 
 export const openStateSchema = z
