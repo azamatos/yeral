@@ -1,7 +1,7 @@
 /**
  * The Ýeral team's sessions (ADR 0026): a random token in an httpOnly cookie on the api's own host (not the parent
  * domain the client site and the business app share), `SameSite=Strict`, path `/v1/admin`, 12 hours and never renewed;
- * only its SHA-256 is kept. From a browser, admin requests come from the admin tool's site only.
+ * only its SHA-256 is kept. Admin requests come from the admin tool's site only (their `Origin`).
  */
 import { and, eq, gt } from 'drizzle-orm'
 import type { Context, MiddlewareHandler } from 'hono'
@@ -40,9 +40,9 @@ export async function endAdminSession(c: Context<AppEnv>): Promise<void> {
 }
 
 export const adminSessionMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
-  // a page of the client site or the business app can't use an admin's cookie
-  const origin = c.req.header('Origin')
-  if (origin && origin !== c.var.deps.site.urls.cms) return c.json(errorBody('forbidden', undefined, 'origin'), 403)
+  // the admin tool is always another origin than the api, so its requests carry Origin: a page of the client site or the
+  // business app, or one served by the api itself (/docs), can't use an admin's cookie
+  if (c.req.header('Origin') !== c.var.deps.site.urls.cms) return c.json(errorBody('forbidden', undefined, 'origin'), 403)
   c.set('admin', null)
   const token = getCookie(c, cookieName(c))
   if (token) {

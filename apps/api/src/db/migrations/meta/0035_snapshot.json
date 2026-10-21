@@ -1,5 +1,5 @@
 {
-  "id": "dd700445-d3ca-4163-90f7-9074692fca21",
+  "id": "fe529eca-0d1a-45e8-b01e-56ce72ef300f",
   "prevId": "2d57f3dc-46c9-4474-8760-08f8dc8cde97",
   "version": "7",
   "dialect": "postgresql",
@@ -297,19 +297,6 @@
         },
         "setup_expires_at": {
           "name": "setup_expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "failed_sign_ins": {
-          "name": "failed_sign_ins",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "locked_until": {
-          "name": "locked_until",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false

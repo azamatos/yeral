@@ -1,13 +1,15 @@
 /** The Ýeral team's sign-in and accounts (ADR 0026; book F-178, Q-011). */
+import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, site, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { rateLimits } from '../../db/schema'
+import { admins, rateLimits } from '../../db/schema'
 import { seed } from '../../db/seed'
+import { sha256Hex } from '../../lib/crypto'
 import { stepOf, totpAt } from '../../lib/totp'
-import { inviteOrReset, LOCK_MINUTES, MAX_FAILED_SIGN_INS } from './accounts'
+import { ADMIN_TRIES_PER_ADDRESS, ADMIN_TRIES_PER_LOGIN, inviteOrReset } from './accounts'
 
 const PASSWORD = 'a long enough password'
 
@@ -43,9 +45,11 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
   const cms = () => {
     const b = browser(t.app)
     return {
-      ...b,
       req: (path: string, init: { method?: string; body?: unknown; headers?: Record<string, string> } = {}) =>
         b.req(path, { ...init, headers: { Origin: site.urls.cms, ...init.headers } }),
+      get cookie() {
+        return b.cookie
+      },
     }
   }
   const tokenOf = (url: string) => url.slice(url.lastIndexOf('/') + 1)
@@ -107,16 +111,39 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
     expect((await signIn(b, 'maya', codes[0]!.toUpperCase())).status).toBe(200)
     expect((await b.req('/v1/admin/me')).json.recoveryCodesLeft).toBe(9)
     expect((await signIn(cms(), 'maya', codes[0]!)).json.error.code).toBe('sign_in_failed')
+    // kept keyed and per account: a copy of the database has nothing to try codes against
+    const [row] = await db.select().from(admins).where(eq(admins.login, 'maya'))
+    expect(row!.recoveryCodes).toHaveLength(9)
+    expect(row!.recoveryCodes).not.toContain(await sha256Hex(`recovery:${codes[1]!.replace('-', '')}`))
   })
 
-  it('10 wrong in a row lock the account for 15 minutes', async () => {
-    const { secret } = await setUp(cms(), 'lock.me')
-    const b = cms()
-    for (let i = 0; i < MAX_FAILED_SIGN_INS; i++) expect((await signIn(b, 'lock.me', '000000')).json.error.code).toBe('sign_in_failed')
-    const locked = await signIn(b, 'lock.me', await totpAt(secret, stepOf(t.clock.now) + 1))
-    expect(locked.json.error).toMatchObject({ code: 'too_many_attempts', details: { retryAfterSec: LOCK_MINUTES * 60 } })
-    t.clock.now += LOCK_MINUTES * 60_000
-    expect((await signIn(b, 'lock.me', await totpAt(secret, stepOf(t.clock.now)))).status).toBe(200)
+  it('one code, two sign-ins at once: one is in', async () => {
+    const { secret } = await setUp(cms(), 'twice')
+    const code = await totpAt(secret, stepOf(t.clock.now) + 1)
+    const both = await Promise.all([signIn(cms(), 'twice', code), signIn(cms(), 'twice', code)])
+    expect(both.map((r) => r.status).sort()).toEqual([200, 401])
+  })
+
+  it('tries are limited per address and per login from it, a real login like an unknown one; elsewhere its owner signs in', async () => {
+    t = testApp(db, { trustedIpHeader: 'x-forwarded-for' })
+    const { secret } = await setUp(cms(), 'limits')
+    const from = (ip: string) => {
+      const b = cms()
+      return (login: string, code = '000000') =>
+        b.req('/v1/admin/sign-in', { body: { login, password: PASSWORD, code }, headers: { 'X-Forwarded-For': ip } })
+    }
+    const guess = from('10.0.0.1')
+    for (let i = 0; i < ADMIN_TRIES_PER_LOGIN; i++) {
+      expect((await guess('limits')).json.error.code).toBe('sign_in_failed')
+      expect((await guess('nobody.here')).json.error.code).toBe('sign_in_failed')
+    }
+    expect((await guess('limits')).json.error.code).toBe('rate_limited')
+    expect((await guess('nobody.here')).json.error.code).toBe('rate_limited')
+    // nobody elsewhere can keep the account's owner out
+    expect((await from('10.0.0.2')('limits', await totpAt(secret, stepOf(t.clock.now) + 1))).status).toBe(200)
+    // and an address has its hour: other logins run out too
+    for (let i = 2 * (ADMIN_TRIES_PER_LOGIN + 1); i < ADMIN_TRIES_PER_ADDRESS; i++) expect((await guess(`other${i}`)).status).toBe(401)
+    expect((await guess('one.more')).json.error.code).toBe('rate_limited')
   })
 
   it('a phone never opens the admin tool, and no other site can use an admin’s cookie', async () => {
@@ -128,6 +155,17 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
     expect((await b.req('/v1/admin/me')).status).toBe(200)
     expect((await b.req('/v1/admin/me', { headers: { Origin: site.urls.client } })).status).toBe(403)
     expect((await b.req('/v1/admin/me', { headers: { Origin: site.urls.business } })).status).toBe(403)
+    expect(
+      (await b.req('/v1/admin/team', { body: { login: 'from.client', name: 'X' }, headers: { Origin: site.urls.client } })).status,
+    ).toBe(403)
+    // nor a page the api serves itself (/docs): its requests carry no Origin
+    expect((await t.app.request('/v1/admin/me', { headers: { cookie: b.cookie } })).status).toBe(403)
+    const bare = await t.app.request('/v1/admin/team', {
+      method: 'POST',
+      headers: { cookie: b.cookie, 'content-type': 'application/json' },
+      body: JSON.stringify({ login: 'no.origin', name: 'X' }),
+    })
+    expect(bare.status).toBe(403)
   })
 
   it('the team invites, resets and turns off one another; never one’s own', async () => {
@@ -158,6 +196,44 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
     expect((await lead.req(`/v1/admin/team/${mine.link.id}/reset`, { method: 'POST' })).status).toBe(403)
     // the server command brings a login back with a new link
     expect(await inviteOrReset(t.deps, 'new.one', 'New one')).toMatchObject({ reset: true })
+    // one turned off with its password and app: refused
+    const off = await setUp(cms(), 'off.one')
+    expect((await lead.req(`/v1/admin/team/${off.link.id}/disable`, { method: 'POST' })).status).toBe(204)
+    expect((await signIn(cms(), 'off.one', await totpAt(off.secret, stepOf(t.clock.now) + 1))).json.error.code).toBe('sign_in_failed')
+  })
+
+  it('two acting on each other at once: the second finds itself reset or turned off', async () => {
+    const [a, b] = [cms(), cms()]
+    const [ra, rb] = [await setUp(a, 'cross.a'), await setUp(b, 'cross.b')]
+    const resets = await Promise.all([
+      a.req(`/v1/admin/team/${rb.link.id}/reset`, { method: 'POST' }),
+      b.req(`/v1/admin/team/${ra.link.id}/reset`, { method: 'POST' }),
+    ])
+    expect(resets.map((r) => r.status).sort()).toEqual([200, 401])
+    const team = (await (resets[0].status === 200 ? a : b).req('/v1/admin/team')).json.items as { login: string; status: string }[]
+    expect(team.filter((m) => m.login.startsWith('cross.') && m.status === 'active')).toHaveLength(1)
+    const [c, d] = [cms(), cms()]
+    const [rc, rd] = [await setUp(c, 'cross.c'), await setUp(d, 'cross.d')]
+    const crossed = await Promise.all([
+      c.req(`/v1/admin/team/${rd.link.id}/disable`, { method: 'POST' }),
+      d.req(`/v1/admin/team/${rc.link.id}/reset`, { method: 'POST' }),
+    ])
+    expect(crossed.filter((r) => r.status === 401)).toHaveLength(1)
+  })
+
+  it('a reset during a setup: the old link stops at every step', async () => {
+    const b = cms()
+    const first = await inviteOrReset(t.deps, 'midway', 'Midway')
+    const token = tokenOf(first.url)
+    const secret = fromBase32((await b.req(`/v1/admin/setup/${token}/password`, { body: { password: PASSWORD } })).json.secret)
+    expect(await inviteOrReset(t.deps, 'midway', 'Midway')).toMatchObject({ reset: true })
+    expect((await b.req(`/v1/admin/setup/${token}/password`, { body: { password: PASSWORD } })).json.error.code).toBe('setup_expired')
+    const confirm = await b.req(`/v1/admin/setup/${token}/confirm`, { body: { code: await totpAt(secret, stepOf(t.clock.now)) } })
+    expect(confirm.json.error.code).toBe('setup_expired')
+    // a link that never was: nothing hashed, the same answer
+    expect((await b.req(`/v1/admin/setup/${'A'.repeat(43)}/password`, { body: { password: PASSWORD } })).json.error.code).toBe(
+      'setup_expired',
+    )
   })
 
   it('a new password ends the other sessions; new recovery codes replace the old', async () => {
@@ -192,5 +268,14 @@ describe('the Ýeral team’s accounts (ADR 0026)', () => {
     })
     expect(res.status).toBe(503)
     expect(res.json.error.code).toBe('admin_unavailable')
+  })
+
+  it('a secret sealed under another key: unavailable, whatever the password', async () => {
+    await setUp(cms(), 'rekeyed')
+    const moved = browser(testApp(db, { adminKey: new Uint8Array(32).fill(9) }).app)
+    const signInWith = (password: string) =>
+      moved.req('/v1/admin/sign-in', { body: { login: 'rekeyed', password, code: '000000' }, headers: { Origin: site.urls.cms } })
+    expect((await signInWith(PASSWORD)).json.error.code).toBe('admin_unavailable')
+    expect((await signInWith('not the password')).json.error.code).toBe('admin_unavailable')
   })
 })

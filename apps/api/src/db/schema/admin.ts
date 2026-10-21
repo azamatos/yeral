@@ -25,9 +25,6 @@ export const admins = pgTable('admins', {
   /** The setup link waiting: SHA-256 of its token, and when it runs out (24 hours). */
   setupTokenHash: text().unique(),
   setupExpiresAt: ts(),
-  /** Wrong sign-ins in a row; 10 lock the account for 15 minutes. */
-  failedSignIns: integer().notNull().default(0),
-  lockedUntil: ts(),
   /** Who invited them; null for the server command. */
   invitedBy: uuid().references((): AnyPgColumn => admins.id, { onDelete: 'set null' }),
   lastSignInAt: ts(),

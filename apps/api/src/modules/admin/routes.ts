@@ -85,7 +85,7 @@ const setupRoute = createRoute({
   tags,
   summary: 'What a setup link is for; `setup_expired` when it ran out or was used',
   request: { params: adminSetupTokenParamSchema },
-  responses: { 200: json(adminSetupSchema), 404: errors[404], 503: errors[503] },
+  responses: { 200: json(adminSetupSchema), 404: errors[404], 429: errors[429], 503: errors[503] },
 })
 const setupPasswordRoute = createRoute({
   method: 'post',
@@ -93,7 +93,7 @@ const setupPasswordRoute = createRoute({
   tags,
   summary: 'The password, and a secret for the authenticator app (asked again, a new one)',
   request: { params: adminSetupTokenParamSchema, ...jsonBody(adminSetupPasswordSchema) },
-  responses: { 200: json(adminSetupSecretSchema), 400: errors[400], 404: errors[404], 503: errors[503] },
+  responses: { 200: json(adminSetupSecretSchema), 400: errors[400], 404: errors[404], 429: errors[429], 503: errors[503] },
 })
 const setupConfirmRoute = createRoute({
   method: 'post',
@@ -138,8 +138,9 @@ const disableRoute = createRoute({
 export const adminRoutes = new OpenAPIHono<AppEnv>()
   .openapi(signInRoute, async (c) => {
     const { deps } = c.var
-    await guardAddress(deps, ipOf(c))
-    const admin = await signIn(deps, c.req.valid('json'))
+    const input = c.req.valid('json')
+    await guardAddress(deps, ipOf(c), input.login)
+    const admin = await signIn(deps, input)
     await startAdminSession(c, deps.db, admin.id)
     return c.json(adminMeOf(admin), 200)
   })
@@ -157,10 +158,14 @@ export const adminRoutes = new OpenAPIHono<AppEnv>()
     const codes = await renewRecoveryCodes(c.var.deps, requireAdmin(c), c.req.valid('json').code)
     return c.json({ codes }, 200)
   })
-  .openapi(setupRoute, async (c) => c.json(await setupOf(c.var.deps, c.req.valid('param').token), 200))
-  .openapi(setupPasswordRoute, async (c) =>
-    c.json(await chooseSetupPassword(c.var.deps, c.req.valid('param').token, c.req.valid('json').password), 200),
-  )
+  .openapi(setupRoute, async (c) => {
+    await guardAddress(c.var.deps, ipOf(c))
+    return c.json(await setupOf(c.var.deps, c.req.valid('param').token), 200)
+  })
+  .openapi(setupPasswordRoute, async (c) => {
+    await guardAddress(c.var.deps, ipOf(c))
+    return c.json(await chooseSetupPassword(c.var.deps, c.req.valid('param').token, c.req.valid('json').password), 200)
+  })
   .openapi(setupConfirmRoute, async (c) => {
     const { deps } = c.var
     await guardAddress(deps, ipOf(c))

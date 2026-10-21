@@ -20,13 +20,18 @@ of the CMS; since ADR 0024 the apps run on our own server with Cloudflare for DN
   the phone never opens the admin tool.
 - **Three things at each sign-in, in one request:** a login name, a password and a 6-digit code from an authenticator
   app (TOTP, RFC 6238: 30 seconds, HMAC-SHA1, one step either side; a code works once). One of 10 one-time recovery
-  codes stands in for the app's code. Any wrong part gets the same refusal (`sign_in_failed`); 10 wrong in a row lock
-  the account for 15 minutes (`too_many_attempts`), and an address gets 30 tries an hour (`rate_limited`).
+  codes stands in for the app's code. Any wrong part gets the same refusal (`sign_in_failed`), for a real login as for
+  an unknown one (an unknown one takes as long). An address gets 30 tries an hour, setup steps included, and 10 a
+  quarter-hour for any one login (`rate_limited`, the same for every login): guessing stays slow, and nobody can lock
+  an account's owner out from elsewhere, as an account lock would let them.
 - **Web Crypto only** (AGENTS rule 7): passwords are PBKDF2-SHA256 with a random salt and 600,000 rounds (12–128
-  characters); the authenticator secrets are kept sealed with AES-256-GCM under `ADMIN_SECRET_KEY` (32 bytes, base64,
-  set on the server; development and tests use a fixed key), so a copy of the database or a backup alone doesn't give
-  the codes. Without the key in production the admin tool answers `admin_unavailable` and the rest of the api runs.
-  No new dependency.
+  characters), and a setup link is checked before its password is hashed. Two keys are derived (HKDF) from
+  `ADMIN_SECRET_KEY` (32 bytes, base64; development and tests use a fixed key): the authenticator secrets are sealed
+  with AES-256-GCM under one, and the recovery codes kept as HMAC-SHA256 of the account and the code under the other.
+  A copy of the database or a backup alone gives neither the codes nor anything to try them against. A config without
+  the key (production) answers `admin_unavailable` on the admin endpoints and the rest of the api runs; the server's
+  compose requires it, and deploy.sh makes it once. A secret sealed under another key answers `admin_unavailable` too,
+  whatever the password, and logs which account to reset. No new dependency.
 - **Accounts start from a link.** The first account is made on the server (`node dist/cli.js admin-invite <login>
   "<name>"` in the api's container; `pnpm --filter @yeral/api admin:invite` locally), which prints a setup link to
   `cms.<domain>/setup/<token>`, valid 24 hours; only its hash is kept. The person picks the password, adds the secret
@@ -35,7 +40,13 @@ of the CMS; since ADR 0024 the apps run on our own server with Cloudflare for DN
   One role (Q-011); no one disables themselves or the last active account.
 - **Sessions of their own:** `admin_sessions`, a cookie `<prefix>.admin` on the api's host only (not the parent
   domain the client and business share), `SameSite=Strict`, path `/v1/admin`, 12 hours with no renewal. Signing out,
-  a reset and disabling end them.
+  a reset and disabling end them. Every `/v1/admin` request must carry the admin tool's `Origin`: no other site, and no
+  page the api serves itself (`/docs`), can use the cookie.
+- **Setup tokens stay out of logs:** Caddy's access logs blank them as they do a booking link's (`/setup/…`,
+  `/v1/admin/setup/…`).
+- **One action at a time per account:** every hold on an account's row is NO KEY UPDATE, an action holds its actor
+  and its target in one order and checks the actor is still active, so two team members acting on each other at once
+  end with the second refused, never with no active account.
 - **Every change the team makes is written down** (`admin_actions`: who, what, which business or review, the reason,
   when), for the business endpoints that follow (step 5).
 

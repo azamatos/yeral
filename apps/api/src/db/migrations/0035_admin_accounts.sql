@@ -32,8 +32,6 @@ CREATE TABLE "admins" (
 	"recovery_codes" jsonb DEFAULT '[]'::jsonb NOT NULL,
 	"setup_token_hash" text,
 	"setup_expires_at" timestamp with time zone,
-	"failed_sign_ins" integer DEFAULT 0 NOT NULL,
-	"locked_until" timestamp with time zone,
 	"invited_by" uuid,
 	"last_sign_in_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,

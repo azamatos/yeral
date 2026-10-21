@@ -1,11 +1,14 @@
 /**
  * The Ýeral team's accounts (ADR 0026): set up from a link, signed in with a login, a password and an authenticator
  * code (or a recovery code), invited, reset and turned off by one another. One role (book Q-011).
+ *
+ * Every hold on an account's row is NO KEY UPDATE, so the foreign keys that point at it (a new action, a session) never
+ * wait on it; two accounts are held in one order (by id), so two crossing actions wait instead of deadlocking.
  */
 import type { AdminMe, AdminMember, AdminSetupLink } from '@yeral/contract/admin'
 import { MARKET } from '@yeral/domain/market'
 import { createT } from '@yeral/i18n/fmt'
-import { and, asc, eq, gt, ne } from 'drizzle-orm'
+import { and, asc, eq, gt, inArray, ne } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import type { Queryable } from '../../db/client'
 import { adminActions, adminSessions, admins } from '../../db/schema'
@@ -15,26 +18,39 @@ import { ApiError, invalid } from '../../http/errors'
 import { randomToken, sha256Hex } from '../../lib/crypto'
 import { checkPassword, hashPassword } from '../../lib/password'
 import { hit, rateLimited } from '../../lib/rate-limit'
-import { seal, sealingKey, unseal, type SealingKey } from '../../lib/sealed'
+import { adminKeys, keyedHash, seal, unseal, type SealingKey } from '../../lib/sealed'
 import { base32, matchTotp, newTotpSecret, otpauthUri } from '../../lib/totp'
 
 export const SETUP_HOURS = 24
-/** Wrong sign-ins in a row before the account locks, and for how long. */
-export const MAX_FAILED_SIGN_INS = 10
-export const LOCK_MINUTES = 15
-/** Sign-ins and setup codes an hour from one address. */
+/** Tries an hour from one address: sign-ins and every setup step. */
 export const ADMIN_TRIES_PER_ADDRESS = 30
+/**
+ * Sign-ins a quarter-hour for one login from one address, right or wrong, any login alike: guessing is slow, a real
+ * login can't be told from an unknown one, and nobody elsewhere can lock the account's owner out.
+ */
+export const ADMIN_TRIES_PER_LOGIN = 10
 export const RECOVERY_CODE_COUNT = 10
 
-type AdminDeps = Pick<Deps, 'db' | 'now' | 'site' | 'adminKey'>
+type AdminDeps = Pick<Deps, 'db' | 'now' | 'site' | 'adminKey' | 'log'>
+type Keys = Awaited<ReturnType<typeof adminKeys>>
 
-const keys = new WeakMap<Uint8Array, Promise<SealingKey>>()
-/** The key the secrets are sealed under; no key, no admin tool (`admin_unavailable`). */
-function sealer(deps: Pick<Deps, 'adminKey'>): Promise<SealingKey> {
+const derived = new WeakMap<Uint8Array, Promise<Keys>>()
+/** The keys the secrets are sealed and the recovery codes hashed under; no key, no admin tool (`admin_unavailable`). */
+function keysOf(deps: Pick<Deps, 'adminKey'>): Promise<Keys> {
   if (!deps.adminKey) throw new ApiError('admin_unavailable')
-  let key = keys.get(deps.adminKey)
-  if (!key) keys.set(deps.adminKey, (key = sealingKey(deps.adminKey)))
-  return key
+  let keys = derived.get(deps.adminKey)
+  if (!keys) derived.set(deps.adminKey, (keys = adminKeys(deps.adminKey)))
+  return keys
+}
+
+/** An account's authenticator secret; one sealed under another `ADMIN_SECRET_KEY` makes the admin tool unavailable. */
+async function openSecret(deps: Pick<Deps, 'log'>, key: SealingKey, admin: Admin): Promise<Uint8Array<ArrayBuffer>> {
+  try {
+    return await unseal(key, admin.totpSecret!)
+  } catch {
+    deps.log.error('admin secret sealed under another ADMIN_SECRET_KEY: reset the account with admin-invite', { login: admin.login })
+    throw new ApiError('admin_unavailable')
+  }
 }
 
 /** What the team did, written down (`admin_actions`); `by` null is the server command. */
@@ -47,17 +63,22 @@ export async function recordAction(
   await db.insert(adminActions).values({ adminId: by?.id ?? null, action, ...about, reason: about.reason ?? null })
 }
 
-/** Each try from an address counts, right or wrong. */
-export async function guardAddress(deps: Pick<Deps, 'db' | 'now'>, ip: string): Promise<void> {
-  const r = await hit(deps.db, `admin:ip:${ip}`, ADMIN_TRIES_PER_ADDRESS, 3600, deps.now())
-  if (!r.ok) throw rateLimited(r.retryAfterSec)
+/** Each try from an address counts, right or wrong; a sign-in also counts for its login from that address. */
+export async function guardAddress(deps: Pick<Deps, 'db' | 'now'>, ip: string, login?: string): Promise<void> {
+  const limits: [string, number, number][] = [[`admin:ip:${ip}`, ADMIN_TRIES_PER_ADDRESS, 3600]]
+  if (login !== undefined) limits.push([`admin:login:${ip}:${login}`, ADMIN_TRIES_PER_LOGIN, 900])
+  for (const [key, limit, windowSec] of limits) {
+    const r = await hit(deps.db, key, limit, windowSec, deps.now())
+    if (!r.ok) throw rateLimited(r.retryAfterSec)
+  }
 }
 
 // ── recovery codes: 8 letters and digits that can't be mistaken for each other, shown as abcd-efgh ──
 
 const RECOVERY_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789'
 const normalizeRecovery = (code: string) => code.toLowerCase().replace(/[^a-z0-9]/g, '')
-const recoveryHash = (code: string) => sha256Hex(`recovery:${normalizeRecovery(code)}`)
+/** Keyed and per account: a copy of the database gives nothing to try them against. */
+const recoveryHash = (keys: Keys, adminId: string, code: string) => keyedHash(keys.recovery, `${adminId}:${normalizeRecovery(code)}`)
 
 function newRecoveryCode(): string {
   let out = ''
@@ -70,9 +91,31 @@ function newRecoveryCode(): string {
   return `${out.slice(0, 4)}-${out.slice(4)}`
 }
 
-async function freshRecoveryCodes(): Promise<{ codes: string[]; hashes: string[] }> {
+async function freshRecoveryCodes(keys: Keys, adminId: string): Promise<{ codes: string[]; hashes: string[] }> {
   const codes = Array.from({ length: RECOVERY_CODE_COUNT }, newRecoveryCode)
-  return { codes, hashes: await Promise.all(codes.map(recoveryHash)) }
+  return { codes, hashes: await Promise.all(codes.map((code) => recoveryHash(keys, adminId, code))) }
+}
+
+// ── holding accounts ──
+
+/** The acting account, held, still active; `unauthorized` once it isn't (turned off or reset meanwhile). */
+async function holdActor(tx: Queryable, by: Admin): Promise<void> {
+  const [row] = await tx.select({ status: admins.status }).from(admins).where(eq(admins.id, by.id)).for('no key update')
+  if (row?.status !== 'active') throw new ApiError('unauthorized')
+}
+
+/** The account acted on, and the actor (still active) with it, held in one order. */
+async function holdTarget(tx: Queryable, by: Admin | null, id: string): Promise<Admin> {
+  const rows = await tx
+    .select()
+    .from(admins)
+    .where(inArray(admins.id, by ? [by.id, id] : [id]))
+    .orderBy(asc(admins.id))
+    .for('no key update')
+  if (by && rows.find((r) => r.id === by.id)?.status !== 'active') throw new ApiError('unauthorized')
+  const target = rows.find((r) => r.id === id)
+  if (!target) throw new ApiError('not_found')
+  return target
 }
 
 // ── setup links ──
@@ -87,22 +130,23 @@ async function setupLink(deps: AdminDeps) {
   }
 }
 
-/** The account a setup link is for, held; `setup_expired` for one that ran out, was used or never was. */
-async function setupRow(tx: Queryable, deps: AdminDeps, token: string): Promise<Admin> {
-  const [row] = await tx
+/** The account a setup link is for (held in a transaction); `setup_expired` for one that ran out, was used or never was. */
+async function setupRow(db: Queryable, deps: AdminDeps, token: string, hold: boolean): Promise<Admin> {
+  const found = db
     .select()
     .from(admins)
     .where(and(eq(admins.setupTokenHash, await sha256Hex(token)), gt(admins.setupExpiresAt, new Date(deps.now()))))
-    .for('update')
+  const [row] = await (hold ? found.for('no key update') : found)
   if (!row || row.status === 'disabled') throw new ApiError('setup_expired')
   return row
 }
 
 /** A new account with a setup link; `login_taken` for a login in use. */
 export async function inviteAdmin(deps: AdminDeps, by: Admin | null, input: { login: string; name: string }): Promise<AdminSetupLink> {
-  await sealer(deps)
+  await keysOf(deps)
   const link = await setupLink(deps)
   return deps.db.transaction(async (tx) => {
+    if (by) await holdActor(tx, by)
     const [row] = await tx
       .insert(admins)
       .values({
@@ -122,15 +166,15 @@ export async function inviteAdmin(deps: AdminDeps, by: Admin | null, input: { lo
 
 /**
  * A teammate who lost their phone or password, or one turned off, starts again from a new link: their password,
- * secret, recovery codes and sessions go. Not one's own: that's a new password or new recovery codes.
+ * secret, recovery codes and sessions go, and an older link with them. Not one's own: that's a new password or new
+ * recovery codes.
  */
 export async function resetAdmin(deps: AdminDeps, by: Admin | null, id: string): Promise<AdminSetupLink> {
   if (by?.id === id) throw new ApiError('forbidden')
-  await sealer(deps)
+  await keysOf(deps)
   const link = await setupLink(deps)
   return deps.db.transaction(async (tx) => {
-    const [row] = await tx.select().from(admins).where(eq(admins.id, id)).for('update')
-    if (!row) throw new ApiError('not_found')
+    await holdTarget(tx, by, id)
     await tx
       .update(admins)
       .set({
@@ -141,8 +185,6 @@ export async function resetAdmin(deps: AdminDeps, by: Admin | null, id: string):
         recoveryCodes: [],
         setupTokenHash: link.tokenHash,
         setupExpiresAt: link.expiresAt,
-        failedSignIns: 0,
-        lockedUntil: null,
       })
       .where(eq(admins.id, id))
     await tx.delete(adminSessions).where(eq(adminSessions.adminId, id))
@@ -155,11 +197,8 @@ export async function resetAdmin(deps: AdminDeps, by: Admin | null, id: string):
 export async function disableAdmin(deps: AdminDeps, by: Admin, id: string): Promise<void> {
   if (by.id === id) throw new ApiError('forbidden')
   await deps.db.transaction(async (tx) => {
-    // the active accounts held in one order, so two turning each other off at once can't leave none
-    const active = await tx.select({ id: admins.id }).from(admins).where(eq(admins.status, 'active')).orderBy(asc(admins.id)).for('update')
-    if (!active.some((a) => a.id === by.id)) throw new ApiError('unauthorized')
-    const [row] = await tx.select().from(admins).where(eq(admins.id, id)).for('update')
-    if (!row) throw new ApiError('not_found')
+    // the actor still active: of two turning each other off at once, the second finds itself off
+    await holdTarget(tx, by, id)
     await tx.update(admins).set({ status: 'disabled', setupTokenHash: null, setupExpiresAt: null }).where(eq(admins.id, id))
     await tx.delete(adminSessions).where(eq(adminSessions.adminId, id))
     await recordAction(tx, by, 'admin.disabled', { targetAdminId: id })
@@ -176,20 +215,20 @@ export async function inviteOrReset(deps: AdminDeps, login: string, name: string
 // ── setting up ──
 
 export async function setupOf(deps: AdminDeps, token: string): Promise<{ login: string; name: string }> {
-  return deps.db.transaction(async (tx) => {
-    const row = await setupRow(tx, deps, token)
-    return { login: row.login, name: row.name }
-  })
+  const row = await setupRow(deps.db, deps, token, false)
+  return { login: row.login, name: row.name }
 }
 
 /** The password, and a new secret for the authenticator app; asked again, a new secret replaces the last. */
 export async function chooseSetupPassword(deps: AdminDeps, token: string, password: string): Promise<{ secret: string; uri: string }> {
-  const key = await sealer(deps)
+  const keys = await keysOf(deps)
+  // a link that works before the slow hash, so nobody can make the api hash for nothing
+  await setupRow(deps.db, deps, token, false)
   const passwordHash = await hashPassword(password)
   const secret = newTotpSecret()
-  const sealed = await seal(key, secret)
+  const sealed = await seal(keys.sealing, secret)
   return deps.db.transaction(async (tx) => {
-    const row = await setupRow(tx, deps, token)
+    const row = await setupRow(tx, deps, token, true)
     await tx.update(admins).set({ passwordHash, totpSecret: sealed, totpLastStep: null }).where(eq(admins.id, row.id))
     return { secret: base32(secret), uri: otpauthUri(secret, createT(MARKET.defaultLanguage)('common.brand'), row.login) }
   })
@@ -197,13 +236,13 @@ export async function chooseSetupPassword(deps: AdminDeps, token: string, passwo
 
 /** The app's first code confirms it: the account is active, its link used, and its recovery codes shown once. */
 export async function confirmSetup(deps: AdminDeps, token: string, code: string): Promise<{ admin: Admin; codes: string[] }> {
-  const key = await sealer(deps)
-  const fresh = await freshRecoveryCodes()
+  const keys = await keysOf(deps)
   return deps.db.transaction(async (tx) => {
-    const row = await setupRow(tx, deps, token)
+    const row = await setupRow(tx, deps, token, true)
     if (!row.passwordHash || !row.totpSecret) throw invalid({ path: ['password'], code: 'missing' })
-    const step = await matchTotp(await unseal(key, row.totpSecret), code, deps.now(), null)
+    const step = await matchTotp(await openSecret(deps, keys.sealing, row), code, deps.now(), null)
     if (step === null) throw new ApiError('admin_code_wrong')
+    const fresh = await freshRecoveryCodes(keys, row.id)
     const [admin] = await tx
       .update(admins)
       .set({
@@ -212,8 +251,6 @@ export async function confirmSetup(deps: AdminDeps, token: string, code: string)
         recoveryCodes: fresh.hashes,
         setupTokenHash: null,
         setupExpiresAt: null,
-        failedSignIns: 0,
-        lockedUntil: null,
         lastSignInAt: new Date(deps.now()),
       })
       .where(eq(admins.id, row.id))
@@ -230,50 +267,37 @@ let dummy: Promise<string> | undefined
 const dummyHash = () => (dummy ??= hashPassword(randomToken()))
 
 /**
- * Login, password and the app's code or a recovery code, all at once (ADR 0026). Any wrong part is `sign_in_failed`;
- * 10 wrong in a row lock the account for 15 minutes (`too_many_attempts`). A code works once.
+ * Login, password and the app's code or a recovery code, all at once (ADR 0026). Any wrong part is `sign_in_failed`,
+ * for any login; the tries are limited per address and per login from it (`guardAddress`). A code works once.
  */
 export async function signIn(deps: AdminDeps, input: { login: string; password: string; code: string }): Promise<Admin> {
-  const key = await sealer(deps)
+  const keys = await keysOf(deps)
   const now = deps.now()
-  const outcome = await deps.db.transaction(async (tx) => {
+  const admin = await deps.db.transaction(async (tx) => {
     // held: two sign-ins with one code can't both use it
-    const [row] = await tx.select().from(admins).where(eq(admins.login, input.login)).for('update')
+    const [row] = await tx.select().from(admins).where(eq(admins.login, input.login)).for('no key update')
     if (!row || row.status !== 'active' || !row.passwordHash || !row.totpSecret) {
       await checkPassword(input.password, await dummyHash())
-      return { kind: 'failed' } as const
+      return null
     }
-    if (row.lockedUntil && row.lockedUntil.getTime() > now) return { kind: 'locked', until: row.lockedUntil.getTime() } as const
-    const passwordOk = await checkPassword(input.password, row.passwordHash)
-    const step = passwordOk ? await matchTotp(await unseal(key, row.totpSecret), input.code, now, row.totpLastStep) : null
-    const recovery = passwordOk && step === null ? await recoveryHash(input.code) : null
-    if (step === null && !(recovery && row.recoveryCodes.includes(recovery))) {
-      const failed = row.failedSignIns + 1
-      await tx
-        .update(admins)
-        .set(
-          failed >= MAX_FAILED_SIGN_INS
-            ? { failedSignIns: 0, lockedUntil: new Date(now + LOCK_MINUTES * 60_000) }
-            : { failedSignIns: failed },
-        )
-        .where(eq(admins.id, row.id))
-      return { kind: 'failed' } as const
-    }
-    const [admin] = await tx
+    // before the password: a secret that won't open says nothing about it
+    const secret = await openSecret(deps, keys.sealing, row)
+    if (!(await checkPassword(input.password, row.passwordHash))) return null
+    const step = await matchTotp(secret, input.code, now, row.totpLastStep)
+    const recovery = step === null ? await recoveryHash(keys, row.id, input.code) : null
+    if (step === null && !row.recoveryCodes.includes(recovery!)) return null
+    const [signed] = await tx
       .update(admins)
       .set({
-        failedSignIns: 0,
-        lockedUntil: null,
         lastSignInAt: new Date(now),
         ...(step !== null ? { totpLastStep: step } : { recoveryCodes: row.recoveryCodes.filter((h) => h !== recovery) }),
       })
       .where(eq(admins.id, row.id))
       .returning()
-    return { kind: 'ok', admin: admin! } as const
+    return signed!
   })
-  if (outcome.kind === 'locked') throw new ApiError('too_many_attempts', { retryAfterSec: Math.ceil((outcome.until - now) / 1000) })
-  if (outcome.kind === 'failed') throw new ApiError('sign_in_failed')
-  return outcome.admin
+  if (!admin) throw new ApiError('sign_in_failed')
+  return admin
 }
 
 // ── one's own account ──
@@ -287,13 +311,13 @@ export const adminMeOf = (admin: Admin): AdminMe => ({
 
 /** New recovery codes, for the app's current code; the old ones stop working. */
 export async function renewRecoveryCodes(deps: AdminDeps, admin: Admin, code: string): Promise<string[]> {
-  const key = await sealer(deps)
-  const fresh = await freshRecoveryCodes()
+  const keys = await keysOf(deps)
   return deps.db.transaction(async (tx) => {
-    const [row] = await tx.select().from(admins).where(eq(admins.id, admin.id)).for('update')
-    if (!row?.totpSecret) throw new ApiError('unauthorized')
-    const step = await matchTotp(await unseal(key, row.totpSecret), code, deps.now(), row.totpLastStep)
+    const [row] = await tx.select().from(admins).where(eq(admins.id, admin.id)).for('no key update')
+    if (row?.status !== 'active' || !row.totpSecret) throw new ApiError('unauthorized')
+    const step = await matchTotp(await openSecret(deps, keys.sealing, row), code, deps.now(), row.totpLastStep)
     if (step === null) throw new ApiError('admin_code_wrong')
+    const fresh = await freshRecoveryCodes(keys, row.id)
     await tx.update(admins).set({ totpLastStep: step, recoveryCodes: fresh.hashes }).where(eq(admins.id, admin.id))
     await recordAction(tx, admin, 'admin.recovery_codes', { targetAdminId: admin.id })
     return fresh.codes
@@ -309,8 +333,9 @@ export async function changeAdminPassword(
 ): Promise<void> {
   const newHash = await hashPassword(input.newPassword)
   await deps.db.transaction(async (tx) => {
-    const [row] = await tx.select().from(admins).where(eq(admins.id, admin.id)).for('update')
-    if (!row?.passwordHash || !(await checkPassword(input.password, row.passwordHash))) throw invalid({ path: ['password'], code: 'wrong' })
+    const [row] = await tx.select().from(admins).where(eq(admins.id, admin.id)).for('no key update')
+    if (row?.status !== 'active') throw new ApiError('unauthorized')
+    if (!row.passwordHash || !(await checkPassword(input.password, row.passwordHash))) throw invalid({ path: ['password'], code: 'wrong' })
     await tx.update(admins).set({ passwordHash: newHash }).where(eq(admins.id, admin.id))
     await tx.delete(adminSessions).where(and(eq(adminSessions.adminId, admin.id), ne(adminSessions.id, sessionId)))
     await recordAction(tx, admin, 'admin.password', { targetAdminId: admin.id })

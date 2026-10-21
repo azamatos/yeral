@@ -26,8 +26,14 @@ const envSchema = z.object({
    * (`openssl rand -base64 32`). Development and tests use a fixed one; production without it has no admin tool.
    */
   ADMIN_SECRET_KEY: z
-    .base64()
-    .refine((key) => atob(key).length === 32, '32 bytes')
+    .string()
+    .refine((key) => {
+      try {
+        return /^[A-Za-z0-9+/]+={0,2}$/.test(key) && atob(key).length === 32
+      } catch {
+        return false
+      }
+    }, '32 bytes, base64')
     .optional(),
 })
 

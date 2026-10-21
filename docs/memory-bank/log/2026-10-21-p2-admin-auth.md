@@ -18,5 +18,15 @@
   - Infra: the server's `.env` gets `ADMIN_SECRET_KEY` from deploy.sh once; compose passes it; operations.md.
 - Tests: `lib/admin-crypto.test.ts`, `modules/admin/admin.test.ts` (setup, sign-in, the lock, a phone and other sites
   kept out, the team's actions, password and recovery codes, no key).
+- The review's findings, fixed: a setup link is checked (and the address counted) before the password is hashed;
+  recovery codes are HMAC-SHA256 of the account and the code under a key derived from `ADMIN_SECRET_KEY` (HKDF, as the
+  sealing key now is); Caddy blanks `/setup/…` and `/v1/admin/setup/…` tokens in its logs (server, edge, local
+  stack); the account lock went (columns gone from migration 0035) for limits per address (30 an hour) and per login
+  from an address (10 a quarter-hour), the same for any login; every account row hold is NO KEY UPDATE, actor and
+  target held in id order with the actor re-checked as active; `/v1/admin/*` needs the cms `Origin` (no Origin is
+  refused too); a secret that won't open answers `admin_unavailable` before the password check and logs the login; a
+  malformed `ADMIN_SECRET_KEY` names the variable. Tests for each (`admin.test.ts`, `config.test.ts`).
+- The edge's Caddyfile changed too: copy `infra/server/edge/Caddyfile` to `/srv/edge` and reload Caddy at the next
+  deploy (as #49's).
 - Follow-ups: the business endpoints of step 5 (verify, reject, hide, close, reported reviews, add a business), each
   through `recordAction()`; the sdk's admin namespace with the admin tool (P4 slice 6); passkeys later (ADR 0026).

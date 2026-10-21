@@ -15,6 +15,7 @@ import pg from 'pg'
 import { adminLoginSchema } from '@yeral/contract/admin'
 import { loadConfig } from '../config'
 import { inviteOrReset } from '../modules/admin/accounts'
+import { createLogger } from '../ports/log'
 import { createDb } from './client'
 import { runMigrations } from './migrate'
 import { seed, seedCatalogue } from './seed'
@@ -44,7 +45,8 @@ async function ensureDatabase() {
 async function adminInvite(db: ReturnType<typeof createDb>, [login, ...name]: string[]) {
   const parsed = adminLoginSchema.safeParse(login ?? '')
   if (!parsed.success || !name.join(' ').trim()) throw new Error('usage: admin-invite <login> "<name>" (login: 3–32 of a-z 0-9 . -)')
-  const link = await inviteOrReset({ db, now: Date.now, site: config.site, adminKey: config.adminKey }, parsed.data, name.join(' ').trim())
+  const deps = { db, now: Date.now, site: config.site, adminKey: config.adminKey, log: createLogger(config.logLevel, { app: 'cli' }) }
+  const link = await inviteOrReset(deps, parsed.data, name.join(' ').trim())
   console.warn(`${link.reset ? 'reset' : 'invited'} ${parsed.data}; the setup link, valid until ${new Date(link.expiresAt).toISOString()}:`)
   // eslint-disable-next-line no-console -- the link alone on stdout, for whoever runs this
   console.log(link.url)
