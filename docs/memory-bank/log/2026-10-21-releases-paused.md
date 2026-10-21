@@ -90,6 +90,10 @@
 - **@yeral/api** (minor), **@yeral/contract** (minor), the admin tool adds a business for an owner the team has met
   (#126; book F-238): a draft on the owner's phone, their account made if they've never signed in; their sign-in reopens
   the setup wizard. The team follows drafts in a `setup` list.
+- **@yeral/api** (minor), **@yeral/contract** (minor), the first launch (#127; book Q-004, Q-030, F-200): example
+  businesses from the design, marked "Example" on cards, pages and bookings and confirming at once, added to production
+  by `setup` with `EXAMPLE_BUSINESSES=true` (no team, no reviews of their own; their photos in the api's image);
+  `BOOKING_TYPES` keeps tables and classes out of lists and search until they ship.
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 

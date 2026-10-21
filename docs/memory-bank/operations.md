@@ -55,7 +55,8 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
   A database seeded on an earlier day shows that day's demo (requests expired, "today" in the past): `pnpm db:seed` (wipes
   the database) brings it to today. Weekly data turns with the dates (opening hours, shifts, breaks, the yoga week), so the
   demo day always has the design's Wednesday, whatever weekday it is. Photos are served by the Node entry (dev and
-  `start`) from `docs/design/assets/photos` at `/media/demo/*` outside production; Docker mounts them at `DEMO_MEDIA_DIR`.
+  `start`) from `docs/design/assets/photos` at `/media/demo/*`; the api image carries them at `/app/demo-photos`
+  (`DEMO_MEDIA_DIR`) and serves them in production too, for the first launch's example businesses.
 - API tests: `TEST_DATABASE_URL` (default `postgres://yeral:yeral@localhost:5432/postgres`, an admin connection). A global
   setup migrates a template of the run's own (`yeral_test_<run>_template`); each test file gets a copy
   (`create database … template …`); at the end the run drops every `yeral_test_<run>_…` database, so parallel runs from
@@ -86,15 +87,21 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
   sets up its app again. The first account, or a new link for one that's locked out:
   `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` prints a
   setup link (24 hours) to hand over in person; locally `pnpm --filter @yeral/api admin:invite <login> "<name>"`.
+- The first launch (book Q-004, Q-030): `EXAMPLE_BUSINESSES=true` makes `setup` (every deploy's migrate step) add the
+  design's appointment businesses that aren't there yet, marked "Example" and confirming at once, with no team; their
+  photos come in the api's image (`/app/demo-photos`, `DEMO_MEDIA_DIR`). They show `EXAMPLE_PHONE` (required with them:
+  Ýeral's support line), never the design's numbers. `BOOKING_TYPES=appointment` keeps tables and classes out of
+  lists and search. Both sit in the server's compose; turn the examples on with the code on the screen. When the pilot
+  ends, hide them from the admin tool (a close can't be undone for a business with no owner account).
 - Photos: the ones people upload on the server's disk behind a storage port (`ports/storage.ts`), in `MEDIA_DIR` (the
   `media` volume at `/data/media` on the server and in the local stack; `apps/api/data/media` in development),
-  served at `/media/up/…`; demo photos are served only outside production. The nightly backup (step 7) must take the
+  served at `/media/up/…`; the design's demo photos come with the image (above). The nightly backup (step 7) must take the
   volume along with the database.
 
 ## The production-like stack (since M2g)
 
 `pnpm docker:up` builds `infra/docker/api.Dockerfile` (turbo prune with the lockfile's turbo → pnpm install → esbuild
-bundle → `node:24-alpine` with only `dist/`), starts Postgres 18, runs `migrate` (`node dist/cli.js setup`: migrations,
+bundle → `node:24-alpine` with `dist/` and the design's demo photos), starts Postgres 18, runs `migrate` (`node dist/cli.js setup`: migrations,
 demo seed while empty), the api (jobs tick inside), the business app, the client site and Caddy
 (`infra/docker/Caddyfile`, plain HTTP, one site per host): http://yeral.localhost, http://business.yeral.localhost,
 http://api.yeral.localhost/docs. A single-page app's image

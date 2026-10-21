@@ -1,3 +1,4 @@
+import { BOOKING_TYPES } from '@yeral/domain/model'
 import { siteConfig } from '@yeral/lib/site'
 import { createApp } from '../src/app'
 import { DEV_ADMIN_KEY } from '../src/config'
@@ -26,6 +27,7 @@ export function testApp(
     codeOnScreen?: boolean
     smsDelivers?: boolean
     adminKey?: Uint8Array<ArrayBuffer> | null
+    bookingTypes?: Deps['bookingTypes']
   } = {},
 ) {
   const clock = { now: opts.now ?? DEMO_NOW }
@@ -42,6 +44,8 @@ export function testApp(
     trustedIpHeader: opts.trustedIpHeader,
     codeOnScreen: opts.codeOnScreen ?? false,
     adminKey: opts.adminKey === undefined ? DEV_ADMIN_KEY : opts.adminKey,
+    // every kind, so the table and class paths stay tested; the first launch's rule has its own test
+    bookingTypes: opts.bookingTypes ?? BOOKING_TYPES,
   }
   const app = createApp(async (c, next) => {
     c.set('deps', deps)

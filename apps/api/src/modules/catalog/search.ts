@@ -13,7 +13,7 @@ import { businesses, categories, services } from '../../db/schema'
 import type { Deps } from '../../deps'
 import { buildCards } from './cards'
 import { cityOrMain } from './cities'
-import { isPublic } from './map'
+import { isPublic, takesOpenTypes } from './map'
 
 const escapeLike = (q: string) => q.replace(/[\\%_]/g, (ch) => `\\${ch}`)
 
@@ -60,7 +60,7 @@ export async function search(deps: Deps, q: SearchQuery) {
   const radius = !q.bbox && position
   const city = q.bbox || position ? null : await cityOrMain(db, q.city)
 
-  const where: SQL[] = [isPublic()]
+  const where: SQL[] = [isPublic(), takesOpenTypes(deps.bookingTypes)]
   if (city) where.push(eq(businesses.cityId, city))
   if (q.cat) where.push(eq(businesses.categoryId, q.cat))
   if (q.type) where.push(sql`${q.type} = any(${businesses.bookingTypes})`)

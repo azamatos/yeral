@@ -135,6 +135,7 @@ export async function buildCards(deps: Deps, ids: string[], opts: CardOptions): 
         name: b.name,
         category: { id: b.categoryId, name: text(b.kind, opts.lang) || text(category?.name, opts.lang) },
         photo: b.photos[0] ? photoOf(deps, b.photos[0], opts.lang, b.name) : null,
+        example: b.demo,
         rating: b.rating,
         reviewsCount: b.reviewsCount,
         street: b.street,

@@ -45,6 +45,13 @@ services:
       # the first launch's sign-in code on the screen (book Q-036): anyone who types a number signs in as it, so it
       # goes on only when the first launch opens (operations.md)
       SIGN_IN_CODE_ON_SCREEN: 'false'
+      # the first launch's example businesses (book Q-004): `setup` adds them, marked "Example" and confirming at once;
+      # on with the code on the screen when the first launch opens (operations.md)
+      EXAMPLE_BUSINESSES: 'false'
+      # the phone every example shows and "Call" reaches: Ýeral's own support line (set it with the examples)
+      # EXAMPLE_PHONE: '+993…'
+      # the kinds of booking open (book Q-030): appointments until tables and classes ship
+      BOOKING_TYPES: appointment
       # the Ýeral team's authenticator secrets are sealed under it (ADR 0026); deploy.sh makes it once
       ADMIN_SECRET_KEY: ${ADMIN_SECRET_KEY:?set by deploy.sh}
     depends_on:

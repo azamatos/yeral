@@ -78,6 +78,8 @@ export const businessCardSchema = z
   .object({
     slug: slugSchema,
     name: z.string(),
+    /** One of the first launch's example businesses (book Q-004): "Example" beside its name. */
+    example: z.boolean(),
     category: z.object({ id: slugSchema, name: z.string() }),
     photo: photoSchema.nullable(),
     rating: z.number().min(0).max(5).nullable(),
@@ -184,7 +186,11 @@ export const suggestQuerySchema = langQuerySchema.extend({
 export const suggestResponseSchema = z.object({
   categories: z.array(z.object({ id: slugSchema, name: z.string() })).max(4),
   services: z.array(z.string()).max(6),
-  businesses: z.array(z.object({ slug: slugSchema, name: z.string(), category: z.string() })).max(6),
+  businesses: z
+    .array(
+      z.object({ slug: slugSchema, name: z.string(), /** An example business (book Q-004). */ example: z.boolean(), category: z.string() }),
+    )
+    .max(6),
 })
 
 // ── Cities and places ("Nirede?") ──
@@ -285,6 +291,8 @@ export const businessDetailSchema = z
   .object({
     slug: slugSchema,
     name: z.string(),
+    /** One of the first launch's example businesses (book Q-004): "Example" beside its name; it confirms at once. */
+    example: z.boolean(),
     category: z.object({ id: slugSchema, name: z.string() }),
     bookingTypes: z.array(bookingTypeSchema).min(1),
     specialistWord: z.string(),

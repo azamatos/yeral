@@ -27,7 +27,7 @@ import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
 import { cityOrMain, loadCities } from './cities'
 import { businessDetail, visibleBusiness } from './detail'
-import { isPublic, text } from './map'
+import { categoryTakes, isPublic, takesOpenTypes, text } from './map'
 import { search, wordStartLikes } from './search'
 
 const slugParam = z.object({ slug: slugSchema })
@@ -98,7 +98,8 @@ const reviewsRoute = createRoute({
 export const catalogRoutes = new OpenAPIHono<AppEnv>()
   .openapi(categoriesRoute, async (c) => {
     const { lang } = c.req.valid('query')
-    const rows = await c.var.deps.db.select().from(categories).orderBy(asc(categories.sort))
+    // the kinds of booking open now only (book Q-030)
+    const rows = await c.var.deps.db.select().from(categories).where(categoryTakes(c.var.deps.bookingTypes)).orderBy(asc(categories.sort))
     const items = rows.map((r) => ({
       id: r.id,
       icon: r.icon,
@@ -129,13 +130,17 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
     const { db } = c.var.deps
     const [start, word] = wordStartLikes(q)
     const matches = (col: SQL | AnyColumn) => or(sql`${col} ilike ${start}`, sql`${col} ilike ${word}`)
-    // the businesses search would show: public, and in the chosen city when there is one
-    const shown = and(isPublic(), city ? eq(businesses.cityId, await cityOrMain(db, city)) : undefined)
+    // the businesses search would show: public, of a kind open now, and in the chosen city when there is one
+    const shown = and(
+      isPublic(),
+      takesOpenTypes(c.var.deps.bookingTypes),
+      city ? eq(businesses.cityId, await cityOrMain(db, city)) : undefined,
+    )
     const [cats, svc, biz] = await Promise.all([
       db
         .select()
         .from(categories)
-        .where(anyTextLike(categories.name, start, word))
+        .where(and(anyTextLike(categories.name, start, word), categoryTakes(c.var.deps.bookingTypes)))
         .orderBy(asc(categories.sort))
         .limit(4),
       db
@@ -155,7 +160,7 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
       {
         categories: cats.map((x) => ({ id: x.id, name: text(x.name, lang) })),
         services: svc.map((x) => x.name).sort((x, y) => x.localeCompare(y)),
-        businesses: biz.map((x) => ({ slug: x.slug, name: x.name, category: text(x.kind, lang) })),
+        businesses: biz.map((x) => ({ slug: x.slug, name: x.name, example: x.demo, category: text(x.kind, lang) })),
       },
       200,
     )

@@ -842,7 +842,7 @@ flowchart TD
 **Edge cases**
 
 - **First launch** (Q-004, decided 18.10.2026): production also gets example businesses from the design's demo data, marked "Example" everywhere they appear and set to confirm bookings at once. Bookings visitors make there show only in their own *Ýazylyşlarym*. "Try the business app" opens a shared demo workspace with seeded clients only, so no visitor sees another visitor's phone; it resets every night. Real businesses sit beside the examples.
-- **Code differs:** production refuses all demo data, and nothing marks a business as an example or resets a demo workspace.
+- Code (21.10.2026): production's setup adds the examples once each when `EXAMPLE_BUSINESSES` is on (the design's appointment businesses, marked `example`, confirming at once, with no team anyone signs in to and no reviews of their own, their photos served from the api's image); nothing else is touched. **Code differs:** nothing resets a demo workspace yet (F-242).
 
 > Open question Q-004: who the first launch is for.
 

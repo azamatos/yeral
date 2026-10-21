@@ -96,7 +96,15 @@ export const bookingWhatSchema = z.discriminatedUnion('type', [
 export const bookingSummarySchema = z
   .object({
     code: bookingCodeSchema,
-    business: z.object({ slug: slugSchema, name: z.string(), category: z.string(), photo: photoSchema.nullable(), phone: phoneSchema }),
+    business: z.object({
+      slug: slugSchema,
+      name: z.string(),
+      /** An example business (book Q-004): "Example" beside its name. */
+      example: z.boolean(),
+      category: z.string(),
+      photo: photoSchema.nullable(),
+      phone: phoneSchema,
+    }),
     /** What was booked; `what.type` is the booking type. */
     what: bookingWhatSchema,
     date: ymdSchema,
