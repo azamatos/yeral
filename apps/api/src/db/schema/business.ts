@@ -119,8 +119,6 @@ export const businesses = pgTable(
     rating: real(),
     reviewsCount: integer().notNull().default(0),
     ratingBreakdown: jsonb().$type<Record<'1' | '2' | '3' | '4' | '5', number>>().notNull().default({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }),
-    /** Median minutes from request to answer over recent requests; null without history. */
-    typicalConfirmMinutes: integer(),
     /** Only verified businesses are public (ADR 0018). */
     verification: verificationStatus().notNull().default('pending'),
     /** A verified business moved (book Q-215): the Ýeral team checks it again and clears this; the page stays public. */
