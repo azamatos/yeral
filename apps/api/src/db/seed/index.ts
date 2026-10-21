@@ -84,6 +84,8 @@ interface Ctx {
    * visitor's booking), no invites, no reviews of their own, and only the design's yearly days off.
    */
   example?: boolean
+  /** The phone an example shows (`EXAMPLE_PHONE`). */
+  examplePhone?: string
 }
 
 function code(ctx: Ctx, fixed?: string): string {
@@ -136,7 +138,8 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       entranceNote: def.entranceNote ?? null,
       lat: geo.lat,
       lng: geo.lng,
-      phone: def.phone,
+      // an example shows Ýeral's own line: the design's numbers may be real people's
+      phone: ctx.example ? ctx.examplePhone! : def.phone,
       photos: def.photos.map((name) => {
         const photo = PHOTOS[name]
         if (!photo) throw new Error(`unknown photo ${name}`)
@@ -199,7 +202,8 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
         daysOff: (s.daysOff ?? [])
           .filter((e) => e.yearly || !ctx.example)
           .map((e) => (e.yearly ? e : { ...e, from: ctx.day(e.from), to: ctx.day(e.to) })),
-        rating: s.rating ?? null,
+        // an example's specialists have no reviews of their own either
+        rating: ctx.example ? null : (s.rating ?? null),
       })
       .returning({ id: t.staff.id })
     if (!row) throw new Error('staff insert failed')
@@ -408,7 +412,7 @@ export async function seed(db: Db, opts: { demo: boolean; now: number }): Promis
  * (by page address), marked as examples (`demo`), confirming at once, with no team to sign in to and no reviews of their
  * own; nothing else is touched, so production keeps its data and visitors' bookings. Their week is the design's.
  */
-export async function seedExamples(db: Db, opts: { now: number }): Promise<number> {
+export async function seedExamples(db: Db, opts: { now: number; phone: string }): Promise<number> {
   return db.transaction(async (tx) => {
     const ctx: Ctx = {
       db: tx,
@@ -419,6 +423,7 @@ export async function seedExamples(db: Db, opts: { now: number }): Promise<numbe
       users: new Map(),
       clients: new Map(),
       example: true,
+      examplePhone: opts.phone,
     }
     const there = new Set((await tx.select({ slug: t.businesses.slug }).from(t.businesses)).map((b) => b.slug))
     let added = 0

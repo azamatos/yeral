@@ -18,10 +18,10 @@ const app = createApp(async (c, next) => {
   await next()
 })
 
-if (config.site.demo || config.exampleBusinesses) {
+if (config.site.demo || process.env.DEMO_MEDIA_DIR) {
   // demo photos from the design export (free Unsplash licence, docs/design/assets/photos/CREDITS.md), found from
   // src/entry/ (dev) and dist/ (`start`) alike; the api image carries them at /app/demo-photos (DEMO_MEDIA_DIR), for
-  // the first launch's example businesses (book Q-004)
+  // the first launch's example businesses (book Q-004), served while the image has them
   const root = process.env.DEMO_MEDIA_DIR ?? findUp(new URL(import.meta.url), 'docs/design/assets/photos')
   if (root) app.use('/media/demo/*', serveStatic({ root, rewriteRequestPath: (p) => p.replace(/^\/media\/demo/, '') }))
   else log.warn('demo photos not found: set DEMO_MEDIA_DIR')

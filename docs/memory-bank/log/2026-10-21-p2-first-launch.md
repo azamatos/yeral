@@ -14,5 +14,10 @@
     compose sets `EXAMPLE_BUSINESSES: 'false'` and `BOOKING_TYPES: appointment`.
 - Tests: `db/seed/examples.test.ts` (added once each, instant, nobody to sign in to, no reviews; a visitor's booking
   confirmed at once and marked; appointments only in categories, search and suggestions).
+- The review's findings, fixed: the examples show `EXAMPLE_PHONE` (required with them: Ýeral's support line, which
+  the owner still has to give), never the design's numbers, which may be real people's; their specialists have no
+  invented ratings; the suggestions leave other kinds' categories out and mark examples; the image's photos are served
+  whenever the image has them, so turning the flag off later doesn't break them (hide the examples from the admin tool
+  instead; a close can't be undone with no owner account); operations.md says the image carries the photos.
 - Follow-ups: the business app's demo workspace (F-242), reset every night; when the Turkmenistan launch comes, the
   examples are hidden or closed from the admin tool.

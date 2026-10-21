@@ -14,3 +14,13 @@ describe('ADMIN_SECRET_KEY (ADR 0026)', () => {
     expect(() => loadConfig({ ...base, ADMIN_SECRET_KEY: key(31) })).toThrow(/ADMIN_SECRET_KEY/)
   })
 })
+
+describe('EXAMPLE_BUSINESSES (book Q-004)', () => {
+  it('needs the phone the examples show', () => {
+    expect(() => loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true' })).toThrow(/EXAMPLE_PHONE/)
+    expect(loadConfig({ ...base, EXAMPLE_BUSINESSES: 'true', EXAMPLE_PHONE: '+99312000000' })).toMatchObject({
+      exampleBusinesses: true,
+      examplePhone: '+99312000000',
+    })
+  })
+})

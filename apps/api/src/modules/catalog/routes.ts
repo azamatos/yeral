@@ -140,7 +140,7 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
       db
         .select()
         .from(categories)
-        .where(anyTextLike(categories.name, start, word))
+        .where(and(anyTextLike(categories.name, start, word), categoryTakes(c.var.deps.bookingTypes)))
         .orderBy(asc(categories.sort))
         .limit(4),
       db
@@ -160,7 +160,7 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
       {
         categories: cats.map((x) => ({ id: x.id, name: text(x.name, lang) })),
         services: svc.map((x) => x.name).sort((x, y) => x.localeCompare(y)),
-        businesses: biz.map((x) => ({ slug: x.slug, name: x.name, category: text(x.kind, lang) })),
+        businesses: biz.map((x) => ({ slug: x.slug, name: x.name, example: x.demo, category: text(x.kind, lang) })),
       },
       200,
     )

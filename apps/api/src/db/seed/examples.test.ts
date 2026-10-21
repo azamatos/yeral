@@ -10,6 +10,7 @@ import { BUSINESSES } from './demo-data'
 import { seed, seedExamples } from './index'
 
 const APPOINTMENTS = BUSINESSES.filter((b) => b.type === 'appointment')
+const SUPPORT = '+99312000000'
 
 describe('the first launch’s example businesses (book Q-004, F-200)', () => {
   let db: Db
@@ -23,16 +24,18 @@ describe('the first launch’s example businesses (book Q-004, F-200)', () => {
   })
 
   it('the design’s appointment businesses, once each: confirming at once, no team to sign in to, no reviews of their own', async () => {
-    expect(await seedExamples(db, { now: DEMO_NOW })).toBe(APPOINTMENTS.length)
-    expect(await seedExamples(db, { now: DEMO_NOW })).toBe(0)
+    expect(await seedExamples(db, { now: DEMO_NOW, phone: SUPPORT })).toBe(APPOINTMENTS.length)
+    expect(await seedExamples(db, { now: DEMO_NOW, phone: SUPPORT })).toBe(0)
     const rows = await db.select().from(t.businesses)
     expect(rows.map((b) => b.slug).sort()).toEqual(APPOINTMENTS.map((b) => b.slug).sort())
     expect(rows.every((b) => b.demo && b.verification === 'verified' && b.rating === null && b.reviewsCount === 0)).toBe(true)
+    // Ýeral's line, never the design's numbers; no invented ratings for their specialists either
+    expect(rows.every((b) => b.phone === SUPPORT)).toBe(true)
     expect((await db.select().from(t.bookingRules)).every((r) => r.confirmMode === 'instant')).toBe(true)
     // nobody signs in to them: no accounts, the owner's row alone with the app (and no account), no invites
     expect(await db.select().from(t.users)).toHaveLength(0)
     const team = await db.select().from(t.staff)
-    expect(team.every((s) => !s.userId && s.status === 'active' && s.hasApp === (s.level === 'owner'))).toBe(true)
+    expect(team.every((s) => !s.userId && s.status === 'active' && s.hasApp === (s.level === 'owner') && s.rating === null)).toBe(true)
     expect(await db.select().from(t.invites)).toHaveLength(0)
   })
 
@@ -85,5 +88,11 @@ describe('appointments only, until tables and classes ship (book Q-030)', () => 
     expect((await found(every)).some((s) => tables.includes(s))).toBe(true)
     const suggested = (await open.req('/v1/search/suggest?q=Bag&lang=en')).json as { businesses?: { slug: string }[] }
     expect((suggested.businesses ?? []).map((b) => b.slug)).not.toContain('bag-kafe')
+    // nor a category of another kind
+    const cats = (await open.req('/v1/search/suggest?q=Rest&lang=en')).json.categories as { id: string }[]
+    expect(cats.map((c) => c.id)).not.toContain('restaurant')
+    // an example is marked in the suggestions too
+    const glow = (await open.req('/v1/search/suggest?q=Glow&lang=en')).json.businesses as { slug: string; example: boolean }[]
+    expect(glow.find((b) => b.slug === 'glow-studio')).toMatchObject({ example: true })
   })
 })

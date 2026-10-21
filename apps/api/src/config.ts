@@ -1,7 +1,7 @@
 /** Environment for the api, read once from `process.env` (ADR 0024). */
 import { resolve } from 'node:path'
 import { BOOKING_TYPES, type BookingType } from '@yeral/domain/model'
-import { parseEnv } from '@yeral/lib/env'
+import { EnvError, parseEnv } from '@yeral/lib/env'
 import { siteFromEnv, type SiteConfig } from '@yeral/lib/site'
 import { z } from 'zod'
 import type { TrustedIpHeader } from './lib/rate-limit'
@@ -37,6 +37,14 @@ const envSchema = z.object({
    */
   EXAMPLE_BUSINESSES: z.enum(['true', 'false']).default('false'),
   /**
+   * The phone every example business shows and "Call" reaches (Ýeral's own support line): never the design's invented
+   * numbers, which may be real people's. Required with `EXAMPLE_BUSINESSES`.
+   */
+  EXAMPLE_PHONE: z
+    .string()
+    .regex(/^\+\d{8,15}$/, 'E.164, such as +99312345678')
+    .optional(),
+  /**
    * The key the Ýeral team's authenticator secrets are sealed under (ADR 0026): 32 random bytes, base64
    * (`openssl rand -base64 32`). Development and tests use a fixed one; production without it has no admin tool.
    */
@@ -66,14 +74,17 @@ export interface Config {
   codeOnScreen: boolean
   /** The kinds of booking open now (`BOOKING_TYPES`, book Q-030). */
   bookingTypes: BookingType[]
-  /** `EXAMPLE_BUSINESSES`: `setup` adds the first launch's example businesses. */
+  /** `EXAMPLE_BUSINESSES`: `setup` adds the first launch's example businesses, showing `examplePhone`. */
   exampleBusinesses: boolean
+  examplePhone: string | null
   /** `ADMIN_SECRET_KEY`'s bytes; null in production until it's set (the admin tool answers `admin_unavailable`). */
   adminKey: Uint8Array<ArrayBuffer> | null
 }
 
 export function loadConfig(source: Record<string, unknown>): Config {
   const env = parseEnv(envSchema, source)
+  if (env.EXAMPLE_BUSINESSES === 'true' && !env.EXAMPLE_PHONE)
+    throw new EnvError(['EXAMPLE_PHONE'], "the example businesses' phone (Ýeral's support line), with EXAMPLE_BUSINESSES")
   const site = siteFromEnv(source)
   return {
     databaseUrl: env.DATABASE_URL,
@@ -86,6 +97,7 @@ export function loadConfig(source: Record<string, unknown>): Config {
     codeOnScreen: env.SIGN_IN_CODE_ON_SCREEN === 'true',
     bookingTypes: env.BOOKING_TYPES,
     exampleBusinesses: env.EXAMPLE_BUSINESSES === 'true',
+    examplePhone: env.EXAMPLE_PHONE ?? null,
     adminKey: env.ADMIN_SECRET_KEY
       ? Uint8Array.from(atob(env.ADMIN_SECRET_KEY), (ch) => ch.charCodeAt(0))
       : site.env === 'production'
