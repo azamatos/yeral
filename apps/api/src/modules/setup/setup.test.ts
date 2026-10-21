@@ -30,7 +30,10 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     const started = await owner.req('/v1/setup', { body: { name: 'Aýna Beauty', categoryId: 'beauty' } })
     expect(started.status).toBe(201)
     expect(started.json).toEqual({ slug: 'ayna-beauty' })
-    expect((await owner.req('/v1/me/setup')).json).toEqual({ setup: { slug: 'ayna-beauty', name: 'Aýna Beauty', step: 'address' } })
+    // the sign-in's card: the category, no logo yet, no address before the address step (the draft sits at the centre)
+    expect((await owner.req('/v1/me/setup')).json).toEqual({
+      setup: { slug: 'ayna-beauty', name: 'Aýna Beauty', step: 'address', category: 'Beauty', logo: null, address: null },
+    })
     const again = await owner.req('/v1/setup', { body: { name: 'Second', categoryId: 'beauty' } })
     expect(again.json.error).toMatchObject({ code: 'setup_in_progress', details: { slug: 'ayna-beauty' } })
     // not in the switcher, no "Biznes" link, not public
@@ -38,8 +41,20 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     expect((await owner.req('/v1/me')).json.hasBusiness).toBe(false)
     expect((await browser(t.app).req('/v1/businesses/ayna-beauty')).status).toBe(404)
     // the wizard moves on, and reopens there
+    const location = {
+      cityId: 'ashgabat',
+      address: '247 Bitarap Türkmenistan Avenue',
+      street: 'Bitarap Türkmenistan Avenue',
+      lat: 37.95,
+      lng: 58.38,
+    }
+    expect((await owner.req('/v1/w/ayna-beauty/settings/profile', { method: 'PATCH', body: { location } })).status).toBe(200)
     expect((await owner.req('/v1/w/ayna-beauty/setup', { method: 'PUT', body: { step: 'hours' } })).status).toBe(204)
-    expect((await owner.req('/v1/me/setup')).json.setup.step).toBe('hours')
+    // past the address step the card says where it is
+    expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({
+      step: 'hours',
+      address: { line: '247 Bitarap Türkmenistan Avenue', city: { id: 'ashgabat', name: 'Ashgabat' } },
+    })
     // another business of that name gets the next address; tables wait for later
     const other = await as('+99365930002')
     expect((await other.req('/v1/setup', { body: { name: 'Glow Studio', categoryId: 'nails' } })).json).toEqual({ slug: 'glow-studio-2' })

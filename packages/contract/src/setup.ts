@@ -6,7 +6,7 @@
 import { NAME_MAX } from '@yeral/domain/names'
 import { SETUP_STEPS } from '@yeral/domain/setup'
 import { z } from 'zod'
-import { slugSchema } from './common'
+import { cityRefSchema, photoSchema, slugSchema } from './common'
 
 /** Step 2, "Biznes": the name and a category that takes appointments (tables and classes come later, book Q-030). */
 export const setupStartSchema = z
@@ -25,8 +25,13 @@ export const setupSchema = z
   .object({
     slug: slugSchema,
     name: z.string(),
-    /** Where the wizard reopens. */
+    /** Where the wizard reopens; the steps before it are done (the sign-in's "Continue setting up" card, Q-200). */
     step: z.enum(SETUP_STEPS),
+    /** The category's name, as the card says it ("Beauty · setup not finished"). */
+    category: z.string(),
+    logo: photoSchema.nullable(),
+    /** The address the address step saved; null until the wizard is past it (the draft starts at the city's centre). */
+    address: z.object({ line: z.string(), city: cityRefSchema }).nullable(),
   })
   .meta({ id: 'Setup' })
 
