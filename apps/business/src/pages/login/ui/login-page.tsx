@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useSignIn } from '@yeral/features/auth-by-phone'
+import { useCodeOnScreen, useSignIn } from '@yeral/features/auth-by-phone'
 import { toast } from '@yeral/ui/toast'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
@@ -22,6 +22,8 @@ export function LoginPage() {
   const sdk = useSdk()
   const errorText = useErrorText()
   const me = useQuery(sdk.me.get())
+  // asked with the account, so the phone step's demo note is there when it opens
+  useCodeOnScreen()
   const logout = useMutation(sdk.auth.logout())
   const [identity, setIdentity] = useState<{ name: string | null; ticket: string } | null>(null)
   const [declined, setDeclined] = useState<string | null>(null)

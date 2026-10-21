@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useSignIn } from '@yeral/features/auth-by-phone'
+import { useCodeOnScreen, useSignIn } from '@yeral/features/auth-by-phone'
 import { useSdk } from '@yeral/sdk/react'
 import { Modal, ModalContent } from '@yeral/ui/modal'
 import { toast } from '@yeral/ui/toast'
@@ -49,6 +49,8 @@ function LoginSteps({ onSignedIn }: { onSignedIn: () => void }) {
   const me = useQuery(sdk.me.get())
   const [identity, setIdentity] = useState<{ name: string | null; ticket: string } | null>(null)
   const failed = (error: unknown) => void toast(errorText(error))
+  // asked as the modal opens, so the phone step's demo note is there with it
+  useCodeOnScreen()
   const signIn = useSignIn({
     onVerified: (answer) => {
       if ('isThisYou' in answer) setIdentity(answer.isThisYou)

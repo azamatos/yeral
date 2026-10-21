@@ -52,7 +52,8 @@
       "last": "Last name <optional>(optional)</optional>",
       "required": "Enter your first name.",
       "continue": "Continue"
-    }
+    },
+    "demoNote": "This is a demo of {brand}: the sign-in code shows here instead of an SMS. Use a made-up number, and don’t type in real people’s names or numbers."
   },
   "account": {
     "menu": "Account menu: {name}",

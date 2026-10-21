@@ -90,6 +90,7 @@
     "lead": "Enter your phone number — we’ll show you a 4-digit code. No password needed.",
     "phoneLabel": "Phone number",
     "phoneHint": "If you already book on {brand} as a client, use that number — one account works for both.",
+    "phoneHintDemo": "Use the same made-up number on the {brand} site and here — one account works for both.",
     "sendCode": "Send code",
     "sending": "Sending…",
     "incomplete": "The number is incomplete — it needs {digits} digits.",
@@ -173,7 +174,8 @@
       "one": "We open the workspace you used last.",
       "many": "You have {count} workspaces. We open the one you used last; pick another at the top of the left menu.",
       "now": "Open the calendar now"
-    }
+    },
+    "demoNote": "This is a demo of {brand}: the sign-in code shows here instead of an SMS. Use a made-up number, and don’t type in real people’s names or numbers."
   },
   "placeholder": {
     "setupTitle": "Create a business",

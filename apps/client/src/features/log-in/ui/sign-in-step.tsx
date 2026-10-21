@@ -6,6 +6,7 @@ import { textLink } from '@yeral/ui/text-link'
 import { useTranslations } from 'use-intl'
 import { CodeStep } from '@/shared/ui'
 import { LoginHeader } from './login-header'
+import { SignInDemoNote } from './sign-in-demo-note'
 
 /**
  * The phone and the code (Auth «1 · Telefon», «2 · SMS kod», «4 · Ýalňyş kod»; book C-19 steps 1, 2, 4) in the
@@ -36,6 +37,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
           )}
         </ModalDescription>
       </LoginHeader>
+      {!onCode && <SignInDemoNote />}
       <CodeStep steps={signIn} />
     </>
   )

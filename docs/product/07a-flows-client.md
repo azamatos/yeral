@@ -775,7 +775,7 @@ flowchart TD
 - The page under the modal keeps its state, a started booking included (Auth, step 3 caption).
 - An account unused for 6 months asks "Is this you?" first, as in C-18 (Q-270).
 
-**Status:** Design: drawn (Auth; States 10) · Code: built (api; the client site's header login, #110 and #114, chapter 9's 21.10.2026 rows); the heart's sign-in comes with favourites.
+**Status:** Design: drawn (Auth; States 10) · Code: built (api; the client site's header login, #110 and #114, and its demo note, chapter 9's 21.10.2026 rows); the heart's sign-in comes with favourites.
 
 ### C-20 · The time was taken while booking
 
