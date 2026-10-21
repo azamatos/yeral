@@ -7,7 +7,7 @@ import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { toast } from '@yeral/ui/toast'
 import { Info, LogOut } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type RefObject } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
@@ -24,11 +24,20 @@ import { ProfilePhoto } from './profile-photo'
  * with the person's level there; the owner can't leave (the owner box), anyone else may leave the workspace on screen
  * (B-15). A right drawer 480 (no scrim from 1280), a bottom sheet on phones.
  */
-export function ProfileDrawer({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function ProfileDrawer({
+  open,
+  onOpenChange,
+  opener,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  /** What opened it (the account menu's button, More): the focus goes back there. */
+  opener?: RefObject<HTMLElement | null>
+}) {
   const t = useTranslations()
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} scrim="auto">
-      <DrawerContent aria-describedby={undefined}>
+    <Drawer open={open} onOpenChange={onOpenChange} scrim="auto" returnFocus={opener}>
+      <DrawerContent>
         <DrawerHeader
           title={t('shell.profile.title')}
           subtitle={t('shell.profile.lead', { brand: t('common.brand') })}
@@ -51,7 +60,6 @@ function Profile({ onDone }: { onDone: () => void }) {
   const [first, setFirst] = useState(me?.firstName ?? '')
   const [last, setLast] = useState(me?.surname ?? '')
   const [missing, setMissing] = useState(false)
-  const [leaving, setLeaving] = useState(false)
   if (!me || !workspace || !workspaces) return null
   const owner = workspace.level === 'owner'
 
@@ -123,17 +131,17 @@ function Profile({ onDone }: { onDone: () => void }) {
       </DrawerBody>
       <DrawerFooter className="items-center [&>*]:flex-none">
         {!owner && (
-          <Button variant="danger-ghost" className="-ml-1.5 px-1.5 text-small" aria-haspopup="dialog" onClick={() => setLeaving(true)}>
-            <LogOut aria-hidden />
-            {t('shell.profile.leave')}
-          </Button>
+          <LeaveConfirm workspace={workspace} onLeft={onDone}>
+            <Button variant="danger-ghost" className="-ml-1.5 px-1.5 text-small">
+              <LogOut aria-hidden />
+              {t('shell.profile.leave')}
+            </Button>
+          </LeaveConfirm>
         )}
-        <span className="flex-1" />
-        <Button type="submit" form="my-profile" variant="primary" loading={update.isPending}>
+        <Button type="submit" form="my-profile" variant="primary" loading={update.isPending} className="ml-auto">
           {t('shell.profile.save')}
         </Button>
       </DrawerFooter>
-      <LeaveConfirm open={leaving} onOpenChange={setLeaving} workspace={workspace} onLeft={onDone} />
     </>
   )
 }

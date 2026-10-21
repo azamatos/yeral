@@ -501,7 +501,9 @@ export const InlinePhone: Story = {
   name: 'Inline · New number',
   args: { step: 'phone', layout: 'inline', copy: CHANGE, onCancel: fn() },
   play: async ({ args, canvas }) => {
-    await userEvent.type(canvas.getByLabelText('New phone number'), '61057732{Enter}')
+    // opened on a tap: the focus is in the field
+    await waitFor(() => expect(canvas.getByLabelText('New phone number')).toHaveFocus())
+    await userEvent.keyboard('61057732{Enter}')
     await expect(args.onSendCode).toHaveBeenCalledOnce()
     await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }))
     await expect(args.onCancel).toHaveBeenCalledOnce()
@@ -525,6 +527,15 @@ export const InlineCode: Story = {
     await expect(canvas.getByRole('button', { name: 'Get a new code in 0:42' })).toBeDisabled()
     await userEvent.keyboard('4821')
     await waitFor(() => expect(args.onSubmitCode).toHaveBeenCalledWith('4821'))
+  },
+}
+
+/** Checking the code: with no Confirm to say so, the hint does. */
+export const InlineChecking: Story = {
+  name: 'Inline · Checking',
+  args: { layout: 'inline', copy: CHANGE, code: '4821', checking: true, resendIn: 42 },
+  play: async ({ canvas }) => {
+    await expect(canvas.getAllByText('Checking…').find((el) => el.checkVisibility())).toBeVisible()
   },
 }
 

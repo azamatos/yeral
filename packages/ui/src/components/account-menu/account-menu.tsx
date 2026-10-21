@@ -17,7 +17,8 @@ export interface AccountMenuItem {
   /** A page elsewhere: the row is a link (`external` opens it in a new tab). */
   href?: string
   external?: boolean
-  onSelect?: () => void
+  /** Gets the menu's button: a drawer or dialog the row opens gives the focus back to it when it closes. */
+  onSelect?: (trigger: HTMLElement | null) => void
   /** It opens a drawer or a dialog (My profile), which takes the focus: the menu doesn't hand it back to its button. */
   opensDialog?: boolean
 }
@@ -58,6 +59,7 @@ export function AccountMenu({
   const avatar = <Avatar decorative name={name} src={photo} size={32} letters={1} />
   // the row chosen opens a dialog: the focus stays with it when the menu closes
   const handOver = useRef(false)
+  const trigger = useRef<HTMLButtonElement>(null)
   const menu = (
     <MenuContent
       aria-label={menuLabel}
@@ -77,7 +79,7 @@ export function AccountMenu({
             asChild={!!item.href}
             onSelect={() => {
               handOver.current = !!item.opensDialog
-              item.onSelect?.()
+              item.onSelect?.(trigger.current)
             }}
             className={cn(accountMenuItem, item.danger && dangerItem)}
           >
@@ -104,6 +106,7 @@ export function AccountMenu({
     return (
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
+          ref={trigger}
           aria-label={triggerLabel}
           className={cn(
             'inline-flex size-11 flex-none cursor-pointer items-center justify-center rounded-m border-0 bg-transparent hover:bg-group focus-visible:shadow-focus focus-visible:outline-none data-[state=open]:bg-group',
@@ -125,6 +128,7 @@ export function AccountMenu({
       </span>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
+          ref={trigger}
           aria-label={triggerLabel}
           className="inline-flex size-9 flex-none cursor-pointer items-center justify-center rounded-s border-0 bg-transparent text-n-900 hover:bg-group focus-visible:shadow-focus focus-visible:outline-none data-[state=open]:bg-group"
         >

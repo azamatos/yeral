@@ -2,7 +2,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import { BottomTab, BottomTabBar, BottomTabButton } from '@yeral/ui/bottom-tab-bar'
 import { MoreSheet, MoreSheetDivider, MoreSheetPerson, MoreSheetRow } from '@yeral/ui/more-sheet'
 import { ExternalLink, LogOut, Menu, User } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { sectionOf, sectionsFor, type Section } from '../model/sections'
 import { useAccount } from '../model/use-account'
@@ -18,12 +18,13 @@ const TABS: readonly Section[] = ['calendar', 'bookings', 'clients']
  * More opens the sheet above the bar: the workspace (its switcher), Reviews and Settings where the level has them, the
  * person, the client site and Log out.
  */
-export function ShellTabBar({ onProfile }: { onProfile: () => void }) {
+export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | null) => void }) {
   const t = useTranslations('shell')
   const { slug, me, workspace } = useWorkspace()
   const account = useAccount()
   const pathname = useLocation({ select: (l) => l.pathname })
   const [more, setMore] = useState(false)
+  const moreButton = useRef<HTMLButtonElement>(null)
   // another page (a row, another workspace from the switcher): More has done its job
   const [at, setAt] = useState(pathname)
   if (at !== pathname) {
@@ -50,6 +51,7 @@ export function ShellTabBar({ onProfile }: { onProfile: () => void }) {
           </BottomTab>
         ))}
         <BottomTabButton
+          ref={moreButton}
           icon={<Menu />}
           label={t('more')}
           aria-expanded={more}
@@ -81,7 +83,8 @@ export function ShellTabBar({ onProfile }: { onProfile: () => void }) {
           label={t('account.profile')}
           onClick={() => {
             setMore(false)
-            onProfile()
+            // My profile closes back to More, as the sheet it came from would
+            onProfile(moreButton.current)
           }}
         />
         <MoreSheetRow asChild icon={<ExternalLink />} label={t('account.openAsClient')} hint={account.client.host}>

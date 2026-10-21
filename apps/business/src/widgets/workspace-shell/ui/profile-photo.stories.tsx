@@ -4,6 +4,7 @@
  * then the drawer shows only the picture.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { ApiError } from '@yeral/sdk'
 import { expect, fn, userEvent, waitFor } from 'storybook/test'
 import { I18nProvider } from '@/shared/i18n'
 import { ProfilePhoto } from './profile-photo'
@@ -57,6 +58,16 @@ export const WrongType: Story = {
   play: async ({ canvas, canvasElement }) => {
     await userEvent.upload(fileInput(canvasElement), file('price-list.pdf', 'application/pdf'), { applyAccept: false })
     await expect(canvas.getByRole('alert')).toHaveTextContent('price-list.pdf isn’t a photo. Use JPG or PNG.')
+  },
+}
+
+/** The api refused it (or the connection dropped): its words under the picture. */
+export const Refused: Story = {
+  args: { upload: fn(() => Promise.reject(new ApiError(413, 'validation_error'))) },
+  play: async ({ canvas, canvasElement }) => {
+    await userEvent.upload(fileInput(canvasElement), file('me.jpg', 'image/jpeg'))
+    await expect(await canvas.findByRole('alert')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Add photo' })).toBeEnabled()
   },
 }
 

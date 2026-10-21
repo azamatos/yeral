@@ -66,6 +66,7 @@
       "changeTo": "To change to <b>{phone}</b>.",
       "oldWorks": "Until the new number is verified you can log in with the old one.",
       "taken": "This number is used by another account",
+      "same": "This is already your number",
       "changed": "Phone number changed",
       "cancel": "Cancel",
       "workspaces": "My workspaces",

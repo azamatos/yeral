@@ -4,6 +4,7 @@ import { FieldMessage } from '@yeral/ui/field'
 import { Camera } from 'lucide-react'
 import { useId, useRef, useState } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
+import { useErrorText } from '@/shared/i18n'
 
 /** What the drawer takes (B-Shell "Optional · JPG or PNG"); the size cap is the business photos' (B-Settings, 10 MB). */
 const TYPES = ['image/jpeg', 'image/png']
@@ -11,12 +12,13 @@ export const PHOTO_MAX_MB = 10
 
 /**
  * The person's photo in My profile (B-Shell: avatar 64 and "Add photo", "Optional · JPG or PNG"; the states follow the
- * business photos': uploading, too big, not a photo). `upload` sends the picked file; without it (the api takes no
+ * business photos': uploading, too big, not a photo, refused). `upload` sends the picked file; without it (the api takes no
  * photo yet) there's only the picture, never a button that can't work.
  */
 export function ProfilePhoto({ name, src, upload }: { name: string; src?: string | null; upload?: (file: File) => Promise<unknown> }) {
   const t = useTranslations('shell.profile')
   const format = useFormatter()
+  const errorText = useErrorText()
   const inputId = useId()
   const input = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
@@ -28,7 +30,10 @@ export function ProfilePhoto({ name, src, upload }: { name: string; src?: string
     if (!TYPES.includes(file.type)) return setRefused(t('photoWrongType', { file: file.name }))
     if (mb > PHOTO_MAX_MB) return setRefused(t('photoTooBig', { file: file.name, size: format.number(Math.ceil(mb)), max: PHOTO_MAX_MB }))
     setUploading(true)
-    void upload?.(file).finally(() => setUploading(false))
+    void upload?.(file)
+      // refused or lost: the api's words under the picture, which stays as it was
+      .catch((error: unknown) => setRefused(errorText(error)))
+      .finally(() => setUploading(false))
   }
 
   return (

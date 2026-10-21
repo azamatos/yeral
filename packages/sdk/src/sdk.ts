@@ -232,7 +232,11 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         onSuccess: signedOut,
       }),
     phoneCode: () =>
-      mutationOptions({ mutationFn: (body: z.input<typeof sendCodeSchema>) => call(v1.me.phone.code.$post({ json: body })) }),
+      mutationOptions({
+        mutationFn: (body: z.input<typeof sendCodeSchema>) => call(v1.me.phone.code.$post({ json: body })),
+        // the account can't change its number now: `canChangePhone` was stale, so the profile stops offering it
+        onError: (error) => (isApiError(error, 'phone_change_unavailable') ? invalidate(keys.me()) : undefined),
+      }),
     phoneVerify: () =>
       mutationOptions({
         mutationFn: (body: z.input<typeof verifyCodeSchema>) => call(v1.me.phone.verify.$post({ json: body })),
@@ -445,6 +449,11 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   /** The business team (ADR 0025): the switcher, invites, and the team the owner manages. */
   const w = v1.w[':slug']
   const teamChanged = (slug?: string) => invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug)] : []))
+  /** The person isn't on that team any more: nothing of it stays (every workspace key names it second), nor what they saw as its team. */
+  const left = (slug: string) => {
+    forgetPerson(inWorkspace(slug))
+    return invalidate(keys.workspaces(), keys.me())
+  }
   const team = {
     /** The switcher; `current` is the workspace opened last. */
     workspaces: () =>
@@ -550,11 +559,9 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     leave: () =>
       mutationOptions({
         mutationFn: (slug: string) => call(v1.w[':slug'].leave.$post({ param: { slug } })),
-        // nothing of that workspace stays (every workspace key names it second), nor what they saw as its team
-        onSuccess: (_, slug) => {
-          forgetPerson(inWorkspace(slug))
-          return invalidate(keys.workspaces(), keys.me())
-        },
+        onSuccess: (_, slug) => left(slug),
+        // not on that team any more (removed meanwhile, or left on another device): it's gone all the same
+        onError: (error, slug) => (isApiError(error, 'not_found') ? left(slug) : undefined),
       }),
   }
 

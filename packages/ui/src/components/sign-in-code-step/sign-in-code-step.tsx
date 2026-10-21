@@ -207,6 +207,10 @@ export function SignInCodeStep({
   useEffect(() => {
     if (step === 'phone' && hasPhoneError) phoneRef.current?.focus()
   }, [step, hasPhoneError])
+  // inline, it opens on a tap (and comes back to the number from its code): the focus moves into the field
+  useEffect(() => {
+    if (inline && step === 'phone') phoneRef.current?.focus()
+  }, [inline, step])
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -291,11 +295,16 @@ export function SignInCodeStep({
                 ? codeExpired && !limited
                   ? copy.codeExpired
                   : undefined
-                : checking || wrong
-                  ? undefined
-                  : resent
-                    ? copy.resent
-                    : copy.codeHint
+                : checking
+                  ? // inline has no Confirm to say it: the hint does
+                    inline
+                    ? copy.checking
+                    : undefined
+                  : wrong
+                    ? undefined
+                    : resent
+                      ? copy.resent
+                      : copy.codeHint
             }
             className="gap-2"
           >

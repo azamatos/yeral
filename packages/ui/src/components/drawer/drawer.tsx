@@ -1,33 +1,54 @@
 import { X } from 'lucide-react'
 import { Dialog } from 'radix-ui'
-import { createContext, use, type ComponentProps, type ReactNode } from 'react'
+import { createContext, use, useState, type ComponentProps, type ReactNode, type RefObject } from 'react'
 import { cn } from '../../lib/cn'
 import { useMediaQuery } from '../../lib/use-media-query'
 import { Button } from '../button'
 
-/** Whether the drawer dims the page now (and holds the focus inside it). */
-const Scrimmed = createContext(true)
+/** Whether the drawer dims the page now (and holds the focus inside it), and where the focus goes back to. */
+const Mode = createContext<{ modal: boolean; returnFocus?: RefObject<HTMLElement | null> }>({ modal: true })
 
 /**
  * Right drawer, 480 (Account-Bookings `.drw`): details and edits without leaving the page — a booking, a client card,
  * filters on md. Under 768 it's a bottom sheet (max 92% high) with a grab handle. `scrim="auto"` (the business app,
  * DS-Patterns Drawer · ScrimAuto): from 1280 no scrim and the page stays usable beside it; the focus still moves in
- * and comes back.
+ * and comes back. An open drawer keeps the mode it opened with (a zoom or a turned tablet would remount what's half
+ * typed in it). The focus comes back to its `DrawerTrigger`; one opened from elsewhere (a menu's row, a sheet's row)
+ * names the element to give it back to in `returnFocus`.
  */
-export function Drawer({ scrim = 'always', ...props }: ComponentProps<typeof Dialog.Root> & { scrim?: 'always' | 'auto' }) {
+export function Drawer({
+  scrim = 'always',
+  returnFocus,
+  open: openProp,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: Omit<ComponentProps<typeof Dialog.Root>, 'modal'> & { scrim?: 'always' | 'auto'; returnFocus?: RefObject<HTMLElement | null> }) {
   const wide = useMediaQuery('(min-width: 1280px)')
-  const modal = scrim === 'always' || !wide
+  const [openState, setOpenState] = useState(defaultOpen ?? false)
+  const open = openProp ?? openState
+  const now = scrim === 'always' || !wide
+  const [modal, setModal] = useState(now)
+  if (!open && modal !== now) setModal(now)
   return (
-    <Scrimmed value={modal}>
-      <Dialog.Root modal={modal} {...props} />
-    </Scrimmed>
+    <Mode value={{ modal, returnFocus }}>
+      <Dialog.Root
+        {...props}
+        modal={modal}
+        open={open}
+        onOpenChange={(next) => {
+          setOpenState(next)
+          onOpenChange?.(next)
+        }}
+      />
+    </Mode>
   )
 }
 export const DrawerTrigger = Dialog.Trigger
 export const DrawerClose = Dialog.Close
 
-export function DrawerContent({ className, children, ...props }: ComponentProps<typeof Dialog.Content>) {
-  const scrim = use(Scrimmed)
+export function DrawerContent({ className, children, onCloseAutoFocus, ...props }: ComponentProps<typeof Dialog.Content>) {
+  const { modal: scrim, returnFocus } = use(Mode)
   // without a scrim it sits beside a page still in use: working there (or the focus coming back to a menu that opened
   // it) leaves it open; Esc and its close button close it
   const beside = scrim ? {} : { onInteractOutside: (e: Event) => e.preventDefault() }
@@ -37,6 +58,13 @@ export function DrawerContent({ className, children, ...props }: ComponentProps<
       <Dialog.Content
         {...beside}
         {...props}
+        onCloseAutoFocus={(e) => {
+          onCloseAutoFocus?.(e)
+          const to = returnFocus?.current
+          if (e.defaultPrevented || !to?.isConnected) return
+          e.preventDefault()
+          to.focus()
+        }}
         className={cn(
           'fixed inset-x-0 bottom-0 z-41 flex max-h-[92%] w-full flex-col bg-n-0 outline-none',
           'rounded-t-card shadow-sheet data-[state=open]:animate-sheet-in',

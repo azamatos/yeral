@@ -1,6 +1,7 @@
 ---
 '@yeral/business': minor
 '@yeral/ui': minor
+'@yeral/sdk': patch
 ---
 
 My profile in the business app (book B-12, B-13, B-15): from the account menu or More, a drawer (a bottom sheet on
@@ -8,4 +9,6 @@ phones) with the first and last name (Save), the photo's place, the login number
 new number, then its code; offered only when the account may change it), My workspaces with the level in each, and
 "Leave this business" (asked once) — or, for the owner, why they can't leave. `@yeral/ui`: Button `danger-ghost`;
 Drawer heads 19/24 and `scrim="auto"` (none from 1280, the page stays usable); SignInCodeStep `layout="inline"` (S
-buttons with Cancel inside a form that has its own primary); AccountMenu rows that open a dialog keep its focus.
+buttons with Cancel inside a form that has its own primary); AccountMenu rows that open a dialog keep its focus and
+pass the menu's button on; Drawer `returnFocus` and an open drawer keeps its mode. `@yeral/sdk`: leaving a workspace
+the person is no longer on (`not_found`) forgets it as a leave does; `phone_change_unavailable` asks for `me` again.

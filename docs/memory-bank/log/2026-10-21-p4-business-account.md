@@ -34,6 +34,17 @@
 - Gaps for the backend: the person's specialization per workspace (My workspaces shows the level only; B-12 step 5);
   the count of the person's bookings and requests ahead in the workspace (the leave text's numbers); the photo upload
   is #116 (`PUT /v1/me/photo`, `me.photo`): wire `ProfilePhoto`'s `upload` and `src` once it lands.
+- Review (code-review, 15 findings, all fixed or answered): the footer's spacer lost to `[&>*]:flex-none` (Save
+  `ml-auto` now); the focus comes back (Drawer `returnFocus`, AccountMenu passes its button to `onSelect`, More's
+  button on phones; LeaveConfirm is a `ModalTrigger` on its button; "Change number" opens into the field and Cancel
+  returns to it); an open drawer keeps its mode (a zoom past 1280 no longer remounts the half-typed form; `modal` isn't
+  a prop any more); the sdk refreshes on a leave's `not_found` and on `phone_change_unavailable`; your own number →
+  "This is already your number" (no api call); a refused photo upload shows the api's words; the dialog keeps its
+  description; a lost workspace goes where `placeFor` says (one rule with the route); the login and Change number share
+  `useCodeStepWords`; the inline code step says "Checking…" in its hint and has "Change number" beside the number.
+  Answered: the field's "This number is used by another account" is the board's wording (B-Shell, the copy log), not
+  `errors.phone_taken`; the name form stays on `useState` — TanStack Form isn't in the catalog or any app yet, and
+  adding it is a hot-spot PR best made with the first large form (settings, the setup wizard).
 - Checked: stories (owner, no first name, change number, taken, unavailable, a specialist leaving, phone width; the
   photo's six states; SignInCodeStep inline ×6; Drawer scrim ×2); in the browser against the local api at 500: Aýna
   left Glow Studio from My profile on the phone → "You don't have a workspace yet" (`staff.status` removed); Maýsa

@@ -15,7 +15,14 @@ import { ShellSwitcher } from './shell-switcher'
  * person's level has, the person at the bottom. The Bookings count is the requests they may answer here; the reviews
  * count waits for the api.
  */
-export function ShellSidebar({ collapsed = false, onProfile }: { collapsed?: boolean; onProfile: () => void }) {
+export function ShellSidebar({
+  collapsed = false,
+  onProfile,
+}: {
+  collapsed?: boolean
+  /** My profile, opened from the account menu (its button gets the focus back). */
+  onProfile: (opener: HTMLElement | null) => void
+}) {
   const t = useTranslations('shell')
   const { slug, workspace } = useWorkspace()
   const account = useAccount()

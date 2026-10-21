@@ -290,6 +290,27 @@ describe('sdk', () => {
       expect([keys.favorites('tk'), keys.bookingList('upcoming', 'tk')].filter(kept(f))).toHaveLength(2)
     })
 
+    it('a workspace the person is no longer on counts as left; other refusals keep it', async () => {
+      const f = seeded()
+      await f.sdk.team.leave().onError!(new ApiError(404, 'not_found'), 'glow-studio', undefined, {} as never)
+      const studio = [...person, ...viewer].filter((key) => key[1] === 'glow-studio')
+      expect(studio.filter(kept(f))).toEqual([])
+      expect(f.queryClient.getQueryState(keys.workspaces())?.isInvalidated).toBe(true)
+
+      const owner = seeded()
+      await owner.sdk.team.leave().onError!(new ApiError(409, 'owner_cannot_leave'), 'glow-studio', undefined, {} as never)
+      expect(studio.filter(kept(owner))).toEqual(studio)
+    })
+
+    it('a number change the account can’t make now asks for the account again', async () => {
+      const f = seeded()
+      await f.sdk.me.phoneCode().onError!(new ApiError(409, 'phone_change_unavailable'), {} as never, undefined, {} as never)
+      expect(f.queryClient.getQueryState(keys.me())?.isInvalidated).toBe(true)
+      const g = seeded()
+      await g.sdk.me.phoneCode().onError!(new ApiError(409, 'phone_taken'), {} as never, undefined, {} as never)
+      expect(g.queryClient.getQueryState(keys.me())?.isInvalidated).toBe(false)
+    })
+
     it('accepting an invite refreshes what that business shows its team, not every business', async () => {
       const f = seeded()
       f.queryClient.setQueryData(keys.business('glow-nails', 'tk', null), { of: before.id })

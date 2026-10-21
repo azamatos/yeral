@@ -328,6 +328,17 @@ export const MyProfile: Story = {
   },
 }
 
+/** By keyboard: Esc closes it, and the focus is back on the account menu's button. */
+export const MyProfileKeyboard: Story = {
+  play: async ({ canvas }) => {
+    await openProfile(canvas)
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(within(document.body).queryByRole('dialog', { name: 'My profile' })).not.toBeInTheDocument())
+    const button = canvas.getAllByRole('button', { name: 'Account menu' }).find((b) => b.checkVisibility())
+    await waitFor(() => expect(button).toHaveFocus())
+  },
+}
+
 /** A first name is required (Q-156); the surname may go. */
 export const MyProfileNoFirstName: Story = {
   play: async ({ canvas }) => {
@@ -343,6 +354,12 @@ export const ChangeNumber: Story = {
   play: async ({ canvas }) => {
     const drawer = await openProfile(canvas)
     await userEvent.click(drawer.getByRole('button', { name: 'Change number' }))
+    // the focus moves into the box
+    await waitFor(() => expect(drawer.getByLabelText('New phone number')).toHaveFocus())
+    // her own number isn't a change
+    await userEvent.keyboard('65102030{Enter}')
+    await expect(await drawer.findByRole('alert')).toHaveTextContent('This is already your number')
+    await userEvent.clear(drawer.getByLabelText('New phone number'))
     await userEvent.type(drawer.getByLabelText('New phone number'), '61057732')
     await userEvent.click(drawer.getByRole('button', { name: 'Send code' }))
     await expect(await drawer.findByText('+993 61 05 77 32')).toBeVisible()
@@ -352,6 +369,17 @@ export const ChangeNumber: Story = {
     const toastShown = await within(document.body).findByText('Phone number changed')
     await waitFor(() => expect(toastShown).toBeVisible())
     await waitFor(() => expect(drawer.queryByLabelText('Code')).not.toBeInTheDocument())
+  },
+}
+
+/** Cancel closes the box and gives the focus back to "Change number". */
+export const ChangeNumberCancel: Story = {
+  play: async ({ canvas }) => {
+    const drawer = await openProfile(canvas)
+    await userEvent.click(drawer.getByRole('button', { name: 'Change number' }))
+    await userEvent.click(drawer.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(drawer.getByRole('button', { name: 'Change number' })).toHaveFocus())
+    await expect(drawer.queryByLabelText('New phone number')).not.toBeInTheDocument()
   },
 }
 
@@ -382,8 +410,13 @@ export const LeaveWorkspace: Story = {
   play: async ({ canvas }) => {
     const drawer = await openProfile(canvas)
     await userEvent.click(drawer.getByRole('button', { name: 'Leave this business' }))
-    const confirm = await within(document.body).findByRole('dialog', { name: 'Leave Glow Studio?' })
+    let confirm = await within(document.body).findByRole('dialog', { name: 'Leave Glow Studio?' })
     await waitFor(() => expect(within(confirm).getByRole('button', { name: 'Cancel' })).toHaveFocus())
+    // not now: back on the button that asked
+    await userEvent.click(within(confirm).getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(drawer.getByRole('button', { name: 'Leave this business' })).toHaveFocus())
+    await userEvent.click(drawer.getByRole('button', { name: 'Leave this business' }))
+    confirm = await within(document.body).findByRole('dialog', { name: 'Leave Glow Studio?' })
     await userEvent.click(within(confirm).getByRole('button', { name: 'Leave Glow Studio' }))
     await waitFor(() => expect(document.title).toBe('Calendar · Aýnanyň saç studiýasy · Ýeral Business'))
   },
@@ -398,5 +431,8 @@ export const MyProfilePhone: Story = {
     const sheet = await within(document.body).findByRole('dialog', { name: 'More' })
     await userEvent.click(within(sheet).getByRole('button', { name: 'My profile' }))
     await expect(await within(document.body).findByRole('dialog', { name: 'My profile' })).toBeVisible()
+    // closed: back on More, where it came from
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'More' })).toHaveFocus())
   },
 }
