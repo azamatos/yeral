@@ -9,7 +9,7 @@ References: `docs/memory-bank/operations.md`, ADR 0009 (amended 2026-10-21: rele
 `.github/workflows/{ci,deploy}.yml`.
 
 There are **no releases while the MVP is being built**: no changesets, no version PR, no tags. Versions stay where
-they are until releases come back before the first launch (book chapter 10, P5).
+they are until releases come back before the first launch (book chapter 10, P2 step 7).
 
 ## Ship a change
 
@@ -21,7 +21,8 @@ they are until releases come back before the first launch (book chapter 10, P5).
 4. **No staging** (ADR 0020): prove the change locally before merging — `pnpm check`, the Docker stack
    (`pnpm docker:up`) for api or infra changes, the flows from skill `qa-flows` against local dev servers.
 5. **Storybook** deploys itself from `main` after the checks (`ci.yml` → `deploy-storybook`).
-6. **Production by hand** (only when the owner asks): legacy and Storybook with
+6. **Production by hand** (only when the owner asks), after the flows are click-tested (skill `qa-flows`): legacy and
+   Storybook with
    `gh workflow run deploy.yml -f app=legacy -f environment=production` (the smoke check verifies `/version.json` and
    key pages), or locally `pnpm --filter @yeral/legacy run deploy` (needs `wrangler login`); the api on the own server
    with `infra/server/README.md` → "Deploying Ýeral by hand".

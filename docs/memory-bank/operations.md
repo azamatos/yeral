@@ -143,9 +143,9 @@ wait for its dependencies.
   PR titles follow Conventional Commits with the app or package as scope: `feat(client): show free slots on cards`.
 - **No releases while the MVP is built** (the owner, 2026-10-21; ADR 0009 amended): no changesets, no version PR, no
   tags or GitHub Releases. Versions and the `CHANGELOG.md` files stay where they are; releases (Changesets or another
-  tool) come back before the first launch (book chapter 10, P5). Packages use `workspace:*`.
+  tool) come back before the first launch (book chapter 10, P2 step 7). Packages use `workspace:*`.
 - **API versions:** path prefix `/v1`; only additive changes inside it; breaking changes ship as `/v2` side by side.
-  CI compares the OpenAPI document with `main` and fails on breaking changes (oasdiff).
+  Planned, not built: CI comparing the OpenAPI document with `main` and failing on breaking changes (oasdiff).
 - **Database:** drizzle-kit SQL migrations in git, forward only, expand → migrate data → contract.
 - **Build stamp:** `/version.json` `{ app, version, commit, builtAt }` in every app; `X-Yeral-Version` from the api.
 

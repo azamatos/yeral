@@ -35,7 +35,7 @@ packages/config    shared tsconfig, ESLint, Prettier and Vitest presets
 turbo/generators   `pnpm gen <generator>` templates
 scripts/           version stamp and post-deploy smoke checks
 docs/              memory bank, decisions, design export, API notes
-.github/           CI, release and deploy workflows, Renovate, issue and PR templates
+.github/           CI and deploy workflows, Renovate, issue and PR templates
 ```
 
 Planned: `apps/{landing,client,business,cms,api,storybook}`, `packages/{domain,contract,sdk,i18n,ui,lib}` — see

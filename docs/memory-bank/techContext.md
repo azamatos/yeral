@@ -197,4 +197,4 @@ so one login works in every app locally.
 
 **Today**: `pnpm dev` runs `apps/legacy` on :3000. `apps/client` takes :3000 when it replaces legacy (end of M3); until
 then it runs on :3001 next to legacy.
-`pnpm --filter @yeral/legacy run deploy` builds with OpenNext and publishes to Cloudflare by hand (fallback to the release flow).
+`pnpm --filter @yeral/legacy run deploy` builds with OpenNext and publishes to Cloudflare by hand (or Actions → Deploy from `main`; releases are paused, ADR 0009).

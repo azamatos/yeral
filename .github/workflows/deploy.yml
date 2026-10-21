@@ -33,6 +33,8 @@ permissions:
 jobs:
   deploy:
     name: ${{ inputs.app }} → ${{ inputs.environment }}
+    # production only from main: a run started by hand on another branch does nothing
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     environment: ${{ inputs.environment }}

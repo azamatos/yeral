@@ -1,6 +1,6 @@
 ---
 name: qa-flows
-description: Click-test Yeral's critical flows in a real browser with Claude in Chrome — client booking, salon answers, cancel/move/review, favourites, business calendar, phone layouts — and report what broke. Use before a release, after porting or changing a screen, or when the user asks to test the site.
+description: Click-test Yeral's critical flows in a real browser with Claude in Chrome — client booking, salon answers, cancel/move/review, favourites, business calendar, phone layouts — and report what broke. Use before a production deploy, after porting or changing a screen, at the end of a slice, or when the user asks to test the site.
 ---
 
 # Browser QA

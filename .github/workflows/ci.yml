@@ -59,6 +59,13 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
       - run: pnpm --filter @yeral/storybook exec playwright install --with-deps chromium
+      - name: No changesets while releases are paused
+        # ADR 0009, amended 2026-10-21: a PR that still adds .changeset/*.md would bring the folder back without config
+        run: |
+          if [ -e .changeset ]; then
+            echo "::error::Releases are paused (ADR 0009): delete .changeset/ from this branch."
+            exit 1
+          fi
       - name: Format
         run: pnpm format:check
       - name: Lint, FSD, types, tests, build
