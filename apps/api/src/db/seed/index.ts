@@ -87,20 +87,56 @@ interface Ctx {
   example?: boolean
   /** The phone an example shows: the market's support line, or `EXAMPLE_PHONE`. */
   examplePhone?: string
+  /** A design number as it's stored: as it is, or in the demo workspace the market's unused range's (`demoPhones`). */
+  phone: (designPhone: string) => string
+  /** The business app's demo workspace (book F-242): its accounts are demo accounts and its numbers nobody's. */
+  sandbox?: boolean
 }
 
-async function user(ctx: Ctx, phone: string, name: string | null): Promise<string> {
+/** The demo workspace's page address (book F-242); it's nobody's page: the workspace is never public. */
+export const SANDBOX_SLUG = 'demo'
+
+/**
+ * The design's numbers moved to the market's unused range (`MARKET.phone.unusedPrefix`): the design's may be real
+ * people's (book F-242). Each keeps its last digits; two that would meet are a mistake in the data.
+ */
+export function demoPhones(): (designPhone: string) => string {
+  const { countryCode, unusedPrefix } = MARKET.phone
+  const from = new Map<string, string>()
+  return (designPhone) => {
+    const national = designPhone.slice(countryCode.length + 1)
+    const phone = `+${countryCode}${unusedPrefix}${national.slice(unusedPrefix.length)}`
+    const before = from.get(phone)
+    if (before && before !== designPhone) throw new Error(`${before} and ${designPhone} both become ${phone} in the demo workspace`)
+    from.set(phone, designPhone)
+    return phone
+  }
+}
+
+async function user(ctx: Ctx, designPhone: string, name: string | null): Promise<string> {
+  const phone = ctx.phone(designPhone)
   const known = ctx.users.get(phone)
   if (known) return known
   // the demo's one-field names, in the account's two (book Q-156)
   const { first, surname } = splitName(name)
-  const [row] = await ctx.db
-    .insert(t.users)
-    .values({ phone, name: first, surname, lang: MARKET.defaultLanguage })
-    .returning({ id: t.users.id })
-  if (!row) throw new Error('user insert failed')
-  ctx.users.set(phone, row.id)
-  return row.id
+  let id: string | undefined
+  if (ctx.sandbox) {
+    // the demo workspace's accounts outlive its nightly remake, so the visitors' sessions in them go on
+    const [held] = await ctx.db.select({ id: t.users.id, demo: t.users.demo }).from(t.users).where(eq(t.users.phone, phone))
+    if (held && !held.demo) throw new Error(`the demo workspace's number ${phone} is a real account's`)
+    if (held) await ctx.db.update(t.users).set({ name: first, surname }).where(eq(t.users.id, held.id))
+    id = held?.id
+  }
+  if (!id) {
+    const [row] = await ctx.db
+      .insert(t.users)
+      .values({ phone, name: first, surname, lang: MARKET.defaultLanguage, demo: !!ctx.sandbox })
+      .returning({ id: t.users.id })
+    if (!row) throw new Error('user insert failed')
+    id = row.id
+  }
+  ctx.users.set(phone, id)
+  return id
 }
 
 interface SeededBusiness {
@@ -120,7 +156,7 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
   const [biz] = await db
     .insert(t.businesses)
     .values({
-      slug: def.slug,
+      slug: ctx.sandbox ? SANDBOX_SLUG : def.slug,
       name: def.name,
       categoryId: def.category,
       kind: def.kind,
@@ -133,7 +169,7 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       lat: geo.lat,
       lng: geo.lng,
       // an example shows Ýeral's own line: the design's numbers may be real people's
-      phone: ctx.example ? ctx.examplePhone! : def.phone,
+      phone: ctx.example ? ctx.examplePhone! : ctx.phone(def.phone),
       photos: def.photos.map((name) => {
         const photo = PHOTOS[name]
         if (!photo) throw new Error(`unknown photo ${name}`)
@@ -162,6 +198,9 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
       verification: 'verified',
       tableRequests: def.tableRequests ?? [],
       demo: true,
+      sandbox: !!ctx.sandbox,
+      // the demo workspace's last remake: the jobs make it again after the next 04:00
+      ...(ctx.sandbox ? { createdAt: new Date(ctx.now) } : {}),
     })
     .returning({ id: t.businesses.id, sittingMinutes: t.businesses.tableSittingMinutes })
   if (!biz) throw new Error('business insert failed')
@@ -184,7 +223,7 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
         name: s.name,
         fullName: s.fullName ?? null,
         specialization: s.specialization ?? null,
-        phone: s.phone ?? null,
+        phone: s.phone ? ctx.phone(s.phone) : null,
         gender: s.gender ?? null,
         bookable: s.bookable ?? true,
         // an example's owner keeps the app (a workspace always has one) but no account: nobody signs in to it
@@ -203,12 +242,14 @@ async function seedBusiness(ctx: Ctx, def: DemoBusiness): Promise<SeededBusiness
     if (!row) throw new Error('staff insert failed')
     staffIds.set(s.key, { id: row.id, name: s.name })
     if (signInPhone && invited) {
+      // in the demo workspace a demo account holds the invited number too, so nobody signs in to its invite (F-242)
+      if (ctx.sandbox) await user(ctx, signInPhone, s.fullName ?? s.name)
       // sent two days before the demo day, so it shows as pending with five days left
       const sentAt = ctx.now - 2 * 86_400_000
       await db.insert(t.invites).values({
         businessId: biz.id,
         staffId: row.id,
-        phone: signInPhone,
+        phone: ctx.phone(signInPhone),
         tokenHash: await sha256Hex(randomToken()),
         sentAt: new Date(sentAt),
         expiresAt: new Date(inviteExpiresAt(sentAt)),
@@ -286,8 +327,12 @@ function lifecycle(
       ? ctx.now - (biz.holdMinutes - (b.hold ?? biz.holdMinutes)) * 60_000
       : Math.min(ctx.now, startEpoch) - 3 * 86_400_000
   return {
-    // the demo shows `hold` minutes still to go, whenever it's seeded (the nightly reset runs while businesses are closed)
-    holdUntil: b.status === 'pending' ? new Date(Math.min(ctx.now + (b.hold ?? biz.holdMinutes) * 60_000, startEpoch)) : null,
+    // the demo shows `hold` minutes still to go, whenever it's seeded; in the demo workspace, made at 04:00, a request
+    // waits until its visit, so visitors can answer the design's requests all day (book F-242)
+    holdUntil:
+      b.status === 'pending'
+        ? new Date(ctx.sandbox ? startEpoch : Math.min(ctx.now + (b.hold ?? biz.holdMinutes) * 60_000, startEpoch))
+        : null,
     createdAt: new Date(createdAt),
     confirmedAt: b.status === 'pending' ? null : new Date(createdAt + 10 * 60_000),
     // answered by the business ten minutes after it was sent (book Q-113)
@@ -335,7 +380,7 @@ async function seedAppointment(ctx: Ctx, a: AppointmentSeed): Promise<string> {
       clientId: a.clientId,
       userId: a.userId,
       clientName: a.clientName,
-      clientPhone: a.clientPhone,
+      clientPhone: ctx.phone(a.clientPhone),
       date: a.date,
       start: a.start,
       end,
@@ -373,12 +418,13 @@ async function seedClient(
   businessId: string,
   c: { phone: string; name: string; userId?: string | null } & Partial<typeof t.clients.$inferInsert>,
 ) {
-  const key = `${businessId} ${c.phone}`
+  const phone = ctx.phone(c.phone)
+  const key = `${businessId} ${phone}`
   const known = ctx.clients.get(key)
   if (known) return known
   const [row] = await ctx.db
     .insert(t.clients)
-    .values({ ...c, businessId })
+    .values({ ...c, phone, businessId })
     .returning({ id: t.clients.id })
   if (!row) throw new Error('client insert failed')
   ctx.clients.set(key, row.id)
@@ -418,6 +464,7 @@ export async function seedExamples(db: Db, opts: { now: number; phone: string })
       clients: new Map(),
       example: true,
       examplePhone: opts.phone,
+      phone: (p) => p,
     }
     const there = new Set((await tx.select({ slug: t.businesses.slug }).from(t.businesses)).map((b) => b.slug))
     let added = 0
@@ -454,6 +501,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
     code: codeMaker(),
     users: new Map(),
     clients: new Map(),
+    phone: (p) => p,
   }
 
   await db
@@ -473,8 +521,23 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
   const ayjemal = await user(ctx, DEMO_USER.phone, DEMO_USER.name)
   await db.insert(t.favorites).values(DEMO_USER.favorites.map((slug) => ({ userId: ayjemal, businessId: biz(slug).id })))
 
-  // Glow Studio: client list, notes, history, the demo day, requests, reviews
-  const glow = biz('glow-studio')
+  await seedGlow(ctx, biz('glow-studio'), (phone) => (phone === DEMO_USER.phone ? ayjemal : null))
+  await seedAyjemalElsewhere(ctx, biz, ayjemal)
+  await seedYogaAndParahat(ctx, biz, ayjemal, shift)
+
+  const [row] = await db.execute<{ n: number }>(sql`select count(*)::int as n from bookings`).then((r) => r.rows)
+  counts.bookings = row?.n ?? 0
+  counts.users = ctx.users.size
+  return counts
+}
+
+/**
+ * Glow Studio's working data (the business app's demo): the client list and notes, the demo day's bookings and
+ * requests, the past visits and the reviews. `holder`: the account a design number's bookings join (Aýjemal's in
+ * development; none in the demo workspace).
+ */
+async function seedGlow(ctx: Ctx, glow: SeededBusiness, holder: (designPhone: string) => string | null): Promise<void> {
+  const { db } = ctx
   const clientIds = new Map<string, string>()
   const historyByClient = new Map<string, { id: string; service: string; date: string }[]>()
   for (const c of GLOW_CLIENTS) {
@@ -484,7 +547,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
       tags: c.tags,
       source: c.source ?? null,
       onlineBlocked: c.onlineBlocked ?? false,
-      userId: c.phone === DEMO_USER.phone ? ayjemal : null,
+      userId: holder(c.phone),
       createdAt: new Date(epochOf(ctx.day(c.since ?? '2026-01-15'), 600)),
     })
     clientIds.set(c.key, id)
@@ -505,7 +568,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
     await seedAppointment(ctx, {
       biz: glow,
       clientId: clientIds.get(b.client) ?? null,
-      userId: c.phone === DEMO_USER.phone ? ayjemal : null,
+      userId: holder(c.phone),
       clientName: c.fullName ?? c.name,
       clientPhone: c.phone,
       serviceKey: b.service,
@@ -545,7 +608,7 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
       const id = await seedAppointment(ctx, {
         biz: glow,
         clientId: clientIds.get(c.key) ?? null,
-        userId: c.phone === DEMO_USER.phone ? ayjemal : null,
+        userId: holder(c.phone),
         clientName: c.fullName ?? c.name,
         clientPhone: c.phone,
         serviceKey: e.service,
@@ -581,8 +644,11 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
       createdAt: new Date(createdAt),
     })
   }
+}
 
-  // Aýjemal's bookings elsewhere
+/** Aýjemal's bookings at the other demo businesses (development's demo client). */
+async function seedAyjemalElsewhere(ctx: Ctx, biz: (slug: string) => SeededBusiness, ayjemal: string): Promise<void> {
+  const { db } = ctx
   for (const a of AYJEMAL_BOOKINGS) {
     const b = biz(a.business)
     const clientId = await seedClient(ctx, b.id, { phone: DEMO_USER.phone, name: DEMO_USER.name, userId: ayjemal, source: 'yeral' })
@@ -644,7 +710,12 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
       })
     }
   }
+}
 
+/** Aýdyň ýoga's classes with Aýjemal's seat, and Glow Studio · Parahat's two waiting requests (development's demo). */
+async function seedYogaAndParahat(ctx: Ctx, biz: (slug: string) => SeededBusiness, ayjemal: string, shift: number): Promise<void> {
+  const { db } = ctx
+  const opts = { now: ctx.now }
   // Aýdyň ýoga: sessions from a week ago to two weeks ahead; the demo day's seats as in the design
   const yoga = biz('aydyn-yoga')
   // the design's weekday of each date: YOGA_WEEK and the seats taken are written for the design's dates
@@ -754,9 +825,37 @@ async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<st
       hold: r.hold,
     })
   }
+}
 
-  const [row] = await db.execute<{ n: number }>(sql`select count(*)::int as n from bookings`).then((r) => r.rows)
-  counts.bookings = row?.n ?? 0
-  counts.users = ctx.users.size
-  return counts
+/**
+ * The business app's demo workspace (book F-242), made from scratch: the one there goes first, with everything
+ * visitors added to it, then the design's Glow Studio comes back with its team, clients, today's bookings and
+ * requests, the past visits and the reviews, its dates on today. Every number is in the market's unused range, and
+ * each one a team member signs in or is invited with is a demo account's (kept from night to night, so the visitors'
+ * sessions in them go on); nothing joins a real account. Booking codes skip every code the table has.
+ */
+export async function seedSandbox(db: Db, opts: { now: number }): Promise<{ businessId: string }> {
+  return db.transaction(async (tx) => {
+    await tx.delete(t.businesses).where(eq(t.businesses.sandbox, true))
+    const taken = new Set((await tx.select({ code: t.bookings.code }).from(t.bookings)).map((b) => b.code))
+    const shift = diffDays(today(opts.now), DEMO_DAY)
+    const turn = ((shift % 7) + 7) % 7
+    const ctx: Ctx = {
+      db: tx,
+      now: opts.now,
+      day: (d) => addDays(d, shift),
+      week: <T>(days: readonly T[]): T[] => days.map((_, i) => days[(i - turn + 7) % 7] as T),
+      code: codeMaker(undefined, taken),
+      users: new Map(),
+      clients: new Map(),
+      phone: demoPhones(),
+      sandbox: true,
+    }
+    const def = BUSINESSES.find((b) => b.slug === 'glow-studio')
+    if (!def) throw new Error('the design has no Glow Studio')
+    const glow = await seedBusiness(ctx, def)
+    await seedGlow(ctx, glow, () => null)
+    await tx.execute(FILL_TOLD)
+    return { businessId: glow.id }
+  })
 }

@@ -31,6 +31,8 @@ export interface Deps {
   bookingTypes: readonly BookingType[]
   /** The key the Ýeral team's authenticator secrets are sealed under (ADR 0026); null: no admin tool here. */
   adminKey: Uint8Array<ArrayBuffer> | null
+  /** The business app's demo workspace (`DEMO_WORKSPACE`, book F-242): kept by the jobs, made again every night. */
+  demoWorkspace: boolean
 }
 
 /** The dependencies as the Node entry builds them (ADR 0024). */
@@ -49,5 +51,6 @@ export function createDeps(config: Config, db: Db, log: Logger = createLogger(co
     codeOnScreen: config.codeOnScreen,
     adminKey: config.adminKey,
     bookingTypes: config.bookingTypes,
+    demoWorkspace: config.demoWorkspace,
   }
 }

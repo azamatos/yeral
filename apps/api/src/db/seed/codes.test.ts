@@ -34,6 +34,14 @@ describe('booking codes in a seed', () => {
     expect(() => code('YR-12345')).toThrow(/DEMO_CODES/)
   })
 
+  it('in a live database, skips every code it holds, a demo booking’s own included (book F-242)', () => {
+    const code = codeMaker(queue('YR-11111', 'YR-22222', 'YR-33333'), new Set(['YR-11111', 'YR-48213']))
+    expect(code()).toBe('YR-22222')
+    // a live booking has the design's code: the demo booking gets a generated one, and that's no mistake in the data
+    expect(code('YR-48213')).toBe('YR-33333')
+    expect(code('YR-47702')).toBe('YR-47702')
+  })
+
   it('generates the same booking-shaped codes every run', () => {
     const a = seededCodes()
     const b = seededCodes()

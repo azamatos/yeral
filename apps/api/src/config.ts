@@ -46,6 +46,11 @@ const envSchema = z.object({
     .regex(/^\+\d{8,15}$/, 'E.164, such as +99312345678')
     .optional(),
   /**
+   * The business app's demo workspace (book F-242): the jobs make it when it's missing and again every night at 04:00.
+   * Off unless set.
+   */
+  DEMO_WORKSPACE: z.enum(['true', 'false']).default('false'),
+  /**
    * The key the Ýeral team's authenticator secrets are sealed under (ADR 0026): 32 random bytes, base64
    * (`openssl rand -base64 32`). Development and tests use a fixed one; production without it has no admin tool.
    */
@@ -78,6 +83,8 @@ export interface Config {
   /** `EXAMPLE_BUSINESSES`: `setup` adds the first launch's example businesses, showing `examplePhone`. */
   exampleBusinesses: boolean
   examplePhone: string
+  /** `DEMO_WORKSPACE`: the business app's demo workspace (book F-242). */
+  demoWorkspace: boolean
   /** `ADMIN_SECRET_KEY`'s bytes; null in production until it's set (the admin tool answers `admin_unavailable`). */
   adminKey: Uint8Array<ArrayBuffer> | null
 }
@@ -97,6 +104,7 @@ export function loadConfig(source: Record<string, unknown>): Config {
     bookingTypes: env.BOOKING_TYPES,
     exampleBusinesses: env.EXAMPLE_BUSINESSES === 'true',
     examplePhone: env.EXAMPLE_PHONE ?? MARKET.support.phone,
+    demoWorkspace: env.DEMO_WORKSPACE === 'true',
     adminKey: env.ADMIN_SECRET_KEY
       ? Uint8Array.from(atob(env.ADMIN_SECRET_KEY), (ch) => ch.charCodeAt(0))
       : site.env === 'production'

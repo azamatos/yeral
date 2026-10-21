@@ -27,6 +27,11 @@ export interface PhoneRules {
   mobile: RegExp
   /** How the national digits are grouped on screen: `+993 65 12 34 56` is [2, 2, 2, 2]. */
   groups: readonly number[]
+  /**
+   * National digits no operator gives out yet (`69` in Turkmenistan): every number in the demo workspace starts with
+   * them, so none is a real person's (book F-242). Checked again before a market launches.
+   */
+  unusedPrefix: string
 }
 
 /** Ýeral's own support line in a market (book F-174): Contact Ýeral in the business app, the example businesses' phone. */
@@ -87,6 +92,8 @@ export const TURKMENISTAN: Market = {
     valid: /^[1-7]\d{7}$/,
     mobilePrefixes: ['6', '7'],
     groups: [2, 2, 2, 2],
+    // no operator has 69 (21.10.2026)
+    unusedPrefix: '69',
   }),
   mainCity: 'ashgabat',
   // the owner's own number and Telegram until Ýeral has its own (the owner, 21.10.2026)

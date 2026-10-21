@@ -5,6 +5,7 @@
  * 3. Reported reviews Ýeral didn't decide in 48 hours → counted again (book Q-261).
  * 4. Invites whose 7 days ran out → the team's and the invitee's open screens refresh (S-13).
  * 5. Queued work: SMS, reminders, demo businesses answering.
+ * 6. The business app's demo workspace, made again after 04:00 (book F-242).
  */
 import { DAY_MINUTES } from '@yeral/domain/hours'
 import {
@@ -54,6 +55,7 @@ import { hideLinkTokens } from '../../ports/sms'
 import { onlineRefusal } from '../clients/online'
 import { itemsOf, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow } from '../bookings/repo'
 import { ADDRESS_SMS } from '../bookings/address-sms'
+import { keepSandbox } from '../demo/sandbox'
 import { recountReviews } from '../reviews/team'
 import { teamChanged } from '../team/service'
 
@@ -83,6 +85,8 @@ const DROPPED_SAME_ADDRESS = 'dropped: the client knows the address as it is'
  * 7); its clients' own online bookings still hear what happens to them.
  */
 const DROPPED_IN_REVIEW = 'dropped: the business is in review'
+/** The demo workspace sends no SMS at all (book F-242): its numbers are nobody's, or whatever a visitor typed in. */
+const DROPPED_SANDBOX = 'dropped: the demo workspace sends no SMS'
 /**
  * SMS about a business's bookings: so many a day, reminders included, and so many in 10 minutes from what happens to
  * them (book chapter 10, P2 step 7). They carry the business's own words under Ýeral's sender, so a team can't send
@@ -111,11 +115,13 @@ class Deferred extends Error {
  * notices are Ýeral's own (book Q-213): never held.
  */
 async function businessSmsLimit(deps: Deps, b: BookingRow, kind: string, firstTry: boolean): Promise<string | undefined> {
+  const [biz] = await deps.db
+    .select({ verification: businesses.verification, sandbox: businesses.sandbox })
+    .from(businesses)
+    .where(eq(businesses.id, b.businessId))
+  if (biz?.sandbox) return DROPPED_SANDBOX
   if (b.status === 'cancelled' && b.businessCancelReason === 'business_closed') return
-  if (!isOnlineSource(b.source)) {
-    const [biz] = await deps.db.select({ verification: businesses.verification }).from(businesses).where(eq(businesses.id, b.businessId))
-    if (biz?.verification !== 'verified') return DROPPED_IN_REVIEW
-  }
+  if (!isOnlineSource(b.source) && biz?.verification !== 'verified') return DROPPED_IN_REVIEW
   const now = deps.now()
   const limits: [string, number, number][] = [[`sms:business:${b.businessId}:day`, BUSINESS_SMS_PER_DAY, 86_400]]
   if (!REMINDERS.has(kind)) limits.push([`sms:business:${b.businessId}:burst`, BUSINESS_SMS_PER_BURST, 600])
@@ -591,5 +597,6 @@ export async function runDueJobs(
   const recounted = await recountReviews(deps)
   const invitesExpired = await tellExpiredInvites(deps)
   const ran = await runQueue(deps)
+  await keepSandbox(deps)
   return { expired, completed, recounted, invitesExpired, jobs: ran }
 }

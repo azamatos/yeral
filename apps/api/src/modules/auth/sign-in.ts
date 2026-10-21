@@ -5,7 +5,7 @@
 import type { Locale } from '@yeral/domain/model'
 import { MARKET } from '@yeral/domain/market'
 import { addDays, today } from '@yeral/domain/time'
-import { and, eq, gte, isNull, or, sql } from 'drizzle-orm'
+import { and, eq, gte, isNull, or, sql, type AnyColumn } from 'drizzle-orm'
 import type { Context } from 'hono'
 import type { Queryable } from '../../db/client'
 import { bookings, clients, users } from '../../db/schema'
@@ -43,17 +43,23 @@ export const recentRecord = (now: number) =>
       and "bookings"."date" >= ${addDays(today(now), -SIX_MONTHS_DAYS)} and "bookings"."account_deleted_at" is null)`,
   )
 
+/** Not the demo workspace's (book F-242): whatever number a visitor typed in there joins nobody's account. */
+const outsideSandbox = (businessId: AnyColumn) => sql`${businessId} not in (select "id" from "businesses" where "sandbox")`
+
 /**
  * The phone may already be known: a business's client list, phone bookings. Only what's upcoming or from the last 6
  * months joins the account (book Q-270), so a number that passed to someone else doesn't bring them the older history.
  * At a sign-in, and when an account takes a new number (Q-171).
  */
 export async function linkPhone(tx: Queryable, userId: string, phone: string, now: number): Promise<void> {
-  await tx.update(bookings).set({ userId }).where(unheldBooking(phone, now))
+  await tx
+    .update(bookings)
+    .set({ userId })
+    .where(and(unheldBooking(phone, now), outsideSandbox(bookings.businessId)))
   await tx
     .update(clients)
     .set({ userId })
-    .where(and(eq(clients.phone, phone), isNull(clients.userId), recentRecord(now)))
+    .where(and(eq(clients.phone, phone), isNull(clients.userId), recentRecord(now), outsideSandbox(clients.businessId)))
 }
 
 export async function signIn(c: Context<AppEnv>, phone: string, lang: Locale | undefined) {

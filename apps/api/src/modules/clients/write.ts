@@ -17,6 +17,7 @@ import { emit } from '../../notify'
 import { pgCode } from '../bookings/repo'
 import { rulesOf } from '../settings/service'
 import { unusedSince } from '../auth/sign-in'
+import { isSandbox } from '../demo/sandbox'
 import { aheadAt, seenClient } from './facts'
 import { setOnlineBlocked } from './online'
 
@@ -47,11 +48,13 @@ async function holderOf(db: Queryable, businessId: string, phone: string): Promi
 
 /**
  * The account a record of this number joins, as a team's booking joins it (`phoneClient`): the holder's, unless the
- * account went unused for 6 months (the number may be someone else's now; book Q-270).
+ * account went unused for 6 months (the number may be someone else's now; book Q-270). None in the demo workspace
+ * (book F-242).
  */
-async function holderAccount(db: Queryable, phone: string, now: number): Promise<string | null> {
+async function holderAccount(db: Queryable, businessId: string, phone: string, now: number): Promise<string | null> {
   const [account] = await db.select().from(users).where(eq(users.phone, phone))
-  return account && !unusedSince(account.lastSeenAt, now) ? account.id : null
+  if (!account || unusedSince(account.lastSeenAt, now) || (await isSandbox(db, businessId))) return null
+  return account.id
 }
 
 /** Two saves for one number at once: the database refuses the second (`clients_business_phone`). */
@@ -74,7 +77,7 @@ export async function addClient(deps: Deps, business: Business, actor: Actor, in
         birthday: input.birthday ?? null,
         source: input.source ?? null,
         tags: input.tags,
-        userId: await holderAccount(tx, input.phone, now),
+        userId: await holderAccount(tx, business.id, input.phone, now),
         createdAt: new Date(now),
       })
       .onConflictDoNothing({ target: [clients.businessId, clients.phone] })
@@ -122,7 +125,7 @@ export async function updateClient(deps: Deps, business: Business, actor: Actor,
       const set = Object.fromEntries(
         Object.entries({
           phone,
-          userId: phone ? await holderAccount(tx, phone, now) : undefined,
+          userId: phone ? await holderAccount(tx, business.id, phone, now) : undefined,
           name: change.name,
           // a name the team typed is theirs: a booking's undo no longer takes it back (B-24)
           nameSetBy: change.name !== undefined ? null : undefined,

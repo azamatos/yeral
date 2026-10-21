@@ -26,6 +26,11 @@ export const users = pgTable('users', {
    * (book Q-270).
    */
   lastSeenAt: ts().notNull().defaultNow(),
+  /**
+   * One of the demo workspace's own accounts (book F-242): its number is in the market's unused range, so it's nobody's,
+   * and a session of it may only try the demo workspace.
+   */
+  demo: boolean().notNull().default(false),
   createdAt: createdAt(),
 })
 
