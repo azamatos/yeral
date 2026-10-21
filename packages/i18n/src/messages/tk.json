@@ -91,6 +91,7 @@
     "admin_code_wrong": "Kod gabat gelmedi. Telefonyňyzyň wagtyny barlaň we iň täze kody ýazyň.",
     "setup_expired": "Bu sazlama salgysynyň möhleti geçdi ýa-da ol ulanyldy. Kärdeşiňizden täzesini soraň.",
     "login_taken": "Bu login eýýäm alnan.",
+    "owner_account_unused": "Bu belginiň hasaby 6 aý ulanylmady, ol indi başga biriniňki bolup biler. Eýesinden ilki bir gezek girmegini haýyş ediň.",
     "admin_unavailable": "Dolandyryş guraly bu serwerde entek sazlanmady.",
     "rate_limited": "Haýyş köp boldy. {retryAfterMin} minutdan soň täzeden synanyşyň.",
     "internal": "Näsazlyk ýüze çykdy. Gaýtadan synanyşyň.",

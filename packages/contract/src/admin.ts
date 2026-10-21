@@ -13,7 +13,7 @@ import {
   langQuerySchema,
   latLngSchema,
   marketLocaleSchema,
-  phoneInputSchema,
+  mobileInputSchema,
   photoSchema,
 } from './common'
 import { setupStartSchema } from './setup'
@@ -166,7 +166,10 @@ export const adminAddBusinessSchema = setupStartSchema
   .extend({
     owner: z
       .object({
-        phone: phoneInputSchema,
+        /** A mobile: they sign in with it. */
+        phone: mobileInputSchema,
+        /** The language they speak, for the SMS until they choose one; the market's main one by default. */
+        lang: marketLocaleSchema.optional(),
         name: z
           .string()
           .trim()

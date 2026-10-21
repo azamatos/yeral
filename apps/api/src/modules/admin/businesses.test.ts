@@ -362,6 +362,21 @@ describe('the admin tool’s businesses (book F-179)', () => {
       body: { name: 'Cafe', categoryId: 'restaurant', owner: { phone: '+99365970002', name: 'Aman' } },
     })
     expect(tables.status).toBe(400)
+    // nothing is left behind by an add that failed
+    expect(await db.select().from(users).where(eq(users.phone, '+99365970002'))).toHaveLength(0)
+    // a landline signs in to nothing; an account unused for 6 months may be someone else's now
+    const add = (name: string, owner: Record<string, string>) => team.req(ADMIN, { body: { name, categoryId: 'beauty', owner } })
+    expect((await add('Ak Gul', { phone: '+99312345678', name: 'Aman' })).status).toBe(400)
+    await db.insert(users).values({ phone: '+99365970003', name: 'Merdan', lang: 'en', lastSeenAt: new Date(DEMO_NOW - 200 * 86_400_000) })
+    expect((await add('Merdan Cuts', { phone: '+99365970003', name: 'Ogulgerek' })).json.error.code).toBe('owner_account_unused')
+    // an existing account keeps its name; a new one takes the team's language
+    await db.insert(users).values({ phone: '+99365970004', name: 'Aýna', lang: 'en', lastSeenAt: new Date(DEMO_NOW) })
+    expect((await add('Ayna Nails', { phone: '+99365970004', name: 'Someone Else' })).status).toBe(201)
+    expect((await db.select().from(users).where(eq(users.phone, '+99365970004')))[0]!.name).toBe('Aýna')
+    // the language is one of the market's (English alone for now)
+    expect((await add('Russian Nails', { phone: '+99365970005', name: 'Olga', lang: 'ru' })).status).toBe(400)
+    expect((await add('English Nails', { phone: '+99365970005', name: 'Olga', lang: 'en' })).status).toBe(201)
+    expect((await db.select().from(users).where(eq(users.phone, '+99365970005')))[0]!.lang).toBe('en')
   })
 
   it('only the Ýeral team', async () => {

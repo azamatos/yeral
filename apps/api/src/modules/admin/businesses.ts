@@ -36,6 +36,7 @@ import { teamChanged } from '../team/service'
 import { cityRefOf, loadCities } from '../catalog/cities'
 import { isPublic, photoOf, publicRow, text } from '../catalog/map'
 import { likeOf } from '../catalog/search'
+import { unusedSince } from '../auth/sign-in'
 import { startSetup } from '../setup/service'
 import { holdActor, recordAction } from './accounts'
 
@@ -401,28 +402,43 @@ export async function reopenBusiness(deps: Deps, by: Admin, id: string): Promise
 }
 
 /**
- * A business the team adds for an owner it has met (F-238, Q-002): the owner's account, made now if they've never signed
- * in (named as the team was told), and a draft on it, as the wizard's business step makes one (`startSetup`). The
- * owner's sign-in reopens the wizard at its next step; until they finish it, it's in the `setup` list only.
+ * A business the team adds for an owner it has met (F-238, Q-002), in one go: the owner's account, made if the number
+ * has none (named as the team was told, in the language the team gives), and a draft on it, as the wizard's business
+ * step makes one (`startSetup`). An existing account keeps its own name; one unused for 6 months is refused
+ * (`owner_account_unused`), since the number may have passed to someone else (Q-270): its holder signs in first. The
+ * owner's sign-in reopens the wizard; until they finish it, it's in the `setup` list only.
  */
 export async function addBusinessForOwner(
   deps: Deps,
   by: Admin,
-  input: { name: string; categoryId: string; owner: { phone: string; name: string } },
+  input: { name: string; categoryId: string; owner: { phone: string; name: string; lang?: Locale } },
 ): Promise<{ id: string; slug: string }> {
-  const { db } = deps
-  // the acting account still active, as for every admin action
-  await db.transaction((tx) => holdActor(tx, by))
-  const { first, surname } = splitName(input.owner.name)
-  await db
-    .insert(users)
-    .values({ phone: input.owner.phone, name: first, surname, lang: MARKET.defaultLanguage })
-    .onConflictDoNothing({ target: users.phone })
-  let [owner] = await db.select().from(users).where(eq(users.phone, input.owner.phone))
-  // an account that never gave a name takes the one the team was told
-  if (owner && !owner.name) [owner] = await db.update(users).set({ name: first, surname }).where(eq(users.id, owner.id)).returning()
-  const { slug } = await startSetup(deps, owner!, { name: input.name, categoryId: input.categoryId })
-  const [b] = await db.select({ id: businesses.id }).from(businesses).where(eq(businesses.slug, slug))
-  await recordAction(db, by, 'business.added', { businessId: b!.id, details: { owner: input.owner.phone } })
-  return { id: b!.id, slug }
+  return deps.db.transaction(async (tx) => {
+    // the acting account held, still active, as for every admin action
+    await holdActor(tx, by)
+    const { first, surname } = splitName(input.owner.name)
+    await tx
+      .insert(users)
+      .values({
+        phone: input.owner.phone,
+        name: first,
+        surname,
+        lang: input.owner.lang ?? MARKET.defaultLanguage,
+        lastSeenAt: new Date(deps.now()),
+      })
+      .onConflictDoNothing({ target: users.phone })
+    let [owner] = await tx.select().from(users).where(eq(users.phone, input.owner.phone)).for('no key update')
+    if (!owner) throw new Error('the owner account is missing')
+    if (unusedSince(owner.lastSeenAt, deps.now())) throw new ApiError('owner_account_unused')
+    // an account that never gave a name takes the one the team was told
+    if (!owner.name) [owner] = await tx.update(users).set({ name: first, surname }).where(eq(users.id, owner.id)).returning()
+    // the wizard's own start, inside this transaction (its retries are savepoints)
+    const { slug } = await startSetup({ ...deps, db: tx as unknown as Deps['db'] }, owner!, {
+      name: input.name,
+      categoryId: input.categoryId,
+    })
+    const [b] = await tx.select({ id: businesses.id }).from(businesses).where(eq(businesses.slug, slug))
+    await recordAction(tx, by, 'business.added', { businessId: b!.id, details: { owner: input.owner.phone } })
+    return { id: b!.id, slug }
+  })
 }

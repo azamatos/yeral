@@ -91,6 +91,7 @@
     "admin_code_wrong": "That code didn't match. Check the time on your phone and type the newest code.",
     "setup_expired": "This setup link has run out or was used. Ask a teammate for a new one.",
     "login_taken": "This login is taken.",
+    "owner_account_unused": "This number's account hasn't been used for 6 months, so it may belong to someone else now. Ask the owner to sign in once first.",
     "admin_unavailable": "The admin tool isn't set up on this server yet.",
     "rate_limited": "Too many requests. Try again in {retryAfterMin, plural, one {# minute} other {# minutes}}.",
     "internal": "Something went wrong. Please try again.",

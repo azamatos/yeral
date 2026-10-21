@@ -90,6 +90,8 @@ export const ERROR_STATUS = {
   /** A setup link that ran out, was used or never was. */
   setup_expired: 404,
   login_taken: 409,
+  /** The owner's number has an account unused for 6 months (book Q-270): its holder signs in first. */
+  owner_account_unused: 409,
   /** The server has no `ADMIN_SECRET_KEY`: no admin tool there. */
   admin_unavailable: 503,
   rate_limited: 429,
