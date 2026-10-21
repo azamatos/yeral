@@ -24,7 +24,7 @@ Apps call it only through `@yeral/sdk`. The frozen `apps/legacy` keeps its own i
 
 | Area | Endpoint | Schemas (`@yeral/contract/…`) |
 |---|---|---|
-| Login | `POST /v1/auth/code` · `POST /v1/auth/verify` · `POST /v1/auth/logout` | `account`: `sendCode`, `verifyCode` → `verifyCodeResponse` |
+| Login | `GET /v1/auth/mode` · `POST /v1/auth/code` · `POST /v1/auth/verify` · `POST /v1/auth/logout` | `account`: `authMode` (the code on the screen: a demo), `sendCode`, `verifyCode` → `verifyCodeResponse` |
 | Me | `GET /v1/me` · `PATCH /v1/me` · `DELETE /v1/me` · `POST /v1/me/phone/code` · `POST /v1/me/phone/verify` | `account`: `me`, `updateMe`, `changePhone` |
 | Favourites | `GET /v1/me/favorites` · `PUT /v1/me/favorites/:slug` · `DELETE /v1/me/favorites/:slug` | `catalog`: `businessCard` |
 | Categories | `GET /v1/categories` | `catalog`: `categoryList` |

@@ -20,6 +20,12 @@ export const sendCodeResponseSchema = z.object({
     .optional(),
 })
 
+/**
+ * What the sign-in screens know before a number is typed: whether the code will show on the screen. While it does, a
+ * number proves nothing, so the screens say it's a demo (the first launch, book Q-036, F-200).
+ */
+export const authModeSchema = z.object({ codeOnScreen: z.boolean() }).meta({ id: 'AuthMode' })
+
 export const verifyCodeSchema = z
   .object({
     phone: phoneInputSchema,

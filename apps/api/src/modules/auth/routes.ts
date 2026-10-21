@@ -1,6 +1,7 @@
 /** Phone login (ADR 0019): send a code, verify it, log out. */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import {
+  authModeSchema,
   identityAnswerSchema,
   isThisYouSchema,
   sendCodeResponseSchema,
@@ -14,9 +15,17 @@ import { users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { clientIp } from '../../lib/rate-limit'
-import { checkCode, sendCode } from './codes'
+import { checkCode, sendCode, showsCodeOnScreen } from './codes'
 import { endSession } from './session'
 import { afterCode, answerIdentity } from './identity'
+
+const modeRoute = createRoute({
+  method: 'get',
+  path: '/auth/mode',
+  tags: ['auth'],
+  summary: 'Whether the sign-in shows its code on the screen (the first launch, book Q-036): the screens then say it’s a demo',
+  responses: { 200: json(authModeSchema) },
+})
 
 const sendCodeRoute = createRoute({
   method: 'post',
@@ -48,6 +57,11 @@ const identityRoute = createRoute({
 const logoutRoute = createRoute({ method: 'post', path: '/auth/logout', tags: ['auth'], summary: 'Sign out', responses: noContent })
 
 export const authRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(modeRoute, (c) => {
+    // a minute: when the first launch's switch or an SMS gateway changes it, open pages follow soon
+    c.header('Cache-Control', 'public, max-age=60')
+    return c.json({ codeOnScreen: showsCodeOnScreen(c.var.deps) }, 200)
+  })
   .openapi(sendCodeRoute, async (c) => {
     const { phone, lang } = c.req.valid('json')
     const [known] = await c.var.deps.db.select({ lang: users.lang }).from(users).where(eq(users.phone, phone))

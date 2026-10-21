@@ -125,7 +125,7 @@ describe('sdk', () => {
       keys.invite('a-long-random-token-from-the-link'),
       keys.link('a-long-random-token-from-the-sms-link', 'tk'),
     ]
-    const anyone = [keys.categories('tk'), keys.searchAll()]
+    const anyone = [keys.authMode(), keys.categories('tk'), keys.searchAll()]
     type F = ReturnType<typeof fixture>
     const seeded = (respond: (url: URL) => Response | Promise<Response> = () => json(200, {})) => {
       const f = fixture(respond)

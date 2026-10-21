@@ -9,6 +9,8 @@ question in this book, the answer is added here with its date, and the chapters 
 
 | Date | Question | Decision | By |
 |---|---|---|---|
+| 21.10.2026 | F-200, C-18, C-19, B-07 | While the sign-in code shows on the screen, both sign-ins say it's a demo: sign in with a made-up number, enter no real names or phone numbers | owner |
+| 21.10.2026 | F-200 (how) | The screens learn it before a number is typed from `GET /v1/auth/mode` (`{ codeOnScreen }`, public, cached a minute), by the same rule that puts the code in `/auth/code`'s answer; the note's words and place come with the apps | Claude (delegated) |
 | 21.10.2026 | Q-036 (concern settled) | No real businesses at the first launch: it's still a demo, with the example businesses and the demo workspace; real businesses join with the Turkmenistan launch and its real SMS sign-in | owner |
 | 21.10.2026 | Q-036 (how) | Anyone may still set a business up to try it, but while the sign-in code shows on the screen the admin tool verifies nothing (the api answers `verify_unavailable`), so no business but the examples goes public | Claude (delegated) |
 | 21.10.2026 | Q-299 (concern settled) | The SMS safety limit built in #128 stays: it never drops an SMS (past 1000 a day or 30 in 10 minutes per business an SMS waits for the window), a business in review texts no number its team typed in; the Ýeral team still watches a monthly count | Claude (delegated) |

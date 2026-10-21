@@ -405,6 +405,7 @@ describe('account', () => {
         '/v1/auth/code',
         '/v1/auth/identity',
         '/v1/auth/logout',
+        '/v1/auth/mode',
         '/v1/auth/verify',
         '/v1/bookings',
         '/v1/businesses/{slug}',

@@ -10,6 +10,7 @@ export type BookingTab = z.output<typeof myBookingsQuerySchema>['tab']
 
 export const keys = {
   me: () => ['me'] as const,
+  authMode: () => ['authMode'] as const,
   favorites: (lang: Locale) => ['favorites', lang] as const,
   favoritesAll: () => ['favorites'] as const,
   categories: (lang: Locale) => ['categories', lang] as const,
@@ -80,7 +81,7 @@ export const keys = {
  */
 export type Audience = 'anyone' | 'viewer' | 'person'
 
-const ANYONE: readonly unknown[] = ['categories', 'cities', 'search', 'suggest', 'places']
+const ANYONE: readonly unknown[] = ['authMode', 'categories', 'cities', 'search', 'suggest', 'places']
 const VIEWER: readonly unknown[] = ['business', 'reviews', 'availability']
 
 export function audienceOf(queryKey: readonly unknown[]): Audience {
