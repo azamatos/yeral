@@ -101,6 +101,7 @@
       "as": "As {level, select, admin {an Admin} other {a Specialist}}",
       "admin1": "You’ll see every calendar, booking and client",
       "admin2": "You can answer requests and reply to reviews",
+      "admin2Reviews": "You can reply to reviews",
       "admin3": "You can change services, prices and settings",
       "specialist1": "You’ll see your own calendar and bookings",
       "specialist2": "You can answer your own requests",

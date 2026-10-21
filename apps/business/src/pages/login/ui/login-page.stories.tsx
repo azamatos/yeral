@@ -7,7 +7,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useParams } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import type { InviteCard, Workspace } from '@yeral/contract/team'
-import { expect, userEvent, waitFor } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
 import { LoginPage } from './login-page'
 
@@ -97,7 +97,7 @@ const PEOPLE: Record<string, Account> = {
     current: null,
     invites: [
       invite('pending', Date.now() + 3 * DAY),
-      // an Admin where each specialist answers their own requests: no requests line
+      // an Admin where each specialist answers their own requests: reviews only
       invite('pending', Date.now() + 5 * DAY, {
         id: 'inv-2',
         slug: 'glow-nails',
@@ -113,6 +113,19 @@ const PEOPLE: Record<string, Account> = {
     workspaces: [workspace('selbi-studio', 'Selbi’s studio', 'owner', 1)],
     current: 'selbi-studio',
     invites: [invite('pending', Date.now() + 3 * DAY)],
+  },
+  // an Admin and a Specialist invited where they won't answer requests
+  '+99363110033': {
+    me: person('+99363110033', 'Ogulşat', 'Berdiýewa'),
+    workspaces: [],
+    current: null,
+    invites: [invite('pending', Date.now() + 5 * DAY, { level: 'admin', answersRequests: false })],
+  },
+  '+99363110044': {
+    me: person('+99363110044', 'Leýli', 'Gurbanowa'),
+    workspaces: [],
+    current: null,
+    invites: [invite('pending', Date.now() + 5 * DAY, { answersRequests: false })],
   },
   '+99365312210': {
     me: person('+99365312210', 'Aýna', 'Myradowa'),
@@ -423,9 +436,44 @@ export const TwoInvites: Story = {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Nails invites you to the team' })).toBeVisible()
     await expect(canvas.getByText('As an Admin')).toBeVisible()
     await expect(canvas.getByText('You’ll see every calendar, booking and client')).toBeVisible()
+    // she won't answer requests there: an Admin still replies to reviews
     await expect(canvas.queryByText('You can answer requests and reply to reviews')).not.toBeInTheDocument()
+    await expect(canvas.getByText('You can reply to reviews')).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'Accept' }))
     await expect(await canvas.findByText('Calendar of glow-nails', {}, { timeout: 1000 })).toBeVisible()
+  },
+}
+
+/**
+ * Invited where they won't answer requests (`answersRequests` false: the business's "who answers", instant
+ * confirmation): an Administrator's card says reviews only (book chapter 3), a Specialist's loses the requests line.
+ */
+export const InviteNotAnswering: Story = {
+  name: 'Invite · not answering requests',
+  args: { server: fakeApi() },
+  play: async ({ canvas }) => {
+    await sendCode(canvas, '63110033')
+    await userEvent.keyboard('4821')
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio invites you to the team' })).toBeVisible()
+    await expect(canvas.getByText('As an Admin')).toBeVisible()
+    const admin = within(canvas.getByRole('list'))
+    await expect(admin.getAllByRole('listitem').map((li) => li.textContent)).toEqual([
+      'You’ll see every calendar, booking and client',
+      'You can reply to reviews',
+      'You can change services, prices and settings',
+    ])
+  },
+}
+
+export const InviteNotAnsweringSpecialist: Story = {
+  name: 'Invite · not answering requests (Specialist)',
+  args: { server: fakeApi() },
+  play: async ({ canvas }) => {
+    await sendCode(canvas, '63110044')
+    await userEvent.keyboard('4821')
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio invites you to the team' })).toBeVisible()
+    await expect(canvas.getByRole('list').querySelectorAll('li')).toHaveLength(2)
+    await expect(canvas.queryByText('You can answer your own requests')).not.toBeInTheDocument()
   },
 }
 

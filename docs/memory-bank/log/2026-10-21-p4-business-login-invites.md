@@ -11,9 +11,11 @@
   workspace yet" (which can create a business); the person arrives once (`now` from the entry step's first render).
   The number on it is masked, as on the invite card.
 - The invite card's requests line (`invite-step.tsx`): shown only when the card's `answersRequests` (#109) is true; the
-  level gives its scope (the desk's for an Administrator, their own for a Specialist); no replacement line when false.
+  level gives its scope (the desk's for an Administrator, their own for a Specialist). When false an Administrator's
+  card says "You can reply to reviews" (book chapter 3: administrators answer reviews; the concern below, answered by
+  the lead) and a Specialist's has no line there (they only read reviews about them).
 - Tests: `entry.test.ts` (the week's edge), stories `Business/Access/LoginFlow` (accepted → calendar at once; two
-  invites one after another, the Admin's without the requests line; a member's decline confirmed; expired masked;
+  invites one after another, the Admin's with reviews only; not answering requests (Admin, Specialist); a member's decline confirmed; expired masked;
   expired over a week ago → no workspace).
 - Review (12 findings; 8 fixed): the accept path keeps its own record (`answered` ids filtered out at once, `joined`
   slug) so a failed refetch can't bring the accepted invite back and nothing hangs on the sdk awaiting its
@@ -23,7 +25,7 @@
   (the calendar within 1 s, before the 1.5 s card could), the fake accept makes the joined workspace current as the
   api does; the week is `EXPIRED_INVITE_SHOWN_DAYS` / `showsExpiredInvite()` in `@yeral/domain/team` (`<`, as the other
   day rules); `DeclinedLine` has its own file; a failed `/me` refetch no longer replaces the screen with "Something went
-  wrong" while the person is known. Not taken: the Admin's reviews line when `answersRequests` is false (the brief
-  says no replacement line without the board or the book; raised as a concern), the server deciding the expired
+  wrong" while the person is known. Not taken at first: the Admin's reviews line when `answersRequests` is false
+  (raised as a concern; the lead then pointed to chapter 3's "Reply to reviews | yes", so it's built), the server deciding the expired
   card's week (one clock; suggested to the backend), editing the book's Code differs lines (the lead clears them).
 - Waiting: the unfinished-setup card (Q-200, B-Login `step=setup`) comes with the api's `GET /v1/me/setup` (#112).

@@ -3,31 +3,44 @@ import { localOf } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
-import { Bell, Calendar, Clock, Settings, UsersRound, type LucideIcon } from 'lucide-react'
+import { Bell, Calendar, Clock, Settings, Star, UsersRound, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { AuthPage } from '@/shared/ui'
 import { AccountLine } from './account-line'
 import { BusinessMark } from './business-mark'
 
-type Line = 'admin1' | 'admin2' | 'admin3' | 'specialist1' | 'specialist2' | 'specialist3'
+type Line = 'admin1' | 'admin2' | 'admin2Reviews' | 'admin3' | 'specialist1' | 'specialist2' | 'specialist3'
+interface Can {
+  icon: LucideIcon
+  line: Line
+}
 
 /**
- * What each level may do, in three lines (the fixed permission table, design §28.1). The requests line (`answers`)
- * shows only when the invite says they'll answer requests there: the business's "who answers", instant confirmation
- * and their own switch decide it (book B-08, chapter 9 21.10.2026); the level says how far (the desk's, or their own).
+ * What each level may do, in three lines (the fixed permission table, design §28.1). The requests line says requests
+ * only when the invite says they'll answer them there: the business's "who answers", instant confirmation and their
+ * own switch decide it (book B-08, chapter 9 21.10.2026); the level says how far (the desk's, or their own).
+ * `notAnswering` is that line when they won't: an Administrator still replies to reviews (book chapter 3, "Reply to
+ * reviews"), a Specialist has nothing left there (they read the reviews about them).
  */
-const CAN: Record<InviteCard['level'], { icon: LucideIcon; line: Line; answers?: true }[]> = {
+const CAN: Record<InviteCard['level'], (Can & { notAnswering?: Can | null })[]> = {
   admin: [
     { icon: Calendar, line: 'admin1' },
-    { icon: Bell, line: 'admin2', answers: true },
+    { icon: Bell, line: 'admin2', notAnswering: { icon: Star, line: 'admin2Reviews' } },
     { icon: Settings, line: 'admin3' },
   ],
   specialist: [
     { icon: Calendar, line: 'specialist1' },
-    { icon: Bell, line: 'specialist2', answers: true },
+    { icon: Bell, line: 'specialist2', notAnswering: null },
     { icon: UsersRound, line: 'specialist3' },
   ],
+}
+
+/** The lines for this invite. */
+function linesFor(invite: InviteCard): Can[] {
+  return CAN[invite.level].flatMap(({ notAnswering, ...can }) =>
+    invite.answersRequests || notAnswering === undefined ? [can] : notAnswering ? [notAnswering] : [],
+  )
 }
 
 /**
@@ -99,16 +112,14 @@ export function InviteStep({
           {t('login.invite.as', { level: invite.level })}
         </span>
         <ul aria-labelledby="invite-can" className="m-0 flex list-none flex-col gap-3 p-0">
-          {CAN[invite.level]
-            .filter(({ answers }) => !answers || invite.answersRequests)
-            .map(({ icon: Icon, line }) => (
-              <li key={line} className="flex items-center gap-3 text-body">
-                <span className="inline-flex size-9 flex-none items-center justify-center rounded-pill bg-group">
-                  <Icon aria-hidden className="size-4.5" />
-                </span>
-                {t(`login.invite.${line}`)}
-              </li>
-            ))}
+          {linesFor(invite).map(({ icon: Icon, line }) => (
+            <li key={line} className="flex items-center gap-3 text-body">
+              <span className="inline-flex size-9 flex-none items-center justify-center rounded-pill bg-group">
+                <Icon aria-hidden className="size-4.5" />
+              </span>
+              {t(`login.invite.${line}`)}
+            </li>
+          ))}
         </ul>
       </div>
       <p className="m-0 flex items-center gap-2 text-small font-medium">
