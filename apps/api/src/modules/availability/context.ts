@@ -199,10 +199,16 @@ export async function loadElsewhere(
  * booking takes it (`lockedHours`), `no key update` as an hours save does.
  */
 export async function loadHours(db: Queryable, businessId: string, opts: { lock?: 'share' | 'no key update' } = {}) {
-  const q = db.select({ hours: businesses.hours, exceptions: businesses.exceptions }).from(businesses).where(eq(businesses.id, businessId))
+  const q = db
+    .select({ hours: businesses.hours, exceptions: businesses.exceptions, closedAt: businesses.closedAt })
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
   const [b] = opts.lock ? await q.for(opts.lock) : await q
   if (!b) throw new ApiError('not_found')
-  return b
+  // a booking's paths hold the hours (`lockedHours`): a closed business (book Q-213) takes none, read after a close in
+  // progress has committed
+  if (opts.lock === 'share' && b.closedAt) throw new ApiError('not_found')
+  return { hours: b.hours, exceptions: b.exceptions }
 }
 
 /**

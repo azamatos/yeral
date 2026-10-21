@@ -134,7 +134,8 @@ At launch the team:
 - adds a business for an owner it has met (Q-002, F-238);
 - can hide a business from search and from its page, with a reason sent to the owner, and un-verify a live business
   by hand (Q-012, Q-275, decided 18.10.2026);
-- closes a workspace when its owner asks: hides the page and keeps the data (Q-213, decided 18.10.2026).
+- closes a workspace when its owner asks: cancels its bookings ahead with an SMS to each client, hides the page, takes it
+  out of its team's switcher and keeps the data; it can open it again (Q-213, decided 18.10.2026).
 
 Later, from the specs (Q-010):
 

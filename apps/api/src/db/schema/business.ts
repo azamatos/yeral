@@ -140,6 +140,12 @@ export const businesses = pgTable(
      */
     hiddenAt: ts(),
     hiddenReason: text(),
+    /**
+     * Closed by the Ýeral team as its owner asked (book Q-213): hidden from everyone, out of its team's switcher, its
+     * bookings ahead cancelled; its data kept (`closedReason`: the team's note).
+     */
+    closedAt: ts(),
+    closedReason: text(),
     /** Table businesses: how long a party keeps a table, and the special-request chips. */
     tableSittingMinutes: integer().notNull().default(120),
     tableRequests: text().array().notNull().default([]),

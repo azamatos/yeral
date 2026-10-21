@@ -97,6 +97,8 @@ export async function restoreBooking(deps: Deps, b: BookingRow): Promise<Booking
       // the seats may have gone meanwhile; tables, specialists and a person's time across workspaces are guarded by
       // the database
       if (b.type === 'class' && b.sessionId && (await seatsLeft(tx, b.sessionId)) < (b.seats ?? 1)) throw new ApiError('session_full')
+      // the hours held for every kind, before the booking: a business closed since takes nothing back (book Q-213)
+      await lockedHours(tx, b.businessId)
       const row = await setStatus(tx, b, { status, at: new Date(now) })
       await emit(tx, { type: 'booking.updated', businessId: row.businessId, bookingId: row.id, bookingCode: row.code, userId: row.userId })
       return row

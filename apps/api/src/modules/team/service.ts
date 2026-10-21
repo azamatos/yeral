@@ -40,7 +40,16 @@ export async function requireMember(c: Context<AppEnv>, slug: string, opts: { dr
     .select({ business: businesses, member: staff })
     .from(staff)
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
-    .where(and(eq(businesses.slug, slug), eq(staff.userId, user.id), signsIn, opts.draft ? undefined : isNull(businesses.setupStep)))
+    .where(
+      and(
+        eq(businesses.slug, slug),
+        eq(staff.userId, user.id),
+        signsIn,
+        // a closed workspace is out of reach (Q-213); a draft only for the wizard
+        isNull(businesses.closedAt),
+        opts.draft ? undefined : isNull(businesses.setupStep),
+      ),
+    )
   if (!row) throw new ApiError('not_found')
   return { user, business: row.business, member: row.member, actor: actorOf(row.member) }
 }

@@ -82,6 +82,11 @@
   Q-262): the queue of reports waiting, kept (it counts and can't be reported again) or removed (gone from the page, the
   business's list and the rating; its author still sees it). Migration 0037 adds `reviews.removed_at` and
   `removed_reason`.
+- **@yeral/api** (minor), **@yeral/contract** (minor), **@yeral/domain** (minor), **@yeral/i18n** (minor), closing a
+  workspace (#125; book Q-213): the Ýeral team closes it as its owner asks; its bookings ahead and waiting requests are
+  cancelled ("The business has closed", each client told by SMS), its page hidden from everyone and the workspace out of
+  its team's switcher; the data stays, and it can be opened again. Migration 0038 adds `businesses.closed_at`,
+  `closed_reason` and the cancel reason `business_closed`.
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 

@@ -86,9 +86,10 @@ export const adminPasswordChangeSchema = z
 
 /**
  * The lists: `review` the finished businesses waiting (the longest waiting first), `moved` verified ones to check again
- * after a move, `rejected` sent back, `hidden` hidden by the team, `verified` the live ones, `all` a search across them.
+ * after a move, `rejected` sent back, `hidden` hidden by the team, `verified` the live ones (public), `closed` those closed
+ * as their owner asked, `all` a search across them.
  */
-export const ADMIN_BUSINESS_VIEWS = ['review', 'moved', 'rejected', 'hidden', 'verified', 'all'] as const
+export const ADMIN_BUSINESS_VIEWS = ['review', 'moved', 'rejected', 'hidden', 'verified', 'closed', 'all'] as const
 export type AdminBusinessView = (typeof ADMIN_BUSINESS_VIEWS)[number]
 export const adminBusinessesQuerySchema = langQuerySchema.extend({
   view: z.enum(ADMIN_BUSINESS_VIEWS).default('review'),
@@ -114,6 +115,8 @@ export const adminBusinessItemSchema = z
     /** Why it was sent back, as the owner reads it. */
     reason: z.string().nullable(),
     hidden: z.object({ at: epochSchema, reason: z.string() }).nullable(),
+    /** Closed as its owner asked (Q-213). */
+    closed: z.object({ at: epochSchema, reason: z.string() }).nullable(),
     /** A verified business moved: check it again (Q-215). */
     addressChangedAt: epochSchema.nullable(),
     /** When it was finished or sent again: the queue's order. */

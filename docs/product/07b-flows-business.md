@@ -1363,7 +1363,7 @@ flowchart TD
 
 - Switching to a table category: "Bu kategoriýa stol bronlamak bilen işleýär — zallary we stollary «Stollar» bölüminde gurnaň."
 - A business that moves may change its address and keeps everything, perhaps with a new Ýeral check; only a second, simultaneous location needs a new workspace (Q-215, decided 18.10.2026). Every client with a booking ahead hears the new address by SMS, and the booking and the business page say "New address" (owner, 20.10.2026; chapter 8). **Design to fix:** the address block's save says that clients with bookings ahead will get an SMS, and how many.
-- No self-service delete on MVP: switching online booking off pauses the business (B-41), and closing a workspace goes through the Ýeral team: the owner contacts them (help page contacts) and cancels the future bookings, each client getting an SMS; the team hides the page in the admin tool (Q-012), and the data is kept (Q-213, decided 18.10.2026).
+- No self-service delete on MVP: switching online booking off pauses the business (B-41), and closing a workspace goes through the Ýeral team: the owner contacts them (help page contacts) and the team closes it in the admin tool, which cancels the future bookings and waiting requests, each client getting an SMS ("The business has closed"), hides the page from everyone and takes the workspace out of its team's switcher; the data is kept, and the team can open it again (Q-213, decided 18.10.2026; api built 21.10.2026).
 
 > Open question Q-215: a business moves to a new address.
 

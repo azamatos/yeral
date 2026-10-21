@@ -511,6 +511,8 @@ describe('account', () => {
         '/v1/admin/businesses/{id}/reject',
         '/v1/admin/businesses/{id}/hide',
         '/v1/admin/businesses/{id}/show',
+        '/v1/admin/businesses/{id}/close',
+        '/v1/admin/businesses/{id}/reopen',
         '/v1/w/{slug}/verification',
         '/v1/admin/reviews',
         '/v1/admin/reviews/{id}/clear',

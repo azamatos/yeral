@@ -111,7 +111,8 @@
     "staff_away": "The specialist can't come in",
     "other": "Other reason",
     "closed": "We're closed that day",
-    "hours": "The opening hours changed"
+    "hours": "The opening hours changed",
+    "business_closed": "The business has closed"
   },
   "undo": {
     "failed": "Couldn't undo — {reason}.",
@@ -150,7 +151,9 @@
     "pageVerified": "{brand}: {business} is open: clients find it in search and at {link}",
     "pageRejected": "{brand}: {business} isn't open yet: {reason}. Fix it in your workspace and send it again: {link}",
     "pageHidden": "{brand}: we've hidden {business}'s page for now: {reason}.",
-    "pageShown": "{brand}: {business}'s page is open again."
+    "pageShown": "{brand}: {business}'s page is open again.",
+    "pageClosed": "{brand}: {business} is closed, as you asked: its page is hidden, its bookings ahead are cancelled and their clients told. Your data is kept.",
+    "pageReopened": "{brand}: {business} is open again in your workspace."
   },
   "fmt": {
     "money": "{amount} {currency}",
