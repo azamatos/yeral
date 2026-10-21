@@ -31,8 +31,9 @@ export function codeMaker(next: () => string = seededCodes(), taken: ReadonlySet
   return (fixed) => {
     if (fixed) {
       if (!DEMO_CODES.has(fixed)) throw new Error(`the booking code ${fixed} isn't one of the demo data's (DEMO_CODES)`)
-      if (used.has(fixed) && !taken.has(fixed)) throw new Error(`the demo data gives the booking code ${fixed} twice`)
+      // a live booking holds it: a generated one below instead
       if (!taken.has(fixed)) {
+        if (used.has(fixed)) throw new Error(`the demo data gives the booking code ${fixed} twice`)
         used.add(fixed)
         return fixed
       }

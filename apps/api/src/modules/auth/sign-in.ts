@@ -43,6 +43,22 @@ export const recentRecord = (now: number) =>
       and "bookings"."date" >= ${addDays(today(now), -SIX_MONTHS_DAYS)} and "bookings"."account_deleted_at" is null)`,
   )
 
+/**
+ * The account a business's record or booking of this number joins when its team types the number in (B-23, B-33): its
+ * holder's, unless the account went unused for 6 months (the number may be someone else's now; book Q-270), and none
+ * in the demo workspace (F-242).
+ */
+export async function accountFor(
+  db: Queryable,
+  business: { sandbox: boolean },
+  phone: string,
+  now: number,
+): Promise<typeof users.$inferSelect | undefined> {
+  if (business.sandbox) return undefined
+  const [account] = await db.select().from(users).where(eq(users.phone, phone))
+  return account && !unusedSince(account.lastSeenAt, now) ? account : undefined
+}
+
 /** Not the demo workspace's (book F-242): whatever number a visitor typed in there joins nobody's account. */
 const outsideSandbox = (businessId: AnyColumn) => sql`${businessId} not in (select "id" from "businesses" where "sandbox")`
 

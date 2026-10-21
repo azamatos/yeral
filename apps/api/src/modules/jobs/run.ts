@@ -114,14 +114,16 @@ class Deferred extends Error {
  * waits (`Deferred`); else it counts, once: a retry after a failed send doesn't count again (`firstTry`). The closing's
  * notices are Ýeral's own (book Q-213): never held.
  */
-async function businessSmsLimit(deps: Deps, b: BookingRow, kind: string, firstTry: boolean): Promise<string | undefined> {
-  const [biz] = await deps.db
-    .select({ verification: businesses.verification, sandbox: businesses.sandbox })
-    .from(businesses)
-    .where(eq(businesses.id, b.businessId))
-  if (biz?.sandbox) return DROPPED_SANDBOX
+async function businessSmsLimit(
+  deps: Deps,
+  b: BookingRow,
+  biz: Pick<typeof businesses.$inferSelect, 'verification' | 'sandbox'>,
+  kind: string,
+  firstTry: boolean,
+): Promise<string | undefined> {
+  if (biz.sandbox) return DROPPED_SANDBOX
   if (b.status === 'cancelled' && b.businessCancelReason === 'business_closed') return
-  if (!isOnlineSource(b.source) && biz?.verification !== 'verified') return DROPPED_IN_REVIEW
+  if (!isOnlineSource(b.source) && biz.verification !== 'verified') return DROPPED_IN_REVIEW
   const now = deps.now()
   const limits: [string, number, number][] = [[`sms:business:${b.businessId}:day`, BUSINESS_SMS_PER_DAY, 86_400]]
   if (!REMINDERS.has(kind)) limits.push([`sms:business:${b.businessId}:burst`, BUSINESS_SMS_PER_BURST, 600])
@@ -334,7 +336,7 @@ async function sendOutcomeSms(deps: Deps, b: BookingRow, kind: OutcomeSmsKind, f
   const sms = { ...at, businessName: biz.name, address: biz.address }
   const to = user?.phone ?? b.clientPhone ?? ''
   const byPhone = !!(await onlineRefusal(deps.db, lb, to))
-  const limited = await businessSmsLimit(deps, b, kind, firstTry)
+  const limited = await businessSmsLimit(deps, b, biz, kind, firstTry)
   if (limited) return limited
   await sendWithLink(deps, b, to, (link) => outcome.text(lang, { ...sms, link }, b, byPhone))
 }
@@ -437,7 +439,7 @@ async function sendBookingSms(
   // the texts with a link get one of their own (book Q-168)
   // the person's phone now: a changed number gets them, the old one nothing more (book Q-171)
   const to = user?.phone ?? b.clientPhone
-  const limited = await businessSmsLimit(deps, b, kind, firstTry)
+  const limited = await businessSmsLimit(deps, b, biz, kind, firstTry)
   if (limited) return limited
   if (LINKED_SMS.has(kind)) await sendWithLink(deps, b, to, (link) => bookingSmsText(lang, kind, { ...sms, link }))
   else await deps.sms.send({ to, text: bookingSmsText(lang, kind, sms) })
@@ -474,7 +476,7 @@ async function sendAddressSms(deps: Deps, bookingId: string, firstTry: boolean):
     address: addressAsShown(current, biz.hideExactAddress, status),
     city: await smsCityOf(deps.db, biz.cityId, lang),
   }
-  const limited = await businessSmsLimit(deps, b, ADDRESS_SMS, firstTry)
+  const limited = await businessSmsLimit(deps, b, biz, ADDRESS_SMS, firstTry)
   if (limited) return limited
   await sendWithLink(deps, b, user?.phone ?? b.clientPhone, (link) => addressSmsText(lang, { ...sms, link }))
   await noteAddressTold(deps, b, current)

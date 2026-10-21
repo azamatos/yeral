@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { E164, formatNational, formatPhone, isMobile, isPhone, maskPhone, nationalDigits, toE164 } from './phone'
+import { E164, formatNational, formatPhone, isMobile, isPhone, isUnusedNumber, maskPhone, nationalDigits, toE164 } from './phone'
 
 describe('Turkmen phones (the market of the first launch)', () => {
   it('stores numbers as E.164 of the market', () => {
@@ -51,6 +51,14 @@ describe('Turkmen phones (the market of the first launch)', () => {
     expect(isMobile('+993 65 12 34 56')).toBe(true)
     expect(isMobile('+993 71 12 34 56')).toBe(true)
     expect(isMobile('+993 12 45 67 89')).toBe(false)
+  })
+
+  it('the unused range is a valid number but no mobile: nothing goes to it, nobody signs in with it (book F-242)', () => {
+    expect(isPhone('+993 69 10 20 30')).toBe(true)
+    expect(isUnusedNumber('+993 69 10 20 30')).toBe(true)
+    expect(isUnusedNumber('8 69 10 20 30')).toBe(true)
+    expect(isMobile('+993 69 10 20 30')).toBe(false)
+    expect(isUnusedNumber('+993 65 10 20 30')).toBe(false)
   })
 })
 

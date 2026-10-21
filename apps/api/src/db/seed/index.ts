@@ -8,6 +8,7 @@ import { MARKET } from '@yeral/domain/market'
 import { localized, type BookingStatus } from '@yeral/domain/model'
 import { splitName } from '@yeral/domain/names'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
+import { DEMO_SLUG } from '@yeral/domain/setup'
 import { inviteExpiresAt } from '@yeral/domain/team'
 import { addDays, diffDays, dow, epochOf, today } from '@yeral/domain/time'
 import { and, eq, getTableName, inArray, is, ne, sql } from 'drizzle-orm'
@@ -17,7 +18,7 @@ import type { Db, Queryable } from '../client'
 import * as t from '../schema'
 import { CATEGORIES } from './categories'
 import { CITIES } from './cities'
-import { codeMaker } from './codes'
+import { codeMaker, DEMO_CODES, seededCodes } from './codes'
 import {
   AYJEMAL_BOOKINGS,
   BUSINESSES,
@@ -93,8 +94,8 @@ interface Ctx {
   sandbox?: boolean
 }
 
-/** The demo workspace's page address (book F-242); it's nobody's page: the workspace is never public. */
-export const SANDBOX_SLUG = 'demo'
+/** The demo workspace's page address (book F-242), which no business gets; it's nobody's page: it's never public. */
+export const SANDBOX_SLUG = DEMO_SLUG
 
 /**
  * The design's numbers moved to the market's unused range (`MARKET.phone.unusedPrefix`): the design's may be real
@@ -124,7 +125,20 @@ async function user(ctx: Ctx, designPhone: string, name: string | null): Promise
     // the demo workspace's accounts outlive its nightly remake, so the visitors' sessions in them go on
     const [held] = await ctx.db.select({ id: t.users.id, demo: t.users.demo }).from(t.users).where(eq(t.users.phone, phone))
     if (held && !held.demo) throw new Error(`the demo workspace's number ${phone} is a real account's`)
-    if (held) await ctx.db.update(t.users).set({ name: first, surname }).where(eq(t.users.id, held.id))
+    // whatever a visitor changed in it goes back: the name, the photo, the language, the SMS switches
+    if (held)
+      await ctx.db
+        .update(t.users)
+        .set({
+          name: first,
+          surname,
+          photo: null,
+          lang: MARKET.defaultLanguage,
+          notifyConfirmation: true,
+          notifyReminderDay: true,
+          notifyReminder2h: true,
+        })
+        .where(eq(t.users.id, held.id))
     id = held?.id
   }
   if (!id) {
@@ -328,10 +342,15 @@ function lifecycle(
       : Math.min(ctx.now, startEpoch) - 3 * 86_400_000
   return {
     // the demo shows `hold` minutes still to go, whenever it's seeded; in the demo workspace, made at 04:00, a request
-    // waits until its visit, so visitors can answer the design's requests all day (book F-242)
+    // waits until its visit, and one whose visit is already past for the hold time, so visitors can answer the
+    // design's requests all day (book F-242)
     holdUntil:
       b.status === 'pending'
-        ? new Date(ctx.sandbox ? startEpoch : Math.min(ctx.now + (b.hold ?? biz.holdMinutes) * 60_000, startEpoch))
+        ? new Date(
+            ctx.sandbox
+              ? Math.max(startEpoch, ctx.now + biz.holdMinutes * 60_000)
+              : Math.min(ctx.now + (b.hold ?? biz.holdMinutes) * 60_000, startEpoch),
+          )
         : null,
     createdAt: new Date(createdAt),
     confirmedAt: b.status === 'pending' ? null : new Date(createdAt + 10 * 60_000),
@@ -431,18 +450,21 @@ async function seedClient(
   return row.id
 }
 
-/** What each client knows of a seeded booking: the booking as seeded, as migration 0024 fills the ones made before it. */
-const FILL_TOLD = sql`UPDATE "bookings" b SET "told" = jsonb_build_object(
+/**
+ * What each client knows of a seeded booking: the booking as seeded, as migration 0024 fills the ones made before it;
+ * `businessId` keeps it to one business (the demo workspace's remake in a live database).
+ */
+const fillTold = (businessId?: string) => sql`UPDATE "bookings" b SET "told" = jsonb_build_object(
   'date', b."date",
   'start', b."start",
   'staff', coalesce((SELECT string_agg(coalesce(i."staff_id"::text, ''), ',' ORDER BY i."sort") FROM "booking_items" i WHERE i."booking_id" = b."id"), '')
-) WHERE b."told" IS NULL`
+) WHERE b."told" IS NULL${businessId ? sql` AND b."business_id" = ${businessId}` : sql``}`
 
 export async function seed(db: Db, opts: { demo: boolean; now: number }): Promise<Record<string, number>> {
   return db.transaction(async (tx) => {
     if (!opts.demo) return seedCatalogue(tx)
     const counts = await seedDemo(tx, opts)
-    await tx.execute(FILL_TOLD)
+    await tx.execute(fillTold())
     return counts
   })
 }
@@ -488,16 +510,26 @@ export async function seedCatalogue(db: Queryable): Promise<Record<string, numbe
   return { cities: await seedCities(db), categories: await seedCategories(db) }
 }
 
+/** The demo's dates on today (`day`), its weekly data turned with them (`week`), and the days between (`shift`). */
+function demoDates(now: number): Pick<Ctx, 'day' | 'week'> & { shift: number } {
+  const shift = diffDays(today(now), DEMO_DAY)
+  const turn = ((shift % 7) + 7) % 7
+  return {
+    shift,
+    day: (d) => addDays(d, shift),
+    week: <T>(days: readonly T[]): T[] => days.map((_, i) => days[(i - turn + 7) % 7] as T),
+  }
+}
+
 async function seedDemo(db: Queryable, opts: { now: number }): Promise<Record<string, number>> {
   await wipe(db)
   const counts = await seedCatalogue(db)
-  const shift = diffDays(today(opts.now), DEMO_DAY)
-  const turn = ((shift % 7) + 7) % 7
+  const { shift, day, week } = demoDates(opts.now)
   const ctx: Ctx = {
     db,
     now: opts.now,
-    day: (d) => addDays(d, shift),
-    week: <T>(days: readonly T[]): T[] => days.map((_, i) => days[(i - turn + 7) % 7] as T),
+    day,
+    week,
     code: codeMaker(),
     users: new Map(),
     clients: new Map(),
@@ -715,11 +747,10 @@ async function seedAyjemalElsewhere(ctx: Ctx, biz: (slug: string) => SeededBusin
 /** Aýdyň ýoga's classes with Aýjemal's seat, and Glow Studio · Parahat's two waiting requests (development's demo). */
 async function seedYogaAndParahat(ctx: Ctx, biz: (slug: string) => SeededBusiness, ayjemal: string, shift: number): Promise<void> {
   const { db } = ctx
-  const opts = { now: ctx.now }
   // Aýdyň ýoga: sessions from a week ago to two weeks ahead; the demo day's seats as in the design
   const yoga = biz('aydyn-yoga')
   // the design's weekday of each date: YOGA_WEEK and the seats taken are written for the design's dates
-  const sessionRows = Array.from({ length: 22 }, (_, i) => addDays(today(opts.now), i - 7)).flatMap((date) =>
+  const sessionRows = Array.from({ length: 22 }, (_, i) => addDays(today(ctx.now), i - 7)).flatMap((date) =>
     YOGA_WEEK.filter((x) => x.dow === dow(addDays(date, -shift))).map((s) => ({
       businessId: yoga.id,
       name: s.name,
@@ -770,7 +801,7 @@ async function seedYogaAndParahat(ctx: Ctx, biz: (slug: string) => SeededBusines
         seats: 1,
         priceType: 'fixed' as const,
         priceAmount: s.price,
-        confirmedAt: new Date(opts.now - 86_400_000),
+        confirmedAt: new Date(ctx.now - 86_400_000),
       })),
     )
   }
@@ -798,8 +829,8 @@ async function seedYogaAndParahat(ctx: Ctx, biz: (slug: string) => SeededBusines
       seats: yogaBooking.seats ?? 1,
       priceType: 'fixed',
       priceAmount: s.price,
-      createdAt: new Date(opts.now - 2 * 86_400_000),
-      confirmedAt: new Date(opts.now - 2 * 86_400_000),
+      createdAt: new Date(ctx.now - 2 * 86_400_000),
+      confirmedAt: new Date(ctx.now - 2 * 86_400_000),
     })
   }
 
@@ -818,7 +849,7 @@ async function seedYogaAndParahat(ctx: Ctx, biz: (slug: string) => SeededBusines
       clientPhone: r.phone,
       serviceKey: i === 0 ? 'p1' : 'p2',
       staffKey: 'ogulbibi',
-      date: addDays(today(opts.now), 1),
+      date: addDays(today(ctx.now), 1),
       start: m(r.start),
       status: 'pending',
       source: 'web',
@@ -827,25 +858,47 @@ async function seedYogaAndParahat(ctx: Ctx, biz: (slug: string) => SeededBusines
   }
 }
 
+/** Generated codes the demo workspace may take: all looked up in the table before it's made. */
+const SANDBOX_CODES = 2000
+
 /**
  * The business app's demo workspace (book F-242), made from scratch: the one there goes first, with everything
  * visitors added to it, then the design's Glow Studio comes back with its team, clients, today's bookings and
  * requests, the past visits and the reviews, its dates on today. Every number is in the market's unused range, and
- * each one a team member signs in or is invited with is a demo account's (kept from night to night, so the visitors'
- * sessions in them go on); nothing joins a real account. Booking codes skip every code the table has.
+ * each one a team member signs in or is invited with is a demo account's: kept from night to night (the visitors'
+ * sessions in them go on), whatever a visitor changed in it put back. Nothing joins a real account. Booking codes skip
+ * those live bookings hold. `uploads`: the photo keys visitors put in it, to drop from the disk once this commits.
  */
-export async function seedSandbox(db: Db, opts: { now: number }): Promise<{ businessId: string }> {
+export async function seedSandbox(db: Db, opts: { now: number }): Promise<{ businessId: string; uploads: string[] }> {
   return db.transaction(async (tx) => {
-    await tx.delete(t.businesses).where(eq(t.businesses.sandbox, true))
-    const taken = new Set((await tx.select({ code: t.bookings.code }).from(t.bookings)).map((b) => b.code))
-    const shift = diffDays(today(opts.now), DEMO_DAY)
-    const turn = ((shift % 7) + 7) % 7
+    const team = await tx
+      .select({ photo: t.staff.photo })
+      .from(t.staff)
+      .innerJoin(t.businesses, eq(t.businesses.id, t.staff.businessId))
+      .where(eq(t.businesses.sandbox, true))
+    const accounts = await tx.select({ photo: t.users.photo }).from(t.users).where(eq(t.users.demo, true))
+    const gone = await tx
+      .delete(t.businesses)
+      .where(eq(t.businesses.sandbox, true))
+      .returning({ photos: t.businesses.photos, logo: t.businesses.logo })
+    const uploads = [
+      ...gone.flatMap((b) => [...b.photos, ...(b.logo ? [b.logo] : [])]),
+      ...[...team, ...accounts].flatMap((x) => (x.photo ? [x.photo] : [])),
+    ].map((p) => p.key)
+    // the codes it may take: the demo's own and the first generated ones, less those live bookings hold
+    const candidates = [...DEMO_CODES, ...Array.from({ length: SANDBOX_CODES }, seededCodes())]
+    const held = await tx.select({ code: t.bookings.code }).from(t.bookings).where(inArray(t.bookings.code, candidates))
+    const generated = seededCodes()
+    let drawn = 0
+    const next = () => {
+      if (++drawn > SANDBOX_CODES) throw new Error(`the demo workspace takes more than ${SANDBOX_CODES} generated booking codes`)
+      return generated()
+    }
     const ctx: Ctx = {
       db: tx,
       now: opts.now,
-      day: (d) => addDays(d, shift),
-      week: <T>(days: readonly T[]): T[] => days.map((_, i) => days[(i - turn + 7) % 7] as T),
-      code: codeMaker(undefined, taken),
+      ...demoDates(opts.now),
+      code: codeMaker(next, new Set(held.map((b) => b.code))),
       users: new Map(),
       clients: new Map(),
       phone: demoPhones(),
@@ -855,7 +908,7 @@ export async function seedSandbox(db: Db, opts: { now: number }): Promise<{ busi
     if (!def) throw new Error('the design has no Glow Studio')
     const glow = await seedBusiness(ctx, def)
     await seedGlow(ctx, glow, () => null)
-    await tx.execute(FILL_TOLD)
-    return { businessId: glow.id }
+    await tx.execute(fillTold(glow.id))
+    return { businessId: glow.id, uploads }
   })
 }

@@ -120,6 +120,8 @@ export async function adminBusinesses(db: Queryable, query: { view: AdminBusines
     .where(
       and(
         view.where,
+        // the demo workspace is in no list: what visitors do there isn't the team's to check (book F-242)
+        eq(businesses.sandbox, false),
         q ? or(ilike(businesses.name, likeOf(q)), ilike(businesses.slug, likeOf(q)), ilike(businesses.phone, likeOf(q))) : undefined,
       ),
     )

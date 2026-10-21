@@ -2,11 +2,10 @@
 import { canOn, type Actor } from '@yeral/domain/permissions'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookings, clients, staff, users } from '../../db/schema'
+import { bookings, clients, staff } from '../../db/schema'
 import { ApiError } from '../../http/errors'
-import { unusedSince } from '../auth/sign-in'
+import { accountFor } from '../auth/sign-in'
 import { awaitingAnswer, itemsOf, type BookingRow, type ItemRow } from '../bookings/repo'
-import { isSandbox } from '../demo/sandbox'
 
 /** A workspace as the calendar needs it. */
 export interface Business {
@@ -63,14 +62,14 @@ export async function specialistAccounts(db: Queryable, staffIds: readonly strin
  */
 export async function phoneClient(
   tx: Queryable,
-  businessId: string,
+  business: { id: string; sandbox: boolean },
   phone: string,
   name: string | undefined,
   now: number,
   bookingId: string,
 ) {
-  const [account] = await tx.select().from(users).where(eq(users.phone, phone))
-  const holder = account && !unusedSince(account.lastSeenAt, now) && !(await isSandbox(tx, businessId)) ? account : undefined
+  const businessId = business.id
+  const holder = await accountFor(tx, business, phone, now)
   const [record] = await tx
     .insert(clients)
     // an undo removes a record its booking made: made at the booking's instant, held by no other booking

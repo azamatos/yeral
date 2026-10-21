@@ -4,16 +4,10 @@
  */
 import { addDays, epochOf, today } from '@yeral/domain/time'
 import { eq } from 'drizzle-orm'
-import type { Queryable } from '../../db/client'
 import { businesses } from '../../db/schema'
 import { seedSandbox } from '../../db/seed'
 import type { Deps } from '../../deps'
-
-/** The demo workspace (book F-242)? Its numbers join no account: a visitor may type in anyone's. */
-export async function isSandbox(db: Queryable, businessId: string): Promise<boolean> {
-  const [row] = await db.select({ sandbox: businesses.sandbox }).from(businesses).where(eq(businesses.id, businessId))
-  return !!row?.sandbox
-}
+import { dropPhotos } from '../media/photos'
 
 /** 04:00 at the businesses: the demo workspace is made again while every business is closed. */
 export const SANDBOX_REMAKE_AT = 4 * 60
@@ -25,13 +19,23 @@ export function lastRemakeAt(now: number): number {
   return at <= now ? at : epochOf(addDays(day, -1), SANDBOX_REMAKE_AT)
 }
 
-/** Each run of the jobs: the demo workspace is made when it's missing or older than the last 04:00. */
+/**
+ * Each run of the jobs: the demo workspace is made when it's missing or older than the last 04:00, and what visitors
+ * uploaded goes from the disk once the new one is in. A remake that fails leaves the old one and says so; the next
+ * run tries again.
+ */
 export async function keepSandbox(deps: Deps): Promise<boolean> {
   if (!deps.demoWorkspace) return false
   const now = deps.now()
   const [row] = await deps.db.select({ createdAt: businesses.createdAt }).from(businesses).where(eq(businesses.sandbox, true))
   if (row && row.createdAt.getTime() >= lastRemakeAt(now)) return false
-  await seedSandbox(deps.db, { now })
+  try {
+    const { uploads } = await seedSandbox(deps.db, { now })
+    await dropPhotos(deps, uploads)
+  } catch (error) {
+    deps.log.error('demo workspace not made', { error: error instanceof Error ? error.message : String(error) })
+    return false
+  }
   deps.log.info('demo workspace made', { at: new Date(now).toISOString() })
   return true
 }
