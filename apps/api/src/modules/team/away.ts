@@ -36,6 +36,7 @@ import {
   itemsOf,
   itemsOfBookings,
   lockBooking,
+  countAhead,
   StaleBooking,
   stateOf,
   type BookingRow,
@@ -76,7 +77,13 @@ interface Ahead {
  * started, from yesterday's business day on (it may run past midnight, book Q-105); a waiting move is answered on its
  * own. Soonest first.
  */
-async function bookingsAheadWith(db: Queryable, businessId: string, staffId: string, now: number): Promise<Ahead[]> {
+async function bookingsAheadWith(
+  db: Queryable,
+  businessId: string,
+  staffId: string,
+  now: number,
+  opts: { items?: boolean } = {},
+): Promise<Ahead[]> {
   const rows = await db
     .selectDistinct({ b: bookings })
     .from(bookings)
@@ -92,6 +99,8 @@ async function bookingsAheadWith(db: Queryable, businessId: string, staffId: str
     )
   const ahead = rows.map((r) => r.b).filter((b) => occupiesSlot(stateOf(b), now) && epochOf(b.date, b.start) > now)
   if (!ahead.length) return []
+  // a count needs no items
+  if (opts.items === false) return ahead.map((b) => ({ b, items: [] }))
   const items = await itemsOfBookings(
     db,
     ahead.map((b) => b.id),
@@ -99,6 +108,14 @@ async function bookingsAheadWith(db: Queryable, businessId: string, staffId: str
   return ahead
     .sort((x, y) => epochOf(x.date, x.start) - epochOf(y.date, y.start))
     .map((b) => ({ b, items: items.filter((i) => i.bookingId === b.id) }))
+}
+
+/** What leaving leaves behind for the owner (B-15's confirm): the person's bookings ahead and waiting requests here. */
+export async function leaveCounts(db: Queryable, businessId: string, staffId: string, now: number) {
+  return countAhead(
+    (await bookingsAheadWith(db, businessId, staffId, now, { items: false })).map((a) => a.b),
+    now,
+  )
 }
 
 /** "{dates}: N ýazylyş bar": the bookings one by one, with the colleagues who do each one's services when removing. */
@@ -270,7 +287,7 @@ function moveTo(
  * A client's waiting move onto this specialist where they no longer work (B-21): refused as the business would refuse
  * it ("no specialist"), the booking keeping its time and the client told; it can't be confirmed any more.
  */
-async function refuseMovesOnto(
+export async function refuseMovesOnto(
   tx: Queryable,
   businessId: string,
   staffId: string,

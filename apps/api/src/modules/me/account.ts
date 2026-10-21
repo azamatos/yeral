@@ -2,7 +2,7 @@
  * An account and its phone number: letting the account go (deleting it, book Q-172, or "Is this you?" answered "No",
  * Q-270), and moving it to a new number (Q-171).
  */
-import { epochOf, today } from '@yeral/domain/time'
+import { addDays, epochOf, today } from '@yeral/domain/time'
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingLinks, bookingRules, bookings, businesses, clientNotes, clients, invites, reviews, staff, users } from '../../db/schema'
@@ -10,10 +10,45 @@ import { ApiError } from '../../http/errors'
 import type { User } from '../../http/env'
 import { emit } from '../../notify'
 import { linkPhone, recentRecord, unheldBooking } from '../auth/sign-in'
-import { pgCode, setStatus, StaleBooking } from '../bookings/repo'
+import { countAhead, pgCode, setStatus, StaleBooking } from '../bookings/repo'
 import { blockedByCount } from '../clients/online'
 import { isCounted, shiftReviews } from '../reviews/rating'
+import { leaveCounts } from '../team/away'
 import { teamChanged } from '../team/service'
+
+/** The account's bookings and move requests ahead, active: what deleting it cancels (book Q-172). */
+async function bookingsAheadOf(db: Queryable, userId: string, now: number) {
+  const rows = await db
+    .select()
+    .from(bookings)
+    // from yesterday's business day on: it may run past midnight (book Q-105)
+    .where(and(eq(bookings.userId, userId), eq(bookings.active, true), gte(bookings.date, addDays(today(now), -1))))
+  return rows.filter((b) => epochOf(b.date, b.start) > now)
+}
+
+/**
+ * What deleting the account touches (book Q-172's confirm): the bookings and waiting requests ahead it cancels, the
+ * ones `releaseAccount` cancels; and, as it leaves its teams, those it's on as a specialist, which stay with each
+ * business for its owner (B-15). An owner can't delete it, as the deletion answers (`owns_workspace`).
+ */
+export async function deletionCounts(db: Queryable, user: User, now: number) {
+  const rows = await db
+    .select({ member: staff, closedAt: businesses.closedAt, draft: businesses.setupStep })
+    .from(staff)
+    .innerJoin(businesses, eq(businesses.id, staff.businessId))
+    .where(and(eq(staff.userId, user.id), eq(staff.status, 'active')))
+  // a draft goes with the account, and a workspace the Ýeral team closed holds nobody back
+  if (rows.some((r) => r.member.level === 'owner' && !r.closedAt && !r.draft)) throw new ApiError('owns_workspace')
+  const teams = rows.filter((r) => r.member.level !== 'owner' && !r.closedAt)
+  const onTeams = await Promise.all(teams.map((r) => leaveCounts(db, r.member.businessId, r.member.id, now)))
+  return {
+    ...countAhead(await bookingsAheadOf(db, user.id, now), now),
+    team: onTeams.reduce((sum, c) => ({ bookings: sum.bookings + c.bookings, requests: sum.requests + c.requests }), {
+      bookings: 0,
+      requests: 0,
+    }),
+  }
+}
 
 /**
  * Invites to a number that's leaving its person (a deleted account, a changed phone): cancelled, so whoever gets the
@@ -144,12 +179,8 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
     })
     // one Ýeral was checking had left the rating already
     await shiftReviews(tx, gone.filter(isCounted), -1, 'review.deleted')
-    const mine = await tx
-      .select()
-      .from(bookings)
-      .where(and(eq(bookings.userId, user.id), eq(bookings.active, true)))
     // bookings before their move requests, the order every path locks them in; one the jobs settled meanwhile is done
-    const ahead = mine.filter((x) => epochOf(x.date, x.start) > now).sort((x, y) => Number(!!x.rescheduleOf) - Number(!!y.rescheduleOf))
+    const ahead = (await bookingsAheadOf(tx, user.id, now)).sort((x, y) => Number(!!x.rescheduleOf) - Number(!!y.rescheduleOf))
     for (const b of ahead) {
       try {
         const row = await setStatus(tx, b, { status: 'cancelled', cancelledBy: 'client', at })

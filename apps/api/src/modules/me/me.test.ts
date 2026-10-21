@@ -254,6 +254,25 @@ describe('account', () => {
     expect(leyla[0]).toMatchObject({ id: mine!.id, phone: newPhone, noShowsSince: at(5) })
   })
 
+  it('the delete confirm counts what deleting touches: its bookings and requests ahead, those on its teams (book Q-172)', async () => {
+    expect((await browser(t.app).req('/v1/me/deletion')).status).toBe(401)
+    const fresh = browser(t.app)
+    await fresh.login('+99365222077', 'Nobody')
+    const none = { bookings: 0, requests: 0 }
+    expect((await fresh.req('/v1/me/deletion')).json).toEqual({ ...none, team: none })
+    // Aýjemal's demo: the request YR-48213 and two confirmed visits ahead; her history is past
+    const ayjemal = browser(t.app)
+    await ayjemal.login('+99365901122')
+    expect((await ayjemal.req('/v1/me/deletion')).json).toEqual({ bookings: 2, requests: 1, team: none })
+    // a specialist's visits stay with the business for its owner; an owner can't delete, as the deletion answers
+    const ayna = browser(t.app)
+    await ayna.login('+99365312210')
+    expect(((await ayna.req('/v1/me/deletion')).json.team.bookings as number) > 0).toBe(true)
+    const maysa = browser(t.app)
+    await maysa.login('+99365102030')
+    expect((await maysa.req('/v1/me/deletion')).json.error.code).toBe('owns_workspace')
+  })
+
   it('deleting the account cancels upcoming bookings, deletes the reviews and signs out (book Q-172)', async () => {
     const b = browser(t.app)
     const { me } = await b.login('+99365222004', 'Aman')
@@ -492,6 +511,7 @@ describe('account', () => {
         '/v1/w/{slug}/setup/finish',
         '/v1/me/photo',
         '/v1/w/{slug}/settings/logo',
+        '/v1/me/deletion',
         '/v1/w/{slug}/settings/photos',
         '/v1/w/{slug}/settings/photos/{id}',
         '/v1/w/{slug}/settings/photos/order',

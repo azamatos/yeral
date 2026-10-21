@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  aheadAs,
   businessSmsAt,
   expiryWarningAt,
   canRemoveComplaint,
@@ -53,6 +54,21 @@ const MIN = 60_000
 
 const booking = (over: Partial<BookingState> = {}): BookingState => ({ date: THU, start: 870, end: 930, status: 'confirmed', ...over })
 const rules = { cancelWindowMinutes: 120 }
+
+describe('aheadAs (book B-15, Q-172: what a confirm counts)', () => {
+  const at = epochOf('2026-10-20', 600)
+  const visit = { date: '2026-10-20', start: 660, end: 720 }
+  it('a confirmed visit that hasn’t started is a booking; a request inside its hold is a request', () => {
+    expect(aheadAs({ ...visit, status: 'confirmed' }, at)).toBe('booking')
+    expect(aheadAs({ ...visit, status: 'pending', holdUntil: at + 60_000 }, at)).toBe('request')
+  })
+  it('a request past its hold, a visit that started, and anything settled are nothing', () => {
+    expect(aheadAs({ ...visit, status: 'pending', holdUntil: at - 1 }, at)).toBeNull()
+    expect(aheadAs({ ...visit, status: 'confirmed' }, epochOf('2026-10-20', 660))).toBeNull()
+    expect(aheadAs({ ...visit, status: 'cancelled', cancelledBy: 'client' }, at)).toBeNull()
+    expect(aheadAs({ ...visit, status: 'completed' }, at)).toBeNull()
+  })
+})
 
 describe('typicalAnswerMinutes (book Q-113)', () => {
   it('the median, rounded up to a step; hidden under 5 answers', () => {

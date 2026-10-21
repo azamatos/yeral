@@ -272,6 +272,16 @@ export function occupiesSlot(b: BookingState, now = Date.now()): boolean {
 }
 
 /**
+ * What a confirm counts a booking as (book B-15's leave, Q-172's account deletion): a visit ahead, a waiting request,
+ * or nothing once it started, ran out or ended.
+ */
+export function aheadAs(b: BookingState, now = Date.now()): 'booking' | 'request' | null {
+  if (epochOf(b.date, b.start) <= now) return null
+  const s = effectiveStatus(b, now).status
+  return s === 'pending' ? 'request' : s === 'confirmed' ? 'booking' : null
+}
+
+/**
  * What a job must do with a booking now: expire an unanswered request or complete a finished visit. Derived from
  * `effectiveStatus`, so the jobs store exactly what screens already show.
  */

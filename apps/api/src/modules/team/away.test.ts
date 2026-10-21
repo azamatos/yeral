@@ -12,6 +12,7 @@ import { runDueJobs } from '../jobs/run'
 
 const MAYSA = '+99365102030' // owner of Glow Studio
 const AYNA = '+99365312210' // a specialist there
+const MARAL = '+99361440819' // a specialist there: nails
 const W = '/v1/w/glow-studio'
 const THU = '2026-11-12'
 const FRI = '2026-11-13'
@@ -275,5 +276,39 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
     // gone from the team: nothing more for them
     await maysa.req(`${W}/team/${mahri}/remove`, { body: { affected: 'keep' } })
     await expect(assertStaffFree(db, hours, FRI, [{ staffId: mahri, start: 600, end: 660 }])).rejects.toBeInstanceOf(OutsideHours)
+  })
+
+  it('leaving refuses a client’s waiting move onto the person; the confirms count a visit and its move once', async () => {
+    const maysa = await as(MAYSA)
+    const maral = await as(MARAL)
+    const [row] = await db
+      .select()
+      .from(staff)
+      .where(and(eq(staff.businessId, glowId), eq(staff.phone, MARAL)))
+    const client = await as('+99365800552', 'Mover')
+    const sent = await client.req('/v1/bookings', {
+      body: { type: 'appointment', business: 'glow-studio', serviceIds: [manicure], staffId: row!.id, date: '2026-10-27', start: 600 },
+    })
+    expect(sent.status).toBe(201)
+    expect((await maysa.req(`${W}/requests/${sent.json.code}/confirm`, { body: {} })).status).toBe(204)
+    expect((await client.req(`/v1/me/bookings/${sent.json.code}/reschedule`, { body: { date: '2026-10-28', start: 600 } })).status).toBe(
+      200,
+    )
+    // the client's confirm: one visit, its waiting move not counted beside it
+    expect((await client.req('/v1/me/deletion')).json).toMatchObject({ bookings: 1, requests: 0 })
+    // Maral's: the visit stays for the owner, in her leave confirm and among her teams' in her delete confirm
+    const counts = (await maral.req(`${W}/leave`)).json as { bookings: number; requests: number }
+    expect(counts.bookings).toBeGreaterThanOrEqual(1)
+    expect((await maral.req('/v1/me/deletion')).json.team).toEqual(counts)
+    try {
+      expect((await maral.req(`${W}/leave`, { method: 'POST' })).status).toBe(204)
+      // the move onto her can't be confirmed any more: refused as a removal refuses it, the visit keeping its time
+      const [original] = await db.select().from(bookings).where(eq(bookings.code, sent.json.code))
+      const [move] = await db.select().from(bookings).where(eq(bookings.rescheduleOf, original!.id))
+      expect(move).toMatchObject({ status: 'cancelled', cancelledBy: 'business' })
+      expect(original).toMatchObject({ status: 'confirmed', date: '2026-10-27' })
+    } finally {
+      await maysa.req(`${W}/team/${row!.id}/reactivate`, { method: 'POST' })
+    }
   })
 })

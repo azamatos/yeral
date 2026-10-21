@@ -25,7 +25,7 @@ Apps call it only through `@yeral/sdk`. The frozen `apps/legacy` keeps its own i
 | Area | Endpoint | Schemas (`@yeral/contract/…`) |
 |---|---|---|
 | Login | `GET /v1/auth/mode` · `POST /v1/auth/code` · `POST /v1/auth/verify` · `POST /v1/auth/logout` | `account`: `authMode` (the code on the screen: a demo), `sendCode`, `verifyCode` → `verifyCodeResponse` |
-| Me | `GET /v1/me` · `PATCH /v1/me` · `DELETE /v1/me` · `POST /v1/me/phone/code` · `POST /v1/me/phone/verify` | `account`: `me`, `updateMe`, `changePhone` |
+| Me | `GET /v1/me` · `PATCH /v1/me` · `GET /v1/me/deletion` (what deleting touches) · `DELETE /v1/me` · `POST /v1/me/phone/code` · `POST /v1/me/phone/verify` | `account`: `me`, `updateMe`, `changePhone`, `deletionCounts` |
 | Favourites | `GET /v1/me/favorites` · `PUT /v1/me/favorites/:slug` · `DELETE /v1/me/favorites/:slug` | `catalog`: `businessCard` |
 | Categories | `GET /v1/categories` | `catalog`: `categoryList` |
 | Cities | `GET /v1/cities?lat&lng` (the list, the market's main city, the one the position is in; book Q-107) | `catalog`: `citiesQuery` → `cityList` |
@@ -44,7 +44,7 @@ Apps call it only through `@yeral/sdk`. The frozen `apps/legacy` keeps its own i
 |---|---|---|
 | Switcher | `GET /v1/me/workspaces` · `POST /v1/me/workspaces/:slug/open` | `team`: `workspaceList` |
 | My invites | `GET /v1/me/invites` · `POST /v1/me/invites/:id/accept` · `POST /v1/me/invites/:id/decline` · `GET /v1/invites/:token` (the link, no sign-in) | `team`: `inviteList`, `inviteCard`, `workspace` |
-| The team | `GET /v1/w/:slug/team` (owner, administrators) · `POST …/team/invites` · `POST …/team/phone-only` · `POST`/`DELETE …/team/:staffId/invite` · `PATCH …/team/:staffId` · `POST …/team/:staffId/remove` · `POST …/team/:staffId/reactivate` (owner) · `POST /v1/w/:slug/leave` | `team`: `team`, `teamMember`, `inviteInput`, `inviteSent`, `phoneOnlyInput`, `updateMember` |
+| The team | `GET /v1/w/:slug/team` (owner, administrators) · `POST …/team/invites` · `POST …/team/phone-only` · `POST`/`DELETE …/team/:staffId/invite` · `PATCH …/team/:staffId` · `POST …/team/:staffId/remove` · `POST …/team/:staffId/reactivate` (owner) · `GET /v1/w/:slug/leave` (what leaving leaves for the owner) · `POST /v1/w/:slug/leave` | `team`: `team`, `teamMember`, `inviteInput`, `inviteSent`, `phoneOnlyInput`, `updateMember`; `common`: `bookingsAhead` (the leave confirm) |
 
 Who may call: catalogue, search, places and free times are public (cacheable except free times); everything under
 `/v1/me` and `POST /v1/bookings` needs a session. Login code requests are rate-limited per phone and IP.

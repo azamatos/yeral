@@ -3,7 +3,7 @@
  * owner manages (`/w/{slug}/team…`). Only the owner changes the team; administrators see it; specialists don't.
  */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
-import { photoUploadSchema } from '@yeral/contract/common'
+import { bookingsAheadSchema, photoUploadSchema } from '@yeral/contract/common'
 import {
   inviteCardSchema,
   inviteIdParamSchema,
@@ -31,12 +31,13 @@ import { inviteState } from '@yeral/domain/team'
 import { and, asc, eq } from 'drizzle-orm'
 import { businesses, invites, staff } from '../../db/schema'
 import { ApiError, invalid } from '../../http/errors'
+import type { Context } from 'hono'
 import type { AppEnv } from '../../http/env'
 import { errors, formBody, json, jsonBody, noContent } from '../../http/openapi'
 import { sha256Hex } from '../../lib/crypto'
 import { requireUser } from '../auth/session'
 import { loadHours } from '../availability/context'
-import { removeMember, scheduleOf, updateSchedule } from './away'
+import { leaveCounts, refuseMovesOnto, removeMember, scheduleOf, updateSchedule } from './away'
 import { uploadGuard } from '../media/photos'
 import { removeStaffPhoto, setStaffPhoto } from './photo'
 import {
@@ -192,6 +193,14 @@ const reactivateRoute = createRoute({
   request: { params: staffIdParamSchema },
   responses: { 200: json(teamMemberSchema), 409: errors[409], ...ownerOnly },
 })
+const leaveCountsRoute = createRoute({
+  method: 'get',
+  path: '/w/{slug}/leave',
+  tags,
+  summary: 'What leaving leaves for the owner: the person’s bookings ahead and waiting requests here (the confirm, B-15)',
+  request: { params: workspaceParamSchema },
+  responses: { 200: json(bookingsAheadSchema), 401: errors[401], 404: errors[404], 409: errors[409] },
+})
 const leaveRoute = createRoute({
   method: 'post',
   path: '/w/{slug}/leave',
@@ -200,6 +209,13 @@ const leaveRoute = createRoute({
   request: { params: workspaceParamSchema },
   responses: { ...noContent, 401: errors[401], 404: errors[404], 409: errors[409] },
 })
+
+/** Someone who may leave this workspace (B-15): on its team and not its owner, who can't. */
+async function leaver(c: Context<AppEnv>, slug: string) {
+  const found = await requireMember(c, slug)
+  if (found.member.level === 'owner') throw new ApiError('owner_cannot_leave')
+  return found
+}
 
 /** The owner manages the team; anyone else gets "not allowed". */
 const assertOwner = (actor: Parameters<typeof canManageTeam>[0]) => {
@@ -492,15 +508,21 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     })
     return c.json(back, 200)
   })
+  .openapi(leaveCountsRoute, async (c) => {
+    const { business, member: row } = await leaver(c, c.req.valid('param').slug)
+    return c.json(await leaveCounts(c.var.deps.db, business.id, row.id, c.var.deps.now()), 200)
+  })
   .openapi(leaveRoute, async (c) => {
-    const { business, member: row } = await requireMember(c, c.req.valid('param').slug)
-    if (row.level === 'owner') throw new ApiError('owner_cannot_leave')
+    const { business, member: row } = await leaver(c, c.req.valid('param').slug)
     const { deps } = c.var
     await deps.db.transaction(async (tx) => {
+      const now = deps.now()
       // ordered with the bookings being made for them, as a removal is (their bookings stay for the owner, B-15)
       await loadHours(tx, business.id, { lock: 'no key update' })
-      await removeRow(tx, row, deps.now())
+      await removeRow(tx, row, now)
       await teamChanged(tx, business.id, { userId: row.userId })
+      // a client's waiting move onto them can't be confirmed any more: refused, as a removal refuses it (B-21)
+      await refuseMovesOnto(tx, business.id, row.id, now, () => false)
     })
     return c.body(null, 204)
   })

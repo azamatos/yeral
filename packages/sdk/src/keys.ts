@@ -32,6 +32,8 @@ export const keys = {
     ['availability', slug, kind, params] as const,
   availabilityAll: (slug: string) => ['availability', slug] as const,
   bookings: () => ['bookings'] as const,
+  /** What deleting the account cancels: under the person's bookings, so their changes refresh it. */
+  deletionCounts: () => ['bookings', 'deletion'] as const,
   /** Under `bookings`: a booking change or event refreshes the link page too. */
   link: (token: string, lang: Locale) => ['bookings', 'link', token, lang] as const,
   bookingLists: () => ['bookings', 'list'] as const,
@@ -58,6 +60,8 @@ export const keys = {
   requests: (slug: string) => ['requests', slug] as const,
   // the business's own bookings (book B-23–B-27): every query of its calendar under its prefix
   calendar: (slug: string) => ['calendar', slug] as const,
+  /** What leaving leaves behind: under the workspace's calendar, so its bookings' changes refresh it. */
+  leaveCounts: (slug: string) => ['calendar', slug, 'leave'] as const,
   freeTimes: (slug: string, params: Record<string, unknown>) => ['calendar', slug, 'free-times', params] as const,
   calendarView: (slug: string, params: Record<string, unknown>) => ['calendar', slug, 'view', params] as const,
   teamBookings: (slug: string, params: Record<string, unknown>) => ['calendar', slug, 'bookings', params] as const,

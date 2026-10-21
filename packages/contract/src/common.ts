@@ -61,6 +61,14 @@ export const phoneSchema = z.string().regex(E164).meta({ example: '+99365901122'
 export const latLngSchema = z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) })
 /** A place on the map; `approximate` for home-based businesses until the booking is confirmed (≈ 1 km circle). */
 export const geoSchema = latLngSchema.extend({ approximate: z.boolean() })
+/**
+ * What a confirm says it touches (book B-15's leave, Q-172's account deletion): the bookings ahead and the waiting
+ * requests, counted apart; a move request isn't counted beside its booking.
+ */
+export const bookingsAheadSchema = z
+  .object({ bookings: z.number().int().min(0), requests: z.number().int().min(0) })
+  .meta({ id: 'BookingsAhead' })
+
 export const photoSchema = z.object({ url: z.string(), alt: z.string() }).meta({ id: 'Photo' })
 
 /**
