@@ -49,6 +49,11 @@
 - **@yeral/domain** (minor), **@yeral/features** (minor), **@yeral/business** (patch), the mobile prefixes (#111):
   `MARKET.phone.mobilePrefixes` (Turkmenistan `['6', '7']`) is the one source; `MARKET.phone.mobile` is built from it,
   so the api's `isMobile` checks the list the screens name.
+- **@yeral/api** (minor), **@yeral/contract** (minor), **@yeral/domain** (minor), **@yeral/i18n** (minor),
+  **@yeral/sdk** (minor), setting a business up (#112; book B-02–B-06, Q-200): the business step starts a draft with its
+  own page address; the wizard saves its step and reopens there at sign-in; the steps fill it in through the settings;
+  finishing (with an address, an open day and a service) puts it in the switcher and in Ýeral's review. Migration 0031
+  adds `businesses.setup_step`.
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 
