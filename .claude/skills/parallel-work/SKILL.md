@@ -30,11 +30,10 @@ Decision: ADR 0014. Needs M0 (issues board, `PORT_BASE`, `db:setup`); before tha
 ## Finish
 
 1. Checks: `pnpm lint && pnpm lint:fsd && pnpm typecheck && pnpm test` (+ `pnpm e2e` if flows changed).
-2. `pnpm changeset` if anything user-visible changed.
-3. Memory note: `docs/memory-bank/log/YYYY-MM-DD-<topic>.md` — what changed, decisions (link ADRs), follow-ups. Don't edit
+2. Memory note: `docs/memory-bank/log/YYYY-MM-DD-<topic>.md` — what changed, decisions (link ADRs), follow-ups. Don't edit
    `activeContext.md` or `progress.md`.
-4. `gh pr create` with: `Closes #<n>`, what changed, how to test, screenshots for UI, a **Handoff** section (open ends, risks).
-5. After merge: `git worktree remove ../yeral-wt/<topic>`, drop the database (`pnpm db:drop`), label the issue `status:done`.
+3. `gh pr create` with: `Closes #<n>`, what changed, how to test, screenshots for UI, a **Handoff** section (open ends, risks).
+4. After merge: `git worktree remove ../yeral-wt/<topic>`, drop the database (`pnpm db:drop`), label the issue `status:done`.
 
 ## Lead session
 

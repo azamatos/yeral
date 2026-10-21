@@ -19,6 +19,8 @@ own (staging and production sharing `Domain=yeral.app`).
 - A change is proven locally before it merges: tests (unit, story, API on Postgres), the Docker stack, a code review, and
   green CI on the PR. Merging to `main` deploys only Storybook.
 - Production changes only from a release (the Changesets version PR), and the owner decides when a release ships.
+  (Amended 2026-10-21: releases are paused until the MVP works, ADR 0009; production is deployed by hand when the owner
+  asks.)
 - A risky migration can be rehearsed on a throwaway Neon branch of production (branches are free; delete it afterwards).
 - The api's Worker has one environment, `production` (`yeral-api` on `api.yeral.app`); it's created when the new client
   site (M3) ships, with the owner's go-ahead for the Hyperdrive config and the DNS record.

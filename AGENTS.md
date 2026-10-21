@@ -50,7 +50,8 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 8. UI components live in `@yeral/ui` with Storybook stories for every variant; scaffold with `pnpm gen ui-component` (ADR 0012).
 9. Tests come with the change: domain rule → unit test; component → stories; endpoint → API test; bug fix → a failing test first (ADR 0013).
 10. Check "Where shared things live" in `techContext.md` before writing a helper; add new shared helpers there.
-11. User-visible change → `pnpm changeset`. Commits and PR titles: Conventional Commits, scope = app or package.
+11. Commits and PR titles: Conventional Commits, scope = app or package. No changesets: releases are paused until the
+    MVP works (ADR 0009, amended 2026-10-21).
 12. Architecture, core library or process change → ADR + memory-bank update in the same commit.
 
 ## Working with the owner
@@ -58,7 +59,7 @@ in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-ban
 - The owner writes in English. The product is built in English; each market adds its languages at launch
   (Turkmenistan: Turkmen, Russian; ADR 0022).
 - Finished work: review it (skill `code-review`, fix what it finds), then commit, push and merge on green CI without
-  asking. There is no staging (ADR 0020): prove changes locally. Production changes only from a release (the version PR),
+  asking. There is no staging (ADR 0020): prove changes locally. Production deploys go by hand while releases are paused (ADR 0009),
   and the owner decides when one ships.
 - Ask first before: repository settings, DNS changes, deleting anything in the Cloudflare or GitHub account, paid services,
   adding files from outside the repo.
@@ -90,7 +91,6 @@ Every task runs through Turborepo from the root; `--filter=@yeral/<name>...` nar
 | `pnpm format` | Prettier on everything except `apps/legacy`, `docs/design` and Markdown |
 | `pnpm test:stories` | every Storybook story as a Chromium test (render, interactions, axe) |
 | `pnpm gen package` · `pnpm gen ui-component` | scaffold an internal package / a design-system component with stories |
-| `pnpm changeset` | describe a user-visible change for the next release |
 | `pnpm book show\|refs <ID>` · `pnpm book toc <doc>` · `pnpm book open` | look the docs up by ID (`Q-107`, `F-012`, `B-05`, `ADR 0021`); outline a doc; questions still open or with a concern |
 | `pnpm db:up` · `pnpm db:setup` | Postgres 18 in Docker; create, migrate and seed the database in `apps/api/.env.local` (API tests need it too) |
 | `pnpm db:generate` | a new SQL migration from the Drizzle schema (`apps/api/src/db/schema`) |

@@ -41,8 +41,8 @@ docs/              memory bank, decisions, design export, API notes
 Planned: `apps/{landing,client,business,cms,api,storybook}`, `packages/{domain,contract,sdk,i18n,ui,lib}` — see
 [systemPatterns](docs/memory-bank/systemPatterns.md).
 
-## Release
+## Shipping
 
-Changes land through pull requests with green CI. User-visible changes carry a changeset (`pnpm changeset`); the
-release workflow turns them into a «chore: version packages» PR, and merging it tags the versions and deploys the
-changed apps. Details: [operations](docs/memory-bank/operations.md).
+Changes land through pull requests with green CI, squash-merged. There are no releases while the MVP is being built
+(ADR 0009, amended 2026-10-21): no changesets, no version PR, no tags; Storybook deploys from `main`, the rest by hand.
+Details: [operations](docs/memory-bank/operations.md).

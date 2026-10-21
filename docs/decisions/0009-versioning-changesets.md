@@ -1,7 +1,18 @@
 # 0009. Versioning with Changesets, trunk-based flow
 
-- Status: Accepted 2026-10-13
+- Status: Accepted 2026-10-13 · amended 2026-10-21 (releases paused until the MVP works)
 - Decided by: Claude, on the owner's request for versioning
+
+## Amendment 2026-10-21: releases paused
+
+The owner: "Lets remove release logic for now. We are under development. There is no even working MVP version." The
+version PR had become a chore nobody used: it collected changesets for apps that don't run yet, and once the repository
+was public its CI waited for approval. Removed: `release.yml`, `.changeset/` with its config, the `changeset` /
+`version-packages` / `tag-release` scripts and the Changesets packages, the changeset step in AGENTS.md, the skills and
+the templates. Kept: trunk-based work, Conventional Commits, squash merges on green CI, the `/v1` API rules, forward-only
+migrations, the build stamp, the versions and `CHANGELOG.md` files as they are, and the existing tags. Storybook still
+deploys from `main`; legacy and the api deploy by hand when the owner asks (`deploy.yml`, `infra/server/README.md`).
+Releases come back before the first launch (book chapter 10, P5): Changesets again or another tool, decided then.
 
 ## Context
 

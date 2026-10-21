@@ -16,6 +16,5 @@ Closes #
 
 - [ ] `pnpm check` passes locally
 - [ ] Tests or stories cover the change (ADR 0013)
-- [ ] `pnpm changeset` if users or API consumers can notice it
 - [ ] Memory: a `docs/memory-bank/log/` note (parallel work) or memory-bank update (working alone)
 - [ ] No secrets, no hard-coded domains or user-visible strings

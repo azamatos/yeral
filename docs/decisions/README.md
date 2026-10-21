@@ -14,7 +14,7 @@ before any code used them were edited in place (marked "revised").
 | [0006](0006-contract-and-sdk.md) | zod contract, Hono RPC client, generated OpenAPI | Accepted 2026-10-13 |
 | [0007](0007-hosting-cloudflare-now-docker-later.md) | Hosting: Cloudflare now, own server with Docker + nginx later | Accepted 2026-10-13 (revised); superseded for the api and the new apps by 0024 |
 | [0008](0008-i18n-use-intl.md) | i18n with use-intl | Accepted 2026-10-13, amended by 0016 |
-| [0009](0009-versioning-changesets.md) | Versioning with Changesets, trunk-based flow | Accepted 2026-10-13 |
+| [0009](0009-versioning-changesets.md) | Versioning with Changesets, trunk-based flow | Accepted 2026-10-13 · amended 2026-10-21 (releases paused) |
 | [0010](0010-ci-cd-github-actions.md) | CI/CD on GitHub Actions | Accepted 2026-10-13 (revised) |
 | [0011](0011-state-management.md) | State management: each kind of state has one owner | Accepted 2026-10-13 |
 | [0012](0012-design-system-and-storybook.md) | Design system in `@yeral/ui`, documented and tested in Storybook | Accepted 2026-10-13 (revised 2026-10-14) |

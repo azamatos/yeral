@@ -12,7 +12,6 @@ pnpm-lock.yaml
 **/dist/
 **/storybook-static/
 **/coverage/
-.changeset/*.md
 # generator templates are Handlebars
 turbo/generators/templates/
 apps/api/src/db/migrations

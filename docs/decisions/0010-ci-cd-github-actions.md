@@ -15,7 +15,7 @@ Docker on an own server later (ADR 0007), so CI/CD must produce both without bei
   - `ci.yml` (PRs and `main`): install (pnpm cache) → `turbo run lint lint:fsd typecheck test build --affected` →
     Storybook/Vitest browser tests → API tests with a Postgres service → Playwright on affected apps → Docker image builds
     for affected deployables (build only, proves the Dockerfiles work).
-  - `release.yml` (`main`): Changesets «Version packages» PR; when merged, tags `@yeral/<app>@x.y.z`, GitHub Releases, production deploy of those apps.
+  - `release.yml` (`main`): Changesets «Version packages» PR; when merged, tags `@yeral/<app>@x.y.z`, GitHub Releases, production deploy of those apps. (Removed 2026-10-21 while releases are paused, ADR 0009.)
   - `deploy.yml` (reusable): environment + apps → build → run database migrations (api) → deploy → smoke check
     (`/version.json` shows the commit, key pages answer 200).
 - **Staging** on every green push to `main` (including Storybook); **production** only from a release, behind the

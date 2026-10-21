@@ -241,6 +241,7 @@ question in this book, the answer is added here with its date, and the chapters 
 
 | Date | Decision | Source |
 |---|---|---|
+| 21.10.2026 | No releases while the MVP is built: the version PR, Changesets and the release workflow are removed; Storybook deploys from `main`, the rest by hand when the owner asks; releases come back before the first launch | owner, ADR 0009 (amended) |
 | 19.10.2026 | The first launch runs on the owner's server (netcup VPS 1000, EU) in Docker, not on Cloudflare; the server also hosts other projects | ADR 0023 (revised) |
 | 18.10.2026 | One code base, one deployment per country; the first launch runs on Cloudflare | ADR 0023 |
 | 18.10.2026 | Built in English; each country adds its languages and settings | ADR 0022 |
@@ -253,7 +254,7 @@ question in this book, the answer is added here with its date, and the chapters 
 | 13.10.2026 | One shared contract for the api and a client library generated from it | ADR 0006 |
 | 13.10.2026 | Cloudflare now; the team's own server with Docker and nginx later | ADR 0007 |
 | 13.10.2026 | Translations with use-intl | ADR 0008 |
-| 13.10.2026 | Versions and releases with Changesets | ADR 0009 |
+| 13.10.2026 | Versions and releases with Changesets (paused 21.10.2026) | ADR 0009 |
 | 13.10.2026 | Checks and deploys on GitHub Actions | ADR 0010 |
 | 13.10.2026 | Every kind of app state has one owner | ADR 0011 |
 | 13.10.2026 | The design system lives in `@yeral/ui` and is tested in Storybook | ADR 0012 |
