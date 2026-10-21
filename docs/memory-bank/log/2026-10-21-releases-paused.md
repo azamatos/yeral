@@ -64,6 +64,9 @@
   S-13): each request says when "Haýyşyň wagty gutarýar" is due (`warnAt`, 5 minutes of open time before its answer time
   ends), and when an invite's 7 days run out the team's and the invitee's screens refresh once. Migration 0033 adds
   `invites.expiry_told_at`.
+- **@yeral/api** (minor), **@yeral/contract** (minor), the business profile has "Floor, room" (#120; book F-099, up to
+  40 characters) beside the address, shown on the page and on a booking as the exact address is. Migration 0034 adds
+  `businesses.floor`.
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 

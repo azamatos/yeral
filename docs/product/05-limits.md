@@ -67,7 +67,7 @@ copy to say businesses keep their visit records (Q-172).
 | What | Value | Who can change it | Source |
 |---|---|---|---|
 | Gallery | 1 large + 4 small photos; *Ähli suratlar* (all photos) | Fixed | client spec §4.3 |
-| Business profile texts | name 1–80 characters; description up to 1 000 per language; address up to 200, street line up to 120, floor and room up to 40, entrance note up to 200 | Owner/admin | Claude (delegated), 20.10.2026; floor and room: design round 3.4; code: packages/contract/src/settings.ts (no floor and room yet) |
+| Business profile texts | name 1–80 characters; description up to 1 000 per language; address up to 200, street line up to 120, floor and room up to 40, entrance note up to 200 | Owner/admin | Claude (delegated), 20.10.2026; floor and room: design round 3.4; code: packages/contract/src/settings.ts |
 | Amenities | Wi-Fi, air conditioning, parking, card payment (the demo's; the design names no longer list yet) | Owner/admin | Claude (delegated), 20.10.2026; code: packages/domain/src/model.ts |
 | Photos | 3 or more recommended, up to 20; each up to 10 MB (JPG, PNG or WebP), made smaller on upload; the first is the cover everywhere | Owner/admin | business spec §7, §8; client spec §11; Q-115, decided 18.10.2026 |
 | Typical answer time | "*Adatça 15 minudyň dowamynda tassyklaýar*"; the median answer time over the last 30 days, rounded (15 min, 1 sagat …); hidden until the business has answered 5 requests | Fixed | client spec §4.3; Q-113, decided 18.10.2026; code: packages/domain/src/lifecycle.ts (`typicalAnswerMinutes`) |

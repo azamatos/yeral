@@ -207,6 +207,17 @@ describe('a new address (book Q-215)', () => {
     expect(started).toBeTruthy()
   })
 
+  it('"Floor, room" on a booking: a home-based business shows it once the booking is confirmed (F-099)', async () => {
+    const maysa = await as(MAYSA)
+    const { entranceNote } = await glow()
+    await maysa.req(PROFILE, { method: 'PATCH', body: { hideExactAddress: true, floor: '2nd floor', entranceNote: 'Blue door' } })
+    const { client, code } = await request('+99365800420', TUE, 840)
+    expect((await client.req(`/v1/me/bookings/${code}`)).json).toMatchObject({ floor: null, entranceNote: null })
+    expect((await maysa.req(`${W}/requests/${code}/confirm`, { method: 'POST', body: {} })).status).toBe(204)
+    expect((await client.req(`/v1/me/bookings/${code}`)).json).toMatchObject({ floor: '2nd floor', entranceNote: 'Blue door' })
+    await maysa.req(PROFILE, { method: 'PATCH', body: { hideExactAddress: false, floor: '', entranceNote } })
+  })
+
   it('a home-based business: a waiting request knows only the street', async () => {
     const maysa = await as(MAYSA)
     await maysa.req(PROFILE, { method: 'PATCH', body: { hideExactAddress: true } })

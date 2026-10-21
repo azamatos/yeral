@@ -97,6 +97,8 @@ export const businesses = pgTable(
       .references(() => cities.id),
     /** The street line on search rows. */
     street: text().notNull(),
+    /** "Floor, room" (B-37): beside the address, kept from visitors as the exact address is. */
+    floor: text(),
     entranceNote: text(),
     hideExactAddress: boolean().notNull().default(false),
     lat: doublePrecision().notNull(),

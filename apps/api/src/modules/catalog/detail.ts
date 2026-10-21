@@ -168,6 +168,7 @@ export async function businessDetail(
     ratingBreakdown: b.ratingBreakdown,
     address: b.hideExactAddress ? b.street : b.address,
     city: cityRefOf(cities, b.cityId, lang),
+    floor: b.hideExactAddress ? null : b.floor,
     entranceNote: b.hideExactAddress ? null : b.entranceNote,
     hideExactAddress: b.hideExactAddress,
     movedAt: newAddressSince(b.movedAt?.getTime() ?? null, now),

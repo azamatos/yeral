@@ -92,6 +92,23 @@ describe('the business profile (book B-37)', () => {
     expect(await page(maysa)).toMatchObject({ address: 'Oguzhan köçesi', entranceNote: null })
   })
 
+  it('"Floor, room": beside the address, kept from visitors as it is; a change alone isn’t a move', async () => {
+    const maysa = await as(MAYSA)
+    await maysa.req(PROFILE, { method: 'PATCH', body: { hideExactAddress: false } })
+    const [before] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const set = await maysa.req(PROFILE, { method: 'PATCH', body: { floor: ' 2nd floor ' } })
+    expect(set.json.floor).toBe('2nd floor')
+    expect(await page(maysa)).toMatchObject({ floor: '2nd floor' })
+    // nothing for the Ýeral team to check again, no "New address", no SMS
+    const [after] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    expect([after!.addressChangedAt, after!.movedAt]).toEqual([before!.addressChangedAt, before!.movedAt])
+    expect((await maysa.req(PROFILE, { method: 'PATCH', body: { floor: 'x'.repeat(41) } })).status).toBe(400)
+    // home-based: not before a booking is confirmed
+    await maysa.req(PROFILE, { method: 'PATCH', body: { hideExactAddress: true } })
+    expect((await page(maysa)).floor).toBeNull()
+    expect((await maysa.req(PROFILE, { method: 'PATCH', body: { floor: '' } })).json.floor).toBeNull()
+  })
+
   it('a category of the same kind of booking only; amenities from the list', async () => {
     const maysa = await as(MAYSA)
     expect((await maysa.req(PROFILE, { method: 'PATCH', body: { categoryId: 'nails' } })).json.categoryId).toBe('nails')
