@@ -30,9 +30,13 @@ function writeCookie(c: Context<AppEnv>, token: string, expiresAt: Date) {
   })
 }
 
+/** A demo account's session (book F-242): one day, never renewed, however it started. */
+export const DEMO_SESSION_DAYS = 1
+
 export async function startSession(c: Context<AppEnv>, db: Queryable, userId: string): Promise<void> {
   const token = randomToken()
-  const expiresAt = new Date(c.var.deps.now() + SESSION_DAYS * DAY)
+  const [account] = await db.select({ demo: users.demo }).from(users).where(eq(users.id, userId))
+  const expiresAt = new Date(c.var.deps.now() + (account?.demo ? DEMO_SESSION_DAYS : SESSION_DAYS) * DAY)
   await db
     .insert(sessions)
     .values({ userId, tokenHash: await sha256Hex(token), expiresAt, userAgent: c.req.header('user-agent')?.slice(0, 200) ?? null })
@@ -64,7 +68,8 @@ export const sessionMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
       .where(and(eq(sessions.tokenHash, await sha256Hex(token)), gt(sessions.expiresAt, new Date(now()))))
     if (row) {
       c.set('auth', { user: row.user, sessionId: row.session.id })
-      if (row.session.expiresAt.getTime() - now() < RENEW_UNDER_DAYS * DAY) {
+      // a demo account's session isn't renewed: the visitor tries the demo for a day (book F-242)
+      if (!row.user.demo && row.session.expiresAt.getTime() - now() < RENEW_UNDER_DAYS * DAY) {
         const expiresAt = new Date(now() + SESSION_DAYS * DAY)
         await db
           .update(sessions)

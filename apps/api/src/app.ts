@@ -22,6 +22,8 @@ import { bookingRoutes } from './modules/bookings/routes'
 import { calendarRoutes } from './modules/calendar/routes'
 import { catalogRoutes } from './modules/catalog/routes'
 import { clientRoutes } from './modules/clients/routes'
+import { demoGuard } from './modules/demo/guard'
+import { demoRoutes } from './modules/demo/routes'
 import { eventRoutes } from './modules/events/routes'
 import { healthRoutes } from './modules/health/routes'
 import { meRoutes } from './modules/me/routes'
@@ -70,6 +72,8 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
   })
 
   app.use('/v1/*', sessionMiddleware)
+  // a demo account tries the demo workspace and nothing else (book F-242)
+  app.use('/v1/*', demoGuard)
   // the Ýeral team's own sessions, from the admin tool's site only (ADR 0026)
   app.use('/v1/admin/*', adminSessionMiddleware)
 
@@ -102,6 +106,7 @@ export function createApp(provide: MiddlewareHandler<AppEnv>) {
     .route('/v1', clientRoutes)
     .route('/v1', reviewRoutes)
     .route('/v1', setupRoutes)
+    .route('/v1', demoRoutes)
     .route('/v1', adminRoutes)
     .route('/v1', adminBusinessRoutes)
     .route('/v1', adminReviewRoutes)

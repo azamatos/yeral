@@ -20,6 +20,7 @@ export function person(phone: string, firstName: string | null, surname: string 
     hasBusiness: false,
     // the first launch shows the sign-in code on the screen, so a number can't be changed (book Q-036)
     canChangePhone: false,
+    demo: false,
     photo: null,
   }
 }

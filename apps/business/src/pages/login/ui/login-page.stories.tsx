@@ -26,6 +26,7 @@ const person = (phone: string, firstName: string | null, surname: string | null 
   notifications,
   hasBusiness: false,
   canChangePhone: true,
+  demo: false,
   photo: null,
 })
 

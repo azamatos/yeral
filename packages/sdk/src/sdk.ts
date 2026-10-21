@@ -211,6 +211,16 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
+  /** The business app's demo workspace (book F-242). */
+  const demo = {
+    /** "Try the business app": a day in the demo workspace as its owner; whoever was signed in is signed out. */
+    start: () =>
+      mutationOptions({
+        mutationFn: () => call(v1.demo.session.$post()),
+        onSuccess: signedIn,
+      }),
+  }
+
   const me = {
     /** null when signed out (no error). */
     get: () =>
@@ -1039,7 +1049,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       }),
   }
 
-  return { auth, me, catalog, availability, bookings, team, settings, requests, calendar, clients, reviews, setup, links }
+  return { auth, demo, me, catalog, availability, bookings, team, settings, requests, calendar, clients, reviews, setup, links }
 }
 
 export type Sdk = ReturnType<typeof createSdk>

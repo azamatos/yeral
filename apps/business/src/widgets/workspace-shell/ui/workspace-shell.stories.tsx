@@ -28,6 +28,7 @@ const person = (phone: string, firstName: string, surname: string): Me => ({
   notifications,
   hasBusiness: true,
   canChangePhone: true,
+  demo: false,
   photo: null,
 })
 

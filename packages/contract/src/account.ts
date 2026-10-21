@@ -76,6 +76,11 @@ export const meSchema = z
      * Q-036), when `/me/phone/code` answers `phone_change_unavailable`.
      */
     canChangePhone: z.boolean(),
+    /**
+     * One of the demo workspace's own accounts (book F-242): the visitor tries the demo workspace only, the apps show
+     * the Demo frame ("Log in" for the account block, the Demo banner), and every number typed must be a made-up one.
+     */
+    demo: z.boolean(),
   })
   .meta({ id: 'Me' })
 export type Me = z.infer<typeof meSchema>
