@@ -71,6 +71,16 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     const aynaRow = team.find((m) => m.name.startsWith('Aýna'))!
     expect(aynaRow.specialization).not.toBeNull()
     expect(await mine(ayna)).toMatchObject({ status: 'live', specialization: aynaRow.specialization, reviewsToAnswer: 0 })
+    // an administrator replies too, so counts them; a reply takes one off, and taking it away puts it back
+    const selbi = await as(SELBI)
+    expect(await mine(selbi)).toMatchObject({ reviewsToAnswer: unanswered })
+    const open = (await maysa.req('/v1/w/glow-studio/reviews?unanswered=true')).json.items[0] as { id: string }
+    expect((await selbi.req(`/v1/w/glow-studio/reviews/${open.id}/reply`, { method: 'PUT', body: { text: 'Thank you!' } })).status).toBe(
+      204,
+    )
+    expect(await mine(maysa)).toMatchObject({ reviewsToAnswer: unanswered - 1 })
+    expect((await selbi.req(`/v1/w/glow-studio/reviews/${open.id}/reply`, { method: 'DELETE' })).status).toBe(204)
+    expect(await mine(maysa)).toMatchObject({ reviewsToAnswer: unanswered })
     const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
     try {
       // sent back: the reason to the owner, who can fix it; the specialist sees the state only
@@ -79,6 +89,8 @@ describe('the team (book chapter 3, ADR 0025)', () => {
         .set({ verification: 'rejected', verificationReason: 'Add photos of the place' })
         .where(eq(businesses.id, glow!.id))
       expect(await mine(maysa)).toMatchObject({ status: 'not_approved', statusReason: 'Add photos of the place' })
+      // an administrator can fix what it points to; the specialist sees the state only
+      expect(await mine(selbi)).toMatchObject({ status: 'not_approved', statusReason: 'Add photos of the place' })
       expect(await mine(ayna)).toMatchObject({ status: 'not_approved', statusReason: null })
       // hidden by the Ýeral team wins over the review
       await db
@@ -91,6 +103,9 @@ describe('the team (book chapter 3, ADR 0025)', () => {
         .set({ verification: 'pending', verificationReason: null, hiddenAt: null, hiddenReason: null })
         .where(eq(businesses.id, glow!.id))
       expect(await mine(maysa)).toMatchObject({ status: 'in_review', statusReason: null })
+      // the shared demo workspace says so, whatever its review (F-242)
+      await db.update(businesses).set({ sandbox: true }).where(eq(businesses.id, glow!.id))
+      expect(await mine(maysa)).toMatchObject({ status: 'demo', statusReason: null })
     } finally {
       await db
         .update(businesses)
@@ -99,6 +114,7 @@ describe('the team (book chapter 3, ADR 0025)', () => {
           verificationReason: glow!.verificationReason,
           hiddenAt: glow!.hiddenAt,
           hiddenReason: glow!.hiddenReason,
+          sandbox: false,
         })
         .where(eq(businesses.id, glow!.id))
     }

@@ -975,7 +975,9 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   }
 
   // the reviews; a report changes the rating on the business's page too
-  const reviewsChanged = (slug: string, rating = false) => invalidate(keys.reviewsAll(slug), ...(rating ? [keys.businessAll(slug)] : []))
+  // the switcher counts the reviews waiting for a reply
+  const reviewsChanged = (slug: string, rating = false) =>
+    invalidate(keys.reviewsAll(slug), keys.workspaces(), ...(rating ? [keys.businessAll(slug)] : []))
   const reviews = {
     /** "Teswirler" (book B-53): pages of 20, filtered and sorted, with the summary (none for a specialist). */
     list: (slug: string, p: Omit<Params<typeof teamReviewsQuerySchema, 'lang'>, 'cursor'>) => {

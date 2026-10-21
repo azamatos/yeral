@@ -31,7 +31,7 @@ const person = (phone: string, firstName: string, surname: string): Me => ({
   photo: null,
 })
 
-const workspace = (slug: string, name: string, level: Workspace['level'], requestsToAnswer: number): Workspace => ({
+const workspace = (slug: string, name: string, level: Workspace['level'], requestsToAnswer: number, reviewsToAnswer = 0): Workspace => ({
   slug,
   name,
   address: '247 Bitarap Türkmenistan Avenue',
@@ -41,7 +41,7 @@ const workspace = (slug: string, name: string, level: Workspace['level'], reques
   status: 'live',
   statusReason: null,
   specialization: null,
-  reviewsToAnswer: 0,
+  reviewsToAnswer,
   requestsToAnswer,
   lastOpenedAt: 1,
 })
@@ -68,7 +68,8 @@ interface Account {
 
 const MAYSA: Account = {
   me: person('+99365102030', 'Maýsa', 'Annaýewa'),
-  workspaces: [workspace('glow-studio', 'Glow Studio', 'owner', 6), workspace('glow-nails', 'Glow Nails', 'owner', 2)],
+  // the board's counts: 6 requests, 4 reviews without a reply
+  workspaces: [workspace('glow-studio', 'Glow Studio', 'owner', 6, 4), workspace('glow-nails', 'Glow Nails', 'owner', 2)],
   current: 'glow-studio',
   invites: [],
 }
@@ -183,6 +184,8 @@ export const Owner: Story = {
     const menu = within(nav!)
     await expect(menu.getByRole('link', { name: 'Calendar' })).toHaveAttribute('aria-current', 'page')
     await expect(menu.getByRole('link', { name: 'Bookings 6 requests' })).toBeVisible()
+    // the reviews waiting for a reply, muted
+    await expect(menu.getByRole('link', { name: 'Reviews 4 unanswered' })).toBeVisible()
     await expect(menu.getByRole('link', { name: 'Settings' })).toBeVisible()
     await userEvent.click(menu.getByRole('link', { name: 'Clients' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Clients' })).toBeVisible()
@@ -296,7 +299,7 @@ export const PhoneMore: Story = {
     await expect(within(contact).getByRole('link', { name: `Call ${SUPPORT_LINE.phone}` })).toHaveAttribute('href', SUPPORT_LINE.phoneHref)
     await userEvent.keyboard('{Escape}')
     await waitFor(() => expect(contactRow).toHaveFocus())
-    await userEvent.click(within(sheet).getByRole('link', { name: 'Reviews' }))
+    await userEvent.click(within(sheet).getByRole('link', { name: 'Reviews 4 unanswered' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Reviews' })).toBeVisible()
     await waitFor(() => expect(within(document.body).queryByRole('dialog', { name: 'More' })).not.toBeInTheDocument())
   },

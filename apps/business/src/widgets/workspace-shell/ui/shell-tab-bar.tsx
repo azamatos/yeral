@@ -37,6 +37,7 @@ export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | n
   }
   if (!workspace) return null
   const requests = workspace.requestsToAnswer
+  const reviews = workspace.reviewsToAnswer
   const inMore = sectionsFor(workspace.level).filter((s) => !TABS.includes(s))
   const here = sectionOf(pathname)
 
@@ -74,11 +75,7 @@ export function ShellTabBar({ onProfile }: { onProfile: (opener: HTMLElement | n
             drill
             icon={<SectionIcon section={section} />}
             label={t(`sections.${section}`)}
-            count={
-              section === 'reviews' && workspace.reviewsToAnswer > 0
-                ? { count: workspace.reviewsToAnswer, tone: 'muted', label: t('reviewsToAnswer', { count: workspace.reviewsToAnswer }) }
-                : null
-            }
+            count={section === 'reviews' ? { count: reviews, tone: 'muted', label: t('reviewsToAnswer', { count: reviews }) } : null}
             onClick={() => setMore(false)}
           >
             <Link to={`/w/$slug/${section}`} params={{ slug }} />

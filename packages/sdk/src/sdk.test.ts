@@ -483,10 +483,14 @@ describe('live events', () => {
     expect(staleKeys({ type: 'review.created', business: 'bag-kafe', bookingCode: null })).toEqual([
       ['reviews', 'bag-kafe'],
       ['business', 'bag-kafe'],
+      // the switcher's "Jogapsyz"
+      ['workspaces'],
     ])
     expect(staleKeys({ type: 'review.deleted', business: 'bag-kafe', bookingCode: null })).toEqual([
       ['reviews', 'bag-kafe'],
       ['business', 'bag-kafe'],
+      // the switcher's "Jogapsyz"
+      ['workspaces'],
     ])
   })
 
@@ -506,6 +510,8 @@ describe('live events', () => {
     expect(staleKeys({ type: 'review.updated', business: 'glow-studio', bookingCode: null })).toEqual([
       ['reviews', 'glow-studio'],
       ['business', 'glow-studio'],
+      // the switcher's "Jogapsyz"
+      ['workspaces'],
     ])
   })
 

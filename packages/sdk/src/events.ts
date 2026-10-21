@@ -36,9 +36,9 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
         keys.clients(e.business),
       )
   }
-  // the reviews, the team's list included (under the same prefix), and the rating on the page
+  // the reviews, the team's list included (under the same prefix), the rating on the page, the switcher's "Jogapsyz"
   if ((e.type === 'review.created' || e.type === 'review.deleted' || e.type === 'review.updated') && e.business)
-    out.push(keys.reviewsAll(e.business), keys.businessAll(e.business))
+    out.push(keys.reviewsAll(e.business), keys.businessAll(e.business), keys.workspaces())
   if (e.type === 'team.changed') {
     // a setup finished joins the switcher and the "Biznes" link
     out.push(keys.workspaces(), keys.invites(), keys.setup(), keys.me())

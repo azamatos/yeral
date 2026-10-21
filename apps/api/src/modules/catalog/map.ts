@@ -38,6 +38,29 @@ export const isPublic = () =>
 export const publicRow = (b: Pick<BusinessRow, 'verification' | 'hiddenAt' | 'closedAt' | 'sandbox'>) =>
   b.verification === 'verified' && !b.hiddenAt && !b.closedAt && !b.sandbox
 
+/**
+ * A page's state as its team's banner says it (B-Shell BusinessStatusBanner): the demo workspace first (it's never
+ * public), then hidden by the Ýeral team (over a verified page too), then its review, with the Ýeral team's reason for
+ * `not_approved` and `hidden`. Every review state is named, so a new one can't pass for live.
+ */
+export function pageStateOf(b: Pick<BusinessRow, 'verification' | 'verificationReason' | 'hiddenAt' | 'hiddenReason' | 'sandbox'>): {
+  state: 'live' | 'in_review' | 'not_approved' | 'hidden' | 'demo'
+  reason: string | null
+} {
+  if (b.sandbox) return { state: 'demo', reason: null }
+  if (b.hiddenAt) return { state: 'hidden', reason: b.hiddenReason }
+  switch (b.verification) {
+    case 'verified':
+      return { state: 'live', reason: null }
+    case 'pending':
+      return { state: 'in_review', reason: null }
+    case 'rejected':
+      return { state: 'not_approved', reason: b.verificationReason }
+    default:
+      throw new Error(`no page state for ${String(b.verification satisfies never)}`)
+  }
+}
+
 /** A business that takes one of the kinds of booking open now (book Q-030), in SQL; `categoryTakes` for a category. */
 const overlap = (col: AnyColumn, types: readonly BookingType[]) =>
   sql`${col} && array[${sql.join(

@@ -32,7 +32,7 @@ export const inviteStateSchema = z.enum(['pending', 'expired', 'accepted', 'decl
 // ── The person's workspaces (switcher) ──
 
 /** A workspace's page as its banner says it (B-Shell BusinessStatusBanner). */
-export const WORKSPACE_STATUSES = ['live', 'in_review', 'not_approved', 'hidden'] as const
+export const WORKSPACE_STATUSES = ['live', 'in_review', 'not_approved', 'hidden', 'demo'] as const
 
 export const workspaceSchema = z
   .object({
@@ -46,7 +46,8 @@ export const workspaceSchema = z
     level: levelSchema,
     /**
      * The page's state, the shell's banner (B-Shell BusinessStatusBanner, Q-012, Q-274): `live`, `in_review` (only the
-     * team sees it), `not_approved` (sent back by the Ýeral team) or `hidden` (by the Ýeral team).
+     * team sees it), `not_approved` (sent back by the Ýeral team), `hidden` (by the Ýeral team) or `demo` (the shared
+     * demo workspace, F-242, never public).
      */
     status: z.enum(WORKSPACE_STATUSES),
     /** The Ýeral team's reason, for `not_approved` and `hidden`, to the owner and administrators (who can act on it); else null. */

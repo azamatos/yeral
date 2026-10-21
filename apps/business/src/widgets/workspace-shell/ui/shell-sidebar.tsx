@@ -50,7 +50,7 @@ export function ShellSidebar({
             count={
               section === 'bookings' && requests > 0
                 ? { count: requests, tone: 'attention', label: t('requests', { count: requests }) }
-                : section === 'reviews' && reviews > 0
+                : section === 'reviews'
                   ? { count: reviews, tone: 'muted', label: t('reviewsToAnswer', { count: reviews }) }
                   : null
             }
