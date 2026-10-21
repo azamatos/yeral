@@ -1,14 +1,15 @@
 /** Drawer — booking detail from «Ýazylyşlarym» (right 480 on desktop, bottom sheet on phones). */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { MapPin, Phone } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { expect, screen, userEvent, waitFor } from 'storybook/test'
 import { Button } from '../button'
 import { StatusBadge } from '../status-badge'
 import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, DrawerTrigger } from './drawer'
 
-function BookingDetail({ defaultOpen }: { defaultOpen?: boolean }) {
+function BookingDetail({ defaultOpen, scrim }: { defaultOpen?: boolean; scrim?: 'always' | 'auto' }) {
   return (
-    <Drawer defaultOpen={defaultOpen}>
+    <Drawer defaultOpen={defaultOpen} scrim={scrim}>
       <DrawerTrigger asChild>
         <Button>Jikme-jiklikler</Button>
       </DrawerTrigger>
@@ -66,4 +67,62 @@ export const PhoneSheet: Story = {
   name: 'Open on a phone (bottom sheet)',
   args: { defaultOpen: true },
   globals: { viewport: { value: 'xs' } },
+}
+
+/** The business app (`scrim="auto"`): from 1280 no scrim, the page beside it stays usable; below 1280 it dims as before. */
+export const ScrimAuto: Story = {
+  name: 'Scrim auto · 1440',
+  args: { scrim: 'auto' },
+  globals: { viewport: { value: 'xl' } },
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Jikme-jiklikler' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Glow Studio' })
+    await waitFor(() => expect(dialog).toBeVisible())
+    await expect(document.querySelector('.bg-scrim')).toBeNull()
+    await userEvent.click(screen.getByRole('button', { name: 'Ýap' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  },
+}
+
+export const ScrimAutoTablet: Story = {
+  name: 'Scrim auto · 1024 (dims)',
+  args: { scrim: 'auto', defaultOpen: true },
+  globals: { viewport: { value: 'md' } },
+  play: async () => {
+    await screen.findByRole('dialog', { name: 'Glow Studio' })
+    await expect(document.querySelector('.bg-scrim')).not.toBeNull()
+  },
+}
+
+/** Opened from elsewhere (an account menu's row): `returnFocus` names where the focus goes back when it closes. */
+function FromAMenu() {
+  const [open, setOpen] = useState(false)
+  const account = useRef<HTMLButtonElement>(null)
+  return (
+    <div className="flex gap-3">
+      <Button ref={account}>Hasap</Button>
+      <Button onClick={() => setOpen(true)}>Profilim</Button>
+      <Drawer open={open} onOpenChange={setOpen} scrim="auto" returnFocus={account}>
+        <DrawerContent>
+          <DrawerHeader title="Profilim" subtitle="Ýeral hasabyňyz" closeLabel="Ýap" />
+          <DrawerBody>Maýsa Annaýewa</DrawerBody>
+        </DrawerContent>
+      </Drawer>
+    </div>
+  )
+}
+
+export const ReturnFocus: Story = {
+  name: 'Focus back to where it was opened from',
+  render: () => <FromAMenu />,
+  globals: { viewport: { value: 'xl' } },
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Profilim' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Profilim' })
+    await waitFor(() => expect(dialog).toBeVisible())
+    await expect(dialog).toHaveAccessibleDescription('Ýeral hasabyňyz')
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Hasap' })).toHaveFocus())
+  },
 }

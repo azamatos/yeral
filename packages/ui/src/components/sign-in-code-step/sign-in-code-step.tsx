@@ -34,6 +34,8 @@ export type SignInCodeStepCopy = {
   codeExpired: string
   /** «Here’s a new code.» («New code sent.» with `sms`) */
   resent: string
+  /** «Cancel» — `inline` only: closes the step where it opened. */
+  cancel?: string
 }
 
 /** The market's phone rules, as PhoneInput takes them (`COUNTRY_PREFIX`, `MARKET.phone.length`, `formatNational`). */
@@ -45,6 +47,13 @@ export type SignInCodeStepProps = Omit<ComponentProps<'form'>, 'onSubmit' | 'chi
   phoneRules: SignInPhoneRules
   /** Boxes 48 (client modal, booking step; M buttons) or 56 (business login; L buttons); 52 on phones either way. */
   size?: 48 | 56
+  /**
+   * `inline`: the step opened inside a form that has its own primary (My profile's "Change number", B-Shell): S
+   * buttons at the end of the row with Cancel, no full-width Confirm (the 4th digit and Enter check the code).
+   */
+  layout?: 'page' | 'inline'
+  /** `inline`: Cancel closes the step. */
+  onCancel?: () => void
   /** The market sends codes by SMS: no code on screen. Market config, never per person; off at the first release. */
   sms?: boolean
   /**
@@ -115,6 +124,8 @@ export function SignInCodeStep({
   copy,
   phoneRules,
   size = 48,
+  layout = 'page',
+  onCancel,
   sms = false,
   tooManyCodes,
   phone = '',
@@ -143,6 +154,12 @@ export function SignInCodeStep({
   const codeRef = useRef<HTMLInputElement>(null)
   const newCodeRef = useRef<HTMLButtonElement>(null)
   const buttonSize = size === 56 ? 'l' : 'm'
+  const inline = layout === 'inline'
+  const cancel = inline && onCancel && (
+    <Button type="button" variant="ghost" size="s" onClick={onCancel}>
+      {copy.cancel}
+    </Button>
+  )
   const limited = Boolean(tooManyCodes)
   const blocked = limited || Boolean(locked) || codeExpired
   const wrong = Boolean(codeError) && !blocked
@@ -190,6 +207,10 @@ export function SignInCodeStep({
   useEffect(() => {
     if (step === 'phone' && hasPhoneError) phoneRef.current?.focus()
   }, [step, hasPhoneError])
+  // inline, it opens on a tap (and comes back to the number from its code): the focus moves into the field
+  useEffect(() => {
+    if (inline && step === 'phone') phoneRef.current?.focus()
+  }, [inline, step])
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -230,16 +251,32 @@ export function SignInCodeStep({
               />
             )}
           </Field>
-          <div className="flex flex-col gap-3">
-            {limited ? (
-              <FieldMessage live={false}>{tooManyCodes}</FieldMessage>
-            ) : (
-              <SubmitButton size={buttonSize} busy={sending} busyLabel={copy.sending}>
-                {copy.sendCode}
-              </SubmitButton>
-            )}
-            {sendNote}
-          </div>
+          {inline ? (
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {limited && (
+                <FieldMessage live={false} className="mr-auto">
+                  {tooManyCodes}
+                </FieldMessage>
+              )}
+              {cancel}
+              {!limited && (
+                <Button type="submit" variant="secondary" size="s" loading={sending} loadingText={copy.sending}>
+                  {copy.sendCode}
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {limited ? (
+                <FieldMessage live={false}>{tooManyCodes}</FieldMessage>
+              ) : (
+                <SubmitButton size={buttonSize} busy={sending} busyLabel={copy.sending}>
+                  {copy.sendCode}
+                </SubmitButton>
+              )}
+              {sendNote}
+            </div>
+          )}
         </>
       ) : (
         <>
@@ -258,11 +295,16 @@ export function SignInCodeStep({
                 ? codeExpired && !limited
                   ? copy.codeExpired
                   : undefined
-                : checking || wrong
-                  ? undefined
-                  : resent
-                    ? copy.resent
-                    : copy.codeHint
+                : checking
+                  ? // inline has no Confirm to say it: the hint does
+                    inline
+                    ? copy.checking
+                    : undefined
+                  : wrong
+                    ? undefined
+                    : resent
+                      ? copy.resent
+                      : copy.codeHint
             }
             className="gap-2"
           >
@@ -283,7 +325,18 @@ export function SignInCodeStep({
               aria-busy={checking || undefined}
             />
           </Field>
-          {codeExpired && !limited ? (
+          {inline ? (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              {codeExpired && !limited ? (
+                <Button ref={newCodeRef} type="button" variant="secondary" size="s" onClick={onResend}>
+                  {copy.resend}
+                </Button>
+              ) : (
+                !blocked && <ResendLink copy={copy} resendIn={resendIn} disabled={resendIn > 0 || checking} onResend={onResend} />
+              )}
+              <span className="ml-auto">{cancel}</span>
+            </div>
+          ) : codeExpired && !limited ? (
             <Button ref={newCodeRef} variant="primary" size={buttonSize} className="w-full" onClick={onResend}>
               {copy.resend}
             </Button>
@@ -293,18 +346,7 @@ export function SignInCodeStep({
                 <SubmitButton size={buttonSize} busy={checking} busyLabel={copy.checking}>
                   {copy.confirm}
                 </SubmitButton>
-                <button
-                  type="button"
-                  disabled={resendIn > 0 || checking}
-                  onClick={onResend}
-                  className={cn(
-                    'hit inline-flex min-h-8 cursor-pointer items-center gap-1.5 self-start rounded-xs text-small font-semibold whitespace-nowrap text-a-600',
-                    'hover:text-a-700 hover:underline focus-visible:shadow-focus focus-visible:outline-none',
-                    'disabled:cursor-default disabled:text-n-500 disabled:tabular-nums disabled:no-underline',
-                  )}
-                >
-                  {resendIn > 0 ? copy.resendIn(formatCountdown(resendIn)) : copy.resend}
-                </button>
+                <ResendLink copy={copy} resendIn={resendIn} disabled={resendIn > 0 || checking} onResend={onResend} />
               </div>
             )
           )}
@@ -314,6 +356,34 @@ export function SignInCodeStep({
         {spoken}
       </span>
     </form>
+  )
+}
+
+/** «Get a new code in 0:42» → «Get a new code»: the resend link. */
+function ResendLink({
+  copy,
+  resendIn,
+  disabled,
+  onResend,
+}: {
+  copy: SignInCodeStepCopy
+  resendIn: number
+  disabled: boolean
+  onResend?: () => void
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onResend}
+      className={cn(
+        'hit inline-flex min-h-8 cursor-pointer items-center gap-1.5 self-start rounded-xs text-small font-semibold whitespace-nowrap text-a-600',
+        'hover:text-a-700 hover:underline focus-visible:shadow-focus focus-visible:outline-none',
+        'disabled:cursor-default disabled:text-n-500 disabled:tabular-nums disabled:no-underline',
+      )}
+    >
+      {resendIn > 0 ? copy.resendIn(formatCountdown(resendIn)) : copy.resend}
+    </button>
   )
 }
 

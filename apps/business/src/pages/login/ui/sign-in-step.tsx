@@ -1,20 +1,20 @@
 import { Link } from '@tanstack/react-router'
-import { MARKET } from '@yeral/domain/market'
 import { formatPhone, toE164 } from '@yeral/domain/phone'
 import { PHONE_RULES, type useSignIn } from '@yeral/features/auth-by-phone'
 import { cn } from '@yeral/ui/cn'
-import { SignInCodeStep, type SignInCodeStepCopy } from '@yeral/ui/sign-in-code-step'
+import { SignInCodeStep } from '@yeral/ui/sign-in-code-step'
 import { useEffect, useId, useRef } from 'react'
-import { useFormatter, useTranslations } from 'use-intl'
+import { useTranslations } from 'use-intl'
+import { useCodeStepWords } from '@/shared/i18n'
 import { AuthPage, textLink } from '@/shared/ui'
 
 /** The phone step and the code step (B-Login `step` phone · code and their states), in the shared SignInCodeStep. */
 export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> }) {
   const t = useTranslations()
-  const format = useFormatter()
   const titleId = useId()
   const formRef = useRef<HTMLFormElement>(null)
   const { state, view } = signIn
+  const said = useCodeStepWords(signIn)
   const brand = t('common.brand')
   const onCode = state.step === 'code'
 
@@ -23,27 +23,6 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
   useEffect(() => {
     if (changedNumber) formRef.current?.querySelector('input')?.focus()
   }, [changedNumber])
-
-  const copy: SignInCodeStepCopy = {
-    phoneLabel: t('login.phoneLabel'),
-    sendCode: t('login.sendCode'),
-    sending: t('login.sending'),
-    codeLabel: t('login.codeLabel'),
-    codeHint: t('login.codeHint'),
-    yourCode: t('login.yourCode'),
-    confirm: t('login.confirm'),
-    checking: t('login.checking'),
-    resend: t('login.resend'),
-    resendIn: (time) => t('login.resendIn', { time }),
-    codeExpired: t('login.codeExpired'),
-    resent: t('login.resent'),
-  }
-  const phoneError =
-    state.phoneError === 'incomplete'
-      ? t('login.incomplete', { digits: MARKET.phone.length })
-      : state.phoneError === 'notMobile'
-        ? t('login.notMobile', { starts: format.list(MARKET.phone.mobilePrefixes, { type: 'disjunction' }) })
-        : undefined
 
   return (
     <AuthPage
@@ -70,13 +49,13 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
         aria-labelledby={titleId}
         step={state.step}
         size={56}
-        copy={copy}
+        copy={said.copy}
         phoneRules={PHONE_RULES}
-        tooManyCodes={view.tooManyCodesMin ? t('login.tooManyCodes', { minutes: view.tooManyCodesMin }) : undefined}
+        tooManyCodes={said.tooManyCodes}
         phone={state.phone}
         onPhoneChange={signIn.changePhone}
         phoneHint={t('login.phoneHint', { brand })}
-        phoneError={phoneError}
+        phoneError={said.phoneError}
         sending={signIn.sending}
         onSendCode={signIn.sendCode}
         code={state.code}
@@ -84,8 +63,8 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
         onSubmitCode={signIn.submitCode}
         shownCode={state.shownCode}
         checking={signIn.checking}
-        codeError={state.attemptsLeft !== undefined ? t('login.wrongCode', { left: state.attemptsLeft }) : undefined}
-        locked={view.locked ? t('login.locked', { seconds: view.lockLeftSec }) : undefined}
+        codeError={said.codeError}
+        locked={said.locked}
         codeExpired={state.codeExpired}
         resendIn={view.resendInSec}
         resent={state.resent}

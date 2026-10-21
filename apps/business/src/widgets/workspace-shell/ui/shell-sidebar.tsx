@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { AccountMenu } from '@yeral/ui/account-menu'
 import { cn } from '@yeral/ui/cn'
 import { SideNav, SideNavDivider, SideNavItem } from '@yeral/ui/side-nav'
-import { ExternalLink, LogOut } from 'lucide-react'
+import { ExternalLink, LogOut, User } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { sectionsFor } from '../model/sections'
 import { useAccount } from '../model/use-account'
@@ -15,7 +15,14 @@ import { ShellSwitcher } from './shell-switcher'
  * person's level has, the person at the bottom. The Bookings count is the requests they may answer here; the reviews
  * count waits for the api.
  */
-export function ShellSidebar({ collapsed = false }: { collapsed?: boolean }) {
+export function ShellSidebar({
+  collapsed = false,
+  onProfile,
+}: {
+  collapsed?: boolean
+  /** My profile, opened from the account menu (its button gets the focus back). */
+  onProfile: (opener: HTMLElement | null) => void
+}) {
   const t = useTranslations('shell')
   const { slug, workspace } = useWorkspace()
   const account = useAccount()
@@ -56,6 +63,7 @@ export function ShellSidebar({ collapsed = false }: { collapsed?: boolean }) {
         menuLabel={t('account.menu')}
         triggerLabel={collapsed ? t('account.triggerOf', { name: account.name }) : t('account.trigger')}
         items={[
+          { id: 'profile', label: t('account.profile'), icon: <User />, onSelect: onProfile, opensDialog: true },
           {
             id: 'client',
             label: t('account.openAsClient'),
