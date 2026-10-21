@@ -169,6 +169,10 @@ export const CodeNotShown: Story = {
     const modal = await sendCode(canvas, '65901122')
     await expect(modal.queryByText('Your code:')).toBeNull()
     await expect(modal.getByRole('button', { name: /Get a new code in 0:5\d/ })).toBeDisabled()
+    // no demo note once codes go by SMS: not on the phone step either
+    await userEvent.click(modal.getByRole('button', { name: 'Change number' }))
+    await modal.findByLabelText('Phone number')
+    await expect(modal.queryByText(/This is a demo/)).toBeNull()
     await userEvent.keyboard('{Escape}')
   },
 }

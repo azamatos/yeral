@@ -1,12 +1,13 @@
 import { Link } from '@tanstack/react-router'
 import { formatPhone, toE164 } from '@yeral/domain/phone'
-import { PHONE_RULES, type useSignIn } from '@yeral/features/auth-by-phone'
+import { PHONE_RULES, useCodeOnScreen, type useSignIn } from '@yeral/features/auth-by-phone'
 import { cn } from '@yeral/ui/cn'
 import { SignInCodeStep } from '@yeral/ui/sign-in-code-step'
 import { useEffect, useId, useRef } from 'react'
 import { useTranslations } from 'use-intl'
 import { useCodeStepWords } from '@/shared/i18n'
-import { AuthPage, DemoNote, textLink } from '@/shared/ui'
+import { AuthPage, textLink } from '@/shared/ui'
+import { SignInDemoNote } from './sign-in-demo-note'
 
 /** The phone step and the code step (B-Login `step` phone · code and their states), in the shared SignInCodeStep. */
 export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> }) {
@@ -17,6 +18,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
   const said = useCodeStepWords(signIn)
   const brand = t('common.brand')
   const onCode = state.step === 'code'
+  const codeOnScreen = useCodeOnScreen()
 
   // «Change number» goes away with the code step: the number takes the focus instead of the page (B-Login focusStep)
   const { changedNumber } = state
@@ -44,7 +46,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
         )
       }
     >
-      {!onCode && <DemoNote />}
+      {!onCode && <SignInDemoNote />}
       <SignInCodeStep
         ref={formRef}
         aria-labelledby={titleId}
@@ -55,7 +57,7 @@ export function SignInStep({ signIn }: { signIn: ReturnType<typeof useSignIn> })
         tooManyCodes={said.tooManyCodes}
         phone={state.phone}
         onPhoneChange={signIn.changePhone}
-        phoneHint={t('login.phoneHint', { brand })}
+        phoneHint={t(codeOnScreen ? 'login.phoneHintDemo' : 'login.phoneHint', { brand })}
         phoneError={said.phoneError}
         sending={signIn.sending}
         onSendCode={signIn.sendCode}

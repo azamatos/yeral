@@ -309,9 +309,8 @@ export const Phone: Story = {
     // the first launch shows the code on the screen: the phone step says it's a demo (book Q-036)
     await expect(await canvas.findByText(/This is a demo of Ýeral: the sign-in code shows here instead of an SMS/)).toBeVisible()
     const phone = canvas.getByLabelText('Phone number')
-    await expect(phone).toHaveAccessibleDescription(
-      'If you already book on Ýeral as a client, use that number — one account works for both.',
-    )
+    // a demo asks for the same made-up number on both sites
+    await expect(phone).toHaveAccessibleDescription('Use the same made-up number on the Ýeral site and here — one account works for both.')
     await userEvent.type(phone, '651020')
     await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
     await expect(await canvas.findByRole('alert')).toHaveTextContent('The number is incomplete — it needs 8 digits.')
@@ -384,11 +383,14 @@ export const CodeNotShown: Story = {
     await sendCode(canvas, '65102030')
     await expect(canvas.queryByText('Your code:')).not.toBeInTheDocument()
     await expect(canvas.getByRole('button', { name: /Get a new code in 0:5\d/ })).toBeDisabled()
-    // no demo note once codes go by SMS (nor on the code step)
+    // no demo note once codes go by SMS (nor on the code step), and the usual hint
     await expect(canvas.queryByText(/This is a demo/)).not.toBeInTheDocument()
     await userEvent.click(canvas.getByRole('button', { name: 'Change number' }))
-    await canvas.findByLabelText('Phone number')
+    const phone = await canvas.findByLabelText('Phone number')
     await expect(canvas.queryByText(/This is a demo/)).not.toBeInTheDocument()
+    await expect(phone).toHaveAccessibleDescription(
+      'If you already book on Ýeral as a client, use that number — one account works for both.',
+    )
   },
 }
 

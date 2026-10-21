@@ -2,4 +2,5 @@
 // requests behind them and the market's phone rules. Each app draws the steps in its own frame and words.
 export { PHONE_RULES, phoneProblem } from './lib/phone'
 export { initialSignIn, signInReducer, signInView, type SignInEvent, type SignInState, type SignInStep } from './model/sign-in'
+export { useCodeOnScreen } from './model/use-code-on-screen'
 export { useCodeSteps, useRequestLanguage, useSignIn, type CodeSteps, type CodeStepsOptions, type Verified } from './model/use-sign-in'
