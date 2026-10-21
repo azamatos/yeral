@@ -87,6 +87,9 @@
   cancelled ("The business has closed", each client told by SMS), its page hidden from everyone and the workspace out of
   its team's switcher; the data stays, and it can be opened again. Migration 0038 adds `businesses.closed_at`,
   `closed_reason` and the cancel reason `business_closed`.
+- **@yeral/api** (minor), **@yeral/contract** (minor), the admin tool adds a business for an owner the team has met
+  (#126; book F-238): a draft on the owner's phone, their account made if they've never signed in; their sign-in reopens
+  the setup wizard. The team follows drafts in a `setup` list.
 - Not written as changesets (they came after): the client profile (#118), the business login's invites (#115), My
   account (#121).
 

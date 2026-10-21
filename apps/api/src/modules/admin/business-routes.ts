@@ -1,6 +1,7 @@
 /** The admin tool's businesses (book F-179, S-17; Q-274, Q-275, Q-012, Q-215): `/v1/admin/businesses/*`. */
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import {
+  adminAddBusinessSchema,
   adminBusinessesQuerySchema,
   adminBusinessItemSchema,
   adminBusinessParamSchema,
@@ -12,6 +13,7 @@ import { langQuerySchema, listOf } from '@yeral/contract/common'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import {
+  addBusinessForOwner,
   adminBusiness,
   adminBusinesses,
   closeBusiness,
@@ -75,6 +77,14 @@ const showRoute = createRoute({
   responses: { ...noContent, 404: errors[404], 409: errors[409], ...signedIn },
 })
 
+const addRoute = createRoute({
+  method: 'post',
+  path: '/admin/businesses',
+  tags,
+  summary: 'A business added for an owner the team met (F-238): a draft their sign-in reopens; `setup_in_progress`',
+  request: jsonBody(adminAddBusinessSchema),
+  responses: { 201: json(z.object({ id: z.string(), slug: z.string() })), 400: errors[400], 409: errors[409], ...signedIn },
+})
 const closeRoute = createRoute({
   method: 'post',
   path: '/admin/businesses/{id}/close',
@@ -93,6 +103,7 @@ const reopenRoute = createRoute({
 })
 
 export const adminBusinessRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(addRoute, async (c) => c.json(await addBusinessForOwner(c.var.deps, requireAdmin(c), c.req.valid('json')), 201))
   .openapi(closeRoute, async (c) =>
     c.json(await closeBusiness(c.var.deps, requireAdmin(c), c.req.valid('param').id, c.req.valid('json').reason), 200),
   )

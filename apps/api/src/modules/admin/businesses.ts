@@ -6,7 +6,9 @@
  */
 import type { AdminBusiness, AdminBusinessItem, AdminBusinessView } from '@yeral/contract/admin'
 import { businessSmsAt } from '@yeral/domain/lifecycle'
+import { MARKET } from '@yeral/domain/market'
 import type { Locale } from '@yeral/domain/model'
+import { splitName } from '@yeral/domain/names'
 import { createT } from '@yeral/i18n/fmt'
 import { addDays, epochOf, today } from '@yeral/domain/time'
 import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, isNull, lte, or, sql, type SQL } from 'drizzle-orm'
@@ -34,6 +36,8 @@ import { teamChanged } from '../team/service'
 import { cityRefOf, loadCities } from '../catalog/cities'
 import { isPublic, photoOf, publicRow, text } from '../catalog/map'
 import { likeOf } from '../catalog/search'
+import { unusedSince } from '../auth/sign-in'
+import { startSetup } from '../setup/service'
 import { holdActor, recordAction } from './accounts'
 
 /** A list holds this many at most: the newest, or the longest waiting. */
@@ -58,6 +62,8 @@ const VIEWS: Record<AdminBusinessView, { where: SQL; order: SQL[] }> = {
   hidden: { where: and(open, isNotNull(businesses.hiddenAt))!, order: [desc(businesses.hiddenAt)] },
   verified: { where: isPublic(), order: [desc(businesses.createdAt)] },
   closed: { where: isNotNull(businesses.closedAt), order: [desc(businesses.closedAt)] },
+  // drafts, the newest first: those the team added wait for their owner's sign-in
+  setup: { where: isNotNull(businesses.setupStep), order: [desc(businesses.createdAt)] },
   // every finished business: a search across them
   all: { where: finished, order: [desc(businesses.createdAt)] },
 }
@@ -98,6 +104,7 @@ async function itemsOf(db: Queryable, rows: BusinessRow[], lang: Locale): Promis
       closed: b.closedAt ? { at: b.closedAt.getTime(), reason: b.closedReason ?? '' } : null,
       addressChangedAt: b.addressChangedAt?.getTime() ?? null,
       sentForReviewAt: (b.sentForReviewAt ?? b.createdAt).getTime(),
+      setupStep: b.setupStep,
       createdAt: b.createdAt.getTime(),
     }
   })
@@ -124,8 +131,9 @@ export async function adminBusinesses(db: Queryable, query: { view: AdminBusines
 async function rowOf(db: Queryable, id: string, lock = false, opts: { closed?: boolean } = {}): Promise<BusinessRow> {
   const found = db.select().from(businesses).where(eq(businesses.id, id))
   const [row] = await (lock ? found.for('no key update') : found)
-  // a draft isn't the team's to check until it's finished (book Q-200)
-  if (!row || row.setupStep) throw new ApiError('not_found')
+  if (!row) throw new ApiError('not_found')
+  // a draft is only to look at until it's finished (book Q-200): nothing to verify or hide yet
+  if (lock && row.setupStep) throw new ApiError('invalid_status')
   // a closed business is only to look at, or to open again
   if (lock && row.closedAt && !opts.closed) throw new ApiError('invalid_status')
   return row
@@ -390,5 +398,47 @@ export async function reopenBusiness(deps: Deps, by: Admin, id: string): Promise
     await emit(tx, { type: 'business.updated', businessId: b.id })
     await emit(tx, { type: 'team.changed', businessId: b.id })
     await tellOwner(tx, deps, b, 'reopened')
+  })
+}
+
+/**
+ * A business the team adds for an owner it has met (F-238, Q-002), in one go: the owner's account, made if the number
+ * has none (named as the team was told, in the language the team gives), and a draft on it, as the wizard's business
+ * step makes one (`startSetup`). An existing account keeps its own name; one unused for 6 months is refused
+ * (`owner_account_unused`), since the number may have passed to someone else (Q-270): its holder signs in first. The
+ * owner's sign-in reopens the wizard; until they finish it, it's in the `setup` list only.
+ */
+export async function addBusinessForOwner(
+  deps: Deps,
+  by: Admin,
+  input: { name: string; categoryId: string; owner: { phone: string; name: string; lang?: Locale } },
+): Promise<{ id: string; slug: string }> {
+  return deps.db.transaction(async (tx) => {
+    // the acting account held, still active, as for every admin action
+    await holdActor(tx, by)
+    const { first, surname } = splitName(input.owner.name)
+    await tx
+      .insert(users)
+      .values({
+        phone: input.owner.phone,
+        name: first,
+        surname,
+        lang: input.owner.lang ?? MARKET.defaultLanguage,
+        lastSeenAt: new Date(deps.now()),
+      })
+      .onConflictDoNothing({ target: users.phone })
+    let [owner] = await tx.select().from(users).where(eq(users.phone, input.owner.phone)).for('no key update')
+    if (!owner) throw new Error('the owner account is missing')
+    if (unusedSince(owner.lastSeenAt, deps.now())) throw new ApiError('owner_account_unused')
+    // an account that never gave a name takes the one the team was told
+    if (!owner.name) [owner] = await tx.update(users).set({ name: first, surname }).where(eq(users.id, owner.id)).returning()
+    // the wizard's own start, inside this transaction (its retries are savepoints)
+    const { slug } = await startSetup({ ...deps, db: tx as unknown as Deps['db'] }, owner!, {
+      name: input.name,
+      categoryId: input.categoryId,
+    })
+    const [b] = await tx.select({ id: businesses.id }).from(businesses).where(eq(businesses.slug, slug))
+    await recordAction(tx, by, 'business.added', { businessId: b!.id, details: { owner: input.owner.phone } })
+    return { id: b!.id, slug }
   })
 }
