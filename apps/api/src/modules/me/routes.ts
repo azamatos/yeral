@@ -2,14 +2,14 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { meSchema, sendCodeResponseSchema, sendCodeSchema, updateMeSchema, verifyCodeSchema } from '@yeral/contract/account'
 import { businessCardSchema } from '@yeral/contract/catalog'
-import { langQuerySchema, listOf, slugSchema } from '@yeral/contract/common'
+import { langQuerySchema, listOf, photoUploadSchema, slugSchema } from '@yeral/contract/common'
 import { NAME_MAX, splitName } from '@yeral/domain/names'
 import { today } from '@yeral/domain/time'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { businesses, favorites, sessions, users } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { ApiError, invalid } from '../../http/errors'
-import { errors, json, jsonBody, noContent } from '../../http/openapi'
+import { errors, formBody, json, jsonBody, noContent } from '../../http/openapi'
 import { clientIp } from '../../lib/rate-limit'
 import { checkCode, sendCode } from '../auth/codes'
 import { endSession, requireUser } from '../auth/session'
@@ -17,6 +17,8 @@ import { buildCards } from '../catalog/cards'
 import { publicBusiness } from '../catalog/detail'
 import { changePhone, releaseAccount } from './account'
 import { accountName, phoneChangeOpen, toMe } from './me'
+import { dropPhotos, uploadGuard } from '../media/photos'
+import { removeMyPhoto, setMyPhoto } from './photo'
 
 const tags = ['me']
 const slugParam = z.object({ slug: slugSchema })
@@ -85,7 +87,32 @@ const removeFavoriteRoute = createRoute({
   responses: { ...noContent, 401: errors[401], 404: errors[404] },
 })
 
+const photoRoute = createRoute({
+  method: 'put',
+  path: '/me/photo',
+  tags,
+  summary: '"Profilim": the person\'s photo (JPEG, PNG or WebP, up to 10 MB), the same in every workspace',
+  middleware: [uploadGuard] as const,
+  request: formBody(photoUploadSchema),
+  responses: { 200: json(meSchema), 400: errors[400], 401: errors[401], 429: errors[429] },
+})
+const removePhotoRoute = createRoute({
+  method: 'delete',
+  path: '/me/photo',
+  tags,
+  summary: "The person's photo goes",
+  responses: { 200: json(meSchema), 401: errors[401] },
+})
+
 export const meRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(photoRoute, async (c) => {
+    const row = await setMyPhoto(c.var.deps, requireUser(c), c.req.valid('form').file)
+    return c.json(await toMe(c.var.deps.db, row, c.var.deps), 200)
+  })
+  .openapi(removePhotoRoute, async (c) => {
+    const row = await removeMyPhoto(c.var.deps, requireUser(c))
+    return c.json(await toMe(c.var.deps.db, row, c.var.deps), 200)
+  })
   .openapi(meRoute, async (c) => c.json(await toMe(c.var.deps.db, requireUser(c), c.var.deps), 200))
   .openapi(updateRoute, async (c) => {
     const user = requireUser(c)
@@ -118,8 +145,9 @@ export const meRoutes = new OpenAPIHono<AppEnv>()
     const user = requireUser(c)
     const { deps } = c.var
     const now = deps.now()
-    await deps.db.transaction((tx) => releaseAccount(tx, user, now, 'deleted'))
+    const photos = await deps.db.transaction((tx) => releaseAccount(tx, user, now, 'deleted'))
     await endSession(c)
+    await dropPhotos(deps, photos)
     return c.body(null, 204)
   })
   .openapi(phoneCodeRoute, async (c) => {

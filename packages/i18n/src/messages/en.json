@@ -63,6 +63,7 @@
     "cannot_move": "The booking can't move there.",
     "move_waiting": "The client asked for a new time: answer that first.",
     "statuses_full": "Up to 5 internal statuses.",
+    "gallery_full": "Up to 20 photos.",
     "setup_in_progress": "Finish setting up your business first.",
     "setup_incomplete": "Add the address, the hours and at least one service first.",
     "client_exists": "This number is already one of your clients.",

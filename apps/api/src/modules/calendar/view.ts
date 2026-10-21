@@ -22,6 +22,7 @@ import { photoOf } from '../catalog/map'
 import { awaitingAnswer, itemsOfBookings, stateOf, type ItemRow } from '../bookings/repo'
 import { teamItemOf, teamPriceOf } from '../bookings/team-view'
 import { statusesOf } from '../settings/statuses'
+import { teamPhotos } from '../team/service'
 import { alertNotesOf } from '../clients/facts'
 import { blocksBetween } from './blocks'
 import type { Business } from './repo'
@@ -105,10 +106,14 @@ export async function calendarView(deps: Deps, business: Business, actor: Actor,
   const others = [...new Set(items.flatMap((i) => (i.staffId && sees(i.staffId) && !onTeam.has(i.staffId) ? [i.staffId] : [])))]
   const gone = others.length ? await db.select().from(staff).where(inArray(staff.id, others)) : []
   const people = [...team.map((s) => ({ row: s, removed: false })), ...gone.map((s) => ({ row: s, removed: s.status !== 'active' }))]
+  const photos = await teamPhotos(
+    db,
+    people.map((p) => p.row),
+  )
   const columns = people.map(({ row, removed }) => ({
     staffId: row.id,
     name: row.name,
-    photo: row.photo ? photoOf(deps, row.photo, q.lang) : null,
+    photo: photos.has(row.id) ? photoOf(deps, photos.get(row.id)!, q.lang, row.name) : null,
     level: row.level,
     hasApp: row.hasApp,
     removed,

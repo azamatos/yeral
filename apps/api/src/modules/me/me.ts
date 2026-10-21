@@ -3,6 +3,7 @@ import { fullName, type PersonName } from '@yeral/domain/names'
 import type { Queryable } from '../../db/client'
 import type { Deps } from '../../deps'
 import type { User } from '../../http/env'
+import { photoOf } from '../catalog/map'
 import { hasWorkspace } from '../team/members'
 
 /** The account's name, in its two fields (book Q-156). */
@@ -18,7 +19,7 @@ export const accountName = (user: User): string | null => fullName(nameOf(user))
 export const phoneChangeOpen = (deps: Pick<Deps, 'codeOnScreen'>) => !deps.codeOnScreen
 
 /** The signed-in person, as the deployment `deps` runs. */
-export async function toMe(db: Queryable, user: User, deps: Pick<Deps, 'codeOnScreen'>): Promise<Me> {
+export async function toMe(db: Queryable, user: User, deps: Pick<Deps, 'codeOnScreen' | 'media'>): Promise<Me> {
   const business = await hasWorkspace(db, user.id)
   return {
     id: user.id,
@@ -33,6 +34,7 @@ export async function toMe(db: Queryable, user: User, deps: Pick<Deps, 'codeOnSc
       reminder2h: user.notifyReminder2h,
       reviewAsk: false,
     },
+    photo: user.photo ? photoOf(deps, user.photo, user.lang, user.name ?? '') : null,
     hasBusiness: business,
     canChangePhone: phoneChangeOpen(deps),
   }

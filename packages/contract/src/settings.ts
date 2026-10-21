@@ -11,6 +11,7 @@ import {
   VERIFICATION_STATUSES,
 } from '@yeral/domain/model'
 import { REQUEST_ANSWERERS } from '@yeral/domain/rules'
+import { GALLERY_MAX } from '@yeral/domain/photos'
 import { z } from 'zod'
 import { idSchema, latLngSchema, marketLocaleSchema, minuteSchema, phoneInputSchema, phoneSchema, slugSchema, ymdSchema } from './common'
 
@@ -112,6 +113,23 @@ export const businessProfileUpdateSchema = z
   .partial()
   .strict()
   .meta({ id: 'BusinessProfileUpdate' })
+
+// ── The gallery (B-37, Q-115) ──
+
+/** A gallery photo id: the end of its key. */
+const photoIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/)
+export const galleryPhotoParamSchema = z.object({ slug: slugSchema, id: photoIdSchema })
+
+/** "Suratlar": up to 20, the first the cover on every card and page. */
+export const gallerySchema = z
+  .object({ items: z.array(z.object({ id: photoIdSchema, url: z.string(), alt: z.string() })) })
+  .meta({ id: 'Gallery' })
+
+/** The gallery in a new order: every photo it has, once. */
+export const galleryOrderSchema = z
+  .object({ ids: z.array(photoIdSchema).max(GALLERY_MAX) })
+  .strict()
+  .meta({ id: 'GalleryOrder' })
 
 // ── Hours and special days (B-39, B-40) ──
 

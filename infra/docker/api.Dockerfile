@@ -27,6 +27,8 @@ FROM node:24-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /repo/apps/api/dist ./dist
+# the uploaded photos (MEDIA_DIR): a named volume takes this folder and its owner
+RUN mkdir -p /data/media && chown node:node /data/media
 USER node
 EXPOSE 3004
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD wget -qO- http://127.0.0.1:${PORT:-3004}/v1/health || exit 1

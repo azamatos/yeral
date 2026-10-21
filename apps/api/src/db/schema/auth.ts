@@ -1,5 +1,6 @@
 /** People, login codes and sessions (ADR 0019). */
-import { boolean, index, integer, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core'
+import { boolean, index, integer, jsonb, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core'
+import type { StoredPhoto } from './business'
 import { codePurpose, locale } from './enums'
 import { createdAt, ts } from './types'
 
@@ -11,6 +12,8 @@ export const users = pgTable('users', {
   name: text(),
   /** The surname, optional (book Q-156). */
   surname: text(),
+  /** "Profilim": the person's photo, the same in every workspace (book B-12, F-084). */
+  photo: jsonb().$type<StoredPhoto>(),
   /** Chosen by the person; until then the language they signed in with, else the market's main one (no database default: the market is configuration). */
   lang: locale().notNull(),
   notifyConfirmation: boolean().notNull().default(true),

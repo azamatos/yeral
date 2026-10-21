@@ -227,6 +227,17 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: (body: z.input<typeof updateMeSchema>) => call(v1.me.$patch({ json: body })),
         onSuccess: (data) => forThePerson(data.id, () => queryClient.setQueryData(keys.me(), data)),
       }),
+    /** "Profilim": the person's photo (book B-12); the app makes it smaller first. */
+    setPhoto: () =>
+      mutationOptions({
+        mutationFn: (file: File) => call(v1.me.photo.$put({ form: { file } })),
+        onSuccess: (data) => forThePerson(data.id, () => queryClient.setQueryData(keys.me(), data)),
+      }),
+    removePhoto: () =>
+      mutationOptions({
+        mutationFn: () => call(v1.me.photo.$delete()),
+        onSuccess: (data) => forThePerson(data.id, () => queryClient.setQueryData(keys.me(), data)),
+      }),
     remove: () =>
       mutationOptions({
         mutationFn: () => call(v1.me.$delete()),
@@ -449,7 +460,9 @@ export function createSdk(client: Client, queryClient: QueryClient) {
 
   /** The business team (ADR 0025): the switcher, invites, and the team the owner manages. */
   const w = v1.w[':slug']
-  const teamChanged = (slug?: string) => invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug)] : []))
+  // the page shows the team's specialists with their pictures
+  const teamChanged = (slug?: string) =>
+    invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug), keys.businessAll(slug)] : []))
   /** The person isn't on that team any more: nothing of it stays (every workspace key names it second), nor what they saw as its team. */
   const left = (slug: string) => {
     forgetPerson(inWorkspace(slug))
@@ -526,6 +539,18 @@ export function createSdk(client: Client, queryClient: QueryClient) {
           call(w.team[':staffId'].$patch({ param: { slug, staffId }, json })),
         onSuccess: () => teamChanged(slug),
       }),
+    /** The picture clients see beside a team member (owner). */
+    setPhoto: (slug: string) =>
+      mutationOptions({
+        mutationFn: ({ staffId, file }: { staffId: string; file: File }) =>
+          call(w.team[':staffId'].photo.$put({ param: { slug, staffId }, form: { file } })),
+        onSuccess: () => teamChanged(slug),
+      }),
+    removePhoto: (slug: string) =>
+      mutationOptions({
+        mutationFn: (staffId: string) => call(w.team[':staffId'].photo.$delete({ param: { slug, staffId } })),
+        onSuccess: () => teamChanged(slug),
+      }),
     /**
      * "Işgäri öçür" (book B-50): their bookings ahead make it `bookings_affected` (`details` lists them, each with the
      * colleagues who do it) until it's sent again with `affected: 'move' | 'keep' | 'cancel'`.
@@ -589,6 +614,29 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     updateProfile: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof businessProfileUpdateSchema>) => call(w.settings.profile.$patch({ param: { slug }, json })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    /** "Suratlar" (book B-37): up to 20, the first the cover. */
+    gallery: (slug: string) =>
+      queryOptions({
+        queryKey: keys.gallery(slug),
+        queryFn: ({ signal }) => call(w.settings.photos.$get({ param: { slug } }, abortWith(signal))),
+      }),
+    /** A photo at the end; `gallery_full` past 20. The app makes it smaller first. */
+    addPhoto: (slug: string) =>
+      mutationOptions({
+        mutationFn: (file: File) => call(w.settings.photos.$post({ param: { slug }, form: { file } })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    removePhoto: (slug: string) =>
+      mutationOptions({
+        mutationFn: (id: string) => call(w.settings.photos[':id'].$delete({ param: { slug, id } })),
+        onSuccess: () => settingsChanged(slug),
+      }),
+    /** Every photo once, in the new order; the first is the cover. */
+    orderPhotos: (slug: string) =>
+      mutationOptions({
+        mutationFn: (ids: string[]) => call(w.settings.photos.order.$put({ param: { slug }, json: { ids } })),
         onSuccess: () => settingsChanged(slug),
       }),
     /** The week and the special days (book B-39, B-40). */

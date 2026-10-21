@@ -17,6 +17,9 @@ next-env.d.ts
 .wrangler/
 .dev.vars*
 
+# uploaded photos in local development (MEDIA_DIR)
+apps/api/data/
+
 # tests
 coverage/
 playwright-report/

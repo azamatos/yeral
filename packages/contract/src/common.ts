@@ -8,6 +8,7 @@ import { MARKET } from '@yeral/domain/market'
 import { BOOKING_TYPES, LOCALES, PRICE_TYPES } from '@yeral/domain/model'
 import { E164, isMobile, isPhone, toE164 } from '@yeral/domain/phone'
 import { isYmd } from '@yeral/domain/time'
+import { PHOTO_MAX_BYTES } from '@yeral/domain/photos'
 import { z } from 'zod'
 
 export const ymdSchema = z.string().refine(isYmd, 'Expected a date YYYY-MM-DD').meta({ example: '2026-10-15' })
@@ -61,6 +62,14 @@ export const latLngSchema = z.object({ lat: z.number().min(-90).max(90), lng: z.
 /** A place on the map; `approximate` for home-based businesses until the booking is confirmed (≈ 1 km circle). */
 export const geoSchema = latLngSchema.extend({ approximate: z.boolean() })
 export const photoSchema = z.object({ url: z.string(), alt: z.string() }).meta({ id: 'Photo' })
+
+/**
+ * A photo sent as `multipart/form-data` (book F-101): up to 10 MB, JPEG, PNG or WebP by what its bytes say; the apps
+ * make it smaller first.
+ */
+export const photoUploadSchema = z
+  .object({ file: z.file().max(PHOTO_MAX_BYTES).meta({ type: 'string', format: 'binary' }) })
+  .meta({ id: 'PhotoUpload' })
 /**
  * The city of an address (book Q-107): the client shows it beside the address only when it differs from the city the
  * person chose.

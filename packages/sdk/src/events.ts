@@ -42,8 +42,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
   if (e.type === 'team.changed') {
     // a setup finished joins the switcher and the "Biznes" link
     out.push(keys.workspaces(), keys.invites(), keys.setup(), keys.me())
-    // the calendar's columns are the team's
-    if (e.business) out.push(keys.team(e.business), keys.calendar(e.business))
+    // the calendar's columns are the team's, and the page shows its specialists with their pictures
+    if (e.business) out.push(keys.team(e.business), keys.calendar(e.business), keys.businessAll(e.business))
   }
   // a client's record or notes: their pages, the calendar's alert markers, the requests' notes
   if (e.type === 'client.updated' && e.business) out.push(keys.clients(e.business), keys.calendar(e.business), keys.requests(e.business))

@@ -12,6 +12,7 @@ import { bookings, clients, identityChecks, staff, users } from '../../db/schema
 import type { AppEnv, User } from '../../http/env'
 import { ApiError } from '../../http/errors'
 import { randomToken, sha256Hex } from '../../lib/crypto'
+import { dropPhotos } from '../media/photos'
 import { releaseAccount } from '../me/account'
 import { signIn, unusedSince } from './sign-in'
 
@@ -70,14 +71,16 @@ export async function afterCode(c: Context<AppEnv>, phone: string, lang: Locale 
     if (name || (await holdsAnything(db, user.id))) return ask(c, user, name)
     // nothing of a person's in it, favourites at most: not worth a question, and not to be handed on. The number
     // starts afresh, once the account's row is locked and still found unused and empty (as an answer finds it)
+    const gone: string[] = []
     const still = await db.transaction(async (tx) => {
-      const [row] = await tx.select().from(users).where(eq(users.id, user.id)).for('update')
+      const [row] = await tx.select().from(users).where(eq(users.id, user.id)).for('no key update')
       if (row?.phone === phone && !row.name && unusedSince(row.lastSeenAt, now()) && !(await holdsAnything(tx, row.id))) {
-        await releaseAccount(tx, row, now(), 'passedOn')
+        gone.push(...(await releaseAccount(tx, row, now(), 'passedOn')))
         return null
       }
       return row
     })
+    await dropPhotos(c.var.deps, gone)
     // it changed meanwhile: still unused, it's asked about after all; in use again, it signs in as any account does
     if (still?.phone === phone && unusedSince(still.lastSeenAt, now())) return ask(c, still, await knownAs(db, still))
   }
@@ -93,9 +96,11 @@ export async function afterCode(c: Context<AppEnv>, phone: string, lang: Locale 
 export async function answerIdentity(c: Context<AppEnv>, ticket: string, yes: boolean, lang: Locale | undefined) {
   const { db, now } = c.var.deps
   const tokenHash = await sha256Hex(ticket)
+  // the let-go account's photo, taken from the store once it's gone
+  const gone: string[] = []
   const phone = await db.transaction(async (tx) => {
     const [asked] = await tx.select({ userId: identityChecks.userId }).from(identityChecks).where(eq(identityChecks.tokenHash, tokenHash))
-    const [old] = asked ? await tx.select().from(users).where(eq(users.id, asked.userId)).for('update') : []
+    const [old] = asked ? await tx.select().from(users).where(eq(users.id, asked.userId)).for('no key update') : []
     const settled = old ? await tx.delete(identityChecks).where(eq(identityChecks.userId, old.id)).returning() : []
     const check = settled.find((x) => x.tokenHash === tokenHash && x.expiresAt.getTime() > now())
     // an old ticket, or one already answered: the code step starts again
@@ -106,10 +111,11 @@ export async function answerIdentity(c: Context<AppEnv>, ticket: string, yes: bo
     if (!yes && old.phone === check.phone) {
       // in use again since the question: not this answer's to let go
       if (!unusedSince(old.lastSeenAt, now())) throw new ApiError('code_expired')
-      await releaseAccount(tx, old, now(), 'passedOn')
+      gone.push(...(await releaseAccount(tx, old, now(), 'passedOn')))
     }
     return check.phone
   })
+  await dropPhotos(c.var.deps, gone)
   return signIn(c, phone, lang)
 }
 

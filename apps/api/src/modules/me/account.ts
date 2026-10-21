@@ -49,7 +49,7 @@ export async function cancelInvitesTo(
  * their history without the number, so none joins the new holder, applies its marks to them or comes back for an invite
  * to the number.
  */
-export async function releaseAccount(tx: Queryable, account: User, now: number, how: 'deleted' | 'passedOn'): Promise<void> {
+export async function releaseAccount(tx: Queryable, account: User, now: number, how: 'deleted' | 'passedOn'): Promise<string[]> {
   const at = new Date(now)
   // the account's row as it is now (a phone change in flight finishes first), held so that a review being written lands
   // before this or finds the account gone. NO KEY UPDATE leaves other actions' foreign-key share locks on it alone, so
@@ -63,13 +63,15 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
     .from(staff)
     .innerJoin(businesses, eq(businesses.id, staff.businessId))
     .where(and(eq(staff.userId, user.id), eq(staff.level, 'owner'), isNotNull(businesses.setupStep)))
-  if (how === 'deleted' && drafts.length)
-    await tx.delete(businesses).where(
-      inArray(
-        businesses.id,
-        drafts.map((d) => d.id),
-      ),
-    )
+  // the photos that go with the account, for the caller to take from the store once this is done: its own, and a
+  // deleted draft's team pictures and gallery, as the deletes find them (a photo added meanwhile goes too)
+  const photos = [user.photo?.key]
+  if (how === 'deleted' && drafts.length) {
+    const ids = drafts.map((d) => d.id)
+    const pictures = await tx.delete(staff).where(inArray(staff.businessId, ids)).returning({ photo: staff.photo })
+    const gone = await tx.delete(businesses).where(inArray(businesses.id, ids)).returning({ photos: businesses.photos })
+    photos.push(...pictures.map((p) => p.photo?.key), ...gone.flatMap((b) => b.photos.map((p) => p.key)))
+  }
   const kept = how === 'deleted' ? [] : drafts.map((d) => d.id)
   // a workspace always has its one owner; the person's other rows leave their teams (ADR 0025)
   const rows = (await tx.select().from(staff).where(eq(staff.userId, user.id)).for('update')).filter((r) => !kept.includes(r.businessId))
@@ -143,6 +145,7 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
   await tx.delete(bookingLinks).where(inArray(bookingLinks.bookingId, tx.select({ id: bookings.id }).from(bookings).where(linked)))
   if (how === 'passedOn') await handOnRecords(tx, user, now)
   await tx.delete(users).where(eq(users.id, user.id))
+  return photos.filter((k): k is string => !!k)
 }
 
 /**

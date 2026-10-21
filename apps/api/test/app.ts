@@ -4,6 +4,7 @@ import type { Db } from '../src/db/client'
 import type { Deps } from '../src/deps'
 import { nullLogger } from '../src/ports/log'
 import { memorySms } from '../src/ports/sms'
+import { memoryStorage } from '../src/ports/storage'
 
 /** Demo clock: Wednesday 2026-10-14, 11:20 at the business. */
 export const DEMO_NOW = Date.parse('2026-10-14T06:20:00Z')
@@ -21,12 +22,14 @@ export function testApp(
 ) {
   const clock = { now: opts.now ?? DEMO_NOW }
   const sms = memorySms({ delivers: opts.smsDelivers })
+  const storage = memoryStorage()
   const deps: Deps = {
     db,
     site: opts.demo === false ? { ...site, demo: false } : site,
     now: () => clock.now,
     sms,
     media: (key) => `http://media.test/${key}`,
+    storage,
     log: nullLogger,
     trustedIpHeader: opts.trustedIpHeader,
     codeOnScreen: opts.codeOnScreen ?? false,
@@ -35,5 +38,5 @@ export function testApp(
     c.set('deps', deps)
     await next()
   })
-  return { app, clock, sms, deps }
+  return { app, clock, sms, storage, deps }
 }

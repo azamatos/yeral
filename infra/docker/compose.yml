@@ -32,6 +32,7 @@ services:
       YERAL_DOMAIN: yeral.app
       PORT: '3004'
       DEMO_MEDIA_DIR: /app/media-demo
+      MEDIA_DIR: /data/media
       # client IPs for rate limits come from Caddy (Caddyfile)
       TRUSTED_IP_HEADER: x-forwarded-for
     depends_on:
@@ -44,6 +45,7 @@ services:
     volumes:
       # the design's demo photos (free Unsplash licence, docs/design/assets/photos/CREDITS.md)
       - ../../docs/design/assets/photos:/app/media-demo:ro
+      - media:/data/media
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -89,3 +91,4 @@ services:
 
 volumes:
   pgdata:
+  media:

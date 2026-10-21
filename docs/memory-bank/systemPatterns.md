@@ -151,10 +151,13 @@ apps/api/src/
                     calendar (the team's bookings: free times, by phone and walk-in, move, cancel) · requests (answering)
                     settings (booking rules, profile, hours) · menu (services) · team (levels, invites, who is on which team)
                     clients (the phone-only block) · reviews (ratings) · events (live feed) · jobs (runDueJobs)
-                    later: the rest of the business endpoints (P2 step 4: schedules, clients, reviews, photos…) · admin/*
+                    setup (the wizard's draft) · media (photos kept without their metadata, dropped once nothing
+                      points at them; `uploadGuard` before an upload's body is read)
+                    later: the rest of the business endpoints (P2 step 4: schedules, clients, reviews…) · admin/*
   db/               schema/*.ts (Drizzle), migrations/ (SQL), seed/ (docs/design demo data + 13 categories)
   jobs/             runDueJobs(): expire requests at holdUntil, complete visits, reminders, SMS
-  ports/            sms (written to the log everywhere until a gateway; dev code 1234), files (server disk), clock
+  ports/            sms (written to the log everywhere until a gateway; dev code 1234), storage (photos people upload:
+                    the server's disk in `MEDIA_DIR`, memory in tests), clock
   config.ts         one place that reads env (process.env)
   entry/node.ts     one pool, the app, the jobs tick every minute
 ```

@@ -101,6 +101,8 @@ export const teamMemberSchema = z
     canAnswerOwn: z.boolean(),
     /** Has accepted: the row is linked to an account. */
     joined: z.boolean(),
+    /** The picture clients see beside their name (set by the owner, book B-44). */
+    photo: photoSchema.nullable(),
     invite: z.object({ id: idSchema, state: inviteStateSchema, sentAt: epochSchema, expiresAt: epochSchema }).nullable(),
   })
   .meta({ id: 'TeamMember' })

@@ -15,8 +15,9 @@
 
 http://api.yeral.localhost {
 	encode zstd gzip
+	# a photo is 10 MB at most (PHOTO_MAX_BYTES, @yeral/domain/photos); the form around it adds a few bytes
 	request_body {
-		max_size 10MB
+		max_size 11MB
 	}
 	header {
 		X-Content-Type-Options nosniff
