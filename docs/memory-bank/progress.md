@@ -214,6 +214,19 @@
   business shell `950cc1b` (#119), My account `b5a8adf` (#121), slice 1's how decisions `9ae5baa` (#131). Releases
   paused `76ed572` (#133, ADR 0009 amended). Ýeral's support line `580811e` (#134); the flaky demo-bookings test fixed
   `a2e0418` (#135). Main at a2e0418 deployed to the server by hand (migrations 0000–0038).
+- **2026-10-21 (evening) · P2 step 6 finished, the frontend's gaps closed** (each PR reviewed with `code-review`, one
+  round, and fixed before merging; details in `log/2026-10-21-*`): six concerns settled `0b58ef9` (#137); no business
+  verified while the code shows on the screen `9d97d5a` (#138, ADR 0023 amended); `GET /v1/auth/mode` for the
+  sign-in screens `23a1c14` (#139); the business logo `cc2c06b` (#140, migration 0039); the "Continue setting up"
+  card's data `9874568` (#141); the demo workspace made again every night `d3fc296` (#143, 0040); what the leave and
+  delete confirms touch `aa3fe98` (#142); the switcher's page state, specialization and reviews to answer `0c6a8b7`
+  (#144); a day in the demo workspace for any visitor `62709b5` (#145, ADR 0019 amended); two unused columns dropped
+  `10c3bce` (#147, 0041, the first contract migration); the demo note on both sign-ins `3469215` (#146). Left open:
+  #148 (the "How was it?" card's api, in conflict after #147) and `feat/api-address-search` (no PR yet).
+- **2026-10-22 · The owner's answers:** no backups and no error tracking or uptime alerts for the demo launch (with
+  the real working MVP, P6; Claude's concern on the uptime check); the first launch approved in advance; the DNS
+  records for `api`, `business` and `cms` now, `yeral.app` and `www` at launch (`infra/server/README.md`, "DNS
+  records"); book chapter 9, 22.10.2026.
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.

@@ -115,7 +115,7 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    setting (Q-163; done 20.10.2026), the 4 undo reasons (ROUND6 A6; done 20.10.2026), the answer time worked out (Q-113; done 20.10.2026, declines count with step 4), phone-only clients and paused
    businesses (Q-154; done 20.10.2026: the business page, the booking detail and the link page), the owner's preview of an unverified page (F-032; done 20.10.2026), no average bill and the hidden-price text
    (Q-103; done 20.10.2026), lateness fixed at 15 min (Q-118; done 20.10.2026), a price range filter (done 20.10.2026), the failed-SMS alert and late reminders dropped
-   (Q-284; done 20.10.2026, the alert reaching people with F-209 in step 7), the SMS for a move not accepted (Q-289; done 20.10.2026), offered times keeping a request on top of Upcoming (C-40; done 20.10.2026); and the new engine rules: *Başga ýerde* (Q-272; done 20.10.2026, the calendar block with step 4), blocked time
+   (Q-284; done 20.10.2026, the alert reaching people with F-209 at the real working MVP, P6), the SMS for a move not accepted (Q-289; done 20.10.2026), offered times keeping a request on top of Upcoming (C-40; done 20.10.2026); and the new engine rules: *Başga ýerde* (Q-272; done 20.10.2026, the calendar block with step 4), blocked time
    (F-121) and internal statuses (F-104, F-133).
 4. **Business endpoints** (the booking rules, the services menu, the profile with the SMS when the business moves (Q-215), answering requests, the team's bookings by phone and walk-in, its moves and cancels, the hours and special days, the staff schedules and days off (B-47), removing someone with their bookings (B-50), blocked time (B-18), internal statuses (B-29), the calendar day and week view (B-16, B-17) and complaints (B-28) done 20.10.2026; the clients: list, lookup, card, adding, edit, notes, switches and delete (B-32–B-36), the bookings list and its CSV export (B-30, B-31), reviews with the reply and the report (B-53, B-54), the setup wizard's draft and its saved step (Q-200, B-02–B-06), photos behind a storage port (F-084, F-101), the 5-minute warning and the invites' expiry (S-01, S-13), the address's floor and room (F-099) 21.10.2026): workspace, calendar, requests, bookings with CSV export (F-135), clients, team, settings,
    services, hours, reviews; photos (F-084, F-101) stored on the server's disk behind a storage port; the address with
@@ -132,9 +132,10 @@ endpoints for client screens, none for businesses or the Ýeral team, and nothin
    lists and search until tables and classes ship. It doesn't wait for the design: the seed's example businesses already
    have English texts; the demo workspace follows the business boards' demo (`docs/design/business/demo-data.json`
    and the v0.6 boards), while `docs/design/demo-data.json` stays the v0.5 client data in Turkmen.
-7. **Before the first launch:** releases back (paused 21.10.2026, ADR 0009) and deploys from GitHub over SSH after the owner approves a release (ADR 0020), nightly
-   backups to Cloudflare R2 with a restore drill (F-211), error tracking and uptime alerts (F-209; it alerts on the `job gave up` line), sitemap data
-   (F-197; done 21.10.2026). Before SMS go out: a daily cap and a rate limit per business on the SMS its team's bookings and cancels (done 21.10.2026)
+7. **Before the first launch:** releases back (paused 21.10.2026, ADR 0009) and deploys from GitHub over SSH after the owner approves a release (ADR 0020), sitemap data
+   (F-197; done 21.10.2026). Backups to Cloudflare R2 with a restore drill (F-211) and error tracking with uptime alerts (F-209; it alerts on the
+   `job gave up` line) aren't for the first launch, a demo: they come with the real working MVP, before any real business's data (P6; owner,
+   22.10.2026). Before SMS go out: a daily cap and a rate limit per business on the SMS its team's bookings and cancels (done 21.10.2026)
    send to numbers it types in, and none from a business still in review (the backend review of 20.10.2026: they carry
    the business's own words, "Other reason", under Ýeral's sender).
 
@@ -173,8 +174,11 @@ The order of Q-001: every slice ends working end to end on a local machine, with
 
 The client site, the business app, the admin tool and the api go to production on the owner's server (a netcup VPS 1000 in the EU (4 vCPU, 8 GB, 128 GB)) in Docker, with Cloudflare for DNS (ADR 0007, ADR 0023), from a release the owner approves
 (ADR 0020). The server, its shared HTTPS front door and the api's stack are set up (19.10.2026, `infra/server`);
-deploys from GitHub and backups come with P2 step 7. The new client site replaces the old one on
-yeral.app. No real businesses yet: it's a demo with the example businesses and the demo workspace, and nothing is
+deploys from GitHub come with P2 step 7; no backups or error tracking for this demo (owner, 22.10.2026). The owner
+approved the launch in advance (22.10.2026): it goes out once P4's slices are built and checked locally, and Claude
+deploys. DNS (`infra/server/README.md`, "DNS records"): `api`, `business` and `cms` point at the server from
+22.10.2026; at launch `yeral.app` and `www` move from the legacy Worker to the server. The new client site replaces
+the old one on yeral.app. No real businesses yet: it's a demo with the example businesses and the demo workspace, and nothing is
 verified while the sign-in code shows on the screen (Q-036, owner 21.10.2026).
 
 ### P6 · Turkmenistan launch
@@ -186,6 +190,8 @@ After investment, when the owner sets the date:
 - A lawyer in Turkmenistan: law 519-V on personal data, the privacy policy and terms (Q-033, Q-037).
 - The server in Turkmenistan (below), the data moved, the addresses switched (ADR 0023).
 - An SMS provider and real SMS sign-in; the first-launch mode switched off for this market (Q-036).
+- Before any real business's data: nightly backups with a restore drill (F-211) and error tracking with uptime alerts
+  (F-209), left out of the demo launch (owner, 22.10.2026).
 - The first real businesses, added by the team in the admin tool after meeting their owners (Q-002); verifying
   opens once the code no longer shows on the screen (Q-036, 21.10.2026).
 
@@ -194,7 +200,7 @@ After investment, when the owner sets the date:
 | When | What | Monthly |
 |---|---|---|
 | From now | the server, netcup VPS 1000, shared with the owner's other projects; Storybook stays on Cloudflare | €16.68 a month, €12.32 on a 12-month term (with German VAT) |
-| First launch | nothing more: the same server; database backups to Cloudflare R2 (free up to 10 GB); no SMS | — |
+| First launch | nothing more: the same server; no backups or error tracking for the demo (owner, 22.10.2026); no SMS | — |
 | Turkmenistan launch | the server, SMS per message, the lawyer once | priced then, in manats |
 
 The domain yeral.app is already paid for.
@@ -225,8 +231,8 @@ so there is time to test it from Ashgabat, rehearse the move and fix what breaks
 | P1 | pasted the design prompts (rounds 1–3.4, stopped 20.10.2026); now only an occasional small prompt for a critical detail |
 | P2 | nothing required |
 | P3–P4 | reviews the built components in Storybook and each finished slice in the local app; that review replaces the canvas check |
-| P5 | approves the release; adds the DNS records; sets up the second factor of their admin account; meets the first businesses and adds them in the admin tool |
-| P6 | the investment, the lawyer, buying the server, the SMS provider account, the native language check |
+| P5 | approved in advance (22.10.2026); adds the DNS records for `api`, `business` and `cms` now and moves `yeral.app` and `www` to the server at launch (`infra/server/README.md`); sets up their admin account (a password and an authenticator app) from the setup link Claude makes once the admin tool is live: only a login and a name are needed, nothing secret goes through the chat |
+| P6 | the investment, the lawyer, buying the server, the SMS provider account, an R2 token for the backups and an error-tracking account, the native language check, meeting the first businesses |
 
 ## Risks we carry
 
@@ -236,3 +242,5 @@ so there is time to test it from Ashgabat, rehearse the move and fix what breaks
 - **"Everything flexible"** turns every option into a setting (Claude's concern on Q-105).
 - **The database awake all day** for the every-minute jobs costs compute (Q-250).
 - **Turkmen quality:** Claude's Turkmen is its weakest language (Claude's concern on Q-101).
+- **Nobody hears the demo is down:** no uptime check at the first launch (Claude's concern on the owner's 22.10.2026
+  answer, F-209); a free check could come back on its own.

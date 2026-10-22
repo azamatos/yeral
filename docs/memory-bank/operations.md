@@ -28,7 +28,7 @@ shared Caddy (section "The own server" below). Cloudflare keeps:
 | DNS for `yeral.app` | records point at the server, not proxied (Caddy gets the certificates) |
 | `storybook.yeral.app` | Worker `yeral-storybook`, deployed from `main` |
 | `yeral.app`, `www` | Worker `yeral-web` = `apps/legacy` until the new client site replaces it |
-| backups | R2 (P2 step 7; needs the owner's token) |
+| backups | R2 with the real working MVP, not the demo launch (owner, 2026-10-22; needs the owner's token then) |
 
 **Cost:** the server (€16.68 a month, €12.32 on a 12-month term), shared with the owner's other projects; Workers
 Free for Storybook and legacy; R2 free up to 10 GB.
@@ -36,8 +36,9 @@ Free for Storybook and legacy; R2 free up to 10 GB.
 **Left on the owner's accounts, unused** (delete only if the owner asks): the Neon project Yeral (Frankfurt) and the
 Hyperdrive config `yeral-production` (created 2026-10-18).
 
-**Owner's one-time steps** (when the milestone needs them): the DNS records when going public, an R2 token for
-backups, accounts for error tracking and uptime checks (P2 step 7).
+**Owner's one-time steps** (when the milestone needs them): the DNS records (`infra/server/README.md`, "DNS records":
+`api`, `business`, `cms` now, `yeral.app` and `www` at launch); with the real working MVP (P6), an R2 token for backups
+and accounts for error tracking and uptime checks (owner, 2026-10-22: not for the demo launch).
 
 ## Local database and API tests (since M2d)
 
@@ -100,8 +101,8 @@ backups, accounts for error tracking and uptime checks (P2 step 7).
   Turn it on with the examples when the first launch opens.
 - Photos: the ones people upload on the server's disk behind a storage port (`ports/storage.ts`), in `MEDIA_DIR` (the
   `media` volume at `/data/media` on the server and in the local stack; `apps/api/data/media` in development),
-  served at `/media/up/…`; the design's demo photos come with the image (above). The nightly backup (step 7) must take the
-  volume along with the database.
+  served at `/media/up/…`; the design's demo photos come with the image (above). The nightly backup (with the real working MVP, P6) must
+  take the volume along with the database.
 
 ## The production-like stack (since M2g)
 
@@ -134,8 +135,8 @@ owner's Claude Code allows `Bash(ssh yeral-vps:*)`). It also hosts the owner's o
 - `/srv/edge`: one Caddy for every project (HTTPS by itself); projects add `sites/<project>.caddy`.
 - `/srv/yeral`: Postgres 18 and the api (image built on the server from a `git archive`), `.env` with the database
   password (server only). First deploy 2026-10-19 at `382c6bc`: health ok, 13 categories.
-- Not yet: the `api.yeral.app` DNS record (then `PUBLIC=1` adds the Caddy site), GitHub deploys over SSH, nightly
-  backups to R2 (needs an R2 token in `.env`).
+- Not yet: the `api.yeral.app` DNS record (the owner adds it, 2026-10-22; then `PUBLIC=1` adds the Caddy site), GitHub
+  deploys over SSH; nightly backups to R2 (an R2 token in `.env`) come with the real working MVP (P6).
 
 **The Turkmenistan deployment** (ADR 0023) is the same stack on a second server inside the country: buy it about a
 month before that launch → test from Ashgabat that its address and the DNS work without a VPN → run `setup.sh` and the
@@ -174,7 +175,8 @@ wait for its dependencies.
 
 - GitHub secrets, never in the repo or in chat: `CLOUDFLARE_API_TOKEN` (Workers deploys of Storybook and legacy);
   later the SSH deploy key for the own server, the error tracker's DSN and the SMS gateway keys.
-- On the server: `/srv/yeral/.env` (mode 600) holds the database password, later the R2 token for backups.
+- On the server: `/srv/yeral/.env` (mode 600) holds the database password and `ADMIN_SECRET_KEY`, later (P6) the R2
+  token for backups.
 - The owner creates tokens in the providers' dashboards and stores them with `gh secret set NAME --env production`
   (the value is typed into the prompt).
 - Local: `.env.local` per app (gitignored); `.env.example` committed and documents every variable.

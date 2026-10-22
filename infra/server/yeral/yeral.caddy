@@ -1,5 +1,7 @@
 # Ýeral's sites on the shared Caddy. deploy.sh copies this file to /srv/edge/sites/ once the DNS records exist
-# (DNS only, not proxied), so Caddy can get the certificates. Client, business and cms hosts join with their apps.
+# (DNS only, not proxied), so Caddy can get the certificates. Client, business and cms hosts join with their apps (the
+# client with www redirecting to the apex); until then business. and cms. resolve here and get a certificate error.
+# The records: infra/server/README.md, "DNS records".
 # Only an A record for now: Docker's edge network has no IPv6, so a visitor over IPv6 would reach Caddy as the Docker
 # gateway and every such visitor would share one rate-limit bucket (infra/server/README.md, "Still to do").
 api.yeral.app {

@@ -1,35 +1,34 @@
 # Active context
 
-_Last updated: 2026-10-21_
+_Last updated: 2026-10-22_
 
 ## Current focus
 
-**2026-10-21: the backend stack and P4 slice 1 are merged.** GitHub Actions started no job from 22:53 UTC on 20.10
-(account billing) until the owner made the repo public on 21.10. The 12 backend PRs that waited (P2 steps 4–7) were
-then rebased and merged in order by web-b2: #112 the setup wizard's draft, #116 photos, #117 the 5-minute warning and
-invites' expiry, #120 "Floor, room", #122 the Ýeral team's sign-in (ADR 0026), #123 verify, send back, hide, #124
-reported reviews, #125 close a workspace, #126 add a business for its owner, #127 the first launch's examples and
-appointments only, #128 a business's SMS limits, #129 the sitemap data. Migrations 0031–0038 came in that order
-(0033 and 0035 were replaced in review: a development database migrated on an early commit of #117 or #122 must be
-set up again). On the way: the deleted changesets went into `log/2026-10-21-releases-paused.md` ("Unreleased"), the
-apps' stand-in accounts got `photo: null`, and #122's admin test of the try limits got a 60 s timeout (PBKDF2 at
-600,000 rounds ran past 20 s on CI). P4 slice 1 (accounts) is built: the business app with its sign-in, shell and My
-account, the client site with its login and profile (#99, #102, #107, #108, #110, #111, #113–#115, #118, #119, #121,
-#131; book chapter 10). Later the same day: Ýeral's support line (#134; the owner's phone and Telegram until Ýeral has
-its own, in `MARKET.support`; Contact Ýeral in the business app, the examples' phone), the flaky demo-bookings test
-fixed (#135: the seed's generated codes never take a design code), and main at a2e0418 deployed to the server by hand
-(Server, below). The day's lesson, from the owner: at a wall, stop, notify, wait (the global CLAUDE.md, "Walls" and
-"Unattended runs").
+**2026-10-22: the backend is all but done for the first launch; the owner answered what it still asked for.** The
+evening of 21.10 merged #137–#147 (each reviewed with `code-review`, one round, on green CI): six concerns settled with
+the recommended option (#137); no business verified while the sign-in code shows on the screen (#138, ADR 0023
+amended); the sign-in screens ask `GET /v1/auth/mode` before a number is typed (#139); the business logo (#140,
+migration 0039); the "Continue setting up" card's data (#141); what the leave and delete confirms touch (#142); the
+business app's demo workspace, made again every night (#143, migration 0040), and a day in it for any visitor (#145,
+ADR 0019 amended: demo sessions in a cookie of their own); the switcher's page state, specialization and reviews to
+answer (#144); the demo note on both sign-ins (#146); two unused columns dropped (#147, migration 0041, a contract
+migration: no rollback to an older image past it). On 22.10 the owner answered (Owner's direction): no backups and no
+error tracking for the demo launch, both with the real working MVP (P6); the first launch approved in advance; the DNS
+records for `api`, `business` and `cms` now (`infra/server/README.md`, "DNS records").
+
+Open: **#148** the "How was it?" card's api (F-243, migration 0042): green, but in conflict since #147 merged under
+it; it needs a rebase and its review. **`feat/api-address-search`** (`39259e4`): the address search behind the map pin
+through a geocoder port (Photon over OpenStreetMap, ADR 0027 in the branch), pushed without a PR or review.
 
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16). Releases are paused until the MVP works
-(#133, ADR 0009 amended; the `release` skill is now `ship`): no versions or changesets, and production goes by hand when
-the owner asks. The api and Postgres run on the owner's server since 2026-10-19 (not public), the api at a2e0418 since
-2026-10-21; yeral.app still serves `apps/legacy`. P2: steps 0–3 done; step 4 done but the business logo and the map
-address search; step 5 (admin endpoints) done; step 6 has the examples and appointments only (the demo workspace, F-242,
-isn't built); step 7 has the SMS limits and the sitemap data. P4: slice 1 done, slice 2 (business setup) next. The
-design redraw stopped (ADR 0021 amended 2026-10-20): the apps are built from the book and the drawn boards, and Claude
-Design is used only for a critical undrawn detail. The frontend (web-b2) builds slice by slice: components in Storybook,
-then the apps.
+(#133, ADR 0009 amended; the `release` skill is now `ship`): no versions or changesets, and production goes by hand.
+The api and Postgres run on the owner's server since 2026-10-19 (not public), the api at a2e0418 since 2026-10-21;
+main is 12 merges ahead of it (migrations 0039–0041). yeral.app still serves `apps/legacy`. P2: steps 0–6 done (step 4
+but the map address search, in the open branch); step 7 has the SMS limits and the sitemap data, and keeps releases
+and deploys from GitHub (backups and error tracking moved to P6, owner 22.10). P4: slice 1 done, slice 2 (business
+setup) next. The design redraw stopped (ADR 0021 amended 2026-10-20): the apps are built from the book and the drawn
+boards, and Claude Design is used only for a critical undrawn detail. The frontend (web-b2) builds slice by slice:
+components in Storybook, then the apps.
 
 ## Owner's direction
 - 2026-10-13: infrastructure first; Cloudflare now, own server (Docker + nginx, Cloudflare for DNS) later; name/domain in
@@ -95,6 +94,12 @@ then the apps.
   before the work starts, with its full description (no IDs to look up).
 - 2026-10-21 (later), on the code on the screen (Q-036): "Go with option B …, its demo version still. When we launch in
   TKM we will add real phone number code protection." No real businesses at the first launch.
+- 2026-10-22: "Backups are not necessary for now. We can add it later on real working MVP. Error tracking is also
+  not favorite for demo one." Both come with the real working MVP, before any real business's data (P6); uptime alerts
+  wait with them (Claude's concern: nobody hears that the demo is down; a free uptime check could come back alone).
+  Until then the api's alert lines stay in its Docker logs, read at each deploy. "I approve launch": the first launch
+  is approved in advance and goes out once the apps are built and checked locally. The owner adds the DNS records
+  (`infra/server/README.md`, "DNS records"). For the admin account nothing secret goes through the chat.
 
 ## Decisions
 
@@ -154,8 +159,13 @@ unless critical). Six concerns settled the same way (chapter 9, 21.10.2026): Q-2
 no password, Q-259 a "How was it?" card once per completed visit (F-243, no SMS), Q-105 flexible where businesses
 differ with good defaults, Q-103 a price level later (F-244), Q-101 a native proofread before the Turkmenistan launch.
 Q-036's concern was critical; the owner chose: no real businesses at the first launch, they come with the Turkmenistan
-launch's real SMS sign-in; while the code shows on the screen the api verifies nothing (`verify_unavailable`). The
-book has no open question or concern left.
+launch's real SMS sign-in; while the code shows on the screen the api verifies nothing (`verify_unavailable`; ADR
+[0023](../decisions/0023-one-deployment-per-market.md) amended, #138). [0019](../decisions/0019-own-phone-login-and-sessions.md)
+amended: the demo workspace's sessions in a cookie of their own (#145). The book has no open question left.
+
+2026-10-22 (no ADR; the book's chapter 9, 22.10.2026): backups (F-211) and error tracking with uptime alerts (F-209)
+with the real working MVP, not the demo launch (owner; Claude's concern on the uptime check); the first launch
+approved in advance (owner); DNS for the own server (Claude, delegated).
 
 ## Open questions
 
@@ -176,38 +186,40 @@ Where the old questions went (2026-10-17):
 
 ## Next steps
 
-1. **P4 slice 2, business setup** (the wizard, profile, services, hours, team, booking rules, link and QR; book
-   chapter 10): its endpoints are merged (the setup draft #112, photos #116, the floor #120, step 4's settings). Also
-   wire the photo upload #116 brought into My account (`ProfilePhoto`'s `upload` and `src`: `PUT /v1/me/photo`,
-   `me.photo`).
-2. **The frontend's backend gaps** (from web-b2, small PRs): the unfinished-setup card's category and steps done
-   beside `{slug, name, step}` (Q-200); per workspace in `GET /v1/me/workspaces` the business's status (for banners),
-   the person's specialization and the unanswered reviews count; for leaving a workspace, the person's bookings and
-   requests ahead there; for deleting an account, the upcoming bookings it would cancel; `POST /auth/code`: its own
-   error code for a number that isn't a mobile; the comment on `mobileInputSchema` still names 61–65, 71; for slice
-   3, the "How was it?" card (F-243): a per-booking "card closed" mark and the completed visits that still show a
-   card, on `/v1/me/bookings` or a small endpoint of its own.
-3. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md` for the api, `deploy.yml` for
-   legacy). The first admin account isn't made yet: `docker compose -f /srv/yeral/compose.yml run --rm api node
-   dist/cli.js admin-invite <login> "<name>"` when the admin tool needs one.
-4. **P2 left:** step 6's demo workspace (F-242: a session kind that can't act as a client, a nightly reseed of one
-   workspace, demo numbers that can't be real people's); step 7: deploys from GitHub, nightly backups to R2 with a
-   restore drill (the `media` volume and `.env` too), error tracking and uptime alerts (they watch `job gave up`,
-   `business SMS limit reached`, `admin codes guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`), the
-   code-SMS cap; step 4: the business logo, the map address search (F-014, needs a geocoder choice).
+1. **Finish the two open backend pieces:** rebase #148 on main (its migration stays 0042), review it, merge; open a PR
+   for `feat/api-address-search`, review it, merge.
+2. **P4 slice 2, business setup** (the wizard, profile, services, hours, team, booking rules, link and QR; book
+   chapter 10): its endpoints are merged (the setup draft #112 and its card #141, photos #116, the logo #140, the floor
+   #120, step 4's settings; the address search once merged). Also: the photo upload in My account (`ProfilePhoto`'s
+   `upload` and `src`: `PUT /v1/me/photo`, `me.photo`); the Demo frame from `me.demo` (the signed-out sidebar with
+   "Log in", the Demo banner, `demo` in the switcher), "Try the business app" (`sdk.demo.start()`) on the login and the
+   wizard, and `demo_number`'s hint; the leave and delete confirms' counts (#142); the page-state banner (#144).
+3. **Deploy by hand** (no release: #133; `infra/server/README.md`): once the owner's `api` record exists, deploy main
+   with `PUBLIC=1` and check `https://api.yeral.app/v1/health`; the server is at a2e0418, and 0041 drops columns, so
+   no image older than it runs after that deploy. The first launch (approved in advance, 22.10) goes when slices 2–7
+   are built and checked locally: the switches `SIGN_IN_CODE_ON_SCREEN`, `EXAMPLE_BUSINESSES`, `DEMO_WORKSPACE` on,
+   then the owner moves `yeral.app` and `www`.
+4. **P2 left:** step 7's releases and deploys from GitHub, and the code-SMS cap. Follow-ups: `/v1/health` comparing
+   the database's newest migration with the image's; the jobs runner's `reviewAsk` drop branch, dead after the deploy
+   with 0041; checking the settings permission before an upload's body is read; the invite-accept route reading every
+   workspace. With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
+   `.env` too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
+   guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
-**Waiting on the owner:** the rest of the cleanup, by hand since the agents' permission checks block it: the Neon
-project "Yeral" (done on 21.10 by the owner: the 42 merged branches on GitHub, the 80 local ones, `.neon` and
-`apps/api/dist-worker/` in the main checkout, the Actions setting, the Hyperdrive config `yeral-production`); later an
-R2 token, accounts for error tracking and uptime checks, the DNS records when going
-public. The old Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an early Ýeral prototype) stays until all
-the web apps are live, then goes (the owner, 21.10); the owner's other Pages projects aren't Ýeral's and stay.
+**Waiting on the owner:** the DNS records of 22.10 (`api`, `business`, `cms`, and the two TXT records; then `yeral.app`
+and `www` at the launch). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
+runs `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` (login 3–32
+of a-z 0-9 . -) and the owner opens the setup link (24 hours, `cms.<domain>/setup/<token>`), picks the password, adds
+the authenticator app and keeps the 10 recovery codes. `docs/design/Claude outputs/yeral-design-v0.5.zip` (untracked,
+in the main checkout) is the owner's to delete. The old Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an
+early Ýeral prototype) stays until all the web apps are live, then goes (the owner, 21.10); the owner's other Pages
+projects aren't Ýeral's and stay. Later (P6): an R2 token, accounts for error tracking and uptime checks.
 
 **Server:** `ssh yeral-vps` (the owner allowed `Bash(ssh yeral-vps:*)`); deploy by hand with `infra/server/README.md` →
 "Deploying Ýeral by hand". Since 2026-10-21 it runs main at a2e0418 (api image `yeral-api:a2e04184e1e3`, deployed by
 web-b2): migrations 0000–0038 applied, the 6 cities and 13 categories, no businesses; `ADMIN_SECRET_KEY` in
-`/srv/yeral/.env`, no admin account yet; `EXAMPLE_BUSINESSES` and `SIGN_IN_CODE_ON_SCREEN` off (the examples can go on
-whenever the first launch opens); the edge Caddyfile with the token log filter. Kept from the deploy: the database
+`/srv/yeral/.env`, no admin account yet; `EXAMPLE_BUSINESSES`, `SIGN_IN_CODE_ON_SCREEN` and `DEMO_WORKSPACE` off (on
+when the first launch opens); the edge Caddyfile with the token log filter. Kept from the deploy: the database
 before it (`/srv/yeral/backup-2026-10-21-before-a2e0418.sql.gz`) and the old edge config
-(`/srv/edge/Caddyfile.before-2026-10-21`). Firewall SSH/80/443, fail2ban, keys only; not public yet (no DNS record),
-no backups to R2, and the `deploy` user has no key yet (P2 step 7).
+(`/srv/edge/Caddyfile.before-2026-10-21`). Firewall SSH/80/443, fail2ban, keys only; not public yet (the DNS records
+are the owner's, 22.10); no backups to R2 (P6), and the `deploy` user has no key yet (P2 step 7).

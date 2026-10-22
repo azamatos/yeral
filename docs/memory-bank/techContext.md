@@ -75,9 +75,9 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | The own server (netcup VPS 1000, EU) | runs the api, its jobs, Postgres and later the apps in Docker (ADR 0024; `infra/server`) |
 | Docker + Compose | the server's stacks and the local production-like stack: one image per deployable (`turbo prune --docker`, multi-stage) |
 | Caddy 2 | the front door on the server (shared by the owner's projects) and locally: HTTPS certificates by itself, reverse proxy, compression |
-| Cloudflare: DNS, Workers + wrangler 4, R2 | DNS (not proxied); Storybook and the legacy site as Workers; R2 for backups |
+| Cloudflare: DNS, Workers + wrangler 4, R2 | DNS (not proxied); Storybook and the legacy site as Workers; R2 for backups with the real working MVP (P6) |
 | GitHub Actions | CI/CD; deploys to the server over SSH from P2 step 7 |
-| Sentry or similar (free tier) | error tracking and alerts, decided with P2 step 7 |
+| Sentry or similar (free tier) | error tracking and alerts, chosen with the real working MVP (P6): not for the demo launch (owner, 2026-10-22) |
 | Cloudflare Web Analytics | privacy-friendly page analytics now; Umami on the own server later |
 
 ## Where shared things live
