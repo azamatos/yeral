@@ -870,7 +870,7 @@ flowchart TD
 1. Booking SMS go into a queue with their planned time.
 2. Right before sending, the system checks the booking again: its state, its time and the switches (S-04).
 3. If sending fails, it tries again after 1, 2, 4 and 8 minutes.
-4. After 5 failed tries, about 15 minutes in all, it gives up, keeps the record and alerts the Ýeral team (Q-284, decided 18.10.2026). **Code differs:** the give-up writes an error line, `job gave up`, that error tracking (F-209, P2 step 7) turns into an alert; until then nobody is told.
+4. After 5 failed tries, about 15 minutes in all, it gives up, keeps the record and alerts the Ýeral team (Q-284, decided 18.10.2026). **Code differs:** the give-up writes an error line, `job gave up`, that error tracking (F-209, with the real working MVP: P6, owner 22.10.2026) turns into an alert; until then nobody is told.
 
 **Edge cases**
 

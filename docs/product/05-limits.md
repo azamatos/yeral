@@ -341,7 +341,7 @@ flowchart LR
 | Staff SMS | only for "new request" and "Ýeral" messages | Each person | business spec §22 |
 | Staff channels on MVP | browser and SMS; "in the app" once the business app ships | Fixed | business spec §16 |
 
-**Code differs:** after 5 failed tries the give-up writes an error line, `job gave up`, that error tracking (F-209, P2 step 7) turns into an alert; until then nobody is told (code: apps/api/src/modules/jobs/run.ts). Reminders keep
+**Code differs:** after 5 failed tries the give-up writes an error line, `job gave up`, that error tracking (F-209, with the real working MVP: P6, owner 22.10.2026) turns into an alert; until then nobody is told (code: apps/api/src/modules/jobs/run.ts). Reminders keep
 out of the night (`reminderPlan()`, Q-285) and never go once the visit has started (Q-284; 20.10.2026).
 
 > Open question Q-285: client SMS at night.

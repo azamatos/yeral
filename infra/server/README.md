@@ -43,12 +43,48 @@ the api and checks `/v1/health`. With `PUBLIC=1` it also adds Ýeral's sites to 
 `api.yeral.app` → the server's address exists (DNS only, not proxied). Until then the api is reachable only inside the
 server.
 
+## DNS records
+
+The zone `yeral.app` is on Cloudflare (ADR 0024; the plan: book chapter 9, 22.10.2026). The owner edits it in the dashboard:
+yeral.app → DNS → Records. The server's IPv4 address is the `hostname` of `ssh -G yeral-vps`.
+
+Every record that points at the server is **DNS only** (the grey cloud, not proxied): Caddy gets its own certificates
+from Let's Encrypt, and it must see each visitor's real address, since the api's rate limits count by it. TTL Auto.
+Only A records, no AAAA (IPv6, below).
+
+**Now** (the owner, 22.10.2026):
+
+| Type | Name | Content | Proxy |
+|---|---|---|---|
+| A | `api` | the server's IPv4 address | DNS only |
+| A | `business` | the server's IPv4 address | DNS only |
+| A | `cms` | the server's IPv4 address | DNS only |
+| TXT | `@` | `v=spf1 -all` | — |
+| TXT | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;` | — |
+
+The two TXT records tell mail servers that no mail ever comes from `yeral.app` (Ýeral sends no e-mail), so nobody can
+send mail in its name. `api` serves once a deploy runs with `PUBLIC=1` (above). `business` and `cms` answer with a
+certificate error until their apps join `yeral.caddy`: harmless, nobody is sent there before.
+
+**At the first launch** (once the new client site is deployed to the server and its hosts are in `yeral.caddy`):
+
+1. Workers & Pages → `yeral-web` (the legacy site, `apps/legacy/wrangler.jsonc`) → Settings → Domains & Routes:
+   remove `yeral.app` and `www.yeral.app`. Then DNS → Records should hold no record named `yeral.app` or `www`;
+   delete any left.
+2. DNS → Records: A `@` and A `www` → the server's IPv4 address, DNS only. `www` redirects to the apex in
+   `yeral.caddy`.
+3. Claude reloads Caddy, which gets the certificates at once, and checks both addresses.
+
+`storybook` stays as it is: a proxied record of the Worker `yeral-storybook`. Add no CAA record: Caddy falls back to
+another certificate authority when Let's Encrypt fails, and the proxied records use Cloudflare's own.
+
 ## Still to do
 
 - Deploys from GitHub Actions over SSH with the `deploy` user, after the owner approves a release (ADR 0020).
-- A nightly database backup to Cloudflare R2: needs an R2 token, which the owner creates and puts in the server's
-  `.env` (never in chat or git).
-- The client, business and cms sites join `yeral.caddy` with their apps.
+- The client, business and cms sites join `yeral.caddy` with their apps (`www` → the apex with the client site).
+- With the real working MVP, before any real business's data (book chapter 10, P6; not for the demo launch, owner
+  22.10.2026): a nightly database backup to Cloudflare R2 with the `media` volume and `.env`, which needs an R2 token
+  the owner creates and puts in the server's `.env` (never in chat or git); error tracking and uptime alerts.
 - IPv6: the server has an IPv6 address, but the `edge` network doesn't, so Docker's userland proxy would hand Caddy
   the gateway's address for every IPv6 visitor, and rate limits would lump them together. Until Docker's IPv6 is on
   (`"ipv6": true`, `"ip6tables": true`, the `edge` network recreated with IPv6; it touches every project on the
