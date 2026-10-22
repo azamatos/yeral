@@ -73,8 +73,17 @@ function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
   if (step !== asked) return <Navigate to="/setup/$step" params={{ step }} replace />
   // appointments only at the first launch: the table and class categories come later (book Q-030)
   const pickable = categories.data.items.filter((c) => c.bookingTypes.includes('appointment'))
+  // a category the list no longer offers is picked again
+  const categoryId = draft && pickable.some((c) => c.id === draft.categoryId) ? draft.categoryId : null
   return (
-    <Steps key={draft?.slug ?? 'new'} step={step} me={me} draft={draft} more={workspaces.data.items.length > 0} categories={pickable} />
+    <Steps
+      key={draft?.slug ?? 'new'}
+      step={step}
+      me={me}
+      draft={draft && { ...draft, categoryId }}
+      more={workspaces.data.items.length > 0}
+      categories={pickable}
+    />
   )
 }
 
@@ -84,6 +93,7 @@ type Draft = {
   name: string
   step: SetupStep
   category: string
+  /** Null when the list no longer offers the draft's category. */
   categoryId: string | null
   address: { line: string; city: { name: string } } | null
 }

@@ -27,9 +27,9 @@ export const setupSchema = z
     name: z.string(),
     /** Where the wizard reopens; the steps before it are done (the sign-in's "Continue setting up" card, Q-200). */
     step: z.enum(SETUP_STEPS),
-    /** The category's name, as the card says it ("Beauty · setup not finished"). */
+    /** What the place is (the business's kind, set from its category's name), as the card says it ("Beauty · setup not finished"). */
     category: z.string(),
-    /** The category's id: the wizard's business step picks it again. */
+    /** The category's id: the wizard's business step picks it again by it, whatever the language of `category`. */
     categoryId: z.string(),
     logo: photoSchema.nullable(),
     /** The address saved (at the address step or in the settings); null while it has none (the draft starts empty). */

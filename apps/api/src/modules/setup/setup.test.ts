@@ -65,6 +65,9 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     // back at the address step it keeps the one saved
     expect((await owner.req('/v1/w/ayna-beauty/setup', { method: 'PUT', body: { step: 'address' } })).status).toBe(204)
     expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({ step: 'address', address })
+    // back at the business step another category: the wizard picks it again by its id
+    expect((await owner.req('/v1/w/ayna-beauty/settings/profile', { method: 'PATCH', body: { categoryId: 'nails' } })).status).toBe(200)
+    expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({ category: 'Nails', categoryId: 'nails' })
     // and the logo once there is one
     const form = new FormData()
     form.set('file', new File([new Uint8Array([0xff, 0xd8, 0xff, 0xda, 0, 3, 1, 0x12, 0xff, 0xd9])], 'logo.jpg', { type: 'image/jpeg' }))

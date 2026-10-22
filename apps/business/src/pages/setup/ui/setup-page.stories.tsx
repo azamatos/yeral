@@ -166,7 +166,10 @@ export const CreateAnother: Story = {
   },
 }
 
-/** An unfinished setup reopens at its saved step; Back and the done steps lead to the earlier ones. */
+/**
+ * An unfinished setup reopens at its saved step; Back and the done steps lead to the earlier ones. The draft names its
+ * category in the account's language, which isn't the list's: the business step picks it by its id.
+ */
 export const Reopens: Story = {
   args: {
     server: fakeApi({
@@ -174,7 +177,7 @@ export const Reopens: Story = {
         slug: 'glow-studio',
         name: 'Glow Studio',
         step: 'hours',
-        category: 'Beauty',
+        category: 'Gözellik',
         categoryId: 'beauty',
         logo: null,
         address: { line: '247 Bitarap Türkmenistan Avenue', city },
