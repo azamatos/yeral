@@ -74,25 +74,53 @@ export type FieldProps = {
   className?: string
   /** Use your own id when the control needs a known one. */
   id?: string
+  /** Words after the label in regular n-600: «(optional)». */
+  optional?: ReactNode
+  /**
+   * A character counter right of the hint (B-Onboarding `.ccount`): `text` is «12 / 80» formatted by the screen,
+   * `value` and `max` set its tone — n-600, warning ink from 90 % of `max`, danger ink 600 over `max`. It describes the
+   * control too.
+   */
+  counter?: { value: number; max: number; text: ReactNode }
   children: ReactNode
 }
 
 /** Label above, always visible; a message (error, warning, success) and a hint below (DS-Components → Inputs). */
-export function Field({ label, hint, error, status, message, messageLive = true, disabled, className, id, children }: FieldProps) {
+export function Field({
+  label,
+  hint,
+  error,
+  status,
+  message,
+  messageLive = true,
+  disabled,
+  className,
+  id,
+  optional,
+  counter,
+  children,
+}: FieldProps) {
   const auto = useId()
   const controlId = id ?? auto
   const labelId = `${controlId}-label`
   const messageId = `${controlId}-message`
   const hintId = `${controlId}-hint`
+  const counterId = `${controlId}-counter`
   // a falsy `error` (`error={failed && text}`) leaves room for the message
   const note = error ? error : message
   const tone: FieldStatus | undefined = error ? 'error' : message ? (status ?? 'error') : undefined
-  const describedBy = [note ? messageId : null, hint ? hintId : null].filter(Boolean).join(' ') || undefined
+  const describedBy = [note ? messageId : null, hint ? hintId : null, counter ? counterId : null].filter(Boolean).join(' ') || undefined
+  const hintEl = hint && (
+    <span id={hintId} className="text-dense text-n-600">
+      {hint}
+    </span>
+  )
   return (
     <FieldContext.Provider value={{ id: controlId, labelId, describedBy, invalid: tone === 'error', status: tone, disabled }}>
       <div className={cn('flex min-w-0 flex-col gap-1.5', className)}>
         <label id={labelId} htmlFor={controlId} className="text-dense font-semibold text-n-900">
           {label}
+          {optional && <span className="font-normal text-n-600"> {optional}</span>}
         </label>
         {children}
         {note && tone && (
@@ -100,10 +128,21 @@ export function Field({ label, hint, error, status, message, messageLive = true,
             {note}
           </FieldMessage>
         )}
-        {hint && (
-          <span id={hintId} className="text-dense text-n-600">
-            {hint}
-          </span>
+        {counter ? (
+          <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+            {hintEl}
+            <span
+              id={counterId}
+              className={cn(
+                'ml-auto text-dense whitespace-nowrap text-n-600 tabular-nums',
+                counter.value > counter.max ? 'font-semibold text-danger-ink' : counter.value >= counter.max * 0.9 && 'text-st-pending-ink',
+              )}
+            >
+              {counter.text}
+            </span>
+          </div>
+        ) : (
+          hintEl
         )}
       </div>
     </FieldContext.Provider>

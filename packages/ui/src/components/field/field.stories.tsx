@@ -83,6 +83,63 @@ export const Messages: Story = {
   },
 }
 
+/** A character counter right of the hint (B-Onboarding business name: 80). The screen formats «11 / 80». */
+export const WithCounter: Story = {
+  render: () => (
+    <Field
+      label="Business name"
+      hint="Your page: yeral.app/b/glow-studio"
+      counter={{ value: 11, max: 80, text: '11 / 80' }}
+      className="max-w-140"
+    >
+      <Input defaultValue="Glow Studio" />
+    </Field>
+  ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByLabelText('Business name')).toHaveAccessibleDescription('Your page: yeral.app/b/glow-studio 11 / 80')
+  },
+}
+
+/** Over the limit: the counter turns danger and the error blocks saving. */
+export const CounterOver: Story = {
+  render: () => (
+    <Field
+      label="Business name"
+      error="Too long: up to 80 characters."
+      hint="Your page: yeral.app/b/…"
+      counter={{ value: 84, max: 80, text: '84 / 80' }}
+      className="max-w-140"
+    >
+      <Input defaultValue="Glow Studio: hair, nails, brows and lashes in the heart of the city since 2015, ok" />
+    </Field>
+  ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByLabelText('Business name')).toHaveAttribute('aria-invalid', 'true')
+    await expect(canvas.getByText('84 / 80')).toHaveClass('text-danger-ink')
+  },
+}
+
+/** Near the limit (90 % and up): warning ink. */
+export const CounterNearLimit: Story = {
+  render: () => (
+    <Field label="Business name" counter={{ value: 74, max: 80, text: '74 / 80' }} className="max-w-140">
+      <Input defaultValue="Glow Studio: hair, nails, brows and lashes in the heart of the city since" />
+    </Field>
+  ),
+}
+
+/** An optional field: «(optional)» after the label in regular n-600. */
+export const Optional: Story = {
+  render: () => (
+    <Field label="Last name" optional="(optional)" className="max-w-90">
+      <Input autoComplete="family-name" />
+    </Field>
+  ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByLabelText('Last name (optional)')).toBeInTheDocument()
+  },
+}
+
 export const Disabled: Story = {
   render: () => (
     <Field label="Telefon belgisi" disabled className="max-w-90">
