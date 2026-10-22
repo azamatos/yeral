@@ -1,15 +1,13 @@
 # Ýeral's sites on the shared Caddy. deploy.sh copies this file to /srv/edge/sites/ once the DNS records exist
-# (DNS only, not proxied), so Caddy can get the certificates. Client, business and cms hosts join with their apps (the
-# client with www redirecting to the apex); until then business. and cms. resolve here and get a certificate error.
-# The records: infra/server/README.md, "DNS records".
-# Only an A record for now: Docker's edge network has no IPv6, so a visitor over IPv6 would reach Caddy as the Docker
+# (DNS only, not proxied), so Caddy can get the certificates. Business and cms hosts join with their apps; until then
+# business. and cms. resolve here and get a certificate error. The records: infra/server/README.md, "DNS records".
+# Only A records for now: Docker's edge network has no IPv6, so a visitor over IPv6 would reach Caddy as the Docker
 # gateway and every such visitor would share one rate-limit bucket (infra/server/README.md, "Still to do").
-api.yeral.app {
+# The hosts are written here because Caddy needs them; the apps read theirs from config (@yeral/lib/site).
+
+# what every Ýeral site sends and logs
+(yeral_site) {
 	encode zstd gzip
-	# a photo is 10 MB at most (PHOTO_MAX_BYTES, @yeral/domain/photos); the form around it adds a few bytes
-	request_body {
-		max_size 11MB
-	}
 	header {
 		X-Content-Type-Options nosniff
 		Referrer-Policy strict-origin-when-cross-origin
@@ -27,6 +25,60 @@ api.yeral.app {
 			}
 		}
 	}
+}
+
+api.yeral.app {
+	import yeral_site
+	# a photo is 10 MB at most (PHOTO_MAX_BYTES, @yeral/domain/photos); the form around it adds a few bytes
+	request_body {
+		max_size 11MB
+	}
 	# Caddy writes the caller's address into X-Forwarded-For and drops what the caller sent (TRUSTED_IP_HEADER)
 	reverse_proxy yeral-api:3004
+}
+
+# Temporary (the owner, 22.10.2026): the old site is retired and the apex shows this page, at every path, until the
+# client site joins this file and takes the apex over. Colours from docs/design/tokens.css; no request leaves the page.
+yeral.app {
+	import yeral_site
+	header {
+		Content-Type "text/html; charset=utf-8"
+		Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+		Cache-Control "public, max-age=300"
+	}
+	# no icon yet: a browser's favicon request gets nothing rather than the page
+	respond /favicon.ico 404
+	respond <<HTML
+		<!doctype html>
+		<html lang="en">
+		<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Ýeral</title>
+		<meta name="description" content="Booking for any business that sells its time. Coming soon.">
+		<style>
+		:root { color-scheme: light dark; --bg: #ffffff; --ink: #101014; --soft: #5a5a64; --tag-bg: #efecfe; --tag-ink: #4429d6; }
+		@media (prefers-color-scheme: dark) { :root { --bg: #101014; --ink: #ffffff; --soft: #d8d8de; --tag-bg: #241573; --tag-ink: #c3b6fb; } }
+		* { box-sizing: border-box; }
+		html, body { height: 100%; margin: 0; }
+		body { display: grid; place-items: center; padding: 16px; background: var(--bg); color: var(--ink); font-family: ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif; text-align: center; }
+		main { max-width: 560px; }
+		h1 { margin: 0; font-size: 44px; line-height: 48px; letter-spacing: -0.03em; font-weight: 700; }
+		p { margin: 16px 0 0; font-size: 17px; line-height: 26px; color: var(--soft); }
+		.soon { display: inline-block; margin-top: 24px; padding: 4px 12px; border-radius: 999px; background: var(--tag-bg); color: var(--tag-ink); font-size: 11px; line-height: 14px; letter-spacing: 0.07em; font-weight: 600; text-transform: uppercase; }
+		</style>
+		</head>
+		<body>
+		<main>
+		<h1>Ýeral</h1>
+		<p>Booking for any business that sells its time.</p>
+		<span class="soon">Coming soon</span>
+		</main>
+		</body>
+		</html>
+		HTML 200
+}
+
+www.yeral.app {
+	redir https://yeral.app{uri} permanent
 }

@@ -37,7 +37,8 @@ Free for Storybook and legacy; R2 free up to 10 GB.
 Hyperdrive config `yeral-production` (created 2026-10-18).
 
 **Owner's one-time steps** (when the milestone needs them): the DNS records (`infra/server/README.md`, "DNS records":
-`api`, `business`, `cms` now, `yeral.app` and `www` at launch); with the real working MVP (P6), an R2 token for backups
+`yeral.app` and `www` off the old Worker, then `@`, `www`, `api`, `business`, `cms`, all now; the apex shows a
+coming-soon page until the client site takes it over); with the real working MVP (P6), an R2 token for backups
 and accounts for error tracking and uptime checks (owner, 2026-10-22: not for the demo launch).
 
 ## Local database and API tests (since M2d)

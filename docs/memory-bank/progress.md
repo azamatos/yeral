@@ -225,8 +225,9 @@
   #148 (the "How was it?" card's api, in conflict after #147) and `feat/api-address-search` (no PR yet).
 - **2026-10-22 · The owner's answers:** no backups and no error tracking or uptime alerts for the demo launch (with
   the real working MVP, P6; Claude's concern on the uptime check); the first launch approved in advance; the DNS
-  records for `api`, `business` and `cms` now, `yeral.app` and `www` at launch (`infra/server/README.md`, "DNS
-  records"); book chapter 9, 22.10.2026.
+  records for `api`, `business` and `cms` now (`infra/server/README.md`, "DNS records"); book chapter 9, 22.10.2026.
+  Later the same day the old site was retired: `yeral.app` and `www` point at the server now too, and the apex shows a
+  coming-soon page from Caddy until the client site takes it over; then `apps/legacy` and the Worker go.
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.

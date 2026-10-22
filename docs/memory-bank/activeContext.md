@@ -100,6 +100,11 @@ components in Storybook, then the apps.
   Until then the api's alert lines stay in its Docker logs, read at each deploy. "I approve launch": the first launch
   is approved in advance and goes out once the apps are built and checked locally. The owner adds the DNS records
   (`infra/server/README.md`, "DNS records"). For the admin account nothing secret goes through the chat.
+- 2026-10-22 (later): "i dont think we need current working yeral.app, lets make dns for it too". The old site is
+  retired now: `yeral.app` and `www` point at the server with the other records, and the apex shows a coming-soon page
+  (`infra/server/yeral/yeral.caddy`) until the client site takes it over. After the switch the owner deletes the
+  Worker `yeral-web` and a PR removes `apps/legacy` (AGENTS.md's "the live marketplace is still … `apps/legacy`" line
+  changes with it).
 
 ## Decisions
 
@@ -194,11 +199,13 @@ Where the old questions went (2026-10-17):
    `upload` and `src`: `PUT /v1/me/photo`, `me.photo`); the Demo frame from `me.demo` (the signed-out sidebar with
    "Log in", the Demo banner, `demo` in the switcher), "Try the business app" (`sdk.demo.start()`) on the login and the
    wizard, and `demo_number`'s hint; the leave and delete confirms' counts (#142); the page-state banner (#144).
-3. **Deploy by hand** (no release: #133; `infra/server/README.md`): once the owner's `api` record exists, deploy main
-   with `PUBLIC=1` and check `https://api.yeral.app/v1/health`; the server is at a2e0418, and 0041 drops columns, so
-   no image older than it runs after that deploy. The first launch (approved in advance, 22.10) goes when slices 2–7
-   are built and checked locally: the switches `SIGN_IN_CODE_ON_SCREEN`, `EXAMPLE_BUSINESSES`, `DEMO_WORKSPACE` on,
-   then the owner moves `yeral.app` and `www`.
+3. **Deploy by hand** (no release: #133; `infra/server/README.md`): once the owner's records exist (`yeral.app` and
+   `www` off the Worker `yeral-web`, then the A records), deploy main with `PUBLIC=1` and check `https://yeral.app`
+   (the coming-soon page), the `www` redirect and `https://api.yeral.app/v1/health`; the server is at a2e0418, and
+   0041 drops columns, so no image older than it runs after that deploy. Then a PR removes `apps/legacy`, its deploy
+   option and AGENTS.md's legacy line, and the owner deletes the Worker. The first launch (approved in advance, 22.10)
+   goes when slices 2–7 are built and checked locally: the switches `SIGN_IN_CODE_ON_SCREEN`, `EXAMPLE_BUSINESSES`,
+   `DEMO_WORKSPACE` on, and the client site replaces the coming-soon page in `yeral.caddy` (no DNS change).
 4. **P2 left:** step 7's releases and deploys from GitHub, and the code-SMS cap. Follow-ups: `/v1/health` comparing
    the database's newest migration with the image's; the jobs runner's `reviewAsk` drop branch, dead after the deploy
    with 0041; checking the settings permission before an upload's body is read; the invite-accept route reading every
@@ -206,8 +213,8 @@ Where the old questions went (2026-10-17):
    `.env` too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
    guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
-**Waiting on the owner:** the DNS records of 22.10 (`api`, `business`, `cms`, and the two TXT records; then `yeral.app`
-and `www` at the launch). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
+**Waiting on the owner:** the DNS records of 22.10 (`yeral.app` and `www` removed from the Worker `yeral-web`, then A
+records for `@`, `www`, `api`, `business` and `cms`, and the two TXT records; `infra/server/README.md`). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
 runs `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` (login 3–32
 of a-z 0-9 . -) and the owner opens the setup link (24 hours, `cms.<domain>/setup/<token>`), picks the password, adds
 the authenticator app and keeps the 10 recovery codes. `docs/design/Claude outputs/yeral-design-v0.5.zip` (untracked,
