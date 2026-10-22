@@ -23,6 +23,7 @@ export function BusinessStep({
   owner,
   name,
   onName,
+  pageSlug,
   categoryId,
   onCategory,
   categories,
@@ -31,14 +32,19 @@ export function BusinessStep({
   owner: { name: string; phone: string }
   name: string
   onName: (name: string) => void
+  /** The draft's page address, once there is one: renaming the business doesn't change it. */
+  pageSlug?: string
   categoryId: string | null
   onCategory: (id: string) => void
   categories: readonly PickableCategory[]
 }) {
   const t = useTranslations()
   const brand = t('common.brand')
-  const long = name.length > BUSINESS_NAME_MAX
-  const slug = slugFrom(name)
+  // spaces around the name don't count: the api trims it before its limit
+  const length = name.trim().length
+  const long = length > BUSINESS_NAME_MAX
+  // a new name's address as the api makes it (it adds a number if that one is taken)
+  const slug = pageSlug ?? (length ? slugFrom(name) : '…')
   return (
     <section className="flex flex-col gap-8 max-sm:gap-7">
       <StepHeader
@@ -61,14 +67,14 @@ export function BusinessStep({
         label={t('setup.business.name')}
         error={long && t('setup.business.nameLong', { max: BUSINESS_NAME_MAX })}
         hint={t.rich('setup.business.page', {
-          url: `${clientHost}/b/${slug || '…'}`,
+          url: `${clientHost}/b/${slug}`,
           // the address in the board's mono 13, ink
           mono: (chunks) => <span className="font-mono text-dense text-n-900">{chunks}</span>,
         })}
         counter={{
-          value: name.length,
+          value: length,
           max: BUSINESS_NAME_MAX,
-          text: t('setup.business.counter', { count: name.length, max: BUSINESS_NAME_MAX }),
+          text: t('setup.business.counter', { count: length, max: BUSINESS_NAME_MAX }),
         }}
       >
         <Input

@@ -19,4 +19,6 @@
   (`entry.ts` still goes to the no-workspace card; the api's `GET /v1/me/setup` has the data, #141); the steps after the
   business one (address with the map pin and the address search, hours, services, team, rules, done with
   `setup.finish`), which show their header and a disabled Continue until each is built.
+- Follow-up for the api: `GET /v1/me/setup` names the draft's category only (in the account's language), so the wizard
+  finds its id by that name in a list asked in the account's language; a `categoryId` beside it would be cleaner.
 - Next step: the address step (MapFrame, the address search endpoint when it merges), then hours.

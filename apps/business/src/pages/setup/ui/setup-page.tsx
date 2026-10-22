@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useParams } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import { formatPhone } from '@yeral/domain/phone'
 import type { SetupStep } from '@yeral/domain/setup'
+import { isLocale } from '@yeral/i18n'
 import { isApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Spinner } from '@yeral/ui/spinner'
@@ -64,17 +65,27 @@ function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
   const setup = useQuery(sdk.setup.mine())
   const workspaces = useQuery(sdk.team.workspaces())
   const categories = useQuery(sdk.catalog.categories(locale))
-  if (setup.isPending || workspaces.isPending || categories.isPending) return <Waiting />
-  if (setup.isError) throw setup.error
-  if (workspaces.isError) throw workspaces.error
-  if (categories.isError) throw categories.error
+  // the draft names its category in the account's language: the list in that language finds its id
+  const named = useQuery(sdk.catalog.categories(isLocale(me.lang) ? me.lang : locale))
+  if (setup.isPending || workspaces.isPending || categories.isPending || named.isPending) return <Waiting />
+  // a failed refetch keeps what's on screen (and what's typed); only a first load that failed is a failure
+  if (!setup.data || !workspaces.data || !categories.data || !named.data)
+    throw setup.error ?? workspaces.error ?? categories.error ?? named.error ?? new Error('setup data missing')
   const draft = setup.data.setup
   const step = stepFor(asked, draft?.step ?? null)
   if (step !== asked) return <Navigate to="/setup/$step" params={{ step }} replace />
   // appointments only at the first launch: the table and class categories come later (book Q-030)
   const pickable = categories.data.items.filter((c) => c.bookingTypes.includes('appointment'))
+  const draftCategory = draft && named.data.items.find((c) => c.name === draft.category)?.id
   return (
-    <Steps key={draft?.slug ?? 'new'} step={step} me={me} draft={draft} more={workspaces.data.items.length > 0} categories={pickable} />
+    <Steps
+      key={draft?.slug ?? 'new'}
+      step={step}
+      me={me}
+      draft={draft && { ...draft, categoryId: draftCategory ?? null }}
+      more={workspaces.data.items.length > 0}
+      categories={pickable}
+    />
   )
 }
 
@@ -84,6 +95,8 @@ type Draft = {
   name: string
   step: SetupStep
   category: string
+  /** Found by its name (`GET /v1/me/setup` says the name only); null if the list no longer has it. */
+  categoryId: string | null
   address: { line: string; city: { name: string } } | null
 }
 
@@ -106,9 +119,8 @@ function Steps({
   const navigate = useNavigate()
   const errorText = useErrorText()
   const stepName = useStepName()
-  // the draft says its category by name, in the account's language, as the list does
   const [name, setName] = useState(draft?.name ?? '')
-  const [categoryId, setCategoryId] = useState(categories.find((c) => c.name === draft?.category)?.id ?? null)
+  const [categoryId, setCategoryId] = useState(draft?.categoryId ?? null)
   const start = useMutation(sdk.setup.start())
   const saveStep = useMutation(sdk.setup.step(draft?.slug ?? ''))
   const updateProfile = useMutation(sdk.settings.updateProfile(draft?.slug ?? ''))
@@ -117,47 +129,75 @@ function Steps({
   const reached: SetupStep = draft?.step ?? 'business'
   const phone = formatPhone(me.phone)
   const ownerName = me.name ?? me.firstName ?? ''
-  const businessValid = !!name.trim() && name.length <= BUSINESS_NAME_MAX && !!categoryId
+  // spaces around the name don't count: the api trims it before its limit
+  const length = name.trim().length
+  const businessValid = length > 0 && length <= BUSINESS_NAME_MAX && !!categoryId
   const valid = step === 'business' ? businessValid : true
+  const edited = step === 'business' && (name.trim() !== (draft?.name ?? '') || categoryId !== (draft?.categoryId ?? null))
 
   const go = (to: WizardStep) => void navigate({ to: '/setup/$step', params: { step: to } })
-  /** After a save: the draft as the api now has it, so the next step finds it there. */
-  const reload = () => queryClient.fetchQuery({ ...sdk.setup.mine(), staleTime: 0 })
   const failed = (error: unknown) => void toast(errorText(error))
 
-  const continueBusiness = async () => {
+  /**
+   * The business step's name and category into the draft: a new draft (saved at the address step), or the edits to
+   * the one there. `false` when it failed (the person heard why).
+   */
+  const saveBusiness = async (): Promise<boolean> => {
     const values = { name: name.trim(), categoryId: categoryId! }
     try {
+      // the sdk refreshes the draft (`GET /v1/me/setup`) before these resolve, so the next step finds it
       if (!draft) await start.mutateAsync(values)
-      else {
-        const before = categories.find((c) => c.name === draft.category)?.id
-        if (values.name !== draft.name || values.categoryId !== before) await updateProfile.mutateAsync(values)
-        if (stepIndex(draft.step) < stepIndex('address')) await saveStep.mutateAsync('address')
+      else if (edited) {
+        await updateProfile.mutateAsync(values)
+        // the profile's save refreshes the settings, not the draft's name and category
+        await queryClient.invalidateQueries({ queryKey: sdk.setup.mine().queryKey })
       }
-      await reload()
-      go('address')
+      return true
     } catch (error) {
       // a draft made meanwhile (another tab): the wizard goes on with that one
-      if (isApiError(error, 'setup_in_progress')) {
-        await reload()
-        go('business')
-      }
+      if (isApiError(error, 'setup_in_progress')) await queryClient.invalidateQueries({ queryKey: sdk.setup.mine().queryKey })
+      failed(error)
+      return false
+    }
+  }
+
+  const continueBusiness = async () => {
+    if (!(await saveBusiness())) return
+    try {
+      if (draft && stepIndex(draft.step) < stepIndex('address')) await saveStep.mutateAsync('address')
+      go('address')
+    } catch (error) {
       failed(error)
     }
+  }
+
+  /** A step in the list: the business step's edits are saved first, so leaving it never drops them. */
+  const open = async (to: WizardStep) => {
+    if (busy) return
+    if (edited && businessValid && !(await saveBusiness())) return
+    go(to)
   }
 
   const later = async () => {
+    if (busy) return
+    // reopening lands where it was left; a new draft starts at the address step, as Continue would leave it
+    let reopens: SetupStep = step
     try {
+      // a valid business step keeps what's typed
+      if (step === 'business' && businessValid && (edited || !draft)) {
+        if (!(await saveBusiness())) return
+        if (!draft) reopens = 'address'
+      }
       if (draft) await saveStep.mutateAsync(step)
-      toast(t('setup.laterSaved', { phone, step: stepName(step, more) }))
+      toast(t('setup.laterSaved', { phone, step: stepName(reopens, more) }))
     } catch (error) {
       failed(error)
     }
   }
 
-  const hint = !name.trim()
+  const hint = !length
     ? t('setup.business.hintName')
-    : name.length > BUSINESS_NAME_MAX
+    : length > BUSINESS_NAME_MAX
       ? t('setup.business.hintLong', { max: BUSINESS_NAME_MAX })
       : t('setup.business.hintCategory')
   const previous = WIZARD_STEPS[stepIndex(step) - 1]
@@ -199,8 +239,8 @@ function Steps({
       reached={reached}
       more={more}
       summaries={summaries}
-      canOpen={(s) => s !== 'phone' && stepIndex(s) <= stepIndex(reached) && (stepIndex(s) < stepIndex(step) || valid)}
-      onOpen={go}
+      canOpen={(s) => !busy && s !== 'phone' && stepIndex(s) <= stepIndex(reached) && (stepIndex(s) < stepIndex(step) || valid)}
+      onOpen={(s) => void open(s)}
       onLater={step === 'done' ? undefined : () => void later()}
       live={busy ? t('setup.saving') : undefined}
       footer={footer}
@@ -211,6 +251,7 @@ function Steps({
           owner={{ name: ownerName, phone }}
           name={name}
           onName={setName}
+          pageSlug={draft?.slug}
           categoryId={categoryId}
           onCategory={setCategoryId}
           categories={categories}
