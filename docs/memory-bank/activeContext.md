@@ -23,9 +23,9 @@ migration: no rollback to an older image past it). On 22.10 the owner answered (
 error tracking for the demo launch, both with the real working MVP (P6); the first launch approved in advance; the DNS
 records for `api`, `business` and `cms` now (`infra/server/README.md`, "DNS records").
 
-Open: **#148** the "How was it?" card's api (F-243, migration 0042): green, but in conflict since #147 merged under
-it; it needs a rebase and its review. **`feat/api-address-search`** (`39259e4`): the address search behind the map pin
-through a geocoder port (Photon over OpenStreetMap, ADR 0027 in the branch), pushed without a PR or review.
+Merged 23.10: **#148** the "How was it?" card's api (F-243, migration 0042, `d4d4042`; not deployed yet). Open:
+**`feat/api-address-search`** (`39259e4`): the address search behind the map pin through a geocoder port (Photon over
+OpenStreetMap, ADR 0027 in the branch), pushed without a PR or review.
 
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16). Releases are paused until the MVP works
 (#133, ADR 0009 amended; the `release` skill is now `ship`): no versions or changesets, and production goes by hand.
@@ -199,8 +199,7 @@ Where the old questions went (2026-10-17):
 
 ## Next steps
 
-1. **Finish the two open backend pieces:** rebase #148 on main (its migration stays 0042), review it, merge; open a PR
-   for `feat/api-address-search`, review it, merge.
+1. **Finish the open backend piece:** open a PR for `feat/api-address-search`, review it, merge (#148 merged 23.10).
 2. **P4 slice 2, business setup** (the wizard, profile, services, hours, team, booking rules, link and QR; book
    chapter 10): its endpoints are merged (the setup draft #112 and its card #141, photos #116, the logo #140, the floor
    #120, step 4's settings; the address search once merged). Also: the photo upload in My account (`ProfilePhoto`'s
