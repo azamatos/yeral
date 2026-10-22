@@ -26,16 +26,21 @@ describe('the Photon geocoder (ADR 0027)', () => {
 
   it('asks near the city, named; keeps the market’s country, no repeats, as many as asked; a day’s answer isn’t asked again', async () => {
     const asked: { url: URL; ua: string | null }[] = []
-    const fetcher = (async (input: URL, init?: RequestInit) => {
+    const fetcher = ((input: URL, init?: RequestInit) => {
       asked.push({ url: new URL(input), ua: new Headers(init?.headers).get('user-agent') })
-      return Response.json({
-        features: [
-          feature({ housenumber: '247', street: 'Bitarap Türkmenistan Avenue', city: 'Ashgabat' }),
-          feature({ housenumber: '247', street: 'Bitarap Türkmenistan Avenue', city: 'Ashgabat' }),
-          { ...feature({ street: 'Amir Temur Street', city: 'Tashkent' }), properties: { street: 'Amir Temur Street', countrycode: 'UZ' } },
-          feature({ street: 'Atatürk Street', city: 'Ashgabat' }),
-        ],
-      })
+      return Promise.resolve(
+        Response.json({
+          features: [
+            feature({ housenumber: '247', street: 'Bitarap Türkmenistan Avenue', city: 'Ashgabat' }),
+            feature({ housenumber: '247', street: 'Bitarap Türkmenistan Avenue', city: 'Ashgabat' }),
+            {
+              ...feature({ street: 'Amir Temur Street', city: 'Tashkent' }),
+              properties: { street: 'Amir Temur Street', countrycode: 'UZ' },
+            },
+            feature({ street: 'Atatürk Street', city: 'Ashgabat' }),
+          ],
+        }),
+      )
     }) as typeof fetch
     let now = 0
     const geo = photonGeocoder('https://photon.test', 'Yeral/test', () => now, fetcher)
@@ -57,12 +62,7 @@ describe('the Photon geocoder (ADR 0027)', () => {
   })
 
   it('a geocoder that answers an error fails the search, for the endpoint to say so', async () => {
-    const geo = photonGeocoder(
-      'https://photon.test',
-      'Yeral/test',
-      Date.now,
-      (async () => new Response('busy', { status: 429 })) as typeof fetch,
-    )
+    const geo = photonGeocoder('https://photon.test', 'Yeral/test', Date.now, () => Promise.resolve(new Response('busy', { status: 429 })))
     await expect(geo.search('Bitarap', { near: { lat: 37.95, lng: 58.38 }, country: 'tm', lang: 'en', limit: 5 })).rejects.toThrow(/429/)
   })
 })
