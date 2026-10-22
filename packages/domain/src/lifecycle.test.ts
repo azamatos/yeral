@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   aheadAs,
   asksHowItWas,
+  mayReview,
   businessSmsAt,
   expiryWarningAt,
   canRemoveComplaint,
@@ -67,6 +68,21 @@ describe('asksHowItWas (book F-243)', () => {
     expect(asksHowItWas(visit, false, true, after)).toBe(false)
     expect(asksHowItWas(visit, false, false, epochOf('2026-12-01', 600))).toBe(false)
     expect(asksHowItWas({ ...visit, status: 'cancelled', cancelledBy: 'client' }, false, false, after)).toBe(false)
+  })
+  it('a confirmed visit that has ended counts as completed before the job marks it', () => {
+    expect(asksHowItWas({ ...visit, status: 'confirmed' }, false, false, after)).toBe(true)
+    expect(asksHowItWas({ ...visit, status: 'confirmed' }, false, false, epochOf('2026-10-20', 630))).toBe(false)
+  })
+  it('asks exactly where the detail offers "Teswir ýaz" (mayReview, clientActions)', () => {
+    for (const [b, reviewed, now] of [
+      [visit, false, after],
+      [visit, true, after],
+      [visit, false, epochOf('2026-12-01', 600)],
+      [{ ...visit, status: 'confirmed' as const }, false, epochOf('2026-10-20', 630)],
+    ] as const) {
+      expect(asksHowItWas(b, reviewed, false, now)).toBe(mayReview(b, reviewed, now))
+      expect(clientActions(b, rules, reviewed ? { createdAt: now } : null, now).review).toBe(mayReview(b, reviewed, now))
+    }
   })
 })
 

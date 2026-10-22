@@ -14,16 +14,16 @@ import {
   reviewInputSchema,
 } from '@yeral/contract/bookings'
 import { langQuerySchema } from '@yeral/contract/common'
-import { asksHowItWas, effectiveStatus } from '@yeral/domain/lifecycle'
-import { addDays, epochOf, today } from '@yeral/domain/time'
-import { and, eq, gte, inArray, isNull } from 'drizzle-orm'
-import { bookings, reviews } from '../../db/schema'
+import { effectiveStatus } from '@yeral/domain/lifecycle'
+import { and, eq, isNull } from 'drizzle-orm'
+import { bookings } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody } from '../../http/openapi'
 import { requireUser } from '../auth/session'
 import {
   acceptAlternative,
   cancelBooking,
+  closeHowWasIt,
   editNote,
   editReview,
   rescheduleBooking,
@@ -33,7 +33,7 @@ import {
 } from './actions'
 import { createBooking } from './create'
 import { withOffersAhead } from './offers'
-import { myBooking, stateOf, type BookingRow } from './repo'
+import { myBooking, stateOf, visitAskingHowItWas, type BookingRow } from './repo'
 import { detailOf, summaries } from './view'
 
 const tags = ['bookings']
@@ -77,7 +77,7 @@ const closeHowWasItRoute = createRoute({
   method: 'post',
   path: '/me/bookings/{code}/how-was-it/close',
   tags,
-  summary: '"How was it?" closed for good for this visit (book F-243)',
+  summary: '"How was it?" closed for good for this visit, while the card asks about it (book F-243)',
   request: { params: bookingCodeParamSchema },
   responses: { 204: { description: 'Closed' }, 401: errors[401], 404: errors[404] },
 })
@@ -144,34 +144,13 @@ export const bookingRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(howWasItRoute, async (c) => {
     const user = requireUser(c)
-    const { deps } = c.var
-    const now = deps.now()
-    // the visits that ended in the last 30 days (the review window; one past midnight ends a day later)
-    const rows = await deps.db
-      .select({ b: bookings, reviewed: reviews.id })
-      .from(bookings)
-      .leftJoin(reviews, eq(reviews.bookingId, bookings.id))
-      .where(
-        and(
-          eq(bookings.userId, user.id),
-          inArray(bookings.status, ['confirmed', 'completed']),
-          isNull(bookings.rescheduleOf),
-          gte(bookings.date, addDays(today(now), -32)),
-        ),
-      )
-    const asked = rows
-      .filter((r) => asksHowItWas(stateOf(r.b), !!r.reviewed, !!r.b.howWasItClosedAt, now))
-      .sort((x, y) => epochOf(y.b.date, y.b.end) - epochOf(x.b.date, x.b.end))[0]
-    const [visit] = asked ? await summaries(deps, [asked.b], c.req.valid('query').lang) : []
+    const row = await visitAskingHowItWas(c.var.deps.db, user.id, c.var.deps.now())
+    const [visit] = row ? await summaries(c.var.deps, [row], c.req.valid('query').lang) : []
     return c.json({ visit: visit ?? null }, 200)
   })
   .openapi(closeHowWasItRoute, async (c) => {
     const user = requireUser(c)
-    const row = await myBooking(c.var.deps.db, user.id, c.req.valid('param').code)
-    await c.var.deps.db
-      .update(bookings)
-      .set({ howWasItClosedAt: new Date(c.var.deps.now()) })
-      .where(and(eq(bookings.id, row.id), isNull(bookings.howWasItClosedAt)))
+    await closeHowWasIt(c.var.deps, await myBooking(c.var.deps.db, user.id, c.req.valid('param').code))
     return c.body(null, 204)
   })
   .openapi(listRoute, async (c) => {

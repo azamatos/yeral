@@ -1,11 +1,18 @@
 /** Booking rows: lookups, the lifecycle view, status changes, codes. */
 import { bookingCode } from '@yeral/domain/id'
-import { aheadAs, type BookingState, type LifecycleError, type RestoreState } from '@yeral/domain/lifecycle'
+import {
+  aheadAs,
+  asksHowItWas,
+  REVIEW_WRITE_DAYS,
+  type BookingState,
+  type LifecycleError,
+  type RestoreState,
+} from '@yeral/domain/lifecycle'
 import type { BookingStatus, BusinessCancelReason, CancelledBy, DeclineReason } from '@yeral/domain/model'
-import { diffDays, epochOf, localOf } from '@yeral/domain/time'
-import { and, asc, eq, gt, inArray, sql } from 'drizzle-orm'
+import { addDays, diffDays, epochOf, localOf, today } from '@yeral/domain/time'
+import { and, asc, between, eq, gt, inArray, isNull, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
-import { bookingItems, bookings, type MoveRefused, type TimeSlot } from '../../db/schema'
+import { bookingItems, bookings, reviews, type MoveRefused, type TimeSlot } from '../../db/schema'
 import { ApiError } from '../../http/errors'
 
 export type BookingRow = typeof bookings.$inferSelect
@@ -88,6 +95,36 @@ export async function myBooking(db: Queryable, userId: string, code: string): Pr
     .where(and(eq(bookings.code, code), eq(bookings.userId, userId)))
   if (!row) throw new ApiError('not_found')
   return row
+}
+
+/**
+ * "How was it?" (book F-243): the latest visit the card asks about, or null. The query keeps the person's visits of the
+ * review window without a review or a closed card; `asksHowItWas` decides on each one's effective status (a confirmed
+ * visit that has ended counts as completed before the job marks it).
+ */
+export async function visitAskingHowItWas(db: Queryable, userId: string, now: number): Promise<BookingRow | null> {
+  const day = today(now)
+  const rows = await db
+    .select({ b: bookings })
+    .from(bookings)
+    .leftJoin(reviews, eq(reviews.bookingId, bookings.id))
+    .where(
+      and(
+        eq(bookings.userId, userId),
+        inArray(bookings.status, ['confirmed', 'completed']),
+        isNull(bookings.rescheduleOf),
+        isNull(bookings.howWasItClosedAt),
+        isNull(reviews.id),
+        // the review window by the visit's day: one past midnight ends a day later, and a day's margin for the zone
+        between(bookings.date, addDays(day, -(REVIEW_WRITE_DAYS + 2)), day),
+      ),
+    )
+  return (
+    rows
+      .map((r) => r.b)
+      .filter((b) => asksHowItWas(stateOf(b), false, false, now))
+      .sort((x, y) => epochOf(y.date, y.end) - epochOf(x.date, x.end))[0] ?? null
+  )
 }
 
 export async function itemsOf(db: Queryable, bookingId: string): Promise<ItemRow[]> {

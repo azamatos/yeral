@@ -34,8 +34,9 @@ export const keys = {
   bookings: () => ['bookings'] as const,
   /** What deleting the account cancels: under the person's bookings, so their changes refresh it. */
   deletionCounts: () => ['bookings', 'deletion'] as const,
-  /** "How was it?": under the person's bookings, so a review or a booking's change refreshes it. */
+  /** "How was it?": under the person's bookings, so a booking event refreshes it; their own actions refresh `howWasItAll`. */
   howWasIt: (lang: Locale) => ['bookings', 'how-was-it', lang] as const,
+  howWasItAll: () => ['bookings', 'how-was-it'] as const,
   /** Under `bookings`: a booking change or event refreshes the link page too. */
   link: (token: string, lang: Locale) => ['bookings', 'link', token, lang] as const,
   bookingLists: () => ['bookings', 'list'] as const,
