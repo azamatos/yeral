@@ -41,7 +41,15 @@ const glow: Workspace = {
   lastOpenedAt: 1,
 }
 
-type Draft = { slug: string; name: string; step: string; category: string; logo: null; address: { line: string; city: typeof city } | null }
+type Draft = {
+  slug: string
+  name: string
+  step: string
+  category: string
+  categoryId: string
+  logo: null
+  address: { line: string; city: typeof city } | null
+}
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -70,7 +78,15 @@ const fakeApi =
       if (route === 'POST /setup') {
         if (setup) return json({ error: { code: 'setup_in_progress', details: { slug: setup.slug } } }, 409)
         const category = LAUNCH_CATEGORIES.find((c) => c.id === body.categoryId)!
-        setup = { slug: 'glow-studio-2', name: String(body.name), step: 'address', category: category.name, logo: null, address: null }
+        setup = {
+          slug: 'glow-studio-2',
+          name: String(body.name),
+          step: 'address',
+          category: category.name,
+          categoryId: category.id,
+          logo: null,
+          address: null,
+        }
         return json({ slug: setup.slug }, 201)
       }
       const step = /^PUT \/w\/([^/]+)\/setup$/.exec(route)
@@ -82,7 +98,7 @@ const fakeApi =
       if (profile && setup) {
         if (typeof body.name === 'string') setup.name = body.name
         const category = LAUNCH_CATEGORIES.find((c) => c.id === body.categoryId)
-        if (category) setup.category = category.name
+        if (category) Object.assign(setup, { category: category.name, categoryId: category.id })
         return json({})
       }
       return json({ error: { code: 'not_found' } }, 404)
@@ -159,6 +175,7 @@ export const Reopens: Story = {
         name: 'Glow Studio',
         step: 'hours',
         category: 'Beauty',
+        categoryId: 'beauty',
         logo: null,
         address: { line: '247 Bitarap Türkmenistan Avenue', city },
       },
@@ -180,7 +197,15 @@ export const Reopens: Story = {
 export const ContinueLater: Story = {
   args: {
     server: fakeApi({
-      draft: { slug: 'glow-studio', name: 'Glow Studio', step: 'address', category: 'Beauty', logo: null, address: null },
+      draft: {
+        slug: 'glow-studio',
+        name: 'Glow Studio',
+        step: 'address',
+        category: 'Beauty',
+        categoryId: 'beauty',
+        logo: null,
+        address: null,
+      },
     }),
   },
   play: async ({ canvas }) => {

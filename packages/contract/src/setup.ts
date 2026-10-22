@@ -29,6 +29,8 @@ export const setupSchema = z
     step: z.enum(SETUP_STEPS),
     /** The category's name, as the card says it ("Beauty · setup not finished"). */
     category: z.string(),
+    /** The category's id: the wizard's business step picks it again. */
+    categoryId: z.string(),
     logo: photoSchema.nullable(),
     /** The address saved (at the address step or in the settings); null while it has none (the draft starts empty). */
     address: z.object({ line: z.string(), city: cityRefSchema }).nullable(),

@@ -3,7 +3,6 @@ import { Link, Navigate, useNavigate, useParams } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import { formatPhone } from '@yeral/domain/phone'
 import type { SetupStep } from '@yeral/domain/setup'
-import { isLocale } from '@yeral/i18n'
 import { isApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Spinner } from '@yeral/ui/spinner'
@@ -65,27 +64,17 @@ function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
   const setup = useQuery(sdk.setup.mine())
   const workspaces = useQuery(sdk.team.workspaces())
   const categories = useQuery(sdk.catalog.categories(locale))
-  // the draft names its category in the account's language: the list in that language finds its id
-  const named = useQuery(sdk.catalog.categories(isLocale(me.lang) ? me.lang : locale))
-  if (setup.isPending || workspaces.isPending || categories.isPending || named.isPending) return <Waiting />
+  if (setup.isPending || workspaces.isPending || categories.isPending) return <Waiting />
   // a failed refetch keeps what's on screen (and what's typed); only a first load that failed is a failure
-  if (!setup.data || !workspaces.data || !categories.data || !named.data)
-    throw setup.error ?? workspaces.error ?? categories.error ?? named.error ?? new Error('setup data missing')
+  if (!setup.data || !workspaces.data || !categories.data)
+    throw setup.error ?? workspaces.error ?? categories.error ?? new Error('setup data missing')
   const draft = setup.data.setup
   const step = stepFor(asked, draft?.step ?? null)
   if (step !== asked) return <Navigate to="/setup/$step" params={{ step }} replace />
   // appointments only at the first launch: the table and class categories come later (book Q-030)
   const pickable = categories.data.items.filter((c) => c.bookingTypes.includes('appointment'))
-  const draftCategory = draft && named.data.items.find((c) => c.name === draft.category)?.id
   return (
-    <Steps
-      key={draft?.slug ?? 'new'}
-      step={step}
-      me={me}
-      draft={draft && { ...draft, categoryId: draftCategory ?? null }}
-      more={workspaces.data.items.length > 0}
-      categories={pickable}
-    />
+    <Steps key={draft?.slug ?? 'new'} step={step} me={me} draft={draft} more={workspaces.data.items.length > 0} categories={pickable} />
   )
 }
 
@@ -95,7 +84,6 @@ type Draft = {
   name: string
   step: SetupStep
   category: string
-  /** Found by its name (`GET /v1/me/setup` says the name only); null if the list no longer has it. */
   categoryId: string | null
   address: { line: string; city: { name: string } } | null
 }

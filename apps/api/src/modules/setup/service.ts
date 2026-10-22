@@ -32,6 +32,7 @@ async function draftOf(db: Queryable, userId: string) {
       name: businesses.name,
       step: businesses.setupStep,
       kind: businesses.kind,
+      categoryId: businesses.categoryId,
       logo: businesses.logo,
       address: businesses.address,
       street: businesses.street,
@@ -49,8 +50,9 @@ async function draftOf(db: Queryable, userId: string) {
 
 /**
  * Where the wizard reopens at sign-in, if anywhere (Q-200), with what the "Continue setting up" card shows (B-Login's
- * ContinueSetupCard): the category, the logo, and the address once one is saved (the rule finishing reads: a street).
- * In the account's language, as the workspaces and invites are.
+ * ContinueSetupCard): the category (and its id, which the wizard's business step picks again), the logo, and the
+ * address once one is saved (the rule finishing reads: a street). In the account's language, as the workspaces and
+ * invites are.
  */
 export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Promise<MySetup> {
   const draft = await draftOf(deps.db, user.id)
@@ -61,6 +63,7 @@ export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Pro
       name: draft.name,
       step: draft.step,
       category: text(draft.kind, user.lang),
+      categoryId: draft.categoryId,
       logo: logoOf(deps, draft, user.lang),
       address: draft.street ? { line: draft.address, city: { id: draft.cityId, name: text(draft.city, user.lang) } } : null,
     },

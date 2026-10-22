@@ -32,7 +32,15 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     expect(started.json).toEqual({ slug: 'ayna-beauty' })
     // the sign-in's card: the category, no logo yet, no address before the address step (the draft sits at the centre)
     expect((await owner.req('/v1/me/setup')).json).toEqual({
-      setup: { slug: 'ayna-beauty', name: 'Aýna Beauty', step: 'address', category: 'Beauty', logo: null, address: null },
+      setup: {
+        slug: 'ayna-beauty',
+        name: 'Aýna Beauty',
+        step: 'address',
+        category: 'Beauty',
+        categoryId: 'beauty',
+        logo: null,
+        address: null,
+      },
     })
     const again = await owner.req('/v1/setup', { body: { name: 'Second', categoryId: 'beauty' } })
     expect(again.json.error).toMatchObject({ code: 'setup_in_progress', details: { slug: 'ayna-beauty' } })
