@@ -37,4 +37,10 @@
   it); `Setup` is a type in `@yeral/contract/setup`.
 - The card sits in `pages/login/ui` beside the other entry cards (COMPONENTS.md names `widgets/workspace-entry`; the
   login keeps its cards in the page until a second user needs them).
-- Still open from the handoff above: the phone step inside the wizard, steps 3–8, the api's `categoryId`.
+- Still open from the handoff above: the phone step inside the wizard, steps 3–8.
+
+## The draft's category id (feat/setup-category-id)
+
+- `GET /v1/me/setup` gives `categoryId` beside the category's name (contract `setupSchema`, `mySetup`); the wizard's
+  business step picks the draft's category by it, and its second category list (asked in the account's language to
+  find the id by name) is gone.

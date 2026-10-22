@@ -42,6 +42,7 @@ const setup = (step: Setup['step']): Setup => ({
   name: 'Glow Studio',
   step,
   category: 'Beauty',
+  categoryId: 'beauty',
   logo: null,
   address: { line: '247 Bitarap Türkmenistan Avenue', city },
 })

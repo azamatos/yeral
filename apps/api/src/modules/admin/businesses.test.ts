@@ -374,7 +374,15 @@ describe('the admin tool’s businesses (book F-179)', () => {
     const owner = browser(t.app)
     expect((await owner.login(OWNER)).isNew).toBe(false)
     expect((await owner.req('/v1/me/setup')).json).toEqual({
-      setup: { slug: 'ogulgerek-beauty', name: 'Ogulgerek Beauty', step: 'address', category: 'Beauty', logo: null, address: null },
+      setup: {
+        slug: 'ogulgerek-beauty',
+        name: 'Ogulgerek Beauty',
+        step: 'address',
+        category: 'Beauty',
+        categoryId: 'beauty',
+        logo: null,
+        address: null,
+      },
     })
     // one setup at a time, and appointments only
     const again = await team.req(ADMIN, {
