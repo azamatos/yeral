@@ -175,6 +175,26 @@
       "many": "You have {count} workspaces. We open the one you used last; pick another at the top of the left menu.",
       "now": "Open the calendar now"
     },
+    "setup": {
+      "where": "{category} · setup not finished",
+      "eyebrow": "Step {n, number} of {total, number} · {step}",
+      "title": "Continue setting up {business}",
+      "lead": "You stopped at {step, select, business {your business details} address {your address} hours {your hours} services {your services} team {your team} rules {your booking rules} other {the last step}}. Everything you entered so far is saved.",
+      "progress": "Setup progress",
+      "progressText": "{done, number} of {total, number} steps done",
+      "doneList": "Done",
+      "doneStep": "{step} · {detail}",
+      "next": "Next: {steps}",
+      "ahead": {
+        "business": "business details",
+        "address": "address",
+        "hours": "hours",
+        "services": "services",
+        "team": "team",
+        "rules": "booking rules"
+      },
+      "continue": "Continue"
+    },
     "demoNote": "This is a demo of {brand}: the sign-in code shows here instead of an SMS. Use a made-up number, and don’t type in real people’s names or numbers."
   },
   "notFound": {

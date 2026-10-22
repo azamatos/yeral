@@ -34,6 +34,7 @@ export const setupSchema = z
     address: z.object({ line: z.string(), city: cityRefSchema }).nullable(),
   })
   .meta({ id: 'Setup' })
+export type Setup = z.infer<typeof setupSchema>
 
 /** The person's unfinished setup, if any (the login routes there before the no-workspace card). */
 export const mySetupSchema = z.object({ setup: setupSchema.nullable() }).meta({ id: 'MySetup' })

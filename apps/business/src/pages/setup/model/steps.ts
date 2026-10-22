@@ -4,10 +4,9 @@
  * wizard is at the business step; with one it may open any step up to the one saved (the furthest the wizard moved on
  * to, unless "Continue later" saved an earlier one), never a later one.
  */
-import { SETUP_STEPS, type SetupStep } from '@yeral/domain/setup'
+import { SETUP_STEPS, WIZARD_STEPS, type SetupStep, type WizardStep } from '@yeral/domain/setup'
 
-export const WIZARD_STEPS = ['phone', ...SETUP_STEPS] as const
-export type WizardStep = (typeof WIZARD_STEPS)[number]
+export { WIZARD_STEPS, type WizardStep } from '@yeral/domain/setup'
 
 export function isWizardStep(step: string): step is WizardStep {
   return (WIZARD_STEPS as readonly string[]).includes(step)

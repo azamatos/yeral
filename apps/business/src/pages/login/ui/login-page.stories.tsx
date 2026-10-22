@@ -7,6 +7,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
 import { useParams } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
+import type { Setup } from '@yeral/contract/setup'
 import type { InviteCard, Workspace } from '@yeral/contract/team'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { PageStory } from '@/shared/storybook'
@@ -74,6 +75,8 @@ interface Account {
   invites: InviteCard[]
   /** Unused for 6 months: "Is this you?" first (book Q-270). */
   unused?: boolean
+  /** An unfinished setup (book Q-200). */
+  setup?: Setup
 }
 
 const PEOPLE: Record<string, Account> = {
@@ -148,6 +151,36 @@ const PEOPLE: Record<string, Account> = {
     current: 'glow-studio',
     invites: [],
     unused: true,
+  },
+  // stopped at the hours (B-Login's unfinished setup), with an invite that ended yesterday: the setup comes first
+  '+99362481540': {
+    me: person('+99362481540', 'Maýsa', 'Annaýewa'),
+    workspaces: [],
+    current: null,
+    invites: [invite('expired', Date.now() - DAY)],
+    setup: {
+      slug: 'glow-studio',
+      name: 'Glow Studio',
+      step: 'hours',
+      category: 'Beauty',
+      logo: null,
+      address: { line: '247 Bitarap Türkmenistan Avenue', city },
+    },
+  },
+  // Russian-length texts (book P3): a long name, category and address, stopped at the services
+  '+99362481541': {
+    me: person('+99362481541', 'Ogulgerek', 'Berdimuhammedowa'),
+    workspaces: [],
+    current: null,
+    invites: [],
+    setup: {
+      slug: 'salon-krasoty-i-zdorovya-zolotaya-orkhideya',
+      name: 'Салон красоты и здоровья «Золотая орхидея» на проспекте',
+      step: 'services',
+      category: 'Спа и массаж для всей семьи',
+      logo: null,
+      address: { line: 'проспект Битарап Туркменистан, дом 247, второй этаж, офис 12', city },
+    },
   },
 }
 
@@ -243,6 +276,7 @@ const fakeApi =
       if (route === 'GET /me/invites')
         return json({ items: signedInAs.invites.filter((i) => i.state === 'pending' || i.state === 'expired') })
       if (route === 'GET /me/workspaces') return json({ items: signedInAs.workspaces, current: signedInAs.current })
+      if (route === 'GET /me/setup') return json({ setup: signedInAs.setup ?? null })
       const answer = /^POST \/me\/invites\/([^/]+)\/(accept|decline)$/.exec(route)
       if (answer) {
         const found = signedInAs.invites.find((i) => i.id === answer[1])
@@ -543,6 +577,39 @@ export const InviteExpired: Story = {
     await expect(canvas.getByText('Jeren · +993 62 •• •• 30')).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'Log in with another number' }))
     await expect(await canvas.findByLabelText('Phone number')).toBeVisible()
+  },
+}
+
+/**
+ * An unfinished setup (B-Login `step=setup`, book Q-200): "Continue setting up", never the no-workspace card, ahead of
+ * an invite that ended yesterday; Continue reopens the wizard at the saved step.
+ */
+export const ContinueSetup: Story = {
+  name: 'Unfinished setup',
+  args: { server: fakeApi({ signedIn: '+99362481540' }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Continue setting up Glow Studio' })).toBeVisible()
+    await expect(canvas.getByText('Step 4 of 8 · Hours')).toBeVisible()
+    await expect(canvas.getByText('Beauty · setup not finished')).toBeVisible()
+    await expect(canvas.getByText('You stopped at your hours. Everything you entered so far is saved.')).toBeVisible()
+    await expect(canvas.getByRole('progressbar', { name: 'Setup progress' })).toHaveAttribute('aria-valuetext', '3 of 8 steps done')
+    const done = within(canvas.getByRole('list', { name: 'Done' }))
+    await expect(done.getByText('Business · Beauty')).toBeVisible()
+    await expect(done.getByText('Address · 247 Bitarap Türkmenistan Avenue, Ashgabat')).toBeVisible()
+    await expect(done.getByText('Next: hours, services, team, booking rules')).toBeVisible()
+    await expect(canvas.getByText('Maýsa Annaýewa · +993 62 48 15 40')).toBeVisible()
+    await userEvent.click(canvas.getByRole('link', { name: 'Continue' }))
+    await expect(await canvas.findByText('Setup: hours')).toBeVisible()
+  },
+}
+
+/** The card with Russian-length texts (book P3, Q-101): the long name, category and address wrap inside the card. */
+export const ContinueSetupLong: Story = {
+  name: 'Unfinished setup · long texts',
+  args: { server: fakeApi({ signedIn: '+99362481541' }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('Step 5 of 8 · Services')).toBeVisible()
+    await expect(canvas.getByText('Next: services, team, booking rules')).toBeVisible()
   },
 }
 
