@@ -89,6 +89,7 @@ describe('sdk', () => {
     expect(f.queryClient.getQueryData(['bookings', 'detail', 'YR-48213', 'tk'])).toEqual(detail)
     expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toEqual([
       ['bookings', 'list'],
+      ['bookings', 'how-was-it'],
       ['availability', 'glow-studio'],
     ])
   })
@@ -338,14 +339,15 @@ describe('sdk', () => {
     expect(f.calls[0]?.url.pathname).toBe('/v1/me/bookings/YR-48213/accept-alternative')
     expect(f.queryClient.getQueryData(['bookings', 'detail', 'YR-48214', 'tk'])).toEqual(detail)
     expect(f.queryClient.getQueryData(['bookings', 'detail', 'YR-48213', 'tk'])).toBeUndefined()
-    // the lists and that business's free times, not the detail just written
+    // the lists, "How was it?" and that business's free times, not the detail just written
     expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toEqual([
       ['bookings', 'list'],
+      ['bookings', 'how-was-it'],
       ['availability', 'glow-studio'],
     ])
   })
 
-  it('a review refreshes the business’s reviews and rating', async () => {
+  it('a review refreshes the business’s reviews and rating, and ends "How was it?" (book F-243)', async () => {
     const detail = { code: 'YR-46511', business: { slug: 'glow-studio' }, status: 'completed' }
     const f = fixture(() => json(200, detail))
     const spy = vi.spyOn(f.queryClient, 'invalidateQueries')
@@ -355,11 +357,21 @@ describe('sdk', () => {
       await m.onSuccess!(await m.mutationFn!(vars, {} as never), vars, undefined, {} as never)
       expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toEqual(
         expect.arrayContaining([
+          ['bookings', 'how-was-it'],
           ['reviews', 'glow-studio'],
           ['business', 'glow-studio'],
         ]),
       )
     }
+  })
+
+  it('closing "How was it?" refreshes it, so the visit before it asks (book F-243)', async () => {
+    const f = fixture(() => new Response(null, { status: 204 }))
+    const spy = vi.spyOn(f.queryClient, 'invalidateQueries')
+    const m = f.sdk.bookings.closeHowWasIt()
+    await m.onSuccess!(await m.mutationFn!('YR-46511', {} as never), 'YR-46511', undefined, {} as never)
+    expect(f.calls[0]?.url.pathname).toBe('/v1/me/bookings/YR-46511/how-was-it/close')
+    expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toEqual([['bookings', 'how-was-it']])
   })
 
   it('the cities are cached per kilometre of position, and places carry the chosen city', async () => {

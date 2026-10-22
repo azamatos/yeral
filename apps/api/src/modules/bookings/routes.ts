@@ -8,6 +8,7 @@ import {
   cancelBookingSchema,
   createBookingSchema,
   editNoteSchema,
+  howWasItSchema,
   myBookingsQuerySchema,
   rescheduleSchema,
   reviewInputSchema,
@@ -22,6 +23,7 @@ import { requireUser } from '../auth/session'
 import {
   acceptAlternative,
   cancelBooking,
+  closeHowWasIt,
   editNote,
   editReview,
   rescheduleBooking,
@@ -31,7 +33,7 @@ import {
 } from './actions'
 import { createBooking } from './create'
 import { withOffersAhead } from './offers'
-import { myBooking, stateOf, type BookingRow } from './repo'
+import { myBooking, stateOf, visitAskingHowItWas, type BookingRow } from './repo'
 import { detailOf, summaries } from './view'
 
 const tags = ['bookings']
@@ -61,6 +63,23 @@ const listRoute = createRoute({
   summary: 'My bookings: upcoming (requests with an offered time ahead first, then soonest first) or past (newest first)',
   request: { query: myBookingsQuerySchema },
   responses: { 200: json(bookingListSchema), 401: errors[401] },
+})
+
+const howWasItRoute = createRoute({
+  method: 'get',
+  path: '/me/how-was-it',
+  tags,
+  summary: '"How was it?": the latest completed visit still open to a review, without one, its card not closed (book F-243)',
+  request: { query: langQuerySchema },
+  responses: { 200: json(howWasItSchema), 401: errors[401] },
+})
+const closeHowWasItRoute = createRoute({
+  method: 'post',
+  path: '/me/bookings/{code}/how-was-it/close',
+  tags,
+  summary: '"How was it?" closed for good for this visit, while the card asks about it (book F-243)',
+  request: { params: bookingCodeParamSchema },
+  responses: { 204: { description: 'Closed' }, 401: errors[401], 404: errors[404] },
 })
 
 const detailRoute = createRoute({
@@ -122,6 +141,17 @@ export const bookingRoutes = new OpenAPIHono<AppEnv>()
     const user = requireUser(c)
     const row = await createBooking(c.var.deps, user, c.req.valid('json'))
     return c.json(await detailOf(c.var.deps, row, c.req.valid('query').lang), 201)
+  })
+  .openapi(howWasItRoute, async (c) => {
+    const user = requireUser(c)
+    const row = await visitAskingHowItWas(c.var.deps.db, user.id, c.var.deps.now())
+    const [visit] = row ? await summaries(c.var.deps, [row], c.req.valid('query').lang) : []
+    return c.json({ visit: visit ?? null }, 200)
+  })
+  .openapi(closeHowWasItRoute, async (c) => {
+    const user = requireUser(c)
+    await closeHowWasIt(c.var.deps, await myBooking(c.var.deps.db, user.id, c.req.valid('param').code))
+    return c.body(null, 204)
   })
   .openapi(listRoute, async (c) => {
     const user = requireUser(c)

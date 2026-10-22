@@ -335,6 +335,19 @@ export function canWriteReview(b: BookingState, now = Date.now()): Guard {
   return now <= endOf(b) + REVIEW_WRITE_DAYS * 24 * HOUR ? null : 'review_window_passed'
 }
 
+/** The visit may get its review now: none yet, and `canWriteReview` allows it (the detail's "Teswir ýaz"). */
+export function mayReview(b: BookingState, reviewed: boolean, now = Date.now()): boolean {
+  return !reviewed && canWriteReview(b, now) === null
+}
+
+/**
+ * "How was it?" (book F-243): a visit that may get its review (`mayReview`: completed, 30 days, none yet), its card not
+ * closed. My bookings and the home page show it until then; no SMS asks.
+ */
+export function asksHowItWas(b: BookingState, reviewed: boolean, closed: boolean, now = Date.now()): boolean {
+  return !closed && mayReview(b, reviewed, now)
+}
+
 /**
  * The reason kept with a client's cancel (book Q-163): only when the business asks for one ("Ýatyrylanda sebäp sora"),
  * and never a blank one.
@@ -405,7 +418,7 @@ export function clientActions(
     reschedule: canClientReschedule(b, rules, now) === null,
     editNote: canEditNote(b, now) === null,
     callOnly: status === 'confirmed' && !cancel,
-    review: !review && canWriteReview(b, now) === null,
+    review: mayReview(b, !!review, now),
     editReview: status === 'completed' && !!review && now - review.createdAt < REVIEW_EDIT_DAYS * 86_400_000,
     bookAgain: status === 'completed' || status === 'cancelled' || status === 'noshow',
   }

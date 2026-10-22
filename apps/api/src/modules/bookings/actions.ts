@@ -1,6 +1,7 @@
 /** What a client can do with their booking (client spec §4.8 "Client actions by status"; ADR 0017). */
 import type { OfferSource } from '@yeral/contract/bookings'
 import {
+  asksHowItWas,
   canClientCancel,
   canClientReschedule,
   canClientRestore,
@@ -13,7 +14,7 @@ import {
 } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
 import { reviewName, splitName } from '@yeral/domain/names'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, isNull, sql } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookingItems, bookings, classSessions, reviews, users } from '../../db/schema'
 import type { Deps } from '../../deps'
@@ -204,6 +205,24 @@ export async function acceptAlternative(deps: Deps, user: User, b: BookingRow, s
     if (pgCode(e) === '23505') throw new ApiError('invalid_status')
     throw e
   }
+}
+
+/**
+ * "How was it?" closed for good for this visit (book F-243), only while the card asks about it: a visit ahead, one
+ * reviewed or past the window, or one already closed is left as it is. The person's other screens hear it.
+ */
+export async function closeHowWasIt(deps: Deps, b: BookingRow): Promise<void> {
+  const [review] = await deps.db.select({ id: reviews.id }).from(reviews).where(eq(reviews.bookingId, b.id))
+  if (!asksHowItWas(stateOf(b), !!review, !!b.howWasItClosedAt, deps.now())) return
+  await deps.db.transaction(async (tx) => {
+    const closed = await tx
+      .update(bookings)
+      .set({ howWasItClosedAt: new Date(deps.now()) })
+      .where(and(eq(bookings.id, b.id), isNull(bookings.howWasItClosedAt)))
+      .returning({ id: bookings.id })
+    // the person's own devices only: no business and no booking id, so no team hears a card closed
+    if (closed.length) await emit(tx, { type: 'booking.updated', businessId: null, bookingCode: b.code, userId: b.userId })
+  })
 }
 
 export async function writeReview(deps: Deps, user: User, b: BookingRow, input: { rating: number; tags: string[]; text?: string }) {

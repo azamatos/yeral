@@ -404,13 +404,14 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   }
 
   /**
-   * The booking that came back is cached under its own code (taking an offered time makes a new booking); my lists and
-   * that business's free times refresh, the detail just written doesn't.
+   * The booking that came back is cached under its own code (taking an offered time makes a new booking); my lists,
+   * "How was it?" (a review ends it, a cancel or a move changes which visit it asks about) and that business's free
+   * times refresh, the detail just written doesn't.
    */
   const settle = (lang: Locale, data: BookingDetail, ...stale: (readonly unknown[])[]) => {
     // an answer that lands after a log-out isn't kept (`me` null; undefined is not asked yet)
     if (queryClient.getQueryData(keys.me()) !== null) queryClient.setQueryData(keys.booking(data.code, lang), data)
-    return invalidate(keys.bookingLists(), keys.availabilityAll(data.business.slug), ...stale)
+    return invalidate(keys.bookingLists(), keys.howWasItAll(), keys.availabilityAll(data.business.slug), ...stale)
   }
   const bookingAction = <B>(
     lang: Locale,
@@ -438,6 +439,18 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       queryOptions({
         queryKey: keys.booking(code, lang),
         queryFn: ({ signal }) => call(one.$get({ param: { code }, query: { lang } }, abortWith(signal))),
+      }),
+    /** "How was it?" (book F-243): the visit My bookings and the home page ask about, or none. */
+    howWasIt: (lang: Locale) =>
+      queryOptions({
+        queryKey: keys.howWasIt(lang),
+        queryFn: ({ signal }) => call(v1.me['how-was-it'].$get({ query: { lang } }, abortWith(signal))),
+      }),
+    /** The card closed for good for this visit; the next one (if any) shows. */
+    closeHowWasIt: () =>
+      mutationOptions({
+        mutationFn: (code: string) => call(one['how-was-it'].close.$post({ param: { code } })),
+        onSuccess: () => invalidate(keys.howWasItAll()),
       }),
     create: (lang: Locale) =>
       mutationOptions({

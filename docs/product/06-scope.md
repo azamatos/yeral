@@ -186,7 +186,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-070 | "This isn't me" on phone bookings | A client reports a phone booking made with their number by mistake. | Later | not designed | legacy only |  |
 | F-071 | Confirm visit the day before | After repeated no-shows the client must confirm the day before or lose the slot. | Never | not designed | legacy only | Design uses "phone only after N no-shows" instead (F-191). |
 | F-072 | My reviews page | A list of the client's own reviews with edit / delete. | Later | not designed | legacy only |  |
-| F-243 | "How was it?" card | After a completed visit, *Ýazylyşlarym* (My bookings) and the home page show a small card once for that visit; its stars open the review form (F-067), one tap closes it for good. No SMS. | MVP | not designed (the nearest drawn card pattern) | not built (the api remembers a closed card per booking) | Q-259, settled 21.10.2026 (Claude, delegated). |
+| F-243 | "How was it?" card | After a completed visit, *Ýazylyşlarym* (My bookings) and the home page show a small card once for that visit; its stars open the review form (F-067), one tap closes it for good. No SMS. | MVP | not designed (the nearest drawn card pattern) | api built (`GET /v1/me/how-was-it`, `POST /v1/me/bookings/{code}/how-was-it/close`, 21.10.2026); the cards with slices 3 and 5 | Q-259, settled 21.10.2026 (Claude, delegated). |
 
 ## Client · account
 
