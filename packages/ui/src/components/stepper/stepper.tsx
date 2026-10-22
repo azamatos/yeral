@@ -18,7 +18,7 @@ export type StepperProps = {
   summaries?: ReactNode[]
   /** vertical: the furthest step reached (default `current`); a step after the current one up to it shows as reachable. */
   reached?: number
-  /** vertical: which steps open on click (default: those before the current one); the others are disabled. */
+  /** vertical: which steps open on click (default: every step up to `reached`); the others are disabled. */
   canOpen?: (index: number) => boolean
   /** vertical: the done check's accessible name («Done»). */
   doneLabel?: string
@@ -95,22 +95,25 @@ function VerticalSteps({
   className,
   summaries,
   reached = current,
-  canOpen = (i) => i < current,
+  canOpen,
   doneLabel,
 }: Omit<StepperProps, 'orientation'>) {
+  // a step before the current one is always done, whatever `reached` says
+  const top = Math.max(reached, current)
+  const opens = canOpen ?? ((i: number) => i <= top)
   return (
     <nav aria-label={ariaLabel} className={className}>
       <ol className="m-0 flex list-none flex-col gap-0.5 p-0">
         {steps.map((label, i) => {
           const cur = i === current
-          const done = i < reached && !cur
-          const vis = i === reached && !cur
+          const done = i < top && !cur
+          const vis = i === top && !cur
           const summary = done ? summaries?.[i] : undefined
           return (
             <li key={i}>
               <button
                 type="button"
-                disabled={!cur && !canOpen(i)}
+                disabled={!cur && !opens(i)}
                 aria-current={cur ? 'step' : undefined}
                 onClick={() => {
                   if (!cur) onStepClick?.(i)

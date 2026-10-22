@@ -61,8 +61,14 @@ export const WithCancel: Story = {
   },
 }
 
-/** Saving the step: the primary keeps its width and shows a spinner. */
-export const Saving: Story = { args: { primary: { children: 'Continue', loading: true, loadingLabel: 'Saving' } } }
+/** Saving the step: the primary keeps its width and shows a spinner; Back waits. */
+export const Saving: Story = {
+  args: { primary: { children: 'Continue', loading: true, loadingLabel: 'Saving' } },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('button', { name: 'Saving' })).toHaveAttribute('aria-busy', 'true')
+    await expect(canvas.getByRole('button', { name: 'Back' })).toBeDisabled()
+  },
+}
 
 /** The last step: a secondary action before the primary. */
 export const LastStep: Story = {

@@ -20,23 +20,32 @@ export type WizardFooterProps = Omit<ComponentProps<'div'>, 'children'> & {
  * WizardFooter (DS-Patterns → «Wizard footer · desktop sticky bottom»; B-Onboarding `.foot .fin .fh`): the setup
  * wizard's bar, sticky at the bottom, white with a top line. Back (ghost L) at the start, then the hint (13/18, n-600,
  * right-aligned, max 220) and the primary L at the end; the disabled primary is described by the hint. Inner width 736,
- * padding 16 48 → 14 32 under 1024 → 12 16 under 768, where the hint hides and the primary takes the free width.
- * Every word comes from props.
+ * padding 16 48 → 14 32 under 1024 → 12 16 under 768, where the hint hides and the primary takes the free width; long
+ * labels wrap the row. Back waits while the primary saves. Every word comes from props.
  */
 export function WizardFooter({ back, start, hint, primary, children, className, ...props }: WizardFooterProps) {
   const hintId = useId()
   const { className: primaryClass, ...primaryProps } = primary ?? {}
   return (
     <div {...props} className={cn('sticky bottom-0 z-5 border-t border-n-200 bg-n-0', className)}>
-      <div className="mx-auto flex max-w-184 items-center gap-3 px-12 py-4 max-md:px-8 max-md:py-3.5 max-sm:px-4 max-sm:py-3">
+      <div className="mx-auto flex max-w-184 flex-wrap items-center gap-3 px-12 py-4 max-md:px-8 max-md:py-3.5 max-sm:px-4 max-sm:py-3">
         {start}
         {back && (
-          <Button type="button" variant="ghost" size="l" onClick={back.onClick} className="-ml-3 min-w-0 pr-5 pl-3">
+          <Button
+            type="button"
+            variant="ghost"
+            size="l"
+            onClick={back.onClick}
+            // leaving a step while it saves would land the save's answer on another step
+            disabled={primary?.loading}
+            className="-ml-3 min-w-0 pr-5 pl-3 disabled:bg-transparent"
+          >
             <ChevronLeft aria-hidden strokeWidth={1.75} />
             {back.label}
           </Button>
         )}
-        <div className="flex-1" />
+        {/* on phones the primary takes the free width itself */}
+        <div className="flex-1 max-sm:hidden" />
         {hint && (
           <span id={hintId} className="max-w-55 text-right text-dense text-n-600 max-sm:hidden">
             {hint}

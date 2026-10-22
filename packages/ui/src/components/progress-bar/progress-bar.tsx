@@ -1,4 +1,5 @@
 import { cva } from 'class-variance-authority'
+import { Progress } from 'radix-ui'
 import type { ComponentProps } from 'react'
 import { cn } from '../../lib/cn'
 
@@ -19,36 +20,36 @@ export type ProgressBarProps = Omit<ComponentProps<'div'>, 'role' | 'children'> 
   label: string
   value: number
   max: number
-  /** The lowest value it reads out (the setup flow counts steps from 1). The bar fills `value / max`. */
-  min?: number
+  /** What a screen reader says instead of a percentage: «Step 4 of 8», «2 of 3 photos». */
+  valueText?: string
   variant?: 'goal' | 'flow'
 }
 
 /**
  * ProgressBar (DS-Patterns → Status «Progress»; B-Onboarding's setup top bar, B-Analytics' goal): an a-500 fill on an
- * n-100 track, filled `value / max`. `flow` is the 3 px bar under the setup wizard's phone header, its fill rounded at
- * the leading end only; `goal` is the 8 px meter under a label row the screen draws. A `role="progressbar"` with its
- * label and values; the text around it comes from the screen.
+ * n-100 track, filled `value / max` (Radix Progress: `role="progressbar"`, the value clamped to 0…max). `flow` is the
+ * 3 px bar under the setup wizard's phone header, its fill rounded at the leading end only; `goal` is the 8 px meter
+ * under a label row the screen draws. The text around it comes from the screen.
  */
-export function ProgressBar({ label, value, max, min = 0, variant = 'goal', className, ...props }: ProgressBarProps) {
-  const pct = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0
+export function ProgressBar({ label, value, max, valueText, variant = 'goal', className, ...props }: ProgressBarProps) {
+  const now = Math.min(max, Math.max(0, value))
+  const pct = max > 0 ? (now / max) * 100 : 0
   return (
-    <div
+    <Progress.Root
       {...props}
-      role="progressbar"
+      value={now}
+      max={max}
       aria-label={label}
-      aria-valuemin={min}
-      aria-valuemax={max}
-      aria-valuenow={value}
+      getValueLabel={valueText ? () => valueText : undefined}
       className={cn(track({ variant }), className)}
     >
-      <span
+      <Progress.Indicator
         className={cn(
           'block h-full bg-a-500 transition-[width] duration-200 motion-reduce:transition-none',
           variant === 'flow' ? 'rounded-r-pill' : 'rounded-pill',
         )}
         style={{ width: `${pct}%` }}
       />
-    </div>
+    </Progress.Root>
   )
 }

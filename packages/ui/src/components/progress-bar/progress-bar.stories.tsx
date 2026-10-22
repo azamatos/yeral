@@ -33,9 +33,9 @@ export const Goal: Story = {
   },
 }
 
-/** The setup flow's top bar: step 4 of 8, counted from 1, half filled. */
+/** The setup flow's top bar: step 4 of 8, half filled, read out as «Step 4 of 8». */
 export const Flow: Story = {
-  args: { variant: 'flow', label: 'Setup steps', value: 4, min: 1, max: 8 },
+  args: { variant: 'flow', label: 'Setup steps', value: 4, max: 8, valueText: 'Step 4 of 8' },
   render: (args) => (
     <div className="overflow-hidden rounded-m border border-n-200">
       <div className="flex h-14 items-center gap-3 px-5 text-small font-semibold">
@@ -48,10 +48,18 @@ export const Flow: Story = {
   ),
   play: async ({ canvas }) => {
     const bar = canvas.getByRole('progressbar', { name: 'Setup steps' })
-    await expect(bar).toHaveAttribute('aria-valuemin', '1')
+    await expect(bar).toHaveAttribute('aria-valuetext', 'Step 4 of 8')
     await expect(bar.firstElementChild).toHaveStyle({ width: '50%' })
   },
 }
 
 export const Empty: Story = { args: { value: 0 } }
 export const Full: Story = { args: { value: 3 } }
+
+/** Past the goal (4 photos of 3): a full bar, and the value read out is clamped to the max. */
+export const PastTheGoal: Story = {
+  args: { value: 4 },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '3')
+  },
+}
