@@ -176,9 +176,9 @@ The client site, the business app, the admin tool and the api go to production o
 (ADR 0020). The server, its shared HTTPS front door and the api's stack are set up (19.10.2026, `infra/server`);
 deploys from GitHub come with P2 step 7; no backups or error tracking for this demo (owner, 22.10.2026). The owner
 approved the launch in advance (22.10.2026): it goes out once P4's slices are built and checked locally, and Claude
-deploys. DNS (`infra/server/README.md`, "DNS records"): `api`, `business` and `cms` point at the server from
-22.10.2026; at launch `yeral.app` and `www` move from the legacy Worker to the server. The new client site replaces
-the old one on yeral.app. No real businesses yet: it's a demo with the example businesses and the demo workspace, and nothing is
+deploys. DNS (`infra/server/README.md`, "DNS records"): `yeral.app`, `www`, `api`, `business` and `cms` point at the
+server from 22.10.2026. The old site is retired (owner, 22.10.2026): the apex shows a coming-soon page from the server
+until the new client site takes it over, with no DNS change then. No real businesses yet: it's a demo with the example businesses and the demo workspace, and nothing is
 verified while the sign-in code shows on the screen (Q-036, owner 21.10.2026).
 
 ### P6 · Turkmenistan launch
@@ -231,7 +231,7 @@ so there is time to test it from Ashgabat, rehearse the move and fix what breaks
 | P1 | pasted the design prompts (rounds 1–3.4, stopped 20.10.2026); now only an occasional small prompt for a critical detail |
 | P2 | nothing required |
 | P3–P4 | reviews the built components in Storybook and each finished slice in the local app; that review replaces the canvas check |
-| P5 | approved in advance (22.10.2026); adds the DNS records for `api`, `business` and `cms` now and moves `yeral.app` and `www` to the server at launch (`infra/server/README.md`); sets up their admin account (a password and an authenticator app) from the setup link Claude makes once the admin tool is live: only a login and a name are needed, nothing secret goes through the chat |
+| P5 | approved in advance (22.10.2026); takes `yeral.app` and `www` off the old Worker and adds the DNS records for them, `api`, `business` and `cms` now (`infra/server/README.md`); sets up their admin account (a password and an authenticator app) from the setup link Claude makes once the admin tool is live: only a login and a name are needed, nothing secret goes through the chat |
 | P6 | the investment, the lawyer, buying the server, the SMS provider account, an R2 token for the backups and an error-tracking account, the native language check, meeting the first businesses |
 
 ## Risks we carry

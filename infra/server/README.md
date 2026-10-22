@@ -39,9 +39,9 @@ ssh yeral-vps "COMMIT=$(git rev-parse HEAD) bash /srv/yeral/src/infra/server/yer
 ```
 
 `deploy.sh` builds the api image on the server, runs the migrations and the category catalogue (never the demo), starts
-the api and checks `/v1/health`. With `PUBLIC=1` it also adds Ýeral's sites to Caddy: do that only once the DNS record
-`api.yeral.app` → the server's address exists (DNS only, not proxied). Until then the api is reachable only inside the
-server.
+the api and checks `/v1/health`. With `PUBLIC=1` it also adds Ýeral's sites (`yeral.caddy`) to Caddy: do that only once
+the DNS records below point at the server (DNS only, not proxied); a host still pointing elsewhere only makes Caddy
+retry its certificate. Until then the api is reachable only inside the server.
 
 ## DNS records
 
@@ -52,28 +52,36 @@ Every record that points at the server is **DNS only** (the grey cloud, not prox
 from Let's Encrypt, and it must see each visitor's real address, since the api's rate limits count by it. TTL Auto.
 Only A records, no AAAA (IPv6, below).
 
-**Now** (the owner, 22.10.2026):
+**Now** (the owner, 22.10.2026; the old site is retired, and the apex shows a coming-soon page from the server until
+the client site takes it over):
 
-| Type | Name | Content | Proxy |
-|---|---|---|---|
-| A | `api` | the server's IPv4 address | DNS only |
-| A | `business` | the server's IPv4 address | DNS only |
-| A | `cms` | the server's IPv4 address | DNS only |
-| TXT | `@` | `v=spf1 -all` | — |
-| TXT | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;` | — |
+1. Workers & Pages → `yeral-web` (the old site, `apps/legacy/wrangler.jsonc`) → Settings → Domains & Routes: remove
+   `yeral.app` and `www.yeral.app`. Then DNS → Records should hold no record named `yeral.app` or `www`; delete any
+   left.
+2. DNS → Records, add:
 
-The two TXT records tell mail servers that no mail ever comes from `yeral.app` (Ýeral sends no e-mail), so nobody can
-send mail in its name. `api` serves once a deploy runs with `PUBLIC=1` (above). `business` and `cms` answer with a
-certificate error until their apps join `yeral.caddy`: harmless, nobody is sent there before.
+   | Type | Name | Content | Proxy |
+   |---|---|---|---|
+   | A | `@` | the server's IPv4 address | DNS only |
+   | A | `www` | the server's IPv4 address | DNS only |
+   | A | `api` | the server's IPv4 address | DNS only |
+   | A | `business` | the server's IPv4 address | DNS only |
+   | A | `cms` | the server's IPv4 address | DNS only |
+   | TXT | `@` | `v=spf1 -all` | — |
+   | TXT | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;` | — |
 
-**At the first launch** (once the new client site is deployed to the server and its hosts are in `yeral.caddy`):
+3. Claude deploys with `PUBLIC=1` (above): Caddy gets the certificates, and Claude checks `https://yeral.app`, the
+   `www` redirect and `https://api.yeral.app/v1/health`. Between steps 1 and 3 the apex shows nothing for a few
+   minutes.
+4. Then the owner may delete the Worker `yeral-web`; `apps/legacy` and its deploy option leave the repo in a PR of
+   their own.
 
-1. Workers & Pages → `yeral-web` (the legacy site, `apps/legacy/wrangler.jsonc`) → Settings → Domains & Routes:
-   remove `yeral.app` and `www.yeral.app`. Then DNS → Records should hold no record named `yeral.app` or `www`;
-   delete any left.
-2. DNS → Records: A `@` and A `www` → the server's IPv4 address, DNS only. `www` redirects to the apex in
-   `yeral.caddy`.
-3. Claude reloads Caddy, which gets the certificates at once, and checks both addresses.
+The apex serves the coming-soon page in `yeral.caddy` at every path, and `www` redirects to the apex. The two TXT
+records tell mail servers that no mail ever comes from `yeral.app` (Ýeral sends no e-mail), so nobody can send mail in
+its name. `business` and `cms` answer with a certificate error until their apps join `yeral.caddy`: harmless, nobody is
+sent there before.
+
+**When the client site is ready** it replaces the coming-soon page in `yeral.caddy`; no DNS change.
 
 `storybook` stays as it is: a proxied record of the Worker `yeral-storybook`. Add no CAA record: Caddy falls back to
 another certificate authority when Let's Encrypt fails, and the proxied records use Cloudflare's own.
@@ -81,7 +89,8 @@ another certificate authority when Let's Encrypt fails, and the proxied records 
 ## Still to do
 
 - Deploys from GitHub Actions over SSH with the `deploy` user, after the owner approves a release (ADR 0020).
-- The client, business and cms sites join `yeral.caddy` with their apps (`www` → the apex with the client site).
+- The client site replaces the apex's coming-soon page in `yeral.caddy`; the business and cms sites join with their
+  apps.
 - With the real working MVP, before any real business's data (book chapter 10, P6; not for the demo launch, owner
   22.10.2026): a nightly database backup to Cloudflare R2 with the `media` volume and `.env`, which needs an R2 token
   the owner creates and puts in the server's `.env` (never in chat or git); error tracking and uptime alerts.
