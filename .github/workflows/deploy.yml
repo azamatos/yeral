@@ -1,9 +1,9 @@
 name: Deploy
 
-# Reusable: ci.yml calls it for Storybook on every push to main; legacy is deployed by hand (Actions → Deploy). Releases
-# are paused until the MVP works (ADR 0009, amended 2026-10-21); there is no staging (ADR 0020).
-# Each app has a `deploy:<environment>` script: Storybook and legacy on Cloudflare. The api and the new apps deploy to
-# the own server over SSH (book chapter 10, P2 step 7; by hand until then: infra/server/README.md).
+# Reusable: ci.yml calls it for Storybook on every push to main; Actions → Deploy runs it by hand. Releases are paused
+# until the MVP works (ADR 0009, amended 2026-10-21); there is no staging (ADR 0020).
+# Each app here has a `deploy:<environment>` script: Storybook on Cloudflare. The api and the other apps deploy to the
+# own server over SSH (book chapter 10, P2 step 7; by hand until then: infra/server/README.md).
 
 on:
   workflow_call:
@@ -21,7 +21,7 @@ on:
       app:
         description: App to deploy
         type: choice
-        options: [legacy, storybook]
+        options: [storybook]
       environment:
         description: Environment
         type: choice

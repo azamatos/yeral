@@ -3,7 +3,7 @@
 The api is `apps/api` (Hono, M2). Request and response shapes are the zod schemas in `@yeral/contract`
 (`packages/contract/src/<area>.ts`); the OpenAPI 3.1 document generated from the routes is the reference, served at
 `/docs` ([ADR 0005](decisions/0005-typescript-backend-in-monorepo.md), [ADR 0006](decisions/0006-contract-and-sdk.md)).
-Apps call it only through `@yeral/sdk`. The frozen `apps/legacy` keeps its own in-browser mock.
+Apps call it only through `@yeral/sdk`.
 
 ## Conventions
 

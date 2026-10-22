@@ -75,7 +75,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | The own server (netcup VPS 1000, EU) | runs the api, its jobs, Postgres and later the apps in Docker (ADR 0024; `infra/server`) |
 | Docker + Compose | the server's stacks and the local production-like stack: one image per deployable (`turbo prune --docker`, multi-stage) |
 | Caddy 2 | the front door on the server (shared by the owner's projects) and locally: HTTPS certificates by itself, reverse proxy, compression |
-| Cloudflare: DNS, Workers + wrangler 4, R2 | DNS (not proxied); Storybook and the legacy site as Workers; R2 for backups with the real working MVP (P6) |
+| Cloudflare: DNS, Workers + wrangler 4, R2 | DNS (not proxied); Storybook as a Worker; R2 for backups with the real working MVP (P6) |
 | GitHub Actions | CI/CD; deploys to the server over SSH from P2 step 7 |
 | Sentry or similar (free tier) | error tracking and alerts, chosen with the real working MVP (P6): not for the demo launch (owner, 2026-10-22) |
 | Cloudflare Web Analytics | privacy-friendly page analytics now; Umami on the own server later |
@@ -191,7 +191,7 @@ pnpm check                      # lint, FSD lint, types, tests, format — same 
 pnpm test:stories               # every Storybook story as a Chromium test (render, play, axe)
 pnpm dev --filter=@yeral/storybook   # Storybook on :3005 (PORT_BASE + 5)
 pnpm dev --filter=@yeral/business --filter=@yeral/api   # the business app on :3002 (PORT_BASE + 2) with the api on :3004
-pnpm dev --filter=@yeral/client --filter=@yeral/api     # the client site on :3001 (PORT_BASE + 1, beside legacy's +0) with the api
+pnpm dev --filter=@yeral/client --filter=@yeral/api     # the client site on :3001 (PORT_BASE + 1) with the api
 pnpm --filter @yeral/client build && pnpm --filter @yeral/client start   # the built site on Node (PORT, default 3000)
 pnpm e2e                        # (M3) Playwright against the local stack
 pnpm docker:up                  # production-like stack (Caddy + images) on *.yeral.localhost
@@ -199,7 +199,7 @@ pnpm docker:up                  # production-like stack (Caddy + images) on *.ye
 
 | client | business | cms | api | storybook | — |
 |---|---|---|---|---|---|
-| :3000 (:3001 while legacy lives) | :3002 | :3003 | :3004 (`/docs`) | :3005 | |
+| :3001 | :3002 | :3003 | :3004 (`/docs`) | :3005 | |
 
 Storybook dev generates Tailwind classes as stories load; if a new component looks unstyled, reload. If the port is
 busy, an old server is still running: `pkill -f "storybook/dist/bin/dispatcher"`. The static build (`pnpm build`) is
@@ -208,6 +208,5 @@ what CI tests and deploys.
 Ports are `PORT_BASE` + offset (`PORT_BASE=3100` in a second worktree). Cookies on `localhost` are shared across ports,
 so one login works in every app locally.
 
-**Today**: `pnpm dev` runs `apps/legacy` on :3000. `apps/client` takes :3000 when it replaces legacy (end of M3); until
-then it runs on :3001 next to legacy.
-`pnpm --filter @yeral/legacy run deploy` builds with OpenNext and publishes to Cloudflare by hand (or Actions → Deploy from `main`; releases are paused, ADR 0009).
+:3000 (`PORT_BASE` + 0) was the old Next.js site's (`apps/legacy`, removed 2026-10-23); it stays free, so no app's
+port moves mid-build.

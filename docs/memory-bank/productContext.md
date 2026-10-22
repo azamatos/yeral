@@ -135,7 +135,8 @@ rules, hours, calendar day, clients) are the seed for every screen: demo clock `
 (`+993 65 90 11 22`), businesses (Glow Studio, Barber Loft, Ak Diş, Ojak, Aýdyň ýoga …), bookings. In the designs, SMS
 code `0000` is wrong and any other works; the real demo environment accepts `1234`.
 
-## The first web version (`apps/legacy`)
+## The first web version (`apps/legacy`, retired)
 
-Beauty-only, Russian, salon-centric model with instant-confirmation and "declined/expired" statuses. It stays live until
-the client site replaces it (M3) and is not a reference for new behaviour.
+Beauty-only, Russian, salon-centric model with instant-confirmation and "declined/expired" statuses, on mock data. It
+served yeral.app until 2026-10-22 and left the repo on 2026-10-23 (its commits keep it); it was never a reference for
+new behaviour.

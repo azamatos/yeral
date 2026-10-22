@@ -35,13 +35,15 @@ From the repo root, at the commit to deploy:
 ```
 git archive --format=tar HEAD > /tmp/yeral-src.tar
 ssh yeral-vps 'rm -rf /srv/yeral/src && mkdir -p /srv/yeral/src && tar -x -C /srv/yeral/src' < /tmp/yeral-src.tar
-ssh yeral-vps "COMMIT=$(git rev-parse HEAD) bash /srv/yeral/src/infra/server/yeral/deploy.sh"
+ssh yeral-vps "COMMIT=$(git rev-parse HEAD) PUBLIC=1 bash /srv/yeral/src/infra/server/yeral/deploy.sh"
 ```
 
-`deploy.sh` builds the api image on the server, runs the migrations and the category catalogue (never the demo), starts
-the api and checks `/v1/health`. With `PUBLIC=1` it also adds Ýeral's sites (`yeral.caddy`) to Caddy: do that only once
-the DNS records below point at the server (DNS only, not proxied); a host still pointing elsewhere only makes Caddy
-retry its certificate. Until then the api is reachable only inside the server.
+`deploy.sh` builds the api image on the server, saves the database first
+(`/srv/yeral/backup-<date>-before-<commit>.sql.gz`, mode 600; a failed dump stops the deploy; the way back from a bad
+migration, operations.md "Rollback"), runs the migrations and the category catalogue (never the demo), starts the api
+and checks `/v1/health`. `PUBLIC=1` also copies Ýeral's sites (`yeral.caddy`) to Caddy and reloads it: always, since
+the DNS records point at the server (2026-10-22); without it a change to `yeral.caddy` doesn't ship. Delete old
+backups by hand when the disk needs it.
 
 ## DNS records
 
@@ -52,12 +54,11 @@ Every record that points at the server is **DNS only** (the grey cloud, not prox
 from Let's Encrypt, and it must see each visitor's real address, since the api's rate limits count by it. TTL Auto.
 Only A records, no AAAA (IPv6, below).
 
-**Now** (the owner, 22.10.2026; the old site is retired, and the apex shows a coming-soon page from the server until
-the client site takes it over):
+**Done 22.10.2026** (the owner; the old site is retired, and the apex shows a coming-soon page from the server until
+the client site takes it over; live since 2026-10-22 21:18 UTC):
 
-1. Workers & Pages → `yeral-web` (the old site, `apps/legacy/wrangler.jsonc`) → Settings → Domains & Routes: remove
-   `yeral.app` and `www.yeral.app`. Then DNS → Records should hold no record named `yeral.app` or `www`; delete any
-   left.
+1. Workers & Pages → `yeral-web` (the old site) → Settings → Domains & Routes: remove `yeral.app` and
+   `www.yeral.app`. Then DNS → Records should hold no record named `yeral.app` or `www`; delete any left.
 2. DNS → Records, add:
 
    | Type | Name | Content | Proxy |
@@ -67,19 +68,29 @@ the client site takes it over):
    | A | `api` | the server's IPv4 address | DNS only |
    | A | `business` | the server's IPv4 address | DNS only |
    | A | `cms` | the server's IPv4 address | DNS only |
-   | TXT | `@` | `v=spf1 -all` | — |
-   | TXT | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;` | — |
 
 3. Claude deploys with `PUBLIC=1` (above): Caddy gets the certificates, and Claude checks `https://yeral.app`, the
    `www` redirect and `https://api.yeral.app/v1/health`. Between steps 1 and 3 the apex shows nothing for a few
    minutes.
-4. Then the owner may delete the Worker `yeral-web`; `apps/legacy` and its deploy option leave the repo in a PR of
-   their own.
+4. Then the owner may delete the Worker `yeral-web` (the switch is confirmed); `apps/legacy` and its deploy option
+   left the repo on 23.10.2026.
 
-The apex serves the coming-soon page in `yeral.caddy` at every path, and `www` redirects to the apex. The two TXT
-records tell mail servers that no mail ever comes from `yeral.app` (Ýeral sends no e-mail), so nobody can send mail in
-its name. `business` and `cms` answer with a certificate error until their apps join `yeral.caddy`: harmless, nobody is
-sent there before.
+The apex serves the coming-soon page in `yeral.caddy` at every path, and `www` redirects to the apex. `business` and
+`cms` answer with a certificate error until their apps join `yeral.caddy`: harmless, nobody is sent there before.
+
+**E-mail records: not added yet** (the owner chooses later, 23.10.2026). `yeral.app` has none today, so anyone can send
+mail in its name. Ýeral sends no e-mail; one of:
+
+- **Lock it down** (no mail sent or received): DNS → Records, add
+
+  | Type | Name | Content |
+  |---|---|---|
+  | TXT | `@` | `v=spf1 -all` |
+  | TXT | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;` |
+  | MX | `@` | mail server `.` (a single dot), priority 0: the null MX, "no mail received here" (skip it if the dashboard refuses the dot) |
+
+- **Receive mail at an address** such as `hello@…`, forwarded to the owner's inbox: Email → Email Routing → Get
+  started (it adds its own MX and SPF records), then only the `_dmarc` TXT record above. Sending stays off.
 
 **When the client site is ready** it replaces the coming-soon page in `yeral.caddy`; no DNS change.
 
