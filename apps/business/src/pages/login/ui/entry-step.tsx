@@ -7,7 +7,7 @@ import { isApiError } from '@yeral/sdk'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { entryOf, waitsForSetup, type Entry } from '../model/entry'
+import { entryOf, type Entry } from '../model/entry'
 import { ContinueSetupStep } from './continue-setup-step'
 import { InviteStep } from './invite-step'
 import { InviteExpiredStep, NoWorkspaceStep } from './no-workspace-steps'
@@ -38,7 +38,8 @@ export function EntryStep({
   const sdk = useSdk()
   const invites = useQuery(sdk.team.myInvites())
   const workspaces = useQuery(sdk.team.workspaces())
-  const setup = useQuery(sdk.setup.mine())
+  // the unfinished setup matters only to someone without a workspace: a workspace opens first, whatever the setup
+  const setup = useQuery({ ...sdk.setup.mine(), enabled: workspaces.data?.items.length === 0 })
   const accept = useMutation(sdk.team.accept())
   const decline = useMutation(sdk.team.decline())
   // the invite being answered stays on screen until the answer is in
@@ -60,6 +61,7 @@ export function EntryStep({
         onRetry={() => {
           void invites.refetch()
           void workspaces.refetch()
+          if (setup.isError) void setup.refetch()
         }}
       />
     )
@@ -76,14 +78,11 @@ export function EntryStep({
   const open = invites.data.items.filter((i) => !answered.includes(i.id))
   const entry: Entry = answering
     ? { kind: 'invite', invite: answering }
-    : entryOf(open, workspaces.data, setup.data?.setup ?? null, { declined: declined !== null, now })
+    : entryOf(open, workspaces.data, setup.data?.setup, { declined: declined !== null, now })
   // accepted with nothing else waiting: straight into its calendar, as drawn (B-07; the api made it the last used)
   if (joined && entry.kind !== 'invite') return <Navigate to="/w/$slug/calendar" params={{ slug: joined }} replace />
-  // the setup decides only when nothing comes before it: an invite or a workspace doesn't wait for it
-  if (!setup.data && waitsForSetup(entry)) {
-    if (!setup.isError) return <WaitStep />
-    return <FailedStep onRetry={() => void setup.refetch()} />
-  }
+  // the setup decides, and isn't in yet
+  if (entry.kind === 'pending') return setup.isError ? <FailedStep onRetry={() => void setup.refetch()} /> : <WaitStep />
   const line = { who: who(formatPhone(me.phone)), onOtherNumber, leaving }
   // the invited number is masked on the invite and expired cards (B-Login), as on the owner's invite row
   const masked = who(maskPhone(me.phone))
@@ -129,7 +128,7 @@ export function EntryStep({
     case 'opening':
       return <OpeningStep workspace={entry.workspace} count={entry.count} current={workspaces.data.current} declined={declined} />
     case 'setup':
-      return <ContinueSetupStep {...line} setup={entry.setup} />
+      return <ContinueSetupStep {...line} setup={entry.setup} declined={declined} />
     case 'expired':
       return <InviteExpiredStep {...line} who={masked} invite={entry.invite} />
     case 'empty':

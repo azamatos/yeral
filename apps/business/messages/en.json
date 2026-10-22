@@ -184,7 +184,6 @@
       "progressText": "{done, number} of {total, number} steps done",
       "doneList": "Done",
       "doneStep": "{step} · {detail}",
-      "address": "{line}, {city}",
       "next": "Next: {steps}",
       "ahead": {
         "business": "business details",

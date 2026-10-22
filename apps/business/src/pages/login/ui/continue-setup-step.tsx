@@ -1,14 +1,16 @@
 import { Link } from '@tanstack/react-router'
 import type { Setup } from '@yeral/contract/setup'
 import type { SetupStep } from '@yeral/domain/setup'
+import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { cn } from '@yeral/ui/cn'
 import { Check, Clock } from 'lucide-react'
-import { useLocale, useTranslations } from 'use-intl'
+import { useFormatter, useTranslations } from 'use-intl'
 import { AuthPage } from '@/shared/ui'
 import { setupProgress } from '../model/entry'
 import { AccountLine } from './account-line'
 import { BusinessMark } from './business-mark'
+import { DeclinedLine } from './declined-line'
 
 /**
  * An unfinished setup (B-Login `step=setup`, ContinueSetupCard, book B-07 step 4, Q-200): the draft, the step it
@@ -20,34 +22,44 @@ export function ContinueSetupStep({
   who,
   onOtherNumber,
   leaving,
+  declined,
 }: {
   setup: Setup
   who: string
   onOtherNumber: () => void
   leaving: boolean
+  /** The business whose invite was just declined: the card says so on top. */
+  declined: string | null
 }) {
   const t = useTranslations()
-  const locale = useLocale()
+  const format = useFormatter()
+  const fmt = useFmt()
   const { n, total, done, before, ahead } = setupProgress(setup.step)
-  // what the draft says about a step done: the category, the address once one is saved
+  // what the draft says about a step done (B-Login): the category, the address once one is saved
   const detail = (step: SetupStep): string | null => {
     if (step === 'business') return setup.category
-    if (step === 'address' && setup.address) return t('login.setup.address', { line: setup.address.line, city: setup.address.city.name })
+    if (step === 'address' && setup.address) return fmt.addressIn(setup.address.line, setup.address.city.name)
     return null
   }
-  const nextSteps = new Intl.ListFormat(locale, { type: 'unit' }).format(ahead.map((s) => t(`login.setup.ahead.${s}`)))
+  const nextSteps = format.list(
+    ahead.map((s) => t(`login.setup.ahead.${s}`)),
+    { type: 'unit' },
+  )
 
   return (
     <AuthPage
       focusKey="setup"
       media={
-        <div className="flex min-w-0 items-center gap-3.5">
-          <BusinessMark name={setup.name} logo={setup.logo} />
-          <span className="flex min-w-0 flex-col gap-0.5">
-            <span className="text-[17px] leading-6 font-semibold">{setup.name}</span>
-            <span className="text-dense text-n-600">{t('login.setup.where', { category: setup.category })}</span>
-          </span>
-        </div>
+        <>
+          {declined && <DeclinedLine business={declined} />}
+          <div className="flex min-w-0 items-center gap-3.5">
+            <BusinessMark name={setup.name} logo={setup.logo} />
+            <span className="flex min-w-0 flex-col gap-0.5">
+              <span className="text-[17px] leading-6 font-semibold">{setup.name}</span>
+              <span className="text-dense text-n-600">{t('login.setup.where', { category: setup.category })}</span>
+            </span>
+          </div>
+        </>
       }
       eyebrow={t('login.setup.eyebrow', { n, total, step: t(`setup.names.${setup.step}`) })}
       title={t('login.setup.title', { business: setup.name })}

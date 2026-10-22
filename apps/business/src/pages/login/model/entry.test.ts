@@ -2,7 +2,7 @@ import type { Setup } from '@yeral/contract/setup'
 import type { InviteCard, Workspace } from '@yeral/contract/team'
 import { describe, expect, it } from 'vitest'
 import { EXPIRED_INVITE_SHOWN_DAYS } from '@yeral/domain/team'
-import { entryOf, setupProgress, waitsForSetup } from './entry'
+import { entryOf, setupProgress } from './entry'
 
 const city = { id: 'ashgabat', name: 'Ashgabat' }
 const workspace = (slug: string, lastOpenedAt: number | null = null): Workspace => ({
@@ -115,11 +115,11 @@ describe('entryOf', () => {
       expect(entryOf([], { items: [workspace('home')], current: 'home' }, setup('team'), { now })).toMatchObject({ kind: 'opening' })
     })
 
-    it('only the expired and empty cards wait for it', () => {
-      expect(waitsForSetup({ kind: 'empty' })).toBe(true)
-      expect(waitsForSetup({ kind: 'expired', invite: invite('a', 'expired') })).toBe(true)
-      expect(waitsForSetup({ kind: 'opening', workspace: workspace('home'), count: 1 })).toBe(false)
-      expect(waitsForSetup({ kind: 'invite', invite: invite('b', 'pending') })).toBe(false)
+    it('only the cards after it wait for it: a waiting invite or a workspace goes ahead while it is unknown', () => {
+      expect(entryOf([], none, undefined, { now })).toEqual({ kind: 'pending' })
+      expect(entryOf([invite('a', 'expired', now - 5)], none, undefined, { now })).toEqual({ kind: 'pending' })
+      expect(entryOf([invite('b', 'pending')], none, undefined, { now })).toMatchObject({ kind: 'invite' })
+      expect(entryOf([], { items: [workspace('home')], current: 'home' }, undefined, { now })).toMatchObject({ kind: 'opening' })
     })
   })
 })

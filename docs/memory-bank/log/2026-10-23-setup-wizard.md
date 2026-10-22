@@ -27,8 +27,9 @@
 
 - `pages/login`: `entryOf` takes the person's setup (`sdk.setup.mine()`, `GET /v1/me/setup`) and returns `setup`
   after a waiting invite and the last-used workspace, before the expired invite's card and the no-workspace card
-  (chapter 9's 21.10.2026 B-07 row, revised). Only the expired and empty cards wait for the setup (`waitsForSetup`);
-  a failed setup call shows the step's "try again". `ContinueSetupStep` (B-Login `step=setup`, ContinueSetupCard): the
+  (chapter 9's 21.10.2026 B-07 row, revised). The setup is asked only without a workspace, and only the cards after it
+  wait for it (`pending`); a failed setup call shows the step's "try again". After a decline the card carries "You
+  declined …'s invite." on top. `ContinueSetupStep` (B-Login `step=setup`, ContinueSetupCard): the
   logo or letter tile, "{category} · setup not finished", "Step 4 of 8 · Hours", the 8-part progress («3 of 8 steps
   done»), the draft's steps done (Business · category, Address · line, city) and "Next: …" (the saved step up to the
   rules), Continue → `/setup/{step}`, the account line. `setupProgress` counts the steps.

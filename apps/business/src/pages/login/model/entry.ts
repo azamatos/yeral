@@ -15,15 +15,18 @@ export type Entry =
   | { kind: 'setup'; setup: Setup }
   | { kind: 'expired'; invite: InviteCard }
   | { kind: 'empty' }
+  /** The setup decides and isn't known yet. */
+  | { kind: 'pending' }
 
 /**
- * `setup`: the person's unfinished setup, if any. `declined`: the person just declined an invite, so the no-workspace
- * card says so (B-Login), not an older expiry. `now`: when the person arrived, for the expired card's week.
+ * `setup`: the person's unfinished setup, null without one, undefined while it isn't known (only the cards after it
+ * wait for it). `declined`: the person just declined an invite, so the card after it says so (B-Login), and no
+ * older expiry shows. `now`: when the person arrived, for the expired card's week.
  */
 export function entryOf(
   invites: readonly InviteCard[],
   workspaces: { items: readonly Workspace[]; current: string | null },
-  setup: Setup | null,
+  setup: Setup | null | undefined,
   { declined = false, now }: { declined?: boolean; now: number },
 ): Entry {
   // oldest first, as the api lists them; several at once aren't drawn, so they come one after another
@@ -33,6 +36,7 @@ export function entryOf(
   const last =
     items.find((w) => w.slug === workspaces.current) ?? [...items].sort((a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0))[0]
   if (last) return { kind: 'opening', workspace: last, count: items.length }
+  if (setup === undefined) return { kind: 'pending' }
   if (setup) return { kind: 'setup', setup }
   const expired = declined
     ? undefined
@@ -42,15 +46,10 @@ export function entryOf(
 }
 
 /**
- * Whether the person's setup may still change this entry (into the setup card), so it waits for `GET /v1/me/setup`:
- * an invite or a workspace comes first, whatever the setup.
- */
-export const waitsForSetup = (entry: Entry): boolean => entry.kind === 'expired' || entry.kind === 'empty'
-
-/**
  * The "Continue setting up" card's numbers (B-Login): the saved step's place among the wizard's 8 (the phone is the
  * first), how many are done before it, the draft's steps done (`before`) and the ones still ahead, the saved one
- * included (the last step, the result, isn't one to do).
+ * included (the last step, the result, isn't one to do). The steps before the saved one are the done ones (chapter 9
+ * 21.10.2026), as the wizard reopens there, also when "Continue later" saved an earlier step than the furthest.
  */
 export function setupProgress(step: SetupStep) {
   const at = SETUP_STEPS.indexOf(step)

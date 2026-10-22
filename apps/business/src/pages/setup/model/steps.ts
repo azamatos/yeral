@@ -6,7 +6,7 @@
  */
 import { SETUP_STEPS, WIZARD_STEPS, type SetupStep, type WizardStep } from '@yeral/domain/setup'
 
-export { WIZARD_STEPS, type WizardStep }
+export { WIZARD_STEPS, type WizardStep } from '@yeral/domain/setup'
 
 export function isWizardStep(step: string): step is WizardStep {
   return (WIZARD_STEPS as readonly string[]).includes(step)
