@@ -10,7 +10,7 @@ Watch the console (`read_console_messages` with a pattern) for errors on every p
 
 ## Demo facts
 
-- Local: `pnpm db:setup` once, then `pnpm dev`: client :3001, business :3002, cms :3003 (not built yet), api :3004
+- Local: `pnpm db:up && pnpm db:setup` once (Postgres in Docker, migrated and seeded), then `pnpm dev`: client :3001, business :3002, cms :3003 (not built yet), api :3004
   (`/docs`), Storybook :3005 (plus the `PORT_BASE` offset in other worktrees). No staging (ADR 0020): test locally or
   with `pnpm docker:up` (`*.yeral.localhost`).
 - Sign-in outside production: any mobile number of the market (`MARKET` in `@yeral/domain/market`), code `1234`; the

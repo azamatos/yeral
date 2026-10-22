@@ -22,7 +22,8 @@ they are until releases come back before the first launch (book chapter 10, P2 s
    (`pnpm docker:up`) for api or infra changes, the flows from skill `qa-flows` against local dev servers.
 5. **Storybook** deploys itself from `main` after the checks (`ci.yml` → `deploy-storybook`).
 6. **Production by hand** (only when the owner asks), after the flows are click-tested (skill `qa-flows`): the api and
-   the sites on the own server with `infra/server/README.md` → "Deploying Ýeral by hand" (take a database backup first);
+   the sites on the own server with `infra/server/README.md` → "Deploying Ýeral by hand" (`deploy.sh` saves the database
+   first);
    Storybook deploys itself, or `gh workflow run deploy.yml -f app=storybook -f environment=production` (the smoke check
    verifies `/version.json` and key pages).
 

@@ -11,9 +11,9 @@ are two kinds of environment only, local and production (ADR 0020): no staging.
 
 | Env | Hosts | Database | Deployed |
 |---|---|---|---|
-| local | `localhost:3000–3005` (`PORT_BASE` + offset) | Postgres in Docker, one database per worktree | `pnpm dev` |
+| local | `localhost:3001–3005` (`PORT_BASE` + offset; +0 is free) | Postgres in Docker, one database per worktree | `pnpm dev` |
 | local, production-like | `*.yeral.localhost` through Caddy | Postgres container | `pnpm docker:up` |
-| production | the owner's server `yeral-vps`: `api.yeral.app` and `yeral.app` (a coming-soon page; `www` redirects) since 2026-10-23, `business.` and `cms.` with their apps; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
+| production | the owner's server `yeral-vps`: `api.yeral.app` and `yeral.app` (a coming-soon page; `www` redirects) since 2026-10-22 21:18 UTC, `business.` and `cms.` with their apps; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
 
 No staging and no PR previews (ADR 0020): a change is proven locally (tests, the Docker stack), reviewed, and merged on
 green CI; production is deployed by hand, when the owner asks, while releases are paused. A risky migration is rehearsed on a production dump restored into
@@ -222,4 +222,5 @@ that reads a file outside every package lists it as an input with `$TURBO_ROOT$`
   read (0041 drops `users.notify_review_ask`, `businesses.avg_bill` and `businesses.typical_confirm_minutes`) ends
   that. An image older than it can't run on the database after it (Drizzle names every column it knows in its selects
   and returns), and `/v1/health` doesn't notice: roll back only to an image at or after the newest contract migration,
-  or restore the database from the backup taken before the deploy.
+  or restore the database from the backup taken before the deploy (`deploy.sh` saves it as
+  `/srv/yeral/backup-<date>-before-<commit>.sql.gz`, mode 600).

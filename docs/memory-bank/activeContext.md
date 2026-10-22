@@ -29,8 +29,8 @@ through a geocoder port (Photon over OpenStreetMap, ADR 0027 in the branch), pus
 
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16). Releases are paused until the MVP works
 (#133, ADR 0009 amended; the `release` skill is now `ship`): no versions or changesets, and production goes by hand.
-The api and Postgres run on the owner's server since 2026-10-19, public at `api.yeral.app` since 2026-10-23 (main at
-5c07be4); yeral.app shows a coming-soon page from the server until the client site takes it over. P2: steps 0–6 done (step 4
+The api and Postgres run on the owner's server since 2026-10-19, public at `api.yeral.app` since 2026-10-22 21:18 UTC
+(23.10 the owner's time; main at 5c07be4); yeral.app shows a coming-soon page from the server until the client site takes it over. P2: steps 0–6 done (step 4
 but the map address search, in the open branch); step 7 has the SMS limits and the sitemap data, and keeps releases
 and deploys from GitHub (backups and error tracking moved to P6, owner 22.10). P4: slice 1 done, slice 2 (business
 setup) next. The design redraw stopped (ADR 0021 amended 2026-10-20): the apps are built from the book and the drawn
