@@ -49,7 +49,7 @@ export const Flow: Story = {
   play: async ({ canvas }) => {
     const bar = canvas.getByRole('progressbar', { name: 'Setup steps' })
     await expect(bar).toHaveAttribute('aria-valuetext', 'Step 4 of 8')
-    await expect(bar.firstElementChild).toHaveStyle({ width: '50%' })
+    await expect((bar.firstElementChild as HTMLElement).style.width).toBe('50%')
   },
 }
 
