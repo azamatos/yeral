@@ -8,6 +8,13 @@
 export const SETUP_STEPS = ['business', 'address', 'hours', 'services', 'team', 'rules', 'done'] as const
 export type SetupStep = (typeof SETUP_STEPS)[number]
 
+/**
+ * The wizard's steps as the person counts them (B-Onboarding's 8): the phone (the sign-in) first, then the draft's.
+ * The wizard and the sign-in's "Continue setting up" card number the steps by it.
+ */
+export const WIZARD_STEPS = ['phone', ...SETUP_STEPS] as const
+export type WizardStep = (typeof WIZARD_STEPS)[number]
+
 /** What finishing needs: an address, an open day, a service (B-03, B-04). */
 export const SETUP_NEEDS = ['address', 'hours', 'services'] as const
 export type SetupNeed = (typeof SETUP_NEEDS)[number]
