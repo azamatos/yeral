@@ -120,7 +120,9 @@ export const NewBusiness: Story = {
     await expect(cont).toBeEnabled()
     await userEvent.click(cont)
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Where will clients find you?' })).toBeVisible()
-    await expect(within(steps).getByText('Glow Studio · Beauty')).toBeVisible()
+    // the draft made, the wizard draws itself again: the step list is a new one
+    const list = canvas.getByRole('navigation', { name: 'Steps' })
+    await expect(within(list).getByText('Glow Studio · Beauty')).toBeVisible()
   },
 }
 
@@ -184,9 +186,9 @@ export const ContinueLater: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Where will clients find you?' })).toBeVisible()
     await userEvent.click(canvas.getAllByRole('button', { name: 'Continue later' })[0]!)
-    await expect(
-      await within(document.body).findByText('Saved. Log in again with +993 65 10 20 30 and setup reopens at “Address”.'),
-    ).toBeVisible()
+    const toast = await within(document.body).findByText('Saved. Log in again with +993 65 10 20 30 and setup reopens at “Address”.')
+    // the toast slides in
+    await waitFor(() => expect(toast).toBeVisible())
   },
 }
 

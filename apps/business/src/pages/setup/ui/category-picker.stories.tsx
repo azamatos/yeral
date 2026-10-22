@@ -4,7 +4,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { expect, fn, userEvent, within } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import { I18nProvider } from '@/shared/i18n'
 import { LAUNCH_CATEGORIES } from '@/shared/storybook'
 import { CategoryPicker } from './category-picker'
@@ -68,7 +68,9 @@ export const NoMatch: Story = {
     await expect(await canvas.findByText('No category fits? Contact Ýeral.')).toBeVisible()
     await expect(canvas.getByText('Nothing matches “cafe”. Try another word, or tell us what you do.')).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'Contact Ýeral' }))
-    await expect(await within(document.body).findByRole('menu', { name: 'Contact Ýeral' })).toBeVisible()
+    const menu = await within(document.body).findByRole('menu', { name: 'Contact Ýeral' })
+    // the menu fades in
+    await waitFor(() => expect(menu).toBeVisible())
     await userEvent.keyboard('{Escape}')
   },
 }
