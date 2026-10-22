@@ -6,6 +6,7 @@ import type { Db } from '../src/db/client'
 import type { Deps } from '../src/deps'
 import { nullLogger } from '../src/ports/log'
 import { memorySms } from '../src/ports/sms'
+import { noGeocoder } from '../src/ports/geocoder'
 import { memoryStorage } from '../src/ports/storage'
 
 /** Demo clock: Wednesday 2026-10-14, 11:20 at the business. */
@@ -30,6 +31,7 @@ export function testApp(
     adminKey?: Uint8Array<ArrayBuffer> | null
     bookingTypes?: Deps['bookingTypes']
     demoWorkspace?: boolean
+    geocoder?: Deps['geocoder']
   } = {},
 ) {
   const clock = { now: opts.now ?? DEMO_NOW }
@@ -49,6 +51,7 @@ export function testApp(
     // every kind, so the table and class paths stay tested; the first launch's rule has its own test
     bookingTypes: opts.bookingTypes ?? BOOKING_TYPES,
     demoWorkspace: opts.demoWorkspace ?? false,
+    geocoder: opts.geocoder ?? noGeocoder,
   }
   const app = createApp(async (c, next) => {
     c.set('deps', deps)

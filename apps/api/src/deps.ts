@@ -4,6 +4,8 @@ import type { SiteConfig } from '@yeral/lib/site'
 import type { Config } from './config'
 import type { Db } from './db/client'
 import type { TrustedIpHeader } from './lib/rate-limit'
+import { build } from './version'
+import { noGeocoder, photonGeocoder, type GeocoderPort } from './ports/geocoder'
 import { createLogger, type Logger } from './ports/log'
 import { logSms, type SmsPort } from './ports/sms'
 import { diskStorage, type StoragePort } from './ports/storage'
@@ -33,6 +35,8 @@ export interface Deps {
   adminKey: Uint8Array<ArrayBuffer> | null
   /** The business app's demo workspace (`DEMO_WORKSPACE`, book F-242): kept by the jobs, made again every night. */
   demoWorkspace: boolean
+  /** The address search behind the map pin (ADR 0027). */
+  geocoder: GeocoderPort
 }
 
 /** The dependencies as the Node entry builds them (ADR 0024). */
@@ -52,5 +56,9 @@ export function createDeps(config: Config, db: Db, log: Logger = createLogger(co
     adminKey: config.adminKey,
     bookingTypes: config.bookingTypes,
     demoWorkspace: config.demoWorkspace,
+    // named, as the public Photon asks of every app: the site's own address (from config), the api's version
+    geocoder: config.geocoderUrl
+      ? photonGeocoder(config.geocoderUrl, `${new URL(config.site.urls.client).host}/${build.version} (+${config.site.urls.client})`)
+      : noGeocoder,
   }
 }

@@ -62,6 +62,7 @@ import type { reviewReplyInputSchema, reviewReportInputSchema, teamReviewsQueryS
 import type { setupStartSchema, setupStepInputSchema } from '@yeral/contract/setup'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
 import type {
+  addressSearchQuerySchema,
   bookingRulesUpdateSchema,
   businessHoursUpdateSchema,
   businessProfileUpdateSchema,
@@ -663,6 +664,19 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: () => call(w.verification.$post({ param: { slug } })),
         onSuccess: () => settingsChanged(slug),
+      }),
+    /**
+     * Addresses to pick for the map pin (B-04, B-37; ADR 0027): 3 letters or more, near the city. The app waits for a
+     * pause in the typing; `address_search_unavailable` lets the pin be placed by hand.
+     */
+    addressSearch: (slug: string, params: z.input<typeof addressSearchQuerySchema>) =>
+      queryOptions({
+        queryKey: keys.addressSearch(slug, params),
+        queryFn: ({ signal }) => call(w.settings['address-search'].$get({ param: { slug }, query: params }, abortWith(signal))),
+        // an address doesn't move: the same letters needn't ask again
+        staleTime: 60 * 60_000,
+        // the next pause in the typing asks again; unavailable means the pin by hand now, not after retries
+        retry: false,
       }),
     /** The logo (book B-37): square; the app crops and shrinks it first. The switcher and invite cards show it. */
     setLogo: (slug: string) =>

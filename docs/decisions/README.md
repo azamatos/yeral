@@ -32,6 +32,7 @@ before any code used them were edited in place (marked "revised").
 | [0024](0024-own-server-docker-caddy.md) | The own server runs every app: Docker + Caddy, Postgres beside the api, no Neon, no Workers | Accepted 2026-10-19 |
 | [0025](0025-fixed-levels-team-rows-invites.md) | Three fixed access levels; a team member is one staff row; invites wait for an answer | Accepted 2026-10-19 |
 | [0026](0026-team-accounts-password-and-totp.md) | The Ýeral team signs in with its own accounts: a password and an authenticator code | Accepted 2026-10-21 |
+| [0027](0027-address-search-geocoder-port.md) | The address search goes through a geocoder port: Photon over OpenStreetMap | Accepted 2026-10-21 |
 
 New record: copy [`_template.md`](_template.md), take the next number, add a row here, update the affected
 memory-bank file in the same commit.

@@ -100,6 +100,10 @@ tracking and uptime checks (owner, 2026-10-22: not for the demo launch).
   the market's unused range (`MARKET.phone.unusedPrefix`), each a team member uses held by a demo account (`users.demo`),
   kept from night to night. It's never public, sends no SMS and links nothing to a real account (`businesses.sandbox`).
   Turn it on with the examples when the first launch opens.
+- The address search (ADR 0027): `GEOCODER_URL` is a Photon server's address (its `api` under it), the public
+  `https://photon.komoot.io` by default (fair use, no guarantee; the api caches a day, pauses a minute after a failure,
+  and counts 120 searches an hour per account and 240 per address); `off` turns it off and the pin is placed by hand. For the Turkmenistan launch: a self-hosted Photon with the country's extract, or a paid
+  geocoder (the owner's call).
 - Photos: the ones people upload on the server's disk behind a storage port (`ports/storage.ts`), in `MEDIA_DIR` (the
   `media` volume at `/data/media` on the server and in the local stack; `apps/api/data/media` in development),
   served at `/media/up/…`; the design's demo photos come with the image (above). The nightly backup (with the real working MVP, P6) must

@@ -139,6 +139,22 @@ export const businessProfileUpdateSchema = z
   .strict()
   .meta({ id: 'BusinessProfileUpdate' })
 
+// ── The address search (B-04, B-37; ADR 0027) ──
+
+/** The words typed (3 or more) and the city the address is in; the answer is in the reader's language. */
+export const addressSearchQuerySchema = z.object({
+  q: z.string().trim().min(3).max(120),
+  cityId: z.string().max(40),
+  lang: marketLocaleSchema.optional(),
+})
+
+/** The addresses to pick from ("Salgyny sanawdan saýlaň"): what the list shows, the line kept, the street, the pin. */
+export const addressSearchSchema = z
+  .object({
+    items: z.array(z.object({ label: z.string(), line: z.string(), street: z.string(), lat: z.number(), lng: z.number() })),
+  })
+  .meta({ id: 'AddressSearch' })
+
 // ── The logo (B-37) ──
 
 /**
