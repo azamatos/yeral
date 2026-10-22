@@ -51,9 +51,10 @@ export const keys = {
   team: (slug: string) => ['team', slug] as const,
   blocks: (slug: string, from: string, to: string) => ['calendar', slug, 'blocks', from, to] as const,
   schedule: (slug: string, staffId: string) => ['team', slug, staffId, 'schedule'] as const,
+  /** Addresses to pick (ADR 0027): not under the settings, whose every change would ask the geocoder again. */
+  addressSearch: (slug: string, params: Record<string, unknown>) => ['address-search', slug, params] as const,
   // business settings (book B-37–B-43): every one of a workspace under its prefix
   settings: (slug: string) => ['settings', slug] as const,
-  addressSearch: (slug: string, params: Record<string, unknown>) => ['settings', slug, 'address-search', params] as const,
   rules: (slug: string) => ['settings', slug, 'rules'] as const,
   menu: (slug: string) => ['settings', slug, 'services'] as const,
   profile: (slug: string) => ['settings', slug, 'profile'] as const,

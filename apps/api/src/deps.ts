@@ -56,7 +56,9 @@ export function createDeps(config: Config, db: Db, log: Logger = createLogger(co
     adminKey: config.adminKey,
     bookingTypes: config.bookingTypes,
     demoWorkspace: config.demoWorkspace,
-    // named, as the public Photon asks of every app
-    geocoder: config.geocoderUrl ? photonGeocoder(config.geocoderUrl, `Yeral/${build.version} (+${config.site.urls.client})`) : noGeocoder,
+    // named, as the public Photon asks of every app: the site's own address (from config), the api's version
+    geocoder: config.geocoderUrl
+      ? photonGeocoder(config.geocoderUrl, `${new URL(config.site.urls.client).host}/${build.version} (+${config.site.urls.client})`)
+      : noGeocoder,
   }
 }

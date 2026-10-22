@@ -25,3 +25,12 @@ describe('EXAMPLE_BUSINESSES (book Q-004)', () => {
     })
   })
 })
+
+describe('GEOCODER_URL (ADR 0027)', () => {
+  it('the public Photon by default, any http address (a path too), off, and nothing else', () => {
+    expect(loadConfig(base).geocoderUrl).toBe('https://photon.komoot.io')
+    expect(loadConfig({ ...base, GEOCODER_URL: 'http://photon:2322/photon' }).geocoderUrl).toBe('http://photon:2322/photon')
+    expect(loadConfig({ ...base, GEOCODER_URL: 'off' }).geocoderUrl).toBeNull()
+    expect(() => loadConfig({ ...base, GEOCODER_URL: 'ftp://photon.test' })).toThrow(/GEOCODER_URL/)
+  })
+})

@@ -51,10 +51,10 @@ const envSchema = z.object({
    */
   DEMO_WORKSPACE: z.enum(['true', 'false']).default('false'),
   /**
-   * The geocoder behind the address search (ADR 0027): a Photon server's origin, the public one by default (fair use,
-   * no guarantee); `off` turns the search off (the pin is placed by hand).
+   * The geocoder behind the address search (ADR 0027): a Photon server's address (http or https, its `api` under it), the
+   * public one by default (fair use, no guarantee); `off` turns the search off (the pin is placed by hand).
    */
-  GEOCODER_URL: z.union([z.literal('off'), z.url()]).default('https://photon.komoot.io'),
+  GEOCODER_URL: z.union([z.literal('off'), z.url({ protocol: /^https?$/ })]).default('https://photon.komoot.io'),
   /**
    * The key the Ýeral team's authenticator secrets are sealed under (ADR 0026): 32 random bytes, base64
    * (`openssl rand -base64 32`). Development and tests use a fixed one; production without it has no admin tool.

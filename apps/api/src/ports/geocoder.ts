@@ -27,11 +27,13 @@ export interface SearchOptions {
 export interface GeocoderPort {
   /** Off (`GEOCODER_URL=off`): the endpoint says so, and the app lets the pin be placed by hand. */
   readonly on: boolean
+  /** An answer kept from an earlier search, or undefined: it costs the geocoder nothing, so the endpoint doesn't count it. */
+  cached(q: string, opts: SearchOptions): Place[] | undefined
   search(q: string, opts: SearchOptions): Promise<Place[]>
 }
 
 /** A geocoder that's off: the endpoint answers `address_search_unavailable`. */
-export const noGeocoder: GeocoderPort = { on: false, search: () => Promise.resolve([]) }
+export const noGeocoder: GeocoderPort = { on: false, cached: () => undefined, search: () => Promise.resolve([]) }
 
 interface PhotonFeature {
   geometry: { coordinates: [number, number] }
@@ -42,13 +44,19 @@ interface PhotonFeature {
     city?: string
     district?: string
     countrycode?: string
+    /** OpenStreetMap's main tag: `highway` for a street, `place` for a city or a district, `shop`, `amenity`… */
+    osm_key?: string
   }
 }
 
-/** A Photon feature as a place: "247 Bitarap Türkmenistan Avenue", its name first when it's a place of its own. */
+/**
+ * A Photon feature as a place: "247 Bitarap Türkmenistan Avenue", its name first when it's a place of its own. It needs
+ * a street: its own, or its name when it is one (`osm_key` `highway`); a city, a district, or a shop with no street isn't
+ * an address to pick.
+ */
 export function placeOf(f: PhotonFeature): Place | null {
   const p = f.properties
-  const street = p.street ?? (p.housenumber ? undefined : p.name)
+  const street = p.street ?? (p.osm_key === 'highway' ? p.name : undefined)
   if (!street) return null
   const line = p.housenumber ? `${p.housenumber} ${street}` : street
   const named = p.name && p.name !== street && p.name !== line ? p.name : null
@@ -58,10 +66,20 @@ export function placeOf(f: PhotonFeature): Place | null {
 }
 
 const DAY = 86_400_000
+/** After a failure (Photon throttling, down or slow), searches answer at once for this long without asking it. */
+export const GEOCODER_PAUSE_MS = 60_000
+/** Places asked of Photon per search: more than a list shows, as other countries' answers and non-addresses go. */
+const ASKED = 20
+/** Answers kept: the oldest goes past this many. */
+const KEPT = 500
+
+/** Photon names places in English or as written locally. */
+const photonLang = (lang: Locale) => (lang === 'en' ? 'en' : 'default')
 
 /**
- * Photon at `baseUrl` (`/api?q=…`): the market's country only, near the city, 3 s at most, each answer kept a day in
- * this process (fair use: the same letters typed again don't reach it).
+ * Photon at `baseUrl` (its `api` under that address, so a self-hosted one may sit under a path): the market's country
+ * only, near the city, 3 s at most. Fair use: each answer is kept a day in this process (the same letters typed again,
+ * in any language Photon answers the same, don't reach it), and after a failure it isn't asked for a minute.
  */
 export function photonGeocoder(
   baseUrl: string,
@@ -69,49 +87,64 @@ export function photonGeocoder(
   now: () => number = Date.now,
   fetcher: typeof fetch = fetch,
 ): GeocoderPort {
+  const endpoint = new URL('api', baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`)
   const cache = new Map<string, { at: number; places: Place[] }>()
+  let pausedUntil = 0
+  const keyOf = (q: string, { near, country, lang }: SearchOptions) =>
+    [country, photonLang(lang), near.lat.toFixed(2), near.lng.toFixed(2), q.trim().toLowerCase()].join('|')
+  const kept = (key: string) => {
+    const found = cache.get(key)
+    if (found && now() - found.at < DAY) return found.places
+    if (found) cache.delete(key)
+    return undefined
+  }
   return {
     on: true,
-    async search(q, { near, country, lang, limit }) {
-      const key = [country, lang, near.lat.toFixed(2), near.lng.toFixed(2), limit, q.trim().toLowerCase()].join('|')
-      const kept = cache.get(key)
-      if (kept && now() - kept.at < DAY) return kept.places
-      const url = new URL('/api', baseUrl)
+    cached: (q, opts) => kept(keyOf(q, opts))?.slice(0, opts.limit),
+    async search(q, opts) {
+      const key = keyOf(q, opts)
+      const known = kept(key)
+      if (known) return known.slice(0, opts.limit)
+      if (now() < pausedUntil) throw new Error('geocoder paused after a failure')
+      const url = new URL(endpoint)
       url.search = new URLSearchParams({
         q: q.trim(),
-        lat: String(near.lat),
-        lon: String(near.lng),
-        // more than asked: other countries' answers go
-        limit: String(limit * 3),
-        // Photon names places in English or as written locally
-        lang: lang === 'en' ? 'en' : 'default',
+        lat: String(opts.near.lat),
+        lon: String(opts.near.lng),
+        limit: String(ASKED),
+        lang: photonLang(opts.lang),
       }).toString()
-      const res = await fetcher(url, {
-        headers: { 'user-agent': userAgent, accept: 'application/json' },
-        signal: AbortSignal.timeout(3000),
-      })
-      if (!res.ok) throw new Error(`geocoder answered ${res.status}`)
-      const body = (await res.json()) as { features?: PhotonFeature[] }
-      const places = (body.features ?? [])
-        .filter((f) => f.properties.countrycode?.toLowerCase() === country)
-        .map(placeOf)
-        .filter((p): p is Place => !!p)
-        .filter((p, i, all) => all.findIndex((o) => o.label === p.label) === i)
-        .slice(0, limit)
-      // a small cache: the oldest goes past 500 answers
-      if (cache.size >= 500) cache.delete(cache.keys().next().value!)
+      let places: Place[]
+      try {
+        const res = await fetcher(url, {
+          headers: { 'user-agent': userAgent, accept: 'application/json' },
+          signal: AbortSignal.timeout(3000),
+        })
+        if (!res.ok) throw new Error(`geocoder answered ${res.status}`)
+        const body = (await res.json()) as { features?: PhotonFeature[] }
+        places = (body.features ?? [])
+          .filter((f) => f.properties.countrycode?.toLowerCase() === opts.country)
+          .map(placeOf)
+          .filter((p): p is Place => !!p)
+          .filter((p, i, all) => all.findIndex((o) => o.label === p.label) === i)
+      } catch (e) {
+        pausedUntil = now() + GEOCODER_PAUSE_MS
+        throw e
+      }
+      if (!cache.has(key) && cache.size >= KEPT) cache.delete(cache.keys().next().value!)
       cache.set(key, { at: now(), places })
-      return places
+      return places.slice(0, opts.limit)
     },
   }
 }
 
-/** Tests: the places it knows, matched by the words typed, the market's country only. */
+/** Tests: the places it knows, matched by the words typed, the market's country only; it keeps nothing. */
 export function memoryGeocoder(places: readonly (Place & { country: string })[]): GeocoderPort & { asked: string[] } {
   const asked: string[] = []
   return {
     on: true,
     asked,
+    cached: () => undefined,
     search(q, { country, limit }) {
       asked.push(q)
       const words = q.toLowerCase().split(/\s+/).filter(Boolean)

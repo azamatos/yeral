@@ -675,6 +675,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         queryFn: ({ signal }) => call(w.settings['address-search'].$get({ param: { slug }, query: params }, abortWith(signal))),
         // an address doesn't move: the same letters needn't ask again
         staleTime: 60 * 60_000,
+        // the next pause in the typing asks again; unavailable means the pin by hand now, not after retries
+        retry: false,
       }),
     /** The logo (book B-37): square; the app crops and shrinks it first. The switcher and invite cards show it. */
     setLogo: (slug: string) =>

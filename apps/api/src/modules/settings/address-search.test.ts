@@ -7,7 +7,7 @@ import type { Db } from '../../db/client'
 import { rateLimits } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { memoryGeocoder, type GeocoderPort } from '../../ports/geocoder'
-import { ADDRESS_SEARCHES_PER_HOUR } from './address-search'
+import { ADDRESS_SEARCHES_PER_ADDRESS_HOUR, ADDRESS_SEARCHES_PER_HOUR } from './address-search'
 
 const MAYSA = '+99365102030' // owner of Glow Studio
 const AYNA = '+99365312210' // a specialist there
@@ -59,16 +59,38 @@ describe('the address search (ADR 0027)', () => {
     expect((await maysa.req(`${SEARCH}?q=bitarap&cityId=nowhere`)).json.error.code).toBe('validation_error')
   })
 
-  it('so many an hour per account; off or failing, it says so and the pin is placed by hand', async () => {
+  it('an answer the geocoder keeps isn’t counted against the limits', async () => {
+    const kept = [
+      {
+        label: '247 Bitarap Türkmenistan Avenue, Ashgabat',
+        line: '247 Bitarap Türkmenistan Avenue',
+        street: 'Bitarap Türkmenistan Avenue',
+        lat: 37.95,
+        lng: 58.38,
+      },
+    ]
+    app({ on: true, cached: () => kept, search: () => Promise.reject(new Error('asked')) })
+    const maysa = await as(MAYSA)
+    await db.delete(rateLimits)
+    const found = await maysa.req(`${SEARCH}?q=bitarap&cityId=ashgabat`)
+    expect([found.status, found.json.items]).toEqual([200, kept])
+    expect(await db.select().from(rateLimits)).toEqual([])
+  })
+
+  it('so many an hour per account and per address; off or failing, it says so and the pin is placed by hand', async () => {
     const maysa = await as(MAYSA)
     const { id } = (await maysa.req('/v1/me')).json as { id: string }
     await db.insert(rateLimits).values({ key: `geo:user:${id}`, windowStart: new Date(DEMO_NOW), count: ADDRESS_SEARCHES_PER_HOUR })
     expect((await maysa.req(`${SEARCH}?q=bitarap&cityId=ashgabat`)).json.error.code).toBe('rate_limited')
     await db.delete(rateLimits)
-    app({ on: false, search: () => Promise.resolve([]) })
+    // no trusted header in tests: every caller is the one unknown address
+    await db.insert(rateLimits).values({ key: 'geo:ip:unknown', windowStart: new Date(DEMO_NOW), count: ADDRESS_SEARCHES_PER_ADDRESS_HOUR })
+    expect((await maysa.req(`${SEARCH}?q=bitarap&cityId=ashgabat`)).json.error.code).toBe('rate_limited')
+    await db.delete(rateLimits)
+    app({ on: false, cached: () => undefined, search: () => Promise.resolve([]) })
     const off = await (await as(MAYSA)).req(`${SEARCH}?q=bitarap&cityId=ashgabat`)
     expect([off.status, off.json.error.code]).toEqual([503, 'address_search_unavailable'])
-    app({ on: true, search: () => Promise.reject(new Error('geocoder answered 429')) })
+    app({ on: true, cached: () => undefined, search: () => Promise.reject(new Error('geocoder answered 429')) })
     const down = await (await as(MAYSA)).req(`${SEARCH}?q=bitarap&cityId=ashgabat`)
     expect([down.status, down.json.error.code]).toEqual([503, 'address_search_unavailable'])
   })

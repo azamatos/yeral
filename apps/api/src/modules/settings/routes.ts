@@ -36,6 +36,7 @@ import { requireMember } from '../team/service'
 import { hoursOf, updateHours } from './hours'
 import { profileOf, rulesOf, updateProfile, updateRules } from './service'
 import { uploadGuard } from '../media/photos'
+import { clientIp } from '../../lib/rate-limit'
 import { searchAddress } from './address-search'
 import { removeLogo, setLogo } from './logo'
 import { addPhoto, galleryOf, orderPhotos, removePhoto } from './photos'
@@ -216,7 +217,8 @@ export const settingsRoutes = new OpenAPIHono<AppEnv>()
   .openapi(addressSearchRoute, async (c) => {
     const { user } = await requireSettings(c, c.req.valid('param').slug)
     const { q, cityId, lang } = c.req.valid('query')
-    return c.json(await searchAddress(c.var.deps, user, q, cityId, lang ?? user.lang), 200)
+    const ip = clientIp((n) => c.req.header(n), c.var.deps.trustedIpHeader)
+    return c.json(await searchAddress(c.var.deps, user, ip, q, cityId, lang ?? user.lang), 200)
   })
   .openapi(setLogoRoute, async (c) => {
     const { business, user } = await requireSettings(c, c.req.valid('param').slug)
