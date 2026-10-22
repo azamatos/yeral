@@ -177,11 +177,6 @@
     },
     "demoNote": "This is a demo of {brand}: the sign-in code shows here instead of an SMS. Use a made-up number, and don’t type in real people’s names or numbers."
   },
-  "placeholder": {
-    "setupTitle": "Create a business",
-    "setupLead": "Setting up a business comes with the next part of the app.",
-    "toLogin": "Back to log in"
-  },
   "notFound": {
     "title": "Page not found",
     "lead": "The address may have a typo, or the page has moved.",
@@ -197,5 +192,86 @@
     "contactCaption": "{phone} · Telegram",
     "call": "Call",
     "write": "Write on Telegram"
+  },
+  "setup": {
+    "title": "Set up your business",
+    "titleMore": "Create a business",
+    "caption": "8 steps · about 5 minutes · free",
+    "captionMore": "7 steps · about 5 minutes · free",
+    "steps": "Steps",
+    "progress": "Setup steps",
+    "stepOf": "Step {n, number} of {total, number}",
+    "stepShort": "{n, number} / {total, number}",
+    "doneMark": "Done",
+    "names": {
+      "phone": "Phone",
+      "account": "Account",
+      "business": "Business",
+      "address": "Address",
+      "hours": "Hours",
+      "services": "Services",
+      "team": "Team",
+      "rules": "Booking rules",
+      "done": "Done"
+    },
+    "later": "Continue later",
+    "laterNote": "Saves this step. Log in again and setup reopens right here.",
+    "laterSaved": "Saved. Log in again with {phone} and setup reopens at “{step}”.",
+    "questions": "Questions? Contact {brand}: <b>{phone}</b>",
+    "back": "Back",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "saving": "Saving",
+    "business": {
+      "title": "About your business",
+      "lead": "Clients find you by this name and category. The category also suggests starter services.",
+      "titleMore": "Create a business",
+      "leadMore": "Each workspace is one business at one address: its own calendar, team, clients and settings. Your {brand} account stays the same, and you’ll be the owner of the new business.",
+      "account": "Your {brand} account",
+      "name": "Business name",
+      "namePlaceholder": "For example: Glow Studio",
+      "nameLong": "Too long: up to {max, number} characters.",
+      "page": "Your page: <mono>{url}</mono>",
+      "counter": "{count, number} / {max, number}",
+      "hintName": "Enter the business name.",
+      "hintLong": "Shorten the business name to {max, number} characters.",
+      "hintCategory": "Pick a category."
+    },
+    "category": {
+      "label": "Category",
+      "selected": "Selected: <b>{name}</b>",
+      "search": "Search categories",
+      "searchPlaceholder": "Search, for example: nails, dentist, tutor",
+      "noneTitle": "No category fits? Contact {brand}.",
+      "noneText": "Nothing matches “{query}”. Try another word, or tell us what you do."
+    },
+    "address": {
+      "title": "Where will clients find you?",
+      "lead": "Search for the address, then fine-tune the pin on the map. Clients use this pin to find their way."
+    },
+    "hours": {
+      "title": "Your hours",
+      "lead": "Clients can book only within these hours. You’ll add staff shifts later."
+    },
+    "services": {
+      "title": "Your services",
+      "lead": "Pick from the ready list, then adjust each name, duration and price to suit you."
+    },
+    "team": {
+      "title": "Who do you work with?",
+      "lead": "With a team, each specialist gets their own calendar and clients can pick who they book with."
+    },
+    "rules": {
+      "title": "How should bookings arrive?",
+      "lead": "Confirm each new online booking yourself, or accept it at once."
+    },
+    "done": {
+      "title": "{name} is ready!",
+      "lead": "Add bookings that come by phone or walk-in. Online booking opens after the review."
+    },
+    "signedOut": {
+      "lead": "Setting up a business starts with your phone number. Log in or sign up first.",
+      "login": "Log in"
+    }
   }
 }
