@@ -1,8 +1,15 @@
 # Active context
 
-_Last updated: 2026-10-22_
+_Last updated: 2026-10-23_
 
 ## Current focus
+
+**2026-10-23: yeral.app moved to the own server.** The owner removed `yeral.app` and `www` from the old Worker
+`yeral-web` and added the A records for `@`, `www`, `api`, `business` and `cms` (DNS only; 22.10). Claude deployed main
+at 5c07be4 with `PUBLIC=1` (22.10 21:18 UTC, a database backup first): migrations 0039–0041 applied, Caddy got Let's
+Encrypt certificates for `yeral.app`, `www` and `api`, `https://yeral.app` shows the coming-soon page (#150), `www`
+redirects to it, `https://api.yeral.app/v1/health` answers. The old site left the repo (`apps/legacy`, its deploy option
+and smoke check, its ignore entries; this PR).
 
 **2026-10-22: the backend is all but done for the first launch; the owner answered what it still asked for.** The
 evening of 21.10 merged #137–#147 (each reviewed with `code-review`, one round, on green CI): six concerns settled with
@@ -22,8 +29,8 @@ through a geocoder port (Photon over OpenStreetMap, ADR 0027 in the branch), pus
 
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16). Releases are paused until the MVP works
 (#133, ADR 0009 amended; the `release` skill is now `ship`): no versions or changesets, and production goes by hand.
-The api and Postgres run on the owner's server since 2026-10-19 (not public), the api at a2e0418 since 2026-10-21;
-main is 12 merges ahead of it (migrations 0039–0041). yeral.app still serves `apps/legacy`. P2: steps 0–6 done (step 4
+The api and Postgres run on the owner's server since 2026-10-19, public at `api.yeral.app` since 2026-10-23 (main at
+5c07be4); yeral.app shows a coming-soon page from the server until the client site takes it over. P2: steps 0–6 done (step 4
 but the map address search, in the open branch); step 7 has the SMS limits and the sitemap data, and keeps releases
 and deploys from GitHub (backups and error tracking moved to P6, owner 22.10). P4: slice 1 done, slice 2 (business
 setup) next. The design redraw stopped (ADR 0021 amended 2026-10-20): the apps are built from the book and the drawn
@@ -103,8 +110,9 @@ components in Storybook, then the apps.
 - 2026-10-22 (later): "i dont think we need current working yeral.app, lets make dns for it too". The old site is
   retired now: `yeral.app` and `www` point at the server with the other records, and the apex shows a coming-soon page
   (`infra/server/yeral/yeral.caddy`) until the client site takes it over. After the switch the owner deletes the
-  Worker `yeral-web` and a PR removes `apps/legacy` (AGENTS.md's "the live marketplace is still … `apps/legacy`" line
-  changes with it).
+  Worker `yeral-web` and a PR removes `apps/legacy` (done 23.10.2026).
+- 2026-10-23: "Lets go back to email settings later. FOr now lest go with deploy and other tasks." The e-mail records
+  wait (lock down, or receive mail at an address through Email Routing); deployed the same night.
 
 ## Decisions
 
@@ -199,13 +207,10 @@ Where the old questions went (2026-10-17):
    `upload` and `src`: `PUT /v1/me/photo`, `me.photo`); the Demo frame from `me.demo` (the signed-out sidebar with
    "Log in", the Demo banner, `demo` in the switcher), "Try the business app" (`sdk.demo.start()`) on the login and the
    wizard, and `demo_number`'s hint; the leave and delete confirms' counts (#142); the page-state banner (#144).
-3. **Deploy by hand** (no release: #133; `infra/server/README.md`): once the owner's records exist (`yeral.app` and
-   `www` off the Worker `yeral-web`, then the A records), deploy main with `PUBLIC=1` and check `https://yeral.app`
-   (the coming-soon page), the `www` redirect and `https://api.yeral.app/v1/health`; the server is at a2e0418, and
-   0041 drops columns, so no image older than it runs after that deploy. Then a PR removes `apps/legacy`, its deploy
-   option and AGENTS.md's legacy line, and the owner deletes the Worker. The first launch (approved in advance, 22.10)
-   goes when slices 2–7 are built and checked locally: the switches `SIGN_IN_CODE_ON_SCREEN`, `EXAMPLE_BUSINESSES`,
-   `DEMO_WORKSPACE` on, and the client site replaces the coming-soon page in `yeral.caddy` (no DNS change).
+3. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md`, a database backup first). The
+   first launch (approved in advance, 22.10) goes when slices 2–7 are built and checked locally: the switches
+   `SIGN_IN_CODE_ON_SCREEN`, `EXAMPLE_BUSINESSES`, `DEMO_WORKSPACE` on, the client site replaces the coming-soon page in
+   `yeral.caddy` (no DNS change), and the business and cms sites join it with their apps.
 4. **P2 left:** step 7's releases and deploys from GitHub, and the code-SMS cap. Follow-ups: `/v1/health` comparing
    the database's newest migration with the image's; the jobs runner's `reviewAsk` drop branch, dead after the deploy
    with 0041; checking the settings permission before an upload's body is read; the invite-accept route reading every
@@ -213,8 +218,9 @@ Where the old questions went (2026-10-17):
    `.env` too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
    guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
-**Waiting on the owner:** the DNS records of 22.10 (`yeral.app` and `www` removed from the Worker `yeral-web`, then A
-records for `@`, `www`, `api`, `business` and `cms`, and the two TXT records; `infra/server/README.md`). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
+**Waiting on the owner:** deleting the Worker `yeral-web` in Cloudflare (the switch is confirmed, 23.10); the e-mail
+records (`infra/server/README.md`, "DNS records": lock `yeral.app` down with SPF, DMARC and a null MX, or receive mail at
+an address through Email Routing and add only DMARC). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
 runs `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` (login 3–32
 of a-z 0-9 . -) and the owner opens the setup link (24 hours, `cms.<domain>/setup/<token>`), picks the password, adds
 the authenticator app and keeps the 10 recovery codes. `docs/design/Claude outputs/yeral-design-v0.5.zip` (untracked,
@@ -223,10 +229,12 @@ early Ýeral prototype) stays until all the web apps are live, then goes (the ow
 projects aren't Ýeral's and stay. Later (P6): an R2 token, accounts for error tracking and uptime checks.
 
 **Server:** `ssh yeral-vps` (the owner allowed `Bash(ssh yeral-vps:*)`); deploy by hand with `infra/server/README.md` →
-"Deploying Ýeral by hand". Since 2026-10-21 it runs main at a2e0418 (api image `yeral-api:a2e04184e1e3`, deployed by
-web-b2): migrations 0000–0038 applied, the 6 cities and 13 categories, no businesses; `ADMIN_SECRET_KEY` in
-`/srv/yeral/.env`, no admin account yet; `EXAMPLE_BUSINESSES`, `SIGN_IN_CODE_ON_SCREEN` and `DEMO_WORKSPACE` off (on
-when the first launch opens); the edge Caddyfile with the token log filter. Kept from the deploy: the database
-before it (`/srv/yeral/backup-2026-10-21-before-a2e0418.sql.gz`) and the old edge config
-(`/srv/edge/Caddyfile.before-2026-10-21`). Firewall SSH/80/443, fail2ban, keys only; not public yet (the DNS records
-are the owner's, 22.10); no backups to R2 (P6), and the `deploy` user has no key yet (P2 step 7).
+"Deploying Ýeral by hand". Since 2026-10-22 21:18 UTC (23.10 00:18 the owner's time) it runs main at 5c07be4 (api
+image `yeral-api:5c07be492cf7`; before it 23a1c14 from 21.10, not a2e0418 as these notes said): migrations 0000–0041
+applied, the 6 cities and 13 categories, no businesses; `ADMIN_SECRET_KEY` in `/srv/yeral/.env`, no admin account yet;
+`EXAMPLE_BUSINESSES`, `SIGN_IN_CODE_ON_SCREEN` and `DEMO_WORKSPACE` off (on when the first launch opens). Public: the
+edge Caddy serves `yeral.caddy` (`/srv/edge/sites/`): `api.yeral.app`, the coming-soon page on `yeral.app`, `www` → the
+apex, with Let's Encrypt certificates; `business.` and `cms.` resolve to the server and fail TLS until their apps join.
+Kept from the deploy: the database before it (`/srv/yeral/backup-2026-10-23-before-5c07be4.sql.gz`; every backup there
+is mode 600) and the edge config (`/srv/edge/Caddyfile.before-2026-10-23`). Firewall SSH/80/443, fail2ban, keys only;
+no backups to R2 (P6), and the `deploy` user has no key yet (P2 step 7).

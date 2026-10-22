@@ -1,6 +1,6 @@
 ---
 name: qa-flows
-description: Click-test Yeral's critical flows in a real browser with Claude in Chrome — client booking, salon answers, cancel/move/review, favourites, business calendar, phone layouts — and report what broke. Use before a production deploy, after porting or changing a screen, at the end of a slice, or when the user asks to test the site.
+description: Click-test Yeral's critical flows in a real browser with Claude in Chrome — sign-in, profile, the business app's shell, and each slice's flows as they're built (booking, answering, calendar), phone layouts — and report what broke. Use before a production deploy, after porting or changing a screen, at the end of a slice, or when the user asks to test the site.
 ---
 
 # Browser QA
@@ -10,32 +10,25 @@ Watch the console (`read_console_messages` with a pattern) for errors on every p
 
 ## Demo facts
 
-- Login: any `+993` number, code `1234`. `+993 65 12 34 56` = demo client with history.
-- «Ножницы» (`/nozhnitsy`) waits for the salon's answer; other salons answer by themselves or confirm instantly.
-- Reset: profile → «Сбросить демо-данные».
-- Local: `apps/legacy` on `http://localhost:3000` today (`pnpm dev`); after the migration landing :3000, client :3001, business :3002, cms :3003,
-  api :3004, Storybook :3005 (plus `PORT_BASE` offset in other worktrees). No staging (ADR 0020): test locally or `pnpm docker:up`.
+- Local: `pnpm db:setup` once, then `pnpm dev`: client :3001, business :3002, cms :3003 (not built yet), api :3004
+  (`/docs`), Storybook :3005 (plus the `PORT_BASE` offset in other worktrees). No staging (ADR 0020): test locally or
+  with `pnpm docker:up` (`*.yeral.localhost`).
+- Sign-in outside production: any mobile number of the market (`MARKET` in `@yeral/domain/market`), code `1234`; the
+  development seed's accounts and businesses are in `apps/api/src/db/seed`.
+- The old site's flows (`apps/legacy`, removed 2026-10-23) went with it.
 
 ## Flows (expected result in brackets)
 
-The flows below test `apps/legacy`. From M3 the client site follows `docs/design/screens/README.md`: rewrite this list
-from it (Home → Search → Business page → appointment / table / class booking → login → my bookings → profile, plus every
-state on the States board, at 1440 and 390, in TK, RU and EN).
+Each P4 slice adds its flows here as it's built, from the book's flows (`pnpm book show C-…` / `B-…`) and the design
+(`docs/design/screens/README.md`, `docs/design/business/README.md`), at 1440 and 390, in English.
 
-
-1. **Discover**: home → category tile → search (list + map pins, day rail changes the free times) → salon card → salon page
-   (photos, services, team, reviews, hours, map) [no empty sections, times in the future only].
-2. **Book, any master**: salon → «Записаться» → service → «Любой мастер» → time (shows who is free) → confirm →
-   phone login inline → send [request screen; status «ждёт подтверждения»].
-3. **Salon answers**: on «Ножницы», answer the request (business app, or the demo panel today): confirm / decline with
-   reason / propose another time [client screen updates without reload; proposal can be accepted or declined].
-4. **Cancel**: my visits → booking → cancel with reason [free before the deadline, «поздняя отмена» after].
-5. **Move**: booking → move → new time [new request; the old slot stays until the salon answers].
-6. **Review**: a done visit → leave a review → edit it → it shows on the salon page.
-7. **Favourites, notifications, profile**: heart on a card → favourites page; bell → click-through to the booking; edit profile.
-8. **Direct link**: open `/{slug}` in a fresh session and book [channel `direct` recorded].
-9. **Phone layout**: flows 1–2 at 390 px [no horizontal scroll, sticky CTA visible, sheets instead of dialogs].
-10. **Business** (after M5): requests list → confirm; calendar drag → proposal (app client) or move (phone client); manual booking.
+1. **Client sign-in** (slice 1): client site → Log in → number → code → name for a new account [signed in; the header
+   shows the account; the demo note shows while the code is on the screen].
+2. **Client profile** (slice 1): edit the name and photo, log out, log in again [changes kept].
+3. **Business sign-in** (slice 1): business app → number → code [the workspace switcher, an invite card or the
+   "Continue setting up" card].
+4. **My account** (slice 1): open it from the shell, edit, leave a workspace [the confirm says what it touches].
+5. **Phone layout**: flows 1 and 3 at 390 px [no horizontal scroll; sheets instead of dialogs].
 
 ## Report
 

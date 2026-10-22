@@ -3,15 +3,12 @@ node_modules/
 .pnpm-store/
 
 # build output
-.next/
 out/
 dist/
 build/
 storybook-static/
-.open-next/
 .turbo/
 *.tsbuildinfo
-next-env.d.ts
 
 # cloudflare
 .wrangler/
@@ -32,7 +29,6 @@ test-results/
 
 # generated at build time
 **/public/version.json
-apps/legacy/public/vendor/
 
 # misc
 .DS_Store

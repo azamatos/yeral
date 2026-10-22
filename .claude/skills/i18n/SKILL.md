@@ -6,7 +6,7 @@ description: Add or change user-visible text, numbers, prices, dates, durations,
 # Strings and formats
 
 References: ADR 0022 (English first, languages per market), ADR 0008 (use-intl), ADR 0016 (prefixed URLs), `docs/design/README.md` §8 (formats) and §9
-(Turkmen glossary). Library: `use-intl` (today `next-intl` in `apps/legacy`, Russian only — not a reference for new copy).
+(Turkmen glossary). Library: `use-intl`.
 
 ## Where strings go
 

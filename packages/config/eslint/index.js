@@ -16,7 +16,7 @@ const IGNORES = [
 ]
 
 /**
- * Shared ESLint flat config for packages and apps (not apps/legacy, which keeps eslint-config-next).
+ * Shared ESLint flat config for packages and apps.
  *
  *   // eslint.config.js
  *   import { config } from '@yeral/config/eslint'

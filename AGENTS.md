@@ -4,8 +4,9 @@
 tutors, mechanics and more — launching in Turkmenistan. One monorepo for the client marketplace (yeral.app), the
 business workspace, the CMS, the api and the design system (Storybook). Applies to every agent tool; Claude Code also reads `CLAUDE.md`.
 
-**Migration in progress:** the monorepo foundation is in place (M0); the live marketplace is still the frozen Next.js app
-in `apps/legacy`, deployed to yeral.app. Status and milestones: `docs/memory-bank/progress.md`.
+**Building the MVP:** the backend is nearly done and the apps are built slice by slice; yeral.app shows a coming-soon
+page from the own server until the client site takes it over (the old Next.js site was retired on 2026-10-23). Status
+and milestones: `docs/memory-bank/progress.md`.
 
 ## Read first
 
@@ -85,10 +86,10 @@ Every task runs through Turborepo from the root; `--filter=@yeral/<name>...` nar
 
 | Command | Does |
 |---|---|
-| `pnpm dev` | all dev servers (`PORT_BASE` + offset, legacy on +0) |
+| `pnpm dev` | all dev servers (`PORT_BASE` + offset: client +1, business +2, cms +3, api +4, Storybook +5) |
 | `pnpm check` | lint, FSD lint, types, tests, format check — run before every PR |
 | `pnpm build` · `pnpm lint` · `pnpm typecheck` · `pnpm test` | one task across the workspace |
-| `pnpm format` | Prettier on everything except `apps/legacy`, `docs/design` and Markdown |
+| `pnpm format` | Prettier on everything except `docs/design` and Markdown |
 | `pnpm test:stories` | every Storybook story as a Chromium test (render, interactions, axe) |
 | `pnpm gen package` · `pnpm gen ui-component` | scaffold an internal package / a design-system component with stories |
 | `pnpm book show\|refs <ID>` · `pnpm book toc <doc>` · `pnpm book open` | look the docs up by ID (`Q-107`, `F-012`, `B-05`, `ADR 0021`); outline a doc; questions still open or with a concern |

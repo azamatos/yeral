@@ -8,10 +8,6 @@ env=$2
 commit=${3:-}
 
 case "$app:$env" in
-  legacy:production)
-    base=https://yeral.app
-    paths=(/ /search /nozhnitsy /for-business)
-    ;;
   storybook:production)
     base=https://storybook.yeral.app
     paths=(/ /iframe.html /index.json)

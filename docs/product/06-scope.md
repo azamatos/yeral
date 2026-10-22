@@ -138,8 +138,8 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-033 | Page chrome | Marketing header, search header with the what / where / when query bar, focused booking header, footer (links incl. "Biznes girişi", "Bahalar"). | MVP | drawn (all client screens) | partly: the marketing header and the footer on the client site (#110); QueryBar, CompactSearch, HeroSearch in `@yeral/ui`; the search and booking headers come with their slices | Footer link "Bahalar" (prices) survives on every client screen although there is no pricing in the free MVP. |
 | F-034 | Static pages | About, help, privacy, terms: header + 720 px text column + footer. | MVP | spec only (pattern) | not built | Privacy and terms texts don't exist yet. |
 | F-035 | Error, empty and loading states | 404, no results, closed today, network error toast, loading skeletons. | MVP | drawn (States) | built (ui: EmptyState, Skeleton, Toast) |  |
-| F-036 | Legacy home sections | Browse by district, "Recommended" (top-rated) and "New on Ýeral" sections. | Later | not designed | legacy only | The new design names no city or district in copy. Owner: Later (18.10.2026). |
-| F-037 | Instant-confirmation filter | Search filter for businesses that confirm at once. | Later | not designed | legacy only |  |
+| F-036 | Legacy home sections | Browse by district, "Recommended" (top-rated) and "New on Ýeral" sections. | Later | not designed | not built (was in the old site) | The new design names no city or district in copy. Owner: Later (18.10.2026). |
+| F-037 | Instant-confirmation filter | Search filter for businesses that confirm at once. | Later | not designed | not built (was in the old site) |  |
 | F-240 | City choice | The person's location preselects a city; they can pick another; an address shows its city when it differs from the selected one. | MVP | not designed | api built (20.10.2026): the city list, the nearest city, search and places by city, the city on cards, pages and bookings, the city in reminder SMS outside the main city | Q-107 (decided 18.10.2026). |
 
 ## Client · booking (per type)
@@ -182,10 +182,10 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-066 | Book again | "Gaýtadan ýazyl" from completed, cancelled or no-show bookings. | MVP | drawn (Account-Bookings) | not built |  |
 | F-067 | Leave a review | Stars (required), quick tags, text up to 500 chars; one per completed booking, editable for 7 days, shown as "Aýjemal G.". | MVP | drawn (Account-Bookings · review) | built (api) | Only after a Completed booking. |
 | F-068 | SMS link page | The SMS token link (Q-168) works signed out: booking card, status, offered times, inline login limited to the booking's masked phone. | MVP | drawn (Booking-Link, Mobile 14–15) | api built (`GET /v1/links/{token}`, sign-in limited to the booking's phone); page not built | Round 6 A1. |
-| F-069 | Business-proposed new time | The business proposes another time and the client accepts or keeps the old one. | Later | not designed | legacy only | Design has decline-with-offers instead. Owner: Later (18.10.2026). |
-| F-070 | "This isn't me" on phone bookings | A client reports a phone booking made with their number by mistake. | Later | not designed | legacy only |  |
-| F-071 | Confirm visit the day before | After repeated no-shows the client must confirm the day before or lose the slot. | Never | not designed | legacy only | Design uses "phone only after N no-shows" instead (F-191). |
-| F-072 | My reviews page | A list of the client's own reviews with edit / delete. | Later | not designed | legacy only |  |
+| F-069 | Business-proposed new time | The business proposes another time and the client accepts or keeps the old one. | Later | not designed | not built (was in the old site) | Design has decline-with-offers instead. Owner: Later (18.10.2026). |
+| F-070 | "This isn't me" on phone bookings | A client reports a phone booking made with their number by mistake. | Later | not designed | not built (was in the old site) |  |
+| F-071 | Confirm visit the day before | After repeated no-shows the client must confirm the day before or lose the slot. | Never | not designed | not built (was in the old site) | Design uses "phone only after N no-shows" instead (F-191). |
+| F-072 | My reviews page | A list of the client's own reviews with edit / delete. | Later | not designed | not built (was in the old site) |  |
 | F-243 | "How was it?" card | After a completed visit, *Ýazylyşlarym* (My bookings) and the home page show a small card once for that visit; its stars open the review form (F-067), one tap closes it for good. No SMS. | MVP | not designed (the nearest drawn card pattern) | api built (`GET /v1/me/how-was-it`, `POST /v1/me/bookings/{code}/how-was-it/close`, 21.10.2026); the cards with slices 3 and 5 | Q-259, settled 21.10.2026 (Claude, delegated). |
 
 ## Client · account
@@ -201,7 +201,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-079 | SMS notification switches | Confirmation, reminder 1 day before, reminder 2 h before. | MVP | drawn (Account-Profile) | built (api, jobs honour them) | No review-ask SMS (Q-259); the in-app card is F-243. |
 | F-080 | Favourites list | Grid of saved businesses with remove + undo. | MVP | drawn (Account-Profile · favourites) | api built |  |
 | F-081 | Delete account | Danger action with a confirm modal. | MVP | drawn (Account-Profile) | built (api `DELETE /v1/me`; the client profile, #118) |  |
-| F-082 | Client browser notifications | Browser notifications about answers, moves and reminders. | Later | not designed | legacy only | Client push comes with native apps (F-224). |
+| F-082 | Client browser notifications | Browser notifications about answers, moves and reminders. | Later | not designed | not built (was in the old site) | Client push comes with native apps (F-224). |
 
 ## Business · access (login, workspaces, invites, levels, permissions, ownership)
 
@@ -399,7 +399,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-210 | Page analytics | Cloudflare Web Analytics now, Umami on the own server. | Later | not designed | not built | Planned. |
 | F-211 | Backups | Regular database and photo backups with a restore drill. | MVP | not designed | not built | Not for the first launch, a demo (owner, 22.10.2026): nightly to Cloudflare R2 with the real working MVP, before any real business's data (chapter 10, P6); needs the owner's R2 token then. |
 | F-212 | Domain and brand in config | Domains, cookie domain and brand name come from configuration. | MVP | not designed | built (`@yeral/lib/site`) | Final name/domain = Q-003. |
-| F-213 | Legacy site | The first Next.js marketplace (beauty only, Russian, mock data) still serves yeral.app. | Never | not designed | built (`apps/legacy`) | Deleted when M3 replaces it. |
+| F-213 | Legacy site | The first Next.js marketplace (beauty only, Russian, mock data); it served yeral.app until 22.10.2026. | Never | not designed | retired | The owner retired it on 22.10.2026; `apps/legacy` left the repo on 23.10.2026, and the apex shows a coming-soon page until the client site. |
 
 ## Later and non-goals
 
@@ -428,7 +428,7 @@ What's already built and doesn't match a decision; fixed when coding resumes, no
 | F-234 | Win-back reminders | "Ýatlatma iber" to clients who haven't come for 60+ days. | Later | drawn as "ýakynda" (B-Analytics) | not built |  |
 | F-235 | Message all class attendees | One message to everyone in a session. | Later | spec only ("later", business §21) | not built |  |
 | F-236 | Review photos | Clients attach photos to reviews. | Later | spec only ("later", business §15) | not built |  |
-| F-237 | Notify me when booking reopens | Client asks to be told when a paused business takes online bookings again. | Later | not designed | legacy only |  |
+| F-237 | Notify me when booking reopens | Client asks to be told when a paused business takes online bookings again. | Later | not designed | not built (was in the old site) |  |
 | F-239 | Menu | A restaurant's or café's menu on its page. | Later | not designed | not built | Owner, Q-103: "maybe in some future". |
 | F-241 | Client karma | No-shows and floods of bookings lower a client's karma across Ýeral; below a set level the client can't book online, and each business chooses the lowest karma it accepts. | Later | not designed | not built | Owner's idea on Q-012 (18.10.2026). Needs first: a way to dispute a no-show (Q-166), karma that recovers over time, and a screen that tells the client why they're limited. |
 | F-244 | Price level | An optional price level, one to four marks, that a restaurant or café sets for its page and cards. Not billing. | Later | not designed | not built | Q-103, settled 21.10.2026 (Claude, delegated). |

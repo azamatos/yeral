@@ -14,8 +14,8 @@ Status 2026-10-13: **target architecture, agreed; migration not started.** The l
                                                                                   └─ files: storage port (server disk)
 ```
 
-The api, its jobs, Postgres and the apps run on the own server in Docker behind a shared Caddy; Cloudflare keeps DNS,
-Storybook and the legacy site (ADR 0024). Site map: ADR 0015.
+The api, its jobs, Postgres and the apps run on the own server in Docker behind a shared Caddy; Cloudflare keeps DNS and
+Storybook (ADR 0024; the old Next.js site was retired on 2026-10-23). Site map: ADR 0015.
 One session cookie on the parent domain serves the client site and the business workspace; the CMS has its own accounts and cookie.
 
 ## Monorepo layout
@@ -27,8 +27,7 @@ yeral/                           github.com/azamatos/yeral
 │  ├─ business/    Vite SPA + TanStack Router, installable (PWA)
 │  ├─ cms/         Vite SPA + TanStack Router
 │  ├─ api/         Hono + zod-openapi + Drizzle; entry/node.ts (Docker on the own server)
-│  ├─ storybook/   Storybook 10: stories from packages/* and app slices
-│  └─ legacy/      the first Next.js marketplace (frozen, live on yeral.app until M4)
+│  └─ storybook/   Storybook 10: stories from packages/* and app slices
 ├─ packages/
 │  ├─ domain/      @yeral/domain    market settings, types, business time, booking rules, phone, ids. Pure TS, zero deps
 │  ├─ contract/    @yeral/contract  zod schemas of everything on the wire: DTOs, inputs, enums, error codes

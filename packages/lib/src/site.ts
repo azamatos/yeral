@@ -28,7 +28,7 @@ export interface SiteConfig {
 
 /** Local dev ports are PORT_BASE + offset (techContext "Local development"). */
 export const PORT_OFFSETS: Record<SiteApp, number> = {
-  // the client site takes +0 when it replaces apps/legacy (end of M3); until then legacy has +0
+  // +0 was the old site's (apps/legacy, removed 2026-10-23); it stays free so no app's port moves mid-build
   client: 1,
   business: 2,
   cms: 3,

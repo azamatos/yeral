@@ -1,13 +1,9 @@
-# frozen Next.js app, replaced milestone by milestone
-apps/legacy/
 # the owner's design export
 docs/design/
 # markdown keeps hand-written tables and line breaks
 **/*.md
 pnpm-lock.yaml
 **/node_modules/
-**/.next/
-**/.open-next/
 **/.turbo/
 **/dist/
 **/storybook-static/

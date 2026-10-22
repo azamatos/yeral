@@ -6,8 +6,7 @@ description: Add or change a Yeral API endpoint end to end — zod contract, api
 # API endpoint, end to end
 
 References: ADR 0005, 0006; `systemPatterns.md` (Backend, Data flow); `productContext.md` (rules, mirror screens);
-`docs/API.md` (current endpoint list). Before milestone M2 the API is the in-browser mock in `apps/legacy/src/api` —
-there, change `contract.ts`, `mock/index.ts` and `hooks.ts` the same way.
+`docs/API.md` (current endpoint list).
 
 ## Steps
 

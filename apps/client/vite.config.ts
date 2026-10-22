@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 
 // The client site: TanStack Start, server-rendered public pages and client-only account pages (systemPatterns
-// "Rendering"). The dev port comes from the `dev` script (PORT_BASE + 1 while apps/legacy keeps + 0); hosts come from
+// "Rendering"). The dev port comes from the `dev` script (PORT_BASE + 1); hosts come from
 // `@yeral/lib/site` (shared/config). `vite build` writes dist/client (the browser's files) and dist/server (the
 // renderer), which server.mjs serves on Node (ADR 0024).
 export default defineConfig(({ command }) => ({

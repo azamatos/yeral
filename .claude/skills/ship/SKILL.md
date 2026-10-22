@@ -21,15 +21,15 @@ they are until releases come back before the first launch (book chapter 10, P2 s
 4. **No staging** (ADR 0020): prove the change locally before merging — `pnpm check`, the Docker stack
    (`pnpm docker:up`) for api or infra changes, the flows from skill `qa-flows` against local dev servers.
 5. **Storybook** deploys itself from `main` after the checks (`ci.yml` → `deploy-storybook`).
-6. **Production by hand** (only when the owner asks), after the flows are click-tested (skill `qa-flows`): legacy and
-   Storybook with
-   `gh workflow run deploy.yml -f app=legacy -f environment=production` (the smoke check verifies `/version.json` and
-   key pages), or locally `pnpm --filter @yeral/legacy run deploy` (needs `wrangler login`); the api on the own server
-   with `infra/server/README.md` → "Deploying Ýeral by hand".
+6. **Production by hand** (only when the owner asks), after the flows are click-tested (skill `qa-flows`): the api and
+   the sites on the own server with `infra/server/README.md` → "Deploying Ýeral by hand" (take a database backup first);
+   Storybook deploys itself, or `gh workflow run deploy.yml -f app=storybook -f environment=production` (the smoke check
+   verifies `/version.json` and key pages).
 
 ## Rollback
 
-Cloudflare: `cd apps/<app> && pnpm exec wrangler rollback` (pick the previous version), then fix forward with a PR.
+Cloudflare (Storybook): `cd apps/storybook && pnpm exec wrangler rollback` (pick the previous version), then fix forward
+with a PR.
 Own server: deploy the previous commit the same way (`infra/server/README.md`); migrations are backward compatible back to
 the newest contract migration (one that drops a column, as 0041 does), so never roll back to an image older than it
 without restoring the backup taken before the deploy (operations.md, "Rollback"). Record the

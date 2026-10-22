@@ -30,9 +30,11 @@ Docker with log rotation, the `edge` network, a `deploy` user for automated depl
 
 ## Deploying Ýeral by hand
 
-From the repo root, at the commit to deploy:
+From the repo root, at the commit to deploy. First a database backup on the server (kept beside the compose file,
+`chmod 600`; the way back if a migration goes wrong, operations.md "Rollback"):
 
 ```
+ssh yeral-vps 'f=/srv/yeral/backup-$(date +%F)-before-<short sha>.sql.gz; docker exec yeral-postgres-1 pg_dump -U yeral yeral | gzip > $f && chmod 600 $f'
 git archive --format=tar HEAD > /tmp/yeral-src.tar
 ssh yeral-vps 'rm -rf /srv/yeral/src && mkdir -p /srv/yeral/src && tar -x -C /srv/yeral/src' < /tmp/yeral-src.tar
 ssh yeral-vps "COMMIT=$(git rev-parse HEAD) bash /srv/yeral/src/infra/server/yeral/deploy.sh"
@@ -52,13 +54,12 @@ Every record that points at the server is **DNS only** (the grey cloud, not prox
 from Let's Encrypt, and it must see each visitor's real address, since the api's rate limits count by it. TTL Auto.
 Only A records, no AAAA (IPv6, below).
 
-**Now** (the owner, 22.10.2026; the old site is retired, and the apex shows a coming-soon page from the server until
-the client site takes it over):
+**Done 22.10.2026** (the owner; the old site is retired, and the apex shows a coming-soon page from the server until
+the client site takes it over; checked live 23.10.2026):
 
-1. Workers & Pages → `yeral-web` (the old site, `apps/legacy/wrangler.jsonc`) → Settings → Domains & Routes: remove
-   `yeral.app` and `www.yeral.app`. Then DNS → Records should hold no record named `yeral.app` or `www`; delete any
-   left.
-2. DNS → Records, add:
+1. Workers & Pages → `yeral-web` (the old site) → Settings → Domains & Routes: remove `yeral.app` and
+   `www.yeral.app`. Then DNS → Records should hold no record named `yeral.app` or `www`; delete any left.
+2. DNS → Records, add (the five A records are in; the two TXT records wait for the owner's e-mail choice, below):
 
    | Type | Name | Content | Proxy |
    |---|---|---|---|
@@ -73,12 +74,14 @@ the client site takes it over):
 3. Claude deploys with `PUBLIC=1` (above): Caddy gets the certificates, and Claude checks `https://yeral.app`, the
    `www` redirect and `https://api.yeral.app/v1/health`. Between steps 1 and 3 the apex shows nothing for a few
    minutes.
-4. Then the owner may delete the Worker `yeral-web`; `apps/legacy` and its deploy option leave the repo in a PR of
-   their own.
+4. Then the owner may delete the Worker `yeral-web` (the switch is confirmed); `apps/legacy` and its deploy option
+   left the repo on 23.10.2026.
 
 The apex serves the coming-soon page in `yeral.caddy` at every path, and `www` redirects to the apex. The two TXT
 records tell mail servers that no mail ever comes from `yeral.app` (Ýeral sends no e-mail), so nobody can send mail in
-its name. `business` and `cms` answer with a certificate error until their apps join `yeral.caddy`: harmless, nobody is
+its name. The owner decides later (22.10.2026) between them (with a null MX: `MX @ .`, priority 0) and receiving mail
+at an address such as `hello@…` through Cloudflare Email Routing, which adds its own MX and SPF records; then only the
+DMARC record is added. `business` and `cms` answer with a certificate error until their apps join `yeral.caddy`: harmless, nobody is
 sent there before.
 
 **When the client site is ready** it replaces the coming-soon page in `yeral.caddy`; no DNS change.

@@ -5,7 +5,6 @@ pre-commit:
     format:
       glob: '*.{js,mjs,cjs,ts,tsx,json,jsonc,css,yml,yaml}'
       exclude:
-        - 'apps/legacy/**'
         - 'docs/design/**'
         - 'pnpm-lock.yaml'
       run: pnpm exec prettier --write --ignore-unknown {staged_files}

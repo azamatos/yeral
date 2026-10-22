@@ -1,9 +1,10 @@
 # Operations: environments, hosting, Docker, CI/CD, versioning, parallel work
 
-Status 2026-10-13 (M0): production = `apps/legacy` (Next.js) on Cloudflare. `ci.yml` and `deploy.yml` exist; releases
-are paused until the MVP works (ADR 0009, amended 2026-10-21: `release.yml` and Changesets removed), so legacy deploys
-by hand (Actions → Deploy). The
-`CLOUDFLARE_API_TOKEN` repository secret is set; without it the deploy job skips with a warning. Since 2026-10-16 there
+Status 2026-10-23: production = the owner's server (`yeral-vps`): the api, its jobs and Postgres, and Caddy serving
+`api.yeral.app` and a coming-soon page on `yeral.app` (`www` redirects to it); the old Next.js site (`apps/legacy`, the
+Worker `yeral-web`) was retired on 2026-10-22/23. Storybook is the only Cloudflare deploy left (`deploy.yml`, on every
+push to `main`). Releases are paused until the MVP works (ADR 0009, amended 2026-10-21: `release.yml` and Changesets
+removed). The `CLOUDFLARE_API_TOKEN` repository secret is set; without it the deploy job skips with a warning. Since 2026-10-16 there
 are two kinds of environment only, local and production (ADR 0020): no staging.
 
 ## Environments
@@ -12,7 +13,7 @@ are two kinds of environment only, local and production (ADR 0020): no staging.
 |---|---|---|---|
 | local | `localhost:3000–3005` (`PORT_BASE` + offset) | Postgres in Docker, one database per worktree | `pnpm dev` |
 | local, production-like | `*.yeral.localhost` through Caddy | Postgres container | `pnpm docker:up` |
-| production | the owner's server `yeral-vps` (api running since 2026-10-19, no public host yet); `yeral.app` still serves legacy on Cloudflare; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
+| production | the owner's server `yeral-vps`: `api.yeral.app` and `yeral.app` (a coming-soon page; `www` redirects) since 2026-10-23, `business.` and `cms.` with their apps; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
 
 No staging and no PR previews (ADR 0020): a change is proven locally (tests, the Docker stack), reviewed, and merged on
 green CI; production is deployed by hand, when the owner asks, while releases are paused. A risky migration is rehearsed on a production dump restored into
@@ -27,19 +28,18 @@ shared Caddy (section "The own server" below). Cloudflare keeps:
 |---|---|
 | DNS for `yeral.app` | records point at the server, not proxied (Caddy gets the certificates) |
 | `storybook.yeral.app` | Worker `yeral-storybook`, deployed from `main` |
-| `yeral.app`, `www` | Worker `yeral-web` = `apps/legacy` until the new client site replaces it |
 | backups | R2 with the real working MVP, not the demo launch (owner, 2026-10-22; needs the owner's token then) |
 
 **Cost:** the server (€16.68 a month, €12.32 on a 12-month term), shared with the owner's other projects; Workers
-Free for Storybook and legacy; R2 free up to 10 GB.
+Free for Storybook; R2 free up to 10 GB.
 
 **Left on the owner's accounts, unused** (delete only if the owner asks): the Neon project Yeral (Frankfurt) and the
 Hyperdrive config `yeral-production` (created 2026-10-18).
 
-**Owner's one-time steps** (when the milestone needs them): the DNS records (`infra/server/README.md`, "DNS records":
-`yeral.app` and `www` off the old Worker, then `@`, `www`, `api`, `business`, `cms`, all now; the apex shows a
-coming-soon page until the client site takes it over); with the real working MVP (P6), an R2 token for backups
-and accounts for error tracking and uptime checks (owner, 2026-10-22: not for the demo launch).
+**Owner's one-time steps** (when the milestone needs them): the DNS records (`infra/server/README.md`, "DNS records";
+the A records for `@`, `www`, `api`, `business` and `cms` done 2026-10-22, the e-mail records when the owner chooses);
+deleting the Worker `yeral-web`; with the real working MVP (P6), an R2 token for backups and accounts for error
+tracking and uptime checks (owner, 2026-10-22: not for the demo launch).
 
 ## Local database and API tests (since M2d)
 
@@ -148,7 +148,7 @@ stacks → restore the database and photos → switch the DNS records → point 
 | Workflow | Trigger | Does |
 |---|---|---|
 | `ci.yml` | pull request, push to `main` | pnpm install (cached) → format check → one `turbo run lint lint:fsd typecheck test build --affected` step (on `main` without `--affected`): the Storybook stories run as Vitest browser tests in Chromium, the api tests against a Postgres 18 service · a Docker job builds and starts the api stack (`infra/docker/compose.yml`) and checks its health through Caddy · the PR title is checked as a Conventional Commit |
-| `deploy.yml` | called by `ci.yml` for Storybook; by hand (Actions → Deploy) for legacy | build → `wrangler deploy` for Storybook and legacy; the api and the new apps over SSH to the own server from P2 step 7 (by hand until then: `infra/server/README.md`) → smoke check: `/version.json` shows the commit, key pages answer 200 |
+| `deploy.yml` | called by `ci.yml` for Storybook; by hand (Actions → Deploy) | build → `wrangler deploy` for Storybook; the api and the new apps over SSH to the own server from P2 step 7 (by hand until then: `infra/server/README.md`) → smoke check: `/version.json` shows the commit, key pages answer 200 |
 | `ci.yml` → `deploy-storybook` | push to `main` after checks | builds Storybook and deploys it to storybook.yeral.app (no release needed: internal docs) |
 | Renovate | weekly | grouped dependency PRs; dev-dependency patches merge themselves when CI is green |
 
@@ -157,8 +157,7 @@ dependencies (say `@yeral/ui` for the Storybook tests, `@yeral/contract` for the
 again instead of replaying a cached result. A new task that reads its dependencies' files needs the same. A task
 that reads a file outside every package lists it as an input with `$TURBO_ROOT$` in its package's `turbo.json`
 (`@yeral/ui#test` reads `docs/design/tokens.css`; the Storybook build and tests and the api tests read
-`docs/design/assets/photos`); otherwise a change there runs no check at all. The frozen legacy app's lint doesn't
-wait for its dependencies.
+`docs/design/assets/photos`); otherwise a change there runs no check at all.
 
 ## Versioning (releases paused)
 
@@ -174,7 +173,7 @@ wait for its dependencies.
 
 ## Secrets
 
-- GitHub secrets, never in the repo or in chat: `CLOUDFLARE_API_TOKEN` (Workers deploys of Storybook and legacy);
+- GitHub secrets, never in the repo or in chat: `CLOUDFLARE_API_TOKEN` (the Storybook Worker's deploys);
   later the SSH deploy key for the own server, the error tracker's DSN and the SMS gateway keys.
 - On the server: `/srv/yeral/.env` (mode 600) holds the database password and `ADMIN_SECRET_KEY`, later (P6) the R2
   token for backups.
@@ -212,11 +211,11 @@ wait for its dependencies.
   native binary), run `npm i -g pnpm@12` once, or `node ~/Library/pnpm/.tools/pnpm/<version>/node_modules/pnpm/install.js`.
 - pnpm 11+ blocks dependency install scripts unless listed in `allowBuilds` (`pnpm-workspace.yaml`); it also skips package
   versions younger than one day and records exceptions in `minimumReleaseAgeExclude`.
-- `apps/legacy` and `docs/design` are excluded from Prettier; Markdown is never auto-formatted.
+- `docs/design` is excluded from Prettier; Markdown is never auto-formatted.
 
 ## Rollback
 
-- Cloudflare (Storybook, legacy): `wrangler rollback` per Worker to the previous version.
+- Cloudflare (Storybook): `wrangler rollback` to the previous version.
 - The own server: point `YERAL_API_IMAGE` in `/srv/yeral/.env` at an earlier image (`docker images yeral-api`: they
   stay on the server) and run `docker compose up -d` in `/srv/yeral`, or redeploy the previous commit with `deploy.sh`. Migrations add before they take away (expand, then contract), so an
   image runs on a database migrated after it, back to the last contract migration: one that drops what older images

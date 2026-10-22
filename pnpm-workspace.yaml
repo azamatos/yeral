@@ -3,7 +3,6 @@ packages:
   - packages/*
 
 # One version of each shared dependency for the whole monorepo: packages reference them as "catalog:".
-# apps/legacy (the frozen Next.js app) keeps its own pinned versions.
 catalog:
   class-variance-authority: ^0.7.1
   drizzle-kit: ^0.31.11
@@ -69,18 +68,13 @@ catalog:
 # Install scripts (pnpm 11+): nothing runs unless listed as true. These ship prebuilt binaries through
 # optional dependencies, so their scripts aren't needed; listing them as false keeps installs quiet.
 allowBuilds:
-  '@parcel/watcher': false
-  '@swc/core': false
   esbuild: false
   lefthook: false
   sharp: false
-  unrs-resolver: false
   workerd: false
 
 # Versions younger than pnpm's 1-day minimum release age that the lockfile already uses (written by pnpm).
 minimumReleaseAgeExclude:
-  - '@opennextjs/aws@4.1.10'
-  - '@opennextjs/cloudflare@1.20.11'
   - '@radix-ui/react-accordion@1.3.1'
   - '@radix-ui/react-alert-dialog@1.2.1'
   - '@radix-ui/react-avatar@1.3.1'
