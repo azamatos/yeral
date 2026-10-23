@@ -224,7 +224,9 @@ const fakeApi =
               services: g.services.map((x, si) => ({
                 id: x.id ?? `s${gi}-${si}-${servicesSaved.length}`,
                 groupId: id,
-                name: x.name ?? before.find((y) => y.id === x.id)?.name ?? { en: starters.find((y) => y.id === x.starter)?.name ?? '' },
+                // the api keeps a starter's every language, the catalogue's others too
+                name: x.name ??
+                  before.find((y) => y.id === x.id)?.name ?? { tk: 'Saç', en: starters.find((y) => y.id === x.starter)?.name ?? '' },
                 description: null,
                 durationMin: x.durationMin,
                 priceType: x.priceType,
@@ -624,6 +626,18 @@ export const Services: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Who do you work with?' })).toBeVisible()
     await expect(servicesSaved).toHaveLength(1)
+    // a saved row renamed: by its id, in the market's languages only
+    await userEvent.click(canvas.getByRole('button', { name: 'Back' }))
+    await userEvent.type(await canvas.findByRole('textbox', { name: 'Service name: Hair colouring' }), ' and toning')
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Who do you work with?' })).toBeVisible()
+    await expect(servicesSaved[1]!.groups[0]!.services[1]).toEqual({
+      id: 's0-1-1',
+      name: { en: 'Hair colouring and toning' },
+      durationMin: 120,
+      priceType: 'from',
+      priceAmount: 250,
+    })
   },
 }
 

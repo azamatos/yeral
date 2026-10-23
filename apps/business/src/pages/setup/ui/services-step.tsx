@@ -18,17 +18,22 @@ import { useErrorText } from '@/shared/i18n'
 import { choicesWith } from '../model/rules'
 import {
   DURATION_CHOICES,
+  fixedPrice,
   formFromMenu,
   formFromStarters,
   pickedCount,
+  PRICE_DIGITS,
   SERVICE_NAME_MAX,
   servicesInput,
   servicesProblem,
   withNewRow,
+  withStarters,
   type ServiceRow,
   type ServicesForm,
 } from '../model/services'
 import { StepHeader, type StepAction } from './setup-frame'
+
+const HINT = { none: 'hintNone', newName: 'hintName', name: 'hintNameEach', price: 'hintPrice' } as const
 
 // B-Onboarding `.svr` / `.svh`: the box, the name, 150 for the duration, 132 for the price; on phones the name on a
 // line of its own above the duration and the price
@@ -46,7 +51,7 @@ export function useServicesStep(
   slug: string,
   on: boolean,
   known: boolean,
-  category: Pick<Category, 'name' | 'starterGroups'> | null,
+  category: Pick<Category, 'id' | 'name' | 'starterGroups'> | null,
 ): { body: ReactNode; action: StepAction; summary?: string } {
   const t = useTranslations('setup.services')
   const sdk = useSdk()
@@ -56,22 +61,28 @@ export function useServicesStep(
   const menu = useQuery({ ...sdk.settings.menu(slug), enabled: on || known })
   const save = useMutation(sdk.setup.services(slug))
   const ownName = t('newGroup')
-  // what's typed, and the menu as last saved (null: never saved, so Continue makes it)
-  const [state, setState] = useState<{ form: ServicesForm; saved: string | null } | null>(null)
-  if (on && !state && menu.data && category) {
-    const saved = menu.data.groups.some((g) => g.services.length)
-    const form = saved ? formFromMenu(menu.data, locale, ownName) : formFromStarters(category.starterGroups)
-    setState({ form, saved: saved ? JSON.stringify(servicesInput(form, locale)) : null })
+  // what's typed; the menu as last saved (null: never saved, so Continue makes it); what the form was made from
+  // (the saved menu's rows, or the category's starters) and whether the owner has changed it since
+  const [state, setState] = useState<{ form: ServicesForm; saved: string | null; basis: string; edited: boolean } | null>(null)
+  const savedMenu = !!menu.data?.groups.some((g) => g.services.length)
+  const basis = savedMenu
+    ? `menu:${menu.data!.groups.flatMap((g) => [g.id, ...g.services.map((x) => x.id)]).join(',')}`
+    : `starters:${category?.id ?? ''}`
+  // made again from what's there when that changed and nothing is typed (the menu changed elsewhere), or when the
+  // category did (another starter list, the owner's own rows kept)
+  if (on && menu.data && category && (!state || (state.basis !== basis && (!state.edited || !savedMenu)))) {
+    const form = savedMenu
+      ? formFromMenu(menu.data, locale, ownName)
+      : state
+        ? withStarters(state.form, category.starterGroups)
+        : formFromStarters(category.starterGroups)
+    setState({ form, saved: savedMenu ? JSON.stringify(servicesInput(form, locale)) : null, basis, edited: !!state?.edited && !savedMenu })
   }
-  const form = state?.form
-  const summary =
-    menu.data && menu.data.groups.some((g) => g.services.length)
-      ? t('summary', { count: menu.data.groups.reduce((n, g) => n + g.services.length, 0) })
-      : undefined
+  const summary = savedMenu ? t('summary', { count: menu.data!.groups.reduce((n, g) => n + g.services.length, 0) }) : undefined
 
   // a failed refetch keeps what's on screen; only a first load that failed is a failure
-  if (on && !form && menu.isError) throw menu.error
-  if (!on || !state || !form)
+  if (on && !state && menu.isError) throw menu.error
+  if (!on || !state)
     return {
       body: (
         <div className="flex justify-center py-16">
@@ -82,13 +93,14 @@ export function useServicesStep(
       summary,
     }
 
+  const { form } = state
   const saving = save.isPending
-  const update = (change: (f: ServicesForm) => ServicesForm) => setState((s) => s && { ...s, form: change(s.form) })
+  const update = (change: (f: ServicesForm) => ServicesForm) => setState((s) => s && { ...s, form: change(s.form), edited: true })
   const setRow = (key: string, patch: Partial<ServiceRow>) =>
     update((f) => ({ ...f, rows: f.rows.map((r) => (r.key === key ? { ...r, ...patch } : r)) }))
 
   const problem = servicesProblem(form)
-  const hint = problem === 'none' ? t('hintNone') : problem === 'name' ? t('hintName') : problem === 'price' ? t('hintPrice') : undefined
+  const hint = problem ? t(HINT[problem]) : undefined
 
   /** The whole menu, when it changed or was never saved; false when it failed (the person heard why). */
   const onSave = async (): Promise<boolean> => {
@@ -98,8 +110,10 @@ export function useServicesStep(
     if (sent === state.saved) return true
     try {
       // the rows as saved, by id from now on: saving again keeps them
-      const saved = formFromMenu(await save.mutateAsync(input), locale, ownName)
-      setState({ form: saved, saved: JSON.stringify(servicesInput(saved, locale)) })
+      const menu = await save.mutateAsync(input)
+      const saved = formFromMenu(menu, locale, ownName)
+      const ids = menu.groups.flatMap((g) => [g.id, ...g.services.map((x) => x.id)]).join(',')
+      setState({ form: saved, saved: JSON.stringify(servicesInput(saved, locale)), basis: `menu:${ids}`, edited: false })
       return true
     } catch (error) {
       toast(errorText(error))
@@ -191,6 +205,7 @@ function Row({
   const name = r.name.trim() || t('unnamed')
   const off = !r.on || disabled
   const from = r.priceType === 'from'
+  const settable = fixedPrice(r)
   return (
     <div className={`${ROW_GRID} border-t border-n-200 py-2`}>
       <Checkbox aria-label={t('pick', { name })} checked={r.on} disabled={disabled} onChange={() => onChange({ on: !r.on })} />
@@ -218,24 +233,28 @@ function Row({
           </option>
         ))}
       </Select>
-      <span className="relative block min-w-0 max-md:col-3">
-        {from && (
-          <span aria-hidden className="pointer-events-none absolute inset-y-0 left-3 z-1 flex items-center text-small text-n-600">
-            {t('from')}
-          </span>
-        )}
-        <InputGroup
-          size="m"
-          suffix={MARKET.currency}
-          inputMode="numeric"
-          placeholder="0"
-          aria-label={from ? t('priceFrom', { name }) : t('price', { name })}
-          value={r.price}
-          disabled={off}
-          onChange={(e) => onChange({ price: e.target.value.replace(/\D/g, '').slice(0, 5) })}
-          className="[&_input]:text-right"
-        />
-      </span>
+      {settable ? (
+        <span className="relative block min-w-0 max-md:col-3">
+          {from && (
+            <span aria-hidden className="pointer-events-none absolute inset-y-0 left-3 z-1 flex items-center text-small text-n-600">
+              {t('from')}
+            </span>
+          )}
+          <InputGroup
+            size="m"
+            suffix={MARKET.currency}
+            inputMode="numeric"
+            placeholder="0"
+            aria-label={from ? t('priceFrom', { name }) : t('price', { name })}
+            value={r.price}
+            disabled={off}
+            onChange={(e) => onChange({ price: e.target.value.replace(/\D/g, '').slice(0, PRICE_DIGITS) })}
+          />
+        </span>
+      ) : (
+        // free or hidden, set in Settings: shown as it is, changed there
+        <span className="text-right text-small text-n-600 max-md:col-3">{fmt.price({ type: r.priceType, amount: Number(r.price) })}</span>
+      )}
     </div>
   )
 }

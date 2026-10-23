@@ -19,6 +19,9 @@
   `SetupServices` are types in the contract now. Stories: `Services`, `ServicesOwn`; the fake api answers
   `GET …/services` and `PUT …/setup/services`.
 - Decided: chapter 9, 23.10.2026, B-04 / F-098 (how): the services step, Claude (delegated).
-- Follow-ups: a category changed at the business step after the menu was saved keeps the old category's menu at
-  step 5 (Clear and add, or Settings); the team step decides who does which once there's a team (every service is done
+- Follow-ups: a category changed at the business step after the menu was saved keeps that menu at step 5 (Clear and
+  add, or Settings; before a save the step swaps the starter list, own rows kept); the step list's count reads the
+  whole menu (`GET …/services`) on the later steps, as the hours step reads the week (a count in `GET /v1/me/setup`
+  would be lighter); the api keeps a starter's every catalogue language in the menu, and the step sends back the
+  market's only; the team step decides who does which once there's a team (every service is done
   by everyone who takes bookings when it's saved).

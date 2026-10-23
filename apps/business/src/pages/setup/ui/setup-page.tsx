@@ -181,7 +181,7 @@ function Steps({
   const address = useAddressStep(draft?.slug ?? '', step === 'address' && !!draft)
   const hours = useHoursStep(draft?.slug ?? '', step === 'hours' && !!draft, !!draft && stepIndex(reached) >= stepIndex('hours'))
   // the draft's category as the list gives it (its starter list); one the list no longer offers has none
-  const category = draft ? (categories.find((c) => c.id === draft.categoryId) ?? { name: draft.category, starterGroups: [] }) : null
+  const category = draft ? (categories.find((c) => c.id === draft.categoryId) ?? { id: '', name: draft.category, starterGroups: [] }) : null
   const services = useServicesStep(
     draft?.slug ?? '',
     step === 'services' && !!draft,

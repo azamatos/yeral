@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formFromMenu, formFromStarters, servicesInput, servicesProblem, withNewRow } from './services'
+import { formFromMenu, formFromStarters, servicesInput, servicesProblem, withNewRow, withStarters } from './services'
 
 const starters = [
   {
@@ -18,7 +18,7 @@ describe('the services step (B-Onboarding step 5)', () => {
     expect(servicesProblem(form)).toBeNull()
     form = { ...form, rows: form.rows.map((r) => (r.starter === 'womens-haircut' ? { ...r, name: ' Haircut ' } : r)) }
     form = withNewRow(form, 'New services')
-    expect(servicesProblem(form)).toBe('name')
+    expect(servicesProblem(form)).toBe('newName')
     form = { ...form, rows: form.rows.map((r) => (r.key === 'new:0' ? { ...r, name: 'Henna' } : r)) }
     expect(servicesProblem(form)).toBe('price')
     form = { ...form, rows: form.rows.map((r) => (r.key === 'new:0' ? { ...r, price: '120' } : r)) }
@@ -38,6 +38,18 @@ describe('the services step (B-Onboarding step 5)', () => {
     // nothing picked: Continue waits, and a group without a picked row isn't sent
     const none = { ...form, rows: form.rows.map((r) => ({ ...r, on: false })) }
     expect(servicesProblem(none)).toBe('none')
+    // names before prices, whatever the order of the rows
+    const both = { ...form, rows: form.rows.map((r, i) => (i === 0 ? { ...r, price: '' } : i === 1 ? { ...r, name: '' } : r)) }
+    expect(servicesProblem(both)).toBe('name')
+    // another category: its starters, the own row kept
+    const barber = [
+      {
+        id: 'beard',
+        name: 'Beard',
+        services: [{ id: 'beard-trim', name: 'Beard trim', durationMin: 30, price: { type: 'fixed' as const, amount: 40 } }],
+      },
+    ]
+    expect(withStarters(form, barber).rows.map((r) => r.name)).toEqual(['Beard trim', 'Henna'])
   })
 
   it('reopens on the menu saved before: every language kept, an edit written over the app’s language only', () => {
@@ -63,6 +75,7 @@ describe('the services step (B-Onboarding step 5)', () => {
           ],
         },
         { id: 'g2', name: { en: 'New services' }, services: [] },
+        { id: 'g3', name: { en: 'New services' }, services: [] },
       ],
     }
     let form = formFromMenu(menu, 'en', 'New services')
@@ -72,8 +85,13 @@ describe('the services step (B-Onboarding step 5)', () => {
       services: [{ id: 's1', durationMin: 60, priceType: 'fixed', priceAmount: 80 }],
     })
     form = { ...form, rows: form.rows.map((r) => ({ ...r, name: 'Haircut' })) }
-    expect(servicesInput(form, 'en').groups[0]!.services[0]!.name).toEqual({ tk: 'Aýal saç kesimi', en: 'Haircut' })
+    // the market's languages only: the catalogue's others aren't the business's to send
+    expect(servicesInput(form, 'en').groups[0]!.services[0]!.name).toEqual({ en: 'Haircut' })
     // a new service joins the menu's «New services», no second one
-    expect(withNewRow(form, 'New services').groups.filter((g) => g.key === 'own')).toHaveLength(1)
+    expect(
+      withNewRow(form, 'New services')
+        .groups.filter((g) => g.key === 'own')
+        .map((g) => g.id),
+    ).toEqual(['g2'])
   })
 })

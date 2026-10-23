@@ -358,7 +358,8 @@
       "hintNone": "Pick at least one service.",
       "hintName": "Name the new service.",
       "hintPrice": "Add a price to each service.",
-      "summary": "{count, plural, one {# service} other {# services}}"
+      "summary": "{count, plural, one {# service} other {# services}}",
+      "hintNameEach": "Name each service."
     },
     "team": {
       "title": "Who do you work with?",
