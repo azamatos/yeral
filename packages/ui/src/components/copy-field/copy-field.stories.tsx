@@ -17,7 +17,7 @@ const meta = {
     value: link,
     display: 'yeral.app/b/glow-studio',
     label: 'Your page link',
-    copy: { copy: 'Copy', copied: 'Copied', share: 'Share' },
+    copy: { copy: 'Copy', copied: 'Copied' },
     onCopy: fn(),
   },
   decorators: [(Story) => <div className="max-w-140">{Story()}</div>],
@@ -56,10 +56,13 @@ export const Copied: Story = {
 /** Share opens a menu of places, each a link to a new tab. */
 export const WithShare: Story = {
   args: {
-    share: [
-      { id: 'whatsapp', label: 'WhatsApp', href: `https://wa.me/?text=${encodeURIComponent(link)}` },
-      { id: 'telegram', label: 'Telegram', href: `https://t.me/share/url?url=${encodeURIComponent(link)}` },
-    ],
+    share: {
+      label: 'Share',
+      targets: [
+        { id: 'whatsapp', label: 'WhatsApp', href: `https://wa.me/?text=${encodeURIComponent(link)}` },
+        { id: 'telegram', label: 'Telegram', href: `https://t.me/share/url?url=${encodeURIComponent(link)}` },
+      ],
+    },
   },
   play: async ({ canvas, canvasElement }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Share' }))
@@ -71,18 +74,38 @@ export const WithShare: Story = {
   },
 }
 
-/** When the clipboard refuses, nothing claims a copy: the field's text is selected for ⌘C. */
+/**
+ * When the clipboard refuses, nothing claims a copy: the field shows the full address Copy would have copied, selected
+ * for ⌘C.
+ */
 export const ClipboardRefused: Story = {
   play: async ({ canvas, args }) => {
     const write = spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('denied'))
     try {
-      await userEvent.click(canvas.getByRole('button', { name: 'Copy' }))
       const field = canvas.getByRole<HTMLInputElement>('textbox', { name: 'Your page link' })
-      await waitFor(() => expect(field.selectionEnd).toBe(field.value.length))
+      await userEvent.click(canvas.getByRole('button', { name: 'Copy' }))
+      await waitFor(() => expect(field).toHaveValue(link))
+      await waitFor(() => expect([field.selectionStart, field.selectionEnd]).toEqual([0, link.length]))
       await expect(canvas.queryByRole('button', { name: 'Copied' })).toBeNull()
       await expect(args.onCopy).not.toHaveBeenCalled()
     } finally {
       write.mockRestore()
+    }
+  },
+}
+
+/** The inline value when the clipboard refuses: the number's text is selected instead. */
+export const InlineClipboardRefused: Story = {
+  args: { variant: 'inline', value: '+99365447019', display: '+993 65 44 70 19', label: 'Copy number' },
+  play: async ({ canvas, args }) => {
+    const write = spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('denied'))
+    try {
+      await userEvent.click(canvas.getByRole('button', { name: 'Copy number' }))
+      await waitFor(() => expect(window.getSelection()?.toString()).toBe('+993 65 44 70 19'))
+      await expect(args.onCopy).not.toHaveBeenCalled()
+    } finally {
+      write.mockRestore()
+      window.getSelection()?.removeAllRanges()
     }
   },
 }

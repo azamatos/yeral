@@ -47,7 +47,12 @@ const setup = (logo: ChecklistItem['status'], photos: ChecklistItem['status'], a
 const meta = {
   title: 'Display/Checklist',
   component: Checklist,
-  args: { title: 'Make your page stronger', countLabel: '1 / 3 done', doneLabel: 'Done', items: setup('done', 'current', 'todo') },
+  args: {
+    title: 'Make your page stronger',
+    countLabel: (done, total) => `${done} / ${total} done`,
+    doneLabel: 'Done',
+    items: setup('done', 'current', 'todo'),
+  },
   decorators: [(Story) => <div className="max-w-184">{Story()}</div>],
 } satisfies Meta<typeof Checklist>
 export default meta
@@ -62,6 +67,7 @@ export const Setup: Story = {
   ),
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('heading', { name: 'Make your page stronger' })).toBeInTheDocument()
+    await expect(canvas.getByText('1 / 3 done')).toBeInTheDocument()
     const items = canvas.getAllByRole('listitem')
     await expect(items).toHaveLength(3)
     // the done one says so and drops its action; the others keep theirs
@@ -74,19 +80,22 @@ export const Setup: Story = {
 
 /** Nothing done yet, as the wizard's last step opens for a new business: the meter is empty. */
 export const NoneDone: Story = {
-  args: { countLabel: '0 / 3 done', items: setup('todo', 'todo', 'todo') },
+  args: { items: setup('todo', 'todo', 'todo') },
   play: async ({ canvas }) => {
     await expect(canvas.queryByRole('img', { name: 'Done' })).toBeNull()
     await expect(canvas.getAllByRole('link', { name: /^Add/ })).toHaveLength(3)
+    await expect(canvas.getByText('0 / 3 done')).toBeInTheDocument()
+    await expect(canvas.getByRole('progressbar', { name: 'Make your page stronger' })).toHaveAttribute('aria-valuenow', '0')
   },
 }
 
 /** Every item done: three «Done» markers, no actions, the meter full. */
 export const AllDone: Story = {
-  args: { countLabel: '3 / 3 done', items: setup('done', 'done', 'done') },
+  args: { items: setup('done', 'done', 'done') },
   play: async ({ canvas }) => {
     await expect(canvas.getAllByRole('img', { name: 'Done' })).toHaveLength(3)
     await expect(canvas.queryAllByRole('link')).toHaveLength(0)
+    await expect(canvas.getByRole('progressbar')).toHaveAttribute('aria-valuetext', '3 / 3 done')
   },
 }
 

@@ -38,6 +38,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | dnd-kit (`@dnd-kit/core`) | 6.3 | calendar drag and drop; re-check `@dnd-kit/react` (0.x) at the business milestone | pragmatic-drag-and-drop |
 | Recharts | 3 | analytics charts | visx (lower level), ECharts (heavy) |
 | MapLibre GL | 6 | maps, restyled to the design; OpenFreeMap tiles now (owner's decision 2026-10-14), self-hosted tiles on the own server | Google, Yandex (keys, billing, third-party scripts) |
+| lean-qr | 2.7 | a business's QR code drawn in the browser (`QrBlock`, `@yeral/ui/qr-block`): no dependencies, about 4 kB, its SVG path for the screen and its PNG and SVG for the downloads (2026-10-23) | `qrcode` (larger, CommonJS), a QR image from a server |
 
 ## Backend
 
@@ -87,6 +88,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | class names | `cn()` (tailwind-merge that knows the design's scales) | `@yeral/ui/cn` |
 | design-system components | `import { Button } from '@yeral/ui/button'` (subpath per component folder) | `@yeral/ui/*` |
 | an inline text link, or a button that reads as one («Change number», «Start free») | `textLink` (classes; size and layout from the caller) | `@yeral/ui/text-link` |
+| a link or a number to copy and share; a page's QR code with its downloads | `CopyField` (Copy → «Copied» 2 s, a Share menu of links); `QrBlock` / `QrCode` (lean-qr, PNG and SVG) | `@yeral/ui/copy-field`, `@yeral/ui/qr-block` |
 | a form's unsaved changes: «Save your changes?» Discard · Save, sticky at the bottom | `SaveBar` (shown only while the form is dirty; `form` to submit a form; a toast after) | `@yeral/ui/save-bar` |
 | logo, brand images | `Logo`, `brand` | `@yeral/ui/brand` |
 | app-wide providers | `UIProvider` (Lucide stroke 1.75, tooltip delay), `Toaster` | `@yeral/ui/provider`, `@yeral/ui/toast` |

@@ -63,3 +63,13 @@ export const PastTheGoal: Story = {
     await expect(canvas.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '3')
   },
 }
+
+/** The checklist's 4 px meter under its heading: one of three done. */
+export const Meter: Story = {
+  args: { variant: 'meter', label: 'Make your page stronger', value: 1, max: 3, valueText: '1 / 3 done' },
+  play: async ({ canvas }) => {
+    const bar = canvas.getByRole('progressbar', { name: 'Make your page stronger' })
+    await expect(bar).toHaveClass('h-1')
+    await expect(bar).toHaveAttribute('aria-valuetext', '1 / 3 done')
+  },
+}

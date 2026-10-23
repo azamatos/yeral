@@ -4,7 +4,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, spyOn, userEvent, waitFor } from 'storybook/test'
-import { QrBlock, qrPath } from './qr-block'
+import { QrBlock } from './qr-block'
 
 const value = 'https://yeral.app/b/glow-studio'
 
@@ -37,7 +37,7 @@ export const Card: Story = {
     const code = canvas.getByRole('img', { name: 'QR code for Glow Studio’s page' })
     await expect(code).toHaveAttribute('width', '200')
     // the board's link fits a 25-module code; with the 2-module quiet zone the square is 29 wide
-    await expect(code).toHaveAttribute('viewBox', '0 0 29 29')
+    await expect(code).toHaveAttribute('viewBox', '-2 -2 29 29')
     await expect(code).toHaveAttribute('shape-rendering', 'crispEdges')
     await expect(canvas.getByText('yeral.app/b/glow-studio')).toBeInTheDocument()
     await expect(canvas.getByRole('button', { name: 'Download PNG' })).toBeInTheDocument()
@@ -69,6 +69,9 @@ export const Downloaded: Story = {
       await userEvent.click(canvas.getByRole('button', { name: 'Download SVG' }))
       await waitFor(() => expect(canvas.getByRole('status')).toHaveTextContent('QR code downloaded (SVG)'))
       await expect((click.mock.contexts[1] as HTMLAnchorElement).download).toBe('glow-studio-qr.svg')
+      // the PNG is a data address at print size; the SVG a file of its own
+      await expect((click.mock.contexts[0] as HTMLAnchorElement).href).toMatch(/^data:image\/png/)
+      await expect((click.mock.contexts[1] as HTMLAnchorElement).href).toMatch(/^blob:/)
     } finally {
       click.mockRestore()
     }
@@ -82,8 +85,11 @@ export const LongerLink: Story = {
     link: 'yeral.app/b/glow-studio-beauty-and-nails-on-the-main-street',
   },
   play: async ({ canvas }) => {
-    const { size } = qrPath('https://yeral.app/b/glow-studio-beauty-and-nails-on-the-main-street')
-    await expect(size).toBeGreaterThan(29)
-    await expect(canvas.getByRole('img', { name: 'QR code for Glow Studio’s page' })).toHaveAttribute('viewBox', `0 0 ${size} ${size}`)
+    const [x, y, w, h] = (canvas.getByRole('img', { name: 'QR code for Glow Studio’s page' }).getAttribute('viewBox') ?? '')
+      .split(' ')
+      .map(Number)
+    await expect([x, y]).toEqual([-2, -2])
+    await expect(w).toBe(h)
+    await expect(w).toBeGreaterThan(29)
   },
 }
