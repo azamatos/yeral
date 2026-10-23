@@ -157,12 +157,14 @@ export function SetupFrame({
 }
 
 /** A step's header (B-Onboarding `.shd`): «Step 2 of 8», the title (32/38 → 26/32 on phones) and its lead. */
-export function StepHeader({ step, title, lead }: { step: WizardStep; title: ReactNode; lead: ReactNode }) {
+export function StepHeader({ step, title, lead, titleId }: { step: WizardStep; title: ReactNode; lead: ReactNode; titleId?: string }) {
   const t = useTranslations('setup')
   return (
     <header className="flex flex-col gap-2.5 pb-2">
       <span className="text-label text-n-500 uppercase">{t('stepOf', { n: stepIndex(step) + 1, total: WIZARD_STEPS.length })}</span>
-      <h1 className="m-0 text-h2 max-sm:text-[26px] max-sm:leading-8">{title}</h1>
+      <h1 id={titleId} className="m-0 text-h2 max-sm:text-[26px] max-sm:leading-8">
+        {title}
+      </h1>
       <p className="m-0 max-w-140 text-body text-n-600">{lead}</p>
     </header>
   )

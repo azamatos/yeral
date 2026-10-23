@@ -3,11 +3,12 @@ import { useCodeOnScreen, useSignIn } from '@yeral/features/auth-by-phone'
 import { toast } from '@yeral/ui/toast'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
+import { ContactYeralLink } from '@/features/contact-yeral'
+import { IdentityStep } from '@/features/sign-in'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { usePageTitle } from '@/shared/lib'
 import { EntryStep } from './entry-step'
-import { IdentityStep } from './identity-step'
 import { NameStep } from './name-step'
 import { SignInStep } from './sign-in-step'
 import { FailedStep, WaitStep } from './wait-steps'
@@ -66,6 +67,7 @@ export function LoginPage() {
           signIn.refuseCode(error)
         }}
         onFailed={failed}
+        contact={<ContactYeralLink />}
       />
     )
   if (me.isPending) return <WaitStep />

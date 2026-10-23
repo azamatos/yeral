@@ -3,16 +3,16 @@ import { isApiError, type ApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { cn } from '@yeral/ui/cn'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { ContactYeralLink } from '@/features/contact-yeral'
 import { AuthPage, textLink } from '@/shared/ui'
 
 /**
  * "Is this you?" (book Q-270): the code was right, but the number's account hasn't been used for 6 months, so the
  * person says whether it's theirs before anyone signs in. Not drawn: the invite card's pattern (title, lead, a
- * primary and a secondary L button, a way back).
+ * primary and a secondary L button, a way back). The login and the setup wizard's phone step both ask it; `contact` is
+ * the page's «Contact Ýeral» link, focused when "No" is refused.
  */
 export function IdentityStep({
   name,
@@ -21,6 +21,7 @@ export function IdentityStep({
   onBack,
   onExpired,
   onFailed,
+  contact,
 }: {
   name: string | null
   ticket: string
@@ -31,6 +32,8 @@ export function IdentityStep({
   /** The question ran out or was answered elsewhere: the code step again. */
   onExpired: (error: ApiError) => void
   onFailed: (error: unknown) => void
+  /** «Contact Ýeral» (a feature of its own): its button takes the focus when "No" is refused. */
+  contact: ReactNode
 }) {
   const t = useTranslations()
   const sdk = useSdk()
@@ -38,9 +41,9 @@ export function IdentityStep({
   const answer = useMutation(sdk.auth.answerIdentity())
   const [ownsWorkspace, setOwnsWorkspace] = useState(false)
   // "No" is refused and turns off: the focus goes to the way forward, Contact Ýeral
-  const contactLink = useRef<HTMLButtonElement>(null)
+  const contactBox = useRef<HTMLSpanElement>(null)
   useEffect(() => {
-    if (ownsWorkspace) contactLink.current?.focus()
+    if (ownsWorkspace) contactBox.current?.querySelector('button')?.focus()
   }, [ownsWorkspace])
   const brand = t('common.brand')
 
@@ -69,7 +72,14 @@ export function IdentityStep({
       lead={t('login.identity.lead')}
     >
       {ownsWorkspace && (
-        <Callout tone="danger" actions={<ContactYeralLink ref={contactLink} />}>
+        <Callout
+          tone="danger"
+          actions={
+            <span ref={contactBox} className="contents">
+              {contact}
+            </span>
+          }
+        >
           {t('login.identity.ownsWorkspace', { brand })}
         </Callout>
       )}

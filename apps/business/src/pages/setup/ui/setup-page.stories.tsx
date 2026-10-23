@@ -119,7 +119,8 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
 /**
- * The api as the wizard uses it. `signedIn`: false for nobody. `workspaces`: the person's businesses (one makes it
+ * The api as the wizard uses it. `signedIn`: false for nobody (the sign-in answers code «4821» for any number and makes
+ * a new account without a name), `'noName'` for a new account that hasn't given its name. `workspaces`: the person's businesses (one makes it
  * «Create a business»). `draft`: an unfinished setup. `search`: `false` when the address search isn't there
  * (`address_search_unavailable`). `hours`: the draft's week (every day closed, as a new draft's). `team`: the draft's
  * people besides the owner. Each `PATCH …/settings/rules` body lands in `rulesSaved`. `photos`: the gallery's count.
@@ -136,7 +137,7 @@ const fakeApi =
     photos = 0,
     missing = [],
   }: {
-    signedIn?: boolean
+    signedIn?: boolean | 'noName'
     workspaces?: Workspace[]
     draft?: Draft | null
     search?: boolean
@@ -148,6 +149,8 @@ const fakeApi =
     missing?: string[]
   } = {}) =>
   (): typeof fetch => {
+    const nameless = (phone: string): Me => ({ ...maysa, phone, name: null, firstName: null, surname: null })
+    let me: Me | null = signedIn === true ? maysa : signedIn === 'noName' ? nameless(maysa.phone) : null
     let setup = draft && { ...draft }
     let week = hours
     // the draft's booking rules as the rules step reads and saves them
@@ -172,7 +175,22 @@ const fakeApi =
       const body = (request.method === 'GET' ? {} : await request.json().catch(() => ({}))) as Record<string, unknown>
       const route = `${request.method} ${path}`
       if (route === 'GET /auth/mode') return json({ codeOnScreen: true })
-      if (route === 'GET /me') return json(signedIn ? maysa : null)
+      if (route === 'GET /me') return json(me)
+      if (route === 'POST /auth/code') return json({ resendAfterSec: 59, expiresInSec: 300, code: '4821' })
+      if (route === 'POST /auth/verify') {
+        if (body.code !== '4821') return json({ error: { code: 'code_invalid', details: { attemptsLeft: 2 } } }, 400)
+        me = nameless(String(body.phone))
+        return json({ me, isNew: true })
+      }
+      if (route === 'POST /auth/logout') {
+        me = null
+        return new Response(null, { status: 204 })
+      }
+      if (route === 'PATCH /me' && me) {
+        me = { ...me, firstName: String(body.firstName), surname: (body.surname as string | null) ?? null }
+        me.name = [me.firstName, me.surname].filter(Boolean).join(' ')
+        return json(me)
+      }
       if (route === 'GET /me/workspaces') return json({ items: workspaces, current: workspaces[0]?.slug ?? null })
       if (route === 'GET /me/setup') return json({ setup })
       if (route === 'GET /cities') return json({ items: cities, main: 'ashgabat', nearest: null })
@@ -422,11 +440,58 @@ export const ContinueLater: Story = {
   },
 }
 
-/** Signed out: the sign-in comes first. */
+/**
+ * Signed out: step 1 is the sign-in inside the wizard. Continue waits («Enter your number and get a code.»); the number,
+ * then the code on the screen; the new account gives its name (Continue waits for the first name), and the business
+ * step opens with step 1 done.
+ */
 export const SignedOut: Story = {
   args: { server: fakeApi({ signedIn: false }) },
   play: async ({ canvas }) => {
-    await expect(await canvas.findByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login')
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Welcome to Ýeral Business' })).toBeVisible()
+    await expect(canvas.getByText('Step 1 of 8')).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login')
+    const go = canvas.getByRole('button', { name: 'Continue' })
+    await expect(go).toBeDisabled()
+    await expect(go).toHaveAccessibleDescription('Enter your number and get a code.')
+    await expect(canvas.queryByRole('button', { name: /Continue later/ })).toBeNull()
+
+    // the first launch shows the code on the screen: the number step says it's a demo (book Q-036)
+    await expect(await canvas.findByText(/This is a demo of Ýeral/)).toBeVisible()
+    await userEvent.type(canvas.getByLabelText('Phone number'), '65102030')
+    await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
+    const code = await canvas.findByLabelText('Code', {}, { timeout: 3000 })
+    await expect(canvas.getByRole('heading', { level: 1, name: 'Enter the code' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Continue' })).toHaveAccessibleDescription('Enter the code.')
+    await waitFor(() => expect(code).toHaveFocus())
+    await userEvent.keyboard('4821')
+
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'What’s your name?' })).toBeVisible()
+    const first = canvas.getByRole('textbox', { name: 'First name' })
+    await waitFor(() => expect(first).toHaveFocus())
+    await expect(canvas.getByRole('button', { name: 'Continue' })).toHaveAccessibleDescription('Enter your first name.')
+    await userEvent.type(first, 'Maýsa')
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'About your business' })).toBeVisible()
+  },
+}
+
+/** Any other step signed out opens step 1. */
+export const SignedOutLater: Story = {
+  args: { server: fakeApi({ signedIn: false }), path: '/setup/hours' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Welcome to Ýeral Business' })).toBeVisible()
+  },
+}
+
+/** A new account without its name (signed in elsewhere): its name first; «Change number» signs out to the number. */
+export const NoName: Story = {
+  args: { server: fakeApi({ signedIn: 'noName' }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'What’s your name?' })).toBeVisible()
+    await expect(canvas.getByText('+993 65 10 20 30')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Change number' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Welcome to Ýeral Business' })).toBeVisible()
   },
 }
 

@@ -242,6 +242,14 @@
     "cancel": "Cancel",
     "continue": "Continue",
     "saving": "Saving",
+    "phone": {
+      "title": "Welcome to {app}",
+      "hintPhone": "Enter your number and get a code.",
+      "hintCode": "Enter the code.",
+      "hintName": "Enter your first name.",
+      "nameHint": "For your {brand} account — your team will see you by this name. You’ll be the owner of the business.",
+      "login": "Already have an account? <login>Log in</login>"
+    },
     "business": {
       "title": "About your business",
       "lead": "Clients find you by this name and category. The category also suggests starter services.",
@@ -436,10 +444,6 @@
         "aboutCaption": "Tell clients what to expect: services, products, experience",
         "aboutAdd": "Add an About"
       }
-    },
-    "signedOut": {
-      "lead": "Setting up a business starts with your phone number. Log in or sign up first.",
-      "login": "Log in"
     }
   }
 }

@@ -143,7 +143,7 @@ flowchart TD
 
 > Open question Q-200: where a half-finished setup continues.
 
-**Status** — Design: drawn (B-Onboarding · `step`) · Code: built for the phone, code, lock and landline rules (shared login, ADR 0019); the wizard's api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026).
+**Status** — Design: drawn (B-Onboarding · `step`) · Code: built for the phone, code, lock and landline rules (shared login, ADR 0019); the wizard's api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); step 1 built inside the wizard for someone signed out (the number, the code on the screen, "Is this you?", the name; the login's pieces shared in `features/sign-in`; 23.10.2026; chapter 9, B-02 (how)).
 
 ### B-03 · Describe the business: name, category, address
 
