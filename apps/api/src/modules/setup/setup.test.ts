@@ -123,6 +123,85 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     expect((await owner.req('/v1/setup', { body: { name: 'Merjen Nails Two', categoryId: 'nails' } })).status).toBe(201)
   })
 
+  it('the services step makes the menu in one go: starters in every language, own services, again without twins', async () => {
+    const owner = await as('+99365930040', 'Ogulgerek')
+    const { slug } = (await owner.req('/v1/setup', { body: { name: 'Ogulgerek Beauty', categoryId: 'beauty' } })).json as { slug: string }
+    const W = `/v1/w/${slug}`
+    const body = {
+      groups: [
+        {
+          starter: 'hair',
+          services: [
+            // unchanged: its name in every language
+            { starter: 'womens-haircut', name: { en: 'Women’s haircut' }, durationMin: 60, priceType: 'fixed', priceAmount: 90 },
+            // renamed by the owner: as written
+            { starter: 'hair-styling', name: { en: 'Blow-dry' }, durationMin: 45, priceType: 'fixed', priceAmount: 60 },
+          ],
+        },
+        { name: { en: 'New services' }, services: [{ name: { en: 'Henna' }, durationMin: 90, priceType: 'from', priceAmount: 100 }] },
+      ],
+    }
+    const saved = await owner.req(`${W}/setup/services`, { method: 'PUT', body })
+    expect(saved.status).toBe(200)
+    const [me] = await db
+      .select({ id: staff.id })
+      .from(staff)
+      .innerJoin(businesses, eq(businesses.id, staff.businessId))
+      .where(and(eq(businesses.slug, slug), eq(staff.level, 'owner')))
+    expect(saved.json.groups).toMatchObject([
+      {
+        name: { tk: 'Saç', ru: 'Волосы', en: 'Hair' },
+        services: [
+          {
+            name: { tk: 'Aýal saç kesimi', ru: 'Женская стрижка', en: 'Women’s haircut' },
+            durationMin: 60,
+            priceAmount: 90,
+            staffIds: [me!.id],
+          },
+          { name: { en: 'Blow-dry' }, durationMin: 45, priceAmount: 60, staffIds: [me!.id] },
+        ],
+      },
+      { name: { en: 'New services' }, services: [{ name: { en: 'Henna' }, priceType: 'from', priceAmount: 100, staffIds: [me!.id] }] },
+    ])
+    // a retry, or back at the step: the same menu, nothing twice
+    const again = await owner.req(`${W}/setup/services`, { method: 'PUT', body })
+    expect(again.json.groups.map((g: { services: unknown[] }) => g.services.length)).toEqual([2, 1])
+    expect((await owner.req(`${W}/services`)).json.groups).toHaveLength(2)
+    // a starter not in the draft's category, one twice, a nameless own service, terms out of the menu's limits
+    const wrong = await owner.req(`${W}/setup/services`, {
+      method: 'PUT',
+      body: {
+        groups: [
+          {
+            starter: 'beard',
+            services: [
+              { starter: 'manicure', durationMin: 45, priceType: 'fixed', priceAmount: 50 },
+              { starter: 'manicure', durationMin: 45, priceType: 'fixed', priceAmount: 50 },
+              { durationMin: 7, priceType: 'fixed', priceAmount: 0 },
+            ],
+          },
+        ],
+      },
+    })
+    expect(wrong.status).toBe(400)
+    expect(wrong.json.error.details.issues).toEqual([
+      { path: ['groups', 0, 'starter'], code: 'invalid' },
+      { path: ['groups', 0, 'services', 1, 'starter'], code: 'invalid' },
+      { path: ['groups', 0, 'services', 2, 'name'], code: 'invalid' },
+      { path: ['groups', 0, 'services', 2, 'durationMin'], code: 'invalid' },
+      { path: ['groups', 0, 'services', 2, 'priceAmount'], code: 'invalid' },
+    ])
+    expect((await owner.req(`${W}/services`)).json.groups).toHaveLength(2)
+    // only the draft's owner, only while it's a draft
+    expect((await (await as('+99365930041')).req(`${W}/setup/services`, { method: 'PUT', body })).status).toBe(404)
+    const location = { cityId: 'ashgabat', address: 'Görogly köçesi 1', street: 'Görogly köçesi', lat: 37.94, lng: 58.38 }
+    await owner.req(`${W}/settings/profile`, { method: 'PATCH', body: { location } })
+    const day = { open: 600, close: 1140, break: null }
+    await owner.req(`${W}/settings/hours`, { method: 'PUT', body: { hours: [day, day, day, day, day, null, null], specialDays: [] } })
+    expect((await owner.req(`${W}/setup/finish`, { method: 'POST' })).status).toBe(204)
+    expect((await owner.req(`${W}/setup/services`, { method: 'PUT', body })).json.error.code).toBe('invalid_status')
+  })
+
   it('a draft is only for the wizard: no calendar, clients or invites yet; its account deleted takes it along', async () => {
     const owner = await as('+99365930020', 'Läle')
     const { slug } = (await owner.req('/v1/setup', { body: { name: 'Läle Spa', categoryId: 'spa' } })).json as { slug: string }
