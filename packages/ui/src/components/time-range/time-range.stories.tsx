@@ -103,7 +103,7 @@ export const WithRemove: Story = {
   },
 }
 
-/** A break in a night open 18:00–02:00: a start before the day's opening is the night's (01:00 is minute 1500). */
+/** A break in a night open 18:00–02:00: a time before the day's opening is the night's (01:00 is minute 1500). */
 export const BreakAfterMidnight: Story = {
   args: {
     value: { open: 1320, close: 1380 },
@@ -116,7 +116,7 @@ export const BreakAfterMidnight: Story = {
   play: async ({ canvas, args }) => {
     const starts = canvas.getByRole('combobox', { name: 'Friday: break starts' })
     await userEvent.selectOptions(starts, '01:00')
-    await expect(args.onChange).toHaveBeenLastCalledWith({ open: 1500, close: 2820 })
+    await expect(args.onChange).toHaveBeenLastCalledWith({ open: 1500, close: 1380 })
     await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Friday: break ends' }), '01:30')
     await expect(args.onChange).toHaveBeenLastCalledWith({ open: 1500, close: 1530 })
     await expect(starts).toHaveDisplayValue('01:00')

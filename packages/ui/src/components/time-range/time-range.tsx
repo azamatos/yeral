@@ -81,8 +81,9 @@ export type TimeRangeFieldProps = {
   fromLabel: string
   toLabel: string
   /**
-   * The earliest opening: an opening time of day before it is the next day's. A break in a day open 18:00–02:00 passes
-   * the day's opening, so a break at 01:00 is the night's (minute 1500).
+   * A stretch inside a day that opens at this minute (a break): both times are that day's, a time of day before its
+   * opening the night's, so in a day open 18:00–02:00 a break at 01:00 is minute 1500. Without it the range is the
+   * day's own hours: the closing time is the next day's when it comes at or before the opening.
    */
   dayStart?: number
   /** A label before the pickers, 72 wide (a break's «Break»); the row becomes a group it names. */
@@ -113,7 +114,7 @@ export function TimeRangeField({
   onChange,
   fromLabel,
   toLabel,
-  dayStart = 0,
+  dayStart,
   label,
   remove,
   nextDay,
@@ -128,10 +129,13 @@ export function TimeRangeField({
   const messageId = `${id}-message`
   const pillId = `${id}-next-day`
   const { opens, closes } = timesFor(step > 0 && DAY % step === 0 ? step : 30)
-  const base = value.open >= DAY ? DAY : 0
-  const openTime = value.open - base
+  const inside = dayStart !== undefined
+  // a break's times read as times of day; a day's closing past midnight as the next day's
+  const base = !inside && value.open >= DAY ? DAY : 0
+  const openTime = value.open >= DAY ? value.open - DAY : value.open
   const late = value.close - base > DAY
   const closeTime = late ? value.close - base - DAY : value.close - base
+  const night = (time: number) => (dayStart !== undefined && time < dayStart ? time + DAY : time)
   const invalid = !!error
   const pill = nextDay && late
   const describe = (...ids: (string | false)[]) => ids.filter(Boolean).join(' ') || undefined
@@ -154,9 +158,9 @@ export function TimeRangeField({
         describedBy={describe(invalid && messageId)}
         disabled={disabled}
         onChange={(time) => {
-          const open = time < dayStart ? time + DAY : time
-          // the closing time of day stays; it may move to the next day against the new opening
-          onChange({ open, close: closeAt(open, closeTime) })
+          const open = night(time)
+          // a day's closing time stays, and may move to the next day against the new opening
+          onChange({ open, close: inside ? value.close : closeAt(open, closeTime) })
         }}
       />
       <span aria-hidden className="text-n-600">
@@ -169,7 +173,7 @@ export function TimeRangeField({
         invalid={invalid}
         describedBy={describe(!!pill && pillId, invalid && messageId)}
         disabled={disabled}
-        onChange={(time) => onChange({ open: value.open, close: closeAt(value.open, time) })}
+        onChange={(time) => onChange({ open: value.open, close: inside ? night(time) : closeAt(value.open, time) })}
       />
       {pill && (
         <span
