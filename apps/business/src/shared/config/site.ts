@@ -5,3 +5,9 @@
 import { siteFromEnv } from '@yeral/lib/site'
 
 export const site = siteFromEnv(import.meta.env, 'VITE_')
+
+/** The client site's host as people read and type it («yeral.app»). */
+export const clientHost = new URL(site.urls.client).host
+
+/** A business's public page (design §28 Link and QR, no language in it): the address to open, and as people read it. */
+export const pageLink = (slug: string) => ({ url: `${site.urls.client}/b/${slug}`, display: `${clientHost}/b/${slug}` })

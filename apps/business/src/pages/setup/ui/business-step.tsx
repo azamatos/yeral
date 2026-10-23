@@ -4,14 +4,11 @@ import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { useTranslations } from 'use-intl'
 import { CategoryPicker, type PickableCategory } from './category-picker'
-import { site } from '@/shared/config'
+import { pageLink } from '@/shared/config'
 import { StepHeader } from './setup-frame'
 
 /** The business name's longest (design §28.5 text limits, the api's `setupStartSchema`). */
 export const BUSINESS_NAME_MAX = 80
-
-/** The client site's host as people type it («yeral.app»), from the site config. */
-const clientHost = new URL(site.urls.client).host
 
 /**
  * Step 2, «About your business» (B-Onboarding `isBiz`, book B-03): the business name with its counter and the page
@@ -67,7 +64,7 @@ export function BusinessStep({
         label={t('setup.business.name')}
         error={long && t('setup.business.nameLong', { max: BUSINESS_NAME_MAX })}
         hint={t.rich('setup.business.page', {
-          url: `${clientHost}/b/${slug}`,
+          url: pageLink(slug).display,
           // the address in the board's mono 13, ink
           mono: (chunks) => <span className="font-mono text-dense text-n-900">{chunks}</span>,
         })}

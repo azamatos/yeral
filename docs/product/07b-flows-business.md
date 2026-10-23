@@ -294,7 +294,7 @@ flowchart TD
 - QR codes are not generated for real in the design (§11 "real QR generation" not designed).
 - Table and class businesses (after the MVP): step 8 ends with a checklist pointing to *Stollar* or *Sapaklar* (Q-201, B-03).
 
-**Status** — Design: drawn (B-Onboarding · `step=8`, `fromSwitcher`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); finishing needs an address, an open day and a service (`setup_incomplete`), then the workspace joins the switcher and waits for Ýeral's review; the QR and photos come with uploads.
+**Status** — Design: drawn (B-Onboarding · `step=8`, `fromSwitcher`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); finishing needs an address, an open day and a service (`setup_incomplete`), then the workspace joins the switcher and waits for Ýeral's review; the wizard's step 8 built 23.10.2026 (the preview card, the link with Copy and Share, the QR code drawn in the browser with PNG and SVG downloads, the checklist, «Go to the calendar» finishing into the calendar; the team's invites come with the team step).
 
 ### B-07 · Log in
 
