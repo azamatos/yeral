@@ -23,6 +23,7 @@
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "lucide-react": "catalog:",
+    "maplibre-gl": "catalog:",
     "radix-ui": "catalog:",
     "sonner": "catalog:",
     "tailwind-merge": "catalog:"
