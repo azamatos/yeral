@@ -80,6 +80,8 @@ type Draft = {
 type Day = WeekdayHours | null
 /** What the rules step sent, one body per save (the fake api fills it). */
 const rulesSaved: Record<string, unknown>[] = []
+/** What the team step sent, one body per save. */
+const teamSaved: Record<string, unknown>[] = []
 /** The drafts finished (`POST …/setup/finish`), by page address. */
 const finished: string[] = []
 /** What the services step sent, one body per save (the fake api fills it). */
@@ -156,6 +158,8 @@ const fakeApi =
     // the draft's booking rules as the rules step reads and saves them
     let rules = { ...DEFAULT_RULES, lateMinutes: 15 }
     rulesSaved.length = 0
+    let people = team
+    teamSaved.length = 0
     finished.length = 0
     // the draft's menu as the services step reads and saves it
     let menu: Menu = { groups: [] }
@@ -222,9 +226,19 @@ const fakeApi =
         rules = { ...rules, ...body }
         return json(rules)
       }
-      // the api doesn't show a draft's team (`not_found`); `team` plays the day it does
-      if (/^GET \/w\/[^/]+\/team$/.test(route))
-        return team.length ? json({ items: [owner, ...team] }) : json({ error: { code: 'not_found' } }, 404)
+      // the draft's team: the owner and `team`; the team step saves it whole
+      if (/^GET \/w\/[^/]+\/team$/.test(route)) return json({ items: [owner, ...people] })
+      if (/^PUT \/w\/[^/]+\/setup\/team$/.test(route)) {
+        teamSaved.push(body)
+        const members = (body.members ?? []) as { name: string; phone: string; level: 'specialist' | 'admin'; hasApp: boolean }[]
+        people = members.map((m, i) => ({
+          ...member(`t${i}`, m.name, m.level, m.hasApp),
+          phone: m.phone,
+          status: m.hasApp ? 'invited' : 'active',
+          joined: false,
+        }))
+        return json({ items: [owner, ...people] })
+      }
       if (/^GET \/w\/[^/]+\/services$/.test(route)) return json(menu)
       if (/^PUT \/w\/[^/]+\/setup\/services$/.test(route)) {
         const sent = body as unknown as SetupServices
@@ -722,10 +736,68 @@ export const ServicesOwn: Story = {
   },
 }
 
+const teamDraft: Draft = { ...addressDraft, step: 'team', address: { line: '247 Bitarap Türkmenistan Avenue', city } }
+
+/**
+ * The team step of a draft with nobody but its owner: «I work alone» with its note; «I have a team» gives an empty row
+ * and Continue waits for someone. A specialist with the app hears where the invite shows; Continue saves the team in
+ * one go and the rules step asks who answers requests.
+ */
+export const Team: Story = {
+  args: { server: fakeApi({ draft: teamDraft }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Who do you work with?' })).toBeVisible()
+    await expect(canvas.getByRole('radio', { name: /I work alone/ })).toHaveAttribute('aria-checked', 'true')
+    await expect(canvas.getByText(/every booking comes to you/)).toBeVisible()
+    await userEvent.click(canvas.getByRole('radio', { name: /I have a team/ }))
+    const cont = canvas.getByRole('button', { name: 'Continue' })
+    await expect(cont).toHaveAccessibleDescription('Add a team member or pick “I work alone”.')
+    await userEvent.type(canvas.getByRole('textbox', { name: 'Name of team member 1' }), 'Aýna')
+    await userEvent.type(canvas.getByRole('textbox', { name: 'Aýna: phone number' }), '65123456')
+    await expect(canvas.getByText('They’ll see the invite when they sign in with +993 65 •• •• 56 · valid 7 days')).toBeVisible()
+    await userEvent.click(cont)
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'How should bookings arrive?' })).toBeVisible()
+    await expect(teamSaved).toEqual([{ members: [{ name: 'Aýna', phone: '+99365123456', level: 'specialist', hasApp: true }] }])
+    await expect(await canvas.findByRole('radiogroup', { name: 'Who answers requests?' })).toBeVisible()
+  },
+}
+
+/**
+ * A row to fix: a mobile number for everyone; a specialist without the app is bookable at once; an administrator
+ * always has the app; a number twice is taken. Continue waits while a filled row has a problem.
+ */
+export const TeamProblems: Story = {
+  args: { server: fakeApi({ draft: teamDraft, team: [member('m1', 'Leýli', 'specialist', false)] }) },
+  play: async ({ canvas }) => {
+    const row = await canvas.findByRole('group', { name: 'Team member 1: Leýli' })
+    await expect(within(row).getByRole('switch', { name: 'Uses the app' })).not.toBeChecked()
+    await userEvent.click(canvas.getByRole('button', { name: 'Add a team member' }))
+    await userEvent.type(canvas.getByRole('textbox', { name: 'Name of team member 2' }), 'Arslan')
+    const phone = canvas.getByRole('textbox', { name: 'Arslan: phone number' })
+    await userEvent.type(phone, '12345678')
+    await expect(canvas.getByText('Mobile numbers only — enter a number starting with 6 or 7.')).toBeVisible()
+    const cont = canvas.getByRole('button', { name: 'Continue' })
+    await expect(cont).toHaveAccessibleDescription('Enter each person’s name and mobile number (8 digits).')
+    const arslan = canvas.getByRole('group', { name: 'Team member 2: Arslan' })
+    await userEvent.clear(phone)
+    await userEvent.type(phone, '65123456')
+    await expect(cont).toBeEnabled()
+    await userEvent.click(within(arslan).getByRole('switch', { name: 'Uses the app' }))
+    await expect(within(arslan).getByText(/Bookable at once, never signs in/)).toBeVisible()
+    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Arslan: access level' }), 'Admin')
+    await expect(within(arslan).queryByRole('switch')).toBeNull()
+    await expect(within(arslan).getByText(/They’ll see the invite/)).toBeVisible()
+    await userEvent.clear(phone)
+    await userEvent.type(phone, '65000000')
+    await expect(within(arslan).getByText('This number is already on the team.')).toBeVisible()
+    await expect(cont).toBeDisabled()
+  },
+}
+
 const rulesDraft: Draft = { ...addressDraft, step: 'rules', address: { line: '247 Bitarap Türkmenistan Avenue', city } }
 
 /**
- * The booking rules step of a draft (whose team the api doesn't show): «I confirm» with a 30-minute hold, no «Who
+ * The booking rules step of a draft with nobody but its owner: «I confirm» with a 30-minute hold, no «Who
  * answers requests?»;
  * instant confirmation hides the hold and says to block busy times; Continue saves only what changed and opens Done.
  */
@@ -749,7 +821,7 @@ export const Rules: Story = {
   },
 }
 
-/** With a team (an api that shows the draft's team): who answers requests, «Both» by default; saved with the step. */
+/** With a team: who answers requests, «Both» by default; saved with the step. */
 export const RulesWithTeam: Story = {
   args: { server: fakeApi({ draft: rulesDraft, team: [member('m1', 'Aýna', 'specialist'), member('m2', 'Leýli', 'specialist', false)] }) },
   play: async ({ canvas }) => {

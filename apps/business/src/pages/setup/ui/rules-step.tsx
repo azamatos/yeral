@@ -35,8 +35,8 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
   const fmt = useFmt()
   const errorText = useErrorText()
   const rules = useQuery({ ...sdk.settings.rules(slug), enabled: on })
-  // only «Who answers requests?» needs the team: the step doesn't wait for it, and without it (the api doesn't show a
-  // draft's team yet) the question stays hidden and the setting keeps its value
+  // only «Who answers requests?» needs the team: the step doesn't wait for it, and without it (it didn't load) the
+  // question stays hidden and the setting keeps its value
   const team = useQuery({ ...sdk.team.list(slug), enabled: on, retry: false })
   const update = useMutation(sdk.settings.updateRules(slug))
   const [state, setState] = useState<{ form: RulesForm; stored: RulesForm } | null>(null)

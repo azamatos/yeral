@@ -39,9 +39,16 @@ export const BUFFER_CHOICES = RULE_OPTIONS.bufferMinutes
 
 /**
  * «Who answers requests?» shows in manual mode once someone besides the owner signs in to the workspace (book B-42):
- * a member who joined, or an invite still waiting, with the app; a specialist without the app doesn't answer anything,
- * and a declined, cancelled or expired invite isn't anyone.
+ * a member who joined, an invite still waiting, or a draft's person the finish will invite (`invited`, no invite yet),
+ * with the app; a specialist without the app doesn't answer anything, and a declined, cancelled or expired invite isn't
+ * anyone.
  */
 export function hasTeam(members: Pick<TeamMember, 'level' | 'status' | 'hasApp' | 'joined' | 'invite'>[]): boolean {
-  return members.some((m) => m.level !== 'owner' && m.status !== 'removed' && m.hasApp && (m.joined || m.invite?.state === 'pending'))
+  return members.some(
+    (m) =>
+      m.level !== 'owner' &&
+      m.status !== 'removed' &&
+      m.hasApp &&
+      (m.joined || m.invite?.state === 'pending' || (m.status === 'invited' && !m.invite)),
+  )
 }

@@ -24,7 +24,8 @@ import { useHoursStep } from './hours-step'
 import { PhoneStep } from './phone-step'
 import { useRulesStep } from './rules-step'
 import { useServicesStep } from './services-step'
-import { SetupFrame, StepHeader, useStepName, type StepAction } from './setup-frame'
+import { SetupFrame, useStepName, type StepAction } from './setup-frame'
+import { useTeamStep } from './team-step'
 
 /**
  * `/setup/{step}` — the setup wizard (B-Onboarding, design §27.2, book B-02–B-06, Q-200). Someone signed in with a
@@ -180,6 +181,7 @@ function Steps({
     !!draft && stepIndex(reached) >= stepIndex('services'),
     category,
   )
+  const team = useTeamStep(draft?.slug ?? '', step === 'team' && !!draft, { name: ownerName, phone: me.phone })
   const rules = useRulesStep(draft?.slug ?? '', step === 'rules' && !!draft)
   const done = useDoneStep(draft, step === 'done' && !!draft, back, onFinished)
   const [body, action]: [ReactNode, StepAction] =
@@ -212,11 +214,11 @@ function Steps({
           ? [hours.body, hours.action]
           : step === 'services'
             ? [services.body, services.action]
-            : step === 'rules'
-              ? [rules.body, rules.action]
-              : step === 'done'
-                ? [done.body, done.action]
-                : [<LaterStep step={step} />, { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) }]
+            : step === 'team'
+              ? [team.body, team.action]
+              : step === 'rules'
+                ? [rules.body, rules.action]
+                : [done.body, done.action]
   const busy = action.busy || saveStep.isPending
 
   /** Continue: the step saved, the draft moved on to the next step (a new draft already starts at the address). */
@@ -278,7 +280,7 @@ function Steps({
             }
           : {
               children: t('setup.continue'),
-              // the steps not built yet come with their own pieces of slice 2
+              // while the step loads, or what's typed isn't valid yet
               disabled: !action.ready || !action.valid,
               loading: busy,
               loadingLabel: t('setup.saving'),
@@ -309,15 +311,5 @@ function Steps({
     >
       {body}
     </SetupFrame>
-  )
-}
-
-/** A step built by a later piece of slice 2: its header only (B-Onboarding's titles and leads). */
-function LaterStep({ step }: { step: Exclude<SetupStep, 'business' | 'address' | 'hours' | 'rules' | 'done'> }) {
-  const t = useTranslations('setup')
-  return (
-    <section className="flex flex-col gap-8 max-sm:gap-7">
-      <StepHeader step={step} title={t(`${step}.title`)} lead={t(`${step}.lead`)} />
-    </section>
   )
 }
