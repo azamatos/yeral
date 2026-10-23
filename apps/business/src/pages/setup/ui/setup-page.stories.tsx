@@ -78,6 +78,8 @@ type Draft = {
 type Day = WeekdayHours | null
 /** What the rules step sent, one body per save (the fake api fills it). */
 const rulesSaved: Record<string, unknown>[] = []
+/** The drafts finished (`POST …/setup/finish`), by page address. */
+const finished: string[] = []
 
 const member = (id: string, name: string, level: TeamMember['level'], hasApp = true): TeamMember => ({
   id,
@@ -103,7 +105,8 @@ const json = (body: unknown, status = 200) =>
  * The api as the wizard uses it. `signedIn`: false for nobody. `workspaces`: the person's businesses (one makes it
  * «Create a business»). `draft`: an unfinished setup. `search`: `false` when the address search isn't there
  * (`address_search_unavailable`). `hours`: the draft's week (every day closed, as a new draft's). `team`: the draft's
- * people besides the owner. Each `PATCH …/settings/rules` body lands in `rulesSaved`.
+ * people besides the owner. Each `PATCH …/settings/rules` body lands in `rulesSaved`. `photos`: the gallery's count.
+ * `missing`: what `POST …/setup/finish` finds missing; a finish lands in `finished`.
  */
 const fakeApi =
   ({
@@ -113,6 +116,8 @@ const fakeApi =
     search = true,
     hours = [null, null, null, null, null, null, null],
     team = [],
+    photos = 0,
+    missing = [],
   }: {
     signedIn?: boolean
     workspaces?: Workspace[]
@@ -120,6 +125,10 @@ const fakeApi =
     search?: boolean
     hours?: Day[]
     team?: TeamMember[]
+    /** The draft's gallery: this many photos. */
+    photos?: number
+    /** What finishing finds missing (`setup_incomplete`); empty: it finishes. */
+    missing?: string[]
   } = {}) =>
   (): typeof fetch => {
     let setup = draft && { ...draft }
@@ -127,6 +136,7 @@ const fakeApi =
     // the draft's booking rules as the rules step reads and saves them
     let rules = { ...DEFAULT_RULES, lateMinutes: 15 }
     rulesSaved.length = 0
+    finished.length = 0
     // the draft's profile as the address step reads and saves it
     let location = {
       cityId: 'ashgabat',
@@ -217,6 +227,15 @@ const fakeApi =
             hideExactAddress: !!body.hideExactAddress,
           }
         return json({})
+      }
+      if (/^GET \/w\/[^/]+\/settings\/photos$/.test(route) && setup)
+        return json({ items: Array.from({ length: photos }, (_, i) => ({ id: `p${i}`, url: `/photos/${i}.jpg`, alt: '' })) })
+      const finish = /^POST \/w\/([^/]+)\/setup\/finish$/.exec(route)
+      if (finish && setup) {
+        if (missing.length) return json({ error: { code: 'setup_incomplete', details: { missing } } }, 422)
+        finished.push(finish[1]!)
+        setup = null
+        return new Response(null, { status: 204 })
       }
       if (/^GET \/w\/[^/]+\/settings\/hours$/.test(route) && setup) return json({ hours: week, specialDays: [] })
       if (/^PUT \/w\/[^/]+\/settings\/hours$/.test(route) && setup) {
@@ -528,5 +547,71 @@ export const RulesWithTeam: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio is ready!' })).toBeVisible()
     await waitFor(() => expect(rulesSaved).toEqual([{ requestAnswerers: 'each' }]))
+  },
+}
+
+const doneDraft: Draft = { ...rulesDraft, step: 'done' }
+/** The workspace's calendar the done step finishes into: here only its heading. */
+const Calendar = () => <h1>Calendar</h1>
+
+/**
+ * The done step: the page in review, the card clients will see, the page link with Copy and Share, the QR code with
+ * its downloads, «Make your page stronger» with nothing done yet (the logo ringed as next). «Go to the calendar»
+ * finishes the setup and opens the workspace's calendar.
+ */
+export const Done: Story = {
+  args: {
+    routes: { '/setup/$step': SetupPage, '/w/$slug/calendar': Calendar },
+    path: '/setup/done',
+    server: fakeApi({ draft: doneDraft }),
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio is ready!' })).toBeVisible()
+    await expect(canvas.getByText(/Your page is in review/)).toBeVisible()
+    await expect(canvas.getByText('Beauty · 247 Bitarap Türkmenistan Avenue, Ashgabat')).toBeVisible()
+    const link = canvas.getByRole<HTMLInputElement>('textbox', { name: 'Your page link' })
+    await expect(link.value).toMatch(/\/b\/glow-studio$/)
+    await expect(canvas.getByRole('img', { name: 'QR code for Glow Studio’s page' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Download PNG' })).toBeVisible()
+    const checklist = canvas.getByRole('heading', { level: 2, name: 'Make your page stronger' })
+    await expect(checklist).toBeVisible()
+    await expect(canvas.getByText('0 / 3 done')).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Continue later' })).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: 'Go to the calendar' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Calendar' })).toBeVisible()
+    await expect(finished).toEqual(['glow-studio'])
+  },
+}
+
+/** Three photos already: «Add 3+ photos» reads «Added», the first photo is the card's picture. */
+export const DoneWithPhotos: Story = {
+  args: { path: '/setup/done', server: fakeApi({ draft: doneDraft, photos: 3 }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('1 / 3 done')).toBeVisible()
+    await expect(canvas.getByRole('img', { name: 'Glow Studio' })).toHaveAttribute('src', '/photos/0.jpg')
+    await expect(canvas.getByText('Added')).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Add photos' })).toBeNull()
+  },
+}
+
+/** Finishing finds the services missing (`setup_incomplete`): the person hears why and the services step opens. */
+export const DoneIncomplete: Story = {
+  args: { path: '/setup/done', server: fakeApi({ draft: doneDraft, missing: ['services'] }) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Go to the calendar' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Your services' })).toBeVisible()
+    await expect(finished).toEqual([])
+  },
+}
+
+/** Someone who came from another workspace hears where it went: the switcher, with the way back to it. */
+export const DoneFromSwitcher: Story = {
+  args: {
+    path: '/setup/done',
+    server: fakeApi({ draft: { ...doneDraft, slug: 'glow-studio-2', name: 'Glow Nails' }, workspaces: [glow] }),
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Nails is ready!' })).toBeVisible()
+    await expect(canvas.getByText(/switch back to Glow Studio there/)).toBeVisible()
   },
 }

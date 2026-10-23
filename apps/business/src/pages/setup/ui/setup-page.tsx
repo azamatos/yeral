@@ -17,6 +17,7 @@ import { AuthPage } from '@/shared/ui'
 import { isWizardStep, nextStep, stepFor, stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
 import { useAddressStep } from './address-step'
 import { BUSINESS_NAME_MAX, BusinessStep } from './business-step'
+import { useDoneStep } from './done-step'
 import { useHoursStep } from './hours-step'
 import { useRulesStep } from './rules-step'
 import { SetupFrame, StepHeader, useStepName, type StepAction } from './setup-frame'
@@ -85,6 +86,7 @@ function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
       me={me}
       draft={draft && { ...draft, categoryId }}
       more={workspaces.data.items.length > 0}
+      back={workspaces.data.items.find((w) => w.slug === workspaces.data.current)?.name ?? workspaces.data.items[0]?.name ?? null}
       categories={pickable}
     />
   )
@@ -106,12 +108,15 @@ function Steps({
   me,
   draft,
   more,
+  back,
   categories,
 }: {
   step: SetupStep
   me: Me
   draft: Draft | null
   more: boolean
+  /** The workspace someone came from to create this one (the done step names it), or null. */
+  back: string | null
   categories: { id: string; name: string; hint: string }[]
 }) {
   const t = useTranslations()
@@ -170,6 +175,7 @@ function Steps({
   const address = useAddressStep(draft?.slug ?? '', step === 'address' && !!draft)
   const hours = useHoursStep(draft?.slug ?? '', step === 'hours' && !!draft, !!draft && stepIndex(reached) >= stepIndex('hours'))
   const rules = useRulesStep(draft?.slug ?? '', step === 'rules' && !!draft)
+  const done = useDoneStep(draft, step === 'done' && !!draft, back)
   const [body, action]: [ReactNode, StepAction] =
     step === 'business'
       ? [
@@ -200,10 +206,12 @@ function Steps({
           ? [hours.body, hours.action]
           : step === 'rules'
             ? [rules.body, rules.action]
-            : [
-                <LaterStep step={step} name={draft?.name ?? ''} />,
-                { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) },
-              ]
+            : step === 'done'
+              ? [done.body, done.action]
+              : [
+                  <LaterStep step={step} name={draft?.name ?? ''} />,
+                  { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) },
+                ]
   const busy = action.busy || saveStep.isPending
 
   /** Continue: the step saved, the draft moved on to the next step (a new draft already starts at the address). */
@@ -251,7 +259,18 @@ function Steps({
       hint={action.ready && !action.valid ? action.hint : undefined}
       primary={
         step === 'done'
-          ? undefined
+          ? {
+              children: (
+                <>
+                  {done.primary.label}
+                  {done.primary.icon}
+                </>
+              ),
+              disabled: !action.ready,
+              loading: busy,
+              loadingLabel: t('setup.saving'),
+              onClick: done.primary.finish,
+            }
           : {
               children: t('setup.continue'),
               // the steps not built yet come with their own pieces of slice 2
