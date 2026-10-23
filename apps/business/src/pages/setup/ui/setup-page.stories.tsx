@@ -6,6 +6,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { WeekdayHours } from '@yeral/contract/settings'
+import type { Menu } from '@yeral/contract/services'
+import type { SetupServices } from '@yeral/contract/setup'
 import type { TeamMember, Workspace } from '@yeral/contract/team'
 import { DEFAULT_RULES } from '@yeral/domain/rules'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
@@ -80,6 +82,21 @@ type Day = WeekdayHours | null
 const rulesSaved: Record<string, unknown>[] = []
 /** The drafts finished (`POST …/setup/finish`), by page address. */
 const finished: string[] = []
+/** What the services step sent, one body per save (the fake api fills it). */
+const servicesSaved: SetupServices[] = []
+
+/** Beauty's starter list as `GET /v1/categories` gives it (a part of the seed's); the other categories have none here. */
+const beautyStarters = [
+  {
+    id: 'hair',
+    name: 'Hair',
+    services: [
+      { id: 'womens-haircut', name: 'Women’s haircut', durationMin: 60, price: { type: 'fixed', amount: 80 } },
+      { id: 'hair-colouring', name: 'Hair colouring', durationMin: 120, price: { type: 'from', amount: 250 } },
+    ],
+  },
+  { id: 'nails', name: 'Nails', services: [{ id: 'manicure', name: 'Manicure', durationMin: 60, price: { type: 'fixed', amount: 60 } }] },
+]
 
 const member = (id: string, name: string, level: TeamMember['level'], hasApp = true): TeamMember => ({
   id,
@@ -137,6 +154,9 @@ const fakeApi =
     let rules = { ...DEFAULT_RULES, lateMinutes: 15 }
     rulesSaved.length = 0
     finished.length = 0
+    // the draft's menu as the services step reads and saves it
+    let menu: Menu = { groups: [] }
+    servicesSaved.length = 0
     // the draft's profile as the address step reads and saves it
     let location = {
       cityId: 'ashgabat',
@@ -187,9 +207,48 @@ const fakeApi =
       // the api doesn't show a draft's team (`not_found`); `team` plays the day it does
       if (/^GET \/w\/[^/]+\/team$/.test(route))
         return team.length ? json({ items: [owner, ...team] }) : json({ error: { code: 'not_found' } }, 404)
+      if (/^GET \/w\/[^/]+\/services$/.test(route)) return json(menu)
+      if (/^PUT \/w\/[^/]+\/setup\/services$/.test(route)) {
+        const sent = body as unknown as SetupServices
+        servicesSaved.push(sent)
+        // the starters' names from the list, a row saved before by its id, the others as written
+        const starters = beautyStarters.flatMap((g) => g.services)
+        const before = menu.groups.flatMap((g) => g.services)
+        menu = {
+          groups: sent.groups.map((g, gi) => {
+            const id = g.id ?? `g${gi}-${servicesSaved.length}`
+            const old = menu.groups.find((x) => x.id === g.id)
+            return {
+              id,
+              name: g.name ?? old?.name ?? { en: beautyStarters.find((x) => x.id === g.starter)?.name ?? '' },
+              services: g.services.map((x, si) => ({
+                id: x.id ?? `s${gi}-${si}-${servicesSaved.length}`,
+                groupId: id,
+                name: x.name ?? before.find((y) => y.id === x.id)?.name ?? { en: starters.find((y) => y.id === x.starter)?.name ?? '' },
+                description: null,
+                durationMin: x.durationMin,
+                priceType: x.priceType,
+                priceAmount: x.priceAmount,
+                bufferMin: null,
+                online: true,
+                staffIds: ['owner'],
+                futureBookings: 0,
+              })),
+            }
+          }),
+        }
+        return json(menu)
+      }
       if (route === 'GET /categories')
         return json({
-          items: LAUNCH_CATEGORIES.map((c) => ({ ...c, icon: 'store', bookingTypes: ['appointment'], specialistWord: '', intro: '' })),
+          items: LAUNCH_CATEGORIES.map((c) => ({
+            ...c,
+            icon: 'store',
+            bookingTypes: ['appointment'],
+            specialistWord: '',
+            intro: '',
+            starterGroups: c.id === 'beauty' ? beautyStarters : [],
+          })),
         })
       if (route === 'POST /setup') {
         if (setup) return json({ error: { code: 'setup_in_progress', details: { slug: setup.slug } } }, 409)
@@ -506,6 +565,77 @@ export const HoursAllClosed: Story = {
     for (const day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
       await userEvent.click(canvas.getByRole('switch', { name: `${day}: open` }))
     await expect(canvas.getByRole('button', { name: 'Continue' })).toHaveAccessibleDescription('At least one day must be open.')
+  },
+}
+
+const atServices: Draft = { ...atHours, step: 'services' }
+
+/**
+ * The services step of a Beauty draft: the starter list in its groups, every row picked; «Clear» a group, rename a
+ * starter, add an own service (its name, then its price, hold Continue); Continue sends the whole menu in one call
+ * (a renamed starter's name, an unchanged one's id only) and the step list says how many.
+ */
+export const Services: Story = {
+  args: { server: fakeApi({ draft: atServices }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Your services' })).toBeVisible()
+    await expect(canvas.getByRole('heading', { level: 2, name: 'Suggested services for Beauty' })).toBeVisible()
+    await expect(canvas.getByText('3 services selected')).toBeVisible()
+    await expect(canvas.getByRole('checkbox', { name: 'Select: Women’s haircut' })).toBeChecked()
+    await expect(canvas.getByRole('textbox', { name: 'Hair colouring: price (from)' })).toHaveValue('250')
+    // Nails' «Clear», the second group's
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Clear' })[1]!)
+    await expect(canvas.getByRole('checkbox', { name: 'Select: Manicure' })).not.toBeChecked()
+    await expect(canvas.getByRole('button', { name: 'Select all' })).toBeVisible()
+    await expect(canvas.getByRole('textbox', { name: 'Service name: Manicure' })).toBeDisabled()
+    const haircut = canvas.getByRole('textbox', { name: 'Service name: Women’s haircut' })
+    await userEvent.clear(haircut)
+    await userEvent.type(haircut, 'Haircut')
+    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Haircut: duration' }), '45')
+    await userEvent.click(canvas.getByRole('button', { name: 'Add service' }))
+    await expect(canvas.getByRole('heading', { level: 3, name: 'New services' })).toBeVisible()
+    const cont = canvas.getByRole('button', { name: 'Continue' })
+    await expect(cont).toHaveAccessibleDescription('Name the new service.')
+    await userEvent.type(canvas.getByRole('textbox', { name: 'Service name: New service' }), 'Henna')
+    await expect(cont).toHaveAccessibleDescription('Add a price to each service.')
+    await userEvent.type(canvas.getByRole('textbox', { name: 'Henna: price' }), '120')
+    await expect(cont).toBeEnabled()
+    await userEvent.click(cont)
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Who do you work with?' })).toBeVisible()
+    await expect(servicesSaved).toEqual([
+      {
+        groups: [
+          {
+            starter: 'hair',
+            services: [
+              { starter: 'womens-haircut', name: { en: 'Haircut' }, durationMin: 45, priceType: 'fixed', priceAmount: 80 },
+              { starter: 'hair-colouring', durationMin: 120, priceType: 'from', priceAmount: 250 },
+            ],
+          },
+          { name: { en: 'New services' }, services: [{ name: { en: 'Henna' }, durationMin: 60, priceType: 'fixed', priceAmount: 120 }] },
+        ],
+      },
+    ])
+    await expect(canvas.getByText('3 services')).toBeVisible()
+    // back at the step: the menu as saved, its rows by id; nothing changed sends nothing
+    await userEvent.click(canvas.getByRole('button', { name: 'Back' }))
+    await expect(await canvas.findByRole('textbox', { name: 'Service name: Haircut' })).toHaveValue('Haircut')
+    await expect(canvas.queryByRole('checkbox', { name: 'Select: Manicure' })).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Who do you work with?' })).toBeVisible()
+    await expect(servicesSaved).toHaveLength(1)
+  },
+}
+
+/** A category without a starter list: the note, and «Add service» to start; Continue waits for one. */
+export const ServicesOwn: Story = {
+  args: { server: fakeApi({ draft: { ...atServices, category: 'Auto', categoryId: 'auto' } }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 2, name: 'Add your services' })).toBeVisible()
+    await expect(canvas.getByText(/There’s no ready list for this category yet/)).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Continue' })).toHaveAccessibleDescription('Pick at least one service.')
+    await userEvent.click(canvas.getByRole('button', { name: 'Add service' }))
+    await expect(canvas.getByRole('combobox', { name: 'New service: duration' })).toHaveValue('60')
   },
 }
 
