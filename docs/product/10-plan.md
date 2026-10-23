@@ -232,7 +232,7 @@ so there is time to test it from Ashgabat, rehearse the move and fix what breaks
 | P1 | pasted the design prompts (rounds 1–3.4, stopped 20.10.2026); now only an occasional small prompt for a critical detail |
 | P2 | nothing required |
 | P3–P4 | reviews the built components in Storybook and each finished slice in the local app; that review replaces the canvas check |
-| P5 | approved in advance (22.10.2026); took `yeral.app` and `www` off the old Worker and added the DNS records for them, `api`, `business` and `cms` (done 22.10.2026, `infra/server/README.md`); deletes the old Worker `yeral-web`; chooses the e-mail records; sets up their admin account (a password and an authenticator app) from the setup link Claude makes once the admin tool is live: only a login and a name are needed, nothing secret goes through the chat |
+| P5 | approved in advance (22.10.2026); took `yeral.app` and `www` off the old Worker and added the DNS records for them, `api`, `business` and `cms` (done 22.10.2026, `infra/server/README.md`); deleted the old Worker `yeral-web` (23.10.2026); turns on Email Routing for `hello@yeral.app` and adds the `_dmarc` record (chosen 23.10.2026); sets up their admin account (a password and an authenticator app) from the setup link Claude makes once the admin tool is live: only a login and a name are needed, nothing secret goes through the chat |
 | P6 | the investment, the lawyer, buying the server, the SMS provider account, an R2 token for the backups and an error-tracking account, the native language check, meeting the first businesses |
 
 ## Risks we carry

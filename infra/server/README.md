@@ -72,25 +72,37 @@ the client site takes it over; live since 2026-10-22 21:18 UTC):
 3. Claude deploys with `PUBLIC=1` (above): Caddy gets the certificates, and Claude checks `https://yeral.app`, the
    `www` redirect and `https://api.yeral.app/v1/health`. Between steps 1 and 3 the apex shows nothing for a few
    minutes.
-4. Then the owner may delete the Worker `yeral-web` (the switch is confirmed); `apps/legacy` and its deploy option
-   left the repo on 23.10.2026.
+4. The owner deleted the Worker `yeral-web` on 23.10.2026; `apps/legacy` and its deploy option left the repo the same
+   day.
 
 The apex serves the coming-soon page in `yeral.caddy` at every path, and `www` redirects to the apex. `business` and
 `cms` answer with a certificate error until their apps join `yeral.caddy`: harmless, nobody is sent there before.
 
-**E-mail records: not added yet** (the owner chooses later, 23.10.2026). `yeral.app` has none today, so anyone can send
-mail in its name. Ýeral sends no e-mail; one of:
+**E-mail: received at `hello@yeral.app`, nothing sent** (the owner's choice, 23.10.2026). Cloudflare Email Routing
+(free) forwards mail for the address to the owner's inbox; Ýeral sends no e-mail. The owner sets it up:
 
-- **Lock it down** (no mail sent or received): DNS → Records, add
+1. yeral.app → Email → Email Routing → Get started.
+2. Custom address `hello`, action "Send to an email", destination the owner's inbox; Create and continue.
+3. Open the verification mail Cloudflare sends there; Verify email address.
+4. Add records and enable: Cloudflare adds its own records; leave them as they are:
 
-  | Type | Name | Content |
-  |---|---|---|
-  | TXT | `@` | `v=spf1 -all` |
-  | TXT | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;` |
-  | MX | `@` | mail server `.` (a single dot), priority 0: the null MX, "no mail received here" (skip it if the dashboard refuses the dot) |
+   | Type | Name | Content |
+   |---|---|---|
+   | MX ×3 | `@` | `route1`, `route2`, `route3.mx.cloudflare.net` |
+   | TXT | `@` | `v=spf1 include:_spf.mx.cloudflare.net ~all` |
+   | TXT | `cf2024-1._domainkey` | the DKIM key |
 
-- **Receive mail at an address** such as `hello@…`, forwarded to the owner's inbox: Email → Email Routing → Get
-  started (it adds its own MX and SPF records), then only the `_dmarc` TXT record above. Sending stays off.
+5. DNS → Records, add one record by hand, so that nobody can send mail in yeral.app's name:
+
+   | Type | Name | Content |
+   |---|---|---|
+   | TXT | `_dmarc` | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;` |
+
+6. Test from another account: a mailbox that sends to itself through a forward may hide the copy.
+
+The catch-all stays off (spam); another address (`support@`) is one more custom address. Replies go out from the
+owner's own address. Sending as `hello@` needs a sending service later; a Gmail "Send mail as" alias through Gmail's own
+servers would fail DMARC and be rejected.
 
 **When the client site is ready** it replaces the coming-soon page in `yeral.caddy`; no DNS change.
 

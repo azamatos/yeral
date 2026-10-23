@@ -37,8 +37,8 @@ Free for Storybook; R2 free up to 10 GB.
 Hyperdrive config `yeral-production` (created 2026-10-18).
 
 **Owner's one-time steps** (when the milestone needs them): the DNS records (`infra/server/README.md`, "DNS records";
-the A records for `@`, `www`, `api`, `business` and `cms` done 2026-10-22, the e-mail records when the owner chooses);
-deleting the Worker `yeral-web`; with the real working MVP (P6), an R2 token for backups and accounts for error
+the A records for `@`, `www`, `api`, `business` and `cms` done 2026-10-22; Email Routing for `hello@` and the `_dmarc`
+record, chosen 2026-10-23); the Worker `yeral-web` (deleted 2026-10-23); with the real working MVP (P6), an R2 token for backups and accounts for error
 tracking and uptime checks (owner, 2026-10-22: not for the demo launch).
 
 ## Local database and API tests (since M2d)
