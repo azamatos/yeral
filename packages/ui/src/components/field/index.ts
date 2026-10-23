@@ -1,1 +1,1 @@
-export { Field, FieldMessage, useField, type FieldProps, type FieldStatus } from './field'
+export { Field, FieldMessage, FieldScope, useField, type FieldProps, type FieldStatus } from './field'
