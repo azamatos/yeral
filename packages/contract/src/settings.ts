@@ -193,6 +193,8 @@ export const weekdayHoursSchema = z.object({
   break: z.object({ start: hoursMinuteSchema, end: hoursMinuteSchema }).nullable(),
 })
 
+export type WeekdayHours = z.infer<typeof weekdayHoursSchema>
+
 /**
  * A holiday or an unusual day (B-40): its name (clients see it if a booking is cancelled for it), the dates, yearly or
  * not, and closed (`hours` null) or other hours.

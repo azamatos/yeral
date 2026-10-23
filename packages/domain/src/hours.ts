@@ -321,8 +321,8 @@ export function openMinutesBetween(b: BusinessHours, from: number, to: number): 
 
 /**
  * Problems with a week of hours, by weekday (0 = Monday): opening isn't a time of day, closing isn't after it or runs
- * past 48:00 or a full day, the break isn't inside the hours, or the part past midnight runs into the next day's
- * opening (Sunday's into Monday's). Empty when valid.
+ * past 48:00 or a full day, or the day has a `dayHoursProblem` (opening and closing at the same time, the part past
+ * midnight running into the next day's opening, Sunday's into Monday's, a break outside the hours). Empty when valid.
  */
 export function weekHoursErrors(week: WeekHours): number[] {
   const bad = new Set<number>()
@@ -330,9 +330,27 @@ export function weekHoursErrors(week: WeekHours): number[] {
     if (!h) return
     if (!Number.isInteger(h.open) || h.open < 0 || h.open >= DAY_MINUTES) bad.add(i)
     if (!Number.isInteger(h.close) || h.close <= h.open || h.close > MAX_DAY_END || h.close - h.open > DAY_MINUTES) bad.add(i)
-    if (h.break && (h.break.start < h.open || h.break.end > h.close || h.break.end <= h.break.start)) bad.add(i)
-    const next = week[(i + 1) % 7]
-    if (next && h.close - DAY_MINUTES > next.open) bad.add(i)
+    if (dayHoursProblem(week, i)) bad.add(i)
   })
   return [...bad].sort((a, b) => a - b)
+}
+
+/**
+ * Why a weekday's hours can't be saved, as the hours editor says it under the day (B-Onboarding step 4, B-Settings
+ * hours) and `weekHoursErrors` refuses it: opening and closing at the same time (a full day from a time other than
+ * midnight; 00:00–24:00 is fine), the part past midnight running into the next open day's opening (closing as it opens
+ * is fine), a break that ends before it starts, or one outside the day's hours. The first that applies; null when the
+ * day is fine or closed.
+ */
+export type DayHoursProblem = 'same-time' | 'into-next-day' | 'break-order' | 'break-outside'
+
+export function dayHoursProblem(week: WeekHours, day: number): DayHoursProblem | null {
+  const h = week[day]
+  if (!h) return null
+  if (h.close - h.open === DAY_MINUTES && h.open > 0) return 'same-time'
+  const next = week[(day + 1) % 7]
+  if (next && h.close - DAY_MINUTES > next.open) return 'into-next-day'
+  if (h.break && h.break.end <= h.break.start) return 'break-order'
+  if (h.break && (h.break.start < h.open || h.break.end > h.close)) return 'break-outside'
+  return null
 }

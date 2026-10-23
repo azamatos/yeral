@@ -4,6 +4,7 @@ import { appointmentSlots, nextFreeSlot, type AppointmentContext, type Appointme
 import {
   businessDay,
   currentBusinessDate,
+  dayHoursProblem,
   openState,
   weekHoursErrors,
   yearlyNightOverlaps,
@@ -75,6 +76,37 @@ describe('hours past midnight', () => {
     expect(
       weekHoursErrors([h(1200, 1100), h(600, 2900), h(0, 1500), { ...h(600, 1200), break: { start: 500, end: 700 } }, null, null, null]),
     ).toEqual([0, 1, 2, 3])
+    // opening and closing at the same time: a full day only from midnight
+    expect(weekHoursErrors([h(540, 1980), h(0, 1440), null, null, null, null, null])).toEqual([0])
+  })
+})
+
+describe('what the hours editor says under a day', () => {
+  const week = (...days: WeekHours): WeekHours => [...days, ...Array<null>(7 - days.length).fill(null)]
+
+  it('a fine day, a closed one and 00:00–24:00 say nothing', () => {
+    expect(dayHoursProblem(NIGHT, 0)).toBeNull()
+    expect(dayHoursProblem(NIGHT, 6)).toBeNull()
+    expect(dayHoursProblem(week(h(0, 1440)), 0)).toBeNull()
+  })
+
+  it('opening and closing at the same time is a full day from 09:00, refused', () => {
+    expect(dayHoursProblem(week(h(540, 1980)), 0)).toBe('same-time')
+  })
+
+  it('the part past midnight may end as the next day opens, not after (Sunday into Monday too)', () => {
+    expect(dayHoursProblem(week(h(1080, 1980), h(540, 1200)), 0)).toBeNull()
+    expect(dayHoursProblem(week(h(600, 2010), h(540, 1200)), 0)).toBe('into-next-day')
+    expect(dayHoursProblem([h(540, 1200), null, null, null, null, null, h(1080, 2040)], 6)).toBe('into-next-day')
+    // the next day closed: nothing to run into
+    expect(dayHoursProblem(week(h(1080, 2040)), 0)).toBeNull()
+  })
+
+  it('a break ends after it starts, inside the hours (past midnight too)', () => {
+    expect(dayHoursProblem(week({ ...h(540, 1200), break: { start: 840, end: 780 } }), 0)).toBe('break-order')
+    expect(dayHoursProblem(week({ ...h(540, 1200), break: { start: 480, end: 600 } }), 0)).toBe('break-outside')
+    expect(dayHoursProblem(week({ ...h(1080, 1560), break: { start: 1500, end: 1530 } }), 0)).toBeNull()
+    expect(dayHoursProblem(week({ ...h(1080, 1560), break: { start: 1500, end: 1620 } }), 0)).toBe('break-outside')
   })
 })
 
