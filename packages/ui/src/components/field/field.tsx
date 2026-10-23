@@ -20,6 +20,9 @@ export function useField(): FieldState | null {
   return useContext(FieldContext)
 }
 
+/** Gives the controls inside the same wiring as <Field> does, for a label drawn another way (SettingsRow). */
+export const FieldScope = FieldContext.Provider
+
 const messageIcon = { error: CircleAlert, warning: TriangleAlert, success: CircleCheck }
 const messageTone = {
   error: 'text-danger-ink',

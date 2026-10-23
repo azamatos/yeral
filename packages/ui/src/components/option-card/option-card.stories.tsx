@@ -89,7 +89,8 @@ export const Large: Story = {
   play: async ({ canvas }) => {
     const manual = canvas.getByRole('radio', { name: /I confirm/ })
     await expect(manual).toHaveAttribute('aria-checked', 'true')
-    await expect(manual).toHaveAccessibleName(/Recommended/)
+    await expect(manual).toHaveAccessibleName('I confirm Recommended')
+    await expect(manual).toHaveAccessibleDescription(/Every new booking arrives as a request Client sees Pending/)
     await userEvent.click(canvas.getByRole('radio', { name: /Instant confirmation/ }))
     await expect(canvas.getByRole('radio', { name: /Instant confirmation/ })).toHaveAttribute('aria-checked', 'true')
   },
