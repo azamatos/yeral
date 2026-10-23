@@ -253,9 +253,13 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     const W = `/v1/w/${slug}`
     const put = (members: unknown[]) => owner.req(`${W}/setup/team`, { method: 'PUT', body: { members } })
     const [draft] = await db.select().from(businesses).where(eq(businesses.slug, slug))
+    const [me] = await db
+      .select()
+      .from(staff)
+      .where(and(eq(staff.businessId, draft!.id), eq(staff.level, 'owner')))
     const group = await owner.req(`${W}/services/groups`, { body: { name: { en: 'Hair' } } })
     const haircut = await owner.req(`${W}/services`, {
-      body: { groupId: group.json.id, name: { en: 'Haircut' }, durationMin: 30, priceType: 'fixed', priceAmount: 40 },
+      body: { groupId: group.json.id, name: { en: 'Haircut' }, durationMin: 30, priceType: 'fixed', priceAmount: 40, staffIds: [me!.id] },
     })
     expect(haircut.status).toBe(201)
     // a mobile number for everyone, with the app or not
