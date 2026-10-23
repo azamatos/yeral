@@ -20,10 +20,11 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** A price with its unit inside: the figures align right, and the field reads «Price, TMT». */
+/** A price with its unit inside: the figures align right, and the unit is the field's description («Price, TMT»). */
 export const Suffix: Story = {
   play: async ({ canvas }) => {
-    const input = canvas.getByRole('textbox', { name: 'Price TMT' })
+    const input = canvas.getByRole('textbox', { name: 'Price' })
+    await expect(input).toHaveAccessibleDescription('TMT')
     await expect(input).toHaveValue('250')
     await expect(input).toHaveStyle({ textAlign: 'right' })
     await expect(input.offsetHeight).toBe(44)
@@ -37,7 +38,17 @@ export const Suffix: Story = {
 export const SuffixInARow: Story = {
   render: (args) => <InputGroup {...args} aria-label="Women’s haircut: price" className="w-40" />,
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('textbox', { name: 'Women’s haircut: price TMT' })).toBeVisible()
+    await expect(canvas.getByRole('textbox', { name: 'Women’s haircut: price' })).toHaveAccessibleDescription('TMT')
+  },
+}
+
+/** A longer unit takes its own room: the figures stop before it (48 here). */
+export const LongUnit: Story = {
+  args: { suffix: 'TMT / h', size: 'l', defaultValue: '1250' },
+  play: async ({ canvas }) => {
+    const input = canvas.getByRole('textbox', { name: 'Price' })
+    await expect(input.offsetHeight).toBe(48)
+    await expect(parseFloat(getComputedStyle(input).paddingRight)).toBeGreaterThan(56)
   },
 }
 
@@ -70,11 +81,27 @@ export const Prefix: Story = {
   },
 }
 
-/** A row that's switched off: the field waits. */
-export const Disabled: Story = {
-  args: { disabled: true, defaultValue: '40' },
+/** A prefix and a unit together: the field fills the room between them. */
+export const PrefixAndSuffix: Story = {
+  args: { prefix: '≈', className: 'w-60' },
+  render: (args) => (
+    <Field label="Price">
+      <InputGroup {...args} />
+    </Field>
+  ),
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('textbox', { name: 'Price TMT' })).toBeDisabled()
+    const input = canvas.getByRole('textbox', { name: 'Price' })
+    await expect(input.offsetWidth).toBeGreaterThan(150)
+    await expect(input).toHaveAccessibleDescription('TMT')
+  },
+}
+
+/** A row that's switched off: the field and its prefix box wait. */
+export const Disabled: Story = {
+  args: { disabled: true, defaultValue: '40', prefix: '≈' },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('textbox', { name: 'Price' })).toBeDisabled()
+    await expect(canvas.getByText('≈')).toHaveAttribute('data-disabled')
   },
 }
 
@@ -86,6 +113,6 @@ export const Invalid: Story = {
     </Field>
   ),
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('textbox', { name: 'Price TMT' })).toHaveAttribute('aria-invalid', 'true')
+    await expect(canvas.getByRole('textbox', { name: 'Price' })).toHaveAttribute('aria-invalid', 'true')
   },
 }

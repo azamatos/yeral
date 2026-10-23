@@ -3,6 +3,7 @@ import type { ComponentProps } from 'react'
 import { cn } from '../../lib/cn'
 import { useField } from '../field'
 import { inputClass, useControlProps } from '../input'
+import { addonClass } from '../input-group'
 
 type Common = {
   /** The market's country code, shown in its own box: «+993» (`COUNTRY_PREFIX` in @yeral/domain/phone). */
@@ -39,7 +40,7 @@ type MaskedProps = Common & {
 
 export type PhoneInputProps = EditableProps | MaskedProps
 
-const prefixBox = 'inline-flex flex-none items-center rounded-input border border-n-300 bg-n-50 px-3 font-medium text-n-900'
+const prefixBox = addonClass
 const heights = { 48: 'h-12 text-body', 44: 'h-11 text-small' }
 
 /**
