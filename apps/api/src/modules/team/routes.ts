@@ -333,7 +333,8 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     return c.json(card, 200)
   })
   .openapi(teamRoute, async (c) => {
-    const { business, actor, user } = await requireMember(c, c.req.valid('param').slug)
+    // a draft's too: the wizard's team step reopens with it, and the rules step asks who answers requests
+    const { business, actor, user } = await requireMember(c, c.req.valid('param').slug, { draft: true })
     if (!can(actor, 'team')) throw new ApiError('forbidden')
     return c.json({ items: await members(c.var.deps, business.id, user.lang, c.var.deps.now()) }, 200)
   })

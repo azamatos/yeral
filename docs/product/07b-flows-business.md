@@ -223,7 +223,7 @@ flowchart TD
 
 > Open question Q-201: setup for table and class businesses.
 
-**Status** — Design: drawn (B-Onboarding · `step`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); hours and the team through their settings endpoints (invites from the final step); the services in one call, `PUT /v1/w/{slug}/setup/services` (the picked starters and the owner's own, the whole menu at once, 23.10.2026).
+**Status** — Design: drawn (B-Onboarding · `step`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); hours through its settings endpoint; the team in one call, `PUT /v1/w/{slug}/setup/team` (the people besides the owner, the whole team at once; the finish sends the invites, 23.10.2026); the services in one call, `PUT /v1/w/{slug}/setup/services` (the picked starters and the owner's own, the whole menu at once, 23.10.2026).
 
 ### B-05 · Choose how bookings arrive
 

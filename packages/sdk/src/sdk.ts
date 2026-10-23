@@ -59,7 +59,7 @@ import {
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
 import type { reviewReplyInputSchema, reviewReportInputSchema, teamReviewsQuerySchema } from '@yeral/contract/reviews'
-import type { setupServicesSchema, setupStartSchema, setupStepInputSchema } from '@yeral/contract/setup'
+import type { setupServicesSchema, setupStartSchema, setupStepInputSchema, setupTeamSchema } from '@yeral/contract/setup'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
 import type {
   addressSearchQuerySchema,
@@ -1077,11 +1077,22 @@ export function createSdk(client: Client, queryClient: QueryClient) {
           queryClient.setQueryData(keys.menu(slug), menu)
         },
       }),
+    /** Step 6: the draft's team besides its owner in one go, replacing the step's last save (invites go at the finish). */
+    team: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof setupTeamSchema>) => call(w.setup.team.$put({ param: { slug }, json })),
+        // the team comes back whole; the menu's doers may have changed with it
+        onSuccess: (team) => {
+          queryClient.setQueryData(keys.team(slug), team)
+          return invalidate(keys.menu(slug))
+        },
+      }),
     /** "Senenama geç": into the switcher and Ýeral's review; `setup_incomplete` names what's missing. */
     finish: (slug: string) =>
       mutationOptions({
         mutationFn: () => call(w.setup.finish.$post({ param: { slug } })),
-        onSuccess: () => invalidate(keys.setup(), keys.workspaces(), keys.me()),
+        // the finish sends the team step's invites
+        onSuccess: () => invalidate(keys.setup(), keys.workspaces(), keys.me(), keys.team(slug)),
       }),
   }
 

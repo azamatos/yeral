@@ -6,13 +6,14 @@
  */
 import type { SetupIncompleteDetails } from '@yeral/contract/errors'
 import type { menuSchema } from '@yeral/contract/services'
-import type { mySetupSchema, SetupServices, setupStartSchema } from '@yeral/contract/setup'
+import type { mySetupSchema, SetupServices, setupStartSchema, setupTeamSchema } from '@yeral/contract/setup'
+import type { TeamMember } from '@yeral/contract/team'
 import { MARKET } from '@yeral/domain/market'
-import type { Localized } from '@yeral/domain/model'
+import type { Locale, Localized } from '@yeral/domain/model'
 import type { Actor } from '@yeral/domain/permissions'
 import { serviceErrors } from '@yeral/domain/services'
 import { cutAtWord, DEMO_SLUG, SLUG_MAX, slugFrom, type SetupNeed, type SetupStep } from '@yeral/domain/setup'
-import { and, asc, eq, isNotNull, like, ne, or } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNotNull, like, ne, or } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
 import { bookingRules, businesses, categories, cities, services, staff, users } from '../../db/schema'
@@ -23,11 +24,12 @@ import { pgCode } from '../bookings/repo'
 import { logoOf, text } from '../catalog/map'
 import { accountName } from '../me/me'
 import { setMenu, type PlannedGroup } from '../menu/service'
-import { teamChanged } from '../team/service'
+import { issueInvite, members, setServices, teamChanged } from '../team/service'
 
 type Start = z.infer<typeof setupStartSchema>
 type MySetup = z.infer<typeof mySetupSchema>
 type Menu = z.infer<typeof menuSchema>
+type SetupTeam = z.output<typeof setupTeamSchema>
 
 /** The person's draft: a business they own still being set up, with what the sign-in's card shows of it. */
 async function draftOf(db: Queryable, userId: string) {
@@ -103,7 +105,7 @@ async function freeSlug(db: Queryable, name: string): Promise<string> {
 /**
  * Step 2 (B-03): the draft, with the name and category, the market's main city's centre until the address step puts
  * it on the map, the owner's number as its phone, every day closed until the hours step, the booking rules' defaults;
- * the person its owner, on the team and bookable (the team step may change it).
+ * the person its owner, on the team and bookable (Settings → Team changes it; the team step adds the others).
  */
 export async function startSetup(deps: Deps, user: User, input: Start): Promise<{ slug: string }> {
   const { db } = deps
@@ -253,6 +255,79 @@ export async function setupServices(
 }
 
 /**
+ * Step 6 (B-04): the draft's team besides its owner as the step leaves it, in one transaction. Someone already saved
+ * keeps their row (by phone) and, at the same level, their services; anyone not sent goes (a draft's people have no
+ * bookings, invites or account yet). Someone with the app waits as `invited` until the finish sends the invites; a
+ * specialist without it is active at once. A new specialist does every service of the menu, as a new service is done
+ * by everyone who takes bookings (step 5), and takes bookings once the menu has a service; an administrator doesn't.
+ */
+export async function setupTeam(
+  deps: Deps,
+  business: { id: string; setupStep: SetupStep | null },
+  actor: Actor,
+  input: SetupTeam,
+  lang: Locale,
+): Promise<TeamMember[]> {
+  assertDraft(business, actor)
+  await deps.db.transaction(async (tx) => {
+    const [b] = await tx
+      .select({ setupStep: businesses.setupStep })
+      .from(businesses)
+      .where(eq(businesses.id, business.id))
+      .for('no key update')
+    if (!b?.setupStep) throw new ApiError('invalid_status')
+    const team = await tx.select().from(staff).where(eq(staff.businessId, business.id))
+    const owner = team.find((r) => r.level === 'owner')
+
+    const issues: Issue[] = []
+    const seen = new Set<string>()
+    input.members.forEach((m, i) => {
+      // an administrator always signs in
+      if (m.level === 'admin' && !m.hasApp) issues.push({ path: ['members', i, 'hasApp'], code: 'invalid' })
+      if (seen.has(m.phone) || m.phone === owner?.phone) issues.push({ path: ['members', i, 'phone'], code: 'taken' })
+      seen.add(m.phone)
+    })
+    if (issues.length) throw invalid(...issues)
+
+    const others = team.filter((r) => r.level !== 'owner')
+    const kept = new Set(input.members.map((m) => m.phone))
+    const gone = others.filter((r) => !r.phone || !kept.has(r.phone)).map((r) => r.id)
+    if (gone.length) await tx.delete(staff).where(and(eq(staff.businessId, business.id), inArray(staff.id, gone)))
+    const byPhone = new Map(others.flatMap((r) => (r.phone ? [[r.phone, r] as const] : [])))
+    const menu = await tx
+      .select({ id: services.id })
+      .from(services)
+      .where(and(eq(services.businessId, business.id), eq(services.archived, false)))
+    for (const [i, m] of input.members.entries()) {
+      const specialist = m.level === 'specialist'
+      const found = byPhone.get(m.phone)
+      // a kept row at the same level keeps what it does (Settings may have narrowed it); a new or changed one is set
+      const keep = found?.level === m.level
+      const fields = {
+        // the step's order, after the owner
+        sort: i + 1,
+        name: m.name,
+        phone: m.phone,
+        level: m.level,
+        hasApp: m.hasApp,
+        status: m.hasApp ? ('invited' as const) : ('active' as const),
+        bookable: keep ? found.bookable : specialist && menu.length > 0,
+      }
+      const [row] = found
+        ? await tx.update(staff).set(fields).where(eq(staff.id, found.id)).returning({ id: staff.id })
+        : await tx
+            .insert(staff)
+            .values({ businessId: business.id, ...fields })
+            .returning({ id: staff.id })
+      if (!row) throw new Error('staff write failed')
+      if (!keep) await setServices(tx, business.id, row.id, specialist ? menu.map((s) => s.id) : [])
+    }
+    await teamChanged(tx, business.id)
+  })
+  return members(deps, business.id, lang, deps.now())
+}
+
+/**
  * "Senenama geç" (B-06): with an address, an open day and a service (`setup_incomplete` names what's missing), the
  * draft becomes a workspace in the switcher, and its page goes to Ýeral's review (it opens to clients once verified).
  */
@@ -276,10 +351,22 @@ export async function finishSetup(deps: Deps, business: { id: string; setupStep:
     ]
     const details: SetupIncompleteDetails = { missing }
     if (missing.length) throw new ApiError('setup_incomplete', details)
+    const now = deps.now()
     await tx
       .update(businesses)
-      .set({ setupStep: null, sentForReviewAt: new Date(deps.now()) })
+      .set({ setupStep: null, sentForReviewAt: new Date(now) })
       .where(eq(businesses.id, business.id))
+    // the team step's people with the app get their invites now (B-04: "invites go out from the final step"), each
+    // seen at sign-in with that number for 7 days
+    const invitees = await tx
+      .select({ id: staff.id, phone: staff.phone })
+      .from(staff)
+      .where(and(eq(staff.businessId, business.id), eq(staff.status, 'invited'), eq(staff.hasApp, true)))
+    for (const row of invitees) {
+      if (!row.phone) continue
+      await issueInvite(tx, now, { businessId: business.id, staffId: row.id, phone: row.phone, invitedBy: user.id })
+      await teamChanged(tx, business.id, { phone: row.phone })
+    }
     // the switcher shows it now
     await teamChanged(tx, business.id, { userId: user.id })
   })
