@@ -244,8 +244,7 @@
     "saving": "Saving",
     "phone": {
       "title": "Welcome to {app}",
-      "hintPhone": "Enter your number and get a code.",
-      "hintCode": "Enter the code.",
+      "leadSms": "Enter your phone number — we’ll send you a 4-digit code. No password needed.",
       "hintName": "Enter your first name.",
       "nameHint": "For your {brand} account — your team will see you by this name. You’ll be the owner of the business.",
       "login": "Already have an account? <login>Log in</login>"

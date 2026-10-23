@@ -165,7 +165,7 @@ export function StepHeader({ step, title, lead, titleId }: { step: WizardStep; t
       <h1 id={titleId} className="m-0 text-h2 max-sm:text-[26px] max-sm:leading-8">
         {title}
       </h1>
-      <p className="m-0 max-w-140 text-body text-n-600">{lead}</p>
+      <p className="m-0 max-w-140 text-body text-n-600 [&_b]:font-semibold [&_b]:text-n-900">{lead}</p>
     </header>
   )
 }

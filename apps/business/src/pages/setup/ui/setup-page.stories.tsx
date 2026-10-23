@@ -451,9 +451,8 @@ export const SignedOut: Story = {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Welcome to Ýeral Business' })).toBeVisible()
     await expect(canvas.getByText('Step 1 of 8')).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login')
-    const go = canvas.getByRole('button', { name: 'Continue' })
-    await expect(go).toBeDisabled()
-    await expect(go).toHaveAccessibleDescription('Enter your number and get a code.')
+    // the sign-in's own buttons lead: no Continue (or Continue later) before the number is verified
+    await expect(canvas.queryByRole('button', { name: 'Continue' })).toBeNull()
     await expect(canvas.queryByRole('button', { name: /Continue later/ })).toBeNull()
 
     // the first launch shows the code on the screen: the number step says it's a demo (book Q-036)
@@ -462,7 +461,6 @@ export const SignedOut: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Send code' }))
     const code = await canvas.findByLabelText('Code', {}, { timeout: 3000 })
     await expect(canvas.getByRole('heading', { level: 1, name: 'Enter the code' })).toBeVisible()
-    await expect(canvas.getByRole('button', { name: 'Continue' })).toHaveAccessibleDescription('Enter the code.')
     await waitFor(() => expect(code).toHaveFocus())
     await userEvent.keyboard('4821')
 
@@ -470,28 +468,34 @@ export const SignedOut: Story = {
     const first = canvas.getByRole('textbox', { name: 'First name' })
     await waitFor(() => expect(first).toHaveFocus())
     await expect(canvas.getByRole('button', { name: 'Continue' })).toHaveAccessibleDescription('Enter your first name.')
-    await userEvent.type(first, 'Maýsa')
-    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    // Enter in the name saves, as Continue does
+    await userEvent.type(first, 'Maýsa{Enter}')
     await expect(await canvas.findByRole('heading', { level: 1, name: 'About your business' })).toBeVisible()
   },
 }
 
-/** Any other step signed out opens step 1. */
+/** Any other step signed out, or an unknown one, opens step 1. */
 export const SignedOutLater: Story = {
-  args: { server: fakeApi({ signedIn: false }), path: '/setup/hours' },
+  args: { server: fakeApi({ signedIn: false }), path: '/setup/somewhere' },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Welcome to Ýeral Business' })).toBeVisible()
   },
 }
 
-/** A new account without its name (signed in elsewhere): its name first; «Change number» signs out to the number. */
+/**
+ * A new account without its name (signed in elsewhere): its name first; «Change number» signs out to the number, and
+ * an unknown address signed out goes to step 1.
+ */
 export const NoName: Story = {
   args: { server: fakeApi({ signedIn: 'noName' }) },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'What’s your name?' })).toBeVisible()
     await expect(canvas.getByText('+993 65 10 20 30')).toBeVisible()
+    await userEvent.type(canvas.getByRole('textbox', { name: 'First name' }), 'Maýsa')
     await userEvent.click(canvas.getByRole('button', { name: 'Change number' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Welcome to Ýeral Business' })).toBeVisible()
+    // the number takes the focus (B-Login focusStep)
+    await waitFor(() => expect(canvas.getByLabelText('Phone number')).toHaveFocus())
   },
 }
 

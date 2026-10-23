@@ -67,7 +67,7 @@ export function LoginPage() {
           signIn.refuseCode(error)
         }}
         onFailed={failed}
-        contact={<ContactYeralLink />}
+        contact={ContactYeralLink}
       />
     )
   if (me.isPending) return <WaitStep />

@@ -4,6 +4,7 @@ import type { Me } from '@yeral/contract/account'
 import type { Setup } from '@yeral/contract/setup'
 import { formatPhone } from '@yeral/domain/phone'
 import type { SetupStep } from '@yeral/domain/setup'
+import { useCodeOnScreen } from '@yeral/features/auth-by-phone'
 import { isApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Spinner } from '@yeral/ui/spinner'
@@ -35,6 +36,8 @@ export function SetupPage() {
   const sdk = useSdk()
   const { step = '' } = useParams({ strict: false })
   const me = useQuery(sdk.me.get())
+  // asked with the account, so step 1's demo note is there when the number opens
+  useCodeOnScreen()
   usePageTitle(t('setup.title'))
   // an unknown step opens where the person is in the wizard
   const asked = isWizardStep(step) ? step : 'phone'
@@ -42,8 +45,7 @@ export function SetupPage() {
   // a failed refetch keeps the person on screen; only not knowing who is signed in at all is a failure
   if (me.isError && me.data === undefined) throw me.error
   // signed out, or the new account's name not given yet: step 1 first, wherever the address pointed
-  if (!me.data?.firstName)
-    return asked === 'phone' ? <PhoneStep me={me.data ?? null} /> : <Navigate to="/setup/$step" params={{ step: 'phone' }} replace />
+  if (!me.data?.firstName) return step === 'phone' ? <PhoneStep /> : <Navigate to="/setup/$step" params={{ step: 'phone' }} replace />
   return <Wizard asked={asked} me={me.data} />
 }
 
