@@ -4,6 +4,7 @@ import type { Me } from '@yeral/contract/account'
 import type { Setup } from '@yeral/contract/setup'
 import { formatPhone } from '@yeral/domain/phone'
 import type { SetupStep } from '@yeral/domain/setup'
+import { useCodeOnScreen } from '@yeral/features/auth-by-phone'
 import { isApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Spinner } from '@yeral/ui/spinner'
@@ -14,13 +15,13 @@ import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { usePageTitle } from '@/shared/lib'
-import { AuthPage } from '@/shared/ui'
 import { isWizardStep, nextStep, stepFor, stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
 import type { Category } from '@yeral/contract/catalog'
 import { useAddressStep } from './address-step'
 import { BUSINESS_NAME_MAX, BusinessStep } from './business-step'
 import { useDoneStep, type AfterSetup } from './done-step'
 import { useHoursStep } from './hours-step'
+import { PhoneStep } from './phone-step'
 import { useRulesStep } from './rules-step'
 import { useServicesStep } from './services-step'
 import { SetupFrame, StepHeader, useStepName, type StepAction } from './setup-frame'
@@ -28,20 +29,23 @@ import { SetupFrame, StepHeader, useStepName, type StepAction } from './setup-fr
 /**
  * `/setup/{step}` — the setup wizard (B-Onboarding, design §27.2, book B-02–B-06, Q-200). Someone signed in with a
  * name goes through the steps after the phone; the draft the business step makes reopens at its saved step. Signed
- * out, the wizard starts at the sign-in: the phone step inside the wizard comes with its own piece of slice 2.
+ * out (or without a name), the wizard starts at step 1, the phone.
  */
 export function SetupPage() {
   const t = useTranslations()
   const sdk = useSdk()
   const { step = '' } = useParams({ strict: false })
   const me = useQuery(sdk.me.get())
+  // asked with the account, so step 1's demo note is there when the number opens
+  useCodeOnScreen()
   usePageTitle(t('setup.title'))
   // an unknown step opens where the person is in the wizard
   const asked = isWizardStep(step) ? step : 'phone'
   if (me.isPending) return <Waiting />
   // a failed refetch keeps the person on screen; only not knowing who is signed in at all is a failure
   if (me.isError && me.data === undefined) throw me.error
-  if (!me.data?.firstName) return <SignedOut />
+  // signed out, or the new account's name not given yet: step 1 first, wherever the address pointed
+  if (!me.data?.firstName) return step === 'phone' ? <PhoneStep /> : <Navigate to="/setup/$step" params={{ step: 'phone' }} replace />
   return <Wizard asked={asked} me={me.data} />
 }
 
@@ -50,18 +54,6 @@ function Waiting() {
     <div className="flex min-h-dvh items-center justify-center">
       <Spinner />
     </div>
-  )
-}
-
-/** Not signed in (or the sign-up's name step isn't done): the sign-in comes first. */
-function SignedOut() {
-  const t = useTranslations('setup')
-  return (
-    <AuthPage focusKey="setup" title={t('title')} lead={t('signedOut.lead')}>
-      <Button asChild variant="primary" size="l" className="w-full">
-        <Link to="/login">{t('signedOut.login')}</Link>
-      </Button>
-    </AuthPage>
   )
 }
 
