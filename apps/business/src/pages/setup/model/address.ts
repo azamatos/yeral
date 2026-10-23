@@ -4,8 +4,10 @@
  * and the entrance note; what it sends to the profile (`PATCH /w/{slug}/settings/profile`).
  */
 
-/** The address line's longest (design §28.5; the contract's street line). */
+/** What can be typed in the address field (design §28.5; the contract's street line). */
 export const ADDRESS_MAX = 120
+/** A picked address's line (the contract's `address`): a search result may be longer than what can be typed. */
+export const LINE_MAX = 200
 /** «Where is the entrance?» (design §28.5). */
 export const ENTRANCE_MAX = 200
 /** «Floor, room» (the contract). */
@@ -50,7 +52,10 @@ export function formFrom(profile: Profile): AddressForm {
 
 /** Why Continue waits, or null when the step can be saved; the counters count what's kept, without the spaces around it. */
 export function addressProblem(form: AddressForm): 'long' | 'entrance' | 'floor' | 'pick' | null {
-  if (form.query.trim().length > ADDRESS_MAX) return 'long'
+  const long = form.picked
+    ? form.picked.line.length > LINE_MAX || form.picked.street.length > ADDRESS_MAX
+    : form.query.trim().length > ADDRESS_MAX
+  if (long) return 'long'
   if (form.entrance.trim().length > ENTRANCE_MAX) return 'entrance'
   if (form.floor.trim().length > FLOOR_MAX) return 'floor'
   if (!form.picked) return 'pick'

@@ -36,10 +36,18 @@ describe('the address step', () => {
   })
 
   it('waits for a shorter address or note before anything else', () => {
-    expect(addressProblem({ ...picked, query: 'x'.repeat(121) })).toBe('long')
+    expect(addressProblem({ ...picked, picked: null, query: 'x'.repeat(121) })).toBe('long')
+    // typed by hand, the line is its street
+    expect(addressProblem({ ...picked, picked: { line: 'x'.repeat(121), street: 'x'.repeat(121) } })).toBe('long')
     expect(addressProblem({ ...picked, entrance: 'x'.repeat(201) })).toBe('entrance')
     expect(addressProblem({ ...picked, floor: 'x'.repeat(41) })).toBe('floor')
     expect(addressProblem({ ...picked, entrance: ` ${'x'.repeat(200)} ` })).toBeNull()
+  })
+
+  it('takes a picked search result longer than what can be typed, up to its line and street limits', () => {
+    const line = `${'x'.repeat(130)}`
+    expect(addressProblem({ ...picked, query: line, picked: { line, street: 'x'.repeat(110) } })).toBeNull()
+    expect(addressProblem({ ...picked, picked: { line: 'x'.repeat(201), street: 'x' } })).toBe('long')
   })
 
   it('sends the picked line, its street and the pin; empty notes as none', () => {

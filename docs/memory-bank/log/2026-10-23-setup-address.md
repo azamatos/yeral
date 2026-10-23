@@ -14,9 +14,11 @@
   `address_search_unavailable` → the typed street, pinned by hand), the pin, «I work from home» (the circle, the note),
   the floor and the entrance note with counters; Continue saves through `settings.updateProfile` (`location`, `floor`,
   `entranceNote`, `hideExactAddress`), moves the draft to `hours` and opens it. `model/address.ts` holds the form's
-  rules (unit-tested). The wizard's steps now hand the frame a `StepAction` (valid, hint, busy, onContinue, keep)
-  through a render function (`StepFrame`): Back, the step list and «Continue later» call `keep` first, so a step built
-  next only writes its component and its action. `useDebounced` in the business app's `shared/lib`.
+  rules (unit-tested). Each step now gives the wizard its content and a `StepAction` (valid, hint, busy, ready, save,
+  reopens; `setup-frame.tsx`); the address step is a hook (`useAddressStep(slug, on)`), so `Steps` renders one
+  `SetupFrame` around every step (no remount between steps). Continue, Back, the step list and «Continue later» call
+  `save` first; Continue then moves the draft to the next step with the one `setup.step` mutation. A step built next
+  adds a hook like it and one branch in `Steps`. `useDebounced` in the business app's `shared/lib`.
 - Choices made: chapter 9, 23.10.2026, B-03 (how).
 - Next: the hours step (TimeRangeField, #158), then services, team, rules, done; Settings → Business profile reuses
   MapFrame and the address search (the form's rules can move to a feature then).

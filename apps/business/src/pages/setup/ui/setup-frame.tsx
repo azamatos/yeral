@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import type { SetupStep } from '@yeral/domain/setup'
 import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
 import { Logo } from '@yeral/ui/brand'
 import { ProgressBar } from '@yeral/ui/progress-bar'
@@ -14,18 +15,18 @@ export type StepAction = {
   valid: boolean
   /** Why Continue waits («Pick the address from the list.»): the disabled button's description. */
   hint?: string
+  /** Saving: Continue spins, the step list and «Continue later» wait. */
   busy: boolean
-  /** Continue; none while the step isn't built yet (Continue stays disabled). */
-  onContinue?: () => void
+  /** False while the step can't go on yet (loading, or not built): Continue stays disabled. */
+  ready: boolean
   /**
-   * Saves what's typed when it's valid and changed, before Back, the step list or «Continue later» leave the step;
-   * false when it failed (the person heard why) and the step stays.
+   * Saves what's typed when it's valid and changed: before Continue moves the draft on, and before Back, the step list
+   * or «Continue later» leave the step. False when it failed (the person heard why) and the step stays.
    */
-  keep: () => Promise<boolean>
+  save: () => Promise<boolean>
+  /** Where «Continue later» reopens when the save made the draft (the business step's first save: the address step). */
+  reopens?: SetupStep
 }
-
-/** The frame around a step's content, with the footer and the step list working on the step's action. */
-export type StepFrame = (body: ReactNode, action: StepAction) => ReactNode
 
 /** The step's name in the list: the phone step is «Account» for someone who already has a business. */
 export function useStepName() {

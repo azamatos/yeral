@@ -1,5 +1,4 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { SetupStep } from '@yeral/domain/setup'
 import { Callout } from '@yeral/ui/callout'
 import { Combobox, ComboboxInput, ComboboxList, type ComboboxOption } from '@yeral/ui/combobox'
 import { Field } from '@yeral/ui/field'
@@ -10,7 +9,7 @@ import { Spinner } from '@yeral/ui/spinner'
 import { Switch } from '@yeral/ui/switch'
 import { toast } from '@yeral/ui/toast'
 import { Info, MapPin, Move } from 'lucide-react'
-import { useId, useState } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
@@ -26,140 +25,113 @@ import {
   type AddressForm,
   type LatLng,
 } from '../model/address'
-import { stepIndex } from '../model/steps'
-import { StepHeader, type StepFrame } from './setup-frame'
+import { StepHeader, type StepAction } from './setup-frame'
 
 /** The search asks after this pause in the typing, from 3 letters (the api's least). */
 const SEARCH_PAUSE_MS = 300
 const SEARCH_MIN = 3
 
-type City = { id: string; name: string; lat: number; lng: number }
-
-/**
- * Step 3, «Where will clients find you?» (B-Onboarding `isAddr`, book B-04): the city, the address searched and picked
- * from the list, the pin to fine-tune on the map (or the approximate circle for someone who works from home), the floor
- * and the entrance note. Continue saves them to the draft's profile and opens the hours.
- */
-export function AddressStep({
-  slug,
-  saved,
-  frame,
-  onContinued,
-}: {
-  slug: string
-  /** The draft's saved step: Continue moves it on to the hours. */
-  saved: SetupStep
-  frame: StepFrame
-  onContinued: () => void
-}) {
-  const sdk = useSdk()
-  const locale = useLocale()
-  const profile = useQuery(sdk.settings.profile(slug))
-  const cities = useQuery(sdk.catalog.cities(locale))
-  if (profile.isPending || cities.isPending)
-    return frame(
-      <div className="flex justify-center py-16">
-        <Spinner />
-      </div>,
-      { valid: false, busy: true, keep: () => Promise.resolve(true) },
-    )
-  // a failed refetch keeps what's on screen; only a first load that failed is a failure
-  if (!profile.data || !cities.data) throw profile.error ?? cities.error ?? new Error('address step data missing')
-  return (
-    <Form slug={slug} saved={saved} initial={formFrom(profile.data)} cities={cities.data.items} frame={frame} onContinued={onContinued} />
-  )
+type State = {
+  form: AddressForm
+  /** What the profile has, kept up to date by the saves: leaving the step saves only what differs. */
+  stored: AddressForm
+  /** Where the map looks: the picked address or the city, not every move of the pin. */
+  focus: LatLng
 }
 
-function Form({
-  slug,
-  saved,
-  initial,
-  cities,
-  frame,
-  onContinued,
-}: {
-  slug: string
-  saved: SetupStep
-  initial: AddressForm
-  cities: City[]
-  frame: StepFrame
-  onContinued: () => void
-}) {
+/**
+ * Step 3, «Where will clients find you?» (B-Onboarding `isAddr`, book B-03): the city, the address searched and picked
+ * from the list, the pin to fine-tune on the map (or the approximate circle for someone who works from home), the floor
+ * and the entrance note. Its `save` puts them into the draft's profile. A hook, so the wizard's frame stays the same
+ * element around every step; `on` while the step shows (its data loads then, and what's typed stays while the wizard
+ * is on another step).
+ */
+export function useAddressStep(slug: string, on: boolean): { body: ReactNode; action: StepAction } {
   const t = useTranslations('setup.address')
   const sdk = useSdk()
   const locale = useLocale()
   const queryClient = useQueryClient()
   const errorText = useErrorText()
   const homeId = useId()
-  // what the profile has, kept up to date by the saves: leaving the step saves only what differs
-  const [stored, setStored] = useState(initial)
-  const [form, setForm] = useState(initial)
-  // where the map looks: the picked address or the city, not every move of the pin
-  const [focus, setFocus] = useState<LatLng>(initial.pin)
+  const profile = useQuery({ ...sdk.settings.profile(slug), enabled: on })
+  const cities = useQuery({ ...sdk.catalog.cities(locale), enabled: on })
   const update = useMutation(sdk.settings.updateProfile(slug))
-  const saveStep = useMutation(sdk.setup.step(slug))
-  const busy = update.isPending || saveStep.isPending
+  const [state, setState] = useState<State | null>(null)
+  if (on && !state && profile.data) {
+    const form = formFrom(profile.data)
+    setState({ form, stored: form, focus: form.pin })
+  }
+  const form = state?.form
+  const setForm = (change: (f: AddressForm) => AddressForm, focus?: LatLng) =>
+    setState((s) => s && { ...s, form: change(s.form), focus: focus ?? s.focus })
 
-  const city = cities.find((c) => c.id === form.cityId)
-  const typed = form.query.trim()
+  const typed = form?.query.trim() ?? ''
   const asked = useDebounced(typed, SEARCH_PAUSE_MS)
-  const searching = !form.picked && asked.length >= SEARCH_MIN
+  // only once the typing has paused: the line just picked (or reopened) isn't asked again at the first new letter
+  const searching = on && !!form && !form.picked && asked === typed && asked.length >= SEARCH_MIN
   const search = useQuery({
-    ...sdk.settings.addressSearch(slug, { q: asked, cityId: form.cityId, lang: locale }),
+    ...sdk.settings.addressSearch(slug, { q: asked, cityId: form?.cityId ?? '', lang: locale }),
     enabled: searching,
     placeholderData: keepPreviousData,
   })
+
+  // a failed refetch keeps what's on screen; only a first load that failed is a failure
+  if (on && !form && (profile.isError || cities.isError)) throw profile.error ?? cities.error ?? new Error('address step data missing')
+  if (!on || !state || !form || !cities.data)
+    return {
+      body: (
+        <div className="flex justify-center py-16">
+          <Spinner />
+        </div>
+      ),
+      // loading isn't saving: Continue waits, nothing is announced
+      action: { valid: false, busy: false, ready: false, save: () => Promise.resolve(true) },
+    }
+
+  const city = cities.data.items.find((c) => c.id === form.cityId)
   const pin = <MapPin aria-hidden strokeWidth={1.75} />
   const found = search.data?.items ?? []
+  const asking = !form.picked && typed.length >= SEARCH_MIN
   // nothing found, or no search here (`address_search_unavailable`): the typed street, pinned by hand
   const byHand = searching && (search.isError || (search.isSuccess && !search.isPlaceholderData && found.length === 0))
   const options: ComboboxOption[] = byHand
     ? [{ id: 'typed', label: typed, description: t('byHand', { city: city?.name ?? '' }), icon: pin }]
-    : found.map((a, i) => ({ id: `${i}:${a.label}`, label: a.line, description: a.label, icon: pin }))
+    : asking
+      ? found.map((a, i) => ({ id: `${i}:${a.label}`, label: a.line, description: a.label, icon: pin }))
+      : []
 
   const choose = (option: ComboboxOption) => {
     const at = byHand ? null : found[Number(option.id.split(':')[0])]
     if (at) {
       const place = { lat: at.lat, lng: at.lng }
-      setForm((f) => ({ ...f, query: at.line, picked: { line: at.line, street: at.street }, pin: place }))
-      setFocus(place)
-    } else setForm((f) => ({ ...f, query: typed, picked: { line: typed, street: typed }, pin: focus }))
+      setForm((f) => ({ ...f, query: at.line, picked: { line: at.line, street: at.street }, pin: place }), place)
+    }
+    // by hand: the pin stays where it is, and the map shows it
+    else setForm((f) => ({ ...f, query: typed, picked: { line: typed, street: typed } }), form.pin)
   }
 
   const pickCity = (id: string) => {
-    const next = cities.find((c) => c.id === id)
+    const next = cities.data.items.find((c) => c.id === id)
     if (!next || id === form.cityId) return
     const centre = { lat: next.lat, lng: next.lng }
-    setForm((f) => ({ ...f, cityId: id, query: '', picked: null, pin: centre }))
-    setFocus(centre)
+    setForm((f) => ({ ...f, cityId: id, query: '', picked: null, pin: centre }), centre)
   }
 
   const problem = addressProblem(form)
-  const edited = addressEdited(form, stored)
+  const edited = addressEdited(form, state.stored)
 
-  /** The address into the draft's profile; false when it failed (the person heard why). */
-  const store = async (): Promise<boolean> => {
-    if (!form.picked) return true
+  /** The address into the draft's profile when it's valid and changed; false when it failed (the person heard why). */
+  const save = async (): Promise<boolean> => {
+    if (!edited || problem || !form.picked) return true
     try {
       await update.mutateAsync(addressUpdate({ ...form, picked: form.picked }))
       // the profile's save refreshes the settings, not the draft's summary in the step list
       await queryClient.invalidateQueries({ queryKey: sdk.setup.mine().queryKey })
-      setStored(form)
+      setState((s) => s && { ...s, stored: form })
       return true
     } catch (error) {
       toast(errorText(error))
       return false
-    }
-  }
-
-  const onContinue = async () => {
-    if (busy || problem) return
-    if (edited && !(await store())) return
-    try {
-      if (stepIndex(saved) < stepIndex('hours')) await saveStep.mutateAsync('hours')
-      onContinued()
-    } catch (error) {
-      toast(errorText(error))
     }
   }
 
@@ -180,7 +152,7 @@ function Form({
       <StepHeader step="address" title={t('title')} lead={t('lead')} />
       <Field label={t('city')} className="max-w-80">
         <Select value={form.cityId} onChange={(e) => pickCity(e.target.value)}>
-          {cities.map((c) => (
+          {cities.data.items.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
             </option>
@@ -193,7 +165,7 @@ function Form({
         onValueChange={(query) => setForm((f) => ({ ...f, query, picked: null }))}
         options={options}
         onSelect={choose}
-        open={!form.picked && typed.length >= SEARCH_MIN && options.length > 0}
+        open={options.length > 0}
         listLabel={t('suggestions')}
       >
         <div className="flex flex-col gap-1.5">
@@ -213,7 +185,7 @@ function Form({
       </Combobox>
       <div className="flex flex-col gap-2.5">
         <MapFrame
-          center={focus}
+          center={state.focus}
           controls={{ zoomIn: t('zoomIn'), zoomOut: t('zoomOut') }}
           overlay={!form.picked && t('pickFirst')}
           onMapClick={(at) => setForm((f) => ({ ...f, pin: at }))}
@@ -279,12 +251,8 @@ function Form({
     </section>
   )
 
-  return frame(body, {
-    valid: !problem,
-    hint: problem ? hint : undefined,
-    busy,
-    onContinue: () => void onContinue(),
-    // the list and «Continue later» keep a valid address; one still being typed stays as it was
-    keep: async () => (edited && !problem ? store() : true),
-  })
+  return {
+    body,
+    action: { valid: !problem, hint: problem ? hint : undefined, busy: update.isPending, ready: true, save },
+  }
 }
