@@ -18,6 +18,7 @@ import { isWizardStep, nextStep, stepFor, stepIndex, WIZARD_STEPS, type WizardSt
 import { useAddressStep } from './address-step'
 import { BUSINESS_NAME_MAX, BusinessStep } from './business-step'
 import { useHoursStep } from './hours-step'
+import { useRulesStep } from './rules-step'
 import { SetupFrame, StepHeader, useStepName, type StepAction } from './setup-frame'
 
 /**
@@ -168,6 +169,7 @@ function Steps({
   // each step's content and what it tells the frame; the frame stays one element around every step
   const address = useAddressStep(draft?.slug ?? '', step === 'address' && !!draft)
   const hours = useHoursStep(draft?.slug ?? '', step === 'hours' && !!draft, !!draft && stepIndex(reached) >= stepIndex('hours'))
+  const rules = useRulesStep(draft?.slug ?? '', step === 'rules' && !!draft)
   const [body, action]: [ReactNode, StepAction] =
     step === 'business'
       ? [
@@ -196,10 +198,12 @@ function Steps({
         ? [address.body, address.action]
         : step === 'hours'
           ? [hours.body, hours.action]
-          : [
-              <LaterStep step={step} name={draft?.name ?? ''} />,
-              { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) },
-            ]
+          : step === 'rules'
+            ? [rules.body, rules.action]
+            : [
+                <LaterStep step={step} name={draft?.name ?? ''} />,
+                { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) },
+              ]
   const busy = action.busy || saveStep.isPending
 
   /** Continue: the step saved, the draft moved on to the next step (a new draft already starts at the address). */
