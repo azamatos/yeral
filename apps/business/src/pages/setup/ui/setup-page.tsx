@@ -15,8 +15,9 @@ import { useErrorText } from '@/shared/i18n'
 import { usePageTitle } from '@/shared/lib'
 import { AuthPage } from '@/shared/ui'
 import { isWizardStep, stepFor, stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
+import { AddressStep } from './address-step'
 import { BUSINESS_NAME_MAX, BusinessStep } from './business-step'
-import { SetupFrame, StepHeader, useStepName } from './setup-frame'
+import { SetupFrame, StepHeader, useStepName, type StepAction, type StepFrame } from './setup-frame'
 
 /**
  * `/setup/{step}` — the setup wizard (B-Onboarding, design §27.2, book B-02–B-06, Q-200). Someone signed in with a
@@ -122,7 +123,6 @@ function Steps({
   const start = useMutation(sdk.setup.start())
   const saveStep = useMutation(sdk.setup.step(draft?.slug ?? ''))
   const updateProfile = useMutation(sdk.settings.updateProfile(draft?.slug ?? ''))
-  const busy = start.isPending || saveStep.isPending || updateProfile.isPending
 
   const reached: SetupStep = draft?.step ?? 'business'
   const phone = formatPhone(me.phone)
@@ -130,7 +130,6 @@ function Steps({
   // spaces around the name don't count: the api trims it before its limit
   const length = name.trim().length
   const businessValid = length > 0 && length <= BUSINESS_NAME_MAX && !!categoryId
-  const valid = step === 'business' ? businessValid : true
   const edited = step === 'business' && (name.trim() !== (draft?.name ?? '') || categoryId !== (draft?.categoryId ?? null))
 
   const go = (to: WizardStep) => void navigate({ to: '/setup/$step', params: { step: to } })
@@ -169,23 +168,25 @@ function Steps({
     }
   }
 
-  /** A step in the list: the business step's edits are saved first, so leaving it never drops them. */
-  const open = async (to: WizardStep) => {
-    if (busy) return
-    if (edited && businessValid && !(await saveBusiness())) return
+  /** Back or a step in the list: the step's valid edits are saved first, so leaving it never drops them. */
+  const open = async (to: WizardStep, action: StepAction) => {
+    if (action.busy || saveStep.isPending) return
+    if (!(await action.keep())) return
     go(to)
   }
 
-  const later = async () => {
-    if (busy) return
+  const later = async (action: StepAction) => {
+    if (action.busy || saveStep.isPending) return
     // reopening lands where it was left; a new draft starts at the address step, as Continue would leave it
     let reopens: SetupStep = step
     try {
-      // a valid business step keeps what's typed
-      if (step === 'business' && businessValid && (edited || !draft)) {
-        if (!(await saveBusiness())) return
-        if (!draft) reopens = 'address'
-      }
+      if (step === 'business' && !draft) {
+        // a valid business step keeps what's typed
+        if (businessValid) {
+          if (!(await saveBusiness())) return
+          reopens = 'address'
+        }
+      } else if (!(await action.keep())) return
       if (draft) await saveStep.mutateAsync(step)
       toast(t('setup.laterSaved', { phone, step: stepName(reopens, more) }))
     } catch (error) {
@@ -199,66 +200,82 @@ function Steps({
       ? t('setup.business.hintLong', { max: BUSINESS_NAME_MAX })
       : t('setup.business.hintCategory')
   const previous = WIZARD_STEPS[stepIndex(step) - 1]
-  const footer = (
-    <WizardFooter
-      // the phone step is the sign-in, done once someone is signed in: the business step has no Back
-      back={step !== 'business' && previous ? { label: t('setup.back'), onClick: () => go(previous) } : undefined}
-      start={
-        more && step === 'business' ? (
-          <Button asChild variant="ghost" size="l">
-            <Link to="/">{t('setup.cancel')}</Link>
-          </Button>
-        ) : undefined
-      }
-      hint={step === 'business' && !businessValid ? hint : undefined}
-      primary={
-        step === 'done'
-          ? undefined
-          : {
-              children: t('setup.continue'),
-              // the steps after the business one come with their own pieces of slice 2
-              disabled: step !== 'business' || !valid,
-              loading: busy,
-              loadingLabel: t('setup.saving'),
-              onClick: () => void continueBusiness(),
-            }
-      }
-    />
-  )
 
   const summaries: Partial<Record<WizardStep, ReactNode>> = {
     phone: more ? `${ownerName} · ${phone}` : phone,
     business: draft && `${draft.name} · ${draft.category}`,
     address: draft?.address && `${draft.address.line}, ${draft.address.city.name}`,
   }
-  return (
-    <SetupFrame
-      current={step}
-      reached={reached}
-      more={more}
-      summaries={summaries}
-      canOpen={(s) => !busy && s !== 'phone' && stepIndex(s) <= stepIndex(reached) && (stepIndex(s) < stepIndex(step) || valid)}
-      onOpen={(s) => void open(s)}
-      onLater={step === 'done' ? undefined : () => void later()}
-      live={busy ? t('setup.saving') : undefined}
-      footer={footer}
-    >
-      {step === 'business' ? (
-        <BusinessStep
-          more={more}
-          owner={{ name: ownerName, phone }}
-          name={name}
-          onName={setName}
-          pageSlug={draft?.slug}
-          categoryId={categoryId}
-          onCategory={setCategoryId}
-          categories={categories}
-        />
-      ) : (
-        <LaterStep step={step} name={draft?.name ?? ''} />
-      )}
-    </SetupFrame>
-  )
+
+  /** The frame with the footer and the step list working on what the step says (its `StepAction`). */
+  const frame: StepFrame = (body, action) => {
+    const busy = action.busy || saveStep.isPending
+    const footer = (
+      <WizardFooter
+        // the phone step is the sign-in, done once someone is signed in: the business step has no Back
+        back={step !== 'business' && previous ? { label: t('setup.back'), onClick: () => void open(previous, action) } : undefined}
+        start={
+          more && step === 'business' ? (
+            <Button asChild variant="ghost" size="l">
+              <Link to="/">{t('setup.cancel')}</Link>
+            </Button>
+          ) : undefined
+        }
+        hint={action.onContinue && !action.valid ? action.hint : undefined}
+        primary={
+          step === 'done'
+            ? undefined
+            : {
+                children: t('setup.continue'),
+                // the steps not built yet come with their own pieces of slice 2
+                disabled: !action.onContinue || !action.valid,
+                loading: busy,
+                loadingLabel: t('setup.saving'),
+                onClick: () => action.onContinue?.(),
+              }
+        }
+      />
+    )
+    return (
+      <SetupFrame
+        current={step}
+        reached={reached}
+        more={more}
+        summaries={summaries}
+        canOpen={(s) => !busy && s !== 'phone' && stepIndex(s) <= stepIndex(reached) && (stepIndex(s) < stepIndex(step) || action.valid)}
+        onOpen={(s) => void open(s, action)}
+        onLater={step === 'done' ? undefined : () => void later(action)}
+        live={busy ? t('setup.saving') : undefined}
+        footer={footer}
+      >
+        {body}
+      </SetupFrame>
+    )
+  }
+
+  if (step === 'business')
+    return frame(
+      <BusinessStep
+        more={more}
+        owner={{ name: ownerName, phone }}
+        name={name}
+        onName={setName}
+        pageSlug={draft?.slug}
+        categoryId={categoryId}
+        onCategory={setCategoryId}
+        categories={categories}
+      />,
+      {
+        valid: businessValid,
+        hint,
+        busy: start.isPending || updateProfile.isPending,
+        onContinue: () => void continueBusiness(),
+        keep: async () => (edited && businessValid ? saveBusiness() : true),
+      },
+    )
+  // past the business step there's always a draft (stepFor sends someone without one back to it)
+  if (step === 'address' && draft) return <AddressStep slug={draft.slug} saved={draft.step} frame={frame} onContinued={() => go('hours')} />
+  return frame(<LaterStep step={step} name={draft?.name ?? ''} />, { valid: true, busy: false, keep: () => Promise.resolve(true) })
 }
 
 /** A step built by a later piece of slice 2: its header only (B-Onboarding's titles and leads). */

@@ -9,6 +9,24 @@ import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
 
+/** What a step tells the frame: whether it can go on (and the hint while it can't), and how to keep what's typed. */
+export type StepAction = {
+  valid: boolean
+  /** Why Continue waits («Pick the address from the list.»): the disabled button's description. */
+  hint?: string
+  busy: boolean
+  /** Continue; none while the step isn't built yet (Continue stays disabled). */
+  onContinue?: () => void
+  /**
+   * Saves what's typed when it's valid and changed, before Back, the step list or «Continue later» leave the step;
+   * false when it failed (the person heard why) and the step stays.
+   */
+  keep: () => Promise<boolean>
+}
+
+/** The frame around a step's content, with the footer and the step list working on the step's action. */
+export type StepFrame = (body: ReactNode, action: StepAction) => ReactNode
+
 /** The step's name in the list: the phone step is «Account» for someone who already has a business. */
 export function useStepName() {
   const t = useTranslations('setup.names')
