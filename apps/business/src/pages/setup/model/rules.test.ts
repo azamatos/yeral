@@ -46,5 +46,7 @@ describe('the booking rules step', () => {
     expect(hasTeam([owner, { ...person, level: 'specialist', status: 'invited', joined: false, invite: invite('declined') }])).toBe(false)
     expect(hasTeam([owner, { ...person, level: 'specialist', status: 'invited', joined: false, invite: invite('pending') }])).toBe(true)
     expect(hasTeam([owner, { ...person, level: 'admin' }])).toBe(true)
+    // a draft's team step: invited at the finish, no invite yet
+    expect(hasTeam([owner, { ...person, level: 'specialist', status: 'invited', joined: false, invite: null }])).toBe(true)
   })
 })
