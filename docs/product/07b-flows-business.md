@@ -260,7 +260,7 @@ flowchart TD
 
 > Open question Q-119: free-cancel choices in the setup wizard and in settings.
 
-**Status** — Design: drawn (B-Onboarding · `step=7`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); the rules through `PATCH /v1/w/{slug}/settings/rules`.
+**Status** — Design: drawn (B-Onboarding · `step=7`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); the rules through `PATCH /v1/w/{slug}/settings/rules`; the wizard's step 7 built in the business app (23.10.2026; chapter 9, B-05, B-42 (how)).
 
 ### B-06 · Finish setup: link, QR and review
 

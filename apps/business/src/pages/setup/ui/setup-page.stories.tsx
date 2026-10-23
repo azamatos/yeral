@@ -6,7 +6,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { WeekdayHours } from '@yeral/contract/settings'
-import type { Workspace } from '@yeral/contract/team'
+import type { TeamMember, Workspace } from '@yeral/contract/team'
+import { DEFAULT_RULES } from '@yeral/domain/rules'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { LAUNCH_CATEGORIES, PageStory } from '@/shared/storybook'
 import { SetupPage } from './setup-page'
@@ -75,6 +76,25 @@ type Draft = {
 }
 
 type Day = WeekdayHours | null
+/** What the rules step sent, one body per save (the fake api fills it). */
+const rulesSaved: Record<string, unknown>[] = []
+
+const member = (id: string, name: string, level: TeamMember['level'], hasApp = true): TeamMember => ({
+  id,
+  name,
+  fullName: null,
+  specialization: null,
+  phone: '+99365000000',
+  level,
+  status: 'active',
+  hasApp,
+  bookable: level !== 'admin',
+  canAnswerOwn: false,
+  joined: true,
+  photo: null,
+  invite: null,
+})
+const owner = member('owner', 'Maýsa', 'owner')
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -82,7 +102,8 @@ const json = (body: unknown, status = 200) =>
 /**
  * The api as the wizard uses it. `signedIn`: false for nobody. `workspaces`: the person's businesses (one makes it
  * «Create a business»). `draft`: an unfinished setup. `search`: `false` when the address search isn't there
- * (`address_search_unavailable`). `hours`: the draft's week (every day closed, as a new draft's).
+ * (`address_search_unavailable`). `hours`: the draft's week (every day closed, as a new draft's). `team`: the draft's
+ * people besides the owner. Each `PATCH …/settings/rules` body lands in `rulesSaved`.
  */
 const fakeApi =
   ({
@@ -91,10 +112,21 @@ const fakeApi =
     draft = null,
     search = true,
     hours = [null, null, null, null, null, null, null],
-  }: { signedIn?: boolean; workspaces?: Workspace[]; draft?: Draft | null; search?: boolean; hours?: Day[] } = {}) =>
+    team = [],
+  }: {
+    signedIn?: boolean
+    workspaces?: Workspace[]
+    draft?: Draft | null
+    search?: boolean
+    hours?: Day[]
+    team?: TeamMember[]
+  } = {}) =>
   (): typeof fetch => {
     let setup = draft && { ...draft }
     let week = hours
+    // the draft's booking rules as the rules step reads and saves them
+    let rules = { ...DEFAULT_RULES, lateMinutes: 15 }
+    rulesSaved.length = 0
     // the draft's profile as the address step reads and saves it
     let location = {
       cityId: 'ashgabat',
@@ -136,6 +168,13 @@ const fakeApi =
         const words = q.toLowerCase().split(/\s+/).filter(Boolean)
         return json({ items: found.filter((a) => words.every((w) => a.label.toLowerCase().includes(w))) })
       }
+      if (/^GET \/w\/[^/]+\/settings\/rules$/.test(route)) return json(rules)
+      if (/^PATCH \/w\/[^/]+\/settings\/rules$/.test(route)) {
+        rulesSaved.push(body)
+        rules = { ...rules, ...body }
+        return json(rules)
+      }
+      if (/^GET \/w\/[^/]+\/team$/.test(route)) return json({ items: [owner, ...team] })
       if (route === 'GET /categories')
         return json({
           items: LAUNCH_CATEGORIES.map((c) => ({ ...c, icon: 'store', bookingTypes: ['appointment'], specialistWord: '', intro: '' })),
@@ -446,5 +485,45 @@ export const HoursAllClosed: Story = {
     for (const day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
       await userEvent.click(canvas.getByRole('switch', { name: `${day}: open` }))
     await expect(canvas.getByRole('button', { name: 'Continue' })).toHaveAccessibleDescription('At least one day must be open.')
+  },
+}
+
+const rulesDraft: Draft = { ...addressDraft, step: 'rules', address: { line: '247 Bitarap Türkmenistan Avenue', city } }
+
+/**
+ * The booking rules step, someone working alone: «I confirm» with a 30-minute hold, no «Who answers requests?»;
+ * instant confirmation hides the hold and says to block busy times; Continue saves only what changed and opens Done.
+ */
+export const Rules: Story = {
+  args: { server: fakeApi({ draft: rulesDraft }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'How should bookings arrive?' })).toBeVisible()
+    const manual = canvas.getByRole('radio', { name: /I confirm/ })
+    await expect(manual).toHaveAttribute('aria-checked', 'true')
+    await expect(manual).toHaveAccessibleName(/Recommended/)
+    await expect(canvas.getByRole('combobox', { name: 'Hold requests for' })).toHaveValue('30')
+    await expect(canvas.queryByRole('radiogroup', { name: 'Who answers requests?' })).toBeNull()
+    await userEvent.click(canvas.getByRole('radio', { name: /Instant confirmation/ }))
+    await expect(canvas.queryByRole('combobox', { name: 'Hold requests for' })).toBeNull()
+    await expect(canvas.getByText(/Block the times you’re busy in the calendar/)).toBeVisible()
+    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Clients can cancel for free' }), 'Any time')
+    await expect(canvas.getByRole('combobox', { name: 'Buffer' })).toHaveValue('10')
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio is ready!' })).toBeVisible()
+    await expect(rulesSaved).toEqual([{ confirmMode: 'instant', cancelWindowMinutes: null }])
+  },
+}
+
+/** With a team: who answers requests, «Both» by default; the choice is saved with the step. */
+export const RulesWithTeam: Story = {
+  args: { server: fakeApi({ draft: rulesDraft, team: [member('m1', 'Aýna', 'specialist'), member('m2', 'Leýli', 'specialist', false)] }) },
+  play: async ({ canvas }) => {
+    const who = await canvas.findByRole('radiogroup', { name: 'Who answers requests?' })
+    await expect(within(who).getByRole('radio', { name: /Both/ })).toHaveAttribute('aria-checked', 'true')
+    await userEvent.click(within(who).getByRole('radio', { name: /Each specialist/ }))
+    await expect(canvas.getByText('Requests for specialists who don’t use the app always go to you and the admins.')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio is ready!' })).toBeVisible()
+    await waitFor(() => expect(rulesSaved).toEqual([{ requestAnswerers: 'each' }]))
   },
 }
