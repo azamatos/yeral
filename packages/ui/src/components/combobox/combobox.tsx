@@ -1,5 +1,15 @@
 import { Search } from 'lucide-react'
-import { createContext, useContext, useId, useState, type ComponentProps, type KeyboardEvent, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ComponentProps,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react'
 import { cn } from '../../lib/cn'
 import { Input } from '../input'
 
@@ -66,36 +76,41 @@ export function Combobox(props: ComboboxProps) {
   const listId = useId()
   const [focused, setFocused] = useState(false)
   const [dismissed, setDismissed] = useState(false)
-  const [active, setActive] = useState(-1)
+  // the active row by its option's id: new results under it (the search answered) don't move the choice to another
+  const [activeId, setActiveId] = useState<string | null>(null)
   const rows = options.length + (create ? 1 : 0)
   const shown = open && focused && !dismissed && (rows > 0 || !!empty)
+  const CREATE = '\u0000create'
+  const idAt = (i: number) => (i < options.length ? options[i]!.id : create ? CREATE : null)
+  const found = activeId === CREATE ? (create ? options.length : -1) : options.findIndex((o) => o.id === activeId)
+  const setActive = (i: number) => setActiveId(i < 0 ? null : idAt(i))
   const state: State = {
     listId,
     value,
     type: (next) => {
       onValueChange(next)
       setDismissed(false)
-      setActive(-1)
+      setActiveId(null)
     },
     rows,
-    active: shown && active < rows ? active : -1,
+    active: shown ? found : -1,
     setActive,
     shown,
     focus: (on) => {
       setFocused(on)
       if (on) setDismissed(false)
-      else setActive(-1)
+      else setActiveId(null)
     },
     dismiss: () => {
       setDismissed(true)
-      setActive(-1)
+      setActiveId(null)
     },
     choose: (i) => {
       const option = options[i]
       if (option) onSelect(option)
       else create?.onSelect()
       setDismissed(true)
-      setActive(-1)
+      setActiveId(null)
     },
     props,
   }
@@ -112,10 +127,26 @@ export function ComboboxInput({
   ...props
 }: Omit<ComponentProps<'input'>, 'value' | 'onChange' | 'size' | 'role'> & { size?: 'l' | 'm'; invalid?: boolean }) {
   const s = useCombobox()
+  const input = useRef<HTMLInputElement>(null)
   const optionId = (i: number) => `${s.listId}-${i}`
+  // Esc closes the list before a dialog around it hears it: Radix listens on the document while capturing, so this
+  // listens on the window, earlier still
+  const { shown, dismiss } = s
+  useEffect(() => {
+    if (!shown) return
+    const close = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.target !== input.current || e.isComposing) return
+      e.stopPropagation()
+      e.preventDefault()
+      dismiss()
+    }
+    window.addEventListener('keydown', close, true)
+    return () => window.removeEventListener('keydown', close, true)
+  }, [shown, dismiss])
   const keys = (e: KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(e)
-    if (e.defaultPrevented) return
+    // a key that finishes a composed letter (an IME, a dead key) isn't a choice
+    if (e.defaultPrevented || e.nativeEvent.isComposing) return
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault()
       if (!s.shown) return s.focus(true)
@@ -125,9 +156,6 @@ export function ComboboxInput({
     } else if (e.key === 'Enter' && s.shown && s.active >= 0) {
       e.preventDefault()
       s.choose(s.active)
-    } else if (e.key === 'Escape' && s.shown) {
-      e.preventDefault()
-      s.dismiss()
     }
   }
   return (
@@ -141,6 +169,7 @@ export function ComboboxInput({
         type="search"
         autoComplete="off"
         {...props}
+        ref={input}
         role="combobox"
         // the list exists only with rows: the empty line alone isn't a list to point at
         aria-expanded={s.shown && s.rows > 0}

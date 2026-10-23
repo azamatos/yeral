@@ -37,25 +37,29 @@ export const Preview: Story = {
   ),
 }
 
-/** Results: time pins, the chosen one hot, and the zoom buttons. */
+/** Results: time pins to pick (buttons with their full labels), the chosen one hot, and the zoom buttons. */
 export const Results: Story = {
   args: { controls },
   render: (args) => (
     <MapFrame {...args}>
-      <MapMarker at={{ lat: 37.9385, lng: 58.3775 }}>
-        <MapPin>14:30</MapPin>
-      </MapMarker>
-      <MapMarker at={{ lat: 37.937, lng: 58.3805 }}>
-        <MapPin hot>15:00</MapPin>
-      </MapMarker>
-      <MapMarker at={{ lat: 37.9392, lng: 58.3822 }}>
-        <MapPin>16:15</MapPin>
-      </MapMarker>
+      {[
+        { at: { lat: 37.9385, lng: 58.3775 }, time: '14:30', name: 'Glow Studio' },
+        { at: { lat: 37.937, lng: 58.3805 }, time: '15:00', name: 'Ak Ýol Barber', hot: true },
+        { at: { lat: 37.9392, lng: 58.3822 }, time: '16:15', name: 'Nur Nails' },
+      ].map((p) => (
+        <MapMarker key={p.time} at={p.at}>
+          <MapPin hot={p.hot} asChild>
+            <button type="button" aria-label={`${p.name} · ${p.time}`}>
+              {p.time}
+            </button>
+          </MapPin>
+        </MapMarker>
+      ))}
     </MapFrame>
   ),
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('button', { name: 'Zoom in' })).toBeVisible()
-    await expect(await canvas.findByText('15:00')).toBeVisible()
+    await expect(await canvas.findByRole('button', { name: 'Ak Ýol Barber · 15:00' })).toBeVisible()
   },
 }
 

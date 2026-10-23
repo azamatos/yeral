@@ -1,5 +1,6 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import { Minus, Plus } from 'lucide-react'
+import { Slot } from 'radix-ui'
 import {
   createContext,
   useContext,
@@ -11,6 +12,7 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react'
+import { flushSync } from 'react-dom'
 import { cn } from '../../lib/cn'
 import { fromScreen, toScreen, type LatLng, type MapView } from './projection'
 
@@ -39,13 +41,19 @@ function useFrame(): Frame {
 const ZOOM_MIN = 3
 const ZOOM_MAX = 19
 
+let webgl: boolean | undefined
+/** Asked once per page, and the test context let go at once: browsers keep only a few alive. */
 function hasWebGL() {
+  if (webgl !== undefined) return webgl
   try {
     const canvas = document.createElement('canvas')
-    return !!(canvas.getContext('webgl2') ?? canvas.getContext('webgl'))
+    const context = canvas.getContext('webgl2') ?? canvas.getContext('webgl')
+    context?.getExtension('WEBGL_lose_context')?.loseContext()
+    webgl = !!context
   } catch {
-    return false
+    webgl = false
   }
+  return webgl
 }
 
 const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -89,8 +97,13 @@ export function MapFrame({
   const map = useRef<MapLibreMap | null>(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
   const [camera, setCamera] = useState({ center, zoom })
-  // where MapLibre opens (again, for a new style): the last place it showed
+  // where MapLibre opens: the camera as it is when the lazy import lands (a centre or zoom changed meanwhile counts)
   const start = useRef(camera)
+  useEffect(() => {
+    start.current = camera
+  })
+  // MapLibre made: it takes the pointer from the drawn ground; loaded: its tiles are drawn, the ground fades out
+  const [live, setLive] = useState(false)
   const [loaded, setLoaded] = useState(false)
   // a new centre from outside (a picked address) moves the map, without waiting for an effect
   const [shown, setShown] = useState(center)
@@ -118,45 +131,60 @@ export function MapFrame({
     if (!style || !host.current || !hasWebGL()) return
     let gone = false
     const container = host.current
-    void Promise.all([import('maplibre-gl'), import('maplibre-gl/dist/maplibre-gl.css')]).then(([{ Map }]) => {
+    void Promise.all([
+      import('maplibre-gl'),
+      // the worker's file as the bundler emits it: MapLibre's own guess at its address doesn't survive bundling
+      import('maplibre-gl/dist/maplibre-gl-worker.mjs?url'),
+      import('maplibre-gl/dist/maplibre-gl.css'),
+    ]).then(([{ Map, setWorkerUrl }, worker]) => {
       if (gone) return
-      const m = new Map({
-        container,
-        style,
-        center: [start.current.center.lng, start.current.center.lat],
-        zoom: start.current.zoom,
-        minZoom: ZOOM_MIN,
-        maxZoom: ZOOM_MAX,
-        interactive,
-        dragRotate: false,
-        pitchWithRotate: false,
-        touchPitch: false,
-        keyboard: false,
-        attributionControl: { compact: true },
-      })
+      setWorkerUrl(worker.default)
+      let m: MapLibreMap
+      try {
+        m = new Map({
+          container,
+          style,
+          center: [start.current.center.lng, start.current.center.lat],
+          zoom: start.current.zoom,
+          minZoom: ZOOM_MIN,
+          maxZoom: ZOOM_MAX,
+          interactive,
+          dragRotate: false,
+          pitchWithRotate: false,
+          touchPitch: false,
+          keyboard: false,
+          attributionControl: { compact: true },
+        })
+      } catch {
+        // no WebGL context after all: the drawn ground stays
+        return
+      }
       m.touchZoomRotate.disableRotation()
       // decorative: the pins carry the labels, and the canvas isn't a tab stop
       m.getCanvas().setAttribute('aria-hidden', 'true')
       m.getCanvas().tabIndex = -1
+      // the pins follow in the same frame as the tiles, not one behind
       m.on('move', () => {
         const c = m.getCenter()
-        start.current = { center: { lat: c.lat, lng: c.lng }, zoom: m.getZoom() }
-        setCamera(start.current)
+        flushSync(() => setCamera({ center: { lat: c.lat, lng: c.lng }, zoom: m.getZoom() }))
       })
       m.on('click', (e) => clickRef.current?.({ lat: e.lngLat.lat, lng: e.lngLat.lng }))
       m.once('load', () => setLoaded(true))
       map.current = m
+      setLive(true)
     })
     return () => {
       gone = true
       map.current?.remove()
       map.current = null
+      setLive(false)
       setLoaded(false)
     }
   }, [style, interactive])
 
   useEffect(() => {
-    map.current?.easeTo({ center: [shown.lng, shown.lat], duration: reducedMotion() ? 0 : 300 })
+    // after the commit: the move it starts updates the pins at once (flushSync isn't for effects)
+    queueMicrotask(() => map.current?.easeTo({ center: [shown.lng, shown.lat], duration: reducedMotion() ? 0 : 300 }))
   }, [shown])
 
   const zoomBy = (delta: number) => {
@@ -186,13 +214,14 @@ export function MapFrame({
       <div
         aria-hidden
         onClick={tapGround}
-        className={cn('absolute inset-0 transition-opacity duration-300', loaded && 'pointer-events-none opacity-0')}
+        className={cn('absolute inset-0 transition-opacity duration-300', live && 'pointer-events-none', loaded && 'opacity-0')}
       >
         <Ground />
       </div>
       {!overlay && size.width > 0 && <FrameContext value={{ view: { ...camera, ...size }, frame }}>{children}</FrameContext>}
+      {/* above the veil, as the board draws them: zooming a waiting map does no harm */}
       {controls && (
-        <div className="absolute top-3 right-3 z-1 flex flex-col overflow-hidden rounded-m border border-n-200 bg-n-0 shadow-raised">
+        <div className="absolute top-3 right-3 z-3 flex flex-col overflow-hidden rounded-m border border-n-200 bg-n-0 shadow-raised">
           <ControlButton label={controls.zoomIn} onClick={() => zoomBy(1)}>
             <Plus aria-hidden strokeWidth={2} />
           </ControlButton>
@@ -347,13 +376,16 @@ export function MapMarker({ at, children }: { at: LatLng; children: ReactNode })
  * A pill pin above its place (DS-Patterns `.y-mpin`): 30 high, white with an n-300 line and the control shadow; `hot`
  * is ink and raised (the business on a preview, the chosen time on results).
  */
-export function MapPin({ hot = false, className, ...props }: ComponentProps<'span'> & { hot?: boolean }) {
+export function MapPin({ hot = false, asChild, className, ...props }: ComponentProps<'span'> & { hot?: boolean; asChild?: boolean }) {
+  // a pin to pick (a time on the results) is a button with its full label: render it with `asChild`
+  const Comp = asChild ? Slot.Root : 'span'
   return (
-    <span
+    <Comp
       {...props}
       className={cn(
         'absolute bottom-0 left-0 inline-flex h-7.5 -translate-x-1/2 items-center rounded-pill border px-2.5 text-dense font-bold whitespace-nowrap',
         hot ? 'z-2 border-n-900 bg-n-900 text-n-0 shadow-raised' : 'border-n-300 bg-n-0 text-n-900 shadow-control',
+        asChild && 'cursor-pointer outline-none focus-visible:shadow-focus',
         className,
       )}
     />
