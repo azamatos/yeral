@@ -10,5 +10,7 @@
   the instant note; the free cancel window and the buffer; «You can change all of this later in Settings.». `save`
   sends only what changed through `settings.updateRules`. `model/rules.ts` holds the form's rules (unit-tested).
 - Choices made: chapter 9, 23.10.2026, B-05, B-42 (how).
-- Follow-ups: the step list's summary for this step («I confirm · 30 min») needs the rules in `GET /v1/me/setup` (or
+- Follow-ups: the api doesn't show a draft's team (`GET /v1/w/{slug}/team` needs `requireMember(…, { draft: true })`
+  or a «has a team» fact on `GET /v1/me/setup`), so «Who answers requests?» stays hidden in the wizard until then; the
+  step list's summary for this step («I confirm · 30 min») needs the rules in `GET /v1/me/setup` (or
   the step's own query while it isn't shown); Settings → Booking rules reuses SettingsRow and the option cards.

@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { ConfirmMode } from '@yeral/domain/model'
-import type { RequestAnswerers } from '@yeral/domain/rules'
+import { REQUEST_ANSWERERS, type RequestAnswerers } from '@yeral/domain/rules'
 import { useFmt } from '@yeral/i18n'
 import { Callout } from '@yeral/ui/callout'
 import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
@@ -17,8 +17,7 @@ import { useErrorText } from '@/shared/i18n'
 import { BUFFER_CHOICES, CANCEL_CHOICES, choicesWith, formFrom, hasTeam, HOLD_CHOICES, rulesUpdate, type RulesForm } from '../model/rules'
 import { StepHeader, type StepAction } from './setup-frame'
 
-const ANSWERERS: RequestAnswerers[] = ['desk', 'each', 'both']
-const ANSWERER_KEY = { desk: 'whoDesk', each: 'whoEach', both: 'whoBoth' } as const
+const ANSWERER_KEY: Record<RequestAnswerers, 'whoDesk' | 'whoEach' | 'whoBoth'> = { desk: 'whoDesk', each: 'whoEach', both: 'whoBoth' }
 
 /** A select's value for the cancel window: `null` is «Any time». */
 const ANY = 'any'
@@ -36,7 +35,9 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
   const fmt = useFmt()
   const errorText = useErrorText()
   const rules = useQuery({ ...sdk.settings.rules(slug), enabled: on })
-  const team = useQuery({ ...sdk.team.list(slug), enabled: on })
+  // only «Who answers requests?» needs the team: the step doesn't wait for it, and without it (the api doesn't show a
+  // draft's team yet) the question stays hidden and the setting keeps its value
+  const team = useQuery({ ...sdk.team.list(slug), enabled: on, retry: false })
   const update = useMutation(sdk.settings.updateRules(slug))
   const [state, setState] = useState<{ form: RulesForm; stored: RulesForm } | null>(null)
   if (on && !state && rules.data) {
@@ -47,8 +48,8 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
   const set = (change: Partial<RulesForm>) => setState((s) => s && { ...s, form: { ...s.form, ...change } })
 
   // a failed refetch keeps what's on screen; only a first load that failed is a failure
-  if (on && !form && (rules.isError || team.isError)) throw rules.error ?? team.error ?? new Error('rules step data missing')
-  if (!on || !state || !form || !team.data)
+  if (on && !form && rules.isError) throw rules.error
+  if (!on || !state || !form)
     return {
       body: (
         <div className="flex justify-center py-16">
@@ -59,7 +60,9 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
     }
 
   const manual = form.confirmMode === 'manual'
-  const askWho = manual && hasTeam(team.data.items)
+  const askWho = manual && !!team.data && hasTeam(team.data.items)
+  // what's chosen while the save is on its way would be left out of it
+  const saving = update.isPending
 
   /** What changed into the draft's rules; false when it failed (the person heard why). */
   const save = async (): Promise<boolean> => {
@@ -91,6 +94,7 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
       <OptionCardGroup
         aria-label={t('confirmation')}
         value={form.confirmMode}
+        disabled={saving}
         onValueChange={(confirmMode) => set({ confirmMode: confirmMode as ConfirmMode })}
         className="grid grid-cols-2 gap-4 max-md:grid-cols-1"
       >
@@ -123,7 +127,12 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
       <div className="flex flex-col">
         {manual && (
           <SettingsRow label={t('hold')} description={t('holdHint')} className={row}>
-            <Select className={select} value={form.holdMinutes} onChange={(e) => set({ holdMinutes: Number(e.target.value) })}>
+            <Select
+              className={select}
+              disabled={saving}
+              value={form.holdMinutes}
+              onChange={(e) => set({ holdMinutes: Number(e.target.value) })}
+            >
               {choicesWith(HOLD_CHOICES, form.holdMinutes).map((m) => (
                 <option key={m} value={m}>
                   {fmt.duration(m)}
@@ -134,16 +143,18 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
         )}
         {askWho && (
           <SettingsRow layout="stacked" label={t('who')} description={t('whoHint')} className={row}>
-            {({ labelId, descriptionId }) => (
+            {({ id, labelId, descriptionId }) => (
               <>
                 <OptionCardGroup
+                  id={id}
+                  disabled={saving}
                   aria-labelledby={labelId}
                   aria-describedby={descriptionId}
                   value={form.requestAnswerers}
                   onValueChange={(requestAnswerers) => set({ requestAnswerers: requestAnswerers as RequestAnswerers })}
                   className="gap-2"
                 >
-                  {ANSWERERS.map((who) => (
+                  {REQUEST_ANSWERERS.map((who) => (
                     <OptionCard
                       key={who}
                       value={who}
@@ -166,6 +177,7 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
         <SettingsRow label={t('cancel')} description={t('cancelHint')} className={row}>
           <Select
             className={select}
+            disabled={saving}
             value={form.cancelWindowMinutes ?? ANY}
             onChange={(e) => set({ cancelWindowMinutes: e.target.value === ANY ? null : Number(e.target.value) })}
           >
@@ -177,7 +189,12 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
           </Select>
         </SettingsRow>
         <SettingsRow label={t('buffer')} description={t('bufferHint')} className={`${row} border-b`}>
-          <Select className={select} value={form.bufferMinutes} onChange={(e) => set({ bufferMinutes: Number(e.target.value) })}>
+          <Select
+            className={select}
+            disabled={saving}
+            value={form.bufferMinutes}
+            onChange={(e) => set({ bufferMinutes: Number(e.target.value) })}
+          >
             {choicesWith(BUFFER_CHOICES, form.bufferMinutes).map((m) => (
               <option key={m} value={m}>
                 {m === 0 ? t('bufferNone') : fmt.duration(m)}
@@ -190,5 +207,5 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
     </section>
   )
 
-  return { body, action: { valid: true, busy: update.isPending, ready: true, save } }
+  return { body, action: { valid: true, busy: saving, ready: true, save } }
 }

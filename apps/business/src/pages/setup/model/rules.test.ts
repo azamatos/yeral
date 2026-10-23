@@ -29,12 +29,22 @@ describe('the booking rules step', () => {
     expect(choicesWith(CANCEL_CHOICES, null)[0]).toBeNull()
   })
 
+  it('does not send the hold or who answers once instant confirmation hides them', () => {
+    const stored = formFrom(DEFAULT_RULES)
+    expect(rulesUpdate({ ...stored, holdMinutes: 1440, requestAnswerers: 'each', confirmMode: 'instant' }, stored)).toEqual({
+      confirmMode: 'instant',
+    })
+  })
+
   it('asks who answers requests once someone besides the owner signs in', () => {
-    const owner = { level: 'owner', status: 'active', hasApp: true }
+    const person = { status: 'active', hasApp: true, joined: true, invite: null } as const
+    const owner = { ...person, level: 'owner' } as const
+    const invite = (state: 'pending' | 'declined') => ({ id: 'i1', state, sentAt: 1, expiresAt: 2 })
     expect(hasTeam([owner])).toBe(false)
-    expect(hasTeam([owner, { level: 'specialist', status: 'active', hasApp: false }])).toBe(false)
-    expect(hasTeam([owner, { level: 'specialist', status: 'removed', hasApp: true }])).toBe(false)
-    expect(hasTeam([owner, { level: 'specialist', status: 'invited', hasApp: true }])).toBe(true)
-    expect(hasTeam([owner, { level: 'admin', status: 'active', hasApp: true }])).toBe(true)
+    expect(hasTeam([owner, { ...person, level: 'specialist', hasApp: false }])).toBe(false)
+    expect(hasTeam([owner, { ...person, level: 'specialist', status: 'removed' }])).toBe(false)
+    expect(hasTeam([owner, { ...person, level: 'specialist', status: 'invited', joined: false, invite: invite('declined') }])).toBe(false)
+    expect(hasTeam([owner, { ...person, level: 'specialist', status: 'invited', joined: false, invite: invite('pending') }])).toBe(true)
+    expect(hasTeam([owner, { ...person, level: 'admin' }])).toBe(true)
   })
 })

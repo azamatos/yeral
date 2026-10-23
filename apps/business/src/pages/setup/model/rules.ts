@@ -1,19 +1,26 @@
+import type { TeamMember } from '@yeral/contract/team'
 import { RULE_OPTIONS, type BookingRules } from '@yeral/domain/rules'
-
-/** What step 7 sets of the booking rules (B-Onboarding `isRules`, book B-05); the others stay for Settings. */
-export type RulesForm = Pick<BookingRules, 'confirmMode' | 'holdMinutes' | 'requestAnswerers' | 'cancelWindowMinutes' | 'bufferMinutes'>
 
 const FIELDS = ['confirmMode', 'holdMinutes', 'requestAnswerers', 'cancelWindowMinutes', 'bufferMinutes'] as const
 
+/** What step 7 sets of the booking rules (B-Onboarding `isRules`, book B-05); the others stay for Settings. */
+export type RulesForm = Pick<BookingRules, (typeof FIELDS)[number]>
+
 export function formFrom(rules: BookingRules): RulesForm {
-  const { confirmMode, holdMinutes, requestAnswerers, cancelWindowMinutes, bufferMinutes } = rules
-  return { confirmMode, holdMinutes, requestAnswerers, cancelWindowMinutes, bufferMinutes }
+  const form: Partial<RulesForm> = {}
+  for (const k of FIELDS) Object.assign(form, { [k]: rules[k] })
+  return form as RulesForm
 }
 
-/** Only what changed goes to `PATCH …/settings/rules`; nothing changed sends nothing. */
+/**
+ * Only what changed goes to `PATCH …/settings/rules`; nothing changed sends nothing. In instant mode the hold and who
+ * answers are hidden, so a change made there before switching isn't sent.
+ */
 export function rulesUpdate(form: RulesForm, stored: RulesForm): Partial<RulesForm> | null {
+  const shown =
+    form.confirmMode === 'manual' ? form : { ...form, holdMinutes: stored.holdMinutes, requestAnswerers: stored.requestAnswerers }
   const changes: Partial<RulesForm> = {}
-  for (const k of FIELDS) if (form[k] !== stored[k]) Object.assign(changes, { [k]: form[k] })
+  for (const k of FIELDS) if (shown[k] !== stored[k]) Object.assign(changes, { [k]: shown[k] })
   return Object.keys(changes).length ? changes : null
 }
 
@@ -32,8 +39,9 @@ export const BUFFER_CHOICES = RULE_OPTIONS.bufferMinutes
 
 /**
  * «Who answers requests?» shows in manual mode once someone besides the owner signs in to the workspace (book B-42):
- * a member or an invite with the app; a specialist without the app doesn't answer anything.
+ * a member who joined, or an invite still waiting, with the app; a specialist without the app doesn't answer anything,
+ * and a declined, cancelled or expired invite isn't anyone.
  */
-export function hasTeam(members: { level: string; status: string; hasApp: boolean }[]): boolean {
-  return members.some((m) => m.level !== 'owner' && m.status !== 'removed' && m.hasApp)
+export function hasTeam(members: Pick<TeamMember, 'level' | 'status' | 'hasApp' | 'joined' | 'invite'>[]): boolean {
+  return members.some((m) => m.level !== 'owner' && m.status !== 'removed' && m.hasApp && (m.joined || m.invite?.state === 'pending'))
 }

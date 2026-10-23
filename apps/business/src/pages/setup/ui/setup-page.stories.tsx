@@ -174,7 +174,9 @@ const fakeApi =
         rules = { ...rules, ...body }
         return json(rules)
       }
-      if (/^GET \/w\/[^/]+\/team$/.test(route)) return json({ items: [owner, ...team] })
+      // the api doesn't show a draft's team (`not_found`); `team` plays the day it does
+      if (/^GET \/w\/[^/]+\/team$/.test(route))
+        return team.length ? json({ items: [owner, ...team] }) : json({ error: { code: 'not_found' } }, 404)
       if (route === 'GET /categories')
         return json({
           items: LAUNCH_CATEGORIES.map((c) => ({ ...c, icon: 'store', bookingTypes: ['appointment'], specialistWord: '', intro: '' })),
@@ -491,7 +493,8 @@ export const HoursAllClosed: Story = {
 const rulesDraft: Draft = { ...addressDraft, step: 'rules', address: { line: '247 Bitarap Türkmenistan Avenue', city } }
 
 /**
- * The booking rules step, someone working alone: «I confirm» with a 30-minute hold, no «Who answers requests?»;
+ * The booking rules step of a draft (whose team the api doesn't show): «I confirm» with a 30-minute hold, no «Who
+ * answers requests?»;
  * instant confirmation hides the hold and says to block busy times; Continue saves only what changed and opens Done.
  */
 export const Rules: Story = {
@@ -514,7 +517,7 @@ export const Rules: Story = {
   },
 }
 
-/** With a team: who answers requests, «Both» by default; the choice is saved with the step. */
+/** With a team (an api that shows the draft's team): who answers requests, «Both» by default; saved with the step. */
 export const RulesWithTeam: Story = {
   args: { server: fakeApi({ draft: rulesDraft, team: [member('m1', 'Aýna', 'specialist'), member('m2', 'Leýli', 'specialist', false)] }) },
   play: async ({ canvas }) => {
