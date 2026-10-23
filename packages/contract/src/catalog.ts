@@ -47,8 +47,12 @@ export const categorySchema = z
      */
     starterGroups: z.array(
       z.object({
+        /** Unique in the category, like each service's: the wizard keys its rows by them. */
+        id: slugSchema,
         name: z.string(),
-        services: z.array(z.object({ name: z.string(), durationMin: z.number().int().positive(), price: priceSchema })).min(1),
+        services: z
+          .array(z.object({ id: slugSchema, name: z.string(), durationMin: z.number().int().positive(), price: priceSchema }))
+          .min(1),
       }),
     ),
   })

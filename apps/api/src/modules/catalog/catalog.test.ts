@@ -33,7 +33,13 @@ describe('catalogue', () => {
     const en = await b.req('/v1/categories')
     const beauty = en.json.items[0]
     expect(beauty.starterGroups.map((g: { name: string }) => g.name)).toEqual(['Hair', 'Nails', 'Face', 'Massage'])
-    expect(beauty.starterGroups[0].services[0]).toEqual({ name: 'Women’s haircut', durationMin: 60, price: { type: 'fixed', amount: 80 } })
+    expect(beauty.starterGroups[0]).toMatchObject({ id: 'hair', name: 'Hair' })
+    expect(beauty.starterGroups[0].services[0]).toEqual({
+      id: 'womens-haircut',
+      name: 'Women’s haircut',
+      durationMin: 60,
+      price: { type: 'fixed', amount: 80 },
+    })
     expect(beauty.starterGroups[0].services[2]).toMatchObject({ name: 'Hair colouring', price: { type: 'from', amount: 250 } })
     expect(en.json.items.find((c: { id: string }) => c.id === 'restaurant').starterGroups).toEqual([])
     const tk = await b.req('/v1/categories?lang=tk')

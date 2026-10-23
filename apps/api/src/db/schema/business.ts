@@ -43,9 +43,10 @@ export interface StoredPhoto {
   alt: Localized
 }
 
-/** A service the wizard offers for a category (step 5, F-098), under its group ("Hair", "Nails"). */
+/** A service the wizard offers for a category (step 5, F-098), under its group ("Hair", "Nails"); ids are slugs. */
 export interface StarterService {
-  group: Localized
+  id: string
+  group: { id: string; name: Localized }
   name: Localized
   durationMin: number
   price: { type: 'fixed' | 'from' | 'free' | 'hidden'; amount: number }

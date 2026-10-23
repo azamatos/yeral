@@ -20,9 +20,32 @@ export interface CategorySeed {
 
 const L = (tk: string, ru: string, en: string): Localized => ({ tk, ru, en })
 type Starter = [name: Localized, durationMin: number, amount: number, from?: 'from']
+/** "Women’s haircut" → `womens-haircut`: a starter's or group's id in its category. */
+const slug = (l: Localized) =>
+  (l.en ?? '')
+    .toLowerCase()
+    .replace(/[’']/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
 /** One group of starter services: `[name, minutes, TMT]`, with `'from'` for a price that starts there. */
 const group = (name: Localized, ...rows: Starter[]): StarterService[] =>
-  rows.map(([svc, durationMin, amount, from]) => ({ group: name, name: svc, durationMin, price: { type: from ?? 'fixed', amount } }))
+  rows.map(([svc, durationMin, amount, from]) => ({
+    id: slug(svc),
+    group: { id: slug(name), name },
+    name: svc,
+    durationMin,
+    price: { type: from ?? 'fixed', amount },
+  }))
+
+// starters more than one category offers (B-Onboarding's lists repeat them)
+const MANICURE: Starter = [L('Manikýur', 'Маникюр', 'Manicure'), 60, 70]
+const GEL_MANICURE: Starter = [L('Gel manikýur', 'Гель-маникюр', 'Gel manicure'), 90, 110]
+const PEDICURE: Starter = [L('Pedikýur', 'Педикюр', 'Pedicure'), 75, 90]
+const FACIAL: Starter = [L('Ýüz arassalamak', 'Чистка лица', 'Facial cleansing'), 60, 150]
+const BACK_MASSAGE: Starter = [L('Arka massažy', 'Массаж спины', 'Back massage'), 30, 90]
+const BODY_MASSAGE: Starter = [L('Doly beden massažy', 'Массаж всего тела', 'Full body massage'), 60, 160]
+const KIDS_HAIRCUT: Starter = [L('Çaga saç kesimi', 'Детская стрижка', 'Children’s haircut'), 30, 40]
+const MASSAGE = L('Massaž', 'Массаж', 'Massage')
 
 export const CATEGORIES: CategorySeed[] = [
   {
@@ -38,24 +61,11 @@ export const CATEGORIES: CategorySeed[] = [
         [L('Aýal saç kesimi', 'Женская стрижка', 'Women’s haircut'), 60, 80],
         [L('Saç düzmek', 'Укладка', 'Hair styling'), 45, 60],
         [L('Saç reňklemek', 'Окрашивание', 'Hair colouring'), 120, 250, 'from'],
-        [L('Çaga saç kesimi', 'Детская стрижка', 'Children’s haircut'), 30, 40],
+        KIDS_HAIRCUT,
       ),
-      ...group(
-        L('Dyrnak', 'Ногти', 'Nails'),
-        [L('Manikýur', 'Маникюр', 'Manicure'), 60, 70],
-        [L('Gel manikýur', 'Гель-маникюр', 'Gel manicure'), 90, 110],
-        [L('Pedikýur', 'Педикюр', 'Pedicure'), 75, 90],
-      ),
-      ...group(
-        L('Ýüz', 'Лицо', 'Face'),
-        [L('Ýüz arassalamak', 'Чистка лица', 'Facial cleansing'), 60, 150],
-        [L('Gaş we kirpik', 'Брови и ресницы', 'Brows and lashes'), 30, 50],
-      ),
-      ...group(
-        L('Massaž', 'Массаж', 'Massage'),
-        [L('Arka massažy', 'Массаж спины', 'Back massage'), 30, 90],
-        [L('Doly beden massažy', 'Массаж всего тела', 'Full body massage'), 60, 160],
-      ),
+      ...group(L('Dyrnak', 'Ногти', 'Nails'), MANICURE, GEL_MANICURE, PEDICURE),
+      ...group(L('Ýüz', 'Лицо', 'Face'), FACIAL, [L('Gaş we kirpik', 'Брови и ресницы', 'Brows and lashes'), 30, 50]),
+      ...group(MASSAGE, BACK_MASSAGE, BODY_MASSAGE),
     ],
   },
   {
@@ -66,11 +76,7 @@ export const CATEGORIES: CategorySeed[] = [
     bookingTypes: ['appointment'],
     specialistWord: L('dellek', 'барбер', 'barber'),
     starterServices: [
-      ...group(
-        L('Saç kesimi', 'Стрижки', 'Haircuts'),
-        [L('Erkek saç kesimi', 'Мужская стрижка', 'Men’s haircut'), 45, 60],
-        [L('Çaga saç kesimi', 'Детская стрижка', 'Children’s haircut'), 30, 40],
-      ),
+      ...group(L('Saç kesimi', 'Стрижки', 'Haircuts'), [L('Erkek saç kesimi', 'Мужская стрижка', 'Men’s haircut'), 45, 60], KIDS_HAIRCUT),
       ...group(
         L('Sakgal', 'Борода', 'Beard'),
         [L('Sakgal düzediş', 'Оформление бороды', 'Beard trim'), 30, 40],
@@ -86,16 +92,8 @@ export const CATEGORIES: CategorySeed[] = [
     bookingTypes: ['appointment'],
     specialistWord: L('ussa', 'мастер', 'nail technician'),
     starterServices: [
-      ...group(
-        L('Eller', 'Руки', 'Hands'),
-        [L('Manikýur', 'Маникюр', 'Manicure'), 60, 70],
-        [L('Gel manikýur', 'Гель-маникюр', 'Gel manicure'), 90, 110],
-      ),
-      ...group(
-        L('Aýaklar', 'Ноги', 'Feet'),
-        [L('Pedikýur', 'Педикюр', 'Pedicure'), 75, 90],
-        [L('Gel pedikýur', 'Гель-педикюр', 'Gel pedicure'), 90, 120],
-      ),
+      ...group(L('Eller', 'Руки', 'Hands'), MANICURE, GEL_MANICURE),
+      ...group(L('Aýaklar', 'Ноги', 'Feet'), PEDICURE, [L('Gel pedikýur', 'Гель-педикюр', 'Gel pedicure'), 90, 120]),
     ],
   },
   {
@@ -106,16 +104,8 @@ export const CATEGORIES: CategorySeed[] = [
     bookingTypes: ['appointment'],
     specialistWord: L('hünärmen', 'мастер', 'therapist'),
     starterServices: [
-      ...group(
-        L('Massaž', 'Массаж', 'Massage'),
-        [L('Arka massažy', 'Массаж спины', 'Back massage'), 30, 90],
-        [L('Doly beden massažy', 'Массаж всего тела', 'Full body massage'), 60, 160],
-      ),
-      ...group(
-        L('Spa', 'Спа', 'Spa'),
-        [L('Ýüz arassalamak', 'Чистка лица', 'Facial cleansing'), 60, 150],
-        [L('Spa dessury', 'Спа-ритуал', 'Spa ritual'), 90, 250],
-      ),
+      ...group(MASSAGE, BACK_MASSAGE, BODY_MASSAGE),
+      ...group(L('Spa', 'Спа', 'Spa'), FACIAL, [L('Spa dessury', 'Спа-ритуал', 'Spa ritual'), 90, 250]),
     ],
   },
   {

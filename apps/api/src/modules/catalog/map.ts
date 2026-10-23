@@ -4,21 +4,18 @@ import { localized, type BookingType, type Locale, type Localized, type Price } 
 import { and, eq, isNull, sql, type AnyColumn } from 'drizzle-orm'
 import { businesses, categories, type StarterService, type StoredPhoto } from '../../db/schema'
 import type { Deps } from '../../deps'
+import { groupBy } from '../../lib/group'
 import type { BusinessRow, ServiceRow } from '../availability/context'
 
 export const text = (l: Localized | null | undefined, lang: Locale): string => (l ? localized(l, lang) : '')
 
 /** A category's starter services in their groups (step 5, F-098), each group where its first service is. */
-export function starterGroups(rows: StarterService[], lang: Locale) {
-  const groups = new Map<string, { name: string; services: { name: string; durationMin: number; price: Price }[] }>()
-  for (const r of rows) {
-    const name = text(r.group, lang)
-    const group = groups.get(name) ?? { name, services: [] }
-    group.services.push({ name: text(r.name, lang), durationMin: r.durationMin, price: r.price })
-    groups.set(name, group)
-  }
-  return [...groups.values()]
-}
+export const starterGroups = (rows: StarterService[], lang: Locale) =>
+  [...groupBy(rows, (r) => r.group.id)].map(([id, services]) => ({
+    id,
+    name: text(services[0]!.group.name, lang),
+    services: services.map((s) => ({ id: s.id, name: text(s.name, lang), durationMin: s.durationMin, price: s.price })),
+  }))
 
 /** "Aýal saç kesimi + Gel-lak · Aýna": what a review was for, from the visit's services in the reader's language. */
 export function visitWhat(items: { serviceName: Localized; staffName: string | null }[], lang: Locale): string {
