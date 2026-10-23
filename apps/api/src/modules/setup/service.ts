@@ -6,7 +6,7 @@
  */
 import type { SetupIncompleteDetails } from '@yeral/contract/errors'
 import type { menuSchema } from '@yeral/contract/services'
-import type { mySetupSchema, setupServicesSchema, setupStartSchema } from '@yeral/contract/setup'
+import type { mySetupSchema, SetupServices, setupStartSchema } from '@yeral/contract/setup'
 import { MARKET } from '@yeral/domain/market'
 import type { Localized } from '@yeral/domain/model'
 import type { Actor } from '@yeral/domain/permissions'
@@ -15,20 +15,18 @@ import { cutAtWord, DEMO_SLUG, SLUG_MAX, slugFrom, type SetupNeed, type SetupSte
 import { and, asc, eq, isNotNull, like, ne, or } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
-import { bookingRules, businesses, categories, cities, serviceGroups, services, staff, staffServices, users } from '../../db/schema'
+import { bookingRules, businesses, categories, cities, services, staff, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import type { User } from '../../http/env'
 import { ApiError, invalid, type Issue } from '../../http/errors'
-import { emit } from '../../notify'
 import { pgCode } from '../bookings/repo'
 import { logoOf, text } from '../catalog/map'
 import { accountName } from '../me/me'
-import { menuOf } from '../menu/service'
+import { setMenu, type PlannedGroup } from '../menu/service'
 import { teamChanged } from '../team/service'
 
 type Start = z.infer<typeof setupStartSchema>
 type MySetup = z.infer<typeof mySetupSchema>
-type SetupServices = z.infer<typeof setupServicesSchema>
 type Menu = z.infer<typeof menuSchema>
 
 /** The person's draft: a business they own still being set up, with what the sign-in's card shows of it. */
@@ -184,18 +182,15 @@ export async function saveStep(deps: Deps, business: { id: string; setupStep: Se
   if (!saved) throw new ApiError('invalid_status')
 }
 
-/** The most services the services step makes (a menu that long is set up in Settings). */
-const SETUP_SERVICES_MAX = 100
-
-/** The same text in the languages written: an owner's "change" that leaves a starter's name as it was. */
-const sameText = (written: Localized, of: Localized) =>
-  Object.entries(written).every(([lang, value]) => of[lang as keyof Localized] === value)
+/** The same text where both are written: a starter sent back as it was (blank languages don't count). */
+const sameText = (sent: Localized, of: Localized) =>
+  Object.entries(sent).every(([lang, value]) => !value || of[lang as keyof Localized] === value)
 
 /**
- * Step 5 (B-04, F-098): the draft's menu as the step leaves it, in one transaction that replaces what the step made
- * before (a retry or a second save adds nothing twice; a draft has no bookings to keep). Starters come from the draft's
- * category as it is now, with their names in every language while unchanged, in the order the request gives; everyone
- * on the team who takes bookings does every service, as the step's "I work alone" default (Settings changes it).
+ * Step 5 (B-04, F-098): the draft's whole menu as the step leaves it (`setMenu`), in one transaction. Starters come
+ * from the draft's category as it is now: a starter group or service keeps its names in every language while the name
+ * sent is the same, and each is used once. A new service is done by everyone on the team who takes bookings, or the
+ * owner when nobody does (the step's "I work alone"). Only the draft's owner, while it's a draft.
  */
 export async function setupServices(
   deps: Deps,
@@ -205,7 +200,7 @@ export async function setupServices(
 ): Promise<Menu> {
   assertDraft(business, actor)
   return deps.db.transaction(async (tx) => {
-    // the menu held, as its own changes hold it (`lockMenu`), and the draft still one
+    // held as the menu's own changes hold it, and still a draft: a save racing the finish doesn't change a workspace
     const [b] = await tx
       .select({ setupStep: businesses.setupStep, categoryId: businesses.categoryId })
       .from(businesses)
@@ -217,48 +212,43 @@ export async function setupServices(
     const starterGroups = new Map((category?.starters ?? []).map((s) => [s.group.id, s.group.name]))
 
     const issues: Issue[] = []
-    const used = new Set<string>()
-    const groups = input.groups.map((g, gi) => {
-      const groupName = g.name ?? (g.starter ? starterGroups.get(g.starter) : undefined)
-      if (g.starter && !starterGroups.has(g.starter)) issues.push({ path: ['groups', gi, 'starter'], code: 'invalid' })
-      else if (!groupName) issues.push({ path: ['groups', gi, 'name'], code: 'invalid' })
-      const rows = g.services.map((s, si) => {
+    const usedGroups = new Set<string>()
+    const usedServices = new Set<string>()
+    /** A starter's names unless the one sent differs; issues for a starter not in the category, or used twice. */
+    const resolve = (
+      ref: { id?: string; starter?: string; name?: Localized },
+      of: Map<string, Localized>,
+      used: Set<string>,
+      at: (string | number)[],
+    ): Localized | undefined => {
+      if (ref.starter === undefined) {
+        if (!ref.id && !ref.name) issues.push({ path: [...at, 'name'], code: 'invalid' })
+        return ref.name
+      }
+      const names = of.get(ref.starter)
+      if (ref.id || !names || used.has(ref.starter)) issues.push({ path: [...at, 'starter'], code: 'invalid' })
+      used.add(ref.starter)
+      return ref.name && !(names && sameText(ref.name, names)) ? ref.name : names
+    }
+    const starterNames = new Map([...starters].map(([id, s]) => [id, s.name]))
+    const plan: PlannedGroup[] = input.groups.map((g, gi) => ({
+      id: g.id,
+      name: resolve(g, starterGroups, usedGroups, ['groups', gi]),
+      services: g.services.map((s, si) => {
         const at = ['groups', gi, 'services', si]
-        const starter = s.starter ? starters.get(s.starter) : undefined
-        if (s.starter && (!starter || used.has(s.starter))) issues.push({ path: [...at, 'starter'], code: 'invalid' })
-        if (s.starter) used.add(s.starter)
-        const name = s.name && !(starter && sameText(s.name, starter.name)) ? s.name : starter?.name
-        if (!name && !s.starter) issues.push({ path: [...at, 'name'], code: 'invalid' })
         for (const field of Object.keys(serviceErrors({ ...s, bufferMin: null }))) issues.push({ path: [...at, field], code: 'invalid' })
-        return { name: name ?? {}, durationMin: s.durationMin, priceType: s.priceType, priceAmount: s.priceAmount }
-      })
-      return { name: groupName ?? {}, rows }
-    })
-    if (groups.reduce((n, g) => n + g.rows.length, 0) > SETUP_SERVICES_MAX) issues.push({ path: ['groups'], code: 'too_big' })
+        return { ...s, name: resolve(s, starterNames, usedServices, at) }
+      }),
+    }))
     if (issues.length) throw invalid(...issues)
 
-    // what the step made before goes (the links with its services), then the menu as sent
-    await tx.delete(services).where(eq(services.businessId, business.id))
-    await tx.delete(serviceGroups).where(eq(serviceGroups.businessId, business.id))
-    const made: string[] = []
-    for (const [sort, g] of groups.entries()) {
-      const [group] = await tx
-        .insert(serviceGroups)
-        .values({ businessId: business.id, name: g.name, sort })
-        .returning({ id: serviceGroups.id })
-      const rows = await tx
-        .insert(services)
-        .values(g.rows.map((r, i) => ({ ...r, businessId: business.id, groupId: group!.id, sort: i })))
-        .returning({ id: services.id })
-      made.push(...rows.map((r) => r.id))
-    }
-    const doers = await tx
-      .select({ id: staff.id })
+    const team = await tx
+      .select({ id: staff.id, level: staff.level, bookable: staff.bookable })
       .from(staff)
-      .where(and(eq(staff.businessId, business.id), eq(staff.bookable, true), ne(staff.status, 'removed')))
-    if (doers.length) await tx.insert(staffServices).values(doers.flatMap((d) => made.map((serviceId) => ({ staffId: d.id, serviceId }))))
-    await emit(tx, { type: 'business.updated', businessId: business.id })
-    return menuOf(tx, business.id, deps.now())
+      .where(and(eq(staff.businessId, business.id), ne(staff.status, 'removed')))
+    const bookable = team.filter((m) => m.bookable)
+    const doers = (bookable.length ? bookable : team.filter((m) => m.level === 'owner')).map((m) => m.id)
+    return setMenu(tx, business.id, plan, doers, deps.now())
   })
 }
 

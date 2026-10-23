@@ -1072,7 +1072,10 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     services: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof setupServicesSchema>) => call(w.setup.services.$put({ param: { slug }, json })),
-        onSuccess: () => settingsChanged(slug),
+        // the menu comes back whole: a draft's other screens have nothing else to refetch
+        onSuccess: (menu) => {
+          queryClient.setQueryData(keys.menu(slug), menu)
+        },
       }),
     /** "Senenama geç": into the switcher and Ýeral's review; `setup_incomplete` names what's missing. */
     finish: (slug: string) =>
