@@ -14,9 +14,10 @@ import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { usePageTitle } from '@/shared/lib'
 import { AuthPage } from '@/shared/ui'
-import { isWizardStep, stepFor, stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
+import { isWizardStep, nextStep, stepFor, stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
+import { useAddressStep } from './address-step'
 import { BUSINESS_NAME_MAX, BusinessStep } from './business-step'
-import { SetupFrame, StepHeader, useStepName } from './setup-frame'
+import { SetupFrame, StepHeader, useStepName, type StepAction } from './setup-frame'
 
 /**
  * `/setup/{step}` — the setup wizard (B-Onboarding, design §27.2, book B-02–B-06, Q-200). Someone signed in with a
@@ -122,7 +123,6 @@ function Steps({
   const start = useMutation(sdk.setup.start())
   const saveStep = useMutation(sdk.setup.step(draft?.slug ?? ''))
   const updateProfile = useMutation(sdk.settings.updateProfile(draft?.slug ?? ''))
-  const busy = start.isPending || saveStep.isPending || updateProfile.isPending
 
   const reached: SetupStep = draft?.step ?? 'business'
   const phone = formatPhone(me.phone)
@@ -130,7 +130,6 @@ function Steps({
   // spaces around the name don't count: the api trims it before its limit
   const length = name.trim().length
   const businessValid = length > 0 && length <= BUSINESS_NAME_MAX && !!categoryId
-  const valid = step === 'business' ? businessValid : true
   const edited = step === 'business' && (name.trim() !== (draft?.name ?? '') || categoryId !== (draft?.categoryId ?? null))
 
   const go = (to: WizardStep) => void navigate({ to: '/setup/$step', params: { step: to } })
@@ -159,50 +158,81 @@ function Steps({
     }
   }
 
-  const continueBusiness = async () => {
-    if (!(await saveBusiness())) return
-    try {
-      if (draft && stepIndex(draft.step) < stepIndex('address')) await saveStep.mutateAsync('address')
-      go('address')
-    } catch (error) {
-      failed(error)
-    }
-  }
-
-  /** A step in the list: the business step's edits are saved first, so leaving it never drops them. */
-  const open = async (to: WizardStep) => {
-    if (busy) return
-    if (edited && businessValid && !(await saveBusiness())) return
-    go(to)
-  }
-
-  const later = async () => {
-    if (busy) return
-    // reopening lands where it was left; a new draft starts at the address step, as Continue would leave it
-    let reopens: SetupStep = step
-    try {
-      // a valid business step keeps what's typed
-      if (step === 'business' && businessValid && (edited || !draft)) {
-        if (!(await saveBusiness())) return
-        if (!draft) reopens = 'address'
-      }
-      if (draft) await saveStep.mutateAsync(step)
-      toast(t('setup.laterSaved', { phone, step: stepName(reopens, more) }))
-    } catch (error) {
-      failed(error)
-    }
-  }
-
   const hint = !length
     ? t('setup.business.hintName')
     : length > BUSINESS_NAME_MAX
       ? t('setup.business.hintLong', { max: BUSINESS_NAME_MAX })
       : t('setup.business.hintCategory')
+
+  // each step's content and what it tells the frame; the frame stays one element around every step
+  const address = useAddressStep(draft?.slug ?? '', step === 'address' && !!draft)
+  const [body, action]: [ReactNode, StepAction] =
+    step === 'business'
+      ? [
+          <BusinessStep
+            more={more}
+            owner={{ name: ownerName, phone }}
+            name={name}
+            onName={setName}
+            pageSlug={draft?.slug}
+            categoryId={categoryId}
+            onCategory={setCategoryId}
+            categories={categories}
+          />,
+          {
+            valid: businessValid,
+            hint,
+            busy: start.isPending || updateProfile.isPending,
+            ready: true,
+            // a new draft from a valid business step; edits to the one there
+            save: () => (businessValid && (!draft || edited) ? saveBusiness() : Promise.resolve(true)),
+            // a new draft starts at the address step, as Continue would leave it
+            reopens: !draft && businessValid ? 'address' : undefined,
+          },
+        ]
+      : step === 'address'
+        ? [address.body, address.action]
+        : [
+            <LaterStep step={step} name={draft?.name ?? ''} />,
+            { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) },
+          ]
+  const busy = action.busy || saveStep.isPending
+
+  /** Continue: the step saved, the draft moved on to the next step (a new draft already starts at the address). */
+  const next = nextStep(step)
+  const onContinue = async () => {
+    if (busy || !next || !(await action.save())) return
+    try {
+      if (draft && stepIndex(draft.step) < stepIndex(next)) await saveStep.mutateAsync(next)
+      go(next)
+    } catch (error) {
+      failed(error)
+    }
+  }
+
+  /** Back or a step in the list: the step's valid edits are saved first, so leaving it never drops them. */
+  const open = async (to: WizardStep) => {
+    if (busy || !(await action.save())) return
+    go(to)
+  }
+
+  const later = async () => {
+    if (busy) return
+    try {
+      if (!(await action.save())) return
+      if (draft) await saveStep.mutateAsync(step)
+      // reopening lands where it was left
+      toast(t('setup.laterSaved', { phone, step: stepName(action.reopens ?? step, more) }))
+    } catch (error) {
+      failed(error)
+    }
+  }
+
   const previous = WIZARD_STEPS[stepIndex(step) - 1]
   const footer = (
     <WizardFooter
       // the phone step is the sign-in, done once someone is signed in: the business step has no Back
-      back={step !== 'business' && previous ? { label: t('setup.back'), onClick: () => go(previous) } : undefined}
+      back={step !== 'business' && previous ? { label: t('setup.back'), onClick: () => void open(previous) } : undefined}
       start={
         more && step === 'business' ? (
           <Button asChild variant="ghost" size="l">
@@ -210,17 +240,17 @@ function Steps({
           </Button>
         ) : undefined
       }
-      hint={step === 'business' && !businessValid ? hint : undefined}
+      hint={action.ready && !action.valid ? action.hint : undefined}
       primary={
         step === 'done'
           ? undefined
           : {
               children: t('setup.continue'),
-              // the steps after the business one come with their own pieces of slice 2
-              disabled: step !== 'business' || !valid,
+              // the steps not built yet come with their own pieces of slice 2
+              disabled: !action.ready || !action.valid,
               loading: busy,
               loadingLabel: t('setup.saving'),
-              onClick: () => void continueBusiness(),
+              onClick: () => void onContinue(),
             }
       }
     />
@@ -237,26 +267,13 @@ function Steps({
       reached={reached}
       more={more}
       summaries={summaries}
-      canOpen={(s) => !busy && s !== 'phone' && stepIndex(s) <= stepIndex(reached) && (stepIndex(s) < stepIndex(step) || valid)}
+      canOpen={(s) => !busy && s !== 'phone' && stepIndex(s) <= stepIndex(reached) && (stepIndex(s) < stepIndex(step) || action.valid)}
       onOpen={(s) => void open(s)}
       onLater={step === 'done' ? undefined : () => void later()}
       live={busy ? t('setup.saving') : undefined}
       footer={footer}
     >
-      {step === 'business' ? (
-        <BusinessStep
-          more={more}
-          owner={{ name: ownerName, phone }}
-          name={name}
-          onName={setName}
-          pageSlug={draft?.slug}
-          categoryId={categoryId}
-          onCategory={setCategoryId}
-          categories={categories}
-        />
-      ) : (
-        <LaterStep step={step} name={draft?.name ?? ''} />
-      )}
+      {body}
     </SetupFrame>
   )
 }

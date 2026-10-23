@@ -185,7 +185,7 @@ flowchart TD
 
 > Open question Q-201: setup for table and class businesses.
 
-**Status** — Design: drawn (B-Onboarding · `step`, `homeBased`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); the name and category start the draft, the address is the profile's `location` (a draft's first address isn't a move).
+**Status** — Design: drawn (B-Onboarding · `step`, `homeBased`) · Code: api built (`POST /v1/setup` the draft, `GET /v1/me/setup` its step, `PUT /v1/w/{slug}/setup` the step, `POST …/setup/finish`; the steps save through the settings endpoints; 21.10.2026); the name and category start the draft, the address is the profile's `location` (a draft's first address isn't a move); the wizard's steps 2 and 3 built in the business app (23.10.2026; chapter 9, B-03 (how)).
 
 ### B-04 · Set hours, services and team
 

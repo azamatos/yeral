@@ -11,6 +11,28 @@ import { LAUNCH_CATEGORIES, PageStory } from '@/shared/storybook'
 import { SetupPage } from './setup-page'
 
 const city = { id: 'ashgabat', name: 'Ashgabat' }
+const cities = [
+  { ...city, lat: 37.9601, lng: 58.3261 },
+  { id: 'mary', name: 'Mary', lat: 37.6005, lng: 61.8302 },
+]
+
+/** What the address search finds for «247 Bitarap» in Ashgabat (Photon's answer, as the api shapes it). */
+const found = [
+  {
+    label: '247 Bitarap Türkmenistan Avenue, Ashgabat',
+    line: '247 Bitarap Türkmenistan Avenue',
+    street: 'Bitarap Türkmenistan Avenue',
+    lat: 37.9375,
+    lng: 58.38,
+  },
+  {
+    label: 'Ak Öý, 247/1 Bitarap Türkmenistan Avenue, Ashgabat',
+    line: '247/1 Bitarap Türkmenistan Avenue',
+    street: 'Bitarap Türkmenistan Avenue',
+    lat: 37.9371,
+    lng: 58.3806,
+  },
+]
 
 const maysa: Me = {
   id: 'u-maysa',
@@ -56,12 +78,27 @@ const json = (body: unknown, status = 200) =>
 
 /**
  * The api as the wizard uses it. `signedIn`: false for nobody. `workspaces`: the person's businesses (one makes it
- * «Create a business»). `draft`: an unfinished setup.
+ * «Create a business»). `draft`: an unfinished setup. `search`: `false` when the address search isn't there
+ * (`address_search_unavailable`).
  */
 const fakeApi =
-  ({ signedIn = true, workspaces = [], draft = null }: { signedIn?: boolean; workspaces?: Workspace[]; draft?: Draft | null } = {}) =>
+  ({
+    signedIn = true,
+    workspaces = [],
+    draft = null,
+    search = true,
+  }: { signedIn?: boolean; workspaces?: Workspace[]; draft?: Draft | null; search?: boolean } = {}) =>
   (): typeof fetch => {
     let setup = draft && { ...draft }
+    // the draft's profile as the address step reads and saves it
+    let location = {
+      cityId: 'ashgabat',
+      address: setup?.address?.line ?? '',
+      street: setup?.address?.line ?? '',
+      lat: 37.9601,
+      lng: 58.3261,
+    }
+    let notes = { floor: null as string | null, entranceNote: null as string | null, hideExactAddress: false }
     return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
       const request = new Request(input, init)
       const path = new URL(request.url).pathname.replace(/^\/v1/, '')
@@ -71,6 +108,29 @@ const fakeApi =
       if (route === 'GET /me') return json(signedIn ? maysa : null)
       if (route === 'GET /me/workspaces') return json({ items: workspaces, current: workspaces[0]?.slug ?? null })
       if (route === 'GET /me/setup') return json({ setup })
+      if (route === 'GET /cities') return json({ items: cities, main: 'ashgabat', nearest: null })
+      if (/^GET \/w\/[^/]+\/settings\/profile$/.test(route) && setup)
+        return json({
+          slug: setup.slug,
+          name: setup.name,
+          logo: null,
+          categoryId: setup.categoryId,
+          about: {},
+          phone: maysa.phone,
+          amenities: [],
+          womenOnly: false,
+          location,
+          ...notes,
+          verification: 'pending',
+          verificationReason: null,
+          hidden: null,
+        })
+      if (/^GET \/w\/[^/]+\/settings\/address-search$/.test(route)) {
+        if (!search) return json({ error: { code: 'address_search_unavailable' } }, 503)
+        const q = new URL(request.url).searchParams.get('q') ?? ''
+        const words = q.toLowerCase().split(/\s+/).filter(Boolean)
+        return json({ items: found.filter((a) => words.every((w) => a.label.toLowerCase().includes(w))) })
+      }
       if (route === 'GET /categories')
         return json({
           items: LAUNCH_CATEGORIES.map((c) => ({ ...c, icon: 'store', bookingTypes: ['appointment'], specialistWord: '', intro: '' })),
@@ -99,6 +159,17 @@ const fakeApi =
         if (typeof body.name === 'string') setup.name = body.name
         const category = LAUNCH_CATEGORIES.find((c) => c.id === body.categoryId)
         if (category) Object.assign(setup, { category: category.name, categoryId: category.id })
+        if (body.location) {
+          location = body.location as typeof location
+          const c = cities.find((x) => x.id === location.cityId)!
+          setup.address = { line: location.address, city: { id: c.id, name: c.name } }
+        }
+        if ('floor' in body)
+          notes = {
+            floor: body.floor as string | null,
+            entranceNote: body.entranceNote as string | null,
+            hideExactAddress: !!body.hideExactAddress,
+          }
         return json({})
       }
       return json({ error: { code: 'not_found' } }, 404)
@@ -233,5 +304,69 @@ export const Phone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('progressbar', { name: 'Setup steps' })).toHaveAttribute('aria-valuetext', 'Step 2 of 8')
+  },
+}
+
+const addressDraft: Draft = {
+  slug: 'glow-studio',
+  name: 'Glow Studio',
+  step: 'address',
+  category: 'Beauty',
+  categoryId: 'beauty',
+  logo: null,
+  address: null,
+}
+
+/**
+ * The address step: the map waits behind «Pick the address first»; the search lists what it finds, a pick puts the pin
+ * there; the entrance note counts its letters; Continue saves the address and opens the hours with it in the list.
+ */
+export const Address: Story = {
+  args: { server: fakeApi({ draft: addressDraft }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Where will clients find you?' })).toBeVisible()
+    await expect(canvas.getByText('Pick the address first')).toBeVisible()
+    const cont = canvas.getByRole('button', { name: 'Continue' })
+    await expect(cont).toHaveAccessibleDescription('Pick the address from the list.')
+    await userEvent.type(canvas.getByRole('combobox', { name: 'Address' }), '247 Bitarap')
+    const list = await canvas.findByRole('listbox', { name: 'Address suggestions' })
+    await expect(within(list).getAllByRole('option')).toHaveLength(2)
+    await userEvent.click(within(list).getByRole('option', { name: /247\/1 Bitarap/ }))
+    await expect(canvas.getByRole('combobox', { name: 'Address' })).toHaveValue('247/1 Bitarap Türkmenistan Avenue')
+    await expect(await canvas.findByRole('button', { name: 'Pin on the map. Move it with the arrow keys' })).toBeVisible()
+    await expect(canvas.getByText('Drag the pin to fine-tune it')).toBeVisible()
+    await userEvent.type(canvas.getByLabelText('Where is the entrance?'), 'Through the courtyard')
+    await expect(canvas.getByText('21 / 200')).toBeVisible()
+    await expect(cont).toBeEnabled()
+    await userEvent.click(cont)
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Your hours' })).toBeVisible()
+    await expect(canvas.getByText('247/1 Bitarap Türkmenistan Avenue, Ashgabat')).toBeVisible()
+  },
+}
+
+/** No address search here: the typed street is the one choice, and the pin is placed by hand. */
+export const AddressByHand: Story = {
+  args: { server: fakeApi({ draft: addressDraft, search: false }) },
+  play: async ({ canvas }) => {
+    const input = await canvas.findByRole('combobox', { name: 'Address' })
+    await userEvent.type(input, '12 Oguzhan Street')
+    const option = await canvas.findByRole('option', { name: /12 Oguzhan Street/ })
+    await expect(option).toHaveTextContent('Street · you place the pin yourself · Ashgabat')
+    await userEvent.click(option)
+    await expect(await canvas.findByRole('button', { name: 'Pin on the map. Move it with the arrow keys' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Continue' })).toBeEnabled()
+  },
+}
+
+/** Working from home: the approximate circle instead of the pin, and the note on who sees the exact address. */
+export const AddressFromHome: Story = {
+  args: {
+    server: fakeApi({ draft: { ...addressDraft, address: { line: '12 Oguzhan Street', city } } }),
+  },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('switch', { name: 'I work from home' }))
+    await expect(await canvas.findByRole('button', { name: /The approximate area/ })).toBeVisible()
+    await expect(canvas.getByText(/The exact address shows only after a booking is confirmed/)).toBeVisible()
+    await expect(canvas.getByText('Clients see only the approximate area — you can drag the circle')).toBeVisible()
   },
 }

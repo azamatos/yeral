@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import type { SetupStep } from '@yeral/domain/setup'
 import { SUPPORT_LINE } from '@yeral/features/contact-yeral'
 import { Logo } from '@yeral/ui/brand'
 import { ProgressBar } from '@yeral/ui/progress-bar'
@@ -8,6 +9,24 @@ import { LogOut } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
+
+/** What a step tells the frame: whether it can go on (and the hint while it can't), and how to keep what's typed. */
+export type StepAction = {
+  valid: boolean
+  /** Why Continue waits («Pick the address from the list.»): the disabled button's description. */
+  hint?: string
+  /** Saving: Continue spins, the step list and «Continue later» wait. */
+  busy: boolean
+  /** False while the step can't go on yet (loading, or not built): Continue stays disabled. */
+  ready: boolean
+  /**
+   * Saves what's typed when it's valid and changed: before Continue moves the draft on, and before Back, the step list
+   * or «Continue later» leave the step. False when it failed (the person heard why) and the step stays.
+   */
+  save: () => Promise<boolean>
+  /** Where «Continue later» reopens when the save made the draft (the business step's first save: the address step). */
+  reopens?: SetupStep
+}
 
 /** The step's name in the list: the phone step is «Account» for someone who already has a business. */
 export function useStepName() {
