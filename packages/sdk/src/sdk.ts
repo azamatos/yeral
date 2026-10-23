@@ -59,7 +59,7 @@ import {
 import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
 import type { reviewReplyInputSchema, reviewReportInputSchema, teamReviewsQuerySchema } from '@yeral/contract/reviews'
-import type { setupStartSchema, setupStepInputSchema } from '@yeral/contract/setup'
+import type { setupServicesSchema, setupStartSchema, setupStepInputSchema } from '@yeral/contract/setup'
 import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
 import type {
   addressSearchQuerySchema,
@@ -1067,6 +1067,15 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: (step: z.input<typeof setupStepInputSchema>['step']) => call(w.setup.$put({ param: { slug }, json: { step } })),
         onSuccess: () => invalidate(keys.setup()),
+      }),
+    /** Step 5: the draft's whole menu in one go (the picked starters and the owner's own), replacing the step's last save. */
+    services: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof setupServicesSchema>) => call(w.setup.services.$put({ param: { slug }, json })),
+        // the menu comes back whole: a draft's other screens have nothing else to refetch
+        onSuccess: (menu) => {
+          queryClient.setQueryData(keys.menu(slug), menu)
+        },
       }),
     /** "Senenama geç": into the switcher and Ýeral's review; `setup_incomplete` names what's missing. */
     finish: (slug: string) =>

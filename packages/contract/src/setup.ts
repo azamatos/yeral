@@ -6,7 +6,8 @@
 import { NAME_MAX } from '@yeral/domain/names'
 import { SETUP_STEPS } from '@yeral/domain/setup'
 import { z } from 'zod'
-import { cityRefSchema, photoSchema, slugSchema } from './common'
+import { cityRefSchema, idSchema, photoSchema, slugSchema } from './common'
+import { groupInputSchema, serviceInputSchema } from './services'
 
 /** Step 2, "Biznes": the name and a category that takes appointments (tables and classes come later, book Q-030). */
 export const setupStartSchema = z
@@ -45,3 +46,59 @@ export const setupStepInputSchema = z
   .object({ step: z.enum(SETUP_STEPS) })
   .strict()
   .meta({ id: 'SetupStepInput' })
+
+/** The most services the services step makes in one go (a longer menu is set up in Settings). */
+export const SETUP_SERVICES_MAX = 100
+
+/** The terms each row of the step has (the menu's own limits: `serviceErrors`). */
+const terms = serviceInputSchema.pick({ durationMin: true, priceType: true, priceAmount: true }).shape
+
+/**
+ * Step 5, "Hyzmatlar" (B-04, F-098): the draft's whole menu as the step leaves it, made in one go, in this order. A
+ * group or service saved before comes by its `id` and keeps what the step doesn't show (a description, its buffer,
+ * who does it); anything of the menu not sent goes, so saving again adds nothing twice. A starter of the draft's
+ * category keeps its name in every language while the one sent is the same; the owner's own rows ("New services")
+ * come with their names as written. A new service is done by everyone on the team who takes bookings (the owner when
+ * nobody does), the step's "I work alone" default; Settings → Services changes it.
+ */
+export const setupServicesSchema = z
+  .object({
+    groups: z
+      .array(
+        z
+          .object({
+            /** A group of the draft's menu. */
+            id: idSchema.optional(),
+            /** A starter group of the draft's category. */
+            starter: slugSchema.optional(),
+            /** As written: needed for a new group without `starter`. */
+            name: groupInputSchema.shape.name.optional(),
+            services: z
+              .array(
+                z
+                  .object({
+                    /** A service of the draft's menu. */
+                    id: idSchema.optional(),
+                    /** A starter service of the draft's category. */
+                    starter: slugSchema.optional(),
+                    /** As written: needed for a new service without `starter`. */
+                    name: serviceInputSchema.shape.name.optional(),
+                    ...terms,
+                  })
+                  .strict(),
+              )
+              .min(1)
+              .max(SETUP_SERVICES_MAX),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(30),
+  })
+  .strict()
+  .refine((m) => m.groups.reduce((n, g) => n + g.services.length, 0) <= SETUP_SERVICES_MAX, {
+    path: ['groups'],
+    message: `Up to ${SETUP_SERVICES_MAX} services`,
+  })
+  .meta({ id: 'SetupServices' })
+export type SetupServices = z.input<typeof setupServicesSchema>

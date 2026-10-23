@@ -3,13 +3,14 @@
  * again at sign-in, save the wizard's step, finish.
  */
 import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
-import { mySetupSchema, setupSchema, setupStartSchema, setupStepInputSchema } from '@yeral/contract/setup'
+import { menuSchema } from '@yeral/contract/services'
+import { mySetupSchema, setupSchema, setupServicesSchema, setupStartSchema, setupStepInputSchema } from '@yeral/contract/setup'
 import { workspaceParamSchema } from '@yeral/contract/team'
 import type { AppEnv } from '../../http/env'
 import { errors, json, jsonBody, noContent } from '../../http/openapi'
 import { requireUser } from '../auth/session'
 import { requireMember } from '../team/service'
-import { finishSetup, mySetup, saveStep, startSetup } from './service'
+import { finishSetup, mySetup, saveStep, setupServices, startSetup } from './service'
 
 const tags = ['setup']
 const denied = { 401: errors[401], 403: errors[403], 404: errors[404] }
@@ -37,6 +38,14 @@ const stepRoute = createRoute({
   request: { params: workspaceParamSchema, ...jsonBody(setupStepInputSchema) },
   responses: { ...noContent, 400: errors[400], 409: errors[409], ...denied },
 })
+const servicesRoute = createRoute({
+  method: 'put',
+  path: '/w/{slug}/setup/services',
+  tags,
+  summary: "Step 5: the draft's whole menu, the picked starters and the owner's own services, replacing the step's last save",
+  request: { params: workspaceParamSchema, ...jsonBody(setupServicesSchema) },
+  responses: { 200: json(menuSchema), 400: errors[400], 409: errors[409], ...denied },
+})
 const finishRoute = createRoute({
   method: 'post',
   path: '/w/{slug}/setup/finish',
@@ -53,6 +62,10 @@ export const setupRoutes = new OpenAPIHono<AppEnv>()
     const { business, actor } = await requireMember(c, c.req.valid('param').slug, { draft: true })
     await saveStep(c.var.deps, business, actor, c.req.valid('json').step)
     return c.body(null, 204)
+  })
+  .openapi(servicesRoute, async (c) => {
+    const { business, actor } = await requireMember(c, c.req.valid('param').slug, { draft: true })
+    return c.json(await setupServices(c.var.deps, business, actor, c.req.valid('json')), 200)
   })
   .openapi(finishRoute, async (c) => {
     const { user, business, actor } = await requireMember(c, c.req.valid('param').slug, { draft: true })

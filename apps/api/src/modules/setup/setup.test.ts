@@ -123,6 +123,130 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     expect((await owner.req('/v1/setup', { body: { name: 'Merjen Nails Two', categoryId: 'nails' } })).status).toBe(201)
   })
 
+  it('the services step makes the menu in one go: starters in every language, own services, saved again by id', async () => {
+    const owner = await as('+99365930040', 'Ogulgerek')
+    const { slug } = (await owner.req('/v1/setup', { body: { name: 'Ogulgerek Beauty', categoryId: 'beauty' } })).json as { slug: string }
+    const W = `/v1/w/${slug}`
+    const put = (body: unknown) => owner.req(`${W}/setup/services`, { method: 'PUT', body })
+    const body = {
+      groups: [
+        {
+          // sent back as shown: still the starter's names
+          starter: 'hair',
+          name: { en: 'Hair' },
+          services: [
+            { starter: 'womens-haircut', name: { en: 'Women’s haircut' }, durationMin: 60, priceType: 'fixed', priceAmount: 90 },
+            // renamed by the owner: as written
+            { starter: 'hair-styling', name: { en: 'Blow-dry' }, durationMin: 45, priceType: 'fixed', priceAmount: 60 },
+          ],
+        },
+        { name: { en: 'New services' }, services: [{ name: { en: 'Henna' }, durationMin: 90, priceType: 'from', priceAmount: 100 }] },
+      ],
+    }
+    const saved = await put(body)
+    expect(saved.status).toBe(200)
+    const [me] = await db
+      .select({ id: staff.id })
+      .from(staff)
+      .innerJoin(businesses, eq(businesses.id, staff.businessId))
+      .where(and(eq(businesses.slug, slug), eq(staff.level, 'owner')))
+    const menu = saved.json as {
+      groups: { id: string; name: object; services: { id: string; name: object; staffIds: string[] }[] }[]
+    }
+    expect(menu.groups).toMatchObject([
+      {
+        name: { tk: 'Saç', ru: 'Волосы', en: 'Hair' },
+        services: [
+          {
+            name: { tk: 'Aýal saç kesimi', ru: 'Женская стрижка', en: 'Women’s haircut' },
+            durationMin: 60,
+            priceAmount: 90,
+            staffIds: [me!.id],
+          },
+          { name: { en: 'Blow-dry' }, durationMin: 45, priceAmount: 60, staffIds: [me!.id] },
+        ],
+      },
+      { name: { en: 'New services' }, services: [{ name: { en: 'Henna' }, priceType: 'from', priceAmount: 100, staffIds: [me!.id] }] },
+    ])
+    // Settings adds a description; back at the step the menu comes by id: kept, the haircut's price changed, the
+    // blow-dry left out goes, and nothing twice
+    const [hair, own] = menu.groups
+    const [haircut, blowDry] = hair!.services
+    await owner.req(`${W}/services/${haircut!.id}`, { method: 'PATCH', body: { description: { en: 'Wash and cut' } } })
+    const again = await put({
+      groups: [
+        { id: hair!.id, services: [{ id: haircut!.id, durationMin: 60, priceType: 'fixed', priceAmount: 100 }] },
+        { id: own!.id, services: [{ id: own!.services[0]!.id, durationMin: 90, priceType: 'from', priceAmount: 100 }] },
+      ],
+    })
+    expect(again.status).toBe(200)
+    expect(again.json.groups).toMatchObject([
+      {
+        id: hair!.id,
+        name: { tk: 'Saç', en: 'Hair' },
+        services: [{ id: haircut!.id, description: { en: 'Wash and cut' }, priceAmount: 100, name: { tk: 'Aýal saç kesimi' } }],
+      },
+      { id: own!.id, services: [{ name: { en: 'Henna' } }] },
+    ])
+    expect(again.json.groups[0].services.map((x: { id: string }) => x.id)).not.toContain(blowDry!.id)
+    // not on the menu or twice, a starter of another category or used twice, a nameless new row, terms out of limits
+    const wrong = await put({
+      groups: [
+        {
+          starter: 'beard',
+          services: [
+            { id: blowDry!.id, durationMin: 45, priceType: 'fixed', priceAmount: 50 },
+            { starter: 'manicure', durationMin: 45, priceType: 'fixed', priceAmount: 50 },
+            { starter: 'manicure', durationMin: 45, priceType: 'fixed', priceAmount: 50 },
+            { durationMin: 7, priceType: 'fixed', priceAmount: 0 },
+          ],
+        },
+        { starter: 'nails', services: [{ id: haircut!.id, durationMin: 60, priceType: 'fixed', priceAmount: 90 }] },
+        { starter: 'nails', services: [{ id: haircut!.id, durationMin: 60, priceType: 'fixed', priceAmount: 90 }] },
+      ],
+    })
+    expect(wrong.status).toBe(400)
+    expect(wrong.json.error.details.issues).toEqual([
+      { path: ['groups', 0, 'starter'], code: 'invalid' },
+      { path: ['groups', 0, 'services', 2, 'starter'], code: 'invalid' },
+      { path: ['groups', 0, 'services', 3, 'durationMin'], code: 'invalid' },
+      { path: ['groups', 0, 'services', 3, 'priceAmount'], code: 'invalid' },
+      { path: ['groups', 0, 'services', 3, 'name'], code: 'invalid' },
+      { path: ['groups', 2, 'starter'], code: 'invalid' },
+    ])
+    // the ids are checked against the menu once the starters pass
+    const stale = await put({
+      groups: [{ name: { en: 'X' }, services: [{ id: blowDry!.id, durationMin: 45, priceType: 'fixed', priceAmount: 50 }] }],
+    })
+    expect(stale.json.error.details.issues).toEqual([{ path: ['groups', 0, 'services', 0, 'id'], code: 'invalid' }])
+    const tooMany = await put({
+      groups: [
+        {
+          name: { en: 'A' },
+          services: Array.from({ length: 101 }, () => ({ name: { en: 'S' }, durationMin: 30, priceType: 'fixed', priceAmount: 10 })),
+        },
+      ],
+    })
+    expect(tooMany.status).toBe(400)
+    expect((await owner.req(`${W}/services`)).json.groups).toHaveLength(2)
+    // the owner taken off every service in Settings still does the new ones: «I work alone»
+    await owner.req(`${W}/services/${haircut!.id}`, { method: 'PATCH', body: { staffIds: [] } })
+    await owner.req(`${W}/services/${own!.services[0]!.id}`, { method: 'PATCH', body: { staffIds: [] } })
+    const alone = await put({
+      groups: [{ starter: 'nails', services: [{ starter: 'manicure', durationMin: 45, priceType: 'fixed', priceAmount: 50 }] }],
+    })
+    expect(alone.json.groups).toMatchObject([{ name: { en: 'Nails' }, services: [{ staffIds: [me!.id] }] }])
+    expect((await db.select({ bookable: staff.bookable }).from(staff).where(eq(staff.id, me!.id)))[0]!.bookable).toBe(true)
+    // only the draft's owner, only while it's a draft
+    expect((await (await as('+99365930041')).req(`${W}/setup/services`, { method: 'PUT', body })).status).toBe(404)
+    const location = { cityId: 'ashgabat', address: 'Görogly köçesi 1', street: 'Görogly köçesi', lat: 37.94, lng: 58.38 }
+    await owner.req(`${W}/settings/profile`, { method: 'PATCH', body: { location } })
+    const day = { open: 600, close: 1140, break: null }
+    await owner.req(`${W}/settings/hours`, { method: 'PUT', body: { hours: [day, day, day, day, day, null, null], specialDays: [] } })
+    expect((await owner.req(`${W}/setup/finish`, { method: 'POST' })).status).toBe(204)
+    expect((await put(body)).json.error.code).toBe('invalid_status')
+  })
+
   it('a draft is only for the wizard: no calendar, clients or invites yet; its account deleted takes it along', async () => {
     const owner = await as('+99365930020', 'Läle')
     const { slug } = (await owner.req('/v1/setup', { body: { name: 'Läle Spa', categoryId: 'spa' } })).json as { slug: string }

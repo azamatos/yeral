@@ -4,15 +4,16 @@
  * stay as they are (Q-210). Every change tells the team's open screens (`business.updated`).
  */
 import type { menuOrderSchema, menuSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
-import type { Localized } from '@yeral/domain/model'
+import { randomUUID } from 'node:crypto'
+import type { Localized, PriceType } from '@yeral/domain/model'
 import { serviceErrors, type ServiceTerms } from '@yeral/domain/services'
 import { localOf } from '@yeral/domain/time'
-import { and, asc, countDistinct, eq, gt, inArray, max, ne, or, sql } from 'drizzle-orm'
+import { and, asc, countDistinct, eq, gt, inArray, max, ne, notInArray, or, sql } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
 import { bookingItems, bookings, businesses, serviceGroups, services, staff, staffServices } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { ApiError, invalid } from '../../http/errors'
+import { ApiError, invalid, type Issue } from '../../http/errors'
 import { emit } from '../../notify'
 
 type Menu = z.infer<typeof menuSchema>
@@ -124,6 +125,15 @@ async function check(db: Queryable, businessId: string, s: ServiceTerms & { grou
   if (fields.length) throw invalidFields(fields)
 }
 
+/** Everyone gained a service is bookable now, and everyone who lost the last one isn't (the team screen's rule). */
+async function bookableAgain(db: Queryable, staffIds: readonly string[]) {
+  if (!staffIds.length) return
+  await db
+    .update(staff)
+    .set({ bookable: sql`exists (select 1 from ${staffServices} where ${staffServices.staffId} = ${staff.id})` })
+    .where(inArray(staff.id, [...staffIds]))
+}
+
 /**
  * Who does the service, among the team rows not removed (a removed person's links wait for a reactivation). Any service
  * makes a row bookable and none takes it off, as on the team screen, for everyone gained or lost here.
@@ -139,12 +149,7 @@ async function setStaff(db: Queryable, serviceId: string, staffIds: readonly str
   if (before.length)
     await db.delete(staffServices).where(and(eq(staffServices.serviceId, serviceId), inArray(staffServices.staffId, before)))
   if (staffIds.length) await db.insert(staffServices).values(staffIds.map((staffId) => ({ staffId, serviceId })))
-  const touched = [...new Set([...before, ...staffIds])]
-  if (touched.length)
-    await db
-      .update(staff)
-      .set({ bookable: sql`exists (select 1 from ${staffServices} where ${staffServices.staffId} = ${staff.id})` })
-      .where(inArray(staff.id, touched))
+  await bookableAgain(db, [...new Set([...before, ...staffIds])])
 }
 
 /** The next place at the end of a group. */
@@ -325,4 +330,93 @@ export async function orderMenu(deps: Deps, businessId: string, order: z.infer<t
     await emit(tx, { type: 'business.updated', businessId })
     return menuOf(tx, businessId, deps.now())
   })
+}
+
+/** A service of a whole menu given at once (`setMenu`): one already on it by `id`, or a new one. */
+export type PlannedService = { id?: string; name?: Localized; durationMin: number; priceType: PriceType; priceAmount: number }
+export type PlannedGroup = { id?: string; name?: Localized; services: PlannedService[] }
+
+/**
+ * The whole menu as given, in its order (the setup wizard's services step, B-04): a group or service given by `id`
+ * stays itself, keeping what the step doesn't show (a description, its own buffer, online, who does it) and its name
+ * unless one comes; a new one needs its name, and a new service is done by `doers`; what isn't given goes, its
+ * bookings keeping their copies. `invalid` with the given places for an id that isn't on the menu or comes twice.
+ */
+export async function setMenu(
+  db: Queryable,
+  businessId: string,
+  plan: PlannedGroup[],
+  doers: readonly string[],
+  now: number,
+): Promise<Menu> {
+  await lockMenu(db, businessId)
+  const [groups, rows] = await all(db, [
+    () => db.select({ id: serviceGroups.id }).from(serviceGroups).where(eq(serviceGroups.businessId, businessId)),
+    () => db.select({ id: services.id }).from(services).where(onMenu(businessId)),
+  ])
+  const issues: Issue[] = []
+  const known = (on: { id: string }[]) => {
+    const ids = new Set(on.map((r) => r.id))
+    const seen = new Set<string>()
+    return (id: string | undefined, path: (string | number)[]) => {
+      if (id === undefined) return
+      if (!ids.has(id) || seen.has(id)) issues.push({ path: [...path, 'id'], code: 'invalid' })
+      seen.add(id)
+    }
+  }
+  const groupKnown = known(groups)
+  const serviceKnown = known(rows)
+  plan.forEach((g, gi) => {
+    groupKnown(g.id, ['groups', gi])
+    g.services.forEach((s, si) => serviceKnown(s.id, ['groups', gi, 'services', si]))
+  })
+  if (issues.length) throw invalid(...issues)
+
+  // what isn't given goes: the services first (a group holds them), then the groups
+  const keptServices = plan.flatMap((g) => g.services.flatMap((s) => (s.id ? [s.id] : [])))
+  const keptGroups = plan.flatMap((g) => (g.id ? [g.id] : []))
+  await db
+    .delete(services)
+    .where(and(eq(services.businessId, businessId), keptServices.length ? notInArray(services.id, keptServices) : undefined))
+  await db
+    .delete(serviceGroups)
+    .where(and(eq(serviceGroups.businessId, businessId), keptGroups.length ? notInArray(serviceGroups.id, keptGroups) : undefined))
+
+  const placed = plan.map((g) => ({ ...g, id: g.id ?? randomUUID(), fresh: !g.id }))
+  const fresh = placed.filter((g) => g.fresh)
+  if (fresh.length)
+    await db.insert(serviceGroups).values(fresh.map((g) => ({ id: g.id, businessId, name: g.name ?? {}, sort: placed.indexOf(g) })))
+  for (const [sort, g] of placed.entries())
+    if (!g.fresh)
+      await db
+        .update(serviceGroups)
+        .set({ sort, ...(g.name && { name: g.name }) })
+        .where(eq(serviceGroups.id, g.id))
+
+  const made: string[] = []
+  const newRows = placed.flatMap((g) =>
+    g.services.flatMap((s, i) => {
+      if (s.id) return []
+      const id = randomUUID()
+      made.push(id)
+      const { durationMin, priceType, priceAmount } = s
+      return [{ id, businessId, groupId: g.id, name: s.name ?? {}, durationMin, priceType, priceAmount, sort: i }]
+    }),
+  )
+  if (newRows.length) await db.insert(services).values(newRows)
+  for (const g of placed)
+    for (const [sort, s] of g.services.entries()) {
+      if (!s.id) continue
+      const { durationMin, priceType, priceAmount } = s
+      await db
+        .update(services)
+        .set({ groupId: g.id, sort, durationMin, priceType, priceAmount, ...(s.name && { name: s.name }) })
+        .where(eq(services.id, s.id))
+    }
+  if (made.length && doers.length) {
+    await db.insert(staffServices).values(doers.flatMap((staffId) => made.map((serviceId) => ({ staffId, serviceId }))))
+    await bookableAgain(db, doers)
+  }
+  await emit(db, { type: 'business.updated', businessId })
+  return menuOf(db, businessId, now)
 }

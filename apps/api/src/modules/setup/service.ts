@@ -5,24 +5,29 @@
  * list (it isn't verified) and in no switcher; one is set up at a time.
  */
 import type { SetupIncompleteDetails } from '@yeral/contract/errors'
-import type { mySetupSchema, setupStartSchema } from '@yeral/contract/setup'
+import type { menuSchema } from '@yeral/contract/services'
+import type { mySetupSchema, SetupServices, setupStartSchema } from '@yeral/contract/setup'
 import { MARKET } from '@yeral/domain/market'
+import type { Localized } from '@yeral/domain/model'
 import type { Actor } from '@yeral/domain/permissions'
+import { serviceErrors } from '@yeral/domain/services'
 import { cutAtWord, DEMO_SLUG, SLUG_MAX, slugFrom, type SetupNeed, type SetupStep } from '@yeral/domain/setup'
-import { and, asc, eq, isNotNull, like, or } from 'drizzle-orm'
+import { and, asc, eq, isNotNull, like, ne, or } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
 import { bookingRules, businesses, categories, cities, services, staff, users } from '../../db/schema'
 import type { Deps } from '../../deps'
 import type { User } from '../../http/env'
-import { ApiError, invalid } from '../../http/errors'
+import { ApiError, invalid, type Issue } from '../../http/errors'
 import { pgCode } from '../bookings/repo'
 import { logoOf, text } from '../catalog/map'
 import { accountName } from '../me/me'
+import { setMenu, type PlannedGroup } from '../menu/service'
 import { teamChanged } from '../team/service'
 
 type Start = z.infer<typeof setupStartSchema>
 type MySetup = z.infer<typeof mySetupSchema>
+type Menu = z.infer<typeof menuSchema>
 
 /** The person's draft: a business they own still being set up, with what the sign-in's card shows of it. */
 async function draftOf(db: Queryable, userId: string) {
@@ -175,6 +180,76 @@ export async function saveStep(deps: Deps, business: { id: string; setupStep: Se
     .where(and(eq(businesses.id, business.id), isNotNull(businesses.setupStep)))
     .returning({ id: businesses.id })
   if (!saved) throw new ApiError('invalid_status')
+}
+
+/** The same text where both are written: a starter sent back as it was (blank languages don't count). */
+const sameText = (sent: Localized, of: Localized) =>
+  Object.entries(sent).every(([lang, value]) => !value || of[lang as keyof Localized] === value)
+
+/**
+ * Step 5 (B-04, F-098): the draft's whole menu as the step leaves it (`setMenu`), in one transaction. Starters come
+ * from the draft's category as it is now: a starter group or service keeps its names in every language while the name
+ * sent is the same, and each is used once. A new service is done by everyone on the team who takes bookings, or the
+ * owner when nobody does (the step's "I work alone"). Only the draft's owner, while it's a draft.
+ */
+export async function setupServices(
+  deps: Deps,
+  business: { id: string; setupStep: SetupStep | null },
+  actor: Actor,
+  input: SetupServices,
+): Promise<Menu> {
+  assertDraft(business, actor)
+  return deps.db.transaction(async (tx) => {
+    // held as the menu's own changes hold it, and still a draft: a save racing the finish doesn't change a workspace
+    const [b] = await tx
+      .select({ setupStep: businesses.setupStep, categoryId: businesses.categoryId })
+      .from(businesses)
+      .where(eq(businesses.id, business.id))
+      .for('no key update')
+    if (!b?.setupStep) throw new ApiError('invalid_status')
+    const [category] = await tx.select({ starters: categories.starterServices }).from(categories).where(eq(categories.id, b.categoryId))
+    const starters = new Map((category?.starters ?? []).map((s) => [s.id, s]))
+    const starterGroups = new Map((category?.starters ?? []).map((s) => [s.group.id, s.group.name]))
+
+    const issues: Issue[] = []
+    const usedGroups = new Set<string>()
+    const usedServices = new Set<string>()
+    /** A starter's names unless the one sent differs; issues for a starter not in the category, or used twice. */
+    const resolve = (
+      ref: { id?: string; starter?: string; name?: Localized },
+      of: Map<string, Localized>,
+      used: Set<string>,
+      at: (string | number)[],
+    ): Localized | undefined => {
+      if (ref.starter === undefined) {
+        if (!ref.id && !ref.name) issues.push({ path: [...at, 'name'], code: 'invalid' })
+        return ref.name
+      }
+      const names = of.get(ref.starter)
+      if (ref.id || !names || used.has(ref.starter)) issues.push({ path: [...at, 'starter'], code: 'invalid' })
+      used.add(ref.starter)
+      return ref.name && !(names && sameText(ref.name, names)) ? ref.name : names
+    }
+    const starterNames = new Map([...starters].map(([id, s]) => [id, s.name]))
+    const plan: PlannedGroup[] = input.groups.map((g, gi) => ({
+      id: g.id,
+      name: resolve(g, starterGroups, usedGroups, ['groups', gi]),
+      services: g.services.map((s, si) => {
+        const at = ['groups', gi, 'services', si]
+        for (const field of Object.keys(serviceErrors({ ...s, bufferMin: null }))) issues.push({ path: [...at, field], code: 'invalid' })
+        return { ...s, name: resolve(s, starterNames, usedServices, at) }
+      }),
+    }))
+    if (issues.length) throw invalid(...issues)
+
+    const team = await tx
+      .select({ id: staff.id, level: staff.level, bookable: staff.bookable })
+      .from(staff)
+      .where(and(eq(staff.businessId, business.id), ne(staff.status, 'removed')))
+    const bookable = team.filter((m) => m.bookable)
+    const doers = (bookable.length ? bookable : team.filter((m) => m.level === 'owner')).map((m) => m.id)
+    return setMenu(tx, business.id, plan, doers, deps.now())
+  })
 }
 
 /**
