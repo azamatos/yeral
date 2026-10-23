@@ -376,6 +376,8 @@
       "switcherNote": "The new workspace appears in the workspace switcher at the top of the left menu — switch back to {name} there.",
       "previewLabel": "After the review, clients see you like this",
       "approxArea": "{city} · approximate area shown",
+      "addressLine": "{line}, {city}",
+      "cardMeta": "{category} · {where}",
       "new": "New",
       "linkLabel": "Link and QR",
       "linkReady": "Your link and QR code are ready — they open to clients after the review.",

@@ -232,7 +232,7 @@ const fakeApi =
         return json({ items: Array.from({ length: photos }, (_, i) => ({ id: `p${i}`, url: `/photos/${i}.jpg`, alt: '' })) })
       const finish = /^POST \/w\/([^/]+)\/setup\/finish$/.exec(route)
       if (finish && setup) {
-        if (missing.length) return json({ error: { code: 'setup_incomplete', details: { missing } } }, 422)
+        if (missing.length) return json({ error: { code: 'setup_incomplete', details: { missing } } }, 409)
         finished.push(finish[1]!)
         setup = null
         return new Response(null, { status: 204 })
@@ -586,9 +586,10 @@ export const Done: Story = {
 /** Three photos already: «Add 3+ photos» reads «Added», the first photo is the card's picture. */
 export const DoneWithPhotos: Story = {
   args: { path: '/setup/done', server: fakeApi({ draft: doneDraft, photos: 3 }) },
-  play: async ({ canvas }) => {
+  play: async ({ canvas, canvasElement }) => {
     await expect(await canvas.findByText('1 / 3 done')).toBeVisible()
-    await expect(canvas.getByRole('img', { name: 'Glow Studio' })).toHaveAttribute('src', '/photos/0.jpg')
+    // the card's picture is decorative: its name is printed under it
+    await expect(canvasElement.querySelector('img[src="/photos/0.jpg"]')).toHaveAttribute('alt', '')
     await expect(canvas.getByText('Added')).toBeVisible()
     await expect(canvas.queryByRole('button', { name: 'Add photos' })).toBeNull()
   },

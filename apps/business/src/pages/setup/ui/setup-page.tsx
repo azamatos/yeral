@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, Navigate, useNavigate, useParams } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
+import type { Setup } from '@yeral/contract/setup'
 import { formatPhone } from '@yeral/domain/phone'
 import type { SetupStep } from '@yeral/domain/setup'
 import { isApiError } from '@yeral/sdk'
@@ -17,7 +18,7 @@ import { AuthPage } from '@/shared/ui'
 import { isWizardStep, nextStep, stepFor, stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
 import { useAddressStep } from './address-step'
 import { BUSINESS_NAME_MAX, BusinessStep } from './business-step'
-import { useDoneStep } from './done-step'
+import { useDoneStep, type AfterSetup } from './done-step'
 import { useHoursStep } from './hours-step'
 import { useRulesStep } from './rules-step'
 import { SetupFrame, StepHeader, useStepName, type StepAction } from './setup-frame'
@@ -68,11 +69,19 @@ function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
   const setup = useQuery(sdk.setup.mine())
   const workspaces = useQuery(sdk.team.workspaces())
   const categories = useQuery(sdk.catalog.categories(locale))
+  // the setup just finished: the wizard opens the workspace, whatever the draft's refresh says meanwhile
+  const [finished, setFinished] = useState<{ slug: string; after: AfterSetup } | null>(null)
+  if (finished)
+    return (
+      <Navigate to={finished.after === 'calendar' ? '/w/$slug/calendar' : '/w/$slug/settings'} params={{ slug: finished.slug }} replace />
+    )
   if (setup.isPending || workspaces.isPending || categories.isPending) return <Waiting />
   // a failed refetch keeps what's on screen (and what's typed); only a first load that failed is a failure
   if (!setup.data || !workspaces.data || !categories.data)
     throw setup.error ?? workspaces.error ?? categories.error ?? new Error('setup data missing')
   const draft = setup.data.setup
+  // the done step's draft gone (finished in another tab): the app's start finds the workspace, not a new draft
+  if (!draft && asked === 'done') return <Navigate to="/" replace />
   const step = stepFor(asked, draft?.step ?? null)
   if (step !== asked) return <Navigate to="/setup/$step" params={{ step }} replace />
   // appointments only at the first launch: the table and class categories come later (book Q-030)
@@ -88,20 +97,13 @@ function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
       more={workspaces.data.items.length > 0}
       back={workspaces.data.items.find((w) => w.slug === workspaces.data.current)?.name ?? workspaces.data.items[0]?.name ?? null}
       categories={pickable}
+      onFinished={(slug, after) => setFinished({ slug, after })}
     />
   )
 }
 
-/** What the wizard reads of the draft (`GET /v1/me/setup`). */
-type Draft = {
-  slug: string
-  name: string
-  step: SetupStep
-  category: string
-  /** Null when the list no longer offers the draft's category. */
-  categoryId: string | null
-  address: { line: string; city: { name: string } } | null
-}
+/** What the wizard reads of the draft (`GET /v1/me/setup`); `categoryId` is null when the list no longer offers it. */
+type Draft = Omit<Setup, 'categoryId' | 'logo'> & { categoryId: string | null }
 
 function Steps({
   step,
@@ -110,6 +112,7 @@ function Steps({
   more,
   back,
   categories,
+  onFinished,
 }: {
   step: SetupStep
   me: Me
@@ -118,6 +121,7 @@ function Steps({
   /** The workspace someone came from to create this one (the done step names it), or null. */
   back: string | null
   categories: { id: string; name: string; hint: string }[]
+  onFinished: (slug: string, after: AfterSetup) => void
 }) {
   const t = useTranslations()
   const sdk = useSdk()
@@ -175,7 +179,7 @@ function Steps({
   const address = useAddressStep(draft?.slug ?? '', step === 'address' && !!draft)
   const hours = useHoursStep(draft?.slug ?? '', step === 'hours' && !!draft, !!draft && stepIndex(reached) >= stepIndex('hours'))
   const rules = useRulesStep(draft?.slug ?? '', step === 'rules' && !!draft)
-  const done = useDoneStep(draft, step === 'done' && !!draft, back)
+  const done = useDoneStep(draft, step === 'done' && !!draft, back, onFinished)
   const [body, action]: [ReactNode, StepAction] =
     step === 'business'
       ? [
@@ -208,10 +212,7 @@ function Steps({
             ? [rules.body, rules.action]
             : step === 'done'
               ? [done.body, done.action]
-              : [
-                  <LaterStep step={step} name={draft?.name ?? ''} />,
-                  { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) },
-                ]
+              : [<LaterStep step={step} />, { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) }]
   const busy = action.busy || saveStep.isPending
 
   /** Continue: the step saved, the draft moved on to the next step (a new draft already starts at the address). */
@@ -307,12 +308,11 @@ function Steps({
 }
 
 /** A step built by a later piece of slice 2: its header only (B-Onboarding's titles and leads). */
-function LaterStep({ step, name }: { step: Exclude<SetupStep, 'business'>; name: string }) {
+function LaterStep({ step }: { step: Exclude<SetupStep, 'business' | 'address' | 'hours' | 'rules' | 'done'> }) {
   const t = useTranslations('setup')
-  const title = step === 'done' ? t('done.title', { name }) : t(`${step}.title`)
   return (
     <section className="flex flex-col gap-8 max-sm:gap-7">
-      <StepHeader step={step} title={title} lead={t(`${step}.lead`)} />
+      <StepHeader step={step} title={t(`${step}.title`)} lead={t(`${step}.lead`)} />
     </section>
   )
 }

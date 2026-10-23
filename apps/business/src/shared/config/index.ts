@@ -1,1 +1,1 @@
-export { site } from './site'
+export { clientHost, pageLink, site } from './site'

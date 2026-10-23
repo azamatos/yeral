@@ -16,11 +16,10 @@ export type QualityStatus = 'done' | 'current' | 'todo'
 export function qualityOf(page: { logo: boolean; photos: number; about: boolean }): Record<QualityItem, QualityStatus> {
   const done: Record<QualityItem, boolean> = { logo: page.logo, photos: page.photos >= PHOTOS_GOOD, about: page.about }
   const next = QUALITY_ITEMS.find((item) => !done[item])
-  return {
-    logo: done.logo ? 'done' : next === 'logo' ? 'current' : 'todo',
-    photos: done.photos ? 'done' : next === 'photos' ? 'current' : 'todo',
-    about: done.about ? 'done' : next === 'about' ? 'current' : 'todo',
-  }
+  return Object.fromEntries(QUALITY_ITEMS.map((item) => [item, done[item] ? 'done' : item === next ? 'current' : 'todo'])) as Record<
+    QualityItem,
+    QualityStatus
+  >
 }
 
 /** Whether any language's «About» says something. */

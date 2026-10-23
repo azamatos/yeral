@@ -12,9 +12,10 @@
   category and the address or «approximate area shown»), the page link with Copy and Share (WhatsApp, Telegram), the
   compact QR with its downloads, «Make your page stronger». The footer's primary on the last step is «Go to the
   calendar».
-- Decided: chapter 9, 23.10.2026, B-06 / F-097 (how). Finishing navigates first and refreshes the setup, the
-  workspaces and the person after (`setup.finish`'s own refresh is held back): refreshing the draft while the wizard
-  shows would send it to a new draft's business step.
+- Decided: chapter 9, 23.10.2026, B-06 / F-097 (how). A finish tells the wizard first (`onFinished`, before the
+  sdk's refresh, the events feed or another tab finds the draft gone) and empties the draft in the cache; the wizard
+  then opens the workspace's calendar (or Settings) instead of a new draft. A done step whose draft is gone (finished
+  in another tab) goes to the app's start. `clientHost` and `pageLink(slug)` moved to `@/shared/config`.
 - Follow-ups: «Send invites» on this step with the team step (6); the checklist's «Add» opens Settings' section page
   until Settings → Business profile is built (then a link to its logo, photos and About); finishing needs a service, so
   until the services step is built a draft's finish sends the person to step 5.

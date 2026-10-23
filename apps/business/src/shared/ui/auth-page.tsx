@@ -3,10 +3,7 @@ import { AuthCard, type AuthCardProps } from '@yeral/ui/auth-card'
 import { Logo } from '@yeral/ui/brand'
 import { ArrowRight } from 'lucide-react'
 import { useTranslations } from 'use-intl'
-import { site } from '@/shared/config'
-
-/** The client site's host as people type it («yeral.app»), from the site config. */
-const clientHost = new URL(site.urls.client).host
+import { clientHost, site } from '@/shared/config'
 
 /**
  * The sign-in page's frame (B-Login): AuthCard with the header lockup («Ýeral» + the «Business» tag, one link home)

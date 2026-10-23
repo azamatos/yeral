@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import type { SetupIncompleteDetails } from '@yeral/contract/errors'
+import type { Setup } from '@yeral/contract/setup'
 import { isApiError } from '@yeral/sdk'
 import { Callout } from '@yeral/ui/callout'
 import { Checklist, type ChecklistItem } from '@yeral/ui/checklist'
@@ -10,29 +11,21 @@ import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { ArrowRight, Clock, FileText, Image, ImagePlus, Star } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { site } from '@/shared/config'
+import { pageLink } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
 import { firstMissing, hasAbout, qualityOf, QUALITY_ITEMS, shareLinks, type QualityItem } from '../model/done'
 import { StepHeader, type StepAction } from './setup-frame'
 
-/** The client site's host as people read it («yeral.app»), from the site config. */
-const clientHost = new URL(site.urls.client).host
-
 const QUALITY_ICON: Record<QualityItem, ReactNode> = { logo: <ImagePlus />, photos: <Image />, about: <FileText /> }
 
-/** What the done step reads of the draft. */
-export type DoneDraft = {
-  slug: string
-  name: string
-  category: string
-  address: { line: string; city: { name: string } } | null
-}
+/** What the done step reads of the draft (`GET /v1/me/setup`). */
+export type DoneDraft = Pick<Setup, 'slug' | 'name' | 'category' | 'address'>
 
 /** Where finishing goes next: the calendar, or Settings to make the page stronger. */
-type After = 'calendar' | 'settings'
+export type AfterSetup = 'calendar' | 'settings'
 
 /**
  * Step 8, «{name} is ready!» (B-Onboarding `isDone`, book B-06): the page is in review (only the team sees it, the
@@ -42,11 +35,14 @@ type After = 'calendar' | 'settings'
  * checklist «Add» finishes the same way into Settings. When finishing finds a step missing (`setup_incomplete`), the
  * wizard opens it. A hook, as the other steps are, so the wizard's frame stays one element; `on` while it shows.
  * `back`: the workspace someone came from («Create a business» from the switcher), named in the switcher note.
+ * `onFinished` tells the wizard first, before the draft's refresh comes back empty, so it opens the workspace instead
+ * of a new draft (whichever refresh gets there: the sdk's, the events feed's, another tab's).
  */
 export function useDoneStep(
   draft: DoneDraft | null,
   on: boolean,
   back: string | null,
+  onFinished: (slug: string, after: AfterSetup) => void,
 ): { body: ReactNode; action: StepAction; primary: { label: string; icon: ReactNode; finish: () => void } } {
   const t = useTranslations('setup.done')
   const sdk = useSdk()
@@ -56,32 +52,41 @@ export function useDoneStep(
   const slug = draft?.slug ?? ''
   const profile = useQuery({ ...sdk.settings.profile(slug), enabled: on && !!draft })
   const gallery = useQuery({ ...sdk.settings.gallery(slug), enabled: on && !!draft })
-  // the draft is gone once it's finished: the wizard would open a new one, so its data is refreshed only after the
-  // person has left it for the workspace
-  const finish = useMutation({ ...sdk.setup.finish(slug), onSuccess: undefined })
-  const [leaving, setLeaving] = useState(false)
+  // set at once (a re-render comes a tick later): a second press can't send a second finish
+  const leaving = useRef<AfterSetup | null>(null)
+  const options = sdk.setup.finish(slug)
+  const finish = useMutation({
+    ...options,
+    onSuccess: async (...args) => {
+      // the wizard hears it before any refresh finds the draft gone, and the draft is gone from the cache at once
+      onFinished(slug, leaving.current ?? 'calendar')
+      queryClient.setQueryData(sdk.setup.mine().queryKey, { setup: null })
+      await options.onSuccess?.(...args)
+    },
+  })
 
-  const leave = async (after: After) => {
-    if (finish.isPending || leaving) return
+  const leave = async (after: AfterSetup) => {
+    if (leaving.current) return
+    leaving.current = after
     try {
       await finish.mutateAsync()
     } catch (error) {
+      leaving.current = null
       toast(errorText(error))
       const missing = isApiError(error, 'setup_incomplete') ? firstMissing((error.details as SetupIncompleteDetails).missing) : null
       if (missing) void navigate({ to: '/setup/$step', params: { step: missing } })
-      return
+      // finished meanwhile (another tab) or gone: the draft is asked again, and the wizard follows what it finds
+      else if (isApiError(error, 'invalid_status') || isApiError(error, 'not_found'))
+        void queryClient.invalidateQueries({ queryKey: sdk.setup.mine().queryKey })
     }
-    setLeaving(true)
-    await navigate({ to: after === 'calendar' ? '/w/$slug/calendar' : '/w/$slug/settings', params: { slug } })
-    for (const queryKey of [sdk.setup.mine().queryKey, sdk.team.workspaces().queryKey, sdk.me.get().queryKey])
-      void queryClient.invalidateQueries({ queryKey })
   }
-  const busy = finish.isPending || leaving
+  const busy = finish.isPending || finish.isSuccess
   const primary = { label: t('toCalendar'), icon: <ArrowRight aria-hidden />, finish: () => void leave('calendar') }
 
   // a failed refetch keeps what's on screen; only a first load that failed is a failure
   if (on && draft && !profile.data && profile.isError) throw profile.error
-  if (!on || !draft || !profile.data || (!gallery.data && !gallery.isError))
+  if (on && draft && !gallery.data && gallery.isError) throw gallery.error
+  if (!on || !draft || !profile.data || !gallery.data)
     return {
       body: (
         <div className="flex justify-center py-16">
@@ -92,12 +97,16 @@ export function useDoneStep(
       primary,
     }
 
-  const photos = gallery.data?.items ?? []
+  const photos = gallery.data.items
   const quality = qualityOf({ logo: !!profile.data.logo, photos: photos.length, about: hasAbout(profile.data.about) })
   const city = draft.address?.city.name ?? ''
-  const where = profile.data.hideExactAddress ? t('approxArea', { city }) : draft.address ? `${draft.address.line}, ${city}` : city
-  const url = `${site.urls.client}/b/${draft.slug}`
-  const share = shareLinks(url)
+  const where = profile.data.hideExactAddress
+    ? t('approxArea', { city })
+    : draft.address
+      ? t('addressLine', { line: draft.address.line, city })
+      : city
+  const link = pageLink(draft.slug)
+  const share = shareLinks(link.url)
 
   const items: ChecklistItem[] = QUALITY_ITEMS.map((item) => ({
     id: item,
@@ -133,7 +142,8 @@ export function useDoneStep(
         <div className="flex min-w-0 flex-col gap-3">
           <span className="text-label text-n-500 uppercase">{t('previewLabel')}</span>
           {photos[0] ? (
-            <img src={photos[0].url} alt={draft.name} className="block aspect-4/3 w-full rounded-m object-cover" />
+            // decorative: the card's name is right under it
+            <img src={photos[0].url} alt="" className="block aspect-4/3 w-full rounded-m object-cover" />
           ) : (
             // no photo yet: the card's place, as the client site keeps it for a business without one
             <div aria-hidden className="flex aspect-4/3 w-full items-center justify-center rounded-m bg-n-100 text-n-500">
@@ -143,7 +153,7 @@ export function useDoneStep(
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 flex-col gap-0.5">
               <span className="text-[17px] leading-[22px] font-semibold text-n-900">{draft.name}</span>
-              <span className="text-dense text-n-600">{`${draft.category} · ${where}`}</span>
+              <span className="text-dense text-n-600">{t('cardMeta', { category: draft.category, where })}</span>
             </div>
             <span className="inline-flex shrink-0 items-center gap-1 text-small font-semibold text-n-900">
               <Star aria-hidden className="size-3.5 fill-n-900 stroke-none" />
@@ -156,8 +166,8 @@ export function useDoneStep(
           <span className="text-label text-n-500 uppercase">{t('linkLabel')}</span>
           <span className="text-body font-semibold text-n-900">{t('linkReady')}</span>
           <CopyField
-            value={url}
-            display={`${clientHost}/b/${draft.slug}`}
+            value={link.url}
+            display={link.display}
             label={t('pageLink')}
             copy={{ copy: t('copy'), copied: t('copied') }}
             share={{
@@ -170,7 +180,7 @@ export function useDoneStep(
           />
           <QrBlock
             variant="compact"
-            value={url}
+            value={link.url}
             label={t('qrLabel', { name: draft.name })}
             fileName={`${draft.slug}-qr`}
             caption={t('qrNote')}

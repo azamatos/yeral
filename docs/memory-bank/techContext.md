@@ -89,6 +89,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | design-system components | `import { Button } from '@yeral/ui/button'` (subpath per component folder) | `@yeral/ui/*` |
 | an inline text link, or a button that reads as one («Change number», «Start free») | `textLink` (classes; size and layout from the caller) | `@yeral/ui/text-link` |
 | a link or a number to copy and share; a page's QR code with its downloads | `CopyField` (Copy → «Copied» 2 s, a Share menu of links); `QrBlock` / `QrCode` (lean-qr, PNG and SVG) | `@yeral/ui/copy-field`, `@yeral/ui/qr-block` |
+| the client site's host («yeral.app») and a business's page link in the business app | `clientHost`, `pageLink(slug)` (`{ url, display }`, `/b/{slug}`) | `@/shared/config` (apps/business) |
 | a form's unsaved changes: «Save your changes?» Discard · Save, sticky at the bottom | `SaveBar` (shown only while the form is dirty; `form` to submit a form; a toast after) | `@yeral/ui/save-bar` |
 | logo, brand images | `Logo`, `brand` | `@yeral/ui/brand` |
 | app-wide providers | `UIProvider` (Lucide stroke 1.75, tooltip delay), `Toaster` | `@yeral/ui/provider`, `@yeral/ui/toast` |
