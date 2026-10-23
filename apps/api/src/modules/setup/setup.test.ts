@@ -5,7 +5,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { businesses, rateLimits, staff } from '../../db/schema'
+import { businesses, invites, rateLimits, staff, staffServices } from '../../db/schema'
 import { seed } from '../../db/seed'
 
 describe('setting a business up (book B-02–B-06, Q-200)', () => {
@@ -247,13 +247,88 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     expect((await put(body)).json.error.code).toBe('invalid_status')
   })
 
+  it('the team step saves the people in one go; their invites go out at the finish', async () => {
+    const owner = await as('+99365930050', 'Bahar')
+    const { slug } = (await owner.req('/v1/setup', { body: { name: 'Bahar Barber', categoryId: 'barbershop' } })).json as { slug: string }
+    const W = `/v1/w/${slug}`
+    const put = (members: unknown[]) => owner.req(`${W}/setup/team`, { method: 'PUT', body: { members } })
+    const [draft] = await db.select().from(businesses).where(eq(businesses.slug, slug))
+    const group = await owner.req(`${W}/services/groups`, { body: { name: { en: 'Hair' } } })
+    const haircut = await owner.req(`${W}/services`, {
+      body: { groupId: group.json.id, name: { en: 'Haircut' }, durationMin: 30, priceType: 'fixed', priceAmount: 40 },
+    })
+    expect(haircut.status).toBe(201)
+    // mobile numbers for the app, an administrator always with it, nobody twice and not the owner's own number
+    const wrong = await put([
+      { name: 'Arslan', phone: '+99312345678', level: 'specialist', hasApp: true },
+      { name: 'Jeren', phone: '+99365930051', level: 'admin', hasApp: false },
+      { name: 'Twice', phone: '+99365930051', level: 'specialist', hasApp: true },
+      { name: 'Me', phone: '+99365930050', level: 'specialist', hasApp: true },
+    ])
+    expect(wrong.status).toBe(400)
+    expect(wrong.json.error.details.issues).toEqual([
+      { path: ['members', 0, 'phone'], code: 'not_mobile' },
+      { path: ['members', 1, 'hasApp'], code: 'invalid' },
+      { path: ['members', 2, 'phone'], code: 'taken' },
+      { path: ['members', 3, 'phone'], code: 'taken' },
+    ])
+    const saved = await put([
+      { name: 'Arslan', phone: '+99365930052', level: 'specialist', hasApp: true },
+      { name: 'Jeren', phone: '+99365930053', level: 'admin', hasApp: true },
+      { name: 'Myrat', phone: '+99312345678', level: 'specialist', hasApp: false },
+    ])
+    expect(saved.status).toBe(200)
+    type Row = { id: string; name: string; level: string; status: string; hasApp: boolean; bookable: boolean; invite: unknown }
+    const view = (items: Row[]) =>
+      items.map(({ name, level, status, hasApp, bookable, invite }) => ({ name, level, status, hasApp, bookable, invite }))
+    expect(view(saved.json.items)).toEqual([
+      { name: 'Bahar', level: 'owner', status: 'active', hasApp: true, bookable: true, invite: null },
+      { name: 'Arslan', level: 'specialist', status: 'invited', hasApp: true, bookable: true, invite: null },
+      { name: 'Jeren', level: 'admin', status: 'invited', hasApp: true, bookable: false, invite: null },
+      { name: 'Myrat', level: 'specialist', status: 'active', hasApp: false, bookable: true, invite: null },
+    ])
+    // the step reopens with them; no invite exists before the finish
+    expect(view((await owner.req(`${W}/team`)).json.items)).toEqual(view(saved.json.items))
+    expect(await db.select().from(invites).where(eq(invites.businessId, draft!.id))).toEqual([])
+    // the specialists do the menu's services
+    const arslan = (saved.json.items as Row[]).find((m) => m.name === 'Arslan')!
+    expect(await db.select().from(staffServices).where(eq(staffServices.staffId, arslan.id))).toHaveLength(1)
+    // saved again: a kept person keeps their row, someone left out goes
+    const again = await put([{ name: 'Arslan B.', phone: '+99365930052', level: 'specialist', hasApp: true }])
+    expect((again.json.items as Row[]).map((m) => [m.name, m.id === arslan.id || m.level === 'owner'])).toEqual([
+      ['Bahar', true],
+      ['Arslan B.', true],
+    ])
+    // "I work alone": only the owner
+    expect((await put([])).json.items.map((m: Row) => m.level)).toEqual(['owner'])
+    await put([
+      { name: 'Arslan', phone: '+99365930052', level: 'specialist', hasApp: true },
+      { name: 'Myrat', phone: '+99312345678', level: 'specialist', hasApp: false },
+    ])
+    // only the owner sets the team up, only while it's a draft
+    const location = { cityId: 'ashgabat', address: 'Magtymguly şaýoly 7', street: 'Magtymguly şaýoly', lat: 37.95, lng: 58.37 }
+    await owner.req(`${W}/settings/profile`, { method: 'PATCH', body: { location } })
+    const day = { open: 600, close: 1140, break: null }
+    await owner.req(`${W}/settings/hours`, { method: 'PUT', body: { hours: [day, day, day, day, day, null, null], specialDays: [] } })
+    expect((await owner.req(`${W}/setup/finish`, { method: 'POST' })).status).toBe(204)
+    // the finish sends the invite to the one with the app, who sees it at sign-in
+    const sent = await db.select().from(invites).where(eq(invites.businessId, draft!.id))
+    expect(sent.map((i) => [i.phone, i.status])).toEqual([['+99365930052', 'pending']])
+    const invitee = await as('+99365930052', 'Arslan')
+    expect((await invitee.req('/v1/me/invites')).json.items).toHaveLength(1)
+    expect((await put([])).json.error.code).toBe('invalid_status')
+  })
+
   it('a draft is only for the wizard: no calendar, clients or invites yet; its account deleted takes it along', async () => {
     const owner = await as('+99365930020', 'Läle')
     const { slug } = (await owner.req('/v1/setup', { body: { name: 'Läle Spa', categoryId: 'spa' } })).json as { slug: string }
     expect((await owner.req(`/v1/w/${slug}/settings/profile`)).status).toBe(200)
     expect((await owner.req(`/v1/w/${slug}/calendar?date=2026-10-15`)).status).toBe(404)
     expect((await owner.req(`/v1/w/${slug}/clients`)).status).toBe(404)
-    expect((await owner.req(`/v1/w/${slug}/team`)).status).toBe(404)
+    // its team is read (the wizard's team step), but nobody is invited through the settings while it's a draft
+    expect((await owner.req(`/v1/w/${slug}/team`)).json.items.map((m: { level: string }) => m.level)).toEqual(['owner'])
+    const invite = { name: 'Aýgül', phone: '+99365930022', level: 'specialist' }
+    expect((await owner.req(`/v1/w/${slug}/team/invites`, { body: invite })).status).toBe(404)
     // a stranger signed in doesn't learn it exists
     expect((await (await as('+99365930021')).req(`/v1/businesses/${slug}`)).status).toBe(404)
     expect((await owner.req('/v1/me', { method: 'DELETE' })).status).toBe(204)
