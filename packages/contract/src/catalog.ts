@@ -57,6 +57,7 @@ export const categorySchema = z
     ),
   })
   .meta({ id: 'Category' })
+export type Category = z.infer<typeof categorySchema>
 export const categoryListSchema = listOf(categorySchema)
 
 /**

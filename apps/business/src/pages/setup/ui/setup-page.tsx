@@ -16,11 +16,13 @@ import { useErrorText } from '@/shared/i18n'
 import { usePageTitle } from '@/shared/lib'
 import { AuthPage } from '@/shared/ui'
 import { isWizardStep, nextStep, stepFor, stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
+import type { Category } from '@yeral/contract/catalog'
 import { useAddressStep } from './address-step'
 import { BUSINESS_NAME_MAX, BusinessStep } from './business-step'
 import { useDoneStep, type AfterSetup } from './done-step'
 import { useHoursStep } from './hours-step'
 import { useRulesStep } from './rules-step'
+import { useServicesStep } from './services-step'
 import { SetupFrame, StepHeader, useStepName, type StepAction } from './setup-frame'
 
 /**
@@ -120,7 +122,7 @@ function Steps({
   more: boolean
   /** The workspace someone came from to create this one (the done step names it), or null. */
   back: string | null
-  categories: { id: string; name: string; hint: string }[]
+  categories: Pick<Category, 'id' | 'name' | 'hint' | 'starterGroups'>[]
   onFinished: (slug: string, after: AfterSetup) => void
 }) {
   const t = useTranslations()
@@ -178,6 +180,14 @@ function Steps({
   // each step's content and what it tells the frame; the frame stays one element around every step
   const address = useAddressStep(draft?.slug ?? '', step === 'address' && !!draft)
   const hours = useHoursStep(draft?.slug ?? '', step === 'hours' && !!draft, !!draft && stepIndex(reached) >= stepIndex('hours'))
+  // the draft's category as the list gives it (its starter list); one the list no longer offers has none
+  const category = draft ? (categories.find((c) => c.id === draft.categoryId) ?? { id: '', name: draft.category, starterGroups: [] }) : null
+  const services = useServicesStep(
+    draft?.slug ?? '',
+    step === 'services' && !!draft,
+    !!draft && stepIndex(reached) >= stepIndex('services'),
+    category,
+  )
   const rules = useRulesStep(draft?.slug ?? '', step === 'rules' && !!draft)
   const done = useDoneStep(draft, step === 'done' && !!draft, back, onFinished)
   const [body, action]: [ReactNode, StepAction] =
@@ -208,11 +218,13 @@ function Steps({
         ? [address.body, address.action]
         : step === 'hours'
           ? [hours.body, hours.action]
-          : step === 'rules'
-            ? [rules.body, rules.action]
-            : step === 'done'
-              ? [done.body, done.action]
-              : [<LaterStep step={step} />, { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) }]
+          : step === 'services'
+            ? [services.body, services.action]
+            : step === 'rules'
+              ? [rules.body, rules.action]
+              : step === 'done'
+                ? [done.body, done.action]
+                : [<LaterStep step={step} />, { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) }]
   const busy = action.busy || saveStep.isPending
 
   /** Continue: the step saved, the draft moved on to the next step (a new draft already starts at the address). */
@@ -289,6 +301,7 @@ function Steps({
     business: draft && `${draft.name} · ${draft.category}`,
     address: draft?.address && `${draft.address.line}, ${draft.address.city.name}`,
     hours: hours.summary,
+    services: services.summary,
   }
   return (
     <SetupFrame

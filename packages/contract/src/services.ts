@@ -37,6 +37,7 @@ export const menuGroupSchema = z
   .meta({ id: 'MenuGroup' })
 
 export const menuSchema = z.object({ groups: z.array(menuGroupSchema) }).meta({ id: 'Menu' })
+export type Menu = z.infer<typeof menuSchema>
 
 const serviceFields = {
   groupId: idSchema,

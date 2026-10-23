@@ -332,7 +332,34 @@
     },
     "services": {
       "title": "Your services",
-      "lead": "Pick from the ready list, then adjust each name, duration and price to suit you."
+      "lead": "Pick from the ready list, then adjust each name, duration and price to suit you.",
+      "suggested": "Suggested services for {category}",
+      "own": "Add your services",
+      "selected": "{count, plural, one {# service selected} other {# services selected}}",
+      "noStarter": "There’s no ready list for this category yet. Add your services below — 2–3 are enough to start.",
+      "columns": {
+        "service": "Service",
+        "duration": "Duration",
+        "price": "Price"
+      },
+      "selectAll": "Select all",
+      "clear": "Clear",
+      "pick": "Select: {name}",
+      "name": "Service name: {name}",
+      "namePlaceholder": "Service name",
+      "unnamed": "New service",
+      "duration": "{name}: duration",
+      "price": "{name}: price",
+      "priceFrom": "{name}: price (from)",
+      "from": "from",
+      "add": "Add service",
+      "newGroup": "New services",
+      "settingsLater": "Who does which service, descriptions and photos can be added later in Settings → Services.",
+      "hintNone": "Pick at least one service.",
+      "hintName": "Name the new service.",
+      "hintPrice": "Add a price to each service.",
+      "summary": "{count, plural, one {# service} other {# services}}",
+      "hintNameEach": "Name each service."
     },
     "team": {
       "title": "Who do you work with?",
