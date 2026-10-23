@@ -1,23 +1,41 @@
-import { ChevronDown, Moon, X } from 'lucide-react'
+import { Moon, X } from 'lucide-react'
 import { useId, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import { Button } from '../button'
 import { FieldMessage } from '../field'
-import { inputClass } from '../input'
+import { Select } from '../select'
 
-/** A stretch of one day in minutes from its midnight: `to` up to 1440 (24:00); a `to` before `from` is the next day's. */
-export type TimeRange = { from: number; to: number }
+/**
+ * A stretch of a business day as `@yeral/domain/hours` keeps it: minutes from the day's midnight, `close` after `open`
+ * and at most a day later (18:00–02:00 is `{ open: 1080, close: 1560 }`).
+ */
+export type TimeRange = { open: number; close: number }
 
 const DAY = 1440
 const pad2 = (n: number) => String(n).padStart(2, '0')
+const clock = (min: number) => `${pad2(Math.floor(min / 60))}:${pad2(min % 60)}`
 
-/** 570 → «09:30», 1440 → «24:00»: the pickers' 24-hour clock. */
-export function formatTime(min: number): string {
-  return `${pad2(Math.floor(min / 60))}:${pad2(min % 60)}`
+/** The pickers' times for a step: opening 00:00 to the last step before 24:00, closing one step on to 24:00. */
+const lists = new Map<number, { opens: number[]; closes: number[] }>()
+function timesFor(step: number) {
+  let times = lists.get(step)
+  if (!times) {
+    const opens: number[] = []
+    for (let m = 0; m < DAY; m += step) opens.push(m)
+    times = { opens, closes: [...opens.slice(1), DAY] }
+    lists.set(step, times)
+  }
+  return times
 }
 
-/** Whether the range closes after midnight: its closing time comes before its opening time. */
-export const pastMidnight = (range: TimeRange) => range.to < range.from
+/** A list with the value in it: a time off the step (a shift saved at 09:15) still shows as it is. */
+const withValue = (list: number[], value: number) => (list.includes(value) ? list : [...list, value].sort((a, b) => a - b))
+
+/** The day's minute a closing time of day gives: after the opening, the next day's when it comes at or before it. */
+function closeAt(open: number, time: number) {
+  const base = open >= DAY ? DAY : 0
+  return base + time + (time <= open - base ? DAY : 0)
+}
 
 function Picker({
   value,
@@ -34,31 +52,25 @@ function Picker({
   invalid: boolean
   describedBy?: string
   disabled?: boolean
-  onChange: (min: number) => void
+  onChange: (time: number) => void
 }) {
   return (
-    <span className="relative inline-flex flex-none">
-      <select
-        aria-label={label}
-        aria-invalid={invalid || undefined}
-        aria-describedby={describedBy}
-        disabled={disabled}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className={cn(inputClass, 'h-10 w-26 cursor-pointer appearance-none pr-7 pl-3 text-small tabular-nums disabled:cursor-default')}
-      >
-        {options.map((m) => (
-          <option key={m} value={m}>
-            {formatTime(m)}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        aria-hidden
-        strokeWidth={1.75}
-        className="pointer-events-none absolute top-1/2 right-2 size-4 -translate-y-1/2 text-n-600"
-      />
-    </span>
+    <Select
+      size="s"
+      className="w-26 flex-none"
+      aria-label={label}
+      invalid={invalid}
+      aria-describedby={describedBy}
+      disabled={disabled}
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+    >
+      {options.map((m) => (
+        <option key={m} value={m}>
+          {clock(m)}
+        </option>
+      ))}
+    </Select>
   )
 }
 
@@ -68,6 +80,11 @@ export type TimeRangeFieldProps = {
   /** The pickers' accessible names («Monday: opens», «Monday: closes»). */
   fromLabel: string
   toLabel: string
+  /**
+   * The earliest opening: an opening time of day before it is the next day's. A break in a day open 18:00–02:00 passes
+   * the day's opening, so a break at 01:00 is the night's (minute 1500).
+   */
+  dayStart?: number
   /** A label before the pickers, 72 wide (a break's «Break»); the row becomes a group it names. */
   label?: ReactNode
   /** A remove button after the pickers (a break's), 36 ghost. */
@@ -77,7 +94,7 @@ export type TimeRangeFieldProps = {
   /** A message under the pickers (14 px icon, `role="alert"`); both pickers turn invalid and point at it. */
   error?: ReactNode
   disabled?: boolean
-  /** Minutes between the options: 30 for the hours (book Q-128). */
+  /** Minutes between the options: the hours pass the contract's `HOURS_STEP` (30, book Q-128). */
   step?: number
   /** More in the row after the pill (a day's «+ Break» link). */
   children?: ReactNode
@@ -86,8 +103,9 @@ export type TimeRangeFieldProps = {
 
 /**
  * TimeRangeField (DS-Patterns → Inputs, B-Settings hours, B-Onboarding step 4, the special-day modal): two 40 × 104
- * native selects with an en dash, opening 00:00–23:30 and closing 00:30–24:00 in `step` minutes. A closing time
- * before the opening time is the next day's: the slate pill with a moon says so. Checking a range against its
+ * native selects with an en dash, opening 00:00–23:30 and closing 00:30–24:00 in `step` minutes. A closing time at or
+ * before the opening time is the next day's, and the slate pill with a moon says so: the same time on both is a full
+ * day, which the hours refuse («Opening and closing can't be at the same time»). Checking a range against its
  * neighbours (the part after midnight must end before the next day opens) is the screen's; it passes the message.
  */
 export function TimeRangeField({
@@ -95,6 +113,7 @@ export function TimeRangeField({
   onChange,
   fromLabel,
   toLabel,
+  dayStart = 0,
   label,
   remove,
   nextDay,
@@ -107,11 +126,15 @@ export function TimeRangeField({
   const id = useId()
   const labelId = `${id}-label`
   const messageId = `${id}-message`
-  const opens: number[] = []
-  for (let m = 0; m < DAY; m += step) opens.push(m)
-  const closes = [...opens.slice(1), DAY]
+  const pillId = `${id}-next-day`
+  const { opens, closes } = timesFor(step > 0 && DAY % step === 0 ? step : 30)
+  const base = value.open >= DAY ? DAY : 0
+  const openTime = value.open - base
+  const late = value.close - base > DAY
+  const closeTime = late ? value.close - base - DAY : value.close - base
   const invalid = !!error
-  const describedBy = invalid ? messageId : undefined
+  const pill = nextDay && late
+  const describe = (...ids: (string | false)[]) => ids.filter(Boolean).join(' ') || undefined
   return (
     <div
       role={label ? 'group' : undefined}
@@ -124,30 +147,37 @@ export function TimeRangeField({
         </span>
       )}
       <Picker
-        value={value.from}
-        options={opens}
+        value={openTime}
+        options={withValue(opens, openTime)}
         label={fromLabel}
         invalid={invalid}
-        describedBy={describedBy}
+        describedBy={describe(invalid && messageId)}
         disabled={disabled}
-        onChange={(from) => onChange({ ...value, from })}
+        onChange={(time) => {
+          const open = time < dayStart ? time + DAY : time
+          // the closing time of day stays; it may move to the next day against the new opening
+          onChange({ open, close: closeAt(open, closeTime) })
+        }}
       />
       <span aria-hidden className="text-n-600">
         –
       </span>
       <Picker
-        value={value.to}
-        options={closes}
+        value={closeTime}
+        options={withValue(closes, closeTime)}
         label={toLabel}
         invalid={invalid}
-        describedBy={describedBy}
+        describedBy={describe(!!pill && pillId, invalid && messageId)}
         disabled={disabled}
-        onChange={(to) => onChange({ ...value, to })}
+        onChange={(time) => onChange({ open: value.open, close: closeAt(value.open, time) })}
       />
-      {nextDay && pastMidnight(value) && (
-        <span className="inline-flex h-6 flex-none items-center gap-1 rounded-pill border border-st-cancelled-line bg-st-cancelled-bg px-2 text-micro font-semibold whitespace-nowrap text-st-cancelled-ink">
+      {pill && (
+        <span
+          id={pillId}
+          className="inline-flex h-6 flex-none items-center gap-1 rounded-pill border border-st-cancelled-line bg-st-cancelled-bg px-2 text-micro font-semibold whitespace-nowrap text-st-cancelled-ink"
+        >
           <Moon aria-hidden strokeWidth={2} className="size-3" />
-          {nextDay(formatTime(value.to))}
+          {nextDay(clock(closeTime))}
         </span>
       )}
       {remove && (
