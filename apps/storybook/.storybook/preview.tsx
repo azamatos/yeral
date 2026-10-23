@@ -1,9 +1,17 @@
 import type { Preview } from '@storybook/react-vite'
+import { MapTiles } from '@yeral/ui/map-frame'
 import { UIProvider } from '@yeral/ui/provider'
 import '../src/styles.css'
 
 const preview: Preview = {
-  decorators: [(Story) => <UIProvider>{Story()}</UIProvider>],
+  decorators: [
+    (Story) => (
+      <UIProvider>
+        {/* maps draw their ground only: the story tests stay offline and the same on every run */}
+        <MapTiles style={null}>{Story()}</MapTiles>
+      </UIProvider>
+    ),
+  ],
   parameters: {
     layout: 'padded',
     controls: { expanded: true },
