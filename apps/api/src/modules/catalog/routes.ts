@@ -28,7 +28,7 @@ import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
 import { cityOrMain, loadCities } from './cities'
 import { businessDetail, visibleBusiness } from './detail'
-import { categoryTakes, isPublic, takesOpenTypes, text } from './map'
+import { categoryTakes, isPublic, starterGroups, takesOpenTypes, text } from './map'
 import { search, wordStartLikes } from './search'
 
 const slugParam = z.object({ slug: slugSchema })
@@ -138,6 +138,7 @@ export const catalogRoutes = new OpenAPIHono<AppEnv>()
       bookingTypes: r.bookingTypes,
       specialistWord: text(r.specialistWord, lang),
       intro: text(r.intro, lang),
+      starterGroups: starterGroups(r.starterServices, lang),
     }))
     return c.json({ items }, 200)
   })

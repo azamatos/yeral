@@ -41,6 +41,20 @@ export const categorySchema = z
     specialistWord: z.string(),
     /** SEO intro on the category landing `/{lang}/c/{category}`. */
     intro: z.string(),
+    /**
+     * The setup wizard's starter list (step 5, F-098), in groups in the catalogue's order; empty when the category has
+     * none ("Add your services").
+     */
+    starterGroups: z.array(
+      z.object({
+        /** Unique in the category, like each service's: the wizard keys its rows by them. */
+        id: slugSchema,
+        name: z.string(),
+        services: z
+          .array(z.object({ id: slugSchema, name: z.string(), durationMin: z.number().int().positive(), price: priceSchema }))
+          .min(1),
+      }),
+    ),
   })
   .meta({ id: 'Category' })
 export const categoryListSchema = listOf(categorySchema)

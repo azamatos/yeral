@@ -2,11 +2,20 @@
 import { openState } from '@yeral/domain/hours'
 import { localized, type BookingType, type Locale, type Localized, type Price } from '@yeral/domain/model'
 import { and, eq, isNull, sql, type AnyColumn } from 'drizzle-orm'
-import { businesses, categories, type StoredPhoto } from '../../db/schema'
+import { businesses, categories, type StarterService, type StoredPhoto } from '../../db/schema'
 import type { Deps } from '../../deps'
+import { groupBy } from '../../lib/group'
 import type { BusinessRow, ServiceRow } from '../availability/context'
 
 export const text = (l: Localized | null | undefined, lang: Locale): string => (l ? localized(l, lang) : '')
+
+/** A category's starter services in their groups (step 5, F-098), each group where its first service is. */
+export const starterGroups = (rows: StarterService[], lang: Locale) =>
+  [...groupBy(rows, (r) => r.group.id)].map(([id, services]) => ({
+    id,
+    name: text(services[0]!.group.name, lang),
+    services: services.map((s) => ({ id: s.id, name: text(s.name, lang), durationMin: s.durationMin, price: s.price })),
+  }))
 
 /** "Aýal saç kesimi + Gel-lak · Aýna": what a review was for, from the visit's services in the reader's language. */
 export function visitWhat(items: { serviceName: Localized; staffName: string | null }[], lang: Locale): string {
