@@ -5,6 +5,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
+import type { WeekdayHours } from '@yeral/contract/settings'
 import type { Workspace } from '@yeral/contract/team'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { LAUNCH_CATEGORIES, PageStory } from '@/shared/storybook'
@@ -73,13 +74,15 @@ type Draft = {
   address: { line: string; city: typeof city } | null
 }
 
+type Day = WeekdayHours | null
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
 /**
  * The api as the wizard uses it. `signedIn`: false for nobody. `workspaces`: the person's businesses (one makes it
  * «Create a business»). `draft`: an unfinished setup. `search`: `false` when the address search isn't there
- * (`address_search_unavailable`).
+ * (`address_search_unavailable`). `hours`: the draft's week (every day closed, as a new draft's).
  */
 const fakeApi =
   ({
@@ -87,9 +90,11 @@ const fakeApi =
     workspaces = [],
     draft = null,
     search = true,
-  }: { signedIn?: boolean; workspaces?: Workspace[]; draft?: Draft | null; search?: boolean } = {}) =>
+    hours = [null, null, null, null, null, null, null],
+  }: { signedIn?: boolean; workspaces?: Workspace[]; draft?: Draft | null; search?: boolean; hours?: Day[] } = {}) =>
   (): typeof fetch => {
     let setup = draft && { ...draft }
+    let week = hours
     // the draft's profile as the address step reads and saves it
     let location = {
       cityId: 'ashgabat',
@@ -171,6 +176,11 @@ const fakeApi =
             hideExactAddress: !!body.hideExactAddress,
           }
         return json({})
+      }
+      if (/^GET \/w\/[^/]+\/settings\/hours$/.test(route) && setup) return json({ hours: week, specialDays: [] })
+      if (/^PUT \/w\/[^/]+\/settings\/hours$/.test(route) && setup) {
+        week = body.hours as Day[]
+        return json({ hours: week, specialDays: [], cancelled: 0 })
       }
       return json({ error: { code: 'not_found' } }, 404)
     }
@@ -368,5 +378,73 @@ export const AddressFromHome: Story = {
     await expect(await canvas.findByRole('button', { name: /The approximate area/ })).toBeVisible()
     await expect(canvas.getByText(/The exact address shows only after a booking is confirmed/)).toBeVisible()
     await expect(canvas.getByText('Clients see only the approximate area — you can drag the circle')).toBeVisible()
+  },
+}
+
+const atHours: Draft = {
+  slug: 'glow-studio',
+  name: 'Glow Studio',
+  step: 'hours',
+  category: 'Beauty',
+  categoryId: 'beauty',
+  logo: null,
+  address: { line: '247 Bitarap Türkmenistan Avenue', city },
+}
+
+/**
+ * The hours step of a new business: the drawn week, «Same hours Monday to Friday» on (Tuesday to Friday follow Monday
+ * and can't be changed on their own), a closed day, a break; Continue saves the week and the step list sums it up.
+ */
+export const Hours: Story = {
+  args: { server: fakeApi({ draft: atHours }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Your hours' })).toBeVisible()
+    await expect(canvas.getByRole('switch', { name: 'Same hours Monday to Friday' })).toBeChecked()
+    await expect(canvas.getAllByText('Same as Monday')).toHaveLength(4)
+    await expect(canvas.getByRole('combobox', { name: 'Tuesday: closes' })).toBeDisabled()
+    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Monday: closes' }), '18:00')
+    await expect(canvas.getByRole('combobox', { name: 'Friday: closes' })).toHaveDisplayValue('18:00')
+    await userEvent.click(canvas.getByRole('button', { name: 'Monday: add a break' }))
+    await expect(canvas.getByRole('combobox', { name: 'Monday: break starts' })).toHaveDisplayValue('13:00')
+    await expect(canvas.getByRole('combobox', { name: 'Thursday: break ends' })).toHaveDisplayValue('14:00')
+    await userEvent.click(canvas.getByRole('switch', { name: 'Sunday: open' }))
+    await expect(within(canvas.getByRole('group', { name: 'Sunday' })).getByText('Closed')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Your services' })).toBeVisible()
+    await expect(canvas.getByText('Mo–Fr 09:00–18:00, Sa 09:00–20:00')).toBeVisible()
+  },
+}
+
+/**
+ * A day past midnight: the same time on both is refused, a close that runs into the next day's opening says which
+ * day, and one that ends before it is the next day's with its pill. Continue waits while a day has a problem.
+ */
+export const HoursPastMidnight: Story = {
+  args: { server: fakeApi({ draft: atHours }) },
+  play: async ({ canvas }) => {
+    const opens = await canvas.findByRole('combobox', { name: 'Sunday: opens' })
+    const closes = canvas.getByRole('combobox', { name: 'Sunday: closes' })
+    const cont = canvas.getByRole('button', { name: 'Continue' })
+    await userEvent.selectOptions(opens, '18:00')
+    await expect(canvas.getByRole('alert')).toHaveTextContent('Opening and closing can’t be at the same time.')
+    await expect(cont).toBeDisabled()
+    await expect(cont).toHaveAccessibleDescription('Check the times.')
+    await userEvent.selectOptions(closes, '10:00')
+    await expect(canvas.getByRole('alert')).toHaveTextContent('Closes after Monday opens. Pick an earlier time.')
+    await userEvent.selectOptions(closes, '02:00')
+    await expect(canvas.getByText('until 02:00, next day')).toBeVisible()
+    await expect(canvas.queryByRole('alert')).not.toBeInTheDocument()
+    await expect(cont).toBeEnabled()
+  },
+}
+
+/** Every day closed: Continue waits for an open day. */
+export const HoursAllClosed: Story = {
+  args: { server: fakeApi({ draft: atHours }) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('switch', { name: 'Same hours Monday to Friday' }))
+    for (const day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+      await userEvent.click(canvas.getByRole('switch', { name: `${day}: open` }))
+    await expect(canvas.getByRole('button', { name: 'Continue' })).toHaveAccessibleDescription('At least one day must be open.')
   },
 }

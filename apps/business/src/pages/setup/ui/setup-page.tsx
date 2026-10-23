@@ -17,6 +17,7 @@ import { AuthPage } from '@/shared/ui'
 import { isWizardStep, nextStep, stepFor, stepIndex, WIZARD_STEPS, type WizardStep } from '../model/steps'
 import { useAddressStep } from './address-step'
 import { BUSINESS_NAME_MAX, BusinessStep } from './business-step'
+import { useHoursStep } from './hours-step'
 import { SetupFrame, StepHeader, useStepName, type StepAction } from './setup-frame'
 
 /**
@@ -166,6 +167,7 @@ function Steps({
 
   // each step's content and what it tells the frame; the frame stays one element around every step
   const address = useAddressStep(draft?.slug ?? '', step === 'address' && !!draft)
+  const hours = useHoursStep(draft?.slug ?? '', step === 'hours' && !!draft, !!draft && stepIndex(reached) >= stepIndex('hours'))
   const [body, action]: [ReactNode, StepAction] =
     step === 'business'
       ? [
@@ -192,10 +194,12 @@ function Steps({
         ]
       : step === 'address'
         ? [address.body, address.action]
-        : [
-            <LaterStep step={step} name={draft?.name ?? ''} />,
-            { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) },
-          ]
+        : step === 'hours'
+          ? [hours.body, hours.action]
+          : [
+              <LaterStep step={step} name={draft?.name ?? ''} />,
+              { valid: true, busy: false, ready: false, save: () => Promise.resolve(true) },
+            ]
   const busy = action.busy || saveStep.isPending
 
   /** Continue: the step saved, the draft moved on to the next step (a new draft already starts at the address). */
@@ -260,6 +264,7 @@ function Steps({
     phone: more ? `${ownerName} · ${phone}` : phone,
     business: draft && `${draft.name} · ${draft.category}`,
     address: draft?.address && `${draft.address.line}, ${draft.address.city.name}`,
+    hours: hours.summary,
   }
   return (
     <SetupFrame
