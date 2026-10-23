@@ -88,7 +88,9 @@ The apex serves the coming-soon page in `yeral.caddy` at every path, and `www` r
 
    | Type | Name | Content |
    |---|---|---|
-   | MX ×3 | `@` | `route1`, `route2`, `route3.mx.cloudflare.net` |
+   | MX | `@` | `route1.mx.cloudflare.net` (Cloudflare picks the priorities) |
+   | MX | `@` | `route2.mx.cloudflare.net` |
+   | MX | `@` | `route3.mx.cloudflare.net` |
    | TXT | `@` | `v=spf1 include:_spf.mx.cloudflare.net ~all` |
    | TXT | `cf2024-1._domainkey` | the DKIM key |
 

@@ -236,7 +236,8 @@
   its ignore, lint-hook, Renovate, Turborepo and pnpm entries `1bda69d` (#151). The owner deleted the Worker
   `yeral-web` the same evening.
 - **2026-10-23 (night) · P4 slice 2 started, P2 step 4 finished** (an unattended 2-hour run, each PR reviewed with
-  `code-review`, one round, on green CI; details in `log/2026-10-23-setup-wizard.md`): the "How was it?" card's api
+  `code-review`, one round, on green CI; details in `log/2026-10-21-how-was-it.md`, `log/2026-10-21-address-search.md` and
+  `log/2026-10-23-setup-wizard.md`): the "How was it?" card's api
   `d4d4042` (#148, F-243, migration 0042); the address search behind the map pin `93c8a09` (#153, ADR 0027: a
   geocoder port, Photon over OpenStreetMap); the wizard's pieces in `@yeral/ui` (ProgressBar, WizardFooter, vertical
   Stepper, Field counter and optional) `e75cd83` (#152); the wizard's frame and business step `9fedd9f` (#154); the

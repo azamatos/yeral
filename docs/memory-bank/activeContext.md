@@ -8,7 +8,8 @@ _Last updated: 2026-10-23_
 with `code-review`, one round, on green CI) merged #151 (the old site out of the repo), #148 (the "How was it?" card's
 api, migration 0042), #153 (the address search behind the map pin, ADR 0027), #152 (the wizard's pieces in
 `@yeral/ui`), #154 (the wizard's frame and its business step), #155 (the login reopens an unfinished setup) and #156
-(the draft's category id); details in `log/2026-10-23-setup-wizard.md`. None of it is deployed: the server runs
+(the draft's category id); details in `log/2026-10-21-how-was-it.md`, `log/2026-10-21-address-search.md` and
+`log/2026-10-23-setup-wizard.md`. None of it is deployed: the server runs
 5c07be4. Left in the wizard: steps 3–8 (address, hours, services, team, booking rules, done with `setup.finish`) and
 the phone step for someone signed out. The evening of 23.10 the owner deleted the Worker `yeral-web` and asked how to
 receive e-mail at yeral.app (Cloudflare Email Routing; `infra/server/README.md`, "DNS records").
@@ -35,8 +36,8 @@ records for `api`, `business` and `cms` now (`infra/server/README.md`, "DNS reco
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16). Releases are paused until the MVP works
 (#133, ADR 0009 amended; the `release` skill is now `ship`): no versions or changesets, and production goes by hand.
 The api and Postgres run on the owner's server since 2026-10-19, public at `api.yeral.app` since 2026-10-22 21:18 UTC
-(23.10 the owner's time; main at 5c07be4); yeral.app shows a coming-soon page from the server until the client site takes it over. P2: steps 0–6 done (the map
-address search too, #153); step 7 has the SMS limits and the sitemap data, and keeps releases and deploys from GitHub
+(23.10 the owner's time; the server at 5c07be4, main ahead); yeral.app shows a coming-soon page from the server until
+the client site takes it over. P2: steps 0–6 done (the map address search too, #153); step 7 has the SMS limits and the sitemap data, and keeps releases and deploys from GitHub
 (backups and error tracking moved to P6, owner 22.10). P4: slice 1 done, slice 2 (business setup) under way: the
 wizard's frame, its business step and the login's "Continue setting up" card. The design redraw stopped (ADR 0021 amended 2026-10-20): the apps are built from the book and the drawn
 boards, and Claude Design is used only for a critical undrawn detail. The frontend (web-b2) builds slice by slice:
@@ -117,7 +118,8 @@ components in Storybook, then the apps.
   (`infra/server/yeral/yeral.caddy`) until the client site takes it over. After the switch the owner deletes the
   Worker `yeral-web` and a PR removes `apps/legacy` (done 23.10.2026).
 - 2026-10-23: "Lets go back to email settings later. FOr now lest go with deploy and other tasks." The e-mail records
-  wait (lock down, or receive mail at an address through Email Routing); deployed the same night.
+  wait (lock down, or receive mail at an address through Email Routing); deployed the same night. (E-mail: replaced
+  the next evening, below.)
 - 2026-10-23 (night): "Lets go. U have 2 hours, do not hit the wall more than 3 times. And do not make the macbook
   heat, by using too much cpu/gpu and etc." Seven PRs merged, no wall (Current focus).
 - 2026-10-23 (evening): the owner deleted the Worker `yeral-web` and the untracked `docs/design/Claude outputs/`;
@@ -187,6 +189,10 @@ launch's real SMS sign-in; while the code shows on the screen the api verifies n
 [0023](../decisions/0023-one-deployment-per-market.md) amended, #138). [0019](../decisions/0019-own-phone-login-and-sessions.md)
 amended: the demo workspace's sessions in a cookie of their own (#145). The book has no open question left.
 
+2026-10-23: [0027](../decisions/0027-geocoder-port.md) the address search behind a geocoder port (Photon over
+OpenStreetMap, #153); e-mail (no ADR; the book's chapter 9, 23.10.2026): `hello@yeral.app` received through Cloudflare
+Email Routing, nothing sent, DMARC reject (the owner; the details Claude's, delegated).
+
 2026-10-22 (no ADR; the book's chapter 9, 22.10.2026): backups (F-211) and error tracking with uptime alerts (F-209)
 with the real working MVP, not the demo launch (owner; Claude's concern on the uptime check); the first launch
 approved in advance (owner); DNS for the own server (Claude, delegated).
@@ -226,7 +232,8 @@ Where the old questions went (2026-10-17):
 3. **P2 left:** step 7's releases and deploys from GitHub, and the code-SMS cap. Follow-ups: `/v1/health` comparing
    the database's newest migration with the image's; the jobs runner's `reviewAsk` drop branch, dead after the deploy
    with 0041; checking the settings permission before an upload's body is read; the invite-accept route reading every
-   workspace. Main is ahead of the server by #151–#156 (migration 0042). With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
+   workspace. Main is ahead of the server by #148 and #151–#156
+   (#148 brings migration 0042). With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
    `.env` too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
    guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
