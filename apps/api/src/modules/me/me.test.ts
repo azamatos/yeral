@@ -510,6 +510,7 @@ describe('account', () => {
         '/v1/me/setup',
         '/v1/w/{slug}/setup',
         '/v1/w/{slug}/setup/finish',
+        '/v1/w/{slug}/setup/services',
         '/v1/me/photo',
         '/v1/w/{slug}/settings/address-search',
         '/v1/w/{slug}/settings/logo',
