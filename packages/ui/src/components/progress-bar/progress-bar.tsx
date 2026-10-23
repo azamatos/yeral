@@ -10,6 +10,8 @@ const track = cva('block overflow-hidden bg-n-100', {
       goal: 'h-2 rounded-pill',
       /** the setup flow's top bar on phones and tablets (B-Onboarding `.mbp`): 3 high, square track */
       flow: 'h-0.75',
+      /** a 4 px meter under a heading with its count (DS-Patterns «Checklist»: «1 / 3 done») */
+      meter: 'h-1 rounded-pill',
     },
   },
   defaultVariants: { variant: 'goal' },
@@ -22,7 +24,7 @@ export type ProgressBarProps = Omit<ComponentProps<'div'>, 'role' | 'children'> 
   max: number
   /** What a screen reader says instead of a percentage: «Step 4 of 8», «2 of 3 photos». */
   valueText?: string
-  variant?: 'goal' | 'flow'
+  variant?: 'goal' | 'flow' | 'meter'
 }
 
 /**
