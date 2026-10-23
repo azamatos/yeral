@@ -29,6 +29,17 @@ describe('catalogue', () => {
     expect((await b.req('/v1/categories?lang=ru')).json.items[1].name).toBe('Барбершоп')
   })
 
+  it("gives each category's starter services in their groups, in the asked language (F-098)", async () => {
+    const en = await b.req('/v1/categories')
+    const beauty = en.json.items[0]
+    expect(beauty.starterGroups.map((g: { name: string }) => g.name)).toEqual(['Hair', 'Nails', 'Face', 'Massage'])
+    expect(beauty.starterGroups[0].services[0]).toEqual({ name: 'Women’s haircut', durationMin: 60, price: { type: 'fixed', amount: 80 } })
+    expect(beauty.starterGroups[0].services[2]).toMatchObject({ name: 'Hair colouring', price: { type: 'from', amount: 250 } })
+    expect(en.json.items.find((c: { id: string }) => c.id === 'restaurant').starterGroups).toEqual([])
+    const tk = await b.req('/v1/categories?lang=tk')
+    expect(tk.json.items[0].starterGroups[0]).toMatchObject({ name: 'Saç', services: [{ name: 'Aýal saç kesimi' }, {}, {}, {}] })
+  })
+
   it('search: nearest first, only places with free time today, distances when located', async () => {
     const res = await b.req(`/v1/search?${near}`)
     expect(res.status).toBe(200)
