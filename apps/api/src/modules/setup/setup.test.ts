@@ -258,24 +258,29 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
       body: { groupId: group.json.id, name: { en: 'Haircut' }, durationMin: 30, priceType: 'fixed', priceAmount: 40 },
     })
     expect(haircut.status).toBe(201)
-    // mobile numbers for the app, an administrator always with it, nobody twice and not the owner's own number
+    // a mobile number for everyone, with the app or not
+    const landline = await put([{ name: 'Myrat', phone: '+99312345678', level: 'specialist', hasApp: false }])
+    expect(landline.status).toBe(400)
+    // an administrator always with the app, nobody twice and not the owner's own number
     const wrong = await put([
-      { name: 'Arslan', phone: '+99312345678', level: 'specialist', hasApp: true },
       { name: 'Jeren', phone: '+99365930051', level: 'admin', hasApp: false },
       { name: 'Twice', phone: '+99365930051', level: 'specialist', hasApp: true },
       { name: 'Me', phone: '+99365930050', level: 'specialist', hasApp: true },
     ])
     expect(wrong.status).toBe(400)
     expect(wrong.json.error.details.issues).toEqual([
-      { path: ['members', 0, 'phone'], code: 'not_mobile' },
-      { path: ['members', 1, 'hasApp'], code: 'invalid' },
+      { path: ['members', 0, 'hasApp'], code: 'invalid' },
+      { path: ['members', 1, 'phone'], code: 'taken' },
       { path: ['members', 2, 'phone'], code: 'taken' },
-      { path: ['members', 3, 'phone'], code: 'taken' },
     ])
+    // only the draft's owner: a stranger doesn't learn it exists
+    const stranger = await as('+99365930059')
+    expect((await stranger.req(`${W}/setup/team`, { method: 'PUT', body: { members: [] } })).status).toBe(404)
+    expect((await stranger.req(`${W}/team`)).status).toBe(404)
     const saved = await put([
       { name: 'Arslan', phone: '+99365930052', level: 'specialist', hasApp: true },
       { name: 'Jeren', phone: '+99365930053', level: 'admin', hasApp: true },
-      { name: 'Myrat', phone: '+99312345678', level: 'specialist', hasApp: false },
+      { name: 'Myrat', phone: '+99365930054', level: 'specialist', hasApp: false },
     ])
     expect(saved.status).toBe(200)
     type Row = { id: string; name: string; level: string; status: string; hasApp: boolean; bookable: boolean; invite: unknown }
@@ -290,22 +295,32 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     // the step reopens with them; no invite exists before the finish
     expect(view((await owner.req(`${W}/team`)).json.items)).toEqual(view(saved.json.items))
     expect(await db.select().from(invites).where(eq(invites.businessId, draft!.id))).toEqual([])
-    // the specialists do the menu's services
-    const arslan = (saved.json.items as Row[]).find((m) => m.name === 'Arslan')!
+    // the specialists do the menu's services, an administrator none
+    const byName = (name: string) => (saved.json.items as Row[]).find((m) => m.name === name)!
+    const arslan = byName('Arslan')
     expect(await db.select().from(staffServices).where(eq(staffServices.staffId, arslan.id))).toHaveLength(1)
+    expect(
+      await db
+        .select()
+        .from(staffServices)
+        .where(eq(staffServices.staffId, byName('Jeren').id)),
+    ).toEqual([])
+    // what a kept specialist does stays as it was (Settings may narrow it)
+    await db.delete(staffServices).where(eq(staffServices.staffId, arslan.id))
     // saved again: a kept person keeps their row, someone left out goes
     const again = await put([{ name: 'Arslan B.', phone: '+99365930052', level: 'specialist', hasApp: true }])
     expect((again.json.items as Row[]).map((m) => [m.name, m.id === arslan.id || m.level === 'owner'])).toEqual([
       ['Bahar', true],
       ['Arslan B.', true],
     ])
+    expect(await db.select().from(staffServices).where(eq(staffServices.staffId, arslan.id))).toEqual([])
     // "I work alone": only the owner
     expect((await put([])).json.items.map((m: Row) => m.level)).toEqual(['owner'])
     await put([
       { name: 'Arslan', phone: '+99365930052', level: 'specialist', hasApp: true },
-      { name: 'Myrat', phone: '+99312345678', level: 'specialist', hasApp: false },
+      { name: 'Myrat', phone: '+99365930054', level: 'specialist', hasApp: false },
     ])
-    // only the owner sets the team up, only while it's a draft
+    // finished with an address, an open day and a service
     const location = { cityId: 'ashgabat', address: 'Magtymguly şaýoly 7', street: 'Magtymguly şaýoly', lat: 37.95, lng: 58.37 }
     await owner.req(`${W}/settings/profile`, { method: 'PATCH', body: { location } })
     const day = { open: 600, close: 1140, break: null }

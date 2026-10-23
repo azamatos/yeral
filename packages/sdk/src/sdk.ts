@@ -1091,7 +1091,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     finish: (slug: string) =>
       mutationOptions({
         mutationFn: () => call(w.setup.finish.$post({ param: { slug } })),
-        onSuccess: () => invalidate(keys.setup(), keys.workspaces(), keys.me()),
+        // the finish sends the team step's invites
+        onSuccess: () => invalidate(keys.setup(), keys.workspaces(), keys.me(), keys.team(slug)),
       }),
   }
 

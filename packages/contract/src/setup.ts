@@ -6,9 +6,9 @@
 import { NAME_MAX } from '@yeral/domain/names'
 import { SETUP_STEPS } from '@yeral/domain/setup'
 import { z } from 'zod'
-import { cityRefSchema, idSchema, phoneInputSchema, photoSchema, slugSchema } from './common'
+import { cityRefSchema, idSchema, mobileInputSchema, photoSchema, slugSchema } from './common'
 import { groupInputSchema, serviceInputSchema } from './services'
-import { assignableLevelSchema } from './team'
+import { assignableLevelSchema, inviteInputSchema } from './team'
 
 /** Step 2, "Biznes": the name and a category that takes appointments (tables and classes come later, book Q-030). */
 export const setupStartSchema = z
@@ -108,9 +108,10 @@ export type SetupServices = z.input<typeof setupServicesSchema>
 export const SETUP_TEAM_MAX = 30
 /**
  * Step 6, "Topar" (B-04): the draft's team besides its owner as the step leaves it, saved in one go; anyone not sent
- * goes, so saving again adds nobody twice, and "I work alone" sends nobody. Someone with the app (an administrator
- * always) gets an invite when the setup finishes, seen at sign-in with that mobile number for 7 days; a specialist
- * without it (Q-216) is bookable at once and never signs in. A specialist does every service of the menu.
+ * goes, so saving again adds nobody twice, and "I work alone" sends nobody. Everyone gives a mobile number (it's how
+ * they sign in, now or later; B-Onboarding). Someone with the app (an administrator always) gets an invite when the
+ * setup finishes, seen at sign-in with that number for 7 days; a specialist without it (Q-216) is bookable at once and
+ * never signs in. A new specialist does every service of the menu.
  */
 export const setupTeamSchema = z
   .object({
@@ -119,10 +120,10 @@ export const setupTeamSchema = z
         z
           .object({
             /** As clients see it: "Aýna". */
-            name: z.string().trim().min(1).max(40),
-            phone: phoneInputSchema,
+            name: inviteInputSchema.shape.name,
+            phone: mobileInputSchema,
             level: assignableLevelSchema,
-            /** false = without the app ("Programmasyz"), a specialist only; with it the number must be a mobile one. */
+            /** false = without the app ("Programmasyz"), a specialist only. */
             hasApp: z.boolean(),
           })
           .strict(),
