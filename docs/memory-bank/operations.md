@@ -28,6 +28,7 @@ shared Caddy (section "The own server" below). Cloudflare keeps:
 |---|---|
 | DNS for `yeral.app` | records point at the server, not proxied (Caddy gets the certificates) |
 | `storybook.yeral.app` | Worker `yeral-storybook`, deployed from `main` |
+| mail to `hello@yeral.app` | Email Routing forwards it to the owner's inbox (its MX, SPF and DKIM records; nothing sent; 2026-10-23) |
 | backups | R2 with the real working MVP, not the demo launch (owner, 2026-10-22; needs the owner's token then) |
 
 **Cost:** the server (€16.68 a month, €12.32 on a 12-month term), shared with the owner's other projects; Workers
@@ -37,9 +38,9 @@ Free for Storybook; R2 free up to 10 GB.
 Hyperdrive config `yeral-production` (created 2026-10-18).
 
 **Owner's one-time steps** (when the milestone needs them): the DNS records (`infra/server/README.md`, "DNS records";
-the A records for `@`, `www`, `api`, `business` and `cms` done 2026-10-22, the e-mail records when the owner chooses);
-deleting the Worker `yeral-web`; with the real working MVP (P6), an R2 token for backups and accounts for error
-tracking and uptime checks (owner, 2026-10-22: not for the demo launch).
+the A records for `@`, `www`, `api`, `business` and `cms` done 2026-10-22; Email Routing for `hello@` and the `_dmarc`
+record, chosen 2026-10-23); the Worker `yeral-web` (deleted 2026-10-23); with the real working MVP (P6), an R2 token
+for backups and accounts for error tracking and uptime checks (owner, 2026-10-22: not for the demo launch).
 
 ## Local database and API tests (since M2d)
 

@@ -4,12 +4,22 @@ _Last updated: 2026-10-23_
 
 ## Current focus
 
+**2026-10-23: P4 slice 2 (business setup) under way.** The night of 23.10 (an unattended 2-hour run, every PR reviewed
+with `code-review`, one round, on green CI) merged #151 (the old site out of the repo), #148 (the "How was it?" card's
+api, migration 0042), #153 (the address search behind the map pin, ADR 0027), #152 (the wizard's pieces in
+`@yeral/ui`), #154 (the wizard's frame and its business step), #155 (the login reopens an unfinished setup) and #156
+(the draft's category id); details in `log/2026-10-21-how-was-it.md`, `log/2026-10-21-address-search.md` and
+`log/2026-10-23-setup-wizard.md`. None of it is deployed: the server runs
+5c07be4. Left in the wizard: steps 3–8 (address, hours, services, team, booking rules, done with `setup.finish`) and
+the phone step for someone signed out. The evening of 23.10 the owner deleted the Worker `yeral-web` and asked how to
+receive e-mail at yeral.app (Cloudflare Email Routing; `infra/server/README.md`, "DNS records").
+
 **2026-10-23: yeral.app moved to the own server.** The owner removed `yeral.app` and `www` from the old Worker
 `yeral-web` and added the A records for `@`, `www`, `api`, `business` and `cms` (DNS only; 22.10). Claude deployed main
 at 5c07be4 with `PUBLIC=1` (22.10 21:18 UTC, a database backup first): migrations 0039–0041 applied, Caddy got Let's
 Encrypt certificates for `yeral.app`, `www` and `api`, `https://yeral.app` shows the coming-soon page (#150), `www`
 redirects to it, `https://api.yeral.app/v1/health` answers. The old site left the repo (`apps/legacy`, its deploy option
-and smoke check, its ignore entries; this PR).
+and smoke check, its ignore entries; #151).
 
 **2026-10-22: the backend is all but done for the first launch; the owner answered what it still asked for.** The
 evening of 21.10 merged #137–#147 (each reviewed with `code-review`, one round, on green CI): six concerns settled with
@@ -23,17 +33,13 @@ migration: no rollback to an older image past it). On 22.10 the owner answered (
 error tracking for the demo launch, both with the real working MVP (P6); the first launch approved in advance; the DNS
 records for `api`, `business` and `cms` now (`infra/server/README.md`, "DNS records").
 
-Merged 23.10: **#148** the "How was it?" card's api (F-243, migration 0042, `d4d4042`; not deployed yet). Open:
-**`feat/api-address-search`** (`39259e4`): the address search behind the map pin through a geocoder port (Photon over
-OpenStreetMap, ADR 0027 in the branch), pushed without a PR or review.
-
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16). Releases are paused until the MVP works
 (#133, ADR 0009 amended; the `release` skill is now `ship`): no versions or changesets, and production goes by hand.
 The api and Postgres run on the owner's server since 2026-10-19, public at `api.yeral.app` since 2026-10-22 21:18 UTC
-(23.10 the owner's time; main at 5c07be4); yeral.app shows a coming-soon page from the server until the client site takes it over. P2: steps 0–6 done (step 4
-but the map address search, in the open branch); step 7 has the SMS limits and the sitemap data, and keeps releases
-and deploys from GitHub (backups and error tracking moved to P6, owner 22.10). P4: slice 1 done, slice 2 (business
-setup) next. The design redraw stopped (ADR 0021 amended 2026-10-20): the apps are built from the book and the drawn
+(23.10 the owner's time; the server at 5c07be4, main ahead); yeral.app shows a coming-soon page from the server until
+the client site takes it over. P2: steps 0–6 done (the map address search too, #153); step 7 has the SMS limits and the sitemap data, and keeps releases and deploys from GitHub
+(backups and error tracking moved to P6, owner 22.10). P4: slice 1 done, slice 2 (business setup) under way: the
+wizard's frame, its business step and the login's "Continue setting up" card. The design redraw stopped (ADR 0021 amended 2026-10-20): the apps are built from the book and the drawn
 boards, and Claude Design is used only for a critical undrawn detail. The frontend (web-b2) builds slice by slice:
 components in Storybook, then the apps.
 
@@ -112,7 +118,14 @@ components in Storybook, then the apps.
   (`infra/server/yeral/yeral.caddy`) until the client site takes it over. After the switch the owner deletes the
   Worker `yeral-web` and a PR removes `apps/legacy` (done 23.10.2026).
 - 2026-10-23: "Lets go back to email settings later. FOr now lest go with deploy and other tasks." The e-mail records
-  wait (lock down, or receive mail at an address through Email Routing); deployed the same night.
+  wait (lock down, or receive mail at an address through Email Routing); deployed the same night. (E-mail: replaced
+  the next evening, below.)
+- 2026-10-23 (night): "Lets go. U have 2 hours, do not hit the wall more than 3 times. And do not make the macbook
+  heat, by using too much cpu/gpu and etc." Seven PRs merged, no wall (Current focus).
+- 2026-10-23 (evening): the owner deleted the Worker `yeral-web` and the untracked `docs/design/Claude outputs/`;
+  "can we set getting email for yeral?": receive mail at `hello@` through Cloudflare Email Routing, forwarded to the
+  owner's inbox, with a DMARC record against mail sent in yeral.app's name; sending stays off (the owner sets it up,
+  `infra/server/README.md`, "DNS records"). Docker Desktop stays as it is. Then two more hours on slice 2.
 
 ## Decisions
 
@@ -176,6 +189,10 @@ launch's real SMS sign-in; while the code shows on the screen the api verifies n
 [0023](../decisions/0023-one-deployment-per-market.md) amended, #138). [0019](../decisions/0019-own-phone-login-and-sessions.md)
 amended: the demo workspace's sessions in a cookie of their own (#145). The book has no open question left.
 
+2026-10-23: [0027](../decisions/0027-geocoder-port.md) the address search behind a geocoder port (Photon over
+OpenStreetMap, #153); e-mail (no ADR; the book's chapter 9, 23.10.2026): `hello@yeral.app` received through Cloudflare
+Email Routing, nothing sent, DMARC reject (the owner; the details Claude's, delegated).
+
 2026-10-22 (no ADR; the book's chapter 9, 22.10.2026): backups (F-211) and error tracking with uptime alerts (F-209)
 with the real working MVP, not the demo launch (owner; Claude's concern on the uptime check); the first launch
 approved in advance (owner); DNS for the own server (Claude, delegated).
@@ -199,31 +216,32 @@ Where the old questions went (2026-10-17):
 
 ## Next steps
 
-1. **Finish the open backend piece:** open a PR for `feat/api-address-search`, review it, merge (#148 merged 23.10).
-2. **P4 slice 2, business setup** (the wizard, profile, services, hours, team, booking rules, link and QR; book
+1. **P4 slice 2, business setup** (the wizard, profile, services, hours, team, booking rules, link and QR; book
    chapter 10): its endpoints are merged (the setup draft #112 and its card #141, photos #116, the logo #140, the floor
-   #120, step 4's settings; the address search once merged). Also: the photo upload in My account (`ProfilePhoto`'s
+   #120, step 4's settings, the address search #153). Built: the wizard's frame and business step (#154), the login's
+   card (#155). Next: the wizard's steps 3–8 (address with MapFrame and the address search, hours, services, team,
+   booking rules, done with `setup.finish`), then its phone step for someone signed out, then the Settings sections.
+   Also: the photo upload in My account (`ProfilePhoto`'s
    `upload` and `src`: `PUT /v1/me/photo`, `me.photo`); the Demo frame from `me.demo` (the signed-out sidebar with
    "Log in", the Demo banner, `demo` in the switcher), "Try the business app" (`sdk.demo.start()`) on the login and the
    wizard, and `demo_number`'s hint; the leave and delete confirms' counts (#142); the page-state banner (#144).
-3. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md`, a database backup first). The
+2. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md`, a database backup first). The
    first launch (approved in advance, 22.10) goes when slices 2–7 are built and checked locally: the switches
    `SIGN_IN_CODE_ON_SCREEN`, `EXAMPLE_BUSINESSES`, `DEMO_WORKSPACE` on, the client site replaces the coming-soon page in
    `yeral.caddy` (no DNS change), and the business and cms sites join it with their apps.
-4. **P2 left:** step 7's releases and deploys from GitHub, and the code-SMS cap. Follow-ups: `/v1/health` comparing
+3. **P2 left:** step 7's releases and deploys from GitHub, and the code-SMS cap. Follow-ups: `/v1/health` comparing
    the database's newest migration with the image's; the jobs runner's `reviewAsk` drop branch, dead after the deploy
    with 0041; checking the settings permission before an upload's body is read; the invite-accept route reading every
-   workspace. With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
+   workspace. Main is ahead of the server by #148 and #151–#156
+   (#148 brings migration 0042). With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
    `.env` too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
    guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
-**Waiting on the owner:** deleting the Worker `yeral-web` in Cloudflare (the switch is confirmed, 23.10); the e-mail
-records (`infra/server/README.md`, "DNS records": lock `yeral.app` down with SPF, DMARC and a null MX, or receive mail at
-an address through Email Routing and add only DMARC). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
+**Waiting on the owner:** turning on Email Routing for `hello@yeral.app` and adding the `_dmarc` record
+(`infra/server/README.md`, "DNS records"); Claude checks the records afterwards. The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
 runs `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` (login 3–32
 of a-z 0-9 . -) and the owner opens the setup link (24 hours, `cms.<domain>/setup/<token>`), picks the password, adds
-the authenticator app and keeps the 10 recovery codes. `docs/design/Claude outputs/yeral-design-v0.5.zip` (untracked,
-in the main checkout) is the owner's to delete. The old Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an
+the authenticator app and keeps the 10 recovery codes. The old Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an
 early Ýeral prototype) stays until all the web apps are live, then goes (the owner, 21.10); the owner's other Pages
 projects aren't Ýeral's and stay. Later (P6): an R2 token, accounts for error tracking and uptime checks.
 

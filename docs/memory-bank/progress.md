@@ -233,7 +233,16 @@
   only, 22.10); the coming-soon page `5c07be4` (#150); main at 5c07be4 deployed by hand with `PUBLIC=1` after a
   database backup (migrations 0039–0041; Let's Encrypt certificates for `yeral.app`, `www`, `api`; `www` → the apex;
   `api.yeral.app/v1/health` answers). The old site left the repo: `apps/legacy`, its deploy option and smoke check,
-  its ignore, lint-hook, Renovate, Turborepo and pnpm entries. The Worker `yeral-web` is the owner's to delete.
+  its ignore, lint-hook, Renovate, Turborepo and pnpm entries `1bda69d` (#151). The owner deleted the Worker
+  `yeral-web` the same evening.
+- **2026-10-23 (night) · P4 slice 2 started, P2 step 4 finished** (an unattended 2-hour run, each PR reviewed with
+  `code-review`, one round, on green CI; details in `log/2026-10-21-how-was-it.md`, `log/2026-10-21-address-search.md` and
+  `log/2026-10-23-setup-wizard.md`): the "How was it?" card's api
+  `d4d4042` (#148, F-243, migration 0042); the address search behind the map pin `93c8a09` (#153, ADR 0027: a
+  geocoder port, Photon over OpenStreetMap); the wizard's pieces in `@yeral/ui` (ProgressBar, WizardFooter, vertical
+  Stepper, Field counter and optional) `e75cd83` (#152); the wizard's frame and business step `9fedd9f` (#154); the
+  login reopens an unfinished setup `782e05d` (#155, B-07 revised); the draft's category id `a3c0eda` (#156). Not
+  deployed (the server runs 5c07be4).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.
