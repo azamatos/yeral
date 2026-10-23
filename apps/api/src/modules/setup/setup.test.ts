@@ -249,7 +249,7 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
 
   it('the team step saves the people in one go; their invites go out at the finish', async () => {
     const owner = await as('+99365930050', 'Bahar')
-    const { slug } = (await owner.req('/v1/setup', { body: { name: 'Bahar Barber', categoryId: 'barbershop' } })).json as { slug: string }
+    const { slug } = (await owner.req('/v1/setup', { body: { name: 'Bahar Barber', categoryId: 'barber' } })).json as { slug: string }
     const W = `/v1/w/${slug}`
     const put = (members: unknown[]) => owner.req(`${W}/setup/team`, { method: 'PUT', body: { members } })
     const [draft] = await db.select().from(businesses).where(eq(businesses.slug, slug))
