@@ -68,6 +68,14 @@ const PROFILE: BusinessProfile = {
   hidden: null,
 }
 
+const CITIES = {
+  items: [
+    { id: 'ashgabat', name: 'Ashgabat', lat: 37.9601, lng: 58.3261 },
+    { id: 'mary', name: 'Mary', lat: 37.6005, lng: 61.8302 },
+  ],
+  main: 'ashgabat',
+}
+
 const sent: { profile: unknown[]; rules: unknown[]; review: number; logo: number[][]; order: string[][]; removed: string[] } = {
   profile: [],
   rules: [],
@@ -130,6 +138,7 @@ const fakeApi =
           })),
         })
       if (route === 'GET /w/glow-studio/settings/profile') return json(profile)
+      if (route === 'GET /cities') return json(CITIES)
       if (route === 'PATCH /w/glow-studio/settings/profile') {
         sent.profile.push(body)
         const phone = typeof body.phone === 'string' ? `+993${body.phone}` : profile.phone
@@ -313,6 +322,24 @@ export const PhotoRefused: Story = {
     await expect(await within(section).findByText('price-list.pdf isn’t a photo. Use JPG, PNG or WebP.', {}, UPLOAD)).toBeVisible()
     await userEvent.click(within(section).getByRole('button', { name: 'Dismiss price-list.pdf' }))
     await expect(within(section).queryByText('Not a photo')).toBeNull()
+  },
+}
+
+/**
+ * The address: the wizard's fields with the map; «I work from home» joins the save bar and goes to the profile with the
+ * rest of the location as it is.
+ */
+export const Address: Story = {
+  play: async ({ canvas }) => {
+    const section = await canvas.findByRole('region', { name: 'Address' })
+    await expect(within(section).getByRole('combobox', { name: 'Address' })).toHaveValue(PROFILE.location.address)
+    await expect(within(section).getByText(/Moved\?/)).toBeVisible()
+    await expect(within(section).getByRole('link', { name: 'Create a business' })).toBeVisible()
+    await userEvent.click(within(section).getByRole('switch', { name: 'I work from home' }))
+    const bar = canvas.getByRole('region', { name: 'Unsaved changes' })
+    await userEvent.click(within(bar).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(canvas.queryByRole('region', { name: 'Unsaved changes' })).toBeNull())
+    await expect(sent.profile).toEqual([expect.objectContaining({ hideExactAddress: true, location: PROFILE.location })])
   },
 }
 
