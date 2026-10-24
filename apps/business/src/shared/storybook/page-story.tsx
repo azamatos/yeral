@@ -6,6 +6,7 @@ import {
   createRouter,
   Outlet,
   RouterProvider,
+  type AnyRoute,
   type RouteComponent,
 } from '@tanstack/react-router'
 import { UIProvider } from '@yeral/ui/provider'
@@ -14,6 +15,12 @@ import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { createApi, SdkProvider, type Api } from '@/shared/api'
 import { appLocale, I18nProvider } from '@/shared/i18n'
+
+/** A layout route with the pages (or layouts) inside it. */
+export interface StoryLayout {
+  component: RouteComponent
+  children: Record<string, RouteComponent | StoryLayout>
+}
 
 /** No api in the story: every request fails like a lost connection. */
 const offline = (): typeof fetch => () => Promise.reject(new TypeError('no api in this story'))
@@ -30,8 +37,11 @@ export function PageStory({
   server = offline,
 }: {
   routes: Record<string, RouteComponent>
-  /** Layout routes with pages inside (`'/w/$slug': { component: WorkspaceShell, children: { calendar: … } }`). */
-  layouts?: Record<string, { component: RouteComponent; children: Record<string, RouteComponent> }>
+  /**
+   * Layout routes with pages inside (`'/w/$slug': { component: WorkspaceShell, children: { calendar: … } }`), and
+   * layouts inside layouts (`settings: { component: SettingsLayoutPage, children: { link: … } }`).
+   */
+  layouts?: Record<string, StoryLayout>
   path?: string
   server?: () => typeof fetch
 }) {
@@ -40,15 +50,17 @@ export function PageStory({
     // a story fails at once instead of retrying
     api.queryClient.setDefaultOptions({ queries: { retry: false }, mutations: { retry: false } })
     const root = createRootRouteWithContext<Api>()({ component: Outlet })
-    const nested = Object.entries(layouts).map(([path, { component, children }]) => {
-      const layout = createRoute({ getParentRoute: () => root, path, component })
+    const nest = (parent: AnyRoute, path: string, { component, children }: StoryLayout): AnyRoute => {
+      const layout = createRoute({ getParentRoute: () => parent, path, component })
       return layout.addChildren(
-        Object.entries(children).map(([path, component]) => createRoute({ getParentRoute: () => layout, path, component })),
+        Object.entries(children).map(([path, child]) =>
+          typeof child === 'function' ? createRoute({ getParentRoute: () => layout, path, component: child }) : nest(layout, path, child),
+        ),
       )
-    })
+    }
     const pages = [
       ...Object.entries(routes).map(([path, component]) => createRoute({ getParentRoute: () => root, path, component })),
-      ...nested,
+      ...Object.entries(layouts).map(([path, layout]) => nest(root, path, layout)),
     ]
     const router = createRouter({
       routeTree: root.addChildren(pages),

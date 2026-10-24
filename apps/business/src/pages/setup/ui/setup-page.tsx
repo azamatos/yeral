@@ -64,11 +64,16 @@ function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
   const setup = useQuery(sdk.setup.mine())
   const workspaces = useQuery(sdk.team.workspaces())
   const categories = useQuery(sdk.catalog.categories(locale))
-  // the setup just finished: the wizard opens the workspace, whatever the draft's refresh says meanwhile
+  // the setup just finished: the wizard opens the workspace, whatever the draft's refresh says meanwhile (the checklist's
+  // «Add»: the business profile, where the logo, the photos and the About are)
   const [finished, setFinished] = useState<{ slug: string; after: AfterSetup } | null>(null)
   if (finished)
     return (
-      <Navigate to={finished.after === 'calendar' ? '/w/$slug/calendar' : '/w/$slug/settings'} params={{ slug: finished.slug }} replace />
+      <Navigate
+        to={finished.after === 'calendar' ? '/w/$slug/calendar' : '/w/$slug/settings/profile'}
+        params={{ slug: finished.slug }}
+        replace
+      />
     )
   if (setup.isPending || workspaces.isPending || categories.isPending) return <Waiting />
   // a failed refetch keeps what's on screen (and what's typed); only a first load that failed is a failure

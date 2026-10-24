@@ -441,11 +441,6 @@
       "linkLabel": "Link and QR",
       "linkReady": "Your link and QR code are ready — they open to clients after the review.",
       "pageLink": "Your page link",
-      "copy": "Copy",
-      "copied": "Copied",
-      "share": "Share",
-      "whatsapp": "WhatsApp",
-      "telegram": "Telegram",
       "qrLabel": "QR code for {name}’s page",
       "qrNote": "Print it and put it by the till: after the review clients scan it with their phone and book straight away.",
       "downloadPng": "Download PNG",
@@ -523,5 +518,48 @@
     "noShowsTimes": "{n, plural, one {# time} other {# times}}",
     "fewer": "Fewer",
     "more": "More"
+  },
+  "pageLink": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "share": "Share",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram"
+  },
+  "settings": {
+    "title": "Settings",
+    "nav": "Settings sections",
+    "sections": {
+      "profile": "Business profile",
+      "rules": "Booking rules",
+      "hours": "Hours",
+      "services": "Services",
+      "team": "Team",
+      "permissions": "Permissions",
+      "link": "Link and QR"
+    },
+    "link": {
+      "lead": "Send clients straight to your booking page.",
+      "state": {
+        "live": "Live",
+        "liveText": "Your page shows in search and opens at your link.",
+        "inReview": "In review",
+        "inReviewText": "Your page opens to clients after the check. Until then only you and your team can see it.",
+        "notApproved": "Not approved",
+        "fix": "Fix and send again",
+        "hidden": "Hidden by {brand}",
+        "hiddenText": "Clients can’t find your page or open your link. Your calendar and bookings work as usual."
+      },
+      "linkTitle": "Your page link",
+      "linkCaption": "Put it in your Instagram profile, WhatsApp status or on your business card — clients book straight from it.",
+      "noLanguage": "The link has no language in it: the page opens in each visitor’s language.",
+      "qrTitle": "QR code",
+      "qrLabel": "QR code for {name}’s page",
+      "qrNote": "Put it by the till — clients open it on their phone and book.",
+      "qrCaption": "PNG for printing, SVG for designers.",
+      "downloadPng": "Download PNG",
+      "downloadSvg": "Download SVG",
+      "downloaded": "QR code downloaded ({format})"
+    }
   }
 }

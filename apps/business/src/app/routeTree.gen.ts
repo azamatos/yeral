@@ -18,7 +18,15 @@ import { Route as WSlugBookingsRouteImport } from './routes/w/$slug/bookings'
 import { Route as WSlugCalendarRouteImport } from './routes/w/$slug/calendar'
 import { Route as WSlugClientsRouteImport } from './routes/w/$slug/clients'
 import { Route as WSlugReviewsRouteImport } from './routes/w/$slug/reviews'
-import { Route as WSlugSettingsRouteImport } from './routes/w/$slug/settings'
+import { Route as WSlugSettingsRouteRouteImport } from './routes/w/$slug/settings/route'
+import { Route as WSlugSettingsIndexRouteImport } from './routes/w/$slug/settings/index'
+import { Route as WSlugSettingsHoursRouteImport } from './routes/w/$slug/settings/hours'
+import { Route as WSlugSettingsLinkRouteImport } from './routes/w/$slug/settings/link'
+import { Route as WSlugSettingsPermissionsRouteImport } from './routes/w/$slug/settings/permissions'
+import { Route as WSlugSettingsProfileRouteImport } from './routes/w/$slug/settings/profile'
+import { Route as WSlugSettingsRulesRouteImport } from './routes/w/$slug/settings/rules'
+import { Route as WSlugSettingsServicesRouteImport } from './routes/w/$slug/settings/services'
+import { Route as WSlugSettingsTeamRouteImport } from './routes/w/$slug/settings/team'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -65,10 +73,51 @@ const WSlugReviewsRoute = WSlugReviewsRouteImport.update({
   path: '/reviews',
   getParentRoute: () => WSlugRouteRoute,
 } as any)
-const WSlugSettingsRoute = WSlugSettingsRouteImport.update({
+const WSlugSettingsRouteRoute = WSlugSettingsRouteRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => WSlugRouteRoute,
+} as any)
+const WSlugSettingsIndexRoute = WSlugSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WSlugSettingsRouteRoute,
+} as any)
+const WSlugSettingsHoursRoute = WSlugSettingsHoursRouteImport.update({
+  id: '/hours',
+  path: '/hours',
+  getParentRoute: () => WSlugSettingsRouteRoute,
+} as any)
+const WSlugSettingsLinkRoute = WSlugSettingsLinkRouteImport.update({
+  id: '/link',
+  path: '/link',
+  getParentRoute: () => WSlugSettingsRouteRoute,
+} as any)
+const WSlugSettingsPermissionsRoute =
+  WSlugSettingsPermissionsRouteImport.update({
+    id: '/permissions',
+    path: '/permissions',
+    getParentRoute: () => WSlugSettingsRouteRoute,
+  } as any)
+const WSlugSettingsProfileRoute = WSlugSettingsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => WSlugSettingsRouteRoute,
+} as any)
+const WSlugSettingsRulesRoute = WSlugSettingsRulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => WSlugSettingsRouteRoute,
+} as any)
+const WSlugSettingsServicesRoute = WSlugSettingsServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => WSlugSettingsRouteRoute,
+} as any)
+const WSlugSettingsTeamRoute = WSlugSettingsTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => WSlugSettingsRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -76,12 +125,20 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/w/$slug': typeof WSlugRouteRouteWithChildren
   '/setup/$step': typeof SetupStepRoute
+  '/w/$slug/settings': typeof WSlugSettingsRouteRouteWithChildren
   '/w/$slug/bookings': typeof WSlugBookingsRoute
   '/w/$slug/calendar': typeof WSlugCalendarRoute
   '/w/$slug/clients': typeof WSlugClientsRoute
   '/w/$slug/reviews': typeof WSlugReviewsRoute
-  '/w/$slug/settings': typeof WSlugSettingsRoute
   '/w/$slug/': typeof WSlugIndexRoute
+  '/w/$slug/settings/hours': typeof WSlugSettingsHoursRoute
+  '/w/$slug/settings/link': typeof WSlugSettingsLinkRoute
+  '/w/$slug/settings/permissions': typeof WSlugSettingsPermissionsRoute
+  '/w/$slug/settings/profile': typeof WSlugSettingsProfileRoute
+  '/w/$slug/settings/rules': typeof WSlugSettingsRulesRoute
+  '/w/$slug/settings/services': typeof WSlugSettingsServicesRoute
+  '/w/$slug/settings/team': typeof WSlugSettingsTeamRoute
+  '/w/$slug/settings/': typeof WSlugSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,8 +148,15 @@ export interface FileRoutesByTo {
   '/w/$slug/calendar': typeof WSlugCalendarRoute
   '/w/$slug/clients': typeof WSlugClientsRoute
   '/w/$slug/reviews': typeof WSlugReviewsRoute
-  '/w/$slug/settings': typeof WSlugSettingsRoute
   '/w/$slug': typeof WSlugIndexRoute
+  '/w/$slug/settings/hours': typeof WSlugSettingsHoursRoute
+  '/w/$slug/settings/link': typeof WSlugSettingsLinkRoute
+  '/w/$slug/settings/permissions': typeof WSlugSettingsPermissionsRoute
+  '/w/$slug/settings/profile': typeof WSlugSettingsProfileRoute
+  '/w/$slug/settings/rules': typeof WSlugSettingsRulesRoute
+  '/w/$slug/settings/services': typeof WSlugSettingsServicesRoute
+  '/w/$slug/settings/team': typeof WSlugSettingsTeamRoute
+  '/w/$slug/settings': typeof WSlugSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -100,12 +164,20 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/w/$slug': typeof WSlugRouteRouteWithChildren
   '/setup/$step': typeof SetupStepRoute
+  '/w/$slug/settings': typeof WSlugSettingsRouteRouteWithChildren
   '/w/$slug/bookings': typeof WSlugBookingsRoute
   '/w/$slug/calendar': typeof WSlugCalendarRoute
   '/w/$slug/clients': typeof WSlugClientsRoute
   '/w/$slug/reviews': typeof WSlugReviewsRoute
-  '/w/$slug/settings': typeof WSlugSettingsRoute
   '/w/$slug/': typeof WSlugIndexRoute
+  '/w/$slug/settings/hours': typeof WSlugSettingsHoursRoute
+  '/w/$slug/settings/link': typeof WSlugSettingsLinkRoute
+  '/w/$slug/settings/permissions': typeof WSlugSettingsPermissionsRoute
+  '/w/$slug/settings/profile': typeof WSlugSettingsProfileRoute
+  '/w/$slug/settings/rules': typeof WSlugSettingsRulesRoute
+  '/w/$slug/settings/services': typeof WSlugSettingsServicesRoute
+  '/w/$slug/settings/team': typeof WSlugSettingsTeamRoute
+  '/w/$slug/settings/': typeof WSlugSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -114,12 +186,20 @@ export interface FileRouteTypes {
     | '/login'
     | '/w/$slug'
     | '/setup/$step'
+    | '/w/$slug/settings'
     | '/w/$slug/bookings'
     | '/w/$slug/calendar'
     | '/w/$slug/clients'
     | '/w/$slug/reviews'
-    | '/w/$slug/settings'
     | '/w/$slug/'
+    | '/w/$slug/settings/hours'
+    | '/w/$slug/settings/link'
+    | '/w/$slug/settings/permissions'
+    | '/w/$slug/settings/profile'
+    | '/w/$slug/settings/rules'
+    | '/w/$slug/settings/services'
+    | '/w/$slug/settings/team'
+    | '/w/$slug/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -129,20 +209,35 @@ export interface FileRouteTypes {
     | '/w/$slug/calendar'
     | '/w/$slug/clients'
     | '/w/$slug/reviews'
-    | '/w/$slug/settings'
     | '/w/$slug'
+    | '/w/$slug/settings/hours'
+    | '/w/$slug/settings/link'
+    | '/w/$slug/settings/permissions'
+    | '/w/$slug/settings/profile'
+    | '/w/$slug/settings/rules'
+    | '/w/$slug/settings/services'
+    | '/w/$slug/settings/team'
+    | '/w/$slug/settings'
   id:
     | '__root__'
     | '/'
     | '/login'
     | '/w/$slug'
     | '/setup/$step'
+    | '/w/$slug/settings'
     | '/w/$slug/bookings'
     | '/w/$slug/calendar'
     | '/w/$slug/clients'
     | '/w/$slug/reviews'
-    | '/w/$slug/settings'
     | '/w/$slug/'
+    | '/w/$slug/settings/hours'
+    | '/w/$slug/settings/link'
+    | '/w/$slug/settings/permissions'
+    | '/w/$slug/settings/profile'
+    | '/w/$slug/settings/rules'
+    | '/w/$slug/settings/services'
+    | '/w/$slug/settings/team'
+    | '/w/$slug/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -221,27 +316,108 @@ declare module '@tanstack/react-router' {
       id: '/w/$slug/settings'
       path: '/settings'
       fullPath: '/w/$slug/settings'
-      preLoaderRoute: typeof WSlugSettingsRouteImport
+      preLoaderRoute: typeof WSlugSettingsRouteRouteImport
       parentRoute: typeof WSlugRouteRoute
+    }
+    '/w/$slug/settings/': {
+      id: '/w/$slug/settings/'
+      path: '/'
+      fullPath: '/w/$slug/settings/'
+      preLoaderRoute: typeof WSlugSettingsIndexRouteImport
+      parentRoute: typeof WSlugSettingsRouteRoute
+    }
+    '/w/$slug/settings/hours': {
+      id: '/w/$slug/settings/hours'
+      path: '/hours'
+      fullPath: '/w/$slug/settings/hours'
+      preLoaderRoute: typeof WSlugSettingsHoursRouteImport
+      parentRoute: typeof WSlugSettingsRouteRoute
+    }
+    '/w/$slug/settings/link': {
+      id: '/w/$slug/settings/link'
+      path: '/link'
+      fullPath: '/w/$slug/settings/link'
+      preLoaderRoute: typeof WSlugSettingsLinkRouteImport
+      parentRoute: typeof WSlugSettingsRouteRoute
+    }
+    '/w/$slug/settings/permissions': {
+      id: '/w/$slug/settings/permissions'
+      path: '/permissions'
+      fullPath: '/w/$slug/settings/permissions'
+      preLoaderRoute: typeof WSlugSettingsPermissionsRouteImport
+      parentRoute: typeof WSlugSettingsRouteRoute
+    }
+    '/w/$slug/settings/profile': {
+      id: '/w/$slug/settings/profile'
+      path: '/profile'
+      fullPath: '/w/$slug/settings/profile'
+      preLoaderRoute: typeof WSlugSettingsProfileRouteImport
+      parentRoute: typeof WSlugSettingsRouteRoute
+    }
+    '/w/$slug/settings/rules': {
+      id: '/w/$slug/settings/rules'
+      path: '/rules'
+      fullPath: '/w/$slug/settings/rules'
+      preLoaderRoute: typeof WSlugSettingsRulesRouteImport
+      parentRoute: typeof WSlugSettingsRouteRoute
+    }
+    '/w/$slug/settings/services': {
+      id: '/w/$slug/settings/services'
+      path: '/services'
+      fullPath: '/w/$slug/settings/services'
+      preLoaderRoute: typeof WSlugSettingsServicesRouteImport
+      parentRoute: typeof WSlugSettingsRouteRoute
+    }
+    '/w/$slug/settings/team': {
+      id: '/w/$slug/settings/team'
+      path: '/team'
+      fullPath: '/w/$slug/settings/team'
+      preLoaderRoute: typeof WSlugSettingsTeamRouteImport
+      parentRoute: typeof WSlugSettingsRouteRoute
     }
   }
 }
 
+interface WSlugSettingsRouteRouteChildren {
+  WSlugSettingsHoursRoute: typeof WSlugSettingsHoursRoute
+  WSlugSettingsLinkRoute: typeof WSlugSettingsLinkRoute
+  WSlugSettingsPermissionsRoute: typeof WSlugSettingsPermissionsRoute
+  WSlugSettingsProfileRoute: typeof WSlugSettingsProfileRoute
+  WSlugSettingsRulesRoute: typeof WSlugSettingsRulesRoute
+  WSlugSettingsServicesRoute: typeof WSlugSettingsServicesRoute
+  WSlugSettingsTeamRoute: typeof WSlugSettingsTeamRoute
+  WSlugSettingsIndexRoute: typeof WSlugSettingsIndexRoute
+}
+
+const WSlugSettingsRouteRouteChildren: WSlugSettingsRouteRouteChildren = {
+  WSlugSettingsHoursRoute: WSlugSettingsHoursRoute,
+  WSlugSettingsLinkRoute: WSlugSettingsLinkRoute,
+  WSlugSettingsPermissionsRoute: WSlugSettingsPermissionsRoute,
+  WSlugSettingsProfileRoute: WSlugSettingsProfileRoute,
+  WSlugSettingsRulesRoute: WSlugSettingsRulesRoute,
+  WSlugSettingsServicesRoute: WSlugSettingsServicesRoute,
+  WSlugSettingsTeamRoute: WSlugSettingsTeamRoute,
+  WSlugSettingsIndexRoute: WSlugSettingsIndexRoute,
+}
+
+const WSlugSettingsRouteRouteWithChildren =
+  WSlugSettingsRouteRoute._addFileChildren(WSlugSettingsRouteRouteChildren)
+
 interface WSlugRouteRouteChildren {
+  WSlugSettingsRouteRoute: typeof WSlugSettingsRouteRouteWithChildren
   WSlugBookingsRoute: typeof WSlugBookingsRoute
   WSlugCalendarRoute: typeof WSlugCalendarRoute
   WSlugClientsRoute: typeof WSlugClientsRoute
   WSlugReviewsRoute: typeof WSlugReviewsRoute
-  WSlugSettingsRoute: typeof WSlugSettingsRoute
   WSlugIndexRoute: typeof WSlugIndexRoute
 }
 
 const WSlugRouteRouteChildren: WSlugRouteRouteChildren = {
+  WSlugSettingsRouteRoute: WSlugSettingsRouteRouteWithChildren,
   WSlugBookingsRoute: WSlugBookingsRoute,
   WSlugCalendarRoute: WSlugCalendarRoute,
   WSlugClientsRoute: WSlugClientsRoute,
   WSlugReviewsRoute: WSlugReviewsRoute,
-  WSlugSettingsRoute: WSlugSettingsRoute,
   WSlugIndexRoute: WSlugIndexRoute,
 }
 
