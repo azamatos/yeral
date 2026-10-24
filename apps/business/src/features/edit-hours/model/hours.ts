@@ -1,6 +1,7 @@
 /**
- * The hours step's week (B-Onboarding step 4, design §28 hours, book B-04): seven days Monday first, each open or
- * closed with its hours and one break, and «Same hours Monday to Friday»: the weekdays follow the first open one.
+ * The business's week as the hours editor holds it (the setup wizard's step 4, B-Onboarding; Settings → Hours,
+ * B-Settings; design §28 hours, book B-04, B-39): seven days Monday first, each open or closed with its hours and one
+ * break, and «Same hours Monday to Friday» (the wizard's): the weekdays follow the first open one.
  */
 import type { WeekdayHours } from '@yeral/contract/settings'
 import { DAY_MINUTES, dayHoursProblem, type DayHoursProblem, type WeekHours } from '@yeral/domain/hours'
@@ -55,6 +56,15 @@ export function editorWeek(saved: WeekHours): EditorWeek {
   return { days, same: open.length > 1 && open.every((i) => sameHours(hoursOf(days[i]!), hoursOf(days[open[0]!]!))) }
 }
 
+/**
+ * The editor's week for Settings (no «Same hours», B-Settings): the saved week as it is, every day closed included
+ * (each keeping the drawn hours for when it's switched on), never the wizard's starting week.
+ */
+export function settingsWeek(saved: WeekHours): EditorWeek {
+  const week = editorWeek(saved)
+  return { days: saved.some(Boolean) ? week.days : week.days.map((d) => ({ ...d, open: false })), same: false }
+}
+
 /** The days as they apply: while «Same hours» is on, the weekdays after the lead take its hours and break; each keeps its switch. */
 export function effectiveDays(week: EditorWeek): EditorDay[] {
   const lead = week.days[leadDay(week.days)]!
@@ -102,6 +112,10 @@ export function hoursRuns(week: WeekHours): { from: number; to: number; open: nu
   }
   return runs
 }
+
+/** The weekdays a change touches (Monday first): their switch, hours or break differ. */
+export const changedDays = (was: WeekHours, next: WeekHours): number[] =>
+  next.flatMap((d, i) => (sameWeek([d], [was[i] ?? null]) ? [] : [i]))
 
 /** A closing minute as its clock shows it: 1560 is 02:00 the next day; 1440 stays 24:00. */
 export const closingClock = (close: number) => (close > DAY_MINUTES ? close - DAY_MINUTES : close)
