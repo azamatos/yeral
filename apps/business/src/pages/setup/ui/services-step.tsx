@@ -15,7 +15,7 @@ import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
-import { choicesWith } from '../model/rules'
+import { choicesWith } from '@/shared/lib'
 import {
   DURATION_CHOICES,
   fixedPrice,
