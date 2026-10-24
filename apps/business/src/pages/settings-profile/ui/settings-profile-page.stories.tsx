@@ -77,6 +77,12 @@ const sent: { profile: unknown[]; rules: unknown[]; review: number; logo: number
   removed: [],
 }
 
+/**
+ * An upload's end: the picture is decoded and drawn in the browser, sent, and the settings are asked again before the
+ * page says so, which on a busy CI runner takes longer than a query's default second.
+ */
+const UPLOAD = { timeout: 10_000 }
+
 // flat squares in the brand's tints: no network in the stories
 const square = (fill: string) =>
   `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><rect width="4" height="4" fill="${fill}"/></svg>`)}`
@@ -259,10 +265,11 @@ async function picture(width: number, height: number): Promise<File> {
 export const Logo: Story = {
   play: async ({ canvas }) => {
     await userEvent.upload(await canvas.findByLabelText('Logo'), await picture(600, 400))
-    const saved = await within(document.body).findByText('Logo saved')
+    // the upload's end: the api got the square, the row offers «Change logo», then the toast
+    await waitFor(() => expect(sent.logo).toEqual([[400, 400]]), UPLOAD)
+    await expect(await canvas.findByRole('button', { name: 'Change logo' }, UPLOAD)).toBeVisible()
+    const saved = await within(document.body).findByText('Logo saved', {}, UPLOAD)
     await waitFor(() => expect(saved).toBeVisible())
-    await expect(sent.logo).toEqual([[400, 400]])
-    await expect(await canvas.findByRole('button', { name: 'Change logo' })).toBeVisible()
   },
 }
 
@@ -270,7 +277,7 @@ export const Logo: Story = {
 export const LogoTooSmall: Story = {
   play: async ({ canvas }) => {
     await userEvent.upload(await canvas.findByLabelText('Logo'), await picture(300, 300))
-    await expect(await canvas.findByText('logo.png is 300 × 300 px — the logo needs at least 400 × 400 px.')).toBeVisible()
+    await expect(await canvas.findByText('logo.png is 300 × 300 px — the logo needs at least 400 × 400 px.', {}, UPLOAD)).toBeVisible()
     await expect(sent.logo).toEqual([])
   },
 }
@@ -289,7 +296,7 @@ export const Photos: Story = {
     // named by their place: the api names every photo after the business
     await expect(within(section).getByRole('button', { name: 'Make cover: Photo 2' })).toBeVisible()
     await userEvent.upload(within(section).getByLabelText('Add photo'), await picture(800, 600))
-    await expect(await within(section).findByText('3 of 20')).toBeVisible()
+    await expect(await within(section).findByText('3 of 20', {}, UPLOAD)).toBeVisible()
     await expect(within(section).queryByText(/more photo/)).toBeNull()
     await userEvent.click(within(section).getByRole('button', { name: 'Remove photo: Photo 2' }))
     await expect(await within(section).findByText('2 of 20')).toBeVisible()
@@ -303,7 +310,7 @@ export const PhotoRefused: Story = {
     const section = await canvas.findByRole('region', { name: 'Photos' })
     const input = await within(section).findByLabelText('Add photo')
     await userEvent.upload(input, new File(['%PDF-1.7'], 'price-list.pdf', { type: 'image/png' }), { applyAccept: false })
-    await expect(await within(section).findByText('price-list.pdf isn’t a photo. Use JPG, PNG or WebP.')).toBeVisible()
+    await expect(await within(section).findByText('price-list.pdf isn’t a photo. Use JPG, PNG or WebP.', {}, UPLOAD)).toBeVisible()
     await userEvent.click(within(section).getByRole('button', { name: 'Dismiss price-list.pdf' }))
     await expect(within(section).queryByText('Not a photo')).toBeNull()
   },
