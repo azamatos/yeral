@@ -90,6 +90,17 @@ describe('dates and times', () => {
     expect(ru.monthYear('2026-10-14')).toBe('Октябрь 2026')
   })
 
+  it('a date in running text: the weekday in three letters; today and tomorrow by name, any other day a date', () => {
+    expect(en.shortWeekdayDate('2026-10-16')).toBe('Fri, 16 Oct')
+    expect(tk.shortWeekdayDate('2026-10-16')).toBe('Ann, 16 okt.')
+    expect(ru.shortWeekdayDate('2026-10-16')).toBe('Пт, 16 окт.')
+    expect(en.relativeShortDate('2026-10-16', '2026-10-16')).toBe('Today')
+    expect(en.relativeShortDate('2026-10-17', '2026-10-16')).toBe('Tomorrow')
+    expect(en.relativeShortDate('2026-10-23', '2026-10-16')).toBe('Fri, 23 Oct')
+    // yesterday's business day, still ahead past midnight
+    expect(en.relativeShortDate('2026-10-15', '2026-10-16')).toBe('Thu, 15 Oct')
+  })
+
   it('relative days', () => {
     expect(tk.relativeDay('2026-10-14', '2026-10-14')).toBe('Şu gün')
     expect(tk.relativeDay('2026-10-15', '2026-10-14')).toBe('Ertir')

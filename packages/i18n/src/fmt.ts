@@ -82,8 +82,17 @@ export function createFmt(locale: Locale) {
     shortDate: (date: string) => t('dayMonth', { day: parseYmd(date).getUTCDate(), month: t(`monthsShort.${monthOf(date)}`) }),
     /** `Thursday` */
     weekday: (date: string) => t(`weekdays.${weekdayOf(date)}`),
-    /** `Th` */
+    /** `Th`: only week headers and date strips («Fr 16», COMPONENTS.md); running text takes `shortWeekdayDate` */
     weekdayShort: (date: string) => t(`weekdaysShort.${weekdayOf(date)}`),
+    /** `Fri, 16 Oct`: a date in running text, the weekday in three letters (its own template, for the proofread) */
+    shortWeekdayDate: (date: string) => t('weekdayDateShort', { weekday: t(`weekdaysAbbr.${weekdayOf(date)}`), date: fmt.shortDate(date) }),
+    /** `Today`, `Tomorrow`, otherwise `Fri, 16 Oct` (lists of bookings ahead; a past day is a date too). */
+    relativeShortDate: (date: string, today: string) => {
+      const d = diffDays(date, today)
+      if (d === 0) return t('today')
+      if (d === 1) return t('tomorrow')
+      return fmt.shortWeekdayDate(date)
+    },
     /** `Thursday, 15 October` */
     weekdayDate: (date: string) => t('weekdayDate', { weekday: fmt.weekday(date), date: fmt.dayMonth(date) }),
     /** `October 2026` (month picker header) */

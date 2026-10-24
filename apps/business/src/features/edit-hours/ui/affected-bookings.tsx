@@ -1,5 +1,5 @@
 import type { BookingsAffectedDetails } from '@yeral/contract/errors'
-import { diffDays, today } from '@yeral/domain/time'
+import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { Modal, ModalActions, ModalContent, ModalDescription, ModalHeader } from '@yeral/ui/modal'
@@ -40,11 +40,8 @@ export function AffectedBookingsList({ bookings, labelledBy }: { bookings: reado
   const fmt = useFmt()
   const join = useJoin()
   const [now] = useState(() => Date.now())
-  const day = (date: string) =>
-    // today and tomorrow by name, then «Fr, 16 Oct»
-    diffDays(date, today(now)) <= 1
-      ? fmt.relativeDay(date, today(now))
-      : t('date', { weekday: fmt.weekdayShort(date), date: fmt.shortDate(date) })
+  // today and tomorrow by name, any other day «Fri, 16 Oct» (yesterday's business day too, still ahead past midnight)
+  const day = (date: string) => fmt.relativeShortDate(date, today(now))
   return (
     <div role="list" aria-labelledby={labelledBy} className="flex flex-col border-t border-n-200">
       {bookings.map((b) => {

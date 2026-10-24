@@ -21,6 +21,6 @@
   saved week with every day closed shows closed (`settingsWeek`, not the wizard's starting week) and «At least one day
   must be open.»; a special day the new week runs into says so; separators come from messages; keyed by the slug.
 - Follow-ups: the special days section (list, add/edit modal that saves directly, overlap warning); TimerPill in
-  `@yeral/ui` (COMPONENTS.md: role timer, ticking, hot at 15 min, «By 09:30») for the list's hand-drawn pill; «Fri, 16
-  Oct» needs a three-letter weekday in `fmt` (the list shows «Fr, 16 Oct»). The save bar's words are the shared
-  `settings.save` (with Booking rules).
+  `@yeral/ui` (COMPONENTS.md: role timer, ticking, hot at 15 min, «By 09:30») for the list's hand-drawn pill. The save
+  bar's words are the shared `settings.save` (with Booking rules). Done later the same night: «Fri, 16 Oct» through
+  `fmt.relativeShortDate` and `fmt.shortWeekdayDate` (`fmt.weekdaysAbbr`: Mon…Sun, Duş…Ýek, Пн…Вс; its own template).

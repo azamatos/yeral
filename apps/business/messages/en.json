@@ -255,7 +255,6 @@
     "cancel": "Cancel and offer 3 other times",
     "cancelCaption": "Each client picks a new time in one tap in My bookings.",
     "when": "{day} · {time}",
-    "date": "{weekday}, {date}",
     "unnamed": "Unnamed client",
     "left": "{time} left to answer",
     "more": "And {n, number} more.",
