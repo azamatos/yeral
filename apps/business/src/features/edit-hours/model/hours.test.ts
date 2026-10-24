@@ -6,6 +6,7 @@ import {
   effectiveDays,
   follows,
   hoursRuns,
+  settingsWeek,
   STARTING_WEEK,
   sameWeek,
   weekOf,
@@ -85,6 +86,13 @@ describe('the hours step’s week', () => {
     ])
     expect(hoursRuns(CLOSED)).toEqual([])
     expect([closingClock(1560), closingClock(1440)]).toEqual([120, 1440])
+  })
+
+  it('Settings shows the saved week as it is, every day on its own, a closed week closed', () => {
+    const week = [h(540, 1200), h(540, 1200), h(540, 1200), h(540, 1200), h(540, 1200), h(600, 1080), null]
+    expect(settingsWeek(week).same).toBe(false)
+    expect(weekOf(effectiveDays(settingsWeek(week)))).toEqual(week)
+    expect(weekOf(effectiveDays(settingsWeek(CLOSED)))).toEqual(CLOSED)
   })
 
   it('names the weekdays a change touches: their switch, hours or break', () => {

@@ -231,4 +231,23 @@ export const Invalid: Story = {
 }
 
 /** The phone: each day's hours under its name and switch, the modal as a sheet. */
-export const Phone: Story = { globals: { viewport: { value: 'xs' } }, args: { server: fakeApi(affected) } }
+export const Phone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  args: { server: fakeApi(affected) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('switch', { name: 'Sunday: open' }))
+    await userEvent.click(within(await canvas.findByRole('region', { name: 'Unsaved changes' })).getByRole('button', { name: 'Save' }))
+    const dialog = await within(document.body).findByRole('dialog')
+    await expect(within(dialog).getByRole('radio', { name: 'Keep them' })).toBeChecked()
+  },
+}
+
+/** Every day switched off: it says one must be open, and Save waits. */
+export const NoOpenDay: Story = {
+  play: async ({ canvas }) => {
+    for (const day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+      await userEvent.click(await canvas.findByRole('switch', { name: `${day}: open` }))
+    await expect(canvas.getByRole('alert')).toHaveTextContent('At least one day must be open.')
+    await expect(within(canvas.getByRole('region', { name: 'Unsaved changes' })).getByRole('button', { name: 'Save' })).toBeDisabled()
+  },
+}

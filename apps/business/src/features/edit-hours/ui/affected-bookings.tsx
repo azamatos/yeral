@@ -1,5 +1,5 @@
 import type { BookingsAffectedDetails } from '@yeral/contract/errors'
-import { today } from '@yeral/domain/time'
+import { diffDays, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { Modal, ModalActions, ModalContent, ModalDescription, ModalHeader } from '@yeral/ui/modal'
@@ -11,6 +11,13 @@ import { useTranslations } from 'use-intl'
 
 export type AffectedChoice = 'keep' | 'cancel'
 type Listed = BookingsAffectedDetails['bookings'][number]
+
+/** Words joined as the language joins them: «a · b · c» (`dot`) or «a, b» (`list`). */
+export function useJoin() {
+  const t = useTranslations('affected')
+  return (parts: readonly string[], how: 'dot' | 'list') =>
+    parts.filter(Boolean).reduce((a, b) => (a ? t(how === 'dot' ? 'joinDot' : 'joinList', { a, b }) : b), '')
+}
 
 /** «5 bookings and 1 request» (`and`) or «5 bookings · 1 request» (the list's label). */
 export function useAffectedCount() {
@@ -25,25 +32,35 @@ export function useAffectedCount() {
 /**
  * The bookings a change leaves out (DS-Business AffectedBookingsList, B-Settings `.abl`): a row each, «Today ·
  * 18:00–18:45» over «client · service · specialist», Confirmed, or Pending with the time left to answer. Moves to
- * `entities/booking` once Team's shift and remove flows list them too (COMPONENTS.md).
+ * `entities/booking` once Team's shift and remove flows list them too (COMPONENTS.md), the timer to TimerPill.
  */
 export function AffectedBookingsList({ bookings, labelledBy }: { bookings: readonly Listed[]; labelledBy: string }) {
   const t = useTranslations('affected')
   const s = useTranslations('status')
   const fmt = useFmt()
+  const join = useJoin()
   const [now] = useState(() => Date.now())
-  const day = (date: string) => {
-    const d = fmt.relativeDay(date, today(now))
-    // past tomorrow: «Fr, 16 Oct»
-    return d === fmt.weekday(date) || d === fmt.dayMonth(date)
-      ? t('date', { weekday: fmt.weekdayShort(date), date: fmt.shortDate(date) })
-      : d
-  }
+  const day = (date: string) =>
+    // today and tomorrow by name, then «Fr, 16 Oct»
+    diffDays(date, today(now)) <= 1
+      ? fmt.relativeDay(date, today(now))
+      : t('date', { weekday: fmt.weekdayShort(date), date: fmt.shortDate(date) })
   return (
     <div role="list" aria-labelledby={labelledBy} className="flex flex-col border-t border-n-200">
       {bookings.map((b) => {
-        const left = b.holdUntil === null ? null : fmt.duration(Math.max(1, Math.ceil((b.holdUntil - now) / 60_000)))
-        const who = [b.client ?? t('unnamed'), b.items.map((i) => i.service).join(', '), b.staff.join(', ')].filter(Boolean).join(' · ')
+        // a hold already over (not expired yet by the jobs) shows no time
+        const left = b.holdUntil !== null && b.holdUntil > now ? fmt.duration(Math.ceil((b.holdUntil - now) / 60_000)) : null
+        const who = join(
+          [
+            b.client ?? t('unnamed'),
+            join(
+              b.items.map((i) => i.service),
+              'list',
+            ),
+            join(b.staff, 'list'),
+          ],
+          'dot',
+        )
         return (
           <div
             key={b.code}
@@ -66,6 +83,7 @@ export function AffectedBookingsList({ bookings, labelledBy }: { bookings: reado
                   </StatusBadge>
                   {left && (
                     <span
+                      role="timer"
                       aria-label={t('left', { time: left })}
                       title={t('left', { time: left })}
                       className="inline-flex h-6 items-center gap-1 rounded-pill border border-st-pending-line bg-st-pending-bg px-2 text-micro font-semibold whitespace-nowrap text-st-pending-ink tabular-nums [&_svg]:size-3"
@@ -84,66 +102,65 @@ export function AffectedBookingsList({ bookings, labelledBy }: { bookings: reado
   )
 }
 
-/**
- * «5 bookings and 1 request fall outside the new hours» (B-Settings, design §28.5 hours, book Q-211): the changed days
- * as the lead, Keep them or Cancel and offer 3 other times, the list, and Save sends the save again with the choice.
- * New bookings follow the new hours either way.
- */
-export function HoursAffectedBookings({
-  details,
-  lead,
-  saving,
-  onSave,
-  onClose,
-}: {
+type ModalProps = {
   /** The 409's list; null while nothing waits for a choice. */
   details: BookingsAffectedDetails | null
   lead: string
   saving: boolean
   onSave: (choice: AffectedChoice) => void
   onClose: () => void
-}) {
-  const t = useTranslations('affected')
-  const count = useAffectedCount()
-  const [choice, setChoice] = useState<AffectedChoice>('keep')
-  const labelId = useId()
-  const open = details !== null
+}
+
+/**
+ * «5 bookings and 1 request fall outside the new hours» (B-Settings, design §28.5 hours, book Q-211): the changed days
+ * as the lead, Keep them or Cancel and offer 3 other times, the list, and Save sends the save again with the choice.
+ * New bookings follow the new hours either way. Each opening starts on Keep them.
+ */
+export function HoursAffectedBookings({ details, saving, onClose, ...rest }: ModalProps) {
   return (
     <Modal
-      open={open}
+      open={details !== null}
       onOpenChange={(next) => {
         if (!next && !saving) onClose()
       }}
     >
-      {details && (
-        <ModalContent size={560} className="gap-4.5">
-          <ModalHeader title={t('hoursTitle', { what: count(details.counts, 'and'), n: details.count })} closeLabel={t('close')}>
-            <ModalDescription>{t('hoursLead', { days: lead })}</ModalDescription>
-          </ModalHeader>
-          <OptionCardGroup value={choice} onValueChange={(v) => setChoice(v as AffectedChoice)} aria-label={t('what')} className="gap-2">
-            <OptionCard value="keep" indicator="start" title={t('keep')} caption={t('keepCaption')} />
-            <OptionCard value="cancel" indicator="start" title={t('cancel')} caption={t('cancelCaption')} />
-          </OptionCardGroup>
-          <div className="flex flex-col gap-2">
-            <span id={labelId} className="text-n-700 text-label font-semibold">
-              {count(details.counts, 'dot')}
-            </span>
-            <AffectedBookingsList bookings={details.bookings} labelledBy={labelId} />
-            {details.count > details.bookings.length && (
-              <span className="text-dense text-n-600">{t('more', { n: details.count - details.bookings.length })}</span>
-            )}
-          </div>
-          <p className="m-0 text-dense text-n-600">{t('hoursEither')}</p>
-          <ModalActions>
-            <Button variant="secondary" disabled={saving} onClick={onClose}>
-              {t('back')}
-            </Button>
-            <Button variant="primary" loading={saving} loadingLabel={t('saving')} onClick={() => onSave(choice)}>
-              {t('save')}
-            </Button>
-          </ModalActions>
-        </ModalContent>
-      )}
+      {details && <AffectedBody details={details} saving={saving} onClose={onClose} {...rest} />}
     </Modal>
+  )
+}
+
+function AffectedBody({ details, lead, saving, onSave, onClose }: ModalProps & { details: BookingsAffectedDetails }) {
+  const t = useTranslations('affected')
+  const count = useAffectedCount()
+  const [choice, setChoice] = useState<AffectedChoice>('keep')
+  const labelId = useId()
+  return (
+    <ModalContent size={560} className="gap-4.5">
+      <ModalHeader title={t('hoursTitle', { what: count(details.counts, 'and'), n: details.count })} closeLabel={t('close')}>
+        <ModalDescription>{t('hoursLead', { days: lead })}</ModalDescription>
+      </ModalHeader>
+      <OptionCardGroup value={choice} onValueChange={(v) => setChoice(v as AffectedChoice)} aria-label={t('what')} className="gap-2">
+        <OptionCard value="keep" indicator="start" title={t('keep')} caption={t('keepCaption')} />
+        <OptionCard value="cancel" indicator="start" title={t('cancel')} caption={t('cancelCaption')} />
+      </OptionCardGroup>
+      <div className="flex flex-col gap-2">
+        <span id={labelId} className="text-n-700 text-label font-semibold">
+          {count(details.counts, 'dot')}
+        </span>
+        <AffectedBookingsList bookings={details.bookings} labelledBy={labelId} />
+        {details.count > details.bookings.length && (
+          <span className="text-dense text-n-600">{t('more', { n: details.count - details.bookings.length })}</span>
+        )}
+      </div>
+      <p className="m-0 text-dense text-n-600">{t('hoursEither')}</p>
+      <ModalActions>
+        <Button variant="secondary" disabled={saving} onClick={onClose}>
+          {t('back')}
+        </Button>
+        <Button variant="primary" loading={saving} loadingLabel={t('saving')} onClick={() => onSave(choice)}>
+          {t('save')}
+        </Button>
+      </ModalActions>
+    </ModalContent>
   )
 }

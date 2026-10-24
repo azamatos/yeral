@@ -16,6 +16,11 @@
 - **Placement:** COMPONENTS.md puts the list in `entities/booking/ui/affected-bookings-list`; with one consumer the FSD
   lint (steiger `insignificant-slice`) refuses that slice, so the list sits in `features/edit-hours` and moves to
   `entities/booking` with Team's shift and remove flows.
-- Follow-ups: the special days section (list, add/edit modal that saves directly, overlap warning); «Fri, 16 Oct»
-  needs a three-letter weekday in `fmt` (the list shows «Fr, 16 Oct»); the save bar's words live in `settings.hours.save`
-  until a second section shares them; a week with every day closed disables Save without saying why.
+- Review (one round): each opening of the modal starts on Keep them; night breaks and closings through `fmt.timeRange`;
+  an edit made while saving stays; the cancel toast counts what the api cancelled; the timer is a `role="timer"`; a
+  saved week with every day closed shows closed (`settingsWeek`, not the wizard's starting week) and «At least one day
+  must be open.»; a special day the new week runs into says so; separators come from messages; keyed by the slug.
+- Follow-ups: the special days section (list, add/edit modal that saves directly, overlap warning); TimerPill in
+  `@yeral/ui` (COMPONENTS.md: role timer, ticking, hot at 15 min, «By 09:30») for the list's hand-drawn pill; «Fri, 16
+  Oct» needs a three-letter weekday in `fmt` (the list shows «Fr, 16 Oct»); the save bar's words live in
+  `settings.hours.save` until a second section shares them.

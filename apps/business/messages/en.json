@@ -245,6 +245,7 @@
     "requests": "{n, plural, one {# request} other {# requests}}",
     "joinAnd": "{a} and {b}",
     "joinDot": "{a} · {b}",
+    "joinList": "{a}, {b}",
     "hoursTitle": "{what} {n, plural, one {falls} other {fall}} outside the new hours",
     "hoursLead": "{days}. These were booked before the change.",
     "hoursEither": "New bookings follow the new hours either way.",
@@ -657,6 +658,7 @@
       "weekTitle": "Opening hours",
       "weekCaption": "Specialists’ shifts stay within these hours.",
       "note": "A day can close after midnight: 18:00–02:00 means open until 02:00 the next day. The part after midnight must end before the next day opens.",
+      "noDay": "At least one day must be open.",
       "save": {
         "message": "Save your changes?",
         "label": "Unsaved changes",
@@ -667,12 +669,13 @@
       "saved": "Hours saved",
       "savedKept": "Hours saved · {what} kept as {n, plural, one {it is} other {they are}}",
       "savedCancelled": "Hours saved · {what} cancelled — each client picks a new time in My bookings",
+      "cancelledCount": "{n, plural, one {# booking} other {# bookings}}",
+      "specialDayClash": "A special day open past midnight runs into these hours. Change that special day first.",
       "days": {
         "day": "{day} {hours}",
         "closed": "closed",
-        "range": "{from}–{to}",
-        "nextDay": "{from}–{to} (next day)",
-        "withBreak": "{hours}, break {from}–{to}"
+        "nextDay": "{hours} (next day)",
+        "withBreak": "{hours}, break {break}"
       }
     }
   }
