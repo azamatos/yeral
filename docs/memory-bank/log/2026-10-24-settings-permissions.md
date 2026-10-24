@@ -7,4 +7,8 @@
   the caption says specialists without the app never sign in.
 - A test keeps the rows that are `@yeral/domain/permissions` rows in step with `PERMISSION_TABLE` (none → No, all /
   manage → Yes, own / view → words). Editing permissions stays Later (F-089).
+- Review (one round): the admin's «Answer requests» says «Per “Who answers requests?”» (the book: the setting narrows
+  the admin too; the board drew a check), the header 44, the dash 16 from the messages, the level names read on
+  phones. Left: deriving the yes/no cells from `PERMISSION_TABLE` instead of a checked copy; a shared fake api for
+  Settings' stories (this one and Link and QR's repeat ~60 lines).
 - Built on the settings frame (`log/2026-10-24-settings-frame.md`); story `Business/Settings/Permissions`.

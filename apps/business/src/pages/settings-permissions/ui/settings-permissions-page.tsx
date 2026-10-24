@@ -8,9 +8,11 @@ import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
 import { PERMISSION_ROWS, type PermissionCell } from '../model/rows'
 
-// What · Owner · Admin · Specialist (B-Team `.mx-r`); under 768 the name on its own line and two columns under it
-const ROW =
-  'grid grid-cols-2 items-center gap-x-3 gap-y-2 border-b border-n-200 px-4 py-3 text-small text-n-900 last:border-b-0 sm:min-h-14 sm:grid-cols-[minmax(0,1fr)_72px_88px_minmax(160px,248px)] sm:gap-y-0 sm:px-5 sm:py-2'
+// What · Owner · Admin · Specialist (B-Team `.mx-r`, 56; the header `.mx-h`, 44 on n-50); under 768 the header goes,
+// each row puts its name on its own line and two columns under it
+const COLUMNS = 'sm:grid sm:grid-cols-[minmax(0,1fr)_72px_88px_minmax(160px,248px)] sm:items-center sm:gap-x-3 sm:px-5'
+const ROW = `${COLUMNS} grid grid-cols-2 items-center gap-x-3 gap-y-2 border-b border-n-200 px-4 py-3 text-small text-n-900 last:border-b-0 sm:min-h-14 sm:gap-y-0 sm:py-2`
+const HEADER = `${COLUMNS} hidden min-h-11 border-b border-n-200 bg-n-50`
 const LABEL = 'text-label text-n-500 uppercase'
 
 /**
@@ -34,7 +36,7 @@ export function SettingsPermissionsPage() {
       })}
     >
       <div role="table" aria-label={p('table')} className="overflow-hidden rounded-card border border-n-200 bg-n-0">
-        <div role="row" className={cn(ROW, 'hidden min-h-11 bg-n-50 py-0 sm:grid sm:py-0')}>
+        <div role="row" className={HEADER}>
           <span role="columnheader" className={LABEL}>
             {p('what')}
           </span>
@@ -54,7 +56,7 @@ export function SettingsPermissionsPage() {
               {p(`rows.${row.id}`)}
             </span>
             {LEVELS.map((level) => (
-              <Cell key={level} level={level} value={row[level]} />
+              <Cell key={level} level={level} levelName={t(`levels.${level}`)} value={row[level]} />
             ))}
           </div>
         ))}
@@ -64,19 +66,22 @@ export function SettingsPermissionsPage() {
   )
 }
 
-/** A cell: a check (yes), a dash (no) or the narrower reach in words; under 768 led by its level's name. */
-function Cell({ level, value }: { level: Level; value: PermissionCell }) {
-  const t = useTranslations()
+/**
+ * A cell: a check (yes), a dash (no) or the narrower reach in words. Under 768 the header is gone, so each cell leads
+ * with its level's name, read too; the Specialist's cell takes the row's width there and starts at the top (`.mx-c.l`).
+ */
+function Cell({ level, levelName, value }: { level: Level; levelName: string; value: PermissionCell }) {
   const p = useTranslations('settings.permissions')
-  const words = level === 'specialist'
+  const specialist = level === 'specialist'
   return (
     <span
       role="cell"
-      className={cn('flex min-h-6 min-w-0 items-start gap-2 sm:items-center', words ? 'col-span-full sm:col-span-1' : 'sm:justify-center')}
+      className={cn(
+        'flex min-h-6 min-w-0 gap-2 sm:items-center',
+        specialist ? 'col-span-full items-start sm:col-span-1' : 'items-center sm:justify-center',
+      )}
     >
-      <span aria-hidden className={cn(LABEL, 'flex-none pt-0.75 sm:hidden')}>
-        {t(`levels.${level}`)}
-      </span>
+      <span className={cn(LABEL, 'flex-none sm:hidden', specialist && 'pt-0.75')}>{levelName}</span>
       {value === 'yes' ? (
         <>
           <Check aria-hidden strokeWidth={2} className="size-4.5 flex-none text-n-900" />
@@ -84,8 +89,8 @@ function Cell({ level, value }: { level: Level; value: PermissionCell }) {
         </>
       ) : value === 'no' ? (
         <>
-          <span aria-hidden className="text-base leading-5 text-n-500">
-            —
+          <span aria-hidden className="text-[16px] leading-5 text-n-500">
+            {p('noMark')}
           </span>
           <span className="sr-only">{p('no')}</span>
         </>

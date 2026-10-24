@@ -566,6 +566,7 @@
       "what": "What",
       "yes": "Yes",
       "no": "No",
+      "noMark": "—",
       "rows": {
         "calendar": "See everyone’s calendar",
         "answer": "Answer requests",
@@ -584,6 +585,7 @@
       "cells": {
         "own": "Own",
         "ownColumn": "Own column (others’ time shows as “Busy”)",
+        "perAnswers": "Per “Who answers requests?”",
         "ownAnswers": "Own — per “Who answers requests?”",
         "ownBookings": "Own bookings",
         "ownClients": "Own clients (with a booking with them)",

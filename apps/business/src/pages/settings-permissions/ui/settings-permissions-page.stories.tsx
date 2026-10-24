@@ -96,8 +96,8 @@ export const Owner: Story = {
     await expect(specialist).toHaveTextContent('Own earnings only')
     await expect(canvas.getByRole('link', { name: 'Permissions' })).toHaveAttribute('aria-current', 'page')
     // the lead's «Team» (the menu has one too)
-    const [, toTeam] = canvas.getAllByRole('link', { name: 'Team' })
-    await userEvent.click(toTeam!)
+    const header = canvas.getByRole('heading', { level: 2, name: 'Permissions' }).parentElement!
+    await userEvent.click(within(header).getByRole('link', { name: 'Team' }))
     await expect(await canvas.findByRole('heading', { level: 2, name: 'Team' })).toBeVisible()
   },
 }
@@ -110,8 +110,20 @@ export const Admin: Story = {
     const [, admin, specialist] = within(within(table).getByRole('row', { name: /Manage the team/ })).getAllByRole('cell')
     await expect(admin).toHaveTextContent('View only')
     await expect(specialist).toHaveTextContent('No')
+    // who answers depends on «Who answers requests?», for an admin too (book chapter 3)
+    const [, answers] = within(within(table).getByRole('row', { name: /Answer requests/ })).getAllByRole('cell')
+    await expect(answers).toHaveTextContent('Per “Who answers requests?”')
   },
 }
 
-/** The phone: each row stacks, the name on top and every cell with its level's name. */
-export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
+/** The phone: no header; each row stacks, the name on top and every cell with its level's name, read too. */
+export const Phone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    const table = await canvas.findByRole('table', { name: 'Permissions by access level' })
+    await expect(within(table).queryByRole('columnheader', { name: 'Owner' })).toBeNull()
+    const [owner, , specialist] = within(within(table).getByRole('row', { name: /See revenue/ })).getAllByRole('cell')
+    await expect(owner).toHaveTextContent('OwnerYes')
+    await expect(specialist).toHaveTextContent('SpecialistOwn earnings only')
+  },
+}
