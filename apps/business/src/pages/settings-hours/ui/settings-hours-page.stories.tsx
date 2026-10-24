@@ -204,7 +204,8 @@ export const BookingsOutside: Story = {
     const body = within(document.body)
     const dialog = await body.findByRole('dialog', { name: '3 bookings and 1 request fall outside the new hours' })
     const modal = within(dialog)
-    await expect(modal.getByText('Sunday closed. These were booked before the change.')).toBeVisible()
+    // the modal pops in
+    await waitFor(() => expect(modal.getByText('Sunday closed. These were booked before the change.')).toBeVisible())
     await expect(modal.getByRole('radio', { name: 'Keep them' })).toBeChecked()
     const list = modal.getByRole('list', { name: '3 bookings · 1 request' })
     await expect(within(list).getAllByRole('listitem')).toHaveLength(4)
