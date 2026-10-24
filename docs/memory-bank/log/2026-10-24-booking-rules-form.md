@@ -9,9 +9,15 @@
   requests?, When clients can book, Cancelling, lateness and no-shows) with the «Requests already waiting keep their
   timers…» note and the fixed «Clients may be up to 15 min late» row; `useRuleLabels()` writes the choices the same in
   both places. The copy lives in the new `bookingRules` namespace; `setup.rules` lost its duplicates.
-- The wizard's step uses the hook and the labels; it looks and saves as before (its stories pass unchanged). One edge
-  changed: after a save the form shows what was saved, so a hold changed in manual mode and then hidden by instant
-  confirmation comes back as stored, not as typed.
+- The hook's form belongs to one slug (the switcher keeps the Settings page mounted across workspaces) and, while
+  nothing is edited, follows the rules as they reload (another admin's change, a live update). «Other…» starts at 25
+  (B-Settings `bufCustom`) and takes figures only, three at most.
+- The wizard's step uses the hook and `HoldSelect` / `CancelSelect` / `BufferSelect` from the slice; it looks and saves
+  as before (its stories pass unchanged). One edge changed: after a save the form shows what was saved, so a hold
+  changed in manual mode and then hidden by instant confirmation comes back as stored, not as typed.
+- Review (one round, `code-review` high): all 13 findings fixed (the slug and reload above, the first-load guard, the
+  stepper's off ends and `onKeyDown`, the buffer box's filter and description, the shared selects, the story title from
+  COMPONENTS.md, `Business/Settings/BookingRules`).
 - **`NumberStepper`** (`@yeral/ui/number-stepper`, Inputs/NumberStepper; DS-Patterns `.y-stp`): − n + in one 44 box,
   `format`, ↑/↓, `wide` for a unit; an end button is `aria-disabled` so the focus stays on it at `min` / `max`.
 - `choicesWith` moved to `shared/lib` (the services step uses it too).

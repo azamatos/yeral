@@ -21,6 +21,7 @@ export function NumberStepper({
   decreaseLabel,
   increaseLabel,
   className,
+  onKeyDown,
   ...props
 }: Omit<ComponentProps<'div'>, 'onChange' | 'children'> & {
   value: number
@@ -37,14 +38,16 @@ export function NumberStepper({
 }) {
   const atMin = value - step < min
   const atMax = value + step > max
+  // a step that would leave `min` – `max` does nothing, from a button or a key alike
   const change = (by: number) => {
-    const next = Math.min(max, Math.max(min, value + by))
-    if (next !== value) onValueChange(next)
+    if (disabled || (by < 0 ? atMin : atMax)) return
+    onValueChange(value + by)
   }
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
+  const onKeys = (e: KeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(e)
+    if (e.defaultPrevented || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return
     e.preventDefault()
-    if (!disabled) change(e.key === 'ArrowUp' ? step : -step)
+    change(e.key === 'ArrowUp' ? step : -step)
   }
   const button = cn(
     'inline-flex size-10.5 flex-none cursor-pointer items-center justify-center rounded-[9px] border-0 bg-transparent p-0 text-n-900',
@@ -56,7 +59,7 @@ export function NumberStepper({
     <div
       role="group"
       {...props}
-      onKeyDown={onKeyDown}
+      onKeyDown={onKeys}
       className={cn('inline-flex h-11 flex-none items-center rounded-s border border-n-300 bg-n-0', className)}
     >
       <button

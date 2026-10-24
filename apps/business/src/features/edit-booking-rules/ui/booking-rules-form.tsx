@@ -15,22 +15,15 @@ import { useId, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { choicesWith } from '@/shared/lib'
 import { ANSWERER_KEY, useRuleLabels } from '../lib/labels'
-import {
-  BUFFER_CHOICES,
-  bufferIsOther,
-  bufferProblem,
-  CANCEL_CHOICES,
-  HOLD_CHOICES,
-  LEAD_CHOICES,
-  NO_SHOW_MAX,
-  STEP_CHOICES,
-  WINDOW_CHOICES,
-} from '../model/rules'
+import { BUFFER_CHOICES, bufferIsOther, LEAD_CHOICES, NO_SHOW_MAX, STEP_CHOICES, WINDOW_CHOICES } from '../model/rules'
 import type { RulesFormState } from '../model/use-rules-form'
+import { CancelSelect, HoldSelect } from './rule-selects'
 
-/** A select's value for «Any time» (a `null` cancel window) and for the buffer's «Other…». */
-const ANY = 'any'
+/** The buffer select's value for «Other…». */
 const OTHER = 'other'
+
+/** What «Other…» starts from when a preset was chosen (B-Settings `bufCustom: '25'`). */
+const OTHER_START = 25
 
 /** The first free times the time-step caption shows («10:00, 10:15, 10:30…»). */
 const EXAMPLE_START = 10 * 60
@@ -50,7 +43,7 @@ export function BookingRulesForm({ rules }: { rules: RulesFormState }) {
   const { form, set, saving } = rules
   const manual = form.confirmMode === 'manual'
   const other = bufferIsOther(form)
-  const bufferBad = bufferProblem(form)
+  const bufferBad = rules.bufferInvalid
   const select = 'min-w-44'
   const examples = [0, 1, 2].map((i) => fmt.time(EXAMPLE_START + i * form.slotStep)).join(', ')
 
@@ -80,29 +73,24 @@ export function BookingRulesForm({ rules }: { rules: RulesFormState }) {
         )}
         {manual && (
           <SettingsRow label={t('hold')} description={t('holdHint')}>
-            <Select
+            <HoldSelect
               size="m"
               className={select}
               disabled={saving}
               value={form.holdMinutes}
-              onChange={(e) => set({ holdMinutes: Number(e.target.value) })}
-            >
-              {choicesWith(HOLD_CHOICES, form.holdMinutes).map((m) => (
-                <option key={m} value={m}>
-                  {label.hold(m)}
-                </option>
-              ))}
-            </Select>
+              onValueChange={(holdMinutes) => set({ holdMinutes })}
+            />
           </SettingsRow>
         )}
       </Section>
 
       {rules.askWho && (
         <Section title={t('who')} description={t('whoHint')}>
-          {(titleId) => (
+          {({ titleId, descriptionId }) => (
             <>
               <OptionCardGroup
                 aria-labelledby={titleId}
+                aria-describedby={descriptionId}
                 disabled={saving}
                 value={form.requestAnswerers}
                 onValueChange={(requestAnswerers) => set({ requestAnswerers: requestAnswerers as RequestAnswerers })}
@@ -156,7 +144,7 @@ export function BookingRulesForm({ rules }: { rules: RulesFormState }) {
           </Select>
         </SettingsRow>
         <SettingsRow label={t('buffer')} description={t('bufferHint')}>
-          {({ id }) => (
+          {({ id, descriptionId }) => (
             <>
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <Select
@@ -164,11 +152,10 @@ export function BookingRulesForm({ rules }: { rules: RulesFormState }) {
                   id={id}
                   className={select}
                   disabled={saving}
-                  invalid={false}
                   value={other ? OTHER : form.bufferMinutes}
                   onChange={(e) =>
                     e.target.value === OTHER
-                      ? set({ bufferOther: String(form.bufferMinutes) })
+                      ? set({ bufferOther: String(OTHER_START) })
                       : set({ bufferMinutes: Number(e.target.value), bufferOther: null })
                   }
                 >
@@ -185,11 +172,12 @@ export function BookingRulesForm({ rules }: { rules: RulesFormState }) {
                       id={`${id}-other`}
                       inputMode="numeric"
                       aria-label={t('bufferMinutes')}
-                      aria-describedby={bufferBad ? `${id}-other-error` : undefined}
+                      aria-describedby={[descriptionId, bufferBad && `${id}-other-error`].filter(Boolean).join(' ') || undefined}
                       invalid={bufferBad}
                       disabled={saving}
                       value={form.bufferOther ?? String(form.bufferMinutes)}
-                      onChange={(e) => set({ bufferOther: e.target.value })}
+                      // whole minutes only, up to three figures (B-Settings `onBufCustom`)
+                      onChange={(e) => set({ bufferOther: e.target.value.replace(/\D/g, '').slice(0, 3) })}
                       className="h-11 w-18 text-center text-small"
                     />
                     <span className="text-dense text-n-600">{t('minutesUnit')}</span>
@@ -221,19 +209,13 @@ export function BookingRulesForm({ rules }: { rules: RulesFormState }) {
 
       <Section title={t('cancelling')}>
         <SettingsRow label={t('cancel')} description={t('cancelHint')}>
-          <Select
+          <CancelSelect
             size="m"
             className={select}
             disabled={saving}
-            value={form.cancelWindowMinutes ?? ANY}
-            onChange={(e) => set({ cancelWindowMinutes: e.target.value === ANY ? null : Number(e.target.value) })}
-          >
-            {choicesWith(CANCEL_CHOICES, form.cancelWindowMinutes).map((m) => (
-              <option key={m ?? ANY} value={m ?? ANY}>
-                {label.cancel(m)}
-              </option>
-            ))}
-          </Select>
+            value={form.cancelWindowMinutes}
+            onValueChange={(cancelWindowMinutes) => set({ cancelWindowMinutes })}
+          />
         </SettingsRow>
         <SettingsRow label={t('reason')} description={t('reasonHint')}>
           {({ id, labelId, descriptionId }) => (
@@ -286,18 +268,23 @@ function Section({
 }: {
   title: string
   description?: string
-  children: ReactNode | ((titleId: string) => ReactNode)
+  children: ReactNode | ((ids: { titleId: string; descriptionId?: string }) => ReactNode)
 }) {
   const titleId = useId()
+  const descriptionId = description ? `${titleId}-help` : undefined
   return (
     <section aria-labelledby={titleId} className="flex flex-col gap-5 border-t border-n-200 py-6">
       <div className="flex flex-col gap-0.5">
         <h3 id={titleId} className="m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em]">
           {title}
         </h3>
-        {description && <span className="text-dense text-n-600">{description}</span>}
+        {description && (
+          <span id={descriptionId} className="text-dense text-n-600">
+            {description}
+          </span>
+        )}
       </div>
-      {typeof children === 'function' ? children(titleId) : children}
+      {typeof children === 'function' ? children({ titleId, descriptionId }) : children}
     </section>
   )
 }

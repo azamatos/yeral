@@ -2,19 +2,14 @@ import type { ConfirmMode } from '@yeral/domain/model'
 import { REQUEST_ANSWERERS, type RequestAnswerers } from '@yeral/domain/rules'
 import { Callout } from '@yeral/ui/callout'
 import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
-import { Select } from '@yeral/ui/select'
 import { SettingsRow } from '@yeral/ui/settings-row'
 import { Spinner } from '@yeral/ui/spinner'
 import { StatusBadge } from '@yeral/ui/status-badge'
 import { Check, Clock, Info, UserCheck, Zap } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
-import { ANSWERER_KEY, BUFFER_CHOICES, CANCEL_CHOICES, HOLD_CHOICES, useRuleLabels, useRulesForm } from '@/features/edit-booking-rules'
-import { choicesWith } from '@/shared/lib'
+import { ANSWERER_KEY, BufferSelect, CancelSelect, HoldSelect, useRulesForm } from '@/features/edit-booking-rules'
 import { StepHeader, type StepAction } from './setup-frame'
-
-/** A select's value for the cancel window: `null` is «Any time». */
-const ANY = 'any'
 
 /**
  * Step 7, «How should bookings arrive?» (B-Onboarding `isRules`, book B-05): confirm each booking (the default, with
@@ -26,7 +21,6 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
   const t = useTranslations('setup.rules')
   const tr = useTranslations('bookingRules')
   const ts = useTranslations('status')
-  const label = useRuleLabels()
   const rules = useRulesForm(slug, on)
   if (!rules)
     return {
@@ -90,18 +84,12 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
       <div className="flex flex-col">
         {manual && (
           <SettingsRow label={t('hold')} description={t('holdHint')} className={row}>
-            <Select
+            <HoldSelect
               className={select}
               disabled={saving}
               value={form.holdMinutes}
-              onChange={(e) => set({ holdMinutes: Number(e.target.value) })}
-            >
-              {choicesWith(HOLD_CHOICES, form.holdMinutes).map((m) => (
-                <option key={m} value={m}>
-                  {label.hold(m)}
-                </option>
-              ))}
-            </Select>
+              onValueChange={(holdMinutes) => set({ holdMinutes })}
+            />
           </SettingsRow>
         )}
         {askWho && (
@@ -138,32 +126,20 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
           </Callout>
         )}
         <SettingsRow label={t('cancel')} description={t('cancelHint')} className={row}>
-          <Select
+          <CancelSelect
             className={select}
             disabled={saving}
-            value={form.cancelWindowMinutes ?? ANY}
-            onChange={(e) => set({ cancelWindowMinutes: e.target.value === ANY ? null : Number(e.target.value) })}
-          >
-            {choicesWith(CANCEL_CHOICES, form.cancelWindowMinutes).map((m) => (
-              <option key={m ?? ANY} value={m ?? ANY}>
-                {label.cancel(m)}
-              </option>
-            ))}
-          </Select>
+            value={form.cancelWindowMinutes}
+            onValueChange={(cancelWindowMinutes) => set({ cancelWindowMinutes })}
+          />
         </SettingsRow>
         <SettingsRow label={t('buffer')} description={t('bufferHint')} className={`${row} border-b`}>
-          <Select
+          <BufferSelect
             className={select}
             disabled={saving}
             value={form.bufferMinutes}
-            onChange={(e) => set({ bufferMinutes: Number(e.target.value) })}
-          >
-            {choicesWith(BUFFER_CHOICES, form.bufferMinutes).map((m) => (
-              <option key={m} value={m}>
-                {label.buffer(m)}
-              </option>
-            ))}
-          </Select>
+            onValueChange={(bufferMinutes) => set({ bufferMinutes })}
+          />
         </SettingsRow>
       </div>
       <p className="text-dense text-n-600">{t('settingsLater')}</p>

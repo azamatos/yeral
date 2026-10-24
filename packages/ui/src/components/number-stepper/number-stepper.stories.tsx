@@ -49,6 +49,20 @@ export const AtMin: Story = {
   },
 }
 
+/** A step that would leave the range does nothing: by 2 from 1 with `min` 0, − is off and stays at 1. */
+export const OffTheStep: Story = {
+  args: { value: 1, min: 0, max: 10, step: 2 },
+  play: async ({ canvas }) => {
+    const fewer = canvas.getByRole('button', { name: 'Fewer' })
+    await expect(fewer).toHaveAttribute('aria-disabled', 'true')
+    await userEvent.click(fewer)
+    await userEvent.keyboard('{ArrowDown}')
+    await expect(canvas.getByRole('group')).toHaveTextContent('1')
+    await userEvent.keyboard('{ArrowUp}')
+    await expect(canvas.getByRole('group')).toHaveTextContent('3')
+  },
+}
+
 /** At `max` the + button is off. */
 export const AtMax: Story = {
   args: { value: 8 },

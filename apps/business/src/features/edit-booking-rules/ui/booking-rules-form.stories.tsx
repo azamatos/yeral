@@ -1,7 +1,9 @@
 /**
- * Settings → Booking rules' form (B-Settings `isRules`, design §8 and §28.5, book B-05, B-41, B-42) over a `fetch`
- * that answers like the api, with plain Save and Discard buttons standing in for the page's save bar. Each
- * `PATCH …/settings/rules` body lands in `saved`.
+ * Settings → Booking rules' form (B-Settings `isRules`, design §8 and §28.5, book B-05, B-41, B-42; COMPONENTS.md
+ * «Business/Settings/BookingRules») over a `fetch` that answers like the api, with plain Save and Discard buttons
+ * standing in for the page's save bar. Each `PATCH …/settings/rules` body lands in `saved`. The Offline variant (online
+ * booking paused) is the Settings page's, which adds the note and the preview; the Wizard variant is the setup flow's
+ * rules step (Business/Onboarding/SetupFlow).
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { TeamMember } from '@yeral/contract/team'
@@ -74,7 +76,7 @@ function Harness() {
 }
 
 const meta = {
-  title: 'Business/Settings/BookingRulesForm',
+  title: 'Business/Settings/BookingRules',
   component: PageStory,
   parameters: { layout: 'fullscreen' },
   args: { routes: { '/': Harness }, server: fakeApi() },
@@ -86,7 +88,7 @@ type Story = StoryObj<typeof meta>
  * A one-person business in manual mode: confirmation, the hold, when clients can book and cancelling, with no «Who
  * answers requests?». Changing several rules saves only those, in one request.
  */
-export const OnePerson: Story = {
+export const Manual: Story = {
   play: async ({ canvas }) => {
     const hold = await canvas.findByRole('combobox', { name: 'Hold requests for' })
     await expect(hold).toHaveValue('30')
@@ -142,18 +144,21 @@ export const WithTeam: Story = {
 }
 
 /**
- * The buffer's «Other…» takes 1 to 120 minutes: outside them the box is invalid with «Enter 1 to 120 minutes.» and
- * Save waits; a whole number in range saves as the buffer.
+ * The buffer's «Other…» starts at 25 and takes 1 to 120 whole minutes (figures only, three at most): outside them the
+ * box is invalid with «Enter 1 to 120 minutes.» and Save waits; a number in range saves as the buffer.
  */
 export const CustomBuffer: Story = {
   play: async ({ canvas }) => {
     await userEvent.selectOptions(await canvas.findByRole('combobox', { name: 'Buffer' }), 'Other…')
     const minutes = canvas.getByRole('textbox', { name: 'Buffer, minutes' })
-    await expect(minutes).toHaveValue('10')
+    await expect(minutes).toHaveValue('25')
+    await expect(minutes).toHaveAccessibleDescription(/Free time kept after each service/)
     await userEvent.clear(minutes)
-    await userEvent.type(minutes, '150')
+    await userEvent.type(minutes, '1.5x0')
+    await expect(minutes).toHaveValue('150')
     await expect(minutes).toHaveAttribute('aria-invalid', 'true')
     await expect(canvas.getByRole('alert')).toHaveTextContent('Enter 1 to 120 minutes.')
+    await expect(minutes).toHaveAccessibleDescription(/Enter 1 to 120 minutes\./)
     await expect(canvas.getByRole('button', { name: 'Save' })).toBeDisabled()
     await userEvent.clear(minutes)
     await userEvent.type(minutes, '45')
@@ -174,7 +179,7 @@ export const StoredOtherBuffer: Story = {
 }
 
 /** Lateness is the same for every business: a fixed row, no control. Instant mode from the start shows no hold. */
-export const InstantAndFixedLateness: Story = {
+export const Instant: Story = {
   args: { server: fakeApi({ rules: { confirmMode: 'instant', cancelWindowMinutes: null } }) },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('Clients may be up to 15 min late')).toBeVisible()
