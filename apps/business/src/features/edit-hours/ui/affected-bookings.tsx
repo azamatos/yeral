@@ -41,10 +41,8 @@ export function AffectedBookingsList({ bookings, labelledBy }: { bookings: reado
   const join = useJoin()
   const [now] = useState(() => Date.now())
   const day = (date: string) =>
-    // today and tomorrow by name, then «Fr, 16 Oct»
-    diffDays(date, today(now)) <= 1
-      ? fmt.relativeDay(date, today(now))
-      : t('date', { weekday: fmt.weekdayShort(date), date: fmt.shortDate(date) })
+    // today and tomorrow by name, then «Fri, 16 Oct»
+    diffDays(date, today(now)) <= 1 ? fmt.relativeDay(date, today(now)) : fmt.dayDate(date)
   return (
     <div role="list" aria-labelledby={labelledBy} className="flex flex-col border-t border-n-200">
       {bookings.map((b) => {

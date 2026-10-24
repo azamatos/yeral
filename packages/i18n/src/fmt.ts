@@ -84,6 +84,8 @@ export function createFmt(locale: Locale) {
     weekday: (date: string) => t(`weekdays.${weekdayOf(date)}`),
     /** `Th` */
     weekdayShort: (date: string) => t(`weekdaysShort.${weekdayOf(date)}`),
+    /** `Fri, 16 Oct`: a date in running text (COMPONENTS.md: «Fr 16» only in week headers and date strips) */
+    dayDate: (date: string) => t('weekdayDate', { weekday: t(`weekdaysAbbr.${weekdayOf(date)}`), date: fmt.shortDate(date) }),
     /** `Thursday, 15 October` */
     weekdayDate: (date: string) => t('weekdayDate', { weekday: fmt.weekday(date), date: fmt.dayMonth(date) }),
     /** `October 2026` (month picker header) */

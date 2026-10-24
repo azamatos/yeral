@@ -90,6 +90,12 @@ describe('dates and times', () => {
     expect(ru.monthYear('2026-10-14')).toBe('Октябрь 2026')
   })
 
+  it('a date in running text: the weekday in three letters', () => {
+    expect(en.dayDate('2026-10-16')).toBe('Fri, 16 Oct')
+    expect(tk.dayDate('2026-10-16')).toBe('Ann, 16 okt.')
+    expect(ru.dayDate('2026-10-16')).toMatch(/^Пт, 16 /)
+  })
+
   it('relative days', () => {
     expect(tk.relativeDay('2026-10-14', '2026-10-14')).toBe('Şu gün')
     expect(tk.relativeDay('2026-10-15', '2026-10-14')).toBe('Ertir')
