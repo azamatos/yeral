@@ -901,6 +901,69 @@
       "onlineLabel": "Online booking: {name}",
       "openedOnline": "{name} is open for online booking",
       "closedOnline": "{name}: not bookable online — it’s hidden from your page"
+    },
+    "team": {
+      "lead": "Clients see specialists in this order.",
+      "adminNote": "You can view the team and change which services each person does. Only the owner adds and removes people and changes access levels, shifts and time off.",
+      "columns": {
+        "name": "Name",
+        "level": "Access level",
+        "services": "Services",
+        "hours": "Hours",
+        "status": "Status"
+      },
+      "sections": {
+        "specialists": {
+          "title": "Specialists",
+          "sub": "Clients see and pick"
+        },
+        "management": {
+          "title": "Management",
+          "sub": "They don’t take bookings — clients don’t see them"
+        },
+        "invites": {
+          "title": "Invites",
+          "sub": "Each invite works for 7 days. They join when they accept it."
+        },
+        "former": {
+          "title": "No longer on the team",
+          "sub": "Their past bookings and reviews stay"
+        }
+      },
+      "hours": {
+        "business": "Business hours",
+        "own": "Own shift",
+        "varies": "varies by day",
+        "noDays": "no working days"
+      },
+      "status": {
+        "active": "Active",
+        "invited": "Invited",
+        "removed": "Removed",
+        "expired": "Expired",
+        "declined": "Declined",
+        "cancelled": "Cancelled",
+        "daysLeft": "{n, plural, one {# day left} other {# days left}}",
+        "endedOn": "ended on {date}",
+        "untilAccept": "works without the app until they accept"
+      },
+      "services": "{n, plural, one {# service} other {# services}}",
+      "you": "You",
+      "noApp": "Doesn’t use the app",
+      "copyLink": "Copy invite link",
+      "copyLinkAria": "Copy invite link: {name}",
+      "linkCopied": "Invite link copied",
+      "resend": "Resend invite",
+      "resendAria": "Resend invite: {name}",
+      "resent": "Invite sent again to {name}",
+      "cancelInvite": "Cancel invite",
+      "cancelled": "Invite cancelled · {name} can’t accept it any more",
+      "reactivate": "Reactivate",
+      "reactivateAria": "Reactivate: {name}",
+      "reactivated": "{name} is back on the team",
+      "reactivateCaption": "Reactivate restores {name}’s access and makes {name} bookable again.",
+      "signInWith": "They’ll see the invite when they sign in with {phone}",
+      "actions": "{name}: actions"
     }
   }
 }
