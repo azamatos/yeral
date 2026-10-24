@@ -243,6 +243,19 @@
   Stepper, Field counter and optional) `e75cd83` (#152); the wizard's frame and business step `9fedd9f` (#154); the
   login reopens an unfinished setup `782e05d` (#155, B-07 revised); the draft's category id `a3c0eda` (#156). Not
   deployed (the server runs 5c07be4).
+- **2026-10-23 (evening) · The setup wizard built end to end** (a second unattended 2-hour run, the same way; details
+  in `log/2026-10-23-setup-{address,hours,rules,services,done,team,phone}.md` and
+  `log/2026-10-23-starter-services.md`): the night's docs `c4ef6a8` (#157); `@yeral/ui`: TimeRangeField and Select
+  sizes `e61cdc2` (#158), MapFrame (MapLibre + OpenFreeMap, lazy, a drawn ground offline) and Combobox `7b5324a`
+  (#159), InputGroup `75c5b56` (#164), SettingsRow and OptionCard L `1a6cc47` (#163), Checklist, QrBlock (lean-qr) and
+  CopyField `cf2e295` (#168); the api: each category's starter services in groups `af0d97e` (#165), the services step's
+  menu in one transaction `b217727` (#167), the team step's people in one transaction, invites sent at the finish, a
+  draft's team readable `9bdf8f4` (#171); the wizard's steps: address `3b104e2` (#162, replacing #161, closed when
+  its base branch went), hours `00bfdd5` (#160, with `dayHoursProblem`: the api refuses opening and closing at the
+  same time),
+  booking rules `3acada4` (#166), done with the link, the QR and the finish `d806340` (#169), services `72c4d04`
+  (#170), phone for someone signed out (`features/sign-in`, shared with the login) `bf282fb` (#172), team `d11ec52`
+  (#173). Not deployed. Gaps left: in Next steps (activeContext).
 - **2026-10-18 · Book closed:** the last four questions answered (Q-004 English pilot with example businesses and a
   demo workspace; Q-005 *Ýeral* spelling; Q-036 no SMS at the first launch, codes on screen; Q-216 specialist without
   the app as an option). Build plan written as book chapter 10.
