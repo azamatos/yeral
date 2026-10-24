@@ -1,18 +1,20 @@
 # Active context
 
-_Last updated: 2026-10-23_
+_Last updated: 2026-10-24_
 
 ## Current focus
 
-**2026-10-23: P4 slice 2 (business setup) under way.** The night of 23.10 (an unattended 2-hour run, every PR reviewed
-with `code-review`, one round, on green CI) merged #151 (the old site out of the repo), #148 (the "How was it?" card's
-api, migration 0042), #153 (the address search behind the map pin, ADR 0027), #152 (the wizard's pieces in
-`@yeral/ui`), #154 (the wizard's frame and its business step), #155 (the login reopens an unfinished setup) and #156
-(the draft's category id); details in `log/2026-10-21-how-was-it.md`, `log/2026-10-21-address-search.md` and
-`log/2026-10-23-setup-wizard.md`. None of it is deployed: the server runs
-5c07be4. Left in the wizard: steps 3–8 (address, hours, services, team, booking rules, done with `setup.finish`) and
-the phone step for someone signed out. The evening of 23.10 the owner deleted the Worker `yeral-web` and asked how to
-receive e-mail at yeral.app (Cloudflare Email Routing; `infra/server/README.md`, "DNS records").
+**2026-10-24: P4 slice 2, the setup wizard is built; Settings under way.** Two unattended 2-hour runs on 23.10 (every
+PR reviewed with `code-review`, one round, on green CI) built the wizard end to end: the night merged #148, #151–#156
+(the "How was it?" card's api with migration 0042, the old site out of the repo, the address search behind the map pin
+(ADR 0027), the wizard's pieces, its frame and business step, the login reopening an unfinished setup); the evening
+merged #157–#173: step 1 phone for someone signed out, 3 address with the map, 4 hours, 5 services from the category's
+starters (one api call makes the menu), 6 team (one api call; the finish sends the invites), 7 booking rules and 8 done
+with the link, the QR and `setup.finish`, with their `@yeral/ui` pieces (MapFrame, Combobox, TimeRangeField,
+InputGroup, SettingsRow, OptionCard L, Checklist, QrBlock, CopyField). Details: `log/2026-10-23-setup-*.md` and
+`log/2026-10-23-starter-services.md`. None of it is deployed: the server runs 5c07be4. The run of 24.10 builds the
+Settings sections on the wizard's forms (its notes in `log/2026-10-24-*.md`). The owner's e-mail for yeral.app waits
+for another session (owner, 24.10).
 
 **2026-10-23: yeral.app moved to the own server.** The owner removed `yeral.app` and `www` from the old Worker
 `yeral-web` and added the A records for `@`, `www`, `api`, `business` and `cms` (DNS only; 22.10). Claude deployed main
@@ -21,25 +23,13 @@ Encrypt certificates for `yeral.app`, `www` and `api`, `https://yeral.app` shows
 redirects to it, `https://api.yeral.app/v1/health` answers. The old site left the repo (`apps/legacy`, its deploy option
 and smoke check, its ignore entries; #151).
 
-**2026-10-22: the backend is all but done for the first launch; the owner answered what it still asked for.** The
-evening of 21.10 merged #137–#147 (each reviewed with `code-review`, one round, on green CI): six concerns settled with
-the recommended option (#137); no business verified while the sign-in code shows on the screen (#138, ADR 0023
-amended); the sign-in screens ask `GET /v1/auth/mode` before a number is typed (#139); the business logo (#140,
-migration 0039); the "Continue setting up" card's data (#141); what the leave and delete confirms touch (#142); the
-business app's demo workspace, made again every night (#143, migration 0040), and a day in it for any visitor (#145,
-ADR 0019 amended: demo sessions in a cookie of their own); the switcher's page state, specialization and reviews to
-answer (#144); the demo note on both sign-ins (#146); two unused columns dropped (#147, migration 0041, a contract
-migration: no rollback to an older image past it). On 22.10 the owner answered (Owner's direction): no backups and no
-error tracking for the demo launch, both with the real working MVP (P6); the first launch approved in advance; the DNS
-records for `api`, `business` and `cms` now (`infra/server/README.md`, "DNS records").
-
 Where things stand: M0–M2 are merged and released as tags (#20, 2026-10-16). Releases are paused until the MVP works
 (#133, ADR 0009 amended; the `release` skill is now `ship`): no versions or changesets, and production goes by hand.
 The api and Postgres run on the owner's server since 2026-10-19, public at `api.yeral.app` since 2026-10-22 21:18 UTC
 (23.10 the owner's time; the server at 5c07be4, main ahead); yeral.app shows a coming-soon page from the server until
 the client site takes it over. P2: steps 0–6 done (the map address search too, #153); step 7 has the SMS limits and the sitemap data, and keeps releases and deploys from GitHub
 (backups and error tracking moved to P6, owner 22.10). P4: slice 1 done, slice 2 (business setup) under way: the
-wizard's frame, its business step and the login's "Continue setting up" card. The design redraw stopped (ADR 0021 amended 2026-10-20): the apps are built from the book and the drawn
+whole wizard and the login's "Continue setting up" card are built; Settings is next. The design redraw stopped (ADR 0021 amended 2026-10-20): the apps are built from the book and the drawn
 boards, and Claude Design is used only for a critical undrawn detail. The frontend (web-b2) builds slice by slice:
 components in Storybook, then the apps.
 
@@ -125,7 +115,10 @@ components in Storybook, then the apps.
 - 2026-10-23 (evening): the owner deleted the Worker `yeral-web` and the untracked `docs/design/Claude outputs/`;
   "can we set getting email for yeral?": receive mail at `hello@` through Cloudflare Email Routing, forwarded to the
   owner's inbox, with a DMARC record against mail sent in yeral.app's name; sending stays off (the owner sets it up,
-  `infra/server/README.md`, "DNS records"). Docker Desktop stays as it is. Then two more hours on slice 2.
+  `infra/server/README.md`, "DNS records"). Docker Desktop stays as it is (so the api tests run in CI, not locally).
+  "Lets continue on tasks, u have one more 2 hours": the rest of the wizard, #157–#173, no wall.
+- 2026-10-24: "Go for 2 hours, email settings leave for other session. Focus on yeral." The run builds the Settings
+  sections; the e-mail records wait.
 
 ## Decisions
 
@@ -218,10 +211,14 @@ Where the old questions went (2026-10-17):
 
 1. **P4 slice 2, business setup** (the wizard, profile, services, hours, team, booking rules, link and QR; book
    chapter 10): its endpoints are merged (the setup draft #112 and its card #141, photos #116, the logo #140, the floor
-   #120, step 4's settings, the address search #153). Built: the wizard's frame and business step (#154), the login's
-   card (#155). Next: the wizard's steps 3–8 (address with MapFrame and the address search, hours, services, team,
-   booking rules, done with `setup.finish`), then its phone step for someone signed out, then the Settings sections.
-   Also: the photo upload in My account (`ProfilePhoto`'s
+   #120, step 4's settings, the address search #153). Built: the whole wizard (#154–#173, all 8 steps and the phone
+   step), the login's card (#155). Next: the Settings sections (Business profile, Booking rules, Hours with special
+   days, Services, Team, Permissions, Link and QR; under way 24.10), reusing the wizard's forms. The wizard's
+   follow-ups (from the reviews, `log/2026-10-23-setup-*.md`): the step list's summaries for team and rules (rules in
+   `GET /v1/me/setup`) and lighter counts there instead of reading the whole menu; a category changed after the menu
+   was saved keeps that menu at step 5; a lighter public categories list (the starters ride along); the done step's
+   note on who gets an invite; focus after adding or removing a team row; full-width selects on phones; the optional
+   photo on the name; the terms line (slice 7). Also: the photo upload in My account (`ProfilePhoto`'s
    `upload` and `src`: `PUT /v1/me/photo`, `me.photo`); the Demo frame from `me.demo` (the signed-out sidebar with
    "Log in", the Demo banner, `demo` in the switcher), "Try the business app" (`sdk.demo.start()`) on the login and the
    wizard, and `demo_number`'s hint; the leave and delete confirms' counts (#142); the page-state banner (#144).
@@ -232,13 +229,14 @@ Where the old questions went (2026-10-17):
 3. **P2 left:** step 7's releases and deploys from GitHub, and the code-SMS cap. Follow-ups: `/v1/health` comparing
    the database's newest migration with the image's; the jobs runner's `reviewAsk` drop branch, dead after the deploy
    with 0041; checking the settings permission before an upload's body is read; the invite-accept route reading every
-   workspace. Main is ahead of the server by #148 and #151–#156
-   (#148 brings migration 0042). With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
+   workspace. Main is ahead of the server by #148 and #151–#173
+   (#148 brings migration 0042; #165 the starter services, which the seed's upsert brings to the server). With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
    `.env` too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
    guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
 **Waiting on the owner:** turning on Email Routing for `hello@yeral.app` and adding the `_dmarc` record
-(`infra/server/README.md`, "DNS records"); Claude checks the records afterwards. The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
+(`infra/server/README.md`, "DNS records"; Cloudflare's dashboard now names the path Compute → Email Service → Email
+Routing); Claude checks the records afterwards, in another session (owner, 24.10). The admin account needs nothing secret: once the admin tool (slice 6) is deployed, Claude
 runs `docker compose -f /srv/yeral/compose.yml run --rm api node dist/cli.js admin-invite <login> "<name>"` (login 3–32
 of a-z 0-9 . -) and the owner opens the setup link (24 hours, `cms.<domain>/setup/<token>`), picks the password, adds
 the authenticator app and keeps the 10 recovery codes. The old Cloudflare Pages project `yeral-proto` (yeral.azamatos.com, an
