@@ -923,7 +923,7 @@
         },
         "invites": {
           "title": "Invites",
-          "sub": "Each invite works for 7 days. They join when they accept it."
+          "sub": "Each invite works for {days, plural, one {# day} other {# days}}. They join when they accept it."
         },
         "former": {
           "title": "No longer on the team",
@@ -963,7 +963,14 @@
       "reactivated": "{name} is back on the team",
       "reactivateCaption": "Reactivate restores {name}’s access and makes {name} bookable again.",
       "signInWith": "They’ll see the invite when they sign in with {phone}",
-      "actions": "{name}: actions"
+      "actions": "{name}: actions",
+      "reactivatedInvite": "{name} is back as invited — send a new invite so they can join",
+      "linkTitle": "Invite link for {name}",
+      "linkLead": "Send it to them yourself. It works for {days, plural, one {# day} other {# days}}; an earlier link no longer opens.",
+      "linkLabel": "Invite link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "close": "Close"
     }
   }
 }

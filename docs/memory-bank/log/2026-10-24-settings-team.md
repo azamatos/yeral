@@ -12,8 +12,16 @@
 - **The owner's actions:** «Copy invite link», «Resend invite», «Cancel invite» (an open invite's menu), «Reactivate»
   (someone removed, with its caption). The administrator sees the board's note and no actions.
 - **Delegated (Claude, 24.10.2026, the coordinator's call):** the api keeps only an invite token's hash, so an open
-  invite's link can't be listed; «Copy invite link» resends the invite and copies the link the resend returns (its 7
-  days start again). The token storage stays as it is.
+  invite's link can't be listed; «Copy invite link» sends the invite again and shows the link it returns in a small
+  modal with Copy (a fresh click, and a refused clipboard leaves it selected): the earlier link stops opening and the 7
+  days start again, which the modal says. Resend's toast offers the same link. The token storage stays as it is.
+- Review (one round): the table only from 1280 (the pane is 720 at most beside the settings menu; under it each row
+  stacks: level · services · hours under the name, the status under it); «N days left» in calendar days
+  (`inviteState`, `INVITE_DAYS`); the page waits for the menu (the groups and counts come from it); Reactivate of
+  someone removed before they joined says a new invite is needed; `Avatar` with the member's photo; an open invite's
+  phone only masked in its caption; no disabled focused buttons. Left: one schedule request per specialist (a shift
+  summary on the team list would save them), Remove for past invites and Undo for Cancel invite, the table roles, the
+  board's 768–1023 status column.
 - **Not in the contract yet:** someone who left and someone removed are both `removed` (STAFF_STATUSES), so the list
   shows «Removed» for both, with Reactivate; the board's «Left» with «Invite again» needs a `left` flag on the member
   (a small additive contract change, follow-up). No removal date either («Removed · 19 October»).

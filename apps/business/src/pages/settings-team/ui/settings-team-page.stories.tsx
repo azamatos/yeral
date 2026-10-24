@@ -135,13 +135,14 @@ const fakeApi =
         const [, method, id, what] = one
         const m = people.find((p) => p.id === id)!
         if (what === 'schedule') return json(scheduleOf(id!))
+        // as the api: someone removed before they joined comes back invited, without a new invite
         if (what === 'reactivate') {
-          people = people.map((p) => (p.id === id ? { ...p, status: 'active' } : p))
+          people = people.map((p) => (p.id === id ? { ...p, status: p.joined ? 'active' : 'invited' } : p))
           return json(people.find((p) => p.id === id))
         }
         if (method === 'DELETE') {
           people = people.map((p) => (p.id === id ? { ...p, invite: p.invite && { ...p.invite, state: 'cancelled' } } : p))
-          return json(people.find((p) => p.id === id))
+          return new Response(null, { status: 204 })
         }
         const sent = { ...m, invite: invite('pending', 7) }
         people = people.map((p) => (p.id === id ? sent : p))
@@ -213,8 +214,8 @@ export const CopyInviteLink: Story = {
     const write = spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined)
     try {
       await userEvent.click(await canvas.findByRole('button', { name: 'Copy invite link: Gülnar Öwezowa' }))
-      const toast = await body.findByText('Invite link copied')
-      await waitFor(() => expect(toast).toBeVisible())
+      const dialog = within(await body.findByRole('dialog', { name: 'Invite link for Gülnar Öwezowa' }))
+      await userEvent.click(await dialog.findByRole('button', { name: 'Copy' }))
       await expect(write).toHaveBeenCalledWith('https://business.yeral.localhost/invite/gulnar-token-0123456789')
     } finally {
       write.mockRestore()
@@ -250,8 +251,8 @@ export const Admin: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByText(/Only the owner adds and removes people/)).toBeVisible()
     await expect(await canvas.findByText('Maral Ataýewa')).toBeVisible()
-    await expect(canvas.queryByRole('button', { name: /^Copy invite link/ })).toBeNull()
-    await expect(canvas.queryByRole('button', { name: /^Reactivate/ })).toBeNull()
+    await expect(canvas.queryByRole('button', { name: /^Copy invite link: / })).toBeNull()
+    await expect(canvas.queryByRole('button', { name: /^Reactivate: / })).toBeNull()
   },
 }
 
