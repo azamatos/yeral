@@ -1,4 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SettingsPlaceholder } from '@/pages/settings'
+import { SettingsPermissionsPage } from '@/pages/settings-permissions'
 
-export const Route = createFileRoute('/w/$slug/settings/permissions')({ component: () => <SettingsPlaceholder section="permissions" /> })
+export const Route = createFileRoute('/w/$slug/settings/permissions')({ component: SettingsPermissionsPage })
