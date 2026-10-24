@@ -113,8 +113,17 @@ export function SettingsSection({ className, ...props }: ComponentProps<'section
   return <section {...props} className={cn('flex flex-col gap-5 border-t border-n-200 py-6', className)} />
 }
 
-/** A group's title (`.pst`) and its caption (`.cap`). */
-export function SettingsSectionTitle({ caption, className, children, ...props }: ComponentProps<'h3'> & { caption?: ReactNode }) {
+/**
+ * A group's title (`.pst`) and its caption (`.cap`). `captionId` lets the group's control point at the caption
+ * (`aria-describedby`, the booking rules' «Who answers requests?» radio cards).
+ */
+export function SettingsSectionTitle({
+  caption,
+  captionId,
+  className,
+  children,
+  ...props
+}: ComponentProps<'h3'> & { caption?: ReactNode; captionId?: string }) {
   const title = (
     <h3 {...props} className={cn('m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900', !caption && className)}>
       {children}
@@ -124,7 +133,9 @@ export function SettingsSectionTitle({ caption, className, children, ...props }:
   return (
     <div className={cn('flex flex-col gap-0.5', className)}>
       {title}
-      <p className="m-0 text-dense text-n-600">{caption}</p>
+      <p id={captionId} className="m-0 text-dense text-n-600">
+        {caption}
+      </p>
     </div>
   )
 }

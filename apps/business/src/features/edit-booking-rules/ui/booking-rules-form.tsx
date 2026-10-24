@@ -291,14 +291,9 @@ function Section({
   const descriptionId = description ? `${titleId}-help` : undefined
   return (
     <SettingsSection aria-labelledby={titleId}>
-      <div className="flex flex-col gap-0.5">
-        <SettingsSectionTitle id={titleId}>{title}</SettingsSectionTitle>
-        {description && (
-          <p id={descriptionId} className="m-0 text-dense text-n-600">
-            {description}
-          </p>
-        )}
-      </div>
+      <SettingsSectionTitle id={titleId} caption={description} captionId={descriptionId}>
+        {title}
+      </SettingsSectionTitle>
       {typeof children === 'function' ? children({ titleId, descriptionId }) : children}
     </SettingsSection>
   )

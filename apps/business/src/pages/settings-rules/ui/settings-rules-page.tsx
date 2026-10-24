@@ -1,16 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { localized } from '@yeral/domain/model'
-import { useFmt } from '@yeral/i18n'
 import { Callout } from '@yeral/ui/callout'
 import { SaveBar } from '@yeral/ui/save-bar'
 import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
-import { CirclePause } from 'lucide-react'
+import { Info } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { BookingRulesForm, useRulesForm } from '@/features/edit-booking-rules'
+import { BookingRulesForm, useRuleLabels, useRulesForm } from '@/features/edit-booking-rules'
 import { useSdk } from '@/shared/api'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
@@ -54,11 +53,14 @@ function RulesSection({ slug, name }: { slug: string; name: string }) {
   return (
     <SettingsPage section="rules" lead={lead} aside={<RulesPreview slug={slug} name={name} form={rules.form} paused={paused} />}>
       {paused && (
-        <Callout tone="neutral" icon={<CirclePause aria-hidden />} live={false} className="mb-6">
-          {t('rules.paused')}{' '}
-          <Link to="/w/$slug/settings/profile" params={{ slug }} className={textLink}>
-            {t('rules.resume')}
-          </Link>
+        <Callout tone="neutral" size="s" icon={<Info aria-hidden />} live={false} className="mb-6">
+          {t.rich('rules.paused', {
+            link: (words) => (
+              <Link to="/w/$slug/settings/profile" params={{ slug }} className={textLink}>
+                {words}
+              </Link>
+            ),
+          })}
         </Callout>
       )}
       <BookingRulesForm rules={rules} bufferNote={ownBuffers} />
@@ -73,6 +75,8 @@ function RulesSection({ slug, name }: { slug: string; name: string }) {
           onSave={() => void save()}
           invalid={!rules.valid}
           saving={rules.saving}
+          // on a phone above the shell's tab bar, where its toasts sit too (B-Settings `.sbar` under 768)
+          className="max-sm:bottom-[var(--toast-bottom,12px)]"
         />
       )}
     </SettingsPage>
@@ -85,19 +89,22 @@ function RulesSection({ slug, name }: { slug: string; name: string }) {
  */
 function useOwnBuffers(slug: string): ReactNode {
   const t = useTranslations('settings.rules')
-  const fmt = useFmt()
+  const label = useRuleLabels()
   const locale = useLocale()
   const sdk = useSdk()
   const menu = useQuery(sdk.settings.menu(slug))
-  const own = (menu.data?.groups ?? []).flatMap((g) => g.services).filter((s) => s.bufferMin !== null)
+  const own = (menu.data?.groups ?? [])
+    .flatMap((g) => g.services)
+    .flatMap((s) =>
+      s.bufferMin === null ? [] : [t('ownBuffer', { service: localized(s.name, locale), buffer: label.buffer(s.bufferMin) })],
+    )
   if (!own.length) return null
-  const list = own.map((s) => t('ownBuffer', { service: localized(s.name, locale), buffer: fmt.duration(s.bufferMin ?? 0) })).join(', ')
-  return (
-    <>
-      {t('ownBuffers', { list })} ·{' '}
+  return t.rich('ownBuffers', {
+    list: new Intl.ListFormat(locale, { type: 'unit', style: 'short' }).format(own),
+    link: (words) => (
       <Link to="/w/$slug/settings/services" params={{ slug }} className={textLink}>
-        {t('services')}
+        {words}
       </Link>
-    </>
-  )
+    ),
+  })
 }

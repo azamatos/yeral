@@ -18,4 +18,19 @@
 - The form's groups now use `SettingsSection` / `SettingsSectionTitle` from `@yeral/ui/settings-layout`. Settings' save
   bar words are `settings.save.*`, for the other form sections too.
 - The steiger override for `features/edit-booking-rules` is gone: the wizard and this page both use the slice.
+- Review (one round, `code-review` high). Fixed:
+  - the save bar sits above the phone's tab bar (`--toast-bottom`);
+  - the example pairs an online service with someone who does it;
+  - «up to 2 hours before», as the copy log has it;
+  - an own buffer of 0 reads «None»;
+  - the answer time waits for the hours;
+  - the board's note and tile sizes, its Info icons and the Call button (`buttonVariants`);
+  - separators and links inside the messages (`t.rich`, `Intl.ListFormat`);
+  - `SettingsSectionTitle` gains `captionId`.
+- Left from the review:
+  - The example request ignores the minimum notice and tomorrow's hours. It is the board's fixed example.
+  - No prompt on leaving with unsaved changes. The frame's note says the board draws none; it would be one for every
+    save-bar section.
+  - COMPONENTS.md maps the preview to `entities/business/ui/rules-preview`. It stays in the page until a second user
+    (the wizard) needs it.
 - Not here: the internal statuses (the list and «Add status») are their own piece.

@@ -606,11 +606,9 @@
     },
     "rules": {
       "lead": "Choose when and how clients can book you online. The rules apply to every specialist.",
-      "paused": "Online booking is paused — clients see a Call card.",
-      "resume": "Resume it in Business profile",
-      "ownBuffers": "Set per service: {list}",
+      "paused": "Online booking is paused — clients see a Call card. <link>Resume it in Business profile</link>",
+      "ownBuffers": "Set per service: {list} · <link>Services</link>",
       "ownBuffer": "{service} — {buffer}",
-      "services": "Services",
       "preview": "What the client sees",
       "sentTitle": "Booking sent",
       "answerBy": "The business answers by {time}",
@@ -623,10 +621,11 @@
       "call": "Call {phone}",
       "when": "{day} · {date} · {time}",
       "cancelAny": "You can cancel or change the booking for free at any time.",
-      "cancelBefore": "You can cancel or change the booking for free up to {hours, number} h before.",
+      "cancelBefore": "You can cancel or change the booking for free up to {hours, plural, one {# hour} other {# hours}} before.",
       "captionOff": "Your page shows this card instead of free times.",
       "captionManual": "Example: a request sent today at {time}. It updates as you change the rules.",
-      "captionInstant": "It updates as you change the rules."
+      "captionInstant": "It updates as you change the rules.",
+      "booking": "{name} · {service} · {specialist}"
     }
   }
 }

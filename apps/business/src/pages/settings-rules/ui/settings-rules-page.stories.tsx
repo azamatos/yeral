@@ -161,15 +161,16 @@ export const Manual: Story = {
     await expect(canvas.getByRole('link', { name: 'Booking rules' })).toHaveAttribute('aria-current', 'page')
     const preview = await canvas.findByRole('complementary', { name: 'What the client sees' })
     await expect(within(preview).getByText('Booking sent')).toBeVisible()
-    await expect(within(preview).getByText('The business answers by 15:10')).toBeVisible()
-    await expect(await within(preview).findByText('Glow Studio · Women’s haircut · Maýsa')).toBeVisible()
-    await expect(within(preview).getByText('You can cancel or change the booking for free up to 2 h before.')).toBeVisible()
+    await expect(await within(preview).findByText('The business answers by 15:10')).toBeVisible()
+    // the first service clients can book, with someone who does it
+    await expect(await within(preview).findByText('Glow Studio · Women’s haircut · Aýna')).toBeVisible()
+    await expect(within(preview).getByText('You can cancel or change the booking for free up to 2 hours before.')).toBeVisible()
     const own = await canvas.findByText(/Set per service: Hair colouring — 15 min/)
     await expect(own).toBeVisible()
     await expect(within(own).getByRole('link', { name: 'Services' })).toHaveAttribute('href', '/w/glow-studio/settings/services')
     await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Hold requests for' }), '6 h')
     // 14:40–19:00 today, the rest from 09:00 tomorrow
-    await expect(within(preview).getByText('The business answers by 10:40 tomorrow')).toBeVisible()
+    await expect(await within(preview).findByText('The business answers by 10:40 tomorrow')).toBeVisible()
     await waitFor(() => expect(document.title).toBe('Booking rules · Settings · Glow Studio · Ýeral Business'))
   },
 }
@@ -226,5 +227,13 @@ export const Offline: Story = {
 /** 1024: the preview wraps under the rules. */
 export const Laptop: Story = { globals: { viewport: { value: 'md' } } }
 
-/** The phone: the chip row, the rules, then the preview. */
-export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
+/** The phone: the chip row, the rules, then the preview; the save bar sits above the tab bar, not under it. */
+export const Phone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await userEvent.selectOptions(await canvas.findByRole('combobox', { name: 'Minimum notice' }), 'No limit')
+    const bar = canvas.getByRole('region', { name: 'Unsaved changes' })
+    const tabs = canvas.getByRole('link', { name: 'Calendar' }).getBoundingClientRect()
+    await waitFor(() => expect(bar.getBoundingClientRect().bottom).toBeLessThanOrEqual(tabs.top))
+  },
+}

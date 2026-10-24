@@ -1,4 +1,4 @@
-export { ANSWERER_KEY } from './lib/labels'
+export { ANSWERER_KEY, useRuleLabels } from './lib/labels'
 export type { RulesForm } from './model/rules'
 export { useRulesForm, type RulesFormState } from './model/use-rules-form'
 export { BookingRulesForm } from './ui/booking-rules-form'
