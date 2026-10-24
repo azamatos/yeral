@@ -17,5 +17,15 @@
   this day — Maral 4»; «… fall outside these hours» for other hours), Keep them with the kind's caption (Closed: «No new
   online bookings on that day / those days.»; Different hours: «New bookings follow the new hours.») or Cancel and offer
   3 other times; the next Save sends the choice; the toast counts what the api cancelled.
-- Follow-ups: a delete over bookings (a day of other hours whose removal leaves bookings outside the week) only shows
-  the error; the date fields are the browser's own date inputs (no date picker in `@yeral/ui` yet).
+- **A delete over bookings** (a day of other hours whose removal leaves bookings outside the week) opens the hours'
+  Keep them / Cancel step («Without “Party”, the week’s hours apply.»), then deletes with the choice.
+- Review (one round): Undo saves the list as it is now (read again) with the day back in its place, so a change since
+  and a day the api dropped meanwhile stay; a day is known by its fields, not its index; nothing else saves while one
+  save runs; a new day goes last (in a full tie the existing one applies, as `findException` and the warning say);
+  10:00–10:00 (a whole day from 10:00) is «the same time»; a yearly day says whether to close earlier or open later; a
+  dated year-long range overlaps every yearly day; the cancel toast counts bookings and requests as the week's does;
+  the stories don't depend on the weekday or the year.
+- Follow-ups: one precedence helper in `@yeral/domain/hours` (`specialDayWinner`, COMPONENTS.md
+  `entities/business/model/special-day-precedence`) shared with the api, instead of the model's copy of the ranking;
+  `Pill` in `@yeral/ui` and SpecialDayRow in `entities/business` (COMPONENTS.md) for the row's hand-drawn tags; the
+  date fields are the browser's own date inputs (no date picker in `@yeral/ui` yet).

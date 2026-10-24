@@ -5,7 +5,7 @@
  * that run into a neighbouring day's, and which day applies where two overlap.
  */
 import type { WeekdayHours } from '@yeral/contract/settings'
-import { nightOverlaps, specialDayErrors, yearlyNightOverlaps, type BusinessHours } from '@yeral/domain/hours'
+import { DAY_MINUTES, nightOverlaps, specialDayErrors, yearlyNightOverlaps, type BusinessHours } from '@yeral/domain/hours'
 import { addDays, diffDays, dow } from '@yeral/domain/time'
 
 /** A special day as the api saves it (`specialDaySettingSchema`): `hours` null when closed. */
@@ -58,28 +58,42 @@ export function dateProblem(day: SpecialDay, today: string): 'past' | 'order' | 
   return specialDayErrors(day).includes('to') ? 'long' : null
 }
 
-export type NightProblem = { kind: 'same' } | { kind: 'next'; weekday: number } | { kind: 'before' } | { kind: 'yearly' }
+export type NightProblem =
+  { kind: 'same' } | { kind: 'next'; weekday: number } | { kind: 'before' } | { kind: 'yearlyNext' } | { kind: 'yearlyBefore' }
 
 /**
- * Other hours checked as the api checks them (`checkChange`): opening and closing at the same time; past midnight, not
- * into the next day's opening, nor the night before into this day's; a yearly day against every weekday (it falls on
- * any of them some year). `week` is the saved week, `others` the other special days.
+ * Other hours checked as the api checks them (`checkChange`): opening and closing at the same time (the picker makes
+ * that a whole day from a time other than 00:00, as the week's `dayHoursProblem` refuses); past midnight, not into the
+ * next day's opening, nor the night before into this day's; a yearly day against every weekday (it falls on any of them
+ * some year). `week` is the saved week, `others` the other special days, before this one in the saved list.
  */
 export function nightProblem(day: SpecialDay, week: readonly (WeekdayHours | null)[], others: readonly SpecialDay[]): NightProblem | null {
   const h = day.hours
   if (!h) return null
-  if (h.open === h.close) return { kind: 'same' }
+  if (h.open === h.close || (h.close - h.open === DAY_MINUTES && h.open > 0)) return { kind: 'same' }
   const next: BusinessHours = { hours: [...week], exceptions: [...others, day] }
   const over = nightOverlaps(next, addDays(day.from, -1), day.to)
   if (over.length) {
     const first = over[0]!
     return first < day.from ? { kind: 'before' } : { kind: 'next', weekday: dow(addDays(first, 1)) }
   }
-  return day.yearly && yearlyNightOverlaps(next.hours, h) ? { kind: 'yearly' } : null
+  if (!day.yearly || !yearlyNightOverlaps(next.hours, h)) return null
+  // its closing into a weekday's opening, or a weekday's night into its opening
+  return next.hours.some((d) => !!d && h.close - DAY_MINUTES > d.open) ? { kind: 'yearlyNext' } : { kind: 'yearlyBefore' }
 }
 
-/** The month-and-day stretches a day covers in a year: one, or two when it wraps New Year. */
+/** The same special day (the list has no ids): every field alike. */
+export const sameDay = (a: SpecialDay, b: SpecialDay) =>
+  a.name === b.name &&
+  a.from === b.from &&
+  a.to === b.to &&
+  a.yearly === b.yearly &&
+  (a.hours?.open ?? null) === (b.hours?.open ?? null) &&
+  (a.hours?.close ?? null) === (b.hours?.close ?? null)
+
+/** The month-and-day stretches a day covers in a year: one, two when it wraps New Year, all of it for a year-long range. */
 const monthDays = (d: SpecialDay): [string, string][] => {
+  if (!d.yearly && diffDays(d.to, d.from) >= 364) return [['01-01', '12-31']]
   const [a, b] = [d.from.slice(5), d.to.slice(5)]
   return a <= b
     ? [[a, b]]

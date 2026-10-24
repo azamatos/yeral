@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { bookingsAffectedDetailsSchema, type BookingsAffectedDetails } from '@yeral/contract/errors'
 import { HOURS_STEP, type WeekdayHours } from '@yeral/contract/settings'
 import { parseYmd, today } from '@yeral/domain/time'
@@ -26,11 +26,12 @@ import {
   draftOf,
   nightProblem,
   overlapOf,
+  sameDay,
   SPECIAL_DAY_NAME_MAX,
   type SpecialDay,
   type SpecialDayDraft,
 } from '../model/special-days'
-import { useAffectedCount, useJoin, type AffectedChoice } from './affected-bookings'
+import { HoursAffectedBookings, useAffectedCount, useJoin, type AffectedChoice } from './affected-bookings'
 
 type Saved = { hours: (WeekdayHours | null)[]; specialDays: SpecialDay[] }
 
@@ -59,27 +60,50 @@ export function SpecialDays({ slug, saved }: { slug: string; saved: Saved }) {
   const sdk = useSdk()
   const errorText = useErrorText()
   const dates = useDates()
+  const count = useAffectedCount()
+  const queryClient = useQueryClient()
   const update = useMutation(sdk.settings.updateHours(slug))
   const titleId = useId()
-  // the day being edited (its index), a new one (null), or no modal (undefined)
-  const [editing, setEditing] = useState<number | null | undefined>(undefined)
+  // the day being edited, a new one (null), or no modal (undefined); a day is known by its fields (the list has no ids)
+  const [editing, setEditing] = useState<SpecialDay | null | undefined>(undefined)
+  // a delete the api sent back: the bookings it leaves outside the week, waiting for Keep or Cancel
+  const [deleting, setDeleting] = useState<{ day: SpecialDay; details: BookingsAffectedDetails } | null>(null)
+  const busy = update.isPending
 
-  const put = (specialDays: SpecialDay[]) => update.mutateAsync({ hours: saved.hours, specialDays })
-  const remove = async (i: number) => {
-    const gone = saved.specialDays[i]!
+  const cancelledText = (cancelled: number, counts?: BookingsAffectedDetails['counts']) =>
+    counts && cancelled === counts.bookings + counts.requests ? count(counts, 'and') : count({ bookings: cancelled, requests: 0 }, 'and')
+
+  // Undo saves what's there now with the day back in its place: a change since stays, a day the api dropped meanwhile too
+  const undo = async (gone: SpecialDay, at: number) => {
     try {
-      await put(saved.specialDays.filter((_, j) => j !== i))
-      toast(t('deleted', { name: gone.name }), {
-        action: {
-          label: t('undo'),
-          onClick: () => {
-            const back = [...saved.specialDays]
-            put(back).catch((error: unknown) => toast(errorText(error)))
-          },
-        },
-      })
+      const now = await queryClient.fetchQuery({ ...sdk.settings.hours(slug), staleTime: 0 })
+      const list = [...now.specialDays]
+      list.splice(Math.min(at, list.length), 0, gone)
+      await update.mutateAsync({ hours: now.hours, specialDays: list })
     } catch (error) {
       toast(errorText(error))
+    }
+  }
+  const remove = async (gone: SpecialDay, affected?: AffectedChoice) => {
+    const at = saved.specialDays.findIndex((d) => sameDay(d, gone))
+    try {
+      const result = await update.mutateAsync({
+        hours: saved.hours,
+        specialDays: saved.specialDays.filter((d) => !sameDay(d, gone)),
+        ...(affected ? { affected } : {}),
+      })
+      const counts = deleting?.details.counts
+      setDeleting(null)
+      toast(
+        result.cancelled > 0
+          ? t('deletedCancelled', { name: gone.name, what: cancelledText(result.cancelled, counts) })
+          : t('deleted', { name: gone.name }),
+        { action: { label: t('undo'), onClick: () => void undo(gone, at) } },
+      )
+    } catch (error) {
+      const details = isApiError(error, 'bookings_affected') ? bookingsAffectedDetailsSchema.safeParse(error.details) : null
+      if (details?.success) setDeleting({ day: gone, details: details.data })
+      else toast(errorText(error))
     }
   }
 
@@ -89,14 +113,14 @@ export function SpecialDays({ slug, saved }: { slug: string; saved: Saved }) {
         <SettingsSectionTitle id={titleId} caption={t('caption')} className="min-w-0 flex-[1_1_280px]">
           {t('title')}
         </SettingsSectionTitle>
-        <Button size="s" onClick={() => setEditing(null)}>
+        <Button size="s" disabled={busy} onClick={() => setEditing(null)}>
           <Plus strokeWidth={2} />
           {t('add')}
         </Button>
       </div>
       <div className="flex flex-col border-t border-n-200">
         {saved.specialDays.length === 0 && <p className="m-0 border-b border-n-200 py-5 text-dense text-n-600">{t('empty')}</p>}
-        {saved.specialDays.map((d, i) => (
+        {saved.specialDays.map((d) => (
           <div key={`${d.name}-${d.from}-${d.to}`} className="flex min-h-16 items-center gap-3.5 border-b border-n-200 py-2.5">
             <span aria-hidden className="flex size-10 flex-none items-center justify-center rounded-[10px] bg-group text-n-600">
               <Calendar className="size-5" />
@@ -111,16 +135,16 @@ export function SpecialDays({ slug, saved }: { slug: string; saved: Saved }) {
             </span>
             <Menu>
               <MenuTrigger asChild>
-                <Button variant="ghost" size="s" iconOnly aria-label={t('actions', { name: d.name })}>
+                <Button variant="ghost" size="s" iconOnly disabled={busy} aria-label={t('actions', { name: d.name })}>
                   <Ellipsis />
                 </Button>
               </MenuTrigger>
               <MenuContent>
-                <MenuItem onSelect={() => setEditing(i)}>
+                <MenuItem onSelect={() => setEditing(d)}>
                   <Pencil aria-hidden className="size-4.5" />
                   {t('edit')}
                 </MenuItem>
-                <MenuItem onSelect={() => void remove(i)} className="text-danger-ink">
+                <MenuItem onSelect={() => void remove(d)} className="text-danger-ink">
                   <Trash2 aria-hidden className="size-4.5" />
                   {t('delete')}
                 </MenuItem>
@@ -129,23 +153,30 @@ export function SpecialDays({ slug, saved }: { slug: string; saved: Saved }) {
           </div>
         ))}
       </div>
-      <Modal open={editing !== undefined} onOpenChange={(open) => !open && !update.isPending && setEditing(undefined)}>
+      <Modal open={editing !== undefined} onOpenChange={(open) => !open && !busy && setEditing(undefined)}>
         {editing !== undefined && (
           <SpecialDayModal
-            key={editing ?? 'new'}
-            index={editing}
+            key={editing ? `${editing.name}-${editing.from}-${editing.to}` : 'new'}
+            original={editing}
             saved={saved}
-            saving={update.isPending}
-            onSave={async (specialDays, affected) => {
+            saving={busy}
+            onSave={async (specialDays, affected, counts) => {
               const result = await update.mutateAsync({ hours: saved.hours, specialDays, ...(affected ? { affected } : {}) })
               setEditing(undefined)
               const done = editing === null ? t('added') : t('saved')
-              toast(result.cancelled > 0 ? t('savedCancelled', { done, n: result.cancelled }) : done)
+              toast(result.cancelled > 0 ? t('savedCancelled', { done, what: cancelledText(result.cancelled, counts) }) : done)
             }}
             onClose={() => setEditing(undefined)}
           />
         )}
       </Modal>
+      <HoursAffectedBookings
+        details={deleting?.details ?? null}
+        lead={deleting ? t('deleteLead', { name: deleting.day.name }) : ''}
+        saving={busy}
+        onSave={(choice) => deleting && void remove(deleting.day, choice)}
+        onClose={() => setDeleting(null)}
+      />
     </SettingsSection>
   )
 }
@@ -172,16 +203,17 @@ function Tag({ tone, children }: { tone?: 'accent' | 'slate'; children: ReactNod
  * first: keep them, or cancel them with 3 other times, then it saves again with the choice.
  */
 function SpecialDayModal({
-  index,
+  original,
   saved,
   saving,
   onSave,
   onClose,
 }: {
-  index: number | null
+  /** The day being edited as it was saved; null for a new one. */
+  original: SpecialDay | null
   saved: Saved
   saving: boolean
-  onSave: (specialDays: SpecialDay[], affected?: AffectedChoice) => Promise<void>
+  onSave: (specialDays: SpecialDay[], affected?: AffectedChoice, counts?: BookingsAffectedDetails['counts']) => Promise<void>
   onClose: () => void
 }) {
   const t = useTranslations('specialDays')
@@ -193,7 +225,7 @@ function SpecialDayModal({
   const ids = useId()
   // the business day it opened on: a day ending today isn't past yet
   const [todayDate] = useState(() => today(Date.now()))
-  const [draft, setDraft] = useState<SpecialDayDraft>(() => draftOf(index === null ? undefined : saved.specialDays[index]))
+  const [draft, setDraft] = useState<SpecialDayDraft>(() => draftOf(original ?? undefined))
   const [conflict, setConflict] = useState<BookingsAffectedDetails | null>(null)
   const [choice, setChoice] = useState<AffectedChoice>('keep')
   const set = (patch: Partial<SpecialDayDraft>) => {
@@ -202,7 +234,8 @@ function SpecialDayModal({
     setConflict(null)
   }
 
-  const others = saved.specialDays.filter((_, i) => i !== index)
+  // found again in the list as it is now (a refetch may have moved or dropped others)
+  const others = saved.specialDays.filter((d) => !(original && sameDay(d, original)))
   const day = dayOf(draft)
   const dates = day && dateProblem(day, todayDate)
   const night = day && !dates ? nightProblem(day, saved.hours, others) : null
@@ -214,13 +247,15 @@ function SpecialDayModal({
       ? h('problems.sameTime')
       : night.kind === 'next'
         ? h('problems.intoNextDay', { next: dayName(night.weekday) })
-        : t(night.kind === 'before' ? 'nightBefore' : 'nightYearly'))
+        : t(night.kind === 'before' || night.kind === 'yearlyBefore' ? 'nightBefore' : 'nightYearly'))
 
   const save = async () => {
     if (!day || invalid) return
-    const list = index === null ? [day, ...others] : saved.specialDays.map((d, i) => (i === index ? day : d))
+    // an edited day keeps its place; a new one goes last, so in a full tie the existing day applies (`findException`)
+    const kept = original !== null && saved.specialDays.some((d) => sameDay(d, original))
+    const list = kept ? saved.specialDays.map((d) => (sameDay(d, original) ? day : d)) : [...others, day]
     try {
-      await onSave(list, conflict ? choice : undefined)
+      await onSave(list, conflict ? choice : undefined, conflict?.counts)
     } catch (error) {
       const details = isApiError(error, 'bookings_affected') ? bookingsAffectedDetailsSchema.safeParse(error.details) : null
       if (details?.success) {
@@ -243,7 +278,7 @@ function SpecialDayModal({
 
   return (
     <ModalContent size={560}>
-      <ModalHeader title={index === null ? t('addTitle') : t('editTitle')} closeLabel={t('close')} />
+      <ModalHeader title={original === null ? t('addTitle') : t('editTitle')} closeLabel={t('close')} />
       <Field label={t('name')} hint={t('nameHint')}>
         <Input
           value={draft.name}
@@ -352,7 +387,7 @@ function SpecialDayModal({
           {t('back')}
         </Button>
         <Button variant="primary" disabled={invalid} loading={saving} loadingLabel={t('saving')} onClick={() => void save()}>
-          {index === null ? t('addCta') : t('saveCta')}
+          {original === null ? t('addCta') : t('saveCta')}
         </Button>
       </ModalActions>
     </ModalContent>

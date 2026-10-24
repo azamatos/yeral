@@ -303,7 +303,7 @@
     "otherHours": "Different hours",
     "opens": "Opens",
     "closes": "Closes",
-    "nightBefore": "The night before is open past this opening. Pick a later time.",
+    "nightBefore": "The night before is still open at this time. Pick a later opening.",
     "nightYearly": "Some years this closes after the next day opens. Pick an earlier time.",
     "overlap": "These dates overlap “{name}”. On those days “{winner}” is used.",
     "overlapRule": "A dated day beats a yearly one, a short range beats a long one, and “Closed” beats “Different hours”.",
@@ -323,7 +323,9 @@
     "saving": "Saving",
     "added": "Special day added",
     "saved": "Special day saved",
-    "savedCancelled": "{done} · {n, plural, one {# booking} other {# bookings}} cancelled, the clients are notified"
+    "savedCancelled": "{done} · {what} cancelled, the clients are notified",
+    "deletedCancelled": "{name} deleted · {what} cancelled, the clients are notified",
+    "deleteLead": "Without “{name}”, the week’s hours apply"
   },
   "setup": {
     "title": "Set up your business",

@@ -7,7 +7,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { BookingsAffectedDetails } from '@yeral/contract/errors'
 import type { Workspace } from '@yeral/contract/team'
-import { addDays, today } from '@yeral/domain/time'
+import { addDays, dow, today } from '@yeral/domain/time'
 import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
 import { PageStory } from '@/shared/storybook'
@@ -45,6 +45,17 @@ const glow: Workspace = {
 
 const now = Date.now()
 const on = (days: number) => addDays(today(now), days)
+/** A Monday to Friday from `days` ahead: the next day opens at 09:00 whichever day the story runs. */
+const weekdayAhead = (days: number) => {
+  let d = on(days)
+  while (dow(d) > 4) d = addDays(d, 1)
+  return d
+}
+/** The coming 21 March (inside the yearly Nowruz), never in the past. */
+const nextNowruz = () => {
+  const year = Number(today(now).slice(0, 4))
+  return `${year}-03-21` >= today(now) ? `${year}-03-21` : `${year + 1}-03-21`
+}
 
 const day = (open: number, close: number) => ({ open, close, break: null })
 type Special = { name: string; from: string; to: string; yearly: boolean; hours: { open: number; close: number } | null }
@@ -302,7 +313,7 @@ export const SpecialDayProblems: Story = {
     await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Late night')
     await fireEvent.change(modal.getByLabelText('Date'), { target: { value: on(-3) } })
     await expect(await modal.findByText('You can’t pick a day in the past.')).toBeVisible()
-    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: on(12) } })
+    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: weekdayAhead(12) } })
     await userEvent.click(modal.getByRole('radio', { name: 'Different hours' }))
     await userEvent.selectOptions(modal.getByRole('combobox', { name: 'Opens' }), '20:00')
     await userEvent.selectOptions(modal.getByRole('combobox', { name: 'Closes' }), '10:00')
@@ -316,7 +327,7 @@ export const SpecialDayOverlap: Story = {
   play: async ({ canvas }) => {
     const modal = await openAdd(canvas)
     await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Nowruz — short day')
-    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: '2027-03-21' } })
+    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: nextNowruz() } })
     await expect(await modal.findByText('These dates overlap “Nowruz”. On those days “Nowruz — short day” is used.')).toBeVisible()
   },
 }
@@ -337,7 +348,7 @@ export const SpecialDayOverBookings: Story = {
     await expect(modal.getByText('They stay in the calendar as they are. No new online bookings on that day.')).toBeVisible()
     await userEvent.click(modal.getByRole('radio', { name: 'Cancel and offer 3 other times' }))
     await userEvent.click(modal.getByRole('button', { name: 'Add' }))
-    const toast = await body.findByText('Special day added · 4 bookings cancelled, the clients are notified')
+    const toast = await body.findByText('Special day added · 3 bookings and 1 request cancelled, the clients are notified')
     await waitFor(() => expect(toast).toBeVisible())
   },
 }
@@ -350,5 +361,22 @@ export const DeleteAndUndo: Story = {
     await waitFor(() => expect(canvas.queryByText('Stocktake')).toBeNull())
     await userEvent.click(await body.findByRole('button', { name: 'Undo' }))
     await expect(await canvas.findByText('Stocktake')).toBeVisible()
+  },
+}
+
+/** A delete that leaves bookings outside the week's hours: the same Keep them or Cancel step, then it's gone. */
+export const DeleteOverBookings: Story = {
+  args: { server: fakeApi(affected) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Stocktake: actions' }))
+    await userEvent.click(await body.findByRole('menuitem', { name: 'Delete' }))
+    const dialog = within(await body.findByRole('dialog', { name: '3 bookings and 1 request fall outside the new hours' }))
+    await waitFor(() =>
+      expect(dialog.getByText('Without “Stocktake”, the week’s hours apply. These were booked before the change.')).toBeVisible(),
+    )
+    await userEvent.click(dialog.getByRole('button', { name: 'Save' }))
+    const toast = await body.findByText('Stocktake deleted')
+    await waitFor(() => expect(toast).toBeVisible())
+    await waitFor(() => expect(canvas.queryByText('Stocktake')).toBeNull())
   },
 }

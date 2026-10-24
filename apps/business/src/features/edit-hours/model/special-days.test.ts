@@ -34,9 +34,24 @@ describe('special days', () => {
     })
     expect(nightProblem(late(1560), WEEK, [])).toBeNull()
     expect(nightProblem(late(2010), WEEK, [])).toEqual({ kind: 'next', weekday: 5 })
-    expect(nightProblem({ ...late(1560), hours: { open: 600, close: 600 } }, WEEK, [])).toEqual({ kind: 'same' })
-    // a yearly day falls on any weekday: 18:00–10:00 runs into a 09:00 opening some year
-    expect(nightProblem({ ...late(2040), yearly: true, to: '2026-11-06' }, WEEK, [])).not.toBeNull()
+    // the picker makes 10:00–10:00 a whole day from 10:00: the same time, as the week refuses it
+    expect(nightProblem({ ...late(1560), hours: { open: 600, close: 2040 } }, WEEK, [])).toEqual({ kind: 'same' })
+    expect(nightProblem({ ...late(1560), hours: { open: 0, close: 1440 } }, WEEK, [])).toBeNull()
+  })
+
+  it('the night before may not run into its opening; a yearly day is checked against every weekday', () => {
+    // Thursday open 18:00–02:00, then Friday 6 November opens at 01:00
+    const nights = WEEK.map((d, i) => (i === 3 || i === 4 ? day(1080, i === 3 ? 1560 : 1620) : d))
+    const early: SpecialDay = { name: 'Early', from: '2026-11-06', to: '2026-11-06', yearly: false, hours: { open: 60, close: 360 } }
+    expect(nightProblem(early, nights, [])).toEqual({ kind: 'before' })
+    // Saturday 7 November 18:00–10:00 doesn't reach Sunday's 10:00, but a Monday's 09:00 some year
+    const sat: SpecialDay = { name: 'Late', from: '2026-11-07', to: '2026-11-07', yearly: true, hours: { open: 1080, close: 2040 } }
+    expect(nightProblem({ ...sat, yearly: false }, WEEK, [])).toBeNull()
+    expect(nightProblem(sat, WEEK, [])).toEqual({ kind: 'yearlyNext' })
+    // Monday 9 November 01:00–06:00: Sunday closes at 18:00, but Friday's night runs to 03:00
+    const mon: SpecialDay = { name: 'Dawn', from: '2026-11-09', to: '2026-11-09', yearly: true, hours: { open: 60, close: 360 } }
+    expect(nightProblem({ ...mon, yearly: false }, nights, [])).toBeNull()
+    expect(nightProblem(mon, nights, [])).toEqual({ kind: 'yearlyBefore' })
   })
 
   it('names the overlapping day and the one that applies on the shared days', () => {
@@ -50,5 +65,14 @@ describe('special days', () => {
       winner: 'Week off',
     })
     expect(overlapOf(closed('Stocktake', '2026-11-02'), [nowruz])).toBeNull()
+    // a full tie keeps the existing day; a dated year covers every yearly day
+    expect(overlapOf(closed('Again', '2026-11-02'), [closed('Stocktake', '2026-11-02')])).toEqual({
+      name: 'Stocktake',
+      winner: 'Stocktake',
+    })
+    expect(overlapOf(closed('Year off', '2026-11-01', '2027-11-01'), [closed('New Year', '2027-01-01', '2027-01-01', true)])).toEqual({
+      name: 'New Year',
+      winner: 'Year off',
+    })
   })
 })
