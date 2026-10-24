@@ -6,10 +6,11 @@
  */
 import type { BookingsAffectedDetails } from '@yeral/contract/errors'
 import type { AppointmentQuery, AppointmentSlot } from '@yeral/domain/availability'
-import { cancelledByFor, effectiveStatus, firstSmsFrom, isConfirmationNews, type NewsQueued } from '@yeral/domain/lifecycle'
+import { aheadAs, cancelledByFor, effectiveStatus, firstSmsFrom, isConfirmationNews, type NewsQueued } from '@yeral/domain/lifecycle'
 import { MARKET } from '@yeral/domain/market'
-import { isTeamSource, type BusinessCancelReason, type DeclineReason } from '@yeral/domain/model'
+import { isTeamSource, type BusinessCancelReason, type DeclineReason, type Locale } from '@yeral/domain/model'
 import { priceTotal } from '@yeral/domain/pricing'
+import { epochOf } from '@yeral/domain/time'
 import { and, eq } from 'drizzle-orm'
 import type { Queryable } from '../../db/client'
 import { bookings, type TimeSlot } from '../../db/schema'
@@ -19,7 +20,18 @@ import { emit, queueOutcomeSms } from '../../notify'
 import { OutsideHours, type LoadedBusiness } from '../availability/context'
 import { servicePrice } from '../catalog/map'
 import { newsJobs } from './confirm'
-import { isSlotConflict, itemsOfBookings, recordMoveRefused, setStatus, StaleBooking, stateOf, type BookingRow, type ItemRow } from './repo'
+import {
+  countAhead,
+  isSlotConflict,
+  itemsOfBookings,
+  recordMoveRefused,
+  setStatus,
+  StaleBooking,
+  stateOf,
+  type BookingRow,
+  type ItemRow,
+} from './repo'
+import { teamItemOf } from './team-view'
 
 // ── Items and price ──
 
@@ -237,12 +249,15 @@ export async function cancelForBusiness(
 const LISTED = 50
 
 /**
- * `bookings_affected` (B-39, B-40, B-47, B-50): how many, per specialist (most first), and each booking with its client
- * and specialists; `colleagues`, when removing someone, names who could take each one.
+ * `bookings_affected` (B-39, B-40, B-47, B-50): how many, split into bookings and waiting requests as they stand at
+ * `now` (`countAhead`), per specialist (most first), and each booking with its status, a request's answer time, its
+ * client, each service with who does it (in `lang`, the reader's) and its specialists; `colleagues`, when removing
+ * someone, names who could take each one.
  */
 export function affectedDetails(
   rows: readonly BookingRow[],
   items: readonly ItemRow[],
+  { lang, now }: { lang: Locale; now: number },
   colleagues?: (b: BookingRow, items: readonly ItemRow[]) => { staffId: string; name: string }[],
 ): BookingsAffectedDetails {
   const byStaff = new Map<string, { staffId: string; name: string; bookings: Set<string> }>()
@@ -254,17 +269,24 @@ export function affectedDetails(
   }
   return {
     count: rows.length,
+    counts: countAhead(rows, now),
     byStaff: [...byStaff.values()]
       .map((s) => ({ staffId: s.staffId, name: s.name, count: s.bookings.size }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
     bookings: rows.slice(0, LISTED).map((r) => {
       const mine = items.filter((i) => i.bookingId === r.id)
+      // the callers list only bookings that hold their time: a waiting request or a confirmed booking
+      const request = aheadAs(stateOf(r), now) === 'request'
       return {
         code: r.code,
         date: r.date,
         start: r.start,
         end: r.end,
+        status: request ? ('pending' as const) : ('confirmed' as const),
+        // one without a hold time runs out at its start (`effectiveStatus`)
+        holdUntil: request ? (r.holdUntil?.getTime() ?? epochOf(r.date, r.start)) : null,
         client: r.clientName,
+        items: mine.map((i) => teamItemOf(i, lang)),
         staff: [...new Set(mine.flatMap((i) => (i.staffName ? [i.staffName] : [])))],
         ...(colleagues ? { colleagues: colleagues(r, mine) } : {}),
       }
