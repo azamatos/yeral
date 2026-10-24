@@ -1,4 +1,6 @@
 /** Opening hours and special days (book B-39, B-40): bookings left outside are kept or cancelled with offered times (Q-211). */
+import { MARKET } from '@yeral/domain/market'
+import { localized } from '@yeral/domain/model'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
@@ -33,12 +35,16 @@ describe('opening hours and special days (book B-39, B-40)', () => {
   let db: Db
   let t: ReturnType<typeof testApp>
   let manicure: string
+  /** The manicure's name as the seeded team reads it (their language is the market's). */
+  let manicureName: string
   let maralId: string
   beforeAll(async () => {
     ;({ db } = await testDatabase())
     await seed(db, { demo: true, now: DEMO_NOW })
     const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
-    manicure = (await db.select().from(services).where(eq(services.businessId, glow!.id))).find((s) => s.name.en === 'Manicure')!.id
+    const row = (await db.select().from(services).where(eq(services.businessId, glow!.id))).find((s) => s.name.en === 'Manicure')!
+    manicure = row.id
+    manicureName = localized(row.name, MARKET.defaultLanguage)
     maralId = (
       await db
         .select()
@@ -123,12 +129,15 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     const asked = await save(maysa, repairs)
     expect(asked.status).toBe(409)
     expect(asked.json.error.code).toBe('bookings_affected')
+    // the AffectedBookingsList's rows: "client · service · specialist", none of them a request
+    const listed = { status: 'confirmed', holdUntil: null, services: [manicureName], staff: ['Maral'] }
     expect(asked.json.error.details).toMatchObject({
       count: 2,
+      requests: 0,
       byStaff: [{ staffId: maralId, name: 'Maral', count: 2 }],
       bookings: [
-        { code: first, date: THU, start: 600, staff: ['Maral'] },
-        { code: second, date: THU, start: 720, staff: ['Maral'] },
+        { code: first, date: THU, start: 600, ...listed },
+        { code: second, date: THU, start: 720, ...listed },
       ],
     })
     // nothing saved yet
@@ -322,6 +331,22 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     expect(cancelled.status, JSON.stringify(cancelled.json)).toBeLessThan(300)
 
     const closed = { ...was, specialDays: [...was.specialDays, { name: 'Flooding', from: THU2, to: THU2, yearly: false, hours: null }] }
+    // listed first as a request, with its answer time (the list's "1 request" and its timer)
+    const asked = await save(maysa, closed)
+    expect(asked.json.error.code).toBe('bookings_affected')
+    expect(asked.json.error.details).toMatchObject({
+      count: 1,
+      requests: 1,
+      bookings: [
+        {
+          code: request.json.code,
+          status: 'pending',
+          holdUntil: (await rowOf(request.json.code)).holdUntil!.getTime(),
+          services: [manicureName],
+          staff: ['Maral'],
+        },
+      ],
+    })
     expect((await save(maysa, { ...closed, affected: 'cancel' })).json.cancelled).toBe(1)
     const row = await rowOf(request.json.code)
     expect(row).toMatchObject({

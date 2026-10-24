@@ -285,6 +285,6 @@ export const settingsRoutes = new OpenAPIHono<AppEnv>()
     return c.json(await hoursOf(c.var.deps.db, business.id), 200)
   })
   .openapi(updateHoursRoute, async (c) => {
-    const { business } = await requireSettings(c, c.req.valid('param').slug)
-    return c.json(await updateHours(c.var.deps, business.id, c.req.valid('json')), 200)
+    const { business, user } = await requireSettings(c, c.req.valid('param').slug)
+    return c.json(await updateHours(c.var.deps, business.id, c.req.valid('json'), user.lang), 200)
   })

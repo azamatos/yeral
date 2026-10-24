@@ -18,6 +18,7 @@ import {
   type DateException,
 } from '@yeral/domain/hours'
 import { occupiesSlot } from '@yeral/domain/lifecycle'
+import type { Locale } from '@yeral/domain/model'
 import { addDays, epochOf, today } from '@yeral/domain/time'
 import type { z } from 'zod'
 import type { Queryable } from '../../db/client'
@@ -93,14 +94,15 @@ async function affectedBy(db: Queryable, businessId: string, was: BusinessHours,
     .sort((a, b) => epochOf(a.date, a.start) - epochOf(b.date, b.start))
 }
 
-/** "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1" (most first), and each booking with its client and specialists. */
-async function detailsOf(db: Queryable, rows: readonly BookingRow[]): Promise<BookingsAffectedDetails> {
+/** "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1" (most first), and each booking with its client, services and specialists. */
+async function detailsOf(db: Queryable, rows: readonly BookingRow[], lang: Locale): Promise<BookingsAffectedDetails> {
   return affectedDetails(
     rows,
     await itemsOfBookings(
       db,
       rows.map((r) => r.id),
     ),
+    lang,
   )
 }
 
@@ -161,9 +163,14 @@ async function cancelWithOffers(
 /**
  * Save the week and the special days. Bookings ahead the change leaves outside the hours: without a choice it's 409
  * `bookings_affected` listing them and nothing is saved; `keep` saves and leaves them; `cancel` saves and cancels each
- * with offered times.
+ * with offered times. The list names the services in `lang`, the reader's.
  */
-export async function updateHours(deps: Deps, businessId: string, change: HoursChange): Promise<HoursView & { cancelled: number }> {
+export async function updateHours(
+  deps: Deps,
+  businessId: string,
+  change: HoursChange,
+  lang: Locale,
+): Promise<HoursView & { cancelled: number }> {
   return deps.db.transaction(async (tx) => {
     const now = deps.now()
     // one save at a time, read against the hours it replaces. Every way a booking takes its time reads the hours
@@ -171,7 +178,7 @@ export async function updateHours(deps: Deps, businessId: string, change: HoursC
     const b = await loadHours(tx, businessId, { lock: 'no key update' })
     const next = checkChange(change, b.exceptions, today(now))
     const affected = await affectedBy(tx, businessId, b, next, now)
-    if (affected.length && !change.affected) throw new ApiError('bookings_affected', await detailsOf(tx, affected))
+    if (affected.length && !change.affected) throw new ApiError('bookings_affected', await detailsOf(tx, affected, lang))
     await saveHours(tx, businessId, next)
     await emit(tx, { type: 'business.updated', businessId })
     const cancelled = change.affected === 'cancel' && affected.length ? await cancelWithOffers(tx, businessId, affected, next, now) : 0

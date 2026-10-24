@@ -17,6 +17,7 @@ import {
   type StaffSchedule,
 } from '@yeral/domain/hours'
 import { occupiesSlot } from '@yeral/domain/lifecycle'
+import type { Locale } from '@yeral/domain/model'
 import { addDays, epochOf, today } from '@yeral/domain/time'
 import { and, eq, gte, isNotNull, isNull } from 'drizzle-orm'
 import type { z } from 'zod'
@@ -118,12 +119,16 @@ export async function leaveCounts(db: Queryable, businessId: string, staffId: st
   )
 }
 
-/** "{dates}: N ýazylyş bar": the bookings one by one, with the colleagues who do each one's services when removing. */
-function detailsOf(staffId: string, ahead: readonly Ahead[], lb?: LoadedBusiness): BookingsAffectedDetails {
+/**
+ * "{dates}: N ýazylyş bar": the bookings one by one (services in `lang`), with the colleagues who do each one's services
+ * when removing.
+ */
+function detailsOf(staffId: string, ahead: readonly Ahead[], lang: Locale, lb?: LoadedBusiness): BookingsAffectedDetails {
   const ctx = lb && appointmentContext(lb, [], 0)
   return affectedDetails(
     ahead.map((a) => a.b),
     ahead.flatMap((a) => a.items),
+    lang,
     ctx &&
       ((_, items) =>
         staffDoingAll(
@@ -320,13 +325,14 @@ const skipStale = (e: unknown) => {
  * Save a specialist's schedule (B-47). Bookings ahead the change leaves outside their day, on the dates it changes:
  * without a choice it's 409 `bookings_affected` listing them and nothing is saved; `move` saves and moves each to a
  * free colleague (else 3 other times), `keep` saves and leaves them. A personal day off that has ended is dropped when
- * it was saved before, and refused when it's new.
+ * it was saved before, and refused when it's new. The list names the services in `lang`, the reader's.
  */
 export async function updateSchedule(
   deps: Deps,
   business: Business,
   staffId: string,
   change: ScheduleChange,
+  lang: Locale,
 ): Promise<StaffScheduleView & StaffBookingsResult> {
   return deps.db.transaction(async (tx) => {
     const now = deps.now()
@@ -362,7 +368,7 @@ export async function updateSchedule(
         staffDayChangedOn(hours, was, next, b.date) &&
         items.some((i) => i.staffId === staffId && !withinStaffDay(hours, next, b.date, { start: i.start, end: i.end })),
     )
-    if (affected.length && !change.affected) throw new ApiError('bookings_affected', detailsOf(staffId, affected))
+    if (affected.length && !change.affected) throw new ApiError('bookings_affected', detailsOf(staffId, affected, lang))
     await tx
       .update(staff)
       .set({ shift: next.shift && [...next.shift], breaks: [...next.breaks], daysOff: [...next.daysOff] })
@@ -392,9 +398,16 @@ export async function updateSchedule(
  * a choice it's 409 `bookings_affected`, each with the colleagues who do its services, and nothing changes; `move`
  * gives each to `to` (one `to` can't take follows its row, else is cancelled with 3 other times), `keep` leaves them
  * (they come to those, then go), `cancel` cancels each with 3 other times. The owner can't be removed. Someone already
- * gone (removed, or left by themself) keeps their bookings until the owner settles them here.
+ * gone (removed, or left by themself) keeps their bookings until the owner settles them here. The list names the
+ * services in `lang`, the reader's.
  */
-export async function removeMember(deps: Deps, business: Business, staffId: string, input: RemoveInput): Promise<StaffBookingsResult> {
+export async function removeMember(
+  deps: Deps,
+  business: Business,
+  staffId: string,
+  input: RemoveInput,
+  lang: Locale,
+): Promise<StaffBookingsResult> {
   return deps.db.transaction(async (tx) => {
     const now = deps.now()
     await loadHours(tx, business.id, { lock: 'no key update' })
@@ -404,7 +417,7 @@ export async function removeMember(deps: Deps, business: Business, staffId: stri
     // someone who left by themself (B-15) leaves their bookings for this same flow
     const ahead = await bookingsAheadWith(tx, business.id, staffId, now)
     if (ahead.length && !input.affected)
-      throw new ApiError('bookings_affected', detailsOf(staffId, ahead, await loadBusiness(tx, business.id)))
+      throw new ApiError('bookings_affected', detailsOf(staffId, ahead, lang, await loadBusiness(tx, business.id)))
     await removeRow(tx, row, now)
     await teamChanged(tx, business.id, { userId: row.userId })
     await emit(tx, { type: 'business.updated', businessId: business.id })

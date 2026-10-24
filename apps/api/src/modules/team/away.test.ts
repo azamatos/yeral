@@ -96,9 +96,19 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
 
     const asked = await maysa.req(`${W}/team/${selbi}/remove`, { body: {} })
     expect(asked.status).toBe(409)
-    expect(asked.json.error).toMatchObject({ code: 'bookings_affected', details: { count: 3, byStaff: [{ staffId: selbi, count: 3 }] } })
-    const listed = asked.json.error.details.bookings as { code: string; colleagues: { staffId: string }[] }[]
+    expect(asked.json.error).toMatchObject({
+      code: 'bookings_affected',
+      details: { count: 3, requests: 0, byStaff: [{ staffId: selbi, count: 3 }] },
+    })
+    const listed = asked.json.error.details.bookings as {
+      code: string
+      status: string
+      services: string[]
+      colleagues: { staffId: string }[]
+    }[]
     expect(listed.map((b) => b.code)).toEqual([moved, busyThen, kept])
+    // each row names its services for "client · service · specialist"
+    for (const b of listed) expect(b).toMatchObject({ status: 'confirmed', holdUntil: null, services: [expect.any(String)] })
     expect(listed[0]!.colleagues.map((c) => c.staffId)).toContain(jerenId)
     // nothing changed yet
     expect((await whoOn(moved)).staff).toEqual(['Selbi'])

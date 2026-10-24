@@ -461,9 +461,9 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(removeRoute, async (c) => {
     const { slug, staffId } = c.req.valid('param')
-    const { business, actor } = await requireMember(c, slug)
+    const { business, actor, user } = await requireMember(c, slug)
     assertOwner(actor)
-    return c.json(await removeMember(c.var.deps, business, staffId, c.req.valid('json')), 200)
+    return c.json(await removeMember(c.var.deps, business, staffId, c.req.valid('json'), user.lang), 200)
   })
   .openapi(scheduleRoute, async (c) => {
     const { slug, staffId } = c.req.valid('param')
@@ -473,9 +473,9 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
   })
   .openapi(scheduleUpdateRoute, async (c) => {
     const { slug, staffId } = c.req.valid('param')
-    const { business, actor } = await requireMember(c, slug)
+    const { business, actor, user } = await requireMember(c, slug)
     assertOwner(actor)
-    return c.json(await updateSchedule(c.var.deps, business, staffId, c.req.valid('json')), 200)
+    return c.json(await updateSchedule(c.var.deps, business, staffId, c.req.valid('json'), user.lang), 200)
   })
   .openapi(reactivateRoute, async (c) => {
     const { slug, staffId } = c.req.valid('param')
