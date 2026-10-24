@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { MARKET } from '@yeral/domain/market'
 import { AMENITIES } from '@yeral/domain/model'
 import { PHONE_RULES } from '@yeral/features/auth-by-phone'
@@ -21,6 +22,7 @@ import { CircleAlert, ExternalLink, Headset, Info } from 'lucide-react'
 import { useId, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { ContactYeral } from '@/features/contact-yeral'
+import { AddressFields, useAddressForm, type AddressFormState } from '@/features/edit-address'
 import { useSdk } from '@/shared/api'
 import { pageLink } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
@@ -35,8 +37,8 @@ import { PHOTOS_ANCHOR, PhotosSection } from './photos-section'
  * Settings → Business profile (B-Settings `isProfile`, design §8 and §28.5, book B-37): «View your page»; when the Ýeral
  * team sent the page back, their reason with «Send again»; the main details (the logo, saved at once; the name and the
  * category), the About, the photos (each change saved at once), the phone for clients and the amenities, and «Pause
- * online booking», with «Close this workspace» for the owner (by contacting Ýeral: there's no delete). One save bar for
- * the details while they differ from what's saved, «Saved» after. The address is its own piece.
+ * online booking», with «Close this workspace» for the owner (by contacting Ýeral: there's no delete), and the address
+ * with its map. One save bar for the details and the address while they differ from what's saved, «Saved» after.
  */
 export function SettingsProfilePage() {
   const { workspace } = useWorkspace()
@@ -49,7 +51,9 @@ export function SettingsProfilePage() {
 
 function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; demo: boolean }) {
   const t = useTranslations('settings')
+  const errorText = useErrorText()
   const profile = useProfileForm(slug)
+  const address = useAddressForm(slug, true)
   const lead = t('profile.lead')
   const action = (
     <a
@@ -73,41 +77,103 @@ function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; d
       </SettingsPage>
     )
 
+  // one save bar for the details and the address, each sent to the profile only when it changed
+  const addressEdited = !!address?.edited
+  const dirty = profile.dirty || addressEdited
+  const valid = profile.valid && (!addressEdited || !address?.problem)
+  const saving = profile.saving || !!address?.saving
+  // every field waits while any part of the save runs, so nothing typed meanwhile is left out of it
+  const details = { ...profile, saving }
   const save = async () => {
-    if (await profile.save()) toast(t('save.saved'))
+    if (profile.dirty && !(await profile.save())) return
+    try {
+      if (address?.edited) await address.save()
+      toast(t('save.saved'))
+    } catch (error) {
+      toast(errorText(error))
+    }
+  }
+  const discard = () => {
+    profile.discard()
+    address?.discard()
   }
 
   return (
     <SettingsPage section="profile" lead={lead} action={action}>
       {profile.profile.verification === 'rejected' && (
-        <SentBack slug={slug} reason={profile.profile.verificationReason} owner={owner} unsaved={profile.dirty} />
+        <SentBack slug={slug} reason={profile.profile.verificationReason} owner={owner} unsaved={dirty} />
       )}
       <SettingsSection aria-labelledby={`${slug}-main`}>
         <SettingsSectionTitle id={`${slug}-main`}>{t('profile.main')}</SettingsSectionTitle>
         <LogoRow slug={slug} profile={profile.profile} />
-        <NameRow profile={profile} />
-        <CategoryRow profile={profile} />
+        <NameRow profile={details} />
+        <CategoryRow profile={details} />
       </SettingsSection>
-      <AboutSection profile={profile} />
+      <AboutSection profile={details} />
       <PhotosSection slug={slug} />
-      <ContactSection profile={profile} />
-      <PauseSection profile={profile} owner={owner && !demo} />
-      {profile.dirty && (
+      <ContactSection profile={details} />
+      <AddressSection address={address} disabled={saving} demo={demo} />
+      <PauseSection profile={details} owner={owner && !demo} />
+      {dirty && (
         <SaveBar
           message={t('save.question')}
           label={t('save.unsaved')}
           discardLabel={t('save.discard')}
           saveLabel={t('save.save')}
           savingLabel={t('save.saving')}
-          onDiscard={profile.discard}
+          onDiscard={discard}
           onSave={() => void save()}
-          invalid={!profile.valid}
-          saving={profile.saving}
+          invalid={!valid}
+          saving={saving}
           // on a phone above the shell's tab bar, where its toasts sit too (B-Settings `.sbar` under 768)
           className="max-sm:bottom-[var(--toast-bottom,12px)]"
         />
       )}
     </SettingsPage>
+  )
+}
+
+/**
+ * The address (B-Settings «Address»): the wizard's fields (`features/edit-address`), «Moved? Change the address here…»
+ * and, for a second place at the same time, «Create a business» (a workspace of its own).
+ */
+function AddressSection({ address, disabled, demo }: { address: AddressFormState | null; disabled: boolean; demo: boolean }) {
+  const t = useTranslations('settings.profile.address')
+  const brand = useTranslations('common')('brand')
+  const pick = useTranslations('setup.address')('hintPick')
+  const titleId = useId()
+  return (
+    <SettingsSection aria-labelledby={titleId}>
+      <SettingsSectionTitle id={titleId} caption={t('caption')}>
+        {t('title')}
+      </SettingsSectionTitle>
+      {address ? (
+        <>
+          <AddressFields address={address} disabled={disabled} />
+          {/* Save waits for an address picked from the list: say so here, where it's chosen */}
+          {address.edited && address.problem === 'pick' && <FieldMessage status="error">{pick}</FieldMessage>}
+        </>
+      ) : (
+        <div className="flex justify-center py-8">
+          <Spinner />
+        </div>
+      )}
+      <Callout tone="neutral" size="s" icon={<Info aria-hidden />} live={false}>
+        {t.rich('moved', { brand, b: (words) => <b>{words}</b> })}
+      </Callout>
+      {/* the demo workspace can't start a business of its own */}
+      {!demo && (
+        <p className="m-0 text-dense text-n-600">
+          {t.rich('another', {
+            link: (words) => (
+              <Link to="/setup/$step" params={{ step: 'business' }} className={textLink}>
+                {words}
+              </Link>
+            ),
+          })}
+        </p>
+      )}
+    </SettingsSection>
   )
 }
 

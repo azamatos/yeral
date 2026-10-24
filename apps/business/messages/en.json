@@ -870,6 +870,12 @@
         "parking": "Parking",
         "card_payment": "Card payment at the place"
       },
+      "address": {
+        "title": "Address",
+        "caption": "Clients see it on the map and in their booking.",
+        "moved": "<b>Moved?</b> Change the address here. Your bookings, clients and reviews stay; {brand} may check the new address.",
+        "another": "Another address at the same time is a new workspace: <link>Create a business</link>"
+      },
       "closeTitle": "Pause or close",
       "onlineTitle": "Online booking",
       "pause": "Pause online booking",
