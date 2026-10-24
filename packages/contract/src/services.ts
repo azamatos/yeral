@@ -66,6 +66,9 @@ export const serviceInputSchema = z
 /** Change some of a service; a new group puts it last there. */
 export const serviceUpdateSchema = z.object(serviceFields).partial().strict().meta({ id: 'ServiceUpdate' })
 
+export type ServiceInput = z.input<typeof serviceInputSchema>
+export type ServiceUpdate = z.input<typeof serviceUpdateSchema>
+
 export const groupInputSchema = z
   .object({ name: localizedSchema(60) })
   .strict()

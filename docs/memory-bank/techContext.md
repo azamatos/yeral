@@ -97,6 +97,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | a form's unsaved changes: «Save your changes?» Discard · Save, sticky at the bottom | `SaveBar` (shown only while the form is dirty; `form` to submit a form; a toast after) | `@yeral/ui/save-bar` |
 | a small number stepped − n + (no-shows, seats, party size) | `NumberStepper` (`min`, `max`, `format`, ↑/↓; an end button stays focused, `aria-disabled`) | `@yeral/ui/number-stepper` |
 | one colour or one icon out of a few (an internal status's) | `SwatchPicker` (`options[{value, label, color}]`), `IconPicker` (`options[{value, label, icon}]`, 8 to a row) | `@yeral/ui/swatch-picker`, `@yeral/ui/icon-picker` |
+| one choice out of a few as chips (a service's price type) | `ChipRadioGroup` (`options[{value, label}]`, a radio group; arrow keys) | `@yeral/ui/chip` |
 | a business's booking rules as a form: the wizard's rules step and Settings → Booking rules | `useRulesForm(slug, on)` (load, edits, only what changed saved, discard), `BookingRulesForm`, `useRuleLabels()` | `@/features/edit-booking-rules` (apps/business) |
 | logo, brand images | `Logo`, `brand` | `@yeral/ui/brand` |
 | app-wide providers | `UIProvider` (Lucide stroke 1.75, tooltip delay), `Toaster` | `@yeral/ui/provider`, `@yeral/ui/toast` |
