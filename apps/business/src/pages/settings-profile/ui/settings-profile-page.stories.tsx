@@ -284,13 +284,14 @@ export const Photos: Story = {
     const section = await canvas.findByRole('region', { name: 'Photos' })
     await expect(await within(section).findByText('2 of 20')).toBeVisible()
     await expect(within(section).getByText(/Add 1 more photo/)).toBeVisible()
-    await userEvent.click(within(section).getByRole('button', { name: 'Make cover: Styling chair' }))
-    await expect(sent.order).toEqual([['chair', 'hall']])
-    await expect(within(section).getAllByRole('button', { name: /^Move: / })[0]).toHaveAccessibleName('Move: Styling chair')
+    await userEvent.click(within(section).getByRole('button', { name: 'Make cover: Photo 2' }))
+    await waitFor(() => expect(sent.order).toEqual([['chair', 'hall']]))
+    // named by their place: the api names every photo after the business
+    await expect(within(section).getByRole('button', { name: 'Make cover: Photo 2' })).toBeVisible()
     await userEvent.upload(within(section).getByLabelText('Add photo'), await picture(800, 600))
     await expect(await within(section).findByText('3 of 20')).toBeVisible()
     await expect(within(section).queryByText(/more photo/)).toBeNull()
-    await userEvent.click(within(section).getByRole('button', { name: 'Remove photo: Salon hall' }))
+    await userEvent.click(within(section).getByRole('button', { name: 'Remove photo: Photo 2' }))
     await expect(await within(section).findByText('2 of 20')).toBeVisible()
     await expect(sent.removed).toEqual(['hall'])
   },

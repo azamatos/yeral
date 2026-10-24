@@ -5,8 +5,10 @@
 
 /** Each photo at most (10 MB, as the edge counts them; it lets the form's few bytes more through). */
 export const PHOTO_MAX_BYTES = 10_000_000
-/** A business's gallery at most; 3 or more are recommended. */
+/** A business's gallery at most. */
 export const GALLERY_MAX = 20
+/** A gallery this big or more is done: the done step's «Add 3+ photos», Business profile's hint (design §27.2). */
+export const GALLERY_GOOD = 3
 
 /** The kinds of photo taken, by what their first bytes say (not by what the browser claims). */
 export const PHOTO_KINDS = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' } as const

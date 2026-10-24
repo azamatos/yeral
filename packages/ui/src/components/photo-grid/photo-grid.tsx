@@ -1,12 +1,12 @@
-import { CircleAlert, GripVertical, ImagePlus, X } from 'lucide-react'
-import { useId, useRef, useState, type DragEvent, type KeyboardEvent } from 'react'
+import { GripVertical, ImageOff, Plus, X } from 'lucide-react'
+import { useEffect, useId, useRef, useState, type DragEvent, type KeyboardEvent } from 'react'
 import { cn } from '../../lib/cn'
 import { Spinner } from '../spinner'
 
 export interface PhotoGridPhoto {
   id: string
   src: string
-  /** What the photo shows, for its controls' names: «Remove photo: Salon hall». */
+  /** What tells the photo apart, for its controls' names: «Remove photo: Photo 2». */
   name: string
 }
 
@@ -18,13 +18,13 @@ export type PhotoGridPending =
 export interface PhotoGridWords {
   /** The first photo's chip: «Cover photo». */
   cover: string
-  /** The other photos' button, «Make cover», and its name for screen readers: «Make cover: Salon hall». */
+  /** The other photos' button, «Make cover», and its name for screen readers: «Make cover: Photo 2». */
   makeCover: string
   makeCoverOf: (name: string) => string
   remove: (name: string) => string
-  /** The drag handle: «Move: Salon hall» (Space picks it up, ←/→ move it, Space puts it down, Esc cancels). */
+  /** The drag handle: «Move: Photo 2» (Space picks it up, ←/→ move it, Space puts it down, Esc cancels). */
   move: (name: string) => string
-  /** Said while moving: «Salon hall, 2 of 5». */
+  /** Said while moving: «Photo 2, 3 of 5». */
   position: (name: string, at: number, total: number) => string
   /** Said when put down or cancelled. */
   dropped: (name: string, at: number, total: number) => string
@@ -43,8 +43,10 @@ export interface PhotoGridProps {
   canAdd: boolean
   /** The file types the add tile offers: `image/jpeg,image/png,image/webp`. */
   accept: string
-  /** A change is on its way: the controls wait. */
-  disabled?: boolean
+  /** A change is on its way: the photos' controls wait (they keep the focus, they just do nothing). */
+  busy?: boolean
+  /** The order can't change now (files on their way): no moving, no «Make cover». */
+  locked?: boolean
   onAdd: (files: File[]) => void
   onRemove: (id: string) => void
   /** Every photo once, in the new order; the first is the cover («Make cover», a drag, the keyboard). */
@@ -55,21 +57,28 @@ export interface PhotoGridProps {
 }
 
 const CONTROL =
-  'absolute inline-flex size-7 items-center justify-center rounded-input border-0 bg-n-0 p-0 text-n-900 shadow-control focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default'
+  'absolute inline-flex size-7 items-center justify-center rounded-input border-0 bg-n-0 p-0 text-n-900 shadow-control focus-visible:shadow-focus focus-visible:outline-none aria-disabled:cursor-default aria-disabled:text-n-500'
+
+const moveTo = (from: readonly string[], id: string, to: number) => {
+  const rest = from.filter((x) => x !== id)
+  return [...rest.slice(0, to), id, ...rest.slice(to)]
+}
 
 /**
  * PhotoManager (DS-Business «PhotoManager», B-Settings `.phg`): squares r12 in a grid (104 at least, 12 apart). The
  * first photo is the cover (an ink chip); the others have «Make cover». Each has remove (top right) and a handle (top
  * left) that drags it, or with the keyboard: Space picks it up, ←/→ move it, Space puts it down, Esc puts it back,
- * each step said. Files on their way show a spinner; refused ones a dashed danger tile with dismiss; the add tile takes
- * one file or several. Every word comes from `words`.
+ * each step said. After «Make cover» the focus stays on that photo; after a removal it goes to the next one (else the
+ * add tile). Files on their way show a spinner; refused ones a dashed danger tile with dismiss; the add tile takes one
+ * file or several. Every word comes from `words`.
  */
 export function PhotoGrid({
   photos,
   pending = [],
   canAdd,
   accept,
-  disabled = false,
+  busy = false,
+  locked = false,
   onAdd,
   onRemove,
   onReorder,
@@ -78,46 +87,58 @@ export function PhotoGrid({
   className,
 }: PhotoGridProps) {
   const inputId = useId()
-  const [lifted, setLifted] = useState<{ id: string; order: string[] } | null>(null)
+  // the lifted photo and where it is now; the others keep their order as the photos change meanwhile
+  const [lifted, setLifted] = useState<{ id: string; at: number } | null>(null)
   const [dragged, setDragged] = useState<string | null>(null)
   const [said, setSaid] = useState('')
   const handles = useRef(new Map<string, HTMLButtonElement>())
+  const addInput = useRef<HTMLInputElement>(null)
   const ids = photos.map((p) => p.id)
-  const order = lifted?.order ?? ids
+  // where the focus goes once the photos have changed (the api's answer): a photo's handle, or the add tile
+  const focusNext = useRef<{ to: { photo: string } | 'add'; while: string } | null>(null)
+  const focusAfterChange = (to: { photo: string } | 'add') => (focusNext.current = { to, while: ids.join() })
+  const focusHandle = (id: string) => requestAnimationFrame(() => handles.current.get(id)?.focus())
+  const liftedHere = lifted && ids.includes(lifted.id) ? lifted : null
+  const order = liftedHere ? moveTo(ids, liftedHere.id, Math.min(liftedHere.at, ids.length - 1)) : ids
   const byId = new Map(photos.map((p) => [p.id, p]))
   const shown = order.flatMap((id) => byId.get(id) ?? [])
-
-  const move = (from: string[], id: string, to: number) => {
-    const rest = from.filter((x) => x !== id)
-    return [...rest.slice(0, to), id, ...rest.slice(to)]
-  }
   const nameOf = (id: string) => byId.get(id)?.name ?? ''
+  const canMove = !busy && !locked
+
+  useEffect(() => {
+    const want = focusNext.current
+    if (!want || ids.join() === want.while) return
+    focusNext.current = null
+    if (want.to === 'add') addInput.current?.focus()
+    else handles.current.get(want.to.photo)?.focus()
+  })
 
   const onHandleKey = (event: KeyboardEvent<HTMLButtonElement>, id: string) => {
     const at = order.indexOf(id)
     if (event.key === ' ' || event.key === 'Enter') {
       event.preventDefault()
-      if (!lifted) {
-        setLifted({ id, order: ids })
+      if (!liftedHere) {
+        if (!canMove) return
+        setLifted({ id, at })
         setSaid(words.position(nameOf(id), at + 1, ids.length))
       } else {
         setLifted(null)
         setSaid(words.dropped(nameOf(id), at + 1, order.length))
         if (order.join() !== ids.join()) onReorder(order)
       }
-    } else if (lifted && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+    } else if (liftedHere && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
       event.preventDefault()
       const to = Math.min(order.length - 1, Math.max(0, at + (event.key === 'ArrowLeft' ? -1 : 1)))
       if (to === at) return
-      setLifted({ id, order: move(order, id, to) })
+      setLifted({ id, at: to })
       setSaid(words.position(nameOf(id), to + 1, order.length))
       // the handle moved with its tile: it keeps the focus
-      requestAnimationFrame(() => handles.current.get(id)?.focus())
-    } else if (lifted && event.key === 'Escape') {
+      focusHandle(id)
+    } else if (liftedHere && event.key === 'Escape') {
       event.preventDefault()
       setLifted(null)
       setSaid(words.cancelled(nameOf(id)))
-      requestAnimationFrame(() => handles.current.get(id)?.focus())
+      focusHandle(id)
     }
   }
 
@@ -125,22 +146,32 @@ export function PhotoGrid({
     event.preventDefault()
     const id = dragged
     setDragged(null)
-    if (!id || id === target) return
-    onReorder(move(ids, id, ids.indexOf(target)))
+    if (!id || id === target || !canMove) return
+    onReorder(moveTo(ids, id, ids.indexOf(target)))
+  }
+
+  const removeAt = (id: string) => {
+    if (busy) return
+    const at = ids.indexOf(id)
+    const next = ids[at + 1] ?? ids[at - 1]
+    focusAfterChange(next ? { photo: next } : 'add')
+    onRemove(id)
   }
 
   return (
     <div className={cn('flex flex-col', className)}>
       <ul role="list" className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(104px,100%),1fr))] gap-3 p-0">
         {shown.map((photo, index) => {
-          const isLifted = lifted?.id === photo.id || dragged === photo.id
+          const isLifted = liftedHere?.id === photo.id || dragged === photo.id
           return (
             <li
               key={photo.id}
-              draggable={!disabled && !lifted}
+              draggable={canMove && !liftedHere}
               onDragStart={(e) => {
                 setDragged(photo.id)
                 e.dataTransfer.effectAllowed = 'move'
+                // Firefox starts a drag only with something to carry
+                e.dataTransfer.setData('text/plain', photo.id)
               }}
               onDragEnd={() => setDragged(null)}
               onDragOver={(e) => dragged && e.preventDefault()}
@@ -158,10 +189,10 @@ export function PhotoGrid({
                 }}
                 type="button"
                 aria-label={words.move(photo.name)}
-                aria-pressed={lifted?.id === photo.id}
-                disabled={disabled}
+                aria-pressed={liftedHere?.id === photo.id}
+                aria-disabled={!canMove && liftedHere?.id !== photo.id ? true : undefined}
                 onKeyDown={(e) => onHandleKey(e, photo.id)}
-                onBlur={() => lifted?.id === photo.id && setLifted(null)}
+                onBlur={() => liftedHere?.id === photo.id && setLifted(null)}
                 className={cn(CONTROL, 'top-1.5 left-1.5 cursor-grab')}
               >
                 <GripVertical aria-hidden className="size-4" />
@@ -169,8 +200,8 @@ export function PhotoGrid({
               <button
                 type="button"
                 aria-label={words.remove(photo.name)}
-                disabled={disabled || !!lifted}
-                onClick={() => onRemove(photo.id)}
+                aria-disabled={busy || !!liftedHere ? true : undefined}
+                onClick={() => !liftedHere && removeAt(photo.id)}
                 className={cn(CONTROL, 'top-1.5 right-1.5 cursor-pointer')}
               >
                 <X aria-hidden className="size-4" />
@@ -183,9 +214,14 @@ export function PhotoGrid({
                 <button
                   type="button"
                   aria-label={words.makeCoverOf(photo.name)}
-                  disabled={disabled || !!lifted}
-                  onClick={() => onReorder(move(ids, photo.id, 0))}
-                  className="absolute bottom-1.5 left-1.5 h-7 cursor-pointer rounded-pill border-0 bg-n-0 px-2.5 text-micro font-semibold whitespace-nowrap text-n-900 shadow-control focus-visible:shadow-focus focus-visible:outline-none"
+                  aria-disabled={!canMove || !!liftedHere ? true : undefined}
+                  onClick={() => {
+                    if (!canMove || liftedHere) return
+                    // the button becomes the cover chip: the focus stays on the photo, on its handle
+                    focusAfterChange({ photo: photo.id })
+                    onReorder(moveTo(ids, photo.id, 0))
+                  }}
+                  className="absolute bottom-1.5 left-1.5 h-7 cursor-pointer rounded-pill border-0 bg-n-0 px-2.5 text-micro font-semibold whitespace-nowrap text-n-900 shadow-control focus-visible:shadow-focus focus-visible:outline-none aria-disabled:cursor-default aria-disabled:text-n-500"
                 >
                   {words.makeCover}
                 </button>
@@ -206,9 +242,9 @@ export function PhotoGrid({
           ) : (
             <li
               key={file.id}
-              className="relative m-0 flex aspect-square flex-col items-center justify-center gap-2 overflow-hidden rounded-m border-[1.5px] border-dashed border-danger-line bg-n-0 p-3 text-center text-micro font-semibold [overflow-wrap:anywhere] text-danger-ink"
+              className="relative m-0 flex aspect-square flex-col items-center justify-center gap-2 overflow-hidden rounded-m border-[1.5px] border-dashed border-error bg-n-0 p-3 text-center text-micro font-semibold [overflow-wrap:anywhere] text-danger-ink"
             >
-              <CircleAlert aria-hidden className="size-5" />
+              <ImageOff aria-hidden className="size-5.5" />
               <span>{file.tile}</span>
               <button
                 type="button"
@@ -225,20 +261,16 @@ export function PhotoGrid({
           <li className="m-0 aspect-square">
             <label
               htmlFor={inputId}
-              className={cn(
-                'flex size-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-m border-[1.5px] border-dashed border-n-300 bg-n-0 p-2 text-center text-dense font-semibold text-a-600',
-                'hover:bg-n-50 has-focus-visible:shadow-focus',
-                disabled && 'cursor-default text-n-500',
-              )}
+              className="flex size-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-m border-[1.5px] border-dashed border-n-300 bg-n-0 p-2 text-center text-dense font-semibold text-a-600 hover:bg-n-50 has-focus-visible:shadow-focus"
             >
-              <ImagePlus aria-hidden className="size-5" />
+              <Plus aria-hidden className="size-5.5" />
               <span>{words.add}</span>
               <input
+                ref={addInput}
                 id={inputId}
                 type="file"
                 accept={accept}
                 multiple
-                disabled={disabled}
                 className="sr-only"
                 onChange={(e) => {
                   const files = [...(e.target.files ?? [])]

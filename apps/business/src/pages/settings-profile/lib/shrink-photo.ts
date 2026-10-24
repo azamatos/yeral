@@ -11,13 +11,14 @@ export type PhotoCheck = { ok: true; file: File } | { ok: false; problem: 'wrong
 
 const mbOf = (bytes: number) => Math.ceil(bytes / 1_000_000)
 
-/** Checks the picked file and shrinks it to 2048 on its long side when it's longer; anything unreadable is `wrongType`. */
+/** Checks the picked file by its bytes and size, and shrinks it to 2048 on its long side when it's longer and drawable. */
 export async function shrinkPhoto(file: File): Promise<PhotoCheck> {
   if (file.size > PHOTO_MAX_BYTES) return { ok: false, problem: 'tooBig', mb: mbOf(file.size) }
   const kind = photoKind(new Uint8Array(await file.slice(0, 16).arrayBuffer()))
   if (!kind) return { ok: false, problem: 'wrongType' }
   const image = await createImageBitmap(file).catch(() => null)
-  if (!image) return { ok: false, problem: 'wrongType' }
+  // its bytes are a photo the api takes; this browser can't draw it (a huge one on a phone, CMYK): it goes as it is
+  if (!image) return { ok: true, file }
   try {
     const long = Math.max(image.width, image.height)
     if (long <= PHOTO_MAX_PX) return { ok: true, file }

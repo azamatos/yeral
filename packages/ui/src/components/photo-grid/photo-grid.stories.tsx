@@ -85,15 +85,19 @@ export const Default: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Make cover: Nail desk' }))
     await expect(onReorder).toHaveBeenLastCalledWith(['nails', 'hall', 'chair', 'door'])
     await expect(canvas.getAllByRole('button', { name: /^Move: / })[0]).toHaveAccessibleName('Move: Nail desk')
+    // the button became the cover chip: the focus stays on that photo
+    await expect(canvas.getByRole('button', { name: 'Move: Nail desk' })).toHaveFocus()
   },
 }
 
-/** Remove takes a photo out. */
+/** Remove takes a photo out; the focus goes to the next one. */
 export const Remove: Story = {
   play: async ({ canvas }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Remove photo: Styling chair' }))
     await expect(onRemove).toHaveBeenLastCalledWith('chair')
     await expect(canvas.queryByRole('button', { name: 'Move: Styling chair' })).toBeNull()
+    // the focus goes to the next photo, not to the page
+    await expect(canvas.getByRole('button', { name: 'Move: Nail desk' })).toHaveFocus()
   },
 }
 
