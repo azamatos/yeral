@@ -89,6 +89,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | design-system components | `import { Button } from '@yeral/ui/button'` (subpath per component folder) | `@yeral/ui/*` |
 | an inline text link, or a button that reads as one («Change number», «Start free») | `textLink` (classes; size and layout from the caller) | `@yeral/ui/text-link` |
 | a link or a number to copy and share; a page's QR code with its downloads | `CopyField` (Copy → «Copied» 2 s, a Share menu of links); `QrBlock` / `QrCode` (lean-qr, PNG and SVG) | `@yeral/ui/copy-field`, `@yeral/ui/qr-block` |
+| a grid of photos to order, cover first («Make cover», remove, drag and keyboard moving, uploading and refused tiles, the add tile) | `PhotoGrid` (every word from `words`) | `@yeral/ui/photo-grid` |
 | the client site's host («yeral.app») and a business's page link in the business app | `clientHost`, `pageLink(slug)` (`{ url, display }`, `/b/{slug}`) | `@/shared/config` (apps/business) |
 | a business's page link with Copy and Share (WhatsApp · Telegram) in the business app | `PageLinkField` (`shared/ui`), `shareLinks(url)` (`shared/lib`) | `@/shared/ui`, `@/shared/lib` (apps/business) |
 | settings' layout: a menu beside the section (a chip row under 1024), the section's header, hairline groups | `SettingsLayout SettingsNav SettingsNavItem SettingsPane SettingsPaneHeader SettingsSection SettingsSectionTitle` | `@yeral/ui/settings-layout` |
