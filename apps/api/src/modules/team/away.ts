@@ -120,15 +120,20 @@ export async function leaveCounts(db: Queryable, businessId: string, staffId: st
 }
 
 /**
- * "{dates}: N ýazylyş bar": the bookings one by one (services in `lang`), with the colleagues who do each one's services
- * when removing.
+ * "{dates}: N ýazylyş bar": the bookings one by one (services in the reader's language), with the colleagues who do
+ * each one's services when removing.
  */
-function detailsOf(staffId: string, ahead: readonly Ahead[], lang: Locale, lb?: LoadedBusiness): BookingsAffectedDetails {
+function detailsOf(
+  staffId: string,
+  ahead: readonly Ahead[],
+  view: { lang: Locale; now: number },
+  lb?: LoadedBusiness,
+): BookingsAffectedDetails {
   const ctx = lb && appointmentContext(lb, [], 0)
   return affectedDetails(
     ahead.map((a) => a.b),
     ahead.flatMap((a) => a.items),
-    lang,
+    view,
     ctx &&
       ((_, items) =>
         staffDoingAll(
@@ -368,7 +373,7 @@ export async function updateSchedule(
         staffDayChangedOn(hours, was, next, b.date) &&
         items.some((i) => i.staffId === staffId && !withinStaffDay(hours, next, b.date, { start: i.start, end: i.end })),
     )
-    if (affected.length && !change.affected) throw new ApiError('bookings_affected', detailsOf(staffId, affected, lang))
+    if (affected.length && !change.affected) throw new ApiError('bookings_affected', detailsOf(staffId, affected, { lang, now }))
     await tx
       .update(staff)
       .set({ shift: next.shift && [...next.shift], breaks: [...next.breaks], daysOff: [...next.daysOff] })
@@ -417,7 +422,7 @@ export async function removeMember(
     // someone who left by themself (B-15) leaves their bookings for this same flow
     const ahead = await bookingsAheadWith(tx, business.id, staffId, now)
     if (ahead.length && !input.affected)
-      throw new ApiError('bookings_affected', detailsOf(staffId, ahead, lang, await loadBusiness(tx, business.id)))
+      throw new ApiError('bookings_affected', detailsOf(staffId, ahead, { lang, now }, await loadBusiness(tx, business.id)))
     await removeRow(tx, row, now)
     await teamChanged(tx, business.id, { userId: row.userId })
     await emit(tx, { type: 'business.updated', businessId: business.id })

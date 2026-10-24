@@ -7,6 +7,7 @@ import { MAX_ALTERNATIVES, WAITING_SCOPES } from '@yeral/domain/lifecycle'
 import { SETUP_NEEDS } from '@yeral/domain/setup'
 import { z } from 'zod'
 import { bookingCodeSchema, epochSchema, idSchema, minuteSchema, startMinuteSchema, timeSlotSchema, ymdSchema } from './common'
+import { teamItemSchema } from './requests'
 
 export const ERROR_STATUS = {
   validation_error: 400,
@@ -166,6 +167,9 @@ export type SetupIncompleteDetails = z.infer<typeof setupIncompleteDetailsSchema
 export const clientExistsDetailsSchema = z.object({ id: idSchema, name: z.string().nullable() })
 export type ClientExistsDetails = z.infer<typeof clientExistsDetailsSchema>
 
+/** A booking ahead in a refusal's list: a request waiting for an answer, or a confirmed booking. */
+const aheadStatusSchema = z.enum(['pending', 'confirmed'])
+
 /** `client_has_bookings`: the bookings ahead and the waiting requests, soonest first. */
 export const clientHasBookingsDetailsSchema = z.object({
   bookings: z.array(
@@ -174,7 +178,7 @@ export const clientHasBookingsDetailsSchema = z.object({
       date: ymdSchema,
       start: startMinuteSchema,
       end: minuteSchema,
-      status: z.enum(['pending', 'confirmed']),
+      status: aheadStatusSchema,
     }),
   ),
 })
@@ -192,8 +196,11 @@ export type BlockOverBookingsDetails = z.infer<typeof blockOverBookingsDetailsSc
  */
 export const bookingsAffectedDetailsSchema = z.object({
   count: z.number().int().min(1),
-  /** How many of `count` are requests waiting for an answer ("5 bookings · 1 request"). */
-  requests: z.number().int().min(0),
+  /**
+   * `count` split as a leave confirm counts (`leaveCounts`): confirmed bookings and requests waiting for an answer
+   * ("5 bookings and 1 request", the label "5 bookings · 1 request").
+   */
+  counts: z.object({ bookings: z.number().int().min(0), requests: z.number().int().min(0) }),
   byStaff: z.array(z.object({ staffId: idSchema, name: z.string(), count: z.number().int().min(1) })),
   bookings: z.array(
     z.object({
@@ -201,13 +208,12 @@ export const bookingsAffectedDetailsSchema = z.object({
       date: ymdSchema,
       start: startMinuteSchema,
       end: minuteSchema,
-      /** A request waiting for an answer, or a confirmed booking. */
-      status: z.enum(['pending', 'confirmed']),
-      /** A request's answer time ("45 min"); null for a confirmed booking. */
+      status: aheadStatusSchema,
+      /** A request's answer time, its timer ("45 min"; its start when it has no hold time); null for a booking. */
       holdUntil: epochSchema.nullable(),
       client: z.string().nullable(),
-      /** The booked services' names in the reader's language, in the booking's order. */
-      services: z.array(z.string()),
+      /** Each service with who does it, in the reader's language ("client · service · specialist"). */
+      items: z.array(teamItemSchema),
       staff: z.array(z.string()),
       /** Removing a specialist (B-50): the colleagues who do this booking's services, for the "Kime" list. */
       colleagues: z.array(z.object({ staffId: idSchema, name: z.string() })).optional(),

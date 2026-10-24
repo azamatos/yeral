@@ -95,14 +95,18 @@ async function affectedBy(db: Queryable, businessId: string, was: BusinessHours,
 }
 
 /** "Şu günlere 3 ýazylyş bar — Aýna 2, Maral 1" (most first), and each booking with its client, services and specialists. */
-async function detailsOf(db: Queryable, rows: readonly BookingRow[], lang: Locale): Promise<BookingsAffectedDetails> {
+async function detailsOf(
+  db: Queryable,
+  rows: readonly BookingRow[],
+  view: { lang: Locale; now: number },
+): Promise<BookingsAffectedDetails> {
   return affectedDetails(
     rows,
     await itemsOfBookings(
       db,
       rows.map((r) => r.id),
     ),
-    lang,
+    view,
   )
 }
 
@@ -178,7 +182,7 @@ export async function updateHours(
     const b = await loadHours(tx, businessId, { lock: 'no key update' })
     const next = checkChange(change, b.exceptions, today(now))
     const affected = await affectedBy(tx, businessId, b, next, now)
-    if (affected.length && !change.affected) throw new ApiError('bookings_affected', await detailsOf(tx, affected, lang))
+    if (affected.length && !change.affected) throw new ApiError('bookings_affected', await detailsOf(tx, affected, { lang, now }))
     await saveHours(tx, businessId, next)
     await emit(tx, { type: 'business.updated', businessId })
     const cancelled = change.affected === 'cancel' && affected.length ? await cancelWithOffers(tx, businessId, affected, next, now) : 0

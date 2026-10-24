@@ -1,4 +1,6 @@
 /** A specialist away or leaving (book B-47, B-50): their schedule, and their bookings ahead moved, kept or cancelled. */
+import { MARKET } from '@yeral/domain/market'
+import { localized } from '@yeral/domain/model'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { DEMO_NOW, testApp } from '../../../test/app'
@@ -25,13 +27,17 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
   let t: ReturnType<typeof testApp>
   let glowId: string
   let manicure: string
+  /** The manicure's name as the seeded owner reads it (their language is the market's). */
+  let manicureName: string
   let jerenId: string
   beforeAll(async () => {
     ;({ db } = await testDatabase())
     await seed(db, { demo: true, now: DEMO_NOW })
     const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
     glowId = glow!.id
-    manicure = (await db.select().from(services).where(eq(services.businessId, glowId))).find((s) => s.name.en === 'Manicure')!.id
+    const row = (await db.select().from(services).where(eq(services.businessId, glowId))).find((s) => s.name.en === 'Manicure')!
+    manicure = row.id
+    manicureName = localized(row.name, MARKET.defaultLanguage)
     const [jeren] = await db
       .select()
       .from(staff)
@@ -98,17 +104,17 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
     expect(asked.status).toBe(409)
     expect(asked.json.error).toMatchObject({
       code: 'bookings_affected',
-      details: { count: 3, requests: 0, byStaff: [{ staffId: selbi, count: 3 }] },
+      details: { count: 3, counts: { bookings: 3, requests: 0 }, byStaff: [{ staffId: selbi, count: 3 }] },
     })
-    const listed = asked.json.error.details.bookings as {
-      code: string
-      status: string
-      services: string[]
-      colleagues: { staffId: string }[]
-    }[]
+    const listed = asked.json.error.details.bookings as { code: string; colleagues: { staffId: string }[] }[]
     expect(listed.map((b) => b.code)).toEqual([moved, busyThen, kept])
-    // each row names its services for "client · service · specialist"
-    for (const b of listed) expect(b).toMatchObject({ status: 'confirmed', holdUntil: null, services: [expect.any(String)] })
+    // each row names its service with who does it, for "client · service · specialist"
+    for (const b of listed)
+      expect(b).toMatchObject({
+        status: 'confirmed',
+        holdUntil: null,
+        items: [{ serviceId: manicure, service: manicureName, staffId: selbi, staff: 'Selbi' }],
+      })
     expect(listed[0]!.colleagues.map((c) => c.staffId)).toContain(jerenId)
     // nothing changed yet
     expect((await whoOn(moved)).staff).toEqual(['Selbi'])

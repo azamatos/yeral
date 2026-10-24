@@ -130,10 +130,15 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     expect(asked.status).toBe(409)
     expect(asked.json.error.code).toBe('bookings_affected')
     // the AffectedBookingsList's rows: "client · service · specialist", none of them a request
-    const listed = { status: 'confirmed', holdUntil: null, services: [manicureName], staff: ['Maral'] }
+    const listed = {
+      status: 'confirmed',
+      holdUntil: null,
+      items: [{ serviceId: manicure, service: manicureName, staffId: maralId, staff: 'Maral' }],
+      staff: ['Maral'],
+    }
     expect(asked.json.error.details).toMatchObject({
       count: 2,
-      requests: 0,
+      counts: { bookings: 2, requests: 0 },
       byStaff: [{ staffId: maralId, name: 'Maral', count: 2 }],
       bookings: [
         { code: first, date: THU, start: 600, ...listed },
@@ -336,13 +341,13 @@ describe('opening hours and special days (book B-39, B-40)', () => {
     expect(asked.json.error.code).toBe('bookings_affected')
     expect(asked.json.error.details).toMatchObject({
       count: 1,
-      requests: 1,
+      counts: { bookings: 0, requests: 1 },
       bookings: [
         {
           code: request.json.code,
           status: 'pending',
           holdUntil: (await rowOf(request.json.code)).holdUntil!.getTime(),
-          services: [manicureName],
+          items: [{ service: manicureName, staff: 'Maral' }],
           staff: ['Maral'],
         },
       ],
