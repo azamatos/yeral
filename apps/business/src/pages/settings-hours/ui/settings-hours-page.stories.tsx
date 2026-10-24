@@ -231,6 +231,9 @@ export const BookingsOutside: Story = {
     const list = modal.getByRole('list', { name: '3 bookings · 1 request' })
     await expect(within(list).getAllByRole('listitem')).toHaveLength(4)
     await expect(within(list).getByText('Bahar A. · Gel manicure · Maral')).toBeVisible()
+    // today and tomorrow by name, a later day as «Fri, 16 Oct»
+    await expect(within(list).getByText('Today · 18:00–18:45')).toBeVisible()
+    await expect(within(list).getAllByText(/^[A-Z][a-z]{2}, \d{1,2} [A-Z][a-z]{2} · \d\d:\d\d–\d\d:\d\d$/)).toHaveLength(2)
     await expect(within(list).getByText('Unnamed client · Brows · Jeren')).toBeVisible()
     await expect(within(list).getByLabelText(/left to answer$/)).toBeVisible()
 

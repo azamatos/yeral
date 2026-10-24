@@ -47,7 +47,8 @@ Use `useFmt()` (`@yeral/i18n`). Never `toLocaleString` or raw `Intl` in componen
 | distance | `1,2 km`, under 1 km `850 m` |
 | duration | `60 min`, `1 sag 30 min` |
 | date | `Penşenbe, 15 oktýabr` (weekday capitalised, month lower-case), short `15 okt.`; relative `Şu gün`, `Ertir` |
-| weekdays short | Du Si Ça Pe An Şe Ýe (Monday first) |
+| weekdays short | Du Si Ça Pe An Şe Ýe (Monday first): only week headers and date strips («An 16») |
+| date in running text | `Ann, 16 okt.` (`shortWeekdayDate`, three-letter weekday); `Şu gün` / `Ertir` / `Ann, 16 okt.` (`relativeShortDate`) |
 | time | 24-hour `14:30` |
 | phone | `+993 65 12 34 56` |
 
