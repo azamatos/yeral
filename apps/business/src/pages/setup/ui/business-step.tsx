@@ -3,12 +3,9 @@ import { Avatar } from '@yeral/ui/avatar'
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { useTranslations } from 'use-intl'
+import { BUSINESS_NAME_MAX, pageLink } from '@/shared/config'
 import { CategoryPicker, type PickableCategory } from './category-picker'
-import { pageLink } from '@/shared/config'
 import { StepHeader } from './setup-frame'
-
-/** The business name's longest (design §28.5 text limits, the api's `setupStartSchema`). */
-export const BUSINESS_NAME_MAX = 80
 
 /**
  * Step 2, «About your business» (B-Onboarding `isBiz`, book B-03): the business name with its counter and the page

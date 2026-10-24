@@ -1,4 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SettingsPlaceholder } from '@/pages/settings'
+import { SettingsProfilePage } from '@/pages/settings-profile'
 
-export const Route = createFileRoute('/w/$slug/settings/profile')({ component: () => <SettingsPlaceholder section="profile" /> })
+export const Route = createFileRoute('/w/$slug/settings/profile')({ component: SettingsProfilePage })

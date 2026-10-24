@@ -106,6 +106,7 @@ export const businessProfileSchema = z
     hidden: z.object({ reason: z.string() }).nullable(),
   })
   .meta({ id: 'BusinessProfile' })
+export type BusinessProfile = z.infer<typeof businessProfileSchema>
 
 /** Change some of the profile; a new location is given whole. */
 export const businessProfileUpdateSchema = z
@@ -138,6 +139,7 @@ export const businessProfileUpdateSchema = z
   .partial()
   .strict()
   .meta({ id: 'BusinessProfileUpdate' })
+export type BusinessProfileUpdate = z.input<typeof businessProfileUpdateSchema>
 
 // ── The address search (B-04, B-37; ADR 0027) ──
 
