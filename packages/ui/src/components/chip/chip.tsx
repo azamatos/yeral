@@ -1,5 +1,5 @@
-import { Slot } from 'radix-ui'
-import type { ComponentProps } from 'react'
+import { RadioGroup, Slot } from 'radix-ui'
+import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
 /** Filter chip (DS `.chip`): 36 high pill; tint when on. Use `selected` for toggles (sets aria-pressed). */
@@ -18,5 +18,30 @@ export function Chip({ selected, asChild, className, ...props }: ComponentProps<
         className,
       )}
     />
+  )
+}
+
+/**
+ * One choice out of a few as chips (B-Services «Price»: Fixed · From · Free · Price at the place): a radio group, the
+ * chosen chip in the tint; arrow keys move between them. Name it with `aria-labelledby` or `aria-label`.
+ */
+export function ChipRadioGroup({
+  options,
+  className,
+  ...props
+}: Omit<ComponentProps<typeof RadioGroup.Root>, 'children'> & { options: readonly { value: string; label: ReactNode }[] }) {
+  return (
+    <RadioGroup.Root orientation="horizontal" {...props} className={cn('flex flex-wrap gap-2', className)}>
+      {options.map((o) => (
+        <RadioGroup.Item key={o.value} value={o.value} asChild>
+          <Chip
+            aria-pressed={undefined}
+            className="data-[state=checked]:border-a-line data-[state=checked]:bg-a-50 data-[state=checked]:text-a-600 data-[state=checked]:hover:bg-a-100"
+          >
+            {o.label}
+          </Chip>
+        </RadioGroup.Item>
+      ))}
+    </RadioGroup.Root>
   )
 }

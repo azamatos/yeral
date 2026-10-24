@@ -1,1 +1,1 @@
-export { Chip } from './chip'
+export { Chip, ChipRadioGroup } from './chip'
