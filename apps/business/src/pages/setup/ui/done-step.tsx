@@ -5,7 +5,6 @@ import type { Setup } from '@yeral/contract/setup'
 import { isApiError } from '@yeral/sdk'
 import { Callout } from '@yeral/ui/callout'
 import { Checklist, type ChecklistItem } from '@yeral/ui/checklist'
-import { CopyField } from '@yeral/ui/copy-field'
 import { QrBlock } from '@yeral/ui/qr-block'
 import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
@@ -16,7 +15,8 @@ import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { pageLink } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
-import { firstMissing, hasAbout, qualityOf, QUALITY_ITEMS, shareLinks, type QualityItem } from '../model/done'
+import { PageLinkField } from '@/shared/ui'
+import { firstMissing, hasAbout, qualityOf, QUALITY_ITEMS, type QualityItem } from '../model/done'
 import { StepHeader, type StepAction } from './setup-frame'
 
 const QUALITY_ICON: Record<QualityItem, ReactNode> = { logo: <ImagePlus />, photos: <Image />, about: <FileText /> }
@@ -106,7 +106,6 @@ export function useDoneStep(
       ? t('addressLine', { line: draft.address.line, city })
       : city
   const link = pageLink(draft.slug)
-  const share = shareLinks(link.url)
 
   const items: ChecklistItem[] = QUALITY_ITEMS.map((item) => ({
     id: item,
@@ -165,19 +164,7 @@ export function useDoneStep(
         <div className="flex min-w-0 flex-col gap-3">
           <span className="text-label text-n-500 uppercase">{t('linkLabel')}</span>
           <span className="text-body font-semibold text-n-900">{t('linkReady')}</span>
-          <CopyField
-            value={link.url}
-            display={link.display}
-            label={t('pageLink')}
-            copy={{ copy: t('copy'), copied: t('copied') }}
-            share={{
-              label: t('share'),
-              targets: [
-                { id: 'whatsapp', label: t('whatsapp'), href: share.whatsapp },
-                { id: 'telegram', label: t('telegram'), href: share.telegram },
-              ],
-            }}
-          />
+          <PageLinkField slug={draft.slug} label={t('pageLink')} />
           <QrBlock
             variant="compact"
             value={link.url}

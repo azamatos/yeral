@@ -1,5 +1,5 @@
 /**
- * The done step's rules (B-Onboarding `isDone`, book B-06): the quality checklist's states and the page's share links.
+ * The done step's rules (B-Onboarding `isDone`, book B-06): the quality checklist's states.
  */
 import { SETUP_NEEDS, type SetupNeed } from '@yeral/domain/setup'
 
@@ -24,15 +24,6 @@ export function qualityOf(page: { logo: boolean; photos: number; about: boolean 
 
 /** Whether any language's «About» says something. */
 export const hasAbout = (about: Partial<Record<string, string>>) => Object.values(about).some((text) => !!text?.trim())
-
-/**
- * The page's share links (B-Settings Link and QR's Share menu: WhatsApp · Telegram; IMO has no share address, so it
- * waits for the phone's own share sheet).
- */
-export function shareLinks(url: string) {
-  const link = encodeURIComponent(url)
-  return { whatsapp: `https://wa.me/?text=${link}`, telegram: `https://t.me/share/url?url=${link}` }
-}
 
 /** The step to fix first when finishing finds something missing (`setup_incomplete`), in the wizard's order. */
 export function firstMissing(missing: readonly SetupNeed[]): SetupNeed | null {

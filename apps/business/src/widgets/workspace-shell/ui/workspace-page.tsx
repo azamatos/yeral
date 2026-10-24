@@ -9,15 +9,21 @@ import { ShellSwitcher } from './shell-switcher'
 /**
  * A workspace page's frame (B-Shell): the top bar (its title and one primary action; on the phone's calendar the
  * workspace switcher strip, `switcherOnPhone`), the notes at the top of the content, and the content padded 32 (24 on a
- * tablet, 16 on a phone). The tab title is "Calendar · Glow Studio".
+ * tablet, 16 on a phone). The tab title is "Calendar · Glow Studio"; `tabTitle` names a part of the page there instead
+ * (["Hours", "Settings"] → "Hours · Settings · Glow Studio"). The title takes the focus when the address changes, or
+ * when `focusKey` does: a page whose parts take the focus themselves (Settings' sections) gives one that stays.
  */
 export function WorkspacePage({
   title,
+  tabTitle,
+  focusKey,
   actions,
   switcherOnPhone = false,
   children,
 }: {
   title: string
+  tabTitle?: string[]
+  focusKey?: string
   actions?: ReactNode
   switcherOnPhone?: boolean
   children?: ReactNode
@@ -25,13 +31,13 @@ export function WorkspacePage({
   const { workspace } = useWorkspace()
   // a new page (a menu item, another workspace): its title takes the focus, as the sign-in's steps do
   const pathname = useLocation({ select: (l) => l.pathname })
-  usePageTitle(title, workspace?.name)
+  usePageTitle(...(tabTitle ?? [title]), workspace?.name)
   return (
     <>
       <AppTopBar
         title={title}
         actions={actions}
-        focusKey={pathname}
+        focusKey={focusKey ?? pathname}
         leading={switcherOnPhone ? <ShellSwitcher variant="strip" /> : undefined}
       />
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:p-8">

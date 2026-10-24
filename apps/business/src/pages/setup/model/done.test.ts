@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { firstMissing, hasAbout, qualityOf, shareLinks } from './done'
+import { firstMissing, hasAbout, qualityOf } from './done'
 
 describe('the done step', () => {
   it('rings the first item not done and leaves the rest to do', () => {
@@ -14,12 +14,6 @@ describe('the done step', () => {
     expect(hasAbout({})).toBe(false)
     expect(hasAbout({ en: '  ' })).toBe(false)
     expect(hasAbout({ en: '', tk: 'Gözellik salony' })).toBe(true)
-  })
-
-  it('shares the full address to WhatsApp and Telegram', () => {
-    const links = shareLinks('https://yeral.app/b/glow-studio')
-    expect(links.whatsapp).toBe('https://wa.me/?text=https%3A%2F%2Fyeral.app%2Fb%2Fglow-studio')
-    expect(links.telegram).toBe('https://t.me/share/url?url=https%3A%2F%2Fyeral.app%2Fb%2Fglow-studio')
   })
 
   it('sends a finish that found gaps to the earliest step missing', () => {
