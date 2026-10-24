@@ -213,6 +213,33 @@
     "call": "Call",
     "write": "Write on Telegram"
   },
+  "hours": {
+    "same": "Same hours Monday to Friday",
+    "sameHint": "Pick the time once for Monday–Friday",
+    "columns": {
+      "day": "Day",
+      "open": "Open",
+      "hours": "Hours"
+    },
+    "sameAs": "Same as {day}",
+    "openLabel": "{day}: open",
+    "opens": "{day}: opens",
+    "closes": "{day}: closes",
+    "nextDay": "until {time}, next day",
+    "break": "Break",
+    "addBreak": "{day}: add a break",
+    "breakStarts": "{day}: break starts",
+    "breakEnds": "{day}: break ends",
+    "removeBreak": "{day}: remove the break",
+    "closed": "Closed",
+    "problems": {
+      "sameTime": "Opening and closing can’t be at the same time.",
+      "intoNextDay": "Closes after {next} opens. Pick an earlier time.",
+      "breakOrder": "The break must end after it starts.",
+      "breakOutside": "The break must be within your hours."
+    },
+    "fixOn": "Change it on {day}."
+  },
   "setup": {
     "title": "Set up your business",
     "titleMore": "Create a business",
@@ -305,31 +332,6 @@
     "hours": {
       "title": "Your hours",
       "lead": "Clients can book only within these hours. You’ll add staff shifts later.",
-      "same": "Same hours Monday to Friday",
-      "sameHint": "Pick the time once for Monday–Friday",
-      "columns": {
-        "day": "Day",
-        "open": "Open",
-        "hours": "Hours"
-      },
-      "sameAs": "Same as {day}",
-      "openLabel": "{day}: open",
-      "opens": "{day}: opens",
-      "closes": "{day}: closes",
-      "nextDay": "until {time}, next day",
-      "break": "Break",
-      "addBreak": "{day}: add a break",
-      "breakStarts": "{day}: break starts",
-      "breakEnds": "{day}: break ends",
-      "removeBreak": "{day}: remove the break",
-      "closed": "Closed",
-      "problems": {
-        "sameTime": "Opening and closing can’t be at the same time.",
-        "intoNextDay": "Closes after {next} opens. Pick an earlier time.",
-        "breakOrder": "The break must end after it starts.",
-        "breakOutside": "The break must be within your hours."
-      },
-      "fixOn": "Change it on {day}.",
       "hintNoDay": "At least one day must be open.",
       "hintCheck": "Check the times.",
       "note": "A day can close after midnight: 18:00–02:00 means open until 02:00 the next day. The part after midnight must end before the next day opens. You can add special days (holidays, closures) later in Settings.",

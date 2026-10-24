@@ -1,6 +1,7 @@
 /**
- * The hours step's week (B-Onboarding step 4, design §28 hours, book B-04): seven days Monday first, each open or
- * closed with its hours and one break, and «Same hours Monday to Friday»: the weekdays follow the first open one.
+ * The business's week as the hours editor holds it (the setup wizard's step 4, B-Onboarding; Settings → Hours,
+ * B-Settings; design §28 hours, book B-04, B-39): seven days Monday first, each open or closed with its hours and one
+ * break, and «Same hours Monday to Friday» (the wizard's): the weekdays follow the first open one.
  */
 import type { WeekdayHours } from '@yeral/contract/settings'
 import { DAY_MINUTES, dayHoursProblem, type DayHoursProblem, type WeekHours } from '@yeral/domain/hours'

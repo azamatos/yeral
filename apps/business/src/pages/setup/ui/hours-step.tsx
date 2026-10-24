@@ -1,63 +1,24 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { HOURS_STEP } from '@yeral/contract/settings'
-import type { DayHoursProblem } from '@yeral/domain/hours'
 import { hm } from '@yeral/domain/time'
 import { Spinner } from '@yeral/ui/spinner'
-import { Switch } from '@yeral/ui/switch'
-import { textLink } from '@yeral/ui/text-link'
-import { TimeRangeField } from '@yeral/ui/time-range'
 import { toast } from '@yeral/ui/toast'
-import { Plus } from 'lucide-react'
-import { useId, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
-import { useSdk } from '@/shared/api'
-import { useErrorText, type Messages } from '@/shared/i18n'
 import {
   closingClock,
-  dayProblems,
   editorWeek,
   effectiveDays,
-  follows,
   hoursRuns,
-  leadDay,
+  SameHoursSwitch,
   sameWeek,
+  WeekHoursRows,
   weekOf,
   weekValid,
-  type EditorDay,
   type EditorWeek,
-} from '../model/hours'
+} from '@/features/edit-hours'
+import { useSdk } from '@/shared/api'
+import { useDayName, useErrorText } from '@/shared/i18n'
 import { StepHeader, type StepAction } from './setup-frame'
-
-type Weekday = keyof Messages['fmt']['weekdays']
-
-/** A weekday's name, Monday first: «Monday», or «Mo» short (the step list's summary). */
-export function useDayName() {
-  const t = useTranslations('fmt')
-  return (day: number, short = false) => {
-    const key = String(day) as Weekday
-    return short ? t(`weekdaysShort.${key}`) : t(`weekdays.${key}`)
-  }
-}
-
-const PROBLEM = {
-  'same-time': 'sameTime',
-  'into-next-day': 'intoNextDay',
-  'break-order': 'breakOrder',
-  'break-outside': 'breakOutside',
-} as const satisfies Record<DayHoursProblem, string>
-
-/** A break needs a day of at least three steps, so time is left on both sides of it. */
-const BREAK_ROOM = 3 * HOURS_STEP
-
-/**
- * A new break's place: 13:00–14:00 (B-Onboarding) when it leaves time on both sides, else one step in the middle of the
- * day (a night bar's).
- */
-function newBreak({ open, close }: EditorDay['hours']) {
-  if (open < 780 && close > 840) return { start: 780, end: 840 }
-  const start = open + Math.floor((close - open) / (2 * HOURS_STEP)) * HOURS_STEP
-  return { start, end: start + HOURS_STEP }
-}
 
 /**
  * Step 4, «Your hours» (B-Onboarding `isHours`, design §28 hours, book B-04), as a hook like the address step: the
@@ -131,109 +92,16 @@ export function useHoursStep(slug: string, on: boolean, known: boolean): { body:
 }
 
 /**
- * The step's content: «Same hours Monday to Friday» (the weekdays follow the first open one, Monday as drawn, each
- * keeping its switch), then a row per weekday with its switch, its hours (a close before the open is the next day's)
- * and one break, and the note on hours past midnight and special days. A day's problem shows under it; the footer's
- * hint says what holds Continue.
+ * The step's content: «Same hours Monday to Friday», then a row per weekday (the hours editor, `features/edit-hours`),
+ * and the note on hours past midnight and special days. The footer's hint says what holds Continue.
  */
 function HoursStep({ week, onWeek }: { week: EditorWeek; onWeek: (week: EditorWeek) => void }) {
   const t = useTranslations('setup.hours')
-  const dayName = useDayName()
-  const sameId = useId()
-  const days = effectiveDays(week)
-  const problems = dayProblems(weekOf(days))
-  const lead = dayName(leadDay(week.days))
-  const update = (i: number, patch: Partial<EditorDay>) => onWeek({ ...week, days: days.map((d, j) => (j === i ? { ...d, ...patch } : d)) })
-  // turning «Same hours» off keeps what Tuesday to Friday showed
-  const flipSame = (same: boolean) => onWeek(same ? { ...week, same } : { days, same })
   return (
     <section className="flex flex-col gap-8 max-sm:gap-7">
       <StepHeader step="hours" title={t('title')} lead={t('lead')} />
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span id={sameId} className="text-body font-semibold">
-            {t('same')}
-          </span>
-          <span className="text-dense text-n-600">{t('sameHint')}</span>
-        </div>
-        <Switch checked={week.same} onCheckedChange={flipSame} aria-labelledby={sameId} />
-      </div>
-      <div className="flex flex-col">
-        <div aria-hidden className="grid grid-cols-[120px_52px_minmax(0,1fr)] gap-x-3 pb-2 max-sm:hidden">
-          {(['day', 'open', 'hours'] as const).map((k) => (
-            <span key={k} className="text-label text-n-500 uppercase">
-              {t(`columns.${k}`)}
-            </span>
-          ))}
-        </div>
-        {days.map((d, i) => {
-          const name = dayName(i)
-          const mirror = follows(week, i)
-          const problem = problems[i]
-          // a day that follows another is fixed on that one
-          const error = problem
-            ? [t(`problems.${PROBLEM[problem]}`, { next: dayName((i + 1) % 7) }), mirror ? t('fixOn', { day: lead }) : ''].join(' ').trim()
-            : undefined
-          return (
-            <div
-              key={i}
-              role="group"
-              aria-labelledby={`${sameId}-day-${i}`}
-              className="grid min-h-16 grid-cols-[120px_52px_minmax(0,1fr)] items-center gap-x-3 gap-y-2 border-t border-n-200 py-2.5 max-sm:grid-cols-[minmax(0,1fr)_52px]"
-            >
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <span id={`${sameId}-day-${i}`} className="text-body leading-5 font-semibold">
-                  {name}
-                </span>
-                {mirror && <span className="text-dense text-n-600">{t('sameAs', { day: lead })}</span>}
-              </div>
-              <Switch checked={d.open} onCheckedChange={(open) => update(i, { open })} aria-label={t('openLabel', { day: name })} />
-              <div className="min-w-0 max-sm:col-span-full">
-                {d.open ? (
-                  <TimeRangeField
-                    value={d.hours}
-                    onChange={(hours) => update(i, { hours })}
-                    fromLabel={t('opens', { day: name })}
-                    toLabel={t('closes', { day: name })}
-                    nextDay={(time) => t('nextDay', { time })}
-                    step={HOURS_STEP}
-                    disabled={mirror}
-                    error={error}
-                  >
-                    {!d.break && !mirror && d.hours.close - d.hours.open >= BREAK_ROOM && (
-                      <button
-                        type="button"
-                        aria-label={t('addBreak', { day: name })}
-                        onClick={() => update(i, { break: newBreak(d.hours) })}
-                        className={`${textLink} ml-2 inline-flex min-h-8 items-center gap-1.5 text-small`}
-                      >
-                        <Plus aria-hidden strokeWidth={2} className="size-4" />
-                        {t('break')}
-                      </button>
-                    )}
-                  </TimeRangeField>
-                ) : (
-                  <span className="text-body text-n-500">{t('closed')}</span>
-                )}
-              </div>
-              {d.open && d.break && (
-                <TimeRangeField
-                  className="col-start-3 max-sm:col-span-full max-sm:col-start-1"
-                  value={{ open: d.break.start, close: d.break.end }}
-                  onChange={({ open, close }) => update(i, { break: { start: open, end: close } })}
-                  dayStart={d.hours.open}
-                  label={t('break')}
-                  fromLabel={t('breakStarts', { day: name })}
-                  toLabel={t('breakEnds', { day: name })}
-                  step={HOURS_STEP}
-                  disabled={mirror}
-                  remove={mirror ? undefined : { label: t('removeBreak', { day: name }), onClick: () => update(i, { break: null }) }}
-                />
-              )}
-            </div>
-          )
-        })}
-      </div>
+      <SameHoursSwitch week={week} onWeek={onWeek} />
+      <WeekHoursRows week={week} onWeek={onWeek} />
       <p className="m-0 text-dense text-n-600">{t('note')}</p>
     </section>
   )
