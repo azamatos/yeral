@@ -196,7 +196,8 @@ export const DeleteOwner: Story = {
     await userEvent.click(await canvas.findByRole('button', { name: 'Delete account' }))
     const dialog = within(await body.findByRole('dialog', { name: 'Delete your account?' }))
     await userEvent.click(dialog.getByRole('button', { name: 'Delete account' }))
-    await expect(await dialog.findByText(/You own a business on Ýeral/)).toBeVisible()
+    const refusal = await dialog.findByText(/You own a business on Ýeral/)
+    await waitFor(() => expect(refusal).toBeVisible())
     await expect(dialog.getByRole('button', { name: 'Delete account' })).toBeDisabled()
     await userEvent.keyboard('{Escape}')
   },
