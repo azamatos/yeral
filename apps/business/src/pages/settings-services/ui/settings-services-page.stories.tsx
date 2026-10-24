@@ -211,8 +211,17 @@ export const OnlineSwitch: Story = {
   },
 }
 
-/** Under 1024: no «Who does it» column. */
-export const Laptop: Story = { globals: { viewport: { value: 'md' } } }
+/**
+ * At 1024 the sidebar and the settings menu leave the pane narrow: the columns follow the pane, so each service has
+ * its line under the name, and nothing spills sideways.
+ */
+export const Laptop: Story = {
+  globals: { viewport: { value: 'md' } },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('60 min · 60 TMT · Jeren')).toBeVisible()
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+  },
+}
 
 /** The phone: each service's name with «60 min · 80 TMT · Aýna» under it, and the switch. */
 export const Phone: Story = {
