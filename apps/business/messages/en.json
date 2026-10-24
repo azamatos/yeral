@@ -559,6 +559,40 @@
       "downloadPng": "Download PNG",
       "downloadSvg": "Download SVG",
       "downloaded": "QR code downloaded · {format}"
+    },
+    "permissions": {
+      "lead": "Permissions work by access level — give each person a level in <team>Team</team>.",
+      "table": "Permissions by access level",
+      "what": "What",
+      "yes": "Yes",
+      "no": "No",
+      "rows": {
+        "calendar": "See everyone’s calendar",
+        "answer": "Answer requests",
+        "bookings": "Add, move and cancel bookings; block time",
+        "report": "Report clients (no-show, late, rude)",
+        "clients": "See clients and their phone numbers",
+        "clientsManage": "Add and delete clients, “Phone only” switch",
+        "revenue": "See revenue (visit totals, average check)",
+        "reviews": "Read reviews",
+        "reviewsReply": "Reply to and report reviews",
+        "services": "Change services and prices",
+        "settings": "Change business settings (profile, rules, hours, link and QR)",
+        "shifts": "Shifts and time off",
+        "team": "Manage the team (invite, remove, access level, “Uses the app”)"
+      },
+      "cells": {
+        "own": "Own",
+        "ownColumn": "Own column (others’ time shows as “Busy”)",
+        "ownAnswers": "Own — per “Who answers requests?”",
+        "ownBookings": "Own bookings",
+        "ownClients": "Own clients (with a booking with them)",
+        "ownEarnings": "Own earnings only",
+        "aboutThem": "About them",
+        "viewOnly": "View only",
+        "seeOwn": "See own"
+      },
+      "noApp": "Specialists who don’t use the app never sign in, so the table doesn’t apply to them."
     }
   }
 }
