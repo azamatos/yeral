@@ -527,7 +527,6 @@
     "telegram": "Telegram"
   },
   "settings": {
-    "title": "Settings",
     "nav": "Settings sections",
     "sections": {
       "profile": "Business profile",
@@ -559,7 +558,7 @@
       "qrCaption": "PNG for printing, SVG for designers.",
       "downloadPng": "Download PNG",
       "downloadSvg": "Download SVG",
-      "downloaded": "QR code downloaded ({format})"
+      "downloaded": "QR code downloaded · {format}"
     }
   }
 }

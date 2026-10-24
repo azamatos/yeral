@@ -107,11 +107,16 @@ export const Live: Story = {
   },
 }
 
-/** Another section from the menu: it opens in the frame (its header until slice 2 builds it), the menu stays. */
+/**
+ * Another section from the menu: it opens in the frame (its header until slice 2 builds it), the menu stays, and the
+ * section's name takes the focus (not «Settings» again).
+ */
 export const OtherSection: Story = {
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('link', { name: 'Hours' }))
-    await expect(await canvas.findByRole('heading', { level: 2, name: 'Hours' })).toBeVisible()
+    const title = await canvas.findByRole('heading', { level: 2, name: 'Hours' })
+    await expect(title).toBeVisible()
+    await waitFor(() => expect(title).toHaveFocus())
     await expect(canvas.getByRole('link', { name: 'Hours' })).toHaveAttribute('aria-current', 'page')
     await expect(canvas.getByRole('link', { name: 'Link and QR' })).not.toHaveAttribute('aria-current')
   },

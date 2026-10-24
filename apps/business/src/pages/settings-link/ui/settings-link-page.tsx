@@ -71,13 +71,13 @@ function PageState({ status, reason, slug }: { status: Workspace['status']; reas
   let note: ReactNode = null
   if (status === 'live')
     note = (
-      <Callout tone="success" icon={<CircleCheck />} title={s('live')} live={false} role="status">
+      <Callout tone="success" icon={<CircleCheck />} title={s('live')} role="status">
         <span className="text-n-900">{s('liveText')}</span>
       </Callout>
     )
   else if (status === 'in_review')
     note = (
-      <Callout tone="warning" icon={<Clock />} title={s('inReview')} live={false} role="status">
+      <Callout tone="warning" icon={<Clock />} title={s('inReview')} role="status">
         <span className="text-n-900">{s('inReviewText')}</span>
       </Callout>
     )
@@ -87,7 +87,6 @@ function PageState({ status, reason, slug }: { status: Workspace['status']; reas
         tone="danger"
         icon={<CircleAlert />}
         title={s('notApproved')}
-        live={false}
         role="status"
         actions={
           <Button asChild size="s">
@@ -105,8 +104,8 @@ function PageState({ status, reason, slug }: { status: Workspace['status']; reas
       <Callout
         tone="neutral"
         icon={<EyeOff />}
+        className="border-n-200"
         title={s('hidden', { brand: t('common.brand') })}
-        live={false}
         role="status"
         actions={
           <ContactYeral

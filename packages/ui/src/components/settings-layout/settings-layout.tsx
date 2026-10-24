@@ -1,5 +1,5 @@
 import { Slot } from 'radix-ui'
-import type { ComponentProps, ReactNode } from 'react'
+import type { ComponentProps, ReactNode, Ref } from 'react'
 import { cn } from '../../lib/cn'
 
 /**
@@ -19,16 +19,17 @@ export function SettingsLayout({ nav, className, children, ...props }: Component
 }
 
 /**
- * The settings menu (`.snav`): 240, items 2 apart; under 1024 a chip row 8 apart that scrolls sideways and reaches the
- * page's edges (it undoes the page's 24 / 16 padding and puts it back inside). `aria-label` names it: «Settings sections».
+ * The settings menu (`.snav`): 240, items 2 apart; under 1024 a chip row 8 apart that scrolls sideways (4 above and
+ * below, so a chip's focus ring isn't cut). On the board the row reaches the page's edges: the page gives the classes
+ * that undo its own padding (`max-md:-mx-6 max-md:px-6`). `aria-label` names it: «Settings sections».
  */
 export function SettingsNav({ className, ...props }: ComponentProps<'nav'>) {
   return (
     <nav
       {...props}
       className={cn(
-        'flex flex-none gap-2 overflow-x-auto pb-1 max-md:-mx-6 max-md:px-6 max-sm:-mx-4 max-sm:px-4',
-        'md:sticky md:top-6 md:w-60 md:flex-col md:gap-0.5 md:overflow-visible md:pb-0',
+        'flex flex-none gap-2 overflow-x-auto py-1',
+        'md:sticky md:top-6 md:w-60 md:flex-col md:gap-0.5 md:overflow-visible md:py-0',
         className,
       )}
     />
@@ -68,24 +69,34 @@ export function SettingsNavItem({
 
 /** The open section (`.pane`): up to 720 wide, at least 520 before something beside it wraps under it. */
 export function SettingsPane({ className, ...props }: ComponentProps<'div'>) {
-  return <div {...props} className={cn('flex min-w-0 flex-[999_1_520px] flex-col md:max-w-text', className)} />
+  return <div {...props} className={cn('flex max-w-text min-w-0 flex-[999_1_520px] flex-col', className)} />
 }
 
 /**
  * The section's header (`.phd`): its name (an h2, 22/28 600: the top bar's «Settings» is the page's h1) and one line
  * under it (14/20), with `action` on the right (a link to the public page) that wraps under them when narrow.
+ * `titleRef` makes the name focusable from code (`tabIndex -1`), for the page to move focus there when the section
+ * changes.
  */
 export function SettingsPaneHeader({
   title,
   lead,
   action,
+  titleRef,
   className,
   ...props
-}: Omit<ComponentProps<'div'>, 'title' | 'children'> & { title: ReactNode; lead?: ReactNode; action?: ReactNode }) {
+}: Omit<ComponentProps<'div'>, 'title' | 'children'> & {
+  title: ReactNode
+  lead?: ReactNode
+  action?: ReactNode
+  titleRef?: Ref<HTMLHeadingElement>
+}) {
   return (
     <div {...props} className={cn('flex flex-wrap items-start justify-between gap-x-4 gap-y-3 pb-6', className)}>
       <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-1">
-        <h2 className="m-0 text-h3 text-n-900">{title}</h2>
+        <h2 ref={titleRef} tabIndex={titleRef ? -1 : undefined} className="m-0 text-h3 text-n-900 focus:outline-none">
+          {title}
+        </h2>
         {lead ? <p className="m-0 text-small text-n-600">{lead}</p> : null}
       </div>
       {action}

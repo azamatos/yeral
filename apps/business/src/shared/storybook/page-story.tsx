@@ -54,7 +54,7 @@ export function PageStory({
       const layout = createRoute({ getParentRoute: () => parent, path, component })
       return layout.addChildren(
         Object.entries(children).map(([path, child]) =>
-          typeof child === 'function' ? createRoute({ getParentRoute: () => layout, path, component: child }) : nest(layout, path, child),
+          'children' in child ? nest(layout, path, child) : createRoute({ getParentRoute: () => layout, path, component: child }),
         ),
       )
     }
