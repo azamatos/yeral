@@ -2,7 +2,7 @@
  * Settings → Business profile — B-Settings `isProfile` (v0.6 round 3, English), in the app's shell and Settings' frame
  * over a `fetch` that answers like the api: the main details with the logo, the About, the phone and the amenities,
  * «Pause online booking» and, for the owner, «Close this workspace»; the save bar while there are changes; the Ýeral
- * team's reason when the page was sent back. The photos and the address come with their own pieces.
+ * team's reason when the page was sent back; the photos; the address with its map.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'

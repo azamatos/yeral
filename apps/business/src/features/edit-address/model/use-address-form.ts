@@ -61,7 +61,9 @@ export function useAddressForm(slug: string, on: boolean): AddressFormState | nu
   const current = state?.slug === slug ? state : null
   const loaded = profile.data ? formFrom(profile.data) : null
   const edited = !!current && addressEdited(current.form, current.stored)
-  if (on && loaded && (!current || (!edited && !update.isPending && addressEdited(loaded, current.stored)))) {
+  // typed but not picked yet is an edit too: a reload doesn't replace it
+  const touched = edited || (!!current && current.form.query !== current.stored.query)
+  if (on && loaded && (!current || (!touched && !update.isPending && addressEdited(loaded, current.stored)))) {
     setState({ slug, form: loaded, stored: loaded, focus: loaded.pin })
   }
   const form = current?.form
@@ -77,7 +79,8 @@ export function useAddressForm(slug: string, on: boolean): AddressFormState | nu
   })
 
   // a failed refetch keeps what's on screen; only a first load that failed is a failure
-  if (on && !form && (profile.isError || cities.isError)) throw profile.error ?? cities.error ?? new Error('address data missing')
+  if (on && ((!form && profile.isError) || (!cities.data && cities.isError)))
+    throw profile.error ?? cities.error ?? new Error('address data missing')
   if (!on || !current || !form || !cities.data) return null
 
   const save = async () => {

@@ -68,7 +68,7 @@ function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; d
     </a>
   )
 
-  if (!profile || !address)
+  if (!profile)
     return (
       <SettingsPage section="profile" lead={lead} action={action}>
         <div className="flex justify-center py-16">
@@ -78,13 +78,16 @@ function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; d
     )
 
   // one save bar for the details and the address, each sent to the profile only when it changed
-  const dirty = profile.dirty || address.edited
-  const valid = profile.valid && (!address.edited || !address.problem)
-  const saving = profile.saving || address.saving
+  const addressEdited = !!address?.edited
+  const dirty = profile.dirty || addressEdited
+  const valid = profile.valid && (!addressEdited || !address?.problem)
+  const saving = profile.saving || !!address?.saving
+  // every field waits while any part of the save runs, so nothing typed meanwhile is left out of it
+  const details = { ...profile, saving }
   const save = async () => {
     if (profile.dirty && !(await profile.save())) return
     try {
-      if (address.edited) await address.save()
+      if (address?.edited) await address.save()
       toast(t('save.saved'))
     } catch (error) {
       toast(errorText(error))
@@ -92,25 +95,25 @@ function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; d
   }
   const discard = () => {
     profile.discard()
-    address.discard()
+    address?.discard()
   }
 
   return (
     <SettingsPage section="profile" lead={lead} action={action}>
       {profile.profile.verification === 'rejected' && (
-        <SentBack slug={slug} reason={profile.profile.verificationReason} owner={owner} unsaved={profile.dirty} />
+        <SentBack slug={slug} reason={profile.profile.verificationReason} owner={owner} unsaved={dirty} />
       )}
       <SettingsSection aria-labelledby={`${slug}-main`}>
         <SettingsSectionTitle id={`${slug}-main`}>{t('profile.main')}</SettingsSectionTitle>
         <LogoRow slug={slug} profile={profile.profile} />
-        <NameRow profile={profile} />
-        <CategoryRow profile={profile} />
+        <NameRow profile={details} />
+        <CategoryRow profile={details} />
       </SettingsSection>
-      <AboutSection profile={profile} />
+      <AboutSection profile={details} />
       <PhotosSection slug={slug} />
-      <ContactSection profile={profile} />
-      <AddressSection address={address} disabled={saving} />
-      <PauseSection profile={profile} owner={owner && !demo} />
+      <ContactSection profile={details} />
+      <AddressSection address={address} disabled={saving} demo={demo} />
+      <PauseSection profile={details} owner={owner && !demo} />
       {dirty && (
         <SaveBar
           message={t('save.question')}
@@ -134,28 +137,42 @@ function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; d
  * The address (B-Settings «Address»): the wizard's fields (`features/edit-address`), «Moved? Change the address here…»
  * and, for a second place at the same time, «Create a business» (a workspace of its own).
  */
-function AddressSection({ address, disabled }: { address: AddressFormState; disabled: boolean }) {
+function AddressSection({ address, disabled, demo }: { address: AddressFormState | null; disabled: boolean; demo: boolean }) {
   const t = useTranslations('settings.profile.address')
   const brand = useTranslations('common')('brand')
+  const pick = useTranslations('setup.address')('hintPick')
   const titleId = useId()
   return (
     <SettingsSection aria-labelledby={titleId}>
       <SettingsSectionTitle id={titleId} caption={t('caption')}>
         {t('title')}
       </SettingsSectionTitle>
-      <AddressFields address={address} disabled={disabled} />
+      {address ? (
+        <>
+          <AddressFields address={address} disabled={disabled} />
+          {/* Save waits for an address picked from the list: say so here, where it's chosen */}
+          {address.edited && address.problem === 'pick' && <FieldMessage status="error">{pick}</FieldMessage>}
+        </>
+      ) : (
+        <div className="flex justify-center py-8">
+          <Spinner />
+        </div>
+      )}
       <Callout tone="neutral" size="s" icon={<Info aria-hidden />} live={false}>
         {t.rich('moved', { brand, b: (words) => <b>{words}</b> })}
       </Callout>
-      <p className="m-0 text-dense text-n-600">
-        {t.rich('another', {
-          link: (words) => (
-            <Link to="/setup/$step" params={{ step: 'business' }} className={textLink}>
-              {words}
-            </Link>
-          ),
-        })}
-      </p>
+      {/* the demo workspace can't start a business of its own */}
+      {!demo && (
+        <p className="m-0 text-dense text-n-600">
+          {t.rich('another', {
+            link: (words) => (
+              <Link to="/setup/$step" params={{ step: 'business' }} className={textLink}>
+                {words}
+              </Link>
+            ),
+          })}
+        </p>
+      )}
     </SettingsSection>
   )
 }

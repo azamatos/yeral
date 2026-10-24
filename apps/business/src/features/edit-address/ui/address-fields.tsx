@@ -75,7 +75,8 @@ export function AddressFields({ address, disabled = false }: { address: AddressF
           <Field
             label={t('address')}
             error={problem === 'long' && t('tooLong', { max: ADDRESS_MAX })}
-            counter={counter(typed.length, ADDRESS_MAX)}
+            // a picked address keeps its street within the limit; its line (a search result) may be longer
+            counter={counter(form.picked ? form.picked.street.length : typed.length, ADDRESS_MAX)}
             disabled={disabled}
           >
             <ComboboxInput

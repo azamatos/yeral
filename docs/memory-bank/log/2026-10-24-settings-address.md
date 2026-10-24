@@ -12,3 +12,11 @@
   are each sent to `PATCH …/settings/profile` only when they changed, «Saved» after.
 - The board's Settings layout (city and street side by side, a 260 map, the home switch as a settings row) isn't
   copied: the wizard's layout is reused as the nearest drawn pattern (the coordinator's call: one form for both).
+- Review (one round), fixed: the page no longer waits for the cities (only the address section does) and a failed
+  first cities load is a failure, not a spinner forever; «Send again» waits for the address's unsaved edits too; every
+  field waits during either half of a save; no «Create a business» in the demo workspace; «Pick the address from the
+  list.» under the fields when that is what Save waits for; the counter counts a picked address's street (its line may
+  be 200); typed-not-picked text survives a reload. Left: one PATCH for the details and the address (two today, each
+  only when changed); the board's Settings layout and wording (the wizard's, `setup.address.*` words, reused); the
+  form's `save()` throws while its siblings return a boolean; the map pin stays interactive while a save runs
+  (MapFrame has no disabled state); more stories for the combined save.

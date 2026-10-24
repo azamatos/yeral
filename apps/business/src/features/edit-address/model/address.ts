@@ -1,5 +1,6 @@
 /**
- * The address step's form (B-Onboarding step 3, book B-04, design §28.5 text limits): the city, the address picked
+ * A business's address as a form (the wizard's step 3 and Business profile; B-Onboarding step 3, B-Settings
+ * «Address», book B-04, design §28.5 text limits): the city, the address picked
  * from the search (or typed, when the search has nothing, and pinned by hand), the pin, «I work from home», the floor
  * and the entrance note; what it sends to the profile (`PATCH /w/{slug}/settings/profile`).
  */
@@ -27,7 +28,7 @@ export type AddressForm = {
   entrance: string
 }
 
-/** What the step reads of the profile (`GET /w/{slug}/settings/profile`). */
+/** What the form reads of the profile (`GET /w/{slug}/settings/profile`). */
 type Profile = {
   location: LatLng & { cityId: string; address: string; street: string }
   floor: string | null
