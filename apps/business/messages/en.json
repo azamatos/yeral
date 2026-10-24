@@ -935,10 +935,9 @@
         "amountFrom": "Lowest price",
         "amountHidden": "Amount",
         "amountMissing": "Enter the price.",
-        "currency": "TMT",
         "preview": "Clients see: <b>{price}</b>",
-        "previewEmpty": "… TMT",
-        "previewFromEmpty": "from … TMT",
+        "previewEmpty": "… {currency}",
+        "previewFromEmpty": "from … {currency}",
         "hiddenNote": "Clients see “Price at the place”. The amount counts in your totals.",
         "who": "Who does it",
         "invitedTag": "Invited",
@@ -954,7 +953,9 @@
         "saving": "Saving",
         "added": "New service added: {name}",
         "saved": "{name} saved",
-        "delete": "Delete service"
+        "delete": "Delete service",
+        "descriptionLong": "Too long: up to {max, number} characters.",
+        "teamFailed": "The team didn’t load. Close and open the service again to choose who does it."
       },
       "addGroup": "Add group",
       "newGroupName": "New group name",

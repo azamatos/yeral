@@ -1,12 +1,13 @@
 import type { Menu, ServiceInput, ServiceUpdate } from '@yeral/contract/services'
 import type { Localized, PriceType } from '@yeral/domain/model'
 import { localized } from '@yeral/domain/model'
+import { MARKET } from '@yeral/domain/market'
 import { PRICE_MAX, SERVICE_MINUTES } from '@yeral/domain/services'
 
 type Service = Menu['groups'][number]['services'][number]
 type Locale = Parameters<typeof localized>[1]
 
-/** The drawer's name (B-Services cuts at 60; the api takes up to 80) and description. */
+/** The drawer's name (B-Services cuts at 60; the api takes up to 80) and description (the board's counter). */
 export const SERVICE_NAME_MAX = 60
 export const SERVICE_DESCRIPTION_MAX = 200
 export const PRICE_DIGITS = String(PRICE_MAX).length
@@ -22,8 +23,8 @@ export type BufferChoice = 'rule' | number
 
 /**
  * The service drawer's form (B-Services `.drw`): the name and description in the reader's language (one language at
- * the first release, §28.1; the others a business wrote stay), the group, length, own buffer, price, who does it and
- * online booking. `amount` is the typed figures, whole manats.
+ * the first release, §28.1; the market's other languages a business wrote stay), the group, length, own buffer, price,
+ * who does it and online booking. `amount` is the typed figures, whole manats.
  */
 export type ServiceForm = {
   name: string
@@ -60,19 +61,31 @@ export function formFrom(service: Service, locale: Locale): ServiceForm {
 export const needsAmount = (t: PriceType) => t === 'fixed' || t === 'from'
 export const takesAmount = (t: PriceType) => t !== 'free'
 
-/** What stops Save: «Enter the service name.», «Enter the price.» (a fixed or «from» price above 0). */
-export function formProblems(form: ServiceForm): { name?: true; amount?: true } {
-  const problems: { name?: true; amount?: true } = {}
+/**
+ * What stops Save: «Enter the service name.», «Enter the price.» (a fixed or «from» price above 0), and a description
+ * over its limit («Too long», design §28.5: over a limit blocks saving).
+ */
+export function formProblems(form: ServiceForm): { name?: true; amount?: true; description?: true } {
+  const problems: { name?: true; amount?: true; description?: true } = {}
   if (!form.name.trim()) problems.name = true
   if (needsAmount(form.priceType) && !(Number(form.amount) >= 1)) problems.amount = true
+  if (form.description.trim().length > SERVICE_DESCRIPTION_MAX) problems.description = true
   return problems
 }
 
 const amountOf = (form: ServiceForm) => (takesAmount(form.priceType) ? Number(form.amount) || 0 : 0)
 const bufferOf = (form: ServiceForm) => (form.buffer === 'rule' ? null : form.buffer)
 
-/** The text in the reader's language, the business's other languages kept. */
-const written = (before: Localized | null, locale: Locale, text: string): Localized => ({ ...before, [locale]: text.trim() })
+/**
+ * The text in the reader's language, with the market's other languages the business wrote kept. A starter service
+ * keeps every language it came with (tk, ru, en), and the api takes only the market's, so the rest stay out.
+ */
+function written(before: Localized | null, locale: Locale, text: string): Localized {
+  const kept = Object.fromEntries(
+    Object.entries(before ?? {}).filter(([l, v]) => l !== locale && v && (MARKET.languages as readonly string[]).includes(l)),
+  )
+  return { ...kept, [locale]: text.trim() }
+}
 
 /** `POST …/services`: a new service, last in its group. */
 export function addInput(form: ServiceForm, locale: Locale): ServiceInput {
@@ -90,15 +103,17 @@ export function addInput(form: ServiceForm, locale: Locale): ServiceInput {
   }
 }
 
-/** `PATCH …/services/{id}`: only what changed; nothing changed sends nothing. */
+/**
+ * `PATCH …/services/{id}`: only what changed; nothing changed sends nothing. A description emptied goes in every
+ * language (the one on screen may have been another language's, shown for want of the reader's).
+ */
 export function updateInput(form: ServiceForm, service: Service, locale: Locale): ServiceUpdate | null {
   const was = formFrom(service, locale)
   const update: ServiceUpdate = {}
   if (form.name.trim() !== was.name) update.name = written(service.name, locale, form.name)
   if (form.description.trim() !== was.description) {
     const description = form.description.trim()
-    const others = Object.fromEntries(Object.entries(service.description ?? {}).filter(([l, v]) => l !== locale && v))
-    update.description = description ? written(service.description, locale, description) : Object.keys(others).length ? others : null
+    update.description = description ? written(service.description, locale, description) : null
   }
   if (form.groupId !== service.groupId) update.groupId = form.groupId
   if (form.durationMin !== service.durationMin) update.durationMin = form.durationMin

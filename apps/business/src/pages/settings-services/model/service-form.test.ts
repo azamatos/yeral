@@ -51,12 +51,19 @@ describe('the service drawer', () => {
     expect(updateInput(form, service, 'en')).toBeNull()
     // the same people in another order is no change
     expect(updateInput({ ...form, staffIds: ['maral', 'aya'] }, service, 'en')).toBeNull()
+    // the market speaks English: a starter's other languages stay out of what's sent (the api refuses them)
     expect(updateInput({ ...form, name: 'Colouring', buffer: 'rule', priceType: 'hidden', amount: '' }, service, 'en')).toEqual({
-      name: { en: 'Colouring', tk: 'Saç boýamak' },
+      name: { en: 'Colouring' },
       bufferMin: null,
       priceType: 'hidden',
       priceAmount: 0,
     })
+  })
+
+  it('empties a description in every language, and stops a description over 200', () => {
+    const described = { ...service, description: { en: 'Roots and lengths' } }
+    expect(updateInput({ ...formFrom(described, 'en'), description: ' ' }, described, 'en')).toEqual({ description: null })
+    expect(formProblems({ ...newForm('hair'), name: 'A', priceType: 'free', description: 'x'.repeat(201) })).toEqual({ description: true })
   })
 
   it('opens a price at the place with its amount, and without one when it has none', () => {

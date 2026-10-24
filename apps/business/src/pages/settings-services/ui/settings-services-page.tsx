@@ -62,8 +62,12 @@ function ServicesSection({ slug }: { slug: string }) {
     opener.current = from
     setTarget(to)
   }
-  const deletion = useDeleteService(slug)
+  // a service deleted while its drawer is open (beside the page from 1280) closes it
+  const deletion = useDeleteService(slug, (gone) =>
+    setTarget((open) => (open && 'service' in open && open.service.id === gone.id ? null : open)),
+  )
   const [addingGroup, setAddingGroup] = useState(false)
+  const addGroupButton = useRef<HTMLButtonElement>(null)
 
   // a failed refetch keeps what's on screen; only a first load that failed is a failure
   if (!menu.data && menu.isError) throw menu.error
@@ -88,7 +92,7 @@ function ServicesSection({ slug }: { slug: string }) {
       lead={t('lead', { services, groups: groups.length })}
       action={
         <div className="flex flex-wrap gap-2 max-sm:w-full max-sm:[&>*]:flex-auto">
-          <Button variant="secondary" size="s" aria-expanded={addingGroup} onClick={() => setAddingGroup(true)}>
+          <Button ref={addGroupButton} variant="secondary" size="s" aria-expanded={addingGroup} onClick={() => setAddingGroup(true)}>
             <Plus aria-hidden />
             {t('addGroup')}
           </Button>
@@ -101,7 +105,16 @@ function ServicesSection({ slug }: { slug: string }) {
         </div>
       }
     >
-      {addingGroup && <NewGroup slug={slug} onDone={() => setAddingGroup(false)} />}
+      {addingGroup && (
+        <NewGroup
+          slug={slug}
+          onDone={() => {
+            setAddingGroup(false)
+            // the box goes with the focus in it
+            requestAnimationFrame(() => addGroupButton.current?.focus())
+          }}
+        />
+      )}
       <div className="@container">
         <div className="flex flex-col">
           <div aria-hidden className={`${ROW} min-h-10 border-y border-n-200 text-label text-n-500 uppercase @max-[520px]:hidden`}>
@@ -124,6 +137,7 @@ function ServicesSection({ slug }: { slug: string }) {
               onOpen={(service, from) => open({ service }, from)}
               onAdd={(from) => open({ groupId: g.id }, from)}
               onDelete={deletion.ask}
+              onGroupDeleted={() => setTarget((t) => (t && 'groupId' in t && t.groupId === g.id ? null : t))}
             />
           ))}
         </div>
@@ -132,11 +146,11 @@ function ServicesSection({ slug }: { slug: string }) {
         slug={slug}
         target={target}
         groups={groups}
-        team={team.data?.items ?? []}
+        team={team.data?.items ?? (team.isError ? 'failed' : null)}
         onClose={() => setTarget(null)}
         onDelete={(service) => {
           setTarget(null)
-          deletion.ask(service)
+          deletion.ask(service, opener.current)
         }}
         returnFocus={opener}
       />
@@ -159,7 +173,8 @@ function NewGroup({ slug, onDone }: { slug: string; onDone: () => void }) {
   const labelId = useId()
   const save = () => {
     const text = name.trim()
-    if (!text) return
+    // Enter pressed again while it's on its way adds nothing more
+    if (!text || add.isPending) return
     add.mutate(
       { name: { [locale]: text } },
       {
@@ -215,6 +230,7 @@ function Group({
   onOpen,
   onAdd,
   onDelete,
+  onGroupDeleted,
 }: {
   slug: string
   groupId: string
@@ -224,7 +240,8 @@ function Group({
   openId: string | null
   onOpen: (service: Service, from: HTMLElement) => void
   onAdd: (from: HTMLElement) => void
-  onDelete: (service: Service) => void
+  onDelete: (service: Service, from?: HTMLElement | null) => void
+  onGroupDeleted: () => void
 }) {
   const t = useTranslations('settings.services')
   const sdk = useSdk()
@@ -262,7 +279,10 @@ function Group({
                 className="text-danger-ink [&_svg]:text-danger-ink"
                 onSelect={() =>
                   removeGroup.mutate(groupId, {
-                    onSuccess: () => toast(t('groupDeleted', { name })),
+                    onSuccess: () => {
+                      onGroupDeleted()
+                      toast(t('groupDeleted', { name }))
+                    },
                     onError: (error) => toast(errorText(error)),
                   })
                 }
@@ -283,7 +303,7 @@ function Group({
             lookup={lookup}
             open={openId === s.id}
             onOpen={(from) => onOpen(s, from)}
-            onDelete={() => onDelete(s)}
+            onDelete={(from) => onDelete(s, from)}
           />
         ))
       ) : (
@@ -318,7 +338,7 @@ function ServiceRow({
   /** Its drawer is open: the row in the tint. */
   open: boolean
   onOpen: (from: HTMLElement) => void
-  onDelete: () => void
+  onDelete: (from: HTMLElement | null) => void
 }) {
   const t = useTranslations('settings.services')
   const fmt = useFmt()
@@ -433,7 +453,7 @@ function ServiceRow({
               {online ? t('hideOnline') : t('openOnline')}
             </MenuItem>
             <MenuSeparator />
-            <MenuItem className="text-danger-ink [&_svg]:text-danger-ink" onSelect={onDelete}>
+            <MenuItem className="text-danger-ink [&_svg]:text-danger-ink" onSelect={() => onDelete(actions.current)}>
               <Trash2 aria-hidden />
               {t('deleteService')}
             </MenuItem>

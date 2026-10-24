@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import type { Menu } from '@yeral/contract/services'
 import type { TeamMember } from '@yeral/contract/team'
 import { localized, PRICE_TYPES, type PriceType } from '@yeral/domain/model'
+import { MARKET } from '@yeral/domain/market'
 import { SERVICE_BUFFERS } from '@yeral/domain/services'
 import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
@@ -15,11 +16,12 @@ import { Field } from '@yeral/ui/field'
 import { Input, Textarea } from '@yeral/ui/input'
 import { InputGroup } from '@yeral/ui/input-group'
 import { Select } from '@yeral/ui/select'
+import { Spinner } from '@yeral/ui/spinner'
 import { Switch } from '@yeral/ui/switch'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { Eye, Trash2, TriangleAlert } from 'lucide-react'
-import { useId, useState, type RefObject } from 'react'
+import { useId, useRef, useState, type RefObject } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
@@ -45,7 +47,6 @@ type Service = Menu['groups'][number]['services'][number]
 export type DrawerTarget = { service: Service } | { groupId: string }
 
 const RULE = 'rule'
-const PRICE_KEY: Record<PriceType, 'fixed' | 'from' | 'free' | 'hidden'> = { fixed: 'fixed', from: 'from', free: 'free', hidden: 'hidden' }
 
 /**
  * The service drawer (B-Services `.drw`, design §28.6, book B-38): a new service or one to edit — its name and
@@ -65,14 +66,17 @@ export function ServiceDrawer({
   slug: string
   target: DrawerTarget | null
   groups: Menu['groups']
-  team: TeamMember[]
+  /** The team for «Who does it»; `null` while it loads, `'failed'` when it didn't. */
+  team: TeamMember[] | null | 'failed'
   onClose: () => void
   /** «Delete service» at the drawer's foot (an existing service). */
   onDelete: (service: Service) => void
   returnFocus?: RefObject<HTMLElement | null>
 }) {
+  // while a save is on its way the drawer stays: its answer belongs to this form
+  const busy = useRef(false)
   return (
-    <Drawer scrim="auto" open={!!target} onOpenChange={(open) => !open && onClose()} returnFocus={returnFocus}>
+    <Drawer scrim="auto" open={!!target} onOpenChange={(open) => !open && !busy.current && onClose()} returnFocus={returnFocus}>
       {target && (
         <DrawerContent aria-describedby={undefined}>
           <ServiceEditor
@@ -84,6 +88,9 @@ export function ServiceDrawer({
             team={team}
             onClose={onClose}
             onDelete={onDelete}
+            onBusy={(on) => {
+              busy.current = on
+            }}
           />
         </DrawerContent>
       )}
@@ -98,13 +105,15 @@ function ServiceEditor({
   team,
   onClose,
   onDelete,
+  onBusy,
 }: {
   slug: string
   target: DrawerTarget
   groups: Menu['groups']
-  team: TeamMember[]
+  team: TeamMember[] | null | 'failed'
   onClose: () => void
   onDelete: (service: Service) => void
+  onBusy: (busy: boolean) => void
 }) {
   const t = useTranslations('settings.services.drawer')
   const tc = useTranslations('common')
@@ -121,42 +130,35 @@ function ServiceEditor({
   const set = (change: Partial<ServiceForm>) => setForm((f) => ({ ...f, ...change }))
   const ids = { price: useId(), who: useId(), online: useId() }
   const problems = tried ? formProblems(form) : {}
-  const saving = add.isPending || update.isPending
+  const [saving, setSaving] = useState(false)
   const group = groups.find((g) => g.id === form.groupId)
-  const people = team.filter((m) => m.status !== 'removed')
+  const people = Array.isArray(team) ? team.filter((m) => m.status !== 'removed') : []
   const anyInvited = form.staffIds.some((id) => people.find((m) => m.id === id)?.status === 'invited')
   const amount = Number(form.amount) || 0
   const preview =
     needsAmount(form.priceType) && !amount
-      ? t(form.priceType === 'from' ? 'previewFromEmpty' : 'previewEmpty')
+      ? t(form.priceType === 'from' ? 'previewFromEmpty' : 'previewEmpty', { currency: MARKET.currency })
       : fmt.price({ type: form.priceType, amount })
 
-  const save = () => {
+  const save = async () => {
     setTried(true)
-    if (Object.keys(formProblems(form)).length) return
+    if (saving || Object.keys(formProblems(form)).length) return
     const name = form.name.trim()
-    if (!service) {
-      add.mutate(addInput(form, locale), {
-        onSuccess: () => {
-          toast(t('added', { name }))
-          onClose()
-        },
-        onError: (error) => toast(errorText(error)),
-      })
-      return
+    const changes = service ? updateInput(form, service, locale) : null
+    if (service && !changes) return onClose()
+    setSaving(true)
+    onBusy(true)
+    try {
+      if (service && changes) await update.mutateAsync({ serviceId: service.id, ...changes })
+      else await add.mutateAsync(addInput(form, locale))
+      toast(service ? t('saved', { name }) : t('added', { name }))
+      onBusy(false)
+      onClose()
+    } catch (error) {
+      toast(errorText(error))
+      onBusy(false)
+      setSaving(false)
     }
-    const changes = updateInput(form, service, locale)
-    if (!changes) return onClose()
-    update.mutate(
-      { serviceId: service.id, ...changes },
-      {
-        onSuccess: () => {
-          toast(t('saved', { name }))
-          onClose()
-        },
-        onError: (error) => toast(errorText(error)),
-      },
-    )
   }
 
   return (
@@ -177,7 +179,7 @@ function ServiceEditor({
           className="flex flex-col gap-5"
           onSubmit={(e) => {
             e.preventDefault()
-            save()
+            void save()
           }}
         >
           <Field label={t('name')} error={problems.name && t('nameMissing')}>
@@ -192,6 +194,7 @@ function ServiceEditor({
           <Field
             label={t('description')}
             optional={t('optional')}
+            error={problems.description && t('descriptionLong', { max: SERVICE_DESCRIPTION_MAX })}
             counter={{
               value: form.description.length,
               max: SERVICE_DESCRIPTION_MAX,
@@ -199,7 +202,6 @@ function ServiceEditor({
             }}
           >
             <Textarea
-              maxLength={SERVICE_DESCRIPTION_MAX}
               placeholder={t('descriptionPlaceholder')}
               value={form.description}
               onChange={(e) => set({ description: e.target.value })}
@@ -257,7 +259,7 @@ function ServiceEditor({
               aria-labelledby={ids.price}
               value={form.priceType}
               onValueChange={(v) => set({ priceType: v as PriceType })}
-              options={PRICE_TYPES.map((p) => ({ value: p, label: t(`priceTypes.${PRICE_KEY[p]}`) }))}
+              options={PRICE_TYPES.map((p) => ({ value: p, label: t(`priceTypes.${p}`) }))}
             />
             {takesAmount(form.priceType) && (
               <Field
@@ -268,7 +270,7 @@ function ServiceEditor({
                 <InputGroup
                   size="m"
                   inputMode="numeric"
-                  suffix={t('currency')}
+                  suffix={MARKET.currency}
                   placeholder="0"
                   className="w-40"
                   value={form.amount}
@@ -289,6 +291,8 @@ function ServiceEditor({
             <span id={ids.who} className="text-dense font-semibold text-n-900">
               {t('who')}
             </span>
+            {team === null && <Spinner />}
+            {team === 'failed' && <p className="m-0 text-small text-n-600">{t('teamFailed')}</p>}
             <div role="group" aria-labelledby={ids.who} className="flex flex-col">
               {people.map((m) => (
                 <label key={m.id} className="flex min-h-12 cursor-pointer items-center gap-3 border-b border-n-200 py-1.5 last:border-b-0">
@@ -313,7 +317,7 @@ function ServiceEditor({
                 </label>
               ))}
             </div>
-            {form.staffIds.length ? (
+            {!Array.isArray(team) ? null : form.staffIds.length ? (
               <span className="text-dense text-n-600">{t('whoHint')}</span>
             ) : (
               <Callout tone="warning" size="s" icon={<TriangleAlert aria-hidden />} live>
