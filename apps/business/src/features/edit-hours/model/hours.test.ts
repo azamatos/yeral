@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { closingClock, editorWeek, effectiveDays, follows, hoursRuns, STARTING_WEEK, sameWeek, weekOf, weekValid } from './hours'
+import {
+  changedDays,
+  closingClock,
+  editorWeek,
+  effectiveDays,
+  follows,
+  hoursRuns,
+  STARTING_WEEK,
+  sameWeek,
+  weekOf,
+  weekValid,
+} from './hours'
 
 const h = (open: number, close: number, brk: { start: number; end: number } | null = null) => ({ open, close, break: brk })
 const CLOSED = [null, null, null, null, null, null, null]
@@ -74,5 +85,12 @@ describe('the hours step’s week', () => {
     ])
     expect(hoursRuns(CLOSED)).toEqual([])
     expect([closingClock(1560), closingClock(1440)]).toEqual([120, 1440])
+  })
+
+  it('names the weekdays a change touches: their switch, hours or break', () => {
+    const week = [h(540, 1200), h(540, 1200), h(540, 1200), h(540, 1200), h(540, 1200), h(600, 1080), null]
+    expect(changedDays(week, week)).toEqual([])
+    const next = [h(540, 1080), h(540, 1200), h(540, 1200, { start: 780, end: 840 }), h(540, 1200), null, h(600, 1080), h(600, 900)]
+    expect(changedDays(week, next)).toEqual([0, 2, 4, 6])
   })
 })

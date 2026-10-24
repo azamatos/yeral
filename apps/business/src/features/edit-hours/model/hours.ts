@@ -104,5 +104,9 @@ export function hoursRuns(week: WeekHours): { from: number; to: number; open: nu
   return runs
 }
 
+/** The weekdays a change touches (Monday first): their switch, hours or break differ. */
+export const changedDays = (was: WeekHours, next: WeekHours): number[] =>
+  next.flatMap((d, i) => (sameWeek([d], [was[i] ?? null]) ? [] : [i]))
+
 /** A closing minute as its clock shows it: 1560 is 02:00 the next day; 1440 stays 24:00. */
 export const closingClock = (close: number) => (close > DAY_MINUTES ? close - DAY_MINUTES : close)

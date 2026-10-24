@@ -240,6 +240,29 @@
     },
     "fixOn": "Change it on {day}."
   },
+  "affected": {
+    "bookings": "{n, plural, one {# booking} other {# bookings}}",
+    "requests": "{n, plural, one {# request} other {# requests}}",
+    "joinAnd": "{a} and {b}",
+    "joinDot": "{a} · {b}",
+    "hoursTitle": "{what} {n, plural, one {falls} other {fall}} outside the new hours",
+    "hoursLead": "{days}. These were booked before the change.",
+    "hoursEither": "New bookings follow the new hours either way.",
+    "what": "What happens to these bookings",
+    "keep": "Keep them",
+    "keepCaption": "They stay in the calendar as they are.",
+    "cancel": "Cancel and offer 3 other times",
+    "cancelCaption": "Each client picks a new time in one tap in My bookings.",
+    "when": "{day} · {time}",
+    "date": "{weekday}, {date}",
+    "unnamed": "Unnamed client",
+    "left": "{time} left to answer",
+    "more": "And {n, number} more.",
+    "close": "Close",
+    "back": "Cancel",
+    "save": "Save",
+    "saving": "Saving"
+  },
   "setup": {
     "title": "Set up your business",
     "titleMore": "Create a business",
@@ -628,6 +651,29 @@
       "captionManual": "Example: a request sent today at {time}. It updates as you change the rules.",
       "captionInstant": "It updates as you change the rules.",
       "booking": "{name} · {service} · {specialist}"
+    },
+    "hours": {
+      "lead": "Clients can book online only within these hours.",
+      "weekTitle": "Opening hours",
+      "weekCaption": "Specialists’ shifts stay within these hours.",
+      "note": "A day can close after midnight: 18:00–02:00 means open until 02:00 the next day. The part after midnight must end before the next day opens.",
+      "save": {
+        "message": "Save your changes?",
+        "label": "Unsaved changes",
+        "discard": "Discard",
+        "save": "Save",
+        "saving": "Saving"
+      },
+      "saved": "Hours saved",
+      "savedKept": "Hours saved · {what} kept as {n, plural, one {it is} other {they are}}",
+      "savedCancelled": "Hours saved · {what} cancelled — each client picks a new time in My bookings",
+      "days": {
+        "day": "{day} {hours}",
+        "closed": "closed",
+        "range": "{from}–{to}",
+        "nextDay": "{from}–{to} (next day)",
+        "withBreak": "{hours}, break {from}–{to}"
+      }
     }
   }
 }
