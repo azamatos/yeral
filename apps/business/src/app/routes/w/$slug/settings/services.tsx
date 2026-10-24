@@ -1,4 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SettingsPlaceholder } from '@/pages/settings'
+import { SettingsServicesPage } from '@/pages/settings-services'
 
-export const Route = createFileRoute('/w/$slug/settings/services')({ component: () => <SettingsPlaceholder section="services" /> })
+export const Route = createFileRoute('/w/$slug/settings/services')({ component: SettingsServicesPage })

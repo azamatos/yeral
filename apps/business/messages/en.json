@@ -851,6 +851,30 @@
       "paused": "Online booking is paused. Your page stays open and clients can call you; you can still add bookings in the calendar.",
       "close": "Close this workspace",
       "closeCaption": "To close this workspace, contact {brand}."
+    },
+    "services": {
+      "lead": "{services, plural, one {# service} other {# services}} · {groups, plural, one {# group} other {# groups}}. Clients see them in this order.",
+      "columns": {
+        "service": "Service",
+        "duration": "Duration",
+        "price": "Price",
+        "who": "Who does it",
+        "online": "Online"
+      },
+      "count": "{n, plural, one {# service} other {# services}}",
+      "emptyGroup": "No services in this group yet.",
+      "noBuffer": "no buffer",
+      "buffer": "+{duration} buffer",
+      "hiddenAmount": "{amount} · not shown to clients",
+      "noOne": "No one",
+      "specialists": "{n, plural, one {# specialist} other {# specialists}}",
+      "invited": "{n, plural, one {+ # invited} other {+ # invited}}",
+      "meta": "{duration} · {price} · {who}",
+      "metaShort": "{duration} · {price}",
+      "notOnline": "Not bookable online",
+      "onlineLabel": "Online booking: {name}",
+      "openedOnline": "{name} is open for online booking",
+      "closedOnline": "{name}: not bookable online — it’s hidden from your page"
     }
   }
 }
