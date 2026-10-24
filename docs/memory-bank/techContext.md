@@ -95,6 +95,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | a business settings section: the frame with the menu, one section's pane, the sections' list | `SettingsFrame`, `SettingsPage section lead action aside`, `SETTINGS_SECTIONS settingsSectionOf()` (a section = a `pages/settings-<section>` slice + its route file, log `2026-10-24-settings-frame.md`) | `@/widgets/settings-frame` (apps/business) |
 | a form's unsaved changes: «Save your changes?» Discard · Save, sticky at the bottom | `SaveBar` (shown only while the form is dirty; `form` to submit a form; a toast after) | `@yeral/ui/save-bar` |
 | a small number stepped − n + (no-shows, seats, party size) | `NumberStepper` (`min`, `max`, `format`, ↑/↓; an end button stays focused, `aria-disabled`) | `@yeral/ui/number-stepper` |
+| one colour or one icon out of a few (an internal status's) | `SwatchPicker` (`options[{value, label, color}]`), `IconPicker` (`options[{value, label, icon}]`, 8 to a row) | `@yeral/ui/swatch-picker`, `@yeral/ui/icon-picker` |
 | a business's booking rules as a form: the wizard's rules step and Settings → Booking rules | `useRulesForm(slug, on)` (load, edits, only what changed saved, discard), `BookingRulesForm`, `useRuleLabels()` | `@/features/edit-booking-rules` (apps/business) |
 | logo, brand images | `Logo`, `brand` | `@yeral/ui/brand` |
 | app-wide providers | `UIProvider` (Lucide stroke 1.75, tooltip delay), `Toaster` | `@yeral/ui/provider`, `@yeral/ui/toast` |

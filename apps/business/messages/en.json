@@ -670,6 +670,68 @@
         "nextDay": "{hours} (next day)",
         "withBreak": "{hours}, break {break}"
       }
+    },
+    "statuses": {
+      "title": "Booking statuses",
+      "caption": "Each status has one icon — the same in the calendar, in lists and in the client’s booking.",
+      "system": "System statuses",
+      "locked": "Clients see these · can’t be changed",
+      "meanings": {
+        "pending": "New request — waiting for an answer",
+        "confirmed": "Time set, the client was told",
+        "completed": "The visit happened (set by itself after the end time)",
+        "cancelled": "The client, the business or the system cancelled",
+        "noshow": "The client didn’t come — marked with Report"
+      },
+      "internal": "Internal statuses",
+      "internalCaption": "Only the team sees these: for example, the client arrived or the service started. Picked in the booking drawer and shown in the corner of the calendar block. They don’t change the system status.",
+      "presetCaptions": {
+        "arrived": "The client is here, waiting for the service",
+        "started": "The service has started"
+      },
+      "ownCaption": "Your own status",
+      "delete": "Delete: {name}",
+      "deleted": "“{name}” deleted",
+      "failed": "The statuses didn’t load. Open the page again to try once more.",
+      "addStatus": "Add status",
+      "count": "{n, number} / {max, number} · you can add {left, number} more",
+      "full": "Up to {max, number} internal statuses",
+      "addTitle": "Add internal status",
+      "close": "Close",
+      "name": "Name",
+      "namePlaceholder": "For example: Preparing",
+      "nameTaken": "This name is already used — pick another.",
+      "nameCount": "{n, number} / {max, number}",
+      "icon": "Icon",
+      "icons": {
+        "user-check": "Person with a tick",
+        "play": "Play",
+        "hourglass": "Hourglass",
+        "flag": "Flag",
+        "star": "Star",
+        "bell": "Bell",
+        "message": "Message",
+        "sparkles": "Sparkles"
+      },
+      "colour": "Colour",
+      "colours": {
+        "violet": "Violet",
+        "green": "Green",
+        "brown": "Brown",
+        "red": "Red",
+        "grey": "Grey",
+        "black": "Black"
+      },
+      "preview": "Preview",
+      "previewBlock": "{time} Gülälek N.",
+      "previewService": "Hair colouring",
+      "previewName": "Status name",
+      "previewNote": "Only the team sees it — clients don’t.",
+      "cancel": "Cancel",
+      "add": "Add",
+      "adding": "Adding",
+      "added": "“{name}” added · only the team sees it",
+      "deleting": "Deleting"
     }
   }
 }
