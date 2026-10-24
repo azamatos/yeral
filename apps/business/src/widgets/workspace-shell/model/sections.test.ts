@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canOpen, placeFor, sameSectionIn, sectionOf, sectionsFor } from './sections'
+import { canOpen, placeFor, sameSectionIn, sectionOf, sectionsFor, targetRoute } from './sections'
 
 const AYNA = {
   items: [
@@ -30,6 +30,26 @@ describe('the workspace sections', () => {
       section: 'clients',
     })
     expect(sameSectionIn('/w/glow-studio', { slug: 'glow-nails', level: 'owner' })).toEqual({ slug: 'glow-nails', section: 'calendar' })
+    // Settings keeps its section, not what's under it (a team member)
+    expect(sameSectionIn('/w/glow-studio/settings/hours', { slug: 'glow-nails', level: 'admin' })).toEqual({
+      slug: 'glow-nails',
+      section: 'settings',
+      part: 'hours',
+    })
+    expect(sameSectionIn('/w/glow-studio/settings/team/m-1', { slug: 'glow-nails', level: 'owner' })).toEqual({
+      slug: 'glow-nails',
+      section: 'settings',
+      part: 'team',
+    })
+    expect(sameSectionIn('/w/ayna-studio/settings/hours', { slug: 'glow-studio', level: 'specialist' })).toEqual({
+      slug: 'glow-studio',
+      section: 'calendar',
+    })
+    // an address that isn't a settings section: Settings, which opens its first
+    expect(sameSectionIn('/w/glow-studio/settings/billing', { slug: 'glow-nails', level: 'owner' })).toEqual({
+      slug: 'glow-nails',
+      section: 'settings',
+    })
     // from her own studio's settings into the studio where she's a specialist: its calendar, not a refusal
     expect(sameSectionIn('/w/ayna-studio/settings', { slug: 'glow-studio', level: 'specialist' })).toEqual({
       slug: 'glow-studio',
@@ -57,6 +77,11 @@ describe('where an address goes (design §27.1)', () => {
       to: { slug: 'glow-studio', section: 'calendar' },
       closed: true,
     })
+    // a settings section she may open in her own studio: the same one there
+    expect(placeFor('/w/bag-kafe/settings/hours', 'bag-kafe', AYNA)).toEqual({
+      to: { slug: 'ayna-studio', section: 'settings', part: 'hours' },
+      closed: true,
+    })
     // never opened one: the first
     expect(placeFor('/w/bag-kafe/reviews', 'bag-kafe', { ...AYNA, current: null })).toEqual({
       to: { slug: 'glow-studio', section: 'reviews' },
@@ -66,5 +91,12 @@ describe('where an address goes (design §27.1)', () => {
 
   it('no workspace at all: the sign-in, which says what’s next', () => {
     expect(placeFor('/w/bag-kafe/calendar', 'bag-kafe', { items: [], current: null })).toEqual({ signIn: true })
+  })
+})
+
+describe('the route a place opens', () => {
+  it('names the settings section when there is one', () => {
+    expect(targetRoute({ slug: 'glow-nails', section: 'settings', part: 'hours' })).toBe('/w/$slug/settings/hours')
+    expect(targetRoute({ slug: 'glow-nails', section: 'clients' })).toBe('/w/$slug/clients')
   })
 })

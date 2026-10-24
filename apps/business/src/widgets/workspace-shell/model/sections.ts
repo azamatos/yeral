@@ -5,6 +5,7 @@
  * foreign workspace's address and a section the level hasn't got agree.
  */
 import { levelCan, type Level } from '@yeral/domain/permissions'
+import { isSettingsSection, type SettingsSection } from '@/shared/config'
 
 export const SECTIONS = ['calendar', 'bookings', 'clients', 'reviews', 'settings'] as const
 export type Section = (typeof SECTIONS)[number]
@@ -27,15 +28,30 @@ interface Place {
   level: Level
 }
 
+/** A place in a workspace: a section, and in Settings the settings section open there. */
+export interface Target {
+  slug: string
+  section: Section
+  part?: SettingsSection
+}
+
 /**
  * The same place in another workspace: switching keeps the section (`/w/glow-studio/clients` →
  * `/w/glow-nails/clients`, design §27.1) when the person's level there has it, else the calendar. Deeper parts (a
- * client's card) belong to the workspace left, so only the section is kept.
+ * client's card) belong to the workspace left, so only the section is kept; Settings keeps its section too (every
+ * workspace has the same ones: `settings/hours` → `settings/hours`), but nothing under it (a team member), and nothing
+ * that isn't one of them.
  */
-export function sameSectionIn(pathname: string, to: Place): { slug: string; section: Section } {
+export function sameSectionIn(pathname: string, to: Place): Target {
   const section = sectionOf(pathname)
-  return { slug: to.slug, section: section && canOpen(to.level, section) ? section : 'calendar' }
+  if (!section || !canOpen(to.level, section)) return { slug: to.slug, section: 'calendar' }
+  const part = section === 'settings' ? /^\/w\/[^/]+\/settings\/([^/?#]+)/.exec(pathname)?.[1] : undefined
+  return isSettingsSection(part) ? { slug: to.slug, section, part } : { slug: to.slug, section }
 }
+
+/** The route a target opens (`/w/$slug/settings/hours`), for `navigate`, `redirect` and `<Navigate>`. */
+export const targetRoute = (target: Target) =>
+  target.part ? (`/w/$slug/settings/${target.part}` as const) : (`/w/$slug/${target.section}` as const)
 
 /**
  * Where an address under `/w/{slug}` goes for this person: on (`open`); to another place with "This section is closed
@@ -46,7 +62,7 @@ export function placeFor(
   pathname: string,
   slug: string,
   workspaces: { items: readonly Place[]; current: string | null },
-): { open: true } | { to: { slug: string; section: Section }; closed: true } | { signIn: true } {
+): { open: true } | { to: Target; closed: true } | { signIn: true } {
   const here = workspaces.items.find((w) => w.slug === slug)
   if (here) {
     const section = sectionOf(pathname)

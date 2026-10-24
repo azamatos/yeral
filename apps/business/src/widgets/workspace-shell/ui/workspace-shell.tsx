@@ -3,7 +3,7 @@ import { Navigate, Outlet, useLocation } from '@tanstack/react-router'
 import { TAB_BAR_HEIGHT } from '@yeral/ui/bottom-tab-bar'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useSdk } from '@/shared/api'
-import { placeFor } from '../model/sections'
+import { placeFor, targetRoute } from '../model/sections'
 import { useWorkspace } from '../model/use-workspace'
 import { ProfileDrawer } from './profile-drawer'
 import { ShellSidebar } from './shell-sidebar'
@@ -49,7 +49,7 @@ export function WorkspaceShell() {
   if (workspaces && !workspace) {
     const place = placeFor(pathname, slug, workspaces)
     return 'to' in place ? (
-      <Navigate to={`/w/$slug/${place.to.section}`} params={{ slug: place.to.slug }} replace />
+      <Navigate to={targetRoute(place.to)} params={{ slug: place.to.slug }} replace />
     ) : (
       <Navigate to="/login" replace />
     )

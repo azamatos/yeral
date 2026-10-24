@@ -106,7 +106,9 @@ export function CopyField({ value, display, variant = 'field', label, copy, shar
     )
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    // on a phone the field takes the row and the buttons go under it (B-Settings `.lrow`), so «Copied» never moves
+    // them; wider, they stay beside it (B-Onboarding `.linkf`)
+    <div className={cn('flex items-center gap-2 max-sm:flex-wrap', className)}>
       <input
         ref={field}
         readOnly
@@ -115,7 +117,7 @@ export function CopyField({ value, display, variant = 'field', label, copy, shar
         // on click too: WebKit's mouseup undoes a select() made on focus
         onFocus={(event) => event.currentTarget.select()}
         onClick={(event) => event.currentTarget.select()}
-        className={cn(inputClass, 'h-11 flex-[1_1_260px] border-n-200 bg-n-50 text-small font-medium hover:border-n-200')}
+        className={cn(inputClass, 'h-11 flex-[1_1_260px] border-n-200 bg-n-50 text-small font-medium hover:border-n-200 max-sm:basis-full')}
       />
       <Button size="s" className={copied ? 'min-w-32' : undefined} onClick={() => void copyValue()}>
         {copied ? check : <Copy aria-hidden />}

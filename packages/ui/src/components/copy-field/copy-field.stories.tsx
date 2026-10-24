@@ -75,6 +75,27 @@ export const WithShare: Story = {
 }
 
 /**
+ * A phone: the field takes the row and the buttons go under it (B-Settings `.lrow`), where «Copied» doesn't move them.
+ */
+export const WithSharePhone: Story = {
+  args: WithShare.args,
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    stubClipboard()
+    const field = canvas.getByRole('textbox', { name: 'Your page link' })
+    const copy = canvas.getByRole('button', { name: 'Copy' })
+    const share = canvas.getByRole('button', { name: 'Share' })
+    const under = field.getBoundingClientRect().bottom
+    await expect(copy.getBoundingClientRect().top).toBeGreaterThanOrEqual(under)
+    await expect(share.getBoundingClientRect().top).toBeGreaterThanOrEqual(under)
+    const top = copy.getBoundingClientRect().top
+    await userEvent.click(copy)
+    const copied = await canvas.findByRole('button', { name: 'Copied' })
+    await expect(copied.getBoundingClientRect().top).toBe(top)
+  },
+}
+
+/**
  * When the clipboard refuses, nothing claims a copy: the field shows the full address Copy would have copied, selected
  * for ⌘C.
  */
