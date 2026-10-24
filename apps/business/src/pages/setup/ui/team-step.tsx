@@ -124,8 +124,6 @@ export function useTeamStep(slug: string, on: boolean, owner: { name: string; ph
 }
 
 const COLUMNS = 'grid grid-cols-[minmax(0,1fr)_210px_168px_44px] items-center gap-2 max-md:grid-cols-[minmax(0,1fr)_44px]'
-// the focus target «Add a team member» (rows are named by their keys)
-const ADD = ' add'
 
 function TeamRows({
   form,
@@ -139,29 +137,27 @@ function TeamRows({
   onChange: (change: (f: TeamForm) => TeamForm) => void
 }) {
   const t = useTranslations('setup.team')
-  const list = useId()
-  const nameId = (key: string) => `${list}-${key}-name`
   // where the focus goes once the list has changed: a new row's name; after a removal the next row's (else the one
   // before, else «Add a team member»), so it never falls back to the page
-  const focusNext = useRef<string | null>(null)
+  const [focusNext, setFocusNext] = useState<{ row: string } | 'add' | null>(null)
+  const names = useRef(new Map<string, HTMLInputElement>())
   const addButton = useRef<HTMLButtonElement>(null)
   useEffect(() => {
-    const target = focusNext.current
-    if (!target) return
-    focusNext.current = null
-    if (target === ADD) addButton.current?.focus()
-    else document.getElementById(nameId(target))?.focus()
-  })
+    if (!focusNext) return
+    if (focusNext === 'add') addButton.current?.focus()
+    else names.current.get(focusNext.row)?.focus()
+  }, [focusNext])
   const update = (key: string, patch: Partial<TeamRow>) =>
     onChange((f) => ({ ...f, rows: f.rows.map((r) => (r.key === key ? { ...r, ...patch } : r)) }))
   const remove = (key: string) => {
     const at = form.rows.findIndex((r) => r.key === key)
-    focusNext.current = (form.rows[at + 1] ?? form.rows[at - 1])?.key ?? ADD
+    const next = (form.rows[at + 1] ?? form.rows[at - 1])?.key
+    setFocusNext(next ? { row: next } : 'add')
     onChange((f) => ({ ...f, rows: f.rows.filter((r) => r.key !== key) }))
   }
   const add = () => {
     const row = emptyRow()
-    focusNext.current = row.key
+    setFocusNext({ row: row.key })
     onChange((f) => ({ ...f, rows: [...f.rows, row] }))
   }
   return (
@@ -188,7 +184,10 @@ function TeamRows({
         {form.rows.map((row, i) => (
           <MemberRow
             key={row.key}
-            nameId={nameId(row.key)}
+            nameRef={(input) => {
+              if (input) names.current.set(row.key, input)
+              else names.current.delete(row.key)
+            }}
             index={i + 1}
             row={row}
             problem={isFilled(row) ? rowProblem(row, form.rows, owner.phone) : null}
@@ -225,7 +224,7 @@ function TeamRows({
 }
 
 function MemberRow({
-  nameId,
+  nameRef,
   index,
   row,
   problem,
@@ -233,8 +232,8 @@ function MemberRow({
   onChange,
   onRemove,
 }: {
-  /** The name field's id: the list moves the focus there. */
-  nameId: string
+  /** The name field, for the list to move the focus there. */
+  nameRef: (input: HTMLInputElement | null) => void
   index: number
   row: TeamRow
   problem: ReturnType<typeof rowProblem>
@@ -263,7 +262,7 @@ function MemberRow({
     <div role="group" aria-label={t('member', { n: index, name: who })} className="flex flex-col gap-2 border-t border-n-200 py-2">
       <div className={COLUMNS}>
         <Input
-          id={nameId}
+          ref={nameRef}
           className="h-11 text-small max-sm:text-[16px]"
           aria-label={t('nameOf', { n: index })}
           placeholder={t('name')}

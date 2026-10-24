@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { isApiError } from '@yeral/sdk'
-import { placeFor, sectionClosed, WorkspaceShell } from '@/widgets/workspace-shell'
+import { placeFor, sectionClosed, targetRoute, WorkspaceShell } from '@/widgets/workspace-shell'
 
 /**
  * Every workspace page (design §27.1: addresses always carry the workspace) needs someone signed in who works there, at
@@ -21,7 +21,7 @@ export const Route = createFileRoute('/w/$slug')({
       if ('signIn' in place) return signIn()
       if ('to' in place) {
         if (!preload) sectionClosed()
-        redirect({ to: `/w/$slug/${place.to.section}`, params: { slug: place.to.slug }, replace: true, throw: true })
+        redirect({ to: targetRoute(place.to), params: { slug: place.to.slug }, replace: true, throw: true })
       }
     } catch (error) {
       // the session ended meanwhile: the sdk forgets the person, the sign-in takes over

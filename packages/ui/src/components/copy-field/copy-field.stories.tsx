@@ -74,16 +74,24 @@ export const WithShare: Story = {
   },
 }
 
-/** A phone: the row wraps, so the buttons go under the field instead of squeezing it (B-Settings `.lrow`). */
+/**
+ * A phone: the field takes the row and the buttons go under it (B-Settings `.lrow`), where «Copied» doesn't move them.
+ */
 export const WithSharePhone: Story = {
   args: WithShare.args,
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
+    stubClipboard()
     const field = canvas.getByRole('textbox', { name: 'Your page link' })
+    const copy = canvas.getByRole('button', { name: 'Copy' })
     const share = canvas.getByRole('button', { name: 'Share' })
-    await expect(share.getBoundingClientRect().top).toBeGreaterThanOrEqual(field.getBoundingClientRect().bottom)
-    // the field keeps its width: at least 260, as the board's
-    await expect(field.getBoundingClientRect().width).toBeGreaterThanOrEqual(260)
+    const under = field.getBoundingClientRect().bottom
+    await expect(copy.getBoundingClientRect().top).toBeGreaterThanOrEqual(under)
+    await expect(share.getBoundingClientRect().top).toBeGreaterThanOrEqual(under)
+    const top = copy.getBoundingClientRect().top
+    await userEvent.click(copy)
+    const copied = await canvas.findByRole('button', { name: 'Copied' })
+    await expect(copied.getBoundingClientRect().top).toBe(top)
   },
 }
 

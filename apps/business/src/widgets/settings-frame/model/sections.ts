@@ -1,10 +1,11 @@
 /**
- * Settings' sections (design §28.5, B-Settings, DS-Business «Settings navigation · final list»), each at
- * `/w/{slug}/settings/{section}`, in the menu's order. A Specialist has no Settings at all (the shell's `placeFor`); an
- * Admin sees every section, Team and Permissions read-only (each section says so itself).
+ * Settings' sections (design §28.5, B-Settings): the list itself is `@/shared/config`'s, for the shell's switcher too.
+ * A Specialist has no Settings at all (the shell's `placeFor`); an Admin sees every section, Team and Permissions
+ * read-only (each section says so itself).
  */
-export const SETTINGS_SECTIONS = ['profile', 'rules', 'hours', 'services', 'team', 'permissions', 'link'] as const
-export type SettingsSection = (typeof SETTINGS_SECTIONS)[number]
+import { SETTINGS_SECTIONS, type SettingsSection } from '@/shared/config'
+
+export { SETTINGS_SECTIONS, type SettingsSection }
 
 /** `/w/{slug}/settings` opens this one. */
 export const FIRST_SETTINGS_SECTION: SettingsSection = SETTINGS_SECTIONS[0]
