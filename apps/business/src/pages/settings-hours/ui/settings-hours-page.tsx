@@ -16,6 +16,7 @@ import {
   HoursAffectedBookings,
   sameWeek,
   settingsWeek,
+  SpecialDays,
   useAffectedCount,
   useJoin,
   WeekHoursRows,
@@ -33,7 +34,8 @@ import { useWorkspace } from '@/widgets/workspace-shell'
  * Settings → Hours (B-Settings `pane=hours`, design §8 «Iş wagty», §28.5 hours, book B-39, Q-211): the week, a row per
  * day with its switch, hours (a close before the open is the next day's) and one break, and the save bar while it
  * differs from the saved week. A save that leaves bookings ahead outside the new hours lists them first: keep them, or
- * cancel them with 3 other times offered. The special days are saved as they are (their own section comes next).
+ * cancel them with 3 other times offered. Under it the special days (B-40), each saved on its own from its modal; the
+ * week's save sends them as they are.
  */
 export function SettingsHoursPage() {
   const { workspace } = useWorkspace()
@@ -114,6 +116,7 @@ function HoursSettings({ slug }: { slug: string }) {
         )}
         <p className="m-0 text-dense text-n-600">{t('note')}</p>
       </SettingsSection>
+      <SpecialDays slug={slug} saved={stored} />
       {dirty && (
         <SaveBar
           message={words('question')}

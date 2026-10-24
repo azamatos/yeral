@@ -7,8 +7,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { BookingsAffectedDetails } from '@yeral/contract/errors'
 import type { Workspace } from '@yeral/contract/team'
-import { addDays, today } from '@yeral/domain/time'
-import { expect, userEvent, waitFor, within } from 'storybook/test'
+import { addDays, dow, today } from '@yeral/domain/time'
+import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
@@ -43,12 +43,33 @@ const glow: Workspace = {
   lastOpenedAt: 1,
 }
 
-const day = (open: number, close: number) => ({ open, close, break: null })
-/** Glow Studio's week (demo-data): Monday to Saturday 09:00–20:00, Sunday 10:00–18:00. */
-const hours = { hours: [...Array.from({ length: 6 }, () => day(540, 1200)), day(600, 1080)], specialDays: [] }
-
 const now = Date.now()
 const on = (days: number) => addDays(today(now), days)
+/** A Monday to Friday from `days` ahead: the next day opens at 09:00 whichever day the story runs. */
+const weekdayAhead = (days: number) => {
+  let d = on(days)
+  while (dow(d) > 4) d = addDays(d, 1)
+  return d
+}
+/** The coming 21 March (inside the yearly Nowruz), never in the past. */
+const nextNowruz = () => {
+  const year = Number(today(now).slice(0, 4))
+  return `${year}-03-21` >= today(now) ? `${year}-03-21` : `${year + 1}-03-21`
+}
+
+const day = (open: number, close: number) => ({ open, close, break: null })
+type Special = { name: string; from: string; to: string; yearly: boolean; hours: { open: number; close: number } | null }
+const closed = (name: string, from: string, to = from, yearly = false): Special => ({ name, from, to, yearly, hours: null })
+/** Glow Studio's week (demo-data): Monday to Saturday 09:00–20:00, Sunday 10:00–18:00; the board's special days. */
+const hours: { hours: ReturnType<typeof day>[]; specialDays: Special[] } = {
+  hours: [...Array.from({ length: 6 }, () => day(540, 1200)), day(600, 1080)],
+  specialDays: [
+    closed('Stocktake', on(9)),
+    closed('New Year', '2027-01-01', '2027-01-01', true),
+    closed('Nowruz', '2027-03-21', '2027-03-22', true),
+    closed('Independence Day', '2027-09-27', '2027-09-27', true),
+  ],
+}
 const item = (service: string, staff: string) => ({ serviceId: null, service, staffId: null, staff, start: 0, end: 0 })
 /** Three bookings and a request after the new closing time (B-Settings tweak `affected`). */
 const affected: BookingsAffectedDetails = {
@@ -250,5 +271,113 @@ export const NoOpenDay: Story = {
       await userEvent.click(await canvas.findByRole('switch', { name: `${day}: open` }))
     await expect(canvas.getByRole('alert')).toHaveTextContent('At least one day must be open.')
     await expect(within(canvas.getByRole('region', { name: 'Unsaved changes' })).getByRole('button', { name: 'Save' })).toBeDisabled()
+  },
+}
+
+/** The special days: a row each with its dates, Every year or One-off, and Closed or its hours. */
+export const SpecialDaysList: Story = {
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { name: 'Special days' })).toBeVisible()
+    await expect(canvas.getByText('21–22 March')).toBeVisible()
+    await expect(canvas.getByText('Independence Day')).toBeVisible()
+    await expect(canvas.getAllByText('Every year')).toHaveLength(3)
+    await expect(canvas.getByRole('button', { name: 'Stocktake: actions' })).toBeVisible()
+  },
+}
+
+const body = within(document.body)
+const openAdd = async (canvas: { findByRole: (role: string, options: { name: string }) => Promise<HTMLElement> }) => {
+  await userEvent.click(await canvas.findByRole('button', { name: 'Add a special day' }))
+  const dialog = await body.findByRole('dialog', { name: 'Add a special day' })
+  return within(dialog)
+}
+
+/** Add a day: name, date, closed; it saves straight away and shows in the list. */
+export const AddSpecialDay: Story = {
+  play: async ({ canvas }) => {
+    const modal = await openAdd(canvas)
+    await expect(modal.getByRole('button', { name: 'Add' })).toBeDisabled()
+    await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Training day')
+    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: on(20) } })
+    await userEvent.click(modal.getByRole('button', { name: 'Add' }))
+    const toast = await body.findByText('Special day added')
+    await waitFor(() => expect(toast).toBeVisible())
+    await expect(await canvas.findByText('Training day')).toBeVisible()
+  },
+}
+
+/** A day in the past, or other hours past midnight into the next day's opening: it says what to fix. */
+export const SpecialDayProblems: Story = {
+  play: async ({ canvas }) => {
+    const modal = await openAdd(canvas)
+    await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Late night')
+    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: on(-3) } })
+    await expect(await modal.findByText('You can’t pick a day in the past.')).toBeVisible()
+    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: weekdayAhead(12) } })
+    await userEvent.click(modal.getByRole('radio', { name: 'Different hours' }))
+    await userEvent.selectOptions(modal.getByRole('combobox', { name: 'Opens' }), '20:00')
+    await userEvent.selectOptions(modal.getByRole('combobox', { name: 'Closes' }), '10:00')
+    await expect(await modal.findByText(/opens\. Pick an earlier time\.$/)).toBeVisible()
+    await expect(modal.getByRole('button', { name: 'Add' })).toBeDisabled()
+  },
+}
+
+/** Dates inside another special day: which one applies there, and why. */
+export const SpecialDayOverlap: Story = {
+  play: async ({ canvas }) => {
+    const modal = await openAdd(canvas)
+    await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Nowruz — short day')
+    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: nextNowruz() } })
+    await expect(await modal.findByText('These dates overlap “Nowruz”. On those days “Nowruz — short day” is used.')).toBeVisible()
+  },
+}
+
+/**
+ * A closed day over bookings: the modal asks first, «Keep them» with the closed day's caption or «Cancel and offer 3
+ * other times»; Save sends the choice.
+ */
+export const SpecialDayOverBookings: Story = {
+  args: { server: fakeApi({ ...affected, byStaff: [{ staffId: 'aa61d5e4-1f1a-4b0a-9a8e-3f3c3a3f3a01', name: 'Maral', count: 4 }] }) },
+  play: async ({ canvas }) => {
+    const modal = await openAdd(canvas)
+    await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Repairs')
+    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: on(1) } })
+    await userEvent.click(modal.getByRole('button', { name: 'Add' }))
+    await expect(await modal.findByText('3 bookings and 1 request on this day — Maral 4')).toBeVisible()
+    await expect(modal.getByRole('radio', { name: 'Keep them' })).toBeChecked()
+    await expect(modal.getByText('They stay in the calendar as they are. No new online bookings on that day.')).toBeVisible()
+    await userEvent.click(modal.getByRole('radio', { name: 'Cancel and offer 3 other times' }))
+    await userEvent.click(modal.getByRole('button', { name: 'Add' }))
+    const toast = await body.findByText('Special day added · 3 bookings and 1 request cancelled, the clients are notified')
+    await waitFor(() => expect(toast).toBeVisible())
+  },
+}
+
+/** Delete from the row's menu: it's gone at once, and Undo brings it back. */
+export const DeleteAndUndo: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Stocktake: actions' }))
+    await userEvent.click(await body.findByRole('menuitem', { name: 'Delete' }))
+    await waitFor(() => expect(canvas.queryByText('Stocktake')).toBeNull())
+    await userEvent.click(await body.findByRole('button', { name: 'Undo' }))
+    await expect(await canvas.findByText('Stocktake')).toBeVisible()
+  },
+}
+
+/** A delete that leaves bookings outside the week's hours: the same Keep them or Cancel step, then it's gone. */
+export const DeleteOverBookings: Story = {
+  args: { server: fakeApi(affected) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Stocktake: actions' }))
+    await userEvent.click(await body.findByRole('menuitem', { name: 'Delete' }))
+    const dialog = within(await body.findByRole('dialog', { name: '3 bookings and 1 request fall outside the new hours' }))
+    await waitFor(() =>
+      expect(dialog.getByText('Without “Stocktake”, the week’s hours apply. These were booked before the change.')).toBeVisible(),
+    )
+    await userEvent.click(dialog.getByRole('button', { name: 'Save' }))
+    // the toasts live on the page: another story's «Stocktake deleted» may still be there
+    const toasts = await body.findAllByText('Stocktake deleted')
+    await waitFor(() => expect(toasts.at(-1)).toBeVisible())
+    await waitFor(() => expect(canvas.queryByText('Stocktake')).toBeNull())
   },
 }
