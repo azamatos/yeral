@@ -1,23 +1,17 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
 import type { ConfirmMode } from '@yeral/domain/model'
 import { REQUEST_ANSWERERS, type RequestAnswerers } from '@yeral/domain/rules'
-import { useFmt } from '@yeral/i18n'
 import { Callout } from '@yeral/ui/callout'
 import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
 import { Select } from '@yeral/ui/select'
 import { SettingsRow } from '@yeral/ui/settings-row'
 import { Spinner } from '@yeral/ui/spinner'
 import { StatusBadge } from '@yeral/ui/status-badge'
-import { toast } from '@yeral/ui/toast'
 import { Check, Clock, Info, UserCheck, Zap } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
-import { useSdk } from '@/shared/api'
-import { useErrorText } from '@/shared/i18n'
-import { BUFFER_CHOICES, CANCEL_CHOICES, choicesWith, formFrom, hasTeam, HOLD_CHOICES, rulesUpdate, type RulesForm } from '../model/rules'
+import { ANSWERER_KEY, BUFFER_CHOICES, CANCEL_CHOICES, HOLD_CHOICES, useRuleLabels, useRulesForm } from '@/features/edit-booking-rules'
+import { choicesWith } from '@/shared/lib'
 import { StepHeader, type StepAction } from './setup-frame'
-
-const ANSWERER_KEY: Record<RequestAnswerers, 'whoDesk' | 'whoEach' | 'whoBoth'> = { desk: 'whoDesk', each: 'whoEach', both: 'whoBoth' }
 
 /** A select's value for the cancel window: `null` is «Any time». */
 const ANY = 'any'
@@ -30,26 +24,11 @@ const ANY = 'any'
  */
 export function useRulesStep(slug: string, on: boolean): { body: ReactNode; action: StepAction } {
   const t = useTranslations('setup.rules')
-  const sdk = useSdk()
+  const tr = useTranslations('bookingRules')
   const ts = useTranslations('status')
-  const fmt = useFmt()
-  const errorText = useErrorText()
-  const rules = useQuery({ ...sdk.settings.rules(slug), enabled: on })
-  // only «Who answers requests?» needs the team: the step doesn't wait for it, and without it (it didn't load) the
-  // question stays hidden and the setting keeps its value
-  const team = useQuery({ ...sdk.team.list(slug), enabled: on, retry: false })
-  const update = useMutation(sdk.settings.updateRules(slug))
-  const [state, setState] = useState<{ form: RulesForm; stored: RulesForm } | null>(null)
-  if (on && !state && rules.data) {
-    const form = formFrom(rules.data)
-    setState({ form, stored: form })
-  }
-  const form = state?.form
-  const set = (change: Partial<RulesForm>) => setState((s) => s && { ...s, form: { ...s.form, ...change } })
-
-  // a failed refetch keeps what's on screen; only a first load that failed is a failure
-  if (on && !form && rules.isError) throw rules.error
-  if (!on || !state || !form)
+  const label = useRuleLabels()
+  const rules = useRulesForm(slug, on)
+  if (!rules)
     return {
       body: (
         <div className="flex justify-center py-16">
@@ -59,24 +38,8 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
       action: { valid: false, busy: false, ready: false, save: () => Promise.resolve(true) },
     }
 
+  const { form, set, saving, askWho, save } = rules
   const manual = form.confirmMode === 'manual'
-  const askWho = manual && !!team.data && hasTeam(team.data.items)
-  // what's chosen while the save is on its way would be left out of it
-  const saving = update.isPending
-
-  /** What changed into the draft's rules; false when it failed (the person heard why). */
-  const save = async (): Promise<boolean> => {
-    const changes = rulesUpdate(form, state.stored)
-    if (!changes) return true
-    try {
-      await update.mutateAsync(changes)
-      setState((s) => s && { ...s, stored: form })
-      return true
-    } catch (error) {
-      toast(errorText(error))
-      return false
-    }
-  }
 
   const clientSees = (badge: ReactNode) => (
     <span className="inline-flex flex-wrap items-center gap-2 text-dense text-n-600">
@@ -135,7 +98,7 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
             >
               {choicesWith(HOLD_CHOICES, form.holdMinutes).map((m) => (
                 <option key={m} value={m}>
-                  {fmt.duration(m)}
+                  {label.hold(m)}
                 </option>
               ))}
             </Select>
@@ -159,8 +122,8 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
                       key={who}
                       value={who}
                       indicator="start"
-                      title={t(ANSWERER_KEY[who])}
-                      caption={t(`${ANSWERER_KEY[who]}Caption`)}
+                      title={tr(ANSWERER_KEY[who])}
+                      caption={tr(`${ANSWERER_KEY[who]}Caption`)}
                     />
                   ))}
                 </OptionCardGroup>
@@ -183,7 +146,7 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
           >
             {choicesWith(CANCEL_CHOICES, form.cancelWindowMinutes).map((m) => (
               <option key={m ?? ANY} value={m ?? ANY}>
-                {m === null ? t('cancelAny') : t('cancelBefore', { hours: m / 60 })}
+                {label.cancel(m)}
               </option>
             ))}
           </Select>
@@ -197,7 +160,7 @@ export function useRulesStep(slug: string, on: boolean): { body: ReactNode; acti
           >
             {choicesWith(BUFFER_CHOICES, form.bufferMinutes).map((m) => (
               <option key={m} value={m}>
-                {m === 0 ? t('bufferNone') : fmt.duration(m)}
+                {label.buffer(m)}
               </option>
             ))}
           </Select>
