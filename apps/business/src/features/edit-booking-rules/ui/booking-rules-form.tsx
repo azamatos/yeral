@@ -8,6 +8,7 @@ import { NumberStepper } from '@yeral/ui/number-stepper'
 import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
 import { Segmented, SegmentedItem } from '@yeral/ui/segmented'
 import { Select } from '@yeral/ui/select'
+import { SettingsSection, SettingsSectionTitle } from '@yeral/ui/settings-layout'
 import { SettingsRow } from '@yeral/ui/settings-row'
 import { Switch } from '@yeral/ui/switch'
 import { Info, Lock } from 'lucide-react'
@@ -32,10 +33,11 @@ const EXAMPLE_START = 10 * 60
  * Settings → Booking rules (B-Settings `isRules`, design §8 and §28.5, book B-05, B-41, B-42): confirmation (and the
  * note that waiting requests keep their timers once it changes), the hold and who answers in manual mode, when clients
  * can book (notice, how far ahead, the buffer with «Other…» 1–120, the time step), and cancelling, lateness and
- * no-shows. The page around it gives the header, the paused note, the save bar and the client's preview; the internal
- * statuses are their own piece. Every control waits while a save is on its way.
+ * no-shows. `bufferNote` goes under the buffer's help (the services with a buffer of their own). The page around it
+ * gives the header, the paused note, the save bar and the client's preview; the internal statuses are their own piece.
+ * Every control waits while a save is on its way.
  */
-export function BookingRulesForm({ rules }: { rules: RulesFormState }) {
+export function BookingRulesForm({ rules, bufferNote }: { rules: RulesFormState; bufferNote?: ReactNode }) {
   const t = useTranslations('bookingRules')
   const tc = useTranslations('common')
   const fmt = useFmt()
@@ -143,7 +145,19 @@ export function BookingRulesForm({ rules }: { rules: RulesFormState }) {
             ))}
           </Select>
         </SettingsRow>
-        <SettingsRow label={t('buffer')} description={t('bufferHint')}>
+        <SettingsRow
+          label={t('buffer')}
+          description={
+            bufferNote ? (
+              <>
+                {t('bufferHint')}
+                <span className="block pt-1">{bufferNote}</span>
+              </>
+            ) : (
+              t('bufferHint')
+            )
+          }
+        >
           {({ id, descriptionId }) => (
             <>
               <div className="flex flex-wrap items-center justify-end gap-2">
@@ -260,7 +274,10 @@ export function BookingRulesForm({ rules }: { rules: RulesFormState }) {
   )
 }
 
-/** One group of rules (B-Settings `.ps`): a line above, the 17/24 heading naming it, its rows 20 apart. */
+/**
+ * One group of rules (B-Settings `.ps`, Settings' `SettingsSection`), named by its heading; its caption, when there is
+ * one, also describes the control the group is (`ids` for «Who answers requests?»).
+ */
 function Section({
   title,
   description,
@@ -273,18 +290,11 @@ function Section({
   const titleId = useId()
   const descriptionId = description ? `${titleId}-help` : undefined
   return (
-    <section aria-labelledby={titleId} className="flex flex-col gap-5 border-t border-n-200 py-6">
-      <div className="flex flex-col gap-0.5">
-        <h3 id={titleId} className="m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em]">
-          {title}
-        </h3>
-        {description && (
-          <span id={descriptionId} className="text-dense text-n-600">
-            {description}
-          </span>
-        )}
-      </div>
+    <SettingsSection aria-labelledby={titleId}>
+      <SettingsSectionTitle id={titleId} caption={description} captionId={descriptionId}>
+        {title}
+      </SettingsSectionTitle>
       {typeof children === 'function' ? children({ titleId, descriptionId }) : children}
-    </section>
+    </SettingsSection>
   )
 }

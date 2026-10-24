@@ -1,4 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SettingsPlaceholder } from '@/pages/settings'
+import { SettingsRulesPage } from '@/pages/settings-rules'
 
-export const Route = createFileRoute('/w/$slug/settings/rules')({ component: () => <SettingsPlaceholder section="rules" /> })
+export const Route = createFileRoute('/w/$slug/settings/rules')({ component: SettingsRulesPage })

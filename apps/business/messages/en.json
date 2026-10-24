@@ -595,6 +595,37 @@
         "seeOwn": "See own"
       },
       "noApp": "Specialists who don’t use the app never sign in, so the table doesn’t apply to them."
+    },
+    "save": {
+      "question": "Save your changes?",
+      "unsaved": "Unsaved changes",
+      "discard": "Discard",
+      "save": "Save",
+      "saving": "Saving",
+      "saved": "Saved"
+    },
+    "rules": {
+      "lead": "Choose when and how clients can book you online. The rules apply to every specialist.",
+      "paused": "Online booking is paused — clients see a Call card. <link>Resume it in Business profile</link>",
+      "ownBuffers": "Set per service: {list} · <link>Services</link>",
+      "ownBuffer": "{service} — {buffer}",
+      "preview": "What the client sees",
+      "sentTitle": "Booking sent",
+      "answerBy": "The business answers by {time}",
+      "answerByTomorrow": "The business answers by {time} tomorrow",
+      "sentNote": "You’ll see the answer in My bookings.",
+      "confirmedTitle": "Booking confirmed",
+      "confirmedNote": "Your time is set. You’ll find it in My bookings.",
+      "offTitle": "Book by phone",
+      "offNote": "{name} isn’t taking online bookings right now. Call to book a time.",
+      "call": "Call {phone}",
+      "when": "{day} · {date} · {time}",
+      "cancelAny": "You can cancel or change the booking for free at any time.",
+      "cancelBefore": "You can cancel or change the booking for free up to {hours, plural, one {# hour} other {# hours}} before.",
+      "captionOff": "Your page shows this card instead of free times.",
+      "captionManual": "Example: a request sent today at {time}. It updates as you change the rules.",
+      "captionInstant": "It updates as you change the rules.",
+      "booking": "{name} · {service} · {specialist}"
     }
   }
 }
