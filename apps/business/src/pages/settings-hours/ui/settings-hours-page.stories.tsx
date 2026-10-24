@@ -375,8 +375,9 @@ export const DeleteOverBookings: Story = {
       expect(dialog.getByText('Without “Stocktake”, the week’s hours apply. These were booked before the change.')).toBeVisible(),
     )
     await userEvent.click(dialog.getByRole('button', { name: 'Save' }))
-    const toast = await body.findByText('Stocktake deleted')
-    await waitFor(() => expect(toast).toBeVisible())
+    // the toasts live on the page: another story's «Stocktake deleted» may still be there
+    const toasts = await body.findAllByText('Stocktake deleted')
+    await waitFor(() => expect(toasts.at(-1)).toBeVisible())
     await waitFor(() => expect(canvas.queryByText('Stocktake')).toBeNull())
   },
 }
