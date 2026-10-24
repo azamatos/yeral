@@ -13,13 +13,14 @@ import { BookingRulesForm, useRuleLabels, useRulesForm } from '@/features/edit-b
 import { useSdk } from '@/shared/api'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
+import { BookingStatuses } from './booking-statuses'
 import { RulesPreview } from './rules-preview'
 
 /**
  * Settings → Booking rules (B-Settings `isRules`, design §8 and §28.5, book B-05, B-41, B-42): the rules form with its
  * save bar while there are changes and «Saved» after, the note that online booking is paused (it's switched in Business
- * profile), the services that keep a buffer of their own, and «What the client sees» beside it. The internal statuses
- * are their own piece.
+ * profile), the services that keep a buffer of their own, «What the client sees» beside it, and the booking statuses
+ * (the system ones, locked, and the internal ones, which save on their own).
  */
 export function SettingsRulesPage() {
   const { workspace } = useWorkspace()
@@ -64,6 +65,7 @@ function RulesSection({ slug, name }: { slug: string; name: string }) {
         </Callout>
       )}
       <BookingRulesForm rules={rules} bufferNote={ownBuffers} />
+      <BookingStatuses slug={slug} />
       {rules.dirty && (
         <SaveBar
           message={t('save.question')}
