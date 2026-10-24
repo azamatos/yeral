@@ -22,5 +22,5 @@
   must be open.»; a special day the new week runs into says so; separators come from messages; keyed by the slug.
 - Follow-ups: the special days section (list, add/edit modal that saves directly, overlap warning); TimerPill in
   `@yeral/ui` (COMPONENTS.md: role timer, ticking, hot at 15 min, «By 09:30») for the list's hand-drawn pill; «Fri, 16
-  Oct» needs a three-letter weekday in `fmt` (the list shows «Fr, 16 Oct»); the save bar's words live in
-  `settings.hours.save` until a second section shares them.
+  Oct» needs a three-letter weekday in `fmt` (the list shows «Fr, 16 Oct»). The save bar's words are the shared
+  `settings.save` (with Booking rules).

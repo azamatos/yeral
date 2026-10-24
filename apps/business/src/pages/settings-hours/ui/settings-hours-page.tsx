@@ -44,6 +44,7 @@ export function SettingsHoursPage() {
 
 function HoursSettings({ slug }: { slug: string }) {
   const t = useTranslations('settings.hours')
+  const words = useTranslations('settings.save')
   const sdk = useSdk()
   const errorText = useErrorText()
   const describe = useChangedDays()
@@ -115,15 +116,17 @@ function HoursSettings({ slug }: { slug: string }) {
       </SettingsSection>
       {dirty && (
         <SaveBar
-          message={t('save.message')}
-          label={t('save.label')}
-          discardLabel={t('save.discard')}
-          saveLabel={t('save.save')}
-          savingLabel={t('save.saving')}
+          message={words('question')}
+          label={words('unsaved')}
+          discardLabel={words('discard')}
+          saveLabel={words('save')}
+          savingLabel={words('saving')}
           invalid={!weekValid(hours)}
           saving={update.isPending && !affected}
           onDiscard={() => setEdit(null)}
           onSave={() => void save()}
+          // on a phone above the shell's tab bar, where its toasts sit too (B-Settings `.sbar` under 768)
+          className="max-sm:bottom-[var(--toast-bottom,12px)]"
         />
       )}
       <HoursAffectedBookings

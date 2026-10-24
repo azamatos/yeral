@@ -659,13 +659,6 @@
       "weekCaption": "Specialists’ shifts stay within these hours.",
       "note": "A day can close after midnight: 18:00–02:00 means open until 02:00 the next day. The part after midnight must end before the next day opens.",
       "noDay": "At least one day must be open.",
-      "save": {
-        "message": "Save your changes?",
-        "label": "Unsaved changes",
-        "discard": "Discard",
-        "save": "Save",
-        "saving": "Saving"
-      },
       "saved": "Hours saved",
       "savedKept": "Hours saved · {what} kept as {n, plural, one {it is} other {they are}}",
       "savedCancelled": "Hours saved · {what} cancelled — each client picks a new time in My bookings",
