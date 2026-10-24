@@ -13,7 +13,7 @@ import { Spinner } from '@yeral/ui/spinner'
 import { Switch } from '@yeral/ui/switch'
 import { toast } from '@yeral/ui/toast'
 import { Info, Plus, User, Users, X } from 'lucide-react'
-import { useId, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { SETUP_TEAM_MAX } from '@yeral/contract/setup'
 import { useSdk } from '@/shared/api'
@@ -124,6 +124,8 @@ export function useTeamStep(slug: string, on: boolean, owner: { name: string; ph
 }
 
 const COLUMNS = 'grid grid-cols-[minmax(0,1fr)_210px_168px_44px] items-center gap-2 max-md:grid-cols-[minmax(0,1fr)_44px]'
+// the focus target «Add a team member» (rows are named by their keys)
+const ADD = ' add'
 
 function TeamRows({
   form,
@@ -137,10 +139,31 @@ function TeamRows({
   onChange: (change: (f: TeamForm) => TeamForm) => void
 }) {
   const t = useTranslations('setup.team')
+  const list = useId()
+  const nameId = (key: string) => `${list}-${key}-name`
+  // where the focus goes once the list has changed: a new row's name; after a removal the next row's (else the one
+  // before, else «Add a team member»), so it never falls back to the page
+  const focusNext = useRef<string | null>(null)
+  const addButton = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    const target = focusNext.current
+    if (!target) return
+    focusNext.current = null
+    if (target === ADD) addButton.current?.focus()
+    else document.getElementById(nameId(target))?.focus()
+  })
   const update = (key: string, patch: Partial<TeamRow>) =>
     onChange((f) => ({ ...f, rows: f.rows.map((r) => (r.key === key ? { ...r, ...patch } : r)) }))
-  const remove = (key: string) => onChange((f) => ({ ...f, rows: f.rows.filter((r) => r.key !== key) }))
-  const add = () => onChange((f) => ({ ...f, rows: [...f.rows, emptyRow()] }))
+  const remove = (key: string) => {
+    const at = form.rows.findIndex((r) => r.key === key)
+    focusNext.current = (form.rows[at + 1] ?? form.rows[at - 1])?.key ?? ADD
+    onChange((f) => ({ ...f, rows: f.rows.filter((r) => r.key !== key) }))
+  }
+  const add = () => {
+    const row = emptyRow()
+    focusNext.current = row.key
+    onChange((f) => ({ ...f, rows: [...f.rows, row] }))
+  }
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col">
@@ -165,6 +188,7 @@ function TeamRows({
         {form.rows.map((row, i) => (
           <MemberRow
             key={row.key}
+            nameId={nameId(row.key)}
             index={i + 1}
             row={row}
             problem={isFilled(row) ? rowProblem(row, form.rows, owner.phone) : null}
@@ -176,6 +200,7 @@ function TeamRows({
       </div>
       {form.rows.length < SETUP_TEAM_MAX && (
         <button
+          ref={addButton}
           type="button"
           disabled={disabled}
           onClick={add}
@@ -200,6 +225,7 @@ function TeamRows({
 }
 
 function MemberRow({
+  nameId,
   index,
   row,
   problem,
@@ -207,6 +233,8 @@ function MemberRow({
   onChange,
   onRemove,
 }: {
+  /** The name field's id: the list moves the focus there. */
+  nameId: string
   index: number
   row: TeamRow
   problem: ReturnType<typeof rowProblem>
@@ -235,6 +263,7 @@ function MemberRow({
     <div role="group" aria-label={t('member', { n: index, name: who })} className="flex flex-col gap-2 border-t border-n-200 py-2">
       <div className={COLUMNS}>
         <Input
+          id={nameId}
           className="h-11 text-small max-sm:text-[16px]"
           aria-label={t('nameOf', { n: index })}
           placeholder={t('name')}

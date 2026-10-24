@@ -30,6 +30,21 @@ describe('the workspace sections', () => {
       section: 'clients',
     })
     expect(sameSectionIn('/w/glow-studio', { slug: 'glow-nails', level: 'owner' })).toEqual({ slug: 'glow-nails', section: 'calendar' })
+    // Settings keeps its section, not what's under it (a team member)
+    expect(sameSectionIn('/w/glow-studio/settings/hours', { slug: 'glow-nails', level: 'admin' })).toEqual({
+      slug: 'glow-nails',
+      section: 'settings',
+      part: 'hours',
+    })
+    expect(sameSectionIn('/w/glow-studio/settings/team/m-1', { slug: 'glow-nails', level: 'owner' })).toEqual({
+      slug: 'glow-nails',
+      section: 'settings',
+      part: 'team',
+    })
+    expect(sameSectionIn('/w/ayna-studio/settings/hours', { slug: 'glow-studio', level: 'specialist' })).toEqual({
+      slug: 'glow-studio',
+      section: 'calendar',
+    })
     // from her own studio's settings into the studio where she's a specialist: its calendar, not a refusal
     expect(sameSectionIn('/w/ayna-studio/settings', { slug: 'glow-studio', level: 'specialist' })).toEqual({
       slug: 'glow-studio',

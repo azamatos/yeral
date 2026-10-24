@@ -74,6 +74,19 @@ export const WithShare: Story = {
   },
 }
 
+/** A phone: the row wraps, so the buttons go under the field instead of squeezing it (B-Settings `.lrow`). */
+export const WithSharePhone: Story = {
+  args: WithShare.args,
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    const field = canvas.getByRole('textbox', { name: 'Your page link' })
+    const share = canvas.getByRole('button', { name: 'Share' })
+    await expect(share.getBoundingClientRect().top).toBeGreaterThanOrEqual(field.getBoundingClientRect().bottom)
+    // the field keeps its width: at least 260, as the board's
+    await expect(field.getBoundingClientRect().width).toBeGreaterThanOrEqual(260)
+  },
+}
+
 /**
  * When the clipboard refuses, nothing claims a copy: the field shows the full address Copy would have copied, selected
  * for ⌘C.

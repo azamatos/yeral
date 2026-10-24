@@ -47,9 +47,10 @@ export function ShellSwitcher({ variant, className }: { variant: 'sidebar' | 'ra
       onSelect={(to) => {
         const next = workspaces.items.find((w) => w.slug === to)
         if (!next) return
-        // the same section there, when the person's level there has it
+        // the same section there, when the person's level there has it (in Settings, the same settings section)
         const target = sameSectionIn(pathname, next)
-        void navigate({ to: `/w/$slug/${target.section}`, params: { slug: target.slug } })
+        if (target.part) void navigate({ href: `/w/${target.slug}/${target.section}/${target.part}` })
+        else void navigate({ to: `/w/$slug/${target.section}`, params: { slug: target.slug } })
       }}
       onCreate={() => void navigate({ to: '/setup/$step', params: { step: 'business' } })}
       className={className}

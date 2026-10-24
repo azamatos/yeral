@@ -106,7 +106,8 @@ export function CopyField({ value, display, variant = 'field', label, copy, shar
     )
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    // the buttons wrap under the field when the row is narrow (B-Settings `.lrow`: a phone)
+    <div className={cn('flex flex-wrap items-center gap-2', className)}>
       <input
         ref={field}
         readOnly

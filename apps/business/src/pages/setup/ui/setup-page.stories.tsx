@@ -794,6 +794,24 @@ export const TeamProblems: Story = {
   },
 }
 
+/**
+ * The focus follows the list: «Add a team member» puts it in the new row's name; removing a row moves it to the next
+ * row's name (else the one before), and removing the last one to «Add a team member».
+ */
+export const TeamFocus: Story = {
+  args: { server: fakeApi({ draft: teamDraft, team: [member('m1', 'Leýli', 'specialist', false)] }) },
+  play: async ({ canvas }) => {
+    await canvas.findByRole('group', { name: 'Team member 1: Leýli' })
+    await userEvent.click(canvas.getByRole('button', { name: 'Add a team member' }))
+    await expect(canvas.getByRole('textbox', { name: 'Name of team member 2' })).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove: Leýli' }))
+    // the new row is the first now
+    await expect(canvas.getByRole('textbox', { name: 'Name of team member 1' })).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove: New team member' }))
+    await expect(canvas.getByRole('button', { name: 'Add a team member' })).toHaveFocus()
+  },
+}
+
 const rulesDraft: Draft = { ...addressDraft, step: 'rules', address: { line: '247 Bitarap Türkmenistan Avenue', city } }
 
 /**
