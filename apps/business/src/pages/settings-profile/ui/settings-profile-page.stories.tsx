@@ -68,7 +68,28 @@ const PROFILE: BusinessProfile = {
   hidden: null,
 }
 
-const sent: { profile: unknown[]; rules: unknown[]; review: number; logo: number[][] } = { profile: [], rules: [], review: 0, logo: [] }
+const sent: { profile: unknown[]; rules: unknown[]; review: number; logo: number[][]; order: string[][]; removed: string[] } = {
+  profile: [],
+  rules: [],
+  review: 0,
+  logo: [],
+  order: [],
+  removed: [],
+}
+
+/**
+ * An upload's end: the picture is decoded and drawn in the browser, sent, and the settings are asked again before the
+ * page says so, which on a busy CI runner takes longer than a query's default second.
+ */
+const UPLOAD = { timeout: 10_000 }
+
+// flat squares in the brand's tints: no network in the stories
+const square = (fill: string) =>
+  `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><rect width="4" height="4" fill="${fill}"/></svg>`)}`
+const GALLERY = [
+  { id: 'hall', url: square('#d5cbfb'), alt: 'Salon hall' },
+  { id: 'chair', url: square('#bfe6d1'), alt: 'Styling chair' },
+]
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
@@ -82,10 +103,13 @@ const fakeApi =
   () => {
     let profile: BusinessProfile = { ...PROFILE, ...start }
     let rules = { ...DEFAULT_RULES, lateMinutes: 15 }
+    let gallery = [...GALLERY]
     sent.profile = []
     sent.rules = []
     sent.review = 0
     sent.logo = []
+    sent.order = []
+    sent.removed = []
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const request = new Request(input, init)
       const route = `${request.method} ${new URL(request.url).pathname.replace(/^\/v1/, '')}`
@@ -123,6 +147,24 @@ const fakeApi =
         sent.logo.push(await createImageBitmap(file).then((b) => [b.width, b.height]))
         profile = { ...profile, logo: { url: URL.createObjectURL(file), alt: 'Glow Studio' } }
         return json({ logo: profile.logo })
+      }
+      if (route === 'GET /w/glow-studio/settings/photos') return json({ items: gallery })
+      if (route === 'POST /w/glow-studio/settings/photos') {
+        const file = (await request.formData()).get('file') as File
+        gallery = [...gallery, { id: `p${gallery.length + 1}`, url: URL.createObjectURL(file), alt: '' }]
+        return json({ items: gallery })
+      }
+      if (route === 'PUT /w/glow-studio/settings/photos/order') {
+        const { ids } = (await request.json()) as { ids: string[] }
+        sent.order.push(ids)
+        gallery = ids.flatMap((id) => gallery.find((g) => g.id === id) ?? [])
+        return json({ items: gallery })
+      }
+      const removed = /^DELETE \/w\/glow-studio\/settings\/photos\/([^/]+)$/.exec(route)
+      if (removed?.[1]) {
+        sent.removed.push(removed[1])
+        gallery = gallery.filter((g) => g.id !== removed[1])
+        return new Response(null, { status: 204 })
       }
       if (route === 'POST /w/glow-studio/verification') {
         sent.review += 1
@@ -223,10 +265,11 @@ async function picture(width: number, height: number): Promise<File> {
 export const Logo: Story = {
   play: async ({ canvas }) => {
     await userEvent.upload(await canvas.findByLabelText('Logo'), await picture(600, 400))
-    const saved = await within(document.body).findByText('Logo saved')
+    // the upload's end: the api got the square, the row offers «Change logo», then the toast
+    await waitFor(() => expect(sent.logo).toEqual([[400, 400]]), UPLOAD)
+    await expect(await canvas.findByRole('button', { name: 'Change logo' }, UPLOAD)).toBeVisible()
+    const saved = await within(document.body).findByText('Logo saved', {}, UPLOAD)
     await waitFor(() => expect(saved).toBeVisible())
-    await expect(sent.logo).toEqual([[400, 400]])
-    await expect(await canvas.findByRole('button', { name: 'Change logo' })).toBeVisible()
   },
 }
 
@@ -234,8 +277,42 @@ export const Logo: Story = {
 export const LogoTooSmall: Story = {
   play: async ({ canvas }) => {
     await userEvent.upload(await canvas.findByLabelText('Logo'), await picture(300, 300))
-    await expect(await canvas.findByText('logo.png is 300 × 300 px — the logo needs at least 400 × 400 px.')).toBeVisible()
+    await expect(await canvas.findByText('logo.png is 300 × 300 px — the logo needs at least 400 × 400 px.', {}, UPLOAD)).toBeVisible()
     await expect(sent.logo).toEqual([])
+  },
+}
+
+/**
+ * The photos save at once: «Make cover» sends the new order, remove takes one out, a picked PNG is added; under 3 the
+ * hint says more get seen more.
+ */
+export const Photos: Story = {
+  play: async ({ canvas }) => {
+    const section = await canvas.findByRole('region', { name: 'Photos' })
+    await expect(await within(section).findByText('2 of 20')).toBeVisible()
+    await expect(within(section).getByText(/Add 1 more photo/)).toBeVisible()
+    await userEvent.click(within(section).getByRole('button', { name: 'Make cover: Photo 2' }))
+    await waitFor(() => expect(sent.order).toEqual([['chair', 'hall']]))
+    // named by their place: the api names every photo after the business
+    await expect(within(section).getByRole('button', { name: 'Make cover: Photo 2' })).toBeVisible()
+    await userEvent.upload(within(section).getByLabelText('Add photo'), await picture(800, 600))
+    await expect(await within(section).findByText('3 of 20', {}, UPLOAD)).toBeVisible()
+    await expect(within(section).queryByText(/more photo/)).toBeNull()
+    await userEvent.click(within(section).getByRole('button', { name: 'Remove photo: Photo 2' }))
+    await expect(await within(section).findByText('2 of 20')).toBeVisible()
+    await expect(sent.removed).toEqual(['hall'])
+  },
+}
+
+/** A file that isn't a photo isn't sent: a dashed tile and why, until it's dismissed. */
+export const PhotoRefused: Story = {
+  play: async ({ canvas }) => {
+    const section = await canvas.findByRole('region', { name: 'Photos' })
+    const input = await within(section).findByLabelText('Add photo')
+    await userEvent.upload(input, new File(['%PDF-1.7'], 'price-list.pdf', { type: 'image/png' }), { applyAccept: false })
+    await expect(await within(section).findByText('price-list.pdf isn’t a photo. Use JPG, PNG or WebP.', {}, UPLOAD)).toBeVisible()
+    await userEvent.click(within(section).getByRole('button', { name: 'Dismiss price-list.pdf' }))
+    await expect(within(section).queryByText('Not a photo')).toBeNull()
   },
 }
 

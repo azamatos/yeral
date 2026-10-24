@@ -1,10 +1,11 @@
 /**
  * The done step's rules (B-Onboarding `isDone`, book B-06): the quality checklist's states.
  */
+import { GALLERY_GOOD } from '@yeral/domain/photos'
 import { SETUP_NEEDS, type SetupNeed } from '@yeral/domain/setup'
 
 /** «Add 3+ photos» is done from this many (design §27.2: the first one is the card's picture). */
-export const PHOTOS_GOOD = 3
+export const PHOTOS_GOOD = GALLERY_GOOD
 
 export type QualityItem = 'logo' | 'photos' | 'about'
 export const QUALITY_ITEMS: readonly QualityItem[] = ['logo', 'photos', 'about']

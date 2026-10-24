@@ -29,13 +29,14 @@ import { useWorkspace } from '@/widgets/workspace-shell'
 import { ABOUT_MAX, NAME_MAX, toggleAmenity } from '../model/profile'
 import { useProfileForm, type ProfileFormState } from '../model/use-profile-form'
 import { LogoRow } from './logo-row'
+import { PHOTOS_ANCHOR, PhotosSection } from './photos-section'
 
 /**
  * Settings → Business profile (B-Settings `isProfile`, design §8 and §28.5, book B-37): «View your page»; when the Ýeral
  * team sent the page back, their reason with «Send again»; the main details (the logo, saved at once; the name and the
- * category), the About, the phone for clients and the amenities, and «Pause online booking», with «Close this
- * workspace» for the owner (by contacting Ýeral: there's no delete). One save bar for the details while they differ
- * from what's saved, «Saved» after. The photos and the address are their own pieces.
+ * category), the About, the photos (each change saved at once), the phone for clients and the amenities, and «Pause
+ * online booking», with «Close this workspace» for the owner (by contacting Ýeral: there's no delete). One save bar for
+ * the details while they differ from what's saved, «Saved» after. The address is its own piece.
  */
 export function SettingsProfilePage() {
   const { workspace } = useWorkspace()
@@ -88,6 +89,7 @@ function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; d
         <CategoryRow profile={profile} />
       </SettingsSection>
       <AboutSection profile={profile} />
+      <PhotosSection slug={slug} />
       <ContactSection profile={profile} />
       <PauseSection profile={profile} owner={owner && !demo} />
       {profile.dirty && (
@@ -129,8 +131,8 @@ function SentBack({ slug, reason, owner, unsaved }: { slug: string; reason: stri
       <p id={`${titleId}-caption`} className="m-0 text-dense text-n-600">
         {owner ? t('caption') : t('captionAdmin')}
       </p>
-      {owner && (
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
+        {owner && (
           <Button
             size="s"
             variant="primary"
@@ -141,8 +143,11 @@ function SentBack({ slug, reason, owner, unsaved }: { slug: string; reason: stri
           >
             {t('send')}
           </Button>
-        </div>
-      )}
+        )}
+        <Button asChild size="s" variant="ghost">
+          <a href={`#${PHOTOS_ANCHOR}`}>{t('toPhotos')}</a>
+        </Button>
+      </div>
     </div>
   )
 }
