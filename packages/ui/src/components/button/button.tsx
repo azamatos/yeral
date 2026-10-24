@@ -80,7 +80,8 @@ export function Button({
       type={asChild ? undefined : (type ?? 'button')}
       disabled={asChild ? undefined : disabled}
       aria-busy={loading || undefined}
-      aria-disabled={loading || undefined}
+      // a caller's own `aria-disabled` (a trigger that stays focusable while off) stands too
+      aria-disabled={loading || props['aria-disabled'] || undefined}
       aria-label={loading && loadingLabel ? loadingLabel : props['aria-label']}
       onClick={(e) => {
         if (loading) e.preventDefault()

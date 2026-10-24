@@ -256,8 +256,8 @@ export const Offline: Story = {
 }
 
 /**
- * The booking statuses: the five system ones, locked, with their meaning; Arrived and Started off at first, switched on
- * at once (their own save, not the save bar), never deleted.
+ * The booking statuses: the five system ones, locked, with their meaning; Arrived and Started off at first, never
+ * deleted. Their switches ride the rules' save bar: Save sends each flip, Discard puts them back.
  */
 export const Statuses: Story = {
   play: async ({ canvas }) => {
@@ -266,13 +266,24 @@ export const Statuses: Story = {
     await expect(within(system).getByText('The client didn’t come — marked with Report')).toBeVisible()
     const internal = await canvas.findByRole('group', { name: 'Internal statuses' })
     const arrived = within(internal).getByRole('switch', { name: 'Arrived' })
+    const started = within(internal).getByRole('switch', { name: 'Started' })
     await expect(arrived).not.toBeChecked()
     await expect(within(internal).queryByRole('button', { name: 'Delete: Arrived' })).toBeNull()
-    await userEvent.click(arrived)
-    await waitFor(() => expect(statusCalls).toEqual(['PATCH st-arrived {"enabled":true}']))
-    await waitFor(() => expect(arrived).toBeChecked())
-    await expect(canvas.queryByRole('region', { name: 'Unsaved changes' })).toBeNull()
     await expect(canvas.getByText('2 / 5 · you can add 3 more')).toBeVisible()
+    // Discard puts a flip back
+    await userEvent.click(started)
+    const bar = canvas.getByRole('region', { name: 'Unsaved changes' })
+    await userEvent.click(within(bar).getByRole('button', { name: 'Discard' }))
+    await expect(started).not.toBeChecked()
+    // Save sends it
+    await userEvent.click(arrived)
+    await expect(arrived).toBeChecked()
+    await expect(statusCalls).toEqual([])
+    await userEvent.click(within(canvas.getByRole('region', { name: 'Unsaved changes' })).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(statusCalls).toEqual(['PATCH st-arrived {"enabled":true}']))
+    await expect(saved).toEqual([])
+    await waitFor(() => expect(canvas.queryByRole('region', { name: 'Unsaved changes' })).toBeNull())
+    await expect(arrived).toBeChecked()
   },
 }
 
@@ -302,17 +313,22 @@ export const AddStatus: Story = {
   },
 }
 
-/** The business's own statuses delete at once; five in all closes «Add status». */
+/** The business's own statuses delete at once; five in all closes «Add status» (it keeps its focus). */
 export const FullStatuses: Story = {
   args: { server: fakeApi({}, [own('st-3', 'Preparing'), own('st-4', 'Paid'), own('st-5', 'Washing')]) },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('Up to 5 internal statuses')).toBeVisible()
-    await expect(canvas.getByRole('button', { name: 'Add status' })).toBeDisabled()
+    const add = canvas.getByRole('button', { name: 'Add status' })
+    await expect(add).toHaveAttribute('aria-disabled', 'true')
+    await userEvent.click(add)
+    await expect(within(document.body).queryByRole('dialog')).toBeNull()
     await userEvent.click(canvas.getByRole('button', { name: 'Delete: Paid' }))
     await waitFor(() => expect(statusCalls).toEqual(['DELETE st-4']))
     await expect(await within(document.body).findByText('“Paid” deleted')).toBeInTheDocument()
     await expect(await canvas.findByText('4 / 5 · you can add 1 more')).toBeVisible()
-    await expect(canvas.getByRole('button', { name: 'Add status' })).toBeEnabled()
+    // the row went with its button: the focus moves on to «Add status», open again
+    await waitFor(() => expect(add).toHaveFocus())
+    await expect(add).not.toHaveAttribute('aria-disabled')
   },
 }
 

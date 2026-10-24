@@ -13,6 +13,7 @@ import { BookingRulesForm, useRuleLabels, useRulesForm } from '@/features/edit-b
 import { useSdk } from '@/shared/api'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
+import { useStatusToggles } from '../model/use-status-toggles'
 import { BookingStatuses } from './booking-statuses'
 import { RulesPreview } from './rules-preview'
 
@@ -20,7 +21,7 @@ import { RulesPreview } from './rules-preview'
  * Settings → Booking rules (B-Settings `isRules`, design §8 and §28.5, book B-05, B-41, B-42): the rules form with its
  * save bar while there are changes and «Saved» after, the note that online booking is paused (it's switched in Business
  * profile), the services that keep a buffer of their own, «What the client sees» beside it, and the booking statuses
- * (the system ones, locked, and the internal ones, which save on their own).
+ * (the system ones, locked; the internal ones switched on or off with the rules, added and deleted at once).
  */
 export function SettingsRulesPage() {
   const { workspace } = useWorkspace()
@@ -36,6 +37,7 @@ function RulesSection({ slug, name }: { slug: string; name: string }) {
   const stored = useQuery(sdk.settings.rules(slug))
   const paused = stored.data?.onlineEnabled === false
   const ownBuffers = useOwnBuffers(slug)
+  const toggles = useStatusToggles(slug)
   const lead = t('rules.lead')
 
   if (!rules)
@@ -47,8 +49,15 @@ function RulesSection({ slug, name }: { slug: string; name: string }) {
       </SettingsPage>
     )
 
+  // the rules and the internal statuses' switches are one form with one save bar
+  const dirty = rules.dirty || toggles.dirty
   const save = async () => {
-    if (await rules.save()) toast(t('save.saved'))
+    const saved = (await rules.save()) && (await toggles.save())
+    if (saved) toast(t('save.saved'))
+  }
+  const discard = () => {
+    rules.discard()
+    toggles.discard()
   }
 
   return (
@@ -65,18 +74,18 @@ function RulesSection({ slug, name }: { slug: string; name: string }) {
         </Callout>
       )}
       <BookingRulesForm rules={rules} bufferNote={ownBuffers} />
-      <BookingStatuses slug={slug} />
-      {rules.dirty && (
+      <BookingStatuses slug={slug} toggles={toggles} />
+      {dirty && (
         <SaveBar
           message={t('save.question')}
           label={t('save.unsaved')}
           discardLabel={t('save.discard')}
           saveLabel={t('save.save')}
           savingLabel={t('save.saving')}
-          onDiscard={rules.discard}
+          onDiscard={discard}
           onSave={() => void save()}
           invalid={!rules.valid}
-          saving={rules.saving}
+          saving={rules.saving || toggles.saving}
           // on a phone above the shell's tab bar, where its toasts sit too (B-Settings `.sbar` under 768)
           className="max-sm:bottom-[var(--toast-bottom,12px)]"
         />

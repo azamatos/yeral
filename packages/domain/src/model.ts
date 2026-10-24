@@ -92,6 +92,7 @@ export type Amenity = (typeof AMENITIES)[number]
  * deleted; a name up to 20 characters, unique whatever its case; an icon and a colour from the design's lists.
  */
 export const MAX_INTERNAL_STATUSES = 5
+export const INTERNAL_STATUS_NAME_MAX = 20
 export const INTERNAL_STATUS_PRESETS = ['arrived', 'started'] as const
 export type InternalStatusPreset = (typeof INTERNAL_STATUS_PRESETS)[number]
 export const INTERNAL_STATUS_ICONS = ['user-check', 'play', 'hourglass', 'flag', 'star', 'bell', 'message', 'sparkles'] as const
