@@ -6,3 +6,7 @@ export const GROUP_NAME_MAX = 60
 
 /** A team member's name as clients see it ("Aýna"), the api's 40: the wizard's team step and Team's «Add a team member». */
 export const TEAM_NAME_MAX = 40
+
+/** A team member's full name (80) and specialization (60), the api's: «Add a team member» and the staff drawer. */
+export const FULL_NAME_MAX = 80
+export const SPECIALIZATION_MAX = 60

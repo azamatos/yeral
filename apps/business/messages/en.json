@@ -1159,6 +1159,75 @@
         "copyLink": "Copy invite link",
         "added": "{name} added to the team · clients can book {name} now",
         "addedPlain": "{name} added to the team"
+      },
+      "drawer": {
+        "close": "Close",
+        "you": "You",
+        "tabsLabel": "Team member",
+        "tabs": {
+          "profile": "Profile",
+          "services": "Services",
+          "access": "Access level"
+        },
+        "roNote": "Only the owner changes names, phone numbers and access levels.",
+        "name": "Name clients see",
+        "namePlaceholder": "For example: Gülnar",
+        "clientsSee": "Clients see: <b>{line}</b>",
+        "fullName": "Full name",
+        "optional": "(optional)",
+        "fullNamePlaceholder": "First and last name",
+        "fullNameHint": "Only your team sees it.",
+        "specialization": "Specialization",
+        "specializationPlaceholder": "For example: stylist, colourist",
+        "phone": "Phone number",
+        "phoneHint": {
+          "signsIn": "This is their {brand} login. They change it themselves in My profile.",
+          "noApp": "Required. They can start using the app later with this number.",
+          "invited": "The invite is for this number."
+        },
+        "phoneProblems": {
+          "incomplete": "The number is incomplete — it needs {digits} digits.",
+          "onTeam": "This person is already on the team.",
+          "signsIn": "They signed in with this number before: it’s theirs to change."
+        },
+        "svcQuestion": "What does {name} do?",
+        "svcHintPro": "Clients see {name} only for these services.",
+        "svcHintOff": "{name} doesn’t take bookings now. Pick services and clients can book {name} too.",
+        "noServices": "There are no services yet. Add them in Services, then choose who does each.",
+        "level": "Access level",
+        "ownerLevel": "Owner — every permission, including the team. One owner per workspace; the owner can’t leave it.",
+        "adminNeedsApp": "Admins always use the app: they can be made admins once they use it.",
+        "samePermissions": "Everyone at one access level has the same permissions. <link>See permissions</link>",
+        "usesApp": "Uses the app",
+        "appCap": {
+          "waiting": "The invite is waiting for {name}. Turn this off to cancel it.",
+          "signsIn": "Signs in with {phone}.",
+          "turnOn": "Saving creates an invite. They’ll see it when they sign in with {phone} · valid {days, plural, one {# day} other {# days}}. Until they accept, they work without the app.",
+          "cancel": "Saving cancels the invite. {name} keeps working without the app.",
+          "turnOff": "Saving turns this off: {name} stays bookable but can’t sign in.",
+          "none": "Bookable at once, never signs in — you and admins handle their requests. They can start using the app later with this number.",
+          "needsMobile": "An invite goes to a mobile number: change the number in Profile first."
+        },
+        "invited": "Invited",
+        "invitedNote": "Works without the app until they accept. Their bookings stay with them.",
+        "invitedCap": "They’ll see the invite when they sign in with {phone} · until {date} · {n, plural, one {# day} other {# days}} left",
+        "copyLink": "Copy invite link",
+        "noAppNote": "{name}’s requests go to you and the admins. The permissions don’t apply — {name} never signs in.",
+        "answer": "Can answer own requests",
+        "answerFollows": "Follows the general rule: {rule}. Turn it off and {name} will see the requests but won’t answer them.",
+        "answerOff": "Set for {name} only. General rule: {rule}.",
+        "rules": {
+          "both": "“Both” — whoever answers first",
+          "each": "“Each specialist” — each answers their own",
+          "desk": "“Owner and admins” — specialists don’t answer"
+        },
+        "adminCap": "Admins always use the app.",
+        "save": "Save",
+        "saving": "Saving…",
+        "saved": "{name}: changes saved",
+        "inviteCreated": "Invite created for {name} · valid until {date} · {name} works without the app until they accept",
+        "inviteCancelled": "Invite cancelled · {name} keeps working without the app",
+        "appOff": "{name} no longer uses the app · you and the admins handle {name}’s requests"
       }
     }
   }

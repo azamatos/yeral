@@ -129,6 +129,7 @@ const fakeApi =
   (level: Workspace['level']): (() => typeof fetch) =>
   () => {
     let people = team
+    let staffed = menu
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const request = new Request(input, init)
       const route = `${request.method} ${new URL(request.url).pathname.replace(/^\/v1/, '')}`
@@ -138,7 +139,42 @@ const fakeApi =
       if (route === 'GET /me/invites') return json({ items: [] })
       if (/^POST \/me\/workspaces\/[^/]+\/open$/.test(route)) return new Response(null, { status: 204 })
       if (route === 'GET /w/glow-studio/team') return json({ items: people })
-      if (route === 'GET /w/glow-studio/services') return json(menu)
+      if (route === 'GET /w/glow-studio/services') return json(staffed)
+      if (route === 'GET /w/glow-studio/settings/rules') return json({ requestAnswerers: 'both' })
+      // the staff drawer: the profile and access in one change, the services in their own
+      const edit = /^PATCH \/w\/glow-studio\/team\/([^/]+)$/.exec(route)
+      if (edit) {
+        const body = (await request.json()) as Partial<TeamMember> & { specialization?: Record<string, string> | null }
+        const { specialization, hasApp, ...rest } = body
+        people = people.map((p) =>
+          p.id === edit[1]
+            ? {
+                ...p,
+                ...rest,
+                ...(specialization !== undefined ? { specialization: specialization?.en ?? null } : {}),
+                ...(hasApp === false
+                  ? { hasApp: false, status: 'active' as const, invite: p.invite && { ...p.invite, state: 'cancelled' as const } }
+                  : {}),
+              }
+            : p,
+        )
+        return json(people.find((p) => p.id === edit[1]))
+      }
+      const doing = /^PUT \/w\/glow-studio\/team\/([^/]+)\/services$/.exec(route)
+      if (doing) {
+        const { serviceIds } = (await request.json()) as { serviceIds: string[] }
+        const id = doing[1]!
+        staffed = {
+          groups: staffed.groups.map((g) => ({
+            ...g,
+            services: g.services.map((sv) => ({
+              ...sv,
+              staffIds: serviceIds.includes(sv.id) ? [...new Set([...sv.staffIds, id])] : sv.staffIds.filter((x) => x !== id),
+            })),
+          })),
+        }
+        return json(people.find((p) => p.id === id))
+      }
       // «Add a team member»: an invite, or a specialist without the app, active at once
       if (route === 'POST /w/glow-studio/team/invites' || route === 'POST /w/glow-studio/team/phone-only') {
         const body = (await request.json()) as { phone: string; name: string; level?: 'admin' | 'specialist'; serviceIds?: string[] }
@@ -382,6 +418,105 @@ export const AddMemberPhone: Story = {
     await expect(dialog.getByLabelText('Mobile number')).toBeVisible()
     await userEvent.click(dialog.getByRole('button', { name: 'Cancel' }))
     await waitFor(() => expect(canvas.getByRole('button', { name: 'Add a team member' })).toHaveFocus())
+  },
+}
+
+/** A row opens the staff drawer: the profile, saved with one Save. */
+export const DrawerProfile: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Maral Ataýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Maral Ataýewa' }))
+    await expect(drawer.getByText('Nail artist · Specialist')).toBeVisible()
+    const save = drawer.getByRole('button', { name: 'Save' })
+    await expect(save).toBeDisabled()
+    const spec = drawer.getByLabelText(/^Specialization/)
+    await userEvent.clear(spec)
+    await userEvent.type(spec, 'Nail technician')
+    await expect(drawer.getByText('Maral · Nail technician')).toBeVisible()
+    // someone with the app signs in with their number: it's theirs to change
+    await expect(drawer.getByLabelText('Phone number')).toHaveAttribute('readonly')
+    await userEvent.click(save)
+    const saved = await body.findByText('Maral: changes saved')
+    await waitFor(() => expect(saved).toBeVisible())
+    await expect(body.queryByRole('dialog', { name: 'Maral Ataýewa' })).toBeNull()
+  },
+}
+
+/** A specialist without the app with an invite waiting: the number is the invite's; turning the app off cancels it. */
+export const DrawerNoApp: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Leýli Berdiýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Leýli Berdiýewa' }))
+    // the invite went to this number: it stays as it is while the invite waits (B-Team)
+    await expect(drawer.getByLabelText('Phone number')).toHaveAttribute('readonly')
+    await expect(drawer.getByText('The invite is for this number.')).toBeVisible()
+    await userEvent.click(drawer.getByRole('tab', { name: 'Access level' }))
+    await expect(await drawer.findByText('The invite is waiting for Leýli. Turn this off to cancel it.')).toBeVisible()
+    await expect(drawer.getByText(/^They’ll see the invite when they sign in with \+993 65 •• •• 22 · until/)).toBeVisible()
+    await expect(drawer.getByRole('button', { name: 'Copy invite link' })).toBeVisible()
+    // an administrator always uses the app: Leýli can become one once she does
+    await expect(drawer.getByRole('option', { name: 'Admin' })).toBeDisabled()
+    await userEvent.click(drawer.getByRole('switch', { name: 'Uses the app' }))
+    await expect(drawer.getByText('Saving cancels the invite. Leýli keeps working without the app.')).toBeVisible()
+    await expect(drawer.getByText(/Leýli’s requests go to you and the admins/)).toBeVisible()
+    await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
+    const done = await body.findByText('Invite cancelled · Leýli keeps working without the app')
+    await waitFor(() => expect(done).toBeVisible())
+  },
+}
+
+/** The services someone does, with a group's «All»; the count on Team follows. */
+export const DrawerServices: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Jeren Hojaýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Jeren Hojaýewa' }))
+    await userEvent.click(drawer.getByRole('tab', { name: 'Services' }))
+    await expect(await drawer.findByText('What does Jeren do?')).toBeVisible()
+    await expect(drawer.getByRole('checkbox', { name: /Women’s haircut/ })).toBeChecked()
+    await userEvent.click(drawer.getByRole('checkbox', { name: 'Nails: all' }))
+    await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
+    const saved = await body.findByText('Jeren: changes saved')
+    await waitFor(() => expect(saved).toBeVisible())
+    const specialists = within(canvas.getByRole('group', { name: 'Specialists' }))
+    await expect(await specialists.findByText('3 services')).toBeVisible()
+  },
+}
+
+/** The owner's own row: the profile, and an access level nobody changes. */
+export const DrawerOwner: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Maýsa Annaýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Maýsa Annaýewa' }))
+    await expect(drawer.getByText('You · Owner')).toBeVisible()
+    await userEvent.click(drawer.getByRole('tab', { name: 'Access level' }))
+    await expect(await drawer.findByText(/^Owner — every permission, including the team/)).toBeVisible()
+    await expect(drawer.queryByRole('switch')).toBeNull()
+  },
+}
+
+/** The administrator: everything to read, the services to change. */
+export const DrawerAdmin: Story = {
+  args: { server: fakeApi('admin') },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Leýli Berdiýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Leýli Berdiýewa' }))
+    await expect(drawer.getByText('Only the owner changes names, phone numbers and access levels.')).toBeVisible()
+    await expect(drawer.getByLabelText('Name clients see')).toBeDisabled()
+    await expect(drawer.queryByRole('button', { name: 'Save' })).toBeNull()
+    await userEvent.click(drawer.getByRole('tab', { name: 'Services' }))
+    await userEvent.click(await drawer.findByRole('checkbox', { name: /Manicure/ }))
+    await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
+    const saved = await body.findByText('Leýli: changes saved')
+    await waitFor(() => expect(saved).toBeVisible())
+  },
+}
+
+/** The drawer on a phone: a sheet from the bottom. */
+export const DrawerPhone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Maral Ataýewa' }))
+    await expect(await body.findByRole('dialog', { name: 'Maral Ataýewa' })).toBeVisible()
   },
 }
 

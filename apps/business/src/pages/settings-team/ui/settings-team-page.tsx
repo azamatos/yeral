@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import type { TeamMember } from '@yeral/contract/team'
 import { maskPhone } from '@yeral/domain/phone'
 import { INVITE_DAYS } from '@yeral/domain/team'
-import { diffDays, today } from '@yeral/domain/time'
+import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
@@ -21,7 +21,9 @@ import { useErrorText } from '@/shared/i18n'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
 import { inviteNow } from '../model/invite'
+import { inviteDaysLeft, invitePending } from '../model/member'
 import { AddMember } from './add-member'
+import { MemberDrawer } from './member-drawer'
 
 /**
  * Settings → Team (B-Team `tab=team`, design §8 «Topar», §28.4 Team, book B-43–B-50): everyone in groups,
@@ -51,6 +53,9 @@ function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; 
   // the invite link a send just returned, to copy (the api keeps only its hash, so it can't be read back later)
   const [link, setLink] = useState<{ name: string; url: string } | null>(null)
   const [adding, setAdding] = useState(false)
+  // the staff drawer: whose, and the row's name to give the focus back to
+  const [openId, setOpenId] = useState<string | null>(null)
+  const opener = useRef<HTMLElement | null>(null)
   const addButton = useRef<HTMLButtonElement>(null)
 
   // the groups and counts come from the menu too: both, or the page waits
@@ -121,6 +126,14 @@ function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; 
                     services={servicesOf(m.id)}
                     pro={s.id === 'specialists' || (s.id === 'invites' && m.level === 'specialist')}
                     onLink={(url) => setLink({ name: m.fullName ?? m.name, url })}
+                    onOpen={
+                      s.id === 'former'
+                        ? undefined
+                        : (el) => {
+                            opener.current = el
+                            setOpenId(m.id)
+                          }
+                    }
                   />
                 ))}
               </div>
@@ -138,6 +151,17 @@ function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; 
           onLink={(name, url) => setLink({ name, url })}
         />
       )}
+      <MemberDrawer
+        slug={slug}
+        member={people.find((m) => m.id === openId && m.status !== 'removed') ?? null}
+        people={people}
+        menu={menu.data}
+        owner={owner}
+        myPhone={myPhone}
+        returnFocus={opener}
+        onClose={() => setOpenId(null)}
+        onLink={(name, url) => setLink({ name, url })}
+      />
       <Modal open={link !== null} onOpenChange={(open) => !open && setLink(null)}>
         {link && (
           <ModalContent>
@@ -175,6 +199,7 @@ function MemberRow({
   services,
   pro,
   onLink,
+  onOpen,
 }: {
   slug: string
   member: TeamMember
@@ -183,6 +208,8 @@ function MemberRow({
   services: number
   pro: boolean
   onLink: (url: string) => void
+  /** Opens their staff drawer (not for someone no longer on the team). */
+  onOpen?: (from: HTMLElement) => void
 }) {
   const t = useTranslations('settings.team')
   const levels = useTranslations('levels')
@@ -200,11 +227,10 @@ function MemberRow({
   const inviteRow = m.status === 'invited'
   const [now] = useState(() => Date.now())
   const state = m.invite && inviteNow(m.invite, now)
-  const pending = state === 'pending'
+  const pending = invitePending(m, now)
   // a specialist without the app who was sent an invite works as before until they accept
   const waiting = m.status === 'active' && pending && !m.joined
-  // calendar days, as the board counts them: sent today, «7 days left»
-  const daysLeft = m.invite ? Math.max(1, diffDays(today(m.invite.expiresAt), today(now))) : 0
+  const daysLeft = m.invite ? inviteDaysLeft(m.invite, now) : 0
 
   let status: { tone: 'on' | 'invited' | 'off'; label: string; sub?: string }
   if (former) status = { tone: 'off', label: t('status.removed') }
@@ -277,12 +303,24 @@ function MemberRow({
 
   return (
     <div
-      className={`grid min-h-16 grid-cols-[minmax(0,1fr)_40px] items-center gap-x-3 gap-y-1 border-b border-n-200 px-1 py-2.5 text-small xl:px-2 xl:py-2 ${COLUMNS} ${former ? 'text-n-600' : ''}`}
+      className={`relative grid min-h-16 grid-cols-[minmax(0,1fr)_40px] items-center gap-x-3 gap-y-1 border-b border-n-200 px-1 py-2.5 text-small xl:px-2 xl:py-2 ${COLUMNS} ${former ? 'text-n-600' : ''} ${onOpen ? 'hover:bg-n-50' : ''}`}
     >
       <div className="flex min-w-0 items-center gap-3">
         <Avatar name={m.name} src={m.photo?.url} size={32} letters={1} tone={former || inviteRow ? 'neutral' : 'tint'} decorative />
         <span className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-body leading-5 font-semibold">{name}</span>
+          {onOpen ? (
+            // the whole row opens the drawer (B-Team `.tr`); its link and menu sit above
+            <button
+              type="button"
+              aria-haspopup="dialog"
+              onClick={(e) => onOpen(e.currentTarget)}
+              className="cursor-pointer self-start border-0 bg-transparent p-0 text-left text-body leading-5 font-semibold text-n-900 after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:shadow-[inset_0_0_0_2px_var(--color-a-400)]"
+            >
+              {name}
+            </button>
+          ) : (
+            <span className="text-body leading-5 font-semibold">{name}</span>
+          )}
           {sub && <span className="text-dense text-n-600">{sub}</span>}
           <span className="text-dense text-n-600 xl:hidden">{meta}</span>
         </span>
@@ -314,13 +352,13 @@ function MemberRow({
             aria-label={link.aria}
             aria-busy={busy || undefined}
             onClick={() => void link.go()}
-            className={`${textLink} -ml-2 min-h-8 px-2 py-1 text-left text-dense`}
+            className={`${textLink} relative z-1 -ml-2 min-h-8 px-2 py-1 text-left text-dense`}
           >
             {link.text}
           </button>
         )}
       </div>
-      <div className="col-start-2 row-start-1 flex justify-end xl:col-start-auto xl:row-start-auto">
+      <div className="relative z-1 col-start-2 row-start-1 flex justify-end xl:col-start-auto xl:row-start-auto">
         {owner && inviteRow && pending && (
           <Menu>
             <MenuTrigger asChild>
