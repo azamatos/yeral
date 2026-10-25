@@ -152,13 +152,14 @@ export const inviteSentSchema = z.object({ member: teamMemberSchema, link: z.url
  * clears it, the specialization, the phone of someone without the app, as theirs is how they sign in otherwise), the
  * level, the right to answer one's own requests, and `hasApp: false` to stop using the app: an open invite is
  * cancelled and the person stays active without it, their bookings with them. Turning it on is an invite
- * (`POST …/invite`). The owner's own row takes the profile's names only.
+ * (`POST …/invite`). A phone change cancels an invite sent to the old number. The owner's own row takes the profile
+ * (names, specialization) only; what doesn't change is ignored.
  */
 export const updateMemberSchema = z
   .object({
     name: personFields.name.optional(),
-    fullName: z.string().trim().min(1).max(80).nullable().optional(),
-    specialization: localizedSchema(60).nullable().optional(),
+    fullName: personFields.fullName.unwrap().nullable().optional(),
+    specialization: personFields.specialization.unwrap().nullable().optional(),
     phone: phoneInputSchema.optional(),
     level: assignableLevelSchema.optional(),
     canAnswerOwn: z.boolean().optional(),

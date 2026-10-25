@@ -355,9 +355,13 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     const ayna = await rowOf(AYNA)
     const theirs = await maysa.req(`/v1/w/glow-studio/team/${ayna!.id}`, { method: 'PATCH', body: { phone: '+99365333030' } })
     expect(theirs.json.error.details.issues).toEqual([expect.objectContaining({ path: ['phone'], code: 'signs_in' })])
-    // without it the owner keeps the number up to date, a landline too, not one already on the team
+    // without it the owner keeps the number up to date, a landline too, not one already on the team; an invite sent
+    // to the old number can't be accepted any more
+    expect((await maysa.req(`/v1/w/glow-studio/team/${added.id}/invite`, { method: 'POST' })).status).toBe(201)
     const moved = await maysa.req(`/v1/w/glow-studio/team/${added.id}`, { method: 'PATCH', body: { phone: '+99312345670' } })
     expect(moved.json.phone).toBe('+99312345670')
+    const [old] = await db.select().from(invites).where(eq(invites.phone, '+99365333031'))
+    expect(old!.status).toBe('cancelled')
     const taken = await maysa.req(`/v1/w/glow-studio/team/${added.id}`, { method: 'PATCH', body: { phone: MARAL } })
     expect(taken.json.error.code).toBe('already_on_team')
     // an administrator always uses the app

@@ -246,8 +246,9 @@ describe('a specialist away or leaving (book B-47, B-50)', () => {
   it('a day off over bookings, «Cancel and offer 3 other times»: each cancelled, other times offered (B-Team)', async () => {
     const maysa = await as(MAYSA)
     const nur = await hire(maysa, '+99365800551', 'Nur')
-    const code = await book(maysa, '+99365800552', nur, '2026-11-26', 600)
-    const off = { ...businessWeek, daysOff: [{ name: 'Leave', from: '2026-11-26', to: '2026-11-26', yearly: false }] }
+    // inside the 30-day booking window, where other times can be offered
+    const code = await book(maysa, '+99365800552', nur, '2026-11-10', 600)
+    const off = { ...businessWeek, daysOff: [{ name: 'Leave', from: '2026-11-10', to: '2026-11-10', yearly: false }] }
     expect((await schedule(maysa, nur, { ...off, affected: 'cancel' })).json).toMatchObject({ moved: 0, kept: 0, cancelled: 1 })
     const after = await whoOn(code)
     expect(after).toMatchObject({ status: 'cancelled', reason: 'staff_away' })

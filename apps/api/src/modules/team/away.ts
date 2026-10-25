@@ -385,14 +385,7 @@ export async function updateSchedule(
       items.every((i) => i.staffId !== staffId || withinStaffDay(hours, next, move.date, { start: i.start, end: i.end })),
     )
     const result = affected.length
-      ? await settleStaffBookings(
-          tx,
-          deps,
-          await loadBusiness(tx, business.id),
-          staffId,
-          affected,
-          change.affected === 'move' ? { kind: 'move' } : change.affected === 'cancel' ? { kind: 'cancel' } : { kind: 'keep' },
-        )
+      ? await settleStaffBookings(tx, deps, await loadBusiness(tx, business.id), staffId, affected, { kind: change.affected ?? 'keep' })
       : { moved: 0, kept: 0, cancelled: 0 }
     return { ...viewOf(next), ...result }
   })

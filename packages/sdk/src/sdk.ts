@@ -504,7 +504,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   const teamChanged = (slug?: string) =>
     invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug), keys.businessAll(slug)] : []))
   // and when someone joins with services, or leaves them, the menu's «who does it» changes too
-  const staffChanged = (slug: string) => Promise.all([teamChanged(slug), invalidate(keys.menu(slug))])
+  const staffChanged = (slug: string) => Promise.all([teamChanged(slug), invalidate(keys.menu(slug), keys.availabilityAll(slug))])
   /** The person isn't on that team any more: nothing of it stays (every workspace key names it second), nor what they saw as its team. */
   const left = (slug: string) => {
     forgetPerson(inWorkspace(slug))
@@ -579,7 +579,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       mutationOptions({
         mutationFn: ({ staffId, ...json }: { staffId: string } & z.input<typeof updateMemberSchema>) =>
           call(w.team[':staffId'].$patch({ param: { slug, staffId }, json })),
-        onSuccess: () => teamChanged(slug),
+        // the app off: someone else answers their requests now
+        onSuccess: (_, { hasApp }) => Promise.all([teamChanged(slug), hasApp === false && invalidate(keys.requests(slug))]),
       }),
     /** «Services» in the staff drawer (owner or administrator): everything the person does, in one go. */
     setServices: (slug: string) =>
@@ -617,7 +618,10 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         queryKey: keys.schedule(slug, staffId),
         queryFn: ({ signal }) => call(w.team[':staffId'].schedule.$get({ param: { slug, staffId } }, abortWith(signal))),
       }),
-    /** Saves it; bookings left outside make it `bookings_affected` until it's sent again with `affected: 'move' | 'keep'`. */
+    /**
+     * Saves it; bookings left outside make it `bookings_affected` until it's sent again with
+     * `affected: 'move' | 'keep' | 'cancel'`.
+     */
     updateSchedule: (slug: string, staffId: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof staffScheduleUpdateSchema>) =>
