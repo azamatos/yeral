@@ -164,7 +164,8 @@ export async function requestsFor(db: Queryable, business: Business, actor: Acto
 }
 
 /** The waiting request with this code at this business that the actor may answer; 404 for one they can't see. */
-async function answerable(db: Queryable, business: Business, actor: Actor, code: string, now: number): Promise<BookingRow> {
+/** A request this person may answer now (its code, in this business), else the refusal the answer would get. */
+export async function answerable(db: Queryable, business: Business, actor: Actor, code: string, now: number): Promise<BookingRow> {
   const [b] = await db
     .select()
     .from(bookings)

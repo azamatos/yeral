@@ -40,10 +40,12 @@ export const freeTimesQuerySchema = z.object({
   /** The day whose starts to list ("Başga sene we wagt"); today by default. */
   date: ymdSchema.optional(),
   /**
-   * Times to offer a client when declining (B-20): searched as the client would book them, as the decline checks them,
-   * so none falls inside the lead time, past the booking window or on a service not booked online.
+   * The request (its code) a decline offers times for (B-20): the times are searched as the decline checks its offers,
+   * with the request's services (`services` is then theirs) and its specialist first, its own hold counted as free, and
+   * none inside the lead time, past the booking window or on a service not booked online; the strip's days past the
+   * window are closed. A move or a request no longer open is refused as the decline refuses it.
    */
-  offer: boolQuery.optional(),
+  offer: bookingCodeSchema.optional(),
 })
 
 export const freeTimesSchema = z
