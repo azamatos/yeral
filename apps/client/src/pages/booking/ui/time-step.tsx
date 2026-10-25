@@ -9,7 +9,7 @@ import { Skeleton } from '@yeral/ui/skeleton'
 import { TimeSlots } from '@yeral/ui/time-slots'
 import { CalendarX2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'use-intl'
-import { slotsByPart } from '../model/flow'
+import { isOwnTime, slotsByPart } from '../model/flow'
 import { LoadFailed } from './load-failed'
 import { StepTitle } from './step-title'
 
@@ -18,7 +18,9 @@ import { StepTitle } from './step-title'
  * struck through), the chosen day's title, its free times by part of day, and for a day without one the way to the
  * next free day. The api works out what fits the whole visit back to back with the specialist (or anyone) and the
  * business's lead time; the address naming no day, it answers for today (full or closed: the next free day's button).
- * While another day's times come, the old ones aren't offered.
+ * While another day's times come, the old ones aren't offered. In move mode (C-30) the booking's own time doesn't count
+ * as busy; with its own specialist (or anyone) it stays out of the choice, named «your previous time» (another
+ * specialist at the same time is a move too).
  */
 export function TimeStep({
   slug,
@@ -30,6 +32,7 @@ export function TimeStep({
   time,
   onDate,
   onTime,
+  move,
 }: {
   slug: string
   serviceIds: string[]
@@ -40,7 +43,10 @@ export function TimeStep({
   time: number | null
   onDate: (date: string) => void
   onTime: (start: number, date: string) => void
+  /** The booking being moved, its own time and who it's with now. */
+  move?: { code: string; date: string; start: number; current: string | null }
 }) {
+  const words = useTranslations('booking.move')
   const t = useTranslations('booking')
   const fmt = useFmt()
   const lang = useLocale()
@@ -48,7 +54,7 @@ export function TimeStep({
   const now = useClock()
   const day0 = today(now)
   const free = useQuery({
-    ...sdk.availability.appointment(slug, { lang, services: serviceIds, staff, date: date ?? undefined }),
+    ...sdk.availability.appointment(slug, { lang, services: serviceIds, staff, date: date ?? undefined, move: move?.code }),
     // another day keeps the strip in place while its times come
     placeholderData: keepPreviousData,
   })
@@ -78,9 +84,19 @@ export function TimeStep({
   }
   const groups = slotsByPart(data?.slots ?? []).map((g) => ({
     label: t(`time.${g.part}`),
-    slots: g.slots.map((s) => ({ value: String(s.start), label: fmt.time(s.start) })),
+    slots: g.slots.map((s) =>
+      move && isOwnTime(move, staff, day, s.start)
+        ? { value: String(s.start), label: fmt.time(s.start), disabled: true, ariaLabel: words('currentTime', { time: fmt.time(s.start) }) }
+        : { value: String(s.start), label: fmt.time(s.start) },
+    ),
   }))
-  const title = <StepTitle title={t('time.title')} lead={t('time.lead', { duration: fmt.duration(minutes), staff: staffName })} />
+  const title = (
+    <StepTitle
+      title={move ? words('timeTitle') : t('time.title')}
+      lead={t('time.lead', { duration: fmt.duration(minutes), staff: staffName })}
+      level={move ? 2 : 1}
+    />
+  )
   if (free.isError && !data)
     return (
       <div className="flex flex-col">

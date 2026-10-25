@@ -21,25 +21,30 @@ type NextFree = { date: string; start: number } | null
  * Step 2 (Booking `step=staff`, book C-13): «Any specialist» with the earliest free time, then everyone who does the
  * picked services with their next free time (`OptionCard`s, arrow keys between them); someone who doesn't do them all
  * stays listed, disabled, saying so. When nobody does them all, the note says a free specialist is chosen for each.
+ * In move mode (C-30) the times leave the booking's own out of the busy ones, and the one it's with now says «Current».
  */
 export function StaffStep({
   detail,
   serviceIds,
   staff,
   onPick,
+  move,
 }: {
   detail: BusinessDetail
   serviceIds: string[]
   staff: string
   onPick: (staff: string) => void
+  /** The booking being moved and who it's with now. */
+  move?: { code: string; current: string | null }
 }) {
+  const words = useTranslations('booking.move')
   const t = useTranslations('booking.staff')
   const at = useTranslations('booking')
   const fmt = useFmt()
   const lang = useLocale()
   const sdk = useSdk()
   const now = useClock()
-  const free = useQuery(sdk.availability.specialists(detail.slug, { lang, services: serviceIds }))
+  const free = useQuery(sdk.availability.specialists(detail.slug, { lang, services: serviceIds, move: move?.code }))
   // a start past midnight reads on the next calendar day
   const when = (next: NextFree) => {
     if (!next) return null
@@ -54,7 +59,7 @@ export function StaffStep({
   const anyOne = detail.specialists.some((s) => doesAll(s, serviceIds))
   return (
     <div className="flex flex-col gap-6">
-      <StepTitle title={t('title')} lead={t('lead')} />
+      <StepTitle title={move ? words('staffTitle') : t('title')} lead={t('lead')} level={move ? 2 : 1} />
       {!anyOne && <p className="m-0 rounded-m bg-group px-3.5 py-3 text-small text-n-600">{t('noOneDoesAll')}</p>}
       {free.isError && !free.data && <LoadFailed onRetry={() => void free.refetch()} />}
       <OptionCardGroup aria-label={t('label')} value={staff} onValueChange={onPick}>
@@ -79,6 +84,7 @@ export function StaffStep({
               value={s.id}
               disabled={!ok}
               title={s.name}
+              tag={move?.current === s.id ? words('current') : undefined}
               leading={
                 <Avatar
                   name={s.name}
