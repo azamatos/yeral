@@ -6,6 +6,7 @@ import { DEFAULT_LOCALE, isLocale, type Locale } from './messages'
 
 export { createFmt, formatNumber, type Fmt } from './fmt'
 export { DEFAULT_LOCALE, isLocale, LOCALES, MARKET_LOCALES, messages, type Locale, type SharedMessages } from './messages'
+export { setTextStretch, stretched } from './stretch'
 
 /** Every business is in the market's zone; dates are formatted in it, never in the browser's. */
 export { ZONE as TIME_ZONE } from '@yeral/domain/time'

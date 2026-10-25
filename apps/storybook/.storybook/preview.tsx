@@ -1,16 +1,41 @@
 import type { Preview } from '@storybook/react-vite'
+import { setTextStretch } from '@yeral/i18n'
 import { MapTiles } from '@yeral/ui/map-frame'
 import { UIProvider } from '@yeral/ui/provider'
+import { Fragment } from 'react'
 import '../src/styles.css'
 
 const preview: Preview = {
+  // «Text: +30 %»: the apps' words about as long as Russian's (book Q-101, plan P3), to see what a screen does with them
+  globalTypes: {
+    text: {
+      description: 'Text length',
+      toolbar: {
+        title: 'Text',
+        icon: 'paragraph',
+        items: [
+          { value: 'as written', title: 'As written' },
+          { value: 'longer', title: '+30 % (Russian length)' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+  },
+  initialGlobals: { text: 'as written' },
   decorators: [
-    (Story) => (
-      <UIProvider>
-        {/* maps draw their ground only: the story tests stay offline and the same on every run */}
-        <MapTiles style={null}>{Story()}</MapTiles>
-      </UIProvider>
-    ),
+    (Story, { globals }) => {
+      const longer = globals.text === 'longer'
+      setTextStretch(longer ? 1.3 : 1)
+      return (
+        // a new length makes the story anew, so its words are read again
+        <Fragment key={longer ? 'longer' : 'as written'}>
+          <UIProvider>
+            {/* maps draw their ground only: the story tests stay offline and the same on every run */}
+            <MapTiles style={null}>{Story()}</MapTiles>
+          </UIProvider>
+        </Fragment>
+      )
+    },
   ],
   parameters: {
     layout: 'padded',
