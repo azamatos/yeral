@@ -251,6 +251,12 @@ export const staff = pgTable(
     /** "Öz haýyşlaryna jogap berip biler": the owner can take it away (book chapter 3). */
     canAnswerOwn: boolean().notNull().default(true),
     status: staffStatus().notNull().default('active'),
+    /**
+     * Off the team (B-15, B-50): when, and who ended it: `self` they left (or deleted their account), `owner` they were
+     * removed. Null while on the team, and for rows that left before 0044 (shown as removed).
+     */
+    endedAt: ts(),
+    endedBy: text().$type<'self' | 'owner'>(),
     sort: integer().notNull().default(0),
     /** null = business hours; otherwise 7 entries `{open, close} | null`, Monday first. */
     shift: jsonb().$type<({ open: number; close: number } | null)[]>(),
@@ -274,6 +280,7 @@ export const staff = pgTable(
       .where(sql`${t.level} = 'owner' and ${t.status} = 'active'`),
     check('staff_phone_without_app', sql`${t.hasApp} or ${t.phone} is not null`),
     check('staff_owner_has_app', sql`${t.level} <> 'owner' or ${t.hasApp}`),
+    check('staff_ended_by', sql`${t.endedBy} is null or ${t.endedBy} in ('self', 'owner')`),
   ],
 )
 

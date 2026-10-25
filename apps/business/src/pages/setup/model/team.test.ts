@@ -15,6 +15,7 @@ const person = (id: string, level: TeamMember['level'], hasApp = true): TeamMemb
   hasApp,
   bookable: level === 'specialist',
   canAnswerOwn: false,
+  ended: null,
   joined: false,
   photo: null,
   invite: null,

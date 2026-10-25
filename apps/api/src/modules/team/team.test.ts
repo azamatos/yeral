@@ -268,8 +268,12 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     expect((await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { body: { affected: 'keep' } })).status).toBe(200)
     expect((await maral.req('/v1/me/workspaces')).json.items).toEqual([])
     expect(await shown()).not.toContain('Maral')
+    // the list says who ended it: «Removed»
+    const onList = async () =>
+      ((await maysa.req('/v1/w/glow-studio/team')).json.items as { id: string; ended: unknown }[]).find((m) => m.id === row!.id)!.ended
+    expect(await onList()).toMatchObject({ by: 'owner', bookings: 0, requests: 0 })
     const back = await maysa.req(`/v1/w/glow-studio/team/${row!.id}/reactivate`, { method: 'POST' })
-    expect(back.json).toMatchObject({ status: 'active', bookable: true, joined: true })
+    expect(back.json).toMatchObject({ status: 'active', bookable: true, joined: true, ended: null })
     expect(await shown()).toContain('Maral')
     // leaving: the confirm counts what stays for the owner, the bookings removing her would ask about
     const left = (await maral.req('/v1/w/glow-studio/leave')).json as { bookings: number; requests: number }
@@ -277,7 +281,12 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     expect(left.bookings).toBeGreaterThan(0)
     expect((await maysa.req('/v1/w/glow-studio/leave')).json.error.code).toBe('owner_cannot_leave')
     expect((await maral.req('/v1/w/glow-studio/leave', { method: 'POST' })).status).toBe(204)
-    expect(await rowOf(MARAL)).toMatchObject({ status: 'removed', bookable: false })
+    expect(await rowOf(MARAL)).toMatchObject({ status: 'removed', bookable: false, endedBy: 'self' })
+    // «Left», with what she left for the owner: «Maral left: N bookings need a new specialist» (B-15)
+    expect(await onList()).toMatchObject({ by: 'self', bookings: left.bookings, requests: left.requests })
+    // the owner settling them (here: kept as they are) keeps «Left»
+    expect((await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { body: { affected: 'keep' } })).status).toBe(200)
+    expect(await onList()).toMatchObject({ by: 'self' })
     // the account stays linked to the row, so the bookings kept there still block the person elsewhere
     expect((await rowOf(MARAL))!.userId).not.toBeNull()
     await maysa.req(`/v1/w/glow-studio/team/${row!.id}/reactivate`, { method: 'POST' })
@@ -324,7 +333,7 @@ describe('the team (book chapter 3, ADR 0025)', () => {
       .select()
       .from(staff)
       .where(and(eq(staff.businessId, glow!.id), eq(staff.name, 'Jeren')))
-    expect(row).toMatchObject({ status: 'removed', userId: null })
+    expect(row).toMatchObject({ status: 'removed', userId: null, endedBy: 'self' })
     // invites of the business are untouched
     expect((await db.select().from(invites).where(eq(invites.businessId, glow!.id))).length).toBeGreaterThan(0)
   })

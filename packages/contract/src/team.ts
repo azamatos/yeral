@@ -112,6 +112,13 @@ export const teamMemberSchema = z
     phone: phoneSchema.nullable(),
     level: levelSchema,
     status: z.enum(STAFF_STATUSES),
+    /**
+     * Off the team (B-15, B-50): when, and who ended it: `self` «Left» (by themself, or their account deleted),
+     * `owner` «Removed». For someone who left, their bookings and requests still ahead with them, which the owner
+     * settles («Aýna left: 4 bookings and 1 request need a new specialist»). Null while on the team, and for someone
+     * removed before this was recorded.
+     */
+    ended: z.object({ at: epochSchema, by: z.enum(['self', 'owner']), bookings: z.number().int(), requests: z.number().int() }).nullable(),
     /** false = without the app ("Programmasyz"). */
     hasApp: z.boolean(),
     bookable: z.boolean(),

@@ -135,7 +135,13 @@ export async function releaseAccount(tx: Queryable, account: User, now: number, 
   if (rows.some((r) => r.level === 'owner' && r.status === 'active' && !closed.has(r.businessId))) throw new ApiError('owns_workspace')
   await tx
     .update(staff)
-    .set({ status: 'removed', bookable: false })
+    // they left (a row already off the team keeps who ended it)
+    .set({
+      status: 'removed',
+      bookable: false,
+      endedAt: sql`case when ${staff.status} = 'removed' then ${staff.endedAt} else ${at} end`,
+      endedBy: sql`case when ${staff.status} = 'removed' then ${staff.endedBy} else 'self' end`,
+    })
     .where(
       inArray(
         staff.id,

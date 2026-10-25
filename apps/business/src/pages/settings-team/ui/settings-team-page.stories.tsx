@@ -55,6 +55,7 @@ const person = (id: string, name: string, level: TeamMember['level'], patch: Par
   hasApp: true,
   bookable: level !== 'admin',
   canAnswerOwn: false,
+  ended: null,
   joined: true,
   photo: null,
   invite: null,

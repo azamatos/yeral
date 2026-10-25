@@ -416,7 +416,8 @@ export async function removeMember(
     const ahead = await bookingsAheadWith(tx, business.id, staffId, now)
     if (ahead.length && !input.affected)
       throw new ApiError('bookings_affected', detailsOf(staffId, ahead, { lang, now }, await loadBusiness(tx, business.id)))
-    await removeRow(tx, row, now)
+    // someone who left stays «Left» when the owner settles their bookings
+    await removeRow(tx, row, now, 'owner')
     await teamChanged(tx, business.id, { userId: row.userId })
     await emit(tx, { type: 'business.updated', businessId: business.id })
     await refuseMovesOnto(tx, business.id, staffId, now, () => false)

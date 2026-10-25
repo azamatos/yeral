@@ -16,6 +16,7 @@ const member = (phone: string, patch: Partial<TeamMember>): TeamMember => ({
   hasApp: true,
   bookable: true,
   canAnswerOwn: false,
+  ended: null,
   joined: true,
   photo: null,
   invite: null,

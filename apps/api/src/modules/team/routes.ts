@@ -53,6 +53,7 @@ import {
   lockOpenInvites,
   member,
   members,
+  backOnTeam,
   removeRow,
   requireMember,
   reusableRow,
@@ -350,7 +351,18 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     // a draft's too: the wizard's team step reopens with it, and the rules step asks who answers requests
     const { business, actor, user } = await requireMember(c, c.req.valid('param').slug, { draft: true })
     if (!can(actor, 'team')) throw new ApiError('forbidden')
-    return c.json({ items: await members(c.var.deps, business.id, user.lang, c.var.deps.now()) }, 200)
+    const { deps } = c.var
+    const now = deps.now()
+    const items = await members(deps, business.id, user.lang, now)
+    // someone who left by themself with bookings or requests still with them: the owner's «Someone left» (B-15)
+    const withAhead = await Promise.all(
+      items.map(async (m) =>
+        m.ended?.by === 'self' && m.status === 'removed'
+          ? { ...m, ended: { ...m.ended, ...(await leaveCounts(deps.db, business.id, m.id, now)) } }
+          : m,
+      ),
+    )
+    return c.json({ items: withAhead }, 200)
   })
   .openapi(inviteRoute, async (c) => {
     const { business, actor, user } = await requireMember(c, c.req.valid('param').slug)
@@ -370,6 +382,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
         hasApp: true,
         status: 'invited' as const,
         bookable: (body.serviceIds?.length ?? 0) > 0,
+        ...backOnTeam,
       }
       // someone removed earlier comes back on their old row
       const reused = reusableRow(rows, accountId)
@@ -562,7 +575,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       if (!back && !row.phone) throw new ApiError('invalid_status')
       const [next] = await tx
         .update(staff)
-        .set({ status: back ? 'active' : 'invited', bookable: await hasServices(tx, row.id) })
+        .set({ status: back ? 'active' : 'invited', bookable: await hasServices(tx, row.id), ...backOnTeam })
         .where(eq(staff.id, row.id))
         .returning()
       await teamChanged(tx, business.id, { userId: row.userId })
@@ -581,7 +594,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       const now = deps.now()
       // ordered with the bookings being made for them, as a removal is (their bookings stay for the owner, B-15)
       await loadHours(tx, business.id, { lock: 'no key update' })
-      await removeRow(tx, row, now)
+      await removeRow(tx, row, now, 'self')
       await teamChanged(tx, business.id, { userId: row.userId })
       // a client's waiting move onto them can't be confirmed any more: refused, as a removal refuses it (B-21)
       await refuseMovesOnto(tx, business.id, row.id, now, () => false)
