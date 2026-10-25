@@ -11,7 +11,8 @@ import { toast } from '@yeral/ui/toast'
 import { Building2, CalendarDays, CircleAlert, Clock, Hourglass, Phone, UserRound } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { BookingStatusBadge, useUndoFailed } from '@/entities/booking'
+import { BookingStatusBadge, useUndoFailed, whatParts } from '@/entities/booking'
+import { ReviewModal } from '@/features/write-review'
 import { OfferTimes, useWhen } from './offer-times'
 
 /** A line under the status (`.bby`): a 14 icon and a 13/18 caption. */
@@ -46,7 +47,7 @@ export function useCancelledBy() {
  * phone; the time struck through while offered times stand in for it), the status with what it means now (waiting
  * for the business, who cancelled, a no-show, a waiting move), the reason of a decline or the business's cancel, the
  * price, and what can be done now: Call while it's ahead (and for a client booked by phone only), Undo after the
- * client's own cancel (its failure said in the row), Book again. Times offered after a decline, an expiry or the
+ * client's own cancel (its failure said in the row), Write a review after a visit (`features/write-review`), Book again. Times offered after a decline, an expiry or the
  * business's cancel show as chips ({@link OfferTimes}); once they've all passed, the row says so with the way to the
  * business's page.
  */
@@ -61,9 +62,9 @@ export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upco
   const cancelledBy = useCancelledBy()
   const restore = useMutation(sdk.bookings.restore(lang))
   const [undoFailed, setUndoFailed] = useState<string | null>(null)
-  const items = b.what.type === 'appointment' ? b.what.items : []
-  const staff = [...new Set(items.map((i) => i.staff).filter((s): s is string => Boolean(s)))]
-  const services = items.map((i) => i.service).join(', ')
+  const parts = whatParts(b.what)
+  const services = parts[0] ?? ''
+  const [reviewing, setReviewing] = useState(false)
   const when = at(b.date, b.start, b.end)
   const live = b.offers?.times.some((o) => o.state === 'free') ? b.offers : null
   const passed = b.offers && !live ? b.offers : null
@@ -120,9 +121,7 @@ export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upco
         >
           {b.business.name}
         </Link>
-        {services && (
-          <span className="text-small text-n-600">{staff.length > 0 ? t('what', { services, staff: staff.join(', ') }) : services}</span>
-        )}
+        {services && <span className="text-small text-n-600">{parts.join(' · ')}</span>}
         <span className={cn('inline-flex items-center gap-1.5 text-small', live ? 'text-n-500 line-through' : 'text-n-900')}>
           <CalendarDays aria-hidden className="size-4 flex-none text-n-600" strokeWidth={1.75} />
           {when}
@@ -198,6 +197,19 @@ export function BookingRow({ booking: b, tab }: { booking: MyBooking; tab: 'upco
             >
               {t('undo')}
             </Button>
+          )}
+          {b.actions.review && (
+            <>
+              <Button
+                size="s"
+                variant="secondary"
+                aria-label={t('writeReviewLabel', { business: b.business.name, when })}
+                onClick={() => setReviewing(true)}
+              >
+                {t('writeReview')}
+              </Button>
+              <ReviewModal booking={b} open={reviewing} onOpenChange={setReviewing} />
+            </>
           )}
           {b.actions.bookAgain && (
             <Button asChild size="s" variant="secondary">

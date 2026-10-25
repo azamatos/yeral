@@ -74,6 +74,38 @@ export const Pending: Story = {
 }
 
 /** Opened again after the client's own cancel: who cancelled and why, Undo and Book again. */
+/** A completed visit: «Write a review» first, Book again beside it; the form opens over the drawer. */
+export const Completed: Story = {
+  args: { path: '/en/account/bookings/YR-48101?tab=past' },
+  play: async () => {
+    const d = await drawer()
+    await expect(d.getByRole('link', { name: 'Book again' })).toBeVisible()
+    await userEvent.click(await d.findByRole('button', { name: 'Write a review' }))
+    const form = await body.findByRole('dialog', { name: 'How was it?' })
+    await waitFor(() => expect(form).toBeVisible())
+  },
+}
+
+/** Reviewed: «5 · You rated», and «Edit the review» while it may change. */
+export const Reviewed: Story = {
+  args: {
+    path: '/en/account/bookings/YR-48101?tab=past',
+    server: myBookingsApi({
+      details: {
+        'YR-48101': {
+          review: { rating: 5, tags: [], text: 'Lovely', createdAt: Date.now() - 86_400_000 },
+          actions: { ...MY_BOOKINGS.past[0]!.actions, review: false, editReview: true },
+        },
+      },
+    }),
+  },
+  play: async () => {
+    const d = await drawer()
+    await expect(await d.findByText('5 · You rated')).toBeVisible()
+    await expect(d.getByRole('button', { name: 'Edit the review' })).toBeVisible()
+  },
+}
+
 export const CancelledByYou: Story = {
   args: {
     path: '/en/account/bookings/YR-48150?tab=past',

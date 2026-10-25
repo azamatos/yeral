@@ -116,7 +116,7 @@ export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
     }),
   ],
   past: [
-    row('YR-48101', { date: addDays(today(), -7), status: 'completed', actions: { ...ACTIONS, bookAgain: true } }),
+    row('YR-48101', { date: addDays(today(), -7), status: 'completed', actions: { ...ACTIONS, bookAgain: true, review: true } }),
     row('YR-48150', {
       date: addDays(today(), 4),
       status: 'cancelled',

@@ -75,6 +75,16 @@ export const Past: Story = {
   },
 }
 
+/** A visit to review: «Write a review» opens the review form over the list. */
+export const WriteAReview: Story = {
+  args: { path: '/en/account/bookings?tab=past' },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: /^Write a review: Glow Studio, / }))
+    const form = await within(document.body).findByRole('dialog', { name: 'How was it?' })
+    await waitFor(() => expect(form).toBeVisible())
+  },
+}
+
 /** Undo refused (the time went to someone else): said in the row with the way to another time, Undo gone. */
 export const UndoRefused: Story = {
   args: { path: '/en/account/bookings?tab=past', server: myBookingsApi({ refuse: 'slot_taken' }) },
