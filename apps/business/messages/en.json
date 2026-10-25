@@ -426,11 +426,6 @@
       "home": "I work from home",
       "homeHint": "Only clients with a confirmed booking see your exact address",
       "homeNote": "The exact address shows only after a booking is confirmed; until then the map shows the approximate area.",
-      "inSettings": {
-        "street": "Street and building",
-        "dragPin": "Drag the pin onto your entrance — clients follow it to your door",
-        "dragArea": "Clients see only this area until their booking is confirmed — you can drag the circle"
-      },
       "floor": "Floor, room",
       "floorPlaceholder": "Optional",
       "entrance": "Where is the entrance?",
@@ -915,6 +910,9 @@
       "address": {
         "title": "Address",
         "caption": "Clients see it on the map and in their booking.",
+        "street": "Street and building",
+        "dragPin": "Drag the pin onto your entrance — clients follow it to your door",
+        "dragArea": "Clients see only this area until their booking is confirmed — you can drag the circle",
         "moved": "<b>Moved?</b> Change the address here. Your bookings, clients and reviews stay; {brand} may check the new address.",
         "another": "Another address at the same time is a new workspace: <link>Create a business</link>"
       },

@@ -135,13 +135,12 @@ function ProfileSection({ slug, owner, demo }: { slug: string; owner: boolean; d
 
 /**
  * The address (B-Settings «Address»): the wizard's fields in the board's settings layout (`features/edit-address`,
- * `layout="settings"`), «Moved? Change the address here…»
- * and, for a second place at the same time, «Create a business» (a workspace of its own).
+ * `layout="settings"`), «Moved? Change the address here…» and, for a second place at the same time, «Create a
+ * business» (a workspace of its own).
  */
 function AddressSection({ address, disabled, demo }: { address: AddressFormState | null; disabled: boolean; demo: boolean }) {
   const t = useTranslations('settings.profile.address')
   const brand = useTranslations('common')('brand')
-  const pick = useTranslations('setup.address')('hintPick')
   const titleId = useId()
   return (
     <SettingsSection aria-labelledby={titleId}>
@@ -149,11 +148,8 @@ function AddressSection({ address, disabled, demo }: { address: AddressFormState
         {t('title')}
       </SettingsSectionTitle>
       {address ? (
-        <>
-          <AddressFields address={address} disabled={disabled} layout="settings" />
-          {/* Save waits for an address picked from the list: say so here, where it's chosen */}
-          {address.edited && address.problem === 'pick' && <FieldMessage status="error">{pick}</FieldMessage>}
-        </>
+        // Save waits for an address picked from the list: the street says so
+        <AddressFields address={address} disabled={disabled} layout="settings" />
       ) : (
         <div className="flex justify-center py-8">
           <Spinner />
