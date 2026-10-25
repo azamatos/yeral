@@ -1,6 +1,7 @@
 import type { BusinessDetail } from '@yeral/contract/catalog'
 import { AMENITIES, type Amenity } from '@yeral/domain/model'
 import { useFmt } from '@yeral/i18n'
+import { directionsUrl, telHref } from '@yeral/lib/links'
 import { Button } from '@yeral/ui/button'
 import { useClock } from '@yeral/ui/clock'
 import { cn } from '@yeral/ui/cn'
@@ -9,8 +10,7 @@ import { Pill } from '@yeral/ui/pill'
 import { Car, CircleCheck, Clock, CreditCard, Info, MapPin as Place, Navigation, Phone, Snowflake, Wallet, Wifi } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
-import { directionsUrl } from '@/shared/lib'
-import { weekRows } from '../model/when'
+import { addressLine, confirmLine, weekRows } from '../model/when'
 import { Section } from './sections'
 
 /** An icon row (Venue `.ir`): 20 icon, 15/22 text, 12 apart. */
@@ -103,30 +103,29 @@ function Address({ detail }: { detail: BusinessDetail }) {
   const card = useTranslations('business.card')
   const fmt = useFmt()
   const at = { lat: detail.geo.lat, lng: detail.geo.lng }
-  const google = directionsUrl(at, detail.name, '')
+  // the server's render (and a computer) links Google Maps; a phone's press opens its own map app
+  const google = directionsUrl(at, detail.name)
   return (
     <Part title={t('address')}>
-      <div role="img" aria-label={t('onMap', { name: detail.name })}>
-        <MapFrame center={at} zoom={detail.geo.approximate ? 14 : 16} interactive={false} className="h-70 rounded-card">
-          <MapMarker at={at}>
-            {detail.geo.approximate ? (
-              <span className="absolute size-37.5 -translate-1/2 rounded-pill border-[1.5px] border-a-500/45 bg-a-500/14" />
-            ) : (
-              <>
-                <MapPin hot className="-translate-y-2.5">
-                  {detail.name}
-                </MapPin>
-                <MapDot />
-              </>
-            )}
-          </MapMarker>
-        </MapFrame>
-      </div>
+      {/* the map is a picture of the address written under it; the pin names the place. A new page (a place nearby)
+          makes a new map, so the zoom follows its kind of address too */}
+      <MapFrame key={detail.slug} center={at} zoom={detail.geo.approximate ? 14 : 16} interactive={false} className="h-70 rounded-card">
+        <MapMarker at={at}>
+          {detail.geo.approximate ? (
+            <span className="absolute size-37.5 -translate-1/2 rounded-pill border-[1.5px] border-a-500/45 bg-a-500/14" />
+          ) : (
+            <>
+              <MapPin hot className="-translate-y-2.5">
+                {detail.name}
+              </MapPin>
+              <MapDot />
+            </>
+          )}
+        </MapMarker>
+      </MapFrame>
       <Row icon={<Place aria-hidden strokeWidth={1.75} />}>
         <span className="flex flex-col">
-          <span className="font-semibold">
-            {[fmt.addressIn(detail.address, detail.city.name), detail.floor].filter(Boolean).join(', ')}
-          </span>
+          <span className="font-semibold">{addressLine(detail, fmt)}</span>
           {detail.entranceNote && <span className="text-dense text-n-600">{detail.entranceNote}</span>}
           {detail.distanceM !== null && (
             <span className="text-dense text-n-600">{page('away', { distance: fmt.distance(detail.distanceM) })}</span>
@@ -143,7 +142,7 @@ function Address({ detail }: { detail: BusinessDetail }) {
               rel="noopener noreferrer"
               // the phone's own map app where there is one (book Q-108); the link is Google Maps for a computer
               onClick={(e) => {
-                const own = directionsUrl(at, detail.name, navigator.userAgent)
+                const own = directionsUrl(at, detail.name, navigator)
                 if (own === google) return
                 e.preventDefault()
                 location.href = own
@@ -155,7 +154,7 @@ function Address({ detail }: { detail: BusinessDetail }) {
           </Button>
         )}
         <Button asChild size="s" variant="secondary">
-          <a href={`tel:${detail.phone}`} aria-label={card('callLabel', { phone: fmt.phone(detail.phone) })}>
+          <a href={telHref(detail.phone)} aria-label={card('callLabel', { phone: fmt.phone(detail.phone) })}>
             <Phone aria-hidden />
             <span className="tabular-nums">{fmt.phone(detail.phone)}</span>
           </a>
@@ -220,13 +219,7 @@ function Confirms({ detail }: { detail: BusinessDetail }) {
     <div className="mt-3 flex items-start gap-3 rounded-m bg-n-50 px-5 py-4">
       <CircleCheck aria-hidden className="mt-px size-5 flex-none text-st-completed-ink" strokeWidth={1.75} />
       <span className="flex flex-col gap-0.5">
-        <span className="text-body font-semibold text-n-900">
-          {instant
-            ? card('confirmsAtOnce')
-            : detail.typicalConfirmMinutes
-              ? card('confirmsWithin', { time: fmt.duration(detail.typicalConfirmMinutes) })
-              : card('confirmsByHand')}
-        </span>
+        <span className="text-body font-semibold text-n-900">{confirmLine(detail, fmt, card)}</span>
         <span className="text-dense text-n-600">{instant ? t('atOnce') : t('byHand', { name: detail.name })}</span>
       </span>
     </div>

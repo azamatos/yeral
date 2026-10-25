@@ -9,8 +9,7 @@ import { CalendarX2, CircleCheck, Clock, MapPin, Phone, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { selectionTotal } from '@/features/pick-services'
-import { calendarAt } from '@/shared/lib'
-import { dayHours, openLine } from '../model/when'
+import { confirmLine, dayHours, nextFreeText, openLine } from '../model/when'
 import type { BookingState } from './business-page'
 import { FavouriteButton } from './favourite'
 
@@ -89,23 +88,19 @@ function CallLink({
   )
 }
 
-/** «Today 15:30», «Tomorrow 10:00», «Fri, 16 Oct 10:00»: the next free time on the card and the bar. */
+/** The next free time on the card and the bar (`nextFreeText`). */
 function useNextFree(next: Detail['nextFree']): string | null {
   const t = useTranslations('business.card')
   const fmt = useFmt()
   const now = useClock()
-  if (!next) return null
-  // a start past midnight reads on the next calendar day
-  const at = calendarAt(next.date, next.start)
-  return t('at', { day: fmt.relativeShortDate(at.date, today(now)), time: fmt.time(at.start) })
+  return next && nextFreeText(next, today(now), fmt, (values) => t('at', values))
 }
 
-/** How the business answers (`typicalConfirmMinutes`, book Q-113): within its usual time, by hand, or at once. */
+/** How the business answers (`confirmLine`). */
 function ConfirmLine({ detail }: { detail: Detail }) {
   const t = useTranslations('business.card')
   const fmt = useFmt()
-  if (detail.confirmMode === 'instant') return t('confirmsAtOnce')
-  return detail.typicalConfirmMinutes ? t('confirmsWithin', { time: fmt.duration(detail.typicalConfirmMinutes) }) : t('confirmsByHand')
+  return confirmLine(detail, fmt, t)
 }
 
 /** The booking flow's address with what's picked: the services step with nothing, the specialist step with some. */

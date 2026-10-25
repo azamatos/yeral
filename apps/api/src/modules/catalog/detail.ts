@@ -156,8 +156,9 @@ export async function businessDetail(
     }
   }
 
+  // from yesterday: its night may still be under way past midnight (book Q-105), and the page reads its hours then
   const specialDays: BusinessDetail['specialDays'] = []
-  for (let i = 0; i < SPECIAL_DAYS_AHEAD; i++) {
+  for (let i = -1; i < SPECIAL_DAYS_AHEAD; i++) {
     const date = addDays(day, i)
     const ex = findException(b.exceptions, date)
     if (ex) specialDays.push({ date, name: ex.name, hours: ex.hours ?? null })

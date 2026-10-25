@@ -213,6 +213,12 @@ export const SectionNav: Story = {
     await userEvent.click(nav.getByRole('link', { name: 'Reviews' }))
     await waitFor(() => expect(canvas.getByRole('region', { name: 'Reviews' })).toHaveFocus())
     await waitFor(() => expect(nav.getByRole('link', { name: 'Reviews' })).toHaveAttribute('aria-current', 'true'))
+    // About, last and too short to reach the nav, is current once the page can't scroll further
+    await userEvent.click(nav.getByRole('link', { name: 'About' }))
+    await waitFor(() => expect(nav.getByRole('link', { name: 'About' })).toHaveAttribute('aria-current', 'true'))
+    // the header's «96 reviews» leads there too
+    await userEvent.click(canvas.getByRole('link', { name: '96 reviews' }))
+    await waitFor(() => expect(canvas.getByRole('region', { name: 'Reviews' })).toHaveFocus())
   },
 }
 
@@ -226,6 +232,18 @@ export const Specialists: Story = {
     await expect(cards[2]).toHaveTextContent(/Tomorrow 10:00/)
     await expect(cards[3]).toHaveTextContent(/No free times soon/)
     await expect(team.getByRole('link', { name: 'Book with Aýna' })).toHaveAttribute('href', '/en/b/glow-studio/book?staff=st-ayna')
+  },
+}
+
+/** Services picked on the page go with a specialist's Book, to the specialist step (as the card's Continue). */
+export const SpecialistsPicked: Story = {
+  args: { path: '/en/b/glow-studio?services=s1' },
+  play: async ({ canvas }) => {
+    const team = within(await canvas.findByRole('region', { name: 'Specialists' }))
+    await expect(team.getByRole('link', { name: 'Book with Aýna' })).toHaveAttribute(
+      'href',
+      '/en/b/glow-studio/book?services=s1&step=staff&staff=st-ayna',
+    )
   },
 }
 
@@ -264,6 +282,7 @@ export const ReviewsPaging: Story = {
     await waitFor(() => expect(reviews.getAllByRole('article')).toHaveLength(12))
     await userEvent.click(reviews.getByRole('button', { name: 'All reviews' }))
     await waitFor(() => expect(reviews.getAllByRole('article')).toHaveLength(14))
+    await expect(reviews.getByText('14 reviews shown')).toBeInTheDocument()
     await expect(reviews.queryByRole('button', { name: 'All reviews' })).toBeNull()
   },
 }
@@ -294,7 +313,8 @@ export const About: Story = {
     const days = about.getAllByText(/^\d{2}:\d{2}–\d{2}:\d{2}$|^Closed$/)
     await expect(days).toHaveLength(7)
     await expect(about.getByText('Today')).toBeVisible()
-    await expect(about.getByRole('img', { name: 'Glow Studio on the map' })).toBeVisible()
+    // the map's pin names the place (placed once the frame knows its size)
+    await expect(await about.findByText('Glow Studio', { selector: 'span' })).toBeVisible()
     await expect(about.getByText('Bitarap Türkmenistan avenue 247, Ashgabat, 2nd floor')).toBeVisible()
     await expect(about.getByText('The door beside the shopping centre, lift to the 2nd floor')).toBeVisible()
     await expect(about.getByRole('link', { name: 'Directions' })).toHaveAttribute(

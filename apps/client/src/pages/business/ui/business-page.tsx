@@ -12,6 +12,7 @@ import { cn } from '@yeral/ui/cn'
 import { ExampleBadge } from '@yeral/ui/example-badge'
 import { Pill } from '@yeral/ui/pill'
 import { Rating } from '@yeral/ui/rating'
+import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { Clock, MapPin, Share2 } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -19,13 +20,13 @@ import { useLocale, useTranslations } from 'use-intl'
 import { parseServiceIds, pickedServices, ServicePicker, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { site } from '@/shared/config'
 import { wrap } from '@/shared/ui'
-import { openLine } from '../model/when'
+import { addressLine, openLine } from '../model/when'
 import { About } from './about'
 import { BookingBar, BookingCard } from './booking-card'
 import { FavouriteButton } from './favourite'
 import { Nearby } from './nearby'
 import { Reviews } from './reviews'
-import { Section, SECTIONS, SectionNav } from './sections'
+import { goTo, Section, SECTIONS, SectionNav } from './sections'
 import { Specialists } from './specialists'
 
 /**
@@ -91,7 +92,7 @@ export function BusinessPage() {
                 groupHeading="h3"
               />
             </Section>
-            {detail.specialists.length > 0 && <Specialists detail={detail} state={state} />}
+            {detail.specialists.length > 0 && <Specialists detail={detail} state={state} picked={picked.map((s) => s.id)} />}
             <Reviews detail={detail} />
             <About detail={detail} />
           </div>
@@ -178,7 +179,9 @@ function Header({ detail }: { detail: BusinessDetail }) {
                 <>
                   <Rating value={fmt.rating(detail.rating)} />
                   <span aria-hidden>·</span>
-                  <span className="font-medium text-a-600">{t('reviews', { count: detail.reviewsCount })}</span>
+                  <a href="#reviews" onClick={goTo('reviews')} className={cn(textLink, 'font-medium')}>
+                    {t('reviews', { count: detail.reviewsCount })}
+                  </a>
                 </>
               ) : (
                 <span>{t('noReviews')}</span>
@@ -191,7 +194,7 @@ function Header({ detail }: { detail: BusinessDetail }) {
             <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
               <MapPin aria-hidden className="size-4 flex-none" strokeWidth={1.75} />
               <span>
-                {[fmt.addressIn(detail.address, detail.city.name), detail.floor].filter(Boolean).join(', ')}
+                {addressLine(detail, fmt)}
                 {detail.distanceM !== null && ` · ${t('away', { distance: fmt.distance(detail.distanceM) })}`}
               </span>
               {/* the api sends when it moved only for the 30 days the page says so (book Q-215) */}

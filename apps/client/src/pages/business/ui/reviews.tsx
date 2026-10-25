@@ -18,7 +18,8 @@ type Review = z.infer<typeof reviewSchema>
 
 /**
  * Venue «Teswirler» (book C-07): the average, the count and the 5-to-1 bars beside the reviews, newest first, a page
- * at a time («All reviews» brings the next), and who may write one. A review the business reported and Ýeral is
+ * at a time («All reviews» loads more, as C-07 says, until there are no more; how many show is said), and who may
+ * write one. A review the business reported and Ýeral is
  * checking is listed with its grey line, and counts in none of the numbers (the api leaves it out of them).
  */
 export function Reviews({ detail }: { detail: BusinessDetail }) {
@@ -27,11 +28,19 @@ export function Reviews({ detail }: { detail: BusinessDetail }) {
   const lang = useLocale()
   const sdk = useSdk()
   const list = useInfiniteQuery(sdk.catalog.reviews(detail.slug, lang))
-  const reviews = list.data?.pages.flatMap((p) => p.items) ?? []
+  // the pages go by offset: one written meanwhile pushes the last of a page onto the next, so it comes twice
+  const seen = new Set<string>()
+  const reviews = (list.data?.pages.flatMap((p) => p.items) ?? []).filter((r) => !seen.has(r.id) && !!seen.add(r.id))
+  // one clock for every card: «2 days ago» moves once a day
+  const now = useClock()
   const counted = detail.rating !== null && detail.reviewsCount > 0
   const footer = (
     <div className="flex flex-wrap items-center gap-4 pt-6">
       {list.isError && <span className="w-full text-small text-danger-ink">{t('failed')}</span>}
+      {/* what «All reviews» brought, said: the button stays where it was */}
+      <span aria-live="polite" className="sr-only">
+        {list.data && list.data.pages.length > 1 ? t('shown', { count: reviews.length }) : ''}
+      </span>
       {list.hasNextPage && (
         <Button variant="secondary" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>
           {t('more')}
@@ -67,7 +76,7 @@ export function Reviews({ detail }: { detail: BusinessDetail }) {
           )}
           <div className="flex min-w-0 flex-[999_1_380px] flex-col">
             {reviews.map((r) => (
-              <ReviewCard key={r.id} review={r} business={detail.name} />
+              <ReviewCard key={r.id} review={r} business={detail.name} now={now} />
             ))}
             {footer}
           </div>
@@ -81,10 +90,9 @@ export function Reviews({ detail }: { detail: BusinessDetail }) {
  * One review (COMPONENTS ReviewCard): avatar 40 with the name and how long ago, the stars (14) with what it was for,
  * Ýeral's line while it checks a reported one, the words, and the business's reply in its box.
  */
-function ReviewCard({ review: r, business }: { review: Review; business: string }) {
+function ReviewCard({ review: r, business, now }: { review: Review; business: string; now: number }) {
   const t = useTranslations('business.reviewList')
   const brand = useTranslations('common')('brand')
-  const now = useClock()
   const when = ago(r.createdAt, now)
   return (
     <article className="flex flex-col gap-2.5 border-b border-n-200 py-5">

@@ -203,6 +203,7 @@
       "checking": "{brand} is checking this review · not counted in the rating",
       "reply": "Reply from {name}",
       "more": "All reviews",
+      "shown": "{count, plural, one {# review shown} other {# reviews shown}}",
       "who": "Only clients who booked and came can leave a rating.",
       "none": "No reviews yet",
       "failed": "Couldn't load the reviews. Reload the page to try again."
@@ -213,7 +214,6 @@
       "today": "Today",
       "closed": "Closed",
       "address": "Address",
-      "onMap": "{name} on the map",
       "directions": "Directions",
       "amenities": "Amenities",
       "amenity": {
