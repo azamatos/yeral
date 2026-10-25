@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { Link, useNavigate, useSearch } from '@tanstack/react-router'
+import { Link, Outlet, useNavigate, useSearch } from '@tanstack/react-router'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
@@ -17,7 +17,8 @@ export type BookingsTab = 'upcoming' | 'past'
  * the address, `?tab=past`), the bookings 12 at a time with «Show more», and each tab's empty state. Upcoming puts the
  * declined or expired requests that still have a time to take on top, then the rest soonest first; Past is newest
  * first (the api's order). Changes made elsewhere (the business answers, a request runs out) come in through the live
- * updates the site starts in the browser.
+ * updates the site starts in the browser. A row opens its booking in the drawer over the list (`/account/bookings/{code}`,
+ * the child route's `<Outlet />`).
  */
 export function MyBookingsPage() {
   const t = useTranslations('myBookings')
@@ -79,7 +80,7 @@ export function MyBookingsPage() {
           <ul className="m-0 -mx-4 flex list-none flex-col p-0 max-sm:mx-0">
             {rows.map((b) => (
               <li key={b.code} className="border-b border-n-200 last:border-b-0 max-sm:border-b">
-                <BookingRow booking={b} />
+                <BookingRow booking={b} tab={tab} />
               </li>
             ))}
           </ul>
@@ -113,6 +114,7 @@ export function MyBookingsPage() {
           </TabsContent>
         ))}
       </Tabs>
+      <Outlet />
     </>
   )
 }

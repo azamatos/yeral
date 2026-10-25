@@ -21,6 +21,7 @@ import { Route as LangSiteAccountBookingsRouteImport } from './routes/$lang/_sit
 import { Route as LangSiteAccountProfileRouteImport } from './routes/$lang/_site/account/profile'
 import { Route as LangSiteBSlugRouteImport } from './routes/$lang/_site/b/$slug'
 import { Route as LangBSlugBookRouteImport } from './routes/$lang/b.$slug.book'
+import { Route as LangSiteAccountBookingsCodeRouteImport } from './routes/$lang/_site/account/bookings.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -81,6 +82,12 @@ const LangBSlugBookRoute = LangBSlugBookRouteImport.update({
   path: '/b/$slug/book',
   getParentRoute: () => LangRouteRoute,
 } as any)
+const LangSiteAccountBookingsCodeRoute =
+  LangSiteAccountBookingsCodeRouteImport.update({
+    id: '/$code',
+    path: '/$code',
+    getParentRoute: () => LangSiteAccountBookingsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,22 +96,24 @@ export interface FileRoutesByFullPath {
   '/$lang/account': typeof LangSiteAccountRouteRouteWithChildren
   '/$lang/login': typeof LangSiteLoginRoute
   '/$lang/': typeof LangSiteIndexRoute
-  '/$lang/account/bookings': typeof LangSiteAccountBookingsRoute
+  '/$lang/account/bookings': typeof LangSiteAccountBookingsRouteWithChildren
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
   '/$lang/b/$slug': typeof LangSiteBSlugRoute
   '/$lang/b/$slug/book': typeof LangBSlugBookRoute
   '/$lang/account/': typeof LangSiteAccountIndexRoute
+  '/$lang/account/bookings/$code': typeof LangSiteAccountBookingsCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$lang': typeof LangSiteIndexRoute
   '/b/$slug': typeof BSlugRoute
   '/$lang/login': typeof LangSiteLoginRoute
-  '/$lang/account/bookings': typeof LangSiteAccountBookingsRoute
+  '/$lang/account/bookings': typeof LangSiteAccountBookingsRouteWithChildren
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
   '/$lang/b/$slug': typeof LangSiteBSlugRoute
   '/$lang/b/$slug/book': typeof LangBSlugBookRoute
   '/$lang/account': typeof LangSiteAccountIndexRoute
+  '/$lang/account/bookings/$code': typeof LangSiteAccountBookingsCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -115,11 +124,12 @@ export interface FileRoutesById {
   '/$lang/_site/account': typeof LangSiteAccountRouteRouteWithChildren
   '/$lang/_site/login': typeof LangSiteLoginRoute
   '/$lang/_site/': typeof LangSiteIndexRoute
-  '/$lang/_site/account/bookings': typeof LangSiteAccountBookingsRoute
+  '/$lang/_site/account/bookings': typeof LangSiteAccountBookingsRouteWithChildren
   '/$lang/_site/account/profile': typeof LangSiteAccountProfileRoute
   '/$lang/_site/b/$slug': typeof LangSiteBSlugRoute
   '/$lang/b/$slug/book': typeof LangBSlugBookRoute
   '/$lang/_site/account/': typeof LangSiteAccountIndexRoute
+  '/$lang/_site/account/bookings/$code': typeof LangSiteAccountBookingsCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/$lang/b/$slug'
     | '/$lang/b/$slug/book'
     | '/$lang/account/'
+    | '/$lang/account/bookings/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/$lang/b/$slug'
     | '/$lang/b/$slug/book'
     | '/$lang/account'
+    | '/$lang/account/bookings/$code'
   id:
     | '__root__'
     | '/'
@@ -160,6 +172,7 @@ export interface FileRouteTypes {
     | '/$lang/_site/b/$slug'
     | '/$lang/b/$slug/book'
     | '/$lang/_site/account/'
+    | '/$lang/_site/account/bookings/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -254,17 +267,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LangBSlugBookRouteImport
       parentRoute: typeof LangRouteRoute
     }
+    '/$lang/_site/account/bookings/$code': {
+      id: '/$lang/_site/account/bookings/$code'
+      path: '/$code'
+      fullPath: '/$lang/account/bookings/$code'
+      preLoaderRoute: typeof LangSiteAccountBookingsCodeRouteImport
+      parentRoute: typeof LangSiteAccountBookingsRoute
+    }
   }
 }
 
+interface LangSiteAccountBookingsRouteChildren {
+  LangSiteAccountBookingsCodeRoute: typeof LangSiteAccountBookingsCodeRoute
+}
+
+const LangSiteAccountBookingsRouteChildren: LangSiteAccountBookingsRouteChildren =
+  {
+    LangSiteAccountBookingsCodeRoute: LangSiteAccountBookingsCodeRoute,
+  }
+
+const LangSiteAccountBookingsRouteWithChildren =
+  LangSiteAccountBookingsRoute._addFileChildren(
+    LangSiteAccountBookingsRouteChildren,
+  )
+
 interface LangSiteAccountRouteRouteChildren {
-  LangSiteAccountBookingsRoute: typeof LangSiteAccountBookingsRoute
+  LangSiteAccountBookingsRoute: typeof LangSiteAccountBookingsRouteWithChildren
   LangSiteAccountProfileRoute: typeof LangSiteAccountProfileRoute
   LangSiteAccountIndexRoute: typeof LangSiteAccountIndexRoute
 }
 
 const LangSiteAccountRouteRouteChildren: LangSiteAccountRouteRouteChildren = {
-  LangSiteAccountBookingsRoute: LangSiteAccountBookingsRoute,
+  LangSiteAccountBookingsRoute: LangSiteAccountBookingsRouteWithChildren,
   LangSiteAccountProfileRoute: LangSiteAccountProfileRoute,
   LangSiteAccountIndexRoute: LangSiteAccountIndexRoute,
 }

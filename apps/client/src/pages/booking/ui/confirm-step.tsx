@@ -10,13 +10,11 @@ import { TimeSlot } from '@yeral/ui/time-slots'
 import { CircleCheck, Clock, History, Wallet } from 'lucide-react'
 import { lazy, Suspense, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
+import { NOTE_MAX } from '@/entities/booking'
 import { StepTitle } from './step-title'
 
 // the login comes over the page only when someone needs it: its steps stay out of the flow's first download
 const LoginModal = lazy(() => import('@/features/log-in').then((m) => ({ default: m.LoginModal })))
-
-/** The note's limit: the api's (`noteSchema` in `@yeral/contract/bookings`, which keeps it to itself). */
-export const NOTE_MAX = 500
 
 /** A time the api offered when the chosen one was just taken (`slot_taken`). */
 export type Alternative = { date: string; start: number; end: number }
