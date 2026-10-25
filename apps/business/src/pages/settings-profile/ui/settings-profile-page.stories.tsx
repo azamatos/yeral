@@ -326,13 +326,21 @@ export const PhotoRefused: Story = {
 }
 
 /**
- * The address: the wizard's fields with the map; «I work from home» joins the save bar and goes to the profile with the
- * rest of the location as it is.
+ * The address in B-Settings' layout: the city beside «Street and building», the floor beside the entrance, the 260 map,
+ * «I work from home» as a settings row; it joins the save bar and goes to the profile with the rest of the location as
+ * it is.
  */
 export const Address: Story = {
   play: async ({ canvas }) => {
     const section = await canvas.findByRole('region', { name: 'Address' })
-    await expect(within(section).getByRole('combobox', { name: 'Address' })).toHaveValue(PROFILE.location.address)
+    const street = within(section).getByRole('combobox', { name: 'Street and building' })
+    await expect(street).toHaveValue(PROFILE.location.address)
+    // side by side, as the board draws them: the city's top level with the street's
+    const city = within(section).getByRole('combobox', { name: 'City' })
+    await expect(Math.abs(city.getBoundingClientRect().top - street.getBoundingClientRect().top)).toBeLessThan(2)
+    await expect(within(section).getByRole('switch', { name: 'I work from home' })).toHaveAccessibleDescription(
+      'Only clients with a confirmed booking see your exact address',
+    )
     await expect(within(section).getByText(/Moved\?/)).toBeVisible()
     await expect(within(section).getByRole('link', { name: 'Create a business' })).toBeVisible()
     await userEvent.click(within(section).getByRole('switch', { name: 'I work from home' }))
