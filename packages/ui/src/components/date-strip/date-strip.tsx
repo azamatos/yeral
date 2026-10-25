@@ -62,7 +62,13 @@ export function DateStrip({
           </div>
         )}
       </div>
-      <div role="group" aria-label={ariaLabel} className="-mx-1 mt-3 [scrollbar-width:none] overflow-x-auto p-1 sm:overflow-hidden">
+      {/* `relative`: whatever is placed absolutely inside (the days' hidden words) scrolls with the strip, so on a phone
+          the strip scrolls and the page doesn't */}
+      <div
+        role="group"
+        aria-label={ariaLabel}
+        className="relative -mx-1 mt-3 [scrollbar-width:none] overflow-x-auto p-1 sm:overflow-hidden"
+      >
         <div
           className="flex gap-2 transition-transform duration-250 ease-out"
           style={paged ? { transform: `translateX(calc(${-page} * (100% + 8px)))` } : undefined}

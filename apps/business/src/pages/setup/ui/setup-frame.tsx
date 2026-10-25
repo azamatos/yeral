@@ -84,12 +84,20 @@ export function SetupFrame({
   const name = useStepName()
   const total = WIZARD_STEPS.length
   const n = stepIndex(current) + 1
-  const later = onLater && (
-    <button type="button" onClick={onLater} className={`${textLink} inline-flex min-h-8 items-center gap-1.5 text-small`}>
-      <LogOut aria-hidden strokeWidth={1.75} className="size-4" />
-      {t('setup.later')}
-    </button>
-  )
+  // «Continue later»: with its icon in the aside; in the phone header the words alone, up to half the row, wrapping (a
+  // longer language's too) and shrinking on a narrow phone (B-Onboarding `.mb`), its target still 32 high
+  const laterButton = (header: boolean) =>
+    onLater && (
+      <button
+        type="button"
+        onClick={onLater}
+        className={`${textLink} inline-flex min-h-8 items-center gap-1.5 text-small ${header ? 'max-w-1/2 min-w-0 flex-[0_1_auto] justify-end text-right' : ''}`}
+      >
+        {!header && <LogOut aria-hidden strokeWidth={1.75} className="size-4" />}
+        {t('setup.later')}
+      </button>
+    )
+  const later = laterButton(false)
   return (
     <div className="flex min-h-dvh items-stretch bg-n-0 text-n-900">
       <aside
@@ -140,7 +148,7 @@ export function SetupFrame({
               <span className="whitespace-nowrap text-n-500">{t('setup.stepShort', { n, total })}</span> · {name(current, more)}
             </span>
             <div className="flex-1" />
-            {later && <span className="max-w-1/2 flex-none text-right">{later}</span>}
+            {laterButton(true)}
           </div>
           <ProgressBar variant="flow" label={t('setup.progress')} value={n} max={total} valueText={t('setup.stepOf', { n, total })} />
         </header>

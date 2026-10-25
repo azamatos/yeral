@@ -48,4 +48,16 @@ export const Default: Story = {
     await expect(canvas.getByRole('button', { name: 'Öňki hepde' })).toBeEnabled()
   },
 }
-export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
+/** Phones: the strip scrolls on its own, the page doesn't (the days' hidden words stay inside them). */
+export const Phone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    const strip = canvas.getByRole('group', { name: 'Sene' })
+    await expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth)
+    // the days' hidden words (absolute) are placed within the strip, so its scroll holds them: placed by anything further
+    // out, the last days' words widen the whole page sideways on a phone
+    const words = [...strip.querySelectorAll<HTMLElement>('.sr-only')]
+    await expect(words.length).toBeGreaterThan(0)
+    for (const w of words) await expect(w.offsetParent === strip || strip.contains(w.offsetParent)).toBe(true)
+  },
+}
