@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { bookingsAffectedDetailsSchema, type BookingsAffectedDetails } from '@yeral/contract/errors'
 import type { Menu } from '@yeral/contract/services'
 import type { TeamMember } from '@yeral/contract/team'
 import { MARKET } from '@yeral/domain/market'
@@ -16,6 +17,7 @@ import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { PhoneInput } from '@yeral/ui/phone-input'
 import { Select } from '@yeral/ui/select'
+import { Spinner } from '@yeral/ui/spinner'
 import { Switch } from '@yeral/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
 import { textLink } from '@yeral/ui/text-link'
@@ -23,6 +25,7 @@ import { toast } from '@yeral/ui/toast'
 import { Info, Lock } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
+import { HoursAffectedBookings, type AffectedChoice } from '@/features/edit-hours'
 import { useSdk } from '@/shared/api'
 import { FULL_NAME_MAX, SPECIALIZATION_MAX, TEAM_NAME_MAX } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
@@ -38,10 +41,12 @@ import {
   saveOf,
   type MemberForm,
 } from '../model/member'
+import { sameShift, scheduleWeek, shiftFormOf, shiftValid, type ShiftForm } from '../model/shift'
+import { ShiftEditor, TimeOff } from './member-hours'
 import { RemoveMember } from './remove-member'
 import { ServicePicker } from './service-picker'
 
-const TABS = ['profile', 'services', 'access'] as const
+const TABS = ['profile', 'services', 'hours', 'access'] as const
 type Tab = (typeof TABS)[number]
 
 /**
@@ -145,12 +150,23 @@ function MemberEditor({
   const errorText = useErrorText()
   const id = useId()
   const rules = useQuery(sdk.settings.rules(slug))
+  const schedule = useQuery(sdk.team.schedule(slug, m.id))
+  const businessHours = useQuery(sdk.settings.hours(slug))
+  const updateSchedule = useMutation(sdk.team.updateSchedule(slug, m.id))
   const update = useMutation(sdk.team.update(slug))
   const setServices = useMutation(sdk.team.setServices(slug))
   const resend = useMutation(sdk.team.resendInvite(slug))
   const [now] = useState(() => Date.now())
   const [was] = useState(() => formOf(m, menu, now))
   const [form, setForm] = useState<MemberForm>(was)
+  // the week as saved, once both the schedule and the business hours are read; the change in the drawer over it
+  const week = businessHours.data?.hours
+  const wasShift = schedule.data && week ? shiftFormOf(schedule.data, week) : null
+  const [shiftDraft, setShift] = useState<ShiftForm | null>(null)
+  const shift = shiftDraft ?? wasShift
+  const shiftChanged = !!shift && !!wasShift && !!week && !sameShift(wasShift, shift, week)
+  // bookings outside the new shift: the 409's list, until Keep them or Cancel and offer 3 other times
+  const [shiftAsked, setShiftAsked] = useState<BookingsAffectedDetails | null>(null)
   const [tab, setTab] = useState<Tab>('profile')
   const [removing, setRemoving] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -183,8 +199,8 @@ function MemberEditor({
   const masked = form.phone ? maskPhone(form.phone) : ''
   // an invite goes to a mobile number: turning the app on asks for one first
   const needsMobile = specialist && !was.app && form.app && !inviteable(form)
-  const valid = form.name.trim().length > 0 && !phoneProblem && !phoneLocked && !needsMobile
-  const dirty = isDirty(was, form)
+  const valid = form.name.trim().length > 0 && !phoneProblem && !phoneLocked && !needsMobile && (!shift || !week || shiftValid(shift, week))
+  const dirty = isDirty(was, form) || shiftChanged
   const canSave = owner || tab === 'services' || saving
 
   const phoneHint =
@@ -216,12 +232,32 @@ function MemberEditor({
   const answerers = rules.data?.requestAnswerers
   const daysLeft = m.invite ? inviteDaysLeft(m.invite, now) : 0
 
-  const save = async () => {
+  const save = async (affected?: AffectedChoice) => {
     if (saving || !valid || !dirty) return
     const plan = saveOf(m, was, form, locale, now)
     onBusy(true)
     setSaving(true)
     try {
+      // the week first: over bookings it asks before anything else is saved
+      let settled: { cancelled: number; kept: number } | null = null
+      if (shiftChanged && shift && week && schedule.data) {
+        try {
+          settled = await updateSchedule.mutateAsync({
+            ...scheduleWeek(shift, week),
+            daysOff: schedule.data.daysOff,
+            ...(affected ? { affected } : {}),
+          })
+          setShiftAsked(null)
+        } catch (error) {
+          const listed = isApiError(error, 'bookings_affected') && bookingsAffectedDetailsSchema.safeParse(error.details)
+          if (listed && listed.success) {
+            setShiftAsked(listed.data)
+            onBusy(false)
+            return
+          }
+          throw error
+        }
+      }
       // the profile and the services apart; an invite after them, to the number just saved
       await Promise.all([
         plan.update && update.mutateAsync({ staffId: m.id, ...plan.update }),
@@ -235,6 +271,16 @@ function MemberEditor({
           action: { label: t('copyLink'), onClick: () => onLink(saved, sent.link) },
         })
       } else if (plan.update?.hasApp === false) toast(invited ? t('inviteCancelled', { name: saved }) : t('appOff', { name: saved }))
+      else if (settled)
+        toast(
+          [
+            t('shiftSaved', { name: saved }),
+            settled.cancelled ? t('shiftCancelled', { n: settled.cancelled }) : '',
+            settled.kept ? t('shiftKept', { n: settled.kept }) : '',
+          ]
+            .filter(Boolean)
+            .join(' · '),
+        )
       else toast(t('saved', { name: saved }))
       onBusy(false)
       if (alive.current) onClose()
@@ -336,6 +382,26 @@ function MemberEditor({
             ) : (
               <div className="flex flex-col gap-2">
                 <ServicePicker menu={menu} selected={form.serviceIds} onChange={(serviceIds) => change({ serviceIds })} />
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="hours" className="flex flex-col gap-5">
+            {!owner && (
+              <p className="m-0 flex items-start gap-2.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900">
+                <Info aria-hidden className="mt-px size-4.5 flex-none" strokeWidth={1.75} />
+                {t('roHours')}
+              </p>
+            )}
+            {shift && week && schedule.data ? (
+              <>
+                <ShiftEditor form={shift} business={week} owner={owner} name={name} onChange={setShift} />
+                <span aria-hidden className="h-px flex-none bg-n-200" />
+                <TimeOff slug={slug} member={m} schedule={schedule.data} owner={owner} />
+              </>
+            ) : (
+              <div className="flex justify-center py-10">
+                <Spinner />
               </div>
             )}
           </TabsContent>
@@ -484,6 +550,19 @@ function MemberEditor({
           </Button>
         )}
       </DrawerFooter>
+      <HoursAffectedBookings
+        details={shiftAsked}
+        lead={shift?.own ? t('shiftLeadOwn') : t('shiftLeadBusiness')}
+        saving={saving}
+        onSave={(choice) => void save(choice)}
+        onClose={() => setShiftAsked(null)}
+        words={{
+          title: (what, n) => t('shiftTitle', { what, n, name }),
+          keepCaption: t('shiftKeep'),
+          foot: t('shiftFoot'),
+          save: t('save'),
+        }}
+      />
       {owner && !ownerRow && (
         <RemoveMember slug={slug} member={m} business={business} open={removing} onOpenChange={setRemoving} onRemoved={onRemoved} />
       )}

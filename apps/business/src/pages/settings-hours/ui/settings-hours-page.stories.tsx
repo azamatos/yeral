@@ -10,7 +10,7 @@ import type { Workspace } from '@yeral/contract/team'
 import { addDays, dow, today } from '@yeral/domain/time'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
-import { PageStory } from '@/shared/storybook'
+import { PageStory, pickDate } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { SettingsHoursPage } from './settings-hours-page'
 
@@ -289,19 +289,6 @@ export const SpecialDaysList: Story = {
 }
 
 const body = within(document.body)
-/** Picks `date` in the field's month (DatePicker), moving a month at a time to it. */
-const pickDate = async (modal: Pick<typeof body, 'getByRole'>, label: string, date: string) => {
-  await userEvent.click(modal.getByRole('button', { name: new RegExp(`^${label} `) }))
-  // a neighbouring month's days are there too, hidden and without a button
-  const day = () => body.getByRole('grid').querySelector<HTMLButtonElement>(`[data-day="${date}"]:not([data-hidden]) button`)
-  await body.findByRole('grid')
-  for (let i = 0; i < 24 && !day(); i++) {
-    const shown = body.getByRole('grid').querySelector('[data-day]:not([data-hidden])')?.getAttribute('data-day') ?? ''
-    await userEvent.click(body.getByRole('button', { name: date < shown ? 'Previous month' : 'Next month' }))
-  }
-  await userEvent.click(day()!)
-  await waitFor(() => expect(body.queryByRole('grid')).toBeNull())
-}
 const openAdd = async (canvas: { findByRole: (role: string, options: { name: string }) => Promise<HTMLElement> }) => {
   await userEvent.click(await canvas.findByRole('button', { name: 'Add a special day' }))
   const dialog = await body.findByRole('dialog', { name: 'Add a special day' })

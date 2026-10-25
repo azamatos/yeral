@@ -8,7 +8,7 @@ import type { Me } from '@yeral/contract/account'
 import type { TeamMember, Workspace } from '@yeral/contract/team'
 import { expect, spyOn, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
-import { PageStory } from '@/shared/storybook'
+import { PageStory, pickDate } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
 import { SettingsTeamPage } from './settings-team-page'
 
@@ -114,12 +114,22 @@ const menu = {
     { id: 'g3', name: { en: 'Massage' }, services: [service('s4', 'Back massage', 45, 250, ['leyli'])] },
   ],
 }
-/** Jeren works her own shift; the others follow the business hours. */
-const scheduleOf = (id: string) => ({
+type Schedule = {
+  shift: ({ open: number; close: number } | null)[] | null
+  breaks: ({ start: number; end: number } | null)[]
+  daysOff: { name: string; from: string; to: string; yearly: boolean }[]
+}
+/** Jeren works her own shift, with time off 9–13 November (demo-data v06r3); the others follow the business hours. */
+const scheduleOf = (id: string): Schedule => ({
   shift: id === 'jeren' ? [...Array.from({ length: 6 }, () => ({ open: 720, close: 1140 })), null] : null,
-  breaks: Array(7).fill(null),
-  daysOff: [],
+  breaks: Array<null>(7).fill(null),
+  daysOff: id === 'jeren' ? [{ name: 'Family trip', from: '2026-11-09', to: '2026-11-13', yearly: false }] : [],
 })
+/** Glow Studio's week: Monday to Saturday 09:00–20:00, closed on Sunday. */
+const businessHours = {
+  hours: [...Array.from({ length: 6 }, () => ({ open: 540, close: 1200, break: null })), null],
+  specialDays: [],
+}
 
 /** The rows the last removal sent: what happens to each booking the colleague can't take. */
 let removalRows: { code: string; affected: string }[] | null = null
@@ -166,6 +176,7 @@ const fakeApi =
   () => {
     let people = team
     let staffed = menu
+    const schedules = new Map<string, Schedule>()
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const request = new Request(input, init)
       const route = `${request.method} ${new URL(request.url).pathname.replace(/^\/v1/, '')}`
@@ -177,6 +188,17 @@ const fakeApi =
       if (route === 'GET /w/glow-studio/team') return json({ items: people })
       if (route === 'GET /w/glow-studio/services') return json(staffed)
       if (route === 'GET /w/glow-studio/settings/rules') return json({ requestAnswerers: 'both' })
+      if (route === 'GET /w/glow-studio/settings/hours') return json(businessHours)
+      // a schedule saved: Maral's bookings on 3 November are asked about when time off takes that day
+      const week = /^PUT \/w\/glow-studio\/team\/([^/]+)\/schedule$/.exec(route)
+      if (week) {
+        const { affected, ...next } = (await request.json()) as Schedule & { affected?: string }
+        const hits = week[1] === 'maral' && next.daysOff.some((d) => d.from <= '2026-11-03' && d.to >= '2026-11-03')
+        if (hits && !affected) return json({ error: { code: 'bookings_affected', details: maralAhead } }, 409)
+        schedules.set(week[1]!, next)
+        const settled = hits ? (affected === 'cancel' ? { cancelled: 2, kept: 0 } : { cancelled: 0, kept: 2 }) : { cancelled: 0, kept: 0 }
+        return json({ ...next, moved: 0, ...settled })
+      }
       // the staff drawer: the profile and access in one change, the services in their own
       const edit = /^PATCH \/w\/glow-studio\/team\/([^/]+)$/.exec(route)
       if (edit) {
@@ -243,7 +265,7 @@ const fakeApi =
       if (one) {
         const [, method, id, what] = one
         const m = people.find((p) => p.id === id)!
-        if (what === 'schedule') return json(scheduleOf(id!))
+        if (what === 'schedule') return json(schedules.get(id!) ?? scheduleOf(id!))
         // as the api: someone removed before they joined comes back invited, without a new invite
         if (what === 'reactivate') {
           people = people.map((p) => (p.id === id ? { ...p, status: p.joined ? 'active' : 'invited' } : p))
@@ -553,6 +575,9 @@ export const DrawerAdmin: Story = {
     await expect(drawer.getByLabelText('Name clients see')).toBeDisabled()
     await expect(drawer.queryByRole('button', { name: 'Save' })).toBeNull()
     await expect(drawer.queryByRole('button', { name: 'Remove from the team' })).toBeNull()
+    await userEvent.click(drawer.getByRole('tab', { name: 'Hours' }))
+    await expect(await drawer.findByText('Only the owner changes shifts and time off.')).toBeVisible()
+    await expect(drawer.queryByRole('button', { name: 'Add time off' })).toBeNull()
     await userEvent.click(drawer.getByRole('tab', { name: 'Services' }))
     await userEvent.click(await drawer.findByRole('checkbox', { name: /Manicure/ }))
     await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
@@ -622,6 +647,46 @@ export const RemoveNothingAhead: Story = {
     const done = await body.findByText('Jeren removed from the team')
     await waitFor(() => expect(done).toBeVisible())
     await expect(await within(canvas.getByRole('group', { name: 'No longer on the team' })).findByText('Jeren Hojaýewa')).toBeVisible()
+  },
+}
+
+/** Hours: Jeren's own shift changed and a break added, saved with the drawer; her time off listed. */
+export const DrawerHours: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Jeren Hojaýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Jeren Hojaýewa' }))
+    await userEvent.click(drawer.getByRole('tab', { name: 'Hours' }))
+    await expect(await drawer.findByRole('radio', { name: /^Own shift/ })).toBeChecked()
+    await expect(drawer.getByText('9–13 November 2026')).toBeVisible()
+    await expect(drawer.getByText('5 days · Family trip')).toBeVisible()
+    // Sunday the business is closed: no shift opens it
+    await expect(drawer.getByRole('switch', { name: 'Sunday: works' })).toBeDisabled()
+    await userEvent.selectOptions(drawer.getByRole('combobox', { name: 'Monday: ends' }), '20:00')
+    await userEvent.click(drawer.getByRole('button', { name: 'Monday: add a break' }))
+    await expect(drawer.getByRole('combobox', { name: 'Monday: break starts' })).toBeVisible()
+    await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
+    const saved = await body.findByText('Jeren’s shift saved')
+    await waitFor(() => expect(saved).toBeVisible())
+  },
+}
+
+/** Time off over bookings: asked first, the bookings cancelled with other times offered; added at once. */
+export const DrawerTimeOff: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Maral Ataýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Maral Ataýewa' }))
+    await userEvent.click(drawer.getByRole('tab', { name: 'Hours' }))
+    await expect(await drawer.findByText('No time off planned.')).toBeVisible()
+    await userEvent.click(drawer.getByRole('button', { name: 'Add time off' }))
+    await pickDate(drawer, 'From', '2026-11-03')
+    await userEvent.type(drawer.getByLabelText(/^Note/), 'Wedding')
+    await userEvent.click(within(drawer.getByRole('group', { name: 'Add time off' })).getByRole('button', { name: 'Add time off' }))
+    const modal = within(await body.findByRole('dialog', { name: 'Maral has 2 bookings during this time off' }))
+    await userEvent.click(modal.getByRole('radio', { name: /^Cancel and offer 3 other times/ }))
+    await userEvent.click(modal.getByRole('button', { name: 'Add time off' }))
+    const added = await body.findByText(/^Time off added: 3 November 2026 · 2 bookings cancelled/)
+    await waitFor(() => expect(added).toBeVisible())
+    await expect(await drawer.findByText('1 day · Wedding')).toBeVisible()
   },
 }
 
