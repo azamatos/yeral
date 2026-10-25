@@ -1,7 +1,7 @@
 import type { TeamMember } from '@yeral/contract/team'
 import type { Locale } from '@yeral/domain/model'
 import { MARKET } from '@yeral/domain/market'
-import { isMobile, toE164 } from '@yeral/domain/phone'
+import { isMobile, nationalDigits, toE164 } from '@yeral/domain/phone'
 import { inviteState } from '@yeral/domain/team'
 
 /** «Add a team member» (B-Team `inviteVals`, book B-44): the national digits as typed, the name clients see, the rest. */
@@ -26,6 +26,20 @@ export const emptyInvite: InviteForm = {
   hasApp: true,
   serviceIds: [],
 }
+
+/**
+ * «Invite again» for someone who left (B-Team `inviteAgain`): their number, names and level filled in, with the app;
+ * the services are picked again (the menu doesn't list someone off the team).
+ */
+export const inviteAgainForm = (m: TeamMember): InviteForm => ({
+  phone: m.phone ? nationalDigits(m.phone) : '',
+  name: m.name,
+  fullName: m.fullName ?? '',
+  specialization: m.specialization ?? '',
+  level: m.level === 'admin' ? 'admin' : 'specialist',
+  hasApp: true,
+  serviceIds: [],
+})
 
 /** An administrator always signs in; a specialist without the app never does (book Q-216). */
 export const usesApp = (form: InviteForm) => form.level === 'admin' || form.hasApp

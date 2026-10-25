@@ -13,17 +13,19 @@ import { Modal, ModalContent, ModalDescription, ModalHeader } from '@yeral/ui/mo
 import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
-import { Ellipsis, Info, UserPlus } from 'lucide-react'
+import { Ellipsis, Info, UserMinus, UserPlus } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
+import { useAffectedCount } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
-import { inviteNow } from '../model/invite'
-import { inviteDaysLeft, invitePending } from '../model/member'
+import { inviteAgainForm, inviteNow } from '../model/invite'
+import { inviteDaysLeft, invitePending, leftAhead } from '../model/member'
 import { AddMember } from './add-member'
 import { MemberDrawer } from './member-drawer'
+import { RemoveMember } from './remove-member'
 
 /**
  * Settings → Team (B-Team `tab=team`, design §8 «Topar», §28.4 Team, book B-43–B-50): everyone in groups,
@@ -60,7 +62,13 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
   const menu = useQuery(sdk.settings.menu(slug))
   // the invite link a send just returned, to copy (the api keeps only its hash, so it can't be read back later)
   const [link, setLink] = useState<{ name: string; url: string } | null>(null)
+  const count = useAffectedCount()
   const [adding, setAdding] = useState(false)
+  // «Invite again» for someone who left: Add a team member with them filled in
+  const [again, setAgain] = useState<TeamMember | null>(null)
+  // «Choose» on «Someone left»: whose bookings the remove window settles
+  const [settling, setSettling] = useState<TeamMember | null>(null)
+  const againOpener = useRef<HTMLButtonElement | null>(null)
   // the staff drawer: whose, and the row's name to give the focus back to
   const [openId, setOpenId] = useState<string | null>(null)
   const opener = useRef<HTMLElement | null>(null)
@@ -96,7 +104,16 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
       lead={t('lead')}
       action={
         owner && (
-          <Button ref={addButton} variant="primary" size="s" aria-haspopup="dialog" onClick={() => setAdding(true)}>
+          <Button
+            ref={addButton}
+            variant="primary"
+            size="s"
+            aria-haspopup="dialog"
+            onClick={() => {
+              setAgain(null)
+              setAdding(true)
+            }}
+          >
             <UserPlus aria-hidden strokeWidth={1.75} />
             {t('add.open')}
           </Button>
@@ -108,6 +125,25 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
           {t('adminNote')}
         </Callout>
       )}
+      {/* «Someone left» (B-Team, owner only): their bookings and requests ahead wait for a new specialist */}
+      {owner &&
+        people
+          .filter((m) => leftAhead(m).total > 0)
+          .map((m) => (
+            <Callout
+              key={m.id}
+              tone="warning"
+              icon={<UserMinus />}
+              live
+              action={
+                <Button variant="secondary" size="s" aria-haspopup="dialog" onClick={() => setSettling(m)}>
+                  {t('leftChoose')}
+                </Button>
+              }
+            >
+              {t('leftBanner', { name: m.name, what: count(leftAhead(m), 'and'), n: leftAhead(m).total })}
+            </Callout>
+          ))}
       <div className="flex flex-col">
         <div aria-hidden className={`hidden min-h-10 items-center gap-x-3 border-y border-n-200 px-2 xl:grid ${COLUMNS}`}>
           {(['name', 'level', 'services', 'hours', 'status'] as const).map((k) => (
@@ -134,6 +170,12 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
                     services={servicesOf(m.id)}
                     pro={s.id === 'specialists' || (s.id === 'invites' && m.level === 'specialist')}
                     onLink={(url) => setLink({ name: m.fullName ?? m.name, url })}
+                    onInviteAgain={(el) => {
+                      // the focus comes back to the row's link when the window closes
+                      againOpener.current = el
+                      setAgain(m)
+                      setAdding(true)
+                    }}
                     onOpen={
                       s.id === 'former'
                         ? undefined
@@ -148,14 +190,30 @@ function TeamSettings({ slug, business, owner, myPhone }: { slug: string; busine
             ),
         )}
       </div>
+      {owner && settling && (
+        <RemoveMember
+          slug={slug}
+          member={settling}
+          business={business}
+          mode="left"
+          open
+          onOpenChange={(open) => !open && setSettling(null)}
+          onRemoved={() => {
+            // the banner and its Choose go with the choice: the focus goes to «Add a team member»
+            setSettling(null)
+            setTimeout(() => addButton.current?.focus())
+          }}
+        />
+      )}
       {owner && (
         <AddMember
           slug={slug}
           people={people}
+          initial={again ? inviteAgainForm(again) : undefined}
           menu={menu.data}
           open={adding}
           onOpenChange={setAdding}
-          opener={addButton}
+          opener={again ? againOpener : addButton}
           onLink={(name, url) => setLink({ name, url })}
         />
       )}
@@ -214,6 +272,7 @@ function MemberRow({
   pro,
   onLink,
   onOpen,
+  onInviteAgain,
 }: {
   slug: string
   member: TeamMember
@@ -224,6 +283,8 @@ function MemberRow({
   onLink: (url: string) => void
   /** Opens their staff drawer (not for someone no longer on the team). */
   onOpen?: (from: HTMLElement) => void
+  /** Someone who left: «Invite again» opens Add a team member with them filled in (the link gets the focus back). */
+  onInviteAgain: (from: HTMLButtonElement) => void
 }) {
   const t = useTranslations('settings.team')
   const levels = useTranslations('levels')
@@ -238,6 +299,8 @@ function MemberRow({
 
   const name = m.fullName ?? m.name
   const former = m.status === 'removed'
+  // «Left» by themself, or «Removed» by the owner (B-Team: someone removed before it was recorded reads «Removed»)
+  const left = former && m.ended?.by === 'self'
   const inviteRow = m.status === 'invited'
   const [now] = useState(() => Date.now())
   const state = m.invite && inviteNow(m.invite, now)
@@ -247,7 +310,12 @@ function MemberRow({
   const daysLeft = m.invite ? inviteDaysLeft(m.invite, now) : 0
 
   let status: { tone: 'on' | 'invited' | 'off'; label: string; sub?: string }
-  if (former) status = { tone: 'off', label: t('status.removed') }
+  if (former)
+    status = {
+      tone: 'off',
+      label: left ? t('status.left') : t('status.removed'),
+      sub: m.ended ? (today(m.ended.at) === today(now) ? t('status.today') : fmt.dayMonth(today(m.ended.at))) : undefined,
+    }
   else if (inviteRow)
     status =
       state === 'expired'
@@ -285,15 +353,24 @@ function MemberRow({
 
   const link = !owner
     ? null
-    : former
-      ? { text: t('reactivate'), aria: t('reactivateAria', { name }), go: reactivateIt }
-      : inviteRow || waiting
-        ? pending
-          ? { text: t('copyLink'), aria: t('copyLinkAria', { name }), go: copyLink }
-          : { text: t('resend'), aria: t('resendAria', { name }), go: resendIt }
-        : null
+    : left
+      ? // not while their bookings wait for a choice: invited, they'd leave «Someone left» with the bookings unsettled
+        leftAhead(m).total > 0
+        ? null
+        : {
+            text: t('inviteAgain'),
+            aria: t('inviteAgainAria', { name }),
+            go: (el: HTMLButtonElement) => Promise.resolve(onInviteAgain(el)),
+          }
+      : former
+        ? { text: t('reactivate'), aria: t('reactivateAria', { name }), go: reactivateIt }
+        : inviteRow || waiting
+          ? pending
+            ? { text: t('copyLink'), aria: t('copyLinkAria', { name }), go: copyLink }
+            : { text: t('resend'), aria: t('resendAria', { name }), go: resendIt }
+          : null
   const caption =
-    owner && former
+    owner && former && !left
       ? t('reactivateCaption', { name: m.name })
       : inviteRow && pending && m.phone
         ? t('signInWith', { phone: maskPhone(m.phone) })
@@ -365,7 +442,7 @@ function MemberRow({
             type="button"
             aria-label={link.aria}
             aria-busy={busy || undefined}
-            onClick={() => void link.go()}
+            onClick={(e) => void link.go(e.currentTarget)}
             className={`${textLink} relative z-1 -ml-2 min-h-8 px-2 py-1 text-left text-dense`}
           >
             {link.text}

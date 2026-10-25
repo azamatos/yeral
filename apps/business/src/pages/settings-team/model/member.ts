@@ -113,3 +113,13 @@ export const isDirty = (was: MemberForm, form: MemberForm) => key(was) !== key(f
 
 /** An invite goes to a mobile number (the api's rule): the one typed, or theirs. */
 export const inviteable = (form: MemberForm) => isMobile(form.phone)
+
+/**
+ * What someone who left left for the owner and the owner hasn't chosen for (B-15, «Someone left»): their bookings and
+ * requests ahead; nothing for anyone else, or once chosen.
+ */
+export function leftAhead(m: TeamMember): { bookings: number; requests: number; total: number } {
+  const bookings = m.ended?.by === 'self' ? (m.ended.bookings ?? 0) : 0
+  const requests = m.ended?.by === 'self' ? (m.ended.requests ?? 0) : 0
+  return { bookings, requests, total: bookings + requests }
+}

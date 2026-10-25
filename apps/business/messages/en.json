@@ -1120,6 +1120,8 @@
         "active": "Active",
         "invited": "Invited",
         "removed": "Removed",
+        "left": "Left",
+        "today": "today",
         "expired": "Expired",
         "declined": "Declined",
         "cancelled": "Cancelled",
@@ -1139,6 +1141,10 @@
       "cancelInvite": "Cancel invite",
       "cancelled": "Invite cancelled · {name} can’t accept it any more",
       "reactivate": "Reactivate",
+      "inviteAgain": "Invite again",
+      "inviteAgainAria": "Invite again: {name}",
+      "leftBanner": "{name} left: {what} {n, plural, one {needs} other {need}} a new specialist",
+      "leftChoose": "Choose",
       "reactivateAria": "Reactivate: {name}",
       "reactivated": "{name} is back on the team",
       "reactivateCaption": "Reactivate restores {name}’s access and makes {name} bookable again.",
@@ -1325,7 +1331,13 @@
         "kept": "{n, plural, one {# kept as it is} other {# kept as they are}}",
         "notified": "{sum} · the clients are notified",
         "removedWith": "{name} removed from the team · {sum}",
-        "removed": "{name} removed from the team"
+        "removed": "{name} removed from the team",
+        "leftTitle": "Who takes {name}’s bookings?",
+        "leftLead": "{name} left {business}. They have {what}.",
+        "save": "Save",
+        "saving": "Saving",
+        "settledWith": "{name}’s bookings are settled · {sum}",
+        "settled": "{name}’s bookings are settled"
       }
     }
   },
