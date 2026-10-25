@@ -29,16 +29,20 @@ export function PageHeader({
   tabs?: ReactNode
 }) {
   const Heading = level === 1 ? 'h1' : 'h2'
+  const titled = title != null && title !== false && title !== ''
   return (
     <header {...props} className={cn('flex flex-col', back ? 'gap-2' : 'gap-5', className)}>
       {back && <div className="-ml-1 flex">{back}</div>}
-      {title !== undefined && (
+      {(titled || avatar || actions) && (
+        // the action at the right, or on a line of its own when the title needs the room
         <div className="flex w-full flex-wrap items-center gap-3.5">
           {avatar}
-          <div className="flex min-w-0 flex-1 flex-col">
-            <Heading className={cn('m-0 text-n-900', level === 1 ? 'text-h2' : 'text-h3 font-bold')}>{title}</Heading>
-            {subtitle && <span className="text-small text-n-600">{subtitle}</span>}
-          </div>
+          {(titled || subtitle) && (
+            <div className="flex min-w-0 flex-col">
+              {titled && <Heading className={cn('m-0 text-n-900', level === 1 ? 'text-h2' : 'text-h3 font-bold')}>{title}</Heading>}
+              {subtitle && <span className="text-small text-n-600">{subtitle}</span>}
+            </div>
+          )}
           {actions && <div className="ml-auto flex flex-none items-center gap-2">{actions}</div>}
         </div>
       )}

@@ -13,7 +13,7 @@ export type RatingRow = {
  * RatingDistribution (DS-Patterns → Charts «Rating distribution»): how a business's reviews spread over 1 to 5 stars,
  * a row each in the caller's order (5 → 1): the stars 13/18 600, a 6 bar (n-100, a-500 filled to the row's share of
  * all the reviews), the count in a 28 column; each row `role="img"` named by its `label`. With `average`, the score
- * 44/48 700 above, its stars (16) and the count of reviews beside it. The words and the formatted score come from the
+ * on the h1 token (44/48 700; 32/36 on phones) above, its stars (16) and the count of reviews beside it. The words and the formatted score come from the
  * caller.
  */
 export function RatingDistribution({
@@ -38,7 +38,7 @@ export function RatingDistribution({
     <div {...props} className={cn('flex flex-col gap-4', className)}>
       {average && (
         <div className="flex items-end gap-3.5">
-          <span className="text-[44px] leading-12 font-bold tracking-[-0.03em] text-n-900">{average.score}</span>
+          <span className="text-h1 text-n-900">{average.score}</span>
           <span className="flex flex-col gap-1 pb-0.5">
             <Stars rating={average.rating} label={average.label} />
             <span className="text-dense text-n-600">{average.count}</span>
@@ -57,7 +57,10 @@ export function RatingDistribution({
               {r.stars}
             </span>
             <span aria-hidden className="block h-1.5 overflow-hidden rounded-pill bg-n-100">
-              <span className="block h-full rounded-pill bg-a-500" style={{ width: `${total ? (r.count / total) * 100 : 0}%` }} />
+              <span
+                className="block h-full rounded-pill bg-a-500"
+                style={{ width: `${total ? Math.min(100, Math.max(0, (r.count / total) * 100)) : 0}%` }}
+              />
             </span>
             <span aria-hidden className="text-right text-n-600 tabular-nums">
               {r.count}

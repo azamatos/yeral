@@ -157,11 +157,19 @@ export const HeaderPager: Story = {
     const dialog = await screen.findByRole('dialog', { name: 'Request' })
     await waitFor(() => expect(dialog).toBeVisible())
     const previous = screen.getByRole('button', { name: 'Previous request' })
-    await expect(previous).toBeDisabled()
+    await expect(previous).toHaveAttribute('aria-disabled', 'true')
     await expect(dialog).toHaveTextContent('1 / 5')
-    await userEvent.click(screen.getByRole('button', { name: 'Next request' }))
+    const next = screen.getByRole('button', { name: 'Next request' })
+    await userEvent.click(next)
     await expect(dialog).toHaveTextContent('2 / 5')
     await expect(dialog).toHaveTextContent('Mahym D. · 16:00')
-    await expect(previous).toBeEnabled()
+    await expect(previous).not.toHaveAttribute('aria-disabled')
+    // to the last with the keys: «Next» turns off, keeps the focus and does nothing more
+    for (let i = 0; i < 3; i++) await userEvent.keyboard('{Enter}')
+    await expect(dialog).toHaveTextContent('5 / 5')
+    await expect(next).toHaveAttribute('aria-disabled', 'true')
+    await expect(next).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect(dialog).toHaveTextContent('5 / 5')
   },
 }

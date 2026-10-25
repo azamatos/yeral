@@ -57,6 +57,11 @@ export const Input: Story = {
     await waitFor(() => expect(canvas.getByRole('radio', { name: '5 stars' })).toBeChecked())
     await userEvent.keyboard('{/ArrowRight}')
     await expect(canvasElement.querySelector('[aria-live]')).toHaveTextContent('Excellent')
+    // past the last star the pick stays at 5, never wrapping round to 1
+    await userEvent.keyboard('{ArrowRight>}')
+    await userEvent.keyboard('{/ArrowRight}')
+    await expect(canvas.getByRole('radio', { name: '5 stars' })).toBeChecked()
+    await expect(canvas.getByRole('radio', { name: '5 stars' })).toHaveFocus()
   },
 }
 

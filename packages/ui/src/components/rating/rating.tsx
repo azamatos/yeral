@@ -1,7 +1,9 @@
-import { Star as StarIcon } from 'lucide-react'
 import { RadioGroup } from 'radix-ui'
 import { useState, type ComponentProps, type ReactNode } from 'react'
 import { cn } from '../../lib/cn'
+
+/** The board's sharp star: one shape for the stars shown and the stars picked. */
+const STAR_POINTS = '12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'
 
 function Star({ fill = 1, className }: { fill?: number; className?: string }) {
   const id = `star-${Math.round(fill * 100)}`
@@ -13,10 +15,7 @@ function Star({ fill = 1, className }: { fill?: number; className?: string }) {
           <stop offset={fill} stopColor="var(--color-n-300)" />
         </linearGradient>
       </defs>
-      <polygon
-        fill={`url(#${id})`}
-        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-      />
+      <polygon fill={`url(#${id})`} points={STAR_POINTS} />
     </svg>
   )
 }
@@ -87,6 +86,8 @@ export function RatingInput({
       <RadioGroup.Root
         aria-label={label}
         orientation="horizontal"
+        // the ends stay put: a press past 5 never wraps round to 1
+        loop={false}
         value={value ? String(value) : ''}
         onValueChange={(v) => {
           // a pick (by the keys too) shows itself, not a star the pointer happens to rest on
@@ -108,7 +109,15 @@ export function RatingInput({
               n <= shown && 'text-n-900',
             )}
           >
-            <StarIcon aria-hidden className="size-8" strokeWidth={1.75} fill={n <= shown ? 'currentColor' : 'none'} />
+            <svg viewBox="0 0 24 24" aria-hidden className="size-8">
+              <polygon
+                points={STAR_POINTS}
+                fill={n <= shown ? 'currentColor' : 'none'}
+                stroke="currentColor"
+                strokeWidth={1.75}
+                strokeLinejoin="round"
+              />
+            </svg>
           </RadioGroup.Item>
         ))}
       </RadioGroup.Root>

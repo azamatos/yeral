@@ -4,6 +4,7 @@ import { createContext, use, useState, type ComponentProps, type ReactNode, type
 import { cn } from '../../lib/cn'
 import { useMediaQuery } from '../../lib/use-media-query'
 import { Button } from '../button'
+import { PagerButton } from '../date-strip'
 
 /** Whether the drawer dims the page now (and holds the focus inside it), and where the focus goes back to. */
 const Mode = createContext<{ modal: boolean; returnFocus?: RefObject<HTMLElement | null> }>({ modal: true })
@@ -88,8 +89,8 @@ export type DrawerPager = {
 
 /**
  * Header: optional leading media (photo, avatar), title and subtitle, close button. With a `pager` (DS-Patterns →
- * Drawer «Title + pager»: one request at a time, most urgent first), the title is followed by previous and next (ghost
- * 36 chevrons, their names from the caller) around «1 / 6» (13/18 n-600, tabular).
+ * Drawer «Title + pager»: one request at a time, most urgent first), the title is followed by previous and next (the
+ * pagers' 36 buttons, their names from the caller) around «1 / 6» (13/18 n-600, tabular).
  */
 export function DrawerHeader({
   title,
@@ -113,28 +114,23 @@ export function DrawerHeader({
       </div>
       {pager && (
         <>
-          <div className="-ml-2 flex flex-none items-center gap-0.5">
-            <Button
-              variant="ghost"
-              iconOnly
-              aria-label={pager.previous.label}
-              disabled={pager.previous.disabled}
-              onClick={pager.previous.onClick}
-              className="size-9 rounded-s"
+          {/* off as aria-disabled: the button pressed to reach the last item keeps the focus */}
+          <div className="flex flex-none items-center gap-0.5">
+            <PagerButton
+              label={pager.previous.label}
+              aria-disabled={pager.previous.disabled || undefined}
+              onClick={() => !pager.previous.disabled && pager.previous.onClick()}
             >
               <ChevronLeft />
-            </Button>
+            </PagerButton>
             <span className="min-w-10 text-center text-dense text-n-600 tabular-nums">{pager.position}</span>
-            <Button
-              variant="ghost"
-              iconOnly
-              aria-label={pager.next.label}
-              disabled={pager.next.disabled}
-              onClick={pager.next.onClick}
-              className="size-9 rounded-s"
+            <PagerButton
+              label={pager.next.label}
+              aria-disabled={pager.next.disabled || undefined}
+              onClick={() => !pager.next.disabled && pager.next.onClick()}
             >
               <ChevronRight />
-            </Button>
+            </PagerButton>
           </div>
           <div className="flex-1" />
         </>
