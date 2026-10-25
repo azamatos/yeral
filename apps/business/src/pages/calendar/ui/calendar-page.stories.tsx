@@ -204,7 +204,21 @@ const json = (body: unknown, status = 200) =>
 
 /** The api as the shell and the calendar ask it; `open` false: the business is closed every day (a late request). */
 const fakeApi =
-  (level: Workspace['level'], open = true, arrives = false, moveFits = true): (() => typeof fetch) =>
+  (
+    level: Workspace['level'],
+    {
+      open = true,
+      arrives = false,
+      moveFits = true,
+    }: {
+      /** false: the business is closed every day (a late request). */
+      open?: boolean
+      /** A new request comes in once one is answered (the shell's toast). */
+      arrives?: boolean
+      /** The client's move fits now (B-21's fit line). */
+      moveFits?: boolean
+    } = {},
+  ): (() => typeof fetch) =>
   () => {
     // the requests confirmed in this story
     const answered = new Set<string>()
@@ -390,7 +404,7 @@ export const Specialist: Story = {
 
 /** The business closed now: the request waits for the opening, its timer says by when. */
 export const ClosedNow: Story = {
-  args: { server: fakeApi('owner', false) },
+  args: { server: fakeApi('owner', { open: false }) },
   play: async ({ canvas }) => {
     const by = localOf(now + 18 * 60_000).min
     const time = `${String(Math.floor(by / 60)).padStart(2, '0')}:${String(by % 60).padStart(2, '0')}`
@@ -453,7 +467,7 @@ export const ConfirmRequest: Story = {
 
 /** A request that comes in while the page is open: the shell's toast, on any page of the workspace. */
 export const RequestArrives: Story = {
-  args: { server: fakeApi('owner', true, true) },
+  args: { server: fakeApi('owner', { arrives: true }) },
   play: async ({ canvas }) => {
     await canvas.findByRole('region', { name: /^Calendar, / })
     await userEvent.click(await canvas.findByRole('button', { name: '2 requests — open the most urgent' }))
@@ -536,11 +550,23 @@ export const ShowMove: Story = {
 
 /** A move that doesn't fit now: the fit line says so and its Confirm is off. */
 export const MoveDoesntFit: Story = {
-  args: { server: fakeApi('owner', true, false, false), path: '/w/glow-studio/calendar?request=YR-49001' },
+  args: { server: fakeApi('owner', { moveFits: false }), path: '/w/glow-studio/calendar?request=YR-49001' },
   play: async () => {
     const drawer = within(await page.findByRole('dialog', { name: 'Time change request' }))
-    await expect(await drawer.findByText('Maral isn’t free at the new time — you can’t confirm.')).toBeVisible()
+    await expect(await drawer.findByText('The new time doesn’t fit — you can’t confirm.')).toBeVisible()
     await expect(drawer.getByRole('button', { name: 'Confirm the new time' })).toBeDisabled()
+    // it can still be declined
+    await expect(drawer.getByRole('button', { name: 'Decline' })).toBeEnabled()
+  },
+}
+
+/** Someone who may not answer a move reads who does, without the fit line's «you can confirm». */
+export const MoveViewOnly: Story = {
+  args: { server: fakeApi('specialist'), path: '/w/glow-studio/calendar?request=YR-49001' },
+  play: async () => {
+    const drawer = within(await page.findByRole('dialog', { name: 'Time change request' }))
+    await expect(await drawer.findByText('The owner and admins answer requests — you can only view them.')).toBeVisible()
+    await expect(drawer.queryByText(/you can confirm/)).toBeNull()
   },
 }
 

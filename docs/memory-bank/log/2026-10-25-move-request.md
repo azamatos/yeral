@@ -14,6 +14,13 @@
 - Already in place from B2–B4: the ghost at the asked time linked to its booking; the move in the pager and the queue
   with its own timer; «Confirm the new time» and its toast «New time confirmed: … · the client is notified»;
   «Decline the new time» with the reason only.
-- The fit line (feat/move-fit-line, after W's #227): the box says «Maral is free at the new time — you can confirm.»
-  (completed ink) or «Maral isn’t free at the new time — you can’t confirm.» (pending ink), from the request's `fits`
-  (the confirm's own rule). «Confirm the new time» is off while it doesn't fit; a new request (`fits` null) has no line.
+- The fit line (feat/move-fit-line, after W's #227), from the request's `fits` (the confirm's own rule), for someone
+  who may answer:
+  - «Maral is free at the new time — you can confirm.» (completed ink).
+  - «The new time doesn’t fit — you can’t confirm.» (pending ink). It names no one, because `fits` is false for a
+    closed business or a block too. «Confirm the new time» is off and points at the line; Decline stays.
+  - A move without its box shows the line on its own. Someone who may not answer gets no line, and a new request
+    (`fits` null) has none.
+  - The sdk reads the requests again on any team change, so a fit that changed with the team shows.
+- Decided (Claude, delegated): the board's «Maral isn’t free at the new time» became «The new time doesn’t fit», since
+  the api's `fits` doesn't say why.

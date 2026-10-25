@@ -135,6 +135,7 @@ export function RequestDrawer({
                 variant="primary"
                 // a move that doesn't fit now can't be confirmed (the api refuses it by the same rule)
                 disabled={request.fits === false}
+                aria-describedby={request.fits === false ? fitId(request.code) : undefined}
                 onClick={() => answer(request)}
                 loading={answering && confirm.variables === request.code}
               >
@@ -178,7 +179,7 @@ export function RequestDrawer({
 
   /** Who answers it, for someone who may not: the owner and admins, or its specialists (B-Calendar `whoAnswers`). */
   function viewOnly(r: Request) {
-    const names = [...new Set(r.items.flatMap((i) => (i.staff ? [i.staff] : [])))]
+    const names = staffNamesOf(r)
     return r.answeredBy === 'specialist' && names.length
       ? t('viewOnlyOwn', { n: names.length, names: join(names, 'list') })
       : t('viewOnlyDesk')
@@ -222,11 +223,18 @@ function RequestBody({
     r.items.map((i) => i.service),
     'plus',
   )
-  const names = [...new Set(r.items.flatMap((i) => (i.staff ? [i.staff] : [])))]
+  const names = staffNamesOf(r)
   const staff = join(names, 'list')
   // whose column a phone shows when Show goes to the day
   const specialist = r.items.find((i) => i.staffId)?.staffId ?? undefined
   const when = (date: string, start: number, end: number) => t('when', { date: fmt.weekdayDate(date), time: fmt.timeRange(start, end) })
+  // B-Calendar's fit line, for someone who may answer (the confirm's own rule): free at the new time, or it doesn't fit
+  // (its specialist busy or off, the business closed: the api says which only when refusing)
+  const fitLine = r.canAnswer && r.fits !== null && (r.fits ? !!staff : true) && (
+    <span id={fitId(r.code)} className={cn('text-dense font-medium', r.fits ? 'text-st-completed-ink' : 'text-st-pending-ink')}>
+      {r.fits ? t('fits', { n: names.length, names: staff }) : t('doesntFit')}
+    </span>
+  )
   const Pending = BOOKING_STATUS_ICON.pending
   const Confirmed = BOOKING_STATUS_ICON.confirmed
 
@@ -283,17 +291,14 @@ function RequestBody({
           }
           footer={
             <>
-              {/* B-Calendar's fit line: free at the new time or not, by the confirm's own rule */}
-              {r.fits !== null && staff && (
-                <span className={cn('text-dense font-medium', r.fits ? 'text-st-completed-ink' : 'text-st-pending-ink')}>
-                  {t(r.fits ? 'fits' : 'doesntFit', { n: names.length, names: staff })}
-                </span>
-              )}
+              {fitLine}
               <span className="text-dense text-n-600">{t('moveCaption')}</span>
             </>
           }
         />
       )}
+      {/* a move without its box still says why its confirm is off */}
+      {move && !r.from && fitLine}
       <div className="flex flex-col gap-2">
         <div className="flex items-start gap-3">
           <Avatar name={r.client.name} size={40} letters={1} tone="tint" decorative />
@@ -345,6 +350,16 @@ function RequestBody({
     return t('when', { date: fmt.relativeShortDate(local.date, day), time: fmt.time(local.min) })
   }
 }
+
+/** A request's specialists by name, each person once (two with one name stay two). */
+function staffNamesOf(r: Request): string[] {
+  const byId = new Map<string, string>()
+  for (const i of r.items) if (i.staffId && i.staff) byId.set(i.staffId, i.staff)
+  return [...byId.values()]
+}
+
+/** The fit line's id: the confirm it turns off points at it. */
+const fitId = (code: string) => `fit-${code}`
 
 /**
  * A time in a move's box with «Show» on its right: the calendar goes to that day. Its name says which time
