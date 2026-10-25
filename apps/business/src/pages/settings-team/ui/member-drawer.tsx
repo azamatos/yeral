@@ -5,9 +5,10 @@ import type { TeamMember } from '@yeral/contract/team'
 import { MARKET } from '@yeral/domain/market'
 import { formatPhone, maskPhone } from '@yeral/domain/phone'
 import { INVITE_DAYS } from '@yeral/domain/team'
-import { diffDays, today } from '@yeral/domain/time'
+import { today } from '@yeral/domain/time'
 import { PHONE_RULES } from '@yeral/features/auth-by-phone'
 import { useFmt } from '@yeral/i18n'
+import { isApiError } from '@yeral/sdk'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
 import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@yeral/ui/drawer'
@@ -20,16 +21,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { Info, Lock } from 'lucide-react'
-import { useId, useRef, useState, type ReactNode, type RefObject } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { TEAM_NAME_MAX } from '@/shared/config'
+import { FULL_NAME_MAX, SPECIALIZATION_MAX, TEAM_NAME_MAX } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
-import { formOf, invitePending, isDirty, phoneEditable, phoneEditProblem, saveOf, type MemberForm } from '../model/member'
+import {
+  formOf,
+  inviteable,
+  inviteDaysLeft,
+  invitePending,
+  isDirty,
+  onInvite,
+  phoneEditable,
+  phoneEditProblem,
+  saveOf,
+  type MemberForm,
+} from '../model/member'
 import { ServicePicker } from './service-picker'
 
-const FULL_NAME_MAX = 80
-const SPECIALIZATION_MAX = 60
 const TABS = ['profile', 'services', 'access'] as const
 type Tab = (typeof TABS)[number]
 
@@ -61,10 +71,15 @@ export function MemberDrawer({
   onClose: () => void
   onLink: (name: string, url: string) => void
 }) {
-  // nothing closes it while a save runs: its answer, or its error, needs the form
-  const busy = useRef(false)
+  // nothing closes it while its save runs: the answer, or its error, needs the form (another person's drawer can)
+  const [saving, setSaving] = useState<string | null>(null)
   return (
-    <Drawer scrim="auto" open={member !== null} onOpenChange={(open) => !open && !busy.current && onClose()} returnFocus={returnFocus}>
+    <Drawer
+      scrim="auto"
+      open={member !== null}
+      onOpenChange={(open) => !open && saving !== member?.id && onClose()}
+      returnFocus={returnFocus}
+    >
       {member && (
         <DrawerContent>
           <MemberEditor
@@ -75,9 +90,7 @@ export function MemberDrawer({
             menu={menu}
             owner={owner}
             me={!!myPhone && member.phone === myPhone}
-            onBusy={(b) => {
-              busy.current = b
-            }}
+            onBusy={(b) => setSaving(b ? member.id : null)}
             onClose={onClose}
             onLink={onLink}
           />
@@ -127,57 +140,79 @@ function MemberEditor({
   const [form, setForm] = useState<MemberForm>(was)
   const [tab, setTab] = useState<Tab>('profile')
   const [saving, setSaving] = useState(false)
-  const change = (patch: Partial<MemberForm>) => setForm((f) => ({ ...f, ...patch }))
+  // the api refused the number (someone who joined once keeps theirs): shown on the field until it changes
+  const [phoneLocked, setPhoneLocked] = useState(false)
+  // a save that ends after the drawer moved to someone else (or closed) leaves that one alone
+  const alive = useRef(true)
+  useEffect(
+    () => () => {
+      alive.current = false
+    },
+    [],
+  )
+  const change = (patch: Partial<MemberForm>) => {
+    if (patch.phone !== undefined) setPhoneLocked(false)
+    setForm((f) => ({ ...f, ...patch }))
+  }
 
   const ownerRow = m.level === 'owner'
   const specialist = form.level === 'specialist'
   // clients see and pick them: a specialist, or anyone doing a service (B-Team `kindOf`)
   const pro = specialist || form.serviceIds.length > 0
   const name = form.name.trim() || m.name
-  const editPhone = owner && phoneEditable(m)
+  const editPhone = owner && phoneEditable(m, now)
   const phoneChanged = editPhone && form.phone !== was.phone
   const phoneProblem = phoneChanged ? phoneEditProblem(form.phone, m, people) : null
   const pending = invitePending(m, now)
+  // invited, open or ended, or working without the app with one waiting: on the board, `o.status === 'invited'`
+  const invited = onInvite(m, now)
   const masked = form.phone ? maskPhone(form.phone) : ''
-  const valid = form.name.trim().length > 0 && !phoneProblem
+  // an invite goes to a mobile number: turning the app on asks for one first
+  const needsMobile = specialist && !was.app && form.app && !inviteable(form)
+  const valid = form.name.trim().length > 0 && !phoneProblem && !phoneLocked && !needsMobile
   const dirty = isDirty(was, form)
-  const canSave = owner || tab === 'services'
+  const canSave = owner || tab === 'services' || saving
 
   const phoneHint =
-    !m.hasApp && !pending
+    !m.hasApp && !invited
       ? t('phoneHint.noApp')
-      : pending && !m.joined
+      : invited && !m.joined
         ? t('phoneHint.invited')
         : t('phoneHint.signsIn', { brand: tc('brand') })
-  const phoneError =
-    phoneProblem === 'incomplete'
+  const phoneError = phoneLocked
+    ? t('phoneProblems.signsIn')
+    : phoneProblem === 'incomplete'
       ? t('phoneProblems.incomplete', { digits: MARKET.phone.length })
       : phoneProblem === 'notMobile'
         ? words('notMobile', { starts: format.list(MARKET.phone.mobilePrefixes, { type: 'disjunction' }) })
         : phoneProblem && t('phoneProblems.onTeam')
-  const appCaption =
-    form.app && was.app
-      ? pending
+  const appCaption = needsMobile
+    ? t('appCap.needsMobile')
+    : form.app && was.app
+      ? invited
         ? t('appCap.waiting', { name })
         : t('appCap.signsIn', { phone: masked })
       : form.app
         ? t('appCap.turnOn', { phone: masked, days: INVITE_DAYS })
         : was.app
-          ? pending
+          ? invited
             ? t('appCap.cancel', { name })
             : t('appCap.turnOff', { name })
           : t('appCap.none')
-  const rule = rules.data ? t(`rules.${rules.data.requestAnswerers}`) : ''
-  const daysLeft = m.invite ? Math.max(1, diffDays(today(m.invite.expiresAt), today(now))) : 0
+  const answerers = rules.data?.requestAnswerers
+  const daysLeft = m.invite ? inviteDaysLeft(m.invite, now) : 0
 
   const save = async () => {
     if (saving || !valid || !dirty) return
-    const plan = saveOf(m, was, form, locale)
+    const plan = saveOf(m, was, form, locale, now)
     onBusy(true)
     setSaving(true)
     try {
-      if (plan.update) await update.mutateAsync({ staffId: m.id, ...plan.update })
-      if (plan.serviceIds) await setServices.mutateAsync({ staffId: m.id, serviceIds: plan.serviceIds })
+      // the profile and the services apart; an invite after them, to the number just saved
+      await Promise.all([
+        plan.update && update.mutateAsync({ staffId: m.id, ...plan.update }),
+        plan.serviceIds && setServices.mutateAsync({ staffId: m.id, serviceIds: plan.serviceIds }),
+      ])
       const saved = form.name.trim()
       if (plan.invite) {
         const sent = await resend.mutateAsync(m.id)
@@ -185,13 +220,15 @@ function MemberEditor({
         toast(t('inviteCreated', { name: saved, date: until }), {
           action: { label: t('copyLink'), onClick: () => onLink(saved, sent.link) },
         })
-      } else if (plan.update?.hasApp === false) toast(pending ? t('inviteCancelled', { name: saved }) : t('appOff', { name: saved }))
+      } else if (plan.update?.hasApp === false) toast(invited ? t('inviteCancelled', { name: saved }) : t('appOff', { name: saved }))
       else toast(t('saved', { name: saved }))
       onBusy(false)
-      onClose()
+      if (alive.current) onClose()
     } catch (error) {
       onBusy(false)
-      toast(errorText(error))
+      const issues = isApiError(error, 'validation_error') && Array.isArray(error.details.issues) ? error.details.issues : []
+      if (issues.some((i: { path?: unknown[]; code?: string }) => i.path?.[0] === 'phone' && i.code === 'signs_in')) setPhoneLocked(true)
+      else toast(errorText(error))
     } finally {
       setSaving(false)
     }
@@ -304,8 +341,9 @@ function MemberEditor({
                 <Field label={t('level')} hint={owner && !m.hasApp ? t('adminNeedsApp') : undefined}>
                   <Select
                     value={form.level}
-                    disabled={!owner}
-                    onChange={(e) => change({ level: e.target.value === 'admin' ? 'admin' : 'specialist' })}
+                    disabled={!owner || saving}
+                    // an administrator always uses the app (B-Team `needsApp`)
+                    onChange={(e) => change(e.target.value === 'admin' ? { level: 'admin', app: true } : { level: 'specialist' })}
                   >
                     <option value="specialist">{levels('specialist')}</option>
                     {/* an administrator always uses the app: they become one once they do */}
@@ -347,14 +385,14 @@ function MemberEditor({
                         onCheckedChange={(app) => change({ app })}
                       />
                     </div>
-                    {form.app && was.app && pending && (
+                    {form.app && was.app && invited && (
                       <div role="status" className="flex flex-col gap-1.5 rounded-m bg-group px-3.5 py-3 text-small text-n-900">
                         <span className="inline-flex items-center gap-2 font-semibold text-st-pending-ink">
                           <span aria-hidden className="size-1.5 rounded-pill bg-st-pending-dot" />
                           {t('invited')}
                         </span>
                         <span>{t('invitedNote')}</span>
-                        {m.invite && (
+                        {m.invite && pending && (
                           <span className="text-dense text-n-600">
                             {t('invitedCap', { phone: masked, date: fmt.dayMonth(today(m.invite.expiresAt)), n: daysLeft })}
                           </span>
@@ -378,14 +416,17 @@ function MemberEditor({
                         {t('noAppNote', { name })}
                       </p>
                     )}
-                    {form.app && m.hasApp && m.joined && (
+                    {/* with «Owner and admins» answering, a specialist never does: nothing to switch */}
+                    {form.app && m.hasApp && m.joined && answerers && answerers !== 'desk' && (
                       <div className="flex min-h-15 items-center justify-between gap-4 py-1.5">
                         <span className="flex min-w-0 flex-col gap-0.5">
                           <span id={`${id}-ans`} className="text-body font-medium text-n-900">
                             {t('answer')}
                           </span>
                           <span id={`${id}-ans-cap`} className="text-dense text-n-600">
-                            {form.canAnswerOwn ? t('answerFollows', { rule, name }) : t('answerOff', { rule, name })}
+                            {form.canAnswerOwn
+                              ? t('answerFollows', { rule: t(`rules.${answerers}`), name })
+                              : t('answerOff', { rule: t(`rules.${answerers}`), name })}
                           </span>
                         </span>
                         <Switch
@@ -412,7 +453,7 @@ function MemberEditor({
             {t('save')}
           </Button>
         ) : (
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" disabled={saving} onClick={onClose}>
             {t('close')}
           </Button>
         )}

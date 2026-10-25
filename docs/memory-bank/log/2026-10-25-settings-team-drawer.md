@@ -13,9 +13,18 @@
   through `PUT …/services`; an invite when the app goes on; the toast says which («Invite created for …» with Copy
   invite link, «Invite cancelled · …», «… no longer uses the app …», «…: changes saved»). The administrator reads it
   all and saves only Services; nothing closes the drawer while it saves.
-- Decided (Claude, delegated; chapter 9, 25.10.2026, B-45, B-46 (how)): Admin is offered only to someone who already
-  uses the app (the api makes administrators of people who signed in); «Can answer own requests» is on (follows the
+- Review (one round, 15 findings): Admin keeps the app on (no `hasApp: false` with it); the phone locks while an invite
+  waits for it and shows the api's `signs_in` on the field (someone who joined once); turning the app on needs a mobile
+  number; an ended invite reads as invited; the save of one person never closes another's drawer (the save is tracked
+  per person, and a save that ends after the drawer moved leaves it); spaces don't count as a change; the profile and
+  services go together; Close waits while saving; no answer switch with «Owner and admins»; the limits sit in
+  `@/shared/config`; Team's rows use `invitePending` and `inviteDaysLeft`.
+- Decided (Claude, delegated; chapter 9, 25.10.2026, B-45, B-46 (how)): Admin is offered only to someone with the app; «Can answer own requests» is on (follows the
   rule) or off (the api keeps a yes or no, not the board's third «set for them» state); the phone stays mobile only
   as on the board, though the api takes a landline without the app.
 - Follow-ups: Team PR 3b (Hours with time off, Remove and Reactivate with AffectedBookingsList in `entities/booking`);
-  the drawer header's line and the tabs' line sit one under the other (the board has the tabs' only).
+  the drawer header's line and the tabs' line sit one under the other (the board has the tabs' only); the api replaces
+  a specialization's every language with the one sent (merge per language before Turkmen and Russian); the member
+  could carry what may change (a linked account, whether an invite can go) instead of the app working it out; the
+  group with «All» belongs in `@yeral/ui` (COMPONENTS.md: Checkbox GroupWithSelectAll, also for Services' «Who does
+  it»).

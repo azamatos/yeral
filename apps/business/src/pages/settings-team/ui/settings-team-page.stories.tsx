@@ -442,20 +442,17 @@ export const DrawerProfile: Story = {
   },
 }
 
-/** A specialist without the app with an invite waiting: their number is the owner's to keep; turning the app off cancels it. */
+/** A specialist without the app with an invite waiting: the number is the invite's; turning the app off cancels it. */
 export const DrawerNoApp: Story = {
   play: async ({ canvas }) => {
     await userEvent.click(await canvas.findByRole('button', { name: 'Leýli Berdiýewa' }))
     const drawer = within(await body.findByRole('dialog', { name: 'Leýli Berdiýewa' }))
-    const phone = drawer.getByLabelText('Phone number')
-    await userEvent.clear(phone)
-    await userEvent.type(phone, '65884102')
-    await expect(await drawer.findByText('This person is already on the team.')).toBeVisible()
-    await expect(drawer.getByRole('button', { name: 'Save' })).toBeDisabled()
-    await userEvent.clear(phone)
-    await userEvent.type(phone, '65441122')
+    // the invite went to this number: it stays as it is while the invite waits (B-Team)
+    await expect(drawer.getByLabelText('Phone number')).toHaveAttribute('readonly')
+    await expect(drawer.getByText('The invite is for this number.')).toBeVisible()
     await userEvent.click(drawer.getByRole('tab', { name: 'Access level' }))
     await expect(await drawer.findByText('The invite is waiting for Leýli. Turn this off to cancel it.')).toBeVisible()
+    await expect(drawer.getByText(/^They’ll see the invite when they sign in with \+993 65 •• •• 22 · until/)).toBeVisible()
     await expect(drawer.getByRole('button', { name: 'Copy invite link' })).toBeVisible()
     // an administrator always uses the app: Leýli can become one once she does
     await expect(drawer.getByRole('option', { name: 'Admin' })).toBeDisabled()

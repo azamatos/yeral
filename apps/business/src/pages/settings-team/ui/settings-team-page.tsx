@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import type { TeamMember } from '@yeral/contract/team'
 import { maskPhone } from '@yeral/domain/phone'
 import { INVITE_DAYS } from '@yeral/domain/team'
-import { diffDays, today } from '@yeral/domain/time'
+import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
@@ -21,6 +21,7 @@ import { useErrorText } from '@/shared/i18n'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
 import { inviteNow } from '../model/invite'
+import { inviteDaysLeft, invitePending } from '../model/member'
 import { AddMember } from './add-member'
 import { MemberDrawer } from './member-drawer'
 
@@ -226,11 +227,10 @@ function MemberRow({
   const inviteRow = m.status === 'invited'
   const [now] = useState(() => Date.now())
   const state = m.invite && inviteNow(m.invite, now)
-  const pending = state === 'pending'
+  const pending = invitePending(m, now)
   // a specialist without the app who was sent an invite works as before until they accept
   const waiting = m.status === 'active' && pending && !m.joined
-  // calendar days, as the board counts them: sent today, «7 days left»
-  const daysLeft = m.invite ? Math.max(1, diffDays(today(m.invite.expiresAt), today(now))) : 0
+  const daysLeft = m.invite ? inviteDaysLeft(m.invite, now) : 0
 
   let status: { tone: 'on' | 'invited' | 'off'; label: string; sub?: string }
   if (former) status = { tone: 'off', label: t('status.removed') }

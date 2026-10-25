@@ -1187,7 +1187,8 @@
         },
         "phoneProblems": {
           "incomplete": "The number is incomplete — it needs {digits} digits.",
-          "onTeam": "This person is already on the team."
+          "onTeam": "This person is already on the team.",
+          "signsIn": "They signed in with this number before: it’s theirs to change."
         },
         "svcQuestion": "What does {name} do?",
         "svcHintPro": "Clients see {name} only for these services.",
@@ -1204,7 +1205,8 @@
           "turnOn": "Saving creates an invite. They’ll see it when they sign in with {phone} · valid {days, plural, one {# day} other {# days}}. Until they accept, they work without the app.",
           "cancel": "Saving cancels the invite. {name} keeps working without the app.",
           "turnOff": "Saving turns this off: {name} stays bookable but can’t sign in.",
-          "none": "Bookable at once, never signs in — you and admins handle their requests. They can start using the app later with this number."
+          "none": "Bookable at once, never signs in — you and admins handle their requests. They can start using the app later with this number.",
+          "needsMobile": "An invite goes to a mobile number: change the number in Profile first."
         },
         "invited": "Invited",
         "invitedNote": "Works without the app until they accept. Their bookings stay with them.",

@@ -21,13 +21,11 @@ import { Check, Info, Lock } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type RefObject } from 'react'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { TEAM_NAME_MAX } from '@/shared/config'
+import { FULL_NAME_MAX, SPECIALIZATION_MAX, TEAM_NAME_MAX } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
 import { emptyInvite, inviteInput, phoneProblem, servicesDone, usesApp, whoDone, type InviteForm } from '../model/invite'
 import { ServicePicker } from './service-picker'
 
-const FULL_NAME_MAX = 80
-const SPECIALIZATION_MAX = 60
 const STEPS = ['who', 'services', 'review'] as const
 
 /**
