@@ -288,7 +288,7 @@ flowchart TD
 **Steps**
 
 1. A preview card shows how clients will see the business after the check ("Barlagdan soň müşderiler sizi şeýle görer").
-2. The page address `yeral.app/b/{slug}` with *Göçür* (Copy) and a QR code with *QR-y ýükle* (Download QR): "Salgyňyz we QR kodyňyz taýýar — barlagdan soň müşderiler üçin açylar." (ROUND6-ANSWERS F1).
+2. The page address `yeral.app/b/{slug}` with *Göçür* (Copy) and a QR code with *QR-y ýükle* (Download QR): "Salgyňyz we QR kodyňyz taýýar — barlagdan soň müşderiler üçin açylar." (ROUND6-ANSWERS F1). Since 25.10.2026 both show as Settings → Link and QR draws them (the link with Copy and Share, the large QR card with PNG and SVG), keeping that line and saying the code opens after the review (the owner; chapter 9).
 3. The review notice: "Sahypaňyz barlagda — häzir ony diňe siz we toparyňyz görýärsiňiz. Barlagdan soň gözlegde we salgyňyzda hemmä açylar. Adatça 24 sagat çekýär."
 4. "Senenamany häzirden ulanyp bilersiňiz: jaň edip ýa-da gelip ýazylanlary goşuň. Onlaýn ýazylyş barlagdan soň açylar." (use the calendar now for phone and walk-in bookings; online booking opens after the check).
 5. A checklist "Profilyňyzy güýçlendiriň" (0 / 3): logo, 3+ photos, a description.

@@ -3,14 +3,12 @@ import type { Workspace } from '@yeral/contract/team'
 import { MARKET_LOCALES } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
-import { QrBlock } from '@yeral/ui/qr-block'
 import { SettingsSection, SettingsSectionTitle } from '@yeral/ui/settings-layout'
 import { CircleAlert, CircleCheck, Clock, EyeOff, Headset } from 'lucide-react'
 import { useId, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { ContactYeral, useContactYeral } from '@/features/contact-yeral'
-import { pageLink } from '@/shared/config'
-import { PageLinkField } from '@/shared/ui'
+import { PageLinkField, PageQrCard } from '@/shared/ui'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
 
@@ -21,39 +19,26 @@ import { useWorkspace } from '@/widgets/workspace-shell'
  */
 export function SettingsLinkPage() {
   const t = useTranslations('settings.link')
+  const tl = useTranslations('pageLink')
   const { workspace } = useWorkspace()
   const linkTitle = useId()
   const qrTitle = useId()
   if (!workspace) return null
-  const link = pageLink(workspace.slug)
   return (
     <SettingsPage section="link" lead={t('lead')}>
       <PageState status={workspace.status} reason={workspace.statusReason} slug={workspace.slug} />
 
       <SettingsSection aria-labelledby={linkTitle}>
-        <SettingsSectionTitle id={linkTitle} caption={t('linkCaption')}>
-          {t('linkTitle')}
+        <SettingsSectionTitle id={linkTitle} caption={tl('caption')}>
+          {tl('title')}
         </SettingsSectionTitle>
-        <PageLinkField slug={workspace.slug} label={t('linkTitle')} />
-        {MARKET_LOCALES.length > 1 ? <p className="m-0 text-dense text-n-600">{t('noLanguage')}</p> : null}
+        <PageLinkField slug={workspace.slug} label={tl('title')} />
+        {MARKET_LOCALES.length > 1 ? <p className="m-0 text-dense text-n-600">{tl('noLanguage')}</p> : null}
       </SettingsSection>
 
       <SettingsSection aria-labelledby={qrTitle}>
-        <SettingsSectionTitle id={qrTitle}>{t('qrTitle')}</SettingsSectionTitle>
-        <QrBlock
-          value={link.url}
-          label={t('qrLabel', { name: workspace.name })}
-          fileName={`${workspace.slug}-qr`}
-          title={workspace.name}
-          link={link.display}
-          description={t('qrNote')}
-          caption={t('qrCaption')}
-          copy={{
-            downloadPng: t('downloadPng'),
-            downloadSvg: t('downloadSvg'),
-            downloaded: (format) => t('downloaded', { format }),
-          }}
-        />
+        <SettingsSectionTitle id={qrTitle}>{tl('qrTitle')}</SettingsSectionTitle>
+        <PageQrCard slug={workspace.slug} name={workspace.name} />
       </SettingsSection>
     </SettingsPage>
   )

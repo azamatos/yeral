@@ -21,3 +21,16 @@
   (the frame moves focus nowhere); the workspace row (logo, name, «level · city») is drawn three times (the switcher in
   `@yeral/ui`, My account, here) and could be one component; the choice could name a business's page state (in review,
   hidden); the login's «Start free» could skip the phone step for someone already signed in.
+
+## The done step's link and QR as Settings shows them (fix/setup-done-qr)
+
+- Changed (#199): the owner found the wizard's last step's link and compact QR unclear (25.10.2026); it now shows them
+  as Settings → Link and QR does, full width under the preview card: «Your page link» with the field, Copy and Share
+  (`PageLinkField`) and the language note where the market has several, then «QR code» with the large card
+  (`PageQrCard`, new in `shared/ui`: the code at 200, the business name, the link, the note, Download PNG / SVG, «PNG for
+  printing, SVG for designers.»), which Settings uses too. The step keeps saying they open after the review (its
+  caption and the card's `note`). The shared words moved to `pageLink.*`; `SettingsSectionTitle` takes `as="h2"` for
+  the step's titles; `QrBlock`'s compact variant has no screen now. Chapter 9 and B-06 updated.
+- Review (one round, 10 findings): fixed the half-width link, the lost after-review words, the book row, the language
+  note, the copied title style (now `as`), techContext's row, QrBlock's stale docs, a phone story and the whole-address
+  check, the long comment. Kept: the download status reads as Settings' («QR code downloaded · PNG»).

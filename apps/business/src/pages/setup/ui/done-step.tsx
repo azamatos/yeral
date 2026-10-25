@@ -2,20 +2,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import type { SetupIncompleteDetails } from '@yeral/contract/errors'
 import type { Setup } from '@yeral/contract/setup'
+import { MARKET_LOCALES } from '@yeral/i18n'
 import { isApiError } from '@yeral/sdk'
 import { Callout } from '@yeral/ui/callout'
 import { Checklist, type ChecklistItem } from '@yeral/ui/checklist'
-import { QrBlock } from '@yeral/ui/qr-block'
+import { SettingsSectionTitle } from '@yeral/ui/settings-layout'
 import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { ArrowRight, Clock, FileText, Image, ImagePlus, Star } from 'lucide-react'
-import { useRef, type ReactNode } from 'react'
+import { useId, useRef, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { pageLink } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
-import { PageLinkField } from '@/shared/ui'
+import { PageLinkField, PageQrCard } from '@/shared/ui'
 import { firstMissing, hasAbout, qualityOf, QUALITY_ITEMS, type QualityItem } from '../model/done'
 import { StepHeader, type StepAction } from './setup-frame'
 
@@ -29,8 +29,9 @@ export type AfterSetup = 'calendar' | 'settings'
 
 /**
  * Step 8, «{name} is ready!» (B-Onboarding `isDone`, book B-06): the page is in review (only the team sees it, the
- * calendar works now); the card clients will see; the page link with Copy and Share and the QR code with its
- * downloads; «Make your page stronger» (a logo, 3+ photos, an About). «Go to the calendar» finishes the setup
+ * calendar works now); the card clients will see; the page link with Copy and Share and the QR card with its
+ * downloads, as Settings → Link and QR shows them, saying they open after the review (the owner, 25.10.2026); «Make
+ * your page stronger» (a logo, 3+ photos, an About). «Go to the calendar» finishes the setup
  * (`setup.finish`: the workspace joins the switcher and Ýeral's review) and opens the workspace's calendar; each
  * checklist «Add» finishes the same way into Settings. When finishing finds a step missing (`setup_incomplete`), the
  * wizard opens it. A hook, as the other steps are, so the wizard's frame stays one element; `on` while it shows.
@@ -45,6 +46,10 @@ export function useDoneStep(
   onFinished: (slug: string, after: AfterSetup) => void,
 ): { body: ReactNode; action: StepAction; primary: { label: string; icon: ReactNode; finish: () => void } } {
   const t = useTranslations('setup.done')
+  const tl = useTranslations('pageLink')
+  const previewTitle = useId()
+  const linkTitle = useId()
+  const qrTitle = useId()
   const sdk = useSdk()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -105,7 +110,6 @@ export function useDoneStep(
     : draft.address
       ? t('addressLine', { line: draft.address.line, city })
       : city
-  const link = pageLink(draft.slug)
 
   const items: ChecklistItem[] = QUALITY_ITEMS.map((item) => ({
     id: item,
@@ -137,9 +141,11 @@ export function useDoneStep(
         {back ? <p className="m-0 text-dense text-n-600">{t('switcherNote', { name: back })}</p> : null}
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] items-start gap-8">
-        <div className="flex min-w-0 flex-col gap-3">
-          <span className="text-label text-n-500 uppercase">{t('previewLabel')}</span>
+      <section aria-labelledby={previewTitle} className="flex flex-col gap-3">
+        <SettingsSectionTitle as="h2" id={previewTitle}>
+          {t('previewLabel')}
+        </SettingsSectionTitle>
+        <div className="flex w-full max-w-90 flex-col gap-3">
           {photos[0] ? (
             // decorative: the card's name is right under it
             <img src={photos[0].url} alt="" className="block aspect-4/3 w-full rounded-m object-cover" />
@@ -160,26 +166,23 @@ export function useDoneStep(
             </span>
           </div>
         </div>
+      </section>
 
-        <div className="flex min-w-0 flex-col gap-3">
-          <span className="text-label text-n-500 uppercase">{t('linkLabel')}</span>
-          <span className="text-body font-semibold text-n-900">{t('linkReady')}</span>
-          <PageLinkField slug={draft.slug} label={t('pageLink')} />
-          <QrBlock
-            variant="compact"
-            value={link.url}
-            label={t('qrLabel', { name: draft.name })}
-            fileName={`${draft.slug}-qr`}
-            caption={t('qrNote')}
-            copy={{
-              downloadPng: t('downloadPng'),
-              downloadSvg: t('downloadSvg'),
-              downloaded: (format) => t('downloaded', { format }),
-            }}
-            className="pt-1"
-          />
-        </div>
-      </div>
+      {/* the link and the QR as Settings → Link and QR shows them, saying they open after the review */}
+      <section aria-labelledby={linkTitle} className="flex flex-col gap-5">
+        <SettingsSectionTitle as="h2" id={linkTitle} caption={t('linkReady')}>
+          {tl('title')}
+        </SettingsSectionTitle>
+        <PageLinkField slug={draft.slug} label={tl('title')} />
+        {MARKET_LOCALES.length > 1 ? <p className="m-0 text-dense text-n-600">{tl('noLanguage')}</p> : null}
+      </section>
+
+      <section aria-labelledby={qrTitle} className="flex flex-col gap-5">
+        <SettingsSectionTitle as="h2" id={qrTitle}>
+          {tl('qrTitle')}
+        </SettingsSectionTitle>
+        <PageQrCard slug={draft.slug} name={draft.name} note={t('qrNote')} />
+      </section>
 
       <Checklist
         titleAs="h2"

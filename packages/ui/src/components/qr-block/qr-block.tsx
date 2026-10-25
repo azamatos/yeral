@@ -68,7 +68,10 @@ export type QrBlockProps = {
   label: string
   /** The downloaded files' name without the extension: `glow-studio-qr`. */
   fileName: string
-  /** `card`: the code at 200 with the name, link and hint (B-Settings Link and QR); `compact`: 120 in a box (a wizard step). */
+  /**
+   * `card`: the code at 200 with the name, link and hint (B-Settings Link and QR, the setup's last step); `compact`: 120 in
+   * a box, as B-Onboarding drew the last step (both pages show the card since 25.10.2026; kept for a narrow column).
+   */
   variant?: 'card' | 'compact'
   /** Card only: the business name over the link. */
   title?: ReactNode
@@ -90,7 +93,7 @@ export type QrBlockProps = {
 }
 
 /**
- * QrBlock (DS-Patterns → «QR block»; B-Settings Link and QR, B-Onboarding's last step): the page's QR code drawn in
+ * QrBlock (DS-Patterns → «QR block»; B-Settings Link and QR and the setup's last step): the page's QR code drawn in
  * the browser from `value` (lean-qr; ink on white, crisp edges) with «Download PNG» and «Download SVG». On screen the
  * code keeps the board's 2-module quiet zone; the files get 4 and the PNG is at least 1200 px, for printing. Each
  * download is said in a status line, which clears when the code changes.

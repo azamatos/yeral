@@ -1,6 +1,7 @@
 /**
- * QrBlock — DS-Patterns → «QR block» (B-Settings Link and QR: the card; B-Onboarding's last step: compact). The code
- * is drawn from `value` in the browser. Stories are the component's tests: one per variant and state.
+ * QrBlock — DS-Patterns → «QR block» (B-Settings Link and QR and the setup's last step: the card; compact as B-Onboarding
+ * drew it, no screen uses it since 25.10.2026). The code is drawn from `value` in the browser. Stories are the
+ * component's tests: one per variant and state.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { expect, fn, spyOn, userEvent, waitFor } from 'storybook/test'
@@ -46,7 +47,7 @@ export const Card: Story = {
   },
 }
 
-/** Inside a wizard step: the code at 120 in its box, the downloads beside it. */
+/** Compact, as B-Onboarding drew the last step: the code at 120 in its box, the downloads beside it (for a narrow column). */
 export const Compact: Story = {
   args: { variant: 'compact', title: undefined, link: undefined, description: undefined, caption: undefined },
   play: async ({ canvas }) => {
