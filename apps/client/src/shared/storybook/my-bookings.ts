@@ -33,9 +33,12 @@ const LOFT = {
 const row = (code: string, over: Partial<MyBooking>): MyBooking => ({
   code,
   business: GLOW,
+  // the haircut runs the booking's own time, unless the row names its services
   what: {
     type: 'appointment',
-    items: [{ serviceId: 's1', service: 'Women’s haircut', staffId: 'st-ayna', staff: 'Aýna', start: 870, end: 930 }],
+    items: [
+      { serviceId: 's1', service: 'Women’s haircut', staffId: 'st-ayna', staff: 'Aýna', start: over.start ?? 870, end: over.end ?? 930 },
+    ],
   },
   date: addDays(today(), 1),
   start: 870,
@@ -82,7 +85,7 @@ export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
       business: LOFT,
       what: {
         type: 'appointment',
-        items: [{ serviceId: 'loft-cut', service: 'Men’s haircut', staffId: null, staff: null, start: 660, end: 705 }],
+        items: [{ serviceId: 'loft-cut', service: 'Men’s haircut', staffId: 'loft-merdan', staff: 'Merdan', start: 660, end: 705 }],
       },
       start: 660,
       end: 705,

@@ -21,6 +21,7 @@ import { geoOf, photoOf, text } from '../catalog/map'
 import { bookOnlineFor } from '../clients/online'
 import { bookingRecipient, recipientOf } from './links'
 import { offeredTimes, offersOf } from './offers'
+import { teamItemOf } from './team-view'
 import { noShowMarkedAtOf, refusalCounts, restoreStateOf, stateOf, type BookingRow } from './repo'
 
 /** "Yzyna al" stays possible this long after the client's own cancel. */
@@ -67,14 +68,8 @@ export async function summaries(deps: Deps, rows: BookingRow[], lang: Locale, no
         type: 'appointment',
         items: items
           .filter((i) => i.bookingId === r.id)
-          .map((i) => ({
-            serviceId: i.serviceId,
-            service: text(i.serviceName, lang),
-            staffId: i.staffId,
-            staff: i.staffName,
-            start: i.start,
-            end: i.end,
-          })),
+          // as the team sees them, the ids beside the names (a move asks by them)
+          .map((i) => teamItemOf(i, lang)),
       }
     }
     return {

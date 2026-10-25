@@ -82,6 +82,13 @@ describe('SMS links', () => {
     expect(page.json).toMatchObject({ code, status: 'confirmed', maskedPhone: '+993 65 •• •• 02', owner: false })
     expect(page.json).not.toHaveProperty('clientNote')
     expect(page.json).not.toHaveProperty('actions')
+    // the services and the specialist by name only: their ids are for a move, which needs the account
+    expect(page.json.what.items.length).toBeGreaterThan(0)
+    for (const item of page.json.what.items) {
+      expect(item).toHaveProperty('service')
+      expect(item).not.toHaveProperty('serviceId')
+      expect(item).not.toHaveProperty('staffId')
+    }
   })
 
   it('its owner signed in is told to open "Ýazylyşlarym"; someone else signed in gets the signed-out page (book Q-169)', async () => {

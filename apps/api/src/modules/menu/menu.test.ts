@@ -113,9 +113,9 @@ describe('the services menu (book B-38)', () => {
     expect((await maysa.req(`${MENU}/${id}`, { method: 'DELETE' })).status).toBe(204)
     expect((await menuOf(maysa)).flatMap((g) => g.services).map((s) => s.id)).not.toContain(id)
     expect((await pageServices(maysa)).map((s) => s.id)).not.toContain(id)
-    // the booking keeps its service
+    // the booking keeps its service, archived, by name and id (the catalogue no longer lists it)
     const detail = (await client.req(`/v1/me/bookings/${booked.json.code}?lang=en`)).json
-    expect(detail).toMatchObject({ status: 'pending', what: { items: [{ service: 'Gel polish' }] } })
+    expect(detail).toMatchObject({ status: 'pending', what: { items: [{ service: 'Gel polish', serviceId: id }] } })
     // "Yzyna al"
     const back = await maysa.req(`${MENU}/${id}/restore`, { method: 'POST' })
     expect(back.json).toMatchObject({ id, futureBookings: 1 })

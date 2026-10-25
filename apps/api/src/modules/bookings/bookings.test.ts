@@ -97,11 +97,19 @@ describe('client bookings', () => {
     expect(res.json).toMatchObject({
       status: 'pending',
       business: { slug: 'glow-studio', name: 'Glow Studio', category: 'Beauty salon' },
-      // the ids beside the names: a move asks the free times by them (book C-30)
+      // the ids beside the names: a move asks the free times by them (book C-30); the service is the one sent, the
+      // specialist the one «any» was given
       what: {
         type: 'appointment',
         items: [
-          { serviceId: svc['Aýal saç kesimi'], service: "Women's haircut", staffId: who['Aýna'], staff: 'Aýna', start: 600, end: 660 },
+          {
+            serviceId: svc['Aýal saç kesimi'],
+            service: "Women's haircut",
+            staffId: expect.any(String),
+            staff: 'Aýna',
+            start: 600,
+            end: 660,
+          },
         ],
       },
       price: { type: 'fixed', amount: 80 },
@@ -115,7 +123,8 @@ describe('client bookings', () => {
     expect(res.json.code).toMatch(/^YR-\d{5}$/)
     const list = await b.req('/v1/me/bookings?tab=upcoming')
     expect(list.json.items.map((x: { code: string }) => x.code)).toEqual([res.json.code])
-    expect(list.json.items[0].what.items).toEqual([expect.objectContaining({ serviceId: svc['Aýal saç kesimi'], staffId: who['Aýna'] })])
+    // the list's row says the same as the booking
+    expect(list.json.items[0].what).toEqual(res.json.what)
     expect(t.sms.sent.filter((s) => s.to === '+99365111001')).toHaveLength(1) // the login code only
   })
 
