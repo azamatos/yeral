@@ -78,7 +78,7 @@ type Draft = {
   /** The step list's counts and rules (`GET /me/setup`). */
   services: number
   team: number
-  rules: { confirm: 'manual' | 'instant'; holdMinutes: number } | null
+  rules: { confirmMode: 'manual' | 'instant'; holdMinutes: number }
 }
 
 type Day = WeekdayHours | null
@@ -320,7 +320,7 @@ const fakeApi =
           address: null,
           services: 0,
           team: 0,
-          rules: { confirm: 'manual', holdMinutes: 30 },
+          rules: { confirmMode: 'manual', holdMinutes: 30 },
         }
         return json({ slug: setup.slug }, 201)
       }
@@ -452,7 +452,7 @@ export const MoveAddress: Story = {
         categoryId: 'beauty',
         services: 0,
         team: 0,
-        rules: null,
+        rules: { confirmMode: 'manual', holdMinutes: 30 },
         logo: null,
         address: null,
       },
@@ -529,7 +529,7 @@ export const ReopensWithBusiness: Story = {
         categoryId: 'nails',
         services: 0,
         team: 0,
-        rules: null,
+        rules: { confirmMode: 'manual', holdMinutes: 30 },
         logo: null,
         address: { line: '247 Bitarap Türkmenistan Avenue', city },
       },
@@ -589,7 +589,7 @@ export const Reopens: Story = {
         categoryId: 'beauty',
         services: 0,
         team: 0,
-        rules: null,
+        rules: { confirmMode: 'manual', holdMinutes: 30 },
         logo: null,
         address: { line: '247 Bitarap Türkmenistan Avenue', city },
       },
@@ -619,7 +619,7 @@ export const ContinueLater: Story = {
         categoryId: 'beauty',
         services: 0,
         team: 0,
-        rules: null,
+        rules: { confirmMode: 'manual', holdMinutes: 30 },
         logo: null,
         address: null,
       },
@@ -709,7 +709,7 @@ const addressDraft: Draft = {
   categoryId: 'beauty',
   services: 0,
   team: 0,
-  rules: null,
+  rules: { confirmMode: 'manual', holdMinutes: 30 },
   logo: null,
   address: null,
 }
@@ -776,7 +776,7 @@ const atHours: Draft = {
   categoryId: 'beauty',
   services: 0,
   team: 0,
-  rules: null,
+  rules: { confirmMode: 'manual', holdMinutes: 30 },
   logo: null,
   address: { line: '247 Bitarap Türkmenistan Avenue', city },
 }

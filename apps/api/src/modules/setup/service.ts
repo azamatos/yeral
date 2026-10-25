@@ -9,6 +9,7 @@ import type { menuSchema } from '@yeral/contract/services'
 import type { mySetupSchema, SetupServices, setupStartSchema, setupTeamSchema } from '@yeral/contract/setup'
 import type { TeamMember } from '@yeral/contract/team'
 import { MARKET } from '@yeral/domain/market'
+import { DEFAULT_RULES } from '@yeral/domain/rules'
 import type { Locale, Localized } from '@yeral/domain/model'
 import type { Actor } from '@yeral/domain/permissions'
 import { serviceErrors } from '@yeral/domain/services'
@@ -23,7 +24,7 @@ import { ApiError, invalid, type Issue } from '../../http/errors'
 import { pgCode } from '../bookings/repo'
 import { logoOf, text } from '../catalog/map'
 import { accountName } from '../me/me'
-import { setMenu, type PlannedGroup } from '../menu/service'
+import { onMenu, setMenu, type PlannedGroup } from '../menu/service'
 import { addressTaken, freeAddress, takenNow } from '../settings/page-address'
 import { issueInvite, members, setServices, teamChanged } from '../team/service'
 
@@ -69,11 +70,7 @@ export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Pro
   if (!draft) return { setup: null }
   // the step list's summaries (B-Onboarding `sums`): «5 services», «I work alone» or «2 people», «I confirm · 30 min»
   const [[menu], [team], [rules]] = await all(db, [
-    () =>
-      db
-        .select({ n: count() })
-        .from(services)
-        .where(and(eq(services.businessId, draft.id), eq(services.archived, false))),
+    () => db.select({ n: count() }).from(services).where(onMenu(draft.id)),
     () =>
       db
         .select({ n: count() })
@@ -81,7 +78,7 @@ export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Pro
         .where(and(eq(staff.businessId, draft.id), ne(staff.level, 'owner'), ne(staff.status, 'removed'))),
     () =>
       db
-        .select({ confirm: bookingRules.confirmMode, holdMinutes: bookingRules.holdMinutes })
+        .select({ confirmMode: bookingRules.confirmMode, holdMinutes: bookingRules.holdMinutes })
         .from(bookingRules)
         .where(eq(bookingRules.businessId, draft.id)),
   ])
@@ -96,7 +93,8 @@ export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Pro
       address: draft.street ? { line: draft.address, city: { id: draft.cityId, name: text(draft.city, user.lang) } } : null,
       services: menu?.n ?? 0,
       team: team?.n ?? 0,
-      rules: rules ? { confirm: rules.confirm, holdMinutes: rules.holdMinutes } : null,
+      // every draft has its rules from the start (`startSetup`)
+      rules: rules ?? { confirmMode: DEFAULT_RULES.confirmMode, holdMinutes: DEFAULT_RULES.holdMinutes },
     },
   }
 }

@@ -713,7 +713,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   /**
    * What a settings change makes stale (`business.updated`'s list), except the switcher and the setup draft: they show
    * the name, logo, city, page state and request counts, which only the profile and the booking rules change
-   * (`profileChanged`). The change's event refreshes everything once more.
+   * (`profileChanged`). The change's event refreshes everything once more (the draft's step list counts its services:
+   * the wizard's own saves refresh it at once, `setup.services`).
    */
   const settingsChanged = (slug: string) =>
     invalidate(...businessUpdated(slug).filter((key) => key[0] !== keys.workspaces()[0] && key[0] !== keys.setup()[0]))
@@ -1205,9 +1206,10 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     services: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof setupServicesSchema>) => call(w.setup.services.$put({ param: { slug }, json })),
-        // the menu comes back whole: a draft's other screens have nothing else to refetch
+        // the menu comes back whole; the step list's «3 services» is the setup's
         onSuccess: (menu) => {
           queryClient.setQueryData(keys.menu(slug), menu)
+          return invalidate(keys.setup())
         },
       }),
     /** Step 6: the draft's team besides its owner in one go, replacing the step's last save (invites go at the finish). */
@@ -1217,7 +1219,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         // the team comes back whole; the menu's doers may have changed with it
         onSuccess: (team) => {
           queryClient.setQueryData(keys.team(slug), team)
-          return invalidate(keys.menu(slug))
+          // and the step list's «3 people» is the setup's
+          return invalidate(keys.menu(slug), keys.setup())
         },
       }),
     /** "Senenama geç": into the switcher and Ýeral's review; `setup_incomplete` names what's missing. */

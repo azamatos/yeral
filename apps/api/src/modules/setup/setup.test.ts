@@ -43,7 +43,7 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
         // the step list's summaries: no services yet, «I work alone», «I confirm · 30 min»
         services: 0,
         team: 0,
-        rules: { confirm: 'manual', holdMinutes: 30 },
+        rules: { confirmMode: 'manual', holdMinutes: 30 },
       },
     })
     const again = await owner.req('/v1/setup', { body: { name: 'Second', categoryId: 'beauty' } })
@@ -195,6 +195,8 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
       { id: own!.id, services: [{ name: { en: 'Henna' } }] },
     ])
     expect(again.json.groups[0].services.map((x: { id: string }) => x.id)).not.toContain(blowDry!.id)
+    // the step list counts what's on the menu: the blow-dry off it
+    expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({ services: 2 })
     // not on the menu or twice, a starter of another category or used twice, a nameless new row, terms out of limits
     const wrong = await put({
       groups: [
