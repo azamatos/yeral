@@ -126,3 +126,42 @@ export const ReturnFocus: Story = {
     await waitFor(() => expect(canvas.getByRole('button', { name: 'Hasap' })).toHaveFocus())
   },
 }
+
+const REQUESTS = ['Arzygül H. · 14:30', 'Mahym D. · 16:00', 'Şemşat K. · 16:00', 'Gözel A. · 17:30', 'Mähri G. · 13:00']
+
+function OneAtATime() {
+  const [at, setAt] = useState(0)
+  return (
+    <Drawer defaultOpen scrim="always">
+      <DrawerContent>
+        <DrawerHeader
+          title="Request"
+          closeLabel="Close"
+          pager={{
+            position: `${at + 1} / ${REQUESTS.length}`,
+            previous: { label: 'Previous request', disabled: at === 0, onClick: () => setAt(at - 1) },
+            next: { label: 'Next request', disabled: at === REQUESTS.length - 1, onClick: () => setAt(at + 1) },
+          }}
+        />
+        <DrawerBody>{REQUESTS[at]}</DrawerBody>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+/** Title + pager: one request at a time, most urgent first; previous and next around «1 / 5». */
+export const HeaderPager: Story = {
+  render: () => <OneAtATime />,
+  globals: { viewport: { value: 'xl' } },
+  play: async () => {
+    const dialog = await screen.findByRole('dialog', { name: 'Request' })
+    await waitFor(() => expect(dialog).toBeVisible())
+    const previous = screen.getByRole('button', { name: 'Previous request' })
+    await expect(previous).toBeDisabled()
+    await expect(dialog).toHaveTextContent('1 / 5')
+    await userEvent.click(screen.getByRole('button', { name: 'Next request' }))
+    await expect(dialog).toHaveTextContent('2 / 5')
+    await expect(dialog).toHaveTextContent('Mahym D. · 16:00')
+    await expect(previous).toBeEnabled()
+  },
+}

@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { Dialog } from 'radix-ui'
 import { createContext, use, useState, type ComponentProps, type ReactNode, type RefObject } from 'react'
 import { cn } from '../../lib/cn'
@@ -79,25 +79,66 @@ export function DrawerContent({ className, children, onCloseAutoFocus, ...props 
   )
 }
 
-/** Header: optional leading media (photo, avatar), title and subtitle, close button. */
+export type DrawerPager = {
+  /** Where this item is: «1 / 6». */
+  position: ReactNode
+  previous: { label: string; onClick: () => void; disabled?: boolean }
+  next: { label: string; onClick: () => void; disabled?: boolean }
+}
+
+/**
+ * Header: optional leading media (photo, avatar), title and subtitle, close button. With a `pager` (DS-Patterns →
+ * Drawer «Title + pager»: one request at a time, most urgent first), the title is followed by previous and next (ghost
+ * 36 chevrons, their names from the caller) around «1 / 6» (13/18 n-600, tabular).
+ */
 export function DrawerHeader({
   title,
   subtitle,
   leading,
+  pager,
   closeLabel,
 }: {
   title: ReactNode
   subtitle?: ReactNode
   leading?: ReactNode
+  pager?: DrawerPager
   closeLabel: string
 }) {
   return (
     <div className="flex flex-none items-center gap-3.5 border-b border-n-200 px-4 pt-3 pb-4 sm:py-5 sm:pr-5 sm:pl-6">
       {leading}
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <div className={cn('flex min-w-0 flex-col gap-0.5', !pager && 'flex-1')}>
         <Dialog.Title className="m-0 truncate text-[19px] leading-6 font-semibold tracking-[-0.01em] text-n-900">{title}</Dialog.Title>
         {subtitle && <Dialog.Description className="m-0 truncate text-dense text-n-600">{subtitle}</Dialog.Description>}
       </div>
+      {pager && (
+        <>
+          <div className="-ml-2 flex flex-none items-center gap-0.5">
+            <Button
+              variant="ghost"
+              iconOnly
+              aria-label={pager.previous.label}
+              disabled={pager.previous.disabled}
+              onClick={pager.previous.onClick}
+              className="size-9 rounded-s"
+            >
+              <ChevronLeft />
+            </Button>
+            <span className="min-w-10 text-center text-dense text-n-600 tabular-nums">{pager.position}</span>
+            <Button
+              variant="ghost"
+              iconOnly
+              aria-label={pager.next.label}
+              disabled={pager.next.disabled}
+              onClick={pager.next.onClick}
+              className="size-9 rounded-s"
+            >
+              <ChevronRight />
+            </Button>
+          </div>
+          <div className="flex-1" />
+        </>
+      )}
       <Dialog.Close asChild>
         <Button variant="ghost" iconOnly aria-label={closeLabel} className="size-9 rounded-s">
           <X />
