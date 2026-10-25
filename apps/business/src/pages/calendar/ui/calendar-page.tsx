@@ -7,7 +7,8 @@ import { Button } from '@yeral/ui/button'
 import { Checkbox } from '@yeral/ui/checkbox'
 import { useClock } from '@yeral/ui/clock'
 import { DatePicker } from '@yeral/ui/date-picker'
-import { Pill } from '@yeral/ui/pill'
+import { cn } from '@yeral/ui/cn'
+import { Pill, pillVariants } from '@yeral/ui/pill'
 import { Spinner } from '@yeral/ui/spinner'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -17,6 +18,7 @@ import { useDatePickerWords } from '@/shared/i18n'
 import { useWorkspace, WorkspacePage } from '@/widgets/workspace-shell'
 import type { CalendarSearch } from '../model/search'
 import { DayGrid } from './day-grid'
+import { RequestDrawer } from './request-drawer'
 
 /**
  * The calendar's day (B-Calendar, design §4 and §27.4, book B-16): `?date=` (today without it), the toolbar (Today,
@@ -56,6 +58,23 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
     void navigate({ to: '.', search: (prev: CalendarSearch) => ({ ...prev, ...patch }), replace })
   // another day: the booking picked on this one goes
   const goDay = (next: string) => go({ date: next === todayDate ? undefined : next, booking: undefined })
+  // the waiting requests, most urgent first: the chip opens the first (B-Calendar `openQueue`)
+  const queue = useQuery(sdk.requests.list(slug)).data?.items ?? []
+  /**
+   * A request in the drawer, on its day when it has one (the chip, the pager, «Next request»; the toast's from any page
+   * of the workspace, so it goes to the calendar by name); a block's on the day on screen.
+   */
+  const openRequest = ({ code, date: day }: { code: string; date?: string }, replace = true) =>
+    void navigate({
+      to: '/w/$slug/calendar',
+      params: { slug },
+      search: (prev: CalendarSearch) => ({
+        ...(prev.cancelled ? { cancelled: true as const } : {}),
+        ...(day ? (day === today(Date.now()) ? {} : { date: day }) : prev.date ? { date: prev.date } : {}),
+        request: code,
+      }),
+      replace,
+    })
 
   if (view.isError && (!view.data || view.isPlaceholderData)) throw view.error
   // the day the data is for: the one before while the next loads
@@ -64,6 +83,7 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
   // a client's move waits for an answer as a request does (B-Calendar counts its ghost)
   const moves = view.data?.moves.filter((m) => m.date === shown).length ?? 0
   const requests = (summary?.requests ?? 0) + moves
+  const first = queue[0]
   const bold = (chunks: ReactNode) => <b className="font-semibold text-n-900 tabular-nums">{chunks}</b>
   const dot = (
     <span aria-hidden className="text-n-500">
@@ -94,8 +114,23 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
             onValueChange={goDay}
           />
           <span className="flex-1" />
-          {requests > 0 ? (
-            <Pill tone="warning" size="l" icon={<Clock aria-hidden />} className="h-9 rounded-pill px-3.5 text-small">
+          {first ? (
+            <button
+              type="button"
+              onClick={() => openRequest(first)}
+              className={cn(
+                pillVariants({ tone: 'warning', size: 'l' }),
+                'h-9 cursor-pointer gap-1.5 px-3.5 text-small hover:border-st-pending-dot focus-visible:shadow-[0_0_0_2px_var(--color-n-0),0_0_0_4px_var(--color-a-400)] focus-visible:outline-none',
+              )}
+            >
+              <Clock aria-hidden />
+              {t('requests', { n: queue.length })}
+              {/* its name starts with what it shows (B-Calendar: «6 unanswered requests — open the most urgent») */}
+              <span className="sr-only">{t('openMostUrgent')}</span>
+            </button>
+          ) : requests > 0 ? (
+            // the list not read yet (or not readable): the day's count, as a plain chip
+            <Pill tone="warning" size="l" icon={<Clock aria-hidden />} className="h-9 px-3.5 text-small">
               {t('requests', { n: requests })}
             </Pill>
           ) : (
@@ -137,14 +172,35 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
           date={shown}
           now={now}
           business={business}
-          selected={search.booking ?? null}
+          picked={search}
           busy={view.isPlaceholderData}
-          onOpen={(code) => go({ booking: search.booking === code ? undefined : code }, true)}
+          onOpen={(pick) =>
+            'request' in pick
+              ? openRequest({ code: pick.request })
+              : go({ booking: search.booking === pick.booking ? undefined : pick.booking, request: undefined }, true)
+          }
         />
       ) : (
         <div className="flex flex-1 items-center justify-center py-20">
           <Spinner label={t('loading')} />
         </div>
+      )}
+      {search.request && (
+        <RequestDrawer
+          slug={slug}
+          code={search.request}
+          now={now}
+          business={business}
+          onGo={openRequest}
+          onAnswered={(code) =>
+            void navigate({
+              to: '.',
+              search: (prev: CalendarSearch) => (prev.request === code ? { ...prev, request: undefined } : prev),
+              replace: true,
+            })
+          }
+          onClose={() => go({ request: undefined }, true)}
+        />
       )}
     </WorkspacePage>
   )

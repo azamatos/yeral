@@ -69,6 +69,7 @@ export const requestSchema = z
     answeredBy: z.enum(['desk', 'specialist', 'anyone']),
   })
   .meta({ id: 'Request' })
+export type BookingRequest = z.infer<typeof requestSchema>
 
 /** The waiting requests the viewer may see, the most urgent (least time left) first. */
 export const requestListSchema = z.object({ items: z.array(requestSchema) }).meta({ id: 'RequestList' })

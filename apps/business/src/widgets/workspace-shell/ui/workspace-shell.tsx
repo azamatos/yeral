@@ -6,6 +6,7 @@ import { useSdk } from '@/shared/api'
 import { placeFor, targetRoute } from '../model/sections'
 import { useWorkspace } from '../model/use-workspace'
 import { ProfileDrawer } from './profile-drawer'
+import { RequestArrivals } from './request-arrivals'
 import { ShellSidebar } from './shell-sidebar'
 import { ShellTabBar } from './shell-tab-bar'
 
@@ -68,6 +69,7 @@ export function WorkspaceShell() {
         <Outlet />
       </div>
       <ShellTabBar onProfile={openProfile} />
+      {member && <RequestArrivals key={slug} slug={slug} />}
       <ProfileDrawer open={profile} onOpenChange={setProfile} opener={opener} />
     </div>
   )

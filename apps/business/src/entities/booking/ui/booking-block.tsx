@@ -149,7 +149,10 @@ export function BookingBlock({
   const s = useTranslations('status')
   const fmt = useFmt()
   const join = useJoin()
-  const services = items.map((i) => i.service).join(' + ')
+  const services = join(
+    items.map((i) => i.service),
+    'plus',
+  )
   const start = Math.min(...items.map((i) => i.start))
   const end = Math.max(...items.map((i) => i.end))
   const time = fmt.timeRange(start, end)
@@ -230,7 +233,10 @@ export function MoveBlock({
   const more = join(
     [
       fmt.timeRange(start, end),
-      items.map((i) => i.service).join(' + '),
+      join(
+        items.map((i) => i.service),
+        'plus',
+      ),
       // the time it moves from, unless its line shows it
       height < TIMES_FROM ? t('previous', { when: was }) : '',
       timerText ?? '',

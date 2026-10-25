@@ -8,11 +8,12 @@ import { useTranslations } from 'use-intl'
 
 export type AffectedBooking = BookingsAffectedDetails['bookings'][number]
 
-/** Words joined as the language joins them: «a · b · c» (`dot`) or «a, b» (`list`). */
+const JOIN = { dot: 'joinDot', list: 'joinList', plus: 'joinPlus' } as const
+
+/** Words joined as the language joins them: «a · b · c» (`dot`), «a, b» (`list`) or a booking's services «a + b» (`plus`). */
 export function useJoin() {
   const t = useTranslations('affected')
-  return (parts: readonly string[], how: 'dot' | 'list') =>
-    parts.filter(Boolean).reduce((a, b) => (a ? t(how === 'dot' ? 'joinDot' : 'joinList', { a, b }) : b), '')
+  return (parts: readonly string[], how: keyof typeof JOIN) => parts.filter(Boolean).reduce((a, b) => (a ? t(JOIN[how], { a, b }) : b), '')
 }
 
 /** «5 bookings and 1 request» (`and`) or «5 bookings · 1 request» (the list's label). */

@@ -31,6 +31,10 @@ const COLUMN = 'min-w-50 flex-1 basis-0'
 
 type Timer = (until: number | null) => { node: ReactNode; text: string } | null
 type Link = 'hover' | 'focus'
+/** What a click on a block opens: a request (a new one, or a client's move by its own code) or the booking. */
+type Pick = { request: string } | { booking: string }
+/** The address's booking picked and request open. */
+type Picked = { booking?: string; request?: string }
 
 /**
  * The day's grid (B-Calendar `.gwrap`, DS-Business CalendarGrid «DayAllStaff»): a column per person the reader sees,
@@ -43,7 +47,7 @@ export function DayGrid({
   date,
   now,
   business,
-  selected,
+  picked,
   busy,
   onOpen,
 }: {
@@ -52,10 +56,10 @@ export function DayGrid({
   now: number
   /** The business's hours: a request's timer counts only while it's open. Null: the clock's minutes. */
   business: BusinessHours | null
-  selected: string | null
+  picked: Picked
   /** Another day's on its way: this one stays until it comes. */
   busy?: boolean
-  onOpen: (code: string) => void
+  onOpen: (pick: Pick) => void
 }) {
   const t = useTranslations('calendar')
   const fmt = useFmt()
@@ -173,7 +177,7 @@ export function DayGrid({
               from={from}
               to={to}
               timer={timer}
-              selected={selected}
+              picked={picked}
               linked={hovered ?? focused}
               onLink={onLink}
               onOpen={onOpen}
@@ -201,7 +205,7 @@ function DayColumn({
   from,
   to,
   timer,
-  selected,
+  picked,
   linked,
   onLink,
   onOpen,
@@ -212,10 +216,10 @@ function DayColumn({
   from: number
   to: number
   timer: Timer
-  selected: string | null
+  picked: Picked
   linked: string | null
   onLink: (how: Link, code: string | null) => void
-  onOpen: (code: string) => void
+  onOpen: (pick: Pick) => void
 }) {
   const t = useTranslations('calendar.layers')
   const fmt = useFmt()
@@ -311,11 +315,12 @@ function DayColumn({
             height={place.height}
             style={place}
             half={besideLive(p, placed) ? 'right' : !cancelled && overlaps(p, busy) ? 'left' : undefined}
-            selected={selected === b.code}
+            // a request, or a booking with a client's move, opens the request; the rest pick the booking
+            selected={picked.request ? picked.request === b.code || picked.request === b.move?.code : picked.booking === b.code}
             linked={!!b.move && linked === b.code}
             timer={hold?.node}
             timerText={hold?.text}
-            onOpen={() => onOpen(b.code)}
+            onOpen={() => onOpen(b.status === 'pending' ? { request: b.code } : b.move ? { request: b.move.code } : { booking: b.code })}
             onLink={b.move ? link(b.code) : undefined}
           />
         )
@@ -346,12 +351,11 @@ function DayColumn({
             style={place}
             // at the time of a booking (its own, or another) it takes the right half, as a cancelled one does
             half={overlaps(m, live) ? 'right' : undefined}
-            // it opens its booking, where the client's request is answered (B-21)
-            selected={selected === of}
+            selected={picked.request === m.move.code}
             linked={linked === of}
             timer={hold?.node}
             timerText={hold?.text}
-            onOpen={() => onOpen(of)}
+            onOpen={() => onOpen({ request: m.move.code })}
             onLink={link(of)}
           />
         )
