@@ -1,4 +1,5 @@
 export { AuthPage } from './auth-page'
 export { iconTile } from './icon-tile'
 export { PageLinkField } from './page-link-field'
+export { PageQrCard } from './page-qr-card'
 export { textLink } from '@yeral/ui/text-link'

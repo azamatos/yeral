@@ -5,21 +5,22 @@ import type { Setup } from '@yeral/contract/setup'
 import { isApiError } from '@yeral/sdk'
 import { Callout } from '@yeral/ui/callout'
 import { Checklist, type ChecklistItem } from '@yeral/ui/checklist'
-import { QrBlock } from '@yeral/ui/qr-block'
 import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { ArrowRight, Clock, FileText, Image, ImagePlus, Star } from 'lucide-react'
-import { useRef, type ReactNode } from 'react'
+import { useId, useRef, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { pageLink } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
-import { PageLinkField } from '@/shared/ui'
+import { PageLinkField, PageQrCard } from '@/shared/ui'
 import { firstMissing, hasAbout, qualityOf, QUALITY_ITEMS, type QualityItem } from '../model/done'
 import { StepHeader, type StepAction } from './setup-frame'
 
 const QUALITY_ICON: Record<QualityItem, ReactNode> = { logo: <ImagePlus />, photos: <Image />, about: <FileText /> }
+
+/** The link's and the QR's titles as Settings → Link and QR draws them (`SettingsSectionTitle`), as the page's h2s. */
+const sectionTitle = 'm-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900'
 
 /** What the done step reads of the draft (`GET /v1/me/setup`). */
 export type DoneDraft = Pick<Setup, 'slug' | 'name' | 'category' | 'address'>
@@ -29,8 +30,8 @@ export type AfterSetup = 'calendar' | 'settings'
 
 /**
  * Step 8, «{name} is ready!» (B-Onboarding `isDone`, book B-06): the page is in review (only the team sees it, the
- * calendar works now); the card clients will see; the page link with Copy and Share and the QR code with its
- * downloads; «Make your page stronger» (a logo, 3+ photos, an About). «Go to the calendar» finishes the setup
+ * calendar works now); the card clients will see; the page link with Copy and Share and the QR card with its
+ * downloads, as Settings → Link and QR shows them (the owner, 25.10.2026); «Make your page stronger» (a logo, 3+ photos, an About). «Go to the calendar» finishes the setup
  * (`setup.finish`: the workspace joins the switcher and Ýeral's review) and opens the workspace's calendar; each
  * checklist «Add» finishes the same way into Settings. When finishing finds a step missing (`setup_incomplete`), the
  * wizard opens it. A hook, as the other steps are, so the wizard's frame stays one element; `on` while it shows.
@@ -45,6 +46,9 @@ export function useDoneStep(
   onFinished: (slug: string, after: AfterSetup) => void,
 ): { body: ReactNode; action: StepAction; primary: { label: string; icon: ReactNode; finish: () => void } } {
   const t = useTranslations('setup.done')
+  const tl = useTranslations('pageLink')
+  const linkTitle = useId()
+  const qrTitle = useId()
   const sdk = useSdk()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -105,7 +109,6 @@ export function useDoneStep(
     : draft.address
       ? t('addressLine', { line: draft.address.line, city })
       : city
-  const link = pageLink(draft.slug)
 
   const items: ChecklistItem[] = QUALITY_ITEMS.map((item) => ({
     id: item,
@@ -161,25 +164,23 @@ export function useDoneStep(
           </div>
         </div>
 
-        <div className="flex min-w-0 flex-col gap-3">
-          <span className="text-label text-n-500 uppercase">{t('linkLabel')}</span>
-          <span className="text-body font-semibold text-n-900">{t('linkReady')}</span>
-          <PageLinkField slug={draft.slug} label={t('pageLink')} />
-          <QrBlock
-            variant="compact"
-            value={link.url}
-            label={t('qrLabel', { name: draft.name })}
-            fileName={`${draft.slug}-qr`}
-            caption={t('qrNote')}
-            copy={{
-              downloadPng: t('downloadPng'),
-              downloadSvg: t('downloadSvg'),
-              downloaded: (format) => t('downloaded', { format }),
-            }}
-            className="pt-1"
-          />
-        </div>
+        <section aria-labelledby={linkTitle} className="flex min-w-0 flex-col gap-5">
+          <div className="flex flex-col gap-0.5">
+            <h2 id={linkTitle} className={sectionTitle}>
+              {tl('title')}
+            </h2>
+            <p className="m-0 text-dense text-n-600">{tl('caption')}</p>
+          </div>
+          <PageLinkField slug={draft.slug} label={tl('title')} />
+        </section>
       </div>
+
+      <section aria-labelledby={qrTitle} className="flex flex-col gap-5">
+        <h2 id={qrTitle} className={sectionTitle}>
+          {tl('qrTitle')}
+        </h2>
+        <PageQrCard slug={draft.slug} name={draft.name} />
+      </section>
 
       <Checklist
         titleAs="h2"

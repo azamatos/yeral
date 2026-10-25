@@ -940,9 +940,9 @@ const doneDraft: Draft = { ...rulesDraft, step: 'done' }
 const Calendar = () => <h1>Calendar</h1>
 
 /**
- * The done step: the page in review, the card clients will see, the page link with Copy and Share, the QR code with
- * its downloads, «Make your page stronger» with nothing done yet (the logo ringed as next). «Go to the calendar»
- * finishes the setup and opens the workspace's calendar.
+ * The done step: the page in review, the card clients will see, the page link with Copy and Share and the QR card with
+ * its downloads as Settings → Link and QR shows them, «Make your page stronger» with nothing done yet (the logo ringed
+ * as next). «Go to the calendar» finishes the setup and opens the workspace's calendar.
  */
 export const Done: Story = {
   args: {
@@ -954,10 +954,17 @@ export const Done: Story = {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio is ready!' })).toBeVisible()
     await expect(canvas.getByText(/Your page is in review/)).toBeVisible()
     await expect(canvas.getByText('Beauty · 247 Bitarap Türkmenistan Avenue, Ashgabat')).toBeVisible()
+    await expect(canvas.getByRole('heading', { level: 2, name: 'Your page link' })).toBeVisible()
     const link = canvas.getByRole<HTMLInputElement>('textbox', { name: 'Your page link' })
     await expect(link.value).toMatch(/\/b\/glow-studio$/)
-    await expect(canvas.getByRole('img', { name: 'QR code for Glow Studio’s page' })).toBeVisible()
-    await expect(canvas.getByRole('button', { name: 'Download PNG' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Share' })).toBeVisible()
+    const qr = canvas.getByRole('region', { name: 'QR code' })
+    await expect(within(qr).getByRole('img', { name: 'QR code for Glow Studio’s page' })).toBeVisible()
+    await expect(within(qr).getByText('Glow Studio')).toBeVisible()
+    await expect(within(qr).getByText(/Put it by the till/)).toBeVisible()
+    await expect(within(qr).getByText('PNG for printing, SVG for designers.')).toBeVisible()
+    await expect(within(qr).getByRole('button', { name: 'Download PNG' })).toBeVisible()
+    await expect(within(qr).getByRole('button', { name: 'Download SVG' })).toBeVisible()
     const checklist = canvas.getByRole('heading', { level: 2, name: 'Make your page stronger' })
     await expect(checklist).toBeVisible()
     await expect(canvas.getByText('0 / 3 done')).toBeVisible()

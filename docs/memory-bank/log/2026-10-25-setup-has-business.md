@@ -21,3 +21,12 @@
   (the frame moves focus nowhere); the workspace row (logo, name, «level · city») is drawn three times (the switcher in
   `@yeral/ui`, My account, here) and could be one component; the choice could name a business's page state (in review,
   hidden); the login's «Start free» could skip the phone step for someone already signed in.
+
+## The done step's link and QR as Settings shows them (fix/setup-done-qr)
+
+- Changed: the owner found the wizard's last step's link and compact QR unclear (25.10.2026); it now shows them as
+  Settings → Link and QR does: «Your page link» with its caption and the field with Copy and Share (`PageLinkField`),
+  and «QR code» with the large card (`PageQrCard`, new in `shared/ui`: the code at 200, the business name, the link,
+  «Put it by the till…», Download PNG / SVG, «PNG for printing, SVG for designers.»), which Settings uses too. The words
+  moved to `pageLink.*` (the done step's own link and QR words are gone); the titles are the done step's h2s styled as
+  `SettingsSectionTitle`.
