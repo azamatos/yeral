@@ -247,6 +247,8 @@ const fakeApi =
       if (route === 'GET /w/glow-studio/free-times')
         return json({
           nearest: [
+            // the declined time itself, free to the search: not offered back
+            { date: DAY, start: 660, end: 780, staffId: id(1) },
             { date: DAY, start: 990, end: 1110, staffId: id(1) },
             { date: DAY, start: 1020, end: 1140, staffId: id(1) },
             { date: TOMORROW, start: 600, end: 720, staffId: id(1) },
@@ -493,6 +495,8 @@ export const DeclineWithTimes: Story = {
     await userEvent.click(await modal.findByRole('button', { name: '16:30' }))
     await userEvent.click(modal.getByRole('button', { name: '10:00' }))
     await expect(modal.getByText('2 / 3 times selected')).toBeVisible()
+    // 11:00 only tomorrow: today's is the time declined
+    await expect(modal.getAllByRole('button', { name: '11:00' })).toHaveLength(1)
     await userEvent.click(decline)
     const declined = await page.findByText('Request declined · the client sees the reason and 2 other times')
     await waitFor(() => expect(declined).toBeVisible())

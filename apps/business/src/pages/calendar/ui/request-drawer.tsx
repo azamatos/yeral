@@ -64,6 +64,10 @@ export function RequestDrawer({
   const go = (r: Request | undefined) => r && !answering && onGo(r)
   // the decline modal over the drawer, for the request it opened on
   const [declining, setDeclining] = useState<Request | null>(null)
+  // here, not in the modal: its answer still lands when the request has left the list (the sdk reads it again first)
+  const decline = useMutation(sdk.requests.decline(slug))
+  // the modal stays while its decline is on its way; a request gone meanwhile (answered elsewhere, run out) closes it
+  const declineOpen = !!declining && (decline.isPending || queue.some((o) => o.code === declining.code))
   /** Answered: the drawer closes on it, and the toast offers the next one while more wait. */
   const answered = (r: Request, words: string) => {
     onAnswered(r.code)
@@ -140,15 +144,20 @@ export function RequestDrawer({
           )
         )}
       </DrawerContent>
-      {declining && (
+      {declining && declineOpen && (
         <DeclineModal
           slug={slug}
           request={declining}
-          onOpenChange={(open) => !open && setDeclining(null)}
+          now={now}
+          business={business}
+          pending={decline.isPending}
+          send={(input, done) => decline.mutate({ code: declining.code, ...input }, done)}
+          onOpenChange={(open) => !open && !decline.isPending && setDeclining(null)}
           onDeclined={(words) => {
             setDeclining(null)
             answered(declining, words)
           }}
+          onRefused={() => void list.refetch()}
         />
       )}
     </Drawer>

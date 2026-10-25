@@ -16,6 +16,14 @@
 - A client's move is declined the same way, with the reason only: «Decline the new time», «The client will see the
   reason. The booking stays at its time.», with no «We can’t do this service» and no offered times. Its toast is «New
   time declined · the booking stays at its time · the client sees the reason».
+- Review round:
+  - The decline runs in the drawer, so its toast lands even if the request has already left the list. The modal stays
+    open while a decline is on its way, and closes if the request goes meanwhile (answered elsewhere, or run out).
+  - A refusal reads the requests again.
+  - Picks no longer offered drop out of the count.
+  - The declined time itself isn't offered back.
+  - «Today» is the business day.
+  - A request whose services are off the menu offers no times: the switch is hidden.
 - Decided (Claude, delegated; chapter 9, 25.10.2026, B-20 (how)): the times offered are the nearest 4 free starts in 14
   days, grouped by day. The board draws three times of the same day; the modal has no date picker for now.
 - Next: B5, the move request's box (Previous time / New time with Show, the fit line from W's `fits`).
