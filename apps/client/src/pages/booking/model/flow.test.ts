@@ -8,16 +8,24 @@ const detail = {
   ],
 }
 
+const none = { services: [], date: null, time: null }
+const cut = { services: ['cut'], date: null, time: null }
+const timed = { services: ['cut'], date: '2026-10-25', time: 870 }
+
 describe('the booking address', () => {
   it('keeps what it can read and drops the rest', () => {
-    expect(bookingSearchSchema.parse({ services: 'cut', staff: 'any', date: '2026-10-25', time: '14:30', step: 'time' })).toEqual({
+    expect(bookingSearchSchema.parse({ services: 'cut', staff: 'any', date: '2026-10-25', time: '870', step: 'time' })).toEqual({
       services: 'cut',
       staff: 'any',
       date: '2026-10-25',
-      time: '14:30',
+      time: 870,
       step: 'time',
     })
-    expect(bookingSearchSchema.parse({ date: '25.10.2026', time: '25:00', step: 'pay' })).toEqual({})
+    expect(bookingSearchSchema.parse({ date: '25.10.2026', time: '2880', step: 'pay' })).toEqual({})
+  })
+
+  it('holds a start past midnight on its business day', () => {
+    expect(bookingSearchSchema.parse({ time: 1470 }).time).toBe(1470)
   })
 })
 
@@ -31,29 +39,30 @@ describe('the specialist', () => {
 })
 
 describe('the steps', () => {
-  it('reach the time with a service and the confirmation with a time', () => {
-    expect(reachedStep({ services: [], time: null })).toBe(0)
-    expect(reachedStep({ services: ['cut'], time: null })).toBe(2)
-    expect(reachedStep({ services: ['cut'], time: 870 })).toBe(3)
+  it('reach the time with a service and the confirmation with a time on its day', () => {
+    expect(reachedStep(none)).toBe(0)
+    expect(reachedStep(cut)).toBe(2)
+    expect(reachedStep({ ...cut, time: 870 })).toBe(2)
+    expect(reachedStep(timed)).toBe(3)
   })
 
   it('hold an asked step back to what is reached', () => {
-    expect(currentStep('confirm', { services: [], time: null })).toBe('services')
-    expect(currentStep('confirm', { services: ['cut'], time: null })).toBe('time')
-    expect(currentStep('staff', { services: ['cut'], time: 870 })).toBe('staff')
-    expect(currentStep(undefined, { services: ['cut'], time: 870 })).toBe('services')
+    expect(currentStep('confirm', none)).toBe('services')
+    expect(currentStep('confirm', cut)).toBe('time')
+    expect(currentStep('staff', timed)).toBe('staff')
+    expect(currentStep(undefined, timed)).toBe('services')
   })
 
   it('go on once their own choice is made', () => {
-    expect(stepDone('services', { services: [], time: null })).toBe(false)
-    expect(stepDone('staff', { services: ['cut'], time: null })).toBe(true)
-    expect(stepDone('time', { services: ['cut'], time: null })).toBe(false)
-    expect(stepDone('time', { services: ['cut'], time: 600 })).toBe(true)
+    expect(stepDone('services', none)).toBe(false)
+    expect(stepDone('staff', cut)).toBe(true)
+    expect(stepDone('time', cut)).toBe(false)
+    expect(stepDone('time', timed)).toBe(true)
   })
 })
 
-describe('the times by part of day', () => {
-  it('splits at 12:00 and 17:00 and leaves out empty parts', () => {
+describe('the times', () => {
+  it('split at 12:00 and 17:00, leaving out empty parts', () => {
     expect([partOfDay(540), partOfDay(720), partOfDay(1019), partOfDay(1020)]).toEqual(['morning', 'afternoon', 'afternoon', 'evening'])
     expect(slotsByPart([{ start: 600 }, { start: 1050 }]).map((g) => g.part)).toEqual(['morning', 'evening'])
   })

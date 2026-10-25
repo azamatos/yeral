@@ -10,13 +10,15 @@ import { TimeSlots } from '@yeral/ui/time-slots'
 import { CalendarX2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'use-intl'
 import { slotsByPart } from '../model/flow'
+import { LoadFailed } from './load-failed'
 import { StepTitle } from './step-title'
 
 /**
  * Step 3 (Booking `step=time`, book C-14): the 14 days from today (a week a page from 768; closed days off, full ones
  * struck through), the chosen day's title, its free times by part of day, and for a day without one the way to the
  * next free day. The api works out what fits the whole visit back to back with the specialist (or anyone) and the
- * business's lead time; the first open day is chosen when the address names none.
+ * business's lead time; the address naming no day, it answers for today (full or closed: the next free day's button).
+ * While another day's times come, the old ones aren't offered.
  */
 export function TimeStep({
   slug,
@@ -33,8 +35,8 @@ export function TimeStep({
   serviceIds: string[]
   minutes: number
   staff: string
-  staffName: string | null
-  date: string | undefined
+  staffName: string
+  date: string | null
   time: number | null
   onDate: (date: string) => void
   onTime: (start: number, date: string) => void
@@ -46,7 +48,7 @@ export function TimeStep({
   const now = useClock()
   const day0 = today(now)
   const free = useQuery({
-    ...sdk.availability.appointment(slug, { lang, services: serviceIds, staff, ...(date ? { date } : {}) }),
+    ...sdk.availability.appointment(slug, { lang, services: serviceIds, staff, date: date ?? undefined }),
     // another day keeps the strip in place while its times come
     placeholderData: keepPreviousData,
   })
@@ -61,6 +63,13 @@ export function TimeStep({
       month: fmt.monthYear(d.date),
     }),
   }))
+  // the strip opens on the week holding the chosen day, also when «Next free day» moves it to another week
+  const week = Math.floor(
+    Math.max(
+      0,
+      strip.findIndex((d) => d.date === day),
+    ) / 7,
+  )
   const dayTitle = (d: string) => {
     const long = fmt.weekdayDate(d)
     const ahead = diffDays(d, day0)
@@ -71,9 +80,17 @@ export function TimeStep({
     label: t(`time.${g.part}`),
     slots: g.slots.map((s) => ({ value: String(s.start), label: fmt.time(s.start) })),
   }))
+  const title = <StepTitle title={t('time.title')} lead={t('time.lead', { duration: fmt.duration(minutes), staff: staffName })} />
+  if (free.isError && !data)
+    return (
+      <div className="flex flex-col">
+        {title}
+        <LoadFailed className="mt-7" onRetry={() => void free.refetch()} />
+      </div>
+    )
   return (
     <div className="flex flex-col">
-      <StepTitle title={t('time.title')} lead={t('time.lead', { duration: fmt.duration(minutes), staff: staffName ?? t('staff.any') })} />
+      {title}
       {!data || !day ? (
         <div className="mt-7 flex flex-col gap-3" aria-hidden>
           <Skeleton className="h-6 w-40" />
@@ -83,6 +100,7 @@ export function TimeStep({
       ) : (
         <>
           <DateStrip
+            key={week}
             className="mt-7"
             aria-label={t('time.dateLabel')}
             title={fmt.monthYear(day)}
@@ -93,7 +111,12 @@ export function TimeStep({
             nextLabel={t('time.nextWeek')}
           />
           <div className="mt-7 text-[17px] leading-6 font-semibold">{dayTitle(day)}</div>
-          {groups.length > 0 ? (
+          {free.isPlaceholderData ? (
+            <div className="flex flex-col gap-3 pt-5" aria-hidden>
+              <Skeleton className="h-3.5 w-20" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : groups.length > 0 ? (
             <TimeSlots
               className="pt-5"
               groups={groups}

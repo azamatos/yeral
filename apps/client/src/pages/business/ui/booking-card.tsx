@@ -9,6 +9,7 @@ import { CalendarX2, CircleCheck, Clock, MapPin, Phone, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { selectionTotal } from '@/features/pick-services'
+import { calendarAt } from '@/shared/lib'
 import { dayHours, openLine } from '../model/when'
 import type { BookingState } from './business-page'
 import { FavouriteButton } from './favourite'
@@ -93,7 +94,10 @@ function useNextFree(next: Detail['nextFree']): string | null {
   const t = useTranslations('business.card')
   const fmt = useFmt()
   const now = useClock()
-  return next ? t('at', { day: fmt.relativeShortDate(next.date, today(now)), time: fmt.time(next.start) }) : null
+  if (!next) return null
+  // a start past midnight reads on the next calendar day
+  const at = calendarAt(next.date, next.start)
+  return t('at', { day: fmt.relativeShortDate(at.date, today(now)), time: fmt.time(at.start) })
 }
 
 /** How the business answers (`typicalConfirmMinutes`, book Q-113): within its usual time, by hand, or at once. */

@@ -19,6 +19,10 @@ export const Route = createFileRoute('/$lang/b/$slug/book')({
     })
     if (detail.slug !== params.slug)
       redirect({ to: '/$lang/b/$slug/book', params: { lang, slug: detail.slug }, search: true, statusCode: 301, throw: true })
+    // nothing here to book for whoever looks: paused, a client booked by phone only, the owner's page in review (all
+    // `bookOnline` false), or tables and classes (their flows come later): the page says why and how
+    if (!detail.bookOnline || !detail.bookingTypes.includes('appointment'))
+      redirect({ to: '/$lang/b/$slug', params: { lang, slug: detail.slug }, replace: true, throw: true })
     return { name: detail.name }
   },
   head: ({ params, loaderData }) =>

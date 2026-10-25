@@ -221,9 +221,11 @@
     "back": "Back",
     "close": "Close",
     "summaryLabel": "Your booking",
+    "loadFailed": "Couldn't load the free times.",
     "services": {
       "title": "Choose services",
-      "lead": "You can choose several services."
+      "lead": "You can choose several services.",
+      "max": "Up to {max} services in one booking."
     },
     "staff": {
       "title": "Choose a specialist",

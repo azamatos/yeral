@@ -1,43 +1,43 @@
 import type { BusinessDetail } from '@yeral/contract/catalog'
+import type { Price as PriceValue } from '@yeral/domain/model'
 import { useFmt } from '@yeral/i18n'
 import { Price } from '@yeral/ui/price'
 import { Rating } from '@yeral/ui/rating'
 import { CalendarDays, User } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
-import { selectionTotal } from '@/features/pick-services'
+import { calendarAt } from '@/shared/lib'
 
 type Service = BusinessDetail['serviceGroups'][number]['services'][number]
 
 /**
  * The booking's card beside the steps from 1024 (Booking `.bside`): the business (its first photo, name, rating,
- * street), the picked services with their minutes and prices, the specialist and the chosen time once the flow is
- * past the services, the total with «Pay at the place», the step's primary and, while it's off, what it waits for.
+ * street), the picked services with their minutes and prices, the specialist (`staffName`, once the flow is past the
+ * services) and the chosen time on its day, the total with «Pay at the place», the step's primary and, while it's
+ * off, what it waits for. The page works out the total and the name once for the card and the bar.
  */
 export function Summary({
   detail,
   picked,
-  staff,
+  total,
+  staffName,
   date,
   time,
-  showStaff,
   cta,
   hint,
 }: {
   detail: BusinessDetail
   picked: readonly Service[]
-  staff: string
-  date: string | undefined
+  total: { minutes: number; price: PriceValue }
+  staffName: string | null
+  date: string | null
   time: number | null
-  showStaff: boolean
   cta: ReactNode
   hint: string | null
 }) {
   const t = useTranslations('booking')
   const fmt = useFmt()
-  const total = selectionTotal(picked)
   const photo = detail.photos[0]
-  const staffName = detail.specialists.find((s) => s.id === staff)?.name ?? t('staff.any')
   return (
     <div className="flex flex-col gap-5 rounded-card border border-n-200 bg-n-0 p-6">
       <div className="flex items-center gap-3.5">
@@ -63,7 +63,7 @@ export function Summary({
           </div>
         ))}
       </div>
-      {showStaff && picked.length > 0 && (
+      {staffName && (
         <div className="flex flex-col gap-2.5 text-small [&_svg]:mt-px [&_svg]:size-4.5 [&_svg]:flex-none [&_svg]:text-n-600">
           <div className="flex items-start gap-2.5">
             <User aria-hidden strokeWidth={1.75} />
@@ -72,7 +72,8 @@ export function Summary({
           {date && time !== null && (
             <div className="flex items-start gap-2.5">
               <CalendarDays aria-hidden strokeWidth={1.75} />
-              {t('summary.when', { date: fmt.weekdayDate(date), range: fmt.timeRange(time, time + total.minutes) })}
+              {/* a start past midnight reads on the next calendar day */}
+              {t('summary.when', { date: fmt.weekdayDate(calendarAt(date, time).date), range: fmt.timeRange(time, time + total.minutes) })}
             </div>
           )}
         </div>

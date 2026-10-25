@@ -93,11 +93,27 @@ export const FullDay: Story = {
   },
 }
 
-/** A link to the confirmation without a time opens the time step (the steps hold back to what's chosen). */
+/**
+ * A link to the confirmation without a time opens the time step (the steps hold back to what's chosen), and a pick
+ * there stays on it: Continue goes on.
+ */
 export const HeldBack: Story = {
   args: { path: '/en/b/glow-studio/book?services=s1&step=confirm' },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
+    await userEvent.click(await canvas.findByRole('button', { name: '16:00' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Choose a time' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: '16:00' })).toHaveAttribute('aria-pressed', 'true')
+  },
+}
+
+/** A time the day no longer has (taken since the link was made) counts as not chosen: Continue waits. */
+export const StaleTime: Story = {
+  args: { path: `/en/b/glow-studio/book?services=s1&step=time&date=${today()}&time=600` },
+  play: async ({ canvas }) => {
+    const summary = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
+    await expect(await canvas.findByRole('button', { name: '15:30' })).toBeVisible()
+    await expect(summary.getByRole('button', { name: 'Continue' })).toBeDisabled()
   },
 }
 
@@ -115,7 +131,7 @@ export const Phone: Story = {
 /** Phone, the time step: the strip scrolls, the bar names the chosen time. */
 export const PhoneTime: Story = {
   globals: { viewport: { value: 'xs' } },
-  args: { path: `/en/b/glow-studio/book?services=s1&step=time&date=${today()}&time=15:30` },
+  args: { path: `/en/b/glow-studio/book?services=s1&step=time&date=${today()}&time=930` },
   play: async ({ canvas }) => {
     const bar = within(await canvas.findByRole('region', { name: 'Your booking' }))
     await expect(await bar.findByText('1 service · 80 TMT · 15:30')).toBeVisible()

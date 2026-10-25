@@ -1,16 +1,26 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
-import { parseHm } from '@yeral/domain/time'
+import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { useSdk } from '@yeral/sdk/react'
 import { ActionBar } from '@yeral/ui/action-bar'
 import { Button } from '@yeral/ui/button'
+import { useClock } from '@yeral/ui/clock'
 import { Stepper } from '@yeral/ui/stepper'
+import { toast } from '@yeral/ui/toast'
 import { ChevronLeft, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'use-intl'
-import { parseServiceIds, pickedServices, selectionTotal, ServicePicker, serviceIdsParam, toggleService } from '@/features/pick-services'
+import {
+  parseServiceIds,
+  pickedServices,
+  selectionTotal,
+  ServicePicker,
+  serviceIdsParam,
+  SERVICES_MAX,
+  toggleService,
+} from '@/features/pick-services'
 import { wrap } from '@/shared/ui'
-import { chosenStaff, currentStep, reachedStep, stepDone, STEPS, type BookingSearch, type Step } from '../model/flow'
+import { chosenStaff, currentStep, reachedStep, stepDone, STEPS, type BookingSearch, type Choice, type Step } from '../model/flow'
 import { StaffStep } from './staff-step'
 import { StepTitle } from './step-title'
 import { Summary } from './summary'
@@ -19,8 +29,9 @@ import { TimeStep } from './time-step'
 /**
  * `/{lang}/b/{slug}/book` — the appointment booking flow (Booking, book C-12–C-14): the focused header (Back, the steps,
  * Close back to the page), one step at a time with the booking's summary beside it from 1024 and the action bar under
- * it. Everything chosen lives in the address (`?services=&staff=&date=&time=&step=`): a step change is a new history
- * entry (Back walks the steps), a pick replaces it. The confirmation and the sent page come next (P4 slice 3, C4).
+ * it. Everything chosen lives in the address (`?services=&staff=&date=&time=&step=`): Continue is a new history entry
+ * (the browser's Back walks the steps), a pick and the header's Back replace it. A date already past and a time the day
+ * no longer has count as not chosen. The confirmation and the sent page come next (P4 slice 3, C4).
  */
 export function BookingPage() {
   const { slug = '' } = useParams({ strict: false })
@@ -28,33 +39,52 @@ export function BookingPage() {
   const sdk = useSdk()
   const t = useTranslations('booking')
   const fmt = useFmt()
+  const now = useClock()
   const { data: detail } = useSuspenseQuery(sdk.catalog.business(slug, lang))
   const search: BookingSearch = useSearch({ strict: false })
   const navigate = useNavigate()
   const picked = pickedServices(detail, parseServiceIds(search.services))
   const ids = picked.map((s) => s.id)
   const staff = chosenStaff(detail, ids, search.staff)
-  const time = search.time ? parseHm(search.time) : null
-  const choice = { services: ids, time }
+  // an old link's day already gone counts as none: the time step opens on today
+  const date = search.date && search.date >= today(now) ? search.date : null
+  // the chosen day's free times (the time step asks the same): a time it no longer has isn't chosen any more
+  const free = useQuery({
+    ...sdk.availability.appointment(detail.slug, { lang, services: ids, staff, date: date ?? undefined }),
+    enabled: ids.length > 0 && date !== null && search.time !== undefined,
+  })
+  const settled = free.data && !free.isPlaceholderData ? free.data : null
+  const time =
+    date !== null && search.time !== undefined && (!settled || settled.slots.some((s) => s.start === search.time)) ? search.time : null
+  const choice: Choice = { services: ids, date, time }
   const step = currentStep(search.step, choice)
   const index = STEPS.indexOf(step)
   const done = stepDone(step, choice)
   const total = selectionTotal(picked)
+  const staffName = detail.specialists.find((s) => s.id === staff)?.name ?? t('staff.any')
 
-  const set = (patch: Partial<BookingSearch>, newEntry = false) =>
+  // the step shown goes along with every change, so a link held back to an earlier step stays on it
+  const set = (patch: Partial<BookingSearch>, { newEntry = false, top = false } = {}) =>
     void navigate({
       to: '.',
-      search: (prev: Record<string, unknown>) => ({ ...prev, ...patch }),
+      search: (prev: Record<string, unknown>) => ({ ...prev, step, ...patch }),
       replace: !newEntry,
       // a new step starts at its top (client spec); a pick inside a step keeps the page where it is
-      resetScroll: newEntry,
+      resetScroll: top,
     })
-  const go = (to: Step) => set({ step: to }, true)
-  // a new service may leave the chosen specialist and time behind: they're dropped with it (Booking `set`)
-  const pickServices = (next: string[]) => set({ services: serviceIdsParam(next), time: undefined })
+  const go = (to: Step, newEntry: boolean) => set({ step: to }, { newEntry, top: true })
+  const pickServices = (id: string) => {
+    const next = toggleService(ids, id)
+    if (next.length > SERVICES_MAX) {
+      toast(t('services.max', { max: SERVICES_MAX }))
+      return
+    }
+    // a new service may rule the chosen specialist out and leaves the chosen time behind (Booking `set`)
+    set({ services: serviceIdsParam(next), staff: chosenStaff(detail, next, search.staff), time: undefined })
+  }
   const next = () => {
     const to = STEPS[index + 1]
-    if (done && to) go(to)
+    if (done && to) go(to, true)
   }
   const hint = step === 'time' ? t('summary.pickTime') : t('summary.pickService')
   const cta =
@@ -77,7 +107,7 @@ export function BookingPage() {
               </Link>
             </Button>
           ) : (
-            <Button variant="ghost" className="-ml-2.5 min-w-0 pr-4 pl-2.5" onClick={() => go(STEPS[index - 1] ?? 'services')}>
+            <Button variant="ghost" className="-ml-2.5 min-w-0 pr-4 pl-2.5" onClick={() => go(STEPS[index - 1] ?? 'services', false)}>
               <ChevronLeft aria-hidden />
               {t('back')}
             </Button>
@@ -88,7 +118,7 @@ export function BookingPage() {
           steps={STEPS.map((s) => t(`steps.${s}`))}
           current={index}
           reached={reachedStep(choice)}
-          onStepClick={(i) => go(STEPS[i] ?? 'services')}
+          onStepClick={(i) => go(STEPS[i] ?? 'services', false)}
           className="self-stretch"
         />
         <div className="flex min-w-0 justify-end">
@@ -107,17 +137,18 @@ export function BookingPage() {
                 <>
                   <StepTitle title={t('services.title')} lead={t('services.lead')} />
                   <div className="mt-5 flex flex-col gap-7">
-                    <ServicePicker
-                      groups={detail.serviceGroups}
-                      picked={ids}
-                      onToggle={(id) => pickServices(toggleService(ids, id))}
-                      groupHeading="h2"
-                    />
+                    <ServicePicker groups={detail.serviceGroups} picked={ids} onToggle={pickServices} groupHeading="h2" />
                   </div>
                 </>
               )}
               {step === 'staff' && (
-                <StaffStep detail={detail} serviceIds={ids} staff={staff} onPick={(id) => set({ staff: id, time: undefined })} />
+                <StaffStep
+                  detail={detail}
+                  serviceIds={ids}
+                  staff={staff}
+                  // the same specialist again keeps the chosen time
+                  onPick={(id) => id !== staff && set({ staff: id, time: undefined })}
+                />
               )}
               {step === 'time' && (
                 <TimeStep
@@ -125,11 +156,11 @@ export function BookingPage() {
                   serviceIds={ids}
                   minutes={total.minutes}
                   staff={staff}
-                  staffName={detail.specialists.find((s) => s.id === staff)?.name ?? null}
-                  date={search.date}
+                  staffName={staffName}
+                  date={date}
                   time={time}
-                  onDate={(date) => set({ date, time: undefined })}
-                  onTime={(start, day) => set({ date: day, time: fmt.time(start) })}
+                  onDate={(day) => set({ date: day, time: undefined })}
+                  onTime={(start, day) => set({ date: day, time: start })}
                 />
               )}
               {step === 'confirm' && <StepTitle title={t('confirm.title')} lead={t('confirm.lead')} />}
@@ -139,10 +170,10 @@ export function BookingPage() {
             <Summary
               detail={detail}
               picked={picked}
-              staff={staff}
-              date={step !== 'services' ? search.date : undefined}
+              total={total}
+              staffName={index > 0 && picked.length > 0 ? staffName : null}
+              date={step !== 'services' ? date : null}
               time={step !== 'services' ? time : null}
-              showStaff={index > 0}
               cta={cta}
               hint={done ? null : hint}
             />

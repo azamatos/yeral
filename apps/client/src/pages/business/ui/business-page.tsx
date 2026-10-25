@@ -16,7 +16,7 @@ import { toast } from '@yeral/ui/toast'
 import { Clock, MapPin, Share2 } from 'lucide-react'
 import { useId, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { parseServiceIds, pickedServices, ServicePicker, serviceIdsParam, toggleService } from '@/features/pick-services'
+import { parseServiceIds, pickedServices, ServicePicker, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { site } from '@/shared/config'
 import { wrap } from '@/shared/ui'
 import { openLine } from '../model/when'
@@ -50,6 +50,7 @@ export function BusinessPage() {
   const search: { services?: string } = useSearch({ strict: false })
   const navigate = useNavigate()
   const t = useTranslations('business')
+  const tb = useTranslations('booking')
   const servicesId = useId()
   const state = bookingState(detail)
   const ids = state === 'online' || state === 'preview' ? parseServiceIds(search.services) : []
@@ -76,7 +77,12 @@ export function BusinessPage() {
               <ServicePicker
                 groups={detail.serviceGroups}
                 picked={picked.map((s) => s.id)}
-                onToggle={(id) => pick(toggleService(ids, id))}
+                onToggle={(id) => {
+                  const next = toggleService(ids, id)
+                  // one booking takes up to 10 services (the api's limit)
+                  if (next.length > SERVICES_MAX) toast(tb('services.max', { max: SERVICES_MAX }))
+                  else pick(next)
+                }}
                 canPick={state === 'online' || state === 'preview'}
                 groupHeading="h3"
               />

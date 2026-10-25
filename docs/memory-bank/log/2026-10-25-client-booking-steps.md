@@ -19,4 +19,19 @@
   past what's chosen opens the furthest step reached (`currentStep`, tested).
 - `shared/storybook`: GLOW has its four specialists and `businessApi()` answers the specialists' and the days' free
   times; `FakeRequest` carries the query.
-- Stories: `Client/Pages/Booking` (8).
+- Stories: `Client/Pages/Booking` (9).
+- Review (one round, 15 findings, 13 fixed): the step shown goes into the address with every change (a link held back
+  to an earlier step no longer jumps ahead on the next pick); `time` is the start in minutes of the business day (up
+  to 2879: a start past midnight round-trips, book Q-105) and counts only with its `date`; a date already past counts
+  as none; the page reads the chosen day's free times too and a time the day no longer has isn't chosen (Continue
+  waits); while another day's times come the old ones aren't offered; a failed free-times answer says so with Try
+  again (both steps); up to 10 services (`SERVICES_MAX`, the api's limit; a toast past it, on the business page too);
+  the specialist step on `@yeral/ui`'s OptionCard (arrow keys, the n-500 ring); a specialist ruled out by a new
+  service leaves the address; the same specialist again keeps the time; the header's Back and the step links replace
+  the entry (Continue alone adds one); the strip opens on the week of the chosen day; the route sends a page nothing
+  can be booked on (`bookOnline` false: paused, phone-only, the owner's preview; or not appointments) back to the
+  business page; a next free time past midnight reads on the next day (`calendarAt` in `shared/lib`, the business
+  page too); the summary takes the total and the name from the page; the steps' enum is `STEPS`. Left: the API's
+  answer for a day without `date` is today even when today is closed or full (the empty state offers the next free
+  day, as the board does); one `widgets/booking-summary` for the page's card and the flow's summary (COMPONENTS.md),
+  with C4's variants.

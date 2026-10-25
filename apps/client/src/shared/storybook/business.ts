@@ -124,14 +124,14 @@ export const GLOW: BusinessDetail = {
 
 /**
  * The time step's answer (`GET /businesses/{slug}/availability`): 14 days from today; the day after tomorrow is full
- * and the fifth day closed for a holiday; an open day has eight free times from 10:00 to 18:00 (today from 15:30).
+ * and the fifth day closed for a holiday; an open day has nine free times from 10:00 to 18:00 (today from 15:30).
  * Without a date, the first open day.
  */
 function freeTimes(date: string | null) {
   const days = Array.from({ length: 14 }, (_, i) => addDays(today(), i))
   const state = (d: string) => (d === days[2] ? 'full' : d === days[4] ? 'closed' : 'open')
   const day = date && days.includes(date) ? date : today()
-  const all = [600, 630, 690, 840, 870, 960, 1050, 1080]
+  const all = [600, 630, 690, 840, 870, 930, 960, 1050, 1080]
   const slots = state(day) === 'open' ? all.filter((m) => day !== days[0] || m >= 930) : []
   return {
     date: day,
