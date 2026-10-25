@@ -100,6 +100,18 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: yeral.localhost' http://localhost/)" = 307
           curl -fsS -H 'Host: yeral.localhost' http://localhost/en | grep -q '<html lang="en"'
           test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: yeral.localhost' http://localhost/en/nothing-here)" = 404
+      - name: The push channel through Caddy
+        run: |
+          # signed in (outside production the code is 1234), the stream's `ready` comes at once, neither held back nor
+          # compressed by Caddy's `encode` (the api answers `no-transform`)
+          api=(--resolve api.yeral.localhost:80:127.0.0.1 -b jar -c jar -H 'Content-Type: application/json')
+          curl -fsS "${api[@]}" -d '{"phone":"+99362000222"}' http://api.yeral.localhost/v1/auth/code > /dev/null
+          curl -fsS "${api[@]}" -d '{"phone":"+99362000222","code":"1234"}' http://api.yeral.localhost/v1/auth/verify > /dev/null
+          out=$(curl -sS -N -D - --resolve api.yeral.localhost:80:127.0.0.1 -b jar -H 'Accept-Encoding: gzip, zstd' \
+            --max-time 3 http://api.yeral.localhost/v1/events/stream || true)
+          echo "$out" | grep -qi '^content-type: text/event-stream'
+          if echo "$out" | grep -qi '^content-encoding:'; then echo 'the stream came compressed'; exit 1; fi
+          echo "$out" | grep -q '^event: ready'
       - name: Logs
         if: failure()
         run: docker compose -f infra/docker/compose.yml logs --no-color

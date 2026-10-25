@@ -126,13 +126,20 @@ component ─► useQuery(sdk.businesses.detail(slug)) ─► hc client ─► G
   switcher's request counts). A settings change refreshes the switcher and the draft only for the profile and the
   booking rules (its event refreshes everything once more); opening a workspace marks it current in the cached list
   without reading it again. TanStack's focus refetch stays: answers that change with time (free times) have no event.
-- **Live updates**: the api writes an event per change (`booking.confirmed`, `booking.created` …) to an `events` table.
-  While a screen is open the sdk polls `GET /v1/events?after=<cursor>` (≈10 s, on window focus, and after the user's own
-  mutations) and invalidates the matching queries. A tab opened in the background takes its starting point at once, so
-  it hears what changed before it was first looked at. The person's own change comes back as an event too and
-  refreshes its keys a second time (events don't name who made them: a follow-up with the push channel). The cursor is `<txid>.<id>`: events are read in the order of the
-  transaction that wrote them, only once every older transaction has finished, so one that commits late is never skipped.
-  "Every older transaction" is server-wide: a long one (a demo re-seed) holds updates back until it ends. A push channel can replace polling on the own server; screens don't change.
+- **Live updates**: the api writes an event per change (`booking.confirmed`, `booking.created` …) to an `events` table,
+  in one place (`emit`, `apps/api/src/notify.ts`), with a Postgres `NOTIFY yeral_events` carrying its business and user
+  (sent when the transaction commits). Each api process LISTENs on a connection of its own and nudges the open
+  `GET /v1/events/stream` streams (server-sent events, `modules/events/live.ts`) of that user and of everyone on that
+  business's team; a nudge carries nothing. The sdk (`startEvents`) opens the stream while someone is signed in and, on
+  each nudge, reads `GET /v1/events?after=<cursor>` and invalidates the matching queries (who sees what stays decided
+  there), and once more a second later; it also reads every 60 s (the fallback), on window focus and after the user's
+  own mutations. The cursor is `<txid>.<id>`: events are read in the order of the transaction that wrote them, only
+  once every older transaction has finished, so one that commits late is never skipped. "Every older transaction" is
+  server-wide: a long one (a demo re-seed) holds updates back until it ends. A tab opened in the background takes its
+  starting point at once, so it hears what changed before it was first looked at. The person's own change comes back
+  as an event too and refreshes its keys a second time (events don't name who made them). The stream answers
+  `Cache-Control: no-cache, no-transform`, so Caddy's `encode` leaves it alone, and `reverse_proxy` flushes
+  `text/event-stream` at once; a comment line every 25 s keeps it open.
 
 ## State
 

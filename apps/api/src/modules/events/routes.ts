@@ -1,15 +1,17 @@
 /**
- * Live updates (systemPatterns.md): open screens poll `GET /v1/events?after=<cursor>` and invalidate what changed.
- * A client sees events about their bookings; a team member, events of their businesses as far as their level sees.
+ * Live updates (systemPatterns.md): open screens read `GET /v1/events?after=<cursor>` and invalidate what changed, when
+ * `GET /v1/events/stream` nudges them (`live.ts`) and every minute besides. A client sees events about their bookings;
+ * a team member, events of their businesses as far as their level sees.
  *
  * Event ids are taken when a row is inserted but become visible when its transaction commits, so a later id can show
  * up first. Events are read in the order of the transaction that wrote them, and only from transactions older than
  * every one still running; the cursor `<txid>.<id>` then never passes an event that hasn't committed yet.
  */
-import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
+import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { eventListSchema, eventsQuerySchema, type EventType } from '@yeral/contract/events'
 import { scopeOf } from '@yeral/domain/permissions'
 import { and, asc, desc, eq, inArray, or, sql } from 'drizzle-orm'
+import { streamSSE } from 'hono/streaming'
 import { bookingItems, businesses, events } from '../../db/schema'
 import type { AppEnv } from '../../http/env'
 import { errors, json } from '../../http/openapi'
@@ -32,56 +34,97 @@ const eventsRoute = createRoute({
   responses: { 200: json(eventListSchema), 401: errors[401] },
 })
 
-export const eventRoutes = new OpenAPIHono<AppEnv>().openapi(eventsRoute, async (c) => {
-  const user = requireUser(c)
-  const { db } = c.var.deps
-  const { after } = c.req.valid('query')
-  const latest = async () => {
-    const [row] = await db
-      .select({ txid: events.txid, id: events.id })
-      .from(events)
-      .where(settled)
-      .orderBy(desc(events.txid), desc(events.id))
-      .limit(1)
-    return row ? cursorOf(row) : '0.0'
-  }
-  const [, txid, id] = /^(\d{1,20})\.(\d{1,19})$/.exec(after ?? '') ?? []
-  // no cursor yet, one from before this format, or out of range: start from now
-  if (!txid || !id || BigInt(txid) > MAX_XID8 || BigInt(id) > MAX_ID) return c.json({ items: [], cursor: await latest() }, 200)
-  // a team member sees what their level sees: the whole calendar, or a specialist's own bookings (ADR 0025)
-  const teams = await teamsOf(db, user.id)
-  const whole = teams.filter((t) => scopeOf(t.actor, 'calendar') === 'all').map((t) => t.businessId)
-  const own = teams.filter((t) => scopeOf(t.actor, 'calendar') === 'own').map((t) => t.actor.staffId)
-  const all = teams.map((t) => t.businessId)
-  const mine = or(
-    eq(events.userId, user.id),
-    whole.length ? inArray(events.businessId, whole) : undefined,
-    own.length
-      ? sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${events.bookingId} and ${inArray(bookingItems.staffId, own)})`
-      : undefined,
-    // everyone on a team hears when the team, the business's settings, its review or a client change (the switcher, the
-    // team list, who answers, the banner, the alert notes on their blocks)
-    all.length
-      ? and(
-          inArray(events.type, ['team.changed', 'business.updated', 'business.reviewed', 'client.updated']),
-          inArray(events.businessId, all),
-        )
-      : undefined,
-  )
-  const rows = await db
-    .select({ e: events, slug: businesses.slug })
-    .from(events)
-    .leftJoin(businesses, eq(businesses.id, events.businessId))
-    .where(and(sql`(${events.txid}, ${events.id}) > (${txid}::xid8, ${id}::bigint)`, mine, settled))
-    .orderBy(asc(events.txid), asc(events.id))
-    .limit(PAGE)
-  const items = rows.map(({ e, slug }) => ({
-    id: String(e.id),
-    type: e.type as EventType,
-    at: e.at.getTime(),
-    bookingCode: e.bookingCode,
-    business: slug,
-  }))
-  const last = rows.at(-1)?.e
-  return c.json({ items, cursor: last ? cursorOf(last) : (after as string) }, 200)
+/** A comment line this often keeps the connection open through proxies and idle timeouts. */
+export const STREAM_PING_MS = 25_000
+
+const streamRoute = createRoute({
+  method: 'get',
+  path: '/events/stream',
+  tags: ['events'],
+  summary:
+    'Server-sent events: `ready` at once, then `changed` whenever something of mine may have changed (read `GET /events` then); a comment line every 25 s',
+  responses: {
+    200: { content: { 'text/event-stream': { schema: z.string() } }, description: 'The stream; it carries no data, only nudges' },
+    401: errors[401],
+  },
 })
+
+export const eventRoutes = new OpenAPIHono<AppEnv>()
+  .openapi(streamRoute, (c) => {
+    const user = requireUser(c)
+    const { live } = c.var.deps
+    const res = streamSSE(c, async (stream) => {
+      let stop = () => {}
+      const stopped = new Promise<void>((resolve) => (stop = resolve))
+      const close = live.open(user.id, () => void stream.writeSSE({ event: 'changed', data: '' }))
+      stream.onAbort(() => {
+        close()
+        stop()
+      })
+      // a browser comes back 5 s after a drop
+      await stream.writeSSE({ event: 'ready', data: '', retry: 5_000 })
+      while (!stream.aborted) {
+        let timer: ReturnType<typeof setTimeout> | undefined
+        await Promise.race([stopped, new Promise((resolve) => (timer = setTimeout(resolve, STREAM_PING_MS)))])
+        clearTimeout(timer)
+        if (!stream.aborted) await stream.write(': ping\n\n')
+      }
+    })
+    // nothing in the way may hold it back or compress it (Caddy's `encode` leaves a no-transform answer alone)
+    res.headers.set('Cache-Control', 'no-cache, no-transform')
+    res.headers.set('X-Accel-Buffering', 'no')
+    return res
+  })
+  .openapi(eventsRoute, async (c) => {
+    const user = requireUser(c)
+    const { db } = c.var.deps
+    const { after } = c.req.valid('query')
+    const latest = async () => {
+      const [row] = await db
+        .select({ txid: events.txid, id: events.id })
+        .from(events)
+        .where(settled)
+        .orderBy(desc(events.txid), desc(events.id))
+        .limit(1)
+      return row ? cursorOf(row) : '0.0'
+    }
+    const [, txid, id] = /^(\d{1,20})\.(\d{1,19})$/.exec(after ?? '') ?? []
+    // no cursor yet, one from before this format, or out of range: start from now
+    if (!txid || !id || BigInt(txid) > MAX_XID8 || BigInt(id) > MAX_ID) return c.json({ items: [], cursor: await latest() }, 200)
+    // a team member sees what their level sees: the whole calendar, or a specialist's own bookings (ADR 0025)
+    const teams = await teamsOf(db, user.id)
+    const whole = teams.filter((t) => scopeOf(t.actor, 'calendar') === 'all').map((t) => t.businessId)
+    const own = teams.filter((t) => scopeOf(t.actor, 'calendar') === 'own').map((t) => t.actor.staffId)
+    const all = teams.map((t) => t.businessId)
+    const mine = or(
+      eq(events.userId, user.id),
+      whole.length ? inArray(events.businessId, whole) : undefined,
+      own.length
+        ? sql`exists (select 1 from ${bookingItems} where ${bookingItems.bookingId} = ${events.bookingId} and ${inArray(bookingItems.staffId, own)})`
+        : undefined,
+      // everyone on a team hears when the team, the business's settings, its review or a client change (the switcher, the
+      // team list, who answers, the banner, the alert notes on their blocks)
+      all.length
+        ? and(
+            inArray(events.type, ['team.changed', 'business.updated', 'business.reviewed', 'client.updated']),
+            inArray(events.businessId, all),
+          )
+        : undefined,
+    )
+    const rows = await db
+      .select({ e: events, slug: businesses.slug })
+      .from(events)
+      .leftJoin(businesses, eq(businesses.id, events.businessId))
+      .where(and(sql`(${events.txid}, ${events.id}) > (${txid}::xid8, ${id}::bigint)`, mine, settled))
+      .orderBy(asc(events.txid), asc(events.id))
+      .limit(PAGE)
+    const items = rows.map(({ e, slug }) => ({
+      id: String(e.id),
+      type: e.type as EventType,
+      at: e.at.getTime(),
+      bookingCode: e.bookingCode,
+      business: slug,
+    }))
+    const last = rows.at(-1)?.e
+    return c.json({ items, cursor: last ? cursorOf(last) : (after as string) }, 200)
+  })

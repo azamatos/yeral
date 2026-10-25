@@ -1,9 +1,10 @@
 /**
- * Live updates (systemPatterns.md "Data flow"): while a screen is open, poll `GET /v1/events?after=<cursor>` about every
- * 10 s, when the tab becomes visible again and after the person's own mutations, and invalidate what each event touches.
- * The endpoint needs a user, so polling waits until `me` (`sdk.me.get()`) says someone is signed in; hidden tabs and
- * offline devices skip their turn (TanStack's focus and online managers). A push channel can replace this later without
- * changing screens.
+ * Live updates (systemPatterns.md "Data flow"): while someone is signed in, `GET /v1/events/stream` (server-sent events)
+ * nudges this page whenever something of theirs may have changed; it then reads `GET /v1/events?after=<cursor>` and
+ * invalidates what each event touches, and once more a second later (an event shows only when every older transaction
+ * has finished). It reads too every minute (the stream may be down), when the tab becomes visible again and after the
+ * person's own mutations. The endpoints need a user, so this waits until `me` (`sdk.me.get()`) says someone is signed
+ * in; hidden tabs and offline devices skip their turn (TanStack's focus and online managers).
  */
 import { focusManager, hashKey, onlineManager, type QueryClient } from '@tanstack/react-query'
 import { call, isApiError, type Client } from './client'
@@ -14,6 +15,18 @@ export interface EventsHandle {
   poll(): Promise<void>
   stop(): void
 }
+
+/** What the feed needs of an `EventSource` (tests pass their own). */
+export interface EventStream {
+  addEventListener(type: 'ready' | 'changed' | 'error', listener: () => void): void
+  close(): void
+  /** 2: closed for good (a refusal, a server down): the feed opens another a little later. */
+  readonly readyState: number
+}
+
+/** The browser's `EventSource`, sending the session's cookie to the api's address; none where there is none (the server). */
+const browserStream =
+  typeof EventSource === 'undefined' ? null : (url: string): EventStream => new EventSource(url, { withCredentials: true })
 
 interface LiveEvent {
   type: string
@@ -70,7 +83,12 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
   return out
 }
 
-export function startEvents(client: Client, queryClient: QueryClient, opts: { intervalMs?: number } = {}): EventsHandle {
+export function startEvents(
+  client: Client,
+  queryClient: QueryClient,
+  opts: { intervalMs?: number; rereadMs?: number; reopenMs?: number; stream?: ((url: string) => EventStream) | null } = {},
+): EventsHandle {
+  const openStream = opts.stream === undefined ? browserStream : opts.stream
   let cursor: string | null = null
   let running: Promise<void> | null = null
   let again = false
@@ -125,6 +143,39 @@ export function startEvents(client: Client, queryClient: QueryClient, opts: { in
     return running
   }
 
+  // the push channel: open while someone is signed in, opened again a little after it closes for good
+  let stream: EventStream | null = null
+  let reread: ReturnType<typeof setTimeout> | undefined
+  let reopen: ReturnType<typeof setTimeout> | undefined
+  const closeStream = () => {
+    clearTimeout(reopen)
+    reopen = undefined
+    stream?.close()
+    stream = null
+  }
+  const connect = () => {
+    if (!openStream || stream || stopped || !signedIn()) return
+    const s = openStream(client.v1.events.stream.$url().toString())
+    stream = s
+    // connected (again): whatever changed meanwhile
+    s.addEventListener('ready', () => void poll())
+    s.addEventListener('changed', () => {
+      void poll()
+      // an event committed alongside an older transaction shows a moment later: one more look
+      if (!reread)
+        reread = setTimeout(() => {
+          reread = undefined
+          void poll()
+        }, opts.rereadMs ?? 1_000)
+    })
+    s.addEventListener('error', () => {
+      // a dropped connection comes back by itself; a closed one (a refusal, the api restarting) is opened again
+      if (s.readyState !== 2 || stream !== s) return
+      stream = null
+      reopen = setTimeout(connect, opts.reopenMs ?? 10_000)
+    })
+  }
+
   const meHash = hashKey(keys.me())
   let wasSignedIn = signedIn()
   const unsubscribe = [
@@ -136,21 +187,29 @@ export function startEvents(client: Client, queryClient: QueryClient, opts: { in
     queryClient.getMutationCache().subscribe((e) => {
       if (e.type === 'updated' && e.action.type === 'success') void poll()
     }),
-    // signed in just now, or the session loaded: take the cursor at once
+    // signed in just now, or the session loaded: take the cursor and open the stream at once; signed out: close it
     queryClient.getQueryCache().subscribe((e) => {
       if (e.query.queryHash !== meHash) return
-      if (signedIn() && !wasSignedIn) void poll()
+      if (signedIn() && !wasSignedIn) {
+        void poll()
+        connect()
+      }
+      if (!signedIn() && wasSignedIn) closeStream()
       wasSignedIn = signedIn()
     }),
   ]
-  const timer = setInterval(() => void poll(), opts.intervalMs ?? 10_000)
+  // the fallback while the stream is down or missed something
+  const timer = setInterval(() => void poll(), opts.intervalMs ?? 60_000)
   void poll()
+  connect()
 
   return {
     poll,
     stop() {
       stopped = true
       clearInterval(timer)
+      clearTimeout(reread)
+      closeStream()
       for (const off of unsubscribe) off()
     },
   }
