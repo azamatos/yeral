@@ -60,10 +60,12 @@ describe('the page address a business chooses (chapter 9, 25.10.2026)', () => {
     // the same address again changes nothing; a badly formed, short or reserved one is refused
     expect((await owner.req('/v1/w/ayna-salon/settings/page-address', { method: 'PUT', body: { slug: 'ayna-salon' } })).status).toBe(200)
     expect((await owner.req('/v1/w/ayna-salon/settings/page-address', { method: 'PUT', body: { slug: 'Ayna' } })).status).toBe(400)
-    for (const slug of ['ay', 'support', 'yr-1'])
+    for (const slug of ['ay', 'support'])
       expect(
         (await owner.req('/v1/w/ayna-salon/settings/page-address', { method: 'PUT', body: { slug } })).json.error.details.issues,
       ).toEqual([{ path: ['slug'], code: 'invalid' }])
+    // a booking code's start isn't an address at all (the contract's slug)
+    expect((await owner.req('/v1/w/ayna-salon/settings/page-address', { method: 'PUT', body: { slug: 'yr-1' } })).status).toBe(400)
     // a booking code's start offers the address as a name would give it
     expect(await check(owner, 'yr-beauty')).toEqual({ slug: 'yr-beauty', problem: 'reserved', suggestion: 'yrbeauty' })
   })
