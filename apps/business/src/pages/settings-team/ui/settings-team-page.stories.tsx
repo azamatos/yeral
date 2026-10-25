@@ -68,7 +68,10 @@ const invite = (state: 'pending' | 'expired' | 'declined', days: number) => ({
   expiresAt: now + days * DAY,
 })
 
-/** Glow Studio's team (demo-data v06r3): the owner, an admin, specialists with and without the app, invites, Aýna removed. */
+/**
+ * Glow Studio's team (demo-data v06r3): the owner, an admin, specialists with and without the app, invites, Aýna removed
+ * by the owner, Bahar who left by herself with 2 bookings ahead.
+ */
 const team: TeamMember[] = [
   person('maysa', 'Maýsa', 'owner', { fullName: 'Maýsa Annaýewa', phone: '+99365102030' }),
   person('selbi', 'Selbi', 'admin', { fullName: 'Selbi Orazowa', phone: '+99365884102' }),
@@ -95,6 +98,15 @@ const team: TeamMember[] = [
     status: 'removed',
     specialization: 'Hair stylist',
     phone: '+99365990011',
+    ended: { at: now - 3 * 86_400_000, by: 'owner', bookings: null, requests: null },
+  }),
+  person('bahar', 'Bahar', 'specialist', {
+    fullName: 'Bahar Nurlyýewa',
+    status: 'removed',
+    specialization: 'Nail artist',
+    phone: '+99365771122',
+    joined: true,
+    ended: { at: now, by: 'self', bookings: 2, requests: 0 },
   }),
 ]
 const service = (id: string, name: string, durationMin: number, priceAmount: number, staffIds: string[]) => ({
@@ -227,9 +239,15 @@ const fakeApi =
       const removing = /^POST \/w\/glow-studio\/team\/([^/]+)\/remove$/.exec(route)
       if (removing) {
         const body = (await request.json()) as { affected?: string; rows?: { code: string; affected: string }[] }
-        if (removing[1] === 'maral' && !body.affected) return json({ error: { code: 'bookings_affected', details: maralAhead } }, 409)
+        // Bahar left with bookings like Maral's: asked about, then chosen for («Someone left» stops asking)
+        if ((removing[1] === 'maral' || removing[1] === 'bahar') && !body.affected)
+          return json({ error: { code: 'bookings_affected', details: maralAhead } }, 409)
         removalRows = body.rows ?? null
-        people = people.map((p) => (p.id === removing[1] ? { ...p, status: 'removed' as const } : p))
+        people = people.map((p) =>
+          p.id === removing[1]
+            ? { ...p, status: 'removed' as const, ended: p.ended ? { ...p.ended, bookings: 0, requests: 0 } : p.ended }
+            : p,
+        )
         const cancelled = body.affected === 'cancel' ? 2 : (body.rows ?? []).filter((r) => r.affected === 'cancel').length
         const moved = body.affected === 'move' ? 1 : 0
         return json({ moved, kept: removing[1] === 'maral' ? 2 - moved - cancelled : 0, cancelled })
@@ -368,6 +386,29 @@ export const ResendAndReactivate: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Reactivate: Aýna Myradowa' }))
     const back = await body.findByText('Aýna is back on the team')
     await waitFor(() => expect(back).toBeVisible())
+  },
+}
+
+/** Someone left: the owner's banner, «Choose» for their bookings, and «Invite again» from their row. */
+export const SomeoneLeft: Story = {
+  play: async ({ canvas }) => {
+    const banner = await canvas.findByText('Bahar left: 2 bookings need a new specialist')
+    await waitFor(() => expect(banner).toBeVisible())
+    // «Left» with «Invite again», «Removed» with «Reactivate»
+    await expect(canvas.getByRole('button', { name: 'Invite again: Bahar Nurlyýewa' })).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Reactivate: Aýna Myradowa' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Choose' }))
+    const dialog = within(await body.findByRole('dialog', { name: 'Who takes Bahar’s bookings?' }))
+    await waitFor(() => expect(dialog.getByText('Bahar left Glow Studio. They have 2 bookings.')).toBeVisible())
+    await userEvent.click(await dialog.findByRole('radio', { name: /Cancel and offer 3 other times/ }))
+    await userEvent.click(dialog.getByRole('button', { name: 'Save' }))
+    const done = await body.findByText('Bahar’s bookings are settled · 2 cancelled with 3 other times offered · the clients are notified')
+    await waitFor(() => expect(done).toBeVisible())
+    await waitFor(() => expect(canvas.queryByText('Bahar left: 2 bookings need a new specialist')).toBeNull())
+    // invited again: Add a team member with her filled in
+    await userEvent.click(canvas.getByRole('button', { name: 'Invite again: Bahar Nurlyýewa' }))
+    const add = within(await body.findByRole('dialog', { name: 'Add a team member' }))
+    await waitFor(() => expect(add.getByDisplayValue('Bahar')).toBeVisible())
   },
 }
 

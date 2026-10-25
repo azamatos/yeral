@@ -1,6 +1,6 @@
 import type { TeamMember } from '@yeral/contract/team'
 import { describe, expect, it } from 'vitest'
-import { emptyInvite, inviteInput, phoneProblem, servicesDone, usesApp, whoDone, type InviteForm } from './invite'
+import { emptyInvite, inviteAgainForm, inviteInput, phoneProblem, servicesDone, usesApp, whoDone, type InviteForm } from './invite'
 
 const NOW = Date.UTC(2026, 9, 25, 9)
 const DAY = 86_400_000
@@ -88,5 +88,26 @@ describe('«Add a team member»', () => {
     })
     const bare = inviteInput(form({ phone: '65123456', name: 'Gülnar' }), 'en')
     expect([bare.fullName, bare.specialization]).toEqual([undefined, undefined])
+  })
+
+  it('fills «Invite again» for someone who left: their number, names and level, with the app, the services anew', () => {
+    const left = member('65123456', {
+      status: 'removed',
+      fullName: 'Aýna Myradowa',
+      specialization: 'Hair stylist',
+      level: 'admin',
+      ended: { at: NOW, by: 'self', bookings: 0, requests: 0 },
+    })
+    expect(inviteAgainForm(left)).toEqual({
+      phone: '65123456',
+      name: 'Aýna',
+      fullName: 'Aýna Myradowa',
+      specialization: 'Hair stylist',
+      level: 'admin',
+      hasApp: true,
+      serviceIds: [],
+    })
+    // invited again with the app: the number isn't refused
+    expect(phoneProblem('65123456', true, [left], NOW)).toBeNull()
   })
 })

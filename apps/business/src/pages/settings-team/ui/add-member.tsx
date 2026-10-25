@@ -44,10 +44,13 @@ export function AddMember({
   onOpenChange,
   opener,
   onLink,
+  initial,
 }: {
   slug: string
   people: TeamMember[]
   menu: Menu
+  /** «Invite again»: the form filled in with someone who left. */
+  initial?: InviteForm
   open: boolean
   onOpenChange: (open: boolean) => void
   /** The button that opened it: the focus goes back to it (it isn't a Radix trigger). */
@@ -73,6 +76,7 @@ export function AddMember({
             slug={slug}
             people={people}
             menu={menu}
+            initial={initial}
             onBusy={setBusy}
             onDone={() => {
               setBusy(false)
@@ -93,10 +97,12 @@ function AddMemberSteps({
   onBusy,
   onDone,
   onLink,
+  initial = emptyInvite,
 }: {
   slug: string
   people: TeamMember[]
   menu: Menu
+  initial?: InviteForm
   onBusy: (busy: boolean) => void
   onDone: () => void
   onLink: (name: string, url: string) => void
@@ -113,7 +119,7 @@ function AddMemberSteps({
   const id = useId()
   const invite = useMutation(sdk.team.sendInvite(slug))
   const phoneOnly = useMutation(sdk.team.addPhoneOnly(slug))
-  const [form, setForm] = useState<InviteForm>(emptyInvite)
+  const [form, setForm] = useState<InviteForm>(initial)
   const [step, setStep] = useState(0)
   const [now] = useState(() => Date.now())
   const body = useRef<HTMLDivElement>(null)

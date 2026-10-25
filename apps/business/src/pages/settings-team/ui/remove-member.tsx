@@ -10,7 +10,7 @@ import { OptionCard, OptionCardGroup } from '@yeral/ui/option-card'
 import { Select } from '@yeral/ui/select'
 import { toast } from '@yeral/ui/toast'
 import { ArrowRight } from 'lucide-react'
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { AffectedBookingsList, useAffectedCount, useJoin, type AffectedBooking } from '@/entities/booking'
 import { useSdk } from '@/shared/api'
@@ -29,13 +29,15 @@ function useRemove(slug: string) {
  * bookings and reviews stay. The first Remove asks the api, which removes someone with nothing ahead at once and
  * otherwise lists their bookings (409); then the owner picks: Move to another specialist (only colleagues who do the
  * services are listed; a booking they can't take gets its own Keep it or Cancel and offer 3 other times), Keep them,
- * or Cancel and offer 3 other times, and Remove sends it again with the choice. Moves to `features/remove-staff`
- * (COMPONENTS.md) when «Someone left» settles bookings with it too.
+ * or Cancel and offer 3 other times, and Remove sends it again with the choice. `mode="left"` («Someone left» →
+ * Choose, B-Team `rm` left): «Who takes Aýna’s bookings?» for someone who left by themself, their bookings asked for at
+ * once, the same choices, and Save.
  */
 export function RemoveMember({
   slug,
   member,
   business,
+  mode = 'remove',
   open,
   onOpenChange,
   onRemoved,
@@ -43,6 +45,7 @@ export function RemoveMember({
   slug: string
   member: TeamMember
   business: string
+  mode?: 'remove' | 'left'
   open: boolean
   onOpenChange: (open: boolean) => void
   onRemoved: () => void
@@ -52,7 +55,14 @@ export function RemoveMember({
     // nothing closes it while the removal runs: the answer, or the list it asks about, needs the window
     <Modal open={open} onOpenChange={(next) => (next || !remove.isPending) && onOpenChange(next)}>
       {open && (
-        <RemoveBody member={member} business={business} remove={remove} onCancel={() => onOpenChange(false)} onRemoved={onRemoved} />
+        <RemoveBody
+          member={member}
+          business={business}
+          mode={mode}
+          remove={remove}
+          onCancel={() => onOpenChange(false)}
+          onRemoved={onRemoved}
+        />
       )}
     </Modal>
   )
@@ -61,12 +71,14 @@ export function RemoveMember({
 function RemoveBody({
   member: m,
   business,
+  mode,
   remove,
   onCancel,
   onRemoved,
 }: {
   member: TeamMember
   business: string
+  mode: 'remove' | 'left'
   remove: ReturnType<typeof useRemove>
   onCancel: () => void
   onRemoved: () => void
@@ -83,6 +95,7 @@ function RemoveBody({
   const [to, setTo] = useState('')
   const [rows, setRows] = useState<Record<string, RowChoice>>({})
   const [now] = useState(() => Date.now())
+  const left = mode === 'left'
 
   // the colleagues who do any of these bookings' services, each once
   const colleagues = [
@@ -118,11 +131,9 @@ function RemoveBody({
         result.kept ? t('kept', { n: result.kept }) : '',
       ]
       const sum = join(parts, 'list')
-      toast(
-        sum
-          ? t('removedWith', { name: m.name, sum: result.moved || result.cancelled ? t('notified', { sum }) : sum })
-          : t('removed', { name: m.name }),
-      )
+      const told = result.moved || result.cancelled ? t('notified', { sum }) : sum
+      if (left) toast(sum ? t('settledWith', { name: m.name, sum: told }) : t('settled', { name: m.name }))
+      else toast(sum ? t('removedWith', { name: m.name, sum: told }) : t('removed', { name: m.name }))
       onRemoved()
     } catch (error) {
       const listed = isApiError(error, 'bookings_affected') && bookingsAffectedDetailsSchema.safeParse(error.details)
@@ -136,10 +147,26 @@ function RemoveBody({
     }
   }
 
+  // someone who left: their bookings are what the window is for, asked for as it opens
+  const asked = useRef(false)
+  useEffect(() => {
+    if (!left || asked.current) return
+    asked.current = true
+    void send()
+  })
+
   return (
     <ModalContent size={560} className="gap-4.5">
-      <ModalHeader title={t('title', { name: m.name })} closeLabel={a('close')}>
-        <ModalDescription>{t('lead', { name: m.name, business })}</ModalDescription>
+      <ModalHeader title={left ? t('leftTitle', { name: m.name }) : t('title', { name: m.name })} closeLabel={a('close')}>
+        <ModalDescription>
+          {left
+            ? t('leftLead', {
+                name: m.name,
+                business,
+                what: count({ bookings: m.ended?.bookings ?? 0, requests: m.ended?.requests ?? 0 }, 'and'),
+              })
+            : t('lead', { name: m.name, business })}
+        </ModalDescription>
       </ModalHeader>
       {details && (
         <>
@@ -220,9 +247,16 @@ function RemoveBody({
         <Button variant="secondary" disabled={remove.isPending} onClick={onCancel}>
           {a('back')}
         </Button>
-        <Button variant="danger-solid" loading={remove.isPending} loadingLabel={t('removing')} onClick={() => void send()}>
-          {t('confirm', { name: m.name })}
-        </Button>
+        {left ? (
+          // nothing to save until the bookings are listed
+          <Button variant="primary" disabled={!details} loading={remove.isPending} loadingLabel={t('saving')} onClick={() => void send()}>
+            {t('save')}
+          </Button>
+        ) : (
+          <Button variant="danger-solid" loading={remove.isPending} loadingLabel={t('removing')} onClick={() => void send()}>
+            {t('confirm', { name: m.name })}
+          </Button>
+        )}
       </ModalActions>
     </ModalContent>
   )
