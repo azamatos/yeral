@@ -6,8 +6,9 @@
  *   useMutation(sdk.bookings.cancel('tk'))
  *
  * Mutations invalidate the keys they change; live events from other people arrive through `startEvents`, which also
- * polls after every successful mutation. Queries hand TanStack's abort signal to the request, so a superseded search or
- * a closed screen stops its request.
+ * polls after every successful mutation. A one-tap change (a switch, a rename, the photos' order) changes the cache at
+ * once and puts it back if the api refuses (`instant`; ADR 0011). Queries hand TanStack's abort signal to the request,
+ * so a superseded search or a closed screen stops its request.
  *
  * Request types come from `@yeral/contract` (ADR 0006), so a contract change fails type-checking here: bodies are what a
  * schema accepts (`z.input`), query parameters the values it reads them as (`z.output`), turned back into text below.
@@ -60,7 +61,7 @@ import type { Locale } from '@yeral/contract/common'
 import type { declineInputSchema } from '@yeral/contract/requests'
 import type { reviewReplyInputSchema, reviewReportInputSchema, teamReviewsQuerySchema } from '@yeral/contract/reviews'
 import type { setupServicesSchema, setupStartSchema, setupStepInputSchema, setupTeamSchema } from '@yeral/contract/setup'
-import type { groupInputSchema, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
+import type { groupInputSchema, Menu, menuOrderSchema, serviceInputSchema, serviceUpdateSchema } from '@yeral/contract/services'
 import type {
   addressSearchQuerySchema,
   bookingRulesUpdateSchema,
@@ -77,6 +78,7 @@ import type {
   removeMemberSchema,
   staffScheduleUpdateSchema,
   updateMemberSchema,
+  workspaceListSchema,
 } from '@yeral/contract/team'
 import type { z } from 'zod'
 import { call, isApiError, type Client } from './client'
@@ -99,10 +101,42 @@ export type SearchParams = Omit<Params<typeof searchQuerySchema, 'lang'>, 'curso
 /** Lets TanStack Query abort the request. */
 const abortWith = (signal: AbortSignal) => ({ init: { signal } })
 
+/**
+ * How long the person, their workspaces and their setup draft stay fresh: they change only through the person's own
+ * mutations and the live events, and both refresh them, so a new page or a return to the tab needn't read them again.
+ */
+const LONG_STALE = 5 * 60_000
+
+type Gallery = { items: { id: string }[] }
+type Workspaces = z.infer<typeof workspaceListSchema>
+
+/** The menu with one service changed. */
+function withService<S extends { id: string }, M extends { groups: { services: S[] }[] }>(menu: M, id: string, change: (s: S) => S): M {
+  return { ...menu, groups: menu.groups.map((g) => ({ ...g, services: g.services.map((s) => (s.id === id ? change(s) : s)) })) }
+}
+
 export function createSdk(client: Client, queryClient: QueryClient) {
   const v1 = client.v1
   const invalidate = (...queryKeys: readonly (readonly unknown[])[]) =>
     Promise.all(queryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })))
+
+  /**
+   * A one-tap change shows at once (ADR 0011: only where instant feedback matters): `change` writes it into the cached
+   * `queryKey` before the request, a refresh already on its way can't bring the old data back, and a refusal puts the
+   * old data back and asks again (another change may have landed meanwhile); the screen says why.
+   */
+  const instant = <T, V>(queryKey: readonly unknown[], change: (data: T, vars: V) => T) => ({
+    onMutate: async (vars: V) => {
+      await queryClient.cancelQueries({ queryKey })
+      const before = queryClient.getQueryData<T>(queryKey)
+      if (before !== undefined) queryClient.setQueryData<T>(queryKey, change(before, vars))
+      return { before }
+    },
+    onError: (_error: unknown, _vars: V, context: { before: T | undefined } | undefined) => {
+      if (context?.before !== undefined) queryClient.setQueryData<T>(queryKey, context.before)
+      return invalidate(queryKey)
+    },
+  })
 
   // ── Who is signed in (`audienceOf` in keys.ts says whose each query is) ──
 
@@ -240,7 +274,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
             throw e
           }
         },
-        staleTime: 60_000,
+        // changed by the person's own mutations or the events (team changes; a 401 asks again): no reading on every page
+        staleTime: LONG_STALE,
       }),
     update: () =>
       mutationOptions({
@@ -515,11 +550,17 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       queryOptions({
         queryKey: keys.workspaces(),
         queryFn: ({ signal }) => call(v1.me.workspaces.$get(undefined, abortWith(signal))),
+        // changed by the person's own mutations or the events (team, settings, reviews, bookings' request counts), which
+        // refresh it: no reading again on every page
+        staleTime: LONG_STALE,
       }),
+    /** Remembers the workspace opened last: the cached list says so at once, nothing else in it changes. */
     open: () =>
       mutationOptions({
         mutationFn: (slug: string) => call(v1.me.workspaces[':slug'].open.$post({ param: { slug } })),
-        onSuccess: () => teamChanged(),
+        onMutate: (slug) => {
+          queryClient.setQueryData<Workspaces>(keys.workspaces(), (list) => list && { ...list, current: slug })
+        },
       }),
     /** Open and expired invites for the signed-in phone (shown at sign-in). */
     myInvites: () =>
@@ -640,7 +681,15 @@ export function createSdk(client: Client, queryClient: QueryClient) {
 
   /** Business settings (book B-37–B-43): the owner and administrators read and change them. */
   // what the team's live events refresh too
-  const settingsChanged = (slug: string) => invalidate(...staleKeys({ type: 'business.updated', business: slug, bookingCode: null }))
+  const businessUpdated = (slug: string) => staleKeys({ type: 'business.updated', business: slug, bookingCode: null })
+  /**
+   * What a settings change makes stale (`business.updated`'s list), except the switcher and the setup draft: they show
+   * the name, logo, city, page state and request counts, which only the profile and the booking rules change
+   * (`profileChanged`). The change's event refreshes everything once more.
+   */
+  const settingsChanged = (slug: string) =>
+    invalidate(...businessUpdated(slug).filter((key) => key[0] !== keys.workspaces()[0] && key[0] !== keys.setup()[0]))
+  const profileChanged = (slug: string) => invalidate(...businessUpdated(slug))
   const settings = {
     rules: (slug: string) =>
       queryOptions({
@@ -650,7 +699,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     updateRules: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof bookingRulesUpdateSchema>) => call(w.settings.rules.$patch({ param: { slug }, json })),
-        onSuccess: () => settingsChanged(slug),
+        // who answers requests: the switcher's counts
+        onSuccess: () => profileChanged(slug),
       }),
     /** The business profile (book B-37): what the public page says. */
     profile: (slug: string) =>
@@ -661,13 +711,13 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     updateProfile: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof businessProfileUpdateSchema>) => call(w.settings.profile.$patch({ param: { slug }, json })),
-        onSuccess: () => settingsChanged(slug),
+        onSuccess: () => profileChanged(slug),
       }),
     /** The owner sends a business the Ýeral team sent back for review again, once it's fixed (book Q-274). */
     sendForReview: (slug: string) =>
       mutationOptions({
         mutationFn: () => call(w.verification.$post({ param: { slug } })),
-        onSuccess: () => settingsChanged(slug),
+        onSuccess: () => profileChanged(slug),
       }),
     /**
      * Addresses to pick for the map pin (B-04, B-37; ADR 0027): 3 letters or more, near the city. The app waits for a
@@ -712,12 +762,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     setLogo: (slug: string) =>
       mutationOptions({
         mutationFn: (file: File) => call(w.settings.logo.$put({ param: { slug }, form: { file } })),
-        onSuccess: () => settingsChanged(slug),
+        onSuccess: () => profileChanged(slug),
       }),
     removeLogo: (slug: string) =>
       mutationOptions({
         mutationFn: () => call(w.settings.logo.$delete({ param: { slug } })),
-        onSuccess: () => settingsChanged(slug),
+        onSuccess: () => profileChanged(slug),
       }),
     /** "Suratlar" (book B-37): up to 20, the first the cover. */
     gallery: (slug: string) =>
@@ -731,15 +781,20 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: (file: File) => call(w.settings.photos.$post({ param: { slug }, form: { file } })),
         onSuccess: () => settingsChanged(slug),
       }),
+    /** Gone from the gallery at once. */
     removePhoto: (slug: string) =>
       mutationOptions({
         mutationFn: (id: string) => call(w.settings.photos[':id'].$delete({ param: { slug, id } })),
+        ...instant<Gallery, string>(keys.gallery(slug), (gallery, id) => ({ items: gallery.items.filter((p) => p.id !== id) })),
         onSuccess: () => settingsChanged(slug),
       }),
-    /** Every photo once, in the new order; the first is the cover. */
+    /** Every photo once, in the new order; the first is the cover. The gallery shows it at once. */
     orderPhotos: (slug: string) =>
       mutationOptions({
         mutationFn: (ids: string[]) => call(w.settings.photos.order.$put({ param: { slug }, json: { ids } })),
+        ...instant<Gallery, string[]>(keys.gallery(slug), (gallery, ids) => ({
+          items: ids.flatMap((id) => gallery.items.find((p) => p.id === id) ?? []),
+        })),
         onSuccess: () => settingsChanged(slug),
       }),
     /** The week and the special days (book B-39, B-40). */
@@ -795,11 +850,18 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: (json: z.input<typeof serviceInputSchema>) => call(w.services.$post({ param: { slug }, json })),
         onSuccess: () => settingsChanged(slug),
       }),
+    /** Its online switch shows at once; the menu holds what the api answers, whether or not the refresh comes back. */
     updateService: (slug: string) =>
       mutationOptions({
         mutationFn: ({ serviceId, ...json }: { serviceId: string } & z.input<typeof serviceUpdateSchema>) =>
           call(w.services[':serviceId'].$patch({ param: { slug, serviceId }, json })),
-        onSuccess: () => settingsChanged(slug),
+        ...instant<Menu, { serviceId: string; online?: boolean }>(keys.menu(slug), (menu, { serviceId, online }) =>
+          online === undefined ? menu : withService(menu, serviceId, (s) => ({ ...s, online })),
+        ),
+        onSuccess: (saved) => {
+          queryClient.setQueryData<Menu>(keys.menu(slug), (menu) => menu && withService(menu, saved.id, () => saved))
+          return settingsChanged(slug)
+        },
       }),
     /** "Hyzmaty poz"; `restoreService` is its undo. */
     deleteService: (slug: string) =>
@@ -817,11 +879,21 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: (json: z.input<typeof groupInputSchema>) => call(w.services.groups.$post({ param: { slug }, json })),
         onSuccess: () => settingsChanged(slug),
       }),
+    /** The new name shows at once. */
     renameGroup: (slug: string) =>
       mutationOptions({
         mutationFn: ({ groupId, ...json }: { groupId: string } & z.input<typeof groupInputSchema>) =>
           call(w.services.groups[':groupId'].$patch({ param: { slug, groupId }, json })),
-        onSuccess: () => settingsChanged(slug),
+        ...instant<Menu, { groupId: string; name: Menu['groups'][number]['name'] }>(keys.menu(slug), (menu, { groupId, name }) => ({
+          groups: menu.groups.map((g) => (g.id === groupId ? { ...g, name } : g)),
+        })),
+        onSuccess: (group) => {
+          queryClient.setQueryData<Menu>(
+            keys.menu(slug),
+            (menu) => menu && { groups: menu.groups.map((g) => (g.id === group.id ? { ...g, name: group.name } : g)) },
+          )
+          return settingsChanged(slug)
+        },
       }),
     deleteGroup: (slug: string) =>
       mutationOptions({
@@ -1085,6 +1157,8 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       queryOptions({
         queryKey: keys.setup(),
         queryFn: ({ signal }) => call(v1.me.setup.$get({}, abortWith(signal))),
+        // changed by the wizard's own mutations or the events (team, settings), which refresh it
+        staleTime: LONG_STALE,
       }),
     /** Step 2: the draft with its name and category; `setup_in_progress` names the one to finish first. */
     start: () =>

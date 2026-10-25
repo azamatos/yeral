@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { GALLERY_GOOD, GALLERY_MAX, PHOTO_KINDS, PHOTO_MAX_BYTES } from '@yeral/domain/photos'
 import { FieldMessage } from '@yeral/ui/field'
 import { PhotoGrid, type PhotoGridPending } from '@yeral/ui/photo-grid'
@@ -31,7 +31,6 @@ export function PhotosSection({ slug }: { slug: string }) {
   const format = useFormatter()
   const errorText = useErrorText()
   const sdk = useSdk()
-  const queryClient = useQueryClient()
   const titleId = useId()
   const gallery = useQuery(sdk.settings.gallery(slug))
   const add = useMutation(sdk.settings.addPhoto(slug))
@@ -91,20 +90,6 @@ export function PhotosSection({ slug }: { slug: string }) {
     }
   }
 
-  const reorder = async (ids: string[]) => {
-    const key = sdk.settings.gallery(slug).queryKey
-    // a refresh on its way would put the old order back over the new one
-    await queryClient.cancelQueries({ queryKey: key })
-    const before = queryClient.getQueryData(key)
-    queryClient.setQueryData(key, { items: ids.flatMap((id) => photos.find((p) => p.id === id) ?? []) })
-    order.mutate(ids, {
-      onError: (error) => {
-        queryClient.setQueryData(key, before)
-        toast(errorText(error))
-      },
-    })
-  }
-
   const refused = waiting.flatMap((w) => (w.message ? [w] : []))
   const few = photos.length < GALLERY_GOOD
   return (
@@ -126,7 +111,8 @@ export function PhotosSection({ slug }: { slug: string }) {
         locked={uploading > 0}
         onAdd={(files) => void addFiles(files)}
         onRemove={(id) => remove.mutate(id, { onError: (error) => toast(errorText(error)) })}
-        onReorder={(ids) => void reorder(ids)}
+        // the gallery shows the new order (or one photo fewer) at once, and the old one again if the api refuses
+        onReorder={(ids) => order.mutate(ids, { onError: (error) => toast(errorText(error)) })}
         onDismiss={(id) => settle(id, null)}
         words={{
           cover: t('cover'),

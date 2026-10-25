@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import type { Menu } from '@yeral/contract/services'
 import { localized, type Localized } from '@yeral/domain/model'
 import { useFmt } from '@yeral/i18n'
@@ -266,30 +266,22 @@ function NewGroup({ slug, onDone }: { slug: string; onDone: () => void }) {
 }
 
 /**
- * «Rename group» (the owner, 25.10.2026; not drawn: the «Add group» box in the group's band): the name as it is, saved
- * in the reader's language (the market's others kept) and put in the menu at once; the same name changes nothing.
+ * «Rename group» (the owner, 25.10.2026; not drawn: the «Add group» box in the group's band): the name as it is; Save
+ * hands the new one over and the box closes at once (the menu shows it, `sdk.settings.renameGroup`); the same name
+ * changes nothing.
  */
 function RenameGroup({
-  slug,
-  groupId,
   name,
-  names,
   inputRef,
+  onSave,
   onDone,
 }: {
-  slug: string
-  groupId: string
   name: string
-  names: Localized
   inputRef: RefObject<HTMLInputElement | null>
+  onSave: (next: string) => void
   onDone: () => void
 }) {
   const t = useTranslations('settings.services')
-  const locale = useLocale()
-  const sdk = useSdk()
-  const queryClient = useQueryClient()
-  const errorText = useErrorText()
-  const rename = useMutation(sdk.settings.renameGroup(slug))
   return (
     <div className="flex min-w-0 flex-[1_1_320px] flex-wrap items-center gap-2">
       <GroupNameField
@@ -301,25 +293,11 @@ function RenameGroup({
         size="s"
         saveLabel={t('renameSave')}
         savingLabel={t('renaming')}
-        pending={rename.isPending}
+        pending={false}
         onCancel={onDone}
         onSave={(next) => {
-          if (next === name) return onDone()
-          rename.mutate(
-            { groupId, name: writtenIn(names, locale, next) },
-            {
-              onSuccess: (group) => {
-                // the answer is the group as it is now, whether or not the menu's refetch comes back
-                queryClient.setQueryData(
-                  sdk.settings.menu(slug).queryKey,
-                  (menu) => menu && { groups: menu.groups.map((g) => (g.id === group.id ? { ...g, name: group.name } : g)) },
-                )
-                toast(t('groupRenamed', { name: next }))
-                onDone()
-              },
-              onError: (error) => toast(errorText(error)),
-            },
-          )
+          if (next !== name) onSave(next)
+          onDone()
         }}
       />
     </div>
@@ -353,9 +331,12 @@ function Group({
   onGroupDeleted: () => void
 }) {
   const t = useTranslations('settings.services')
+  const locale = useLocale()
   const sdk = useSdk()
   const errorText = useErrorText()
   const removeGroup = useMutation(sdk.settings.deleteGroup(slug))
+  // here, not in the name box: the box closes at once, and the answer's toast still comes
+  const rename = useMutation(sdk.settings.renameGroup(slug))
   const headId = useId()
   const actions = useRef<HTMLButtonElement>(null)
   const [renaming, setRenaming] = useState(false)
@@ -370,11 +351,17 @@ function Group({
         </h3>
         {renaming ? (
           <RenameGroup
-            slug={slug}
-            groupId={groupId}
             name={name}
-            names={names}
             inputRef={renameInput}
+            onSave={(next) =>
+              rename.mutate(
+                { groupId, name: writtenIn(names, locale, next) },
+                {
+                  onSuccess: () => toast(t('groupRenamed', { name: next })),
+                  onError: (error) => toast(errorText(error)),
+                },
+              )
+            }
             onDone={() => {
               setRenaming(false)
               // the box goes with the focus in it
@@ -487,7 +474,6 @@ function ServiceRow({
   const t = useTranslations('settings.services')
   const fmt = useFmt()
   const sdk = useSdk()
-  const queryClient = useQueryClient()
   const errorText = useErrorText()
   const locale = useLocale()
   const update = useMutation(sdk.settings.updateService(slug))
@@ -504,23 +490,15 @@ function ServiceRow({
       : team.people.length === 1 && team.people[0]
         ? team.people[0].name
         : t('specialists', { n: team.people.length }))
-  // the switch shows where it's going while it saves
-  const online = update.isPending && update.variables?.online !== undefined ? update.variables.online : service.online
+  // the menu shows the switch where it's going at once, and back where it was if the api refuses
+  const online = service.online
 
   const flip = (on: boolean) => {
     if (update.isPending) return
     update.mutate(
       { serviceId: service.id, online: on },
       {
-        onSuccess: (saved) => {
-          // the answer is what the business has now, whether or not the menu's refetch comes back
-          queryClient.setQueryData(
-            sdk.settings.menu(slug).queryKey,
-            (menu) =>
-              menu && { groups: menu.groups.map((g) => ({ ...g, services: g.services.map((s) => (s.id === saved.id ? saved : s)) })) },
-          )
-          toast(on ? t('openedOnline', { name }) : t('closedOnline', { name }))
-        },
+        onSuccess: () => toast(on ? t('openedOnline', { name }) : t('closedOnline', { name })),
         onError: (error) => toast(errorText(error)),
       },
     )

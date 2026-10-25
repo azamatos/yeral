@@ -1,6 +1,7 @@
 /**
  * Live updates (systemPatterns.md "Data flow"): while a screen is open, poll `GET /v1/events?after=<cursor>` about every
- * 10 s, when the tab becomes visible again and after the person's own mutations, and invalidate what each event touches.
+ * 10 s, when the tab becomes visible again and after the person's own mutations, and invalidate what each event touches;
+ * while it runs, queries don't read again on focus (the feed's poll there does it once, for what changed).
  * The endpoint needs a user, so polling waits until `me` (`sdk.me.get()`) says someone is signed in; hidden tabs and
  * offline devices skip their turn (TanStack's focus and online managers). A push channel can replace this later without
  * changing screens.
@@ -34,6 +35,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
         keys.calendar(e.business),
         // visits, the next booking, reports
         keys.clients(e.business),
+        // the switcher's request counts
+        keys.workspaces(),
       )
   }
   // the reviews, the team's list included (under the same prefix), the rating on the page, the switcher's "Jogapsyz"
@@ -121,6 +124,11 @@ export function startEvents(client: Client, queryClient: QueryClient, opts: { in
     return running
   }
 
+  // a return to the tab polls the feed, which refreshes what changed while away: every query reading again on focus
+  // too would read it all twice (the client site, which runs no feed, keeps TanStack's focus refetch)
+  const defaults = queryClient.getDefaultOptions()
+  queryClient.setDefaultOptions({ ...defaults, queries: { ...defaults.queries, refetchOnWindowFocus: false } })
+
   const meHash = hashKey(keys.me())
   let wasSignedIn = signedIn()
   const unsubscribe = [
@@ -148,6 +156,7 @@ export function startEvents(client: Client, queryClient: QueryClient, opts: { in
       stopped = true
       clearInterval(timer)
       for (const off of unsubscribe) off()
+      queryClient.setDefaultOptions(defaults)
     },
   }
 }
