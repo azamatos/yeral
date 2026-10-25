@@ -22,3 +22,13 @@ export const Default: Story = {
 }
 
 export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
+
+/** A business still in review, opened from its link (States tile 11, book C-10): friendly words, no «404», no details. */
+export const NotOpen: Story = {
+  args: { routes: { '/$lang/$': () => <NotFoundPage notOpen /> }, path: '/en/b/new-place' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: "This page hasn't opened yet" })).toBeVisible()
+    await expect(canvas.queryByText('404')).toBeNull()
+    await waitFor(() => expect(document.title).toBe("This page hasn't opened yet · Ýeral"))
+  },
+}
