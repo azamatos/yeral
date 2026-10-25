@@ -983,7 +983,6 @@
       "renameGroup": "Rename group",
       "groupNameLabel": "New name for {name}",
       "renameSave": "Save",
-      "renaming": "Saving",
       "groupRenamed": "Group renamed: {name}",
       "rowActions": "{name}: actions",
       "edit": "Edit",

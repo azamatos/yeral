@@ -117,10 +117,20 @@ component ─► useQuery(sdk.businesses.detail(slug)) ─► hc client ─► G
 
 - Components never call `fetch` or the client directly: they use `queryOptions` / mutation options from `@yeral/sdk`
   (or a slice's `api/` segment that wraps them).
-- Mutations invalidate by query keys defined in `@yeral/sdk`; optimistic updates only where instant feedback matters.
+- Mutations invalidate by query keys defined in `@yeral/sdk`; optimistic updates only where instant feedback matters:
+  the sdk's `instant` (the services' online switch, a group's rename, the photos' order and removal) writes the change
+  into the cache before the request and puts the old data back, and asks again, when the api refuses; the screen toasts
+  why (2026-10-25).
+- **Reads**: queries stay fresh 15 s (`me` a minute); the business app's workspaces and setup draft 5 minutes, since
+  only the person's own mutations and the events change them and both refresh them (booking events refresh the
+  switcher's request counts). A settings change refreshes the switcher and the draft only for the profile and the
+  booking rules (its event refreshes everything once more); opening a workspace marks it current in the cached list
+  without reading it again. TanStack's focus refetch stays: answers that change with time (free times) have no event.
 - **Live updates**: the api writes an event per change (`booking.confirmed`, `booking.created` …) to an `events` table.
   While a screen is open the sdk polls `GET /v1/events?after=<cursor>` (≈10 s, on window focus, and after the user's own
-  mutations) and invalidates the matching queries. The cursor is `<txid>.<id>`: events are read in the order of the
+  mutations) and invalidates the matching queries. A tab opened in the background takes its starting point at once, so
+  it hears what changed before it was first looked at. The person's own change comes back as an event too and
+  refreshes its keys a second time (events don't name who made them: a follow-up with the push channel). The cursor is `<txid>.<id>`: events are read in the order of the
   transaction that wrote them, only once every older transaction has finished, so one that commits late is never skipped.
   "Every older transaction" is server-wide: a long one (a demo re-seed) holds updates back until it ends. A push channel can replace polling on the own server; screens don't change.
 

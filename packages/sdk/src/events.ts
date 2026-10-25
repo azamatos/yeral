@@ -34,6 +34,8 @@ export function staleKeys(e: LiveEvent): (readonly unknown[])[] {
         keys.calendar(e.business),
         // visits, the next booking, reports
         keys.clients(e.business),
+        // the switcher's request counts
+        keys.workspaces(),
       )
   }
   // the reviews, the team's list included (under the same prefix), the rating on the page, the switcher's "Jogapsyz"
@@ -81,12 +83,14 @@ export function startEvents(client: Client, queryClient: QueryClient, opts: { in
       cursor = null
       return
     }
-    if (!focusManager.isFocused() || !onlineManager.isOnline()) return
     try {
+      // the starting point even in a hidden tab: one opened in the background then hears, when it's first looked at,
+      // what changed after its screens loaded (the lists held for minutes, the switcher's, wouldn't read again)
       if (cursor === null) {
         cursor = (await call(client.v1.events.$get({ query: {} }))).cursor
         return
       }
+      if (!focusManager.isFocused() || !onlineManager.isOnline()) return
       const page = await call(client.v1.events.$get({ query: { after: cursor } }))
       cursor = page.cursor
       const stale = new Map<string, readonly unknown[]>()
