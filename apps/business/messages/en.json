@@ -1415,6 +1415,8 @@
       "closedRunsOutMove": "The timer counts only while you’re open, so it waits until {open}. If no one answers by {at}, the request is cancelled — the booking stays at its time.",
       "moveBox": "Time change request",
       "show": "Show",
+      "showPrevious": "Show the previous time",
+      "showNew": "Show the new time",
       "moveCaption": "If you confirm, the booking moves to the new time and the client is notified. If you decline, it stays at its time.",
       "previousTime": "Previous time",
       "newTime": "New time",

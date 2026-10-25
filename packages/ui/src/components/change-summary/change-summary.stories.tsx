@@ -54,6 +54,29 @@ export const Rows: Story = {
   ),
 }
 
+/** Rows with lines under them in the panel: a move request's fit line and what confirming does. */
+export const RowsWithFooter: Story = {
+  args: {
+    variant: 'rows',
+    title: 'Time change request',
+    from: 'Fri, 16 Oct · 10:00',
+    footer: (
+      <>
+        <span className="text-dense font-medium text-st-completed-ink">Maral is free at the new time — you can confirm.</span>
+        <span className="text-dense text-n-600">If you confirm, the booking moves to the new time and the client is notified.</span>
+      </>
+    ),
+  },
+  render: (args) => (
+    <div className="w-96">
+      <ChangeSummary {...args} />
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('Maral is free at the new time — you can confirm.')).toBeVisible()
+  },
+}
+
 /** The phone: the halves stacked, the arrow pointing down. */
 export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
 

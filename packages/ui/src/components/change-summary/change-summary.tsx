@@ -7,7 +7,8 @@ import { cn } from '../../lib/cn'
  * `bar`: two halves with caps labels and an arrow between, the old one 17/24 600 n-600, struck through when the change
  * is made at once (`moved`), the new one 17/24 700; it stacks on phones with the arrow pointing down. `rows`: a quiet
  * panel in a drawer, an optional caps title and a 92 label column. The labels carry the order (the arrow is
- * decoration); the words come from the caller.
+ * decoration); the words come from the caller. `footer` adds lines under the rows in the same panel (a move request's
+ * fit line and what confirming does, B-Calendar `.mvc`).
  */
 export function ChangeSummary({
   from,
@@ -16,6 +17,7 @@ export function ChangeSummary({
   moved = false,
   variant = 'bar',
   title,
+  footer,
   className,
   ...props
 }: Omit<ComponentProps<'div'>, 'title'> & {
@@ -28,6 +30,8 @@ export function ChangeSummary({
   variant?: 'bar' | 'rows'
   /** The rows' caps title: «Time change request». */
   title?: ReactNode
+  /** Rows only: lines under them, in the panel. */
+  footer?: ReactNode
 }) {
   if (variant === 'rows')
     return (
@@ -44,6 +48,7 @@ export function ChangeSummary({
         <span className={cn('text-n-600', moved && 'line-through')}>{from}</span>
         <span className="text-dense text-n-600">{labels.to}</span>
         <span className="font-semibold text-n-900">{to}</span>
+        {footer && <div className="col-span-2 flex flex-col gap-2.5">{footer}</div>}
       </div>
     )
   return (

@@ -199,7 +199,14 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
               replace: true,
             })
           }
-          onShow={(day) => go({ date: day === todayDate ? undefined : day, booking: undefined }, true)}
+          // the day, as the day buttons go there; under 1280 the drawer covers the day, so it closes to show it
+          onShow={(day) =>
+            go({
+              date: day === todayDate ? undefined : day,
+              booking: undefined,
+              ...(window.matchMedia('(min-width: 1280px)').matches ? {} : { request: undefined }),
+            })
+          }
           onClose={() => go({ request: undefined }, true)}
         />
       )}
