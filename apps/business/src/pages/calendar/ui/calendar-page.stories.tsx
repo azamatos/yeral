@@ -120,7 +120,7 @@ const viewOf = (date: string, cancelled: boolean, only?: string): CalendarView =
     summary: [
       {
         date,
-        count: live.filter((b) => b.status !== 'pending').length,
+        count: live.length,
         requests: live.filter((b) => b.status === 'pending').length,
         revenue: only ? 570 : 1410,
       },
@@ -176,7 +176,10 @@ type Story = StoryObj<typeof meta>
 /** The owner's day: everyone's column with their count, the bookings by status, the request's timer, the day's line. */
 export const Day: Story = {
   play: async ({ canvas }) => {
-    const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
+    const region = await canvas.findByRole('region', { name: /^Calendar, / })
+    // the page is as tall as the screen and the day scrolls inside it, under the names
+    await expect(region.clientHeight).toBeLessThan(region.scrollHeight)
+    const grid = within(region)
     const ayna = within(grid.getByRole('group', { name: 'Aýna' }))
     await expect(ayna.getByRole('button', { name: /^10:00 Gözel A\. Women’s haircut.*10:00–10:45, Confirmed$/ })).toBeVisible()
     // the request: its timer in the block, its time left in its name
@@ -186,7 +189,9 @@ export const Day: Story = {
     await expect(maral.getByRole('button', { name: /Ogulgerek M\..*by phone, alert note about the client$/ })).toBeVisible()
     await expect(grid.getByText('Doesn’t use the app')).toBeVisible()
     await expect(canvas.getByText(/^Revenue \(planned\)/)).toBeVisible()
-    await expect(canvas.getByText('1 request', { selector: 'span:not(.sr-only)' })).toBeVisible()
+    // the toolbar's and Aýna's
+    await expect(canvas.getAllByText('1 request', { selector: 'span:not(.sr-only)' })).toHaveLength(2)
+    await expect(grid.getByText('2 bookings ·')).toBeVisible()
     await waitFor(() => expect(document.title).toBe('Calendar · Glow Studio · Ýeral Business'))
   },
 }
@@ -210,6 +215,15 @@ export const NextDay: Story = {
     await expect(canvas.getByText('No new requests')).toBeVisible()
     await userEvent.click(canvas.getByRole('button', { name: 'Today' }))
     await expect(await canvas.findByRole('button', { name: /Gözel A\./ })).toBeVisible()
+  },
+}
+
+/** A day gone by: what it earned, no longer planned. */
+export const PastDay: Story = {
+  play: async ({ canvas }) => {
+    await canvas.findByRole('region', { name: /^Calendar, / })
+    await userEvent.click(canvas.getByRole('button', { name: 'Previous day' }))
+    await expect(await canvas.findByText(/^Revenue:/)).toBeVisible()
   },
 }
 

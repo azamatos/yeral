@@ -31,13 +31,14 @@ const TIMES_FROM = 62
 
 /**
  * BookingBlock (DS-Business → BookingBlock, B-Calendar `.bk`): a booking in the calendar's column, placed by the grid
- * (`style`'s top and height). Line 1 is the status icon, the start and the client (struck through once cancelled);
+ * (`style`'s top and height); `items` the column's person's part of it (all of it by default). Line 1 is the status icon, the start and the client (struck through once cancelled);
  * a taller block adds the services, then «10:15–11:00 · 45 min». On the right: by phone or a walk-in, the client's
  * alert note, and a request's timer (`timer`, which the calendar counts while the business is open). Selected: the ink
  * ring; hover dims it a little. Its name is what it shows, then the time, status, markers and timer in words.
  */
 export function BookingBlock({
   booking: b,
+  items = b.items,
   height,
   style,
   half,
@@ -47,6 +48,8 @@ export function BookingBlock({
   onOpen,
 }: {
   booking: CalendarBooking
+  /** The part of it in this column: a booking shared with a colleague shows each one's part in their column. */
+  items?: CalendarBooking['items']
   /** Its height in pixels: what fits on it. */
   height: number
   style: CSSProperties
@@ -65,8 +68,10 @@ export function BookingBlock({
   const join = useJoin()
   const Icon = BOOKING_STATUS_ICON[b.status]
   const client = b.client.name ?? t('unnamed')
-  const services = b.items.map((i) => i.service).join(' + ')
-  const time = fmt.timeRange(b.start, b.end)
+  const services = items.map((i) => i.service).join(' + ')
+  const start = Math.min(...items.map((i) => i.start))
+  const end = Math.max(...items.map((i) => i.end))
+  const time = fmt.timeRange(start, end)
   const cancelled = b.status === 'cancelled'
   const phone = b.source === 'phone'
   const walkIn = b.source === 'walkin'
@@ -92,13 +97,13 @@ export function BookingBlock({
     >
       <span className="flex min-w-0 items-center gap-1.25 overflow-hidden whitespace-nowrap">
         <Icon aria-hidden strokeWidth={2} className={cn('size-3.5 flex-none', ICON_INK[b.status])} />
-        <span className="flex-none text-[12px] leading-4 font-semibold tabular-nums">{fmt.time(b.start)}</span>
+        <span className="flex-none text-[12px] leading-4 font-semibold tabular-nums">{fmt.time(start)}</span>
         <span className={cn('min-w-0 truncate text-[14px] leading-[18px] font-semibold', cancelled && 'line-through')}>{client}</span>
       </span>
       {height >= SERVICES_FROM && <span className="truncate text-dense text-n-600">{services}</span>}
       {height >= TIMES_FROM && (
         <span className="text-dense whitespace-nowrap text-n-600 tabular-nums">
-          {t('timeLength', { time, length: fmt.duration(b.end - b.start) })}
+          {t('timeLength', { time, length: fmt.duration(end - start) })}
         </span>
       )}
       <span aria-hidden className="absolute top-1 right-1.5 flex items-center gap-1 text-n-900 [&_svg]:size-3.5">
@@ -107,7 +112,7 @@ export function BookingBlock({
         {b.alert && <TriangleAlert strokeWidth={1.75} className="text-danger-ink" />}
         {timer}
       </span>
-      <span className="sr-only">, {more}</span>
+      <span className="sr-only">{t('more', { more })}</span>
     </button>
   )
 }

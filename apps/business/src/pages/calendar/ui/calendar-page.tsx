@@ -10,6 +10,7 @@ import { DatePicker } from '@yeral/ui/date-picker'
 import { Pill } from '@yeral/ui/pill'
 import { Spinner } from '@yeral/ui/spinner'
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useDatePickerWords } from '@/shared/i18n'
@@ -44,32 +45,42 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
   const cancelled = !!search.cancelled
   const view = useQuery({
     ...sdk.calendar.view(slug, { date, days: 1, cancelled, lang: locale }),
-    // the day before stays on screen while the next one loads
+    // the day on screen stays while the next one loads
     placeholderData: keepPreviousData,
   })
   // the business's hours, for the timers that count only while it's open (a specialist doesn't read them: wall time)
   const hours = useQuery({ ...sdk.settings.hours(slug), enabled: !specialist, retry: false })
   const business: BusinessHours | null = hours.data ? { hours: hours.data.hours, exceptions: hours.data.specialDays } : null
 
-  const go = (patch: Partial<CalendarSearch>) =>
-    void navigate({ to: '.', search: (prev: CalendarSearch) => ({ ...prev, ...patch }), replace: 'booking' in patch })
+  const go = (patch: Partial<CalendarSearch>, replace = false) =>
+    void navigate({ to: '.', search: (prev: CalendarSearch) => ({ ...prev, ...patch }), replace })
+  // another day: the booking picked on this one goes
+  const goDay = (next: string) => go({ date: next === todayDate ? undefined : next, booking: undefined })
 
-  if (!view.data && view.isError) throw view.error
-  const summary = view.data?.summary.find((d) => d.date === date)
+  if (view.isError && (!view.data || view.isPlaceholderData)) throw view.error
+  // the day the data is for: the one before while the next loads
+  const shown = view.data?.from ?? date
+  const summary = view.data?.summary.find((d) => d.date === shown)
   const requests = summary?.requests ?? 0
+  const bold = (chunks: ReactNode) => <b className="font-semibold text-n-900 tabular-nums">{chunks}</b>
+  const dot = (
+    <span aria-hidden className="text-n-500">
+      {t('dot')}
+    </span>
+  )
 
   return (
     <WorkspacePage title={sections('calendar')} switcherOnPhone flush>
-      <div className="flex flex-col gap-2.5 border-b border-n-200 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8 lg:py-4">
+      <div className="flex flex-none flex-col gap-2.5 border-b border-n-200 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8 lg:py-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="secondary" size="s" onClick={() => go({ date: undefined })}>
+          <Button variant="secondary" size="s" onClick={() => goDay(todayDate)}>
             {t('today')}
           </Button>
           <span className="flex flex-none items-center gap-0.5">
-            <Button variant="ghost" size="s" iconOnly aria-label={t('prev')} onClick={() => go({ date: addDays(date, -1) })}>
+            <Button variant="ghost" size="s" iconOnly aria-label={t('prev')} onClick={() => goDay(addDays(date, -1))}>
               <ChevronLeft />
             </Button>
-            <Button variant="ghost" size="s" iconOnly aria-label={t('next')} onClick={() => go({ date: addDays(date, 1) })}>
+            <Button variant="ghost" size="s" iconOnly aria-label={t('next')} onClick={() => goDay(addDays(date, 1))}>
               <ChevronRight />
             </Button>
           </span>
@@ -78,7 +89,7 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
             copy={{ ...words, value: fmt.weekdayDate, placeholder: t('pickDate') }}
             today={todayDate}
             value={date}
-            onValueChange={(next) => go({ date: next === todayDate ? undefined : next })}
+            onValueChange={goDay}
           />
           <span className="flex-1" />
           {requests > 0 ? (
@@ -99,21 +110,19 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
         </div>
         {summary && (
           <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-small text-n-600">
-            <span>{t.rich('bookings', { n: summary.count, b: (chunks) => <b className="font-semibold text-n-900">{chunks}</b> })}</span>
-            <span aria-hidden className="text-n-500">
-              ·
-            </span>
-            <span>
-              {t.rich('requestsLine', { n: summary.requests, b: (chunks) => <b className="font-semibold text-n-900">{chunks}</b> })}
-            </span>
+            <span>{t.rich('bookings', { n: summary.count, b: bold })}</span>
+            {dot}
+            <span>{t.rich('requestsLine', { n: summary.requests, b: bold })}</span>
             {summary.revenue !== null && (
               <>
-                <span aria-hidden className="text-n-500">
-                  ·
-                </span>
+                {dot}
                 <span>
-                  {specialist ? t('earnings') : t('revenue')}:{' '}
-                  <b className="font-semibold text-n-900 tabular-nums">{fmt.money(summary.revenue)}</b>
+                  {/* a day gone by: what it earned, no longer planned */}
+                  {t.rich(specialist ? 'earnings' : 'revenue', {
+                    past: shown < todayDate ? 'yes' : 'no',
+                    amount: fmt.money(summary.revenue),
+                    b: bold,
+                  })}
                 </span>
               </>
             )}
@@ -123,11 +132,12 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
       {view.data ? (
         <DayGrid
           view={view.data}
-          date={date}
+          date={shown}
           now={now}
           business={business}
           selected={search.booking ?? null}
-          onOpen={(code) => go({ booking: search.booking === code ? undefined : code })}
+          busy={view.isPlaceholderData}
+          onOpen={(code) => go({ booking: search.booking === code ? undefined : code }, true)}
         />
       ) : (
         <div className="flex flex-1 items-center justify-center py-20">

@@ -4,12 +4,15 @@
   `pages/calendar`): `?date=` (today without it), `?cancelled=true`, `?booking=` the block picked (validated by
   `calendarSearch`). The toolbar: Today, the day before and after, the day as a title that opens the month (DatePicker
   `look="title"`, new in `@yeral/ui`), «1 request» (warning) or «No new requests», Show cancelled; the day's line «16
-  bookings · 3 requests · Revenue (planned): 1,410 TMT» («Your earnings (planned)» for a specialist; no money without
-  the right). The grid (D3: our own, placed by minutes): a column per person the reader sees with the avatar, «Doesn't
+  bookings · 3 requests · Revenue (planned): 1,410 TMT» («Your earnings (planned)» for a specialist; «Revenue» on a day
+  gone by; no money without the right). The grid (D3: our own, placed by minutes): a column per person the reader sees with the avatar, «Doesn't
   use the app» and «6 bookings · 1 request»; the hours from an hour before the earliest working start or booking to an
-  hour after the latest end (08:00–21:00 when nobody works; past midnight for a night bar); a line every quarter (20 px;
-  an hour 80); the now line with its time on today; the names and hours stay while it scrolls sideways. A booking shared
-  with a colleague shows each person's part in their column.
+  hour after the latest end (08:00–21:00 when nobody works; past midnight for a night bar, from midnight when the night
+  before runs past it, those bookings shown too); a line every quarter (20 px; an hour 80), darker on the hour; the now
+  line with its time on today (and on the night before's grid past midnight). The page is as tall as the screen and the
+  grid scrolls both ways inside it, the names and hours staying. A booking shared with a colleague shows each person's
+  part in their column, with that part's time. Another day keeps the one on screen until it comes and drops the picked
+  booking from the address.
 - Changed: `BookingBlock` in `entities/booking` (DS-Business BookingBlock): the status's look (a request dashed on the
   warning tint, cancelled dashed white, struck through), line 1 the status icon, start and client, the services from 44
   px, «10:15–11:00 · 45 min» from 62 px, by phone or walk-in, the alert note, a request's TimerPill (counting only while
