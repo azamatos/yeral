@@ -271,7 +271,7 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     // the list says who ended it: «Removed»
     const onList = async () =>
       ((await maysa.req('/v1/w/glow-studio/team')).json.items as { id: string; ended: unknown }[]).find((m) => m.id === row!.id)!.ended
-    expect(await onList()).toMatchObject({ by: 'owner', bookings: 0, requests: 0 })
+    expect(await onList()).toMatchObject({ by: 'owner', bookings: null, requests: null })
     const back = await maysa.req(`/v1/w/glow-studio/team/${row!.id}/reactivate`, { method: 'POST' })
     expect(back.json).toMatchObject({ status: 'active', bookable: true, joined: true, ended: null })
     expect(await shown()).toContain('Maral')
