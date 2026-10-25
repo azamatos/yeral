@@ -8,8 +8,8 @@ owner's other projects (ADR 0023). From this Mac it's `ssh yeral-vps` (an alias 
 | Path on the server | What | From the repo |
 |---|---|---|
 | `/srv/edge` | the shared Caddy: ports 80 and 443, HTTPS certificates for every project; each project adds `sites/<project>.caddy` | `infra/server/edge/` |
-| `/srv/yeral` | Ýeral: Postgres 18, the api and the business app; `.env` holds the database password (server only) | `infra/server/yeral/` |
-| `/srv/yeral/src` | the source of the last deploy (a `git archive`), from which the api and business images are built | the repo |
+| `/srv/yeral` | Ýeral: Postgres 18, the api, the client site and the business app; `.env` holds the database password (server only) | `infra/server/yeral/` |
+| `/srv/yeral/src` | the source of the last deploy (a `git archive`), from which the api, client and business images are built | the repo |
 
 Projects share the Docker network `edge`; only Caddy publishes ports, so the firewall (SSH, 80, 443) is the whole
 surface. Each project has its own compose project, network, database and memory limits.
@@ -38,10 +38,10 @@ ssh yeral-vps 'rm -rf /srv/yeral/src && mkdir -p /srv/yeral/src && tar -x -C /sr
 ssh yeral-vps "COMMIT=$(git rev-parse HEAD) PUBLIC=1 bash /srv/yeral/src/infra/server/yeral/deploy.sh"
 ```
 
-`deploy.sh` builds the api and business images on the server, saves the database first
+`deploy.sh` builds the api, client and business images on the server, saves the database first
 (`/srv/yeral/backup-<date>-before-<commit>.sql.gz`, mode 600; a failed dump stops the deploy; the way back from a bad
 migration, operations.md "Rollback"), runs the migrations and the category catalogue (never the demo), starts the api
-and the business app, and checks the api's `/v1/health` and the business app's `/version.json`. `PUBLIC=1` also copies Ýeral's sites (`yeral.caddy`) to Caddy and reloads it: always, since
+the client site and the business app, and checks the api's `/v1/health` and both sites' `/version.json`. `PUBLIC=1` also copies Ýeral's sites (`yeral.caddy`) to Caddy and reloads it: always, since
 the DNS records point at the server (2026-10-22); without it a change to `yeral.caddy` doesn't ship. Delete old
 backups by hand when the disk needs it.
 
@@ -75,8 +75,9 @@ the client site takes it over; live since 2026-10-22 21:18 UTC):
 4. The owner deleted the Worker `yeral-web` on 23.10.2026; `apps/legacy` and its deploy option left the repo the same
    day.
 
-The apex serves the coming-soon page in `yeral.caddy` at every path, and `www` redirects to the apex. `business`
-serves the business app since 25.10.2026 (the owner: to try it live, with the sign-in code on the screen). `cms`
+The apex serves the client site (the owner, 25.10.2026: it replaced the coming-soon page so booking can be tried
+live; `X-Robots-Tag: noindex` until the first launch), and `www` redirects to the apex. `business` serves the business
+app since 25.10.2026 (the owner: to try it live, with the sign-in code on the screen). `cms`
 answers with a certificate error until its app joins `yeral.caddy`: harmless, nobody is sent there before.
 
 **E-mail: received at `hello@yeral.app`, nothing sent** (the owner's choice, 23.10.2026). Cloudflare Email Routing
@@ -107,7 +108,8 @@ The catch-all stays off (spam); another address (`support@`) is one more custom 
 owner's own address. Sending as `hello@` needs a sending service later; a Gmail "Send mail as" alias through Gmail's own
 servers would fail DMARC and be rejected.
 
-**When the client site is ready** it replaces the coming-soon page in `yeral.caddy`; no DNS change.
+**The client site** replaced the coming-soon page in `yeral.caddy` (25.10.2026); no DNS change. At the first launch
+the apex's `X-Robots-Tag` goes, so search engines may read it.
 
 `storybook` stays as it is: a proxied record of the Worker `yeral-storybook`. Add no CAA record: Caddy falls back to
 another certificate authority when Let's Encrypt fails, and the proxied records use Cloudflare's own.
@@ -115,8 +117,8 @@ another certificate authority when Let's Encrypt fails, and the proxied records 
 ## Still to do
 
 - Deploys from GitHub Actions over SSH with the `deploy` user, after the owner approves a release (ADR 0020).
-- The client site replaces the apex's coming-soon page in `yeral.caddy`; the cms site joins with its app (the
-  business app joined 25.10.2026).
+- The cms site joins `yeral.caddy` with its app (the business app and the client site joined 25.10.2026); the
+  apex's `noindex` goes at the first launch.
 - With the real working MVP, before any real business's data (book chapter 10, P6; not for the demo launch, owner
   22.10.2026): a nightly database backup to Cloudflare R2 with the `media` volume and `.env`, which needs an R2 token
   the owner creates and puts in the server's `.env` (never in chat or git); error tracking and uptime alerts.

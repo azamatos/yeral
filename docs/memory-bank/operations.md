@@ -1,7 +1,8 @@
 # Operations: environments, hosting, Docker, CI/CD, versioning, parallel work
 
-Status 2026-10-23: production = the owner's server (`yeral-vps`): the api, its jobs and Postgres, and Caddy serving
-`api.yeral.app` and a coming-soon page on `yeral.app` (`www` redirects to it); the old Next.js site (`apps/legacy`, the
+Status 2026-10-25: production = the owner's server (`yeral-vps`): the api, its jobs and Postgres, the client site and
+the business app, and Caddy serving `api.yeral.app`, `yeral.app` (the client site, noindex until the first launch;
+`www` redirects to it) and `business.yeral.app`; the old Next.js site (`apps/legacy`, the
 Worker `yeral-web`) was retired on 2026-10-22/23. Storybook is the only Cloudflare deploy left (`deploy.yml`, on every
 push to `main`). Releases are paused until the MVP works (ADR 0009, amended 2026-10-21: `release.yml` and Changesets
 removed). The `CLOUDFLARE_API_TOKEN` repository secret is set; without it the deploy job skips with a warning. Since 2026-10-16 there
@@ -13,7 +14,7 @@ are two kinds of environment only, local and production (ADR 0020): no staging.
 |---|---|---|---|
 | local | `localhost:3001–3005` (`PORT_BASE` + offset; +0 is free) | Postgres in Docker, one database per worktree | `pnpm dev` |
 | local, production-like | `*.yeral.localhost` through Caddy | Postgres container | `pnpm docker:up` |
-| production | the owner's server `yeral-vps`: `api.yeral.app` and `yeral.app` (a coming-soon page; `www` redirects) since 2026-10-22 21:18 UTC, `business.` and `cms.` with their apps; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
+| production | the owner's server `yeral-vps`: `api.yeral.app` since 2026-10-22, `business.yeral.app` and the client site on `yeral.app` (noindex until the launch; `www` redirects) since 2026-10-25, `cms.` with its app; `storybook.` on Cloudflare | Postgres 18 on the server (categories, no demo) | by hand with `infra/server/yeral/deploy.sh` until GitHub deploys exist; Storybook on every push to `main` |
 
 No staging and no PR previews (ADR 0020): a change is proven locally (tests, the Docker stack), reviewed, and merged on
 green CI; production is deployed by hand, when the owner asks, while releases are paused. A risky migration is rehearsed on a production dump restored into
@@ -21,8 +22,8 @@ the local Postgres. All hosts come from config (`@yeral/lib/site`), so a new dom
 
 ## Hosting (ADR 0024)
 
-The own server runs the api, its jobs, Postgres and the business app (since 2026-10-25), and later the client and cms
-apps, in Docker behind one shared Caddy (section "The own server" below). Cloudflare keeps:
+The own server runs the api, its jobs, Postgres, the business app and the client site (since 2026-10-25), and later
+the cms app, in Docker behind one shared Caddy (section "The own server" below). Cloudflare keeps:
 
 | What | Where |
 |---|---|
@@ -95,7 +96,7 @@ for backups and accounts for error tracking and uptime checks (owner, 2026-10-22
   design's appointment businesses that aren't there yet, marked "Example" and confirming at once, with no team; their
   photos come in the api's image (`/app/demo-photos`, `DEMO_MEDIA_DIR`). They show the market's support line
   (`MARKET.support.phone`, or `EXAMPLE_PHONE` when set), never the design's numbers. `BOOKING_TYPES=appointment` keeps tables and classes out of
-  lists and search. Both sit in the server's compose; turn the examples on with the code on the screen. When the pilot
+  lists and search. Both sit in the server's compose; the examples are on since 2026-10-25 (the owner), with the code on the screen, so booking can be tried live. When the pilot
   ends, hide them from the admin tool (a close can't be undone for a business with no owner account).
 - The business app's demo workspace (book F-242): `DEMO_WORKSPACE=true` makes the jobs (every minute in the api) create
   it when it's missing and again after every 04:00, Ashgabat time: the design's Glow Studio at `/w/demo`, its numbers in

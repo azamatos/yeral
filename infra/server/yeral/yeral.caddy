@@ -44,46 +44,12 @@ business.yeral.app {
 	reverse_proxy yeral-business:80
 }
 
-# Temporary (the owner, 22.10.2026): the old site is retired and the apex shows this page, at every path, until the
-# client site joins this file and takes the apex over. Colours from docs/design/tokens.css; no request leaves the page.
+# the client site (since 25.10.2026, the owner: replacing the coming-soon page so slice 3's booking can be tried live):
+# its image renders the pages (client.Dockerfile). Kept out of search engines until the first launch opens.
 yeral.app {
 	import yeral_site
-	header {
-		Content-Type "text/html; charset=utf-8"
-		Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
-		Cache-Control "public, max-age=300"
-	}
-	# no icon yet: a browser's favicon request gets nothing rather than the page
-	respond /favicon.ico 404
-	respond <<HTML
-		<!doctype html>
-		<html lang="en">
-		<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Ýeral</title>
-		<meta name="description" content="Booking for any business that sells its time. Coming soon.">
-		<style>
-		:root { color-scheme: light dark; --bg: #ffffff; --ink: #101014; --soft: #5a5a64; --tag-bg: #efecfe; --tag-ink: #4429d6; }
-		@media (prefers-color-scheme: dark) { :root { --bg: #101014; --ink: #ffffff; --soft: #d8d8de; --tag-bg: #241573; --tag-ink: #c3b6fb; } }
-		* { box-sizing: border-box; }
-		html, body { height: 100%; margin: 0; }
-		body { display: grid; place-items: center; padding: 16px; background: var(--bg); color: var(--ink); font-family: ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif; text-align: center; }
-		main { max-width: 560px; }
-		h1 { margin: 0; font-size: 44px; line-height: 48px; letter-spacing: -0.03em; font-weight: 700; }
-		p { margin: 16px 0 0; font-size: 17px; line-height: 26px; color: var(--soft); }
-		.soon { display: inline-block; margin-top: 24px; padding: 4px 12px; border-radius: 999px; background: var(--tag-bg); color: var(--tag-ink); font-size: 11px; line-height: 14px; letter-spacing: 0.07em; font-weight: 600; text-transform: uppercase; }
-		</style>
-		</head>
-		<body>
-		<main>
-		<h1>Ýeral</h1>
-		<p>Booking for any business that sells its time.</p>
-		<span class="soon">Coming soon</span>
-		</main>
-		</body>
-		</html>
-		HTML 200
+	header X-Robots-Tag "noindex, nofollow"
+	reverse_proxy yeral-client:3000
 }
 
 www.yeral.app {

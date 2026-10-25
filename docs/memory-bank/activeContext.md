@@ -131,6 +131,10 @@ components in Storybook, then the apps.
   can use some library for date picker and etc. Lets use it, no need for making own one." (ADR 0011 amended: forms are
   plain state; AGENTS.md rule 10a.) A business chooses its own page address instead of `turkmen-barber-2` ("add it to
   the plan"); updates feel slow rather than instant (Next steps).
+- 2026-10-25 (later): "U have whole day to work on this tasks, dont limit yourself" (a run until about 23:00 MSK).
+  Asked about slice 3: the client site takes `yeral.app` now (noindex until the launch), the example businesses go on,
+  and one of the owner's test businesses can be opened to clients with a server command (the book's chapter 9,
+  25.10.2026; the plan: `log/2026-10-25-slice-3-plan.md`).
 
 ## Decisions
 
@@ -243,6 +247,11 @@ Where the old questions went (2026-10-17):
    Demo frame from `me.demo` (the signed-out sidebar with "Log in", the Demo banner, `demo` in the switcher), "Try the
    business app" (`sdk.demo.start()`) on the login and the wizard, and `demo_number`'s hint; the leave and delete
    confirms' counts (#142); the page-state banner (#144).
+1a. **P4 slice 3, the booking loop** (started 25.10; plan, lanes and owner's decisions in
+   `log/2026-10-25-slice-3-plan.md`): shared ui pieces (U1–U3), the push channel for live updates (U5), My bookings'
+   fields (U4), the client site on the apex (U6, this PR) and `make-example` (U7); the client lane (business page,
+   booking steps, confirm, My bookings, the booking drawer, move, review) and the business lane (calendar day, its
+   layers, the request drawer, decline with offered times, move requests).
 2. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md`, a database backup first; the
    business app ships with the api since 25.10). The first launch (approved in advance, 22.10) goes when slices 2–7
    are built and checked: `EXAMPLE_BUSINESSES` and `DEMO_WORKSPACE` on (the code on the screen is on already), the
