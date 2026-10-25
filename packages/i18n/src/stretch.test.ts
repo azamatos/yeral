@@ -19,6 +19,11 @@ describe('longer text for checking screens', () => {
     expect(stretchText('<b>Moved?</b> Change it here.', 1.3)).toMatch(/^<b>Moved\?<\/b> Change it here\. ж+/)
   })
 
+  it('counts the words a message writes, not the values it shows', () => {
+    expect(stretchText('{name} · {phone}', 1.3)).toBe('{name} · {phone}')
+    expect(stretchText('{count} / {max}', 1.3)).toBe('{count} / {max}')
+  })
+
   it('is off unless asked, and then stretches every message once', () => {
     const messages = { a: 'Book', b: { c: 'Send review' } }
     expect(stretched(messages)).toBe(messages)

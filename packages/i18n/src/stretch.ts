@@ -14,11 +14,27 @@ export function setTextStretch(next: number): void {
 }
 
 /**
+ * The words a message writes itself: its text and its plural or select branches' (even depths), not its `{arguments}`
+ * (odd depths: their names and values aren't translated).
+ */
+function literalLength(text: string): number {
+  let depth = 0
+  let n = 0
+  for (const ch of text) {
+    if (ch === '{') depth++
+    else if (ch === '}') depth = Math.max(0, depth - 1)
+    else if (depth % 2 === 0) n++
+  }
+  return n
+}
+
+/**
  * One message longer by the stretch: whole words of filler after it, so lines break as real text does. Added after the
- * whole message, never inside an `{argument}` or a `<tag>`.
+ * whole message, never inside an `{argument}` or a `<tag>`; only its own words count («{name} · {phone}» stays).
  */
 export function stretchText(text: string, by = factor): string {
-  const extra = Math.round(text.length * (by - 1))
+  const own = literalLength(text)
+  const extra = own < 4 ? 0 : Math.round(own * (by - 1))
   if (extra < 1) return text
   const words: string[] = []
   for (let left = extra; left > 0; left -= 7) words.push('ж'.repeat(Math.min(6, left)))
