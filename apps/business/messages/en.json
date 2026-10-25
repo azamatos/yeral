@@ -263,6 +263,14 @@
     "save": "Save",
     "saving": "Saving"
   },
+  "datePicker": {
+    "placeholder": "Pick a date",
+    "prev": "Previous month",
+    "next": "Next month",
+    "withYear": "{date} {year}",
+    "range": "{from} – {to}",
+    "sameMonth": "{from}–{to}"
+  },
   "specialDays": {
     "title": "Special days",
     "caption": "Holidays and unusual days — days you’re closed or open at other times.",
@@ -276,9 +284,6 @@
     "delete": "Delete",
     "deleted": "{name} deleted",
     "undo": "Undo",
-    "withYear": "{date} {year}",
-    "sameMonth": "{from}–{to}",
-    "range": "{from} – {to}",
     "addTitle": "Add a special day",
     "editTitle": "Edit special day",
     "close": "Close",

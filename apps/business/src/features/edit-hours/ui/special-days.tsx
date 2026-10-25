@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { bookingsAffectedDetailsSchema, type BookingsAffectedDetails } from '@yeral/contract/errors'
 import { HOURS_STEP, type WeekdayHours } from '@yeral/contract/settings'
-import { parseYmd, today } from '@yeral/domain/time'
+import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { isApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { Checkbox, Radio } from '@yeral/ui/checkbox'
+import { DatePicker } from '@yeral/ui/date-picker'
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '@yeral/ui/menu'
@@ -19,7 +20,7 @@ import { Calendar, CircleAlert, Ellipsis, Pencil, Plus, Trash2 } from 'lucide-re
 import { useId, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { useDayName, useErrorText } from '@/shared/i18n'
+import { useDatePickerWords, useDateSpan, useDayName, useErrorText } from '@/shared/i18n'
 import {
   dateProblem,
   dayOf,
@@ -37,16 +38,8 @@ type Saved = { hours: (WeekdayHours | null)[]; specialDays: SpecialDay[] }
 
 /** «2 November 2026», «1 January» (yearly), «21–22 March», «28 December 2026 – 3 January 2027». */
 function useDates() {
-  const t = useTranslations('specialDays')
-  const fmt = useFmt()
-  const year = (d: string) => String(parseYmd(d).getUTCFullYear())
-  return (d: SpecialDay) => {
-    const one = (date: string) => (d.yearly ? fmt.dayMonth(date) : t('withYear', { date: fmt.dayMonth(date), year: year(date) }))
-    if (d.from === d.to) return one(d.from)
-    if (d.from.slice(0, 7) === d.to.slice(0, 7)) return t('sameMonth', { from: parseYmd(d.from).getUTCDate(), to: one(d.to) })
-    if (d.yearly || year(d.from) === year(d.to)) return t('range', { from: fmt.dayMonth(d.from), to: one(d.to) })
-    return t('range', { from: one(d.from), to: one(d.to) })
-  }
+  const span = useDateSpan()
+  return (d: Pick<SpecialDay, 'from' | 'to' | 'yearly'>) => span(d.from, d.to, { year: !d.yearly })
 }
 
 /**
@@ -222,6 +215,8 @@ function SpecialDayModal({
   const count = useAffectedCount()
   const join = useJoin()
   const errorText = useErrorText()
+  const pickerWords = useDatePickerWords()
+  const datesOf = useDates()
   const ids = useId()
   // the business day it opened on: a day ending today isn't past yet
   const [todayDate] = useState(() => today(Date.now()))
@@ -233,6 +228,11 @@ function SpecialDayModal({
     // a changed day asks the api again
     setConflict(null)
   }
+
+  // the field reads a yearly day without its year
+  const words = { ...pickerWords, value: (date: string) => datesOf({ from: date, to: date, yearly: draft.yearly }) }
+  // a one-off can't start in the past, but one that has started keeps its first day
+  const earliest = draft.yearly ? undefined : original && original.from < todayDate ? original.from : todayDate
 
   // found again in the list as it is now (a refetch may have moved or dropped others)
   const others = saved.specialDays.filter((d) => !(original && sameDay(d, original)))
@@ -306,18 +306,38 @@ function SpecialDayModal({
           />
         </div>
       </fieldset>
+      {/* the month (rule 10a: react-day-picker) in the board's fields: one day, or From and To */}
       {draft.multi ? (
         <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
           <Field label={t('from')}>
-            <Input type="date" value={draft.start} onChange={(e) => set({ start: e.target.value })} />
+            <DatePicker
+              copy={words}
+              today={todayDate}
+              min={earliest}
+              value={draft.start || null}
+              onValueChange={(start) => start !== draft.start && set({ start })}
+            />
           </Field>
           <Field label={t('to')} error={dates && t(`dates.${dates}`)}>
-            <Input type="date" value={draft.end} onChange={(e) => set({ end: e.target.value })} />
+            <DatePicker
+              copy={words}
+              today={todayDate}
+              min={draft.start && (!earliest || draft.start > earliest) ? draft.start : earliest}
+              value={draft.end || null}
+              onValueChange={(end) => end !== draft.end && set({ end })}
+            />
           </Field>
         </div>
       ) : (
         <Field label={t('date')} error={dates && t(`dates.${dates}`)} className="max-w-60">
-          <Input type="date" value={draft.date} onChange={(e) => set({ date: e.target.value })} />
+          <DatePicker
+            copy={words}
+            today={todayDate}
+            min={earliest}
+            value={draft.date || null}
+            // the same day again changes nothing (a waiting choice over bookings stays)
+            onValueChange={(date) => date !== draft.date && set({ date })}
+          />
         </Field>
       )}
       <Checkbox

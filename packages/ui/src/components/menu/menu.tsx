@@ -18,7 +18,7 @@ export function MenuContent({ className, sideOffset = 8, align = 'end', ...props
         collisionPadding={16}
         {...props}
         className={cn(
-          'z-50 flex w-popover max-w-[calc(100vw-32px)] flex-col rounded-m border border-n-200 bg-n-0 p-1.5 shadow-raised outline-none data-[state=open]:animate-pop-in',
+          'z-65 flex w-popover max-w-[calc(100vw-32px)] flex-col rounded-m border border-n-200 bg-n-0 p-1.5 shadow-raised outline-none data-[state=open]:animate-pop-in',
           className,
         )}
       />
@@ -35,7 +35,7 @@ export function MenuSubContent({ className, sideOffset = 6, ...props }: Componen
         collisionPadding={16}
         {...props}
         className={cn(
-          'z-50 flex w-popover max-w-[calc(100vw-32px)] flex-col rounded-m border border-n-200 bg-n-0 p-1.5 shadow-raised outline-none data-[state=open]:animate-pop-in',
+          'z-65 flex w-popover max-w-[calc(100vw-32px)] flex-col rounded-m border border-n-200 bg-n-0 p-1.5 shadow-raised outline-none data-[state=open]:animate-pop-in',
           className,
         )}
       />

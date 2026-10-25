@@ -8,7 +8,7 @@ import type { Me } from '@yeral/contract/account'
 import type { BookingsAffectedDetails } from '@yeral/contract/errors'
 import type { Workspace } from '@yeral/contract/team'
 import { addDays, dow, today } from '@yeral/domain/time'
-import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
@@ -289,6 +289,19 @@ export const SpecialDaysList: Story = {
 }
 
 const body = within(document.body)
+/** Picks `date` in the field's month (DatePicker), moving a month at a time to it. */
+const pickDate = async (modal: Pick<typeof body, 'getByRole'>, label: string, date: string) => {
+  await userEvent.click(modal.getByRole('button', { name: new RegExp(`^${label} `) }))
+  // a neighbouring month's days are there too, hidden and without a button
+  const day = () => body.getByRole('grid').querySelector<HTMLButtonElement>(`[data-day="${date}"]:not([data-hidden]) button`)
+  await body.findByRole('grid')
+  for (let i = 0; i < 24 && !day(); i++) {
+    const shown = body.getByRole('grid').querySelector('[data-day]:not([data-hidden])')?.getAttribute('data-day') ?? ''
+    await userEvent.click(body.getByRole('button', { name: date < shown ? 'Previous month' : 'Next month' }))
+  }
+  await userEvent.click(day()!)
+  await waitFor(() => expect(body.queryByRole('grid')).toBeNull())
+}
 const openAdd = async (canvas: { findByRole: (role: string, options: { name: string }) => Promise<HTMLElement> }) => {
   await userEvent.click(await canvas.findByRole('button', { name: 'Add a special day' }))
   const dialog = await body.findByRole('dialog', { name: 'Add a special day' })
@@ -301,7 +314,7 @@ export const AddSpecialDay: Story = {
     const modal = await openAdd(canvas)
     await expect(modal.getByRole('button', { name: 'Add' })).toBeDisabled()
     await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Training day')
-    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: on(20) } })
+    await pickDate(modal, 'Date', on(20))
     await userEvent.click(modal.getByRole('button', { name: 'Add' }))
     const toast = await body.findByText('Special day added')
     await waitFor(() => expect(toast).toBeVisible())
@@ -309,14 +322,38 @@ export const AddSpecialDay: Story = {
   },
 }
 
-/** A day in the past, or other hours past midnight into the next day's opening: it says what to fix. */
+/** Several days: From and To, each picked in the month; To can't be before From. */
+export const AddSeveralDays: Story = {
+  play: async ({ canvas }) => {
+    const modal = await openAdd(canvas)
+    await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Stocktake week')
+    await userEvent.click(modal.getByRole('radio', { name: 'Several days' }))
+    const from = weekdayAhead(30)
+    await pickDate(modal, 'From', from)
+    await pickDate(modal, 'To', addDays(from, 2))
+    await expect(modal.getByRole('button', { name: 'Add' })).toBeEnabled()
+    // To opens no earlier than From
+    await userEvent.click(modal.getByRole('button', { name: /^To / }))
+    await body.findByRole('grid')
+    const before = body.getByRole('grid').querySelector<HTMLButtonElement>(`[data-day="${addDays(from, -1)}"]:not([data-hidden]) button`)
+    if (before) await expect(before).toBeDisabled()
+    await userEvent.keyboard('{Escape}')
+  },
+}
+
+/** A day in the past can't be picked; other hours past midnight into the next day's opening say what to fix. */
 export const SpecialDayProblems: Story = {
   play: async ({ canvas }) => {
     const modal = await openAdd(canvas)
     await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Late night')
-    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: on(-3) } })
-    await expect(await modal.findByText('You can’t pick a day in the past.')).toBeVisible()
-    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: weekdayAhead(12) } })
+    await userEvent.click(modal.getByRole('button', { name: /^Date / }))
+    const grid = await body.findByRole('grid')
+    // yesterday is grey in this month, or this month is the first one that opens
+    const yesterday = grid.querySelector<HTMLButtonElement>(`[data-day="${on(-1)}"] button`)
+    if (yesterday) await expect(yesterday).toBeDisabled()
+    else await expect(body.getByRole('button', { name: 'Previous month' })).toHaveAttribute('aria-disabled', 'true')
+    await userEvent.keyboard('{Escape}')
+    await pickDate(modal, 'Date', weekdayAhead(12))
     await userEvent.click(modal.getByRole('radio', { name: 'Different hours' }))
     await userEvent.selectOptions(modal.getByRole('combobox', { name: 'Opens' }), '20:00')
     await userEvent.selectOptions(modal.getByRole('combobox', { name: 'Closes' }), '10:00')
@@ -330,7 +367,7 @@ export const SpecialDayOverlap: Story = {
   play: async ({ canvas }) => {
     const modal = await openAdd(canvas)
     await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Nowruz — short day')
-    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: nextNowruz() } })
+    await pickDate(modal, 'Date', nextNowruz())
     await expect(await modal.findByText('These dates overlap “Nowruz”. On those days “Nowruz — short day” is used.')).toBeVisible()
   },
 }
@@ -344,7 +381,7 @@ export const SpecialDayOverBookings: Story = {
   play: async ({ canvas }) => {
     const modal = await openAdd(canvas)
     await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Repairs')
-    await fireEvent.change(modal.getByLabelText('Date'), { target: { value: on(1) } })
+    await pickDate(modal, 'Date', on(1))
     await userEvent.click(modal.getByRole('button', { name: 'Add' }))
     await expect(await modal.findByText('3 bookings and 1 request on this day — Maral 4')).toBeVisible()
     await expect(modal.getByRole('radio', { name: 'Keep them' })).toBeChecked()
