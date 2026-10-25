@@ -1,6 +1,6 @@
 import type { BusinessDetail } from '@yeral/contract/catalog'
-import { businessDay, currentBusinessDate, type BusinessHours } from '@yeral/domain/hours'
-import { addDays } from '@yeral/domain/time'
+import { businessDay, currentBusinessDate, workingIntervals, type BusinessHours } from '@yeral/domain/hours'
+import { addDays, dow } from '@yeral/domain/time'
 import type { Fmt } from '@yeral/i18n'
 
 type Words = (key: 'openUntil' | 'opensToday' | 'opensTomorrow' | 'opensOn' | 'closed', values?: Record<string, string>) => string
@@ -40,4 +40,37 @@ export function dayHours(
   const day = businessDay(calendar, date)
   if (day) return { hours: fmt.timeRange(day.open, day.close) }
   return { closed: true, reason: detail.specialDays.find((d) => d.date === date)?.name ?? null }
+}
+
+export interface WeekRow {
+  date: string
+  today: boolean
+  /** «09:00–20:00», a break as two stretches («09:00–13:00, 14:00–20:00»); null when closed. */
+  hours: string | null
+  /** The special day's name («Holiday»), when one sets the day's hours. */
+  special: string | null
+}
+
+/**
+ * The hours table (Venue «Iş wagty», States 06): Monday to Sunday, each as the coming day of that name has it from the
+ * business day under way (today's own), so a special day in the next week shows with its name; today marked.
+ */
+export function weekRows(detail: Pick<BusinessDetail, 'hours' | 'specialDays'>, now: number, fmt: Fmt): WeekRow[] {
+  const calendar = calendarOf(detail)
+  const current = currentBusinessDate(calendar, now)
+  return Array.from({ length: 7 }, (_, i) => addDays(current, i))
+    .sort((a, b) => dow(a) - dow(b))
+    .map((date) => {
+      const day = businessDay(calendar, date)
+      return {
+        date,
+        today: date === current,
+        hours:
+          day &&
+          workingIntervals(day)
+            .map((s) => fmt.timeRange(s.start, s.end))
+            .join(', '),
+        special: detail.specialDays.find((d) => d.date === date)?.name ?? null,
+      }
+    })
 }

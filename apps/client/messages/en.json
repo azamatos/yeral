@@ -172,6 +172,68 @@
     "services": {
       "title": "Services"
     },
+    "sections": {
+      "label": "Sections",
+      "services": "Services",
+      "specialists": "Specialists",
+      "reviews": "Reviews",
+      "about": "About"
+    },
+    "team": {
+      "title": "Specialists",
+      "next": "Next free:",
+      "noneSoon": "No free times soon",
+      "book": "Book",
+      "bookLabel": "Book with {name}"
+    },
+    "reviewList": {
+      "title": "Reviews",
+      "average": "Average rating: {rating} out of 5",
+      "count": "{count, plural, one {# review} other {# reviews}}",
+      "row": "{stars, plural, one {# star} other {# stars}}: {count, plural, one {# review} other {# reviews}}",
+      "stars": "Rating: {rating} out of 5",
+      "when": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "days": "{count, plural, one {# day ago} other {# days ago}}",
+        "weeks": "{count, plural, one {# week ago} other {# weeks ago}}",
+        "months": "{count, plural, one {# month ago} other {# months ago}}",
+        "years": "{count, plural, one {# year ago} other {# years ago}}"
+      },
+      "checking": "{brand} is checking this review · not counted in the rating",
+      "reply": "Reply from {name}",
+      "more": "All reviews",
+      "who": "Only clients who booked and came can leave a rating.",
+      "none": "No reviews yet",
+      "failed": "Couldn't load the reviews. Reload the page to try again."
+    },
+    "about": {
+      "title": "About",
+      "hours": "Hours",
+      "today": "Today",
+      "closed": "Closed",
+      "address": "Address",
+      "onMap": "{name} on the map",
+      "directions": "Directions",
+      "amenities": "Amenities",
+      "amenity": {
+        "wifi": "Wi-Fi",
+        "air_conditioning": "Air conditioning",
+        "parking": "Parking",
+        "card_payment": "Card payment at the place"
+      },
+      "rules": "Booking rules",
+      "cancelBefore": "You can cancel or change the booking for free up to {time} before.",
+      "cancelAnyTime": "You can cancel or change the booking for free at any time.",
+      "late": "If you're more than {time} late, the booking may be cancelled.",
+      "pay": "Pay at the place.",
+      "payCashOrCard": "Pay at the place: cash or card.",
+      "byHand": "{name} confirms each booking itself. You'll see the answer in My bookings.",
+      "atOnce": "Your time is set as soon as you book. You'll find it in My bookings."
+    },
+    "nearby": {
+      "title": "Places nearby"
+    },
     "card": {
       "label": "Booking",
       "nextFree": "Next free time",

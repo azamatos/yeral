@@ -1,6 +1,7 @@
 import type { BookingDetail } from '@yeral/contract/bookings'
-import type { BusinessCard, BusinessDetail } from '@yeral/contract/catalog'
+import type { BusinessCard, BusinessDetail, reviewSchema } from '@yeral/contract/catalog'
 import { addDays, today } from '@yeral/domain/time'
+import type { z } from 'zod'
 import { authApi, fakeFetch, json, refuse, type AuthApiOptions } from './fake-api'
 
 const service = (
@@ -127,7 +128,8 @@ export const GLOW: BusinessDetail = {
     specialist('st-ayna', 'Aýna', 'Stylist', 4.9, ['s1', 's2', 's3', 's4', 's12'], { date: today(), start: 930 }),
     specialist('st-maral', 'Maral', 'Nail artist', 5, ['s5', 's6', 's7'], { date: today(), start: 960 }),
     specialist('st-jeren', 'Jeren', 'Cosmetologist', 4.8, ['s8', 's9'], { date: addDays(today(), 1), start: 600 }),
-    specialist('st-leyli', 'Leýli', 'Massage therapist', 4.9, ['s10', 's11'], { date: today(), start: 1080 }),
+    // nothing free soon, as the specialist step answers for her
+    specialist('st-leyli', 'Leýli', 'Massage therapist', 4.9, ['s10', 's11'], null),
   ],
   tables: null,
   similar: [],
@@ -152,11 +154,75 @@ function freeTimes(date: string | null) {
   }
 }
 
+type Review = z.infer<typeof reviewSchema>
+
+const DAY = 86_400_000
+
+/**
+ * Venue's reviews, newest first (written the English way): Merdan K.'s 1★ from yesterday that the business reported
+ * and Ýeral is checking (round 3 names him, never «Anonymous»), Gülälek N.'s with the business's reply, two more.
+ */
+export const REVIEWS: Review[] = [
+  {
+    id: 'r1',
+    author: 'Merdan K.',
+    rating: 1,
+    tags: [],
+    text: 'The worst salon, go somewhere else!',
+    createdAt: Date.now() - DAY,
+    what: '',
+    reply: null,
+    underReview: true,
+  },
+  {
+    id: 'r2',
+    author: 'Gülälek N.',
+    rating: 5,
+    tags: [],
+    text: 'Aýna cut my hair exactly as I wanted. They took me on time, and the salon is clean and calm.',
+    createdAt: Date.now() - 2 * DAY,
+    what: 'Women’s haircut · Aýna',
+    reply: { text: 'Thank you, Gülälek! We look forward to seeing you again.', createdAt: Date.now() - DAY },
+    underReview: false,
+  },
+  {
+    id: 'r3',
+    author: 'Ogulşat M.',
+    rating: 5,
+    tags: [],
+    text: 'Maral works with great care. The gel polish lasted three weeks.',
+    createdAt: Date.now() - 7 * DAY,
+    what: 'Gel manicure · Maral',
+    reply: null,
+    underReview: false,
+  },
+  {
+    id: 'r4',
+    author: 'Bahar A.',
+    rating: 4,
+    tags: [],
+    text: 'Good service, but I had to wait a little before it started.',
+    createdAt: Date.now() - 21 * DAY,
+    what: 'Facial cleansing · Jeren',
+    reply: null,
+    underReview: false,
+  },
+]
+
+/** The reviews' first page as the api sends it (12), and the next from `cursor`. */
+function reviewPage(reviews: readonly Review[], cursor: string | null) {
+  const from = Number(cursor ?? 0)
+  const items = reviews.slice(from, from + 12)
+  return { items, cursor: from + 12 < reviews.length ? String(from + 12) : null }
+}
+
 export interface BusinessApiOptions extends AuthApiOptions {
   /** The page as the api answers it, or the error a missing (`not_found`) or unchecked (`in_review`) one gives. */
   business?: BusinessDetail | 'not_found' | 'in_review'
   /** The signed-in person's favourites, by slug. */
   favourites?: string[]
+  /** The page's reviews, newest first (`REVIEWS` by default). */
+  reviews?: Review[]
   /** A start someone else takes first: sending it answers `slot_taken` with the nearest free times, once. */
   taken?: number
 }
@@ -220,7 +286,7 @@ function sentBooking(business: BusinessDetail, body: Record<string, unknown>, co
  * (`/me/favorites`) and, for everything else, the sign-in (`authApi`).
  */
 export const businessApi =
-  ({ business = GLOW, favourites = [], taken, ...auth }: BusinessApiOptions = {}) =>
+  ({ business = GLOW, favourites = [], reviews = REVIEWS, taken, ...auth }: BusinessApiOptions = {}) =>
   (): typeof fetch => {
     const signIn = authApi(auth)()
     const saved = new Set(favourites)
@@ -261,6 +327,7 @@ export const businessApi =
           ],
         })
       if (/^GET \/businesses\/[^/]+\/availability$/.test(route)) return json(freeTimes(query.get('date')))
+      if (/^GET \/businesses\/[^/]+\/reviews$/.test(route)) return json(reviewPage(reviews, query.get('cursor')))
       const page = /^GET \/businesses\/([^/]+)$/.exec(route)
       if (page) return typeof business === 'string' ? refuse(404, business) : json(business)
       if (route === 'GET /me/favorites') return json({ items: [...saved].map(card), cursor: null })
