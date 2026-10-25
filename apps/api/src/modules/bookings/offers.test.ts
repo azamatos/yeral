@@ -308,7 +308,7 @@ describe('offered times', () => {
     })
 
     it('an expired request: the free times its drawer offers', async () => {
-      const { b, code } = await request('+99365444032', 10)
+      const { b, code } = await request('+99365444032', 1)
       t.clock.now += 31 * MIN
       await runDueJobs(t.deps)
       const { row, detail } = await both(b, code)
@@ -317,12 +317,12 @@ describe('offered times', () => {
     })
 
     it('a confirmed booking with a move waiting: the move, as its drawer shows it', async () => {
-      const { b, code } = await request('+99365444033', 12, FRI)
+      const { b, code } = await request('+99365444033', 1, FRI)
       await db
         .update(bookings)
         .set({ status: 'confirmed', confirmedAt: new Date(t.clock.now) })
         .where(eq(bookings.code, code))
-      const to = await aynaFree(b, 14, FRI)
+      const to = await aynaFree(b, 3, FRI)
       expect((await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: to } })).status).toBe(200)
       const { row } = await both(b, code)
       expect(row.reschedule).toMatchObject({ date: FRI, start: to })
