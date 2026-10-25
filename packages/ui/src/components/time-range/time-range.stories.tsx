@@ -44,6 +44,8 @@ export const Default: Story = {
     const closes = canvas.getByRole('combobox', { name: 'Monday: closes' })
     await expect(opens).toHaveDisplayValue('09:00')
     await expect(closes).toHaveDisplayValue('20:00')
+    // `.y-tsel`: tabular figures, so the week's times line up in their columns
+    await expect(getComputedStyle(opens).fontVariantNumeric).toBe('tabular-nums')
     await expect(opens.querySelectorAll('option')).toHaveLength(48)
     await expect(opens.querySelector('option')).toHaveTextContent('00:00')
     await expect(closes.querySelector('option:last-child')).toHaveTextContent('24:00')

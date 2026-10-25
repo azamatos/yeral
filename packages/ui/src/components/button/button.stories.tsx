@@ -97,21 +97,15 @@ export const Disabled: Story = {
   args: { disabled: true },
   render: (args) => (
     <div className="flex flex-wrap items-center gap-3">
-      <Button {...args} variant="primary">
-        Continue
-      </Button>
-      <Button {...args} variant="secondary">
-        Kartada görkez
-      </Button>
-      <Button {...args} variant="tint">
-        Halanlarym
-      </Button>
-      <Button {...args} variant="danger-solid">
-        Hawa, ýatyr
-      </Button>
+      {(['primary', 'secondary', 'ghost', 'tint', 'danger', 'danger-ghost', 'danger-solid', 'ink'] as const).map((variant) => (
+        <Button key={variant} {...args} variant={variant}>
+          {variant}
+        </Button>
+      ))}
     </div>
   ),
   play: async ({ canvas }) => {
+    await expect(canvas.getAllByRole('button')).toHaveLength(8)
     for (const button of canvas.getAllByRole('button')) {
       await expect(button).toBeDisabled()
       const style = getComputedStyle(button)

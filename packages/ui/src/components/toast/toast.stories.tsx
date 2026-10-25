@@ -25,10 +25,11 @@ export const Undo: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Ýatyr' }))
     const message = await screen.findByText('Ýazylyş ýatyryldy')
     await waitFor(() => expect(message).toBeVisible())
-    // 16 on the left, 8 on the right beside the action
+    // DS-Patterns `.toast`: the action ends 8 from the toast's right edge
     const box = message.closest('[data-sonner-toast]')
-    await expect(box && getComputedStyle(box).paddingRight).toBe('8px')
-    await userEvent.click(screen.getByRole('button', { name: 'Yzyna al' }))
+    const action = screen.getByRole('button', { name: 'Yzyna al' })
+    await expect(box && Math.round(box.getBoundingClientRect().right - action.getBoundingClientRect().right)).toBe(8)
+    await userEvent.click(action)
     await expect(undo).toHaveBeenCalled()
   },
 }
@@ -49,9 +50,9 @@ export const ShellOffset: Story = {
     await waitFor(() => expect(message).toBeVisible())
     const list = message.closest('[data-sonner-toaster]')
     await expect(list && getComputedStyle(list).getPropertyValue('--offset-left').trim()).toBe('272px')
-    // words alone («Saved»): 16 on both sides, so the text sits centred
+    // words alone («Saved»): DS-Patterns `.toast.plain`, 16 left and 20 right
     const box = message.closest('[data-sonner-toast]')
     await expect(box && getComputedStyle(box).paddingLeft).toBe('16px')
-    await expect(box && getComputedStyle(box).paddingRight).toBe('16px')
+    await expect(box && getComputedStyle(box).paddingRight).toBe('20px')
   },
 }

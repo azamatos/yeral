@@ -35,7 +35,7 @@ export const Sizes: Story = {
       <Select aria-label="Hold requests for" size="m" className="min-w-44">
         <option>10 min</option>
       </Select>
-      <Select aria-label="Opens" size="s" tabular className="w-26">
+      <Select aria-label="Opens" size="s" className="w-26">
         <option>09:00</option>
       </Select>
     </div>
