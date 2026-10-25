@@ -199,6 +199,7 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
               replace: true,
             })
           }
+          onShow={(day) => go({ date: day === todayDate ? undefined : day, booking: undefined }, true)}
           onClose={() => go({ request: undefined }, true)}
         />
       )}

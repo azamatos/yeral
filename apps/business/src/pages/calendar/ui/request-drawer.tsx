@@ -6,6 +6,7 @@ import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
+import { ChangeSummary } from '@yeral/ui/change-summary'
 import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@yeral/ui/drawer'
 import { KeyValueList } from '@yeral/ui/key-value'
 import { Pill } from '@yeral/ui/pill'
@@ -36,6 +37,7 @@ export function RequestDrawer({
   business,
   onGo,
   onAnswered,
+  onShow,
   onClose,
 }: {
   slug: string
@@ -45,6 +47,8 @@ export function RequestDrawer({
   business: BusinessHours | null
   /** Open another request on its day (the pager, «Next request»; the toast's works from any page). */
   onGo: (request: Pick<Request, 'code' | 'date'>, replace?: boolean) => void
+  /** «Show» beside a move's times: the calendar goes to that day, the drawer stays. */
+  onShow: (date: string) => void
   /** This request was answered: the drawer closes if it's still the one open. */
   onAnswered: (code: string) => void
   onClose: () => void
@@ -105,7 +109,7 @@ export function RequestDrawer({
           }
         />
         {request ? (
-          <RequestBody request={request} now={now} business={business} />
+          <RequestBody request={request} now={now} business={business} onShow={onShow} />
         ) : list.isPending ? (
           <DrawerBody className="items-center justify-center">
             <Spinner label={t('loading')} />
@@ -120,7 +124,8 @@ export function RequestDrawer({
         )}
         {request ? (
           request.canAnswer ? (
-            <DrawerFooter>
+            // the two answers share the width (B-Calendar `.drw-f`, flex 1 1 0)
+            <DrawerFooter className="[&>*]:basis-0">
               <Button variant="secondary" disabled={answering} onClick={() => setDeclining(request)}>
                 {t('decline')}
               </Button>
@@ -173,7 +178,17 @@ export function RequestDrawer({
 }
 
 /** What the drawer shows of one request. */
-function RequestBody({ request: r, now, business }: { request: Request; now: number; business: BusinessHours | null }) {
+function RequestBody({
+  request: r,
+  now,
+  business,
+  onShow,
+}: {
+  request: Request
+  now: number
+  business: BusinessHours | null
+  onShow: (date: string) => void
+}) {
   const t = useTranslations('calendar.request')
   const s = useTranslations('status')
   const fmt = useFmt()
@@ -235,6 +250,20 @@ function RequestBody({ request: r, now, business }: { request: Request; now: num
           ? t(move ? 'closedRunsOutMove' : 'closedRunsOut', { open: at(addDays(day, state.inDays), state.at), at: runsOut })
           : t(move ? 'runsOutMove' : 'runsOut', { at: runsOut })}
       </Callout>
+      {move && r.from && (
+        // the client's move (B-Calendar `.mvc`, DS-Business MoveRequestBox): the time now and the one asked for
+        <div className="flex flex-col gap-2.5 rounded-m bg-n-50 p-3.5">
+          <ChangeSummary
+            variant="rows"
+            title={t('moveBox')}
+            labels={{ from: t('previousTime'), to: t('newTime') }}
+            from={<Shown text={when(r.from.date, r.from.start, r.from.end)} label={t('show')} onShow={() => onShow(r.from!.date)} />}
+            to={<Shown text={when(r.date, r.start, r.end)} label={t('show')} onShow={() => onShow(r.date)} />}
+            className="bg-transparent p-0"
+          />
+          <span className="text-dense text-n-600">{t('moveCaption')}</span>
+        </div>
+      )}
       <div className="flex flex-col gap-2">
         <div className="flex items-start gap-3">
           <Avatar name={r.client.name} size={40} letters={1} tone="tint" decorative />
@@ -267,13 +296,8 @@ function RequestBody({ request: r, now, business }: { request: Request; now: num
         items={[
           { key: t('service'), value: services },
           ...(staff ? [{ key: t('specialist'), value: staff }] : []),
-          // a move: the booking's time now and the one asked for (B5 draws them in their own box)
-          ...(move && r.from
-            ? [
-                { key: t('previousTime'), value: when(r.from.date, r.from.start, r.from.end) },
-                { key: t('newTime'), value: when(r.date, r.start, r.end) },
-              ]
-            : [{ key: t('dateTime'), value: when(r.date, r.start, r.end) }]),
+          // a move's times are in its box above
+          ...(move ? [] : [{ key: t('dateTime'), value: when(r.date, r.start, r.end) }]),
           { key: t('duration'), value: fmt.duration(r.end - r.start) },
           ...(r.price ? [{ key: t('price'), value: fmt.price(r.price) }] : []),
           ...(move ? [{ key: t('booking'), value: t('bookingKeeps') }] : []),
@@ -289,4 +313,20 @@ function RequestBody({ request: r, now, business }: { request: Request; now: num
     const local = localOf(at)
     return t('when', { date: fmt.relativeShortDate(local.date, day), time: fmt.time(local.min) })
   }
+}
+
+/** A time in a move's box with «Show» on its right: the calendar goes to that day. */
+function Shown({ text, label, onShow }: { text: string; label: string; onShow: () => void }) {
+  return (
+    <span className="flex items-baseline justify-between gap-2.5">
+      <span>{text}</span>
+      <button
+        type="button"
+        onClick={onShow}
+        className="flex-none cursor-pointer rounded-xs text-dense font-semibold text-a-600 hover:underline focus-visible:shadow-[0_0_0_2px_var(--color-a-400)] focus-visible:outline-none"
+      >
+        {label}
+      </button>
+    </span>
+  )
 }
