@@ -33,7 +33,9 @@ api.yeral.app {
 	request_body {
 		max_size 11MB
 	}
-	# Caddy writes the caller's address into X-Forwarded-For and drops what the caller sent (TRUSTED_IP_HEADER)
+	# Caddy writes the caller's address into X-Forwarded-For and drops what the caller sent (TRUSTED_IP_HEADER); the
+	# events stream (`/v1/events/stream`, text/event-stream) goes through at once: reverse_proxy flushes it, and `encode`
+	# leaves its `no-transform` answer alone (checked in CI's Docker stack)
 	reverse_proxy yeral-api:3004
 }
 

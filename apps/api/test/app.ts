@@ -4,6 +4,7 @@ import { createApp } from '../src/app'
 import { DEV_ADMIN_KEY } from '../src/config'
 import type { Db } from '../src/db/client'
 import type { Deps } from '../src/deps'
+import { createLive } from '../src/modules/events/live'
 import { nullLogger } from '../src/ports/log'
 import { memorySms } from '../src/ports/sms'
 import { noGeocoder } from '../src/ports/geocoder'
@@ -52,6 +53,7 @@ export function testApp(
     bookingTypes: opts.bookingTypes ?? BOOKING_TYPES,
     demoWorkspace: opts.demoWorkspace ?? false,
     geocoder: opts.geocoder ?? noGeocoder,
+    live: createLive(db),
   }
   const app = createApp(async (c, next) => {
     c.set('deps', deps)

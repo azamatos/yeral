@@ -439,7 +439,7 @@ describe('live events', () => {
   it('a poll asked for mid-request runs right after it instead of being dropped', async () => {
     const f = eventsFixture()
     f.queryClient.setQueryData(keys.me(), me)
-    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000 })
+    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000, stream: null })
     await events.poll()
     events.stop()
     expect(polls(f)).toEqual(['', '?after=7'])
@@ -448,7 +448,7 @@ describe('live events', () => {
   it('polls after the person’s own mutations', async () => {
     const f = eventsFixture()
     f.queryClient.setQueryData(keys.me(), me)
-    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000 })
+    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000, stream: null })
     await events.poll()
     await new MutationObserver(f.queryClient, f.sdk.me.setFavorite()).mutate({ slug: 'glow-studio', on: true })
     await vi.waitFor(() => expect(polls(f)).toEqual(['', '?after=7', '?after=7']))
@@ -457,7 +457,7 @@ describe('live events', () => {
 
   it('polls only while someone is signed in and the page is visible', async () => {
     const f = eventsFixture()
-    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000 })
+    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000, stream: null })
     await events.poll()
     f.queryClient.setQueryData(keys.me(), null)
     await events.poll()
@@ -478,9 +478,112 @@ describe('live events', () => {
     }
   })
 
+  /** An `EventSource` played by the test: it records its address and is told what arrives. */
+  function fakeStreams() {
+    const opened: { url: string; closed: boolean; readyState: number; on: Record<string, (() => void)[]>; emit: (type: string) => void }[] =
+      []
+    const open = (url: string) => {
+      const s = {
+        url,
+        closed: false,
+        readyState: 1,
+        on: {} as Record<string, (() => void)[]>,
+        addEventListener(type: string, listener: () => void) {
+          ;(s.on[type] ??= []).push(listener)
+        },
+        close() {
+          s.closed = true
+          s.readyState = 2
+        },
+        emit(type: string) {
+          for (const l of s.on[type] ?? []) l()
+        },
+      }
+      opened.push(s)
+      return s
+    }
+    return { opened, open }
+  }
+
+  it('opens the stream while someone is signed in and the tab is visible, and reads at each nudge', async () => {
+    const f = eventsFixture()
+    const streams = fakeStreams()
+    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000, stream: streams.open })
+    try {
+      // nobody signed in: no stream
+      expect(streams.opened).toEqual([])
+      f.queryClient.setQueryData(keys.me(), me)
+      await vi.waitFor(() => expect(streams.opened).toHaveLength(1))
+      expect(streams.opened[0]!.url).toBe('http://api.test/v1/events/stream')
+      await vi.waitFor(() => expect(polls(f)).toEqual(['']))
+      streams.opened[0]!.emit('changed')
+      await vi.waitFor(() => expect(polls(f)).toEqual(['', '?after=7']))
+      // (re)connected: whatever changed meanwhile
+      streams.opened[0]!.emit('ready')
+      await vi.waitFor(() => expect(polls(f)).toHaveLength(3))
+      // away from the tab: closed; back: opened again
+      focusManager.setFocused(false)
+      expect(streams.opened[0]!.closed).toBe(true)
+      focusManager.setFocused(true)
+      expect(streams.opened).toHaveLength(2)
+      // signed in as someone else: a stream of theirs; signed out: none
+      f.queryClient.setQueryData(keys.me(), { ...me, id: 'u2' })
+      expect(streams.opened[1]!.closed).toBe(true)
+      expect(streams.opened).toHaveLength(3)
+      f.queryClient.setQueryData(keys.me(), null)
+      expect(streams.opened[2]!.closed).toBe(true)
+      expect(streams.opened).toHaveLength(3)
+    } finally {
+      events.stop()
+      focusManager.setFocused(undefined)
+    }
+  })
+
+  it('reads again shortly while the api says an event is held back, and stops once it isn’t', async () => {
+    let held = 2
+    const f = fixture((url) =>
+      url.pathname === '/v1/events' ? json(200, { items: [], cursor: '7', held: url.search !== '' && held-- > 0 }) : json(204, null),
+    )
+    f.queryClient.setQueryData(keys.me(), me)
+    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000, rereadMs: 10, stream: null })
+    try {
+      await events.poll()
+      await events.poll()
+      // held twice: two more reads (10 ms, 20 ms later), then nothing
+      await vi.waitFor(() => expect(polls(f)).toEqual(['', '?after=7', '?after=7', '?after=7']))
+      await new Promise((resolve) => setTimeout(resolve, 80))
+      expect(polls(f)).toHaveLength(4)
+    } finally {
+      events.stop()
+    }
+  })
+
+  it('a stream closed for good asks who is signed in and opens again later, later each time; stop closes it', async () => {
+    const f = eventsFixture()
+    const streams = fakeStreams()
+    f.queryClient.setQueryData(keys.me(), me)
+    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000, reopenMs: 20, stream: streams.open })
+    expect(streams.opened).toHaveLength(1)
+    // a dropped connection comes back by itself: nothing to do
+    streams.opened[0]!.emit('error')
+    expect(streams.opened).toHaveLength(1)
+    streams.opened[0]!.readyState = 2
+    streams.opened[0]!.emit('error')
+    expect(f.queryClient.getQueryState(keys.me())?.isInvalidated).toBe(true)
+    await vi.waitFor(() => expect(streams.opened).toHaveLength(2))
+    // closed again before it said ready: 40 ms this time
+    const at = Date.now()
+    streams.opened[1]!.readyState = 2
+    streams.opened[1]!.emit('error')
+    await vi.waitFor(() => expect(streams.opened).toHaveLength(3))
+    expect(Date.now() - at).toBeGreaterThanOrEqual(35)
+    events.stop()
+    expect(streams.opened[2]!.closed).toBe(true)
+  })
+
   it('signing in starts polling at once; a 401 asks who is signed in again', async () => {
     const f = fixture(() => json(401, { error: { code: 'unauthorized' } }))
-    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000 })
+    const events = startEvents(f.client, f.queryClient, { intervalMs: 60_000, stream: null })
     f.queryClient.setQueryData(keys.me(), me)
     await vi.waitFor(() => expect(polls(f)).toEqual(['']))
     await events.poll()

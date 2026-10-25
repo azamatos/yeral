@@ -6,6 +6,7 @@ import { loadConfig } from '../config'
 import { createDb, createPool } from '../db/client'
 import { createDeps } from '../deps'
 import { findUp } from '../lib/find-up'
+import { listenForEvents } from '../modules/events/live'
 import { jobsTick } from '../modules/jobs/tick'
 
 const config = loadConfig(process.env)
@@ -28,6 +29,8 @@ if (config.site.demo || process.env.DEMO_MEDIA_DIR) {
 }
 
 const server = serve({ fetch: app.fetch, port: config.port }, (info) => log.info('listening', { port: info.port, env: config.site.env }))
+// the events' NOTIFYs, nudging the open streams (`GET /v1/events/stream`)
+const stopListening = listenForEvents(config.databaseUrl, deps.live, log)
 
 // the jobs tick (ADR 0005): expiries, completions, SMS, reminders; one run at a time in this process, and across
 // processes through the tick's database lock
@@ -44,6 +47,6 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
     clearInterval(timer)
     server.close()
-    void pool.end().then(() => process.exit(0))
+    void Promise.all([stopListening(), pool.end()]).then(() => process.exit(0))
   })
 }

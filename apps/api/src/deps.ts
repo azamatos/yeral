@@ -4,6 +4,7 @@ import type { SiteConfig } from '@yeral/lib/site'
 import type { Config } from './config'
 import type { Db } from './db/client'
 import type { TrustedIpHeader } from './lib/rate-limit'
+import { createLive, type Live } from './modules/events/live'
 import { build } from './version'
 import { noGeocoder, photonGeocoder, type GeocoderPort } from './ports/geocoder'
 import { createLogger, type Logger } from './ports/log'
@@ -37,6 +38,8 @@ export interface Deps {
   demoWorkspace: boolean
   /** The address search behind the map pin (ADR 0027). */
   geocoder: GeocoderPort
+  /** The open event streams and their nudges (`modules/events/live.ts`); the Node entry LISTENs into it. */
+  live: Live
 }
 
 /** The dependencies as the Node entry builds them (ADR 0024). */
@@ -60,5 +63,6 @@ export function createDeps(config: Config, db: Db, log: Logger = createLogger(co
     geocoder: config.geocoderUrl
       ? photonGeocoder(config.geocoderUrl, `${new URL(config.site.urls.client).host}/${build.version} (+${config.site.urls.client})`)
       : noGeocoder,
+    live: createLive(db),
   }
 }

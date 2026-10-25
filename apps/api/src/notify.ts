@@ -7,10 +7,18 @@ import { MARKET } from '@yeral/domain/market'
 import { localized, reasonWords, type BusinessCancelReason, type DeclineReason, type Locale } from '@yeral/domain/model'
 import { epochOf, localOf } from '@yeral/domain/time'
 import { createFmt, createT } from '@yeral/i18n/fmt'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import type { Queryable } from './db/client'
 import { cities, events, jobs } from './db/schema'
 
+/** The channel an event's NOTIFY goes out on; the api's one LISTEN (`modules/events/live.ts`) nudges the open streams. */
+export const EVENTS_CHANNEL = 'yeral_events'
+
+/**
+ * An event: its row, which `GET /v1/events` reads (who sees what is decided there), and a NOTIFY with its business and
+ * user, which Postgres sends when the transaction commits (nothing if it rolls back), so the streams of whom it
+ * concerns read again at once.
+ */
 export async function emit(
   db: Queryable,
   e: { type: EventType; businessId: string | null; bookingId?: string | null; bookingCode?: string | null; userId?: string | null },
@@ -22,6 +30,7 @@ export async function emit(
     bookingCode: e.bookingCode ?? null,
     userId: e.userId ?? null,
   })
+  await db.execute(sql`select pg_notify(${EVENTS_CHANNEL}, ${JSON.stringify({ b: e.businessId, u: e.userId ?? null })})`)
 }
 
 /** Queue an SMS for `runAt` (the app clock, never the wall clock); `dedupeKey` makes it idempotent. */

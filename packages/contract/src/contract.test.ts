@@ -165,8 +165,8 @@ describe('query strings', () => {
     expect(eventsQuerySchema.safeParse({ after: 'abc' }).success).toBe(false)
     expect(eventsQuerySchema.safeParse({ after: '1.2.3' }).success).toBe(false)
     expect(eventsQuerySchema.safeParse({ after: '' }).success).toBe(false)
-    expect(eventListSchema.safeParse({ items: [], cursor: '7421.318' }).success).toBe(true)
-    expect(eventListSchema.safeParse({ items: [], cursor: 'garbage' }).success).toBe(false)
+    expect(eventListSchema.safeParse({ items: [], cursor: '7421.318', held: false }).success).toBe(true)
+    expect(eventListSchema.safeParse({ items: [], cursor: 'garbage', held: false }).success).toBe(false)
   })
 })
 
