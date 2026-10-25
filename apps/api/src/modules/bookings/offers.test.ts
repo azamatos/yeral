@@ -266,4 +266,67 @@ describe('offered times', () => {
       await db.update(services).set({ online: true }).where(eq(services.id, haircut))
     }
   })
+
+  describe('My bookings rows say what their drawers say (book C-24–C-31)', () => {
+    type Row = { code: string; holdUntil: number | null; reschedule: unknown; decline: unknown; offers: unknown; actions: unknown }
+    /** The row and the drawer of a booking: the row's actions, answer time and waiting move are the drawer's. */
+    const both = async (b: ReturnType<typeof browser>, code: string, tab: 'upcoming' | 'past' = 'upcoming') => {
+      const row = ((await b.req(`/v1/me/bookings?tab=${tab}&lang=en`)).json.items as Row[]).find((i) => i.code === code)!
+      const detail = (await b.req(`/v1/me/bookings/${code}?lang=en`)).json
+      expect(row).toBeDefined()
+      expect(row.actions).toEqual(detail.actions)
+      expect(row.holdUntil).toEqual(detail.holdUntil)
+      expect(row.reschedule).toEqual(detail.reschedule)
+      return { row, detail }
+    }
+
+    it('a waiting request: its answer time and what can be done, no decline, nothing offered', async () => {
+      const { b, code } = await request('+99365444030', 8)
+      const { row } = await both(b, code)
+      expect(row.holdUntil).toEqual(expect.any(Number))
+      expect(row).toMatchObject({ decline: null, offers: null, reschedule: null, actions: { cancel: true } })
+    })
+
+    it('a declined request: the reason, and the times offered as the drawer lists them', async () => {
+      const { b, code } = await request('+99365444031', 6, FRI)
+      const start = await aynaFree(b, 8, FRI)
+      await db
+        .update(bookings)
+        .set({
+          status: 'cancelled',
+          cancelledBy: 'business',
+          cancelledAt: new Date(t.clock.now),
+          declineReason: 'slot_busy',
+          declineText: null,
+          declineAlternatives: [{ date: FRI, start, end: start + 60, staffId: who['Aýna']! }],
+        })
+        .where(eq(bookings.code, code))
+      const { row, detail } = await both(b, code)
+      expect(row.decline).toEqual({ reason: 'slot_busy', text: null })
+      expect(row.offers).toEqual({ source: 'decline', times: detail.decline.alternatives })
+      expect((row.offers as { times: Offer[] }).times[0]?.state).toBe('free')
+    })
+
+    it('an expired request: the free times its drawer offers', async () => {
+      const { b, code } = await request('+99365444032', 10)
+      t.clock.now += 31 * MIN
+      await runDueJobs(t.deps)
+      const { row, detail } = await both(b, code)
+      expect(detail.expiredAlternatives.length).toBeGreaterThan(0)
+      expect(row.offers).toEqual({ source: 'expired', times: detail.expiredAlternatives })
+    })
+
+    it('a confirmed booking with a move waiting: the move, as its drawer shows it', async () => {
+      const { b, code } = await request('+99365444033', 12, FRI)
+      await db
+        .update(bookings)
+        .set({ status: 'confirmed', confirmedAt: new Date(t.clock.now) })
+        .where(eq(bookings.code, code))
+      const to = await aynaFree(b, 14, FRI)
+      expect((await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: to } })).status).toBe(200)
+      const { row } = await both(b, code)
+      expect(row.reschedule).toMatchObject({ date: FRI, start: to })
+      expect(row).toMatchObject({ holdUntil: null, decline: null, offers: null })
+    })
+  })
 })

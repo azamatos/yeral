@@ -132,6 +132,31 @@ export const TIMELINE_EVENTS = [
   'noshow',
 ] as const
 
+/** What the client can do with a booking now (the card and the drawer alike). */
+export const bookingActionsSchema = z.object({
+  cancel: z.boolean(),
+  reschedule: z.boolean(),
+  editNote: z.boolean(),
+  callOnly: z.boolean(),
+  review: z.boolean(),
+  editReview: z.boolean(),
+  bookAgain: z.boolean(),
+  /** "Yzyna al" after the client's own cancel, for a short while and only if the time is still free. */
+  restore: z.boolean(),
+})
+
+/** A pending move of a booking: the original stays confirmed until the business answers. */
+export const waitingMoveSchema = z.object({
+  date: ymdSchema,
+  start: startMinuteSchema,
+  end: minuteSchema,
+  holdUntil: epochSchema.nullable(),
+})
+
+/** Where an offered time comes from: a decline, an expired request, or the business's cancel (B-39, B-40). */
+export const OFFER_SOURCES = ['decline', 'expired', 'cancel'] as const
+export type OfferSource = (typeof OFFER_SOURCES)[number]
+
 export const bookingDetailSchema = bookingSummarySchema
   .extend({
     /** Status timeline: sent → confirmed … */
@@ -208,18 +233,8 @@ export const bookingDetailSchema = bookingSummarySchema
       })
       .nullable(),
     /** A pending move of this booking: the original stays confirmed until the business answers. */
-    reschedule: z.object({ date: ymdSchema, start: startMinuteSchema, end: minuteSchema, holdUntil: epochSchema.nullable() }).nullable(),
-    actions: z.object({
-      cancel: z.boolean(),
-      reschedule: z.boolean(),
-      editNote: z.boolean(),
-      callOnly: z.boolean(),
-      review: z.boolean(),
-      editReview: z.boolean(),
-      bookAgain: z.boolean(),
-      /** "Yzyna al" after the client's own cancel, for a short while and only if the time is still free. */
-      restore: z.boolean(),
-    }),
+    reschedule: waitingMoveSchema.nullable(),
+    actions: bookingActionsSchema,
     review: z
       .object({ rating: z.number().int(), tags: z.array(z.string()), text: z.string().nullable(), createdAt: epochSchema })
       .nullable(),
@@ -278,7 +293,24 @@ export type BookingLink = z.infer<typeof bookingLinkSchema>
  * out keeps its place until the background pass records it (a minute or so). `past`: the rest, newest first (book C-40).
  */
 export const myBookingsQuerySchema = langQuerySchema.extend(cursorQuerySchema.shape).extend({ tab: z.enum(['upcoming', 'past']) })
-export const bookingListSchema = listOf(bookingSummarySchema)
+/**
+ * A row of My bookings (book C-24–C-31, C-40): the summary with what its card shows and offers, as the detail says it:
+ * the actions, the answer time of a request, a waiting move, a decline's reason, and the times offered after a decline,
+ * an expiry or the business's cancel that can still be taken (`offers`; taken with `accept-alternative`).
+ */
+export const myBookingSchema = bookingSummarySchema
+  .extend({
+    /** When an unanswered request expires; pending only. */
+    holdUntil: epochSchema.nullable(),
+    reschedule: waitingMoveSchema.nullable(),
+    decline: z.object({ reason: z.enum(DECLINE_REASONS), text: z.string().nullable() }).nullable(),
+    /** The offered times as the detail lists them (free, taken, past); null when there are none to show. */
+    offers: z.object({ source: z.enum(OFFER_SOURCES), times: z.array(offeredTimeSchema).max(MAX_ALTERNATIVES) }).nullable(),
+    actions: bookingActionsSchema,
+  })
+  .meta({ id: 'MyBooking' })
+export type MyBooking = z.infer<typeof myBookingSchema>
+export const bookingListSchema = listOf(myBookingSchema)
 export const bookingCodeParamSchema = z.object({ code: bookingCodeSchema })
 
 // ── Act ──
@@ -299,9 +331,6 @@ export const rescheduleSchema = z.object({
    */
   staffId: idSchema.nullable().optional(),
 })
-/** Where an offered time comes from: a decline, an expired request, or the business's cancel (B-39, B-40). */
-export const OFFER_SOURCES = ['decline', 'expired', 'cancel'] as const
-export type OfferSource = (typeof OFFER_SOURCES)[number]
 export const acceptAlternativeSchema = z.object({
   index: z
     .number()

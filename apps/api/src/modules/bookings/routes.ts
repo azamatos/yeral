@@ -34,7 +34,7 @@ import {
 import { createBooking } from './create'
 import { withOffersAhead } from './offers'
 import { myBooking, stateOf, visitAskingHowItWas, type BookingRow } from './repo'
-import { detailOf, summaries } from './view'
+import { detailOf, mineOf, summaries } from './view'
 
 const tags = ['bookings']
 const detail = { 200: json(bookingDetailSchema), 401: errors[401], 404: errors[404], 409: errors[409] }
@@ -181,7 +181,7 @@ export const bookingRoutes = new OpenAPIHono<AppEnv>()
     const page = picked.slice(offset, offset + limit)
     return c.json(
       {
-        items: await summaries(c.var.deps, page, lang),
+        items: await mineOf(c.var.deps, page, lang),
         total: picked.length,
         cursor: offset + limit < picked.length ? String(offset + limit) : null,
       },

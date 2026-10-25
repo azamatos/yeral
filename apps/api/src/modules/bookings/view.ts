@@ -1,5 +1,5 @@
 /** Booking rows → `BookingSummary` / `BookingDetail` (client spec §4.8: cards, detail drawer, actions). */
-import type { BookingDetail, BookingSummary, OfferSource } from '@yeral/contract/bookings'
+import type { BookingDetail, BookingSummary, MyBooking, OfferSource } from '@yeral/contract/bookings'
 import {
   addressAsShown,
   cancelDeadline,
@@ -14,7 +14,7 @@ import { epochOf } from '@yeral/domain/time'
 import { and, eq, inArray } from 'drizzle-orm'
 import { bookingItems, bookings, businesses, classSessions, reviews, staff, tableAreas } from '../../db/schema'
 import type { Deps } from '../../deps'
-import { loadBusinesses } from '../availability/context'
+import { loadBusinesses, type LoadedBusiness } from '../availability/context'
 import { cityRef } from '../catalog/cities'
 import { geoOf, photoOf, text } from '../catalog/map'
 import { bookOnlineFor } from '../clients/online'
@@ -92,6 +92,92 @@ export async function summaries(deps: Deps, rows: BookingRow[], lang: Locale): P
   })
 }
 
+/**
+ * What a booking offers its client now, the card in My bookings and the drawer alike (book C-24–C-31): its actions, a
+ * waiting move, the offered times and whether it may still be booked online. Asks only what its status can have: a
+ * review once completed, a waiting move while confirmed, the booking an offer became once there are offers.
+ */
+async function clientSideOf(deps: Deps, row: BookingRow, lb: LoadedBusiness, now: number) {
+  const { db } = deps
+  const state = stateOf(row)
+  const { status } = effectiveStatus(state, now)
+  const [review] = status === 'completed' ? await db.select().from(reviews).where(eq(reviews.bookingId, row.id)) : []
+  const [move] =
+    status === 'confirmed'
+      ? await db
+          .select()
+          .from(bookings)
+          .where(and(eq(bookings.rescheduleOf, row.id), eq(bookings.status, 'pending')))
+      : []
+  const pendingMove = move && effectiveStatus(stateOf(move), now).status === 'pending' ? move : undefined
+  const offers = offersOf(row, now)
+  // one booking per declined or expired request: once an offer is taken the others go
+  const [taker] = offers ? await db.select({ code: bookings.code }).from(bookings).where(eq(bookings.alternativeOf, row.id)) : []
+  // none from a business that has closed (book Q-213)
+  const chips = async (source: OfferSource) =>
+    offers?.source === source && !taker && !lb.business.closedAt ? offeredTimes(db, lb, row, offers.list, now) : []
+  // a paused business or a phone-only client: no free-time chips, no move, the call card instead (book Q-154)
+  // checked for the phone its SMS go to, as the texts are (an account's phone now, after a change too); asked once
+  let online: Promise<boolean> | undefined
+  const bookOnline = () => (online ??= bookingRecipient(db, row).then((recipient) => bookOnlineFor(db, lb, recipient)))
+  const actions = clientActions(state, lb.rules, review ? { createdAt: review.createdAt.getTime() } : null, now)
+  // offered while the 5 minutes run and the visit hasn't started; a request whose answer time ran out is offered too,
+  // and tapping it says so (ROUND6 A6)
+  const why = canClientRestore(restoreStateOf(row), now)
+  return {
+    status,
+    review,
+    move,
+    pendingMove,
+    offers,
+    taker,
+    chips,
+    bookOnline,
+    // a second move replaces a waiting one (ROUND6 A3)
+    actions: {
+      ...actions,
+      reschedule: actions.reschedule && (await bookOnline()),
+      restore: why === null || why === 'request_expired',
+    },
+    holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,
+    reschedule: pendingMove
+      ? { date: pendingMove.date, start: pendingMove.start, end: pendingMove.end, holdUntil: pendingMove.holdUntil?.getTime() ?? null }
+      : null,
+  }
+}
+
+/**
+ * My bookings' rows (book C-24–C-31, C-40): each summary with what its card shows and offers, by the drawer's rules
+ * (`clientSideOf`); the businesses loaded once for the page.
+ */
+export async function mineOf(deps: Deps, rows: BookingRow[], lang: Locale): Promise<MyBooking[]> {
+  if (!rows.length) return []
+  const now = deps.now()
+  const [list, businesses] = await Promise.all([
+    summaries(deps, rows, lang),
+    loadBusinesses(deps.db, [...new Set(rows.map((r) => r.businessId))]),
+  ])
+  return Promise.all(
+    rows.map(async (row, i) => {
+      const lb = businesses.get(row.businessId)
+      const summary = list[i]
+      if (!summary || !lb) throw new Error('booking without business')
+      const side = await clientSideOf(deps, row, lb, now)
+      // after an expiry, the free times only while the client may book online (as the drawer shows them)
+      const times =
+        side.offers && (side.offers.source !== 'expired' || (await side.bookOnline())) ? await side.chips(side.offers.source) : []
+      return {
+        ...summary,
+        holdUntil: side.holdUntil,
+        reschedule: side.reschedule,
+        decline: row.declineReason ? { reason: row.declineReason, text: row.declineText } : null,
+        offers: side.offers && times.length ? { source: side.offers.source, times } : null,
+        actions: side.actions,
+      }
+    }),
+  )
+}
+
 export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promise<BookingDetail> {
   const { db } = deps
   const now = deps.now()
@@ -99,14 +185,18 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
   const lb = (await loadBusinesses(db, [row.businessId])).get(row.businessId)
   if (!summary || !lb) throw new Error('booking without business')
   const b = lb.business
-  const state = stateOf(row)
-  const { status } = effectiveStatus(state, now)
-  const [review] = await db.select().from(reviews).where(eq(reviews.bookingId, row.id))
-  const [move] = await db
-    .select()
-    .from(bookings)
-    .where(and(eq(bookings.rescheduleOf, row.id), eq(bookings.status, 'pending')))
-  const pendingMove = move && effectiveStatus(stateOf(move), now).status === 'pending' ? move : undefined
+  const {
+    status,
+    review,
+    move,
+    pendingMove,
+    taker,
+    chips,
+    bookOnline: online,
+    actions,
+    holdUntil,
+    reschedule,
+  } = await clientSideOf(deps, row, lb, now)
   // a move not accepted: kept on the booking; one whose hold just ran out says so before the jobs record it, by the
   // same rule they record it by
   const justLapsed = move && !pendingMove && refusalCounts(row, move.holdUntil?.getTime() ?? now)
@@ -116,16 +206,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
       : justLapsed
         ? { date: move.date, start: move.start, end: move.end, by: 'system' as const, reason: null, text: null }
         : row.moveRefused
-  // one booking per declined or expired request: once an offer is taken the others go
-  const [taker] = await db.select({ code: bookings.code }).from(bookings).where(eq(bookings.alternativeOf, row.id))
-  const offers = offersOf(row, now)
-  // none from a business that has closed (book Q-213)
-  const chips = async (source: OfferSource) =>
-    offers?.source === source && !taker && !lb.business.closedAt ? offeredTimes(db, lb, row, offers.list, now) : []
-  // a paused business or a phone-only client: no free-time chips, no move, the call card instead (book Q-154)
-  // checked for the phone its SMS go to, as the texts are (an account's phone now, after a change too)
-  const recipient = await bookingRecipient(db, row)
-  const bookOnline = await bookOnlineFor(db, lb, recipient)
+  const bookOnline = await online()
 
   // a booking the business entered (by phone, for a walk-in) was never a request the client sent: it starts confirmed
   const timeline: BookingDetail['timeline'] = isOnlineSource(row.source)
@@ -153,11 +234,6 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
 
   // a home-based business shows its exact address only once the booking is confirmed
   const exact = showsExactAddress(status)
-  const actions = clientActions(state, lb.rules, review ? { createdAt: review.createdAt.getTime() } : null, now)
-  // offered while the 5 minutes run and the visit hasn't started; a request whose answer time ran out is offered too,
-  // and tapping it says so (ROUND6 A6)
-  const why = canClientRestore(restoreStateOf(row), now)
-  const restore = why === null || why === 'request_expired'
 
   return {
     ...summary,
@@ -170,7 +246,7 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     movedAt: row.addressTold?.at !== undefined && hearsOfMove(status, row, now) ? row.addressTold.at : null,
     geo: geoOf(b, exact),
     clientNote: row.clientNote,
-    holdUntil: status === 'pending' ? (row.holdUntil?.getTime() ?? null) : null,
+    holdUntil,
     cancelDeadline: cancelDeadline(lb.rules, row),
     askCancelReason: lb.rules.askCancelReason,
     // the client's own words: a cancel the team entered (as the client asked on the phone, or the business's) has none
@@ -189,11 +265,8 @@ export async function detailOf(deps: Deps, row: BookingRow, lang: Locale): Promi
     bookOnline,
     offerTakenBy: taker?.code ?? null,
     moveRefused,
-    reschedule: pendingMove
-      ? { date: pendingMove.date, start: pendingMove.start, end: pendingMove.end, holdUntil: pendingMove.holdUntil?.getTime() ?? null }
-      : null,
-    // a second move replaces a waiting one (ROUND6 A3)
-    actions: { ...actions, reschedule: actions.reschedule && bookOnline, restore },
+    reschedule,
+    actions,
     review: review ? { rating: review.rating, tags: review.tags, text: review.text, createdAt: review.createdAt.getTime() } : null,
   }
 }
