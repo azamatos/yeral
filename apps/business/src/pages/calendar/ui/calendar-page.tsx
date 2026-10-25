@@ -61,7 +61,9 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
   // the day the data is for: the one before while the next loads
   const shown = view.data?.from ?? date
   const summary = view.data?.summary.find((d) => d.date === shown)
-  const requests = summary?.requests ?? 0
+  // a client's move waits for an answer as a request does (B-Calendar counts its ghost)
+  const moves = view.data?.moves.filter((m) => m.date === shown).length ?? 0
+  const requests = (summary?.requests ?? 0) + moves
   const bold = (chunks: ReactNode) => <b className="font-semibold text-n-900 tabular-nums">{chunks}</b>
   const dot = (
     <span aria-hidden className="text-n-500">
@@ -112,7 +114,7 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
           <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-small text-n-600">
             <span>{t.rich('bookings', { n: summary.count, b: bold })}</span>
             {dot}
-            <span>{t.rich('requestsLine', { n: summary.requests, b: bold })}</span>
+            <span>{t.rich('requestsLine', { n: requests, b: bold })}</span>
             {summary.revenue !== null && (
               <>
                 {dot}
