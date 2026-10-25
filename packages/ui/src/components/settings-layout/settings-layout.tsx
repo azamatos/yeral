@@ -115,19 +115,21 @@ export function SettingsSection({ className, ...props }: ComponentProps<'section
 
 /**
  * A group's title (`.pst`) and its caption (`.cap`). `captionId` lets the group's control point at the caption
- * (`aria-describedby`, the booking rules' «Who answers requests?» radio cards).
+ * (`aria-describedby`, the booking rules' «Who answers requests?» radio cards). `as`: an h2 where the page has no
+ * section title above it (the setup's last step shows Settings' link and QR groups under its own h1).
  */
 export function SettingsSectionTitle({
+  as: Heading = 'h3',
   caption,
   captionId,
   className,
   children,
   ...props
-}: ComponentProps<'h3'> & { caption?: ReactNode; captionId?: string }) {
+}: ComponentProps<'h3'> & { as?: 'h2' | 'h3'; caption?: ReactNode; captionId?: string }) {
   const title = (
-    <h3 {...props} className={cn('m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900', !caption && className)}>
+    <Heading {...props} className={cn('m-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900', !caption && className)}>
       {children}
-    </h3>
+    </Heading>
   )
   if (!caption) return title
   return (

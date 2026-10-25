@@ -955,13 +955,16 @@ export const Done: Story = {
     await expect(canvas.getByText(/Your page is in review/)).toBeVisible()
     await expect(canvas.getByText('Beauty · 247 Bitarap Türkmenistan Avenue, Ashgabat')).toBeVisible()
     await expect(canvas.getByRole('heading', { level: 2, name: 'Your page link' })).toBeVisible()
+    await expect(canvas.getByText('Your link and QR code are ready — they open to clients after the review.')).toBeVisible()
     const link = canvas.getByRole<HTMLInputElement>('textbox', { name: 'Your page link' })
     await expect(link.value).toMatch(/\/b\/glow-studio$/)
+    // the whole address shows, as in Settings: the field has the step's width, not half of it
+    await expect(link.scrollWidth).toBeLessThanOrEqual(link.clientWidth)
     await expect(canvas.getByRole('button', { name: 'Share' })).toBeVisible()
     const qr = canvas.getByRole('region', { name: 'QR code' })
     await expect(within(qr).getByRole('img', { name: 'QR code for Glow Studio’s page' })).toBeVisible()
     await expect(within(qr).getByText('Glow Studio')).toBeVisible()
-    await expect(within(qr).getByText(/Put it by the till/)).toBeVisible()
+    await expect(within(qr).getByText(/after the review clients scan it/)).toBeVisible()
     await expect(within(qr).getByText('PNG for printing, SVG for designers.')).toBeVisible()
     await expect(within(qr).getByRole('button', { name: 'Download PNG' })).toBeVisible()
     await expect(within(qr).getByRole('button', { name: 'Download SVG' })).toBeVisible()
@@ -972,6 +975,18 @@ export const Done: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Go to the calendar' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Calendar' })).toBeVisible()
     await expect(finished).toEqual(['glow-studio'])
+  },
+}
+
+/** The done step on a phone: the link with Copy and Share under it, the QR card in one column; the address shows whole. */
+export const DonePhone: Story = {
+  args: { path: '/setup/done', server: fakeApi({ draft: doneDraft }) },
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    const link = await canvas.findByRole<HTMLInputElement>('textbox', { name: 'Your page link' })
+    await expect(link.scrollWidth).toBeLessThanOrEqual(link.clientWidth)
+    const qr = canvas.getByRole('region', { name: 'QR code' })
+    await expect(within(qr).getByRole('button', { name: 'Download SVG' })).toBeVisible()
   },
 }
 

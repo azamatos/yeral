@@ -534,6 +534,8 @@
       "inReview": "<b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link. You can use the calendar now.",
       "switcherNote": "The new workspace appears in the workspace switcher at the top of the left menu — switch back to {name} there.",
       "previewLabel": "After the review, clients see you like this",
+      "linkReady": "Your link and QR code are ready — they open to clients after the review.",
+      "qrNote": "Print it and put it by the till: after the review clients scan it with their phone and book straight away.",
       "approxArea": "{city} · approximate area shown",
       "addressLine": "{line}, {city}",
       "cardMeta": "{category} · {where}",
@@ -625,7 +627,8 @@
     "qrCaption": "PNG for printing, SVG for designers.",
     "downloadPng": "Download PNG",
     "downloadSvg": "Download SVG",
-    "downloaded": "QR code downloaded · {format}"
+    "downloaded": "QR code downloaded · {format}",
+    "noLanguage": "The link has no language in it: the page opens in each visitor’s language."
   },
   "settings": {
     "nav": "Settings sections",
@@ -649,8 +652,7 @@
         "fix": "Fix and send again",
         "hidden": "Hidden by {brand}",
         "hiddenText": "Clients can’t find your page or open your link. Your calendar and bookings work as usual."
-      },
-      "noLanguage": "The link has no language in it: the page opens in each visitor’s language."
+      }
     },
     "permissions": {
       "lead": "Permissions work by access level — give each person a level in <team>Team</team>.",

@@ -33,7 +33,7 @@ export function SettingsLinkPage() {
           {tl('title')}
         </SettingsSectionTitle>
         <PageLinkField slug={workspace.slug} label={tl('title')} />
-        {MARKET_LOCALES.length > 1 ? <p className="m-0 text-dense text-n-600">{t('noLanguage')}</p> : null}
+        {MARKET_LOCALES.length > 1 ? <p className="m-0 text-dense text-n-600">{tl('noLanguage')}</p> : null}
       </SettingsSection>
 
       <SettingsSection aria-labelledby={qrTitle}>

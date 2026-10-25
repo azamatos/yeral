@@ -2,9 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import type { SetupIncompleteDetails } from '@yeral/contract/errors'
 import type { Setup } from '@yeral/contract/setup'
+import { MARKET_LOCALES } from '@yeral/i18n'
 import { isApiError } from '@yeral/sdk'
 import { Callout } from '@yeral/ui/callout'
 import { Checklist, type ChecklistItem } from '@yeral/ui/checklist'
+import { SettingsSectionTitle } from '@yeral/ui/settings-layout'
 import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
@@ -19,9 +21,6 @@ import { StepHeader, type StepAction } from './setup-frame'
 
 const QUALITY_ICON: Record<QualityItem, ReactNode> = { logo: <ImagePlus />, photos: <Image />, about: <FileText /> }
 
-/** The link's and the QR's titles as Settings → Link and QR draws them (`SettingsSectionTitle`), as the page's h2s. */
-const sectionTitle = 'm-0 text-[17px] leading-6 font-semibold tracking-[-0.01em] text-n-900'
-
 /** What the done step reads of the draft (`GET /v1/me/setup`). */
 export type DoneDraft = Pick<Setup, 'slug' | 'name' | 'category' | 'address'>
 
@@ -31,7 +30,8 @@ export type AfterSetup = 'calendar' | 'settings'
 /**
  * Step 8, «{name} is ready!» (B-Onboarding `isDone`, book B-06): the page is in review (only the team sees it, the
  * calendar works now); the card clients will see; the page link with Copy and Share and the QR card with its
- * downloads, as Settings → Link and QR shows them (the owner, 25.10.2026); «Make your page stronger» (a logo, 3+ photos, an About). «Go to the calendar» finishes the setup
+ * downloads, as Settings → Link and QR shows them, saying they open after the review (the owner, 25.10.2026); «Make
+ * your page stronger» (a logo, 3+ photos, an About). «Go to the calendar» finishes the setup
  * (`setup.finish`: the workspace joins the switcher and Ýeral's review) and opens the workspace's calendar; each
  * checklist «Add» finishes the same way into Settings. When finishing finds a step missing (`setup_incomplete`), the
  * wizard opens it. A hook, as the other steps are, so the wizard's frame stays one element; `on` while it shows.
@@ -47,6 +47,7 @@ export function useDoneStep(
 ): { body: ReactNode; action: StepAction; primary: { label: string; icon: ReactNode; finish: () => void } } {
   const t = useTranslations('setup.done')
   const tl = useTranslations('pageLink')
+  const previewTitle = useId()
   const linkTitle = useId()
   const qrTitle = useId()
   const sdk = useSdk()
@@ -140,9 +141,11 @@ export function useDoneStep(
         {back ? <p className="m-0 text-dense text-n-600">{t('switcherNote', { name: back })}</p> : null}
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] items-start gap-8">
-        <div className="flex min-w-0 flex-col gap-3">
-          <span className="text-label text-n-500 uppercase">{t('previewLabel')}</span>
+      <section aria-labelledby={previewTitle} className="flex flex-col gap-3">
+        <SettingsSectionTitle as="h2" id={previewTitle}>
+          {t('previewLabel')}
+        </SettingsSectionTitle>
+        <div className="flex w-full max-w-90 flex-col gap-3">
           {photos[0] ? (
             // decorative: the card's name is right under it
             <img src={photos[0].url} alt="" className="block aspect-4/3 w-full rounded-m object-cover" />
@@ -163,23 +166,22 @@ export function useDoneStep(
             </span>
           </div>
         </div>
+      </section>
 
-        <section aria-labelledby={linkTitle} className="flex min-w-0 flex-col gap-5">
-          <div className="flex flex-col gap-0.5">
-            <h2 id={linkTitle} className={sectionTitle}>
-              {tl('title')}
-            </h2>
-            <p className="m-0 text-dense text-n-600">{tl('caption')}</p>
-          </div>
-          <PageLinkField slug={draft.slug} label={tl('title')} />
-        </section>
-      </div>
+      {/* the link and the QR as Settings → Link and QR shows them, saying they open after the review */}
+      <section aria-labelledby={linkTitle} className="flex flex-col gap-5">
+        <SettingsSectionTitle as="h2" id={linkTitle} caption={t('linkReady')}>
+          {tl('title')}
+        </SettingsSectionTitle>
+        <PageLinkField slug={draft.slug} label={tl('title')} />
+        {MARKET_LOCALES.length > 1 ? <p className="m-0 text-dense text-n-600">{tl('noLanguage')}</p> : null}
+      </section>
 
       <section aria-labelledby={qrTitle} className="flex flex-col gap-5">
-        <h2 id={qrTitle} className={sectionTitle}>
+        <SettingsSectionTitle as="h2" id={qrTitle}>
           {tl('qrTitle')}
-        </h2>
-        <PageQrCard slug={draft.slug} name={draft.name} />
+        </SettingsSectionTitle>
+        <PageQrCard slug={draft.slug} name={draft.name} note={t('qrNote')} />
       </section>
 
       <Checklist

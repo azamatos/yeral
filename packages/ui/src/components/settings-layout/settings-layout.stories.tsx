@@ -183,3 +183,18 @@ export const RussianLength: Story = {
   args: { words: RU, dirty: true },
   globals: { viewport: { value: 'xl' } },
 }
+
+/** A group's title as an h2 (`as="h2"`), for a page that shows a settings group under its own h1: same look, one level up. */
+export const SectionTitleH2: Story = {
+  render: () => (
+    <SettingsSection aria-labelledby="link">
+      <SettingsSectionTitle as="h2" id="link" caption="Put it in your Instagram profile — clients book straight from it.">
+        Your page link
+      </SettingsSectionTitle>
+    </SettingsSection>
+  ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('heading', { level: 2, name: 'Your page link' })).toBeVisible()
+    await expect(canvas.getByRole('region', { name: 'Your page link' })).toBeVisible()
+  },
+}
