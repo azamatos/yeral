@@ -1,2 +1,2 @@
 export { bookingSearchSchema } from './model/flow'
-export { BookingPage } from './ui/booking-page'
+export { BookingFlow } from './ui/booking-flow'

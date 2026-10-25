@@ -1,6 +1,7 @@
 import type { Me } from '@yeral/contract/account'
 import type { BookingDetail, MyBooking } from '@yeral/contract/bookings'
 import { addDays, epochOf, today } from '@yeral/domain/time'
+import { businessApi, type BusinessApiOptions } from './business'
 import { AYJEMAL, authApi, fakeFetch, json, refuse } from './fake-api'
 
 const ACTIONS = {
@@ -215,7 +216,15 @@ export const myBookingsApi =
     signedIn = AYJEMAL,
     refuse: fail,
     details = {},
-  }: { lists?: typeof MY_BOOKINGS; signedIn?: Me; refuse?: string; details?: Record<string, Partial<BookingDetail>> } = {}) =>
+    instant = false,
+  }: {
+    lists?: typeof MY_BOOKINGS
+    signedIn?: Me
+    refuse?: string
+    details?: Record<string, Partial<BookingDetail>>
+    /** A move changes the time at once, as at a business that confirms at once. */
+    instant?: boolean
+  } = {}) =>
   (): typeof fetch => {
     const signIn = authApi({ signedIn })()
     const all = [...lists.upcoming, ...lists.past]
@@ -230,7 +239,7 @@ export const myBookingsApi =
         const booking = find(one[1])
         return booking ? json(booking) : refuse(404, 'not_found')
       }
-      const act = /^(?:POST|PATCH) \/me\/bookings\/([^/]+)\/(restore|accept-alternative|cancel|withdraw-move|note)$/.exec(route)
+      const act = /^(?:POST|PATCH) \/me\/bookings\/([^/]+)\/(restore|accept-alternative|cancel|withdraw-move|note|reschedule)$/.exec(route)
       if (act?.[1]) {
         const booking = find(act[1])
         if (!booking) return refuse(404, 'not_found')
@@ -247,6 +256,16 @@ export const myBookingsApi =
             })
           case 'withdraw-move':
             return json({ ...booking, reschedule: null })
+          case 'reschedule': {
+            // asked of a business that confirms by hand: the new time waits, the old one stays; at once, it moves
+            if (fail) return refuse(409, fail)
+            const { date, start } = body as { date: string; start: number }
+            if (instant) return json({ ...booking, date, start, end: start + booking.end - booking.start, reschedule: null })
+            return json({
+              ...booking,
+              reschedule: { date, start, end: start + booking.end - booking.start, holdUntil: Date.now() + 30 * 60_000 },
+            })
+          }
           case 'note':
             return json({ ...booking, clientNote: (body as { note: string }).note || null })
           case 'restore':
@@ -260,5 +279,20 @@ export const myBookingsApi =
     return (input, init) => {
       const path = new URL(new Request(input, init).url).pathname
       return path.startsWith('/v1/me/bookings') ? mine(input, init) : signIn(input, init)
+    }
+  }
+
+/**
+ * Move mode's api (C-30): Glow Studio's page and free times (`businessApi`) with My bookings' bookings and their
+ * actions (`myBookingsApi`, the move among them).
+ */
+export const moveApi =
+  (options: Parameters<typeof myBookingsApi>[0] & { business?: BusinessApiOptions } = {}) =>
+  (): typeof fetch => {
+    const mine = myBookingsApi(options)()
+    const page = businessApi(options.business)()
+    return (input, init) => {
+      const path = new URL(new Request(input, init).url).pathname
+      return path.startsWith('/v1/me/bookings') ? mine(input, init) : page(input, init)
     }
   }

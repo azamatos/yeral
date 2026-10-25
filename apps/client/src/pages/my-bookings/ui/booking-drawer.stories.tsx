@@ -95,7 +95,15 @@ export const MoveWaiting: Story = {
   play: async () => {
     const d = await drawer()
     const move = within(await d.findByRole('region', { name: 'Move request' }))
-    await expect(move.getByText('Your current time stays until the business confirms.')).toBeVisible()
+    await expect(move.getByText('Your previous time is kept until the business confirms.')).toBeVisible()
+    // another move replaces this one: asked first
+    await userEvent.click(d.getByRole('button', { name: 'Move to another time' }))
+    const again = within(await body.findByRole('dialog', { name: 'Move to another time' }))
+    // the modal may still be popping in
+    await waitFor(() => expect(again.getByText(/^Your earlier request \(.*\) is replaced by the new one\.$/)).toBeVisible())
+    await expect(again.getByRole('link', { name: 'Continue' })).toHaveAttribute('href', '/en/b/glow-studio/book?move=YR-48190')
+    await userEvent.click(again.getByRole('button', { name: 'Back' }))
+    await waitFor(() => expect(body.queryByRole('dialog', { name: 'Move to another time' })).toBeNull())
     await userEvent.click(move.getByRole('button', { name: 'Withdraw the request' }))
     await toasted('The move request is withdrawn')
     await waitFor(() => expect(d.queryByRole('region', { name: 'Move request' })).toBeNull())
@@ -168,6 +176,8 @@ export const MoveRefused: Story = {
     const d = await drawer()
     await expect(await d.findByText("The new time wasn't accepted: your booking stays at its time.")).toBeVisible()
     await expect(d.getByText("Reason: This time isn't free")).toBeVisible()
+    // a confirmed appointment moves in the booking flow's move mode
+    await expect(d.getByRole('link', { name: 'Move to another time' })).toHaveAttribute('href', '/en/b/barber-loft/book?move=YR-48205')
   },
 }
 

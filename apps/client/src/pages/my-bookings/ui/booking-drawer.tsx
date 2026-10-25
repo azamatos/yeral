@@ -13,6 +13,7 @@ import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@
 import { Field } from '@yeral/ui/field'
 import { Textarea } from '@yeral/ui/input'
 import { KeyValueList } from '@yeral/ui/key-value'
+import { Modal, ModalActions, ModalClose, ModalContent, ModalDescription, ModalHeader, ModalTrigger } from '@yeral/ui/modal'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { Timeline } from '@yeral/ui/timeline'
 import { toast } from '@yeral/ui/toast'
@@ -168,6 +169,8 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
   const reasonText = (r: { reason: string; text: string | null }) =>
     r.text ? list('reasonWith', { reason: r.reason, text: r.text }) : list('reason', { reason: r.reason })
   const page = { to: '/$lang/b/$slug' as const, params: { lang, slug: b.business.slug } }
+  // move mode (C-30), on the business's booking flow
+  const move = { to: '/$lang/b/$slug/book' as const, params: { lang, slug: b.business.slug }, search: { move: b.code } }
   // a refused action means the booking moved on meanwhile: what it is now
   const reread = () => void queryClient.invalidateQueries({ queryKey: sdk.bookings.detail(b.code, lang).queryKey })
 
@@ -226,6 +229,34 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
       <Button key="cancel" ref={cancelButton} variant="danger" onClick={() => setCancelling(true)}>
         {t('cancel')}
       </Button>,
+    )
+  // only an appointment moves (A4); a move already waiting is replaced, so the board asks first
+  if (b.status === 'confirmed' && b.actions.reschedule && b.what.type === 'appointment')
+    footer.push(
+      b.reschedule ? (
+        <Modal key="move">
+          <ModalTrigger asChild>
+            <Button variant="primary">{t('moveIt')}</Button>
+          </ModalTrigger>
+          <ModalContent size={400}>
+            <ModalHeader title={t('moveIt')} closeLabel={t('close')}>
+              <ModalDescription>{t('againText', { when: at(b.reschedule.date, b.reschedule.start, b.reschedule.end) })}</ModalDescription>
+            </ModalHeader>
+            <ModalActions>
+              <ModalClose asChild>
+                <Button variant="secondary">{t('back')}</Button>
+              </ModalClose>
+              <Button asChild variant="primary">
+                <Link {...move}>{t('continue')}</Link>
+              </Button>
+            </ModalActions>
+          </ModalContent>
+        </Modal>
+      ) : (
+        <Button key="move" asChild variant="primary">
+          <Link {...move}>{t('moveIt')}</Link>
+        </Button>
+      ),
     )
   if (late)
     footer.push(

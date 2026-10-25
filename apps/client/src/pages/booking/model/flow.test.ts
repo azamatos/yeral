@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   bookingSearchSchema,
   chosenStaff,
+  currentMoveStep,
   currentStep,
+  isOwnTime,
   namedSpecialist,
   notDoneBy,
   partOfDay,
@@ -10,6 +12,7 @@ import {
   servicesOf,
   slotsByPart,
   stepDone,
+  wasOf,
 } from './flow'
 
 const detail = {
@@ -92,5 +95,33 @@ describe('the times', () => {
   it('split at 12:00 and 17:00, leaving out empty parts', () => {
     expect([partOfDay(540), partOfDay(720), partOfDay(1019), partOfDay(1020)]).toEqual(['morning', 'afternoon', 'afternoon', 'evening'])
     expect(slotsByPart([{ start: 600 }, { start: 1050 }]).map((g) => g.part)).toEqual(['morning', 'evening'])
+  })
+})
+
+describe('move mode', () => {
+  it('starts on the specialist, and holds the confirmation back until a new time is chosen', () => {
+    expect(currentMoveStep(undefined, false)).toBe('staff')
+    expect(currentMoveStep('services', true)).toBe('staff')
+    expect(currentMoveStep('confirm', false)).toBe('time')
+    expect(currentMoveStep('confirm', true)).toBe('confirm')
+  })
+
+  it('keeps the move and its sent page in the address', () => {
+    expect(bookingSearchSchema.parse({ move: 'YR-48190', moved: 'asked', was: '2026-10-26@870' })).toEqual({
+      move: 'YR-48190',
+      moved: 'asked',
+      was: '2026-10-26@870',
+    })
+    expect(bookingSearchSchema.parse({ moved: 'yes', was: 'yesterday' })).toEqual({})
+    expect(wasOf('2026-10-26@870')).toEqual({ date: '2026-10-26', start: 870 })
+    expect(wasOf(undefined)).toBeNull()
+  })
+
+  it('leaves the own time out only with its own specialist, or anyone', () => {
+    const move = { date: '2026-10-26', start: 870, current: 'ayna' }
+    expect(isOwnTime(move, 'ayna', '2026-10-26', 870)).toBe(true)
+    expect(isOwnTime(move, 'any', '2026-10-26', 870)).toBe(true)
+    expect(isOwnTime(move, 'maral', '2026-10-26', 870)).toBe(false)
+    expect(isOwnTime(move, 'ayna', '2026-10-26', 900)).toBe(false)
   })
 })

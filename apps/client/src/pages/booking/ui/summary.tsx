@@ -3,7 +3,7 @@ import type { Price as PriceValue } from '@yeral/domain/model'
 import { useFmt } from '@yeral/i18n'
 import { Price } from '@yeral/ui/price'
 import { Rating } from '@yeral/ui/rating'
-import { CalendarDays, User } from 'lucide-react'
+import { CalendarCheck, CalendarDays, Lock, User } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { calendarAt } from '@/shared/lib'
@@ -14,7 +14,8 @@ type Service = BusinessDetail['serviceGroups'][number]['services'][number]
  * The booking's card beside the steps from 1024 (Booking `.bside`): the business (its first photo, name, rating,
  * street), the picked services with their minutes and prices, the specialist (`staffName`, once the flow is past the
  * services) and the chosen time on its day, the total with «Pay at the place», the step's primary and, while it's
- * off, what it waits for. The page works out the total and the name once for the card and the bar.
+ * off, what it waits for. The page works out the total and the name once for the card and the bar. In move mode
+ * (`move`, C-30) the services are locked with the way to change them, and the previous time stands above the new one.
  */
 export function Summary({
   detail,
@@ -25,6 +26,7 @@ export function Summary({
   time,
   cta,
   hint,
+  move,
 }: {
   detail: BusinessDetail
   picked: readonly Service[]
@@ -34,10 +36,14 @@ export function Summary({
   time: number | null
   cta: ReactNode
   hint: string | null
+  /** The booking's time now («Thursday, 15 October · 14:30–15:30»). */
+  move?: { before: string }
 }) {
   const t = useTranslations('booking')
   const fmt = useFmt()
   const photo = detail.photos[0]
+  const whenText = (date: string, time: number) =>
+    t('summary.when', { date: fmt.weekdayDate(calendarAt(date, time).date), range: fmt.timeRange(time, time + total.minutes) })
   return (
     <div className="flex flex-col gap-5 rounded-card border border-n-200 bg-n-0 p-6">
       <div className="flex items-center gap-3.5">
@@ -55,7 +61,8 @@ export function Summary({
         {picked.length === 0 && <span className="text-dense text-n-600">{t('summary.none')}</span>}
         {picked.map((s) => (
           <div key={s.id} className="flex items-start justify-between gap-4">
-            <span className="flex min-w-0 flex-col gap-0.5">
+            {move && <Lock aria-hidden className="mt-0.5 size-4 flex-none text-n-600" strokeWidth={1.75} />}
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="text-body font-medium">{s.name}</span>
               <span className="text-dense text-n-600">{fmt.duration(s.durationMin)}</span>
             </span>
@@ -63,17 +70,24 @@ export function Summary({
           </div>
         ))}
       </div>
+      {move && <span className="text-dense text-n-600">{t('move.locked')}</span>}
       {staffName && (
         <div className="flex flex-col gap-2.5 text-small [&_svg]:mt-px [&_svg]:size-4.5 [&_svg]:flex-none [&_svg]:text-n-600">
           <div className="flex items-start gap-2.5">
             <User aria-hidden strokeWidth={1.75} />
             {staffName}
           </div>
-          {date && time !== null && (
-            <div className="flex items-start gap-2.5">
+          {move && (
+            <div className="flex items-start gap-2.5 text-n-600">
               <CalendarDays aria-hidden strokeWidth={1.75} />
+              {t('move.before', { when: move.before })}
+            </div>
+          )}
+          {date && time !== null && (
+            <div className={move ? 'flex items-start gap-2.5 font-semibold' : 'flex items-start gap-2.5'}>
+              {move ? <CalendarCheck aria-hidden strokeWidth={1.75} /> : <CalendarDays aria-hidden strokeWidth={1.75} />}
               {/* a start past midnight reads on the next calendar day */}
-              {t('summary.when', { date: fmt.weekdayDate(calendarAt(date, time).date), range: fmt.timeRange(time, time + total.minutes) })}
+              {move ? t('move.after', { when: whenText(date, time) }) : whenText(date, time)}
             </div>
           )}
         </div>

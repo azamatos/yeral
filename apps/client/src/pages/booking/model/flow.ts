@@ -30,8 +30,44 @@ export const bookingSearchSchema = z.object({
   step: z.enum(STEPS).optional().catch(undefined),
   /** The booking just sent (its code): the sent page, which a reload keeps. */
   sent: z.string().optional().catch(undefined),
+  /** Move mode (book C-30): the confirmed appointment whose time changes (its code); no services step. */
+  move: z.string().optional().catch(undefined),
+  /**
+   * The move just sent, its sent page (a reload keeps it): asked of a business that confirms by hand, or changed at
+   * once; the new time is `date` and `time`, the previous one `was` (`YYYY-MM-DD@minute`).
+   */
+  moved: z.enum(['asked', 'changed']).optional().catch(undefined),
+  was: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}@\d{1,4}$/)
+    .optional()
+    .catch(undefined),
 })
 export type BookingSearch = z.infer<typeof bookingSearchSchema>
+
+/** Move mode's steps (Booking `mode=move`): the services stay as booked. */
+export const MOVE_STEPS = ['staff', 'time', 'confirm'] as const
+export type MoveStep = (typeof MOVE_STEPS)[number]
+
+/** A time in the address's `was` (`2026-10-26@870`), or null. */
+export function wasOf(was: string | undefined): { date: string; start: number } | null {
+  const [date, start] = was?.split('@') ?? []
+  return date && start && isYmd(date) ? { date, start: Number(start) } : null
+}
+
+/** The moved booking's own time with its own specialist (or anyone): no new time (another specialist then is one). */
+export const isOwnTime = (
+  move: { date: string; start: number; current: string | null },
+  staff: string,
+  date: string | null | undefined,
+  start: number,
+) => date === move.date && start === move.start && (staff === 'any' || staff === move.current)
+
+/** The move's step the address asks for, held back to the time step until a new time is chosen. */
+export function currentMoveStep(asked: Step | undefined, timed: boolean): MoveStep {
+  const index = Math.min(Math.max(0, MOVE_STEPS.indexOf(asked as MoveStep)), timed ? 2 : 1)
+  return MOVE_STEPS[index] ?? 'staff'
+}
 
 /** What's chosen so far: the services, and a start that counts only on its day. */
 export interface Choice {

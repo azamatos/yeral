@@ -12,29 +12,19 @@ import { useClock } from '@yeral/ui/clock'
 import { Stepper } from '@yeral/ui/stepper'
 import { toast } from '@yeral/ui/toast'
 import { ChevronLeft, X } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { parseServiceIds, pickedServices, selectionTotal, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { useErrorText } from '@/shared/i18n'
 import { wrap } from '@/shared/ui'
 import { chosenStaff, currentStep, reachedStep, stepDone, STEPS, type BookingSearch, type Choice, type Step } from '../model/flow'
 import { ConfirmStep, type Alternative } from './confirm-step'
+import { FocusedHeader } from './focused-header'
 import { SentView } from './sent-view'
 import { ServicesStep } from './services-step'
 import { StaffStep } from './staff-step'
 import { Summary } from './summary'
 import { TimeStep } from './time-step'
-
-/** The focused header (Booking `.fh`): 72 high, its three parts; 16 at the sides on phones. */
-function FocusedHeader({ start, middle, end }: { start: ReactNode; middle?: ReactNode; end: ReactNode }) {
-  return (
-    <header className="grid h-18 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 border-b border-n-200 bg-n-0 px-6 max-sm:px-4">
-      <div className="flex min-w-0 items-center">{start}</div>
-      {middle ?? <span />}
-      <div className="flex min-w-0 justify-end">{end}</div>
-    </header>
-  )
-}
 
 /**
  * `/{lang}/b/{slug}/book` — the appointment booking flow (Booking, book C-12–C-22): the focused header (Back, the steps,
