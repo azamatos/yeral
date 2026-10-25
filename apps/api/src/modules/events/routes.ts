@@ -70,9 +70,15 @@ export const eventRoutes = new OpenAPIHono<AppEnv>()
         if (!stream.aborted) await stream.write(': ping\n\n')
       }
     })
-    // nothing in the way may hold it back or compress it (Caddy's `encode` leaves a no-transform answer alone)
-    res.headers.set('Cache-Control', 'no-cache, no-transform')
-    res.headers.set('X-Accel-Buffering', 'no')
+    // nothing in the way may hold it back or compress it (Caddy's `encode` leaves a no-transform answer alone); on the
+    // context too, whose own headers (streamSSE's `no-cache`) are copied over the answer when it's set again
+    for (const [name, value] of [
+      ['Cache-Control', 'no-cache, no-transform'],
+      ['X-Accel-Buffering', 'no'],
+    ] as const) {
+      c.header(name, value)
+      res.headers.set(name, value)
+    }
     return res
   })
   .openapi(eventsRoute, async (c) => {
