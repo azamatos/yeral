@@ -3,7 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { formatPhone } from '@yeral/domain/phone'
 import { useSdk } from '@yeral/sdk/react'
 import { cn } from '@yeral/ui/cn'
-import { LogOut, UserRound } from 'lucide-react'
+import { CalendarDays, LogOut, UserRound } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useLogOut } from '@/features/log-out'
@@ -19,8 +19,9 @@ const navItem = cn(
 
 /**
  * The account area (Account-Profile `.acc`): the client account aside (avatar 56, the name and phone, the account's
- * places, «Log out») beside the page. Under 1024 the aside becomes a row of pills above the page, without the person
- * and «Log out» (they are in the header's menu). My bookings and favourites join with their pages (slices 3 and 5).
+ * places: My bookings, Profile and settings; «Log out») beside the page. Under 1024 the aside becomes a row of pills
+ * above the page, without the person and «Log out» (they are in the header's menu). Favourites join with their page
+ * (slice 5).
  * Nobody signed in any more (logged out here or in the header, the account deleted, the session ended elsewhere): Home.
  */
 export function AccountLayout({ children }: { children: ReactNode }) {
@@ -53,6 +54,10 @@ export function AccountLayout({ children }: { children: ReactNode }) {
             aria-label={t('sections')}
             className="flex flex-col gap-0.5 max-md:-mx-6 max-md:flex-row max-md:gap-2 max-md:overflow-x-auto max-md:px-6 max-md:pb-1 max-sm:-mx-4 max-sm:px-4"
           >
+            <Link to="/$lang/account/bookings" params={{ lang }} className={navItem}>
+              <CalendarDays aria-hidden />
+              {t('bookings')}
+            </Link>
             <Link to="/$lang/account/profile" params={{ lang }} className={navItem}>
               <UserRound aria-hidden />
               {t('profileAndSettings')}

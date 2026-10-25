@@ -44,7 +44,10 @@ export interface Choice {
 export const doesAll = (specialist: { serviceIds: readonly string[] }, serviceIds: readonly string[]) =>
   serviceIds.length > 0 && serviceIds.every((id) => specialist.serviceIds.includes(id))
 
-/** The chosen specialist while they still do every picked service; otherwise «any» (a new service may rule them out). */
+/**
+ * The chosen specialist while they still do every picked service; otherwise «any» (a new service may rule them out).
+ * The address keeps them meanwhile ({@link namedSpecialist}): taking that service off brings them back.
+ */
 export function chosenStaff(
   detail: { specialists: readonly { id: string; serviceIds: readonly string[] }[] },
   serviceIds: readonly string[],
@@ -53,6 +56,26 @@ export function chosenStaff(
   if (!staff || staff === 'any') return 'any'
   const specialist = detail.specialists.find((s) => s.id === staff)
   return specialist && doesAll(specialist, serviceIds) ? staff : 'any'
+}
+
+/** The specialist the address names (`?staff=`, «Book with …» on the business page) whatever's picked; null for «any». */
+export function namedSpecialist<S extends { id: string }>(detail: { specialists: readonly S[] }, staff: string | undefined): S | null {
+  if (!staff || staff === 'any') return null
+  return detail.specialists.find((s) => s.id === staff) ?? null
+}
+
+/** The picked services the specialist doesn't do, in the order picked. */
+export const notDoneBy = (specialist: { serviceIds: readonly string[] }, serviceIds: readonly string[]) =>
+  serviceIds.filter((id) => !specialist.serviceIds.includes(id))
+
+/** The groups with only the services the specialist does (a group left empty goes). */
+export function servicesOf<G extends { services: readonly { id: string }[] }>(
+  groups: readonly G[],
+  specialist: { serviceIds: readonly string[] },
+): G[] {
+  return groups
+    .map((g) => ({ ...g, services: g.services.filter((s) => specialist.serviceIds.includes(s.id)) }))
+    .filter((g) => g.services.length > 0)
 }
 
 const timed = (choice: Choice) => choice.time !== null && choice.date !== null

@@ -17,6 +17,7 @@ import { Route as LangSiteIndexRouteImport } from './routes/$lang/_site/index'
 import { Route as LangSiteAccountRouteRouteImport } from './routes/$lang/_site/account/route'
 import { Route as LangSiteLoginRouteImport } from './routes/$lang/_site/login'
 import { Route as LangSiteAccountIndexRouteImport } from './routes/$lang/_site/account/index'
+import { Route as LangSiteAccountBookingsRouteImport } from './routes/$lang/_site/account/bookings'
 import { Route as LangSiteAccountProfileRouteImport } from './routes/$lang/_site/account/profile'
 import { Route as LangSiteBSlugRouteImport } from './routes/$lang/_site/b/$slug'
 import { Route as LangBSlugBookRouteImport } from './routes/$lang/b.$slug.book'
@@ -60,6 +61,11 @@ const LangSiteAccountIndexRoute = LangSiteAccountIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LangSiteAccountRouteRoute,
 } as any)
+const LangSiteAccountBookingsRoute = LangSiteAccountBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => LangSiteAccountRouteRoute,
+} as any)
 const LangSiteAccountProfileRoute = LangSiteAccountProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/$lang/account': typeof LangSiteAccountRouteRouteWithChildren
   '/$lang/login': typeof LangSiteLoginRoute
   '/$lang/': typeof LangSiteIndexRoute
+  '/$lang/account/bookings': typeof LangSiteAccountBookingsRoute
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
   '/$lang/b/$slug': typeof LangSiteBSlugRoute
   '/$lang/b/$slug/book': typeof LangBSlugBookRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/$lang': typeof LangSiteIndexRoute
   '/b/$slug': typeof BSlugRoute
   '/$lang/login': typeof LangSiteLoginRoute
+  '/$lang/account/bookings': typeof LangSiteAccountBookingsRoute
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
   '/$lang/b/$slug': typeof LangSiteBSlugRoute
   '/$lang/b/$slug/book': typeof LangBSlugBookRoute
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/$lang/_site/account': typeof LangSiteAccountRouteRouteWithChildren
   '/$lang/_site/login': typeof LangSiteLoginRoute
   '/$lang/_site/': typeof LangSiteIndexRoute
+  '/$lang/_site/account/bookings': typeof LangSiteAccountBookingsRoute
   '/$lang/_site/account/profile': typeof LangSiteAccountProfileRoute
   '/$lang/_site/b/$slug': typeof LangSiteBSlugRoute
   '/$lang/b/$slug/book': typeof LangBSlugBookRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/$lang/account'
     | '/$lang/login'
     | '/$lang/'
+    | '/$lang/account/bookings'
     | '/$lang/account/profile'
     | '/$lang/b/$slug'
     | '/$lang/b/$slug/book'
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/$lang'
     | '/b/$slug'
     | '/$lang/login'
+    | '/$lang/account/bookings'
     | '/$lang/account/profile'
     | '/$lang/b/$slug'
     | '/$lang/b/$slug/book'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/$lang/_site/account'
     | '/$lang/_site/login'
     | '/$lang/_site/'
+    | '/$lang/_site/account/bookings'
     | '/$lang/_site/account/profile'
     | '/$lang/_site/b/$slug'
     | '/$lang/b/$slug/book'
@@ -214,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LangSiteAccountIndexRouteImport
       parentRoute: typeof LangSiteAccountRouteRoute
     }
+    '/$lang/_site/account/bookings': {
+      id: '/$lang/_site/account/bookings'
+      path: '/bookings'
+      fullPath: '/$lang/account/bookings'
+      preLoaderRoute: typeof LangSiteAccountBookingsRouteImport
+      parentRoute: typeof LangSiteAccountRouteRoute
+    }
     '/$lang/_site/account/profile': {
       id: '/$lang/_site/account/profile'
       path: '/profile'
@@ -239,11 +258,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface LangSiteAccountRouteRouteChildren {
+  LangSiteAccountBookingsRoute: typeof LangSiteAccountBookingsRoute
   LangSiteAccountProfileRoute: typeof LangSiteAccountProfileRoute
   LangSiteAccountIndexRoute: typeof LangSiteAccountIndexRoute
 }
 
 const LangSiteAccountRouteRouteChildren: LangSiteAccountRouteRouteChildren = {
+  LangSiteAccountBookingsRoute: LangSiteAccountBookingsRoute,
   LangSiteAccountProfileRoute: LangSiteAccountProfileRoute,
   LangSiteAccountIndexRoute: LangSiteAccountIndexRoute,
 }

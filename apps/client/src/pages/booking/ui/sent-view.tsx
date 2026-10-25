@@ -11,11 +11,11 @@ import { useClock } from '@yeral/ui/clock'
 import { KeyValueList } from '@yeral/ui/key-value'
 import { Price } from '@yeral/ui/price'
 import { Skeleton } from '@yeral/ui/skeleton'
-import { StatusBadge } from '@yeral/ui/status-badge'
 import { Timeline } from '@yeral/ui/timeline'
-import { CalendarPlus, Check, CircleAlert, Clock, Send } from 'lucide-react'
+import { CalendarPlus, Check, CircleAlert, Send } from 'lucide-react'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { BookingStatusBadge } from '@/entities/booking'
 import { site } from '@/shared/config'
 import { calendarAt, downloadFile } from '@/shared/lib'
 
@@ -29,7 +29,7 @@ import { calendarAt, downloadFile } from '@/shared/lib'
  */
 export function SentView({ code, detail }: { code: string; detail: BusinessDetail }) {
   const t = useTranslations('booking.sent')
-  const status = useTranslations('status')
+
   const tb = useTranslations('booking')
   const brand = useTranslations('common')('brand')
   const now = useClock()
@@ -41,7 +41,7 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
   const b = booking.data
   const myBookings = (
     <Button asChild size="l" variant="primary">
-      <Link to="/$lang/account" params={{ lang }}>
+      <Link to="/$lang/account/bookings" params={{ lang }}>
         {t('myBookings')}
       </Link>
     </Button>
@@ -93,18 +93,7 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
         <h1 className="m-0 text-[32px] leading-[38px] font-bold tracking-[-0.025em]">
           {state === 'confirmed' ? t('titleConfirmed') : state === 'pending' ? t('titleSent') : t('titleOther')}
         </h1>
-        <StatusBadge
-          status={b.status}
-          icon={
-            state === 'confirmed' ? (
-              <Check aria-hidden className="size-3.5" strokeWidth={2} />
-            ) : state === 'pending' ? (
-              <Clock aria-hidden className="size-3.5" strokeWidth={2} />
-            ) : undefined
-          }
-        >
-          {status(b.status)}
-        </StatusBadge>
+        <BookingStatusBadge status={b.status} />
         {state === 'pending' && (
           <p className="m-0 max-w-125 text-body text-n-600">
             {own && detail.typicalConfirmMinutes

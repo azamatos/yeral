@@ -63,7 +63,8 @@
     "close": "Close",
     "mine": "My account",
     "sections": "Account sections",
-    "profileAndSettings": "Profile and settings"
+    "profileAndSettings": "Profile and settings",
+    "bookings": "My bookings"
   },
   "profile": {
     "title": "Profile and settings",
@@ -287,7 +288,12 @@
     "services": {
       "title": "Choose services",
       "lead": "You can choose several services.",
-      "max": "Up to {max} services in one booking."
+      "max": "Up to {max} services in one booking.",
+      "theirs": "The services {name} does",
+      "allShown": "All the services",
+      "seeAll": "See all services",
+      "onlyTheirs": "Only {name}'s",
+      "notTheirs": "{name} doesn't do {services}, so any free specialist takes this booking. Take {count, plural, one {it} other {them}} off to book with {name}."
     },
     "staff": {
       "title": "Choose a specialist",
@@ -390,5 +396,54 @@
       "barTime": "{count, plural, one {# service} other {# services}} · {total} · {time}",
       "barNone": "No service chosen"
     }
+  },
+  "myBookings": {
+    "title": "My bookings",
+    "label": "Bookings",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "what": "{services} · {staff}",
+    "when": "{date} · {range}",
+    "byClient": "You cancelled",
+    "byBusiness": "The business cancelled",
+    "declined": "The business declined",
+    "bySystem": "No answer in time",
+    "waiting": "Waiting for the business to confirm",
+    "noshow": "Marked as a no-show",
+    "byPhone": "Booked by phone",
+    "call": "Call",
+    "callLabel": "Call {business}",
+    "offersPassed": "The offered times have passed",
+    "otherTime": "Choose another time",
+    "offerPastLabel": "{when}, passed",
+    "freeTimes": "Free times",
+    "offeredCaption": "Book in one tap: the business offered these times itself.",
+    "tookOffer": "Offered time accepted: {code}",
+    "tookRequest": "New request sent: {code}",
+    "offerGone": "This time was just taken. Pick another one.",
+    "undoLabel": "Undo: {business}, {when}",
+    "moveWaiting": "New time requested: {when} · waiting for an answer",
+    "reason": "Reason: {reason}",
+    "reasonWith": "Reason: {reason} · «{text}»",
+    "offered": "Offered times",
+    "expiredLead": "{business} didn't answer in time. Choose one of these free times:",
+    "offerTaken": "Already taken",
+    "offerTakenLabel": "{when}, already taken",
+    "offerPick": "Book {time}",
+    "ask": "{when} · {what}: book this time?",
+    "back": "Back",
+    "book": "Book",
+    "booked": "Booked: {when}",
+    "requested": "New request sent",
+    "undo": "Undo",
+    "undone": "Your booking is back",
+    "bookAgain": "Book again",
+    "more": "Show more",
+    "emptyUpcoming": "No upcoming bookings",
+    "emptyUpcomingLead": "Open a place you like: its free times are a tap away.",
+    "emptyPast": "No past bookings yet",
+    "emptyPastLead": "Your finished and cancelled bookings show here.",
+    "find": "Find a place",
+    "loadFailed": "Couldn't load your bookings."
   }
 }

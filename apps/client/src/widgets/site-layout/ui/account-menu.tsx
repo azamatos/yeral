@@ -4,17 +4,17 @@ import { formatPhone } from '@yeral/domain/phone'
 import { cn } from '@yeral/ui/cn'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTrigger } from '@yeral/ui/drawer'
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuSeparator, MenuTrigger } from '@yeral/ui/menu'
-import { ChevronDown, ChevronUp, LogOut, User } from 'lucide-react'
+import { CalendarDays, ChevronDown, ChevronUp, LogOut, User } from 'lucide-react'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useLogOut } from '@/features/log-out'
 import { PersonMark } from '@/shared/ui'
 
 /**
- * The signed-in header's avatar and its menu (Auth «Logged-in header»): the person's name and phone, Profile, then
- * «Log out». A popover 260 wide under the avatar; a bottom sheet under 768 (the caption). Both are rendered and CSS
- * shows the one for the screen, so the server's page and the browser's agree. My bookings and favourites join with
- * their pages (P4 slices 3 and 5), the language row with a market's second language.
+ * The signed-in header's avatar and its menu (Auth «Logged-in header»): the person's name and phone, My bookings,
+ * Profile, then «Log out». A popover 260 wide under the avatar; a bottom sheet under 768 (the caption). Both are
+ * rendered and CSS shows the one for the screen, so the server's page and the browser's agree. Favourites join with
+ * their page (P4 slice 5), the language row with a market's second language.
  */
 export function AccountMenu({ me }: { me: Me }) {
   const t = useTranslations('account')
@@ -43,6 +43,12 @@ export function AccountMenu({ me }: { me: Me }) {
       {open ? <ChevronUp aria-hidden className="size-4" /> : <ChevronDown aria-hidden className="size-4" />}
     </button>
   )
+  const bookings = (
+    <Link to="/$lang/account/bookings" params={{ lang }}>
+      <CalendarDays aria-hidden />
+      {t('bookings')}
+    </Link>
+  )
   const profile = (
     <Link to="/$lang/account/profile" params={{ lang }}>
       <User aria-hidden />
@@ -64,6 +70,7 @@ export function AccountMenu({ me }: { me: Me }) {
               </span>
             </MenuLabel>
             <MenuSeparator />
+            <MenuItem asChild>{bookings}</MenuItem>
             <MenuItem asChild>{profile}</MenuItem>
             <MenuSeparator />
             <MenuItem
@@ -91,6 +98,10 @@ export function AccountMenu({ me }: { me: Me }) {
               closeLabel={t('close')}
             />
             <nav aria-label={t('sections')} className="flex flex-col p-2 pb-4">
+              <Link to="/$lang/account/bookings" params={{ lang }} onClick={close} className={sheetRow}>
+                <CalendarDays aria-hidden />
+                {t('bookings')}
+              </Link>
               <Link to="/$lang/account/profile" params={{ lang }} onClick={close} className={sheetRow}>
                 <User aria-hidden />
                 {t('profile')}

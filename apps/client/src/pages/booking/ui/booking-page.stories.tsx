@@ -42,6 +42,29 @@ export const Services: Story = {
   },
 }
 
+/**
+ * «Book» on Maral's card: only her services, «See all services» for the rest; a haircut she doesn't do says so (anyone
+ * takes the booking), and taking it off brings her back.
+ */
+export const WithSpecialist: Story = {
+  args: { path: '/en/b/glow-studio/book?staff=st-maral' },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('The services Maral does')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Select: Manicure' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Select: Women’s haircut' })).toBeNull()
+    await userEvent.click(canvas.getByRole('button', { name: 'Select: Manicure' }))
+    const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'See all services' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Select: Women’s haircut' }))
+    await expect(await canvas.findByText(/^Maral doesn't do Women’s haircut, so any free specialist takes this booking\./)).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Selected: Women’s haircut' }))
+    await expect(await canvas.findByRole('button', { name: "Only Maral's" })).toBeVisible()
+    await userEvent.click(summary.getByRole('button', { name: 'Continue' }))
+    const group = within(await canvas.findByRole('radiogroup', { name: 'Specialist' }))
+    await expect(group.getByRole('radio', { name: /Maral/ })).toHaveAttribute('aria-checked', 'true')
+  },
+}
+
 /** Step 2: anyone with the earliest time, the people who do the haircut, the others disabled with why. */
 export const Specialist: Story = {
   args: { path: '/en/b/glow-studio/book?services=s1&step=staff' },

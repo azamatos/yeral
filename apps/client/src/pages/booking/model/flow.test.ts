@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { bookingSearchSchema, chosenStaff, currentStep, partOfDay, reachedStep, slotsByPart, stepDone } from './flow'
+import {
+  bookingSearchSchema,
+  chosenStaff,
+  currentStep,
+  namedSpecialist,
+  notDoneBy,
+  partOfDay,
+  reachedStep,
+  servicesOf,
+  slotsByPart,
+  stepDone,
+} from './flow'
 
 const detail = {
   specialists: [
@@ -35,6 +46,22 @@ describe('the specialist', () => {
     expect(chosenStaff(detail, ['cut', 'mani'], 'ayna')).toBe('any')
     expect(chosenStaff(detail, ['cut'], 'nobody')).toBe('any')
     expect(chosenStaff(detail, ['cut'], undefined)).toBe('any')
+  })
+
+  it('stays named in the address while a picked service is not theirs', () => {
+    const ayna = namedSpecialist(detail, 'ayna')
+    expect(ayna?.id).toBe('ayna')
+    expect(namedSpecialist(detail, 'any')).toBeNull()
+    expect(namedSpecialist(detail, 'nobody')).toBeNull()
+    expect(notDoneBy(detail.specialists[0]!, ['cut', 'mani', 'colour'])).toEqual(['mani'])
+  })
+
+  it('lists only their services, without groups left empty', () => {
+    const groups = [
+      { id: 'hair', services: [{ id: 'cut' }, { id: 'colour' }] },
+      { id: 'nails', services: [{ id: 'mani' }] },
+    ]
+    expect(servicesOf(groups, { serviceIds: ['colour'] })).toEqual([{ id: 'hair', services: [{ id: 'colour' }] }])
   })
 })
 
