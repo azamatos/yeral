@@ -1,7 +1,7 @@
 /** Date strip — booking time step: 14 days, a week per page on desktop, native scroll on phones. */
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { expect, userEvent, within } from 'storybook/test'
+import { expect, userEvent } from 'storybook/test'
 import { DateStrip, type StripDay } from './date-strip'
 
 const WD = ['Du', 'Si', 'Ça', 'Pe', 'An', 'Şe', 'Ýe']
@@ -54,11 +54,10 @@ export const Phone: Story = {
   play: async ({ canvas }) => {
     const strip = canvas.getByRole('group', { name: 'Sene' })
     await expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth)
-    // a day's hidden words (absolute) are placed by the day itself, so the strip's scroll holds them: placed by
-    // anything further out, the last days' words widen the whole page sideways on a phone
-    for (const day of within(strip).getAllByRole('button')) {
-      const words = day.querySelector<HTMLElement>('.sr-only')
-      if (words) await expect(words.offsetParent).toBe(day)
-    }
+    // the days' hidden words (absolute) are placed within the strip, so its scroll holds them: placed by anything further
+    // out, the last days' words widen the whole page sideways on a phone
+    const words = [...strip.querySelectorAll<HTMLElement>('.sr-only')]
+    await expect(words.length).toBeGreaterThan(0)
+    for (const w of words) await expect(w.offsetParent === strip || strip.contains(w.offsetParent)).toBe(true)
   },
 }

@@ -156,5 +156,19 @@ export const Full: Story = {
 /** A phone: three in a row. */
 export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
 
-/** Russian runs ~30% longer: the chips stay on one line, «Сделать обложкой» fits a tile. */
+/** Russian runs ~30% longer: on a wide tile the chips stay on one line. */
 export const RussianLength: Story = { name: 'Russian (+30% length)', args: { words: RU } }
+
+/** Russian on a phone's small tiles: «Обложка» and «Сделать обложкой» wrap inside their tile, never past it. */
+export const RussianPhone: Story = {
+  args: { words: RU },
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvasElement }) => {
+    const chips = [...canvasElement.querySelectorAll<HTMLElement>('li > .absolute.bottom-1\\.5')]
+    await expect(chips.length).toBeGreaterThan(1)
+    for (const chip of chips) {
+      const tile = chip.closest('li')!.getBoundingClientRect()
+      await expect(chip.getBoundingClientRect().right).toBeLessThanOrEqual(tile.right)
+    }
+  },
+}
