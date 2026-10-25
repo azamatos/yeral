@@ -1,1 +1,1 @@
-export { Rating, Stars } from './rating'
+export { Rating, RatingInput, Stars } from './rating'

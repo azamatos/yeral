@@ -105,7 +105,10 @@ export function DateStrip({
   )
 }
 
-/** Square 36 icon button used by pagers (DS `.pg`). */
+/**
+ * Square 36 icon button used by pagers (DS `.pg`). Off as `disabled`, or as `aria-disabled` where a press can turn it
+ * off while it has the focus (the drawer's pager reaching its last item), which keeps the focus on it.
+ */
 export function PagerButton({ label, children, className, ...props }: ComponentProps<'button'> & { label: string }) {
   return (
     <button
@@ -115,6 +118,7 @@ export function PagerButton({ label, children, className, ...props }: ComponentP
       className={cn(
         'inline-flex size-9 cursor-pointer items-center justify-center rounded-s border border-transparent bg-transparent text-n-900 hover:bg-group',
         'focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default disabled:bg-transparent disabled:text-n-400 [&_svg]:size-[18px]',
+        'aria-disabled:cursor-default aria-disabled:bg-transparent aria-disabled:text-n-400',
         className,
       )}
     >
