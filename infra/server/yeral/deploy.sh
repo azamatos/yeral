@@ -26,8 +26,12 @@ business_image="yeral-business:${COMMIT:0:12}"
 docker build -f src/infra/docker/business.Dockerfile --build-arg "GITHUB_SHA=$COMMIT" -t "$business_image" src
 
 # the database before the migrations, the way back from a bad one (operations.md, "Rollback"); readable by root only,
-# and a failed dump stops the deploy. Nothing to save on the first deploy, before Postgres runs.
-if docker compose ps --status running --services 2>/dev/null | grep -qx postgres; then
+# and a failed dump stops the deploy. Nothing to save on the first deploy, before Postgres runs. Asked of Docker by the
+# compose labels, not `docker compose ps`: that one needs every variable compose.yml asks for, and a new one not in .env
+# yet made it fail quietly and the backup was skipped (25.10.2026).
+postgres_running=$(docker ps -q --filter status=running \
+  --filter label=com.docker.compose.project=yeral --filter label=com.docker.compose.service=postgres)
+if [ -n "$postgres_running" ]; then
   backup="backup-$(date -u +%F)-before-${COMMIT:0:7}.sql.gz"
   if ! (umask 077 && docker compose exec -T postgres pg_dump -U yeral yeral | gzip >"$backup"); then
     rm -f "$backup"
