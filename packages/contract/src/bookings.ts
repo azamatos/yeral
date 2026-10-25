@@ -6,6 +6,7 @@ import { MAX_SEATS_PER_BOOKING } from '@yeral/domain/availability'
 import { MAX_ALTERNATIVES, REVIEW_TAG_LENGTH_MAX, REVIEW_TAGS_MAX, REVIEW_TEXT_MAX } from '@yeral/domain/lifecycle'
 import { BOOKING_SOURCES, BOOKING_STATUSES, BUSINESS_SIDE_CANCEL_REASONS, CANCELLED_BY, DECLINE_REASONS } from '@yeral/domain/model'
 import { z } from 'zod'
+import { teamItemSchema } from './requests'
 import {
   bookingCodeSchema,
   cityRefSchema,
@@ -83,14 +84,26 @@ export type CreateBooking = z.infer<typeof createBookingSchema>
 
 export const bookingStatusSchema = z.enum(BOOKING_STATUSES)
 
-/** What was booked, per type: "Aýal saç kesimi · Aýna", "Stol · 4 adam · Terrasa", "Irden akym · 1 ýer · Aýgözel". */
+const tableWhatSchema = z.object({ type: z.literal('table'), partySize: z.number().int(), area: z.string(), requests: z.array(z.string()) })
+const classWhatSchema = z.object({ type: z.literal('class'), session: z.string(), trainer: z.string().nullable(), seats: z.number().int() })
+
+/**
+ * What was booked, per type: "Aýal saç kesimi · Aýna", "Stol · 4 adam · Terrasa", "Irden akym · 1 ýer · Aýgözel". An
+ * appointment's services are the team's items (`teamItemSchema`): with their ids, which a move asks the free times by
+ * (book C-30). A service the business deleted is archived and keeps its id, as a specialist removed from the team keeps
+ * theirs: the catalogue says whether they're still bookable. Null only once the row itself is gone.
+ */
 export const bookingWhatSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('appointment'),
-    items: z.array(z.object({ service: z.string(), staff: z.string().nullable(), start: minuteSchema, end: minuteSchema })).min(1),
-  }),
-  z.object({ type: z.literal('table'), partySize: z.number().int(), area: z.string(), requests: z.array(z.string()) }),
-  z.object({ type: z.literal('class'), session: z.string(), trainer: z.string().nullable(), seats: z.number().int() }),
+  z.object({ type: z.literal('appointment'), items: z.array(teamItemSchema).min(1) }),
+  tableWhatSchema,
+  classWhatSchema,
+])
+
+/** What was booked as the SMS link page shows it to whoever holds the link: the names, not the ids. */
+export const bookingLinkWhatSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('appointment'), items: z.array(teamItemSchema.omit({ serviceId: true, staffId: true })).min(1) }),
+  tableWhatSchema,
+  classWhatSchema,
 ])
 
 export const bookingSummarySchema = z
@@ -279,6 +292,8 @@ export const bookingLinkSchema = bookingDetailSchema
     bookOnline: true,
   })
   .extend({
+    /** The names only: the ids are for a move, which needs the account. */
+    what: bookingLinkWhatSchema,
     /** "+993 65 •• •• 22": where the login code goes; the page never shows the number. */
     maskedPhone: z.string(),
     /** Signed in as the booking's owner: the site opens "Ýazylyşlarym" with this booking instead (book Q-169). */

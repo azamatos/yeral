@@ -62,6 +62,11 @@ export const linkRoutes = new OpenAPIHono<AppEnv>()
     const d = await detailOf(deps, row, c.req.valid('query').lang)
     const full: Record<string, unknown> = {
       ...d,
+      // the services' and specialists' ids are for a move, which needs the account: whoever holds the link sees names
+      what:
+        d.what.type === 'appointment'
+          ? { ...d.what, items: d.what.items.map(({ serviceId: _service, staffId: _staff, ...named }) => named) }
+          : d.what,
       maskedPhone: maskPhone(row.phone),
       // signed in as someone else (a shared phone): the signed-out page, with the masked-phone login (book Q-169)
       owner: !!row.userId && c.var.auth?.user.id === row.userId,

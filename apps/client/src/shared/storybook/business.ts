@@ -230,14 +230,23 @@ export interface BusinessApiOptions extends AuthApiOptions {
 /** The booking `POST /bookings` makes (`YR-48213`, then `YR-48214` …): pending at a business that confirms by hand, else confirmed. */
 function sentBooking(business: BusinessDetail, body: Record<string, unknown>, code: string): BookingDetail {
   const ids = body.serviceIds as string[]
-  const services = business.serviceGroups.flatMap((g) => g.services).filter((s) => ids.includes(s.id))
+  // in the order sent, as the api runs them
+  const all = business.serviceGroups.flatMap((g) => g.services)
+  const services = ids.flatMap((id) => all.filter((s) => s.id === id))
   const staffId = body.staffId as string | null
   const date = String(body.date)
   const start = Number(body.start)
   let at = start
   const items = services.map((s) => {
-    const staff = business.specialists.find((p) => p.id === (staffId ?? s.staffIds[0]))?.name ?? null
-    const item = { service: s.name, staff, start: at, end: at + s.durationMin }
+    const who = business.specialists.find((p) => p.id === (staffId ?? s.staffIds[0])) ?? null
+    const item = {
+      serviceId: s.id,
+      service: s.name,
+      staffId: who?.id ?? null,
+      staff: who?.name ?? null,
+      start: at,
+      end: at + s.durationMin,
+    }
     at += s.durationMin
     return item
   })
