@@ -5,7 +5,14 @@
  * 409 slot_taken.
  */
 import type { dayStateSchema } from '@yeral/contract/availability'
-import { busyOn, staffDoingAll, type AppointmentContext, type BusyInterval, type TableContext } from '@yeral/domain/availability'
+import {
+  busyOn,
+  nextFreeSlot,
+  staffDoingAll,
+  type AppointmentContext,
+  type BusyInterval,
+  type TableContext,
+} from '@yeral/domain/availability'
 import { businessClosedReason, withinHours, withinStaffDay, type BusinessHours } from '@yeral/domain/hours'
 import { overlaps } from '@yeral/domain/model'
 import type { BookingRules } from '@yeral/domain/rules'
@@ -348,6 +355,22 @@ export function appointmentContext(lb: LoadedBusiness, busy: BusyInterval[], now
     busy: busy.filter((b) => lb.staff.some((s) => s.id === b.staffId)),
     now,
   }
+}
+
+/**
+ * The next free start a client may book for the services, with that specialist or anyone (`null`), in the booking
+ * window from today («Indiki boş wagt»: the business page's card and specialists, the booking's specialist step). For
+ * one specialist only their own busy times are read: a day's free times with them depend on nothing else.
+ */
+export function nextFreeFor(
+  ctx: AppointmentContext,
+  serviceIds: string[],
+  staffId: string | null,
+  excludeBookingIds: readonly string[] = [],
+): { date: string; start: number } | null {
+  const scoped = staffId ? { ...ctx, busy: ctx.busy.filter((b) => b.staffId === staffId) } : ctx
+  const found = nextFreeSlot(scoped, { serviceIds, staffId, by: 'client', excludeBookingIds })
+  return found ? { date: found.date, start: found.slot.start } : null
 }
 
 export type LoadedTableContext = TableContext & { areaRows: (typeof tableAreas.$inferSelect)[] }
