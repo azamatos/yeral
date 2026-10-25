@@ -355,7 +355,10 @@ export const businessDetailSchema = z
     amenities: z.array(z.string()),
     /** Seven entries, Monday first; null = closed. */
     hours: z.array(dayHoursSchema.nullable()).length(7),
-    /** Special days in the next 14 days ("Şu gün ýapyk · Baýramçylyk"). */
+    /**
+     * Special days from yesterday (a night still under way past midnight, book Q-105) through the next 14 days ("Şu gün
+     * ýapyk · Baýramçylyk").
+     */
     specialDays: z.array(specialDaySchema),
     open: openStateSchema,
     rules: z.object({

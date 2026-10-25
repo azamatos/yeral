@@ -14,12 +14,17 @@ export const Route = createFileRoute('/$lang/_site/b/$slug')({
   validateSearch: z.object({ services: z.string().optional().catch(undefined) }),
   loader: async ({ context, params }) => {
     const lang = siteLocale(params.lang)
-    const detail = await context.queryClient.ensureQueryData(context.sdk.catalog.business(params.slug, lang)).catch((error: unknown) => {
-      // an address no page can have (capitals, `_`, too long) is refused before any lookup: no page either
-      if (isApiError(error, 'not_found') || isApiError(error, 'validation_error')) notFound({ throw: true })
-      if (isApiError(error, 'in_review')) notFound({ data: NOT_OPEN, throw: true })
-      throw error
-    })
+    // the first reviews come with the page, read alongside it, once: a failure doesn't hold the page up with retries
+    // but leaves them to the page, which tries again and says so
+    const [detail] = await Promise.all([
+      context.queryClient.ensureQueryData(context.sdk.catalog.business(params.slug, lang)).catch((error: unknown) => {
+        // an address no page can have (capitals, `_`, too long) is refused before any lookup: no page either
+        if (isApiError(error, 'not_found') || isApiError(error, 'validation_error')) notFound({ throw: true })
+        if (isApiError(error, 'in_review')) notFound({ data: NOT_OPEN, throw: true })
+        throw error
+      }),
+      context.queryClient.prefetchInfiniteQuery({ ...context.sdk.catalog.reviews(params.slug, lang), retry: false }),
+    ])
     if (detail.slug !== params.slug)
       redirect({ to: '/$lang/b/$slug', params: { lang, slug: detail.slug }, search: true, statusCode: 301, throw: true })
     return { name: detail.name, category: detail.category.name, preview: detail.preview !== null }

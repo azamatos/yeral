@@ -110,6 +110,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | opening hours, special days, staff shifts and breaks (a day may run past midnight to `MAX_DAY_END`) | `businessDay() staffDay() workingIntervals() staffOffReason() openState() openStretches() weekHoursErrors()` | `@yeral/domain/hours` |
 | busy time across midnight | `busyOn(busy, date)` | `@yeral/domain/availability` |
 | free times: appointment, table, class | `appointmentSlots() findAppointmentSlot() nearestSlots() nextFreeSlot() planRefusal() shiftPlan() busyOf() tableSlots() assignTable() maxSeats()`; one named specialist: `oneSpecialist`/`preferStaffId` on the query, `slotStaffId()` | `@yeral/domain/availability` |
+| the next free time a client may book, with anyone or one specialist (the business page's card and specialists, the specialist step) (api) | `nextFreeFor(ctx, serviceIds, staffId)` (one specialist: only their busy times read) | `apps/api/src/modules/availability/context.ts` |
 | a business, its busy time and hours from the database (api); the hours held against a save | `loadBusiness() loadBusinesses() loadBusy() appointmentContext()`, `loadHours(db, id, { lock })` `lockedHours()` `assertOpenAt()` `assertStaffFree()`; busy elsewhere alone: `loadElsewhere()` | `apps/api/src/modules/availability/context.ts` |
 | a booking as the team reads it (api): its items and price | `teamItemOf() teamPriceOf()` | `apps/api/src/modules/bookings/team-view.ts` |
 | offered times as the client sees them: specialist, free / taken / past; where taking one books (api) | `offeredTimes() offerTarget()` | `apps/api/src/modules/bookings/offers.ts` |
@@ -165,7 +166,7 @@ referenced as `"catalog:"` from packages, so all apps run the same versions. Sta
 | site URLs, cookie domain and prefix, allowed origins, demo flag | `siteConfig({ env, domain, portBase })`, `siteFromEnv(env, 'VITE_')` | `@yeral/lib/site` |
 | add to calendar: one booking as an iCalendar file (UTC, escaped, folded), and saving a file the page made | `buildIcs() ICS_TYPE`; `downloadFile(name, content, type)` | `@yeral/lib/ics`; the client's `shared/lib` |
 | a business day's start as a person reads it (past midnight on the next date) | `calendarAt(date, start)` | the client's `shared/lib` |
-| directions, call *(M3)* | `directionsUrl() telHref()` | `@yeral/lib/links` |
+| directions (book Q-108: the phone's map app, an iPad's too; Google Maps on a computer and from the server), a number to call | `directionsUrl(to, name, navigator)` `telHref(phone)` | `@yeral/lib/links` |
 | local/session storage that never throws *(M3)* | `safeStorage` | `@yeral/lib/storage` |
 | env vars | `parseEnv(schema, source)` (names bad variables, never values) → `shared/config/env.ts` per app, `config.ts` in the api | `@yeral/lib/env` |
 | api: rate limits, the caller's IP (only from `TRUSTED_IP_HEADER`), hashes and random digits | `hit() clientIp()`, `sha256Hex() randomDigits()` | `apps/api/src/lib/{rate-limit,crypto}.ts` |

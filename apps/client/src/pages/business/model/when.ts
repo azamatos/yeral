@@ -1,7 +1,8 @@
 import type { BusinessDetail } from '@yeral/contract/catalog'
-import { businessDay, currentBusinessDate, type BusinessHours } from '@yeral/domain/hours'
-import { addDays } from '@yeral/domain/time'
+import { businessDay, currentBusinessDate, workingIntervals, type BusinessHours } from '@yeral/domain/hours'
+import { addDays, dow } from '@yeral/domain/time'
 import type { Fmt } from '@yeral/i18n'
+import { calendarAt } from '@/shared/lib'
 
 type Words = (key: 'openUntil' | 'opensToday' | 'opensTomorrow' | 'opensOn' | 'closed', values?: Record<string, string>) => string
 
@@ -40,4 +41,64 @@ export function dayHours(
   const day = businessDay(calendar, date)
   if (day) return { hours: fmt.timeRange(day.open, day.close) }
   return { closed: true, reason: detail.specialDays.find((d) => d.date === date)?.name ?? null }
+}
+
+/**
+ * «Today 15:30», «Tomorrow 10:00», «Fri, 16 Oct 10:00»: a next free time on the card, the bar and the specialists' cards;
+ * a start past midnight reads on the next calendar day.
+ */
+export function nextFreeText(
+  next: { date: string; start: number },
+  today: string,
+  fmt: Fmt,
+  at: (values: { day: string; time: string }) => string,
+): string {
+  const on = calendarAt(next.date, next.start)
+  return at({ day: fmt.relativeShortDate(on.date, today), time: fmt.time(on.start) })
+}
+
+type ConfirmWords = (key: 'confirmsAtOnce' | 'confirmsByHand' | 'confirmsWithin', values?: { time: string }) => string
+
+/** How the business answers (`typicalConfirmMinutes`, book Q-113): within its usual time, by hand, or at once. */
+export function confirmLine(detail: Pick<BusinessDetail, 'confirmMode' | 'typicalConfirmMinutes'>, fmt: Fmt, t: ConfirmWords): string {
+  if (detail.confirmMode === 'instant') return t('confirmsAtOnce')
+  return detail.typicalConfirmMinutes ? t('confirmsWithin', { time: fmt.duration(detail.typicalConfirmMinutes) }) : t('confirmsByHand')
+}
+
+/** «Bitarap Türkmenistan avenue 247, Ashgabat, 2nd floor»: the address with its city and floor (the header, About). */
+export function addressLine(detail: Pick<BusinessDetail, 'address' | 'city' | 'floor'>, fmt: Fmt): string {
+  return [fmt.addressIn(detail.address, detail.city.name), detail.floor].filter(Boolean).join(', ')
+}
+
+export interface WeekRow {
+  date: string
+  today: boolean
+  /** «09:00–20:00», a break as two stretches («09:00–13:00, 14:00–20:00»); null when closed. */
+  hours: string | null
+  /** The special day's name («Holiday»), when one sets the day's hours. */
+  special: string | null
+}
+
+/**
+ * The hours table (Venue «Iş wagty», States 06): Monday to Sunday, each as the coming day of that name has it from the
+ * business day under way (today's own), so a special day in the next week shows with its name; today marked.
+ */
+export function weekRows(detail: Pick<BusinessDetail, 'hours' | 'specialDays'>, now: number, fmt: Fmt): WeekRow[] {
+  const calendar = calendarOf(detail)
+  const current = currentBusinessDate(calendar, now)
+  return Array.from({ length: 7 }, (_, i) => addDays(current, i))
+    .sort((a, b) => dow(a) - dow(b))
+    .map((date) => {
+      const day = businessDay(calendar, date)
+      return {
+        date,
+        today: date === current,
+        hours:
+          day &&
+          workingIntervals(day)
+            .map((s) => fmt.timeRange(s.start, s.end))
+            .join(', '),
+        special: detail.specialDays.find((d) => d.date === date)?.name ?? null,
+      }
+    })
 }

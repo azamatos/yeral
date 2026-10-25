@@ -12,16 +12,22 @@ import { cn } from '@yeral/ui/cn'
 import { ExampleBadge } from '@yeral/ui/example-badge'
 import { Pill } from '@yeral/ui/pill'
 import { Rating } from '@yeral/ui/rating'
+import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { Clock, MapPin, Share2 } from 'lucide-react'
-import { useId, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { parseServiceIds, pickedServices, ServicePicker, serviceIdsParam, SERVICES_MAX, toggleService } from '@/features/pick-services'
 import { site } from '@/shared/config'
 import { wrap } from '@/shared/ui'
-import { openLine } from '../model/when'
+import { addressLine, openLine } from '../model/when'
+import { About } from './about'
 import { BookingBar, BookingCard } from './booking-card'
 import { FavouriteButton } from './favourite'
+import { Nearby } from './nearby'
+import { Reviews } from './reviews'
+import { goTo, Section, SECTIONS, SectionNav } from './sections'
+import { Specialists } from './specialists'
 
 /**
  * How the page can be booked by whoever looks: `online` (Select and Book), `preview` (the owner's own page in review:
@@ -37,10 +43,10 @@ export function bookingState(detail: Pick<BusinessDetail, 'preview' | 'onlineEna
 }
 
 /**
- * `/{lang}/b/{slug}` — the business page (Venue, book C-06, C-08–C-11, C-15): the header with the photos, the services
- * to pick from (kept in `?services=`) and the booking card beside them, a bar under 1024. The specialists, reviews,
- * about and nearby parts join next (P4 slice 3, C2). The route's loader has the page in the cache, or has already
- * turned an unknown, hidden or not yet open business into the 404 page (C-10).
+ * `/{lang}/b/{slug}` — the business page (Venue, book C-06–C-11, C-15): the header with the photos; under the section
+ * nav the services to pick from (kept in `?services=`), the specialists, the reviews and About, with the booking card
+ * beside them (a bar under 1024); the places nearby across the foot. The route's loader has the page (and the first
+ * reviews) in the cache, or has already turned an unknown, hidden or not yet open business into the 404 page (C-10).
  */
 export function BusinessPage() {
   const { slug = '' } = useParams({ strict: false })
@@ -51,8 +57,9 @@ export function BusinessPage() {
   const navigate = useNavigate()
   const t = useTranslations('business')
   const tb = useTranslations('booking')
-  const servicesId = useId()
   const state = bookingState(detail)
+  // a page with nobody to pick (tables, classes) has no Specialists part
+  const sections = SECTIONS.filter((s) => s !== 'specialists' || detail.specialists.length > 0)
   const ids = state === 'online' || state === 'preview' ? parseServiceIds(search.services) : []
   const picked = pickedServices(detail, ids)
   const pick = (next: string[]) =>
@@ -69,11 +76,9 @@ export function BusinessPage() {
         <Header detail={detail} />
         <div className="flex flex-wrap items-stretch gap-12 pt-10 max-sm:pt-6">
           <div className="min-w-0 flex-[999_1_540px]">
+            <SectionNav ids={sections} />
             {/* Venue «Hyzmatlar» (`.sect.first`) */}
-            <section aria-labelledby={servicesId} className="flex flex-col gap-5 pt-8 pb-12 max-sm:pt-6 max-sm:pb-10">
-              <h2 id={servicesId} className="m-0 text-[26px] leading-8 font-bold tracking-[-0.02em] max-sm:text-[22px] max-sm:leading-7">
-                {t('services.title')}
-              </h2>
+            <Section id="services" title={t('services.title')} first>
               <ServicePicker
                 groups={detail.serviceGroups}
                 picked={picked.map((s) => s.id)}
@@ -86,7 +91,10 @@ export function BusinessPage() {
                 canPick={state === 'online' || state === 'preview'}
                 groupHeading="h3"
               />
-            </section>
+            </Section>
+            {detail.specialists.length > 0 && <Specialists detail={detail} state={state} picked={picked.map((s) => s.id)} />}
+            <Reviews detail={detail} />
+            <About detail={detail} />
           </div>
           <aside
             aria-label={t('card.label')}
@@ -102,6 +110,7 @@ export function BusinessPage() {
           </aside>
         </div>
       </div>
+      <Nearby places={detail.similar} />
       <BookingBar detail={detail} state={state} picked={picked} />
     </>
   )
@@ -170,7 +179,9 @@ function Header({ detail }: { detail: BusinessDetail }) {
                 <>
                   <Rating value={fmt.rating(detail.rating)} />
                   <span aria-hidden>·</span>
-                  <span className="font-medium text-a-600">{t('reviews', { count: detail.reviewsCount })}</span>
+                  <a href="#reviews" onClick={goTo('reviews')} className={cn(textLink, 'font-medium')}>
+                    {t('reviews', { count: detail.reviewsCount })}
+                  </a>
                 </>
               ) : (
                 <span>{t('noReviews')}</span>
@@ -183,7 +194,7 @@ function Header({ detail }: { detail: BusinessDetail }) {
             <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
               <MapPin aria-hidden className="size-4 flex-none" strokeWidth={1.75} />
               <span>
-                {[fmt.addressIn(detail.address, detail.city.name), detail.floor].filter(Boolean).join(', ')}
+                {addressLine(detail, fmt)}
                 {detail.distanceM !== null && ` · ${t('away', { distance: fmt.distance(detail.distanceM) })}`}
               </span>
               {/* the api sends when it moved only for the 30 days the page says so (book Q-215) */}

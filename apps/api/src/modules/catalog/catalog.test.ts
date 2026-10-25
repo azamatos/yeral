@@ -1,3 +1,4 @@
+import { addDays, today } from '@yeral/domain/time'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { DEMO_NOW, testApp } from '../../../test/app'
@@ -120,6 +121,22 @@ describe('catalogue', () => {
     // the card's, for the first service on the page with anyone
     const any = await b.req(`/v1/businesses/glow-studio/specialists/availability?services=${listed[0].id}`)
     expect(d.nextFree).toEqual(any.json.any)
+  })
+
+  it('the special days start from yesterday, whose night may still be under way (book Q-105)', async () => {
+    const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+    const yesterday = addDays(today(DEMO_NOW), -1)
+    const holiday = { name: 'Holiday', from: yesterday, to: yesterday, yearly: false, hours: null }
+    await db
+      .update(businesses)
+      .set({ exceptions: [...glow!.exceptions, holiday] })
+      .where(eq(businesses.id, glow!.id))
+    try {
+      const d = (await b.req('/v1/businesses/glow-studio')).json
+      expect(d.specialDays[0]).toEqual({ date: yesterday, name: 'Holiday', hours: null })
+    } finally {
+      await db.update(businesses).set({ exceptions: glow!.exceptions }).where(eq(businesses.id, glow!.id))
+    }
   })
 
   it('someone invited isn’t on the client site until they accept (book chapter 3)', async () => {
