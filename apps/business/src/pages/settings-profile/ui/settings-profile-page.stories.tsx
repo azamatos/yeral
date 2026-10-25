@@ -326,13 +326,24 @@ export const PhotoRefused: Story = {
 }
 
 /**
- * The address: the wizard's fields with the map; «I work from home» joins the save bar and goes to the profile with the
- * rest of the location as it is.
+ * The address in B-Settings' layout: the city beside «Street and building», the floor beside the entrance, the 260 map,
+ * «I work from home» as a settings row; it joins the save bar and goes to the profile with the rest of the location as
+ * it is.
  */
 export const Address: Story = {
   play: async ({ canvas }) => {
     const section = await canvas.findByRole('region', { name: 'Address' })
-    await expect(within(section).getByRole('combobox', { name: 'Address' })).toHaveValue(PROFILE.location.address)
+    const street = within(section).getByRole('combobox', { name: 'Street and building' })
+    await expect(street).toHaveValue(PROFILE.location.address)
+    // side by side, as the board draws them: the city's top level with the street's
+    const city = within(section).getByRole('combobox', { name: 'City' })
+    await expect(Math.abs(city.getBoundingClientRect().top - street.getBoundingClientRect().top)).toBeLessThan(2)
+    await expect(within(section).getByRole('switch', { name: 'I work from home' })).toHaveAccessibleDescription(
+      'Only clients with a confirmed booking see your exact address',
+    )
+    // 44 high, as the rest of the page (B-Settings `.i44`)
+    await expect(street.getBoundingClientRect().height).toBe(44)
+    await expect(within(section).getByRole('textbox', { name: 'Floor, room' }).getBoundingClientRect().height).toBe(44)
     await expect(within(section).getByText(/Moved\?/)).toBeVisible()
     await expect(within(section).getByRole('link', { name: 'Create a business' })).toBeVisible()
     await userEvent.click(within(section).getByRole('switch', { name: 'I work from home' }))
@@ -386,5 +397,25 @@ export const Admin: Story = {
   },
 }
 
-/** The phone: the rows stack, the save bar above the tab bar. */
-export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
+/** A street typed and not picked from the list: Save waits, and the street says why. */
+export const AddressUnpicked: Story = {
+  play: async ({ canvas }) => {
+    const section = await canvas.findByRole('region', { name: 'Address' })
+    const street = within(section).getByRole('combobox', { name: 'Street and building' })
+    await userEvent.clear(street)
+    await userEvent.type(street, 'Görogly')
+    await waitFor(() => expect(street).toHaveAccessibleDescription(/Pick the address from the list\./))
+    await expect(street).toHaveAttribute('aria-invalid', 'true')
+  },
+}
+
+/** The phone: the rows stack (the city above the street), the save bar above the tab bar. */
+export const Phone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    const section = await canvas.findByRole('region', { name: 'Address' })
+    const city = within(section).getByRole('combobox', { name: 'City' })
+    const street = within(section).getByRole('combobox', { name: 'Street and building' })
+    await expect(street.getBoundingClientRect().top).toBeGreaterThan(city.getBoundingClientRect().bottom)
+  },
+}
