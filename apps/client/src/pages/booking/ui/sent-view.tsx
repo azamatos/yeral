@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import type { BusinessDetail } from '@yeral/contract/catalog'
-import { epochOf, localOf } from '@yeral/domain/time'
+import { epochOf, localOf, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { buildIcs, ICS_TYPE } from '@yeral/lib/ics'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
+import { useClock } from '@yeral/ui/clock'
 import { KeyValueList } from '@yeral/ui/key-value'
 import { Price } from '@yeral/ui/price'
 import { Skeleton } from '@yeral/ui/skeleton'
@@ -27,6 +28,7 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
   const t = useTranslations('booking.sent')
   const status = useTranslations('status')
   const tb = useTranslations('booking')
+  const now = useClock()
   const lang = useLocale()
   const sdk = useSdk()
   const fmt = useFmt()
@@ -142,7 +144,13 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
                   {
                     title: t('stepAnswer'),
                     caption: answerBy
-                      ? t('stepAnswerBy', { time: fmt.time(answerBy.min) })
+                      ? t('stepAnswerBy', {
+                          // «09:30» today, «Tomorrow 09:30» after a request sent while closed
+                          time:
+                            answerBy.date === today(now)
+                              ? fmt.time(answerBy.min)
+                              : tb('at', { day: fmt.relativeShortDate(answerBy.date, today(now)), time: fmt.time(answerBy.min) }),
+                        })
                       : detail.typicalConfirmMinutes
                         ? t('stepAnswerWithin', { time: fmt.duration(detail.typicalConfirmMinutes) })
                         : undefined,
