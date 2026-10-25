@@ -268,8 +268,12 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     expect((await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { body: { affected: 'keep' } })).status).toBe(200)
     expect((await maral.req('/v1/me/workspaces')).json.items).toEqual([])
     expect(await shown()).not.toContain('Maral')
+    // the list says who ended it: «Removed»
+    const onList = async () =>
+      ((await maysa.req('/v1/w/glow-studio/team')).json.items as { id: string; ended: unknown }[]).find((m) => m.id === row!.id)!.ended
+    expect(await onList()).toMatchObject({ by: 'owner', bookings: null, requests: null })
     const back = await maysa.req(`/v1/w/glow-studio/team/${row!.id}/reactivate`, { method: 'POST' })
-    expect(back.json).toMatchObject({ status: 'active', bookable: true, joined: true })
+    expect(back.json).toMatchObject({ status: 'active', bookable: true, joined: true, ended: null })
     expect(await shown()).toContain('Maral')
     // leaving: the confirm counts what stays for the owner, the bookings removing her would ask about
     const left = (await maral.req('/v1/w/glow-studio/leave')).json as { bookings: number; requests: number }
@@ -277,7 +281,12 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     expect(left.bookings).toBeGreaterThan(0)
     expect((await maysa.req('/v1/w/glow-studio/leave')).json.error.code).toBe('owner_cannot_leave')
     expect((await maral.req('/v1/w/glow-studio/leave', { method: 'POST' })).status).toBe(204)
-    expect(await rowOf(MARAL)).toMatchObject({ status: 'removed', bookable: false })
+    expect(await rowOf(MARAL)).toMatchObject({ status: 'removed', bookable: false, endedBy: 'self' })
+    // «Left», with what she left for the owner: «Maral left: N bookings need a new specialist» (B-15)
+    expect(await onList()).toMatchObject({ by: 'self', bookings: left.bookings, requests: left.requests })
+    // the owner choosing for them (here: kept as they are) keeps «Left», and «Someone left» stops asking
+    expect((await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { body: { affected: 'keep' } })).status).toBe(200)
+    expect(await onList()).toMatchObject({ by: 'self', bookings: 0, requests: 0 })
     // the account stays linked to the row, so the bookings kept there still block the person elsewhere
     expect((await rowOf(MARAL))!.userId).not.toBeNull()
     await maysa.req(`/v1/w/glow-studio/team/${row!.id}/reactivate`, { method: 'POST' })
@@ -324,7 +333,7 @@ describe('the team (book chapter 3, ADR 0025)', () => {
       .select()
       .from(staff)
       .where(and(eq(staff.businessId, glow!.id), eq(staff.name, 'Jeren')))
-    expect(row).toMatchObject({ status: 'removed', userId: null })
+    expect(row).toMatchObject({ status: 'removed', userId: null, endedBy: 'self' })
     // invites of the business are untouched
     expect((await db.select().from(invites).where(eq(invites.businessId, glow!.id))).length).toBeGreaterThan(0)
   })
@@ -438,13 +447,16 @@ describe('the team (book chapter 3, ADR 0025)', () => {
     const ayna = await as(AYNA)
     const row = await rowOf(AYNA)
     await maysa.req(`/v1/w/glow-studio/team/${row!.id}/remove`, { body: { affected: 'keep' } })
+    expect(await rowOf(AYNA)).toMatchObject({ endedBy: 'owner' })
     const sent = await maysa.req('/v1/w/glow-studio/team/invites', { body: { phone: AYNA, name: 'Aýna', level: 'specialist' } })
-    // the old row comes back, still linked to her account (her kept bookings keep blocking her elsewhere)
-    expect(sent.json.member).toMatchObject({ id: row!.id, status: 'invited', joined: false, invite: { state: 'pending' } })
+    // the old row comes back, still linked to her account (her kept bookings keep blocking her elsewhere); invited,
+    // she isn't «Removed», though the row keeps it until she accepts
+    expect(sent.json.member).toMatchObject({ id: row!.id, status: 'invited', joined: false, invite: { state: 'pending' }, ended: null })
+    expect(await rowOf(AYNA)).toMatchObject({ endedBy: 'owner' })
     expect((await maysa.req(`/v1/w/glow-studio/team/${row!.id}/invite`, { method: 'POST' })).status).toBe(201)
     const [card] = (await ayna.req('/v1/me/invites')).json.items
     expect((await ayna.req(`/v1/me/invites/${card.id}/accept`, { method: 'POST' })).status).toBe(200)
-    expect(await rowOf(AYNA)).toMatchObject({ id: row!.id, status: 'active' })
+    expect(await rowOf(AYNA)).toMatchObject({ id: row!.id, status: 'active', endedAt: null, endedBy: null })
   })
 
   it('a refused value says which, as everywhere: an unknown service, an invite to a phone that gets no SMS', async () => {

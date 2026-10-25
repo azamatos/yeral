@@ -40,7 +40,7 @@ import { requireUser } from '../auth/session'
 import { loadHours } from '../availability/context'
 import { lockMenu } from '../menu/service'
 import { emit } from '../../notify'
-import { leaveCounts, refuseMovesOnto, removeMember, scheduleOf, updateSchedule } from './away'
+import { leaveCounts, leftCounts, refuseMovesOnto, removeMember, scheduleOf, updateSchedule } from './away'
 import { uploadGuard } from '../media/photos'
 import { removeStaffPhoto, setStaffPhoto } from './photo'
 import {
@@ -53,6 +53,7 @@ import {
   lockOpenInvites,
   member,
   members,
+  backOnTeam,
   removeRow,
   requireMember,
   reusableRow,
@@ -307,7 +308,14 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       if (twice || (row.userId && row.userId !== user.id)) throw new ApiError('already_on_team')
       await tx
         .update(staff)
-        .set({ userId: user.id, hasApp: true, status: row.status === 'invited' ? 'active' : row.status, lastOpenedAt: new Date(now) })
+        .set({
+          userId: user.id,
+          hasApp: true,
+          status: row.status === 'invited' ? 'active' : row.status,
+          lastOpenedAt: new Date(now),
+          // back on the team: no longer «Left» or «Removed»
+          ...(row.status === 'invited' ? backOnTeam : {}),
+        })
         .where(eq(staff.id, row.id))
       await tx
         .update(invites)
@@ -350,7 +358,15 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     // a draft's too: the wizard's team step reopens with it, and the rules step asks who answers requests
     const { business, actor, user } = await requireMember(c, c.req.valid('param').slug, { draft: true })
     if (!can(actor, 'team')) throw new ApiError('forbidden')
-    return c.json({ items: await members(c.var.deps, business.id, user.lang, c.var.deps.now()) }, 200)
+    const { deps } = c.var
+    const now = deps.now()
+    const items = await members(deps, business.id, user.lang, now)
+    // what someone who left left for the owner, until the owner chooses: «Someone left» (B-15), in one read
+    const counted = await leftCounts(deps.db, business.id, now)
+    const withAhead = items.map((m) =>
+      m.ended?.by === 'self' ? { ...m, ended: { ...m.ended, ...(counted.get(m.id) ?? { bookings: 0, requests: 0 }) } } : m,
+    )
+    return c.json({ items: withAhead }, 200)
   })
   .openapi(inviteRoute, async (c) => {
     const { business, actor, user } = await requireMember(c, c.req.valid('param').slug)
@@ -562,7 +578,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       if (!back && !row.phone) throw new ApiError('invalid_status')
       const [next] = await tx
         .update(staff)
-        .set({ status: back ? 'active' : 'invited', bookable: await hasServices(tx, row.id) })
+        .set({ status: back ? 'active' : 'invited', bookable: await hasServices(tx, row.id), ...backOnTeam })
         .where(eq(staff.id, row.id))
         .returning()
       await teamChanged(tx, business.id, { userId: row.userId })
@@ -581,7 +597,7 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       const now = deps.now()
       // ordered with the bookings being made for them, as a removal is (their bookings stay for the owner, B-15)
       await loadHours(tx, business.id, { lock: 'no key update' })
-      await removeRow(tx, row, now)
+      await removeRow(tx, row, now, 'self')
       await teamChanged(tx, business.id, { userId: row.userId })
       // a client's waiting move onto them can't be confirmed any more: refused, as a removal refuses it (B-21)
       await refuseMovesOnto(tx, business.id, row.id, now, () => false)

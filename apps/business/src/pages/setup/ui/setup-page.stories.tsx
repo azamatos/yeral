@@ -115,6 +115,7 @@ const member = (id: string, name: string, level: TeamMember['level'], hasApp = t
   hasApp,
   bookable: level !== 'admin',
   canAnswerOwn: false,
+  ended: null,
   joined: true,
   photo: null,
   invite: null,

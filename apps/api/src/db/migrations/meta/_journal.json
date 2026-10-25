@@ -309,6 +309,13 @@
       "when": 1792923186813,
       "tag": "0043_old_page_addresses",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1792947597815,
+      "tag": "0044_member_ended",
+      "breakpoints": true
     }
   ]
 }

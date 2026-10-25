@@ -79,13 +79,21 @@ export async function teamChanged(db: Queryable, businessId: string, person?: { 
 
 /**
  * Off the team (B-15, B-50): no access, off the client site, open invites cancelled; their bookings ahead are settled
- * by the removal (`removeMember`), or stay for the owner to settle when they left by themself. The caller holds the
- * business row, so a booking being made for them waits and then finds them gone.
+ * by the removal (`removeMember`), or stay for the owner to settle when they left by themself. `by` records who ended
+ * it (the Team list's «Left» or «Removed»); the owner settling the bookings of someone who left keeps «Left». The
+ * caller holds the business row, so a booking being made for them waits and then finds them gone.
  */
-export async function removeRow(db: Queryable, row: StaffRow, now: number): Promise<void> {
-  if (row.status !== 'removed') await db.update(staff).set({ status: 'removed', bookable: false }).where(eq(staff.id, row.id))
+export async function removeRow(db: Queryable, row: StaffRow, now: number, by: 'self' | 'owner'): Promise<void> {
+  if (row.status !== 'removed')
+    await db
+      .update(staff)
+      .set({ status: 'removed', bookable: false, endedAt: new Date(now), endedBy: by })
+      .where(eq(staff.id, row.id))
   await cancelOpenInvites(db, row.businessId, row.id, now)
 }
+
+/** Back on the team (an invite accepted, «Reactivate»): no longer ended. */
+export const backOnTeam = { endedAt: null, endedBy: null, settledAt: null } as const
 
 /** A row's open invites cancelled (nobody can accept them any more); the phones they went to, for their events. */
 export async function cancelOpenInvites(db: Queryable, businessId: string, staffId: string, now: number): Promise<string[]> {
@@ -253,6 +261,12 @@ export function toMember(
     phone: row.phone,
     level: row.level,
     status: row.status,
+    // off the team only (someone invited again keeps the history until they accept); what someone who left left for the
+    // owner is counted by the team list
+    ended:
+      row.status === 'removed' && row.endedAt && row.endedBy
+        ? { at: row.endedAt.getTime(), by: row.endedBy, bookings: null, requests: null }
+        : null,
     hasApp: row.hasApp,
     bookable: row.bookable,
     canAnswerOwn: row.canAnswerOwn,

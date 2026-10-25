@@ -54,6 +54,7 @@ const member = (id: string, name: string, status: TeamMember['status'] = 'active
   hasApp: true,
   bookable: true,
   canAnswerOwn: false,
+  ended: null,
   joined: status === 'active',
   photo: null,
   invite: null,
