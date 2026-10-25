@@ -22,13 +22,23 @@
   (booking, favourites): `GET /v1/businesses/{old}` answers the page with its new `slug`. The example seed skips an
   address a business had. Events: `business.updated`, so the team's switchers refresh.
 - SDK: `sdk.settings.pageAddressCheck(params)` (`keys.pageAddress`) and `sdk.settings.setPageAddress(slug)`.
+- Business app (feat/page-address-app): `features/page-address`: `usePageAddressCheck(slug, { business, own })` (the
+  rules at once, then the api after a 300 ms pause; a reserved one asked too, for its suggestion; `unknown` when the
+  check failed, the save asks again), `PageAddressField` (InputGroup with the `yeral.app/b/` prefix box, lower case
+  and hyphens as typed, «This address is free.» or the problem with «Use …»), `savable()`, `typedAddress()`. The
+  wizard's business step: a «Page address» field under the name (it replaces the drawn «Your page: …» line), showing
+  the address the name gives as the api makes it (a taken one's free one like it) until the owner writes their own;
+  Continue waits for a good one («Pick a page address that's free.»); a new draft gets `slug` only when written; a
+  draft's change moves it last (`setPageAddress`), and «Continue later» saves the step first, since the move changes
+  the draft's address. Settings → Link and QR: «Change link» under the link (not for the demo workspace): the field,
+  the note that old links and printed QR codes keep working, Cancel / Save link (Enter, Escape); after the move the
+  page opens at `/w/{new}/settings/link` with «Your page's link is now …».
+- Shell: a teammate's open tab at the old address goes to the new one at the same section once their workspaces
+  refresh (the `business.updated` event), through `placeFor` (unit test), with no "closed" toast.
 - Handoff:
-  - The business app (next PR): the wizard's business step's editable address (`setup.start` with `slug` only when
-    the owner wrote one; a draft's later change through `setPageAddress`) and Link and QR's «Change link»; after a
-    change the app goes to `/w/{new}/…`.
   - The client site's business page (slice 3): when `GET /v1/businesses/{slug}` answers another `slug`, redirect
     permanently to `/b/{that}`.
-  - Not done: `/v1/w/{old}/…` doesn't open the workspace: events name a business by its address as they're read, so
-    another member's open tab at the old address learns nothing from them; its switcher's refresh (`workspaces`) has
-    the new address, and the business app should move a workspace page whose address is gone to the one it has now
-    (the business PR checks the shell does).
+  - Not done: `/v1/w/{old}/…` doesn't open the workspace (events name a business by its address as they're read); a
+    bookmark or link to `/w/{old}/…` opened later goes to the person's last used workspace with "This section is closed
+    to you", a wrong word for a workspace that moved (asking the public read for where an old address went would fix
+    it).

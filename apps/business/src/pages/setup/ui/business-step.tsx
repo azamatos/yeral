@@ -1,23 +1,26 @@
-import { slugFrom } from '@yeral/domain/setup'
 import { Avatar } from '@yeral/ui/avatar'
 import { Field } from '@yeral/ui/field'
 import { Input } from '@yeral/ui/input'
 import { useTranslations } from 'use-intl'
-import { BUSINESS_NAME_MAX, pageLink } from '@/shared/config'
+import { PageAddressField, type PageAddressState } from '@/features/page-address'
+import { BUSINESS_NAME_MAX } from '@/shared/config'
 import { CategoryPicker, type PickableCategory } from './category-picker'
 import { StepHeader } from './setup-frame'
 
 /**
- * Step 2, «About your business» (B-Onboarding `isBiz`, book B-03): the business name with its counter and the page
- * address it gives, and the category. Someone who already has a business («Create a business» from the switcher) sees
- * their account above it, since the new business joins the same account.
+ * Step 2, «About your business» (B-Onboarding `isBiz`, book B-03): the business name with its counter, the page address
+ * (the board shows the one the name gives; the owner may write their own, chapter 9 25.10.2026), and the category.
+ * Someone who already has a business («Create a business» from the switcher) sees their account above it, since the
+ * new business joins the same account.
  */
 export function BusinessStep({
   more,
   owner,
   name,
   onName,
-  pageSlug,
+  address,
+  onAddress,
+  addressState,
   categoryId,
   onCategory,
   categories,
@@ -26,8 +29,10 @@ export function BusinessStep({
   owner: { name: string; phone: string }
   name: string
   onName: (name: string) => void
-  /** The draft's page address, once there is one: renaming the business doesn't change it. */
-  pageSlug?: string
+  /** The page address shown: the one the name gives (or the draft's) until the owner writes their own. */
+  address: string
+  onAddress: (slug: string) => void
+  addressState: PageAddressState
   categoryId: string | null
   onCategory: (id: string) => void
   categories: readonly PickableCategory[]
@@ -37,8 +42,6 @@ export function BusinessStep({
   // spaces around the name don't count: the api trims it before its limit
   const length = name.trim().length
   const long = length > BUSINESS_NAME_MAX
-  // a new name's address as the api makes it (it adds a number if that one is taken)
-  const slug = pageSlug ?? (length ? slugFrom(name) : '…')
   return (
     <section className="flex flex-col gap-8 max-sm:gap-7">
       <StepHeader
@@ -60,11 +63,6 @@ export function BusinessStep({
       <Field
         label={t('setup.business.name')}
         error={long && t('setup.business.nameLong', { max: BUSINESS_NAME_MAX })}
-        hint={t.rich('setup.business.page', {
-          url: pageLink(slug).display,
-          // the address in the board's mono 13, ink
-          mono: (chunks) => <span className="font-mono text-dense text-n-900">{chunks}</span>,
-        })}
         counter={{
           value: length,
           max: BUSINESS_NAME_MAX,
@@ -80,6 +78,7 @@ export function BusinessStep({
           onChange={(e) => onName(e.target.value)}
         />
       </Field>
+      <PageAddressField value={address} onChange={onAddress} state={addressState} />
       <CategoryPicker categories={categories} value={categoryId} onChange={onCategory} />
     </section>
   )

@@ -7,7 +7,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { Workspace } from '@yeral/contract/team'
-import { expect, userEvent, waitFor } from 'storybook/test'
+import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
 import { PageStory } from '@/shared/storybook'
 import { WorkspaceShell } from '@/widgets/workspace-shell'
@@ -45,18 +45,39 @@ const glow = (status: Workspace['status'], statusReason: string | null = null): 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
-/** The api as the shell and this section ask it. */
+/** Each `PUT …/settings/page-address` as `from → to`. */
+const moves: string[] = []
+
+/**
+ * The api as the shell and this section ask it: the page address check (glow-taken is another business's, support a
+ * reserved word) and a move, after which the workspace has its new address.
+ */
 const fakeApi =
   (workspace: Workspace): (() => typeof fetch) =>
-  () =>
-  (input: RequestInfo | URL, init?: RequestInit) => {
-    const request = new Request(input, init)
-    const route = `${request.method} ${new URL(request.url).pathname.replace(/^\/v1/, '')}`
-    if (route === 'GET /me') return Promise.resolve(json(me))
-    if (route === 'GET /me/workspaces') return Promise.resolve(json({ items: [workspace], current: workspace.slug }))
-    if (route === 'GET /me/invites') return Promise.resolve(json({ items: [] }))
-    if (/^POST \/me\/workspaces\/[^/]+\/open$/.test(route)) return Promise.resolve(new Response(null, { status: 204 }))
-    return Promise.resolve(json({ error: { code: 'not_found' } }, 404))
+  () => {
+    let current = workspace
+    moves.length = 0
+    return async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init)
+      const url = new URL(request.url)
+      const route = `${request.method} ${url.pathname.replace(/^\/v1/, '')}`
+      if (route === 'GET /me') return json(me)
+      if (route === 'GET /me/workspaces') return json({ items: [current], current: current.slug })
+      if (route === 'GET /me/invites') return json({ items: [] })
+      if (/^POST \/me\/workspaces\/[^/]+\/open$/.test(route)) return new Response(null, { status: 204 })
+      if (route === 'GET /page-address') {
+        const slug = url.searchParams.get('slug') ?? ''
+        const problem = slug === 'glow-taken' ? 'taken' : slug === 'support' ? 'reserved' : null
+        return json({ slug, problem, suggestion: problem ? `${slug}-2` : null })
+      }
+      if (route === `PUT /w/${current.slug}/settings/page-address`) {
+        const { slug } = (await request.json()) as { slug: string }
+        moves.push(`${current.slug} → ${slug}`)
+        current = { ...current, slug }
+        return json({ slug })
+      }
+      return json({ error: { code: 'not_found' } }, 404)
+    }
   }
 
 const layouts = {
@@ -146,6 +167,53 @@ export const Hidden: Story = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('Hidden by Ýeral')).toBeVisible()
     await expect(canvas.getByRole('button', { name: 'Contact Ýeral' })).toBeVisible()
+  },
+}
+
+/**
+ * «Change link»: the address checked as it's typed (lower case, hyphens; a taken one offers a free one like it), the
+ * note that old links and QR codes keep working; Save moves the workspace's pages to the new address. Escape leaves it.
+ */
+export const ChangeLink: Story = {
+  name: 'Change link',
+  play: async ({ canvas }) => {
+    const change = await canvas.findByRole('button', { name: 'Change link' })
+    await userEvent.click(change)
+    const box = canvas.getByRole('textbox', { name: 'New link' })
+    await waitFor(() => expect(box).toHaveFocus())
+    await expect(box).toHaveValue('glow-studio')
+    await expect(canvas.getByText('Old links and printed QR codes keep working: they open your page at its new address.')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Save link' })).toBeDisabled()
+    await userEvent.keyboard('{Escape}')
+    await waitFor(() => expect(canvas.queryByRole('textbox', { name: 'New link' })).toBeNull())
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Change link' })).toHaveFocus())
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Change link' }))
+    const field = canvas.getByRole('textbox', { name: 'New link' })
+    await userEvent.clear(field)
+    await userEvent.type(field, 'Glow Taken')
+    await expect(field).toHaveValue('glow-taken')
+    await expect(await canvas.findByText('Another business has this address.')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Save link' })).toBeDisabled()
+    await userEvent.click(canvas.getByRole('button', { name: 'Use glow-taken-2' }))
+    await expect(field).toHaveValue('glow-taken-2')
+    await expect(await canvas.findByText('This address is free.')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Save link' }))
+    await waitFor(() => expect(moves).toEqual(['glow-studio → glow-taken-2']))
+    await expect(await within(document.body).findByText(/Your page’s link is now .*\/b\/glow-taken-2/)).toBeInTheDocument()
+    // the workspace's pages at the new address: its link shows it
+    await waitFor(() =>
+      expect(canvas.getByRole<HTMLInputElement>('textbox', { name: 'Your page link' }).value).toMatch(/\/b\/glow-taken-2$/),
+    )
+  },
+}
+
+/** The shared demo workspace keeps its address: no «Change link». */
+export const Demo: Story = {
+  args: { server: fakeApi(glow('demo')) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('textbox', { name: 'Your page link' })).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Change link' })).toBeNull()
   },
 }
 
