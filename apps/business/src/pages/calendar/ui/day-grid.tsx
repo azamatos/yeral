@@ -28,6 +28,9 @@ import {
 /** The gutter with the hours (B-Calendar `.ggut`, 64) and a column's least width (`.gcol`, 200). */
 const GUTTER = 'w-16 flex-none'
 const COLUMN = 'min-w-50 flex-1 basis-0'
+/** On a phone one person's column fills the width and the others wait for their chip (B-Calendar `.gx`, `.stchips`). */
+const ONLY_ON_PHONE = 'max-sm:min-w-0'
+const NOT_ON_PHONE = 'max-sm:hidden'
 
 type Timer = (until: number | null) => { node: ReactNode; text: string } | null
 type Link = 'hover' | 'focus'
@@ -48,6 +51,7 @@ export function DayGrid({
   now,
   business,
   picked,
+  phoneStaff,
   busy,
   onOpen,
 }: {
@@ -57,6 +61,8 @@ export function DayGrid({
   /** The business's hours: a request's timer counts only while it's open. Null: the clock's minutes. */
   business: BusinessHours | null
   picked: Picked
+  /** The person whose column a phone shows (their chip); the first without one. */
+  phoneStaff?: string
   /** Another day's on its way: this one stays until it comes. */
   busy?: boolean
   onOpen: (pick: Pick) => void
@@ -77,6 +83,9 @@ export function DayGrid({
   const [hovered, setHovered] = useState<string | null>(null)
   const [focused, setFocused] = useState<string | null>(null)
   const onLink = (how: Link, code: string | null) => (how === 'hover' ? setHovered : setFocused)(code)
+
+  const onPhone = view.columns.find((c) => c.staffId === phoneStaff)?.staffId ?? view.columns[0]?.staffId
+  const phone = (c: CalendarView['columns'][number]) => (c.staffId === onPhone ? ONLY_ON_PHONE : NOT_ON_PHONE)
 
   const timer: Timer = (until) => {
     if (until === null) return null
@@ -123,7 +132,7 @@ export function DayGrid({
             const asked = view.moves.filter((m) => m.date === date && m.items.some((i) => i.staffId === c.staffId)).length
             const waiting = mine.filter((b) => b.status === 'pending').length + asked
             return (
-              <div key={c.staffId} className={`${COLUMN} flex items-center gap-2.5 border-l border-n-200 p-3`}>
+              <div key={c.staffId} className={cn(COLUMN, phone(c), 'flex items-center gap-2.5 border-l border-n-200 p-3')}>
                 <Avatar name={c.name} src={c.photo?.url} size={32} letters={1} tone="tint" decorative />
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[15px] leading-5 font-semibold text-n-900">
@@ -171,6 +180,7 @@ export function DayGrid({
           {view.columns.map((c) => (
             <DayColumn
               key={c.staffId}
+              className={phone(c)}
               view={view}
               column={c}
               date={date}
@@ -199,6 +209,7 @@ export function DayGrid({
  * and a client's move waiting at the asked time.
  */
 function DayColumn({
+  className,
   view,
   column: c,
   date,
@@ -216,6 +227,7 @@ function DayColumn({
   from: number
   to: number
   timer: Timer
+  className: string
   picked: Picked
   linked: string | null
   onLink: (how: Link, code: string | null) => void
@@ -256,7 +268,7 @@ function DayColumn({
     <div
       role="group"
       aria-label={c.name}
-      className={`${COLUMN} relative border-b border-l border-n-200`}
+      className={cn(COLUMN, className, 'relative border-b border-l border-n-200')}
       style={{ height: (to - from) * HOUR_PX + 1 }}
     >
       {shadesOf(day, from, to).map((z) => (
