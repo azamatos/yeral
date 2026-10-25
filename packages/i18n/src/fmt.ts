@@ -11,6 +11,7 @@ import { formatPhone } from '@yeral/domain/phone'
 import { diffDays, dow, hm, parseYmd } from '@yeral/domain/time'
 import { createTranslator } from 'use-intl/core'
 import { messages, type Locale, type SharedMessages } from './messages'
+import { stretched } from './stretch'
 
 const NBSP = ' '
 
@@ -32,7 +33,8 @@ export function formatNumber(locale: Locale, n: number, fractionDigits = 0): str
 }
 
 export function createFmt(locale: Locale) {
-  const t = createTranslator({ locale, messages: messages[locale], namespace: 'fmt' })
+  // as long as the screens' words (Storybook's «Russian length»; as written everywhere else)
+  const t = createTranslator({ locale, messages: stretched(messages[locale]), namespace: 'fmt' })
   const num = (n: number, digits = 0) => formatNumber(locale, n, digits)
   const monthOf = (date: string) => String(parseYmd(date).getUTCMonth() + 1) as keyof SharedMessages['fmt']['months']
   const weekdayOf = (date: string) => String(dow(date)) as keyof SharedMessages['fmt']['weekdays']

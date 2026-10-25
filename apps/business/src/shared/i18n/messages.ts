@@ -3,7 +3,7 @@
  * `fmt` …) plus the app's own from `messages/<locale>.json`. English is the source of the keys; each market's other
  * languages are added before that market launches (Turkmenistan: Turkmen, Russian).
  */
-import { DEFAULT_LOCALE, isLocale, MARKET_LOCALES, messages as shared, stretched, type Locale, type SharedMessages } from '@yeral/i18n'
+import { DEFAULT_LOCALE, isLocale, MARKET_LOCALES, messages as shared, appMessages, type Locale, type SharedMessages } from '@yeral/i18n'
 import en from '../../../messages/en.json'
 
 export type BusinessMessages = typeof en
@@ -20,11 +20,7 @@ export function appLocale(wanted?: string | null): Locale {
   return wanted && isLocale(wanted) && MARKET_LOCALES.includes(wanted) && BUSINESS_MESSAGES[wanted] ? wanted : DEFAULT_LOCALE
 }
 
-const merged = new Map<Locale, Messages>()
-
-/** The words for a language (longer by Storybook's «Text: +30 %» when it's on, `stretched`). */
+/** The words for a language (longer by Storybook's «Text: Russian length» when it's on, `appMessages`). */
 export function messagesFor(locale: Locale): Messages {
-  let words = merged.get(locale)
-  if (!words) merged.set(locale, (words = { ...shared[locale], ...(BUSINESS_MESSAGES[locale] ?? en) }))
-  return stretched(words)
+  return appMessages(shared[locale], BUSINESS_MESSAGES[locale] ?? en)
 }
