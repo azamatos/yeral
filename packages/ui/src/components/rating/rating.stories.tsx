@@ -28,7 +28,15 @@ export const Sizes: Story = {
 
 const WORDS = ['Poor', 'Fair', 'Good', 'Very good', 'Excellent'] as const
 
-function Pick({ words = WORDS, label = 'Rating' }: { words?: readonly [string, string, string, string, string]; label?: string }) {
+function Pick({
+  words = WORDS,
+  label = 'Rating',
+  placeholder = 'Pick the stars',
+}: {
+  words?: readonly [string, string, string, string, string]
+  label?: string
+  placeholder?: string
+}) {
   const [value, setValue] = useState<number | null>(null)
   return (
     <RatingInput
@@ -37,6 +45,7 @@ function Pick({ words = WORDS, label = 'Rating' }: { words?: readonly [string, s
       label={label}
       starLabel={(n) => (n === 1 ? '1 star' : `${n} stars`)}
       words={words}
+      placeholder={placeholder}
     />
   )
 }
@@ -48,6 +57,8 @@ export const Input: Story = {
     const canvas = within(canvasElement)
     const group = canvas.getByRole('radiogroup', { name: 'Rating' })
     await expect(within(group).getAllByRole('radio')).toHaveLength(5)
+    // before a pick, the placeholder word
+    await expect(canvas.getByText('Pick the stars')).toBeVisible()
     await userEvent.click(canvas.getByRole('radio', { name: '4 stars' }))
     await expect(canvas.getByRole('radio', { name: '4 stars' })).toBeChecked()
     await expect(canvasElement.querySelector('[aria-live]')).toHaveTextContent('Very good')
@@ -67,5 +78,7 @@ export const Input: Story = {
 
 /** Russian-length words. */
 export const Russian: Story = {
-  render: () => <Pick label="Оценка" words={['Плохо', 'Так себе', 'Хорошо', 'Очень хорошо', 'Превосходно']} />,
+  render: () => (
+    <Pick label="Оценка" words={['Плохо', 'Так себе', 'Хорошо', 'Очень хорошо', 'Превосходно']} placeholder="Выберите звёзды" />
+  ),
 }

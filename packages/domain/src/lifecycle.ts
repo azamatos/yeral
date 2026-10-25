@@ -54,6 +54,14 @@ export type LifecycleError =
 export const MAX_ALTERNATIVES = 3
 /** A review can be edited this long after it's written. */
 export const REVIEW_EDIT_DAYS = 7
+/**
+ * «Näme gowy boldy?» (book C-34, Account-Bookings): the review form's quick tags, kept as these keys so every reader
+ * gets them in their own language (the api takes any short strings, 6 at most).
+ */
+export const REVIEW_TAGS = ['on_time', 'clean', 'skilled', 'friendly', 'good_value'] as const
+export type ReviewTag = (typeof REVIEW_TAGS)[number]
+/** A review's own words, at most (the contract's `reviewInputSchema`). */
+export const REVIEW_TEXT_MAX = 500
 /** Requests one client may have waiting for an answer at one business, and across Ýeral (book Q-124). */
 export const MAX_WAITING_HERE = 3
 export const MAX_WAITING_IN_ALL = 10

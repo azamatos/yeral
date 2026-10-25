@@ -62,7 +62,8 @@ export function Stars({
  * group (arrow keys move and pick), 32 stars, n-500 outlines until picked, ink filled up to the pick (or up to the one
  * under the pointer, as a preview), and the pick's word beside them («Poor … Excellent», 15/22 600 n-600, said as it
  * changes). The words come from the caller: `label` names the group, `starLabel(n)` each star («4 stars»), `words`
- * the five words. The word under the pointer is only seen; the picked one is said.
+ * the five words, `placeholder` the word before any is picked («Pick the stars», the review modal). The word under the
+ * pointer is only seen; the picked one is said.
  */
 export function RatingInput({
   value,
@@ -70,6 +71,7 @@ export function RatingInput({
   label,
   starLabel,
   words,
+  placeholder = '',
   className,
 }: {
   value: number | null
@@ -77,6 +79,7 @@ export function RatingInput({
   label: string
   starLabel: (stars: number) => string
   words?: readonly [string, string, string, string, string]
+  placeholder?: string
   className?: string
 }) {
   const [hover, setHover] = useState<number | null>(null)
@@ -125,7 +128,7 @@ export function RatingInput({
         <>
           {/* the preview's word is seen; the pick's word is said */}
           <span aria-hidden className="text-body font-semibold text-n-600">
-            {shown ? words[shown - 1] : ''}
+            {shown ? words[shown - 1] : placeholder}
           </span>
           <span aria-live="polite" className="sr-only">
             {value ? words[value - 1] : ''}
