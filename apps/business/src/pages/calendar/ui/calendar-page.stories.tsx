@@ -426,9 +426,11 @@ export const ConfirmRequest: Story = {
     const next = within(await page.findByRole('dialog', { name: 'Time change request' }))
     await expect(next.getByText('New client')).toBeVisible()
     await expect(next.getByRole('button', { name: 'Confirm the new time' })).toBeVisible()
-    // the time it moves from and to
+    // the time it moves from and to, each with Show
     await expect(next.getByText('Previous time')).toBeVisible()
     await expect(next.getByText(/ · 16:00–17:30$/)).toBeVisible()
+    await expect(next.getByText(/^If you confirm, the booking moves to the new time/)).toBeVisible()
+    await expect(next.getByRole('button', { name: 'Show the previous time' })).toBeVisible()
   },
 }
 
@@ -500,6 +502,18 @@ export const DeclineWithTimes: Story = {
     await userEvent.click(decline)
     const declined = await page.findByText('Request declined · the client sees the reason and 2 other times')
     await waitFor(() => expect(declined).toBeVisible())
+  },
+}
+
+/** A move seen from another day: Show takes the calendar to the asked day, the drawer stays beside it. */
+export const ShowMove: Story = {
+  args: { path: `/w/glow-studio/calendar?date=${TOMORROW}&request=YR-49001` },
+  play: async ({ canvas }) => {
+    const drawer = within(await page.findByRole('dialog', { name: 'Time change request' }))
+    await expect(await canvas.findByRole('button', { name: /Jemal B\./ })).toBeVisible()
+    await userEvent.click(await drawer.findByRole('button', { name: 'Show the new time' }))
+    await expect(await canvas.findByRole('button', { name: /^16:00 New time\?/ })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Time change request' })).toBeVisible()
   },
 }
 

@@ -6,12 +6,15 @@ import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
+import { ChangeSummary } from '@yeral/ui/change-summary'
+import { cn } from '@yeral/ui/cn'
 import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@yeral/ui/drawer'
 import { KeyValueList } from '@yeral/ui/key-value'
 import { Pill } from '@yeral/ui/pill'
 import { Quote } from '@yeral/ui/quote'
 import { Spinner } from '@yeral/ui/spinner'
 import { StatusBadge } from '@yeral/ui/status-badge'
+import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
 import { ArrowLeftRight, Clock, Globe, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
@@ -36,6 +39,7 @@ export function RequestDrawer({
   business,
   onGo,
   onAnswered,
+  onShow,
   onClose,
 }: {
   slug: string
@@ -45,6 +49,8 @@ export function RequestDrawer({
   business: BusinessHours | null
   /** Open another request on its day (the pager, «Next request»; the toast's works from any page). */
   onGo: (request: Pick<Request, 'code' | 'date'>, replace?: boolean) => void
+  /** «Show» beside a move's times: the calendar goes to that day (the drawer stays where it doesn't cover it). */
+  onShow: (date: string) => void
   /** This request was answered: the drawer closes if it's still the one open. */
   onAnswered: (code: string) => void
   onClose: () => void
@@ -105,7 +111,7 @@ export function RequestDrawer({
           }
         />
         {request ? (
-          <RequestBody request={request} now={now} business={business} />
+          <RequestBody request={request} now={now} business={business} onShow={onShow} />
         ) : list.isPending ? (
           <DrawerBody className="items-center justify-center">
             <Spinner label={t('loading')} />
@@ -120,7 +126,8 @@ export function RequestDrawer({
         )}
         {request ? (
           request.canAnswer ? (
-            <DrawerFooter>
+            // the two answers share the width (B-Calendar `.drw-f`, flex 1 1 0)
+            <DrawerFooter className="[&>*]:basis-0">
               <Button variant="secondary" disabled={answering} onClick={() => setDeclining(request)}>
                 {t('decline')}
               </Button>
@@ -173,7 +180,17 @@ export function RequestDrawer({
 }
 
 /** What the drawer shows of one request. */
-function RequestBody({ request: r, now, business }: { request: Request; now: number; business: BusinessHours | null }) {
+function RequestBody({
+  request: r,
+  now,
+  business,
+  onShow,
+}: {
+  request: Request
+  now: number
+  business: BusinessHours | null
+  onShow: (date: string) => void
+}) {
   const t = useTranslations('calendar.request')
   const s = useTranslations('status')
   const fmt = useFmt()
@@ -235,6 +252,23 @@ function RequestBody({ request: r, now, business }: { request: Request; now: num
           ? t(move ? 'closedRunsOutMove' : 'closedRunsOut', { open: at(addDays(day, state.inDays), state.at), at: runsOut })
           : t(move ? 'runsOutMove' : 'runsOut', { at: runsOut })}
       </Callout>
+      {move && r.from && (
+        // the client's move (B-Calendar `.mvc`, DS-Business MoveRequestBox): the time now and the one asked for
+        <ChangeSummary
+          variant="rows"
+          title={t('moveBox')}
+          labels={{ from: t('previousTime'), to: t('newTime') }}
+          from={
+            <Shown
+              text={when(r.from.date, r.from.start, r.from.end)}
+              label={{ text: t('show'), name: t('showPrevious') }}
+              onShow={() => onShow(r.from!.date)}
+            />
+          }
+          to={<Shown text={when(r.date, r.start, r.end)} label={{ text: t('show'), name: t('showNew') }} onShow={() => onShow(r.date)} />}
+          footer={<span className="text-dense text-n-600">{t('moveCaption')}</span>}
+        />
+      )}
       <div className="flex flex-col gap-2">
         <div className="flex items-start gap-3">
           <Avatar name={r.client.name} size={40} letters={1} tone="tint" decorative />
@@ -267,16 +301,12 @@ function RequestBody({ request: r, now, business }: { request: Request; now: num
         items={[
           { key: t('service'), value: services },
           ...(staff ? [{ key: t('specialist'), value: staff }] : []),
-          // a move: the booking's time now and the one asked for (B5 draws them in their own box)
-          ...(move && r.from
-            ? [
-                { key: t('previousTime'), value: when(r.from.date, r.from.start, r.from.end) },
-                { key: t('newTime'), value: when(r.date, r.start, r.end) },
-              ]
-            : [{ key: t('dateTime'), value: when(r.date, r.start, r.end) }]),
+          // a move's times are in its box above (one whose booking can't be read keeps the row)
+          ...(move && r.from ? [] : [{ key: t('dateTime'), value: when(r.date, r.start, r.end) }]),
           { key: t('duration'), value: fmt.duration(r.end - r.start) },
           ...(r.price ? [{ key: t('price'), value: fmt.price(r.price) }] : []),
-          ...(move ? [{ key: t('booking'), value: t('bookingKeeps') }] : []),
+          // a move without its box says the booking keeps its time (the box's line says it otherwise)
+          ...(move && !r.from ? [{ key: t('booking'), value: t('bookingKeeps') }] : []),
           { key: t('sourceKey'), value: t('online') },
           ...(move ? [] : [{ key: t('sent'), value: sentAt(r.sentAt) }]),
         ]}
@@ -289,4 +319,19 @@ function RequestBody({ request: r, now, business }: { request: Request; now: num
     const local = localOf(at)
     return t('when', { date: fmt.relativeShortDate(local.date, day), time: fmt.time(local.min) })
   }
+}
+
+/**
+ * A time in a move's box with «Show» on its right: the calendar goes to that day. Its name says which time
+ * («Show the new time»), its text is the board's «Show».
+ */
+function Shown({ text, label, onShow }: { text: string; label: { text: string; name: string }; onShow: () => void }) {
+  return (
+    <span className="flex items-baseline justify-between gap-2.5">
+      <span>{text}</span>
+      <button type="button" aria-label={label.name} onClick={onShow} className={cn(textLink, 'hit inline-flex flex-none text-dense')}>
+        {label.text}
+      </button>
+    </span>
+  )
 }
