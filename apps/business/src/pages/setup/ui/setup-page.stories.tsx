@@ -399,13 +399,47 @@ export const HasBusiness: Story = {
   },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'You already have a business' })).toBeVisible()
+    await waitFor(() => expect(document.title).toBe('You already have a business · Ýeral Business'))
     const list = canvas.getByRole('list', { name: 'Your businesses' })
     await expect(within(list).getByText('Glow Studio')).toBeVisible()
     await expect(within(list).getByText('Owner · Ashgabat')).toBeVisible()
     await expect(within(list).getByRole('link', { name: 'Open Glow Studio' })).toHaveAttribute('href', '/w/glow-studio/calendar')
-    await userEvent.click(canvas.getByRole('button', { name: 'Create another business' }))
+    await expect(canvas.getByText('Maýsa Annaýewa · +993 65 10 20 30')).toBeVisible()
+    await userEvent.click(canvas.getByRole('link', { name: 'Create another business' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Create a business' })).toBeVisible()
     await expect(canvas.getByRole('link', { name: 'Cancel' })).toBeVisible()
+  },
+}
+
+/** Signed in with the wrong number: «Log in with another number» signs out, and the wizard's step 1 asks for one. */
+export const HasBusinessOtherNumber: Story = {
+  args: { server: fakeApi({ workspaces: [glow] }) },
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Log in with another number' }))
+    await expect(await canvas.findByLabelText('Phone number')).toBeVisible()
+  },
+}
+
+/** An unfinished draft reopens at its step for someone already in a business too: no choice in front of it. */
+export const ReopensWithBusiness: Story = {
+  args: {
+    path: '/setup/business',
+    server: fakeApi({
+      workspaces: [glow],
+      draft: {
+        slug: 'glow-nails',
+        name: 'Glow Nails',
+        step: 'hours',
+        category: 'Nails',
+        categoryId: 'nails',
+        logo: null,
+        address: { line: '247 Bitarap Türkmenistan Avenue', city },
+      },
+    }),
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Create a business' })).toBeVisible()
+    await expect(canvas.queryByRole('heading', { name: 'You already have a business' })).toBeNull()
   },
 }
 

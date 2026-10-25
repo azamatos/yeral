@@ -7,11 +7,9 @@ import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
 import { CalendarX2, Info, Store, UsersRound } from 'lucide-react'
 import { useTranslations } from 'use-intl'
-import { AuthPage } from '@/shared/ui'
-import { AccountLine } from './account-line'
+import { AccountLine } from '@/features/sign-in'
+import { AuthPage, iconTile } from '@/shared/ui'
 import { DeclinedLine } from './declined-line'
-
-const iconTile = 'flex size-12 flex-none items-center justify-center rounded-pill bg-group [&_svg]:size-5.5'
 
 /**
  * "You don't have a workspace yet" (B-Login `step=empty`, book B-09): create a business, or ask for an invite. After

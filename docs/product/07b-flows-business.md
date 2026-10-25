@@ -120,7 +120,10 @@ flowchart TD
   F -->|"Third wrong try"| G["60-second lock"]
   F -->|"Yes"| H{"Known account?"}
   H -->|"No"| I["Name and optional photo"]
-  H -->|"Yes"| J["Step 2 business"]
+  H -->|"Yes"| K{"Already in a business, no draft?"}
+  K -->|"No"| J["Step 2 business"]
+  K -->|"Yes"| L["You already have a business: Open, or Create another business"]
+  L -->|"Create another"| J
   I --> J
 ```
 
@@ -139,6 +142,9 @@ flowchart TD
 - Wrong code: "Kod nädogry. Ýene N synanyşyk galdy." After 3 wrong tries a 60-second lock: "Synanyşyklar gutardy. 60 sekuntdan soň täzeden synanyşyň."
 - A person who already has an account skips the name step.
 - "Eýýäm hasabyňyz barmy? Giriş" sends people with a workspace to login (B-07).
+- Someone already in a workspace who reaches the wizard with no draft anyway (step 1's sign-in with their number, an
+  old setup link) first sees «You already have a business»: each of their businesses with «Open» (its calendar) and
+  «Create another business» (step 2); «Log in with another number» signs out (the owner, 25.10.2026; chapter 9).
 - A half-finished setup: the business exists as a draft from step 2. At the next login the wizard reopens at the saved step instead of the no-workspace card, and the draft joins the workspace switcher only when it's finished (Q-200, decided 18.10.2026).
 
 > Open question Q-200: where a half-finished setup continues.
@@ -414,7 +420,8 @@ flowchart TD
 1. The switcher sits at the top of the sidebar: logo, name, the person's level (§9). It is the only switch in the app (§1).
 2. The popover *Iş ýerleriňiz* lists each workspace with "level · address" and an amber count of unanswered requests this person can answer there; the current one has a check.
 3. Picking a row changes everything: calendar, team, clients, settings, numbers, and the person's level (B-Shell). Its calendar opens. Every page address names the workspace, for example `/tk/w/{slug}/calendar`, so links, tabs and notifications always open the right workspace; the switcher just changes the address (Q-202, decided 18.10.2026).
-4. *+ Täze biznes döret* opens the wizard from step 2, already signed in ("Her iş ýeri — bir biznes we bir salgy… Hasabyňyz şol bir galýar, siz täze biznesiň eýesi bolarsyňyz."). The left panel says "7 ädim".
+4. *+ Täze biznes döret* opens the wizard from step 2, already signed in, asking for another business
+   (`/setup/business?another=true`), so it skips the «You already have a business» choice of B-02 (25.10.2026) ("Her iş ýeri — bir biznes we bir salgy… Hasabyňyz şol bir galýar, siz täze biznesiň eýesi bolarsyňyz."). The left panel says "7 ädim".
 5. On a tablet the logo at the top of the icon rail opens the switcher; on a phone it sits in the top strip (§9).
 
 **Edge cases**
