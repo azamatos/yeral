@@ -3,9 +3,6 @@ import type { TeamMember } from '@yeral/contract/team'
 import { MARKET } from '@yeral/domain/market'
 import { isMobile, isPhone, nationalDigits, toE164 } from '@yeral/domain/phone'
 
-/** As clients see a team member's name ("Aýna"): the api's limit. */
-export const TEAM_NAME_MAX = 40
-
 /** A row of step 6: the name, the national digits as typed, the access level, and whether they use the app. */
 export type TeamRow = { key: string; name: string; phone: string; level: 'specialist' | 'admin'; hasApp: boolean }
 export type TeamForm = { solo: boolean; rows: TeamRow[] }

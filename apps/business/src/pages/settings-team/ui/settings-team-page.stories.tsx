@@ -90,18 +90,23 @@ const team: TeamMember[] = [
   person('ogul', 'Ogul', 'specialist', { status: 'invited', joined: false, phone: '+99361223344', invite: invite('expired', -2) }),
   person('ayna', 'Aýna', 'specialist', { fullName: 'Aýna Myradowa', status: 'removed', specialization: 'Hair stylist' }),
 ]
+const service = (id: string, name: string, durationMin: number, priceAmount: number, staffIds: string[]) => ({
+  id,
+  name: { en: name },
+  durationMin,
+  priceType: 'fixed',
+  priceAmount,
+  staffIds,
+})
 const menu = {
   groups: [
     {
       id: 'g1',
-      name: 'Nails',
-      services: [
-        { id: 's1', staffIds: ['maral'] },
-        { id: 's2', staffIds: ['maral'] },
-      ],
+      name: { en: 'Nails' },
+      services: [service('s1', 'Manicure', 60, 150, ['maral']), service('s2', 'Gel polish', 90, 200, ['maral'])],
     },
-    { id: 'g2', name: 'Hair', services: [{ id: 's3', staffIds: ['jeren'] }] },
-    { id: 'g3', name: 'Massage', services: [{ id: 's4', staffIds: ['leyli'] }] },
+    { id: 'g2', name: { en: 'Hair' }, services: [service('s3', 'Women’s haircut', 60, 180, ['jeren'])] },
+    { id: 'g3', name: { en: 'Massage' }, services: [service('s4', 'Back massage', 45, 250, ['leyli'])] },
   ],
 }
 /** Jeren works her own shift; the others follow the business hours. */
@@ -119,7 +124,6 @@ const fakeApi =
   (level: Workspace['level']): (() => typeof fetch) =>
   () => {
     let people = team
-    // eslint-disable-next-line @typescript-eslint/require-await -- the fetch it stands in for answers a promise
     return async (input: RequestInfo | URL, init?: RequestInit) => {
       const request = new Request(input, init)
       const route = `${request.method} ${new URL(request.url).pathname.replace(/^\/v1/, '')}`
@@ -130,6 +134,23 @@ const fakeApi =
       if (/^POST \/me\/workspaces\/[^/]+\/open$/.test(route)) return new Response(null, { status: 204 })
       if (route === 'GET /w/glow-studio/team') return json({ items: people })
       if (route === 'GET /w/glow-studio/services') return json(menu)
+      // «Add a team member»: an invite, or a specialist without the app, active at once
+      if (route === 'POST /w/glow-studio/team/invites' || route === 'POST /w/glow-studio/team/phone-only') {
+        const body = (await request.json()) as { phone: string; name: string; level?: 'admin' | 'specialist'; serviceIds?: string[] }
+        const app = route.endsWith('/invites')
+        const added = person(`new-${people.length}`, body.name, body.level ?? 'specialist', {
+          phone: body.phone,
+          status: app ? 'invited' : 'active',
+          hasApp: app,
+          joined: false,
+          bookable: (body.serviceIds?.length ?? 0) > 0,
+          invite: app ? invite('pending', 7) : null,
+        })
+        people = [...people, added]
+        return app
+          ? json({ member: added, link: `https://business.yeral.localhost/invite/${added.id}-token-0123456789` }, 201)
+          : json(added, 201)
+      }
       const one = /^(GET|POST|DELETE) \/w\/glow-studio\/team\/([^/]+)\/(schedule|invite|reactivate)$/.exec(route)
       if (one) {
         const [, method, id, what] = one
@@ -245,12 +266,117 @@ export const CancelInvite: Story = {
   },
 }
 
+const openAdd = async (canvas: typeof body) => {
+  await userEvent.click(await canvas.findByRole('button', { name: 'Add a team member' }))
+  return within(await body.findByRole('dialog', { name: 'Add a team member' }))
+}
+
+/** «Add a team member»: who, then the services (a group's «All»), then the review, and the invite's link in the toast. */
+export const AddMember: Story = {
+  play: async ({ canvas }) => {
+    const write = spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined)
+    try {
+      const dialog = await openAdd(canvas)
+      const next = dialog.getByRole('button', { name: 'Continue' })
+      await expect(next).toBeDisabled()
+      await userEvent.type(dialog.getByLabelText('Mobile number'), '65334455')
+      await userEvent.type(dialog.getByLabelText('Name clients see'), 'Gülşat')
+      await userEvent.type(dialog.getByLabelText(/^Specialization/), 'Nail artist')
+      await expect(dialog.getByText('They’ll see the invite when they sign in with +993 65 •• •• 55 · valid 7 days')).toBeVisible()
+      await userEvent.click(next)
+
+      await expect(await dialog.findByRole('heading', { name: 'What does Gülşat do?' })).toBeVisible()
+      await expect(dialog.getByRole('button', { name: 'Continue' })).toBeDisabled()
+      await userEvent.click(dialog.getByRole('checkbox', { name: 'Nails: all' }))
+      await expect(dialog.getByRole('checkbox', { name: /Manicure/ })).toBeChecked()
+      await expect(dialog.getByText('2 / 2')).toBeVisible()
+      await expect(dialog.getByText('2 services selected')).toBeVisible()
+      await userEvent.click(dialog.getByRole('checkbox', { name: /Gel polish/ }))
+      // one of the group: «All» reads as mixed
+      await expect(dialog.getByRole('checkbox', { name: 'Nails: all' })).toHaveProperty('indeterminate', true)
+      await userEvent.click(dialog.getByRole('button', { name: 'Continue' }))
+
+      await expect(await dialog.findByRole('button', { name: 'Services: 1: Manicure. Change' })).toBeVisible()
+      await expect(dialog.getByRole('button', { name: 'Mobile number: +993 65 33 44 55. Change' })).toBeVisible()
+      await expect(dialog.getByText(/It works for 7 days — until/)).toBeVisible()
+      await userEvent.click(dialog.getByRole('button', { name: 'Send invite' }))
+
+      const sent = await body.findByText(/^Invite sent to Gülşat · valid until/)
+      await waitFor(() => expect(sent).toBeVisible())
+      await expect(body.queryByRole('dialog', { name: 'Add a team member' })).toBeNull()
+      await expect(await within(canvas.getByRole('group', { name: 'Invites' })).findByText('Gülşat')).toBeVisible()
+      await userEvent.click(within(sent.closest<HTMLElement>('[data-sonner-toast]')!).getByRole('button', { name: 'Copy invite link' }))
+      const link = within(await body.findByRole('dialog', { name: 'Invite link for Gülşat' }))
+      await userEvent.click(await link.findByRole('button', { name: 'Copy' }))
+      await expect(write).toHaveBeenCalledWith(expect.stringMatching(/\/invite\/new-\d+-token-/))
+    } finally {
+      write.mockRestore()
+    }
+  },
+}
+
+/** «Uses the app» off: bookable at once and never signs in, so the last step adds them instead of inviting. */
+export const AddWithoutApp: Story = {
+  play: async ({ canvas }) => {
+    const dialog = await openAdd(canvas)
+    await userEvent.type(dialog.getByLabelText('Mobile number'), '65778899')
+    await userEvent.type(dialog.getByLabelText('Name clients see'), 'Ogulgerek')
+    await userEvent.click(dialog.getByRole('switch', { name: 'Uses the app' }))
+    await expect(dialog.getByText(/^Bookable at once, never signs in/)).toBeVisible()
+    await userEvent.click(dialog.getByRole('button', { name: 'Continue' }))
+    await userEvent.click(await dialog.findByRole('checkbox', { name: /Back massage/ }))
+    await userEvent.click(dialog.getByRole('button', { name: 'Continue' }))
+    await expect(await dialog.findByRole('button', { name: 'Uses the app: No. Change' })).toBeVisible()
+    await expect(
+      dialog.getByText('Ogulgerek can be booked at once and never signs in. You and the admins handle their requests.'),
+    ).toBeVisible()
+    await userEvent.click(dialog.getByRole('button', { name: 'Add to the team' }))
+    const added = await body.findByText('Ogulgerek added to the team · clients can book Ogulgerek now')
+    await waitFor(() => expect(added).toBeVisible())
+  },
+}
+
+/** A number that can't be added says why: not a mobile one, on the team, an open or ended invite, someone removed. */
+export const AddProblems: Story = {
+  play: async ({ canvas }) => {
+    const dialog = await openAdd(canvas)
+    const phone = dialog.getByLabelText('Mobile number')
+    const says = async (digits: string, text: string) => {
+      await userEvent.clear(phone)
+      await userEvent.type(phone, digits)
+      await expect(await dialog.findByText(text)).toBeVisible()
+      await expect(phone).toHaveAttribute('aria-invalid', 'true')
+    }
+    await userEvent.type(dialog.getByLabelText('Name clients see'), 'Aýna')
+    await says('12345678', 'Mobile numbers only — enter a number starting with 6 or 7.')
+    await says('65884102', 'This person is already on the team.')
+    await says('64551290', 'There’s already an open invite for this number.')
+    await says('61223344', 'This number has an earlier invite. Resend it from its row in Team.')
+    await says('65000000', 'This person is already on the team.')
+    await expect(dialog.getByRole('button', { name: 'Continue' })).toBeDisabled()
+    // an administrator always uses the app: no switch, the note says so
+    await userEvent.selectOptions(dialog.getByLabelText('Access level'), 'admin')
+    await expect(dialog.queryByRole('switch', { name: 'Uses the app' })).toBeNull()
+    await expect(dialog.getByText('Manages the whole calendar and all clients; doesn’t see revenue.')).toBeVisible()
+  },
+}
+
+/** The window on a phone. */
+export const AddMemberPhone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    const dialog = await openAdd(canvas)
+    await expect(dialog.getByLabelText('Mobile number')).toBeVisible()
+  },
+}
+
 /** The administrator sees the team with a note, and nothing to change here. */
 export const Admin: Story = {
   args: { server: fakeApi('admin') },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText(/Only the owner adds and removes people/)).toBeVisible()
     await expect(await canvas.findByText('Maral Ataýewa')).toBeVisible()
+    await expect(canvas.queryByRole('button', { name: 'Add a team member' })).toBeNull()
     await expect(canvas.queryByRole('button', { name: /^Copy invite link: / })).toBeNull()
     await expect(canvas.queryByRole('button', { name: /^Reactivate: / })).toBeNull()
   },

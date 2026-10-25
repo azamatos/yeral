@@ -497,9 +497,10 @@ export function createSdk(client: Client, queryClient: QueryClient) {
 
   /** The business team (ADR 0025): the switcher, invites, and the team the owner manages. */
   const w = v1.w[':slug']
-  // the page shows the team's specialists with their pictures
+  // the page shows the team's specialists with their pictures; the menu names who does each service (an invite with
+  // services, someone removed)
   const teamChanged = (slug?: string) =>
-    invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug), keys.businessAll(slug)] : []))
+    invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug), keys.businessAll(slug), keys.menu(slug)] : []))
   /** The person isn't on that team any more: nothing of it stays (every workspace key names it second), nor what they saw as its team. */
   const left = (slug: string) => {
     forgetPerson(inWorkspace(slug))
