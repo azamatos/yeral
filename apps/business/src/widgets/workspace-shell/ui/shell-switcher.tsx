@@ -51,7 +51,7 @@ export function ShellSwitcher({ variant, className }: { variant: 'sidebar' | 'ra
         const target = sameSectionIn(pathname, next)
         void navigate({ to: targetRoute(target), params: { slug: target.slug } })
       }}
-      onCreate={() => void navigate({ to: '/setup/$step', params: { step: 'business' } })}
+      onCreate={() => void navigate({ to: '/setup/$step', params: { step: 'business' }, search: { another: true } })}
       className={className}
     />
   )

@@ -388,9 +388,51 @@ export const NameTooLong: Story = {
   },
 }
 
-/** «Create a business» from the switcher: step 1 is the account, Cancel goes back, the account shows above the form. */
+/**
+ * Someone already in a business opens the setup without a draft (the login's «Start free», an old link): their
+ * business first, «Open» at its calendar; «Create another business» goes on to the business step (owner, 25.10.2026).
+ */
+export const HasBusiness: Story = {
+  args: {
+    routes: { '/setup/$step': SetupPage, '/w/$slug/calendar': () => <p>Calendar</p> },
+    server: fakeApi({ workspaces: [glow] }),
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'You already have a business' })).toBeVisible()
+    const list = canvas.getByRole('list', { name: 'Your businesses' })
+    await expect(within(list).getByText('Glow Studio')).toBeVisible()
+    await expect(within(list).getByText('Owner · Ashgabat')).toBeVisible()
+    await expect(within(list).getByRole('link', { name: 'Open Glow Studio' })).toHaveAttribute('href', '/w/glow-studio/calendar')
+    await userEvent.click(canvas.getByRole('button', { name: 'Create another business' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Create a business' })).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Cancel' })).toBeVisible()
+  },
+}
+
+/** Several businesses, at any level: each with its own «Open»; «Open» goes to that one's calendar. */
+export const HasBusinesses: Story = {
+  args: {
+    routes: { '/setup/$step': SetupPage, '/w/$slug/calendar': () => <p>Calendar</p> },
+    server: fakeApi({
+      workspaces: [glow, { ...glow, slug: 'ayna-hair', name: 'Aýna Hair', level: 'specialist', city: { id: 'mary', name: 'Mary' } }],
+    }),
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'You already have 2 businesses' })).toBeVisible()
+    const list = canvas.getByRole('list', { name: 'Your businesses' })
+    await expect(within(list).getAllByRole('listitem')).toHaveLength(2)
+    await expect(within(list).getByText('Specialist · Mary')).toBeVisible()
+    await userEvent.click(within(list).getByRole('link', { name: 'Open Aýna Hair' }))
+    await expect(await canvas.findByText('Calendar')).toBeVisible()
+  },
+}
+
+/**
+ * «Create a business» from the switcher (`?another=true`): no choice first; step 1 is the account, Cancel goes back,
+ * the account shows above the form.
+ */
 export const CreateAnother: Story = {
-  args: { server: fakeApi({ workspaces: [glow] }) },
+  args: { path: '/setup/business?another=true', server: fakeApi({ workspaces: [glow] }) },
   play: async ({ canvas }) => {
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Create a business' })).toBeVisible()
     await expect(canvas.getByText('7 steps · about 5 minutes · free')).toBeVisible()

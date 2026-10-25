@@ -166,7 +166,7 @@ function AddressSection({ address, disabled, demo }: { address: AddressFormState
         <p className="m-0 text-dense text-n-600">
           {t.rich('another', {
             link: (words) => (
-              <Link to="/setup/$step" params={{ step: 'business' }} className={textLink}>
+              <Link to="/setup/$step" params={{ step: 'business' }} search={{ another: true }} className={textLink}>
                 {words}
               </Link>
             ),

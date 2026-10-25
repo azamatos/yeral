@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, Navigate, useNavigate, useParams } from '@tanstack/react-router'
+import { Link, Navigate, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import type { Me } from '@yeral/contract/account'
 import type { Setup } from '@yeral/contract/setup'
 import { formatPhone } from '@yeral/domain/phone'
@@ -21,6 +21,7 @@ import type { Category } from '@yeral/contract/catalog'
 import { useAddressStep } from './address-step'
 import { BusinessStep } from './business-step'
 import { useDoneStep, type AfterSetup } from './done-step'
+import { HasBusiness } from './has-business'
 import { useHoursStep } from './hours-step'
 import { PhoneStep } from './phone-step'
 import { useRulesStep } from './rules-step'
@@ -31,7 +32,8 @@ import { useTeamStep } from './team-step'
 /**
  * `/setup/{step}` — the setup wizard (B-Onboarding, design §27.2, book B-02–B-06, Q-200). Someone signed in with a
  * name goes through the steps after the phone; the draft the business step makes reopens at its saved step. Signed
- * out (or without a name), the wizard starts at step 1, the phone.
+ * out (or without a name), the wizard starts at step 1, the phone. Someone already in a workspace, with no draft,
+ * first picks between their businesses and another one, unless they came to create another (`?another=true`).
  */
 export function SetupPage() {
   const t = useTranslations()
@@ -62,6 +64,9 @@ function Waiting() {
 function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
   const sdk = useSdk()
   const locale = useLocale()
+  const navigate = useNavigate()
+  // the switcher's «Create a business» (and the profile's link) ask for another business: no choice first
+  const { another } = useSearch({ strict: false })
   const setup = useQuery(sdk.setup.mine())
   const workspaces = useQuery(sdk.team.workspaces())
   const categories = useQuery(sdk.catalog.categories(locale))
@@ -84,7 +89,15 @@ function Wizard({ asked, me }: { asked: WizardStep; me: Me }) {
   // the done step's draft gone (finished in another tab): the app's start finds the workspace, not a new draft
   if (!draft && asked === 'done') return <Navigate to="/" replace />
   const step = stepFor(asked, draft?.step ?? null)
-  if (step !== asked) return <Navigate to="/setup/$step" params={{ step }} replace />
+  if (step !== asked) return <Navigate to="/setup/$step" params={{ step }} search={{ another }} replace />
+  // already in a business and not asking for another one: theirs first, another one if they mean it (owner, 25.10.2026)
+  if (!draft && another !== true && workspaces.data.items.length > 0)
+    return (
+      <HasBusiness
+        workspaces={workspaces.data.items}
+        onCreate={() => void navigate({ to: '/setup/$step', params: { step: 'business' }, search: { another: true } })}
+      />
+    )
   // appointments only at the first launch: the table and class categories come later (book Q-030)
   const pickable = categories.data.items.filter((c) => c.bookingTypes.includes('appointment'))
   // a category the list no longer offers is picked again
