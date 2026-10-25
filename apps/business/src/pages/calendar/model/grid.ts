@@ -32,14 +32,20 @@ export function stretchOn<T extends { date: string; start: number; end: number }
  */
 export type Placed = { booking: Booking; items: Booking['items']; start: number; end: number }
 
+/** One person's part of a booking or a move on this day's grid: their items, where they start and end on it. */
+function partOn(x: { date: string; items: Booking['items'] }, staffId: string, date: string) {
+  const shift = shiftOn(date, x.date)
+  const items = x.items.filter((i) => i.staffId === staffId)
+  if (shift === null || !items.length) return null
+  const end = Math.max(...items.map((i) => i.end)) + shift
+  // the night before's part that ended by midnight is that day's
+  return end > 0 ? { items, start: Math.min(...items.map((i) => i.start)) + shift, end } : null
+}
+
 export function placedIn(bookings: readonly Booking[], staffId: string, date: string): Placed[] {
   return bookings.flatMap((b) => {
-    const shift = shiftOn(date, b.date)
-    const items = b.items.filter((i) => i.staffId === staffId)
-    if (shift === null || !items.length) return []
-    const end = Math.max(...items.map((i) => i.end)) + shift
-    // the night before's part that ended by midnight is that day's
-    return end > 0 ? [{ booking: b, items, start: Math.min(...items.map((i) => i.start)) + shift, end }] : []
+    const part = partOn(b, staffId, date)
+    return part ? [{ booking: b, ...part }] : []
   })
 }
 
@@ -79,14 +85,13 @@ export function placeOf(start: number, end: number, fromHour: number, toHour = 4
   return { top: pxOf(top, fromHour) + 1, height: Math.max(((bottom - top) * HOUR_PX) / 60 - 2, 16) }
 }
 
-/** A client's move waiting in one person's column (B-21): their part of it at the asked time. */
+/** A client's move waiting in one person's column (B-21): their part of it at the asked time, the night before's too. */
 export type PlacedMove = { move: Move; items: Move['items']; start: number; end: number }
 
 export function movesIn(moves: readonly Move[], staffId: string, date: string): PlacedMove[] {
   return moves.flatMap((m) => {
-    const items = m.items.filter((i) => i.staffId === staffId)
-    if (m.date !== date || !items.length) return []
-    return [{ move: m, items, start: Math.min(...items.map((i) => i.start)), end: Math.max(...items.map((i) => i.end)) }]
+    const part = partOn(m, staffId, date)
+    return part ? [{ move: m, ...part }] : []
   })
 }
 
@@ -115,16 +120,19 @@ export function shadesOf(day: Day | undefined, fromHour: number, toHour: number)
  * The buffer after each live booking (B-Calendar `.buf`, «Buffer · 10 min»): the one after the person's last part, up
  * to the next booking and no further than their day's end (a booking past it keeps none).
  */
-export function buffersOf(column: readonly Placed[], day: Day | undefined): (Stretch & { minutes: number })[] {
+export function buffersOf(column: readonly Placed[], day: Day | undefined): (Stretch & { code: string; minutes: number })[] {
   const live = column.filter((p) => p.booking.status !== 'cancelled')
   return live.flatMap((p) => {
     const last = p.items.reduce((a, b) => (b.end > a.end ? b : a))
     const next = Math.min(...live.filter((o) => o !== p && o.start >= p.end).map((o) => o.start))
     const close = day?.working ? Math.max(day.working.close, p.end) : Infinity
     const end = Math.min(p.end + last.bufferAfter, next, close)
-    return end > p.end ? [{ start: p.end, end, minutes: last.bufferAfter }] : []
+    return end > p.end ? [{ code: p.booking.code, start: p.end, end, minutes: last.bufferAfter }] : []
   })
 }
+
+/** Whether a stretch shows on the grid's hours at all (a block or time elsewhere can lie outside them). */
+export const onGrid = (x: Stretch, fromHour: number, toHour: number) => x.end > fromHour * 60 && x.start < toHour * 60
 
 /** Whether a stretch overlaps any of these. */
 export const overlaps = (x: Stretch, list: readonly Stretch[]) => list.some((o) => o.start < x.end && x.start < o.end)

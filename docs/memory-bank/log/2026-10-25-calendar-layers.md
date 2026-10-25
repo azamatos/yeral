@@ -14,12 +14,17 @@
     to a booking at its time it takes the right half and the booking the left.
   - A client's move waiting at the asked time (`MoveBlock` in `entities/booking`): a request's look, «New time?», the
     client, «from Sun, 25 Oct · 10:30», its timer. Its booking reads «→ Sun, 25 Oct · 16:00?» with the same timer.
-    Pointing at or focusing either rings both (n-500).
-- The night before's blocks and busy time past midnight show from midnight, as its bookings do (`stretchOn`).
+    Pointing at or focusing either rings both (n-500). Clicking either picks the booking, where the request is
+    answered (B5). At another booking's time the move takes the right half, as a cancelled booking does.
+- The night before's blocks, busy time and moves past midnight show from midnight, as its bookings do. Blocked time
+  or busy time outside the grid's hours isn't drawn.
 - A move counts as a request: in its person's column, on the toolbar's chip and in the day's line.
 - `BookingBlock` and `MoveBlock` share one frame. `half` is now `'left' | 'right'`.
 - Decided (Claude, delegated; chapter 9, 25.10.2026, B-16 (how), the layers):
   - Busy elsewhere shows without its buffer, because the api leaves the buffer out and the board adds it.
   - Time off shows «Time off» without its note, as the board does.
   - A removed person's column is shaded with no label.
+- Follow-up (api): the view carries only the shown day's shift, so on a grid that starts at midnight the night
+  before's shift past midnight is shaded as time off (its bookings show over it). Busy elsewhere and a cancelled
+  booking beside a live one at the same time share the right half.
 - Next: B3, the request drawer (`?request=`), opened from the requests chip, a request's block or a move's.

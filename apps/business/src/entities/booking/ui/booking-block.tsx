@@ -47,8 +47,8 @@ type Shared = {
   /** The same as words, for the block's name: «18 min left to answer». */
   timerText?: string
   onOpen: () => void
-  /** Pointed at or focused (true), or left (false): a move's blocks ring together. */
-  onLink?: (on: boolean) => void
+  /** Pointed at or focused (true), or left (false), and which: a move's blocks ring together. */
+  onLink?: (on: boolean, how: 'hover' | 'focus') => void
 }
 
 /**
@@ -86,10 +86,10 @@ function Frame({
 }) {
   const t = useTranslations('calendar.block')
   const link = onLink && {
-    onMouseEnter: () => onLink(true),
-    onMouseLeave: () => onLink(false),
-    onFocus: () => onLink(true),
-    onBlur: () => onLink(false),
+    onMouseEnter: () => onLink(true, 'hover'),
+    onMouseLeave: () => onLink(false, 'hover'),
+    onFocus: () => onLink(true, 'focus'),
+    onBlur: () => onLink(false, 'focus'),
   }
   return (
     <button
@@ -164,7 +164,8 @@ export function BookingBlock({
       phone ? t('byPhone') : '',
       walkIn ? t('walkIn') : '',
       b.alert ? t('alert') : '',
-      asked ? t('moveAsked', { when: asked }) : '',
+      // the asked time, unless its line shows it
+      asked && height < TIMES_FROM ? t('moveAsked', { when: asked }) : '',
       timerText ?? '',
     ],
     'list',
@@ -227,7 +228,13 @@ export function MoveBlock({
   const was = t('when', { date: fmt.shortWeekdayDate(m.of.date), time: fmt.time(m.of.start) })
   const client = m.client.name ?? t('unnamed')
   const more = join(
-    [fmt.timeRange(start, end), items.map((i) => i.service).join(' + '), t('previous', { when: was }), timerText ?? ''],
+    [
+      fmt.timeRange(start, end),
+      items.map((i) => i.service).join(' + '),
+      // the time it moves from, unless its line shows it
+      height < TIMES_FROM ? t('previous', { when: was }) : '',
+      timerText ?? '',
+    ],
     'list',
   )
   return (

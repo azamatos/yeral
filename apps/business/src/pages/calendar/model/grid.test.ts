@@ -1,6 +1,6 @@
 import type { CalendarView } from '@yeral/contract/calendar'
 import { describe, expect, it } from 'vitest'
-import { besideLive, buffersOf, gridHours, movesIn, placedIn, placeOf, pxOf, shadesOf, stretchOn } from './grid'
+import { besideLive, buffersOf, gridHours, movesIn, onGrid, placedIn, placeOf, pxOf, shadesOf, stretchOn } from './grid'
 
 const DAY = '2026-10-14'
 const BEFORE = '2026-10-13'
@@ -101,8 +101,8 @@ describe('the calendar day’s grid', () => {
       DAY,
     )
     expect(buffersOf(placed, day)).toEqual([
-      { start: 660, end: 665, minutes: 10 },
-      { start: 700, end: 715, minutes: 15 },
+      { code: 'a', start: 660, end: 665, minutes: 10 },
+      { code: 'b', start: 700, end: 715, minutes: 15 },
     ])
   })
 
@@ -110,7 +110,13 @@ describe('the calendar day’s grid', () => {
     const move = { code: 'YR-1', date: DAY, start: 960, end: 1050, items: [{ staffId: 's', start: 960, end: 1050 }] }
     expect(movesIn([move] as unknown as CalendarView['moves'], 's', DAY)).toMatchObject([{ start: 960, end: 1050 }])
     expect(movesIn([move] as unknown as CalendarView['moves'], 't', DAY)).toEqual([])
+    const night = { ...move, date: BEFORE, start: 1380, end: 1530, items: [{ staffId: 's', start: 1380, end: 1530 }] }
+    expect(movesIn([night] as unknown as CalendarView['moves'], 's', DAY)).toMatchObject([{ start: -60, end: 90 }])
     expect(stretchOn(DAY, { date: BEFORE, start: 1380, end: 1500 })).toEqual({ date: BEFORE, start: -60, end: 60 })
     expect(stretchOn(DAY, { date: BEFORE, start: 600, end: 660 })).toBeNull()
+    // outside the grid's hours: not drawn
+    expect(onGrid({ start: 840, end: 1080 }, 8, 14)).toBe(false)
+    expect(onGrid({ start: 420, end: 480 }, 8, 14)).toBe(false)
+    expect(onGrid({ start: 780, end: 900 }, 8, 14)).toBe(true)
   })
 })

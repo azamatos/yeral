@@ -210,9 +210,7 @@ export const Day: Story = {
     const request = ayna.getByRole('button', { name: /Mähri G\. Hair colouring.*Pending, \d+ min left to answer$/ })
     await expect(within(request).getByText(/^\d+ min$/)).toBeVisible()
     const maral = within(grid.getByRole('group', { name: 'Maral' }))
-    await expect(
-      maral.getByRole('button', { name: /Ogulgerek M\..*by phone, alert note about the client, time change request/ }),
-    ).toBeVisible()
+    await expect(maral.getByRole('button', { name: /Ogulgerek M\..*by phone, alert note about the client/ })).toBeVisible()
     await expect(grid.getByText('Doesn’t use the app')).toBeVisible()
     await expect(canvas.getByText(/^Revenue \(planned\)/)).toBeVisible()
     // Aýna's request and Maral's client asking to move: in their columns and the toolbar
@@ -231,13 +229,16 @@ export const Layers: Story = {
     await expect(ayna.getByText('Busy elsewhere')).toBeVisible()
     await expect(within(grid.getByRole('group', { name: 'Jeren' })).getByText('Closed · Training')).toBeVisible()
     const maral = within(grid.getByRole('group', { name: 'Maral' }))
-    const original = maral.getByRole('button', { name: /Ogulgerek M\..*time change request: .* · 16:00/ })
-    const ghost = maral.getByRole('button', { name: /^16:00 New time\? Ogulgerek M\..*previous time .* · 10:30/ })
+    const original = maral.getByRole('button', { name: /Ogulgerek M\..*→ .* · 16:00\?/ })
+    const ghost = maral.getByRole('button', { name: /^16:00 New time\? Ogulgerek M\. from .* · 10:30/ })
     // pointing at one rings both
     await userEvent.hover(ghost)
     await expect(original).toHaveClass('z-5')
     await userEvent.unhover(ghost)
     await expect(original).not.toHaveClass('z-5')
+    // the move opens its booking
+    await userEvent.click(ghost)
+    await waitFor(() => expect(original).toHaveAttribute('aria-pressed', 'true'))
     // Aýna's request and Maral's move, each counted with their column's bookings
     await expect(grid.getAllByText('2 bookings ·')).toHaveLength(2)
   },

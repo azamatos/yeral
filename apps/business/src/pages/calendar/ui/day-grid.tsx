@@ -15,6 +15,7 @@ import {
   gridHours,
   HOUR_PX,
   movesIn,
+  onGrid,
   overlaps,
   placedIn,
   placeOf,
@@ -29,6 +30,7 @@ const GUTTER = 'w-16 flex-none'
 const COLUMN = 'min-w-50 flex-1 basis-0'
 
 type Timer = (until: number | null) => { node: ReactNode; text: string } | null
+type Link = 'hover' | 'focus'
 
 /**
  * The day's grid (B-Calendar `.gwrap`, DS-Business CalendarGrid «DayAllStaff»): a column per person the reader sees,
@@ -67,7 +69,10 @@ export function DayGrid({
   const closed = business ? openMinutesBetween(business, now, now + 60_000) === 0 : false
 
   // the booking a waiting move belongs to, while its block or the move's is pointed at
-  const [linked, setLinked] = useState<string | null>(null)
+  // pointed at or focused, each kept on its own: leaving one doesn't clear the other
+  const [hovered, setHovered] = useState<string | null>(null)
+  const [focused, setFocused] = useState<string | null>(null)
+  const onLink = (how: Link, code: string | null) => (how === 'hover' ? setHovered : setFocused)(code)
 
   const timer: Timer = (until) => {
     if (until === null) return null
@@ -111,7 +116,8 @@ export function DayGrid({
               (b) => b.date === date && b.status !== 'cancelled' && b.items.some((i) => i.staffId === c.staffId),
             )
             // a client's move waits for an answer too (B-Calendar counts its ghost)
-            const waiting = mine.filter((b) => b.status === 'pending').length + movesIn(view.moves, c.staffId, date).length
+            const asked = view.moves.filter((m) => m.date === date && m.items.some((i) => i.staffId === c.staffId)).length
+            const waiting = mine.filter((b) => b.status === 'pending').length + asked
             return (
               <div key={c.staffId} className={`${COLUMN} flex items-center gap-2.5 border-l border-n-200 p-3`}>
                 <Avatar name={c.name} src={c.photo?.url} size={32} letters={1} tone="tint" decorative />
@@ -168,8 +174,8 @@ export function DayGrid({
               to={to}
               timer={timer}
               selected={selected}
-              linked={linked}
-              onLink={setLinked}
+              linked={hovered ?? focused}
+              onLink={onLink}
               onOpen={onOpen}
             />
           ))}
@@ -208,7 +214,7 @@ function DayColumn({
   timer: Timer
   selected: string | null
   linked: string | null
-  onLink: (code: string | null) => void
+  onLink: (how: Link, code: string | null) => void
   onOpen: (code: string) => void
 }) {
   const t = useTranslations('calendar.layers')
@@ -217,16 +223,15 @@ function DayColumn({
   const placed = placedIn(view.bookings, c.staffId, date)
   const live = placed.filter((p) => p.booking.status !== 'cancelled')
   const moves = movesIn(view.moves, c.staffId, date)
-  const busy = view.elsewhere.flatMap((e) => (e.staffId === c.staffId ? (stretchOn(date, e) ?? []) : []))
-  const blocks = view.blocks.flatMap((k) => (k.staffId === c.staffId ? (stretchOn(date, k) ?? []) : []))
-  const at = (start: number, end: number) => {
-    const place = placeOf(start, end, from, to)
-    return { top: place.top, height: place.height }
-  }
-  const link = (code: string) => (on: boolean) => onLink(on ? code : null)
+  // what lies on the grid's hours: a block or time elsewhere outside them isn't drawn as a stub at an edge
+  const shown = <T extends { start: number; end: number }>(x: T | null): T[] => (x && onGrid(x, from, to) ? [x] : [])
+  const busy = view.elsewhere.flatMap((e) => (e.staffId === c.staffId ? shown(stretchOn(date, e)) : []))
+  const blocks = view.blocks.flatMap((k) => (k.staffId === c.staffId ? shown(stretchOn(date, k)) : []))
+  const at = (start: number, end: number) => placeOf(start, end, from, to)
+  const link = (code: string) => (on: boolean, how: Link) => onLink(how, on ? code : null)
   const lock = <Lock aria-hidden strokeWidth={2} className="size-3.5 flex-none" />
   const layers = [
-    ...(day?.breaks ?? []).map((b) => ({
+    ...(day?.breaks ?? []).flatMap(shown).map((b) => ({
       ...b,
       key: `b${b.start}`,
       icon: <Coffee aria-hidden strokeWidth={2} className="size-3.5 flex-none" />,
@@ -286,7 +291,7 @@ function DayColumn({
       ))}
       {buffersOf(placed, day).map((u) => (
         <div
-          key={u.start}
+          key={u.code}
           aria-hidden
           title={t('buffer', { length: fmt.duration(u.minutes) })}
           className="absolute right-1 left-1 z-3 rounded-b-[6px] bg-[repeating-linear-gradient(135deg,var(--color-n-100)_0_4px,var(--color-n-0)_4px_8px)]"
@@ -315,9 +320,9 @@ function DayColumn({
           />
         )
       })}
-      {busy.map((e) => (
+      {busy.map((e, i) => (
         <div
-          key={`${e.date}${e.start}`}
+          key={i}
           className={cn(
             'pointer-events-none absolute right-1 left-1 z-4 flex items-start overflow-hidden rounded-input border border-n-200 bg-n-50 px-2 py-1.25 text-[12px] leading-4 font-medium whitespace-nowrap text-n-600',
             overlaps(e, live) && 'left-[calc(50%+2px)]',
@@ -331,6 +336,7 @@ function DayColumn({
       {moves.map((m) => {
         const place = at(m.start, m.end)
         const hold = timer(m.move.holdUntil)
+        const of = m.move.of.code
         return (
           <MoveBlock
             key={m.move.code}
@@ -338,12 +344,15 @@ function DayColumn({
             items={m.items}
             height={place.height}
             style={place}
-            selected={selected === m.move.code}
-            linked={linked === m.move.of.code}
+            // at the time of a booking (its own, or another) it takes the right half, as a cancelled one does
+            half={overlaps(m, live) ? 'right' : undefined}
+            // it opens its booking, where the client's request is answered (B-21)
+            selected={selected === of}
+            linked={linked === of}
             timer={hold?.node}
             timerText={hold?.text}
-            onOpen={() => onOpen(m.move.code)}
-            onLink={link(m.move.of.code)}
+            onOpen={() => onOpen(of)}
+            onLink={link(of)}
           />
         )
       })}
