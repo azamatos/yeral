@@ -13,22 +13,25 @@ const sizes = {
 }
 
 /**
- * Native select for fewer than 8 options (DS-Components → Inputs → Etrap; DS-Patterns → Select): 48, 44 or 40 high,
- * figures tabular for times and durations. `className` sizes the box (a width). Longer lists use a searchable picker.
+ * Native select for fewer than 8 options (DS-Components → Inputs → Etrap; DS-Patterns → Select): 48, 44 or 40 high.
+ * `tabular` sets tabular figures where pickers stand in a column and their times must line up (TimeRangeField);
+ * elsewhere the figures stay proportional, as Onest's tabular «1» leaves a gap in «10 min». `className` sizes the box
+ * (a width). Longer lists use a searchable picker.
  */
 export function Select({
   className,
   invalid,
   size = 'l',
+  tabular,
   children,
   ...props
-}: Omit<ComponentProps<'select'>, 'size'> & { invalid?: boolean; size?: keyof typeof sizes }) {
+}: Omit<ComponentProps<'select'>, 'size'> & { invalid?: boolean; size?: keyof typeof sizes; tabular?: boolean }) {
   return (
     <div className={cn('relative', className)}>
       <select
         {...props}
         {...useControlProps({ ...props, invalid })}
-        className={cn(inputClass, 'cursor-pointer appearance-none tabular-nums disabled:cursor-default', sizes[size].select)}
+        className={cn(inputClass, 'cursor-pointer appearance-none disabled:cursor-default', tabular && 'tabular-nums', sizes[size].select)}
       >
         {children}
       </select>

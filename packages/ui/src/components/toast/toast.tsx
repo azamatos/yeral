@@ -23,7 +23,9 @@ export function Toaster({ label }: { label?: string }) {
         unstyled: true,
         classNames: {
           toast:
-            'flex min-h-13 w-full items-center gap-3 rounded-m bg-n-900 py-1.5 pr-2 pl-4 font-sans text-body text-white shadow-raised sm:w-auto sm:max-w-[calc(100vw-48px)]',
+            // 16 on both sides, the right one 8 beside an action (sonner marks its buttons `data-button`), so a toast of
+            // words alone sits centred
+            'flex min-h-13 w-full items-center gap-3 rounded-m bg-n-900 px-4 py-1.5 font-sans text-body text-white shadow-raised has-[[data-button]]:pr-2 sm:w-auto sm:max-w-[calc(100vw-48px)]',
           title: 'font-normal',
           actionButton:
             'ml-auto inline-flex h-10 flex-none cursor-pointer items-center rounded-m border-0 bg-transparent px-2.5 font-semibold text-a-200 hover:bg-ink-btn-hover focus-visible:shadow-focus',

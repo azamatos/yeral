@@ -92,7 +92,35 @@ export const IconOnly: Story = {
   ),
 }
 
-export const Disabled: Story = { args: { disabled: true } }
+/** DS-Components `.b:disabled`: every variant greys out the same way, the primary's gradient included. */
+export const Disabled: Story = {
+  args: { disabled: true },
+  render: (args) => (
+    <div className="flex flex-wrap items-center gap-3">
+      <Button {...args} variant="primary">
+        Continue
+      </Button>
+      <Button {...args} variant="secondary">
+        Kartada görkez
+      </Button>
+      <Button {...args} variant="tint">
+        Halanlarym
+      </Button>
+      <Button {...args} variant="danger-solid">
+        Hawa, ýatyr
+      </Button>
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    for (const button of canvas.getAllByRole('button')) {
+      await expect(button).toBeDisabled()
+      const style = getComputedStyle(button)
+      await expect(style.backgroundImage).toBe('none')
+      await expect(style.backgroundColor).toBe('rgb(240, 240, 243)')
+      await expect(style.color).toBe('rgb(110, 110, 120)')
+    }
+  },
+}
 
 export const Loading: Story = {
   args: { loading: true, loadingLabel: 'Ýüklenýär' },

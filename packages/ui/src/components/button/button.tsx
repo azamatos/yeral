@@ -13,7 +13,9 @@ export const buttonVariants = cva(
     'relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap border border-transparent font-semibold no-underline',
     'transition-[background,box-shadow,transform,border-color] duration-[120ms,120ms,60ms,120ms]',
     'focus-visible:shadow-focus focus-visible:outline-none active:translate-y-px',
-    'disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-n-100 disabled:bg-n-100 disabled:text-n-500 disabled:shadow-none',
+    // DS-Components `.b:disabled` for every variant; `bg-none` drops the primary's gradient (a background image the
+    // colour alone doesn't cover), and the disabled rules sort after hover and active, so neither brings it back
+    'disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-n-100 disabled:bg-n-100 disabled:bg-none disabled:text-n-500 disabled:shadow-none',
     "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]",
   ],
   {

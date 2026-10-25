@@ -57,6 +57,7 @@ function Picker({
   return (
     <Select
       size="s"
+      tabular
       className="w-26 flex-none"
       aria-label={label}
       invalid={invalid}
