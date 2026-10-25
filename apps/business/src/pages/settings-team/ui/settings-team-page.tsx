@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { TeamMember } from '@yeral/contract/team'
 import { maskPhone } from '@yeral/domain/phone'
-import { INVITE_DAYS, inviteState } from '@yeral/domain/team'
+import { INVITE_DAYS } from '@yeral/domain/team'
 import { diffDays, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
@@ -13,21 +13,23 @@ import { Modal, ModalContent, ModalDescription, ModalHeader } from '@yeral/ui/mo
 import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
-import { Ellipsis, Info } from 'lucide-react'
-import { useState } from 'react'
+import { Ellipsis, Info, UserPlus } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
+import { inviteNow } from '../model/invite'
+import { AddMember } from './add-member'
 
 /**
  * Settings → Team (B-Team `tab=team`, design §8 «Topar», §28.4 Team, book B-43–B-50): everyone in groups,
  * Specialists (clients see and pick them), Management (they take no bookings), the open and past Invites, and those no
  * longer on the team. A row says the person's access level, how many services they do, their hours (the business's,
  * or their own shift) and where they stand: Active, Invited (working without the app until they accept), Removed;
- * «Doesn't use the app». The owner gets an invite's link, resends or cancels it, and reactivates someone removed; an
- * administrator sees the team and can't change it here.
+ * «Doesn't use the app». The owner adds someone («Add a team member»), gets an invite's link, resends or cancels it,
+ * and reactivates someone removed; an administrator sees the team and can't change it here.
  */
 export function SettingsTeamPage() {
   const { workspace, me } = useWorkspace()
@@ -48,6 +50,8 @@ function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; 
   const menu = useQuery(sdk.settings.menu(slug))
   // the invite link a send just returned, to copy (the api keeps only its hash, so it can't be read back later)
   const [link, setLink] = useState<{ name: string; url: string } | null>(null)
+  const [adding, setAdding] = useState(false)
+  const addButton = useRef<HTMLButtonElement>(null)
 
   // the groups and counts come from the menu too: both, or the page waits
   if (!team.data && team.isError) throw team.error
@@ -74,7 +78,18 @@ function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; 
   ] as const
 
   return (
-    <SettingsPage section="team" lead={t('lead')}>
+    <SettingsPage
+      section="team"
+      lead={t('lead')}
+      action={
+        owner && (
+          <Button ref={addButton} variant="primary" size="s" aria-haspopup="dialog" onClick={() => setAdding(true)}>
+            <UserPlus aria-hidden strokeWidth={1.75} />
+            {t('add.open')}
+          </Button>
+        )
+      }
+    >
       {!owner && (
         <Callout tone="neutral" icon={<Info />}>
           {t('adminNote')}
@@ -112,6 +127,17 @@ function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; 
             ),
         )}
       </div>
+      {owner && (
+        <AddMember
+          slug={slug}
+          people={people}
+          menu={menu.data}
+          open={adding}
+          onOpenChange={setAdding}
+          opener={addButton}
+          onLink={(name, url) => setLink({ name, url })}
+        />
+      )}
       <Modal open={link !== null} onOpenChange={(open) => !open && setLink(null)}>
         {link && (
           <ModalContent>
@@ -173,8 +199,7 @@ function MemberRow({
   const former = m.status === 'removed'
   const inviteRow = m.status === 'invited'
   const [now] = useState(() => Date.now())
-  const state =
-    m.invite && inviteState({ status: m.invite.state === 'expired' ? 'pending' : m.invite.state, expiresAt: m.invite.expiresAt }, now)
+  const state = m.invite && inviteNow(m.invite, now)
   const pending = state === 'pending'
   // a specialist without the app who was sent an invite works as before until they accept
   const waiting = m.status === 'active' && pending && !m.joined

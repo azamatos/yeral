@@ -17,6 +17,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { SETUP_TEAM_MAX } from '@yeral/contract/setup'
 import { useSdk } from '@/shared/api'
+import { TEAM_NAME_MAX } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
 import {
   emptyRow,
@@ -24,7 +25,6 @@ import {
   isFilled,
   rowProblem,
   sameTeam,
-  TEAM_NAME_MAX,
   teamHint,
   teamInput,
   usesApp,
