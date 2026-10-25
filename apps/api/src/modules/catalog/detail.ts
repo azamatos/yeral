@@ -139,17 +139,22 @@ export async function businessDetail(
   )
   const type = b.bookingTypes[0] ?? 'appointment'
 
+  // the card's next free time with anyone, and each specialist's own, for the first service (theirs) on the page
   let nextFree: BusinessDetail['nextFree'] = null
+  const staffNext = new Map<string, BusinessDetail['nextFree']>()
   const first = online[0]
   if (type === 'appointment' && first && lb.rules.onlineEnabled) {
     const busy = await loadBusy(db, [b.id], day, addDays(day, lb.rules.windowDays))
-    const found = nextFreeSlot(
-      appointmentContext(lb, busy, now),
-      { serviceIds: [first.id], staffId: null, by: 'client' },
-      day,
-      lb.rules.windowDays,
-    )
-    nextFree = found ? { date: found.date, start: found.slot.start } : null
+    const ctx = appointmentContext(lb, busy, now)
+    const freeFor = (serviceId: string, staffId: string | null): BusinessDetail['nextFree'] => {
+      const found = nextFreeSlot(ctx, { serviceIds: [serviceId], staffId, by: 'client' }, day, lb.rules.windowDays)
+      return found ? { date: found.date, start: found.slot.start } : null
+    }
+    nextFree = freeFor(first.id, null)
+    for (const s of specialists) {
+      const theirs = s.serviceIds.find((id) => online.some((o) => o.id === id))
+      if (theirs) staffNext.set(s.id, freeFor(theirs, s.id))
+    }
   }
 
   const specialDays: BusinessDetail['specialDays'] = []
@@ -240,6 +245,7 @@ export async function businessDetail(
       photo: s.photo ? photoOf(deps, s.photo, lang, s.name) : null,
       rating: s.rating,
       serviceIds: s.serviceIds.filter((id) => online.some((o) => o.id === id)),
+      nextFree: staffNext.get(s.id) ?? null,
     })),
     tables:
       type === 'table'

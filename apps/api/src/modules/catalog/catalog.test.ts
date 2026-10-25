@@ -109,6 +109,11 @@ describe('catalogue', () => {
     expect(d.photos[0].url).toBe('http://media.test/demo/adam-winger-FkAZqQJTbXM-unsplash.jpg')
     expect(d.distanceM).toBeGreaterThan(2900)
     expect(d.nextFree).not.toBeNull()
+    // each specialist's own next free time, for the first of their services, as the booking's specialist step has it
+    const maral = d.specialists.find((s: { name: string }) => s.name === 'Maral')
+    const step = await b.req(`/v1/businesses/glow-studio/specialists/availability?services=${maral.serviceIds[0]}`)
+    expect(maral.nextFree).not.toBeNull()
+    expect(maral.nextFree).toEqual(step.json.items.find((i: { staffId: string }) => i.staffId === maral.id).next)
   })
 
   it('someone invited isn’t on the client site until they accept (book chapter 3)', async () => {

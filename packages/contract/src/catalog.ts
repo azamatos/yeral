@@ -282,6 +282,11 @@ export const specialistSchema = z
     photo: photoSchema.nullable(),
     rating: z.number().min(0).max(5).nullable(),
     serviceIds: z.array(idSchema),
+    /**
+     * "Indiki boş: Şu gün 15:30" on the page's specialists (book C-06): their next free time for the first of their
+     * services; null when nothing is free in the window or the page takes no online appointments.
+     */
+    nextFree: nextFreeSchema,
   })
   .meta({ id: 'Specialist' })
 

@@ -18,10 +18,20 @@ const service = (
   staffIds: [staff],
 })
 
+const specialist = (
+  id: string,
+  name: string,
+  role: string,
+  rating: number,
+  serviceIds: string[],
+  nextFree: BusinessDetail['specialists'][number]['nextFree'],
+) => ({ id, name, role, photo: null, rating, serviceIds, nextFree })
+
 /**
  * Glow Studio as the business page reads it (`GET /businesses/glow-studio`, demo-data `v06r3`, written the English
  * way): 12 services in 4 groups (s12 «Bridal hair styling» keeps its price for the place), 4 specialists who each do
- * one group, open, the next free time today at 15:30, confirming by hand. Stories change what they need
+ * one group with their next free times (Venue), open, the next free time today at 15:30, confirming by hand. Stories
+ * change what they need
  * (`{ ...GLOW, onlineEnabled: false }`).
  */
 export const GLOW: BusinessDetail = {
@@ -113,10 +123,10 @@ export const GLOW: BusinessDetail = {
     },
   ],
   specialists: [
-    { id: 'st-ayna', name: 'Aýna', role: 'Stylist', photo: null, rating: 4.9, serviceIds: ['s1', 's2', 's3', 's4', 's12'] },
-    { id: 'st-maral', name: 'Maral', role: 'Nail artist', photo: null, rating: 5, serviceIds: ['s5', 's6', 's7'] },
-    { id: 'st-jeren', name: 'Jeren', role: 'Cosmetologist', photo: null, rating: 4.8, serviceIds: ['s8', 's9'] },
-    { id: 'st-leyli', name: 'Leýli', role: 'Massage therapist', photo: null, rating: 4.9, serviceIds: ['s10', 's11'] },
+    specialist('st-ayna', 'Aýna', 'Stylist', 4.9, ['s1', 's2', 's3', 's4', 's12'], { date: today(), start: 930 }),
+    specialist('st-maral', 'Maral', 'Nail artist', 5, ['s5', 's6', 's7'], { date: today(), start: 960 }),
+    specialist('st-jeren', 'Jeren', 'Cosmetologist', 4.8, ['s8', 's9'], { date: addDays(today(), 1), start: 600 }),
+    specialist('st-leyli', 'Leýli', 'Massage therapist', 4.9, ['s10', 's11'], { date: today(), start: 1080 }),
   ],
   tables: null,
   similar: [],
