@@ -4,27 +4,19 @@ _Last updated: 2026-10-25_
 
 ## Current focus
 
-**2026-10-25: the business app is live at `business.yeral.app`.** The owner wanted to try it on the real domain rather
-than locally (Owner's direction): #192 added the business app to the server (its image built by `deploy.sh`, a
-`business` service, `business.yeral.app` in `yeral.caddy`) and turned the sign-in code on the screen on; Claude
-deployed main at 07952fd with `PUBLIC=1` (2026-10-25 08:42 UTC): migration 0042 and the starter services applied, a
-Let's Encrypt certificate for `business.yeral.app`. Anyone who types a number signs in as it, so only test data goes
-in. That deploy skipped its database backup (the new compose variable made the check fail quietly; nothing was lost:
-no users or businesses yet); a backup was taken right after and the check fixed (`log/2026-10-25-business-live.md`).
-The apex keeps the coming-soon page; the example businesses and the demo workspace stay off.
-
-**2026-10-24: P4 slice 2, the setup wizard is built; Settings under way.** Two unattended 2-hour runs on 23.10 (every
-PR reviewed with `code-review`, one round, on green CI) built the wizard end to end: the night merged #148, #151–#156
-(the "How was it?" card's api with migration 0042, the old site out of the repo, the address search behind the map pin
-(ADR 0027), the wizard's pieces, its frame and business step, the login reopening an unfinished setup); the evening
-merged #157–#173: step 1 phone for someone signed out, 3 address with the map, 4 hours, 5 services from the category's
-starters (one api call makes the menu), 6 team (one api call; the finish sends the invites), 7 booking rules and 8 done
-with the link, the QR and `setup.finish`, with their `@yeral/ui` pieces (MapFrame, Combobox, TimeRangeField,
-InputGroup, SettingsRow, OptionCard L, Checklist, QrBlock, CopyField). Details: `log/2026-10-23-setup-*.md` and
-`log/2026-10-23-starter-services.md`. The run of 24.10 (extended to 25.10 01:02) built the Settings sections on the
-wizard's forms, #174–#191, all but Team's «Add a team member» and its staff drawer (notes in `log/2026-10-24-*.md`, to
-fold). All of it is live since 25.10 (above). The owner's e-mail for yeral.app waits
-for another session (owner, 24.10).
+**2026-10-25: the business app is live at `business.yeral.app`; slice 2's last pieces under way.** The owner wanted to
+try the app on the real domain rather than locally (Owner's direction): #192 added the business app to the server
+(`deploy.sh` builds its image, a `business` service, `business.yeral.app` in `yeral.caddy`) and turned the sign-in code
+on the screen on (anyone who types a number signs in as it: test data only); deployed at 07952fd (08:42 UTC). That
+deploy skipped its database backup (nothing lost; fixed in #193, `log/2026-10-25-business-live.md`). The owner tested
+it, found six things and the done step's QR (fixed in #194, #195, #197, #199, #200) and set the rules "not
+overcomplicating things" and "a library before our own" (ADR 0011 amended, AGENTS.md rule 10a, #196); deployed at
+592cfd2 (10:45 UTC, a backup first). The owner gave the whole day: three agents finish slice 2 (Team's add #198 and its
+drawer, the page address a business chooses: api #201 with migration 0043, then its screens; faster updates), each PR
+reviewed with `code-review` on green CI, notes in `log/2026-10-25-*.md`. Settings was built the night before
+(#174–#191, `log/2026-10-24-*.md`; progress.md), the wizard on 23.10 (#148–#173, `log/2026-10-23-*.md`). The apex
+keeps the coming-soon page; the example businesses and the demo workspace stay off; the owner's e-mail for yeral.app
+waits for another session (24.10).
 
 **2026-10-23: yeral.app moved to the own server.** The owner removed `yeral.app` and `www` from the old Worker
 `yeral-web` and added the A records for `@`, `www`, `api`, `business` and `cms` (DNS only; 22.10). Claude deployed main
@@ -233,29 +225,24 @@ Where the old questions went (2026-10-17):
 
 ## Next steps
 
-0. **The owner's 25.10 test of business.yeral.app:** the six fixes and the done step's QR (under way), then a deploy.
-   Planned with slice 2's end: (a) **the page address a business chooses** (`yeral.app/b/<slug>`): an editable
-   address on the business step and in Link and QR, checked as it's typed (letters, digits and hyphens, a length, taken
-   and reserved words), an old address redirecting to the new one and kept for its business (a migration for the old
-   addresses), the client site's page following it; book rows first. (b) **instant updates**: the server answers in
-   8 ms (p50, Caddy's log, 25.10), but a change made elsewhere shows within the 10-second poll of `GET /v1/events`
-   by design, and the app's own saves wait for the server and a refetch (no optimistic updates). Plan: optimistic
-   updates where a switch or a save should feel instant; a push channel (server-sent events) for `events` with
-   slice 3, when new booking requests must show at once; fewer repeated reads of `me`, the workspaces and the setup.
-   (c) the special days' dates through `react-day-picker` (rule 10a).
-1. **P4 slice 2, business setup** (the wizard, profile, services, hours, team, booking rules, link and QR; book
-   chapter 10): its endpoints are merged (the setup draft #112 and its card #141, photos #116, the logo #140, the floor
-   #120, step 4's settings, the address search #153). Built: the whole wizard (#154–#173, all 8 steps and the phone
-   step), the login's card (#155). Next: the Settings sections (Business profile, Booking rules, Hours with special
-   days, Services, Team, Permissions, Link and QR; under way 24.10), reusing the wizard's forms. The wizard's
-   follow-ups (from the reviews, `log/2026-10-23-setup-*.md`): the step list's summaries for team and rules (rules in
-   `GET /v1/me/setup`) and lighter counts there instead of reading the whole menu; a category changed after the menu
-   was saved keeps that menu at step 5; a lighter public categories list (the starters ride along); the done step's
-   note on who gets an invite; focus after adding or removing a team row; full-width selects on phones; the optional
-   photo on the name; the terms line (slice 7). Also: the photo upload in My account (`ProfilePhoto`'s
-   `upload` and `src`: `PUT /v1/me/photo`, `me.photo`); the Demo frame from `me.demo` (the signed-out sidebar with
-   "Log in", the Demo banner, `demo` in the switcher), "Try the business app" (`sdk.demo.start()`) on the login and the
-   wizard, and `demo_number`'s hint; the leave and delete confirms' counts (#142); the page-state banner (#144).
+1. **P4 slice 2, business setup** (book chapter 10): the wizard (#154–#173) and Settings (#174–#191) are built and
+   live, with the owner's fixes (#194–#200) and «Add a team member» (#198). Under way 25.10: Team's staff drawer
+   (profile, services, hours and time off, remove and reactivate with AffectedBookingsList moved to `entities/booking`;
+   its api first: name, specialization and phone edits, a person's services in one call, the app turned off, `cancel`
+   on a schedule change); the page address a business chooses (#201's api; next its screens: the wizard's business
+   step and «Change link»; the client site's page redirects from an old address in slice 3); faster updates
+   (optimistic switches and saves, fewer repeated reads of `me`, the workspaces and the setup; the server answers in
+   8 ms at p50, the 10-second events poll stays until slice 3's push channel). Then: the special days' dates through
+   `react-day-picker` (rule 10a); "Left" vs "Removed" on Team (a migration: who ended a membership, when); Business
+   profile's address as B-Settings draws it (#190 reuses the wizard's layout); a Russian-length check of slice 2's
+   screens (P3). Follow-ups from the reviews (`log/2026-10-2[345]-*.md`): the step list's summaries for team and rules
+   and lighter counts there; a category changed after the menu was saved keeps that menu; a lighter public categories
+   list; the timer pill, pills and a special-day row in shared layers; one shared rule for which special day applies
+   (app and api); a shared fake api for the Settings stories; leaving a section with unsaved changes asks nothing yet.
+   Also: the photo upload in My account (`ProfilePhoto`'s `upload` and `src`: `PUT /v1/me/photo`, `me.photo`); the
+   Demo frame from `me.demo` (the signed-out sidebar with "Log in", the Demo banner, `demo` in the switcher), "Try the
+   business app" (`sdk.demo.start()`) on the login and the wizard, and `demo_number`'s hint; the leave and delete
+   confirms' counts (#142); the page-state banner (#144).
 2. **Deploy by hand when the owner asks** (no release: #133; `infra/server/README.md`, a database backup first; the
    business app ships with the api since 25.10). The first launch (approved in advance, 22.10) goes when slices 2–7
    are built and checked: `EXAMPLE_BUSINESSES` and `DEMO_WORKSPACE` on (the code on the screen is on already), the
@@ -263,7 +250,7 @@ Where the old questions went (2026-10-17):
 3. **P2 left:** step 7's releases and deploys from GitHub, and the code-SMS cap. Follow-ups: `/v1/health` comparing
    the database's newest migration with the image's; the jobs runner's `reviewAsk` drop branch, dead after the deploy
    with 0041; checking the settings permission before an upload's body is read; the invite-accept route reading every
-   workspace. The server runs main at 07952fd (25.10). With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
+   workspace. The server runs main at 592cfd2 (25.10). With the real working MVP (P6, owner 22.10): backups to R2 with a restore drill (the `media` volume and
    `.env` too), error tracking and uptime alerts (they watch `job gave up`, `business SMS limit reached`, `admin codes
    guessed…`, `admin secret sealed under another ADMIN_SECRET_KEY`).
 
@@ -277,14 +264,15 @@ early Ýeral prototype) stays until all the web apps are live, then goes (the ow
 projects aren't Ýeral's and stay. Later (P6): an R2 token, accounts for error tracking and uptime checks.
 
 **Server:** `ssh yeral-vps` (the owner allowed `Bash(ssh yeral-vps:*)`); deploy by hand with `infra/server/README.md` →
-"Deploying Ýeral by hand". Since 2026-10-25 08:42 UTC it runs main at 07952fd (images `yeral-api:07952fd89ae0` and
-`yeral-business:07952fd89ae0`; before it 5c07be4 from 22.10): migrations 0000–0042 applied, the 6 cities and the
-category catalogue with its starter services, no users or businesses yet; `ADMIN_SECRET_KEY` in `/srv/yeral/.env`, no
+"Deploying Ýeral by hand". Since 2026-10-25 10:45 UTC it runs main at 592cfd2 (images `yeral-api:592cfd20b8bb` and
+`yeral-business:592cfd20b8bb`; before it 07952fd from 08:42 the same day, 5c07be4 from 22.10): migrations 0000–0042
+applied, the 6 cities and the category catalogue with its starter services, the owner's test businesses; `ADMIN_SECRET_KEY` in `/srv/yeral/.env`, no
 admin account yet; `SIGN_IN_CODE_ON_SCREEN` on (owner, 25.10), `EXAMPLE_BUSINESSES` and `DEMO_WORKSPACE` off (on when
 the first launch opens). Public: the edge Caddy serves `yeral.caddy` (`/srv/edge/sites/`): `api.yeral.app`,
 `business.yeral.app`, the coming-soon page on `yeral.app`, `www` → the apex, with Let's Encrypt certificates; `cms.`
-resolves to the server and fails TLS until its app joins. Kept: the database right after the 25.10 deploy
-(`/srv/yeral/backup-2026-10-25-after-07952fd.sql.gz`; the one before it was skipped) and before the 22.10 one
+resolves to the server and fails TLS until its app joins. Kept: the database before the 10:45 deploy
+(`/srv/yeral/backup-2026-10-25-before-592cfd2.sql.gz`), right after the 08:42 one (`backup-2026-10-25-after-07952fd.sql.gz`;
+the one before it was skipped) and before the 22.10 one
 (`backup-2026-10-23-before-5c07be4.sql.gz`; every backup there is mode 600), the site file before 25.10
 (`/srv/edge/sites-yeral.caddy.before-07952fd`) and the edge config (`/srv/edge/Caddyfile.before-2026-10-23`). Firewall SSH/80/443, fail2ban, keys only;
 no backups to R2 (P6), and the `deploy` user has no key yet (P2 step 7).
