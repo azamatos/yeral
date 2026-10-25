@@ -4,7 +4,7 @@ import type { Api } from '@yeral/sdk'
 import { brand } from '@yeral/ui/brand'
 import { useEffect, type ReactNode } from 'react'
 import { ErrorPage } from '@/pages/error'
-import { NotFoundPage } from '@/pages/not-found'
+import { isNotOpen, NotFoundPage } from '@/pages/not-found'
 import { siteLocale } from '@/shared/i18n'
 import { AppProviders } from '../entrypoint/app-providers'
 import { knowVisitor } from '../entrypoint/site-api'
@@ -32,7 +32,8 @@ export const Route = createRootRouteWithContext<Api>()({
   }),
   shellComponent: RootDocument,
   component: Outlet,
-  notFoundComponent: NotFoundPage,
+  // a business still in review answers 404 too, with its own friendly words (book C-10)
+  notFoundComponent: ({ data }) => <NotFoundPage notOpen={isNotOpen(data)} />,
   errorComponent: RootError,
 })
 

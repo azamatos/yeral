@@ -124,5 +124,85 @@
     "contact": "Contact {brand}",
     "call": "Call",
     "write": "Write on Telegram"
+  },
+  "business": {
+    "crumbs": "You are here",
+    "reviews": "{count, plural, one {# review} other {# reviews}}",
+    "noReviews": "No reviews yet",
+    "openUntil": "Open now · until {time}",
+    "opensToday": "Closed · opens at {time}",
+    "opensTomorrow": "Closed · opens tomorrow at {time}",
+    "opensOn": "Closed · opens {day} at {time}",
+    "closed": "Closed",
+    "away": "{distance} from you",
+    "newAddress": "New address",
+    "approximate": "Approximate area: the exact address comes with a confirmed booking.",
+    "example": "Example",
+    "exampleInstant": "This isn't a real business. It's here so you can try Ýeral: bookings are confirmed at once, and nobody waits for you.",
+    "exampleManual": "This isn't a real business. It's here so you can try Ýeral.",
+    "preview": {
+      "pending": "<b>Your page is in review</b> — only you and your team can see it. After the review it opens in search and at your link.",
+      "rejected": "<b>Your page wasn't approved:</b> {reason}",
+      "rejectedNoReason": "<b>Your page wasn't approved.</b> Fix it in Ýeral Business and send it again.",
+      "hidden": "<b>Ýeral has hidden your page:</b> {reason} Clients can't find or book you.",
+      "hiddenNoReason": "<b>Ýeral has hidden your page.</b> Clients can't find or book you."
+    },
+    "favourite": {
+      "add": "Add to favourites",
+      "saved": "In your favourites",
+      "failed": "Couldn't change your favourites. Try again."
+    },
+    "share": {
+      "label": "Share",
+      "copied": "Link copied"
+    },
+    "photoCount": "Photo {n} of {total}",
+    "services": {
+      "title": "Services",
+      "groups": "Service groups",
+      "all": "All",
+      "select": "Select",
+      "selected": "Selected",
+      "selectLabel": "Select: {name}",
+      "selectedLabel": "Selected: {name}",
+      "none": "No services yet."
+    },
+    "card": {
+      "label": "Booking",
+      "nextFree": "Next free time",
+      "noFree": "No free times soon",
+      "book": "Book",
+      "today": "Today {hours}",
+      "closedToday": "Closed today",
+      "confirmsWithin": "Usually confirms within {time}",
+      "confirmsByHand": "The business confirms each booking",
+      "confirmsAtOnce": "Bookings are confirmed at once",
+      "chosen": "Selected services",
+      "count": "{count, plural, one {# service} other {# services}}",
+      "remove": "Remove: {name}",
+      "total": "Total",
+      "continue": "Continue",
+      "clear": "Clear",
+      "payAtPlace": "Pay at the place",
+      "call": "Call",
+      "callLabel": "Call {phone}"
+    },
+    "restricted": {
+      "title": "You can book this business by phone",
+      "lead": "The business asked to arrange bookings with you by phone."
+    },
+    "paused": {
+      "title": "This place isn't taking online bookings right now",
+      "lead": "You can book by phone."
+    },
+    "notOpen": {
+      "title": "This page hasn't opened yet",
+      "lead": "The business just joined Ýeral and is being checked. It usually takes 24 hours."
+    },
+    "booking": {
+      "title": "Booking",
+      "lead": "Booking opens with the next part of the site.",
+      "back": "Back to {name}"
+    }
   }
 }

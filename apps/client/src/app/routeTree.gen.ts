@@ -12,11 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LangRouteRouteImport } from './routes/$lang/route'
 import { Route as LangSiteRouteImport } from './routes/$lang/_site'
+import { Route as BSlugRouteImport } from './routes/b/$slug'
 import { Route as LangSiteIndexRouteImport } from './routes/$lang/_site/index'
 import { Route as LangSiteAccountRouteRouteImport } from './routes/$lang/_site/account/route'
 import { Route as LangSiteLoginRouteImport } from './routes/$lang/_site/login'
 import { Route as LangSiteAccountIndexRouteImport } from './routes/$lang/_site/account/index'
 import { Route as LangSiteAccountProfileRouteImport } from './routes/$lang/_site/account/profile'
+import { Route as LangSiteBSlugRouteImport } from './routes/$lang/_site/b/$slug'
+import { Route as LangSiteBSlugBookRouteImport } from './routes/$lang/_site/b/$slug_.book'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -31,6 +34,11 @@ const LangRouteRoute = LangRouteRouteImport.update({
 const LangSiteRoute = LangSiteRouteImport.update({
   id: '/_site',
   getParentRoute: () => LangRouteRoute,
+} as any)
+const BSlugRoute = BSlugRouteImport.update({
+  id: '/b/$slug',
+  path: '/b/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LangSiteIndexRoute = LangSiteIndexRouteImport.update({
   id: '/',
@@ -57,66 +65,95 @@ const LangSiteAccountProfileRoute = LangSiteAccountProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => LangSiteAccountRouteRoute,
 } as any)
+const LangSiteBSlugRoute = LangSiteBSlugRouteImport.update({
+  id: '/b/$slug',
+  path: '/b/$slug',
+  getParentRoute: () => LangSiteRoute,
+} as any)
+const LangSiteBSlugBookRoute = LangSiteBSlugBookRouteImport.update({
+  id: '/b/$slug_/book',
+  path: '/b/$slug/book',
+  getParentRoute: () => LangSiteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$lang': typeof LangRouteRouteWithChildren
+  '/b/$slug': typeof BSlugRoute
   '/$lang/account': typeof LangSiteAccountRouteRouteWithChildren
   '/$lang/login': typeof LangSiteLoginRoute
   '/$lang/': typeof LangSiteIndexRoute
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
+  '/$lang/b/$slug': typeof LangSiteBSlugRoute
   '/$lang/account/': typeof LangSiteAccountIndexRoute
+  '/$lang/b/$slug/book': typeof LangSiteBSlugBookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$lang': typeof LangSiteIndexRoute
+  '/b/$slug': typeof BSlugRoute
   '/$lang/login': typeof LangSiteLoginRoute
   '/$lang/account/profile': typeof LangSiteAccountProfileRoute
+  '/$lang/b/$slug': typeof LangSiteBSlugRoute
   '/$lang/account': typeof LangSiteAccountIndexRoute
+  '/$lang/b/$slug/book': typeof LangSiteBSlugBookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$lang': typeof LangRouteRouteWithChildren
   '/$lang/_site': typeof LangSiteRouteWithChildren
+  '/b/$slug': typeof BSlugRoute
   '/$lang/_site/account': typeof LangSiteAccountRouteRouteWithChildren
   '/$lang/_site/login': typeof LangSiteLoginRoute
   '/$lang/_site/': typeof LangSiteIndexRoute
   '/$lang/_site/account/profile': typeof LangSiteAccountProfileRoute
+  '/$lang/_site/b/$slug': typeof LangSiteBSlugRoute
   '/$lang/_site/account/': typeof LangSiteAccountIndexRoute
+  '/$lang/_site/b/$slug_/book': typeof LangSiteBSlugBookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/$lang'
+    | '/b/$slug'
     | '/$lang/account'
     | '/$lang/login'
     | '/$lang/'
     | '/$lang/account/profile'
+    | '/$lang/b/$slug'
     | '/$lang/account/'
+    | '/$lang/b/$slug/book'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$lang'
+    | '/b/$slug'
     | '/$lang/login'
     | '/$lang/account/profile'
+    | '/$lang/b/$slug'
     | '/$lang/account'
+    | '/$lang/b/$slug/book'
   id:
     | '__root__'
     | '/'
     | '/$lang'
     | '/$lang/_site'
+    | '/b/$slug'
     | '/$lang/_site/account'
     | '/$lang/_site/login'
     | '/$lang/_site/'
     | '/$lang/_site/account/profile'
+    | '/$lang/_site/b/$slug'
     | '/$lang/_site/account/'
+    | '/$lang/_site/b/$slug_/book'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LangRouteRoute: typeof LangRouteRouteWithChildren
+  BSlugRoute: typeof BSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -141,6 +178,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$lang'
       preLoaderRoute: typeof LangSiteRouteImport
       parentRoute: typeof LangRouteRoute
+    }
+    '/b/$slug': {
+      id: '/b/$slug'
+      path: '/b/$slug'
+      fullPath: '/b/$slug'
+      preLoaderRoute: typeof BSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/$lang/_site/': {
       id: '/$lang/_site/'
@@ -177,6 +221,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LangSiteAccountProfileRouteImport
       parentRoute: typeof LangSiteAccountRouteRoute
     }
+    '/$lang/_site/b/$slug': {
+      id: '/$lang/_site/b/$slug'
+      path: '/b/$slug'
+      fullPath: '/$lang/b/$slug'
+      preLoaderRoute: typeof LangSiteBSlugRouteImport
+      parentRoute: typeof LangSiteRoute
+    }
+    '/$lang/_site/b/$slug_/book': {
+      id: '/$lang/_site/b/$slug_/book'
+      path: '/b/$slug/book'
+      fullPath: '/$lang/b/$slug/book'
+      preLoaderRoute: typeof LangSiteBSlugBookRouteImport
+      parentRoute: typeof LangSiteRoute
+    }
   }
 }
 
@@ -197,12 +255,16 @@ interface LangSiteRouteChildren {
   LangSiteAccountRouteRoute: typeof LangSiteAccountRouteRouteWithChildren
   LangSiteLoginRoute: typeof LangSiteLoginRoute
   LangSiteIndexRoute: typeof LangSiteIndexRoute
+  LangSiteBSlugRoute: typeof LangSiteBSlugRoute
+  LangSiteBSlugBookRoute: typeof LangSiteBSlugBookRoute
 }
 
 const LangSiteRouteChildren: LangSiteRouteChildren = {
   LangSiteAccountRouteRoute: LangSiteAccountRouteRouteWithChildren,
   LangSiteLoginRoute: LangSiteLoginRoute,
   LangSiteIndexRoute: LangSiteIndexRoute,
+  LangSiteBSlugRoute: LangSiteBSlugRoute,
+  LangSiteBSlugBookRoute: LangSiteBSlugBookRoute,
 }
 
 const LangSiteRouteWithChildren = LangSiteRoute._addFileChildren(
@@ -224,6 +286,7 @@ const LangRouteRouteWithChildren = LangRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LangRouteRoute: LangRouteRouteWithChildren,
+  BSlugRoute: BSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
