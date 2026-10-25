@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { TeamMember } from '@yeral/contract/team'
 import { maskPhone } from '@yeral/domain/phone'
-import { INVITE_DAYS, inviteState } from '@yeral/domain/team'
+import { INVITE_DAYS } from '@yeral/domain/team'
 import { diffDays, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Avatar } from '@yeral/ui/avatar'
@@ -13,13 +13,14 @@ import { Modal, ModalContent, ModalDescription, ModalHeader } from '@yeral/ui/mo
 import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
-import { Ellipsis, Info } from 'lucide-react'
-import { useState } from 'react'
+import { Ellipsis, Info, UserPlus } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { useErrorText } from '@/shared/i18n'
 import { SettingsPage } from '@/widgets/settings-frame'
 import { useWorkspace } from '@/widgets/workspace-shell'
+import { inviteNow } from '../model/invite'
 import { AddMember } from './add-member'
 
 /**
@@ -50,6 +51,7 @@ function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; 
   // the invite link a send just returned, to copy (the api keeps only its hash, so it can't be read back later)
   const [link, setLink] = useState<{ name: string; url: string } | null>(null)
   const [adding, setAdding] = useState(false)
+  const addButton = useRef<HTMLButtonElement>(null)
 
   // the groups and counts come from the menu too: both, or the page waits
   if (!team.data && team.isError) throw team.error
@@ -81,7 +83,8 @@ function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; 
       lead={t('lead')}
       action={
         owner && (
-          <Button variant="primary" size="s" aria-haspopup="dialog" onClick={() => setAdding(true)}>
+          <Button ref={addButton} variant="primary" size="s" aria-haspopup="dialog" onClick={() => setAdding(true)}>
+            <UserPlus aria-hidden strokeWidth={1.75} />
             {t('add.open')}
           </Button>
         )
@@ -131,6 +134,7 @@ function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; 
           menu={menu.data}
           open={adding}
           onOpenChange={setAdding}
+          opener={addButton}
           onLink={(name, url) => setLink({ name, url })}
         />
       )}
@@ -195,8 +199,7 @@ function MemberRow({
   const former = m.status === 'removed'
   const inviteRow = m.status === 'invited'
   const [now] = useState(() => Date.now())
-  const state =
-    m.invite && inviteState({ status: m.invite.state === 'expired' ? 'pending' : m.invite.state, expiresAt: m.invite.expiresAt }, now)
+  const state = m.invite && inviteNow(m.invite, now)
   const pending = state === 'pending'
   // a specialist without the app who was sent an invite works as before until they accept
   const waiting = m.status === 'active' && pending && !m.joined

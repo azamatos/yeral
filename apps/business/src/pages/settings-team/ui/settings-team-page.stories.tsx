@@ -88,7 +88,12 @@ const team: TeamMember[] = [
     invite: invite('pending', 6),
   }),
   person('ogul', 'Ogul', 'specialist', { status: 'invited', joined: false, phone: '+99361223344', invite: invite('expired', -2) }),
-  person('ayna', 'Aýna', 'specialist', { fullName: 'Aýna Myradowa', status: 'removed', specialization: 'Hair stylist' }),
+  person('ayna', 'Aýna', 'specialist', {
+    fullName: 'Aýna Myradowa',
+    status: 'removed',
+    specialization: 'Hair stylist',
+    phone: '+99365990011',
+  }),
 ]
 const service = (id: string, name: string, durationMin: number, priceAmount: number, staffIds: string[]) => ({
   id,
@@ -282,6 +287,7 @@ export const AddMember: Story = {
       await userEvent.type(dialog.getByLabelText('Mobile number'), '65334455')
       await userEvent.type(dialog.getByLabelText('Name clients see'), 'Gülşat')
       await userEvent.type(dialog.getByLabelText(/^Specialization/), 'Nail artist')
+      await userEvent.type(dialog.getByLabelText(/^Full name/), 'Gülşat Annaýewa')
       await expect(dialog.getByText('They’ll see the invite when they sign in with +993 65 •• •• 55 · valid 7 days')).toBeVisible()
       await userEvent.click(next)
 
@@ -298,6 +304,7 @@ export const AddMember: Story = {
 
       await expect(await dialog.findByRole('button', { name: 'Services: 1: Manicure. Change' })).toBeVisible()
       await expect(dialog.getByRole('button', { name: 'Mobile number: +993 65 33 44 55. Change' })).toBeVisible()
+      await expect(dialog.getByRole('button', { name: 'Full name: Gülşat Annaýewa. Change' })).toBeVisible()
       await expect(dialog.getByText(/It works for 7 days — until/)).toBeVisible()
       await userEvent.click(dialog.getByRole('button', { name: 'Send invite' }))
 
@@ -354,6 +361,12 @@ export const AddProblems: Story = {
     await says('61223344', 'This number has an earlier invite. Resend it from its row in Team.')
     await says('65000000', 'This person is already on the team.')
     await expect(dialog.getByRole('button', { name: 'Continue' })).toBeDisabled()
+    // someone no longer on the team: invited again with the app, reactivated from their row without it
+    await userEvent.clear(phone)
+    await userEvent.type(phone, '65990011')
+    await expect(phone).not.toHaveAttribute('aria-invalid')
+    await userEvent.click(dialog.getByRole('switch', { name: 'Uses the app' }))
+    await expect(await dialog.findByText('This person was removed from the team — reactivate them in Team instead.')).toBeVisible()
     // an administrator always uses the app: no switch, the note says so
     await userEvent.selectOptions(dialog.getByLabelText('Access level'), 'admin')
     await expect(dialog.queryByRole('switch', { name: 'Uses the app' })).toBeNull()
@@ -361,12 +374,14 @@ export const AddProblems: Story = {
   },
 }
 
-/** The window on a phone. */
+/** The window on a phone; closing it puts the focus back on «Add a team member». */
 export const AddMemberPhone: Story = {
   globals: { viewport: { value: 'xs' } },
   play: async ({ canvas }) => {
     const dialog = await openAdd(canvas)
     await expect(dialog.getByLabelText('Mobile number')).toBeVisible()
+    await userEvent.click(dialog.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Add a team member' })).toHaveFocus())
   },
 }
 

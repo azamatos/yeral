@@ -3,8 +3,8 @@ import type { Menu } from '@yeral/contract/services'
 import type { TeamMember } from '@yeral/contract/team'
 import { MARKET } from '@yeral/domain/market'
 import { localized } from '@yeral/domain/model'
-import { formatPhone, maskPhone, toE164 } from '@yeral/domain/phone'
-import { INVITE_DAYS } from '@yeral/domain/team'
+import { formatPhone, isMobile, maskPhone } from '@yeral/domain/phone'
+import { INVITE_DAYS, inviteExpiresAt } from '@yeral/domain/team'
 import { today } from '@yeral/domain/time'
 import { PHONE_RULES } from '@yeral/features/auth-by-phone'
 import { useFmt } from '@yeral/i18n'
@@ -19,19 +19,21 @@ import { Switch } from '@yeral/ui/switch'
 import { toast } from '@yeral/ui/toast'
 import { cn } from '@yeral/ui/cn'
 import { Check, Info, Lock } from 'lucide-react'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type RefObject } from 'react'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
 import { TEAM_NAME_MAX } from '@/shared/config'
 import { useErrorText } from '@/shared/i18n'
 import { emptyInvite, inviteInput, phoneProblem, servicesDone, usesApp, whoDone, type InviteForm } from '../model/invite'
 
+const FULL_NAME_MAX = 80
 const SPECIALIZATION_MAX = 60
 const STEPS = ['who', 'services', 'review'] as const
 
 /**
- * «Add a team member» (B-Team `inv`, design §8 «Topar», §28.4 Team; owner only): 1 Who (the mobile number, the name
- * clients see, the specialization, the access level, a specialist's «Uses the app»), 2 Services (in the menu's groups,
+ * «Add a team member» (B-Team `inv`, design §8 «Topar», §28.4 Team, book B-44; owner only): 1 Who (the mobile number,
+ * the name clients see, the full name the team sees, the specialization, the access level, a specialist's «Uses the
+ * app»), 2 Services (in the menu's groups,
  * «All» per group), 3 Review (each row opens its step again, the note on what happens next), then Send invite, or Add
  * to the team for a specialist without the app (bookable at once, never signs in). A sent invite's link comes back in
  * the toast's «Copy invite link».
@@ -42,6 +44,7 @@ export function AddMember({
   menu,
   open,
   onOpenChange,
+  opener,
   onLink,
 }: {
   slug: string
@@ -49,15 +52,36 @@ export function AddMember({
   menu: Menu
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** The button that opened it: the focus goes back to it (it isn't a Radix trigger). */
+  opener: RefObject<HTMLButtonElement | null>
   onLink: (name: string, url: string) => void
 }) {
   const t = useTranslations('settings.team.add')
+  // nothing closes it while a send runs: the answer, or its error, needs the form
+  const [busy, setBusy] = useState(false)
   return (
-    <Modal open={open} onOpenChange={onOpenChange}>
+    <Modal open={open} onOpenChange={(next) => (next || !busy) && onOpenChange(next)}>
       {open && (
-        <ModalContent size={560}>
+        <ModalContent
+          size={560}
+          aria-describedby={undefined}
+          onCloseAutoFocus={(e) => {
+            e.preventDefault()
+            opener.current?.focus()
+          }}
+        >
           <ModalHeader title={t('title')} closeLabel={t('close')} />
-          <AddMemberSteps slug={slug} people={people} menu={menu} onDone={() => onOpenChange(false)} onLink={onLink} />
+          <AddMemberSteps
+            slug={slug}
+            people={people}
+            menu={menu}
+            onBusy={setBusy}
+            onDone={() => {
+              setBusy(false)
+              onOpenChange(false)
+            }}
+            onLink={onLink}
+          />
         </ModalContent>
       )}
     </Modal>
@@ -68,16 +92,20 @@ function AddMemberSteps({
   slug,
   people,
   menu,
+  onBusy,
   onDone,
   onLink,
 }: {
   slug: string
   people: TeamMember[]
   menu: Menu
+  onBusy: (busy: boolean) => void
   onDone: () => void
   onLink: (name: string, url: string) => void
 }) {
   const t = useTranslations('settings.team.add')
+  // the same words as the wizard's team step (B-Onboarding and B-Team share them)
+  const words = useTranslations('setup.team')
   const levels = useTranslations('levels')
   const format = useFormatter()
   const fmt = useFmt()
@@ -91,24 +119,29 @@ function AddMemberSteps({
   const [step, setStep] = useState(0)
   const [now] = useState(() => Date.now())
   const body = useRef<HTMLDivElement>(null)
-  const opened = useRef(false)
+  const moved = useRef(false)
   const change = (patch: Partial<InviteForm>) => setForm((f) => ({ ...f, ...patch }))
+  const goTo = (next: number) => {
+    moved.current = true
+    setStep(next)
+  }
 
-  // a new step is announced from its start (not on opening: the dialog takes the focus then)
+  // a step moved to is announced from its start (opening leaves the focus to the dialog)
   useEffect(() => {
-    if (opened.current) body.current?.focus()
-    opened.current = true
+    if (!moved.current) return
+    moved.current = false
+    body.current?.focus()
   }, [step])
 
-  const problem = phoneProblem(form.phone, people, now)
+  const app = usesApp(form)
+  const problem = phoneProblem(form.phone, app, people, now)
   const services = menu.groups.flatMap((g) => g.services)
   const ok = [whoDone(form, problem), servicesDone(form, services.length > 0), true]
-  const app = usesApp(form)
   const specialist = form.level === 'specialist'
   const name = form.name.trim()
-  const complete = form.phone.length === MARKET.phone.length
-  const masked = complete ? maskPhone(form.phone) : t('thisNumber')
-  const until = fmt.dayMonth(today(now + INVITE_DAYS * 86_400_000))
+  const mobile = isMobile(form.phone)
+  const masked = mobile ? maskPhone(form.phone) : t('thisNumber')
+  const until = fmt.dayMonth(today(inviteExpiresAt(now)))
   const busy = invite.isPending || phoneOnly.isPending
   const picked = services.filter((s) => form.serviceIds.includes(s.id))
 
@@ -119,12 +152,13 @@ function AddMemberSteps({
       : t('appOff')
   const phoneError =
     problem === 'notMobile'
-      ? t('problems.notMobile', { starts: format.list(MARKET.phone.mobilePrefixes, { type: 'disjunction' }) })
+      ? words('notMobile', { starts: format.list(MARKET.phone.mobilePrefixes, { type: 'disjunction' }) })
       : problem && t(`problems.${problem}`)
 
   const send = async () => {
-    if (busy) return
+    if (busy || !ok[0] || !ok[1]) return
     const input = inviteInput(form, locale)
+    onBusy(true)
     try {
       if (app) {
         const sent = await invite.mutateAsync(input)
@@ -137,13 +171,15 @@ function AddMemberSteps({
       }
       onDone()
     } catch (error) {
+      onBusy(false)
       toast(errorText(error))
     }
   }
 
   const summary = [
-    { key: t('summary.phone'), value: complete ? formatPhone(toE164(form.phone)) : '', step: 0 },
+    { key: t('summary.phone'), value: mobile ? formatPhone(form.phone) : '', step: 0 },
     { key: t('summary.name'), value: name, step: 0 },
+    { key: t('summary.fullName'), value: form.fullName.trim() || t('dash'), step: 0 },
     { key: t('summary.specialization'), value: form.specialization.trim() || t('dash'), step: 0 },
     { key: t('summary.level'), value: levels(form.level), step: 0 },
     { key: t('summary.usesApp'), value: app ? t('yes') : t('no'), step: 0 },
@@ -169,7 +205,7 @@ function AddMemberSteps({
                 type="button"
                 disabled={!done || busy}
                 aria-current={cur ? 'step' : undefined}
-                onClick={() => setStep(i)}
+                onClick={() => goTo(i)}
                 className={cn(
                   'group inline-flex min-h-8 items-center gap-2 rounded-input border-0 bg-transparent py-0 pr-1.5 pl-0.5 text-left text-small font-medium text-n-500',
                   'focus-visible:shadow-focus focus-visible:outline-none disabled:cursor-default',
@@ -197,7 +233,7 @@ function AddMemberSteps({
       <div ref={body} tabIndex={-1} className="flex flex-col gap-4 outline-none">
         {step === 0 && (
           <>
-            <Field label={t('phone')} hint={t('phoneHint')} error={phoneError}>
+            <Field label={t('phone')} hint={words('phoneNeeded')} error={phoneError}>
               <PhoneInput {...PHONE_RULES} value={form.phone} onValueChange={(phone) => change({ phone })} />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -218,6 +254,14 @@ function AddMemberSteps({
                 />
               </Field>
             </div>
+            <Field label={t('fullName')} optional={t('optional')} hint={t('fullNameHint')}>
+              <Input
+                value={form.fullName}
+                maxLength={FULL_NAME_MAX}
+                placeholder={t('fullNamePlaceholder')}
+                onChange={(e) => change({ fullName: e.target.value })}
+              />
+            </Field>
             <Field label={t('level')}>
               <Select value={form.level} onChange={(e) => change({ level: e.target.value === 'admin' ? 'admin' : 'specialist' })}>
                 <option value="specialist">{levels('specialist')}</option>
@@ -226,7 +270,7 @@ function AddMemberSteps({
             </Field>
             <p className="m-0 -mt-2 flex items-start gap-2 rounded-s bg-group px-3 py-2.5 text-dense text-n-600">
               <Info aria-hidden className="mt-px size-4 flex-none" strokeWidth={1.75} />
-              {t(`levelMeans.${form.level}`)}
+              {words(form.level === 'admin' ? 'adminMeans' : 'specialistMeans')}
             </p>
             {specialist ? (
               <div className="flex min-h-15 items-center justify-between gap-4 py-1.5">
@@ -296,7 +340,7 @@ function AddMemberSteps({
                   type="button"
                   disabled={busy}
                   aria-label={t('changeAria', { key: r.key, value: r.value })}
-                  onClick={() => setStep(r.step)}
+                  onClick={() => goTo(r.step)}
                   className="grid w-full cursor-pointer grid-cols-[96px_minmax(0,1fr)_auto] items-start gap-3 border-0 border-b border-n-200 bg-transparent px-2 py-3 text-left text-small text-n-900 hover:bg-n-50 focus-visible:shadow-focus-inset focus-visible:outline-none sm:grid-cols-[120px_minmax(0,1fr)_auto]"
                 >
                   <span className="text-n-600">{r.key}</span>
@@ -319,12 +363,12 @@ function AddMemberSteps({
             {t('cancel')}
           </Button>
         ) : (
-          <Button variant="secondary" disabled={busy} onClick={() => setStep(step - 1)}>
+          <Button variant="secondary" disabled={busy} onClick={() => goTo(step - 1)}>
             {t('back')}
           </Button>
         )}
         {step < 2 ? (
-          <Button variant="primary" disabled={!ok[step]} onClick={() => setStep(step + 1)}>
+          <Button variant="primary" disabled={!ok[step]} onClick={() => goTo(step + 1)}>
             {t('continue')}
           </Button>
         ) : (

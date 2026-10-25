@@ -497,10 +497,11 @@ export function createSdk(client: Client, queryClient: QueryClient) {
 
   /** The business team (ADR 0025): the switcher, invites, and the team the owner manages. */
   const w = v1.w[':slug']
-  // the page shows the team's specialists with their pictures; the menu names who does each service (an invite with
-  // services, someone removed)
+  // the page shows the team's specialists with their pictures
   const teamChanged = (slug?: string) =>
-    invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug), keys.businessAll(slug), keys.menu(slug)] : []))
+    invalidate(keys.workspaces(), ...(slug ? [keys.team(slug), keys.calendar(slug), keys.businessAll(slug)] : []))
+  // and when someone joins with services, or leaves them, the menu's «who does it» changes too
+  const staffChanged = (slug: string) => Promise.all([teamChanged(slug), invalidate(keys.menu(slug))])
   /** The person isn't on that team any more: nothing of it stays (every workspace key names it second), nor what they saw as its team. */
   const left = (slug: string) => {
     forgetPerson(inWorkspace(slug))
@@ -553,12 +554,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     sendInvite: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof inviteInputSchema>) => call(w.team.invites.$post({ param: { slug }, json })),
-        onSuccess: () => teamChanged(slug),
+        onSuccess: () => staffChanged(slug),
       }),
     addPhoneOnly: (slug: string) =>
       mutationOptions({
         mutationFn: (json: z.input<typeof phoneOnlyInputSchema>) => call(w.team['phone-only'].$post({ param: { slug }, json })),
-        onSuccess: () => teamChanged(slug),
+        onSuccess: () => staffChanged(slug),
       }),
     /** Send again, or switch the app on for a specialist without it. */
     resendInvite: (slug: string) =>
@@ -598,7 +599,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         mutationFn: ({ staffId, ...json }: { staffId: string } & z.input<typeof removeMemberSchema>) =>
           call(w.team[':staffId'].remove.$post({ param: { slug, staffId }, json })),
         // their bookings moved or cancelled, and the free times without them
-        onSuccess: () => Promise.all([teamChanged(slug), booked(slug)]),
+        onSuccess: () => Promise.all([staffChanged(slug), booked(slug)]),
       }),
     /** A team member's shift, breaks and days off (book B-47). */
     schedule: (slug: string, staffId: string) =>
@@ -617,7 +618,7 @@ export function createSdk(client: Client, queryClient: QueryClient) {
     reactivate: (slug: string) =>
       mutationOptions({
         mutationFn: (staffId: string) => call(w.team[':staffId'].reactivate.$post({ param: { slug, staffId } })),
-        onSuccess: () => teamChanged(slug),
+        onSuccess: () => staffChanged(slug),
       }),
     /** What leaving leaves for the owner: the person's bookings ahead and waiting requests here (B-15's confirm). */
     leaveCounts: (slug: string) =>

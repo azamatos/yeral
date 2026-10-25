@@ -1083,9 +1083,7 @@
           "review": "Review"
         },
         "phone": "Mobile number",
-        "phoneHint": "Required for everyone. With the app on, it’s how they sign in.",
         "problems": {
-          "notMobile": "Mobile numbers only — enter a number starting with {starts}.",
           "onTeam": "This person is already on the team.",
           "openInvite": "There’s already an open invite for this number.",
           "earlierInvite": "This number has an earlier invite. Resend it from its row in Team.",
@@ -1096,11 +1094,10 @@
         "specialization": "Specialization",
         "optional": "(optional)",
         "specializationPlaceholder": "For example: stylist",
+        "fullName": "Full name",
+        "fullNamePlaceholder": "For example: Gülnar Öwezowa",
+        "fullNameHint": "Only your team sees it.",
         "level": "Access level",
-        "levelMeans": {
-          "specialist": "Sees their own calendar, bookings and clients; answers their own requests.",
-          "admin": "Manages the whole calendar and all clients; doesn’t see revenue."
-        },
         "usesApp": "Uses the app",
         "thisNumber": "this number",
         "appOn": "They’ll see the invite when they sign in with {phone} · valid {days, plural, one {# day} other {# days}}",
@@ -1119,6 +1116,7 @@
         "summary": {
           "phone": "Mobile number",
           "name": "Name",
+          "fullName": "Full name",
           "specialization": "Specialization",
           "level": "Access level",
           "usesApp": "Uses the app",
