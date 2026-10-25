@@ -1576,6 +1576,10 @@ flowchart LR
 
 - Before verification the link and QR exist but visitors see "Bu sahypa entek açylmady" (B-11).
 - Page addresses must never start with `yr-`, which is reserved for booking codes (ROUND6-ANSWERS notes).
+- *Change link* (owner's request, 25.10.2026): the owner or an administrator writes a new address, checked as it's
+  typed (3–48 of a–z, 0–9 and single hyphens, not a reserved word, not another business's now or before; a free one
+  like it is offered); a short note says old links and printed QR codes keep working. The old address keeps opening
+  the page, which moves to the new one, and stays the business's alone (chapter 9, 25.10.2026).
 
 **Status** — Design: drawn (B-Settings · `pane=link`) · Code: built for the public page at the slug (verified businesses only); the settings pane is not built.
 

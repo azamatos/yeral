@@ -12,8 +12,8 @@ import { MARKET } from '@yeral/domain/market'
 import type { Locale, Localized } from '@yeral/domain/model'
 import type { Actor } from '@yeral/domain/permissions'
 import { serviceErrors } from '@yeral/domain/services'
-import { cutAtWord, DEMO_SLUG, SLUG_MAX, slugFrom, type SetupNeed, type SetupStep } from '@yeral/domain/setup'
-import { and, asc, eq, inArray, isNotNull, like, ne, or } from 'drizzle-orm'
+import { slugFrom, type SetupNeed, type SetupStep } from '@yeral/domain/setup'
+import { and, asc, eq, inArray, isNotNull, ne } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
 import { bookingRules, businesses, categories, cities, services, staff, users } from '../../db/schema'
@@ -24,6 +24,7 @@ import { pgCode } from '../bookings/repo'
 import { logoOf, text } from '../catalog/map'
 import { accountName } from '../me/me'
 import { setMenu, type PlannedGroup } from '../menu/service'
+import { addressTaken, freeAddress, takenNow } from '../settings/page-address'
 import { issueInvite, members, setServices, teamChanged } from '../team/service'
 
 type Start = z.infer<typeof setupStartSchema>
@@ -77,35 +78,12 @@ export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Pro
   }
 }
 
-/** The numbers a page address may take after its name ("glow-studio-2"). */
-const NUMBERED_MAX = 999
-
 /**
- * A page address no business has yet: the name's, then with a number after it. The name part is cut to leave the
- * number room, at a word where it can, and every numbered address is looked up under that same part.
- */
-async function freeSlug(db: Queryable, name: string): Promise<string> {
-  const base = slugFrom(name)
-  const stem = cutAtWord(base, SLUG_MAX - String(NUMBERED_MAX).length - 1)
-  const taken = new Set([
-    // the demo workspace's, made by the jobs whenever it's missing (book F-242)
-    DEMO_SLUG,
-    ...(
-      await db
-        .select({ slug: businesses.slug })
-        .from(businesses)
-        .where(or(eq(businesses.slug, base), like(businesses.slug, `${stem}-%`)))
-    ).map((r) => r.slug),
-  ])
-  if (!taken.has(base)) return base
-  for (let n = 2; n <= NUMBERED_MAX; n++) if (!taken.has(`${stem}-${n}`)) return `${stem}-${n}`
-  throw new Error(`no free page address for ${base}`)
-}
-
-/**
- * Step 2 (B-03): the draft, with the name and category, the market's main city's centre until the address step puts
- * it on the map, the owner's number as its phone, every day closed until the hours step, the booking rules' defaults;
- * the person its owner, on the team and bookable (Settings → Team changes it; the team step adds the others).
+ * Step 2 (B-03): the draft, with the name and category, the page address the owner wrote (`taken` when another
+ * business has it or had it) or one made from the name (with a number when that's taken; chapter 9, 25.10.2026), the
+ * market's main city's centre until the address step puts it on the map, the owner's number as its phone, every day
+ * closed until the hours step, the booking rules' defaults; the person its owner, on the team and bookable (Settings →
+ * Team changes it; the team step adds the others).
  */
 export async function startSetup(deps: Deps, user: User, input: Start): Promise<{ slug: string }> {
   const { db } = deps
@@ -127,7 +105,8 @@ export async function startSetup(deps: Deps, user: User, input: Start): Promise<
         await tx.select({ id: users.id }).from(users).where(eq(users.id, user.id)).for('no key update')
         const ongoing = await draftOf(tx, user.id)
         if (ongoing) throw new ApiError('setup_in_progress', { slug: ongoing.slug })
-        const slug = await freeSlug(tx, input.name)
+        if (input.slug && (await addressTaken(tx, input.slug, null))) throw invalid({ path: ['slug'], code: 'taken' })
+        const slug = input.slug ?? (await freeAddress(tx, slugFrom(input.name)))
         const [b] = await tx
           .insert(businesses)
           .values({
@@ -160,7 +139,9 @@ export async function startSetup(deps: Deps, user: User, input: Start): Promise<
         return { slug }
       })
     } catch (e) {
-      // another business took the address at the same moment: the next free one
+      // the address the owner wrote, taken at the same moment: as one taken before
+      if (input.slug && takenNow(e)) throw invalid({ path: ['slug'], code: 'taken' })
+      // another business took the made-up address at the same moment: the next free one
       if (pgCode(e) !== '23505' || attempt >= 3) throw e
     }
   }

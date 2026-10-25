@@ -6,11 +6,15 @@
 import { NAME_MAX } from '@yeral/domain/names'
 import { SETUP_STEPS } from '@yeral/domain/setup'
 import { z } from 'zod'
-import { cityRefSchema, idSchema, mobileInputSchema, photoSchema, slugSchema } from './common'
+import { cityRefSchema, idSchema, mobileInputSchema, pageAddressSchema, photoSchema, slugSchema } from './common'
 import { groupInputSchema, serviceInputSchema } from './services'
 import { assignableLevelSchema, inviteInputSchema } from './team'
 
-/** Step 2, "Biznes": the name and a category that takes appointments (tables and classes come later, book Q-030). */
+/**
+ * Step 2, "Biznes": the name and a category that takes appointments (tables and classes come later, book Q-030), and
+ * the page address when the owner wrote one (`taken` when another business has it); without it one is made from the
+ * name, with a number when that's taken.
+ */
 export const setupStartSchema = z
   .object({
     name: z
@@ -19,6 +23,7 @@ export const setupStartSchema = z
       .min(1)
       .max(NAME_MAX * 2),
     categoryId: z.string().max(40),
+    slug: pageAddressSchema.optional(),
   })
   .strict()
   .meta({ id: 'SetupStart' })

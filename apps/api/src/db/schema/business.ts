@@ -488,3 +488,20 @@ export const verificationHistory = pgTable('verification_history', {
   reason: text(),
   at: ts().notNull().defaultNow(),
 })
+
+/**
+ * A business's earlier page addresses (chapter 9, 25.10.2026): each still opens its page, which names the address it
+ * has now, and stays that business's alone, so old links and printed QR codes keep working and nobody else takes them.
+ * Taken back as the address, it leaves this list.
+ */
+export const businessOldSlugs = pgTable(
+  'business_old_slugs',
+  {
+    slug: text().primaryKey(),
+    businessId: uuid()
+      .notNull()
+      .references(() => businesses.id, { onDelete: 'cascade' }),
+    retiredAt: ts().notNull().defaultNow(),
+  },
+  (t) => [index().on(t.businessId)],
+)

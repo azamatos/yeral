@@ -9,6 +9,7 @@ import { BOOKING_TYPES, LOCALES, PRICE_TYPES } from '@yeral/domain/model'
 import { E164, isMobile, isPhone, toE164 } from '@yeral/domain/phone'
 import { isYmd } from '@yeral/domain/time'
 import { PHOTO_MAX_BYTES } from '@yeral/domain/photos'
+import { slugProblem } from '@yeral/domain/setup'
 import { z } from 'zod'
 
 export const ymdSchema = z.string().refine(isYmd, 'Expected a date YYYY-MM-DD').meta({ example: '2026-10-15' })
@@ -46,6 +47,14 @@ export const slugSchema = z
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)
   // `/b/` also opens booking codes (`YR-48213`, book chapter 5)
   .refine((s) => !s.startsWith('yr-'), 'Never starts with "yr-"')
+  .meta({ example: 'glow-studio' })
+/**
+ * A page address a business writes itself (chapter 9, 25.10.2026): 3–48 of a–z, 0–9 and single hyphens inside, not a
+ * reserved word (`slugProblem`); whether another business has it is the api's to say.
+ */
+export const pageAddressSchema = z
+  .string()
+  .refine((s) => slugProblem(s) === null, 'Expected a page address: 3–48 of a–z, 0–9 and single hyphens, not a reserved word')
   .meta({ example: 'glow-studio' })
 export const bookingCodeSchema = z.string().refine(isBookingCode, 'Expected a booking code YR-12345').meta({ example: 'YR-48213' })
 /** Any way people type a number of the market in; E.164 out (`+99365123456`). */

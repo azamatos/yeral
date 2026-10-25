@@ -488,7 +488,11 @@ export async function seedExamples(db: Db, opts: { now: number; phone: string })
       examplePhone: opts.phone,
       phone: (p) => p,
     }
-    const there = new Set((await tx.select({ slug: t.businesses.slug }).from(t.businesses)).map((b) => b.slug))
+    // an address a business has, or had (its old links keep opening it, chapter 9 25.10.2026), isn't an example's
+    const there = new Set([
+      ...(await tx.select({ slug: t.businesses.slug }).from(t.businesses)).map((b) => b.slug),
+      ...(await tx.select({ slug: t.businessOldSlugs.slug }).from(t.businessOldSlugs)).map((b) => b.slug),
+    ])
     let added = 0
     for (const def of BUSINESSES)
       if (def.type === 'appointment' && !there.has(def.slug)) {

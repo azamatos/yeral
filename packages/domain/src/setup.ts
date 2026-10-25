@@ -25,6 +25,67 @@ export const SLUG_MAX = 48
 /** The business app's demo workspace's address (`/w/demo`, book F-242): no business gets it, "Demo" is `demo-2`. */
 export const DEMO_SLUG = 'demo'
 
+/** A page address a business writes itself: 3 to `SLUG_MAX` characters (chapter 9, 25.10.2026). */
+export const SLUG_MIN = 3
+
+/**
+ * Words no business takes as its page address (chapter 9, 25.10.2026): Ýeral's own, its apps' and paths' words, and
+ * words a visitor would take for Ýeral speaking. A business named so gets the word with a number ("support-2").
+ */
+export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
+  'about',
+  'account',
+  'admin',
+  'administrator',
+  'api',
+  'app',
+  'b',
+  'book',
+  'booking',
+  'bookings',
+  'business',
+  'businesses',
+  'c',
+  'cms',
+  'contact',
+  DEMO_SLUG,
+  'help',
+  'home',
+  'login',
+  'logout',
+  'me',
+  'new',
+  'official',
+  'privacy',
+  'search',
+  'settings',
+  'setup',
+  'signin',
+  'signup',
+  'staff',
+  'support',
+  'system',
+  'team',
+  'terms',
+  'w',
+  'www',
+  'yeral',
+])
+
+/**
+ * Why a page address a business writes can't be had before anyone looks it up (chapter 9, 25.10.2026): too short,
+ * too long, other characters than a–z, 0–9 and single hyphens inside, or a reserved word (a booking code's `yr-` start
+ * too); null when it may be had unless another business has it.
+ */
+export function slugProblem(slug: string): 'short' | 'long' | 'chars' | 'reserved' | null {
+  if (slug.length < SLUG_MIN) return 'short'
+  if (slug.length > SLUG_MAX) return 'long'
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return 'chars'
+  // `/b/` also opens booking codes (`YR-48213`, book chapter 5)
+  if (RESERVED_SLUGS.has(slug) || slug.startsWith('yr-')) return 'reserved'
+  return null
+}
+
 const LETTERS: Record<string, string> = {
   // Turkmen letters a page address writes in plain Latin
   ä: 'a',

@@ -68,6 +68,8 @@ import type {
   businessProfileUpdateSchema,
   internalStatusInputSchema,
   internalStatusUpdateSchema,
+  pageAddressCheckQuerySchema,
+  pageAddressInputSchema,
 } from '@yeral/contract/settings'
 import type {
   inviteInputSchema,
@@ -679,6 +681,32 @@ export function createSdk(client: Client, queryClient: QueryClient) {
         staleTime: 60 * 60_000,
         // the next pause in the typing asks again; unavailable means the pin by hand now, not after retries
         retry: false,
+      }),
+    /**
+     * Whether a page address may be had as it's typed (chapter 9, 25.10.2026): its problem, `taken` when another business
+     * has or had it, and a free one like it; `business` is the asker's workspace, whose own addresses are free to it.
+     * Asked after a pause in the typing.
+     */
+    pageAddressCheck: (params: z.input<typeof pageAddressCheckQuerySchema>) =>
+      queryOptions({
+        queryKey: keys.pageAddress(params),
+        queryFn: ({ signal }) => call(v1['page-address'].$get({ query: params }, abortWith(signal))),
+        staleTime: 30_000,
+        retry: false,
+      }),
+    /**
+     * A new page address (`taken` on `slug` when another business has or had it): the workspace's pages move to it, so
+     * the app goes there; old links and printed QR codes keep opening the page.
+     */
+    setPageAddress: (slug: string) =>
+      mutationOptions({
+        mutationFn: (json: z.input<typeof pageAddressInputSchema>) => call(w.settings['page-address'].$put({ param: { slug }, json })),
+        onSuccess: (moved) => {
+          // the old address's answers nothing on screen still reads go (what's on screen goes once the app moves)
+          if (moved.slug !== slug)
+            queryClient.removeQueries({ predicate: (q) => inWorkspace(slug)(q.queryKey) && q.getObserversCount() === 0 })
+          return invalidate(keys.workspaces(), keys.setup(), keys.pageAddressAll())
+        },
       }),
     /** The logo (book B-37): square; the app crops and shrinks it first. The switcher and invite cards show it. */
     setLogo: (slug: string) =>

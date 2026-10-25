@@ -53,6 +53,9 @@ export const keys = {
   schedule: (slug: string, staffId: string) => ['team', slug, staffId, 'schedule'] as const,
   /** Addresses to pick (ADR 0027): not under the settings, whose every change would ask the geocoder again. */
   addressSearch: (slug: string, params: Record<string, unknown>) => ['address-search', slug, params] as const,
+  /** A page address's check as it's typed (chapter 9, 25.10.2026), asked again after any address changes. */
+  pageAddress: (params: Record<string, unknown>) => ['page-address', params] as const,
+  pageAddressAll: () => ['page-address'] as const,
   // business settings (book B-37–B-43): every one of a workspace under its prefix
   settings: (slug: string) => ['settings', slug] as const,
   rules: (slug: string) => ['settings', slug, 'rules'] as const,

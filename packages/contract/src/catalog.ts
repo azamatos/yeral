@@ -315,6 +315,10 @@ export const ratingBreakdownSchema = z.object({
 
 export const businessDetailSchema = z
   .object({
+    /**
+     * The page's address now. Asked at an earlier one (chapter 9, 25.10.2026), the answer is the page as it is and names
+     * the new address: the client site moves there with a permanent redirect.
+     */
     slug: slugSchema,
     name: z.string(),
     /** One of the first launch's example businesses (book Q-004): "Example" beside its name; it confirms at once. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cutAtWord, SLUG_MAX, slugFrom } from './setup'
+import { cutAtWord, SLUG_MAX, slugFrom, slugProblem } from './setup'
 
 describe('the page address a name gives (book B-03)', () => {
   it('plain Latin letters, digits and single dashes', () => {
@@ -23,5 +23,22 @@ describe('the page address a name gives (book B-03)', () => {
     expect(long.length).toBeLessThanOrEqual(SLUG_MAX)
     expect(cutAtWord('abcdefghij-kl', 12)).toBe('abcdefghij')
     expect(cutAtWord('ab-cdefghijklmnop', 12)).toBe('ab-cdefghijk')
+  })
+})
+
+describe('the page address a business writes (chapter 9, 25.10.2026)', () => {
+  it('3 to 48 characters of a–z, 0–9 and single hyphens inside', () => {
+    expect(slugProblem('glow-studio')).toBeNull()
+    expect(slugProblem('ab')).toBe('short')
+    expect(slugProblem('a'.repeat(SLUG_MAX))).toBeNull()
+    expect(slugProblem('a'.repeat(SLUG_MAX + 1))).toBe('long')
+    for (const bad of ['-glow', 'glow-', 'glow--studio', 'Glow', 'glow studio', 'gözel', 'glow_studio'])
+      expect(slugProblem(bad)).toBe('chars')
+  })
+  it('never a reserved word or a booking code’s start', () => {
+    for (const word of ['admin', 'api', 'login', 'setup', 'yeral', 'help', 'support', 'demo', 'yr-48213'])
+      expect(slugProblem(word)).toBe('reserved')
+    expect(slugProblem('support-2')).toBeNull()
+    expect(slugProblem('yrma')).toBeNull()
   })
 })
