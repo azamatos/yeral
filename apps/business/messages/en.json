@@ -268,7 +268,8 @@
     "prev": "Previous month",
     "next": "Next month",
     "withYear": "{date} {year}",
-    "range": "{from} – {to}"
+    "range": "{from} – {to}",
+    "sameMonth": "{from}–{to}"
   },
   "specialDays": {
     "title": "Special days",
@@ -283,9 +284,6 @@
     "delete": "Delete",
     "deleted": "{name} deleted",
     "undo": "Undo",
-    "withYear": "{date} {year}",
-    "sameMonth": "{from}–{to}",
-    "range": "{from} – {to}",
     "addTitle": "Add a special day",
     "editTitle": "Edit special day",
     "close": "Close",
@@ -296,7 +294,8 @@
     "oneDay": "One day",
     "severalDays": "Several days",
     "date": "Date",
-    "days": "Dates",
+    "from": "From",
+    "to": "To",
     "dates": {
       "past": "You can’t pick a day in the past.",
       "order": "The end can’t be before the start.",

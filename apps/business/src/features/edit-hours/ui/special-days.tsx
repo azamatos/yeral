@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { bookingsAffectedDetailsSchema, type BookingsAffectedDetails } from '@yeral/contract/errors'
 import { HOURS_STEP, type WeekdayHours } from '@yeral/contract/settings'
-import { parseYmd, today } from '@yeral/domain/time'
+import { today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { isApiError } from '@yeral/sdk'
 import { Button } from '@yeral/ui/button'
@@ -20,7 +20,7 @@ import { Calendar, CircleAlert, Ellipsis, Pencil, Plus, Trash2 } from 'lucide-re
 import { useId, useState, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
-import { useDatePickerWords, useDayName, useErrorText } from '@/shared/i18n'
+import { useDatePickerWords, useDateSpan, useDayName, useErrorText } from '@/shared/i18n'
 import {
   dateProblem,
   dayOf,
@@ -38,16 +38,8 @@ type Saved = { hours: (WeekdayHours | null)[]; specialDays: SpecialDay[] }
 
 /** «2 November 2026», «1 January» (yearly), «21–22 March», «28 December 2026 – 3 January 2027». */
 function useDates() {
-  const t = useTranslations('specialDays')
-  const fmt = useFmt()
-  const year = (d: string) => String(parseYmd(d).getUTCFullYear())
-  return (d: Pick<SpecialDay, 'from' | 'to' | 'yearly'>) => {
-    const one = (date: string) => (d.yearly ? fmt.dayMonth(date) : t('withYear', { date: fmt.dayMonth(date), year: year(date) }))
-    if (d.from === d.to) return one(d.from)
-    if (d.from.slice(0, 7) === d.to.slice(0, 7)) return t('sameMonth', { from: parseYmd(d.from).getUTCDate(), to: one(d.to) })
-    if (d.yearly || year(d.from) === year(d.to)) return t('range', { from: fmt.dayMonth(d.from), to: one(d.to) })
-    return t('range', { from: one(d.from), to: one(d.to) })
-  }
+  const span = useDateSpan()
+  return (d: Pick<SpecialDay, 'from' | 'to' | 'yearly'>) => span(d.from, d.to, { year: !d.yearly })
 }
 
 /**
@@ -237,6 +229,11 @@ function SpecialDayModal({
     setConflict(null)
   }
 
+  // the field reads a yearly day without its year
+  const words = { ...pickerWords, value: (date: string) => datesOf({ from: date, to: date, yearly: draft.yearly }) }
+  // a one-off can't start in the past, but one that has started keeps its first day
+  const earliest = draft.yearly ? undefined : original && original.from < todayDate ? original.from : todayDate
+
   // found again in the list as it is now (a refetch may have moved or dropped others)
   const others = saved.specialDays.filter((d) => !(original && sameDay(d, original)))
   const day = dayOf(draft)
@@ -309,26 +306,37 @@ function SpecialDayModal({
           />
         </div>
       </fieldset>
-      {/* the month (rule 10a: react-day-picker): one day, or a first and a last day; a one-off can't be in the past */}
+      {/* the month (rule 10a: react-day-picker) in the board's fields: one day, or From and To */}
       {draft.multi ? (
-        <Field label={t('days')} error={dates && t(`dates.${dates}`)} className="max-w-80">
-          <DatePicker
-            mode="range"
-            copy={{ ...pickerWords, range: ({ from, to }) => datesOf({ from, to, yearly: draft.yearly }) }}
-            today={todayDate}
-            min={draft.yearly ? undefined : todayDate}
-            value={draft.start && draft.end ? { from: draft.start, to: draft.end } : null}
-            onValueChange={({ from, to }) => set({ start: from, end: to })}
-          />
-        </Field>
+        <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+          <Field label={t('from')}>
+            <DatePicker
+              copy={words}
+              today={todayDate}
+              min={earliest}
+              value={draft.start || null}
+              onValueChange={(start) => start !== draft.start && set({ start })}
+            />
+          </Field>
+          <Field label={t('to')} error={dates && t(`dates.${dates}`)}>
+            <DatePicker
+              copy={words}
+              today={todayDate}
+              min={draft.start && (!earliest || draft.start > earliest) ? draft.start : earliest}
+              value={draft.end || null}
+              onValueChange={(end) => end !== draft.end && set({ end })}
+            />
+          </Field>
+        </div>
       ) : (
         <Field label={t('date')} error={dates && t(`dates.${dates}`)} className="max-w-60">
           <DatePicker
-            copy={{ ...pickerWords, value: (date) => datesOf({ from: date, to: date, yearly: draft.yearly }) }}
+            copy={words}
             today={todayDate}
-            min={draft.yearly ? undefined : todayDate}
+            min={earliest}
             value={draft.date || null}
-            onValueChange={(date) => set({ date })}
+            // the same day again changes nothing (a waiting choice over bookings stays)
+            onValueChange={(date) => date !== draft.date && set({ date })}
           />
         </Field>
       )}

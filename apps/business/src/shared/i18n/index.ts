@@ -1,5 +1,5 @@
 export { useCodeStepWords } from './code-step-words'
-export { useDatePickerWords } from './date-picker-words'
+export { useDatePickerWords, useDateSpan } from './date-picker-words'
 export { useDayName } from './day-name'
 export { useErrorText } from './error-text'
 export { I18nProvider } from './i18n-provider'

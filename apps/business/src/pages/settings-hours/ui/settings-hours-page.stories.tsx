@@ -292,12 +292,14 @@ const body = within(document.body)
 /** Picks `date` in the field's month (DatePicker), moving a month at a time to it. */
 const pickDate = async (modal: Pick<typeof body, 'getByRole'>, label: string, date: string) => {
   await userEvent.click(modal.getByRole('button', { name: new RegExp(`^${label} `) }))
-  const grid = await body.findByRole('grid')
-  for (let i = 0; i < 24 && !grid.ownerDocument.querySelector(`[data-day="${date}"]`); i++) {
-    const shown = body.getByRole('grid').querySelector('[data-day]')?.getAttribute('data-day') ?? ''
+  // a neighbouring month's days are there too, hidden and without a button
+  const day = () => body.getByRole('grid').querySelector<HTMLButtonElement>(`[data-day="${date}"]:not([data-hidden]) button`)
+  await body.findByRole('grid')
+  for (let i = 0; i < 24 && !day(); i++) {
+    const shown = body.getByRole('grid').querySelector('[data-day]:not([data-hidden])')?.getAttribute('data-day') ?? ''
     await userEvent.click(body.getByRole('button', { name: date < shown ? 'Previous month' : 'Next month' }))
   }
-  await userEvent.click(body.getByRole('grid').querySelector<HTMLButtonElement>(`[data-day="${date}"] button`)!)
+  await userEvent.click(day()!)
   await waitFor(() => expect(body.queryByRole('grid')).toBeNull())
 }
 const openAdd = async (canvas: { findByRole: (role: string, options: { name: string }) => Promise<HTMLElement> }) => {
@@ -320,24 +322,22 @@ export const AddSpecialDay: Story = {
   },
 }
 
-/** Several days: one field, its first and last day picked in the month; the field reads the range. */
+/** Several days: From and To, each picked in the month; To can't be before From. */
 export const AddSeveralDays: Story = {
   play: async ({ canvas }) => {
     const modal = await openAdd(canvas)
     await userEvent.type(modal.getByRole('textbox', { name: 'Name' }), 'Stocktake week')
     await userEvent.click(modal.getByRole('radio', { name: 'Several days' }))
-    const [from, to] = [weekdayAhead(30), weekdayAhead(32)]
-    // the first day, then the last: each in the month the picker shows (moving there first)
-    for (const date of [from, to]) {
-      if (!body.queryByRole('grid')) await userEvent.click(modal.getByRole('button', { name: /^Dates / }))
-      const grid = await body.findByRole('grid')
-      for (let i = 0; i < 24 && !grid.ownerDocument.querySelector(`[data-day="${date}"]`); i++)
-        await userEvent.click(body.getByRole('button', { name: 'Next month' }))
-      await userEvent.click(body.getByRole('grid').querySelector<HTMLButtonElement>(`[data-day="${date}"] button`)!)
-    }
-    await waitFor(() => expect(body.queryByRole('grid')).toBeNull())
-    await expect(modal.getByRole('button', { name: /^Dates \d/ })).toBeVisible()
+    const from = weekdayAhead(30)
+    await pickDate(modal, 'From', from)
+    await pickDate(modal, 'To', addDays(from, 2))
     await expect(modal.getByRole('button', { name: 'Add' })).toBeEnabled()
+    // To opens no earlier than From
+    await userEvent.click(modal.getByRole('button', { name: /^To / }))
+    await body.findByRole('grid')
+    const before = body.getByRole('grid').querySelector<HTMLButtonElement>(`[data-day="${addDays(from, -1)}"]:not([data-hidden]) button`)
+    if (before) await expect(before).toBeDisabled()
+    await userEvent.keyboard('{Escape}')
   },
 }
 
