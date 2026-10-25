@@ -25,7 +25,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {}
 export const Disabled: Story = { args: { disabled: true } }
 
-/** 48 in forms, 44 in settings rows (min 176), 40 for times (104 wide). */
+/** 48 in forms, 44 in settings rows (min 176), 40 for times (104 wide, tabular figures so a column lines up). */
 export const Sizes: Story = {
   render: () => (
     <div className="flex flex-col items-start gap-4">
@@ -33,7 +33,7 @@ export const Sizes: Story = {
         <option>1 h 30 min</option>
       </Select>
       <Select aria-label="Hold requests for" size="m" className="min-w-44">
-        <option>30 min</option>
+        <option>10 min</option>
       </Select>
       <Select aria-label="Opens" size="s" className="w-26">
         <option>09:00</option>
@@ -42,9 +42,13 @@ export const Sizes: Story = {
   ),
   play: async ({ canvas }) => {
     await expect(canvas.getByRole('combobox', { name: 'Duration' }).offsetHeight).toBe(48)
-    await expect(canvas.getByRole('combobox', { name: 'Hold requests for' }).offsetHeight).toBe(44)
+    const hold = canvas.getByRole('combobox', { name: 'Hold requests for' })
+    await expect(hold.offsetHeight).toBe(44)
+    // «10 min» in Onest's own figures: the tabular «1» would leave a gap before the «0»
+    await expect(getComputedStyle(hold).fontVariantNumeric).toBe('normal')
     const time = canvas.getByRole('combobox', { name: 'Opens' })
     await expect(time.offsetHeight).toBe(40)
     await expect(time.offsetWidth).toBe(104)
+    await expect(getComputedStyle(time).fontVariantNumeric).toBe('tabular-nums')
   },
 }
