@@ -6,7 +6,7 @@ import { DEMO_NOW, testApp } from '../../../test/app'
 import { browser } from '../../../test/client'
 import { testDatabase } from '../../../test/db'
 import type { Db } from '../../db/client'
-import { bookingRules, bookings, businesses, rateLimits, services, staff, staffServices } from '../../db/schema'
+import { bookingRules, bookings, businesses, rateLimits, reviews, services, staff, staffServices } from '../../db/schema'
 import { seed } from '../../db/seed'
 import { runDueJobs } from '../jobs/run'
 
@@ -265,5 +265,143 @@ describe('offered times', () => {
     } finally {
       await db.update(services).set({ online: true }).where(eq(services.id, haircut))
     }
+  })
+
+  describe('My bookings rows say what their drawers say (book C-24–C-31)', () => {
+    type Row = {
+      code: string
+      holdUntil: number | null
+      reschedule: unknown
+      decline: unknown
+      businessCancel: unknown
+      offers: unknown
+      offerTakenBy: string | null
+      actions: unknown
+    }
+    /** The row and the drawer of a booking: the row's actions, answer time and waiting move are the drawer's. */
+    const both = async (b: ReturnType<typeof browser>, code: string, tab: 'upcoming' | 'past' = 'upcoming') => {
+      const row = ((await b.req(`/v1/me/bookings?tab=${tab}&lang=en`)).json.items as Row[]).find((i) => i.code === code)!
+      const detail = (await b.req(`/v1/me/bookings/${code}?lang=en`)).json
+      expect(row).toBeDefined()
+      expect(row.actions).toEqual(detail.actions)
+      expect(row.holdUntil).toEqual(detail.holdUntil)
+      expect(row.reschedule).toEqual(detail.reschedule)
+      return { row, detail }
+    }
+
+    it('a waiting request: its answer time and what can be done, no decline, nothing offered', async () => {
+      const { b, code } = await request('+99365444030', 8)
+      const { row } = await both(b, code)
+      expect(row.holdUntil).toEqual(expect.any(Number))
+      expect(row).toMatchObject({ decline: null, offers: null, reschedule: null, actions: { cancel: true } })
+    })
+
+    it('a declined request: the reason, and the times offered as the drawer lists them', async () => {
+      const { b, code } = await request('+99365444031', 6, FRI)
+      const start = await aynaFree(b, 8, FRI)
+      await db
+        .update(bookings)
+        .set({
+          status: 'cancelled',
+          cancelledBy: 'business',
+          cancelledAt: new Date(t.clock.now),
+          declineReason: 'slot_busy',
+          declineText: null,
+          declineAlternatives: [{ date: FRI, start, end: start + 60, staffId: who['Aýna']! }],
+        })
+        .where(eq(bookings.code, code))
+      const { row, detail } = await both(b, code)
+      expect(row.decline).toEqual({ reason: 'slot_busy', text: null })
+      expect(row.offers).toEqual({ source: 'decline', times: detail.decline.alternatives })
+      expect((row.offers as { times: Offer[] }).times[0]?.state).toBe('free')
+    })
+
+    it('an expired request: the free times its drawer offers', async () => {
+      const { b, code } = await request('+99365444032', 1)
+      t.clock.now += 31 * MIN
+      await runDueJobs(t.deps)
+      const { row, detail } = await both(b, code)
+      expect(detail.expiredAlternatives.length).toBeGreaterThan(0)
+      expect(row.offers).toEqual({ source: 'expired', times: detail.expiredAlternatives })
+    })
+
+    it('the business’s cancel with offered times: its reason and the times; taken, the row names the new booking', async () => {
+      const { b, code } = await request('+99365444034', 2, FRI)
+      const start = await aynaFree(b, 5, FRI)
+      await db
+        .update(bookings)
+        .set({
+          status: 'cancelled',
+          cancelledBy: 'business',
+          cancelledAt: new Date(t.clock.now),
+          businessCancelReason: 'closed',
+          cancelReason: 'Stocktake',
+          declineAlternatives: [{ date: FRI, start, end: start + 60, staffId: who['Aýna']! }],
+        })
+        .where(eq(bookings.code, code))
+      const { row, detail } = await both(b, code)
+      expect(row.businessCancel).toEqual(detail.businessCancel)
+      expect(row).toMatchObject({ businessCancel: { reason: 'closed' }, offers: { source: 'cancel', times: detail.cancelOffers } })
+      const taken = await b.req(`/v1/me/bookings/${code}/accept-alternative`, { body: { source: 'cancel', index: 0 } })
+      expect(taken.status).toBeLessThan(300)
+      const after = await both(b, code, 'past')
+      expect(after.row).toMatchObject({ offers: null, offerTakenBy: taken.json.code })
+      expect(after.row.offerTakenBy).toBe(after.detail.offerTakenBy)
+    })
+
+    it('a closed business offers nothing: the request leaves the top of upcoming, its row and drawer offer nothing', async () => {
+      const { b, code } = await request('+99365444035', 3, FRI)
+      const start = await aynaFree(b, 7, FRI)
+      await db
+        .update(bookings)
+        .set({
+          status: 'cancelled',
+          cancelledBy: 'business',
+          cancelledAt: new Date(t.clock.now),
+          declineReason: 'slot_busy',
+          declineAlternatives: [{ date: FRI, start, end: start + 60, staffId: who['Aýna']! }],
+        })
+        .where(eq(bookings.code, code))
+      const [glow] = await db.select().from(businesses).where(eq(businesses.slug, 'glow-studio'))
+      await db
+        .update(businesses)
+        .set({ closedAt: new Date(t.clock.now) })
+        .where(eq(businesses.id, glow!.id))
+      try {
+        const { row, detail } = await both(b, code, 'past')
+        expect(row.offers).toBeNull()
+        expect(detail.decline.alternatives).toEqual([])
+      } finally {
+        await db.update(businesses).set({ closedAt: null }).where(eq(businesses.id, glow!.id))
+      }
+    })
+
+    it('a reviewed visit later marked a no-show keeps its review in the drawer', async () => {
+      const { b, code } = await request('+99365444036', 4, FRI)
+      const [row] = await db.select().from(bookings).where(eq(bookings.code, code))
+      await db
+        .update(bookings)
+        .set({ status: 'completed', completedAt: new Date(t.clock.now) })
+        .where(eq(bookings.id, row!.id))
+      await db
+        .insert(reviews)
+        .values({ bookingId: row!.id, businessId: row!.businessId, userId: row!.userId, authorName: 'Client C.', rating: 4 })
+      await db.update(bookings).set({ status: 'noshow' }).where(eq(bookings.id, row!.id))
+      const { detail } = await both(b, code, 'past')
+      expect(detail.review).toMatchObject({ rating: 4 })
+    })
+
+    it('a confirmed booking with a move waiting: the move, as its drawer shows it', async () => {
+      const { b, code } = await request('+99365444033', 1, FRI)
+      await db
+        .update(bookings)
+        .set({ status: 'confirmed', confirmedAt: new Date(t.clock.now) })
+        .where(eq(bookings.code, code))
+      const to = await aynaFree(b, 3, FRI)
+      expect((await b.req(`/v1/me/bookings/${code}/reschedule`, { body: { date: FRI, start: to } })).status).toBe(200)
+      const { row } = await both(b, code)
+      expect(row.reschedule).toMatchObject({ date: FRI, start: to })
+      expect(row).toMatchObject({ holdUntil: null, decline: null, offers: null })
+    })
   })
 })
