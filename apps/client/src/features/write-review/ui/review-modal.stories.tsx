@@ -26,7 +26,10 @@ const VISIT: ReviewedBooking = {
     photo: { url: '/photos/benyamin-bohlouli-e7MJLM5VGjY-unsplash.jpg', alt: 'Ak Diş' },
     phone: '+99312345670',
   },
-  what: { type: 'appointment', items: [{ service: 'Check-up', staff: 'Dr Döwlet', start: 600, end: 630 }] },
+  what: {
+    type: 'appointment',
+    items: [{ serviceId: 'akdis-checkup', service: 'Check-up', staffId: 'akdis-dowlet', staff: 'Dr Döwlet', start: 600, end: 630 }],
+  },
   date: addDays(today(), -3),
   start: 600,
 }

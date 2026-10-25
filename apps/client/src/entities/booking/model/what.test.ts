@@ -4,9 +4,9 @@ import { whatParts } from './what'
 describe('what a booking was for', () => {
   it('names an appointment’s services and its specialists once each', () => {
     const items = [
-      { service: 'Women’s haircut', staff: 'Aýna', start: 600, end: 660 },
-      { service: 'Hair styling', staff: 'Aýna', start: 660, end: 705 },
-      { service: 'Manicure', staff: null, start: 705, end: 765 },
+      { serviceId: 's1', service: 'Women’s haircut', staffId: 'st-ayna', staff: 'Aýna', start: 600, end: 660 },
+      { serviceId: 's2', service: 'Hair styling', staffId: 'st-ayna', staff: 'Aýna', start: 660, end: 705 },
+      { serviceId: 's5', service: 'Manicure', staffId: null, staff: null, start: 705, end: 765 },
     ]
     expect(whatParts({ type: 'appointment', items })).toEqual(['Women’s haircut, Hair styling, Manicure', 'Aýna'])
   })
