@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { bookingsAffectedDetailsSchema, type BookingsAffectedDetails } from '@yeral/contract/errors'
 import type { WeekdayHours } from '@yeral/contract/settings'
 import type { StaffScheduleView, TeamMember } from '@yeral/contract/team'
@@ -21,14 +21,16 @@ import { useId, useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { HoursAffectedBookings, type AffectedChoice } from '@/features/edit-hours'
 import { useSdk } from '@/shared/api'
+import { DAY_OFF_NOTE_MAX } from '@/shared/config'
 import { useDatePickerWords, useDateSpan, useDayName, useErrorText } from '@/shared/i18n'
 import { dayHours, dayProblem, switchShift, works, type ShiftForm } from '../model/shift'
 
 type Business = readonly (WeekdayHours | null)[]
 
-/** A break's place: 13:00–13:40 when it leaves time on both sides (B-Team `addBreak`), else a step in the middle. */
+/** A break's place: 13:00–13:40 when it fits with time on both sides (B-Team `addBreak`), else 40 minutes mid-shift. */
 function newBreak({ open, close }: { open: number; close: number }) {
-  const start = Math.max(open, Math.min(780, close - 2 * HOURS_STEP))
+  if (open < 780 && close > 820) return { start: 780, end: 820 }
+  const start = open + Math.max(0, Math.floor((close - open - 40) / 20) * 10)
   return { start, end: Math.min(start + 40, close) }
 }
 
@@ -39,12 +41,15 @@ function newBreak({ open, close }: { open: number; close: number }) {
  */
 export function ShiftEditor({
   form,
+  saved,
   business,
   owner,
   name,
   onChange,
 }: {
   form: ShiftForm
+  /** The week as saved: back on «Own shift», a saved own shift comes back as it was. */
+  saved: ShiftForm
   business: Business
   owner: boolean
   name: string
@@ -79,7 +84,9 @@ export function ShiftEditor({
                       ]
                         .filter(Boolean)
                         .join(' · ')
-                    : t('dayOff')}
+                    : business[i]
+                      ? t('dayOff')
+                      : h('closed')}
                 </span>
               </div>
             )
@@ -97,7 +104,7 @@ export function ShiftEditor({
         </span>
         <OptionCardGroup
           value={form.own ? 'own' : 'business'}
-          onValueChange={(v) => onChange(switchShift(form, v === 'own', business))}
+          onValueChange={(v) => onChange(v === 'own' && saved.own ? saved : switchShift(form, v === 'own', business))}
           aria-labelledby={`${id}-mode`}
           className="grid grid-cols-2 gap-2 max-sm:grid-cols-1"
         >
@@ -118,8 +125,8 @@ export function ShiftEditor({
                   <Switch
                     checked={d.works}
                     aria-label={t('worksLabel', { day })}
-                    // a weekday the business is closed opens no bookings
-                    disabled={!business[i]}
+                    // a weekday the business is closed opens no bookings: it can be turned off, not on
+                    disabled={!business[i] && !d.works}
                     onCheckedChange={(works) => setDay(i, { works })}
                     className="-ml-1.5"
                   />
@@ -190,16 +197,29 @@ function useOffLine() {
  * Undo; «Add time off» with From, To (optional), Repeat every year and a note only the team sees. Saved at once beside
  * the week as it is saved; over bookings it asks Keep them or Cancel and offer 3 other times. The administrator reads it.
  */
+export type OffDraft = { from: string; to: string; yearly: boolean; note: string }
+
 export function TimeOff({
   slug,
   member: m,
   schedule,
   owner,
+  draft,
+  onDraft,
+  locked,
+  onBusy,
 }: {
   slug: string
   member: TeamMember
   schedule: StaffScheduleView
   owner: boolean
+  /** The form being filled, kept by the drawer so a tab switch doesn't lose it. */
+  draft: OffDraft | null
+  onDraft: (draft: OffDraft | null) => void
+  /** The drawer's own Save is running: the schedule is being written, wait for it. */
+  locked: boolean
+  /** A time-off save is running: the drawer neither closes nor saves meanwhile. */
+  onBusy: (busy: boolean) => void
 }) {
   const t = useTranslations('settings.team.hours')
   const sdk = useSdk()
@@ -208,18 +228,27 @@ export function TimeOff({
   const span = useDateSpan()
   const line = useOffLine()
   const id = useId()
+  const queryClient = useQueryClient()
   const save = useMutation(sdk.team.updateSchedule(slug, m.id))
   const [now] = useState(() => Date.now())
   const todayDate = today(now)
-  const [draft, setDraft] = useState<{ from: string; to: string; yearly: boolean; note: string } | null>(null)
+  const setDraft = onDraft
+  const busy = save.isPending || locked
   const [asked, setAsked] = useState<{ details: BookingsAffectedDetails; daysOff: StaffScheduleView['daysOff']; range: string } | null>(
     null,
   )
-  const badRange = !!draft && !!draft.from && !!draft.to && draft.to < draft.from
+  // the api's rules for a day off: it ends on or after it starts, and lasts a year at most
+  const dates = !draft?.from || !draft.to ? null : draft.to < draft.from ? 'order' : draft.to > addDays(draft.from, 365) ? 'long' : null
 
   // the week as saved (a change still in the drawer goes with its Save), and these days off
-  const send = async (daysOff: StaffScheduleView['daysOff'], affected?: AffectedChoice) =>
-    save.mutateAsync({ shift: schedule.shift, breaks: schedule.breaks, daysOff, ...(affected ? { affected } : {}) })
+  const send = async (daysOff: StaffScheduleView['daysOff'], affected?: AffectedChoice, week: StaffScheduleView = schedule) => {
+    onBusy(true)
+    try {
+      return await save.mutateAsync({ shift: week.shift, breaks: week.breaks, daysOff, ...(affected ? { affected } : {}) })
+    } finally {
+      onBusy(false)
+    }
+  }
 
   const ask = (error: unknown, daysOff: StaffScheduleView['daysOff'], range: string) => {
     const listed = isApiError(error, 'bookings_affected') && bookingsAffectedDetailsSchema.safeParse(error.details)
@@ -250,12 +279,21 @@ export function TimeOff({
     }
   }
 
+  // Undo puts the day back into the schedule as it stands then (read again), not as it stood here
+  const undo = async (gone: StaffScheduleView['daysOff'][number]) => {
+    try {
+      const now = await queryClient.fetchQuery({ ...sdk.team.schedule(slug, m.id), staleTime: 0 })
+      await send([...now.daysOff, gone], undefined, now)
+    } catch (error) {
+      toast(errorText(error))
+    }
+  }
   const remove = async (i: number) => {
     const gone = schedule.daysOff[i]!
     try {
       await send(schedule.daysOff.filter((_, j) => j !== i))
       toast(t('removed', { range: span(gone.from, gone.to, { year: !gone.yearly }) }), {
-        action: { label: t('undo'), onClick: () => void send([...schedule.daysOff]).catch((e: unknown) => toast(errorText(e))) },
+        action: { label: t('undo'), onClick: () => void undo(gone) },
       })
     } catch (error) {
       toast(errorText(error))
@@ -287,7 +325,7 @@ export function TimeOff({
                     size="s"
                     iconOnly
                     aria-label={t('remove', { range: text })}
-                    disabled={save.isPending}
+                    disabled={busy}
                     onClick={() => void remove(i)}
                   >
                     <Trash2 />
@@ -310,7 +348,7 @@ export function TimeOff({
                 onValueChange={(from) => setDraft({ ...draft, from })}
               />
             </Field>
-            <Field label={t('to')} optional={t('optional')} error={badRange && t('badRange')}>
+            <Field label={t('to')} optional={t('optional')} error={dates && t(`dates.${dates}`)}>
               <DatePicker
                 copy={words}
                 today={todayDate}
@@ -330,19 +368,19 @@ export function TimeOff({
           <Field label={t('note')} optional={t('optional')} hint={t('noteHint')}>
             <Input
               value={draft.note}
-              maxLength={40}
+              maxLength={DAY_OFF_NOTE_MAX}
               placeholder={t('notePlaceholder')}
               onChange={(e) => setDraft({ ...draft, note: e.target.value })}
             />
           </Field>
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" size="s" disabled={save.isPending} onClick={() => setDraft(null)}>
+            <Button variant="ghost" size="s" disabled={busy} onClick={() => setDraft(null)}>
               {t('cancel')}
             </Button>
             <Button
               variant="secondary"
               size="s"
-              disabled={!draft.from || badRange}
+              disabled={!draft.from || !!dates || locked}
               loading={save.isPending && !asked}
               loadingLabel={t('saving')}
               onClick={() => void add()}
@@ -358,6 +396,7 @@ export function TimeOff({
           size="s"
           className="self-start"
           id={`${id}-add`}
+          disabled={busy}
           onClick={() => setDraft({ from: '', to: '', yearly: false, note: '' })}
         >
           {t('add')}

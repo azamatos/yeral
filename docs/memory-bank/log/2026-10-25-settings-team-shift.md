@@ -17,3 +17,14 @@
   business week's do (the caption says a shift doesn't open bookings while the business is closed), rather than the
   board's lists bounded by that day's business hours; the window's lead says «their own hours» or «the business
   hours» rather than a summary of the new shift.
+- Review (one round, 15 findings): Undo reads the schedule again and puts the day back into it, so it no longer writes
+  back an older week or drops time off added since; the drawer's Save and a time-off save wait for each other (and the
+  drawer doesn't close during either); the stories pick a day relative to today; a weekday the business has closed can
+  be switched off; back on «Own shift» a saved own shift comes back as it was; a failed load says so with Try again;
+  the time-off form survives a tab switch; a day off longer than a year is refused on the field; a new break sits
+  mid-shift when 13:00 doesn't fit; the note's limit is `DAY_OFF_NOTE_MAX`; the administrator sees «Closed» for the
+  business's closed weekdays.
+- Follow-ups: a day off without a note is stored under «Time off» in the saver's language (the api needs a name: let it
+  be empty); Undo over bookings ahead, or of a day off already over, ends in the api's error; the drawer's Save closes
+  it with an unsent time-off form still filled; `dayProblem` repeats `staffScheduleErrors`' break rules for the
+  business-hours case.

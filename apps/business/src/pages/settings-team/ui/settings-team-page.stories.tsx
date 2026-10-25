@@ -6,6 +6,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { Me } from '@yeral/contract/account'
 import type { TeamMember, Workspace } from '@yeral/contract/team'
+import { addDays, today } from '@yeral/domain/time'
 import { expect, spyOn, userEvent, waitFor, within } from 'storybook/test'
 import { SettingsLayoutPage, SettingsPlaceholder } from '@/pages/settings'
 import { PageStory, pickDate } from '@/shared/storybook'
@@ -134,6 +135,9 @@ const businessHours = {
 /** The rows the last removal sent: what happens to each booking the colleague can't take. */
 let removalRows: { code: string; affected: string }[] | null = null
 
+/** Maral's bookings, a week and a half ahead (any day the pickers may choose, whatever today is). */
+const MARAL_DAY = addDays(today(Date.now()), 9)
+
 /** Maral's bookings ahead as a removal lists them: one Leýli can take, one nobody else does. */
 const maralAhead = {
   count: 2,
@@ -142,7 +146,7 @@ const maralAhead = {
   bookings: [
     {
       code: 'YR-48213',
-      date: '2026-11-03',
+      date: MARAL_DAY,
       start: 600,
       end: 660,
       status: 'confirmed',
@@ -154,7 +158,7 @@ const maralAhead = {
     },
     {
       code: 'YR-48214',
-      date: '2026-11-04',
+      date: addDays(MARAL_DAY, 1),
       start: 720,
       end: 810,
       status: 'confirmed',
@@ -189,11 +193,11 @@ const fakeApi =
       if (route === 'GET /w/glow-studio/services') return json(staffed)
       if (route === 'GET /w/glow-studio/settings/rules') return json({ requestAnswerers: 'both' })
       if (route === 'GET /w/glow-studio/settings/hours') return json(businessHours)
-      // a schedule saved: Maral's bookings on 3 November are asked about when time off takes that day
+      // a schedule saved: Maral's bookings are asked about when time off takes their day
       const week = /^PUT \/w\/glow-studio\/team\/([^/]+)\/schedule$/.exec(route)
       if (week) {
         const { affected, ...next } = (await request.json()) as Schedule & { affected?: string }
-        const hits = week[1] === 'maral' && next.daysOff.some((d) => d.from <= '2026-11-03' && d.to >= '2026-11-03')
+        const hits = week[1] === 'maral' && next.daysOff.some((d) => d.from <= MARAL_DAY && d.to >= MARAL_DAY)
         if (hits && !affected) return json({ error: { code: 'bookings_affected', details: maralAhead } }, 409)
         schedules.set(week[1]!, next)
         const settled = hits ? (affected === 'cancel' ? { cancelled: 2, kept: 0 } : { cancelled: 0, kept: 2 }) : { cancelled: 0, kept: 0 }
@@ -678,13 +682,13 @@ export const DrawerTimeOff: Story = {
     await userEvent.click(drawer.getByRole('tab', { name: 'Hours' }))
     await expect(await drawer.findByText('No time off planned.')).toBeVisible()
     await userEvent.click(drawer.getByRole('button', { name: 'Add time off' }))
-    await pickDate(drawer, 'From', '2026-11-03')
+    await pickDate(drawer, 'From', MARAL_DAY)
     await userEvent.type(drawer.getByLabelText(/^Note/), 'Wedding')
     await userEvent.click(within(drawer.getByRole('group', { name: 'Add time off' })).getByRole('button', { name: 'Add time off' }))
     const modal = within(await body.findByRole('dialog', { name: 'Maral has 2 bookings during this time off' }))
     await userEvent.click(modal.getByRole('radio', { name: /^Cancel and offer 3 other times/ }))
     await userEvent.click(modal.getByRole('button', { name: 'Add time off' }))
-    const added = await body.findByText(/^Time off added: 3 November 2026 · 2 bookings cancelled/)
+    const added = await body.findByText(/^Time off added: .+ · 2 bookings cancelled/)
     await waitFor(() => expect(added).toBeVisible())
     await expect(await drawer.findByText('1 day · Wedding')).toBeVisible()
   },

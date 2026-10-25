@@ -1086,7 +1086,6 @@
         "from": "From",
         "to": "To",
         "optional": "(optional)",
-        "badRange": "The end date can’t be before the start date.",
         "yearly": "Repeat every year",
         "note": "Note",
         "noteHint": "Only your team sees the note.",
@@ -1100,7 +1099,11 @@
         "offTitle": "{name} has {what} during this time off",
         "offLead": "Time off · {range}. These were booked before.",
         "offKeep": "They stay in the calendar as they are — {name} comes in for them.",
-        "offFoot": "Clients can’t book {name} on these days either way."
+        "offFoot": "Clients can’t book {name} on these days either way.",
+        "dates": {
+          "order": "The end date can’t be before the start date.",
+          "long": "Time off lasts a year at most."
+        }
       },
       "status": {
         "active": "Active",
@@ -1285,7 +1288,10 @@
         "shiftFoot": "New bookings follow the new shift either way.",
         "shiftSaved": "{name}’s shift saved",
         "shiftCancelled": "{n, plural, one {# cancelled} other {# cancelled}} — each client picks a new time in My bookings",
-        "shiftKept": "{n, plural, one {# kept as it is} other {# kept as they are}}"
+        "shiftKept": "{n, plural, one {# kept as it is} other {# kept as they are}}",
+        "hoursFailed": "The hours didn’t load.",
+        "retry": "Try again",
+        "hoursLoading": "Loading the hours"
       },
       "remove": {
         "title": "Remove {name} from the team?",

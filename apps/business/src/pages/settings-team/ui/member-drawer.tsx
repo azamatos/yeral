@@ -42,7 +42,7 @@ import {
   type MemberForm,
 } from '../model/member'
 import { sameShift, scheduleWeek, shiftFormOf, shiftValid, type ShiftForm } from '../model/shift'
-import { ShiftEditor, TimeOff } from './member-hours'
+import { ShiftEditor, TimeOff, type OffDraft } from './member-hours'
 import { RemoveMember } from './remove-member'
 import { ServicePicker } from './service-picker'
 
@@ -167,6 +167,9 @@ function MemberEditor({
   const shiftChanged = !!shift && !!wasShift && !!week && !sameShift(wasShift, shift, week)
   // bookings outside the new shift: the 409's list, until Keep them or Cancel and offer 3 other times
   const [shiftAsked, setShiftAsked] = useState<BookingsAffectedDetails | null>(null)
+  // time off: the form kept across the tabs, and a save of it running (the drawer's Save waits for it)
+  const [offDraft, setOffDraft] = useState<OffDraft | null>(null)
+  const [offSaving, setOffSaving] = useState(false)
   const [tab, setTab] = useState<Tab>('profile')
   const [removing, setRemoving] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -233,7 +236,7 @@ function MemberEditor({
   const daysLeft = m.invite ? inviteDaysLeft(m.invite, now) : 0
 
   const save = async (affected?: AffectedChoice) => {
-    if (saving || !valid || !dirty) return
+    if (saving || offSaving || !valid || !dirty) return
     const plan = saveOf(m, was, form, locale, now)
     onBusy(true)
     setSaving(true)
@@ -393,15 +396,34 @@ function MemberEditor({
                 {t('roHours')}
               </p>
             )}
-            {shift && week && schedule.data ? (
+            {shift && wasShift && week && schedule.data ? (
               <>
-                <ShiftEditor form={shift} business={week} owner={owner} name={name} onChange={setShift} />
+                <ShiftEditor form={shift} saved={wasShift} business={week} owner={owner} name={name} onChange={setShift} />
                 <span aria-hidden className="h-px flex-none bg-n-200" />
-                <TimeOff slug={slug} member={m} schedule={schedule.data} owner={owner} />
+                <TimeOff
+                  slug={slug}
+                  member={m}
+                  schedule={schedule.data}
+                  owner={owner}
+                  draft={offDraft}
+                  onDraft={setOffDraft}
+                  locked={saving}
+                  onBusy={(b) => {
+                    setOffSaving(b)
+                    onBusy(b)
+                  }}
+                />
               </>
+            ) : schedule.isError || businessHours.isError ? (
+              <div className="flex flex-col items-start gap-3 py-6">
+                <span className="text-small text-n-900">{t('hoursFailed')}</span>
+                <Button variant="secondary" size="s" onClick={() => void Promise.all([schedule.refetch(), businessHours.refetch()])}>
+                  {t('retry')}
+                </Button>
+              </div>
             ) : (
               <div className="flex justify-center py-10">
-                <Spinner />
+                <Spinner label={t('hoursLoading')} />
               </div>
             )}
           </TabsContent>
@@ -541,7 +563,13 @@ function MemberEditor({
           </Button>
         )}
         {canSave ? (
-          <Button variant="primary" disabled={!dirty || !valid} loading={saving} loadingLabel={t('saving')} onClick={() => void save()}>
+          <Button
+            variant="primary"
+            disabled={!dirty || !valid || offSaving}
+            loading={saving}
+            loadingLabel={t('saving')}
+            onClick={() => void save()}
+          >
             {t('save')}
           </Button>
         ) : (
