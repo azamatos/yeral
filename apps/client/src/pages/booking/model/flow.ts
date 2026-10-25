@@ -28,6 +28,8 @@ export const bookingSearchSchema = z.object({
     .optional()
     .catch(undefined),
   step: z.enum(STEPS).optional().catch(undefined),
+  /** The booking just sent (its code): the sent page, which a reload keeps. */
+  sent: z.string().optional().catch(undefined),
 })
 export type BookingSearch = z.infer<typeof bookingSearchSchema>
 

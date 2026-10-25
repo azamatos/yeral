@@ -6,7 +6,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { addDays, today } from '@yeral/domain/time'
 import { expect, userEvent, within } from 'storybook/test'
-import { businessApi, PageStory } from '@/shared/storybook'
+import { AYJEMAL, businessApi, GLOW, PageStory } from '@/shared/storybook'
 import { BookingPage } from './booking-page'
 
 const routes = {
@@ -135,5 +135,87 @@ export const PhoneTime: Story = {
   play: async ({ canvas }) => {
     const bar = within(await canvas.findByRole('region', { name: 'Your booking' }))
     await expect(await bar.findByText('1 service · 80 TMT · 15:30')).toBeVisible()
+  },
+}
+
+const confirm = `/en/b/glow-studio/book?services=s1&staff=st-ayna&step=confirm&date=${today()}&time=930`
+
+/** Step 4 signed out: «Confirm your number» opens the login; Send booking waits for it. */
+export const ConfirmSignedOut: Story = {
+  args: { path: confirm },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Confirm your booking' })).toBeVisible()
+    const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
+    await expect(summary.getByRole('button', { name: 'Send booking' })).toBeDisabled()
+    await expect(summary.getByText('First confirm your phone number.')).toBeVisible()
+    await expect(canvas.getByRole('button', { name: 'Confirm your number' })).toBeVisible()
+    await expect(canvas.getByText(/up to 2 h before/)).toBeVisible()
+  },
+}
+
+/** Step 4 signed in: who books, a note, Send booking → the sent page, Pending, the code, what happens next. */
+export const ConfirmAndSend: Story = {
+  args: { path: confirm, server: businessApi({ signedIn: AYJEMAL }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('Aýjemal Gurbanowa')).toBeVisible()
+    await userEvent.type(canvas.getByRole('textbox', { name: /Note for the business/ }), 'Long hair')
+    const summary = within(canvas.getByRole('complementary', { name: 'Your booking' }))
+    await expect(summary.getByRole('button', { name: 'Send booking' })).toBeEnabled()
+    await userEvent.click(summary.getByRole('button', { name: 'Send booking' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Booking sent' })).toBeVisible()
+    await expect(canvas.getByText('Pending')).toBeVisible()
+    await expect(canvas.getByText('YR-48213')).toBeVisible()
+    await expect(canvas.getByRole('heading', { name: 'What happens next?' })).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Add to calendar' }))
+    await expect(await canvas.findByText('The calendar file (.ics) is downloaded.')).toBeVisible()
+  },
+}
+
+/** An instant business: «Booking confirmed», nobody waits. */
+export const SentInstant: Story = {
+  args: { path: confirm, server: businessApi({ signedIn: AYJEMAL, business: { ...GLOW, confirmMode: 'instant' } }) },
+  play: async ({ canvas }) => {
+    const summary = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
+    await userEvent.click(await summary.findByRole('button', { name: 'Send booking' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Booking confirmed' })).toBeVisible()
+    await expect(canvas.getByText('Confirmed')).toBeVisible()
+  },
+}
+
+/** The time was taken meanwhile (Booking `slotTaken`): the nearest free times; one tap and it sends. */
+export const SlotTaken: Story = {
+  args: { path: confirm, server: businessApi({ signedIn: AYJEMAL, taken: 930 }) },
+  play: async ({ canvas }) => {
+    const summary = within(await canvas.findByRole('complementary', { name: 'Your booking' }))
+    await userEvent.click(await summary.findByRole('button', { name: 'Send booking' }))
+    const alert = within(await canvas.findByRole('alert'))
+    await expect(alert.getByText('This time was just taken. Free times nearby:')).toBeVisible()
+    // the taken time can't be sent again: a new one first
+    await expect(summary.getByRole('button', { name: 'Send booking' })).toBeDisabled()
+    await expect(summary.getByText('First choose a new time.')).toBeVisible()
+    await userEvent.click(alert.getByRole('button', { name: 'Choose 16:00' }))
+    await expect(canvas.queryByRole('alert')).toBeNull()
+    await expect(await summary.findByText(/· 16:00–17:00$/)).toBeVisible()
+    await userEvent.click(summary.getByRole('button', { name: 'Send booking' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Booking sent' })).toBeVisible()
+  },
+}
+
+/** Phone, step 4: the summary in the flow and Send booking in the bar. */
+export const ConfirmPhone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  args: { path: confirm, server: businessApi({ signedIn: AYJEMAL }) },
+  play: async ({ canvas }) => {
+    const bar = within(await canvas.findByRole('region', { name: 'Your booking' }))
+    await expect(await bar.findByRole('button', { name: 'Send booking' })).toBeEnabled()
+  },
+}
+
+/** The sent page for a booking it can't read (signed out since, another person's): it says so and opens My bookings. */
+export const SentUnreadable: Story = {
+  args: { path: '/en/b/glow-studio/book?sent=YR-99999', server: businessApi({ signedIn: AYJEMAL }) },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText(/This booking can't be shown here/)).toBeVisible()
+    await expect(canvas.getByRole('link', { name: 'Go to my bookings' })).toBeVisible()
   },
 }
