@@ -89,6 +89,13 @@ describe('where an address goes (design §27.1)', () => {
     })
   })
 
+  it('a workspace that moved to another address (chapter 9, 25.10.2026): a tab at the old one goes to the new, same section', () => {
+    // the owner moved Glow Studio to glow; Aýna's tab is still at /w/glow-studio, and her list now names glow, her last used
+    const moved = { items: [{ slug: 'glow', level: 'specialist' as const }, AYNA.items[1]!], current: 'glow' }
+    expect(placeFor('/w/glow-studio/calendar', 'glow-studio', moved)).toEqual({ to: { slug: 'glow', section: 'calendar' }, closed: true })
+    expect(placeFor('/w/glow-studio/clients', 'glow-studio', moved)).toEqual({ to: { slug: 'glow', section: 'clients' }, closed: true })
+  })
+
   it('no workspace at all: the sign-in, which says what’s next', () => {
     expect(placeFor('/w/bag-kafe/calendar', 'bag-kafe', { items: [], current: null })).toEqual({ signIn: true })
   })

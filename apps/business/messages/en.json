@@ -379,11 +379,11 @@
       "name": "Business name",
       "namePlaceholder": "For example: Glow Studio",
       "nameLong": "Too long: up to {max, number} characters.",
-      "page": "Your page: <mono>{url}</mono>",
       "counter": "{count, number} / {max, number}",
       "hintName": "Enter the business name.",
       "hintLong": "Shorten the business name to {max, number} characters.",
-      "hintCategory": "Pick a category."
+      "hintCategory": "Pick a category.",
+      "hintAddress": "Pick a page address that’s free."
     },
     "category": {
       "label": "Category",
@@ -613,6 +613,18 @@
     "fewer": "Fewer",
     "more": "More"
   },
+  "pageAddress": {
+    "label": "Page address",
+    "hint": "Letters a–z, digits and hyphens. Clients open your page at this address.",
+    "free": "This address is free.",
+    "short": "At least {min, number} characters.",
+    "long": "Up to {max, number} characters.",
+    "chars": "Use letters a–z, digits and hyphens — a hyphen not at the start or the end, and not two in a row.",
+    "reserved": "This address is reserved.",
+    "taken": "Another business has this address.",
+    "use": "Use {slug}",
+    "checkFailed": "Couldn’t check the address just now. It’s checked again when you save."
+  },
   "pageLink": {
     "copy": "Copy",
     "copied": "Copied",
@@ -652,7 +664,14 @@
         "fix": "Fix and send again",
         "hidden": "Hidden by {brand}",
         "hiddenText": "Clients can’t find your page or open your link. Your calendar and bookings work as usual."
-      }
+      },
+      "change": "Change link",
+      "changeTitle": "New link",
+      "changeNote": "Old links and printed QR codes keep working: they open your page at its new address.",
+      "cancel": "Cancel",
+      "save": "Save link",
+      "saving": "Saving",
+      "changed": "Your page’s link is now {url}"
     },
     "permissions": {
       "lead": "Permissions work by access level — give each person a level in <team>Team</team>.",

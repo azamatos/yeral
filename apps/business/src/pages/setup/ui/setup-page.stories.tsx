@@ -86,6 +86,10 @@ const teamSaved: Record<string, unknown>[] = []
 const finished: string[] = []
 /** What the services step sent, one body per save (the fake api fills it). */
 const servicesSaved: SetupServices[] = []
+/** Each `POST /setup` body (the business step's name, category and the address the owner wrote). */
+const started: Record<string, unknown>[] = []
+/** Each `PUT …/settings/page-address` as `from → to`. */
+const moves: string[] = []
 
 /** Beauty's starter list as `GET /v1/categories` gives it (a part of the seed's); the other categories have none here. */
 const beautyStarters = [
@@ -164,6 +168,8 @@ const fakeApi =
     // the draft's menu as the services step reads and saves it
     let menu: Menu = { groups: [] }
     servicesSaved.length = 0
+    started.length = 0
+    moves.length = 0
     // the draft's profile as the address step reads and saves it
     let location = {
       cityId: 'ashgabat',
@@ -284,11 +290,23 @@ const fakeApi =
             starterGroups: c.id === 'beauty' ? beautyStarters : [],
           })),
         })
+      // the demo's Glow Studio has glow-studio; support is a reserved word
+      if (route === 'GET /page-address') {
+        const slug = new URL(request.url).searchParams.get('slug') ?? ''
+        const problem = slug === 'glow-studio' ? 'taken' : slug === 'support' ? 'reserved' : null
+        return json({ slug, problem, suggestion: problem ? `${slug}-2` : null })
+      }
+      if (setup && route === `PUT /w/${setup.slug}/settings/page-address`) {
+        moves.push(`${setup.slug} → ${String(body.slug)}`)
+        setup = { ...setup, slug: String(body.slug) }
+        return json({ slug: setup.slug })
+      }
       if (route === 'POST /setup') {
         if (setup) return json({ error: { code: 'setup_in_progress', details: { slug: setup.slug } } }, 409)
+        started.push(body)
         const category = LAUNCH_CATEGORIES.find((c) => c.id === body.categoryId)!
         setup = {
-          slug: 'glow-studio-2',
+          slug: typeof body.slug === 'string' ? body.slug : 'glow-studio-2',
           name: String(body.name),
           step: 'address',
           category: category.name,
@@ -300,6 +318,8 @@ const fakeApi =
       }
       const step = /^PUT \/w\/([^/]+)\/setup$/.exec(route)
       if (step && setup) {
+        // as the api: a draft's old address opens nothing
+        if (step[1] !== setup.slug) return json({ error: { code: 'not_found' } }, 404)
         setup.step = String(body.step)
         return new Response(null, { status: 204 })
       }
@@ -364,15 +384,79 @@ export const NewBusiness: Story = {
     await expect(cont).toBeDisabled()
     await expect(cont).toHaveAccessibleDescription('Enter the business name.')
     await userEvent.type(canvas.getByLabelText('Business name'), 'Glow Studio')
-    await expect(canvas.getByText(/\/b\/glow-studio$/)).toBeVisible()
+    // the address the name gives, as the api makes it: glow-studio is taken, so the next free one
+    const address = canvas.getByRole('textbox', { name: 'Page address' })
+    await waitFor(() => expect(address).toHaveValue('glow-studio-2'))
     await expect(cont).toHaveAccessibleDescription('Pick a category.')
     await userEvent.click(canvas.getByRole('radio', { name: 'Beauty' }))
     await expect(cont).toBeEnabled()
     await userEvent.click(cont)
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Where will clients find you?' })).toBeVisible()
+    // the api makes the address itself: none sent
+    await expect(started).toEqual([{ name: 'Glow Studio', categoryId: 'beauty' }])
     // the draft made, the wizard draws itself again: the step list is a new one
     const list = canvas.getByRole('navigation', { name: 'Steps' })
     await expect(within(list).getByText('Glow Studio · Beauty')).toBeVisible()
+  },
+}
+
+/**
+ * The owner writes their own page address (chapter 9, 25.10.2026): checked as it's typed (too short, a reserved word
+ * with a free one like it), Continue waits for a good one; the draft is made at it.
+ */
+export const OwnAddress: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.type(await canvas.findByLabelText('Business name'), 'Glow Studio')
+    await userEvent.click(canvas.getByRole('radio', { name: 'Beauty' }))
+    const address = canvas.getByRole('textbox', { name: 'Page address' })
+    const cont = canvas.getByRole('button', { name: 'Continue' })
+    await userEvent.clear(address)
+    await userEvent.type(address, 'GS')
+    await expect(address).toHaveValue('gs')
+    await expect(await canvas.findByText('At least 3 characters.')).toBeVisible()
+    await expect(cont).toHaveAccessibleDescription('Pick a page address that’s free.')
+    await userEvent.clear(address)
+    await userEvent.type(address, 'support')
+    await expect(await canvas.findByText('This address is reserved.')).toBeVisible()
+    await userEvent.clear(address)
+    await userEvent.type(address, 'Glow Ashgabat')
+    await expect(address).toHaveValue('glow-ashgabat')
+    await expect(await canvas.findByText('This address is free.')).toBeVisible()
+    await expect(cont).toBeEnabled()
+    await userEvent.click(cont)
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Where will clients find you?' })).toBeVisible()
+    await expect(started).toEqual([{ name: 'Glow Studio', categoryId: 'beauty', slug: 'glow-ashgabat' }])
+  },
+}
+
+/**
+ * A draft left at the business step («Continue later»): its address as it is; written over, Continue moves the draft
+ * to it and saves the step there (the wizard's pages go with it).
+ */
+export const MoveAddress: Story = {
+  args: {
+    server: fakeApi({
+      draft: {
+        slug: 'glow-studio',
+        name: 'Glow Studio',
+        step: 'business',
+        category: 'Beauty',
+        categoryId: 'beauty',
+        logo: null,
+        address: null,
+      },
+    }),
+    path: '/setup/business',
+  },
+  play: async ({ canvas }) => {
+    const address = await canvas.findByRole('textbox', { name: 'Page address' })
+    await expect(address).toHaveValue('glow-studio')
+    await userEvent.clear(address)
+    await userEvent.type(address, 'glow-ashgabat')
+    await expect(await canvas.findByText('This address is free.')).toBeVisible()
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
+    await expect(await canvas.findByRole('heading', { level: 1, name: 'Where will clients find you?' })).toBeVisible()
+    await expect(moves).toEqual(['glow-studio → glow-ashgabat'])
   },
 }
 
