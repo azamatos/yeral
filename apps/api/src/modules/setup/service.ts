@@ -9,11 +9,12 @@ import type { menuSchema } from '@yeral/contract/services'
 import type { mySetupSchema, SetupServices, setupStartSchema, setupTeamSchema } from '@yeral/contract/setup'
 import type { TeamMember } from '@yeral/contract/team'
 import { MARKET } from '@yeral/domain/market'
+import { DEFAULT_RULES } from '@yeral/domain/rules'
 import type { Locale, Localized } from '@yeral/domain/model'
 import type { Actor } from '@yeral/domain/permissions'
 import { serviceErrors } from '@yeral/domain/services'
 import { slugFrom, type SetupNeed, type SetupStep } from '@yeral/domain/setup'
-import { and, asc, eq, inArray, isNotNull, ne } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, isNotNull, ne } from 'drizzle-orm'
 import type { z } from 'zod'
 import { all, type Queryable } from '../../db/client'
 import { bookingRules, businesses, categories, cities, services, staff, users } from '../../db/schema'
@@ -23,7 +24,7 @@ import { ApiError, invalid, type Issue } from '../../http/errors'
 import { pgCode } from '../bookings/repo'
 import { logoOf, text } from '../catalog/map'
 import { accountName } from '../me/me'
-import { setMenu, type PlannedGroup } from '../menu/service'
+import { onMenu, setMenu, type PlannedGroup } from '../menu/service'
 import { addressTaken, freeAddress, takenNow } from '../settings/page-address'
 import { issueInvite, members, setServices, teamChanged } from '../team/service'
 
@@ -36,6 +37,7 @@ type SetupTeam = z.output<typeof setupTeamSchema>
 async function draftOf(db: Queryable, userId: string) {
   const [row] = await db
     .select({
+      id: businesses.id,
       slug: businesses.slug,
       name: businesses.name,
       step: businesses.setupStep,
@@ -63,8 +65,23 @@ async function draftOf(db: Queryable, userId: string) {
  * invites are.
  */
 export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Promise<MySetup> {
-  const draft = await draftOf(deps.db, user.id)
+  const { db } = deps
+  const draft = await draftOf(db, user.id)
   if (!draft) return { setup: null }
+  // the step list's summaries (B-Onboarding `sums`): «5 services», «I work alone» or «2 people», «I confirm · 30 min»
+  const [[menu], [team], [rules]] = await all(db, [
+    () => db.select({ n: count() }).from(services).where(onMenu(draft.id)),
+    () =>
+      db
+        .select({ n: count() })
+        .from(staff)
+        .where(and(eq(staff.businessId, draft.id), ne(staff.level, 'owner'), ne(staff.status, 'removed'))),
+    () =>
+      db
+        .select({ confirmMode: bookingRules.confirmMode, holdMinutes: bookingRules.holdMinutes })
+        .from(bookingRules)
+        .where(eq(bookingRules.businessId, draft.id)),
+  ])
   return {
     setup: {
       slug: draft.slug,
@@ -74,6 +91,10 @@ export async function mySetup(deps: Pick<Deps, 'db' | 'media'>, user: User): Pro
       categoryId: draft.categoryId,
       logo: logoOf(deps, draft, user.lang),
       address: draft.street ? { line: draft.address, city: { id: draft.cityId, name: text(draft.city, user.lang) } } : null,
+      services: menu?.n ?? 0,
+      team: team?.n ?? 0,
+      // every draft has its rules from the start (`startSetup`)
+      rules: rules ?? { confirmMode: DEFAULT_RULES.confirmMode, holdMinutes: DEFAULT_RULES.holdMinutes },
     },
   }
 }

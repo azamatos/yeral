@@ -40,6 +40,10 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
         categoryId: 'beauty',
         logo: null,
         address: null,
+        // the step list's summaries: no services yet, «I work alone», «I confirm · 30 min»
+        services: 0,
+        team: 0,
+        rules: { confirmMode: 'manual', holdMinutes: 30 },
       },
     })
     const again = await owner.req('/v1/setup', { body: { name: 'Second', categoryId: 'beauty' } })
@@ -168,6 +172,8 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
       },
       { name: { en: 'New services' }, services: [{ name: { en: 'Henna' }, priceType: 'from', priceAmount: 100, staffIds: [me!.id] }] },
     ])
+    // the step list says «3 services»
+    expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({ services: 3 })
     // Settings adds a description; back at the step the menu comes by id: kept, the haircut's price changed, the
     // blow-dry left out goes, and nothing twice
     const [hair, own] = menu.groups
@@ -189,6 +195,8 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
       { id: own!.id, services: [{ name: { en: 'Henna' } }] },
     ])
     expect(again.json.groups[0].services.map((x: { id: string }) => x.id)).not.toContain(blowDry!.id)
+    // the step list counts what's on the menu: the blow-dry off it
+    expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({ services: 2 })
     // not on the menu or twice, a starter of another category or used twice, a nameless new row, terms out of limits
     const wrong = await put({
       groups: [
@@ -298,6 +306,8 @@ describe('setting a business up (book B-02–B-06, Q-200)', () => {
     ])
     // the step reopens with them; no invite exists before the finish
     expect(view((await owner.req(`${W}/team`)).json.items)).toEqual(view(saved.json.items))
+    // the step list says «3 people» (the owner aside, the invited ones counted)
+    expect((await owner.req('/v1/me/setup')).json.setup).toMatchObject({ team: 3 })
     expect(await db.select().from(invites).where(eq(invites.businessId, draft!.id))).toEqual([])
     // the specialists do the menu's services, an administrator none
     const byName = (name: string) => (saved.json.items as Row[]).find((m) => m.name === name)!

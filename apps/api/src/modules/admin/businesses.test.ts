@@ -382,6 +382,9 @@ describe('the admin tool’s businesses (book F-179)', () => {
         categoryId: 'beauty',
         logo: null,
         address: null,
+        services: 0,
+        team: 0,
+        rules: { confirmMode: 'manual', holdMinutes: 30 },
       },
     })
     // one setup at a time, and appointments only

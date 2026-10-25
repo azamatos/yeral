@@ -8,6 +8,7 @@ import { SETUP_STEPS } from '@yeral/domain/setup'
 import { z } from 'zod'
 import { cityRefSchema, idSchema, mobileInputSchema, pageAddressSchema, photoSchema, slugSchema } from './common'
 import { groupInputSchema, serviceInputSchema } from './services'
+import { bookingRulesSchema } from './settings'
 import { assignableLevelSchema, inviteInputSchema } from './team'
 
 /**
@@ -41,6 +42,12 @@ export const setupSchema = z
     logo: photoSchema.nullable(),
     /** The address saved (at the address step or in the settings); null while it has none (the draft starts empty). */
     address: z.object({ line: z.string(), city: cityRefSchema }).nullable(),
+    /** The step list's summaries (B-Onboarding): the services on the menu («5 services»). */
+    services: z.number().int().min(0),
+    /** The people on the team besides the owner, invited included: 0 «I work alone», else «2 people». */
+    team: z.number().int().min(0),
+    /** How bookings are confirmed, as the booking rules name it: «I confirm · 30 min» or «Instant confirmation». */
+    rules: bookingRulesSchema.pick({ confirmMode: true, holdMinutes: true }),
   })
   .meta({ id: 'Setup' })
 export type Setup = z.infer<typeof setupSchema>

@@ -82,7 +82,7 @@ async function viewOf(db: Queryable, rows: ServiceRow[], now: number): Promise<M
   }))
 }
 
-const onMenu = (businessId: string) => and(eq(services.businessId, businessId), eq(services.archived, false))
+export const onMenu = (businessId: string) => and(eq(services.businessId, businessId), eq(services.archived, false))
 
 export async function menuOf(db: Queryable, businessId: string, now: number): Promise<Menu> {
   const [groups, rows] = await all(db, [
