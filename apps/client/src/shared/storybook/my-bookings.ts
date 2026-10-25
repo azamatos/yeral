@@ -116,7 +116,7 @@ export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
     }),
   ],
   past: [
-    row('YR-48101', { date: addDays(today(), -7), status: 'completed', actions: { ...ACTIONS, bookAgain: true } }),
+    row('YR-48101', { date: addDays(today(), -7), status: 'completed', actions: { ...ACTIONS, bookAgain: true, review: true } }),
     row('YR-48150', {
       date: addDays(today(), 4),
       status: 'cancelled',
@@ -239,7 +239,9 @@ export const myBookingsApi =
         const booking = find(one[1])
         return booking ? json(booking) : refuse(404, 'not_found')
       }
-      const act = /^(?:POST|PATCH) \/me\/bookings\/([^/]+)\/(restore|accept-alternative|cancel|withdraw-move|note|reschedule)$/.exec(route)
+      const act = /^(?:POST|PATCH) \/me\/bookings\/([^/]+)\/(restore|accept-alternative|cancel|withdraw-move|note|reschedule|review)$/.exec(
+        route,
+      )
       if (act?.[1]) {
         const booking = find(act[1])
         if (!booking) return refuse(404, 'not_found')
@@ -256,6 +258,15 @@ export const myBookingsApi =
             })
           case 'withdraw-move':
             return json({ ...booking, reschedule: null })
+          case 'review': {
+            // written or changed: the stars, tags and words, then open to change for 7 days
+            const { rating, tags = [], text = null } = body as { rating: number; tags?: string[]; text?: string | null }
+            return json({
+              ...booking,
+              review: { rating, tags, text, createdAt: Date.now() },
+              actions: { ...booking.actions, review: false, editReview: true },
+            })
+          }
           case 'reschedule': {
             // asked of a business that confirms by hand: the new time waits, the old one stays; at once, it moves
             if (fail) return refuse(409, fail)

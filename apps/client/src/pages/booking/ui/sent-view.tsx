@@ -15,9 +15,9 @@ import { Timeline } from '@yeral/ui/timeline'
 import { CalendarPlus, Check, CircleAlert, Send } from 'lucide-react'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { BookingStatusBadge } from '@/entities/booking'
+import { BookingStatusBadge, whatParts } from '@/entities/booking'
 import { site } from '@/shared/config'
-import { calendarAt, downloadFile } from '@/shared/lib'
+import { addressLine, calendarAt, downloadFile } from '@/shared/lib'
 
 /**
  * The sent page (Booking `step=sent`, book C-20, C-21): «Booking sent» and Pending for a business that confirms by hand,
@@ -67,10 +67,11 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
   // this page's business speaks for the booking's only when they're the same (a code from another page's link)
   const own = b.business.slug === detail.slug
   const items = b.what.type === 'appointment' ? b.what.items : []
-  const staffNames = [...new Set(items.map((i) => i.staff).filter((s): s is string => Boolean(s)))]
+  // an appointment's (a class's trainer comes with its flow)
+  const [services = '', ...staffNames] = b.what.type === 'appointment' ? whatParts(b.what) : []
   const visit = calendarAt(b.date, b.start)
   const when = tb('summary.when', { date: fmt.weekdayDate(visit.date), range: fmt.timeRange(b.start, b.end) })
-  const address = [fmt.addressIn(b.address, b.city.name), b.floor].filter(Boolean).join(', ')
+  const address = addressLine(b, fmt)
   const answerBy = b.holdUntil ? localOf(b.holdUntil) : null
   const addToCalendar = () => {
     const file = buildIcs({
@@ -78,7 +79,7 @@ export function SentView({ code, detail }: { code: string; detail: BusinessDetai
       product: brand,
       start: epochOf(b.date, b.start),
       end: epochOf(b.date, b.end),
-      title: t('icsTitle', { services: items.map((i) => i.service).join(', '), business: b.business.name }),
+      title: t('icsTitle', { services, business: b.business.name }),
       location: address,
     })
     downloadFile(t('icsFile', { code: b.code }), file, ICS_TYPE)

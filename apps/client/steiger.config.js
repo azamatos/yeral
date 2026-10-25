@@ -3,7 +3,7 @@ import { fsd } from '@yeral/config/steiger'
 
 export default [
   ...fsd,
-  // the review form waits for My bookings and the booking drawer to open it (P4 slice 3, C5, C6): drop this once
-  // they import it
+  // the review form opens from My bookings (its rows and the drawer, one slice); the «How was it?» card (F-243, the
+  // home page and My bookings) makes the second: drop this then
   { files: ['./src/features/write-review/**'], rules: { 'fsd/insignificant-slice': 'off' } },
 ]

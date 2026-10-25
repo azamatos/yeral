@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Link, Outlet, useNavigate, useSearch } from '@tanstack/react-router'
+import type { MyBooking } from '@yeral/contract/bookings'
 import { useSdk } from '@yeral/sdk/react'
 import { Button } from '@yeral/ui/button'
 import { Callout } from '@yeral/ui/callout'
@@ -7,8 +8,10 @@ import { EmptyState } from '@yeral/ui/empty-state'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@yeral/ui/tabs'
 import { CalendarX2, CircleAlert } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { BookingRow } from './booking-row'
+import { ReviewModal } from '@/features/write-review'
+import { BookingRow, rowLinkId } from './booking-row'
 
 export type BookingsTab = 'upcoming' | 'past'
 
@@ -30,6 +33,14 @@ export function MyBookingsPage() {
   const tab = search.tab ?? 'upcoming'
   const list = useInfiniteQuery(sdk.bookings.list(tab, lang))
   const rows = list.data?.pages.flatMap((p) => p.items) ?? []
+  // one review form for the page: a sent review refreshes the list, and the row's button goes, not the form; the focus
+  // comes back to the row's link
+  const [reviewing, setReviewing] = useState<MyBooking | null>(null)
+  const backTo = useRef<HTMLElement | null>(null)
+  const review = (b: MyBooking) => {
+    backTo.current = document.getElementById(rowLinkId(b.code))
+    setReviewing(b)
+  }
   const panel = (
     <>
       {list.isError && !list.data ? (
@@ -80,7 +91,7 @@ export function MyBookingsPage() {
           <ul className="m-0 -mx-4 flex list-none flex-col p-0 max-sm:mx-0">
             {rows.map((b) => (
               <li key={b.code} className="border-b border-n-200 last:border-b-0 max-sm:border-b">
-                <BookingRow booking={b} tab={tab} />
+                <BookingRow booking={b} tab={tab} onReview={review} />
               </li>
             ))}
           </ul>
@@ -114,6 +125,7 @@ export function MyBookingsPage() {
           </TabsContent>
         ))}
       </Tabs>
+      {reviewing && <ReviewModal booking={reviewing} open onOpenChange={(open) => !open && setReviewing(null)} returnFocus={backTo} />}
       <Outlet />
     </>
   )

@@ -13,6 +13,7 @@ import { Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader } from '@
 import { Field } from '@yeral/ui/field'
 import { Textarea } from '@yeral/ui/input'
 import { KeyValueList } from '@yeral/ui/key-value'
+import { Rating } from '@yeral/ui/rating'
 import { Modal, ModalActions, ModalClose, ModalContent, ModalDescription, ModalHeader, ModalTrigger } from '@yeral/ui/modal'
 import { Skeleton } from '@yeral/ui/skeleton'
 import { Timeline } from '@yeral/ui/timeline'
@@ -20,14 +21,15 @@ import { toast } from '@yeral/ui/toast'
 import { Building2, CircleAlert, Clock, Info, Pencil, Phone } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { BookingStatusBadge, NOTE_MAX, useUndoFailed } from '@/entities/booking'
+import { BookingStatusBadge, NOTE_MAX, useUndoFailed, whatParts } from '@/entities/booking'
+import { ReviewModal } from '@/features/write-review'
 import { useErrorText } from '@/shared/i18n'
 import { addressLine } from '@/shared/lib'
 import { DirectionsButton, PlaceMap } from '@/shared/ui'
 import { drawerSteps, offersOf } from '../model/drawer'
 import { ByLine, rowLinkId, useCancelledBy } from './booking-row'
 import { CancelBooking } from './cancel-booking'
-import { OfferTimes, useWhen } from './offer-times'
+import { OfferTimes, useVisitLine, useWhen } from './offer-times'
 
 /** A part of the drawer's body (`.dsec`): a caps label above. */
 function Part({ label, labelId, children }: { label: string; labelId?: string; children: ReactNode }) {
@@ -127,11 +129,13 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
   const errorText = useErrorText()
   const undoFailedText = useUndoFailed()
   const at = useWhen()
+  const visit = useVisitLine()
   const cancelledBy = useCancelledBy()
   const withdraw = useMutation(sdk.bookings.withdrawMove(lang))
   const restore = useMutation(sdk.bookings.restore(lang))
   const saveNote = useMutation(sdk.bookings.note(lang))
   const [cancelling, setCancelling] = useState(false)
+  const [reviewing, setReviewing] = useState(false)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
   const [undoFailed, setUndoFailed] = useState<string | null>(null)
@@ -144,9 +148,9 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
   }, [noteEditing])
 
   const items = b.what.type === 'appointment' ? b.what.items : []
-  const staff = [...new Set(items.map((i) => i.staff).filter((s): s is string => Boolean(s)))]
-  const services = items.map((i) => i.service).join(', ')
-  const what = staff.length > 0 ? list('what', { services, staff: staff.join(', ') }) : services
+  // the details' services and specialists are an appointment's (a table's or a class's come with their flows)
+  const [services = '', ...staff] = b.what.type === 'appointment' ? whatParts(b.what) : []
+  const what = visit(b.what)
   const when = at(b.date, b.start, b.end)
   const stamp = (epoch: number) => {
     const local = localOf(epoch)
@@ -284,8 +288,16 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
     )
   else if (b.actions.bookAgain)
     footer.push(
-      <Button key="again" asChild variant="primary">
+      // beside «Write a review» it's the second action (Account-Bookings `actReview`)
+      <Button key="again" asChild variant={b.actions.review ? 'secondary' : 'primary'}>
         <Link {...page}>{t('bookAgain')}</Link>
+      </Button>,
+    )
+  // a visit to review (book C-34), or the review to change while it may be (C-35, 7 days)
+  if (b.actions.review || (b.actions.editReview && b.review))
+    footer.push(
+      <Button key="review" variant={b.actions.review ? 'primary' : 'secondary'} onClick={() => setReviewing(true)}>
+        {b.actions.review ? t('writeReview') : t('editReview')}
       </Button>,
     )
 
@@ -340,6 +352,15 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
             </Link>
           )}
           {passed && <ByLine>{list('offersPassed')}</ByLine>}
+          {b.review && (
+            // the board's `.rated`: the star and «5 · You rated», heard as «You rated it 5 out of 5»
+            <Rating
+              role="img"
+              aria-label={t('ratedLabel', { rating: b.review.rating })}
+              value={t('rated', { rating: b.review.rating })}
+              className="gap-1.5 self-start text-small leading-[18px] [&_svg]:size-4"
+            />
+          )}
           {undoFailed && (
             <span role="alert" className="flex items-start gap-1.5 text-dense text-danger-ink">
               <CircleAlert aria-hidden className="mt-0.5 size-3.5 flex-none" strokeWidth={2} />
@@ -494,6 +515,7 @@ function BookingView({ booking: b, onClose, onOpen }: { booking: BookingDetail; 
         )}
       </DrawerBody>
       {footer.length > 0 && <DrawerFooter>{footer}</DrawerFooter>}
+      <ReviewModal booking={b} review={b.review} open={reviewing} onOpenChange={setReviewing} />
       <CancelBooking
         booking={b}
         what={what}
