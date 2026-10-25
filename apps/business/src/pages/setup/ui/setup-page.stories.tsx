@@ -656,9 +656,10 @@ export const HoursAllClosed: Story = {
 const atServices: Draft = { ...atHours, step: 'services' }
 
 /**
- * The services step of a Beauty draft: the starter list in its groups, every row picked; «Clear» a group, rename a
- * starter, add an own service (its name, then its price, hold Continue); Continue sends the whole menu in one call
- * (a renamed starter's name, an unchanged one's id only) and the step list says how many.
+ * The services step of a Beauty draft: the starter list in its groups, each group its own card, every row picked;
+ * «Clear» a group, rename a starter, add an own service (its name, then its price, hold Continue) and name its group;
+ * Continue sends the whole menu in one call (a renamed starter's name, an unchanged one's id only, the own group's
+ * name) and the step list says how many.
  */
 export const Services: Story = {
   args: { server: fakeApi({ draft: atServices }) },
@@ -678,13 +679,18 @@ export const Services: Story = {
     await userEvent.type(haircut, 'Haircut')
     await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Haircut: duration' }), '45')
     await userEvent.click(canvas.getByRole('button', { name: 'Add service' }))
-    await expect(canvas.getByRole('heading', { level: 3, name: 'New services' })).toBeVisible()
+    const ownGroup = canvas.getByRole('textbox', { name: 'Group name: New services' })
+    await expect(ownGroup).toHaveValue('New services')
+    await expect(canvas.getByRole('region', { name: 'Hair' })).toBeVisible()
     const cont = canvas.getByRole('button', { name: 'Continue' })
     await expect(cont).toHaveAccessibleDescription('Name the new service.')
     await userEvent.type(canvas.getByRole('textbox', { name: 'Service name: New service' }), 'Henna')
     await expect(cont).toHaveAccessibleDescription('Add a price to each service.')
     await userEvent.type(canvas.getByRole('textbox', { name: 'Henna: price' }), '120')
     await expect(cont).toBeEnabled()
+    await userEvent.clear(ownGroup)
+    await expect(cont).toHaveAccessibleDescription('Name each group.')
+    await userEvent.type(ownGroup, 'Brows')
     await userEvent.click(cont)
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Who do you work with?' })).toBeVisible()
     await expect(servicesSaved).toEqual([
@@ -697,7 +703,7 @@ export const Services: Story = {
               { starter: 'hair-colouring', durationMin: 120, priceType: 'from', priceAmount: 250 },
             ],
           },
-          { name: { en: 'New services' }, services: [{ name: { en: 'Henna' }, durationMin: 60, priceType: 'fixed', priceAmount: 120 }] },
+          { name: { en: 'Brows' }, services: [{ name: { en: 'Henna' }, durationMin: 60, priceType: 'fixed', priceAmount: 120 }] },
         ],
       },
     ])

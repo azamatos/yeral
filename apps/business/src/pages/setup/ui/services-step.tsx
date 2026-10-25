@@ -10,7 +10,7 @@ import { Select } from '@yeral/ui/select'
 import { Spinner } from '@yeral/ui/spinner'
 import { textLink } from '@yeral/ui/text-link'
 import { toast } from '@yeral/ui/toast'
-import { Info, Plus } from 'lucide-react'
+import { Info, Pencil, Plus } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSdk } from '@/shared/api'
@@ -21,6 +21,8 @@ import {
   fixedPrice,
   formFromMenu,
   formFromStarters,
+  GROUP_NAME_MAX,
+  OWN_GROUP,
   pickedCount,
   PRICE_DIGITS,
   SERVICE_NAME_MAX,
@@ -33,11 +35,13 @@ import {
 } from '../model/services'
 import { StepHeader, type StepAction } from './setup-frame'
 
-const HINT = { none: 'hintNone', newName: 'hintName', name: 'hintNameEach', price: 'hintPrice' } as const
+const HINT = { none: 'hintNone', newName: 'hintName', name: 'hintNameEach', groupName: 'hintGroupName', price: 'hintPrice' } as const
 
 // B-Onboarding `.svr` / `.svh`: the box, the name, 150 for the duration, 132 for the price; on phones the name on a
-// line of its own above the duration and the price
+// line of its own above the duration and the price. Inside a group's card, so the columns' heading above takes the
+// card's inset too.
 const ROW_GRID = 'grid grid-cols-[24px_minmax(0,1fr)_150px_132px] items-center gap-3 max-md:grid-cols-[24px_minmax(0,1fr)_minmax(0,1fr)]'
+const CARD_INSET = 'px-4 max-md:px-3'
 
 /**
  * Step 5, «Your services» (B-Onboarding `isSvc`, book B-04, F-098): the draft category's starter list in its groups,
@@ -98,6 +102,8 @@ export function useServicesStep(
   const update = (change: (f: ServicesForm) => ServicesForm) => setState((s) => s && { ...s, form: change(s.form), edited: true })
   const setRow = (key: string, patch: Partial<ServiceRow>) =>
     update((f) => ({ ...f, rows: f.rows.map((r) => (r.key === key ? { ...r, ...patch } : r)) }))
+  const setGroupName = (key: string, name: string) =>
+    update((f) => ({ ...f, groups: f.groups.map((g) => (g.key === key ? { ...g, name } : g)) }))
 
   const problem = servicesProblem(form)
   const hint = problem ? t(HINT[problem]) : undefined
@@ -109,9 +115,10 @@ export function useServicesStep(
     const sent = JSON.stringify(input)
     if (sent === state.saved) return true
     try {
-      // the rows as saved, by id from now on: saving again keeps them
+      // the rows as saved, by id from now on: saving again keeps them; the own group as the owner named it stays
+      // the one new services go to
       const menu = await save.mutateAsync(input)
-      const saved = formFromMenu(menu, locale, ownName)
+      const saved = formFromMenu(menu, locale, form.groups.find((g) => g.key === OWN_GROUP)?.name.trim() || ownName)
       const ids = menu.groups.flatMap((g) => [g.id, ...g.services.map((x) => x.id)]).join(',')
       setState({ form: saved, saved: JSON.stringify(servicesInput(saved, locale)), basis: `menu:${ids}`, edited: false })
       return true
@@ -143,36 +150,61 @@ export function useServicesStep(
           </Callout>
         )}
         {form.rows.length > 0 && (
-          <div aria-hidden className={`${ROW_GRID} pb-1 text-label text-n-500 uppercase max-md:hidden`}>
+          <div
+            aria-hidden
+            className={`${ROW_GRID} ${CARD_INSET} border-x border-transparent pb-2 text-label text-n-500 uppercase max-md:hidden`}
+          >
             <span />
             <span className="pl-2.75">{t('columns.service')}</span>
             <span>{t('columns.duration')}</span>
             <span className="text-right">{t('columns.price')}</span>
           </div>
         )}
-        {groups.map((g) => {
-          const rows = form.rows.filter((r) => r.group === g.key)
-          const all = rows.every((r) => r.on)
-          const keys = new Set(rows.map((r) => r.key))
-          return (
-            <section key={g.key} className="flex flex-col">
-              <div className="flex items-center justify-between gap-3 pt-5 pb-2">
-                <h3 className="text-body font-semibold">{g.name}</h3>
-                <button
-                  type="button"
-                  disabled={saving}
-                  className={`${textLink} text-small`}
-                  onClick={() => update((f) => ({ ...f, rows: f.rows.map((r) => (keys.has(r.key) ? { ...r, on: !all } : r)) }))}
-                >
-                  {all ? t('clear') : t('selectAll')}
-                </button>
-              </div>
-              {rows.map((r) => (
-                <Row key={r.key} row={r} disabled={saving} onChange={(patch) => setRow(r.key, patch)} fmt={fmt} />
-              ))}
-            </section>
-          )
-        })}
+        {/* each group its own card (the owner, 25.10.2026): the name in a tinted band above its services */}
+        <div className="flex flex-col gap-4">
+          {groups.map((g) => {
+            const rows = form.rows.filter((r) => r.group === g.key)
+            const all = rows.every((r) => r.on)
+            const keys = new Set(rows.map((r) => r.key))
+            const name = g.name.trim() || t('unnamedGroup')
+            return (
+              <section key={g.key} aria-label={name} className="overflow-hidden rounded-card border border-n-200 bg-n-0">
+                <div className="flex items-center gap-3 border-b border-n-200 bg-group py-2 pr-4 pl-1.5 max-md:pr-3">
+                  {/* the group's name, written over like a service's: its line shows on hover and focus */}
+                  <span className="relative flex min-w-0 flex-1 items-center">
+                    <Input
+                      aria-label={t('groupName', { name })}
+                      placeholder={t('groupPlaceholder')}
+                      value={g.name}
+                      maxLength={GROUP_NAME_MAX}
+                      disabled={saving}
+                      onChange={(e) => setGroupName(g.key, e.target.value)}
+                      className="peer h-10 border-transparent bg-transparent pr-9 pl-2.5 text-body font-semibold hover:border-n-300 hover:bg-n-0 focus:border-a-500 focus:bg-n-0 disabled:border-transparent disabled:bg-transparent"
+                    />
+                    <Pencil
+                      aria-hidden
+                      strokeWidth={1.75}
+                      className="pointer-events-none absolute right-3 size-4 text-n-500 peer-focus:hidden"
+                    />
+                  </span>
+                  <button
+                    type="button"
+                    disabled={saving}
+                    className={`${textLink} flex-none text-small`}
+                    onClick={() => update((f) => ({ ...f, rows: f.rows.map((r) => (keys.has(r.key) ? { ...r, on: !all } : r)) }))}
+                  >
+                    {all ? t('clear') : t('selectAll')}
+                  </button>
+                </div>
+                <div className={CARD_INSET}>
+                  {rows.map((r) => (
+                    <Row key={r.key} row={r} disabled={saving} onChange={(patch) => setRow(r.key, patch)} fmt={fmt} />
+                  ))}
+                </div>
+              </section>
+            )
+          })}
+        </div>
       </div>
       <button
         type="button"
@@ -207,7 +239,7 @@ function Row({
   const from = r.priceType === 'from'
   const settable = fixedPrice(r)
   return (
-    <div className={`${ROW_GRID} border-t border-n-200 py-2`}>
+    <div className={`${ROW_GRID} border-t border-n-200 py-2 first:border-t-0`}>
       <Checkbox aria-label={t('pick', { name })} checked={r.on} disabled={disabled} onChange={() => onChange({ on: !r.on })} />
       <Input
         aria-label={t('name', { name })}

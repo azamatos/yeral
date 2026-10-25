@@ -78,9 +78,9 @@ const bufferOf = (form: ServiceForm) => (form.buffer === 'rule' ? null : form.bu
 
 /**
  * The text in the reader's language, with the market's other languages the business wrote kept. A starter service
- * keeps every language it came with (tk, ru, en), and the api takes only the market's, so the rest stay out.
+ * (or group) keeps every language it came with (tk, ru, en), and the api takes only the market's, so the rest stay out.
  */
-function written(before: Localized | null, locale: Locale, text: string): Localized {
+export function written(before: Localized | null, locale: Locale, text: string): Localized {
   const kept = Object.fromEntries(
     Object.entries(before ?? {}).filter(([l, v]) => l !== locale && v && (MARKET.languages as readonly string[]).includes(l)),
   )
