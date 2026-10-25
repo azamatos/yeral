@@ -28,7 +28,7 @@ export function StatusDot({
     <span {...props} className={cn('inline-flex items-center gap-2 text-small font-semibold whitespace-nowrap', ink, className)}>
       <span aria-hidden className={cn('size-2 flex-none rounded-pill', dot)} />
       {children}
-      {detail && (
+      {detail != null && detail !== false && (
         <span className="font-normal text-n-600">
           <span aria-hidden>· </span>
           {detail}

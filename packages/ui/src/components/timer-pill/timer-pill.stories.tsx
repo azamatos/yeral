@@ -57,6 +57,17 @@ export const ArrivedWhileClosed: Story = {
   },
 }
 
+/**
+ * A hold that runs past closing counts only while the business is open: its screen passes the open minutes left, here
+ * 25 though the answer is due tomorrow morning.
+ */
+export const OpenMinutes: Story = {
+  args: { until: new Date(min(15 * 60)), left: () => 25 },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('timer', { name: '25 min left to answer' })).toHaveTextContent('25 min')
+  },
+}
+
 /** Time up: 0, never below. */
 export const TimeUp: Story = {
   args: { until: min(-5) },

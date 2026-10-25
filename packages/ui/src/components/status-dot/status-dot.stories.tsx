@@ -11,30 +11,43 @@ const meta = { title: 'Status/StatusDot', component: StatusDot, args: { children
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The board's samples: each tone, with and without a detail. */
-export const Tones: Story = {
+/** «Verified · your page shows in search», «Active». */
+export const Success: Story = {
   render: () => (
     <div className="flex flex-col items-start gap-2">
       <StatusDot tone="success" detail="your page shows in search">
         Verified
       </StatusDot>
+      <StatusDot tone="success">Active</StatusDot>
+    </div>
+  ),
+}
+
+/** «Invited · 6 days left»: read as one line, the dot and the «·» as decoration; a detail of 0 still shows. */
+export const Warning: Story = {
+  render: () => (
+    <div className="flex flex-col items-start gap-2">
       <StatusDot tone="warning" detail="6 days left">
         Invited
       </StatusDot>
-      <StatusDot tone="success">Active</StatusDot>
-      <StatusDot tone="neutral">Turned off</StatusDot>
-      <StatusDot tone="muted" detail="Opens tomorrow at 09:00">
-        Closed today
+      <StatusDot tone="warning" detail={0}>
+        Days left
       </StatusDot>
     </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    // read as one line: the label, then the detail; the dot and the «·» are decoration
     await expect(canvas.getByText('Invited').closest('span')).toHaveTextContent('Invited· 6 days left')
-    await expect(canvasElement.querySelectorAll('[aria-hidden]').length).toBe(8)
+    await expect(canvas.getByText('Days left').closest('span')).toHaveTextContent('Days left· 0')
+    await expect(canvasElement.querySelectorAll('[aria-hidden]')).toHaveLength(4)
   },
 }
+
+/** «Turned off» in slate. */
+export const Neutral: Story = { args: { tone: 'neutral', children: 'Turned off' } }
+
+/** «Closed today · Opens tomorrow at 09:00» in n-500. */
+export const Muted: Story = { args: { tone: 'muted', children: 'Closed today', detail: 'Opens tomorrow at 09:00' } }
 
 /** Russian-length words: the line grows. */
 export const Russian: Story = {

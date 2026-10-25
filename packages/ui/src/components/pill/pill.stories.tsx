@@ -3,7 +3,7 @@
  * 14 on l). Tags in lists, cards and drawers; not booking statuses (StatusBadge), not buttons (Chip).
  */
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { CalendarClock, Crown, Star } from 'lucide-react'
+import { CalendarClock, Crown } from 'lucide-react'
 import { expect, within } from 'storybook/test'
 import { Pill } from './pill'
 
@@ -22,26 +22,32 @@ const TONES = [
   ['ink', 'Cover'],
 ] as const
 
-/** Every tone in every size; the ink tone sits on a photo. */
-export const TonesAndSizes: Story = {
+/** The eight tones at m; the ink tone sits on a photo. */
+export const Tones: Story = {
   render: () => (
-    <div className="grid grid-cols-[repeat(4,max-content)] items-center gap-3">
+    <div className="flex flex-wrap items-center gap-3">
       {TONES.map(([tone, text]) => (
-        <div key={tone} className="contents">
-          {(['s', 'm', 'l'] as const).map((size) => (
-            <span key={size} className={tone === 'ink' ? 'rounded-s bg-n-500 p-2' : 'p-2'}>
-              <Pill tone={tone} size={size}>
-                {text}
-              </Pill>
-            </span>
-          ))}
-          <span className={tone === 'ink' ? 'rounded-s bg-n-500 p-2' : 'p-2'}>
-            <Pill tone={tone} size="l" icon={<Star aria-hidden />}>
+        <span key={tone} className={tone === 'ink' ? 'rounded-s bg-n-500 p-2' : 'p-2'}>
+          <Pill tone={tone}>{text}</Pill>
+        </span>
+      ))}
+    </div>
+  ),
+}
+
+/** s 20, m 24, l 28 in each tone. */
+export const Sizes: Story = {
+  render: () => (
+    <div className="grid grid-cols-[repeat(3,max-content)] items-center gap-3">
+      {TONES.map(([tone, text]) =>
+        (['s', 'm', 'l'] as const).map((size) => (
+          <span key={`${tone}-${size}`} className={tone === 'ink' ? 'rounded-s bg-n-500 p-2' : 'p-2'}>
+            <Pill tone={tone} size={size}>
               {text}
             </Pill>
           </span>
-        </div>
-      ))}
+        )),
+      )}
     </div>
   ),
 }

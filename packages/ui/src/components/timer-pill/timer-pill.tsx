@@ -1,8 +1,8 @@
 import { cva } from 'class-variance-authority'
 import { Clock } from 'lucide-react'
 import type { ComponentProps } from 'react'
+import { useClock } from '../../lib/clock'
 import { cn } from '../../lib/cn'
-import { useMinute } from '../../lib/use-minute'
 
 const timer = cva(
   'inline-flex flex-none items-center rounded-pill border border-st-pending-line font-semibold whitespace-nowrap tabular-nums [&_svg]:flex-none [&_svg]:stroke-2',
@@ -21,8 +21,13 @@ const timer = cva(
 )
 
 export type TimerPillProps = Omit<ComponentProps<'span'>, 'children'> & {
-  /** When the time runs out (epoch ms): the minutes left count down to it. */
-  until: number
+  /** When the time runs out: the minutes left count down to it. */
+  until: Date | number
+  /**
+   * The minutes left at a time: by default the clock's minutes to `until`. A request's hold counts only while the
+   * business is open, so its screen passes the open minutes left (`@yeral/domain`), which stand still while it's closed.
+   */
+  left?: (now: number) => number
   /** The minutes left as the pill shows them: «18 min». */
   format: (minutes: number) => string
   /** The same as a sentence for screen readers: «18 min left to answer». */
@@ -32,26 +37,34 @@ export type TimerPillProps = Omit<ComponentProps<'span'>, 'children'> & {
   size?: 's' | 'm'
   /**
    * In place of the count: a request that arrived while the business was closed shows when to answer by, «By 09:30»,
-   * read «Answer by 09:30 tomorrow»; the time counts only while it's open.
+   * read «Answer by 09:30 tomorrow».
    */
   by?: { text: string; label: string }
-  /** The time now (epoch ms), for a story; the page's shared minute clock otherwise. */
+  /** The time now (epoch ms), for a story or a page drawn on the server; the page's shared clock otherwise. */
   now?: number
 }
 
 /**
  * TimerPill (DS-Patterns → Status «TimerPill»): the time left to answer a request, «18 min» on the warning tint with a
  * clock, danger ink from 15 minutes left (`hotBelowMin`), or «By 09:30» for one that arrived while the business was
- * closed. M (26) in tables and drawers, S (18, white) on a warning-tinted block. Every timer on the page draws again
- * at each new minute on one shared clock; `role="timer"` with the full sentence as its name. The words come from the
- * caller (`format`, `label`, `by`).
+ * closed. M (26) in tables and drawers, S (18, white) on a warning-tinted block. Every timer on the page counts on one
+ * shared clock (`@yeral/ui/clock`, to 15 s), which a sentence beside it reads too; `role="timer"` with the full
+ * sentence as its name. The words come from the caller (`format`, `label`, `by`).
  */
-export function TimerPill({ until, format, label, hotBelowMin = 15, size, by, now, className, ...props }: TimerPillProps) {
-  const minute = useMinute()
-  const minutes = Math.max(0, Math.ceil((until - (now ?? minute)) / 60_000))
+export function TimerPill({ until, left, format, label, hotBelowMin = 15, size, by, now, className, ...props }: TimerPillProps) {
+  const clock = useClock()
+  const at = now ?? clock
+  const minutes = Math.max(0, Math.ceil(left ? left(at) : (+until - at) / 60_000))
   const hot = !by && minutes <= hotBelowMin
   return (
-    <span {...props} role="timer" aria-label={by ? by.label : label(minutes)} className={cn(timer({ size, hot }), className)}>
+    <span
+      {...props}
+      role="timer"
+      aria-label={by ? by.label : label(minutes)}
+      // drawn on the server at its time, then counted in the browser at its own
+      suppressHydrationWarning
+      className={cn(timer({ size, hot }), className)}
+    >
       <Clock aria-hidden />
       {by ? by.text : format(minutes)}
     </span>

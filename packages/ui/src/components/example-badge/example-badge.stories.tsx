@@ -29,35 +29,43 @@ export const Sizes: Story = {
 }
 
 /**
- * On a business card's photo, top-left 10: after the name in the markup, so the card reads «Glow Studio Example», and
- * drawn on the photo.
+ * On a business card's photo, top-left 10. The card is named by its words, the badge after the name in its markup
+ * (drawn on the photo) with a hidden comma between: «Glow Studio, Example».
  */
 export const OnCard: Story = {
   render: (args) => (
     <a href="#card" className="relative block w-64 overflow-hidden rounded-card border border-n-200">
       <span className="block h-36 bg-n-300" />
       <span className="block p-3 text-body font-semibold">Glow Studio</span>
+      <span className="sr-only">, </span>
       <ExampleBadge {...args} className="absolute top-2.5 left-2.5" />
     </a>
   ),
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('link')).toHaveAccessibleName('Glow Studio Example')
+    await expect(within(canvasElement).getByRole('link')).toHaveAccessibleName(/^Glow Studio\s*,\s*Example$/)
   },
 }
 
-/** After the name on a search row (S): the row's name is its words, «Glow Studio Example Beauty salon · 850 m». */
+/** After the name on a search row (S), named by its words: «Glow Studio, Example. Beauty salon · 850 m». */
 export const OnSearchRow: Story = {
   render: (args) => (
     <a href="#row" className="flex w-80 items-center gap-3">
       <span className="size-12 flex-none rounded-s bg-n-300" />
       <span className="flex min-w-0 flex-col">
         <span className="flex items-center gap-2 text-body font-semibold">
-          Glow Studio <ExampleBadge {...args} size="s" />
+          <span>
+            Glow Studio<span className="sr-only">,</span>
+          </span>
+          <ExampleBadge {...args} size="s" />
+          <span className="sr-only">.</span>
         </span>
         <span className="text-dense text-n-600">Beauty salon · 850 m</span>
       </span>
     </a>
   ),
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('link')).toHaveAccessibleName(/^Glow Studio\s*,\s*Example\s*\.\s*Beauty salon · 850 m$/)
+  },
 }
 
 /** Next to the name on the business page, with the owner's line under the header. */
@@ -79,11 +87,11 @@ export const OnPageHeader: Story = {
 export const OnMapPin: Story = {
   render: () => (
     <div className="relative h-24 w-80 rounded-s bg-n-100">
-      <MapPin aria-label="Glow Studio, example" className="gap-1 [&_svg]:size-3.5" style={{ left: 90, bottom: 30 }}>
+      <MapPin aria-label="Glow Studio, example" className="gap-1 pl-2" style={{ left: 90, bottom: 30 }}>
         <ExampleIcon className="text-n-600" />
         Glow Studio
       </MapPin>
-      <MapPin hot aria-label="Aýna Beauty, example" className="gap-1 [&_svg]:size-3.5" style={{ left: 230, bottom: 30 }}>
+      <MapPin hot aria-label="Aýna Beauty, example" className="gap-1 pl-2" style={{ left: 230, bottom: 30 }}>
         <ExampleIcon />
         Aýna Beauty
       </MapPin>
