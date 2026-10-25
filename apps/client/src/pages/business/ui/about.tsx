@@ -1,16 +1,17 @@
 import type { BusinessDetail } from '@yeral/contract/catalog'
 import { AMENITIES, type Amenity } from '@yeral/domain/model'
 import { useFmt } from '@yeral/i18n'
-import { directionsUrl, telHref } from '@yeral/lib/links'
+import { telHref } from '@yeral/lib/links'
 import { Button } from '@yeral/ui/button'
 import { useClock } from '@yeral/ui/clock'
 import { cn } from '@yeral/ui/cn'
-import { MapDot, MapFrame, MapMarker, MapPin } from '@yeral/ui/map-frame'
 import { Pill } from '@yeral/ui/pill'
-import { Car, CircleCheck, Clock, CreditCard, Info, MapPin as Place, Navigation, Phone, Snowflake, Wallet, Wifi } from 'lucide-react'
+import { Car, CircleCheck, Clock, CreditCard, Info, MapPin as Place, Phone, Snowflake, Wallet, Wifi } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
-import { addressLine, confirmLine, weekRows } from '../model/when'
+import { addressLine } from '@/shared/lib'
+import { DirectionsButton, PlaceMap } from '@/shared/ui'
+import { confirmLine, weekRows } from '../model/when'
 import { Section } from './sections'
 
 /** An icon row (Venue `.ir`): 20 icon, 15/22 text, 12 apart. */
@@ -102,27 +103,9 @@ function Address({ detail }: { detail: BusinessDetail }) {
   const page = useTranslations('business')
   const card = useTranslations('business.card')
   const fmt = useFmt()
-  const at = { lat: detail.geo.lat, lng: detail.geo.lng }
-  // the server's render (and a computer) links Google Maps; a phone's press opens its own map app
-  const google = directionsUrl(at, detail.name)
   return (
     <Part title={t('address')}>
-      {/* the map is a picture of the address written under it; the pin names the place. A new page (a place nearby)
-          makes a new map, so the zoom follows its kind of address too */}
-      <MapFrame key={detail.slug} center={at} zoom={detail.geo.approximate ? 14 : 16} interactive={false} className="h-70 rounded-card">
-        <MapMarker at={at}>
-          {detail.geo.approximate ? (
-            <span className="absolute size-37.5 -translate-1/2 rounded-pill border-[1.5px] border-a-500/45 bg-a-500/14" />
-          ) : (
-            <>
-              <MapPin hot className="-translate-y-2.5">
-                {detail.name}
-              </MapPin>
-              <MapDot />
-            </>
-          )}
-        </MapMarker>
-      </MapFrame>
+      <PlaceMap name={detail.name} geo={detail.geo} className="h-70 rounded-card" />
       <Row icon={<Place aria-hidden strokeWidth={1.75} />}>
         <span className="flex flex-col">
           <span className="font-semibold">{addressLine(detail, fmt)}</span>
@@ -135,23 +118,9 @@ function Address({ detail }: { detail: BusinessDetail }) {
       </Row>
       <div className="flex flex-wrap gap-2">
         {!detail.hideExactAddress && (
-          <Button asChild size="s" variant="secondary">
-            <a
-              href={google}
-              target="_blank"
-              rel="noopener noreferrer"
-              // the phone's own map app where there is one (book Q-108); the link is Google Maps for a computer
-              onClick={(e) => {
-                const own = directionsUrl(at, detail.name, navigator)
-                if (own === google) return
-                e.preventDefault()
-                location.href = own
-              }}
-            >
-              <Navigation aria-hidden />
-              {t('directions')}
-            </a>
-          </Button>
+          <DirectionsButton name={detail.name} geo={detail.geo}>
+            {t('directions')}
+          </DirectionsButton>
         )}
         <Button asChild size="s" variant="secondary">
           <a href={telHref(detail.phone)} aria-label={card('callLabel', { phone: fmt.phone(detail.phone) })}>

@@ -463,11 +463,11 @@ export function createSdk(client: Client, queryClient: QueryClient) {
   const bookingAction = <B>(
     lang: Locale,
     run: (code: string, body: B) => Promise<BookingDetail>,
-    alsoStale: (data: BookingDetail) => (readonly unknown[])[] = () => [],
+    alsoStale: (data: BookingDetail, code: string) => (readonly unknown[])[] = () => [],
   ) =>
     mutationOptions({
       mutationFn: ({ code, body }: { code: string; body: B }) => run(code, body),
-      onSuccess: (data) => settle(lang, data, ...alsoStale(data)),
+      onSuccess: (data, { code }) => settle(lang, data, ...alsoStale(data, code)),
     })
   /** A review changes the business's reviews, rating and count. */
   const reviewed = (data: BookingDetail) => [keys.reviewsAll(data.business.slug), keys.businessAll(data.business.slug)]
@@ -523,9 +523,12 @@ export function createSdk(client: Client, queryClient: QueryClient) {
       bookingAction<z.input<typeof rescheduleSchema>>(lang, (code, json) =>
         call(one.reschedule.$post({ param: { code }, query: { lang }, json })),
       ),
+    /** The answer is the booking just made; the one it stood in for now names it (`offerTakenBy`), read again. */
     acceptAlternative: (lang: Locale) =>
-      bookingAction<z.input<typeof acceptAlternativeSchema>>(lang, (code, json) =>
-        call(one['accept-alternative'].$post({ param: { code }, query: { lang }, json })),
+      bookingAction<z.input<typeof acceptAlternativeSchema>>(
+        lang,
+        (code, json) => call(one['accept-alternative'].$post({ param: { code }, query: { lang }, json })),
+        (_, code) => [keys.booking(code, lang)],
       ),
     review: (lang: Locale) =>
       bookingAction<z.input<typeof reviewInputSchema>>(

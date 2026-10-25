@@ -65,11 +65,6 @@ export function confirmLine(detail: Pick<BusinessDetail, 'confirmMode' | 'typica
   return detail.typicalConfirmMinutes ? t('confirmsWithin', { time: fmt.duration(detail.typicalConfirmMinutes) }) : t('confirmsByHand')
 }
 
-/** «Bitarap Türkmenistan avenue 247, Ashgabat, 2nd floor»: the address with its city and floor (the header, About). */
-export function addressLine(detail: Pick<BusinessDetail, 'address' | 'city' | 'floor'>, fmt: Fmt): string {
-  return [fmt.addressIn(detail.address, detail.city.name), detail.floor].filter(Boolean).join(', ')
-}
-
 export interface WeekRow {
   date: string
   today: boolean

@@ -342,11 +342,13 @@ describe('sdk', () => {
     expect(f.calls[0]?.url.pathname).toBe('/v1/me/bookings/YR-48213/accept-alternative')
     expect(f.queryClient.getQueryData(['bookings', 'detail', 'YR-48214', 'tk'])).toEqual(detail)
     expect(f.queryClient.getQueryData(['bookings', 'detail', 'YR-48213', 'tk'])).toBeUndefined()
-    // the lists, "How was it?" and that business's free times, not the detail just written
+    // the lists, "How was it?", that business's free times and the booking the time stood in for (it names the new
+    // one now), not the detail just written
     expect(spy.mock.calls.map((c) => c[0]?.queryKey)).toEqual([
       ['bookings', 'list'],
       ['bookings', 'how-was-it'],
       ['availability', 'glow-studio'],
+      ['bookings', 'detail', 'YR-48213', 'tk'],
     ])
   })
 

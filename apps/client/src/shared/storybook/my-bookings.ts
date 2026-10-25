@@ -1,6 +1,6 @@
 import type { Me } from '@yeral/contract/account'
-import type { MyBooking } from '@yeral/contract/bookings'
-import { addDays, today } from '@yeral/domain/time'
+import type { BookingDetail, MyBooking } from '@yeral/contract/bookings'
+import { addDays, epochOf, today } from '@yeral/domain/time'
 import { AYJEMAL, authApi, fakeFetch, json, refuse } from './fake-api'
 
 const ACTIONS = {
@@ -85,7 +85,14 @@ export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
       offers: { source: 'expired', times: [offer(720, 'free'), offer(780, 'free')] },
       actions: ACTIONS,
     }),
-    row('YR-48213', { status: 'pending', holdUntil: Date.now() + 18 * 60_000, date: today(), start: 1020, end: 1080 }),
+    row('YR-48213', {
+      status: 'pending',
+      holdUntil: Date.now() + 18 * 60_000,
+      date: today(),
+      start: 1020,
+      end: 1080,
+      actions: { ...ACTIONS, cancel: true, reschedule: true, editNote: true },
+    }),
     row('YR-48190', { reschedule: { date: addDays(today(), 3), start: 600, end: 660, holdUntil: Date.now() + 25 * 60_000 } }),
     row('YR-48205', {
       business: LOFT,
@@ -119,29 +126,119 @@ export const MY_BOOKINGS: { upcoming: MyBooking[]; past: MyBooking[] } = {
   ],
 }
 
+const HOUR = 3_600_000
+
 /**
- * My bookings' api: the two lists, Undo and taking an offered time (`refuse` makes either fail with that code), and the
- * sign-in (`authApi`) for everything else.
+ * A row's booking as `GET /me/bookings/{code}` has it: its history by what happened to it (sent two days before; a
+ * decline and an expiry right after), the place's address and position, its free cancel up to 2 hours before, the
+ * offered times by where they come from, and the business asking for a cancel's reason.
+ */
+export function detailOf(b: MyBooking, over: Partial<BookingDetail> = {}): BookingDetail {
+  const visit = epochOf(b.date, b.start)
+  const sent = visit - 48 * HOUR
+  const ev = (event: BookingDetail['timeline'][number]['event'], hours: number) => ({ event, at: sent + hours * HOUR })
+  const timeline =
+    b.status === 'pending'
+      ? [ev('sent', 0)]
+      : b.cancelledBy === 'system'
+        ? [ev('sent', 0), ev('expired', 0.5)]
+        : b.decline
+          ? [ev('sent', 0), ev('declined', 0.3)]
+          : b.status === 'cancelled'
+            ? [ev('sent', 0), ev('confirmed', 0.2), ev(b.cancelledBy === 'client' ? 'cancelled_by_client' : 'cancelled_by_business', 20)]
+            : b.status === 'completed'
+              ? [ev('sent', 0), ev('confirmed', 0.2), ev('completed', 49)]
+              : b.status === 'noshow'
+                ? [ev('sent', 0), ev('confirmed', 0.2), ev('noshow', 48.5)]
+                : [ev('sent', 0), ev('confirmed', 0.2), ...(b.reschedule ? [ev('reschedule_requested', 30)] : [])]
+  const glow = b.business.slug === GLOW.slug
+  return {
+    code: b.code,
+    business: b.business,
+    what: b.what,
+    date: b.date,
+    start: b.start,
+    end: b.end,
+    status: b.status,
+    cancelledBy: b.cancelledBy,
+    price: b.price,
+    source: b.source,
+    timeline,
+    address: glow ? 'Bitarap Türkmenistan avenue 247' : 'Magtymguly avenue 112',
+    city: { id: 'ashgabat', name: 'Ashgabat' },
+    floor: glow ? '2nd floor' : null,
+    entranceNote: glow ? 'The door beside the shopping centre, lift to the 2nd floor' : null,
+    movedAt: null,
+    geo: glow ? { lat: 37.9601, lng: 58.3261, approximate: false } : { lat: 37.9431, lng: 58.3792, approximate: false },
+    clientNote: null,
+    holdUntil: b.holdUntil,
+    cancelDeadline: visit - 2 * HOUR,
+    askCancelReason: true,
+    cancelReason: null,
+    businessCancel: b.businessCancel,
+    decline: b.decline ? { ...b.decline, alternatives: b.offers?.source === 'decline' ? b.offers.times : [] } : null,
+    cancelOffers: b.offers?.source === 'cancel' ? b.offers.times : [],
+    expiredAlternatives: b.offers?.source === 'expired' ? b.offers.times : [],
+    offerTakenBy: b.offerTakenBy,
+    bookOnline: b.bookOnline,
+    moveRefused: null,
+    reschedule: b.reschedule,
+    actions: b.actions,
+    review: null,
+    ...over,
+  }
+}
+
+/**
+ * My bookings' api: the two lists, each booking (`details` over what {@link detailOf} makes of a row), and what the
+ * list and the drawer do: Undo, taking an offered time, cancelling, withdrawing a move and the note (`refuse` makes
+ * Undo and taking a time fail with that code); the sign-in (`authApi`) for everything else.
  */
 export const myBookingsApi =
-  ({ lists = MY_BOOKINGS, signedIn = AYJEMAL, refuse: fail }: { lists?: typeof MY_BOOKINGS; signedIn?: Me; refuse?: string } = {}) =>
+  ({
+    lists = MY_BOOKINGS,
+    signedIn = AYJEMAL,
+    refuse: fail,
+    details = {},
+  }: { lists?: typeof MY_BOOKINGS; signedIn?: Me; refuse?: string; details?: Record<string, Partial<BookingDetail>> } = {}) =>
   (): typeof fetch => {
     const signIn = authApi({ signedIn })()
     const all = [...lists.upcoming, ...lists.past]
-    const mine = fakeFetch(({ route, query }) => {
+    const find = (code: string) => {
+      const b = all.find((r) => r.code === code)
+      return b ? detailOf(b, details[code]) : null
+    }
+    const mine = fakeFetch(({ route, query, body }) => {
       if (route === 'GET /me/bookings') return json({ items: query.get('tab') === 'past' ? lists.past : lists.upcoming, cursor: null })
-      const act = /^POST \/me\/bookings\/([^/]+)\/(restore|accept-alternative)$/.exec(route)
+      const one = /^GET \/me\/bookings\/([^/]+)$/.exec(route)
+      if (one?.[1]) {
+        const booking = find(one[1])
+        return booking ? json(booking) : refuse(404, 'not_found')
+      }
+      const act = /^(?:POST|PATCH) \/me\/bookings\/([^/]+)\/(restore|accept-alternative|cancel|withdraw-move|note)$/.exec(route)
       if (act?.[1]) {
-        const booking = all.find((b) => b.code === act[1])
+        const booking = find(act[1])
         if (!booking) return refuse(404, 'not_found')
-        if (fail) return refuse(409, fail)
-        return json({
-          ...booking,
-          code: act[2] === 'restore' ? booking.code : 'YR-48231',
-          status: 'confirmed',
-          cancelledBy: null,
-          offers: null,
-        })
+        const done = { status: 'confirmed' as const, cancelledBy: null, decline: null, cancelOffers: [], expiredAlternatives: [] }
+        switch (act[2]) {
+          case 'cancel':
+            return json({
+              ...booking,
+              status: 'cancelled',
+              cancelledBy: 'client',
+              reschedule: null,
+              cancelReason: (body as { reason?: string }).reason ?? null,
+              actions: { ...ACTIONS, restore: true, bookAgain: true },
+            })
+          case 'withdraw-move':
+            return json({ ...booking, reschedule: null })
+          case 'note':
+            return json({ ...booking, clientNote: (body as { note: string }).note || null })
+          case 'restore':
+            return fail ? refuse(409, fail) : json({ ...booking, ...done, actions: { ...ACTIONS, cancel: true, reschedule: true } })
+          default:
+            return fail ? refuse(409, fail) : json({ ...booking, ...done, code: 'YR-48231', timeline: booking.timeline.slice(0, 1) })
+        }
       }
       return undefined
     })
