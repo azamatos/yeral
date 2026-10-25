@@ -38,6 +38,7 @@ import {
   saveOf,
   type MemberForm,
 } from '../model/member'
+import { RemoveMember } from './remove-member'
 import { ServicePicker } from './service-picker'
 
 const TABS = ['profile', 'services', 'access'] as const
@@ -51,6 +52,7 @@ type Tab = (typeof TABS)[number]
  */
 export function MemberDrawer({
   slug,
+  business,
   member,
   people,
   menu,
@@ -61,6 +63,8 @@ export function MemberDrawer({
   onLink,
 }: {
   slug: string
+  /** The workspace's name, for «… loses access to Glow Studio». */
+  business: string
   member: TeamMember | null
   people: TeamMember[]
   menu: Menu
@@ -85,6 +89,7 @@ export function MemberDrawer({
           <MemberEditor
             key={member.id}
             slug={slug}
+            business={business}
             member={member}
             people={people}
             menu={menu}
@@ -102,6 +107,7 @@ export function MemberDrawer({
 
 function MemberEditor({
   slug,
+  business,
   member: m,
   people,
   menu,
@@ -112,6 +118,7 @@ function MemberEditor({
   onLink,
 }: {
   slug: string
+  business: string
   member: TeamMember
   people: TeamMember[]
   menu: Menu
@@ -139,6 +146,7 @@ function MemberEditor({
   const [was] = useState(() => formOf(m, menu, now))
   const [form, setForm] = useState<MemberForm>(was)
   const [tab, setTab] = useState<Tab>('profile')
+  const [removing, setRemoving] = useState(false)
   const [saving, setSaving] = useState(false)
   // the api refused the number (someone who joined once keeps theirs): shown on the field until it changes
   const [phoneLocked, setPhoneLocked] = useState(false)
@@ -447,7 +455,20 @@ function MemberEditor({
           </TabsContent>
         </DrawerBody>
       </Tabs>
-      <DrawerFooter>
+      <DrawerFooter className="justify-between [&>*]:flex-none">
+        {owner && !ownerRow ? (
+          <Button
+            variant="danger-ghost"
+            aria-haspopup="dialog"
+            disabled={saving}
+            className="-ml-1.5 px-1.5"
+            onClick={() => setRemoving(true)}
+          >
+            {t('remove')}
+          </Button>
+        ) : (
+          <span />
+        )}
         {canSave ? (
           <Button variant="primary" disabled={!dirty || !valid} loading={saving} loadingLabel={t('saving')} onClick={() => void save()}>
             {t('save')}
@@ -458,6 +479,9 @@ function MemberEditor({
           </Button>
         )}
       </DrawerFooter>
+      {owner && !ownerRow && (
+        <RemoveMember slug={slug} member={m} business={business} open={removing} onOpenChange={setRemoving} onRemoved={onClose} />
+      )}
     </>
   )
 }

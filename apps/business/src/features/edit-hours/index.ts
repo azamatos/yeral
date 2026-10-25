@@ -10,6 +10,6 @@ export {
   weekValid,
   type EditorWeek,
 } from './model/hours'
-export { AffectedBookingsList, HoursAffectedBookings, useAffectedCount, useJoin, type AffectedChoice } from './ui/affected-bookings'
+export { HoursAffectedBookings, type AffectedChoice } from './ui/affected-bookings'
 export { SpecialDays } from './ui/special-days'
 export { SameHoursSwitch, WeekHoursRows } from './ui/week-hours'

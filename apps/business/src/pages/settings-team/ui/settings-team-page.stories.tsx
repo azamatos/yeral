@@ -121,6 +121,39 @@ const scheduleOf = (id: string) => ({
   daysOff: [],
 })
 
+/** Maral's bookings ahead as a removal lists them: one Leýli can take, one nobody else does. */
+const maralAhead = {
+  count: 2,
+  counts: { bookings: 2, requests: 0 },
+  byStaff: [{ staffId: '00000000-0000-4000-8000-000000000003', name: 'Maral', count: 2 }],
+  bookings: [
+    {
+      code: 'YR-48213',
+      date: '2026-11-03',
+      start: 600,
+      end: 660,
+      status: 'confirmed',
+      holdUntil: null,
+      client: 'Gözel A.',
+      items: [{ serviceId: null, service: 'Manicure', staffId: null, staff: 'Maral', start: 600, end: 660 }],
+      staff: ['Maral'],
+      colleagues: [{ staffId: '00000000-0000-4000-8000-000000000005', name: 'Leýli Berdiýewa' }],
+    },
+    {
+      code: 'YR-48214',
+      date: '2026-11-04',
+      start: 720,
+      end: 810,
+      status: 'confirmed',
+      holdUntil: null,
+      client: 'Mähri G.',
+      items: [{ serviceId: null, service: 'Gel polish', staffId: null, staff: 'Maral', start: 720, end: 810 }],
+      staff: ['Maral'],
+      colleagues: [],
+    },
+  ],
+}
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
 
@@ -159,6 +192,16 @@ const fakeApi =
             : p,
         )
         return json(people.find((p) => p.id === edit[1]))
+      }
+      // removing someone: Maral's bookings ahead are asked about first, then settled as chosen
+      const removing = /^POST \/w\/glow-studio\/team\/([^/]+)\/remove$/.exec(route)
+      if (removing) {
+        const body = (await request.json()) as { affected?: string; rows?: { code: string; affected: string }[] }
+        if (removing[1] === 'maral' && !body.affected) return json({ error: { code: 'bookings_affected', details: maralAhead } }, 409)
+        people = people.map((p) => (p.id === removing[1] ? { ...p, status: 'removed' as const } : p))
+        const cancelled = body.affected === 'cancel' ? 2 : (body.rows ?? []).filter((r) => r.affected === 'cancel').length
+        const moved = body.affected === 'move' ? 1 : 0
+        return json({ moved, kept: removing[1] === 'maral' ? 2 - moved - cancelled : 0, cancelled })
       }
       const doing = /^PUT \/w\/glow-studio\/team\/([^/]+)\/services$/.exec(route)
       if (doing) {
@@ -508,6 +551,45 @@ export const DrawerAdmin: Story = {
     await userEvent.click(drawer.getByRole('button', { name: 'Save' }))
     const saved = await body.findByText('Leýli: changes saved')
     await waitFor(() => expect(saved).toBeVisible())
+  },
+}
+
+/** Remove someone with bookings ahead: moved to a colleague who does the service, the one nobody else does cancelled. */
+export const RemoveWithBookings: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Maral Ataýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Maral Ataýewa' }))
+    await userEvent.click(drawer.getByRole('button', { name: 'Remove from the team' }))
+    const modal = within(await body.findByRole('dialog', { name: 'Remove Maral from the team?' }))
+    // the window may still be coming in
+    await waitFor(() => expect(modal.getByText(/^Maral loses access to Glow Studio/)).toBeVisible())
+    await userEvent.click(modal.getByRole('button', { name: 'Remove Maral' }))
+    // the api lists the bookings ahead: moving is picked, to the colleague who does manicures
+    await expect(await modal.findByRole('radio', { name: 'Move to another specialist' })).toBeChecked()
+    await expect(modal.getByRole('combobox', { name: 'To' })).toHaveDisplayValue('Leýli Berdiýewa')
+    await expect(modal.getByText('2 bookings')).toBeVisible()
+    await expect(modal.getByText('Nobody else does Gel polish')).toBeVisible()
+    await userEvent.selectOptions(modal.getByRole('combobox', { name: 'Mähri G.: what happens' }), 'cancel')
+    await userEvent.click(modal.getByRole('button', { name: 'Remove Maral' }))
+    const done = await body.findByText(
+      'Maral removed from the team · 1 moved to Leýli Berdiýewa, 1 cancelled with 3 other times offered · the clients are notified',
+    )
+    await waitFor(() => expect(done).toBeVisible())
+    await expect(body.queryByRole('dialog', { name: 'Maral Ataýewa' })).toBeNull()
+  },
+}
+
+/** Remove someone with nothing ahead: gone at once. */
+export const RemoveNothingAhead: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.click(await canvas.findByRole('button', { name: 'Jeren Hojaýewa' }))
+    const drawer = within(await body.findByRole('dialog', { name: 'Jeren Hojaýewa' }))
+    await userEvent.click(drawer.getByRole('button', { name: 'Remove from the team' }))
+    const modal = within(await body.findByRole('dialog', { name: 'Remove Jeren from the team?' }))
+    await userEvent.click(modal.getByRole('button', { name: 'Remove Jeren' }))
+    const done = await body.findByText('Jeren removed from the team')
+    await waitFor(() => expect(done).toBeVisible())
+    await expect(await within(canvas.getByRole('group', { name: 'No longer on the team' })).findByText('Jeren Hojaýewa')).toBeVisible()
   },
 }
 

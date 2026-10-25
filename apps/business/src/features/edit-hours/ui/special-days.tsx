@@ -32,7 +32,8 @@ import {
   type SpecialDay,
   type SpecialDayDraft,
 } from '../model/special-days'
-import { HoursAffectedBookings, useAffectedCount, useJoin, type AffectedChoice } from './affected-bookings'
+import { useAffectedCount, useJoin } from '@/entities/booking'
+import { HoursAffectedBookings, type AffectedChoice } from './affected-bookings'
 
 type Saved = { hours: (WeekdayHours | null)[]; specialDays: SpecialDay[] }
 

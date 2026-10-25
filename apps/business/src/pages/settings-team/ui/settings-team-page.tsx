@@ -36,7 +36,15 @@ import { MemberDrawer } from './member-drawer'
 export function SettingsTeamPage() {
   const { workspace, me } = useWorkspace()
   if (!workspace) return null
-  return <TeamSettings key={workspace.slug} slug={workspace.slug} owner={workspace.level === 'owner'} myPhone={me?.phone ?? null} />
+  return (
+    <TeamSettings
+      key={workspace.slug}
+      slug={workspace.slug}
+      business={workspace.name}
+      owner={workspace.level === 'owner'}
+      myPhone={me?.phone ?? null}
+    />
+  )
 }
 
 /** Clients pick from specialists and anyone doing a service; the rest manage (B-Team `kindOf`). */
@@ -45,7 +53,7 @@ const takesBookings = (m: TeamMember, services: number) => m.level === 'speciali
 /** The six columns from 1280, where the pane is wide enough for them (B-Team `.tr`); under it each row stacks. */
 const COLUMNS = 'xl:grid-cols-[minmax(0,1.5fr)_104px_88px_minmax(0,1fr)_minmax(0,1.2fr)_40px]'
 
-function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; myPhone: string | null }) {
+function TeamSettings({ slug, business, owner, myPhone }: { slug: string; business: string; owner: boolean; myPhone: string | null }) {
   const t = useTranslations('settings.team')
   const sdk = useSdk()
   const team = useQuery(sdk.team.list(slug))
@@ -153,6 +161,7 @@ function TeamSettings({ slug, owner, myPhone }: { slug: string; owner: boolean; 
       )}
       <MemberDrawer
         slug={slug}
+        business={business}
         member={people.find((m) => m.id === openId && m.status !== 'removed') ?? null}
         people={people}
         menu={menu.data}
