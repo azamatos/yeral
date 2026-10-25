@@ -402,8 +402,22 @@ export const ClosedNow: Story = {
 /** A tablet: the columns scroll sideways under the names and beside the hours. */
 export const Tablet: Story = { globals: { viewport: { value: 'sm' } } }
 
-/** The phone. */
-export const Phone: Story = { globals: { viewport: { value: 'xs' } } }
+/** The phone: one person's day at a time, a chip each. */
+export const Phone: Story = {
+  globals: { viewport: { value: 'xs' } },
+  play: async ({ canvas }) => {
+    const grid = within(await canvas.findByRole('region', { name: /^Calendar, / }))
+    await expect(grid.getByRole('group', { name: 'Aýna' })).toBeVisible()
+    await expect(grid.queryByRole('group', { name: 'Maral' })).toBeNull()
+    await userEvent.click(within(canvas.getByRole('radiogroup', { name: 'Specialist' })).getByRole('radio', { name: 'Maral' }))
+    await waitFor(() => expect(grid.getByRole('group', { name: 'Maral' })).toBeVisible())
+    await expect(grid.queryByRole('group', { name: 'Aýna' })).toBeNull()
+    // a request opened from her column keeps her day on screen
+    await userEvent.click(grid.getByRole('button', { name: /^10:30 Ogulgerek M\./ }))
+    await userEvent.click(within(await page.findByRole('dialog', { name: 'Time change request' })).getByRole('button', { name: 'Close' }))
+    await expect(grid.getByRole('group', { name: 'Maral' })).toBeVisible()
+  },
+}
 
 /** The chip opens the most urgent request: its timer, the client, the details; Confirm, then «Next request». */
 export const ConfirmRequest: Story = {

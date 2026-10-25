@@ -4,7 +4,9 @@ import type { BusinessHours } from '@yeral/domain/hours'
 import { addDays, today } from '@yeral/domain/time'
 import { useFmt } from '@yeral/i18n'
 import { Button } from '@yeral/ui/button'
+import { Avatar } from '@yeral/ui/avatar'
 import { Checkbox } from '@yeral/ui/checkbox'
+import { ChipRadioGroup } from '@yeral/ui/chip'
 import { useClock } from '@yeral/ui/clock'
 import { DatePicker } from '@yeral/ui/date-picker'
 import { cn } from '@yeral/ui/cn'
@@ -61,18 +63,23 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
   // the waiting requests, most urgent first: the chip opens the first (B-Calendar `openQueue`)
   const queue = useQuery(sdk.requests.list(slug)).data?.items ?? []
   /**
-   * A request in the drawer, on its day when it has one (the chip, the pager, «Next request»; the toast's from any page
-   * of the workspace, so it goes to the calendar by name); a block's on the day on screen.
+   * A request in the drawer, on its day and with its specialist's column on a phone when it's a whole request (the chip,
+   * the pager, «Next request»; the toast's from any page of the workspace, so it goes to the calendar by name); a
+   * block's on the day and the person on screen.
    */
-  const openRequest = ({ code, date: day }: { code: string; date?: string }, replace = true) =>
+  const openRequest = (r: { code: string; date?: string; items?: readonly { staffId: string | null }[] }, replace = true) =>
     void navigate({
       to: '/w/$slug/calendar',
       params: { slug },
-      search: (prev: CalendarSearch) => ({
-        ...(prev.cancelled ? { cancelled: true as const } : {}),
-        ...(day ? (day === today(Date.now()) ? {} : { date: day }) : prev.date ? { date: prev.date } : {}),
-        request: code,
-      }),
+      search: (prev: CalendarSearch) => {
+        const staff = r.items?.find((i) => i.staffId)?.staffId ?? prev.staff
+        return {
+          ...(prev.cancelled ? { cancelled: true as const } : {}),
+          ...(r.date ? (r.date === today(Date.now()) ? {} : { date: r.date }) : prev.date ? { date: prev.date } : {}),
+          ...(staff ? { staff } : {}),
+          request: r.code,
+        }
+      },
       replace,
     })
 
@@ -84,6 +91,9 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
   const moves = view.data?.moves.filter((m) => m.date === shown).length ?? 0
   const requests = (summary?.requests ?? 0) + moves
   const first = queue[0]
+  const columns = view.data?.columns ?? []
+  // the person a phone shows: the address's, else the first
+  const phoneStaff = columns.find((c) => c.staffId === search.staff)?.staffId ?? columns[0]?.staffId
   const bold = (chunks: ReactNode) => <b className="font-semibold text-n-900 tabular-nums">{chunks}</b>
   const dot = (
     <span aria-hidden className="text-n-500">
@@ -95,14 +105,28 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
     <WorkspacePage title={sections('calendar')} switcherOnPhone flush>
       <div className="flex flex-none flex-col gap-2.5 border-b border-n-200 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8 lg:py-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="secondary" size="s" onClick={() => goDay(todayDate)}>
+          <Button variant="secondary" size="s" className="max-sm:h-11" onClick={() => goDay(todayDate)}>
             {t('today')}
           </Button>
           <span className="flex flex-none items-center gap-0.5">
-            <Button variant="ghost" size="s" iconOnly aria-label={t('prev')} onClick={() => goDay(addDays(date, -1))}>
+            <Button
+              variant="ghost"
+              size="s"
+              iconOnly
+              className="max-sm:size-11"
+              aria-label={t('prev')}
+              onClick={() => goDay(addDays(date, -1))}
+            >
               <ChevronLeft />
             </Button>
-            <Button variant="ghost" size="s" iconOnly aria-label={t('next')} onClick={() => goDay(addDays(date, 1))}>
+            <Button
+              variant="ghost"
+              size="s"
+              iconOnly
+              className="max-sm:size-11"
+              aria-label={t('next')}
+              onClick={() => goDay(addDays(date, 1))}
+            >
               <ChevronRight />
             </Button>
           </span>
@@ -120,7 +144,7 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
               onClick={() => openRequest(first)}
               className={cn(
                 pillVariants({ tone: 'warning', size: 'l' }),
-                'h-9 cursor-pointer gap-1.5 px-3.5 text-small hover:border-st-pending-dot focus-visible:shadow-[0_0_0_2px_var(--color-n-0),0_0_0_4px_var(--color-a-400)] focus-visible:outline-none',
+                'h-9 cursor-pointer gap-1.5 px-3.5 text-small hover:border-st-pending-dot focus-visible:shadow-[0_0_0_2px_var(--color-n-0),0_0_0_4px_var(--color-a-400)] focus-visible:outline-none max-sm:h-11',
               )}
             >
               <Clock aria-hidden />
@@ -165,6 +189,25 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
             )}
           </p>
         )}
+        {/* on a phone: one person's day at a time, a chip each (B-Calendar `.stchips`; a specialist has only theirs) */}
+        {columns.length > 1 && phoneStaff && (
+          <ChipRadioGroup
+            aria-label={t('specialist')}
+            className="-mx-4 flex-nowrap overflow-x-auto px-4 py-0.5 sm:hidden [&>*]:h-11 [&>*]:flex-none [&>*]:gap-2 [&>*]:pl-2"
+            value={phoneStaff}
+            // the person stays in the address as picked, across days; the booking picked in another column goes
+            onValueChange={(staff) => go({ staff, booking: undefined }, true)}
+            options={columns.map((c) => ({
+              value: c.staffId,
+              label: (
+                <>
+                  <Avatar name={c.name} src={c.photo?.url} size={24} letters={1} tone="tint" decorative />
+                  {c.name}
+                </>
+              ),
+            }))}
+          />
+        )}
       </div>
       {view.data ? (
         <DayGrid
@@ -173,6 +216,7 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
           now={now}
           business={business}
           picked={search}
+          phoneStaff={phoneStaff}
           busy={view.isPlaceholderData}
           onOpen={(pick) =>
             'request' in pick
@@ -200,10 +244,11 @@ function Calendar({ slug, specialist }: { slug: string; specialist: boolean }) {
             })
           }
           // the day, as the day buttons go there; under 1280 the drawer covers the day, so it closes to show it
-          onShow={(day) =>
+          onShow={(day, staff) =>
             go({
               date: day === todayDate ? undefined : day,
               booking: undefined,
+              ...(staff ? { staff } : {}),
               ...(window.matchMedia('(min-width: 1280px)').matches ? {} : { request: undefined }),
             })
           }

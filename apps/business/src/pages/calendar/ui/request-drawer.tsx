@@ -50,7 +50,7 @@ export function RequestDrawer({
   /** Open another request on its day (the pager, «Next request»; the toast's works from any page). */
   onGo: (request: Pick<Request, 'code' | 'date'>, replace?: boolean) => void
   /** «Show» beside a move's times: the calendar goes to that day (the drawer stays where it doesn't cover it). */
-  onShow: (date: string) => void
+  onShow: (date: string, staff?: string) => void
   /** This request was answered: the drawer closes if it's still the one open. */
   onAnswered: (code: string) => void
   onClose: () => void
@@ -189,7 +189,7 @@ function RequestBody({
   request: Request
   now: number
   business: BusinessHours | null
-  onShow: (date: string) => void
+  onShow: (date: string, staff?: string) => void
 }) {
   const t = useTranslations('calendar.request')
   const s = useTranslations('status')
@@ -217,6 +217,8 @@ function RequestBody({
     'plus',
   )
   const staff = join([...new Set(r.items.flatMap((i) => (i.staff ? [i.staff] : [])))], 'list')
+  // whose column a phone shows when Show goes to the day
+  const specialist = r.items.find((i) => i.staffId)?.staffId ?? undefined
   const when = (date: string, start: number, end: number) => t('when', { date: fmt.weekdayDate(date), time: fmt.timeRange(start, end) })
   const Pending = BOOKING_STATUS_ICON.pending
   const Confirmed = BOOKING_STATUS_ICON.confirmed
@@ -262,10 +264,16 @@ function RequestBody({
             <Shown
               text={when(r.from.date, r.from.start, r.from.end)}
               label={{ text: t('show'), name: t('showPrevious') }}
-              onShow={() => onShow(r.from!.date)}
+              onShow={() => onShow(r.from!.date, specialist)}
             />
           }
-          to={<Shown text={when(r.date, r.start, r.end)} label={{ text: t('show'), name: t('showNew') }} onShow={() => onShow(r.date)} />}
+          to={
+            <Shown
+              text={when(r.date, r.start, r.end)}
+              label={{ text: t('show'), name: t('showNew') }}
+              onShow={() => onShow(r.date, specialist)}
+            />
+          }
           footer={<span className="text-dense text-n-600">{t('moveCaption')}</span>}
         />
       )}
