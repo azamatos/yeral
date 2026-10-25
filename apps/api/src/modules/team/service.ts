@@ -92,8 +92,8 @@ export async function removeRow(db: Queryable, row: StaffRow, now: number, by: '
   await cancelOpenInvites(db, row.businessId, row.id, now)
 }
 
-/** Back on the team (an invite again, «Reactivate»): no longer ended. */
-export const backOnTeam = { endedAt: null, endedBy: null } as const
+/** Back on the team (an invite accepted, «Reactivate»): no longer ended. */
+export const backOnTeam = { endedAt: null, endedBy: null, settledAt: null } as const
 
 /** A row's open invites cancelled (nobody can accept them any more); the phones they went to, for their events. */
 export async function cancelOpenInvites(db: Queryable, businessId: string, staffId: string, now: number): Promise<string[]> {
@@ -261,8 +261,12 @@ export function toMember(
     phone: row.phone,
     level: row.level,
     status: row.status,
-    // the bookings and requests still with someone who left are counted by the team list (`withAhead`)
-    ended: row.endedAt && row.endedBy ? { at: row.endedAt.getTime(), by: row.endedBy, bookings: 0, requests: 0 } : null,
+    // off the team only (someone invited again keeps the history until they accept); what someone who left left for the
+    // owner is counted by the team list
+    ended:
+      row.status === 'removed' && row.endedAt && row.endedBy
+        ? { at: row.endedAt.getTime(), by: row.endedBy, bookings: null, requests: null }
+        : null,
     hasApp: row.hasApp,
     bookable: row.bookable,
     canAnswerOwn: row.canAnswerOwn,

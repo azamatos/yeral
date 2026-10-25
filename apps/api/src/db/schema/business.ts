@@ -253,10 +253,13 @@ export const staff = pgTable(
     status: staffStatus().notNull().default('active'),
     /**
      * Off the team (B-15, B-50): when, and who ended it: `self` they left (or deleted their account), `owner` they were
-     * removed. Null while on the team, and for rows that left before 0044 (shown as removed).
+     * removed. Kept through an invite again until it's accepted (or «Reactivate»); null on the team, for rows off it
+     * before 0044, and for an invite dropped when its number changed (all shown as removed).
      */
     endedAt: ts(),
     endedBy: text().$type<'self' | 'owner'>(),
+    /** Someone who left: when the owner chose for the bookings they left («Choose»): «Someone left» stops asking. */
+    settledAt: ts(),
     sort: integer().notNull().default(0),
     /** null = business hours; otherwise 7 entries `{open, close} | null`, Monday first. */
     shift: jsonb().$type<({ open: number; close: number } | null)[]>(),
@@ -281,6 +284,7 @@ export const staff = pgTable(
     check('staff_phone_without_app', sql`${t.hasApp} or ${t.phone} is not null`),
     check('staff_owner_has_app', sql`${t.level} <> 'owner' or ${t.hasApp}`),
     check('staff_ended_by', sql`${t.endedBy} is null or ${t.endedBy} in ('self', 'owner')`),
+    check('staff_ended_both', sql`(${t.endedAt} is null) = (${t.endedBy} is null)`),
   ],
 )
 

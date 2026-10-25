@@ -114,11 +114,19 @@ export const teamMemberSchema = z
     status: z.enum(STAFF_STATUSES),
     /**
      * Off the team (B-15, B-50): when, and who ended it: `self` «Left» (by themself, or their account deleted),
-     * `owner` «Removed». For someone who left, their bookings and requests still ahead with them, which the owner
-     * settles («Aýna left: 4 bookings and 1 request need a new specialist»). Null while on the team, and for someone
-     * removed before this was recorded.
+     * `owner` «Removed». For someone who left, the team list counts their bookings and requests ahead the owner hasn't
+     * chosen for yet («Aýna left: 4 bookings and 1 request need a new specialist · Choose»; 0 once chosen); null where
+     * not counted (one member's answer, someone removed). Null while on the team, and for someone removed before this
+     * was recorded.
      */
-    ended: z.object({ at: epochSchema, by: z.enum(['self', 'owner']), bookings: z.number().int(), requests: z.number().int() }).nullable(),
+    ended: z
+      .object({
+        at: epochSchema,
+        by: z.enum(['self', 'owner']),
+        bookings: z.number().int().nullable(),
+        requests: z.number().int().nullable(),
+      })
+      .nullable(),
     /** false = without the app ("Programmasyz"). */
     hasApp: z.boolean(),
     bookable: z.boolean(),

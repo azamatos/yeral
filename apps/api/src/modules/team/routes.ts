@@ -40,7 +40,7 @@ import { requireUser } from '../auth/session'
 import { loadHours } from '../availability/context'
 import { lockMenu } from '../menu/service'
 import { emit } from '../../notify'
-import { leaveCounts, refuseMovesOnto, removeMember, scheduleOf, updateSchedule } from './away'
+import { leaveCounts, leftCounts, refuseMovesOnto, removeMember, scheduleOf, updateSchedule } from './away'
 import { uploadGuard } from '../media/photos'
 import { removeStaffPhoto, setStaffPhoto } from './photo'
 import {
@@ -308,7 +308,14 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
       if (twice || (row.userId && row.userId !== user.id)) throw new ApiError('already_on_team')
       await tx
         .update(staff)
-        .set({ userId: user.id, hasApp: true, status: row.status === 'invited' ? 'active' : row.status, lastOpenedAt: new Date(now) })
+        .set({
+          userId: user.id,
+          hasApp: true,
+          status: row.status === 'invited' ? 'active' : row.status,
+          lastOpenedAt: new Date(now),
+          // back on the team: no longer «Left» or «Removed»
+          ...(row.status === 'invited' ? backOnTeam : {}),
+        })
         .where(eq(staff.id, row.id))
       await tx
         .update(invites)
@@ -354,13 +361,10 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
     const { deps } = c.var
     const now = deps.now()
     const items = await members(deps, business.id, user.lang, now)
-    // someone who left by themself with bookings or requests still with them: the owner's «Someone left» (B-15)
-    const withAhead = await Promise.all(
-      items.map(async (m) =>
-        m.ended?.by === 'self' && m.status === 'removed'
-          ? { ...m, ended: { ...m.ended, ...(await leaveCounts(deps.db, business.id, m.id, now)) } }
-          : m,
-      ),
+    // what someone who left left for the owner, until the owner chooses: «Someone left» (B-15), in one read
+    const counted = await leftCounts(deps.db, business.id, now)
+    const withAhead = items.map((m) =>
+      m.ended?.by === 'self' ? { ...m, ended: { ...m.ended, ...(counted.get(m.id) ?? { bookings: 0, requests: 0 }) } } : m,
     )
     return c.json({ items: withAhead }, 200)
   })
@@ -382,7 +386,6 @@ export const teamRoutes = new OpenAPIHono<AppEnv>()
         hasApp: true,
         status: 'invited' as const,
         bookable: (body.serviceIds?.length ?? 0) > 0,
-        ...backOnTeam,
       }
       // someone removed earlier comes back on their old row
       const reused = reusableRow(rows, accountId)

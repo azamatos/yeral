@@ -1,5 +1,5 @@
 {
-  "id": "ae03481e-ea64-412b-88ea-0ba7531e44bc",
+  "id": "18eef0bb-78ba-4dec-a8e7-2ddad639b412",
   "prevId": "1a248a28-0e51-4e4d-b96f-beb30a90c7c2",
   "version": "7",
   "dialect": "postgresql",
@@ -4188,6 +4188,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "settled_at": {
+          "name": "settled_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "sort": {
           "name": "sort",
           "type": "integer",
@@ -4348,6 +4354,10 @@
         "staff_ended_by": {
           "name": "staff_ended_by",
           "value": "\"staff\".\"ended_by\" is null or \"staff\".\"ended_by\" in ('self', 'owner')"
+        },
+        "staff_ended_both": {
+          "name": "staff_ended_both",
+          "value": "(\"staff\".\"ended_at\" is null) = (\"staff\".\"ended_by\" is null)"
         }
       },
       "isRLSEnabled": false

@@ -112,6 +112,39 @@ async function bookingsAheadWith(
 }
 
 /** What leaving leaves behind for the owner (B-15's confirm): the person's bookings ahead and waiting requests here. */
+/**
+ * What each person who left by themself left for the owner and the owner hasn't chosen for yet (B-15's «Someone left»):
+ * their bookings and requests ahead, by staff id, in one read.
+ */
+export async function leftCounts(
+  db: Queryable,
+  businessId: string,
+  now: number,
+): Promise<Map<string, { bookings: number; requests: number }>> {
+  const rows = await db
+    .selectDistinct({ b: bookings, staffId: bookingItems.staffId })
+    .from(bookings)
+    .innerJoin(bookingItems, eq(bookingItems.bookingId, bookings.id))
+    .innerJoin(staff, eq(staff.id, bookingItems.staffId))
+    .where(
+      and(
+        eq(bookings.businessId, businessId),
+        eq(bookings.active, true),
+        isNull(bookings.rescheduleOf),
+        eq(staff.status, 'removed'),
+        eq(staff.endedBy, 'self'),
+        isNull(staff.settledAt),
+        gte(bookings.date, addDays(today(now), -1)),
+      ),
+    )
+  const by = new Map<string, BookingRow[]>()
+  for (const r of rows) {
+    if (!r.staffId || !(occupiesSlot(stateOf(r.b), now) && epochOf(r.b.date, r.b.start) > now)) continue
+    by.set(r.staffId, [...(by.get(r.staffId) ?? []), r.b])
+  }
+  return new Map([...by].map(([id, list]) => [id, countAhead(list, now)]))
+}
+
 export async function leaveCounts(db: Queryable, businessId: string, staffId: string, now: number) {
   return countAhead(
     (await bookingsAheadWith(db, businessId, staffId, now, { items: false })).map((a) => a.b),
@@ -416,8 +449,13 @@ export async function removeMember(
     const ahead = await bookingsAheadWith(tx, business.id, staffId, now)
     if (ahead.length && !input.affected)
       throw new ApiError('bookings_affected', detailsOf(staffId, ahead, { lang, now }, await loadBusiness(tx, business.id)))
-    // someone who left stays «Left» when the owner settles their bookings
+    // someone who left stays «Left» when the owner settles their bookings, and «Someone left» stops asking
     await removeRow(tx, row, now, 'owner')
+    if (row.status === 'removed' && row.endedBy === 'self')
+      await tx
+        .update(staff)
+        .set({ settledAt: new Date(now) })
+        .where(eq(staff.id, row.id))
     await teamChanged(tx, business.id, { userId: row.userId })
     await emit(tx, { type: 'business.updated', businessId: business.id })
     await refuseMovesOnto(tx, business.id, staffId, now, () => false)
