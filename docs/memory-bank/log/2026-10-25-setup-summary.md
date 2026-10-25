@@ -15,3 +15,10 @@
   - The sdk's `setup.services` and `setup.team` refresh the setup, so the step list's counts show at once.
   - Settings changes still leave the draft to their event, as before.
   - Tests: an admin-added draft is checked whole, and dropping a service brings the count to 2.
+- The app (feat/setup-summary-app) reads the step list's summaries from the setup:
+  - «3 services» for services.
+  - «I work alone» or «3 people» for the team.
+  - «I confirm · 30 min» or «Instant confirmation» for the rules.
+
+  The services step reads the menu only while it shows (no more for the summary). Hours keep their week summary
+  («Mo–Fr 09:00–18:00»), which needs the week. The stories' fake api keeps the counts and the rule as the steps save.

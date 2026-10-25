@@ -12,6 +12,7 @@ import { toast } from '@yeral/ui/toast'
 import { WizardFooter } from '@yeral/ui/wizard-footer'
 import { useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { useRuleLabels } from '@/features/edit-booking-rules'
 import { savable, takenOnSave, usePageAddressCheck, type PageAddressState } from '@/features/page-address'
 import { useSdk } from '@/shared/api'
 import { BUSINESS_NAME_MAX } from '@/shared/config'
@@ -137,6 +138,7 @@ function Steps({
   onFinished: (slug: string, after: AfterSetup) => void
 }) {
   const t = useTranslations()
+  const ruleLabels = useRuleLabels()
   const sdk = useSdk()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -230,12 +232,7 @@ function Steps({
   const hours = useHoursStep(draft?.slug ?? '', step === 'hours' && !!draft, !!draft && stepIndex(reached) >= stepIndex('hours'))
   // the draft's category as the list gives it (its starter list); one the list no longer offers has none
   const category = draft ? (categories.find((c) => c.id === draft.categoryId) ?? { id: '', name: draft.category, starterGroups: [] }) : null
-  const services = useServicesStep(
-    draft?.slug ?? '',
-    step === 'services' && !!draft,
-    !!draft && stepIndex(reached) >= stepIndex('services'),
-    category,
-  )
+  const services = useServicesStep(draft?.slug ?? '', step === 'services' && !!draft, category)
   const team = useTeamStep(draft?.slug ?? '', step === 'team' && !!draft, { name: ownerName, phone: me.phone })
   const rules = useRulesStep(draft?.slug ?? '', step === 'rules' && !!draft)
   const done = useDoneStep(draft, step === 'done' && !!draft, back, onFinished)
@@ -352,7 +349,15 @@ function Steps({
     business: draft && `${draft.name} · ${draft.category}`,
     address: draft?.address && `${draft.address.line}, ${draft.address.city.name}`,
     hours: hours.summary,
-    services: services.summary,
+    // the counts and the confirm rule as the setup says them (the step list shows them for the steps done)
+    // a menu emptied since (in Settings) has no line, as a step not saved yet
+    services: !!draft?.services && t('setup.services.summary', { count: draft.services }),
+    team: draft && (draft.team ? t('setup.team.summary', { n: draft.team }) : t('setup.team.solo')),
+    rules:
+      draft &&
+      (draft.rules.confirmMode === 'manual'
+        ? t('setup.rules.summaryManual', { hold: ruleLabels.hold(draft.rules.holdMinutes) })
+        : t('setup.rules.instant')),
   }
   return (
     <SetupFrame
