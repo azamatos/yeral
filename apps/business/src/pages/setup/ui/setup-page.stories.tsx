@@ -235,6 +235,8 @@ const fakeApi =
       if (/^PATCH \/w\/[^/]+\/settings\/rules$/.test(route)) {
         rulesSaved.push(body)
         rules = { ...rules, ...body }
+        // as the api: my setup says the confirm rule (the step list's «I confirm · 30 min»)
+        if (setup) setup = { ...setup, rules: { confirmMode: rules.confirmMode, holdMinutes: rules.holdMinutes } }
         return json(rules)
       }
       // the draft's team: the owner and `team`; the team step saves it whole
@@ -248,6 +250,7 @@ const fakeApi =
           status: m.hasApp ? 'invited' : 'active',
           joined: false,
         }))
+        if (setup) setup = { ...setup, team: people.length }
         return json({ items: [owner, ...people] })
       }
       if (/^GET \/w\/[^/]+\/services$/.test(route)) return json(menu)
@@ -282,6 +285,7 @@ const fakeApi =
             }
           }),
         }
+        if (setup) setup = { ...setup, services: menu.groups.reduce((n, g) => n + g.services.length, 0) }
         return json(menu)
       }
       if (route === 'GET /categories')
@@ -1028,6 +1032,9 @@ export const Rules: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }))
     await expect(await canvas.findByRole('heading', { level: 1, name: 'Glow Studio is ready!' })).toBeVisible()
     await expect(rulesSaved).toEqual([{ confirmMode: 'instant', cancelWindowMinutes: null }])
+    // the step list sums the steps done up from the setup: the team and the rules too
+    await expect(await canvas.findByText('Instant confirmation')).toBeVisible()
+    await expect(canvas.getByText('I work alone')).toBeVisible()
   },
 }
 

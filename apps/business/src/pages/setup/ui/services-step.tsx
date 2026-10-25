@@ -48,21 +48,20 @@ const CARD_INSET = 'px-4 max-md:px-3'
  * every row picked, each name, duration and price editable, «Select all» / «Clear» per group, «Add service» into «New
  * services»; a category without a list starts empty. Back at the step it shows the menu saved before. Its `save` sends
  * the whole menu in one call (`PUT …/setup/services`) when it changed or was never saved. A hook, as the other steps
- * are, so the wizard's frame stays one element; `on` while the step shows, `known` once the draft has reached it (the
- * step list's «3 services»).
+ * are, so the wizard's frame stays one element; `on` while the step shows (the step list's «3 services» comes from the
+ * setup itself).
  */
 export function useServicesStep(
   slug: string,
   on: boolean,
-  known: boolean,
   category: Pick<Category, 'id' | 'name' | 'starterGroups'> | null,
-): { body: ReactNode; action: StepAction; summary?: string } {
+): { body: ReactNode; action: StepAction } {
   const t = useTranslations('setup.services')
   const sdk = useSdk()
   const fmt = useFmt()
   const locale = useLocale()
   const errorText = useErrorText()
-  const menu = useQuery({ ...sdk.settings.menu(slug), enabled: on || known })
+  const menu = useQuery({ ...sdk.settings.menu(slug), enabled: on })
   const save = useMutation(sdk.setup.services(slug))
   const ownName = t('newGroup')
   const headIds = useId()
@@ -83,7 +82,6 @@ export function useServicesStep(
         : formFromStarters(category.starterGroups)
     setState({ form, saved: savedMenu ? JSON.stringify(servicesInput(form, locale)) : null, basis, edited: !!state?.edited && !savedMenu })
   }
-  const summary = savedMenu ? t('summary', { count: menu.data!.groups.reduce((n, g) => n + g.services.length, 0) }) : undefined
 
   // a failed refetch keeps what's on screen; only a first load that failed is a failure
   if (on && !state && menu.isError) throw menu.error
@@ -95,7 +93,6 @@ export function useServicesStep(
         </div>
       ),
       action: { valid: false, busy: false, ready: false, save: () => Promise.resolve(true) },
-      summary,
     }
 
   const { form } = state
@@ -225,7 +222,7 @@ export function useServicesStep(
     </section>
   )
 
-  return { body, action: { valid: !problem, hint, busy: saving, ready: true, save: onSave }, summary }
+  return { body, action: { valid: !problem, hint, busy: saving, ready: true, save: onSave } }
 }
 
 function Row({
